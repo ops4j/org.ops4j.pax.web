@@ -178,13 +178,19 @@ class JettyFactoryImpl implements JettyFactory {
 	 */
 	@Override
 	public ServerConnector createSecureConnector(Server server, String name, int port,
-			String sslKeystore, String sslKeystorePassword, String sslKeyPassword,
-			String host, String sslKeystoreType, String sslKeyAlias,
-			String trustStore, String trustStorePassword, String trustStoreType,
-			boolean isClientAuthNeeded, boolean isClientAuthWanted,
-			List<String> cipherSuitesIncluded, List<String> cipherSuitesExcluded,
-			List<String> protocolsIncluded, List<String> protocolsExcluded,
-		 	Boolean sslRenegotiationAllowed) {
+												 String sslKeystore, String sslKeystorePassword, String sslKeyPassword,
+												 String host, String sslKeystoreType, String sslKeyAlias,
+												 String trustStore, String trustStorePassword, String trustStoreType,
+												 boolean isClientAuthNeeded, boolean isClientAuthWanted,
+												 List<String> cipherSuitesIncluded, List<String> cipherSuitesExcluded,
+												 List<String> protocolsIncluded, List<String> protocolsExcluded,
+												 Boolean sslRenegotiationAllowed,
+												 String crlPath,
+												 Boolean enableCRLDP,
+												 Boolean validateCerts,
+												 Boolean validatePeerCerts,
+												 Boolean enableOCSP,
+												 String ocspResponderURL) {
 
 		// SSL Context Factory for HTTPS and SPDY
 		SslContextFactory sslContextFactory = new SslContextFactory();
@@ -193,6 +199,16 @@ class JettyFactoryImpl implements JettyFactory {
 		sslContextFactory.setKeyManagerPassword(sslKeyPassword);
 		sslContextFactory.setNeedClientAuth(isClientAuthNeeded);
 		sslContextFactory.setWantClientAuth(isClientAuthWanted);
+		sslContextFactory.setEnableCRLDP(enableCRLDP);
+		sslContextFactory.setValidateCerts(validateCerts);
+		sslContextFactory.setValidatePeerCerts(validatePeerCerts);
+		sslContextFactory.setEnableOCSP(enableOCSP);
+		if ((null != crlPath) && (!"".equals(crlPath))) {
+                    sslContextFactory.setCrlPath(crlPath);
+                }
+		if ((null != ocspResponderURL) && (!"".equals(ocspResponderURL))) {
+                    sslContextFactory.setOcspResponderURL(ocspResponderURL);
+                }
 		if (sslKeystoreType != null) {
 			sslContextFactory.setKeyStoreType(sslKeystoreType);
 		}

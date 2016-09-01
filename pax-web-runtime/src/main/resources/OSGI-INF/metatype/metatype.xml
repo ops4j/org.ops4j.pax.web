@@ -69,6 +69,13 @@
         <AD name="Server MaxThreads" id="org.ops4j.pax.web.server.maxThreads" required="false" type="String" default="" />
         <AD name="Server MinThreads" id="org.ops4j.pax.web.server.minThreads" required="false" type="String" default="" />
         <AD name="Server Idle Timeout" id="org.ops4j.pax.web.server.idleTimeout" required="false" type="String" default="" />
+
+        <AD name="CRL Path" id="org.ops4j.pax.web.crlPath" type="String" default="" />
+        <AD name="Enable CRLDP" id="org.ops4j.pax.web.enableCRLDP"     type="String" default="false" />
+        <AD name="Validate Certs " id="org.ops4j.pax.web.validateCerts"     type="String" default="false" />
+        <AD name="Validate Peer Certs" id="org.ops4j.pax.web.validatePeerCerts"     type="String" default="false" />
+        <AD name="OCSP Responder URL" id="org.ops4j.pax.web.ocspResponderURL" type="String" default="" />
+        <AD name="Enable OCSP" id="org.ops4j.pax.web.enableOCSP"     type="String" default="false" />
 	</OCD>
 	<Designate pid="org.ops4j.pax.web">
         <Object ocdref="org.ops4j.pax.web"/>

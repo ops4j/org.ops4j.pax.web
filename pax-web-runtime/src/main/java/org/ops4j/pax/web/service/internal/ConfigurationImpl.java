@@ -74,6 +74,12 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_MAX_THREA
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_MIN_THREADS;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_IDLE_TIMEOUT;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_RENEGOTIATION_ALLOWED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CRL_PATH;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENABLE_CRLDP;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_VALIDATE_CERTS;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_VALIDATE_PEER_CERTS;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENABLE_OCSP;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_OCSP_RESPONDER_URL;
 
 import java.io.File;
 import java.net.URI;
@@ -797,5 +803,35 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	public Integer getServerIdleTimeout() {
 		return getResolvedIntegerProperty(PROPERTY_IDLE_TIMEOUT);
 	}
-	
+
+    @Override
+    public String getCrlPath() {
+        return getResolvedStringProperty(PROPERTY_CRL_PATH);
+    }
+
+    @Override
+    public Boolean isEnableCRLDP() {
+        return getResolvedBooleanProperty(PROPERTY_ENABLE_CRLDP);
+    }
+
+    @Override
+    public Boolean isValidateCerts() {
+        return getResolvedBooleanProperty(PROPERTY_VALIDATE_CERTS);
+    }
+
+    @Override
+    public Boolean isValidatePeerCerts() {
+        return getResolvedBooleanProperty(PROPERTY_VALIDATE_PEER_CERTS);
+    }
+
+    @Override
+    public Boolean isEnableOCSP() {
+        return getResolvedBooleanProperty(PROPERTY_ENABLE_OCSP);
+    }
+
+    @Override
+    public String getOcspResponderURL() {
+        return getResolvedStringProperty(PROPERTY_OCSP_RESPONDER_URL);
+    }
+
 }
