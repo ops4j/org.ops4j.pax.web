@@ -180,7 +180,13 @@ class JettyFactoryImpl implements JettyFactory {
 												 boolean isClientAuthNeeded, boolean isClientAuthWanted,
 												 List<String> cipherSuitesIncluded, List<String> cipherSuitesExcluded,
 												 List<String> protocolsIncluded, List<String> protocolsExcluded,
-												 Boolean sslRenegotiationAllowed) {
+												 Boolean sslRenegotiationAllowed,
+												 String crlPath,
+												 Boolean enableCRLDP,
+												 Boolean validateCerts,
+												 Boolean validatePeerCerts,
+												 Boolean enableOCSP,
+												 String ocspResponderURL) {
 
 		// SSL Context Factory for HTTPS and SPDY
 		SslContextFactory sslContextFactory = new SslContextFactory();
@@ -189,6 +195,16 @@ class JettyFactoryImpl implements JettyFactory {
 		sslContextFactory.setKeyManagerPassword(sslKeyPassword);
 		sslContextFactory.setNeedClientAuth(isClientAuthNeeded);
 		sslContextFactory.setWantClientAuth(isClientAuthWanted);
+		sslContextFactory.setEnableCRLDP(enableCRLDP);
+		sslContextFactory.setValidateCerts(validateCerts);
+		sslContextFactory.setValidatePeerCerts(validatePeerCerts);
+		sslContextFactory.setEnableOCSP(enableOCSP);
+		if ((null != crlPath) && (!"".equals(crlPath))) {
+                    sslContextFactory.setCrlPath(crlPath);
+                }
+		if ((null != ocspResponderURL) && (!"".equals(ocspResponderURL))) {
+                    sslContextFactory.setOcspResponderURL(ocspResponderURL);
+                }
 		if (sslKeystoreType != null) {
 			sslContextFactory.setKeyStoreType(sslKeystoreType);
 		}
