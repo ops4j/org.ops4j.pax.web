@@ -243,7 +243,6 @@ public class ServletTracker<T extends Servlet> extends
 			errorMappings = new ArrayList<>();
 			for (String errorPageParam : errorPageParams) {
 				DefaultErrorPageMapping errorMapping = new DefaultErrorPageMapping();
-				errorMapping = new DefaultErrorPageMapping();
 				errorMapping.setHttpContextId(httpContextId);
 				errorMapping.setLocation(alias);
 				errorMapping.setError(errorPageParam);
