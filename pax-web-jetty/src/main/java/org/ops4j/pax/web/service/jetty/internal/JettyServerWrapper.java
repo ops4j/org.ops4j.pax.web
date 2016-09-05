@@ -62,6 +62,7 @@ import org.eclipse.jetty.util.MultiException;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.thread.ThreadPool;
 import org.ops4j.pax.swissbox.core.BundleUtils;
+import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.Model;
@@ -243,7 +244,7 @@ class JettyServerWrapper extends Server {
 				return;
 			}
 			int nref = context.decrementRefCount();
-			if (force || nref <= 0) {
+			if ((force && !(httpContext instanceof SharedWebContainerContext)) || nref <= 0) {
 				try {
 					readLock.unlock();
 					writeLock.lock();
