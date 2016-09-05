@@ -158,19 +158,7 @@ public interface WebContainerConstants {
 	/** Manifest header key for web application bundles. */
 	String CONTEXT_PATH_KEY = "Web-ContextPath";
 
-	String FILTER_RANKING = "filterRank";
-	
-	String PROPERTY_CRL_PATH = PID + ".crlPath";
-	
-	String PROPERTY_ENABLE_CRLDP = PID + ".enableCRLDP";
-	
-	String PROPERTY_VALIDATE_CERTS = PID + ".validateCerts";
-	
-	String PROPERTY_VALIDATE_PEER_CERTS = PID + ".validatePeerCerts";
-	
-	String PROPERTY_ENABLE_OCSP = PID + ".enableOCSP";
-	
-	String PROPERTY_OCSP_RESPONDER_URL = PID + ".ocspResponderURL";
+    String FILTER_RANKING = "filterRank";
 
 }
 //CHECKSTYLE:ON
