@@ -88,12 +88,14 @@
 							org.apache.el.util; version="2.2"; resolution:=optional,
 							*
 						</Import-Package>
-						<DynamicImport-Package>org.eclipse.jetty.*</DynamicImport-Package>
 						<Private-Package>
 							!org.apache.commons.logging,
 							${bundle.namespace}.internal.*,
 							org.apache.commons.lang3.reflect,
 						</Private-Package>
+						<Provide-Capability>
+							osgi.service;effective:=active;objectClass=org.ops4j.pax.web.service.spi.ServerController
+						</Provide-Capability>
 						<Embed-Dependency>*;
 							artifactId=!org.osgi.compendium;
 							scope=compile; type=!pom; inline=true</Embed-Dependency>

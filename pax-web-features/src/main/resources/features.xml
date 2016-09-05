@@ -218,7 +218,7 @@
         <bundle>mvn:org.ops4j.pax.web/pax-web-resources-jsf/${project.version}</bundle>
     </feature>
 
-    <feature name="undertow" version="${dependency.undertow.version}">
+    <feature name="undertow" version="${dependency.undertow-core.version}">
         <bundle dependency="true" start-level="30">mvn:${servlet.spec.groupId}/${servlet.spec.artifactId}/${servlet.spec.version}</bundle>
         <bundle dependency="true">mvn:javax.annotation/javax.annotation-api/1.2</bundle>
         <bundle dependency="true">mvn:org.jboss.logging/jboss-logging/${dependency.jboss-logging}</bundle>
@@ -239,6 +239,12 @@
         <feature>scr</feature>
         <feature>undertow</feature>
         <feature version="[6.0,6.1)">pax-http</feature>
+
+        <bundle dependency="true">mvn:org.ow2.asm/asm-all/${dependency.asm.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.xbean/xbean-bundleutils/${dependency.xbean.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.xbean/xbean-reflect/${dependency.xbean.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.xbean/xbean-finder/${dependency.xbean.version}</bundle>
+
         <bundle>mvn:org.ops4j.pax.web/pax-web-api/${project.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-spi/${project.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-runtime/${project.version}</bundle>
