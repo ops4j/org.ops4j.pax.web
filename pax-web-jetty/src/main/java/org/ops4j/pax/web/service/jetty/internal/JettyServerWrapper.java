@@ -59,6 +59,7 @@ import org.eclipse.jetty.util.MultiException;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.thread.ThreadPool;
 import org.ops4j.pax.swissbox.core.BundleUtils;
+import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.Model;
@@ -207,7 +208,8 @@ class JettyServerWrapper extends Server {
 
 						context = new ServletContextInfo(this.addContext(model));
 						contexts.put(httpContext, context);
-						context.incrementRefCount();
+						// don't increment! - it's already == 1 after creation
+//						context.incrementRefCount();
 					} else {
 						context = contexts.get(httpContext);
 						context.incrementRefCount();
@@ -223,7 +225,7 @@ class JettyServerWrapper extends Server {
 		return context.getHandler();
 	}
 
-	void removeContext(final HttpContext httpContext) {
+	void removeContext(final HttpContext httpContext, boolean force) {
 		ServletContextInfo context;
 		try {
 			readLock.lock();
@@ -232,7 +234,7 @@ class JettyServerWrapper extends Server {
 				return;
 			}
 			int nref = context.decrementRefCount();
-			if (nref <= 0) {
+			if ((force && !(httpContext instanceof SharedWebContainerContext)) || nref <= 0) {
 				try {
 					readLock.unlock();
 					writeLock.lock();
