@@ -23,8 +23,18 @@ import java.net.URL;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.cert.CRL;
+import java.security.cert.CertStore;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.cert.CollectionCertStoreParameters;
+import java.security.cert.PKIXBuilderParameters;
+import java.security.cert.X509CertSelector;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -32,10 +42,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import javax.net.ssl.CertPathTrustManagerParameters;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
@@ -59,7 +71,6 @@ import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xnio.Options;
 import org.xnio.XnioWorker;
 
 import io.undertow.Handlers;
@@ -76,470 +87,559 @@ import io.undertow.server.handlers.accesslog.DefaultAccessLogReceiver;
  */
 public class ServerControllerImpl implements ServerController {
 
-	private enum State {
-		Unconfigured, Stopped, Started
-	}
+    private enum State {
+        Unconfigured,
+        Stopped,
+        Started
+    }
 
-	private static final Logger LOG = LoggerFactory.getLogger(ServerControllerImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ServerControllerImpl.class);
 
-	private Configuration configuration;
-	private final Set<ServerListener> listeners = new CopyOnWriteArraySet<>();
-	private State state = State.Unconfigured;
+    private Configuration configuration;
+    private final Set<ServerListener> listeners = new CopyOnWriteArraySet<>();
+    private State state = State.Unconfigured;
 
-	private IdentityManager identityManager;
-	private final PathHandler path = Handlers.path();
-	private Undertow server;
+    private IdentityManager identityManager;
+    private final PathHandler path = Handlers.path();
+    private Undertow server;
 
-	private final ConcurrentMap<HttpContext, Context> contextMap = new ConcurrentHashMap<>();
+    private final ConcurrentMap<HttpContext, Context> contextMap = new ConcurrentHashMap<>();
 
-	public ServerControllerImpl() {
-	}
+    public ServerControllerImpl() {
+    }
 
-	@Override
-	public synchronized void start() {
-		LOG.debug("Starting server [{}]", this);
-		assertState(State.Stopped);
-		doStart();
-		state = State.Started;
-		notifyListeners(ServerEvent.STARTED);
-	}
+    @Override
+    public synchronized void start() {
+        LOG.debug("Starting server [{}]", this);
+        assertState(State.Stopped);
+        doStart();
+        state = State.Started;
+        notifyListeners(ServerEvent.STARTED);
+    }
 
-	@Override
-	public synchronized void stop() {
-		LOG.debug("Stopping server [{}]", this);
-		assertNotState(State.Unconfigured);
-		if (state == State.Started) {
-			doStop();
-			state = State.Stopped;
-		}
-		notifyListeners(ServerEvent.STOPPED);
-	}
+    @Override
+    public synchronized void stop() {
+        LOG.debug("Stopping server [{}]", this);
+        assertNotState(State.Unconfigured);
+        if (state == State.Started) {
+            doStop();
+            state = State.Stopped;
+        }
+        notifyListeners(ServerEvent.STOPPED);
+    }
 
-	@Override
-	public synchronized void configure(final Configuration config) {
-		LOG.debug("Configuring server [{}] -> [{}] ", this, config);
-		if (config == null) {
-			throw new IllegalArgumentException("configuration == null");
-		}
-		configuration = config;
-		switch (state) {
-			case Unconfigured:
-				state = State.Stopped;
-				notifyListeners(ServerEvent.CONFIGURED);
-				break;
-			case Started:
-				doStop();
-				doStart();
-				break;
-		}
-	}
+    @Override
+    public synchronized void configure(final Configuration config) {
+        LOG.debug("Configuring server [{}] -> [{}] ", this, config);
+        if (config == null) {
+            throw new IllegalArgumentException("configuration == null");
+        }
+        configuration = config;
+        switch (state) {
+        case Unconfigured:
+            state = State.Stopped;
+            notifyListeners(ServerEvent.CONFIGURED);
+            break;
+        case Started:
+            doStop();
+            doStart();
+            break;
+        }
+    }
 
-	@Override
-	public void addListener(ServerListener listener) {
-		if (listener == null) {
-			throw new IllegalArgumentException("listener == null");
-		}
-		listeners.add(listener);
-	}
+    @Override
+    public void addListener(ServerListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener == null");
+        }
+        listeners.add(listener);
+    }
 
-	@Override
-	public void removeListener(ServerListener listener) {
-		listeners.remove(listener);
-	}
+    @Override
+    public void removeListener(ServerListener listener) {
+        listeners.remove(listener);
+    }
 
-	@Override
-	public synchronized boolean isStarted() {
-		return state == State.Started;
-	}
+    @Override
+    public synchronized boolean isStarted() {
+        return state == State.Started;
+    }
 
-	@Override
-	public synchronized boolean isConfigured() {
-		return state != State.Unconfigured;
-	}
+    @Override
+    public synchronized boolean isConfigured() {
+        return state != State.Unconfigured;
+    }
 
-	@Override
-	public Configuration getConfiguration() {
-		return configuration;
-	}
+    @Override
+    public Configuration getConfiguration() {
+        return configuration;
+    }
 
-	@Override
-	public synchronized Integer getHttpPort() {
-		Configuration config = configuration;
-		if (config == null) {
-			throw new IllegalStateException("Not configured");
-		}
-		return config.getHttpPort();
-	}
+    @Override
+    public synchronized Integer getHttpPort() {
+        Configuration config = configuration;
+        if (config == null) {
+            throw new IllegalStateException("Not configured");
+        }
+        return config.getHttpPort();
+    }
 
-	@Override
-	public synchronized Integer getHttpSecurePort() {
-		Configuration config = configuration;
-		if (config == null) {
-			throw new IllegalStateException("Not configured");
-		}
-		return config.getHttpSecurePort();
-	}
+    @Override
+    public synchronized Integer getHttpSecurePort() {
+        Configuration config = configuration;
+        if (config == null) {
+            throw new IllegalStateException("Not configured");
+        }
+        return config.getHttpSecurePort();
+    }
 
-	void notifyListeners(ServerEvent event) {
-		for (ServerListener listener : listeners) {
-			listener.stateChanged(event);
-		}
-	}
+    void notifyListeners(ServerEvent event) {
+        for (ServerListener listener : listeners) {
+            listener.stateChanged(event);
+        }
+    }
 
-	void doStart() {
-		Undertow.Builder builder = Undertow.builder();
+    void doStart() {
+        Undertow.Builder builder = Undertow.builder();
 
-		HttpHandler rootHandler = path;
+        HttpHandler rootHandler = path;
 
-		// PAXWEB-193 suggested we should open this up for external
-		// configuration
-		URL undertowResource = configuration.getConfigurationURL();
-		if (undertowResource == null) {
-			undertowResource = getClass().getResource("/undertow.properties");
-		}
-		if (undertowResource != null) {
-			try {
-				Properties props = new Properties();
-				try (InputStream is = undertowResource.openStream()) {
-					props.load(is);
-				}
-				Map<String, String> config = new LinkedHashMap<>();
-				for (Map.Entry<Object, Object> entry : props.entrySet()) {
-					config.put(entry.getKey().toString(), entry.getValue().toString());
-				}
-				identityManager = (IdentityManager) createConfigurationObject(config, "identityManager");
+        // PAXWEB-193 suggested we should open this up for external
+        // configuration
+        URL undertowResource = configuration.getConfigurationURL();
+        if (undertowResource == null) {
+            undertowResource = getClass().getResource("/undertow.properties");
+        }
+        if (undertowResource != null) {
+            try {
+                Properties props = new Properties();
+                try (InputStream is = undertowResource.openStream()) {
+                    props.load(is);
+                }
+                Map<String, String> config = new LinkedHashMap<>();
+                for (Map.Entry<Object, Object> entry : props.entrySet()) {
+                    config.put(entry.getKey().toString(), entry.getValue().toString());
+                }
+                identityManager = (IdentityManager)createConfigurationObject(config, "identityManager");
 
                 /*
-				String listeners = config.get("listeners");
-                if (listeners != null) {
-                    String[] names = listeners.split("(, )+");
-                    for (String name : names) {
-                        String type = config.get("listeners." + name + ".type");
-                        String address = config.get("listeners." + name + ".address");
-                        String port = config.get("listeners." + name + ".port");
-                        if ("http".equals(type)) {
-                            builder.addHttpListener(Integer.parseInt(port), address);
+                 * String listeners = config.get("listeners"); if (listeners != null) { String[] names =
+                 * listeners.split("(, )+"); for (String name : names) { String type = config.get("listeners."
+                 * + name + ".type"); String address = config.get("listeners." + name + ".address"); String
+                 * port = config.get("listeners." + name + ".port"); if ("http".equals(type)) {
+                 * builder.addHttpListener(Integer.parseInt(port), address); } } }
+                 */
+
+            } catch (Exception e) {
+                LOG.error("Exception while starting Undertow", e);
+                throw new RuntimeException("Exception while starting Undertow", e);
+            }
+        }
+
+        if (configuration.isLogNCSAFormatEnabled()) {
+
+            String logNCSADirectory = configuration.getLogNCSADirectory();
+            String logNCSAFormat = configuration.getLogNCSAFormat();
+
+            Bundle bundle = FrameworkUtil.getBundle(ServerControllerImpl.class);
+            ClassLoader loader = bundle.adapt(BundleWiring.class).getClassLoader();
+            XnioWorker worker = UndertowUtil.createWorker(loader);
+
+            // String logNameSuffix = logNCSAFormat.substring(logNCSAFormat.lastIndexOf("."));
+            // String logBaseName = logNCSAFormat.substring(0, logNCSAFormat.lastIndexOf("."));
+
+            AccessLogReceiver logReceiver = DefaultAccessLogReceiver.builder().setLogWriteExecutor(worker)
+                .setOutputDirectory(new File(logNCSADirectory).toPath()).setLogBaseName("request.")
+                .setLogNameSuffix("log").setRotate(true).build();
+
+            String format;
+            if (configuration.isLogNCSAExtended()) {
+                format = "combined";
+            } else {
+                format = "common";
+            }
+
+            // String format = "%a - - [%t] \"%m %U %H\" %s ";
+            // TODO: still need to find out how to add cookie etc.
+
+            rootHandler = new AccessLogHandler(path, logReceiver, format,
+                                               AccessLogHandler.class.getClassLoader());
+        }
+
+        for (String address : configuration.getListeningAddresses()) {
+            if (configuration.isHttpEnabled()) {
+                LOG.info("Starting undertow http listener on " + address + ":" + configuration.getHttpPort());
+                builder.addHttpListener(configuration.getHttpPort(), address);
+            }
+            if (configuration.isHttpSecureEnabled()) {
+                try {
+                    URL keyStorePath = loadResource(configuration.getSslKeystore());
+                    KeyStore keyStore = getKeyStore(keyStorePath,
+                                                    configuration.getSslKeystoreType() != null
+                                                        ? configuration.getSslKeystoreType() : "JKS",
+                                                    configuration.getSslKeyPassword());
+
+                    String _keyManagerFactoryAlgorithm = Security
+                        .getProperty("ssl.KeyManagerFactory.algorithm") == null
+                            ? KeyManagerFactory.getDefaultAlgorithm()
+                            : Security.getProperty("ssl.KeyManagerFactory.algorithm");
+                    String _keyManagerPassword = configuration.getSslPassword();
+                    String _keyStorePassword = configuration.getSslKeyPassword();
+                    KeyManagerFactory keyManagerFactory = KeyManagerFactory
+                        .getInstance(_keyManagerFactoryAlgorithm);
+                    keyManagerFactory.init(keyStore,
+                                           _keyManagerPassword == null
+                                               ? (_keyStorePassword == null
+                                                   ? null : _keyStorePassword.toCharArray())
+                                               : _keyManagerPassword.toCharArray());
+                    KeyManager[] keyManagers = keyManagerFactory.getKeyManagers();
+
+                    TrustManager[] trustManagers = null;
+                    String _secureRandomAlgorithm = null;
+                    SecureRandom random = (_secureRandomAlgorithm == null)
+                        ? null : SecureRandom.getInstance(_secureRandomAlgorithm);
+                    if (configuration.getTrustStore() != null) {
+                        URL trustStorePath = loadResource(configuration.getTrustStore());
+                        KeyStore trustStore = getKeyStore(trustStorePath,
+                                                          configuration.getTrustStoreType() != null
+                                                              ? configuration.getTrustStoreType() : "JKS",
+                                                          configuration.getTrustStorePassword());
+
+                        String _trustManagerFactoryAlgorithm = Security
+                            .getProperty("ssl.TrustManagerFactory.algorithm") == null
+                                ? TrustManagerFactory.getDefaultAlgorithm()
+                                : Security.getProperty("ssl.TrustManagerFactory.algorithm");
+
+                        
+                        Collection<? extends CRL> crls = configuration.getCrlPath() == null
+                            ? null : loadCRL(configuration.getCrlPath());
+                        String certAlias = configuration.getSslKeyAlias();
+                        if (configuration.isValidateCerts() && keyStore != null) {
+                            if (certAlias == null) {
+                                List<String> aliases = Collections.list(keyStore.aliases());
+                                certAlias = aliases.size() == 1 ? aliases.get(0) : null;
+                            }
+
+                            Certificate cert = certAlias == null ? null : keyStore.getCertificate(certAlias);
+                            if (cert == null) {
+                                throw new Exception("No certificate found in the keystore"
+                                                    + (certAlias == null ? "" : " for alias " + certAlias));
+                            }
+
+                            CertificateValidator validator = new CertificateValidator(trustStore, crls);
+                            validator.setEnableCRLDP(configuration.isEnableCRLDP());
+                            validator.setEnableOCSP(configuration.isEnableOCSP());
+                            validator.setOcspResponderURL(configuration.getOcspResponderURL());
+                            validator.validate(keyStore, cert);
+                        }
+
+                        if (trustStore != null) {
+                            // Revocation checking is only supported for PKIX algorithm
+                            if (configuration.isValidatePeerCerts()
+                                && _trustManagerFactoryAlgorithm.equalsIgnoreCase("PKIX")) {
+                                PKIXBuilderParameters pbParams = new PKIXBuilderParameters(trustStore,
+                                                                                           new X509CertSelector());
+
+                                // Make sure revocation checking is enabled
+                                pbParams.setRevocationEnabled(true);
+
+                                if (crls != null && !crls.isEmpty()) {
+                                    pbParams.addCertStore(CertStore
+                                        .getInstance("Collection", new CollectionCertStoreParameters(crls)));
+                                }
+
+                                if (configuration.isEnableCRLDP()) {
+                                    // Enable Certificate Revocation List Distribution Points (CRLDP) support
+                                    System.setProperty("com.sun.security.enableCRLDP", "true");
+                                }
+
+                                if (configuration.isEnableOCSP()) {
+                                    // Enable On-Line Certificate Status Protocol (OCSP) support
+                                    Security.setProperty("ocsp.enable", "true");
+
+                                    if (configuration.getOcspResponderURL() != null) {
+                                        // Override location of OCSP Responder
+                                        Security.setProperty("ocsp.responderURL",
+                                                             configuration.getOcspResponderURL());
+                                    }
+                                }
+
+                                TrustManagerFactory trustManagerFactory = TrustManagerFactory
+                                    .getInstance(_trustManagerFactoryAlgorithm);
+                                trustManagerFactory.init(new CertPathTrustManagerParameters(pbParams));
+
+                                trustManagers = trustManagerFactory.getTrustManagers();
+                            } else {
+                                TrustManagerFactory trustManagerFactory = TrustManagerFactory
+                                    .getInstance(_trustManagerFactoryAlgorithm);
+                                trustManagerFactory.init(trustStore);
+
+                                trustManagers = trustManagerFactory.getTrustManagers();
+                            }
                         }
                     }
+                    SSLContext context = SSLContext.getInstance("TLS");
+                    context.init(keyManagers, trustManagers, random);
+
+                    LOG.info("Starting undertow https listener on " + address + ":"
+                             + configuration.getHttpSecurePort());
+                    builder.addHttpsListener(configuration.getHttpSecurePort(), address, context);
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Unable to build SSL context", e);
                 }
-                */
+            }
+        }
 
-			} catch (Exception e) {
-				LOG.error("Exception while starting Undertow", e);
-				throw new RuntimeException("Exception while starting Undertow", e);
-			}
-		}
+        builder.setHandler(rootHandler);
+        server = builder.build();
+        server.start();
+    }
 
+    private URL loadResource(String resource) throws MalformedURLException {
+        URL url;
+        try {
+            url = new URL(resource);
+        } catch (MalformedURLException e) {
+            if (!resource.startsWith("ftp:") && !resource.startsWith("file:")
+                && !resource.startsWith("jar:")) {
+                try {
+                    File file = new File(resource).getCanonicalFile();
+                    url = file.toURI().toURL();
+                } catch (Exception e2) {
+                    throw e;
+                }
+            } else {
+                throw e;
+            }
+        }
+        return url;
+    }
 
-		if (configuration.isLogNCSAFormatEnabled()) {
+    private KeyStore getKeyStore(URL storePath, String storeType, String storePassword) throws Exception {
+        KeyStore keystore = KeyStore.getInstance(storeType);
+        try (InputStream is = storePath.openStream()) {
+            keystore.load(is, storePassword.toCharArray());
+        }
+        return keystore;
+    }
 
-			String logNCSADirectory = configuration.getLogNCSADirectory();
-			String logNCSAFormat = configuration.getLogNCSAFormat();
+    private Object createConfigurationObject(Map<String, String> config, String name) throws Exception {
+        String clazzName = config.get(name);
+        if (clazzName != null) {
+            Class<?> clazz = getClass().getClassLoader().loadClass(clazzName);
+            Constructor<?> cns = clazz.getDeclaredConstructor(Map.class);
+            Map<String, String> subCfg = new HashMap<>();
+            for (Map.Entry<String, String> entry : config.entrySet()) {
+                if (entry.getKey().startsWith(name + ".")) {
+                    subCfg.put(entry.getKey().substring(name.length() + 1), entry.getValue());
+                }
+            }
+            return cns.newInstance(subCfg);
+        }
+        return null;
+    }
 
-			Bundle bundle = FrameworkUtil.getBundle(ServerControllerImpl.class);
-			ClassLoader loader = bundle.adapt(BundleWiring.class).getClassLoader();
-			XnioWorker worker = UndertowUtil.createWorker(loader);
+    void doStop() {
+        server.stop();
+    }
 
-//            String logNameSuffix = logNCSAFormat.substring(logNCSAFormat.lastIndexOf("."));
-//            String logBaseName = logNCSAFormat.substring(0, logNCSAFormat.lastIndexOf("."));
+    @Override
+    public synchronized LifeCycle getContext(ContextModel model) {
+        assertNotState(State.Unconfigured);
+        return findOrCreateContext(model);
+    }
 
-			AccessLogReceiver logReceiver = DefaultAccessLogReceiver
-					.builder()
-					.setLogWriteExecutor(worker)
-					.setOutputDirectory(new File(logNCSADirectory).toPath())
-					.setLogBaseName("request.")
-					.setLogNameSuffix("log")
-					.setRotate(true)
-					.build();
+    @Override
+    public synchronized void removeContext(HttpContext httpContext) {
+        assertNotState(State.Unconfigured);
+        final Context context = contextMap.remove(httpContext);
+        if (context == null) {
+            throw new IllegalStateException("Cannot remove the context because it does not exist: "
+                                            + httpContext);
+        }
+        context.destroy();
+    }
 
-			String format;
-			if (configuration.isLogNCSAExtended()) {
-				format = "combined";
-			} else {
-				format = "common";
-			}
+    private void assertState(State state) {
+        if (this.state != state) {
+            throw new IllegalStateException("State is " + this.state + " but should be " + state);
+        }
+    }
 
-			//  String format = "%a - - [%t] \"%m %U %H\" %s ";
-			//TODO: still need to find out how to add cookie etc.
+    private void assertNotState(State state) {
+        if (this.state == state) {
+            throw new IllegalStateException("State should not be " + this.state);
+        }
+    }
 
-			rootHandler = new AccessLogHandler(path, logReceiver, format, AccessLogHandler.class.getClassLoader());
-		}
+    private Context findContext(final ContextModel contextModel) {
+        NullArgumentException.validateNotNull(contextModel, "contextModel");
+        HttpContext httpContext = contextModel.getHttpContext();
+        return contextMap.get(httpContext);
+    }
 
-		for (String address : configuration.getListeningAddresses()) {
-			if (configuration.isHttpEnabled()) {
-				LOG.info("Starting undertow http listener on " + address + ":" + configuration.getHttpPort());
-				builder.addHttpListener(configuration.getHttpPort(), address);
-			}
-			if (configuration.isHttpSecureEnabled()) {
-				try {
-					URL keyStorePath = loadResource(configuration.getSslKeystore());
-					KeyStore keyStore = getKeyStore(
-							keyStorePath,
-							configuration.getSslKeystoreType() != null ? configuration.getSslKeystoreType() : "JKS",
-							configuration.getSslKeyPassword());
+    private Context findOrCreateContext(final ContextModel contextModel) {
+        NullArgumentException.validateNotNull(contextModel, "contextModel");
+        Context newCtx = new Context(identityManager, path, contextModel);
+        Context oldCtx = contextMap.putIfAbsent(contextModel.getHttpContext(), newCtx);
+        return oldCtx != null ? oldCtx : newCtx;
+    }
 
-					String _keyManagerFactoryAlgorithm = Security.getProperty("ssl.KeyManagerFactory.algorithm") == null ?
-							KeyManagerFactory.getDefaultAlgorithm() : Security.getProperty("ssl.KeyManagerFactory.algorithm");
-					String _keyManagerPassword = configuration.getSslPassword();
-					String _keyStorePassword = configuration.getSslKeyPassword();
-					KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(_keyManagerFactoryAlgorithm);
-					keyManagerFactory.init(keyStore, _keyManagerPassword == null ? (_keyStorePassword == null ? null : _keyStorePassword.toCharArray()) : _keyManagerPassword.toCharArray());
-					KeyManager[] keyManagers = keyManagerFactory.getKeyManagers();
+    @Override
+    public synchronized void addServlet(ServletModel model) {
+        assertNotState(State.Unconfigured);
+        try {
+            final Context context = findOrCreateContext(model.getContextModel());
+            context.addServlet(model);
+        } catch (ServletException e) {
+            throw new RuntimeException("Unable to add servlet", e);
+        }
+    }
 
-//                    String _trustManagerFactoryAlgorithm = Security.getProperty("ssl.TrustManagerFactory.algorithm") == null ?
-//                            TrustManagerFactory.getDefaultAlgorithm() : Security.getProperty("ssl.TrustManagerFactory.algorithm");
-//                    TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(_trustManagerFactoryAlgorithm);
-//                    trustManagerFactory.init(trustStore);
-//                    TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-					TrustManager[] trustManagers = null;
+    @Override
+    public void removeServlet(ServletModel model) {
+        assertNotState(State.Unconfigured);
+        try {
+            final Context context = findContext(model.getContextModel());
+            if (context != null) {
+                context.removeServlet(model);
+            }
+        } catch (ServletException e) {
+            throw new RuntimeException("Unable to remove servlet", e);
+        }
+    }
 
-					String _secureRandomAlgorithm = null;
-					SecureRandom random = (_secureRandomAlgorithm == null) ? null : SecureRandom.getInstance(_secureRandomAlgorithm);
+    @Override
+    public void addEventListener(EventListenerModel model) {
+        assertNotState(State.Unconfigured);
+        try {
+            final Context context = findOrCreateContext(model.getContextModel());
+            context.addEventListener(model);
+        } catch (ServletException e) {
+            throw new RuntimeException("Unable to add event listener", e);
+        }
+    }
 
-					SSLContext context = SSLContext.getInstance("TLS");
-					context.init(keyManagers, trustManagers, random);
+    @Override
+    public void removeEventListener(EventListenerModel model) {
+        assertNotState(State.Unconfigured);
+        try {
+            final Context context = findOrCreateContext(model.getContextModel());
+            context.removeEventListener(model);
+        } catch (ServletException e) {
+            throw new RuntimeException("Unable to add event listener", e);
+        }
+    }
 
-					LOG.info("Starting undertow https listener on " + address + ":" + configuration.getHttpSecurePort());
-					builder.addHttpsListener(configuration.getHttpSecurePort(), address, context);
-				} catch (Exception e) {
-					throw new IllegalArgumentException("Unable to build SSL context", e);
-				}
-			}
-		}
+    @Override
+    public void addFilter(FilterModel model) {
+        assertNotState(State.Unconfigured);
+        try {
+            final Context context = findOrCreateContext(model.getContextModel());
+            context.addFilter(model);
+        } catch (ServletException e) {
+            throw new RuntimeException("Unable to add filter", e);
+        }
+    }
 
-		builder.setSocketOption(Options.REUSE_ADDRESSES, true);
-		builder.setHandler(rootHandler);
-		server = builder.build();
-		server.start();
-	}
+    @Override
+    public void removeFilter(FilterModel model) {
+        assertNotState(State.Unconfigured);
+        try {
+            final Context context = findOrCreateContext(model.getContextModel());
+            context.removeFilter(model);
+        } catch (ServletException e) {
+            throw new RuntimeException("Unable to remove filter", e);
+        }
+    }
 
-	private URL loadResource(String resource) throws MalformedURLException {
-		URL url;
-		try {
-			url = new URL(resource);
-		} catch (MalformedURLException e) {
-			if (!resource.startsWith("ftp:") &&
-					!resource.startsWith("file:") &&
-					!resource.startsWith("jar:")) {
-				try {
-					File file = new File(resource).getCanonicalFile();
-					url = file.toURI().toURL();
-				} catch (Exception e2) {
-					throw e;
-				}
-			} else {
-				throw e;
-			}
-		}
-		return url;
-	}
+    @Override
+    public void addErrorPage(ErrorPageModel model) {
+        assertNotState(State.Unconfigured);
+        try {
+            final Context context = findOrCreateContext(model.getContextModel());
+            context.addErrorPage(model);
+        } catch (ServletException e) {
+            throw new RuntimeException("Unable to add error page", e);
+        }
+    }
 
-	private KeyStore getKeyStore(URL storePath, String storeType, String storePassword) throws Exception {
-		KeyStore keystore = KeyStore.getInstance(storeType);
-		try (InputStream is = storePath.openStream()) {
-			keystore.load(is, storePassword.toCharArray());
-		}
-		return keystore;
-	}
+    @Override
+    public void removeErrorPage(ErrorPageModel model) {
+        assertNotState(State.Unconfigured);
+        try {
+            final Context context = findOrCreateContext(model.getContextModel());
+            context.removeErrorPage(model);
+        } catch (ServletException e) {
+            throw new RuntimeException("Unable to remove error page", e);
+        }
+    }
 
-	private Object createConfigurationObject(Map<String, String> config, String name) throws Exception {
-		String clazzName = config.get(name);
-		if (clazzName != null) {
-			Class<?> clazz = getClass().getClassLoader().loadClass(clazzName);
-			Constructor<?> cns = clazz.getDeclaredConstructor(Map.class);
-			Map<String, String> subCfg = new HashMap<>();
-			for (Map.Entry<String, String> entry : config.entrySet()) {
-				if (entry.getKey().startsWith(name + ".")) {
-					subCfg.put(entry.getKey().substring(name.length() + 1), entry.getValue());
-				}
-			}
-			return cns.newInstance(subCfg);
-		}
-		return null;
-	}
+    @Override
+    public void addWelcomFiles(WelcomeFileModel model) {
+        assertNotState(State.Unconfigured);
+        try {
+            final Context context = findOrCreateContext(model.getContextModel());
+            context.addWelcomeFile(model);
+        } catch (ServletException e) {
+            throw new RuntimeException("Unable to add welcome files", e);
+        }
+    }
 
-	void doStop() {
-		server.stop();
-	}
+    @Override
+    public void removeWelcomeFiles(WelcomeFileModel model) {
+        assertNotState(State.Unconfigured);
+        try {
+            final Context context = findOrCreateContext(model.getContextModel());
+            context.removeWelcomeFile(model);
+        } catch (ServletException e) {
+            throw new RuntimeException("Unable to add welcome files", e);
+        }
+    }
 
-	@Override
-	public synchronized LifeCycle getContext(ContextModel model) {
-		assertNotState(State.Unconfigured);
-		return findOrCreateContext(model);
-	}
+    @Override
+    public Servlet createResourceServlet(ContextModel contextModel, String alias, String name) {
+        final Context context = findOrCreateContext(contextModel);
+        return new ResourceServlet(context, alias, name);
+    }
 
-	@Override
-	public synchronized void removeContext(HttpContext httpContext) {
-		assertNotState(State.Unconfigured);
-		final Context context = contextMap.remove(httpContext);
-		if (context == null) {
-			throw new IllegalStateException("Cannot remove the context because it does not exist: " + httpContext);
-		}
-		context.destroy();
-	}
+    @Override
+    public void addSecurityConstraintMapping(SecurityConstraintMappingModel model) {
+        assertNotState(State.Unconfigured);
+        try {
+            final Context context = findOrCreateContext(model.getContextModel());
+            context.addSecurityConstraintMapping(model);
+        } catch (ServletException e) {
+            throw new RuntimeException("Unable to add welcome files", e);
+        }
+    }
 
-	private void assertState(State state) {
-		if (this.state != state) {
-			throw new IllegalStateException("State is " + this.state + " but should be " + state);
-		}
-	}
+    @Override
+    public void addContainerInitializerModel(ContainerInitializerModel model) {
+        assertNotState(State.Unconfigured);
+        try {
+            final Context context = findOrCreateContext(model.getContextModel());
+            context.addContainerInitializerModel(model);
+        } catch (ServletException e) {
+            throw new RuntimeException("Unable to add welcome files", e);
+        }
+    }
 
-	private void assertNotState(State state) {
-		if (this.state == state) {
-			throw new IllegalStateException("State should not be " + this.state);
-		}
-	}
+    public Collection<? extends CRL> loadCRL(String crlPath) throws Exception {
+        Collection<? extends CRL> crlList = null;
 
-	private Context findContext(final ContextModel contextModel) {
-		NullArgumentException.validateNotNull(contextModel, "contextModel");
-		HttpContext httpContext = contextModel.getHttpContext();
-		return contextMap.get(httpContext);
-	}
+        if (crlPath != null) {
+            InputStream in = null;
+            try {
+                in = loadResource(crlPath).openStream();
+                crlList = CertificateFactory.getInstance("X.509").generateCRLs(in);
+            } finally {
+                if (in != null) {
+                    in.close();
+                }
+            }
+        }
 
-	private Context findOrCreateContext(final ContextModel contextModel) {
-		NullArgumentException.validateNotNull(contextModel, "contextModel");
-		Context newCtx = new Context(identityManager, path, contextModel);
-		Context oldCtx = contextMap.putIfAbsent(contextModel.getHttpContext(), newCtx);
-		return oldCtx != null ? oldCtx : newCtx;
-	}
-
-	@Override
-	public synchronized void addServlet(ServletModel model) {
-		assertNotState(State.Unconfigured);
-		try {
-			final Context context = findOrCreateContext(model.getContextModel());
-			context.addServlet(model);
-		} catch (ServletException e) {
-			throw new RuntimeException("Unable to add servlet", e);
-		}
-	}
-
-	@Override
-	public void removeServlet(ServletModel model) {
-		assertNotState(State.Unconfigured);
-		try {
-			final Context context = findContext(model.getContextModel());
-			if (context != null) {
-				context.removeServlet(model);
-			}
-		} catch (ServletException e) {
-			throw new RuntimeException("Unable to remove servlet", e);
-		}
-	}
-
-	@Override
-	public void addEventListener(EventListenerModel model) {
-		assertNotState(State.Unconfigured);
-		try {
-			final Context context = findOrCreateContext(model.getContextModel());
-			context.addEventListener(model);
-		} catch (ServletException e) {
-			throw new RuntimeException("Unable to add event listener", e);
-		}
-	}
-
-	@Override
-	public void removeEventListener(EventListenerModel model) {
-		assertNotState(State.Unconfigured);
-		try {
-			final Context context = findOrCreateContext(model.getContextModel());
-			context.removeEventListener(model);
-		} catch (ServletException e) {
-			throw new RuntimeException("Unable to add event listener", e);
-		}
-	}
-
-	@Override
-	public void addFilter(FilterModel model) {
-		assertNotState(State.Unconfigured);
-		try {
-			final Context context = findOrCreateContext(model.getContextModel());
-			context.addFilter(model);
-		} catch (ServletException e) {
-			throw new RuntimeException("Unable to add filter", e);
-		}
-	}
-
-	@Override
-	public void removeFilter(FilterModel model) {
-		assertNotState(State.Unconfigured);
-		try {
-			final Context context = findOrCreateContext(model.getContextModel());
-			context.removeFilter(model);
-		} catch (ServletException e) {
-			throw new RuntimeException("Unable to remove filter", e);
-		}
-	}
-
-	@Override
-	public void addErrorPage(ErrorPageModel model) {
-		assertNotState(State.Unconfigured);
-		try {
-			final Context context = findOrCreateContext(model.getContextModel());
-			context.addErrorPage(model);
-		} catch (ServletException e) {
-			throw new RuntimeException("Unable to add error page", e);
-		}
-	}
-
-	@Override
-	public void removeErrorPage(ErrorPageModel model) {
-		assertNotState(State.Unconfigured);
-		try {
-			final Context context = findOrCreateContext(model.getContextModel());
-			context.removeErrorPage(model);
-		} catch (ServletException e) {
-			throw new RuntimeException("Unable to remove error page", e);
-		}
-	}
-
-	@Override
-	public void addWelcomFiles(WelcomeFileModel model) {
-		assertNotState(State.Unconfigured);
-		try {
-			final Context context = findOrCreateContext(model.getContextModel());
-			context.addWelcomeFile(model);
-		} catch (ServletException e) {
-			throw new RuntimeException("Unable to add welcome files", e);
-		}
-	}
-
-	@Override
-	public void removeWelcomeFiles(WelcomeFileModel model) {
-		assertNotState(State.Unconfigured);
-		try {
-			final Context context = findOrCreateContext(model.getContextModel());
-			context.removeWelcomeFile(model);
-		} catch (ServletException e) {
-			throw new RuntimeException("Unable to add welcome files", e);
-		}
-	}
-
-	@Override
-	public Servlet createResourceServlet(ContextModel contextModel, String alias, String name) {
-		final Context context = findOrCreateContext(contextModel);
-		return new ResourceServlet(context, alias, name);
-	}
-
-	@Override
-	public void addSecurityConstraintMapping(SecurityConstraintMappingModel model) {
-		assertNotState(State.Unconfigured);
-		try {
-			final Context context = findOrCreateContext(model.getContextModel());
-			context.addSecurityConstraintMapping(model);
-		} catch (ServletException e) {
-			throw new RuntimeException("Unable to add welcome files", e);
-		}
-	}
-
-	@Override
-	public void addContainerInitializerModel(ContainerInitializerModel model) {
-		assertNotState(State.Unconfigured);
-		try {
-			final Context context = findOrCreateContext(model.getContextModel());
-			context.addContainerInitializerModel(model);
-		} catch (ServletException e) {
-			throw new RuntimeException("Unable to add welcome files", e);
-		}
-	}
+        return crlList;
+    }
 }

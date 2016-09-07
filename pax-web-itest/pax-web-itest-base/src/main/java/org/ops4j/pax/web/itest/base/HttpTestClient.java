@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.HttpHost;
@@ -34,12 +33,10 @@ import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
-import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -47,7 +44,6 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.BasicHttpContext;
@@ -70,6 +66,8 @@ public class HttpTestClient {
 	private String password;
 
 	private String keyStore;
+	
+	private String keyStorePassword;
 
 	public HttpTestClient() throws Exception {
 		this("admin", "admin", "src/test/resources/keystore");
@@ -77,12 +75,18 @@ public class HttpTestClient {
 
 	public HttpTestClient(String user, String password, String keyStore)
 			throws Exception {
-		this.user = user;
-		this.password = password;
-		this.keyStore = keyStore;
-
-		httpclient = (CloseableHttpClient) createHttpClient();
+		this("admin", "admin", "src/test/resources/keystore", "password");
 	}
+	
+	public HttpTestClient(String user, String password, String keyStore, String keyStorePassword)
+                throws Exception {
+	        this.user = user;
+	        this.password = password;
+	        this.keyStore = keyStore;
+	        this.keyStorePassword = keyStorePassword;
+	        httpclient = (CloseableHttpClient) createHttpClient();
+	}
+	
 
 	private CloseableHttpClient createHttpClient()
 			throws KeyStoreException, IOException, NoSuchAlgorithmException,
@@ -92,7 +96,7 @@ public class HttpTestClient {
 		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
 		FileInputStream instream = new FileInputStream(new File(keyStore));
 		try {
-			trustStore.load(instream, "password".toCharArray());
+			trustStore.load(instream, this.keyStorePassword.toCharArray());
 		} finally {
 			// CHECKSTYLE:OFF
 			try {
