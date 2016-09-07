@@ -36,5 +36,25 @@ public class HttpTestClientFactory {
 				.addRequestHeader("Accept-Language", "en")
 				.withReturnCode(200);
 	}
+	
+	/**
+         * creates a default HttpTestClient based on Jetty HttpClient with
+         * some default configuration.
+         * <ul>
+         * <li>Return-Code: 200 OK</li>
+         * <li>Keystore: src/main/resources-binary/wss40rev.jks</li>
+         * <li>Request-Header: Accept-Language=en</li>
+         * <li>Request-Timeout: 10 seconds</li>
+         * </ul>
+         *
+         * @return Jetty-based HttpTestClient
+         */
+        public static HttpTestClient createDefaultTestClientWithCRL() {
+                return new JettyTestClient()
+                                .timeoutInSeconds(10)
+                                .withBundleKeystore("org.ops4j.pax.web.itest.pax-web-itest-base", "wss40rev.jks", "security", "security")
+                                .addRequestHeader("Accept-Language", "en")
+                                .withReturnCode(200);
+        }
 
 }

@@ -38,6 +38,17 @@ public interface HttpTestClient {
 	 * @return the HttpTestClient-instance
 	 */
 	HttpTestClient withBundleKeystore(String bundleSymbolicName, String keystoreLocation);
+	
+	/**
+         * Configures a keystore for SSL which is located within a bundle.
+         *
+         * @param bundleSymbolicName The bundle containing the keystore-file
+         * @param keystoreLocation   path to keystore-file within bundle
+         * @param keystorePassword   password to keystore within bundle
+         * @param keyManagerPassword   password to keyManager within bundle
+         * @return the HttpTestClient-instance
+         */
+        HttpTestClient withBundleKeystore(String bundleSymbolicName, String keystoreLocation, String keystorePassword, String keyManagerPassword);
 
 	/**
 	 * Configures the seconds after which a request will get a TimeoutException

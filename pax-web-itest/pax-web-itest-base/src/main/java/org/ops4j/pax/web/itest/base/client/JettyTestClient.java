@@ -65,6 +65,10 @@ class JettyTestClient implements HttpTestClient {
 	private int timeoutInSeconds = 100;
 	private Optional<CookieState> httpState = Optional.empty();
 
+        private String keystorePassword = "password";
+
+        private String keyManagerPassword = "password";
+
 
 	JettyTestClient() {
 	}
@@ -207,8 +211,8 @@ class JettyTestClient implements HttpTestClient {
 		if (keystoreLocationURL != null) {
 			SslContextFactory sslContextFactory = new SslContextFactory(true);
 			sslContextFactory.setKeyStorePath(keystoreLocationURL.toString());
-			sslContextFactory.setKeyStorePassword("password");
-			sslContextFactory.setKeyManagerPassword("password");
+			sslContextFactory.setKeyStorePassword(keystorePassword);
+			sslContextFactory.setKeyManagerPassword(keyManagerPassword);
 			sslContextFactory.setKeyStoreType(KeyStore.getDefaultType());
 			httpClient = new HttpClient(sslContextFactory);
 		} else {
@@ -404,4 +408,12 @@ class JettyTestClient implements HttpTestClient {
 		private String contentType;
 		private Map<String, String> headers;
 	}
+
+    @Override
+    public HttpTestClient withBundleKeystore(String bundleSymbolicName, String keystoreLocation,
+                                             String keystorePassword, String keyManagerPassword) {
+        this.keystorePassword = keystorePassword;
+        this.keyManagerPassword = keyManagerPassword;
+        return withBundleKeystore(bundleSymbolicName, keystoreLocation);
+    }
 }
