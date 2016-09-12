@@ -163,11 +163,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.servicemix.bundles</groupId>
 			<artifactId>org.apache.servicemix.bundles.commons-digester</artifactId>
 			<version>1.8_4</version>

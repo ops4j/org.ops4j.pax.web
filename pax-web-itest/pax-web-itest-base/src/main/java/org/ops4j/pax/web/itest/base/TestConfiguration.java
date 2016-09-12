@@ -98,6 +98,28 @@ public class TestConfiguration {
 
 	}
 
+
+	public static Option jsfBundlesWithDependencies() {
+		return composite(
+				// MyFaces
+				mavenBundle("org.apache.myfaces.core", "myfaces-api").versionAsInProject(),
+				mavenBundle("org.apache.myfaces.core", "myfaces-impl").versionAsInProject(),
+				mavenBundle("javax.annotation", "javax.annotation-api").version("1.2"),
+				mavenBundle("javax.interceptor", "javax.interceptor-api").version("1.2"),
+				mavenBundle("javax.enterprise", "cdi-api").version("1.2"),
+				mavenBundle("javax.validation", "validation-api").version("1.1.0.Final"),
+				mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.javax-inject").version("1_2"),
+				// Commons
+				mavenBundle("commons-io", "commons-io").version("1.4"),
+				mavenBundle("commons-codec", "commons-codec").version("1.10"),
+				mavenBundle("commons-beanutils", "commons-beanutils").version("1.8.3"),
+				mavenBundle("commons-collections", "commons-collections").version("3.2.1"),
+				mavenBundle("commons-digester", "commons-digester").version("1.8.1"),
+				mavenBundle("org.apache.commons", "commons-lang3").version("3.4")
+		);
+
+	}
+
 	public static Option paxJettyBundles() {
 		return composite(
 				mavenBundle().groupId("org.ops4j.pax.web")
@@ -247,15 +269,6 @@ public class TestConfiguration {
 				mavenBundle("javax.enterprise", "cdi-api", "1.2"),
 				mavenBundle("javax.interceptor", "javax.interceptor-api", "1.2"),
 				mavenBundle("javax.validation", "validation-api", "1.1.0.Final"));
-	}
-
-
-	public static Option httpClientBundles() {
-		return composite(
-				mavenBundle("commons-codec", "commons-codec").version(asInProject()),
-				linkBundle("org.apache.httpcomponents.httpcore"),
-				linkBundle("org.apache.httpcomponents.httpmime"),
-				linkBundle("org.apache.httpcomponents.httpclient"));
 	}
 
 

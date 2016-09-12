@@ -41,9 +41,7 @@ public class AuthenticationIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		return combine(configureUndertow(),
-				mavenBundle().groupId("commons-codec").artifactId("commons-codec").versionAsInProject()
-		);
+		return configureUndertow();
 	}
 
 	@Before

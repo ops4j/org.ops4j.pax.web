@@ -47,7 +47,6 @@ public class WarBasicAuthIntegrationTest extends ITestBase {
 	public static Option[] configuration() {
 		return combine(
 				configureUndertow(),
-				mavenBundle().groupId("commons-codec").artifactId("commons-codec").versionAsInProject(),
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
 						.artifactId("undertow-auth-config-fragment")
 						.version(VersionUtil.getProjectVersion()).noStart());

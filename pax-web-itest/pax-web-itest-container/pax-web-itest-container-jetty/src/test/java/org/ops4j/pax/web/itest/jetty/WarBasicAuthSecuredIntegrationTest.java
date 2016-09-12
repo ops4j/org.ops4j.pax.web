@@ -43,20 +43,13 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 	public static Option[] configuration() {
 		return OptionUtils.combine(
 				configureJetty(),
-				mavenBundle().groupId("commons-codec").artifactId("commons-codec").versionAsInProject(),
-				systemProperty("org.osgi.service.http.secure.enabled").value(
-						"true"),
+				systemProperty("org.osgi.service.http.secure.enabled").value("true"),
 				systemProperty("org.ops4j.pax.web.ssl.keystore").value(
 						WarBasicAuthSecuredIntegrationTest.class.getClassLoader().getResource("keystore").getFile()),
-//						"src/test/resources/keystore"),
-				systemProperty("org.ops4j.pax.web.ssl.password").value(
-						"password"),
-				systemProperty("org.ops4j.pax.web.ssl.keypassword").value(
-						"password"),
-				systemProperty("org.ops4j.pax.web.ssl.clientauthneeded").value(
-						"required"),
-				mavenBundle().groupId("org.ops4j.pax.web.samples")
-						.artifactId("jetty-auth-config-fragment")
+				systemProperty("org.ops4j.pax.web.ssl.password").value("password"),
+				systemProperty("org.ops4j.pax.web.ssl.keypassword").value("password"),
+				systemProperty("org.ops4j.pax.web.ssl.clientauthneeded").value("required"),
+				mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("jetty-auth-config-fragment")
 						.version(VersionUtil.getProjectVersion()).noStart());
 	}
 

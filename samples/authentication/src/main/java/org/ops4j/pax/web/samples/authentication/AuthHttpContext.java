@@ -17,11 +17,11 @@ package org.ops4j.pax.web.samples.authentication;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Base64;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.codec.binary.Base64;
 import org.osgi.service.http.HttpContext;
 
 /**
@@ -51,7 +51,7 @@ public class AuthHttpContext implements HttpContext {
 		request.setAttribute(AUTHENTICATION_TYPE, HttpServletRequest.BASIC_AUTH);
 
 		String authzHeader = request.getHeader("Authorization");
-		String usernameAndPassword = new String(Base64.decodeBase64(authzHeader.substring(6).getBytes()));
+		String usernameAndPassword = new String(Base64.getDecoder().decode(authzHeader.substring(6).getBytes()));
 
 		int userNameIndex = usernameAndPassword.indexOf(":");
 		String username = usernameAndPassword.substring(0, userNameIndex);

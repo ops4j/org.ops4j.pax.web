@@ -62,10 +62,10 @@ public class WhiteboardDeregisteringContextIntegrationTest extends ITestBase {
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
 						.artifactId("whiteboard").version(VersionUtil.getProjectVersion())
 						.noStart(),
-				mavenBundle().groupId("com.cedarsoft.commons").artifactId("test-utils").version("6.0.1"),
-				mavenBundle().groupId("com.cedarsoft.commons").artifactId("crypt").version("6.0.1"),
-				mavenBundle().groupId("com.cedarsoft.commons").artifactId("xml-commons").version("6.0.1"),
-				mavenBundle("commons-codec", "commons-codec").version(asInProject()),
+				mavenBundle().groupId("com.cedarsoft.commons").artifactId("test-utils").versionAsInProject(),
+				mavenBundle().groupId("com.cedarsoft.commons").artifactId("crypt").versionAsInProject(),
+				mavenBundle().groupId("com.cedarsoft.commons").artifactId("xml-commons").versionAsInProject(),
+				mavenBundle("commons-codec", "commons-codec").versionAsInProject(),
 				mavenBundle().groupId("com.fasterxml.jackson.core").artifactId("jackson-core").version("2.3.0"),
 				mavenBundle().groupId("com.fasterxml.jackson.core").artifactId("jackson-databind").version("2.3.0"),
 				mavenBundle().groupId("com.fasterxml.jackson.core").artifactId("jackson-annotations").version("2.3.0"),

@@ -74,11 +74,7 @@ public class WebConsoleIntegrationTest extends ITestBase {
 								.version("1.4.1"),
 						mavenBundle().groupId("org.apache.felix")
 								.artifactId("org.apache.felix.webconsole")
-								.version("3.1.8"),
-
-						// HTTP Client needed for UnitTesting
-						mavenBundle("commons-codec", "commons-codec").version(
-								asInProject())// ,
+								.version("3.1.8")
 				);
 	}
 

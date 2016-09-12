@@ -23,6 +23,7 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.TestConfiguration;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.client.CookieState;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
@@ -51,49 +52,9 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 		return OptionUtils
 				.combine(
 						configureJetty(),
-						mavenBundle().groupId("commons-beanutils")
-								.artifactId("commons-beanutils")
-								.version(asInProject()),
-						mavenBundle().groupId("commons-collections")
-								.artifactId("commons-collections")
-								.version(asInProject()),
-						mavenBundle().groupId("commons-codec")
-								.artifactId("commons-codec")
-								.version(asInProject()),
-						mavenBundle()
-								.groupId("org.apache.servicemix.bundles")
-								.artifactId(
-										"org.apache.servicemix.bundles.commons-digester")
-								.version("1.8_4"),
-						mavenBundle()
-								.groupId("org.apache.servicemix.specs")
-								.artifactId(
-										"org.apache.servicemix.specs.jsr303-api-1.0.0")
-								.version(asInProject()),
-						mavenBundle()
-								.groupId("org.apache.servicemix.specs")
-								.artifactId(
-										"org.apache.servicemix.specs.jsr250-1.0")
-								.version(asInProject()),
-						mavenBundle().groupId("org.apache.geronimo.bundles")
-								.artifactId("commons-discovery")
-								.version("0.4_1"),
-
-						mavenBundle().groupId("javax.enterprise")
-								.artifactId("cdi-api").versionAsInProject(),
-						mavenBundle().groupId("javax.interceptor")
-								.artifactId("javax.interceptor-api")
-								.versionAsInProject(),
-
-						mavenBundle().groupId("org.apache.myfaces.core")
-								.artifactId("myfaces-api")
-								.version(VersionUtil.getMyFacesVersion()),
-						mavenBundle().groupId("org.apache.myfaces.core")
-								.artifactId("myfaces-impl")
-								.version(VersionUtil.getMyFacesVersion()),
-						mavenBundle().groupId("org.primefaces")
-								.artifactId("primefaces")
-								.version(asInProject()));
+						TestConfiguration.jsfBundlesWithDependencies(),
+						mavenBundle().groupId("org.primefaces").artifactId("primefaces").version(asInProject())
+				);
 	}
 
 	@Before

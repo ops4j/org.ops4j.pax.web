@@ -41,9 +41,7 @@ public class AuthenticationIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		return combine(configureJetty(),
-				mavenBundle().groupId("commons-codec").artifactId("commons-codec").versionAsInProject()
-		);
+		return configureJetty();
 	}
 
 	@Before

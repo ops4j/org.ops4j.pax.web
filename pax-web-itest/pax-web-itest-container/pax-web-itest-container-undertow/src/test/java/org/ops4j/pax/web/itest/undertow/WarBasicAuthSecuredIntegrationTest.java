@@ -43,7 +43,6 @@ public class WarBasicAuthSecuredIntegrationTest extends ITestBase {
 	public static Option[] configuration() {
 		return OptionUtils.combine(
 				configureUndertow(),
-				mavenBundle().groupId("commons-codec").artifactId("commons-codec").versionAsInProject(),
 				systemProperty("org.osgi.service.http.secure.enabled").value("true"),
 				systemProperty("org.ops4j.pax.web.ssl.keystore").value(
 						WarBasicAuthSecuredIntegrationTest.class.getClassLoader().getResource("keystore").getFile()),

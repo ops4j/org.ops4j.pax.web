@@ -118,8 +118,6 @@ public class KarafBaseTest extends AbstractTestBase {
 				mavenBundle().groupId("commons-collections")
 						.artifactId("commons-collections")
 						.version(asInProject()),
-				mavenBundle().groupId("commons-codec")
-						.artifactId("commons-codec").version(asInProject()),
 				mavenBundle()
 						.groupId("org.apache.servicemix.bundles")
 						.artifactId(

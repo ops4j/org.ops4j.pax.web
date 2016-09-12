@@ -15,11 +15,13 @@
  */
 package org.ops4j.pax.web.service.tomcat.internal;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Locale;
 
@@ -38,7 +40,6 @@ import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.tomcat.util.buf.ByteChunk;
 import org.apache.tomcat.util.buf.MessageBytes;
-import org.apache.tomcat.util.codec.binary.Base64;
 import org.apache.tomcat.util.descriptor.web.LoginConfig;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.apache.tomcat.util.http.FastHttpDateFormat;
@@ -431,8 +432,18 @@ public class OSGiAuthenticatorValve extends AuthenticatorBase {
 		 * surplus surrounding white space.
 		 */
 		private byte[] parseBase64() throws IllegalArgumentException {
-			byte[] decoded = Base64.decodeBase64(authorization.getBuffer(),
-					base64blobOffset, base64blobLength);
+			final byte[] decoded;
+			try(ByteArrayInputStream bis =new ByteArrayInputStream(
+					authorization.getBuffer(),
+					base64blobOffset,
+					base64blobLength)){
+				byte[] byteBuffer = new byte[base64blobLength];
+				bis.read(byteBuffer);
+				decoded = Base64.getDecoder().decode(byteBuffer);
+			} catch (IOException e) {
+				throw new IllegalArgumentException(
+						"Basic Authorization credentials are not Base64");
+			}
 			// restore original offset
 			authorization.setOffset(initialOffset);
 			if (decoded == null) {

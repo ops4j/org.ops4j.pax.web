@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.base.TestConfiguration;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
@@ -48,40 +49,8 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 	public static Option[] configure() {
 		return combine(
 				configureJetty(),
-				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
-						.value("INFO"),
-				mavenBundle().groupId("commons-beanutils")
-						.artifactId("commons-beanutils").version(asInProject()),
-				mavenBundle().groupId("commons-collections")
-						.artifactId("commons-collections")
-						.version(asInProject()),
-				mavenBundle().groupId("commons-codec")
-						.artifactId("commons-codec").version(asInProject()),
-				mavenBundle()
-						.groupId("org.apache.servicemix.bundles")
-						.artifactId(
-								"org.apache.servicemix.bundles.commons-digester")
-						.version("1.8_4"),
-				mavenBundle()
-						.groupId("org.apache.servicemix.specs")
-						.artifactId(
-								"org.apache.servicemix.specs.jsr303-api-1.0.0")
-						.version(asInProject()),
-				mavenBundle().groupId("org.apache.servicemix.specs")
-						.artifactId("org.apache.servicemix.specs.jsr250-1.0")
-						.version(asInProject()),
-				// mavenBundle().groupId("org.apache.servicemix.bundles")
-				// .artifactId("org.apache.servicemix.bundles.xerces")
-				// .version(asInProject()),
-				mavenBundle().groupId("org.apache.geronimo.bundles")
-						.artifactId("commons-discovery").version("0.4_1"),
-				mavenBundle().groupId("org.apache.myfaces.core")
-						.artifactId("myfaces-api").version(VersionUtil.getMyFacesVersion()),
-				mavenBundle().groupId("org.apache.myfaces.core")
-						.artifactId("myfaces-impl")
-						.version(VersionUtil.getMyFacesVersion())
-				// mavenBundle().groupId("org.apache.myfaces.core")
-				// .artifactId("myfaces-bundle").version(getMyFacesVersion())
+				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("INFO"),
+				TestConfiguration.jsfBundlesWithDependencies()
 		);
 
 	}
