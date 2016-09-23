@@ -89,6 +89,11 @@ limitations under the License.
         <AD name="Validate Peer Certs" id="org.ops4j.pax.web.validatePeerCerts"     type="String" default="false" />
         <AD name="OCSP Responder URL" id="org.ops4j.pax.web.ocspResponderURL" type="String" default="" />
         <AD name="Enable OCSP" id="org.ops4j.pax.web.enableOCSP"     type="String" default="false" />
+        <AD name="Enable Encrypted password" id="org.ops4j.pax.web.enc.enabled"     type="String" default="false" />
+        <AD name="Master Password for Encrypted password" id="org.ops4j.pax.web.enc.masterpassword"     type="String" default="" />
+        <AD name="Algorithm for Encrypted password" id="org.ops4j.pax.web.enc.algorithm"     type="String" default="PBEWithMD5AndDES" />
+        <AD name="Prefix for Encrypted password" id="org.ops4j.pax.web.enc.prefix"     type="String" default="ENC(" />
+        <AD name="Suffix for Encrypted password" id="org.ops4j.pax.web.enc.suffix"     type="String" default=")" /> 
 	</OCD>
 	<Designate pid="org.ops4j.pax.web">
         <Object ocdref="org.ops4j.pax.web"/>

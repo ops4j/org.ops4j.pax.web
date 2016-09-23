@@ -69,6 +69,11 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_VALIDATE_
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_VALIDATE_PEER_CERTS;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENABLE_OCSP;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_OCSP_RESPONDER_URL;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_MASTERPASSWORD;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_ALGORITHM;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_ENABLED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_PREFIX;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_SUFFIX;
 
 import java.io.File;
 import java.util.Dictionary;
@@ -477,6 +482,16 @@ public class Activator implements BundleActivator {
                             configuration.isEnableOCSP());
 		setProperty(toPropagate, PROPERTY_OCSP_RESPONDER_URL,
                             configuration.getOcspResponderURL());
+		setProperty(toPropagate, PROPERTY_ENC_ENABLED,
+                            configuration.isEncEnabled());
+		setProperty(toPropagate, PROPERTY_ENC_MASTERPASSWORD,
+                            configuration.getEncMasterPassword());
+		setProperty(toPropagate, PROPERTY_ENC_ALGORITHM,
+                            configuration.getEncAlgorithm());
+		setProperty(toPropagate, PROPERTY_ENC_PREFIX,
+                            configuration.getEncPrefix());
+		setProperty(toPropagate, PROPERTY_ENC_SUFFIX,
+                            configuration.getEncSuffix());
 
 		if (SupportUtils.isJSPAvailable()) {
 			setProperty(toPropagate, PROPERTY_JSP_CHECK_INTERVAL,

@@ -86,7 +86,10 @@
 							com.sun.el;version="2.1.0"; resolution:=optional,
 							com.sun.el.lang;version="2.1.0"; resolution:=optional,
 							com.sun.el.parser;version="2.1.0"; resolution:=optional,
-							com.sun.el.util;version="2.1.0"; resolution:=optional
+							com.sun.el.util;version="2.1.0"; resolution:=optional,
+                                                        org.jasypt.encryption.pbe; resolution:=optional,
+                                                        javax.crypto.spec; resolution:=optional,
+							javax.crypto; resolution:=optional
 						</Import-Package>
 						<Export-Package>
 							org.osgi.service.http; version="1.2.0"
@@ -212,6 +215,10 @@
 			<artifactId>slf4j-log4j12</artifactId>
 			<scope>test</scope>
 		</dependency>
+                <dependency>
+                        <groupId>org.jasypt</groupId>
+                        <artifactId>jasypt</artifactId>
+                </dependency>
 	</dependencies>
 
 </project>

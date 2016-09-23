@@ -173,6 +173,16 @@ public interface WebContainerConstants {
 	String PROPERTY_ENABLE_OCSP = PID + ".enableOCSP";
 	
 	String PROPERTY_OCSP_RESPONDER_URL = PID + ".ocspResponderURL";
+	
+	String PROPERTY_ENC_MASTERPASSWORD = PID + ".enc.masterpassword";
+	
+	String PROPERTY_ENC_ALGORITHM = PID + ".enc.algorithm";
+	
+	String PROPERTY_ENC_ENABLED = PID + ".enc.enabled";
+	
+	String PROPERTY_ENC_PREFIX = PID + ".enc.prefix";
+	
+	String PROPERTY_ENC_SUFFIX = PID + ".enc.suffix";
 
 }
 //CHECKSTYLE:ON
