@@ -80,6 +80,11 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_VALIDATE_
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_VALIDATE_PEER_CERTS;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENABLE_OCSP;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_OCSP_RESPONDER_URL;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_MASTERPASSWORD;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_ALGORITHM;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_ENABLED;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_PREFIX;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_SUFFIX;
 
 import java.io.File;
 import java.net.URI;
@@ -89,6 +94,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.internal.util.SupportUtils;
 import org.ops4j.pax.web.service.spi.Configuration;
@@ -115,6 +121,12 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	 * Property resolver. Cannot be null.
 	 */
 	private final PropertyResolver propertyResolver;
+	
+	/**
+	 * encryptor to decrypt the password
+	 * init it only if necessary
+	 */
+	private StandardPBEStringEncryptor encryptor;
 
 	/**
 	 * Creates a new service configuration.
@@ -234,7 +246,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		if ((null == keystorePassword) || ("".equals(keystorePassword))) {
 			keystorePassword = getResolvedStringProperty(PROPERTY_SSL_PASSWORD);
 		}
-		return keystorePassword;
+		return this.decryptPassword(keystorePassword);
 	}
 
 	/**
@@ -242,15 +254,18 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	 */
 	@Override
 	public String getSslPassword() {
-		return getSslKeystorePassword();
+	        String password =  getSslKeystorePassword();
+	        return decryptPassword(password);
 	}
 
+        
 	/**
 	 * @see Configuration#getSslKeyPassword()
 	 */
 	@Override
 	public String getSslKeyAlias() {
 		return getResolvedStringProperty(PROPERTY_SSL_KEY_ALIAS);
+		
 	}
 
 	/**
@@ -263,7 +278,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		if ((null == privateKeyPassword) || ("".equals(privateKeyPassword))) {
 			privateKeyPassword = getResolvedStringProperty(PROPERTY_SSL_KEYPASSWORD);
 		}
-		return privateKeyPassword;
+		return this.decryptPassword(privateKeyPassword);
 	}
 
 	/**
@@ -279,7 +294,8 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	 */
 	@Override
 	public String getTrustStorePassword() {
-		return getResolvedStringProperty(PROPERTY_SSL_TRUST_STORE_PASSWORD);
+		String password = getResolvedStringProperty(PROPERTY_SSL_TRUST_STORE_PASSWORD);
+		return this.decryptPassword(password);
 	}
 
 	/**
@@ -834,4 +850,60 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
         return getResolvedStringProperty(PROPERTY_OCSP_RESPONDER_URL);
     }
 
+    @Override 
+    public Boolean isEncEnabled() {
+        Boolean encEnabled =  getResolvedBooleanProperty(PROPERTY_ENC_ENABLED);
+        if (encEnabled) {
+            this.encryptor = new StandardPBEStringEncryptor();
+            this.encryptor.setPassword(getEncMasterPassword());
+            this.encryptor.setAlgorithm(getEncAlgorithm());
+        }
+        return encEnabled;
+    }
+    
+    @Override
+    public String getEncMasterPassword() {
+        return getResolvedStringProperty(PROPERTY_ENC_MASTERPASSWORD);
+    }
+    
+    @Override
+    public String getEncAlgorithm() {
+        return getResolvedStringProperty(PROPERTY_ENC_ALGORITHM);
+    }
+    
+    @Override 
+    public String getEncPrefix() {
+        return getResolvedStringProperty(PROPERTY_ENC_PREFIX);
+    }
+    
+    @Override
+    public String getEncSuffix() {
+        return getResolvedStringProperty(PROPERTY_ENC_SUFFIX);
+    }
+    
+    private String decryptPassword(String password) {
+        if (this.encryptor == null && isEncEnabled()) {
+            String masterPassword;
+            //get encryptor master password from env variable first
+            masterPassword = System.getenv("PROPERTY_ENC_MASTERPASSWORD");
+            if (masterPassword == null || masterPassword.length() == 0) {
+                //get encryptor master password from system property
+                masterPassword = System.getProperty(PROPERTY_ENC_MASTERPASSWORD);
+            }
+            if (masterPassword == null || masterPassword.length() == 0) {
+                masterPassword = getEncMasterPassword();
+            }
+            this.encryptor = new StandardPBEStringEncryptor();
+            this.encryptor.setPassword(masterPassword);
+            this.encryptor.setAlgorithm(getEncAlgorithm());
+        }
+        if (this.encryptor != null) {
+            if (password.startsWith(getEncPrefix()) && password.endsWith(getEncSuffix())) {
+                //encrypted password, need decrypt it
+                password = password.substring(getEncPrefix().length(), password.length() - getEncSuffix().length());
+                password = this.encryptor.decrypt(password);
+            }
+        }
+        return password;
+    }
 }

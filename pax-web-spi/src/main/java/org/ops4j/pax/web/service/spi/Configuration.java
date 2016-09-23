@@ -235,4 +235,14 @@ public interface Configuration {
 	Boolean isEnableOCSP();
 	
 	String getOcspResponderURL();
+	
+	Boolean isEncEnabled();
+	
+	String getEncMasterPassword();
+	
+	String getEncAlgorithm();
+	
+	String getEncPrefix();
+	
+	String getEncSuffix();
 }
