@@ -32,12 +32,13 @@ import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionIdListener;
 import javax.servlet.http.HttpSessionListener;
 
-import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ListenerWebElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultListenerMapping;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,8 +74,7 @@ public class ListenerTracker extends
 			final ExtenderContext extenderContext,
 			final BundleContext bundleContext) {
 		return new ListenerTracker(extenderContext, bundleContext)
-				.create(new Class[]{
-						EventListener.class,
+				.create(EventListener.class,
 						ServletContextListener.class,
 						ServletContextAttributeListener.class,
 						ServletRequestListener.class,
@@ -86,8 +86,7 @@ public class ListenerTracker extends
 						AsyncListener.class,
 						ReadListener.class,
 						WriteListener.class,
-						HttpSessionIdListener.class
-				});
+						HttpSessionIdListener.class);
 	}
 
 	/**
@@ -113,11 +112,19 @@ public class ListenerTracker extends
 		)) {
 			return null;
 		}
-		Object httpContextId = serviceReference
-				.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
-		if (httpContextId != null
-				&& (!(httpContextId instanceof String) || ((String) httpContextId)
-				.trim().length() == 0)) {
+
+		Boolean listenerEnabled = ServicePropertiesUtils.getBooleanProperty(
+				serviceReference,
+				HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER);
+		if (Boolean.TRUE.equals(listenerEnabled)) {
+			LOG.warn("Registered listener [" + published
+					+ "] is not enabled via 'osgi.http.whiteboard.listener' property");
+			return null;
+		}
+
+		String httpContextId = ServicePropertiesUtils.extractHttpContextId(serviceReference);
+
+		if (httpContextId != null && httpContextId.trim().length() == 0) {
 			LOG.warn("Registered listener [" + published
 					+ "] did not contain a valid http context id");
 			return null;

@@ -52,7 +52,7 @@ public class ListenerMappingTracker extends
 	}
 
 	/**
-	 * @see AbstractTrackerObsolete#createRegistration(ServiceReference, Object)
+	 * @see AbstractTracker#createWebElement(ServiceReference, Object)
 	 */
 	@Override
 	ListenerWebElement createWebElement(

@@ -178,6 +178,83 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 		registerService.unregister();
 	}
 
+	/**
+	 * Registering a Listener-Service without the property osgi.http.whiteboard.listener=true
+	 * marks the listener as disabled
+	 * @throws Exception propagate to JUnit
+	 */
+	@Test
+	public void testListenersDisabled() throws Exception {
+		ServiceRegistration<Servlet> registerService = registerServlet();
+
+		MyServletRequestListener listener = new MyServletRequestListener();
+
+		ServiceRegistration<ServletRequestListener> listenerService = bundleContext.registerService(ServletRequestListener.class, listener, null);
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Servlet name: value'",
+						resp -> resp.contains("Servlet name: value"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/myservlet");
+
+		assertThat(listener.gotEvent(), is(false));
+
+		listenerService.unregister();
+		registerService.unregister();
+	}
+
+	/**
+	 * Tests if a listener which is mapped on a HttpContext is called only in case of the right context.
+	 * @throws Exception propagate to JUnit
+	 */
+	@Test
+	public void testListenersWithHttpContext() throws Exception {
+		// register context
+		Dictionary<String, String> contextProps = new Hashtable<>();
+		contextProps.put("osgi.http.whiteboard.context.name", "my-context");
+		contextProps.put("osgi.http.whiteboard.context.path", "/myapp");
+
+		CDNServletContextHelper context = new CDNServletContextHelper();
+		ServiceRegistration<ServletContextHelper> contextHelperService = bundleContext
+				.registerService(ServletContextHelper.class, context, contextProps);
+
+		// register servlet
+		Dictionary<String, String> extProps = new Hashtable<>();
+		extProps.put("osgi.http.whiteboard.context.select", "(osgi.http.whiteboard.context.name=my-context)");
+		ServiceRegistration<Servlet> registerServlet = registerServlet(extProps);
+
+		// register listener with context
+		MyServletRequestListener listenerWithContext = new MyServletRequestListener();
+		Dictionary<String, String> properties = new Hashtable<>();
+		properties.put("osgi.http.whiteboard.listener", "true");
+		properties.put("osgi.http.whiteboard.context.select", "(osgi.http.whiteboard.context.name=my-context)");
+		ServiceRegistration<ServletRequestListener> listenerWithContextServiceReg =
+				bundleContext.registerService(ServletRequestListener.class, listenerWithContext, properties);
+
+		// register listener without context
+		MyServletRequestListener listenerNoContext = new MyServletRequestListener();
+		properties = new Hashtable<>();
+		properties.put("osgi.http.whiteboard.listener", "true");
+		ServiceRegistration<ServletRequestListener> listenerNoContextServiceReg =
+		bundleContext.registerService(ServletRequestListener.class, listenerNoContext, properties);
+
+		// test servlet
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Servlet name: value'",
+						resp -> resp.contains("Servlet name: value"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/myapp/myservlet");
+
+		// context must have been called
+		assertEquals(1, context.handleSecurityCalls.get());
+		// listener attached to context must have been called
+		assertThat(listenerWithContext.gotEvent(), is(true));
+		// listener not attached to context must not been called
+		assertThat(listenerNoContext.gotEvent(), is(false));
+
+		listenerWithContextServiceReg.unregister();
+		listenerNoContextServiceReg.unregister();
+		registerServlet.unregister();
+	}
+
 	@Test
 	public void testResources() throws Exception {
 
@@ -314,7 +391,7 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 			System.out.println("Request destroyed for client: " + sre.getServletRequest().getRemoteAddr());
 		}
 
-		public boolean gotEvent() {
+		boolean gotEvent() {
 			return event;
 		}
 	}
