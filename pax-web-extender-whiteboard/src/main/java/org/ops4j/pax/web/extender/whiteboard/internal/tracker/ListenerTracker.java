@@ -116,7 +116,7 @@ public class ListenerTracker extends
 		Boolean listenerEnabled = ServicePropertiesUtils.getBooleanProperty(
 				serviceReference,
 				HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER);
-		if (Boolean.TRUE.equals(listenerEnabled)) {
+		if (!Boolean.TRUE.equals(listenerEnabled)) {
 			LOG.warn("Registered listener [" + published
 					+ "] is not enabled via 'osgi.http.whiteboard.listener' property");
 			return null;
