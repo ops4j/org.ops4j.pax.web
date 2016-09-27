@@ -33,6 +33,8 @@ import org.xnio.XnioProvider;
 
 import javax.inject.Inject;
 
+import java.io.File;
+
 import static org.ops4j.pax.exam.CoreOptions.*;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
@@ -66,6 +68,7 @@ public class ITestBase {
 	protected HttpTestClient testClient;
 
 	public static Option[] baseConfigure() {
+		new File("target/logs").mkdirs();
 		return options(
 				workingDirectory("target/paxexam/"),
 				cleanCaches(true),

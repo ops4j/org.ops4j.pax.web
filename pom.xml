@@ -125,7 +125,7 @@
 		<dependency.commons-codec.version>1.10</dependency.commons-codec.version>
 		<dependency.commons-collection.version>4.0</dependency.commons-collection.version>
 		<dependency.commons-lang.version>3.3.2</dependency.commons-lang.version>
-		<baseline.version>4.2.4</baseline.version>
+		<baseline.version>4.3.0</baseline.version>
 	</properties>
 
 	<build>
