@@ -53,6 +53,10 @@
 			<artifactId>pax-web-tomcat</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-undertow</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-continuation</artifactId>
 			<version>${dependency.jetty.version}</version>
@@ -132,6 +136,7 @@
 								<feature>pax-tomcat</feature>
 								<feature>pax-http-tomcat</feature>
 								<feature>pax-war-tomcat</feature>
+								<feature>pax-http-undertow</feature>
 							</features>
 							<verifyTransitive>false</verifyTransitive>
 							<ignoreMissingConditions>true</ignoreMissingConditions>

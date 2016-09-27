@@ -183,4 +183,43 @@
         <bundle>mvn:org.apache.myfaces.core/myfaces-impl/${jsf-myfaces.version}</bundle>
     </feature>
 
+    <feature name="undertow" version="${dependency.undertow-core.version}">
+        <feature>scr</feature>
+
+        <bundle dependency="true" start-level="30">mvn:${servlet.spec.groupId}/${servlet.spec.artifactId}/${servlet.spec.version}</bundle>
+        <bundle dependency="true">mvn:javax.annotation/javax.annotation-api/1.2</bundle>
+        <bundle dependency="true">mvn:org.jboss.logging/jboss-logging/${dependency.jboss-logging}</bundle>
+        <bundle dependency="true">mvn:javax.websocket/javax.websocket-api/${dependency.websocket.version}</bundle>
+
+        <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.xnio.api/${dependency.xnio-api.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.xnio.nio/${dependency.xnio.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.undertow.core/${dependency.undertow-core.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.undertow.servlet/${dependency.undertow-servlet.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.undertow.websocket-jsr/${dependency.undertow-websocket.version}</bundle>
+    </feature>
+
+    <feature name="pax-http-undertow" version="${project.version}">
+        <config name="org.ops4j.pax.web">
+            org.osgi.service.http.port=8181
+            javax.servlet.context.tempdir=${karaf.data}/pax-web-jsp
+        </config>
+        <feature>scr</feature>
+        <feature>undertow</feature>
+        <feature version="[4.4,4.5)">pax-http</feature>
+
+        <bundle dependency="true">mvn:org.ow2.asm/asm-all/${dependency.asm.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.xbean/xbean-bundleutils/${dependency.xbean.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.xbean/xbean-reflect/${dependency.xbean.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.xbean/xbean-finder/${dependency.xbean.version}</bundle>
+
+        <bundle>mvn:org.ops4j.pax.web/pax-web-api/${project.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.web/pax-web-spi/${project.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.web/pax-web-runtime/${project.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.web/pax-web-undertow/${project.version}</bundle>
+
+        <capability>
+            pax.http.provider;provider:=undertow
+        </capability>
+    </feature>
+
 </features>

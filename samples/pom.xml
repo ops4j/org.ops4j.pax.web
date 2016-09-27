@@ -57,6 +57,7 @@
     <module>web-fragment</module>
     <module>wab-jetty-web</module>
     <module>websocket-jsr356</module>
+    <module>undertow-auth-config-fragment</module>
   </modules>
 
   <properties>
