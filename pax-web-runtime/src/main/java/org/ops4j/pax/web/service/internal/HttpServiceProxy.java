@@ -134,6 +134,12 @@ public class HttpServiceProxy implements StoppableHttpService {
 		delegate.unregisterServlet(servlet);
 	}
 
+	@Override
+	public void unregisterServlet(String servletName) {
+		LOG.debug("Unregistering servlet with name [" + servletName + "]");
+		delegate.unregisterServlet(servletName);
+	}
+	
 	/**
 	 * @see org.ops4j.pax.web.service.WebContainer#registerServlet(java.lang.Class,
 	 *      java.lang.String[], java.util.Dictionary,

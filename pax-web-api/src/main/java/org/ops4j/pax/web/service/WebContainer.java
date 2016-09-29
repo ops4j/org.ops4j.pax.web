@@ -270,9 +270,19 @@ public interface WebContainer extends HttpService {
             Dictionary<String,?> initparams,
             HttpContext httpContext );
 
-    /**
-  	 * Registers a servlet filter.
+	/**
+	 * Unregister a previously registered servlet by it's name.
 	 * 
+	 * @param servletName the servlet identified by it's name.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if the servlet is null
+	 * 
+	 */
+	void unregisterServlet(String servletName);
+        
+        /**
+  	 * Registers a servlet filter.	 
 	 * @param filter
 	 *            a servlet filter class. If null an IllegalArgumentException is
 	 *            thrown.
