@@ -201,7 +201,7 @@ public class IndexedOsgiResourceLocator implements OsgiResourceLocator {
 					.collect(Collectors.toList());
 			// remove the entries from the bundle which got stopped
 			entriesToBeRemoved.forEach(entry -> indexMap.remove(entry.getLookupPath()));
-			logger.info("Removed all resources from bundle '{}'", removedBundleId);
+			logger.info("Removed all resources from bundle '{}'", bundle.getSymbolicName());
 			// revoke the matching shadowed-entries back to the indexMap
 			entriesToBeRevoked.forEach(entry -> {
 				indexMap.put(entry.getLookupPath(), entry);
