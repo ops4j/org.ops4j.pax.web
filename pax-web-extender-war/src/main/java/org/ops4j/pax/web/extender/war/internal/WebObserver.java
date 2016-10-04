@@ -142,23 +142,14 @@ public class WebObserver implements WarManager {
 		webApp.setContextName(contextName);
 		try {
 			eventDispatcher.webEvent(webApp, WebEvent.DEPLOYING);
-
 			parser.parse(bundle, webApp);
 
 			String requireCapabilityHeader = ManifestUtil.getHeader(bundle,
 					"Require-Capability");
-			String paxManagedBeansHeader = ManifestUtil.getHeader(bundle,
-					"Pax-ManagedBeans");
 			// If the header isn't present Pax-Web is able to take care of it.
 			// otherwise needs support by Pax-CDI
-			if (paxManagedBeansHeader == null
-					&& requireCapabilityHeader == null) {
-				webApp.setHasDependencies(true);
-				dependencyManager.addWebApp(webApp);
-			} else if (requireCapabilityHeader != null
-					&& !requireCapabilityHeader
-					.contains("osgi.extender=pax.cdi")) {
-				// needs to be backward compatible
+			if (requireCapabilityHeader == null
+					|| !requireCapabilityHeader.contains("osgi.extender=pax.cdi")) {
 				webApp.setHasDependencies(true);
 				dependencyManager.addWebApp(webApp);
 			}
