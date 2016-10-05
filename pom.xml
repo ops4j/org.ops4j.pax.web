@@ -114,7 +114,7 @@
 		<dependency.paxurl.version>2.5.0</dependency.paxurl.version>
 		<dependency.slf4j>1.6.1</dependency.slf4j>
 		<dependency.scr.version>1.8.2</dependency.scr.version>
-		<dependency.swissbox.version>1.8.0</dependency.swissbox.version>
+		<dependency.swissbox.version>1.8.2</dependency.swissbox.version>
 		<dependency.tomcat.version>8.0.14</dependency.tomcat.version>
 		<dependency.xbean.version>4.1</dependency.xbean.version>
 		<dependency.xnio-api.version>3.3.3.2</dependency.xnio-api.version>
