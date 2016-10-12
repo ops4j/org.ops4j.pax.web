@@ -39,6 +39,16 @@
 	      <artifactId>helloworld-wc</artifactId>
 	      <version>${project.parent.version}</version>
 	    </dependency>
+      <dependency>
+        <groupId>org.ops4j.pax.cdi</groupId>
+        <artifactId>pax-cdi-api</artifactId>
+        <version>${dependency.pax-cdi.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.myfaces.core</groupId>
+        <artifactId>myfaces-impl</artifactId>
+        <version>${jsf-myfaces.version}</version>
+      </dependency>
   	</dependencies>
   </dependencyManagement>
   <modules>
@@ -62,6 +72,7 @@
     <module>undertow-auth-config-fragment</module>
     <module>war-formauth</module>
     <module>war-jsf</module>
+	<module>war-jsf-cdi</module>
     <module>war-jsf-primefaces</module>
     <module>helloworld-servlet3</module>
     <module>jsp-filter</module>

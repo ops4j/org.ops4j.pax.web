@@ -123,7 +123,8 @@
 		<dependency.undertow-servlet.version>1.3.10.2</dependency.undertow-servlet.version>
 		<dependency.undertow-websocket.version>1.3.10.1</dependency.undertow-websocket.version>
 		<dependency.jboss-logging>3.2.1.Final</dependency.jboss-logging>
-                <dependency.jasypt>1.9.2</dependency.jasypt>
+        <dependency.jasypt>1.9.2</dependency.jasypt>
+		<dependency.pax-cdi.version>1.0.0-SNAPSHOT</dependency.pax-cdi.version>
 		<version.pax-exam>4.7.0</version.pax-exam>
 
 		<tipi.tomcat.version>8.0.14.1</tipi.tomcat.version>
