@@ -30,10 +30,11 @@ public class SomeController {
   private String logMessage;
 
   @Inject
+  // must be dynamic because during CDI-scanning the service (which lies in the bundle) is not yet active
   @OsgiService(dynamic = true)
   private CdiService service;
 
-//  @Inject
+  @Inject
   private SomeSessionBean session;
 
   public void submit(){
@@ -41,8 +42,7 @@ public class SomeController {
   }
 
   public String getHelloSession(){
-//    return session.getState();
-    return "fail";
+    return session.getState();
   }
 
   public String getHelloService(){
