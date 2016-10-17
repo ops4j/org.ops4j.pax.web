@@ -963,17 +963,16 @@ class TomcatServerWrapper implements ServerWrapper {
 
 			LOG.debug("Registering ServletContext as service. ");
 			final Dictionary<String, String> properties = new Hashtable<>();
-			properties.put("osgi.web.symbolicname", bundle.getSymbolicName());
+			properties.put(WebContainerConstants.PROPERTY_SYMBOLIC_NAME, bundle.getSymbolicName());
 
 			final Dictionary<String, String> headers = bundle.getHeaders();
-			final String version = (String) headers
-					.get(Constants.BUNDLE_VERSION);
+			final String version = headers.get(Constants.BUNDLE_VERSION);
 			if (version != null && version.length() > 0) {
 				properties.put("osgi.web.version", version);
 			}
 
-			String webContextPath = (String) headers.get(WEB_CONTEXT_PATH);
-			final String webappContext = (String) headers.get("Webapp-Context");
+			String webContextPath = headers.get(WEB_CONTEXT_PATH);
+			final String webappContext = headers.get("Webapp-Context");
 
 			final ServletContext servletContext = context.getServletContext();
 
@@ -990,17 +989,17 @@ class TomcatServerWrapper implements ServerWrapper {
 			if (webContextPath != null && !webContextPath.startsWith("/")) {
 				webContextPath = "/" + webContextPath;
 			}
-
 			if (webContextPath == null) {
-				LOG.warn("osgi.web.contextpath couldn't be set, it's not configured");
+				LOG.warn(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH +
+						" couldn't be set, it's not configured. Assuming '/'");
+				webContextPath = "/";
 			}
 
-			properties.put("osgi.web.contextpath", webContextPath);
+			properties.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
 
 			servletContextService = bundleContext.registerService(
 					ServletContext.class, servletContext, properties);
 			LOG.debug("ServletContext registered as service. ");
-
 		}
 		contextMap.put(contextModel.getHttpContext(), context);
 
