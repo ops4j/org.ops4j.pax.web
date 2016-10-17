@@ -147,7 +147,7 @@ public interface WebContainerConstants {
 	
 	/**
 	 * Servlet context attribute containing the bundle context of the bundle
-	 * registereing the http context.
+	 * registering the http context.
 	 */
 	String BUNDLE_CONTEXT_ATTRIBUTE = "osgi-bundlecontext";
 
@@ -182,5 +182,7 @@ public interface WebContainerConstants {
 	
 	String PROPERTY_ENC_SUFFIX = PID + ".enc.suffix";
 
+	String PROPERTY_SERVLETCONTEXT_PATH = "osgi.web.contextpath";
+	String PROPERTY_SYMBOLIC_NAME = "osgi.web.symbolicname";
 }
 //CHECKSTYLE:ON
