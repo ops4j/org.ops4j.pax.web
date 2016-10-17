@@ -104,4 +104,27 @@ public class WebContainerIntegrationTest extends ITestBase {
 			fail("ServletContext was not registered as Service.");
 		}
 	}
+
+
+	/**
+	 * The server-container must unregister a ServletContext if the ServletContext got destroyed
+	 */
+	@Test
+	public void testServletContextUnregistration() throws Exception {
+		// It's necessary to execute a request, because there might be currently no Undertow-RequestHandler
+		// (which is tied to the availability of the ServletContext)
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Have bundle context in filter: true'",
+						resp -> resp.contains("Have bundle context in filter: true"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/helloworld/wc");
+
+		installWarBundle.stop();
+		String filter = String.format("(%s=%s)",
+				WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, "/");
+
+		if(bundleContext.getServiceReferences(ServletContext.class, filter).size() > 0){
+			fail("ServletContext was not unregistered.");
+		}
+	}
+
 }

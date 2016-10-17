@@ -30,7 +30,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
-import io.undertow.servlet.spec.ServletContextImpl;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
@@ -248,18 +247,31 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		}
 	}
 
+	private String getContextPathForOsgi(final ServletContext servletContext){
+		String contextPath = servletContext.getContextPath();
+		// Undertows ServletContextImpl maps "/" to "". In OSGi path must start with /
+		if (contextPath != null && !contextPath.startsWith("/")) {
+			contextPath = "/" + contextPath;
+		}else if(contextPath == null){
+			LOG.warn("ContextPath not found, it's not configured. Assuming '/'");
+			contextPath = "/";
+		}
+		return contextPath;
+	}
+
+
 	private void unregisterServletContext(final ServletContext servletContext) {
+		String webContextPath = getContextPathForOsgi(servletContext);
 		// find ServiceRegistration which matches the given ServletContext
 		Optional<ServiceRegistration<ServletContext>> serviceReg = registeredServletContexts.stream().filter(reg -> reg.getReference() != null
-				&& servletContext.getServletContextName().equals(reg.getReference().getProperty(WebContainerConstants.CONTEXT_NAME))
-				&& servletContext.getContextPath().equals(reg.getReference().getProperty(WebContainerConstants.CONTEXT_PATH_KEY)))
+				&& webContextPath.equals(reg.getReference().getProperty(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH)))
 				.findFirst();
 		if(serviceReg.isPresent()){
 			try{
 				serviceReg.get().unregister();
 			}catch(IllegalStateException e){
 				LOG.error("Error during unregistration of ServletContext service with path '{}'!",
-						servletContext.getContextPath(), e);
+						webContextPath, e);
 			}finally {
 				registeredServletContexts.remove(serviceReg.get());
 			}
@@ -267,15 +279,8 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	}
 
 	private void registerServletContext(final ServletContext servletContext, final Bundle bundle) {
-			String webContextPath = servletContext.getContextPath();
+			String webContextPath = getContextPathForOsgi(servletContext);
 			// Undertows ServletContextImpl maps "/" to "". In OSGi path must start with /
-			if (webContextPath != null && !webContextPath.startsWith("/")) {
-				webContextPath = "/" + webContextPath;
-			}else if(webContextPath == null){
-				LOG.warn(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH +
-						" couldn't be set, it's not configured. Assuming '/'");
-				webContextPath = "/";
-			}
 			String filter = String.format("(%s=%s)",
 					WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
 		Optional<ServiceReference<ServletContext>> first;
