@@ -16,7 +16,7 @@
 package org.ops4j.pax.web.sample.cdi;
 
 import javax.annotation.PostConstruct;
-import javax.faces.bean.SessionScoped;
+import javax.enterprise.context.SessionScoped;
 import java.io.Serializable;
 
 @SessionScoped
