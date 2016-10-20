@@ -24,8 +24,13 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
+import org.ops4j.pax.web.service.WebContainerConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+
+import javax.servlet.ServletContext;
+
+import static org.junit.Assert.fail;
 
 /**
  * @author Achim Nierbeck
@@ -68,7 +73,6 @@ public class WebContainerTCIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWebContextPathWithServlet() throws Exception {
-
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain '<title>Hello World (servlet name)</title>'",
 						resp -> resp.contains("<title>Hello World (servlet name)</title>"))
@@ -76,4 +80,34 @@ public class WebContainerTCIntegrationTest extends ITestBase {
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/helloworld/wc/sn");
 	}
+
+	/**
+	 * The server-container must register each ServletContext as an OSGi service
+	 */
+	@Test
+	public void testServletContextRegistration() throws Exception {
+
+
+		String filter = String.format("(%s=%s)",
+				WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, "/");
+
+		if(bundleContext.getServiceReferences(ServletContext.class, filter).size() == 0){
+			fail("ServletContext was not registered as Service.");
+		}
+	}
+
+	/**
+	 * The server-container must unregister a ServletContext if the ServletContext got destroyed
+	 */
+	@Test
+	public void testServletContextUnregistration() throws Exception {
+		installWarBundle.stop();
+		String filter = String.format("(%s=%s)",
+				WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, "/");
+
+		if(bundleContext.getServiceReferences(ServletContext.class, filter).size() > 0){
+			fail("ServletContext was not unregistered.");
+		}
+	}
+
 }

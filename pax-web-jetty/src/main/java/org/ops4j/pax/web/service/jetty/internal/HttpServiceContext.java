@@ -437,8 +437,7 @@ class HttpServiceContext extends ServletContextHandler {
 		BundleContext bundleContext = (BundleContext) this.attributes.get(WebContainerConstants.BUNDLE_CONTEXT_ATTRIBUTE);
 		Bundle bundle = bundleContext.getBundle();
 		Dictionary<String, String> properties = new Hashtable<>();
-		properties.put("osgi.web.symbolicname",
-				bundle.getSymbolicName());
+		properties.put(WebContainerConstants.PROPERTY_SYMBOLIC_NAME, bundle.getSymbolicName());
 
 		Dictionary<?, ?> headers = bundle.getHeaders();
 		String version = (String) headers
@@ -446,11 +445,16 @@ class HttpServiceContext extends ServletContextHandler {
 		if (version != null && version.length() > 0) {
 			properties.put("osgi.web.version", version);
 		}
-
 		// Context servletContext = context.getServletContext();
 		String webContextPath = getContextPath();
-
-		properties.put("osgi.web.contextpath", webContextPath);
+		if (webContextPath != null && !webContextPath.startsWith("/")) {
+			webContextPath = "/" + webContextPath;
+		}else if(webContextPath == null){
+			LOG.warn(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH +
+					" couldn't be set, it's not configured. Assuming '/'");
+			webContextPath = "/";
+		}
+		properties.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
 
 		registerService(bundleContext, properties);
 		LOG.debug("ServletContext registered as service. ");
