@@ -264,7 +264,7 @@ class TomcatServerWrapper implements ServerWrapper {
 											.getServletRegistrations();
 									//CHECKSTYLE:OFF
 									if (!servletRegistrations
-											.containsKey(servletName)) { 
+											.containsKey(servletName)) {
 										LOG.debug("need to re-register the servlet ...");
 										createServletWrapper(model, context,
 												servletName, servlet);
@@ -293,7 +293,7 @@ class TomcatServerWrapper implements ServerWrapper {
 											.getServletRegistrations();
 									//CHECKSTYLE:OFF
 									if (!servletRegistrations
-											.containsKey(servletName)) { 
+											.containsKey(servletName)) {
 										LOG.debug("need to re-register the servlet ...");
 										sw.setServletClass(model
 												.getServletClass().getName());
@@ -492,12 +492,12 @@ class TomcatServerWrapper implements ServerWrapper {
 		if (!isApplicationLifecycleListener(eventListener)) {
 			return false;
 		}
-		
+
 		Object[] applicationLifecycleListeners = context.getApplicationLifecycleListeners();
-		
+
 		List<EventListener> listeners = new ArrayList<>();
 		boolean found = filterEventListener(listeners, applicationLifecycleListeners, eventListener);
-		
+
 		if (found) {
 			context.setApplicationLifecycleListeners(listeners.toArray());
 		}
@@ -516,10 +516,10 @@ class TomcatServerWrapper implements ServerWrapper {
 		}
 		Object[] applicationEventListeners = context
 				.getApplicationEventListeners();
-		
+
 		List<EventListener> newEventListeners = new ArrayList<>();
 		boolean found = filterEventListener(newEventListeners, applicationEventListeners, eventListener);
-		
+
 
 		if (found) {
 			context.setApplicationEventListeners(newEventListeners
@@ -527,11 +527,11 @@ class TomcatServerWrapper implements ServerWrapper {
 		}
 		return found;
 	}
-	
+
 	private boolean filterEventListener(List<EventListener> listeners, Object[] applicationEventListeners, EventListener eventListener) {
-		
+
 		boolean found = false;
-		
+
 		for (Object object : applicationEventListeners) {
 			EventListener listener = (EventListener) object;
 			if (listener != eventListener) {
@@ -540,11 +540,11 @@ class TomcatServerWrapper implements ServerWrapper {
 				found = true;
 			}
 		}
-		
+
 		return found;
-		
+
 	}
-	
+
 
 	private boolean isApplicationEventListener(final EventListener eventListener) {
 		return (eventListener instanceof ServletContextAttributeListener
@@ -580,14 +580,14 @@ class TomcatServerWrapper implements ServerWrapper {
 								.getServletContext().addFilter(
 										filterModel.getName(),
 										filterModel.getFilter());
-						
+
 					} else if (filterModel.getFilterClass() != null) {
 						filterRegistration = context
 								.getServletContext().addFilter(
 										filterModel.getName(),
 										filterModel.getFilterClass());
 					}
-					
+
 					if (filterRegistration == null) {
 						filterRegistration = (Dynamic) context
 								.getServletContext().getFilterRegistration(
@@ -868,18 +868,17 @@ class TomcatServerWrapper implements ServerWrapper {
 				&& state != LifecycleState.STARTING_PREP) {
 
 			LOG.debug("Registering ServletContext as service. ");
-			final Dictionary<String, String> properties = new Hashtable<String, String>();
-			properties.put("osgi.web.symbolicname", bundle.getSymbolicName());
+			final Dictionary<String, String> properties = new Hashtable<>();
+			properties.put(WebContainerConstants.PROPERTY_SYMBOLIC_NAME, bundle.getSymbolicName());
 
 			final Dictionary<String, String> headers = bundle.getHeaders();
-			final String version = (String) headers
-					.get(Constants.BUNDLE_VERSION);
+			final String version = headers.get(Constants.BUNDLE_VERSION);
 			if (version != null && version.length() > 0) {
 				properties.put("osgi.web.version", version);
 			}
 
-			String webContextPath = (String) headers.get(WEB_CONTEXT_PATH);
-			final String webappContext = (String) headers.get("Webapp-Context");
+			String webContextPath = headers.get(WEB_CONTEXT_PATH);
+			final String webappContext = headers.get("Webapp-Context");
 
 			final ServletContext servletContext = context.getServletContext();
 
@@ -896,17 +895,17 @@ class TomcatServerWrapper implements ServerWrapper {
 			if (webContextPath != null && !webContextPath.startsWith("/")) {
 				webContextPath = "/" + webContextPath;
 			}
-
 			if (webContextPath == null) {
-				LOG.warn("osgi.web.contextpath couldn't be set, it's not configured");
+				LOG.warn(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH +
+						" couldn't be set, it's not configured. Assuming '/'");
+				webContextPath = "/";
 			}
 
-			properties.put("osgi.web.contextpath", webContextPath);
+			properties.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
 
 			servletContextService = bundleContext.registerService(
 					ServletContext.class, servletContext, properties);
 			LOG.debug("ServletContext registered as service. ");
-
 		}
 		contextMap.put(contextModel.getHttpContext(), context);
 
@@ -925,10 +924,10 @@ class TomcatServerWrapper implements ServerWrapper {
 	 * Returns a list of servlet context attributes out of configured properties
 	 * and attribues containing the bundle context associated with the bundle
 	 * that created the model (web element).
-	 * 
+	 *
 	 * @param bundleContext
 	 *            bundle context to be set as attribute
-	 * 
+	 *
 	 * @return context attributes map
 	 */
 	private Map<String, Object> getContextAttributes(
@@ -948,7 +947,7 @@ class TomcatServerWrapper implements ServerWrapper {
 	@Override
 	public void addWelcomeFiles(WelcomeFileModel model) {
 		final Context context = findOrCreateContext(model.getContextModel());
-		
+
 		for (String welcomeFile : model.getWelcomeFiles()) {
 			context.addWelcomeFile(welcomeFile);
 		}

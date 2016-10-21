@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletContainerInitializer;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
@@ -43,11 +44,7 @@ import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Filter;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.*;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
@@ -104,6 +101,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	private final List<SecurityConstraintMappingModel> securityConstraintMappings = new ArrayList<>();
 	private final List<FilterModel> filters = new ArrayList<>();
 	private final List<ContainerInitializerModel> containerInitializers = new ArrayList<>();
+	private final List<ServiceRegistration<ServletContext>> registeredServletContexts = new ArrayList<>();
 	private final ServletContainer container = ServletContainer.Factory.newInstance();
 	private final AtomicBoolean started = new AtomicBoolean();
 	private final ClassLoader classLoader;
@@ -240,6 +238,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 	private synchronized void destroyHandler() throws ServletException {
 		if (manager != null) {
+			unregisterServletContext(manager.getDeployment().getServletContext());
 			manager.stop();
 			manager.undeploy();
 			manager = null;
@@ -247,10 +246,76 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		}
 	}
 
+	private String getContextPathForOsgi(final ServletContext servletContext){
+		String contextPath = servletContext.getContextPath();
+		// Undertows ServletContextImpl maps "/" to "". In OSGi path must start with /
+		if (contextPath != null && !contextPath.startsWith("/")) {
+			contextPath = "/" + contextPath;
+		}else if(contextPath == null){
+			LOG.warn("ContextPath not found, it's not configured. Assuming '/'");
+			contextPath = "/";
+		}
+		return contextPath;
+	}
+
+
+	private void unregisterServletContext(final ServletContext servletContext) {
+		String webContextPath = getContextPathForOsgi(servletContext);
+		// find ServiceRegistration which matches the given ServletContext
+		ServiceRegistration<ServletContext> serviceReg = null;
+		for (ServiceRegistration<ServletContext> reg : registeredServletContexts) {
+			if (reg != null && reg.getReference() != null) {
+				if(webContextPath.equals(reg.getReference().getProperty(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH))){
+                    serviceReg = reg;
+					break;
+                }
+			}
+		}
+
+		if(serviceReg != null){
+			try{
+				serviceReg.unregister();
+			}catch(IllegalStateException e){
+				LOG.error("Error during unregistration of ServletContext service with path '{}'!",
+						webContextPath, e);
+			}finally {
+				registeredServletContexts.remove(serviceReg);
+			}
+		}
+	}
+
+	private void registerServletContext(final ServletContext servletContext, final Bundle bundle) {
+			String webContextPath = getContextPathForOsgi(servletContext);
+			// Undertows ServletContextImpl maps "/" to "". In OSGi path must start with /
+			String filter = String.format("(%s=%s)",
+					WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
+		ServiceReference<ServletContext> first = null;
+		try {
+			Iterator<ServiceReference<ServletContext>> it = bundle.getBundleContext().getServiceReferences(ServletContext.class, filter).iterator();
+			if(it.hasNext()){
+				first = it.next();
+			}
+		} catch (InvalidSyntaxException e) {
+			LOG.warn("Could not get ServiceReference for ServletContext!", e);
+		}
+		if(first == null) {
+				Dictionary<String, String> props = new Hashtable<>(2);
+				props.put(WebContainerConstants.PROPERTY_SYMBOLIC_NAME, bundle.getSymbolicName());
+				props.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
+				ServiceRegistration<ServletContext> serviceReg = bundle.getBundleContext().registerService(
+						ServletContext.class,
+						servletContext,
+						props);
+				registeredServletContexts.add(serviceReg);
+				LOG.debug("ServletContext registered as service. ");
+			}
+	}
+
 	private void doCreateHandler() throws ServletException {
 		DeploymentInfo deployment = new DeploymentInfo();
 		deployment.setEagerFilterInit(true);
 		deployment.setDeploymentName(contextModel.getContextName());
+		deployment.setDisplayName(contextModel.getContextName());
 		deployment.setContextPath('/' + contextModel.getContextName());
 		deployment.setClassLoader(classLoader);
 		BundleContext bundleContext = contextModel.getBundle().getBundleContext();
@@ -453,6 +518,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 		manager = container.addDeployment(deployment);
 		manager.deploy();
+		registerServletContext(manager.getDeployment().getServletContext(), bundle);
 		handler = manager.start();
 	}
 

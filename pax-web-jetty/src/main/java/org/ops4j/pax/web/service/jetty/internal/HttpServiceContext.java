@@ -168,7 +168,7 @@ class HttpServiceContext extends ServletContextHandler {
 
     @Override
 	protected void doStart() throws Exception {
-    	
+
     	//need to initialize the logger as super doStart is to late already
     	setLogger(Log.getLogger(getDisplayName() == null?getContextPath():getDisplayName()));
 
@@ -195,8 +195,8 @@ class HttpServiceContext extends ServletContextHandler {
 
 			for (final Entry<ServletContainerInitializer, Set<Class<?>>> entry : servletContainerInitializers
 					.entrySet()) {
-				
-				
+
+
 				try {
 					ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
 							new Callable<Void>() {
@@ -225,7 +225,7 @@ class HttpServiceContext extends ServletContextHandler {
 
 		this.setVirtualHosts(virtualHosts.toArray(EMPTY_STRING_ARRAY));
 		if (jettyWebXmlURL != null) {
-			
+
 			try {
 				ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
 						new Callable<Void>() {
@@ -235,20 +235,20 @@ class HttpServiceContext extends ServletContextHandler {
 								//do parsing and altering of webApp here
 								DOMJettyWebXmlParser jettyWebXmlParser = new DOMJettyWebXmlParser();
 								jettyWebXmlParser.parse(HttpServiceContext.this, jettyWebXmlURL.openStream());
-								
+
 								return null;
 							}
 
 						});
 				//CHECKSTYLE:OFF
-			} catch (Exception e) { 
+			} catch (Exception e) {
 				if (e instanceof RuntimeException) {
 					throw (RuntimeException) e;
 				}
 				LOG.error("Ignored exception during listener registration", e);
 			}
 			//CHECKSTYLE:ON
-			
+
 		}
 
 		if (attributes != null) {
@@ -315,7 +315,7 @@ class HttpServiceContext extends ServletContextHandler {
 	 * is started. This has to be done separately as the listener could be added
 	 * after the context is already started, case when servlet context listeners
 	 * are not notified anymore.
-	 * 
+	 *
 	 * @param listener
 	 *            to be notified.
 	 */
@@ -330,7 +330,7 @@ class HttpServiceContext extends ServletContextHandler {
             if (_sessionHandler!=null)
                 _sessionHandler.addEventListener(listener);
         }
-        
+
 	}
 
 	@Override
@@ -596,30 +596,34 @@ class HttpServiceContext extends ServletContextHandler {
 
 	}
 
-    @Override
-    protected void startContext() throws Exception { 
-        super.startContext();
-        LOG.debug("Registering ServletContext as service. ");
-        BundleContext bundleContext = (BundleContext) this.attributes.get(WebContainerConstants.BUNDLE_CONTEXT_ATTRIBUTE);
-        Bundle bundle = bundleContext.getBundle();
-        Dictionary<String, String> properties = new Hashtable<String, String>();
-        properties.put("osgi.web.symbolicname",
-                bundle.getSymbolicName());
+	@Override
+	protected void startContext() throws Exception {
+		super.startContext();
+		LOG.debug("Registering ServletContext as service. ");
+		BundleContext bundleContext = (BundleContext) this.attributes.get(WebContainerConstants.BUNDLE_CONTEXT_ATTRIBUTE);
+		Bundle bundle = bundleContext.getBundle();
+		Dictionary<String, String> properties = new Hashtable<>();
+		properties.put(WebContainerConstants.PROPERTY_SYMBOLIC_NAME, bundle.getSymbolicName());
 
-        Dictionary<?, ?> headers = bundle.getHeaders();
-        String version = (String) headers
-                .get(Constants.BUNDLE_VERSION);
-        if (version != null && version.length() > 0) {
-            properties.put("osgi.web.version", version);
-        }
+		Dictionary<?, ?> headers = bundle.getHeaders();
+		String version = (String) headers
+				.get(Constants.BUNDLE_VERSION);
+		if (version != null && version.length() > 0) {
+			properties.put("osgi.web.version", version);
+		}
+		// Context servletContext = context.getServletContext();
+		String webContextPath = getContextPath();
+		if (webContextPath != null && !webContextPath.startsWith("/")) {
+			webContextPath = "/" + webContextPath;
+		}else if(webContextPath == null){
+			LOG.warn(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH +
+					" couldn't be set, it's not configured. Assuming '/'");
+			webContextPath = "/";
+		}
+		properties.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
 
-        // Context servletContext = context.getServletContext();
-        String webContextPath = getContextPath();
-
-        properties.put("osgi.web.contextpath", webContextPath);
-
-        registerService(bundleContext, properties);
-        LOG.debug("ServletContext registered as service. ");
-    }
+		registerService(bundleContext, properties);
+		LOG.debug("ServletContext registered as service. ");
+	}
 
 }
