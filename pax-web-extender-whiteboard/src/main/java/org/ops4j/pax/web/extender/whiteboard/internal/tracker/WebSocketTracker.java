@@ -29,10 +29,6 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.Optional;
-
 public class WebSocketTracker extends AbstractTracker<Object, WebSocketElement> {
 
 	private BundleContext bundleContext;
@@ -57,11 +53,8 @@ public class WebSocketTracker extends AbstractTracker<Object, WebSocketElement> 
 			return null;
 		}
 
-		// due to different Classloaders we cannot use published.getClass().getAnnotation(ServerEndpoint.class)
-		Optional<Annotation> serverEndpoint = Arrays.stream(published.getClass().getDeclaredAnnotations())
-				.filter(annotation -> annotation.annotationType().getName().equals(ServerEndpoint.class.getName()))
-				.findFirst();
-		if (!serverEndpoint.isPresent()) {
+		ServerEndpoint serverEndpoint = published.getClass().getAnnotation(ServerEndpoint.class);
+		if (serverEndpoint == null) {
 			return null;
 		}
 
