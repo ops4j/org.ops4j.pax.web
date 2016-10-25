@@ -18,12 +18,21 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.element;
 
+import java.util.EventListener;
+
+import javax.servlet.*;
+import javax.servlet.http.*;
+
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.extender.whiteboard.ListenerMapping;
-import org.ops4j.pax.web.extender.whiteboard.internal.util.WebContainerUtils;
+import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.whiteboard.ListenerMapping;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardListener;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Registers/unregisters {@link ListenerMapping} with {@link WebContainer}.
@@ -31,58 +40,87 @@ import org.osgi.service.http.HttpService;
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class ListenerWebElement implements WebElement {
+public class ListenerWebElement<T extends EventListener> extends WebElement<T> implements WhiteboardListener {
 
-	/**
-	 * Listener mapping.
-	 */
+	private Logger LOG = LoggerFactory.getLogger(ServletWebElement.class);
+
 	private final ListenerMapping listenerMapping;
 
 	/**
-	 * Constructor.
-	 *
-	 * @param listenerMapping listener mapping; cannot be null
+	 * Constructs a new ListenerWebElement
+	 * @param ref the service-reference behind the registered http-whiteboard-service
+	 * @param listenerMapping ListenerMapping containing all necessary information
 	 */
-	public ListenerWebElement(final ListenerMapping listenerMapping) {
-		NullArgumentException.validateNotNull(listenerMapping,
-				"Listener mapping");
+	public ListenerWebElement(final ServiceReference<T> ref, final ListenerMapping listenerMapping) {
+		super(ref);
+		NullArgumentException.validateNotNull(listenerMapping, "Listener mapping");
 		this.listenerMapping = listenerMapping;
 	}
 
-	/**
-	 * Registers listener with web container.
-	 */
-	public void register(final HttpService httpService,
+	@Override
+	public void register(final WebContainer webContainer,
 						 final HttpContext httpContext) throws Exception {
-		if (WebContainerUtils.isWebContainer(httpService)) {
-			((WebContainer) httpService).registerEventListener(
-					listenerMapping.getListener(), httpContext);
-		} else {
-			throw new UnsupportedOperationException(
-					"Internal error: In use HttpService is not an WebContainer (from Pax Web)");
-		}
+		webContainer.registerEventListener(listenerMapping.getListener(), httpContext);
 	}
 
-	/**
-	 * Unregisters listener from web container.
-	 */
-	public void unregister(final HttpService httpService,
+	@Override
+	public void unregister(final WebContainer webContainer,
 						   final HttpContext httpContext) {
-		if (WebContainerUtils.isWebContainer(httpService)) {
-			((WebContainer) httpService)
-					.unregisterEventListener(listenerMapping.getListener());
-		}
+		webContainer.unregisterEventListener(listenerMapping.getListener());
 	}
 
+	@Override
 	public String getHttpContextId() {
 		return listenerMapping.getHttpContextId();
 	}
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("mapping=").append(listenerMapping)
-				.append("}").toString();
+		return this.getClass().getSimpleName() + "{mapping=" + listenerMapping + "}";
 	}
 
+	@Override
+	public ListenerMapping getListenerMapping() {
+		return listenerMapping;
+	}
+
+	@Override
+	public boolean isValid() {
+		boolean valid = true;
+
+		final EventListener listener = listenerMapping.getListener();
+
+		if (!(listener instanceof ServletContextListener ||
+				listener instanceof ServletContextAttributeListener ||
+				listener instanceof ServletRequestListener ||
+				listener instanceof ServletRequestAttributeListener ||
+				listener instanceof HttpSessionListener ||
+				listener instanceof HttpSessionBindingListener ||
+				listener instanceof HttpSessionAttributeListener ||
+				listener instanceof HttpSessionActivationListener ||
+				listener instanceof AsyncListener ||
+				listener instanceof ReadListener ||
+				listener instanceof WriteListener ||
+				listener instanceof HttpSessionIdListener
+		)) {
+			valid = false;
+		}
+
+		if (listenerMapping.getHttpContextId() != null && listenerMapping.getHttpContextId().trim().length() == 0) {
+			LOG.warn("Registered listener [" + getPusblishedPID()
+					+ "] did not contain a valid http context id");
+			valid = false;
+		}
+
+		Boolean listenerEnabled = ServicePropertiesUtils.getBooleanProperty(
+				serviceReference,
+				HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER);
+		if (!Boolean.TRUE.equals(listenerEnabled)) {
+			LOG.warn("Registered listener [" + getPusblishedPID()
+					+ "] is not enabled via 'osgi.http.whiteboard.listener' property");
+			valid = false;
+		}
+
+		return valid;
+	}
 }

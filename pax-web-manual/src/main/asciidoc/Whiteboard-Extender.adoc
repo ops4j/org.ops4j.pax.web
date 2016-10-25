@@ -105,7 +105,7 @@ the Resources class (http://issues.ops4j.org/jira/browse/PAXWEBEX-4[see
 in jira]):
 
 ------------------------------------------------------------------------------------------------------
-import org.ops4j.pax.web.extender.whiteboard.ResourceMapping;
+import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultResourceMapping;
 ...
 DefaultResourceMapping resourceMapping = new DefaultResourceMapping();
@@ -114,14 +114,14 @@ resourceMapping.setPath( "/images" );
 bundleContext=bundleContext.registerService( ResourceMapping.class.getName(), resourceMapping, null );
 ------------------------------------------------------------------------------------------------------
 
-Don’t forget to import org.ops4j.pax.web.extender.whiteboard package.
+Don’t forget to import org.ops4j.pax.web.service.whiteboard package.
 
 This is all you have to do to register resources. As you can see there
 is no necesity to lookup a http service or to track it’s availablity.
 The resources are served upon exact match, so listing directories in
 this fashion is not supported right now.
 
-Note: your bundle must import org.ops4j.pax.web.extender.whiteboard
+Note: your bundle must import org.ops4j.pax.web.service.whiteboard
 package.
 
 [[WhiteboardExtender-Howdoesithelponfilterregistration]]

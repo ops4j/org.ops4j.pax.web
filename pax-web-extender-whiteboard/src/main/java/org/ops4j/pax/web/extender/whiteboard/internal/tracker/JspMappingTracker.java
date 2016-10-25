@@ -17,9 +17,9 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
-import org.ops4j.pax.web.extender.whiteboard.JspMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.JspWebElement;
+import org.ops4j.pax.web.service.whiteboard.JspMapping;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -30,35 +30,31 @@ import org.osgi.util.tracker.ServiceTracker;
  * @author Alin Dreghiciu
  * @since 0.4.0, March 14, 2008
  */
-public class JspMappingTracker extends
-		AbstractTracker<JspMapping, JspWebElement> {
+public class JspMappingTracker extends AbstractTracker<JspMapping, JspWebElement> {
 
 	/**
 	 * Constructor.
 	 *
-	 * @param extenderContext extender context; cannot be null
-	 * @param bundleContext   extender bundle context; cannot be null
+	 * @param extenderContext
+	 *            extender context; cannot be null
+	 * @param bundleContext
+	 *            extender bundle context; cannot be null
 	 */
-	private JspMappingTracker(final ExtenderContext extenderContext,
-							  final BundleContext bundleContext) {
+	private JspMappingTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
 		super(extenderContext, bundleContext);
 	}
 
-	public static ServiceTracker<JspMapping, JspWebElement> createTracker(
-			final ExtenderContext extenderContext,
+	public static ServiceTracker<JspMapping, JspWebElement> createTracker(final ExtenderContext extenderContext,
 			final BundleContext bundleContext) {
-		return new JspMappingTracker(extenderContext, bundleContext)
-				.create(JspMapping.class);
+		return new JspMappingTracker(extenderContext, bundleContext).create(JspMapping.class);
 	}
 
 	/**
 	 * @see AbstractTracker#createWebElement(ServiceReference, Object)
 	 */
 	@Override
-	JspWebElement createWebElement(
-			final ServiceReference<JspMapping> serviceReference,
-			final JspMapping published) {
-		return new JspWebElement(published);
+	JspWebElement createWebElement(final ServiceReference<JspMapping> serviceReference, final JspMapping published) {
+		return new JspWebElement(serviceReference, published);
 	}
 
 }

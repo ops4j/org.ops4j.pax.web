@@ -20,7 +20,7 @@ package org.ops4j.pax.web.extender.whiteboard.runtime;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.ops4j.pax.web.extender.whiteboard.JspMapping;
+import org.ops4j.pax.web.service.whiteboard.JspMapping;
 
 /**
  * Default implementation of {@link JspMapping}.

@@ -59,6 +59,7 @@
 							javax.xml.parsers,
 							org.slf4j; version="[1.5,2.0)",
 							org.ops4j.pax.web.service; version="${project.version}",
+							org.ops4j.pax.web.service.whiteboard; version="${project.version}",
 							org.ops4j.pax.web.utils; version="${project.version}",
 							org.osgi.framework; version="[1.0.0,2.0.0)",
 							org.osgi.service.http; version="[1.0.0,2.0.0)",
@@ -78,7 +79,6 @@
 							org.osgi.service.http,
                             org.osgi.service.http.context,
                             org.osgi.service.http.runtime,
-                            org.osgi.service.http.runtime.dto,
                             org.osgi.service.http.whiteboard
 						</Export-Package>
 						<Private-Package>${bundle.namespace}.internal.*</Private-Package>

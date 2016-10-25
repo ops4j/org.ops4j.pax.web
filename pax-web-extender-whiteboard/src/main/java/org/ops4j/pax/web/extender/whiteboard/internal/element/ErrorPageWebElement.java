@@ -16,74 +16,62 @@
 package org.ops4j.pax.web.extender.whiteboard.internal.element;
 
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping;
-import org.ops4j.pax.web.extender.whiteboard.internal.util.WebContainerUtils;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.whiteboard.ErrorPageMapping;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardErrorPage;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 
 /**
  * Registers/unregisters
- * {@link org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping} with
+ * {@link org.ops4j.pax.web.service.whiteboard.ErrorPageMapping} with
  * {@link WebContainer}.
  *
  * @author dsklyut
  * @since 0.7.0
  */
-public class ErrorPageWebElement implements WebElement {
+public class ErrorPageWebElement extends WebElement<ErrorPageMapping> implements WhiteboardErrorPage {
 
 	private final ErrorPageMapping errorPageMapping;
 
 	/**
-	 * Constructor.
-	 *
-	 * @param errorPageMapping error page mapping; cannot be null
+	 * Constructs a new ErrorPageWebElement
+	 * @param ref the service-reference behind the registered http-whiteboard-service
+	 * @param errorPageMapping ErrorPageMapping containing all necessary information
 	 */
-	public ErrorPageWebElement(final ErrorPageMapping errorPageMapping) {
-		NullArgumentException.validateNotNull(errorPageMapping,
-				"error page errorPageMapping");
+	public ErrorPageWebElement(final ServiceReference<ErrorPageMapping> ref, final ErrorPageMapping errorPageMapping) {
+		super(ref);
+		NullArgumentException.validateNotNull(errorPageMapping, "error page errorPageMapping");
 		this.errorPageMapping = errorPageMapping;
 	}
 
-	/**
-	 * registers error page
-	 *
-	 * @param httpService
-	 * @param httpContext
-	 */
-	public void register(HttpService httpService, HttpContext httpContext)
+	@Override
+	public void register(WebContainer webContainer, HttpContext httpContext)
 			throws Exception {
-		if (WebContainerUtils.isWebContainer(httpService)) {
-			((WebContainer) httpService).registerErrorPage(
+			webContainer.registerErrorPage(
 					errorPageMapping.getError(),
 					errorPageMapping.getLocation(), httpContext);
-		} else {
-			throw new UnsupportedOperationException(
-					"Internal error: In use HttpService is not an WebContainer (from Pax Web)");
-		}
 	}
 
-	/**
-	 * unregisters error page
-	 *
-	 * @param httpService
-	 * @param httpContext
-	 */
-	public void unregister(HttpService httpService, HttpContext httpContext) {
-		if (WebContainerUtils.isWebContainer(httpService)) {
-			((WebContainer) httpService).unregisterErrorPage(
+	@Override
+	public void unregister(WebContainer webContainer, HttpContext httpContext) {
+			webContainer.unregisterErrorPage(
 					errorPageMapping.getError(), httpContext);
-		}
 	}
 
+	@Override
 	public String getHttpContextId() {
 		return errorPageMapping.getHttpContextId();
 	}
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("mapping=").append(errorPageMapping)
-				.append("}").toString();
+		return this.getClass().getSimpleName() + "{mapping=" + errorPageMapping + "}";
+	}
+
+
+	@Override
+	public ErrorPageMapping getErrorPageMapping() {
+		return errorPageMapping;
 	}
 }

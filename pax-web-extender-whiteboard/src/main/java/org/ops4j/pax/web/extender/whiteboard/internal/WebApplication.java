@@ -21,12 +21,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -37,19 +32,15 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
-import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
-import org.ops4j.pax.web.extender.whiteboard.internal.element.FilterWebElement;
-import org.ops4j.pax.web.extender.whiteboard.internal.element.ListenerWebElement;
-import org.ops4j.pax.web.extender.whiteboard.internal.element.ResourceWebElement;
-import org.ops4j.pax.web.extender.whiteboard.internal.element.ServletWebElement;
-import org.ops4j.pax.web.extender.whiteboard.internal.element.WebElement;
-import org.ops4j.pax.web.extender.whiteboard.internal.element.WelcomeFileWebElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.element.*;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.DictionaryUtils;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.WebContainerUtils;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.tracker.ReplaceableService;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.tracker.ReplaceableServiceListener;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardElement;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -83,6 +74,11 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	 * Http service lock.
 	 */
 	private final ReadWriteLock httpServiceLock;
+	/**
+	 * An extended version of the HttpServiceRuntime which caches registered
+	 * {@link WhiteboardElement}s
+	 */
+	private final ExtendedHttpServiceRuntime httpServiceRuntime;
 
 	/**
 	 * Current http context mapping.
@@ -95,7 +91,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	/**
 	 * Active http service;
 	 */
-	private HttpService httpService;
+	private WebContainer webContainer;
 	/**
 	 * Provided or created http context.
 	 */
@@ -109,13 +105,15 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	/**
 	 * Constructor.
 	 */
-	public WebApplication(Bundle bundle, String httpContextId, Boolean sharedHttpContext) {
+	public WebApplication(Bundle bundle, String httpContextId, Boolean sharedHttpContext,
+						  ExtendedHttpServiceRuntime httpServiceRuntime) {
 		this.bundle = bundle;
 		this.httpContextId = httpContextId;
 		this.sharedHttpContext = sharedHttpContext;
-		webElements = new CopyOnWriteArrayList<>();
-		httpServiceLock = new ReentrantReadWriteLock();
-		httpServiceTracker = new ReplaceableService<>(bundle.getBundleContext(), HttpService.class, this);
+		this.webElements = new CopyOnWriteArrayList<>();
+		this.httpServiceLock = new ReentrantReadWriteLock();
+		this.httpServiceTracker = new ReplaceableService<>(bundle.getBundleContext(), HttpService.class, this);
+		this.httpServiceRuntime = httpServiceRuntime;
 	}
 
 	public Bundle getBundle() {
@@ -158,10 +156,10 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 				registerWebElement(webElement);
 				//first register all ServletWebElements
 				LOG.debug("registering servlet elements again");
-				stoppableElements.stream().filter(elem -> (elem instanceof ServletWebElement)).forEach(elem -> registerWebElement(elem));
+				stoppableElements.stream().filter(elem -> (elem instanceof ServletWebElement)).forEach(this::registerWebElement);
 				//second register all filters
 				LOG.debug("registering filters again");
-				stoppableElements.stream().filter(elem -> (elem instanceof FilterWebElement)).forEach(elem -> registerWebElement(elem));
+				stoppableElements.stream().filter(elem -> (elem instanceof FilterWebElement)).forEach(this::registerWebElement);
 				//the leftovers ...
 				LOG.debug("registering the others");
 				stoppableElements.stream().filter(elem -> !(elem instanceof ServletWebElement || elem instanceof FilterWebElement)).forEach(element -> registerWebElement(element));
@@ -169,21 +167,21 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 				//find all previous registered filters deregister those and go again
 				List<WebElement> filterWebElements = webElements.stream().filter(elem -> (elem instanceof FilterWebElement)).collect(Collectors.toList());
 				LOG.debug("de-registering {} servlet filters", filterWebElements.size());
-				filterWebElements.stream().forEach(elem -> unregisterWebElement(elem));
+				filterWebElements.forEach(this::unregisterWebElement);
 
 				List<WebElement> welcomeFileMappings = webElements.stream().filter(elem -> (elem instanceof WelcomeFileWebElement)).collect(Collectors.toList());
 				LOG.debug("de-registering {} welcomefilemappings", welcomeFileMappings.size());
-				welcomeFileMappings.stream().forEach(elem -> unregisterWebElement(elem));
+				welcomeFileMappings.forEach(this::unregisterWebElement);
 				
 				LOG.debug("registering weblement:{}", webElement);
 				registerWebElement(webElement);
 				
 				LOG.debug("registering filters again");
-				filterWebElements.stream().forEach(elem -> registerWebElement(elem));
+				filterWebElements.forEach(this::registerWebElement);
 				LOG.debug("filters registerd again");
 				
 				LOG.debug("registering welcomefiles again");
-				welcomeFileMappings.stream().forEach(elem -> registerWebElement(elem));
+				welcomeFileMappings.forEach(this::registerWebElement);
 				LOG.debug("registered welcomeFiles again");
 			} else {
 				LOG.debug("registering weblement:{}", webElement);
@@ -211,10 +209,13 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 
 	@Override
 	public void serviceChanged(HttpService oldService, HttpService newService) {
+		if(newService != null && !WebContainerUtils.isWebContainer(newService)){
+			throw new IllegalStateException("HttpService must be implementing Pax-Web WebContainer!");
+		}
 		httpServiceLock.writeLock().lock();
 		try {
 			unregisterWebElements();
-			httpService = newService;
+			webContainer = (WebContainer)newService;
 			httpContext = null;
 			registerHttpContext();
 		} finally {
@@ -248,9 +249,9 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	}
 
 	private void registerHttpContext() {
-		if (httpContextMapping != null && httpService != null) {
+		if (httpContextMapping != null && webContainer != null) {
 			getHttpContext();
-			if (WebContainerUtils.isWebContainer(httpService)) {
+			if (WebContainerUtils.isWebContainer(webContainer)) {
 				final Map<String, String> contextparams = new HashMap<>();
 				if (httpContextMapping.getPath() != null) {
 					contextparams.put(WebContainerConstants.CONTEXT_NAME,
@@ -258,13 +259,13 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 				}
 				if (httpContextMapping.getParameters() != null) {
 					contextparams.putAll(httpContextMapping.getParameters());
-					Optional<String> virtualHosts = Optional.ofNullable(contextparams.remove(ExtenderConstants.PROPERTY_HTTP_VIRTUAL_HOSTS));
+					String virtualHosts = contextparams.remove(ExtenderConstants.PROPERTY_HTTP_VIRTUAL_HOSTS);
 					List<String> virtualHostsList = convertToList(virtualHosts);
-					Optional<String> connectors = Optional.ofNullable(contextparams.remove(ExtenderConstants.PROPERTY_HTTP_CONNECTORS));
+					String connectors = contextparams.remove(ExtenderConstants.PROPERTY_HTTP_CONNECTORS);
 					List<String> connectorsList = convertToList(connectors);
-					((WebContainer) httpService).setConnectorsAndVirtualHosts(connectorsList, virtualHostsList, httpContext);
+					webContainer.setConnectorsAndVirtualHosts(connectorsList, virtualHostsList, httpContext);
 				}
-				((WebContainer) httpService).setContextParam(
+				webContainer.setContextParam(
 						DictionaryUtils.adapt(contextparams), httpContext);
 			}
 			registerWebElements();
@@ -297,14 +298,14 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 					sharedContext = httpContextMapping.getParameters().get(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED);
 				}
 
-				if (null != sharedContext && Boolean.parseBoolean(sharedContext) && WebContainerUtils.isWebContainer(httpService)) {
+				if (null != sharedContext && Boolean.parseBoolean(sharedContext) && WebContainerUtils.isWebContainer(webContainer)) {
 					//PAXWEB-660
-					httpContext = ((WebContainer) httpService).createDefaultSharedHttpContext();
-				} else if (httpContextId != null && WebContainerUtils.isWebContainer(httpService)) {
-					httpContext = ((WebContainer) httpService).createDefaultHttpContext(httpContextId);
+					httpContext = webContainer.createDefaultSharedHttpContext();
+				} else if (httpContextId != null && WebContainerUtils.isWebContainer(webContainer)) {
+					httpContext = webContainer.createDefaultHttpContext(httpContextId);
 				} else {
 					//default
-					httpContext = httpService.createDefaultHttpContext();
+					httpContext = webContainer.createDefaultHttpContext();
 				}
 			}
 		}
@@ -313,7 +314,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	private void registerWebElements() {
 		httpServiceLock.readLock().lock();
 		try {
-			if (httpService != null && httpContext != null) {
+			if (webContainer != null && httpContext != null) {
 				for (WebElement registerer : webElements) {
 					registerWebElement(registerer);
 				}
@@ -323,11 +324,11 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 		}
 	}
 
-	private List<String> convertToList(Optional<String> elementListAsString) {
+	private List<String> convertToList(String elementListAsString) {
 		List<String> elementList = new LinkedList<>();
-		if (elementListAsString.isPresent()) {
-			String[] elementArray = elementListAsString.get().split(",");
-			elementList = Arrays.asList(elementArray).stream().map(elem -> elem.trim()).collect(Collectors.toList());
+		if (elementListAsString != null) {
+			String[] elementArray = elementListAsString.split(",");
+			elementList = Arrays.stream(elementArray).map(String::trim).collect(Collectors.toList());
 		}
 		return elementList;
 	}
@@ -335,12 +336,14 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	private void registerWebElement(final WebElement registerer) {
 		//CHECKSTYLE:OFF
 		try {
-			if (httpService != null && httpContext != null) {
-				registerer.register(httpService, httpContext);
+			if (webContainer != null && httpContext != null && registerer.isValid()) {
+				registerer.register(webContainer, httpContext);
 			}
 		} catch (Exception ignore) {
 			LOG.error("Registration skipped for [" + registerer
 					+ "] due to error during registration", ignore);
+		} finally {
+			httpServiceRuntime.addWhiteboardElement(registerer);
 		}
 		//CHECKSTYLE:ON
 	}
@@ -348,8 +351,8 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	private void unregisterWebElements() {
 		httpServiceLock.readLock().lock();
 		try {
-			if (httpService != null && httpContext != null) {
-				webElements.stream().forEach(webElement -> unregisterWebElement(webElement));
+			if (webContainer != null && httpContext != null) {
+				webElements.forEach(this::unregisterWebElement);
 			}
 		} finally {
 			httpServiceLock.readLock().unlock();
@@ -357,8 +360,9 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	}
 
 	private void unregisterWebElement(final WebElement registerer) {
-		if (httpService != null && httpContext != null) {
-			registerer.unregister(httpService, httpContext);
+		if (webContainer != null && httpContext != null && registerer.isValid()) {
+			registerer.unregister(webContainer, httpContext);
+			httpServiceRuntime.removeWhiteboardElement(registerer);
 		}
 	}
 
@@ -377,9 +381,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("mapping=").append(httpContextMapping)
-				.append("}").toString();
+		return this.getClass().getSimpleName() + "{mapping=" + httpContextMapping + "}";
 	}
 
 }

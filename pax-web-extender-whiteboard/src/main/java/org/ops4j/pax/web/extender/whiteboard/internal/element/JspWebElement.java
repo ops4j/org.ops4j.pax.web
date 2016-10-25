@@ -19,12 +19,12 @@
 package org.ops4j.pax.web.extender.whiteboard.internal.element;
 
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.extender.whiteboard.JspMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.DictionaryUtils;
-import org.ops4j.pax.web.extender.whiteboard.internal.util.WebContainerUtils;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.whiteboard.JspMapping;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardJspMapping;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 
 /**
  * Registers/unregisters {@link JspMapping} with {@link WebContainer}.
@@ -32,61 +32,47 @@ import org.osgi.service.http.HttpService;
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class JspWebElement implements WebElement {
+public class JspWebElement extends WebElement<JspMapping> implements WhiteboardJspMapping {
 
-	/**
-	 * Jsp mapping.
-	 */
 	private JspMapping jspMapping;
 
 	/**
-	 * Constructor.
-	 *
-	 * @param jspMapping JSP mapping; cannot be null
+	 * Constructs a new JspWebElement
+	 * @param ref the service-reference behind the registered http-whiteboard-service
+	 * @param jspMapping JspMapping containing all necessary information
 	 */
-	public JspWebElement(final JspMapping jspMapping) {
+	public JspWebElement(ServiceReference<JspMapping> ref, final JspMapping jspMapping) {
+		super(ref);
 		NullArgumentException.validateNotNull(jspMapping, "JSP mapping");
 		this.jspMapping = jspMapping;
 	}
 
-	/**
-	 * Registers jsps with web container.
-	 */
-	public void register(final HttpService httpService,
-						 final HttpContext httpContext) throws Exception {
-		if (WebContainerUtils.isWebContainer(httpService)) {
-			((WebContainer) httpService).registerJsps(
+	@Override
+	public void register(final WebContainer webContainer, final HttpContext httpContext) throws Exception {
+		webContainer.registerJsps(
 					jspMapping.getUrlPatterns(),
 					DictionaryUtils.adapt(jspMapping.getInitParams()),
 					httpContext);
-		} else {
-			throw new UnsupportedOperationException(
-					"Internal error: In use HttpService is not an WebContainer (from Pax Web)");
-		}
 	}
 
-	/**
-	 * Unregisters jsps from web container.
-	 */
-	public void unregister(final HttpService httpService,
-						   final HttpContext httpContext) {
-		if (WebContainerUtils.isWebContainer(httpService)) {
-			((WebContainer) httpService).unregisterJsps(
+	@Override
+	public void unregister(final WebContainer webContainer, final HttpContext httpContext) {
+			webContainer.unregisterJsps(
 					jspMapping.getUrlPatterns(), httpContext);
-		} else {
-			throw new UnsupportedOperationException(
-					"Internal error: In use HttpService is not an WebContainer (from Pax Web)");
-		}
 	}
 
+	@Override
 	public String getHttpContextId() {
 		return jspMapping.getHttpContextId();
 	}
 
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() +
-				"{" + "mapping=" + jspMapping + "}";
+		return this.getClass().getSimpleName() + "{mapping=" + jspMapping + "}";
 	}
 
+	@Override
+	public JspMapping getJspMapping() {
+		return jspMapping;
+	}
 }

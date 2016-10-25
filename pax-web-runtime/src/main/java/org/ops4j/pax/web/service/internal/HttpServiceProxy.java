@@ -17,10 +17,7 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.EventListener;
-import java.util.List;
+import java.util.*;
 
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
@@ -31,8 +28,11 @@ import javax.servlet.ServletException;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardElement;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
+import org.osgi.service.http.runtime.dto.RequestInfoDTO;
+import org.osgi.service.http.runtime.dto.RuntimeDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -527,6 +527,16 @@ public class HttpServiceProxy implements StoppableHttpService {
 	@Override
 	public void unregisterWebSocket(Object webSocket, HttpContext httpContext) {
 		delegate.unregisterWebSocket(webSocket, httpContext);
+	}
+
+	@Override
+	public RequestInfoDTO calculateRequestInfoDTO(Iterator<WhiteboardElement> iterator) {
+		return delegate.calculateRequestInfoDTO(iterator);
+	}
+
+	@Override
+	public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator) {
+		return delegate.createWhiteboardRuntimeDTO(iterator);
 	}
 
 

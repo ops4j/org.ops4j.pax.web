@@ -17,7 +17,7 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.runtime;
 
-import org.ops4j.pax.web.extender.whiteboard.ResourceMapping;
+import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
 
 /**
  * Default implementation of {@link ResourceMapping}.

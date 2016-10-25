@@ -22,7 +22,8 @@ import java.util.Map;
 
 import javax.servlet.Filter;
 
-import org.ops4j.pax.web.extender.whiteboard.FilterMapping;
+import org.ops4j.pax.web.service.whiteboard.FilterMapping;
+
 
 /**
  * Default implementation of {@link FilterMapping}.

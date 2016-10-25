@@ -19,7 +19,7 @@ package org.ops4j.pax.web.extender.whiteboard.runtime;
 
 import java.util.EventListener;
 
-import org.ops4j.pax.web.extender.whiteboard.ListenerMapping;
+import org.ops4j.pax.web.service.whiteboard.ListenerMapping;
 
 /**
  * Default implementation of {@link ListenerMapping}.
