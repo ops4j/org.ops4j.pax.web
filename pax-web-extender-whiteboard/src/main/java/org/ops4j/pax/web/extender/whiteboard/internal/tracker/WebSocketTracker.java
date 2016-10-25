@@ -18,11 +18,11 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 import javax.websocket.Endpoint;
 import javax.websocket.server.ServerEndpoint;
 
-import org.ops4j.pax.web.extender.whiteboard.WebSocketMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.WebSocketElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultWebSocketMapping;
+import org.ops4j.pax.web.service.whiteboard.WebSocketMapping;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -39,7 +39,7 @@ public class WebSocketTracker extends AbstractTracker<Object, WebSocketElement> 
 	}
 
 	public static ServiceTracker<Object, WebSocketElement> createTracker(final ExtenderContext extenderContext,
-																		 final BundleContext bundleContext) {
+			final BundleContext bundleContext) {
 		return new WebSocketTracker(extenderContext, bundleContext).create(Object.class);
 	}
 
@@ -48,8 +48,12 @@ public class WebSocketTracker extends AbstractTracker<Object, WebSocketElement> 
 	@Override
 	WebSocketElement createWebElement(ServiceReference<Object> serviceReference, Object published) {
 
+		// FIXME Validation for WebSockets done here rather than in WebElement
+		// because we're tracking Object
+
 		if (Endpoint.class.isAssignableFrom(published.getClass())) {
-			LOG.warn("WebSockets created as instances of Endpoint isn't supported, because it requires also to register ServerApplicationConfig");
+			LOG.warn(
+					"WebSockets created as instances of Endpoint isn't supported, because it requires also to register ServerApplicationConfig");
 			return null;
 		}
 
@@ -63,7 +67,7 @@ public class WebSocketTracker extends AbstractTracker<Object, WebSocketElement> 
 		WebSocketMapping mapping = new DefaultWebSocketMapping();
 		mapping.setHttpContextId(ServicePropertiesUtils.extractHttpContextId(serviceReference));
 		mapping.setWebSocket(published);
-		return new WebSocketElement(mapping);
+		return new WebSocketElement(serviceReference, mapping);
 	}
 
 }

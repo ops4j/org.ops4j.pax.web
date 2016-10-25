@@ -17,11 +17,12 @@ package org.ops4j.pax.web.extender.whiteboard.runtime;
 
 import java.util.Arrays;
 
-import org.ops4j.pax.web.extender.whiteboard.WelcomeFileMapping;
+import org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping;
+
 
 /**
  * Default implementation of
- * {@link org.ops4j.pax.web.extender.whiteboard.WelcomeFileMapping}.
+ * {@link org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping}.
  *
  * @author dsklyut
  * @since 0.7.0
@@ -44,21 +45,21 @@ public class DefaultWelcomeFileMapping implements WelcomeFileMapping {
 	private boolean redirect;
 
 	/**
-	 * @see org.ops4j.pax.web.extender.whiteboard.WelcomeFileMapping#getHttpContextId()
+	 * @see org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping#getHttpContextId()
 	 */
 	public String getHttpContextId() {
 		return httpContextId;
 	}
 
 	/**
-	 * @see org.ops4j.pax.web.extender.whiteboard.WelcomeFileMapping#isRedirect()
+	 * @see org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping#isRedirect()
 	 */
 	public boolean isRedirect() {
 		return redirect;
 	}
 
 	/**
-	 * @see org.ops4j.pax.web.extender.whiteboard.WelcomeFileMapping#getWelcomeFiles()
+	 * @see org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping#getWelcomeFiles()
 	 */
 	public String[] getWelcomeFiles() {
 		return welcomeFiles;

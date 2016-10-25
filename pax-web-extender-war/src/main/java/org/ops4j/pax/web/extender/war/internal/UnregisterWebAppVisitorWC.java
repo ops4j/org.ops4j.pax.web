@@ -63,7 +63,7 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 	/**
 	 * Creates a new unregistration visitor.
 	 *
-	 * @param webContainer http service to be used for unregistration. Cannot be null.
+	 * @param webContainer Pax-Web HttpService-implementation
 	 * @throws NullArgumentException if web container is null
 	 */
 	UnregisterWebAppVisitorWC(final WebContainer webContainer) {
@@ -102,10 +102,8 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 		// unregister JSP support
 		try {
 			webContainer.unregisterJsps(httpContext);
-		} catch (IllegalArgumentException badarg) {
+		} catch (IllegalArgumentException | UnsupportedOperationException badarg) {
 			// Ignore, we haven't registered anything
-		} catch (UnsupportedOperationException ignore) {
-			// Ignore, the warning should have been printed when registering
 		} catch (Exception ignore) {
 			LOG.warn("Unregistration exception. Skipping.", ignore);
 		}

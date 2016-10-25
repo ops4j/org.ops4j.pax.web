@@ -24,16 +24,12 @@ import java.util.Map;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
-import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.WebApplication;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
+import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
+import org.osgi.framework.*;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
@@ -47,14 +43,12 @@ import org.slf4j.LoggerFactory;
  * @author Alin Dreghiciu
  * @since 0.2.0, August 21, 2007
  */
-public class ServletContextHelperTracker<T> implements
-		ServiceTrackerCustomizer<T, ServletContextHelper> {
+public class ServletContextHelperTracker<T> implements ServiceTrackerCustomizer<T, ServletContextHelper> {
 
 	/**
 	 * Logger.
 	 */
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(AbstractTracker.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTracker.class);
 	/**
 	 * Extender context.
 	 */
@@ -64,48 +58,47 @@ public class ServletContextHelperTracker<T> implements
 	/**
 	 * Constructor.
 	 *
-	 * @param extenderContext extender context; cannot be null
-	 * @param bundleContext   extender bundle context; cannot be null
+	 * @param extenderContext
+	 *            extender context; cannot be null
+	 * @param bundleContext
+	 *            extender bundle context; cannot be null
 	 */
-	ServletContextHelperTracker(final ExtenderContext extenderContext,
-								final BundleContext bundleContext) {
+	private ServletContextHelperTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
 		// super( validateBundleContext( bundleContext ), createFilter(
 		// bundleContext, trackedClass ), null );
-		NullArgumentException.validateNotNull(extenderContext,
-				"Extender context");
+		NullArgumentException.validateNotNull(extenderContext, "Extender context");
 		this.extenderContext = extenderContext;
 		this.bundleContext = validateBundleContext(bundleContext);
 	}
 
-	//static <T extends Servlet> ServiceTracker<T, ServletWebElement>
-	public final ServiceTracker<T, ServletContextHelper> create(
-			final Class<? extends T> trackedClass) {
-		return new ServiceTracker<>(bundleContext,
-				createFilter(bundleContext, trackedClass), this);
+	// static <T extends Servlet> ServiceTracker<T, ServletWebElement>
+	public final ServiceTracker<T, ServletContextHelper> create(final Class<? extends T> trackedClass) {
+		return new ServiceTracker<>(bundleContext, createFilter(bundleContext, trackedClass), this);
 	}
 
 	public static <T extends ServletContextHelper> ServiceTracker<T, ServletContextHelper> createTracker(
 			final ExtenderContext extenderContext, final BundleContext bundleContext) {
-		return new ServletContextHelperTracker<T>(extenderContext, bundleContext).create((Class<? extends T>) ServletContextHelper.class);
+		return new ServletContextHelperTracker<T>(extenderContext, bundleContext)
+				.create((Class<T>) ServletContextHelper.class);
 	}
 
 	/**
 	 * Creates an OSGi filter for the classes.
 	 *
-	 * @param bundleContext a bundle context
-	 * @param classes       array of tracked classes
+	 * @param bundleContext
+	 *            a bundle context
+	 * @param classes
+	 *            array of tracked classes
 	 * @return osgi filter
 	 */
-	private static Filter createFilter(final BundleContext bundleContext,
-									   final Class<?>... classes) {
+	private static Filter createFilter(final BundleContext bundleContext, final Class<?>... classes) {
 		final StringBuilder filter = new StringBuilder();
 		if (classes != null) {
 			if (classes.length > 1) {
 				filter.append("(|");
 			}
 			for (Class<?> clazz : classes) {
-				filter.append("(").append(Constants.OBJECTCLASS).append("=")
-						.append(clazz.getName()).append(")");
+				filter.append("(").append(Constants.OBJECTCLASS).append("=").append(clazz.getName()).append(")");
 			}
 			if (classes.length > 1) {
 				filter.append(")");
@@ -114,8 +107,7 @@ public class ServletContextHelperTracker<T> implements
 		try {
 			return bundleContext.createFilter(filter.toString());
 		} catch (InvalidSyntaxException e) {
-			throw new IllegalArgumentException(
-					"Unexpected InvalidSyntaxException: " + e.getMessage());
+			throw new IllegalArgumentException("Unexpected InvalidSyntaxException: " + e.getMessage());
 		}
 	}
 
@@ -123,11 +115,11 @@ public class ServletContextHelperTracker<T> implements
 	 * Validates that the bundle context is not null. If null will throw
 	 * IllegalArgumentException.
 	 *
-	 * @param bundleContext a bundle context
+	 * @param bundleContext
+	 *            a bundle context
 	 * @return the bundle context if not null
 	 */
-	private static BundleContext validateBundleContext(
-			final BundleContext bundleContext) {
+	private static BundleContext validateBundleContext(final BundleContext bundleContext) {
 		NullArgumentException.validateNotNull(bundleContext, "Bundle context");
 		return bundleContext;
 	}
@@ -136,20 +128,21 @@ public class ServletContextHelperTracker<T> implements
 	 * @see ServiceTracker#addingService(ServiceReference)
 	 */
 	@Override
-	public ServletContextHelper addingService(
-			final ServiceReference<T> serviceReference) {
+	public ServletContextHelper addingService(final ServiceReference<T> serviceReference) {
 		LOGGER.debug("Service available " + serviceReference);
 		ServletContextHelper registered = (ServletContextHelper) bundleContext.getService(serviceReference);
 
-		String servletCtxtName = ServicePropertiesUtils.getStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
+		String servletCtxtName = ServicePropertiesUtils.getStringProperty(serviceReference,
+				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
 
 		if (servletCtxtName == null) {
-			return null; //skip as it's a mandatory property
+			return null; // skip as it's a mandatory property
 		}
 
-		String ctxtPath = ServicePropertiesUtils.getStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH);
+		String ctxtPath = ServicePropertiesUtils.getStringProperty(serviceReference,
+				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH);
 		if (ctxtPath == null) {
-			return null; //skip as it's a mandatory property
+			return null; // skip as it's a mandatory property
 		}
 
 		if (ctxtPath.startsWith("/")) {
@@ -157,7 +150,7 @@ public class ServletContextHelperTracker<T> implements
 		}
 
 		final DefaultHttpContextMapping mapping = new DefaultHttpContextMapping();
-		mapping.setHttpContextId((String) servletCtxtName);
+		mapping.setHttpContextId(servletCtxtName);
 		mapping.setHttpContextShared(true);
 		mapping.setPath(ctxtPath);
 		Map<String, String> parameters = mapping.getParameters();
@@ -172,15 +165,15 @@ public class ServletContextHelperTracker<T> implements
 		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED, "true");
 		bundleContext.registerService(HttpContextMapping.class, mapping, props);
 
-		final WebApplication webApplication = extenderContext.getWebApplication(serviceReference.getBundle(), servletCtxtName, true);
+		final WebApplication webApplication = extenderContext.getWebApplication(serviceReference.getBundle(),
+				servletCtxtName, true);
 		webApplication.setServletContextHelper(registered);
 
 		return registered;
 	}
 
 	@Override
-	public void modifiedService(ServiceReference<T> reference,
-								ServletContextHelper service) {
+	public void modifiedService(ServiceReference<T> reference, ServletContextHelper service) {
 		// was not implemented before
 	}
 
@@ -188,35 +181,37 @@ public class ServletContextHelperTracker<T> implements
 	 * @see ServiceTracker#removedService(ServiceReference, Object)
 	 */
 	@Override
-	public void removedService(final ServiceReference<T> serviceReference,
-							   final ServletContextHelper unpublished) {
+	public void removedService(final ServiceReference<T> serviceReference, final ServletContextHelper unpublished) {
 		LOGGER.debug("Service removed " + serviceReference);
 
-//		Boolean sharedHttpContext = Boolean
-//				.parseBoolean((String) serviceReference
-//						.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
-//
-//		final HttpContextMapping mapping = (HttpContextMapping) unpublished;
-//		final WebApplication webApplication = extenderContext
-//				.getExistingWebApplication(serviceReference.getBundle(),
-//						mapping.getHttpContextId(), sharedHttpContext);
-//		
-//		boolean remove = true;
-//		
-//		if (sharedHttpContext) {
-//			Integer sharedWebApplicationCounter = extenderContext.getSharedWebApplicationCounter(webApplication);
-//			if (sharedWebApplicationCounter != null && sharedWebApplicationCounter > 0) {
-//				remove = false;
-//				Integer reduceSharedWebApplicationCount = extenderContext.reduceSharedWebApplicationCount(webApplication);
-//				if (reduceSharedWebApplicationCount == 0) {
-//					remove = true;
-//				}
-//			}
-//		}
-//		
-//		if (webApplication != null && remove) {
-//			webApplication.setHttpContextMapping(null);
-//		}
+		// Boolean sharedHttpContext = Boolean
+		// .parseBoolean((String) serviceReference
+		// .getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
+		//
+		// final HttpContextMapping mapping = (HttpContextMapping) unpublished;
+		// final WebApplication webApplication = extenderContext
+		// .getExistingWebApplication(serviceReference.getBundle(),
+		// mapping.getHttpContextId(), sharedHttpContext);
+		//
+		// boolean remove = true;
+		//
+		// if (sharedHttpContext) {
+		// Integer sharedWebApplicationCounter =
+		// extenderContext.getSharedWebApplicationCounter(webApplication);
+		// if (sharedWebApplicationCounter != null &&
+		// sharedWebApplicationCounter > 0) {
+		// remove = false;
+		// Integer reduceSharedWebApplicationCount =
+		// extenderContext.reduceSharedWebApplicationCount(webApplication);
+		// if (reduceSharedWebApplicationCount == 0) {
+		// remove = true;
+		// }
+		// }
+		// }
+		//
+		// if (webApplication != null && remove) {
+		// webApplication.setHttpContextMapping(null);
+		// }
 	}
 
 }

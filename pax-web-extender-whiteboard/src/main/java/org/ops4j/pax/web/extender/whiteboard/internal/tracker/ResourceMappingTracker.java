@@ -18,9 +18,9 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
-import org.ops4j.pax.web.extender.whiteboard.ResourceMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
-import org.ops4j.pax.web.extender.whiteboard.internal.element.ResourceWebElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.element.ResourceMappingWebElement;
+import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -31,35 +31,32 @@ import org.osgi.util.tracker.ServiceTracker;
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class ResourceMappingTracker extends
-		AbstractTracker<ResourceMapping, ResourceWebElement> {
+public class ResourceMappingTracker extends AbstractTracker<ResourceMapping, ResourceMappingWebElement> {
 
 	/**
 	 * Constructor.
 	 *
-	 * @param extenderContext extender context; cannot be null
-	 * @param bundleContext   extender bundle context; cannot be null
+	 * @param extenderContext
+	 *            extender context; cannot be null
+	 * @param bundleContext
+	 *            extender bundle context; cannot be null
 	 */
-	private ResourceMappingTracker(final ExtenderContext extenderContext,
-								   final BundleContext bundleContext) {
+	private ResourceMappingTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
 		super(extenderContext, bundleContext);
 	}
 
-	public static ServiceTracker<ResourceMapping, ResourceWebElement> createTracker(
-			final ExtenderContext extenderContext,
-			final BundleContext bundleContext) {
-		return new ResourceMappingTracker(extenderContext, bundleContext)
-				.create(ResourceMapping.class);
+	public static ServiceTracker<ResourceMapping, ResourceMappingWebElement> createTracker(
+			final ExtenderContext extenderContext, final BundleContext bundleContext) {
+		return new ResourceMappingTracker(extenderContext, bundleContext).create(ResourceMapping.class);
 	}
 
 	/**
 	 * @see AbstractTracker#createWebElement(ServiceReference, Object)
 	 */
 	@Override
-	ResourceWebElement createWebElement(
-			final ServiceReference<ResourceMapping> serviceReference,
+	ResourceMappingWebElement createWebElement(final ServiceReference<ResourceMapping> serviceReference,
 			final ResourceMapping published) {
-		return new ResourceWebElement(published);
+		return new ResourceMappingWebElement(serviceReference, published);
 	}
 
 }

@@ -15,11 +15,12 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.runtime;
 
-import org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping;
+
+import org.ops4j.pax.web.service.whiteboard.ErrorPageMapping;
 
 /**
  * Default implementation of
- * {@link org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping}
+ * {@link org.ops4j.pax.web.service.whiteboard.ErrorPageMapping}
  */
 public class DefaultErrorPageMapping implements ErrorPageMapping {
 
@@ -39,21 +40,21 @@ public class DefaultErrorPageMapping implements ErrorPageMapping {
 	private String location;
 
 	/**
-	 * @see org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping#getHttpContextId()
+	 * @see org.ops4j.pax.web.service.whiteboard.ErrorPageMapping#getHttpContextId()
 	 */
 	public String getHttpContextId() {
 		return httpContextId;
 	}
 
 	/**
-	 * @see org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping#getError()
+	 * @see org.ops4j.pax.web.service.whiteboard.ErrorPageMapping#getError()
 	 */
 	public String getError() {
 		return error;
 	}
 
 	/**
-	 * @see org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping#getLocation()
+	 * @see org.ops4j.pax.web.service.whiteboard.ErrorPageMapping#getLocation()
 	 */
 	public String getLocation() {
 		return location;

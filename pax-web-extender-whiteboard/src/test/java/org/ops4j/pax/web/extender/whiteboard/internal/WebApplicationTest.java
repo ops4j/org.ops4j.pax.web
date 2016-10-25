@@ -32,12 +32,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.WebElement;
+import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,13 +54,16 @@ public class WebApplicationTest {
 	WebElement webElement;
 
 	@Mock
-	HttpService oldService;
+	WebContainer oldService;
 
 	@Mock
-	HttpService newService;
+	WebContainer newService;
 
 	@Mock
 	HttpContextMapping httpContextMapping;
+
+	@Mock
+	ExtendedHttpServiceRuntime httpServiceRuntime;
 
 	@Mock
 	HttpContext httpContext;
@@ -83,10 +86,10 @@ public class WebApplicationTest {
 		when(bundle.getBundleContext()).thenReturn(bundleContext);
 		when(httpContextMapping.getHttpContext()).thenReturn(httpContext);
 
-		Mockito.doNothing().when(webElement).register(any(HttpService.class), any(HttpContext.class));
-		Mockito.doNothing().when(webElement).unregister(any(HttpService.class), any(HttpContext.class));
+		Mockito.doNothing().when(webElement).register(any(WebContainer.class), any(HttpContext.class));
+		Mockito.doNothing().when(webElement).unregister(any(WebContainer.class), any(HttpContext.class));
 
-		instanceUnderTest = new WebApplication(bundle, "myID", false);
+		instanceUnderTest = new WebApplication(bundle, "myID", false, new ExtendedHttpServiceRuntime(bundleContext));
 		random = new Random();
 	}
 

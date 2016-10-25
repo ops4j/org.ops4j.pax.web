@@ -19,14 +19,10 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
-import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.WebApplication;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
+import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
+import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -38,14 +34,12 @@ import org.slf4j.LoggerFactory;
  * @author Alin Dreghiciu
  * @since 0.2.0, August 21, 2007
  */
-abstract class AbstractHttpContextTracker<T> implements
-		ServiceTrackerCustomizer<T, HttpContextMapping> {
+abstract class AbstractHttpContextTracker<T> implements ServiceTrackerCustomizer<T, HttpContextMapping> {
 
 	/**
 	 * Logger.
 	 */
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(AbstractTracker.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTracker.class);
 	/**
 	 * Extender context.
 	 */
@@ -55,42 +49,40 @@ abstract class AbstractHttpContextTracker<T> implements
 	/**
 	 * Constructor.
 	 *
-	 * @param extenderContext extender context; cannot be null
-	 * @param bundleContext   extender bundle context; cannot be null
+	 * @param extenderContext
+	 *            extender context; cannot be null
+	 * @param bundleContext
+	 *            extender bundle context; cannot be null
 	 */
-	AbstractHttpContextTracker(final ExtenderContext extenderContext,
-							   final BundleContext bundleContext) {
+	AbstractHttpContextTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
 		// super( validateBundleContext( bundleContext ), createFilter(
 		// bundleContext, trackedClass ), null );
-		NullArgumentException.validateNotNull(extenderContext,
-				"Extender context");
+		NullArgumentException.validateNotNull(extenderContext, "Extender context");
 		this.extenderContext = extenderContext;
 		this.bundleContext = validateBundleContext(bundleContext);
 	}
 
-	protected final ServiceTracker<T, HttpContextMapping> create(
-			final Class<? extends T> trackedClass) {
-		return new ServiceTracker<>(bundleContext,
-				createFilter(bundleContext, trackedClass), this);
+	protected final ServiceTracker<T, HttpContextMapping> create(final Class<? extends T> trackedClass) {
+		return new ServiceTracker<>(bundleContext, createFilter(bundleContext, trackedClass), this);
 	}
 
 	/**
 	 * Creates an OSGi filter for the classes.
 	 *
-	 * @param bundleContext a bundle context
-	 * @param classes       array of tracked classes
+	 * @param bundleContext
+	 *            a bundle context
+	 * @param classes
+	 *            array of tracked classes
 	 * @return osgi filter
 	 */
-	private static Filter createFilter(final BundleContext bundleContext,
-									   final Class<?>... classes) {
+	private static Filter createFilter(final BundleContext bundleContext, final Class<?>... classes) {
 		final StringBuilder filter = new StringBuilder();
 		if (classes != null) {
 			if (classes.length > 1) {
 				filter.append("(|");
 			}
 			for (Class<?> clazz : classes) {
-				filter.append("(").append(Constants.OBJECTCLASS).append("=")
-						.append(clazz.getName()).append(")");
+				filter.append("(").append(Constants.OBJECTCLASS).append("=").append(clazz.getName()).append(")");
 			}
 			if (classes.length > 1) {
 				filter.append(")");
@@ -99,8 +91,7 @@ abstract class AbstractHttpContextTracker<T> implements
 		try {
 			return bundleContext.createFilter(filter.toString());
 		} catch (InvalidSyntaxException e) {
-			throw new IllegalArgumentException(
-					"Unexpected InvalidSyntaxException: " + e.getMessage());
+			throw new IllegalArgumentException("Unexpected InvalidSyntaxException: " + e.getMessage());
 		}
 	}
 
@@ -108,11 +99,11 @@ abstract class AbstractHttpContextTracker<T> implements
 	 * Validates that the bundle context is not null. If null will throw
 	 * IllegalArgumentException.
 	 *
-	 * @param bundleContext a bundle context
+	 * @param bundleContext
+	 *            a bundle context
 	 * @return the bundle context if not null
 	 */
-	private static BundleContext validateBundleContext(
-			final BundleContext bundleContext) {
+	private static BundleContext validateBundleContext(final BundleContext bundleContext) {
 		NullArgumentException.validateNotNull(bundleContext, "Bundle context");
 		return bundleContext;
 	}
@@ -121,21 +112,17 @@ abstract class AbstractHttpContextTracker<T> implements
 	 * @see ServiceTracker#addingService(ServiceReference)
 	 */
 	@Override
-	public HttpContextMapping addingService(
-			final ServiceReference<T> serviceReference) {
+	public HttpContextMapping addingService(final ServiceReference<T> serviceReference) {
 		LOGGER.debug("Service available " + serviceReference);
 		T registered = bundleContext.getService(serviceReference);
 
 		Boolean sharedHttpContext = Boolean
-				.parseBoolean((String) serviceReference
-						.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
+				.parseBoolean((String) serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
 
-		HttpContextMapping mapping = createHttpContextMapping(serviceReference,
-				registered);
+		HttpContextMapping mapping = createHttpContextMapping(serviceReference, registered);
 		if (mapping != null) {
-			final WebApplication webApplication = extenderContext
-					.getWebApplication(serviceReference.getBundle(),
-							mapping.getHttpContextId(), sharedHttpContext);
+			final WebApplication webApplication = extenderContext.getWebApplication(serviceReference.getBundle(),
+					mapping.getHttpContextId(), sharedHttpContext);
 			webApplication.setHttpContextMapping(mapping);
 			return mapping;
 		} else {
@@ -146,8 +133,7 @@ abstract class AbstractHttpContextTracker<T> implements
 	}
 
 	@Override
-	public void modifiedService(ServiceReference<T> reference,
-								HttpContextMapping service) {
+	public void modifiedService(ServiceReference<T> reference, HttpContextMapping service) {
 		// was not implemented before
 	}
 
@@ -155,18 +141,16 @@ abstract class AbstractHttpContextTracker<T> implements
 	 * @see ServiceTracker#removedService(ServiceReference, Object)
 	 */
 	@Override
-	public void removedService(final ServiceReference<T> serviceReference,
-							   final HttpContextMapping unpublished) {
+	public void removedService(final ServiceReference<T> serviceReference, final HttpContextMapping unpublished) {
 		LOGGER.debug("Service removed " + serviceReference);
 
 		Boolean sharedHttpContext = Boolean
-				.parseBoolean((String) serviceReference
-						.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
+				.parseBoolean((String) serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
 
-		final HttpContextMapping mapping = (HttpContextMapping) unpublished;
-		final WebApplication webApplication = extenderContext
-				.getExistingWebApplication(serviceReference.getBundle(),
-						mapping.getHttpContextId(), sharedHttpContext);
+		final WebApplication webApplication = extenderContext.getExistingWebApplication(
+				serviceReference.getBundle(),
+				unpublished.getHttpContextId(),
+				sharedHttpContext);
 
 		boolean remove = true;
 
@@ -174,7 +158,8 @@ abstract class AbstractHttpContextTracker<T> implements
 			Integer sharedWebApplicationCounter = extenderContext.getSharedWebApplicationCounter(webApplication);
 			if (sharedWebApplicationCounter != null && sharedWebApplicationCounter > 0) {
 				remove = false;
-				Integer reduceSharedWebApplicationCount = extenderContext.reduceSharedWebApplicationCount(webApplication);
+				Integer reduceSharedWebApplicationCount = extenderContext
+						.reduceSharedWebApplicationCount(webApplication);
 				if (reduceSharedWebApplicationCount == 0) {
 					remove = true;
 				}
@@ -189,11 +174,12 @@ abstract class AbstractHttpContextTracker<T> implements
 	/**
 	 * Factory method for http context mapping.
 	 *
-	 * @param serviceReference service reference for published service
-	 * @param published        the actual published service
+	 * @param serviceReference
+	 *            service reference for published service
+	 * @param published
+	 *            the actual published service
 	 * @return an Registration if could be created or applicable or null if not
 	 */
-	abstract HttpContextMapping createHttpContextMapping(
-			final ServiceReference<T> serviceReference, final T published);
+	abstract HttpContextMapping createHttpContextMapping(final ServiceReference<T> serviceReference, final T published);
 
 }

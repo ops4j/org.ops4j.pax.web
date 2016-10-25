@@ -19,7 +19,7 @@ package org.ops4j.pax.web.extender.whiteboard.runtime;
 
 import java.util.Map;
 
-import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
+import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.osgi.service.http.HttpContext;
 
 /**
@@ -133,11 +133,12 @@ public class DefaultHttpContextMapping implements HttpContextMapping {
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("httpContextId=").append(httpContextId)
-				.append(",path=").append(path).append(",params=")
-				.append(parameters).append(",httpContext=").append(httpContext)
-				.append("}").toString();
+		return this.getClass().getSimpleName() +
+				"{httpContextId=" + httpContextId +
+				",path=" + path +
+				",params=" + parameters +
+				",httpContext=" + httpContext +
+				"}";
 	}
 
 }

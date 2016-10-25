@@ -1,4 +1,5 @@
-/*
+/* Copyright 2012 Harald Wellmann
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,37 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.extender.whiteboard;
+package org.ops4j.pax.web.service.whiteboard;
+
+import java.util.Collection;
 
 /**
- * Welcome file mapping
- *
- * @author dsklyut
- * @since 0.7.0
+ * Created by u000501 on 24.10.2016.
  */
-public interface WelcomeFileMapping {
+public interface WhiteboardServlet extends WhiteboardElement {
 
-	/**
-	 * Getter.
-	 *
-	 * @return id of the http context this jsp belongs to
-	 */
-	String getHttpContextId();
+    ServletMapping getServletMapping();
+    Collection<? extends ErrorPageMapping> getErrorPageMappings();
 
-	/**
-	 * Getter
-	 *
-	 * @return true if the client should be redirected to welcome file or false
-	 * if forwarded
-	 */
-	boolean isRedirect();
-
-	/**
-	 * Getter
-	 *
-	 * @return an array of welcome files paths. Paths must not start or end with
-	 * "/"
-	 */
-	String[] getWelcomeFiles();
-
+    boolean isAliasRegistration();
 }

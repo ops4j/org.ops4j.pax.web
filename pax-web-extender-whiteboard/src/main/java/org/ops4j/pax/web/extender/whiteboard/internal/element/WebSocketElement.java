@@ -16,36 +16,39 @@
 package org.ops4j.pax.web.extender.whiteboard.internal.element;
 
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.extender.whiteboard.WebSocketMapping;
-import org.ops4j.pax.web.extender.whiteboard.internal.util.WebContainerUtils;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.whiteboard.WebSocketMapping;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 
-public class WebSocketElement implements WebElement {
+/**
+ * Registers/unregisters {@link WebSocketMapping} with {@link WebContainer}.
+ *
+ * @since 6.0.0
+ */
+public class WebSocketElement extends WebElement {
 
 	private WebSocketMapping mapping;
 
-	public WebSocketElement(WebSocketMapping mapping) {
+	/**
+	 * Constructs a new WebSocketElement
+	 * @param ref the service-reference behind the registered http-whiteboard-service
+	 * @param mapping WebSocketMapping containing all necessary information
+	 */
+	public WebSocketElement(ServiceReference<Object> ref, WebSocketMapping mapping) {
+		super(ref);
 		NullArgumentException.validateNotNull(mapping, "Websocket mapping");
 		this.mapping = mapping;
 	}
 
 	@Override
-	public void register(HttpService httpService, HttpContext httpContext) throws Exception {
-		if (WebContainerUtils.isWebContainer(httpService)) {
-			((WebContainer) httpService).registerWebSocket(mapping.getWebSocket(), httpContext);
-		} else {
-			throw new UnsupportedOperationException(
-					"Internal error: In use HttpService is not an WebContainer (from Pax Web)");
-		}
+	public void register(WebContainer webContainer, HttpContext httpContext) throws Exception {
+		webContainer.registerWebSocket(mapping.getWebSocket(), httpContext);
 	}
 
 	@Override
-	public void unregister(HttpService httpService, HttpContext httpContext) {
-		if (WebContainerUtils.isWebContainer(httpService)) {
-			((WebContainer) httpService).unregisterWebSocket(mapping.getWebSocket(), httpContext);
-		}
+	public void unregister(WebContainer webContainer, HttpContext httpContext) {
+		webContainer.unregisterWebSocket(mapping.getWebSocket(), httpContext);
 	}
 
 	@Override
@@ -53,4 +56,9 @@ public class WebSocketElement implements WebElement {
 		return mapping.getHttpContextId();
 	}
 
+	@Override
+	public boolean isValid() {
+		// FIXME
+		return false;
+	}
 }

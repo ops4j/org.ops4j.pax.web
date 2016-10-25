@@ -36,63 +36,54 @@ import org.slf4j.LoggerFactory;
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class ResourceTracker extends
-		AbstractTracker<Object, ResourceWebElement> {
+public class ResourceTracker extends AbstractTracker<Object, ResourceWebElement> {
 
 	/**
 	 * Logger.
 	 */
-	private static final Logger LOG = LoggerFactory
-			.getLogger(ResourceTracker.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ResourceTracker.class);
 
 	/**
 	 * Constructor.
 	 *
-	 * @param extenderContext extender context; cannot be null
-	 * @param bundleContext   extender bundle context; cannot be null
+	 * @param extenderContext
+	 *            extender context; cannot be null
+	 * @param bundleContext
+	 *            extender bundle context; cannot be null
 	 */
-	private ResourceTracker(final ExtenderContext extenderContext,
-							final BundleContext bundleContext) {
+	private ResourceTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
 		super(extenderContext, bundleContext);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static ServiceTracker<Object, ResourceWebElement> createTracker(
-			final ExtenderContext extenderContext,
+	public static ServiceTracker<Object, ResourceWebElement> createTracker(final ExtenderContext extenderContext,
 			final BundleContext bundleContext) {
-		return new ResourceTracker(extenderContext, bundleContext)
-				.create(new Class[]{
-						Object.class
-				});
+		return new ResourceTracker(extenderContext, bundleContext).create(new Class[] { Object.class });
 	}
 
 	/**
 	 * @see AbstractTracker#createWebElement(ServiceReference, Object)
 	 */
 	@Override
-	ResourceWebElement createWebElement(
-			final ServiceReference<Object> serviceReference,
-			final Object published) {
+	ResourceWebElement createWebElement(final ServiceReference<Object> serviceReference, final Object published) {
 
-		String[] resourcePattern = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN);
-		String prefix = ServicePropertiesUtils.getStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX);
+		String[] resourcePattern = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference,
+				HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN);
+		String prefix = ServicePropertiesUtils.getStringProperty(serviceReference,
+				HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX);
 
 		if (resourcePattern != null && prefix != null) {
 
 			String httpContextId = ServicePropertiesUtils.extractHttpContextId(serviceReference);
 
-			if (httpContextId != null && httpContextId.trim().length() == 0) {
-				LOG.warn("Registered listener [" + published
-						+ "] did not contain a valid http context id");
-				return null;
-			}
 			final DefaultResourceMapping mapping = new DefaultResourceMapping();
-			mapping.setHttpContextId((String) httpContextId);
+			mapping.setHttpContextId(httpContextId);
 
-			mapping.setAlias(resourcePattern[0]); //TODO: make sure multiple patterns are supported
+			mapping.setAlias(resourcePattern[0]); // TODO: make sure multiple
+													// patterns are supported
 			mapping.setPath(prefix);
 
-			return new ResourceWebElement(mapping);
+			return new ResourceWebElement(serviceReference, mapping);
 		} else {
 			return null;
 		}

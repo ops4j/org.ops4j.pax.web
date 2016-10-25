@@ -76,12 +76,15 @@ import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.ops4j.pax.web.service.spi.model.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardElement;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.ops4j.util.property.PropertyResolver;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
+import org.osgi.service.http.runtime.dto.RequestInfoDTO;
+import org.osgi.service.http.runtime.dto.RuntimeDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -499,6 +502,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void registerFilter(final Filter filter, final String[] urlPatterns,
 							   final String[] servletNames,
@@ -658,7 +662,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
 		final ContextModel contextModel = getOrCreateContext(httpContext);
 		Integer sessionTimeout = contextModel.getSessionTimeout();
-		if (!(minutes == sessionTimeout || minutes != null
+		if (!(minutes == sessionTimeout || minutes != null // FIXME comparison?
 				&& minutes.equals(sessionTimeout))) {
 			if (!serviceModel.canBeConfigured(httpContext)) {
 				throw new IllegalStateException(
@@ -1296,28 +1300,19 @@ class HttpServiceStarted implements StoppableHttpService {
 	}
 
 	@Override
+	public RequestInfoDTO calculateRequestInfoDTO(Iterator<WhiteboardElement> iterator) {
+		// FIXME TBD
+		return new RequestInfoDTO();
+	}
+
+	@Override
+	public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator) {
+		// FIXME TBD
+		return null;
+	}
+
+	@Override
 	public String toString() {
 		return super.toString() + " for bundle " + serviceBundle;
 	}
-
-	/*
-	@Override
-	public void setConnectors(List<String> connectors, HttpContext httpContext) {
-		NullArgumentException.validateNotNull(httpContext, "Http context");
-		if (!serviceModel.canBeConfigured(httpContext)) {
-			throw new IllegalStateException(
-					"Http context already used. ServletContainerInitializer can be set only before first usage");
-		}
-
-		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
-		List<String> realConnectors = connectors;
-		if (realConnectors.size() == 0) {
-			realConnectors = this.serverController.getConfiguration()
-					.getConnectors();
-		}
-		contextModel.setConnectors(realConnectors);
-		serviceModel.addContextModel(contextModel);
-	}
-	*/
 }

@@ -17,9 +17,9 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
-import org.ops4j.pax.web.extender.whiteboard.FilterMapping;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
-import org.ops4j.pax.web.extender.whiteboard.internal.element.FilterWebElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.element.FilterMappingWebElement;
+import org.ops4j.pax.web.service.whiteboard.FilterMapping;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -30,36 +30,33 @@ import org.osgi.util.tracker.ServiceTracker;
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class FilterMappingTracker extends
-		AbstractTracker<FilterMapping, FilterWebElement> {
+public class FilterMappingTracker extends AbstractTracker<FilterMapping, FilterMappingWebElement> {
 
 	/**
 	 * Constructor.
 	 *
-	 * @param extenderContext extender context; cannot be null
-	 * @param bundleContext   extender bundle context; cannot be null
+	 * @param extenderContext
+	 *            extender context; cannot be null
+	 * @param bundleContext
+	 *            extender bundle context; cannot be null
 	 */
 
-	private FilterMappingTracker(final ExtenderContext extenderContext,
-								 final BundleContext bundleContext) {
+	private FilterMappingTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
 		super(extenderContext, bundleContext);
 	}
 
-	public static ServiceTracker<FilterMapping, FilterWebElement> createTracker(
-			final ExtenderContext extenderContext,
-			final BundleContext bundleContext) {
-		return new FilterMappingTracker(extenderContext, bundleContext)
-				.create(FilterMapping.class);
+	public static ServiceTracker<FilterMapping, FilterMappingWebElement> createTracker(
+			final ExtenderContext extenderContext, final BundleContext bundleContext) {
+		return new FilterMappingTracker(extenderContext, bundleContext).create(FilterMapping.class);
 	}
 
 	/**
 	 * @see AbstractTracker#createWebElement(ServiceReference, Object)
 	 */
 	@Override
-	FilterWebElement createWebElement(
-			final ServiceReference<FilterMapping> serviceReference,
+	FilterMappingWebElement createWebElement(final ServiceReference<FilterMapping> serviceReference,
 			final FilterMapping published) {
-		return new FilterWebElement(published);
+		return new FilterMappingWebElement(serviceReference, published);
 	}
 
 }
