@@ -62,8 +62,9 @@
 						<Export-Package>
 							${bundle.namespace};version="${project.version}",
 							${bundle.namespace}.whiteboard;version="${project.version}",
-							org.ops4j.pax.web.utils;version="${project.version}",
+							org.osgi.service.http.runtime,
 							org.osgi.service.http.runtime.dto,
+							org.ops4j.pax.web.utils;version="${project.version}"
 						</Export-Package>
 						<_removeheaders>
 							Include-Resource,
