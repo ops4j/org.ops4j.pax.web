@@ -70,4 +70,12 @@ class WebAppWebContainerContext extends WebAppHttpContext implements
 		return foundPaths;
 	}
 
+	@Override
+	public String getContextId() {
+		if(httpContext instanceof WebContainerContext){
+			return ((WebContainerContext) httpContext).getContextId();
+		}
+		return null;
+	}
+
 }

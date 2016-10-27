@@ -294,6 +294,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 				Dictionary<String, String> props = new Hashtable<>(2);
 				props.put(WebContainerConstants.PROPERTY_SYMBOLIC_NAME, bundle.getSymbolicName());
 				props.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
+				props.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME, servletContext.getServletContextName());
 				ServiceRegistration<ServletContext> serviceReg = bundle.getBundleContext().registerService(
 						ServletContext.class,
 						servletContext,
@@ -304,10 +305,11 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	}
 
 	private void doCreateHandler() throws ServletException {
+		final HttpContext httpContext = contextModel.getHttpContext();
 		DeploymentInfo deployment = new DeploymentInfo();
 		deployment.setEagerFilterInit(true);
 		deployment.setDeploymentName(contextModel.getContextName());
-		deployment.setDisplayName(contextModel.getContextName());
+		deployment.setDisplayName(httpContext instanceof WebContainerContext ? ((WebContainerContext) httpContext).getContextId() : contextModel.getContextName());
 		deployment.setContextPath('/' + contextModel.getContextName());
 		deployment.setClassLoader(classLoader);
 		BundleContext bundleContext = contextModel.getBundle().getBundleContext();

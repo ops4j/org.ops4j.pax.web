@@ -185,6 +185,7 @@ public interface WebContainerConstants {
 	String PROPERTY_ENC_SUFFIX = PID + ".enc.suffix";
 
 	String PROPERTY_SERVLETCONTEXT_PATH = "osgi.web.contextpath";
+	String PROPERTY_SERVLETCONTEXT_NAME = "osgi.web.contextname";
 	String PROPERTY_SYMBOLIC_NAME = "osgi.web.symbolicname";
 }
 //CHECKSTYLE:ON

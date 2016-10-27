@@ -70,7 +70,7 @@ class WebAppHttpContext implements HttpContext {
 	/**
 	 * The http context to delegate to.
 	 */
-	private final HttpContext httpContext;
+	protected final HttpContext httpContext;
 	/**
 	 * Mime mappings.
 	 */
