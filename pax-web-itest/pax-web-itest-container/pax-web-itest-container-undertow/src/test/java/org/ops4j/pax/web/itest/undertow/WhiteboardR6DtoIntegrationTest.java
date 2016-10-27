@@ -78,6 +78,20 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 						resp -> resp.contains("Hello from ServletWithContext"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/context/servlet");
 
+		// test welcome-file
+		// FIXME welcome file not working???
+//		HttpTestClientFactory.createDefaultTestClient()
+//				.withResponseAssertion("Response must contain 'This is a welcome file provided by WhiteboardWelcomeFiles'",
+//						resp -> resp.contains("This is a welcome file provided by WhiteboardWelcomeFiles"))
+//				.doGETandExecuteTest("http://127.0.0.1:8181/");
+
+		// test error-page
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(404)
+				.withResponseAssertion("Response must contain 'Error Servlet, we do have a 404'",
+						resp -> resp.contains("Error Servlet, we do have a 404"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/error");
+
 		// test resource
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseHeaderAssertion("Header 'Content-Type' must be 'plain/text'",

@@ -15,17 +15,23 @@
  */
 package org.ops4j.pax.web.samples.whiteboard.ds;
 
+import org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ServiceScope;
-import org.osgi.service.http.context.ServletContextHelper;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
-@Component(
-        service = ServletContextHelper.class,
-        scope = ServiceScope.BUNDLE,
-        property = {
-                HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH + "=/context", 
-                HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=CustomContext"
-        })
-public class WhiteboardR6Context extends ServletContextHelper {
+@Component
+public class WhiteboardWelcomeFiles implements WelcomeFileMapping {
+    @Override
+    public String getHttpContextId() {
+        return null;
+    }
+
+    @Override
+    public boolean isRedirect() {
+        return true;
+    }
+
+    @Override
+    public String[] getWelcomeFiles() {
+        return new String[] {"index.html"};
+    }
 }

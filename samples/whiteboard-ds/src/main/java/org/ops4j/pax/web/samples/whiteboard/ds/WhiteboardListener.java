@@ -25,15 +25,15 @@ import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
 
 @Component(
-        service = {ServletRequestListener.class, WhiteboardR6Listener.class }, // second registration only for testing
+        service = {ServletRequestListener.class, WhiteboardListener.class }, // second registration only for testing
         property = {
                 HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER + "=true",
                 HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT + "=(osgi.http.whiteboard.context.name=CustomContext)"
         }
 )
-public class WhiteboardR6Listener implements ServletRequestListener {
+public class WhiteboardListener implements ServletRequestListener {
 
-    private static Logger LOG = LoggerFactory.getLogger(WhiteboardR6Listener.class);
+    private static Logger LOG = LoggerFactory.getLogger(WhiteboardListener.class);
 
     @Override
     public void requestDestroyed(ServletRequestEvent sre) {

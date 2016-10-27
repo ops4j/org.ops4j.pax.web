@@ -17,7 +17,8 @@ package org.ops4j.pax.web.samples.whiteboard.ds;
 
 import java.io.IOException;
 
-import javax.servlet.*;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,28 +28,18 @@ import org.osgi.service.component.annotations.ServiceScope;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 @Component(
+        service = Servlet.class,
         scope = ServiceScope.PROTOTYPE,
         property = {
-                HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN + "=/simple-servlet",
-                HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME + "=SimpleFilter"
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN + "=/simple-servlet",
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME + "=SimpleServlet"
         }
 )
-public class WhiteboardR6Filter implements Filter {
-
-
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-
-    }
+public class WhiteboardServlet extends HttpServlet {
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        response.getWriter().println("Request changed by SimpleFilter");
-        chain.doFilter(request, response);
-    }
-
-    @Override
-    public void destroy() {
-
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.setContentType("text/plain");
+        resp.getWriter().println("Hello from SimpleServlet");
     }
 }

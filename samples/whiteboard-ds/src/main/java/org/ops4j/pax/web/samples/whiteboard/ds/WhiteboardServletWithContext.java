@@ -15,31 +15,31 @@
  */
 package org.ops4j.pax.web.samples.whiteboard.ds;
 
-import java.io.IOException;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ServiceScope;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import java.io.IOException;
 
 @Component(
         service = Servlet.class,
         scope = ServiceScope.PROTOTYPE,
         property = {
-                HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN + "=/simple-servlet",
-                HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME + "=SimpleServlet"
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN + "=/servlet",
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME + "=ServletWithContext",
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT + "=(osgi.http.whiteboard.context.name=CustomContext)"
         }
 )
-public class WhiteboardR6Servlet extends HttpServlet {
+public class WhiteboardServletWithContext extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("text/plain");
-        resp.getWriter().println("Hello from SimpleServlet");
+        resp.getWriter().println("Hello from ServletWithContext");
     }
 }

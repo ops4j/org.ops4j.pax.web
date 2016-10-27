@@ -15,17 +15,17 @@
  */
 package org.ops4j.pax.web.samples.whiteboard.ds;
 
-
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 @Component(
-        service = Object.class,
+        service = ServletContextHelper.class,
+        scope = ServiceScope.BUNDLE,
         property = {
-                HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN + "=/resources",
-                HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX + "=/www"
-        }
-)
-public class WhiteboardR6Resource {
-
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH + "=/context", 
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=CustomContext"
+        })
+public class WhiteboardContext extends ServletContextHelper {
 }
