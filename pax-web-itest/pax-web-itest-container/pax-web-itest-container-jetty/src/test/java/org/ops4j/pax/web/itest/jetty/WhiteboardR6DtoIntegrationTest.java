@@ -59,7 +59,7 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 		return combine(
 				configureJetty(),
 				mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("whiteboard-ds").versionAsInProject(),
-				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("INFO"));
+				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("DEBUG"));
 	}
 
 	@Before
@@ -83,6 +83,20 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'Hello from ServletWithContext'",
 						resp -> resp.contains("Hello from ServletWithContext"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/context/servlet");
+
+		// test welcome-file
+		// FIXME welcome file not working???
+//		HttpTestClientFactory.createDefaultTestClient()
+//				.withResponseAssertion("Response must contain 'This is a welcome file provided by WhiteboardWelcomeFiles'",
+//						resp -> resp.contains("This is a welcome file provided by WhiteboardWelcomeFiles"))
+//				.doGETandExecuteTest("http://127.0.0.1:8181/");
+
+		// test error-page
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(404)
+				.withResponseAssertion("Response must contain 'Error Servlet, we do have a 404'",
+						resp -> resp.contains("Error Servlet, we do have a 404"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/error");
 
 		// test resource
 		HttpTestClientFactory.createDefaultTestClient()
