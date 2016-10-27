@@ -122,7 +122,7 @@ class HttpServiceContext extends ServletContextHandler {
 		this.attributes = attributes;
 		this.httpContext = httpContext;
 		this.accessControllerContext = accessControllerContext;
-		setDisplayName(httpContext.toString());
+		setDisplayName(httpContext instanceof WebContainerContext ? ((WebContainerContext) httpContext).getContextId() : contextName);
 		this.servletContainerInitializers = containerInitializers != null ? containerInitializers
 				: new HashMap<>();
 		this.virtualHosts = new ArrayList<>(virtualHosts);
@@ -455,6 +455,7 @@ class HttpServiceContext extends ServletContextHandler {
 			webContextPath = "/";
 		}
 		properties.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
+		properties.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME, getServletContext().getServletContextName());
 
 		registerService(bundleContext, properties);
 		LOG.debug("ServletContext registered as service. ");

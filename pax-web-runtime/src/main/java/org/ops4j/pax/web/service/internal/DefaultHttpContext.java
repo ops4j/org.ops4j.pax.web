@@ -116,6 +116,11 @@ class DefaultHttpContext implements WebContainerContext {
 	}
 
 	@Override
+	public String getContextId() {
+		return contextID;
+	}
+
+	@Override
 	public String toString() {
 		return "DefaultHttpContext [bundle=" + bundle + ", contextID="
 				+ contextID + "]";

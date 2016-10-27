@@ -41,4 +41,9 @@ public interface WebContainerContext extends HttpContext {
 	 */
 	Set<String> getResourcePaths(String name);
 
+	/**
+	 * Returns the name of this Context.
+	 * @return name of the Context
+	 */
+	String getContextId();
 }
