@@ -16,10 +16,8 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -28,11 +26,11 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 
-import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 
+import org.ops4j.pax.web.service.WebContainerContext;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
@@ -81,7 +79,7 @@ public class ServerModel {
 	 * using that http context. Used to block more bundles registering web
 	 * elements udng the same http context.
 	 */
-	private final ConcurrentMap<HttpContext, Bundle> httpContexts;
+	private final ConcurrentMap<WebContainerContext, Bundle> httpContexts;
 	/**
 	 * Servlet lock. Used to sychonchornize on servlet
 	 * registration/unregistrationhat that works agains 3 maps (m_servlets,
@@ -259,7 +257,7 @@ public class ServerModel {
 	 * @param allowReAsssociation if it should allow a context to be reassiciated to a bundle
 	 * @throws IllegalStateException - If htp context is already associated to another bundle.
 	 */
-	public void associateHttpContext(final HttpContext httpContext, final Bundle bundle,
+	public void associateHttpContext(final WebContainerContext httpContext, final Bundle bundle,
 									 final boolean allowReAsssociation) {
 		final Bundle currentBundle = httpContexts.putIfAbsent(httpContext, bundle);
 		if ((!allowReAsssociation) && currentBundle != null && currentBundle != bundle) {
@@ -270,7 +268,7 @@ public class ServerModel {
 
 	public HttpContext findDefaultHttpContextForBundle(Bundle bundle) {
 		HttpContext httpContext = null;
-		for (Entry<HttpContext, Bundle> entry : httpContexts.entrySet()) {
+		for (Entry<WebContainerContext, Bundle> entry : httpContexts.entrySet()) {
 			if (entry.getValue() == bundle) {
 				httpContext = entry.getKey();
 				break;
@@ -290,11 +288,9 @@ public class ServerModel {
 	 * @param bundle bundle to be deassociated from http contexts
 	 */
 	public void deassociateHttpContexts(final Bundle bundle) {
-		for (Map.Entry<HttpContext, Bundle> entry : httpContexts.entrySet()) {
-			if (entry.getValue() == bundle) {
-				httpContexts.remove(entry.getKey());
-			}
-		}
+		httpContexts.entrySet().stream()
+				.filter(entry -> entry.getValue() == bundle)
+				.forEach(entry -> httpContexts.remove(entry.getKey()));
 	}
 
 	public ContextModel matchPathToContext(final String path) {

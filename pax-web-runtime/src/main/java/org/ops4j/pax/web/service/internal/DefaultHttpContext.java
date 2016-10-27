@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -50,9 +51,9 @@ class DefaultHttpContext implements WebContainerContext {
 	/**
 	 * Bundle using the {@link HttpService}.
 	 */
-	private final Bundle bundle;
+	protected final Bundle bundle;
 
-	private String contextID;
+	protected final String contextID;
 
 	/**
 	 * Constructor.
@@ -71,7 +72,7 @@ class DefaultHttpContext implements WebContainerContext {
 	 */
 	@Override
 	public boolean handleSecurity(final HttpServletRequest httpServletRequest,
-								  final HttpServletResponse httpServletResponse) {
+								  final HttpServletResponse httpServletResponse) throws IOException {
 		return true;
 	}
 

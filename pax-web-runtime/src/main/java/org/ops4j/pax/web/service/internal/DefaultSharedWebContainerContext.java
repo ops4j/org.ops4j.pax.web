@@ -39,7 +39,7 @@ public class DefaultSharedWebContainerContext implements
 			.getLogger(DefaultSharedWebContainerContext.class);
 
 	private Queue<Bundle> bundles = new ConcurrentLinkedQueue<>();
-	private String contextId = "shared";
+	private String contextId = DefaultContextIds.SHARED.getValue();
 
 	@Override
 	public boolean registerBundle(Bundle bundle) {

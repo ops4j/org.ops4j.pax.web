@@ -46,6 +46,7 @@ import org.apache.catalina.valves.AccessLogValve;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.coyote.http11.Http11Protocol;
 import org.apache.tomcat.util.digester.Digester;
+import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.osgi.service.http.HttpContext;
@@ -248,10 +249,7 @@ public class EmbeddedTomcat extends Tomcat {
 					LOG.info("configuration processed in {} ms",
 							(elapsed / 1000000));
 				}
-			} catch (IOException e) {
-				LOG.error("Exception while starting Tomcat:", e);
-				throw new RuntimeException("Exception while starting Tomcat", e);
-			} catch (SAXException e) {
+			} catch (IOException | SAXException e) {
 				LOG.error("Exception while starting Tomcat:", e);
 				throw new RuntimeException("Exception while starting Tomcat", e);
 			} finally {
@@ -560,7 +558,7 @@ public class EmbeddedTomcat extends Tomcat {
 			Map<String, String> contextParams,
 			Map<String, Object> contextAttributes,
 			String contextName,
-			HttpContext httpContext,
+			WebContainerContext httpContext,
 			AccessControlContext accessControllerContext,
 			Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers,
 			URL jettyWebXmlURL, List<String> virtualHosts,
@@ -610,9 +608,7 @@ public class EmbeddedTomcat extends Tomcat {
 						null);
 			} catch (ClassNotFoundException e) {
 				LOG.error("Unable to load JasperInitializer", e);
-			} catch (InstantiationException e) {
-				LOG.error("Unable to instantiate JasperInitializer", e);
-			} catch (IllegalAccessException e) {
+			} catch (InstantiationException | IllegalAccessException e) {
 				LOG.error("Unable to instantiate JasperInitializer", e);
 			}
 		}

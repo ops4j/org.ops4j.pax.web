@@ -43,7 +43,7 @@ import javax.servlet.Servlet;
 @RunWith(PaxExam.class)
 public class WhiteboardIntegrationTest extends ITestBase {
 
-	private Bundle installWarBundle;
+	private Bundle installedBundle;
 
 	@Configuration
 	public static Option[] configure() {
@@ -54,14 +54,14 @@ public class WhiteboardIntegrationTest extends ITestBase {
 	public void setUp() throws BundleException, InterruptedException {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard/"
 				+ VersionUtil.getProjectVersion();
-		installWarBundle = installAndStartBundle(bundlePath);
+		installedBundle = installAndStartBundle(bundlePath);
 	}
 
 	@After
 	public void tearDown() throws BundleException {
-		if (installWarBundle != null) {
-			installWarBundle.stop();
-			installWarBundle.uninstall();
+		if (installedBundle != null) {
+			installedBundle.stop();
+			installedBundle.uninstall();
 		}
 	}
 
@@ -160,7 +160,7 @@ public class WhiteboardIntegrationTest extends ITestBase {
 
 	@Test
 	public void testMultipleContextMappings() throws Exception {
-		BundleContext bundleContext = installWarBundle.getBundleContext();
+		BundleContext bundleContext = installedBundle.getBundleContext();
 		DefaultHttpContextMapping httpContextMapping = new DefaultHttpContextMapping();
 		httpContextMapping.setHttpContextId("alternative");
 		httpContextMapping.setPath("alternative");

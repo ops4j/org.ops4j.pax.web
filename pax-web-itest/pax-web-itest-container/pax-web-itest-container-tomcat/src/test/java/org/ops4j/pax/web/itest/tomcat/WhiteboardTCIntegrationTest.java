@@ -39,6 +39,7 @@ import org.osgi.framework.ServiceRegistration;
 
 import javax.servlet.Servlet;
 
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
@@ -54,7 +55,9 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 	@Configuration
 	public Option[] configure() {
 		return combine(
-				configureTomcat() // ,
+				configureTomcat() ,// ,
+				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
+						.value("DEBUG")
 		);
 	}
 
@@ -66,8 +69,6 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 		installWarBundle = installAndStartBundle(bundlePath);
 
 		waitForServletListener();
-
-		waitForServer("http://127.0.0.1:8282/");
 	}
 
 	@After

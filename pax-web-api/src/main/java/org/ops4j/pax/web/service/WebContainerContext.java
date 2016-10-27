@@ -29,6 +29,23 @@ import org.osgi.service.http.HttpContext;
  */
 public interface WebContainerContext extends HttpContext {
 
+
+    enum DefaultContextIds {
+		DEFAULT("default"),
+		SHARED("shared"),
+		CUSTOM("custom");
+
+		private final String value;
+
+		DefaultContextIds(String value) {
+			this.value = value;
+		}
+
+		public String getValue(){
+			return value;
+		}
+	}
+
 	/**
 	 * Returns a set of all the paths (String objects) to entries within the web
 	 * application whose longest sub-path matches the supplied path argument. A
@@ -46,4 +63,9 @@ public interface WebContainerContext extends HttpContext {
 	 * @return name of the Context
 	 */
 	String getContextId();
+
+	default boolean isDefaultOrSharedContext(){
+		return DefaultContextIds.DEFAULT.getValue().equals(getContextId())
+				|| DefaultContextIds.SHARED.getValue().equals(getContextId());
+	}
 }

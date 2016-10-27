@@ -62,6 +62,9 @@ public class WhiteboardResourceIntegrationTest extends ITestBase {
 		resourceMapping.setPath("/images");
 		service = bundleContext.registerService(ResourceMapping.class,
 				resourceMapping, null);
+
+		initServletListener();
+		waitForServletListener();
 	}
 
 	@After
