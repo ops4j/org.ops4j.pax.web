@@ -64,7 +64,7 @@ public class HttpCustomContextIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8181/");
 		// test image-serving
 		HttpTestClientFactory.createDefaultTestClient()
-				.doGETandExecuteTest("http://127.0.0.1:8181/images/logo.png");
+				.doGETandExecuteTest("http://127.0.0.1:8181/www/logo.png");
 	}
 
 }
