@@ -79,7 +79,7 @@ public class ServerModel {
 	/**
 	 * Map between http contexts and the bundle that registred a web element
 	 * using that http context. Used to block more bundles registering web
-	 * elements udng the same http context.
+	 * elements using the same http context.
 	 */
 	private final ConcurrentMap<HttpContext, Bundle> httpContexts;
 	/**
