@@ -18,6 +18,8 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -35,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -76,15 +79,25 @@ import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.ops4j.pax.web.service.spi.model.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
+import org.ops4j.pax.web.service.whiteboard.ServletMapping;
 import org.ops4j.pax.web.service.whiteboard.WhiteboardElement;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardErrorPage;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardFilter;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardJspMapping;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardListener;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardResource;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardServlet;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardWelcomeFile;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.ops4j.util.property.PropertyResolver;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
+import org.osgi.service.http.runtime.dto.FilterDTO;
 import org.osgi.service.http.runtime.dto.RequestInfoDTO;
 import org.osgi.service.http.runtime.dto.RuntimeDTO;
+import org.osgi.service.http.runtime.dto.ServletContextDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1307,9 +1320,45 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	@Override
 	public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator) {
-		// FIXME TBD
-		return null;
+		// FIXME not complete
+	    
+	    RuntimeDTO runtimeDto = new RuntimeDTO();
+	    List<ServletContextDTO> servletContextDTOs = new ArrayList<>();
+	    List<FilterDTO> filterDTOs = new ArrayList<>(); //TODO ... 
+        
+        iterator.forEachRemaining(element -> {
+            if (element  instanceof WhiteboardServlet) {
+                servletContextDTOs.add(transformToDTO((WhiteboardServlet)element));
+            } else if (element instanceof WhiteboardFilter) {
+                //TODO: add filter
+            } else if (element instanceof WhiteboardErrorPage) {
+                //TODO: add error pages
+            } else if (element instanceof WhiteboardJspMapping) {
+                //TODO: add jsp mappings
+            } else if (element instanceof WhiteboardListener) {
+                //TODO: add Listeners
+            } else if (element instanceof WhiteboardResource) {
+                //TODO: add resources
+            } else if (element instanceof WhiteboardWelcomeFile) {
+                //TODO: add welcomefiles
+            }
+        });
+        
+        return runtimeDto;
 	}
+	
+	private ServletContextDTO transformToDTO(WhiteboardServlet whiteBoardServlet) {
+        ServletContextDTO dto = new ServletContextDTO();
+        
+        ServletMapping servletMapping = whiteBoardServlet.getServletMapping();
+        
+        dto.contextPath = servletMapping.getHttpContextId();
+        dto.name = servletMapping.getServletName();
+        dto.initParams = servletMapping.getInitParams();
+
+        //FIXME: not complete
+        return dto;
+    }
 
 	@Override
 	public String toString() {
