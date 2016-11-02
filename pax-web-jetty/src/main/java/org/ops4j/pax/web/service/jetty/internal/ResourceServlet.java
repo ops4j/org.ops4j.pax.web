@@ -123,11 +123,13 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 			return ContextHandler.getCurrentContext().getContextHandler();
 		}
 	}
+	
+	
 
 	@SuppressWarnings("deprecation")
 	@Override
-	protected void doGet(final HttpServletRequest request,
-			final HttpServletResponse response) throws ServletException,
+	protected void service(final HttpServletRequest request,
+						 final HttpServletResponse response) throws ServletException,
 			IOException {
 		if (response.isCommitted()) {
 			return;
