@@ -60,7 +60,7 @@ public class ResourceServletTest {
 
 		replay(httpContext, httpRequest, httpResponse);
 		// execute
-		new ResourceServlet(httpContext, "", alias, name).doGet(httpRequest,
+		new ResourceServlet(httpContext, "", alias, name).service(httpRequest,
 				httpResponse);
 		// verify
 		verify(httpContext, httpRequest, httpResponse);
