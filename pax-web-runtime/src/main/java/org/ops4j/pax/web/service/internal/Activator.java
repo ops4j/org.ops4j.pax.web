@@ -63,12 +63,6 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CIPHERSUI
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_TEMP_DIR;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_WORKER_NAME;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_RENEGOTIATION_ALLOWED;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CRL_PATH;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENABLE_CRLDP;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_VALIDATE_CERTS;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_VALIDATE_PEER_CERTS;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENABLE_OCSP;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_OCSP_RESPONDER_URL;
 
 import java.io.File;
 import java.util.Dictionary;
@@ -482,18 +476,6 @@ public class Activator implements BundleActivator {
 				configuration.isLogNCSADispatch());
 		setProperty(toPropagate, PROPERTY_LOG_NCSA_LOGTIMEZONE,
 				configuration.getLogNCSATimeZone());
-		setProperty(toPropagate, PROPERTY_CRL_PATH,
-                            configuration.getCrlPath());
-		setProperty(toPropagate, PROPERTY_ENABLE_CRLDP,
-                            configuration.isEnableCRLDP());
-		setProperty(toPropagate, PROPERTY_VALIDATE_CERTS,
-                            configuration.isValidateCerts());
-		setProperty(toPropagate, PROPERTY_VALIDATE_PEER_CERTS,
-                            configuration.isValidatePeerCerts());
-		setProperty(toPropagate, PROPERTY_ENABLE_OCSP,
-                            configuration.isEnableOCSP());
-		setProperty(toPropagate, PROPERTY_OCSP_RESPONDER_URL,
-                            configuration.getOcspResponderURL());
 
 		if (SupportUtils.isJSPAvailable()) {
 			setProperty(toPropagate, PROPERTY_JSP_CHECK_INTERVAL,

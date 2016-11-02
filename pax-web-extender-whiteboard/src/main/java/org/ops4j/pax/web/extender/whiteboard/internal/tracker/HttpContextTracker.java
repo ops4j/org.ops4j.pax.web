@@ -88,9 +88,9 @@ public class HttpContextTracker extends AbstractHttpContextTracker<HttpContext> 
 		
 		Boolean sharedContext = httpContextShared != null ? Boolean.valueOf((String) httpContextShared) : false;
 		
-		if (!sharedContext && serviceReference instanceof SharedWebContainerContext) {
+		if (!sharedContext && published instanceof SharedWebContainerContext) {
 			sharedContext = true; //in case it's a shared HttpContext make sure the flag ist set.
-		} else  if (sharedContext && !(serviceReference instanceof SharedWebContainerContext)) {
+		} else  if (sharedContext && !(published instanceof SharedWebContainerContext)) {
 			sharedContext = false; // this shouldn't happen but make sure it doesn't 
 		}
 		

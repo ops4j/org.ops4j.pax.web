@@ -223,16 +223,4 @@ public interface Configuration {
 	String getTrustStoreType();
 
 	Boolean isSslRenegotiationAllowed();
-	
-	String getCrlPath();
-	
-	Boolean isEnableCRLDP();
-	
-	Boolean isValidateCerts();
-	
-	Boolean isValidatePeerCerts();
-	
-	Boolean isEnableOCSP();
-	
-	String getOcspResponderURL();
 }

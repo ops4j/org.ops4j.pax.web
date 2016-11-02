@@ -107,8 +107,13 @@ public class ReplaceableService<T> {
             } else {
                 bind(serviceTracker.getService(bind));
             }
-            if (Bundle.ACTIVE == context.getBundle().getState()) {
-            	context.ungetService(reference);
+            boolean active = false;
+            try {
+                active = Bundle.ACTIVE == context.getBundle().getState();
+            } catch (IllegalStateException ignored) {
+            }
+            if (active) {
+                context.ungetService(reference);
             }
         }
     }

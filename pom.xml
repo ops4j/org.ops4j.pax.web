@@ -11,7 +11,7 @@
 
 	<groupId>org.ops4j.pax</groupId>
 	<artifactId>web</artifactId>
-	<version>4.3.0-SNAPSHOT</version>
+	<version>4.3.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>OPS4J Pax Web</name>
@@ -76,7 +76,7 @@
 	<properties>
 		<dependency.base.version>1.5.0</dependency.base.version>
 		<dependency.swissbox.version>1.8.2</dependency.swissbox.version>
-		<dependency.jetty.version>9.2.17.v20160517</dependency.jetty.version>
+		<dependency.jetty.version>9.2.19.v20160908</dependency.jetty.version>
 		<dependency.jasper.version>6.0.29</dependency.jasper.version>
 		<dependency.jstl.version>1.2</dependency.jstl.version>
 		<dependency.fileinstall.version>3.1.4</dependency.fileinstall.version>

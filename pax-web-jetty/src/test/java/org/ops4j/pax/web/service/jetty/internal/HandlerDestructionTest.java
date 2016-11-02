@@ -85,366 +85,366 @@ public class HandlerDestructionTest {
 			}
 		};
 
+		Bundle testBundle = new Bundle() {
+
+			@Override
+			public int compareTo(Bundle arg0) {
+				// TODO Auto-generated method stub
+				return 0;
+			}
+
+			@Override
+			public int getState() {
+				// TODO Auto-generated method stub
+				return 0;
+			}
+
+			@Override
+			public void start(int options) throws BundleException {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void start() throws BundleException {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void stop(int options) throws BundleException {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void stop() throws BundleException {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void update(InputStream input) throws BundleException {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void update() throws BundleException {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void uninstall() throws BundleException {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public Dictionary<String, String> getHeaders() {
+				Dictionary<String, String> dict = new Hashtable<String, String>();
+				dict.put(Constants.BUNDLE_VERSION, "1.0.0");
+				return dict;
+			}
+
+			@Override
+			public long getBundleId() {
+				return 0;
+			}
+
+			@Override
+			public String getLocation() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public ServiceReference<?>[] getRegisteredServices() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public ServiceReference<?>[] getServicesInUse() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public boolean hasPermission(Object permission) {
+				// TODO Auto-generated method stub
+				return false;
+			}
+
+			@Override
+			public URL getResource(String name) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Dictionary<String, String> getHeaders(String locale) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public String getSymbolicName() {
+				return "HandlerDestructorTest-SymbolicNameBundle";
+			}
+
+			@Override
+			public Class<?> loadClass(String name)
+					throws ClassNotFoundException {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Enumeration<URL> getResources(String name)
+					throws IOException {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Enumeration<String> getEntryPaths(String path) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public URL getEntry(String path) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public long getLastModified() {
+				// TODO Auto-generated method stub
+				return 0;
+			}
+
+			@Override
+			public Enumeration<URL> findEntries(String path,
+												String filePattern, boolean recurse) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public BundleContext getBundleContext() {
+				return new BundleContext() {
+
+					@Override
+					public boolean ungetService(
+							ServiceReference<?> reference) {
+						// TODO Auto-generated method stub
+						return false;
+					}
+
+					@Override
+					public void removeServiceListener(
+							ServiceListener listener) {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void removeFrameworkListener(
+							FrameworkListener listener) {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void removeBundleListener(BundleListener listener) {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public <S> ServiceRegistration<S> registerService(
+							Class<S> clazz, S service,
+							Dictionary<String, ?> properties) {
+						// TODO Auto-generated method stub
+						return null;
+					}
+
+					@Override
+					public ServiceRegistration<?> registerService(
+							String clazz, Object service,
+							Dictionary<String, ?> properties) {
+						// TODO Auto-generated method stub
+						return null;
+					}
+
+					@Override
+					public ServiceRegistration<?> registerService(
+							String[] clazzes, Object service,
+							Dictionary<String, ?> properties) {
+						// TODO Auto-generated method stub
+						return null;
+					}
+
+					@Override
+					public Bundle installBundle(String location,
+												InputStream input) throws BundleException {
+						// TODO Auto-generated method stub
+						return null;
+					}
+
+					@Override
+					public Bundle installBundle(String location)
+							throws BundleException {
+						// TODO Auto-generated method stub
+						return null;
+					}
+
+					@Override
+					public <S> Collection<ServiceReference<S>> getServiceReferences(
+							Class<S> clazz, String filter)
+							throws InvalidSyntaxException {
+						// TODO Auto-generated method stub
+						return null;
+					}
+
+					@Override
+					public ServiceReference<?>[] getServiceReferences(
+							String clazz, String filter)
+							throws InvalidSyntaxException {
+						// TODO Auto-generated method stub
+						return null;
+					}
+
+					@Override
+					public <S> ServiceReference<S> getServiceReference(
+							Class<S> clazz) {
+						// TODO Auto-generated method stub
+						return null;
+					}
+
+					@Override
+					public ServiceReference<?> getServiceReference(
+							String clazz) {
+						// TODO Auto-generated method stub
+						return null;
+					}
+
+					@Override
+					public <S> S getService(ServiceReference<S> reference) {
+						// TODO Auto-generated method stub
+						return null;
+					}
+
+					@Override
+					public String getProperty(String key) {
+						// TODO Auto-generated method stub
+						return null;
+					}
+
+					@Override
+					public File getDataFile(String filename) {
+						// TODO Auto-generated method stub
+						return null;
+					}
+
+					@Override
+					public Bundle[] getBundles() {
+						// TODO Auto-generated method stub
+						return null;
+					}
+
+					@Override
+					public Bundle getBundle(String location) {
+						// TODO Auto-generated method stub
+						return null;
+					}
+
+					@Override
+					public Bundle getBundle(long id) {
+						// TODO Auto-generated method stub
+						return null;
+					}
+
+					@Override
+					public Bundle getBundle() {
+						// TODO Auto-generated method stub
+						return null;
+					}
+
+					@Override
+					public ServiceReference<?>[] getAllServiceReferences(
+							String clazz, String filter)
+							throws InvalidSyntaxException {
+						// TODO Auto-generated method stub
+						return null;
+					}
+
+					@Override
+					public Filter createFilter(String filter)
+							throws InvalidSyntaxException {
+						// TODO Auto-generated method stub
+						return null;
+					}
+
+					@Override
+					public void addServiceListener(
+							ServiceListener listener, String filter)
+							throws InvalidSyntaxException {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void addServiceListener(ServiceListener listener) {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void addFrameworkListener(
+							FrameworkListener listener) {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void addBundleListener(BundleListener listener) {
+						// TODO Auto-generated method stub
+
+					}
+				};
+			}
+
+			@Override
+			public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(
+					int signersType) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Version getVersion() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public <A> A adapt(Class<A> type) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public File getDataFile(String filename) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		};
 		{
 			Servlet servlet = new DefaultServlet();
-			Bundle testBundle = new Bundle() {
-
-				@Override
-				public int compareTo(Bundle arg0) {
-					// TODO Auto-generated method stub
-					return 0;
-				}
-
-				@Override
-				public int getState() {
-					// TODO Auto-generated method stub
-					return 0;
-				}
-
-				@Override
-				public void start(int options) throws BundleException {
-					// TODO Auto-generated method stub
-
-				}
-
-				@Override
-				public void start() throws BundleException {
-					// TODO Auto-generated method stub
-
-				}
-
-				@Override
-				public void stop(int options) throws BundleException {
-					// TODO Auto-generated method stub
-
-				}
-
-				@Override
-				public void stop() throws BundleException {
-					// TODO Auto-generated method stub
-
-				}
-
-				@Override
-				public void update(InputStream input) throws BundleException {
-					// TODO Auto-generated method stub
-
-				}
-
-				@Override
-				public void update() throws BundleException {
-					// TODO Auto-generated method stub
-
-				}
-
-				@Override
-				public void uninstall() throws BundleException {
-					// TODO Auto-generated method stub
-
-				}
-
-				@Override
-				public Dictionary<String, String> getHeaders() {
-					Dictionary<String, String> dict = new Hashtable<String, String>();
-					dict.put(Constants.BUNDLE_VERSION, "1.0.0");
-					return dict;
-				}
-
-				@Override
-				public long getBundleId() {
-					return 0;
-				}
-
-				@Override
-				public String getLocation() {
-					// TODO Auto-generated method stub
-					return null;
-				}
-
-				@Override
-				public ServiceReference<?>[] getRegisteredServices() {
-					// TODO Auto-generated method stub
-					return null;
-				}
-
-				@Override
-				public ServiceReference<?>[] getServicesInUse() {
-					// TODO Auto-generated method stub
-					return null;
-				}
-
-				@Override
-				public boolean hasPermission(Object permission) {
-					// TODO Auto-generated method stub
-					return false;
-				}
-
-				@Override
-				public URL getResource(String name) {
-					// TODO Auto-generated method stub
-					return null;
-				}
-
-				@Override
-				public Dictionary<String, String> getHeaders(String locale) {
-					// TODO Auto-generated method stub
-					return null;
-				}
-
-				@Override
-				public String getSymbolicName() {
-					return "HandlerDestructorTest-SymbolicNameBundle";
-				}
-
-				@Override
-				public Class<?> loadClass(String name)
-						throws ClassNotFoundException {
-					// TODO Auto-generated method stub
-					return null;
-				}
-
-				@Override
-				public Enumeration<URL> getResources(String name)
-						throws IOException {
-					// TODO Auto-generated method stub
-					return null;
-				}
-
-				@Override
-				public Enumeration<String> getEntryPaths(String path) {
-					// TODO Auto-generated method stub
-					return null;
-				}
-
-				@Override
-				public URL getEntry(String path) {
-					// TODO Auto-generated method stub
-					return null;
-				}
-
-				@Override
-				public long getLastModified() {
-					// TODO Auto-generated method stub
-					return 0;
-				}
-
-				@Override
-				public Enumeration<URL> findEntries(String path,
-						String filePattern, boolean recurse) {
-					// TODO Auto-generated method stub
-					return null;
-				}
-
-				@Override
-				public BundleContext getBundleContext() {
-					return new BundleContext() {
-
-						@Override
-						public boolean ungetService(
-								ServiceReference<?> reference) {
-							// TODO Auto-generated method stub
-							return false;
-						}
-
-						@Override
-						public void removeServiceListener(
-								ServiceListener listener) {
-							// TODO Auto-generated method stub
-
-						}
-
-						@Override
-						public void removeFrameworkListener(
-								FrameworkListener listener) {
-							// TODO Auto-generated method stub
-
-						}
-
-						@Override
-						public void removeBundleListener(BundleListener listener) {
-							// TODO Auto-generated method stub
-
-						}
-
-						@Override
-						public <S> ServiceRegistration<S> registerService(
-								Class<S> clazz, S service,
-								Dictionary<String, ?> properties) {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public ServiceRegistration<?> registerService(
-								String clazz, Object service,
-								Dictionary<String, ?> properties) {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public ServiceRegistration<?> registerService(
-								String[] clazzes, Object service,
-								Dictionary<String, ?> properties) {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public Bundle installBundle(String location,
-								InputStream input) throws BundleException {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public Bundle installBundle(String location)
-								throws BundleException {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public <S> Collection<ServiceReference<S>> getServiceReferences(
-								Class<S> clazz, String filter)
-								throws InvalidSyntaxException {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public ServiceReference<?>[] getServiceReferences(
-								String clazz, String filter)
-								throws InvalidSyntaxException {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public <S> ServiceReference<S> getServiceReference(
-								Class<S> clazz) {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public ServiceReference<?> getServiceReference(
-								String clazz) {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public <S> S getService(ServiceReference<S> reference) {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public String getProperty(String key) {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public File getDataFile(String filename) {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public Bundle[] getBundles() {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public Bundle getBundle(String location) {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public Bundle getBundle(long id) {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public Bundle getBundle() {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public ServiceReference<?>[] getAllServiceReferences(
-								String clazz, String filter)
-								throws InvalidSyntaxException {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public Filter createFilter(String filter)
-								throws InvalidSyntaxException {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public void addServiceListener(
-								ServiceListener listener, String filter)
-								throws InvalidSyntaxException {
-							// TODO Auto-generated method stub
-
-						}
-
-						@Override
-						public void addServiceListener(ServiceListener listener) {
-							// TODO Auto-generated method stub
-
-						}
-
-						@Override
-						public void addFrameworkListener(
-								FrameworkListener listener) {
-							// TODO Auto-generated method stub
-
-						}
-
-						@Override
-						public void addBundleListener(BundleListener listener) {
-							// TODO Auto-generated method stub
-
-						}
-					};
-				}
-
-				@Override
-				public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(
-						int signersType) {
-					// TODO Auto-generated method stub
-					return null;
-				}
-
-				@Override
-				public Version getVersion() {
-					// TODO Auto-generated method stub
-					return null;
-				}
-
-				@Override
-				public <A> A adapt(Class<A> type) {
-					// TODO Auto-generated method stub
-					return null;
-				}
-
-				@Override
-				public File getDataFile(String filename) {
-					// TODO Auto-generated method stub
-					return null;
-				}
-			};
 			ContextModel contextModel = new ContextModel(httpContext,
 					testBundle, getClass().getClassLoader());
 			ServletModel servletModel = new ServletModel(contextModel, servlet,
@@ -456,8 +456,8 @@ public class HandlerDestructionTest {
 		final Set<Object> oldbeans = new HashSet<Object>(container.getBeans());
 
 		Servlet servlet = new DefaultServlet();
-		ContextModel contextModel = new ContextModel(httpContext, null,
-				getClass().getClassLoader());
+		ContextModel contextModel = new ContextModel(httpContext,
+				testBundle, getClass().getClassLoader());
 		ServletModel servletModel = new ServletModel(contextModel, servlet,
 				"/", null, null, null);
 		server.addServlet(servletModel);

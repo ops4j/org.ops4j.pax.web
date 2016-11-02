@@ -1,13 +1,11 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -18,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletContext;
 
+import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpContext;
@@ -161,14 +161,42 @@ public class JettyServerWrapperTest {
 			jettyServerWrapperUnderTest.getOrCreateContext(contextModelMock);
 			final HttpServiceContext httpServiceContext = jettyServerWrapperUnderTest
 					.getContext(httpContextMock);
-			jettyServerWrapperUnderTest.removeContext(httpContextMock);
+			jettyServerWrapperUnderTest.removeContext(httpContextMock, false);
 			final HttpServiceContext httpServiceContextAfterRemoved = jettyServerWrapperUnderTest
 					.getContext(httpContextMock);
 
 			assertNotNull(httpServiceContext);
-			assertNotNull(httpServiceContextAfterRemoved);
+			assertNull(httpServiceContextAfterRemoved);
 		} finally {
 			jettyServerWrapperUnderTest.stop();
 		}
 	}
+
+	@Test
+	public void registrationAndUnregistrationOfTwoServletsThereShouldBeNoContexts()
+			throws Exception {
+		JettyServerImpl server = new JettyServerImpl(serverModelMock, null);
+		server.start();
+		try {
+			Bundle testBundle = mock(Bundle.class);
+			ContextModel contextModel = new ContextModel(httpContextMock,
+					testBundle, getClass().getClassLoader());
+			ServletModel servletModel1 = new ServletModel(contextModel, new DefaultServlet(),
+					"/s1", null, null, null);
+			ServletModel servletModel2 = new ServletModel(contextModel, new DefaultServlet(),
+					"/s2", null, null, null);
+			assertNull(server.getServer().getContext(httpContextMock));
+			server.addServlet(servletModel1);
+			assertNotNull(server.getServer().getContext(httpContextMock));
+			server.addServlet(servletModel2);
+			assertNotNull(server.getServer().getContext(httpContextMock));
+			server.removeServlet(servletModel1);
+			assertNotNull(server.getServer().getContext(httpContextMock));
+			server.removeServlet(servletModel2);
+			assertNull(server.getServer().getContext(httpContextMock));
+		} finally {
+			server.stop();
+		}
+	}
+
 }
