@@ -18,7 +18,6 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
 
 import java.io.File;
 import java.net.URL;
@@ -37,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -1321,11 +1319,11 @@ class HttpServiceStarted implements StoppableHttpService {
 	@Override
 	public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator) {
 		// FIXME not complete
-	    
+
 	    RuntimeDTO runtimeDto = new RuntimeDTO();
 	    List<ServletContextDTO> servletContextDTOs = new ArrayList<>();
-	    List<FilterDTO> filterDTOs = new ArrayList<>(); //TODO ... 
-        
+	    List<FilterDTO> filterDTOs = new ArrayList<>(); //TODO ...
+
         iterator.forEachRemaining(element -> {
             if (element  instanceof WhiteboardServlet) {
                 servletContextDTOs.add(transformToDTO((WhiteboardServlet)element));
@@ -1343,15 +1341,15 @@ class HttpServiceStarted implements StoppableHttpService {
                 //TODO: add welcomefiles
             }
         });
-        
+
         return runtimeDto;
 	}
-	
+
 	private ServletContextDTO transformToDTO(WhiteboardServlet whiteBoardServlet) {
         ServletContextDTO dto = new ServletContextDTO();
-        
+
         ServletMapping servletMapping = whiteBoardServlet.getServletMapping();
-        
+
         dto.contextPath = servletMapping.getHttpContextId();
         dto.name = servletMapping.getServletName();
         dto.initParams = servletMapping.getInitParams();
