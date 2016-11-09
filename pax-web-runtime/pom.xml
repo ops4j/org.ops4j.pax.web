@@ -64,6 +64,7 @@
 						<Import-Package>
 							org.ops4j.pax.web.jsp; version="${project.version}"; resolution:=optional,
 							org.ops4j.pax.web.service; version="${project.version}"; resolution:=required,
+							org.ops4j.pax.web.service.whiteboard; version="${project.version}"; resolution:=required,
 							org.ops4j.pax.web.utils; version="${project.version}"; resolution:=required,
 							org.ops4j.pax.web.service.spi; version="${project.version}"; resolution:=required,
 							org.ops4j.pax.web.service.spi.model; version="${project.version}"; resolution:=required,
