@@ -252,7 +252,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		// Undertows ServletContextImpl maps "/" to "". In OSGi path must start with /
 		if (contextPath != null && !contextPath.startsWith("/")) {
 			contextPath = "/" + contextPath;
-		}else if(contextPath == null){
+		} else if (contextPath == null) {
 			LOG.warn("ContextPath not found, it's not configured. Assuming '/'");
 			contextPath = "/";
 		}
@@ -266,13 +266,13 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		Optional<ServiceRegistration<ServletContext>> serviceReg = registeredServletContexts.stream().filter(reg -> reg.getReference() != null
 				&& webContextPath.equals(reg.getReference().getProperty(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH)))
 				.findFirst();
-		if(serviceReg.isPresent()){
-			try{
+		if (serviceReg.isPresent()) {
+			try {
 				serviceReg.get().unregister();
-			}catch(IllegalStateException e){
+			} catch(IllegalStateException e){
 				LOG.error("Error during unregistration of ServletContext service with path '{}'!",
 						webContextPath, e);
-			}finally {
+			} finally {
 				registeredServletContexts.remove(serviceReg.get());
 			}
 		}
@@ -290,10 +290,11 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 			LOG.warn("Could not get ServiceReference for ServletContext!", e);
 			first = Optional.empty();
 		}
-		if(!first.isPresent()) {
+		if (!first.isPresent()) {
 				Dictionary<String, String> props = new Hashtable<>(2);
 				props.put(WebContainerConstants.PROPERTY_SYMBOLIC_NAME, bundle.getSymbolicName());
 				props.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
+				props.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME, servletContext.getServletContextName());
 				ServiceRegistration<ServletContext> serviceReg = bundle.getBundleContext().registerService(
 						ServletContext.class,
 						servletContext,
@@ -304,10 +305,11 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	}
 
 	private void doCreateHandler() throws ServletException {
+		final WebContainerContext httpContext = contextModel.getHttpContext();
 		DeploymentInfo deployment = new DeploymentInfo();
 		deployment.setEagerFilterInit(true);
 		deployment.setDeploymentName(contextModel.getContextName());
-		deployment.setDisplayName(contextModel.getContextName());
+		deployment.setDisplayName(httpContext.getContextId());
 		deployment.setContextPath('/' + contextModel.getContextName());
 		deployment.setClassLoader(classLoader);
 		BundleContext bundleContext = contextModel.getBundle().getBundleContext();
@@ -532,8 +534,8 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 	@Override
 	public Resource getResource(String path) throws IOException {
-		HttpContext context = contextModel.getHttpContext();
-		if (context instanceof WebContainerContext) {
+		WebContainerContext context = contextModel.getHttpContext();
+		if (context != null && context.isDefaultOrSharedContext()) { // FIXME why is this special treatment necessary
 			final URL resource = context.getResource(path);
 			if (resource == null) {
 				return null;
@@ -686,7 +688,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	private class DirectoryResource implements Resource {
 		private final URL url;
 
-		public DirectoryResource(URL url) throws IOException {
+		DirectoryResource(URL url) throws IOException {
 			this.url = url;
 		}
 
@@ -724,13 +726,11 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		public List<Resource> list() {
 			try {
 				List<Resource> children = new ArrayList<>();
-				if (contextModel.getHttpContext() instanceof WebContainerContext) {
-					WebContainerContext ctx = (WebContainerContext) contextModel.getHttpContext();
-					Set<String> rps = ctx.getResourcePaths(getPath());
-					if (rps != null) {
-						for (String child : rps) {
-							children.add(getResource(child));
-						}
+				WebContainerContext ctx = contextModel.getHttpContext();
+				Set<String> rps = ctx.getResourcePaths(getPath());
+				if (rps != null) {
+					for (String child : rps) {
+						children.add(getResource(child));
 					}
 				}
 				return children;

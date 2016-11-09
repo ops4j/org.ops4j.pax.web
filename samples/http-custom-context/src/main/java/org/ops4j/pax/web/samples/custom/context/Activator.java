@@ -66,7 +66,7 @@ public class Activator implements BundleActivator {
 
 	private void registerResources(HttpContext httpContext) {
 		try {
-			httpService.registerResources("/images/", "/", null);
+			httpService.registerResources("/www", "/images", null);
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, "Registering resources failed", e);
 		}

@@ -38,6 +38,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
@@ -56,7 +57,7 @@ public class JettyServerWrapperTest {
 	@Mock
 	private ContextModel contextModelMock;
 	@Mock
-	private HttpContext httpContextMock;
+	private WebContainerContext httpContextMock;
 	@Mock
 	private Bundle bundleMock;
 	@Mock

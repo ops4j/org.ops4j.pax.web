@@ -24,6 +24,7 @@
 	<groupId>org.ops4j.pax.web.samples</groupId>
 	<artifactId>http-custom-context</artifactId>
 	<packaging>bundle</packaging>
+    <name>OPS4J Pax Web - Samples - Http Custom Context</name>
 	
 	<properties>
         <bundle.symbolicName>org.ops4j.pax.web.samples.http-custom-context</bundle.symbolicName>

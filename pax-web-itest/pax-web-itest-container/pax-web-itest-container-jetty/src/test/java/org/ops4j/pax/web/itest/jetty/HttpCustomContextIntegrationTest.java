@@ -27,6 +27,8 @@ import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
+import static org.ops4j.pax.exam.OptionUtils.combine;
+
 /**
  * @author Toni Menzel (tonit)
  * @since Mar 3, 2009
@@ -38,14 +40,16 @@ public class HttpCustomContextIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		return configureJetty();
+		return combine(configureJetty());
 	}
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
+		initServletListener();
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/http-custom-context/"
 				+ VersionUtil.getProjectVersion();
 		installBundle = installAndStartBundle(bundlePath);
+		waitForServletListener();
 	}
 
 	@After
@@ -64,7 +68,7 @@ public class HttpCustomContextIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8181/");
 		// test image-serving
 		HttpTestClientFactory.createDefaultTestClient()
-				.doGETandExecuteTest("http://127.0.0.1:8181/images/logo.png");
+				.doGETandExecuteTest("http://127.0.0.1:8181/www/logo.png");
 	}
 
 }

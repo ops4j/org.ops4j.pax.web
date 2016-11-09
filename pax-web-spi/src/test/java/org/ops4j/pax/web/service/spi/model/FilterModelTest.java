@@ -27,6 +27,7 @@ import javax.servlet.Filter;
 
 import org.junit.Test;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.WebContainerContext;
 import org.osgi.service.http.HttpContext;
 
 /**
@@ -39,7 +40,7 @@ public class FilterModelTest {
 	@Test
 	public void registerWithNoDispatcherInitParams() {
 		FilterModel fm = new FilterModel(new ContextModel(
-				createMock(HttpContext.class), null, getClass()
+				createMock(WebContainerContext.class), null, getClass()
 				.getClassLoader()), createMock(Filter.class),
 				new String[]{"/*"}, null, new Hashtable<>(), false);
 
@@ -49,7 +50,7 @@ public class FilterModelTest {
 	@Test
 	public void registerWithCorrectSubsetOfDispatcherInitParams() {
 		FilterModel fm = new FilterModel(new ContextModel(
-				createMock(HttpContext.class), null, getClass()
+				createMock(WebContainerContext.class), null, getClass()
 				.getClassLoader()), createMock(Filter.class),
 				new String[]{"/*"}, null, new Hashtable<String, String>() {
 			/**
@@ -69,7 +70,7 @@ public class FilterModelTest {
 	@Test
 	public void registerWithFullComplimentOfDispatcherInitParams() {
 		FilterModel fm = new FilterModel(new ContextModel(
-				createMock(HttpContext.class), null, getClass()
+				createMock(WebContainerContext.class), null, getClass()
 				.getClassLoader()), createMock(Filter.class),
 				new String[]{"/*"}, null, new Hashtable<String, String>() {
 			/**
@@ -88,7 +89,7 @@ public class FilterModelTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void registerWithErrorInDispatcherInitParams() {
-		new FilterModel(new ContextModel(createMock(HttpContext.class), null,
+		new FilterModel(new ContextModel(createMock(WebContainerContext.class), null,
 				getClass().getClassLoader()), createMock(Filter.class),
 				new String[]{"/*"}, null, new Hashtable<String, String>() {
 			/**

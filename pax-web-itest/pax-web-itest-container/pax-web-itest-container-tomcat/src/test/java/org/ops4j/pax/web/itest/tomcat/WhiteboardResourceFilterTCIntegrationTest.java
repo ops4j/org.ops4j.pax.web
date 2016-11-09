@@ -62,13 +62,12 @@ public class WhiteboardResourceFilterTCIntegrationTest extends ITestBase {
 	public void setUp() throws Exception {
 		waitForServer("http://127.0.0.1:8282/");
 
-		initServletListener(null);
-
 		Dictionary<String, String> initParams = new Hashtable<>();
 		initParams.put("alias", "/test-resources");
 		service = bundleContext.registerService(Servlet.class,
 				new WhiteboardServlet("/test-resources"), initParams);
 
+		initServletListener();
 		waitForServletListener();
 
 	}

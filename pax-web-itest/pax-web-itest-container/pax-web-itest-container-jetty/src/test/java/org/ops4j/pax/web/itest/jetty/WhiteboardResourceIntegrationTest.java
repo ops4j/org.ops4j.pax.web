@@ -56,18 +56,14 @@ public class WhiteboardResourceIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-
 		DefaultResourceMapping resourceMapping = new DefaultResourceMapping();
 		resourceMapping.setAlias("/whiteboardresources");
 		resourceMapping.setPath("/images");
 		service = bundleContext.registerService(ResourceMapping.class,
 				resourceMapping, null);
 
-//		Dictionary<String, String> initParams = new Hashtable<String, String>();
-//		initParams.put("alias", "/test-resources");
-//		servlet = bundleContext.registerService(Servlet.class,
-//				new WhiteboardServlet("/test-resources"), initParams);
-
+		initServletListener();
+		waitForServletListener();
 	}
 
 	@After

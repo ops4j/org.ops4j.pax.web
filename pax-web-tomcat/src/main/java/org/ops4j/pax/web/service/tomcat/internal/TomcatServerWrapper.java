@@ -76,6 +76,7 @@ import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
@@ -938,6 +939,7 @@ class TomcatServerWrapper implements ServerWrapper {
 		final Bundle bundle = contextModel.getBundle();
 		final BundleContext bundleContext = BundleUtils
 				.getBundleContext(bundle);
+		final WebContainerContext httpContext = contextModel.getHttpContext();
 
 		final Context context = server.addContext(
 				contextModel.getContextParams(),
@@ -949,6 +951,7 @@ class TomcatServerWrapper implements ServerWrapper {
 				contextModel.getVirtualHosts(), null /*contextModel.getConnectors() */,
 				server.getBasedir());
 
+		context.setDisplayName(httpContext.getContextId());
 		context.setParentClassLoader(contextModel.getClassLoader());
 		// TODO: is the context already configured?
 		// TODO: how about security, classloader?
@@ -996,6 +999,7 @@ class TomcatServerWrapper implements ServerWrapper {
 			}
 
 			properties.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
+			properties.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME, context.getServletContext().getServletContextName());
 
 			servletContextService = bundleContext.registerService(
 					ServletContext.class, servletContext, properties);
