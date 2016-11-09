@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -79,15 +78,7 @@ import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.ops4j.pax.web.service.spi.model.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
-import org.ops4j.pax.web.service.whiteboard.ServletMapping;
 import org.ops4j.pax.web.service.whiteboard.WhiteboardElement;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardErrorPage;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardFilter;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardJspMapping;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardListener;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardResource;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardServlet;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardWelcomeFile;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.ops4j.util.property.PropertyResolver;
@@ -96,11 +87,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
-import org.osgi.service.http.runtime.HttpServiceRuntime;
-import org.osgi.service.http.runtime.dto.FilterDTO;
 import org.osgi.service.http.runtime.dto.RequestInfoDTO;
 import org.osgi.service.http.runtime.dto.RuntimeDTO;
-import org.osgi.service.http.runtime.dto.ServletContextDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1352,8 +1340,6 @@ class HttpServiceStarted implements StoppableHttpService {
 		}
 		throw new IllegalStateException(String.format("Service '%s' could not be retrieved!", WhiteboardDtoService.class.getName()));
 	}
-
-
 
 	@Override
 	public String toString() {

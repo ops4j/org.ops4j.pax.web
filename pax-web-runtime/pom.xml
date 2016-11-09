@@ -90,12 +90,12 @@
 							com.sun.el.lang;version="2.1.0"; resolution:=optional,
 							com.sun.el.parser;version="2.1.0"; resolution:=optional,
 							com.sun.el.util;version="2.1.0"; resolution:=optional,
-                                                        org.jasypt.encryption.pbe; resolution:=optional,
-                                                        javax.crypto.spec; resolution:=optional,
+                            org.jasypt.encryption.pbe; resolution:=optional,
+                            javax.crypto.spec; resolution:=optional,
 							javax.crypto; resolution:=optional
 						</Import-Package>
 						<Export-Package>
-							org.osgi.service.http; version="1.2.0"
+							org.osgi.service.http
 						</Export-Package>
 						<Embed-Dependency>*; artifactId=!org.osgi.compendium;
 							scope=compile; type=!pom; inline=true</Embed-Dependency>

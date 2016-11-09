@@ -16,23 +16,33 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import org.ops4j.pax.web.service.whiteboard.*;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.http.runtime.dto.FilterDTO;
-import org.osgi.service.http.runtime.dto.RequestInfoDTO;
-import org.osgi.service.http.runtime.dto.RuntimeDTO;
-import org.osgi.service.http.runtime.dto.ServletContextDTO;
-
-import javax.servlet.ServletContext;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import javax.servlet.ServletContext;
+
+import org.ops4j.pax.web.service.whiteboard.ServletMapping;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardElement;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardErrorPage;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardFilter;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardJspMapping;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardListener;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardResource;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardServlet;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardWelcomeFile;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.http.runtime.dto.FailedServletContextDTO;
+import org.osgi.service.http.runtime.dto.FilterDTO;
+import org.osgi.service.http.runtime.dto.RequestInfoDTO;
+import org.osgi.service.http.runtime.dto.RuntimeDTO;
+import org.osgi.service.http.runtime.dto.ServletContextDTO;
 
 @Component(service = WhiteboardDtoService.class)
 public class WhiteboardDtoService {
@@ -53,11 +63,15 @@ public class WhiteboardDtoService {
 
         RuntimeDTO runtimeDto = new RuntimeDTO();
         List<ServletContextDTO> servletContextDTOs = new ArrayList<>();
-        List<FilterDTO> filterDTOs = new ArrayList<>(); //TODO ...
-
+        List<FailedServletContextDTO> failedServletContextDTOs = new ArrayList<>();
+        List<FilterDTO> filterDTOs = new ArrayList<>(); //TODO ... 
+        
         iterator.forEachRemaining(element -> {
             if (element  instanceof WhiteboardServlet) {
-                servletContextDTOs.add(transformToDTO((WhiteboardServlet)element));
+                if (element.isValid())
+                    servletContextDTOs.add(transformToDTO((WhiteboardServlet)element));
+                else
+                    failedServletContextDTOs.add(transformToDTOFailed((WhiteboardServlet)element));
             } else if (element instanceof WhiteboardFilter) {
                 //TODO: add filter
             } else if (element instanceof WhiteboardErrorPage) {
@@ -122,13 +136,21 @@ public class WhiteboardDtoService {
         //FIXME: not complete
         return dto;
     }
+    
+    private FailedServletContextDTO transformToDTOFailed(WhiteboardServlet whiteBoardServlet) {
+        FailedServletContextDTO dto = new FailedServletContextDTO();
+        
+        dto.contextPath = whiteBoardServlet.getServletMapping().getHttpContextId();
+        
+        return dto;
+    }
 
 
-    protected void addServletContext(ServletContext servletContext) {
+    public void addServletContext(ServletContext servletContext) {
         servletContexts.add(servletContext);
     }
 
-    protected void removeServletContext(ServletContext servletContext) {
+    public void removeServletContext(ServletContext servletContext) {
         servletContexts.remove(servletContext);
     }
 }
