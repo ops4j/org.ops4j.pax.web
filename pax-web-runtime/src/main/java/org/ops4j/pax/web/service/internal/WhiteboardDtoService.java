@@ -44,11 +44,10 @@ import org.osgi.service.http.runtime.dto.RequestInfoDTO;
 import org.osgi.service.http.runtime.dto.RuntimeDTO;
 import org.osgi.service.http.runtime.dto.ServletContextDTO;
 
-@Component(service = WhiteboardDtoService.class)
+@Component(immediate=true, service = WhiteboardDtoService.class)
 public class WhiteboardDtoService {
 
-    @Reference(bind = "addServletContext", unbind = "removeServletContext")
-    private List<ServletContext> servletContexts;
+    private List<ServletContext> servletContexts = new ArrayList<>();
 
     private BundleContext bundleContext;
 
@@ -145,7 +144,7 @@ public class WhiteboardDtoService {
         return dto;
     }
 
-
+    @Reference(unbind = "removeServletContext")
     public void addServletContext(ServletContext servletContext) {
         servletContexts.add(servletContext);
     }
