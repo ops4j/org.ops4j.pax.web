@@ -202,8 +202,7 @@ public class ServiceModel {
 	}
 
 	public synchronized FilterModel removeFilter(final String filterName) {
-		FilterModel filterModel = filterModels.remove(filterName);
-		return filterModel;
+		return filterModels.remove(filterName);
 	}
 
 	public synchronized FilterModel removeFilter(
@@ -293,15 +292,14 @@ public class ServiceModel {
 	public synchronized ContextModel[] getContextModels() {
 		final Collection<ContextModel> contextModelValues = contextModels
 				.values();
-		if (contextModelValues == null || contextModelValues.size() == 0) {
+		if (contextModelValues.size() == 0) {
 			return new ContextModel[0];
 		}
 		return contextModelValues.toArray(new ContextModel[contextModelValues
 				.size()]);
 	}
 
-	public synchronized ContextModel getContextModel(
-			final HttpContext httpContext) {
+	public synchronized ContextModel getContextModel(final HttpContext httpContext) {
 		return contextModels.get(httpContext);
 	}
 
@@ -332,7 +330,7 @@ public class ServiceModel {
 	public synchronized void addWelcomeFileModel(WelcomeFileModel model) {
 		final String key = Arrays.toString(model.getWelcomeFiles()) + "|" + model.getContextModel().getId();
 		if (welcomeFileModels.containsKey(key)) {
-			throw new IllegalArgumentException("Welcom files for [" + model.getWelcomeFiles() + "] already registered.");
+			throw new IllegalArgumentException("Welcome files for [" + Arrays.toString(model.getWelcomeFiles()) + "] already registered.");
 		}
 		welcomeFileModels.put(key, model);
 		addContextModel(model.getContextModel());

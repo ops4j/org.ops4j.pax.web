@@ -58,6 +58,7 @@ import org.ops4j.pax.web.jsp.JspServletWrapper;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.internal.util.SupportUtils;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
@@ -315,12 +316,12 @@ class HttpServiceStarted implements StoppableHttpService {
 	}
 
 	@Override
-	public HttpContext createDefaultHttpContext() {
-		return new DefaultHttpContext(serviceBundle, "default");
+	public WebContainerContext createDefaultHttpContext() {
+		return new DefaultHttpContext(serviceBundle, WebContainerContext.DefaultContextIds.DEFAULT.getValue());
 	}
 
 	@Override
-	public HttpContext createDefaultHttpContext(String contextID) {
+	public WebContainerContext createDefaultHttpContext(String contextID) {
 		return new DefaultHttpContext(serviceBundle, contextID);
 	}
 
@@ -1088,9 +1089,13 @@ class HttpServiceStarted implements StoppableHttpService {
 	}
 
 	private ContextModel getOrCreateContext(final HttpContext httpContext) {
-		HttpContext context = httpContext;
-		if (context == null) {
+		final WebContainerContext context;
+		if (httpContext == null) {
 			context = createDefaultHttpContext();
+		} else if (!(httpContext instanceof WebContainerContext)) {
+			context = new WebContainerContextWrapper(serviceBundle, httpContext);
+		} else {
+			context = (WebContainerContext) httpContext;
 		}
 		serverModel.associateHttpContext(context, serviceBundle,
 				httpContext instanceof SharedWebContainerContext);

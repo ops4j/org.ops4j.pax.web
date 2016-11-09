@@ -39,6 +39,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.util.tracker.ReplaceableSe
 import org.ops4j.pax.web.extender.whiteboard.internal.util.tracker.ReplaceableServiceListener;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.service.whiteboard.WhiteboardElement;
 import org.osgi.framework.Bundle;
@@ -276,7 +277,17 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 		httpContext = httpContextMapping.getHttpContext();
 		if (httpContext == null) {
 			if (servletContextHelper != null) {
-				httpContext = new HttpContext() {
+				httpContext = new WebContainerContext() {
+					@Override
+					public Set<String> getResourcePaths(String name) {
+						return null;
+					}
+
+					@Override
+					public String getContextId() {
+						return httpContextId;
+					}
+
 					@Override
 					public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
 						return servletContextHelper.handleSecurity(request, response);
@@ -308,6 +319,36 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 					httpContext = webContainer.createDefaultHttpContext();
 				}
 			}
+		} else if(!(httpContext instanceof WebContainerContext)){
+			// wrap registered HttpContext in pax-web specific context
+			final HttpContext localHttpContext = httpContext;
+			httpContext = new WebContainerContext() {
+				@Override
+				public Set<String> getResourcePaths(String name) {
+					// FIXME check if this is valid for plain HttpContext-registrations
+					return null;
+				}
+
+				@Override
+				public String getContextId() {
+					return httpContextId;
+				}
+
+				@Override
+				public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+					return localHttpContext.handleSecurity(request, response);
+				}
+
+				@Override
+				public URL getResource(String name) {
+					return localHttpContext.getResource(name);
+				}
+
+				@Override
+				public String getMimeType(String name) {
+					return localHttpContext.getMimeType(name);
+				}
+			};
 		}
 	}
 

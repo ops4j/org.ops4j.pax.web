@@ -56,7 +56,6 @@ import org.eclipse.jetty.server.HandlerContainer;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.SessionIdManager;
-import org.eclipse.jetty.server.SessionManager;
 import org.eclipse.jetty.server.session.AbstractSessionManager;
 import org.eclipse.jetty.server.session.JDBCSessionIdManager;
 import org.eclipse.jetty.server.session.JDBCSessionManager;
@@ -67,7 +66,6 @@ import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
-import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
@@ -111,7 +109,7 @@ class HttpServiceContext extends ServletContextHandler {
 			final Map<String, String> initParams,
 			final Map<String, Object> attributes,
 			final String contextName,
-			final HttpContext httpContext,
+			final WebContainerContext httpContext,
 			final AccessControlContext accessControllerContext,
 			final Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers,
 			URL jettyWebXmlUrl, List<String> virtualHosts) {
@@ -122,7 +120,7 @@ class HttpServiceContext extends ServletContextHandler {
 		this.attributes = attributes;
 		this.httpContext = httpContext;
 		this.accessControllerContext = accessControllerContext;
-		setDisplayName(httpContext instanceof WebContainerContext ? ((WebContainerContext) httpContext).getContextId() : contextName);
+		setDisplayName(httpContext.getContextId());
 		this.servletContainerInitializers = containerInitializers != null ? containerInitializers
 				: new HashMap<>();
 		this.virtualHosts = new ArrayList<>(virtualHosts);
@@ -185,8 +183,7 @@ class HttpServiceContext extends ServletContextHandler {
 
 		if (servletContainerInitializers != null) {
 
-			List<ServletContainerInitializer> list = servletContainerInitializers.entrySet().stream().sorted((entry1, entry2) ->
-					{
+			List<ServletContainerInitializer> list = servletContainerInitializers.entrySet().stream().sorted((entry1, entry2) -> {
 						String name1 = entry1.getKey().getClass().getName();
 						String name2 = entry2.getKey().getClass().getName();
 
@@ -199,7 +196,7 @@ class HttpServiceContext extends ServletContextHandler {
 						}
 						return name1.compareTo(name2);
 					}
-			).map(e -> e.getKey()).collect(Collectors.toList());
+			).map(Entry::getKey).collect(Collectors.toList());
 
 			list.forEach(initializer -> {
 				try {
@@ -449,7 +446,7 @@ class HttpServiceContext extends ServletContextHandler {
 		String webContextPath = getContextPath();
 		if (webContextPath != null && !webContextPath.startsWith("/")) {
 			webContextPath = "/" + webContextPath;
-		}else if(webContextPath == null){
+		} else if (webContextPath == null) {
 			LOG.warn(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH +
 					" couldn't be set, it's not configured. Assuming '/'");
 			webContextPath = "/";

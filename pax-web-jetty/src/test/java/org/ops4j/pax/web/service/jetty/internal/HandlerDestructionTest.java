@@ -23,15 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.security.cert.X509Certificate;
-import java.util.Collection;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
+import java.util.*;
 
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletRequest;
@@ -40,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.util.component.Container;
 import org.junit.Test;
+import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
@@ -72,7 +65,17 @@ public class HandlerDestructionTest {
 		JettyServerWrapper container = server.getServer();
 		container.addBean(listener);
 
-		HttpContext httpContext = new HttpContext() {
+		WebContainerContext httpContext = new WebContainerContext() {
+			@Override
+			public Set<String> getResourcePaths(String name) {
+				return Collections.emptySet();
+			}
+
+			@Override
+			public String getContextId() {
+				return "test";
+			}
+
 			public boolean handleSecurity(HttpServletRequest request,
 										  HttpServletResponse response) throws IOException {
 				return false;
@@ -91,55 +94,46 @@ public class HandlerDestructionTest {
 
 			@Override
 			public int compareTo(Bundle arg0) {
-				// TODO Auto-generated method stub
 				return 0;
 			}
 
 			@Override
 			public int getState() {
-				// TODO Auto-generated method stub
 				return 0;
 			}
 
 			@Override
 			public void start(int options) throws BundleException {
-				// TODO Auto-generated method stub
 
 			}
 
 			@Override
 			public void start() throws BundleException {
-				// TODO Auto-generated method stub
 
 			}
 
 			@Override
 			public void stop(int options) throws BundleException {
-				// TODO Auto-generated method stub
 
 			}
 
 			@Override
 			public void stop() throws BundleException {
-				// TODO Auto-generated method stub
 
 			}
 
 			@Override
 			public void update(InputStream input) throws BundleException {
-				// TODO Auto-generated method stub
 
 			}
 
 			@Override
 			public void update() throws BundleException {
-				// TODO Auto-generated method stub
 
 			}
 
 			@Override
 			public void uninstall() throws BundleException {
-				// TODO Auto-generated method stub
 
 			}
 
@@ -157,37 +151,31 @@ public class HandlerDestructionTest {
 
 			@Override
 			public String getLocation() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
 			public ServiceReference<?>[] getRegisteredServices() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
 			public ServiceReference<?>[] getServicesInUse() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
 			public boolean hasPermission(Object permission) {
-				// TODO Auto-generated method stub
 				return false;
 			}
 
 			@Override
 			public URL getResource(String name) {
-				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
 			public Dictionary<String, String> getHeaders(String locale) {
-				// TODO Auto-generated method stub
 				return null;
 			}
 
@@ -199,39 +187,33 @@ public class HandlerDestructionTest {
 			@Override
 			public Class<?> loadClass(String name)
 					throws ClassNotFoundException {
-				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
 			public Enumeration<URL> getResources(String name)
 					throws IOException {
-				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
 			public Enumeration<String> getEntryPaths(String path) {
-				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
 			public URL getEntry(String path) {
-				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
 			public long getLastModified() {
-				// TODO Auto-generated method stub
 				return 0;
 			}
 
 			@Override
 			public Enumeration<URL> findEntries(String path,
 												String filePattern, boolean recurse) {
-				// TODO Auto-generated method stub
 				return null;
 			}
 
@@ -242,27 +224,23 @@ public class HandlerDestructionTest {
 					@Override
 					public boolean ungetService(
 							ServiceReference<?> reference) {
-						// TODO Auto-generated method stub
 						return false;
 					}
 
 					@Override
 					public void removeServiceListener(
 							ServiceListener listener) {
-						// TODO Auto-generated method stub
 
 					}
 
 					@Override
 					public void removeFrameworkListener(
 							FrameworkListener listener) {
-						// TODO Auto-generated method stub
 
 					}
 
 					@Override
 					public void removeBundleListener(BundleListener listener) {
-						// TODO Auto-generated method stub
 
 					}
 
@@ -270,7 +248,6 @@ public class HandlerDestructionTest {
 					public <S> ServiceRegistration<S> registerService(
 							Class<S> clazz, S service,
 							Dictionary<String, ?> properties) {
-						// TODO Auto-generated method stub
 						return null;
 					}
 
@@ -278,7 +255,6 @@ public class HandlerDestructionTest {
 					public ServiceRegistration<?> registerService(
 							String clazz, Object service,
 							Dictionary<String, ?> properties) {
-						// TODO Auto-generated method stub
 						return null;
 					}
 
@@ -286,21 +262,18 @@ public class HandlerDestructionTest {
 					public ServiceRegistration<?> registerService(
 							String[] clazzes, Object service,
 							Dictionary<String, ?> properties) {
-						// TODO Auto-generated method stub
 						return null;
 					}
 
 					@Override
 					public Bundle installBundle(String location,
 												InputStream input) throws BundleException {
-						// TODO Auto-generated method stub
 						return null;
 					}
 
 					@Override
 					public Bundle installBundle(String location)
 							throws BundleException {
-						// TODO Auto-generated method stub
 						return null;
 					}
 
@@ -308,7 +281,6 @@ public class HandlerDestructionTest {
 					public <S> Collection<ServiceReference<S>> getServiceReferences(
 							Class<S> clazz, String filter)
 							throws InvalidSyntaxException {
-						// TODO Auto-generated method stub
 						return null;
 					}
 
@@ -316,63 +288,53 @@ public class HandlerDestructionTest {
 					public ServiceReference<?>[] getServiceReferences(
 							String clazz, String filter)
 							throws InvalidSyntaxException {
-						// TODO Auto-generated method stub
 						return null;
 					}
 
 					@Override
 					public <S> ServiceReference<S> getServiceReference(
 							Class<S> clazz) {
-						// TODO Auto-generated method stub
 						return null;
 					}
 
 					@Override
 					public ServiceReference<?> getServiceReference(
 							String clazz) {
-						// TODO Auto-generated method stub
 						return null;
 					}
 
 					@Override
 					public <S> S getService(ServiceReference<S> reference) {
-						// TODO Auto-generated method stub
 						return null;
 					}
 
 					@Override
 					public String getProperty(String key) {
-						// TODO Auto-generated method stub
 						return null;
 					}
 
 					@Override
 					public File getDataFile(String filename) {
-						// TODO Auto-generated method stub
 						return null;
 					}
 
 					@Override
 					public Bundle[] getBundles() {
-						// TODO Auto-generated method stub
 						return null;
 					}
 
 					@Override
 					public Bundle getBundle(String location) {
-						// TODO Auto-generated method stub
 						return null;
 					}
 
 					@Override
 					public Bundle getBundle(long id) {
-						// TODO Auto-generated method stub
 						return null;
 					}
 
 					@Override
 					public Bundle getBundle() {
-						// TODO Auto-generated method stub
 						return null;
 					}
 
@@ -380,14 +342,12 @@ public class HandlerDestructionTest {
 					public ServiceReference<?>[] getAllServiceReferences(
 							String clazz, String filter)
 							throws InvalidSyntaxException {
-						// TODO Auto-generated method stub
 						return null;
 					}
 
 					@Override
 					public Filter createFilter(String filter)
 							throws InvalidSyntaxException {
-						// TODO Auto-generated method stub
 						return null;
 					}
 
@@ -395,39 +355,33 @@ public class HandlerDestructionTest {
 					public void addServiceListener(
 							ServiceListener listener, String filter)
 							throws InvalidSyntaxException {
-						// TODO Auto-generated method stub
 
 					}
 
 					@Override
 					public void addServiceListener(ServiceListener listener) {
-						// TODO Auto-generated method stub
 
 					}
 
 					@Override
 					public void addFrameworkListener(
 							FrameworkListener listener) {
-						// TODO Auto-generated method stub
 
 					}
 
 					@Override
 					public void addBundleListener(BundleListener listener) {
-						// TODO Auto-generated method stub
 
 					}
 
 					@Override
 					public <S> ServiceRegistration<S> registerService(Class<S> clazz, ServiceFactory<S> factory,
 																	  Dictionary<String, ?> properties) {
-						// TODO Auto-generated method stub
 						return null;
 					}
 
 					@Override
 					public <S> ServiceObjects<S> getServiceObjects(ServiceReference<S> reference) {
-						// TODO Auto-generated method stub
 						return null;
 					}
 				};
@@ -436,25 +390,21 @@ public class HandlerDestructionTest {
 			@Override
 			public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(
 					int signersType) {
-				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
 			public Version getVersion() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
 			public <A> A adapt(Class<A> type) {
-				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
 			public File getDataFile(String filename) {
-				// TODO Auto-generated method stub
 				return null;
 			}
 		};

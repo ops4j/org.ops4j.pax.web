@@ -939,7 +939,7 @@ class TomcatServerWrapper implements ServerWrapper {
 		final Bundle bundle = contextModel.getBundle();
 		final BundleContext bundleContext = BundleUtils
 				.getBundleContext(bundle);
-		final HttpContext httpContext = contextModel.getHttpContext();
+		final WebContainerContext httpContext = contextModel.getHttpContext();
 
 		final Context context = server.addContext(
 				contextModel.getContextParams(),
@@ -951,7 +951,7 @@ class TomcatServerWrapper implements ServerWrapper {
 				contextModel.getVirtualHosts(), null /*contextModel.getConnectors() */,
 				server.getBasedir());
 
-		context.setDisplayName(httpContext instanceof WebContainerContext ? ((WebContainerContext) httpContext).getContextId() : contextModel.getContextName());
+		context.setDisplayName(httpContext.getContextId());
 		context.setParentClassLoader(contextModel.getClassLoader());
 		// TODO: is the context already configured?
 		// TODO: how about security, classloader?

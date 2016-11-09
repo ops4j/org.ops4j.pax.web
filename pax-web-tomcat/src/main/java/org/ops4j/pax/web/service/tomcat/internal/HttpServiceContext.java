@@ -98,7 +98,7 @@ public class HttpServiceContext extends StandardContext {
 
 			// FIX start PAXWEB-233
 			final String p;
-			if (path != null && path.endsWith("/") && path.length() > 1) {
+			if (path.endsWith("/") && path.length() > 1) {
 				p = path.substring(0, path.length() - 1);
 			} else {
 				p = path;
@@ -159,49 +159,45 @@ public class HttpServiceContext extends StandardContext {
 		// javax.servlet.ServletContext interface
 		@Override
 		public Set<String> getResourcePaths(final String path) {
-			if (httpContext instanceof WebContainerContext) {
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("getting resource paths for : [" + path + "]");
-				}
-				try {
-					final Set<String> paths = AccessController.doPrivileged(
-							new PrivilegedExceptionAction<Set<String>>() {
-								@Override
-								public Set<String> run() throws Exception {
-									return ((WebContainerContext) httpContext)
-											.getResourcePaths(path);
-								}
-							}, accessControllerContext);
-					if (paths == null) {
-						return null;
-					}
-					// Servlet specs mandates that the paths must start with an
-					// slash "/"
-					final Set<String> slashedPaths = new HashSet<>();
-					for (String foundPath : paths) {
-						if (foundPath != null) {
-							if (foundPath.trim().startsWith("/")) {
-								slashedPaths.add(foundPath.trim());
-							} else {
-								slashedPaths.add("/" + foundPath.trim());
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("getting resource paths for : [" + path + "]");
+			}
+			try {
+				final Set<String> paths = AccessController.doPrivileged(
+						new PrivilegedExceptionAction<Set<String>>() {
+							@Override
+							public Set<String> run() throws Exception {
+								return ((WebContainerContext) httpContext)
+										.getResourcePaths(path);
 							}
-						}
-					}
-					if (LOG.isDebugEnabled()) {
-						LOG.debug("found resource paths: " + paths);
-					}
-					return slashedPaths;
-				} catch (PrivilegedActionException e) {
-					LOG.warn("Unauthorized access: " + e.getMessage());
+						}, accessControllerContext);
+				if (paths == null) {
 					return null;
 				}
-			} else {
-				return super.getResourcePaths(path);
+				// Servlet specs mandates that the paths must start with an
+				// slash "/"
+				final Set<String> slashedPaths = new HashSet<>();
+				for (String foundPath : paths) {
+					if (foundPath != null) {
+						if (foundPath.trim().startsWith("/")) {
+							slashedPaths.add(foundPath.trim());
+						} else {
+							slashedPaths.add("/" + foundPath.trim());
+						}
+					}
+				}
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("found resource paths: " + paths);
+				}
+				return slashedPaths;
+			} catch (PrivilegedActionException e) {
+				LOG.warn("Unauthorized access: " + e.getMessage());
+				return null;
 			}
 		}
 	}
 
-	private HttpContext httpContext;
+	private WebContainerContext httpContext;
 
 	/**
 	 * Access controller context of the bundle that registred the http context.
@@ -216,7 +212,7 @@ public class HttpServiceContext extends StandardContext {
 		this.accessControllerContext = accessControllerContext;
 	}
 
-	public void setHttpContext(HttpContext httpContext) {
+	public void setHttpContext(WebContainerContext httpContext) {
 		this.httpContext = httpContext;
 	}
 
