@@ -43,6 +43,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.servlet.Filter;
@@ -91,8 +92,11 @@ import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.ops4j.util.property.PropertyResolver;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
+import org.osgi.service.http.runtime.HttpServiceRuntime;
 import org.osgi.service.http.runtime.dto.FilterDTO;
 import org.osgi.service.http.runtime.dto.RequestInfoDTO;
 import org.osgi.service.http.runtime.dto.RuntimeDTO;
@@ -1317,51 +1321,37 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	@Override
 	public RequestInfoDTO calculateRequestInfoDTO(Iterator<WhiteboardElement> iterator) {
-		// FIXME TBD
-		return new RequestInfoDTO();
+		return withWhiteboardDtoService(service -> service.calculateRequestInfoDTO(iterator));
 	}
 
 	@Override
 	public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator) {
-		// FIXME not complete
-
-	    RuntimeDTO runtimeDto = new RuntimeDTO();
-	    List<ServletContextDTO> servletContextDTOs = new ArrayList<>();
-	    List<FilterDTO> filterDTOs = new ArrayList<>(); //TODO ...
-
-        iterator.forEachRemaining(element -> {
-            if (element  instanceof WhiteboardServlet) {
-                servletContextDTOs.add(transformToDTO((WhiteboardServlet)element));
-            } else if (element instanceof WhiteboardFilter) {
-                //TODO: add filter
-            } else if (element instanceof WhiteboardErrorPage) {
-                //TODO: add error pages
-            } else if (element instanceof WhiteboardJspMapping) {
-                //TODO: add jsp mappings
-            } else if (element instanceof WhiteboardListener) {
-                //TODO: add Listeners
-            } else if (element instanceof WhiteboardResource) {
-                //TODO: add resources
-            } else if (element instanceof WhiteboardWelcomeFile) {
-                //TODO: add welcomefiles
-            }
-        });
-
-        return runtimeDto;
+		return withWhiteboardDtoService(service -> service.createWhiteboardRuntimeDTO(iterator));
 	}
 
-	private ServletContextDTO transformToDTO(WhiteboardServlet whiteBoardServlet) {
-        ServletContextDTO dto = new ServletContextDTO();
+	/**
+	 * WhiteboardDtoService is registered as DS component. Should be removed if this class gets full DS support
+	 * @param function a function which is applied against WhiteboardDtoService
+	 * @param <T> Type of the functions return value
+	 * @return value provided by given function
+	 */
+	private <T> T withWhiteboardDtoService(Function<WhiteboardDtoService, T> function){
+		final BundleContext bundleContext = serviceBundle.getBundleContext();
+		ServiceReference<WhiteboardDtoService> ref = bundleContext.getServiceReference(WhiteboardDtoService.class);
+		if(ref != null){
+			WhiteboardDtoService service = bundleContext.getService(ref);
+			if(service != null){
+				try{
+					return function.apply(service);
+				}finally {
+					bundleContext.ungetService(ref);
+				}
+			}
+		}
+		throw new IllegalStateException(String.format("Service '%s' could not be retrieved!", WhiteboardDtoService.class.getName()));
+	}
 
-        ServletMapping servletMapping = whiteBoardServlet.getServletMapping();
 
-        dto.contextPath = servletMapping.getHttpContextId();
-        dto.name = servletMapping.getServletName();
-        dto.initParams = servletMapping.getInitParams();
-
-        //FIXME: not complete
-        return dto;
-    }
 
 	@Override
 	public String toString() {
