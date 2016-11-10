@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component(
-        service = Servlet.class,
+        service = {Servlet.class, WhiteboardServletWithContext.class}, // WhiteboardServletWithContext only for testing
         scope = ServiceScope.PROTOTYPE,
         property = {
                 HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN + "=/servlet",

@@ -15,32 +15,41 @@
  */
 package org.ops4j.pax.web.itest.jetty;
 
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.web.itest.base.assertion.Assert.*;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME;
 
 
 import javax.inject.Inject;
+import javax.servlet.ServletContext;
 
+import org.eclipse.jetty.servlet.DefaultServlet;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.util.Filter;
+
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
+import org.ops4j.pax.web.samples.whiteboard.ds.*;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.runtime.HttpServiceRuntime;
-import org.osgi.service.http.runtime.dto.RequestInfoDTO;
-import org.osgi.service.http.runtime.dto.RuntimeDTO;
+import org.osgi.service.http.runtime.dto.*;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -120,12 +129,73 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 		return result;
 	}
 
-
+	/**
+	 * Tests the DTO structure for the Whiteboard-Services registered by sample whiteboard-ds
+	 */
 	@Test
 	public void testRuntimeDto() throws Exception {
 		RuntimeDTO runtimeDTO = withService(HttpServiceRuntime::getRuntimeDTO);
-		// FIXME evaluate
 
+		// prepare ServiceIDs for comparrison
+		final long servletServiceId = (Long)bundleContext.getServiceReference(WhiteboardServlet.class).getProperty(Constants.SERVICE_ID);
+		final long servletWithContextServiceId = (Long)bundleContext.getServiceReference(WhiteboardServletWithContext.class).getProperty(Constants.SERVICE_ID);
+		final long defaultContextServiceId = (Long)bundleContext.getServiceReferences(ServletContext.class, "(" + WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME + "=default)").stream().findFirst().orElseThrow(() -> new AssertionError("Default ServletContext not found")).getProperty(Constants.SERVICE_ID);
+		final long customContextServiceId = (Long)bundleContext.getServiceReference(WhiteboardContext.class).getProperty(Constants.SERVICE_ID);
+		final long filterServiceId = (Long)bundleContext.getServiceReference(WhiteboardFilter.class).getProperty(Constants.SERVICE_ID);
+		final long listenerServiceId = (Long)bundleContext.getServiceReference(WhiteboardListener.class).getProperty(Constants.SERVICE_ID);
+		final long resourceServiceId = (Long)bundleContext.getServiceReference(WhiteboardResource.class).getProperty(Constants.SERVICE_ID);
+		final long errorPageServiceId = (Long)bundleContext.getServiceReference(WhiteboardErrorPage.class).getProperty(Constants.SERVICE_ID);
+
+
+		assertThat("ServletContextDTOs must be available", runtimeDTO.servletContextDTOs, servletContextDTOs -> servletContextDTOs.length == 2);
+
+		Optional<ServletContextDTO> defaultContext = Arrays.stream(runtimeDTO.servletContextDTOs)
+				.filter(servletContextDTO -> Objects.equals(servletContextDTO.contextPath, "/"))
+				.findFirst();
+		Optional<ServletContextDTO> customContext = Arrays.stream(runtimeDTO.servletContextDTOs)
+				.filter(servletContextDTO -> Objects.equals(servletContextDTO.contextPath, "/custom"))
+				.findFirst();
+
+		// Test all under Default-ServletContext
+		if(!defaultContext.isPresent()){
+			fail("DefaultContext not found");
+		}else{
+			assertThat("ServletContextDTO for DefaultServletContext doesnt match!", defaultContext.get(), servletContextDTO -> Objects.equals(servletContextDTO.name, "Default"));
+			assertThat("ServletDTO for WhiteboardServlet doesnt match!", defaultContext.get().servletDTOs[0], servletDTO ->
+					Objects.equals(servletDTO.name, "SimpleServlet")
+							&& Objects.equals(servletDTO.patterns[0], "/simple-servlet")
+							&& servletDTO.serviceId == servletServiceId
+							&& servletDTO.servletContextId == defaultContextServiceId);
+			assertThat("FilterDTO for WhiteboardFilter doesnt match!", defaultContext.get().filterDTOs[0], filterDTO ->
+					filterDTO.serviceId == filterServiceId
+							&& filterDTO.servletContextId == defaultContextServiceId);
+			assertThat("ResourceDTO for WhiteboardResource doesnt match!", defaultContext.get().resourceDTOs[0], resourceDTO ->
+					resourceDTO.serviceId == resourceServiceId
+							&& Objects.equals(resourceDTO.prefix, "/www")
+							&& Objects.equals(resourceDTO.patterns[0], "/resources")
+							&& resourceDTO.servletContextId == defaultContextServiceId);
+			assertThat("ErrorPageDTO for WhiteboardErrorPage doesnt match!", defaultContext.get().errorPageDTOs[0], errorPageDTO ->
+					errorPageDTO.serviceId == errorPageServiceId
+							&& Objects.equals(errorPageDTO.exceptions[0], "java.io.IOException")
+							&& errorPageDTO.errorCodes[0] == 404
+							&& errorPageDTO.servletContextId == defaultContextServiceId);
+		}
+		// Test all under Custom-ServletContext
+		if(!customContext.isPresent()){
+			fail("CustomContext not found");
+		}else{
+			assertThat("ServletContextDTO for WhiteboardContext doesnt match!", customContext.get(), servletContextDTO ->
+					Objects.equals(servletContextDTO.name, "CustomContext")
+							&& servletContextDTO.serviceId == customContextServiceId);
+			assertThat("ServletDTO for WhiteboardServletWithContext doesnt match!", customContext.get().servletDTOs[0], servletDTO ->
+					Objects.equals(servletDTO.name, "ServletWithContext")
+							&& Objects.equals(servletDTO.patterns[0], "/servlet")
+							&& servletDTO.serviceId == servletWithContextServiceId
+							&& servletDTO.servletContextId == customContextServiceId);
+			assertThat("ListenerDTO for WhiteboardListener doesnt match!", customContext.get().listenerDTOs[0], listenerDTO ->
+					listenerDTO.serviceId == listenerServiceId
+							&& listenerDTO.servletContextId == customContextServiceId);
+		}
 	}
 
 

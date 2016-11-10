@@ -28,6 +28,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 @Component(
         scope = ServiceScope.PROTOTYPE,
+        service = {Filter.class, WhiteboardFilter.class}, // WhiteboardFilter only for testing
         property = {
                 HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN + "=/simple-servlet",
                 HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME + "=SimpleFilter"

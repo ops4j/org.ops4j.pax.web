@@ -28,7 +28,7 @@ import org.osgi.service.component.annotations.ServiceScope;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 @Component(
-        service = Servlet.class,
+        service = {Servlet.class, WhiteboardErrorPage.class}, // WhiteboardErrorPage only for testing
         scope = ServiceScope.PROTOTYPE,
         property = {
                 HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE + "=java.io.IOException",

@@ -25,7 +25,7 @@ import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
 
 @Component(
-        service = {ServletRequestListener.class, WhiteboardListener.class }, // second registration only for testing
+        service = {ServletRequestListener.class, WhiteboardListener.class }, // WhiteboardListener only for testing
         property = {
                 HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER + "=true",
                 HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT + "=(osgi.http.whiteboard.context.name=CustomContext)"

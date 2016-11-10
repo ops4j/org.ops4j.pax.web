@@ -20,7 +20,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 @Component(
-        service = Object.class,
+        service = {Object.class, WhiteboardResource.class}, // WhiteboardResource only for testing
         property = {
                 HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN + "=/resources",
                 HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX + "=/www"

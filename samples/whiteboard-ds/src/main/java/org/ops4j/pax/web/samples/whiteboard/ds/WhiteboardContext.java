@@ -21,7 +21,7 @@ import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 @Component(
-        service = ServletContextHelper.class,
+        service = {ServletContextHelper.class, WhiteboardContext.class}, // WhiteboardContext only for testing
         scope = ServiceScope.BUNDLE,
         property = {
                 HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH + "=/context", 

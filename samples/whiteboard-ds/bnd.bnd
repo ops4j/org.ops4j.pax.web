@@ -16,3 +16,5 @@ Bundle-Name: ${project.name}
 Bundle-Description: ${project.description}
 Include-Resource: src/main/resources
 -dsannotations: *
+# Export only necessary for integration-test in pax-web
+Export-Package: org.ops4j.pax.web.samples.whiteboard.ds
