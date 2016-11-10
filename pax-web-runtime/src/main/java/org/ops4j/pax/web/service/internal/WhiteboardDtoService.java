@@ -35,9 +35,7 @@ import org.ops4j.pax.web.service.whiteboard.WhiteboardResource;
 import org.ops4j.pax.web.service.whiteboard.WhiteboardServlet;
 import org.ops4j.pax.web.service.whiteboard.WhiteboardWelcomeFile;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.*;
 import org.osgi.service.http.runtime.dto.FailedServletContextDTO;
 import org.osgi.service.http.runtime.dto.FilterDTO;
 import org.osgi.service.http.runtime.dto.RequestInfoDTO;
@@ -47,7 +45,7 @@ import org.osgi.service.http.runtime.dto.ServletContextDTO;
 @Component(immediate=true, service = WhiteboardDtoService.class)
 public class WhiteboardDtoService {
 
-    private List<ServletContext> servletContexts = new ArrayList<>();
+    private volatile List<ServletContext> servletContexts = new ArrayList<>();
 
     private BundleContext bundleContext;
 
@@ -144,7 +142,7 @@ public class WhiteboardDtoService {
         return dto;
     }
 
-    @Reference(unbind = "removeServletContext")
+    @Reference(unbind = "removeServletContext", service = ServletContext.class, cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addServletContext(ServletContext servletContext) {
         servletContexts.add(servletContext);
     }
