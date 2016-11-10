@@ -184,11 +184,11 @@ public class WhiteboardDtoService {
     }
 
     @Reference(unbind = "removeServletContext", service = ServletContext.class, cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    public void addServletContext(ServiceReference<ServletContext> ref, ServletContext servletContext) {
+    protected void addServletContext(ServiceReference<ServletContext> ref, ServletContext servletContext) {
         servletContexts.put(ref, servletContext);
     }
 
-    public void removeServletContext(ServiceReference<ServletContext> ref, ServletContext servletContext) {
+    protected void removeServletContext(ServiceReference<ServletContext> ref, ServletContext servletContext) {
         servletContexts.remove(ref);
     }
 }
