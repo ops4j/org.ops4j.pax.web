@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service.internal;
 
 import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -39,7 +40,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.*;
 import org.osgi.service.http.runtime.dto.*;
 
-@Component(immediate=true, service = WhiteboardDtoService.class)
+@Component(immediate = true, service = WhiteboardDtoService.class)
 public class WhiteboardDtoService {
 
     private volatile Map<ServiceReference<ServletContext>, ServletContext> servletContexts = new ConcurrentHashMap<>(5);
@@ -51,7 +52,6 @@ public class WhiteboardDtoService {
         this.bundleContext = bundleContext;
     }
 
-
     public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator) {
         // FIXME not complete
 
@@ -60,7 +60,9 @@ public class WhiteboardDtoService {
         List<FailedServletContextDTO> failedServletContextDTOs = new ArrayList<>();
         List<ServletDTO> servletDTOs = new ArrayList<>();
         List<FailedServletDTO> failedServletDTOs = new ArrayList<>();
-        List<FilterDTO> filterDTOs = new ArrayList<>(); //TODO ... 
+        List<FilterDTO> filterDTOs = new ArrayList<>(); 
+        List<FailedFilterDTO> failedFilterDTOs = new ArrayList<>();
+        //FIXME: more lists ... 
 
         runtimeDto.servletContextDTOs = this.servletContexts.entrySet().stream()
                 .map(this::transformToDTO)
@@ -69,12 +71,17 @@ public class WhiteboardDtoService {
 
         iterator.forEachRemaining(element -> {
             if (element  instanceof WhiteboardServlet) {
-                if (element.isValid())
+                if (element.isValid()) {
                     servletDTOs.add(transformToDTO((WhiteboardServlet)element));
-                else
+                } else {
                     failedServletDTOs.add(transformToDTOFailed((WhiteboardServlet)element));
+                }
             } else if (element instanceof WhiteboardFilter) {
-                //TODO: add filter
+                if (element.isValid()) {
+                    filterDTOs.add(transformToDTO((WhiteboardFilter)element));
+                } else {
+                    failedFilterDTOs.add(transformToDTOFailed((WhiteboardFilter)element));
+                }
             } else if (element instanceof WhiteboardErrorPage) {
                 //TODO: add error pages
             } else if (element instanceof WhiteboardJspMapping) {
@@ -94,9 +101,16 @@ public class WhiteboardDtoService {
                     .filter(servletDTO -> servletDTO.servletContextId == servletContextDTO.serviceId)
                     .toArray(ServletDTO[]::new);
         });
+        
+        Arrays.stream(runtimeDto.servletContextDTOs).forEach(servletContextDTO -> {
+            servletContextDTO.filterDTOs = filterDTOs.stream()
+                    .filter(filterDTO -> filterDTO.servletContextId == servletContextDTO.serviceId)
+                    .toArray(FilterDTO[]::new);
+        });
 
         runtimeDto.failedServletContextDTOs = failedServletContextDTOs.stream().toArray(FailedServletContextDTO[]::new);
         runtimeDto.failedServletDTOs = failedServletDTOs.stream().toArray(FailedServletDTO[]::new);
+        runtimeDto.failedFilterDTOs = failedFilterDTOs.stream().toArray(FailedFilterDTO[]::new);
 
         return runtimeDto;
     }
@@ -105,82 +119,102 @@ public class WhiteboardDtoService {
         // FIXME TBD
         return null;
     }
-
-
+    
     private ServletContextDTO transformToDTO(Map.Entry<ServiceReference<ServletContext>, ServletContext> mapEntry) {
         final ServiceReference<ServletContext> ref = mapEntry.getKey();
         final ServletContext servletContext = mapEntry.getValue();
 
         ServletContextDTO dto = new ServletContextDTO();
         dto.serviceId = (long) ref.getProperty(Constants.SERVICE_ID);
-        // the actual ServletContext might use "" instead of "/" (depends on the container). DTO must use "/" for root
+        // the actual ServletContext might use "" instead of "/" (depends on the
+        // container). DTO must use "/" for root
         dto.contextPath = servletContext.getContextPath().trim().length() == 0 ? "/" : servletContext.getContextPath();
         dto.name = servletContext.getServletContextName();
 
-        dto.attributes = Collections.list(servletContext.getAttributeNames())
-                .stream()
+        dto.attributes = Collections.list(servletContext.getAttributeNames()).stream()
                 .map(name -> new SimpleEntry(name, servletContext.getAttribute(name)))
-                .collect(
-                        Collectors.toMap(
-                                entry -> entry.getKey().toString(),
-                                entry -> entry.getValue()
-                        )
-                );
-        dto.initParams = Collections.list(servletContext.getInitParameterNames())
-                .stream()
-                .map(name -> new SimpleEntry( name, servletContext.getInitParameter(name) ) )
-                .collect(
-                        Collectors.toMap(
-                                entry -> entry.getKey().toString(),
-                                entry -> entry.getValue().toString()
-                        )
-                );
+                .collect(Collectors.toMap(entry -> entry.getKey().toString(), entry -> entry.getValue()));
+        dto.initParams = Collections.list(servletContext.getInitParameterNames()).stream()
+                .map(name -> new SimpleEntry(name, servletContext.getInitParameter(name)))
+                .collect(Collectors.toMap(entry -> entry.getKey().toString(), entry -> entry.getValue().toString()));
 
         return dto;
     }
-
 
     private ServletDTO transformToDTO(WhiteboardServlet whiteBoardServlet) {
         ServletDTO dto = new ServletDTO();
 
         ServletMapping servletMapping = whiteBoardServlet.getServletMapping();
 
-        Optional<Map.Entry<ServiceReference<ServletContext>, ServletContext>> matchingServletContextEntry =
-                findMatchingServletContext(servletMapping.getHttpContextId());
+        Optional<Map.Entry<ServiceReference<ServletContext>, ServletContext>> matchingServletContextEntry = findMatchingServletContext(
+                servletMapping.getHttpContextId());
 
         if (matchingServletContextEntry.isPresent()) {
             dto.servletContextId = (long) matchingServletContextEntry.get().getKey().getProperty(Constants.SERVICE_ID);
-        }else{
+        } else {
             // FIXME something wrong...what to do
         }
         dto.serviceId = whiteBoardServlet.getServiceID();
         dto.name = servletMapping.getServletName();
         dto.initParams = servletMapping.getInitParams();
 
-        //FIXME: not complete
-        return dto;
-    }
-    
-    private FailedServletDTO transformToDTOFailed(WhiteboardServlet whiteBoardServlet) {
-        FailedServletDTO dto = new FailedServletDTO();
-
-        dto.serviceId = whiteBoardServlet.getServiceID();
-
         // FIXME: not complete
         return dto;
     }
 
-    private Optional<Map.Entry<ServiceReference<ServletContext>, ServletContext>> findMatchingServletContext(String httpContextId){
+    private FilterDTO transformToDTO(WhiteboardFilter whiteboardFilter) {
+        FilterDTO dto = new FilterDTO();
+        dto.asyncSupported = whiteboardFilter.getFilterMapping().getAsyncSupported(); 
+        dto.initParams = whiteboardFilter.getFilterMapping().getInitParams();
+        dto.patterns = whiteboardFilter.getFilterMapping().getUrlPatterns();
+        dto.servletNames = whiteboardFilter.getFilterMapping().getServletNames();
+        dto.serviceId = whiteboardFilter.getServiceID();
+        
+        Optional<Map.Entry<ServiceReference<ServletContext>, ServletContext>> matchingServletContextEntry = findMatchingServletContext(
+                whiteboardFilter.getFilterMapping().getHttpContextId());
+
+        if (matchingServletContextEntry.isPresent()) {
+            dto.servletContextId = (long) matchingServletContextEntry.get().getKey().getProperty(Constants.SERVICE_ID);
+        } else {
+            // FIXME something wrong...what to do
+        }
+        
+        return dto;
+    }
+
+    private FailedServletDTO transformToDTOFailed(WhiteboardServlet whiteboardServlet) {
+        FailedServletDTO dto = new FailedServletDTO();
+
+        dto.serviceId = whiteboardServlet.getServiceID();
+        dto.failureReason = DTOConstants.FAILURE_REASON_VALIDATION_FAILED; 
+        // FIXME: not the only possible reason
+        
+        // FIXME: not complete
+        return dto;
+    }
+    
+    private FailedFilterDTO transformToDTOFailed(WhiteboardFilter whiteboardFilter) {
+        FailedFilterDTO dto = new FailedFilterDTO();
+        
+        dto.serviceId = whiteboardFilter.getServiceID();
+        dto.failureReason = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
+        //FIXME: ... could be some arbitrary reasons
+        
+        return dto;
+    }
+
+    private Optional<Map.Entry<ServiceReference<ServletContext>, ServletContext>> findMatchingServletContext(
+            String httpContextId) {
         final String name;
-        if (httpContextId == null || httpContextId.trim().length() == 0){
-            // FIXME not nice, but currently the only way to map to context (could also be the shared context)
+        if (httpContextId == null || httpContextId.trim().length() == 0) {
+            // FIXME not nice, but currently the only way to map to context
+            // (could also be the shared context)
             name = WebContainerContext.DefaultContextIds.DEFAULT.getValue();
-        }else{
+        } else {
             name = httpContextId;
         }
         return this.servletContexts.entrySet().stream()
-                .filter(entry -> Objects.equals(entry.getValue().getServletContextName(), name))
-                .findFirst();
+                .filter(entry -> Objects.equals(entry.getValue().getServletContextName(), name)).findFirst();
     }
 
     @Reference(unbind = "removeServletContext", service = ServletContext.class, cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
