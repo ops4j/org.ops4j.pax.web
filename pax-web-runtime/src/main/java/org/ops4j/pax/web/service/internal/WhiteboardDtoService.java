@@ -89,6 +89,7 @@ public class WhiteboardDtoService {
         List<FailedErrorPageDTO> failedErrorPageDTOs = new ArrayList<>();
         List<ListenerDTO> listenerDTOs = new ArrayList<>();
         List<FailedListenerDTO> failedListenerDTOs = new ArrayList<>();
+
         //FIXME: more lists ... 
 
         runtimeDto.servletContextDTOs = this.servletContexts.entrySet().stream()
@@ -310,6 +311,8 @@ public class WhiteboardDtoService {
         
         return dto;
     }
+=======
+>>>>>>> ee01db5929db9b9d957f6454a0ea68fffe2c75f6
 
     private Optional<Map.Entry<ServiceReference<ServletContext>, ServletContext>> findMatchingServletContext(
             String httpContextId) {
