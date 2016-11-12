@@ -311,8 +311,6 @@ public class WhiteboardDtoService {
         
         return dto;
     }
-=======
->>>>>>> ee01db5929db9b9d957f6454a0ea68fffe2c75f6
 
     private Optional<Map.Entry<ServiceReference<ServletContext>, ServletContext>> findMatchingServletContext(
             String httpContextId) {
