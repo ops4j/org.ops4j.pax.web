@@ -1,4 +1,4 @@
-/* Copyright 2016 Marc Schlegel
+/* Copyright 2016 Marc Schlegel, Achim Nierbeck
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,15 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Map.Entry;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -37,8 +43,22 @@ import org.ops4j.pax.web.service.whiteboard.WhiteboardWelcomeFile;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.annotations.*;
-import org.osgi.service.http.runtime.dto.*;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.http.runtime.dto.DTOConstants;
+import org.osgi.service.http.runtime.dto.ErrorPageDTO;
+import org.osgi.service.http.runtime.dto.FailedErrorPageDTO;
+import org.osgi.service.http.runtime.dto.FailedFilterDTO;
+import org.osgi.service.http.runtime.dto.FailedServletContextDTO;
+import org.osgi.service.http.runtime.dto.FailedServletDTO;
+import org.osgi.service.http.runtime.dto.FilterDTO;
+import org.osgi.service.http.runtime.dto.RequestInfoDTO;
+import org.osgi.service.http.runtime.dto.RuntimeDTO;
+import org.osgi.service.http.runtime.dto.ServletContextDTO;
+import org.osgi.service.http.runtime.dto.ServletDTO;
 
 @Component(immediate = true, service = WhiteboardDtoService.class)
 public class WhiteboardDtoService {
@@ -62,6 +82,8 @@ public class WhiteboardDtoService {
         List<FailedServletDTO> failedServletDTOs = new ArrayList<>();
         List<FilterDTO> filterDTOs = new ArrayList<>(); 
         List<FailedFilterDTO> failedFilterDTOs = new ArrayList<>();
+        List<ErrorPageDTO> errorPageDTOs = new ArrayList<>();
+        List<FailedErrorPageDTO> failedErrorPageDTOs = new ArrayList<>();
         //FIXME: more lists ... 
 
         runtimeDto.servletContextDTOs = this.servletContexts.entrySet().stream()
@@ -83,7 +105,11 @@ public class WhiteboardDtoService {
                     failedFilterDTOs.add(transformToDTOFailed((WhiteboardFilter)element));
                 }
             } else if (element instanceof WhiteboardErrorPage) {
-                //TODO: add error pages
+                if (element.isValid()) {
+                    errorPageDTOs.add(transformToDTO((WhiteboardErrorPage)element));
+                } else {
+                    failedErrorPageDTOs.add(transformToDTOFailed((WhiteboardErrorPage)element));
+                }
             } else if (element instanceof WhiteboardJspMapping) {
                 //TODO: add jsp mappings
             } else if (element instanceof WhiteboardListener) {
@@ -107,10 +133,17 @@ public class WhiteboardDtoService {
                     .filter(filterDTO -> filterDTO.servletContextId == servletContextDTO.serviceId)
                     .toArray(FilterDTO[]::new);
         });
+        
+        Arrays.stream(runtimeDto.servletContextDTOs).forEach(servletContextDTO -> {
+            servletContextDTO.errorPageDTOs = errorPageDTOs.stream()
+                    .filter(errorPageDTO -> errorPageDTO.servletContextId == servletContextDTO.serviceId)
+                    .toArray(ErrorPageDTO[]::new);
+        });
 
         runtimeDto.failedServletContextDTOs = failedServletContextDTOs.stream().toArray(FailedServletContextDTO[]::new);
         runtimeDto.failedServletDTOs = failedServletDTOs.stream().toArray(FailedServletDTO[]::new);
         runtimeDto.failedFilterDTOs = failedFilterDTOs.stream().toArray(FailedFilterDTO[]::new);
+        runtimeDto.failedErrorPageDTOs = failedErrorPageDTOs.stream().toArray(FailedErrorPageDTO[]::new);
 
         return runtimeDto;
     }
@@ -181,6 +214,36 @@ public class WhiteboardDtoService {
         
         return dto;
     }
+    
+    private ErrorPageDTO transformToDTO(WhiteboardErrorPage whiteboardErrorPage) {
+        ErrorPageDTO dto = new ErrorPageDTO();
+        
+        try {
+            long code = Long.parseLong(whiteboardErrorPage.getErrorPageMapping().getError());
+            dto.errorCodes = new long[] {code};
+        } catch (NumberFormatException nfe) {
+            // OK, not a number must be a class then
+            dto.exceptions = new String[] {whiteboardErrorPage.getErrorPageMapping().getError()};
+        }
+        
+        dto.serviceId = whiteboardErrorPage.getServiceID();
+
+//        whiteboardErrorPage.getErrorPageMapping().getLocation();
+        //FIXME: the errorpage location is never used by the errorpage dto ... 
+        // what really bothers me, the errorpagedto is based on top of a servlet dto, 
+        // but error pages aren't servlets !!!
+        
+        Optional<Map.Entry<ServiceReference<ServletContext>, ServletContext>> matchingServletContextEntry = findMatchingServletContext(
+                whiteboardErrorPage.getErrorPageMapping().getHttpContextId());
+        
+        if (matchingServletContextEntry.isPresent()) {
+            dto.servletContextId = (long) matchingServletContextEntry.get().getKey().getProperty(Constants.SERVICE_ID);
+        } else {
+            // FIXME something wrong...what to do
+        }
+        
+        return dto;
+    }
 
     private FailedServletDTO transformToDTOFailed(WhiteboardServlet whiteboardServlet) {
         FailedServletDTO dto = new FailedServletDTO();
@@ -199,6 +262,15 @@ public class WhiteboardDtoService {
         dto.serviceId = whiteboardFilter.getServiceID();
         dto.failureReason = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
         //FIXME: ... could be some arbitrary reasons
+        
+        return dto;
+    }
+    
+    private FailedErrorPageDTO transformToDTOFailed(WhiteboardErrorPage whiteboardErrorPage) {
+        FailedErrorPageDTO dto = new FailedErrorPageDTO();
+        
+        dto.serviceId = whiteboardErrorPage.getServiceID();
+        dto.failureReason = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
         
         return dto;
     }
