@@ -117,7 +117,11 @@ public class WhiteboardDtoService {
                     failedErrorPageDTOs.add(transformToDTOFailed((WhiteboardErrorPage)element));
                 }
             } else if (element instanceof WhiteboardJspMapping) {
-                //TODO: add jsp mappings
+                if (element.isValid()) {
+                    //TODO: map jsps to servlets
+                } else {
+                    failedServletDTOs.add(transformToDTOFailed((WhiteboardJspMapping)element));
+                }
             } else if (element instanceof WhiteboardListener) {
                 if (element.isValid()) {
                     listenerDTOs.add(tranformToDTO((WhiteboardListener) element));
@@ -307,6 +311,15 @@ public class WhiteboardDtoService {
         FailedListenerDTO dto = new FailedListenerDTO();
         
         dto.serviceId = whiteboardListener.getServiceID();
+        dto.failureReason = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
+        
+        return dto;
+    }
+    
+    private FailedServletDTO transformToDTOFailed(WhiteboardJspMapping whiteboardJspMapping) {
+        FailedServletDTO dto = new FailedServletDTO();
+        
+        dto.serviceId = whiteboardJspMapping.getServiceID();
         dto.failureReason = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
         
         return dto;
