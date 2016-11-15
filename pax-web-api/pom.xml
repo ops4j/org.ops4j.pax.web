@@ -55,6 +55,7 @@
 							org.osgi.framework; version="[1.0.0,2.0.0)",
 							org.osgi.framework.wiring; version="[1.0,2.0)",
 							org.osgi.service.http; version="[1.0.0,2.0.0)",
+							org.osgi.service.http.context; version="[1.0.0,2.0.0)",
 							org.slf4j;version="[1.5,2.0)",
 							org.osgi.service.packageadmin;resolution:=optional,
 							*
@@ -62,6 +63,8 @@
 						<Export-Package>
 							${bundle.namespace};version="${project.version}",
 							${bundle.namespace}.whiteboard;version="${project.version}",
+							org.osgi.service.http,
+							org.osgi.service.http.context,
 							org.osgi.service.http.runtime,
 							org.osgi.service.http.runtime.dto,
 							org.ops4j.pax.web.utils;version="${project.version}"

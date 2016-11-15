@@ -19,8 +19,10 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
+import org.ops4j.pax.web.extender.whiteboard.internal.ExtendedHttpServiceRuntime;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.WebApplication;
+import org.ops4j.pax.web.extender.whiteboard.internal.element.HttpContextElement;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
@@ -34,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * @author Alin Dreghiciu
  * @since 0.2.0, August 21, 2007
  */
-abstract class AbstractHttpContextTracker<T> implements ServiceTrackerCustomizer<T, HttpContextMapping> {
+abstract class AbstractHttpContextTracker<T> implements ServiceTrackerCustomizer<T, HttpContextElement> {
 
 	/**
 	 * Logger.
@@ -45,24 +47,25 @@ abstract class AbstractHttpContextTracker<T> implements ServiceTrackerCustomizer
 	 */
 	private final ExtenderContext extenderContext;
 	private final BundleContext bundleContext;
+	private final ExtendedHttpServiceRuntime httpServiceRuntime;
 
 	/**
 	 * Constructor.
-	 *
-	 * @param extenderContext
+	 *  @param extenderContext
 	 *            extender context; cannot be null
 	 * @param bundleContext
-	 *            extender bundle context; cannot be null
+	 * @param httpServiceRuntime
 	 */
-	AbstractHttpContextTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
+	AbstractHttpContextTracker(final ExtenderContext extenderContext, final BundleContext bundleContext, ExtendedHttpServiceRuntime httpServiceRuntime) {
 		// super( validateBundleContext( bundleContext ), createFilter(
 		// bundleContext, trackedClass ), null );
 		NullArgumentException.validateNotNull(extenderContext, "Extender context");
 		this.extenderContext = extenderContext;
 		this.bundleContext = validateBundleContext(bundleContext);
+		this.httpServiceRuntime = httpServiceRuntime;
 	}
 
-	protected final ServiceTracker<T, HttpContextMapping> create(final Class<? extends T> trackedClass) {
+	protected final ServiceTracker<T, HttpContextElement> create(final Class<? extends T> trackedClass) {
 		return new ServiceTracker<>(bundleContext, createFilter(bundleContext, trackedClass), this);
 	}
 
@@ -112,28 +115,28 @@ abstract class AbstractHttpContextTracker<T> implements ServiceTrackerCustomizer
 	 * @see ServiceTracker#addingService(ServiceReference)
 	 */
 	@Override
-	public HttpContextMapping addingService(final ServiceReference<T> serviceReference) {
+	public HttpContextElement addingService(final ServiceReference<T> serviceReference) {
 		LOGGER.debug("Service available " + serviceReference);
 		T registered = bundleContext.getService(serviceReference);
 
 		Boolean sharedHttpContext = Boolean
 				.parseBoolean((String) serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
 
-		HttpContextMapping mapping = createHttpContextMapping(serviceReference, registered);
-		if (mapping != null) {
+		HttpContextElement contextElement = createHttpContextElement(serviceReference, registered);
+		HttpContextMapping mapping = contextElement.getHttpContextMapping();
+		// only prepare WebApplication if context is valid
+		if (mapping != null && contextElement.isValid()) {
 			final WebApplication webApplication = extenderContext.getWebApplication(serviceReference.getBundle(),
 					mapping.getHttpContextId(), sharedHttpContext);
 			webApplication.setHttpContextMapping(mapping);
-			return mapping;
-		} else {
-			// if no mapping was created release the service
-			bundleContext.ungetService(serviceReference);
-			return null;
 		}
+
+		httpServiceRuntime.addWhiteboardElement(contextElement);
+		return contextElement;
 	}
 
 	@Override
-	public void modifiedService(ServiceReference<T> reference, HttpContextMapping service) {
+	public void modifiedService(ServiceReference<T> reference, HttpContextElement service) {
 		// was not implemented before
 	}
 
@@ -141,33 +144,36 @@ abstract class AbstractHttpContextTracker<T> implements ServiceTrackerCustomizer
 	 * @see ServiceTracker#removedService(ServiceReference, Object)
 	 */
 	@Override
-	public void removedService(final ServiceReference<T> serviceReference, final HttpContextMapping unpublished) {
+	public void removedService(final ServiceReference<T> serviceReference, final HttpContextElement unpublished) {
 		LOGGER.debug("Service removed " + serviceReference);
 
-		Boolean sharedHttpContext = Boolean
-				.parseBoolean((String) serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
+		if (unpublished.isValid()) {
+			Boolean sharedHttpContext = Boolean
+					.parseBoolean((String) serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
 
-		final WebApplication webApplication = extenderContext.getExistingWebApplication(
-				serviceReference.getBundle(),
-				unpublished.getHttpContextId(),
-				sharedHttpContext);
+			final WebApplication webApplication = extenderContext.getExistingWebApplication(
+					serviceReference.getBundle(),
+					unpublished.getHttpContextMapping().getHttpContextId(),
+					sharedHttpContext);
 
-		boolean remove = true;
+			boolean remove = true;
 
-		if (sharedHttpContext) {
-			Integer sharedWebApplicationCounter = extenderContext.getSharedWebApplicationCounter(webApplication);
-			if (sharedWebApplicationCounter != null && sharedWebApplicationCounter > 0) {
-				remove = false;
-				Integer reduceSharedWebApplicationCount = extenderContext
-						.reduceSharedWebApplicationCount(webApplication);
-				if (reduceSharedWebApplicationCount == 0) {
-					remove = true;
+			if (sharedHttpContext) {
+				Integer sharedWebApplicationCounter = extenderContext.getSharedWebApplicationCounter(webApplication);
+				if (sharedWebApplicationCounter != null && sharedWebApplicationCounter > 0) {
+					remove = false;
+					Integer reduceSharedWebApplicationCount = extenderContext
+							.reduceSharedWebApplicationCount(webApplication);
+					if (reduceSharedWebApplicationCount == 0) {
+						remove = true;
+					}
 				}
 			}
-		}
 
-		if (webApplication != null && remove) {
-			webApplication.setHttpContextMapping(null);
+			if (webApplication != null && remove) {
+				webApplication.setHttpContextMapping(null);
+			}
+			httpServiceRuntime.removeWhiteboardElement(unpublished);
 		}
 	}
 
@@ -180,6 +186,6 @@ abstract class AbstractHttpContextTracker<T> implements ServiceTrackerCustomizer
 	 *            the actual published service
 	 * @return an Registration if could be created or applicable or null if not
 	 */
-	abstract HttpContextMapping createHttpContextMapping(final ServiceReference<T> serviceReference, final T published);
+	abstract HttpContextElement createHttpContextElement(final ServiceReference<T> serviceReference, final T published);
 
 }

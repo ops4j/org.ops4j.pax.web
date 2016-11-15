@@ -407,13 +407,14 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 		}
 	}
 
-	public void setServletContextHelper(final ServletContextHelper servletContextHelper) {
+	public void setServletContextHelper(final ServletContextHelper servletContextHelper, final HttpContextMapping httpContextMapping) {
 		httpServiceLock.writeLock().lock();
 		try {
 			if (hasHttpContextMapping()) {
 				unregisterHttpContext();
 			}
 			this.servletContextHelper = servletContextHelper;
+			this.httpContextMapping = httpContextMapping;
 			registerHttpContext();
 		} finally {
 			httpServiceLock.writeLock().unlock();

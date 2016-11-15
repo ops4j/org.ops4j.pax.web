@@ -18,10 +18,11 @@
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
+import org.ops4j.pax.web.extender.whiteboard.internal.ExtendedHttpServiceRuntime;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.element.HttpContextElement;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
-import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
@@ -44,36 +45,34 @@ public class HttpContextTracker extends AbstractHttpContextTracker<HttpContext> 
 
 	/**
 	 * Constructor.
-	 *
-	 * @param extenderContext
+	 *  @param extenderContext
 	 *            extender context; cannot be null
 	 * @param bundleContext
-	 *            whiteboard extender bundle context; cannot be null
+	 * @param httpServiceRuntime
 	 */
-	private HttpContextTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
-		super(extenderContext, bundleContext);
+	private HttpContextTracker(final ExtenderContext extenderContext,
+							   final BundleContext bundleContext,
+							   final ExtendedHttpServiceRuntime httpServiceRuntime) {
+		super(extenderContext, bundleContext, httpServiceRuntime);
 	}
 
-	public static ServiceTracker<HttpContext, HttpContextMapping> createTracker(final ExtenderContext extenderContext,
-			final BundleContext bundleContext) {
-		return new HttpContextTracker(extenderContext, bundleContext).create(HttpContext.class);
+	public static ServiceTracker<HttpContext, HttpContextElement> createTracker(final ExtenderContext extenderContext,
+																				final BundleContext bundleContext,
+																				final ExtendedHttpServiceRuntime httpServiceRuntime) {
+		return new HttpContextTracker(extenderContext, bundleContext, httpServiceRuntime).create(HttpContext.class);
 	}
 
 	/**
-	 * @see AbstractHttpContextTracker#createHttpContextMapping(ServiceReference,
+	 * @see AbstractHttpContextTracker#createHttpContextElement(ServiceReference,
 	 *      Object)
 	 */
 	@Override
-	HttpContextMapping createHttpContextMapping(final ServiceReference<HttpContext> serviceReference,
-			final HttpContext published) {
+	HttpContextElement createHttpContextElement(final ServiceReference<HttpContext> serviceReference,
+												final HttpContext published) {
 		Object httpContextId = serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
 		Object httpContextShared = serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED);
 
-		if (httpContextId != null
-				&& (!(httpContextId instanceof String) || ((String) httpContextId).trim().length() == 0)) {
-			LOG.warn("Registered http context [" + published + "] did not contain a valid http context id");
-			return null;
-		}
+
 		final DefaultHttpContextMapping mapping = new DefaultHttpContextMapping();
 		mapping.setHttpContextId((String) httpContextId);
 
@@ -89,7 +88,7 @@ public class HttpContextTracker extends AbstractHttpContextTracker<HttpContext> 
 
 		mapping.setHttpContextShared(sharedContext);
 		mapping.setHttpContext(published);
-		return mapping;
+		return new HttpContextElement(serviceReference, mapping);
 	}
 
 }

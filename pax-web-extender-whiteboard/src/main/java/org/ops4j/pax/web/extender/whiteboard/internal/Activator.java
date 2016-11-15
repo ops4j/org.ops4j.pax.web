@@ -66,7 +66,7 @@ public class Activator implements BundleActivator {
 		extenderContext = new ExtenderContext(httpServiceRuntime);
 		trackers = new ArrayList<>();
 
-		trackHttpContexts(bundleContext);
+		trackHttpContexts(bundleContext, httpServiceRuntime);
 		trackServlets(bundleContext);
 		trackResources(bundleContext);
 		if (WebContainerUtils.WEB_CONATAINER_AVAILABLE) {
@@ -75,7 +75,7 @@ public class Activator implements BundleActivator {
 			trackJspMappings(bundleContext);
 			trackErrorPages(bundleContext);
 			trackWelcomeFiles(bundleContext);
-			trackServletContextHelper(bundleContext);
+			trackServletContextHelper(bundleContext, httpServiceRuntime);
 			if (WebContainerUtils.WEBSOCKETS_AVAILABLE) {
 				trackWebSockets(bundleContext);
 			} else {
@@ -104,16 +104,17 @@ public class Activator implements BundleActivator {
 	 * Track http contexts.
 	 *
 	 * @param bundleContext the BundleContext associated with this bundle
+	 * @param httpServiceRuntime
 	 */
-	private void trackHttpContexts(final BundleContext bundleContext) {
-		final ServiceTracker<HttpContext, HttpContextMapping> httpContextTracker = HttpContextTracker
-				.createTracker(extenderContext, bundleContext);
+	private void trackHttpContexts(final BundleContext bundleContext, ExtendedHttpServiceRuntime httpServiceRuntime) {
+		final ServiceTracker<HttpContext, HttpContextElement> httpContextTracker = HttpContextTracker
+				.createTracker(extenderContext, bundleContext, httpServiceRuntime);
 
 		httpContextTracker.open();
 		trackers.add(0, httpContextTracker);
 
-		final ServiceTracker<HttpContextMapping, HttpContextMapping> httpContextMappingTracker = HttpContextMappingTracker
-				.createTracker(extenderContext, bundleContext);
+		final ServiceTracker<HttpContextMapping, HttpContextElement> httpContextMappingTracker = HttpContextMappingTracker
+				.createTracker(extenderContext, bundleContext, httpServiceRuntime);
 
 		httpContextMappingTracker.open();
 		trackers.add(0, httpContextMappingTracker);
@@ -123,9 +124,11 @@ public class Activator implements BundleActivator {
 	 * Track servlets.
 	 *
 	 * @param bundleContext the BundleContext associated with this bundle
+	 * @param httpServiceRuntime
 	 */
-	private void trackServletContextHelper(final BundleContext bundleContext) {
-		final ServiceTracker<ServletContextHelper, ServletContextHelper> servletContextHelperTracker = ServletContextHelperTracker.createTracker(extenderContext, bundleContext);
+	private void trackServletContextHelper(final BundleContext bundleContext, ExtendedHttpServiceRuntime httpServiceRuntime) {
+		final ServiceTracker<ServletContextHelper, ServletContextHelperElement> servletContextHelperTracker =
+				ServletContextHelperTracker.createTracker(extenderContext, bundleContext, httpServiceRuntime);
 
 		servletContextHelperTracker.open();
 		trackers.add(0, servletContextHelperTracker);

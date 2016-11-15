@@ -65,7 +65,7 @@ public class ExtenderContext {
 		if (sharedHttpContext) {
 			Integer counter = sharedWebApplicationCounter.get(webApplication);
 			if (counter == null) {
-				counter = new Integer(0);
+				counter = 0;
 			}
 			sharedWebApplicationCounter.put(webApplication, ++counter);
 		}

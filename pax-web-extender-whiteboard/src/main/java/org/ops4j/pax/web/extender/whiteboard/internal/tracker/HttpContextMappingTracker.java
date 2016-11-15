@@ -17,7 +17,9 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
+import org.ops4j.pax.web.extender.whiteboard.internal.ExtendedHttpServiceRuntime;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.element.HttpContextElement;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -33,29 +35,29 @@ public class HttpContextMappingTracker extends AbstractHttpContextTracker<HttpCo
 
 	/**
 	 * Constructor.
-	 *
-	 * @param extenderContext
+	 *  @param extenderContext
 	 *            extender context; cannot be null
 	 * @param bundleContext
-	 *            whiteboard extender bundle context; cannot be null
+	 * @param httpServiceRuntime
 	 */
-	private HttpContextMappingTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
-		super(extenderContext, bundleContext);
+	private HttpContextMappingTracker(final ExtenderContext extenderContext, final BundleContext bundleContext,
+									  ExtendedHttpServiceRuntime httpServiceRuntime) {
+		super(extenderContext, bundleContext, httpServiceRuntime);
 	}
 
-	public static ServiceTracker<HttpContextMapping, HttpContextMapping> createTracker(
-			final ExtenderContext extenderContext, final BundleContext bundleContext) {
-		return new HttpContextMappingTracker(extenderContext, bundleContext).create(HttpContextMapping.class);
+	public static ServiceTracker<HttpContextMapping, HttpContextElement> createTracker(
+			final ExtenderContext extenderContext, final BundleContext bundleContext, ExtendedHttpServiceRuntime httpServiceRuntime) {
+		return new HttpContextMappingTracker(extenderContext, bundleContext, httpServiceRuntime).create(HttpContextMapping.class);
 	}
 
 	/**
-	 * @see AbstractHttpContextTracker#createHttpContextMapping(ServiceReference,
+	 * @see AbstractHttpContextTracker#createHttpContextElement(ServiceReference,
 	 *      Object)
 	 */
 	@Override
-	HttpContextMapping createHttpContextMapping(final ServiceReference<HttpContextMapping> serviceReference,
-			final HttpContextMapping published) {
-		return published;
+	HttpContextElement createHttpContextElement(final ServiceReference<HttpContextMapping> serviceReference,
+												final HttpContextMapping published) {
+		return new HttpContextElement(serviceReference, published);
 	}
 
 }
