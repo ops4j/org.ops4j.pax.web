@@ -16,9 +16,6 @@
  */
 package org.ops4j.pax.web.service.whiteboard;
 
-/**
- * Created by u000501 on 24.10.2016.
- */
 public interface WhiteboardErrorPage extends WhiteboardElement {
 
     ErrorPageMapping getErrorPageMapping();

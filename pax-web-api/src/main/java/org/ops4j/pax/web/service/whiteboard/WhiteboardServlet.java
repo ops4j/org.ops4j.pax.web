@@ -18,9 +18,6 @@ package org.ops4j.pax.web.service.whiteboard;
 
 import java.util.Collection;
 
-/**
- * Created by u000501 on 24.10.2016.
- */
 public interface WhiteboardServlet extends WhiteboardElement {
 
     ServletMapping getServletMapping();
