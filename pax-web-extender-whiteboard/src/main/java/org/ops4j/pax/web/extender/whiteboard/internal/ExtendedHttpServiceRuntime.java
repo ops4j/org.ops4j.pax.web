@@ -78,7 +78,7 @@ public class ExtendedHttpServiceRuntime implements HttpServiceRuntime {
     @Override
     public RequestInfoDTO calculateRequestInfoDTO(String path) {
         return executeWithWebContainer(webContainer ->
-                webContainer.calculateRequestInfoDTO(whiteboardElements.iterator()));
+                webContainer.calculateRequestInfoDTO(path, whiteboardElements.iterator()));
     }
 
     /**

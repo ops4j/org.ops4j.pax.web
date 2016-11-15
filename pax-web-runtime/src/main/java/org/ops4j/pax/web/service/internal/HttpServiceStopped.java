@@ -504,7 +504,7 @@ class HttpServiceStopped implements StoppableHttpService {
 	}
 
 	@Override
-	public RequestInfoDTO calculateRequestInfoDTO(Iterator<WhiteboardElement> iterator) {
+	public RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator) {
 		LOG.warn("Http service has already been stoped");
 		// FIXME check if null valid
 		return null;

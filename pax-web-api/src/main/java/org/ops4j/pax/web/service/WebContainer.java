@@ -636,7 +636,7 @@ public interface WebContainer extends HttpService {
 
 	void unregisterWebSocket(Object webSocket, HttpContext httpContext);
 
-	RequestInfoDTO calculateRequestInfoDTO(Iterator<WhiteboardElement> iterator);
+	RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator);
 
 	RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator);
 }

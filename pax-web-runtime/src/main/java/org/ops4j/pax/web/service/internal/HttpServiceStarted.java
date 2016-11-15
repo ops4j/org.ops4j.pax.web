@@ -1308,14 +1308,14 @@ class HttpServiceStarted implements StoppableHttpService {
 	}
 
 	@Override
-	public RequestInfoDTO calculateRequestInfoDTO(Iterator<WhiteboardElement> iterator) {
+	public RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator) {
 		// FIXME TBD
-		return withWhiteboardDtoService(service -> service.calculateRequestInfoDTO(iterator));
+		return withWhiteboardDtoService(service -> service.calculateRequestInfoDTO(path, iterator, serverModel, serviceModel));
 	}
 
 	@Override
 	public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator) {
-		return withWhiteboardDtoService(service -> service.createWhiteboardRuntimeDTO(iterator));
+		return withWhiteboardDtoService(service -> service.createWhiteboardRuntimeDTO(iterator, serverModel, serviceModel));
 	}
 
 	

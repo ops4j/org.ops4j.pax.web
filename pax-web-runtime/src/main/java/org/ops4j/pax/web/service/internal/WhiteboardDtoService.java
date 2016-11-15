@@ -32,6 +32,8 @@ import java.util.stream.Collectors;
 import javax.servlet.ServletContext;
 
 import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.whiteboard.ServletMapping;
 import org.ops4j.pax.web.service.whiteboard.WhiteboardElement;
 import org.ops4j.pax.web.service.whiteboard.WhiteboardErrorPage;
@@ -75,7 +77,7 @@ public class WhiteboardDtoService {
         this.bundleContext = bundleContext;
     }
 
-    public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator) {
+    public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator, ServerModel serverModel, ServiceModel serviceModel) {
         // FIXME not complete
 
         RuntimeDTO runtimeDto = new RuntimeDTO();
@@ -162,7 +164,7 @@ public class WhiteboardDtoService {
         return runtimeDto;
     }
 
-    public RequestInfoDTO calculateRequestInfoDTO(Iterator<WhiteboardElement> iterator) {
+    public RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator, ServerModel serverModel, ServiceModel serviceModel) {
         // FIXME TBD
         return null;
     }

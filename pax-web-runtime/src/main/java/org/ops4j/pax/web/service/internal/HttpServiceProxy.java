@@ -530,8 +530,8 @@ public class HttpServiceProxy implements StoppableHttpService {
 	}
 
 	@Override
-	public RequestInfoDTO calculateRequestInfoDTO(Iterator<WhiteboardElement> iterator) {
-		return delegate.calculateRequestInfoDTO(iterator);
+	public RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator) {
+		return delegate.calculateRequestInfoDTO(path, iterator);
 	}
 
 	@Override
