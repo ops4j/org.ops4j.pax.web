@@ -86,7 +86,7 @@ public class WhiteboardDtoService {
         return servletContextPath.equals(httpServicePath);
     }
 
-    public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator, ServerModel serverModel, ServiceModel serviceModel) {
+    RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator, ServerModel serverModel, ServiceModel serviceModel) {
         // FIXME not complete
 
         RuntimeDTO runtimeDto = new RuntimeDTO();
@@ -205,7 +205,7 @@ public class WhiteboardDtoService {
         return runtimeDto;
     }
 
-    public RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator, ServerModel serverModel, ServiceModel serviceModel) {
+    RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator, ServerModel serverModel, ServiceModel serviceModel) {
         // FIXME TBD
         return null;
     }
