@@ -39,6 +39,9 @@ public class WebSocketElement extends WebElement {
 		super(ref);
 		NullArgumentException.validateNotNull(mapping, "Websocket mapping");
 		this.mapping = mapping;
+
+		// validate
+		// FIXME validation
 	}
 
 	@Override
@@ -54,11 +57,5 @@ public class WebSocketElement extends WebElement {
 	@Override
 	public String getHttpContextId() {
 		return mapping.getHttpContextId();
-	}
-
-	@Override
-	public boolean isValid() {
-		// FIXME
-		return false;
 	}
 }

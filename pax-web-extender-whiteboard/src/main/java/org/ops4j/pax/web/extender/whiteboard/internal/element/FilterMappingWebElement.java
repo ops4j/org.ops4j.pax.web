@@ -48,6 +48,11 @@ public class FilterMappingWebElement extends WebElement<FilterMapping> implement
 		super(ref);
 		NullArgumentException.validateNotNull(filterMapping, "Filter mapping");
 		this.filterMapping = filterMapping;
+
+		// validate
+		if (filterMapping.getUrlPatterns() == null && filterMapping.getServletNames() == null) {
+			valid = false;
+		}
 	}
 
 	@Override
@@ -78,17 +83,6 @@ public class FilterMappingWebElement extends WebElement<FilterMapping> implement
 	@Override
 	public String toString() {
 		return this.getClass().getSimpleName() + "{mapping=" + filterMapping + "}";
-	}
-
-	@Override
-	public boolean isValid() {
-		boolean valid = true;
-
-		if (filterMapping.getUrlPatterns() == null && filterMapping.getServletNames() == null) {
-			valid = false;
-		}
-
-		return valid;
 	}
 
 	@Override

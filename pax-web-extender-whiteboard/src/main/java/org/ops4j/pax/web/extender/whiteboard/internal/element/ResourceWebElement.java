@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ResourceWebElement extends WebElement<Object> implements WhiteboardResourceMapping {
 
-	private Logger LOG = LoggerFactory.getLogger(ServletWebElement.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ResourceWebElement.class);
 
 	private ResourceMapping resourceMapping;
 
@@ -69,19 +69,6 @@ public class ResourceWebElement extends WebElement<Object> implements Whiteboard
 	public void unregister(final WebContainer webContainer,
 						   final HttpContext httpContext) {
 		webContainer.unregister(resourceMapping.getAlias());
-	}
-
-	@Override
-	public boolean isValid() {
-		boolean valid = true;
-
-		if (resourceMapping.getHttpContextId() != null && resourceMapping.getHttpContextId().trim().length() == 0) {
-			LOG.warn("Registered listener [" + getPusblishedPID()
-					+ "] did not contain a valid http context id");
-			valid = false;
-		}
-
-		return valid;
 	}
 
 	@Override

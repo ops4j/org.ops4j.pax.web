@@ -59,6 +59,29 @@ public class ServletWebElement<T extends Servlet> extends WebElement<T> implemen
 		NullArgumentException.validateNotNull(servletMapping, "Servlet mapping");
 		this.servletMapping = servletMapping;
 		this.errorMappings = errorMappings;
+
+		// validate
+		final String servletName = servletMapping.getServletName();
+		final String alias = servletMapping.getAlias();
+		final String[] urlPatterns = servletMapping.getUrlPatterns();
+
+		if (servletName != null && (servletName.length() == 0)) {
+			LOG.warn("Registered servlet [" + getPusblishedPID()
+					+ "] did not contain a valid servlet-name property.");
+			valid = false;
+		}
+		if (alias != null && urlPatterns != null) {
+			LOG.warn("Registered servlet [" + getPusblishedPID()
+					+ "] cannot have both alias and url patterns");
+			valid = false;
+		}else if (alias == null && urlPatterns == null) {
+			LOG.warn("Registered servlet [" + getPusblishedPID() + "] did not contain a valid alias or url patterns property");
+			valid = false;
+		}else if (alias != null && alias.trim().length() == 0) {
+			LOG.warn("Registered servlet [" + getPusblishedPID()
+					+ "] did not contain a valid alias property");
+			valid = false;
+		}
 	}
 
 	@Override
@@ -109,35 +132,6 @@ public class ServletWebElement<T extends Servlet> extends WebElement<T> implemen
 	@Override
 	public String toString() {
 		return this.getClass().getSimpleName() + "{mapping=" + servletMapping + "}";
-	}
-
-	@Override
-	public boolean isValid() {
-		boolean valid = true;
-
-		final String servletName = servletMapping.getServletName();
-		final String alias = servletMapping.getAlias();
-		final String[] urlPatterns = servletMapping.getUrlPatterns();
-
-		if (servletName != null && (servletName.length() == 0)) {
-			LOG.warn("Registered servlet [" + getPusblishedPID()
-					+ "] did not contain a valid servlet-name property.");
-			valid = false;
-		}
-		if (alias != null && urlPatterns != null) {
-			LOG.warn("Registered servlet [" + getPusblishedPID()
-					+ "] cannot have both alias and url patterns");
-			valid = false;
-		}else if (alias == null && urlPatterns == null) {
-			LOG.warn("Registered servlet [" + getPusblishedPID() + "] did not contain a valid alias or url patterns property");
-			valid = false;
-		}else if (alias != null && alias.trim().length() == 0) {
-			LOG.warn("Registered servlet [" + getPusblishedPID()
-					+ "] did not contain a valid alias property");
-			valid = false;
-		}
-
-		return valid;
 	}
 
 	@Override

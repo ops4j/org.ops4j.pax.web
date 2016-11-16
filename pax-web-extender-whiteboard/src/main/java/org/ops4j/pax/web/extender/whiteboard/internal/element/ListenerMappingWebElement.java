@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ListenerMappingWebElement extends WebElement<ListenerMapping> implements WhiteboardListener {
 
-	private Logger LOG = LoggerFactory.getLogger(ServletWebElement.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ListenerMappingWebElement.class);
 
 	private final ListenerMapping listenerMapping;
 
@@ -56,6 +56,39 @@ public class ListenerMappingWebElement extends WebElement<ListenerMapping> imple
 		super(ref);
 		NullArgumentException.validateNotNull(listenerMapping, "Listener mapping");
 		this.listenerMapping = listenerMapping;
+
+		// validate
+		final EventListener listener = listenerMapping.getListener();
+
+		if (!(listener instanceof ServletContextListener ||
+				listener instanceof ServletContextAttributeListener ||
+				listener instanceof ServletRequestListener ||
+				listener instanceof ServletRequestAttributeListener ||
+				listener instanceof HttpSessionListener ||
+				listener instanceof HttpSessionBindingListener ||
+				listener instanceof HttpSessionAttributeListener ||
+				listener instanceof HttpSessionActivationListener ||
+				listener instanceof AsyncListener ||
+				listener instanceof ReadListener ||
+				listener instanceof WriteListener ||
+				listener instanceof HttpSessionIdListener
+		)) {
+			valid = false;
+		}
+
+		if (listenerMapping.getHttpContextId() != null && listenerMapping.getHttpContextId().trim().length() == 0) {
+			LOG.warn("Registered listener [" + getPusblishedPID() + "] did not contain a valid http context id");
+			valid = false;
+		}
+
+		Boolean listenerEnabled = ServicePropertiesUtils.getBooleanProperty(
+				serviceReference,
+				HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER);
+		if (!Boolean.TRUE.equals(listenerEnabled)) {
+			LOG.warn("Registered listener [" + getPusblishedPID()
+					+ "] is not enabled via 'osgi.http.whiteboard.listener' property");
+			valid = false;
+		}
 	}
 
 	@Override
@@ -83,45 +116,5 @@ public class ListenerMappingWebElement extends WebElement<ListenerMapping> imple
 	@Override
 	public ListenerMapping getListenerMapping() {
 		return listenerMapping;
-	}
-
-	@Override
-	public boolean isValid() {
-		boolean valid = true;
-
-		final EventListener listener = listenerMapping.getListener();
-
-		if (!(listener instanceof ServletContextListener ||
-				listener instanceof ServletContextAttributeListener ||
-				listener instanceof ServletRequestListener ||
-				listener instanceof ServletRequestAttributeListener ||
-				listener instanceof HttpSessionListener ||
-				listener instanceof HttpSessionBindingListener ||
-				listener instanceof HttpSessionAttributeListener ||
-				listener instanceof HttpSessionActivationListener ||
-				listener instanceof AsyncListener ||
-				listener instanceof ReadListener ||
-				listener instanceof WriteListener ||
-				listener instanceof HttpSessionIdListener
-		)) {
-			valid = false;
-		}
-
-		if (listenerMapping.getHttpContextId() != null && listenerMapping.getHttpContextId().trim().length() == 0) {
-			LOG.warn("Registered listener [" + getPusblishedPID()
-					+ "] did not contain a valid http context id");
-			valid = false;
-		}
-
-		Boolean listenerEnabled = ServicePropertiesUtils.getBooleanProperty(
-				serviceReference,
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER);
-		if (!Boolean.TRUE.equals(listenerEnabled)) {
-			LOG.warn("Registered listener [" + getPusblishedPID()
-					+ "] is not enabled via 'osgi.http.whiteboard.listener' property");
-			valid = false;
-		}
-
-		return valid;
 	}
 }

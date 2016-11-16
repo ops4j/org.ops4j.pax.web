@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ListenerWebElement<T extends EventListener> extends WebElement<T> implements WhiteboardListener {
 
-	private Logger LOG = LoggerFactory.getLogger(ServletWebElement.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ListenerWebElement.class);
 
 	private final ListenerMapping listenerMapping;
 
@@ -55,39 +55,8 @@ public class ListenerWebElement<T extends EventListener> extends WebElement<T> i
 		super(ref);
 		NullArgumentException.validateNotNull(listenerMapping, "Listener mapping");
 		this.listenerMapping = listenerMapping;
-	}
 
-	@Override
-	public void register(final WebContainer webContainer,
-						 final HttpContext httpContext) throws Exception {
-		webContainer.registerEventListener(listenerMapping.getListener(), httpContext);
-	}
-
-	@Override
-	public void unregister(final WebContainer webContainer,
-						   final HttpContext httpContext) {
-		webContainer.unregisterEventListener(listenerMapping.getListener());
-	}
-
-	@Override
-	public String getHttpContextId() {
-		return listenerMapping.getHttpContextId();
-	}
-
-	@Override
-	public String toString() {
-		return this.getClass().getSimpleName() + "{mapping=" + listenerMapping + "}";
-	}
-
-	@Override
-	public ListenerMapping getListenerMapping() {
-		return listenerMapping;
-	}
-
-	@Override
-	public boolean isValid() {
-		boolean valid = true;
-
+		// validate
 		final EventListener listener = listenerMapping.getListener();
 
 		if (!(listener instanceof ServletContextListener ||
@@ -120,7 +89,32 @@ public class ListenerWebElement<T extends EventListener> extends WebElement<T> i
 					+ "] is not enabled via 'osgi.http.whiteboard.listener' property");
 			valid = false;
 		}
+	}
 
-		return valid;
+	@Override
+	public void register(final WebContainer webContainer,
+						 final HttpContext httpContext) throws Exception {
+		webContainer.registerEventListener(listenerMapping.getListener(), httpContext);
+	}
+
+	@Override
+	public void unregister(final WebContainer webContainer,
+						   final HttpContext httpContext) {
+		webContainer.unregisterEventListener(listenerMapping.getListener());
+	}
+
+	@Override
+	public String getHttpContextId() {
+		return listenerMapping.getHttpContextId();
+	}
+
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName() + "{mapping=" + listenerMapping + "}";
+	}
+
+	@Override
+	public ListenerMapping getListenerMapping() {
+		return listenerMapping;
 	}
 }

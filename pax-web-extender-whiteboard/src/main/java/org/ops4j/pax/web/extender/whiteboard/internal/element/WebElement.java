@@ -34,6 +34,11 @@ import org.osgi.service.http.HttpContext;
 public abstract class WebElement<T> implements WhiteboardElement {
 
 	protected final ServiceReference<T> serviceReference;
+	/**
+	 * Elements can define custom validation:
+	 * Only valid WebElements registered via whiteboard will be published to the {@link WebContainer}.
+	 */
+	protected boolean valid = true;
 
 	/**
 	 * Subclasses must provide the service-reference.
@@ -85,10 +90,11 @@ public abstract class WebElement<T> implements WhiteboardElement {
 	/**
 	 * Elements can define custom validation:
 	 * Only valid WebElements registered via whiteboard will be published to the {@link WebContainer}.
-	 * @return false in case of validation-errors
+	 * @return the validation-state of this element
+	 * @see #valid
 	 */
 	@Override
 	public boolean isValid() {
-		return true;
+		return valid;
 	}
 }

@@ -20,10 +20,8 @@ package org.ops4j.pax.web.extender.whiteboard.internal.element;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
-import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.service.whiteboard.WhiteboardServletContextHelper;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
@@ -33,7 +31,7 @@ import org.slf4j.LoggerFactory;
 public class ServletContextHelperElement<T extends ServletContextHelper> extends HttpContextElement implements WhiteboardServletContextHelper {
 
 
-    private Logger LOG = LoggerFactory.getLogger(ServletContextHelperElement.class);
+    private static Logger LOG = LoggerFactory.getLogger(ServletContextHelperElement.class);
 
     private final T contextHelper;
 
@@ -43,6 +41,22 @@ public class ServletContextHelperElement<T extends ServletContextHelper> extends
         super(ref, contextMapping);
         NullArgumentException.validateNotNull(contextHelper, "ServletContextHelper");
         this.contextHelper = contextHelper;
+
+        // validate
+        String servletCtxtName = ServicePropertiesUtils.getStringProperty(serviceReference,
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
+
+        if (servletCtxtName == null || servletCtxtName.trim().length() == 0) {
+            LOG.warn("Registered ServletContextHelper [" + getPusblishedPID() + "] did not contain a valid name");
+            valid = false;
+        }
+
+        String ctxtPath = ServicePropertiesUtils.getStringProperty(serviceReference,
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH);
+        if (ctxtPath == null || ctxtPath.trim().length() == 0) {
+            LOG.warn("Registered ServletContextHelper [" + getPusblishedPID() + "] did not contain a valid path");
+            valid = false;
+        }
     }
 
 
@@ -50,27 +64,4 @@ public class ServletContextHelperElement<T extends ServletContextHelper> extends
     public ServletContextHelper getServletContextHelper() {
         return contextHelper;
     }
-
-
-    @Override
-    public boolean isValid() {
-        boolean valid = true;
-
-        String servletCtxtName = ServicePropertiesUtils.getStringProperty(serviceReference,
-                HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
-
-        if (servletCtxtName == null || servletCtxtName.trim().length() == 0) {
-            LOG.warn("Registered ServletContextHelper [" + getPusblishedPID() + "] did not contain a valid name");
-            valid = false; // skip as it's a mandatory property
-        }
-
-        String ctxtPath = ServicePropertiesUtils.getStringProperty(serviceReference,
-                HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH);
-        if (ctxtPath == null || ctxtPath.trim().length() == 0) {
-            LOG.warn("Registered ServletContextHelper [" + getPusblishedPID() + "] did not contain a valid path");
-            valid = false; // skip as it's a mandatory property
-        }
-        return valid;
-    }
-
 }

@@ -28,16 +28,24 @@ import org.slf4j.LoggerFactory;
 
 public class HttpContextElement implements WhiteboardHttpContext {
 
-    private Logger LOG = LoggerFactory.getLogger(HttpContextElement.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HttpContextElement.class);
 
     protected final ServiceReference serviceReference;
-    protected final HttpContextMapping contextMapping;
+    private final HttpContextMapping contextMapping;
+    protected boolean valid = true;
 
     public HttpContextElement(final ServiceReference ref, final HttpContextMapping contextMapping) {
         NullArgumentException.validateNotNull(ref, "service-reference");
         NullArgumentException.validateNotNull(contextMapping, "Context mapping");
         this.serviceReference = ref;
         this.contextMapping = contextMapping;
+
+        // validate
+        String httpContextId = contextMapping.getHttpContextId();
+        if ( httpContextId == null || httpContextId.trim().length() == 0) {
+            LOG.warn("Registered http context [" + getPusblishedPID() + "] did not contain a valid http context id");
+            valid = false;
+        }
     }
 
     @Override
@@ -47,14 +55,6 @@ public class HttpContextElement implements WhiteboardHttpContext {
 
     @Override
     public boolean isValid() {
-        boolean valid = true;
-        String httpContextId = contextMapping.getHttpContextId();
-        if ( httpContextId == null || httpContextId.trim().length() == 0) {
-            LOG.warn("Registered http context [" + getPusblishedPID() + "] did not contain a valid http context id");
-            valid = false;
-        }
-
-
         return valid;
     }
 
