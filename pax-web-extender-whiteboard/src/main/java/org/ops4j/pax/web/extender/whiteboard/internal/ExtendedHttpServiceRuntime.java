@@ -16,8 +16,8 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import org.ops4j.pax.web.extender.whiteboard.internal.element.WebElement;
@@ -34,10 +34,10 @@ public class ExtendedHttpServiceRuntime implements HttpServiceRuntime {
 
     private final BundleContext bundleContext;
     /**
-     * ConcurrentLinkedQueue is used because {@link WebApplication#registerWebElement(WebElement)} and
+     * ConcurrentHashMap.KeySet is used because {@link WebApplication#registerWebElement(WebElement)} and
      * {@link WebApplication#unregisterWebElement(WebElement)} only uses a read-lock
      */
-    private Queue<WhiteboardElement> whiteboardElements = new ConcurrentLinkedQueue<>();
+    private Set<WhiteboardElement> whiteboardElements = ConcurrentHashMap.newKeySet();
 
 
 //    /**

@@ -18,4 +18,5 @@ package org.ops4j.pax.web.service.whiteboard;
 
 public interface WhiteboardResource extends WhiteboardElement {
 
+    ResourceMapping getResourceMapping();
 }

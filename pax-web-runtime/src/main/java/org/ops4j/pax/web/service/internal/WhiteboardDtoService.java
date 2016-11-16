@@ -35,6 +35,7 @@ import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.whiteboard.*;
+import org.osgi.dto.DTO;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
@@ -43,19 +44,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.http.runtime.dto.DTOConstants;
-import org.osgi.service.http.runtime.dto.ErrorPageDTO;
-import org.osgi.service.http.runtime.dto.FailedErrorPageDTO;
-import org.osgi.service.http.runtime.dto.FailedFilterDTO;
-import org.osgi.service.http.runtime.dto.FailedListenerDTO;
-import org.osgi.service.http.runtime.dto.FailedServletContextDTO;
-import org.osgi.service.http.runtime.dto.FailedServletDTO;
-import org.osgi.service.http.runtime.dto.FilterDTO;
-import org.osgi.service.http.runtime.dto.ListenerDTO;
-import org.osgi.service.http.runtime.dto.RequestInfoDTO;
-import org.osgi.service.http.runtime.dto.RuntimeDTO;
-import org.osgi.service.http.runtime.dto.ServletContextDTO;
-import org.osgi.service.http.runtime.dto.ServletDTO;
+import org.osgi.service.http.runtime.dto.*;
 
 @Component(immediate = true, service = WhiteboardDtoService.class)
 public class WhiteboardDtoService {
@@ -87,7 +76,7 @@ public class WhiteboardDtoService {
     }
 
     RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator, ServerModel serverModel, ServiceModel serviceModel) {
-        // FIXME not complete
+        // TODO not complete
 
         RuntimeDTO runtimeDto = new RuntimeDTO();
         List<ServletContextDTO> servletContextDTOs = new ArrayList<>();
@@ -100,8 +89,10 @@ public class WhiteboardDtoService {
         List<FailedErrorPageDTO> failedErrorPageDTOs = new ArrayList<>();
         List<ListenerDTO> listenerDTOs = new ArrayList<>();
         List<FailedListenerDTO> failedListenerDTOs = new ArrayList<>();
+        List<ResourceDTO> resourceDTOs = new ArrayList<>();
+        List<FailedResourceDTO> failedResourceDTOs = new ArrayList<>();
 
-        //FIXME: more lists ... 
+        //TODO: more lists ...
 
 
         iterator.forEachRemaining(element -> {
@@ -111,7 +102,7 @@ public class WhiteboardDtoService {
                         servletContexts.entrySet().stream()
                                 .filter(entry -> compareContextroot(entry.getValue(), whiteboardHttpContext.getHttpContextMapping().getPath()))
                                 .findFirst();
-                // FIXME name missing
+                // TODO name missing
                 if(!whiteboardHttpContext.isValid()){
                     FailedServletContextDTO dto = new FailedServletContextDTO();
                     dto.failureReason = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
@@ -127,23 +118,24 @@ public class WhiteboardDtoService {
                     failedServletContextDTOs.add(dto);
                 } else {
                     // all fine
-                    servletContextDTOs.add(this.transformToDTO(matchingServletContextEntry.get()));
+                    servletContextDTOs.add(this.mapServletContext(matchingServletContextEntry.get()));
                 }
-            } else if (element  instanceof WhiteboardServlet) {
-                if (element.isValid()) {
-                    servletDTOs.add(transformToDTO((WhiteboardServlet)element));
-                } else {
-                    failedServletDTOs.add(transformToDTOFailed((WhiteboardServlet)element));
-                }
+            } else if (element  instanceof WhiteboardServlet && ((WhiteboardServlet) element).getErrorPageMappings().isEmpty()) {
+                mapServlet((WhiteboardServlet)element, servletDTOs, failedServletDTOs);
+            }  else if (element  instanceof WhiteboardServlet && !((WhiteboardServlet) element).getErrorPageMappings().isEmpty()) {
+                mapErrorPage((WhiteboardServlet)element, errorPageDTOs, failedErrorPageDTOs);
             } else if (element instanceof WhiteboardFilter) {
-                if (element.isValid()) {
-                    filterDTOs.add(transformToDTO((WhiteboardFilter)element));
-                } else {
-                    failedFilterDTOs.add(transformToDTOFailed((WhiteboardFilter)element));
-                }
+                mapFilter((WhiteboardFilter)element, filterDTOs, failedFilterDTOs);
+            } else if (element instanceof WhiteboardListener) {
+                mapListener((WhiteboardListener) element, listenerDTOs, failedListenerDTOs);
+            } else if (element instanceof WhiteboardResource) {
+                mapResource((WhiteboardResource) element, resourceDTOs, failedResourceDTOs);
+            } else if (element instanceof WhiteboardWelcomeFile) {
+                //TODO: welcome-files currently not working in whiteboard-ds example
             } else if (element instanceof WhiteboardErrorPage) {
+                // TODO Do we need ErrorPageMappings to be tracked? R6 should be enough
                 if (element.isValid()) {
-                    errorPageDTOs.add(transformToDTO((WhiteboardErrorPage)element));
+                    errorPageDTOs.add(mapServlet((WhiteboardErrorPage)element));
                 } else {
                     failedErrorPageDTOs.add(transformToDTOFailed((WhiteboardErrorPage)element));
                 }
@@ -153,16 +145,6 @@ public class WhiteboardDtoService {
                 } else {
                     failedServletDTOs.add(transformToDTOFailed((WhiteboardJspMapping)element));
                 }
-            } else if (element instanceof WhiteboardListener) {
-                if (element.isValid()) {
-                    listenerDTOs.add(tranformToDTO((WhiteboardListener) element));
-                } else {
-                    failedListenerDTOs.add(transformToDTOFailed((WhiteboardListener)element));
-                }
-            } else if (element instanceof WhiteboardResource) {
-                //TODO: add resources
-            } else if (element instanceof WhiteboardWelcomeFile) {
-                //TODO: add welcomefiles
             }
         });
 
@@ -171,14 +153,14 @@ public class WhiteboardDtoService {
             servletContextDTOs.addAll(servletContexts.entrySet().stream().filter(entry ->
                     WebContainerContext.DefaultContextIds.DEFAULT.getValue().equals(entry.getValue().getServletContextName())
                             || WebContainerContext.DefaultContextIds.SHARED.getValue().equals(entry.getValue().getServletContextName()))
-                    .map(this::transformToDTO)
+                    .map(this::mapServletContext)
                     .collect(Collectors.toList()));
 
         }
         runtimeDto.servletContextDTOs = servletContextDTOs.toArray(new ServletContextDTO[servletContextDTOs.size()]);
         runtimeDto.failedServletContextDTOs = failedServletContextDTOs.toArray(new FailedServletContextDTO[servletContextDTOs.size()]);
 
-
+        // Attach valid DTOs to matching ServletContextDTO
         Arrays.stream(runtimeDto.servletContextDTOs).forEach(servletContextDTO -> {
             // map lists to correct context
             servletContextDTO.servletDTOs = servletDTOs.stream()
@@ -193,25 +175,33 @@ public class WhiteboardDtoService {
             servletContextDTO.listenerDTOs = listenerDTOs.stream()
                     .filter(listenerDTO -> listenerDTO.servletContextId == servletContextDTO.serviceId)
                     .toArray(ListenerDTO[]::new);
+            servletContextDTO.resourceDTOs = resourceDTOs.stream()
+                    .filter(resourceDTO -> resourceDTO.servletContextId == servletContextDTO.serviceId)
+                    .toArray(ResourceDTO[]::new);
         });
         
-        
-
+        // Attach failed DTOs
         runtimeDto.failedServletContextDTOs = failedServletContextDTOs.stream().toArray(FailedServletContextDTO[]::new);
         runtimeDto.failedServletDTOs = failedServletDTOs.stream().toArray(FailedServletDTO[]::new);
         runtimeDto.failedFilterDTOs = failedFilterDTOs.stream().toArray(FailedFilterDTO[]::new);
         runtimeDto.failedErrorPageDTOs = failedErrorPageDTOs.stream().toArray(FailedErrorPageDTO[]::new);
         runtimeDto.failedListenerDTOs = failedListenerDTOs.stream().toArray(FailedListenerDTO[]::new);
+        runtimeDto.failedResourceDTOs = failedResourceDTOs.stream().toArray(FailedResourceDTO[]::new);
 
         return runtimeDto;
     }
 
+
     RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator, ServerModel serverModel, ServiceModel serviceModel) {
-        // FIXME TBD
+        // TODO TBD
         return null;
     }
-    
-    private ServletContextDTO transformToDTO(Map.Entry<ServiceReference<ServletContext>, ServletContext> mapEntry) {
+
+
+    /*
+     * Maps a default context (whithout whiteboard-service) to a ServletContextDTO
+     */
+    private ServletContextDTO mapServletContext(Map.Entry<ServiceReference<ServletContext>, ServletContext> mapEntry) {
         final ServiceReference<ServletContext> ref = mapEntry.getKey();
         final ServletContext servletContext = mapEntry.getValue();
 
@@ -233,28 +223,86 @@ public class WhiteboardDtoService {
     }
 
 
-    private ServletDTO transformToDTO(WhiteboardServlet whiteBoardServlet) {
+    private void mapServlet(WhiteboardServlet whiteBoardServlet, List<ServletDTO> servletDTOs, List<FailedServletDTO> failedServletDTOs) {
         ServletDTO dto = new ServletDTO();
-
         ServletMapping servletMapping = whiteBoardServlet.getServletMapping();
+        dto.serviceId = whiteBoardServlet.getServiceID();
+        dto.name = servletMapping.getServletName();
+        dto.initParams = servletMapping.getInitParams();
+        dto.patterns = servletMapping.getUrlPatterns();
+        dto.servletInfo = servletMapping.getServlet().getServletInfo();
+        dto.asyncSupported = servletMapping.getAsyncSupported();
 
         Optional<Map.Entry<ServiceReference<ServletContext>, ServletContext>> matchingServletContextEntry = findMatchingServletContext(
                 servletMapping.getHttpContextId());
 
         if (matchingServletContextEntry.isPresent()) {
             dto.servletContextId = (long) matchingServletContextEntry.get().getKey().getProperty(Constants.SERVICE_ID);
-        } else {
-            // FIXME something wrong...what to do
         }
-        dto.serviceId = whiteBoardServlet.getServiceID();
-        dto.name = servletMapping.getServletName();
-        dto.initParams = servletMapping.getInitParams();
 
-        // FIXME: not complete
-        return dto;
+        if(!whiteBoardServlet.isValid()){
+            failedServletDTOs.add(
+                    transformToFailedDTO(
+                            dto,
+                            FailedServletDTO.class,
+                            DTOConstants.FAILURE_REASON_VALIDATION_FAILED));
+        } else if (!matchingServletContextEntry.isPresent()){
+            failedServletDTOs.add(
+                    transformToFailedDTO(
+                            dto,
+                            FailedServletDTO.class,
+                            DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING));
+        } else {
+            servletDTOs.add(dto);
+        }
     }
 
-    private FilterDTO transformToDTO(WhiteboardFilter whiteboardFilter) {
+
+    private void mapErrorPage(WhiteboardServlet whiteboardErrorPage, List<ErrorPageDTO> errorPageDTOs, List<FailedErrorPageDTO> failedErrorPageDTOs) {
+        ErrorPageDTO dto = new ErrorPageDTO();
+
+        ServletMapping servletMapping = whiteboardErrorPage.getServletMapping();
+
+        Optional<Map.Entry<ServiceReference<ServletContext>, ServletContext>> matchingServletContextEntry = findMatchingServletContext(
+                servletMapping.getHttpContextId());
+
+        if (matchingServletContextEntry.isPresent()) {
+            dto.servletContextId = (long) matchingServletContextEntry.get().getKey().getProperty(Constants.SERVICE_ID);
+        }
+        dto.serviceId = whiteboardErrorPage.getServiceID();
+        dto.name = servletMapping.getServletName();
+        dto.initParams = servletMapping.getInitParams();
+        dto.exceptions = whiteboardErrorPage.getErrorPageMappings().stream()
+                .map(ErrorPageMapping::getError)
+                .toArray(String[]::new);
+        // FIXME where to get the errorCodes-mapping from
+//        dto.errorCodes = ???
+
+        // FIXME: not complete
+
+        if (matchingServletContextEntry.isPresent()) {
+            dto.servletContextId = (long) matchingServletContextEntry.get().getKey().getProperty(Constants.SERVICE_ID);
+        }
+
+        if(!whiteboardErrorPage.isValid()){
+            failedErrorPageDTOs.add(
+                    transformToFailedDTO(
+                            dto,
+                            FailedErrorPageDTO.class,
+                            DTOConstants.FAILURE_REASON_VALIDATION_FAILED));
+        } else if (!matchingServletContextEntry.isPresent()){
+            failedErrorPageDTOs.add(
+                    transformToFailedDTO(
+                            dto,
+                            FailedErrorPageDTO.class,
+                            DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING));
+        } else {
+            errorPageDTOs.add(dto);
+        }
+    }
+
+
+    private void mapFilter(WhiteboardFilter whiteboardFilter, List<FilterDTO> filterDTOs, List<FailedFilterDTO> failedFilterDTOs) {
         FilterDTO dto = new FilterDTO();
         dto.asyncSupported = whiteboardFilter.getFilterMapping().getAsyncSupported(); 
         dto.initParams = whiteboardFilter.getFilterMapping().getInitParams();
@@ -267,14 +315,90 @@ public class WhiteboardDtoService {
 
         if (matchingServletContextEntry.isPresent()) {
             dto.servletContextId = (long) matchingServletContextEntry.get().getKey().getProperty(Constants.SERVICE_ID);
-        } else {
-            // FIXME something wrong...what to do
         }
-        
-        return dto;
+
+        if(!whiteboardFilter.isValid()){
+            failedFilterDTOs.add(
+                    transformToFailedDTO(
+                            dto,
+                            FailedFilterDTO.class,
+                            DTOConstants.FAILURE_REASON_VALIDATION_FAILED));
+        } else if (!matchingServletContextEntry.isPresent()){
+            failedFilterDTOs.add(
+                    transformToFailedDTO(
+                            dto,
+                            FailedFilterDTO.class,
+                            DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING));
+        } else {
+            filterDTOs.add(dto);
+        }
+    }
+
+
+    private void mapListener(WhiteboardListener whiteboardLister, List<ListenerDTO> listenerDTOs, List<FailedListenerDTO> failedListenerDTOs) {
+        ListenerDTO dto = new ListenerDTO();
+        dto.serviceId = whiteboardLister.getServiceID();
+        dto.types = Arrays.stream(whiteboardLister.getListenerMapping().getListener().getClass().getInterfaces())
+                .filter(EventListener.class::isAssignableFrom)
+                .map(Class::getName)
+                .toArray(String[]::new);
+
+        Optional<Map.Entry<ServiceReference<ServletContext>, ServletContext>> matchingServletContextEntry = findMatchingServletContext(
+                whiteboardLister.getListenerMapping().getHttpContextId());
+
+        if (matchingServletContextEntry.isPresent()) {
+            dto.servletContextId = (long) matchingServletContextEntry.get().getKey().getProperty(Constants.SERVICE_ID);
+        }
+
+        if(!whiteboardLister.isValid()){
+            failedListenerDTOs.add(
+                    transformToFailedDTO(
+                            dto,
+                            FailedListenerDTO.class,
+                            DTOConstants.FAILURE_REASON_VALIDATION_FAILED));
+        } else if (!matchingServletContextEntry.isPresent()){
+            failedListenerDTOs.add(
+                    transformToFailedDTO(
+                            dto,
+                            FailedListenerDTO.class,
+                            DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING));
+        } else {
+            listenerDTOs.add(dto);
+        }
+    }
+
+
+    private void mapResource(WhiteboardResource whiteboardResource, List<ResourceDTO> resourceDTOs, List<FailedResourceDTO> failedResourceDTOs) {
+        ResourceDTO dto = new ResourceDTO();
+        dto.serviceId = whiteboardResource.getServiceID();
+        dto.prefix = whiteboardResource.getResourceMapping().getPath();
+        dto.patterns = new String [] {whiteboardResource.getResourceMapping().getAlias()};
+
+        Optional<Map.Entry<ServiceReference<ServletContext>, ServletContext>> matchingServletContextEntry = findMatchingServletContext(
+                whiteboardResource.getResourceMapping().getHttpContextId());
+
+        if (matchingServletContextEntry.isPresent()) {
+            dto.servletContextId = (long) matchingServletContextEntry.get().getKey().getProperty(Constants.SERVICE_ID);
+        }
+
+        if(!whiteboardResource.isValid()){
+            failedResourceDTOs.add(
+                    transformToFailedDTO(
+                            dto,
+                            FailedResourceDTO.class,
+                            DTOConstants.FAILURE_REASON_VALIDATION_FAILED));
+        } else if (!matchingServletContextEntry.isPresent()){
+            failedResourceDTOs.add(
+                    transformToFailedDTO(
+                            dto,
+                            FailedResourceDTO.class,
+                            DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING));
+        } else {
+            resourceDTOs.add(dto);
+        }
     }
     
-    private ErrorPageDTO transformToDTO(WhiteboardErrorPage whiteboardErrorPage) {
+    private ErrorPageDTO mapServlet(WhiteboardErrorPage whiteboardErrorPage) {
         ErrorPageDTO dto = new ErrorPageDTO();
         
         try {
@@ -304,48 +428,7 @@ public class WhiteboardDtoService {
         return dto;
     }
     
-    private ListenerDTO tranformToDTO(WhiteboardListener whiteboardListener) {
-        ListenerDTO dto = new ListenerDTO();
-        
-        EventListener listener = whiteboardListener.getListenerMapping().getListener();
-        dto.types = new String[] { listener.getClass().getName() };
-        
-        Optional<Map.Entry<ServiceReference<ServletContext>, ServletContext>> matchingServletContextEntry = findMatchingServletContext(
-                whiteboardListener.getListenerMapping().getHttpContextId());
-        
-        if (matchingServletContextEntry.isPresent()) {
-            dto.servletContextId = (long) matchingServletContextEntry.get().getKey().getProperty(Constants.SERVICE_ID);
-        } else {
-            // FIXME something wrong...what to do
-        }
-        
-        return dto;
-    }
 
-    private FailedServletDTO transformToDTOFailed(WhiteboardServlet whiteboardServlet) {
-        FailedServletDTO dto = new FailedServletDTO();
-
-        dto.serviceId = whiteboardServlet.getServiceID();
-        dto.failureReason = DTOConstants.FAILURE_REASON_VALIDATION_FAILED; 
-        // FIXME: not the only possible reason
-        
-        // FIXME: not complete
-        dto.name = whiteboardServlet.getServletMapping().getServletName();
-        dto.patterns = whiteboardServlet.getServletMapping().getUrlPatterns();
-        dto.asyncSupported = whiteboardServlet.getServletMapping().getAsyncSupported();
-        return dto;
-    }
-    
-    private FailedFilterDTO transformToDTOFailed(WhiteboardFilter whiteboardFilter) {
-        FailedFilterDTO dto = new FailedFilterDTO();
-        
-        dto.serviceId = whiteboardFilter.getServiceID();
-        dto.failureReason = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
-        //FIXME: ... could be some arbitrary reasons
-        
-        return dto;
-    }
-    
     private FailedErrorPageDTO transformToDTOFailed(WhiteboardErrorPage whiteboardErrorPage) {
         FailedErrorPageDTO dto = new FailedErrorPageDTO();
         
@@ -377,8 +460,10 @@ public class WhiteboardDtoService {
             String httpContextId) {
         final String name;
         if (httpContextId == null || httpContextId.trim().length() == 0) {
-            // FIXME not nice, but currently the only way to map to context
-            // (could also be the shared context)
+            /*
+             FIXME currently no way to find Default/SharedContext because they are not available in the ServiceModel
+             (could also be the shared context)
+             */
             name = WebContainerContext.DefaultContextIds.DEFAULT.getValue();
         } else {
             name = httpContextId;
@@ -386,6 +471,98 @@ public class WhiteboardDtoService {
         return this.servletContexts.entrySet().stream()
                 .filter(entry -> Objects.equals(entry.getValue().getServletContextName(), name)).findFirst();
     }
+
+
+    /**
+     * A Failure-DTO is the same as the standard-DTO, just with a failure-reason. This method just maps
+     * to a failure-DTO.
+     * @param dto the DTO to convert
+     * @param type the Type of the failure-DTO (necessary for correct Generic)
+     * @param failureReason a constant from {@link DTOConstants}
+     * @param <T> the type of the given DTO
+     * @param <R> the return-type of this method, corresponds to type-param
+     *
+     * @return converted failure-DTO
+     */
+    private <T extends DTO, R extends DTO> R transformToFailedDTO(T dto, Class<R> type, int failureReason){
+        R result;
+        if (dto instanceof ServletContextDTO) {
+            ServletContextDTO servletContextDTO = ((ServletContextDTO) dto);
+            FailedServletContextDTO failedServletContextDTO = new FailedServletContextDTO();
+            failedServletContextDTO.failureReason = failureReason;
+            failedServletContextDTO.serviceId = servletContextDTO.serviceId;
+            failedServletContextDTO.name = servletContextDTO.name;
+            failedServletContextDTO.initParams = servletContextDTO.initParams;
+            failedServletContextDTO.contextPath = servletContextDTO.contextPath;
+            failedServletContextDTO.attributes = servletContextDTO.attributes;
+            failedServletContextDTO.errorPageDTOs = servletContextDTO.errorPageDTOs;
+            failedServletContextDTO.servletDTOs = servletContextDTO.servletDTOs;
+            failedServletContextDTO.listenerDTOs = servletContextDTO.listenerDTOs;
+            failedServletContextDTO.filterDTOs = servletContextDTO.filterDTOs;
+            failedServletContextDTO.resourceDTOs = servletContextDTO.resourceDTOs;
+            result = type.cast(failedServletContextDTO);
+        } else if (dto instanceof ServletDTO) {
+            ServletDTO servletDTO = ((ServletDTO) dto);
+            FailedServletDTO failedServletDTO = new FailedServletDTO();
+            failedServletDTO.failureReason = failureReason;
+            failedServletDTO.serviceId = servletDTO.serviceId;
+            failedServletDTO.servletContextId = servletDTO.servletContextId;
+            failedServletDTO.asyncSupported = servletDTO.asyncSupported;
+            failedServletDTO.patterns = servletDTO.patterns;
+            failedServletDTO.name = servletDTO.name;
+            failedServletDTO.initParams = servletDTO.initParams;
+            failedServletDTO.servletInfo = servletDTO.servletInfo;
+            result = type.cast(failedServletDTO);
+        } else if (dto instanceof ErrorPageDTO) {
+            ErrorPageDTO errorPageDTO = ((ErrorPageDTO) dto);
+            FailedErrorPageDTO failedErrorPageDTO = new FailedErrorPageDTO();
+            failedErrorPageDTO.failureReason = failureReason;
+            failedErrorPageDTO.serviceId = errorPageDTO.serviceId;
+            failedErrorPageDTO.servletContextId = errorPageDTO.servletContextId;
+            failedErrorPageDTO.errorCodes = errorPageDTO.errorCodes;
+            failedErrorPageDTO.exceptions = errorPageDTO.exceptions;
+            failedErrorPageDTO.asyncSupported = errorPageDTO.asyncSupported;
+            failedErrorPageDTO.name = errorPageDTO.name;
+            failedErrorPageDTO.initParams = errorPageDTO.initParams;
+            failedErrorPageDTO.servletInfo = errorPageDTO.servletInfo;
+            result = type.cast(failedErrorPageDTO);
+        } else if(dto instanceof ListenerDTO){
+            ListenerDTO listenerDTO = ((ListenerDTO) dto);
+            FailedListenerDTO failedListenerDTO = new FailedListenerDTO();
+            failedListenerDTO.failureReason = failureReason;
+            failedListenerDTO.serviceId = listenerDTO.serviceId;
+            failedListenerDTO.servletContextId = listenerDTO.servletContextId;
+            failedListenerDTO.types = listenerDTO.types;
+            result = type.cast(failedListenerDTO);
+        } else if(dto instanceof FilterDTO) {
+            FilterDTO filterDTO = ((FilterDTO) dto);
+            FailedFilterDTO failedFilterDTO = new FailedFilterDTO();
+            failedFilterDTO.failureReason = failureReason;
+            failedFilterDTO.serviceId = filterDTO.serviceId;
+            failedFilterDTO.servletContextId = filterDTO.servletContextId;
+            failedFilterDTO.asyncSupported = filterDTO.asyncSupported;
+            failedFilterDTO.patterns = filterDTO.patterns;
+            failedFilterDTO.name = filterDTO.name;
+            failedFilterDTO.dispatcher = filterDTO.dispatcher;
+            failedFilterDTO.initParams = filterDTO.initParams;
+            failedFilterDTO.servletNames = filterDTO.servletNames;
+            failedFilterDTO.regexs = filterDTO.regexs;
+            result = type.cast(failedFilterDTO);
+        } else if(dto instanceof ResourceDTO) {
+            ResourceDTO resourceDTO = ((ResourceDTO) dto);
+            FailedResourceDTO failedResourceDTO = new FailedResourceDTO();
+            failedResourceDTO.failureReason = failureReason;
+            failedResourceDTO.serviceId = resourceDTO.serviceId;
+            failedResourceDTO.servletContextId = resourceDTO.servletContextId;
+            failedResourceDTO.patterns = resourceDTO.patterns;
+            failedResourceDTO.prefix = resourceDTO.prefix;
+            result = type.cast(failedResourceDTO);
+        } else {
+            throw new IllegalArgumentException(dto.getClass().getName() + " not handled!");
+        }
+        return result;
+    }
+
 
     @Reference(unbind = "removeServletContext", service = ServletContext.class, cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addServletContext(ServiceReference<ServletContext> ref, ServletContext servletContext) {

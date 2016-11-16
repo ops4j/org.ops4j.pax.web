@@ -396,6 +396,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 				webElements.forEach(this::unregisterWebElement);
 			}
 		} finally {
+			webElements.forEach(httpServiceRuntime::removeWhiteboardElement);
 			httpServiceLock.readLock().unlock();
 		}
 	}
@@ -403,7 +404,6 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	private void unregisterWebElement(final WebElement registerer) {
 		if (webContainer != null && httpContext != null && registerer.isValid()) {
 			registerer.unregister(webContainer, httpContext);
-			httpServiceRuntime.removeWhiteboardElement(registerer);
 		}
 	}
 

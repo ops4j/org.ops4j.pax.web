@@ -26,7 +26,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 
 /**
- * FIXME not sure if we need to track ListenerMappings in addition to Listeners
+ * FIXME not sure if we need to track ResourceMappings in addition to Resources
  * Registers/unregisters {@link ResourceMapping} with {@link WebContainer}.
  *
  * @author Alin Dreghiciu

@@ -21,7 +21,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal.element;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardResourceMapping;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardResource;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class ResourceWebElement extends WebElement<Object> implements WhiteboardResourceMapping {
+public class ResourceWebElement extends WebElement<Object> implements WhiteboardResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ResourceWebElement.class);
 

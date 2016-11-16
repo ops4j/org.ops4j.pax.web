@@ -203,10 +203,9 @@ public class ServletTracker<T extends Servlet> extends AbstractTracker<T, Servle
 		mapping.setLoadOnStartup(loadOnStartup);
 		mapping.setAsyncSupported(asyncSupported);
 
-		List<DefaultErrorPageMapping> errorMappings = null;
+		List<DefaultErrorPageMapping> errorMappings = new ArrayList<>();
 
 		if (errorPageParams != null) {
-			errorMappings = new ArrayList<>();
 			for (String errorPageParam : errorPageParams) {
 				DefaultErrorPageMapping errorMapping = new DefaultErrorPageMapping();
 				errorMapping.setHttpContextId(httpContextId);
