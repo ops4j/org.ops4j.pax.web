@@ -24,7 +24,9 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVLETCO
 
 
 import javax.inject.Inject;
+import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServlet;
 
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.junit.Before;
@@ -41,16 +43,13 @@ import org.ops4j.pax.web.samples.whiteboard.ds.*;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.*;
+import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.HttpServiceRuntime;
 import org.osgi.service.http.runtime.dto.*;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 @RunWith(PaxExam.class)
@@ -201,8 +200,26 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 
 	@Test
 	public void testRuntimeDtoWithFailedServices() throws Exception {
-		// TODO add invalid services
+
+		// add a ServletContextHelper with missing path
+		Dictionary<String, String> props = new Hashtable<>(1);
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "FailedContextName");
+		ServiceRegistration<ServletContextHelper> failedContextReg =
+				bundleContext.registerService(ServletContextHelper.class, new InvalidServletContextHelper(), props);
+		long serviceIdFailedContext = (Long) failedContextReg.getReference().getProperty(Constants.SERVICE_ID);
+
+		// add a Servlet with missing properties
+		props = new Hashtable<>(1);
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "FailedServletName");
+		ServiceRegistration<Servlet> failedServletReg =
+				bundleContext.registerService(Servlet.class, new InvalidServlet(), props);
+		long serviceIdFailedServlet = (Long) failedServletReg.getReference().getProperty(Constants.SERVICE_ID);
+
 		RuntimeDTO runtimeDTO = withService(HttpServiceRuntime::getRuntimeDTO);
+
+		// Test all failed elements
+		assertThat("Invalid ServletContext doesn't match", runtimeDTO.failedServletContextDTOs[0], failedServletContextDTO -> failedServletContextDTO.serviceId == serviceIdFailedContext);
+		assertThat("Invalid ServletContext doesn't match", runtimeDTO.failedServletDTOs[0], failedServletDTO -> failedServletDTO.serviceId == serviceIdFailedServlet);
 	}
 
 	@Test
@@ -212,5 +229,20 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 		// FIXME evaluate
 	}
 
+
+	/**
+	 * This ServletContextHelper is supposed to be registered with missing properties
+	 */
+	private static final class InvalidServletContextHelper extends ServletContextHelper {
+
+	}
+
+
+	/**
+	 * This Servlet is supposed to be registered with missing properties
+	 */
+	private static final class InvalidServlet extends HttpServlet {
+
+	}
 
 }

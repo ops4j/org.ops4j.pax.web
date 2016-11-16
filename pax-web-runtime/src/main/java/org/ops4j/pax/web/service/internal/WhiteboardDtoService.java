@@ -111,6 +111,7 @@ public class WhiteboardDtoService {
                         servletContexts.entrySet().stream()
                                 .filter(entry -> compareContextroot(entry.getValue(), whiteboardHttpContext.getHttpContextMapping().getPath()))
                                 .findFirst();
+                // FIXME name missing
                 if(!whiteboardHttpContext.isValid()){
                     FailedServletContextDTO dto = new FailedServletContextDTO();
                     dto.failureReason = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
@@ -329,6 +330,9 @@ public class WhiteboardDtoService {
         // FIXME: not the only possible reason
         
         // FIXME: not complete
+        dto.name = whiteboardServlet.getServletMapping().getServletName();
+        dto.patterns = whiteboardServlet.getServletMapping().getUrlPatterns();
+        dto.asyncSupported = whiteboardServlet.getServletMapping().getAsyncSupported();
         return dto;
     }
     
