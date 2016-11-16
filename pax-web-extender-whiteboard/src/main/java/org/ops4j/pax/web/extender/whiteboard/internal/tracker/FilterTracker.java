@@ -222,6 +222,7 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 		mapping.setUrlPatterns(urlPatterns);
 		mapping.setServletNames(servletNames);
 		mapping.setInitParams(initParams);
+		mapping.setDispatcherType(dispatcherTypes);
 		return new FilterWebElement<>(serviceReference, mapping);
 	}
 }

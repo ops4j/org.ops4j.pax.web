@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.whiteboard;
 
 import java.util.Map;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 
 /**
@@ -73,4 +74,11 @@ public interface FilterMapping {
 	Boolean getAsyncSupported();
 
 
+	/**
+	 * Getter
+	 *
+	 * @return an array of DispatcherTypes the filter was registered for
+	 * @see org.ops4j.pax.web.service.WebContainerConstants#FILTER_MAPPING_DISPATCHER
+	 */
+    DispatcherType[] getDispatcherType();
 }

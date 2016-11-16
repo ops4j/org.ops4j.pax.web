@@ -20,6 +20,7 @@ package org.ops4j.pax.web.extender.whiteboard.runtime;
 import java.util.Arrays;
 import java.util.Map;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 
 import org.ops4j.pax.web.service.whiteboard.FilterMapping;
@@ -58,6 +59,11 @@ public class DefaultFilterMapping implements FilterMapping {
 	 * Filter supports async calls
 	 */
 	private boolean asyncSupported;
+
+	/**
+	 * Filter supports Dispatchers
+	 */
+	private DispatcherType[] dispatcherType;
 
 	/**
 	 * @see FilterMapping#getHttpContextId()
@@ -158,4 +164,15 @@ public class DefaultFilterMapping implements FilterMapping {
 				+ initParams + ", asyncSupported=" + asyncSupported + "]";
 	}
 
+    public void setDispatcherType(DispatcherType[] dispatcherType) {
+		if(dispatcherType == null){
+			dispatcherType = new DispatcherType [0];
+		}
+        this.dispatcherType = dispatcherType;
+    }
+
+	@Override
+	public DispatcherType[] getDispatcherType() {
+		return dispatcherType;
+	}
 }

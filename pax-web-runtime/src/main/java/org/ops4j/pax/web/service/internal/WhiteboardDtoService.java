@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
 
+import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
@@ -309,6 +310,9 @@ public class WhiteboardDtoService {
         dto.patterns = whiteboardFilter.getFilterMapping().getUrlPatterns();
         dto.servletNames = whiteboardFilter.getFilterMapping().getServletNames();
         dto.serviceId = whiteboardFilter.getServiceID();
+        dto.dispatcher = Arrays.stream(whiteboardFilter.getFilterMapping().getDispatcherType())
+                .map(Enum::toString)
+                .toArray(String[]::new);
         
         Optional<Map.Entry<ServiceReference<ServletContext>, ServletContext>> matchingServletContextEntry = findMatchingServletContext(
                 whiteboardFilter.getFilterMapping().getHttpContextId());
