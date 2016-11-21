@@ -120,9 +120,9 @@ public class WhiteboardDtoService {
                     // all fine
                     servletContextDTOs.add(this.mapServletContext(matchingServletContextEntry.get()));
                 }
-            } else if (element  instanceof WhiteboardServlet && ((WhiteboardServlet) element).getErrorPageMappings().isEmpty()) {
+            } else if (element  instanceof WhiteboardServlet && ( ((WhiteboardServlet) element).getErrorPageMappings() == null || ((WhiteboardServlet) element).getErrorPageMappings().isEmpty()) ) {
                 mapServlet((WhiteboardServlet)element, servletDTOs, failedServletDTOs);
-            }  else if (element  instanceof WhiteboardServlet && !((WhiteboardServlet) element).getErrorPageMappings().isEmpty()) {
+            }  else if (element  instanceof WhiteboardServlet && ((WhiteboardServlet) element).getErrorPageMappings() != null && !((WhiteboardServlet) element).getErrorPageMappings().isEmpty()) {
                 mapErrorPage((WhiteboardServlet)element, errorPageDTOs, failedErrorPageDTOs);
             } else if (element instanceof WhiteboardFilter) {
                 mapFilter((WhiteboardFilter)element, filterDTOs, failedFilterDTOs);
@@ -133,7 +133,7 @@ public class WhiteboardDtoService {
             } else if (element instanceof WhiteboardWelcomeFile) {
                 //TODO: welcome-files currently not working in whiteboard-ds example
             } else if (element instanceof WhiteboardErrorPage) {
-                // TODO Do we need ErrorPageMappings to be tracked? R6 should be enough
+                // ErrorPageMappings only tracks ErrorServlets as specified, all other ErrorPage mechnisms are ignored. Just fullfills R6
                 if (element.isValid()) {
                     errorPageDTOs.add(mapServlet((WhiteboardErrorPage)element));
                 } else {
