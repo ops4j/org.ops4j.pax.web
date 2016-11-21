@@ -69,7 +69,7 @@ public class ServletMappingWebElement extends WebElement<ServletMapping> impleme
 					+ "] did not contain a valid servlet-name property.");
 			valid = false;
 		}
-		if (alias != null && urlPatterns != null) {
+		if (alias != null && urlPatterns != null && urlPatterns.length != 0) {
 			LOG.warn("Registered servlet [" + getPusblishedPID()
 					+ "] cannot have both alias and url patterns");
 			valid = false;
