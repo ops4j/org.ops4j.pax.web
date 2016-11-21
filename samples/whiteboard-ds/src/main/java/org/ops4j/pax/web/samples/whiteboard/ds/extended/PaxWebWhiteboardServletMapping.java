@@ -27,6 +27,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.ops4j.pax.web.service.whiteboard.ServletMapping;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.http.HttpContext;
 
 @Component
 public class PaxWebWhiteboardServletMapping implements ServletMapping {
@@ -38,7 +42,11 @@ public class PaxWebWhiteboardServletMapping implements ServletMapping {
         }
     };
 
-
+    @Reference( target="(httpContext.id=CustomHttpContext)", 
+                bind="bindHttpContext", 
+                unbind="unbindHttpContext", cardinality=ReferenceCardinality.MANDATORY)
+    private HttpContext context;
+    
     @Override
     public String getHttpContextId() {
         return PaxWebWhiteboardHttpContext.CONTEXT_ID;
@@ -84,5 +92,12 @@ public class PaxWebWhiteboardServletMapping implements ServletMapping {
         return null;
     }
 
+    public void bindHttpContext(HttpContext context) {
+        this.context = context;
+    }
+    
+    public void unbindHttpContext(HttpContext context) {
+        this.context = null;
+    }
 
 }

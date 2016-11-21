@@ -17,9 +17,18 @@ package org.ops4j.pax.web.samples.whiteboard.ds.extended;
 
 import org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.http.HttpContext;
 
 @Component
 public class PaxWebWhiteboardWelcomeFiles implements WelcomeFileMapping {
+    
+    @Reference(target="(httpContext.id=CustomHttpContextMapping)", 
+            bind="bindHttpContext", 
+            unbind="unbindHttpContext", cardinality=ReferenceCardinality.MANDATORY)
+    private HttpContext context;
+    
     @Override
     public String getHttpContextId() {
         return PaxWebWhiteboardHttpContextMapping.HTTP_CONTEXT_ID;
@@ -33,5 +42,13 @@ public class PaxWebWhiteboardWelcomeFiles implements WelcomeFileMapping {
     @Override
     public String[] getWelcomeFiles() {
         return new String[] {"index.html"};
+    }
+    
+    public void bindHttpContext(HttpContext context) {
+        this.context = context;
+    }
+    
+    public void unbindHttpContext(HttpContext context) {
+        this.context = null;
     }
 }
