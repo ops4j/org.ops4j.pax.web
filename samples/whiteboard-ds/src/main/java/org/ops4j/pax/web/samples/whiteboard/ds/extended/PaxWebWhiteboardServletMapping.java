@@ -41,7 +41,7 @@ public class PaxWebWhiteboardServletMapping implements ServletMapping {
 
     @Override
     public String getHttpContextId() {
-        return "CustomHttpContext";
+        return PaxWebWhiteboardHttpContext.CONTEXT_ID;
     }
 
     @Override

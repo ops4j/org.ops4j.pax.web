@@ -15,16 +15,11 @@
  */
 package org.ops4j.pax.web.samples.whiteboard.ds.extended;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.Map;
 
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.http.HttpContext;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 @Component
 public class PaxWebWhiteboardHttpContextMapping implements HttpContextMapping {

@@ -26,15 +26,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@Component(
-        service = {Servlet.class, WhiteboardServletWithContext.class}, // WhiteboardServletWithContext only for testing
-        scope = ServiceScope.PROTOTYPE,
-        property = {
+@Component(service = { Servlet.class, WhiteboardServletWithContext.class }, // WhiteboardServletWithContext
+                                                                            // only
+                                                                            // for
+                                                                            // testing
+        scope = ServiceScope.PROTOTYPE, property = {
                 HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN + "=/servlet",
                 HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME + "=ServletWithContext",
-                HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT + "=(osgi.http.whiteboard.context.name=CustomContext)"
-        }
-)
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT
+                        + "=(osgi.http.whiteboard.context.name=CustomContext)" })
 public class WhiteboardServletWithContext extends HttpServlet {
 
     @Override

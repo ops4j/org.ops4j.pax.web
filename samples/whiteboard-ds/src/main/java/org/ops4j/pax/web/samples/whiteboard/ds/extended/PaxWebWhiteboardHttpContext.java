@@ -26,10 +26,13 @@ import java.net.URL;
 
 
 @Component( property = {
-        ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID + "=CustomHttpContext",
+        ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID + "=" + PaxWebWhiteboardHttpContext.CONTEXT_ID,
         ExtenderConstants.PROPERTY_HTTP_CONTEXT_PATH + "=/custom-http-context" // FIXME this seems broken atm, because its not evaluated in the Tracker and not set in the DefaultMapping
 })
 public class PaxWebWhiteboardHttpContext implements HttpContext {
+    
+    public static final String CONTEXT_ID = "CustomHttpContext";
+    
     @Override
     public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
         return true;
