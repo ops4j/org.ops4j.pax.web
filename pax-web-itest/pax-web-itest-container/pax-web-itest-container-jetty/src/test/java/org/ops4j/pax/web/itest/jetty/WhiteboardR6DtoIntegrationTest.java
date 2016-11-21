@@ -16,6 +16,7 @@
 package org.ops4j.pax.web.itest.jetty;
 
 import static org.junit.Assert.fail;
+import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.OptionUtils.combine;
@@ -41,6 +42,7 @@ import org.ops4j.pax.exam.util.Filter;
 
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.samples.whiteboard.ds.*;
+import org.ops4j.pax.web.samples.whiteboard.ds.extended.PaxWebWhiteboardServletMapping;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping;
@@ -67,7 +69,8 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 	public static Option[] configure() {
 		return combine(
 				configureJetty(),
-				mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("whiteboard-ds").versionAsInProject());
+				mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("whiteboard-ds").versionAsInProject(),
+				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("INFO"));
 	}
 
 	@Before
@@ -92,13 +95,6 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 						resp -> resp.contains("Hello from ServletWithContext"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/context/servlet");
 
-		// test welcome-file
-		// FIXME welcome file not working???
-//		HttpTestClientFactory.createDefaultTestClient()
-//				.withResponseAssertion("Response must contain 'This is a welcome file provided by WhiteboardWelcomeFiles'",
-//						resp -> resp.contains("This is a welcome file provided by WhiteboardWelcomeFiles"))
-//				.doGETandExecuteTest("http://127.0.0.1:8181/");
-
 		// test error-page
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
@@ -112,6 +108,27 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
 								&& header.getValue().equals("text/plain")))
 				.doGETandExecuteTest("http://127.0.0.1:8181/resources/file.txt");
+
+		// Pax-Web specific whiteboard features...not relevant for DTOs
+
+		// test servlet on HttpContext-service
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello from " + PaxWebWhiteboardServletMapping.class.getName() + "'",
+						resp -> resp.contains("Hello from " + PaxWebWhiteboardServletMapping.class.getName()))
+				.doGETandExecuteTest("http://127.0.0.1:8181/custom-http-context/servlet-mapping");
+
+		// test welcome-page on HttpContextMapping-service
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'This is a welcome file provided by PaxWebWhiteboardWelcomeFiles'",
+						resp -> resp.contains("This is a welcome file provided by PaxWebWhiteboardWelcomeFiles"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/custom-http-context-mapping/");
+
+		// test error-page on HttpContextMapping-service
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(404)
+				.withResponseAssertion("Response must contain 'Whoops, there was a 404.'",
+						resp -> resp.contains("Whoops, there was a 404."))
+				.doGETandExecuteTest("http://127.0.0.1:8181/custom-http-context-mapping/not-available");
 	}
 
 

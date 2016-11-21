@@ -26,7 +26,7 @@
 
 	<groupId>org.ops4j.pax.web.samples</groupId>
 	<artifactId>whiteboard-ds</artifactId>
-	<name>OPS4J Pax Web - Samples - Whiteboard R6 Declarative-Services</name>
+	<name>OPS4J Pax Web - Samples - Whiteboard with Declarative-Services</name>
 
 	<properties>
 		<bundle.symbolicName>org.ops4j.pax.web.extender.samples.whiteboard</bundle.symbolicName>
@@ -87,6 +87,11 @@
 			<artifactId>pax-web-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
-	</dependencies>
+        <dependency>
+			<!-- only needed when using Pax-Web specific whiteboard-features -->
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-extender-whiteboard</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>

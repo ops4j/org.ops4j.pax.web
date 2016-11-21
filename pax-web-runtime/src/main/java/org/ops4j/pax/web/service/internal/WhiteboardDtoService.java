@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
 
-import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;

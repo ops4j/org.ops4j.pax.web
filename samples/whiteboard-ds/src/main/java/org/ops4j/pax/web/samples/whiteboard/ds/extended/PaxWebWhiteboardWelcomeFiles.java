@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.samples.whiteboard.ds;
+package org.ops4j.pax.web.samples.whiteboard.ds.extended;
 
 import org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping;
 import org.osgi.service.component.annotations.Component;
 
 @Component
-public class WhiteboardWelcomeFiles implements WelcomeFileMapping {
+public class PaxWebWhiteboardWelcomeFiles implements WelcomeFileMapping {
     @Override
     public String getHttpContextId() {
-        return null;
+        return PaxWebWhiteboardHttpContextMapping.HTTP_CONTEXT_ID;
     }
 
     @Override

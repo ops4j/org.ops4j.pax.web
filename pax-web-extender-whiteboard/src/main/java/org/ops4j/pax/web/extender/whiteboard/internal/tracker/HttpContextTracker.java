@@ -21,6 +21,7 @@ import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtendedHttpServiceRuntime;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.HttpContextElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.osgi.framework.BundleContext;
@@ -29,6 +30,7 @@ import org.osgi.service.http.HttpContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * Tracks {@link HttpContext}s.
@@ -69,24 +71,22 @@ public class HttpContextTracker extends AbstractHttpContextTracker<HttpContext> 
 	@Override
 	HttpContextElement createHttpContextElement(final ServiceReference<HttpContext> serviceReference,
 												final HttpContext published) {
-		Object httpContextId = serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
-		Object httpContextShared = serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED);
-
+		String httpContextId = ServicePropertiesUtils.getStringProperty(serviceReference, ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
+		String httpContextPath = ServicePropertiesUtils.getStringProperty(serviceReference, ExtenderConstants.PROPERTY_HTTP_CONTEXT_PATH);
+		Boolean httpContextShared = ServicePropertiesUtils.getBooleanProperty(serviceReference, ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED);
 
 		final DefaultHttpContextMapping mapping = new DefaultHttpContextMapping();
-		mapping.setHttpContextId((String) httpContextId);
+		mapping.setHttpContextId(httpContextId);
 
-		Boolean sharedContext = httpContextShared != null ? Boolean.valueOf((String) httpContextShared) : false;
 
-		if (!sharedContext && published instanceof SharedWebContainerContext) {
-			sharedContext = true; // in case it's a shared HttpContext make sure
-									// the flag ist set.
-		} else if (sharedContext && !(published instanceof SharedWebContainerContext)) {
-			sharedContext = false; // this shouldn't happen but make sure it
-									// doesn't
+		if (!httpContextShared && published instanceof SharedWebContainerContext) {
+			httpContextShared = true; // in case it's a shared HttpContext make sure the flag ist set.
+		} else if (httpContextShared && !(published instanceof SharedWebContainerContext)) {
+			httpContextShared = false; // this shouldn't happen but make sure it doesn't
 		}
 
-		mapping.setHttpContextShared(sharedContext);
+		mapping.setHttpContextShared(httpContextShared);
+		mapping.setPath(httpContextPath);
 		mapping.setHttpContext(published);
 		return new HttpContextElement(serviceReference, mapping);
 	}
