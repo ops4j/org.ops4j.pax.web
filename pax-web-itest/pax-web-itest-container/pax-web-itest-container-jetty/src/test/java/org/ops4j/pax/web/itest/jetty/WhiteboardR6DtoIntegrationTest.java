@@ -15,6 +15,8 @@
  */
 package org.ops4j.pax.web.itest.jetty;
 
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
@@ -263,9 +265,11 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 		RuntimeDTO runtimeDTO = withService(HttpServiceRuntime::getRuntimeDTO);
 
 		// Test all failed elements
+		assertTrue("Incorrect number of failed ServletContext DTOs", 1 == runtimeDTO.failedServletContextDTOs.length);
 		assertThat("Invalid ServletContext doesn't match",
 				runtimeDTO.failedServletContextDTOs[0],
 				failedServletContextDTO -> failedServletContextDTO.serviceId == serviceIdFailedContext);
+		assertTrue("Incorrect number of invalid ServletContexts", 1 == runtimeDTO.failedServletDTOs.length);
 		assertThat("Invalid ServletContext doesn't match",
 				runtimeDTO.failedServletDTOs[0],
 				failedServletDTO -> failedServletDTO.serviceId == serviceIdFailedServlet);
