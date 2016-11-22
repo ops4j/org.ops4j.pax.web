@@ -231,7 +231,7 @@ public class WhiteboardDtoService {
         dto.initParams = servletMapping.getInitParams();
         dto.patterns = servletMapping.getUrlPatterns();
         dto.servletInfo = servletMapping.getServlet().getServletInfo();
-        dto.asyncSupported = servletMapping.getAsyncSupported();
+        dto.asyncSupported = servletMapping.getAsyncSupported() != null ? servletMapping.getAsyncSupported() : false;
 
         Optional<Map.Entry<ServiceReference<ServletContext>, ServletContext>> matchingServletContextEntry = findMatchingServletContext(
                 servletMapping.getHttpContextId());

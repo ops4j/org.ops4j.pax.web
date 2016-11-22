@@ -27,7 +27,7 @@ import java.net.URL;
 
 @Component( property = {
         ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID + "=" + PaxWebWhiteboardHttpContext.CONTEXT_ID,
-        ExtenderConstants.PROPERTY_HTTP_CONTEXT_PATH + "=/custom-http-context" // FIXME this seems broken atm, because its not evaluated in the Tracker and not set in the DefaultMapping
+        ExtenderConstants.PROPERTY_HTTP_CONTEXT_PATH + "=custom-http-context" // FIXME this seems broken atm, because its not evaluated in the Tracker and not set in the DefaultMapping
 })
 public class PaxWebWhiteboardHttpContext implements HttpContext {
     

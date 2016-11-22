@@ -18,6 +18,7 @@ package org.ops4j.pax.web.samples.whiteboard.ds.extended;
 import java.util.Map;
 
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.http.HttpContext;
 
@@ -26,6 +27,11 @@ public class PaxWebWhiteboardHttpContextMapping implements HttpContextMapping {
 
     static final String HTTP_CONTEXT_ID = "CustomHttpContextMapping";
 
+    @Activate
+    public void start() {
+        System.err.println(PaxWebWhiteboardHttpContextMapping.class.getName() + " started");
+    }
+    
     @Override
     public String getHttpContextId() {
         return HTTP_CONTEXT_ID;
@@ -33,7 +39,7 @@ public class PaxWebWhiteboardHttpContextMapping implements HttpContextMapping {
 
     @Override
     public String getPath() {
-        return "/custom-http-context-mapping";
+        return "custom-http-context-mapping";
     }
 
     @Override
@@ -43,22 +49,6 @@ public class PaxWebWhiteboardHttpContextMapping implements HttpContextMapping {
 
     @Override
     public HttpContext getHttpContext() {
-//        return new HttpContext() {
-//            @Override
-//            public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
-//                return true;
-//            }
-//
-//            @Override
-//            public URL getResource(String name) {
-//                return null;
-//            }
-//
-//            @Override
-//            public String getMimeType(String name) {
-//                return null;
-//            }
-//        };
-        return null;
+        return null; //turns into DefaultHttpContext
     }
 }
