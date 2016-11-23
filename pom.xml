@@ -131,6 +131,8 @@
                         <preparationGoals>clean install</preparationGoals>
                         <goals>deploy</goals>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <!-- TODO should probably reenable ITs if we need to continue with this branch long term -->
+                        <arguments>-Psonatype-oss-release -DskipITs=true</arguments>
                     </configuration>
 				</plugin>
 				<plugin>
