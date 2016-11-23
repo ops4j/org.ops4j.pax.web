@@ -184,9 +184,9 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
         Optional<ServletContextDTO> customContext = Arrays.stream(runtimeDTO.servletContextDTOs)
                 .filter(servletContextDTO -> Objects.equals(servletContextDTO.name, "CustomContext"))
                 .findFirst();
-        Optional<ServletContextDTO> customContextMapping = Arrays.stream(runtimeDTO.servletContextDTOs)
-                .filter(servletContextDTO -> Objects.equals(servletContextDTO.name, "CustomHttpContextMapping"))
-                .findFirst();
+//        Optional<ServletContextDTO> customContextMapping = Arrays.stream(runtimeDTO.servletContextDTOs)
+//                .filter(servletContextDTO -> Objects.equals(servletContextDTO.name, "CustomHttpContextMapping"))
+//                .findFirst();
 
 		// Test all under Default-ServletContext
 		if(!defaultContext.isPresent()){
