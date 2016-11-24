@@ -90,7 +90,7 @@ public class ServiceModel {
 			throw new IllegalArgumentException("Servlet [" + servlet
 					+ " is not currently registered in any context");
 		}
-		servletModels.remove(servlet);
+		servletModels.remove(model);
 		return model;
 	}
 
@@ -99,8 +99,7 @@ public class ServiceModel {
 		if (model == null) {
 			throw new IllegalArgumentException("Servlet with name [" + servletName + "] is currently not registered in any context");
 		}
-		Servlet servlet = model.getServlet();
-		servletModels.remove(servlet);
+		servletModels.remove(model);
 		return model;
 	}
 
@@ -202,8 +201,7 @@ public class ServiceModel {
 	}
 
 	public synchronized FilterModel removeFilter(final String filterName) {
-		FilterModel filterModel = filterModels.remove(filterName);
-		return filterModel;
+		return filterModels.remove(filterName);
 	}
 
 	public synchronized FilterModel removeFilter(
@@ -293,7 +291,7 @@ public class ServiceModel {
 	public synchronized ContextModel[] getContextModels() {
 		final Collection<ContextModel> contextModelValues = contextModels
 				.values();
-		if (contextModelValues == null || contextModelValues.size() == 0) {
+		if (contextModelValues.isEmpty()) {
 			return new ContextModel[0];
 		}
 		return contextModelValues.toArray(new ContextModel[contextModelValues
@@ -332,7 +330,7 @@ public class ServiceModel {
 	public synchronized void addWelcomeFileModel(WelcomeFileModel model) {
 		final String key = Arrays.toString(model.getWelcomeFiles()) + "|" + model.getContextModel().getId();
 		if (welcomeFileModels.containsKey(key)) {
-			throw new IllegalArgumentException("Welcom files for [" + model.getWelcomeFiles() + "] already registered.");
+			throw new IllegalArgumentException("Welcom files for [" + Arrays.toString(model.getWelcomeFiles()) + "] already registered.");
 		}
 		welcomeFileModels.put(key, model);
 		addContextModel(model.getContextModel());
