@@ -81,4 +81,11 @@ public interface FilterMapping {
 	 * @see org.ops4j.pax.web.service.WebContainerConstants#FILTER_MAPPING_DISPATCHER
 	 */
     DispatcherType[] getDispatcherType();
+
+	/**
+	 * Getter
+	 *
+	 * @return if supported, returns the name of this Filter
+	 */
+	String getName();
 }

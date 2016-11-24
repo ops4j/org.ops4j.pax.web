@@ -215,6 +215,7 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 			initParams.put(WebContainerConstants.FILTER_RANKING, serviceRank);
 		}
 
+
 		final DefaultFilterMapping mapping = new DefaultFilterMapping();
 		mapping.setFilter(published);
 		mapping.setAsyncSupported(asyncSupported);
@@ -223,6 +224,9 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 		mapping.setServletNames(servletNames);
 		mapping.setInitParams(initParams);
 		mapping.setDispatcherType(dispatcherTypes);
+		mapping.setName(ServicePropertiesUtils.getStringProperty(
+				serviceReference,
+				HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME));
 		return new FilterWebElement<>(serviceReference, mapping);
 	}
 }

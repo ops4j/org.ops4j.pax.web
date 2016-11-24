@@ -66,6 +66,11 @@ public class DefaultFilterMapping implements FilterMapping {
 	private DispatcherType[] dispatcherType;
 
 	/**
+	 * Name of this filter
+	 */
+	private String name;
+
+	/**
 	 * @see FilterMapping#getHttpContextId()
 	 */
 	public String getHttpContextId() {
@@ -174,5 +179,14 @@ public class DefaultFilterMapping implements FilterMapping {
 	@Override
 	public DispatcherType[] getDispatcherType() {
 		return dispatcherType;
+	}
+
+	@Override
+	public String getName() {
+		return this.name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 }

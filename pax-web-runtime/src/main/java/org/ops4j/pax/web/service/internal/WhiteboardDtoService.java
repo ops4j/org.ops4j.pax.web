@@ -32,8 +32,10 @@ import java.util.stream.Collectors;
 import javax.servlet.ServletContext;
 
 import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
+import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.ops4j.pax.web.service.whiteboard.*;
 import org.osgi.dto.DTO;
 import org.osgi.framework.BundleContext;
@@ -193,8 +195,55 @@ public class WhiteboardDtoService {
 
 
     RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator, ServerModel serverModel, ServiceModel serviceModel) {
-        // TODO TBD
-        return null;
+        RequestInfoDTO dto = new RequestInfoDTO();
+        dto.path = path;
+        ContextModel contextModel = serverModel.matchPathToContext(path);
+        if (contextModel != null) {
+
+            Optional<Map.Entry<ServiceReference<ServletContext>, ServletContext>> matchingServletContextEntry =
+                    findMatchingServletContext(contextModel.getHttpContext().getContextId());
+
+            if (matchingServletContextEntry.isPresent()) {
+                dto.servletContextId = (long) matchingServletContextEntry.get().getKey().getProperty(Constants.SERVICE_ID);
+            }
+
+            List<ServletDTO> servletDTOs = new ArrayList<>();
+            List<FilterDTO> filterDTOs = new ArrayList<>();
+            List<ResourceDTO> resourceDTOs = new ArrayList<>();
+
+            iterator.forEachRemaining(element -> {
+                if (element  instanceof WhiteboardServlet && ( ((WhiteboardServlet) element).getErrorPageMappings() == null || ((WhiteboardServlet) element).getErrorPageMappings().isEmpty())) {
+                    if (isContextModelMatchedByContextId(contextModel, ((WhiteboardServlet) element).getServletMapping().getHttpContextId())) {
+                        mapServlet((WhiteboardServlet) element, servletDTOs, new ArrayList<>()); // dont care about failureDTOs, just reuse this
+                    }
+                }  else if (element instanceof WhiteboardFilter) {
+                    if (isContextModelMatchedByContextId(contextModel, ((WhiteboardFilter) element).getFilterMapping().getHttpContextId())) {
+                        mapFilter((WhiteboardFilter) element, filterDTOs, new ArrayList<>()); // dont care about failureDTOs, just reuse this
+                    }
+                } else if (element instanceof WhiteboardResource ) {
+                    if (isContextModelMatchedByContextId(contextModel, ((WhiteboardResource) element).getResourceMapping().getHttpContextId())) {
+                        mapResource((WhiteboardResource) element, resourceDTOs, new ArrayList<>()); // dont care about failureDTOs, just reuse this
+                    }
+                }
+            });
+
+            if (!servletDTOs.isEmpty()) {
+                dto.servletDTO = servletDTOs.get(0);
+            }
+            if (!resourceDTOs.isEmpty()) {
+                dto.resourceDTO = resourceDTOs.get(0);
+            }
+            dto.filterDTOs = filterDTOs.stream().toArray(FilterDTO[]::new);
+        }
+        return dto;
+    }
+
+
+    private boolean isContextModelMatchedByContextId(ContextModel model, String contextId){
+        String modelId = model.getHttpContext().getContextId();
+        // FIXME is check for DEFAULT sufficeient or should SHARED be included as well
+        return Objects.equals(contextId, modelId)
+                || contextId == null && Objects.equals(modelId, WebContainerContext.DefaultContextIds.DEFAULT.getValue());
     }
 
 
@@ -304,6 +353,7 @@ public class WhiteboardDtoService {
 
     private void mapFilter(WhiteboardFilter whiteboardFilter, List<FilterDTO> filterDTOs, List<FailedFilterDTO> failedFilterDTOs) {
         FilterDTO dto = new FilterDTO();
+        dto.name = whiteboardFilter.getFilterMapping().getName();
         dto.asyncSupported = whiteboardFilter.getFilterMapping().getAsyncSupported(); 
         dto.initParams = whiteboardFilter.getFilterMapping().getInitParams();
         dto.patterns = whiteboardFilter.getFilterMapping().getUrlPatterns();
