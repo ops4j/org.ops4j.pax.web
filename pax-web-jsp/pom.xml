@@ -85,6 +85,7 @@
 							org.osgi.service.http,
 							org.osgi.framework; version="[1.0.0,2.0.0)",
 							org.osgi.service.packageadmin; resolution:=optional,
+							org.osgi.framework.wiring, 
 							org.ops4j.pax.web.utils,
 							javax.sql; resolution:=optional,
 							javax.xml.parsers,
