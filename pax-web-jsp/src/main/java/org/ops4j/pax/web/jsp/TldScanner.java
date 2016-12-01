@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +36,7 @@ import org.apache.tomcat.util.descriptor.tld.TaglibXml;
 import org.apache.tomcat.util.descriptor.tld.TldResourcePath;
 import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -233,24 +235,42 @@ public class TldScanner {
 				.getContextClassLoader();
 		
 		ClassLoader parentLoader = webappLoader.getParent();
-		
-		if (webappLoader instanceof ResourceDelegatingBundleClassLoader || parentLoader instanceof ResourceDelegatingBundleClassLoader) {
-			List<Bundle> bundles = null;
-			if (webappLoader instanceof ResourceDelegatingBundleClassLoader) {
-				bundles = ((ResourceDelegatingBundleClassLoader) webappLoader).getBundles();
-			} else {
-				bundles = ((ResourceDelegatingBundleClassLoader) parentLoader).getBundles();
-			}
 
-			for (Bundle bundle : bundles) {
+		ResourceDelegatingBundleClassLoader classLoader = null;
+		if (webappLoader instanceof ResourceDelegatingBundleClassLoader) {
+			classLoader = (ResourceDelegatingBundleClassLoader) webappLoader;
+		} else if ( parentLoader instanceof ResourceDelegatingBundleClassLoader) { 
+			classLoader = (ResourceDelegatingBundleClassLoader) parentLoader;
+		} else if (isTomcatWebLoader()) {
+			ClassLoader parent = ((org.apache.catalina.loader.WebappClassLoader) webappLoader)
+				.getParent();
+			if (parent instanceof ResourceDelegatingBundleClassLoader) {
+				classLoader = (ResourceDelegatingBundleClassLoader) parent;
+			}
+		}
+		List<Bundle> bundles = classLoader == null ? Collections.<Bundle>emptyList() : classLoader.getBundles();
+		for (Bundle bundle : bundles) {
+			Collection<Enumeration<URL>> enumerations;
+			BundleWiring bundleWiring = bundle.adapt(BundleWiring.class);
+			if (bundleWiring == null) {
 				Enumeration<URL> urls = bundle.findEntries("META-INF", "*.tld",
-						true);
+					true);
+				enumerations = Collections.singleton(urls);
+			} else {
+				Collection<String> resources = bundleWiring.listResources("META-INF", "*.tld", BundleWiring.LISTRESOURCES_RECURSE);
+				enumerations = new ArrayList<>(resources.size());
+				for (String resource : resources) {
+					Enumeration<URL> urls = bundle.getResources(resource);
+					enumerations.add(urls);
+				}
+			} 
+			for (Enumeration<URL> urls : enumerations) {
 				if (urls != null) {
 					while (urls.hasMoreElements()) {
 						URL url = urls.nextElement();
 						log.info("found TLD {}", url);
 						TldResourcePath tldResourcePath = new TldResourcePath(
-								url, null, null);
+							url, null, null);
 						try {
 							parseTld(tldResourcePath);
 						} catch (SAXException e) {
@@ -259,40 +279,8 @@ public class TldScanner {
 					}
 				}
 			}
-
-		} else if (isTomcatWebLoader()) {
-			if (webappLoader instanceof org.apache.catalina.loader.WebappClassLoader) { // special
-																						// case
-				// for Tomcat as
-				// container
-				ClassLoader parent = ((org.apache.catalina.loader.WebappClassLoader) webappLoader)
-						.getParent();
-				if (parent instanceof ResourceDelegatingBundleClassLoader) {
-					List<Bundle> bundles = ((ResourceDelegatingBundleClassLoader) parent)
-							.getBundles();
-
-					for (Bundle bundle : bundles) {
-						Enumeration<URL> urls = bundle.findEntries("META-INF",
-								"*.tld", true);
-						if (urls != null) {
-							while (urls.hasMoreElements()) {
-								URL url = urls.nextElement();
-								log.info("found TLD {}", url);
-								TldResourcePath tldResourcePath = new TldResourcePath(
-										url, null, null);
-								try {
-									parseTld(tldResourcePath);
-								} catch (SAXException e) {
-									throw new IOException(e);
-								}
-							}
-						}
-					}
-				}
-			}
-		} 
-
-    }
+		}
+	}
 
 	private boolean isTomcatWebLoader() {
 		try {
