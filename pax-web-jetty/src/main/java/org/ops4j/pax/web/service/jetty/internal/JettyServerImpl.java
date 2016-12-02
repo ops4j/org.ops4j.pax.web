@@ -164,6 +164,7 @@ class JettyServerImpl implements JettyServer {
 			// Setup JMX
 			try {
 				Class.forName("javax.management.JMX");
+				Class.forName("org.eclipse.jetty.jmx.MBeanContainer");
 				mBeanContainer = new MBeanContainer(
 						ManagementFactory.getPlatformMBeanServer());
 				server.addBean(mBeanContainer);
