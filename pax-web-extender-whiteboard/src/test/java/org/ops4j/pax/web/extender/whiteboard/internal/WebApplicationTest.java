@@ -19,6 +19,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -120,7 +121,7 @@ public class WebApplicationTest {
 						} else {
 							LOG.info("serviceChanged...");
 							instanceUnderTest
-									.serviceChanged(oldService, newService);
+									.serviceChanged(oldService, newService, Collections.EMPTY_MAP);
 						}
 					} catch (final InterruptedException ex) {
 						// ignore

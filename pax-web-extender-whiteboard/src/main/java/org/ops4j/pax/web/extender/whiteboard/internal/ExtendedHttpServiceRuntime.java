@@ -16,21 +16,31 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal;
 
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.ops4j.pax.web.extender.whiteboard.internal.element.WebElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.util.WebContainerUtils;
+import org.ops4j.pax.web.extender.whiteboard.internal.util.tracker.ReplaceableService;
+import org.ops4j.pax.web.extender.whiteboard.internal.util.tracker.ReplaceableServiceListener;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.whiteboard.WhiteboardElement;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.http.HttpService;
 import org.osgi.service.http.runtime.HttpServiceRuntime;
+import org.osgi.service.http.runtime.HttpServiceRuntimeConstants;
 import org.osgi.service.http.runtime.dto.RequestInfoDTO;
 import org.osgi.service.http.runtime.dto.RuntimeDTO;
 
 
-public class ExtendedHttpServiceRuntime implements HttpServiceRuntime {
+public class ExtendedHttpServiceRuntime implements HttpServiceRuntime, ReplaceableServiceListener<HttpService>{
 
     private final BundleContext bundleContext;
     /**
@@ -38,47 +48,41 @@ public class ExtendedHttpServiceRuntime implements HttpServiceRuntime {
      * {@link WebApplication#unregisterWebElement(WebElement)} only uses a read-lock
      */
     private Set<WhiteboardElement> whiteboardElements = ConcurrentHashMap.newKeySet();
+    
+    /**
+     * Http service tracker
+     */
+    private ReplaceableService<HttpService> httpServiceTracker;
 
-
-//    /**
-//     * Dynamic Reference to the Pax-Web Webcontainer.
-//     * Volatile marks this service as dynamic for DS.
-//     */
-//    private volatile WebContainer webContainer;
-
+    /**
+     * Http service lock.
+     */
+    private final ReadWriteLock httpServiceLock;
+    
+    /**
+     * Active http service;
+     */
+    private volatile WebContainer webContainer;
+    
+    /**
+     * RuntimeService as OSGi service
+     */
+    private ServiceRegistration<HttpServiceRuntime> serviceRuntimeService;
 
     ExtendedHttpServiceRuntime(BundleContext bundleContext){
         this.bundleContext = bundleContext;
+        this.httpServiceLock = new ReentrantReadWriteLock();
+        this.httpServiceTracker = new ReplaceableService<>(bundleContext, HttpService.class, this);
     }
-
-    /*
-    Using DS would be easier here, but then the whole module should be designed around DS
-    Until then, the cheapest solution is to get the service if needed.
-     */
-    private <T> T executeWithWebContainer(Function<WebContainer, T> function){
-        T result = null;
-        ServiceReference<WebContainer> serviceReference = bundleContext.getServiceReference(WebContainer.class);
-        if(serviceReference != null){
-            WebContainer webContainer = bundleContext.getService(serviceReference);
-            if(webContainer != null) {
-                result = function.apply(webContainer);
-                bundleContext.ungetService(serviceReference);
-            }
-        }
-        return result;
-    }
-
 
     @Override
     public RuntimeDTO getRuntimeDTO() {
-        return executeWithWebContainer(webContainer ->
-                webContainer.createWhiteboardRuntimeDTO(whiteboardElements.iterator()));
+        return webContainer.createWhiteboardRuntimeDTO(whiteboardElements.iterator());
     }
 
     @Override
     public RequestInfoDTO calculateRequestInfoDTO(String path) {
-        return executeWithWebContainer(webContainer ->
-                webContainer.calculateRequestInfoDTO(path, whiteboardElements.iterator()));
+        return webContainer.calculateRequestInfoDTO(path, whiteboardElements.iterator());
     }
 
     /**
@@ -98,4 +102,50 @@ public class ExtendedHttpServiceRuntime implements HttpServiceRuntime {
     public void removeWhiteboardElement(WhiteboardElement element){
         whiteboardElements.remove(element);
     }
+
+    @Override
+    public void serviceChanged(HttpService oldService, HttpService newService, Map<String, Object> serviceProperties) {
+        if(newService != null && !WebContainerUtils.isWebContainer(newService)){
+            throw new IllegalStateException("HttpService must be implementing Pax-Web WebContainer!");
+        }
+        httpServiceLock.writeLock().lock();
+        try {
+            unregisterService();
+            webContainer = (WebContainer)newService;
+            registerService((WebContainer)newService, serviceProperties);
+        } finally {
+            httpServiceLock.writeLock().unlock();
+        }
+    }
+    
+    private void registerService(WebContainer newService, Map<String, Object> serviceProperties) {
+        if (newService == null)
+            return;
+        
+        Dictionary<String, Object> props = new Hashtable<>();
+        
+        Long id = (Long) serviceProperties.get("service.id");
+        
+        //TODO: retrieve context from webContainer add as endpoint
+        
+        props.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT, "");
+        props.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ID, new ArrayList<>().add(id));
+        
+        serviceRuntimeService = bundleContext.registerService(HttpServiceRuntime.class, this, props);
+    }
+
+    private void unregisterService() {
+        if (serviceRuntimeService != null)
+            serviceRuntimeService.unregister();
+    }
+    
+    public void start() {
+        httpServiceTracker.start();
+    }
+    
+    public void stop() {
+        httpServiceTracker.stop();
+    }
+
+    
 }

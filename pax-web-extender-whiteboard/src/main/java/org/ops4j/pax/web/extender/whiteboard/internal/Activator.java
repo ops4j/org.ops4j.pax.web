@@ -57,12 +57,12 @@ public class Activator implements BundleActivator {
 	 */
 	private List<ServiceTracker<?, ?>> trackers;
 
+    private ExtendedHttpServiceRuntime httpServiceRuntime;
+
 	@Override
 	public void start(final BundleContext bundleContext) throws Exception {
-		// prepare whiteboard-DTO service
-		ExtendedHttpServiceRuntime httpServiceRuntime = new ExtendedHttpServiceRuntime(bundleContext);
-		bundleContext.registerService(HttpServiceRuntime.class, httpServiceRuntime, null);
-
+		httpServiceRuntime = new ExtendedHttpServiceRuntime(bundleContext);
+		httpServiceRuntime.start();
 		extenderContext = new ExtenderContext(httpServiceRuntime);
 		trackers = new ArrayList<>();
 
@@ -97,6 +97,7 @@ public class Activator implements BundleActivator {
 			tracker.close();
 		}
 		this.trackers = null;
+		httpServiceRuntime.stop();
 		LOG.debug("Pax Web Extender stopped");
 	}
 

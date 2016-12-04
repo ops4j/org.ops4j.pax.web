@@ -16,8 +16,11 @@
 package org.ops4j.pax.web.extender.whiteboard.internal.util.tracker;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -49,14 +52,21 @@ public class ReplaceableService<T> {
 	private final List<ServiceReference<T>> boundReferences;
 
 	private T replacableService;
+	
+    private boolean withServiceProperties;
 
 	public ReplaceableService(BundleContext bundleContext, Class<T> replacableServiceClass, ReplaceableServiceListener<T> replacableServiceListener) {
-		this.context = bundleContext;
-		this.serviceClass = replacableServiceClass;
-		this.serviceListener = replacableServiceListener;
-		this.serviceTracker = new ServiceTracker<>(bundleContext, replacableServiceClass, new Customizer());
-		this.boundReferences = new ArrayList<>();
+		this(bundleContext, replacableServiceClass, replacableServiceListener, false);
 	}
+	
+	public ReplaceableService(BundleContext bundleContext, Class<T> replacableServiceClass, ReplaceableServiceListener<T> replacableServiceListener, boolean withServiceProperties) {
+        this.context = bundleContext;
+        this.serviceClass = replacableServiceClass;
+        this.serviceListener = replacableServiceListener;
+        this.serviceTracker = new ServiceTracker<>(bundleContext, replacableServiceClass, new Customizer());
+        this.boundReferences = new ArrayList<>();
+        this.withServiceProperties = withServiceProperties;
+    }
 
 	public void start() {
 		this.serviceTracker.open();
@@ -66,21 +76,25 @@ public class ReplaceableService<T> {
 		this.serviceTracker.close();
 	}
 
-	protected void bind(T service) {
-		if (serviceListener != null) {
-			T oldService;
-			synchronized (this) {
-				oldService = replacableService;
-				replacableService = service;
-			}
-			serviceListener.serviceChanged(oldService, service);
-		}
-	}
+	protected void bind(T service, Map<String, Object> serviceProperties) {
+        if (serviceListener != null) {
+            T oldService;
+            synchronized (this) {
+                oldService = replacableService;
+                replacableService = service;
+            }
+            serviceListener.serviceChanged(oldService, service, serviceProperties);
+        }
+    }
 
 	private class Customizer implements ServiceTrackerCustomizer<T, T> {
 		@Override
 		public T addingService(ServiceReference<T> reference) {
 			T service = context.getService(reference);
+			final Map<String, Object> serviceProperties = new HashMap<>();
+			if (withServiceProperties) {
+			    Arrays.stream(reference.getPropertyKeys()).forEach(key -> serviceProperties.put(key, reference.getProperty(key)));
+			}
 			ServiceReference<T> bind;
 			synchronized (boundReferences) {
 				boundReferences.add(reference);
@@ -88,9 +102,9 @@ public class ReplaceableService<T> {
 				bind = boundReferences.get(0);
 			}
 			if (bind == reference) {
-				bind(service);
+		        bind(service, serviceProperties);
 			} else {
-				bind(serviceTracker.getService(bind));
+		        bind(serviceTracker.getService(bind), serviceProperties);
 			}
 			return service;
 		}
@@ -114,9 +128,9 @@ public class ReplaceableService<T> {
 				}
 			}
 			if (bind == null) {
-				bind(null);
+				bind(null, null);
 			} else {
-				bind(serviceTracker.getService(bind));
+				bind(serviceTracker.getService(bind), null);
 			}
 			try {
 				context.ungetService(reference);

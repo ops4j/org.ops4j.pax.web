@@ -209,7 +209,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	}
 
 	@Override
-	public void serviceChanged(HttpService oldService, HttpService newService) {
+	public void serviceChanged(HttpService oldService, HttpService newService, Map<String, Object> serviceProperties) {
 		if(newService != null && !WebContainerUtils.isWebContainer(newService)){
 			throw new IllegalStateException("HttpService must be implementing Pax-Web WebContainer!");
 		}
