@@ -159,10 +159,6 @@ class WebAppHttpContext implements HttpContext {
 				url = bundle.getResource(normalizedName);
 			}
 			if (url == null) {
-				log.debug("getResource failed, fallback to system bundle getResource");
-				url = bundle.getClass().getClassLoader().getResource(normalizedName);
-			}
-			if (url == null) {
 				url = NO_URL;
 			}
 			resourceCache.putIfAbsent(normalizedName, url);

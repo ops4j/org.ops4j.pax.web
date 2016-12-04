@@ -63,7 +63,7 @@ public class WhiteboardKarafTest extends KarafBaseTest {
 			}
 			failCount++;
 		}
-		waitForServletListener();
+		waitForServletListener(15000l); //longer timeout as a karaf re-configure might intervene the startup
 
 	}
 
