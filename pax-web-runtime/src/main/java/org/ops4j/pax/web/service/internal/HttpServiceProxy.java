@@ -28,6 +28,7 @@ import javax.servlet.ServletException;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.WebContainerDTO;
 import org.ops4j.pax.web.service.whiteboard.WhiteboardElement;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
@@ -538,6 +539,11 @@ public class HttpServiceProxy implements StoppableHttpService {
 	public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator) {
 		return delegate.createWhiteboardRuntimeDTO(iterator);
 	}
+
+    @Override
+    public WebContainerDTO getWebcontainerDTO() {
+        return delegate.getWebcontainerDTO();
+    }
 
 
 }

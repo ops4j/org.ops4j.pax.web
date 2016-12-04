@@ -19,6 +19,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -125,11 +126,18 @@ public class ExtendedHttpServiceRuntime implements HttpServiceRuntime, Replaceab
         Dictionary<String, Object> props = new Hashtable<>();
         
         Long id = (Long) serviceProperties.get("service.id");
+        String endpointString = "";
         
-        //TODO: retrieve context from webContainer add as endpoint
+        if (newService.getWebcontainerDTO().listeningAddresses != null && newService.getWebcontainerDTO().listeningAddresses.length > 0)
+            endpointString = newService.getWebcontainerDTO().listeningAddresses[0] + ":";
         
-        props.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT, "");
-        props.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ID, new ArrayList<>().add(id));
+        endpointString += newService.getWebcontainerDTO().port;
+        
+        List<Long> idList = new ArrayList<>();
+        idList.add(id);
+        
+        props.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT, endpointString);
+        props.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ID, idList);
         
         serviceRuntimeService = bundleContext.registerService(HttpServiceRuntime.class, this, props);
     }

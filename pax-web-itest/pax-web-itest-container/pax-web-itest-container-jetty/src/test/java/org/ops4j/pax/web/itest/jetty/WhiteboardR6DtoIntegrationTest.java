@@ -25,6 +25,7 @@ import static org.ops4j.pax.web.itest.base.assertion.Assert.assertThat;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -56,8 +57,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.http.HttpService;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.HttpServiceRuntime;
+import org.osgi.service.http.runtime.HttpServiceRuntimeConstants;
 import org.osgi.service.http.runtime.dto.RequestInfoDTO;
 import org.osgi.service.http.runtime.dto.RuntimeDTO;
 import org.osgi.service.http.runtime.dto.ServletContextDTO;
@@ -341,6 +344,27 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 				servletDTO -> Objects.equals(servletDTO.patterns[0], "/servlet"));
 		// FIXME evaluate
 	}
+	
+	@Test	
+	public void testDTOServiceProperties() throws Exception {
+	    ServiceReference<HttpServiceRuntime> ref = bundleContext.getServiceReference(HttpServiceRuntime.class);
+	    
+	    assertTrue("HttpServiceRuntime reference shall not be null", ref != null);
+	    
+	    ServiceReference<HttpService> serviceReference = bundleContext.getServiceReference(HttpService.class);
+	    
+	    assertTrue("HttpService reference shall not be null", serviceReference != null);
+
+	    Long serviceId = (Long) serviceReference.getProperty("service.id");
+
+	    String endpoint = (String) ref.getProperty(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT);
+	    List<Long> serviceIds = (List<Long>) ref.getProperty(HttpServiceRuntimeConstants.HTTP_SERVICE_ID);
+	    
+	    assertTrue("HttpServiceIDs shall contain service ID from HttpContext", serviceIds.contains(serviceId));
+	    assertTrue("endpoint shall be not null", endpoint != null);
+	    assertTrue("endpoint shall be not null", endpoint.length() > 0);
+	    
+    }
 
 	/**
 	 * This ServletContextHelper is supposed to be registered with missing properties

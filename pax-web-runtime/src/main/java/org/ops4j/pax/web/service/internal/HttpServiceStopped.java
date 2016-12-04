@@ -30,6 +30,7 @@ import javax.servlet.ServletException;
 
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.WebContainerDTO;
 import org.ops4j.pax.web.service.whiteboard.WhiteboardElement;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
@@ -525,5 +526,11 @@ class HttpServiceStopped implements StoppableHttpService {
 			return super.toString() + " for bundle " + serviceBundle;
 		}
 	}
+
+    @Override
+    public WebContainerDTO getWebcontainerDTO() {
+        LOG.warn("Http service has already been stoped");
+        return null;
+    }
 
 }

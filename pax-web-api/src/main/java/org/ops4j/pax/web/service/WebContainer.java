@@ -639,4 +639,6 @@ public interface WebContainer extends HttpService {
 	RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator);
 
 	RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator);
+	
+	WebContainerDTO getWebcontainerDTO();
 }

@@ -59,6 +59,7 @@ import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.service.WebContainerDTO;
 import org.ops4j.pax.web.service.internal.util.SupportUtils;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
@@ -1309,7 +1310,6 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	@Override
 	public RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator) {
-		// FIXME TBD
 		return withWhiteboardDtoService(service -> service.calculateRequestInfoDTO(path, iterator, serverModel, serviceModel));
 	}
 
@@ -1345,4 +1345,15 @@ class HttpServiceStarted implements StoppableHttpService {
 	public String toString() {
 		return super.toString() + " for bundle " + serviceBundle;
 	}
+
+    @Override
+    public WebContainerDTO getWebcontainerDTO() {
+        WebContainerDTO dto = new WebContainerDTO();
+        
+        dto.port = serverController.getHttpPort();
+        dto.securePort = serverController.getHttpSecurePort();
+        dto.listeningAddresses = serverController.getConfiguration().getListeningAddresses();
+        
+        return dto;
+    }
 }
