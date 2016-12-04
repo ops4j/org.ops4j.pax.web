@@ -73,7 +73,7 @@ public class ExtendedHttpServiceRuntime implements HttpServiceRuntime, Replaceab
     ExtendedHttpServiceRuntime(BundleContext bundleContext){
         this.bundleContext = bundleContext;
         this.httpServiceLock = new ReentrantReadWriteLock();
-        this.httpServiceTracker = new ReplaceableService<>(bundleContext, HttpService.class, this);
+        this.httpServiceTracker = new ReplaceableService<>(bundleContext, HttpService.class, this, true);
     }
 
     @Override
