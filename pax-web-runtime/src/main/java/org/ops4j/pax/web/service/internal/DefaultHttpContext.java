@@ -64,7 +64,7 @@ class DefaultHttpContext implements WebContainerContext {
 	DefaultHttpContext(final Bundle bundle, String contextID) {
 		NullArgumentException.validateNotNull(bundle, "Bundle");
 		this.bundle = bundle;
-		this.contextID = contextID == null ? "default" : contextID;
+		this.contextID = (contextID == null || contextID.equals("")) ? "default" : contextID;
 	}
 
 	/**
