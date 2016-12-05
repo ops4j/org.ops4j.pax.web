@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.itest.undertow;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
@@ -45,8 +46,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.http.HttpService;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.HttpServiceRuntime;
+import org.osgi.service.http.runtime.HttpServiceRuntimeConstants;
 import org.osgi.service.http.runtime.dto.RequestInfoDTO;
 import org.osgi.service.http.runtime.dto.RuntimeDTO;
 import org.osgi.service.http.runtime.dto.ServletContextDTO;
@@ -133,25 +136,27 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 	 */
 	@Test
 	public void testRuntimeDto() throws Exception {
-	    
-	    logger.info("searching for ServletContexts bound to this webapplication");
-	    
+		// fire a request to enable handler in undertow after registration
+		HttpTestClientFactory.createDefaultTestClient()
+				.doGETandExecuteTest("http://127.0.0.1:8181/simple-servlet");
+
+
 		RuntimeDTO runtimeDTO = withService(HttpServiceRuntime::getRuntimeDTO);
 
 		// prepare ServiceIDs for comparrison
 		final long servletServiceId = (long)bundleContext.getServiceReference(WhiteboardServlet.class).getProperty(Constants.SERVICE_ID);
 		final long servletWithContextServiceId = (long)bundleContext.getServiceReference(WhiteboardServletWithContext.class).getProperty(Constants.SERVICE_ID);
-		final long customServletContextServiceId = (long)bundleContext.getServiceReferences(ServletContext.class, "(" + WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME + "=CustomContext)").stream().findFirst().orElseThrow(() -> new AssertionError("CustomContext ServletContext not found")).getProperty(Constants.SERVICE_ID);
 		final long defaultServletContextServiceId = (long)bundleContext.getServiceReferences(ServletContext.class, "(" + WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME + "=default)").stream().findFirst().orElseThrow(() -> new AssertionError("Default ServletContext not found")).getProperty(Constants.SERVICE_ID);
+		final long customServletContextServiceId = (long)bundleContext.getServiceReferences(ServletContext.class, "(" + WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME + "=CustomContext)").stream().findFirst().orElseThrow(() -> new AssertionError("CustomContext ServletContext not found")).getProperty(Constants.SERVICE_ID);
 		final long filterServiceId = (long)bundleContext.getServiceReference(WhiteboardFilter.class).getProperty(Constants.SERVICE_ID);
 		final long listenerServiceId = (long)bundleContext.getServiceReference(WhiteboardListener.class).getProperty(Constants.SERVICE_ID);
 		final long resourceServiceId = (long)bundleContext.getServiceReference(WhiteboardResource.class).getProperty(Constants.SERVICE_ID);
 		final long errorPageServiceId = (long)bundleContext.getServiceReference(WhiteboardErrorPage.class).getProperty(Constants.SERVICE_ID);
 
 
-		assertThat("Default- and CustomServletContextDTO must be available",
+		assertThat("Default- and CustomServletContextDTO must be available:" + runtimeDTO.servletContextDTOs.length,
 				runtimeDTO.servletContextDTOs,
-				servletContextDTOs -> servletContextDTOs.length == 2);
+				servletContextDTOs -> servletContextDTOs.length == 3);
 
 		Optional<ServletContextDTO> defaultContext = Arrays.stream(runtimeDTO.servletContextDTOs)
 				.filter(servletContextDTO -> Objects.equals(servletContextDTO.name, "default"))
@@ -159,6 +164,9 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 		Optional<ServletContextDTO> customContext = Arrays.stream(runtimeDTO.servletContextDTOs)
 				.filter(servletContextDTO -> Objects.equals(servletContextDTO.name, "CustomContext"))
 				.findFirst();
+//        Optional<ServletContextDTO> customContextMapping = Arrays.stream(runtimeDTO.servletContextDTOs)
+//                .filter(servletContextDTO -> Objects.equals(servletContextDTO.name, "CustomHttpContextMapping"))
+//                .findFirst();
 
 		// Test all under Default-ServletContext
 		if(!defaultContext.isPresent()){
@@ -188,7 +196,8 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 			assertThat("FilterDTO for WhiteboardFilter doesn't match!",
 					defaultContext.get().filterDTOs[0],
 					filterDTO -> filterDTO.serviceId == filterServiceId
-							&& filterDTO.servletContextId == defaultServletContextServiceId);
+							&& filterDTO.servletContextId == defaultServletContextServiceId
+							&& Objects.equals(filterDTO.name, "SimpleFilter"));
 			assertThat("ResourceDTO for WhiteboardResource doesn't match!",
 					defaultContext.get().resourceDTOs[0], resourceDTO ->
 							resourceDTO.serviceId == resourceServiceId
@@ -226,11 +235,17 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 							&& listenerDTO.servletContextId == customServletContextServiceId
 							&& Objects.equals(listenerDTO.types[0], ServletRequestListener.class.getName()));
 		}
+
+		//TODO: check CustomHttpContextMapping
 	}
 
 
 	@Test
 	public void testRuntimeDtoWithFailedServices() throws Exception {
+		// fire a request to enable handler in undertow after registration
+		HttpTestClientFactory.createDefaultTestClient()
+				.doGETandExecuteTest("http://127.0.0.1:8181/simple-servlet");
+
 
 		// add a ServletContextHelper with missing path
 		Dictionary<String, String> props = new Hashtable<>(1);
@@ -249,9 +264,16 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 		RuntimeDTO runtimeDTO = withService(HttpServiceRuntime::getRuntimeDTO);
 
 		// Test all failed elements
+
+		System.err.println(runtimeDTO.failedServletContextDTOs.length);
+
+		assertTrue("Incorrect number of failed ServletContext DTOs",
+				1 == runtimeDTO.failedServletContextDTOs.length);
 		assertThat("Invalid ServletContext doesn't match",
 				runtimeDTO.failedServletContextDTOs[0],
 				failedServletContextDTO -> failedServletContextDTO.serviceId == serviceIdFailedContext);
+		assertTrue("Incorrect number of invalid ServletContexts",
+				1 == runtimeDTO.failedServletDTOs.length);
 		assertThat("Invalid ServletContext doesn't match",
 				runtimeDTO.failedServletDTOs[0],
 				failedServletDTO -> failedServletDTO.serviceId == serviceIdFailedServlet);
@@ -259,9 +281,79 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 
 	@Test
 	public void testRequestInfoDto() throws Exception {
+		// fire a request to enable handler in undertow after registration
+		HttpTestClientFactory.createDefaultTestClient()
+				.doGETandExecuteTest("http://127.0.0.1:8181/simple-servlet");
+
+
+		final long defaultServletContextServiceId = (long)bundleContext.getServiceReferences(ServletContext.class, "(" + WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME + "=default)").stream().findFirst().orElseThrow(() -> new AssertionError("Default ServletContext not found")).getProperty(Constants.SERVICE_ID);
+
 		RequestInfoDTO requestInfoDTO = withService(
-				httpServiceRuntime -> httpServiceRuntime.calculateRequestInfoDTO("/custom/servlet"));
+				httpServiceRuntime -> httpServiceRuntime.calculateRequestInfoDTO("/simple-servlet"));
+
+		assertTrue("Path doesn't match",
+				Objects.equals(requestInfoDTO.path, "/simple-servlet"));
+		assertTrue("ServletContext-ServiceID doesn't match",
+				requestInfoDTO.servletContextId == defaultServletContextServiceId);
+		assertThat("ServletDTO doesn't match",
+				requestInfoDTO.servletDTO,  servletDTO ->
+						Objects.equals(servletDTO.patterns[0], "/simple-servlet")
+								&& Objects.equals(servletDTO.name, "SimpleServlet"));
+		assertThat("FilterDTO doesn't match",
+				requestInfoDTO.filterDTOs[0],  filterDTO ->
+						Objects.equals(filterDTO.patterns[0], "/simple-servlet")
+								&& Objects.equals(filterDTO.name, "SimpleFilter"));
+		assertThat("ResourceDTO doesn't match",
+				requestInfoDTO.resourceDTO,  resourceDTO ->
+						Objects.equals(resourceDTO.patterns[0], "/resources"));
 		// FIXME evaluate
+	}
+
+
+	@Test
+	public void testRequestInfoDto_CustomContext() throws Exception {
+		// fire a request to enable handler in undertow after registration
+		HttpTestClientFactory.createDefaultTestClient()
+				.doGETandExecuteTest("http://127.0.0.1:8181/simple-servlet");
+
+		final long customServletContextServiceId = (long)bundleContext.getServiceReferences(ServletContext.class, "(" + WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME + "=CustomContext)").stream().findFirst().orElseThrow(() -> new AssertionError("CustomContext ServletContext not found")).getProperty(Constants.SERVICE_ID);
+
+		RequestInfoDTO requestInfoDTO = withService(
+				httpServiceRuntime -> httpServiceRuntime.calculateRequestInfoDTO("/context/servlet"));
+
+		assertTrue("Path doesn't match",
+				Objects.equals(requestInfoDTO.path, "/context/servlet"));
+		assertTrue("ServletContext-ServiceID doesn't match",
+				requestInfoDTO.servletContextId == customServletContextServiceId);
+		assertThat("ServletDTO doesn't match",
+				requestInfoDTO.servletDTO,
+				servletDTO -> Objects.equals(servletDTO.patterns[0], "/servlet"));
+		// FIXME evaluate
+	}
+
+	@Test
+	public void testDTOServiceProperties() throws Exception {
+		// fire a request to enable handler in undertow after registration
+		HttpTestClientFactory.createDefaultTestClient()
+				.doGETandExecuteTest("http://127.0.0.1:8181/simple-servlet");
+
+		ServiceReference<HttpServiceRuntime> ref = bundleContext.getServiceReference(HttpServiceRuntime.class);
+
+		assertTrue("HttpServiceRuntime reference shall not be null", ref != null);
+
+		ServiceReference<HttpService> serviceReference = bundleContext.getServiceReference(HttpService.class);
+
+		assertTrue("HttpService reference shall not be null", serviceReference != null);
+
+		Long serviceId = (Long) serviceReference.getProperty("service.id");
+
+		String endpoint = (String) ref.getProperty(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT);
+		List<Long> serviceIds = (List<Long>) ref.getProperty(HttpServiceRuntimeConstants.HTTP_SERVICE_ID);
+
+		assertTrue("HttpServiceIDs shall contain service ID from HttpContext", serviceIds.contains(serviceId));
+		assertTrue("endpoint shall be not null", endpoint != null);
+		assertTrue("endpoint shall be not null", endpoint.length() > 0);
+
 	}
 
 

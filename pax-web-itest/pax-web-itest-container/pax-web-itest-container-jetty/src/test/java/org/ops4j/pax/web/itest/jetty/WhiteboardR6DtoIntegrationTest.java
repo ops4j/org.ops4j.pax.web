@@ -92,7 +92,6 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 
 	/**
 	 * This test just makes sure that the sample is working as expected for the other tests in this class.
-	 * @throws Exception
 	 */
 	@Test
 	public void testAllSamplesRegisteredAsExpected() throws Exception {
