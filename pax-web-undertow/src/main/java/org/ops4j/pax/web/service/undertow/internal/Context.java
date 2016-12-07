@@ -230,6 +230,9 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	synchronized HttpHandler getHandler(final Consumer<ServletContext> consumer) throws ServletException {
 		if (handler == null) {
 			createHandler(consumer);
+		} else if (consumer != null) {
+			// Handler might be available, but the ServletContextProxy needs initialization. TODO check why
+			consumer.accept(manager.getDeployment().getServletContext());
 		}
 		return handler;
 	}
@@ -278,20 +281,22 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	private void unregisterServletContext(final ServletContext servletContext) {
 		final String webContextPath = getContextPathForOsgi(servletContext);
 
-		// find ServiceRegistration which matches the given ServletContext
-		Optional<ServiceRegistration<ServletContext>> serviceReg = registeredServletContexts.stream().filter(reg -> reg.getReference() != null
-				&& webContextPath.equals(reg.getReference().getProperty(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH)))
-				.findFirst();
-		if (serviceReg.isPresent()) {
-		    LOG.debug("Unregistered ServletContext with ServletContext Name: ", serviceReg.get().getReference().getProperty(WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME));
-			try {
-				serviceReg.get().unregister();
-			} catch(IllegalStateException e){
-				LOG.error("Error during unregistration of ServletContext service with path '{}'!",
-						webContextPath, e);
-			} finally {
-				registeredServletContexts.remove(serviceReg.get());
+		Optional<ServiceRegistration<ServletContext>> serviceReg = Optional.empty();
+		try {
+			// find ServiceRegistration which matches the given ServletContext
+			serviceReg = registeredServletContexts.stream().filter(reg -> reg.getReference() != null
+					&& webContextPath.equals(reg.getReference().getProperty(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH)))
+					.findFirst();
+			if (serviceReg.isPresent()) {
+				LOG.debug("Unregistered ServletContext with ServletContext Name: ", serviceReg.get().getReference().getProperty(WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME));
+
+					serviceReg.get().unregister();
 			}
+		} catch(IllegalStateException e){
+			LOG.error("Error during unregistration of ServletContext service with path '{}'!",
+					webContextPath, e);
+		} finally {
+			serviceReg.ifPresent(registeredServletContexts::remove);
 		}
 	}
 
