@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletContainerInitializer;
@@ -152,7 +153,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 			for (ServletModel servlet : servlets) {
 				doStart(servlet);
 			}
-			createHandler();
+			createHandler(null);
 		}
 	}
 
@@ -194,7 +195,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 	public synchronized void destroy() {
 		try {
-			destroyHandler();
+			destroyHandler(false);
 		} catch (ServletException e) {
 			e.printStackTrace();
 		}
@@ -202,7 +203,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 	@Override
 	public void handleRequest(HttpServerExchange exchange) throws Exception {
-		HttpHandler h = getHandler();
+		HttpHandler h = getHandler(null);
 		if (h != null) {
 			// Put back original request path
 			String path = exchange.getRequestPath();
@@ -217,29 +218,43 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		}
 	}
 
-	private HttpHandler getHandler() throws ServletException {
+	/**
+	 * Creates a new HttpHandler if not already available.
+	 * Once the the ServletContext for this Context has been created, it will be applied to a given (optional) consumer.
+	 * The consumer is used to update a ServletContext-OSGi-service which is actually a proxy
+	 * @param consumer optional function to work with new ServletContext.
+	 * @return fully initialized HttpHandler
+	 * @throws ServletException if something goes wrong during startup
+	 * @see ServletContextProxy
+	 */
+	synchronized HttpHandler getHandler(final Consumer<ServletContext> consumer) throws ServletException {
 		if (handler == null) {
-			synchronized (this) {
-				createHandler();
-			}
+			createHandler(consumer);
 		}
 		return handler;
 	}
 
-	private synchronized void createHandler() throws ServletException {
+
+	private void createHandler(final Consumer<ServletContext> consumer) throws ServletException {
 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
 		try {
 			ClassLoader ncl = classLoader;
 			Thread.currentThread().setContextClassLoader(ncl);
-			doCreateHandler();
+			doCreateHandler(consumer);
 		} finally {
 			Thread.currentThread().setContextClassLoader(cl);
 		}
 	}
 
 	private synchronized void destroyHandler() throws ServletException {
+		destroyHandler(true);
+	}
+
+	private synchronized void destroyHandler(boolean keepProxy) throws ServletException {
 		if (manager != null) {
-			unregisterServletContext(manager.getDeployment().getServletContext());
+			if (!keepProxy) {
+				unregisterServletContext(manager.getDeployment().getServletContext());
+			}
 			manager.stop();
 			manager.undeploy();
 			manager = null;
@@ -261,7 +276,8 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 
 	private void unregisterServletContext(final ServletContext servletContext) {
-		String webContextPath = getContextPathForOsgi(servletContext);
+		final String webContextPath = getContextPathForOsgi(servletContext);
+
 		// find ServiceRegistration which matches the given ServletContext
 		Optional<ServiceRegistration<ServletContext>> serviceReg = registeredServletContexts.stream().filter(reg -> reg.getReference() != null
 				&& webContextPath.equals(reg.getReference().getProperty(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH)))
@@ -280,10 +296,10 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	}
 
 	private void registerServletContext(final ServletContext servletContext, final Bundle bundle) {
-			String webContextPath = getContextPathForOsgi(servletContext);
-			// Undertows ServletContextImpl maps "/" to "". In OSGi path must start with /
-			String filter = String.format("(%s=%s)",
-					WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
+		String webContextPath = getContextPathForOsgi(servletContext);
+		// Undertows ServletContextImpl maps "/" to "". In OSGi path must start with /
+		String filter = String.format("(%s=%s)",
+				WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
 		Optional<ServiceReference<ServletContext>> first;
 		try {
 			first = bundle.getBundleContext().getServiceReferences(ServletContext.class, filter).stream().findFirst();
@@ -298,14 +314,14 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 				props.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME, servletContext.getServletContextName());
 				ServiceRegistration<ServletContext> serviceReg = bundle.getBundleContext().registerService(
 						ServletContext.class,
-						servletContext,
+						new ServletContextProxy(this),
 						props);
 				registeredServletContexts.add(serviceReg);
 				LOG.debug("ServletContext registered as service with properties: {}", props);
 			}
 	}
 
-	private void doCreateHandler() throws ServletException {
+	private void doCreateHandler(Consumer<ServletContext> consumer) throws ServletException {
 		final WebContainerContext httpContext = contextModel.getHttpContext();
 		DeploymentInfo deployment = new DeploymentInfo();
 		deployment.setEagerFilterInit(true);
@@ -506,6 +522,9 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		manager = container.addDeployment(deployment);
 		manager.deploy();
 		registerServletContext(manager.getDeployment().getServletContext(), bundle);
+		if(consumer != null){
+			consumer.accept(manager.getDeployment().getServletContext());
+		}
 		handler = manager.start();
 	}
 
@@ -785,4 +804,5 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 			return null;
 		}
 	}
+
 }
