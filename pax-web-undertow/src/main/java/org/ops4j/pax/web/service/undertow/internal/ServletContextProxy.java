@@ -44,7 +44,7 @@ class ServletContextProxy implements ServletContext {
         try {
             synchronized (lock) {
                 if(servletContextRef.get() == null) {
-                    context.getHandler(servletContext -> servletContextRef.getAndSet(servletContext));
+                    context.getHandler(servletContext -> servletContextRef.set(servletContext));
                 }
             }
         } catch (ServletException e) {

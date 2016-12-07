@@ -230,6 +230,9 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	synchronized HttpHandler getHandler(final Consumer<ServletContext> consumer) throws ServletException {
 		if (handler == null) {
 			createHandler(consumer);
+		} else if (consumer != null) {
+			// Handler might be available, but the ServletContextProxy needs initialization. TODO check why
+			consumer.accept(manager.getDeployment().getServletContext());
 		}
 		return handler;
 	}
