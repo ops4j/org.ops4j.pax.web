@@ -15,26 +15,32 @@
  */
 package org.ops4j.pax.web.itest.undertow;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
+import org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldServlet;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.runtime.dto.FailedResourceDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletContext;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
 
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 /**
@@ -52,11 +58,11 @@ public class WebContainerIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-		initWebListener();
+		initServletListener();
 		final String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-wc/"
 				+ VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
-		waitForWebListener();
+		waitForServletListener();
 	}
 
 	@After
@@ -90,19 +96,22 @@ public class WebContainerIntegrationTest extends ITestBase {
 	 */
 	@Test
 	public void testServletContextRegistration() throws Exception {
-		// It's necessary to execute a request, because there might be currently no Undertow-RequestHandler
-		// (which is tied to the availability of the ServletContext)
-		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'Have bundle context in filter: true'",
-						resp -> resp.contains("Have bundle context in filter: true"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/helloworld/wc");
-
 		String filter = String.format("(%s=%s)",
 				WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, "/");
 
-		if(bundleContext.getServiceReferences(ServletContext.class, filter).size() == 0){
+		Collection<ServiceReference<ServletContext>> serviceReferences = bundleContext.getServiceReferences(
+				ServletContext.class,
+				filter);
+		if(serviceReferences.isEmpty()){
 			fail("ServletContext was not registered as Service.");
 		}
+
+		Optional<ServiceReference<ServletContext>> contextRef = serviceReferences.stream().findFirst();
+
+		assertThat("Proxy must initialize ServletContext and provide correct name",
+				bundleContext.getService(contextRef.orElseThrow(AssertionError::new)).getServletContextName(),
+				CoreMatchers.equalTo("default"));
+
 	}
 
 
@@ -111,18 +120,11 @@ public class WebContainerIntegrationTest extends ITestBase {
 	 */
 	@Test
 	public void testServletContextUnregistration() throws Exception {
-		// It's necessary to execute a request, because there might be currently no Undertow-RequestHandler
-		// (which is tied to the availability of the ServletContext)
-		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'Have bundle context in filter: true'",
-						resp -> resp.contains("Have bundle context in filter: true"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/helloworld/wc");
-
 		installWarBundle.stop();
 		String filter = String.format("(%s=%s)",
 				WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, "/");
 
-		if(bundleContext.getServiceReferences(ServletContext.class, filter).size() > 0){
+		if(!bundleContext.getServiceReferences(ServletContext.class, filter).isEmpty()){
 			fail("ServletContext was not unregistered.");
 		}
 	}
