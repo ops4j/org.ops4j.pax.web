@@ -17,11 +17,7 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.Servlet;
 import javax.servlet.annotation.WebInitParam;
@@ -49,65 +45,62 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Joseph
  * @since 0.4.0, April 05, 2008
  */
-public class ServletTracker<T extends Servlet> extends
-		AbstractTracker<T, ServletWebElement> {
+public class ServletTracker<T extends Servlet> extends AbstractTracker<T, ServletWebElement> {
 
 	/**
 	 * Logger.
 	 */
-	private static final Logger LOG = LoggerFactory
-			.getLogger(ServletTracker.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ServletTracker.class);
 
 	/**
 	 * Constructor.
 	 *
-	 * @param extenderContext extender context; cannot be null
-	 * @param bundleContext   extender bundle context; cannot be null
+	 * @param extenderContext
+	 *            extender context; cannot be null
+	 * @param bundleContext
+	 *            extender bundle context; cannot be null
 	 */
-	private ServletTracker(final ExtenderContext extenderContext,
-						   final BundleContext bundleContext) {
+	private ServletTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
 		super(extenderContext, bundleContext);
 	}
 
 	@SuppressWarnings("unchecked")
 	public static <T extends Servlet> ServiceTracker<T, ServletWebElement> createTracker(
-			final ExtenderContext extenderContext,
-			final BundleContext bundleContext) {
+			final ExtenderContext extenderContext, final BundleContext bundleContext) {
 		return new ServletTracker<T>(extenderContext, bundleContext)
-				.create(new Class[]{
-						Servlet.class,
-						HttpServlet.class
-				});
+				.create(new Class[] { Servlet.class, HttpServlet.class });
 	}
 
 	/**
 	 * @see AbstractTracker#createWebElement(ServiceReference, Object)
 	 */
 	@Override
-	ServletWebElement createWebElement(
-			final ServiceReference<T> serviceReference, final T published) {
+	ServletWebElement createWebElement(final ServiceReference<T> serviceReference, final T published) {
 		String alias = ServicePropertiesUtils.getStringProperty(serviceReference, ExtenderConstants.PROPERTY_ALIAS);
 		Object urlPatternsProp = serviceReference.getProperty(ExtenderConstants.PROPERTY_URL_PATTERNS);
 
 		String[] initParamKeys = serviceReference.getPropertyKeys();
-		String initPrefixProp = ServicePropertiesUtils.getStringProperty(serviceReference, ExtenderConstants.PROPERTY_INIT_PREFIX);
+		String initPrefixProp = ServicePropertiesUtils.getStringProperty(serviceReference,
+				ExtenderConstants.PROPERTY_INIT_PREFIX);
 		if (initPrefixProp == null) {
 			initPrefixProp = ExtenderConstants.DEFAULT_INIT_PREFIX_PROP;
 		}
-		String servletName = ServicePropertiesUtils.getStringProperty(serviceReference, WebContainerConstants.SERVLET_NAME);
+		String servletName = ServicePropertiesUtils.getStringProperty(serviceReference,
+				WebContainerConstants.SERVLET_NAME);
 
 		if (urlPatternsProp == null) {
 			urlPatternsProp = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN);
 		} else {
-			String[] whiteBoardProp = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN);
-			urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp, Arrays.asList(whiteBoardProp));
+			String[] whiteBoardProp = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference,
+					HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN);
+			urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp,
+					Arrays.asList(whiteBoardProp));
 		}
-
 
 		if (servletName == null) {
-			servletName = ServicePropertiesUtils.getStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME);
+			servletName = ServicePropertiesUtils.getStringProperty(serviceReference,
+					HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME);
 		}
-
 
 		ServletAnnotationScanner annotationScan = new ServletAnnotationScanner(published.getClass());
 
@@ -116,25 +109,14 @@ public class ServletTracker<T extends Servlet> extends
 				urlPatternsProp = annotationScan.urlPatterns;
 			} else {
 				List<String> annotationsUrlPatterns = Arrays.asList(annotationScan.urlPatterns);
-				urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp, annotationsUrlPatterns);
+				urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp,
+						annotationsUrlPatterns);
 			}
 		}
 
 		// special Whiteboard Error-Servlet handling
-		String[] errorPageParams = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE);
-
-		if (servletName != null
-				&& (!(servletName instanceof String) || servletName.toString()
-				.trim().length() == 0)) {
-			LOG.warn("Registered servlet [" + published
-					+ "] did not contain a valid servlet-name property.");
-			return null;
-		}
-		if (alias != null && urlPatternsProp != null) {
-			LOG.warn("Registered servlet [" + published
-					+ "] cannot have both alias and url patterns");
-			return null;
-		}
+		String[] errorPageParams = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference,
+				HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE);
 
 		if (errorPageParams != null) {
 			if (servletName == null) {
@@ -145,31 +127,12 @@ public class ServletTracker<T extends Servlet> extends
 			}
 		}
 
-		if (alias == null && urlPatternsProp == null) {
-			LOG.warn("Registered servlet ["
-					+ published
-					+ "] did not contain a valid alias or url patterns property");
-			return null;
-		}
-		if (alias != null
-				&& (!(alias instanceof String) || ((String) alias).trim()
-				.length() == 0)) {
-			LOG.warn("Registered servlet [" + published
-					+ "] did not contain a valid alias property");
-			return null;
-		}
 		String[] urlPatterns = null;
 		if (urlPatternsProp != null) {
-			if (urlPatternsProp instanceof String
-					&& ((String) urlPatternsProp).trim().length() != 0) {
-				urlPatterns = new String[]{(String) urlPatternsProp};
+			if (urlPatternsProp instanceof String && ((String) urlPatternsProp).trim().length() != 0) {
+				urlPatterns = new String[] { (String) urlPatternsProp };
 			} else if (urlPatternsProp instanceof String[]) {
 				urlPatterns = (String[]) urlPatternsProp;
-			} else {
-				LOG.warn("Registered servlet ["
-						+ published
-						+ "] has an invalid url pattern property (must be a non empty String or String[])");
-				return null;
 			}
 		}
 
@@ -190,7 +153,9 @@ public class ServletTracker<T extends Servlet> extends
 				if (key.startsWith(initPrefixProp == null ? "" : initPrefixProp)) {
 					initParams.put(key.replaceFirst(initPrefixProp, ""), value);
 				} else if (key.startsWith(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX)) {
-					initParams.put(key.replaceFirst(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX, ""), value);
+					initParams.put(
+							key.replaceFirst(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX, ""),
+							value);
 				}
 				if ("load-on-startup".equalsIgnoreCase(key) && value != null) {
 					loadOnStartup = Integer.parseInt(value);
@@ -198,15 +163,16 @@ public class ServletTracker<T extends Servlet> extends
 				if ("async-supported".equalsIgnoreCase(key) && value != null) {
 					asyncSupported = Boolean.parseBoolean(value);
 				}
-				//CHECKSTYLE:OFF
+				// CHECKSTYLE:OFF
 			} catch (Exception ignore) {
 				// ignore
 			}
-			//CHECKSTYLE:ON
+			// CHECKSTYLE:ON
 		}
 
 		if (asyncSupported == null) {
-			asyncSupported = ServicePropertiesUtils.getBooleanProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED);
+			asyncSupported = ServicePropertiesUtils.getBooleanProperty(serviceReference,
+					HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED);
 		}
 
 		if (annotationScan.scanned) {
@@ -222,25 +188,24 @@ public class ServletTracker<T extends Servlet> extends
 		}
 
 		if (annotationScan.scanned && annotationScan.loadOnStartup != null) {
-			loadOnStartup = Integer.valueOf(annotationScan.loadOnStartup);
+			loadOnStartup = annotationScan.loadOnStartup;
 		}
 
 		DefaultServletMapping mapping = new DefaultServletMapping();
 		mapping.setHttpContextId(httpContextId);
 		mapping.setServlet(published);
 		if (servletName != null) {
-			mapping.setServletName(servletName.toString().trim());
+			mapping.setServletName(servletName.trim());
 		}
-		mapping.setAlias((String) alias);
+		mapping.setAlias(alias);
 		mapping.setUrlPatterns(urlPatterns);
 		mapping.setInitParams(initParams);
 		mapping.setLoadOnStartup(loadOnStartup);
 		mapping.setAsyncSupported(asyncSupported);
 
-		List<DefaultErrorPageMapping> errorMappings = null;
+		List<DefaultErrorPageMapping> errorMappings = new ArrayList<>();
 
 		if (errorPageParams != null) {
-			errorMappings = new ArrayList<>();
 			for (String errorPageParam : errorPageParams) {
 				DefaultErrorPageMapping errorMapping = new DefaultErrorPageMapping();
 				errorMapping.setHttpContextId(httpContextId);
@@ -250,7 +215,7 @@ public class ServletTracker<T extends Servlet> extends
 			}
 		}
 
-		return new ServletWebElement(mapping, errorMappings);
+		return new ServletWebElement<>(serviceReference, mapping, errorMappings);
 	}
 
 }

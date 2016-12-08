@@ -42,6 +42,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.servlet.Filter;
@@ -57,6 +58,8 @@ import org.ops4j.pax.web.jsp.JspServletWrapper;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.service.WebContainerDTO;
 import org.ops4j.pax.web.service.internal.util.SupportUtils;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
@@ -76,12 +79,17 @@ import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.ops4j.pax.web.service.spi.model.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardElement;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.ops4j.util.property.PropertyResolver;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
+import org.osgi.service.http.runtime.dto.RequestInfoDTO;
+import org.osgi.service.http.runtime.dto.RuntimeDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -301,12 +309,12 @@ class HttpServiceStarted implements StoppableHttpService {
 	}
 
 	@Override
-	public HttpContext createDefaultHttpContext() {
-		return new DefaultHttpContext(serviceBundle, "default");
+	public WebContainerContext createDefaultHttpContext() {
+		return new DefaultHttpContext(serviceBundle, WebContainerContext.DefaultContextIds.DEFAULT.getValue());
 	}
 
 	@Override
-	public HttpContext createDefaultHttpContext(String contextID) {
+	public WebContainerContext createDefaultHttpContext(String contextID) {
 		return new DefaultHttpContext(serviceBundle, contextID);
 	}
 
@@ -499,6 +507,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void registerFilter(final Filter filter, final String[] urlPatterns,
 							   final String[] servletNames,
@@ -658,7 +667,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
 		final ContextModel contextModel = getOrCreateContext(httpContext);
 		Integer sessionTimeout = contextModel.getSessionTimeout();
-		if (!(minutes == sessionTimeout || minutes != null
+		if (!(minutes == sessionTimeout || minutes != null // FIXME comparison?
 				&& minutes.equals(sessionTimeout))) {
 			if (!serviceModel.canBeConfigured(httpContext)) {
 				throw new IllegalStateException(
@@ -1073,9 +1082,13 @@ class HttpServiceStarted implements StoppableHttpService {
 	}
 
 	private ContextModel getOrCreateContext(final HttpContext httpContext) {
-		HttpContext context = httpContext;
-		if (context == null) {
+		final WebContainerContext context;
+		if (httpContext == null) {
 			context = createDefaultHttpContext();
+		} else if (!(httpContext instanceof WebContainerContext)) {
+			context = new WebContainerContextWrapper(serviceBundle, httpContext);
+		} else {
+			context = (WebContainerContext) httpContext;
 		}
 		serverModel.associateHttpContext(context, serviceBundle,
 				httpContext instanceof SharedWebContainerContext);
@@ -1296,28 +1309,51 @@ class HttpServiceStarted implements StoppableHttpService {
 	}
 
 	@Override
+	public RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator) {
+		return withWhiteboardDtoService(service -> service.calculateRequestInfoDTO(path, iterator, serverModel, serviceModel));
+	}
+
+	@Override
+	public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator) {
+		return withWhiteboardDtoService(service -> service.createWhiteboardRuntimeDTO(iterator, serverModel, serviceModel));
+	}
+
+	
+	/**
+	 * WhiteboardDtoService is registered as DS component. Should be removed if this class gets full DS support
+	 * @param function a function which is applied against WhiteboardDtoService
+	 * @param <T> Type of the functions return value
+	 * @return value provided by given function
+	 */
+	private <T> T withWhiteboardDtoService(Function<WhiteboardDtoService, T> function){
+		final BundleContext bundleContext = serviceBundle.getBundleContext();
+		ServiceReference<WhiteboardDtoService> ref = bundleContext.getServiceReference(WhiteboardDtoService.class);
+		if(ref != null){
+			WhiteboardDtoService service = bundleContext.getService(ref);
+			if(service != null){
+				try{
+					return function.apply(service);
+				}finally {
+					bundleContext.ungetService(ref);
+				}
+			}
+		}
+		throw new IllegalStateException(String.format("Service '%s' could not be retrieved!", WhiteboardDtoService.class.getName()));
+	}
+
+	@Override
 	public String toString() {
 		return super.toString() + " for bundle " + serviceBundle;
 	}
 
-	/*
-	@Override
-	public void setConnectors(List<String> connectors, HttpContext httpContext) {
-		NullArgumentException.validateNotNull(httpContext, "Http context");
-		if (!serviceModel.canBeConfigured(httpContext)) {
-			throw new IllegalStateException(
-					"Http context already used. ServletContainerInitializer can be set only before first usage");
-		}
-
-		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
-		List<String> realConnectors = connectors;
-		if (realConnectors.size() == 0) {
-			realConnectors = this.serverController.getConfiguration()
-					.getConnectors();
-		}
-		contextModel.setConnectors(realConnectors);
-		serviceModel.addContextModel(contextModel);
-	}
-	*/
+    @Override
+    public WebContainerDTO getWebcontainerDTO() {
+        WebContainerDTO dto = new WebContainerDTO();
+        
+        dto.port = serverController.getHttpPort();
+        dto.securePort = serverController.getHttpSecurePort();
+        dto.listeningAddresses = serverController.getConfiguration().getListeningAddresses();
+        
+        return dto;
+    }
 }

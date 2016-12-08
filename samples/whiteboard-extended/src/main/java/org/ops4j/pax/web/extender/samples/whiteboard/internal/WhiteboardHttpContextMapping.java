@@ -18,7 +18,7 @@ package org.ops4j.pax.web.extender.samples.whiteboard.internal;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
+import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.osgi.service.http.HttpContext;
 
 public class WhiteboardHttpContextMapping implements HttpContextMapping {

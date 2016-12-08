@@ -23,12 +23,12 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
-import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
-import org.ops4j.pax.web.extender.whiteboard.ServletMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultServletMapping;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
+import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
+import org.ops4j.pax.web.service.whiteboard.ServletMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -43,7 +43,7 @@ import javax.servlet.Servlet;
 @RunWith(PaxExam.class)
 public class WhiteboardIntegrationTest extends ITestBase {
 
-	private Bundle installWarBundle;
+	private Bundle installedBundle;
 
 	@Configuration
 	public static Option[] configure() {
@@ -54,14 +54,14 @@ public class WhiteboardIntegrationTest extends ITestBase {
 	public void setUp() throws BundleException, InterruptedException {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard/"
 				+ VersionUtil.getProjectVersion();
-		installWarBundle = installAndStartBundle(bundlePath);
+		installedBundle = installAndStartBundle(bundlePath);
 	}
 
 	@After
 	public void tearDown() throws BundleException {
-		if (installWarBundle != null) {
-			installWarBundle.stop();
-			installWarBundle.uninstall();
+		if (installedBundle != null) {
+			installedBundle.stop();
+			installedBundle.uninstall();
 		}
 	}
 
@@ -160,7 +160,7 @@ public class WhiteboardIntegrationTest extends ITestBase {
 
 	@Test
 	public void testMultipleContextMappings() throws Exception {
-		BundleContext bundleContext = installWarBundle.getBundleContext();
+		BundleContext bundleContext = installedBundle.getBundleContext();
 		DefaultHttpContextMapping httpContextMapping = new DefaultHttpContextMapping();
 		httpContextMapping.setHttpContextId("alternative");
 		httpContextMapping.setPath("alternative");

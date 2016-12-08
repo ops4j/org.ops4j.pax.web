@@ -66,12 +66,13 @@ public class WhiteboardResourceFilterIntegrationTest extends ITestBase {
 		service = bundleContext.registerService(Servlet.class,
 				new WhiteboardServlet("/test-resources"), initParams);
 
+		initServletListener();
+		waitForServletListener();
 	}
 
 	@After
 	public void tearDown() throws BundleException {
 		service.unregister();
-
 	}
 
 	@Test

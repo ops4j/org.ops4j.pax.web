@@ -33,8 +33,8 @@ import javax.servlet.ServletContainerInitializer;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.WebContainerContext;
 import org.osgi.framework.Bundle;
-import org.osgi.service.http.HttpContext;
 
 /**
  * Models a servlet context related to an http context.
@@ -44,7 +44,7 @@ import org.osgi.service.http.HttpContext;
  */
 public class ContextModel extends Identity {
 
-	private final HttpContext httpContext;
+	private final WebContainerContext httpContext;
 	private final ClassLoader classLoader;
 	private final Map<String, String> contextParams;
 	private String contextName;
@@ -158,7 +158,7 @@ public class ContextModel extends Identity {
 	 * @param bundle
 	 * @param classLoader
 	 */
-	public ContextModel(final HttpContext httpContext, final Bundle bundle,
+	public ContextModel(final WebContainerContext httpContext, final Bundle bundle,
 						final ClassLoader classLoader) {
 		this.bundle = bundle;
 		NullArgumentException.validateNotNull(httpContext, "Http context");
@@ -177,7 +177,7 @@ public class ContextModel extends Identity {
 		this.webBundle = false;
 	}
 
-	public HttpContext getHttpContext() {
+	public WebContainerContext getHttpContext() {
 		return httpContext;
 	}
 

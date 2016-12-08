@@ -26,11 +26,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.WebApplication;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.WebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -42,14 +38,12 @@ import org.slf4j.LoggerFactory;
  * @author Alin Dreghiciu
  * @since 0.2.0, August 21, 2007
  */
-abstract class AbstractTracker<T, W extends WebElement> implements
-		ServiceTrackerCustomizer<T, W> {
+abstract class AbstractTracker<T, W extends WebElement> implements ServiceTrackerCustomizer<T, W> {
 
 	/**
 	 * Logger.
 	 */
-	private static final Logger LOG = LoggerFactory
-			.getLogger(AbstractTracker.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractTracker.class);
 	/**
 	 * Extender context.
 	 */
@@ -63,63 +57,57 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 	/**
 	 * Constructor.
 	 *
-	 * @param extenderContext extender context; cannot be null
-	 * @param bundleContext   extender bundle context; cannot be null
+	 * @param extenderContext
+	 *            extender context; cannot be null
+	 * @param bundleContext
+	 *            extender bundle context; cannot be null
 	 */
-	AbstractTracker(final ExtenderContext extenderContext,
-					final BundleContext bundleContext) {
+	AbstractTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
 		this.extenderContext = extenderContext;
 		this.bundleContext = validateBundleContext(bundleContext);
 	}
 
-	protected final ServiceTracker<T, W> create(
-			final Class<? extends T> trackedClass) {
-		return new ServiceTracker<>(bundleContext, createFilter(
-				bundleContext, trackedClass), this);
+	protected final ServiceTracker<T, W> create(final Class<? extends T> trackedClass) {
+		return new ServiceTracker<>(bundleContext, createFilter(bundleContext, trackedClass), this);
 	}
 
 	@SafeVarargs
-	protected final ServiceTracker<T, W> create(
-			final Class<? extends T>... trackedClass) {
-		return new ServiceTracker<>(bundleContext, createFilter(
-				bundleContext, trackedClass), this);
+	protected final ServiceTracker<T, W> create(final Class<? extends T>... trackedClass) {
+		return new ServiceTracker<>(bundleContext, createFilter(bundleContext, trackedClass), this);
 	}
 
 	/**
 	 * Creates an OSGi filter for the classes.
 	 *
-	 * @param bundleContext a bundle context
-	 * @param trackedClass  the class being tracked
+	 * @param bundleContext
+	 *            a bundle context
+	 * @param trackedClass
+	 *            the class being tracked
 	 * @return osgi filter
 	 */
-	private static Filter createFilter(final BundleContext bundleContext,
-									   final Class<?> trackedClass) {
+	private static Filter createFilter(final BundleContext bundleContext, final Class<?> trackedClass) {
 		final String filter = "(" + Constants.OBJECTCLASS + "=" + trackedClass.getName() + ")";
 		try {
 			return bundleContext.createFilter(filter);
 		} catch (InvalidSyntaxException e) {
-			throw new IllegalArgumentException(
-					"Unexpected InvalidSyntaxException: " + e.getMessage());
+			throw new IllegalArgumentException("Unexpected InvalidSyntaxException: " + e.getMessage());
 		}
 	}
 
-	private static Filter createFilter(final BundleContext bundleContext,
-									   final Class<?>... trackedClass) {
+	private static Filter createFilter(final BundleContext bundleContext, final Class<?>... trackedClass) {
 		if (trackedClass.length == 1) {
 			return createFilter(bundleContext, trackedClass[0]);
 		} else {
 			StringBuilder filter = new StringBuilder();
 			filter.append("(|");
 			for (Class<?> clazz : trackedClass) {
-				filter.append("(").append(Constants.OBJECTCLASS).append("=")
-						.append(clazz.getName()).append(")");
+				filter.append("(").append(Constants.OBJECTCLASS).append("=").append(clazz.getName()).append(")");
 			}
 			filter.append(")");
 			try {
 				return bundleContext.createFilter(filter.toString());
 			} catch (InvalidSyntaxException e) {
-				throw new IllegalArgumentException(
-						"Unexpected InvalidSyntaxException: " + e.getMessage());
+				throw new IllegalArgumentException("Unexpected InvalidSyntaxException: " + e.getMessage());
 			}
 		}
 	}
@@ -128,11 +116,11 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 	 * Validates that the bundle context is not null. If null will throw
 	 * IllegalArgumentException.
 	 *
-	 * @param bundleContext a bundle context
+	 * @param bundleContext
+	 *            a bundle context
 	 * @return the bundle context if not null
 	 */
-	private static BundleContext validateBundleContext(
-			final BundleContext bundleContext) {
+	private static BundleContext validateBundleContext(final BundleContext bundleContext) {
 		NullArgumentException.validateNotNull(bundleContext, "Bundle context");
 		return bundleContext;
 	}
@@ -150,10 +138,17 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 		W webElement = createWebElement(serviceReference, registered);
 		if (webElement != null) {
 			String httpContextId = webElement.getHttpContextId();
-			final WebApplication webApplication = extenderContext
-					.getWebApplication(serviceReference.getBundle(),
-							httpContextId, sharedHttpContext);
-			if ((httpContextId == null && !webApplication.hasHttpContextMapping()) /*|| (httpContextId != null && httpContextId.equalsIgnoreCase(HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME))*/) {
+			final WebApplication webApplication = extenderContext.getWebApplication(serviceReference.getBundle(),
+					httpContextId, sharedHttpContext);
+			if ((httpContextId == null && !webApplication
+					.hasHttpContextMapping()) /*
+												 * || (httpContextId != null &&
+												 * httpContextId.
+												 * equalsIgnoreCase(
+												 * HttpWhiteboardConstants.
+												 * HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME
+												 * ))
+												 */) {
 				webApplication.setHttpContextMapping(new DefaultHttpContextMapping());
 			}
 			webApplication.addWebElement(webElement);
@@ -174,24 +169,22 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 	 * @see ServiceTrackerCustomizer#removedService(ServiceReference, Object)
 	 */
 	@Override
-	public void removedService(final ServiceReference<T> serviceReference,
-							   final W webElement) {
+	public void removedService(final ServiceReference<T> serviceReference, final W webElement) {
 		LOG.debug("Service removed {}", serviceReference);
 
 		Boolean sharedHttpContext = Boolean
-				.parseBoolean((String) serviceReference
-						.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
+				.parseBoolean((String) serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
 
-		final WebApplication webApplication = extenderContext
-				.getExistingWebApplication(serviceReference.getBundle(),
-						webElement.getHttpContextId(), sharedHttpContext);
+		final WebApplication webApplication = extenderContext.getExistingWebApplication(serviceReference.getBundle(),
+				webElement.getHttpContextId(), sharedHttpContext);
 		boolean remove = true;
 
 		if (sharedHttpContext) {
 			Integer sharedWebApplicationCounter = extenderContext.getSharedWebApplicationCounter(webApplication);
 			if (sharedWebApplicationCounter != null && sharedWebApplicationCounter > 0) {
 				remove = false;
-				Integer reduceSharedWebApplicationCount = extenderContext.reduceSharedWebApplicationCount(webApplication);
+				Integer reduceSharedWebApplicationCount = extenderContext
+						.reduceSharedWebApplicationCount(webApplication);
 				if (reduceSharedWebApplicationCount == 0) {
 					remove = true;
 				}
@@ -199,7 +192,8 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 
 			T registered = bundleContext.getService(serviceReference);
 			if (!remove && Servlet.class.isAssignableFrom(registered.getClass())) {
-				//special case where the removed service is a servlet, all other filters etc. should be stopped now too.
+				// special case where the removed service is a servlet, all
+				// other filters etc. should be stopped now too.
 				remove = true;
 			}
 			bundleContext.ungetService(serviceReference);
@@ -219,11 +213,12 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 	 * will cancel the registration of the service. Aditionally it can log an
 	 * error so the user is notified about the problem.
 	 *
-	 * @param serviceReference service reference for published service
-	 * @param published        the actual published service
+	 * @param serviceReference
+	 *            service reference for published service
+	 * @param published
+	 *            the actual published service
 	 * @return an Registration if could be created or applicable or null if not
 	 */
-	abstract W createWebElement(final ServiceReference<T> serviceReference,
-								final T published);
+	abstract W createWebElement(final ServiceReference<T> serviceReference, final T published);
 
 }

@@ -113,7 +113,7 @@
 		<dependency.pax-logging.version>1.6.3</dependency.pax-logging.version>
 		<dependency.paxurl.version>2.5.0</dependency.paxurl.version>
 		<dependency.slf4j>1.6.1</dependency.slf4j>
-		<dependency.scr.version>1.8.2</dependency.scr.version>
+		<dependency.scr.version>2.0.6</dependency.scr.version>
 		<dependency.swissbox.version>1.8.2</dependency.swissbox.version>
 		<dependency.tomcat.version>8.0.14</dependency.tomcat.version>
 		<dependency.xbean.version>4.1</dependency.xbean.version>
@@ -1179,6 +1179,7 @@
                                 <exclude>**/goal.txt</exclude>
                                 <exclude>**/grep.txt</exclude>
                                 <exclude>**/edit.txt</exclude>
+								<exclude>**/file.txt</exclude>
                                 <exclude>**/wc.txt</exclude>
                                 <exclude>**/foo</exclude>
                                 <exclude>**/maven-metadata-local.xml</exclude>

@@ -19,60 +19,65 @@
 package org.ops4j.pax.web.extender.whiteboard.internal.element;
 
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.extender.whiteboard.ResourceMapping;
+import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardResource;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
- * Registers/unregisters {@link ResourceMapping} with {@link HttpService}.
+ * Registers/unregisters {@link ResourceMapping} with {@link WebContainer}.
  *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class ResourceWebElement implements WebElement {
+public class ResourceWebElement extends WebElement<Object> implements WhiteboardResource {
 
-	/**
-	 * Resource mapping.
-	 */
+	private static final Logger LOG = LoggerFactory.getLogger(ResourceWebElement.class);
+
 	private ResourceMapping resourceMapping;
 
 	/**
-	 * Constructor.
-	 *
-	 * @param resourceMapping resource mapping; cannot be null
+	 * Constructs a new ResourceWebElement
+	 * @param ref the service-reference behind the registered http-whiteboard-service
+	 * @param resourceMapping ResourceMapping containing all necessary information
 	 */
-	public ResourceWebElement(final ResourceMapping resourceMapping) {
-		NullArgumentException.validateNotNull(resourceMapping,
-				"Resource mapping");
+	public ResourceWebElement(final ServiceReference<Object> ref, ResourceMapping resourceMapping) {
+		super(ref);
+		NullArgumentException.validateNotNull(resourceMapping, "Resource mapping");
 		this.resourceMapping = resourceMapping;
 	}
 
-	/**
-	 * Registers resource with http service.
-	 */
-	public void register(final HttpService httpService,
+	@Override
+	public void register(final WebContainer webContainer,
 						 final HttpContext httpContext) throws Exception {
-		httpService.registerResources(resourceMapping.getAlias(),
-				resourceMapping.getPath(), httpContext);
+		webContainer.registerResources(
+				resourceMapping.getAlias(),
+				resourceMapping.getPath(),
+				httpContext);
 	}
 
+	@Override
 	public String getHttpContextId() {
 		return resourceMapping.getHttpContextId();
 	}
 
-	/**
-	 * Unregisters resource from http service.
-	 */
-	public void unregister(final HttpService httpService,
+	@Override
+	public void unregister(final WebContainer webContainer,
 						   final HttpContext httpContext) {
-		httpService.unregister(resourceMapping.getAlias());
+		webContainer.unregister(resourceMapping.getAlias());
 	}
 
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() +
-				"{mapping=" + resourceMapping +
-				"}";
+		return this.getClass().getSimpleName() + "{mapping=" + resourceMapping + "}";
 	}
 
+	@Override
+	public ResourceMapping getResourceMapping() {
+		return resourceMapping;
+	}
 }

@@ -16,76 +16,58 @@
 package org.ops4j.pax.web.extender.whiteboard.internal.element;
 
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.extender.whiteboard.WelcomeFileMapping;
-import org.ops4j.pax.web.extender.whiteboard.internal.util.WebContainerUtils;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardWelcomeFile;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 
 /**
- * Registers/unregisters
- * {@link org.ops4j.pax.web.extender.whiteboard.WelcomeFileMapping} with
- * {@link org.ops4j.pax.web.service.WebContainer}.
+ * Registers/unregisters {@link WelcomeFileMapping} with {@link WebContainer}.
  *
  * @author dsklyut
  * @since 0.7.0
  */
-public class WelcomeFileWebElement implements WebElement {
+public class WelcomeFileWebElement extends WebElement<WelcomeFileMapping> implements WhiteboardWelcomeFile {
 
-	/**
-	 * welcome file mapping
-	 */
 	private final WelcomeFileMapping welcomeFileMapping;
 
 	/**
-	 * Constructor.
-	 *
-	 * @param welcomeFileMapping welcome file mapping; cannot be null
+	 * Constructs a new WelcomeFileWebElement
+	 * @param ref the service-reference behind the registered http-whiteboard-service
+	 * @param welcomeFileMapping WelcomeFileMapping containing all necessary information
 	 */
-	public WelcomeFileWebElement(WelcomeFileMapping welcomeFileMapping) {
-		NullArgumentException.validateNotNull(welcomeFileMapping,
-				"Welcome file mapping");
+	public WelcomeFileWebElement(ServiceReference<WelcomeFileMapping> ref, WelcomeFileMapping welcomeFileMapping) {
+		super(ref);
+		NullArgumentException.validateNotNull(welcomeFileMapping, "Welcome file mapping");
 		this.welcomeFileMapping = welcomeFileMapping;
 	}
 
-	/**
-	 * registers welcome file with httpService
-	 *
-	 * @param httpService
-	 * @param httpContext
-	 */
-	public void register(HttpService httpService, HttpContext httpContext)
+	@Override
+	public void register(WebContainer webContainer, HttpContext httpContext)
 			throws Exception {
-		if (WebContainerUtils.isWebContainer(httpService)) {
-			((WebContainer) httpService).registerWelcomeFiles(
-					welcomeFileMapping.getWelcomeFiles(),
-					welcomeFileMapping.isRedirect(), httpContext);
-		} else {
-			throw new UnsupportedOperationException(
-					"Internal error: In use HttpService is not an WebContainer (from Pax Web)");
-		}
+		webContainer.registerWelcomeFiles(
+				welcomeFileMapping.getWelcomeFiles(),
+				welcomeFileMapping.isRedirect(), httpContext);
 	}
 
-	/**
-	 * unregisters welcome file
-	 *
-	 * @param httpService
-	 * @param httpContext
-	 */
-	public void unregister(HttpService httpService, HttpContext httpContext) {
-		if (WebContainerUtils.isWebContainer(httpService)) {
-			((WebContainer) httpService).unregisterWelcomeFiles(welcomeFileMapping.getWelcomeFiles(), httpContext);
-		}
+	@Override
+	public void unregister(WebContainer webContainer, HttpContext httpContext) {
+		webContainer.unregisterWelcomeFiles(welcomeFileMapping.getWelcomeFiles(), httpContext);
 	}
 
+	@Override
 	public String getHttpContextId() {
 		return welcomeFileMapping.getHttpContextId();
 	}
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("mapping=").append(welcomeFileMapping)
-				.append("}").toString();
+		return this.getClass().getSimpleName() + "{mapping=" + welcomeFileMapping +	"}";
+	}
+
+	@Override
+	public WelcomeFileMapping getWelcomeFilemapping() {
+		return welcomeFileMapping;
 	}
 }

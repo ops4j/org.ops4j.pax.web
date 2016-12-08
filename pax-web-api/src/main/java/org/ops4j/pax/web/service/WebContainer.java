@@ -19,17 +19,17 @@ package org.ops4j.pax.web.service;
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.EventListener;
+import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.Filter;
-import javax.servlet.MultipartConfigElement;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletException;
+import javax.servlet.*;
 
+import org.ops4j.pax.web.service.whiteboard.WhiteboardElement;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import org.osgi.service.http.runtime.dto.RequestInfoDTO;
+import org.osgi.service.http.runtime.dto.RuntimeDTO;
 
 /**
  * WebContainer allows bundles to dynamically:
@@ -191,33 +191,48 @@ public interface WebContainer extends HttpService {
 	 * PAXWEB-xxx
 	 *
 	 * @param servletClass
+	 *            the class of a Servlet to be registered
 	 * @param urlPatterns
+	 *            url patterns this servlet maps to
 	 * @param initParams
+	 *            initialization arguments for the servlet or null if there are
+	 *            none. This argument is used by the servlet's ServletConfig
+	 *            object.
 	 * @param httpContext
+	 *            the http context this servlet is for. If null a default http
+	 *            context will be used.
 	 * @throws ServletException
+	 *             if servlet was already registered
 	 */
-	void registerServlet(Class<? extends Servlet> servletClass,
-						 String[] urlPatterns, Dictionary<String, ?> initParams,
-						 HttpContext httpContext) throws ServletException;
+	void registerServlet(Class<? extends Servlet> servletClass, String[] urlPatterns, Dictionary<String, ?> initParams,
+			HttpContext httpContext) throws ServletException;
 
 	/**
 	 * Register a Servlet by a given Classname instead of an instance ... See
 	 * PAXWEB-xxx
 	 *
 	 * @param servletClass
+	 *            the class of a Servlet to be registered
 	 * @param urlPatterns
+	 *            url patterns this servlet maps to
 	 * @param initParams
-	 * @param loadOnStartup  this is used by the Servlet Holder for configuration of how
-	 *                       much instances should be loaded on startup.
-	 * @param asyncSupported this is new with Servlet 3.0 and tells wether this servlet
-	 *                       supports this type of requests.
+	 *            initialization arguments for the servlet or null if there are
+	 *            none. This argument is used by the servlet's ServletConfig
+	 *            object.
+	 * @param loadOnStartup
+	 *            this is used by the Servlet Holder for configuration of how
+	 *            much instances should be loaded on startup.
+	 * @param asyncSupported
+	 *            this is new with Servlet 3.0 and tells wether this servlet
+	 *            supports this type of requests.
 	 * @param httpContext
+	 *            the http context this servlet is for. If null a default http
+	 *            context will be used.
 	 * @throws ServletException
+	 *             if servlet was already registered
 	 */
-	void registerServlet(Class<? extends Servlet> servletClass,
-						 String[] urlPatterns, Dictionary<String, ?> initParams,
-						 Integer loadOnStartup, Boolean asyncSupported,
-						 HttpContext httpContext) throws ServletException;
+	void registerServlet(Class<? extends Servlet> servletClass, String[] urlPatterns, Dictionary<String, ?> initParams,
+			Integer loadOnStartup, Boolean asyncSupported, HttpContext httpContext) throws ServletException;
 
 	/**
 	 * Unregisters a previously registered servlet.
@@ -621,4 +636,9 @@ public interface WebContainer extends HttpService {
 
 	void unregisterWebSocket(Object webSocket, HttpContext httpContext);
 
+	RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator);
+
+	RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator);
+	
+	WebContainerDTO getWebcontainerDTO();
 }

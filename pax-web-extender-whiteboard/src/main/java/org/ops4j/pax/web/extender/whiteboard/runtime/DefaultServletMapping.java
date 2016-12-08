@@ -23,7 +23,7 @@ import java.util.Map;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 
-import org.ops4j.pax.web.extender.whiteboard.ServletMapping;
+import org.ops4j.pax.web.service.whiteboard.ServletMapping;
 
 /**
  * Default implementation of {@link ServletMapping}.
@@ -208,14 +208,12 @@ public class DefaultServletMapping implements ServletMapping {
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("httpContextId=").append(httpContextId)
-				.append(",urlPatterns=")
-				.append(Arrays.deepToString(urlPatterns))
-				.append(",initParams=").append(initParams).append(",servlet=")
-				.append(servlet).append(", alias=").append(alias)
-				.append(", servletName").append(servletName).append("}")
-				.toString();
+		return this.getClass().getSimpleName() +
+				"{" + "httpContextId=" + httpContextId +
+				",urlPatterns=" + Arrays.deepToString(urlPatterns) +
+				",initParams=" + initParams +
+				",servlet=" + servlet + ", alias=" + alias +
+				", servletName" + servletName + "}";
 	}
 
 }

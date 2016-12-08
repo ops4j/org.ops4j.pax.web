@@ -15,6 +15,8 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.util.tracker;
 
+import java.util.Map;
+
 /**
  * Listener for events related to replaceable service.
  */
@@ -25,7 +27,8 @@ public interface ReplaceableServiceListener<T> {
 	 *
 	 * @param oldService old service or null if there was no service
 	 * @param newService new service or null if there is no new service
+	 * @param serviceProperties of the new serivce or null if no properties have been requested in ReplaceableService 
 	 */
-	void serviceChanged(T oldService, T newService);
+	void serviceChanged(T oldService, T newService, Map<String, Object> serviceProperties);
 
 }

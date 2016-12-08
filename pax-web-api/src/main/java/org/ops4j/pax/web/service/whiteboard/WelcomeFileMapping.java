@@ -13,38 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.extender.whiteboard;
+package org.ops4j.pax.web.service.whiteboard;
 
 /**
- * Registers an error page to customize the response sent back to the web client
- * in case that an exception or error propagates back to the web container, or
- * the servlet/filter calls sendError() on the response object for a specific
- * status code.
+ * Welcome file mapping
  *
  * @author dsklyut
- * @since 0.7.0 Jun 23, 2009
+ * @since 0.7.0
  */
-public interface ErrorPageMapping {
+public interface WelcomeFileMapping {
 
 	/**
 	 * Getter.
 	 *
-	 * @return id of the http context this filter belongs to
+	 * @return id of the http context this jsp belongs to
 	 */
 	String getHttpContextId();
 
 	/**
 	 * Getter
 	 *
-	 * @return error code or an FQN of the exception
+	 * @return true if the client should be redirected to welcome file or false
+	 * if forwarded
 	 */
-	String getError();
+	boolean isRedirect();
 
 	/**
 	 * Getter
 	 *
-	 * @return the request path that will fill the response page. The location
-	 * must start with an "/"
+	 * @return an array of welcome files paths. Paths must not start or end with
+	 * "/"
 	 */
-	String getLocation();
+	String[] getWelcomeFiles();
+
 }

@@ -15,7 +15,8 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.runtime;
 
-import org.ops4j.pax.web.extender.whiteboard.WebSocketMapping;
+
+import org.ops4j.pax.web.service.whiteboard.WebSocketMapping;
 
 public class DefaultWebSocketMapping implements WebSocketMapping {
 

@@ -15,6 +15,12 @@
  */
 package org.ops4j.pax.web.itest.jetty;
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+
+import javax.servlet.Servlet;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,18 +29,19 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
-import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
-import org.ops4j.pax.web.extender.whiteboard.ServletMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultServletMapping;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
+import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
+import org.ops4j.pax.web.service.whiteboard.ServletMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-
-import javax.servlet.Servlet;
+import org.osgi.service.http.runtime.HttpServiceRuntime;
+import org.osgi.service.http.runtime.dto.RuntimeDTO;
 
 /**
  * @author Toni Menzel (tonit)
@@ -191,5 +198,54 @@ public class WhiteboardIntegrationTest extends ITestBase {
 			httpContextMappingRegistration.unregister();
 		}
 	}
+
+
+    @Test
+    public void testMultipleContextMappingsWithDTOsCheck() throws Exception {
+        BundleContext bundleContext = installWarBundle.getBundleContext();
+        DefaultHttpContextMapping httpContextMapping = new DefaultHttpContextMapping();
+        httpContextMapping.setHttpContextId("dtoCheck");
+        httpContextMapping.setPath("dtocheck");
+        ServiceRegistration<HttpContextMapping> httpContextMappingRegistration = bundleContext
+                .registerService(HttpContextMapping.class,
+                        httpContextMapping, null);
+        try {
+            Servlet servlet = new WhiteboardServlet("/dtocheck");
+            DefaultServletMapping servletMapping = new DefaultServletMapping();
+            servletMapping.setServlet(servlet);
+            servletMapping.setAlias("/dtocheck");
+            String httpContextId = httpContextMapping.getHttpContextId();
+            servletMapping.setHttpContextId(httpContextId);
+            ServiceRegistration<ServletMapping> servletRegistration = bundleContext
+                    .registerService(ServletMapping.class,
+                            servletMapping, null);
+            
+            ServiceReference<HttpServiceRuntime> serviceReference = bundleContext.getServiceReference(HttpServiceRuntime.class);
+            try {
+                HttpTestClientFactory.createDefaultTestClient()
+                        .withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
+                                resp -> resp.contains("Hello Whiteboard Extender"))
+                        .doGETandExecuteTest("http://127.0.0.1:8181/dtocheck/dtocheck");
+                
+                HttpServiceRuntime httpServiceRuntime = bundleContext.getService(serviceReference);
+                
+                RuntimeDTO runtimeDTO = httpServiceRuntime.getRuntimeDTO();
+                
+                assertTrue(0 == runtimeDTO.failedServletContextDTOs.length);
+                
+                assertTrue(2 == runtimeDTO.servletContextDTOs.length);
+                
+                long count = Arrays.stream(runtimeDTO.servletContextDTOs).filter(servletContext -> servletContext.name.equalsIgnoreCase("dtoCheck")).count();
+                
+                assertTrue(1 == count);
+                
+            } finally {
+                bundleContext.ungetService(serviceReference);
+                servletRegistration.unregister();
+            }
+        } finally {
+            httpContextMappingRegistration.unregister();
+        }
+    }
 
 }

@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.internal;
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.EventListener;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.Filter;
@@ -29,9 +30,13 @@ import javax.servlet.ServletException;
 
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.WebContainerDTO;
+import org.ops4j.pax.web.service.whiteboard.WhiteboardElement;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
+import org.osgi.service.http.runtime.dto.RequestInfoDTO;
+import org.osgi.service.http.runtime.dto.RuntimeDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -355,7 +360,7 @@ class HttpServiceStopped implements StoppableHttpService {
 	}
 
 	/**
-	 * @see WebContainer#unregisterWelcomeFiles(HttpContext)
+	 * @see WebContainer#unregisterWelcomeFiles(String[], HttpContext)
 	 */
 	@Override
 	public void unregisterWelcomeFiles(String[] welcomeFiles,
@@ -364,7 +369,7 @@ class HttpServiceStopped implements StoppableHttpService {
 	}
 
 	/**
-	 * @see WebContainer#registerLoginConfig()
+	 * @see WebContainer#registerLoginConfig(String, String, String, String, HttpContext)
 	 */
 	@Override
 	public void registerLoginConfig(String authMethod, String realmName,
@@ -373,7 +378,7 @@ class HttpServiceStopped implements StoppableHttpService {
 	}
 
 	/**
-	 * @see WebContainer#unregisterLoginConfig()
+	 * @see WebContainer#unregisterLoginConfig(HttpContext)
 	 */
 	@Override
 	public void unregisterLoginConfig(HttpContext httpContext) {
@@ -393,7 +398,7 @@ class HttpServiceStopped implements StoppableHttpService {
 	}
 
 	/**
-	 * @see WebContainer#unregisterConstraintMapping()
+	 * @see WebContainer#unregisterConstraintMapping(HttpContext)
 	 */
 	@Override
 	public void unregisterConstraintMapping(HttpContext httpContext) {
@@ -500,6 +505,20 @@ class HttpServiceStopped implements StoppableHttpService {
 	}
 
 	@Override
+	public RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator) {
+		LOG.warn("Http service has already been stoped");
+		// FIXME check if null valid
+		return null;
+	}
+
+	@Override
+	public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator) {
+		LOG.warn("Http service has already been stoped");
+		// FIXME check if null valid
+		return null;
+	}
+
+	@Override
 	public String toString() {
 		if (serviceBundle == null) {
 			return super.toString();
@@ -507,5 +526,11 @@ class HttpServiceStopped implements StoppableHttpService {
 			return super.toString() + " for bundle " + serviceBundle;
 		}
 	}
+
+    @Override
+    public WebContainerDTO getWebcontainerDTO() {
+        LOG.warn("Http service has already been stoped");
+        return null;
+    }
 
 }

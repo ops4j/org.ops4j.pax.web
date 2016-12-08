@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
  */
 
+
 @Version("6.0.0")
-package org.ops4j.pax.web.extender.whiteboard;
+package org.ops4j.pax.web.service.whiteboard;
 
 import org.osgi.annotation.versioning.Version;

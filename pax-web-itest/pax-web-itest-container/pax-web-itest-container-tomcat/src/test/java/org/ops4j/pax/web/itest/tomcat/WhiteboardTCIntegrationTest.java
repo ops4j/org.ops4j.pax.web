@@ -26,12 +26,12 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
-import org.ops4j.pax.web.extender.whiteboard.HttpContextMapping;
-import org.ops4j.pax.web.extender.whiteboard.ServletMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultServletMapping;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
+import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
+import org.ops4j.pax.web.service.whiteboard.ServletMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -39,6 +39,7 @@ import org.osgi.framework.ServiceRegistration;
 
 import javax.servlet.Servlet;
 
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
@@ -54,7 +55,9 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 	@Configuration
 	public Option[] configure() {
 		return combine(
-				configureTomcat() // ,
+				configureTomcat() ,// ,
+				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level")
+						.value("DEBUG")
 		);
 	}
 
@@ -66,8 +69,6 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 		installWarBundle = installAndStartBundle(bundlePath);
 
 		waitForServletListener();
-
-		waitForServer("http://127.0.0.1:8282/");
 	}
 
 	@After

@@ -89,9 +89,8 @@ public class TomcatResourceServlet extends HttpServlet {
 		}
 
 		String mapping = null;
-		Boolean included = request
-				.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null;
-		if (included != null && included) {
+		Boolean included = request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null;
+		if (included) {
 			String servletPath = (String) request
 					.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
 			String pathInfo = (String) request
@@ -122,9 +121,8 @@ public class TomcatResourceServlet extends HttpServlet {
 
 		final URL url = httpContext.getResource(mapping);
 
-		if (url == null
-				|| (url != null && "//".equals(mapping) && "bundleentry".equalsIgnoreCase(url.getProtocol()))
-				|| (url != null && "/".equals(mapping)) && "bundleentry".equalsIgnoreCase(url.getProtocol())) {
+		if (url == null || "//".equals(mapping) && "bundleentry".equalsIgnoreCase(url.getProtocol())
+				|| "/".equals(mapping) && "bundleentry".equalsIgnoreCase(url.getProtocol())) {
 			if (!response.isCommitted()) {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			}
@@ -161,16 +159,14 @@ public class TomcatResourceServlet extends HttpServlet {
 
 		if (mimeType == null) {
 			try {
-				if (url != null && url.openConnection() != null) {
+				if (url.openConnection() != null) {
 					mimeType = url.openConnection().getContentType();
 				}
-			} catch (IOException ignore) {
+			} catch (IOException | NullPointerException ignore) {
 				// we do not care about such an exception as the fact that
 				// we are using also the connection for
 				// finding the mime type is just a "nice to have" not an
 				// requirement
-			} catch (NullPointerException npe) {
-				// IGNORE
 			}
 		}
 

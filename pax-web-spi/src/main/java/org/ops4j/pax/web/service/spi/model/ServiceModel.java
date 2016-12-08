@@ -298,8 +298,7 @@ public class ServiceModel {
 				.size()]);
 	}
 
-	public synchronized ContextModel getContextModel(
-			final HttpContext httpContext) {
+	public synchronized ContextModel getContextModel(final HttpContext httpContext) {
 		return contextModels.get(httpContext);
 	}
 

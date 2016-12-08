@@ -270,7 +270,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		// Undertows ServletContextImpl maps "/" to "". In OSGi path must start with /
 		if (contextPath != null && !contextPath.startsWith("/")) {
 			contextPath = "/" + contextPath;
-		}else if(contextPath == null){
+		} else if (contextPath == null) {
 			LOG.warn("ContextPath not found, it's not configured. Assuming '/'");
 			contextPath = "/";
 		}
@@ -281,19 +281,22 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	private void unregisterServletContext(final ServletContext servletContext) {
 		final String webContextPath = getContextPathForOsgi(servletContext);
 
-		// find ServiceRegistration which matches the given ServletContext
-		Optional<ServiceRegistration<ServletContext>> serviceReg = registeredServletContexts.stream().filter(reg -> reg.getReference() != null
-				&& webContextPath.equals(reg.getReference().getProperty(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH)))
-				.findFirst();
-		if(serviceReg.isPresent()){
-			try{
-				serviceReg.get().unregister();
-			}catch(IllegalStateException e){
-				LOG.error("Error during unregistration of ServletContext service with path '{}'!",
-						webContextPath, e);
-			}finally {
-				registeredServletContexts.remove(serviceReg.get());
+		Optional<ServiceRegistration<ServletContext>> serviceReg = Optional.empty();
+		try {
+			// find ServiceRegistration which matches the given ServletContext
+			serviceReg = registeredServletContexts.stream().filter(reg -> reg.getReference() != null
+					&& webContextPath.equals(reg.getReference().getProperty(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH)))
+					.findFirst();
+			if (serviceReg.isPresent()) {
+				LOG.debug("Unregistered ServletContext with ServletContext Name: ", serviceReg.get().getReference().getProperty(WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME));
+
+					serviceReg.get().unregister();
 			}
+		} catch(IllegalStateException e){
+			LOG.error("Error during unregistration of ServletContext service with path '{}'!",
+					webContextPath, e);
+		} finally {
+			serviceReg.ifPresent(registeredServletContexts::remove);
 		}
 	}
 
@@ -309,7 +312,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 			LOG.warn("Could not get ServiceReference for ServletContext!", e);
 			first = Optional.empty();
 		}
-		if(!first.isPresent()) {
+		if (!first.isPresent()) {
 				Dictionary<String, String> props = new Hashtable<>(2);
 				props.put(WebContainerConstants.PROPERTY_SYMBOLIC_NAME, bundle.getSymbolicName());
 				props.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
@@ -319,16 +322,16 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 						new ServletContextProxy(this),
 						props);
 				registeredServletContexts.add(serviceReg);
-				LOG.debug("ServletContext for '{}' registered as service.", webContextPath);
+				LOG.debug("ServletContext registered as service with properties: {}", props);
 			}
 	}
 
 	private void doCreateHandler(Consumer<ServletContext> consumer) throws ServletException {
-		final HttpContext httpContext = contextModel.getHttpContext();
+		final WebContainerContext httpContext = contextModel.getHttpContext();
 		DeploymentInfo deployment = new DeploymentInfo();
 		deployment.setEagerFilterInit(true);
 		deployment.setDeploymentName(contextModel.getContextName());
-		deployment.setDisplayName(httpContext instanceof WebContainerContext ? ((WebContainerContext) httpContext).getContextId() : contextModel.getContextName());
+		deployment.setDisplayName(httpContext.getContextId());
 		deployment.setContextPath('/' + contextModel.getContextName());
 		deployment.setClassLoader(classLoader);
 		BundleContext bundleContext = contextModel.getBundle().getBundleContext();
@@ -556,8 +559,8 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 	@Override
 	public Resource getResource(String path) throws IOException {
-		HttpContext context = contextModel.getHttpContext();
-		if (context instanceof WebContainerContext) {
+		WebContainerContext context = contextModel.getHttpContext();
+		if (context != null && context.isDefaultOrSharedContext()) { // FIXME why is this special treatment necessary
 			final URL resource = context.getResource(path);
 			if (resource == null) {
 				return null;
@@ -710,7 +713,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	private class DirectoryResource implements Resource {
 		private final URL url;
 
-		public DirectoryResource(URL url) throws IOException {
+		DirectoryResource(URL url) throws IOException {
 			this.url = url;
 		}
 
@@ -748,13 +751,11 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		public List<Resource> list() {
 			try {
 				List<Resource> children = new ArrayList<>();
-				if (contextModel.getHttpContext() instanceof WebContainerContext) {
-					WebContainerContext ctx = (WebContainerContext) contextModel.getHttpContext();
-					Set<String> rps = ctx.getResourcePaths(getPath());
-					if (rps != null) {
-						for (String child : rps) {
-							children.add(getResource(child));
-						}
+				WebContainerContext ctx = contextModel.getHttpContext();
+				Set<String> rps = ctx.getResourcePaths(getPath());
+				if (rps != null) {
+					for (String child : rps) {
+						children.add(getResource(child));
 					}
 				}
 				return children;

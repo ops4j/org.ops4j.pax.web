@@ -67,7 +67,7 @@
 		<property name="path" value="/images" />
 	</bean>
 	<service id="resources" ref="resourceMapping"
-		interface="org.ops4j.pax.web.extender.whiteboard.ResourceMapping" />
+		interface="org.ops4j.pax.web.service.whiteboard.ResourceMapping" />
 		
 	<!-- Registering Filters -->
 	<bean id="filteredServlet" class="org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet">
@@ -98,7 +98,7 @@
 		</service-properties>	
 		<bean class="org.ops4j.pax.web.extender.samples.whiteboard.internal.ExceptionServlet"/>
 	</service>
-	<service interface="org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping">
+	<service interface="org.ops4j.pax.web.service.whiteboard.ErrorPageMapping">
 		<bean class="org.ops4j.pax.web.extender.whiteboard.runtime.DefaultErrorPageMapping">
 			<property name="error" value="java.lang.Exception"/>
 			<property name="location" value="/uncaughtException.html"/>
@@ -106,7 +106,7 @@
 	</service>
 	
 	<!-- Default Resource Mapping -->
-	<service id="defaultResourceService" interface="org.ops4j.pax.web.extender.whiteboard.ResourceMapping">
+	<service id="defaultResourceService" interface="org.ops4j.pax.web.service.whiteboard.ResourceMapping">
 		<bean class="org.ops4j.pax.web.extender.whiteboard.runtime.DefaultResourceMapping">
 			<property name="alias" value="/"/>
 			<property name="path" value=""/>
@@ -126,10 +126,10 @@
 	</bean>
 
 	<service id="welcomeFileService" ref="welcomeFile"
-		interface="org.ops4j.pax.web.extender.whiteboard.WelcomeFileMapping" />
+		interface="org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping" />
 
 	<!-- 404 mapping -->
-	<service id="errorPageMapping" interface="org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping">
+	<service id="errorPageMapping" interface="org.ops4j.pax.web.service.whiteboard.ErrorPageMapping">
 		<bean class="org.ops4j.pax.web.extender.whiteboard.runtime.DefaultErrorPageMapping">
 			<property name="error" value="404"/>
 			<property name="location" value="/404.html"/>
@@ -137,7 +137,7 @@
 	</service>
 	
 	<!-- JSP handling -->
-	<service id="jspMapping" interface="org.ops4j.pax.web.extender.whiteboard.JspMapping">
+	<service id="jspMapping" interface="org.ops4j.pax.web.service.whiteboard.JspMapping">
 		<bean class="org.ops4j.pax.web.extender.whiteboard.runtime.DefaultJspMapping">
 			<property name="urlPatterns">
 				<array>

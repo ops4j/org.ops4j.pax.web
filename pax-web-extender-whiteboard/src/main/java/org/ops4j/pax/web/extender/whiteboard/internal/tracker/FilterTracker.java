@@ -17,13 +17,7 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
@@ -56,49 +50,49 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 	/**
 	 * Logger.
 	 */
-	private static final Logger LOG = LoggerFactory
-			.getLogger(FilterTracker.class);
+	private static final Logger LOG = LoggerFactory.getLogger(FilterTracker.class);
 
 	/**
 	 * Constructor.
 	 *
-	 * @param extenderContext extender context; cannot be null
-	 * @param bundleContext   extender bundle context; cannot be null
+	 * @param extenderContext
+	 *            extender context; cannot be null
+	 * @param bundleContext
+	 *            extender bundle context; cannot be null
 	 */
-	private FilterTracker(final ExtenderContext extenderContext,
-						  final BundleContext bundleContext) {
+	private FilterTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
 		super(extenderContext, bundleContext);
 	}
 
-	public static ServiceTracker<Filter, FilterWebElement> createTracker(
-			final ExtenderContext extenderContext,
+	public static ServiceTracker<Filter, FilterWebElement> createTracker(final ExtenderContext extenderContext,
 			final BundleContext bundleContext) {
-		return new FilterTracker(extenderContext, bundleContext)
-				.create(Filter.class);
+		return new FilterTracker(extenderContext, bundleContext).create(Filter.class);
 	}
 
 	/**
 	 * @see AbstractTracker#createWebElement(ServiceReference, Object)
 	 */
 	@Override
-	FilterWebElement createWebElement(
-			final ServiceReference<Filter> serviceReference,
-			final Filter published) {
+	FilterWebElement createWebElement(final ServiceReference<Filter> serviceReference, final Filter published) {
 
 		Object urlPatternsProp = serviceReference.getProperty(ExtenderConstants.PROPERTY_URL_PATTERNS);
 
 		if (urlPatternsProp == null) {
 			urlPatternsProp = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN);
 		} else {
-			String[] whiteBoardProp = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN);
+			String[] whiteBoardProp = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference,
+					HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN);
 			if (whiteBoardProp != null) {
-				urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp, Arrays.asList(whiteBoardProp));
+				urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp,
+						Arrays.asList(whiteBoardProp));
 			}
 		}
 
-		String[] regexUrlProps = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX);
+		String[] regexUrlProps = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference,
+				HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX);
 		if (regexUrlProps != null) {
-			urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp, Arrays.asList(regexUrlProps));
+			urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp,
+					Arrays.asList(regexUrlProps));
 		}
 
 		String[] urlPatterns = null;
@@ -111,8 +105,7 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 			} else {
 				Set<String> patterns = new HashSet<>();
 				patterns.addAll(Arrays.asList(annotationScan.urlPatterns));
-				if (urlPatternsProp instanceof String
-						&& ((String) urlPatternsProp).trim().length() != 0) {
+				if (urlPatternsProp instanceof String && ((String) urlPatternsProp).trim().length() != 0) {
 					patterns.add((String) urlPatternsProp);
 				} else if (urlPatternsProp instanceof String[]) {
 					patterns.addAll(Arrays.asList((String[]) urlPatternsProp));
@@ -124,18 +117,12 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 
 		if (urlPatternsProp != null) {
 			if (urlPatternsProp instanceof String) {
-				urlPatterns = new String[]{(String) urlPatternsProp};
+				urlPatterns = new String[] { (String) urlPatternsProp };
 			} else if (urlPatternsProp instanceof String[]) {
 				urlPatterns = (String[]) urlPatternsProp;
-			} else {
-				LOG.warn("Registered filter ["
-						+ published
-						+ "] has an invalid url pattern property (must be String or String[])");
-				return null;
 			}
 		}
-		Object servletNamesProp = serviceReference
-				.getProperty(ExtenderConstants.PROPERTY_SERVLET_NAMES);
+		Object servletNamesProp = serviceReference.getProperty(ExtenderConstants.PROPERTY_SERVLET_NAMES);
 
 		if (annotationScan.scanned) {
 			if (servletNamesProp == null) {
@@ -143,8 +130,7 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 			} else {
 				Set<String> patterns = new HashSet<>();
 				patterns.addAll(Arrays.asList(annotationScan.servletNames));
-				if (servletNamesProp instanceof String
-						&& ((String) servletNamesProp).trim().length() != 0) {
+				if (servletNamesProp instanceof String && ((String) servletNamesProp).trim().length() != 0) {
 					patterns.add((String) servletNamesProp);
 				} else if (servletNamesProp instanceof String[]) {
 					patterns.addAll(Arrays.asList((String[]) servletNamesProp));
@@ -156,21 +142,10 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 		String[] servletNames = null;
 		if (servletNamesProp != null) {
 			if (servletNamesProp instanceof String) {
-				servletNames = new String[]{(String) servletNamesProp};
+				servletNames = new String[] { (String) servletNamesProp };
 			} else if (servletNamesProp instanceof String[]) {
 				servletNames = (String[]) servletNamesProp;
-			} else {
-				LOG.warn("Registered filter ["
-						+ published
-						+ "] has an invalid servlet names property (must be String or String[])");
-				return null;
 			}
-		}
-		if (urlPatterns == null && servletNames == null) {
-			LOG.warn("Registered filter ["
-					+ published
-					+ "] did not contain a valid url pattern or servlet names property");
-			return null;
 		}
 
 		String httpContextId = ServicePropertiesUtils.extractHttpContextId(serviceReference);
@@ -184,11 +159,11 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 				String value = serviceReference.getProperty(key) == null ? ""
 						: serviceReference.getProperty(key).toString();
 				initParams.put(key, value);
-				//CHECKSTYLE:OFF
+				// CHECKSTYLE:OFF
 			} catch (Exception ignore) {
 				// ignore
 			}
-			//CHECKSTYLE:ON
+			// CHECKSTYLE:ON
 		}
 
 		if (annotationScan.scanned) {
@@ -197,13 +172,15 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 			}
 		}
 
-		Boolean asyncSupported = ServicePropertiesUtils.getBooleanProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_ASYNC_SUPPORTED);
+		Boolean asyncSupported = ServicePropertiesUtils.getBooleanProperty(serviceReference,
+				HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_ASYNC_SUPPORTED);
 
 		if (annotationScan.scanned) {
 			asyncSupported = annotationScan.asyncSupported;
 		}
 
-		String[] dispatcherTypeProps = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER);
+		String[] dispatcherTypeProps = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference,
+				HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER);
 		DispatcherType[] dispatcherTypes = null;
 
 		if (annotationScan.scanned) {
@@ -238,6 +215,7 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 			initParams.put(WebContainerConstants.FILTER_RANKING, serviceRank);
 		}
 
+
 		final DefaultFilterMapping mapping = new DefaultFilterMapping();
 		mapping.setFilter(published);
 		mapping.setAsyncSupported(asyncSupported);
@@ -245,6 +223,10 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 		mapping.setUrlPatterns(urlPatterns);
 		mapping.setServletNames(servletNames);
 		mapping.setInitParams(initParams);
-		return new FilterWebElement(mapping);
+		mapping.setDispatcherType(dispatcherTypes);
+		mapping.setName(ServicePropertiesUtils.getStringProperty(
+				serviceReference,
+				HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME));
+		return new FilterWebElement<>(serviceReference, mapping);
 	}
 }

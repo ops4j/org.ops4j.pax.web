@@ -19,18 +19,8 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import java.util.EventListener;
 
-import javax.servlet.AsyncListener;
-import javax.servlet.ReadListener;
-import javax.servlet.ServletContextAttributeListener;
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletRequestAttributeListener;
-import javax.servlet.ServletRequestListener;
-import javax.servlet.WriteListener;
-import javax.servlet.http.HttpSessionActivationListener;
-import javax.servlet.http.HttpSessionAttributeListener;
-import javax.servlet.http.HttpSessionBindingListener;
-import javax.servlet.http.HttpSessionIdListener;
-import javax.servlet.http.HttpSessionListener;
+import javax.servlet.*;
+import javax.servlet.http.*;
 
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ListenerWebElement;
@@ -38,7 +28,6 @@ import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtil
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultListenerMapping;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,90 +38,48 @@ import org.slf4j.LoggerFactory;
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class ListenerTracker extends
-		AbstractTracker<EventListener, ListenerWebElement> {
+public class ListenerTracker extends AbstractTracker<EventListener, ListenerWebElement> {
 
 	/**
 	 * Logger.
 	 */
-	private static final Logger LOG = LoggerFactory
-			.getLogger(ListenerTracker.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ListenerTracker.class);
 
 	/**
 	 * Constructor.
 	 *
-	 * @param extenderContext extender context; cannot be null
-	 * @param bundleContext   extender bundle context; cannot be null
+	 * @param extenderContext
+	 *            extender context; cannot be null
+	 * @param bundleContext
+	 *            extender bundle context; cannot be null
 	 */
-	private ListenerTracker(final ExtenderContext extenderContext,
-							final BundleContext bundleContext) {
+	private ListenerTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
 		super(extenderContext, bundleContext);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static ServiceTracker<EventListener, ListenerWebElement> createTracker(
-			final ExtenderContext extenderContext,
+	public static ServiceTracker<EventListener, ListenerWebElement> createTracker(final ExtenderContext extenderContext,
 			final BundleContext bundleContext) {
-		return new ListenerTracker(extenderContext, bundleContext)
-				.create(EventListener.class,
-						ServletContextListener.class,
-						ServletContextAttributeListener.class,
-						ServletRequestListener.class,
-						ServletRequestAttributeListener.class,
-						HttpSessionListener.class,
-						HttpSessionBindingListener.class,
-						HttpSessionAttributeListener.class,
-						HttpSessionActivationListener.class,
-						AsyncListener.class,
-						ReadListener.class,
-						WriteListener.class,
-						HttpSessionIdListener.class);
+		return new ListenerTracker(extenderContext, bundleContext).create(EventListener.class,
+				ServletContextListener.class, ServletContextAttributeListener.class, ServletRequestListener.class,
+				ServletRequestAttributeListener.class, HttpSessionListener.class, HttpSessionBindingListener.class,
+				HttpSessionAttributeListener.class, HttpSessionActivationListener.class, AsyncListener.class,
+				ReadListener.class, WriteListener.class, HttpSessionIdListener.class);
 	}
 
 	/**
 	 * @see AbstractTracker#createWebElement(ServiceReference, Object)
 	 */
 	@Override
-	ListenerWebElement createWebElement(
-			final ServiceReference<EventListener> serviceReference,
+	ListenerWebElement createWebElement(final ServiceReference<EventListener> serviceReference,
 			final EventListener published) {
-
-		if (!(published instanceof ServletContextListener ||
-				published instanceof ServletContextAttributeListener ||
-				published instanceof ServletRequestListener ||
-				published instanceof ServletRequestAttributeListener ||
-				published instanceof HttpSessionListener ||
-				published instanceof HttpSessionBindingListener ||
-				published instanceof HttpSessionAttributeListener ||
-				published instanceof HttpSessionActivationListener ||
-				published instanceof AsyncListener ||
-				published instanceof ReadListener ||
-				published instanceof WriteListener ||
-				published instanceof HttpSessionIdListener
-		)) {
-			return null;
-		}
-
-		Boolean listenerEnabled = ServicePropertiesUtils.getBooleanProperty(
-				serviceReference,
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER);
-		if (!Boolean.TRUE.equals(listenerEnabled)) {
-			LOG.warn("Registered listener [" + published
-					+ "] is not enabled via 'osgi.http.whiteboard.listener' property");
-			return null;
-		}
 
 		String httpContextId = ServicePropertiesUtils.extractHttpContextId(serviceReference);
 
-		if (httpContextId != null && httpContextId.trim().length() == 0) {
-			LOG.warn("Registered listener [" + published
-					+ "] did not contain a valid http context id");
-			return null;
-		}
 		final DefaultListenerMapping mapping = new DefaultListenerMapping();
-		mapping.setHttpContextId((String) httpContextId);
+		mapping.setHttpContextId(httpContextId);
 		mapping.setListener(published);
-		return new ListenerWebElement(mapping);
+		return new ListenerWebElement<>(serviceReference, mapping);
 	}
 
 }

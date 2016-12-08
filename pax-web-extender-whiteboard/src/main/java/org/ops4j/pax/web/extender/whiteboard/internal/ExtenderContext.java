@@ -33,13 +33,17 @@ public class ExtenderContext {
 
 	private final ConcurrentHashMap<WebApplication, Integer> sharedWebApplicationCounter;
 
-	public ExtenderContext() {
+	private final ExtendedHttpServiceRuntime httpServiceRuntime;
+
+	public ExtenderContext(ExtendedHttpServiceRuntime httpServiceRuntime) {
 		webApplications = new ConcurrentHashMap<>();
 		sharedWebApplicationCounter = new ConcurrentHashMap<>();
+		this.httpServiceRuntime = httpServiceRuntime;
 	}
 
 	public WebApplication getWebApplication(final Bundle bundle,
-											final String httpContextId, final Boolean sharedHttpContext) {
+											final String httpContextId,
+											final Boolean sharedHttpContext) {
 		if (bundle == null) {
 			// PAXWEB-500 - it might happen that the bundle is
 			// already gone!
@@ -49,7 +53,7 @@ public class ExtenderContext {
 				sharedHttpContext);
 		WebApplication webApplication = webApplications.get(contextKey);
 		if (webApplication == null) {
-			webApplication = new WebApplication(bundle, httpContextId, sharedHttpContext);
+			webApplication = new WebApplication(bundle, httpContextId, sharedHttpContext, httpServiceRuntime);
 			// PAXWEB-681 - webApplication and existing webApplication might not be the same.
 			WebApplication existingWebApplication = webApplications.putIfAbsent(contextKey, webApplication);
 			if (existingWebApplication == null) {
@@ -61,7 +65,7 @@ public class ExtenderContext {
 		if (sharedHttpContext) {
 			Integer counter = sharedWebApplicationCounter.get(webApplication);
 			if (counter == null) {
-				counter = new Integer(0);
+				counter = 0;
 			}
 			sharedWebApplicationCounter.put(webApplication, ++counter);
 		}
