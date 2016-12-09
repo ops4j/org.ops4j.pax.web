@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.itest.tomcat;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
@@ -247,17 +248,59 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 		RuntimeDTO runtimeDTO = withService(HttpServiceRuntime::getRuntimeDTO);
 
 		// Test all failed elements
-		assertThat("Invalid ServletContext doesn't match", runtimeDTO.failedServletContextDTOs[0], failedServletContextDTO -> failedServletContextDTO.serviceId == serviceIdFailedContext);
-		assertThat("Invalid ServletContext doesn't match", runtimeDTO.failedServletDTOs[0], failedServletDTO -> failedServletDTO.serviceId == serviceIdFailedServlet);
+		// Test all failed elements
+		assertTrue("Incorrect number of failed ServletContext DTOs",
+				1 == runtimeDTO.failedServletContextDTOs.length);
+		assertThat("Invalid ServletContext doesn't match",
+				runtimeDTO.failedServletContextDTOs[0],
+				failedServletContextDTO -> failedServletContextDTO.serviceId == serviceIdFailedContext);
+		assertTrue("Incorrect number of invalid ServletContexts",
+				1 == runtimeDTO.failedServletDTOs.length);
+		assertThat("Invalid ServletContext doesn't match",
+				runtimeDTO.failedServletDTOs[0],
+				failedServletDTO -> failedServletDTO.serviceId == serviceIdFailedServlet);
 	}
 
 	@Test
 	public void testRequestInfoDto() throws Exception {
+		final long defaultServletContextServiceId = (long)bundleContext.getServiceReferences(ServletContext.class, "(" + WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME + "=default)").stream().findFirst().orElseThrow(() -> new AssertionError("Default ServletContext not found")).getProperty(Constants.SERVICE_ID);
+
 		RequestInfoDTO requestInfoDTO = withService(
-				httpServiceRuntime -> httpServiceRuntime.calculateRequestInfoDTO("/custom/servlet"));
-		// FIXME evaluate
+				httpServiceRuntime -> httpServiceRuntime.calculateRequestInfoDTO("/simple-servlet"));
+
+		assertTrue("Path doesn't match",
+				Objects.equals(requestInfoDTO.path, "/simple-servlet"));
+		assertTrue("ServletContext-ServiceID doesn't match",
+				requestInfoDTO.servletContextId == defaultServletContextServiceId);
+		assertThat("ServletDTO doesn't match",
+				requestInfoDTO.servletDTO,  servletDTO ->
+						Objects.equals(servletDTO.patterns[0], "/simple-servlet")
+								&& Objects.equals(servletDTO.name, "SimpleServlet"));
+		assertThat("FilterDTO doesn't match",
+				requestInfoDTO.filterDTOs[0],  filterDTO ->
+						Objects.equals(filterDTO.patterns[0], "/simple-servlet")
+								&& Objects.equals(filterDTO.name, "SimpleFilter"));
+		assertThat("ResourceDTO doesn't match",
+				requestInfoDTO.resourceDTO,  resourceDTO ->
+						Objects.equals(resourceDTO.patterns[0], "/resources"));
 	}
 
+
+	@Test
+	public void testRequestInfoDto_CustomContext() throws Exception {
+		final long customServletContextServiceId = (long)bundleContext.getServiceReferences(ServletContext.class, "(" + WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME + "=CustomContext)").stream().findFirst().orElseThrow(() -> new AssertionError("CustomContext ServletContext not found")).getProperty(Constants.SERVICE_ID);
+
+		RequestInfoDTO requestInfoDTO = withService(
+				httpServiceRuntime -> httpServiceRuntime.calculateRequestInfoDTO("/context/servlet"));
+
+		assertTrue("Path doesn't match",
+				Objects.equals(requestInfoDTO.path, "/context/servlet"));
+		assertTrue("ServletContext-ServiceID doesn't match",
+				requestInfoDTO.servletContextId == customServletContextServiceId);
+		assertThat("ServletDTO doesn't match",
+				requestInfoDTO.servletDTO,
+				servletDTO -> Objects.equals(servletDTO.patterns[0], "/servlet"));
+	}
 
 	/**
 	 * This ServletContextHelper is supposed to be registered with missing properties

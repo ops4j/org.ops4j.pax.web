@@ -137,11 +137,6 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 	 */
 	@Test
 	public void testRuntimeDto() throws Exception {
-		// fire a request to enable handler in undertow after registration
-		HttpTestClientFactory.createDefaultTestClient()
-				.doGETandExecuteTest("http://127.0.0.1:8181/simple-servlet");
-
-
 		RuntimeDTO runtimeDTO = withService(HttpServiceRuntime::getRuntimeDTO);
 
 		// prepare ServiceIDs for comparrison
@@ -243,11 +238,6 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 
 	@Test
 	public void testRuntimeDtoWithFailedServices() throws Exception {
-		// fire a request to enable handler in undertow after registration
-		HttpTestClientFactory.createDefaultTestClient()
-				.doGETandExecuteTest("http://127.0.0.1:8181/simple-servlet");
-
-
 		// add a ServletContextHelper with missing path
 		Dictionary<String, String> props = new Hashtable<>(1);
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "FailedContextName");
@@ -282,11 +272,6 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 
 	@Test
 	public void testRequestInfoDto() throws Exception {
-		// fire a request to enable handler in undertow after registration
-		HttpTestClientFactory.createDefaultTestClient()
-				.doGETandExecuteTest("http://127.0.0.1:8181/simple-servlet");
-
-
 		final long defaultServletContextServiceId = (long)bundleContext.getServiceReferences(ServletContext.class, "(" + WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME + "=default)").stream().findFirst().orElseThrow(() -> new AssertionError("Default ServletContext not found")).getProperty(Constants.SERVICE_ID);
 
 		RequestInfoDTO requestInfoDTO = withService(
@@ -307,16 +292,11 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 		assertThat("ResourceDTO doesn't match",
 				requestInfoDTO.resourceDTO,  resourceDTO ->
 						Objects.equals(resourceDTO.patterns[0], "/resources"));
-		// FIXME evaluate
 	}
 
 
 	@Test
 	public void testRequestInfoDto_CustomContext() throws Exception {
-		// fire a request to enable handler in undertow after registration
-		HttpTestClientFactory.createDefaultTestClient()
-				.doGETandExecuteTest("http://127.0.0.1:8181/simple-servlet");
-
 		final long customServletContextServiceId = (long)bundleContext.getServiceReferences(ServletContext.class, "(" + WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME + "=CustomContext)").stream().findFirst().orElseThrow(() -> new AssertionError("CustomContext ServletContext not found")).getProperty(Constants.SERVICE_ID);
 
 		RequestInfoDTO requestInfoDTO = withService(
@@ -329,15 +309,10 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 		assertThat("ServletDTO doesn't match",
 				requestInfoDTO.servletDTO,
 				servletDTO -> Objects.equals(servletDTO.patterns[0], "/servlet"));
-		// FIXME evaluate
 	}
 
 	@Test
 	public void testDTOServiceProperties() throws Exception {
-		// fire a request to enable handler in undertow after registration
-		HttpTestClientFactory.createDefaultTestClient()
-				.doGETandExecuteTest("http://127.0.0.1:8181/simple-servlet");
-
 		ServiceReference<HttpServiceRuntime> ref = bundleContext.getServiceReference(HttpServiceRuntime.class);
 
 		assertTrue("HttpServiceRuntime reference shall not be null", ref != null);
