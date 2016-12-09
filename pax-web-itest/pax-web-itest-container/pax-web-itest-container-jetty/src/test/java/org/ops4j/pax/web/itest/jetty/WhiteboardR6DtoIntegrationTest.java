@@ -362,6 +362,7 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 	    assertTrue("HttpServiceIDs shall contain service ID from HttpContext", serviceIds.contains(serviceId));
 	    assertTrue("endpoint shall be not null", endpoint != null);
 	    assertTrue("endpoint shall be not null", endpoint.length() > 0);
+	    assertTrue("endpoint should be bound to 0.0.0.0:8181", endpoint.contentEquals("0.0.0.0:8181"));
 	    
     }
 
