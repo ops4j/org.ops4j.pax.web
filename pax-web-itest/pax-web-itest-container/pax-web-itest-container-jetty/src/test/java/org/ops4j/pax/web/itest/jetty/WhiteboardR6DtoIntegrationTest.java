@@ -286,9 +286,6 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 		RuntimeDTO runtimeDTO = withService(HttpServiceRuntime::getRuntimeDTO);
 
 		// Test all failed elements
-		
-		System.err.println(runtimeDTO.failedServletContextDTOs.length);
-		
 		assertTrue("Incorrect number of failed ServletContext DTOs",
 				1 == runtimeDTO.failedServletContextDTOs.length);
 		assertThat("Invalid ServletContext doesn't match",
@@ -323,7 +320,6 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 		assertThat("ResourceDTO doesn't match",
 				requestInfoDTO.resourceDTO,  resourceDTO ->
 				Objects.equals(resourceDTO.patterns[0], "/resources"));
-		// FIXME evaluate
 	}
 
 
@@ -341,7 +337,6 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 		assertThat("ServletDTO doesn't match",
 				requestInfoDTO.servletDTO,
 				servletDTO -> Objects.equals(servletDTO.patterns[0], "/servlet"));
-		// FIXME evaluate
 	}
 	
 	@Test	
