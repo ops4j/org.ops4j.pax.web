@@ -119,5 +119,5 @@ previously made sample of specialized ContextHandler as service.
 
 [source,java,indent=0]
 ----
-include::{sourcedir}/pax-web-itest-container-jetty-test-sources-jar/org/ops4j/pax/web/itest/jetty/JettyHandlerServiceIntegrationTest.java[lines=84..91]
+include::{sourcedir}/pax-web-itest-container-jetty-test-sources-jar/org/ops4j/pax/web/itest/jetty/JettyHandlerServiceIntegrationTest.java[lines=101..108]
 ----

@@ -23,6 +23,8 @@ of Http Service availability. +
  Note it is not mandatory for the extender to work with Pax Web, it can
 work with any Http Service implementation.
 
+NOTE: starting with Pax Web 6.0.0 the Whiteboard Extender is OSGi R6 compliant. 
+
 [[WhiteboardExtender-KeepingtrackofHttpServiceavailability]]
 == Keeping track of Http Service availability
 

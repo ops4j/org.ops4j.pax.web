@@ -25,7 +25,7 @@
 
 [cols=",",]
 |=======================================================================
-|filter |The flter to register
+|filter |The filter to register
 
 |urlPatterns |An array of url patterns this filter maps to. Can be null.
 
