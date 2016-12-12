@@ -24,6 +24,8 @@ Currently it supports the following:
 ## Documentation
 
 * <https://ops4j1.jira.com/wiki/display/paxweb/Pax+Web>
+or alternative
+* <http://ops4j.github.io/pax/web/index.html>
 
 ## Contributing
 
@@ -34,6 +36,8 @@ All we ask you is to move carefully and to clean up after yourself:
 * Submit a [JIRA](https://ops4j1.jira.com/browse/PAXWEB) issue before creating a pull request. This is required for the release notes.
 * For discussions, the [mailing list](https://groups.google.com/forum/#!forum/ops4j) is more suitable than JIRA.
 * Any bugfix or new feature must be covered by regression tests.
+
+
 
 Building Pax Web
 ================
