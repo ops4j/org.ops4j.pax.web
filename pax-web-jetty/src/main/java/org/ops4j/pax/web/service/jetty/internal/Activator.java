@@ -30,7 +30,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
- * Registers the ServletControllerFwactory on startup
+ * Registers the ServletControllerFactory on startup
  *
  * @author Alin Dreghiciu (adreghiciu@gmail.com)
  * @since 0.7.0, July 31, 2009
