@@ -81,6 +81,23 @@ public class ServicePropertiesUtils {
 		return Boolean.parseBoolean(stringProperty);
 	}
 
+	public static Integer getIntegerProperty(final ServiceReference<?> serviceReference, final String key) {
+		NullArgumentException.validateNotNull(serviceReference, "Service reference");
+		NullArgumentException.validateNotEmpty(key, true, "Property key");
+		final Object value = serviceReference.getProperty(key);
+		if (value instanceof Integer) {
+			return (Integer) value;
+		} else if (value != null) {
+			try {
+				return Integer.parseInt(String.valueOf(value));
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		} else {
+			return null;
+		}
+	}
+
 	public static String[] getArrayOfStringProperty(final ServiceReference<?> serviceReference, final String key) {
 		NullArgumentException.validateNotNull(serviceReference, "Service reference");
 		NullArgumentException.validateNotEmpty(key, true, "Property key");
