@@ -81,6 +81,15 @@ public class ServicePropertiesUtils {
 		return Boolean.parseBoolean(stringProperty);
 	}
 
+	/**
+	 * Returns a property as Integer.
+	 *
+	 * @param serviceReference service reference; cannot be null
+	 * @param key              property key; cannot be null
+	 * @return property value; null if property is not set or property value is
+	 * not an Integer
+	 * @throws NullArgumentException - If service reference is null - If key is null
+	 */
 	public static Integer getIntegerProperty(final ServiceReference<?> serviceReference, final String key) {
 		NullArgumentException.validateNotNull(serviceReference, "Service reference");
 		NullArgumentException.validateNotEmpty(key, true, "Property key");
@@ -91,6 +100,8 @@ public class ServicePropertiesUtils {
 			try {
 				return Integer.parseInt(String.valueOf(value));
 			} catch (NumberFormatException e) {
+				final String message = String.format("Property [%s] value must be an Integer: %s", key, e.getMessage());
+				LOG.error(message, e);
 				return null;
 			}
 		} else {
