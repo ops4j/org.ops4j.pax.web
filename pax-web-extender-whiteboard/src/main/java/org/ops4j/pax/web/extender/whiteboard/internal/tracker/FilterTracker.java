@@ -210,9 +210,9 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 			initParams.put(WebContainerConstants.FILTER_MAPPING_DISPATCHER, dispatcherInitString);
 		}
 
-		String serviceRank = String.valueOf(ServicePropertiesUtils.getIntegerProperty(serviceReference, Constants.SERVICE_RANKING));
+		Integer serviceRank = ServicePropertiesUtils.getIntegerProperty(serviceReference, Constants.SERVICE_RANKING);
 		if (serviceRank != null) {
-			initParams.put(WebContainerConstants.FILTER_RANKING, serviceRank);
+			initParams.put(WebContainerConstants.FILTER_RANKING, serviceRank.toString());
 		}
 
 
