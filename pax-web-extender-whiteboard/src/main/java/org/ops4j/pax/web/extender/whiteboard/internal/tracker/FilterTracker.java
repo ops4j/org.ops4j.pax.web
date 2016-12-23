@@ -29,6 +29,7 @@ import javax.servlet.annotation.WebInitParam;
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.FilterWebElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultFilterMapping;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.utils.FilterAnnotationScanner;
@@ -185,11 +186,11 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 			}
 		}
 
-        String serviceRank = (String) serviceReference.getProperty(Constants.SERVICE_RANKING); 
-        if (serviceRank != null) {
-            initParams.put(WebContainerConstants.FILTER_RANKING, serviceRank);
-        }
-        
+		Integer serviceRank = ServicePropertiesUtils.getIntegerProperty(serviceReference, Constants.SERVICE_RANKING);
+		if (serviceRank != null) {
+			initParams.put(WebContainerConstants.FILTER_RANKING, serviceRank.toString());
+		}
+
 		final DefaultFilterMapping mapping = new DefaultFilterMapping();
 		mapping.setFilter(published);
 		mapping.setHttpContextId((String) httpContextId);
