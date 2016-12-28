@@ -3,7 +3,7 @@
     <parent>
         <artifactId>samples</artifactId>
         <groupId>org.ops4j.pax.web</groupId>
-        <version>3.3.2</version>
+        <version>3.3.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>org.ops4j.pax.web.samples</groupId>
