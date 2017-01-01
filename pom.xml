@@ -115,7 +115,7 @@
 		<dependency.scr.version>2.0.6</dependency.scr.version>
 		<dependency.swissbox.version>1.8.2</dependency.swissbox.version>
 		<dependency.tomcat.version>8.0.14</dependency.tomcat.version>
-		<dependency.xbean.version>4.6</dependency.xbean.version>
+		<dependency.xbean.version>4.6-SNAPSHOT</dependency.xbean.version>
 		<dependency.xnio-api.version>3.3.3.2</dependency.xnio-api.version>
 		<dependency.xnio.version>3.3.3.1</dependency.xnio.version>
 		<dependency.undertow-core.version>1.3.10.1</dependency.undertow-core.version>
