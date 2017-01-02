@@ -18,6 +18,7 @@ package org.ops4j.pax.web.itest.undertow;
 import org.hamcrest.CoreMatchers;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -90,6 +91,48 @@ public class WebContainerIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8181/helloworld/wc");
 	}
 
+	@Test
+	public void testImageResources() throws Exception {
+	    HttpTestClientFactory.createDefaultTestClient()
+	        .withResponseAssertion("Response must contain an image", resp -> {
+	            byte[] img = resp.getBytes();
+	            return img.length > 0;
+	        })
+	        .doGETandExecuteTest("http://localhost:8181/images/logo.png");
+	}
+	
+    @Test
+    @Ignore("PAXWEB-1038 - custom error-pages with undertow aren't rendered.")
+    public void testErrorPage() throws Exception  {
+        HttpTestClientFactory.createDefaultTestClient()
+        .withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+                resp -> resp.contains("<h1>Hello World</h1>"))
+        .withResponseAssertion("Response must contain 'Have bundle context in filter: true'",
+                resp -> resp.contains("Have bundle context in filter: true"))
+        .doGETandExecuteTest("http://127.0.0.1:8181/helloworld/wc");
+        
+        HttpTestClientFactory.createDefaultTestClient()
+            .withResponseAssertion("Response must contain '<h1>Hello World Error Page</h1>'",
+                    resp -> resp.contains("<h1>Hello World Error Page</h1>"))
+            .withReturnCode(404)
+            .doGETandExecuteTest("http://127.0.0.1:8181/helloworld");
+    }
+    
+    @Test
+    @Ignore("PAXWEB-1032 - this is a test for that issue, somehow this test fails, while the white-board extender ones work.")
+    public void testWelcomFiles() throws Exception {
+        HttpTestClientFactory.createDefaultTestClient()
+            .withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+                    resp -> resp.contains("<h1>Hello World</h1>"))
+            .withResponseAssertion("Response must contain 'Have bundle context in filter: true'",
+                    resp -> resp.contains("Have bundle context in filter: true"))
+            .doGETandExecuteTest("http://127.0.0.1:8181/helloworld/wc");
+
+        HttpTestClientFactory.createDefaultTestClient()
+            .withResponseAssertion("Response must contain '<h1>Welcome</h1>'",
+                resp -> resp.contains("<h1>Welcome</h1>"))
+            .doGETandExecuteTest("http://127.0.0.1:8181/");
+    }
 
 	/**
 	 * The server-container must register each ServletContext as an OSGi service

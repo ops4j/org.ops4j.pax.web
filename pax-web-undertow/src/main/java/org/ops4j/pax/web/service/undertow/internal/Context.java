@@ -641,6 +641,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	public synchronized void addWelcomeFile(WelcomeFileModel welcomeFile) throws ServletException {
 		if (welcomeFiles.add(welcomeFile)) {
 			destroyHandler();
+            createHandler(null);
 		}
 	}
 
@@ -650,9 +651,10 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		}
 	}
 
-	public void addErrorPage(ErrorPageModel model) throws ServletException {
+	public synchronized void addErrorPage(ErrorPageModel model) throws ServletException {
 		if (errorPages.add(model)) {
 			destroyHandler();
+			createHandler(null);
 		}
 	}
 
