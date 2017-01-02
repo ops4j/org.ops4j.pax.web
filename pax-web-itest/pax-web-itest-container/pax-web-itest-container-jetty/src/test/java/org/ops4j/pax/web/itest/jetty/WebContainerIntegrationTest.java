@@ -58,9 +58,6 @@ public class WebContainerIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
 	
-	@Inject
-	private WebContainer webContainer;
-
 	@Configuration
 	public static Option[] configure() {
 		return configureJetty();
