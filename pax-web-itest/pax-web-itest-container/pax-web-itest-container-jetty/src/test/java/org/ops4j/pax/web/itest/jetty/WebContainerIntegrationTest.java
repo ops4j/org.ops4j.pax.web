@@ -17,6 +17,7 @@ package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -24,15 +25,27 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
+import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.Assert.fail;
+
+import java.io.IOException;
 
 /**
  * @author Achim Nierbeck
@@ -44,6 +57,9 @@ public class WebContainerIntegrationTest extends ITestBase {
 			.getLogger(WebContainerIntegrationTest.class);
 
 	private Bundle installWarBundle;
+	
+	@Inject
+	private WebContainer webContainer;
 
 	@Configuration
 	public static Option[] configure() {
@@ -103,5 +119,30 @@ public class WebContainerIntegrationTest extends ITestBase {
 			fail("ServletContext was not unregistered.");
 		}
 	}
+	
+	@Test
+	public void testErrorPage() throws Exception  {
+	    HttpTestClientFactory.createDefaultTestClient()
+            .withResponseAssertion("Response must contain '<h1>Hello World Error Page</h1>'",
+                    resp -> resp.contains("<h1>Hello World Error Page</h1>"))
+            .withReturnCode(404)
+            .doGETandExecuteTest("http://127.0.0.1:8181/helloworld");
+	}
+	
+	@Test
+	@Ignore("PAXWEB-1032 - this is a test for that issue, somehow this test fails, while the white-board extender ones work.")
+    public void testWelcomFiles() throws Exception {
+	    HttpTestClientFactory.createDefaultTestClient()
+            .withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+                    resp -> resp.contains("<h1>Hello World</h1>"))
+            .withResponseAssertion("Response must contain 'Have bundle context in filter: true'",
+                    resp -> resp.contains("Have bundle context in filter: true"))
+            .doGETandExecuteTest("http://127.0.0.1:8181/helloworld/wc");
 
+        HttpTestClientFactory.createDefaultTestClient()
+            .withResponseAssertion("Response must contain '<h1>Welcome</h1>'",
+                resp -> resp.contains("<h1>Welcome</h1>"))
+            .doGETandExecuteTest("http://127.0.0.1:8181");
+    }
+	
 }

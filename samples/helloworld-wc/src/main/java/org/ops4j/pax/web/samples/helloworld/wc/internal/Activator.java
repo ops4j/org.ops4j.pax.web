@@ -132,6 +132,9 @@ public final class Activator implements BundleActivator {
 					// register static htmls
 					webContainer.registerResources("/html", "/html",
 							httpContext);
+                    // register a welcome file
+                    webContainer.registerWelcomeFiles(
+                            new String[]{"index.html"}, true, httpContext);
 					errorServlet = new HelloWorldErrorServlet();
 					webContainer.registerServlet(errorServlet, // registered
 							// servlet
@@ -161,9 +164,6 @@ public final class Activator implements BundleActivator {
 							"/helloworld/wc/error", // path to error servlet
 							httpContext // http context
 					);
-					// register a welcome file
-					webContainer.registerWelcomeFiles(
-							new String[]{"index.html"}, false, httpContext);
 
 					webContainer.end(httpContext);
 				}
