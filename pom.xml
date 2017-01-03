@@ -124,7 +124,7 @@
 		<dependency.jboss-logging>3.2.1.Final</dependency.jboss-logging>
         <dependency.jasypt>1.9.2</dependency.jasypt>
 		<dependency.pax-cdi.version>1.0.0.RC2</dependency.pax-cdi.version>
-		<version.pax-exam>4.7.0</version.pax-exam>
+		<version.pax-exam>4.9.2</version.pax-exam>
 
 		<tipi.tomcat.version>8.0.14.1</tipi.tomcat.version>
 		<jsf-myfaces.version>2.2.10</jsf-myfaces.version>
@@ -369,7 +369,7 @@
 									<pluginExecutionFilter>
 										<groupId>org.ops4j.pax.exam</groupId>
 										<artifactId>exam-maven-plugin</artifactId>
-										<versionRange>[4.7.0-SNAPSHOT,)</versionRange>
+										<versionRange>[4.9.0,)</versionRange>
 										<goals>
 											<goal>generate-link-files</goal>
 										</goals>
