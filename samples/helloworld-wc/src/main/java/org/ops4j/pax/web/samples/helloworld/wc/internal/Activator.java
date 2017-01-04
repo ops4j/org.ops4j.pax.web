@@ -134,7 +134,7 @@ public final class Activator implements BundleActivator {
 							httpContext);
                     // register a welcome file
                     webContainer.registerWelcomeFiles(
-                            new String[]{"/html/index.html"}, true, httpContext);
+                            new String[]{"index.html"}, true, httpContext);
 					errorServlet = new HelloWorldErrorServlet();
 					webContainer.registerServlet(errorServlet, // registered
 							// servlet
