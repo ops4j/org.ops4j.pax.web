@@ -17,6 +17,7 @@ package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -85,6 +86,7 @@ public class WhiteboardKarafTest extends KarafBaseTest {
 	}
 
 	@Test
+	@Ignore("this is a blinking test, therefore disabled on purpose. PAXWEB-1053")
 	public void testWhiteBoardSlash() throws Exception {
 		createTestClientForKaraf()
 				.withResponseAssertion("Response must be served from welcome-page!",
