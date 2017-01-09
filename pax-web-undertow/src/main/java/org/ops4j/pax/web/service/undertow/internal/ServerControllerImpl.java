@@ -51,6 +51,8 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
+import io.undertow.security.idm.Account;
+import io.undertow.security.idm.Credential;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.LifeCycle;
@@ -85,7 +87,7 @@ import io.undertow.server.handlers.accesslog.DefaultAccessLogReceiver;
 /**
  * @author Guillaume Nodet
  */
-public class ServerControllerImpl implements ServerController {
+public class ServerControllerImpl implements ServerController, IdentityManager {
 
     private enum State {
         Unconfigured,
@@ -480,7 +482,7 @@ public class ServerControllerImpl implements ServerController {
 
     private Context findOrCreateContext(final ContextModel contextModel) {
         NullArgumentException.validateNotNull(contextModel, "contextModel");
-        Context newCtx = new Context(identityManager, path, contextModel);
+        Context newCtx = new Context(this, path, contextModel);
         Context oldCtx = contextMap.putIfAbsent(contextModel.getHttpContext(), newCtx);
         return oldCtx != null ? oldCtx : newCtx;
     }
@@ -641,5 +643,29 @@ public class ServerControllerImpl implements ServerController {
         }
 
         return crlList;
+    }
+
+    @Override
+    public Account verify(Account account) {
+        if (identityManager != null) {
+            return identityManager.verify(account);
+        }
+        throw new IllegalStateException("No identity manager configured");
+    }
+
+    @Override
+    public Account verify(String id, Credential credential) {
+        if (identityManager != null) {
+            return identityManager.verify(id, credential);
+        }
+        throw new IllegalStateException("No identity manager configured");
+    }
+
+    @Override
+    public Account verify(Credential credential) {
+        if (identityManager != null) {
+            return identityManager.verify(credential);
+        }
+        throw new IllegalStateException("No identity manager configured");
     }
 }

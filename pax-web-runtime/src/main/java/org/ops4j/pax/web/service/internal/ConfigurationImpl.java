@@ -433,7 +433,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 					+ PROPERTY_SERVER_CONFIGURATION_FILE + " has failed");
 		}
 		//CHECKSTYLE:ON
-		return null;
+		return get(PROPERTY_SERVER_CONFIGURATION_FILE);
 	}
 
 	@Override
@@ -451,7 +451,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 					+ PROPERTY_SERVER_CONFIGURATION_URL + " has failed");
 		}
 		//CHECKSTYLE:ON
-		return null;
+		return get(PROPERTY_SERVER_CONFIGURATION_URL);
 	}
 
 	/**

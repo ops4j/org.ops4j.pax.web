@@ -1,7 +1,8 @@
 OPS4j Pax Web
 =============
 
-[![Build Status](https://travis-ci.org/ops4j/org.ops4j.pax.web.svg?branch=master)](https://travis-ci.org/ops4j/org.ops4j.pax.web)
+[![Jenkins](https://img.shields.io/jenkins/s/http/ci.ops4j.org/jenkins/job/org.ops4j.pax.web.svg)](http://ci.ops4j.org/jenkins/job/org.ops4j.pax.web)
+[![Jenkins tests](https://img.shields.io/jenkins/t/http/ci.ops4j.org/jenkins/job/org.ops4j.pax.web.svg)](http://ci.ops4j.org/jenkins/job/org.ops4j.pax.web/lastBuild/testReport/)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.ops4j.pax/web/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.ops4j.pax/web)
 [![License](https://img.shields.io/hexpm/l/plug.svg)](https://ops4j1.jira.com/wiki/display/ops4j/Licensing)
 

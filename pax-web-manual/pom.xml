@@ -12,7 +12,7 @@
 	<parent>
 		<groupId>org.ops4j.pax</groupId>
 		<artifactId>web</artifactId>
-		<version>6.0.1-SNAPSHOT</version>
+		<version>6.1.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<groupId>org.ops4j.pax.web</groupId>
@@ -79,7 +79,7 @@
 								<docVersion>${project.version}</docVersion>
 								<tomcatVersion>${dependency.tomcat.version}</tomcatVersion>
 								<jettyVersion>${dependency.jetty.version}</jettyVersion>
-								<undertowVersion>${dependency.undertow.version}</undertowVersion>
+								<undertowVersion>${dependency.undertow-core.version}</undertowVersion>
 								<latestStableVersion>${baseline.version}</latestStableVersion>
 								<servletVersion>${servlet.spec.version}</servletVersion>
 								<jspVersion>${servlet-jsp.spec.version}</jspVersion>

@@ -23,7 +23,7 @@
 		<relativePath>../pom.xml</relativePath>
 		<groupId>org.ops4j.pax</groupId>
 		<artifactId>web</artifactId>
-		<version>6.0.1-SNAPSHOT</version>
+		<version>6.1.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.ops4j.pax.web</groupId>
@@ -176,11 +176,16 @@
 									<type>xml</type>
 									<classifier>features</classifier>
 								</artifact>
-                                <artifact>
-                                    <file>src/main/resources/jetty.xml</file>
-                                    <type>xml</type>
-                                    <classifier>jettyconfig</classifier>
-                                </artifact>
+								<artifact>
+									<file>src/main/resources/jetty.xml</file>
+									<type>xml</type>
+									<classifier>jettyconfig</classifier>
+								</artifact>
+								<artifact>
+									<file>src/main/resources/undertow.properties</file>
+									<type>properties</type>
+									<classifier>undertowconfig</classifier>
+								</artifact>
                             </artifacts>
                         </configuration>
                     </execution>
