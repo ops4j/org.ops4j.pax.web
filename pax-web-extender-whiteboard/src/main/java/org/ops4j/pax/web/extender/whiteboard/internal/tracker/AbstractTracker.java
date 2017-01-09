@@ -226,7 +226,7 @@ abstract class AbstractTracker<T, W extends WebElement> implements
 	 * Factory method for registrations corresponding to the published service.
 	 * If the registration cannot be created from the published service (e.g.
 	 * not enough metadata) the register method should return null, fact that
-	 * will cancel the registration of the service. Aditionally it can log an
+	 * will cancel the registration of the service. Additionally it can log an
 	 * error so the user is notified about the problem.
 	 * 
 	 * @param serviceReference
