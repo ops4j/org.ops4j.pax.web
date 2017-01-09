@@ -1018,7 +1018,11 @@
 				<enabled>false</enabled>
 			</releases>
 		</repository>
-
+		<repository>
+			<id>osgi-releases-and-snapshots</id>
+			<url>https://oss.sonatype.org/content/groups/osgi/</url>
+			<layout>default</layout>
+		</repository>
 		<repository>
 			<releases>
 				<enabled>false</enabled>

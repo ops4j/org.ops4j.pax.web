@@ -63,6 +63,7 @@
     <module>whiteboard-extended</module>
     <module>whiteboard-blueprint</module>
 	<module>whiteboard-ds</module>
+	<module>whiteboard-ds-jaxrs</module>
     <module>provision</module>
     <module>features</module>
     <module>jetty-config-fragment</module>
