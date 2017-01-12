@@ -8,7 +8,7 @@ OPS4j Pax Web
 What is Pax Web
 ===============
 
-OSGi R4 Http Service and Web Applications (OSGi Enterprise Release chapter 128) implementation using Jetty 9 and Tomcat 7.   
+OSGi R6 Http Service and Web Applications (OSGi Enterprise Release chapter 128) implementation using Jetty 9 and Tomcat 8.   
 Pax Web extends OSGi Http Service with better servlet support, filters, listeners, error pages and JSPs and some others in order to meet the latest versions of Servlet specs.    
 Pax Web facilitates an easy installation of WAR bundles as well as discovery of web elements published as OSGi services. All of this beside the, standard, programmatic registration as detailed in the HTTP Service specs.
 
@@ -17,8 +17,8 @@ Currently it supports the following:
 * JSP 1.1.2   
 * JSF 2.1   
 * Jetty 9.x   
-* Tomcat 7.x  
-* support of CDI (through Pax-CDI)  
+* Tomcat 8.x  
+* support of CDI (through [Pax CDI](https://github.com/ops4j/org.ops4j.pax.cdi))  
 * support of only Servlet 3.0 annotated Servlets in JAR   
 
 ## Documentation
@@ -42,7 +42,7 @@ All we ask you is to move carefully and to clean up after yourself:
 Building Pax Web
 ================
 
-mvn clean install
+`mvn clean install`
 
 NB: if you want to avoid test execution:
 mvn clean install -DskipTests
@@ -50,9 +50,9 @@ mvn clean install -DskipTests
 Releasing Pax Web
 =================
 
-mvn -Prelease -Darguments="-Prelease" release:prepare -DautoVersionSubmodules=true
+`mvn -Prelease -Darguments="-Prelease" release:prepare -DautoVersionSubmodules=true`
 
-mvn -Prelease -Darguments="-Prelease" -Dgoals=deploy release:perform
+`mvn -Prelease -Darguments="-Prelease" -Dgoals=deploy release:perform`
 
 Go to oss.sonatype.org and push pax-web to central.
 
