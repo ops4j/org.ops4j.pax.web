@@ -85,11 +85,11 @@
     </feature>
 
     <feature name="pax-http-jetty" version="${project.version}">
-        <configfile finalname="/etc/jetty.xml">mvn:org.ops4j.pax.web/pax-web-features/${project.version}/xml/jettyconfig</configfile>
+        <configfile finalname="${karaf.etc}/jetty.xml">mvn:org.ops4j.pax.web/pax-web-features/${project.version}/xml/jettyconfig</configfile>
         <config name="org.ops4j.pax.web">
             org.osgi.service.http.port=8181
             javax.servlet.context.tempdir=${karaf.data}/pax-web-jsp
-            org.ops4j.pax.web.config.file=${karaf.base}/etc/jetty.xml
+            org.ops4j.pax.web.config.file=${karaf.etc}/jetty.xml
         </config>
         <feature>scr</feature>
         <feature version="[9.3,10.0)">pax-jetty</feature>
