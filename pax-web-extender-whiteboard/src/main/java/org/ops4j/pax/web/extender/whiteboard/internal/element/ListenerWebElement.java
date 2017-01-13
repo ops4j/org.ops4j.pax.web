@@ -76,8 +76,7 @@ public class ListenerWebElement<T extends EventListener> extends WebElement<T> i
 		}
 
 		if (listenerMapping.getHttpContextId() != null && listenerMapping.getHttpContextId().trim().length() == 0) {
-			LOG.warn("Registered listener [" + getPusblishedPID()
-					+ "] did not contain a valid http context id");
+			LOG.warn("Registered listener [{}] did not contain a valid http context id.", getServiceID());
 			valid = false;
 		}
 
@@ -85,8 +84,7 @@ public class ListenerWebElement<T extends EventListener> extends WebElement<T> i
 				serviceReference,
 				HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER);
 		if (!Boolean.TRUE.equals(listenerEnabled)) {
-			LOG.warn("Registered listener [" + getPusblishedPID()
-					+ "] is not enabled via 'osgi.http.whiteboard.listener' property");
+			LOG.warn("Registered listener [{}] is not enabled via 'osgi.http.whiteboard.listener' property.", getServiceID());
 			valid = false;
 		}
 	}
@@ -117,4 +115,4 @@ public class ListenerWebElement<T extends EventListener> extends WebElement<T> i
 	public ListenerMapping getListenerMapping() {
 		return listenerMapping;
 	}
-}
+}
