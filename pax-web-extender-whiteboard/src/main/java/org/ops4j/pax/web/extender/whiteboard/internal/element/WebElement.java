@@ -80,14 +80,6 @@ public abstract class WebElement<T> implements WhiteboardElement {
 	}
 
 	/**
-	 * Return the PID of the registered whiteboard-service. Used mainly for logging.
-	 * @return PID from registered whiteboard-service
-	 */
-	protected String getPusblishedPID(){
-		return (String)serviceReference.getProperty(Constants.SERVICE_PID);
-	}
-
-	/**
 	 * Elements can define custom validation:
 	 * Only valid WebElements registered via whiteboard will be published to the {@link WebContainer}.
 	 * @return the validation-state of this element
