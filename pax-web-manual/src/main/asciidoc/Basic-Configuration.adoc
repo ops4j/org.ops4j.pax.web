@@ -116,7 +116,7 @@ org.ops4j.pax.web.log.ncsa.format = /yyyy_mm_dd.request.log
 -----------------------------------------------------------
 
 [[BasicConfiguration-org.ops4j.pax.web.log.ncsa.retainDays]]
-`org.ops4j.pax.web.log.ncsa.retainDays`
+`org.ops4j.pax.web.log.ncsa.retaindays`
 
 ------------------------------------------
 org.ops4j.pax.web.log.ncsa.retainDays = 90
