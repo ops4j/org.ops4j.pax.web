@@ -95,8 +95,10 @@ public class ServletTracker<T extends Servlet> extends AbstractTracker<T, Servle
 		} else {
 			String[] whiteBoardProp = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference,
 					HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN);
-			urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp,
-					Arrays.asList(whiteBoardProp));
+			if (whiteBoardProp != null) {
+				urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp,
+						Arrays.asList(whiteBoardProp));
+			}
 		}
 
 		if (servletName == null) {
