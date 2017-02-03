@@ -349,20 +349,27 @@ public class WebAppParser {
 			webAppServletContainerInitializer.setServletContainerInitializer(servletContainerInitializer);
 
 			if (!webApp.getMetaDataComplete() && majorVersion != null && majorVersion >= 3) {
-				@SuppressWarnings("unchecked")
-				Class<HandlesTypes> loadClass = (Class<HandlesTypes>) bundle
-						.loadClass("javax.servlet.annotation.HandlesTypes");
-				HandlesTypes handlesTypes = loadClass.cast(servletContainerInitializer.getClass().getAnnotation(
-						loadClass));
-				LOG.debug("Found HandlesTypes {}", handlesTypes);
-				Class<?>[] classes;
-				if (handlesTypes != null) {
-					// add annotated classes to service
-					classes = handlesTypes.value();
-					webAppServletContainerInitializer.setClasses(classes);
-				}
+				 Class<?>[] classes = getHandledTypes(servletContainerInitializer, bundle);
+				 if (classes != null) {
+  					 // add annotated classes to service
+					 webAppServletContainerInitializer.setClasses(classes);
+				 }
 			}
 			webApp.addServletContainerInitializer(webAppServletContainerInitializer);
+		}
+	}
+	
+	private Class<?>[] getHandledTypes(ServletContainerInitializer servletContainerInitializer, Bundle bundle) {
+		try {
+			@SuppressWarnings("unchecked")
+			Class<HandlesTypes> loadClass = (Class<HandlesTypes>) bundle.loadClass("javax.servlet.annotation.HandlesTypes");
+			HandlesTypes handlesTypes = loadClass.cast(servletContainerInitializer.getClass().getAnnotation(
+					loadClass));
+			LOG.debug("Found HandlesTypes {}", handlesTypes);
+			return (handlesTypes != null) ? handlesTypes.value() : null;
+		} catch (ClassNotFoundException e) {
+			LOG.debug("HandlesTypes annotation not present", e);
+			return null;
 		}
 	}
 
