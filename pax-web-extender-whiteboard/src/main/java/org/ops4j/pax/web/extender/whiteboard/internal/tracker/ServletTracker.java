@@ -32,6 +32,7 @@ import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultServletMapping;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.utils.ServletAnnotationScanner;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
@@ -76,7 +77,8 @@ public class ServletTracker<T extends Servlet> extends AbstractTracker<T, Servle
 	 */
 	@Override
 	ServletWebElement createWebElement(final ServiceReference<T> serviceReference, final T published) {
-		String alias = ServicePropertiesUtils.getStringProperty(serviceReference, ExtenderConstants.PROPERTY_ALIAS);
+		LOG.debug("Creating web element for service {} {} ({}).", serviceReference.getProperty(Constants.SERVICE_ID), serviceReference, published);
+        String alias = ServicePropertiesUtils.getStringProperty(serviceReference, ExtenderConstants.PROPERTY_ALIAS);
 		Object urlPatternsProp = serviceReference.getProperty(ExtenderConstants.PROPERTY_URL_PATTERNS);
 
 		String[] initParamKeys = serviceReference.getPropertyKeys();
@@ -93,8 +95,10 @@ public class ServletTracker<T extends Servlet> extends AbstractTracker<T, Servle
 		} else {
 			String[] whiteBoardProp = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference,
 					HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN);
-			urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp,
-					Arrays.asList(whiteBoardProp));
+			if (whiteBoardProp != null) {
+				urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp,
+						Arrays.asList(whiteBoardProp));
+			}
 		}
 
 		if (servletName == null) {

@@ -76,7 +76,7 @@ class JettyServerHandlerCollection extends HandlerCollection {
 
 			try {
 				NullArgumentException.validateNotNull(context,
-						"Found context is Null");
+						"Context (handler) for " + target);
 				context.handle(target, baseRequest, request, response);
 
 				//CHECKSTYLE:OFF
