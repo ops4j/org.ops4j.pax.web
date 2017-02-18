@@ -478,7 +478,7 @@ public class WebAppParser {
 	private static void parseSessionConfig(final SessionConfigType sessionConfigType, final WebApp webApp) {
 		// Fix for PAXWEB-201
 		if (sessionConfigType.getSessionTimeout() != null) {
-			webApp.setSessionTimeout(sessionConfigType.getSessionTimeout().toString());
+			webApp.setSessionTimeout(sessionConfigType.getSessionTimeout().getValue().toString());
 		}
 		if (sessionConfigType.getCookieConfig() != null) {
 			CookieConfigType cookieConfig = sessionConfigType.getCookieConfig();
@@ -844,7 +844,7 @@ public class WebAppParser {
 		return match;
 	}
 
-	private WebAppType parseWebXml(URL url) {
+	protected WebAppType parseWebXml(URL url) {
 		try {
 			XMLReader reader = XMLReaderFactory.createXMLReader();
 
