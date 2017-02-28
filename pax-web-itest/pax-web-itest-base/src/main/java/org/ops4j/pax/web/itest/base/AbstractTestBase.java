@@ -29,7 +29,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.cm.Configuration;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
@@ -217,16 +216,11 @@ public abstract class AbstractTestBase {
 
 	/**
 	 * Assuming that <code>serviceClass</code> represents a service related to <code>pid</code>, this method
-	 * synchronously updates given PID and waits for service to be modified.
+	 * synchronously performs some operation (e.g., configadmin update) and waits for service to be modified.
 	 * @param bundleContext
-	 * @param configuration
-	 * @param properties
-	 * @param pid
 	 * @param serviceClass
 	 */
-	protected <T> boolean updateConfigAdminAndWait(BundleContext bundleContext,
-			Configuration configuration, Dictionary<String, Object> properties,
-			String pid, Class<T> serviceClass, ServiceUpdateKind updateKind) throws InterruptedException, IOException {
+	protected <T> boolean waitForServiceReregistration(BundleContext bundleContext, Class<T> serviceClass, ServiceUpdateKind updateKind, Runnable callback) throws InterruptedException, IOException {
 		// first get current service instance
 		ServiceTracker<T, T> tracker = new ServiceTracker<>(bundleContext, serviceClass, null);
 		tracker.open();
@@ -259,7 +253,7 @@ public abstract class AbstractTestBase {
 
 		// update and wait
 		try {
-			configuration.update(properties);
+			callback.run();
 			return latch.await(20, TimeUnit.SECONDS);
 		} finally {
 			bundleContext.removeServiceListener(listener);

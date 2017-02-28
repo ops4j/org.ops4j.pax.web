@@ -69,8 +69,14 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 		props.put(WebContainerConstants.PROPERTY_HTTP_PORT, "8181");
 
 		config.setBundleLocation(null);
-		updateConfigAdminAndWait(getBundleContext(), config, props,
-				WebContainerConstants.PID, HttpService.class, ServiceUpdateKind.UNREGISTER_REGISTER);
+		Runnable callback = () -> {
+			try {
+				config.update(props);
+			} catch (IOException e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
+		};
+		waitForServiceReregistration(getBundleContext(), HttpService.class, ServiceUpdateKind.UNREGISTER_REGISTER, callback);
 
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
