@@ -25,7 +25,11 @@ import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.Configuration;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
@@ -37,6 +41,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.ops4j.pax.exam.CoreOptions.*;
@@ -211,6 +216,57 @@ public abstract class AbstractTestBase {
 	}
 
 	/**
+	 * Assuming that <code>serviceClass</code> represents a service related to <code>pid</code>, this method
+	 * synchronously updates given PID and waits for service to be modified.
+	 * @param bundleContext
+	 * @param configuration
+	 * @param properties
+	 * @param pid
+	 * @param serviceClass
+	 */
+	protected <T> boolean updateConfigAdminAndWait(BundleContext bundleContext,
+			Configuration configuration, Dictionary<String, Object> properties,
+			String pid, Class<T> serviceClass, ServiceUpdateKind updateKind) throws InterruptedException, IOException {
+		// first get current service instance
+		ServiceTracker<T, T> tracker = new ServiceTracker<>(bundleContext, serviceClass, null);
+		tracker.open();
+		tracker.waitForService(TimeUnit.SECONDS.toMillis(5));
+
+		// listener to wait for modified service
+		final CountDownLatch latch = new CountDownLatch(updateKind.getEventCount());
+		ServiceListener listener = (event) -> {
+			switch (updateKind) {
+				case MODIFY: {
+					if (event.getType() == ServiceEvent.MODIFIED) {
+						latch.countDown();
+					}
+					break;
+				}
+				case UNREGISTER_REGISTER: {
+					if (event.getType() == ServiceEvent.UNREGISTERING
+							|| event.getType() == ServiceEvent.REGISTERED) {
+						latch.countDown();
+					}
+					break;
+				}
+			}
+		};
+		try {
+			bundleContext.addServiceListener(listener, "(objectClass=" + serviceClass.getName() + ")");
+		} catch (InvalidSyntaxException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
+
+		// update and wait
+		try {
+			configuration.update(properties);
+			return latch.await(20, TimeUnit.SECONDS);
+		} finally {
+			bundleContext.removeServiceListener(listener);
+		}
+	}
+
+	/**
 	 * Callback to get access to the injected BundleContext
 	 *
 	 * @return the frameworks BundleContext
@@ -261,6 +317,21 @@ public abstract class AbstractTestBase {
 				.executeTest();
 
 		service.unregisterFilter(filter);
+	}
+
+	public static enum ServiceUpdateKind {
+		UNREGISTER_REGISTER(2),
+		MODIFY(1);
+
+		private int eventCount;
+
+		ServiceUpdateKind(int eventCount) {
+			this.eventCount = eventCount;
+		}
+
+		public int getEventCount() {
+			return eventCount;
+		}
 	}
 
 }

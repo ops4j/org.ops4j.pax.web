@@ -28,6 +28,7 @@ import org.ops4j.pax.web.service.WebContainerConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.http.HttpService;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -54,7 +55,7 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 	@Configuration
 	public static Option[] configure() {
 		return combine(configureUndertow(),
-				mavenBundle("org.apache.felix", "org.apache.felix.configadmin", "1.4.0"));
+				mavenBundle("org.apache.felix", "org.apache.felix.configadmin", "1.8.12"));
 	}
 
 	@Before
@@ -68,13 +69,12 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 		props.put(WebContainerConstants.PROPERTY_HTTP_PORT, "8181");
 
 		config.setBundleLocation(null);
-		config.update(props);
+		updateConfigAdminAndWait(getBundleContext(), config, props,
+				WebContainerConstants.PID, HttpService.class, ServiceUpdateKind.UNREGISTER_REGISTER);
 
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
-		Thread.sleep(2000);
 		waitForServer("http://127.0.0.1:8181/");
-		Thread.sleep(2000);
 	}
 
 	@After
@@ -82,7 +82,6 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 		if (installWarBundle != null) {
 			installWarBundle.stop();
 			installWarBundle.uninstall();
-			Thread.sleep(2000);
 		}
 	}
 
