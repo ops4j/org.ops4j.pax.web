@@ -69,9 +69,6 @@
 						<goals>
 							<goal>baseline</goal>
 						</goals>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
