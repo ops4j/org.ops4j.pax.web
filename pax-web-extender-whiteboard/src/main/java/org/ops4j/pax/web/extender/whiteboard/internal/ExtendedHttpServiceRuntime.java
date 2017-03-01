@@ -143,8 +143,10 @@ public class ExtendedHttpServiceRuntime implements HttpServiceRuntime, Replaceab
     }
 
     private void unregisterService() {
-        if (serviceRuntimeService != null)
+        if (serviceRuntimeService != null) {
             serviceRuntimeService.unregister();
+            serviceRuntimeService = null;
+        }
     }
     
     public void start() {

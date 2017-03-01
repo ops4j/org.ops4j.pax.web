@@ -241,35 +241,30 @@
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam-junit4</artifactId>
-			<version>${version.pax-exam}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam-invoker-junit</artifactId>
-			<version>${version.pax-exam}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam-container-native</artifactId>
-			<version>${version.pax-exam}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam-inject</artifactId>
-			<version>${version.pax-exam}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam-extender-service</artifactId>
-			<version>${version.pax-exam}</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -484,7 +479,6 @@
 		<dependency>
 		    <groupId>javax.websocket</groupId>
 		    <artifactId>javax.websocket-api</artifactId>
-		    <version>1.1</version>
 		</dependency>
 		<!-- Test-Client -->
 		<dependency>
@@ -594,22 +588,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			
-			<plugin>
-                <groupId>org.ops4j.pax.exam</groupId>
-                <artifactId>exam-maven-plugin</artifactId>
-                <version>${version.pax-exam}</version>
-                <executions>
-                    <execution>
-                        <id>dependencies</id>
-                        <phase>generate-test-resources</phase>
-                        <goals>
-                            <goal>generate-link-files</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
