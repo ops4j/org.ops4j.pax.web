@@ -17,13 +17,16 @@
 <Server port="8005" shutdown="SHUTDOWN">
   <Service name="Catalina">
     <Connector port="8009" protocol="AJP/1.3" redirectPort="8443" />
+
+    <Connector port="8282" protocol="HTTP/1.1" redirectPort="8443" />
+    <Connector port="8283" address="127.0.0.1" protocol="HTTP/1.1" redirectPort="8443" />
  
     <Engine name="Catalina" defaultHost="localhost">
  
       <Host name="localhost"  appBase="webapps"
             unpackWARs="true" autoDeploy="true">
         <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
-               prefix="localhost_access_log." suffix=".txt"
+               prefix="localhost_access_log" suffix=".txt"
                pattern="%h %l %u %t &quot;%r&quot; %s %b" />
       </Host>
     </Engine>

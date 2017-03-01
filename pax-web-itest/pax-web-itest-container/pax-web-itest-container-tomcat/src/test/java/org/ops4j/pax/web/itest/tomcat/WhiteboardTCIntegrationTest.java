@@ -157,7 +157,6 @@ public class WhiteboardTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore("Failing for duplicate Context - PAXWEB-597")
 	public void testMultipleContextMappings() throws Exception {
 		BundleContext bundleContext = installWarBundle.getBundleContext();
 		DefaultHttpContextMapping httpContextMapping = new DefaultHttpContextMapping();

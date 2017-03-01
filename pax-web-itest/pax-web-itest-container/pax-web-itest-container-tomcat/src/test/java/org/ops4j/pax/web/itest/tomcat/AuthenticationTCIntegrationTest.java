@@ -17,7 +17,6 @@ package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -37,7 +36,6 @@ import org.osgi.service.http.HttpService;
 
 import static org.junit.Assert.assertNotNull;
 
-@Ignore("Fails for unknown reason")
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
 public class AuthenticationTCIntegrationTest extends ITestBase {
@@ -124,6 +122,7 @@ public class AuthenticationTCIntegrationTest extends ITestBase {
 		waitForServletListener();
 
 		HttpTestClientFactory.createDefaultTestClient()
+		        .authenticate("admin", "admin", "Test Realm")
 				.withResponseAssertion("Response must contain 'org.osgi.service.http.authentication.type : BASIC'",
 						resp -> resp.contains("org.osgi.service.http.authentication.type : BASIC"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/status-with-auth");
