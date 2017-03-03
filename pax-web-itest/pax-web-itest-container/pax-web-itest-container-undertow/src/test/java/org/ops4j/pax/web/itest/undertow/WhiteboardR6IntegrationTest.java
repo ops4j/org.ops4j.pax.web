@@ -20,6 +20,7 @@ import java.util.Hashtable;
 import javax.inject.Inject;
 import javax.servlet.Servlet;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -50,6 +51,7 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 	}
 
 	@Test
+	@Ignore("Not implemented yet")
 	public void testErrorServlet() throws Exception {
 		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, new String[] {
