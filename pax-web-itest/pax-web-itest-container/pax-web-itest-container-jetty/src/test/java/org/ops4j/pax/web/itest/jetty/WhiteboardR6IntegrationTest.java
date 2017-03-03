@@ -35,6 +35,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Dictionary;
@@ -104,20 +106,52 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 
 	@Test
 	public void testErrorServlet() throws Exception {
-		Dictionary<String, String> properties = new Hashtable<>();
-		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, "java.io.IOException");
-		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, "404");
+		Dictionary<String, Object> properties = new Hashtable<>();
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, new String[] {
+				"404", "442", "5xx",
+				"java.io.IOException"
+		});
 
 		ServiceRegistration<Servlet> registerService = bundleContext.registerService(Servlet.class,
 				new MyErrorServlet(), properties);
+		ServiceRegistration<Servlet> brokenServlet = registerBrokenServlet();
 
+		final String message1 = String.format("%d|null|%s|null|%s|null", 404, "Not Found", "/error");
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
-				.withResponseAssertion("Response must contain 'Error Servlet, we do have a 404'",
-						resp -> resp.contains("Error Servlet, we do have a 404"))
+				.timeoutInSeconds(7200)
+				.withResponseAssertion("Response must contain '" + message1 + "'",
+						resp -> resp.contains(message1))
 				.doGETandExecuteTest("http://127.0.0.1:8181/error");
 
+		final String message2 = String.format("%d|null|%s|null|%s|broken-servlet", 442, "442", "/broken");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(442)
+				.timeoutInSeconds(7200)
+				.withResponseAssertion("Response must contain '" + message2 + "'",
+						resp -> resp.contains(message2))
+				.doGETandExecuteTest("http://127.0.0.1:8181/broken?what=return&code=442");
+
+		final String message3 = String.format("%d|null|%s|null|%s|broken-servlet", 502, "Bad Gateway", "/broken");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(502)
+				.timeoutInSeconds(7200)
+				.withResponseAssertion("Response must contain '" + message3 + "'",
+						resp -> resp.contains(message3))
+				.doGETandExecuteTest("http://127.0.0.1:8181/broken?what=return&code=502");
+
+		String exception = "java.io.IOException";
+		final String message4 = String.format("%d|%s|%s|%s|%s|broken-servlet",
+				500, exception, "java.io.IOException: somethingwronghashappened", exception, "/broken");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(500)
+				.timeoutInSeconds(7200)
+				.withResponseAssertion("Response must contain '" + message4 + "'",
+						resp -> resp.contains(message4))
+				.doGETandExecuteTest("http://127.0.0.1:8181/broken?what=throw&ex=" + exception + "&message=somethingwronghashappened");
+
 		registerService.unregister();
+		brokenServlet.unregister();
 	}
 
 	@Test
@@ -294,6 +328,15 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 				properties);
 	}
 
+	private ServiceRegistration<Servlet> registerBrokenServlet() {
+		Dictionary<String, String> properties = new Hashtable<>();
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "broken-servlet");
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/broken");
+
+		return bundleContext.registerService(Servlet.class, new MyBrokenServlet(),
+				properties);
+	}
+
 	private static class CDNServletContextHelper extends ServletContextHelper {
 		final AtomicInteger handleSecurityCalls = new AtomicInteger();
 
@@ -328,6 +371,38 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 		}
 	}
 
+	private static class MyBrokenServlet extends HttpServlet {
+
+		private static final long serialVersionUID = 1L;
+
+		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			resp.setContentType("text/plain");
+			String what = req.getParameter("what");
+			if ("throw".equals(what)) {
+				String exceptionClass = req.getParameter("ex");
+				String exceptionMessage = req.getParameter("message");
+				try {
+					Class<?> tc = Class.forName(exceptionClass);
+					Constructor<?> ct = tc.getConstructor(String.class);
+					if (RuntimeException.class.isAssignableFrom(tc)) {
+						throw (RuntimeException) ct.newInstance(exceptionMessage);
+					} else if (IOException.class.isAssignableFrom(tc)) {
+						throw (IOException) ct.newInstance(exceptionMessage);
+					} else {
+						throw new ServletException((Throwable)ct.newInstance(exceptionMessage));
+					}
+				} catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+					throw new RuntimeException("unexpected");
+				}
+			} else if ("return".equals(what)) {
+				Integer code = Integer.parseInt(req.getParameter("code"));
+				resp.sendError(code);
+			} else {
+				resp.getWriter().println("OK");
+			}
+		}
+	}
+
 	private static class MyErrorServlet extends HttpServlet {
 
 		private static final long serialVersionUID = 1L;
@@ -335,7 +410,21 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 		@Override
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			resp.setContentType("text/plain");
-			resp.getWriter().println("Error Servlet, we do have a 404");
+
+			// Servlets 3.1 spec, 10.9.1 "Request Attributes"
+			Integer status_code = (Integer) req.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+			Class<?> exception_type = (Class<?>) req.getAttribute(RequestDispatcher.ERROR_EXCEPTION_TYPE);
+			String message = (String) req.getAttribute(RequestDispatcher.ERROR_MESSAGE);
+			Throwable exception = (Throwable) req.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
+			String request_uri = (String) req.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
+			String servlet_name = (String) req.getAttribute(RequestDispatcher.ERROR_SERVLET_NAME);
+			resp.getWriter().println(String.format("%d|%s|%s|%s|%s|%s",
+					status_code == null ? 0 : status_code,
+					exception_type == null ? "null" : exception_type.getName(),
+					message,
+					exception == null ? "null" : exception.getClass().getName(),
+					request_uri,
+					servlet_name));
 		}
 	}
 

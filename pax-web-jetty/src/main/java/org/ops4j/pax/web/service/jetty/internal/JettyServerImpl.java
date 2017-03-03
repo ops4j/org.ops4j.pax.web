@@ -667,12 +667,20 @@ class JettyServerImpl implements JettyServer {
 			if (ErrorPageModel.ERROR_PAGE.equalsIgnoreCase(model.getError())) {
 				errorPageHandler.addErrorPage(ErrorPageErrorHandler.GLOBAL_ERROR_PAGE, model.getLocation());
 			} else {
-				// OK, not a number must be a class then
-				errorPageHandler
-						.addErrorPage(model.getError(), model.getLocation());
+				// 140.4.1 Error Pages
+				if ("4xx".equals(model.getError())) {
+					errorPageHandler
+							.addErrorPage(400, 499, model.getLocation());
+				} else if ("5xx".equals(model.getError())) {
+					errorPageHandler
+							.addErrorPage(500, 599, model.getLocation());
+				} else {
+					// OK, not a number must be a class then
+					errorPageHandler
+							.addErrorPage(model.getError(), model.getLocation());
+				}
 			}
 		}
-
 	}
 
 	@Override
