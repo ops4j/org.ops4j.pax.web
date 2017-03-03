@@ -88,6 +88,7 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 	public void setUp() throws Exception {
 		initServletListener();
 		waitForServletListener();
+		waitForServer("http://127.0.0.1:8181/");
 	}
 
 	/**
