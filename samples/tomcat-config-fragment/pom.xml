@@ -28,7 +28,7 @@
   <artifactId>tomcat-config-fragment</artifactId>
   <packaging>bundle</packaging>
 
-  <name>OPS4J Pax Web - Samples - Jetty config fragment</name>
+  <name>OPS4J Pax Web - Samples - Tomcat config fragment</name>
 
   <properties>
     <bundle.symbolicName>org.ops4j.pax.web.samples.tomcat.config</bundle.symbolicName>

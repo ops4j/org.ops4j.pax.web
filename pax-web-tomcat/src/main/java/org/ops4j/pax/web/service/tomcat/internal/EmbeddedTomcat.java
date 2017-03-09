@@ -315,7 +315,6 @@ public class EmbeddedTomcat extends Tomcat {
                                     httpConnector = connector;
                                 }
                                 //CHECKSTYLE:ON
-                                configureConnector(configuration, null, httpPort, useNIO, connector);
                                 masterConnectorFound = true;
                                 LOG.debug("master connector found, will alter it");
                             } else {
@@ -365,7 +364,6 @@ public class EmbeddedTomcat extends Tomcat {
                             if (matches(address, httpSecurePort, connector)) {
                                 httpSecureConnector = sslCon;
                                 masterSSLConnectorFound = true;
-                                configureSSLConnector(configuration, null, useNIO, httpSecurePort, sslCon);
                             } else {
                                 // default behaviour
                                 if (backupConnector == null) {
