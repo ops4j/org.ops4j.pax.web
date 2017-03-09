@@ -20,7 +20,11 @@
 
     <Connector port="8282" protocol="HTTP/1.1" redirectPort="8443" />
     <Connector port="8283" address="127.0.0.1" protocol="HTTP/1.1" redirectPort="8443" />
- 
+
+    <Connector port="8443" protocol="HTTP/1.1" scheme="https" secure="true" SSLEnabled="true"
+               keystoreFile="../src/test/resources-binary/keystore" keystorePass="password"
+               clientAuth="false" sslProtocol="TLS"/>
+
     <Engine name="Catalina" defaultHost="localhost">
  
       <Host name="localhost"  appBase="webapps"
