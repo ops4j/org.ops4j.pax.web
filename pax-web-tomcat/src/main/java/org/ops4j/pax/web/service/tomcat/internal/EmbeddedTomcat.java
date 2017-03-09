@@ -342,7 +342,7 @@ public class EmbeddedTomcat extends Tomcat {
                 Connector[] connectors = getService().findConnectors();
                 if (connectors != null) {
                     for (Connector connector : connectors) {
-                        if ((connector instanceof Connector) && !connector.getSecure()) {
+                        if (!connector.getSecure()) {
                             LOG.debug("Removing connector {}", connector);
                             getService().removeConnector(connector);
                         }
@@ -413,118 +413,80 @@ public class EmbeddedTomcat extends Tomcat {
 
     private Connector createSSLConnector(Configuration configuration, Connector httpSecureConnector, String address, Integer httpSecurePort,
             final String sslPassword, final String sslKeyPassword, Boolean useNIO) {
-        // no combination of jetty.xml and config-admin/properties
-        // needed
+        Connector secureConnector  = null;
         if (sslPassword != null && sslKeyPassword != null) {
-        	Connector secureConnector = new Connector("HTTPS/1.1");
-        	configureSSLConnector(configuration, address, useNIO,
-        			httpSecurePort, secureConnector);
-        	// secureConnector.
-        	if (httpSecureConnector == null) {
-        		httpSecureConnector = secureConnector;
-        	}
-        	getService().addConnector(httpSecureConnector);
+        	secureConnector = new Connector("HTTPS/1.1");
+        	secureConnector.setPort(httpSecurePort);
+            secureConnector.setSecure(true);
+            secureConnector.setScheme("https");
+            secureConnector.setProperty("SSLEnabled", "true");
+
+            secureConnector.setProperty("keystoreFile",
+            		configuration.getSslKeystore());
+            secureConnector.setProperty("keystorePass",
+            		configuration.getSslKeyPassword());
+            secureConnector.setProperty("clientAuth", "false");
+            secureConnector.setProperty("sslProtocol", "TLS");
+
+            if (useNIO) {
+            	secureConnector.setProtocolHandlerClassName(Http11NioProtocol.class
+            			.getName());
+            } else {
+            	secureConnector.setProtocolHandlerClassName(Http11Protocol.class
+            			.getName());
+            }
+
+            if (configuration.getServerMaxThreads() != null) {
+            	secureConnector.setAttribute("maxThreads", configuration.getServerMaxThreads());
+            }
+            if (configuration.getServerMinThreads() != null) {
+            	secureConnector.setAttribute("minSpareThreads", configuration.getServerMinThreads());
+            }
+
+            if (address != null) {
+                secureConnector.setAttribute("address", address);
+            }
+        	getService().addConnector(secureConnector);
         } else {
         	LOG.warn("SSL password and SSL keystore password must be set in order to enable SSL.");
         	LOG.warn("SSL connector will not be started");
         }
-        return httpSecureConnector;
+        return httpSecureConnector == null ? secureConnector : httpSecureConnector;
     }
 
     private Connector createConnector(Configuration configuration, Connector httpConnector, String address, Integer httpPort, Boolean useNIO) {
         LOG.debug("No Master connector found create a new one");
-        connector = new Connector("HTTP/1.1");
+        Connector connector = new Connector("HTTP/1.1");
         LOG.debug("Reconfiguring master connector");
-        configureConnector(configuration, address, httpPort, useNIO, connector);
-        if (httpConnector == null) {
-            httpConnector = connector;
+        LOG.debug("Configuring connector {}", connector);
+        connector.setScheme("http");
+        connector.setPort(httpPort);
+        if (configuration.isHttpSecureEnabled()) {
+        	connector.setRedirectPort(configuration.getHttpSecurePort());
         }
+        if (useNIO) {
+        	connector.setProtocolHandlerClassName(Http11NioProtocol.class
+        			.getName());
+        } else {
+        	connector.setProtocolHandlerClassName(Http11Protocol.class
+        			.getName());
+        }
+
+        if (configuration.getServerMaxThreads() != null) {
+        	connector.setAttribute("maxThreads", configuration.getServerMaxThreads());
+        }
+        if (configuration.getServerMinThreads() != null) {
+        	connector.setAttribute("minSpareThreads", configuration.getServerMinThreads());
+        }
+
+        if (address != null) {
+            connector.setAttribute("address", address);
+        }
+
+        LOG.debug("configuration done: {}", connector);
         service.addConnector(connector);
-        return httpConnector;
+        return httpConnector == null ? connector : httpConnector;
     }
-
-	/**
-	 * @param configuration
-	 * @param useNIO
-	 * @param httpSecurePort
-	 * @param secureConnector
-	 */
-	private void configureSSLConnector(Configuration configuration, String address,
-									   Boolean useNIO, Integer httpSecurePort, Connector secureConnector) {
-		secureConnector.setPort(httpSecurePort);
-		secureConnector.setSecure(true);
-		secureConnector.setScheme("https");
-		secureConnector.setProperty("SSLEnabled", "true");
-
-		secureConnector.setProperty("keystoreFile",
-				configuration.getSslKeystore());
-		secureConnector.setProperty("keystorePass",
-				configuration.getSslKeyPassword());
-		secureConnector.setProperty("clientAuth", "false");
-		secureConnector.setProperty("sslProtocol", "TLS");
-
-		// configuration.getSslKeystoreType();
-		// configuration.getSslPassword();
-
-		// keystoreFile="${user.home}/.keystore" keystorePass="changeit"
-		// clientAuth="false" sslProtocol="TLS"
-
-		if (useNIO) {
-			secureConnector.setProtocolHandlerClassName(Http11NioProtocol.class
-					.getName());
-		} else {
-			secureConnector.setProtocolHandlerClassName(Http11Protocol.class
-					.getName());
-		}
-
-		if (configuration.getServerMaxThreads() != null) {
-			secureConnector.setAttribute("maxThreads", configuration.getServerMaxThreads());
-		}
-		if (configuration.getServerMinThreads() != null) {
-			secureConnector.setAttribute("minSpareThreads", configuration.getServerMinThreads());
-		}
-
-		if (address != null) {
-		    secureConnector.setAttribute("address", address);
-		}
-	}
-
-	/**
-	 * @param configuration
-	 * @param httpPort
-	 * @param useNIO
-	 * @param connector
-	 */
-	private void configureConnector(Configuration configuration, String address,
-									Integer httpPort, Boolean useNIO, Connector connector) {
-		LOG.debug("Configuring connector {}", connector);
-		connector.setScheme("http");
-		connector.setPort(httpPort);
-		if (configuration.isHttpSecureEnabled()) {
-			connector.setRedirectPort(configuration.getHttpSecurePort());
-		}
-		if (useNIO) {
-			connector.setProtocolHandlerClassName(Http11NioProtocol.class
-					.getName());
-		} else {
-			connector.setProtocolHandlerClassName(Http11Protocol.class
-					.getName());
-		}
-
-		if (configuration.getServerMaxThreads() != null) {
-			connector.setAttribute("maxThreads", configuration.getServerMaxThreads());
-		}
-		if (configuration.getServerMinThreads() != null) {
-			connector.setAttribute("minSpareThreads", configuration.getServerMinThreads());
-		}
-
-		if (address != null) {
-		    connector.setAttribute("address", address);
-		}
-
-		// connector
-		LOG.debug("configuration done: {}", connector);
-	}
 
 	private void initBaseDir(Configuration configuration) {
 		setBaseDir(configuration.getTemporaryDirectory().getAbsolutePath());
