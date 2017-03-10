@@ -69,4 +69,20 @@ public class JspFilterIntegrationTest extends ITestBase {
 						resp -> resp.contains("Filtered"))
 				.doGETandExecuteTest("http://localhost:8181/jsp-filter/");
 	}
+	
+	@Test
+	public void testExplicitTagLib() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'works'",
+						resp -> resp.contains("works"))
+				.doGETandExecuteTest("http://localhost:8181/jsp-filter/test-taglib.jsp");
+	}
+	
+	@Test
+	public void testAutoIncludedTagLib() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'works'",
+						resp -> resp.contains("works"))
+				.doGETandExecuteTest("http://localhost:8181/jsp-filter/test-taglib-inc.jsp");
+	}
 }
