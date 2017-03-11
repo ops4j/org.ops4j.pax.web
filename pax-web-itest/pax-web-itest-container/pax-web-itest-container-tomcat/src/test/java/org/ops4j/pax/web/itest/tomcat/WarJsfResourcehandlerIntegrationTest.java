@@ -21,12 +21,13 @@
 package org.ops4j.pax.web.itest.tomcat;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.itest.base.TestConfiguration;
 import org.ops4j.pax.web.itest.base.WaitCondition2;
 import org.ops4j.pax.web.itest.base.assertion.BundleMatchers;
@@ -56,7 +57,6 @@ import java.util.Collection;
 
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 import static org.ops4j.pax.web.itest.base.assertion.Assert.assertThat;
 
@@ -64,6 +64,9 @@ import static org.ops4j.pax.web.itest.base.assertion.Assert.assertThat;
  * @author Marc Schlegel
  */
 @RunWith(PaxExam.class)
+// testResourceUnavailable uninstalls a bundle, so it destroys the container for 
+// other tests. Therefore we need a new container per test method
+@ExamReactorStrategy(PerMethod.class)
 public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
 
 	@Configuration
@@ -146,7 +149,6 @@ public class WarJsfResourcehandlerIntegrationTest extends ITestBase {
 	 * </pre>
 	 */
 	@Test
-	@Ignore("[PAXWEB-929] should fix this")
 	public void testJsfResourceHandler() throws Exception {
 		final String pageUrl = "http://127.0.0.1:8282/osgi-resourcehandler-myfaces/index.xhtml";
 		final String imageUrl = "http://127.0.0.1:8282/osgi-resourcehandler-myfaces/javax.faces.resource/images/iceland.jpg.xhtml?type=osgi&ln=default&lv=2_0";
