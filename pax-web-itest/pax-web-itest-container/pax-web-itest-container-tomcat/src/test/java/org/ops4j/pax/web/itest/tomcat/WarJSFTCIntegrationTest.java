@@ -92,7 +92,7 @@ public class WarJSFTCIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Please enter your name'",
 						resp -> resp.contains("Please enter your name"))
-				.doGETandExecuteTest("http://127.0.0.1:8282/war-jsf-sample/index.jsp");
+				.doGETandExecuteTest("http://127.0.0.1:8282/war-jsf-sample");
 	}
 
 	@Test
@@ -124,7 +124,7 @@ public class WarJSFTCIntegrationTest extends ITestBase {
 							logger.debug("Found ID: {}", inputID);
 							return true;
 						})
-				.doGETandExecuteTest("http://127.0.0.1:8282/war-jsf-sample/index.jsp");
+				.doGETandExecuteTest("http://127.0.0.1:8282/war-jsf-sample");
 
 		Pattern patternViewState = Pattern
 				.compile("id=\\\"j_id_.*:javax.faces.ViewState:\\w\\\"");
