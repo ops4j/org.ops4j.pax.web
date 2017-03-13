@@ -794,8 +794,9 @@ class TomcatServerWrapper implements ServerWrapper {
 	public Servlet createResourceServlet(final ContextModel contextModel,
 										 final String alias, final String name) {
 		LOG.debug("createResourceServlet( contextModel: {}, alias: {}, name: {})");
+		final Context context = findOrCreateContext(contextModel);
 		return new TomcatResourceServlet(contextModel.getHttpContext(),
-				contextModel.getContextName(), alias, name);
+				contextModel.getContextName(), alias, name, context);
 	}
 
 	@Override
