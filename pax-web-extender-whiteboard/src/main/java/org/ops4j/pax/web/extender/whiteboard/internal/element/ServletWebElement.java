@@ -25,6 +25,7 @@ import javax.servlet.Servlet;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.DictionaryUtils;
+import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultErrorPageMapping;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.whiteboard.ErrorPageMapping;
@@ -73,7 +74,11 @@ public class ServletWebElement<T extends Servlet> extends WebElement<T> implemen
 			LOG.warn("Registered servlet [{}] cannot have both alias and url patterns.", getServiceID());
 			valid = false;
 		}else if (alias == null && urlPatterns == null) {
-			LOG.warn("Registered servlet [{}] did not contain a valid alias or url patterns property.", getServiceID());
+			String felixWebconsoleLabel = ServicePropertiesUtils.getStringProperty(serviceReference, "felix.webconsole.label");
+			if (felixWebconsoleLabel == null) {
+				// Skip warning for felix webconsole plugins
+				LOG.info("Ignoring servlet [{}] without valid alias or url patterns property.", getServiceID());
+			}
 			valid = false;
 		}else if (alias != null && alias.trim().length() == 0) {
 			LOG.warn("Registered servlet [{}] did not contain a valid alias property.", getServiceID());
