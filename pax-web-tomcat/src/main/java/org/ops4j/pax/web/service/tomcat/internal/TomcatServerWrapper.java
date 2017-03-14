@@ -543,12 +543,18 @@ class TomcatServerWrapper implements ServerWrapper {
 		}
 
 		final Context context = contextMap.remove(httpContext);
-		this.server.getHost().removeChild(context);
 		if (context == null) {
 			throw new RemoveContextException(
 					"cannot remove the context because it does not exist: "
 							+ httpContext);
 		}
+		try {
+			context.stop();
+		} catch (LifecycleException e) {
+			throw new RemoveContextException("cannot stop the context: "
+					+ httpContext, e);
+		}
+		this.server.getHost().removeChild(context);
 		try {
 			final LifecycleState state = context.getState();
 			if (LifecycleState.DESTROYED != state
