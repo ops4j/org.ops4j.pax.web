@@ -140,7 +140,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	public void addWebElement(final WebElement webElement) {
 		NullArgumentException.validateNotNull(webElement, "Registerer");
 		// FIX for PAXWEB-485 changing order of registration.
-		httpServiceLock.readLock().lock();
+		httpServiceLock.writeLock().lock();
 		try {
 			//check if servlets and such are already registered while this is a ServletContextListener
 			if (webElement instanceof ListenerWebElement) {
@@ -190,7 +190,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 			}
 		} finally {
 			webElements.add(webElement);
-			httpServiceLock.readLock().unlock();
+			httpServiceLock.writeLock().unlock();
 		}
 	}
 
