@@ -620,6 +620,9 @@ class JettyServerImpl implements JettyServer {
 		// then remove the filter
 		final FilterHolder filterHolder = servletHandler.getFilter(model
 				.getName());
+		if (filterHolder == null) {
+			return; // The filter has already been removed so nothing do to anymore
+		}
 		final FilterHolder[] filterHolders = servletHandler.getFilters();
 		final FilterHolder[] newFilterHolders = (FilterHolder[]) ArrayUtil.removeFromArray(filterHolders, filterHolder);
 		servletHandler.setFilters(newFilterHolders);
