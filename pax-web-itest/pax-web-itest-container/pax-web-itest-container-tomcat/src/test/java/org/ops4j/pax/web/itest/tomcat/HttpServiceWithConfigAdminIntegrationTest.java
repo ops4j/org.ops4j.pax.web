@@ -22,6 +22,8 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.service.WebContainerConstants;
@@ -43,6 +45,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
  * @since Mar 3, 2009
  */
 @RunWith(PaxExam.class)
+@ExamReactorStrategy(PerMethod.class)
 public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;

@@ -77,7 +77,9 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 	public void setUp() throws Exception {
 		initServletListener();
 		waitForServletListener();
-	}
+
+		waitForServer("http://127.0.0.1:8282/");
+}
 
 	@Test
 	public void testAllSamplesRegisteredAsExpected() throws Exception {
@@ -123,7 +125,7 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 		ServiceTracker<HttpServiceRuntime, HttpServiceRuntime> st = new ServiceTracker<HttpServiceRuntime, HttpServiceRuntime>(bundleContext, HttpServiceRuntime.class, null);
 		st.open();
 		try {
-		    HttpServiceRuntime service = st.waitForService(2000);
+		    HttpServiceRuntime service = st.waitForService(3000);
             if(service != null){
                 result = function.apply(service);
             }
