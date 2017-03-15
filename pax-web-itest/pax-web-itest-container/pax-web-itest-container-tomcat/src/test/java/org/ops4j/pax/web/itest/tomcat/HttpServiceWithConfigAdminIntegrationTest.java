@@ -152,6 +152,9 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 
 		waitForServer("http://127.0.0.1:9191/");
 
+		// Wait a second. This is really ugly but without that the tests flicker
+		Thread.sleep(1500);
+
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Servlet Path: '",
 						resp -> resp.contains("Servlet Path: "))
