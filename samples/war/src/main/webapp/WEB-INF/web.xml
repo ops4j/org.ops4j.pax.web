@@ -79,10 +79,10 @@
         <url-pattern>/wc/sn</url-pattern>
     </servlet-mapping>
 
-<!--     <servlet-mapping> -->
-<!--         <servlet-name>example.servlet</servlet-name> -->
-<!--         <url-pattern>/</url-pattern> -->
-<!--     </servlet-mapping> -->
+    <servlet-mapping>
+        <servlet-name>example.servlet</servlet-name>
+        <url-pattern>/wc/alias</url-pattern>
+    </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>test-talkative-startup-load</servlet-name>
