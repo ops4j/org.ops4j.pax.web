@@ -146,13 +146,13 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 		props.put(WebContainerConstants.PROPERTY_LISTENING_ADDRESSES, "127.0.0.1");
 		props.put(WebContainerConstants.PROPERTY_HTTP_PORT, "9191");
 
-		initServletListener();
-
 		config.setBundleLocation(null);
 		config.update(props);
 
 		waitForServer("http://127.0.0.1:9191/");
-		waitForServletListener();
+
+		// give the container time to start the servlet again in the new server
+		Thread.sleep(1500);
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Servlet Path: '",
