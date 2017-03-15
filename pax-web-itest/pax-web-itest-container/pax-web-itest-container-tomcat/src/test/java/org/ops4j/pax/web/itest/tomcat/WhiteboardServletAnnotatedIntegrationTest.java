@@ -41,7 +41,6 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
  * @since Dec 30, 2012
  */
 @RunWith(PaxExam.class)
-@Ignore("These tests run locally but they randomly fail on the CI jenkins")
 public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 
 	@Configuration
@@ -61,13 +60,14 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 	@Test
 	public void testWhiteboardServletRegistration() throws Exception {
 
+		initServletListener();
+
 		ServiceRegistration<Servlet> servletRegistration = bundleContext
 				.registerService(Servlet.class, new AnnotatedTestServlet(),
 						null);
 
-		// Wait a second. This is really ugly but without that the tests flicker
-		Thread.sleep(1500);
-		
+		waitForServletListener();
+
 		try {
 			HttpTestClientFactory.createDefaultTestClient()
 					.withResponseAssertion("Response must contain 'TEST OK'",
@@ -84,12 +84,13 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 
 		AnnotatedTestServlet annotatedTestServlet = new AnnotatedTestServlet();
 
+		initServletListener();
+		
 		ServiceRegistration<Servlet> servletRegistration = bundleContext
 				.registerService(Servlet.class, annotatedTestServlet,
 						null);
 
-		// Wait a second. This is really ugly but without that the tests flicker
-		Thread.sleep(1500);
+		waitForServletListener();
 
 		try {
 			HttpTestClientFactory.createDefaultTestClient()
@@ -108,6 +109,8 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 	@Ignore
 	public void testWhiteboardFilterRegistration() throws Exception {
 
+		initServletListener();
+
 		ServiceRegistration<Servlet> servletRegistration = bundleContext
 				.registerService(Servlet.class, new AnnotatedTestServlet(),
 						null);
@@ -115,8 +118,7 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 		ServiceRegistration<Filter> filterRegistration = bundleContext
 				.registerService(Filter.class, new AnnotatedTestFilter(), null);
 
-		// Wait a second. This is really ugly but without that the tests flicker
-		Thread.sleep(1500);
+		waitForServletListener();
 
 		try {
 			HttpTestClientFactory.createDefaultTestClient()

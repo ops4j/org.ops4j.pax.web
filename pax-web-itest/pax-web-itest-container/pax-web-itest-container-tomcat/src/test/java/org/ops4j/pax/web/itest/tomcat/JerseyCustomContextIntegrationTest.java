@@ -63,12 +63,14 @@ public class JerseyCustomContextIntegrationTest extends ITestBase {
 	public void setUp() throws BundleException, InterruptedException {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/web-jersey/"
 				+ VersionUtil.getProjectVersion();
+
+		initServletListener();
+
 		installWarBundle = installAndStartBundle(bundlePath);
 
 		waitForServer("http://127.0.0.1:8282/");
 
-		// Wait a second. This is really ugly but without that the tests flicker
-		Thread.sleep(1500);
+		waitForServletListener();
 }
 
 	@After
