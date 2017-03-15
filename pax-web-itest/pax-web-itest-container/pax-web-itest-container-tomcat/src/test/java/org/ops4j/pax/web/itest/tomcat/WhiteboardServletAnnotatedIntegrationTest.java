@@ -23,8 +23,6 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.base.support.AnnotatedTestFilter;
 import org.ops4j.pax.web.itest.base.support.AnnotatedTestServlet;
@@ -43,7 +41,6 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
  * @since Dec 30, 2012
  */
 @RunWith(PaxExam.class)
-@ExamReactorStrategy(PerMethod.class)
 public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 
 	@Configuration
@@ -67,7 +64,8 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 				.registerService(Servlet.class, new AnnotatedTestServlet(),
 						null);
 
-		waitForServer("http://127.0.0.1:8282/test");
+		// Wait a second. This is really ugly but without that the tests flicker
+		Thread.sleep(1500);
 		
 		try {
 			HttpTestClientFactory.createDefaultTestClient()
@@ -89,7 +87,8 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 				.registerService(Servlet.class, annotatedTestServlet,
 						null);
 
-		waitForServer("http://127.0.0.1:8282/test");
+		// Wait a second. This is really ugly but without that the tests flicker
+		Thread.sleep(1500);
 
 		try {
 			HttpTestClientFactory.createDefaultTestClient()
@@ -114,6 +113,9 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 
 		ServiceRegistration<Filter> filterRegistration = bundleContext
 				.registerService(Filter.class, new AnnotatedTestFilter(), null);
+
+		// Wait a second. This is really ugly but without that the tests flicker
+		Thread.sleep(1500);
 
 		try {
 			HttpTestClientFactory.createDefaultTestClient()

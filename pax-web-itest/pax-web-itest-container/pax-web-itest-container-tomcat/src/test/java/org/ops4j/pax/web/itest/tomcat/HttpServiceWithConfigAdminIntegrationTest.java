@@ -78,7 +78,7 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 		waitForServer("http://127.0.0.1:8282/");
 
 		// Wait a second. This is really ugly but without that the tests flicker
-		Thread.sleep(1000);
+		Thread.sleep(1500);
 	}
 
 	@After

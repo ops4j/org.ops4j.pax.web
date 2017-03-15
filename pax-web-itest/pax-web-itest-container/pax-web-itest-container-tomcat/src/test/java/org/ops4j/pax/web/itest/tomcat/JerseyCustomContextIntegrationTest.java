@@ -66,6 +66,9 @@ public class JerseyCustomContextIntegrationTest extends ITestBase {
 		installWarBundle = installAndStartBundle(bundlePath);
 
 		waitForServer("http://127.0.0.1:8282/");
+
+		// Wait a second. This is really ugly but without that the tests flicker
+		Thread.sleep(1500);
 }
 
 	@After
