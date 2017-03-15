@@ -72,13 +72,12 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 		config.setBundleLocation(null);
 		config.update(props);
 
+		initServletListener();
+
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 
-		waitForServer("http://127.0.0.1:8282/");
-
-		// Wait a second. This is really ugly but without that the tests flicker
-		Thread.sleep(1500);
+		waitForServletListener();
 	}
 
 	@After
@@ -147,13 +146,13 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 		props.put(WebContainerConstants.PROPERTY_LISTENING_ADDRESSES, "127.0.0.1");
 		props.put(WebContainerConstants.PROPERTY_HTTP_PORT, "9191");
 
+		initServletListener();
+
 		config.setBundleLocation(null);
 		config.update(props);
 
 		waitForServer("http://127.0.0.1:9191/");
-
-		// Wait a second. This is really ugly but without that the tests flicker
-		Thread.sleep(1500);
+		waitForServletListener();
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Servlet Path: '",
