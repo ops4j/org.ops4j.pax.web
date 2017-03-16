@@ -17,7 +17,6 @@ package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -35,14 +34,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.fail;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
 /**
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
-@Ignore("Failes: can't find the EL factory -> [PAXWEB-929] should fix this")
 public class WarJSFTCIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
@@ -96,7 +92,7 @@ public class WarJSFTCIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Please enter your name'",
 						resp -> resp.contains("Please enter your name"))
-				.doGETandExecuteTest("http://127.0.0.1:8282/war-jsf-sample/");
+				.doGETandExecuteTest("http://127.0.0.1:8282/war-jsf-sample");
 	}
 
 	@Test
@@ -156,7 +152,7 @@ public class WarJSFTCIntegrationTest extends ITestBase {
 				.useCookieState(cookieState)
 				.withResponseAssertion("Response from POST must contain 'Hello Dummy-User. We hope you enjoy Apache MyFaces'",
 						resp -> resp.contains("Hello Dummy-User. We hope you enjoy Apache MyFaces"))
-				.doPOST("http://127.0.0.1:8181/war-jsf-sample/faces/helloWorld.jsp")
+				.doPOST("http://127.0.0.1:8282/war-jsf-sample/faces/helloWorld.jsp")
 				.addParameter("mainForm:name", "Dummy-User")
 				.addParameter(viewStateID, viewStateValue)
 				.addParameter(inputID, "Press me")

@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Joseph
  * @since 0.4.0, April 05, 2008
  */
+@SuppressWarnings("rawtypes")
 public class ServletTracker<T extends Servlet> extends AbstractTracker<T, ServletWebElement> {
 
 	/**

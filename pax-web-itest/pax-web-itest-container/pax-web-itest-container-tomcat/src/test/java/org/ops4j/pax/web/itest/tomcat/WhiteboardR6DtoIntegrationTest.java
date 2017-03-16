@@ -54,6 +54,7 @@ import org.osgi.service.http.runtime.dto.RequestInfoDTO;
 import org.osgi.service.http.runtime.dto.RuntimeDTO;
 import org.osgi.service.http.runtime.dto.ServletContextDTO;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.util.tracker.ServiceTracker;
 
 @RunWith(PaxExam.class)
 public class WhiteboardR6DtoIntegrationTest extends ITestBase {
@@ -76,7 +77,9 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 	public void setUp() throws Exception {
 		initServletListener();
 		waitForServletListener();
-	}
+
+		waitForServer("http://127.0.0.1:8282/");
+}
 
 	@Test
 	public void testAllSamplesRegisteredAsExpected() throws Exception {
@@ -89,11 +92,10 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8282/simple-servlet");
 
 		// test custom-servlet with additional context
-		// FIXME error file not working with tomcat?
-//		HttpTestClientFactory.createDefaultTestClient()
-//				.withResponseAssertion("Response must contain 'Hello from ServletWithContext'",
-//						resp -> resp.contains("Hello from ServletWithContext"))
-//				.doGETandExecuteTest("http://127.0.0.1:8282/context/servlet");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello from ServletWithContext'",
+						resp -> resp.contains("Hello from ServletWithContext"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/context/servlet");
 
 		// test welcome-file
 		// FIXME welcome file not working???
@@ -120,14 +122,16 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 
 	private <T> T withService(Function<HttpServiceRuntime, T> function){
 		T result = null;
-		ServiceReference<HttpServiceRuntime> ref = bundleContext.getServiceReference(HttpServiceRuntime.class);
-		if(ref != null){
-			HttpServiceRuntime service = bundleContext.getService(ref);
-			if(service != null){
-				result = function.apply(service);
-				bundleContext.ungetService(ref);
-			}
-		}
+		ServiceTracker<HttpServiceRuntime, HttpServiceRuntime> st = new ServiceTracker<HttpServiceRuntime, HttpServiceRuntime>(bundleContext, HttpServiceRuntime.class, null);
+		st.open();
+		try {
+		    HttpServiceRuntime service = st.waitForService(3000);
+            if(service != null){
+                result = function.apply(service);
+            }
+        } catch (InterruptedException e) {
+        }
+		st.close();
 		return result;
 	}
 
@@ -139,7 +143,7 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 	public void testRuntimeDto() throws Exception {
 		RuntimeDTO runtimeDTO = withService(HttpServiceRuntime::getRuntimeDTO);
 
-		// prepare ServiceIDs for comparrison
+		// prepare ServiceIDs for comparison
 		final long servletServiceId = (long)bundleContext.getServiceReference(WhiteboardServlet.class).getProperty(Constants.SERVICE_ID);
 		final long servletWithContextServiceId = (long)bundleContext.getServiceReference(WhiteboardServletWithContext.class).getProperty(Constants.SERVICE_ID);
 		final long defaultServletContextServiceId = (long)bundleContext.getServiceReferences(ServletContext.class, "(" + WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME + "=default)").stream().findFirst().orElseThrow(() -> new AssertionError("Default ServletContext not found")).getProperty(Constants.SERVICE_ID);

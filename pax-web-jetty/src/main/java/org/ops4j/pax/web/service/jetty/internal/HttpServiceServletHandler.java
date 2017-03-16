@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.util.URIUtil;
 import org.ops4j.lang.NullArgumentException;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ class HttpServiceServletHandler extends ServletHandler {
 	HttpServiceServletHandler(final HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
 		this.httpContext = httpContext;
+		setEnsureDefaultServlet(false);
 	}
 
 	@Override
@@ -84,6 +86,17 @@ class HttpServiceServletHandler extends ServletHandler {
 					responseWrapper.sendError(responseWrapper.getStatus());
 				}
 			}
+		}
+	}
+
+	@Override
+	protected void notFound(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+		if (LOG.isDebugEnabled())
+			LOG.debug("Not Found {}", request.getRequestURI());
+		if (getHandler() != null) {
+			nextHandle(URIUtil.addPaths(request.getServletPath(), request.getPathInfo()), baseRequest, request, response);
+		} else {
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		}
 	}
 

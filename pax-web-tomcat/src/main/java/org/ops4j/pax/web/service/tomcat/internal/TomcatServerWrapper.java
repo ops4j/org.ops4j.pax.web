@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.DispatcherType;
@@ -73,8 +72,8 @@ import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.apache.tomcat.util.descriptor.web.TaglibDescriptorImpl;
 import org.ops4j.lang.NullArgumentException;
+import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.swissbox.core.BundleUtils;
-import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.LifeCycle;
@@ -86,6 +85,7 @@ import org.ops4j.pax.web.service.spi.model.Model;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -271,23 +271,7 @@ class TomcatServerWrapper implements ServerWrapper {
 		@Override
 		public synchronized void load() throws ServletException {
 			try {
-				instance = ContextClassLoaderUtils.doWithClassLoader(
-						model.getContextModel().getClassLoader(),
-						new Callable<Servlet>() {
-
-							@Override
-							public Servlet call() {
-								try {
-									return loadServlet();
-								} catch (final ServletException e) {
-									LOG.warn(
-											"Caucht exception while loading Servlet with classloader {}",
-											e);
-									return null;
-								}
-							}
-
-						});
+				instance =  loadServlet();
 			} catch (Exception e) {
 				if (e instanceof RuntimeException) {
 					throw (RuntimeException) e;
@@ -538,12 +522,18 @@ class TomcatServerWrapper implements ServerWrapper {
 		}
 
 		final Context context = contextMap.remove(httpContext);
-		this.server.getHost().removeChild(context);
 		if (context == null) {
 			throw new RemoveContextException(
 					"cannot remove the context because it does not exist: "
 							+ httpContext);
 		}
+		try {
+			context.stop();
+		} catch (LifecycleException e) {
+			throw new RemoveContextException("cannot stop the context: "
+					+ httpContext, e);
+		}
+		this.server.getHost().removeChild(context);
 		try {
 			final LifecycleState state = context.getState();
 			if (LifecycleState.DESTROYED != state
@@ -810,8 +800,9 @@ class TomcatServerWrapper implements ServerWrapper {
 	public Servlet createResourceServlet(final ContextModel contextModel,
 										 final String alias, final String name) {
 		LOG.debug("createResourceServlet( contextModel: {}, alias: {}, name: {})");
+		final Context context = findOrCreateContext(contextModel);
 		return new TomcatResourceServlet(contextModel.getHttpContext(),
-				contextModel.getContextName(), alias, name);
+				contextModel.getContextName(), alias, name, context);
 	}
 
 	@Override
@@ -876,18 +867,7 @@ class TomcatServerWrapper implements ServerWrapper {
 				if (!context.getState().isAvailable()) {
 					LOG.info("server is available, in state {}",
 							context.getState());
-
-					ContextClassLoaderUtils.doWithClassLoader(
-							context.getParentClassLoader(),
-							new Callable<Void>() {
-
-								@Override
-								public Void call() throws LifecycleException {
-									context.start();
-									return null;
-								}
-
-							});
+					context.start();
 				}
 			}
 
@@ -952,7 +932,13 @@ class TomcatServerWrapper implements ServerWrapper {
 				server.getBasedir());
 
 		context.setDisplayName(httpContext.getContextId());
-		context.setParentClassLoader(contextModel.getClassLoader());
+		// Similar to the Jetty fix for PAXWEB-725
+		// Without this the el implementation is not found
+        ClassLoader classLoader = contextModel.getClassLoader();
+        List<Bundle> bundles = ((ResourceDelegatingBundleClassLoader) classLoader).getBundles();
+        ClassLoader parentClassLoader = getClass().getClassLoader();
+        ResourceDelegatingBundleClassLoader containerSpecificClassLoader = new ResourceDelegatingBundleClassLoader(bundles, parentClassLoader);
+        context.setParentClassLoader(containerSpecificClassLoader);
 		// TODO: is the context already configured?
 		// TODO: how about security, classloader?
 		// TODO: compare with JettyServerWrapper.addContext

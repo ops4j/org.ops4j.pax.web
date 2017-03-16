@@ -91,9 +91,14 @@ class JettyServerHandlerCollection extends HandlerCollection {
 
 		}
 		// now handle all other handlers
+		// PAXWEB-981 - let's ensure that only one org.eclipse.jetty.server.handler.ContextHandler can handle a request
+		// Servlets 3.1, 12.1 "Use of URL Paths":
+		//  - Upon receipt of a client request, the Web container determines the Web application to which to forward it.
+		//  - The Web container next must locate the servlet to process the request using the path mapping procedure [...]
+		//  - The first successful match is used with no further matches attempted
 		for (Handler handler : getHandlers()) {
 			if (matched != null
-					&& matchedContextEqualsHandler(matched, handler)) {
+					&& (handler instanceof ContextHandler || matchedContextEqualsHandler(matched, handler))) {
 				continue;
 			}
 			handler.handle(target, baseRequest, request, response);

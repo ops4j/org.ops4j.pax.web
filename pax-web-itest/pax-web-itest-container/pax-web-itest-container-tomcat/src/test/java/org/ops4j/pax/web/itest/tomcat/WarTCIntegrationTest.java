@@ -90,6 +90,14 @@ public class WarTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
+	public void testWebContainerAlias() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/war/wc/alias");
+	}
+
+	@Test
 	public void testWebContainerSN() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
@@ -148,7 +156,7 @@ public class WarTCIntegrationTest extends ITestBase {
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
-						resp -> resp.contains("<h1>Hello World!</h1>"))
+						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/war/wc");
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain '<h2>Hello World!</h2>'",

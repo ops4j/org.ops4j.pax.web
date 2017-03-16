@@ -48,6 +48,7 @@
 				<configuration>
 					<extension>true</extension>
 					<generatePackage>org.ops4j.pax.web.descriptor.gen</generatePackage>
+                    <catalog>src/main/resources/catalog.cat</catalog>
 					<schemaIncludes>
 						<include>xsd/web-app_3_1.xsd</include>
 					</schemaIncludes>
@@ -69,9 +70,6 @@
 						<goals>
 							<goal>baseline</goal>
 						</goals>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>

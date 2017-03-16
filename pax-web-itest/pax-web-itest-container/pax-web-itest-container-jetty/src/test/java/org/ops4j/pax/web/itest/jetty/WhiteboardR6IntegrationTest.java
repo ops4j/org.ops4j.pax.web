@@ -22,6 +22,8 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.util.Filter;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
+import org.ops4j.pax.web.itest.base.support.BrokenServlet;
+import org.ops4j.pax.web.itest.base.support.ErrorServlet;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -104,20 +106,51 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 
 	@Test
 	public void testErrorServlet() throws Exception {
-		Dictionary<String, String> properties = new Hashtable<>();
-		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, "java.io.IOException");
-		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, "404");
+		Dictionary<String, Object> properties = new Hashtable<>();
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, new String[] {
+				"404", "442", "5xx",
+				"java.io.IOException"
+		});
 
-		ServiceRegistration<Servlet> registerService = bundleContext.registerService(Servlet.class,
-				new MyErrorServlet(), properties);
+		ServiceRegistration<Servlet> errorServletReg = ErrorServlet.register(bundleContext, properties);
+		ServiceRegistration<Servlet> brokenServletReg = BrokenServlet.register(bundleContext);
 
+		final String message1 = String.format("%d|null|%s|null|%s|null", 404, "Not Found", "/error");
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
-				.withResponseAssertion("Response must contain 'Error Servlet, we do have a 404'",
-						resp -> resp.contains("Error Servlet, we do have a 404"))
+				.timeoutInSeconds(7200)
+				.withResponseAssertion("Response must contain '" + message1 + "'",
+						resp -> resp.contains(message1))
 				.doGETandExecuteTest("http://127.0.0.1:8181/error");
 
-		registerService.unregister();
+		final String message2 = String.format("%d|null|%s|null|%s|broken-servlet", 442, "442", "/broken");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(442)
+				.timeoutInSeconds(7200)
+				.withResponseAssertion("Response must contain '" + message2 + "'",
+						resp -> resp.contains(message2))
+				.doGETandExecuteTest("http://127.0.0.1:8181/broken?what=return&code=442");
+
+		final String message3 = String.format("%d|null|%s|null|%s|broken-servlet", 502, "Bad Gateway", "/broken");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(502)
+				.timeoutInSeconds(7200)
+				.withResponseAssertion("Response must contain '" + message3 + "'",
+						resp -> resp.contains(message3))
+				.doGETandExecuteTest("http://127.0.0.1:8181/broken?what=return&code=502");
+
+		String exception = "java.io.IOException";
+		final String message4 = String.format("%d|%s|%s|%s|%s|broken-servlet",
+				500, exception, "java.io.IOException: somethingwronghashappened", exception, "/broken");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(500)
+				.timeoutInSeconds(7200)
+				.withResponseAssertion("Response must contain '" + message4 + "'",
+						resp -> resp.contains(message4))
+				.doGETandExecuteTest("http://127.0.0.1:8181/broken?what=throw&ex=" + exception + "&message=somethingwronghashappened");
+
+		errorServletReg.unregister();
+		brokenServletReg.unregister();
 	}
 
 	@Test
@@ -325,17 +358,6 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 			resp.setContentType("text/plain");
 			resp.getWriter().println("Servlet name: " + name);
-		}
-	}
-
-	private static class MyErrorServlet extends HttpServlet {
-
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-			resp.setContentType("text/plain");
-			resp.getWriter().println("Error Servlet, we do have a 404");
 		}
 	}
 
