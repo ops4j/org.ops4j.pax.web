@@ -17,7 +17,6 @@ package org.ops4j.pax.web.itest.common;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.client.CookieState;
@@ -83,7 +82,6 @@ public abstract class AbstractWarJSFPrimefacesIntegrationTest extends ITestBase 
 	}
 
 	@Test
-	@Ignore
 	public void testJSF() throws Exception {
 		// needed to wait for fully initializing the container
 		Thread.sleep(1000);
