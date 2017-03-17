@@ -117,11 +117,7 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 						resp -> resp.contains("Please enter your name"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/war-jsf-primefaces-sample/");
 
-		String intermediate = response.substring(response.indexOf("name=\"javax.faces.ViewState\""));
-		int indexOf = intermediate.indexOf("value=\"");
-		String substring = intermediate.substring(indexOf + 7);
-		indexOf = substring.indexOf("\"");
-		substring = substring.substring(0, indexOf);
+		String viewState = extractJsfViewState(response);
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.useCookieState(cookieState)
@@ -130,7 +126,7 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 				.doPOST("http://127.0.0.1:8282/war-jsf-primefaces-sample/")
 				.addParameter("mainForm:name", "Dummy-User")
 				.addParameter("mainForm:j_id_b", "Press+me")
-				.addParameter("javax.faces.ViewState", substring)
+				.addParameter("javax.faces.ViewState", viewState)
 				.addParameter("mainForm_SUBMIT", "1")
 				.executeTest();
 	}

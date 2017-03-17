@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
 /**
@@ -102,6 +103,7 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf-primefaces-sample/");
 	}
 
+	@Test
 	public void testJSF() throws Exception {
 		// needed to wait for fully initializing the container
 		Thread.sleep(1000);
@@ -115,19 +117,16 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 						resp -> resp.contains("Please enter your name"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf-primefaces-sample/");
 
-		int indexOf = response.indexOf("id=\"javax.faces.ViewState\" value=");
-		String substring = response.substring(indexOf + 34);
-		indexOf = substring.indexOf("\"");
-		substring = substring.substring(0, indexOf);
+		String viewState = extractJsfViewState(response);
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.useCookieState(cookieState)
 				.withResponseAssertion("Response must contain 'Hello Dummy-User. We hope you enjoy Apache MyFaces'",
 						resp -> resp.contains("Hello Dummy-User. We hope you enjoy Apache MyFaces"))
-				.doPOST("http://127.0.0.1:8181/war-jsf-sample")
+				.doPOST("http://127.0.0.1:8181/war-jsf-primefaces-sample/")
 				.addParameter("mainForm:name", "Dummy-User")
-				.addParameter("mainForm:j_id_a", "Press me")
-				.addParameter("javax.faces.ViewState", substring)
+				.addParameter("mainForm:j_id_b", "Press me")
+				.addParameter("javax.faces.ViewState", viewState)
 				.addParameter("mainForm_SUBMIT", "1")
 				.executeTest();
 	}
