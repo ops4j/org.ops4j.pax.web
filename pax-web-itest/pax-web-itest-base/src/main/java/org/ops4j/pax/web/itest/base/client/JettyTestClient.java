@@ -32,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.net.HttpCookie;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyStore;
@@ -218,6 +217,9 @@ class JettyTestClient implements HttpTestClient {
 		} else {
 			httpClient = new HttpClient();
 		}
+		if (httpState.isPresent()) {
+			httpClient.setCookieStore(httpState.get().getCookieStore());
+		}
 
 		Request request;
 		if (doGET && !doPOST) {
@@ -234,11 +236,6 @@ class JettyTestClient implements HttpTestClient {
 		}
 
 		request.timeout(timeoutInSeconds, TimeUnit.SECONDS);
-
-
-		if (httpState.isPresent()) {
-			httpState.get().getStateValues().forEach(entry -> request.cookie(new HttpCookie(entry.getKey(), entry.getValue())));
-		}
 
 		for (Map.Entry<String, String> headerEntry : httpHeaders.entrySet()) {
 			request.header(headerEntry.getKey(), headerEntry.getValue());
@@ -272,11 +269,6 @@ class JettyTestClient implements HttpTestClient {
 				Result result = future.get();
 				resultWrapper.httpStatus = result.getResponse().getStatus();
 				resultWrapper.headers = extractHeadersFromResponse(result.getResponse());
-				if (httpState.isPresent()) {
-					Map<String, String> cookies = extractCockiesFromResponse(result.getResponse());
-					httpState.get().putAll(cookies);
-				}
-
 
 			} else {
 				LOG.info("calling synchronous");
@@ -285,11 +277,6 @@ class JettyTestClient implements HttpTestClient {
 				resultWrapper.contentType = contentResponse.getMediaType() != null ? contentResponse.getMediaType() : "";
 				resultWrapper.httpStatus = contentResponse.getStatus();
 				resultWrapper.headers = extractHeadersFromResponse(contentResponse);
-				if (httpState.isPresent()) {
-					LOG.info("storing state in cookie");
-					Map<String, String> cookies = extractCockiesFromResponse(contentResponse);
-					httpState.get().putAll(cookies);
-				}
 
 			}
 		} catch (ExecutionException e) {
@@ -326,16 +313,6 @@ class JettyTestClient implements HttpTestClient {
 							LOG.warn("Dupplicate key '{}' found! Using first occurece.", key1);
 							return key1;
 						}));
-	}
-
-	private Map<String, String> extractCockiesFromResponse(final Response response) {
-		return StreamSupport.stream(
-				Spliterators.spliteratorUnknownSize(
-						response.getHeaders().iterator(), Spliterator.ORDERED), false)
-				.filter(httpField -> httpField.getName().equals("Set-Cookie"))
-				.collect(Collectors.toMap(
-						httpField -> httpField.getValue().substring(0, httpField.getValue().indexOf('=')),
-						httpField -> httpField.getValue().substring(httpField.getValue().indexOf('=') + 1, httpField.getValue().length())));
 	}
 
 	private void doAssertion(ResultWrapper result) {
