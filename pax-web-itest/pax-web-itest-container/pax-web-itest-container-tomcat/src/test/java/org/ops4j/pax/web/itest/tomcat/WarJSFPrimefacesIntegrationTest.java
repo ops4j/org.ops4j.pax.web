@@ -104,7 +104,6 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore("This does work in the browser but not in the test")
 	public void testJSF() throws Exception {
 		// needed to wait for fully initializing the container
 		Thread.sleep(1000);
@@ -126,8 +125,8 @@ public class WarJSFPrimefacesIntegrationTest extends ITestBase {
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.useCookieState(cookieState)
-				//.withResponseAssertion("Response must contain 'Hello Dummy-User. We hope you enjoy Apache MyFaces'",
-				//		resp -> resp.contains("Hello Dummy-User. We hope you enjoy Apache MyFaces"))
+				.withResponseAssertion("Response must contain 'Hello Dummy-User. We hope you enjoy Apache MyFaces'",
+						resp -> resp.contains("Hello Dummy-User. We hope you enjoy Apache MyFaces"))
 				.doPOST("http://127.0.0.1:8282/war-jsf-primefaces-sample/")
 				.addParameter("mainForm:name", "Dummy-User")
 				.addParameter("mainForm:j_id_b", "Press+me")
