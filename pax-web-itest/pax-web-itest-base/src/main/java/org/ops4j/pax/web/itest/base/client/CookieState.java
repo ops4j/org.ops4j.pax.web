@@ -15,9 +15,8 @@
  */
 package org.ops4j.pax.web.itest.base.client;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
+import java.net.CookieManager;
+import java.net.CookieStore;
 
 /**
  * Stores Cookie-Data for further Requests.
@@ -26,13 +25,9 @@ import java.util.stream.Stream;
  */
 public class CookieState {
 
-	private Map<String, String> state = new HashMap<>();
+	private CookieStore cookieStore = new CookieManager().getCookieStore();
 
-	Stream<Map.Entry<String, String>> getStateValues() {
-		return state.entrySet().stream();
-	}
-
-	void putAll(Map<String, String> cookies) {
-		this.state.putAll(cookies);
+	CookieStore getCookieStore() {
+		return cookieStore;
 	}
 }
