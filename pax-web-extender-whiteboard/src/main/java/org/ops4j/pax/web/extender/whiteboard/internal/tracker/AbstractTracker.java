@@ -172,8 +172,7 @@ abstract class AbstractTracker<T, W extends WebElement> implements ServiceTracke
 	public void removedService(final ServiceReference<T> serviceReference, final W webElement) {
 		LOG.debug("Service removed {}", serviceReference);
 
-		Boolean sharedHttpContext = Boolean
-				.parseBoolean((String) serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
+		Boolean sharedHttpContext = ServicePropertiesUtils.extractSharedHttpContext(serviceReference);
 
 		final WebApplication webApplication = extenderContext.getExistingWebApplication(serviceReference.getBundle(),
 				webElement.getHttpContextId(), sharedHttpContext);
