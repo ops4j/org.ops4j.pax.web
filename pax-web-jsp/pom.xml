@@ -218,6 +218,7 @@
 							org.apache.taglibs.standard.tag.rt.xml,
 							org.apache.taglibs.standard.tei,
 							org.apache.taglibs.standard.tlv,
+                            org.apache.tomcat,
 							org.apache.tomcat.util.descriptor.tld
 						</Export-Package>
 						<Include-Resource> {maven-dependencies},
