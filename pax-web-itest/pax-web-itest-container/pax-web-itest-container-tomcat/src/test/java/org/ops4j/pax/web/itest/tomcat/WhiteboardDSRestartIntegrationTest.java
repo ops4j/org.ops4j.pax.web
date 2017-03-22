@@ -107,11 +107,14 @@ public class WhiteboardDSRestartIntegrationTest extends ITestBase {
 				.waitForCondition(10000, 500, () -> fail("Whiteboard bundle did not stop in time"));
 
 		// start Whiteboard bundle again
+		initServletListener();
 		whiteBoardBundle.start();
 
 		new WaitCondition2("Check if Whiteboard bundle gets activated",
 				() -> whiteBoardBundle.getState() == Bundle.ACTIVE)
 				.waitForCondition(10000, 500, () -> fail("Whiteboard bundle did not start in time"));
+		// also wait till the servlet is registered
+		waitForServletListener();
 
 		// Test
 		HttpTestClientFactory.createDefaultTestClient()
