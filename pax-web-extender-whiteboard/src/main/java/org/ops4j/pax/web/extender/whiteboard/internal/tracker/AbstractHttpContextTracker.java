@@ -23,6 +23,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.ExtendedHttpServiceRuntime
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.WebApplication;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.HttpContextElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
@@ -119,8 +120,7 @@ abstract class AbstractHttpContextTracker<T> implements ServiceTrackerCustomizer
 		LOGGER.debug("Service available " + serviceReference);
 		T registered = bundleContext.getService(serviceReference);
 
-		Boolean sharedHttpContext = Boolean
-				.parseBoolean((String) serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
+		Boolean sharedHttpContext = ServicePropertiesUtils.extractSharedHttpContext(serviceReference);
 
 		HttpContextElement contextElement = createHttpContextElement(serviceReference, registered);
 		HttpContextMapping mapping = contextElement.getHttpContextMapping();
@@ -148,8 +148,7 @@ abstract class AbstractHttpContextTracker<T> implements ServiceTrackerCustomizer
 		LOGGER.debug("Service removed " + serviceReference);
 
 		if (unpublished.isValid()) {
-			Boolean sharedHttpContext = Boolean
-					.parseBoolean((String) serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
+			Boolean sharedHttpContext = ServicePropertiesUtils.extractSharedHttpContext(serviceReference);
 
 			final WebApplication webApplication = extenderContext.getExistingWebApplication(
 					serviceReference.getBundle(),
@@ -159,16 +158,20 @@ abstract class AbstractHttpContextTracker<T> implements ServiceTrackerCustomizer
 			boolean remove = true;
 
 			if (sharedHttpContext) {
+				LOGGER.debug("Shared Context ... ");
 				Integer sharedWebApplicationCounter = extenderContext.getSharedWebApplicationCounter(webApplication);
+				LOGGER.debug("... counter:"+sharedWebApplicationCounter);
 				if (sharedWebApplicationCounter != null && sharedWebApplicationCounter > 0) {
 					remove = false;
 					Integer reduceSharedWebApplicationCount = extenderContext
 							.reduceSharedWebApplicationCount(webApplication);
+					LOGGER.debug("reduced counter:"+reduceSharedWebApplicationCount);
 					if (reduceSharedWebApplicationCount == 0) {
 						remove = true;
 					}
 				}
 			}
+			LOGGER.debug("Shared Context can be removed: "+remove);
 
 			if (webApplication != null && remove) {
 				webApplication.setHttpContextMapping(null);

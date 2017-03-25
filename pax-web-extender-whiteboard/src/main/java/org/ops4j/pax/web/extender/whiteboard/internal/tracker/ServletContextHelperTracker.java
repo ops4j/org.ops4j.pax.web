@@ -134,7 +134,7 @@ public class ServletContextHelperTracker<T extends ServletContextHelper> impleme
 	 */
 	@Override
 	public ServletContextHelperElement addingService(final ServiceReference<T> serviceReference) {
-		LOGGER.debug("Service available " + serviceReference);
+		LOGGER.debug("ServletContextHelperService available " + serviceReference);
 		T registered = bundleContext.getService(serviceReference);
 
 		String servletCtxtName = ServicePropertiesUtils.getStringProperty(serviceReference,
@@ -172,6 +172,7 @@ public class ServletContextHelperTracker<T extends ServletContextHelper> impleme
 			webApplication.setServletContextHelper(registered, mapping);
 		}
 
+		LOGGER.debug("Registering ServletContextHelper");
 
 		httpServiceRuntime.addWhiteboardElement(servletContextHelperElement);
 		return servletContextHelperElement;
@@ -187,11 +188,10 @@ public class ServletContextHelperTracker<T extends ServletContextHelper> impleme
 	 */
 	@Override
 	public void removedService(final ServiceReference<T> serviceReference, final ServletContextHelperElement unpublished) {
-		LOGGER.debug("Service removed " + serviceReference);
+		LOGGER.debug("ServletContextHelperService removed " + serviceReference);
 
 		if (unpublished.isValid()) {
-			Boolean sharedHttpContext = Boolean
-					.parseBoolean((String) serviceReference.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
+			Boolean sharedHttpContext = ServicePropertiesUtils.extractSharedHttpContext(serviceReference);
 
 			final WebApplication webApplication = extenderContext.getExistingWebApplication(
 					serviceReference.getBundle(),
@@ -201,11 +201,14 @@ public class ServletContextHelperTracker<T extends ServletContextHelper> impleme
 			boolean remove = true;
 
 			if (sharedHttpContext) {
+				LOGGER.debug("Shared Context ... ");
 				Integer sharedWebApplicationCounter = extenderContext.getSharedWebApplicationCounter(webApplication);
+				LOGGER.debug("... counter:"+sharedWebApplicationCounter);
 				if (sharedWebApplicationCounter != null && sharedWebApplicationCounter > 0) {
 					remove = false;
 					Integer reduceSharedWebApplicationCount = extenderContext
 							.reduceSharedWebApplicationCount(webApplication);
+					LOGGER.debug("reduced counter:"+reduceSharedWebApplicationCount);
 					if (reduceSharedWebApplicationCount == 0) {
 						remove = true;
 					}
