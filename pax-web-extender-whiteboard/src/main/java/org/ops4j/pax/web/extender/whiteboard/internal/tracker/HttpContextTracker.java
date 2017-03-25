@@ -73,7 +73,7 @@ public class HttpContextTracker extends AbstractHttpContextTracker<HttpContext> 
 												final HttpContext published) {
 		String httpContextId = ServicePropertiesUtils.getStringProperty(serviceReference, ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
 		String httpContextPath = ServicePropertiesUtils.getStringProperty(serviceReference, ExtenderConstants.PROPERTY_HTTP_CONTEXT_PATH);
-		Boolean httpContextShared = ServicePropertiesUtils.getBooleanProperty(serviceReference, ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED);
+		Boolean httpContextShared = ServicePropertiesUtils.extractSharedHttpContext(serviceReference);
 
 		final DefaultHttpContextMapping mapping = new DefaultHttpContextMapping();
 		mapping.setHttpContextId(httpContextId);
@@ -88,6 +88,9 @@ public class HttpContextTracker extends AbstractHttpContextTracker<HttpContext> 
 		mapping.setHttpContextShared(httpContextShared);
 		mapping.setPath(httpContextPath);
 		mapping.setHttpContext(published);
+
+		LOG.debug("Create new HttpContext with mapping: "+mapping);
+
 		return new HttpContextElement(serviceReference, mapping);
 	}
 

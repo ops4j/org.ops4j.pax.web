@@ -17,6 +17,7 @@ package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -117,6 +118,46 @@ public class WhiteboardDSRestartIntegrationTest extends ITestBase {
 						resp -> resp.contains("Hello from SimpleServlet"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/simple-servlet");
 
+
+		// Test
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello from ServletWithContext'",
+						resp -> resp.contains("Hello from ServletWithContext"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/context/servlet");
+	}
+
+	@Test
+	@Ignore("See PAXWEB-1077")
+	public void testWhiteBoardSampleBundleRestart() throws Exception {
+		// Test
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello from ServletWithContext'",
+						resp -> resp.contains("Hello from ServletWithContext"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/context/servlet");
+
+		// find Whiteboard-bundle
+		final Bundle whiteBoardSampleBundle = Arrays.stream(ctx.getBundles()).filter(bundle -> "org.ops4j.pax.web.samples.whiteboard-ds".equalsIgnoreCase(bundle.getSymbolicName()))
+				.findFirst().orElseThrow(() -> new AssertionError("no Whiteboard Sample bundle found"));
+
+		// stop Whiteboard bundle
+		whiteBoardSampleBundle.stop();
+
+		new WaitCondition2("Check if Whiteboard Sample bundle gets stopped",
+				() -> whiteBoardSampleBundle.getState() == Bundle.RESOLVED)
+				.waitForCondition(10000, 500, () -> fail("Whiteboard Sample bundle did not stop in time"));
+
+		// start Whiteboard bundle again
+		whiteBoardSampleBundle.start();
+
+		new WaitCondition2("Check if Whiteboard Sample bundle gets activated",
+				() -> whiteBoardSampleBundle.getState() == Bundle.ACTIVE)
+				.waitForCondition(10000, 500, () -> fail("Whiteboard Sample bundle did not start in time"));
+
+		// Test
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello from SimpleServlet'",
+						resp -> resp.contains("Hello from SimpleServlet"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/simple-servlet");
 
 		// Test
 		HttpTestClientFactory.createDefaultTestClient()

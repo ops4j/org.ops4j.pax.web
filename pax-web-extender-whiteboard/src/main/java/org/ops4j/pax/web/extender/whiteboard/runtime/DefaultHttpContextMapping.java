@@ -131,14 +131,14 @@ public class DefaultHttpContextMapping implements HttpContextMapping {
 		return this.sharedHttpContext;
 	}
 
-	@Override
-	public String toString() {
-		return this.getClass().getSimpleName() +
-				"{httpContextId=" + httpContextId +
-				",path=" + path +
-				",params=" + parameters +
-				",httpContext=" + httpContext +
-				"}";
-	}
-
+    @Override
+    public String toString() {
+        return "DefaultHttpContextMapping{" +
+                "httpContextId='" + httpContextId + '\'' +
+                ", path='" + path + '\'' +
+                ", parameters=" + parameters +
+                ", httpContext=" + httpContext +
+                ", sharedHttpContext=" + sharedHttpContext +
+                '}';
+    }
 }

@@ -179,11 +179,14 @@ abstract class AbstractTracker<T, W extends WebElement> implements ServiceTracke
 		boolean remove = true;
 
 		if (sharedHttpContext) {
+			LOG.debug("Shared Context ... ");
 			Integer sharedWebApplicationCounter = extenderContext.getSharedWebApplicationCounter(webApplication);
+			LOG.debug("... counter:"+sharedWebApplicationCounter);
 			if (sharedWebApplicationCounter != null && sharedWebApplicationCounter > 0) {
 				remove = false;
 				Integer reduceSharedWebApplicationCount = extenderContext
 						.reduceSharedWebApplicationCount(webApplication);
+				LOG.debug("reduced counter:"+reduceSharedWebApplicationCount);
 				if (reduceSharedWebApplicationCount == 0) {
 					remove = true;
 				}
@@ -195,6 +198,7 @@ abstract class AbstractTracker<T, W extends WebElement> implements ServiceTracke
 				// other filters etc. should be stopped now too.
 				remove = true;
 			}
+			LOG.debug("service can be removed: "+remove);
 			bundleContext.ungetService(serviceReference);
 		}
 
