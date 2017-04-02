@@ -245,6 +245,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 	private void unregisterHttpContext() {
 		if (httpContext != null) {
 			unregisterWebElements();
+			httpServiceRuntime.stop();
 			httpContext = null;
 		}
 	}
@@ -317,7 +318,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 				} else {
 					//default
 					httpContext = webContainer.createDefaultHttpContext();
-								}
+                }
 			}
 		} else if(!(httpContext instanceof WebContainerContext)){
 			// wrap registered HttpContext in pax-web specific context
