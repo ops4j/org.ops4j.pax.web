@@ -62,7 +62,7 @@ class JettyServerHandlerCollection extends HandlerCollection {
 			return;
 		}
 
-		final ContextModel matched = serverModel.matchPathToContext(target);
+		final ContextModel matched = serverModel.matchPathToContext(request.getServerName(),target);
 		if (matched != null) {
 			// check for nulls and start complaining
 			NullArgumentException.validateNotNull(matched.getHttpContext(),

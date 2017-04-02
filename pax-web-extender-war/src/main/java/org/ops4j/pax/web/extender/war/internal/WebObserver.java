@@ -15,6 +15,8 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import static org.ops4j.pax.web.extender.war.internal.parser.WebAppParser.canSeeClass;
 import static org.ops4j.pax.web.extender.war.internal.util.ManifestUtil.getHeader;
 import static org.ops4j.pax.web.service.spi.WebEvent.DEPLOYING;
@@ -82,9 +84,15 @@ public class WebObserver implements WarManager {
 
 	/**
 	 * The queue of published WebApp objects to a context.
+         * The map was wrapped into map for virtual hosts.
 	 */
-	private final Map<String, List<WebApp>> contexts = new HashMap<>();
-
+	private final Map<String,Map<String, List<WebApp>>> contexts = new HashMap<>();
+        
+        /**
+         * This virtual host is used if there is no Web-VirtualHosts in manifest.
+         */
+        private final String DEFAULT_VIRTUAL_HOST="default";
+        
 	public WebObserver(WebAppParser parser, WebAppPublisher publisher,
 					   WebEventDispatcher eventDispatcher,
 					   DefaultWebAppDependencyManager dependencyManager,
@@ -200,19 +208,21 @@ public class WebObserver implements WarManager {
 	}
 
 	public void deploy(WebApp webApp) {
-		List<WebApp> queue = getQueue(webApp);
 		Collection<Long> duplicateIds = null;
-		synchronized (queue) {
-			if (queue.isEmpty()) {
-				queue.add(webApp);
-			} else {
-				queue.add(webApp);
-				duplicateIds = new LinkedList<>();
-				for (WebApp duplicateWebApp : queue) {
-					duplicateIds.add(duplicateWebApp.getBundle().getBundleId());
-				}
-			}
-		}
+                for (Map.Entry<String,List<WebApp>> entry:getQueues(webApp).entrySet()){
+                    List<WebApp> queue = entry.getValue();
+                    synchronized (queue) {
+                            if (queue.isEmpty()) {
+                                    queue.add(webApp);
+                            } else {
+                                    queue.add(webApp);
+                                    duplicateIds = new LinkedList<>();
+                                    for (WebApp duplicateWebApp : queue) {
+                                            duplicateIds.add(duplicateWebApp.getBundle().getBundleId());
+                                    }
+                            }
+                    }
+                }
 		if (duplicateIds == null) {
 			publisher.publish(webApp);
 		} else {
@@ -226,25 +236,27 @@ public class WebObserver implements WarManager {
 		boolean unpublish = false;
 		boolean undeploy = false;
 		WebApp next = null;
-		List<WebApp> queue = getQueue(webApp);
-		synchronized (queue) {
-			if (!queue.isEmpty() && queue.get(0) == webApp) {
-				unpublish = true;
-				undeploy = true;
-				queue.remove(0);
-				LOG.debug("Check for a waiting webapp.");
-				if (!queue.isEmpty()) {
-					LOG.debug("Found another bundle waiting for the context");
-					next = queue.get(0);
-				} else {
-					synchronized (contexts) {
-						contexts.remove(webApp.getContextName());
-					}
-				}
-			} else if (queue.remove(webApp)) {
-				undeploy = true;
-			}
-		}
+                for (Map.Entry<String,List<WebApp>> entry:getQueues(webApp).entrySet()){
+                    List<WebApp> queue = entry.getValue();
+                    synchronized (queue) {
+                            if (!queue.isEmpty() && queue.get(0) == webApp) {
+                                    unpublish = true;
+                                    undeploy = true;
+                                    queue.remove(0);
+                                    LOG.debug("Check for a waiting webapp.");
+                                    if (!queue.isEmpty()) {
+                                            LOG.debug("Found another bundle waiting for the context");
+                                            next = queue.get(0);
+                                    } else {
+                                            synchronized (contexts) {
+                                                    contexts.get(entry.getKey()).remove(webApp.getContextName());
+                                            }
+                                    }
+                            } else if (queue.remove(webApp)) {
+                                    undeploy = true;
+                            }
+                    }
+                }
 		if (unpublish) {
 			webApp.setDeploymentState(UNDEPLOYED);
 			eventDispatcher.webEvent(webApp, UNDEPLOYING);
@@ -262,15 +274,29 @@ public class WebObserver implements WarManager {
 		}
 	}
 
-	private List<WebApp> getQueue(WebApp webApp) {
-		synchronized (contexts) {
-			List<WebApp> queue = contexts.get(webApp.getContextName());
-			if (queue == null) {
-				queue = new LinkedList<>();
-				contexts.put(webApp.getContextName(), queue);
-			}
-			return queue;
-		}
+	private Map<String,List<WebApp>> getQueues(WebApp webApp) {
+                Map<String,List<WebApp>> queues=new HashMap<>();
+                synchronized (contexts) {
+                    List<String>virtualHosts=webApp.getVirtualHostList();
+                    if (virtualHosts==null ||virtualHosts.isEmpty()){
+                        virtualHosts=new ArrayList<>();
+                        virtualHosts.add(DEFAULT_VIRTUAL_HOST);
+                    }
+                    for (String virtualHost:virtualHosts){
+                        Map<String,List<WebApp>> virtualHostContexts=contexts.get(virtualHost);
+                        if (virtualHostContexts==null){
+                            virtualHostContexts=new HashMap<>();
+                            contexts.put(virtualHost, virtualHostContexts);
+                        }
+                        List<WebApp> queue = virtualHostContexts.get(webApp.getContextName());
+                        if (queue == null) {
+                            queue = new LinkedList<>();
+                            virtualHostContexts.put(webApp.getContextName(), queue);
+                        }
+                        queues.put(virtualHost, queue);
+                    }
+                    return queues;
+                }
 	}
 
 	public int start(long bundleId, String contextName) {

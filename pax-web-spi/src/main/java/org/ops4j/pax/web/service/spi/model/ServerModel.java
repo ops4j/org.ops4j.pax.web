@@ -16,15 +16,13 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
@@ -53,57 +51,124 @@ public class ServerModel {
 	/**
 	 * Map between aliases used for registering a servlet and the registered
 	 * servlet model. Used to block registration of an alias more then one time.
+         * The map is wrapped into map for virtual hosts.
 	 */
-	private final Map<String, ServletModel> aliasMapping;
+	private final Map<String,Map<String, ServletModel>> aliasMapping;
 	/**
 	 * Set of all registered servlets. Used to block registration of the same
-	 * servlet more times.
+	 * servlet more times.The map is wrapped into map for virtual hosts.
 	 */
-	private final Set<Servlet> servlets;
+	private final Map<String,Set<Servlet>> servlets;
 	/**
 	 * Mapping between full registration url patterns and servlet model. Full
 	 * url pattern mean that it has the context name prepended (if context name
 	 * is set) to the actual url pattern. Used to globally find (against all
 	 * registered patterns) the right servlet context for the pattern.
+         * The map is wrapped into map for virtual hosts.
 	 */
-	private final Map<String, UrlPattern> servletUrlPatterns;
+	private final Map<String,Map<String, UrlPattern>> servletUrlPatterns;
+
 	/**
 	 * Mapping between full registration url patterns and filter model. Full url
 	 * pattern mean that it has the context name prepended (if context name is
 	 * set) to the actual url pattern. Used to globally find (against all
 	 * registered patterns) the right filter context for the pattern.
+     * The map is wrapped into map for virtual hosts.
 	 */
-	private final ConcurrentMap<String, Set<UrlPattern>> filterUrlPatterns;
+	private final ConcurrentMap<String,ConcurrentMap<String, Set<UrlPattern>>> filterUrlPatterns;
+
 	/**
 	 * Map between http contexts and the bundle that registred a web element
 	 * using that http context. Used to block more bundles registering web
+     * The map is wrapped into map for virtual hosts.
 	 * elements using the same http context.
 	 */
-	private final ConcurrentMap<WebContainerContext, Bundle> httpContexts;
+
+	private final ConcurrentMap<String,ConcurrentMap<WebContainerContext, Bundle>> httpContexts;
 	/**
 	 * Servlet lock. Used to sychonchornize on servlet
 	 * registration/unregistrationhat that works agains 3 maps (m_servlets,
 	 * m_aliasMaping, m_servletToUrlPattern).
 	 */
+
 	private final ReentrantReadWriteLock servletLock;
 
 	private final ReentrantReadWriteLock filterLock;
 
 	private final ConcurrentMap<ServletContainerInitializer, ContainerInitializerModel> containerInitializers;
 
+    /**
+     * This virtual host is used if there is no Web-VirtualHosts in manifest.
+     */
+    private final String DEFAULT_VIRTUAL_HOST="default";
+
+    private final Map<String,List<Bundle>> bundlesByVirtualHost;
+
 	/**
 	 * Constructor.
 	 */
 	public ServerModel() {
 		aliasMapping = new HashMap<>();
-		servlets = new HashSet<>();
+		servlets = new HashMap<>();
 		servletUrlPatterns = new HashMap<>();
 		filterUrlPatterns = new ConcurrentHashMap<>();
 		httpContexts = new ConcurrentHashMap<>();
 		containerInitializers = new ConcurrentHashMap<>();
 		servletLock = new ReentrantReadWriteLock(true);
 		filterLock = new ReentrantReadWriteLock(true);
+        bundlesByVirtualHost=new HashMap<>();
 	}
+
+    private List<String> resolveVirtualHosts(Model model){
+        List<String> virtualHosts=model.getContextModel().getVirtualHosts();
+        if (virtualHosts==null || virtualHosts.isEmpty()){
+            virtualHosts=new ArrayList<>();
+            virtualHosts.add(DEFAULT_VIRTUAL_HOST);
+        }
+        return virtualHosts;
+    }
+
+    private String resolveVirtualHost(String hostName){
+        if (bundlesByVirtualHost.containsKey(hostName)){
+            return hostName;
+        }else{
+            return DEFAULT_VIRTUAL_HOST;
+        }
+    }
+
+    private List<String> resolveVirtualHosts(Bundle bundle){
+        List<String> virtualHosts=new ArrayList<>();
+        for (Map.Entry<String,List<Bundle>> entry:bundlesByVirtualHost.entrySet()){
+            if (entry.getValue().contains(bundle)){
+                virtualHosts.add(entry.getKey());
+            }
+        }
+        if (virtualHosts.isEmpty()){
+            virtualHosts.add(DEFAULT_VIRTUAL_HOST);
+        }
+        return virtualHosts;
+    }
+
+    private void associateBundle(List<String> virtualHosts,Bundle bundle){
+        for (String virtualHost:virtualHosts){
+            List<Bundle> bundles=bundlesByVirtualHost.get(virtualHost);
+            if (bundles==null){
+                bundles=new ArrayList<>();
+                bundlesByVirtualHost.put(virtualHost, bundles);
+            }
+            bundles.add(bundle);
+        }
+    }
+
+    private void deassociateBundle(List<String> virtualHosts,Bundle bundle){
+        for (String virtualHost:virtualHosts){
+            List<Bundle> bundles=bundlesByVirtualHost.get(virtualHost);
+            bundles.remove(bundle);
+            if (bundles.isEmpty()){
+                bundlesByVirtualHost.remove(virtualHost);
+            }
+        }
+    }
 
 	/**
 	 * Registers a servlet model.
@@ -115,23 +180,35 @@ public class ServerModel {
 	public void addServletModel(final ServletModel model) throws NamespaceException, ServletException {
 		servletLock.writeLock().lock();
 		try {
-			if (model.getServlet() != null && servlets.contains(model.getServlet())) {
-				throw new ServletException("servlet already registered with a different alias");
-			}
-			if (model.getAlias() != null) {
-				final String alias = getFullPath(model.getContextModel(), model.getAlias());
-				if (aliasMapping.containsKey(alias)) {
-					throw new NamespaceException("alias: '" + alias + "' is already in use in this or another context");
-				}
-				aliasMapping.put(alias, model);
-			}
-			if (model.getServlet() != null) {
-				servlets.add(model.getServlet());
-			}
-			for (String urlPattern : model.getUrlPatterns()) {
-				servletUrlPatterns.put(getFullPath(model.getContextModel(), urlPattern),
-						new UrlPattern(getFullPath(model.getContextModel(), urlPattern), model));
-			}
+            associateBundle(model.getContextModel().getVirtualHosts(), model.getContextModel().getBundle());
+            for (String virtualHost:resolveVirtualHosts(model)){
+                if (servlets.get(virtualHost)==null){
+                    servlets.put(virtualHost, new HashSet<>());
+                }
+                if (model.getServlet() != null && servlets.get(virtualHost).contains(model.getServlet())) {
+                        throw new ServletException("servlet already registered with a different alias");
+                }
+                if (model.getAlias() != null) {
+                        final String alias = getFullPath(model.getContextModel(), model.getAlias());
+                        if (aliasMapping.get(virtualHost)==null){
+                            aliasMapping.put(virtualHost, new HashMap<>());
+                        }
+                        if (aliasMapping.get(virtualHost).containsKey(alias)) {
+                                throw new NamespaceException("alias: '" + alias + "' is already in use in this or another context");
+                        }
+                        aliasMapping.get(virtualHost).put(alias, model);
+                }
+                if (model.getServlet() != null) {
+                        servlets.get(virtualHost).add(model.getServlet());
+                }
+                for (String urlPattern : model.getUrlPatterns()) {
+                        if (servletUrlPatterns.get(virtualHost)==null){
+                            servletUrlPatterns.put(virtualHost, new HashMap<>());
+                        }
+                        servletUrlPatterns.get(virtualHost).put(getFullPath(model.getContextModel(), urlPattern),
+                                        new UrlPattern(getFullPath(model.getContextModel(), urlPattern), model));
+                }
+            }
 		} finally {
 			servletLock.writeLock().unlock();
 		}
@@ -145,17 +222,20 @@ public class ServerModel {
 	public void removeServletModel(final ServletModel model) {
 		servletLock.writeLock().lock();
 		try {
-			if (model.getAlias() != null) {
-				aliasMapping.remove(getFullPath(model.getContextModel(), model.getAlias()));
-			}
-			if (model.getServlet() != null) {
-				servlets.remove(model.getServlet());
-			}
-			if (model.getUrlPatterns() != null) {
-				for (String urlPattern : model.getUrlPatterns()) {
-					servletUrlPatterns.remove(getFullPath(model.getContextModel(), urlPattern));
-				}
-			}
+            deassociateBundle(model.getContextModel().getVirtualHosts(), model.getContextModel().getBundle());
+            for (String virtualHost:resolveVirtualHosts(model)){
+                if (model.getAlias() != null) {
+                        aliasMapping.get(virtualHost).remove(getFullPath(model.getContextModel(), model.getAlias()));
+                }
+                if (model.getServlet() != null) {
+                        servlets.get(virtualHost).remove(model.getServlet());
+                }
+                if (model.getUrlPatterns() != null) {
+                        for (String urlPattern : model.getUrlPatterns()) {
+                                servletUrlPatterns.get(virtualHost).remove(getFullPath(model.getContextModel(), urlPattern));
+                        }
+                }
+            }
 		} finally {
 			servletLock.writeLock().unlock();
 		}
@@ -170,26 +250,32 @@ public class ServerModel {
 		if (model.getUrlPatterns() != null) {
 			try {
 				filterLock.writeLock().lock();
-				for (String urlPattern : model.getUrlPatterns()) {
-					final UrlPattern newUrlPattern = new UrlPattern(getFullPath(model.getContextModel(), urlPattern),
-							model);
-					String fullPath = getFullPath(model.getContextModel(), urlPattern);
-					Set<UrlPattern> urlSet = filterUrlPatterns.get(fullPath);
-					if (urlSet == null) {
-						//initialize first
-						urlSet = new HashSet<>();
-					}
-					urlSet.add(newUrlPattern);
-					filterUrlPatterns.put(fullPath, urlSet);
-//					final UrlPattern existingPattern = filterUrlPatterns.putIfAbsent(
-//							getFullPath(model.getContextModel(), urlPattern), newUrlPattern);
-//					if (existingPattern != null) {
-//						// this should never happen but is a good assertion
-//						LOG.error("Internal error (please report): Cannot associate url mapping "
-//								+ getFullPath(model.getContextModel(), urlPattern) + " to " + newUrlPattern
-//								+ " because is already associated to " + existingPattern);
-//					}
-				}
+				associateBundle(model.getContextModel().getVirtualHosts(), model.getContextModel().getBundle());
+				for (String virtualHost:resolveVirtualHosts(model)){
+					for (String urlPattern : model.getUrlPatterns()) {
+							final UrlPattern newUrlPattern = new UrlPattern(getFullPath(model.getContextModel(), urlPattern),
+											model);
+							String fullPath = getFullPath(model.getContextModel(), urlPattern);
+							if (filterUrlPatterns.get(virtualHost)==null){
+								filterUrlPatterns.put(virtualHost, new ConcurrentHashMap<>());
+							}
+							Set<UrlPattern> urlSet = filterUrlPatterns.get(virtualHost).get(fullPath);
+							if (urlSet == null) {
+									//initialize first
+									urlSet = new HashSet<>();
+							}
+							urlSet.add(newUrlPattern);
+							filterUrlPatterns.get(virtualHost).put(fullPath, urlSet);
+    //					final UrlPattern existingPattern = filterUrlPatterns.putIfAbsent(
+    //							getFullPath(model.getContextModel(), urlPattern), newUrlPattern);
+    //					if (existingPattern != null) {
+    //						// this should never happen but is a good assertion
+    //						LOG.error("Internal error (please report): Cannot associate url mapping "
+    //								+ getFullPath(model.getContextModel(), urlPattern) + " to " + newUrlPattern
+    //								+ " because is already associated to " + existingPattern);
+    //					}
+                                    }
+                                }
 			} finally {
 				filterLock.writeLock().unlock();
 			}
@@ -204,21 +290,24 @@ public class ServerModel {
 	public void removeFilterModel(final FilterModel model) {
 		if (model.getUrlPatterns() != null) {
 			try {
+				deassociateBundle(model.getContextModel().getVirtualHosts(), model.getContextModel().getBundle());
 				filterLock.writeLock().lock();
-				for (String urlPattern : model.getUrlPatterns()) {
-					String fullPath = getFullPath(model.getContextModel(), urlPattern);
-					Set<UrlPattern> urlSet = filterUrlPatterns.get(fullPath);
-					UrlPattern toDelete = null;
-					for (UrlPattern pattern : urlSet) {
-						FilterModel filterModel = (FilterModel) pattern.getModel();
-						Class<?> filter = filterModel.getFilterClass();
-						Class<?> matchFilter = model.getFilterClass();
-						if (filter != null && filter.equals(matchFilter)) {
-							toDelete = pattern;
-							break;
-						}
+				for (String virtualHost:resolveVirtualHosts(model)){
+					for (String urlPattern : model.getUrlPatterns()) {
+							String fullPath = getFullPath(model.getContextModel(), urlPattern);
+							Set<UrlPattern> urlSet = filterUrlPatterns.get(virtualHost).get(fullPath);
+							UrlPattern toDelete = null;
+							for (UrlPattern pattern : urlSet) {
+									FilterModel filterModel = (FilterModel) pattern.getModel();
+									Class<?> filter = filterModel.getFilterClass();
+									Class<?> matchFilter = model.getFilterClass();
+									if (filter != null && filter.equals(matchFilter)) {
+											toDelete = pattern;
+											break;
+									}
+							}
+							urlSet.remove(toDelete);
 					}
-					urlSet.remove(toDelete);
 				}
 			} finally {
 				filterLock.writeLock().unlock();
@@ -259,21 +348,32 @@ public class ServerModel {
 	 */
 	public void associateHttpContext(final WebContainerContext httpContext, final Bundle bundle,
 									 final boolean allowReAsssociation) {
-		final Bundle currentBundle = httpContexts.putIfAbsent(httpContext, bundle);
-		if ((!allowReAsssociation) && currentBundle != null && currentBundle != bundle) {
-			throw new IllegalStateException("Http context " + httpContext + " is already associated to bundle "
-					+ currentBundle);
+		List<String> virtualHosts=resolveVirtualHosts(bundle);
+		for (String virtualHost:virtualHosts){
+			ConcurrentMap<WebContainerContext, Bundle> virtualHostHttpContexts=httpContexts.get(virtualHost);
+			if (virtualHostHttpContexts==null){
+				virtualHostHttpContexts=new ConcurrentHashMap<>();
+				httpContexts.put(virtualHost, virtualHostHttpContexts);
+			}
+			final Bundle currentBundle = virtualHostHttpContexts.putIfAbsent(httpContext, bundle);
+			if ((!allowReAsssociation) && currentBundle != null && currentBundle != bundle) {
+					throw new IllegalStateException("Http context " + httpContext + " is already associated to bundle "
+									+ currentBundle);
+			}
 		}
 	}
 
 	public HttpContext findDefaultHttpContextForBundle(Bundle bundle) {
 		HttpContext httpContext = null;
-		for (Entry<WebContainerContext, Bundle> entry : httpContexts.entrySet()) {
-			if (entry.getValue() == bundle) {
-				httpContext = entry.getKey();
-				break;
-			}
-		}
+        List<String> virtualHosts=resolveVirtualHosts(bundle);
+        for (String virtualHost:virtualHosts){
+            for (Entry<WebContainerContext, Bundle> entry : httpContexts.get(virtualHost).entrySet()) {
+                if (entry.getValue() == bundle) {
+                    httpContext = entry.getKey();
+                    break;
+                }
+            }
+        }
 		return httpContext;
 	}
 
@@ -288,27 +388,40 @@ public class ServerModel {
 	 * @param bundle bundle to be deassociated from http contexts
 	 */
 	public void deassociateHttpContexts(final Bundle bundle) {
-		httpContexts.entrySet().stream()
-				.filter(entry -> entry.getValue() == bundle)
-				.forEach(entry -> httpContexts.remove(entry.getKey()));
+        List<String> virtualHosts=resolveVirtualHosts(bundle);
+        virtualHosts.stream()
+            .map(virtualHost -> httpContexts.get(virtualHost))
+            .map(entry -> entry.entrySet())
+            .flatMap(setEntry -> setEntry.stream())
+            .filter(entry -> entry.getValue() == bundle)
+            .forEach(entry -> httpContexts.remove(entry.getKey()));
 	}
 
 	public ContextModel matchPathToContext(final String path) {
-		final boolean debug = LOG.isDebugEnabled();
+        return matchPathToContext("", path);
+    }
+
+	public ContextModel matchPathToContext(final String hostName,final String path) {
+                final boolean debug = LOG.isDebugEnabled();
 		if (debug) {
 			LOG.debug("Matching [" + path + "]...");
 		}
+        String virtualHost = resolveVirtualHost(hostName);
 		UrlPattern urlPattern = null;
 		// first match servlets
 		servletLock.readLock().lock();
 		try {
-			urlPattern = matchPathToContext(servletUrlPatterns, path);
+		    Optional<Map<String, UrlPattern>> optionalServletUrlPatterns = Optional.ofNullable(servletUrlPatterns.get(virtualHost));
+		    if(optionalServletUrlPatterns.isPresent())
+			    urlPattern = matchPathToContext(optionalServletUrlPatterns.get(), path);
 		} finally {
 			servletLock.readLock().unlock();
 		}
 		// then if there is no matched servlet look for filters
 		if (urlPattern == null) {
-			urlPattern = matchFilterPathToContext(filterUrlPatterns, path);
+		    Optional<ConcurrentMap<String, Set<UrlPattern>>> optionalFilterUrlPattern = Optional.ofNullable(filterUrlPatterns.get(virtualHost));
+		    if(optionalFilterUrlPattern.isPresent())
+			    urlPattern = matchFilterPathToContext(filterUrlPatterns.get(virtualHost), path);
 		}
 		ContextModel matched = null;
 		if (urlPattern != null) {
