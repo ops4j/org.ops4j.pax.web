@@ -19,6 +19,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -79,15 +80,18 @@ public class JspFilterIntegrationTest extends KarafBaseTest {
 	public void testExplicitTagLib() throws Exception {
 	    createTestClientForKaraf()
 				.withResponseAssertion("Response must contain 'works'",
-						resp -> resp.contains("works"))
+						resp -> resp.contains("core taglib works\n" +
+								"<body>"))
 				.doGETandExecuteTest("http://localhost:8181/jsp-filter/test-taglib.jsp");
 	}
 	
 	@Test
+	@Ignore("PAXWEB-1070: Tags aren't interpreted correctly")
 	public void testAutoIncludedTagLib() throws Exception {
 	    createTestClientForKaraf()
-				.withResponseAssertion("Response must contain 'works'",
-						resp -> resp.contains("works"))
+				.withResponseAssertion("Response must contain 'core taglib works'",
+						resp -> resp.contains("core taglib works\n" +
+								"<body>"))
 				.doGETandExecuteTest("http://localhost:8181/jsp-filter/test-taglib-inc.jsp");
 	}
 }
