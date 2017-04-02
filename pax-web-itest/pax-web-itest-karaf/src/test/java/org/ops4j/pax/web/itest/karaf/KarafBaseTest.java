@@ -82,7 +82,7 @@ public class KarafBaseTest extends AbstractTestBase {
 		return new Option[]{
 				karafDistributionConfiguration().frameworkUrl(mvnKarafDist())
 						.unpackDirectory(new File("target/paxexam/unpack/"))
-						.useDeployFolder(false)/*.runEmbedded(true), //only for debugging*/,
+						.useDeployFolder(false).runEmbedded(false)/*.runEmbedded(true), //only for debugging*/,
 
 //				 KarafDistributionOption.debugConfiguration("5005", true),
 				configureConsole().ignoreLocalConsole(),
