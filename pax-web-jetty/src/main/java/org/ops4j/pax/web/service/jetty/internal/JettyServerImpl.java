@@ -274,7 +274,12 @@ class JettyServerImpl implements JettyServer {
 		return new LifeCycle() {
 			@Override
 			public void start() throws Exception {
-				// Fixfor PAXWEB-725 
+				// PAXWEB-1084 - start qtp before starting first context
+				if (server.getThreadPool() instanceof org.eclipse.jetty.util.component.LifeCycle) {
+					((org.eclipse.jetty.util.component.LifeCycle) server.getThreadPool()).start();
+				}
+
+				// Fixfor PAXWEB-725
 				ClassLoader classLoader = context.getClassLoader();
 				List<Bundle> bundles = ((ResourceDelegatingBundleClassLoader) classLoader).getBundles();
 				BundleClassLoader parentClassLoader
