@@ -75,6 +75,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>helloworld-servlet3</artifactId>
+			<type>war</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>whiteboard</artifactId>
 			<scope>test</scope>
 		</dependency>
