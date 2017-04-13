@@ -203,6 +203,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 			empty = webElements.isEmpty();
 			unregisterWebElement(webElement);
 		} finally {
+			httpServiceRuntime.removeWhiteboardElement(webElement);
 			httpServiceLock.readLock().unlock();
 		}
 		return empty;
