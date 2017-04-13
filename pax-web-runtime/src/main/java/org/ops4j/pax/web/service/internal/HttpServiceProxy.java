@@ -94,13 +94,14 @@ public class HttpServiceProxy implements StoppableHttpService {
 	public synchronized void stop() {
 		LOG.debug("Stopping http service: [" + this + " -> " + delegate + "]");
 		final StoppableHttpService stopping = delegate;
+		/*
 		if (stopping instanceof HttpServiceStarted) {
 			delegate = new HttpServiceStopped((HttpServiceStarted) stopping);
 		} else {
 			delegate = new HttpServiceStopped();
 		}
+		*/
 		stopping.stop();
-
 	}
 
 	/**

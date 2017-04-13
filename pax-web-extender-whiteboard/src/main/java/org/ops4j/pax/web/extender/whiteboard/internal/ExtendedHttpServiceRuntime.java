@@ -154,6 +154,7 @@ public class ExtendedHttpServiceRuntime implements HttpServiceRuntime, Replaceab
     }
     
     public void stop() {
+        unregisterService();
         httpServiceTracker.stop();
     }
 
