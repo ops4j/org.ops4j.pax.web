@@ -296,7 +296,7 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 		properties.put("osgi.http.whiteboard.resource.pattern", "/files");
 		properties.put("osgi.http.whiteboard.resource.prefix", "/images");
 
-		ServiceRegistration<Object> registerService = bundleContext.registerService(Object.class, new MyResourceService(), properties);
+		ServiceRegistration<MyResourceService> registerService = bundleContext.registerService(MyResourceService.class, new MyResourceService(), properties);
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseHeaderAssertion("Header 'Content-Type' must be 'image/png'",

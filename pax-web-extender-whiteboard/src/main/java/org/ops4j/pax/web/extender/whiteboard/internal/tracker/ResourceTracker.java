@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Tracks {@link EventListener}s.
+ * Tracks resource (service) registrations.
  *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
@@ -58,7 +58,7 @@ public class ResourceTracker extends AbstractTracker<Object, ResourceWebElement>
 	@SuppressWarnings("unchecked")
 	public static ServiceTracker<Object, ResourceWebElement> createTracker(final ExtenderContext extenderContext,
 			final BundleContext bundleContext) {
-		return new ResourceTracker(extenderContext, bundleContext).create(new Class[] { Object.class });
+		return new ResourceTracker(extenderContext, bundleContext).create();
 	}
 
 	/**
