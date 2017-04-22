@@ -100,4 +100,24 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 		brokenServletReg.unregister();
 	}
 
+	@Test
+	public void testResources() throws Exception {
+
+		Dictionary<String, String> properties = new Hashtable<>();
+		properties.put("osgi.http.whiteboard.resource.pattern", "/files");
+		properties.put("osgi.http.whiteboard.resource.prefix", "/images");
+
+		ServiceRegistration<MyResourceService> registerService = bundleContext.registerService(MyResourceService.class, new MyResourceService(), properties);
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseHeaderAssertion("Header 'Content-Type' must be 'image/png'",
+						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
+								&& header.getValue().equals("image/png")))
+				.doGETandExecuteTest("http://127.0.0.1:8282/files/ops4j.png");
+
+		registerService.unregister();
+	}
+
+
+	private static class MyResourceService {}
 }

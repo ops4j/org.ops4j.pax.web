@@ -44,6 +44,12 @@ abstract class AbstractTracker<T, W extends WebElement> implements ServiceTracke
 	 * Logger.
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractTracker.class);
+	
+	/**
+	 * Track any service.
+	 */
+	private static final String ANY_SERVICE = "(" + Constants.OBJECTCLASS + "=*)";
+	
 	/**
 	 * Extender context.
 	 */
@@ -70,6 +76,14 @@ abstract class AbstractTracker<T, W extends WebElement> implements ServiceTracke
 	protected final ServiceTracker<T, W> create(final Class<? extends T> trackedClass) {
 		return new ServiceTracker<>(bundleContext, createFilter(bundleContext, trackedClass), this);
 	}
+	
+	/**
+	 * Creates a new tracker that tracks the defined service types.
+	 *
+	 * @param trackedClass
+	 *            the classes defining the service types to track; an empty array tracks any service
+	 * @return a configured osgi service tracker
+	 */
 
 	@SafeVarargs
 	protected final ServiceTracker<T, W> create(final Class<? extends T>... trackedClass) {
@@ -97,18 +111,25 @@ abstract class AbstractTracker<T, W extends WebElement> implements ServiceTracke
 	private static Filter createFilter(final BundleContext bundleContext, final Class<?>... trackedClass) {
 		if (trackedClass.length == 1) {
 			return createFilter(bundleContext, trackedClass[0]);
+		}
+
+		String filter;
+		if (trackedClass.length == 0) {
+			filter = ANY_SERVICE;
 		} else {
-			StringBuilder filter = new StringBuilder();
-			filter.append("(|");
+			StringBuilder filterBuilder = new StringBuilder();
+			filterBuilder.append("(|");
 			for (Class<?> clazz : trackedClass) {
-				filter.append("(").append(Constants.OBJECTCLASS).append("=").append(clazz.getName()).append(")");
+				filterBuilder.append("(").append(Constants.OBJECTCLASS).append("=").append(clazz.getName()).append(")");
 			}
-			filter.append(")");
-			try {
-				return bundleContext.createFilter(filter.toString());
-			} catch (InvalidSyntaxException e) {
-				throw new IllegalArgumentException("Unexpected InvalidSyntaxException: " + e.getMessage());
-			}
+			filterBuilder.append(")");
+			filter = filterBuilder.toString();
+		}
+
+		try {
+			return bundleContext.createFilter(filter);
+		} catch (InvalidSyntaxException e) {
+			throw new IllegalArgumentException("Unexpected InvalidSyntaxException: " + e.getMessage());
 		}
 	}
 
