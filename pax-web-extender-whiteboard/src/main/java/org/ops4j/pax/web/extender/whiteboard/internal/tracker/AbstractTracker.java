@@ -20,13 +20,13 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 import javax.servlet.Servlet;
 
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.WebApplication;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.WebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
 import org.osgi.framework.*;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -161,15 +161,9 @@ abstract class AbstractTracker<T, W extends WebElement> implements ServiceTracke
 			String httpContextId = webElement.getHttpContextId();
 			final WebApplication webApplication = extenderContext.getWebApplication(serviceReference.getBundle(),
 					httpContextId, sharedHttpContext);
-			if ((httpContextId == null && !webApplication
-					.hasHttpContextMapping()) /*
-												 * || (httpContextId != null &&
-												 * httpContextId.
-												 * equalsIgnoreCase(
-												 * HttpWhiteboardConstants.
-												 * HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME
-												 * ))
-												 */) {
+            if (httpContextId == null && !webApplication.hasHttpContextMapping()
+                    // PAXWEB-1090 create DefaultHttpContext when contextId available without mapping
+                    || HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME.equalsIgnoreCase(httpContextId)) {
 				webApplication.setHttpContextMapping(new DefaultHttpContextMapping());
 			}
 			webApplication.addWebElement(webElement);
