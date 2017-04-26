@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.tomcat;
 
-import static org.ops4j.pax.exam.CoreOptions.*;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -25,12 +23,17 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.repository;
+import static org.ops4j.pax.exam.OptionUtils.combine;
+
 @RunWith(PaxExam.class)
+@Ignore (value = "Tomcat and Aries-JAXRS-RI conflict on javax.xml.stream due to org.apache.geronimo.specs.geronimo-stax-api_1.2_spec")
 public class WhiteboardR7JaxRsIntegrationTest extends ITestBase {
 
     @Configuration
     public static Option[] configure() {
-        return combine(configureJetty(),
+        return combine(configureTomcat(),
                 // aries-jax-rs-whiteboard not yet released
                 repository("http://repository.apache.org/content/groups/snapshots/")
                         .id("aries-snapshots")
@@ -41,7 +44,7 @@ public class WhiteboardR7JaxRsIntegrationTest extends ITestBase {
                 mavenBundle().groupId("javax.json").artifactId("javax.json-api").version("1.0"),
                 mavenBundle().groupId("javax.ws.rs").artifactId("javax.ws.rs-api").version("2.0.1"),
                 mavenBundle().groupId("org.apache.ws.xmlschema").artifactId("xmlschema-core").version("2.2.1"),
-                mavenBundle().groupId("org.ow2.asm").artifactId("asm").versionAsInProject(),
+                mavenBundle().groupId("org.ow2.asm").artifactId("asm").version("5.2"), // Tomcat already uses ASM 6_Alpa
                 mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.configadmin").versionAsInProject(),
                 // Runtime
                 // Do not add this to Maven-Dependencies because Exam-Probe will get wrong imports and cause Classloader-issues
