@@ -162,7 +162,7 @@ abstract class AbstractTracker<T, W extends WebElement> implements ServiceTracke
 			final WebApplication webApplication = extenderContext.getWebApplication(serviceReference.getBundle(),
 					httpContextId, sharedHttpContext);
             if (httpContextId == null && !webApplication.hasHttpContextMapping()
-                    // PAXWEB-1090 create DefaultHttpContext when contextId available without mapping
+                    // PAXWEB-1090 create DefaultHttpContext when default-whiteboard-contextId available without mapping
                     || HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME.equalsIgnoreCase(httpContextId)) {
 				webApplication.setHttpContextMapping(new DefaultHttpContextMapping());
 			}
