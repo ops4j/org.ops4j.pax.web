@@ -305,11 +305,14 @@
 			<type>war</type>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
-			<groupId>javax.websocket</groupId>
-			<artifactId>javax.websocket-api</artifactId>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>war-introspection</artifactId>
+			<version>${project.version}</version>
+			<type>war</type>
+			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>javax.json</groupId>
 			<artifactId>javax.json-api</artifactId>
