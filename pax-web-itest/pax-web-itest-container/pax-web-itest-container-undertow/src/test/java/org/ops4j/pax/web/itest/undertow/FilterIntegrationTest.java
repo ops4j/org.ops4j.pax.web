@@ -111,7 +111,6 @@ public class FilterIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore
 	public void testFilterWar() throws Exception {
 		String bundlePath = WEB_BUNDLE
 				+ "mvn:org.ops4j.pax.web.samples/simple-filter/"
