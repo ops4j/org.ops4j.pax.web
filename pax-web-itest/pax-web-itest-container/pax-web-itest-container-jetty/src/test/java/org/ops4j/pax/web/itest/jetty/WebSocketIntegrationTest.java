@@ -15,7 +15,16 @@
  */
 package org.ops4j.pax.web.itest.jetty;
 
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.StatusCode;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
+import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -27,6 +36,15 @@ import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import java.io.StringReader;
+import java.net.URI;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertThat;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
@@ -37,7 +55,8 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 @RunWith(PaxExam.class)
 public class WebSocketIntegrationTest extends ITestBase {
 
-	private static final Logger LOG = LoggerFactory.getLogger(WebSocketIntegrationTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger
+			(WebSocketIntegrationTest.class);
 
 	@Configuration
 	public static Option[] configure() {
@@ -59,7 +78,7 @@ public class WebSocketIntegrationTest extends ITestBase {
 
 
 	@Test
-	public void testWebsocket() throws Exception {
+	public void testWebsocketWebapp() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Chatroom'",
 						resp -> resp.contains("Chatroom"))
@@ -69,5 +88,65 @@ public class WebSocketIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8181/websocket/resource/js/jquery-1.10.2.min.js");
 	}
 
-}
 
+	@Test
+	@Ignore (value = "PAXWEB-1027")
+	public void testWebsocket() throws Exception {
+
+		WebSocketClient client = new WebSocketClient();
+		SimpleChatSocket socket = new SimpleChatSocket();
+		URI uri = new URI("ws://0.0.0.0:8181/websocket/chat/scala");
+
+		client.start();
+		ClientUpgradeRequest request = new ClientUpgradeRequest();
+		client.connect(socket, uri, request);
+		socket.awaitClose(5, TimeUnit.SECONDS);
+		client.stop();
+
+		JsonObject obj = Json.createReader(new
+				StringReader(socket.getAnswer()))
+				.readObject();
+
+		assertThat(obj.getString("message"), equalTo("test"));
+		assertThat(obj.getString("sender"), equalTo("me"));
+	}
+
+	@WebSocket
+	public class SimpleChatSocket {
+
+		private final CountDownLatch closeLatch = new CountDownLatch(1);
+		private String answer;
+
+		@OnWebSocketConnect
+		public void onConnect(Session session) throws Exception {
+			System.out.printf("Got connect: %s%n",session);
+			session.getRemote()
+					.sendStringByFuture("{'message':'test', 'sender':'me'}")
+					.get(2, TimeUnit.SECONDS);
+			session.close(StatusCode.NORMAL, "Done");
+		}
+
+		@OnWebSocketMessage
+		public void onMessage(final String session, final String message){
+			System.out.printf("Message received: %s", message);
+			this.answer = message;
+		}
+
+		@OnWebSocketClose
+		public void onClose(int statusCode, String reason){
+			System.out.printf("Connection closed: %d - %s%n", statusCode,
+					reason);
+			this.closeLatch.countDown();
+		}
+
+		boolean awaitClose(int duration, TimeUnit unit) throws
+				InterruptedException
+		{
+			return this.closeLatch.await(duration,unit);
+		}
+
+		String getAnswer() {
+			return answer;
+		}
+	}
+}
