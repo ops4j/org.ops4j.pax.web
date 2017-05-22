@@ -1173,7 +1173,7 @@
                                 <exclude>**/goal.txt</exclude>
                                 <exclude>**/grep.txt</exclude>
                                 <exclude>**/edit.txt</exclude>
-								<exclude>**/file.txt</exclude>
+                                <exclude>**/file.txt</exclude>
                                 <exclude>**/wc.txt</exclude>
                                 <exclude>**/foo</exclude>
                                 <exclude>**/maven-metadata-local.xml</exclude>
@@ -1195,7 +1195,7 @@
                                 <!-- test cache -->
                                 <exclude>**/test/cache/**/*</exclude>
                                 <!-- SSH keys -->
-				                <exclude>**/*.key</exclude>
+                                <exclude>**/*.key</exclude>
                                 <!-- For Jenkins, ignore the .repository -->
                                 <exclude>.repository/**</exclude>
                                 <!-- jar files -->
@@ -1208,6 +1208,7 @@
                                 <!-- README -->
                                 <exclude>README.md</exclude>
                                 <exclude>**/Readme.md</exclude>
+                                <exclude>**/*.adoc</exclude>
                                 <!-- archetype resources -->
                                 <exclude>**/archetype-resources/**/*</exclude>
                                 <!-- service initializers -->

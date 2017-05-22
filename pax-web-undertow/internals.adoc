@@ -1,0 +1,174 @@
+= Internals of pax-web-undertow
+:toc:
+:icons: font
+
+== How Undertow is configured in wildfly-10.1.0.Final
+
+Here's the chain of `io.undertow.server.HttpHandler` instances configured in Wildfly, starting from XNIO
+listeners. This tree shows how default handler is configured without drilling down to deployed WAR applications.
+
+[source,options="nowrap"]
+----
+QueuedNioTcpServer@10249 = "TCP server (NIO) <b75f502>"
+ acceptListener: {org.xnio.ChannelListeners$10@10217} "Accepting listener for io.undertow.server.protocol.http.HttpOpenListener@2f752a51"
+  openListener: {io.undertow.server.protocol.http.HttpOpenListener@10216}
+   rootHandler: {io.undertow.server.handlers.DisallowedMethodsHandler@10214}
+    disallowedMethods: {java.util.HashSet@10370}  size = 1
+     0 = {io.undertow.util.HttpString@10484} "TRACE"
+    next: {io.undertow.server.protocol.http2.Http2UpgradeHandler@10211}
+     next: {io.undertow.server.handlers.ChannelUpgradeHandler@10210}
+      nonUpgradeHandler: {io.undertow.server.handlers.CanonicalPathHandler@10209}
+       next: {io.undertow.server.handlers.error.SimpleErrorPageHandler@10208} <1>
+        next: {io.undertow.server.handlers.NameVirtualHostHandler@10207}
+         defaultHandler: {org.wildfly.extension.undertow.Host$HostRootHandler@10206}
+          this$0: {org.wildfly.extension.undertow.Host@10386}
+           pathHandler: {io.undertow.server.handlers.PathHandler@10199} <3>
+            pathMatcher: {io.undertow.util.PathMatcher@10213}
+             defaultHandler: {org.wildfly.extension.undertow.LocationService$LocationHandler@10407} <2>
+              this$0: {org.wildfly.extension.undertow.LocationService@10416}
+               locationPath: "/"
+               filters: {java.util.concurrent.CopyOnWriteArrayList@10420}  size = 0
+               configuredHandler: {org.wildfly.extension.undertow.deployment.GlobalRequestControllerHandler@10421}
+                next: {io.undertow.server.handlers.resource.ResourceHandler@10422} <4>
+                 welcomeFiles: {java.util.concurrent.CopyOnWriteArrayList@10425}  size = 4
+                  0 = "index.html"
+                  1 = "index.htm"
+                  2 = "default.html"
+                  3 = "default.htm"
+                 resourceManager: {io.undertow.server.handlers.resource.FileResourceManager@10428}
+                  base: "/data/servers/wildfly-10.1.0.Final/welcome-content/"
+                 next: {io.undertow.server.handlers.ResponseCodeHandler@10429}
+                  HANDLE_200: {io.undertow.server.handlers.ResponseCodeHandler@10436}
+                  HANDLE_403: {io.undertow.server.handlers.ResponseCodeHandler@10437}
+                  HANDLE_404: {io.undertow.server.handlers.ResponseCodeHandler@10429}
+                  HANDLE_405: {io.undertow.server.handlers.ResponseCodeHandler@10438}
+                  HANDLE_406: {io.undertow.server.handlers.ResponseCodeHandler@10439}
+                  HANDLE_500: {io.undertow.server.handlers.ResponseCodeHandler@10440}
+                  responseCode: 404 (0x194)
+             paths: io.undertow.util.SubstringMap  = {io.undertow.util.SubstringMap@10408} <5>
+              table: java.lang.Object[]  = {java.lang.Object[16]@10411}
+               6 = "/test-servlet31"
+               7 = {io.undertow.util.SubstringMap$SubstringMatch@10413}
+               8 = "/console"
+               9 = {io.undertow.util.SubstringMap$SubstringMatch@10415}
+              size: int  = 2 (0x2)
+----
+<1> `io.undertow.server.handlers.error.SimpleErrorPageHandler` writes simple HTML page if response code is > HTTP 400
+<2> This is default handler invoked when nothing is matched using <4>
+<3> PathHandler will be drilled down later
+<4> These 4 welcome pages are defaults from `io.undertow.server.handlers.resource.ResourceHandler.welcomeFiles`
+<5> Standard javax.servlet context mapping
+
+Here's how `io.undertow.Undertow` (Wildfly's version is `org.wildfly.extension.undertow.Server`)
+instance can be found (there's one instance of this class):
+
+[source,options="nowrap"]
+----
+value: {org.wildfly.extension.undertow.Server@10511}
+ defaultHost: "default-host"
+ name: "default-server"
+ virtualHostHandler: {io.undertow.server.handlers.NameVirtualHostHandler@10207}
+ servletContainer: {org.jboss.msc.value.InjectedValue@10514}
+ undertowService: {org.jboss.msc.value.InjectedValue@10515}
+ root: {io.undertow.server.handlers.CanonicalPathHandler@10209}
+  next: {io.undertow.server.handlers.error.SimpleErrorPageHandler@10208}
+   next: {io.undertow.server.handlers.NameVirtualHostHandler@10207}
+    defaultHandler: {org.wildfly.extension.undertow.Host$HostRootHandler@10206}
+    hosts: {io.undertow.util.CopyOnWriteMap@10379}  size = 2
+...
+----
+
+And here's how deployed WAR looks like (filtered for clarity):
+
+[source,options="nowrap"]
+----
+next: {io.undertow.server.handlers.PathHandler@10199}
+ pathMatcher: {io.undertow.util.PathMatcher@10213}
+  paths: {io.undertow.util.SubstringMap@10408}
+   table: {java.lang.Object[16]@10411}
+    6 = "/test-servlet31"
+    7 = {io.undertow.util.SubstringMap$SubstringMatch@10413}
+     key: "/test-servlet31"
+     value: {io.undertow.server.handlers.HttpContinueReadHandler@10493}
+      handler: {org.wildfly.extension.undertow.deployment.GlobalRequestControllerHandler@10494}
+       next: {io.undertow.servlet.handlers.ServletInitialHandler@10522}
+        next: {io.undertow.server.handlers.PredicateHandler@10527}
+         trueHandler: {io.undertow.server.handlers.PredicateHandler@10536}
+          trueHandler: {org.wildfly.extension.undertow.security.jacc.JACCContextIdHandler@10584}
+           next: {io.undertow.server.handlers.PredicateHandler@10537}
+            trueHandler: {io.undertow.security.handlers.SecurityInitialHandler@10581}
+             next: {io.undertow.security.handlers.NotificationReceiverHandler@10589}
+              next: {io.undertow.servlet.handlers.security.CachedAuthenticatedSessionHandler@10591}
+               next: {io.undertow.security.handlers.AuthenticationMechanismsHandler@10597}
+                next: {io.undertow.servlet.handlers.security.ServletConfidentialityConstraintHandler@10598}
+                 next: {io.undertow.server.handlers.PredicateHandler@10601}
+                  trueHandler: {io.undertow.server.handlers.DisableCacheHandler@10603}
+                   next: {io.undertow.servlet.handlers.security.ServletAuthenticationCallHandler@10604}
+                    next: {io.undertow.servlet.handlers.security.SSLInformationAssociationHandler@10605}
+                     next: {io.undertow.server.handlers.PredicateHandler@10582}
+                      trueHandler: {org.wildfly.extension.undertow.security.SecurityContextAssociationHandler@10607}
+                       next: {io.undertow.servlet.handlers.ServletDispatchingHandler@10608} <1>
+        paths: {io.undertow.servlet.handlers.ServletPathMatches@10531} <2>
+         DEFAULT_SERVLET_NAME: "default"
+         deployment: {io.undertow.servlet.core.DeploymentImpl@10539}
+          servletPaths: {io.undertow.servlet.handlers.ServletPathMatches@10531}
+           DEFAULT_SERVLET_NAME: "default"
+           deployment: {io.undertow.servlet.core.DeploymentImpl@10539}
+           welcomePages: {java.lang.String[3]@10540}
+           resourceManager: {io.undertow.server.handlers.resource.CachingResourceManager@10541}
+           data: {io.undertow.servlet.handlers.ServletPathMatchesData@10542}
+           pathMatchCache: {io.undertow.server.handlers.cache.LRUCache@10543}
+          servlets: {io.undertow.servlet.core.ManagedServlets@10557} <3>
+           managedServletMap: {io.undertow.util.CopyOnWriteMap@10567}  size = 4
+            0 = {java.util.HashMap$Node@10570} "default" ->
+             key: "default"
+             value: {io.undertow.servlet.handlers.ServletHandler@10574}
+              managedServlet: {io.undertow.servlet.core.ManagedServlet@10618} "ManagedServlet{servletInfo=ServletInfo{mappings=[], servletClass=class io.undertow.servlet.handlers.DefaultServlet, name='default'}}"
+            1 = {java.util.HashMap$Node@10571} "my" ->
+             key: "my"
+             value: {io.undertow.servlet.handlers.ServletHandler@10576}
+              managedServlet: {io.undertow.servlet.core.ManagedServlet@10631} "ManagedServlet{servletInfo=ServletInfo{mappings=[/my], servletClass=class grgr.test.MyServlet, name='my'}}"
+               servletInfo: {io.undertow.servlet.api.ServletInfo@10633} "ServletInfo{mappings=[/my], servletClass=class grgr.test.MyServlet, name='my'}"
+               servletContext: {io.undertow.servlet.spec.ServletContextImpl@10529}
+               instanceStrategy: {io.undertow.servlet.core.ManagedServlet$DefaultInstanceStrategy@10634}
+                servletContext: {io.undertow.servlet.spec.ServletContextImpl@10529}
+                instance: {grgr.test.MyServlet@10639} <4>
+            2 = {java.util.HashMap$Node@10572} "error" ->
+            3 = {java.util.HashMap$Node@10573} "jsp" ->
+         welcomePages: {java.lang.String[3]@10540}
+          0 = "index.html"
+          1 = "index.htm"
+          2 = "index.jsp"
+         resourceManager: {io.undertow.server.handlers.resource.CachingResourceManager@10541} <5>
+          underlyingResourceManager: {org.wildfly.extension.undertow.deployment.ServletResourceManager@10545}
+           deploymentResourceManager: {io.undertow.server.handlers.resource.PathResourceManager@10548}
+            base: "/data/servers/wildfly-10.1.0.Final/standalone/tmp/vfs/temp/temp9a5bc5f32c4e2ee2/content-d5f0a79b8aa04191/"
+----
+<1> The role of `io.undertow.servlet.handlers.ServletDispatchingHandler` is to fetch attachment from
+`io.undertow.server.HttpServerExchange` and call `io.undertow.server.HttpHandler.handleRequest()` on its handler, see next drill-down
+<2> Path matching withing single web application
+<3> Servlets of web application
+<4> The actual instance of one of the the servlets
+<5> Resource manager for calls to e.g., `javax.servlet.ServletContext.getResource()`
+
+Here's what really is invoked by `io.undertow.servlet.handlers.ServletDispatchingHandler`:
+
+[source,options="nowrap"]
+----
+ServletSecurityRoleHandler@10663
+ next: {io.undertow.servlet.handlers.ServletHandler@10576}
+  managedServlet: {io.undertow.servlet.core.ManagedServlet@10673} "ManagedServlet{servletInfo=ServletInfo{mappings=[/my], servletClass=class grgr.test.MyServlet, name='my'}}"
+   servletInfo: {io.undertow.servlet.api.ServletInfo@10676} "ServletInfo{mappings=[/my], servletClass=class grgr.test.MyServlet, name='my'}"
+    servletClass: {@4} "class grgr.test.MyServlet"
+    name: java.lang.String  = "my"
+    mappings: {java.util.ArrayList@10681}  size = 1
+    initParams: {java.util.HashMap@10682}  size = 0
+    securityRoleRefs: {java.util.ArrayList@10683}  size = 0
+    handlerChainWrappers: {java.util.ArrayList@10684}  size = 0
+   servletContext: {io.undertow.servlet.spec.ServletContextImpl@10677}
+   instanceStrategy: {io.undertow.servlet.core.ManagedServlet$DefaultInstanceStrategy@10678}
+    servletInfo: {io.undertow.servlet.api.ServletInfo@10676} "ServletInfo{mappings=[/my], servletClass=class grgr.test.MyServlet, name='my'}"
+    servletContext: {io.undertow.servlet.spec.ServletContextImpl@10677}
+    instance: {grgr.test.MyServlet@10698} <1>
+----
+<1> The actual instance of the servlet
