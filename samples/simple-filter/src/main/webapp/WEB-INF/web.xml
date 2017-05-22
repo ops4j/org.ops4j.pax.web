@@ -26,6 +26,5 @@
   <filter-mapping>
     <filter-name>TestFilter</filter-name>
     <url-pattern>*.filter</url-pattern>
-    <dispatcher>INCLUDE</dispatcher>
   </filter-mapping>
 </web-app>
