@@ -23,12 +23,15 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
@@ -47,7 +50,6 @@ import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
 import org.ops4j.pax.web.utils.ServletContainerInitializerScanner;
 import org.osgi.framework.*;
-import org.osgi.service.http.HttpContext;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -167,28 +169,42 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	}
 
 	private void doStart(ServletModel servlet) throws ServletException {
+		withPatterns(servlet,
+				(pattern, handler) -> path.addPrefixPath(pattern, this),
+				(pattern, handler) -> path.addExactPath(pattern, this));
+	}
+
+	private void doStop(ServletModel servlet) throws ServletException {
+		withPatterns(servlet,
+				(pattern, handler) -> path.removePrefixPath(pattern),
+				(pattern, handler) -> path.removeExactPath(pattern));
+	}
+
+	private void withPatterns(ServletModel servlet,
+							  BiConsumer<String, HttpHandler> forPrefixPath, BiConsumer<String, HttpHandler> forExactPath) {
+		String contextPath = "";
+		if (!contextModel.getContextName().isEmpty()) {
+			contextPath = "/" + contextModel.getContextName();
+		}
 		for (String pattern : servlet.getUrlPatterns()) {
-			if (!contextModel.getContextName().isEmpty()) {
-				pattern = "/" + contextModel.getContextName() + pattern;
+			// after org.ops4j.pax.web.service.spi.util.Path.normalizePattern() we have patterns
+			// starting with either "/" or "*"
+			if (pattern.startsWith("/")) {
+				pattern = contextPath + pattern;
+			} else if (pattern.startsWith("*.")) {
+				// for e.g., *.jsp we don't care about exactPath, as this won't map to JSP servlet anyway
+				// it'll be handled at io.undertow.servlet.handlers.ServletPathMatch level
+				// will simply map *.ext mappings as exact paths with contextPath only
+				// this.handler contains proper mappings handled by Undertow
+				pattern = contextPath;
 			}
 			if (pattern.endsWith("/*") || pattern.endsWith("/")) {
 				if (pattern.endsWith("/*")) {
 					pattern = pattern.substring(0, pattern.length() - 1);
 				}
-				path.addPrefixPath(pattern, this);
+				forPrefixPath.accept(pattern, this);
 			} else {
-				path.addExactPath(pattern, this);
-			}
-		}
-	}
-
-	private void doStop(ServletModel servlet) throws ServletException {
-		for (String pattern : servlet.getUrlPatterns()) {
-			if (pattern.endsWith("/*")) {
-				pattern = pattern.substring(0, pattern.length() - 1);
-				path.removePrefixPath(pattern);
-			} else {
-				path.removeExactPath(pattern);
+				forExactPath.accept(pattern, this);
 			}
 		}
 	}
@@ -213,7 +229,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 			exchange.setRelativePath(path);
 			h.handleRequest(exchange);
 		} else {
-			exchange.setResponseCode(StatusCodes.NOT_FOUND);
+			exchange.setStatusCode(StatusCodes.NOT_FOUND);
 			exchange.endExchange();
 		}
 	}
@@ -406,7 +422,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		}
 
 		if (!filters.isEmpty() && filters.get(0).getInitParams().get(WebContainerConstants.FILTER_RANKING) != null) {
-			filters.sort((filter1, filter2) -> Integer.valueOf(filter1.getInitParams().get(WebContainerConstants.FILTER_RANKING)).compareTo(Integer.valueOf(filter2.getInitParams().get(WebContainerConstants.FILTER_RANKING))));
+			filters.sort(Comparator.comparing(filter -> Integer.valueOf(filter.getInitParams().get(WebContainerConstants.FILTER_RANKING))));
 		}
 
 		for (FilterModel filter : filters) {
@@ -538,7 +554,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		if (clazz != null) {
 			return clazz;
 		} else {
-			return (Class<T>) instance.getClass();
+			return (Class<? extends T>) instance.getClass();
 		}
 	}
 
