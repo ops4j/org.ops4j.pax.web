@@ -637,7 +637,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	}
 
 	public synchronized void addServlet(ServletModel model) throws ServletException {
-		if (servlets.add(model)) {
+		if (servlets.add(model) && !model.getContextModel().isWebBundle()) {
 			destroyHandler();
 			if (started.get()) {
 				doStart(model);
@@ -655,7 +655,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	}
 
 	public synchronized void addWelcomeFile(WelcomeFileModel welcomeFile) throws ServletException {
-		if (welcomeFiles.add(welcomeFile)) {
+		if (welcomeFiles.add(welcomeFile) && !welcomeFile.getContextModel().isWebBundle()) {
 			destroyHandler();
             createHandler(null);
 		}
@@ -668,7 +668,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	}
 
 	public synchronized void addErrorPage(ErrorPageModel model) throws ServletException {
-		if (errorPages.add(model)) {
+		if (errorPages.add(model) && !model.getContextModel().isWebBundle()) {
 			destroyHandler();
 			createHandler(null);
 		}
