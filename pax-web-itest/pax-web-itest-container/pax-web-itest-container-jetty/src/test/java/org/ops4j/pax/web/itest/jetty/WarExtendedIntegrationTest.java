@@ -58,8 +58,6 @@ public class WarExtendedIntegrationTest extends ITestBase {
 		// all the below bundles are required to activate
 		// org.eclipse.jetty.websocket:javax-websocket-server-impl so it configures HttpServiceContexts
 		options.addAll(Arrays.asList(
-				mavenBundle().groupId("org.ow2.asm")
-						.artifactId("asm-all").version(asInProject()),
 				mavenBundle().groupId("org.apache.aries")
 						.artifactId("org.apache.aries.util").version(asInProject()),
 				// org.apache.aries.spifly.dynamic.bundle bundle provides
