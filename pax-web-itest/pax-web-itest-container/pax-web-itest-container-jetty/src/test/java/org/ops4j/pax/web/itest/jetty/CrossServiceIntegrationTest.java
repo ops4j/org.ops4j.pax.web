@@ -118,7 +118,6 @@ public class CrossServiceIntegrationTest extends ITestBase {
 
 	}
 
-	@Ignore("sharing the context for WABs isn't possible")
 	@Test
 	public void testMultipleServiceCombinationWithWebContainer() throws Exception {
 		ServiceReference<HttpService> reference = bundleContext.getServiceReference(HttpService.class);
@@ -129,20 +128,21 @@ public class CrossServiceIntegrationTest extends ITestBase {
 
 
 		//registering without an explicit context might be the issue. 
-		httpService.registerServlet("/crosservice", new TestServlet(), null, null);
+		httpService.registerServlet("/crossservice", new TestServlet(), null, null);
 
 		// Register a servlet filter via webcontainer
-		wcService.registerFilter(new SimpleFilter(), new String[]{"/crossservice/*"}, null, null, null);
+		SimpleFilter filter = new SimpleFilter();
+		wcService.registerFilter(filter, new String[]{"/crossservice/*"}, null, null, null);
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Crossservice response must contain 'TEST OK'",
 						resp -> resp.contains("TEST OK"))
 				.withResponseAssertion("Crossservice response must contain 'FILTER-INIT: true'",
 						resp -> resp.contains("FILTER-INIT: true"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/crosservice");
+				.doGETandExecuteTest("http://127.0.0.1:8181/crossservice");
 
-		wcService.unregisterFilter(new SimpleFilter());
-		httpService.unregister("/crosservice");
+		wcService.unregisterFilter(filter);
+		httpService.unregister("/crossservice");
 
 	}
 }
