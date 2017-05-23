@@ -38,7 +38,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
-@Ignore("Doesn't work right now needs further investigation")
+@Ignore("Fails with ERROR o.f.s.layout.DefaultLayoutStrategy - Unhandled: org.fusesource.scalate.TemplateException")
 public class KarafDocWarIntegrationTest extends ITestBase {
 
 	private static final Logger LOG = LoggerFactory.getLogger(KarafDocWarIntegrationTest.class);
@@ -47,10 +47,7 @@ public class KarafDocWarIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		return combine(configureJetty(),
-				mavenBundle().groupId("org.apache.karaf")
-						.artifactId("manual").type("war").version(asInProject()).start()
-		);
+		return configureJetty();
 	}
 
 
@@ -59,6 +56,13 @@ public class KarafDocWarIntegrationTest extends ITestBase {
 		LOG.info("Setting up test");
 
 		initWebListener();
+
+		// we have to install with webbundle:, because manual.war is a bundle that doesn't
+		// import javax.servlet package, which is needed when processing using pax-web-extender-war
+		String bundlePath = WEB_BUNDLE
+				+ "mvn:org.apache.karaf/manual/3.0.1/war";
+		installWarBundle = bundleContext.installBundle(bundlePath);
+		installWarBundle.start();
 
 		waitForWebListener();
 	}
