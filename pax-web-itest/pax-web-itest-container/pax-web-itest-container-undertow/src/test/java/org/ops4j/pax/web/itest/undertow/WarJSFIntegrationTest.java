@@ -44,7 +44,6 @@ import static org.ops4j.pax.exam.MavenUtils.asInProject;
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
-@Ignore
 public class WarJSFIntegrationTest extends ITestBase {
 
 	// private static final String MYFACES_VERSION = "2.1.0";

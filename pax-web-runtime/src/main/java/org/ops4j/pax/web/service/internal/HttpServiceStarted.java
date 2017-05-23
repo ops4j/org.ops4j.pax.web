@@ -584,6 +584,16 @@ class HttpServiceStarted implements StoppableHttpService {
 			serviceSuccess = true;
 			serverController.addFilter(model);
 			controllerSuccess = true;
+			ContextModel contextModel = model.getContextModel();
+			if (model.getFilter() != null && !isWebAppWebContainerContext(contextModel)) {
+				try {
+					serverController.getContext(contextModel).start();
+					// CHECKSTYLE:OFF
+				} catch (Exception e) {
+					LOG.error("Could not start the servlet context for context path ["
+							+ contextModel.getContextName() + "]", e);
+				} //CHECKSTYLE:ON
+			}
 		} finally {
 			// as this compensatory actions to work the remove methods should
 			// not throw exceptions.
@@ -931,6 +941,15 @@ class HttpServiceStarted implements StoppableHttpService {
 			serviceSuccess = true;
 			serverController.addWelcomFiles(model);
 			controllerSuccess = true;
+			if (model.getWelcomeFiles() != null && !isWebAppWebContainerContext(contextModel)) {
+				try {
+					serverController.getContext(contextModel).start();
+					// CHECKSTYLE:OFF
+				} catch (Exception e) {
+					LOG.error("Could not start the servlet context for context path ["
+							+ contextModel.getContextName() + "]", e);
+				} //CHECKSTYLE:ON
+			}
 		} finally {
 			// as this compensatory actions to work the remove methods should
 			// not throw exceptions.

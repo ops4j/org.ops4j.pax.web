@@ -92,7 +92,7 @@ class RegisterWebAppVisitorHS implements WebAppVisitor {
 				webApp.getBundle(), webApp.getMimeMappings());
 		try {
 			LOG.info("Pax Web not available. Skipping context params registration");
-			httpService.registerResources("/", "", httpContext);
+			httpService.registerResources("/", "default", httpContext);
 			//CHECKSTYLE:OFF
 		} catch (Throwable ignore) {
 			LOG.error("Registration exception. Skipping.", ignore);

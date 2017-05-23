@@ -60,7 +60,7 @@ public class WhiteboardFilterOnlyIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Hello Whiteboard Filter'",
 						resp -> resp.contains("Hello Whiteboard Filter"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/testFilter/testme");
+				.doGETandExecuteTest("http://127.0.0.1:8181/testfilter/testme");
 
 		filter.unregister();
 

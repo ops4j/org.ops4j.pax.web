@@ -110,7 +110,7 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-formauth/wc/sn");
 	}
 
-	@Ignore
+	@Ignore("This test assumes redirection/forward to /wc/example which isn't configured")
 	@Test
 	public void testSlash() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()

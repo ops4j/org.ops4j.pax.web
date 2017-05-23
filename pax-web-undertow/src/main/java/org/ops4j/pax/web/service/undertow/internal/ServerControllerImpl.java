@@ -64,6 +64,7 @@ import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
+import org.ops4j.pax.web.service.spi.model.ResourceModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
@@ -484,6 +485,16 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
         NullArgumentException.validateNotNull(contextModel, "contextModel");
         Context newCtx = new Context(this, path, contextModel);
         Context oldCtx = contextMap.putIfAbsent(contextModel.getHttpContext(), newCtx);
+        if (oldCtx == null) {
+            final Servlet servlet = createResourceServlet(contextModel, "/", "default");
+            final ResourceModel model = new ResourceModel(contextModel, servlet, "/", "default");
+            try {
+                newCtx.addServlet(model);
+            } catch (ServletException e) {
+                LOG.warn(e.getMessage(), e);
+            }
+
+        }
         return oldCtx != null ? oldCtx : newCtx;
     }
 
