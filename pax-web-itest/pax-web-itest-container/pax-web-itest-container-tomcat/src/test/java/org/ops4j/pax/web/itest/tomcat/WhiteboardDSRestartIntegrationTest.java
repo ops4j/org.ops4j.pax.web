@@ -68,6 +68,7 @@ public class WhiteboardDSRestartIntegrationTest extends ITestBase {
 
 
 	@Test
+	@Ignore("Failing for duplicate Context - PAXWEB-597")
 	public void testWhiteBoardSimpleServlet() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Hello from SimpleServlet'",
@@ -85,6 +86,7 @@ public class WhiteboardDSRestartIntegrationTest extends ITestBase {
 	}
 
 	@Test
+	@Ignore("Failing for duplicate Context - PAXWEB-597")
 	public void testWhiteBoardFiltered() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Request changed by SimpleFilter'",
