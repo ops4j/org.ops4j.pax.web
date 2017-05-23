@@ -30,8 +30,6 @@ import javax.servlet.DispatcherType;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
@@ -257,8 +255,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	private void createHandler(final Consumer<ServletContext> consumer) throws ServletException {
 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
 		try {
-			ClassLoader ncl = classLoader;
-			Thread.currentThread().setContextClassLoader(ncl);
+			Thread.currentThread().setContextClassLoader(classLoader);
 			doCreateHandler(consumer);
 		} finally {
 			Thread.currentThread().setContextClassLoader(cl);
@@ -392,14 +389,28 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 				int error = Integer.parseInt(errorPage.getError());
 				deployment.addErrorPage(new ErrorPage(errorPage.getLocation(), error));
 			} catch (NumberFormatException nfe) {
-				try {
-					@SuppressWarnings("unchecked")
-					Class<? extends Throwable> clazz = (Class<? extends Throwable>)
-							classLoader.loadClass(errorPage.getError());
-					deployment.addErrorPage(new ErrorPage(errorPage.getLocation(), clazz));
-				} catch (ClassNotFoundException cnfe) {
-					cnfe.addSuppressed(nfe);
-					throw new IllegalArgumentException("Unsupported error: " + errorPage.getError(), cnfe);
+				// for Nxx codes, we have to loop
+				// Undertow doesn't support error code range handlers, but
+				// in the end - it's just a io.undertow.servlet.core.ErrorPages.errorCodeLocations map of code -> location
+				if ("4xx".equals(errorPage.getError())) {
+					for (int c = 400; c < 500; c++) {
+						deployment.addErrorPage(new ErrorPage(errorPage.getLocation(), c));
+					}
+				} else if ("5xx".equals(errorPage.getError())) {
+					for (int c = 500; c < 600; c++) {
+						deployment.addErrorPage(new ErrorPage(errorPage.getLocation(), c));
+					}
+				} else {
+					// must be an exception then
+					try {
+						@SuppressWarnings("unchecked")
+						Class<? extends Throwable> clazz = (Class<? extends Throwable>)
+								classLoader.loadClass(errorPage.getError());
+						deployment.addErrorPage(new ErrorPage(errorPage.getLocation(), clazz));
+					} catch (ClassNotFoundException cnfe) {
+						cnfe.addSuppressed(nfe);
+						throw new IllegalArgumentException("Unsupported error: " + errorPage.getError(), cnfe);
+					}
 				}
 			}
 		}
@@ -549,7 +560,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		handler = manager.start();
 	}
 
-
+	@SuppressWarnings("unchecked")
 	private static <T> Class<? extends T> clazz(Class<? extends T> clazz, T instance) {
 		if (clazz != null) {
 			return clazz;
