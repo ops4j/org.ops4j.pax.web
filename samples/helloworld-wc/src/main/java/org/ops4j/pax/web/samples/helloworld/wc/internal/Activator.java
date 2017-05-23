@@ -134,7 +134,7 @@ public final class Activator implements BundleActivator {
 							httpContext);
                     // register a welcome file
                     webContainer.registerWelcomeFiles(
-                            new String[]{"index.html"}, true, httpContext);
+                            new String[]{"html/index.html"}, true, httpContext);
 					errorServlet = new HelloWorldErrorServlet();
 					webContainer.registerServlet(errorServlet, // registered
 							// servlet
@@ -205,7 +205,7 @@ public final class Activator implements BundleActivator {
 			webContainer.unregisterErrorPage("java.lang.Exception", httpContext);
 			webContainer.unregisterErrorPage("404", httpContext);
 
-			webContainer.unregisterWelcomeFiles(new String[]{"index.html"}, httpContext);
+			webContainer.unregisterWelcomeFiles(new String[]{"html/index.html"}, httpContext);
 
 			webContainer = null;
 
