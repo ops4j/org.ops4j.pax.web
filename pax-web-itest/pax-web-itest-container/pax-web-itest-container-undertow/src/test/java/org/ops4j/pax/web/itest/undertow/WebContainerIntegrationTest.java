@@ -18,26 +18,19 @@ package org.ops4j.pax.web.itest.undertow;
 import org.hamcrest.CoreMatchers;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
-import org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldServlet;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.runtime.dto.FailedResourceDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletContext;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -102,7 +95,6 @@ public class WebContainerIntegrationTest extends ITestBase {
 	}
 	
     @Test
-    @Ignore("PAXWEB-1038 - custom error-pages with undertow aren't rendered.")
     public void testErrorPage() throws Exception  {
         HttpTestClientFactory.createDefaultTestClient()
         .withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
