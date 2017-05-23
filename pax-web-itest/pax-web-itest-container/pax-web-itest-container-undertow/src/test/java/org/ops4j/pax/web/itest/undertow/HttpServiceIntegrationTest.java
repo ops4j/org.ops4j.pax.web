@@ -292,7 +292,7 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		logger.debug("... adding additional content to war");
 
 		final AtomicReference<HttpContext> httpContext2 = new AtomicReference<>();
-		bundleContext.registerService(ServletListener.class, servletEvent -> {
+		installWarBundle.getBundleContext().registerService(ServletListener.class, servletEvent -> {
 			if (servletEvent.getType() == ServletEvent.DEPLOYED && "/test2".equals(servletEvent.getAlias())) {
 				httpContext2.set(servletEvent.getHttpContext());
 			}
@@ -319,16 +319,18 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'TEST OK'",
 						resp -> resp.contains("TEST OK"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/war/test2");
+					.doGETandExecuteTest("http://127.0.0.1:8181/war/test2");
 
 		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet2.isInitCalled());
 	}
 
-
+	/**
+	 * Test works, when using bundle context of web bundle that has servlets for which we want to register filters
+	 * @throws Exception
+	 */
 	@Test
-	@Ignore("Test fails due to a filter doesn't work right now for the root '/'")
 	public void testRootFilterRegistration() throws Exception {
-		ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<>(bundleContext, WebContainer.class, null);
+		ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<>(installWarBundle.getBundleContext(), WebContainer.class, null);
 		tracker.open();
 		WebContainer service = tracker.waitForService(TimeUnit.SECONDS.toMillis(20));
 		final String fullContent = "This content is Filtered by a javax.servlet.Filter";
@@ -412,7 +414,6 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore("disabled because it's a blinking test. If run standalone it works very well.")
 	public void testNCSALogger() throws Exception {
 		testServletPath();
 

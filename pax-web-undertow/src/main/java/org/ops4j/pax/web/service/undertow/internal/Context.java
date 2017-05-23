@@ -167,24 +167,24 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	}
 
 	private void doStart(ServletModel servlet) throws ServletException {
-		withPatterns(servlet,
+		withPatterns(servlet.getUrlPatterns(),
 				(pattern, handler) -> path.addPrefixPath(pattern, this),
 				(pattern, handler) -> path.addExactPath(pattern, this));
 	}
 
 	private void doStop(ServletModel servlet) throws ServletException {
-		withPatterns(servlet,
+		withPatterns(servlet.getUrlPatterns(),
 				(pattern, handler) -> path.removePrefixPath(pattern),
 				(pattern, handler) -> path.removeExactPath(pattern));
 	}
 
-	private void withPatterns(ServletModel servlet,
+	private void withPatterns(String[] patterns,
 							  BiConsumer<String, HttpHandler> forPrefixPath, BiConsumer<String, HttpHandler> forExactPath) {
 		String contextPath = "";
 		if (!contextModel.getContextName().isEmpty()) {
 			contextPath = "/" + contextModel.getContextName();
 		}
-		for (String pattern : servlet.getUrlPatterns()) {
+		for (String pattern : patterns) {
 			// after org.ops4j.pax.web.service.spi.util.Path.normalizePattern() we have patterns
 			// starting with either "/" or "*"
 			if (pattern.startsWith("/")) {
@@ -362,10 +362,13 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 					contextModel.getFormErrorPage());
 			deployment.setLoginConfig(cfg);
 		}
+		boolean defaultServletAdded = false;
+		ServletModel fallbackDefaultServlet = null;
 		for (ServletModel servlet : servlets) {
 			if (servlet instanceof ResourceModel
 					&& "default".equalsIgnoreCase(servlet.getName())) {
 				// this is a default resource, so ignore it
+				fallbackDefaultServlet = servlet;
 				continue;
 			}
 			ServletInfo info = new ServletInfo(
@@ -377,8 +380,18 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 				info.addInitParam(param.getKey(), param.getValue());
 			}
 			info.addMappings(servlet.getUrlPatterns());
+			defaultServletAdded = servlet.getUrlPatterns() != null
+					&& Arrays.stream(servlet.getUrlPatterns()).anyMatch("/"::equals);
 			info.setAsyncSupported(servlet.getAsyncSupported() != null ? servlet.getAsyncSupported() : false);
 			info.setLoadOnStartup(servlet.getLoadOnStartup() != null ? servlet.getLoadOnStartup() : -1);
+			deployment.addServlet(info);
+		}
+		if (!defaultServletAdded && fallbackDefaultServlet != null) {
+			ServletInfo info = new ServletInfo(fallbackDefaultServlet.getName(),
+					clazz(fallbackDefaultServlet.getServletClass(), fallbackDefaultServlet.getServlet()),
+					factory(fallbackDefaultServlet.getServletClass(), fallbackDefaultServlet.getServlet()));
+			info.setLoadOnStartup(0);
+			doStart(fallbackDefaultServlet);
 			deployment.addServlet(info);
 		}
 		for (WelcomeFileModel welcomeFile : welcomeFiles) {
@@ -648,9 +661,9 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	}
 
 	public synchronized void addServlet(ServletModel model) throws ServletException {
-		if (servlets.add(model) && !model.getContextModel().isWebBundle()) {
-			destroyHandler();
+		if (servlets.add(model)) {
 			if (started.get()) {
+				destroyHandler();
 				doStart(model);
 			}
 		}
@@ -658,84 +671,106 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 	public synchronized void removeServlet(ServletModel model) throws ServletException {
 		if (servlets.remove(model)) {
-			destroyHandler();
 			if (started.get()) {
+				destroyHandler();
 				doStop(model);
 			}
 		}
 	}
 
 	public synchronized void addWelcomeFile(WelcomeFileModel welcomeFile) throws ServletException {
-		if (welcomeFiles.add(welcomeFile) && !welcomeFile.getContextModel().isWebBundle()) {
-			destroyHandler();
-            createHandler(null);
+		if (welcomeFiles.add(welcomeFile)) {
+			if (started.get()) {
+				destroyHandler();
+			}
 		}
 	}
 
 	public synchronized void removeWelcomeFile(WelcomeFileModel welcomeFile) throws ServletException {
 		if (welcomeFiles.remove(welcomeFile)) {
-			destroyHandler();
+			if (started.get()) {
+				destroyHandler();
+			}
 		}
 	}
 
 	public synchronized void addErrorPage(ErrorPageModel model) throws ServletException {
-		if (errorPages.add(model) && !model.getContextModel().isWebBundle()) {
-			destroyHandler();
-			createHandler(null);
+		if (errorPages.add(model)) {
+			if (started.get()) {
+				destroyHandler();
+			}
 		}
 	}
 
 	public void removeErrorPage(ErrorPageModel model) throws ServletException {
 		if (errorPages.remove(model)) {
-			destroyHandler();
+			if (started.get()) {
+				destroyHandler();
+			}
 		}
 	}
 
 	public void addEventListener(EventListenerModel model) throws ServletException {
 		if (eventListeners.add(model)) {
-			destroyHandler();
+			if (started.get()) {
+				destroyHandler();
+			}
 		}
 	}
 
 	public void removeEventListener(EventListenerModel model) throws ServletException {
 		if (eventListeners.remove(model)) {
-			destroyHandler();
+			if (started.get()) {
+				destroyHandler();
+			}
 		}
 	}
 
 	public void addFilter(FilterModel model) throws ServletException {
 		if (filters.add(model)) {
-			destroyHandler();
+			if (started.get()) {
+				destroyHandler();
+			}
 		}
 	}
 
 	public void removeFilter(FilterModel model) throws ServletException {
 		if (filters.remove(model)) {
-			destroyHandler();
+			if (started.get()) {
+				destroyHandler();
+			}
 		}
 	}
 
 	public void addSecurityConstraintMapping(SecurityConstraintMappingModel model) throws ServletException {
 		if (securityConstraintMappings.add(model)) {
-			destroyHandler();
+			if (started.get()) {
+				destroyHandler();
+			}
 		}
 	}
 
 	public void removeSecurityConstraintMapping(SecurityConstraintMappingModel model) throws ServletException {
 		if (securityConstraintMappings.remove(model)) {
-			destroyHandler();
+			if (started.get()) {
+				destroyHandler();
+			}
 		}
 	}
 
 	public void addContainerInitializerModel(ContainerInitializerModel model) throws ServletException {
 		if (containerInitializers.add(model)) {
-			destroyHandler();
+			if (started.get()) {
+				destroyHandler();
+			}
 		}
 	}
 
 	public void removeContainerInitializerModel(ContainerInitializerModel model) throws ServletException {
 		if (containerInitializers.remove(model)) {
-			destroyHandler();
+			if (started.get()) {
+				destroyHandler();
+			}
 		}
 	}
 

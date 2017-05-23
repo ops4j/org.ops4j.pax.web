@@ -123,6 +123,11 @@ public class WebContainerIntegrationTest extends ITestBase {
             .withResponseAssertion("Response must contain '<h1>Welcome</h1>'",
                 resp -> resp.contains("<h1>Welcome</h1>"))
             .doGETandExecuteTest("http://127.0.0.1:8181/");
+
+        HttpTestClientFactory.createDefaultTestClient()
+            .withResponseAssertion("Response must contain '<h1>Welcome</h1>'",
+                resp -> resp.contains("<h1>Welcome</h1>"))
+            .doGETandExecuteTest("http://127.0.0.1:8181");
     }
 
 	/**
