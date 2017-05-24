@@ -18,11 +18,13 @@ package org.ops4j.pax.web.itest.tomcat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 import static org.ops4j.pax.web.itest.base.assertion.Assert.assertThat;
 
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import javax.inject.Inject;
@@ -42,8 +44,10 @@ import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.samples.whiteboard.ds.*;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
@@ -99,10 +103,11 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 		// FIXME welcome file not working???
 //		HttpTestClientFactory.createDefaultTestClient()
 //				.withResponseAssertion("Response must contain 'This is a welcome file provided by WhiteboardWelcomeFiles'",
-//						resp -> resp.contains("This is a welcome file provided by WhiteboardWelcomeFiles"))
+//						resp -> resp.contains("This is a welcome file provided by PaxWebWhiteboardWelcomeFiles"))
 //				.doGETandExecuteTest("http://127.0.0.1:8282/");
 
 		// test error-page
+		//FIXME custom error pages not working?
 //		HttpTestClientFactory.createDefaultTestClient()
 //				.withReturnCode(404)
 //				.withResponseAssertion("Response must contain 'Error Servlet, we do have a 404'",
@@ -120,7 +125,7 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 
 	private <T> T withService(Function<HttpServiceRuntime, T> function){
 		T result = null;
-		ServiceTracker<HttpServiceRuntime, HttpServiceRuntime> st = new ServiceTracker<HttpServiceRuntime, HttpServiceRuntime>(bundleContext, HttpServiceRuntime.class, null);
+		ServiceTracker<HttpServiceRuntime, HttpServiceRuntime> st = new ServiceTracker<>(bundleContext, HttpServiceRuntime.class, null);
 		st.open();
 		try {
 		    HttpServiceRuntime service = st.waitForService(2000);
@@ -141,18 +146,17 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 	public void testRuntimeDto() throws Exception {
 		RuntimeDTO runtimeDTO = withService(HttpServiceRuntime::getRuntimeDTO);
 
-		// prepare ServiceIDs for comparison
-		final long servletServiceId = (long)bundleContext.getServiceReference(WhiteboardServlet.class).getProperty(Constants.SERVICE_ID);
-		final long servletWithContextServiceId = (long)bundleContext.getServiceReference(WhiteboardServletWithContext.class).getProperty(Constants.SERVICE_ID);
-		final long defaultServletContextServiceId = (long)bundleContext.getServiceReferences(ServletContext.class, "(" + WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME + "=default)").stream().findFirst().orElseThrow(() -> new AssertionError("Default ServletContext not found")).getProperty(Constants.SERVICE_ID);
-		final long customServletContextServiceId = (long)bundleContext.getServiceReferences(ServletContext.class, "(" + WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME + "=CustomContext)").stream().findFirst().orElseThrow(() -> new AssertionError("CustomContext ServletContext not found")).getProperty(Constants.SERVICE_ID);
-		final long filterServiceId = (long)bundleContext.getServiceReference(WhiteboardFilter.class).getProperty(Constants.SERVICE_ID);
-		final long listenerServiceId = (long)bundleContext.getServiceReference(WhiteboardListener.class).getProperty(Constants.SERVICE_ID);
-		final long resourceServiceId = (long)bundleContext.getServiceReference(WhiteboardResource.class).getProperty(Constants.SERVICE_ID);
-		final long errorPageServiceId = (long)bundleContext.getServiceReference(WhiteboardErrorPage.class).getProperty(Constants.SERVICE_ID);
+		// prepare ServiceIDs for comparrison
+		final long servletServiceId = (long)getServiceReference(bundleContext, WhiteboardServlet.class, null).getProperty(Constants.SERVICE_ID);
+		final long servletWithContextServiceId = (long)getServiceReference(bundleContext, WhiteboardServletWithContext.class, null).getProperty(Constants.SERVICE_ID);
+		final long defaultServletContextServiceId = (long)getServiceReference(bundleContext, ServletContext.class, "(" + WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME + "=default)").getProperty(Constants.SERVICE_ID);
+		final long customServletContextServiceId = (long)getServiceReference(bundleContext, ServletContext.class, "(" + WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME + "=CustomContext)").getProperty(Constants.SERVICE_ID);
+		final long filterServiceId = (long)getServiceReference(bundleContext, WhiteboardFilter.class, null).getProperty(Constants.SERVICE_ID);
+		final long listenerServiceId = (long)getServiceReference(bundleContext, WhiteboardListener.class, null).getProperty(Constants.SERVICE_ID);
+		final long resourceServiceId = (long)getServiceReference(bundleContext, WhiteboardResource.class, null).getProperty(Constants.SERVICE_ID);
+		final long errorPageServiceId = (long)getServiceReference(bundleContext, WhiteboardErrorPage.class, null).getProperty(Constants.SERVICE_ID);
 
-
-		assertThat("Default- and CustomServletContextDTO must be available",
+		assertThat("Default- and CustomServletContextDTO must be available:" + runtimeDTO.servletContextDTOs.length,
 				runtimeDTO.servletContextDTOs,
 				servletContextDTOs -> servletContextDTOs.length == 3);
 
@@ -231,10 +235,8 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 		}
 	}
 
-
 	@Test
 	public void testRuntimeDtoWithFailedServices() throws Exception {
-
 		// add a ServletContextHelper with missing path
 		Dictionary<String, String> props = new Hashtable<>(1);
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "FailedContextName");
@@ -267,7 +269,7 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 
 	@Test
 	public void testRequestInfoDto() throws Exception {
-		final long defaultServletContextServiceId = (long)bundleContext.getServiceReferences(ServletContext.class, "(" + WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME + "=default)").stream().findFirst().orElseThrow(() -> new AssertionError("Default ServletContext not found")).getProperty(Constants.SERVICE_ID);
+		final long defaultServletContextServiceId = (long)getServiceReference(bundleContext, ServletContext.class, "(" + WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME + "=default)").getProperty(Constants.SERVICE_ID);
 
 		RequestInfoDTO requestInfoDTO = withService(
 				httpServiceRuntime -> httpServiceRuntime.calculateRequestInfoDTO("/simple-servlet"));
@@ -306,14 +308,14 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 				servletDTO -> Objects.equals(servletDTO.patterns[0], "/servlet"));
 	}
 
-
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testDTOServiceProperties() throws Exception {
-		ServiceReference<HttpServiceRuntime> ref = bundleContext.getServiceReference(HttpServiceRuntime.class);
+		ServiceReference<HttpServiceRuntime> ref = getServiceReference(bundleContext, HttpServiceRuntime.class, null);
 
 		assertTrue("HttpServiceRuntime reference shall not be null", ref != null);
 
-		ServiceReference<HttpService> serviceReference = bundleContext.getServiceReference(HttpService.class);
+		ServiceReference<HttpService> serviceReference = getServiceReference(bundleContext, HttpService.class, null);
 
 		assertTrue("HttpService reference shall not be null", serviceReference != null);
 
@@ -325,7 +327,38 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 		assertTrue("HttpServiceIDs shall contain service ID from HttpContext", serviceIds.contains(serviceId));
 		assertTrue("endpoint shall be not null", endpoint != null);
 		assertTrue("endpoint shall be not null", endpoint.length() > 0);
-		assertTrue("endpoint should be bound to 0.0.0.0:8181", endpoint.contentEquals("0.0.0.0:8282"));
+		assertTrue("endpoint should be bound to 0.0.0.0:8282", endpoint.contentEquals("0.0.0.0:8282"));
+	}
+
+	private <T> ServiceReference<T> getServiceReference(BundleContext bundleContext, Class<T> clazz, String filter) throws InterruptedException {
+		final CountDownLatch latch = new CountDownLatch(1);
+		final org.osgi.framework.Filter serviceFilter;
+		try {
+			serviceFilter = filter != null ? bundleContext.createFilter(filter) : null;
+		} catch (InvalidSyntaxException ex) {
+			throw new IllegalArgumentException(ex);
+		}
+		final AtomicReference<ServiceReference<T>> ref = new AtomicReference<>();
+		ServiceTracker<T, T> tracker = new ServiceTracker<T, T>(bundleContext, clazz, null) {
+			@Override
+			public T addingService(ServiceReference<T> reference) {
+				T service = super.addingService(reference);
+				if (serviceFilter == null || serviceFilter.match(reference)) {
+					ref.set(reference);
+					latch.countDown();
+				}
+				return service;
+			}
+		};
+		tracker.open();
+		try {
+			if (latch.await(5, TimeUnit.SECONDS)) {
+				return ref.get();
+			}
+			return new EmptyServiceReference<>();
+		} finally {
+			tracker.close();
+		}
 	}
 
 	/**
@@ -342,4 +375,37 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 	private static final class InvalidServlet extends HttpServlet {
 
 	}
+
+	private static class EmptyServiceReference<T> implements ServiceReference<T> {
+		@Override
+		public Object getProperty(String key) {
+			return "<no value>";
+		}
+
+		@Override
+		public String[] getPropertyKeys() {
+			return new String[0];
+		}
+
+		@Override
+		public Bundle getBundle() {
+			return null;
+		}
+
+		@Override
+		public Bundle[] getUsingBundles() {
+			return new Bundle[0];
+		}
+
+		@Override
+		public boolean isAssignableTo(Bundle bundle, String className) {
+			return false;
+		}
+
+		@Override
+		public int compareTo(Object reference) {
+			return 0;
+		}
+	}
+
 }
