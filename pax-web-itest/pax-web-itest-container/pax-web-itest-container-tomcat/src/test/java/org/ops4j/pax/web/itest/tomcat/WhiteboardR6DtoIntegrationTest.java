@@ -158,7 +158,7 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 
 		assertThat("Default- and CustomServletContextDTO must be available:" + runtimeDTO.servletContextDTOs.length,
 				runtimeDTO.servletContextDTOs,
-				servletContextDTOs -> servletContextDTOs.length == 3);
+				servletContextDTOs -> servletContextDTOs.length >= 3);
 
 		Optional<ServletContextDTO> defaultContext = Arrays.stream(runtimeDTO.servletContextDTOs)
 				.filter(servletContextDTO -> Objects.equals(servletContextDTO.name, "default"))
