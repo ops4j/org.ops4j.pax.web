@@ -134,7 +134,6 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 		return result;
 	}
 
-
 	/**
 	 * Tests the DTO structure for the Whiteboard-Services registered by sample whiteboard-ds
 	 */
@@ -283,15 +282,15 @@ public class WhiteboardR6DtoIntegrationTest extends ITestBase {
 		assertTrue("ServletContext-ServiceID doesn't match",
 				requestInfoDTO.servletContextId == defaultServletContextServiceId);
 		assertThat("ServletDTO doesn't match",
-				requestInfoDTO.servletDTO,  servletDTO ->
+				requestInfoDTO.servletDTO, servletDTO ->
 						Objects.equals(servletDTO.patterns[0], "/simple-servlet")
 								&& Objects.equals(servletDTO.name, "SimpleServlet"));
 		assertThat("FilterDTO doesn't match",
-				requestInfoDTO.filterDTOs[0],  filterDTO ->
+				requestInfoDTO.filterDTOs[0], filterDTO ->
 						Objects.equals(filterDTO.patterns[0], "/simple-servlet")
 								&& Objects.equals(filterDTO.name, "SimpleFilter"));
 		assertThat("ResourceDTO doesn't match",
-				requestInfoDTO.resourceDTO,  resourceDTO ->
+				requestInfoDTO.resourceDTO, resourceDTO ->
 						Objects.equals(resourceDTO.patterns[0], "/resources"));
 	}
 
