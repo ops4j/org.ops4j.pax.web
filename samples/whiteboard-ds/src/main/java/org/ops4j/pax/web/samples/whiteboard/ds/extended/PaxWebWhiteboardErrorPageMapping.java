@@ -20,7 +20,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 
-//@Component
+@Component
 public class PaxWebWhiteboardErrorPageMapping implements ErrorPageMapping {
     
     @Activate

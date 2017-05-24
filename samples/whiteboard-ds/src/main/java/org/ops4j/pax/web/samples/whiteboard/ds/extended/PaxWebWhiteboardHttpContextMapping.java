@@ -22,7 +22,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.http.HttpContext;
 
-//@Component
+@Component
 public class PaxWebWhiteboardHttpContextMapping implements HttpContextMapping {
 
     static final String HTTP_CONTEXT_ID = "CustomHttpContextMapping";
