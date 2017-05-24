@@ -31,7 +31,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
         service = {Servlet.class, WhiteboardErrorPage.class}, // WhiteboardErrorPage only for testing
         scope = ServiceScope.PROTOTYPE,
         property = {
-                HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE + "=java.io.IOException," +
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE + "=java.io.IOException",
                 HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE + "=404"
         }
 )
