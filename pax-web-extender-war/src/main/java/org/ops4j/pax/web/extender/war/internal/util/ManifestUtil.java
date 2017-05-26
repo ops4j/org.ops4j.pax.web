@@ -38,7 +38,7 @@ public class ManifestUtil {
 
 	/**
 	 * @param bundle
-	 * @return
+	 * @return header
 	 */
 	public static String getHeader(final Bundle bundle, String... keys) {
 		NullArgumentException.validateNotNull(bundle, "Bundle");
@@ -48,7 +48,7 @@ public class ManifestUtil {
 		// Look in the bundle...
 		Dictionary<String, String> headers = bundle.getHeaders();
 		for (String key : keys) {
-			String value = (String) headers.get(key);
+			String value = headers.get(key);
 			if (value != null) {
 				return value;
 			}
@@ -65,7 +65,7 @@ public class ManifestUtil {
 			// A fragment must also have the FRAGMENT_HOST header and the
 			// FRAGMENT_HOST header
 			// must be equal to the bundle symbolic name
-			String fragmentHost = (String) fragment.getHeaders().get(
+			String fragmentHost = fragment.getHeaders().get(
 					Constants.FRAGMENT_HOST);
 			if ((fragmentHost == null)
 					|| (!fragmentHost.equals(bundle.getSymbolicName()))) {
@@ -73,7 +73,7 @@ public class ManifestUtil {
 			}
 			headers = fragment.getHeaders();
 			for (String key : keys) {
-				String value = (String) headers.get(key);
+				String value = headers.get(key);
 				if (value != null) {
 					return value;
 				}
@@ -84,7 +84,7 @@ public class ManifestUtil {
 
 	/**
 	 * @param bundle
-	 * @return
+	 * @return context name - from Web-ContextPath or Webapp-Context headers, fallbacks to symbolic name or even ID
 	 */
 	public static String extractContextName(final Bundle bundle) {
 		// set the context name as first looking for a manifest entry named

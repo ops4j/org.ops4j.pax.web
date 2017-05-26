@@ -64,6 +64,7 @@
 						<configuration>
 							<sourceHighlighter>coderay</sourceHighlighter>
 							<backend>html5</backend>
+							<doctype>article</doctype>
 							<attributes>
 								<toc>left</toc>
 								<toc-position>left</toc-position>

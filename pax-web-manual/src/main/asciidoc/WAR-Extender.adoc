@@ -59,7 +59,7 @@ servlets/resources/filters/listeners
 * easy to use
 
 // Push titles down one level
-:leveloffset: 3
+:leveloffset: +1
 
 include::WAR-Extender-Examples.adoc[]
 
@@ -70,4 +70,4 @@ include::Supported-Web-Elements.adoc[]
 include::WAR-Extender-FAQ.adoc[]
 
 // Return to normal title levels
-:leveloffset: 2
+:leveloffset: -1

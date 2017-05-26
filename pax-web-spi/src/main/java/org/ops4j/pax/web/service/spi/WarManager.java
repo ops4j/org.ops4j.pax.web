@@ -44,7 +44,7 @@ public interface WarManager {
 	 * Stops a war bundle.
 	 *
 	 * @param bundleId The bundle id that contains the war.
-	 * @return
+	 * @return result of stop operation
 	 */
 	int stop(long bundleId);
 

@@ -31,7 +31,7 @@ public class WebAppConstraintMapping {
 	}
 
 	/**
-	 * @return
+	 * @return mapping
 	 */
 	public String getMapping() {
 		return mapping;
@@ -59,7 +59,7 @@ public class WebAppConstraintMapping {
 	}
 
 	/**
-	 * @return
+	 * @return url
 	 */
 	public String getUrl() {
 		return url;

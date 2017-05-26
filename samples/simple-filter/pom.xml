@@ -80,7 +80,6 @@
 					<instructions>
 						<_wab>src/main/webapp</_wab>
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-						<Bundle-Version>${project.version}</Bundle-Version>
 						<Import-Package>
 							javax.servlet;version="[3.0,3.2.0)",
 							javax.servlet.http;version="[3.0,3.2.0)",

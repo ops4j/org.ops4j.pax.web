@@ -99,18 +99,18 @@
                         <supportedProjectType>war</supportedProjectType>
                     </supportedProjectTypes>
                     <instructions>
+                        <_wab>src/main/webapp</_wab>
                         <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-                        <Bundle-Version>${project.version}</Bundle-Version>
                         <Import-Package>
                         	org.springframework.osgi.web.context.support,
                         	org.springframework.web.servlet.view,
                         	org.springframework.web.servlet,
                             *; resolution:=optional
                         </Import-Package>
-                        <Export-Package>org.ops4j.pax.web.samples.spring.*,!*</Export-Package>
-                        <Bundle-Classpath>
+                        <Export-Package>org.ops4j.pax.web.samples.spring.controller,!*</Export-Package>
+                        <Bundle-ClassPath>
                             WEB-INF/classes
-                        </Bundle-Classpath>
+                        </Bundle-ClassPath>
                         <Web-ContextPath>war-spring</Web-ContextPath>
                         <Embed-Dependency>*; artifactId=!org.osgi.compendium; scope=compile; type=!pom; inline=true</Embed-Dependency>
                         <Embed-Transitive>true</Embed-Transitive>

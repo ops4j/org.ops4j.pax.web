@@ -43,9 +43,12 @@ the, standard, programmatic registration as detailed in the HTTP Service
 specs.
 
 
+:leveloffset: +1
+
 include::Pax-Web.adoc[]
 
 = link:User-Guide.html[User-Guide]
 
 = link:Developer-Guide.html[Developer-Guide]
 
+:leveloffset: -1

@@ -55,7 +55,6 @@
 						<_wab>src/main/webapp/</_wab>
 						<Web-ContextPath>websocket</Web-ContextPath>
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-						<Bundle-Version>${project.version}</Bundle-Version>
 						<Import-Package>
 							*, 
 							javax.servlet

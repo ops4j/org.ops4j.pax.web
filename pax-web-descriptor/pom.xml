@@ -48,7 +48,8 @@
 				<configuration>
 					<extension>true</extension>
 					<generatePackage>org.ops4j.pax.web.descriptor.gen</generatePackage>
-                    <catalog>src/main/resources/catalog.cat</catalog>
+					<catalog>src/main/resources/catalog.cat</catalog>
+					<strict>false</strict>
 					<schemaIncludes>
 						<include>xsd/web-app_3_1.xsd</include>
 					</schemaIncludes>
@@ -61,7 +62,7 @@
 				<configuration>
 					<instructions>
 						<Export-Package>org.ops4j.pax.web.descriptor.gen;
-							version=${project.version}</Export-Package>
+							version="${pax-web.osgi.version}"</Export-Package>
 					</instructions>
 				</configuration>
 				<executions>

@@ -37,7 +37,6 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-            <Bundle-Version>${project.version}</Bundle-Version>
             <Fragment-Host>org.ops4j.pax.web.pax-web-tomcat</Fragment-Host>
           </instructions>
         </configuration>

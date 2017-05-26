@@ -535,7 +535,7 @@ public class WebApp {
 	}
 
 	/**
-	 * @return
+	 * @return list of {@link WebAppConstraintMapping}
 	 */
 	public WebAppConstraintMapping[] getConstraintMappings() {
 		return constraintsMapping
@@ -553,7 +553,7 @@ public class WebApp {
 	}
 
 	/**
-	 * @return
+	 * @return list of {@link WebAppSecurityRole}
 	 */
 	public WebAppSecurityRole[] getSecurityRoles() {
 		return securityRoles.toArray(new WebAppSecurityRole[securityRoles
@@ -577,7 +577,7 @@ public class WebApp {
 	}
 
 	/**
-	 * @return
+	 * @return list of {@link WebAppLoginConfig}
 	 */
 	public WebAppLoginConfig[] getLoginConfigs() {
 		return loginConfig.toArray(new WebAppLoginConfig[loginConfig.size()]);

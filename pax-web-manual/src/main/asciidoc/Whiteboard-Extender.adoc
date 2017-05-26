@@ -171,9 +171,9 @@ By web elements we mean any of http context, servlet, resources, filter,
 listener.
 
 // Push titles down one level
-:leveloffset: 3
+:leveloffset: +1
 
 include::Whiteboard-Examples.adoc[]
 
 // Return to normal title levels
-:leveloffset: 2
+:leveloffset: -1

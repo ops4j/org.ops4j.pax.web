@@ -61,8 +61,7 @@
 					<instructions>
 						<_wab>src/main/webapp</_wab>
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-						<Bundle-Version>${project.version}</Bundle-Version>
-						<Bundle-ClassPath>.,WEB-INF/classes</Bundle-ClassPath>
+						<Bundle-ClassPath>WEB-INF/classes</Bundle-ClassPath>
 						<Export-Package>
 							org.ops4j.pax.web.jettyconftest.*
 						</Export-Package>

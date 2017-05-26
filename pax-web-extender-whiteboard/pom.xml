@@ -51,16 +51,15 @@
 					<instructions>
 						<_dsannotations>*</_dsannotations>
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-						<Bundle-Version>${project.version}</Bundle-Version>
 						<Bundle-Activator>${bundle.namespace}.internal.Activator</Bundle-Activator>
 						<Import-Package>
-							${bundle.namespace}; version="${project.version}",
-							${bundle.namespace}.runtime; version="${project.version}",
+							${bundle.namespace}; version="${pax-web.osgi.version}",
+							${bundle.namespace}.runtime; version="${pax-web.osgi.version}",
 							javax.xml.parsers,
 							org.slf4j; version="[1.5,2.0)",
-							org.ops4j.pax.web.service; version="${project.version}",
-							org.ops4j.pax.web.service.whiteboard; version="${project.version}",
-							org.ops4j.pax.web.utils; version="${project.version}",
+							org.ops4j.pax.web.service; version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.whiteboard; version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.utils; version="${pax-web.osgi.version}",
 							org.osgi.framework; version="[1.0.0,2.0.0)",
 							org.osgi.service.http; version="[1.0.0,2.0.0)",
 							org.osgi.service.http.context; version="[1.0.0,2.0.0)",
@@ -77,8 +76,8 @@
 							!javax.security.auth.x500
 						</Import-Package>
 						<Export-Package>
-							${bundle.namespace}; version="${project.version}",
-							${bundle.namespace}.runtime; version="${project.version}",
+							${bundle.namespace}; version="${pax-web.osgi.version}",
+							${bundle.namespace}.runtime; version="${pax-web.osgi.version}",
                             org.osgi.service.http.whiteboard
 						</Export-Package>
 						<Private-Package>${bundle.namespace}.internal.*</Private-Package>

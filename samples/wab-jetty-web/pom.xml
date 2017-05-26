@@ -42,7 +42,7 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <_wab>src/main/webapp/</_wab>
+                        <_wab>src/main/webapp</_wab>
                         <Web-ContextPath>wab-jetty-web</Web-ContextPath>
                     </instructions>
                 </configuration>

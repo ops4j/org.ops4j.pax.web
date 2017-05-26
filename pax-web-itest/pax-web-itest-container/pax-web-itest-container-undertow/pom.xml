@@ -23,7 +23,7 @@
 		<version>6.0.5-SNAPSHOT</version>
 	</parent>
 	<artifactId>pax-web-itest-container-undertow</artifactId>
-	<packaging>bundle</packaging>
+	<packaging>jar</packaging>
 	<groupId>org.ops4j.pax.web.itest.container</groupId>
 
 	<name>OPS4J Pax Web - Integration Undertow Container Tests </name>
@@ -733,22 +733,6 @@
 				<configuration>
 					<skip>true</skip>
 				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>baseline</id>
-						<goals>
-							<goal>baseline</goal>
-						</goals>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 
 			<plugin>

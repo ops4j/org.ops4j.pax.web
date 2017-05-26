@@ -25,7 +25,7 @@ means somebody that uses Pax Web.
 Details on Pax Web can be found at the link:index.html[overview].
 
 // Push titles down one level
-:leveloffset: 1
+:leveloffset: +1
 
 include::Configuration.adoc[]
 
@@ -33,7 +33,7 @@ include::Http-Service-Extensions.adoc[]
 
 include::Examples.adoc[]
 
-include::War-Extender.adoc[]
+include::WAR-Extender.adoc[]
 
 include::Whiteboard-Extender.adoc[]
 
@@ -44,4 +44,4 @@ include::JSP-Usage.adoc[]
 include::Webresources.adoc[]
 
 // Return to normal title levels
-:leveloffset: 0
+:leveloffset: -1

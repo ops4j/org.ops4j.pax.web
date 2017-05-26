@@ -49,4 +49,3 @@ Import-Package: \
 	javax.servlet,\
 	javax.el,\
 	*
-Private-Package: org.ops4j.pax.web.sample.cdi

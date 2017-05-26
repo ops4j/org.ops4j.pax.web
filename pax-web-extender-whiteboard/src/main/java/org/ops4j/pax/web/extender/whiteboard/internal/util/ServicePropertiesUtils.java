@@ -198,7 +198,7 @@ public class ServicePropertiesUtils {
 	 * Utility method to extract the shared state of the HttpContext
 	 *
 	 * @param serviceReference
-	 * @return
+	 * @return whether the context is shared
 	 */
 	static public Boolean extractSharedHttpContext(final ServiceReference<?> serviceReference) {
 		Boolean sharedHttpContext = Boolean
