@@ -58,7 +58,6 @@
 					</supportedProjectTypes>
 					<instructions>
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-						<Bundle-Version>${project.version}</Bundle-Version>
 						<_wab>src/main/webapp</_wab>
 						<Import-Package>
 							javax.el,

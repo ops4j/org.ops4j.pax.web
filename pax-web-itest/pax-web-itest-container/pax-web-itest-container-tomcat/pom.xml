@@ -24,7 +24,7 @@
 	</parent>
 	<groupId>org.ops4j.pax.web.itest.container</groupId>
 	<artifactId>pax-web-itest-container-tomcat</artifactId>
-	<packaging>bundle</packaging>
+	<packaging>jar</packaging>
 
 	<name>OPS4J Pax Web - Integration Tomcat Container Tests</name>
 
@@ -651,11 +651,6 @@
 				<configuration>
 					<skip>true</skip>
 				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
 			</plugin>
 
 			<plugin>

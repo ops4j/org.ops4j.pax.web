@@ -66,10 +66,9 @@
 				<configuration>
 					<instructions>
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-						<Bundle-Version>${project.version}</Bundle-Version>
 						<Import-Package>
-							org.ops4j.pax.web.service.spi.util; version="${project.version}",
-							${bundle.namespace}; version="${project.version}",
+							org.ops4j.pax.web.service.spi.util; version="${pax-web.osgi.version}",
+							${bundle.namespace}; version="${pax-web.osgi.version}",
 							javax.servlet; version="[2.3.0,4.0.0)",
 							javax.servlet.http; version="[2.3.0,4.0.0)",
 							javax.servlet.descriptor;version="[2.3.0,4.0.0)",
@@ -175,7 +174,7 @@
 							org.apache.juli.logging
 						</Private-Package>
 						<Export-Package>
-							${bundle.namespace}; version="${project.version}",
+							${bundle.namespace}; version="${pax-web.osgi.version}",
 							javax.servlet.jsp; version="2.3.1",
 							javax.servlet.jsp.el; version="2.3.1",
 							javax.servlet.jsp.tagext; version="2.3.1",
@@ -184,17 +183,21 @@
 							javax.servlet.jsp.jstl.sql; version="1.2.1",
 							javax.servlet.jsp.jstl.tlv; version="1.2.1",
 							javax.servlet.jsp.resources; version="2.2",
-							org.apache.el.*; version="2.2",
+							org.apache.el; version="2.2",
+							org.apache.el.lang; version="2.2",
+							org.apache.el.parser; version="2.2",
+							org.apache.el.stream; version="2.2",
+							org.apache.el.util; version="2.2",
 							org.apache.jasper; version="2.2"; -split-package:="merge-first",
-							org.apache.jasper.compiler; version="2.2",
-							org.apache.jasper.compiler.tagplugin; version="2.2",
-							org.apache.jasper.el; version="2.2",
-							org.apache.jasper.resources; version="2.2",
-							org.apache.jasper.runtime; version="2.2",
-							org.apache.jasper.security; version="2.2",
-							org.apache.jasper.servlet; version="2.2",
-							org.apache.jasper.tagplugins.jstl; version="2.2",
-							org.apache.jasper.xmlparser; version="2.2",
+							org.apache.jasper.compiler; version="2.2"; -split-package:=merge-first,
+							org.apache.jasper.compiler.tagplugin; version="2.2"; -split-package:=merge-first,
+							org.apache.jasper.el; version="2.2"; -split-package:=merge-first,
+							org.apache.jasper.resources; version="2.2"; -split-package:=merge-first,
+							org.apache.jasper.runtime; version="2.2"; -split-package:=merge-first,
+							org.apache.jasper.security; version="2.2"; -split-package:=merge-first,
+							org.apache.jasper.servlet; version="2.2"; -split-package:=merge-first,
+							org.apache.jasper.tagplugins.jstl; version="2.2"; -split-package:=merge-first,
+							org.apache.jasper.xmlparser; version="2.2"; -split-package:=merge-first,
 							org.apache.taglibs.standard,
 							org.apache.taglibs.standard.extra.spath,
 							org.apache.taglibs.standard.functions,

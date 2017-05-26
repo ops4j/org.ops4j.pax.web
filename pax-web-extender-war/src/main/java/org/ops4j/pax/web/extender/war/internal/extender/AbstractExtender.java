@@ -169,7 +169,7 @@ public abstract class AbstractExtender implements BundleActivator,
 
 	/**
 	 * @param bundles
-	 * @return
+	 * @return bundles to destroy
 	 */
 	protected Collection<Bundle> chooseBundlesToDestroy(Set<Bundle> bundles) {
 		return null;
@@ -337,7 +337,7 @@ public abstract class AbstractExtender implements BundleActivator,
 	 * to be extended.
 	 *
 	 * @param bundle the bundle to extend
-	 * @return
+	 * @return created {@link Extension}
 	 * @throws Exception
 	 */
 	protected abstract Extension doCreateExtension(Bundle bundle)

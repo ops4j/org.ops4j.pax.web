@@ -42,7 +42,7 @@ public class ResourceModel extends ServletModel {
 	/**
 	 * There should be one resource model for given name/alias registered in web context
 	 * @param o
-	 * @return
+	 * @return whether the resource models are equal
 	 */
 	@Override
 	public boolean equals(Object o) {

@@ -142,14 +142,14 @@ public interface Configuration {
 	/**
 	 * Returns the directory containing the external configuration
 	 *
-	 * @return
+	 * @return configuration directory
 	 */
 	File getConfigurationDir();
 
 	/**
 	 * Returns the URL of external web server configuration
 	 *
-	 * @return
+	 * @return configuration URL
 	 */
 	URL getConfigurationURL();
 

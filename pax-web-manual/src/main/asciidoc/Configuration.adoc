@@ -49,7 +49,7 @@ framework must fallback to using standard Java System properties (set
 via vm -D option).
 
 // Push titles down one level
-:leveloffset: 3
+:leveloffset: +1
 
 include::Basic-Configuration.adoc[]
 
@@ -60,4 +60,4 @@ include::SSL-Configuration.adoc[]
 include::JSP-Configuration.adoc[]
 
 // Return to normal title levels
-:leveloffset: 2
+:leveloffset: -1

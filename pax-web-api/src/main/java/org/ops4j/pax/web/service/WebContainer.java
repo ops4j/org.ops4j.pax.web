@@ -610,7 +610,7 @@ public interface WebContainer extends HttpService {
 	 * Creates a default HttpContext as defined for {@link HttpService#createDefaultHttpContext()}
 	 *
 	 * @param contextID the context.id which is used while registering the HttpContext as service.
-	 * @return
+	 * @return {@link HttpContext}
 	 */
 	HttpContext createDefaultHttpContext(String contextID);
 

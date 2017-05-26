@@ -49,7 +49,6 @@
 				<configuration>
 					<instructions>
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-						<Bundle-Version>${project.version}</Bundle-Version>
 						<Import-Package>
 							javax.servlet.*; version="[2.3.0,4.0.0)",
 							org.osgi.framework; version="[1.0.0,2.0.0)",
@@ -61,13 +60,13 @@
 							*
 						</Import-Package>
 						<Export-Package>
-							${bundle.namespace};version="${project.version}",
-							${bundle.namespace}.whiteboard;version="${project.version}",
+							${bundle.namespace};version="${pax-web.osgi.version}",
+							${bundle.namespace}.whiteboard;version="${pax-web.osgi.version}",
 							org.osgi.service.http,
 							org.osgi.service.http.context,
 							org.osgi.service.http.runtime,
 							org.osgi.service.http.runtime.dto,
-							org.ops4j.pax.web.utils;version="${project.version}"
+							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}"
 						</Export-Package>
 						<_removeheaders>
 							Include-Resource,

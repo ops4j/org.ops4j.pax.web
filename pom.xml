@@ -137,7 +137,7 @@
 
 		<!-- Plugins -->
 		<gatling-plugin.version>2.0.0</gatling-plugin.version>
-		<bundle-plugin.version>3.2.0</bundle-plugin.version>
+		<bundle-plugin.version>3.3.0</bundle-plugin.version>
 
 		<servlet.spec.groupId>javax.servlet</servlet.spec.groupId>
 		<servlet.spec.artifactId>javax.servlet-api</servlet.spec.artifactId>
@@ -259,6 +259,9 @@
 							<goal>jar</goal>
 							<goal>test-javadoc</goal>
 						</goals>
+						<configuration>
+							<additionalparam>${javadoc.opts}</additionalparam>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -294,6 +297,18 @@
 							<configuration>
 								<comparisonVersion>${baseline.version}</comparisonVersion>
 								<failOnWarning>false</failOnWarning>
+							</configuration>
+						</execution>
+						<execution>
+							<id>cleanVersions</id>
+							<phase>generate-sources</phase>
+							<goals>
+								<goal>cleanVersions</goal>
+							</goals>
+							<configuration>
+								<versions>
+									<pax-web.osgi.version>${project.version}</pax-web.osgi.version>
+								</versions>
 							</configuration>
 						</execution>
 					</executions>
@@ -1132,6 +1147,15 @@
 			</modules>
 		</profile>
 		<profile>
+			<id>doclint-java8-disable</id>
+			<activation>
+				<jdk>[1.8,)</jdk>
+			</activation>
+			<properties>
+				<javadoc.opts>-Xdoclint:none</javadoc.opts>
+			</properties>
+		</profile>
+		<profile>
             <id>rat</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1141,7 +1165,7 @@
                     <plugin>
                         <groupId>org.apache.rat</groupId>
                         <artifactId>apache-rat-plugin</artifactId>
-                        <version>0.11</version>
+                        <version>0.12</version>
                         <executions>
                             <execution>
                                 <phase>verify</phase>

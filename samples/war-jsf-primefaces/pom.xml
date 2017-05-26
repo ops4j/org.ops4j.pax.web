@@ -62,7 +62,6 @@
                     <instructions>
                     	<_wab>src/main/webapp</_wab>
                         <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-                        <Bundle-Version>${project.version}</Bundle-Version>
                         <Import-Package>
                             javax.el,
                             javax.faces.webapp,

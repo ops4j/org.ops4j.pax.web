@@ -48,7 +48,6 @@
 					<excludeDependencies>META-INF/ECLIPSEF.RSA</excludeDependencies>
 					<instructions>
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-						<Bundle-Version>${project.version}</Bundle-Version>
 						<Bundle-Activator>${bundle.namespace}.internal.CompositeActivator</Bundle-Activator>
 						<Import-Package>
 							javax.net.ssl; resolution:=optional,
@@ -87,16 +86,16 @@
 							javax.servlet.http;version="3.0.0",
 							javax.servlet.resources;version="3.0.0",
 							org.ops4j.pax.web.utils;
-							version="${project.version}"; -split-package:=merge-first,
+							version="${pax-web.osgi.version}"; -split-package:=merge-first,
 							org.ops4j.pax.web.service;
-							version="${project.version}";
+							version="${pax-web.osgi.version}";
 							-split-package:=merge-first,
 							org.ops4j.pax.web.service.spi;
-							version="${project.version}"; -split-package:=merge-first,
+							version="${pax-web.osgi.version}"; -split-package:=merge-first,
 							org.ops4j.pax.web.service.spi.model;
-							version="${project.version}"; -split-package:=merge-first,
+							version="${pax-web.osgi.version}"; -split-package:=merge-first,
 							org.ops4j.pax.web.service.spi.util;
-							version="${project.version}";
+							version="${pax-web.osgi.version}";
 							-split-package:=merge-first,
 							org.osgi.service.http;version="1.2.0",
 							org.apache.catalina.*;version="${dependency.tomcat.version}";
