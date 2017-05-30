@@ -153,6 +153,12 @@
 		<dependency>
 			<groupId>biz.aQute.bnd</groupId>
 			<artifactId>bndlib</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.osgi</groupId>
+					<artifactId>org.osgi.core</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.url</groupId>
@@ -726,7 +732,7 @@
 				<dependency>
 					<groupId>org.apache.felix</groupId>
 					<artifactId>org.apache.felix.framework</artifactId>
-					<version>5.0.1</version>
+					<version>5.6.2</version>
 					<scope>provided</scope>
 				</dependency>
 			</dependencies>

@@ -35,7 +35,6 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<version.osgi>5.0.0</version.osgi>
 		<version.slf4j>1.7.12</version.slf4j>
 		<version.jsf>2.2</version.jsf>
 		<version.servlet>3.1.0</version.servlet>
@@ -54,16 +53,6 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>org.osgi</groupId>
-				<artifactId>org.osgi.core</artifactId>
-				<version>${version.osgi}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.osgi</groupId>
-				<artifactId>org.osgi.compendium</artifactId>
-				<version>${version.osgi}</version>
-			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.tipi</groupId>
 				<artifactId>org.ops4j.pax.tipi.junit</artifactId>
