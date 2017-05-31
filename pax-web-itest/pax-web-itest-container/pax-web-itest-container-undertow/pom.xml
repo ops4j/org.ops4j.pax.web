@@ -240,6 +240,12 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
+			<version>1_2</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>javax.annotation</groupId>
 			<artifactId>javax.annotation-api</artifactId>
 			<version>1.2</version>
@@ -695,9 +701,9 @@
 					<!-- This test will work if PAXWEB-154 and PAXWEB-123 are fixed -->
 					<excludes>
 						<!-- <exclude>**/JspFilterIntegrationTest.java</exclude> -->
-						<exclude>**/JettyWebIntegrationTest.java</exclude>
+						<!--<exclude>**/JettyWebIntegrationTest.java</exclude>-->
 						<!-- Test for PAXWEB-382 -->
-						<exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>
+						<!--<exclude>**/WarJSFFaceletsIntegrationTest.java</exclude>-->
 						<!-- Test for PAXWEB-646 -->
 						<!-- <exclude>**/WarJSFIntegrationTest.java</exclude> -->
 						<!-- <exclude>**/WarJSFPrimefacesIntegrationTest.java</exclude> -->
@@ -706,6 +712,8 @@
 						<ProjectVersion>${project.version}</ProjectVersion>
 						<MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
 						<coverage.command>${jcoverage.command}</coverage.command>
+						<!-- to configure pax-exam with pax.exam.system=default which gives us more control over installed bundles -->
+						<pax.exam.configuration>file:../../pax-web-itest-base/src/main/resources/controlled-exam.properties</pax.exam.configuration>
 					</systemPropertyVariables>
 					<argLine>${jcoverage.command} -Xss8m</argLine>
 					<forkMode>pertest</forkMode>
