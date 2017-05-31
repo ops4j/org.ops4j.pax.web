@@ -74,6 +74,7 @@
     <module>undertow-auth-config-fragment</module>
     <module>war-formauth</module>
     <module>war-introspection</module>
+    <module>war-introspection-bundle</module>
     <module>war-jsf</module>
 	<module>war-jsf-cdi</module>
     <module>war-jsf-primefaces</module>
