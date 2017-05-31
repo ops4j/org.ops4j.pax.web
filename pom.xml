@@ -97,6 +97,8 @@
 		<dependency.commons-collection.version>4.0</dependency.commons-collection.version>
 		<dependency.commons-lang.version>3.3.2</dependency.commons-lang.version>
 		<dependency.commons-logging.version>1.1.1</dependency.commons-logging.version>
+		<dependency.felix.framework.version>5.6.2</dependency.felix.framework.version>
+		<dependency.configadmin.version>1.8.14</dependency.configadmin.version>
 		<dependency.fileinstall.version>3.5.0</dependency.fileinstall.version>
 		<dependency.gatling.version>2.0.1</dependency.gatling.version>
 		<dependency.jasper.version>6.0.29</dependency.jasper.version>
@@ -109,7 +111,7 @@
 		<dependency.jstl.version>1.2</dependency.jstl.version>
 		<dependency.karaf.version>4.1.0</dependency.karaf.version>
 		<dependency.osgi.version>6.0.0</dependency.osgi.version>
-		<dependency.paxurl.version>2.5.0</dependency.paxurl.version>
+		<dependency.paxurl.version>2.5.2</dependency.paxurl.version>
 		<dependency.pax-logging.version>1.10.0</dependency.pax-logging.version>
 		<dependency.slf4j>1.7.12</dependency.slf4j>
 		<dependency.scr.version>2.0.6</dependency.scr.version>
@@ -709,8 +711,18 @@
 
 			<dependency>
 				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.framework</artifactId>
+				<version>${dependency.felix.framework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.fileinstall</artifactId>
 				<version>${dependency.fileinstall.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.configadmin</artifactId>
+				<version>${dependency.configadmin.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>biz.aQute.bnd</groupId>

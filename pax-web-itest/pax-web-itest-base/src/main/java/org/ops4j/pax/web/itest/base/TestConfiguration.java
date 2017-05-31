@@ -104,11 +104,9 @@ public class TestConfiguration {
 				// MyFaces
 				mavenBundle("org.apache.myfaces.core", "myfaces-api").versionAsInProject(),
 				mavenBundle("org.apache.myfaces.core", "myfaces-impl").versionAsInProject(),
-				mavenBundle("javax.annotation", "javax.annotation-api").version("1.2"),
 				mavenBundle("javax.interceptor", "javax.interceptor-api").version("1.2"),
 				mavenBundle("javax.enterprise", "cdi-api").version("1.2"),
 				mavenBundle("javax.validation", "validation-api").version("1.1.0.Final"),
-				mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.javax-inject").version("1_2"),
 				// Commons
 				mavenBundle("commons-io", "commons-io").version("1.4"),
 				mavenBundle("commons-codec", "commons-codec").version("1.10"),

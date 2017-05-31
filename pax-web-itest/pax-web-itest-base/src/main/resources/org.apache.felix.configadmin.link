@@ -1,0 +1,1 @@
+mvn:org.apache.felix/org.apache.felix.configadmin/${dependency.configadmin.version}
