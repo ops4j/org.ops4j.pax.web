@@ -112,14 +112,12 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>jul-to-slf4j</artifactId>
 			<scope>test</scope>
-			<version>1.7.5</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
 			<scope>test</scope>
-			<version>1.7.5</version>
 		</dependency>
 
 		<dependency>
@@ -166,6 +164,16 @@
 			<artifactId>org.apache.servicemix.bundles.commons-digester</artifactId>
 			<version>1.8_4</version>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>logkit</groupId>
+					<artifactId>logkit</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>commons-collections</groupId>

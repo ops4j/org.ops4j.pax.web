@@ -213,6 +213,12 @@
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-jsp</artifactId>
 			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.tomcat.embed</groupId>
+					<artifactId>tomcat-embed-jasper</artifactId>
+				</exclusion>
+			</exclusions>
 			<optional>true</optional>
 		</dependency>
 
@@ -241,11 +247,6 @@
 			<artifactId>slf4j-api</artifactId>
 			<type>jar</type>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
