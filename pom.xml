@@ -109,9 +109,9 @@
 		<dependency.jstl.version>1.2</dependency.jstl.version>
 		<dependency.karaf.version>4.1.0</dependency.karaf.version>
 		<dependency.osgi.version>6.0.0</dependency.osgi.version>
-		<dependency.pax-logging.version>1.6.3</dependency.pax-logging.version>
 		<dependency.paxurl.version>2.5.0</dependency.paxurl.version>
-		<dependency.slf4j>1.7.0</dependency.slf4j>
+		<dependency.pax-logging.version>1.10.0</dependency.pax-logging.version>
+		<dependency.slf4j>1.7.12</dependency.slf4j>
 		<dependency.scr.version>2.0.6</dependency.scr.version>
 		<dependency.swissbox.version>1.8.2</dependency.swissbox.version>
 		<dependency.tomcat.version>8.0.14</dependency.tomcat.version>
@@ -588,8 +588,21 @@
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-log4j12</artifactId>
+				<artifactId>slf4j-jdk14</artifactId>
 				<version>${dependency.slf4j}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>jcl-over-slf4j</artifactId>
+				<version>${dependency.slf4j}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>jul-to-slf4j</artifactId>
+				<version>${dependency.slf4j}</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -739,6 +752,12 @@
 			<dependency>
 				<groupId>org.ops4j.pax.logging</groupId>
 				<artifactId>pax-logging-service</artifactId>
+				<version>${dependency.pax-logging.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.logging</groupId>
+				<artifactId>pax-logging-log4j2</artifactId>
 				<version>${dependency.pax-logging.version}</version>
 				<scope>provided</scope>
 			</dependency>

@@ -1,0 +1,5 @@
+# Using mvn: will work with org.ops4j.pax.exam.nat.internal.NativeTestContainer,
+# because we have test-scoped dependency to pax-url-aether
+# when running with org.ops4j.pax.exam.karaf.container.internal.KarafTestContainer, pax-url-aether
+# would need to be installed separately
+mvn:org.ops4j.pax.logging/pax-logging-api/${dependency.pax-logging.version}
