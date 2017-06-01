@@ -78,7 +78,6 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 	}
 
 	@Test
-//    @Ignore("Registration of ServletContextHelper isn't functional right now")
 	public void testWhiteBoardServletWithContext() throws Exception {
 		Dictionary<String, String> contextProps = new Hashtable<>();
 		contextProps.put("osgi.http.whiteboard.context.name", "my-context");
@@ -115,7 +114,7 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 		ServiceRegistration<Servlet> errorServletReg = ErrorServlet.register(bundleContext, properties);
 		ServiceRegistration<Servlet> brokenServletReg = BrokenServlet.register(bundleContext);
 
-		final String message1 = String.format("%d|null|%s|null|%s|null", 404, "Not Found", "/error");
+		final String message1 = String.format("%d|null|%s|null|%s|default", 404, "Not Found", "/error");
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
 				.timeoutInSeconds(7200)
