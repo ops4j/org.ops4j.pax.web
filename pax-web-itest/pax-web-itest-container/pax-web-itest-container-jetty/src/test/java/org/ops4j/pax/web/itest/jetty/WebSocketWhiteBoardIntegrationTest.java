@@ -18,7 +18,6 @@ package org.ops4j.pax.web.itest.jetty;
 import org.eclipse.jetty.util.component.LifeCycle;
 import org.eclipse.jetty.websocket.jsr356.ClientContainer;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -58,7 +57,6 @@ public class WebSocketWhiteBoardIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore("Only works with an external websocket test tool like 'Simple Websocket client' a chrome extension")
 	public void testWebsocket() throws Exception {
 
 		SimpleWebSocket simpleWebSocket = new SimpleWebSocket();

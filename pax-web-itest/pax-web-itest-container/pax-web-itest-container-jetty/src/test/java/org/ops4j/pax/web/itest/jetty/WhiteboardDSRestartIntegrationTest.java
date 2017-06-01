@@ -127,7 +127,6 @@ public class WhiteboardDSRestartIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	//@Ignore("See PAXWEB-1077")
 	public void testWhiteBoardSampleBundleRestart() throws Exception {
 		// Test
 		HttpTestClientFactory.createDefaultTestClient()

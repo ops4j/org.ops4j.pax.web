@@ -103,7 +103,6 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-formauth/wc/sn");
 	}
 
-	@Ignore
 	@Test
 	public void testSlash() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()

@@ -322,9 +322,8 @@ public class HttpServiceIntegrationTest extends ITestBase {
 
 
 	@Test
-	@Ignore("Test fails due to a filter doesn't work right now for the root '/'")
 	public void testRootFilterRegistration() throws Exception {
-		ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<>(bundleContext, WebContainer.class, null);
+		ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<>(installWarBundle.getBundleContext(), WebContainer.class, null);
 		tracker.open();
 		WebContainer service = tracker.waitForService(TimeUnit.SECONDS.toMillis(20));
 		final String fullContent = "This content is Filtered by a javax.servlet.Filter";
@@ -403,7 +402,6 @@ public class HttpServiceIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore("this is a constantly 'blinking' test, skip for now.")
 	public void testNCSALogger() throws Exception {
 		testServletPath();
 
