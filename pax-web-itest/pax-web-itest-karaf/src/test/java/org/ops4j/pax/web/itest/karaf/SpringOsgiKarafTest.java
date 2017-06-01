@@ -38,7 +38,6 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
  * @author achim
  */
 @RunWith(PaxExam.class)
-@Ignore("Ignored for unknown reason")
 public class SpringOsgiKarafTest extends KarafBaseTest {
 
 	Logger LOG = LoggerFactory.getLogger(SpringOsgiKarafTest.class);
@@ -53,17 +52,37 @@ public class SpringOsgiKarafTest extends KarafBaseTest {
 
 		return combine(
 				jettyConfig(),
-				features(
-						maven().groupId("org.apache.karaf.features")
-								.artifactId("spring").type("xml")
-								.classifier("features").versionAsInProject(),
-						"spring-dm"),
+
+				// Karaf 4 no longer provides spring-dm feature
+
+				mavenBundle().groupId("org.springframework")
+						.artifactId("org.springframework.beans").versionAsInProject().start(true),
+				mavenBundle().groupId("org.springframework")
+						.artifactId("org.springframework.core").versionAsInProject().start(true),
+				mavenBundle().groupId("org.springframework")
+						.artifactId("org.springframework.context").versionAsInProject().start(true),
+				mavenBundle().groupId("org.springframework")
+						.artifactId("org.springframework.context.support").versionAsInProject().start(true),
+				mavenBundle().groupId("org.aopalliance")
+						.artifactId("com.springsource.org.aopalliance").versionAsInProject().start(true),
+				mavenBundle().groupId("org.springframework")
+						.artifactId("org.springframework.aop").versionAsInProject().start(true),
+				mavenBundle().groupId("org.springframework")
+						.artifactId("org.springframework.expression").versionAsInProject().start(true),
 				mavenBundle().groupId("org.springframework")
 						.artifactId("org.springframework.web").versionAsInProject().start(true),
 				mavenBundle().groupId("org.springframework")
 						.artifactId("org.springframework.web.servlet").versionAsInProject().start(true),
 				mavenBundle().groupId("org.springframework.osgi")
-						.artifactId("spring-osgi-web").versionAsInProject().start(true));
+						.artifactId("spring-osgi-web").versionAsInProject().start(true),
+				mavenBundle().groupId("org.springframework.osgi")
+						.artifactId("spring-osgi-core").versionAsInProject().start(true),
+				mavenBundle().groupId("org.springframework.osgi")
+						.artifactId("spring-osgi-extender").versionAsInProject().start(true),
+				mavenBundle().groupId("org.springframework.osgi")
+						.artifactId("spring-osgi-io").versionAsInProject().start(true),
+				mavenBundle().groupId("org.springframework.osgi")
+						.artifactId("spring-osgi-annotation").versionAsInProject().start(true));
 	}
 
 	/**
@@ -82,8 +101,6 @@ public class SpringOsgiKarafTest extends KarafBaseTest {
 				.getFeature("pax-war")));
 		assertTrue(featuresService.isInstalled(featuresService
 				.getFeature("pax-http-whiteboard")));
-		assertTrue(featuresService.isInstalled(featuresService
-				.getFeature("spring-dm")));
 	}
 
 	@Test
@@ -104,27 +121,6 @@ public class SpringOsgiKarafTest extends KarafBaseTest {
 
 	@Before
 	public void setUp() throws Exception {
-
-		if (featuresService == null) {
-			throw new RuntimeException("Featuresservice is null");
-		}
-
-		boolean installed = featuresService.isInstalled(featuresService
-				.getFeature("spring-dm"));
-
-		int counter = 0;
-		while (!installed && counter < 100) {
-			Thread.sleep(500);
-			installed = featuresService.isInstalled(featuresService
-					.getFeature("spring-dm"));
-			counter++;
-		}
-		LOG.info("waited {} ms for Spring-DM feature to appear", counter * 500);
-		if (!installed) {
-			throw new RuntimeException("No Spring-Dm available ...");
-		}
-
-
 		Bundle[] bundles = bundleContext.getBundles();
 		for (Bundle bundle : bundles) {
 			String symbolicName = bundle.getSymbolicName();

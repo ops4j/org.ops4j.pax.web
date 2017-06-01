@@ -41,7 +41,7 @@ import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.karaf.options.configs.CustomProperties;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.ops4j.pax.exam.options.MavenUrlReference;
-import org.ops4j.pax.web.itest.base.AbstractTestBase;
+import org.ops4j.pax.web.itest.base.AbstractControlledTestBase;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.client.HttpTestClient;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
@@ -49,7 +49,7 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class KarafBaseTest extends AbstractTestBase {
+public class KarafBaseTest extends AbstractControlledTestBase {
 
 	private static final Logger LOG = LoggerFactory.getLogger(KarafBaseTest.class);
 	public static final String RMI_SERVER_PORT = "44445";
@@ -84,7 +84,7 @@ public class KarafBaseTest extends AbstractTestBase {
 						.unpackDirectory(new File("target/paxexam/unpack/"))
 						.useDeployFolder(false).runEmbedded(false)/*.runEmbedded(true), //only for debugging*/,
 
-//				 KarafDistributionOption.debugConfiguration("5005", true),
+//				KarafDistributionOption.debugConfiguration("5005", true),
 				configureConsole().ignoreLocalConsole(),
 				when(isEquinox()).useOptions(
 						editConfigurationFilePut(CustomProperties.KARAF_FRAMEWORK, "equinox"),
@@ -105,12 +105,15 @@ public class KarafBaseTest extends AbstractTestBase {
 						" osgi.service;effective:=active;objectClass=org.osgi.service.startlevel.StartLevel, \n" +
 						" osgi.service;effective:=active;objectClass=org.osgi.service.url.URLHandlers"),
 
+				editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j2.pattern", "%d{HH:mm:ss.SSS} %-5level {%thread} [%C] (%F:%L) : %msg%n"),
+				editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j2.logger.paxweb.name", "org.ops4j.pax.web"),
+				editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j2.logger.paxweb.level", "trace"),
+
 				KarafDistributionOption.replaceConfigurationFile("etc/keystore", new File(getClass().getClassLoader().getResource("keystore").getFile())),
 				KarafDistributionOption.replaceConfigurationFile("/etc/jetty.xml", new File(getClass().getClassLoader().getResource("jetty.xml").getFile())),
 				systemProperty("ProjectVersion").value(
 						VersionUtil.getProjectVersion()),
 				addCodeCoverageOption(),
-
 
 				mavenBundle().groupId("org.ops4j.pax.web.itest")
 						.artifactId("pax-web-itest-base").versionAsInProject(),

@@ -70,6 +70,18 @@
 			<version>${karaf.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.karaf.management</groupId>
+			<artifactId>org.apache.karaf.management.server</artifactId>
+			<version>${karaf.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.webconsole</artifactId>
+			<version>3.1.8</version>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>org.apache.karaf.system</groupId>
@@ -256,6 +268,12 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
 		<!-- Spring DM Tests -->
 		<dependency>
 			<groupId>org.apache.karaf.features</groupId>
@@ -335,6 +353,18 @@
 					<groupId>org.osgi</groupId>
 					<artifactId>org.osgi.compendium</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.ops4j.pax.logging</groupId>
+					<artifactId>pax-logging-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.ops4j.pax.logging</groupId>
+					<artifactId>pax-logging-log4j2</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.karaf</groupId>
+					<artifactId>org.apache.karaf.client</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -381,6 +411,7 @@
 						<pax.exam.framework>${pax.exam.framework}</pax.exam.framework>
 						<coverage.command>${jcoverage.command}</coverage.command>
 					</systemPropertyVariables>
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 				</configuration>
 				<executions>
 					<execution>
