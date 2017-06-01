@@ -81,6 +81,17 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 	}
 
 	@Test
+	public void testServerVersion() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseHeaderAssertion( "Response must not contain a jetty version", header ->
+					header.map(entry -> entry.getKey()).allMatch(s -> !s.equalsIgnoreCase("Server"))
+				)
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://localhost:8181/test/wc/example");
+	}
+
+	@Test
 	public void testWebIP() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
