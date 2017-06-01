@@ -127,7 +127,6 @@ public class WebContainerIntegrationTest extends ITestBase {
 	}
 	
 	@Test
-	@Ignore("PAXWEB-1032 - this is a test for that issue, somehow this test fails, while the white-board extender ones work.")
     public void testWelcomFiles() throws Exception {
 	    HttpTestClientFactory.createDefaultTestClient()
             .withResponseAssertion("Response must contain '<h1>Hello World</h1>'",

@@ -26,11 +26,8 @@ import java.util.Arrays;
 import java.util.EventListener;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
 
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
@@ -69,7 +66,6 @@ import org.ops4j.pax.web.service.spi.model.ResourceModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
-import org.ops4j.pax.web.service.spi.model.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
 import org.osgi.framework.Bundle;
@@ -288,6 +284,19 @@ class JettyServerImpl implements JettyServer {
 				context.setClassLoader(containerSpecificClassLoader);
 				if (!context.isStarted()) {
 					context.start();
+				}
+
+				boolean hasDefault = false;
+				for (ServletMapping mapping : context.getServletHandler().getServletMappings()) {
+					if (mapping.isDefault()) {
+						hasDefault = true;
+						break;
+					}
+				}
+				if (!hasDefault) {
+					ResourceServlet servlet = new ResourceServlet(model.getHttpContext(), model.getContextName(), "/", "default");
+					ResourceModel resourceModel = new ResourceModel(model, servlet, "/", "default");
+					addServlet(resourceModel);
 				}
 
 				// Fixfor PAXWEB-751
@@ -719,6 +728,23 @@ class JettyServerImpl implements JettyServer {
 
 		context.setWelcomeFiles(model.getWelcomeFiles());
 
+		boolean hasDefault = false;
+		if (context.getServletHandler() == null || context.getServletHandler().getServletMappings() == null) {
+			return;
+		}
+		for (ServletMapping mapping : context.getServletHandler().getServletMappings()) {
+			if (mapping.isDefault()) {
+				ServletHolder defaultServlet = context.getServletHandler().getServlet(mapping.getServletName());
+				try {
+					LOG.debug("Reinitializing {} with new welcome files {}", defaultServlet, Arrays.asList(model.getWelcomeFiles()));
+					defaultServlet.getServlet().init(defaultServlet.getServlet().getServletConfig());
+				} catch (ServletException e) {
+					LOG.warn("Problem reinitializing welcome files of default servlet", e);
+				}
+				hasDefault = true;
+				break;
+			}
+		}
 	}
 
 	@Override
