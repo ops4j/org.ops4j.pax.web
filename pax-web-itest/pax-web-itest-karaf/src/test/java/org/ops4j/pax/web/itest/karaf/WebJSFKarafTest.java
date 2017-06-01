@@ -34,13 +34,13 @@ import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
  * @author achim
  */
 @RunWith(PaxExam.class)
-@Ignore("Ignored for unknown reason")
 public class WebJSFKarafTest extends KarafBaseTest {
 
 	Logger LOG = LoggerFactory.getLogger(WebJSFKarafTest.class);
@@ -53,8 +53,18 @@ public class WebJSFKarafTest extends KarafBaseTest {
 
 	@Configuration
 	public Option[] config() {
-		return combine(jettyConfig(), new VMOption("-DMyFacesVersion="
-				+ getMyFacesVersion()));
+		return combine(
+				jettyConfig(),
+				mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.javax-inject").version("1_2"),
+				mavenBundle("javax.enterprise", "cdi-api").version("1.2"),
+				mavenBundle("javax.validation", "validation-api").version("1.1.0.Final"),
+				mavenBundle("javax.annotation", "javax.annotation-api").version("1.2"),
+				mavenBundle("javax.interceptor", "javax.interceptor-api").version("1.2"),
+				mavenBundle("commons-io", "commons-io").version("1.4"),
+				mavenBundle("commons-codec", "commons-codec").version("1.10"),
+				mavenBundle("commons-beanutils", "commons-beanutils").version("1.8.3"),
+				new VMOption("-DMyFacesVersion=" + getMyFacesVersion())
+		);
 	}
 
 	@Test
@@ -75,6 +85,8 @@ public class WebJSFKarafTest extends KarafBaseTest {
 	}
 
 	@Test
+	@Ignore("java.lang.IllegalStateException: No Factories configured for this Application. This happens if the faces-initialization does not work at all - make sure that you properly include all configuration settings necessary for a basic faces application and that all the necessary libs are included. Also check the logging output of your web application and your container for any exceptions!\n" +
+			"If you did that and find nothing, the mistake might be due to the fact that you use some special web-containers which do not support registering context-listeners via TLD files and a context listener is not setup in your web.xml.")
 	public void testJSF() throws Exception {
 
 		LOG.info("Testing JSF workflow!");

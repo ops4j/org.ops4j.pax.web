@@ -44,9 +44,9 @@ public class WebConsoleKarafTest extends KarafBaseTest {
 				mavenBundle().groupId("org.apache.felix")
 						.artifactId("org.apache.felix.bundlerepository")
 						.version("1.6.2"),
-				mavenBundle().groupId("org.apache.felix")
-						.artifactId("org.apache.felix.configadmin")
-						.version("1.2.8"),
+//				mavenBundle().groupId("org.apache.felix")
+//						.artifactId("org.apache.felix.configadmin")
+//						.version("1.2.8"),
 				mavenBundle().groupId("org.apache.felix")
 						.artifactId("org.apache.felix.shell").version("1.4.2"),
 				mavenBundle().groupId("org.apache.felix")
@@ -75,16 +75,12 @@ public class WebConsoleKarafTest extends KarafBaseTest {
 	}
 
 	@Test
-	@Ignore("Strange behaviour with Authentication")
 	public void testBundlesPathWithAuthentication() throws Exception {
 		createTestClientForKaraf()
-				.authenticate("karaf", "karaf", "OSGi Management Console")
-				.withResponseAssertion("Response must contain text served by Karaf!",
+				.authenticate("admin", "admin", "OSGi Management Console")
+				.withResponseAssertion("Response must contain text served by Felix Console!",
 						resp -> resp.contains("Apache Felix Web Console<br/>Bundles"))
 				.doGETandExecuteTest("http://localhost:8181/system/console/bundles");
-
-//		testClient.testWebPath("http://localhost:8181/system/console/bundles",
-//				"Apache Felix Web Console<br/>Bundles", 200, true);
 	}
 
 	@Before

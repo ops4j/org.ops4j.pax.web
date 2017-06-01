@@ -86,7 +86,6 @@ public class WhiteboardKarafTest extends KarafBaseTest {
 	}
 
 	@Test
-	@Ignore("this is a blinking test, therefore disabled on purpose. PAXWEB-1053")
 	public void testWhiteBoardSlash() throws Exception {
 		createTestClientForKaraf()
 				.withResponseAssertion("Response must be served from welcome-page!",

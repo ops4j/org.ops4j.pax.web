@@ -16,24 +16,28 @@
  -->
 <configuration>
 
-  <!--  log to System.out on console  -->
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
-    </appender>
-  
-  <!--  log to file test.log  -->
-    <appender name="TEST_LOG" class="ch.qos.logback.core.FileAppender">
-        <file>target/test.log</file>
-        <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
-    </appender>
+  <!-- Logback configuration for pax-exam itself - not for OSGi runtime started by pax-exam-container-karaf -->
 
-    <root level="WARN">
-        <appender-ref ref="STDOUT" />
-        <appender-ref ref="TEST_LOG" />
-    </root>
+  <!--  log to System.out on console  -->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level (%F:%L\) %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!--  log to file test.log  -->
+  <appender name="TEST_LOG" class="ch.qos.logback.core.FileAppender">
+    <file>target/logs/pax-exam-test.log</file>
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level (%F:%L\) %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <root level="WARN">
+    <appender-ref ref="STDOUT"/>
+    <appender-ref ref="TEST_LOG"/>
+  </root>
+  <logger name="org.ops4j.pax.web" level="WARN"/>
+  <logger name="org.ops4j.pax.exam" level="DEBUG"/>
 
 </configuration>

@@ -76,14 +76,18 @@ public class WarUndertowKarafTest extends KarafBaseTest {
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/sn");
 	}
 
+	/**
+	 * With <code>war/</code> URI, Undertow/ResourceManager found it's directory access, but index is forbidden,
+	 * thus 403.
+	 * @throws Exception
+	 */
 	@Test
-	@Ignore("fails with 403")
-	public void testSlash() throws Exception {
+	public void test404() throws Exception {
 		createTestClientForKaraf()
 				.withReturnCode(404)
 				.withResponseAssertion("Response must contain text from error-page served by Karaf!",
 						resp -> resp.contains("<h1>Error Page</h1>"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/war/");
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/../../etc/passwd");
 	}
 
 	@Test
