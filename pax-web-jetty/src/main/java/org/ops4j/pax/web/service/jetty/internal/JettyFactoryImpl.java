@@ -16,31 +16,10 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import java.lang.reflect.InvocationTargetException;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.apache.commons.lang3.reflect.MethodUtils;
 import org.eclipse.jetty.http.HttpScheme;
-import org.eclipse.jetty.server.AbstractConnectionFactory;
-import org.eclipse.jetty.server.ConnectionFactory;
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.ForwardedRequestCustomizer;
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.HttpConfiguration;
-import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.NegotiatingServerConnectionFactory;
-import org.eclipse.jetty.server.SecureRequestCustomizer;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
@@ -49,15 +28,33 @@ import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.ops4j.util.xml.ElementHelper.*;
+
 
 class JettyFactoryImpl implements JettyFactory {
-
-	private Logger log = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Associated server model.
 	 */
 	private final ServerModel serverModel;
+	private Logger log = LoggerFactory.getLogger(getClass());
 	private Bundle bundle;
 
 	private List<Connector> connectors;
@@ -113,16 +110,10 @@ class JettyFactoryImpl implements JettyFactory {
 	public ServerConnector createConnector(final Server server, final String name, final int port, int securePort, final String host,
 										   final Boolean checkForwaredHeaders) {
 
-		// HTTP Configuration
-		HttpConfiguration httpConfig = new HttpConfiguration();
-		httpConfig.setSecureScheme(HttpScheme.HTTPS.asString());
-		httpConfig.setSecurePort(securePort != 0 ? securePort : 8443);
-		httpConfig.setOutputBufferSize(32768);
-		if (checkForwaredHeaders) {
-			httpConfig.addCustomizer(new ForwardedRequestCustomizer());
-		}
+        HttpConfiguration httpConfig = getHttpConfiguration(securePort, checkForwaredHeaders, server);
 
-		ConnectionFactory factory = null;
+
+        ConnectionFactory factory = null;
 
 		if (alpnCLassesAvailable()) {
 			log.info("HTTP/2 available, adding HTTP/2 to connector");
@@ -169,7 +160,155 @@ class JettyFactoryImpl implements JettyFactory {
 		return http;
 	}
 
-	/**
+    private HttpConfiguration getHttpConfiguration(int securePort, Boolean checkForwaredHeaders, Server server) {
+
+        File serverConfigDir = ((JettyServerWrapper) server).getServerConfigDir();
+        URL jettyResource = ((JettyServerWrapper) server).getServerConfigURL();
+
+        // HTTP Configuration
+        HttpConfiguration httpConfig = new HttpConfiguration();
+
+        if (jettyResource == null) {
+            jettyResource = getClass().getResource("/jetty.xml");
+        }
+        try {
+            if (jettyResource == null && serverConfigDir != null) {
+                if (!serverConfigDir.isDirectory()
+                        && serverConfigDir.canRead()) {
+                    String fileName = serverConfigDir.getName();
+                    if (fileName.equalsIgnoreCase("jetty.xml")) {
+                        jettyResource = serverConfigDir.toURI().toURL();
+                    } else {
+                        jettyResource = serverConfigDir.toURI().toURL();
+                    }
+                }
+            }
+
+            if (jettyResource != null) {
+                ClassLoader loader = Thread.currentThread()
+                        .getContextClassLoader();
+                try {
+                    httpConfig = parseAndConfigureHttpConfig(jettyResource);
+                } catch (IOException | SAXException | ParserConfigurationException e) {
+                    log.error("Can't parse jetty.xml for HttpConfiguration!", e);
+                }
+            }
+
+        } catch (MalformedURLException e) {
+            log.error("URI to configure HttpConfiguration via jetty.xml is malformed", e);
+        }
+
+        if (httpConfig.getSecureScheme() == null)
+            httpConfig.setSecureScheme(HttpScheme.HTTPS.asString());
+        if (httpConfig.getSecurePort() == 0)
+            httpConfig.setSecurePort(securePort != 0 ? securePort : 8443);
+        if (httpConfig.getOutputBufferSize() == 0)
+            httpConfig.setOutputBufferSize(32768);
+
+        if (checkForwaredHeaders != null && checkForwaredHeaders) {
+            httpConfig.addCustomizer(new ForwardedRequestCustomizer());
+        }
+        return httpConfig;
+    }
+
+    private HttpConfiguration parseAndConfigureHttpConfig(URL jettyResource) throws IOException, ParserConfigurationException, SAXException {
+        InputStream inputStream = jettyResource.openStream();
+
+        Element rootElement = getRootElement(inputStream);
+        Element[] news = getChildren(rootElement, "New");
+        final List<Element> httpConfigElements = Arrays.stream(news)
+                .filter(element -> element.hasAttribute("class"))
+                .filter(element -> getAttribute(element, "class")
+                        .equalsIgnoreCase("org.eclipse.jetty.server.HttpConfiguration"))
+                .collect(Collectors.toList());
+
+        if (httpConfigElements.size() < 1) {
+            log.warn("No HttpConfig Element found in jetty.xml, using default");
+            return new HttpConfiguration();
+        }
+
+        if (httpConfigElements.size() > 1) {
+            log.warn("To many HttpConfig elements found, will use default!");
+            return new HttpConfiguration();
+        }
+
+        HttpConfiguration httpConfig = new HttpConfiguration();
+
+        final Element httpConfigElement = httpConfigElements.get(0);
+        Element[] children = getChildren(httpConfigElement);
+
+        Map<String, String> confProps = new HashMap<>();
+
+        Arrays.stream(children).filter(element -> element.getTagName().equalsIgnoreCase("Set")).forEach(element -> {
+            String name = getAttribute(element, "name");
+            String value = getValue(element);
+            if (element.hasChildNodes()) {
+                Element property = getChild(element, "Property");
+                if (property != null)
+                    value = property.getAttribute("default");
+            }
+            confProps.put(name,value);
+        });
+
+        Map<String, Method> methods = new HashMap<>();
+
+        Arrays.stream(HttpConfiguration.class.getMethods()).forEach(method -> {
+            methods.put(method.getName(), method);
+        });
+
+        HttpConfiguration finalHttpConfig = httpConfig;
+        confProps.entrySet().stream().forEach(entry -> {
+            String key = entry.getKey();
+            key = key.substring(0,1).toUpperCase().concat(key.substring(1));
+            String name = "set".concat(key);
+            Method method = methods.get(name);
+            Class<?> parameterType = method.getParameterTypes()[0];
+            try {
+                Object o = toObject(parameterType, entry.getValue());
+                method.invoke(finalHttpConfig, o);
+            } catch (IllegalAccessException | NumberFormatException | InvocationTargetException e) {
+                log.error("HttpConfiguration failed to set variable {} with method {}", entry.getValue(), name);
+            }
+        });
+
+        if (finalHttpConfig == null) {
+            log.warn("HttpConfiguration is null ... even though it should be initialized!!!");
+            httpConfig = new HttpConfiguration();
+        } else {
+            httpConfig = finalHttpConfig;
+        }
+
+        return httpConfig;
+    }
+
+    private static Object toObject( Class clazz, String value ) {
+        if( Boolean.class == clazz || Boolean.TYPE == clazz ) return Boolean.parseBoolean( value );
+        if( Byte.class == clazz || Byte.TYPE == clazz ) return Byte.parseByte( value );
+        if( Short.class == clazz || Short.TYPE == clazz ) return Short.parseShort( value );
+        if( Integer.class == clazz || Integer.TYPE == clazz ) return Integer.parseInt( value );
+        if( Long.class == clazz || Long.TYPE == clazz ) return Long.parseLong( value );
+        if( Float.class == clazz || Float.TYPE == clazz ) return Float.parseFloat( value );
+        if( Double.class == clazz || Double.TYPE == clazz ) return Double.parseDouble( value );
+        return value;
+    }
+
+/*
+    private boolean findClassAttribute(XMLStreamReader streamReader) {
+        int attributeCount = streamReader.getAttributeCount();
+        boolean foundClass = false;
+        for (int i = 0; i < attributeCount; i++) {
+            QName attributeName = streamReader.getAttributeName(i);
+            if (attributeName.getLocalPart().equalsIgnoreCase("class")) {
+                String attributeValue = streamReader.getAttributeValue(i);
+                if (attributeValue.equalsIgnoreCase("org.eclipse.jetty.server.HttpConfiguration"))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+*/
+    /**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -276,10 +415,7 @@ class JettyFactoryImpl implements JettyFactory {
 		}
 
 		// HTTP Configuration
-		HttpConfiguration httpConfig = new HttpConfiguration();
-		httpConfig.setSecureScheme(HttpScheme.HTTPS.asString());
-		httpConfig.setSecurePort(port);
-		httpConfig.setOutputBufferSize(32768);
+        HttpConfiguration httpConfig = getHttpConfiguration(port, null, server);
 
 		// HTTPS Configuration
 		HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);
