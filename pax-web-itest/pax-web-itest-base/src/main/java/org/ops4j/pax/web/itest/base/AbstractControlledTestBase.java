@@ -62,6 +62,7 @@ import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemTimeout;
 import static org.ops4j.pax.exam.CoreOptions.url;
 import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
+import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.web.itest.base.TestConfiguration.paxWebBundles;
 
 /**
@@ -108,6 +109,7 @@ public abstract class AbstractControlledTestBase {
 				cleanCaches(true),
 				systemTimeout(60 * 60 * 1000),
 
+				// path relative to pax-web-itest-container-<containerName>
 				systemProperty("org.ops4j.pax.logging.property.file").value("src/test/resources/pax-logging.properties"),
 				frameworkProperty("felix.bootdelegation.implicit").value("false"),
 				// set to "4" to see Felix wiring information
@@ -157,10 +159,10 @@ public abstract class AbstractControlledTestBase {
 
 //				addCodeCoverageOption(),
 
-//				mavenBundle().groupId("javax.websocket").artifactId("javax.websocket-api").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web.itest").artifactId("pax-web-itest-base").versionAsInProject(),
 
 				mavenBundle().groupId("javax.servlet").artifactId("javax.servlet-api").versionAsInProject(),
+				mavenBundle().groupId("javax.websocket").artifactId("javax.websocket-api").version(asInProject()),
 				paxWebBundles(),
 
 				// Jetty HttpClient for testing
@@ -324,6 +326,31 @@ public abstract class AbstractControlledTestBase {
 				.executeTest();
 
 		service.unregisterFilter(filter);
+	}
+
+	/**
+	 * <p>
+	 *     JSF uses a hidden input-field which carries around a JSF internal View-State. The View-State is necessary
+	 *     when form submits are tested with a POST-request.
+	 * </p>
+	 * <p>
+	 *     When testing a POST against JSF, a prior GET has to be made!
+	 *     This method extracts the View-State from prior GET.
+	 * </p>
+	 * @param response the response from a initial GET-request
+	 * @return found View-State
+	 * @throws IllegalStateException when no View-State was found
+	 */
+	protected String extractJsfViewState(String response){
+		String intermediate = response.substring(response.indexOf("name=\"javax.faces.ViewState\""));
+		int indexOf = intermediate.indexOf("value=\"");
+		String substring = intermediate.substring(indexOf + 7);
+		indexOf = substring.indexOf("\"");
+		String viewstate = substring.substring(0, indexOf);
+		if(viewstate == null || viewstate.trim().length() == 0){
+			throw new IllegalStateException("No JSF-View-State was found in response!");
+		}
+		return viewstate;
 	}
 
 }
