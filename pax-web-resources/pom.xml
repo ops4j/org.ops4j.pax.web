@@ -46,8 +46,8 @@
 		<version.pax-web>4.2.1</version.pax-web>
 		<version.tipi.junit>4.12.0.1</version.tipi.junit>
 		<version.tipi.hamcrest>1.3.0.1</version.tipi.hamcrest>
-		<version.mockito>2.0.31-beta</version.mockito>
-		<version.myfaces>2.2.8</version.myfaces>
+		<version.mockito>1.9.5</version.mockito>
+		<version.myfaces>2.2.10</version.myfaces>
 		<version.mojarra>2.2.9</version.mojarra>
 	</properties>
 

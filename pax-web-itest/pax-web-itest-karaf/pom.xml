@@ -173,6 +173,10 @@
 					<groupId>logkit</groupId>
 					<artifactId>logkit</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>servlet-api</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -278,6 +282,12 @@
 			<groupId>org.springframework.osgi</groupId>
 			<artifactId>spring-osgi-web</artifactId>
 			<version>${spring-dm.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>com.springsource.javax.servlet</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>

@@ -28,7 +28,7 @@
     <properties>
         <bundle.symbolicName>org.ops4j.pax.web.samples.web-jsf</bundle.symbolicName>
         <bundle.namespace>org.ops4j.pax.web.samples</bundle.namespace>
-        <jsf-myfaces.version>2.1.15</jsf-myfaces.version>
+        <jsf-myfaces.version>2.2.10</jsf-myfaces.version>
         <jsf-ri.version>1.2_13</jsf-ri.version>
         <maven.jetty.plugin.version>6.1.16</maven.jetty.plugin.version>
         <log4j.version>1.2.13</log4j.version>
