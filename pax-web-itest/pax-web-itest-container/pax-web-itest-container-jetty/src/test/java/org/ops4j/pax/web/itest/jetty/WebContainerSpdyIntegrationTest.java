@@ -134,7 +134,7 @@ public class WebContainerSpdyIntegrationTest extends ITestBase {
 	}
 	
 	@Test
-	@Ignore("Invalid Preface!?!")
+	@Ignore("org.eclipse.jetty.io.NegotiatingClientConnectionFactory not found by org.eclipse.jetty.alpn.client")
 	public void testSimpleWebContextPathAvailability() throws Exception {
       HttpTestClientFactory.createDefaultTestClient()
       .withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
@@ -143,7 +143,7 @@ public class WebContainerSpdyIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore("client not working :(")
+	@Ignore("org.eclipse.jetty.io.NegotiatingClientConnectionFactory not found by org.eclipse.jetty.alpn.client")
 	public void testWebContextPath() throws Exception {
 	    HTTP2Client client = new HTTP2Client();
         SslContextFactory sslContextFactory = new SslContextFactory(true);

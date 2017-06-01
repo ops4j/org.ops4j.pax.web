@@ -35,17 +35,16 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 @RunWith(PaxExam.class)
 public class WarJsfCdiIntegrationTest extends ITestBase {
 
-    private static String VERSION_PAX_CDI = "1.0.0-SNAPSHOT";
+    // 1.0.0.RC2 misses pax-cdi-servlet
+    // 1.0.0.RC1 has requirement: (&(osgi.wiring.package=org.ops4j.pax.web.service)(version>=3.0.0)(!(version>=5.0.0)))
+    private static String VERSION_PAX_CDI = "1.0.0.RC2";
 
     private Option[] configureJsfAndCdi() {
         return options(
                 systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("INFO"),
-                mavenBundle("org.apache.felix", "org.apache.felix.configadmin").version("1.8.10"),
                 // API
-                mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.javax-inject").version("1_2"),
                 mavenBundle("javax.enterprise", "cdi-api").version("1.2"),
                 mavenBundle("javax.validation", "validation-api").version("1.1.0.Final"),
-                mavenBundle("javax.annotation", "javax.annotation-api").version("1.2"),
                 mavenBundle("javax.interceptor", "javax.interceptor-api").version("1.2"),
                 // Common
                 mavenBundle("com.google.guava", "guava").version("19.0"),

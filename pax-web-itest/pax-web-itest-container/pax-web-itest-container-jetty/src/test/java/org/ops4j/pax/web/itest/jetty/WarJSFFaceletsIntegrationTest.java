@@ -24,23 +24,20 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.TestConfiguration;
-import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
 import java.util.Dictionary;
 
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
  * @author achim
  */
 @RunWith(PaxExam.class)
-@Ignore
+@Ignore("Fails with \"Duplicate import: javax.faces.webapp\" - pax-url-war bug?")
 public class WarJSFFaceletsIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
@@ -57,8 +54,6 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws Exception {
-		waitForServer("http://127.0.0.1:8181/");
-
 		Bundle[] bundles = bundleContext.getBundles();
 		for (Bundle bundle : bundles) {
 			if ("org.apache.myfaces.core.api".equalsIgnoreCase(bundle
@@ -73,7 +68,8 @@ public class WarJSFFaceletsIntegrationTest extends ITestBase {
 		initWebListener();
 
 		String bundlePath = WEB_BUNDLE
-				+ "mvn:org.apache.myfaces.commons/myfaces-commons-facelets-examples20/1.0.2.1/war?"
+//				+ "mvn:org.apache.myfaces.commons/myfaces-commons-facelets-examples20/1.0.2.1/war?"
+				+ "mvn:org.apache.myfaces.trinidad/trinidad-demo/2.2.0/war?"
 				// +
 				// "mvn:org.apache.myfaces.tomahawk/myfaces-example-simple20/1.1.14/war?"
 				+ WEB_CONTEXT_PATH + "=/simple";
