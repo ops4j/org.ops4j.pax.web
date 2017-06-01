@@ -358,11 +358,11 @@
 			<groupId>org.eclipse.jetty.http2</groupId>
 			<artifactId>http2-common</artifactId>
 		</dependency>
-		
-		
+
 		<dependency>
-			<groupId>org.apache.geronimo.specs</groupId>
-			<artifactId>geronimo-atinject_1.0_spec</artifactId>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
+			<version>1_2</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -702,26 +702,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<artifactId>maven-resources-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>copy-resources</id>
-						<phase>generate-test-resources</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${basedir}/target</outputDirectory>
-							<resources>
-								<resource>
-									<directory>src/test/resources</directory>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 
 			<!-- generate dependencies versions -->
 			<plugin>
@@ -776,6 +756,8 @@
 						<MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
 						<coverage.command>${jcoverage.command}</coverage.command>
 						<alpn-boot>${settings.localRepository}/org/mortbay/jetty/alpn/alpn-boot/${alpn-version}/alpn-boot-${alpn-version}.jar</alpn-boot>
+						<!-- to configure pax-exam with pax.exam.system=default which gives us more control over installed bundles -->
+						<pax.exam.configuration>file:../../pax-web-itest-base/src/main/resources/controlled-exam.properties</pax.exam.configuration>
 					</systemPropertyVariables>
 					<argLine>${jcoverage.command} -Xss8m</argLine>
 					<forkMode>pertest</forkMode>

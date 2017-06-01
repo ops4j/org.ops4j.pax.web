@@ -19,7 +19,7 @@ import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
-import org.ops4j.pax.web.itest.base.AbstractTestBase;
+import org.ops4j.pax.web.itest.base.AbstractControlledTestBase;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +37,7 @@ import java.io.File;
  * Intermediate Base-Class until old base has been removed
  */
 @ExamReactorStrategy(PerMethod.class)
-public class ITestBase extends AbstractTestBase {
+public class ITestBase extends AbstractControlledTestBase {
     
     private static final Logger LOG = LoggerFactory.getLogger(ITestBase.class);
 	
@@ -49,33 +49,18 @@ public class ITestBase extends AbstractTestBase {
 		return bundleContext;
 	}
 
-	public static Option[] configureBaseWithServlet() {
-		return combine(
-				baseConfigure(),
-				mavenBundle().groupId("javax.servlet")
-				.artifactId("javax.servlet-api").versionAsInProject());
-	}
-
 	public static Option[] configureJetty() {
 		return combine(
-				configureBaseWithServlet(),
+				baseConfigure(),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-jetty").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-runtime").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-util").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-io").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-http").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-continuation")
 						.version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-server").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-client").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-security").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
