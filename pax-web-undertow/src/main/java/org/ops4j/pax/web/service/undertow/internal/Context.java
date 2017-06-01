@@ -209,6 +209,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 	public synchronized void destroy() {
 		try {
+			LOG.info("destroying context {}, with context-name: {}", contextModel.getHttpContext(), contextModel.getContextName());
 			destroyHandler(false);
 		} catch (ServletException e) {
 			e.printStackTrace();

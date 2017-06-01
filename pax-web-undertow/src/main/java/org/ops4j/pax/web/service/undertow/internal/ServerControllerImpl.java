@@ -483,9 +483,12 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
 
     private Context findOrCreateContext(final ContextModel contextModel) {
         NullArgumentException.validateNotNull(contextModel, "contextModel");
-        Context newCtx = new Context(this, path, contextModel);
-        Context oldCtx = contextMap.putIfAbsent(contextModel.getHttpContext(), newCtx);
-        if (oldCtx == null) {
+        synchronized (contextMap) {
+            if (contextMap.containsKey(contextModel.getHttpContext())) {
+                return contextMap.get(contextModel.getHttpContext());
+            }
+            Context newCtx = new Context(this, path, contextModel);
+            contextMap.put(contextModel.getHttpContext(), newCtx);
             final Servlet servlet = createResourceServlet(contextModel, "/", "default");
             final ResourceModel model = new ResourceModel(contextModel, servlet, "/", "default");
             try {
@@ -493,9 +496,8 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
             } catch (ServletException e) {
                 LOG.warn(e.getMessage(), e);
             }
-
+            return newCtx;
         }
-        return oldCtx != null ? oldCtx : newCtx;
     }
 
     @Override
