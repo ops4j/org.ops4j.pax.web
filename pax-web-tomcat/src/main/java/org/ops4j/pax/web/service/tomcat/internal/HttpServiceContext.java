@@ -31,6 +31,7 @@ import javax.servlet.ServletContext;
 
 import org.apache.catalina.Globals;
 import org.apache.catalina.Host;
+import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.core.ApplicationContext;
 import org.apache.catalina.core.StandardContext;
 import org.ops4j.pax.web.service.WebContainerContext;
@@ -116,9 +117,22 @@ public class HttpServiceContext extends StandardContext {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("found resource: " + resource);
 				}
+				if (resource != null) {
+					return resource;
+				}
 			} catch (PrivilegedActionException e) {
 				LOG.warn("Unauthorized access: " + e.getMessage());
 			}
+
+			// the HttpServiceContext might contain resources
+	        WebResourceRoot resources = getResources();
+	        if (resources != null) {
+	            resource = resources.getResource(path).getURL();
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("found resource: " + resource);
+				}
+	        }
+
 			return resource;
 
 		}
