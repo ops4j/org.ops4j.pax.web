@@ -16,6 +16,12 @@
 
 package org.ops4j.pax.web.service.tomcat.internal;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -59,9 +65,12 @@ import org.apache.catalina.Wrapper;
 import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.security.SecurityUtil;
+import org.apache.catalina.startup.ContextRuleSet;
+import org.apache.catalina.startup.NamingRuleSet;
 import org.apache.catalina.startup.Tomcat.ExistingStandardWrapper;
 import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
 import org.apache.tomcat.util.ExceptionUtils;
+import org.apache.tomcat.util.descriptor.XmlErrorHandler;
 import org.apache.tomcat.util.descriptor.web.ErrorPage;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
@@ -71,8 +80,9 @@ import org.apache.tomcat.util.descriptor.web.JspPropertyGroupDescriptorImpl;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.apache.tomcat.util.descriptor.web.TaglibDescriptorImpl;
+import org.apache.tomcat.util.digester.Digester;
+import org.apache.tomcat.util.digester.RuleSet;
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
@@ -93,6 +103,8 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXParseException;
 
 /**
  * @author Romain Gilles
@@ -939,8 +951,23 @@ class TomcatServerWrapper implements ServerWrapper {
         ClassLoader parentClassLoader = getClass().getClassLoader();
         ResourceDelegatingBundleClassLoader containerSpecificClassLoader = new ResourceDelegatingBundleClassLoader(bundles, parentClassLoader);
         context.setParentClassLoader(containerSpecificClassLoader);
-		// TODO: is the context already configured?
-		// TODO: how about security, classloader?
+
+		// support default context.xml in configurationDir or config fragment
+		URL defaultContextUrl = getDefaultContextXml();
+		// support MTA-INF/context.xml in war
+		URL configFile = bundle.getEntry(org.apache.catalina.startup.Constants.ApplicationContextXml);
+		if (defaultContextUrl != null || configFile != null) {
+			Digester digester = createContextDigester();
+			if (defaultContextUrl != null) {
+				processContextConfig(context, digester, defaultContextUrl);
+			}
+			if (configFile != null) {
+				context.setConfigFile(configFile);
+				processContextConfig(context, digester, configFile);
+			}
+		}
+
+        // TODO: how about security, classloader?
 		// TODO: compare with JettyServerWrapper.addContext
 		// TODO: what about the init parameters?
 
@@ -995,6 +1022,101 @@ class TomcatServerWrapper implements ServerWrapper {
 
 		return context;
 	}
+
+	private URL getDefaultContextXml() {
+		// get the resource URL from the config fragment
+		URL defaultContextUrl = getClass().getResource("/context.xml");
+		// overwrite with context xml from configuration directory if it exists
+		File configurationFile = new File(server.getConfigurationDir(), "context.xml");
+		if (configurationFile.exists()) {
+			try {
+				defaultContextUrl = configurationFile.toURI().toURL();
+			} catch (MalformedURLException e) {
+				LOG.error("cannot access default context file", e);
+			}
+		}
+		return defaultContextUrl;
+	}
+
+	private Digester createContextDigester() {
+		Digester digester = new Digester();
+		digester.setValidating(false);
+		digester.setRulesValidation(true);
+		HashMap<Class<?>, List<String>> fakeAttributes = new HashMap<>();
+		ArrayList<String> attrs = new ArrayList<>();
+		attrs.add("className");
+		fakeAttributes.put(Object.class, attrs);
+		digester.setFakeAttributes(fakeAttributes);
+		RuleSet contextRuleSet = new ContextRuleSet("", false);
+		digester.addRuleSet(contextRuleSet);
+		RuleSet namingRuleSet = new NamingRuleSet("Context/");
+		digester.addRuleSet(namingRuleSet);
+		return digester;
+	}
+
+    private void processContextConfig(Context context, Digester digester, URL contextXml) {
+
+        if (LOG.isDebugEnabled()) {
+        	LOG.debug("Processing context [" + context.getName()
+                    + "] configuration file [" + contextXml + "]");
+        }
+
+        InputSource source = null;
+        InputStream stream = null;
+
+        try {
+            source = new InputSource(contextXml.toString());
+            URLConnection xmlConn = contextXml.openConnection();
+            xmlConn.setUseCaches(false);
+            stream = xmlConn.getInputStream();
+        } catch (Exception e) {
+            LOG.error("Cannot read context file" , e);
+        }
+
+        if (source == null) {
+            return;
+        }
+
+        try {
+            source.setByteStream(stream);
+            digester.setClassLoader(this.getClass().getClassLoader());
+            digester.setUseContextClassLoader(false);
+            digester.push(context.getParent());
+            digester.push(context);
+            XmlErrorHandler errorHandler = new XmlErrorHandler();
+            digester.setErrorHandler(errorHandler);
+            digester.parse(source);
+            if (errorHandler.getWarnings().size() > 0 ||
+                    errorHandler.getErrors().size() > 0) {
+                for (SAXParseException e : errorHandler.getWarnings()) {
+                    LOG.warn("Warning in XML processing", e.getMessage(), source);
+                }
+                for (SAXParseException e : errorHandler.getErrors()) {
+                    LOG.warn("Error in XML processing", e.getMessage(), source);
+                }
+            }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Successfully processed context [" + context.getName()
+                        + "] configuration file [" + contextXml + "]");
+            }
+        } catch (SAXParseException e) {
+            LOG.error("Cannot parse config file {}", context.getName(), e);
+            LOG.error("at {} {}",
+                             "" + e.getLineNumber(),
+                             "" + e.getColumnNumber());
+        } catch (Exception e) {
+        	LOG.error("Cannot parse context {}",
+                    context.getName(), e);
+        } finally {
+            try {
+                if (stream != null) {
+                    stream.close();
+                }
+            } catch (IOException e) {
+                LOG.error("Cannot close context configuration", e);
+            }
+        }
+    }
 
 	private void configureJspConfigDescriptor(Context context, ContextModel model) {
 

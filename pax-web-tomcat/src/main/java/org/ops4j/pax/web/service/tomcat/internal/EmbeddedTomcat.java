@@ -156,7 +156,7 @@ public class EmbeddedTomcat extends Tomcat {
 
 	private Boolean configurationSessionCookieHttpOnly;
 
-	private String configurationWorkerName;
+	private File configurationDir;
 
 	private EmbeddedTomcat() {
 	}
@@ -215,7 +215,8 @@ public class EmbeddedTomcat extends Tomcat {
 			tomcatResource = getClass().getResource("/tomcat-server.xml");
 		}
 
-		File configurationFile = new File(configuration.getConfigurationDir(),
+		configurationDir = configuration.getConfigurationDir();
+		File configurationFile = new File(configurationDir,
 				SERVER_CONFIG_FILE_NAME);
 		if (configurationFile.exists()) {
 			try {
@@ -272,7 +273,6 @@ public class EmbeddedTomcat extends Tomcat {
 		configurationSessionCookie = configuration.getSessionCookie();
 		configurationSessionCookieHttpOnly = configuration
 				.getSessionCookieHttpOnly();
-		configurationWorkerName = configuration.getWorkerName();
 
 		// NCSA Logger --> AccessLogValve
 		if (configuration.isLogNCSAFormatEnabled()) {
@@ -495,6 +495,10 @@ public class EmbeddedTomcat extends Tomcat {
 
 	String getBasedir() {
 		return basedir;
+	}
+
+	File getConfigurationDir() {
+		return configurationDir;
 	}
 
 	public Context findContext(ContextModel contextModel) {
