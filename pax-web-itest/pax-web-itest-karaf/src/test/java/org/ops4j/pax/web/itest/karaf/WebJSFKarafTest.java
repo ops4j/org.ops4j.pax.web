@@ -55,7 +55,9 @@ public class WebJSFKarafTest extends KarafBaseTest {
 	public Option[] config() {
 		return combine(
 				jettyConfig(),
-				mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.javax-inject").version("1_2"),
+				// pax-exam 4.7.0 uses <bundle>mvn:org.apache.geronimo.specs/geronimo-atinject_1.0_spec/1.0</bundle>
+				// pax-exam 4.9.2 uses <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-atinject_1.0_spec/1.0</bundle>
+//				mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.javax-inject").version("1_2"),
 				mavenBundle("javax.enterprise", "cdi-api").version("1.2"),
 				mavenBundle("javax.validation", "validation-api").version("1.1.0.Final"),
 				mavenBundle("javax.annotation", "javax.annotation-api").version("1.2"),

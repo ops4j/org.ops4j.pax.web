@@ -43,7 +43,6 @@ public class WhiteboardR7JaxRsIntegrationTest extends ITestBase {
                 mavenBundle().groupId("javax.ws.rs").artifactId("javax.ws.rs-api").version("2.0.1"),
                 mavenBundle().groupId("org.apache.ws.xmlschema").artifactId("xmlschema-core").version("2.2.1"),
                 mavenBundle().groupId("org.ow2.asm").artifactId("asm").version("5.2"), // Undertow already uses ASM 6_Alpa
-                mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.configadmin").versionAsInProject(),
                 // Runtime
                 // Do not add this to Maven-Dependencies because Exam-Probe will get wrong imports and cause Classloader-issues
                 mavenBundle().groupId("org.apache.aries.jax.rs").artifactId("org.apache.aries.jax.rs.api").version("0.0.1-SNAPSHOT"),
