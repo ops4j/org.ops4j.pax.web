@@ -125,7 +125,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		BundleClassLoader parentClassLoader = new BundleClassLoader(FrameworkUtil.getBundle(getClass()));
 		this.classLoader = new ResourceDelegatingBundleClassLoader(bundles, parentClassLoader);
 
-		LOG.info("registering context {}, with context-name: {}", contextModel.getHttpContext(), contextModel.getContextName());
+		LOG.info("registering context {}, with context path: /{}", contextModel.getHttpContext(), contextModel.getContextName());
 
 		undertowBundle = FrameworkUtil.getBundle(getClass());
 
@@ -150,6 +150,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	@Override
 	public synchronized void start() throws Exception {
 		if (started.compareAndSet(false, true)) {
+ 			LOG.info("Starting context /{}", contextModel.getContextName());
 			for (ServletModel servlet : servlets) {
 				doStart(servlet);
 			}
@@ -160,6 +161,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	@Override
 	public synchronized void stop() throws Exception {
 		if (started.compareAndSet(true, false)) {
+			LOG.info("Stopping context /{}", contextModel.getContextName());
 			for (ServletModel servlet : servlets) {
 				doStop(servlet);
 			}
@@ -209,10 +211,10 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 	public synchronized void destroy() {
 		try {
-			LOG.info("destroying context {}, with context-name: {}", contextModel.getHttpContext(), contextModel.getContextName());
+			LOG.info("destroying context {}, with context path: {}", contextModel.getHttpContext(), contextModel.getContextName());
 			destroyHandler(false);
 		} catch (ServletException e) {
-			e.printStackTrace();
+			LOG.error(e.getMessage(), e);
 		}
 	}
 
@@ -244,6 +246,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	 */
 	synchronized HttpHandler getHandler(final Consumer<ServletContext> consumer) throws ServletException {
 		if (handler == null) {
+			LOG.debug("Creating handler on demand");
 			createHandler(consumer);
 		} else if (consumer != null) {
 			// Handler might be available, but the ServletContextProxy needs initialization. TODO check why
@@ -269,10 +272,13 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 	private synchronized void destroyHandler(boolean keepProxy) throws ServletException {
 		if (manager != null) {
+			LOG.debug("Destroying handler for context /{}", contextModel.getContextName());
 			if (!keepProxy) {
 				unregisterServletContext(manager.getDeployment().getServletContext());
 			}
+			LOG.debug("Stopping manager for context /{}", contextModel.getContextName());
 			manager.stop();
+			LOG.debug("Undeploying manager for context /{}", contextModel.getContextName());
 			manager.undeploy();
 			manager = null;
 			handler = null;
@@ -341,6 +347,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	}
 
 	private void doCreateHandler(Consumer<ServletContext> consumer) throws ServletException {
+		LOG.debug("Creating handler for context /{}", contextModel.getContextName());
 		final WebContainerContext httpContext = contextModel.getHttpContext();
 		DeploymentInfo deployment = new DeploymentInfo();
 		deployment.setEagerFilterInit(true);
@@ -388,6 +395,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 			deployment.addServlet(info);
 		}
 		if (!defaultServletAdded && fallbackDefaultServlet != null) {
+			LOG.info("Adding implicit \"default\" servlet");
 			ServletInfo info = new ServletInfo(fallbackDefaultServlet.getName(),
 					clazz(fallbackDefaultServlet.getServletClass(), fallbackDefaultServlet.getServlet()),
 					factory(fallbackDefaultServlet.getServletClass(), fallbackDefaultServlet.getServlet()));
@@ -566,11 +574,19 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		});
 
 		manager = container.addDeployment(deployment);
+		LOG.info("Creating undertow servlet deployment for context path /{}...", contextModel.getContextName());
 		manager.deploy();
+		LOG.info("Creating undertow servlet deployment for context path /{} - done", contextModel.getContextName());
+
+		LOG.info("Registering {} as OSGi service...", manager.getDeployment().getServletContext());
 		registerServletContext(manager.getDeployment().getServletContext(), bundle);
+		LOG.info("Registering {} as OSGi service - done", manager.getDeployment().getServletContext());
+
 		if(consumer != null){
 			consumer.accept(manager.getDeployment().getServletContext());
 		}
+
+		LOG.info("Starting Undertow web application for context path /{}", contextModel.getContextName());
 		handler = manager.start();
 	}
 

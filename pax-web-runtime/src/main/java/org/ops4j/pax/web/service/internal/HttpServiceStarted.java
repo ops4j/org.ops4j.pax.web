@@ -141,7 +141,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		this.serverListener = new ServerListener() {
 			@Override
 			public void stateChanged(final ServerEvent event) {
-				LOG.debug("Handling event: [" + event + "]");
+				LOG.debug("{}: Handling event: [{}]", this, event);
 
 				if (event == ServerEvent.STARTED) {
 					for (ServletModel model : serviceModel.getServletModels()) {
@@ -165,12 +165,18 @@ class HttpServiceStarted implements StoppableHttpService {
 					}
 				}
 			}
+
+			@Override
+			public String toString() {
+				return "ServerListener for " + serviceBundle;
+			}
 		};
 		this.serverController.addListener(serverListener);
 	}
 
 	@Override
 	public void stop() {
+		LOG.debug("Stopping http service for: " + serviceBundle);
 		this.serverController.removeListener(serverListener);
 		for (ServletModel model : serviceModel.getServletModels()) {
 			servletEvent(ServletEvent.UNDEPLOYING, serviceBundle, model);
@@ -208,7 +214,7 @@ class HttpServiceStarted implements StoppableHttpService {
 								final HttpContext httpContext) throws ServletException,
 			NamespaceException {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
+		LOG.debug("Register servlet (alias={}). Using context [{}]", alias, contextModel);
 		@SuppressWarnings("unchecked")
 		final ServletModel model = new ServletModel(contextModel, servlet,
 				alias, initParams, loadOnStartup, asyncSupported);
@@ -278,7 +284,7 @@ class HttpServiceStarted implements StoppableHttpService {
 								  final HttpContext httpContext) throws NamespaceException {
 		synchronized (lock) {
 			final ContextModel contextModel = getOrCreateContext(httpContext);
-			LOG.debug("Registering resource using context [" + contextModel + "]");
+			LOG.debug("Register resources (alias={}). Using context [" + contextModel + "]");
 			final Servlet servlet = serverController.createResourceServlet(
 					contextModel, alias, name);
 			final ResourceModel model = new ResourceModel(contextModel, servlet,
@@ -295,6 +301,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	@Override
 	public void unregister(final String alias) {
 		synchronized (lock) {
+			LOG.debug("Unregister servlet (alias={})", alias);
 			final ServletModel model = serviceModel.getServletModelWithAlias(alias);
 			if (model == null) {
 				throw new IllegalArgumentException("Alias [" + alias
@@ -363,7 +370,7 @@ class HttpServiceStarted implements StoppableHttpService {
 								Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multiPartConfig,
 								HttpContext httpContext) throws ServletException {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
+		LOG.debug("Register servlet (name={}). Using context [{}]", servletName, contextModel);
 		final ServletModel model = new ServletModel(contextModel, servlet,
 				servletName, urlPatterns, null, // no alias
 				initParams, loadOnStartup, asyncSupported, multiPartConfig);
@@ -380,7 +387,7 @@ class HttpServiceStarted implements StoppableHttpService {
 								Integer loadOnStartup, Boolean asyncSupported,
 								HttpContext httpContext) throws ServletException {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
+		LOG.debug("Register servlet (name={}). Using context [{}]", servletName, contextModel);
 		final ServletModel model = new ServletModel(contextModel, servlet,
 				servletName, urlPatterns, null, // no alias
 				initParams, loadOnStartup, asyncSupported, null);
@@ -399,6 +406,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void unregisterServlet(final Servlet servlet) {
 		final ServletModel model = serviceModel.removeServlet(servlet);
 		if (model != null) {
+			LOG.debug("Unregister servlet (servlet={})", servlet);
 			servletEvent(ServletEvent.UNDEPLOYING, serviceBundle, model);
 			serverModel.removeServletModel(model);
 			serverController.removeServlet(model);
@@ -410,6 +418,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void unregisterServlet(String servletName) {
 		ServletModel model = serviceModel.removeServlet(servletName);
 		if (model != null) {
+			LOG.debug("Unregister servlet (name={})", servletName);
 			servletEvent(ServletEvent.UNDEPLOYING, serviceBundle, model);
 			serverModel.removeServletModel(model);
 			serverController.removeServlet(model);
@@ -431,7 +440,7 @@ class HttpServiceStarted implements StoppableHttpService {
 								Integer loadOnStartup, Boolean asyncSupported,
 								HttpContext httpContext) throws ServletException {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
+		LOG.debug("Register servlet (class={}). Using context [{}]", servletClass, contextModel);
 		final ServletModel model = new ServletModel(contextModel, servletClass,
 				null, urlPatterns, null, // no name, no alias
 				initParams, loadOnStartup, asyncSupported, null);
@@ -448,7 +457,7 @@ class HttpServiceStarted implements StoppableHttpService {
 								Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multiPartConfig,
 								HttpContext httpContext) throws ServletException {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
+		LOG.debug("Register servlet (class={}). Using context [{}]", servletClass, contextModel);
 		final ServletModel model = new ServletModel(contextModel, servletClass,
 				null, urlPatterns, null, // no name, no alias
 				initParams, loadOnStartup, asyncSupported, multiPartConfig);
@@ -465,6 +474,9 @@ class HttpServiceStarted implements StoppableHttpService {
 				.removeServletClass(servletClass);
 		if (models != null) {
 			for (ServletModel model : models) {
+				if (model != null) {
+					LOG.debug("Unregister servlet (servlet={})", model.getServlet());
+				}
 				servletEvent(ServletEvent.UNDEPLOYING, serviceBundle, model);
 				serverModel.removeServletModel(model);
 				serverController.removeServlet(model);
@@ -477,7 +489,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void registerEventListener(final EventListener listener,
 									  final HttpContext httpContext) {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
+		LOG.debug("Register event listener (listener={}). Using context [{}]", listener, contextModel);
 		final EventListenerModel model = new EventListenerModel(contextModel,
 				listener);
 		boolean serviceSuccess = false;
@@ -503,6 +515,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		final EventListenerModel model = serviceModel
 				.removeEventListener(listener);
 		if (model != null) {
+			LOG.debug("Unegister event listener (listener={})", listener);
 			serverController.removeEventListener(model);
 		}
 	}
@@ -520,7 +533,15 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void registerFilter(Filter filter, String[] urlPatterns, String[] servletNames,
 							   Dictionary<String, String> initParams, Boolean asyncSupported, HttpContext httpContext) {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
+		if (LOG.isDebugEnabled()) {
+			if (urlPatterns != null) {
+				LOG.debug("Register filter (urlPatterns={}). Using context [{}]", Arrays.asList(urlPatterns), contextModel);
+			} else if (servletNames != null) {
+				LOG.debug("Register filter (servletNames={}). Using context [{}]", Arrays.asList(servletNames), contextModel);
+			} else {
+				LOG.debug("Register filter. Using context [{}]", contextModel);
+			}
+		}
 		final FilterModel model = new FilterModel(contextModel, filter,
 				urlPatterns, servletNames, initParams, asyncSupported);
 		if (initParams != null && !initParams.isEmpty()
@@ -568,9 +589,12 @@ class HttpServiceStarted implements StoppableHttpService {
 
 
 	private void unregister(FilterModel model) {
-		serviceModel.removeFilter(model.getName());
-		serverModel.removeFilterModel(model);
-		serverController.removeFilter(model);
+		if (model != null) {
+			LOG.debug("Unregister filter (filter={})", model.getFilter());
+			serviceModel.removeFilter(model.getName());
+			serverModel.removeFilterModel(model);
+			serverController.removeFilter(model);
+		}
 	}
 
 	private void registerFilter(FilterModel model) {
@@ -619,7 +643,15 @@ class HttpServiceStarted implements StoppableHttpService {
 							   String[] urlPatterns, String[] servletNames,
 							   Dictionary<String, String> initParams, boolean asyncSupported, HttpContext httpContext) {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
+		if (LOG.isDebugEnabled()) {
+			if (urlPatterns != null) {
+				LOG.debug("Register filter (urlPatterns={}). Using context [{}]", Arrays.asList(urlPatterns), contextModel);
+			} else if (servletNames != null) {
+				LOG.debug("Register filter (servletNames={}). Using context [{}]", Arrays.asList(servletNames), contextModel);
+			} else {
+				LOG.debug("Register filter. Using context [{}]", contextModel);
+			}
+		}
 		final FilterModel model = new FilterModel(contextModel, filterClass,
 				urlPatterns, servletNames, initParams, asyncSupported);
 		registerFilter(model);
@@ -629,6 +661,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void unregisterFilter(final Filter filter) {
 		final FilterModel model = serviceModel.removeFilter(filter);
 		if (model != null) {
+			LOG.debug("Unregister filter (filter={})", filter);
 			serverModel.removeFilterModel(model);
 			serverController.removeFilter(model);
 		}
@@ -638,6 +671,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void unregisterFilter(Class<? extends Filter> filterClass) {
 		final FilterModel model = serviceModel.removeFilter(filterClass);
 		if (model != null) {
+			LOG.debug("Unregister filter (class={})", filterClass);
 			serverModel.removeFilterModel(model);
 			serverController.removeFilter(model);
 		}
@@ -647,6 +681,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void unregisterFilter(String filterName) {
 		final FilterModel model = serviceModel.removeFilter(filterName);
 		if (model != null) {
+			LOG.debug("Unregister filter (name={})", filterName);
 			serverModel.removeFilterModel(model);
 			serverController.removeFilter(model);
 		}
@@ -889,7 +924,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void registerErrorPage(final String error, final String location,
 								  final HttpContext httpContext) {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [{}]", contextModel);
+		LOG.debug("Register error page (error={}, location={}). Using context [{}]", error, location, contextModel);
 		final ErrorPageModel model = new ErrorPageModel(contextModel, error,
 				location);
 		boolean serviceSuccess = false;
@@ -920,6 +955,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		final ErrorPageModel model = serviceModel.removeErrorPage(error,
 				serviceModel.getContextModel(httpContext));
 		if (model != null) {
+			LOG.debug("Unregister error page (error={})", error);
 			serverController.removeErrorPage(model);
 		}
 	}
@@ -931,6 +967,9 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void registerWelcomeFiles(final String[] welcomeFiles,
 									 final boolean redirect, final HttpContext httpContext) {
 		ContextModel contextModel = serviceModel.getContextModel(httpContext);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Register welcome files (welcomeFiles={}). Using context [{}]", Arrays.asList(welcomeFiles), contextModel);
+		}
 		//PAXWEB-123: try to use the setWelcomeFile method
 		final WelcomeFileModel model = new WelcomeFileModel(contextModel, welcomeFiles);
 
@@ -974,6 +1013,9 @@ class HttpServiceStarted implements StoppableHttpService {
 
 		final WelcomeFileModel model = serviceModel.removeWelcomeFileModel(Arrays.toString(welcomeFiles), contextModel);
 		if (model != null) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Unregister welcome files (welcomeFiles={})", Arrays.asList(welcomeFiles));
+			}
 			serverController.removeWelcomeFiles(model);
 		}
 		/*
@@ -1039,7 +1081,7 @@ class HttpServiceStarted implements StoppableHttpService {
 										  String mapping, String dataConstraint, boolean authentication,
 										  List<String> roles, HttpContext httpContext) {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		LOG.debug("Using context [" + contextModel + "]");
+		LOG.debug("Register constraint mapping (name={}). Using context [{}]", constraintName, contextModel);
 		SecurityConstraintMappingModel secConstraintMapModel = new SecurityConstraintMappingModel(
 				contextModel, constraintName, mapping, url, dataConstraint,
 				authentication, roles);

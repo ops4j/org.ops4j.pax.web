@@ -17,8 +17,6 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
-import java.util.EventListener;
-
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ResourceWebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
@@ -58,7 +56,7 @@ public class ResourceTracker extends AbstractTracker<Object, ResourceWebElement>
 	@SuppressWarnings("unchecked")
 	public static ServiceTracker<Object, ResourceWebElement> createTracker(final ExtenderContext extenderContext,
 			final BundleContext bundleContext) {
-		return new ResourceTracker(extenderContext, bundleContext).create();
+		return new ResourceTracker(extenderContext, bundleContext).create("(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX + "=*)");
 	}
 
 	/**
