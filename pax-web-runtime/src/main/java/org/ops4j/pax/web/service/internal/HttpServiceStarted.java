@@ -287,8 +287,14 @@ class HttpServiceStarted implements StoppableHttpService {
 			LOG.debug("Register resources (alias={}). Using context [" + contextModel + "]");
 			final Servlet servlet = serverController.createResourceServlet(
 					contextModel, alias, name);
+			String resourceModelName = name;
+			if (!"default".equals(name)) {
+				// PAXWEB-1099 - we should be able to register multiple "resources" for same name (==basePath)
+				// but under different alias
+				resourceModelName = alias + ":" + name;
+			}
 			final ResourceModel model = new ResourceModel(contextModel, servlet,
-					alias, name);
+					alias, resourceModelName);
 			try {
 				registerServlet(model);
 			} catch (ServletException e) {
