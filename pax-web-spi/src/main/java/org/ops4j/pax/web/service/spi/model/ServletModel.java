@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.spi.model;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
@@ -189,6 +190,25 @@ public class ServletModel extends Model {
 			}
 		}
 		return urlPattern;
+	}
+
+	/*
+	 * From web app XSD:
+	 * The servlet-name element contains the canonical name of the
+	 * servlet. Each servlet name is unique within the web application.
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		ServletModel that = (ServletModel) o;
+		return Objects.equals(getName(), that.getName()) &&
+				Objects.equals(getContextModel().getContextName(), that.getContextModel().getContextName());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(getName(), getContextModel().getContextName());
 	}
 
 	@Override

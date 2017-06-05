@@ -17,6 +17,7 @@
 package org.ops4j.pax.web.service.spi.model;
 
 import java.util.EventListener;
+import java.util.Objects;
 
 import org.ops4j.lang.NullArgumentException;
 
@@ -33,6 +34,20 @@ public class EventListenerModel extends Model {
 
 	public EventListener getEventListener() {
 		return eventListener;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		EventListenerModel that = (EventListenerModel) o;
+		return Objects.equals(eventListener, that.eventListener) &&
+				Objects.equals(getContextModel().getContextName(), that.getContextModel().getContextName());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(eventListener, getContextModel().getContextName());
 	}
 
 }

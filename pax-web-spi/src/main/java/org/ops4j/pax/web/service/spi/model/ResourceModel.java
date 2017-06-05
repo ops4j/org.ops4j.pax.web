@@ -39,22 +39,4 @@ public class ResourceModel extends ServletModel {
 		return name;
 	}
 
-	/**
-	 * There should be one resource model for given name/alias registered in web context
-	 * @param o
-	 * @return whether the resource models are equal
-	 */
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-
-		ResourceModel that = (ResourceModel) o;
-
-		if (name != null ? !name.equals(that.name) : that.name != null) return false;
-		if (getAlias() != null ? !getAlias().equals(that.getAlias()) : that.getAlias() != null) return false;
-
-		return true;
-	}
-
 }
