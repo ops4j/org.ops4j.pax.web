@@ -84,10 +84,23 @@ abstract class AbstractTracker<T, W extends WebElement> implements ServiceTracke
 	 *            the classes defining the service types to track; an empty array tracks any service
 	 * @return a configured osgi service tracker
 	 */
-
 	@SafeVarargs
 	protected final ServiceTracker<T, W> create(final Class<? extends T>... trackedClass) {
 		return new ServiceTracker<>(bundleContext, createFilter(bundleContext, trackedClass), this);
+	}
+
+	/**
+	 * Creates a new tracker that tracks services by generic filter
+	 *
+	 * @param filter generic filter to use for tracker
+	 * @return a configured osgi service tracker
+	 */
+	protected final ServiceTracker<T, W> create(String filter) {
+		try {
+			return new ServiceTracker<>(bundleContext, bundleContext.createFilter(filter), this);
+		} catch (InvalidSyntaxException e) {
+			throw new IllegalArgumentException("Unexpected InvalidSyntaxException: " + e.getMessage());
+		}
 	}
 
 	/**

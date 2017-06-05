@@ -176,12 +176,37 @@ public class ServletEvent {
 	 */
 	@Override
 	public String toString() {
-		return "ServletEvent [replay=" + replay + ", type=" + type
+		return "ServletEvent [replay=" + replay + ", type=" + type(type)
 				+ ", bundle=" + bundleId + "-" + bundleName + ", timestamp=" + timestamp
 				+ ", alias=" + alias + ", servletName=" + servletName
-				+ ", urlParameter=" + urlParameter
+				+ ", urlParameter=" + (urlParameter == null ? "null" : Arrays.asList(urlParameter))
 				+ ", servletClass=" + servletClassName + "]" + ", httpContext="
 				+ httpContext + "]";
+	}
+
+	private String type(int type) {
+		String name = "UNKNOWN";
+		switch (type) {
+			case DEPLOYING:
+				name = "DEPLOYING";
+				break;
+			case DEPLOYED:
+				name = "DEPLOYED";
+				break;
+			case UNDEPLOYING:
+				name = "UNDEPLOYING";
+				break;
+			case UNDEPLOYED:
+				name = "UNDEPLOYED";
+				break;
+			case FAILED:
+				name = "FAILED";
+				break;
+			case WAITING:
+				name = "WAITING";
+				break;
+		}
+		return name;
 	}
 
 }
