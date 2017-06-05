@@ -96,13 +96,13 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	private final IdentityManager identityManager;
 	private final PathHandler path;
 	private final ContextModel contextModel;
-	private final List<ServletModel> servlets = new ArrayList<>();
-	private final List<WelcomeFileModel> welcomeFiles = new ArrayList<>();
-	private final List<ErrorPageModel> errorPages = new ArrayList<>();
-	private final List<EventListenerModel> eventListeners = new ArrayList<>();
-	private final List<SecurityConstraintMappingModel> securityConstraintMappings = new ArrayList<>();
-	private final List<FilterModel> filters = new ArrayList<>();
-	private final List<ContainerInitializerModel> containerInitializers = new ArrayList<>();
+	private final Set<ServletModel> servlets = new LinkedHashSet<>();
+	private final Set<WelcomeFileModel> welcomeFiles = new LinkedHashSet<>();
+	private final Set<ErrorPageModel> errorPages = new LinkedHashSet<>();
+	private final Set<EventListenerModel> eventListeners = new LinkedHashSet<>();
+	private final Set<SecurityConstraintMappingModel> securityConstraintMappings = new LinkedHashSet<>();
+	private final Set<FilterModel> filters = new TreeSet<>(new FilterRankComparator());
+	private final Set<ContainerInitializerModel> containerInitializers = new LinkedHashSet<>();
 	private final List<ServiceRegistration<ServletContext>> registeredServletContexts = new ArrayList<>();
 	private final ServletContainer container = ServletContainer.Factory.newInstance();
 	private final AtomicBoolean started = new AtomicBoolean();
@@ -165,6 +165,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 			for (ServletModel servlet : servlets) {
 				doStop(servlet);
 			}
+			destroy();
 		}
 	}
 
@@ -452,10 +453,6 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 					factory(null, entry.getKey()),
 					entry.getValue()
 			));
-		}
-
-		if (!filters.isEmpty() && filters.get(0).getInitParams().get(WebContainerConstants.FILTER_RANKING) != null) {
-			filters.sort(Comparator.comparing(filter -> Integer.valueOf(filter.getInitParams().get(WebContainerConstants.FILTER_RANKING))));
 		}
 
 		for (FilterModel filter : filters) {
@@ -888,6 +885,22 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		@Override
 		public Path getResourceManagerRootPath() {
 			return null;
+		}
+	}
+
+	private class FilterRankComparator implements Comparator<FilterModel> {
+		@Override
+		public int compare(FilterModel fm1, FilterModel fm2) {
+			int r1 = ((fm1.getInitParams() == null) || (fm1.getInitParams().get(WebContainerConstants.FILTER_RANKING) == null))
+					? 0 : Integer.parseInt(fm1.getInitParams().get(WebContainerConstants.FILTER_RANKING));
+			int r2 = ((fm2.getInitParams() == null) || (fm2.getInitParams().get(WebContainerConstants.FILTER_RANKING) == null))
+					? 0 : Integer.parseInt(fm2.getInitParams().get(WebContainerConstants.FILTER_RANKING));
+
+			if (r1 == r2) {
+				return fm1.getName().compareTo(fm2.getName());
+			}
+
+			return Integer.compare(r1, r2);
 		}
 	}
 

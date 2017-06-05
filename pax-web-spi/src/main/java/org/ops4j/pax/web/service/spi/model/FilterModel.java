@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -148,6 +149,25 @@ public class FilterModel extends Model {
 
 	public boolean isAsyncSupported() {
 		return asyncSupported;
+	}
+
+	/*
+	 * From web app XSD:
+	 * The logical name of the filter is declare by using filter-nameType. This name is used to map the
+	 * filter. Each filter name is unique within the web application.
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		FilterModel that = (FilterModel) o;
+		return Objects.equals(name, that.name) &&
+				Objects.equals(getContextModel().getContextName(), that.getContextModel().getContextName());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(name, getContextModel().getContextName());
 	}
 
 	@Override
