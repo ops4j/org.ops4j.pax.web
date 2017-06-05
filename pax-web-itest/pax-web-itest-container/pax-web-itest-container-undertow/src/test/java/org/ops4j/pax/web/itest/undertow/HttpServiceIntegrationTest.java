@@ -93,7 +93,22 @@ public class HttpServiceIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8181/helloworld/hs");
 		// test image-serving
 		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseHeaderAssertion("Hello World resources should be available under /images",
+						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
+								&& header.getValue().equals("image/png")))
 				.doGETandExecuteTest("http://127.0.0.1:8181/images/logo.png");
+		// test image-serving from different alias
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseHeaderAssertion("Hello World resources should be available under /alt-images",
+						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
+								&& header.getValue().equals("image/png")))
+				.doGETandExecuteTest("http://127.0.0.1:8181/alt-images/logo.png");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(200)
+				.withResponseHeaderAssertion("Other resource paths will be served by servlet mapped at /*",
+						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
+								&& header.getValue().startsWith("text/html")))
+				.doGETandExecuteTest("http://127.0.0.1:8181/alt2-images/logo.png");
 	}
 
 	@Test
