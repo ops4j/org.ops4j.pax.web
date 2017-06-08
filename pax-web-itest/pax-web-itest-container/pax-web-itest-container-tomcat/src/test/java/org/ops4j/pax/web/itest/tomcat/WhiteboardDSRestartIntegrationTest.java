@@ -17,7 +17,6 @@ package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -68,7 +67,6 @@ public class WhiteboardDSRestartIntegrationTest extends ITestBase {
 
 
 	@Test
-	@Ignore("Failing for duplicate Context - PAXWEB-597")
 	public void testWhiteBoardSimpleServlet() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Hello from SimpleServlet'",
@@ -77,7 +75,6 @@ public class WhiteboardDSRestartIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore("Failing for duplicate Context - PAXWEB-597")
 	public void testWhiteBoardServletWithContext() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Hello from ServletWithContext'",
@@ -86,7 +83,6 @@ public class WhiteboardDSRestartIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore("Failing for duplicate Context - PAXWEB-597")
 	public void testWhiteBoardFiltered() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Request changed by SimpleFilter'",
@@ -127,10 +123,9 @@ public class WhiteboardDSRestartIntegrationTest extends ITestBase {
 
 
 		// Test
-		// PAXWEB-597
-		//HttpTestClientFactory.createDefaultTestClient()
-		//		.withResponseAssertion("Response must contain 'Hello from ServletWithContext'",
-		//				resp -> resp.contains("Hello from ServletWithContext"))
-		//		.doGETandExecuteTest("http://127.0.0.1:8282/context/servlet");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello from ServletWithContext'",
+						resp -> resp.contains("Hello from ServletWithContext"))
+				.doGETandExecuteTest("http://127.0.0.1:8282/context/servlet");
 	}
 }
