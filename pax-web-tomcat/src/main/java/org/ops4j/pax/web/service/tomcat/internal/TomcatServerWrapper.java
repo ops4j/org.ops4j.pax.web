@@ -759,7 +759,7 @@ class TomcatServerWrapper implements ServerWrapper {
 
 	@Override
 	public void addErrorPage(final ErrorPageModel model) {
-		final Context context = findContext(model);
+		final Context context = findOrCreateContext(model);
 		if (context == null) {
 			throw new AddErrorPageException(
 					"cannot retrieve the associated context: " + model);
@@ -921,6 +921,9 @@ class TomcatServerWrapper implements ServerWrapper {
 		HttpContext httpContext = contextModel.getHttpContext();
 		Context context = contextMap.get(httpContext);
 
+		if (context == null) {
+			context = server.findContext(contextModel);
+		}
 		if (context == null) {
 			context = createContext(contextModel);
 		}
