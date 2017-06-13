@@ -62,7 +62,9 @@
         </conditional>
 
         <capability>
-            pax.http.provider;provider:=jetty
+            pax.http.provider;provider:=jetty,
+            osgi.contract;osgi.contract=JavaServlet;version:Version="${servlet.spec.version}";uses:="javax.servlet,javax.servlet.http,javax.servlet.descriptor,javax.servlet.annotation",
+            osgi.contract;osgi.contract=JavaWebSockets;version:Version="1";uses:="javax.websocket, javax.websocket.server"
         </capability>
     </feature>
     
@@ -119,6 +121,12 @@
         <bundle start-level="30" dependency="true">mvn:javax.el/javax.el-api/${dependency.el-api.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${project.version}</bundle>
+        
+        <capability>
+            osgi.contract;osgi.contract=JavaEl;version:Version="3";uses:="javax.el",
+            osgi.contract;osig.contract=JavaJSP;version:Version="2.3";uses:="javax.servlet.jsp, javax.servlet.jsp.el, javax.servlet.jsp.tagext",
+            osgi.contract;osgi.contract=JavaJSTL;version:Version="1.2";uses:="javax.servlet.jsp.jstl.core, javax.servlet.jsp.jstl.fmt, javax.servlet.jsp.jstl.sql, javax.servlet.jsp.jstl.tlv"
+        </capability>
     </feature>
 
     <feature name="pax-war" description="Provide support of a full WebContainer" version="${project.version}">
@@ -126,8 +134,6 @@
             org.ops4j.pax.url.war.importPaxLoggingPackages=true
         </config>
         <feature version="[6.1,6.2)">pax-http-whiteboard</feature>
-        <bundle start-level="30" dependency="true">mvn:javax.el/javax.el-api/${dependency.el-api.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-descriptor/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-war/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${project.version}</bundle>
@@ -186,6 +192,8 @@
 
         <capability>
             pax.http.provider;provider:=tomcat
+            osgi.contract;osgi.contract=JavaServlet;version:Version="${servlet.spec.version}";uses:="javax.servlet,javax.servlet.http,javax.servlet.descriptor,javax.servlet.annotation",
+            osgi.contract;osgi.contract=JavaWebSockets;version:Version="1";uses:="javax.websocket, javax.websocket.server"
         </capability>
     </feature>
 
@@ -206,6 +214,10 @@
         <bundle dependency="true">mvn:org.apache.geronimo.bundles/commons-discovery/0.4_1</bundle>
         <bundle>mvn:org.apache.myfaces.core/myfaces-api/${jsf-myfaces.version}</bundle>
         <bundle>mvn:org.apache.myfaces.core/myfaces-impl/${jsf-myfaces.version}</bundle>
+        
+        <capability>
+            osgi.contract;osgi.contract=JavaJSF;version:Version="2.2";uses:="javax.faces, javax.faces.application, javax.faces.bean, javax.faces.component, javax.faces.component.behavior, javax.faces.component.html, javax.faces.component.visit, javax.faces.context, javax.faces.convert, javax.faces.el, javax.faces.event, javax.faces.flow, javax.faces.flow.builder, javax.faces.lifecycle, javax.faces.model, javax.faces.render, javax.faces.validator, javax.faces.view, javax.faces.view.facelets, javax.faces.webapp"
+        </capability>
     </feature>
 
     <feature name="pax-jsf-resources-support" description="Provide sharing of resources according to Servlet 3.0 for OSGi bundles and JSF" version="${project.version}">
@@ -225,6 +237,10 @@
         <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.undertow.core/${dependency.undertow-core.version}</bundle>
         <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.undertow.servlet/${dependency.undertow-servlet.version}</bundle>
         <bundle>mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.undertow.websocket-jsr/${dependency.undertow-websocket.version}</bundle>
+        <capability>
+            osgi.contract;osgi.contract=JavaServlet;version:Version="${servlet.spec.version}";uses:="javax.servlet,javax.servlet.http,javax.servlet.descriptor,javax.servlet.annotation",
+            osgi.contract;osgi.contract=JavaWebSockets;version:Version="1";uses:="javax.websocket, javax.websocket.server"
+        </capability>
     </feature>
 
     <feature name="pax-http-undertow" version="${project.version}">
