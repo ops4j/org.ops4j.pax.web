@@ -252,8 +252,8 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.ops4j.pax.tipi</groupId>
-			<artifactId>org.ops4j.pax.tipi.undertow.servlet</artifactId>
+			<groupId>io.undertow</groupId>
+			<artifactId>undertow-servlet</artifactId>
 			<scope>provided</scope>
 			<exclusions>
 				<exclusion>
@@ -271,13 +271,13 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.ops4j.pax.tipi</groupId>
-			<artifactId>org.ops4j.pax.tipi.undertow.core</artifactId>
+			<groupId>io.undertow</groupId>
+			<artifactId>undertow-core</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.ops4j.pax.tipi</groupId>
-			<artifactId>org.ops4j.pax.tipi.undertow.websocket-jsr</artifactId>
+			<groupId>io.undertow</groupId>
+			<artifactId>undertow-websockets-jsr</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -286,13 +286,13 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.ops4j.pax.tipi</groupId>
-			<artifactId>org.ops4j.pax.tipi.xnio.api</artifactId>
+			<groupId>org.jboss.xnio</groupId>
+			<artifactId>xnio-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.ops4j.pax.tipi</groupId>
-			<artifactId>org.ops4j.pax.tipi.xnio.nio</artifactId>
+			<groupId>org.jboss.xnio</groupId>
+			<artifactId>xnio-nio</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
