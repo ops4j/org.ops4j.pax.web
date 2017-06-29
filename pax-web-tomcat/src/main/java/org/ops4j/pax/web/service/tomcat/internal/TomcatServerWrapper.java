@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.DispatcherType;
@@ -68,7 +67,6 @@ import org.apache.catalina.Wrapper;
 import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.security.SecurityUtil;
-import org.apache.catalina.startup.ContextConfig;
 import org.apache.catalina.startup.ContextRuleSet;
 import org.apache.catalina.startup.NamingRuleSet;
 import org.apache.catalina.startup.Tomcat.ExistingStandardWrapper;
@@ -115,22 +113,6 @@ import org.xml.sax.SAXParseException;
  * @author Romain Gilles
  */
 class TomcatServerWrapper implements ServerWrapper {
-	private static final Properties authenticators;
-
-	static {
-        // Load our mapping properties for the standard authenticators
-        Properties props = new Properties();
-        try (InputStream is = ContextConfig.class.getClassLoader().getResourceAsStream(
-                "org/apache/catalina/startup/Authenticators.properties");) {
-            if (is != null) {
-                props.load(is);
-            }
-        } catch (IOException ioe) {
-            props = null;
-        }
-        authenticators = props;
-    }
-
 	private final class WrappedServletLifecycleListener implements LifecycleListener {
 		private final Context context;
 		private final String servletName;
