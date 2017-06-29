@@ -190,13 +190,13 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.ops4j.pax.tipi</groupId>
-			<artifactId>org.ops4j.pax.tipi.undertow.servlet</artifactId>
+			<groupId>io.undertow</groupId>
+			<artifactId>undertow-servlet</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.ops4j.pax.tipi</groupId>
-			<artifactId>org.ops4j.pax.tipi.undertow.websocket-jsr</artifactId>
+			<groupId>io.undertow</groupId>
+			<artifactId>undertow-websockets-jsr</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
