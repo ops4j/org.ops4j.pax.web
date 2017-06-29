@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.DispatcherType;
@@ -49,6 +50,7 @@ import javax.servlet.UnavailableException;
 import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 import javax.servlet.descriptor.TaglibDescriptor;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionListener;
 
@@ -61,10 +63,12 @@ import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.LifecycleState;
+import org.apache.catalina.Valve;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.security.SecurityUtil;
+import org.apache.catalina.startup.ContextConfig;
 import org.apache.catalina.startup.ContextRuleSet;
 import org.apache.catalina.startup.NamingRuleSet;
 import org.apache.catalina.startup.Tomcat.ExistingStandardWrapper;
@@ -77,6 +81,7 @@ import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.descriptor.web.JspConfigDescriptorImpl;
 import org.apache.tomcat.util.descriptor.web.JspPropertyGroup;
 import org.apache.tomcat.util.descriptor.web.JspPropertyGroupDescriptorImpl;
+import org.apache.tomcat.util.descriptor.web.LoginConfig;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.apache.tomcat.util.descriptor.web.TaglibDescriptorImpl;
@@ -110,6 +115,22 @@ import org.xml.sax.SAXParseException;
  * @author Romain Gilles
  */
 class TomcatServerWrapper implements ServerWrapper {
+	private static final Properties authenticators;
+
+	static {
+        // Load our mapping properties for the standard authenticators
+        Properties props = new Properties();
+        try (InputStream is = ContextConfig.class.getClassLoader().getResourceAsStream(
+                "org/apache/catalina/startup/Authenticators.properties");) {
+            if (is != null) {
+                props.load(is);
+            }
+        } catch (IOException ioe) {
+            props = null;
+        }
+        authenticators = props;
+    }
+
 	private final class WrappedServletLifecycleListener implements LifecycleListener {
 		private final Context context;
 		private final String servletName;
@@ -970,6 +991,20 @@ class TomcatServerWrapper implements ServerWrapper {
 			}
 		}
 
+		if (context.getAuthenticator() == null) {
+			String authMethod = contextModel.getAuthMethod();
+			String realmName = contextModel.getRealmName();
+			String loginPage = contextModel.getFormLoginPage();
+			String errorPage = contextModel.getFormErrorPage();
+			LoginConfig loginConfig = new LoginConfig(authMethod, realmName, loginPage, errorPage);
+			context.setLoginConfig(loginConfig);
+			LOG.debug("method={} realm={}", authMethod, realmName);
+			// Custom Service Valve for checking authentication stuff ...
+			context.getPipeline().addValve(new ServiceValve(httpContext));
+			// Custom OSGi Security
+			context.getPipeline().addValve(getAuthenticatorValve(authMethod));
+		}
+
         // TODO: how about security, classloader?
 		// TODO: compare with JettyServerWrapper.addContext
 		// TODO: what about the init parameters?
@@ -1024,6 +1059,14 @@ class TomcatServerWrapper implements ServerWrapper {
 		contextMap.put(contextModel.getHttpContext(), context);
 
 		return context;
+	}
+	
+	private Valve getAuthenticatorValve(String authMethod) {
+		if (HttpServletRequest.FORM_AUTH.equalsIgnoreCase(authMethod)) {
+			return new FormAuthenticatorValve();
+		}
+		// use the BasicAuthenticator valve for everything else
+		return new BasicAuthenticatorValve();
 	}
 
 	private URL getDefaultContextXml() {

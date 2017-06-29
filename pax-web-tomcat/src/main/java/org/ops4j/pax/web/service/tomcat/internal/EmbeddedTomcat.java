@@ -582,11 +582,6 @@ public class EmbeddedTomcat extends Tomcat {
 			host.addChild(ctx);
 		}
 
-		// Custom Service Valve for checking authentication stuff ...
-		ctx.getPipeline().addValve(new ServiceValve(httpContext));
-		// Custom OSGi Security
-		ctx.getPipeline().addValve(new OSGiAuthenticatorValve(httpContext));
-
 		// add mimetypes here?
 		// MIME mappings
 		for (int i = 0; i < DEFAULT_MIME_MAPPINGS.length; ) {
