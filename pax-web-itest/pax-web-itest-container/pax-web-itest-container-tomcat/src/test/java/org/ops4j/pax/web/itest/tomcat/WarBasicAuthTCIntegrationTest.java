@@ -85,7 +85,7 @@ public class WarBasicAuthTCIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8282/war-authentication/wc/example");
 
 		HttpTestClientFactory.createDefaultTestClient()
-				.authenticate("admin", "admin", "Authentication required")
+				.authenticate("admin", "admin", "Test Realm")
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/war-authentication/wc/example");
@@ -98,7 +98,7 @@ public class WarBasicAuthTCIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8282/war-authentication/wc/additionalsample");
 
 		HttpTestClientFactory.createDefaultTestClient()
-				.authenticate("admin", "admin", "Authentication required")
+				.authenticate("admin", "admin", "Test Realm")
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/war-authentication/wc/additionalsample");

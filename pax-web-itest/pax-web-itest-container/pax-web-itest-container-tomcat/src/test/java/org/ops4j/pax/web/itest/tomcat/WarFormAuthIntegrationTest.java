@@ -87,12 +87,17 @@ public class WarFormAuthIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore("Use Form-Submit with Jetty HttpClient")
 	public void testWebContainerExample() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain '<title>Login Page for Examples</title>'",
 						resp -> resp.contains("<title>Login Page for Examples</title>"))
 				.doGETandExecuteTest("http://127.0.0.1:8282/war-formauth/wc/example");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.addParameter("j_username", "admin")
+				.addParameter("j_password", "admin")
+				.doPOST("http://127.0.0.1:8282/war-formauth/wc/example?action=j_security_check");
 	}
 
 	@Test

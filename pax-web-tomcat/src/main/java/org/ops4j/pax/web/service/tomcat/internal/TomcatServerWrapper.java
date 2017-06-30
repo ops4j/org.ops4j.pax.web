@@ -31,6 +31,7 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -61,7 +62,14 @@ import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.LifecycleState;
+import org.apache.catalina.Valve;
 import org.apache.catalina.Wrapper;
+import org.apache.catalina.authenticator.BasicAuthenticator;
+import org.apache.catalina.authenticator.DigestAuthenticator;
+import org.apache.catalina.authenticator.FormAuthenticator;
+import org.apache.catalina.authenticator.NonLoginAuthenticator;
+import org.apache.catalina.authenticator.SSLAuthenticator;
+import org.apache.catalina.authenticator.SpnegoAuthenticator;
 import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.security.SecurityUtil;
@@ -77,6 +85,7 @@ import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.descriptor.web.JspConfigDescriptorImpl;
 import org.apache.tomcat.util.descriptor.web.JspPropertyGroup;
 import org.apache.tomcat.util.descriptor.web.JspPropertyGroupDescriptorImpl;
+import org.apache.tomcat.util.descriptor.web.LoginConfig;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.apache.tomcat.util.descriptor.web.TaglibDescriptorImpl;
@@ -970,7 +979,24 @@ class TomcatServerWrapper implements ServerWrapper {
 			}
 		}
 
-        // TODO: how about security, classloader?
+		if (context.getAuthenticator() == null) {
+			String authMethod = contextModel.getAuthMethod();
+			if (authMethod == null) {
+				authMethod = "NONE";
+			}
+			String realmName = contextModel.getRealmName();
+			String loginPage = contextModel.getFormLoginPage();
+			String errorPage = contextModel.getFormErrorPage();
+			LoginConfig loginConfig = new LoginConfig(authMethod, realmName, loginPage, errorPage);
+			context.setLoginConfig(loginConfig);
+			LOG.debug("method={} realm={}", authMethod, realmName);
+			// Custom Service Valve for checking authentication stuff ...
+			context.getPipeline().addValve(new ServiceValve(httpContext));
+			// Custom OSGi Security
+			context.getPipeline().addValve(getAuthenticatorValve(authMethod));
+		}
+
+		// TODO: how about classloader?
 		// TODO: compare with JettyServerWrapper.addContext
 		// TODO: what about the init parameters?
 
@@ -1024,6 +1050,25 @@ class TomcatServerWrapper implements ServerWrapper {
 		contextMap.put(contextModel.getHttpContext(), context);
 
 		return context;
+	}
+	
+	private Valve getAuthenticatorValve(String authMethod) {
+		String authUpper = authMethod.toUpperCase(Locale.ROOT);
+		// this is the content of org/apache/catalina/startup/Authenticators.properties
+		switch (authUpper) {
+		case "BASIC":
+			return new BasicAuthenticator();
+		case "CLIENT-CERT":
+			return new SSLAuthenticator();
+		case "DIGEST":
+			return new DigestAuthenticator();
+		case "FORM":
+			return new FormAuthenticator();
+		case "SPNEGO":
+			return new SpnegoAuthenticator();
+		default:
+			return new NonLoginAuthenticator();
+		}
 	}
 
 	private URL getDefaultContextXml() {
