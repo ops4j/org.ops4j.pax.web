@@ -31,6 +31,7 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -49,7 +50,6 @@ import javax.servlet.UnavailableException;
 import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 import javax.servlet.descriptor.TaglibDescriptor;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionListener;
 
@@ -64,6 +64,12 @@ import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.LifecycleState;
 import org.apache.catalina.Valve;
 import org.apache.catalina.Wrapper;
+import org.apache.catalina.authenticator.BasicAuthenticator;
+import org.apache.catalina.authenticator.DigestAuthenticator;
+import org.apache.catalina.authenticator.FormAuthenticator;
+import org.apache.catalina.authenticator.NonLoginAuthenticator;
+import org.apache.catalina.authenticator.SSLAuthenticator;
+import org.apache.catalina.authenticator.SpnegoAuthenticator;
 import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.security.SecurityUtil;
@@ -975,6 +981,9 @@ class TomcatServerWrapper implements ServerWrapper {
 
 		if (context.getAuthenticator() == null) {
 			String authMethod = contextModel.getAuthMethod();
+			if (authMethod == null) {
+				authMethod = "NONE";
+			}
 			String realmName = contextModel.getRealmName();
 			String loginPage = contextModel.getFormLoginPage();
 			String errorPage = contextModel.getFormErrorPage();
@@ -987,7 +996,7 @@ class TomcatServerWrapper implements ServerWrapper {
 			context.getPipeline().addValve(getAuthenticatorValve(authMethod));
 		}
 
-        // TODO: how about security, classloader?
+		// TODO: how about classloader?
 		// TODO: compare with JettyServerWrapper.addContext
 		// TODO: what about the init parameters?
 
@@ -1044,11 +1053,22 @@ class TomcatServerWrapper implements ServerWrapper {
 	}
 	
 	private Valve getAuthenticatorValve(String authMethod) {
-		if (HttpServletRequest.FORM_AUTH.equalsIgnoreCase(authMethod)) {
-			return new FormAuthenticatorValve();
+		String authUpper = authMethod.toUpperCase(Locale.ROOT);
+		// this is the content of org/apache/catalina/startup/Authenticators.properties
+		switch (authUpper) {
+		case "BASIC":
+			return new BasicAuthenticator();
+		case "CLIENT-CERT":
+			return new SSLAuthenticator();
+		case "DIGEST":
+			return new DigestAuthenticator();
+		case "FORM":
+			return new FormAuthenticator();
+		case "SPNEGO":
+			return new SpnegoAuthenticator();
+		default:
+			return new NonLoginAuthenticator();
 		}
-		// use the BasicAuthenticator valve for everything else
-		return new BasicAuthenticatorValve();
 	}
 
 	private URL getDefaultContextXml() {
