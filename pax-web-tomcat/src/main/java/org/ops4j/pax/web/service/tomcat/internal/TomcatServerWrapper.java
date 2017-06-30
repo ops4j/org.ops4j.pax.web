@@ -979,20 +979,20 @@ class TomcatServerWrapper implements ServerWrapper {
 			}
 		}
 
+		String authMethod = contextModel.getAuthMethod();
+		if (authMethod == null) {
+			authMethod = "NONE";
+		}
+		String realmName = contextModel.getRealmName();
+		String loginPage = contextModel.getFormLoginPage();
+		String errorPage = contextModel.getFormErrorPage();
+		LoginConfig loginConfig = new LoginConfig(authMethod, realmName, loginPage, errorPage);
+		context.setLoginConfig(loginConfig);
+		LOG.debug("loginConfig: method={} realm={}", authMethod, realmName);
+		// Custom Service Valve for checking authentication stuff ...
+		context.getPipeline().addValve(new ServiceValve(httpContext));
 		if (context.getAuthenticator() == null) {
-			String authMethod = contextModel.getAuthMethod();
-			if (authMethod == null) {
-				authMethod = "NONE";
-			}
-			String realmName = contextModel.getRealmName();
-			String loginPage = contextModel.getFormLoginPage();
-			String errorPage = contextModel.getFormErrorPage();
-			LoginConfig loginConfig = new LoginConfig(authMethod, realmName, loginPage, errorPage);
-			context.setLoginConfig(loginConfig);
-			LOG.debug("method={} realm={}", authMethod, realmName);
-			// Custom Service Valve for checking authentication stuff ...
-			context.getPipeline().addValve(new ServiceValve(httpContext));
-			// Custom OSGi Security
+			// Authentication Valve according to configured authentication method
 			context.getPipeline().addValve(getAuthenticatorValve(authMethod));
 		}
 
