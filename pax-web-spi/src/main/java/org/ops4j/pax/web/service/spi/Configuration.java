@@ -20,6 +20,9 @@ import java.io.File;
 import java.net.URL;
 import java.util.List;
 
+import org.osgi.annotation.versioning.ProviderType;
+
+@ProviderType
 public interface Configuration {
 
 	Boolean useNIO();
