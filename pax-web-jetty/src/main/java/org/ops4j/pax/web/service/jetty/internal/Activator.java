@@ -21,11 +21,14 @@ import java.util.Hashtable;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.util.thread.ShutdownThread;
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -55,6 +58,22 @@ public class Activator implements BundleActivator {
 		connectorTracker = new ServiceTracker<>(bundleContext, Connector.class, new ConnectorCustomizer());
 		connectorTracker.open();
 
+		ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+		try {
+			for (Bundle b : bundleContext.getBundles()) {
+				if ("org.eclipse.jetty.util".equals(b.getSymbolicName())) {
+					// perform optimistic static initialization of org.eclipse.jetty.util.thread.ShutdownThread
+					// class (nothing prevents some earlier bundle to do the same)
+					// this should set TCCL of org.eclipse.jetty.util.thread.ShutdownThread instance to its
+					// loading CL
+					Thread.currentThread().setContextClassLoader(b.adapt(BundleWiring.class).getClassLoader());
+					ShutdownThread.getInstance();
+					break;
+				}
+			}
+		} finally {
+			Thread.currentThread().setContextClassLoader(tccl);
+		}
 
 		registration = bundleContext.registerService(
 				ServerControllerFactory.class,
