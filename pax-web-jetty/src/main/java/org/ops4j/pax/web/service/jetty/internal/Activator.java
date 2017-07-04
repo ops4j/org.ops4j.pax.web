@@ -50,6 +50,14 @@ public class Activator implements BundleActivator {
 	@Override
 	public void start(BundleContext bundleContext) throws Exception {
 		this.bundleContext = bundleContext;
+
+		for (Bundle b : bundleContext.getBundles()) {
+			if ("org.eclipse.jetty.util".equals(b.getSymbolicName())) {
+				// explicitly set org.eclipse.jetty.util.thread.ShutdownThread's TCCL to its own CL
+				ShutdownThread.getInstance().setContextClassLoader(b.adapt(BundleWiring.class).getClassLoader());
+			}
+		}
+
 		serverControllerFactory = new ServerControllerFactoryImpl(bundleContext.getBundle());
 
 		handlerTracker = new ServiceTracker<Handler, Handler>(bundleContext, Handler.class, new HandlerCustomizer());
@@ -57,23 +65,6 @@ public class Activator implements BundleActivator {
 
 		connectorTracker = new ServiceTracker<Connector, Connector>(bundleContext, Connector.class, new ConnectorCustomizer());
 		connectorTracker.open();
-
-		ClassLoader tccl = Thread.currentThread().getContextClassLoader();
-		try {
-			for (Bundle b : bundleContext.getBundles()) {
-				if ("org.eclipse.jetty.util".equals(b.getSymbolicName())) {
-					// perform optimistic static initialization of org.eclipse.jetty.util.thread.ShutdownThread
-					// class (nothing prevents some earlier bundle to do the same)
-					// this should set TCCL of org.eclipse.jetty.util.thread.ShutdownThread instance to its
-					// loading CL
-					Thread.currentThread().setContextClassLoader(b.adapt(BundleWiring.class).getClassLoader());
-					ShutdownThread.getInstance();
-					break;
-				}
-			}
-		} finally {
-			Thread.currentThread().setContextClassLoader(tccl);
-		}
 
 		registration = bundleContext.registerService(
 				ServerControllerFactory.class,
