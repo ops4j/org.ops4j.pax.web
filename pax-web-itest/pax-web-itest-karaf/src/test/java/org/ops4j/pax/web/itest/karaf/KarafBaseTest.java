@@ -111,6 +111,7 @@ public class KarafBaseTest extends AbstractControlledTestBase {
 
 				KarafDistributionOption.replaceConfigurationFile("etc/keystore", new File(getClass().getClassLoader().getResource("keystore").getFile())),
 				KarafDistributionOption.replaceConfigurationFile("/etc/jetty.xml", new File(getClass().getClassLoader().getResource("jetty.xml").getFile())),
+				systemProperty("karaf.log.console").value("DEBUG"),
 				systemProperty("ProjectVersion").value(
 						VersionUtil.getProjectVersion()),
 				addCodeCoverageOption(),
