@@ -69,6 +69,7 @@ import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,11 +142,24 @@ class JettyServerImpl implements JettyServer {
 				ClassLoader loader = Thread.currentThread()
 						.getContextClassLoader();
 				try {
-					Thread.currentThread().setContextClassLoader(
-							getClass().getClassLoader());
+					// first find XmlConfiguration class' CL to set it as TCCL when performing static
+					// initialization of XmlConfiguration in order to not leak
+					// org.eclipse.jetty.xml.XmlConfiguration.__factoryLoader.loader
+					ClassLoader jettyXmlCl = null;
+					for (Bundle b : bundle.getBundleContext().getBundles()) {
+						if ("org.eclipse.jetty.xml".equals(b.getSymbolicName())) {
+							jettyXmlCl = b.adapt(BundleWiring.class).getClassLoader();
+							break;
+						}
+					}
+					// TCCL to perform static initialization of XmlConfiguration
+					Thread.currentThread().setContextClassLoader(jettyXmlCl);
 					LOG.debug("Configure using resource " + jettyResource);
 					XmlConfiguration configuration = new XmlConfiguration(
 							jettyResource);
+					// TCCL to run configure (this is where objects defined in jetty.xml are created)
+					Thread.currentThread().setContextClassLoader(
+							getClass().getClassLoader());
 					// configuration.configure(m_server);
 					Method method = XmlConfiguration.class.getMethod(
 							"configure", Object.class);
