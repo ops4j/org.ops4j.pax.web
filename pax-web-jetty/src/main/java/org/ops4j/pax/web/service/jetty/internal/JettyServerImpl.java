@@ -337,7 +337,7 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	@Override
-	public void addServlet(final ServletModel model) {
+	public synchronized void addServlet(final ServletModel model) {
 		LOG.debug("Adding servlet [" + model + "]");
 		final ServletMapping mapping = new ServletMapping();
 		mapping.setServletName(model.getName());
@@ -406,7 +406,7 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	@Override
-	public void removeServlet(final ServletModel model) {
+	public synchronized void removeServlet(final ServletModel model) {
 		LOG.debug("Removing servlet [" + model + "]");
 		// jetty does not provide a method for removing a servlet so we have to
 		// do it by our own
@@ -483,7 +483,7 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	@Override
-	public void removeEventListener(final EventListenerModel model) {
+	public synchronized void removeEventListener(final EventListenerModel model) {
 		final ServletContextHandler context = server.getContext(model
 				.getContextModel().getHttpContext());
 
@@ -517,7 +517,7 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	@Override
-	public void addFilter(final FilterModel model) {
+	public synchronized void addFilter(final FilterModel model) {
 		LOG.debug("Adding filter model [" + model + "]");
 		final FilterMapping mapping = new FilterMapping();
 		mapping.setFilterName(model.getName());
@@ -597,7 +597,7 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	@Override
-	public void removeFilter(FilterModel model) {
+	public synchronized void removeFilter(FilterModel model) {
 		LOG.debug("Removing filter model [" + model + "]");
 		final ServletContextHandler context = server.getContext(model
 				.getContextModel().getHttpContext());
