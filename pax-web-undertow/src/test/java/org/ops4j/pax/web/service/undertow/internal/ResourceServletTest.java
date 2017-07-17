@@ -14,69 +14,61 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.jetty.internal;
-
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
-import static org.easymock.EasyMock.verify;
+package org.ops4j.pax.web.service.undertow.internal;
 
 import java.io.IOException;
-
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
+import io.undertow.server.handlers.PathHandler;
+import io.undertow.server.handlers.resource.Resource;
+import io.undertow.server.handlers.resource.ResourceManager;
 import org.junit.Test;
-import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.spi.model.ContextModel;
+
+import static org.easymock.classextension.EasyMock.createMock;
+import static org.easymock.classextension.EasyMock.expect;
+import static org.easymock.classextension.EasyMock.replay;
+import static org.easymock.classextension.EasyMock.verify;
 
 public class ResourceServletTest {
 
-	private HttpContext httpContext;
-	private HttpServletRequest httpRequest;
-	private HttpServletResponse httpResponse;
+	private ResourceManager resourceManager;
+	private Context context;
+	private ContextModel contextModel;
 
 	public void setUp() {
-		httpContext = createMock(HttpContext.class);
-		httpRequest = createMock(HttpServletRequest.class);
-		httpResponse = createMock(HttpServletResponse.class);
+		context = createMock(Context.class);
+		resourceManager = createMock(ResourceManager.class);
+		contextModel = createMock(ContextModel.class);
 	}
 
 	private void checkResourceNameSpaceMapping(String context, String alias, String name,
 											   String uri, String expected) throws IOException, ServletException {
 		setUp();
 		// prepare
-		expect(httpRequest.getRequestURI()).andReturn(uri).anyTimes();
-		expect(httpRequest.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI))
-				.andReturn(null);
-		expect(httpResponse.isCommitted()).andReturn(false);
-//		expect(httpRequest.getPathInfo()).andReturn(null).anyTimes();
-		httpResponse.sendError(404);
-		expect(httpContext.getResource(expected)).andReturn(null);
+		expect(this.context.getContextModel()).andReturn(contextModel).anyTimes();
+		expect(contextModel.getContextName()).andReturn(context).anyTimes();
+		expect(this.context.getResource(expected)).andReturn(null);
 
-		replay(httpContext, httpRequest, httpResponse);
+		replay(this.context, resourceManager, contextModel);
 		// execute
-		new ResourceServlet(httpContext, context, alias, name).service(httpRequest,
-				httpResponse);
+		new ResourceServlet(this.context, alias, name).getResource(uri);
 		// verify
-		verify(httpContext, httpRequest, httpResponse);
+		verify(this.context, resourceManager, contextModel);
 	}
 
 	@Test
 	public void checkResourceNameSpaceMapping01() throws IOException,
 			ServletException {
 		checkResourceNameSpaceMapping("", "/", "", "/fudd/bugs", "/fudd/bugs");
-		checkResourceNameSpaceMapping("war", "/", "", "/war/fudd/bugs", "/fudd/bugs");
+		checkResourceNameSpaceMapping("war", "/", "", "/fudd/bugs", "/fudd/bugs");
 	}
 
 	@Test
 	public void checkResourceNameSpaceMapping02() throws IOException,
 			ServletException {
 		checkResourceNameSpaceMapping("", "/", "/", "/fudd/bugs", "/fudd/bugs");
-		checkResourceNameSpaceMapping("war", "/", "/", "/war/fudd/bugs", "/fudd/bugs");
+		checkResourceNameSpaceMapping("war", "/", "/", "/fudd/bugs", "/fudd/bugs");
 	}
 
 	@Test
@@ -84,7 +76,7 @@ public class ResourceServletTest {
 			ServletException {
 		checkResourceNameSpaceMapping("", "/", "/tmp", "/fudd/bugs",
 				"/tmp/fudd/bugs");
-		checkResourceNameSpaceMapping("war", "/", "/tmp", "/war/fudd/bugs",
+		checkResourceNameSpaceMapping("war", "/", "/tmp", "/fudd/bugs",
 				"/tmp/fudd/bugs");
 	}
 
@@ -93,7 +85,7 @@ public class ResourceServletTest {
 			ServletException {
 		checkResourceNameSpaceMapping("", "/", "default", "/fudd/bugs",
 				"/fudd/bugs");
-		checkResourceNameSpaceMapping("war", "/", "default", "/war/fudd/bugs",
+		checkResourceNameSpaceMapping("war", "/", "default", "/fudd/bugs",
 				"/fudd/bugs");
 	}
 
@@ -101,24 +93,24 @@ public class ResourceServletTest {
 	public void checkResourceNameSpaceMapping04() throws IOException,
 			ServletException {
 		checkResourceNameSpaceMapping("", "/fudd", "", "/fudd/bugs", "/bugs");
-		checkResourceNameSpaceMapping("war", "/fudd", "", "/war/fudd/bugs", "/bugs");
-		checkResourceNameSpaceMapping("fudd", "/fudd", "", "/fudd/fudd/bugs", "/bugs");
+		checkResourceNameSpaceMapping("war", "/fudd", "", "/fudd/bugs", "/bugs");
+		checkResourceNameSpaceMapping("fudd", "/fudd", "", "/fudd/bugs", "/bugs");
 	}
 
 	@Test
 	public void checkResourceNameSpaceMapping04a() throws IOException,
 			ServletException {
 		checkResourceNameSpaceMapping("", "/fudd", "default", "/fudd/bugs", "/bugs");
-		checkResourceNameSpaceMapping("war", "/fudd", "default", "/war/fudd/bugs", "/bugs");
-		checkResourceNameSpaceMapping("fudd", "/fudd", "default", "/fudd/fudd/bugs", "/bugs");
+		checkResourceNameSpaceMapping("war", "/fudd", "default", "/fudd/bugs", "/bugs");
+		checkResourceNameSpaceMapping("fudd", "/fudd", "default", "/fudd/bugs", "/bugs");
 	}
 
 	@Test
 	public void checkResourceNameSpaceMapping05() throws IOException,
 			ServletException {
 		checkResourceNameSpaceMapping("", "/fudd", "/", "/fudd/bugs", "/bugs");
-		checkResourceNameSpaceMapping("war", "/fudd", "/", "/war/fudd/bugs", "/bugs");
-		checkResourceNameSpaceMapping("fudd", "/fudd", "/", "/fudd/fudd/bugs", "/bugs");
+		checkResourceNameSpaceMapping("war", "/fudd", "/", "/fudd/bugs", "/bugs");
+		checkResourceNameSpaceMapping("fudd", "/fudd", "/", "/fudd/bugs", "/bugs");
 	}
 
 	@Test
@@ -126,9 +118,9 @@ public class ResourceServletTest {
 			ServletException {
 		checkResourceNameSpaceMapping("", "/fudd", "/tmp", "/fudd/bugs",
 				"/tmp/bugs");
-		checkResourceNameSpaceMapping("war", "/fudd", "/tmp", "/war/fudd/bugs",
+		checkResourceNameSpaceMapping("war", "/fudd", "/tmp", "/fudd/bugs",
 				"/tmp/bugs");
-		checkResourceNameSpaceMapping("fudd", "/fudd", "/tmp", "/fudd/fudd/bugs",
+		checkResourceNameSpaceMapping("fudd", "/fudd", "/tmp", "/fudd/bugs",
 				"/tmp/bugs");
 	}
 
@@ -137,9 +129,9 @@ public class ResourceServletTest {
 			ServletException {
 		checkResourceNameSpaceMapping("", "/fudd", "tmp", "/fudd/bugs/x.gif",
 				"tmp/bugs/x.gif");
-		checkResourceNameSpaceMapping("war", "/fudd", "tmp", "/war/fudd/bugs/x.gif",
+		checkResourceNameSpaceMapping("war", "/fudd", "tmp", "/fudd/bugs/x.gif",
 				"tmp/bugs/x.gif");
-		checkResourceNameSpaceMapping("fudd", "/fudd", "tmp", "/fudd/fudd/bugs/x.gif",
+		checkResourceNameSpaceMapping("fudd", "/fudd", "tmp", "/fudd/bugs/x.gif",
 				"tmp/bugs/x.gif");
 	}
 
@@ -149,9 +141,23 @@ public class ResourceServletTest {
 		checkResourceNameSpaceMapping("", "/fudd/bugs/x.gif", "tmp/y.gif",
 				"/fudd/bugs/x.gif", "tmp/y.gif");
 		checkResourceNameSpaceMapping("war", "/fudd/bugs/x.gif", "tmp/y.gif",
-				"/war/fudd/bugs/x.gif", "tmp/y.gif");
+				"/fudd/bugs/x.gif", "tmp/y.gif");
 		checkResourceNameSpaceMapping("fudd", "/fudd/bugs/x.gif", "tmp/y.gif",
-				"/fudd/fudd/bugs/x.gif", "tmp/y.gif");
+				"/fudd/bugs/x.gif", "tmp/y.gif");
+	}
+
+	private class MockContext extends Context {
+		private ResourceManager manager = null;
+
+		public MockContext(ResourceManager resourceManager, PathHandler path, ContextModel contextModel) {
+			super(null, path, contextModel);
+			this.manager = resourceManager;
+		}
+
+		@Override
+		public Resource getResource(String path) throws IOException {
+			return manager.getResource(path);
+		}
 	}
 
 }

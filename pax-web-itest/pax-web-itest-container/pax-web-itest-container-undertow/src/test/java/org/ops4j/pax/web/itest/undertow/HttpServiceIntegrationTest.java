@@ -233,6 +233,14 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		TestServlet servlet2 = new TestServlet();
 		httpService.registerServlet("/test2", servlet2, null, httpContext1.get());
 
+		// register resources to different context
+		// "/" will be changed to "" anyway
+		httpService.registerResources("/r1", "/static", httpContext1.get());
+		httpService.registerResources("/r2", "static", httpContext1.get());
+		httpService.registerResources("/r3", "/", httpContext1.get());
+		httpService.registerResources("/r4", "", httpContext1.get());
+		httpService.registerResources("/", "/static", httpContext1.get());
+
 		for (int count = 0; count < 100; count++) {
 			if (httpContext2.get() == null) {
 				Thread.sleep(100);
@@ -250,6 +258,28 @@ public class HttpServiceIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'TEST OK'",
 						resp -> resp.contains("TEST OK"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/test2");
+
+		// resources
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'registerResources test (static)'",
+						resp -> resp.contains("registerResources test"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/r1/readme.txt");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'registerResources test (static)'",
+						resp -> resp.contains("registerResources test"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/r2/readme.txt");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'registerResources test (ROOT)'",
+						resp -> resp.contains("registerResources test"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/r3/readme.txt");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'registerResources test (ROOT)'",
+						resp -> resp.contains("registerResources test"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/r4/readme.txt");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'registerResources test (ROOT)'",
+						resp -> resp.contains("registerResources test"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/readme.txt");
 
 		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet2.isInitCalled());
 
@@ -316,6 +346,19 @@ public class HttpServiceIntegrationTest extends ITestBase {
 		TestServlet servlet2 = new TestServlet();
 		httpService.registerServlet("/test2", servlet2, null, httpContext1.get());
 
+		// register resources to different context
+		// "/" will be changed to "" anyway
+		// without more changes, these resources will be loaded from original bundle that "created" this http context
+		httpService.registerResources("/r1", "/static", httpContext1.get());
+		httpService.registerResources("/r2", "static", httpContext1.get());
+		httpService.registerResources("/r3", "/", httpContext1.get());
+		httpService.registerResources("/r4", "", httpContext1.get());
+		// case when "resource name" == "context"
+		httpService.registerResources("/war", "/static", httpContext1.get());
+		// can't replace WAR's "default" resource servlet:
+		// "org.osgi.service.http.NamespaceException: alias: '/war' is already in use in this or another context"
+		//		httpService.registerResources("/", "/static", httpContext1.get());
+
 		for (int count = 0; count < 100; count++) {
 			if (httpContext2.get() == null) {
 				Thread.sleep(100);
@@ -337,6 +380,28 @@ public class HttpServiceIntegrationTest extends ITestBase {
 					.doGETandExecuteTest("http://127.0.0.1:8181/war/test2");
 
 		Assert.assertTrue("Servlet.init(ServletConfig) was not called", servlet2.isInitCalled());
+
+		// resources
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'registerResources test (static)'",
+						resp -> resp.contains("registerResources test"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/r1/readme.txt");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'registerResources test (static)'",
+						resp -> resp.contains("registerResources test"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/r2/readme.txt");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'registerResources test (ROOT)'",
+						resp -> resp.contains("registerResources test"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/r3/readme.txt");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'registerResources test (ROOT)'",
+						resp -> resp.contains("registerResources test"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/r4/readme.txt");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'registerResources test (static)'",
+						resp -> resp.contains("registerResources test"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war/war/readme.txt");
 	}
 
 	/**

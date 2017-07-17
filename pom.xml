@@ -780,6 +780,12 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
+				<groupId>org.easymock</groupId>
+				<artifactId>easymockclassextension</artifactId>
+				<version>2.3</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
 				<groupId>org.ops4j.pax.logging</groupId>
 				<artifactId>pax-logging-api</artifactId>
 				<version>${dependency.pax-logging.version}</version>

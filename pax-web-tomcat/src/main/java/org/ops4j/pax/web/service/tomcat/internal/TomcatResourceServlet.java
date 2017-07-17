@@ -120,22 +120,16 @@ public class TomcatResourceServlet extends HttpServlet {
 			mapping = addPaths(servletPath, pathInfo);
 		} else {
 			included = Boolean.FALSE;
-			if (contextName.equals(alias)) {
-				// special handling since resouceServlet has default name
-				// attached to it
-				if (!"default".equalsIgnoreCase(name)) {
-					mapping = name + request.getRequestURI();
-				} else {
-					mapping = request.getRequestURI();
-				}
-			} else {
-				mapping = request.getRequestURI()
-						.replaceFirst(contextName, "/");
-				if (!"default".equalsIgnoreCase(name)) {
-					mapping = mapping.replaceFirst(alias,
-							Matcher.quoteReplacement(name));
-				}
-                pathInfo = ((HttpServletRequest) request).getPathInfo();
+			// getRequestURI will return full path with context name
+			mapping = request.getRequestURI();
+			if (!"/".equals(contextName)) {
+				mapping = mapping.substring(contextName.length());
+			}
+			if (!"/".equals(alias)) {
+				mapping = mapping.substring(alias.length());
+			}
+			if (!name.isEmpty() && !"default".equals(name)) {
+				mapping = name + mapping;
 			}
 		}
 

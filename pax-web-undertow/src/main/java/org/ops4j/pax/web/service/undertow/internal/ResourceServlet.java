@@ -38,7 +38,10 @@ public class ResourceServlet extends HttpServlet implements ResourceManager {
 
 	private final Context context;
 	private final HttpHandler handler;
+	// alias = part of the request URL after "/<context-name>" denoting the resource servlet
 	private final String alias;
+	// name = "default" when accessing resources from the root of the bundle or "/<base-path>", when
+	// accessing resources from some path under root of the bundle
 	private final String name;
 
 	public ResourceServlet(final Context context, String alias, String name) {
@@ -75,25 +78,19 @@ public class ResourceServlet extends HttpServlet implements ResourceManager {
 
 	@Override
 	public Resource getResource(String path) throws IOException {
+		// remember - differently than in org.ops4j.pax.web.service.jetty.internal.ResourceServlet.service(),
+		// here path is already relative to context!
+
 		String contextName = context.getContextModel().getContextName();
 		if (contextName.isEmpty()) {
 			contextName = "/";
 		}
-		String mapping;
-		if (contextName.equals(alias)) {
-			// special handling since resouceServlet has default name
-			// attached to it
-			if (!"default".equalsIgnoreCase(name)) {
-				mapping = name + path;
-			} else {
-				mapping = path;
-			}
-		} else {
-			mapping = path.replaceFirst(contextName, "/");
-			if (!"default".equalsIgnoreCase(name)) {
-				mapping = mapping.replaceFirst(alias,
-						Matcher.quoteReplacement(name));
-			}
+		String mapping = path;
+		if (!"/".equals(alias)) {
+			mapping = mapping.substring(alias.length());
+		}
+		if (!name.isEmpty() && !"default".equals(name)) {
+			mapping = name + mapping;
 		}
 		return context.getResource(mapping);
 	}

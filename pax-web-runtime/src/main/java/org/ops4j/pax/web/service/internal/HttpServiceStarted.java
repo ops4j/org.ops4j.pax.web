@@ -291,7 +291,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			if (!"default".equals(name)) {
 				// PAXWEB-1099 - we should be able to register multiple "resources" for same name (==basePath)
 				// but under different alias
-				resourceModelName = alias + ":" + name;
+				resourceModelName = String.format("%s:%s", alias, "/".equals(name) ? "" : name);
 			}
 			final ResourceModel model = new ResourceModel(contextModel, servlet,
 					alias, resourceModelName);
