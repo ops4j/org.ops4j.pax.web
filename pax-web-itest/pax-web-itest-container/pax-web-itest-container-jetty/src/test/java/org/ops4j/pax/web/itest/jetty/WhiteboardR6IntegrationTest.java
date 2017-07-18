@@ -157,6 +157,7 @@ public class WhiteboardR6IntegrationTest extends ITestBase {
 	public void testAsyncServlet() throws Exception {
 		Dictionary<String, String> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/as");
+		// it should be Boolean value, but I think relaxing the requirement a bit is not bad
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED, "true");
 
 		ServiceRegistration<Servlet> registerService = bundleContext.registerService(Servlet.class, new AsyncServlet(),
