@@ -280,6 +280,14 @@ public abstract class AbstractControlledTestBase {
 		return httpService;
 	}
 
+	public static WebContainer getWebContainer(final BundleContext bundleContext) {
+		ServiceReference<WebContainer> ref = bundleContext.getServiceReference(WebContainer.class);
+		Assert.assertNotNull("Failed to get WebContainer", ref);
+		WebContainer webContainer = bundleContext.getService(ref);
+		Assert.assertNotNull("Failed to get WebContainer", webContainer);
+		return webContainer;
+	}
+
 	/**
 	 * Assuming that <code>serviceClass</code> represents a service related to <code>pid</code>, this method
 	 * synchronously performs some operation (e.g., configadmin update) and waits for service to be modified.

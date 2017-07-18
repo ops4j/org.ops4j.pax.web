@@ -176,8 +176,12 @@ public class ServletTracker<T extends Servlet> extends AbstractTracker<T, Servle
 		}
 
 		if (asyncSupported == null) {
-			asyncSupported = ServicePropertiesUtils.getBooleanProperty(serviceReference,
-					HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED);
+			asyncSupported = Boolean.FALSE;
+			// spec 140.16.2.21: "The value of this service property must be of type Boolean."
+			Object value = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED);
+			if (value instanceof Boolean) {
+				asyncSupported = (Boolean) value;
+			}
 		}
 
 		if (annotationScan.scanned) {
