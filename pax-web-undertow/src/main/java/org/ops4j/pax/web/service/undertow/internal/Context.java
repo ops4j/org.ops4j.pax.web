@@ -462,6 +462,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 			for (Map.Entry<String, String> param : filter.getInitParams().entrySet()) {
 				info.addInitParam(param.getKey(), param.getValue());
 			}
+			info.setAsyncSupported(filter.isAsyncSupported());
 
 			deployment.addFilter(info);
 			String[] dispatchers = filter.getDispatcher();

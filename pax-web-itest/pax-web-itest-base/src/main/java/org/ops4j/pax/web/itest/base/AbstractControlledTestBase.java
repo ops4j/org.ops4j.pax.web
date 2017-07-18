@@ -276,6 +276,14 @@ public abstract class AbstractControlledTestBase {
 		return httpService;
 	}
 
+	public static WebContainer getWebContainer(final BundleContext bundleContext) {
+		ServiceReference<WebContainer> ref = bundleContext.getServiceReference(WebContainer.class);
+		Assert.assertNotNull("Failed to get WebContainer", ref);
+		WebContainer webContainer = bundleContext.getService(ref);
+		Assert.assertNotNull("Failed to get WebContainer", webContainer);
+		return webContainer;
+	}
+
 	/**
 	 * Callback to get access to the injected BundleContext
 	 *
