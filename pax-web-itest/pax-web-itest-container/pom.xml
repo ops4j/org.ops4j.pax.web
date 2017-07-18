@@ -33,6 +33,14 @@
 
 	<profiles>
 		<profile>
+			<id>release</id>
+			<modules>
+				<module>pax-web-itest-container-jetty</module>
+				<module>pax-web-itest-container-tomcat</module>
+				<module>pax-web-itest-container-undertow</module>
+			</modules>
+		</profile>
+		<profile>
 			<id>jetty</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
