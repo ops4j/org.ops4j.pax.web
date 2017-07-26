@@ -143,3 +143,11 @@ org.ops4j.pax.web.log.ncsa.extended = true/false
 -------------------------------------------
 org.ops4j.pax.web.log.ncsa.LogTimeZone= GMT
 -------------------------------------------
+
+[[BasicConfiguration-org.osgi.service.http.checkForwardedHeaders]]
+`org.osgi.service.http.checkForwardedHeaders`
+
+------------------------------------------------
+org.osgi.service.http.checkForwardedHeaders = true/false
+------------------------------------------------
+Behind a reverse proxy it is sometime necessary to handle the X-Forwarded-*.
