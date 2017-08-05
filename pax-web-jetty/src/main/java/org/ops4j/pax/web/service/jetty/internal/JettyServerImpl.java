@@ -337,7 +337,7 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	@Override
-	public void addServlet(final ServletModel model) {
+	public synchronized void addServlet(final ServletModel model) {
 		LOG.debug("Adding servlet [" + model + "]");
 		final ServletMapping mapping = new ServletMapping();
 		mapping.setServletName(model.getName());
@@ -406,7 +406,7 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	@Override
-	public void removeServlet(final ServletModel model) {
+	public synchronized void removeServlet(final ServletModel model) {
 		LOG.debug("Removing servlet [" + model + "]");
 		// jetty does not provide a method for removing a servlet so we have to
 		// do it by our own
@@ -477,13 +477,13 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	@Override
-	public void addEventListener(final EventListenerModel model) {
+	public synchronized void addEventListener(final EventListenerModel model) {
 		server.getOrCreateContext(model).addEventListener(
 				model.getEventListener());
 	}
 
 	@Override
-	public void removeEventListener(final EventListenerModel model) {
+	public synchronized void removeEventListener(final EventListenerModel model) {
 		final ServletContextHandler context = server.getContext(model
 				.getContextModel().getHttpContext());
 
@@ -507,17 +507,17 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	@Override
-	public void removeContext(final HttpContext httpContext) {
+	public synchronized void removeContext(final HttpContext httpContext) {
 		server.removeContext(httpContext, false);
 	}
 
 	@Override
-	public void removeContext(HttpContext httpContext, boolean force) {
+	public synchronized void removeContext(HttpContext httpContext, boolean force) {
 		server.removeContext(httpContext, force);
 	}
 
 	@Override
-	public void addFilter(final FilterModel model) {
+	public synchronized void addFilter(final FilterModel model) {
 		LOG.debug("Adding filter model [" + model + "]");
 		final FilterMapping mapping = new FilterMapping();
 		mapping.setFilterName(model.getName());
@@ -597,7 +597,7 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	@Override
-	public void removeFilter(FilterModel model) {
+	public synchronized void removeFilter(FilterModel model) {
 		LOG.debug("Removing filter model [" + model + "]");
 		final ServletContextHandler context = server.getContext(model
 				.getContextModel().getHttpContext());
@@ -682,7 +682,7 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	@Override
-	public void addErrorPage(final ErrorPageModel model) {
+	public synchronized void addErrorPage(final ErrorPageModel model) {
 		final ServletContextHandler context = server.getOrCreateContext(model);
 		final ErrorPageErrorHandler errorPageHandler = (ErrorPageErrorHandler) context
 				.getErrorHandler();
@@ -715,7 +715,7 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	@Override
-	public void removeErrorPage(final ErrorPageModel model) {
+	public synchronized void removeErrorPage(final ErrorPageModel model) {
 		final ServletContextHandler context = server.getContext(model
 				.getContextModel().getHttpContext());
 		if (context == null) {
@@ -736,7 +736,7 @@ class JettyServerImpl implements JettyServer {
 
 	// PAXWEB-123: try to register WelcomeFiles differently
 	@Override
-	public void addWelcomeFiles(final WelcomeFileModel model) {
+	public synchronized void addWelcomeFiles(final WelcomeFileModel model) {
 		final ServletContextHandler context = server
 				.getOrCreateContext(model);
 
@@ -762,7 +762,7 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	@Override
-	public void removeWelcomeFiles(final WelcomeFileModel model) {
+	public synchronized void removeWelcomeFiles(final WelcomeFileModel model) {
 		final ServletContextHandler context = server.getContext(model
 				.getContextModel().getHttpContext());
 		if (context == null) {
