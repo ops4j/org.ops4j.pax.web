@@ -29,6 +29,7 @@
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-jaas/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-xml/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-client/${dependency.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-deploy/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-server/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-client/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-common/${dependency.jetty.version}</bundle>
