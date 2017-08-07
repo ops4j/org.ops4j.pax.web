@@ -29,9 +29,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -191,17 +191,18 @@ class JettyFactoryImpl implements JettyFactory {
         }
         return httpConfig;
     }
-	
-	private HttpConfiguration parseAndConfigureHttpConfig(URL jettyResource) throws IOException, ParserConfigurationException, SAXException {
+
+    private HttpConfiguration parseAndConfigureHttpConfig(URL jettyResource) throws IOException, ParserConfigurationException, SAXException {
         InputStream inputStream = jettyResource.openStream();
 
         Element rootElement = getRootElement(inputStream);
         Element[] news = getChildren(rootElement, "New");
-        final List<Element> httpConfigElements = Arrays.stream(news)
-                .filter(element -> element.hasAttribute("class"))
-                .filter(element -> getAttribute(element, "class")
-                        .equalsIgnoreCase("org.eclipse.jetty.server.HttpConfiguration"))
-                .collect(Collectors.toList());
+        final List<Element> httpConfigElements = new LinkedList<>();
+        for (Element element : news) {
+            if (element.hasAttribute("class") && getAttribute(element, "class").equalsIgnoreCase("org.eclipse.jetty.server.HttpConfiguration")) {
+                httpConfigElements.add(element);
+            }
+        }
 
         if (httpConfigElements.size() < 1) {
             log.warn("No HttpConfig Element found in jetty.xml, using default");
@@ -220,25 +221,27 @@ class JettyFactoryImpl implements JettyFactory {
 
         Map<String, String> confProps = new HashMap<>();
 
-        Arrays.stream(children).filter(element -> element.getTagName().equalsIgnoreCase("Set")).forEach(element -> {
-            String name = getAttribute(element, "name");
-            String value = getValue(element);
-            if (element.hasChildNodes()) {
-                Element property = getChild(element, "Property");
-                if (property != null)
-                    value = property.getAttribute("default");
+        for (Element element : children) {
+            if (element.getTagName().equalsIgnoreCase("Set")) {
+                String name = getAttribute(element, "name");
+                String value = getValue(element);
+                if (element.hasChildNodes()) {
+                    Element property = getChild(element, "Property");
+                    if (property != null)
+                        value = property.getAttribute("default");
+                }
+                confProps.put(name,value);
             }
-            confProps.put(name,value);
-        });
+        }
 
         Map<String, Method> methods = new HashMap<>();
 
-        Arrays.stream(HttpConfiguration.class.getMethods()).forEach(method -> {
+        for (Method method : HttpConfiguration.class.getMethods()) {
             methods.put(method.getName(), method);
-        });
+        }
 
         HttpConfiguration finalHttpConfig = httpConfig;
-        confProps.entrySet().stream().forEach(entry -> {
+        for (Map.Entry<String, String> entry : confProps.entrySet()) {
             String key = entry.getKey();
             key = key.substring(0,1).toUpperCase().concat(key.substring(1));
             String name = "set".concat(key);
@@ -250,7 +253,7 @@ class JettyFactoryImpl implements JettyFactory {
             } catch (IllegalAccessException | NumberFormatException | InvocationTargetException e) {
                 log.error("HttpConfiguration failed to set variable {} with method {}", entry.getValue(), name);
             }
-        });
+        }
 
         if (finalHttpConfig == null) {
             log.warn("HttpConfiguration is null ... even though it should be initialized!!!");
@@ -261,7 +264,7 @@ class JettyFactoryImpl implements JettyFactory {
 
         return httpConfig;
     }
-	
+
 	private static Object toObject( Class clazz, String value ) {
         if( Boolean.class == clazz || Boolean.TYPE == clazz ) return Boolean.parseBoolean( value );
         if( Byte.class == clazz || Byte.TYPE == clazz ) return Byte.parseByte( value );
