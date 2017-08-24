@@ -210,6 +210,24 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
         // PAXWEB-193 suggested we should open this up for external
         // configuration
         URL undertowResource = configuration.getConfigurationURL();
+        // even if it's "dir" it may point to "file" (same as in o.o.p.w.s.jetty.internal.JettyFactoryImpl.getHttpConfiguration())
+        File serverConfigDir = configuration.getConfigurationDir();
+
+        try {
+            if (undertowResource == null && serverConfigDir != null) {
+                if (serverConfigDir.isFile() && serverConfigDir.canRead()) {
+                    String fileName = serverConfigDir.getName();
+                    undertowResource = serverConfigDir.toURI().toURL();
+                } else if (serverConfigDir.isDirectory()) {
+                    File configuration = new File(serverConfigDir, "undertow.properties");
+                    if (configuration.isFile() && configuration.canRead()) {
+                        undertowResource = configuration.toURI().toURL();
+                    }
+                }
+            }
+        } catch (MalformedURLException ignored) {
+        }
+
         if (undertowResource == null) {
             undertowResource = getClass().getResource("/undertow.properties");
         }
