@@ -21,8 +21,11 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.util.Collection;
 
+import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.Test;
 import org.ops4j.pax.web.service.jetty.internal.util.DOMJettyWebXmlParser;
 
@@ -42,6 +45,18 @@ public class DOMJettyWebXmlParserTest {
 			+ "  <Set name=\"file\">\n" + "    <New class=\"java.io.File\">\n"
 			+ "      <Arg>PATH</Arg>\n" + "    </New>\n" + "  </Set>\n"
 			+ "</Configure>";
+	
+	String xmlErrorInput = "<Configure class=\"org.eclipse.jetty.webapp.WebAppContext\">\n" + 
+	        "    <Set name=\"contextPath\">/dashboard</Set>\n" + 
+	        "    \n" + 
+	        "    <Get name=\"errorHandler\">\n" + 
+	        "        <Call name=\"addErrorPage\">\n" + 
+	        "            <Arg type=\"int\">400</Arg>\n" + 
+	        "            <Arg type=\"int\">599</Arg>\n" + 
+	        "            <Arg type=\"String\">/error.xhtml</Arg> <!-- ERROR HERE -->\n" + 
+	        "        </Call>\n" + 
+	        "    </Get>\n" + 
+	        "</Configure>";
 
 	/**
 	 * Test method for
@@ -90,5 +105,23 @@ public class DOMJettyWebXmlParserTest {
 
 		assertNotNull(test.getFile());
 		assertEquals(test.getFile().getPath(), "PATH");
+	}
+	
+	@Test
+	public void testErrorInput() {
+	    final DOMJettyWebXmlParser parser = new DOMJettyWebXmlParser();
+	    
+	    final ByteArrayInputStream in = new ByteArrayInputStream(xmlErrorInput.getBytes());
+	    
+	    WebAppContext ctxt = new WebAppContext();
+	    parser.parse(ctxt, in);
+	    
+	    assertNotNull(ctxt);
+	    assertEquals("/dashboard", ctxt.getContextPath());
+	    assertNotNull(ctxt.getErrorHandler());
+	    ErrorHandler errorHandler = ctxt.getErrorHandler();
+	    
+	    //assertNotNull();
+	    
 	}
 }
