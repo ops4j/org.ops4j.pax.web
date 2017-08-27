@@ -790,8 +790,15 @@ public class DOMJettyWebXmlParser {
 				} else {
 					value = item;
 				}
-			}
+			} else  if (first == last) {
+	            // Single Item value
+	            value = itemValue(obj,getChildren(node)[0]);
+		    } else {
+	            value = getValue(node);
+	        }
 		}
+		
+		
 
 		// Untyped or unknown
 		if (value == null) {
