@@ -61,12 +61,6 @@ public class ITestBase extends AbstractTestBase {
 						.artifactId("org.ops4j.pax.tipi.tomcat-embed-core")
 						.version(asInProject()),
 
-				mavenBundle()
-						.groupId("org.ops4j.pax.tipi")
-						.artifactId(
-								"org.ops4j.pax.tipi.tomcat-embed-logging-juli")
-						.version(asInProject()),
-
 				mavenBundle().groupId("org.ops4j.pax.tipi")
 						.artifactId("org.ops4j.pax.tipi.tomcat-embed-websocket")
 						.version(asInProject()),

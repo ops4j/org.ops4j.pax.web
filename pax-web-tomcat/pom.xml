@@ -199,11 +199,6 @@
 			<artifactId>org.ops4j.pax.tipi.tomcat-embed-websocket</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.tipi</groupId>
-			<artifactId>org.ops4j.pax.tipi.tomcat-embed-logging-juli</artifactId>
-			<scope>provided</scope>
-		</dependency>
 
 		<!-- Provided dependencies (not transitive) -->
 		<dependency>
