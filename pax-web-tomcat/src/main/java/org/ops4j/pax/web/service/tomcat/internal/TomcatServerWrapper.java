@@ -901,7 +901,7 @@ class TomcatServerWrapper implements ServerWrapper {
 			// the specification so
 			// tomcat should provide
 			// it out of the box
-			context.addServletMapping(urlPattern, servletName);
+			context.addServletMappingDecoded(urlPattern, servletName);
 		}
 	}
 
