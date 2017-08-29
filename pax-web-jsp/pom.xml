@@ -50,11 +50,9 @@
 			<resource>
 				<directory>target/dependency</directory>
 				<excludes>
-					<exclude>org/apache/jasper/compiler/TagLibraryInfoImpl.java</exclude>
 					<exclude>org/apache/jasper/compiler/TldCache.java</exclude>
 					<exclude>org/apache/jasper/compiler/JspConfig.java</exclude>
 					<exclude>org/apache/jasper/JspCompilationContext.java</exclude>
-					<exclude>org/apache/jasper/servlet/JspServletWrapper.java</exclude>
 					<exclude>org/apache/tomcat/util/descriptor/tagplugin/TagPluginParser.java</exclude>
 				</excludes>
 			</resource>
@@ -80,6 +78,7 @@
 							org.slf4j; version="[1.5,2.0)",
 							org.apache.tools.ant.*; resolution:=optional,
 							org.eclipse.*; resolution:=optional,
+							org.eclipse.jdt.internal.compiler.parser; resolution:=optional,
 							org.osgi.service.http,
 							org.osgi.framework; version="[1.0.0,2.0.0)",
 							org.osgi.service.packageadmin; resolution:=optional,
@@ -225,10 +224,8 @@
 						</Export-Package>
 						<Include-Resource> {maven-dependencies},
 							{maven-resources},
-							org/apache/jasper/compiler/TagLibraryInfoImpl.class=target/classes/org/apache/jasper/compiler/TagLibraryInfoImpl.class,
 							org/apache/jasper/compiler/TldCache.class=target/classes/org/apache/jasper/compiler/TldCache.class,
 							org/apache/jasper/JspCompilationContext.class=target/classes/org/apache/jasper/JspCompilationContext.class,
-							org/apache/jasper/servlet/JspServletWrapper.class=target/classes/org/apache/jasper/servlet/JspServletWrapper.class,
 							org/apache/tomcat/util/descriptor/tagplugin/TagPluginParser.class=target/classes/org/apache/tomcat/util/descriptor/tagplugin/TagPluginParser.class
 						</Include-Resource>
 						<Embed-Dependency>*; scope=compile; type=!pom;
@@ -253,28 +250,6 @@
 							<comparisonVersion>${baseline.version}</comparisonVersion>
 							<failOnWarning>false</failOnWarning>
 							<failOnError>false</failOnError>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>unpack</id>
-						<phase>generate-resources</phase>
-						<goals>
-							<goal>unpack</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>org.apache.tomcat.embed</groupId>
-									<artifactId>tomcat-embed-jasper</artifactId>
-									<version>8.0.14</version>
-									<classifier>sources</classifier>
-								</artifactItem>
-							</artifactItems>
 						</configuration>
 					</execution>
 				</executions>
@@ -346,6 +321,10 @@
 				</exclusion>
 				<exclusion>
 					<artifactId>core</artifactId>
+					<groupId>org.eclipse.jdt</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>ecj</artifactId>
 					<groupId>org.eclipse.jdt</groupId>
 				</exclusion>
 			</exclusions>

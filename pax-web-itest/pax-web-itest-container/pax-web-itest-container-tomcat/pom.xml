@@ -421,16 +421,6 @@
 			<artifactId>org.ops4j.pax.tipi.tomcat-embed-websocket</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.tipi</groupId>
-			<artifactId>org.ops4j.pax.tipi.tomcat-embed-logging-juli</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<!--<dependency>
-			<groupId>org.ops4j.pax.tipi</groupId>
-			<artifactId>org.ops4j.pax.tipi.tomcat-embed-el</artifactId>
-			<scope>provided</scope>
-		</dependency>-->
 
 		<dependency>
 			<groupId>org.apache.servicemix.specs</groupId>
