@@ -27,10 +27,9 @@ import javax.servlet.ServletContext;
 
 import org.apache.jasper.Constants;
 import org.apache.jasper.JasperException;
-import org.apache.jasper.compiler.Localizer;
+import org.apache.tomcat.Jar;
 import org.apache.tomcat.util.descriptor.tld.TaglibXml;
 import org.apache.tomcat.util.descriptor.tld.TldResourcePath;
-import org.apache.tomcat.util.scan.Jar;
 import org.ops4j.pax.web.jsp.TldParser;
 import org.xml.sax.SAXException;
 
@@ -42,145 +41,148 @@ import org.xml.sax.SAXException;
  */
 public class TldCache {
 
-	public static final String SERVLET_CONTEXT_ATTRIBUTE_NAME =
-			TldCache.class.getName();
+    public static final String SERVLET_CONTEXT_ATTRIBUTE_NAME =
+            TldCache.class.getName();
 
-	private final ServletContext servletContext;
-	private final Map<String, TldResourcePath> uriTldResourcePathMap = new HashMap<>();
-	private final Map<TldResourcePath, TaglibXmlCacheEntry> tldResourcePathTaglibXmlMap =
-			new HashMap<>();
-	private final TldParser tldParser;
-
-
-	public static TldCache getInstance(ServletContext servletContext) {
-		if (servletContext == null) {
-			throw new IllegalArgumentException(Localizer.getMessage(
-					"org.apache.jasper.compiler.TldCache.servletContextNull"));
-		}
-		return (TldCache) servletContext.getAttribute(SERVLET_CONTEXT_ATTRIBUTE_NAME);
-	}
+    private final ServletContext servletContext;
+    private final Map<String,TldResourcePath> uriTldResourcePathMap = new HashMap<>();
+    private final Map<TldResourcePath,TaglibXmlCacheEntry> tldResourcePathTaglibXmlMap =
+            new HashMap<>();
+    private final TldParser tldParser;
 
 
-	public TldCache(ServletContext servletContext,
-					Map<String, TldResourcePath> uriTldResourcePathMap,
-					Map<TldResourcePath, TaglibXml> tldResourcePathTaglibXmlMap) {
-		this.servletContext = servletContext;
-		this.uriTldResourcePathMap.putAll(uriTldResourcePathMap);
-		for (Entry<TldResourcePath, TaglibXml> entry : tldResourcePathTaglibXmlMap.entrySet()) {
-			TldResourcePath tldResourcePath = entry.getKey();
-			long lastModified[] = getLastModified(tldResourcePath);
-			TaglibXmlCacheEntry cacheEntry = new TaglibXmlCacheEntry(
-					entry.getValue(), lastModified[0], lastModified[1]);
-			this.tldResourcePathTaglibXmlMap.put(tldResourcePath, cacheEntry);
-		}
-		boolean validate = Boolean.parseBoolean(
-				servletContext.getInitParameter(Constants.XML_VALIDATION_TLD_INIT_PARAM));
-		String blockExternalString = servletContext.getInitParameter(
-				Constants.XML_BLOCK_EXTERNAL_INIT_PARAM);
-		boolean blockExternal;
-		if (blockExternalString == null) {
-			blockExternal = true;
-		} else {
-			blockExternal = Boolean.parseBoolean(blockExternalString);
-		}
-		tldParser = new TldParser(true, validate, blockExternal);
-	}
+    public static TldCache getInstance(ServletContext servletContext) {
+        if (servletContext == null) {
+            throw new IllegalArgumentException(Localizer.getMessage(
+                    "org.apache.jasper.compiler.TldCache.servletContextNull"));
+        }
+        return (TldCache) servletContext.getAttribute(SERVLET_CONTEXT_ATTRIBUTE_NAME);
+    }
 
 
-	public TldResourcePath getTldResourcePath(String uri) {
-		return uriTldResourcePathMap.get(uri);
-	}
+    public TldCache(ServletContext servletContext,
+            Map<String, TldResourcePath> uriTldResourcePathMap,
+            Map<TldResourcePath, TaglibXml> tldResourcePathTaglibXmlMap) {
+        this.servletContext = servletContext;
+        this.uriTldResourcePathMap.putAll(uriTldResourcePathMap);
+        for (Entry<TldResourcePath, TaglibXml> entry : tldResourcePathTaglibXmlMap.entrySet()) {
+            TldResourcePath tldResourcePath = entry.getKey();
+            long lastModified[] = getLastModified(tldResourcePath);
+            TaglibXmlCacheEntry cacheEntry = new TaglibXmlCacheEntry(
+                    entry.getValue(), lastModified[0], lastModified[1]);
+            this.tldResourcePathTaglibXmlMap.put(tldResourcePath, cacheEntry);
+        }
+        boolean validate = Boolean.parseBoolean(
+                servletContext.getInitParameter(Constants.XML_VALIDATION_TLD_INIT_PARAM));
+        String blockExternalString = servletContext.getInitParameter(
+                Constants.XML_BLOCK_EXTERNAL_INIT_PARAM);
+        boolean blockExternal;
+        if (blockExternalString == null) {
+            blockExternal = true;
+        } else {
+            blockExternal = Boolean.parseBoolean(blockExternalString);
+        }
+        tldParser = new TldParser(true, validate, blockExternal);
+    }
 
 
-	public TaglibXml getTaglibXml(TldResourcePath tldResourcePath) throws JasperException {
-		TaglibXmlCacheEntry cacheEntry = tldResourcePathTaglibXmlMap.get(tldResourcePath);
-		long lastModified[] = getLastModified(tldResourcePath);
-		if (lastModified[0] != cacheEntry.getWebAppPathLastModified() ||
-				lastModified[1] != cacheEntry.getEntryLastModified()) {
-			synchronized (cacheEntry) {
-				if (lastModified[0] != cacheEntry.getWebAppPathLastModified() ||
-						lastModified[1] != cacheEntry.getEntryLastModified()) {
-					// Re-parse TLD
-					TaglibXml updatedTaglibXml;
-					try {
-						updatedTaglibXml = tldParser.parse(tldResourcePath);
-					} catch (IOException | SAXException e) {
-						throw new JasperException(e);
-					}
-					cacheEntry.setTaglibXml(updatedTaglibXml);
-					cacheEntry.setWebAppPathLastModified(lastModified[0]);
-					cacheEntry.setEntryLastModified(lastModified[1]);
-				}
-			}
-		}
-		return cacheEntry.getTaglibXml();
-	}
+    public TldResourcePath getTldResourcePath(String uri) {
+        return uriTldResourcePathMap.get(uri);
+    }
 
 
-	private long[] getLastModified(TldResourcePath tldResourcePath) {
-		long[] result = new long[2];
-		result[0] = -1;
-		result[1] = -1;
-		try {
-			String webappPath = tldResourcePath.getWebappPath();
-			if (webappPath != null) {
-				// webappPath will be null for JARs containing TLDs that are on
-				// the class path but not part of the web application
-				URL url = servletContext.getResource(tldResourcePath.getWebappPath());
-				URLConnection conn = url.openConnection();
-				result[0] = conn.getLastModified();
-				if ("file".equals(url.getProtocol())) {
-					// Reading the last modified time opens an input stream so we
-					// need to make sure it is closed again otherwise the TLD file
-					// will be locked until GC runs.
-					conn.getInputStream().close();
-				}
-			}
-			try (Jar jar = tldResourcePath.getJar()) {
-				if (jar != null) {
-					result[1] = jar.getLastModified(tldResourcePath.getEntryName());
-				}
-			}
-		} catch (IOException e) {
-			// Ignore (shouldn't happen)
-		}
-		return result;
-	}
+    public TaglibXml getTaglibXml(TldResourcePath tldResourcePath) throws JasperException {
+        TaglibXmlCacheEntry cacheEntry = tldResourcePathTaglibXmlMap.get(tldResourcePath);
+        if (cacheEntry == null) {
+            return null;
+        }
+        long lastModified[] = getLastModified(tldResourcePath);
+        if (lastModified[0] != cacheEntry.getWebAppPathLastModified() ||
+                lastModified[1] != cacheEntry.getEntryLastModified()) {
+            synchronized (cacheEntry) {
+                if (lastModified[0] != cacheEntry.getWebAppPathLastModified() ||
+                        lastModified[1] != cacheEntry.getEntryLastModified()) {
+                    // Re-parse TLD
+                    TaglibXml updatedTaglibXml;
+                    try {
+                        updatedTaglibXml = tldParser.parse(tldResourcePath);
+                    } catch (IOException | SAXException e) {
+                        throw new JasperException(e);
+                    }
+                    cacheEntry.setTaglibXml(updatedTaglibXml);
+                    cacheEntry.setWebAppPathLastModified(lastModified[0]);
+                    cacheEntry.setEntryLastModified(lastModified[1]);
+                }
+            }
+        }
+        return cacheEntry.getTaglibXml();
+    }
 
-	private static class TaglibXmlCacheEntry {
-		private volatile TaglibXml taglibXml;
-		private volatile long webAppPathLastModified;
-		private volatile long entryLastModified;
 
-		public TaglibXmlCacheEntry(TaglibXml taglibXml, long webAppPathLastModified,
-								   long entryLastModified) {
-			this.taglibXml = taglibXml;
-			this.webAppPathLastModified = webAppPathLastModified;
-			this.entryLastModified = entryLastModified;
-		}
+    private long[] getLastModified(TldResourcePath tldResourcePath) {
+        long[] result = new long[2];
+        result[0] = -1;
+        result[1] = -1;
+        try {
+            String webappPath = tldResourcePath.getWebappPath();
+            if (webappPath != null) {
+                // webappPath will be null for JARs containing TLDs that are on
+                // the class path but not part of the web application
+                URL url = servletContext.getResource(tldResourcePath.getWebappPath());
+                URLConnection conn = url.openConnection();
+                result[0] = conn.getLastModified();
+                if ("file".equals(url.getProtocol())) {
+                    // Reading the last modified time opens an input stream so we
+                    // need to make sure it is closed again otherwise the TLD file
+                    // will be locked until GC runs.
+                    conn.getInputStream().close();
+                }
+            }
+            try (Jar jar = tldResourcePath.openJar()) {
+                if (jar != null) {
+                    result[1] = jar.getLastModified(tldResourcePath.getEntryName());
+                }
+            }
+        } catch (IOException e) {
+            // Ignore (shouldn't happen)
+        }
+        return result;
+    }
 
-		public TaglibXml getTaglibXml() {
-			return taglibXml;
-		}
+    private static class TaglibXmlCacheEntry {
+        private volatile TaglibXml taglibXml;
+        private volatile long webAppPathLastModified;
+        private volatile long entryLastModified;
 
-		public void setTaglibXml(TaglibXml taglibXml) {
-			this.taglibXml = taglibXml;
-		}
+        public TaglibXmlCacheEntry(TaglibXml taglibXml, long webAppPathLastModified,
+                long entryLastModified) {
+            this.taglibXml = taglibXml;
+            this.webAppPathLastModified = webAppPathLastModified;
+            this.entryLastModified = entryLastModified;
+        }
 
-		public long getWebAppPathLastModified() {
-			return webAppPathLastModified;
-		}
+        public TaglibXml getTaglibXml() {
+            return taglibXml;
+        }
 
-		public void setWebAppPathLastModified(long webAppPathLastModified) {
-			this.webAppPathLastModified = webAppPathLastModified;
-		}
+        public void setTaglibXml(TaglibXml taglibXml) {
+            this.taglibXml = taglibXml;
+        }
 
-		public long getEntryLastModified() {
-			return entryLastModified;
-		}
+        public long getWebAppPathLastModified() {
+            return webAppPathLastModified;
+        }
 
-		public void setEntryLastModified(long entryLastModified) {
-			this.entryLastModified = entryLastModified;
-		}
-	}
+        public void setWebAppPathLastModified(long webAppPathLastModified) {
+            this.webAppPathLastModified = webAppPathLastModified;
+        }
+
+        public long getEntryLastModified() {
+            return entryLastModified;
+        }
+
+        public void setEntryLastModified(long entryLastModified) {
+            this.entryLastModified = entryLastModified;
+        }
+    }
 }

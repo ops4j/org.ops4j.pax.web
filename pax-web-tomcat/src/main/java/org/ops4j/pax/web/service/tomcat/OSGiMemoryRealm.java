@@ -26,6 +26,7 @@ import java.util.Enumeration;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.LifecycleState;
 import org.apache.catalina.realm.MemoryRealm;
+import org.apache.catalina.realm.MessageDigestCredentialHandler;
 import org.apache.tomcat.util.digester.Digester;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,6 +91,10 @@ public class OSGiMemoryRealm extends MemoryRealm {
 							"realmBase.algorithm", digest), e);
 				}
 			}
+
+	        if (getCredentialHandler() == null) {
+	            setCredentialHandler(new MessageDigestCredentialHandler());
+	        }
 
 			setState(LifecycleState.STARTING);
 		} else {
