@@ -231,6 +231,12 @@ class JettyServerImpl implements JettyServer {
 			for (Handler handler : childHandlers) {
 				handler.stop();
 			}
+
+			// PAXWEB-1127 - stop qtp after stopping server, as we've started it manually
+			if (server.getThreadPool() instanceof org.eclipse.jetty.util.component.LifeCycle) {
+				((org.eclipse.jetty.util.component.LifeCycle) server.getThreadPool()).stop();
+			}
+
 			server.destroy();
 			//CHECKSTYLE:OFF
 
@@ -304,6 +310,14 @@ class JettyServerImpl implements JettyServer {
 					Thread.currentThread().setContextClassLoader(
 							getClass().getClassLoader());
 					server.start();
+
+					// PAXWEB-1127: load org.eclipse.jetty.util.FutureCallback class, so it's there when we shutdown connectors
+					// to avoid NPE in org.apache.felix.framework.BundleWiringImpl.searchImports()
+					ServerConnector.class.getClassLoader().loadClass("org.eclipse.jetty.util.FutureCallback");
+					// load some other required classes
+					QueuedThreadPool.class.getClassLoader().loadClass("org.eclipse.jetty.util.thread.QueuedThreadPool$1");
+					QueuedThreadPool.class.getClassLoader().loadClass("org.eclipse.jetty.util.thread.QueuedThreadPool$2");
+					QueuedThreadPool.class.getClassLoader().loadClass("org.eclipse.jetty.util.thread.QueuedThreadPool$3");
 				} finally {
 					Thread.currentThread().setContextClassLoader(loader);
 				}
