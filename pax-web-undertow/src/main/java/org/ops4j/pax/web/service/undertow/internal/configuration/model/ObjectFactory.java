@@ -24,8 +24,8 @@ public class ObjectFactory {
 	static final String NS_UNDERTOW = "urn:jboss:domain:undertow:3.1";
 	static final String NS_WILDFLY = "urn:jboss:domain:4.2";
 
-	public Configuration createConfiguration() {
-		return new Configuration();
+	public UndertowConfiguration createConfiguration() {
+		return new UndertowConfiguration();
 	}
 
 }

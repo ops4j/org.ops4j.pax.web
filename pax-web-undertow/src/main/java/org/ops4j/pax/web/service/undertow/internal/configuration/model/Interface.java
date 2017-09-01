@@ -15,6 +15,8 @@
  */
 package org.ops4j.pax.web.service.undertow.internal.configuration.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
@@ -22,7 +24,7 @@ import javax.xml.bind.annotation.XmlType;
 import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_WILDFLY;
 
 @XmlType(name = "named-interfaceType", namespace = NS_WILDFLY, propOrder = {
-		"address"
+		"addresses"
 })
 public class Interface {
 
@@ -30,7 +32,7 @@ public class Interface {
 	private String name;
 
 	@XmlElement(name = "inet-address")
-	private InetAddress address;
+	private List<InetAddress> addresses = new ArrayList<>();
 
 	public String getName() {
 		return name;
@@ -40,26 +42,21 @@ public class Interface {
 		this.name = name;
 	}
 
-	public InetAddress getAddress() {
-		return address;
-	}
-
-	public void setAddress(InetAddress address) {
-		this.address = address;
+	public List<InetAddress> getAddresses() {
+		return addresses;
 	}
 
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder("{ ");
 		sb.append("name: " + name);
-		sb.append(", address: " + (address == null ? "?" : address.ip));
+		sb.append(", address: " + addresses);
 		sb.append(" }");
 		return sb.toString();
 	}
 
 	@XmlType(name = "inet-addressType", namespace = NS_WILDFLY)
 	public static class InetAddress {
-
 		@XmlAttribute(name = "value")
 		private String ip;
 
@@ -71,6 +68,13 @@ public class Interface {
 			this.ip = ip;
 		}
 
+		@Override
+		public String toString() {
+			final StringBuilder sb = new StringBuilder("{ ");
+			sb.append("ip: ").append(ip).append('\'');
+			sb.append(" }");
+			return sb.toString();
+		}
 	}
 
 }

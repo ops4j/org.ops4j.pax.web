@@ -24,7 +24,13 @@ import javax.xml.bind.annotation.XmlType;
 
 import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_UNDERTOW;
 
-@XmlType(name = "undertow-subsystemType", namespace = NS_UNDERTOW)
+@XmlType(name = "undertow-subsystemType", namespace = NS_UNDERTOW, propOrder = {
+		"bufferCache",
+		"server",
+		"servletContainer",
+		"fileHandlers",
+		"filters"
+})
 public class UndertowSubsystem {
 
 	@XmlElement(name = "buffer-cache")
@@ -42,6 +48,42 @@ public class UndertowSubsystem {
 
 	@XmlElement
 	private Filters filters;
+
+	public BufferCache getBufferCache() {
+		return bufferCache;
+	}
+
+	public void setBufferCache(BufferCache bufferCache) {
+		this.bufferCache = bufferCache;
+	}
+
+	public Server getServer() {
+		return server;
+	}
+
+	public void setServer(Server server) {
+		this.server = server;
+	}
+
+	public ServletContainer getServletContainer() {
+		return servletContainer;
+	}
+
+	public void setServletContainer(ServletContainer servletContainer) {
+		this.servletContainer = servletContainer;
+	}
+
+	public Filters getFilters() {
+		return filters;
+	}
+
+	public void setFilters(Filters filters) {
+		this.filters = filters;
+	}
+
+	public List<FileHandler> getFileHandlers() {
+		return fileHandlers;
+	}
 
 	@Override
 	public String toString() {
@@ -132,7 +174,11 @@ public class UndertowSubsystem {
 		}
 	}
 
-	@XmlType(name = "filterType", namespace = NS_UNDERTOW)
+	@XmlType(name = "filterType", namespace = NS_UNDERTOW, propOrder = {
+			"responseHeaders",
+			"errorPages",
+			"customFilters"
+	})
 	public static class Filters {
 		@XmlElement(name = "response-header")
 		private List<ResponseHeaderFilter> responseHeaders = new ArrayList<>();
@@ -140,16 +186,24 @@ public class UndertowSubsystem {
 		private List<ErrorPageFilter> errorPages = new ArrayList<>();
 		@XmlElement(name = "filter")
 		private List<CustomFilter> customFilters = new ArrayList<>();
+
+		public List<ResponseHeaderFilter> getResponseHeaders() {
+			return responseHeaders;
+		}
+
+		public List<ErrorPageFilter> getErrorPages() {
+			return errorPages;
+		}
+
+		public List<CustomFilter> getCustomFilters() {
+			return customFilters;
+		}
 	}
 
-	@XmlType(name = "response-headerType", namespace = NS_UNDERTOW)
-	public static class ResponseHeaderFilter {
+	@XmlType(name = "abstractFilterType", namespace = NS_UNDERTOW)
+	public static class AbstractFilter {
 		@XmlAttribute
-		private String name;
-		@XmlAttribute(name = "header-name")
-		private String header;
-		@XmlAttribute(name = "header-value")
-		private String value;
+		protected String name;
 
 		public String getName() {
 			return name;
@@ -158,6 +212,14 @@ public class UndertowSubsystem {
 		public void setName(String name) {
 			this.name = name;
 		}
+	}
+
+	@XmlType(name = "response-headerType", namespace = NS_UNDERTOW)
+	public static class ResponseHeaderFilter extends AbstractFilter {
+		@XmlAttribute(name = "header-name")
+		private String header;
+		@XmlAttribute(name = "header-value")
+		private String value;
 
 		public String getHeader() {
 			return header;
@@ -177,21 +239,11 @@ public class UndertowSubsystem {
 	}
 
 	@XmlType(name = "errorPageType", namespace = NS_UNDERTOW)
-	public static class ErrorPageFilter {
-		@XmlAttribute
-		private String name;
+	public static class ErrorPageFilter extends AbstractFilter {
 		@XmlAttribute
 		private String code;
 		@XmlAttribute
 		private String path;
-
-		public String getName() {
-			return name;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
 
 		public String getCode() {
 			return code;
@@ -211,21 +263,11 @@ public class UndertowSubsystem {
 	}
 
 	@XmlType(name = "customFilterType", namespace = NS_UNDERTOW)
-	public static class CustomFilter {
-		@XmlAttribute
-		private String name;
+	public static class CustomFilter extends AbstractFilter {
 		@XmlAttribute(name = "class-name")
 		private String className;
 		@XmlAttribute
 		private String module;
-
-		public String getName() {
-			return name;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
 
 		public String getClassName() {
 			return className;

@@ -18,6 +18,8 @@ package org.ops4j.pax.web.service.undertow.internal;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.xnio.XnioProvider;
@@ -31,6 +33,13 @@ public class UndertowServerControllerFactory implements ServerControllerFactory 
 	// dummy reference to make sure the provider is available by the time the server starts
 	private XnioProvider provider;
 
+	private BundleContext context;
+
+	@Activate
+	public void activate(BundleContext context) {
+		this.context = context;
+	}
+
 	@Reference
 	public void setNioXnioProvider(XnioProvider provider) {
 		this.provider = provider;
@@ -42,7 +51,7 @@ public class UndertowServerControllerFactory implements ServerControllerFactory 
 
 	@Override
 	public ServerController createServerController(ServerModel serverModel) {
-		return new ServerControllerImpl();
+		return new ServerControllerImpl(context);
 	}
 
 }
