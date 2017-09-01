@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<undertow xmlns="urn:org.ops4j.pax.web:undertow:1.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:wildfly="urn:jboss:domain:4.2"
+        xsi:schemaLocation="
+            urn:org.ops4j.pax.web:undertow:1.0 file://../../../main/resources/schema/pax-web-undertow_1_0.xsd
+            urn:jboss:domain:undertow:3.1 http://www.jboss.org/schema/jbossas/wildfly-undertow_3_1.xsd
+            urn:jboss:domain:4.2 http://www.jboss.org/schema/jbossas/wildfly-config_4_2.xsd">
+
+    <!-- https://docs.jboss.org/author/display/WFLY10/Undertow+subsystem+configuration -->
+    <subsystem xmlns="urn:jboss:domain:undertow:3.1">
+        <!-- org.wildfly.extension.undertow.BufferCacheDefinition -->
+        <buffer-cache name="default" buffer-size="1024" buffers-per-region="1024" max-regions="10" />
+        <server name="default-server">
+            <http-listener name="http" socket-binding="http" redirect-socket="https"
+                    tcp-keep-alive="true" read-timeout="${http.read.timeout}" write-timeout="${http.write.timeout}"
+                    enabled="true" secure="false"
+                    buffer-pool="default"
+                    url-charset="UTF-8"
+                    receive-buffer="0" send-buffer="0" tcp-backlog="10000" max-connections="0" />
+            <https-listener name="http" socket-binding="http"
+                    tcp-keep-alive="true" read-timeout="${http.read.timeout}" write-timeout="${http.write.timeout}"
+                    enabled="true" secure="false"
+                    security-realm="default" verify-client="true"
+                    enabled-protocols="TLSv1 TLSv1.1 TLSv1.2" enabled-cipher-suites="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384 TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"
+                    buffer-pool="default"
+                    url-charset="UTF-8"
+                    receive-buffer="0" send-buffer="0" tcp-backlog="10000" max-connections="0" />
+            <host name="default-host" alias="localhost">
+                <location name="/" handler="welcome-content" />
+                <location name="/docs" handler="docs-content">
+                    <filter-ref name="x-docs" />
+                </location>
+                <access-log directory="${karaf.data}/log" pattern="common" prefix="access_log." suffix="log" rotate="true" />
+                <filter-ref name="server-header" />
+                <filter-ref name="x-powered-by-header" />
+            </host>
+        </server>
+        <servlet-container name="default">
+            <jsp-config />
+            <websockets />
+            <welcome-files>
+                <welcome-file name="??1" />
+                <welcome-file name="??2" />
+            </welcome-files>
+        </servlet-container>
+        <handlers>
+            <file name="welcome-content" path="/tmp" />
+        </handlers>
+        <filters>
+            <!-- filters for reference from /host/filter-ref and /host/location/filter-ref -->
+            <response-header name="server-header" header-name="Server" header-value="pax-undertow" />
+            <response-header name="x-powered-by-header" header-name="X-Powered-By" header-value="Pax-Undertow/1" />
+            <response-header name="x-docs" header-name="X-Docs" header-value="Pax-Undertow-Docs/1" />
+            <error-page name="custom-error-page-1" code="404" path="/error" />
+            <filter name="custom-filter-1" class-name="fully.qualified.filter.class.Name" module="irrelevant JBoss Module" />
+        </filters>
+    </subsystem>
+
+    <!-- https://docs.jboss.org/author/display/WFLY10/Security+Realms -->
+    <security-realm name="default">
+        <wildfly:server-identities>
+            <wildfly:ssl>
+                <!-- sun.security.ssl.ProtocolVersion -->
+                <!-- sun.security.ssl.CipherSuite -->
+                <wildfly:engine
+                        enabled-cipher-suites="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384 TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"
+                        enabled-protocols="TLSv1 TLSv1.1 TLSv1.2" />
+                <wildfly:keystore path="${karaf.etc}/certs/server.keystore" provider="JKS" alias="server"
+                        keystore-password="secret" key-password="secret"
+                        generate-self-signed-certificate-host="localhost" />
+            </wildfly:ssl>
+        </wildfly:server-identities>
+        <wildfly:authentication>
+            <wildfly:truststore path="${karaf.etc}/certs/server.truststore" provider="JKS" keystore-password="secret" />
+        </wildfly:authentication>
+    </security-realm>
+
+    <interface name="default">
+        <!-- Only one currently -->
+        <wildfly:inet-address value="0.0.0.0" />
+    </interface>
+    <interface name="secure">
+        <!-- Only one currently -->
+        <wildfly:inet-address value="127.0.0.1" />
+    </interface>
+
+    <socket-binding name="http" interface="default" port="${org.osgi.service.http.port}" />
+    <socket-binding name="https" interface="default" port="${org.osgi.service.http.port.secure}" />
+
+</undertow>
