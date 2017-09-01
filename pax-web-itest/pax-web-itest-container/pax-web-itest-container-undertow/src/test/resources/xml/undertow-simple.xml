@@ -10,7 +10,9 @@
     <subsystem xmlns="urn:jboss:domain:undertow:3.1">
         <server name="default-server">
             <http-listener name="http" socket-binding="http" />
-            <host name="default-host" alias="localhost" />
+            <host name="default-host" alias="localhost">
+                <access-log pattern="common" directory="target" prefix="access--log--simple" suffix=".log" />
+            </host>
         </server>
     </subsystem>
 
