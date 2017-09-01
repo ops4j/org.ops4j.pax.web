@@ -15,7 +15,6 @@
  */
 package org.ops4j.pax.web.service.undertow.internal.configuration;
 
-import java.io.FileInputStream;
 import java.util.Properties;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -23,11 +22,10 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.UnmarshallerHandler;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.stream.StreamSource;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.ops4j.pax.web.service.undertow.internal.configuration.model.Configuration;
+import org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
@@ -70,7 +68,7 @@ public class ConfigurationParserTest {
 		xmlReader.parse(new InputSource(getClass().getResourceAsStream("/templates/undertow-default-template.xml")));
 
 		//Configuration cfg = (Configuration) unmarshaller.unmarshal(source);
-		Configuration cfg = (Configuration) unmarshallerHandler.getResult();
+		UndertowConfiguration cfg = (UndertowConfiguration) unmarshallerHandler.getResult();
 		LOG.info("Configuration: {}", cfg);
 
 		assertThat(cfg.getSocketBindings().get(0).getPort(), equalTo(8123));

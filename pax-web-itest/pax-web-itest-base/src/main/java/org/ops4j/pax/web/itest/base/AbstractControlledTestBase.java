@@ -104,6 +104,7 @@ public abstract class AbstractControlledTestBase {
 		return options(
 				// basic options
 				bootDelegationPackage("sun.*"),
+				bootDelegationPackage("com.sun.*"),
 				frameworkStartLevel(START_LEVEL_TEST_BUNDLE),
 				workingDirectory("target/paxexam"),
 				cleanCaches(true),

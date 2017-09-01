@@ -362,6 +362,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 			deployment.addServletContextAttribute("org.springframework.osgi.web.org.osgi.framework.BundleContext", bundleContext);
 		}
 		deployment.setResourceManager(this);
+		// TODO: move to XML configuration
 		deployment.setIdentityManager(identityManager);
 		if (contextModel.getRealmName() != null && contextModel.getAuthMethod() != null) {
 			LoginConfig cfg = new LoginConfig(

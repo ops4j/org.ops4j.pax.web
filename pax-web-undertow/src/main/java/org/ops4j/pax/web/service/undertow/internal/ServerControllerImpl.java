@@ -32,7 +32,9 @@ import java.security.cert.PKIXBuilderParameters;
 import java.security.cert.X509CertSelector;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,10 +52,17 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.UnmarshallerHandler;
+import javax.xml.parsers.SAXParserFactory;
 
 import io.undertow.security.idm.Account;
 import io.undertow.security.idm.Credential;
+import io.undertow.servlet.api.ServletContainer;
 import org.ops4j.lang.NullArgumentException;
+import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
+import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServerController;
@@ -68,12 +77,24 @@ import org.ops4j.pax.web.service.spi.model.ResourceModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
+import org.ops4j.pax.web.service.undertow.internal.configuration.ResolvingContentHandler;
+import org.ops4j.pax.web.service.undertow.internal.configuration.model.SecurityRealm;
+import org.ops4j.pax.web.service.undertow.internal.configuration.model.Server;
+import org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowConfiguration;
+import org.ops4j.util.property.DictionaryPropertyResolver;
+import org.ops4j.util.property.PropertyResolver;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
+import org.xnio.Options;
+import org.xnio.Sequence;
+import org.xnio.SslClientAuthMode;
 import org.xnio.XnioWorker;
 
 import io.undertow.Handlers;
@@ -98,17 +119,23 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(ServerControllerImpl.class);
 
+    private final BundleContext bundleContext;
+    private JAXBContext jaxb = null;
+
     private Configuration configuration;
+
     private final Set<ServerListener> listeners = new CopyOnWriteArraySet<>();
     private State state = State.Unconfigured;
-
     private IdentityManager identityManager;
-    private final PathHandler path = Handlers.path();
-    private Undertow server;
 
+    // Standard URI -> HttpHandler map - may be wrapped by access log, filters, etc. later
+    private final PathHandler path = Handlers.path();
+    // all Contexts add own mapping here
+    private Undertow server;
     private final ConcurrentMap<HttpContext, Context> contextMap = new ConcurrentHashMap<>();
 
-    public ServerControllerImpl() {
+    public ServerControllerImpl(BundleContext context) {
+        this.bundleContext = context;
     }
 
     @Override
@@ -202,63 +229,83 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
         }
     }
 
+    /**
+     * Here's where Undertow is being rebuild at {@link Undertow} level (not {@link ServletContainer} level).
+     * This is were <em>global</em> objects are configured (listeners, global filters, ...)
+     */
     void doStart() {
         Undertow.Builder builder = Undertow.builder();
 
+        // if no configuration method change root handler, simple path->HttpHandler will be used
+        // where each HttpHandler is created in separate org.ops4j.pax.web.service.undertow.internal.Context
         HttpHandler rootHandler = path;
 
-        // PAXWEB-193 suggested we should open this up for external
-        // configuration
-        URL undertowResource = configuration.getConfigurationURL();
-        // even if it's "dir" it may point to "file" (same as in o.o.p.w.s.jetty.internal.JettyFactoryImpl.getHttpConfiguration())
-        File serverConfigDir = configuration.getConfigurationDir();
+        URL undertowResource = detectUndertowConfiguration();
+        ConfigSource source = ConfigSource.kind(undertowResource);
 
+        switch (source) {
+            case XML:
+                LOG.info("Using \"" + undertowResource + "\" to configure Undertow");
+                rootHandler = configureUndertow(configuration, builder, rootHandler, undertowResource);
+                break;
+            case PROPERTIES:
+                LOG.info("Using \"" + undertowResource + "\" to read additional configuration for Undertow");
+                configureIdentityManager(undertowResource);
+                // do not break - go to standard PID configuration
+            case PID:
+                LOG.info("Using \"org.ops4j.pax.url.web\" PID to configure Undertow");
+                rootHandler = configureUndertow(configuration, builder, rootHandler);
+                break;
+        }
+
+        builder.setHandler(rootHandler);
+        server = builder.build();
+        server.start();
+    }
+
+    /**
+     * Loads additional properties and configure {@link ServerControllerImpl#identityManager}
+     * @param undertowResource
+     */
+    private void configureIdentityManager(URL undertowResource) {
         try {
-            if (undertowResource == null && serverConfigDir != null) {
-                if (serverConfigDir.isFile() && serverConfigDir.canRead()) {
-                    String fileName = serverConfigDir.getName();
-                    undertowResource = serverConfigDir.toURI().toURL();
-                } else if (serverConfigDir.isDirectory()) {
-                    File configuration = new File(serverConfigDir, "undertow.properties");
-                    if (configuration.isFile() && configuration.canRead()) {
-                        undertowResource = configuration.toURI().toURL();
-                    }
-                }
+            Properties props = new Properties();
+            try (InputStream is = undertowResource.openStream()) {
+                props.load(is);
             }
-        } catch (MalformedURLException ignored) {
-        }
-
-        if (undertowResource == null) {
-            undertowResource = getClass().getResource("/undertow.properties");
-        }
-        if (undertowResource != null) {
-            try {
-                Properties props = new Properties();
-                try (InputStream is = undertowResource.openStream()) {
-                    props.load(is);
-                }
-                Map<String, String> config = new LinkedHashMap<>();
-                for (Map.Entry<Object, Object> entry : props.entrySet()) {
-                    config.put(entry.getKey().toString(), entry.getValue().toString());
-                }
-                identityManager = (IdentityManager)createConfigurationObject(config, "identityManager");
-
-                /*
-                 * String listeners = config.get("listeners"); if (listeners != null) { String[] names =
-                 * listeners.split("(, )+"); for (String name : names) { String type = config.get("listeners."
-                 * + name + ".type"); String address = config.get("listeners." + name + ".address"); String
-                 * port = config.get("listeners." + name + ".port"); if ("http".equals(type)) {
-                 * builder.addHttpListener(Integer.parseInt(port), address); } } }
-                 */
-
-            } catch (Exception e) {
-                LOG.error("Exception while starting Undertow", e);
-                throw new RuntimeException("Exception while starting Undertow", e);
+            Map<String, String> config = new LinkedHashMap<>();
+            for (Map.Entry<Object, Object> entry : props.entrySet()) {
+                config.put(entry.getKey().toString(), entry.getValue().toString());
             }
-        }
+            identityManager = (IdentityManager)createConfigurationObject(config, "identityManager");
 
+//            String listeners = config.get("listeners");
+//            if (listeners != null) {
+//                String[] names = listeners.split("(, )+");
+//                for (String name : names) {
+//                    String type = config.get("listeners." + name + ".type");
+//                    String address = config.get("listeners." + name + ".address");
+//                    String port = config.get("listeners." + name + ".port");
+//                    if ("http".equals(type)) {
+//                        builder.addHttpListener(Integer.parseInt(port), address);
+//                    }
+//                }
+//            }
+        } catch (Exception e) {
+            LOG.error("Exception while starting Undertow", e);
+            throw new RuntimeException("Exception while starting Undertow", e);
+        }
+    }
+
+    /**
+     * Configuration using <code>org.ops4j.pax.web</code> PID - only listeners and NCSA logging
+     * @param configuration
+     * @param builder
+     * @param rootHandler current root handler
+     * @return
+     */
+    private HttpHandler configureUndertow(Configuration configuration, Undertow.Builder builder, HttpHandler rootHandler) {
         if (configuration.isLogNCSAFormatEnabled()) {
-
             String logNCSADirectory = configuration.getLogNCSADirectory();
             String logNCSAFormat = configuration.getLogNCSAFormat();
 
@@ -270,8 +317,8 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
             // String logBaseName = logNCSAFormat.substring(0, logNCSAFormat.lastIndexOf("."));
 
             AccessLogReceiver logReceiver = DefaultAccessLogReceiver.builder().setLogWriteExecutor(worker)
-                .setOutputDirectory(new File(logNCSADirectory).toPath()).setLogBaseName("request.")
-                .setLogNameSuffix("log").setRotate(true).build();
+                    .setOutputDirectory(new File(logNCSADirectory).toPath()).setLogBaseName("request.")
+                    .setLogNameSuffix("log").setRotate(true).build();
 
             String format;
             if (configuration.isLogNCSAExtended()) {
@@ -284,7 +331,7 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
             // TODO: still need to find out how to add cookie etc.
 
             rootHandler = new AccessLogHandler(path, logReceiver, format,
-                                               AccessLogHandler.class.getClassLoader());
+                    AccessLogHandler.class.getClassLoader());
         }
 
         for (String address : configuration.getListeningAddresses()) {
@@ -293,127 +340,373 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
                 builder.addHttpListener(configuration.getHttpPort(), address);
             }
             if (configuration.isHttpSecureEnabled()) {
-                try {
-                    URL keyStorePath = loadResource(configuration.getSslKeystore());
-                    KeyStore keyStore = getKeyStore(keyStorePath,
-                                                    configuration.getSslKeystoreType() != null
-                                                        ? configuration.getSslKeystoreType() : "JKS",
-                                                    configuration.getSslKeyPassword());
-
-                    String _keyManagerFactoryAlgorithm = Security
-                        .getProperty("ssl.KeyManagerFactory.algorithm") == null
-                            ? KeyManagerFactory.getDefaultAlgorithm()
-                            : Security.getProperty("ssl.KeyManagerFactory.algorithm");
-                    String _keyManagerPassword = configuration.getSslPassword();
-                    String _keyStorePassword = configuration.getSslKeyPassword();
-                    KeyManagerFactory keyManagerFactory = KeyManagerFactory
-                        .getInstance(_keyManagerFactoryAlgorithm);
-                    keyManagerFactory.init(keyStore,
-                                           _keyManagerPassword == null
-                                               ? (_keyStorePassword == null
-                                                   ? null : _keyStorePassword.toCharArray())
-                                               : _keyManagerPassword.toCharArray());
-                    KeyManager[] keyManagers = keyManagerFactory.getKeyManagers();
-
-                    TrustManager[] trustManagers = null;
-                    String _secureRandomAlgorithm = null;
-                    SecureRandom random = (_secureRandomAlgorithm == null)
-                        ? null : SecureRandom.getInstance(_secureRandomAlgorithm);
-                    if (configuration.getTrustStore() != null) {
-                        URL trustStorePath = loadResource(configuration.getTrustStore());
-                        KeyStore trustStore = getKeyStore(trustStorePath,
-                                                          configuration.getTrustStoreType() != null
-                                                              ? configuration.getTrustStoreType() : "JKS",
-                                                          configuration.getTrustStorePassword());
-
-                        String _trustManagerFactoryAlgorithm = Security
-                            .getProperty("ssl.TrustManagerFactory.algorithm") == null
-                                ? TrustManagerFactory.getDefaultAlgorithm()
-                                : Security.getProperty("ssl.TrustManagerFactory.algorithm");
-
-                        
-                        Collection<? extends CRL> crls = configuration.getCrlPath() == null
-                            ? null : loadCRL(configuration.getCrlPath());
-                        String certAlias = configuration.getSslKeyAlias();
-                        if (configuration.isValidateCerts() && keyStore != null) {
-                            if (certAlias == null) {
-                                List<String> aliases = Collections.list(keyStore.aliases());
-                                certAlias = aliases.size() == 1 ? aliases.get(0) : null;
-                            }
-
-                            Certificate cert = certAlias == null ? null : keyStore.getCertificate(certAlias);
-                            if (cert == null) {
-                                throw new Exception("No certificate found in the keystore"
-                                                    + (certAlias == null ? "" : " for alias " + certAlias));
-                            }
-
-                            CertificateValidator validator = new CertificateValidator(trustStore, crls);
-                            validator.setEnableCRLDP(configuration.isEnableCRLDP());
-                            validator.setEnableOCSP(configuration.isEnableOCSP());
-                            validator.setOcspResponderURL(configuration.getOcspResponderURL());
-                            validator.validate(keyStore, cert);
-                        }
-
-                        if (trustStore != null) {
-                            // Revocation checking is only supported for PKIX algorithm
-                            if (configuration.isValidatePeerCerts()
-                                && _trustManagerFactoryAlgorithm.equalsIgnoreCase("PKIX")) {
-                                PKIXBuilderParameters pbParams = new PKIXBuilderParameters(trustStore,
-                                                                                           new X509CertSelector());
-
-                                // Make sure revocation checking is enabled
-                                pbParams.setRevocationEnabled(true);
-
-                                if (crls != null && !crls.isEmpty()) {
-                                    pbParams.addCertStore(CertStore
-                                        .getInstance("Collection", new CollectionCertStoreParameters(crls)));
-                                }
-
-                                if (configuration.isEnableCRLDP()) {
-                                    // Enable Certificate Revocation List Distribution Points (CRLDP) support
-                                    System.setProperty("com.sun.security.enableCRLDP", "true");
-                                }
-
-                                if (configuration.isEnableOCSP()) {
-                                    // Enable On-Line Certificate Status Protocol (OCSP) support
-                                    Security.setProperty("ocsp.enable", "true");
-
-                                    if (configuration.getOcspResponderURL() != null) {
-                                        // Override location of OCSP Responder
-                                        Security.setProperty("ocsp.responderURL",
-                                                             configuration.getOcspResponderURL());
-                                    }
-                                }
-
-                                TrustManagerFactory trustManagerFactory = TrustManagerFactory
-                                    .getInstance(_trustManagerFactoryAlgorithm);
-                                trustManagerFactory.init(new CertPathTrustManagerParameters(pbParams));
-
-                                trustManagers = trustManagerFactory.getTrustManagers();
-                            } else {
-                                TrustManagerFactory trustManagerFactory = TrustManagerFactory
-                                    .getInstance(_trustManagerFactoryAlgorithm);
-                                trustManagerFactory.init(trustStore);
-
-                                trustManagers = trustManagerFactory.getTrustManagers();
-                            }
-                        }
-                    }
-                    SSLContext context = SSLContext.getInstance("TLS");
-                    context.init(keyManagers, trustManagers, random);
-
-                    LOG.info("Starting undertow https listener on " + address + ":"
-                             + configuration.getHttpSecurePort());
-                    builder.addHttpsListener(configuration.getHttpSecurePort(), address, context);
-                } catch (Exception e) {
-                    throw new IllegalArgumentException("Unable to build SSL context", e);
-                }
+                LOG.info("Starting undertow https listener on " + address + ":" + configuration.getHttpSecurePort());
+                // TODO: could this be shared across interface:port bindings?
+                SSLContext context = buildSSLContext();
+                builder.addHttpsListener(configuration.getHttpSecurePort(), address, context);
             }
         }
 
-        builder.setHandler(rootHandler);
-        server = builder.build();
-        server.start();
+        return rootHandler;
+    }
+
+    /**
+     * Configuration using <code>undertow.xml</code> conforming to Undertow/Wildfly XML Schemas
+     * @param configuration
+     * @param builder
+     * @param rootHandler current root handler
+     * @param undertowResource URI for XML configuration
+     * @return
+     */
+    private HttpHandler configureUndertow(Configuration configuration, Undertow.Builder builder, HttpHandler rootHandler, URL undertowResource) {
+        try {
+            if (jaxb == null) {
+                // we don't want static references here
+                jaxb = JAXBContext.newInstance("org.ops4j.pax.web.service.undertow.internal.configuration.model",
+                        UndertowConfiguration.class.getClassLoader());
+            }
+            Unmarshaller unmarshaller = jaxb.createUnmarshaller();
+            UnmarshallerHandler unmarshallerHandler = unmarshaller.getUnmarshallerHandler();
+
+            Dictionary<String, Object> properties = new Hashtable<>();
+            // use only some properties from org.ops4j.pax.web PID
+            properties.put(WebContainerConstants.PROPERTY_HTTP_PORT, configuration.getHttpPort());
+            properties.put(WebContainerConstants.PROPERTY_HTTP_SECURE_PORT, configuration.getHttpSecurePort());
+            // TODO: pass more properties?
+            // TODO: add direct configadmin support?
+
+            // BundleContextPropertyResolver gives access to e.g., ${karaf.base}
+            final PropertyResolver resolver = new DictionaryPropertyResolver(properties,
+                    new BundleContextPropertyResolver(bundleContext));
+
+            // indirect unmarslaling with property resolution *inside XML attribute values*
+            SAXParserFactory spf = SAXParserFactory.newInstance();
+            spf.setNamespaceAware(true);
+            XMLReader xmlReader = spf.newSAXParser().getXMLReader();
+            xmlReader.setContentHandler(new ResolvingContentHandler(new Properties() {
+                @Override
+                public String getProperty(String key) {
+                    return resolver.get(key);
+                }
+
+                @Override
+                public String getProperty(String key, String defaultValue) {
+                    String value = resolver.get(key);
+                    return value == null ? defaultValue : value;
+                }
+            }, unmarshallerHandler));
+            try (InputStream stream = undertowResource.openStream()) {
+                xmlReader.parse(new InputSource(stream));
+            }
+
+            UndertowConfiguration cfg = (UndertowConfiguration) unmarshallerHandler.getResult();
+            if (cfg == null
+                    || cfg.getSocketBindings().size() == 0
+                    || cfg.getInterfaces().size() == 0
+                    || cfg.getSubsystem() == null
+                    || cfg.getSubsystem().getServer() == null) {
+                throw new IllegalArgumentException("Problem configuring Undertow server using \"" + undertowResource + "\": invalid XML");
+            }
+            cfg.init();
+
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Undertow XML configuration: {}", cfg);
+            }
+
+            // ok, we have everything unmarshalled from XML to config object
+            // we can configure all/some aspects of Undertow now
+
+            Server.HttpListener http = cfg.getSubsystem().getServer().getHttpListener();
+            Server.HttpsListener https = cfg.getSubsystem().getServer().getHttpsListener();
+            if (http == null && https == null) {
+                throw new IllegalArgumentException("No listener configuration available in \"" + undertowResource + "\". Please configure http and/or https listeners.");
+            }
+
+            // http listener
+            if (http != null) {
+                UndertowConfiguration.BindingInfo binding = cfg.bindingInfo(http.getSocketBindingName());
+                for (String address : binding.getAddresses()) {
+                    LOG.info("Starting undertow http listener on " + address + ":" + binding.getPort());
+                    builder.addHttpListener(binding.getPort(), address);
+                }
+            }
+
+            // https listener
+            if (https != null) {
+                UndertowConfiguration.BindingInfo binding = cfg.bindingInfo(https.getSocketBindingName());
+                SecurityRealm realm = cfg.securityRealm(https.getSecurityRealm());
+                if (realm == null) {
+                    throw new IllegalArgumentException("No security realm with name \"" + https.getSecurityRealm() + "\" available for \"" + https.getName() + "\" https listener.");
+                }
+                for (String address : binding.getAddresses()) {
+                    LOG.info("Starting undertow https listener on " + address + ":" + binding.getPort());
+                    // TODO: could this be shared across interface:port bindings?
+                    SSLContext sslContext = buildSSLContext(realm);
+
+                    builder.addHttpsListener(binding.getPort(), address, sslContext);
+
+                    // options - see io.undertow.protocols.ssl.UndertowAcceptingSslChannel()
+                    // one of NOT_REQUESTED, REQUESTED, REQUIRED
+                    builder.setSocketOption(Options.SSL_CLIENT_AUTH_MODE, SslClientAuthMode.valueOf(https.getVerifyClient()));
+
+                    SecurityRealm.Engine engine = realm.getIdentities().getSsl().getEngine();
+                    if (engine != null) {
+                        // could be taken from these as well:
+                        //  - https.getEnabledProtocols();
+                        //  - https.getEnabledCipherSuites();
+                        if (engine.getEnabledProtocols().size() > 0) {
+                            builder.setSocketOption(Options.SSL_ENABLED_PROTOCOLS, Sequence.of(engine.getEnabledProtocols()));
+                        }
+                        if (engine.getEnabledCipherSuites().size() > 0) {
+                            builder.setSocketOption(Options.SSL_ENABLED_CIPHER_SUITES, Sequence.of(engine.getEnabledCipherSuites()));
+                        }
+                    }
+                }
+            }
+
+            // access log
+            if (cfg.getSubsystem().getServer().getHost() != null
+                    && cfg.getSubsystem().getServer().getHost().getAccessLog() != null) {
+                Server.Host.AccessLog accessLog = cfg.getSubsystem().getServer().getHost().getAccessLog();
+
+                Bundle bundle = FrameworkUtil.getBundle(ServerControllerImpl.class);
+                ClassLoader loader = bundle.adapt(BundleWiring.class).getClassLoader();
+                XnioWorker worker = UndertowUtil.createWorker(loader);
+
+                AccessLogReceiver logReceiver = DefaultAccessLogReceiver.builder()
+                        .setLogWriteExecutor(worker)
+                        .setOutputDirectory(new File(accessLog.getDirectory()).toPath())
+                        .setLogBaseName(accessLog.getPrefix())
+                        .setLogNameSuffix(accessLog.getSuffix())
+                        .setRotate(Boolean.parseBoolean(accessLog.getRotate()))
+                        .build();
+
+                rootHandler = new AccessLogHandler(rootHandler, logReceiver, accessLog.getPattern(),
+                        AccessLogHandler.class.getClassLoader());
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Problem configuring Undertow server using \"" + undertowResource + "\": " + e.getMessage(), e);
+        }
+
+        return rootHandler;
+    }
+
+    /**
+     * <p>Scans for file used to configure Undertow:<ul>
+     *     <li>Always consider <code>org.ops4j.pax.web</code> PID</li>
+     *     <li>If this PID contains <code>org.ops4j.pax.web.config.url</code> or <code>org.ops4j.pax.web.config.file</code>
+     *     check such resource</li>
+     *     <li>If such resource exists and has <code>properties</code> extension <strong>or</strong>
+     *     is a directory and there's <code>undertow.properties</code> inside, load some properties from there
+     *     (identity manager configuration) and merge with other properties from <code>org.ops4j.pax.web</code> PID</li>
+     *     <li>If such resource exists and has <code>xml</code> extension <strong>or</strong>
+     *     is a directory and there's <code>undertow.xml</code> inside, use this configuration and
+     *     <strong>do not</strong> consider other properties from the PID <strong>except</strong>
+     *     for property placeholder resolution inside XML file.</li>
+     * </ul>
+     * </p>
+     * @return
+     */
+    private URL detectUndertowConfiguration() {
+        URL undertowResource = configuration.getConfigurationURL();
+        // even if it's "dir" it may point to "file"
+        // (same as in o.o.p.w.s.jetty.internal.JettyFactoryImpl.getHttpConfiguration())
+        File serverConfigDir = configuration.getConfigurationDir();
+
+        try {
+            if (undertowResource == null && serverConfigDir != null) {
+                // org.ops4j.pax.web.config.file
+                if (serverConfigDir.isFile() && serverConfigDir.canRead()) {
+                    undertowResource = serverConfigDir.toURI().toURL();
+                } else if (serverConfigDir.isDirectory()) {
+                    for (String name : new String[] { "undertow.xml", "undertow.properties" }) {
+                        File configuration = new File(serverConfigDir, name);
+                        if (configuration.isFile() && configuration.canRead()) {
+                            undertowResource = configuration.toURI().toURL();
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (MalformedURLException ignored) {
+        }
+
+        if (undertowResource == null) {
+            undertowResource = getClass().getResource("/undertow.xml");
+        }
+        if (undertowResource == null) {
+            undertowResource = getClass().getResource("/undertow.properties");
+        }
+
+        return undertowResource;
+    }
+
+    /**
+     * Build {@link SSLContext} using arguments only
+     * @param keystorePath
+     * @param keystoreType
+     * @param keystorePassword
+     * @param keystoreCertAlias
+     * @param truststorePath
+     * @param truststoreType
+     * @param truststorePassword
+     * @param validateCerts
+     * @param crlPath
+     * @param secureRandomAlgorithm
+     * @param validatePeerCerts
+     * @param enableCRLDP
+     * @param enableOCSP
+     * @param ocspResponderURL
+     * @return
+     */
+    private SSLContext buildSSLContext(String keystorePath, String keystoreType, String keystorePassword, String keystoreKeyPassword, String keystoreCertAlias,
+                                       String truststorePath, String truststoreType, String truststorePassword,
+                                       boolean validateCerts, String crlPath,
+                                       String secureRandomAlgorithm,
+                                       boolean validatePeerCerts, boolean enableCRLDP,
+                                       boolean enableOCSP, String ocspResponderURL) {
+        try {
+            URL keyStoreURL = loadResource(keystorePath);
+            KeyStore keyStore = getKeyStore(keyStoreURL,
+                    keystoreType != null ? keystoreType : "JKS",
+                    keystorePassword);
+
+            // key managers
+            String _keyManagerFactoryAlgorithm = Security.getProperty("ssl.KeyManagerFactory.algorithm") == null
+                    ? KeyManagerFactory.getDefaultAlgorithm()
+                    : Security.getProperty("ssl.KeyManagerFactory.algorithm");
+            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(_keyManagerFactoryAlgorithm);
+            keyManagerFactory.init(keyStore, keystoreKeyPassword == null ? null : keystoreKeyPassword.toCharArray());
+            KeyManager[] keyManagers = keyManagerFactory.getKeyManagers();
+
+            // trust managers - possibly with OCSP
+            TrustManager[] trustManagers = null;
+            SecureRandom random = (secureRandomAlgorithm == null) ? null : SecureRandom.getInstance(secureRandomAlgorithm);
+            if (truststorePath != null) {
+                URL trustStoreURL = loadResource(truststorePath);
+                KeyStore trustStore = getKeyStore(trustStoreURL,
+                        truststoreType != null ? truststoreType : "JKS",
+                        truststorePassword);
+
+                String _trustManagerFactoryAlgorithm = Security.getProperty("ssl.TrustManagerFactory.algorithm") == null
+                        ? TrustManagerFactory.getDefaultAlgorithm()
+                        : Security.getProperty("ssl.TrustManagerFactory.algorithm");
+
+                Collection<? extends CRL> crls = crlPath == null ? null : loadCRL(crlPath);
+
+                if (validateCerts && keyStore != null) {
+                    if (keystoreCertAlias == null) {
+                        List<String> aliases = Collections.list(keyStore.aliases());
+                        keystoreCertAlias = aliases.size() == 1 ? aliases.get(0) : null;
+                    }
+
+                    Certificate cert = keystoreCertAlias == null ? null : keyStore.getCertificate(keystoreCertAlias);
+                    if (cert == null) {
+                        throw new IllegalArgumentException("No certificate found in the keystore" + (keystoreCertAlias == null ? "" : " for alias \"" + keystoreCertAlias + "\""));
+                    }
+
+                    CertificateValidator validator = new CertificateValidator(trustStore, crls);
+                    validator.setEnableCRLDP(enableCRLDP);
+                    validator.setEnableOCSP(enableOCSP);
+                    validator.setOcspResponderURL(ocspResponderURL);
+                    validator.validate(keyStore, cert);
+                }
+
+                // Revocation checking is only supported for PKIX algorithm
+                // see org.eclipse.jetty.util.ssl.SslContextFactory.getTrustManagers()
+                if (validatePeerCerts && _trustManagerFactoryAlgorithm.equalsIgnoreCase("PKIX")) {
+                    PKIXBuilderParameters pbParams = new PKIXBuilderParameters(trustStore, new X509CertSelector());
+
+                    // Make sure revocation checking is enabled
+                    pbParams.setRevocationEnabled(true);
+
+                    if (crls != null && !crls.isEmpty()) {
+                        pbParams.addCertStore(CertStore.getInstance("Collection", new CollectionCertStoreParameters(crls)));
+                    }
+
+                    if (enableCRLDP) {
+                        // Enable Certificate Revocation List Distribution Points (CRLDP) support
+                        System.setProperty("com.sun.security.enableCRLDP", "true");
+                    }
+
+                    if (enableOCSP) {
+                        // Enable On-Line Certificate Status Protocol (OCSP) support
+                        Security.setProperty("ocsp.enable", "true");
+
+                        if (ocspResponderURL != null) {
+                            // Override location of OCSP Responder
+                            Security.setProperty("ocsp.responderURL", ocspResponderURL);
+                        }
+                    }
+
+                    TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(_trustManagerFactoryAlgorithm);
+                    trustManagerFactory.init(new CertPathTrustManagerParameters(pbParams));
+
+                    trustManagers = trustManagerFactory.getTrustManagers();
+                } else {
+                    TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(_trustManagerFactoryAlgorithm);
+                    trustManagerFactory.init(trustStore);
+
+                    trustManagers = trustManagerFactory.getTrustManagers();
+                }
+            }
+
+            SSLContext context = SSLContext.getInstance("TLS");
+            context.init(keyManagers, trustManagers, random);
+
+            return context;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Unable to build SSL context", e);
+        }
+    }
+
+    /**
+     * Build {@link SSLContext} from <code>org.ops4j.pax.web</code> PID configuration
+     * @return
+     */
+    private SSLContext buildSSLContext() {
+        String keyANDkeystorePassword = configuration.getSslKeyPassword() == null ? configuration.getSslPassword() : configuration.getSslKeyPassword();
+        return buildSSLContext(configuration.getSslKeystore(), configuration.getSslKeystoreType(),
+                keyANDkeystorePassword, keyANDkeystorePassword,
+                configuration.getSslKeyAlias(),
+                configuration.getTrustStore(), configuration.getTrustStoreType(),
+                configuration.getTrustStorePassword(),
+                configuration.isValidateCerts(), configuration.getCrlPath(),
+                null,
+                configuration.isValidatePeerCerts(), configuration.isEnableCRLDP(), configuration.isEnableOCSP(),
+                configuration.getOcspResponderURL());
+    }
+
+    /**
+     * Build {@link SSLContext} from XML configuration
+     * @param realm
+     * @return
+     */
+    private SSLContext buildSSLContext(SecurityRealm realm) {
+        if (realm.getAuthentication() == null || realm.getAuthentication().getTruststore() == null) {
+            throw new IllegalArgumentException("No truststore configuration in security realm \"" + realm.getName() + "\".");
+        }
+        if (realm.getIdentities() == null || realm.getIdentities().getSsl() == null
+                || realm.getIdentities().getSsl().getKeystore() == null) {
+            throw new IllegalArgumentException("No keystore configuration in security realm \"" + realm.getName() + "\".");
+        }
+
+        SecurityRealm.Keystore keystore = realm.getIdentities().getSsl().getKeystore();
+        SecurityRealm.Truststore truststore = realm.getAuthentication().getTruststore();
+
+        String keystorePassword = keystore.getPassword();
+        String keyPassword = keystore.getKeyPassword();
+
+        // we'll reuse PID configuration for OCSP/CRL stuff
+        return buildSSLContext(keystore.getPath(), keystore.getProvider(),
+                keystorePassword, keyPassword,
+                keystore.getAlias(),
+                truststore.getPath(), truststore.getProvider(),
+                truststore.getPassword(),
+                configuration.isValidateCerts(), configuration.getCrlPath(),
+                null, // "SHA1PRNG", "NativePRNGNonBlocking", ...
+                configuration.isValidatePeerCerts(), configuration.isEnableCRLDP(), configuration.isEnableOCSP(),
+                configuration.getOcspResponderURL());
     }
 
     private URL loadResource(String resource) throws MalformedURLException {
@@ -699,4 +992,39 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
         }
         throw new IllegalStateException("No identity manager configured");
     }
+
+    /**
+     * Kind of configuration used
+     */
+    private enum ConfigSource {
+        /** Configuration in undertow.xml */
+        XML,
+        /** Additional (merged with PID) configuration in undertow.properties */
+        PROPERTIES,
+        /** Configuration purely from Configadmin */
+        PID;
+
+        /**
+         * Detect {@link ConfigSource} by the type of URL
+         * @param undertowResource
+         * @return
+         */
+        public static ConfigSource kind(URL undertowResource) {
+            if (undertowResource == null) {
+                return PID;
+            }
+            String path = undertowResource.getPath();
+            if (path == null) {
+                return PID;
+            }
+            String name = new File(path).getName();
+            if (name.endsWith(".properties")) {
+                return PROPERTIES;
+            } else if (name.endsWith(".xml")) {
+                return XML;
+            }
+            return PID;
+        }
+    }
+
 }

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<undertow xmlns="urn:org.ops4j.pax.web:undertow:1.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:w="urn:jboss:domain:4.2"
+        xsi:schemaLocation="
+            urn:jboss:domain:undertow:3.1 http://www.jboss.org/schema/jbossas/wildfly-undertow_3_1.xsd
+            urn:jboss:domain:4.2 http://www.jboss.org/schema/jbossas/wildfly-config_4_2.xsd">
+
+    <subsystem xmlns="urn:jboss:domain:undertow:3.1">
+        <server name="default-server">
+            <https-listener name="https" socket-binding="https"
+                    security-realm="default" verify-client="REQUIRED" />
+            <host name="default-host" alias="localhost" />
+        </server>
+    </subsystem>
+
+    <security-realm name="default">
+        <w:server-identities>
+            <w:ssl>
+                <w:engine
+                        enabled-cipher-suites="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384 TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384 TLS_DHE_RSA_WITH_AES_128_GCM_SHA256"
+                        enabled-protocols="TLSv1 TLSv1.1 TLSv1.2" />
+                <w:keystore path="src/test/resources-binary/certs/server.keystore" provider="JKS" alias="server"
+                        keystore-password="secret1" key-password="secret2" />
+            </w:ssl>
+        </w:server-identities>
+        <w:authentication>
+            <w:truststore path="src/test/resources-binary/certs/server.keystore" provider="JKS" keystore-password="secret1" />
+        </w:authentication>
+    </security-realm>
+
+    <interface name="default">
+        <w:inet-address value="127.0.0.1" />
+    </interface>
+
+    <socket-binding name="https" interface="default" port="${org.osgi.service.http.port.secure.special}" />
+
+</undertow>
