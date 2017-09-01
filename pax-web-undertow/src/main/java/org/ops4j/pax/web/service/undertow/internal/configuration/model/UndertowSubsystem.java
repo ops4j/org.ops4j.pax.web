@@ -1,0 +1,247 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.
+ *
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.ops4j.pax.web.service.undertow.internal.configuration.model;
+
+import java.util.ArrayList;
+import java.util.List;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlType;
+
+import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_UNDERTOW;
+
+@XmlType(name = "undertow-subsystemType", namespace = NS_UNDERTOW)
+public class UndertowSubsystem {
+
+	@XmlElement(name = "buffer-cache")
+	private BufferCache bufferCache;
+
+	@XmlElement
+	private Server server;
+
+	@XmlElement(name = "servlet-container")
+	private ServletContainer servletContainer;
+
+	@XmlElementWrapper(name = "handlers")
+	@XmlElement(name = "file")
+	private List<FileHandler> fileHandlers = new ArrayList<>();
+
+	@XmlElement
+	private Filters filters;
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("{");
+		sb.append("\n\t\tbuffer cache: " + bufferCache);
+		sb.append("\n\t\tserver: " + server);
+		sb.append("\n\t\tservlet container: " + servletContainer);
+		sb.append("\n\t}");
+		return sb.toString();
+	}
+
+	@XmlType(name = "buffer-cacheType", namespace = NS_UNDERTOW)
+	public static class BufferCache {
+		@XmlAttribute
+		private String name;
+		@XmlAttribute(name = "buffer-size")
+		private int bufferSize = 1024;
+		@XmlAttribute(name = "buffers-per-region")
+		private int buffersPerRegion = 1024;
+		@XmlAttribute(name = "max-regions")
+		private int maxRegions = 10;
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public int getBufferSize() {
+			return bufferSize;
+		}
+
+		public void setBufferSize(int bufferSize) {
+			this.bufferSize = bufferSize;
+		}
+
+		public int getBuffersPerRegion() {
+			return buffersPerRegion;
+		}
+
+		public void setBuffersPerRegion(int buffersPerRegion) {
+			this.buffersPerRegion = buffersPerRegion;
+		}
+
+		public int getMaxRegions() {
+			return maxRegions;
+		}
+
+		public void setMaxRegions(int maxRegions) {
+			this.maxRegions = maxRegions;
+		}
+
+		@Override
+		public String toString() {
+			final StringBuilder sb = new StringBuilder("{ ");
+			sb.append("name: ").append(name);
+			sb.append(", buffer size: ").append(bufferSize);
+			sb.append(", buffers per region: ").append(buffersPerRegion);
+			sb.append(", max regions: ").append(maxRegions);
+			sb.append(" }");
+			return sb.toString();
+		}
+	}
+
+	@XmlType(name = "file-handlerType", namespace = NS_UNDERTOW)
+	public static class FileHandler {
+		@XmlAttribute
+		private String name;
+		@XmlAttribute
+		private String path;
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getPath() {
+			return path;
+		}
+
+		public void setPath(String path) {
+			this.path = path;
+		}
+	}
+
+	@XmlType(name = "filterType", namespace = NS_UNDERTOW)
+	public static class Filters {
+		@XmlElement(name = "response-header")
+		private List<ResponseHeaderFilter> responseHeaders = new ArrayList<>();
+		@XmlElement(name = "error-page")
+		private List<ErrorPageFilter> errorPages = new ArrayList<>();
+		@XmlElement(name = "filter")
+		private List<CustomFilter> customFilters = new ArrayList<>();
+	}
+
+	@XmlType(name = "response-headerType", namespace = NS_UNDERTOW)
+	public static class ResponseHeaderFilter {
+		@XmlAttribute
+		private String name;
+		@XmlAttribute(name = "header-name")
+		private String header;
+		@XmlAttribute(name = "header-value")
+		private String value;
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getHeader() {
+			return header;
+		}
+
+		public void setHeader(String header) {
+			this.header = header;
+		}
+
+		public String getValue() {
+			return value;
+		}
+
+		public void setValue(String value) {
+			this.value = value;
+		}
+	}
+
+	@XmlType(name = "errorPageType", namespace = NS_UNDERTOW)
+	public static class ErrorPageFilter {
+		@XmlAttribute
+		private String name;
+		@XmlAttribute
+		private String code;
+		@XmlAttribute
+		private String path;
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getCode() {
+			return code;
+		}
+
+		public void setCode(String code) {
+			this.code = code;
+		}
+
+		public String getPath() {
+			return path;
+		}
+
+		public void setPath(String path) {
+			this.path = path;
+		}
+	}
+
+	@XmlType(name = "customFilterType", namespace = NS_UNDERTOW)
+	public static class CustomFilter {
+		@XmlAttribute
+		private String name;
+		@XmlAttribute(name = "class-name")
+		private String className;
+		@XmlAttribute
+		private String module;
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getClassName() {
+			return className;
+		}
+
+		public void setClassName(String className) {
+			this.className = className;
+		}
+
+		public String getModule() {
+			return module;
+		}
+
+		public void setModule(String module) {
+			this.module = module;
+		}
+	}
+
+}
