@@ -45,7 +45,7 @@
 	<scm>
 		<connection>scm:git:git@github.com:ops4j/org.ops4j.pax.web.git</connection>
 		<developerConnection>scm:git:git@github.com:ops4j/org.ops4j.pax.web.git</developerConnection>
-		<url>http://github.com/ops4j/org.ops4j.pax.web/tree/master</url>
+		<url>http://github.com/ops4j/org.ops4j.pax.web/tree/pax-web-6.1.x</url>
 		<tag>HEAD</tag>
 	</scm>
 
@@ -169,7 +169,7 @@
 		<sonar.language>java</sonar.language>
 
 		<!-- version to compare this version to for baselineing -->
-		<baseline.version>6.0.0</baseline.version>
+		<baseline.version>6.0.7</baseline.version>
 	</properties>
 
 	<build>
