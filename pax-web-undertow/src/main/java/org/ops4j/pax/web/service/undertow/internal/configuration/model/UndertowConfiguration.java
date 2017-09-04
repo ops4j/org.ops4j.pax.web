@@ -98,6 +98,16 @@ public class UndertowConfiguration {
 	}
 
 	/**
+	 * Returns {@link org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowSubsystem.FileHandler}
+	 * by name
+	 * @param name
+	 * @return
+	 */
+	public UndertowSubsystem.FileHandler handler(String name) {
+		return handlersMap.get(name);
+	}
+
+	/**
 	 * Returns {@link org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowSubsystem.AbstractFilter}
 	 * by name
 	 * @param name
