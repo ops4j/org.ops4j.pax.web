@@ -87,6 +87,15 @@
 			</roles>
 			<timezone>UTC+1</timezone>
 		</developer>
+		<developer>
+			<id>ggrzybek</id>
+			<name>Grzegorz Grzybek</name>
+			<email>gr.grzybek@gmail.com</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>UTC-1</timezone>
+		</developer>
 	</developers>
 
 	<properties>
