@@ -59,6 +59,8 @@ import javax.xml.parsers.SAXParserFactory;
 
 import io.undertow.security.idm.Account;
 import io.undertow.security.idm.Credential;
+import io.undertow.server.handlers.resource.FileResourceManager;
+import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.servlet.api.ServletContainer;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
@@ -81,6 +83,7 @@ import org.ops4j.pax.web.service.undertow.internal.configuration.ResolvingConten
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.SecurityRealm;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.Server;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowConfiguration;
+import org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowSubsystem;
 import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.ops4j.util.property.PropertyResolver;
 import org.osgi.framework.Bundle;
@@ -330,7 +333,7 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
             // String format = "%a - - [%t] \"%m %U %H\" %s ";
             // TODO: still need to find out how to add cookie etc.
 
-            rootHandler = new AccessLogHandler(path, logReceiver, format,
+            rootHandler = new AccessLogHandler(rootHandler, logReceiver, format,
                     AccessLogHandler.class.getClassLoader());
         }
 
@@ -461,6 +464,34 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
                             builder.setSocketOption(Options.SSL_ENABLED_CIPHER_SUITES, Sequence.of(engine.getEnabledCipherSuites()));
                         }
                     }
+                }
+            }
+
+            // /undertow/subsystem/server/host/location - file handlers for static context paths.
+            for (Server.Host.Location location : cfg.getSubsystem().getServer().getHost().getLocation()) {
+                String context = location.getName();
+                String handlerRef = location.getHandler();
+                UndertowSubsystem.FileHandler fileHandler = cfg.handler(handlerRef);
+                if (fileHandler == null) {
+                    throw new IllegalArgumentException("No handler with name \"" + location.getHandler() + "\" available for " + location.getName() + " location.");
+                }
+                File base = new File(fileHandler.getPath());
+                if (!base.isDirectory()) {
+                    throw new IllegalArgumentException(base.getCanonicalPath() + " is not accessible. Can't configure handler for " + location.getName() + " location.");
+                }
+                // fileHandler.path is simply filesystem directory
+                ResourceHandler rh = new ResourceHandler(new FileResourceManager(base, 4096));
+                if (cfg.getSubsystem().getServletContainer() != null) {
+                    rh.setWelcomeFiles();
+                    for (org.ops4j.pax.web.service.undertow.internal.configuration.model.ServletContainer.WelcomeFile wf : cfg.getSubsystem().getServletContainer().getWelcomeFiles()) {
+                        rh.addWelcomeFiles(wf.getName());
+                    }
+                }
+                if (rootHandler instanceof PathHandler) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Adding resource handler for location \"" + context + "\" and base path \"" + base.getCanonicalPath() + "\".");
+                    }
+                    ((PathHandler) rootHandler).addPrefixPath(context, rh);
                 }
             }
 
