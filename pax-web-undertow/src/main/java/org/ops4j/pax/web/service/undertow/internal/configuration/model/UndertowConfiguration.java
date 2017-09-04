@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
+import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_PAXWEB_UNDERTOW;
 import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_UNDERTOW;
 
 @XmlRootElement(name = "undertow")
@@ -41,7 +42,7 @@ public class UndertowConfiguration {
 	@XmlElement(namespace = NS_UNDERTOW)
 	private UndertowSubsystem subsystem;
 
-	@XmlElement(name = "security-realm")
+	@XmlElement(name = "security-realm", namespace = NS_PAXWEB_UNDERTOW)
 	private List<SecurityRealm> securityRealms = new ArrayList<>();
 
 	@XmlElement(name = "interface")

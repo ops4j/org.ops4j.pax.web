@@ -419,6 +419,7 @@
 						<coverage.command>${jcoverage.command}</coverage.command>
 					</systemPropertyVariables>
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
+					<runOrder>alphabetical</runOrder>
 				</configuration>
 				<executions>
 					<execution>

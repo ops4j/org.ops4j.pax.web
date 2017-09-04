@@ -33,6 +33,12 @@
         </filters>
     </subsystem>
 
+    <security-realm name="default">
+        <w:authentication>
+            <w:properties path="target/users.properties" />
+        </w:authentication>
+    </security-realm>
+
     <interface name="default">
         <w:inet-address value="127.0.0.1" />
     </interface>

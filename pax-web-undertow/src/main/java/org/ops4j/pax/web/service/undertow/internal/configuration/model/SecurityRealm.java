@@ -21,22 +21,31 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
+import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_PAXWEB_UNDERTOW;
 import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_WILDFLY;
 
-@XmlType(name = "security-realmType", namespace = NS_WILDFLY, propOrder = {
+@XmlType(name = "security-realmType", namespace = NS_PAXWEB_UNDERTOW, propOrder = {
 		"identities",
-		"authentication"
+		"authentication",
+		"userPrincipalClassName",
+		"rolePrincipalClassNames"
 })
 public class SecurityRealm {
 
 	@XmlAttribute
 	private String name;
 
-	@XmlElement(name = "server-identities")
+	@XmlElement(name = "server-identities", namespace = NS_WILDFLY)
 	private ServerIdentities identities;
 
-	@XmlElement(name = "authentication")
+	@XmlElement(name = "authentication", namespace = NS_WILDFLY)
 	private Authentication authentication;
+
+	@XmlElement(name = "user-principal-class-name")
+	private String userPrincipalClassName;
+
+	@XmlElement(name = "role-principal-class-name")
+	private List<String> rolePrincipalClassNames = new ArrayList<>();
 
 	public ServerIdentities getIdentities() {
 		return identities;
@@ -62,12 +71,28 @@ public class SecurityRealm {
 		this.name = name;
 	}
 
+	public String getUserPrincipalClassName() {
+		return userPrincipalClassName;
+	}
+
+	public void setUserPrincipalClassName(String userPrincipalClassName) {
+		this.userPrincipalClassName = userPrincipalClassName;
+	}
+
+	public List<String> getRolePrincipalClassNames() {
+		return rolePrincipalClassNames;
+	}
+
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder("{\n");
 		sb.append("\t\t\tname: " + name);
-		sb.append("\n\t\t\tssl: " + identities.getSsl());
+		if (identities != null) {
+			sb.append("\n\t\t\tssl: " + identities.getSsl());
+		}
 		sb.append("\n\t\t\tauthentication: " + authentication);
+		sb.append("\n\t\t\tuser principal class name: " + userPrincipalClassName);
+		sb.append("\n\t\t\trole principal class names: " + rolePrincipalClassNames);
 		sb.append("\n\t\t}");
 		return sb.toString();
 	}
@@ -126,11 +151,17 @@ public class SecurityRealm {
 	}
 
 	@XmlType(name = "authenticationType", namespace = NS_WILDFLY, propOrder = {
-			"truststore"
+			"truststore",
+			"jaas",
+			"properties"
 	})
 	public static class Authentication {
-		@XmlElement(name = "truststore")
+		@XmlElement
 		private Truststore truststore;
+		@XmlElement
+		private JaasAuth jaas;
+		@XmlElement
+		private PropertiesAuth properties;
 
 		public Truststore getTruststore() {
 			return truststore;
@@ -140,10 +171,28 @@ public class SecurityRealm {
 			this.truststore = truststore;
 		}
 
+		public JaasAuth getJaas() {
+			return jaas;
+		}
+
+		public void setJaas(JaasAuth jaas) {
+			this.jaas = jaas;
+		}
+
+		public PropertiesAuth getProperties() {
+			return properties;
+		}
+
+		public void setProperties(PropertiesAuth properties) {
+			this.properties = properties;
+		}
+
 		@Override
 		public String toString() {
 			final StringBuilder sb = new StringBuilder("{ ");
 			sb.append("truststore: ").append(truststore);
+			sb.append(", jaas: ").append(jaas);
+			sb.append(", properties: ").append(properties);
 			sb.append(" }");
 			return sb.toString();
 		}
@@ -256,6 +305,50 @@ public class SecurityRealm {
 			sb.append("provider: ").append(getProvider());
 			sb.append(", path: ").append(getPath());
 			sb.append(", alias: ").append(alias);
+			sb.append(" }");
+			return sb.toString();
+		}
+	}
+
+	@XmlType(name = "jaasAuthenticationType", namespace = NS_WILDFLY)
+	public static class JaasAuth {
+		@XmlAttribute
+		private String name;
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String toString() {
+			final StringBuilder sb = new StringBuilder("{ ");
+			sb.append("name: ").append(name);
+			sb.append(" }");
+			return sb.toString();
+		}
+	}
+
+	@XmlType(name = "propertiesAuthenticationType", namespace = NS_WILDFLY)
+	public static class PropertiesAuth {
+		@XmlAttribute
+		private String path;
+
+		public String getPath() {
+			return path;
+		}
+
+		public void setPath(String path) {
+			this.path = path;
+		}
+
+		@Override
+		public String toString() {
+			final StringBuilder sb = new StringBuilder("{ ");
+			sb.append("path: ").append(path);
 			sb.append(" }");
 			return sb.toString();
 		}
