@@ -22,6 +22,9 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlType;
 
+import io.undertow.server.HttpHandler;
+import io.undertow.server.handlers.SetHeaderHandler;
+
 import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_UNDERTOW;
 
 @XmlType(name = "undertow-subsystemType", namespace = NS_UNDERTOW, propOrder = {
@@ -201,7 +204,7 @@ public class UndertowSubsystem {
 	}
 
 	@XmlType(name = "abstractFilterType", namespace = NS_UNDERTOW)
-	public static class AbstractFilter {
+	public abstract static class AbstractFilter {
 		@XmlAttribute
 		protected String name;
 
@@ -212,6 +215,13 @@ public class UndertowSubsystem {
 		public void setName(String name) {
 			this.name = name;
 		}
+
+		/**
+		 * Configures given filter using <code>handler</code> as <em>next</em> {@link HttpHandler}
+		 * @param handler
+		 * @return
+		 */
+		public abstract HttpHandler configure(HttpHandler handler);
 	}
 
 	@XmlType(name = "response-headerType", namespace = NS_UNDERTOW)
@@ -220,6 +230,11 @@ public class UndertowSubsystem {
 		private String header;
 		@XmlAttribute(name = "header-value")
 		private String value;
+
+		@Override
+		public HttpHandler configure(HttpHandler handler) {
+			return new SetHeaderHandler(handler, header, value);
+		}
 
 		public String getHeader() {
 			return header;
@@ -245,6 +260,12 @@ public class UndertowSubsystem {
 		@XmlAttribute
 		private String path;
 
+		@Override
+		public HttpHandler configure(HttpHandler handler) {
+			// TODO: not sure what to do here
+			return handler;
+		}
+
 		public String getCode() {
 			return code;
 		}
@@ -268,6 +289,12 @@ public class UndertowSubsystem {
 		private String className;
 		@XmlAttribute
 		private String module;
+
+		@Override
+		public HttpHandler configure(HttpHandler handler) {
+			// TODO: use javax.servlet filters or just generic io.undertow.server.HttpHandler?
+			return handler;
+		}
 
 		public String getClassName() {
 			return className;

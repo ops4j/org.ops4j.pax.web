@@ -14,6 +14,8 @@
                 <location name="/docs" handler="docs-handler" />
                 <location name="/welcome" handler="welcome-handler" />
                 <access-log pattern="common" directory="target" prefix="access--log--simple" suffix=".log" />
+                <filter-ref name="server" />
+                <filter-ref name="power" />
             </host>
         </server>
         <servlet-container name="default">
@@ -25,6 +27,10 @@
             <file name="docs-handler" path="target/sites/docs" />
             <file name="welcome-handler" path="target/sites/home" />
         </handlers>
+        <filters>
+            <response-header name="server" header-name="Server" header-value="Pax-Web/42" />
+            <response-header name="power" header-name="X-Powered-By" header-value="OPS4J" />
+        </filters>
     </subsystem>
 
     <interface name="default">

@@ -468,30 +468,43 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
             }
 
             // /undertow/subsystem/server/host/location - file handlers for static context paths.
-            for (Server.Host.Location location : cfg.getSubsystem().getServer().getHost().getLocation()) {
-                String context = location.getName();
-                String handlerRef = location.getHandler();
-                UndertowSubsystem.FileHandler fileHandler = cfg.handler(handlerRef);
-                if (fileHandler == null) {
-                    throw new IllegalArgumentException("No handler with name \"" + location.getHandler() + "\" available for " + location.getName() + " location.");
-                }
-                File base = new File(fileHandler.getPath());
-                if (!base.isDirectory()) {
-                    throw new IllegalArgumentException(base.getCanonicalPath() + " is not accessible. Can't configure handler for " + location.getName() + " location.");
-                }
-                // fileHandler.path is simply filesystem directory
-                ResourceHandler rh = new ResourceHandler(new FileResourceManager(base, 4096));
-                if (cfg.getSubsystem().getServletContainer() != null) {
-                    rh.setWelcomeFiles();
-                    for (org.ops4j.pax.web.service.undertow.internal.configuration.model.ServletContainer.WelcomeFile wf : cfg.getSubsystem().getServletContainer().getWelcomeFiles()) {
-                        rh.addWelcomeFiles(wf.getName());
+            if (cfg.getSubsystem().getServer().getHost() != null) {
+                for (Server.Host.Location location : cfg.getSubsystem().getServer().getHost().getLocation()) {
+                    String context = location.getName();
+                    String handlerRef = location.getHandler();
+                    UndertowSubsystem.FileHandler fileHandler = cfg.handler(handlerRef);
+                    if (fileHandler == null) {
+                        throw new IllegalArgumentException("No handler with name \"" + location.getHandler() + "\" available for " + location.getName() + " location.");
+                    }
+                    File base = new File(fileHandler.getPath());
+                    if (!base.isDirectory()) {
+                        throw new IllegalArgumentException(base.getCanonicalPath() + " is not accessible. Can't configure handler for " + location.getName() + " location.");
+                    }
+                    // fileHandler.path is simply filesystem directory
+                    ResourceHandler rh = new ResourceHandler(new FileResourceManager(base, 4096));
+                    if (cfg.getSubsystem().getServletContainer() != null) {
+                        rh.setWelcomeFiles();
+                        for (org.ops4j.pax.web.service.undertow.internal.configuration.model.ServletContainer.WelcomeFile wf : cfg.getSubsystem().getServletContainer().getWelcomeFiles()) {
+                            rh.addWelcomeFiles(wf.getName());
+                        }
+                    }
+                    if (rootHandler instanceof PathHandler) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Adding resource handler for location \"" + context + "\" and base path \"" + base.getCanonicalPath() + "\".");
+                        }
+                        ((PathHandler) rootHandler).addPrefixPath(context, rh);
                     }
                 }
-                if (rootHandler instanceof PathHandler) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Adding resource handler for location \"" + context + "\" and base path \"" + base.getCanonicalPath() + "\".");
+            }
+
+            // global filters (subsystem/filters/response-header and subsystem/filters/filter)
+            if (cfg.getSubsystem().getServer().getHost() != null) {
+                for (Server.Host.FilterRef fr : cfg.getSubsystem().getServer().getHost().getFilterRef()) {
+                    UndertowSubsystem.AbstractFilter filter = cfg.filter(fr.getName());
+                    if (filter == null) {
+                        throw new IllegalArgumentException("No filter with name \"" + fr.getName() + "\" available.");
                     }
-                    ((PathHandler) rootHandler).addPrefixPath(context, rh);
+                    rootHandler = filter.configure(rootHandler);
                 }
             }
 
