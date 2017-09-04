@@ -64,4 +64,18 @@ public class XmlConfigurationIntegrationTest extends XmlITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8186/welcome/h2.md");
 	}
 
+	@Test
+	public void testFilters() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseHeaderAssertion("Response must contain 'Server' header",
+						map -> map.anyMatch(e -> "Server".equals(e.getKey())
+								&& "Pax-Web/42".equals(e.getValue())))
+				.doGETandExecuteTest("http://127.0.0.1:8186");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseHeaderAssertion("Response must contain 'Server' header",
+						map -> map.anyMatch(e -> "X-Powered-By".equals(e.getKey())
+								&& "OPS4J".equals(e.getValue())))
+				.doGETandExecuteTest("http://127.0.0.1:8186");
+	}
+
 }
