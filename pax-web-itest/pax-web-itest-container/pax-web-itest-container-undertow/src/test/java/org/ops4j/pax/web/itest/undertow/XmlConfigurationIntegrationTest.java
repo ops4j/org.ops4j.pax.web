@@ -31,6 +31,7 @@ public class XmlConfigurationIntegrationTest extends XmlITestBase {
 
 	@Configuration
 	public static Option[] configure() throws IOException {
+		FileUtils.writeStringToFile(new File("target/users.properties"), "Administrator=admin1,admin");
 		FileUtils.writeStringToFile(new File("target/sites/docs/d1.txt"), "d1.txt");
 		FileUtils.writeStringToFile(new File("target/sites/docs/index.txt"), "index.txt1");
 		FileUtils.writeStringToFile(new File("target/sites/home/index.txt"), "index.txt2");
@@ -38,7 +39,7 @@ public class XmlConfigurationIntegrationTest extends XmlITestBase {
 
 		return combine(
 				configure("src/test/resources/xml/undertow-configs.xml"),
-				systemProperty("org.osgi.service.http.port.special").value("8186"));
+				systemProperty("org.osgi.service.http.port.special").value("8184"));
 	}
 
 	@Test
@@ -46,22 +47,22 @@ public class XmlConfigurationIntegrationTest extends XmlITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("index.txt1"))
-				.doGETandExecuteTest("http://127.0.0.1:8186/docs");
+				.doGETandExecuteTest("http://127.0.0.1:8184/docs");
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("d1.txt"))
-				.doGETandExecuteTest("http://127.0.0.1:8186/docs/d1.txt");
+				.doGETandExecuteTest("http://127.0.0.1:8184/docs/d1.txt");
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("index.txt2"))
-				.doGETandExecuteTest("http://127.0.0.1:8186/welcome");
+				.doGETandExecuteTest("http://127.0.0.1:8184/welcome");
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("h1.md"))
-				.doGETandExecuteTest("http://127.0.0.1:8186/welcome/h1.md");
+				.doGETandExecuteTest("http://127.0.0.1:8184/welcome/h1.md");
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
-				.doGETandExecuteTest("http://127.0.0.1:8186/welcome/h2.md");
+				.doGETandExecuteTest("http://127.0.0.1:8184/welcome/h2.md");
 	}
 
 	@Test
@@ -70,12 +71,12 @@ public class XmlConfigurationIntegrationTest extends XmlITestBase {
 				.withResponseHeaderAssertion("Response must contain 'Server' header",
 						map -> map.anyMatch(e -> "Server".equals(e.getKey())
 								&& "Pax-Web/42".equals(e.getValue())))
-				.doGETandExecuteTest("http://127.0.0.1:8186");
+				.doGETandExecuteTest("http://127.0.0.1:8184");
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseHeaderAssertion("Response must contain 'Server' header",
 						map -> map.anyMatch(e -> "X-Powered-By".equals(e.getKey())
 								&& "OPS4J".equals(e.getValue())))
-				.doGETandExecuteTest("http://127.0.0.1:8186");
+				.doGETandExecuteTest("http://127.0.0.1:8184");
 	}
 
 }

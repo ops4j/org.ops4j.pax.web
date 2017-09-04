@@ -30,7 +30,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 @RunWith(PaxExam.class)
 public class XmlITestBase extends ITestBase {
 
-	private Bundle installWarBundle;
+	protected Bundle installWarBundle;
 
 	public static Option[] configure(String xmlFilePath) {
 		return combine(

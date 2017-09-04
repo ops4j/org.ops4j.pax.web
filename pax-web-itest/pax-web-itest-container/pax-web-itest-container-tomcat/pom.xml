@@ -608,6 +608,7 @@
 					<argLine>${jcoverage.command}</argLine>
 					<forkMode>pertest</forkMode>
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
+					<runOrder>alphabetical</runOrder>
 				</configuration>
 				<executions>
 					<execution>

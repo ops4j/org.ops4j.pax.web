@@ -22,10 +22,21 @@
     <xs:complexType name="UndertowType">
         <xs:sequence>
             <xs:element ref="undertow:subsystem" />
-            <xs:element name="security-realm" type="wildfly:security-realmType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="security-realm" type="tns:security-realmType" minOccurs="0" maxOccurs="unbounded" />
             <xs:element name="interface" type="wildfly:named-interfaceType" minOccurs="0" maxOccurs="unbounded" />
             <xs:element name="socket-binding" type="wildfly:socket-bindingType" minOccurs="0" maxOccurs="unbounded" />
         </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="security-realmType">
+        <xs:complexContent>
+            <xs:extension base="wildfly:security-realmType">
+                <xs:sequence>
+                    <xs:element name="user-principal-class-name" type="xs:string" minOccurs="0" />
+                    <xs:element name="role-principal-class-name" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
     </xs:complexType>
 
 </xs:schema>

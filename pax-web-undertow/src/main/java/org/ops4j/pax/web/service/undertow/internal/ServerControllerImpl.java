@@ -16,6 +16,7 @@
 package org.ops4j.pax.web.service.undertow.internal;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
@@ -33,9 +34,11 @@ import java.security.cert.X509CertSelector;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -84,6 +87,8 @@ import org.ops4j.pax.web.service.undertow.internal.configuration.model.SecurityR
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.Server;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowConfiguration;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowSubsystem;
+import org.ops4j.pax.web.service.undertow.internal.security.JaasIdentityManager;
+import org.ops4j.pax.web.service.undertow.internal.security.PropertiesIdentityManager;
 import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.ops4j.util.property.PropertyResolver;
 import org.osgi.framework.Bundle;
@@ -464,6 +469,36 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
                             builder.setSocketOption(Options.SSL_ENABLED_CIPHER_SUITES, Sequence.of(engine.getEnabledCipherSuites()));
                         }
                     }
+                }
+            }
+
+            // identity manager - looked up in "default" security realm
+            SecurityRealm defaultRealm = cfg.securityRealm("default");
+            if (defaultRealm != null) {
+                SecurityRealm.JaasAuth jaasAuth = defaultRealm.getAuthentication().getJaas();
+                SecurityRealm.PropertiesAuth propertiesAuth = defaultRealm.getAuthentication().getProperties();
+                if (jaasAuth != null) {
+                    String userPrincipalClassName = defaultRealm.getUserPrincipalClassName();
+                    if (userPrincipalClassName == null || "".equals(userPrincipalClassName.trim())) {
+                        userPrincipalClassName = "java.security.Principal";
+                    }
+                    Set<String> rolePrincipalClassNames = new LinkedHashSet<>(defaultRealm.getRolePrincipalClassNames());
+                    identityManager = new JaasIdentityManager(jaasAuth.getName(),
+                            userPrincipalClassName, rolePrincipalClassNames);
+                } else if (propertiesAuth != null) {
+                    File userBase = new File(propertiesAuth.getPath());
+                    if (!userBase.isFile()) {
+                        throw new IllegalArgumentException(userBase.getCanonicalPath() + " is not accessible. Can't load users/groups information.");
+                    }
+                    Properties userProperties = new Properties();
+                    Map<String, String> map = new HashMap<>();
+                    try (FileInputStream stream = new FileInputStream(userBase)) {
+                        userProperties.load(stream);
+                        for (String user : userProperties.stringPropertyNames()) {
+                            map.put(user, userProperties.getProperty(user));
+                        }
+                    }
+                    identityManager = new PropertiesIdentityManager(map);
                 }
             }
 

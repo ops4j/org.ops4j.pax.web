@@ -292,7 +292,7 @@ public class Server {
 			sb.append(", socket binding name: ").append(socketBindingName);
 			sb.append(", buffer pool name: ").append(bufferPoolName);
 			sb.append(", enabled: ").append(enabled);
-			sb.append(", url charset: '").append(urlCharset);
+			sb.append(", url charset: ").append(urlCharset);
 			sb.append(", secure: ").append(secure);
 			sb.append(", redirect socket: ").append(redirectSocket);
 			sb.append(" }");
@@ -359,7 +359,7 @@ public class Server {
 			sb.append(", socket binding name: ").append(socketBindingName);
 			sb.append(", buffer pool name: ").append(bufferPoolName);
 			sb.append(", enabled: ").append(enabled);
-			sb.append(", url charset: '").append(urlCharset);
+			sb.append(", url charset: ").append(urlCharset);
 			sb.append(", secure: ").append(secure);
 			sb.append(", security realm: ").append(securityRealm);
 			sb.append(", verify client: ").append(verifyClient);
