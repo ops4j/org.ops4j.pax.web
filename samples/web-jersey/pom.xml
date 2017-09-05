@@ -18,7 +18,7 @@
 	<parent>
 		<groupId>org.ops4j.pax.web</groupId>
 		<artifactId>samples</artifactId>
-		<version>6.0.7</version>
+		<version>6.0.8-SNAPSHOT</version>
 	</parent>
 	<artifactId>web-jersey</artifactId>
 	<name>OPS4J Pax Web - Samples - HTTP Service - Jersey Rest Sample</name>

@@ -21,7 +21,7 @@
 	<parent>
 		<artifactId>web</artifactId>
 		<groupId>org.ops4j.pax</groupId>
-		<version>6.0.7</version>
+		<version>6.0.8-SNAPSHOT</version>
 	</parent>
 	<groupId>org.ops4j.pax.web</groupId>
 	<artifactId>pax-web-itest</artifactId>
