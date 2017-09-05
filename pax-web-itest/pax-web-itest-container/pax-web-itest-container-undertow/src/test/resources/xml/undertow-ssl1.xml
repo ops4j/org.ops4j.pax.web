@@ -10,12 +10,12 @@
     <subsystem xmlns="urn:jboss:domain:undertow:3.1">
         <server name="default-server">
             <https-listener name="https" socket-binding="https"
-                    security-realm="default" verify-client="NOT_REQUESTED" />
+                    security-realm="https-config" verify-client="NOT_REQUESTED" />
             <host name="default-host" alias="localhost" />
         </server>
     </subsystem>
 
-    <security-realm name="default">
+    <security-realm name="https-config">
         <w:server-identities>
             <w:ssl>
                 <w:engine

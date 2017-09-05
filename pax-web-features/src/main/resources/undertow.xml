@@ -18,7 +18,6 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns:w="urn:jboss:domain:4.2"
         xsi:schemaLocation="
-            urn:org.ops4j.pax.web:undertow:1.0 file://../../../main/resources/schema/pax-web-undertow_1_0.xsd
             urn:jboss:domain:undertow:3.1 http://www.jboss.org/schema/jbossas/wildfly-undertow_3_1.xsd
             urn:jboss:domain:4.2 http://www.jboss.org/schema/jbossas/wildfly-config_4_2.xsd">
 
@@ -27,27 +26,14 @@
         <!-- org.wildfly.extension.undertow.BufferCacheDefinition -->
         <buffer-cache name="default" buffer-size="1024" buffers-per-region="1024" max-regions="10" />
         <server name="default-server">
-            <http-listener name="http" socket-binding="http" redirect-socket="https"
-                    tcp-keep-alive="true" read-timeout="${http.read.timeout}" write-timeout="${http.write.timeout}"
-                    enabled="true" secure="false"
-                    buffer-pool="default"
-                    url-charset="UTF-8"
-                    receive-buffer="0" send-buffer="0" tcp-backlog="10000" max-connections="0" />
+            <!-- HTTP(S) Listener references Socket Binding (and indirectly - Interfaces) -->
+            <http-listener name="http" socket-binding="http" />
             <!-- verify-client: org.xnio.SslClientAuthMode.NOT_REQUESTED, org.xnio.SslClientAuthMode.REQUESTED, org.xnio.SslClientAuthMode.REQUIRED -->
-            <https-listener name="https" socket-binding="https"
-                    tcp-keep-alive="true" read-timeout="${http.read.timeout}" write-timeout="${http.write.timeout}"
-                    enabled="true" secure="true"
-                    security-realm="https" verify-client="NOT_REQUESTED"
-                    enabled-protocols="TLSv1 TLSv1.1 TLSv1.2" enabled-cipher-suites="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384 TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"
-                    buffer-pool="default"
-                    url-charset="UTF-8"
-                    receive-buffer="0" send-buffer="0" tcp-backlog="10000" max-connections="0" />
+            <!--<https-listener name="https" socket-binding="https"-->
+                    <!--security-realm="https" verify-client="NOT_REQUESTED" />-->
             <host name="default-host" alias="localhost">
-                <location name="/" handler="welcome-content" />
-                <location name="/docs" handler="docs-content">
-                    <filter-ref name="x-docs" />
-                </location>
-                <!-- pattern: common, combined, "" // io.undertow.server.handlers.accesslog.AccessLogHandler.handleCommonNames() -->
+                <!--<location name="/" handler="welcome-content" />-->
+                <!--<location name="/docs" handler="docs-content" />-->
                 <access-log directory="${karaf.data}/log" pattern="common" prefix="access_log." suffix="log" rotate="true" />
                 <filter-ref name="server-header" />
                 <filter-ref name="x-powered-by-header" />
@@ -62,15 +48,13 @@
             </welcome-files>
         </servlet-container>
         <handlers>
-            <file name="welcome-content" path="/tmp" />
+            <file name="welcome-content" path="${karaf.home}/welcome" />
+            <!--<file name="docs-content" path="${karaf.home}/docs" />-->
         </handlers>
         <filters>
             <!-- filters for reference from /host/filter-ref and /host/location/filter-ref -->
-            <response-header name="server-header" header-name="Server" header-value="pax-undertow" />
-            <response-header name="x-powered-by-header" header-name="X-Powered-By" header-value="Pax-Undertow/1" />
-            <response-header name="x-docs" header-name="X-Docs" header-value="Pax-Undertow-Docs/1" />
-            <error-page name="custom-error-page-1" code="404" path="/error" />
-            <filter name="custom-filter-1" class-name="fully.qualified.filter.class.Name" module="irrelevant JBoss Module" />
+            <response-header name="server-header" header-name="Server" header-value="Pax-HTTP-Undertow" />
+            <response-header name="x-powered-by-header" header-name="X-Powered-By" header-value="Pax-HTTP-Undertow/${project.version}" />
         </filters>
     </subsystem>
 
@@ -84,9 +68,9 @@
     <security-realm name="default">
         <w:authentication>
             <!-- JaasIdentityManager for given realm -->
-            <!--<w:jaas name="karaf" />-->
+            <w:jaas name="karaf" />
             <!-- OR PropertiesIdentityManager (mutually exclusive with <w:jaas>) -->
-            <w:properties path="users.properties" />
+            <!--<w:properties path="users.properties" />-->
         </w:authentication>
         <user-principal-class-name>org.apache.karaf.jaas.boot.principal.UserPrincipal</user-principal-class-name>
         <role-principal-class-name>org.apache.karaf.jaas.boot.principal.RolePrincipal</role-principal-class-name>

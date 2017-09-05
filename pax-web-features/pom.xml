@@ -172,18 +172,23 @@
 						<configuration>
 							<artifacts>
 								<artifact>
-									<file>target/classes/features.xml</file>
+									<file>${project.build.outputDirectory}/features.xml</file>
 									<type>xml</type>
 									<classifier>features</classifier>
 								</artifact>
 								<artifact>
-									<file>src/main/resources/jetty.xml</file>
+									<file>${project.build.outputDirectory}/jetty.xml</file>
 									<type>xml</type>
 									<classifier>jettyconfig</classifier>
 								</artifact>
 								<artifact>
-									<file>src/main/resources/undertow.properties</file>
+									<file>${project.build.outputDirectory}/undertow.properties</file>
 									<type>properties</type>
+									<classifier>undertowconfig</classifier>
+								</artifact>
+								<artifact>
+									<file>${project.build.outputDirectory}/undertow.xml</file>
+									<type>xml</type>
 									<classifier>undertowconfig</classifier>
 								</artifact>
                             </artifacts>
