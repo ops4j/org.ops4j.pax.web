@@ -307,10 +307,12 @@ class JettyServerImpl implements JettyServer {
 				}
 
 				boolean hasDefault = false;
-				for (ServletMapping mapping : context.getServletHandler().getServletMappings()) {
-					if (mapping.isDefault()) {
-						hasDefault = true;
-						break;
+				if (context.getServletHandler() != null && context.getServletHandler().getServletMappings() != null) {
+					for (ServletMapping mapping : context.getServletHandler().getServletMappings()) {
+						if (mapping.isDefault()) {
+							hasDefault = true;
+							break;
+						}
 					}
 				}
 				if (!hasDefault) {
