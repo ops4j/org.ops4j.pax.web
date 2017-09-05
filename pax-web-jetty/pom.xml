@@ -211,6 +211,16 @@
 			<artifactId>jetty-all</artifactId>
 			<classifier>uber</classifier>
 			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.ow2.asm</groupId>
+					<artifactId>asm-commons</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.ow2.asm</groupId>
+					<artifactId>asm</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	    <dependency>
 		    <groupId>org.eclipse.jetty</groupId>
@@ -261,6 +271,12 @@
 		<dependency>
 			<groupId>org.apache.xbean</groupId>
 			<artifactId>xbean-finder</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm-all</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
