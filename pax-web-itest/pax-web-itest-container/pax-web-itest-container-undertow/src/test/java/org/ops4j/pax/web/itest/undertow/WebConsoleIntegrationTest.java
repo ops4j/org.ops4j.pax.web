@@ -64,9 +64,6 @@ public class WebConsoleIntegrationTest extends ITestBase {
 								.artifactId("org.apache.felix.bundlerepository")
 								.version("1.6.2"),
 						mavenBundle().groupId("org.apache.felix")
-								.artifactId("org.apache.felix.configadmin")
-								.version("1.2.8"),
-						mavenBundle().groupId("org.apache.felix")
 								.artifactId("org.apache.felix.shell")
 								.version("1.4.2"),
 						mavenBundle().groupId("org.apache.felix")

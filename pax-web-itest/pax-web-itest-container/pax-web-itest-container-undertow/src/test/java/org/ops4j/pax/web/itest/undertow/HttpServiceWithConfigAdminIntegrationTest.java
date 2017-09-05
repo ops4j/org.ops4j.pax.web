@@ -53,8 +53,7 @@ public class HttpServiceWithConfigAdminIntegrationTest extends ITestBase {
 
 	@Configuration
 	public static Option[] configure() {
-		return combine(configureUndertow(),
-				mavenBundle("org.apache.felix", "org.apache.felix.configadmin", "1.4.0"));
+		return combine(configureUndertow());
 	}
 
 	@Before

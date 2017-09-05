@@ -40,7 +40,6 @@ public class WarJsfCdiIntegrationTest extends ITestBase {
     private Option[] configureJsfAndCdi() {
         return options(
                 systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("INFO"),
-                mavenBundle("org.apache.felix", "org.apache.felix.configadmin").version("1.8.10"),
                 // API
                 mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.javax-inject").version("1_2"),
                 mavenBundle("javax.enterprise", "cdi-api").version("1.2"),
