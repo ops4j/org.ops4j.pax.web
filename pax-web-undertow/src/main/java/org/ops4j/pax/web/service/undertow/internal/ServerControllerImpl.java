@@ -34,7 +34,6 @@ import java.security.cert.X509CertSelector;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
@@ -378,10 +377,15 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
 
             Dictionary<String, Object> properties = new Hashtable<>();
             // use only some properties from org.ops4j.pax.web PID
-            properties.put(WebContainerConstants.PROPERTY_HTTP_PORT, configuration.getHttpPort());
-            properties.put(WebContainerConstants.PROPERTY_HTTP_SECURE_PORT, configuration.getHttpSecurePort());
+            if (configuration.getHttpPort() != null) {
+                properties.put(WebContainerConstants.PROPERTY_HTTP_PORT, Integer.toString(configuration.getHttpPort()));
+            }
+            if (configuration.getHttpSecurePort() != null) {
+                properties.put(WebContainerConstants.PROPERTY_HTTP_SECURE_PORT, Integer.toString(configuration.getHttpSecurePort()));
+            }
             // TODO: pass more properties?
             // TODO: add direct configadmin support?
+            // TODO: pass underlying properties from org.ops4j.pax.web.service.spi.Configuration object?
 
             // BundleContextPropertyResolver gives access to e.g., ${karaf.base}
             final PropertyResolver resolver = new DictionaryPropertyResolver(properties,

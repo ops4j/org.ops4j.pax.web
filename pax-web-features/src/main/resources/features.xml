@@ -246,10 +246,12 @@
 
     <feature name="pax-http-undertow" version="${project.version}">
         <configfile finalname="${karaf.etc}/undertow.properties">mvn:org.ops4j.pax.web/pax-web-features/${project.version}/properties/undertowconfig</configfile>
+        <configfile finalname="${karaf.etc}/undertow.xml">mvn:org.ops4j.pax.web/pax-web-features/${project.version}/xml/undertowconfig</configfile>
         <config name="org.ops4j.pax.web">
             org.osgi.service.http.port=8181
             javax.servlet.context.tempdir=${karaf.data}/pax-web-jsp
-            org.ops4j.pax.web.config.file=${karaf.etc}/undertow.properties
+            #org.ops4j.pax.web.config.file=${karaf.etc}/undertow.properties
+            org.ops4j.pax.web.config.file=${karaf.etc}/undertow.xml
         </config>
         <feature>scr</feature>
         <feature>undertow</feature>

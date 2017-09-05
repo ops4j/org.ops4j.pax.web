@@ -76,7 +76,7 @@ public class ConfigurationParserTest {
 		assertThat(cfg.getSocketBindings().get(1).getPort(), equalTo(8423));
 		assertThat(cfg.getSocketBindings().get(1).getName(), equalTo("https"));
 
-		assertThat(cfg.getSecurityRealms().get(0).getIdentities().getSsl().getKeystore().getPath(),
+		assertThat(cfg.getSecurityRealms().get(1).getIdentities().getSsl().getKeystore().getPath(),
 				equalTo("/data/tmp/certs/server.keystore"));
 
 		LOG.info("Marshall configuration");
