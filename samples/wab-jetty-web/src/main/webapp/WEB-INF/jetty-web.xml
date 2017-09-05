@@ -20,7 +20,7 @@
     <Get id="old_handler" name="handler"/>
     <Set name="handler">
         <New class="org.eclipse.jetty.server.handler.ResourceHandler">
-        	<Set name="handler"><Ref refid="old_handler"/></Set>
+        	<Set name="handler"><Ref id="old_handler"/></Set>
             <Set name="resourceBase">file:/tmp</Set>
         </New>
     </Set>

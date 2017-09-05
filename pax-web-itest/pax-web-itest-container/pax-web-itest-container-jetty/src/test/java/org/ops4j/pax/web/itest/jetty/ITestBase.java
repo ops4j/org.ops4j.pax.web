@@ -89,7 +89,7 @@ public class ITestBase extends AbstractControlledTestBase {
             throw new IllegalStateException("Unable to find the alpn boot jar here: " + alpnBoot); 
         }
         
-        LOG.warn("found alpn: {}", alpnBoot);
+        LOG.info("found alpn: {}", alpnBoot);
 	    
 		return combine(
 				configureJetty(),
