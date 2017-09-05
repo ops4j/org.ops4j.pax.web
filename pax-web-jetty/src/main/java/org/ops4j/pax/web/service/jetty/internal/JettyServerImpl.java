@@ -332,7 +332,6 @@ class JettyServerImpl implements JettyServer {
 					// load some other required classes
 					QueuedThreadPool.class.getClassLoader().loadClass("org.eclipse.jetty.util.thread.QueuedThreadPool$1");
 					QueuedThreadPool.class.getClassLoader().loadClass("org.eclipse.jetty.util.thread.QueuedThreadPool$2");
-					QueuedThreadPool.class.getClassLoader().loadClass("org.eclipse.jetty.util.thread.QueuedThreadPool$3");
 				} finally {
 					Thread.currentThread().setContextClassLoader(loader);
 				}
