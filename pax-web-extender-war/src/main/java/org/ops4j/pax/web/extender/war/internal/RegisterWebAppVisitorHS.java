@@ -29,7 +29,6 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppJspConfig;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;

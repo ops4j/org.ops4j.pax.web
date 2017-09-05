@@ -28,7 +28,6 @@ import javax.servlet.Filter;
 import org.junit.Test;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
-import org.osgi.service.http.HttpContext;
 
 /**
  * @author Dmitry Sklyut

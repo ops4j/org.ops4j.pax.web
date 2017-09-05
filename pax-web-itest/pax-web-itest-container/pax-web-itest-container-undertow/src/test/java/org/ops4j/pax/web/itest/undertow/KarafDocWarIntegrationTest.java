@@ -23,16 +23,11 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.MavenUtils.asInProject;
-import static org.ops4j.pax.exam.OptionUtils.combine;
 
 
 /**

@@ -29,10 +29,6 @@ import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.MavenUtils.asInProject;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-
 
 /**
  * @author Achim Nierbeck

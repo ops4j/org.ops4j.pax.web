@@ -44,7 +44,6 @@ import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.http.HttpContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JettyServerWrapperTest {

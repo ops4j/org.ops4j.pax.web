@@ -17,7 +17,6 @@ package org.ops4j.pax.web.itest.undertow;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -37,8 +36,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.fail;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
 /**
  * @author Achim Nierbeck

@@ -17,9 +17,7 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 
 import org.ops4j.lang.NullArgumentException;
@@ -30,7 +28,6 @@ import org.ops4j.pax.web.extender.whiteboard.internal.WebApplication;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ServletContextHelperElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
-import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.osgi.framework.*;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
