@@ -119,7 +119,7 @@
 		<dependency.slf4j>1.7.12</dependency.slf4j>
 		<dependency.scr.version>2.0.6</dependency.scr.version>
 		<dependency.swissbox.version>1.8.2</dependency.swissbox.version>
-		<dependency.tomcat.version>8.0.46</dependency.tomcat.version>
+		<dependency.tomcat.version>8.5.20</dependency.tomcat.version>
 		<dependency.xbean.version>4.6-SNAPSHOT</dependency.xbean.version>
 		<dependency.xnio-api.version>3.3.8.Final</dependency.xnio-api.version>
 		<dependency.xnio.version>3.3.8.Final</dependency.xnio.version>
@@ -131,7 +131,7 @@
 		<dependency.pax-cdi.version>1.0.0.RC2</dependency.pax-cdi.version>
 		<version.pax-exam>4.7.0</version.pax-exam>
 
-		<tipi.tomcat.version>8.0.46.1</tipi.tomcat.version>
+		<tipi.tomcat.version>8.5.20.1</tipi.tomcat.version>
 		<jsf-myfaces.version>2.2.10</jsf-myfaces.version>
 
 		<dependency.junit.version>4.11</dependency.junit.version>
@@ -150,6 +150,7 @@
 		<servlet-jsp.spec.version>2.3.1</servlet-jsp.spec.version>
 		<servlet-jstl.spec.version>1.2.1</servlet-jstl.spec.version>
 		<dependency.el-api.version>3.0.0</dependency.el-api.version>
+		<dependency.jaspic.version>1.1</dependency.jaspic.version>
 
 		<!-- Tells Sonar to use JaCoCo as the code coverage tool -->
 		<sonar.skippedModules>pax-web-itest-load</sonar.skippedModules>

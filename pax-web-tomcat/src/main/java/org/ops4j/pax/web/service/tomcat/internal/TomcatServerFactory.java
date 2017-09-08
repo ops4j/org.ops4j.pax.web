@@ -17,15 +17,11 @@
 package org.ops4j.pax.web.service.tomcat.internal;
 
 import org.ops4j.pax.web.service.spi.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Romain Gilles
  */
 public class TomcatServerFactory implements ServerFactory {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(TomcatServerFactory.class);
 
 	public TomcatServerFactory() {
 	}
