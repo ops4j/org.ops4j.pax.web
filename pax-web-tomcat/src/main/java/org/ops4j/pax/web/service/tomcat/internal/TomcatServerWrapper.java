@@ -42,11 +42,9 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextListener;
-import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestListener;
-import javax.servlet.UnavailableException;
 import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 import javax.servlet.descriptor.TaglibDescriptor;
@@ -55,8 +53,6 @@ import javax.servlet.http.HttpSessionListener;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.Context;
-import org.apache.catalina.Globals;
-import org.apache.catalina.InstanceEvent;
 import org.apache.catalina.Lifecycle;
 import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleException;
@@ -72,12 +68,10 @@ import org.apache.catalina.authenticator.SSLAuthenticator;
 import org.apache.catalina.authenticator.SpnegoAuthenticator;
 import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.core.StandardContext;
-import org.apache.catalina.security.SecurityUtil;
 import org.apache.catalina.startup.ContextRuleSet;
 import org.apache.catalina.startup.NamingRuleSet;
 import org.apache.catalina.startup.Tomcat.ExistingStandardWrapper;
 import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
-import org.apache.tomcat.util.ExceptionUtils;
 import org.apache.tomcat.util.descriptor.XmlErrorHandler;
 import org.apache.tomcat.util.descriptor.web.ErrorPage;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
@@ -140,7 +134,7 @@ class TomcatServerWrapper implements ServerWrapper {
 				if (!servletRegistrations.containsKey(servletName)) {
 					LOG.debug("need to re-register the servlet ...");
 					createServletWrapper(model, context,
-							servletName, null);
+							servletName);
 				}
 			}
 		}
@@ -182,13 +176,11 @@ class TomcatServerWrapper implements ServerWrapper {
 	}
 
 	private final class ServletLifecycleListener implements LifecycleListener {
-		private final Servlet servlet;
 		private final Context context;
 		private final String servletName;
 		private final ServletModel model;
 
-		private ServletLifecycleListener(Servlet servlet, Context context, String servletName, ServletModel model) {
-			this.servlet = servlet;
+		private ServletLifecycleListener(Context context, String servletName, ServletModel model) {
 			this.context = context;
 			this.servletName = servletName;
 			this.model = model;
@@ -206,7 +198,7 @@ class TomcatServerWrapper implements ServerWrapper {
 						.containsKey(servletName)) {
 					LOG.debug("need to re-register the servlet ...");
 					createServletWrapper(model, context,
-							servletName, servlet);
+							servletName);
 				}
 				//CHECKSTYLE:ON
 			}
@@ -276,85 +268,6 @@ class TomcatServerWrapper implements ServerWrapper {
 				}
 				filterRegistration.setInitParameters(filterModel
 						.getInitParams());
-			}
-		}
-	}
-
-	private final class OsgiExistingStandardWrapper extends
-			ExistingStandardWrapper {
-		private final ServletModel model;
-
-		private OsgiExistingStandardWrapper(Servlet existing, ServletModel model) {
-			super(existing);
-			this.model = model;
-		}
-
-		@Override
-		public synchronized void load() throws ServletException {
-			try {
-				instance =  loadServlet();
-			} catch (Exception e) {
-				if (e instanceof RuntimeException) {
-					throw (RuntimeException) e;
-				}
-				LOG.error(
-						"Ignored exception during servlet registration",
-						e);
-			}
-
-			if (!instanceInitialized) {
-				initServlet(instance);
-			}
-
-			// skip the JMX part not needed here!
-		}
-
-		private synchronized void initServlet(Servlet servlet)
-				throws ServletException {
-
-			if (instanceInitialized && !singleThreadModel) {
-				return;
-			}
-
-			// Call the initialization method of this servlet
-			try {
-				instanceSupport.fireInstanceEvent(
-						InstanceEvent.BEFORE_INIT_EVENT, servlet);
-
-				if (Globals.IS_SECURITY_ENABLED) {
-
-					Object[] args = new Object[]{(facade)};
-					SecurityUtil.doAsPrivilege("init", servlet,
-							classType, args);
-					args = null;
-				} else {
-					servlet.init(facade);
-				}
-
-				instanceInitialized = true;
-
-				instanceSupport.fireInstanceEvent(
-						InstanceEvent.AFTER_INIT_EVENT, servlet);
-			} catch (UnavailableException f) {
-				instanceSupport.fireInstanceEvent(
-						InstanceEvent.AFTER_INIT_EVENT, servlet, f);
-				unavailable(f);
-				throw f;
-			} catch (ServletException f) {
-				instanceSupport.fireInstanceEvent(
-						InstanceEvent.AFTER_INIT_EVENT, servlet, f);
-				// If the servlet wanted to be unavailable it would have
-				// said so, so do not call unavailable(null).
-				throw f;
-			} catch (Throwable f) {
-				ExceptionUtils.handleThrowable(f);
-				getServletContext().log("StandardWrapper.Throwable", f);
-				instanceSupport.fireInstanceEvent(
-						InstanceEvent.AFTER_INIT_EVENT, servlet, f);
-				// If the servlet wanted to be unavailable it would have
-				// said so, so do not call unavailable(null).
-				throw new ServletException(sm.getString(
-						"standardWrapper.initException", getName()), f);
 			}
 		}
 	}
@@ -431,10 +344,10 @@ class TomcatServerWrapper implements ServerWrapper {
 				final Servlet servlet = model.getServletFromName();
 
 				if (servlet != null) {
-					createServletWrapper(model, context, servletName, servlet);
+					createServletWrapper(model, context, servletName);
 
 					if (!model.getContextModel().isWebBundle()) {
-						ServletLifecycleListener listener = new ServletLifecycleListener(servlet, context, servletName, model);
+						ServletLifecycleListener listener = new ServletLifecycleListener(context, servletName, model);
 						servletLifecycleListenerMap.put(model, listener);
 						context.addLifecycleListener(listener);
 					}
@@ -457,7 +370,7 @@ class TomcatServerWrapper implements ServerWrapper {
 			}
 
 		} else {
-			createServletWrapper(model, context, servletName, null);
+			createServletWrapper(model, context, servletName);
 
 			if (!model.getContextModel().isWebBundle()) {
 				WrappedServletLifecycleListener listener = new WrappedServletLifecycleListener(context, servletName, model);
@@ -468,18 +381,9 @@ class TomcatServerWrapper implements ServerWrapper {
 	}
 
 	private void createServletWrapper(final ServletModel model,
-									  final Context context, final String servletName, Servlet servlet) {
-
-		if (servlet != null) {
-			Wrapper sw = new OsgiExistingStandardWrapper(model.getServlet(),
-					model);
-			addServletWrapper(sw, servletName, context, model);
-		} else {
-			Wrapper sw = new OsgiExistingStandardWrapper(model.getServlet(),
-					model);
-			addServletWrapper(sw, servletName, context, model);
-		}
-
+									  final Context context, final String servletName) {
+		Wrapper sw = new ExistingStandardWrapper(model.getServlet());
+		addServletWrapper(sw, servletName, context, model);
 	}
 
 	private void addServletWrapper(final Wrapper sw, final String servletName,
@@ -755,7 +659,7 @@ class TomcatServerWrapper implements ServerWrapper {
 		FilterDef findFilterDef = context.findFilterDef(filterModel.getName());
 		LOG.info("removing ServletFilter with name: {}", filterModel.getName());
 		context.removeFilterDef(findFilterDef);
-		LOG.info("filterDefs now contain: {}", context.findFilterDefs());
+		LOG.info("filterDefs now contains {} filters", context.findFilterDefs().length);
 		FilterMap[] filterMaps = context.findFilterMaps();
 		for (FilterMap filterMap : filterMaps) {
 			if (filterMap.getFilterName().equalsIgnoreCase(
