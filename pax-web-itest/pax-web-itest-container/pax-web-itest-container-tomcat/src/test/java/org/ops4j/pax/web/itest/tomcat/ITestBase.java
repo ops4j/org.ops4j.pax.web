@@ -107,6 +107,9 @@ public class ITestBase extends AbstractTestBase {
 						.version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.specs")
 						.artifactId("geronimo-osgi-registry")
+						.version(asInProject()),
+				mavenBundle().groupId("javax.security.auth.message")
+						.artifactId("javax.security.auth.message-api")
 						.version(asInProject())
 		);
 	}

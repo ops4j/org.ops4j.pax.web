@@ -27,7 +27,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import org.apache.jasper.Constants;
 import org.apache.jasper.servlet.JspServlet;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.osgi.framework.Bundle;
@@ -136,12 +135,11 @@ public class JspServletWrapper implements Servlet {
 	 *
 	 * @see JspServlet#service(ServletRequest, ServletResponse)
 	 */
-	@SuppressWarnings("deprecation")
 	@Override
 	public void service(final ServletRequest req, final ServletResponse res)
 			throws ServletException, IOException {
 		if (jspFile != null) {
-			req.setAttribute(Constants.JSP_FILE, jspFile);
+			req.setAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH, jspFile);
 		}
 		String includeRequestUri = (String) req
 				.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
