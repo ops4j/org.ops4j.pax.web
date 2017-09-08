@@ -157,6 +157,7 @@
         <feature>scr</feature>
         <feature version="[6.1,6.2)">pax-http</feature>
         <bundle dependency="true" start-level="30">mvn:javax.el/javax.el-api/3.0.0</bundle>
+        <bundle dependency="true" start-level="30">mvn:javax.security.auth.message/javax.security.auth.message-api/${dependency.jaspic.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.tomcat-embed-core/${tipi.tomcat.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.tomcat-embed-websocket/${tipi.tomcat.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:${servlet.spec.groupId}/${servlet.spec.artifactId}/${servlet.spec.version}</bundle>

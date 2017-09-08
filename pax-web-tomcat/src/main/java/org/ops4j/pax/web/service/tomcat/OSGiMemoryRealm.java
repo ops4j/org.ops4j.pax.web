@@ -19,8 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Enumeration;
 
 import org.apache.catalina.LifecycleException;
@@ -35,7 +33,6 @@ public class OSGiMemoryRealm extends MemoryRealm {
 
 	private static final Logger log = LoggerFactory.getLogger(OSGiMemoryRealm.class);
 
-	@SuppressWarnings("deprecation")
 	@Override
 	protected void startInternal() throws LifecycleException {
 
@@ -80,16 +77,6 @@ public class OSGiMemoryRealm extends MemoryRealm {
 				//CHECKSTYLE:ON
 			} finally {
 				digester.reset();
-			}
-
-			// Create a MessageDigest instance for credentials, if desired
-			if (digest != null) {
-				try {
-					md = MessageDigest.getInstance(digest);
-				} catch (NoSuchAlgorithmException e) {
-					throw new LifecycleException(sm.getString(
-							"realmBase.algorithm", digest), e);
-				}
 			}
 
 	        if (getCredentialHandler() == null) {

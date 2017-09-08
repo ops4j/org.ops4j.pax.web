@@ -151,12 +151,6 @@
 					</dependency>
 					
 					<dependency>
-						<groupId>org.apache.tomcat.embed</groupId>
-						<artifactId>tomcat-embed-logging-juli</artifactId>
-						<version>${dependency.tomcat.version}</version>
-					</dependency>
-
-					<dependency>
 						<groupId>org.apache.geronimo.bundles</groupId>
 						<artifactId>jstl</artifactId>
 						<version>1.2_1</version>

@@ -33,19 +33,14 @@ import javax.servlet.ServletContainerInitializer;
 import org.apache.catalina.AccessLog;
 import org.apache.catalina.Container;
 import org.apache.catalina.Context;
-import org.apache.catalina.Engine;
-import org.apache.catalina.Host;
 import org.apache.catalina.Server;
 import org.apache.catalina.Service;
 import org.apache.catalina.Valve;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.ContainerBase;
-import org.apache.catalina.core.StandardService;
 import org.apache.catalina.startup.Catalina;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.valves.AccessLogValve;
-import org.apache.coyote.http11.Http11NioProtocol;
-import org.apache.coyote.http11.Http11Protocol;
 import org.apache.tomcat.util.digester.Digester;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.Configuration;
@@ -170,30 +165,9 @@ public class EmbeddedTomcat extends Tomcat {
 	public void setServer(Server server) {
 	    this.server = server;
 		Service[] findServices = server.findServices();
-        for (Service service : findServices) {
-            // check the connectors and set the first connector to the tomcat instance
-            Connector[] connectors = service.findConnectors();
-            if (connectors != null && connectors.length > 0) {
-                this.connector = connectors[0];
-            }
-            Container container = service.getContainer();
-            // if this container is an engine, we also need to set this and the appropriate service to this
-            if (container instanceof Engine) {
-                this.service = service;
-                this.engine = (Engine) container;
-                this.host = (Host) engine.findChild(this.engine.getDefaultHost());
-                break;
-            }            
-        }
-        // check that there is a service and an engine
-        if (this.service == null) {
-            service = new StandardService();
-            service.setName("Catalina");
-            server.addService(service);
-        }
-        if (this.engine == null) {
-            getEngine().setName("Catalina");
-        }
+		if (findServices != null && findServices.length > 0 && findServices[0].getContainer() == null) {
+			getEngine().setName("Catalina");
+		}
 	}
 
 	private static class FakeCatalina extends Catalina {
@@ -295,7 +269,6 @@ public class EmbeddedTomcat extends Tomcat {
 		}
 
 		Integer httpPort = configuration.getHttpPort();
-		Boolean useNIO = configuration.useNIO();
 		Integer httpSecurePort = configuration.getHttpSecurePort();
 
         for (String address : addresses) {
@@ -333,7 +306,7 @@ public class EmbeddedTomcat extends Tomcat {
                 }
 
                 if (!masterConnectorFound) {
-                    httpConnector = createConnector(configuration, httpConnector, address, httpPort, useNIO);
+                    httpConnector = createConnector(configuration, httpConnector, address, httpPort);
                 }
             } else {
                 // remove maybe already configured connectors through server.xml,
@@ -379,7 +352,7 @@ public class EmbeddedTomcat extends Tomcat {
 
                 if (!masterSSLConnectorFound) {
                     httpSecureConnector = createSSLConnector(configuration, httpSecureConnector, address, httpSecurePort, sslPassword,
-                            sslKeyPassword, useNIO);
+                            sslKeyPassword);
                 }
             } else {
                 // remove maybe already configured connectors through tomcat-config.xml, the
@@ -394,13 +367,6 @@ public class EmbeddedTomcat extends Tomcat {
                 }
             }
         }
-        // set the default connector to one of the found connectors, otherwise the container will create one later
-        if (this.connector == null) {
-            this.connector = httpSecureConnector;
-        }
-        if (this.connector == null) {
-            this.connector = httpConnector;
-        }
 	}
 
     private boolean matches(String address, Integer port, Connector connector) {
@@ -412,7 +378,7 @@ public class EmbeddedTomcat extends Tomcat {
     }
 
     private Connector createSSLConnector(Configuration configuration, Connector httpSecureConnector, String address, Integer httpSecurePort,
-            final String sslPassword, final String sslKeyPassword, Boolean useNIO) {
+            final String sslPassword, final String sslKeyPassword) {
         Connector secureConnector  = null;
         if (sslPassword != null && sslKeyPassword != null) {
         	secureConnector = new Connector("HTTPS/1.1");
@@ -427,14 +393,6 @@ public class EmbeddedTomcat extends Tomcat {
             		configuration.getSslKeyPassword());
             secureConnector.setProperty("clientAuth", "false");
             secureConnector.setProperty("sslProtocol", "TLS");
-
-            if (useNIO) {
-            	secureConnector.setProtocolHandlerClassName(Http11NioProtocol.class
-            			.getName());
-            } else {
-            	secureConnector.setProtocolHandlerClassName(Http11Protocol.class
-            			.getName());
-            }
 
             if (configuration.getServerMaxThreads() != null) {
             	secureConnector.setAttribute("maxThreads", configuration.getServerMaxThreads());
@@ -454,7 +412,7 @@ public class EmbeddedTomcat extends Tomcat {
         return httpSecureConnector == null ? secureConnector : httpSecureConnector;
     }
 
-    private Connector createConnector(Configuration configuration, Connector httpConnector, String address, Integer httpPort, Boolean useNIO) {
+    private Connector createConnector(Configuration configuration, Connector httpConnector, String address, Integer httpPort) {
         LOG.debug("No Master connector found create a new one");
         Connector connector = new Connector("HTTP/1.1");
         LOG.debug("Reconfiguring master connector");
@@ -463,13 +421,6 @@ public class EmbeddedTomcat extends Tomcat {
         connector.setPort(httpPort);
         if (configuration.isHttpSecureEnabled()) {
         	connector.setRedirectPort(configuration.getHttpSecurePort());
-        }
-        if (useNIO) {
-        	connector.setProtocolHandlerClassName(Http11NioProtocol.class
-        			.getName());
-        } else {
-        	connector.setProtocolHandlerClassName(Http11Protocol.class
-        			.getName());
         }
 
         if (configuration.getServerMaxThreads() != null) {
@@ -484,7 +435,7 @@ public class EmbeddedTomcat extends Tomcat {
         }
 
         LOG.debug("configuration done: {}", connector);
-        service.addConnector(connector);
+        getService().addConnector(connector);
         return httpConnector == null ? connector : httpConnector;
     }
 
@@ -524,7 +475,7 @@ public class EmbeddedTomcat extends Tomcat {
 			Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers,
 			URL jettyWebXmlURL, List<String> virtualHosts,
 			List<String> connectors, String basedir) {
-		silence(host, "/" + contextName);
+		silence("/" + contextName);
 		Context ctx = new HttpServiceContext(getHost(), accessControllerContext);
 		String name = generateContextName(contextName, httpContext);
 		LOG.info("registering context {}, with context-name: {}", httpContext, name);
@@ -574,13 +525,8 @@ public class EmbeddedTomcat extends Tomcat {
 			}
 		}
 
-		if (host == null) {
-			((ContainerBase) getHost()).setStartChildren(false);
-			getHost().addChild(ctx);
-		} else {
-			((ContainerBase) host).setStartChildren(false);
-			host.addChild(ctx);
-		}
+		((ContainerBase) getHost()).setStartChildren(false);
+		getHost().addChild(ctx);
 
 		// add mimetypes here?
 		// MIME mappings
@@ -617,13 +563,9 @@ public class EmbeddedTomcat extends Tomcat {
 		}
 	}
 
-	private void silence(Host host, String ctx) {
+	private void silence(String ctx) {
 		String base = "org.apache.catalina.core.ContainerBase.[default].[";
-		if (host == null) {
-			base += getHost().getName();
-		} else {
-			base += host.getName();
-		}
+		base += getHost().getName();
 		base += "].[";
 		base += ctx;
 		base += "]";
