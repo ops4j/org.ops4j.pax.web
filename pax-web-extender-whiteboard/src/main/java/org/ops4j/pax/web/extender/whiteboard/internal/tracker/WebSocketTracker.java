@@ -18,6 +18,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 import javax.websocket.Endpoint;
 import javax.websocket.server.ServerEndpoint;
 
+import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.WebSocketElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
@@ -41,7 +42,7 @@ public class WebSocketTracker extends AbstractTracker<Object, WebSocketElement> 
 
 	public static ServiceTracker<Object, WebSocketElement> createTracker(final ExtenderContext extenderContext,
 			final BundleContext bundleContext) {
-		return new WebSocketTracker(extenderContext, bundleContext).create(Object.class);
+		return new WebSocketTracker(extenderContext, bundleContext).create("(&(objectClass=" + Object.class.getName() + ")(" + ExtenderConstants.WEBSOCKET + "=true))");
 	}
 
 	@Override
