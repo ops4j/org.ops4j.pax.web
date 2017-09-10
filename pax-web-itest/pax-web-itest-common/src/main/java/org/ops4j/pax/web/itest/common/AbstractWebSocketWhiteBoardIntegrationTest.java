@@ -15,8 +15,12 @@
  */
 package org.ops4j.pax.web.itest.common;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.itest.common.support.SimpleWebSocket;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -43,7 +47,9 @@ public abstract class AbstractWebSocketWhiteBoardIntegrationTest extends ITestBa
 
 		SimpleWebSocket simpleWebSocket = new SimpleWebSocket();
 
-		bundleContext.registerService(Object.class.getName(), simpleWebSocket, null);
+		Dictionary<String, Object> filter = new Hashtable<>();
+		filter.put(ExtenderConstants.WEBSOCKET, "true");
+		bundleContext.registerService(Object.class.getName(), simpleWebSocket, filter);
 
 		Thread.sleep(1000);
 	}

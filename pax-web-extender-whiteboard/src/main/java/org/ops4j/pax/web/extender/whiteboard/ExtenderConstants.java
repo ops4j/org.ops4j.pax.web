@@ -75,4 +75,9 @@ public interface ExtenderConstants {
 	 */
 	String DEFAULT_INIT_PREFIX_PROP = "init.";
 
+	/**
+	 * A registration property for enabling filtering for WebSockets via Whitebox Tracking.
+	 */
+	String WEBSOCKET = "websocket";
+
 }
