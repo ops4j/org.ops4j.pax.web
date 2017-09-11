@@ -35,7 +35,6 @@ import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
-import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.ops4j.pax.web.service.whiteboard.*;
 import org.osgi.dto.DTO;
 import org.osgi.framework.BundleContext;

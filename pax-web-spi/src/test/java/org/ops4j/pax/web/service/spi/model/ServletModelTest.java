@@ -24,7 +24,6 @@ import javax.servlet.Servlet;
 
 import org.junit.Test;
 import org.ops4j.pax.web.service.WebContainerContext;
-import org.osgi.service.http.HttpContext;
 
 public class ServletModelTest {
 

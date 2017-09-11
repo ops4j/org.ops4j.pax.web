@@ -35,7 +35,6 @@ import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.core.ApplicationContext;
 import org.apache.catalina.core.StandardContext;
 import org.ops4j.pax.web.service.WebContainerContext;
-import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

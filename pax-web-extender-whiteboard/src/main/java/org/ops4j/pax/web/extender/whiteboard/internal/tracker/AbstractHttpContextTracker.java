@@ -18,7 +18,6 @@
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtendedHttpServiceRuntime;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.WebApplication;

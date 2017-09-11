@@ -19,7 +19,6 @@ package org.ops4j.pax.web.service.jetty.internal;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.verify;
 
 import java.io.IOException;
@@ -29,7 +28,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.http.HttpContext;
 

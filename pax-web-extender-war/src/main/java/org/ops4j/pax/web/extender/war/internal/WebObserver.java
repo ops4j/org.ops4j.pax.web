@@ -16,7 +16,6 @@
 package org.ops4j.pax.web.extender.war.internal;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import static org.ops4j.pax.web.extender.war.internal.parser.WebAppParser.canSeeClass;
 import static org.ops4j.pax.web.extender.war.internal.util.ManifestUtil.getHeader;
 import static org.ops4j.pax.web.service.spi.WebEvent.DEPLOYING;

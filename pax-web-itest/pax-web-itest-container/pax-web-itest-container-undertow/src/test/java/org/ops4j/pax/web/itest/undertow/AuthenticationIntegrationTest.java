@@ -27,9 +27,6 @@ import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-
 /**
  * @author Toni Menzel (tonit)
  * @since Mar 3, 2009

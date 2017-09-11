@@ -16,7 +16,6 @@
 package org.ops4j.pax.web.itest.undertow.support;
 
 import java.io.IOException;
-import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;

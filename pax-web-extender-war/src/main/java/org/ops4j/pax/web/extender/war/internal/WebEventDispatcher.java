@@ -42,7 +42,6 @@ import org.ops4j.pax.web.service.spi.WebEvent.WebTopic;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
