@@ -57,7 +57,7 @@
 							javax.security.auth,
 							javax.security.auth.callback,
 							javax.security.auth.login,
-							javax.security.cert,
+							javax.security.cert;
 							resolution:=optional;version="[2.3.0,3.1.0)",
 							javax.xml.parsers,
 							org.osgi.framework;version="[1.0.0,2.0.0)",
@@ -118,6 +118,19 @@
 						</_removeheaders>
 					</instructions>
 				</configuration>
+				<executions>
+					<execution>
+						<id>baseline</id>
+						<goals>
+							<goal>baseline</goal>
+						</goals>
+						<configuration>
+							<comparisonVersion>${baseline.version}</comparisonVersion>
+							<failOnWarning>false</failOnWarning>
+							<failOnError>false</failOnError>
+						</configuration>
+					</execution>
+				</executions>
 				<dependencies>
 					<dependency>
 						<groupId>biz.aQute.bnd</groupId>
