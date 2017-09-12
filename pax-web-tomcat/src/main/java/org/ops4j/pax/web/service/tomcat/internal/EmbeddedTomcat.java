@@ -545,6 +545,7 @@ public class EmbeddedTomcat extends Tomcat {
 
 		// new OSGi methods
 		((HttpServiceContext) ctx).setHttpContext(httpContext);
+		((HttpServiceContext) ctx).setContextAttributes(contextAttributes);
 		// TODO: what about the AccessControlContext?
 		// TODO: the virtual host section below
 		// TODO: what about the VirtualHosts?
