@@ -16,7 +16,6 @@
 package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -56,7 +55,6 @@ public class CrossServiceIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore("Filter services do not work")
 	public void testMultipleServiceCombination() throws Exception {
 		ServiceReference<HttpService> reference = bundleContext.getServiceReference(HttpService.class);
 		HttpService httpService = bundleContext.getService(reference);
@@ -93,7 +91,6 @@ public class CrossServiceIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore("Filter services do not work")
 	public void testMultipleServiceCombinationWithDefaultHttpContext() throws Exception {
 		ServiceReference<HttpService> reference = bundleContext.getServiceReference(HttpService.class);
 		HttpService httpService = bundleContext.getService(reference);
@@ -119,7 +116,6 @@ public class CrossServiceIntegrationTest extends ITestBase {
 		}
 	}
 
-	@Ignore("sharing the context for WABs isn't possible")
 	@Test
 	public void testMultipleServiceCombinationWithWebContainer() throws Exception {
 		ServiceReference<HttpService> reference = bundleContext.getServiceReference(HttpService.class);
@@ -133,7 +129,8 @@ public class CrossServiceIntegrationTest extends ITestBase {
 		httpService.registerServlet("/crosservice", new TestServlet(), null, null);
 
 		// Register a servlet filter via webcontainer
-		wcService.registerFilter(new SimpleFilter(), new String[]{"/crossservice/*"}, null, null, null);
+		Filter filter = new SimpleFilter();
+		wcService.registerFilter(filter, new String[]{"/crosservice/*"}, null, null, null);
 
 		try {
 			HttpTestClientFactory.createDefaultTestClient()
@@ -142,7 +139,7 @@ public class CrossServiceIntegrationTest extends ITestBase {
 							resp -> resp.contains("FILTER-INIT: true"))
 					.doGETandExecuteTest("http://127.0.0.1:8282/crosservice");
 		} finally {
-			wcService.unregisterFilter(new SimpleFilter());
+			wcService.unregisterFilter(filter);
 			httpService.unregister("/crosservice");
 		}
 	}

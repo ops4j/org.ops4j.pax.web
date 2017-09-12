@@ -92,6 +92,7 @@ public class FilterModel extends Model {
 			idName = getId();
 		}
 		this.name = idName;
+		initParams.remove(WebContainerConstants.FILTER_NAME);
 		this.asyncSupported = asyncSupported;
 		setupDispatcher();
 	}
@@ -102,6 +103,7 @@ public class FilterModel extends Model {
 	private void setupDispatcher() {
 		String dispatches = initParams
 				.get(WebContainerConstants.FILTER_MAPPING_DISPATCHER);
+		initParams.remove(WebContainerConstants.FILTER_MAPPING_DISPATCHER);
 		if (dispatches != null && dispatches.trim().length() > 0) {
 			if (dispatches.indexOf(",") > -1) {
 				// parse
