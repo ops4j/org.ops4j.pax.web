@@ -24,7 +24,9 @@ import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -218,6 +220,8 @@ public class HttpServiceContext extends StandardContext {
 	 */
 	private final AccessControlContext accessControllerContext;
 
+	private Map<String, Object> contextAttributes = Collections.emptyMap();
+
 	/**
 	 * @param host
 	 */
@@ -230,12 +234,19 @@ public class HttpServiceContext extends StandardContext {
 		this.httpContext = httpContext;
 	}
 
+	public void setContextAttributes(Map<String, Object> contextAttributes) {
+		this.contextAttributes = contextAttributes;
+	}
+
 	@Override
 	public ServletContext getServletContext() {
 		if (context == null) {
 			context = new ServletApplicationContext(this);
 			if (getAltDDName() != null) {
 				context.setAttribute(Globals.ALT_DD_ATTR, getAltDDName());
+			}
+			for (Map.Entry<String, Object> attribute : contextAttributes.entrySet()) {
+				context.setAttribute(attribute.getKey(), attribute.getValue());
 			}
 		}
 		return super.getServletContext();
