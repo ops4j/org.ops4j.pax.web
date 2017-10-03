@@ -20,6 +20,7 @@ import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.eclipse.jetty.http.HttpScheme;
 import org.eclipse.jetty.server.*;
+import org.eclipse.jetty.server.HttpConfiguration.Customizer;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
@@ -56,10 +57,7 @@ class JettyFactoryImpl implements JettyFactory {
 	private final ServerModel serverModel;
 	private Logger log = LoggerFactory.getLogger(getClass());
 	private Bundle bundle;
-
-	private List<Connector> connectors;
-
-	private List<Handler> handlers;
+	private Comparator<?> priorityComparator;
 
 	/**
 	 * Constrcutor.
@@ -67,22 +65,11 @@ class JettyFactoryImpl implements JettyFactory {
 	 * @param serverModel asscociated server model
 	 * @param bundle
 	 */
-	JettyFactoryImpl(final ServerModel serverModel, Bundle bundle) {
-		this(serverModel, bundle, null, null);
-	}
-
-	/**
-	 * Constrcutor.
-	 *
-	 * @param serverModel asscociated server model
-	 * @param bundle
-	 */
-	JettyFactoryImpl(final ServerModel serverModel, Bundle bundle, List<Handler> handlers, List<Connector> connectors) {
+	JettyFactoryImpl(final ServerModel serverModel, Bundle bundle, Comparator<?> priorityComparator) {
 		NullArgumentException.validateNotNull(serverModel, "Service model");
 		this.serverModel = serverModel;
 		this.bundle = bundle;
-		this.handlers = handlers;
-		this.connectors = connectors;
+		this.priorityComparator = priorityComparator;
 	}
 
 	/**
@@ -100,7 +87,7 @@ class JettyFactoryImpl implements JettyFactory {
 		} else {
 			threadPool = new QueuedThreadPool();
 		}
-		return new JettyServerImpl(serverModel, bundle, handlers, connectors, threadPool);
+		return new JettyServerImpl(serverModel, bundle, priorityComparator, threadPool);
 	}
 
 	/**
@@ -207,6 +194,12 @@ class JettyFactoryImpl implements JettyFactory {
 
         if (checkForwaredHeaders != null && checkForwaredHeaders) {
             httpConfig.addCustomizer(new ForwardedRequestCustomizer());
+            if (priorityComparator != null) {
+            	@SuppressWarnings("unchecked")
+				Comparator<Customizer> comparator = (Comparator<Customizer>) priorityComparator;
+            	List<Customizer> customizers = httpConfig.getCustomizers();
+            	Collections.sort(customizers, comparator);
+            }
         }
         return httpConfig;
     }
@@ -325,7 +318,8 @@ class JettyFactoryImpl implements JettyFactory {
 												 Boolean validateCerts,
 												 Boolean validatePeerCerts,
 												 Boolean enableOCSP,
-												 String ocspResponderURL) {
+												 String ocspResponderURL,
+												 Boolean checkForwaredHeaders) {
 
 		// SSL Context Factory for HTTPS and SPDY
 		SslContextFactory sslContextFactory = new SslContextFactory();
@@ -415,7 +409,7 @@ class JettyFactoryImpl implements JettyFactory {
 		}
 
 		// HTTP Configuration
-        HttpConfiguration httpConfig = getHttpConfiguration(port, null, server);
+        HttpConfiguration httpConfig = getHttpConfiguration(port, checkForwaredHeaders, server);
 
 		// HTTPS Configuration
 		HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);

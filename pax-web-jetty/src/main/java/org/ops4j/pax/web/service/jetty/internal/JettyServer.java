@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.Map;
 
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
@@ -51,6 +52,8 @@ public interface JettyServer {
 	 * @param connector a secure connector
 	 */
 	void addConnector(Connector connector);
+	
+	void addHandler(Handler handler);
 
 	/**
 	 * Adds a context to jetty server.
@@ -119,6 +122,10 @@ public interface JettyServer {
 	Connector[] getConnectors();
 
 	void removeConnector(Connector connector);
+	
+	Handler[] getHandlers();
+	
+	void removeHandler(Handler handler);
 
 	LifeCycle getContext(ContextModel model);
 
