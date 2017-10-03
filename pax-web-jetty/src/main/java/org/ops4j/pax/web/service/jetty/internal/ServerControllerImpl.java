@@ -17,14 +17,22 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.net.InetSocketAddress;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.servlet.Servlet;
 
+import org.eclipse.jetty.server.ConnectionFactory;
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConfiguration.Customizer;
+import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.ops4j.pax.web.service.spi.Configuration;
@@ -53,16 +61,18 @@ class ServerControllerImpl implements ServerController {
 	private Configuration configuration;
 	private State state;
 	private final JettyFactory jettyFactory;
-	private JettyServer jettyServer;
+	JettyServer jettyServer;
 	private final Set<ServerListener> listeners;
 	private ServerConnector httpConnector;
 	private ServerConnector httpSecureConnector;
+	private final Comparator<?> priorityComparator;
 
-	ServerControllerImpl(final JettyFactory jettyFactory) {
+	ServerControllerImpl(final JettyFactory jettyFactory, Comparator<?> priorityComparator) {
 		this.jettyFactory = jettyFactory;
 		this.configuration = null;
 		this.state = new Unconfigured();
 		this.listeners = new CopyOnWriteArraySet<>();
+		this.priorityComparator = priorityComparator;
 	}
 
 	@Override
@@ -186,6 +196,14 @@ class ServerControllerImpl implements ServerController {
 		state.addContainerInitializerModel(model);
 	}
 
+	public void addCustomizers(Collection<Customizer> customizers) {
+		state.addCustomizers(customizers);
+	}
+
+	public void removeCustomizers(Collection<Customizer> customizers) {
+		state.removeCustomizers(customizers);
+	}
+
 	@Override
 	public Integer getHttpPort() {
 		if (httpConnector != null && httpConnector.isStarted()) {
@@ -260,6 +278,10 @@ class ServerControllerImpl implements ServerController {
 		void removeErrorPage(ErrorPageModel model);
 
 		LifeCycle getContext(ContextModel model);
+		
+		void addCustomizers(Collection<Customizer> customizers);
+		
+		void removeCustomizers(Collection<Customizer> customizers);
 
 	}
 
@@ -364,6 +386,47 @@ class ServerControllerImpl implements ServerController {
 		@Override
 		public void addWelcomeFiles(WelcomeFileModel model) {
 			jettyServer.addWelcomeFiles(model);
+		}
+
+		@Override
+		public void addCustomizers(Collection<Customizer> customizers) {
+			Connector[] connectors = jettyServer.getConnectors();
+			for (Connector connector : connectors) {
+				Collection<ConnectionFactory> connectionFactories = connector.getConnectionFactories();
+				for (ConnectionFactory connectionFactory : connectionFactories) {
+					if (connectionFactory instanceof HttpConnectionFactory) {
+						HttpConnectionFactory httpConnectionFactory = (HttpConnectionFactory) connectionFactory;
+						HttpConfiguration httpConfiguration = httpConnectionFactory.getHttpConfiguration();
+						if (priorityComparator == null) {
+							for (Customizer customizer : customizers) {
+								httpConfiguration.addCustomizer(customizer);
+							}
+						} else {
+    						List<Customizer> httpConfigurationCustomizers = httpConfiguration.getCustomizers();
+    						httpConfigurationCustomizers.addAll(customizers);
+    						@SuppressWarnings("unchecked")
+    						Comparator<Customizer> comparator = (Comparator<Customizer>) priorityComparator;
+    						Collections.sort(httpConfigurationCustomizers, comparator);
+						}
+					}
+				}
+			}
+		}
+
+		@Override
+		public void removeCustomizers(Collection<Customizer> customizers)	{
+			Connector[] connectors = jettyServer.getConnectors();
+			for (Connector connector : connectors) {
+				Collection<ConnectionFactory> connectionFactories = connector.getConnectionFactories();
+				for (ConnectionFactory connectionFactory : connectionFactories) {
+					if (connectionFactory instanceof HttpConnectionFactory) {
+						HttpConnectionFactory httpConnectionFactory = (HttpConnectionFactory) connectionFactory;
+						HttpConfiguration httpConfiguration = httpConnectionFactory.getHttpConfiguration();
+						List<Customizer> httpConfigurationCustomizers = httpConfiguration.getCustomizers();
+						httpConfigurationCustomizers.removeAll(customizers);
+					}
+				}
+			}
 		}
 
 	}
@@ -550,7 +613,8 @@ class ServerControllerImpl implements ServerController {
 											configuration.isValidateCerts(),
 											configuration.isValidatePeerCerts(),
 											configuration.isEnableOCSP(),
-											configuration.getOcspResponderURL());
+											configuration.getOcspResponderURL(),
+											configuration.checkForwardedHeaders());
 							if (httpSecureConnector == null) {
 								httpSecureConnector = (ServerConnector) secureConnector;
 							}
@@ -669,6 +733,16 @@ class ServerControllerImpl implements ServerController {
 		@Override
 		public void addSecurityConstraintMapping(
 				SecurityConstraintMappingModel model) {
+			// do nothing if server is not started
+		}
+
+		@Override
+		public void addCustomizers(Collection<Customizer> customizers) {
+			// do nothing if server is not started
+		}
+
+		@Override
+		public void removeCustomizers(Collection<Customizer> customizers)	{
 			// do nothing if server is not started
 		}
 

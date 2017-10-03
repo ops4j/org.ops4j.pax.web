@@ -66,6 +66,7 @@ public interface JettyFactory {
 									Boolean validateCerts,
 									Boolean validatePeerCerts,
 									Boolean enableOCSP,
-									String ocspResponderURL);
+									String ocspResponderURL,
+									Boolean checkForwaredHeaders);
 
 }
