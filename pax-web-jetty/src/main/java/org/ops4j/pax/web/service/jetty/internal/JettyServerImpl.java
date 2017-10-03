@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.EventListener;
 import java.util.List;
 import java.util.Map;
@@ -85,25 +86,17 @@ class JettyServerImpl implements JettyServer {
 
 	private MBeanContainer mBeanContainer;
 
+	private Comparator<?> priorityComparator;
+	
 	JettyServerImpl(final ServerModel serverModel, Bundle bundle) {
-		this(serverModel, bundle, null, null, new QueuedThreadPool());
+		this(serverModel, bundle, null, null);
 	}
 
-	JettyServerImpl(final ServerModel serverModel, Bundle bundle, List<Handler> handlers, List<Connector> connectors, ThreadPool threadPool) {
+	public JettyServerImpl(final ServerModel serverModel, Bundle bundle, Comparator<?> priorityComparator, ThreadPool threadPool) {
 		server = new JettyServerWrapper(serverModel, threadPool);
 
 		this.bundle = bundle;
-
-		if (connectors != null) {
-			for (Connector connector : connectors) {
-				server.addConnector(connector);
-			}
-		}
-		if (handlers != null) {
-			for (Handler handler : handlers) {
-				((HandlerCollection) server.getHandler()).addHandler(handler);
-			}
-		}
+		this.priorityComparator = priorityComparator;
 	}
 
 	@Override
@@ -256,6 +249,12 @@ class JettyServerImpl implements JettyServer {
 						: ((ServerConnector) connector).getHost(),
 				((ServerConnector) connector).getPort());
 		server.addConnector(connector);
+		if (priorityComparator != null) {
+			Connector[] connectors = server.getConnectors();
+			@SuppressWarnings("unchecked")
+			Comparator<Connector> comparator = (Comparator<Connector>) priorityComparator;
+			Arrays.sort(connectors, comparator);
+		}
 	}
 
 	@Override
@@ -270,6 +269,28 @@ class JettyServerImpl implements JettyServer {
 						: ((ServerConnector) connector).getHost(),
 				((ServerConnector) connector).getPort());
 		server.removeConnector(connector);
+	}
+	
+	@Override
+	public void addHandler(Handler handler) {
+		HandlerCollection handlerCollection = (HandlerCollection) server.getHandler();
+		handlerCollection.addHandler(handler);
+		if (priorityComparator != null) {
+			Handler[] handlers = handlerCollection.getHandlers();
+			@SuppressWarnings("unchecked")
+			Comparator<Handler> comparator = (Comparator<Handler>) priorityComparator;
+			Arrays.sort(handlers, comparator);
+		}
+	}
+
+	@Override
+	public Handler[] getHandlers() {
+		return ((HandlerCollection) server.getHandler()).getHandlers();
+	}
+
+	@Override
+	public void removeHandler(Handler handler) {
+		((HandlerCollection) server.getHandler()).removeHandler(handler);
 	}
 
 	@Override
