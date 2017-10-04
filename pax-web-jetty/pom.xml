@@ -59,6 +59,7 @@
 							org.ops4j.pax.web.jsp; version="${pax-web.osgi.version}"; resolution:=optional,
 							org.apache.jasper.servlet; resolution:=optional,
 							org.apache.commons.logging,
+							javax.annotation; version="[1.2,2)"; resolution:=optional,
 							javax.management.*; resolution:=optional,
 							javax.security.auth,
 							javax.security.auth.callback,
