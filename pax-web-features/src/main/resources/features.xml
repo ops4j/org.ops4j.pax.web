@@ -110,14 +110,14 @@
 
     <feature name="pax-http" version="${project.version}" description="Implementation of the OSGI HTTP Service">
         <details>Allows to publish servlets using pax web and jetty</details>
-        <feature dependency="true" version="[6.1,6.2)">pax-http-jetty</feature>
+        <feature dependency="true" version="[7.0,7.1)">pax-http-jetty</feature>
         <requirement>
             pax.http.provider
         </requirement>
     </feature>
 
     <feature name="pax-http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}">
-        <feature version="[6.1,6.2)">pax-http</feature>
+        <feature version="[7.0,7.1)">pax-http</feature>
         <bundle dependency="true" start-level="30">mvn:${dependency.jdt.groupId}/${dependency.jdt.artifactId}/${dependency.jdt.version}</bundle>
         <bundle start-level="30" dependency="true">mvn:javax.el/javax.el-api/${dependency.el-api.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
@@ -134,7 +134,7 @@
         <config name="org.ops4j.pax.url.war">
             org.ops4j.pax.url.war.importPaxLoggingPackages=true
         </config>
-        <feature version="[6.1,6.2)">pax-http-whiteboard</feature>
+        <feature version="[7.0,7.1)">pax-http-whiteboard</feature>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-descriptor/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-war/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${project.version}</bundle>
@@ -151,7 +151,7 @@
             javax.servlet.context.tempdir=${karaf.data}/pax-web-jsp
         </config>
         <feature>scr</feature>
-        <feature version="[6.1,6.2)">pax-http</feature>
+        <feature version="[7.0,7.1)">pax-http</feature>
         <bundle dependency="true" start-level="30">mvn:javax.el/javax.el-api/3.0.0</bundle>
         <bundle dependency="true" start-level="30">mvn:javax.security.auth.message/javax.security.auth.message-api/${dependency.jaspic.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.tomcat-embed-core/${tipi.tomcat.version}</bundle>
@@ -199,12 +199,12 @@
     </feature>
 
     <feature name="pax-war-tomcat" version="${project.version}">
-        <feature version="[6.1,6.2)">pax-http-tomcat</feature>
-        <feature version="[6.1,6.2)">pax-war</feature>
+        <feature version="[7.0,7.1)">pax-http-tomcat</feature>
+        <feature version="[7.0,7.1)">pax-war</feature>
     </feature>
 
     <feature name="pax-jsf-support" version="${project.version}">
-        <feature version="[6.1,6.2)">pax-war</feature>
+        <feature version="[7.0,7.1)">pax-war</feature>
         <feature>pax-cdi-web-openwebbeans</feature>
         <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr250-1.0/${servicemix.specs.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr303-api-1.0.0/${servicemix.specs.version}</bundle>
@@ -222,7 +222,7 @@
     </feature>
 
     <feature name="pax-jsf-resources-support" description="Provide sharing of resources according to Servlet 3.0 for OSGi bundles and JSF" version="${project.version}">
-        <feature version="[6.1,6.2)">pax-jsf-support</feature>
+        <feature version="[7.0,7.1)">pax-jsf-support</feature>
         <bundle dependency="true">mvn:org.ops4j.pax.web/pax-web-resources-extender/${project.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-resources-jsf/${project.version}</bundle>
     </feature>
@@ -253,7 +253,7 @@
         </config>
         <feature>scr</feature>
         <feature>undertow</feature>
-        <feature version="[6.1,6.2)">pax-http</feature>
+        <feature version="[7.0,7.1)">pax-http</feature>
 
         <bundle dependency="true">mvn:org.ow2.asm/asm-all/${dependency.asm.version}</bundle>
         <bundle dependency="true">mvn:org.apache.xbean/xbean-bundleutils/${dependency.xbean.version}</bundle>
