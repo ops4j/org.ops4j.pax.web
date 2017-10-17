@@ -392,7 +392,11 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 			info.addMappings(servlet.getUrlPatterns());
 			defaultServletAdded = servlet.getUrlPatterns() != null
 					&& Arrays.stream(servlet.getUrlPatterns()).anyMatch("/"::equals);
-			info.setAsyncSupported(servlet.getAsyncSupported() != null ? servlet.getAsyncSupported() : false);
+                        if (Boolean.valueOf(servlet.getInitParams().get("async-supported"))) {
+ 			    info.setAsyncSupported(true);
+ 			} else {
+ 			    info.setAsyncSupported(servlet.getAsyncSupported() != null ? servlet.getAsyncSupported() : false);
+ 			}
 			info.setLoadOnStartup(servlet.getLoadOnStartup() != null ? servlet.getLoadOnStartup() : -1);
 			deployment.addServlet(info);
 		}
