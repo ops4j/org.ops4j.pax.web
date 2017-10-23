@@ -265,6 +265,12 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
 		<!-- Test dependencies (not transitive) -->
 		<dependency>
 			<groupId>junit</groupId>
