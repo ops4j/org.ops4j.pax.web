@@ -58,10 +58,10 @@ public class HttpServiceIntegrationTest /*extends ITestBase*/ {
 				mavenBundle().groupId("javax.servlet").artifactId("javax.servlet-api").version("3.1.0"),
 				mavenBundle("org.osgi", "org.osgi.compendium", "5.0.0"),
 
-				mavenBundle().groupId("org.apache.xbean").artifactId("xbean-reflect").version("4.1"),
-				mavenBundle().groupId("org.apache.xbean").artifactId("xbean-finder").version("4.1"),
-				mavenBundle().groupId("org.apache.xbean").artifactId("xbean-bundleutils").version("4.1"),
-				mavenBundle().groupId("org.ow2.asm").artifactId("asm-all").version("5.0.2"),
+				mavenBundle().groupId("org.apache.xbean").artifactId("xbean-reflect").version("4.6-SNAPSHOT"),
+				mavenBundle().groupId("org.apache.xbean").artifactId("xbean-finder").version("4.6-SNAPSHOT"),
+				mavenBundle().groupId("org.apache.xbean").artifactId("xbean-bundleutils").version("4.6-SNAPSHOT"),
+				mavenBundle().groupId("org.ow2.asm").artifactId("asm").version("6.0"),
 
 				mavenBundle().groupId("org.ops4j.pax.logging").artifactId("pax-logging-service").version("1.7.4"),
 				mavenBundle().groupId("org.ops4j.pax.logging").artifactId("pax-logging-api").version("1.7.4"),

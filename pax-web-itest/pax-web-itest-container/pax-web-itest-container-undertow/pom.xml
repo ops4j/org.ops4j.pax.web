@@ -556,7 +556,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.ow2.asm</groupId>
-			<artifactId>asm-all</artifactId>
+			<artifactId>asm</artifactId>
 			<scope>test</scope>
 		</dependency>
 

@@ -59,6 +59,7 @@
 							javax.servlet.*; version="[2.3.0,4.0.0)",
 							javax.websocket.*; resolution:=optional,
 							io.undertow;version="[1.2,2)",
+							io.undertow.connector;version="[1.2,2)",
 							io.undertow.io;version="[1.2,2)",
 							io.undertow.security.idm;version="[1.2,2)",
 							io.undertow.server;version="[1.2,2)",

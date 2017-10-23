@@ -225,8 +225,8 @@ public class TestConfiguration {
 				// needed by pax-cdi-web-openwebbeans
 				mavenBundle("org.apache.geronimo.specs", "geronimo-jsp_2.2_spec", "1.2"),
 
-				mavenBundle("org.apache.xbean", "xbean-asm5-shaded", "4.1"), //
-				mavenBundle("org.apache.xbean", "xbean-finder-shaded", "4.1"), //
+				mavenBundle("org.apache.xbean", "xbean-asm6-shaded", "4.6-SNAPSHOT"), //
+				mavenBundle("org.apache.xbean", "xbean-finder-shaded", "4.6-SNAPSHOT"), //
 				//mavenBundle("org.slf4j", "jul-to-slf4j").versionAsInProject(),
 				mavenBundle("org.apache.geronimo.specs", "geronimo-jta_1.1_spec", "1.1.1"),
 				mavenBundle("javax.validation", "validation-api", "1.1.0.Final"),
