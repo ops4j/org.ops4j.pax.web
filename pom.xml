@@ -99,7 +99,7 @@
 	</developers>
 
 	<properties>
-		<dependency.asm.version>5.0.4</dependency.asm.version>
+		<dependency.asm.version>6.0</dependency.asm.version>
 		<dependency.atinject.version>1.0</dependency.atinject.version>
 		<dependency.base.version>1.5.0</dependency.base.version>
 		<dependency.bndlib.version>2.4.0</dependency.bndlib.version>
@@ -129,7 +129,7 @@
 		<dependency.scr.version>2.0.6</dependency.scr.version>
 		<dependency.swissbox.version>1.8.2</dependency.swissbox.version>
 		<dependency.tomcat.version>8.5.20</dependency.tomcat.version>
-		<dependency.xbean.version>4.1</dependency.xbean.version>
+		<dependency.xbean.version>4.6</dependency.xbean.version>
 		<dependency.xnio-api.version>3.3.6.1</dependency.xnio-api.version>
 		<dependency.xnio.version>3.3.6.1</dependency.xnio.version>
 		<dependency.undertow-core.version>1.3.25.1</dependency.undertow-core.version>
@@ -145,7 +145,7 @@
 
 		<dependency.junit.version>4.11</dependency.junit.version>
 
-		<aries.spifly.version>1.0.2</aries.spifly.version>
+		<aries.spifly.version>1.0.10</aries.spifly.version>
 		<aries.util.version>1.1.0</aries.util.version>
 
 
@@ -836,7 +836,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ow2.asm</groupId>
-				<artifactId>asm-all</artifactId>
+				<artifactId>asm</artifactId>
 				<version>${dependency.asm.version}</version>
 			</dependency>
 

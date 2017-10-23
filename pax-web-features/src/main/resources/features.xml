@@ -25,7 +25,11 @@
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
 		<bundle dependency="true" start-level="30">mvn:javax.annotation/javax.annotation-api/${javax.annotation.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jaspic_1.0_spec/${geronimo.jaspic-spec.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm-all/${dependency.asm.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm/${dependency.asm.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm-util/${dependency.asm.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm-tree/${dependency.asm.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm-analysis/${dependency.asm.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm-commons/${dependency.asm.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.aries.spifly/org.apache.aries.spifly.dynamic.bundle/${aries.spifly.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-continuation/${dependency.jetty.version}</bundle>
@@ -94,7 +98,11 @@
         <feature>scr</feature>
         <feature version="[9.3,10.0)">pax-jetty</feature>
 
-        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-all/${dependency.asm.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm/${dependency.asm.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-util/${dependency.asm.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-tree/${dependency.asm.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-analysis/${dependency.asm.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-commons/${dependency.asm.version}</bundle>
         <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-bundleutils/${dependency.xbean.version}</bundle>
         <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-reflect/${dependency.xbean.version}</bundle>
         <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-finder/${dependency.xbean.version}</bundle>
@@ -182,7 +190,11 @@
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-annotation_1.1_spec/1.0.1</bundle>
         <bundle dependency="true" start-level="30">mvn:javax.websocket/javax.websocket-api/${dependency.websocket.version}</bundle>
 
-        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-all/${dependency.asm.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm/${dependency.asm.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-util/${dependency.asm.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-tree/${dependency.asm.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-analysis/${dependency.asm.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-commons/${dependency.asm.version}</bundle>
         <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-bundleutils/${dependency.xbean.version}</bundle>
         <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-reflect/${dependency.xbean.version}</bundle>
         <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-finder/${dependency.xbean.version}</bundle>
@@ -258,7 +270,11 @@
         <feature>undertow</feature>
         <feature version="[6.1,6.2)">pax-http</feature>
 
-        <bundle dependency="true">mvn:org.ow2.asm/asm-all/${dependency.asm.version}</bundle>
+        <bundle dependency="true">mvn:org.ow2.asm/asm/${dependency.asm.version}</bundle>
+        <bundle dependency="true">mvn:org.ow2.asm/asm-util/${dependency.asm.version}</bundle>
+        <bundle dependency="true">mvn:org.ow2.asm/asm-tree/${dependency.asm.version}</bundle>
+        <bundle dependency="true">mvn:org.ow2.asm/asm-analysis/${dependency.asm.version}</bundle>
+        <bundle dependency="true">mvn:org.ow2.asm/asm-commons/${dependency.asm.version}</bundle>
         <bundle dependency="true">mvn:org.apache.xbean/xbean-bundleutils/${dependency.xbean.version}</bundle>
         <bundle dependency="true">mvn:org.apache.xbean/xbean-reflect/${dependency.xbean.version}</bundle>
         <bundle dependency="true">mvn:org.apache.xbean/xbean-finder/${dependency.xbean.version}</bundle>
