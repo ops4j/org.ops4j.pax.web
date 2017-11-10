@@ -55,6 +55,7 @@ public class WhiteboardR7JaxRsIntegrationTest extends ITestBase {
         );
     }
 
+    @Ignore(value = "PAXWEB-1116 needed")
     @Test
     public void testWhiteboardJaxRsApplication() throws Exception {
         HttpTestClientFactory.createDefaultTestClient()

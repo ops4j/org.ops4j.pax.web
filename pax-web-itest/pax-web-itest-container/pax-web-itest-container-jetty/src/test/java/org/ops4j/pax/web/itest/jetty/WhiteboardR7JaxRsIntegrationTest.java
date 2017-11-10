@@ -18,6 +18,7 @@ package org.ops4j.pax.web.itest.jetty;
 import static org.ops4j.pax.exam.CoreOptions.*;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -51,6 +52,7 @@ public class WhiteboardR7JaxRsIntegrationTest extends ITestBase {
         );
     }
 
+    @Ignore(value = "PAXWEB-1116 needed")
     @Test
     public void testWhiteboardJaxRsApplication() throws Exception {
         HttpTestClientFactory.createDefaultTestClient()
