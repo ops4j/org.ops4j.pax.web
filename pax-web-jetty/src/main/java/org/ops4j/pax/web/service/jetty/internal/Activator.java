@@ -17,15 +17,19 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Hashtable;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.HttpConfiguration.Customizer;
 import org.eclipse.jetty.util.thread.ShutdownThread;
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.wiring.BundleWiring;
@@ -40,11 +44,31 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  */
 public class Activator implements BundleActivator {
 
+	private static class PriorityComparator implements Comparator<Object> {
+
+		@Override
+		public int compare(Object element1, Object element2)
+		{
+			Integer comparison = 0;
+			if (element1 != element2) {
+				comparison = null;
+				for (Object element : Arrays.asList(element1, element2)) {
+					javax.annotation.Priority annotation = element.getClass().getAnnotation(javax.annotation.Priority.class);
+					int priority = annotation == null ? 0 : annotation.value();
+					comparison = comparison == null ? priority : comparison - priority; 
+				}
+			}
+			return comparison;
+		}
+		
+	}
+	
 	@SuppressWarnings("rawtypes")
 	private ServiceRegistration registration;
 	private ServiceTracker<Handler, Handler> handlerTracker;
 	private BundleContext bundleContext;
 	private ServiceTracker<Connector, Connector> connectorTracker;
+	private ServiceTracker<Customizer, Customizer> customizerTracker;
 	private ServerControllerFactoryImpl serverControllerFactory;
 
 	@Override
@@ -58,13 +82,25 @@ public class Activator implements BundleActivator {
 			}
 		}
 
-		serverControllerFactory = new ServerControllerFactoryImpl(bundleContext.getBundle());
+
+		Bundle bundle = bundleContext.getBundle();
+		Comparator<?> comparator;
+		try {
+			bundle.loadClass("javax.annotation.Priority");
+			comparator = new PriorityComparator();
+		} catch (ClassNotFoundException e) {
+			comparator = null;
+		}
+		serverControllerFactory = new ServerControllerFactoryImpl(bundle, comparator);
 
 		handlerTracker = new ServiceTracker<>(bundleContext, Handler.class, new HandlerCustomizer());
 		handlerTracker.open();
 
 		connectorTracker = new ServiceTracker<>(bundleContext, Connector.class, new ConnectorCustomizer());
 		connectorTracker.open();
+		
+		customizerTracker = new ServiceTracker<>(bundleContext, Customizer.class, new CustomizerCustomizer());
+		customizerTracker.open();
 
 		registration = bundleContext.registerService(
 				ServerControllerFactory.class,
@@ -79,6 +115,9 @@ public class Activator implements BundleActivator {
 		} catch (IllegalStateException e) {
 			// bundle context has already been invalidated ?
 		}
+		connectorTracker.close();
+		handlerTracker.close();
+		customizerTracker.close();
 	}
 
 	private class HandlerCustomizer implements ServiceTrackerCustomizer<Handler, Handler> {
@@ -86,19 +125,8 @@ public class Activator implements BundleActivator {
 		@Override
 		public Handler addingService(ServiceReference<Handler> reference) {
 			Handler handler = bundleContext.getService(reference);
-
-			//add handler to factory and restart. 
-			if (registration != null) {
-				registration.unregister();
-			}
-
-			serverControllerFactory.addHandler(handler);
-
-
-			registration = bundleContext.registerService(
-					ServerControllerFactory.class,
-					serverControllerFactory,
-					new Hashtable<>());
+			Integer ranking = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
+			serverControllerFactory.addHandler(handler, ranking == null ? 0 : ranking);
 
 			return handler;
 		}
@@ -113,18 +141,7 @@ public class Activator implements BundleActivator {
 			// What ever happens: We un-get the service first
 			bundleContext.ungetService(reference);
 			try {
-				// remove handler from factory and restart it. 
-				if (registration != null) {
-					registration.unregister();
-				}
-
 				serverControllerFactory.removeHandler(handler);
-
-
-				registration = bundleContext.registerService(
-						ServerControllerFactory.class,
-						serverControllerFactory,
-						new Hashtable<>());
 			} catch (NoClassDefFoundError e) {
 				// we should never go here, but if this happens silently ignore it
 			}
@@ -142,8 +159,8 @@ public class Activator implements BundleActivator {
 			if (registration != null) {
 				registration.unregister();
 			}
-
-			serverControllerFactory.addConnector(connector);
+			Integer ranking = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
+			serverControllerFactory.addConnector(connector, ranking == null ? 0 : ranking);
 
 
 			registration = bundleContext.registerService(
@@ -176,6 +193,37 @@ public class Activator implements BundleActivator {
 						ServerControllerFactory.class,
 						serverControllerFactory,
 						new Hashtable<>());
+			} catch (NoClassDefFoundError e) {
+				// we should never go here, but if this happens silently ignore it
+			}
+		}
+
+	}
+	
+	private class CustomizerCustomizer implements ServiceTrackerCustomizer<Customizer, Customizer> {
+
+		@Override
+		public Customizer addingService(ServiceReference<Customizer> reference) {
+			Customizer customizer = bundleContext.getService(reference);
+			Integer ranking = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
+			serverControllerFactory.addCustomizer(customizer, ranking == null ? 0 : ranking);
+
+			return customizer;
+		}
+
+		@Override
+		public void modifiedService(ServiceReference<Customizer> reference, Customizer service) {
+			// ignore
+		}
+
+		@Override
+		public void removedService(ServiceReference<Customizer> reference, Customizer customizer) {
+			// What ever happens: We un-get the service first
+			bundleContext.ungetService(reference);
+			try {
+
+				serverControllerFactory.removeCustomizer(customizer);
+				
 			} catch (NoClassDefFoundError e) {
 				// we should never go here, but if this happens silently ignore it
 			}
