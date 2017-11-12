@@ -110,7 +110,7 @@ public class ServletContainerInitializerScanner {
 										.findAnnotatedClasses((Class<? extends Annotation>) klass);
 								setOfClasses.addAll(annotatedClasses);
 							} catch (Exception e) {
-								log.warn("Failed to find annotated classes for ServletContainerInitializer", e);
+								log.warn("Failed to find annotated classes for ServletContainerInitializer");
 							}
 						} else if (isInteraface) {
 							BundleAssignableClassFinder basf = new BundleAssignableClassFinder(
