@@ -351,9 +351,18 @@ class JettyServerImpl implements JettyServer {
 					// to avoid NPE in org.apache.felix.framework.BundleWiringImpl.searchImports()
 					ServerConnector.class.getClassLoader().loadClass("org.eclipse.jetty.util.FutureCallback");
 					// load some other required classes
-					QueuedThreadPool.class.getClassLoader().loadClass("org.eclipse.jetty.util.thread.QueuedThreadPool$1");
-					QueuedThreadPool.class.getClassLoader().loadClass("org.eclipse.jetty.util.thread.QueuedThreadPool$2");
-					QueuedThreadPool.class.getClassLoader().loadClass("org.eclipse.jetty.util.thread.QueuedThreadPool$3");
+					try {
+						QueuedThreadPool.class.getClassLoader().loadClass("org.eclipse.jetty.util.thread.QueuedThreadPool$1");
+					} catch (java.lang.Exception exception) {
+					}
+					try {
+						QueuedThreadPool.class.getClassLoader().loadClass("org.eclipse.jetty.util.thread.QueuedThreadPool$2");
+					} catch (java.lang.Exception exception) {
+					}
+					try {
+						QueuedThreadPool.class.getClassLoader().loadClass("org.eclipse.jetty.util.thread.QueuedThreadPool$3");
+					} catch (java.lang.Exception exception) {
+					}
 				} finally {
 					Thread.currentThread().setContextClassLoader(loader);
 				}
