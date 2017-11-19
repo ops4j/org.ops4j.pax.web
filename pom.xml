@@ -563,6 +563,11 @@
 				<version>${dependency.jetty.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-continuation</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.tomcat</groupId>
 				<artifactId>jasper</artifactId>
 				<version>${dependency.jasper.version}</version>
