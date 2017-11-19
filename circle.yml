@@ -5,3 +5,18 @@ machine:
     version: oraclejdk8
   environment:
     _JAVA_OPTIONS: "-Xms512m -Xmx2048m"
+
+dependencies:
+  override:
+    # https://issues.apache.org/jira/browse/MDEP-516
+    # alternative, just: mvn -B dependency:resolve-plugins
+    - mvn --fail-never dependency:go-offline || true
+
+test:
+  override:
+    # CircleCI's default phase 'integration-test' is not sufficient
+    - mvn install
+  post:
+    - mkdir -p $CIRCLE_TEST_REPORTS/junit/
+    - find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
+    
