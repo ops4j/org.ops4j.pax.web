@@ -169,9 +169,6 @@ public class HttpServiceContext extends StandardContext {
 		 * Delegate to http context in case that the http context is an
 		 * {@link WebContainerContext}. {@inheritDoc}
 		 */
-		@SuppressWarnings("unchecked")
-		// Cannot remove this warning as it is an issue with the
-		// javax.servlet.ServletContext interface
 		@Override
 		public Set<String> getResourcePaths(final String path) {
 			if (LOG.isDebugEnabled()) {
