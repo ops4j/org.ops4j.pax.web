@@ -33,11 +33,14 @@ import javax.servlet.ServletContainerInitializer;
 import org.apache.catalina.AccessLog;
 import org.apache.catalina.Container;
 import org.apache.catalina.Context;
+import org.apache.catalina.Engine;
+import org.apache.catalina.Host;
 import org.apache.catalina.Server;
 import org.apache.catalina.Service;
 import org.apache.catalina.Valve;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.ContainerBase;
+import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.startup.Catalina;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.valves.AccessLogValve;
@@ -545,13 +548,26 @@ public class EmbeddedTomcat extends Tomcat {
 		return ctx;
 	}
 
-	public String generateContextName(String contextName,
-									  HttpContext httpContext) {
+	public String generateContextName(String contextName, HttpContext httpContext) {
+		String contextId;
+		if (httpContext instanceof WebContainerContext) {
+			contextId = ((WebContainerContext) httpContext).getContextId();
+		} else {
+			contextId = null;
+		}
 		String name;
 		if (contextName != null) {
-			name = "[" + contextName + "]-" + httpContext.getClass().getName();
+			if (contextId != null) {
+				name = "[" + contextName + "]-" + contextId;
+			} else {
+				name = "[" + contextName + "]";
+			}
 		} else {
-			name = "[]-" + httpContext.getClass().getName();
+			if (contextId != null) {
+				name = "[]-" + contextId;
+			} else {
+				name = "[]";
+			}
 		}
 		return name;
 	}
@@ -573,4 +589,21 @@ public class EmbeddedTomcat extends Tomcat {
 		LOG.warn(base);
 	}
 
+	@Override
+	public Host getHost() {
+		Engine engine = getEngine();
+		if (engine.findChildren().length > 0) {
+			return (Host) engine.findChildren()[0];
+		}
+		Host host = new StandardHost();
+		/*
+		 * This is almost a copy of super.getHost(), but if (and only if) a new host is created,
+		 * we need to set a new Basic Valve, that changes the dispatch logic
+		 */
+		Valve contextSelect = new ContextSelectionHostValve(host.getPipeline().getBasic(), getService().getMapper());
+		host.getPipeline().setBasic(contextSelect);
+		host.setName(hostname);
+		getEngine().addChild(host);
+		return host;
+	}
 }
