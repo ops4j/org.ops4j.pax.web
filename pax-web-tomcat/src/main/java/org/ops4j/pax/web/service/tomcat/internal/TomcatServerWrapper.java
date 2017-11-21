@@ -747,9 +747,13 @@ class TomcatServerWrapper implements ServerWrapper {
 		context.removeLifecycleListener(filterLifecycleListener);
 
 		FilterDef findFilterDef = context.findFilterDef(filterModel.getName());
-		LOG.info("removing ServletFilter with name: {}", filterModel.getName());
-		context.removeFilterDef(findFilterDef);
-		LOG.info("filterDefs now contain: {}", context.findFilterDefs());
+		if (findFilterDef == null) {
+			LOG.warn("no ServletFilter with name: {}", filterModel.getName());
+		} else {
+			LOG.info("removing ServletFilter with name: {}", filterModel.getName());
+			context.removeFilterDef(findFilterDef);
+		}
+		LOG.info("filterDefs now contains {} filters", context.findFilterDefs().length);
 		FilterMap[] filterMaps = context.findFilterMaps();
 		for (FilterMap filterMap : filterMaps) {
 			if (filterMap.getFilterName().equalsIgnoreCase(
