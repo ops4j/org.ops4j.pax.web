@@ -17,7 +17,6 @@ package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -106,7 +105,6 @@ public class WhiteboardServletAnnotatedIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore
 	public void testWhiteboardFilterRegistration() throws Exception {
 
 		initServletListener();
