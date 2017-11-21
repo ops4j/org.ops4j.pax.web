@@ -33,6 +33,7 @@ public class ServiceValve extends ValveBase {
 	private HttpContext httpContext;
 
 	public ServiceValve(HttpContext httpContext) {
+		super(true);
 		this.httpContext = httpContext;
 	}
 
