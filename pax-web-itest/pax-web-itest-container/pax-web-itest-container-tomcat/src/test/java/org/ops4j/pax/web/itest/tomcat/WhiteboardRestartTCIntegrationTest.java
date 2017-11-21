@@ -17,7 +17,6 @@ package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -78,7 +77,6 @@ public class WhiteboardRestartTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore("Failing for duplicate Context - PAXWEB-597")
 	public void testWhiteBoardSlash() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Welcome to the Welcome page'",
@@ -87,7 +85,6 @@ public class WhiteboardRestartTCIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore("Failing for duplicate context - PAXWEB-597")
 	public void testWhiteBoardForbidden() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(401)
