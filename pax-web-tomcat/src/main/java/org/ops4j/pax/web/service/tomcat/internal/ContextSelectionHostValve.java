@@ -36,6 +36,7 @@ public class ContextSelectionHostValve extends ValveBase {
 	Mapper mapper;
 
 	public ContextSelectionHostValve(Valve standardHostValve, Mapper mapper) {
+		super(true);
 		this.standardHostValve = standardHostValve;
 		this.mapper = mapper;
 	}
