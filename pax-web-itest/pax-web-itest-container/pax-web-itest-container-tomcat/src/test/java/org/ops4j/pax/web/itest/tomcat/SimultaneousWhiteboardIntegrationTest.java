@@ -16,6 +16,7 @@
 package org.ops4j.pax.web.itest.tomcat;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -39,6 +40,7 @@ import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
  * @since Mar 3, 2009
  */
 @RunWith(PaxExam.class)
+@Ignore
 public class SimultaneousWhiteboardIntegrationTest extends ITestBase {
 
 	@Configuration
