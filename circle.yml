@@ -10,12 +10,12 @@ dependencies:
   override:
     # https://issues.apache.org/jira/browse/MDEP-516
     # alternative, just: mvn -B dependency:resolve-plugins
-    - mvn -DskipTests clean install dependency:resolve-plugins dependency:go-offline
+    - mvn -DskipTests clean install dependency:resolve-plugins dependency:go-offline -Pjetty,tomcat,undertow
 
 test:
   override:
     # CircleCI's default phase 'integration-test' is not sufficient
-    - mvn -o surefire:test
+    - mvn -o test
   post:
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
