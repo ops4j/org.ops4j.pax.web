@@ -19,7 +19,7 @@ dependencies:
 test:
   override:
     # CircleCI's default phase 'integration-test' is not sufficient
-    - mvn surefire:test failsafe:integration-test
+    - mvn surefire:test failsafe:verify
   post:
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
