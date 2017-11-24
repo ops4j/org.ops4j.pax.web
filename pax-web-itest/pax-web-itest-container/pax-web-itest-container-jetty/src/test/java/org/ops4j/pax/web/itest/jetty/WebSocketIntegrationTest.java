@@ -15,29 +15,22 @@
  */
 package org.ops4j.pax.web.itest.jetty;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.OptionUtils.combine;
+
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
-import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
-import org.osgi.framework.BundleException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.OptionUtils.combine;
+import org.ops4j.pax.web.itest.common.AbstractWebSocketIntegrationTest;
 
 
 /**
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
-public class WebSocketIntegrationTest extends ITestBase {
-
-	private static final Logger LOG = LoggerFactory.getLogger(WebSocketIntegrationTest.class);
+public class WebSocketIntegrationTest extends AbstractWebSocketIntegrationTest {
 
 	@Configuration
 	public static Option[] configure() {
@@ -50,24 +43,4 @@ public class WebSocketIntegrationTest extends ITestBase {
 				mavenBundle().groupId("javax.json")
 						.artifactId("javax.json-api").versionAsInProject());
 	}
-
-	@Before
-	public void setUp() throws BundleException, InterruptedException {
-		initWebListener();
-		waitForWebListener();
-	}
-
-
-	@Test
-	public void testWebsocket() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'Chatroom'",
-						resp -> resp.contains("Chatroom"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/websocket/index.html");
-
-		HttpTestClientFactory.createDefaultTestClient()
-				.doGETandExecuteTest("http://127.0.0.1:8181/websocket/resource/js/jquery-1.10.2.min.js");
-	}
-
 }
-

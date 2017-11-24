@@ -47,26 +47,24 @@ public class ManifestIntegrationTest {
 				+ VersionUtil.getProjectVersion() + ".jar");
 		Assert.assertTrue("File exists: " + file, file.exists());
 
-		ClassLoader classLoader = new URLClassLoader(new URL[]{file.toURI()
-				.toURL()});
-		Enumeration<URL> resources = classLoader
-				.getResources(JarFile.MANIFEST_NAME);
-		Assert.assertTrue("Manifest entry found", resources.hasMoreElements());
-		while (resources.hasMoreElements()) {
-			Manifest manifest = null;
-			URL url = null;
-			//CHECKSTYLE:OFF
-			try {
-				url = resources.nextElement();
-				LOG.debug("Found URL: {}", url);
-				manifest = new Manifest(url.openStream());
-				Assert.assertNotNull("Manifest not null", manifest);
-			} catch (Throwable t) {
-				Assert.fail("Caught Exception " + t.getMessage()
-						+ " on manifest: " + manifest + " and URL: " + url);
-			}
-			//CHECKSTYLE:ON
-		}
+        try (URLClassLoader classLoader = new URLClassLoader(new URL[] { file.toURI().toURL() })) {
+            Enumeration<URL> resources = classLoader.getResources(JarFile.MANIFEST_NAME);
+            Assert.assertTrue("Manifest entry found", resources.hasMoreElements());
+            while (resources.hasMoreElements()) {
+                Manifest manifest = null;
+                URL url = null;
+                //CHECKSTYLE:OFF
+                try {
+                    url = resources.nextElement();
+                    LOG.debug("Found URL: {}", url);
+                    manifest = new Manifest(url.openStream());
+                    Assert.assertNotNull("Manifest not null", manifest);
+                } catch (Throwable t) {
+                    Assert.fail("Caught Exception " + t.getMessage() + " on manifest: " + manifest + " and URL: " + url);
+                }
+                //CHECKSTYLE:ON
+            }
+        }
 	}
 
 	@Test
@@ -79,16 +77,15 @@ public class ManifestIntegrationTest {
 				+ "/pax-web-jetty-" + VersionUtil.getProjectVersion() + ".jar");
 		Assert.assertTrue("File exists: " + file, file.exists());
 
-		ClassLoader classLoader = new URLClassLoader(new URL[]{file.toURI()
-				.toURL()});
-		Enumeration<URL> resources = classLoader
-				.getResources(JarFile.MANIFEST_NAME);
-		Assert.assertTrue("Manifest entry found", resources.hasMoreElements());
-		while (resources.hasMoreElements()) {
-			URL url = resources.nextElement();
-			Manifest manifest = new Manifest(url.openStream());
-			Assert.assertNotNull("Manifest not null", manifest);
-		}
+        try (URLClassLoader classLoader = new URLClassLoader(new URL[] { file.toURI().toURL() })) {
+            Enumeration<URL> resources = classLoader.getResources(JarFile.MANIFEST_NAME);
+            Assert.assertTrue("Manifest entry found", resources.hasMoreElements());
+            while (resources.hasMoreElements()) {
+                URL url = resources.nextElement();
+                Manifest manifest = new Manifest(url.openStream());
+                Assert.assertNotNull("Manifest not null", manifest);
+            }
+        }
 	}
 
 	@Test
@@ -101,15 +98,14 @@ public class ManifestIntegrationTest {
 				+ "/pax-web-jsp-" + VersionUtil.getProjectVersion() + ".jar");
 		Assert.assertTrue("File exists: " + file, file.exists());
 
-		ClassLoader classLoader = new URLClassLoader(new URL[]{file.toURI()
-				.toURL()});
-		Enumeration<URL> resources = classLoader
-				.getResources(JarFile.MANIFEST_NAME);
-		Assert.assertTrue("Manifest entry found", resources.hasMoreElements());
-		while (resources.hasMoreElements()) {
-			URL url = resources.nextElement();
-			Manifest manifest = new Manifest(url.openStream());
-			Assert.assertNotNull("Manifest not null", manifest);
-		}
+        try (URLClassLoader classLoader = new URLClassLoader(new URL[] { file.toURI().toURL() })) {
+            Enumeration<URL> resources = classLoader.getResources(JarFile.MANIFEST_NAME);
+            Assert.assertTrue("Manifest entry found", resources.hasMoreElements());
+            while (resources.hasMoreElements()) {
+                URL url = resources.nextElement();
+                Manifest manifest = new Manifest(url.openStream());
+                Assert.assertNotNull("Manifest not null", manifest);
+            }
+        }
 	}
 }

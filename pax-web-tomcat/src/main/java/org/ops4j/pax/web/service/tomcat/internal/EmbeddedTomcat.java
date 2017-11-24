@@ -34,6 +34,7 @@ import org.apache.catalina.AccessLog;
 import org.apache.catalina.Container;
 import org.apache.catalina.Context;
 import org.apache.catalina.Engine;
+import org.apache.catalina.Globals;
 import org.apache.catalina.Host;
 import org.apache.catalina.Server;
 import org.apache.catalina.Service;
@@ -443,7 +444,9 @@ public class EmbeddedTomcat extends Tomcat {
     }
 
 	private void initBaseDir(Configuration configuration) {
-		setBaseDir(configuration.getTemporaryDirectory().getAbsolutePath());
+		if (System.getProperty(Globals.CATALINA_HOME_PROP) == null) {
+			setBaseDir(configuration.getTemporaryDirectory().getAbsolutePath());
+		}
 		initBaseDir();
 	}
 

@@ -128,32 +128,28 @@ public class WarExtendedIntegrationTest extends ITestBase {
 
 	@Test
 	public void testWars() throws Exception {
-
-        HttpTestClientFactory.createDefaultTestClient()
-                .withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
-                        resp -> resp.contains("<h1>Hello World</h1>"))
-                .doGETandExecuteTest("http://127.0.0.1:8181/war1/wc");
-
-        HttpTestClientFactory.createDefaultTestClient()
-                .withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
-                        resp -> resp.contains("<h1>Hello World</h1>"))
-                .doGETandExecuteTest("http://127.0.0.1:8181/war2/hello");
-
-        HttpTestClientFactory.createDefaultTestClient()
-                .withReturnCode(HttpServletResponse.SC_NOT_FOUND)
-                .doGETandExecuteTest("http://127.0.0.1:8181/war3");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war1/wc");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war2/hello");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(HttpServletResponse.SC_NOT_FOUND)
+				.doGETandExecuteTest("http://127.0.0.1:8181/war3");
 
 		// after stopping one of two wars, without PAXWEB-1084 fix, Jetty's qtp is stopped as well
 		installWar1Bundle.stop();
 
-        HttpTestClientFactory.createDefaultTestClient()
-                .withReturnCode(HttpServletResponse.SC_NOT_FOUND)
-                .doGETandExecuteTest("http://127.0.0.1:8181/war1/wc");
-
-        HttpTestClientFactory.createDefaultTestClient()
-                .withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
-                        resp -> resp.contains("<h1>Hello World</h1>"))
-                .doGETandExecuteTest("http://127.0.0.1:8181/war2/hello");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(HttpServletResponse.SC_NOT_FOUND)
+				.doGETandExecuteTest("http://127.0.0.1:8181/war1/wc");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war2/hello");
 	}
 
 }

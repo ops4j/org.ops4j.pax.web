@@ -15,81 +15,19 @@
  */
 package org.ops4j.pax.web.itest.undertow;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.base.VersionUtil;
-import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.ops4j.pax.web.itest.common.AbstractWarPostIntegrationTest;
 
 /**
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
-public class WarPostIntegrationTest extends ITestBase {
-
-	private static final Logger LOG = LoggerFactory
-			.getLogger(WarPostIntegrationTest.class);
-
-	private Bundle installWarBundle;
-
+public class WarPostIntegrationTest extends AbstractWarPostIntegrationTest {
 	@Configuration
 	public static Option[] configure() {
 		return configureUndertow();
 	}
-
-	@Before
-	public void setUp() throws BundleException, InterruptedException {
-		LOG.info("Setting up test");
-
-		initWebListener();
-
-		String bundlePath = "mvn:org.ops4j.pax.web.samples/war-extended-post/"
-				+ VersionUtil.getProjectVersion() + "/war";
-		installWarBundle = bundleContext.installBundle(bundlePath);
-		installWarBundle.start();
-
-		waitForWebListener();
-	}
-
-	@After
-	public void tearDown() throws BundleException {
-		if (installWarBundle != null) {
-			installWarBundle.stop();
-			installWarBundle.uninstall();
-		}
-	}
-
-	@Test
-	public void testWC() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.doGETandExecuteTest("http://127.0.0.1:8181/posttest/index.html");
-
-		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'POST data size is: 3000000'",
-						resp -> resp.contains("POST data size is: 3000000"))
-				.doPOST("http://127.0.0.1:8181/posttest/upload-check")
-				.addParameter("data", createData())
-				.executeTest();
-	}
-
-	private String createData() {
-		StringBuffer buff = new StringBuffer();
-
-		int i = 0;
-		while (i < 3000000) {
-			buff.append("A");
-			i++;
-		}
-
-		return buff.toString();
-	}
-
 }
