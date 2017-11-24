@@ -189,7 +189,7 @@ public class ServletTracker<T extends Servlet> extends AbstractTracker<T, Servle
 			}
 		}
 
-		if (annotationScan.scanned) {
+		if (annotationScan.scanned && annotationScan.webInitParams != null) {
 			for (WebInitParam param : annotationScan.webInitParams) {
 				String name = param.name();
 				String value = param.value();
