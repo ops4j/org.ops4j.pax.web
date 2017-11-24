@@ -16,17 +16,8 @@
 package org.ops4j.pax.web.itest.base;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -46,7 +37,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -341,51 +331,6 @@ public abstract class AbstractControlledTestBase {
 	 * @return the frameworks BundleContext
 	 */
 	protected abstract BundleContext getBundleContext();
-
-	public void testSimpleFilter() throws Exception {
-		ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<>(getBundleContext(), WebContainer.class, null);
-		tracker.open();
-		WebContainer service = tracker.waitForService(TimeUnit.SECONDS.toMillis(20));
-
-		final String fullContent = "This content is Filtered by a javax.servlet.Filter";
-		Filter filter = new Filter() {
-
-			@Override
-			public void init(FilterConfig filterConfig) throws ServletException {
-			}
-
-			@Override
-			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-				PrintWriter writer = response.getWriter();
-				writer.write(fullContent);
-				writer.flush();
-			}
-
-			@Override
-			public void destroy() {
-			}
-		};
-
-		Dictionary<String, String> initParams = new Hashtable<>();
-
-		HttpContext defaultHttpContext = service.createDefaultHttpContext();
-		service.begin(defaultHttpContext);
-		service.registerResources("/", "default", defaultHttpContext);
-
-		service.registerFilter(filter, new String[] { "/testFilter/*", }, new String[] { "default", }, initParams, defaultHttpContext);
-
-		service.end(defaultHttpContext);
-
-		Thread.sleep(200);
-
-		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain test from previous FilterChain",
-						resp -> resp.contains("This content is Filtered by a javax.servlet.Filter"))
-				.doGET("http://127.0.0.1:8181/testFilter/filter.me")
-				.executeTest();
-
-		service.unregisterFilter(filter);
-	}
 
 	public static enum ServiceUpdateKind {
 		UNREGISTER_REGISTER(2),

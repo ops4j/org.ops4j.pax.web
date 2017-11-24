@@ -15,28 +15,23 @@
  */
 package org.ops4j.pax.web.itest.undertow;
 
-import org.junit.Before;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.OptionUtils.combine;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
-import org.osgi.framework.BundleException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.OptionUtils.combine;
+import org.ops4j.pax.web.itest.common.AbstractWebFragmentIntegrationTest;
 
 
 /**
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
-public class WebFragmentIntegrationTest extends ITestBase {
-
-	private static final Logger LOG = LoggerFactory.getLogger(WebFragmentIntegrationTest.class);
+public class WebFragmentIntegrationTest extends AbstractWebFragmentIntegrationTest {
 
 	@Configuration
 	public static Option[] configure() {
@@ -46,84 +41,10 @@ public class WebFragmentIntegrationTest extends ITestBase {
 		);
 	}
 
-
-	@Before
-	public void setUp() throws BundleException, InterruptedException {
-		LOG.info("Setting up test");
-
-		initWebListener();
-		waitForWebListener();
-	}
-
-
-	@Test
-	public void testWC() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
-						resp -> resp.contains("<h1>Hello World</h1>"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc");
-
-	}
-
-	@Test
-	public void testFilterInit() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'Have bundle context in filter: true'",
-						resp -> resp.contains("Have bundle context in filter: true"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc");
-	}
-
-	@Test
-	public void testWebContainerExample() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
-						resp -> resp.contains("<h1>Hello World</h1>"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/example");
-		// test image-serving
-		HttpTestClientFactory.createDefaultTestClient()
-				.doGETandExecuteTest("http://127.0.0.1:8181/war/images/logo.png");
-	}
-
-	@Test
-	public void testWebContainerSN() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
-						resp -> resp.contains("<h1>Hello World</h1>"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/sn");
-	}
-
-	@Test
-	public void testSlash() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.withReturnCode(403)
-				.doGETandExecuteTest("http://127.0.0.1:8181/war/");
-	}
-
-
-	@Test
-	public void testSubJSP() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain '<h2>Hello World!</h2>'",
-						resp -> resp.contains("<h2>Hello World!</h2>"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/subjsp");
-	}
-
-	@Test
-	public void testErrorJSPCall() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.withReturnCode(404)
-				.withResponseAssertion("Response must contain '<h1>Error Page</h1>'",
-						resp -> resp.contains("<h1>Error Page</h1>"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/error.jsp");
-	}
-
-	@Test
-	public void testWrongServlet() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.withReturnCode(404)
-				.withResponseAssertion("Response must contain '<h1>Error Page</h1>'",
-						resp -> resp.contains("<h1>Error Page</h1>"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/war/wrong/");
-	}
-
+    @Test
+    public void testSlash() throws Exception {
+        HttpTestClientFactory.createDefaultTestClient()
+                .withReturnCode(403)
+                .doGETandExecuteTest("http://127.0.0.1:8181/war/");
+    }
 }
