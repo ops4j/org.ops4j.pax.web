@@ -15,30 +15,29 @@
  */
 package org.ops4j.pax.web.itest.tomcat;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Configuration;
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.tinybundles.core.InnerClassStrategy;
-import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
-import org.ops4j.pax.web.itest.base.support.TestServlet;
-import org.ops4j.pax.web.itest.base.support.TestServletContainerInitializer;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
-
-import java.io.InputStream;
-
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
 
+import java.io.InputStream;
+
+import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.tinybundles.core.InnerClassStrategy;
+import org.ops4j.pax.web.itest.base.support.TestServlet;
+import org.ops4j.pax.web.itest.base.support.TestServletContainerInitializer;
+import org.ops4j.pax.web.itest.common.AbstractWarContainerInitializerIntegrationTest;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
+
 /**
  * @author Marc Schlegel
  */
 @RunWith(PaxExam.class)
-public class WarContainerInitializerIntegrationTest extends ITestBase {
+public class WarContainerInitializerIntegrationTest extends AbstractWarContainerInitializerIntegrationTest {
 
     @Configuration
     public static Option[] configure() {
@@ -48,7 +47,8 @@ public class WarContainerInitializerIntegrationTest extends ITestBase {
         );
     }
 
-    private Bundle installWarBundle(String webXml) throws Exception {
+    @Override
+    protected Bundle installWarBundle(String webXml) throws Exception {
         InputStream in = bundle()
                 .add(TestServlet.class, InnerClassStrategy.NONE)
                 .add(TestServletContainerInitializer.class, InnerClassStrategy.NONE)
@@ -62,40 +62,5 @@ public class WarContainerInitializerIntegrationTest extends ITestBase {
                 .set("Web-ContextPath", "contextroot")
                 .build();
         return bundleContext.installBundle("bundleLocation", in);
-    }
-
-
-    @Test
-    public void testServlet_2_5() throws Exception {
-        initWebListener();
-        Bundle bundle = installWarBundle("web-2.5.xml");
-        bundle.start();
-
-        waitForWebListener();
-
-        HttpTestClientFactory.createDefaultTestClient()
-                .withResponseAssertion("Response must contain 'TEST OK'!", resp -> resp.contains("TEST OK"))
-                .withResponseAssertion("Response must NOT contain 'FILTER-INIT'! Since this WAR uses Servlet 2.5 no ContainerInitializer should be used", resp -> !resp.contains("FILTER-INIT"))
-                .doGETandExecuteTest("http://127.0.0.1:8282/contextroot/servlet");
-
-        bundle.uninstall();
-    }
-
-
-    @Test
-    public void testServlet_3_0() throws Exception {
-        initWebListener();
-
-        Bundle bundle = installWarBundle("web-3.0.xml");
-        bundle.start();
-
-        waitForWebListener();
-
-        HttpTestClientFactory.createDefaultTestClient()
-                .withResponseAssertion("Response must contain 'TEST OK'!", resp -> resp.contains("TEST OK"))
-                .withResponseAssertion("Filter is registered in Service-Locator for ContainerInitializer. Response must contain 'FILTER-INIT'", resp -> resp.contains("FILTER-INIT"))
-                .doGETandExecuteTest("http://127.0.0.1:8282/contextroot/servlet");
-
-        bundle.uninstall();
     }
 }

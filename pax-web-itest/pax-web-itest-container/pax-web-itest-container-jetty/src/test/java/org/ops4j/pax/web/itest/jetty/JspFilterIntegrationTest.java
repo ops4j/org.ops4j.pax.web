@@ -15,74 +15,20 @@
  */
 package org.ops4j.pax.web.itest.jetty;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.base.VersionUtil;
-import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.ops4j.pax.web.itest.common.AbstractJspFilterIntegrationTest;
 
 /**
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
-public class JspFilterIntegrationTest extends ITestBase {
-
-	private static final Logger LOG = LoggerFactory.getLogger(JspFilterIntegrationTest.class);
-
-	private Bundle installWarBundle;
+public class JspFilterIntegrationTest extends AbstractJspFilterIntegrationTest {
 
 	@Configuration
 	public static Option[] configure() {
 		return configureJetty();
-	}
-
-	@Before
-	public void setUp() throws BundleException, InterruptedException {
-		initWebListener();
-		final String bundlePath = "mvn:org.ops4j.pax.web.samples/jsp-filter/"
-				+ VersionUtil.getProjectVersion() + "/war";
-		installWarBundle = installAndStartBundle(bundlePath);
-		waitForWebListener();
-	}
-
-	@After
-	public void tearDown() throws BundleException {
-		if (installWarBundle != null) {
-			installWarBundle.stop();
-			installWarBundle.uninstall();
-		}
-	}
-
-
-	@Test
-	public void testSimpleJsp() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'Filtered'",
-						resp -> resp.contains("Filtered"))
-				.doGETandExecuteTest("http://localhost:8181/jsp-filter/");
-	}
-	
-	@Test
-	public void testExplicitTagLib() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'works'",
-						resp -> resp.contains("works"))
-				.doGETandExecuteTest("http://localhost:8181/jsp-filter/test-taglib.jsp");
-	}
-	
-	@Test
-	public void testAutoIncludedTagLib() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'works'",
-						resp -> resp.contains("works"))
-				.doGETandExecuteTest("http://localhost:8181/jsp-filter/test-taglib-inc.jsp");
 	}
 }

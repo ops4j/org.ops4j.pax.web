@@ -15,51 +15,24 @@
  */
 package org.ops4j.pax.web.itest.undertow;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.ops4j.pax.exam.OptionUtils.combine;
+
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.osgi.framework.BundleException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import static org.ops4j.pax.exam.OptionUtils.combine;
+import org.ops4j.pax.web.itest.common.AbstractWebSocketWhiteBoardIntegrationTest;
 
 
 /**
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
-public class WebSocketWhiteBoardIntegrationTest extends ITestBase {
-
-	private static final Logger LOG = LoggerFactory.getLogger(WebSocketWhiteBoardIntegrationTest.class);
+public class WebSocketWhiteBoardIntegrationTest extends AbstractWebSocketWhiteBoardIntegrationTest {
 
 	@Configuration
 	public static Option[] configure() {
 		return combine(
 				configureWebSocketUndertow());
 	}
-
-	@Before
-	public void setUp() throws BundleException, InterruptedException {
-		LOG.info("Setting up test");
-
-		initWebListener();
-		waitForWebListener();
-	}
-
-
-	@Test
-//	@Ignore("Only works with an external websocket test tool like 'Simple Websocket client' a chrome extension")
-	public void testWebsocket() throws Exception {
-
-		SimpleWebSocket simpleWebSocket = new SimpleWebSocket();
-
-		bundleContext.registerService(Object.class.getName(), simpleWebSocket, null);
-
-		Thread.sleep(1000);
-	}
 }
-

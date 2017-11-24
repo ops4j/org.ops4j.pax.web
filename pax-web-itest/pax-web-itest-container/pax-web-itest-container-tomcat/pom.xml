@@ -53,6 +53,13 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.web.itest</groupId>
+            <artifactId>pax-web-itest-common</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
 		
 		<dependency>
 			<groupId>org.apache.felix</groupId>
@@ -67,6 +74,11 @@
 			<type>war</type>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web.samples</groupId>
+            <artifactId>war-jsf-cdi</artifactId>
+            <scope>test</scope>
+        </dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>helloworld-hs</artifactId>
@@ -405,6 +417,13 @@
 			<scope>provided</scope>
 		</dependency>
 
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
+            <version>1_2</version>
+            <scope>provided</scope>
+        </dependency>
+
 		<dependency>
 			<groupId>org.apache.servicemix.specs</groupId>
 			<artifactId>org.apache.servicemix.specs.jsr303-api-1.0.0</artifactId>
@@ -476,6 +495,32 @@
 		    <groupId>javax.websocket</groupId>
 		    <artifactId>javax.websocket-api</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>javax.json</groupId>
+            <artifactId>javax.json-api</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <!-- test framework -->
+        <!-- Rules for using within tests -->
+        <dependency>
+            <groupId>com.cedarsoft.commons</groupId>
+            <artifactId>test-utils</artifactId>
+            <version>6.0.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.cedarsoft.commons</groupId>
+            <artifactId>crypt</artifactId>
+            <version>6.0.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.cedarsoft.commons</groupId>
+            <artifactId>xml-commons</artifactId>
+            <version>6.0.1</version>
+            <scope>test</scope>
+        </dependency>
+
 		<!-- Test-Client -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
