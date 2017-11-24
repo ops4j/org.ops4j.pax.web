@@ -15,26 +15,19 @@
  */
 package org.ops4j.pax.web.itest.undertow;
 
-import org.junit.After;
-import org.junit.Before;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
-
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import org.ops4j.pax.web.itest.common.AbstractWebContainerSecuredIntegrationTest;
 
 @RunWith(PaxExam.class)
-public class WebContainerSecureWithEncryptedPassword extends ITestBase {
-
-
-	private Bundle installWarBundle;
+public class WebContainerSecureWithEncryptedPassword extends AbstractWebContainerSecuredIntegrationTest {
 
 	@Configuration
 	public static Option[] configure() {
@@ -63,25 +56,6 @@ public class WebContainerSecureWithEncryptedPassword extends ITestBase {
 				
 		                
 	}
-
-	@Before
-	public void setUp() throws BundleException, InterruptedException {
-		initWebListener();
-		final String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-wc/"
-				+ VersionUtil.getProjectVersion();
-		installWarBundle = installAndStartBundle(bundlePath);
-		waitForWebListener();
-		waitForServer("https://127.0.0.1:8443");
-	}
-
-	@After
-	public void tearDown() throws BundleException {
-		if (installWarBundle != null) {
-			installWarBundle.stop();
-			installWarBundle.uninstall();
-		}
-	}
-
 
 	@Test
 	public void testWebContextPath() throws Exception {

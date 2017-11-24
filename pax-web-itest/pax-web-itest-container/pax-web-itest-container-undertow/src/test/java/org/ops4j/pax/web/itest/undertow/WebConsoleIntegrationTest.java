@@ -15,32 +15,26 @@
  */
 package org.ops4j.pax.web.itest.undertow;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
+
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import static org.ops4j.pax.exam.CoreOptions.*;
-import static org.ops4j.pax.exam.MavenUtils.asInProject;
+import org.ops4j.pax.web.itest.common.AbstractWebConsoleIntegrationTest;
 
 /**
  * @author Toni Menzel (tonit)
  * @since Mar 3, 2009
  */
 @RunWith(PaxExam.class)
-public class WebConsoleIntegrationTest extends ITestBase {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(WarIntegrationTest.class);
+public class WebConsoleIntegrationTest extends AbstractWebConsoleIntegrationTest {
 
 	@Configuration
 	public static Option[] configure() {
-
 		return OptionUtils
 				.combine(
 						configureUndertow(),
@@ -74,29 +68,4 @@ public class WebConsoleIntegrationTest extends ITestBase {
 								.version("3.1.8")
 				);
 	}
-
-	@Before
-	public void setUp() throws Exception {
-		initServletListener(null);
-
-		waitForServer("http://127.0.0.1:8181/");
-
-		waitForServletListener();
-
-	}
-
-
-	@Test
-	public void testBundlesPath() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.withReturnCode(401)
-				.doGETandExecuteTest("http://localhost:8181/system/console/bundles");
-
-		HttpTestClientFactory.createDefaultTestClient()
-				.authenticate("admin", "admin", "OSGi Management Console")
-				.withResponseAssertion("Response must contain 'Apache Felix Web Console<br/>Bundles'",
-						resp -> resp.contains("Apache Felix Web Console<br/>Bundles"))
-				.doGETandExecuteTest("http://localhost:8181/system/console/bundles");
-	}
-
 }

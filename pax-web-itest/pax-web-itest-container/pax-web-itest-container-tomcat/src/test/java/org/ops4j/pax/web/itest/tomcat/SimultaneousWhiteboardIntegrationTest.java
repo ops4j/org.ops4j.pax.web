@@ -15,33 +15,27 @@
  */
 package org.ops4j.pax.web.itest.tomcat;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Configuration;
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardFilter;
-import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
-import org.ops4j.pax.web.itest.base.support.TestActivator;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
-
-import static org.junit.Assert.assertNotNull;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.streamBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
 
+import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardFilter;
+import org.ops4j.pax.web.itest.base.support.TestActivator;
+import org.ops4j.pax.web.itest.common.AbstractSimultaneousWhiteboardIntegrationTest;
+import org.osgi.framework.Constants;
+
 /**
  * @author Toni Menzel (tonit)
  * @since Mar 3, 2009
  */
 @RunWith(PaxExam.class)
-@Ignore
-public class SimultaneousWhiteboardIntegrationTest extends ITestBase {
+public class SimultaneousWhiteboardIntegrationTest extends AbstractSimultaneousWhiteboardIntegrationTest {
 
 	@Configuration
 	public static Option[] configure() {
@@ -58,44 +52,4 @@ public class SimultaneousWhiteboardIntegrationTest extends ITestBase {
 								.set(Constants.DYNAMICIMPORT_PACKAGE, "*")
 								.build()).noStart());
 	}
-
-	@Before
-	public void setUp() throws Exception {
-		Bundle whiteBoardBundle = null;
-		Bundle simultaneousTestBundle = null;
-
-		Bundle[] bundles = bundleContext.getBundles();
-		for (Bundle bundle : bundles) {
-			String symbolicName = bundle.getSymbolicName();
-			if ("org.ops4j.pax.web.extender.samples.whiteboard".equals(symbolicName)) {
-				whiteBoardBundle = bundle;
-			} else if ("org.ops4j.pax.web.itest.SimultaneousTest".equals(symbolicName)) {
-				simultaneousTestBundle = bundle;
-			}
-		}
-
-		assertNotNull(simultaneousTestBundle);
-		assertNotNull(whiteBoardBundle);
-
-		simultaneousTestBundle.start();
-		whiteBoardBundle.start();
-	}
-
-
-	@Test
-	public void testWhiteBoardRoot() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
-						resp -> resp.contains("Hello Whiteboard Extender"))
-				.doGETandExecuteTest("http://127.0.0.1:8282/root");
-	}
-
-	@Test
-	public void testWhiteBoardSlash() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'Welcome to the Welcome page'",
-						resp -> resp.contains("Welcome to the Welcome page"))
-				.doGETandExecuteTest("http://127.0.0.1:8282/");
-	}
-
 }
