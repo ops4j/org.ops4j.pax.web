@@ -15,54 +15,20 @@
  */
 package org.ops4j.pax.web.itest.undertow;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.base.VersionUtil;
-import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
+import org.ops4j.pax.web.itest.common.AbstractJspFilterIntegrationTest;
 
 /**
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
-public class JspFilterIntegrationTest extends ITestBase {
-
-	private Bundle installWarBundle;
+public class JspFilterIntegrationTest extends AbstractJspFilterIntegrationTest {
 
 	@Configuration
 	public static Option[] configure() {
 		return configureUndertow();
-	}
-
-	@Before
-	public void setUp() throws BundleException, InterruptedException {
-		initWebListener();
-		final String bundlePath = "mvn:org.ops4j.pax.web.samples/jsp-filter/"
-				+ VersionUtil.getProjectVersion() + "/war";
-		installWarBundle = installAndStartBundle(bundlePath);
-		waitForWebListener();
-	}
-
-	@After
-	public void tearDown() throws BundleException {
-		if (installWarBundle != null) {
-			installWarBundle.stop();
-			installWarBundle.uninstall();
-		}
-	}
-
-
-	@Test
-	public void testSimpleJsp() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'Filtered'",
-						resp -> resp.contains("Filtered"))
-				.doGETandExecuteTest("http://localhost:8181/jsp-filter/");
 	}
 }

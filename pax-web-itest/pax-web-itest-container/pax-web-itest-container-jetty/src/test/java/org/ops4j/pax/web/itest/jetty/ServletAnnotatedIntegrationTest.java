@@ -15,24 +15,19 @@
  */
 package org.ops4j.pax.web.itest.jetty;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.ops4j.pax.exam.CoreOptions.streamBundle;
+import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
+
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.base.support.AnnotatedMultipartTestServlet;
 import org.ops4j.pax.web.itest.base.support.AnnotatedTestServlet;
+import org.ops4j.pax.web.itest.common.AbstractServletAnnotatedIntegrationTest;
 import org.ops4j.pax.web.service.WebContainerConstants;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
-
-import static org.ops4j.pax.exam.CoreOptions.streamBundle;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
 
 
 /**
@@ -40,7 +35,7 @@ import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
  * @since Dec 30, 2012
  */
 @RunWith(PaxExam.class)
-public class ServletAnnotatedIntegrationTest extends ITestBase {
+public class ServletAnnotatedIntegrationTest extends AbstractServletAnnotatedIntegrationTest {
 
 	@Configuration
 	public static Option[] configure() {
@@ -53,34 +48,5 @@ public class ServletAnnotatedIntegrationTest extends ITestBase {
 						.set(Constants.IMPORT_PACKAGE, "javax.servlet")
 						.set(Constants.DYNAMICIMPORT_PACKAGE, "*")
 						.build()));
-	}
-
-	@Before
-	public void setUp() throws Exception {
-		waitForServer("http://127.0.0.1:8181/");
-		initServletListener("test");
-		waitForServletListener();
-	}
-
-	@After
-	public void tearDown() throws BundleException {
-	}
-
-
-	@Test
-	public void testBundle1() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'TEST OK'",
-						resp -> resp.contains("TEST OK"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/annotatedTest/test");
-	}
-
-	@Test
-	@Ignore("Find a way for multipart-post with jetty-client")
-	public void testMultipart() throws Exception {
-		// TODO Mutipart
-//		Map<String, Object> multiPartContent = new HashMap<String, Object>();
-//		multiPartContent.put("exampleFile", "file.part");
-//		testClient.testPostMultipart("http://127.0.0.1:8181/annotatedTest/multipartest", multiPartContent , "Part of file: exampleFile", 200);
 	}
 }

@@ -33,6 +33,7 @@
 	<modules>
 		<module>pax-web-itest-container</module>
 		<module>pax-web-itest-base</module>
+		<module>pax-web-itest-common</module>
 	</modules>
 
 	<properties>
