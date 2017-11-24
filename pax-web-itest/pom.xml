@@ -33,6 +33,7 @@
 	<modules>
 		<module>pax-web-itest-container</module>
 		<module>pax-web-itest-base</module>
+		<module>pax-web-itest-common</module>
 	</modules>
 
 	<properties>
@@ -430,18 +431,6 @@
 				<artifactId>logback-classic</artifactId>
 				<version>1.0.6</version>
 			</dependency>
-
-			<dependency>
-				<groupId>org.ops4j.pax.tipi</groupId>
-				<artifactId>org.ops4j.pax.tipi.tomcat-catalina</artifactId>
-				<version>8.0.12.1-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.tipi</groupId>
-				<artifactId>org.ops4j.pax.tipi.tomcat-util</artifactId>
-				<version>8.0.12.1-SNAPSHOT</version>
-			</dependency>
-
 			<dependency>
 				<groupId>org.apache.servicemix.specs</groupId>
 				<artifactId>

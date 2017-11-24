@@ -42,14 +42,20 @@
 			<scope>test</scope>
 		</dependency>
 
+        <dependency>
+            <groupId>org.ops4j.pax.web.itest</groupId>
+            <artifactId>pax-web-itest-base</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>org.ops4j.pax.web.itest</groupId>
-			<artifactId>pax-web-itest-base</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-		
+        <dependency>
+            <groupId>org.ops4j.pax.web.itest</groupId>
+            <artifactId>pax-web-itest-common</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.scr</artifactId>

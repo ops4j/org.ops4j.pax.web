@@ -336,4 +336,29 @@ public abstract class AbstractControlledTestBase {
 		service.unregisterFilter(filter);
 	}
 
+	/**
+	 * <p>
+	 *     JSF uses a hidden input-field which carries around a JSF internal View-State. The View-State is necessary
+	 *     when form submits are tested with a POST-request.
+	 * </p>
+	 * <p>
+	 *     When testing a POST against JSF, a prior GET has to be made!
+	 *     This method extracts the View-State from prior GET.
+	 * </p>
+	 * @param response the response from a initial GET-request
+	 * @return found View-State
+	 * @throws IllegalStateException when no View-State was found
+	 */
+	protected String extractJsfViewState(String response){
+		String intermediate = response.substring(response.indexOf("name=\"javax.faces.ViewState\""));
+		int indexOf = intermediate.indexOf("value=\"");
+		String substring = intermediate.substring(indexOf + 7);
+		indexOf = substring.indexOf("\"");
+		String viewstate = substring.substring(0, indexOf);
+		if(viewstate == null || viewstate.trim().length() == 0){
+			throw new IllegalStateException("No JSF-View-State was found in response!");
+		}
+		return viewstate;
+	}
+
 }
