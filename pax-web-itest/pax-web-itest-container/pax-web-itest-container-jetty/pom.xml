@@ -791,7 +791,7 @@
 						<!-- to configure pax-exam with pax.exam.system=default which gives us more control over installed bundles -->
 						<pax.exam.configuration>file:../../pax-web-itest-base/src/main/resources/controlled-exam.properties</pax.exam.configuration>
 					</systemPropertyVariables>
-					<argLine>${jcoverage.command} -Xss8m</argLine>
+					<argLine>-Xss8m</argLine>
 					<forkMode>pertest</forkMode>
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 					<runOrder>alphabetical</runOrder>
