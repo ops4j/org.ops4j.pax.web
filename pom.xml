@@ -1212,7 +1212,7 @@
 		<profile>
 			<id>doclint-java8-disable</id>
 			<activation>
-				<jdk>[1.8,)</jdk>
+				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
 				<javadoc.opts>-Xdoclint:none</javadoc.opts>
@@ -1306,6 +1306,10 @@
                                 <exclude>**/*.bundles</exclude>
                                 <!-- js script files in samples -->
                                 <exclude>**/*.js</exclude>
+                                <!-- undertow cert files -->
+                                <exclude>**/*.req</exclude>
+                                <exclude>**/*.cer</exclude>
+                                <exclude>**/*.srl</exclude>
                             </excludes>
                         </configuration>
                     </plugin>

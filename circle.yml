@@ -14,8 +14,8 @@ dependencies:
   override:
     # https://issues.apache.org/jira/browse/MDEP-516
     # alternative, just: mvn -B dependency:resolve-plugins
-    - mvn -DskipTests clean install dependency:resolve-plugins dependency:go-offline -Pjetty,tomcat,undertow
-
+    - mvn -DskipTests clean install dependency:resolve-plugins dependency:go-offline
+    
 test:
   override:
     # CircleCI's default phase 'integration-test' is not sufficient
