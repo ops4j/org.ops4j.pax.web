@@ -126,9 +126,20 @@ public class Activator implements BundleActivator {
 		public Handler addingService(ServiceReference<Handler> reference) {
 			Handler handler = bundleContext.getService(reference);
 			Integer ranking = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
+
+            //add handler to factory and restart. 
+            if (registration != null) {
+                registration.unregister();
+            }
+			
 			serverControllerFactory.addHandler(handler, ranking == null ? 0 : ranking);
 
-			return handler;
+            registration = bundleContext.registerService(
+                    ServerControllerFactory.class,
+                    serverControllerFactory,
+                    new Hashtable<>());
+
+            return handler;
 		}
 
 		@Override
