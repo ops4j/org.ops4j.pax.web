@@ -15,7 +15,6 @@
  */
 package org.ops4j.pax.web.itest.undertow;
 
-import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -33,7 +32,6 @@ import org.ops4j.pax.web.itest.common.AbstractJspSelfRegistrationIntegrationTest
  * @author Serge Huber
  */
 @RunWith(PaxExam.class)
-@Ignore("FIXME: This worked before")
 public class JspSelfRegistrationIntegrationTest extends AbstractJspSelfRegistrationIntegrationTest {
 
 	@Configuration

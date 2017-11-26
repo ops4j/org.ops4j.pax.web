@@ -136,6 +136,7 @@ public abstract class ITestBase extends AbstractControlledTestBase {
 	public static Option[] configureTomcat() {
 		return combine(
 				baseConfigure(),
+				systemProperty("catalina.base").value("target"),
 				mavenBundle().groupId("org.ops4j.pax.web.itest").artifactId("pax-web-itest-common").versionAsInProject(),
 
 				systemPackages("javax.xml.namespace;version=1.0.0","javax.transaction;version=1.1.0"),
@@ -166,8 +167,7 @@ public abstract class ITestBase extends AbstractControlledTestBase {
 				// mavenBundle().groupId("org.apache.geronimo.specs").artifactId("geronimo-osgi-registry").version(asInProject()),
 				mavenBundle().groupId("javax.security.auth.message").artifactId("javax.security.auth.message-api").version(asInProject()),
 				systemProperty("org.ops4j.pax.url.war.importPaxLoggingPackages").value("true"),
-				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value("logs"),
-				systemProperty("catalina.base").value("target")
+				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value("logs")
 		);
 	}
 

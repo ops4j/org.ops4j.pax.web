@@ -26,7 +26,7 @@
 	<artifactId>pax-web-itest-common</artifactId>
 	<packaging>jar</packaging>
 
-	<name>OPS4J Pax Web - Integration test abstract</name>
+	<name>OPS4J Pax Web - Integration test common</name>
 
 	<description>Abstract Pax Web integration tests for all containers</description>
 

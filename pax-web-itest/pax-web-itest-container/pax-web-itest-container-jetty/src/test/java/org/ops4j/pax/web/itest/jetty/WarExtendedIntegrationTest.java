@@ -16,26 +16,38 @@
 
 package org.ops4j.pax.web.itest.jetty;
 
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.MavenUtils.asInProject;
-
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Ignore;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.common.AbstractWarExtendedIntegrationTest;
+import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
 /**
  * @author Grzegorz Grzybek
  */
 @RunWith(PaxExam.class)
-@Ignore("FIXME: This worked before")
-public class WarExtendedIntegrationTest extends AbstractWarExtendedIntegrationTest {
+public class WarExtendedIntegrationTest extends ITestBase {
+
+	private static final Logger LOG = LoggerFactory.getLogger(WarExtendedIntegrationTest.class);
+
+	private Bundle installWar1Bundle;
+	private Bundle installWar2Bundle;
 
 	@Configuration
 	public static Option[] configure() {
@@ -78,4 +90,66 @@ public class WarExtendedIntegrationTest extends AbstractWarExtendedIntegrationTe
 		options.addAll(Arrays.asList(configureJetty()));
 		return options.toArray(new Option[options.size()]);
 	}
+
+	@Before
+	public void setUp() throws BundleException, InterruptedException {
+		LOG.info("Setting up test");
+
+		initWebListener();
+
+		String bundlePath = WEB_BUNDLE
+				+ "mvn:org.ops4j.pax.web.samples/war/"
+				+ VersionUtil.getProjectVersion() + "/war?"
+				+ WEB_CONTEXT_PATH + "=/war1";
+		installWar1Bundle = bundleContext.installBundle(bundlePath);
+		installWar1Bundle.start();
+
+		bundlePath = WEB_BUNDLE
+				+ "mvn:org.ops4j.pax.web.samples/helloworld-servlet3/"
+				+ VersionUtil.getProjectVersion() + "/war?"
+				+ WEB_CONTEXT_PATH + "=/war2";
+		installWar2Bundle = bundleContext.installBundle(bundlePath);
+		installWar2Bundle.start();
+
+		waitForWebListener();
+	}
+
+	@After
+	public void tearDown() throws BundleException {
+		if (installWar1Bundle != null) {
+			installWar1Bundle.stop();
+			installWar1Bundle.uninstall();
+		}
+		if (installWar2Bundle != null) {
+			installWar2Bundle.stop();
+			installWar2Bundle.uninstall();
+		}
+	}
+
+	@Test
+	public void testWars() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war1/wc");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war2/hello");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(HttpServletResponse.SC_NOT_FOUND)
+				.doGETandExecuteTest("http://127.0.0.1:8181/war3");
+
+		// after stopping one of two wars, without PAXWEB-1084 fix, Jetty's qtp is stopped as well
+		installWar1Bundle.stop();
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(HttpServletResponse.SC_NOT_FOUND)
+				.doGETandExecuteTest("http://127.0.0.1:8181/war1/wc");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war2/hello");
+	}
+
 }

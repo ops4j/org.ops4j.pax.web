@@ -15,8 +15,6 @@
  */
 package org.ops4j.pax.web.itest.jetty;
 
-import org.junit.Ignore;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -24,7 +22,6 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.web.itest.common.AbstractHttpServiceIntegrationTest;
-
 
 /**
  * @author Toni Menzel (tonit)
@@ -37,12 +34,6 @@ public class HttpServiceIntegrationTest extends AbstractHttpServiceIntegrationTe
 	@Configuration
 	public static Option[] configure() {
 		return configureJetty();
-	}
-
-	@Test
-	@Ignore("FIXME: This worked before")
-	public void testRegisterMultipleServletsSameContext() throws Exception {
-	    super.testRegisterMultipleServletsSameContext();
 	}
 
 	@Override

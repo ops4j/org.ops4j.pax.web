@@ -48,6 +48,9 @@ public abstract class AbstractSimultaneousWhiteboardIntegrationTest extends ITes
 
 		simultaneousTestBundle.start();
 		whiteBoardBundle.start();
+
+		// It make some time for the services to get registered
+		Thread.sleep(1000);
 	}
 
 

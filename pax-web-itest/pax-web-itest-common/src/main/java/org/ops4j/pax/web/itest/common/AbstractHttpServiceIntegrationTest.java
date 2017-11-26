@@ -262,9 +262,6 @@ public abstract class AbstractHttpServiceIntegrationTest extends ITestBase {
 			Assert.fail("Timout waiting for servlet event");
 		}
 
-		Assert.assertSame(httpContext1.get(), httpContext2.get());
-		Assert.assertSame(servlet1.getServletContext(), servlet2.getServletContext());
-
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'TEST OK'",
 						resp -> resp.contains("TEST OK"))
@@ -296,6 +293,9 @@ public abstract class AbstractHttpServiceIntegrationTest extends ITestBase {
 				.withResponseAssertion("Response must contain 'registerResources test (ROOT)'",
 						resp -> resp.contains("registerResources test"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/readme.txt");
+
+		Assert.assertSame(httpContext1.get(), httpContext2.get());
+		Assert.assertSame(servlet1.getServletContext(), servlet2.getServletContext());
 	}
 
 	/**
