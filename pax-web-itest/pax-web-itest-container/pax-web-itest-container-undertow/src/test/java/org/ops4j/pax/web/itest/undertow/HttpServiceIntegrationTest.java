@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -49,7 +48,6 @@ public class HttpServiceIntegrationTest extends AbstractHttpServiceIntegrationTe
     }
 
     @Test
-    @Ignore("FIXME: The old test worked")
     public void testRegisterMultipleServletsSameContext() throws Exception {
         super.testRegisterMultipleServletsSameContext();
     }

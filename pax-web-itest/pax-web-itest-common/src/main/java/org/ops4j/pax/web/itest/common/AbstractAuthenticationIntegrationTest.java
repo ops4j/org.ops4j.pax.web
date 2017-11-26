@@ -33,6 +33,14 @@ public abstract class AbstractAuthenticationIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
+		/*
+		 * Tomcat will start a default root context. This will not hurt, but if we initialize the 
+		 * ServletListener too early it will detect this startup and will start the test before the
+		 * Servlet configured here is registered. Therefore we wait for a second before we initialize
+		 * the ServletListener and register the configuration.
+		 */
+		Thread.sleep(1000);
+
 		initWebListener();
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/authentication/"
 				+ VersionUtil.getProjectVersion();

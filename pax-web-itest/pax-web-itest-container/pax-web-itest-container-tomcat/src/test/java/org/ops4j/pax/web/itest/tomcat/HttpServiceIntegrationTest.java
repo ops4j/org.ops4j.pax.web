@@ -63,7 +63,7 @@ public class HttpServiceIntegrationTest extends AbstractHttpServiceIntegrationTe
 	}
 	
 	@Test
-	@Ignore("worked before - framework settings?")
+	//@Ignore("worked before - framework settings?")
 	public void testNCSALogger() throws Exception {
 		testSubPath();
 
