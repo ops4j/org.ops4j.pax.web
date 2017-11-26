@@ -1,21 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<!-- 
-	
-	Licensed under the Apache License, Version 2.0 (the "License");
-	you may not use this file except in compliance with the License.
-	You may obtain a copy of the License at
-	 
-	    http://www.apache.org/licenses/LICENSE-2.0
-	 
-	Unless required by applicable law or agreed to in writing, software
-	distributed under the License is distributed on an "AS IS" BASIS,
-	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	See the License for the specific language governing permissions and
-	limitations under the License.
-	
-	 -->
+	<!-- Licensed under the Apache License, Version 2.0 (the "License"); you 
+		may not use this file except in compliance with the License. You may obtain 
+		a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless 
+		required by applicable law or agreed to in writing, software distributed 
+		under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES 
+		OR CONDITIONS OF ANY KIND, either express or implied. See the License for 
+		the specific language governing permissions and limitations under the License. -->
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -136,9 +129,9 @@
 		<dependency.undertow-servlet.version>1.4.18.Final</dependency.undertow-servlet.version>
 		<dependency.undertow-websockets.version>1.4.18.Final</dependency.undertow-websockets.version>
 		<dependency.jboss-logging>3.3.0.Final</dependency.jboss-logging>
-	    <dependency.jasypt>1.9.2</dependency.jasypt>
+		<dependency.jasypt>1.9.2</dependency.jasypt>
 		<dependency.pax-cdi.version>1.0.0.RC2</dependency.pax-cdi.version>
-		<version.pax-exam>4.7.0</version.pax-exam>
+		<version.pax-exam>4.11.0</version.pax-exam>
 
 		<tipi.tomcat.version>8.5.20.1</tipi.tomcat.version>
 		<jsf-myfaces.version>2.2.10</jsf-myfaces.version>
@@ -147,11 +140,17 @@
 
 		<aries.spifly.version>1.0.9-SNAPSHOT</aries.spifly.version>
 		<aries.util.version>1.1.3</aries.util.version>
+		
+		<dependency.primefaces.version>5.1</dependency.primefaces.version>
+		<dependency.logback.version>1.0.6</dependency.logback.version>
 
 
 		<!-- Plugins -->
 		<gatling-plugin.version>2.0.0</gatling-plugin.version>
 		<bundle-plugin.version>3.3.0</bundle-plugin.version>
+
+		<surefire-plugin.version>2.20.1</surefire-plugin.version>
+		<failsafe-plugin.version>2.20.1</failsafe-plugin.version>
 
 		<servlet.spec.groupId>javax.servlet</servlet.spec.groupId>
 		<servlet.spec.artifactId>javax.servlet-api</servlet.spec.artifactId>
@@ -333,98 +332,6 @@
 					<version>2.8</version>
 					<extensions>true</extensions>
 				</plugin>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.mortbay.jetty</groupId>
-										<artifactId>jetty-jspc-maven-plugin</artifactId>
-										<versionRange>[8,)</versionRange>
-										<goals>
-											<goal>jspc</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.jacoco</groupId>
-										<artifactId>jacoco-maven-plugin</artifactId>
-										<versionRange>[0.7.0.201403182114,)
-										</versionRange>
-										<goals>
-											<goal>prepare-agent</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.apache.servicemix.tooling</groupId>
-										<artifactId>depends-maven-plugin</artifactId>
-										<versionRange>1.2,)</versionRange>
-										<goals>
-											<goal>generate-depends-file</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.ops4j.pax.exam</groupId>
-										<artifactId>maven-paxexam-plugin</artifactId>
-										<versionRange>[1.2.3,)</versionRange>
-										<goals>
-											<goal>generate-depends-file</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.ops4j.pax.exam</groupId>
-										<artifactId>exam-maven-plugin</artifactId>
-										<versionRange>[4.7.0-SNAPSHOT,)</versionRange>
-										<goals>
-											<goal>generate-link-files</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.asciidoctor</groupId>
-										<artifactId>asciidoctor-maven-plugin</artifactId>
-										<versionRange>[1.5.2,)</versionRange>
-										<goals>
-											<goal>process-asciidoc</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
 				<plugin>
 					<groupId>io.gatling</groupId>
 					<artifactId>gatling-maven-plugin</artifactId>
@@ -438,10 +345,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.13</version>
-					<configuration>
-						<argLine>${jcoverage.command}</argLine>
-					</configuration>
+					<version>${surefire-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>${failsafe-plugin.version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.sonar</groupId>
@@ -452,6 +361,11 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-gpg-plugin</artifactId>
 					<version>1.6</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.servicemix.tooling</groupId>
+					<artifactId>depends-maven-plugin</artifactId>
+					<version>1.4.0</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -839,6 +753,23 @@
 				<artifactId>asm-all</artifactId>
 				<version>${dependency.asm.version}</version>
 			</dependency>
+			
+			<dependency>
+				<groupId>org.primefaces</groupId>
+				<artifactId>primefaces</artifactId>
+				<version>${dependency.primefaces.version}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-core</artifactId>
+				<version>${dependency.logback.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-classic</artifactId>
+				<version>${dependency.logback.version}</version>
+			</dependency>
 
 			<!-- Load-Test Dependencies -->
 			<dependency>
@@ -1018,9 +949,9 @@
 				<version>${dependency.xnio.version}</version>
 			</dependency>
 			<dependency>
-					<groupId>org.jasypt</groupId>
-					<artifactId>jasypt</artifactId>
-					<version>${dependency.jasypt}</version>
+				<groupId>org.jasypt</groupId>
+				<artifactId>jasypt</artifactId>
+				<version>${dependency.jasypt}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.logging</groupId>
@@ -1209,103 +1140,103 @@
 			</properties>
 		</profile>
 		<profile>
-            <id>rat</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.rat</groupId>
-                        <artifactId>apache-rat-plugin</artifactId>
-                        <version>0.12</version>
-                        <executions>
-                            <execution>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>check</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <reportFile>${project.build.directory}/${project.build.finalName}.rat</reportFile>
-                            <excludeSubProjects>false</excludeSubProjects>
-                            <excludes>
-                                <exclude>**/*.pub</exclude>
-                                <exclude>**/target/**/*</exclude>
-                                <!-- GIT files -->
-                                <exclude>**/.git/**/*</exclude>
-                                <!-- IDEA files -->
-                                <exclude>**/.idea/**/*</exclude>
-                                <exclude>**/*.iml</exclude>
-                                <exclude>**/*.ipr</exclude>
-                                <exclude>**/*.iws</exclude>
-                                <!-- Eclipse files -->
-                                <exclude>**/.*</exclude>
-                                <exclude>**/eclipse-classes/**/*</exclude>
-                                <exclude>**/dependency-reduced-pom.xml</exclude>
-                                <exclude>**/.settings/**</exclude>
-                                <exclude>**/bin/**</exclude>
-                                <!-- resources file -->
-                                <exclude>**/goal.txt</exclude>
-                                <exclude>**/grep.txt</exclude>
-                                <exclude>**/edit.txt</exclude>
-                                <exclude>**/file.txt</exclude>
-                                <exclude>**/wc.txt</exclude>
-                                <exclude>**/foo</exclude>
-                                <exclude>**/maven-metadata-local.xml</exclude>
-                                <exclude>**/*.xsd</exclude>
-                                <exclude>**/*.svg</exclude>
-                                <!--manual resources -->
-                                <exclude>**/*.css</exclude>
-                                <exclude>**/*.ssp</exclude>
-                                <exclude>**/*.conf</exclude>
-                                <!-- test manifests -->
-                                <exclude>**/*.mf</exclude>
-                                <exclude>**/*.MF</exclude>
-                                <!-- test json files -->
-                                <exclude>**/*.json</exclude>
-                                <!-- test log files -->
-                                <exclude>**/test.log</exclude>
-                                <exclude>**/build.log</exclude>
-                                <exclude>**/sonar.log</exclude>
-                                <!-- test cache -->
-                                <exclude>**/test/cache/**/*</exclude>
-                                <!-- SSH keys -->
-                                <exclude>**/*.key</exclude>
-                                <!-- For Jenkins, ignore the .repository -->
-                                <exclude>.repository/**</exclude>
-                                <!-- jar files -->
-                                <exclude>**/*.jar</exclude>
-                                <!-- travis et al -->
-                                <exclude>**/*.yml</exclude>
-                                <!-- versions.properties -->
-                                <exclude>**/versions.properties</exclude>
-                                <exclude>**/pax-web-version.properties</exclude>
-                                <!-- README -->
-                                <exclude>README.md</exclude>
-                                <exclude>**/Readme.md</exclude>
-                                <exclude>**/*.adoc</exclude>
-                                <!-- archetype resources -->
-                                <exclude>**/archetype-resources/**/*</exclude>
-                                <!-- service initializers -->
-                                <exclude>**/META-INF/services/**/*</exclude>
-                                <!-- placeholders -->
-                                <exclude>**/placeholder.txt</exclude>
-                                <!-- bnd bundles -->
-                                <exclude>**/*.bundles</exclude>
-                                <!-- js script files in samples -->
-                                <exclude>**/*.js</exclude>
-                                <!-- undertow cert files -->
-                                <exclude>**/*.req</exclude>
-                                <exclude>**/*.cer</exclude>
-                                <exclude>**/*.srl</exclude>
-                            </excludes>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
+			<id>rat</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.rat</groupId>
+						<artifactId>apache-rat-plugin</artifactId>
+						<version>0.12</version>
+						<executions>
+							<execution>
+								<phase>verify</phase>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<reportFile>${project.build.directory}/${project.build.finalName}.rat</reportFile>
+							<excludeSubProjects>false</excludeSubProjects>
+							<excludes>
+								<exclude>**/*.pub</exclude>
+								<exclude>**/target/**/*</exclude>
+								<!-- GIT files -->
+								<exclude>**/.git/**/*</exclude>
+								<!-- IDEA files -->
+								<exclude>**/.idea/**/*</exclude>
+								<exclude>**/*.iml</exclude>
+								<exclude>**/*.ipr</exclude>
+								<exclude>**/*.iws</exclude>
+								<!-- Eclipse files -->
+								<exclude>**/.*</exclude>
+								<exclude>**/eclipse-classes/**/*</exclude>
+								<exclude>**/dependency-reduced-pom.xml</exclude>
+								<exclude>**/.settings/**</exclude>
+								<exclude>**/bin/**</exclude>
+								<!-- resources file -->
+								<exclude>**/goal.txt</exclude>
+								<exclude>**/grep.txt</exclude>
+								<exclude>**/edit.txt</exclude>
+								<exclude>**/file.txt</exclude>
+								<exclude>**/wc.txt</exclude>
+								<exclude>**/foo</exclude>
+								<exclude>**/maven-metadata-local.xml</exclude>
+								<exclude>**/*.xsd</exclude>
+								<exclude>**/*.svg</exclude>
+								<!--manual resources -->
+								<exclude>**/*.css</exclude>
+								<exclude>**/*.ssp</exclude>
+								<exclude>**/*.conf</exclude>
+								<!-- test manifests -->
+								<exclude>**/*.mf</exclude>
+								<exclude>**/*.MF</exclude>
+								<!-- test json files -->
+								<exclude>**/*.json</exclude>
+								<!-- test log files -->
+								<exclude>**/test.log</exclude>
+								<exclude>**/build.log</exclude>
+								<exclude>**/sonar.log</exclude>
+								<!-- test cache -->
+								<exclude>**/test/cache/**/*</exclude>
+								<!-- SSH keys -->
+								<exclude>**/*.key</exclude>
+								<!-- For Jenkins, ignore the .repository -->
+								<exclude>.repository/**</exclude>
+								<!-- jar files -->
+								<exclude>**/*.jar</exclude>
+								<!-- travis et al -->
+								<exclude>**/*.yml</exclude>
+								<!-- versions.properties -->
+								<exclude>**/versions.properties</exclude>
+								<exclude>**/pax-web-version.properties</exclude>
+								<!-- README -->
+								<exclude>README.md</exclude>
+								<exclude>**/Readme.md</exclude>
+								<exclude>**/*.adoc</exclude>
+								<!-- archetype resources -->
+								<exclude>**/archetype-resources/**/*</exclude>
+								<!-- service initializers -->
+								<exclude>**/META-INF/services/**/*</exclude>
+								<!-- placeholders -->
+								<exclude>**/placeholder.txt</exclude>
+								<!-- bnd bundles -->
+								<exclude>**/*.bundles</exclude>
+								<!-- js script files in samples -->
+								<exclude>**/*.js</exclude>
+								<!-- undertow cert files -->
+								<exclude>**/*.req</exclude>
+								<exclude>**/*.cer</exclude>
+								<exclude>**/*.srl</exclude>
+							</excludes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 		<profile>
 			<id>code-analysis</id>
 			<activation>

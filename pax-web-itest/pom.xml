@@ -37,7 +37,6 @@
 	</modules>
 
 	<properties>
-<!-- 		<jsf-myfaces.version>2.2.6</jsf-myfaces.version> -->
 		<version.http-client>4.4</version.http-client>
 		<version.httpcore>4.4</version.httpcore>
 		<version.http-async-client>4.1</version.http-async-client>
@@ -45,18 +44,10 @@
 	</properties>
 	<build>
 		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
 			<!-- generate dependencies versions -->
 			<plugin>
 				<groupId>org.apache.servicemix.tooling</groupId>
 				<artifactId>depends-maven-plugin</artifactId>
-				<version>1.2</version>
 				<executions>
 					<execution>
 						<id>generate-depends-file</id>
@@ -429,28 +420,28 @@
 			<dependency>
 				<groupId>org.primefaces</groupId>
 				<artifactId>primefaces</artifactId>
-				<version>5.1</version>
+				<version>${dependency.primefaces.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-core</artifactId>
-				<version>1.0.6</version>
+				<version>${dependency.logback.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>1.0.6</version>
+				<version>${dependency.logback.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.ops4j.pax.tipi</groupId>
 				<artifactId>org.ops4j.pax.tipi.tomcat-catalina</artifactId>
-				<version>8.0.12.1-SNAPSHOT</version>
+				<version>${dependency.tomcat.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.tipi</groupId>
 				<artifactId>org.ops4j.pax.tipi.tomcat-util</artifactId>
-				<version>8.0.12.1-SNAPSHOT</version>
+				<version>${dependency.tomcat.version}</version>
 			</dependency>
 
 			<dependency>
