@@ -43,8 +43,10 @@ public abstract class AbstractWhiteboardDSRestartIntegrationTest extends ITestBa
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
+		initServletListener();
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard-ds/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
+		waitForServletListener();
 	}
 
 	@After
@@ -95,11 +97,15 @@ public abstract class AbstractWhiteboardDSRestartIntegrationTest extends ITestBa
 				.waitForCondition(10000, 500, () -> fail("Whiteboard bundle did not stop in time"));
 
 		// start Whiteboard bundle again
+		initServletListener();
 		whiteBoardBundle.start();
 
 		new WaitCondition2("Check if Whiteboard bundle gets activated",
 				() -> whiteBoardBundle.getState() == Bundle.ACTIVE)
 				.waitForCondition(10000, 500, () -> fail("Whiteboard bundle did not start in time"));
+		// also wait till the servlet is registered
+		waitForServletListener();
+		Thread.sleep(1500);
 
 		// Test
 		HttpTestClientFactory.createDefaultTestClient()

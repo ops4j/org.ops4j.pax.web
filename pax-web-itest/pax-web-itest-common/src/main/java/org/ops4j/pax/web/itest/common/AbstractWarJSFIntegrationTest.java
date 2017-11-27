@@ -51,6 +51,9 @@ public abstract class AbstractWarJSFIntegrationTest extends ITestBase {
 
 		logger.info("Setting up test");
 
+		// Give the web container a second to recover after bundle restarts
+		Thread.sleep(1000);
+
 		initWebListener();
 
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/war-jsf/"
