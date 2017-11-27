@@ -178,25 +178,59 @@
             <version>1.0</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web.samples</groupId>
+            <artifactId>whiteboard</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web.samples</groupId>
+            <artifactId>whiteboard-ds</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- test framework -->
+        <dependency>
+            <groupId>com.cedarsoft.commons</groupId>
+            <artifactId>test-utils</artifactId>
+            <version>6.0.1</version>
+            <scope>provided</scope>
+        </dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
-  			<plugin>
+			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
 				<configuration>
 					<instructions>
+						<!-- These packages are used by some tests but are not always available
+							 dynamic import of these packages will make sure that it can be wired
+							 anyway but does not prevent wiring the commons bundle if they are not
+							 available -->
+						<DynamicImport-Package>
+							javax.faces.*,
+							javax.json,
+							com.cedarsoft.test.utils,
+							org.apache.commons.lang3,
+							org.eclipse.jetty.websocket.*,
+							org.ops4j.pax.web.extender.samples.*,
+							org.ops4j.pax.web.resources.*,
+							org.ops4j.pax.web.samples.*
+						</DynamicImport-Package>
 						<Import-Package>
-                             javax.faces.*;resolution:=optional,
-                             javax.json;resolution:=optional,
-							 javax.servlet;version="[2.5,4)",
-							 javax.servlet.annotation;version="[2.5,4)",
-							 javax.servlet.http;version="[2.5,4)",
-                             org.apache.commons.lang3;resolution:=optional,
-                             org.eclipse.jetty.websocket.*;resolution:=optional,
-                             org.ops4j.pax.web.resources.*;resolution:=optional,
-							 *
+							!javax.faces.*,
+							!javax.json,
+							!com.cedarsoft.test.utils,
+							!org.apache.commons.lang3,
+							!org.eclipse.jetty.websocket.*,
+							!org.ops4j.pax.web.extender.samples.*,
+							!org.ops4j.pax.web.resources.*,
+							!org.ops4j.pax.web.samples.*,
+							javax.servlet;version="[2.5,4)",
+							javax.servlet.annotation;version="[2.5,4)",
+							javax.servlet.http;version="[2.5,4)",
+							*
 						</Import-Package>
 					</instructions>
 				</configuration>
@@ -214,5 +248,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>

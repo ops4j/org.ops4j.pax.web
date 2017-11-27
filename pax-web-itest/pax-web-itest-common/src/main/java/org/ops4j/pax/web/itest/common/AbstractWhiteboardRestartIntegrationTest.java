@@ -13,15 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.tomcat;
+package org.ops4j.pax.web.itest.common;
+
+import static org.junit.Assert.fail;
+
+import java.util.Arrays;
+
+import javax.inject.Inject;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Configuration;
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.WaitCondition2;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
@@ -29,30 +31,19 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
-import javax.inject.Inject;
-
-import java.util.Arrays;
-
-import static org.junit.Assert.fail;
-
 /**
+ * @author Toni Menzel (tonit)
+ * @since Mar 3, 2009
  */
-@RunWith(PaxExam.class)
-public class WhiteboardRestartTCIntegrationTest extends ITestBase {
+public abstract class AbstractWhiteboardRestartIntegrationTest extends ITestBase {
 
 	private Bundle installWarBundle;
 
 	@Inject
 	private BundleContext ctx;
 
-	@Configuration
-	public Option[] configure() {
-		return configureTomcat();
-	}
-
 	@Before
-	public void setUp() throws Exception {
-		waitForServer("http://127.0.0.1:8282/");
+	public void setUp() throws BundleException, InterruptedException {
 		initServletListener("jsp");
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
@@ -73,7 +64,7 @@ public class WhiteboardRestartTCIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
 						resp -> resp.contains("Hello Whiteboard Extender"))
-				.doGETandExecuteTest("http://127.0.0.1:8282/root");
+				.doGETandExecuteTest("http://127.0.0.1:8181/root");
 	}
 
 	@Test
@@ -81,14 +72,14 @@ public class WhiteboardRestartTCIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Welcome to the Welcome page'",
 						resp -> resp.contains("Welcome to the Welcome page"))
-				.doGETandExecuteTest("http://127.0.0.1:8282/");
+				.doGETandExecuteTest("http://127.0.0.1:8181/");
 	}
 
 	@Test
 	public void testWhiteBoardForbidden() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(401)
-				.doGETandExecuteTest("http://127.0.0.1:8282/forbidden");
+				.doGETandExecuteTest("http://127.0.0.1:8181/forbidden");
 	}
 
 	@Test
@@ -96,12 +87,11 @@ public class WhiteboardRestartTCIntegrationTest extends ITestBase {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Filter was there before'",
 						resp -> resp.contains("Filter was there before"))
-				.doGETandExecuteTest("http://127.0.0.1:8282/filtered");
+				.doGETandExecuteTest("http://127.0.0.1:8181/filtered");
 	}
 
 	@Test
 	public void testWhiteBoardRootRestart() throws Exception {
-
 		// find Whiteboard-bundle
 		final Bundle whiteBoardBundle = Arrays.stream(ctx.getBundles()).filter(bundle ->
 				"org.ops4j.pax.web.pax-web-extender-whiteboard".equalsIgnoreCase(bundle.getSymbolicName()))
@@ -115,19 +105,16 @@ public class WhiteboardRestartTCIntegrationTest extends ITestBase {
 				.waitForCondition(10000, 500, () -> fail("Whiteboard bundle did not stop in time"));
 
 		// start Whiteboard bundle again
-		initServletListener();
 		whiteBoardBundle.start();
 
 		new WaitCondition2("Check if Whiteboard bundle gets activated",
 				() -> whiteBoardBundle.getState() == Bundle.ACTIVE)
 				.waitForCondition(10000, 500, () -> fail("Whiteboard bundle did not start in time"));
-		// also wait till the servlet is registered
-		waitForServletListener();
 
 		// Test
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
 						resp -> resp.contains("Hello Whiteboard Extender"))
-				.doGETandExecuteTest("http://127.0.0.1:8282/root");
+				.doGETandExecuteTest("http://127.0.0.1:8181/root");
 	}
 }

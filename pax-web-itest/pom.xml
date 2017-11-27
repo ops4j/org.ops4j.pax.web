@@ -432,18 +432,6 @@
 				<artifactId>logback-classic</artifactId>
 				<version>${dependency.logback.version}</version>
 			</dependency>
-
-			<dependency>
-				<groupId>org.ops4j.pax.tipi</groupId>
-				<artifactId>org.ops4j.pax.tipi.tomcat-catalina</artifactId>
-				<version>${dependency.tomcat.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.tipi</groupId>
-				<artifactId>org.ops4j.pax.tipi.tomcat-util</artifactId>
-				<version>${dependency.tomcat.version}</version>
-			</dependency>
-
 			<dependency>
 				<groupId>org.apache.servicemix.specs</groupId>
 				<artifactId>

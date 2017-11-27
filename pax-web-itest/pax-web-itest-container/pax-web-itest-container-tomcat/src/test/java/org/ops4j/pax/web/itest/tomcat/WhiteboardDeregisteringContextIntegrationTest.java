@@ -13,32 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.tomcat;
 
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.base.VersionUtil;
-import org.ops4j.pax.web.itest.common.AbstractWhiteboardRankedFilterIntegrationTest;
+import org.ops4j.pax.web.itest.common.AbstractWhiteboardDeregisteringContextIntegrationTest;
 
 /**
  * @author Toni Menzel (tonit)
  * @since Mar 3, 2009
  */
 @RunWith(PaxExam.class)
-public class WhiteboardRankedFilterIntegrationTest extends AbstractWhiteboardRankedFilterIntegrationTest {
+public class WhiteboardDeregisteringContextIntegrationTest extends AbstractWhiteboardDeregisteringContextIntegrationTest {
 
 	@Configuration
 	public static Option[] configure() {
 		return combine(
-				configureUndertow(),
-				mavenBundle().groupId("org.ops4j.pax.web.samples")
-						.artifactId("whiteboard").version(VersionUtil.getProjectVersion())
-						.noStart());
-
+				configureTomcat(),
+				configureWhiteboard());
 	}
 }
