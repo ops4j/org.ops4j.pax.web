@@ -15,49 +15,21 @@
  */
 package org.ops4j.pax.web.itest.jetty;
 
-import static org.ops4j.pax.exam.CoreOptions.*;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
-import org.junit.Ignore;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
+import org.ops4j.pax.web.itest.common.AbstractWhiteboardR7JaxRsIntegrationTest;
 
 @RunWith(PaxExam.class)
-public class WhiteboardR7JaxRsIntegrationTest extends ITestBase {
+public class WhiteboardR7JaxRsIntegrationTest extends AbstractWhiteboardR7JaxRsIntegrationTest {
 
     @Configuration
     public static Option[] configure() {
         return combine(configureJetty(),
-                // aries-jax-rs-whiteboard not yet released
-                repository("http://repository.apache.org/content/groups/snapshots/")
-                        .id("aries-snapshots")
-                        .allowSnapshots()
-                        .disableReleases(),
-                // Deps
-                mavenBundle().groupId("org.osgi").artifactId("org.osgi.service.jaxrs").versionAsInProject(),
-                mavenBundle().groupId("javax.json").artifactId("javax.json-api").version("1.0"),
-                mavenBundle().groupId("javax.ws.rs").artifactId("javax.ws.rs-api").version("2.0.1"),
-                mavenBundle().groupId("org.apache.ws.xmlschema").artifactId("xmlschema-core").version("2.2.1"),
-                mavenBundle().groupId("org.ow2.asm").artifactId("asm").versionAsInProject(),
-                // Runtime
-                // Do not add this to Maven-Dependencies because Exam-Probe will get wrong imports and cause Classloader-issues
-                mavenBundle().groupId("org.apache.aries.jax.rs").artifactId("org.apache.aries.jax.rs.api").version("0.0.1-SNAPSHOT"),
-                mavenBundle().groupId("org.apache.aries.jax.rs").artifactId("org.apache.aries.jax.rs.whiteboard").version("0.0.1-SNAPSHOT"),
-                // Sample
-                mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("whiteboard-ds-jaxrs").versionAsInProject()
+                configureJaxrs()
         );
-    }
-
-    @Ignore(value = "PAXWEB-1116 needed")
-    @Test
-    public void testWhiteboardJaxRsApplication() throws Exception {
-        HttpTestClientFactory.createDefaultTestClient()
-                .withResponseAssertion("Response must contain 'Hello from JAXRS'",
-                        resp -> resp.contains("Hello from JAXRS"))
-                .doGETandExecuteTest("http://127.0.0.1:8181/jaxrs-application");
     }
 }
