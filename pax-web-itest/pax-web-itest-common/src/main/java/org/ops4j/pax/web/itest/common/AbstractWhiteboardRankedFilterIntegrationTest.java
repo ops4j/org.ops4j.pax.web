@@ -46,12 +46,12 @@ public abstract class AbstractWhiteboardRankedFilterIntegrationTest extends ITes
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-
+		initServletListener("/ranked");
 		Dictionary<String, String> initParams = new Hashtable<>();
 		initParams.put("alias", "/ranked");
 		service = bundleContext.registerService(Servlet.class,
 				new WhiteboardServlet("/ranked"), initParams);
-
+		waitForServletListener();
 	}
 
 	@After
@@ -75,6 +75,9 @@ public abstract class AbstractWhiteboardRankedFilterIntegrationTest extends ITes
 		props.put(WebContainerConstants.FILTER_NAME, "rank_2");
 		ServiceRegistration<Filter> filter2 = bundleContext.registerService(
 				Filter.class, new RankFilter(), props);
+
+		// Wait for servlet re-registration
+		Thread.sleep(1500);
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Filter Rank: 1'",
@@ -102,6 +105,9 @@ public abstract class AbstractWhiteboardRankedFilterIntegrationTest extends ITes
 		props.put(WebContainerConstants.FILTER_NAME, "rank_1");
 		ServiceRegistration<Filter> filter2 = bundleContext.registerService(
 				Filter.class, new RankFilter(), props);
+
+		// Wait for servlet re-registration
+		Thread.sleep(1500);
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Filter Rank: 1'",
@@ -136,6 +142,9 @@ public abstract class AbstractWhiteboardRankedFilterIntegrationTest extends ITes
 		props.put(WebContainerConstants.FILTER_NAME, "rank_2");
 		ServiceRegistration<Filter> filter2 = bundleContext.registerService(
 				Filter.class, new RankFilter(), props);
+
+		// Wait for servlet re-registration
+		Thread.sleep(1500);
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Filter Rank: 1'",
