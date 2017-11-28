@@ -48,11 +48,7 @@ public class HttpServiceIntegrationTest extends AbstractHttpServiceIntegrationTe
     }
 
     @Test
-    public void testRegisterMultipleServletsSameContext() throws Exception {
-        super.testRegisterMultipleServletsSameContext();
-    }
-
-    @Test
+    // Logging depends on the container implementation and configuration
     public void testNCSALogger() throws Exception {
         testServletPath();
 
