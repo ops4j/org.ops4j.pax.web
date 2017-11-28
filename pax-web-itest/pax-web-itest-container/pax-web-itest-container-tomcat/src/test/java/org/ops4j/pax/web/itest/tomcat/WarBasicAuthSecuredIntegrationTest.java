@@ -18,7 +18,6 @@ package org.ops4j.pax.web.itest.tomcat;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
-import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -31,7 +30,6 @@ import org.ops4j.pax.web.itest.common.AbstractWarBasicAuthSecuredIntegrationTest
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
-@Ignore
 public class WarBasicAuthSecuredIntegrationTest extends AbstractWarBasicAuthSecuredIntegrationTest {
 
 	@Configuration
