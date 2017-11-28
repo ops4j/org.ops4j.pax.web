@@ -121,10 +121,10 @@ public class TomcatResourceServlet extends HttpServlet {
 			included = Boolean.FALSE;
 			// getRequestURI will return full path with context name
 			mapping = request.getRequestURI();
-			if (!"/".equals(contextName)) {
+			if (!"/".equals(contextName) && mapping.startsWith(contextName)) {
 				mapping = mapping.substring(contextName.length());
 			}
-			if (!"/".equals(alias)) {
+			if (!"/".equals(alias) && mapping.startsWith(alias)) {
 				mapping = mapping.substring(alias.length());
 			}
 			if (!name.isEmpty() && !"default".equals(name)) {
