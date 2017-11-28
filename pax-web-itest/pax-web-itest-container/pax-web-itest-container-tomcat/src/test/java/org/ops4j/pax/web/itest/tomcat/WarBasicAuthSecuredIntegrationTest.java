@@ -18,20 +18,20 @@ package org.ops4j.pax.web.itest.tomcat;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
-import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.common.AbstractWarBasicAuthSecuredIntegrationTest;
 
 /**
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
-@Ignore
 public class WarBasicAuthSecuredIntegrationTest extends AbstractWarBasicAuthSecuredIntegrationTest {
 
 	@Configuration
@@ -46,5 +46,21 @@ public class WarBasicAuthSecuredIntegrationTest extends AbstractWarBasicAuthSecu
 				systemProperty("org.ops4j.pax.web.ssl.clientauthneeded").value("required"),
 				mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("tomcat-auth-config-fragment")
 						.version(VersionUtil.getProjectVersion()).noStart());
+	}
+
+	@Test
+	public void testWebContainerExample() throws Exception {
+		// The error page does not contain the word "Unauthorized"
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(401)
+				.withResponseAssertion("Response must contain 'Unauthorized'",
+						resp -> resp.contains("HTTP Status 401"))
+				.doGETandExecuteTest("https://127.0.0.1:8443/war-authentication/wc/example");
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.authenticate("admin", "admin", "Test Realm")
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.doGETandExecuteTest("https://127.0.0.1:8443/war-authentication/wc/example");
 	}
 }

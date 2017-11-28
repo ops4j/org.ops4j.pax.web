@@ -417,7 +417,7 @@ public class EmbeddedTomcat extends Tomcat {
             final String sslPassword, final String sslKeyPassword, Boolean useNIO) {
         Connector secureConnector  = null;
         if (sslPassword != null && sslKeyPassword != null) {
-        	secureConnector = new Connector("HTTPS/1.1");
+        	secureConnector = new Connector("HTTP/1.1");
         	secureConnector.setPort(httpSecurePort);
             secureConnector.setSecure(true);
             secureConnector.setScheme("https");
