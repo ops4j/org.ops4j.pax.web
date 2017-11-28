@@ -15,20 +15,10 @@
  */
 package org.ops4j.pax.web.itest.common;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Proxy;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -45,7 +35,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.ops4j.pax.web.itest.base.VersionUtil;
-import org.ops4j.pax.web.itest.base.WaitCondition;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.base.support.SimpleOnlyFilter;
 import org.ops4j.pax.web.itest.base.support.TestServlet;
@@ -62,7 +51,6 @@ import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * @author Toni Menzel (tonit)
@@ -208,6 +196,11 @@ public abstract class AbstractHttpServiceIntegrationTest extends ITestBase {
 	public void testRegisterMultipleServletsSameContext() throws Exception {
 		final HttpService httpService = getHttpService(bundleContext);
 
+		// the helloworld-hs bundle registers a servlet under the root
+		// we stop this to prevent this to interfere with the resource registered
+		// in this test
+		installWarBundle.stop();
+
 		final AtomicReference<HttpContext> httpContext1 = new AtomicReference<>();
 		final AtomicReference<HttpContext> httpContext2 = new AtomicReference<>();
 		bundleContext.registerService(ServletListener.class, servletEvent -> {
@@ -275,23 +268,23 @@ public abstract class AbstractHttpServiceIntegrationTest extends ITestBase {
 		// resources
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'registerResources test (static)'",
-						resp -> resp.contains("registerResources test"))
+						resp -> resp.contains("registerResources test (static)"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/r1/readme.txt");
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'registerResources test (static)'",
-						resp -> resp.contains("registerResources test"))
+						resp -> resp.contains("registerResources test (static)"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/r2/readme.txt");
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'registerResources test (ROOT)'",
-						resp -> resp.contains("registerResources test"))
+						resp -> resp.contains("registerResources test (ROOT)"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/r3/readme.txt");
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'registerResources test (ROOT)'",
-						resp -> resp.contains("registerResources test"))
+						resp -> resp.contains("registerResources test (ROOT)"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/r4/readme.txt");
 		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'registerResources test (ROOT)'",
-						resp -> resp.contains("registerResources test"))
+				.withResponseAssertion("Response must contain 'registerResources test (static)'",
+						resp -> resp.contains("registerResources test (static)"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/readme.txt");
 
 		Assert.assertSame(httpContext1.get(), httpContext2.get());
@@ -496,38 +489,5 @@ public abstract class AbstractHttpServiceIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8181/testFilter/filterMe");
 
 		service.unregisterFilter(filter);
-	}
-
-	@Test
-	public void testNCSALogger() throws Exception {
-		testServletPath();
-
-		SimpleDateFormat formater = new SimpleDateFormat("yyyy_MM_dd");
-		String date = formater.format(new Date());
-
-		final File logFile = new File("target/logs/" + date + ".request.log");
-
-		LOG.info("Log-File: {}", logFile.getAbsoluteFile());
-
-		assertNotNull(logFile);
-
-		new WaitCondition("logfile") {
-			@Override
-			protected boolean isFulfilled() throws Exception {
-				return logFile.exists();
-			}
-		}.waitForCondition();
-
-		boolean exists = logFile.getAbsoluteFile().exists();
-
-		assertTrue(exists);
-
-		FileInputStream fstream = new FileInputStream(logFile.getAbsoluteFile());
-		DataInputStream in = new DataInputStream(fstream);
-		BufferedReader br = new BufferedReader(new InputStreamReader(in));
-		String strLine = br.readLine();
-		assertNotNull(strLine);
-		in.close();
-		fstream.close();
 	}
 }

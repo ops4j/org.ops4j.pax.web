@@ -26,7 +26,6 @@ import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -49,21 +48,9 @@ public class HttpServiceIntegrationTest extends AbstractHttpServiceIntegrationTe
 	public static Option[] configure() {
 		return configureTomcat();
 	}
-	
-	@Test
-	@Ignore
-	public void testRegisterServletToWarContext() throws Exception {
-		super.testRegisterServletToWarContext();
-	}
 
 	@Test
-	@Ignore
-	public void testRegisterMultipleServletsSameContext() throws Exception {
-		super.testRegisterMultipleServletsSameContext();
-	}
-	
-	@Test
-	//@Ignore("worked before - framework settings?")
+    // Logging depends on the container implementation and configuration
 	public void testNCSALogger() throws Exception {
 		testSubPath();
 
@@ -111,7 +98,7 @@ public class HttpServiceIntegrationTest extends AbstractHttpServiceIntegrationTe
 		in.close();
 		fstream.close();
 	}
-	
+
 	@Override
 	protected boolean isInitEager() {
 		return false;
