@@ -72,7 +72,11 @@ public class TestConfiguration {
 				linkBundle("org.apache.xbean.finder"),
 				mavenBundle().groupId("org.apache.xbean")
 						.artifactId("xbean-reflect").version(asInProject()),
-				linkBundle("org.objectweb.asm"),
+				mavenBundle("org.ow2.asm", "asm").versionAsInProject(),
+				mavenBundle("org.ow2.asm", "asm-commons").versionAsInProject(),
+				mavenBundle("org.ow2.asm", "asm-tree").versionAsInProject(),
+				mavenBundle("org.ow2.asm", "asm-util").versionAsInProject(),
+				mavenBundle("org.ow2.asm", "asm-analysis").versionAsInProject(),
 
 				linkBundle("org.apache.felix.eventadmin"),
 
