@@ -36,7 +36,7 @@ public abstract class AbstractWhiteboardR7JaxRsIntegrationTest extends ITestBase
                 mavenBundle().groupId("javax.json").artifactId("javax.json-api").version("1.0"),
                 mavenBundle().groupId("javax.ws.rs").artifactId("javax.ws.rs-api").version("2.0.1"),
                 mavenBundle().groupId("org.apache.ws.xmlschema").artifactId("xmlschema-core").version("2.2.1"),
-                mavenBundle().groupId("org.ow2.asm").artifactId("asm-all").versionAsInProject(),
+                mavenBundle().groupId("org.ow2.asm").artifactId("asm").versionAsInProject(),
                 // Runtime
                 // Do not add this to Maven-Dependencies because Exam-Probe will get wrong imports and cause Classloader-issues
                 mavenBundle().groupId("org.apache.aries.jax.rs").artifactId("org.apache.aries.jax.rs.api").version("0.0.1-SNAPSHOT"),
