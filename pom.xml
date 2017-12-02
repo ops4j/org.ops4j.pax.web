@@ -153,6 +153,9 @@
 		<gatling-plugin.version>2.0.0</gatling-plugin.version>
 		<bundle-plugin.version>3.3.0</bundle-plugin.version>
 
+		<surefire-plugin.version>2.20.1</surefire-plugin.version>
+		<failsafe-plugin.version>2.20.1</failsafe-plugin.version>
+
 		<servlet.spec.groupId>javax.servlet</servlet.spec.groupId>
 		<servlet.spec.artifactId>javax.servlet-api</servlet.spec.artifactId>
 		<servlet.spec.version>3.1.0</servlet.spec.version>
@@ -279,6 +282,14 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
 			</plugin>
 		</plugins>
 		<pluginManagement>
@@ -438,10 +449,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.13</version>
-					<configuration>
-						<argLine>${jcoverage.command}</argLine>
-					</configuration>
+					<version>${surefire-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>${failsafe-plugin.version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.sonar</groupId>
@@ -858,6 +871,23 @@
 				<groupId>org.ow2.asm</groupId>
 				<artifactId>asm-analysis</artifactId>
 				<version>${dependency.asm.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.primefaces</groupId>
+				<artifactId>primefaces</artifactId>
+				<version>${dependency.primefaces.version}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-core</artifactId>
+				<version>${dependency.logback.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-classic</artifactId>
+				<version>${dependency.logback.version}</version>
 			</dependency>
 
 			<!-- Load-Test Dependencies -->
