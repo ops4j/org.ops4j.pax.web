@@ -30,6 +30,9 @@ For cases that requires advanced Jetty configuration read
 link:Advanced-Jetty-Configuration.html[Advanced Jetty
 Configuration] page.
 
+Undertow specific configuration can be found in link:Advanced-Undertow-Configuration.html[Advanced Undertow
+Configuration] page.
+
 
 [[Configuration-ConfigurationviaOSGiConfigurationAdminService]]
 == Configuration via OSGi Configuration Admin Service
