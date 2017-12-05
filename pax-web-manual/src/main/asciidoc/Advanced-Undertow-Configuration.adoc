@@ -1,0 +1,262 @@
+
+////
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+	 
+	    http://www.apache.org/licenses/LICENSE-2.0
+	 
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+
+////
+
+= Advanced Undertow Configuration
+
+There are three _layers_ of Undertow configuration. In most generic and simple case, it's enough to
+have `org.ops4j.pax.web` PID configuration in Configuration Admin service. In Apache Karaf, that's typically
+done using `$KARAF_HOME/etc/org.ops4j.pax.web.cfg` file. All the standard options work.
+
+Standard configuration is described
+ link:Configuration.html#Configuration-ConfigurationviaOSGiConfigurationAdminService[in Configuration section].
+
+
+== Using additional `undertow.properties` file
+
+`org.ops4j.pax.web.config.file` option can point to `undertow.properties` (or any other file with
+`*.properties` extension) that can be used to configure additional properties for Undertow server.
+
+It's possible to configure these additional properties:
+
+[source, property]
+----
+identityManager = org.ops4j.pax.web.service.undertow.internal.security.JaasIdentityManager
+identityManager.realm = karaf
+identityManager.userPrincipalClassName = org.apache.karaf.jaas.boot.principal.UserPrincipal
+identityManager.rolePrincipalClassNames = org.apache.karaf.jaas.boot.principal.RolePrincipal
+----
+
+`identityManager` property configures Undertow's implementation of `io.undertow.security.idm.IdentityManager`
+interface. pax-web specific `JaasIdentityManager` hooks OSGi JAAS authentication into Undertow mechanisms,
+so standard Karaf JAAS configuration can be used to configure authentication.
+
+
+== Using `undertow.xml` file
+
+`org.ops4j.pax.web.config.file` option can point to `undertow.xml` (or any other file with `*.xml` extension)
+that can be used to configure much more aspects of Undertow embedded server.
+
+Undertow server was designed to use _embedded first_ approach. There's no official ZIP archive, which can
+be unzipped and started using some kind of `bin/start` script.
+The most known server that embeds Undertow is Open Source server http://wildfly.org/[Wildfly].
+
+And just as pax-web-jetty reuses Jetty DTD for embedded Jetty configuration, pax-web-undertow reuses
+XML Schemas from Wildfly and it's https://github.com/wildfly/wildfly/tree/10.1.0.Final/undertow[Undertow Subsystem].
+And because pax-web doesn't use any of Wildfly related classes for parsing and processing these XML configuration files,
+not all options are taken into account (and even valid in pax-web case). All the supported configuration elements
+will be described below.
+
+pax-web-undertow 6.1 uses XML configuration of Undertow server according to these schemas:
+
+* pax-web specific configuration: https://raw.githubusercontent.com/ops4j/org.ops4j.pax.web/pax-web-6.1.x/pax-web-undertow/src/main/resources/schema/pax-web-undertow_1_0.xsd (location may change in future).
+* Generic Wildfly configuration: http://www.jboss.org/schema/jbossas/wildfly-config_4_2.xsd
+* Wildfly Undertow subsystem configuration: http://www.jboss.org/schema/jbossas/wildfly-undertow_3_1.xsd
+
+pax-web specific XML Schema provides a wrapper and most of configuration elements come from one of Wildfly
+schemas.
+
+The template XML configuration file is available as Maven artifact with `mvn:org.ops4j.pax.web/pax-web-features/6.1.x/xml/undertowconfig`
+URI. It looks like this:
+
+[source, xml]
+----
+<undertow xmlns="urn:org.ops4j.pax.web:undertow:1.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:w="urn:jboss:domain:4.2"
+        xsi:schemaLocation="
+            urn:jboss:domain:undertow:3.1 http://www.jboss.org/schema/jbossas/wildfly-undertow_3_1.xsd
+            urn:jboss:domain:4.2 http://www.jboss.org/schema/jbossas/wildfly-config_4_2.xsd">
+
+    <!-- https://docs.jboss.org/author/display/WFLY10/Undertow+subsystem+configuration -->
+    <subsystem xmlns="urn:jboss:domain:undertow:3.1">
+        <!-- org.wildfly.extension.undertow.BufferCacheDefinition -->
+        <buffer-cache name="default" buffer-size="1024" buffers-per-region="1024" max-regions="10" />
+        <server name="default-server">
+            <!-- HTTP(S) Listener references Socket Binding (and indirectly - Interfaces) -->
+            <http-listener name="http" socket-binding="http" />
+            <!-- verify-client: org.xnio.SslClientAuthMode.NOT_REQUESTED, org.xnio.SslClientAuthMode.REQUESTED, org.xnio.SslClientAuthMode.REQUIRED -->
+            <!--<https-listener name="https" socket-binding="https"-->
+                    <!--security-realm="https" verify-client="NOT_REQUESTED" />-->
+            <host name="default-host" alias="localhost">
+                <!--<location name="/" handler="welcome-content" />-->
+                <!--<location name="/docs" handler="docs-content" />-->
+                <access-log directory="${karaf.data}/log" pattern="common" prefix="access_log." suffix="log" rotate="true" />
+                <filter-ref name="server-header" />
+                <filter-ref name="x-powered-by-header" />
+            </host>
+        </server>
+        <servlet-container name="default">
+            <jsp-config />
+            <websockets />
+            <welcome-files>
+                <welcome-file name="index.html" />
+                <welcome-file name="index.txt" />
+            </welcome-files>
+        </servlet-container>
+        <handlers>
+            <file name="welcome-content" path="${karaf.home}/welcome" />
+            <!--<file name="docs-content" path="${karaf.home}/docs" />-->
+        </handlers>
+        <filters>
+            <!-- filters for reference from /host/filter-ref and /host/location/filter-ref -->
+            <response-header name="server-header" header-name="Server" header-value="Pax-HTTP-Undertow" />
+            <response-header name="x-powered-by-header" header-name="X-Powered-By" header-value="Pax-HTTP-Undertow/${project.version}" />
+        </filters>
+    </subsystem>
+
+    <!-- https://docs.jboss.org/author/display/WFLY10/Security+Realms -->
+    <!--
+        we'll use "default" security realm by default to configure jaas/properties authentication
+        (io.undertow.security.idm.IdentityManager):
+         - w:jaas - org.ops4j.pax.web.service.undertow.internal.security.JaasIdentityManager
+         - w:properties - org.ops4j.pax.web.service.undertow.internal.security.PropertiesIdentityManager
+    -->
+    <security-realm name="default">
+        <w:authentication>
+            <!-- JaasIdentityManager for given realm -->
+            <w:jaas name="karaf" />
+            <!-- OR PropertiesIdentityManager (mutually exclusive with <w:jaas>) -->
+            <!--<w:properties path="users.properties" />-->
+        </w:authentication>
+        <user-principal-class-name>org.apache.karaf.jaas.boot.principal.UserPrincipal</user-principal-class-name>
+        <role-principal-class-name>org.apache.karaf.jaas.boot.principal.RolePrincipal</role-principal-class-name>
+        <!--<role-principal-class-name>...</role-principal-class-name>-->
+    </security-realm>
+    <!--
+        Any security realm may be referenced by https-listener to define trust/keystore, protocols and cipher suites
+    -->
+    <security-realm name="https">
+        <w:server-identities>
+            <w:ssl>
+                <!-- sun.security.ssl.ProtocolVersion -->
+                <!-- sun.security.ssl.CipherSuite -->
+                <!-- openssl ciphers 'ALL:eNULL' | sed -e 's/:/\n/g' | sort -->
+                <w:engine
+                        enabled-cipher-suites="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384 TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"
+                        enabled-protocols="TLSv1 TLSv1.1 TLSv1.2" />
+                <w:keystore path="${karaf.etc}/certs/server.keystore" provider="JKS" alias="server"
+                        keystore-password="secret" key-password="secret"
+                        generate-self-signed-certificate-host="localhost" />
+            </w:ssl>
+        </w:server-identities>
+        <w:authentication>
+            <w:truststore path="${karaf.etc}/certs/server.truststore" provider="JKS" keystore-password="secret" />
+        </w:authentication>
+    </security-realm>
+
+    <!-- Interface lists IP addresses to bind to -->
+    <interface name="default">
+        <w:inet-address value="0.0.0.0" />
+        <!--<w:inet-address value="127.0.0.1" />-->
+    </interface>
+    <interface name="secure">
+        <w:inet-address value="127.0.0.1" />
+    </interface>
+
+    <!-- Socket Binding adds port for each IP from referenced Interface -->
+    <socket-binding name="http" interface="default" port="${org.osgi.service.http.port}" />
+    <socket-binding name="https" interface="secure" port="${org.osgi.service.http.port.secure}" />
+
+</undertow>
+----
+
+Comments in the above example provide some explanation, but here's the summary of options. We'll start
+from the low level options.
+
+[NOTE]
+All values may use property placeholders (like `${org.osgi.service.http.port}`) that will be resolved with properties
+available in configuration or bundle context.
+
+=== Networking options
+
+Basic networking configuration requires two elements:
+
+* `<interface>/<w:inet-address>` defines networking addresses that will be used for socket binding. Typical settings are
+`0.0.0.0` (all interfaces), `127.0.0.1` (loopback interface) or any interface address bound to network device
+* `<socket-binding>` adds port information to binding address
+
+=== Undertow server listener configuration
+
+Having address/port options configured, we can specify configuration for http(s) listener in Undertow embedded server.
+
+* `<subsystem>/<server>/<http[s]-listener>` configures embedded server to listen on given address/port.
+
+For `<https-listener>` we can use `realm` to point to security configuration and `verify-client` attribute with
+one of these values: `NOT_REQUESTED`, `REQUESTED`, `REQUIRED`.
+
+=== Security configuration
+
+XML configuration may specify multiple `<security-realm name="name">` elements.
+
+Special `<security-realm name="default">` realm is used to configure `io.undertow.security.idm.IdentityManager`.
+
+* `<security-realm name="default">/<w:authentication>/<w:jaas name="karaf" />` defines JAAS authentication
+and elements `<user-principal-class-name>` and `<role-principal-class-name>` are required.
+* `<security-realm name="default">/<w:authentication>/<w:properties path="users.properties" />` switches to simple
+authentication where users are specified in simple properties file.
+
+When security realm has different name (dedicated, but `default` may also be referenced), it can be referenced
+from `<subsystem>/<server>/<https-listener>` to define additional TLS configuration:
+
+* `<security-realm name="https">/<w:server-identities>/<w:ssl>/<w:engine>` allows to configure these options:
+** `enabled-cipher-suites` (for example `TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384 TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384` -
+see source code of `sun.security.ssl.CipherSuite` to check available cipher suites - for standard security engine)
+** `enabled-protocols` (for example `TLSv1 TLSv1.1 TLSv1.2` - see source code of `sun.security.ssl.ProtocolVersion` to check
+available protocol identifiers - for standard security engine)
+* `<security-realm name="https">/<w:server-identities>/<w:ssl>/<w:keystore>` configures keystore that contains server
+certificate and private key
+* `<security-realm name="https">/<w:authentication>/<w:truststore>` configures truststore that contains trusted (CA)
+certificates
+
+
+== HTTP server configuration
+
+Having networking elements configured, `<subsystem>/<server>` is used to create actual instance of embedded Undertow
+server.
+
+* `<subsystem>/<server>/<http[s]-listener>` is a reference to already defined listener
+* `<subsystem>/<server>/<host>` currently only one virtual host is supported
+* `<subsystem>/<server>/<host>/<location>` maps referenced `<subsystem>/<handler>` to given http request path
+* `<subsystem>/<server>/<host>/<access-log>` configures access logging
+* `<subsystem>/<server>/<host>/<filter-ref>` configures additional filters to be used for all requests handled by this
+virtual host. Filters are defined in `<subsystem>/<handlers>/<handler>` elements
+
+
+== Filter and Handler configuration
+
+Filters and handlers handle HTTP requests. Filters pass the request further down the chain, and handlers are actual
+endpoints that do something (e.g., servlets).
+
+Filters:
+
+* `<subsystem>/<filters>/<response-header>` adds some HTTP header to response and proceeds
+* `<subsystem>/<filters>/<filter>` not implemented yet
+* `<subsystem>/<filters>/<error-page>` not implemented yet
+
+Handlers:
+
+* `<subsystem>/<handlers>/<file>` configures resource handler that simply serves static resources from given location. Usually
+"welcome" handler is configured this way, to serve some initial resources for e.g., Apache Karaf.
+
+
+== Servlet container configuration
+
+Last and _highest level_ of configuration is servlet container - how Undertow handles servlets.
+
+* `<subsystem>/<servlet-container>/<welcome-files>/<welcome-file>` configures default files that are returned in case there's
+no match for any configured servlets, filters or resources (same configuration as in `WEB-INF/web.xml`)
+
