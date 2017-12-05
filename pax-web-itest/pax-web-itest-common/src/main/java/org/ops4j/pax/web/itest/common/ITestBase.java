@@ -182,17 +182,17 @@ public abstract class ITestBase extends AbstractControlledTestBase {
 				mavenBundle().groupId("org.ops4j.pax.web").artifactId("pax-web-runtime").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web").artifactId("pax-web-undertow").version(asInProject()),
 
-				mavenBundle().groupId("org.ops4j.pax.tipi").artifactId("org.ops4j.pax.tipi.xnio.api").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.tipi").artifactId("org.ops4j.pax.tipi.xnio.nio").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.tipi").artifactId("org.ops4j.pax.tipi.undertow.core").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.tipi").artifactId("org.ops4j.pax.tipi.undertow.servlet").version(asInProject())
+				mavenBundle().groupId("org.jboss.xnio").artifactId("xnio-api").version(asInProject()),
+				mavenBundle().groupId("org.jboss.xnio").artifactId("xnio-nio").version(asInProject()),
+				mavenBundle().groupId("io.undertow").artifactId("undertow-core").version(asInProject()),
+				mavenBundle().groupId("io.undertow").artifactId("undertow-servlet").version(asInProject())
 		);
 	}
 
 	public static Option[] configureWebSocketUndertow() {
 		return combine(
 				configureUndertow(),
-				mavenBundle().groupId("org.ops4j.pax.tipi").artifactId("org.ops4j.pax.tipi.undertow.websocket-jsr").version(asInProject())
+				mavenBundle().groupId("io.undertow").artifactId("undertow-websockets-jsr").version(asInProject())
 		);
 	}
 
