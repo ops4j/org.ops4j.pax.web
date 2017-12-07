@@ -41,6 +41,7 @@ import javax.servlet.FilterRegistration.Dynamic;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeListener;
+import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletRegistration;
 import javax.servlet.ServletRequestAttributeListener;
@@ -545,6 +546,10 @@ class TomcatServerWrapper implements ServerWrapper {
 		boolean found = filterEventListener(listeners, applicationLifecycleListeners, eventListener);
 
 		if (found) {
+			// notify the ServletContextListener before unregistering it
+			if (eventListener instanceof ServletContextListener) {
+				((ServletContextListener) eventListener).contextDestroyed(new ServletContextEvent(context.getServletContext()));
+			}
 			context.setApplicationLifecycleListeners(listeners.toArray());
 		}
 		return found;
