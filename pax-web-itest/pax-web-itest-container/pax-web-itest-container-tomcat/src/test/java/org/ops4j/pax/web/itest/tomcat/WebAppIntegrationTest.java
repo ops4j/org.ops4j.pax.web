@@ -16,8 +16,6 @@
 
 package org.ops4j.pax.web.itest.tomcat;
 
-import org.junit.Ignore;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -34,10 +32,4 @@ public class WebAppIntegrationTest extends AbstractWebAppIntegrationTest {
 	public static Option[] configure() {
 		return configureTomcat();
 	}
-
-    @Test
-    @Ignore("Something's wrong with Tomcat and redundant events")
-    public void testWars() throws Exception {
-        super.testWars();
-    }
 }
