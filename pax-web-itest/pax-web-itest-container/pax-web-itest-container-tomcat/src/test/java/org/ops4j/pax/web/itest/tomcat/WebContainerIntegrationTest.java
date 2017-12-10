@@ -15,8 +15,6 @@
  */
 package org.ops4j.pax.web.itest.tomcat;
 
-import org.junit.Ignore;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -32,11 +30,5 @@ public class WebContainerIntegrationTest extends AbstractWebContainerIntegration
 	@Configuration
 	public static Option[] configure() {
 		return configureTomcat();
-	}
-
-	@Test
-	@Ignore
-    public void testWelcomFiles() throws Exception {
-		super.testWelcomFiles();
 	}
 }
