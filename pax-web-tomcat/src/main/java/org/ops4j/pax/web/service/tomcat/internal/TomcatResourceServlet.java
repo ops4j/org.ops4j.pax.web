@@ -168,7 +168,7 @@ public class TomcatResourceServlet extends HttpServlet {
 				return;
 			}
 
-			String welcome = getWelcomeFile(mapping);
+			String welcome = endsWithSlash ? getWelcomeFile(mapping) : null;
 
 			// else look for a welcome file
 			if (null != welcome) {
@@ -301,14 +301,15 @@ public class TomcatResourceServlet extends HttpServlet {
 			return null;
 		}
 
-		String welcomeServlet = null;
 		for (int i = 0; i < welcomes.length; i++) {
-			String welcomeInContext = addPaths(pathInContext, welcomes[i]);
-			if (httpContext.getResource(welcomeInContext) != null) {
+			if (httpContext.getResource(welcomes[i]) != null) {
+				if (!welcomes[i].startsWith("/")) {
+					return "/" + welcomes[i];
+				}
 				return welcomes[i];
 			}
 		}
-		return welcomeServlet;
+		return null;
 	}
 
 	private static String addPaths(String p1, String p2) {
