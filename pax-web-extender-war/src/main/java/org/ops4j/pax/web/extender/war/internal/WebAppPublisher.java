@@ -235,7 +235,7 @@ class WebAppPublisher {
 					eventDispatcher.webEvent(webApp, WebEvent.DEPLOYED,
 							webAppHttpService);
 					//CHECKSTYLE:OFF
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					LOG.error("Error deploying web application", e);
 					eventDispatcher.webEvent(webApp, WebEvent.FAILED, e);
 				}

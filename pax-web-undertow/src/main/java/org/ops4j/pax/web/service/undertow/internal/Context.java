@@ -32,6 +32,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
+import org.keycloak.adapters.undertow.KeycloakServletExtension;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
@@ -365,6 +366,9 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		// TODO: move to XML configuration
 		deployment.setIdentityManager(identityManager);
 		if (contextModel.getRealmName() != null && contextModel.getAuthMethod() != null) {
+			if ("KEYCLOAK".equals(contextModel.getAuthMethod())) {
+				deployment.getServletExtensions().add(new KeycloakServletExtension());
+			}
 			LoginConfig cfg = new LoginConfig(
 					contextModel.getAuthMethod(),
 					contextModel.getRealmName(),

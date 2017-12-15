@@ -57,7 +57,7 @@ public abstract class SimpleExtension implements Extension {
 			}
 			try {
 				doStart();
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				logger.warn("Error starting extension for bundle " + bundle, e);
 			}
 		}

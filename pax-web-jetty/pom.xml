@@ -121,11 +121,13 @@
 							org.apache.el.lang; version="2.2"; resolution:=optional,
 							org.apache.el.parser; version="2.2"; resolution:=optional,
 							org.apache.el.stream; version="2.2"; resolution:=optional,
-							org.apache.el.util; version="2.2"; resolution:=optional
+							org.apache.el.util; version="2.2"; resolution:=optional,
+							org.keycloak.*; version="[3.4,4.0)"; resolution:=optional
 						</Import-Package>
 						<DynamicImport-Package>org.eclipse.jetty.*</DynamicImport-Package>
 						<Private-Package>
 							!org.apache.commons.logging,
+							!org.apache.http.*,
 							${bundle.namespace}.internal.*,
 							org.apache.commons.lang3.reflect,
 						</Private-Package>
@@ -269,6 +271,14 @@
 			<groupId>org.ow2.asm</groupId>
 			<artifactId>asm</artifactId>
 			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ops4j.pax.keycloak</groupId>
+			<artifactId>pax-keycloak-jetty</artifactId>
+			<version>${dependency.pax-keycloak.version}</version>
+			<scope>provided</scope>
+			<optional>true</optional>
 		</dependency>
 
 		<!-- Test dependencies (not transitive) -->

@@ -114,6 +114,11 @@
         <capability>
             pax.http.provider;provider:=jetty
         </capability>
+
+        <conditional>
+            <condition>pax-keycloak</condition>
+            <feature>pax-keycloak-http-jetty</feature>
+        </conditional>
     </feature>
 
     <feature name="pax-http" version="${project.version}" description="Implementation of the OSGI HTTP Service">
@@ -286,6 +291,11 @@
         <capability>
             pax.http.provider;provider:=undertow
         </capability>
+
+        <conditional>
+            <condition>pax-keycloak</condition>
+            <feature>pax-keycloak-http-undertow</feature>
+        </conditional>
     </feature>
 
 </features>
