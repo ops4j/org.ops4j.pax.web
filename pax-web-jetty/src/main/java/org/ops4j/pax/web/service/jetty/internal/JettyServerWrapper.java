@@ -58,6 +58,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler.TagLib;
 import org.eclipse.jetty.util.MultiException;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.thread.ThreadPool;
+import org.keycloak.adapters.jetty.KeycloakJettyAuthenticator;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainerConstants;
@@ -481,6 +482,9 @@ class JettyServerWrapper extends Server {
 					break;
 				case Constraint.__SPNEGO_AUTH:
 					authenticator = new SpnegoAuthenticator();
+					break;
+				case "KEYCLOAK":
+					authenticator = new KeycloakJettyAuthenticator();
 					break;
 				default:
 					LOG.warn("UNKNOWN AUTH METHOD: " + authMethod);
