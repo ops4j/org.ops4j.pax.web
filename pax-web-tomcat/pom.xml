@@ -243,6 +243,15 @@
 			<classifier>uber</classifier>
 			<scope>provided</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.ops4j.pax.keycloak</groupId>
+			<artifactId>pax-keycloak-tomcat</artifactId>
+			<version>${dependency.pax-keycloak.version}</version>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+
 		<!-- Test dependencies (not transitive) -->
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>

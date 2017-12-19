@@ -86,6 +86,7 @@ import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.apache.tomcat.util.descriptor.web.TaglibDescriptorImpl;
 import org.apache.tomcat.util.digester.Digester;
 import org.apache.tomcat.util.digester.RuleSet;
+import org.keycloak.adapters.tomcat.KeycloakAuthenticatorValve;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
@@ -979,6 +980,8 @@ class TomcatServerWrapper implements ServerWrapper {
 			return new FormAuthenticator();
 		case "SPNEGO":
 			return new SpnegoAuthenticator();
+		case "KEYCLOAK":
+			return new KeycloakAuthenticatorValve();
 		default:
 			return new NonLoginAuthenticator();
 		}
