@@ -22,7 +22,7 @@
 		<relativePath>../</relativePath>
 		<groupId>org.ops4j.pax.web</groupId>
 		<artifactId>samples</artifactId>
-		<version>6.1.0</version>
+		<version>6.1.1-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.ops4j.pax.web.samples</groupId>
