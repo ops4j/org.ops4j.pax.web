@@ -15,6 +15,11 @@
  */
 package org.ops4j.pax.web.itest.jetty;
 
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -24,8 +29,20 @@ import org.ops4j.pax.web.itest.common.AbstractWhiteboardR6IntegrationTest;
 @RunWith(PaxExam.class)
 public class WhiteboardR6IntegrationTest extends AbstractWhiteboardR6IntegrationTest {
 
+    private static final Map<Integer, String> ERROR_MESSAGES = Stream.of(
+            new SimpleEntry<>(404, "Not Found"),
+            new SimpleEntry<>(442, "442"),
+            new SimpleEntry<>(502, "Bad Gateway"),
+            new SimpleEntry<>(500, "java.io.IOException: somethingwronghashappened"))
+            .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
+
 	@Configuration
 	public static Option[] configure() {
 		return configureJetty();
 	}
+
+	@Override
+	protected String getErrorMessage(int statusCode) {
+        return ERROR_MESSAGES.get(statusCode);
+    }
 }
