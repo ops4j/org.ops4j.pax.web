@@ -776,18 +776,35 @@ class TomcatServerWrapper implements ServerWrapper {
 			throw new AddErrorPageException(
 					"cannot retrieve the associated context: " + model);
 		}
-		final ErrorPage errorPage = createErrorPage(model);
-		context.addErrorPage(errorPage);
+		// for Nxx codes, we have to loop
+		// Tomcat doesn't support error code range handlers, but
+		// in the end - it's just a org.apache.catalina.core.StandardContext.statusPages map of code -> error page
+		if ("4xx".equals(model.getError())) {
+			for (int c = 400; c < 500; c++) {
+				final ErrorPage errorPage = createErrorPage(model, c);
+				context.addErrorPage(errorPage);
+			}
+		} else if ("5xx".equals(model.getError())) {
+			for (int c = 500; c < 600; c++) {
+				final ErrorPage errorPage = createErrorPage(model, c);
+				context.addErrorPage(errorPage);
+			}
+		} else {
+			final ErrorPage errorPage = createErrorPage(model, null);
+			context.addErrorPage(errorPage);
+		}
 	}
 
-	private ErrorPage createErrorPage(final ErrorPageModel model) {
+	private ErrorPage createErrorPage(final ErrorPageModel model, Integer errorCode) {
 		NullArgumentException.validateNotNull(model, "model");
 		NullArgumentException.validateNotNull(model.getLocation(),
 				"model#location");
 		NullArgumentException.validateNotNull(model.getError(), "model#error");
 		final ErrorPage errorPage = new ErrorPage();
 		errorPage.setLocation(model.getLocation());
-		final Integer errorCode = parseErrorCode(model.getError());
+		if (errorCode == null) {
+			errorCode = parseErrorCode(model.getError());
+		}
 		if (errorCode != null) {
 			errorPage.setErrorCode(errorCode);
 		} else {
@@ -813,11 +830,23 @@ class TomcatServerWrapper implements ServerWrapper {
 			throw new RemoveErrorPageException(
 					"cannot retrieve the associated context: " + model);
 		}
-
-		LOG.info("remove error page");
-		final ErrorPage errorPage = createErrorPage(model);
-		context.removeErrorPage(errorPage);
-
+		// for Nxx codes, we have to loop
+		// Tomcat doesn't support error code range handlers, but
+		// in the end - it's just a org.apache.catalina.core.StandardContext.statusPages map of code -> error page
+		if ("4xx".equals(model.getError())) {
+			for (int c = 400; c < 500; c++) {
+				final ErrorPage errorPage = createErrorPage(model, c);
+				context.removeErrorPage(errorPage);
+			}
+		} else if ("5xx".equals(model.getError())) {
+			for (int c = 500; c < 600; c++) {
+				final ErrorPage errorPage = createErrorPage(model, c);
+				context.removeErrorPage(errorPage);
+			}
+		} else {
+			final ErrorPage errorPage = createErrorPage(model, null);
+			context.removeErrorPage(errorPage);
+		}
 	}
 
 	@Override
