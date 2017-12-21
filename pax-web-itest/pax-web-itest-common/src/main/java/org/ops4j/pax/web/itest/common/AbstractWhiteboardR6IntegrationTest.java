@@ -105,18 +105,13 @@ public abstract class AbstractWhiteboardR6IntegrationTest extends ITestBase {
 
 	protected abstract String getErrorMessage(int statusCode);
 
-	protected Dictionary<String, Object> getRegistrationProperties() {
+	@Test
+	public void testErrorServlet() throws Exception {
 		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, new String[] {
 				"404", "442", "5xx",
 				"java.io.IOException"
 		});
-		return properties;
-	}
-	
-	@Test
-	public void testErrorServlet() throws Exception {
-		Dictionary<String, Object> properties = getRegistrationProperties();
 
 		ServiceRegistration<Servlet> errorServletReg = ErrorServlet.register(bundleContext, properties);
 		ServiceRegistration<Servlet> brokenServletReg = BrokenServlet.register(bundleContext);
