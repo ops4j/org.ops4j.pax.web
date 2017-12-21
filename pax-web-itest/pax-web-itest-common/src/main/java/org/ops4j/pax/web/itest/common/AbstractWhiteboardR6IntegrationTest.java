@@ -56,7 +56,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
-public class AbstractWhiteboardR6IntegrationTest extends ITestBase {
+public abstract class AbstractWhiteboardR6IntegrationTest extends ITestBase {
 
 	@Inject
 	@Filter(timeout = 20000)
@@ -103,6 +103,8 @@ public class AbstractWhiteboardR6IntegrationTest extends ITestBase {
 
 	}
 
+	protected abstract String getErrorMessage(int statusCode);
+
 	@Test
 	public void testErrorServlet() throws Exception {
 		Dictionary<String, Object> properties = new Hashtable<>();
@@ -114,7 +116,7 @@ public class AbstractWhiteboardR6IntegrationTest extends ITestBase {
 		ServiceRegistration<Servlet> errorServletReg = ErrorServlet.register(bundleContext, properties);
 		ServiceRegistration<Servlet> brokenServletReg = BrokenServlet.register(bundleContext);
 
-		final String message1 = String.format("%d|null|%s|null|%s|default", 404, "Not Found", "/error");
+		final String message1 = String.format("%d|null|%s|null|%s|", 404, getErrorMessage(404), "/error");
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
 				.timeoutInSeconds(7200)
@@ -122,7 +124,7 @@ public class AbstractWhiteboardR6IntegrationTest extends ITestBase {
 						resp -> resp.contains(message1))
 				.doGETandExecuteTest("http://127.0.0.1:8181/error");
 
-		final String message2 = String.format("%d|null|%s|null|%s|broken-servlet", 442, "442", "/broken");
+		final String message2 = String.format("%d|null|%s|null|%s|broken-servlet", 442, getErrorMessage(442), "/broken");
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(442)
 				.timeoutInSeconds(7200)
@@ -130,7 +132,7 @@ public class AbstractWhiteboardR6IntegrationTest extends ITestBase {
 						resp -> resp.contains(message2))
 				.doGETandExecuteTest("http://127.0.0.1:8181/broken?what=return&code=442");
 
-		final String message3 = String.format("%d|null|%s|null|%s|broken-servlet", 502, "Bad Gateway", "/broken");
+		final String message3 = String.format("%d|null|%s|null|%s|broken-servlet", 502, getErrorMessage(502), "/broken");
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(502)
 				.timeoutInSeconds(7200)
@@ -140,7 +142,7 @@ public class AbstractWhiteboardR6IntegrationTest extends ITestBase {
 
 		String exception = "java.io.IOException";
 		final String message4 = String.format("%d|%s|%s|%s|%s|broken-servlet",
-				500, exception, "java.io.IOException: somethingwronghashappened", exception, "/broken");
+				500, exception, getErrorMessage(500), exception, "/broken");
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(500)
 				.timeoutInSeconds(7200)

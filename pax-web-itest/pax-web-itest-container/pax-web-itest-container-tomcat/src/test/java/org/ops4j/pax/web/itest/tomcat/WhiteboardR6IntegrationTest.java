@@ -15,8 +15,11 @@
  */
 package org.ops4j.pax.web.itest.tomcat;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -26,14 +29,20 @@ import org.ops4j.pax.web.itest.common.AbstractWhiteboardR6IntegrationTest;
 @RunWith(PaxExam.class)
 public class WhiteboardR6IntegrationTest extends AbstractWhiteboardR6IntegrationTest {
 
+    private static final Map<Integer, String> ERROR_MESSAGES = Stream.of(
+            new SimpleEntry<>(404, ""),
+            new SimpleEntry<>(442, ""),
+            new SimpleEntry<>(502, ""),
+            new SimpleEntry<>(500, "somethingwronghashappened"))
+            .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
+
 	@Configuration
 	public static Option[] configure() {
 		return configureTomcat();
 	}
 
-	@Test
-	@Ignore
-	public void testErrorServlet() throws Exception {
-		super.testErrorServlet();
-	}
+    @Override
+    protected String getErrorMessage(int statusCode) {
+        return ERROR_MESSAGES.get(statusCode);
+    }
 }
