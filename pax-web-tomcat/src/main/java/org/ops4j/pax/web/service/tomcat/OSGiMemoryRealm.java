@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 public class OSGiMemoryRealm extends MemoryRealm {
 
-	private static final Logger log = LoggerFactory.getLogger(OSGiMemoryRealm.class);
+	private static final Logger LOG = LoggerFactory.getLogger(OSGiMemoryRealm.class);
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -46,7 +46,7 @@ public class OSGiMemoryRealm extends MemoryRealm {
 				URL pathUrl = new URL(pathName);
 				pathName = pathUrl.getHost();
 			} catch (MalformedURLException e) {
-				log.error("Pathname URL is a malformed URL", e);
+				LOG.error("Pathname URL is a malformed URL", e);
 			}
 
 			ClassLoader classLoader = getClass().getClassLoader();
@@ -63,7 +63,7 @@ public class OSGiMemoryRealm extends MemoryRealm {
 					}
 
 				} catch (IOException e) {
-					log.warn("IOException while iterating over resources", e);
+					LOG.warn("IOException while iterating over resources", e);
 				}
 			}
 
