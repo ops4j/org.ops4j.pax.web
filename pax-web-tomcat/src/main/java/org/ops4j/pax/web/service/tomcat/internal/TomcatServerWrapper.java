@@ -689,7 +689,7 @@ class TomcatServerWrapper implements ServerWrapper {
 		}
 		// for Nxx codes, we have to loop
 		// Tomcat doesn't support error code range handlers, but
-		// in the end - it's just a io.undertow.servlet.core.ErrorPages.errorCodeLocations map of code -> location
+		// in the end - it's just a org.apache.catalina.core.StandardContext.statusPages map of code -> error page
 		if ("4xx".equals(model.getError())) {
 			for (int c = 400; c < 500; c++) {
 				final ErrorPage errorPage = createErrorPage(model, c);
@@ -743,7 +743,7 @@ class TomcatServerWrapper implements ServerWrapper {
 		}
 		// for Nxx codes, we have to loop
 		// Tomcat doesn't support error code range handlers, but
-		// in the end - it's just a io.undertow.servlet.core.ErrorPages.errorCodeLocations map of code -> location
+		// in the end - it's just a org.apache.catalina.core.StandardContext.statusPages map of code -> error page
 		if ("4xx".equals(model.getError())) {
 			for (int c = 400; c < 500; c++) {
 				final ErrorPage errorPage = createErrorPage(model, c);
