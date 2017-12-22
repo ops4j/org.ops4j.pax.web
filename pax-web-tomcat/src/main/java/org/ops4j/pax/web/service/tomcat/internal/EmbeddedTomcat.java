@@ -21,7 +21,6 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessControlContext;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -266,9 +265,6 @@ public class EmbeddedTomcat extends Tomcat {
         if (addresses == null || addresses.length == 0) {
             addresses = new String[]{null};
         }
-		Map<String, Object> attributes = new HashMap<>();
-		attributes.put("javax.servlet.context.tempdir",
-				configuration.getTemporaryDirectory());
 
 		// Fix for PAXWEB-193
 		configurationSessionTimeout = configuration.getSessionTimeout();
@@ -589,9 +585,8 @@ public class EmbeddedTomcat extends Tomcat {
 
 		// add mimetypes here?
 		// MIME mappings
-		for (int i = 0; i < DEFAULT_MIME_MAPPINGS.length; ) {
-			ctx.addMimeMapping(DEFAULT_MIME_MAPPINGS[i++],
-					DEFAULT_MIME_MAPPINGS[i++]);
+		for (int i = 0; i < DEFAULT_MIME_MAPPINGS.length; i += 2) {
+			ctx.addMimeMapping(DEFAULT_MIME_MAPPINGS[i], DEFAULT_MIME_MAPPINGS[i + 1]);
 		}
 
 		// try {
