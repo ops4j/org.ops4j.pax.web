@@ -239,6 +239,7 @@ class TomcatServerWrapper implements ServerWrapper {
 									filterModel.getName());
 					if (filterRegistration == null) {
 						LOG.error("Can't register Filter due to unknown reason!");
+						return;
 					}
 				}
 
@@ -682,10 +683,6 @@ class TomcatServerWrapper implements ServerWrapper {
 	@Override
 	public void addErrorPage(final ErrorPageModel model) {
 		final Context context = findOrCreateContext(model);
-		if (context == null) {
-			throw new AddErrorPageException(
-					"cannot retrieve the associated context: " + model);
-		}
 		// for Nxx codes, we have to loop
 		// Tomcat doesn't support error code range handlers, but
 		// in the end - it's just a org.apache.catalina.core.StandardContext.statusPages map of code -> error page
@@ -705,15 +702,18 @@ class TomcatServerWrapper implements ServerWrapper {
 		}
 	}
 
-	private ErrorPage createErrorPage(final ErrorPageModel model, Integer errorCode) {
+	private ErrorPage createErrorPage(final ErrorPageModel model, Integer overrideErrorCode) {
 		NullArgumentException.validateNotNull(model, "model");
 		NullArgumentException.validateNotNull(model.getLocation(),
 				"model#location");
 		NullArgumentException.validateNotNull(model.getError(), "model#error");
 		final ErrorPage errorPage = new ErrorPage();
 		errorPage.setLocation(model.getLocation());
-		if (errorCode == null) {
+		Integer errorCode;
+		if (overrideErrorCode == null) {
 			errorCode = parseErrorCode(model.getError());
+		} else {
+			errorCode = overrideErrorCode;
 		}
 		if (errorCode != null) {
 			errorPage.setErrorCode(errorCode);
@@ -816,10 +816,6 @@ class TomcatServerWrapper implements ServerWrapper {
 	@Override
 	public LifeCycle getContext(final ContextModel model) {
 		final Context context = findOrCreateContext(model);
-		if (context == null) {
-			throw new RemoveErrorPageException(
-					"cannot retrieve the associated context: " + model);
-		}
 		return new LifeCycle() {
 			@Override
 			public void start() throws Exception {
