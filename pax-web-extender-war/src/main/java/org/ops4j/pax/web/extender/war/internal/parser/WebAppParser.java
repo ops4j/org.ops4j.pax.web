@@ -486,12 +486,25 @@ public class WebAppParser {
 		if (sessionConfigType.getCookieConfig() != null) {
 			CookieConfigType cookieConfig = sessionConfigType.getCookieConfig();
 			WebAppCookieConfig sessionCookieConfig = new WebAppCookieConfig();
-			sessionCookieConfig.setDomain(cookieConfig.getDomain().getValue());
-			sessionCookieConfig.setHttpOnly(cookieConfig.getHttpOnly().isValue());
-			sessionCookieConfig.setMaxAge(cookieConfig.getMaxAge().getValue().intValue());
-			sessionCookieConfig.setName(cookieConfig.getName().getValue());
-			sessionCookieConfig.setPath(cookieConfig.getPath().getValue());
-			sessionCookieConfig.setSecure(cookieConfig.getSecure().isValue());
+			if (cookieConfig.getDomain() != null) {
+				sessionCookieConfig.setDomain(cookieConfig.getDomain().getValue());
+			}
+			if (cookieConfig.getHttpOnly() != null) {
+				sessionCookieConfig.setHttpOnly(cookieConfig.getHttpOnly().isValue());
+			}
+			if (cookieConfig.getMaxAge() != null) {
+				sessionCookieConfig.setMaxAge(cookieConfig.getMaxAge().getValue().intValue());
+			}
+			if (cookieConfig.getName() != null) {
+				sessionCookieConfig.setName(cookieConfig.getName().getValue());
+			}
+			if (cookieConfig.getPath() != null) {
+				sessionCookieConfig.setPath(cookieConfig.getPath().getValue());
+			}
+			if (cookieConfig.getSecure() != null) {
+				sessionCookieConfig.setSecure(cookieConfig.getSecure().isValue());
+			}
+
 			webApp.setSessionCookieConfig(sessionCookieConfig);
 		}
 		if (sessionConfigType.getTrackingMode() != null) {
