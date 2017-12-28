@@ -17,9 +17,7 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 
 import org.ops4j.lang.NullArgumentException;
@@ -30,8 +28,11 @@ import org.ops4j.pax.web.extender.whiteboard.internal.WebApplication;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ServletContextHelperElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
-import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
@@ -203,12 +204,12 @@ public class ServletContextHelperTracker<T extends ServletContextHelper> impleme
 			if (sharedHttpContext) {
 				LOGGER.debug("Shared Context ... ");
 				Integer sharedWebApplicationCounter = extenderContext.getSharedWebApplicationCounter(webApplication);
-				LOGGER.debug("... counter:"+sharedWebApplicationCounter);
+				LOGGER.debug("... counter:" + sharedWebApplicationCounter);
 				if (sharedWebApplicationCounter != null && sharedWebApplicationCounter > 0) {
 					remove = false;
 					Integer reduceSharedWebApplicationCount = extenderContext
 							.reduceSharedWebApplicationCount(webApplication);
-					LOGGER.debug("reduced counter:"+reduceSharedWebApplicationCount);
+					LOGGER.debug("reduced counter:" + reduceSharedWebApplicationCount);
 					if (reduceSharedWebApplicationCount == 0) {
 						remove = true;
 					}

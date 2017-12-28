@@ -89,7 +89,7 @@ public class HttpContextTracker extends AbstractHttpContextTracker<HttpContext> 
 		mapping.setPath(httpContextPath);
 		mapping.setHttpContext(published);
 
-		LOG.debug("Create new HttpContext with mapping: "+mapping);
+		LOG.debug("Create new HttpContext with mapping: " + mapping);
 
 		return new HttpContextElement(serviceReference, mapping);
 	}

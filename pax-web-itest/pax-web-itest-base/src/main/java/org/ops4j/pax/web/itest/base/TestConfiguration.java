@@ -15,6 +15,9 @@
  */
 package org.ops4j.pax.web.itest.base;
 
+import java.io.IOException;
+import java.util.Properties;
+
 import org.ops4j.lang.Ops4jException;
 import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
@@ -22,15 +25,30 @@ import org.ops4j.pax.exam.util.PathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Properties;
-
-import static org.ops4j.pax.exam.CoreOptions.*;
+import static org.ops4j.pax.exam.CoreOptions.bootDelegationPackages;
+import static org.ops4j.pax.exam.CoreOptions.composite;
+import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
+import static org.ops4j.pax.exam.CoreOptions.linkBundle;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.systemPackages;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.exam.CoreOptions.when;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
 public class TestConfiguration {
 
-	static final Logger LOG = LoggerFactory.getLogger(TestConfiguration.class);
+	// the name of the system property which captures the jacoco coverage agent command
+	//if specified then agent would be specified otherwise ignored
+	public static final String COVERAGE_COMMAND = "coverage.command";
+
+	public static final String PAX_CDI_VERSION;
+	public static final String PAX_WEB_VERSION;
+	public static final String OWB_VERSION;
+
+	private static final Logger LOG = LoggerFactory.getLogger(TestConfiguration.class);
+
+	private static boolean consoleEnabled =
+			Boolean.valueOf(System.getProperty("org.ops4j.pax.web.console", "false"));
 
 	static {
 		try {
@@ -43,18 +61,6 @@ public class TestConfiguration {
 			throw new IllegalArgumentException(exc);
 		}
 	}
-
-	// the name of the system property which captures the jococo coverage agent command
-	//if specified then agent would be specified otherwise ignored
-	public static final String COVERAGE_COMMAND = "coverage.command";
-
-	public static final String PAX_CDI_VERSION;
-	public static final String PAX_WEB_VERSION;
-	public static final String OWB_VERSION;
-
-	private static boolean consoleEnabled =
-			Boolean.valueOf(System.getProperty("org.ops4j.pax.web.console", "false"));
-
 
 	public static Option addCodeCoverageOption() {
 		String coverageCommand = System.getProperty(COVERAGE_COMMAND);

@@ -31,8 +31,8 @@ public class HttpContextElement implements WhiteboardHttpContext {
     private static final Logger LOG = LoggerFactory.getLogger(HttpContextElement.class);
 
     protected final ServiceReference serviceReference;
-    private final HttpContextMapping contextMapping;
     protected boolean valid = true;
+    private final HttpContextMapping contextMapping;
 
     public HttpContextElement(final ServiceReference ref, final HttpContextMapping contextMapping) {
         NullArgumentException.validateNotNull(ref, "service-reference");
@@ -68,7 +68,7 @@ public class HttpContextElement implements WhiteboardHttpContext {
      * Return the PID of the registered whiteboard-service. Used mainly for logging.
      * @return PID from registered whiteboard-service
      */
-    protected String getPusblishedPID(){
+    protected String getPusblishedPID() {
         return (String)serviceReference.getProperty(Constants.SERVICE_PID);
     }
 

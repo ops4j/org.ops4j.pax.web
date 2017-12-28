@@ -27,8 +27,6 @@ import org.slf4j.LoggerFactory;
 
 public class FilterAnnotationScanner {
 
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
-
 	public Boolean scanned = false;
 	public String[] urlPatterns;
 	public String filterName;
@@ -40,6 +38,8 @@ public class FilterAnnotationScanner {
 	public String[] servletNames;
 
 	public DispatcherType[] dispatcherTypes;
+
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public FilterAnnotationScanner(Class<?> clazz) {
 		filterAnnotation = (WebFilter) clazz.getAnnotation(WebFilter.class);

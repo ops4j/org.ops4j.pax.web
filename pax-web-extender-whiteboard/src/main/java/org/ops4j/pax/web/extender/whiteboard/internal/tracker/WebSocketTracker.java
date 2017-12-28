@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class WebSocketTracker extends AbstractTracker<Object, WebSocketElement> {
+    private static final Logger LOG = LoggerFactory.getLogger(WebSocketTracker.class);
 
 	private BundleContext bundleContext;
 
@@ -42,8 +43,6 @@ public class WebSocketTracker extends AbstractTracker<Object, WebSocketElement> 
 			final BundleContext bundleContext) {
 		return new WebSocketTracker(extenderContext, bundleContext).create(Object.class);
 	}
-
-	private static final Logger LOG = LoggerFactory.getLogger(WebSocketTracker.class);
 
 	@Override
 	WebSocketElement createWebElement(ServiceReference<Object> serviceReference, Object published) {

@@ -32,7 +32,7 @@ public class WhiteboardFilter implements Filter {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(WhiteboardFilter.class);
-	private boolean haveBundleContext = false;
+	private boolean haveBundleContext;
 
 	public void init(FilterConfig filterConfig) throws ServletException {
 		LOG.info("Initialized");

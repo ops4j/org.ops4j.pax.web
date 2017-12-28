@@ -18,14 +18,17 @@
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtendedHttpServiceRuntime;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.WebApplication;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.HttpContextElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -160,18 +163,18 @@ abstract class AbstractHttpContextTracker<T> implements ServiceTrackerCustomizer
 			if (sharedHttpContext) {
 				LOGGER.debug("Shared Context ... ");
 				Integer sharedWebApplicationCounter = extenderContext.getSharedWebApplicationCounter(webApplication);
-				LOGGER.debug("... counter:"+sharedWebApplicationCounter);
+				LOGGER.debug("... counter:" + sharedWebApplicationCounter);
 				if (sharedWebApplicationCounter != null && sharedWebApplicationCounter > 0) {
 					remove = false;
 					Integer reduceSharedWebApplicationCount = extenderContext
 							.reduceSharedWebApplicationCount(webApplication);
-					LOGGER.debug("reduced counter:"+reduceSharedWebApplicationCount);
+					LOGGER.debug("reduced counter:" + reduceSharedWebApplicationCount);
 					if (reduceSharedWebApplicationCount == 0) {
 						remove = true;
 					}
 				}
 			}
-			LOGGER.debug("Shared Context can be removed: "+remove);
+			LOGGER.debug("Shared Context can be removed: " + remove);
 
 			if (webApplication != null && remove) {
 				webApplication.setHttpContextMapping(null);

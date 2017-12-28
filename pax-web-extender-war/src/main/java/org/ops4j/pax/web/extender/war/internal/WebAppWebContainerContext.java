@@ -72,7 +72,7 @@ class WebAppWebContainerContext extends WebAppHttpContext implements
 
 	@Override
 	public String getContextId() {
-		if(httpContext instanceof WebContainerContext){
+		if (httpContext instanceof WebContainerContext) {
 			return ((WebContainerContext) httpContext).getContextId();
 		}
 		return null;

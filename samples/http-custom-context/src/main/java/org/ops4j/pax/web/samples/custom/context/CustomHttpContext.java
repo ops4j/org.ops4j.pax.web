@@ -65,13 +65,6 @@ class CustomHttpContext implements HttpContext {
 		boolean success = session != null;
 		logger.info("#### Test " + (success ? "successful!" : "failed!"));
 
-		if (request.getCookies() != null && session != null) {
-			return true;
-		} else if (request.getCookies() == null) {
-			return true; //no one called the getSession() method yet. 
-		} else {
-			return false;
-		}
-
+		return success || request.getCookies() == null;
 	}
 }
