@@ -16,7 +16,7 @@
  */
 package org.ops4j.pax.web.service.whiteboard;
 
-public interface WhiteboardHttpContext extends WhiteboardElement{
+public interface WhiteboardHttpContext extends WhiteboardElement {
 
     HttpContextMapping getHttpContextMapping();
 

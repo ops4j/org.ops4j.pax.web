@@ -160,8 +160,12 @@ public class FilterModel extends Model {
 	 */
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+		if (this == o) {
+		    return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+		    return false;
+		}
 		FilterModel that = (FilterModel) o;
 		return Objects.equals(name, that.name) &&
 				Objects.equals(getContextModel().getContextName(), that.getContextModel().getContextName());

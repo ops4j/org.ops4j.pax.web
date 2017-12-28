@@ -159,7 +159,7 @@ public class ServicePropertiesUtils {
 		return subset;
 	}
 
-	static public Object mergePropertyListOfStringsToArrayOfStrings(final Object objectToMerge, final List<String> listOfStrings) {
+	public static Object mergePropertyListOfStringsToArrayOfStrings(final Object objectToMerge, final List<String> listOfStrings) {
 		Set<String> setToMerge = new HashSet<>();
 		setToMerge.addAll(listOfStrings);
 		if (objectToMerge instanceof String
@@ -179,7 +179,7 @@ public class ServicePropertiesUtils {
 	 * @param serviceReference - service reference where the httpContextID needs to be extracted from.
 	 * @return the http context id
 	 */
-	static public String extractHttpContextId(final ServiceReference<?> serviceReference) {
+	public static String extractHttpContextId(final ServiceReference<?> serviceReference) {
 		String httpContextId = getStringProperty(serviceReference, ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
 
 		//TODO: Make sure the current HttpContextSelect works together with R6
@@ -200,7 +200,7 @@ public class ServicePropertiesUtils {
 	 * @param serviceReference
 	 * @return whether the context is shared
 	 */
-	static public Boolean extractSharedHttpContext(final ServiceReference<?> serviceReference) {
+	public static Boolean extractSharedHttpContext(final ServiceReference<?> serviceReference) {
 		Boolean sharedHttpContext = Boolean
 				.parseBoolean((String) serviceReference
 						.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));

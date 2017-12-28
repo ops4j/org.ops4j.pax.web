@@ -1336,7 +1336,7 @@ class HttpServiceStarted implements StoppableHttpService {
 							LOG.debug("couldn't find ServerContainer, will try again in 500ms");
 							LOG.debug("this is the {} try", registerTry);
 							Thread.sleep(500);
-							return registerWebSocket(ctx, registerTry++);
+							return registerWebSocket(ctx, registerTry + 1);
 						} catch (InterruptedException e) {
 							LOG.error("Failed to register WebSocket due to: ", e);
 							return false;
@@ -1392,15 +1392,15 @@ class HttpServiceStarted implements StoppableHttpService {
 	 * @param <T> Type of the functions return value
 	 * @return value provided by given function
 	 */
-	private <T> T withWhiteboardDtoService(Function<WhiteboardDtoService, T> function){
+	private <T> T withWhiteboardDtoService(Function<WhiteboardDtoService, T> function) {
 		final BundleContext bundleContext = serviceBundle.getBundleContext();
 		ServiceReference<WhiteboardDtoService> ref = bundleContext.getServiceReference(WhiteboardDtoService.class);
-		if(ref != null){
+		if (ref != null) {
 			WhiteboardDtoService service = bundleContext.getService(ref);
-			if(service != null){
-				try{
+			if (service != null) {
+				try {
 					return function.apply(service);
-				}finally {
+				} finally {
 					bundleContext.ungetService(ref);
 				}
 			}

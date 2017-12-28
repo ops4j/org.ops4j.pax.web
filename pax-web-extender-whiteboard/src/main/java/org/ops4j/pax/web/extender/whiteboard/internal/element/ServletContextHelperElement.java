@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 public class ServletContextHelperElement<T extends ServletContextHelper> extends HttpContextElement implements WhiteboardServletContextHelper {
 
 
-    private static Logger LOG = LoggerFactory.getLogger(ServletContextHelperElement.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ServletContextHelperElement.class);
 
     private final T contextHelper;
 

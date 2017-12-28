@@ -71,8 +71,12 @@ public class ErrorPageModel extends Model {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+		if (this == o) {
+		    return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+		    return false;
+		}
 		ErrorPageModel that = (ErrorPageModel) o;
 		return Objects.equals(error, that.error) &&
 				Objects.equals(getContextModel().getContextName(), that.getContextModel().getContextName());

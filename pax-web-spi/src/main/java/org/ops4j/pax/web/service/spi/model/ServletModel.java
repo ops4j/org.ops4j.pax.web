@@ -199,8 +199,12 @@ public class ServletModel extends Model {
 	 */
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+		if (this == o) {
+		    return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+		    return false;
+		}
 		ServletModel that = (ServletModel) o;
 		return Objects.equals(getName(), that.getName()) &&
 				Objects.equals(getContextModel().getContextName(), that.getContextModel().getContextName());

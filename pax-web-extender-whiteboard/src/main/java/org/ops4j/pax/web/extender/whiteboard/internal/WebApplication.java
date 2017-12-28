@@ -21,7 +21,12 @@ package org.ops4j.pax.web.extender.whiteboard.internal;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -32,7 +37,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
-import org.ops4j.pax.web.extender.whiteboard.internal.element.*;
+import org.ops4j.pax.web.extender.whiteboard.internal.element.FilterWebElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.element.ListenerWebElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.element.ResourceWebElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.element.ServletWebElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.element.WebElement;
+import org.ops4j.pax.web.extender.whiteboard.internal.element.WelcomeFileWebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.DictionaryUtils;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.WebContainerUtils;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.tracker.ReplaceableService;
@@ -211,7 +221,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 
 	@Override
 	public void serviceChanged(HttpService oldService, HttpService newService, Map<String, Object> serviceProperties) {
-		if(newService != null && !WebContainerUtils.isWebContainer(newService)){
+		if (newService != null && !WebContainerUtils.isWebContainer(newService)) {
 			throw new IllegalStateException("HttpService must be implementing Pax-Web WebContainer!");
 		}
 		httpServiceLock.writeLock().lock();
@@ -320,7 +330,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 					httpContext = webContainer.createDefaultHttpContext();
 								}
 			}
-		} else if(!(httpContext instanceof WebContainerContext)){
+		} else if (!(httpContext instanceof WebContainerContext)) {
 			// wrap registered HttpContext in pax-web specific context
 			final HttpContext localHttpContext = httpContext;
 			httpContext = new WebContainerContext() {

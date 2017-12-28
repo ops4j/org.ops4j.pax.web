@@ -42,8 +42,20 @@ import org.xml.sax.ext.EntityResolver2;
  */
 public class DigesterFactory {
 
-	private static final Log log = LogFactory.getLog(DigesterFactory.class);
-	private static final StringManager sm = StringManager
+    /**
+     * Mapping of well-known public IDs used by the Servlet API to the matching
+     * local resource.
+     */
+    public static final Map<String, String> SERVLET_API_PUBLIC_IDS;
+
+    /**
+     * Mapping of well-known system IDs used by the Servlet API to the matching
+     * local resource.
+     */
+    public static final Map<String, String> SERVLET_API_SYSTEM_IDS;
+
+	private static final Log LOG = LogFactory.getLog(DigesterFactory.class);
+	private static final StringManager SM = StringManager
 			.getManager(Constants.PACKAGE_NAME);
 
 	private static final Class<ServletContext> CLASS_SERVLET_CONTEXT;
@@ -59,18 +71,6 @@ public class DigesterFactory {
 		}
 		CLASS_JSP_CONTEXT = jspContext;
 	}
-
-	/**
-	 * Mapping of well-known public IDs used by the Servlet API to the matching
-	 * local resource.
-	 */
-	public static final Map<String, String> SERVLET_API_PUBLIC_IDS;
-
-	/**
-	 * Mapping of well-known system IDs used by the Servlet API to the matching
-	 * local resource.
-	 */
-	public static final Map<String, String> SERVLET_API_SYSTEM_IDS;
 
 	static {
 		Map<String, String> publicIds = new HashMap<>();
@@ -185,7 +185,7 @@ public class DigesterFactory {
 			}
 		}
 		if (location == null) {
-			log.warn(sm.getString("digesterFactory.missingSchema", name));
+			LOG.warn(SM.getString("digesterFactory.missingSchema", name));
 			return null;
 		}
 		return location.toExternalForm();

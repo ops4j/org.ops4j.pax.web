@@ -31,13 +31,13 @@ public class CdiServiceBean implements CdiService {
 
   @Override
   public void logMessage(String message) {
-    if(logService != null){
+    if (logService != null) {
       logService.log(LogService.LOG_INFO, message);
     }
   }
 
   @Override
-  public String helloFromService(){
+  public String helloFromService() {
     return "Hello from OSGi-Service";
   }
 }
