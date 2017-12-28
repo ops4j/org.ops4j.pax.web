@@ -49,7 +49,7 @@ public class WebObserver implements WarManager {
 	/**
 	 * Logger.
 	 */
-	static final Logger LOG = LoggerFactory.getLogger(WebObserver.class);
+	private static final Logger LOG = LoggerFactory.getLogger(WebObserver.class);
 	/**
 	 * Web app publisher.
 	 */

@@ -101,21 +101,19 @@ public abstract class AbstractWebSocketIntegrationTest extends ITestBase {
 		}
 
 		@OnWebSocketMessage
-		public void onMessage(final String session, final String message){
+		public void onMessage(final String session, final String message) {
 			System.out.printf("Message received: %s", message);
 			this.answer = message;
 		}
 
 		@OnWebSocketClose
-		public void onClose(int statusCode, String reason){
+		public void onClose(int statusCode, String reason) {
 			System.out.printf("Connection closed: %d - %s%n", statusCode,
 					reason);
 			this.closeLatch.countDown();
 		}
 
-		boolean awaitClose(int duration, TimeUnit unit) throws
-				InterruptedException
-		{
+		boolean awaitClose(int duration, TimeUnit unit) throws InterruptedException {
 			return this.closeLatch.await(duration,unit);
 		}
 

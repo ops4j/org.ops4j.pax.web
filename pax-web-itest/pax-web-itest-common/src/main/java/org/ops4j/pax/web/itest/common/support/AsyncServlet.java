@@ -28,8 +28,8 @@ import javax.servlet.http.HttpServletResponse;
 
 @WebServlet(asyncSupported = true)
 public class AsyncServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
 	public static final int SIZE = 1024 + 32;
+	private static final long serialVersionUID = 1L;
 	private static final int PART = 128;
 
 	private final ExecutorService executor = Executors.newSingleThreadExecutor();

@@ -27,15 +27,12 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet(urlPatterns = {"/duplicate"})
 public class DuplicateDefinitionServlet extends HttpServlet {
 
+    private static final long serialVersionUID = 1L;
+
 	@Override
 	public void init() throws ServletException {
 		System.out.println("****** INIT DuplicateDefinitionServlet");
 	}
-
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 1L;
 
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response)

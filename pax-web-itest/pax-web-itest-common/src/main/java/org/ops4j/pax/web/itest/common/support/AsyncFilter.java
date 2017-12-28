@@ -26,7 +26,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletResponse;
 
-@WebFilter(asyncSupported=true)
+@WebFilter(asyncSupported = true)
 public class AsyncFilter implements Filter {
 
 	@Override
@@ -35,7 +35,7 @@ public class AsyncFilter implements Filter {
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-		((HttpServletResponse)response).setHeader("_Async-Done", "true");
+		((HttpServletResponse) response).setHeader("_Async-Done", "true");
 		chain.doFilter(request, response);
 	}
 

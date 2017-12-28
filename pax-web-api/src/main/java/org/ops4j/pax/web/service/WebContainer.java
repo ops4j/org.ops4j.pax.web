@@ -22,7 +22,11 @@ import java.util.EventListener;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
+import javax.servlet.ServletException;
 
 import org.ops4j.pax.web.service.whiteboard.WhiteboardElement;
 import org.osgi.service.http.HttpContext;

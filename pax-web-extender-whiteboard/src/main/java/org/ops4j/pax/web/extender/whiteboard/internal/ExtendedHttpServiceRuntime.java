@@ -41,7 +41,7 @@ import org.osgi.service.http.runtime.dto.RequestInfoDTO;
 import org.osgi.service.http.runtime.dto.RuntimeDTO;
 
 
-public class ExtendedHttpServiceRuntime implements HttpServiceRuntime, ReplaceableServiceListener<HttpService>{
+public class ExtendedHttpServiceRuntime implements HttpServiceRuntime, ReplaceableServiceListener<HttpService> {
 
     private final BundleContext bundleContext;
     /**
@@ -70,7 +70,7 @@ public class ExtendedHttpServiceRuntime implements HttpServiceRuntime, Replaceab
      */
     private ServiceRegistration<HttpServiceRuntime> serviceRuntimeService;
 
-    ExtendedHttpServiceRuntime(BundleContext bundleContext){
+    ExtendedHttpServiceRuntime(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
         this.httpServiceLock = new ReentrantReadWriteLock();
         this.httpServiceTracker = new ReplaceableService<>(bundleContext, HttpService.class, this, true);
@@ -91,7 +91,7 @@ public class ExtendedHttpServiceRuntime implements HttpServiceRuntime, Replaceab
      * each registered element must be added.
      * @param element the whiteboard-element to add.
      */
-    public void addWhiteboardElement(WhiteboardElement element){
+    public void addWhiteboardElement(WhiteboardElement element) {
         whiteboardElements.add(element);
     }
 
@@ -100,13 +100,13 @@ public class ExtendedHttpServiceRuntime implements HttpServiceRuntime, Replaceab
      * each unregistered element must be removed.
      * @param element the whiteboard-element to remove.
      */
-    public void removeWhiteboardElement(WhiteboardElement element){
+    public void removeWhiteboardElement(WhiteboardElement element) {
         whiteboardElements.remove(element);
     }
 
     @Override
     public void serviceChanged(HttpService oldService, HttpService newService, Map<String, Object> serviceProperties) {
-        if(newService != null && !WebContainerUtils.isWebContainer(newService)){
+        if (newService != null && !WebContainerUtils.isWebContainer(newService)) {
             throw new IllegalStateException("HttpService must be implementing Pax-Web WebContainer!");
         }
         httpServiceLock.writeLock().lock();
@@ -120,16 +120,18 @@ public class ExtendedHttpServiceRuntime implements HttpServiceRuntime, Replaceab
     }
     
     private void registerService(WebContainer newService, Map<String, Object> serviceProperties) {
-        if (newService == null)
+        if (newService == null) {
             return;
+        }
         
         Dictionary<String, Object> props = new Hashtable<>();
         
         Long id = (Long) serviceProperties.get("service.id");
         String endpointString = "";
         
-        if (newService.getWebcontainerDTO().listeningAddresses != null && newService.getWebcontainerDTO().listeningAddresses.length > 0)
+        if (newService.getWebcontainerDTO().listeningAddresses != null && newService.getWebcontainerDTO().listeningAddresses.length > 0) {
             endpointString = newService.getWebcontainerDTO().listeningAddresses[0] + ":";
+        }
         
         endpointString += newService.getWebcontainerDTO().port;
         

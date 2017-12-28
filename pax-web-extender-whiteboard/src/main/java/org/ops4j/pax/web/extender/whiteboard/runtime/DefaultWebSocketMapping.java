@@ -40,8 +40,8 @@ public class DefaultWebSocketMapping implements WebSocketMapping {
 	}
 
 	@Override
-	public void setSharedContext(Boolean extractSharedHttpContext) {
-		this.extractSharedHttpContext = extractSharedHttpContext;
+	public void setSharedContext(Boolean sharedHttpContext) {
+		this.extractSharedHttpContext = sharedHttpContext;
 	}
 
 	@Override

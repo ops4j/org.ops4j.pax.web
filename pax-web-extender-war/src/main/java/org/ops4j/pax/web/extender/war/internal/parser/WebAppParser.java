@@ -18,8 +18,57 @@
 package org.ops4j.pax.web.extender.war.internal.parser;
 
 import org.apache.xbean.finder.BundleAnnotationFinder;
-import org.ops4j.pax.web.descriptor.gen.*;
-import org.ops4j.pax.web.extender.war.internal.model.*;
+import org.ops4j.pax.web.descriptor.gen.AuthConstraintType;
+import org.ops4j.pax.web.descriptor.gen.CookieConfigType;
+import org.ops4j.pax.web.descriptor.gen.DescriptionType;
+import org.ops4j.pax.web.descriptor.gen.DisplayNameType;
+import org.ops4j.pax.web.descriptor.gen.EmptyType;
+import org.ops4j.pax.web.descriptor.gen.ErrorPageType;
+import org.ops4j.pax.web.descriptor.gen.FilterMappingType;
+import org.ops4j.pax.web.descriptor.gen.FilterType;
+import org.ops4j.pax.web.descriptor.gen.FormLoginConfigType;
+import org.ops4j.pax.web.descriptor.gen.JspConfigType;
+import org.ops4j.pax.web.descriptor.gen.JspPropertyGroupType;
+import org.ops4j.pax.web.descriptor.gen.ListenerType;
+import org.ops4j.pax.web.descriptor.gen.LoginConfigType;
+import org.ops4j.pax.web.descriptor.gen.MimeMappingType;
+import org.ops4j.pax.web.descriptor.gen.MultipartConfigType;
+import org.ops4j.pax.web.descriptor.gen.ParamValueType;
+import org.ops4j.pax.web.descriptor.gen.PathType;
+import org.ops4j.pax.web.descriptor.gen.RoleNameType;
+import org.ops4j.pax.web.descriptor.gen.SecurityConstraintType;
+import org.ops4j.pax.web.descriptor.gen.SecurityRoleType;
+import org.ops4j.pax.web.descriptor.gen.ServletMappingType;
+import org.ops4j.pax.web.descriptor.gen.ServletNameType;
+import org.ops4j.pax.web.descriptor.gen.ServletType;
+import org.ops4j.pax.web.descriptor.gen.SessionConfigType;
+import org.ops4j.pax.web.descriptor.gen.TaglibType;
+import org.ops4j.pax.web.descriptor.gen.TrackingModeType;
+import org.ops4j.pax.web.descriptor.gen.TrueFalseType;
+import org.ops4j.pax.web.descriptor.gen.UrlPatternType;
+import org.ops4j.pax.web.descriptor.gen.UserDataConstraintType;
+import org.ops4j.pax.web.descriptor.gen.WebAppType;
+import org.ops4j.pax.web.descriptor.gen.WebResourceCollectionType;
+import org.ops4j.pax.web.descriptor.gen.WelcomeFileListType;
+import org.ops4j.pax.web.extender.war.internal.model.WebApp;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppCookieConfig;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppFilterMapping;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppJspConfig;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppJspPropertyGroup;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppJspServlet;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppMimeMapping;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityConstraint;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityRole;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppTagLib;
 import org.ops4j.pax.web.extender.war.internal.util.ManifestUtil;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.utils.ClassPathUtil;
@@ -51,12 +100,20 @@ import javax.xml.transform.sax.SAXSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import static java.lang.Boolean.TRUE;
-import static org.ops4j.util.xml.ElementHelper.*;
-
-import java.lang.String;
+import static org.ops4j.util.xml.ElementHelper.getChild;
+import static org.ops4j.util.xml.ElementHelper.getChildren;
+import static org.ops4j.util.xml.ElementHelper.getRootElement;
 
 /**
  * Web xml parser implementation TODO parse and use session-config
@@ -94,7 +151,7 @@ public class WebAppParser {
 			WebAppType webAppType = parseWebXml(webXmlURL);
 			// web-app attributes
 			majorVersion = scanMajorVersion(webAppType);
-			if(webAppType != null) {
+			if (webAppType != null) {
 				if (webAppType.isMetadataComplete() != null) {
 					webApp.setMetaDataComplete(webAppType.isMetadataComplete());
 				}
@@ -197,7 +254,7 @@ public class WebAppParser {
 			} else if (value instanceof SecurityRoleType) {
 				SecurityRoleType securityRole = (SecurityRoleType) value;
 				parseSecurityRole(securityRole, webApp);
-			} else if (value instanceof DescriptionType || value instanceof DisplayNameType ||value instanceof EmptyType ) {
+			} else if (value instanceof DescriptionType || value instanceof DisplayNameType || value instanceof EmptyType ) {
                 //Descripton Type  or Display Name Type contains no valueable information for pax web, so just ignore it
                 //and make sure there is no warning about it
 			} else {

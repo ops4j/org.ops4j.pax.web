@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ServletMappingWebElement extends WebElement<ServletMapping> implements WhiteboardServlet {
 
-	private Logger LOG = LoggerFactory.getLogger(ServletMappingWebElement.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ServletMappingWebElement.class);
 
 	private ServletMapping servletMapping;
 	private List<DefaultErrorPageMapping> errorMappings;
@@ -71,10 +71,10 @@ public class ServletMappingWebElement extends WebElement<ServletMapping> impleme
 		if (alias != null && urlPatterns != null && urlPatterns.length != 0) {
 			LOG.warn("Registered servlet [{}] cannot have both alias and url patterns.", getServiceID());
 			valid = false;
-		}else if (alias == null && urlPatterns == null) {
+		} else if (alias == null && urlPatterns == null) {
 			LOG.warn("Registered servlet [{}] did not contain a valid alias or url patterns property.", getServiceID());
 			valid = false;
-		}else if (alias != null && alias.trim().length() == 0) {
+		} else if (alias != null && alias.trim().length() == 0) {
 			LOG.warn("Registered servlet [{}] did not contain a valid alias property.", getServiceID());
 			valid = false;
 		}
