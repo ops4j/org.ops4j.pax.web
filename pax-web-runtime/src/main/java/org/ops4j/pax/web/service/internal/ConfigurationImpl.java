@@ -903,8 +903,8 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
         if (this.encryptor != null) {
             if (password.startsWith(getEncPrefix()) && password.endsWith(getEncSuffix())) {
                 //encrypted password, need decrypt it
-                password = password.substring(getEncPrefix().length(), password.length() - getEncSuffix().length());
-                password = this.encryptor.decrypt(password);
+                String encryptedPassword = password.substring(getEncPrefix().length(), password.length() - getEncSuffix().length());
+                return this.encryptor.decrypt(encryptedPassword);
             }
         }
         return password;

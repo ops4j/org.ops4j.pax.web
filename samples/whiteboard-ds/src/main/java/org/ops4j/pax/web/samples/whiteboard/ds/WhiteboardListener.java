@@ -33,7 +33,7 @@ import javax.servlet.ServletRequestListener;
 )
 public class WhiteboardListener implements ServletRequestListener {
 
-    private static Logger LOG = LoggerFactory.getLogger(WhiteboardListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WhiteboardListener.class);
 
     @Override
     public void requestDestroyed(ServletRequestEvent sre) {
