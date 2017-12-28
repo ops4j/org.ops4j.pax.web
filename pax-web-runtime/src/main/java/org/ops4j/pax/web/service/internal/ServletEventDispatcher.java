@@ -36,7 +36,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;

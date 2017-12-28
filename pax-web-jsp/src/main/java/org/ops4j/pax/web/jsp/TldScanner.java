@@ -46,7 +46,7 @@ import org.xml.sax.SAXException;
  */
 public class TldScanner {
 
-    private static final Logger log = LoggerFactory.getLogger(TldScanner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TldScanner.class);
     private static final String MSG = "org.apache.jasper.servlet.TldScanner";
     private static final String TLD_EXT = ".tld";
     private static final String WEB_INF = "/WEB-INF/";
@@ -156,12 +156,12 @@ public class TldScanner {
                 resourcePath = WEB_INF + resourcePath;
             }
             if (uriTldResourcePathMap.containsKey(taglibURI)) {
-                log.warn(Localizer.getMessage(MSG + ".webxmlSkip", resourcePath, taglibURI));
+                LOG.warn(Localizer.getMessage(MSG + ".webxmlSkip", resourcePath, taglibURI));
                 continue;
             }
 
-            if (log.isTraceEnabled()) {
-                log.trace(Localizer.getMessage(MSG + ".webxmlAdd", resourcePath, taglibURI));
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(Localizer.getMessage(MSG + ".webxmlAdd", resourcePath, taglibURI));
             }
 
             URL url = context.getResource(resourcePath);
@@ -183,7 +183,7 @@ public class TldScanner {
                     listeners.addAll(tld.getListeners());
                 }
             } else {
-                log.warn(Localizer.getMessage(MSG + ".webxmlFailPathDoesNotExist", resourcePath, taglibURI));
+                LOG.warn(Localizer.getMessage(MSG + ".webxmlFailPathDoesNotExist", resourcePath, taglibURI));
                 continue;
             }
         }
@@ -265,7 +265,7 @@ public class TldScanner {
                 if (urls != null) {
                     while (urls.hasMoreElements()) {
                         URL url = urls.nextElement();
-                        log.info("found TLD {}", url);
+                        LOG.info("found TLD {}", url);
                         TldResourcePath tldResourcePath = new TldResourcePath(url, null, null);
                         try {
                             parseTld(tldResourcePath);

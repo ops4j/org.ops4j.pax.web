@@ -37,15 +37,15 @@ public class SomeController {
   @Inject
   private SomeSessionBean session;
 
-  public void submit(){
+  public void submit() {
     service.logMessage(logMessage);
   }
 
-  public String getHelloSession(){
+  public String getHelloSession() {
     return session.getState();
   }
 
-  public String getHelloService(){
+  public String getHelloService() {
     return service.helloFromService();
   }
 

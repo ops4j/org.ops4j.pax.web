@@ -16,13 +16,18 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
@@ -47,6 +52,11 @@ public class ServerModel {
 	 * Logger.
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(ServerModel.class);
+
+    /**
+     * This virtual host is used if there is no Web-VirtualHosts in manifest.
+     */
+    private static final String DEFAULT_VIRTUAL_HOST = "default";
 
 	/**
 	 * Map between aliases used for registering a servlet and the registered
@@ -97,11 +107,6 @@ public class ServerModel {
 
 	private final ConcurrentMap<ServletContainerInitializer, ContainerInitializerModel> containerInitializers;
 
-    /**
-     * This virtual host is used if there is no Web-VirtualHosts in manifest.
-     */
-    private final String DEFAULT_VIRTUAL_HOST="default";
-
     private final Map<String,List<Bundle>> bundlesByVirtualHost;
 
 	/**
@@ -116,55 +121,55 @@ public class ServerModel {
 		containerInitializers = new ConcurrentHashMap<>();
 		servletLock = new ReentrantReadWriteLock(true);
 		filterLock = new ReentrantReadWriteLock(true);
-        bundlesByVirtualHost=new HashMap<>();
+        bundlesByVirtualHost = new HashMap<>();
 	}
 
-    private List<String> resolveVirtualHosts(Model model){
-        List<String> virtualHosts=model.getContextModel().getVirtualHosts();
-        if (virtualHosts==null || virtualHosts.isEmpty()){
-            virtualHosts=new ArrayList<>();
+    private List<String> resolveVirtualHosts(Model model) {
+        List<String> virtualHosts = model.getContextModel().getVirtualHosts();
+        if (virtualHosts == null || virtualHosts.isEmpty()) {
+            virtualHosts = new ArrayList<>();
             virtualHosts.add(DEFAULT_VIRTUAL_HOST);
         }
         return virtualHosts;
     }
 
-    private String resolveVirtualHost(String hostName){
-        if (bundlesByVirtualHost.containsKey(hostName)){
+    private String resolveVirtualHost(String hostName) {
+        if (bundlesByVirtualHost.containsKey(hostName)) {
             return hostName;
-        }else{
+        } else {
             return DEFAULT_VIRTUAL_HOST;
         }
     }
 
-    private List<String> resolveVirtualHosts(Bundle bundle){
-        List<String> virtualHosts=new ArrayList<>();
-        for (Map.Entry<String,List<Bundle>> entry:bundlesByVirtualHost.entrySet()){
-            if (entry.getValue().contains(bundle)){
+    private List<String> resolveVirtualHosts(Bundle bundle) {
+        List<String> virtualHosts = new ArrayList<>();
+        for (Map.Entry<String, List<Bundle>> entry : bundlesByVirtualHost.entrySet()) {
+            if (entry.getValue().contains(bundle)) {
                 virtualHosts.add(entry.getKey());
             }
         }
-        if (virtualHosts.isEmpty()){
+        if (virtualHosts.isEmpty()) {
             virtualHosts.add(DEFAULT_VIRTUAL_HOST);
         }
         return virtualHosts;
     }
 
-    private void associateBundle(List<String> virtualHosts,Bundle bundle){
-        for (String virtualHost:virtualHosts){
-            List<Bundle> bundles=bundlesByVirtualHost.get(virtualHost);
-            if (bundles==null){
-                bundles=new ArrayList<>();
+    private void associateBundle(List<String> virtualHosts, Bundle bundle) {
+        for (String virtualHost : virtualHosts) {
+            List<Bundle> bundles = bundlesByVirtualHost.get(virtualHost);
+            if (bundles == null) {
+                bundles = new ArrayList<>();
                 bundlesByVirtualHost.put(virtualHost, bundles);
             }
             bundles.add(bundle);
         }
     }
 
-    private void deassociateBundle(List<String> virtualHosts,Bundle bundle){
-        for (String virtualHost:virtualHosts){
-            List<Bundle> bundles=bundlesByVirtualHost.get(virtualHost);
+    private void deassociateBundle(List<String> virtualHosts, Bundle bundle) {
+        for (String virtualHost : virtualHosts) {
+            List<Bundle> bundles = bundlesByVirtualHost.get(virtualHost);
             bundles.remove(bundle);
-            if (bundles.isEmpty()){
+            if (bundles.isEmpty()) {
                 bundlesByVirtualHost.remove(virtualHost);
             }
         }
@@ -181,8 +186,8 @@ public class ServerModel {
 		servletLock.writeLock().lock();
 		try {
             associateBundle(model.getContextModel().getVirtualHosts(), model.getContextModel().getBundle());
-            for (String virtualHost:resolveVirtualHosts(model)){
-                if (servlets.get(virtualHost)==null){
+            for (String virtualHost:resolveVirtualHosts(model)) {
+                if (servlets.get(virtualHost) == null) {
                     servlets.put(virtualHost, new HashSet<>());
                 }
                 if (model.getServlet() != null && servlets.get(virtualHost).contains(model.getServlet())) {
@@ -190,7 +195,7 @@ public class ServerModel {
                 }
                 if (model.getAlias() != null) {
                         final String alias = getFullPath(model.getContextModel(), model.getAlias());
-                        if (aliasMapping.get(virtualHost)==null){
+                        if (aliasMapping.get(virtualHost) == null) {
                             aliasMapping.put(virtualHost, new HashMap<>());
                         }
                         if (aliasMapping.get(virtualHost).containsKey(alias)) {
@@ -202,7 +207,7 @@ public class ServerModel {
                         servlets.get(virtualHost).add(model.getServlet());
                 }
                 for (String urlPattern : model.getUrlPatterns()) {
-                        if (servletUrlPatterns.get(virtualHost)==null){
+                        if (servletUrlPatterns.get(virtualHost) == null) {
                             servletUrlPatterns.put(virtualHost, new HashMap<>());
                         }
                         servletUrlPatterns.get(virtualHost).put(getFullPath(model.getContextModel(), urlPattern),
@@ -223,7 +228,7 @@ public class ServerModel {
 		servletLock.writeLock().lock();
 		try {
             deassociateBundle(model.getContextModel().getVirtualHosts(), model.getContextModel().getBundle());
-            for (String virtualHost:resolveVirtualHosts(model)){
+            for (String virtualHost:resolveVirtualHosts(model)) {
                 if (model.getAlias() != null) {
                         aliasMapping.get(virtualHost).remove(getFullPath(model.getContextModel(), model.getAlias()));
                 }
@@ -251,12 +256,12 @@ public class ServerModel {
 			try {
 				filterLock.writeLock().lock();
 				associateBundle(model.getContextModel().getVirtualHosts(), model.getContextModel().getBundle());
-				for (String virtualHost:resolveVirtualHosts(model)){
+				for (String virtualHost : resolveVirtualHosts(model)) {
 					for (String urlPattern : model.getUrlPatterns()) {
 							final UrlPattern newUrlPattern = new UrlPattern(getFullPath(model.getContextModel(), urlPattern),
 											model);
 							String fullPath = getFullPath(model.getContextModel(), urlPattern);
-							if (filterUrlPatterns.get(virtualHost)==null){
+							if (filterUrlPatterns.get(virtualHost) == null) {
 								filterUrlPatterns.put(virtualHost, new ConcurrentHashMap<>());
 							}
 							Set<UrlPattern> urlSet = filterUrlPatterns.get(virtualHost).get(fullPath);
@@ -292,7 +297,7 @@ public class ServerModel {
 			try {
 				deassociateBundle(model.getContextModel().getVirtualHosts(), model.getContextModel().getBundle());
 				filterLock.writeLock().lock();
-				for (String virtualHost:resolveVirtualHosts(model)){
+				for (String virtualHost:resolveVirtualHosts(model)) {
 					for (String urlPattern : model.getUrlPatterns()) {
 							String fullPath = getFullPath(model.getContextModel(), urlPattern);
 							Set<UrlPattern> urlSet = filterUrlPatterns.get(virtualHost).get(fullPath);
@@ -348,11 +353,11 @@ public class ServerModel {
 	 */
 	public void associateHttpContext(final WebContainerContext httpContext, final Bundle bundle,
 									 final boolean allowReAsssociation) {
-		List<String> virtualHosts=resolveVirtualHosts(bundle);
-		for (String virtualHost:virtualHosts){
-			ConcurrentMap<WebContainerContext, Bundle> virtualHostHttpContexts=httpContexts.get(virtualHost);
-			if (virtualHostHttpContexts==null){
-				virtualHostHttpContexts=new ConcurrentHashMap<>();
+		List<String> virtualHosts = resolveVirtualHosts(bundle);
+		for (String virtualHost : virtualHosts) {
+			ConcurrentMap<WebContainerContext, Bundle> virtualHostHttpContexts = httpContexts.get(virtualHost);
+			if (virtualHostHttpContexts == null) {
+				virtualHostHttpContexts = new ConcurrentHashMap<>();
 				httpContexts.put(virtualHost, virtualHostHttpContexts);
 			}
 			final Bundle currentBundle = virtualHostHttpContexts.putIfAbsent(httpContext, bundle);
@@ -365,8 +370,8 @@ public class ServerModel {
 
 	public HttpContext findDefaultHttpContextForBundle(Bundle bundle) {
 		HttpContext httpContext = null;
-        List<String> virtualHosts=resolveVirtualHosts(bundle);
-        for (String virtualHost:virtualHosts){
+        List<String> virtualHosts = resolveVirtualHosts(bundle);
+        for (String virtualHost : virtualHosts) {
             for (Entry<WebContainerContext, Bundle> entry : httpContexts.get(virtualHost).entrySet()) {
                 if (entry.getValue() == bundle) {
                     httpContext = entry.getKey();
@@ -388,7 +393,7 @@ public class ServerModel {
 	 * @param bundle bundle to be deassociated from http contexts
 	 */
 	public void deassociateHttpContexts(final Bundle bundle) {
-        List<String> virtualHosts=resolveVirtualHosts(bundle);
+        List<String> virtualHosts = resolveVirtualHosts(bundle);
         virtualHosts.stream()
             .map(virtualHost -> httpContexts.get(virtualHost))
             .map(entry -> entry.entrySet())
@@ -412,16 +417,18 @@ public class ServerModel {
 		servletLock.readLock().lock();
 		try {
 		    Optional<Map<String, UrlPattern>> optionalServletUrlPatterns = Optional.ofNullable(servletUrlPatterns.get(virtualHost));
-		    if(optionalServletUrlPatterns.isPresent())
+		    if (optionalServletUrlPatterns.isPresent()) {
 			    urlPattern = matchPathToContext(optionalServletUrlPatterns.get(), path);
+		    }
 		} finally {
 			servletLock.readLock().unlock();
 		}
 		// then if there is no matched servlet look for filters
 		if (urlPattern == null) {
 		    Optional<ConcurrentMap<String, Set<UrlPattern>>> optionalFilterUrlPattern = Optional.ofNullable(filterUrlPatterns.get(virtualHost));
-		    if(optionalFilterUrlPattern.isPresent())
+		    if (optionalFilterUrlPattern.isPresent()) {
 			    urlPattern = matchFilterPathToContext(filterUrlPatterns.get(virtualHost), path);
+		    }
 		}
 		ContextModel matched = null;
 		if (urlPattern != null) {
