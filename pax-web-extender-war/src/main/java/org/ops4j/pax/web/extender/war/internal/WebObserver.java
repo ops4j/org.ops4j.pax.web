@@ -16,7 +16,6 @@
 package org.ops4j.pax.web.extender.war.internal;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import static org.ops4j.pax.web.extender.war.internal.parser.WebAppParser.canSeeClass;
 import static org.ops4j.pax.web.extender.war.internal.util.ManifestUtil.getHeader;
 import static org.ops4j.pax.web.service.spi.WebEvent.DEPLOYING;
@@ -88,10 +87,10 @@ public class WebObserver implements WarManager {
 	 */
 	private final Map<String,Map<String, List<WebApp>>> contexts = new HashMap<>();
         
-        /**
-         * This virtual host is used if there is no Web-VirtualHosts in manifest.
-         */
-        private final String DEFAULT_VIRTUAL_HOST="default";
+    /**
+      * This virtual host is used if there is no Web-VirtualHosts in manifest.
+      */
+    private final String defaultVirtualHost = "default";
         
 	public WebObserver(WebAppParser parser, WebAppPublisher publisher,
 					   WebEventDispatcher eventDispatcher,
@@ -209,7 +208,7 @@ public class WebObserver implements WarManager {
 
 	public void deploy(WebApp webApp) {
 		Collection<Long> duplicateIds = null;
-                for (Map.Entry<String,List<WebApp>> entry:getQueues(webApp).entrySet()){
+                for (Map.Entry<String,List<WebApp>> entry:getQueues(webApp).entrySet()) {
                     List<WebApp> queue = entry.getValue();
                     synchronized (queue) {
                             if (queue.isEmpty()) {
@@ -236,7 +235,7 @@ public class WebObserver implements WarManager {
 		boolean unpublish = false;
 		boolean undeploy = false;
 		WebApp next = null;
-                for (Map.Entry<String,List<WebApp>> entry:getQueues(webApp).entrySet()){
+                for (Map.Entry<String,List<WebApp>> entry:getQueues(webApp).entrySet()) {
                     List<WebApp> queue = entry.getValue();
                     synchronized (queue) {
                             if (!queue.isEmpty() && queue.get(0) == webApp) {
@@ -275,17 +274,17 @@ public class WebObserver implements WarManager {
 	}
 
 	private Map<String,List<WebApp>> getQueues(WebApp webApp) {
-                Map<String,List<WebApp>> queues=new HashMap<>();
+                Map<String,List<WebApp>> queues = new HashMap<>();
                 synchronized (contexts) {
-                    List<String>virtualHosts=webApp.getVirtualHostList();
-                    if (virtualHosts==null ||virtualHosts.isEmpty()){
-                        virtualHosts=new ArrayList<>();
-                        virtualHosts.add(DEFAULT_VIRTUAL_HOST);
+                    List<String>virtualHosts = webApp.getVirtualHostList();
+                    if (virtualHosts == null || virtualHosts.isEmpty()) {
+                        virtualHosts = new ArrayList<>();
+                        virtualHosts.add(defaultVirtualHost);
                     }
-                    for (String virtualHost:virtualHosts){
-                        Map<String,List<WebApp>> virtualHostContexts=contexts.get(virtualHost);
-                        if (virtualHostContexts==null){
-                            virtualHostContexts=new HashMap<>();
+                    for (String virtualHost:virtualHosts) {
+                        Map<String,List<WebApp>> virtualHostContexts = contexts.get(virtualHost);
+                        if (virtualHostContexts == null) {
+                            virtualHostContexts = new HashMap<>();
                             contexts.put(virtualHost, virtualHostContexts);
                         }
                         List<WebApp> queue = virtualHostContexts.get(webApp.getContextName());

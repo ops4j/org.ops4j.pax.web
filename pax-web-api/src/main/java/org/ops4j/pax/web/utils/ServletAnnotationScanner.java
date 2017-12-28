@@ -26,8 +26,6 @@ import org.slf4j.LoggerFactory;
 
 public class ServletAnnotationScanner {
 
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
-
 	public Boolean scanned = false;
 	public String[] urlPatterns;
 	public String servletName;
@@ -36,6 +34,8 @@ public class ServletAnnotationScanner {
 	public WebInitParam[] webInitParams;
 	public MultipartConfig multiPartConfigAnnotation;
 	public WebServlet annotation;
+
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public ServletAnnotationScanner(Class<?> clazz) {
 		WebServlet annotation = (WebServlet) clazz.getAnnotation(WebServlet.class);

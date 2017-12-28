@@ -80,7 +80,7 @@ public abstract class AbstractWebContainerIntegrationTest extends ITestBase {
 		String filter = String.format("(%s=%s)",
 				WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, "/");
 
-		if(bundleContext.getServiceReferences(ServletContext.class, filter).size() == 0){
+		if (bundleContext.getServiceReferences(ServletContext.class, filter).size() == 0) {
 			fail("ServletContext was not registered as Service.");
 		}
 	}
@@ -94,7 +94,7 @@ public abstract class AbstractWebContainerIntegrationTest extends ITestBase {
 		String filter = String.format("(%s=%s)",
 				WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, "/");
 
-		if(bundleContext.getServiceReferences(ServletContext.class, filter).size() > 0){
+		if (bundleContext.getServiceReferences(ServletContext.class, filter).size() > 0) {
 			fail("ServletContext was not unregistered.");
 		}
 	}

@@ -42,7 +42,6 @@ import org.ops4j.pax.web.service.spi.WebEvent.WebTopic;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -241,11 +240,9 @@ public class WebEventDispatcher implements WebListener {
 					properties.put("bundle.symbolicName", webEvent
 							.getBundleName());
 					properties.put("bundle.id", webEvent.getBundleId());
-					Object bundleVersionObject = webEvent.getBundleVersion();
+					String bundleVersionObject = webEvent.getBundleVersion();
 					Version bundleVersion;
-					if (bundleVersionObject instanceof Version) {
-						bundleVersion = (Version) bundleVersionObject;
-					} else if (bundleVersionObject instanceof String) {
+					if (bundleVersionObject != null) {
 						bundleVersion = new Version(
 								(String) bundleVersionObject);
 					} else {
@@ -259,12 +256,10 @@ public class WebEventDispatcher implements WebListener {
 							.getExtenderBundleId());
 					properties.put("extender.bundle.symbolicName", webEvent
 							.getExtenderBundleName());
-					Object extenderBundleVersionObject = webEvent
+					String extenderBundleVersionObject = webEvent
 							.getExtenderBundleVersion();
 					Version extenderVersion;
-					if (extenderBundleVersionObject instanceof Version) {
-						extenderVersion = (Version) extenderBundleVersionObject;
-					} else if (extenderBundleVersionObject instanceof String) {
+					if (extenderBundleVersionObject != null) {
 						extenderVersion = new Version(
 								(String) extenderBundleVersionObject);
 					} else {

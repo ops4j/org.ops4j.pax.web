@@ -36,19 +36,19 @@ public class ErrorServlet extends HttpServlet {
 		resp.setContentType("text/plain");
 
 		// Servlets 3.1 spec, 10.9.1 "Request Attributes"
-		Integer status_code = (Integer) req.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
-		Class<?> exception_type = (Class<?>) req.getAttribute(RequestDispatcher.ERROR_EXCEPTION_TYPE);
+		Integer statusCode = (Integer) req.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+		Class<?> exceptionType = (Class<?>) req.getAttribute(RequestDispatcher.ERROR_EXCEPTION_TYPE);
 		String message = (String) req.getAttribute(RequestDispatcher.ERROR_MESSAGE);
 		Throwable exception = (Throwable) req.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
-		String request_uri = (String) req.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
-		String servlet_name = (String) req.getAttribute(RequestDispatcher.ERROR_SERVLET_NAME);
+		String requestUri = (String) req.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
+		String servletName = (String) req.getAttribute(RequestDispatcher.ERROR_SERVLET_NAME);
 		resp.getWriter().println(String.format("%d|%s|%s|%s|%s|%s",
-				status_code == null ? 0 : status_code,
-				exception_type == null ? "null" : exception_type.getName(),
+				statusCode == null ? 0 : statusCode,
+				exceptionType == null ? "null" : exceptionType.getName(),
 				message,
 				exception == null ? "null" : exception.getClass().getName(),
-				request_uri,
-				servlet_name));
+				requestUri,
+				servletName));
 	}
 
 	public static ServiceRegistration<Servlet> register(BundleContext context, Dictionary<String, ?> properties) {

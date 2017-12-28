@@ -15,7 +15,9 @@
  */
 package org.ops4j.pax.web.itest.common;
 
-import static org.ops4j.pax.exam.CoreOptions.*;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.repository;
 
 import org.junit.Ignore;
 import org.junit.Test;

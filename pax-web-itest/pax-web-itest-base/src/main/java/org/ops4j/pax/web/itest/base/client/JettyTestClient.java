@@ -35,7 +35,14 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyStore;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -48,7 +55,7 @@ import static org.ops4j.pax.web.itest.base.assertion.Assert.assertTrue;
 
 class JettyTestClient implements HttpTestClient {
 
-	private static Logger LOG = LoggerFactory.getLogger(JettyTestClient.class);
+	private static final Logger LOG = LoggerFactory.getLogger(JettyTestClient.class);
 
 	private int[] returnCode;
 	private final Map<String, String> httpHeaders = new HashMap<>();
@@ -57,7 +64,7 @@ class JettyTestClient implements HttpTestClient {
 	private final Collection<AssertionDefinition<Stream<Map.Entry<String, String>>>> responseHeaderAssertion = new ArrayList<>();
 	private URL keystoreLocationURL;
 	private BaseAuthDefinition authDefinition;
-	private String pathToTest = null;
+	private String pathToTest;
 	private boolean doGET;
 	private boolean doPOST;
 	private Map<String, String> requestParameters = new HashMap<>();
@@ -78,15 +85,18 @@ class JettyTestClient implements HttpTestClient {
 		if (keystoreLocation == null) {
 			throw new IllegalArgumentException("keystoreLocation must not be null!");
 		}
+		String keystoreFilename;
 		if (keystoreLocation.startsWith("${")) {
 			int indexOfPlaceHolder = keystoreLocation.indexOf("}");
 			String placeHolder = keystoreLocation.substring(0, indexOfPlaceHolder);
 			placeHolder = placeHolder.substring(2, placeHolder.length());
 			String property = System.getProperty(placeHolder);
-			keystoreLocation = property + keystoreLocation.substring(indexOfPlaceHolder + 1);
+			keystoreFilename = property + keystoreLocation.substring(indexOfPlaceHolder + 1);
+		} else {
+			keystoreFilename = keystoreLocation;
 		}
 
-		File keystore = new File(keystoreLocation);
+		File keystore = new File(keystoreFilename);
 
 		if (keystore.exists()) {
 			try {
@@ -95,7 +105,7 @@ class JettyTestClient implements HttpTestClient {
 				throw new RuntimeException(e);
 			}
 		} else {
-			throw new IllegalArgumentException("No keystore-file found under '" + keystoreLocation + "'!");
+			throw new IllegalArgumentException("No keystore-file found under '" + keystoreFilename + "'!");
 		}
 
 		return this;
