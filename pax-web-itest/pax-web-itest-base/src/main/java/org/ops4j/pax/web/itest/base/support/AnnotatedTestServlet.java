@@ -30,10 +30,10 @@ import java.io.IOException;
 public class AnnotatedTestServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-	private Logger LOG = LoggerFactory.getLogger(AnnotatedTestServlet.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AnnotatedTestServlet.class);
 
-	private boolean initCalled = false;
-	private boolean destroyCalled = false;
+	private boolean initCalled;
+	private boolean destroyCalled;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {

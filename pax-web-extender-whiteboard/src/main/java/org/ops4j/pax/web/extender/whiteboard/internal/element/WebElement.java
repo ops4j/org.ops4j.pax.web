@@ -44,7 +44,7 @@ public abstract class WebElement<T> implements WhiteboardElement {
 	 * Subclasses must provide the service-reference.
 	 * @param ref the service-reference of the registered service. Used to extract further properties.
 	 */
-	WebElement(ServiceReference<T> ref){
+	WebElement(ServiceReference<T> ref) {
 		NullArgumentException.validateNotNull(ref, "service-reference");
 		this.serviceReference = ref;
 	}

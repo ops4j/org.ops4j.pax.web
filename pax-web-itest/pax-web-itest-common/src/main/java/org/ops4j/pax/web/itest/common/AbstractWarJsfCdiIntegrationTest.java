@@ -34,7 +34,7 @@ public abstract class AbstractWarJsfCdiIntegrationTest extends ITestBase {
 
     // 1.0.0.RC2 misses pax-cdi-servlet
     // 1.0.0.RC1 has requirement: (&(osgi.wiring.package=org.ops4j.pax.web.service)(version>=3.0.0)(!(version>=5.0.0)))
-    private static String VERSION_PAX_CDI = "1.0.0.RC2";
+    private static final String VERSION_PAX_CDI = "1.0.0.RC2";
 
     protected static Option[] configureJsfAndCdi() {
         return options(
@@ -61,7 +61,7 @@ public abstract class AbstractWarJsfCdiIntegrationTest extends ITestBase {
     }
 
     @Before
-    public void setUp() throws Exception{
+    public void setUp() throws Exception {
         // Pax-CDI started later, because order is important
         installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-api").version(VERSION_PAX_CDI).getURL());
         installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-spi").version(VERSION_PAX_CDI).getURL());

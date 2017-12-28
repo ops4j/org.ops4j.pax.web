@@ -15,9 +15,11 @@
  */
 package org.ops4j.pax.web.itest.base.support;
 
-
-import javax.servlet.*;
 import java.util.Set;
+
+import javax.servlet.ServletContainerInitializer;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 
 /**
  * Registers an additional Filter.

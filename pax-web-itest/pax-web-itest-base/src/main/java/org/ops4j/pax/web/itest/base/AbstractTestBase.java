@@ -15,6 +15,19 @@
  */
 package org.ops4j.pax.web.itest.base;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.concurrent.TimeUnit;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+
 import org.junit.Assert;
 import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
@@ -32,18 +45,16 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.*;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.concurrent.TimeUnit;
-
-import static org.ops4j.pax.exam.CoreOptions.*;
+import static org.ops4j.pax.exam.CoreOptions.cleanCaches;
+import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
+import static org.ops4j.pax.exam.CoreOptions.junitBundles;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.web.itest.base.TestConfiguration.logbackBundles;
 import static org.ops4j.pax.web.itest.base.TestConfiguration.paxWebBundles;
-
 
 /**
  * Removes redundant code (including tests that are the same in Jetty-, Tomcat-, Undertow-Servers)
@@ -276,13 +287,13 @@ public abstract class AbstractTestBase {
 	 * @return found View-State
 	 * @throws IllegalStateException when no View-State was found
 	 */
-	protected String extractJsfViewState(String response){
+	protected String extractJsfViewState(String response) {
 		String intermediate = response.substring(response.indexOf("name=\"javax.faces.ViewState\""));
 		int indexOf = intermediate.indexOf("value=\"");
 		String substring = intermediate.substring(indexOf + 7);
 		indexOf = substring.indexOf("\"");
 		String viewstate = substring.substring(0, indexOf);
-		if(viewstate == null || viewstate.trim().length() == 0){
+		if (viewstate == null || viewstate.trim().length() == 0) {
 			throw new IllegalStateException("No JSF-View-State was found in response!");
 		}
 		return viewstate;

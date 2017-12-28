@@ -24,7 +24,7 @@ public class SomeSessionBean implements Serializable {
     private String state;
 
     @PostConstruct
-    public void init(){
+    public void init() {
         state = "Hello from CDI-Managed SomeSessionBean";
     }
 

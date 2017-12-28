@@ -133,7 +133,7 @@ public class WebresourcesExtender implements BundleActivator, BundleListener {
 	private boolean checkBundleWiringForExtender(Bundle bundle) {
 		boolean wired = false;
 		BundleWiring bundleWiring = bundle.adapt(BundleWiring.class);
-		if(bundleWiring != null){
+		if (bundleWiring != null) {
 			List<BundleWire> wires = bundleWiring.getRequiredWires(CAPABILITY_EXTENDER);
 			if (wires != null) {
 				for (BundleWire wire : wires) {

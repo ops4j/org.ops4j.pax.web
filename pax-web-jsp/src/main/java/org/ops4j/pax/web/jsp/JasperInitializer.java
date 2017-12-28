@@ -41,7 +41,7 @@ import org.xml.sax.SAXException;
 public class JasperInitializer implements ServletContainerInitializer {
 
 	private static final String MSG = "org.apache.jasper.servlet.JasperInitializer";
-	private static final Logger log = LoggerFactory.getLogger(JasperInitializer.class);
+	private static final Logger LOG = LoggerFactory.getLogger(JasperInitializer.class);
 
 	/**
 	 * Preload classes required at runtime by a JSP servlet so that
@@ -77,8 +77,8 @@ public class JasperInitializer implements ServletContainerInitializer {
 
 	@Override
 	public void onStartup(Set<Class<?>> types, ServletContext context) throws ServletException {
-		if (log.isDebugEnabled()) {
-			log.debug(Localizer.getMessage(MSG + ".onStartup", context.getServletContextName()));
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(Localizer.getMessage(MSG + ".onStartup", context.getServletContextName()));
 		}
 
 		// Setup a simple default Instance Manager
@@ -111,7 +111,7 @@ public class JasperInitializer implements ServletContainerInitializer {
 				context.addListener(listener);
 			} catch (RuntimeException e) {
 				if (e.getCause() instanceof ClassNotFoundException) {
-					log.error("Could not add listener from scanned TLD to context. " +
+					LOG.error("Could not add listener from scanned TLD to context. " +
 							"The referenced class could not be found (missing import): {}", e.getMessage());
 				} else {
 					throw e;

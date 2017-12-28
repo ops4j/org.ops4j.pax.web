@@ -17,7 +17,11 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.net.URL;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.EventListener;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
