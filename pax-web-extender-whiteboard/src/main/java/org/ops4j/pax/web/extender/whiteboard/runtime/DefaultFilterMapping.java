@@ -156,9 +156,10 @@ public class DefaultFilterMapping implements FilterMapping {
 
 	public void setAsyncSupported(Boolean asyncSupported) {
 		if (asyncSupported == null) {
-			asyncSupported = false;
+			this.asyncSupported = false;
+		} else {
+		    this.asyncSupported = asyncSupported;
 		}
-		this.asyncSupported = asyncSupported;
 	}
 
 
@@ -170,10 +171,11 @@ public class DefaultFilterMapping implements FilterMapping {
 	}
 
     public void setDispatcherType(DispatcherType[] dispatcherType) {
-		if(dispatcherType == null){
-			dispatcherType = new DispatcherType [0];
+		if (dispatcherType == null) {
+			this.dispatcherType = new DispatcherType [0];
+		} else {
+		    this.dispatcherType = dispatcherType;
 		}
-        this.dispatcherType = dispatcherType;
     }
 
 	@Override

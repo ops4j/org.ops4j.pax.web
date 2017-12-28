@@ -66,10 +66,7 @@ import static org.ops4j.pax.web.itest.base.TestConfiguration.paxWebBundles;
  */
 public abstract class AbstractControlledTestBase {
 
-	public static Logger LOG = LoggerFactory.getLogger("org.ops4j.pax.web.itest");
-
-	@Rule
-	public TestName testName = new TestName();
+	protected static final Logger LOG = LoggerFactory.getLogger("org.ops4j.pax.web.itest");
 
 	// the name of the system property which captures the jococo coverage agent command
 	// if specified then agent would be specified otherwise ignored
@@ -79,6 +76,9 @@ public abstract class AbstractControlledTestBase {
 	protected static final String WEB_VIRTUAL_HOSTS = "Web-VirtualHosts";
 	protected static final String WEB_BUNDLE = "webbundle:";
 	protected static final String REALM_NAME = "realm.properties";
+
+	@Rule
+	public TestName testName = new TestName();
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 	protected WebListener webListener;
@@ -360,13 +360,13 @@ public abstract class AbstractControlledTestBase {
 	 * @return found View-State
 	 * @throws IllegalStateException when no View-State was found
 	 */
-	protected String extractJsfViewState(String response){
+	protected String extractJsfViewState(String response) {
 		String intermediate = response.substring(response.indexOf("name=\"javax.faces.ViewState\""));
 		int indexOf = intermediate.indexOf("value=\"");
 		String substring = intermediate.substring(indexOf + 7);
 		indexOf = substring.indexOf("\"");
 		String viewstate = substring.substring(0, indexOf);
-		if(viewstate == null || viewstate.trim().length() == 0){
+		if (viewstate == null || viewstate.trim().length() == 0) {
 			throw new IllegalStateException("No JSF-View-State was found in response!");
 		}
 		return viewstate;

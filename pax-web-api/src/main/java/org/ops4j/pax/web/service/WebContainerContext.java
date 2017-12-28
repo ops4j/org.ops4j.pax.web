@@ -41,7 +41,7 @@ public interface WebContainerContext extends HttpContext {
 			this.value = value;
 		}
 
-		public String getValue(){
+		public String getValue() {
 			return value;
 		}
 	}
@@ -64,7 +64,7 @@ public interface WebContainerContext extends HttpContext {
 	 */
 	String getContextId();
 
-	default boolean isDefaultOrSharedContext(){
+	default boolean isDefaultOrSharedContext() {
 		return DefaultContextIds.DEFAULT.getValue().equals(getContextId())
 				|| DefaultContextIds.SHARED.getValue().equals(getContextId());
 	}

@@ -17,7 +17,13 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;

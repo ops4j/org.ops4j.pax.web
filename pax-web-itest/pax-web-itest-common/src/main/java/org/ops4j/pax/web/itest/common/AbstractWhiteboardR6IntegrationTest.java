@@ -59,11 +59,11 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 public abstract class AbstractWhiteboardR6IntegrationTest extends ITestBase {
 
 	@Inject
-	@Filter(timeout = 20000)
-	private WebContainer webcontainer;
+	protected BundleContext bundleContext;
 
 	@Inject
-	protected BundleContext bundleContext;
+	@Filter(timeout = 20000)
+	private WebContainer webcontainer;
 
 	@Test
 	public void testWhiteBoardServlet() throws Exception {
@@ -403,7 +403,7 @@ public abstract class AbstractWhiteboardR6IntegrationTest extends ITestBase {
 
 	private static class MyServletRequestListener implements ServletRequestListener {
 
-		private boolean event = false;
+		private boolean event;
 
 		public void requestInitialized(ServletRequestEvent sre) {
 			event = true;

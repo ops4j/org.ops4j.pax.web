@@ -143,9 +143,9 @@ public abstract class AbstractWhiteboardR6DtoIntegrationTest extends ITestBase {
 	private <T> T withService(Function<HttpServiceRuntime, T> function) throws InterruptedException {
 		T result = null;
 		ServiceReference<HttpServiceRuntime> ref = getServiceReference(bundleContext, HttpServiceRuntime.class, null);
-		if(ref != null){
+		if (ref != null) {
 			HttpServiceRuntime service = bundleContext.getService(ref);
-			if(service != null){
+			if (service != null) {
 				result = function.apply(service);
 				bundleContext.ungetService(ref);
 			}
@@ -185,9 +185,9 @@ public abstract class AbstractWhiteboardR6DtoIntegrationTest extends ITestBase {
 //                .findFirst();
 
 		// Test all under Default-ServletContext
-		if(!defaultContext.isPresent()){
+		if (!defaultContext.isPresent()) {
 			fail("DefaultContext not found");
-		}else{
+		} else {
 			assertThat("ServletContextDTO for DefaultServletContext doesn't match!",
 					defaultContext.get(),
 					servletContextDTO -> Objects.equals(servletContextDTO.contextPath, "/"));
@@ -228,9 +228,9 @@ public abstract class AbstractWhiteboardR6DtoIntegrationTest extends ITestBase {
 							&& errorPageDTO.servletContextId == defaultServletContextServiceId);
 		}
 		// Test all under Custom-ServletContext
-		if(!customContext.isPresent()){
+		if (!customContext.isPresent()) {
 			fail("CustomContext not found");
-		}else{
+		} else {
 			assertThat("ServletContextDTO for WhiteboardContext doesn't match!",
 					customContext.get(), servletContextDTO -> Objects.equals(servletContextDTO.contextPath, "/context")
 							&& servletContextDTO.serviceId == customServletContextServiceId);
