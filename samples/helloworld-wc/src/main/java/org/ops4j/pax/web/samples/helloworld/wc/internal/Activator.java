@@ -129,12 +129,13 @@ public final class Activator implements BundleActivator {
 					// register images as resources
 					webContainer.registerResources("/images", "/images",
 							httpContext);
+					// register a welcome file - should be used for ALL resource servlets
+					// - default and non default
+					webContainer.registerWelcomeFiles(
+							new String[] { "index.html" }, true, httpContext);
 					// register static htmls
 					webContainer.registerResources("/html", "/html",
 							httpContext);
-                    // register a welcome file
-                    webContainer.registerWelcomeFiles(
-                            new String[]{"html/index.html"}, true, httpContext);
 					errorServlet = new HelloWorldErrorServlet();
 					webContainer.registerServlet(errorServlet, // registered
 							// servlet
@@ -205,7 +206,7 @@ public final class Activator implements BundleActivator {
 			webContainer.unregisterErrorPage("java.lang.Exception", httpContext);
 			webContainer.unregisterErrorPage("404", httpContext);
 
-			webContainer.unregisterWelcomeFiles(new String[]{"html/index.html"}, httpContext);
+			webContainer.unregisterWelcomeFiles(new String[]{"index.html"}, httpContext);
 
 			webContainer = null;
 

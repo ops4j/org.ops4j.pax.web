@@ -1313,6 +1313,7 @@
                                 <exclude>**/edit.txt</exclude>
                                 <exclude>**/file.txt</exclude>
                                 <exclude>**/wc.txt</exclude>
+                                <exclude>**/start.txt</exclude>
                                 <exclude>**/foo</exclude>
                                 <exclude>**/maven-metadata-local.xml</exclude>
                                 <exclude>**/*.xsd</exclude>

@@ -134,10 +134,22 @@
         <error-code>404</error-code>
         <location>/error.jsp</location>
     </error-page>
+    <error-page>
+        <error-code>403</error-code>
+        <location>/error-403.jsp</location>
+    </error-page>
 
     <error-page>
         <exception-type>java.lang.Exception</exception-type>
         <location>/exception.jsp</location>
     </error-page>
+
+    <!--
+        Because this WAR includes helloworld-wc lib, which has now ROOT/index.html,
+        we need artificial welcome-file
+    -->
+    <welcome-file-list>
+        <welcome-file>default.txt</welcome-file>
+    </welcome-file-list>
 
 </web-app>
