@@ -13,24 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.undertow;
+
+package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.common.AbstractWarIntegrationTest;
-
+import org.ops4j.pax.web.itest.common.AbstractWarWelcomeFilesIntegrationTest;
 
 /**
- * @author Achim Nierbeck
+ * @author Grzegorz Grzybek
  */
 @RunWith(PaxExam.class)
-public class WarIntegrationTest extends AbstractWarIntegrationTest {
+public class WarWelcomeFilesIntegrationTest extends AbstractWarWelcomeFilesIntegrationTest {
 
 	@Configuration
 	public static Option[] configure() {
-		return configureUndertow();
+		return configureJetty();
 	}
 
 }

@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.regex.Matcher;
+import java.util.List;
 
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -28,10 +28,14 @@ import io.undertow.server.handlers.resource.Resource;
 import io.undertow.server.handlers.resource.ResourceChangeListener;
 import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.server.handlers.resource.ResourceManager;
+import io.undertow.servlet.handlers.DefaultServlet;
 import io.undertow.servlet.handlers.ServletRequestContext;
 import io.undertow.servlet.spec.HttpServletRequestImpl;
 
 /**
+ * TODO: Undertow resource handling is done not by {@link DefaultServlet} but by {@link ResourceHandler}.
+ * That means we can't e.g., custom error pages for (in particular) HTTP 403 error code set for directory request
+ * (directory listing is disabled).
  * @author Guillaume Nodet
  */
 public class ResourceServlet extends HttpServlet implements ResourceManager {
@@ -43,6 +47,7 @@ public class ResourceServlet extends HttpServlet implements ResourceManager {
 	// name = "default" when accessing resources from the root of the bundle or "/<base-path>", when
 	// accessing resources from some path under root of the bundle
 	private final String name;
+	private List<String> welcomePages;
 
 	public ResourceServlet(final Context context, String alias, String name) {
 		this.context = context;
@@ -114,4 +119,15 @@ public class ResourceServlet extends HttpServlet implements ResourceManager {
 	public void close() throws IOException {
 
 	}
+
+	/**
+	 * Reconfigures default welcome pages with ones provided externally
+	 * @param welcomePages
+	 */
+	public void configureWelcomeFiles(List<String> welcomePages) {
+		this.welcomePages = welcomePages;
+		((ResourceHandler) handler).setWelcomeFiles();
+		((ResourceHandler) handler).addWelcomeFiles(welcomePages.toArray(new String[welcomePages.size()]));
+	}
+
 }

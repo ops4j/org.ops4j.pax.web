@@ -41,10 +41,4 @@ public class WebFragmentIntegrationTest extends AbstractWebFragmentIntegrationTe
 		);
 	}
 
-    @Test
-    public void testSlash() throws Exception {
-        HttpTestClientFactory.createDefaultTestClient()
-                .withReturnCode(403)
-                .doGETandExecuteTest("http://127.0.0.1:8181/war/");
-    }
 }

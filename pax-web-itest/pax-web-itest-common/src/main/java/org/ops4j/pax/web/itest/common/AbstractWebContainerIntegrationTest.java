@@ -107,20 +107,52 @@ public abstract class AbstractWebContainerIntegrationTest extends ITestBase {
             .withReturnCode(404)
             .doGETandExecuteTest("http://127.0.0.1:8181/helloworld");
 	}
-	
-	@Test
-    public void testWelcomFiles() throws Exception {
-	    HttpTestClientFactory.createDefaultTestClient()
-            .withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
-                    resp -> resp.contains("<h1>Hello World</h1>"))
-            .withResponseAssertion("Response must contain 'Have bundle context in filter: true'",
-                    resp -> resp.contains("Have bundle context in filter: true"))
-            .doGETandExecuteTest("http://127.0.0.1:8181/helloworld/wc");
 
-        HttpTestClientFactory.createDefaultTestClient()
-            .withResponseAssertion("Response must contain '<h1>Welcome</h1>'",
-                resp -> resp.contains("<h1>Welcome</h1>"))
-            .doGETandExecuteTest("http://127.0.0.1:8181");
-    }
-	
+	@Test
+	public void testWelcomFiles() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
+				.withResponseAssertion("Response must contain 'Have bundle context in filter: true'",
+						resp -> resp.contains("Have bundle context in filter: true"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/helloworld/wc");
+
+		if (containerAlwaysInstallsDefaultServlet()) {
+			HttpTestClientFactory.createDefaultTestClient()
+					.withResponseAssertion("Response must contain '<h1>ROOT says Hi</h1>'",
+							resp -> resp.contains("<h1>ROOT says Hi</h1>"))
+					.doGETandExecuteTest("http://127.0.0.1:8181");
+		}
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Images say Hi</h1>'",
+						resp -> resp.contains("<h1>Images say Hi</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/images");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Welcome</h1>'",
+						resp -> resp.contains("<h1>Welcome</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/html");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Nested Hello</h1>'",
+						resp -> resp.contains("<h1>Nested Hello</h1>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/html/nested");
+		// OSGi problem with org.osgi.framework.Bundle#getEntry() not detecting directories...
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(200)
+				.doGETandExecuteTest("http://127.0.0.1:8181/html/nested-without-welcome");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(403)
+				.doGETandExecuteTest("http://127.0.0.1:8181/html/nested-without-welcome/");
+	}
+
+	/**
+	 * Derived classes may inform the test case if given container installs implicit "default" servlet
+	 * if one is not provided.
+	 * TODO: provide such servlet for Tomcat. Jetty and Undertow have better lifecycle and it's easier there
+	 * @return
+	 */
+	protected boolean containerAlwaysInstallsDefaultServlet() {
+		return true;
+	}
+
 }

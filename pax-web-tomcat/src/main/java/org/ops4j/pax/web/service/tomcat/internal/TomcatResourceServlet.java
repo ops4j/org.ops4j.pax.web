@@ -168,7 +168,16 @@ public class TomcatResourceServlet extends HttpServlet {
 				return;
 			}
 
-			String welcome = endsWithSlash ? getWelcomeFile(mapping) : null;
+			// let's check if this is maybe a directory. org.osgi.framework.Bundle.getResource()
+			// returns proper URL for directory entry and we can't tell if it's a directory or not
+			boolean possibleDirectoryBundleEntry = false;
+			if (foundResource) {
+				try (InputStream peek = url.openStream()) {
+					possibleDirectoryBundleEntry = peek.available() == 0;
+				}
+			}
+
+			String welcome = possibleDirectoryBundleEntry || endsWithSlash ? getWelcomeFile(mapping) : null;
 
 			// else look for a welcome file
 			if (null != welcome) {
@@ -176,7 +185,7 @@ public class TomcatResourceServlet extends HttpServlet {
 				// Forward to the index
 				RequestDispatcher dispatcher = request.getRequestDispatcher(welcome);
 				if (dispatcher != null) {
-					if (included.booleanValue()) {
+					if (included) {
 						dispatcher.include(request, response);
 						return;
 					} else {
@@ -187,8 +196,16 @@ public class TomcatResourceServlet extends HttpServlet {
 			} else if (!foundResource) {
 				// still not found anything, then do the following ...
 				if (!response.isCommitted()) {
-					response.sendError(HttpServletResponse.SC_NOT_FOUND);
+					if (endsWithSlash) {
+						response.sendError(HttpServletResponse.SC_FORBIDDEN);
+					} else {
+						response.sendError(HttpServletResponse.SC_NOT_FOUND);
+					}
 				}
+				return;
+			} else if (foundResource && url.getPath().endsWith("/")) {
+				// directory listing
+				response.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return;
 			}
 
@@ -301,12 +318,15 @@ public class TomcatResourceServlet extends HttpServlet {
 			return null;
 		}
 
+		if (!pathInContext.endsWith("/")) {
+			pathInContext = pathInContext + "/";
+		}
+		if (!"default".equals(name) && pathInContext.startsWith(name)) {
+			// in Tomcat, welcome-files registered in HttpService directly, with non-default resource servlet
+		}
 		for (int i = 0; i < welcomes.length; i++) {
-			if (httpContext.getResource(welcomes[i]) != null) {
-				if (!welcomes[i].startsWith("/")) {
-					return "/" + welcomes[i];
-				}
-				return welcomes[i];
+			if (httpContext.getResource(pathInContext + welcomes[i]) != null) {
+				return pathInContext + welcomes[i];
 			}
 		}
 		return null;
