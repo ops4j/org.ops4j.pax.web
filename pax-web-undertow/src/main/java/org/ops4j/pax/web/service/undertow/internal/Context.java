@@ -17,6 +17,7 @@ package org.ops4j.pax.web.service.undertow.internal;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.nio.file.Path;
@@ -32,6 +33,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
+import io.undertow.util.CanonicalPathUtils;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
@@ -378,6 +380,10 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 					&& "default".equalsIgnoreCase(servlet.getName())) {
 				// this is a default resource, so ignore it
 				fallbackDefaultServlet = servlet;
+				// we have to configure webapp-wide welcome files here
+				List<String> welcomePages = new LinkedList<>();
+				welcomeFiles.forEach(model -> welcomePages.addAll(Arrays.asList(model.getWelcomeFiles())));
+				((ResourceServlet)servlet.getServlet()).configureWelcomeFiles(welcomePages);
 				continue;
 			}
 			ServletInfo info = new ServletInfo(
@@ -626,6 +632,37 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 			} else if (resource.toString().endsWith("/")) {
 				return new DirectoryResource(resource);
 			} else {
+				// let's check if this is maybe a directory. org.osgi.framework.Bundle.getResource()
+				// returns proper URL for directory entry and we can't tell if it's a directory or not
+				boolean possibleDirectoryBundleEntry = false;
+				try (InputStream peek = resource.openStream()) {
+					possibleDirectoryBundleEntry = peek.available() == 0;
+				}
+				if (possibleDirectoryBundleEntry) {
+				    // consult welcome files
+					String realBase;
+					if (path.endsWith("/")) {
+						realBase = path;
+					} else {
+						realBase = path + "/";
+					}
+					final URLResource[] indexResource = new URLResource[1];
+					welcomeFiles.forEach(wfm -> {
+						for (String wf : wfm.getWelcomeFiles()) {
+							URL index = context.getResource(CanonicalPathUtils.canonicalize(realBase + wf));
+							if (index != null) {
+								try {
+									indexResource[0] = new URLResource(index, index.openConnection(), path);
+								} catch (IOException e) {
+									LOG.warn(e.getMessage(), e);
+								}
+							}
+						}
+					});
+					if (indexResource[0] != null) {
+						return indexResource[0];
+					}
+				}
 				return new URLResource(resource, resource.openConnection(), path);
 			}
 		} else {

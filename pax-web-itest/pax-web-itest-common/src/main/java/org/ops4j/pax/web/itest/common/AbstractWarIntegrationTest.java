@@ -61,7 +61,6 @@ public abstract class AbstractWarIntegrationTest extends ITestBase {
 		}
 	}
 
-
 	@Test
 	public void testWC() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -104,7 +103,6 @@ public abstract class AbstractWarIntegrationTest extends ITestBase {
 						resp -> resp.contains("Have bundle context in filter: true"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc");
 	}
-
 
 	@Test
 	public void testUpdateBundle() throws Exception {
@@ -152,15 +150,20 @@ public abstract class AbstractWarIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/alias");
 	}
 
+	/**
+	 * Note: Undertow (in current pax-web-undertow implementation) doesn't use custom (servlet) error pages
+	 * for HTTP codes returned from {@code io.undertow.server.handlers.resource.ResourceHandler}. So even
+	 * if we get HTTP 403, we won't get our custom error page.
+	 * @throws Exception
+	 */
 	@Test
 	public void testSlash() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
-				.withReturnCode(404)
-				.withResponseAssertion("Response must contain '<h1>Error Page</h1>'",
-						resp -> resp.contains("<h1>Error Page</h1>"))
+				.withReturnCode(403)
+//				.withResponseAssertion("Response must contain '<h1>Error 403 Page</h1>'",
+//						resp -> resp.contains("<h1>Error 403 Page</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/");
 	}
-
 
 	@Test
 	public void testSubJSP() throws Exception {
@@ -195,5 +198,5 @@ public abstract class AbstractWarIntegrationTest extends ITestBase {
 						resp -> resp.contains("<h1>Silent Servlet activated</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/wc/talkative");
 	}
-}
 
+}

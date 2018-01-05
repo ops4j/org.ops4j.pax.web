@@ -17,11 +17,11 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.regex.Matcher;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -185,37 +185,51 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 
 		try {
 
-			if ((resource == null || !resource.exists()) && !endsWithSlash) {
+			if ((resource == null || (!resource.exists()) && getWelcomeFile(mapping) == null)) {
 				if (!response.isCommitted()) {
-					response.sendError(HttpServletResponse.SC_NOT_FOUND);
+					if (mapping.equals("/")) {
+						// root directory listing, but no "dir entry" from bundle
+						response.sendError(HttpServletResponse.SC_FORBIDDEN);
+					} else {
+						response.sendError(HttpServletResponse.SC_NOT_FOUND);
+					}
 				}
 				return;
 			}
 
-			if (((resource != null && resource.isDirectory()) && (mapping != null && !mapping.equals("//"))) && (resource.isDirectory() && !mapping.equals("/"))) {
-				response.sendError(HttpServletResponse.SC_FORBIDDEN);
-				return;
+			// let's check if this is maybe a directory. org.osgi.framework.Bundle.getResource()
+			// returns proper URL for directory entry and we can't tell if it's a directory or not
+			boolean possibleDirectoryBundleEntry = !resource.exists();
+			if (resource.exists()) {
+				try (InputStream peek = resource.getInputStream()) {
+					possibleDirectoryBundleEntry = peek.available() == 0;
+				}
 			}
-
-			String welcome = getWelcomeFile(mapping);
+			String welcome = possibleDirectoryBundleEntry ? getWelcomeFile(mapping) : null;
 			boolean redirect = false;
 
 			// else look for a welcome file
 			if (null != welcome) {
 				LOG.debug("welcome={}", welcome);
 				// Forward to the index
-				if (redirect && response instanceof HttpServletResponse) {
-					((HttpServletResponse) response).sendRedirect(welcome);
+				if (redirect) {
+					response.sendRedirect(welcome);
 					return;
 				} else {
-
+					if (!mapping.endsWith("/")) {
+						// we found welcome file by _accident_ because org.osgi.framework.Bundle.getResource()
+						// doesn't distinguish between directories and files.
+						// we have to alter the welcome path to correctly handle relative locations
+						welcome = mapping + "/" + welcome;
+					}
 					RequestDispatcher dispatcher = request
 							.getRequestDispatcher(welcome);
 					if (dispatcher != null) {
-						if (included.booleanValue()) {
+						if (included) {
 							dispatcher.include(request, response);
 							return;
 						} else {
+							// only used as marker in org.eclipse.jetty.security.SecurityHandler.checkSecurity()
 							request.setAttribute(
 									"org.eclipse.jetty.server.welcome", welcome);
 							dispatcher.forward(request, response);
@@ -223,13 +237,9 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 						}
 					}
 				}
-			} else if (resource == null || !resource.exists()
-					|| (resource.isDirectory() && mapping.equals("//"))
-					|| (resource.isDirectory() && mapping.equals("/"))) {
-				// still not found anything, then do the following ...
-				if (!response.isCommitted()) {
-					response.sendError(HttpServletResponse.SC_NOT_FOUND);
-				}
+			} else if (resource != null && resource.isDirectory()) {
+				// directory listing
+				response.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return;
 			}
 
@@ -326,7 +336,6 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 			return null;
 		}
 
-		String welcomeServlet = null;
 		for (int i = 0; i < welcomes.length; i++) {
 			String welcomeInContext = URIUtil.addPaths(pathInContext,
 					welcomes[i]);
@@ -336,7 +345,7 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 				return welcomes[i];
 			}
 		}
-		return welcomeServlet;
+		return null;
 	}
 
 	@Override

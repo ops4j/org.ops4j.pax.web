@@ -31,4 +31,10 @@ public class WebContainerIntegrationTest extends AbstractWebContainerIntegration
 	public static Option[] configure() {
 		return configureTomcat();
 	}
+
+	@Override
+	protected boolean containerAlwaysInstallsDefaultServlet() {
+		return false;
+	}
+
 }

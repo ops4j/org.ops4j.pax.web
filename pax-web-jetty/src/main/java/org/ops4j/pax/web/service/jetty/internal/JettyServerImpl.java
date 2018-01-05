@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.EventListener;
 import java.util.List;
@@ -460,7 +461,7 @@ class JettyServerImpl implements JettyServer {
 			final ServletHolder holder = servletHandler.getServlet(model
 					.getName());
 			if (holder != null) {
-				servletHandler.setServlets((ServletHolder[]) ArrayUtil.removeFromArray(holders, holder));
+				servletHandler.setServlets(ArrayUtil.removeFromArray(holders, holder));
 				// we have to find the servlet mapping by hand :( as there is no
 				// method provided by jetty
 				// and the remove is done based on equals, that is not
@@ -477,7 +478,7 @@ class JettyServerImpl implements JettyServer {
 					}
 					if (mapping != null) {
 						servletHandler
-								.setServletMappings((ServletMapping[]) ArrayUtil.removeFromArray(mappings, mapping));
+								.setServletMappings(ArrayUtil.removeFromArray(mappings, mapping));
 						removed = true;
 					}
 				}
@@ -650,9 +651,7 @@ class JettyServerImpl implements JettyServer {
 		for (FilterMapping filterMapping : filterMappings) {
 			if (filterMapping.getFilterName().equals(model.getName())) {
 				if (newFilterMappings.isEmpty()) {
-					for (FilterMapping mapping : filterMappings) {
-						newFilterMappings.add(mapping);
-					}
+					Collections.addAll(newFilterMappings, filterMappings);
 				}
 				newFilterMappings.remove(filterMapping);
 			}
@@ -688,7 +687,7 @@ class JettyServerImpl implements JettyServer {
 			return; // The filter has already been removed so nothing do to anymore
 		}
 		final FilterHolder[] filterHolders = servletHandler.getFilters();
-		final FilterHolder[] newFilterHolders = (FilterHolder[]) ArrayUtil.removeFromArray(filterHolders, filterHolder);
+		final FilterHolder[] newFilterHolders = ArrayUtil.removeFromArray(filterHolders, filterHolder);
 		servletHandler.setFilters(newFilterHolders);
 		// if filter is still started stop the filter (=filter.destroy()) as
 		// Jetty will not do that
@@ -778,21 +777,18 @@ class JettyServerImpl implements JettyServer {
 
 		context.setWelcomeFiles(model.getWelcomeFiles());
 
-		boolean hasDefault = false;
 		if (context.getServletHandler() == null || context.getServletHandler().getServletMappings() == null) {
 			return;
 		}
 		for (ServletMapping mapping : context.getServletHandler().getServletMappings()) {
-			if (mapping.isDefault()) {
-				ServletHolder defaultServlet = context.getServletHandler().getServlet(mapping.getServletName());
-				try {
-					LOG.debug("Reinitializing {} with new welcome files {}", defaultServlet, Arrays.asList(model.getWelcomeFiles()));
-					defaultServlet.getServlet().init(defaultServlet.getServlet().getServletConfig());
-				} catch (ServletException e) {
-					LOG.warn("Problem reinitializing welcome files of default servlet", e);
+			ServletHolder servlet = context.getServletHandler().getServlet(mapping.getServletName());
+			try {
+				if (servlet.getServlet() instanceof ResourceServlet) {
+					LOG.debug("Reinitializing {} with new welcome files {}", servlet, Arrays.asList(model.getWelcomeFiles()));
+					servlet.getServlet().init(servlet.getServlet().getServletConfig());
 				}
-				hasDefault = true;
-				break;
+			} catch (ServletException e) {
+				LOG.warn("Problem reinitializing welcome files of default servlet", e);
 			}
 		}
 	}
