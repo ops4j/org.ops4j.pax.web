@@ -97,7 +97,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	private static final Logger LOG = LoggerFactory.getLogger(Context.class);
 
 	private final IdentityManager identityManager;
-	private final PathHandler path;
+	private final ContextAwarePathHandler path;
 	private final ContextModel contextModel;
 	private final Set<ServletModel> servlets = new LinkedHashSet<>();
 	private final Set<WelcomeFileModel> welcomeFiles = new LinkedHashSet<>();
@@ -118,7 +118,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 	private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
 
-	public Context(IdentityManager identityManager, PathHandler path, ContextModel contextModel) {
+	public Context(IdentityManager identityManager, ContextAwarePathHandler path, ContextModel contextModel) {
 		this.identityManager = identityManager;
 		this.path = path;
 		this.contextModel = contextModel;
@@ -180,7 +180,12 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 	private void doStop(ServletModel servlet) throws ServletException {
 		withPatterns(servlet.getUrlPatterns(),
-				(pattern, handler) -> path.removePrefixPath(pattern),
+				(pattern, handler) -> {
+					// do not try to remove default handler if it's not set by us
+					if (!"/".equals(pattern) || path.getDefaultHandler() == Context.this) {
+						path.removePrefixPath(pattern);
+					}
+				},
 				(pattern, handler) -> path.removeExactPath(pattern));
 	}
 
@@ -220,6 +225,27 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		} catch (ServletException e) {
 			LOG.error(e.getMessage(), e);
 		}
+		// clean up.
+		// we really have to unregister all remaining ServletContext registrations, implicit Default Servlets
+		// and even normal servlets. For example CXF re-registers CXFServlet even when stopping
+		// cxf-rt-transports-http bundle
+		registeredServletContexts.forEach(r -> {
+			try {
+				r.unregister();
+			} catch (IllegalStateException ignored) {
+			}
+		});
+		registeredServletContexts.clear();
+
+		// only servlets may register paths in PathHandler, so let's clean remaining (or registered during shutdown)
+		// servlets
+		servlets.forEach(sm -> {
+			try {
+				doStop(sm);
+			} catch (ServletException e) {
+				LOG.error(e.getMessage(), e);
+			}
+		});
 	}
 
 	@Override
@@ -388,7 +414,9 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 				// we have to configure webapp-wide welcome files here
 				List<String> welcomePages = new LinkedList<>();
 				welcomeFiles.forEach(model -> welcomePages.addAll(Arrays.asList(model.getWelcomeFiles())));
-				((ResourceServlet)servlet.getServlet()).configureWelcomeFiles(welcomePages);
+				if (welcomePages.size() > 0) {
+					((ResourceServlet)servlet.getServlet()).configureWelcomeFiles(welcomePages);
+				}
 				continue;
 			}
 			ServletInfo info = new ServletInfo(

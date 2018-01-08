@@ -136,7 +136,7 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
     private IdentityManager identityManager;
 
     // Standard URI -> HttpHandler map - may be wrapped by access log, filters, etc. later
-    private final PathHandler path = Handlers.path();
+    private final ContextAwarePathHandler path = new ContextAwarePathHandler(Handlers.path());
     // all Contexts add own mapping here
     private Undertow server;
     private final ConcurrentMap<HttpContext, Context> contextMap = new ConcurrentHashMap<>();
