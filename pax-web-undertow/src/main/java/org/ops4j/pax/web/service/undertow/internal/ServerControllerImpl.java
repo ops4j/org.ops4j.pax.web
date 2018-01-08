@@ -103,7 +103,8 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
     private State state = State.Unconfigured;
 
     private IdentityManager identityManager;
-    private final PathHandler path = Handlers.path();
+    // Standard URI -> HttpHandler map - may be wrapped by access log, filters, etc. later
+    private final ContextAwarePathHandler path = new ContextAwarePathHandler(Handlers.path());
     private Undertow server;
 
     private final ConcurrentMap<HttpContext, Context> contextMap = new ConcurrentHashMap<>();
