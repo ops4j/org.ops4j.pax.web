@@ -149,7 +149,7 @@ public class ResourceServletTest {
 	private class MockContext extends Context {
 		private ResourceManager manager = null;
 
-		public MockContext(ResourceManager resourceManager, PathHandler path, ContextModel contextModel) {
+		public MockContext(ResourceManager resourceManager, ContextAwarePathHandler path, ContextModel contextModel) {
 			super(null, path, contextModel);
 			this.manager = resourceManager;
 		}
