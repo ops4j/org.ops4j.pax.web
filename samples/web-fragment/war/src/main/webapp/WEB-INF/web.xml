@@ -91,4 +91,12 @@
         <listener-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldListener</listener-class>
     </listener>
 
+    <!--
+        Because this WAR includes helloworld-wc lib, which has now ROOT/index.html,
+        we need artificial welcome-file
+    -->
+    <welcome-file-list>
+        <welcome-file>default.txt</welcome-file>
+    </welcome-file-list>
+
 </web-app>

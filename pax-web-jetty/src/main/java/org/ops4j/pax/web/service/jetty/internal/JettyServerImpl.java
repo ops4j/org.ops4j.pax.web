@@ -748,16 +748,14 @@ class JettyServerImpl implements JettyServer {
 			return;
 		}
 		for (ServletMapping mapping : context.getServletHandler().getServletMappings()) {
-			if (mapping.isDefault()) {
-				ServletHolder defaultServlet = context.getServletHandler().getServlet(mapping.getServletName());
-				try {
-					LOG.debug("Reinitializing {} with new welcome files {}", defaultServlet, Arrays.asList(model.getWelcomeFiles()));
-					defaultServlet.getServlet().init(defaultServlet.getServlet().getServletConfig());
-				} catch (ServletException e) {
-					LOG.warn("Problem reinitializing welcome files of default servlet", e);
+			ServletHolder servlet = context.getServletHandler().getServlet(mapping.getServletName());
+			try {
+				if (servlet.getServlet() instanceof ResourceServlet) {
+					LOG.debug("Reinitializing {} with new welcome files {}", servlet, Arrays.asList(model.getWelcomeFiles()));
+					servlet.getServlet().init(servlet.getServlet().getServletConfig());
 				}
-				hasDefault = true;
-				break;
+			} catch (ServletException e) {
+				LOG.warn("Problem reinitializing welcome files of default servlet", e);
 			}
 		}
 	}
