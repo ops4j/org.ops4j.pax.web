@@ -89,15 +89,4 @@ class HttpServiceServletHandler extends ServletHandler {
 		}
 	}
 
-	@Override
-	protected void notFound(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-		if (LOG.isDebugEnabled())
-			LOG.debug("Not Found {}", request.getRequestURI());
-		if (getHandler() != null) {
-			nextHandle(URIUtil.addPaths(request.getServletPath(), request.getPathInfo()), baseRequest, request, response);
-		} else {
-			response.sendError(HttpServletResponse.SC_NOT_FOUND);
-		}
-	}
-
 }

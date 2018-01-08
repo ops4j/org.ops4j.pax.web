@@ -30,6 +30,7 @@ import java.util.concurrent.Callable;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.ServletException;
 
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.security.ConstraintMapping;
@@ -304,6 +305,19 @@ class JettyServerImpl implements JettyServer {
 					context.start();
 				}
 
+				boolean hasDefault = false;
+				for (ServletMapping mapping : context.getServletHandler().getServletMappings()) {
+					if (mapping.isDefault()) {
+						hasDefault = true;
+						break;
+					}
+				}
+				if (!hasDefault) {
+					ResourceServlet servlet = new ResourceServlet(model.getHttpContext(), model.getContextName(), "/", "default");
+					ResourceModel resourceModel = new ResourceModel(model, servlet, "/", "default");
+					addServlet(resourceModel);
+				}
+
 				// Fixfor PAXWEB-751
 				ClassLoader loader = Thread.currentThread().getContextClassLoader();
 				try {
@@ -423,7 +437,7 @@ class JettyServerImpl implements JettyServer {
 			final ServletHolder holder = servletHandler.getServlet(model
 					.getName());
 			if (holder != null) {
-				servletHandler.setServlets((ServletHolder[]) ArrayUtil.removeFromArray(holders, holder));
+				servletHandler.setServlets(ArrayUtil.removeFromArray(holders, holder));
 				// we have to find the servlet mapping by hand :( as there is no
 				// method provided by jetty
 				// and the remove is done based on equals, that is not
@@ -440,7 +454,7 @@ class JettyServerImpl implements JettyServer {
 					}
 					if (mapping != null) {
 						servletHandler
-								.setServletMappings((ServletMapping[]) ArrayUtil.removeFromArray(mappings, mapping));
+								.setServletMappings(ArrayUtil.removeFromArray(mappings, mapping));
 						removed = true;
 					}
 				}
@@ -491,7 +505,7 @@ class JettyServerImpl implements JettyServer {
 		}
 		
 
-		final List<EventListener> listeners = new ArrayList<EventListener>(
+		final List<EventListener> listeners = new ArrayList<>(
 				Arrays.asList(context.getEventListeners()));
 		EventListener listener = model.getEventListener();
 		
@@ -647,7 +661,7 @@ class JettyServerImpl implements JettyServer {
 		final FilterHolder filterHolder = servletHandler.getFilter(model
 				.getName());
 		final FilterHolder[] filterHolders = servletHandler.getFilters();
-		final FilterHolder[] newFilterHolders = (FilterHolder[]) ArrayUtil.removeFromArray(filterHolders, filterHolder);
+		final FilterHolder[] newFilterHolders = ArrayUtil.removeFromArray(filterHolders, filterHolder);
 		servletHandler.setFilters(newFilterHolders);
 		// if filter is still started stop the filter (=filter.destroy()) as
 		// Jetty will not do that
@@ -720,17 +734,34 @@ class JettyServerImpl implements JettyServer {
 		}
 		removeContext(model.getContextModel().getHttpContext());
 	}
-	
+
 	// PAXWEB-123: try to register WelcomeFiles differently
 	@Override
 	public void addWelcomeFiles(final WelcomeFileModel model) {
 		final ServletContextHandler context = server
 				.getOrCreateContext(model);
-		
+
 		context.setWelcomeFiles(model.getWelcomeFiles());
 
+		boolean hasDefault = false;
+		if (context.getServletHandler() == null || context.getServletHandler().getServletMappings() == null) {
+			return;
+		}
+		for (ServletMapping mapping : context.getServletHandler().getServletMappings()) {
+			if (mapping.isDefault()) {
+				ServletHolder defaultServlet = context.getServletHandler().getServlet(mapping.getServletName());
+				try {
+					LOG.debug("Reinitializing {} with new welcome files {}", defaultServlet, Arrays.asList(model.getWelcomeFiles()));
+					defaultServlet.getServlet().init(defaultServlet.getServlet().getServletConfig());
+				} catch (ServletException e) {
+					LOG.warn("Problem reinitializing welcome files of default servlet", e);
+				}
+				hasDefault = true;
+				break;
+			}
+		}
 	}
-	
+
 	@Override
 	public void removeWelcomeFiles(final WelcomeFileModel model) {
 		final ServletContextHandler context = server.getContext(model
@@ -739,7 +770,7 @@ class JettyServerImpl implements JettyServer {
 			return;// Obviously context is already removed
 		}
 		String[] welcomeFiles = context.getWelcomeFiles();
-		List<String> welcomeFileList = new ArrayList<String>(Arrays.asList(welcomeFiles));
+		List<String> welcomeFileList = new ArrayList<>(Arrays.asList(welcomeFiles));
 		welcomeFileList.removeAll(Arrays.asList(model.getWelcomeFiles()));
 		removeContext(model.getContextModel().getHttpContext());
 	}
