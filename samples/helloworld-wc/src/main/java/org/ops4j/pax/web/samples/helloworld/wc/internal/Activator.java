@@ -129,6 +129,9 @@ public final class Activator implements BundleActivator {
 					// register images as resources
 					webContainer.registerResources("/images", "/images",
 							httpContext);
+					// register a welcome file
+					webContainer.registerWelcomeFiles(
+							new String[] { "index.html" }, false, httpContext);
 					// register static htmls
 					webContainer.registerResources("/html", "/html",
 							httpContext);
@@ -161,9 +164,6 @@ public final class Activator implements BundleActivator {
 							"/helloworld/wc/error", // path to error servlet
 							httpContext // http context
 							);
-					// register a welcome file
-					webContainer.registerWelcomeFiles(
-							new String[] { "index.html" }, false, httpContext);
 
 					webContainer.end(httpContext);
 				}

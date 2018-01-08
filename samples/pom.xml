@@ -45,6 +45,8 @@
     <module>tomcat-config-fragment</module>
     <module>tomcat-auth-config-fragment</module>
     <module>war-formauth</module>
+    <module>war-introspection</module>
+    <module>war-introspection-bundle</module>
     <module>war-jsf</module>
     <module>war-jsf-primefaces</module>
     <module>helloworld-servlet3</module>

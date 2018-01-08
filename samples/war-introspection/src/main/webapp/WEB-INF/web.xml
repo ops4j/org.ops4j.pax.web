@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+		http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+
+-->
+<web-app version="3.1" metadata-complete="true"
+		xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+
+	<listener>
+		<listener-class>org.ops4j.pax.web.introspection.ContextListener</listener-class>
+	</listener>
+
+	<servlet>
+		<servlet-name>introspection-default-servlet</servlet-name>
+		<servlet-class>org.ops4j.pax.web.introspection.DefaultServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>introspection-default-servlet</servlet-name>
+		<url-pattern>/introspect</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>introspection-default-servlet</servlet-name>
+		<!-- This mapping confused the runtime - it was assigned to JSP servlet -->
+		<url-pattern>/wc/subjsp</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>introspection-broken-servlet</servlet-name>
+		<servlet-class>org.ops4j.pax.web.introspection.BrokenServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>introspection-broken-servlet</servlet-name>
+		<url-pattern>/broken</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>introspection-error-servlet</servlet-name>
+		<servlet-class>org.ops4j.pax.web.introspection.ErrorServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>introspection-error-servlet</servlet-name>
+		<url-pattern>/error</url-pattern>
+	</servlet-mapping>
+
+	<filter>
+		<filter-name>introspection-default-filter</filter-name>
+		<filter-class>org.ops4j.pax.web.introspection.DefaultFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>introspection-default-filter</filter-name>
+		<servlet-name>introspection-default-servlet</servlet-name>
+	</filter-mapping>
+
+	<error-page>
+		<error-code>404</error-code>
+		<location>/error</location>
+	</error-page>
+
+	<error-page>
+		<exception-type>java.io.IOException</exception-type>
+		<location>/error</location>
+	</error-page>
+
+	<welcome-file-list>
+		<welcome-file>start.txt</welcome-file>
+		<welcome-file>start.md</welcome-file>
+	</welcome-file-list>
+
+</web-app>

@@ -42,6 +42,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>war-introspection</artifactId>
+			<type>war</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>helloworld-hs</artifactId>
 			<scope>test</scope>
 		</dependency>

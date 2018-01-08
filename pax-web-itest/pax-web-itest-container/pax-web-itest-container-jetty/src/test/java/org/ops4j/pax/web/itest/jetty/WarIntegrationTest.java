@@ -160,7 +160,7 @@ public class WarIntegrationTest extends ITestBase {
 	@Test
 	public void testSlash() throws Exception {
 			
-		testClient.testWebPath("http://127.0.0.1:8181/war/", "<h1>Error Page</h1>", 404, false);
+		testClient.testWebPath("http://127.0.0.1:8181/war/", "<h1>Error 403 Page</h1>", 403, false);
 
 	}
 	
