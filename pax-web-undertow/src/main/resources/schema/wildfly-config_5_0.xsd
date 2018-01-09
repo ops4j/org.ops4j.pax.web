@@ -23,8 +23,8 @@
   -->
 
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           xmlns="urn:jboss:domain:4.2"
-           targetNamespace="urn:jboss:domain:4.2"
+           xmlns="urn:jboss:domain:5.0"
+           targetNamespace="urn:jboss:domain:5.0"
            elementFormDefault="qualified"
            attributeFormDefault="unqualified"
         >
@@ -58,6 +58,13 @@
                 <xs:annotation>
                     <xs:documentation>
                         The name to use for the domain controller. Useful for administrators who need to work with multiple domains.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="domain-organization" type="xs:string" use="optional">
+                <xs:annotation>
+                    <xs:documentation>
+                        The name of the organization running this domain.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
@@ -105,7 +112,7 @@
             <xs:attribute name="organization" type="xs:string" use="optional">
                 <xs:annotation>
                     <xs:documentation>
-                        The name of the organization running this server.
+                        The name of the organization running this host.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
@@ -182,6 +189,7 @@
                     </xs:attribute>
                 </xs:complexType>
             </xs:element>
+            <xs:element name="identity" type="identityType" minOccurs="0" />
             <xs:element name="security-realms" minOccurs="0">
                 <xs:complexType>
                     <xs:sequence>
@@ -269,6 +277,13 @@
         </xs:annotation>
         <xs:sequence>
             <xs:element name="properties" type="properties" minOccurs="0" />
+            <xs:element name="search-credential-reference" type="credentialReferenceType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        The credential reference to use when connecting to perform a search.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
         </xs:sequence>
         <xs:attribute name="name" type="xs:string" use="required">
             <xs:annotation>
@@ -555,6 +570,15 @@
                 Configuration of the secret/password-based identity of this server.
             </xs:documentation>
         </xs:annotation>
+        <xs:sequence>
+            <xs:element name="credential-reference" type="credentialReferenceType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        Credential to be used by as protection parameter for the Credential Store.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
         <xs:attribute name="value" type="xs:string" use="required">
             <xs:annotation>
                 <xs:documentation>
@@ -620,7 +644,16 @@
                 The keystore configuration for the server.
             </xs:documentation>
         </xs:annotation>
-        <xs:attribute name="keystore-password" type="xs:string" use="required">
+        <xs:sequence>
+            <xs:element name="keystore-password-credential-reference" type="credentialReferenceType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        Credential reference to be used by as protection parameter for the Keystore.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="keystore-password" type="xs:string" use="optional">
             <xs:annotation>
                 <xs:documentation>
                     The password to open the keystore.
@@ -638,6 +671,15 @@
         </xs:annotation>
         <xs:complexContent>
             <xs:extension base="keyStoreType">
+                <xs:sequence>
+                    <xs:element name="key-password-credential-reference" type="credentialReferenceType" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>
+                                Credential reference to be used by as protection parameter when loading keys from the keystore.
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
                 <xs:attribute name="alias" type="xs:string" use="optional">
                     <xs:annotation>
                         <xs:documentation>
@@ -1240,6 +1282,13 @@
                                 </xs:documentation>
                             </xs:annotation>
                         </xs:attribute>
+                        <xs:attribute name="parse-group-name-from-dn" type="xs:boolean" default="false">
+                            <xs:annotation>
+                                <xs:documentation>
+                                    Extract the groupe name from the distinguished name instead of requesting it.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:attribute>
                     </xs:complexType>
                 </xs:element>
             </xs:choice>
@@ -1560,7 +1609,7 @@
         </xs:attribute>
     </xs:complexType>
 
-    <xs:complexType name="file-audit-log-handlerType">
+    <xs:complexType name="abstract-file-audit-log-handlerType">
         <xs:annotation>
             <xs:documentation>
                 Configuration of a simple file handler for the audit log. This writes to a local file.
@@ -1568,25 +1617,44 @@
         </xs:annotation>
         <xs:complexContent>
             <xs:extension base="base-audit-log-handlerType">
-			        <xs:attribute name="path" type="xs:string" use="required">
-			            <xs:annotation>
-			                <xs:documentation>
-			                    The path of the audit log.
-			                </xs:documentation>
-			            </xs:annotation>
-			        </xs:attribute>
-			        <xs:attribute name="relative-to" use="optional" type="xs:string">
-			            <xs:annotation>
-			                <xs:documentation>
-			                    The name of another previously named path, or of one of the
-			                    standard paths provided by the system. If 'relative-to' is
-			                    provided, the value of the 'path' attribute is treated as
-			                    relative to the path specified by this attribute.
-			                </xs:documentation>
-			            </xs:annotation>
-			        </xs:attribute>
-			   </xs:extension>
-			</xs:complexContent>
+                <xs:attribute name="path" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The path of the audit log.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="relative-to" use="optional" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The name of another previously named path, or of one of the
+                            standard paths provided by the system. If 'relative-to' is
+                            provided, the value of the 'path' attribute is treated as
+                            relative to the path specified by this attribute.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="file-audit-log-handlerType">
+        <xs:annotation>
+            <xs:documentation>
+                Configuration of a simple file handler for the audit log. This writes to a local file.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="abstract-file-audit-log-handlerType">
+                <xs:attribute name="rotate-at-startup" type="xs:boolean" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Whether or not should an old log file be rotated during a handler initialization.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
     </xs:complexType>
 
     <xs:complexType name="size-rotating-file-audit-log-handlerType">
@@ -1598,7 +1666,7 @@
             </xs:documentation>
         </xs:annotation>
         <xs:complexContent>
-            <xs:extension base="file-audit-log-handlerType">
+            <xs:extension base="abstract-file-audit-log-handlerType">
                 <xs:attribute name="rotate-size" type="sizeType" use="optional">
                     <xs:annotation>
                         <xs:documentation>
@@ -1626,7 +1694,7 @@
             </xs:documentation>
         </xs:annotation>
         <xs:complexContent>
-            <xs:extension base="file-audit-log-handlerType">
+            <xs:extension base="abstract-file-audit-log-handlerType">
                 <xs:attribute name="suffix" type="xs:string" use="required">
                     <xs:annotation>
                         <xs:documentation>
@@ -2007,6 +2075,15 @@
     </xs:complexType>
 
     <xs:complexType name="management-interfaceType">
+        <xs:attribute name="ssl-context" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    Reference to the SSLContext to use for this management interface.
+
+                    If this is not set then the SSLContext will be obtained from any referenced security-realm.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
         <xs:attribute name="security-realm" type="xs:string" use="optional">
             <xs:annotation>
                 <xs:documentation>
@@ -2036,6 +2113,58 @@
         </xs:attribute>
     </xs:complexType>
 
+    <xs:complexType name="http-management-interfaceType" abstract="true">
+        <xs:complexContent>
+            <xs:extension base="management-interfaceType">
+                <xs:sequence>
+                    <xs:element name="http-upgrade" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>
+                                HTTP Upgrade configuration on the management interface.
+                            </xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                            <xs:attribute name="enabled" type="xs:boolean" use="optional" default="false">
+                                <xs:annotation>
+                                    <xs:documentation>
+                                        Is HTTP Upgrade to 'remote' enabled.
+                                    </xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
+                            <xs:attribute name="sasl-authentication-factory" type="xs:string" use="optional">
+                                <xs:annotation>
+                                    <xs:documentation>
+                                        The SASL authentication policy to secure connections upgraded from HTTP.
+                                    </xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+                <xs:attribute name="http-authentication-factory" type="xs:string" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The HTTP authentication factory to use to secure normal HTTP requests.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="native-management-interfaceType" abstract="true">
+        <xs:complexContent>
+            <xs:extension base="management-interfaceType">
+                <xs:attribute name="sasl-authentication-factory" type="xs:string" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The SASL server authentication policy to secure connections upgraded from HTTP.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
 
     <xs:complexType name="host-native-management-interfaceType">
         <xs:annotation>
@@ -2044,7 +2173,7 @@
             </xs:documentation>
         </xs:annotation>
         <xs:complexContent>
-            <xs:extension base="management-interfaceType">
+            <xs:extension base="native-management-interfaceType">
                 <xs:sequence>
                     <xs:element name="socket" type="native-management-socketType"/>
                 </xs:sequence>
@@ -2095,12 +2224,11 @@
             </xs:documentation>
         </xs:annotation>
         <xs:complexContent>
-            <xs:extension base="management-interfaceType">
+            <xs:extension base="http-management-interfaceType">
                 <xs:sequence>
                     <xs:element name="socket" type="host-http-management-socketType"/>
                 </xs:sequence>
                 <xs:attribute name="console-enabled" type="xs:boolean" use="optional" default="true"/>
-                <xs:attribute name="http-upgrade-enabled" type="xs:boolean" use="optional" default="false"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -2131,8 +2259,8 @@
 
                             If not specified the port will not be opened.
 
-                            If specified the security-realm will be required to obtain
-                            the SSL configuration.
+                            If specified an ssl-context or security-realm will be
+                            required to obtain the SSL configuration.
                         </xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
@@ -2164,6 +2292,9 @@
                             If specified with a different value from the 'interface'
                             attribute, redirect of HTTPS requests received on the HTTP
                             socket to the HTTPS address will not be supported.
+
+                            If specified an ssl-context or security-realm will be
+                            required to obtain the SSL configuration.
                         </xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
@@ -2186,7 +2317,7 @@
             </xs:documentation>
         </xs:annotation>
         <xs:complexContent>
-            <xs:extension base="management-interfaceType">
+            <xs:extension base="native-management-interfaceType">
                 <xs:annotation>
                     <xs:documentation>
                         Configuration of the socket to use for the native management interface is a choice
@@ -2233,7 +2364,7 @@
             </xs:documentation>
         </xs:annotation>
         <xs:complexContent>
-            <xs:extension base="management-interfaceType">
+            <xs:extension base="http-management-interfaceType">
                 <xs:annotation>
                     <xs:documentation>
                         Configuration of the socket to use for the HTTP/HTTPS management interface is a choice
@@ -2255,7 +2386,6 @@
                     <xs:element name="socket-binding" type="http-management-socket-binding-refType"/>
                 </xs:choice>
                 <xs:attribute name="console-enabled" type="xs:boolean" use="optional" default="true"/>
-                <xs:attribute name="http-upgrade-enabled" type="xs:boolean" use="optional" default="false"/>
                 <xs:attribute name="allowed-origins" type="urlListType" use="optional" >
                     <xs:annotation>
                         <xs:documentation>
@@ -2287,7 +2417,7 @@
                 <xs:documentation>
                     Name of a socket-binding configuration declared in the server's socket-binding-group to use for a HTTPS socket.
 
-                    Note: When specified the interface must also be configured to reference a security realm with a configured keystore.
+                    Note: When specified the interface must also be configured to reference an ssl-context or a security realm with a configured keystore.
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
@@ -2344,6 +2474,13 @@
                     The remote domain controller's port. If not set, a discovery option must be provided,
                     or the --cached-dc startup option must be used, or the --admin-only startup option must be used
                     with the 'admin-only-policy' attribute set to a value other than 'fetch-from-master'.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="authentication-context" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Reference to the authentication-context to use when establishing the remote connection.
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
@@ -3260,6 +3397,8 @@
             <xs:enumeration value="remote"/>
             <xs:enumeration value="http-remoting"/>
             <xs:enumeration value="https-remoting"/>
+            <xs:enumeration value="remote+http"/>
+            <xs:enumeration value="remote+https"/>
         </xs:restriction>
     </xs:simpleType>
 
@@ -3824,8 +3963,20 @@
     <xs:complexType name="jvmType">
         <xs:all minOccurs="0" maxOccurs="1">
             <xs:element name="heap" type="heapType" minOccurs="0"/>
-            <!-- XX:PermSize, XX:MaxPermSize -->
-            <xs:element name="permgen" type="bounded-memory-sizeType" minOccurs="0"/>
+            <xs:element name="permgen" type="bounded-memory-sizeType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        <![CDATA[
+                    Deprecated. Has no effect on current version servers or on any servers controlled
+                    by previous version host controllers running on JDK 8 or later, as the JVM no
+                    longer provides a separate Permanent Generation space.
+
+                    For legacy version servers running on JDK 7 or earlier, this configures the size of the
+                    server VM's Permanent Generation space (i.e. -XX:PermSize, -XX:MaxPermSize.)
+                    ]]>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
             <!-- Xss -->
             <xs:element name="stack" type="memory-sizeType" minOccurs="0"/>
             <xs:element name="agent-lib" type="jvm-agentLibType" minOccurs="0"/>
@@ -4109,6 +4260,7 @@
             <xs:element name="constraints" type="constraintsType" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="provider" type="access-control-providerType" use="optional" default="simple"/>
+        <xs:attribute name="use-identity-roles" type="xs:boolean" default="false" />
         <xs:attribute name="permission-combination-policy" type="permission-combination-policyType" use="optional" default="permissive"/>
     </xs:complexType>
 
@@ -4185,6 +4337,22 @@
             <xs:element name="constraints" type="constraintsType" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="provider" type="access-control-providerType" use="optional" default="simple"/>
+        <xs:attribute name="use-identity-roles" type="xs:boolean" default="false" />
+    </xs:complexType>
+
+    <xs:complexType name="identityType">
+        <xs:annotation>
+            <xs:documentation>
+                Definition of the security domain to use to obtain the current identity from.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="security-domain" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    Reference to the security domain to use to obtain the current identity.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
 
     <xs:complexType name="role-mappingType">
@@ -4290,6 +4458,8 @@
                 <xs:documentation>
                     <![CDATA[
                         The name of the realm the user used to authenticate.
+
+                        This attribute is deprecated and should not be used once management security is migrated to WildFly Elytron.
                     ]]>
                 </xs:documentation>
             </xs:annotation>
@@ -4642,7 +4812,7 @@
                         <xs:annotation>
                             <xs:documentation>
                                 <![CDATA[
-                                   A shorthand identifier for a kernel management API version 1.5.x
+                                   A shorthand identifier for kernel management API version 1.5.x
                                 ]]>
                             </xs:documentation>
                         </xs:annotation>
@@ -4651,7 +4821,7 @@
                         <xs:annotation>
                             <xs:documentation>
                                 <![CDATA[
-                                   A shorthand identifier for a kernel management API version 1.6.x
+                                   A shorthand identifier for kernel management API version 1.6.x
                                 ]]>
                             </xs:documentation>
                         </xs:annotation>
@@ -4660,7 +4830,7 @@
                         <xs:annotation>
                             <xs:documentation>
                                 <![CDATA[
-                                   A shorthand identifier for a kernel management API version 1.7.x
+                                   A shorthand identifier for kernel management API version 1.7.x
                                 ]]>
                             </xs:documentation>
                         </xs:annotation>
@@ -4669,7 +4839,25 @@
                         <xs:annotation>
                             <xs:documentation>
                                 <![CDATA[
-                                   A shorthand identifier for a kernel management API version 4.0.x
+                                   A shorthand identifier for kernel management API version 4.0.x
+                                ]]>
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:enumeration>
+                    <xs:enumeration value="EAP7.0">
+                        <xs:annotation>
+                            <xs:documentation>
+                                <![CDATA[
+                                   A shorthand identifier for kernel management API version 4.1.x
+                                ]]>
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:enumeration>
+                    <xs:enumeration value="WildFly10.1">
+                        <xs:annotation>
+                            <xs:documentation>
+                                <![CDATA[
+                                   A shorthand identifier for kernel management API version 4.2.x
                                 ]]>
                             </xs:documentation>
                         </xs:annotation>
@@ -4735,4 +4923,49 @@
             <xs:element name="extension" type="extensionType" minOccurs="1" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
+
+    <!-- Credential Reference Types -->
+    <xs:attributeGroup name="credentialReferenceStoreBased">
+        <xs:annotation>
+            <xs:documentation>
+                Group of attributes used when referencing credential through credential store.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="store" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    Credential store name used to fetch credential with given 'alias' from.
+                    Credential store name has to be defined elsewhere.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="alias" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    Alias of credential in the credential store.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="type" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    Type of credential to be fetched from credential store.
+                    It is usually fully qualified class name.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:attributeGroup>
+
+    <xs:complexType name="credentialReferenceType">
+        <xs:attributeGroup ref="credentialReferenceStoreBased"/>
+        <xs:attribute name="clear-text" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    Credential/password in clear text. Use just for testing purpose.
+                    Otherwise use credential store to mask the actual credential from your configuration.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
 </xs:schema>

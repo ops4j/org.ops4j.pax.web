@@ -23,8 +23,8 @@
   -->
 
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           xmlns="urn:jboss:domain:undertow:3.1"
-           targetNamespace="urn:jboss:domain:undertow:3.1"
+           xmlns="urn:jboss:domain:undertow:4.0"
+           targetNamespace="urn:jboss:domain:undertow:4.0"
            elementFormDefault="qualified"
            attributeFormDefault="unqualified"
            version="1.0">
@@ -45,6 +45,7 @@
             <xs:element name="servlet-container" type="servletContainerType" minOccurs="0" maxOccurs="unbounded"/>
             <xs:element name="handlers" type="handlerType" minOccurs="0" maxOccurs="1"/>
             <xs:element name="filters" type="filterType" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="application-security-domains" type="applicationSecurityDomainsType" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="default-server" type="xs:string" default="default-server"/>
         <xs:attribute name="default-virtual-host" type="xs:string" default="default-host"/>
@@ -105,6 +106,7 @@
                 <xs:attribute name="request-parse-timeout" type="xs:int"/>
                 <xs:attribute name="disallowed-methods" type="stringList" default="TRACE"/>
                 <xs:attribute name="secure" type="xs:boolean" default="false"/>
+                <xs:attribute name="rfc6265-cookie-validation" type="xs:boolean" default="false"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -112,7 +114,7 @@
     <xs:complexType name="http-listener-type">
         <xs:complexContent>
             <xs:extension base="listener-type">
-                <xs:attribute name="certificate-forwarding" use="optional" type="xs:string">
+               <xs:attribute name="certificate-forwarding" use="optional" type="xs:string" default="false">
                     <xs:annotation>
                         <xs:documentation>
                             <![CDATA[
@@ -132,7 +134,7 @@
                         </xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
-                <xs:attribute name="proxy-address-forwarding" use="optional" type="xs:string">
+                <xs:attribute name="proxy-address-forwarding" use="optional" type="xs:string" default="false">
                     <xs:annotation>
                         <xs:documentation>
                             <![CDATA[
@@ -156,6 +158,7 @@
                 <xs:attribute name="http2-max-concurrent-streams" type="xs:int" use="optional" />
                 <xs:attribute name="http2-max-frame-size" type="xs:int" use="optional" />
                 <xs:attribute name="http2-max-header-list-size" type="xs:int" use="optional" />
+                <xs:attribute name="require-host-http11" type="xs:boolean" use="optional" default="false"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -163,7 +166,46 @@
     <xs:complexType name="https-listener-type">
         <xs:complexContent>
             <xs:extension base="listener-type">
-                <xs:attribute name="security-realm" use="required" type="xs:string"/>
+                <xs:attribute name="ssl-context" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Reference to the SSLContext that should be used by this listener.
+
+                            If neither ssl-context or security-realm are set the JVM wide default SSLContext will be used instead.
+                            
+                            If this attribute is defined, the attributes 'verify-client', 'enabled-cipher-suites', 'enabled-protocols',
+                            'ssl-session-cache-size', and 'ssl-session-timeout' must not be set.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="certificate-forwarding" use="optional" type="xs:string" default="false">
+                    <xs:annotation>
+                        <xs:documentation>
+                            <![CDATA[
+                                                If certificate forwarding should be enabled. If this is enabled then the listener will take the certificate from the SSL_CLIENT_CERT
+                                                attribute. This should only be enabled if behind a proxy, and the proxy is configured to always set these headers.
+                                               ]]>
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="proxy-address-forwarding" use="optional" type="xs:string" default="false">
+                    <xs:annotation>
+                        <xs:documentation>
+                            <![CDATA[
+                                              enables x-forwarded-host and similar headers and set a remote ip address and hostname
+                                               ]]>
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="security-realm" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Reference to the legacy security realm to use to obtain an SSLContext.
+
+                            If neither ssl-context or security-realm are set the JVM wide default SSLContext will be used instead.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
                 <xs:attribute name="verify-client" use="optional" type="xs:string"/>
                 <xs:attribute name="enabled-cipher-suites" use="optional" type="xs:string"/>
                 <xs:attribute name="enabled-protocols" use="optional" type="xs:string"/>
@@ -177,6 +219,7 @@
                 <xs:attribute name="http2-max-concurrent-streams" type="xs:int" use="optional" />
                 <xs:attribute name="http2-max-frame-size" type="xs:int" use="optional" />
                 <xs:attribute name="http2-max-header-list-size" type="xs:int" use="optional" />
+                <xs:attribute name="require-host-http11" type="xs:boolean" use="optional" default="false"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -224,6 +267,8 @@
         <xs:attribute name="proactive-authentication" type="xs:string" use="optional" default="false" />
         <xs:attribute name="session-id-length" type="xs:int" use="optional" default="30" />
         <xs:attribute name="max-sessions" type="xs:int" use="optional" />
+        <xs:attribute name="disable-file-watch-service" type="xs:boolean" use="optional" />
+        <xs:attribute name="disable-session-id-reuse" type="xs:boolean" use="optional" />
     </xs:complexType>
 
     <xs:complexType name="mime-mappingsType">
@@ -253,6 +298,7 @@
             <xs:element name="access-log" type="accessLogType" maxOccurs="1" minOccurs="0"/>
             <xs:element name="filter-ref" type="filter-refType" minOccurs="0" maxOccurs="unbounded"/>
             <xs:element name="single-sign-on" minOccurs="0" maxOccurs="1" type="singleSignOnType"/>
+            <xs:element name="http-invoker" minOccurs="0" maxOccurs="1" type="http-invokerType"/>
         </xs:sequence>
         <xs:attribute name="name" use="required" type="xs:string"/>
         <xs:attribute name="alias" use="optional" type="xs:string"/>
@@ -267,10 +313,18 @@
         <xs:attribute name="disable-console-redirect" use="optional" type="xs:boolean" default="false"/>
     </xs:complexType>
 
+    <xs:complexType name="http-invokerType">
+        <xs:attribute name="path" use="optional" type="xs:string" default="wildfly-services"/>
+        <xs:attribute name="http-authentication-factory" type="xs:string" use="optional"/>
+        <xs:attribute name="security-realm" type="xs:string" use="optional"/>
+    </xs:complexType>
+
     <xs:complexType name="websocketsType">
         <xs:attribute name="worker" use="optional" type="xs:string" default="default"/>
         <xs:attribute name="buffer-pool" use="optional" type="xs:string" default="default"/>
         <xs:attribute name="dispatch-to-worker" use="optional" type="xs:boolean" default="true"/>
+        <xs:attribute name="per-message-deflate" use="optional" type="xs:boolean" default="false"/>
+        <xs:attribute name="deflater-level" use="optional" type="xs:int"/>
     </xs:complexType>
 
     <xs:complexType name="crawler-session-managementType">
@@ -421,6 +475,7 @@
         <xs:attribute name="request-queue-size" use="optional" type="xs:integer"/>
         <xs:attribute name="cached-connections-per-thread" use="optional" type="xs:integer"/>
         <xs:attribute name="connection-idle-timeout" use="optional" type="xs:integer"/>
+        <xs:attribute name="max-retries" type="xs:int" use="optional" />
     </xs:complexType>
 
     <xs:complexType name="reverse-proxy-hostType">
@@ -429,7 +484,9 @@
         <xs:attribute name="scheme" use="optional" type="xs:string" default="http"/>
         <xs:attribute name="path" use="optional" type="xs:string" default=""/>
         <xs:attribute name="instance-id" use="optional" type="xs:string"/>
+        <xs:attribute name="ssl-context" type="xs:string" />
         <xs:attribute name="security-realm" type="xs:string" use="optional" />
+        <xs:attribute name="enable-http2" type="xs:boolean" use="optional" default="false" />
     </xs:complexType>
 
     <xs:complexType name="filter-refType">
@@ -523,7 +580,7 @@
     <xs:complexType name="request-limitType">
         <xs:attribute name="name" use="required" type="xs:string"/>
         <xs:attribute name="max-concurrent-requests" use="required" type="xs:integer"/>
-        <xs:attribute name="queue-size" use="optional" type="xs:integer"/>
+        <xs:attribute name="queue-size" use="optional" type="xs:integer" default="0"/>
     </xs:complexType>
     <xs:complexType name="response-headerType">
         <xs:attribute name="name" use="required" type="xs:string"/>
@@ -538,11 +595,18 @@
     <xs:complexType name="modClusterType">
         <xs:attribute name="name" use="required" type="xs:string"/>
         <xs:attribute name="management-socket-binding" type="xs:string" use="required"/>
-        <xs:attribute name="advertise-socket-binding" type="xs:string" use="required"/>
+        <xs:attribute name="advertise-socket-binding" type="xs:string" use="optional"/>
         <xs:attribute name="security-key" type="xs:string" use="optional"/>
         <xs:attribute name="advertise-protocol" type="xs:string" use="optional"/>
         <xs:attribute name="advertise-path" type="xs:string" use="optional"/>
         <xs:attribute name="advertise-frequency" type="xs:int" use="optional"/>
+        <xs:attribute name="failover-strategy" type="failoverStrategy" default="LOAD_BALANCED" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    Determines how a failover node is chosen, in the event that the node to which a session has affinity is not available.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
         <xs:attribute name="health-check-interval" type="xs:int" use="optional"/>
         <xs:attribute name="broken-node-timeout" type="xs:int" use="optional"/>
         <xs:attribute name="worker" type="xs:string" use="optional" />
@@ -552,6 +616,7 @@
         <xs:attribute name="cached-connections-per-thread" type="xs:int" use="optional" />
         <xs:attribute name="connection-idle-timeout" type="xs:int" use="optional" />
         <xs:attribute name="request-queue-size" type="xs:int" use="optional" />
+        <xs:attribute name="ssl-context" type="xs:string" />
         <xs:attribute name="security-realm" type="xs:string" use="optional" />
         <xs:attribute name="use-alias" type="xs:string" use="optional" default="false" />
         <xs:attribute name="enable-http2" type="xs:string" use="optional" default="false" />
@@ -562,5 +627,142 @@
         <xs:attribute name="http2-max-concurrent-streams" type="xs:int" use="optional" />
         <xs:attribute name="http2-max-frame-size" type="xs:int" use="optional" />
         <xs:attribute name="http2-max-header-list-size" type="xs:int" use="optional" />
+        <xs:attribute name="max-retries" type="xs:int" use="optional" />
     </xs:complexType>
+
+    <xs:simpleType name="failoverStrategy">
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="LOAD_BALANCED">
+                <xs:annotation>
+                    <xs:documentation>
+                        Failover target chosen via load balancing mechanism.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="DETERMINISTIC">
+                <xs:annotation>
+                    <xs:documentation>
+                        Failover target chosen deterministically from the associated session identifier.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="applicationSecurityDomainsType">
+        <xs:annotation>
+            <xs:documentation>
+                Listing of security domains from applications that should be mapped to an Elytron
+                backed authentication policy.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="application-security-domain" type="applicationSecurityDomainType" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="applicationSecurityDomainType">
+        <xs:sequence>
+            <xs:element name="single-sign-on" type="applicationSecurityDomainSingleSignOnType" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The name of the security domain as specified in deployments.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="http-authentication-factory" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    Reference to the HttpAuthenticationFactory that should be used.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="override-deployment-config" type="xs:boolean" default="false">
+            <xs:annotation>
+                <xs:documentation>
+                    The references HttpServerAuthenticationMechanismFactory contains it's own policy configuration
+                    to control the authentication mechanisms it supports, if this attribute is set to 'true'
+                    that policy will override the methods specified within the deployment.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="enable-jacc" type="xs:boolean" use="optional" default="false">
+            <xs:annotation>
+                <xs:documentation>
+                    Enable authorization using JACC.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="applicationSecurityDomainSingleSignOnType">
+        <xs:complexContent>
+            <xs:extension base="singleSignOnType">
+                <xs:sequence>
+                    <xs:element name="credential-reference" type="credentialReferenceType" minOccurs="0"/>
+                </xs:sequence>
+                <xs:attribute name="key-store" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation>References key store containing the key used to sign and verify logout requests.</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="key-alias" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation>The alias of the key used to sign and verify logout requests.</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="client-ssl-context" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation>The ssl context used to secure back-channel logout connections.</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- Copied from elytron subsystem schema -->
+    <xs:attributeGroup name="credentialReferenceStoreBased">
+        <xs:annotation>
+            <xs:documentation>
+                Group of attributes used when referencing credential through credential store.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="store" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    Credential store name used to fetch credential with given 'alias' from.
+                    Credential store name has to be defined elsewhere.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="alias" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    Alias of credential in the credential store.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="type" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    Type of credential to be fetched from credential store.
+                    It is usually fully qualified class name.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:attributeGroup>
+    <xs:complexType name="credentialReferenceType">
+        <xs:attributeGroup ref="credentialReferenceStoreBased"/>
+        <xs:attribute name="clear-text" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    Credential/password in clear text. Use just for testing purpose.
+                    Otherwise use credential store to mask the actual credential from your configuration.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
 </xs:schema>

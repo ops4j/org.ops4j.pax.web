@@ -16,9 +16,9 @@
 @XmlSchema(namespace = "urn:org.ops4j.pax.web:undertow:1.0",
 		elementFormDefault = XmlNsForm.QUALIFIED, attributeFormDefault = XmlNsForm.UNQUALIFIED,
 		xmlns = {
-			@XmlNs(prefix = "", namespaceURI = "urn:org.ops4j.pax.web:undertow:1.0"),
-			@XmlNs(prefix = "wildfly", namespaceURI = "urn:jboss:domain:4.2"),
-			@XmlNs(prefix = "undertow", namespaceURI = "urn:jboss:domain:undertow:3.1")
+			@XmlNs(prefix = "", namespaceURI = ObjectFactory.NS_PAXWEB_UNDERTOW),
+			@XmlNs(prefix = "wildfly", namespaceURI = ObjectFactory.NS_WILDFLY),
+			@XmlNs(prefix = "undertow", namespaceURI = ObjectFactory.NS_UNDERTOW)
 		}
 )
 @XmlAccessorType(XmlAccessType.FIELD)
