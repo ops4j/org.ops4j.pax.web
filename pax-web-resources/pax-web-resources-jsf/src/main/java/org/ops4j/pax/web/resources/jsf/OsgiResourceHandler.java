@@ -75,7 +75,6 @@ import org.slf4j.LoggerFactory;
  * </faces-config>
  * }
  * </pre>
- * </p>
  * <h3>Currently Unsupported by external resource-bundle</h3>
  * <p>
  * Currently JSF-Contracts are not supported to be located from other bundles than the WAB. Furthermore resources

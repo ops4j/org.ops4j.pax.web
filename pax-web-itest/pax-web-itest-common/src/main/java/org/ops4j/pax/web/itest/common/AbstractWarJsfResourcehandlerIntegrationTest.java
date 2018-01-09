@@ -85,8 +85,9 @@ public class AbstractWarJsfResourcehandlerIntegrationTest extends ITestBase {
 	}
 
 	/**
+	 * <p>
 	 * Does multiple assertions in one test since container-startup is slow
-	 * <p/>
+	 * </p>
 	 * <ul>
 	 * 	<li>Check if pax-web-resources-jsf is started</li>
 	 * 	<li>Check if application under test (jsf-application-myfaces) is started
