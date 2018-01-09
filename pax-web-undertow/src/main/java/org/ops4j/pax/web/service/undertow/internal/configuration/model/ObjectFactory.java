@@ -21,8 +21,8 @@ import javax.xml.bind.annotation.XmlRegistry;
 public class ObjectFactory {
 
 	static final String NS_PAXWEB_UNDERTOW = "urn:org.ops4j.pax.web:undertow:1.0";
-	static final String NS_UNDERTOW = "urn:jboss:domain:undertow:3.1";
-	static final String NS_WILDFLY = "urn:jboss:domain:4.2";
+	static final String NS_UNDERTOW = "urn:jboss:domain:undertow:4.0";
+	static final String NS_WILDFLY = "urn:jboss:domain:5.0";
 
 	public UndertowConfiguration createConfiguration() {
 		return new UndertowConfiguration();

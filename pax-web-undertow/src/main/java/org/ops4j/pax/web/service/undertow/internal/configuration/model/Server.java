@@ -205,6 +205,7 @@ public class Server {
 		//<xs:attribute name="no-request-timeout" type="xs:int" default="60000"/>
 		//<xs:attribute name="request-parse-timeout" type="xs:int"/>
 		//<xs:attribute name="disallowed-methods" type="stringList" default="TRACE"/>
+		//<xs:attribute name="rfc6265-cookie-validation" type="xs:boolean" default="false"/>
 
 		public String getName() {
 			return name;
@@ -259,9 +260,9 @@ public class Server {
 	public static class HttpListener extends Listener {
 		@XmlAttribute(name = "redirect-socket")
 		private String redirectSocket;
-		//<xs:attribute name="certificate-forwarding" use="optional" type="xs:string">
+		//<xs:attribute name="certificate-forwarding" use="optional" type="xs:string" default="false">
 		//<xs:attribute name="redirect-socket" use="optional" type="xs:string">
-		//<xs:attribute name="proxy-address-forwarding" use="optional" type="xs:string">
+		//<xs:attribute name="proxy-address-forwarding" use="optional" type="xs:string" default="false">
 		//<xs:attribute name="enable-http2" use="optional" type="xs:string">
 		//<xs:attribute name="http2-enable-push" type="xs:boolean" use="optional" />
 		//<xs:attribute name="http2-header-table-size" type="xs:int" use="optional" />
@@ -269,6 +270,7 @@ public class Server {
 		//<xs:attribute name="http2-max-concurrent-streams" type="xs:int" use="optional" />
 		//<xs:attribute name="http2-max-frame-size" type="xs:int" use="optional" />
 		//<xs:attribute name="http2-max-header-list-size" type="xs:int" use="optional" />
+		//<xs:attribute name="require-host-http11" type="xs:boolean" use="optional" default="false"/>
 
 		public String getRedirectSocket() {
 			return redirectSocket;
@@ -302,6 +304,10 @@ public class Server {
 
 	@XmlType(name = "https-listener-type", namespace = NS_UNDERTOW)
 	public static class HttpsListener extends HttpListener {
+		// new in urn:jboss:domain:undertow:4.0 - but unimplemented in pax-web-undertow
+		@XmlAttribute(name="ssl-context")
+		private String sslContext;
+		// legacy in urn:jboss:domain:undertow:4.0 - but still used in pax-web
 		@XmlAttribute(name="security-realm")
 		private String securityRealm;
 		@XmlAttribute(name="verify-client")
@@ -310,16 +316,27 @@ public class Server {
 		private List<String> enabledCipherSuites = new ArrayList<>();
 		@XmlAttribute(name="enabled-protocols")
 		private List<String> enabledProtocols = new ArrayList<>();
+		//<xs:attribute name="certificate-forwarding" use="optional" type="xs:string" default="false">
+		//<xs:attribute name="proxy-address-forwarding" use="optional" type="xs:string" default="false">
 		//<xs:attribute name="enable-http2" use="optional" type="xs:string">
 		//<xs:attribute name="enable-spdy" use="optional" type="xs:string">
-        //<xs:attribute name="ssl-session-cache-size" use="optional" type="xs:string"/>
-        //<xs:attribute name="ssl-session-timeout" use="optional" type="xs:string"/>
+		//<xs:attribute name="ssl-session-cache-size" use="optional" type="xs:string"/>
+		//<xs:attribute name="ssl-session-timeout" use="optional" type="xs:string"/>
 		//<xs:attribute name="http2-enable-push" type="xs:boolean" use="optional" />
 		//<xs:attribute name="http2-header-table-size" type="xs:int" use="optional" />
 		//<xs:attribute name="http2-initial-window-size" type="xs:int" use="optional" />
 		//<xs:attribute name="http2-max-concurrent-streams" type="xs:int" use="optional" />
 		//<xs:attribute name="http2-max-frame-size" type="xs:int" use="optional" />
 		//<xs:attribute name="http2-max-header-list-size" type="xs:int" use="optional" />
+		//<xs:attribute name="require-host-http11" type="xs:boolean" use="optional" default="false"/>
+
+		public String getSslContext() {
+			return sslContext;
+		}
+
+		public void setSslContext(String sslContext) {
+			this.sslContext = sslContext;
+		}
 
 		public String getSecurityRealm() {
 			return securityRealm;

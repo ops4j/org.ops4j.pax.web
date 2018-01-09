@@ -16,13 +16,13 @@
 -->
 <undertow xmlns="urn:org.ops4j.pax.web:undertow:1.0"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:w="urn:jboss:domain:4.2"
+        xmlns:w="urn:jboss:domain:5.0"
         xsi:schemaLocation="
-            urn:jboss:domain:undertow:3.1 http://www.jboss.org/schema/jbossas/wildfly-undertow_3_1.xsd
-            urn:jboss:domain:4.2 http://www.jboss.org/schema/jbossas/wildfly-config_4_2.xsd">
+            urn:jboss:domain:undertow:4.0 http://www.jboss.org/schema/jbossas/wildfly-undertow_4_0.xsd
+            urn:jboss:domain:5.0 http://www.jboss.org/schema/jbossas/wildfly-config_5_0.xsd">
 
-    <!-- https://docs.jboss.org/author/display/WFLY10/Undertow+subsystem+configuration -->
-    <subsystem xmlns="urn:jboss:domain:undertow:3.1">
+    <!-- https://docs.jboss.org/author/display/WFLY/Undertow+subsystem+configuration -->
+    <subsystem xmlns="urn:jboss:domain:undertow:4.0">
         <!-- org.wildfly.extension.undertow.BufferCacheDefinition -->
         <buffer-cache name="default" buffer-size="1024" buffers-per-region="1024" max-regions="10" />
         <server name="default-server">
@@ -58,7 +58,7 @@
         </filters>
     </subsystem>
 
-    <!-- https://docs.jboss.org/author/display/WFLY10/Security+Realms -->
+    <!-- https://docs.jboss.org/author/display/WFLY/Security+Realms -->
     <!--
         we'll use "default" security realm by default to configure jaas/properties authentication
         (io.undertow.security.idm.IdentityManager):
