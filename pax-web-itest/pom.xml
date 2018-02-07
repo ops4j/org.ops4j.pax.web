@@ -199,7 +199,8 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
-				<artifactId>war-jsf-cdi</artifactId>
+				<artifactId>war-jsf22-cdi</artifactId>
+				<type>war</type>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

@@ -17,6 +17,7 @@ package org.ops4j.pax.web.itest.tomcat;
 
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -24,10 +25,22 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.common.AbstractWarJsfCdiIntegrationTest;
 
 @RunWith(PaxExam.class)
+@Ignore("pax-cdi doesn't have tomcat specific bundle")
 public class WarJsfCdiIntegrationTest extends AbstractWarJsfCdiIntegrationTest {
 
     @Configuration
     public Option[] config() {
         return combine(configureTomcat(), configureJsfAndCdi());
     }
+
+    @Override
+    protected String cdiWebBundleArtifact() {
+        return null;
+    }
+
+    @Override
+    protected String containerIdentification() {
+        return null;
+    }
+
 }

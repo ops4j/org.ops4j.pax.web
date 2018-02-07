@@ -442,7 +442,9 @@ public class WebApp {
 		NullArgumentException.validateNotNull(listener, "Listener");
 		NullArgumentException.validateNotNull(listener.getListenerClass(),
 				"Listener class");
-		listeners.add(listener);
+		if (!listeners.contains(listener)) {
+			listeners.add(listener);
+		}
 	}
 
 	/**

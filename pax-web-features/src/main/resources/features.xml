@@ -17,6 +17,21 @@
 
 <features name="org.ops4j.pax.web-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0">
 
+    <feature name="pax-web-core" description="Provide Core pax-web bundles" version="${project.version}">
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-api/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-spi/${project.version}</bundle>
+
+        <bundle dependency="true">mvn:org.ow2.asm/asm/${dependency.asm.version}</bundle>
+        <bundle dependency="true">mvn:org.ow2.asm/asm-util/${dependency.asm.version}</bundle>
+        <bundle dependency="true">mvn:org.ow2.asm/asm-tree/${dependency.asm.version}</bundle>
+        <bundle dependency="true">mvn:org.ow2.asm/asm-analysis/${dependency.asm.version}</bundle>
+        <bundle dependency="true">mvn:org.ow2.asm/asm-commons/${dependency.asm.version}</bundle>
+
+        <bundle dependency="true">mvn:org.apache.xbean/xbean-bundleutils/${dependency.xbean.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.xbean/xbean-reflect/${dependency.xbean.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.xbean/xbean-finder/${dependency.xbean.version}</bundle>
+    </feature>
+
     <feature name="pax-jetty" description="Provide Jetty engine support" version="${dependency.jetty.version}">
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/${servicemix.specs.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:${servlet.spec.groupId}/${servlet.spec.artifactId}/${servlet.spec.version}</bundle>
@@ -24,11 +39,6 @@
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:javax.annotation/javax.annotation-api/${javax.annotation.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jaspic_1.0_spec/${geronimo.jaspic-spec.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm/${dependency.asm.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm-util/${dependency.asm.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm-tree/${dependency.asm.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm-analysis/${dependency.asm.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm-commons/${dependency.asm.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.aries.spifly/org.apache.aries.spifly.dynamic.bundle/${aries.spifly.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-continuation/${dependency.jetty.version}</bundle>
@@ -68,7 +78,7 @@
             osgi.contract;osgi.contract=JavaWebSockets;version:Version="1";uses:="javax.websocket, javax.websocket.server"
         </capability>
     </feature>
-    
+
     <feature name="pax-jetty-http2" version="${project.version}" description="Optional additional feature to run Jetty with SPDY">
         <details>
             Please beware, for this feature to run properly you'll need to add the alpn-boot.jar to the
@@ -97,17 +107,7 @@
         <feature>scr</feature>
         <feature version="[9.3,10.0)">pax-jetty</feature>
 
-        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm/${dependency.asm.version}</bundle>
-        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-util/${dependency.asm.version}</bundle>
-        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-tree/${dependency.asm.version}</bundle>
-        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-analysis/${dependency.asm.version}</bundle>
-        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-commons/${dependency.asm.version}</bundle>
-        <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-bundleutils/${dependency.xbean.version}</bundle>
-        <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-reflect/${dependency.xbean.version}</bundle>
-        <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-finder/${dependency.xbean.version}</bundle>
-
-        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-api/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-spi/${project.version}</bundle>
+        <feature>pax-web-core</feature>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-runtime/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jetty/${project.version}</bundle>
 
@@ -135,7 +135,7 @@
         <bundle start-level="30" dependency="true">mvn:javax.el/javax.el-api/${dependency.el-api.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${project.version}</bundle>
-        
+
         <capability>
             osgi.contract;osgi.contract=JavaEl;version:Version="3";uses:="javax.el",
             osgi.contract;osig.contract=JavaJSP;version:Version="2.3";uses:="javax.servlet.jsp, javax.servlet.jsp.el, javax.servlet.jsp.tagext",
@@ -167,11 +167,11 @@
         <feature version="[7.0,7.1)">pax-http</feature>
         <bundle dependency="true" start-level="30">mvn:javax.el/javax.el-api/3.0.0</bundle>
         <bundle dependency="true" start-level="30">mvn:javax.security.auth.message/javax.security.auth.message-api/${dependency.jaspic.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:javax.validation/validation-api/${dependency.validation-api.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.tomcat-embed-core/${tipi.tomcat.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.tomcat-embed-websocket/${tipi.tomcat.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:${servlet.spec.groupId}/${servlet.spec.artifactId}/${servlet.spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-atinject_1.0_spec/${dependency.atinject.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr303-api-1.0.0/${servicemix.specs.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jsr305/${dependency.jsr305.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/${servicemix.specs.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.java-persistence-api-2.0/${servicemix.specs.version}</bundle>
@@ -193,17 +193,7 @@
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-annotation_1.1_spec/1.0.1</bundle>
         <bundle dependency="true" start-level="30">mvn:javax.websocket/javax.websocket-api/${dependency.websocket.version}</bundle>
 
-        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm/${dependency.asm.version}</bundle>
-        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-util/${dependency.asm.version}</bundle>
-        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-tree/${dependency.asm.version}</bundle>
-        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-analysis/${dependency.asm.version}</bundle>
-        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-commons/${dependency.asm.version}</bundle>
-        <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-bundleutils/${dependency.xbean.version}</bundle>
-        <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-reflect/${dependency.xbean.version}</bundle>
-        <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-finder/${dependency.xbean.version}</bundle>
-
-        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-api/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-spi/${project.version}</bundle>
+        <feature>pax-web-core</feature>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-runtime/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-tomcat/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
@@ -227,8 +217,11 @@
 
     <feature name="pax-jsf-support" version="${project.version}">
         <feature version="[7.0,7.1)">pax-war</feature>
-        <feature>pax-cdi-web-openwebbeans</feature>
+        <bundle dependency="true">mvn:javax.enterprise/cdi-api/1.2</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_2</bundle>
+        <bundle dependency="true">mvn:javax.interceptor/javax.interceptor-api/1.2</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr250-1.0/${servicemix.specs.version}</bundle>
+        <bundle dependency="true">mvn:javax.validation/validation-api/${dependency.validation-api.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr303-api-1.0.0/${servicemix.specs.version}</bundle>
         <bundle dependency="true">mvn:commons-beanutils/commons-beanutils/1.8.3</bundle>
         <bundle dependency="true">mvn:commons-collections/commons-collections/3.2.1</bundle>
@@ -237,7 +230,6 @@
         <bundle dependency="true">mvn:org.apache.geronimo.bundles/commons-discovery/0.4_1</bundle>
         <bundle>mvn:org.apache.myfaces.core/myfaces-api/${jsf-myfaces.version}</bundle>
         <bundle>mvn:org.apache.myfaces.core/myfaces-impl/${jsf-myfaces.version}</bundle>
-        
         <capability>
             osgi.contract;osgi.contract=JavaJSF;version:Version="2.2";uses:="javax.faces, javax.faces.application, javax.faces.bean, javax.faces.component, javax.faces.component.behavior, javax.faces.component.html, javax.faces.component.visit, javax.faces.context, javax.faces.convert, javax.faces.el, javax.faces.event, javax.faces.flow, javax.faces.flow.builder, javax.faces.lifecycle, javax.faces.model, javax.faces.render, javax.faces.validator, javax.faces.view, javax.faces.view.facelets, javax.faces.webapp"
         </capability>
@@ -279,17 +271,7 @@
         <feature>undertow</feature>
         <feature version="[7.0,7.1)">pax-http</feature>
 
-        <bundle dependency="true">mvn:org.ow2.asm/asm/${dependency.asm.version}</bundle>
-        <bundle dependency="true">mvn:org.ow2.asm/asm-util/${dependency.asm.version}</bundle>
-        <bundle dependency="true">mvn:org.ow2.asm/asm-tree/${dependency.asm.version}</bundle>
-        <bundle dependency="true">mvn:org.ow2.asm/asm-analysis/${dependency.asm.version}</bundle>
-        <bundle dependency="true">mvn:org.ow2.asm/asm-commons/${dependency.asm.version}</bundle>
-        <bundle dependency="true">mvn:org.apache.xbean/xbean-bundleutils/${dependency.xbean.version}</bundle>
-        <bundle dependency="true">mvn:org.apache.xbean/xbean-reflect/${dependency.xbean.version}</bundle>
-        <bundle dependency="true">mvn:org.apache.xbean/xbean-finder/${dependency.xbean.version}</bundle>
-
-        <bundle>mvn:org.ops4j.pax.web/pax-web-api/${project.version}</bundle>
-        <bundle>mvn:org.ops4j.pax.web/pax-web-spi/${project.version}</bundle>
+        <feature>pax-web-core</feature>
         <bundle>mvn:org.ops4j.pax.web/pax-web-runtime/${project.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-undertow/${project.version}</bundle>
 

@@ -102,10 +102,11 @@
 		<dependency.commons-collection.version>4.0</dependency.commons-collection.version>
 		<dependency.commons-lang.version>3.3.2</dependency.commons-lang.version>
 		<dependency.commons-logging.version>1.1.1</dependency.commons-logging.version>
-		<dependency.felix.framework.version>5.6.2</dependency.felix.framework.version>
+		<dependency.felix.framework.version>5.6.10</dependency.felix.framework.version>
 		<dependency.configadmin.version>1.8.14</dependency.configadmin.version>
 		<dependency.fileinstall.version>3.5.0</dependency.fileinstall.version>
 		<dependency.gatling.version>2.0.1</dependency.gatling.version>
+		<dependency.logback.version>1.0.6</dependency.logback.version>
 		<dependency.jasper.version>6.0.29</dependency.jasper.version>
 		<dependency.jdt.groupId>org.eclipse.jdt.core.compiler</dependency.jdt.groupId>
 		<dependency.jdt.artifactId>ecj</dependency.jdt.artifactId>
@@ -119,7 +120,7 @@
 		<dependency.paxurl.version>2.5.2</dependency.paxurl.version>
 		<dependency.pax-logging.version>1.10.0</dependency.pax-logging.version>
 		<dependency.slf4j>1.7.12</dependency.slf4j>
-		<dependency.scr.version>2.0.6</dependency.scr.version>
+		<dependency.scr.version>2.0.12</dependency.scr.version>
 		<dependency.swissbox.version>1.8.2</dependency.swissbox.version>
 		<dependency.tomcat.version>8.5.20</dependency.tomcat.version>
 		<dependency.xbean.version>4.6</dependency.xbean.version>
@@ -129,13 +130,13 @@
 		<dependency.undertow-servlet.version>1.4.18.Final</dependency.undertow-servlet.version>
 		<dependency.undertow-websockets.version>1.4.18.Final</dependency.undertow-websockets.version>
 		<dependency.jboss-logging>3.3.0.Final</dependency.jboss-logging>
-		<dependency.jasypt>1.9.2</dependency.jasypt>
-		<dependency.pax-cdi.version>1.0.0.RC2</dependency.pax-cdi.version>
+	    <dependency.jasypt>1.9.2</dependency.jasypt>
+		<dependency.pax-cdi.version>1.0.0-SNAPSHOT</dependency.pax-cdi.version>
 		<dependency.pax-keycloak.version>0.1.0</dependency.pax-keycloak.version>
 		<version.pax-exam>4.11.0</version.pax-exam>
 
 		<tipi.tomcat.version>8.5.20.1</tipi.tomcat.version>
-		<jsf-myfaces.version>2.2.10</jsf-myfaces.version>
+		<jsf-myfaces.version>2.2.12</jsf-myfaces.version>
 
 		<dependency.junit.version>4.11</dependency.junit.version>
 
@@ -159,6 +160,7 @@
 		<servlet-jsp.spec.version>2.3.1</servlet-jsp.spec.version>
 		<servlet-jstl.spec.version>1.2.1</servlet-jstl.spec.version>
 		<dependency.el-api.version>3.0.0</dependency.el-api.version>
+		<dependency.validation-api.version>1.1.0.Final</dependency.validation-api.version>
 		<dependency.jaspic.version>1.1</dependency.jaspic.version>
 
 		<!-- Tells Sonar to use JaCoCo as the code coverage tool -->
