@@ -23,7 +23,7 @@ import javax.ws.rs.core.Application;
 import java.util.Collections;
 import java.util.Set;
 
-import static org.osgi.service.jaxrs.whiteboard.JaxRSWhiteboardConstants.JAX_RS_APPLICATION_BASE;
+import static org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants.JAX_RS_APPLICATION_BASE;
 
 
 @Component(
