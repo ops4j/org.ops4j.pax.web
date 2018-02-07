@@ -35,4 +35,15 @@ public class WarJsfCdiIntegrationTest extends AbstractWarJsfCdiIntegrationTest {
     public Option[] config() {
         return combine(configureJetty(), configureJsfAndCdi());
     }
+
+    @Override
+    protected String cdiWebBundleArtifact() {
+        return "pax-cdi-jetty-weld";
+    }
+
+    @Override
+    protected String containerIdentification() {
+        return "jetty.internal.ServerControllerFactoryImpl";
+    }
+
 }

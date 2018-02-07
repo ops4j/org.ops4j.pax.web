@@ -75,6 +75,8 @@
     <module>war-introspection</module>
     <module>war-introspection-bundle</module>
     <module>war-jsf</module>
+    <module>war-jsf22</module>
+    <module>war-jsf22-cdi</module>
 	<module>war-jsf-cdi</module>
     <module>war-jsf-primefaces</module>
     <module>helloworld-servlet3</module>

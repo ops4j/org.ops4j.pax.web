@@ -300,14 +300,15 @@ public class WebAppParser {
 		List<URL> taglibs = new ArrayList<>();
 		List<URL> facesConfigs = new ArrayList<>();
 
-		for (URL u : ClassPathUtil.findResources(bundlesInClassSpace, "/", "*.tld", true)) {
-			try (InputStream is = u.openStream()) {
-				Element rootTld = getRootElement(is);
-				if (rootTld != null) {
-					parseListeners(rootTld, webApp);
-				}
-			}
-		}
+		// do not register TLD-defined listeners - they'll be registered by JasperInitializer
+//		for (URL u : ClassPathUtil.findResources(bundlesInClassSpace, "/", "*.tld", true)) {
+//			try (InputStream is = u.openStream()) {
+//				Element rootTld = getRootElement(is);
+//				if (rootTld != null) {
+//					parseListeners(rootTld, webApp);
+//				}
+//			}
+//		}
 
 		for (URL u : ClassPathUtil.findResources(bundlesInClassSpace, "/META-INF", "*.taglib.xml", false)) {
 			LOG.info("found taglib {}", u.toString());

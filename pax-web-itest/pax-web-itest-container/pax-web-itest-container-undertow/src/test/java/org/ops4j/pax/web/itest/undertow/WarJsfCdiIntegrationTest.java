@@ -35,4 +35,15 @@ public class WarJsfCdiIntegrationTest extends AbstractWarJsfCdiIntegrationTest {
     public Option[] config() {
         return combine(configureUndertow(), configureJsfAndCdi());
     }
+
+    @Override
+    protected String cdiWebBundleArtifact() {
+        return "pax-cdi-undertow-weld";
+    }
+
+    @Override
+    protected String containerIdentification() {
+        return "undertow.internal.UndertowServerControllerFactory";
+    }
+
 }

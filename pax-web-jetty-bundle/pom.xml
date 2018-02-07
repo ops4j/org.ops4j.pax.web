@@ -107,7 +107,11 @@
 							javax.servlet.http;version="3.1.0",
 							javax.websocket.server;uses:="javax.websocket";version="1.1",
 							javax.websocket;version="1.1",
-							org.osgi.service.http; version="1.2.0",
+							org.osgi.service.http; version="1.2.1",
+							org.osgi.service.http.context; version="1.0",
+							org.osgi.service.http.runtime; version="1.0",
+							org.osgi.service.http.runtime.dto; version="1.0",
+							org.osgi.service.http.whiteboard; version="1.0",
 							org.eclipse.jetty.*; version="${dependency.jetty.version}";
 							-split-package:=merge-first
 						</Export-Package>
