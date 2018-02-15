@@ -286,6 +286,13 @@ public class HttpServiceProxy implements StoppableHttpService {
 		delegate.setSessionTimeout(minutes, httpContext);
 	}
 
+	@Override
+	public void setSessionCookieConfig(String domain, String name, Boolean httpOnly, Boolean secure, String path, Integer maxAge, HttpContext httpContext) {
+		LOG.debug(String.format("Setting session cookie configuration to: domain=%s, name=%s, http-only=%b, secure=%b, path=%s, max-age=%d",
+				domain, name, httpOnly, secure, path, maxAge));
+		delegate.setSessionCookieConfig(domain, name, httpOnly, secure, path, maxAge, httpContext);
+	}
+
 	/**
 	 * @see WebContainer#registerJsps(String[], HttpContext)
 	 */

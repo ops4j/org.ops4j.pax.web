@@ -645,4 +645,7 @@ public interface WebContainer extends HttpService {
 	RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator);
 	
 	WebContainerDTO getWebcontainerDTO();
+
+	void setSessionCookieConfig(String domain, String name, Boolean httpOnly, Boolean secure, String path, Integer maxAge, HttpContext httpContext);
+
 }

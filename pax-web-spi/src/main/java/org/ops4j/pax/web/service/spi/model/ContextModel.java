@@ -87,6 +87,10 @@ public class ContextModel extends Identity {
 	 */
 	private Boolean sessionCookieSecure;
 	/**
+	 * Session Cookie max Age in seconds
+	 */
+	private Integer sessionCookieMaxAge;
+	/**
 	 * Name appended to session id, used to assist session affinity in a load
 	 * balancer.
 	 */
@@ -377,6 +381,24 @@ public class ContextModel extends Identity {
 	 */
 	public void setSessionCookieSecure(final Boolean sessionCookieSecure) {
 		this.sessionCookieSecure = sessionCookieSecure;
+	}
+
+	/**
+	 * Getter.
+	 *
+	 * @return session cookie max age
+	 */
+	public Integer getSessionCookieMaxAge() {
+		return sessionCookieMaxAge;
+	}
+
+	/**
+	 * Setter.
+	 *
+	 * @param sessionCookieMaxAge session cookie max age
+	 */
+	public void setSessionCookieMaxAge(Integer sessionCookieMaxAge) {
+		this.sessionCookieMaxAge = sessionCookieMaxAge;
 	}
 
 	/**

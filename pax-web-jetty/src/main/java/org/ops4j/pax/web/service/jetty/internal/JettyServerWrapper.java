@@ -127,6 +127,8 @@ class JettyServerWrapper extends Server {
 
 	private Boolean sessionCookieSecure;
 
+	private Integer sessionCookieMaxAge;
+
 	private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 	private final Lock readLock = rwLock.readLock();
 	private final Lock writeLock = rwLock.writeLock();
@@ -157,7 +159,8 @@ class JettyServerWrapper extends Server {
 
 	public void configureContext(final Map<String, Object> attributes, final Integer timeout, final String cookie,
 								 final String domain, final String path, final String url, final Boolean cookieHttpOnly,
-								 final Boolean sessionCookieSecure, final String workerName, final Boolean lazy, final String directory) {
+								 final Boolean sessionCookieSecure, final String workerName, final Boolean lazy, final String directory,
+								 Integer maxAge) {
 		this.contextAttributes = attributes;
 		this.sessionTimeout = timeout;
 		this.sessionCookie = cookie;
@@ -169,6 +172,7 @@ class JettyServerWrapper extends Server {
 		this.sessionWorkerName = workerName;
 		lazyLoad = lazy;
 		this.storeDirectory = directory;
+		this.sessionCookieMaxAge = maxAge;
 	}
 
 	HttpServiceContext getContext(final HttpContext httpContext) {
@@ -319,8 +323,16 @@ class JettyServerWrapper extends Server {
 		if (workerName == null) {
 			workerName = sessionWorkerName;
 		}
+		Integer maxAge = model.getSessionCookieMaxAge();
+		if (maxAge == null) {
+			maxAge = sessionCookieMaxAge;
+		}
+		if (maxAge == null) {
+			maxAge = -1;
+		}
 		configureSessionManager(context, modelSessionTimeout, modelSessionCookie, modelSessionDomain, modelSessionPath,
-				modelSessionUrl, modelSessionCookieHttpOnly, modelSessionSecure, workerName, lazyLoad, storeDirectory);
+				modelSessionUrl, modelSessionCookieHttpOnly, modelSessionSecure, workerName, lazyLoad, storeDirectory,
+				maxAge);
 
 		if (model.getRealmName() != null && model.getAuthMethod() != null) {
 			configureSecurity(context, model.getRealmName(), model.getAuthMethod(), model.getFormLoginPage(),
@@ -534,10 +546,12 @@ class JettyServerWrapper extends Server {
 	 *                       its created during a https request.
 	 * @param workerName     name appended to session id, used to assist session affinity
 	 *                       in a load balancer
+	 * @param maxAge         session cookie maxAge
 	 */
 	private void configureSessionManager(final ServletContextHandler context, final Integer minutes,
 										 final String cookie, String domain, String path, final String url, final Boolean cookieHttpOnly,
-										 final Boolean secure, final String workerName, final Boolean lazy, final String directory) {
+										 final Boolean secure, final String workerName, final Boolean lazy, final String directory,
+										 final int maxAge) {
 		LOG.debug("configureSessionManager for context [" + context + "] using - timeout:" + minutes + ", cookie:"
 				+ cookie + ", url:" + url + ", cookieHttpOnly:" + cookieHttpOnly + ", workerName:" + workerName
 				+ ", lazyLoad:" + lazy + ", storeDirectory: " + directory);
@@ -576,6 +590,10 @@ class JettyServerWrapper extends Server {
 				if (secure != null) {
 					sessionManager.getSessionCookieConfig().setSecure(secure);
 					LOG.debug("Session cookie secure set to " + secure + " for context [" + context + "]");
+				}
+				if (secure != null) {
+					sessionManager.getSessionCookieConfig().setMaxAge(maxAge);
+					LOG.debug("Session cookie maxAge set to " + maxAge + " for context [" + context + "]");
 				}
 				if (url != null) {
 					sessionManager.setSessionIdPathParameterName(url);

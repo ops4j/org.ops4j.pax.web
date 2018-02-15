@@ -126,6 +126,8 @@ public interface Configuration {
 
 	Boolean getSessionCookieSecure();
 
+	Integer getSessionCookieMaxAge();
+
 	String getSessionStoreDirectory();
 
 	Boolean getSessionLazyLoad();
