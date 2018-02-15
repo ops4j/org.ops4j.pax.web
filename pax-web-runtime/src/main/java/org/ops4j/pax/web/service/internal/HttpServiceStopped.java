@@ -296,6 +296,11 @@ class HttpServiceStopped implements StoppableHttpService {
 		LOG.warn("Http service has already been stopped");
 	}
 
+	@Override
+	public void setSessionCookieConfig(String domain, String name, Boolean httpOnly, Boolean secure, String path, Integer maxAge, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
 	/**
 	 * @see WebContainer#registerJsps(String[], HttpContext)
 	 */

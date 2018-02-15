@@ -30,7 +30,6 @@ import org.ops4j.pax.web.service.spi.model.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.FilterModel;
 import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
-import org.ops4j.pax.web.service.spi.model.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.osgi.service.http.HttpContext;
 
@@ -73,12 +72,14 @@ public interface JettyServer {
 	 *                              in a load balancer
 	 * @param lazyLoad              flag if a HashSessionManager should use lazyLoading
 	 * @param storeDirectory        the directory to store the hashSessions
+	 * @param maxAge                session cookie max-age
 	 */
 	void configureContext(Map<String, Object> attributes,
 						  Integer sessionTimeout, String sessionCookie, String sessionDomain,
 						  String sessionPath, String sessionUrl, Boolean sessionCookieHttpOnly,
 						  Boolean sessionCookieSecure, String sessionWorkerName,
-						  Boolean lazyLoad, String storeDirectory);
+						  Boolean lazyLoad, String storeDirectory,
+						  Integer maxAge);
 
 	void removeContext(HttpContext httpContext);
 

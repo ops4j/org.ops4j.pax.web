@@ -802,4 +802,9 @@ public class WebApp {
 	public WebAppJspConfig getJspConfigDescriptor() {
 		return jspConfigDescriptor;
 	}
+
+	public WebAppCookieConfig getSessionCookieConfig() {
+		return sessionCookieConfig;
+	}
+
 }

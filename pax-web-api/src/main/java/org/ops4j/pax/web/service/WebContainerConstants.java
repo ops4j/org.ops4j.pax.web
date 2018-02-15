@@ -57,7 +57,7 @@ public interface WebContainerConstants {
 	 * <p>
 	 * values are not case sensitive.
 	 */
-	String FILTER_MAPPING_DISPATCHER = "filter-mapping-dispatcher".intern();
+	String FILTER_MAPPING_DISPATCHER = "filter-mapping-dispatcher";
 
 	String PROPERTY_HTTP_USE_NIO = "org.osgi.service.http.useNIO";
 	String PROPERTY_HTTP_CHECK_FORWARDED_HEADERS = "org.osgi.service.http.checkForwardedHeaders";
@@ -116,6 +116,7 @@ public interface WebContainerConstants {
 	String PROPERTY_WORKER_NAME = PID + ".worker.name";
 	String PROPERTY_SESSION_COOKIE_HTTP_ONLY = PID + ".session.cookie.httpOnly";
 	String PROPERTY_SESSION_COOKIE_SECURE = PID + ".session.cookie.secure";
+	String PROPERTY_SESSION_COOKIE_MAX_AGE = PID + ".session.cookie.maxAge";
 	String PROPERTY_SESSION_LAZY_LOAD = PID + ".session.lazyload";
 	String PROPERTY_SESSION_STORE_DIRECTORY = PID + ".session.storedirectory";
 

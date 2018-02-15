@@ -14,13 +14,23 @@
 	limitations under the License.
 
 -->
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-    id="jspSimpleTest" version="2.5">
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+        version="3.0">
+
     <display-name>JSP-SimpleTest</display-name>
     <!-- Default page to server -->
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
+
+    <session-config>
+        <session-timeout>6</session-timeout>
+        <cookie-config>
+            <name>J_S_ID</name>
+            <path>/war2</path>
+            <max-age>2400</max-age>
+        </cookie-config>
+    </session-config>
+
 </web-app>

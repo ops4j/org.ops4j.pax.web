@@ -33,6 +33,7 @@ import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.extender.war.internal.model.WebApp;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
+import org.ops4j.pax.web.extender.war.internal.model.WebAppCookieConfig;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppJspConfig;
@@ -151,6 +152,12 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 		}
 		//CHECKSTYLE:ON
 
+		WebAppCookieConfig scc = webApp.getSessionCookieConfig();
+		if (scc != null) {
+			webContainer.setSessionCookieConfig(scc.getDomain(), scc.getName(), scc.getHttpOnly(), scc.getSecure(),
+					scc.getPath(), scc.getMaxAge(), httpContext);
+		}
+
 		for (WebAppServletContainerInitializer servletContainerInitializer : webApp
 				.getServletContainerInitializers()) {
 			webContainer.registerServletContainerInitializer(
@@ -228,7 +235,6 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 				webContainer.registerJspConfigPropertyGroup(includeCodes, includePreludes, urlPatterns, elIgnored, scriptingInvalid, isXml, httpContext);
 			}
 		}
-
 	}
 
 	/**

@@ -729,6 +729,24 @@ class HttpServiceStarted implements StoppableHttpService {
 		serviceModel.addContextModel(contextModel);
 	}
 
+	@Override
+	public void setSessionCookieConfig(String domain, String name, Boolean httpOnly, Boolean secure, String path, Integer maxAge, HttpContext httpContext) {
+		NullArgumentException.validateNotNull(httpContext, "Http context");
+		final ContextModel contextModel = getOrCreateContext(httpContext);
+		if (!serviceModel.canBeConfigured(httpContext)) {
+			throw new IllegalStateException(
+					"Http context already used. Session cookie configuration can be set/changed only before first usage");
+		}
+		contextModel.setSessionDomain(domain);
+		contextModel.setSessionCookie(name);
+		contextModel.setSessionCookieHttpOnly(httpOnly);
+		contextModel.setSessionCookieSecure(secure);
+		contextModel.setSessionPath(path);
+		contextModel.setSessionCookieMaxAge(maxAge);
+
+		serviceModel.addContextModel(contextModel);
+	}
+
 	/**
 	 * @see WebContainer#registerJsps(String[], Dictionary, HttpContext)
 	 */

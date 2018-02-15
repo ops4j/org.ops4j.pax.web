@@ -465,7 +465,8 @@ class ServerControllerImpl implements ServerController {
 					configuration.getSessionCookieSecure(),
 					configuration.getWorkerName(),
 					configuration.getSessionLazyLoad(),
-					configuration.getSessionStoreDirectory());
+					configuration.getSessionStoreDirectory(),
+					configuration.getSessionCookieMaxAge());
 
 			// Configure NCSA RequestLogHandler
 			if (configuration.isLogNCSAFormatEnabled()) {

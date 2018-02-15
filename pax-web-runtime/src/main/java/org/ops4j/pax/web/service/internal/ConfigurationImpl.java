@@ -41,6 +41,7 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVER_CONFIGURATION_FILE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVER_CONFIGURATION_URL;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE_MAX_AGE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_DOMAIN;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_PATH;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE_HTTP_ONLY;
@@ -491,6 +492,11 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	@Override
 	public Boolean getSessionCookieSecure() {
 		return getResolvedBooleanProperty(PROPERTY_SESSION_COOKIE_SECURE);
+	}
+
+	@Override
+	public Integer getSessionCookieMaxAge() {
+		return getResolvedIntegerProperty(PROPERTY_SESSION_COOKIE_MAX_AGE);
 	}
 
 	@Override
