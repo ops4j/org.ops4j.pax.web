@@ -52,6 +52,21 @@ public abstract class AbstractJspSimpleIntegrationTest extends ITestBase {
 
 
 	@Test
+	public void testSimpleJspWithCookies() throws Exception {
+
+		Thread.sleep(2000); //let the web.xml parser finish his job
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello, World, from JSP'",
+						resp -> resp.contains("Hello, World, from JSP"))
+				.withResponseHeaderAssertion("Response should contain customized session cookie",
+						headers -> headers.anyMatch(header -> header.getKey().equals("Set-Cookie")
+								&& header.getValue().contains("J_S_ID")
+								&& header.getValue().contains("Expires")))
+				.doGETandExecuteTest("http://localhost:8181/jsp-simple/");
+	}
+
+	@Test
 	public void testSimpleJsp() throws Exception {
 
 		Thread.sleep(2000); //let the web.xml parser finish his job

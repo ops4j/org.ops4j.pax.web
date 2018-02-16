@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
+import javax.servlet.SessionCookieConfig;
 
 import org.apache.catalina.Globals;
 import org.apache.catalina.Host;
@@ -48,7 +49,99 @@ public class HttpServiceContext extends StandardContext {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(HttpServiceContext.class);
 
+	public class HttpServiceSessionCookieConfig implements SessionCookieConfig {
+		private boolean httpOnly;
+		private boolean secure;
+		private int maxAge = -1;
+		private String comment;
+		private String domain;
+		private String name;
+		private String path;
+		private StandardContext context;
+
+		@Override
+		public boolean isHttpOnly() {
+			return httpOnly;
+		}
+
+		@Override
+		public void setHttpOnly(boolean httpOnly) {
+			this.httpOnly = httpOnly;
+		}
+
+		@Override
+		public boolean isSecure() {
+			return secure;
+		}
+
+		@Override
+		public void setSecure(boolean secure) {
+			this.secure = secure;
+		}
+
+		@Override
+		public int getMaxAge() {
+			return maxAge;
+		}
+
+		@Override
+		public void setMaxAge(int maxAge) {
+			this.maxAge = maxAge;
+		}
+
+		@Override
+		public String getComment() {
+			return comment;
+		}
+
+		@Override
+		public void setComment(String comment) {
+			this.comment = comment;
+		}
+
+		@Override
+		public String getDomain() {
+			return domain;
+		}
+
+		@Override
+		public void setDomain(String domain) {
+			this.domain = domain;
+		}
+
+		@Override
+		public String getName() {
+			return name;
+		}
+
+		@Override
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String getPath() {
+			return path;
+		}
+
+		@Override
+		public void setPath(String path) {
+			this.path = path;
+		}
+
+		public StandardContext getContext() {
+			return context;
+		}
+
+		public void setContext(StandardContext context) {
+			this.context = context;
+		}
+	}
+
 	public class ServletApplicationContext extends ApplicationContext {
+
+		// we have to allow more flexible configuration wrt lifecycle
+		private SessionCookieConfig sessionCookieConfig;
 
 		public ServletApplicationContext(StandardContext context) {
 			super(context);
@@ -207,6 +300,15 @@ public class HttpServiceContext extends StandardContext {
 				return null;
 			}
 		}
+
+		@Override
+		public SessionCookieConfig getSessionCookieConfig() {
+			return sessionCookieConfig;
+		}
+
+		public void setSessionCookieConfig(SessionCookieConfig sessionCookieConfig) {
+			this.sessionCookieConfig = sessionCookieConfig;
+		}
 	}
 
 	private WebContainerContext httpContext;
@@ -238,6 +340,8 @@ public class HttpServiceContext extends StandardContext {
 	public ServletContext getServletContext() {
 		if (context == null) {
 			context = new ServletApplicationContext(this);
+			((ServletApplicationContext) context).setSessionCookieConfig(new HttpServiceSessionCookieConfig());
+
 			if (getAltDDName() != null) {
 				context.setAttribute(Globals.ALT_DD_ATTR, getAltDDName());
 			}

@@ -317,7 +317,7 @@ class JettyTestClient implements HttpTestClient {
 		return StreamSupport.stream(
 				Spliterators.spliteratorUnknownSize(
 						response.getHeaders().iterator(), Spliterator.ORDERED), false)
-				.filter(httpField -> !httpField.getName().equals("Set-Cookie"))
+//				.filter(httpField -> !httpField.getName().equals("Set-Cookie"))
 				.collect(Collectors.toMap(HttpField::getName, HttpField::getValue,
 						(key1, key2) -> {
 							LOG.warn("Dupplicate key '{}' found! Using first occurece.", key1);

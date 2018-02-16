@@ -46,6 +46,7 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.ServletRegistration;
 import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestListener;
+import javax.servlet.SessionCookieConfig;
 import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 import javax.servlet.descriptor.TaglibDescriptor;
@@ -965,6 +966,27 @@ class TomcatServerWrapper implements ServerWrapper {
 			if ("/".equalsIgnoreCase(context.getPath())
 					&& (webContextPath == null || webappContext == null)) {
 				webContextPath = context.getPath();
+			}
+
+			// PAXWEB-1147
+			SessionCookieConfig scc = servletContext.getSessionCookieConfig();
+			if (scc != null) {
+				if (contextModel.getSessionDomain() != null) {
+					scc.setDomain(contextModel.getSessionDomain());
+				}
+				if (contextModel.getSessionCookie() != null) {
+					scc.setName(contextModel.getSessionCookie());
+					context.setSessionCookieName(contextModel.getSessionCookie());
+				}
+				if (contextModel.getSessionCookieMaxAge() != null) {
+					scc.setMaxAge(contextModel.getSessionCookieMaxAge());
+				}
+				if (contextModel.getSessionCookieHttpOnly() != null) {
+					scc.setHttpOnly(contextModel.getSessionCookieHttpOnly());
+				}
+				if (contextModel.getSessionCookieSecure() != null) {
+					scc.setSecure(contextModel.getSessionCookieSecure());
+				}
 			}
 
 			// makes sure the servlet context contains a leading slash
