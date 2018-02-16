@@ -152,6 +152,8 @@ public class EmbeddedTomcat extends Tomcat {
 
 	private String configurationSessionCookie;
 
+	private Integer configurationSessionCookieMaxAge;
+
 	private Boolean configurationSessionCookieHttpOnly;
 
 	private File configurationDir;
@@ -245,6 +247,7 @@ public class EmbeddedTomcat extends Tomcat {
 		// Fix for PAXWEB-193
 		configurationSessionTimeout = configuration.getSessionTimeout();
 		configurationSessionCookie = configuration.getSessionCookie();
+		configurationSessionCookieMaxAge = configuration.getSessionCookieMaxAge();
 		configurationSessionCookieHttpOnly = configuration
 				.getSessionCookieHttpOnly();
 
