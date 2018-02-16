@@ -16,7 +16,8 @@
 package org.ops4j.pax.web.sample.cdi;
 
 
-import org.ops4j.pax.cdi.api.OsgiService;
+import org.ops4j.pax.cdi.api.Dynamic;
+import org.ops4j.pax.cdi.api.Service;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -31,7 +32,8 @@ public class SomeController {
 
   @Inject
   // must be dynamic because during CDI-scanning the service (which lies in the bundle) is not yet active
-  @OsgiService(dynamic = true)
+  @Service
+  @Dynamic
   private CdiService service;
 
   @Inject

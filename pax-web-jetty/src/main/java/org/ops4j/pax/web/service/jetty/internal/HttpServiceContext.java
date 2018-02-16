@@ -32,13 +32,12 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
@@ -172,6 +171,9 @@ class HttpServiceContext extends ServletContextHandler {
 		//need to initialize the logger as super doStart is to late already
 		setLogger(Log.getLogger(getDisplayName() == null ? getContextPath() : getDisplayName()));
 
+		// org.eclipse.jetty.webapp.WebAppContext._configurations handles annotation and TLD scanning
+		// we have to do it manually here
+		// see org.eclipse.jetty.webapp.WebAppContext.DEFAULT_CONFIGURATION_CLASSES
 		// Special handling for JASPER
 		if (isJspAvailable()) { // use JasperClassloader
 			LOG.info("registering JasperInitializer");
@@ -182,21 +184,31 @@ class HttpServiceContext extends ServletContextHandler {
 		}
 
 		if (servletContainerInitializers != null) {
+			List<ServletContainerInitializer> list2 = new LinkedList<>();
 
-			List<ServletContainerInitializer> list = servletContainerInitializers.entrySet().stream().sorted((entry1, entry2) -> {
-						String name1 = entry1.getKey().getClass().getName();
-						String name2 = entry2.getKey().getClass().getName();
+			final List<ServletContainerInitializer> cdi = new LinkedList<>();
+			final List<ServletContainerInitializer> jsp = new LinkedList<>();
+			final List<ServletContainerInitializer> jettyWebSocket = new LinkedList<>();
+			final List<ServletContainerInitializer> remaining = new LinkedList<>();
 
-						if (name1.contains("JasperInitializer") && !name2.contains("WebSocketServerContainerInitializer")) {
-							return -1;
-						} else if (name1.contains("WebSocketServerContainerInitializer")) {
-							return -1;
-						} else if (name2.contains("WebSocketServerContainerInitializer")) {
-							return 1;
-						}
-						return name1.compareTo(name2);
-					}
-			).map(Entry::getKey).collect(Collectors.toList());
+			servletContainerInitializers.keySet().forEach(sci -> {
+				String className = sci.getClass().getName();
+				if ("org.ops4j.pax.cdi.web.impl.CdiServletContainerInitializer".equals(className)) {
+					cdi.add(sci);
+				} else if (className.startsWith("org.eclipse.jetty.websocket")) {
+					jettyWebSocket.add(sci);
+				} else if ("org.ops4j.pax.web.jsp.JasperInitializer".equals(className)) {
+					jsp.add(sci);
+				} else {
+					remaining.add(sci);
+				}
+			});
+
+			List<ServletContainerInitializer> list = new LinkedList<>();
+			list.addAll(cdi);
+			list.addAll(jettyWebSocket);
+			list.addAll(jsp);
+			list.addAll(remaining);
 
 			list.forEach(initializer -> {
 				try {

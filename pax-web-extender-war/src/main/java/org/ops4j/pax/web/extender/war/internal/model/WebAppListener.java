@@ -18,6 +18,7 @@
 package org.ops4j.pax.web.extender.war.internal.model;
 
 import java.util.EventListener;
+import java.util.Objects;
 
 import org.ops4j.lang.NullArgumentException;
 
@@ -75,6 +76,19 @@ public class WebAppListener {
 	 */
 	public void setListener(final EventListener listener) {
 		this.listener = listener;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		WebAppListener that = (WebAppListener) o;
+		return Objects.equals(listenerClass, that.listenerClass);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(listenerClass);
 	}
 
 	@Override

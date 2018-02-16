@@ -57,6 +57,7 @@
 							org.osgi.service.http.context; version="[1.0.0,2.0.0)",
 							org.slf4j;version="[1.5,2.0)",
 							org.osgi.service.packageadmin;resolution:=optional,
+							org.apache.xbean.finder; version="[4.1,5)",
 							*
 						</Import-Package>
 						<Export-Package>
