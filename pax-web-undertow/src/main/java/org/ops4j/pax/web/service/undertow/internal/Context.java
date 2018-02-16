@@ -33,6 +33,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
+import io.undertow.servlet.api.ServletSessionConfig;
 import io.undertow.util.CanonicalPathUtils;
 import org.keycloak.adapters.undertow.KeycloakServletExtension;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
@@ -64,7 +65,6 @@ import io.undertow.server.DefaultByteBufferPool;
 import io.undertow.server.HandlerWrapper;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.resource.Resource;
 import io.undertow.server.handlers.resource.ResourceChangeListener;
 import io.undertow.server.handlers.resource.ResourceManager;
@@ -613,6 +613,27 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 				};
 			}
 		});
+
+		ServletSessionConfig ssc = new ServletSessionConfig();
+		if (contextModel.getSessionDomain() != null) {
+			ssc.setDomain(contextModel.getSessionDomain());
+		}
+		if (contextModel.getSessionCookie() != null) {
+			ssc.setName(contextModel.getSessionCookie());
+		}
+		if (contextModel.getSessionCookieHttpOnly() != null) {
+			ssc.setHttpOnly(contextModel.getSessionCookieHttpOnly());
+		}
+		if (contextModel.getSessionCookieSecure() != null) {
+			ssc.setSecure(contextModel.getSessionCookieSecure());
+		}
+		if (contextModel.getSessionCookieMaxAge() != null) {
+			ssc.setMaxAge(contextModel.getSessionCookieMaxAge());
+		}
+		if (contextModel.getSessionPath() != null) {
+			ssc.setPath(contextModel.getSessionPath());
+		}
+		deployment.setServletSessionConfig(ssc);
 
 		manager = container.addDeployment(deployment);
 		LOG.info("Creating undertow servlet deployment for context path /{}...", contextModel.getContextName());
