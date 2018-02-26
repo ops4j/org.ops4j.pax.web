@@ -602,12 +602,32 @@ public class WebAppParser {
 
 		MultipartConfigType multipartConfig = servletType.getMultipartConfig();
 		if (multipartConfig != null) {
-			String location = multipartConfig.getLocation().getValue();
-			String maxFileSize = Long.toString(multipartConfig.getMaxFileSize());
-			String maxRequestSize = Long.toString(multipartConfig.getMaxRequestSize());
-			String fileSizeThreshold = multipartConfig.getFileSizeThreshold().toString();
-			MultipartConfigElement multipartConfigElement = new MultipartConfigElement(location,
-					Long.parseLong(maxFileSize), Long.parseLong(maxRequestSize), Integer.parseInt(fileSizeThreshold));
+			String location;
+			if (multipartConfig.getLocation() == null) {
+				location = null;
+			} else {
+				location = multipartConfig.getLocation().getValue();
+			}
+			long maxFileSize;
+			if (multipartConfig.getMaxFileSize() == null) {
+				maxFileSize = 0;
+			} else {
+				maxFileSize = multipartConfig.getMaxFileSize();
+			}
+			long maxRequestSize;
+			if (multipartConfig.getMaxRequestSize() == null) {
+				maxRequestSize = 0;
+			} else {
+				maxRequestSize = multipartConfig.getMaxRequestSize();
+			}
+			int fileSizeThreshold;
+			if (multipartConfig.getFileSizeThreshold() == null) {
+				fileSizeThreshold = 0;
+			} else {
+				fileSizeThreshold = multipartConfig.getFileSizeThreshold().intValue();
+			}
+			MultipartConfigElement multipartConfigElement = new MultipartConfigElement(location, maxFileSize, maxRequestSize,
+					fileSizeThreshold);
 			servlet.setMultipartConfig(multipartConfigElement);
 		}
 
