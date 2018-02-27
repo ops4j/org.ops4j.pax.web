@@ -98,7 +98,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.sax.SAXSource;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -113,7 +112,6 @@ import java.util.Set;
 import static java.lang.Boolean.TRUE;
 import static org.ops4j.util.xml.ElementHelper.getChild;
 import static org.ops4j.util.xml.ElementHelper.getChildren;
-import static org.ops4j.util.xml.ElementHelper.getRootElement;
 
 /**
  * Web xml parser implementation TODO parse and use session-config
@@ -453,10 +451,12 @@ public class WebAppParser {
 		if ("FORM".equalsIgnoreCase(webLoginConfig.getAuthMethod())) { // FORM
 			// authorization
 			FormLoginConfigType formLoginConfigElement = loginConfig.getFormLoginConfig();
-			webLoginConfig
-					.setFormLoginPage(formLoginConfigElement.getFormLoginPage().getValue());
-			webLoginConfig
-					.setFormErrorPage(formLoginConfigElement.getFormErrorPage().getValue());
+			if (formLoginConfigElement != null) {
+				webLoginConfig.setFormLoginPage(formLoginConfigElement.getFormLoginPage().getValue());
+				webLoginConfig.setFormErrorPage(formLoginConfigElement.getFormErrorPage().getValue());
+			} else {
+				LOG.warn("<login-config> contains <auth-method> FORM but no <form-login-config>");
+			}
 		}
 		webApp.addLoginConfig(webLoginConfig);
 	}
