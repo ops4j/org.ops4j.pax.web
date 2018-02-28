@@ -35,7 +35,7 @@ public abstract class AbstractWarJsfCdiIntegrationTest extends ITestBase {
 
     // 1.0.0.RC2 misses pax-cdi-servlet
     // 1.0.0.RC1 has requirement: (&(osgi.wiring.package=org.ops4j.pax.web.service)(version>=3.0.0)(!(version>=5.0.0)))
-    private static final String VERSION_PAX_CDI = "1.0.0-SNAPSHOT";
+    private static final String VERSION_PAX_CDI = "1.0.0";
 
     protected static Option[] configureJsfAndCdi() {
         return options(
