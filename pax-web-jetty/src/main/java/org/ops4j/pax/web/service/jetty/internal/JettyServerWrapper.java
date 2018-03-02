@@ -558,7 +558,7 @@ class JettyServerWrapper extends Server {
 				sessionHandler.setMaxInactiveInterval(minutes * 60);
 				LOG.debug("Session timeout set to {} minutes for context [{]]", minutes, context);
 			}
-			if (cookie == null || "none".equals(cookie)) {
+			if (cookie != null && !"none".equals(cookie)) {
 				sessionHandler.getSessionCookieConfig().setName(cookie);
 				LOG.debug("Session cookie set to {} for context [{}]", cookie, context);
 
