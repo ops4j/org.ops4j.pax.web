@@ -22,7 +22,6 @@
         <New class="org.eclipse.jetty.security.HashLoginService">
           <Set name="name">Test Realm</Set>
           <Set name="config">target/realm.properties</Set>
-          <Set name="refreshInterval">0</Set>
         </New>
       </Arg>
     </Call>
@@ -32,7 +31,6 @@
         <New class="org.eclipse.jetty.security.HashLoginService">
           <Set name="name">default</Set>
           <Set name="config">target/realm.properties</Set>
-          <Set name="refreshInterval">0</Set>
         </New>
       </Arg>
     </Call>
