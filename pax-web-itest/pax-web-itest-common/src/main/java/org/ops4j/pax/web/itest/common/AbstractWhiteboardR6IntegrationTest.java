@@ -141,7 +141,7 @@ public abstract class AbstractWhiteboardR6IntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8181/broken?what=return&code=502");
 
 		String exception = "java.io.IOException";
-		final String message4 = "java.io.IOException: somethingwronghashappened";
+		final String message4 = "somethingwronghashappened";
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(500)
 				.timeoutInSeconds(7200)
