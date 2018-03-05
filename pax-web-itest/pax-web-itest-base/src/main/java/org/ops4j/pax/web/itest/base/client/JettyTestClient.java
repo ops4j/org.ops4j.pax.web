@@ -287,7 +287,6 @@ class JettyTestClient implements HttpTestClient {
 				resultWrapper.contentType = contentResponse.getMediaType() != null ? contentResponse.getMediaType() : "";
 				resultWrapper.httpStatus = contentResponse.getStatus();
 				resultWrapper.headers = extractHeadersFromResponse(contentResponse);
-
 			}
 		} catch (ExecutionException e) {
 			LOG.info("caught exception from client call: ", e);
@@ -346,6 +345,8 @@ class JettyTestClient implements HttpTestClient {
 			final boolean assertionResult = assertTrue(result.content != null ? result.content : "", wrapper.predicate);
 			if (!assertionResult) {
 				assertionErrors.add("Response-Content mismatch: " + wrapper.message);
+				assertionErrors.add("Predicate: " + wrapper.predicate.toString());
+				assertionErrors.add("Result: " + result.content);
 			}
 		}
 

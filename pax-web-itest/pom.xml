@@ -331,6 +331,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.http2</groupId>
+				<artifactId>http2-common</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.http2</groupId>
 				<artifactId>http2-http-client-transport</artifactId>
 				<version>${dependency.jetty.version}</version>
 			</dependency>
