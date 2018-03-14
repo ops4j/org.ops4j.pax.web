@@ -18,7 +18,6 @@ package org.ops4j.pax.web.itest.jetty.support;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import org.eclipse.jetty.http.*;
-import org.eclipse.jetty.http.pathmap.MappedResource;
 import org.eclipse.jetty.io.WriterOutputStream;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.ContextHandler;
