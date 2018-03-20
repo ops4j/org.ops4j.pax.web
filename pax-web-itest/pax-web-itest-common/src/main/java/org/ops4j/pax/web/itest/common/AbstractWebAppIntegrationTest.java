@@ -76,13 +76,15 @@ public abstract class AbstractWebAppIntegrationTest extends ITestBase {
 
 		assertThat("There should be single ServletContext initialization",
 				events.stream().filter(s -> s.equals("contextInitialized: /war-bundle")).count(), equalTo(1L));
+		assertThat("The context parameter should be available",
+				events.stream().filter(s -> s.equals("paramFound: my.value")).count(), equalTo(1L));
 
 		installWarBundle.stop();
 
 		assertThat("There should be single ServletContext disposal",
 				events.stream().filter(s -> s.equals("contextDestroyed: /war-bundle")).count(), equalTo(1L));
-		assertThat("war-bundle should have 5 registration and 5 unregistration events recorded",
-				events.size(), equalTo(10));
+		assertThat("war-bundle should have 5 registration, 5 unregistration, and 1 parameter found events recorded",
+				events.size(), equalTo(11));
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(HttpServletResponse.SC_NOT_FOUND)
@@ -97,8 +99,8 @@ public abstract class AbstractWebAppIntegrationTest extends ITestBase {
 						resp -> resp.contains("OK: hello"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-bundle/introspect?message=hello");
 
-		assertThat("war-bundle should have 10 registration and 5 unregistration events recorded",
-				events.size(), equalTo(15));
+		assertThat("war-bundle should have 10 registration, 5 unregistration, and 2 parameter found events recorded",
+				events.size(), equalTo(17));
 		assertThat("There should be two ServletContext initialization",
 				events.stream().filter(s -> s.equals("contextInitialized: /war-bundle")).count(), equalTo(2L));
 	}
