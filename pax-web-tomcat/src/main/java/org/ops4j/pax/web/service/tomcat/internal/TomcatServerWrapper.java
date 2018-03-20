@@ -935,6 +935,11 @@ class TomcatServerWrapper implements ServerWrapper {
 			// Authentication Valve according to configured authentication method
 			context.getPipeline().addValve(getAuthenticatorValve(authMethod));
 		}
+		if (contextModel.getContextParams() != null) {
+			for (Map.Entry<String, String> entry : contextModel.getContextParams().entrySet()) {
+				context.addParameter(entry.getKey(), entry.getValue());
+			}
+		}
 
 		// TODO: how about classloader?
 		// TODO: compare with JettyServerWrapper.addContext
