@@ -94,6 +94,7 @@
 							org.apache.commons.lang3.reflect,
 						</Private-Package>
 						<Provide-Capability>
+							osgi.service;objectClass=javax.servlet.ServletContext,
 							osgi.service;effective:=active;objectClass=org.ops4j.pax.web.service.spi.ServerController
 						</Provide-Capability>
 						<Embed-Dependency>*;
