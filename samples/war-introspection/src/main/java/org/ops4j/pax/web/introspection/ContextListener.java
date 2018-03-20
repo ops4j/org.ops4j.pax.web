@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.introspection;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
@@ -23,7 +24,9 @@ public class ContextListener implements ServletContextListener {
 
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
+		ServletContext sc = sce.getServletContext();
 		Introspection.event(String.format("contextInitialized: %s", sce.getServletContext().getContextPath()));
+		Introspection.event(String.format("paramFound: %s", sc.getInitParameter("my.param")));
 	}
 
 	@Override
