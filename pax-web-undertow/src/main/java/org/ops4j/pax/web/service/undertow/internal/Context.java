@@ -480,6 +480,11 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 				}
 			}
 		}
+		if (contextModel.getContextParams() != null) {
+			for (Map.Entry<String, String> entry : contextModel.getContextParams().entrySet()) {
+				deployment.addInitParameter(entry.getKey(), entry.getValue());
+			}
+		}
 
 		Bundle bundle = contextModel.getBundle();
 		ServletContainerInitializerScanner scanner = new ServletContainerInitializerScanner(bundle, undertowBundle, packageAdminTracker.getService());

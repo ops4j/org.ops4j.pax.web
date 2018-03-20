@@ -79,4 +79,8 @@
 		<welcome-file>start.md</welcome-file>
 	</welcome-file-list>
 
+	<context-param>
+		<param-name>my.param</param-name>
+		<param-value>my.value</param-value>
+	</context-param>
 </web-app>
