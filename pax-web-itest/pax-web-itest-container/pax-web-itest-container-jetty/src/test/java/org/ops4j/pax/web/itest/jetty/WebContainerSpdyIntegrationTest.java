@@ -112,7 +112,6 @@ public class WebContainerSpdyIntegrationTest extends ITestBase {
 	 * wrapped into a bundle called pax-exam-probe
 	 */
 	@Test
-	@Ignore("java.lang.ClassNotFoundException: org.eclipse.jetty.http2.api.Session$Listener not found by PAXEXAM-PROBE")
 	public void listBundles() {
 		for (final Bundle b : bundleContext.getBundles()) {
 			if (b.getState() != Bundle.ACTIVE

@@ -25,13 +25,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.io.File;
 
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
-
-import java.io.File;
 
 /**
  * Intermediate Base-Class until old base has been removed
@@ -93,15 +92,21 @@ public class ITestBase extends AbstractControlledTestBase {
 	    
 		return combine(
 				configureJetty(),
-				    CoreOptions.vmOptions("-Xbootclasspath/p:" + alpnBoot),
-				    mavenBundle().groupId("org.eclipse.jetty.osgi").artifactId("jetty-osgi-alpn").version(asInProject()).noStart(),
-					mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-alpn-server").version(asInProject()),
-                   mavenBundle().groupId("org.eclipse.jetty.http2")
-                       .artifactId("http2-common").version(asInProject()),
-                   mavenBundle().groupId("org.eclipse.jetty.http2")
-                           .artifactId("http2-hpack").version(asInProject()),
-                   mavenBundle().groupId("org.eclipse.jetty.http2")
-                           .artifactId("http2-server").version(asInProject())
+				CoreOptions.vmOptions("-Xbootclasspath/p:" + alpnBoot),
+				mavenBundle().groupId("org.eclipse.jetty.osgi").artifactId("jetty-osgi-alpn").version(asInProject()).noStart(),
+				mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-alpn-server").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty.http2")
+						.artifactId("http2-common").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty.http2")
+						.artifactId("http2-hpack").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty.http2")
+						.artifactId("http2-server").version(asInProject()),
+				mavenBundle().groupId("org.apache.aries.spifly")
+						.artifactId("org.apache.aries.spifly.dynamic.bundle")
+						.versionAsInProject(),
+				mavenBundle().groupId("org.apache.aries")
+						.artifactId("org.apache.aries.util")
+						.versionAsInProject()
 				);
 	}
 
