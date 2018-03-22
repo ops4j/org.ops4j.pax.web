@@ -95,7 +95,7 @@ public class KarafBaseTest extends AbstractControlledTestBase {
 				logLevel(LogLevel.WARN),
 				keepRuntimeFolder(),
 				when(isKaraf4()).useOptions(
-						features(karafStandardFeature, "wrap")
+						features(karafStandardFeature, "wrap", "aries-blueprint")
 				),
 				editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
 				editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
