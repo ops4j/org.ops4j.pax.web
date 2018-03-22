@@ -121,7 +121,7 @@
 		<dependency.jsr303.version>1.8.0</dependency.jsr303.version>
 		<dependency.jsr305.version>1.3.9_1</dependency.jsr305.version>
 		<dependency.jstl.version>1.2</dependency.jstl.version>
-		<dependency.karaf.version>4.1.0</dependency.karaf.version>
+		<dependency.karaf.version>4.2.0.M2</dependency.karaf.version>
 		<dependency.osgi.version>6.0.0</dependency.osgi.version>
 		<dependency.paxurl.version>2.5.2</dependency.paxurl.version>
 		<dependency.pax-logging.version>1.10.0</dependency.pax-logging.version>
