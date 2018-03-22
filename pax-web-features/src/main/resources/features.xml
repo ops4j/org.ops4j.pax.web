@@ -270,7 +270,7 @@
             org.ops4j.pax.web.config.file=${karaf.etc}/undertow.xml
         </config>
         <feature>scr</feature>
-        <feature>undertow</feature>
+        <feature version="${dependency.undertow-core.version}">undertow</feature>
         <feature version="[7.0,7.1)">pax-http</feature>
 
         <feature>pax-web-core</feature>

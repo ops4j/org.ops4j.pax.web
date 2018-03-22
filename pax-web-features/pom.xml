@@ -151,7 +151,8 @@
 								-->
 								<feature>pax-tomcat</feature>
 								<feature>pax-http-tomcat</feature>
-								<!-- <feature>pax-http-undertow</feature> -->
+								<feature>pax-undertow</feature>
+								<feature>pax-http-undertow</feature>
 							</features>
 							<verifyTransitive>false</verifyTransitive>
 							<ignoreMissingConditions>true</ignoreMissingConditions>
