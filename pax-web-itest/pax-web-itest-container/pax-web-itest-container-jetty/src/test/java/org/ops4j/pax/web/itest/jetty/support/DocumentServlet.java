@@ -67,7 +67,6 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 	private boolean etags = false;
 
 	private Resource resourceBase;
-	private ResourceCache cache;
 
 	private MimeTypes mimeTypes;
 	private String[] welcomes;
@@ -169,34 +168,9 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 				throw new UnavailableException(
 						"resourceCache specified with resource bases");
 			}
-			cache = (ResourceCache) servletContext.getAttribute(resourceCache);
-
-			logger.debug("Cache {}={}", resourceCache, cache);
 		}
 
 		etags = getInitBoolean("etags", etags);
-
-		try {
-			if (cache == null && maxCachedFiles > 0) {
-				cache = new ResourceCache(null, this, mimeTypes,
-						useFileMappedBuffer, true, gzip);
-
-				if (maxCacheSize > 0) {
-					cache.setMaxCacheSize(maxCacheSize);
-				}
-				if (maxCachedFileSize >= -1) {
-					cache.setMaxCachedFileSize(maxCachedFileSize);
-				}
-				if (maxCachedFiles >= -1) {
-					cache.setMaxCachedFiles(maxCachedFiles);
-				}
-			}
-			//CHECKSTYLE:OFF
-		} catch (Exception e) {
-			logger.warn(Log.EXCEPTION, e);
-			throw new UnavailableException(e.toString());
-		}
-		//CHECKSTYLE:ON
 
 		gzipEquivalentFileExtensions = new ArrayList<>();
 		String otherGzipExtensions = getInitParameter("otherGzipFileExtensions");
@@ -374,12 +348,7 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 					&& !endsWithSlash) {
 				// Look for a gzip resource
 				pathInContextGz = pathInContext + ".gz";
-				if (cache == null) {
-					resource = getResource(pathInContextGz);
-				} else {
-					content = cache.lookup(pathInContextGz);
-					resource = (content == null) ? null : content.getResource();
-				}
+				resource = getResource(pathInContextGz);
 
 				// Does a gzip resource exist?
 				if (resource != null && resource.exists()
@@ -399,12 +368,7 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 
 			// find resource
 			if (!gzipDefault) {
-				if (cache == null) {
-					resource = getResource(pathInContext);
-				} else {
-					content = cache.lookup(pathInContext);
-					resource = content == null ? null : content.getResource();
-				}
+				resource = getResource(pathInContext);
 			}
 
 			if (logger.isDebugEnabled()) {
@@ -580,7 +544,7 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 	 * read from the {@link ContextHandler} for this servlet, or
 	 * <code>"index.jsp" , "index.html"</code> if that is <code>null</code>.
 	 *
-	 * @param resource
+	 * @param pathInContext
 	 * @return The path of the matching welcome file in context or null.
 	 * @throws IOException
 	 * @throws MalformedURLException
@@ -597,19 +561,6 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 			Resource welcome = getResource(welcomeInContext);
 			if (welcome != null && welcome.exists()) {
 				return welcomes[i];
-			}
-
-			if ((welcomeServlets || welcomeExactServlets)
-					&& welcomeServlet == null) {
-				Map.Entry<?, ?> entry = servletHandler
-						.getHolderEntry(welcomeInContext);
-				if (entry != null
-						&& entry.getValue() != defaultHolder
-						&& (welcomeServlets || (welcomeExactServlets && entry
-						.getKey().equals(welcomeInContext)))) {
-					welcomeServlet = welcomeInContext;
-				}
-
 			}
 		}
 		return welcomeServlet;
@@ -1023,9 +974,6 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 	 */
 	@Override
 	public void destroy() {
-		if (cache != null) {
-			cache.flushCache();
-		}
 		super.destroy();
 	}
 

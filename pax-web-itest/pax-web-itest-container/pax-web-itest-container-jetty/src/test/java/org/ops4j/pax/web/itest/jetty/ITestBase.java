@@ -96,12 +96,11 @@ public class ITestBase extends AbstractControlledTestBase {
 				    CoreOptions.vmOptions("-Xbootclasspath/p:" + alpnBoot),
 				    mavenBundle().groupId("org.eclipse.jetty.osgi").artifactId("jetty-osgi-alpn").version(asInProject()).noStart(),
 					mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-alpn-server").version(asInProject()),
-                   mavenBundle().groupId("org.eclipse.jetty.http2")
-                       .artifactId("http2-common").version(asInProject()),
-                   mavenBundle().groupId("org.eclipse.jetty.http2")
-                           .artifactId("http2-hpack").version(asInProject()),
-                   mavenBundle().groupId("org.eclipse.jetty.http2")
-                           .artifactId("http2-server").version(asInProject())
+                   	mavenBundle().groupId("org.eclipse.jetty.http2").artifactId("http2-common").version(asInProject()),
+                   	mavenBundle().groupId("org.eclipse.jetty.http2").artifactId("http2-hpack").version(asInProject()),
+                   	mavenBundle().groupId("org.eclipse.jetty.http2").artifactId("http2-server").version(asInProject()),
+					mavenBundle().groupId("org.apache.aries.spifly").artifactId("org.apache.aries.spifly.dynamic.bundle").version(asInProject()),
+					mavenBundle().groupId("org.apache.aries").artifactId("org.apache.aries.util").version(asInProject())
 				);
 	}
 

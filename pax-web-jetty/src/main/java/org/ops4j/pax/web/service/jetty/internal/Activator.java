@@ -78,7 +78,14 @@ public class Activator implements BundleActivator {
 		for (Bundle b : bundleContext.getBundles()) {
 			if ("org.eclipse.jetty.util".equals(b.getSymbolicName())) {
 				// explicitly set org.eclipse.jetty.util.thread.ShutdownThread's TCCL to its own CL
-				ShutdownThread.getInstance().setContextClassLoader(b.adapt(BundleWiring.class).getClassLoader());
+				ClassLoader tcl = Thread.currentThread().getContextClassLoader();
+				try {
+					ClassLoader cl = b.adapt(BundleWiring.class).getClassLoader();
+					Thread.currentThread().setContextClassLoader(cl);
+					ShutdownThread.getInstance().setContextClassLoader(b.adapt(BundleWiring.class).getClassLoader());
+				} finally {
+					Thread.currentThread().setContextClassLoader(tcl);
+				}
 			}
 		}
 

@@ -537,22 +537,9 @@ class JettyServerImpl implements JettyServer {
 			return; // Obviously context is already destroyed
 		}
 
-
 		final List<EventListener> listeners = new ArrayList<>(
 				Arrays.asList(context.getEventListeners()));
 		EventListener listener = model.getEventListener();
-
-		if (listener instanceof ServletContextListener) {
-			try {
-				ContextClassLoaderUtils.doWithClassLoader(context.getClassLoader(),
-						(Callable<Void>) () -> {
-							((ServletContextListener) listener).contextDestroyed(new ServletContextEvent(context.getServletContext()));
-							return null;
-						});
-			} catch (Exception e) {
-				throw new RuntimeException(e.getMessage(), e);
-			}
-		}
 
 		listeners.remove(listener);
 		context.setEventListeners(listeners.toArray(new EventListener[listeners
