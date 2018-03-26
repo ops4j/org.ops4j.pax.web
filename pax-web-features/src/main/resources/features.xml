@@ -88,6 +88,7 @@
 
             mvn:org.mortbay.jetty.alpn/alpn-boot/8.1.4.v20150727 (and yes version 8.x is intentional there is no newer version available)
         </details>
+        <library type="extension">mvn:org.mortbay.jetty.alpn/alpn-boot/8.1.4.v20150727</library>
         <feature version="[9.3,10.0)">pax-jetty</feature>
         <bundle start-level="1">mvn:org.eclipse.jetty.osgi/jetty-osgi-alpn/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.alpn/alpn-api/${dependency.alpn.version}</bundle>
@@ -268,7 +269,7 @@
             org.ops4j.pax.web.config.file=${karaf.etc}/undertow.xml
         </config>
         <feature>scr</feature>
-        <feature>undertow</feature>
+        <feature version="${dependency.undertow-core.version}">undertow</feature>
         <feature version="[8.0,8.1)">pax-http</feature>
 
         <feature>pax-web-core</feature>

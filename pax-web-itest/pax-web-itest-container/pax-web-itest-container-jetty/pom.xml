@@ -343,7 +343,12 @@
 			<groupId>org.eclipse.jetty.websocket</groupId>
 			<artifactId>javax-websocket-client-impl</artifactId>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>org.eclipse.jetty.http2</groupId>
+			<artifactId>http2-common</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.http2</groupId>
 			<artifactId>http2-http-client-transport</artifactId>
@@ -389,6 +394,13 @@
 			<groupId>org.apache.aries.spifly</groupId>
 			<artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
 			<version>${aries.spifly.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.aries</groupId>
+			<artifactId>org.apache.aries.util</artifactId>
+			<version>${aries.util.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
