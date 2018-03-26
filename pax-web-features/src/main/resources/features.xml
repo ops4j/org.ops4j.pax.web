@@ -140,7 +140,7 @@
 
         <capability>
             osgi.contract;osgi.contract=JavaEl;version:Version="3";uses:="javax.el",
-            osgi.contract;osig.contract=JavaJSP;version:Version="2.3";uses:="javax.servlet.jsp, javax.servlet.jsp.el, javax.servlet.jsp.tagext",
+            osgi.contract;osgi.contract=JavaJSP;version:Version="2.3";uses:="javax.servlet.jsp, javax.servlet.jsp.el, javax.servlet.jsp.tagext",
             osgi.contract;osgi.contract=JavaJSTL;version:Version="1.2";uses:="javax.servlet.jsp.jstl.core, javax.servlet.jsp.jstl.fmt, javax.servlet.jsp.jstl.sql, javax.servlet.jsp.jstl.tlv"
         </capability>
     </feature>
