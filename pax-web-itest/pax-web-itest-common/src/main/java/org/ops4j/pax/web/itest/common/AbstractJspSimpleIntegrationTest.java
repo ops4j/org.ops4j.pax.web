@@ -17,7 +17,6 @@ package org.ops4j.pax.web.itest.common;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
@@ -53,7 +52,6 @@ public abstract class AbstractJspSimpleIntegrationTest extends ITestBase {
 
 
 	@Test
-	@Ignore
 	public void testSimpleJspWithCookies() throws Exception {
 
 		Thread.sleep(2000); //let the web.xml parser finish his job
