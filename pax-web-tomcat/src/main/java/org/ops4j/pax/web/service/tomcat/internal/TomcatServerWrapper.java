@@ -33,6 +33,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.DispatcherType;
@@ -87,12 +88,12 @@ import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.apache.tomcat.util.descriptor.web.TaglibDescriptorImpl;
 import org.apache.tomcat.util.digester.Digester;
 import org.apache.tomcat.util.digester.RuleSet;
-import org.keycloak.adapters.tomcat.KeycloakAuthenticatorValve;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.LifeCycle;
+import org.ops4j.pax.web.service.spi.auth.AuthenticatorService;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.EventListenerModel;
@@ -1032,11 +1033,26 @@ class TomcatServerWrapper implements ServerWrapper {
 			return new FormAuthenticator();
 		case "SPNEGO":
 			return new SpnegoAuthenticator();
-		case "KEYCLOAK":
-			return new KeycloakAuthenticatorValve();
-		default:
+		case "NONE":
 			return new NonLoginAuthenticator();
+		default:
+			return getAuthenticator(authUpper);
 		}
+	}
+
+	private Valve getAuthenticator(String method) {
+		ServiceLoader<AuthenticatorService> sl = ServiceLoader.load(AuthenticatorService.class, getClass().getClassLoader());
+		for (AuthenticatorService svc : sl) {
+			try {
+				Valve auth = svc.getAuthenticatorService(method, Valve.class);
+				if (auth != null) {
+					return auth;
+				}
+			} catch (Throwable t) {
+				LOG.debug("Unable to load AuthenticatorService for: " + method, t);
+			}
+		}
+		return null;
 	}
 
 	private URL getDefaultContextXml() {

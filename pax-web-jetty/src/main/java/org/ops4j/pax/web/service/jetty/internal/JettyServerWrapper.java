@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
@@ -52,10 +53,10 @@ import org.eclipse.jetty.servlet.ServletContextHandler.TagLib;
 import org.eclipse.jetty.util.MultiException;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.thread.ThreadPool;
-import org.keycloak.adapters.jetty.KeycloakJettyAuthenticator;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.spi.auth.AuthenticatorService;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.Model;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
@@ -488,11 +489,8 @@ class JettyServerWrapper extends Server {
 				case Constraint.__SPNEGO_AUTH:
 					authenticator = new SpnegoAuthenticator();
 					break;
-				case "KEYCLOAK":
-					authenticator = new KeycloakJettyAuthenticator();
-					break;
 				default:
-					LOG.warn("UNKNOWN AUTH METHOD: " + authMethod);
+					authenticator = getAuthenticator(authMethod);
 					break;
 			}
 		}
@@ -501,6 +499,21 @@ class JettyServerWrapper extends Server {
 
 		securityHandler.setRealmName(realmName);
 
+	}
+
+	private Authenticator getAuthenticator(String method) {
+		ServiceLoader<AuthenticatorService> sl = ServiceLoader.load(AuthenticatorService.class, getClass().getClassLoader());
+		for (AuthenticatorService svc : sl) {
+			try {
+				Authenticator auth = svc.getAuthenticatorService(method, Authenticator.class);
+				if (auth != null) {
+					return auth;
+				}
+			} catch (Throwable t) {
+				LOG.debug("Unable to load AuthenticatorService for: " + method, t);
+			}
+		}
+		return null;
 	}
 
 	/**
