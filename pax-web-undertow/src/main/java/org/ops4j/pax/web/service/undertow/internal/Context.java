@@ -34,9 +34,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
 import io.undertow.servlet.api.ServletSessionConfig;
+import io.undertow.servlet.ServletExtension;
 import io.undertow.util.CanonicalPathUtils;
-import org.keycloak.adapters.undertow.KeycloakServletExtension;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
+import org.ops4j.pax.web.service.AuthenticatorService;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.LifeCycle;
@@ -394,9 +395,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		// TODO: move to XML configuration
 		deployment.setIdentityManager(identityManager);
 		if (contextModel.getRealmName() != null && contextModel.getAuthMethod() != null) {
-			if ("KEYCLOAK".equals(contextModel.getAuthMethod())) {
-				deployment.getServletExtensions().add(new KeycloakServletExtension());
-			}
+			deployment.getServletExtensions().add(getAuthenticator(contextModel.getAuthMethod()));
 			LoginConfig cfg = new LoginConfig(
 					contextModel.getAuthMethod(),
 					contextModel.getRealmName(),
@@ -655,6 +654,21 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 		LOG.info("Starting Undertow web application for context path /{}", contextModel.getContextName());
 		handler = manager.start();
+	}
+
+	private ServletExtension getAuthenticator(String method) {
+		ServiceLoader<AuthenticatorService> sl = ServiceLoader.load(AuthenticatorService.class, getClass().getClassLoader());
+		for (AuthenticatorService svc : sl) {
+			try {
+				ServletExtension auth = svc.getAuthenticatorService(method, ServletExtension.class);
+				if (auth != null) {
+					return auth;
+				}
+			} catch (Throwable t) {
+				LOG.debug("Unable to load AuthenticatorService for: " + method, t);
+			}
+		}
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")
