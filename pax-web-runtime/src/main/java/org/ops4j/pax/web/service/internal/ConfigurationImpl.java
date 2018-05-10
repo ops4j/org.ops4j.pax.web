@@ -56,12 +56,15 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYPA
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE_TYPE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE_PASSWORD;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE_PROVIDER;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEY_ALIAS;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEY_PASSWORD;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_PASSWORD;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_PROVIDER;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_TRUST_STORE;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_TRUST_STORE_PASSWORD;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_TRUST_STORE_TYPE;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_TRUST_STORE_PROVIDER;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CIPHERSUITE_INCLUDED;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CIPHERSUITE_EXCLUDED;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CIPHERSUITES_INCLUDED;
@@ -220,6 +223,11 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		return getResolvedBooleanProperty(PROPERTY_HTTP_SECURE_ENABLED);
 	}
 
+    @Override
+    public String getSslProvider() {
+        return getResolvedStringProperty(PROPERTY_SSL_PROVIDER);
+    }
+
 	/**
 	 * @see Configuration#getSslKeystore()
 	 */
@@ -235,6 +243,11 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	public String getSslKeystoreType() {
 		return getResolvedStringProperty(PROPERTY_SSL_KEYSTORE_TYPE);
 	}
+
+    @Override
+    public String getSslKeystoreProvider() {
+        return getResolvedStringProperty(PROPERTY_SSL_KEYSTORE_PROVIDER);
+    }
 
 	/**
 	 * @see Configuration#getSslKeystorePassword()
@@ -305,6 +318,11 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	public String getTrustStoreType() {
 		return getResolvedStringProperty(PROPERTY_SSL_TRUST_STORE_TYPE);
 	}
+
+    @Override
+    public String getSslTrustStoreProvider() {
+        return getResolvedStringProperty(PROPERTY_SSL_TRUST_STORE_PROVIDER);
+    }
 
 	@Override
 	public Boolean isSslRenegotiationAllowed() {
@@ -915,4 +933,5 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
         }
         return password;
     }
+
 }
