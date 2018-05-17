@@ -1101,8 +1101,8 @@ class HttpServiceStarted implements StoppableHttpService {
 	}
 
 	@Override
-	public void registerConstraintMapping(String constraintName, String url,
-										  String mapping, String dataConstraint, boolean authentication,
+	public void registerConstraintMapping(String constraintName, String mapping,
+										  String url, String dataConstraint, boolean authentication,
 										  List<String> roles, HttpContext httpContext) {
 		final ContextModel contextModel = getOrCreateContext(httpContext);
 		LOG.debug("Register constraint mapping (name={}). Using context [{}]", constraintName, contextModel);
