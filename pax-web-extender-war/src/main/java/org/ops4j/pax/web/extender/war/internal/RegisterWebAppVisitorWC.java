@@ -389,7 +389,8 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 
 			webContainer.registerConstraintMapping(
 					constraintMapping.getConstraintName(),
-					constraintMapping.getUrl(), constraintMapping.getMapping(),
+					constraintMapping.getMapping(),
+					constraintMapping.getUrl(),
 					securityConstraint.getDataConstraint(),
 					securityConstraint.getAuthenticate(),
 					securityConstraint.getRoles(), httpContext);
