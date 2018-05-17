@@ -388,12 +388,12 @@ public class HttpServiceProxy implements StoppableHttpService {
 	}
 
 	@Override
-	public void registerConstraintMapping(String constraintName, String url,
-										  String mapping, String dataConstraint, boolean authentication,
+	public void registerConstraintMapping(String constraintName, String mapping,
+										  String url, String dataConstraint, boolean authentication,
 										  List<String> roles, HttpContext httpContext) {
 		LOG.debug("Registering constraint mapping for [ " + constraintName
 				+ " ] ");
-		delegate.registerConstraintMapping(constraintName, url, mapping,
+		delegate.registerConstraintMapping(constraintName, mapping, url,
 				dataConstraint, authentication, roles, httpContext);
 
 	}
