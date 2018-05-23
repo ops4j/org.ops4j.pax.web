@@ -610,13 +610,13 @@ public class WebAppParser {
 			}
 			long maxFileSize;
 			if (multipartConfig.getMaxFileSize() == null) {
-				maxFileSize = 0;
+				maxFileSize = -1L;
 			} else {
 				maxFileSize = multipartConfig.getMaxFileSize();
 			}
 			long maxRequestSize;
 			if (multipartConfig.getMaxRequestSize() == null) {
-				maxRequestSize = 0;
+				maxRequestSize = -1L;
 			} else {
 				maxRequestSize = multipartConfig.getMaxRequestSize();
 			}
