@@ -395,7 +395,10 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		// TODO: move to XML configuration
 		deployment.setIdentityManager(identityManager);
 		if (contextModel.getRealmName() != null && contextModel.getAuthMethod() != null) {
-			deployment.getServletExtensions().add(getAuthenticator(contextModel.getAuthMethod()));
+			ServletExtension authenticator = getAuthenticator(contextModel.getAuthMethod());
+			if (authenticator != null) {
+				deployment.getServletExtensions().add(authenticator);
+			}
 			LoginConfig cfg = new LoginConfig(
 					contextModel.getAuthMethod(),
 					contextModel.getRealmName(),
