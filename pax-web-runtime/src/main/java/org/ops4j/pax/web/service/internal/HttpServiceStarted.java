@@ -1072,7 +1072,7 @@ class HttpServiceStarted implements StoppableHttpService {
 						formErrorPage))) {
 			if (!serviceModel.canBeConfigured(httpContext)) {
 				throw new IllegalStateException(
-						"Http context already used. Session timeout can be set/changed only before first usage");
+						"Http context already used. Login configuration can be set/changed only before first usage");
 			}
 			contextModel.setAuthMethod(authMethod);
 			contextModel.setRealmName(realmName);
@@ -1158,7 +1158,7 @@ class HttpServiceStarted implements StoppableHttpService {
 				&& contextModelJettyWebXmlURL.equals(jettyWebXmlURL))) {
 			if (!serviceModel.canBeConfigured(httpContext)) {
 				throw new IllegalStateException(
-						"Http context already used. ServletContainerInitializer can be set/changed only before first usage");
+						"Http context already used. jetty-web.xml URL can be set/changed only before first usage");
 			}
 			contextModel.setJettyWebXmlUrl(jettyWebXmlURL);
 		}
@@ -1236,7 +1236,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
 		if (!serviceModel.canBeConfigured(httpContext)) {
 			throw new IllegalStateException(
-					"Http context already used. ServletContainerInitializer can be set only before first usage");
+					"Http context already used. Connectors and VirtualHosts can be set only before first usage");
 		}
 
 		final ContextModel contextModel = getOrCreateContext(httpContext);
