@@ -25,7 +25,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,12 +49,15 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
 import org.ops4j.pax.exam.util.Filter;
+import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.base.support.BrokenServlet;
 import org.ops4j.pax.web.itest.base.support.ErrorServlet;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
@@ -75,6 +80,46 @@ public abstract class AbstractWhiteboardR6IntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://127.0.0.1:8181/myservlet");
 
 		registerService.unregister();
+	}
+
+	@Test
+	public void testWhiteBoardServletWithContextParams() throws Exception {
+		HttpContextMapping contextMapping = new HttpContextMapping() {
+			@Override
+			public String getHttpContextId() {
+				return "default";
+			}
+
+			@Override
+			public String getPath() {
+				return "context";
+			}
+
+			@Override
+			public Map<String, String> getParameters() {
+				HashMap<String, String> map = new HashMap<>();
+				map.put("context-param", "context-value");
+				return map;
+			}
+
+			@Override
+			public HttpContext getHttpContext() {
+				return webcontainer.createDefaultHttpContext();
+			}
+		};
+		ServiceRegistration<HttpContextMapping> registerMapping = bundleContext.registerService(HttpContextMapping.class, contextMapping, null);
+
+		Hashtable<String, String> params = new Hashtable<>();
+		params.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "default");
+		ServiceRegistration<Servlet> registerService = registerServlet(params);
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Servlet name: value' and 'Context parameter: context-value'",
+						resp -> resp.contains("Servlet name: value") && resp.contains("Context parameter: context-value"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/context/myservlet");
+
+		registerService.unregister();
+		registerMapping.unregister();
 	}
 
 	@Test
@@ -358,6 +403,7 @@ public abstract class AbstractWhiteboardR6IntegrationTest extends ITestBase {
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 			resp.setContentType("text/plain");
 			resp.getWriter().println("Servlet name: " + name);
+			resp.getWriter().println("Context parameter: " + req.getServletContext().getInitParameter("context-param"));
 		}
 	}
 
