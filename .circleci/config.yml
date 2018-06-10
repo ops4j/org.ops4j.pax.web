@@ -39,6 +39,8 @@ jobs:
     - image: circleci/openjdk:8-jdk-browsers
     steps:
     - checkout
+    - attach_workspace:
+        at: ~/ops4j/org.ops4j.pax.web
     - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
     - restore_cache:
         keys:
@@ -67,6 +69,8 @@ jobs:
     - image: circleci/openjdk:8-jdk-browsers
     steps:
     - checkout
+    - attach_workspace:
+        at: ~/ops4j/org.ops4j.pax.web
     - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
     - restore_cache:
         keys:
@@ -95,6 +99,8 @@ jobs:
     - image: circleci/openjdk:8-jdk-browsers
     steps:
     - checkout
+    - attach_workspace:
+        at: ~/ops4j/org.ops4j.pax.web
     - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
     - restore_cache:
         keys:
