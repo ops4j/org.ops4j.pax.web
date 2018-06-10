@@ -17,7 +17,7 @@ jobs:
         - v1-dep-{{ .Branch }}-
         - v1-dep-master-
         - v1-dep-
-    - run: mvn -DskipTests clean install dependency:resolve-plugins dependency:go-offline
+    - run: mvn -B -DskipTests clean install dependency:resolve-plugins dependency:go-offline
     - save_cache:
         key: v1-dep-{{ .Branch }}-{{ epoch }}
         paths:
@@ -45,7 +45,7 @@ jobs:
         - v1-dep-{{ .Branch }}-
         - v1-dep-master-
         - v1-dep-
-    - run: mvn integration-test verify -P jetty
+    - run: mvn -o -B -P jetty integration-test verify
     - run: mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - run: find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
     - run: find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
@@ -73,7 +73,7 @@ jobs:
         - v1-dep-{{ .Branch }}-
         - v1-dep-master-
         - v1-dep-
-    - run: mvn integration-test verify -P undertow
+    - run: mvn -o -B -P undertow integration-test verify
     - run: mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - run: find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
     - run: find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
@@ -101,7 +101,7 @@ jobs:
         - v1-dep-{{ .Branch }}-
         - v1-dep-master-
         - v1-dep-
-    - run: mvn integration-test verify -P tomcat
+    - run: mvn -B -o -P tomcat integration-test verify
     - run: mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - run: find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
     - run: find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
