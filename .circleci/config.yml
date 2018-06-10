@@ -31,8 +31,6 @@ jobs:
         - ~/.cache/bower
   test_jetty:
     working_directory: ~/ops4j/org.ops4j.pax.web
-    parallelism: 1
-    shell: /bin/bash --login
     environment:
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
@@ -61,8 +59,6 @@ jobs:
         path: /tmp/circleci-test-results
   test_undertow:
     working_directory: ~/ops4j/org.ops4j.pax.web
-    parallelism: 1
-    shell: /bin/bash --login
     environment:
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
@@ -91,8 +87,6 @@ jobs:
         path: /tmp/circleci-test-results
   test_tomcat:
     working_directory: ~/ops4j/org.ops4j.pax.web
-    parallelism: 1
-    shell: /bin/bash --login
     environment:
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
