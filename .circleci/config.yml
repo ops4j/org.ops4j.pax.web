@@ -44,6 +44,14 @@ jobs:
     - image: circleci/openjdk:8-jdk-browsers
     steps:
     - checkout
+    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+    - run:
+        working_directory: ~/ops4j/org.ops4j.pax.web
+    - restore_cache:
+        keys:
+        - v1-dep-{{ .Branch }}-
+        - v1-dep-master-
+        - v1-dep-
     - run: mvn surefire:test failsafe:integration-test failsafe:verify -P jetty
     - run: mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - run: find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
@@ -67,6 +75,15 @@ jobs:
     docker:
     - image: circleci/openjdk:8-jdk-browsers
     steps:
+    - checkout
+    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+    - run:
+        working_directory: ~/ops4j/org.ops4j.pax.web
+    - restore_cache:
+        keys:
+        - v1-dep-{{ .Branch }}-
+        - v1-dep-master-
+        - v1-dep-
     - run: mvn surefire:test failsafe:integration-test failsafe:verify -P undertow
     - run: mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - run: find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
@@ -90,6 +107,15 @@ jobs:
     docker:
     - image: circleci/openjdk:8-jdk-browsers
     steps:
+    - checkout
+    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+    - run:
+        working_directory: ~/ops4j/org.ops4j.pax.web
+    - restore_cache:
+        keys:
+        - v1-dep-{{ .Branch }}-
+        - v1-dep-master-
+        - v1-dep-
     - run: mvn surefire:test failsafe:integration-test failsafe:verify -P tomcat
     - run: mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - run: find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
