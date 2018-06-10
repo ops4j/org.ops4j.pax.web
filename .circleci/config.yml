@@ -42,8 +42,6 @@ jobs:
     steps:
     - checkout
     - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
-    - run:
-        working_directory: ~/ops4j/org.ops4j.pax.web
     - restore_cache:
         keys:
         - v1-dep-{{ .Branch }}-
@@ -74,8 +72,6 @@ jobs:
     steps:
     - checkout
     - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
-    - run:
-        working_directory: ~/ops4j/org.ops4j.pax.web
     - restore_cache:
         keys:
         - v1-dep-{{ .Branch }}-
@@ -106,8 +102,6 @@ jobs:
     steps:
     - checkout
     - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
-    - run:
-        working_directory: ~/ops4j/org.ops4j.pax.web
     - restore_cache:
         keys:
         - v1-dep-{{ .Branch }}-
