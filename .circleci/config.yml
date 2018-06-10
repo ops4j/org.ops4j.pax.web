@@ -29,6 +29,34 @@ jobs:
         - ~/.go_workspace
         - ~/.gradle
         - ~/.cache/bower
+  test:
+    working_directory: ~/ops4j/org.ops4j.pax.web
+    environment:
+      CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
+      CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
+      _JAVA_OPTIONS: -Xms512m -Xmx2048m
+    docker:
+    - image: circleci/openjdk:8-jdk-browsers
+    steps:
+    - checkout
+    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+    - restore_cache:
+        keys:
+        - v1-dep-{{ .Branch }}-
+        - v1-dep-master-
+        - v1-dep-
+    - run: mvn surefire:test
+    - run: mkdir -p $CIRCLE_TEST_REPORTS/junit/
+    - run: find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
+    - run: find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
+    - store_test_results:
+        path: /tmp/circleci-test-results
+    - store_artifacts:
+        path: /tmp/circleci-artifacts
+    - store_artifacts:
+        path: $CIRCLE_TEST_REPORTS
+    - store_artifacts:
+        path: /tmp/circleci-test-results
   test_jetty:
     working_directory: ~/ops4j/org.ops4j.pax.web
     environment:
@@ -45,7 +73,7 @@ jobs:
         - v1-dep-{{ .Branch }}-
         - v1-dep-master-
         - v1-dep-
-    - run: mvn surefire:test failsafe:integration-test failsafe:verify -P jetty
+    - run: mvn failsafe:integration-test failsafe:verify -P jetty
     - run: mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - run: find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
     - run: find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
@@ -73,7 +101,7 @@ jobs:
         - v1-dep-{{ .Branch }}-
         - v1-dep-master-
         - v1-dep-
-    - run: mvn surefire:test failsafe:integration-test failsafe:verify -P undertow
+    - run: mvn failsafe:integration-test failsafe:verify -P undertow
     - run: mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - run: find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
     - run: find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
@@ -101,7 +129,7 @@ jobs:
         - v1-dep-{{ .Branch }}-
         - v1-dep-master-
         - v1-dep-
-    - run: mvn surefire:test failsafe:integration-test failsafe:verify -P tomcat
+    - run: mvn failsafe:integration-test failsafe:verify -P tomcat
     - run: mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - run: find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
     - run: find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
@@ -118,12 +146,15 @@ workflows:
   build-test:
     jobs:
     - build
+    - test:
+        requires:
+        - build
     - test_jetty:
         requires:
-        - build
+        - test
     - test_undertow:
         requires:
-        - build
+        - test
     - test_tomcat:
         requires:
-        - build
+        - test
