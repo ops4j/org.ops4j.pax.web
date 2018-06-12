@@ -290,6 +290,10 @@
 				<artifactId>surefire-junit4</artifactId>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.surefire</groupId>
+				<artifactId>surefire-junit3</artifactId>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 			</plugin>
@@ -384,6 +388,11 @@
 				<plugin>
 					<groupId>org.apache.maven.surefire</groupId>
 					<artifactId>surefire-junit4</artifactId>
+					<version>2.20.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.surefire</groupId>
+					<artifactId>surefire-junit3</artifactId>
 					<version>2.20.1</version>
 				</plugin>
 			</plugins>
