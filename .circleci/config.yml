@@ -34,6 +34,7 @@ jobs:
     environment:
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
+      JUNIT_REPORT_PATH: ~/junit
       _JAVA_OPTIONS: -Xms512m -Xmx2048m
     docker:
     - image: circleci/openjdk:8-jdk-browsers
@@ -41,7 +42,7 @@ jobs:
     - checkout
     - attach_workspace:
         at: ~/ops4j/org.ops4j.pax.web
-    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+    - run: mkdir -p /tmp/circleci-artifacts /tmp/circleci-test-results ~/junit
     - restore_cache:
         keys:
         - v1-dep-{{ .Branch }}-
@@ -78,7 +79,7 @@ jobs:
     - checkout
     - attach_workspace:
         at: ~/ops4j/org.ops4j.pax.web
-    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS $JUNIT_REPORT_PATH
+    - run: mkdir -p /tmp/circleci-artifacts /tmp/circleci-test-results ~/junit
     - restore_cache:
         keys:
         - v1-dep-{{ .Branch }}-
@@ -114,7 +115,7 @@ jobs:
     - checkout
     - attach_workspace:
         at: ~/ops4j/org.ops4j.pax.web
-    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+    - run: mkdir -p /tmp/circleci-artifacts /tmp/circleci-test-results ~/junit
     - restore_cache:
         keys:
         - v1-dep-{{ .Branch }}-
