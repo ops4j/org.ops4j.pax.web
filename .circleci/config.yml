@@ -59,11 +59,11 @@ jobs:
             find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} ~/junit/ \;
           when: always
     - store_test_results:
-        path: $JUNIT_REPORT_PATH
+        path: ~/junit
     - store_artifacts:
         path: $CIRCLE_ARTIFACTS
     - store_artifacts:
-        path: $JUNIT_REPORT_PATH
+        path: ~/junit
 
   test_undertow:
     working_directory: ~/ops4j/org.ops4j.pax.web
@@ -96,11 +96,11 @@ jobs:
             find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} ~/junit/ \;
           when: always
     - store_test_results:
-        path: $JUNIT_REPORT_PATH
+        path: ~/junit
     - store_artifacts:
         path: $CIRCLE_ARTIFACTS
     - store_artifacts:
-        path: $JUNIT_REPORT_PATH
+        path: ~/junit
 
   test_tomcat:
     working_directory: ~/ops4j/org.ops4j.pax.web
@@ -132,11 +132,11 @@ jobs:
             find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} ~/junit/ \;
           when: always
     - store_test_results:
-        path: $JUNIT_REPORT_PATH
+        path: ~/junit
     - store_artifacts:
         path: $CIRCLE_ARTIFACTS
     - store_artifacts:
-        path: $JUNIT_REPORT_PATH
+        path: ~/junit
 
 workflows:
   version: 2
