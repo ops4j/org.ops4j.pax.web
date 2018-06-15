@@ -137,6 +137,30 @@ jobs:
         path: $CIRCLE_ARTIFACTS
     - store_artifacts:
         path: ~/junit
+  
+  deploy:
+    working_directory: ~/ops4j/org.ops4j.pax.web
+    environment:
+      CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
+      CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
+      _JAVA_OPTIONS: -Xms512m -Xmx2048m
+    docker:
+    - image: circleci/openjdk:8-jdk-browsers
+    steps:
+    - checkout
+    - attach_workspace:
+        at: ~/ops4j/org.ops4j.pax.web
+    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+    - restore_cache:
+        keys:
+        - v1-dep-{{ .Branch }}-
+        - v1-dep-master-
+        - v1-dep-
+    - deploy:
+      command: |
+        if [ "${CIRCLE_BRANCH}" == "master" ]; then
+          mvn deploy
+        fi
 
 workflows:
   version: 2
@@ -152,3 +176,8 @@ workflows:
     - test_tomcat:
         requires:
         - build
+    - deploy:
+        requires:
+        - test_jetty
+        - test_undertow
+        - test_tomcat
