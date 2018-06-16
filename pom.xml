@@ -1191,6 +1191,8 @@
 							<excludes>
 								<exclude>**/*.pub</exclude>
 								<exclude>**/target/**/*</exclude>
+								<!-- circle ci files -->
+								<exclude>**/.circleci/**/*</exclude>
 								<!-- GIT files -->
 								<exclude>**/.git/**/*</exclude>
 								<!-- IDEA files -->
