@@ -156,7 +156,7 @@ jobs:
     - deploy:
         command: |
           if [ "${CIRCLE_BRANCH}" == "master" ]; then
-            mvn deploy
+            mvn deploy -Dmaven.install.skip=true -DskipTests 
           fi
 workflows:
   version: 2
