@@ -154,10 +154,10 @@ jobs:
         - v1-dep-master-
         - v1-dep-
     - deploy:
-      command: |
-        if [ "${CIRCLE_BRANCH}" == "master" ]; then
-          mvn deploy
-        fi
+        command: |
+          if [ "${CIRCLE_BRANCH}" == "master" ]; then
+            mvn deploy
+          fi
 workflows:
   version: 2
   build-test:
