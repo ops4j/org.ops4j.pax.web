@@ -156,7 +156,7 @@ jobs:
     - deploy:
         command: |
           if [ "${CIRCLE_BRANCH}" == "master" ]; then
-            mvn -s ~/.circleci/settings.xml -Dmaven.install.skip=true -DskipTests deploy 
+            mvn -s .circleci/settings.xml -Dmaven.install.skip=true -DskipTests deploy 
           fi
 workflows:
   version: 2
