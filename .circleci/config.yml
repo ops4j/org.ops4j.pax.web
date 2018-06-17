@@ -1,0 +1,179 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/ops4j/org.ops4j.pax.web
+    environment:
+      CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
+      CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
+      _JAVA_OPTIONS: -Xms512m -Xmx2048m
+    docker:
+    - image: circleci/openjdk:8-jdk-browsers
+    steps:
+    - checkout
+    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+    - restore_cache:
+        keys:
+        - v1-dep-{{ .Branch }}-
+        - v1-dep-master-
+        - v1-dep-
+    - run: mvn -B -DskipTests clean install dependency:resolve-plugins dependency:go-offline
+    - save_cache:
+        key: v1-dep-{{ .Branch }}-{{ epoch }}
+        paths:
+        - vendor/bundle
+        - ~/virtualenvs
+        - ~/.m2
+        - ~/.ivy2
+        - ~/.bundle
+        - ~/.go_workspace
+        - ~/.gradle
+        - ~/.cache/bower
+  test_jetty:
+    working_directory: ~/ops4j/org.ops4j.pax.web
+    environment:
+      CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
+      CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
+      JUNIT_REPORT_PATH: ~/junit
+      _JAVA_OPTIONS: -Xms512m -Xmx2048m
+    docker:
+    - image: circleci/openjdk:8-jdk-browsers
+    steps:
+    - checkout
+    - attach_workspace:
+        at: ~/ops4j/org.ops4j.pax.web
+    - run: mkdir -p /tmp/circleci-artifacts /tmp/circleci-test-results ~/junit
+    - restore_cache:
+        keys:
+        - v1-dep-{{ .Branch }}-
+        - v1-dep-master-
+        - v1-dep-
+    - run: mvn -o -B -P jetty integration-test verify
+    - run:
+        name: Save test results
+        command: |
+          find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/junit/ \;
+        when: always
+    - run:
+        name: Save integration test results
+        command: |
+          find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} ~/junit/ \;
+        when: always
+    - store_test_results:
+        path: ~/junit
+    - store_artifacts:
+        path: $CIRCLE_ARTIFACTS
+    - store_artifacts:
+        path: ~/junit
+  test_undertow:
+    working_directory: ~/ops4j/org.ops4j.pax.web
+    environment:
+      CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
+      CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
+      JUNIT_REPORT_PATH: ~/junit
+      _JAVA_OPTIONS: -Xms512m -Xmx2048m
+    docker:
+    - image: circleci/openjdk:8-jdk-browsers
+    steps:
+    - checkout
+    - attach_workspace:
+        at: ~/ops4j/org.ops4j.pax.web
+    - run: mkdir -p /tmp/circleci-artifacts /tmp/circleci-test-results ~/junit
+    - restore_cache:
+        keys:
+        - v1-dep-{{ .Branch }}-
+        - v1-dep-master-
+        - v1-dep-
+    - run: mvn -o -B -P undertow integration-test verify
+    - run:
+        name: Save test results
+        command: |
+          find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/junit/ \;
+        when: always
+    - run:
+        name: Save integration test results
+        command: |
+          find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} ~/junit/ \;
+        when: always
+    - store_test_results:
+        path: ~/junit
+    - store_artifacts:
+        path: $CIRCLE_ARTIFACTS
+    - store_artifacts:
+        path: ~/junit
+  test_tomcat:
+    working_directory: ~/ops4j/org.ops4j.pax.web
+    environment:
+      CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
+      CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
+      _JAVA_OPTIONS: -Xms512m -Xmx2048m
+    docker:
+    - image: circleci/openjdk:8-jdk-browsers
+    steps:
+    - checkout
+    - attach_workspace:
+        at: ~/ops4j/org.ops4j.pax.web
+    - run: mkdir -p /tmp/circleci-artifacts /tmp/circleci-test-results ~/junit
+    - restore_cache:
+        keys:
+        - v1-dep-{{ .Branch }}-
+        - v1-dep-master-
+        - v1-dep-
+    - run: mvn -B -o -P tomcat integration-test verify
+    - run:
+        name: Save test results
+        command: |
+          find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/junit/ \;
+        when: always
+    - run:
+        name: Save integration test results
+        command: |
+          find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} ~/junit/ \;
+        when: always
+    - store_test_results:
+        path: ~/junit
+    - store_artifacts:
+        path: $CIRCLE_ARTIFACTS
+    - store_artifacts:
+        path: ~/junit
+  deploy:
+    working_directory: ~/ops4j/org.ops4j.pax.web
+    environment:
+      CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
+      CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
+      _JAVA_OPTIONS: -Xms512m -Xmx2048m
+    docker:
+    - image: circleci/openjdk:8-jdk-browsers
+    steps:
+    - checkout
+    - attach_workspace:
+        at: ~/ops4j/org.ops4j.pax.web
+    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+    - restore_cache:
+        keys:
+        - v1-dep-{{ .Branch }}-
+        - v1-dep-master-
+        - v1-dep-
+    - deploy:
+        command: |
+          if [ "${CIRCLE_BRANCH}" == "pax-web-7.1.x" ]; then
+            mvn -s .circleci/settings.xml -Dmaven.install.skip=true -DskipTests deploy 
+          fi
+workflows:
+  version: 2
+  build-test:
+    jobs:
+    - build
+    - test_jetty:
+        requires:
+        - build
+    - test_undertow:
+        requires:
+        - build
+    - test_tomcat:
+        requires:
+        - build
+    - deploy:
+        requires:
+        - test_jetty
+        - test_undertow
+        - test_tomcat
