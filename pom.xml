@@ -1280,6 +1280,8 @@
                             <excludes>
                                 <exclude>**/*.pub</exclude>
                                 <exclude>**/target/**/*</exclude>
+                                <!-- circle ci -->
+                                <exclude>**/.circleci/**/*</exclude>
                                 <!-- GIT files -->
                                 <exclude>**/.git/**/*</exclude>
                                 <!-- IDEA files -->
