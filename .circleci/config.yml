@@ -16,7 +16,8 @@ jobs:
         - v1-dep-{{ .Branch }}-
         - v1-dep-master-
         - v1-dep-
-    - run: mvn -B -DskipTests clean install dependency:resolve-plugins dependency:go-offline
+    - run: mvn -B dependency:resolve-plugins dependency:go-offline
+    - run: mvn -B -T 4 -DskipTests clean install
     - save_cache:
         key: v1-dep-{{ .Branch }}-{{ epoch }}
         paths:
@@ -156,7 +157,7 @@ jobs:
     - deploy:
         command: |
           if [ "${CIRCLE_BRANCH}" == "master" ]; then
-            mvn -s .circleci/settings.xml -Dmaven.install.skip=true -DskipTests deploy 
+            mvn -o -B -s .circleci/settings.xml -Dmaven.install.skip=true -DskipTests deploy 
           fi
 workflows:
   version: 2
