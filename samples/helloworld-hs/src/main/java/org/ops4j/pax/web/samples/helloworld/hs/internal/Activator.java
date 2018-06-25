@@ -81,10 +81,10 @@ public final class Activator implements BundleActivator,
 						initParams, httpContext);
 				// register images as resources
 				httpService
-						.registerResources("/images", "/images", httpContext);
+						.registerResources("/images/*", "/images", httpContext);
 				// register images as resources under another alias
 				httpService
-						.registerResources("/alt-images", "/images", httpContext);
+						.registerResources("/alt-images/*", "/images", httpContext);
 			} catch (ServletException e) {
 				e.printStackTrace();
 			} catch (NamespaceException e) {
