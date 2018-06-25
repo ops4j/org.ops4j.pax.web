@@ -129,6 +129,9 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 			}
 		}
 		Object servletNamesProp = serviceReference.getProperty(ExtenderConstants.PROPERTY_SERVLET_NAMES);
+		if (servletNamesProp == null) {
+			servletNamesProp = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_SERVLET);
+		}
 
 		if (annotationScan.scanned) {
 			if (servletNamesProp == null) {
