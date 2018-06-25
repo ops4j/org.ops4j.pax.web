@@ -338,20 +338,24 @@ public class Activator implements BundleActivator {
 			try {
 				final PropertyResolver tmpResolver = new BundleContextPropertyResolver(
 						bundleContext, new DefaultPropertyResolver());
-				final PropertyResolver resolver = dictionary != null ? new DictionaryPropertyResolver(
-						dictionary, tmpResolver) : tmpResolver;
-				final ConfigurationImpl configuration = new ConfigurationImpl(
-						resolver);
+				final PropertyResolver resolver = dictionary != null
+						? new DictionaryPropertyResolver(dictionary, tmpResolver)
+						: tmpResolver;
+
+				final ConfigurationImpl configuration = new ConfigurationImpl(resolver);
 				final ServerModel serverModel = new ServerModel();
+
 				serverController = controllerFactory.createServerController(serverModel);
 				serverController.configure(configuration);
+
 				Dictionary<String, Object> props = determineServiceProperties(
 						dictionary, configuration,
 						serverController.getHttpPort(),
 						serverController.getHttpSecurePort());
+				// register a SCOPE_BUNDLE ServiceFactory - every bundle will have their
+				// own HttpService/WebContainer
 				httpServiceFactoryReg = bundleContext.registerService(
-						new String[]{HttpService.class.getName(),
-								WebContainer.class.getName()},
+						new String[] { HttpService.class.getName(), WebContainer.class.getName() },
 						new HttpServiceFactoryImpl() {
 							@Override
 							HttpService createService(final Bundle bundle) {
@@ -360,27 +364,28 @@ public class Activator implements BundleActivator {
 										servletEventDispatcher));
 							}
 						}, props);
+
 				if (!serverController.isStarted()) {
 					while (!serverController.isConfigured()) {
 						try {
 							Thread.sleep(100);
 						} catch (InterruptedException e) {
-							LOG.warn(
-									"caught interruptexception while waiting for configuration",
-									e);
+							LOG.warn("caught interruptexception while waiting for configuration", e);
 							Thread.currentThread().interrupt();
 							return;
 						}
 					}
+					LOG.info("Starting server controller {}", serverController.getClass().getName());
 					serverController.start();
 				}
 				//CHECKSTYLE:OFF
 			} catch (Throwable t) {
 				// TODO: ignore those exceptions if the bundle is being stopped
-				LOG.error("Unable to start pax web server: " + t.getMessage(),
-						t);
+				LOG.error("Unable to start pax web server: " + t.getMessage(), t);
 			}
 			//CHECKSTYLE:ON
+		} else {
+			LOG.info("ServerControllerFactory is gone, HTTP Service is not available now.");
 		}
 		this.factory = controllerFactory;
 		this.config = dictionary;

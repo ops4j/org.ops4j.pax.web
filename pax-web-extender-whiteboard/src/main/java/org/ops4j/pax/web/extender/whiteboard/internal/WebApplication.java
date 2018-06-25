@@ -173,7 +173,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 				stoppableElements.stream().filter(elem -> (elem instanceof FilterWebElement)).forEach(this::registerWebElement);
 				//the leftovers ...
 				LOG.debug("registering the others");
-				stoppableElements.stream().filter(elem -> !(elem instanceof ServletWebElement || elem instanceof FilterWebElement)).forEach(element -> registerWebElement(element));
+				stoppableElements.stream().filter(elem -> !(elem instanceof ServletWebElement || elem instanceof FilterWebElement)).forEach(this::registerWebElement);
 			} else if (webElement instanceof ServletWebElement) {
 				//find all previous registered filters deregister those and go again
 				List<WebElement> filterWebElements = webElements.stream().filter(elem -> (elem instanceof FilterWebElement)).collect(Collectors.toList());
@@ -321,7 +321,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 					sharedContext = httpContextMapping.getParameters().get(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED);
 				}
 
-				if (null != sharedContext && Boolean.parseBoolean(sharedContext) && WebContainerUtils.isWebContainer(webContainer)) {
+				if (Boolean.parseBoolean(sharedContext) && WebContainerUtils.isWebContainer(webContainer)) {
 					//PAXWEB-660
 					httpContext = webContainer.createDefaultSharedHttpContext();
 				} else if (httpContextId != null && WebContainerUtils.isWebContainer(webContainer)) {
@@ -329,7 +329,7 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 				} else {
 					//default
 					httpContext = webContainer.createDefaultHttpContext();
-                }
+				}
 			}
 		} else if (!(httpContext instanceof WebContainerContext)) {
 			// wrap registered HttpContext in pax-web specific context

@@ -772,8 +772,7 @@ class TomcatServerWrapper implements ServerWrapper {
 	}
 
 	@Override
-	public void addSecurityConstraintMapping(
-			final SecurityConstraintMappingModel secMapModel) {
+	public void addSecurityConstraintMapping(final SecurityConstraintMappingModel secMapModel) {
 		LOG.debug("add security contstraint mapping [{}]", secMapModel);
 		final Context context = findOrCreateContext(secMapModel
 				.getContextModel());
