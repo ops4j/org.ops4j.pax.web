@@ -17,6 +17,7 @@
 package org.ops4j.pax.web.service.spi.model;
 
 import java.util.List;
+import java.util.Objects;
 
 public class SecurityConstraintMappingModel extends Model {
 
@@ -103,6 +104,24 @@ public class SecurityConstraintMappingModel extends Model {
 
 	public void setDataConstraint(String dataConstraint) {
 		this.dataConstraint = dataConstraint;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		SecurityConstraintMappingModel that = (SecurityConstraintMappingModel) o;
+		return Objects.equals(constraintName, that.constraintName) &&
+				Objects.equals(getContextModel().getContextName(), that.getContextModel().getContextName());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(constraintName, getContextModel().getContextName());
 	}
 
 }

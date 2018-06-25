@@ -70,6 +70,7 @@ import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServerController;
+import org.ops4j.pax.web.service.spi.ServerControllerEx;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
 import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
@@ -116,7 +117,7 @@ import io.undertow.server.handlers.accesslog.DefaultAccessLogReceiver;
 /**
  * @author Guillaume Nodet
  */
-public class ServerControllerImpl implements ServerController, IdentityManager {
+public class ServerControllerImpl implements ServerController, ServerControllerEx, IdentityManager {
 
     private enum State {
         Unconfigured,
@@ -1018,6 +1019,17 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
         try {
             final Context context = findOrCreateContext(model.getContextModel());
             context.addSecurityConstraintMapping(model);
+        } catch (ServletException e) {
+            throw new RuntimeException("Unable to add welcome files", e);
+        }
+    }
+
+    @Override
+    public void removeSecurityConstraintMapping(SecurityConstraintMappingModel model) {
+        assertNotState(State.Unconfigured);
+        try {
+            final Context context = findOrCreateContext(model.getContextModel());
+            context.removeSecurityConstraintMapping(model);
         } catch (ServletException e) {
             throw new RuntimeException("Unable to add welcome files", e);
         }

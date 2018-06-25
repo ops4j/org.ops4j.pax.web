@@ -60,6 +60,8 @@ public interface ServerWrapper {
 
 	void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
 
+	void removeSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
+
 	LifeCycle getContext(ContextModel model);
 
 	void addWelcomeFiles(WelcomeFileModel model);

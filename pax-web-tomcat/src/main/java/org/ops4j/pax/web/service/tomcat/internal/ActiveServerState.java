@@ -57,9 +57,13 @@ class ActiveServerState extends AbstractServerState implements ServerState {
 	}
 
 	@Override
-	public void addSecurityConstraintMapping(
-			SecurityConstraintMappingModel secMapModel) {
+	public void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel) {
 		serverWrapper.addSecurityConstraintMapping(secMapModel);
+	}
+
+	@Override
+	public void removeSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel) {
+		serverWrapper.removeSecurityConstraintMapping(secMapModel);
 	}
 
 	@Override

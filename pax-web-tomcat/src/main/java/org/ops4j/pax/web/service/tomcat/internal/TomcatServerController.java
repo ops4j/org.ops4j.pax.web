@@ -23,6 +23,7 @@ import javax.servlet.Servlet;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServerController;
+import org.ops4j.pax.web.service.spi.ServerControllerEx;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
 import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
@@ -40,7 +41,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Romain Gilles
  */
-class TomcatServerController implements ServerController {
+class TomcatServerController implements ServerController, ServerControllerEx {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(TomcatServerController.class);
@@ -171,9 +172,13 @@ class TomcatServerController implements ServerController {
 	}
 
 	@Override
-	public void addSecurityConstraintMapping(
-			SecurityConstraintMappingModel secMapModel) {
+	public void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel) {
 		serverState.addSecurityConstraintMapping(secMapModel);
+	}
+
+	@Override
+	public void removeSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel) {
+		serverState.removeSecurityConstraintMapping(secMapModel);
 	}
 
 	@Override

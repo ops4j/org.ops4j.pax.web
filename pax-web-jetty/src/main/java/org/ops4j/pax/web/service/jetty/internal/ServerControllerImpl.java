@@ -38,6 +38,7 @@ import org.eclipse.jetty.server.SslConnectionFactory;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServerController;
+import org.ops4j.pax.web.service.spi.ServerControllerEx;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
 import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
@@ -53,7 +54,7 @@ import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class ServerControllerImpl implements ServerController {
+class ServerControllerImpl implements ServerController, ServerControllerEx {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ServerControllerImpl.class);
@@ -186,9 +187,13 @@ class ServerControllerImpl implements ServerController {
 	}
 
 	@Override
-	public void addSecurityConstraintMapping(
-			SecurityConstraintMappingModel model) {
+	public void addSecurityConstraintMapping(SecurityConstraintMappingModel model) {
 		state.addSecurityConstraintMapping(model);
+	}
+
+	@Override
+	public void removeSecurityConstraintMapping(SecurityConstraintMappingModel model) {
+		state.removeSecurityConstraintMappings(model);
 	}
 
 	@Override

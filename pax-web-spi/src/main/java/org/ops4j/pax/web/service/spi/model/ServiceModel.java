@@ -384,6 +384,10 @@ public class ServiceModel {
 				.size()]);
 	}
 
+	public synchronized void removeSecurityConstraintMappingModel(SecurityConstraintMappingModel model) {
+		securityConstraintMappingModels.remove(model.getConstraintName());
+	}
+
 	public synchronized void addContainerInitializerModel(
 			ContainerInitializerModel model) {
 		if (containerInitializers.containsKey(model.getContainerInitializer())) {

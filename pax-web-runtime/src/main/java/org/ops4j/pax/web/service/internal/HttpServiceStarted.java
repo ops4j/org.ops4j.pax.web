@@ -63,6 +63,7 @@ import org.ops4j.pax.web.service.WebContainerDTO;
 import org.ops4j.pax.web.service.internal.util.SupportUtils;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
+import org.ops4j.pax.web.service.spi.ServerControllerEx;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
 import org.ops4j.pax.web.service.spi.ServletEvent;
@@ -705,8 +706,12 @@ class HttpServiceStarted implements StoppableHttpService {
 		Map<String, String> contextParams = contextModel.getContextParams();
 		if (!contextParams.equals(params)) {
 			if (!serviceModel.canBeConfigured(httpContext)) {
-				throw new IllegalStateException(
-						"Http context already used. Context params can be set/changed only before first usage");
+				try {
+					LOG.debug("Stopping context model {} to set context parameters", contextModel);
+					serverController.getContext(contextModel).stop();
+				} catch (Exception e) {
+					LOG.info(e.getMessage(), e);
+				}
 			}
 			contextModel.setContextParams(params);
 		}
@@ -1055,17 +1060,20 @@ class HttpServiceStarted implements StoppableHttpService {
 									String formLoginPage, String formErrorPage, HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
 		final ContextModel contextModel = getOrCreateContext(httpContext);
-		String contextModelAuthMethod = contextModel.getAuthMethod();
-		String contextModelRealmName = contextModel.getRealmName();
-		String contextModelFormLoginPage = contextModel.getFormLoginPage();
-		String contextModelFormErrorPage = contextModel.getFormErrorPage();
-		if (!Arrays.asList(contextModelAuthMethod, contextModelRealmName,
-				contextModelFormLoginPage, contextModelFormErrorPage).equals(
-				Arrays.asList(authMethod, realmName, formLoginPage,
-						formErrorPage))) {
+		String currentAuthMethod = contextModel.getAuthMethod();
+		String currentRealmName = contextModel.getRealmName();
+		String currentFormLoginPage = contextModel.getFormLoginPage();
+		String currentFormErrorPage = contextModel.getFormErrorPage();
+		List<String> currentConfiguration = Arrays.asList(currentAuthMethod, currentRealmName, currentFormLoginPage, currentFormErrorPage);
+		List<String> newConfiguration = Arrays.asList(authMethod, realmName, formLoginPage, formErrorPage);
+		if (!currentConfiguration.equals(newConfiguration)) {
 			if (!serviceModel.canBeConfigured(httpContext)) {
-				throw new IllegalStateException(
-						"Http context already used. Login configuration can be set/changed only before first usage");
+				try {
+					LOG.debug("Stopping context model {} to register login configuration", contextModel);
+					serverController.getContext(contextModel).stop();
+				} catch (Exception e) {
+					LOG.error(e.getMessage(), e);
+				}
 			}
 			contextModel.setAuthMethod(authMethod);
 			contextModel.setRealmName(realmName);
@@ -1078,19 +1086,24 @@ class HttpServiceStarted implements StoppableHttpService {
 	@Override
 	public void unregisterLoginConfig(final HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
-		final ContextModel contextModel = serviceModel
-				.getContextModel(httpContext);
-		if (contextModel == null || contextModel.getAuthMethod() == null
-				|| contextModel.getRealmName() == null) {
+		final ContextModel contextModel = serviceModel.getContextModel(httpContext);
+		if (contextModel == null || contextModel.getAuthMethod() == null || contextModel.getRealmName() == null) {
 			throw new IllegalArgumentException(
 					"Security Realm and authorization method are not registered for http context ["
 							+ httpContext + "]");
 		}
+
 		try {
-			// NOP
-		} finally { // NOPMD
-			// NOP
+			LOG.debug("Stopping context model {} to unregister login configuration", contextModel);
+			serverController.getContext(contextModel).stop();
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
 		}
+
+		contextModel.setRealmName(null);
+		contextModel.setAuthMethod(null);
+		contextModel.setFormLoginPage(null);
+		contextModel.setFormErrorPage(null);
 	}
 
 	@Override
@@ -1109,7 +1122,27 @@ class HttpServiceStarted implements StoppableHttpService {
 	@Override
 	public void unregisterConstraintMapping(final HttpContext httpContext) {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
-		// NOP
+		final ContextModel contextModel = serviceModel.getContextModel(httpContext);
+
+		try {
+			LOG.debug("Stopping context model {} to unregister constraint mapping", contextModel);
+			serverController.getContext(contextModel).stop();
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
+
+		// Without changing WebContainer interface, we can't remove individual constraints...
+		SecurityConstraintMappingModel[] mappings = serviceModel.getSecurityConstraintMappings();
+		if (mappings != null) {
+			for (SecurityConstraintMappingModel model: mappings) {
+				if (model != null) {
+					serviceModel.removeSecurityConstraintMappingModel(model);
+					if (serverController instanceof ServerControllerEx) {
+						((ServerControllerEx)serverController).removeSecurityConstraintMapping(model);
+					}
+				}
+			}
+		}
 	}
 
 	@Override

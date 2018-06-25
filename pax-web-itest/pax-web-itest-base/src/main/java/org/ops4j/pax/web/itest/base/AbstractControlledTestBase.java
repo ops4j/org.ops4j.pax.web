@@ -211,18 +211,24 @@ public abstract class AbstractControlledTestBase {
 	}
 
 	protected void waitForServletListener(Long timeOut) throws InterruptedException {
+		waitForServletListener(timeOut, false);
+	}
+
+	protected void waitForServletListener(Long timeOut, boolean newEventOnly) throws InterruptedException {
 		if (timeOut == null) {
 			new WaitCondition("servlet startup") {
 				@Override
 				protected boolean isFulfilled() {
-					return ((ServletListenerImpl) servletListener).gotEvent();
+					return newEventOnly ? ((ServletListenerImpl) servletListener).gotNewEvent()
+							: ((ServletListenerImpl) servletListener).gotEvent();
 				}
 			}.waitForCondition();
 		} else {
 			new WaitCondition("servlet startup") {
 				@Override
 				protected boolean isFulfilled() {
-					return ((ServletListenerImpl) servletListener).gotEvent();
+					return newEventOnly ? ((ServletListenerImpl) servletListener).gotNewEvent()
+							: ((ServletListenerImpl) servletListener).gotEvent();
 				}
 			}.waitForCondition(timeOut);
 		}

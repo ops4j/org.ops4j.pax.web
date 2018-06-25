@@ -869,8 +869,8 @@ class JettyServerImpl implements JettyServer {
 		for (ConstraintMapping constraintMapping : constraintMappings) {
 			boolean urlMatch = constraintMapping.getPathSpec()
 					.equalsIgnoreCase(model.getUrl());
-			boolean methodMatch = constraintMapping.getMethod()
-					.equalsIgnoreCase(model.getMapping());
+			boolean methodMatch = (constraintMapping.getMethod() == null && model.getMapping() == null)
+					|| (constraintMapping.getMethod().equalsIgnoreCase(model.getMapping()));
 			if (urlMatch && methodMatch) {
 				constraintMappings.remove(constraintMapping);
 			}
