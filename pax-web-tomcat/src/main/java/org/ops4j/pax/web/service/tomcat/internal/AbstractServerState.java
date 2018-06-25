@@ -149,8 +149,12 @@ abstract class AbstractServerState implements ServerState {
 	}
 
 	@Override
-	public void addSecurityConstraintMapping(
-			SecurityConstraintMappingModel secMapModel) {
+	public void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel) {
+		throwIllegalState();
+	}
+
+	@Override
+	public void removeSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel) {
 		throwIllegalState();
 	}
 

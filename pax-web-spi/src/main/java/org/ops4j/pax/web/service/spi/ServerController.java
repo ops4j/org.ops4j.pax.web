@@ -79,6 +79,8 @@ public interface ServerController {
 
 	void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
 
+	void removeSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
+
 	void addContainerInitializerModel(ContainerInitializerModel model);
 
 }

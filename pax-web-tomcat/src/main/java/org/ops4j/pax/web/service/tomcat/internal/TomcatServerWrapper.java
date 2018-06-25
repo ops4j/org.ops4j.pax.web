@@ -816,6 +816,28 @@ class TomcatServerWrapper implements ServerWrapper {
 	}
 
 	@Override
+	public void removeSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel) {
+		if (secMapModel == null) {
+			return;
+		}
+
+		LOG.debug("remove security contstraint mapping [{}]", secMapModel);
+		final Context context = findOrCreateContext(secMapModel.getContextModel());
+
+		SecurityConstraint toRemove = null;
+		for (SecurityConstraint sc: context.findConstraints()) {
+			if (sc.getDisplayName().equalsIgnoreCase(secMapModel.getConstraintName())) {
+				toRemove = sc;
+				break;
+			}
+		}
+
+		if (toRemove != null) {
+			context.removeConstraint(toRemove);
+		}
+	}
+
+	@Override
 	public LifeCycle getContext(final ContextModel model) {
 		final Context context = findOrCreateContext(model);
 		return new LifeCycle() {

@@ -106,6 +106,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
+import org.osgi.service.cm.ManagedServiceFactory;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.log.LogService;
@@ -118,7 +119,25 @@ public class Activator implements BundleActivator {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
+	/**
+	 * Current Configuration Admin configuration (PID = {@code org.ops4j.pax.web})
+	 */
+	private Dictionary<String, ?> config;
+
+	/**
+	 * Current {@link ServerControllerFactory} tracked from OSGi registry
+	 */
+	private ServerControllerFactory factory;
+
+	/**
+	 * Current {@link ServerController} created using current {@link #factory}
+	 */
 	private ServerController serverController;
+
+	/**
+	 * Registration for current {@link org.osgi.framework.ServiceFactory} for {@link HttpService} and
+	 * {@link WebContainer}
+	 */
 	private ServiceRegistration<?> httpServiceFactoryReg;
 
 	private BundleContext bundleContext;
@@ -134,11 +153,9 @@ public class Activator implements BundleActivator {
 	private final ExecutorService configExecutor = new ThreadPoolExecutor(0, 1,
 			20, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("paxweb-config"));
 
-	private Dictionary<String, ?> config;
-
-	private ServerControllerFactory factory;
-
 	private boolean initialConfigSet;
+
+	private HttpContextProcessing httpContextProcessing;
 
 	public Activator() {
 	}
@@ -182,6 +199,7 @@ public class Activator implements BundleActivator {
 		}
 
 		if (SupportUtils.isManagedServiceAvailable()) {
+			// ManagedService for org.ops4j.pax.web PID
 			createManagedService(context);
 		} else {
 			scheduleUpdateConfig(null);
@@ -212,6 +230,9 @@ public class Activator implements BundleActivator {
 		if (servletEventDispatcher != null) {
 			servletEventDispatcher.destroy();
 		}
+		if (httpContextProcessing != null) {
+			httpContextProcessing.destroy();
+		}
 		// Wait up to 20 seconds, otherwhise
 		try {
 			configExecutor.shutdown();
@@ -230,26 +251,35 @@ public class Activator implements BundleActivator {
 	 * @param context bundle context to use for registration
 	 */
 	private void createManagedService(final BundleContext context) {
-		ManagedService service = configuration -> scheduleUpdateConfig(configuration);
+		ManagedService service = this::scheduleUpdateConfig;
 		final Dictionary<String, String> props = new Hashtable<>();
-		props.put(Constants.SERVICE_PID,
-				org.ops4j.pax.web.service.WebContainerConstants.PID);
+		props.put(Constants.SERVICE_PID, org.ops4j.pax.web.service.WebContainerConstants.PID);
 		context.registerService(ManagedService.class, service, props);
-		// If ConfigurationAdmin service is not available, then do a default
-		// configuration.
-		// In other cases, ConfigurationAdmin service will always call the
-		// ManagedService.
-		if (context.getServiceReference(ConfigurationAdmin.class
-				.getName()) == null) {
+
+		// If ConfigurationAdmin service is not available, then do a default configuration.
+		// In other cases, ConfigurationAdmin service will always call the ManagedService.
+		if (context.getServiceReference(ConfigurationAdmin.class.getName()) == null) {
 			try {
 				service.updated(null);
 			} catch (ConfigurationException ignore) {
 				// this should never happen
-				LOG.error(
-						"Internal error. Cannot set initial configuration resolver.",
-						ignore);
+				LOG.error("Internal error. Cannot set initial configuration resolver.", ignore);
 			}
 		}
+	}
+
+	/**
+	 * Registers a managed service factory to create {@link org.osgi.service.http.HttpContext} <em>processors</em>
+	 * - these will possibly register additional web items (like login configurations or filters) for shared or
+	 * per-bundle http services.
+	 *
+	 * @param context
+	 */
+	private void createManagedServiceFactory(BundleContext context) {
+		final Dictionary<String, String> props = new Hashtable<>();
+		props.put(Constants.SERVICE_PID, HttpContextProcessing.PID);
+		httpContextProcessing = new HttpContextProcessing(bundleContext, serverController);
+		context.registerService(ManagedServiceFactory.class, httpContextProcessing, props);
 	}
 
 	protected boolean same(Dictionary<String, ?> cfg1,
@@ -283,12 +313,23 @@ public class Activator implements BundleActivator {
 		}
 	}
 
+	/**
+	 * That's actual implementation of {@link ManagedService#updated(Dictionary)}
+	 * @param configuration
+	 */
 	private void scheduleUpdateConfig(final Dictionary<String, ?> configuration) {
+		// change configuration using new properties from configadmin
 		configExecutor.submit(() -> updateController(configuration, factory));
 	}
 
+	/**
+	 * Called by tracker of {@link ServerControllerFactory} services
+	 * @param controllerFactory
+	 */
 	private void scheduleUpdateFactory(final ServerControllerFactory controllerFactory) {
+		// change configuration using new (or null when not available) ServerControllerFactory
 		Future<?> future = configExecutor.submit(() -> updateController(config, controllerFactory));
+
 		// Make sure we destroy things synchronously
 		if (controllerFactory == null) {
 			try {
@@ -302,8 +343,9 @@ public class Activator implements BundleActivator {
 	}
 
 	/**
-	 * This method is the only place which is allowed to modify the config and
-	 * factory fields.
+	 * <p>This method is the only place which is allowed to modify the config and factory fields.</p>
+	 * <p>Here a new {@link org.osgi.framework.ServiceFactory} for {@link HttpService} and {@link WebContainer}
+	 * is registered for {@code org.ops4j.pax.web} PID.</p>
 	 *
 	 * @param dictionary
 	 * @param controllerFactory
@@ -378,6 +420,10 @@ public class Activator implements BundleActivator {
 					LOG.info("Starting server controller {}", serverController.getClass().getName());
 					serverController.start();
 				}
+
+				// ManagedServiceFactory for org.ops4j.pax.web.context factory PID
+				// we need registered WebContainer for this MSF to work
+				createManagedServiceFactory(bundleContext);
 				//CHECKSTYLE:OFF
 			} catch (Throwable t) {
 				// TODO: ignore those exceptions if the bundle is being stopped

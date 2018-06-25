@@ -1024,6 +1024,17 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
     }
 
     @Override
+    public void removeSecurityConstraintMapping(SecurityConstraintMappingModel model) {
+        assertNotState(State.Unconfigured);
+        try {
+            final Context context = findOrCreateContext(model.getContextModel());
+            context.removeSecurityConstraintMapping(model);
+        } catch (ServletException e) {
+            throw new RuntimeException("Unable to add welcome files", e);
+        }
+    }
+
+    @Override
     public void addContainerInitializerModel(ContainerInitializerModel model) {
         assertNotState(State.Unconfigured);
         try {

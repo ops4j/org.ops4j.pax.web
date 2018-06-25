@@ -186,9 +186,13 @@ class ServerControllerImpl implements ServerController {
 	}
 
 	@Override
-	public void addSecurityConstraintMapping(
-			SecurityConstraintMappingModel model) {
+	public void addSecurityConstraintMapping(SecurityConstraintMappingModel model) {
 		state.addSecurityConstraintMapping(model);
+	}
+
+	@Override
+	public void removeSecurityConstraintMapping(SecurityConstraintMappingModel model) {
+		state.removeSecurityConstraintMappings(model);
 	}
 
 	@Override

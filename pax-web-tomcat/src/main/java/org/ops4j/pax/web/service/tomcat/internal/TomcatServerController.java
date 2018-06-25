@@ -171,9 +171,13 @@ class TomcatServerController implements ServerController {
 	}
 
 	@Override
-	public void addSecurityConstraintMapping(
-			SecurityConstraintMappingModel secMapModel) {
+	public void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel) {
 		serverState.addSecurityConstraintMapping(secMapModel);
+	}
+
+	@Override
+	public void removeSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel) {
+		serverState.removeSecurityConstraintMapping(secMapModel);
 	}
 
 	@Override

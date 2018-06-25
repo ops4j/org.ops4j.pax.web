@@ -72,6 +72,8 @@ interface ServerState {
 
 	void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
 
+	void removeSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
+
 	void addContainerInitializerModel(ContainerInitializerModel model);
 
 	LifeCycle getContext(ContextModel model);

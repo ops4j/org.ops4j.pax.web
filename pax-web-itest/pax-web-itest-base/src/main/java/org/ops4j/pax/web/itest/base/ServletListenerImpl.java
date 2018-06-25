@@ -24,6 +24,7 @@ public class ServletListenerImpl implements ServletListener {
 	private static final Logger LOG = LoggerFactory.getLogger(ServletListenerImpl.class);
 
 	private boolean event;
+	private boolean replay;
 
 	private String servletName;
 
@@ -49,9 +50,15 @@ public class ServletListenerImpl implements ServletListener {
 		} else if (servletEvent.getType() == ServletEvent.UNDEPLOYED) {
 			this.event = false;
 		}
+		this.replay = servletEvent.isReplay();
 	}
 
 	public boolean gotEvent() {
 		return event;
 	}
+
+	public boolean gotNewEvent() {
+		return event && !replay;
+	}
+
 }
