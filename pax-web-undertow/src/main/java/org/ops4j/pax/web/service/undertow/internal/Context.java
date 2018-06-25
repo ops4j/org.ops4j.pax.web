@@ -40,6 +40,7 @@ import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.service.AuthenticatorService;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
@@ -118,6 +119,8 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	private Bundle undertowBundle;
 
 	private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
+
+	private Configuration configuration;
 
 	public Context(IdentityManager identityManager, ContextAwarePathHandler path, ContextModel contextModel) {
 		this.identityManager = identityManager;
@@ -624,21 +627,33 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		ServletSessionConfig ssc = new ServletSessionConfig();
 		if (contextModel.getSessionDomain() != null) {
 			ssc.setDomain(contextModel.getSessionDomain());
+		} else if (configuration != null && configuration.getSessionDomain() != null) {
+			ssc.setDomain(configuration.getSessionDomain());
 		}
 		if (contextModel.getSessionCookie() != null) {
 			ssc.setName(contextModel.getSessionCookie());
+		} else if (configuration != null && configuration.getSessionCookie() != null) {
+			ssc.setName(configuration.getSessionCookie());
 		}
 		if (contextModel.getSessionCookieHttpOnly() != null) {
 			ssc.setHttpOnly(contextModel.getSessionCookieHttpOnly());
+		} else if (configuration != null && configuration.getSessionCookieHttpOnly() != null) {
+			ssc.setHttpOnly(configuration.getSessionCookieHttpOnly());
 		}
 		if (contextModel.getSessionCookieSecure() != null) {
 			ssc.setSecure(contextModel.getSessionCookieSecure());
+		} else if (configuration != null && configuration.getSessionCookieSecure() != null) {
+			ssc.setSecure(configuration.getSessionCookieSecure());
 		}
 		if (contextModel.getSessionCookieMaxAge() != null) {
 			ssc.setMaxAge(contextModel.getSessionCookieMaxAge());
+		} else if (configuration != null && configuration.getSessionCookieMaxAge() != null) {
+			ssc.setMaxAge(configuration.getSessionCookieMaxAge());
 		}
 		if (contextModel.getSessionPath() != null) {
 			ssc.setPath(contextModel.getSessionPath());
+		} else if (configuration != null && configuration.getSessionPath() != null) {
+			ssc.setPath(configuration.getSessionPath());
 		}
 		deployment.setServletSessionConfig(ssc);
 
@@ -900,6 +915,10 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 				destroyHandler();
 			}
 		}
+	}
+
+	public void setConfiguration(Configuration configuration) {
+		this.configuration = configuration;
 	}
 
 	private class DirectoryResource implements Resource {

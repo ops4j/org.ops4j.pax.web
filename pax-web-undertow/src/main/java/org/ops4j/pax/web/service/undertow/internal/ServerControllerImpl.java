@@ -883,6 +883,7 @@ public class ServerControllerImpl implements ServerController, ServerControllerE
                 return contextMap.get(contextModel.getHttpContext());
             }
             Context newCtx = new Context(this, path, contextModel);
+            newCtx.setConfiguration(configuration);
             contextMap.put(contextModel.getHttpContext(), newCtx);
             final Servlet servlet = createResourceServlet(contextModel, "/", "default");
             final ResourceModel model = new ResourceModel(contextModel, servlet, "/", "default");
