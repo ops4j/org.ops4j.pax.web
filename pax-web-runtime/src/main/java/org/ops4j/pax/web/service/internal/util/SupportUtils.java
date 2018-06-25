@@ -20,6 +20,7 @@ package org.ops4j.pax.web.service.internal.util;
 /**
  * Allows to check if support for several optional modules is possible
  */
+@SuppressWarnings("ConstantConditions")
 public class SupportUtils {
 	private SupportUtils() {
 		// utils class

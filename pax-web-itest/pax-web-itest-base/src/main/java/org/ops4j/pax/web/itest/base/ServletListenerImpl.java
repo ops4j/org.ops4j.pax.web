@@ -37,7 +37,7 @@ public class ServletListenerImpl implements ServletListener {
 	@Override
 	public void servletEvent(ServletEvent servletEvent) {
 		LOG.info("Got event: " + servletEvent);
-		boolean checkServletName = servletName != null ? true : false;
+		boolean checkServletName = servletName != null;
 
 		boolean servletMatch = true;
 		if (checkServletName) {

@@ -32,6 +32,11 @@ import javax.servlet.ServletContainerInitializer;
 import org.ops4j.lang.NullArgumentException;
 import org.osgi.service.http.HttpContext;
 
+/**
+ * <p>Service Model is created per bundle - representing <em>virtual</em> web applications that may be created for single
+ * bundle.</p>
+ * <p>Single bundle may create many <em>web applications</em> - one for single {@link HttpContext}.</p>
+ */
 public class ServiceModel {
 
 	private final Map<String, ServletModel> aliasMapping;

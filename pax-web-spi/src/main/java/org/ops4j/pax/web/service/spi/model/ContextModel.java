@@ -36,9 +36,10 @@ import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.osgi.framework.Bundle;
+import org.osgi.service.http.HttpContext;
 
 /**
- * Models a servlet context related to an http context.
+ * Models a {@link javax.servlet.ServletContext servlet context} related to an {@link HttpContext http context}.
  *
  * @author Alin Dreghiciu
  * @since 0.3.0, December 29, 2007

@@ -101,6 +101,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			.getLogger(HttpServiceStarted.class);
 	private static SharedWebContainerContext sharedWebContainerContext;
 
+	// the bundle for which this HttpService was created by ServiceFactory
 	final Bundle serviceBundle;
 	private final ClassLoader bundleClassLoader;
 	private final ServerController serverController;
@@ -482,11 +483,11 @@ class HttpServiceStarted implements StoppableHttpService {
 			for (ServletModel model : models) {
 				if (model != null) {
 					LOG.debug("Unregister servlet (servlet={})", model.getServlet());
+					servletEvent(ServletEvent.UNDEPLOYING, serviceBundle, model);
+					serverModel.removeServletModel(model);
+					serverController.removeServlet(model);
+					servletEvent(ServletEvent.UNDEPLOYED, serviceBundle, model);
 				}
-				servletEvent(ServletEvent.UNDEPLOYING, serviceBundle, model);
-				serverModel.removeServletModel(model);
-				serverController.removeServlet(model);
-				servletEvent(ServletEvent.UNDEPLOYED, serviceBundle, model);
 			}
 		}
 	}
@@ -718,8 +719,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		NullArgumentException.validateNotNull(httpContext, "Http context");
 		final ContextModel contextModel = getOrCreateContext(httpContext);
 		Integer sessionTimeout = contextModel.getSessionTimeout();
-		if (!(minutes == sessionTimeout || minutes != null // FIXME comparison?
-				&& minutes.equals(sessionTimeout))) {
+		if ((sessionTimeout != null && !sessionTimeout.equals(minutes)) || minutes != null) {
 			if (!serviceModel.canBeConfigured(httpContext)) {
 				throw new IllegalStateException(
 						"Http context already used. Session timeout can be set/changed only before first usage");
@@ -783,9 +783,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		final Servlet jspServlet = new JspServletWrapper(serviceBundle, jspFile);
 		final ContextModel contextModel = getOrCreateContext(httpContext);
 		//CHECKSTYLE:OFF
-		initParams = createInitParams(contextModel,
-				initParams == null ? new Hashtable<>()
-						: initParams);
+		initParams = createInitParams(contextModel, initParams == null ? new Hashtable<>() : initParams);
 		//CHECKSTYLE:ON
 		serviceModel.addContextModel(contextModel);
 		try {
@@ -808,16 +806,14 @@ class HttpServiceStarted implements StoppableHttpService {
 	@SuppressWarnings("unchecked")
 	private Dictionary<String, ?> createInitParams(ContextModel contextModel,
 												   Dictionary<String, ?> initParams) {
+		NullArgumentException.validateNotNull(initParams, "Init params");
 		Queue<Configuration> configurations = new LinkedList<>();
-		Configuration serverControllerConfiguration = serverController
-				.getConfiguration();
-		if (initParams != null) {
-			PropertyResolver propertyResolver = new DictionaryPropertyResolver(
-					initParams);
-			Configuration configuration = new ConfigurationImpl(
-					propertyResolver);
-			configurations.add(configuration);
-		}
+		Configuration serverControllerConfiguration = serverController.getConfiguration();
+
+		PropertyResolver propertyResolver = new DictionaryPropertyResolver(initParams);
+		Configuration c = new ConfigurationImpl(propertyResolver);
+		configurations.add(c);
+
 		configurations.add(serverControllerConfiguration);
 		for (Configuration configuration : configurations) {
 			String scratchDir = configuration.getJspScratchDir();
@@ -829,8 +825,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			}
 			if (configuration.equals(serverControllerConfiguration)) {
 				// [PAXWEB-225] creates a bundle specific scratch dir
-				File tempDir = new File(scratchDir,
-						contextModel.getContextName());
+				File tempDir = new File(scratchDir, contextModel.getContextName());
 				if (!tempDir.exists()) {
 					tempDir.mkdirs();
 				}
@@ -844,8 +839,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			String jspIeClassId = configuration.getJspIeClassId();
 			String jspJavaEncoding = configuration.getJspJavaEncoding();
 			Boolean jspKeepgenerated = configuration.getJspKeepgenerated();
-			String jspLogVerbosityLevel = configuration
-					.getJspLogVerbosityLevel();
+			String jspLogVerbosityLevel = configuration.getJspLogVerbosityLevel();
 			Boolean jspMappedfile = configuration.getJspMappedfile();
 			Integer jspTagpoolMaxSize = configuration.getJspTagpoolMaxSize();
 			Boolean jspPrecompilation = configuration.getJspPrecompilation();
@@ -870,8 +864,7 @@ class HttpServiceStarted implements StoppableHttpService {
 				Object param = entry.getValue();
 				if (param != null) {
 					String initParam = entry.getKey();
-					((Hashtable<String, Object>) initParams).put(initParam,
-							param.toString());
+					((Hashtable<String, Object>) initParams).put(initParam, param.toString());
 				}
 			}
 
@@ -1166,7 +1159,14 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	}
 
+	/**
+	 * Single, bundle-scoped instance of {@link HttpService} (this class) may manage different {@link ContextModel servlet contexts}
+	 * identified by {@link HttpContext}.
+	 * @param httpContext
+	 * @return
+	 */
 	private ContextModel getOrCreateContext(final HttpContext httpContext) {
+		// org.osgi.service.http.HttpContext -> org.ops4j.pax.web.service.WebContainerContext
 		final WebContainerContext context;
 		if (httpContext == null) {
 			context = createDefaultHttpContext();
@@ -1175,8 +1175,10 @@ class HttpServiceStarted implements StoppableHttpService {
 		} else {
 			context = (WebContainerContext) httpContext;
 		}
-		serverModel.associateHttpContext(context, serviceBundle,
-				httpContext instanceof SharedWebContainerContext);
+
+		// sanity check - non shared context should be associated to single bundle
+		serverModel.associateHttpContext(context, serviceBundle, httpContext instanceof SharedWebContainerContext);
+
 		ContextModel contextModel = serviceModel.getContextModel(context);
 		if (contextModel == null) {
 			contextModel = new ContextModel(context, serviceBundle,
@@ -1205,11 +1207,9 @@ class HttpServiceStarted implements StoppableHttpService {
 			serverController.getContext(contextModel);
 			contextModel.setWebBundle(true);
 			//CHECKSTYLE:OFF
-		} catch (Exception e) {
-			if (e instanceof RuntimeException) {
-				throw (RuntimeException) e;
-			}
+		} catch (RuntimeException e) {
 			LOG.error("Exception starting HttpContext registration", e);
+			throw e;
 		}
 		//CHECKSTYLE:ON
 	}
@@ -1311,13 +1311,7 @@ class HttpServiceStarted implements StoppableHttpService {
 
 				@Override
 				public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
-					Callable<Boolean> task = new Callable<Boolean>() {
-
-						@Override
-						public Boolean call() throws Exception {
-							return registerWebSocket(ctx, 1);
-						}
-					};
+					Callable<Boolean> task = () -> registerWebSocket(ctx, 1);
 
 					ExecutorService executor = Executors.newSingleThreadExecutor();
 					Future<Boolean> future = executor.submit(task);
