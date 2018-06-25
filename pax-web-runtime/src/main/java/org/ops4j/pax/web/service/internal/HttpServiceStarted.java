@@ -287,8 +287,14 @@ class HttpServiceStarted implements StoppableHttpService {
 		synchronized (lock) {
 			final ContextModel contextModel = getOrCreateContext(httpContext);
 			LOG.debug("Register resources (alias={}). Using context [" + contextModel + "]");
-			final Servlet servlet = serverController.createResourceServlet(
-					contextModel, alias, name);
+
+			// PAXWEB-1085, OSGi Enterprise R6 140.6 "Registering Resources", JavaEE Servlet spec "12.2 Specification of Mappings"
+			// "A string beginning with a ‘ / ’ character and ending with a ‘ /* ’ suffix is used for path mapping."
+			String osgiAlias = alias;
+			if (osgiAlias != null && osgiAlias.endsWith("/*")) {
+				osgiAlias = osgiAlias.substring(0, osgiAlias.length() - 2);
+			}
+			final Servlet servlet = serverController.createResourceServlet(contextModel, osgiAlias, name);
 			String resourceModelName = name;
 			if (!"default".equals(name)) {
 				// PAXWEB-1099 - we should be able to register multiple "resources" for same name (==basePath)
