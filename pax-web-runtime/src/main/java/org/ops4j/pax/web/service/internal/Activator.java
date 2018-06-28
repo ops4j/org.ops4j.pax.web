@@ -385,6 +385,16 @@ public class Activator implements BundleActivator {
 						: tmpResolver;
 
 				final ConfigurationImpl configuration = new ConfigurationImpl(resolver);
+				if (dictionary != null) {
+					// PAXWEB-1169: dictionary comes directly from configadmin.
+					// however, org.ops4j.util.property.PropertyStore.m_properties gets also filled after
+					// calling org.ops4j.util.property.PropertyStore.set() in every getXXX() method of
+					// ConfigurationImpl...
+					// For now, the dictionary is set from configadmin only and not from unpredictable state of
+					// PropertyStore.m_properties (which over time may contain default values for properties
+					// which are not found in PropertyResolver passed to the configurationImpl object)
+					configuration.setDictionary(dictionary);
+				}
 				final ServerModel serverModel = new ServerModel();
 
 				serverController = controllerFactory.createServerController(serverModel);

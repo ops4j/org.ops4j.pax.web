@@ -34,6 +34,7 @@ import java.security.cert.X509CertSelector;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
@@ -68,6 +69,7 @@ import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
 import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.Configuration;
+import org.ops4j.pax.web.service.spi.ConfigurationSource;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
@@ -376,16 +378,24 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
             UnmarshallerHandler unmarshallerHandler = unmarshaller.getUnmarshallerHandler();
 
             Dictionary<String, Object> properties = new Hashtable<>();
-            // use only some properties from org.ops4j.pax.web PID
-            if (configuration.getHttpPort() != null) {
-                properties.put(WebContainerConstants.PROPERTY_HTTP_PORT, Integer.toString(configuration.getHttpPort()));
+
+            if (configuration instanceof ConfigurationSource) {
+                Dictionary<String, Object> externalConfig = ((ConfigurationSource) configuration).getConfiguration();
+                if (externalConfig != null) {
+                    for (Enumeration<String> e = externalConfig.keys(); e.hasMoreElements(); ) {
+                        String key = e.nextElement();
+                        properties.put(key, externalConfig.get(key));
+                    }
+                }
+            } else {
+                // use only some properties from org.ops4j.pax.web PID
+                if (configuration.getHttpPort() != null) {
+                    properties.put(WebContainerConstants.PROPERTY_HTTP_PORT, Integer.toString(configuration.getHttpPort()));
+                }
+                if (configuration.getHttpSecurePort() != null) {
+                    properties.put(WebContainerConstants.PROPERTY_HTTP_SECURE_PORT, Integer.toString(configuration.getHttpSecurePort()));
+                }
             }
-            if (configuration.getHttpSecurePort() != null) {
-                properties.put(WebContainerConstants.PROPERTY_HTTP_SECURE_PORT, Integer.toString(configuration.getHttpSecurePort()));
-            }
-            // TODO: pass more properties?
-            // TODO: add direct configadmin support?
-            // TODO: pass underlying properties from org.ops4j.pax.web.service.spi.Configuration object?
 
             // BundleContextPropertyResolver gives access to e.g., ${karaf.base}
             final PropertyResolver resolver = new DictionaryPropertyResolver(properties,
@@ -395,6 +405,8 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
             SAXParserFactory spf = SAXParserFactory.newInstance();
             spf.setNamespaceAware(true);
             XMLReader xmlReader = spf.newSAXParser().getXMLReader();
+
+            // tricky PropertyResolver -> Properties bridge
             xmlReader.setContentHandler(new ResolvingContentHandler(new Properties() {
                 @Override
                 public String getProperty(String key) {

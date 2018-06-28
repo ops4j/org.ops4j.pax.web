@@ -92,6 +92,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -99,6 +100,7 @@ import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.internal.util.SupportUtils;
 import org.ops4j.pax.web.service.spi.Configuration;
+import org.ops4j.pax.web.service.spi.ConfigurationSource;
 import org.ops4j.util.property.PropertyResolver;
 import org.ops4j.util.property.PropertyStore;
 import org.slf4j.Logger;
@@ -110,7 +112,7 @@ import org.slf4j.LoggerFactory;
  * @author Alin Dreghiciu
  * @since 0.3.0, January 22, 2008
  */
-public class ConfigurationImpl extends PropertyStore implements Configuration {
+public class ConfigurationImpl extends PropertyStore implements Configuration, ConfigurationSource {
 
 	/**
 	 * Logger.
@@ -129,6 +131,8 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	 */
 	private StandardPBEStringEncryptor encryptor;
 
+	private Dictionary<String, ?> dictionary;
+
 	/**
 	 * Creates a new service configuration.
 	 *
@@ -138,6 +142,15 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		NullArgumentException.validateNotNull(propertyResolver,
 				"Property resolver");
 		this.propertyResolver = propertyResolver;
+	}
+
+	@Override
+	public Dictionary<String, Object> getConfiguration() {
+		return (Dictionary<String, Object>) this.dictionary;
+	}
+
+	public void setDictionary(Dictionary<String, ?> dictionary) {
+		this.dictionary = dictionary;
 	}
 
 	/**
