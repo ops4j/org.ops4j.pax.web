@@ -387,14 +387,12 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
                         properties.put(key, externalConfig.get(key));
                     }
                 }
-            } else {
-                // use only some properties from org.ops4j.pax.web PID
-                if (configuration.getHttpPort() != null) {
-                    properties.put(WebContainerConstants.PROPERTY_HTTP_PORT, Integer.toString(configuration.getHttpPort()));
-                }
-                if (configuration.getHttpSecurePort() != null) {
-                    properties.put(WebContainerConstants.PROPERTY_HTTP_SECURE_PORT, Integer.toString(configuration.getHttpSecurePort()));
-                }
+            }
+            if (properties.get(WebContainerConstants.PROPERTY_HTTP_PORT) == null && configuration.getHttpPort() != null) {
+                properties.put(WebContainerConstants.PROPERTY_HTTP_PORT, Integer.toString(configuration.getHttpPort()));
+            }
+            if (properties.get(WebContainerConstants.PROPERTY_HTTP_SECURE_PORT) == null && configuration.getHttpSecurePort() != null) {
+                properties.put(WebContainerConstants.PROPERTY_HTTP_SECURE_PORT, Integer.toString(configuration.getHttpSecurePort()));
             }
 
             // BundleContextPropertyResolver gives access to e.g., ${karaf.base}
