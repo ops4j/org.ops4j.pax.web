@@ -15,9 +15,16 @@
  */
 package org.ops4j.pax.web.service.undertow.internal;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.nio.file.Path;
@@ -35,6 +42,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import io.undertow.servlet.api.ServletSessionConfig;
 import io.undertow.servlet.ServletExtension;
+import io.undertow.servlet.api.SessionPersistenceManager;
 import io.undertow.util.CanonicalPathUtils;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.service.AuthenticatorService;
@@ -661,6 +669,49 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 			ssc.setPath(configuration.getSessionPath());
 		}
 		deployment.setServletSessionConfig(ssc);
+		File sessions = bundleContext.getDataFile("sessions");
+		sessions.mkdirs();
+		deployment.setSessionPersistenceManager(new SessionPersistenceManager() {
+			@Override
+			public void persistSessions(String deploymentName, Map<String, PersistentSession> sessionData) {
+				LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+				for (Map.Entry<String, PersistentSession> e : sessionData.entrySet()) {
+					LinkedHashMap<String, Object> mps = new LinkedHashMap<>();
+					mps.put("expiration", e.getValue().getExpiration().getTime());
+					mps.put("data", e.getValue().getSessionData());
+					map.put(e.getKey(), mps);
+				}
+				try (ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(new File(sessions, deploymentName))))) {
+					oos.writeObject(map);
+				} catch (Exception e) {
+					LOG.info("Error persisting sessions for deployment " + deploymentName, e);
+				}
+			}
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public Map<String, PersistentSession> loadSessionAttributes(String deploymentName, ClassLoader classLoader) {
+				LinkedHashMap<String, PersistentSession> sessionData = new LinkedHashMap<>();
+				try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(new File(sessions, deploymentName))))) {
+					Map<String, Map<String, Object>> map = (Map) (Map) ois.readObject();
+					for (Map.Entry<String, Map<String, Object>> e : map.entrySet()) {
+						long expiration = (Long) e.getValue().get("expiration");
+						Map<String, Object> data = (Map) e.getValue().get("data");
+						sessionData.put(e.getKey(), new PersistentSession(new Date(expiration), data));
+					}
+				} catch (FileNotFoundException e) {
+					// ignore
+				} catch (Exception e) {
+					LOG.info("Error loading sessions for deployment " + deploymentName, e);
+				}
+				return sessionData;
+			}
+
+			@Override
+			public void clear(String deploymentName) {
+				new File(sessions, deploymentName).delete();
+			}
+		});
 
 		manager = container.addDeployment(deployment);
 		LOG.info("Creating undertow servlet deployment for context path /{}...", contextModel.getContextName());
