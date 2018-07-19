@@ -341,7 +341,7 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 							} else if (paramName.endsWith(".method")) {
 								model.method = v;
 							} else if (paramName.endsWith(".roles")) {
-								model.roles.addAll(Arrays.asList(v.split("\\s*,\\s")));
+								model.roles.addAll(Arrays.asList(v.split("\\s*,\\s*")));
 							}
 						}
 					}
