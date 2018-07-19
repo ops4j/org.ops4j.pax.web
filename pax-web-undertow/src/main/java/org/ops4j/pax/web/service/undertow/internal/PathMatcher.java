@@ -123,7 +123,7 @@ public class PathMatcher<T> {
 				} else {
 					// there are two default handlers which come from different (?) Contexts, so we
 					// have a collision, but let's assume user knows what (s)he's doing
-					if (!(this.defaultHandler instanceof ResourceHandler)) {
+					if (this.defaultHandler != handler && !(this.defaultHandler instanceof ResourceHandler)) {
 						LOG.warn("Overwriting existing default context {} with a new one {}",
 								this.defaultHandler, handler);
 						this.defaultHandler = handler;
