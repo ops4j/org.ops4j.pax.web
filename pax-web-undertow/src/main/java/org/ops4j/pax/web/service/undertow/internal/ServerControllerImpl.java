@@ -141,6 +141,8 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
     private Undertow server;
     private final ConcurrentMap<HttpContext, Context> contextMap = new ConcurrentHashMap<>();
 
+    private XnioWorker xnioWorker;
+
     public ServerControllerImpl(BundleContext context) {
         this.bundleContext = context;
     }
@@ -318,12 +320,12 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
 
             Bundle bundle = FrameworkUtil.getBundle(ServerControllerImpl.class);
             ClassLoader loader = bundle.adapt(BundleWiring.class).getClassLoader();
-            XnioWorker worker = UndertowUtil.createWorker(loader);
+            xnioWorker = UndertowUtil.createWorker(loader);
 
             // String logNameSuffix = logNCSAFormat.substring(logNCSAFormat.lastIndexOf("."));
             // String logBaseName = logNCSAFormat.substring(0, logNCSAFormat.lastIndexOf("."));
 
-            AccessLogReceiver logReceiver = DefaultAccessLogReceiver.builder().setLogWriteExecutor(worker)
+            AccessLogReceiver logReceiver = DefaultAccessLogReceiver.builder().setLogWriteExecutor(xnioWorker)
                     .setOutputDirectory(new File(logNCSADirectory).toPath()).setLogBaseName("request.")
                     .setLogNameSuffix("log").setRotate(true).build();
 
@@ -554,10 +556,10 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
 
                 Bundle bundle = FrameworkUtil.getBundle(ServerControllerImpl.class);
                 ClassLoader loader = bundle.adapt(BundleWiring.class).getClassLoader();
-                XnioWorker worker = UndertowUtil.createWorker(loader);
+                xnioWorker = UndertowUtil.createWorker(loader);
 
                 AccessLogReceiver logReceiver = DefaultAccessLogReceiver.builder()
-                        .setLogWriteExecutor(worker)
+                        .setLogWriteExecutor(xnioWorker)
                         .setOutputDirectory(new File(accessLog.getDirectory()).toPath())
                         .setLogBaseName(accessLog.getPrefix())
                         .setLogNameSuffix(accessLog.getSuffix())
@@ -837,6 +839,9 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
     }
 
     void doStop() {
+        if (xnioWorker != null) {
+            xnioWorker.shutdown();
+        }
         server.stop();
     }
 
