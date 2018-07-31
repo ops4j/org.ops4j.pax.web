@@ -121,6 +121,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
 
 	private Configuration configuration;
+	private XnioWorker wsXnioWorker;
 
 	public Context(IdentityManager identityManager, ContextAwarePathHandler path, ContextModel contextModel) {
 		this.identityManager = identityManager;
@@ -229,6 +230,10 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		} catch (ServletException e) {
 			LOG.error(e.getMessage(), e);
 		}
+		if (wsXnioWorker != null) {
+			wsXnioWorker.shutdown();
+		}
+
 		// clean up.
 		// we really have to unregister all remaining ServletContext registrations, implicit Default Servlets
 		// and even normal servlets. For example CXF re-registers CXFServlet even when stopping
@@ -583,12 +588,12 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		}
 
 		if (isWebSocketAvailable()) {
-			XnioWorker xnioWorker = UndertowUtil.createWorker(contextModel.getClassLoader());
-			if (xnioWorker != null) {
+			wsXnioWorker = UndertowUtil.createWorker(contextModel.getClassLoader());
+			if (wsXnioWorker != null) {
 				deployment.addServletContextAttribute(
 						io.undertow.websockets.jsr.WebSocketDeploymentInfo.ATTRIBUTE_NAME,
 						new io.undertow.websockets.jsr.WebSocketDeploymentInfo()
-								.setWorker(xnioWorker)
+								.setWorker(wsXnioWorker)
 								.setBuffers(new DefaultByteBufferPool(true, 100))
 				);
 			}
