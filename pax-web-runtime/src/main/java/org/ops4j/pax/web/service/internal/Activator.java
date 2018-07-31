@@ -140,6 +140,12 @@ public class Activator implements BundleActivator {
 	 */
 	private ServiceRegistration<?> httpServiceFactoryReg;
 
+	/**
+	 * Registration of MSF for {@code org.ops4j.pax.web.context} factory PID for current
+	 * {@link ServerControllerFactory}
+	 */
+	private ServiceRegistration<ManagedServiceFactory> managedServiceFactoryReg;
+
 	private BundleContext bundleContext;
 
 	private ServletEventDispatcher servletEventDispatcher;
@@ -276,10 +282,15 @@ public class Activator implements BundleActivator {
 	 * @param context
 	 */
 	private void createManagedServiceFactory(BundleContext context) {
+		// sanity check
+		if (managedServiceFactoryReg != null) {
+			managedServiceFactoryReg.unregister();
+			managedServiceFactoryReg = null;
+		}
 		final Dictionary<String, String> props = new Hashtable<>();
 		props.put(Constants.SERVICE_PID, HttpContextProcessing.PID);
 		httpContextProcessing = new HttpContextProcessing(bundleContext, serverController);
-		context.registerService(ManagedServiceFactory.class, httpContextProcessing, props);
+		managedServiceFactoryReg = context.registerService(ManagedServiceFactory.class, httpContextProcessing, props);
 	}
 
 	protected boolean same(Dictionary<String, ?> cfg1,
@@ -371,6 +382,10 @@ public class Activator implements BundleActivator {
 		if (httpServiceFactoryReg != null) {
 			httpServiceFactoryReg.unregister();
 			httpServiceFactoryReg = null;
+		}
+		if (managedServiceFactoryReg != null) {
+			managedServiceFactoryReg.unregister();
+			managedServiceFactoryReg = null;
 		}
 		if (serverController != null) {
 			serverController.stop();
