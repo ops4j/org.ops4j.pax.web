@@ -828,7 +828,7 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 			//  since were here now), send that range with a 216 response
 			if (ranges.size() == 1) {
 				InclusiveByteRange singleSatisfiableRange = ranges.get(0);
-				long singleLength = singleSatisfiableRange.getSize(content_length);
+				long singleLength = singleSatisfiableRange.getSize();
 				putHeaders(response, content, singleLength);
 				response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
 				if (!response.containsHeader(HttpHeader.DATE.asString())) {
@@ -836,7 +836,7 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 				}
 				response.setHeader(HttpHeader.CONTENT_RANGE.asString(),
 						singleSatisfiableRange.toHeaderRangeString(content_length));
-				resource.writeTo(out, singleSatisfiableRange.getFirst(content_length), singleLength);
+				resource.writeTo(out, singleSatisfiableRange.getFirst(), singleLength);
 				return;
 			}
 
@@ -881,7 +881,7 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 								(mimetype == null ? 0 : HttpHeader.CONTENT_TYPE.asString().length() + 2 + mimetype.length()) + 2 +
 								HttpHeader.CONTENT_RANGE.asString().length() + 2 + header[i].length() + 2 +
 								2 +
-								(ibr.getLast(content_length) - ibr.getFirst(content_length)) + 1;
+								(ibr.getLast() - ibr.getFirst()) + 1;
 			}
 			length += 2 + 2 + multi.getBoundary().length() + 2 + 2;
 			response.setContentLength(length);
@@ -890,8 +890,8 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 				InclusiveByteRange ibr = ranges.get(i);
 				multi.startPart(mimetype, new String[]{HttpHeader.CONTENT_RANGE + ": " + header[i]});
 
-				long start = ibr.getFirst(content_length);
-				long size = ibr.getSize(content_length);
+				long start = ibr.getFirst();
+				long size = ibr.getSize();
 				if (in != null) {
 					// Handle non cached resource
 					if (start < pos) {
