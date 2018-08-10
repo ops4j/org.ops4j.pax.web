@@ -58,7 +58,7 @@
 							javax.servlet.http,
 							javax.servlet.jsp,
 							javax.servlet.jsp.tagext,
-							!org.apache.tomcat
+							org.apache.tomcat; resolution:=optional
 						</Import-Package>
 						<Export-Package>!*</Export-Package>
 						<Private-Package>
@@ -94,12 +94,12 @@
 					<packageName>org.apache.jsp</packageName>
 					<defaultSourcesDirectory>${project.basedir}/src/main/resources</defaultSourcesDirectory>
 				</configuration>
-				<!-- Use the Tomcat 6 JSP compiler -->
+				<!-- Use the Tomcat 8 JSP compiler -->
 				<dependencies>
 					<dependency>
 						<groupId>org.jasig.mojo.jspc</groupId>
-						<artifactId>jspc-compiler-tomcat6</artifactId>
-						<version>2.0.0</version>
+						<artifactId>jspc-compiler-tomcat8</artifactId>
+						<version>2.0.2</version>
 						<exclusions>
 							<exclusion>
 								<groupId>org.apache.tomcat</groupId>
