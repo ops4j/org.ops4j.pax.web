@@ -119,7 +119,9 @@ jobs:
         - v1-dep-{{ .Branch }}-
         - v1-dep-master-
         - v1-dep-
-    - run: mvn -B -o -P tomcat integration-test verify
+    - run:
+        command: mvn -B -o -P tomcat integration-test verify
+        no_output_timeout: 30m
     - run:
         name: Save test results
         command: |
@@ -178,3 +180,4 @@ workflows:
         - test_jetty
         - test_undertow
         - test_tomcat
+
