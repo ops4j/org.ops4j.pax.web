@@ -118,7 +118,9 @@ jobs:
         - v1-dep-{{ .Branch }}-
         - v1-dep-master-
         - v1-dep-
-    - run: mvn -B -o -P tomcat integration-test verify
+    - run:
+        command: mvn -B -o -P tomcat integration-test verify
+        no_output_timeout: 30m
     - run:
         name: Save test results
         command: |
@@ -155,7 +157,7 @@ jobs:
         - v1-dep-
     - deploy:
         command: |
-          if [ "${CIRCLE_BRANCH}" == "pax-web-7.1.x" ]; then
+          if [ "${CIRCLE_BRANCH}" == "pax-web-7.2.x" ]; then
             mvn -s .circleci/settings.xml -Dmaven.install.skip=true -DskipTests deploy 
           fi
 workflows:
