@@ -74,6 +74,8 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_ALGOR
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_ENABLED;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_PREFIX;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_SUFFIX;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_DEFAULT_AUTHMETHOD;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_DEFAULT_REALMNAME;
 
 import java.io.File;
 import java.util.Dictionary;
@@ -519,6 +521,10 @@ public class Activator implements BundleActivator {
 		setProperty(toPropagate, PROPERTY_WORKER_NAME, configuration.getWorkerName());
 		setProperty(toPropagate, PROPERTY_LISTENING_ADDRESSES,
 				configuration.getListeningAddresses());
+		setProperty(toPropagate, PROPERTY_DEFAULT_AUTHMETHOD,
+				configuration.getDefaultAuthMethod());
+		setProperty(toPropagate, PROPERTY_DEFAULT_REALMNAME,
+				configuration.getDefaultRealmName());
 
 		// then replace ports
 		setProperty(toPropagate, PROPERTY_HTTP_PORT, httpPort);

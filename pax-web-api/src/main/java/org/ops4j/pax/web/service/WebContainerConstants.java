@@ -138,7 +138,8 @@ public interface WebContainerConstants {
 
 	String PROPERTY_VIRTUAL_HOST_LIST = "org.ops4j.pax.web.default.virtualhosts";
 	String PROPERTY_CONNECTOR_LIST = "org.ops4j.pax.web.default.connectors";
-
+    String PROPERTY_DEFAULT_AUTHMETHOD = "org.ops4j.pax.web.default.authmethod";
+    String PROPERTY_DEFAULT_REALMNAME = "org.ops4j.pax.web.default.realmname";
 
 	String PROPERTY_MAX_THREADS = "org.ops4j.pax.web.server.maxThreads";
 

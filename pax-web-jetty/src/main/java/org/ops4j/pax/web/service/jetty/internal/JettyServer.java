@@ -118,6 +118,14 @@ public interface JettyServer {
 
 	URL getServerConfigURL();
 
+	void setDefaultAuthMethod(String defaultAuthMethod);
+
+	String getDefaultAuthMethod() ;
+
+	void setDefaultRealmName(String defaultRealmName);
+
+	String getDefaultRealmName() ;
+
 	void addServletContainerInitializer(ContainerInitializerModel model);
 
 	Connector[] getConnectors();
