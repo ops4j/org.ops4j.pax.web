@@ -86,6 +86,8 @@ import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_ALGOR
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_ENABLED;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_PREFIX;
 import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_SUFFIX;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_DEFAULT_AUTHMETHOD;
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_DEFAULT_REALMNAME;
 
 import java.io.File;
 import java.net.URI;
@@ -903,6 +905,12 @@ public class ConfigurationImpl extends PropertyStore implements Configuration, C
         return getResolvedStringProperty(PROPERTY_ENC_SUFFIX);
     }
     
+	@Override
+	public String getDefaultAuthMethod() {return getResolvedStringProperty(PROPERTY_DEFAULT_AUTHMETHOD); }
+
+	@Override
+	public String getDefaultRealmName() {return getResolvedStringProperty(PROPERTY_DEFAULT_REALMNAME); }
+
     private String decryptPassword(String password) {
         if (this.encryptor == null && isEncEnabled()) {
             String masterPassword;

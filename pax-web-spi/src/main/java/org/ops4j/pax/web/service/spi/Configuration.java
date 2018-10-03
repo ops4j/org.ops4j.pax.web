@@ -249,4 +249,8 @@ public interface Configuration {
 	String getEncPrefix();
 	
 	String getEncSuffix();
+
+	String getDefaultAuthMethod();
+
+	String getDefaultRealmName();
 }

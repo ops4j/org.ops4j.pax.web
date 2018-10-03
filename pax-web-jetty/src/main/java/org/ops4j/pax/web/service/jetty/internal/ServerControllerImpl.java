@@ -459,6 +459,8 @@ class ServerControllerImpl implements ServerController {
 			// Fix for PAXWEB-193
 			jettyServer.setServerConfigDir(configuration.getConfigurationDir());
 			jettyServer.setServerConfigURL(configuration.getConfigurationURL());
+			jettyServer.setDefaultAuthMethod(configuration.getDefaultAuthMethod());
+			jettyServer.setDefaultRealmName(configuration.getDefaultRealmName());
 			jettyServer.configureContext(attributes,
 					configuration.getSessionTimeout(),
 					configuration.getSessionCookie(),
