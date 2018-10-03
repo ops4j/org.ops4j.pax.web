@@ -246,4 +246,24 @@ public interface Configuration {
 	String getEncPrefix();
 	
 	String getEncSuffix();
+
+	/**
+	 * The default implementation will be removed on next major release - 8.0.0
+	 * No default auth method with be used if implementation is not provided.
+	 *
+	 * @return the default auth method, null if not implemented
+	 */
+	default String getDefaultAuthMethod(){
+		return null;
+	}
+
+	/**
+	 * The default implementation will be removed on next major release - 8.0.0
+	 * No default realm name with be used if implementation is not provided.
+	 *
+	 * @return the default realm name, null if not implemented
+	 */
+	default String getDefaultRealmName(){
+		return null;
+	}
 }

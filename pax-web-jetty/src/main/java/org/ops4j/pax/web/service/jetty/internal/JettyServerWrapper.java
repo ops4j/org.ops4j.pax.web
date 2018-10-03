@@ -118,6 +118,9 @@ class JettyServerWrapper extends Server {
 
 	private URL serverConfigURL;
 
+	private String defaultAuthMethod;
+	private String defaultRealmName;
+
 	private Boolean sessionCookieHttpOnly;
 
 	private Boolean sessionCookieSecure;
@@ -329,6 +332,12 @@ class JettyServerWrapper extends Server {
 				modelSessionUrl, modelSessionCookieHttpOnly, modelSessionSecure, workerName, lazyLoad, storeDirectory,
 				maxAge);
 
+		if(this.defaultAuthMethod != null && model.getAuthMethod() == null){
+            model.setAuthMethod(this.defaultAuthMethod);
+        }
+        if(this.defaultRealmName != null && model.getRealmName() == null){
+            model.setRealmName(this.defaultRealmName);
+        }
 		if (model.getRealmName() != null && model.getAuthMethod() != null) {
 			configureSecurity(context, model.getRealmName(), model.getAuthMethod(), model.getFormLoginPage(),
 					model.getFormErrorPage());
@@ -623,5 +632,20 @@ class JettyServerWrapper extends Server {
 
 	public void setServerConfigURL(URL serverConfigURL) {
 		this.serverConfigURL = serverConfigURL;
+	}
+
+	public String getDefaultAuthMethod(){
+	    return defaultAuthMethod;
+    }
+
+	public void setDefaultAuthMethod(String defaultAuthMethod) {
+		this.defaultAuthMethod = defaultAuthMethod;
+	}
+	public String getDefaultRealmName() {
+		return defaultRealmName;
+	}
+
+	public void setDefaultRealmName(String defaultRealmName) {
+		this.defaultRealmName = defaultRealmName;
 	}
 }

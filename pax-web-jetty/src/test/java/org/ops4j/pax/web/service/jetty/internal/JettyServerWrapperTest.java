@@ -50,6 +50,8 @@ import org.osgi.service.http.HttpContext;
 public class JettyServerWrapperTest {
 	private static final String KNOWN_CONTEXT_NAME = "TestContext";
 	private static final String BUNDLE_SYMBOLIC_NAME = "BundleSymbolicName";
+	private static final String DEFAULT_AUTH_METHOD = "DDF";
+	private static final String DEFAULT_REALM_NAME = "Karaf";
 	private static final int NUMBER_OF_CONCURRENT_EXECUTIONS = 2;
 	private static final int REPETITIONS_OF_MULTI_THREADED_TEST = 1000;
 	@Mock
@@ -69,6 +71,10 @@ public class JettyServerWrapperTest {
 		when(contextModelMock.getContextName()).thenReturn(KNOWN_CONTEXT_NAME);
 		when(contextModelMock.getHttpContext()).thenReturn(httpContextMock);
 		when(contextModelMock.getBundle()).thenReturn(bundleMock);
+		doCallRealMethod().when(contextModelMock).getRealmName();
+		doCallRealMethod().when(contextModelMock).getAuthMethod();
+		doCallRealMethod().when(contextModelMock).setRealmName(anyString());
+		doCallRealMethod().when(contextModelMock).setAuthMethod(anyString());
 		when(bundleMock.getHeaders()).thenReturn(
 				new Hashtable<>());
 		when(bundleMock.getSymbolicName()).thenReturn(BUNDLE_SYMBOLIC_NAME);
@@ -215,4 +221,36 @@ public class JettyServerWrapperTest {
 		}
 	}
 
+	@Test
+	public void testDefaultAuthMethod()
+			throws Exception {
+		final JettyServerWrapper jettyServerWrapperUnderTest = new JettyServerWrapper(
+				serverModelMock, new QueuedThreadPool());
+		try {
+			assertNull(contextModelMock.getAuthMethod());
+			jettyServerWrapperUnderTest.setDefaultAuthMethod(DEFAULT_AUTH_METHOD);
+			jettyServerWrapperUnderTest.start();
+			HttpServiceContext context = jettyServerWrapperUnderTest.getOrCreateContext(contextModelMock);
+			context.start();
+			assertTrue(DEFAULT_AUTH_METHOD.equals(contextModelMock.getAuthMethod()));
+		} finally {
+			jettyServerWrapperUnderTest.stop();
+		}
+	}
+	@Test
+	public void testDefaultRealmName()
+			throws Exception {
+		final JettyServerWrapper jettyServerWrapperUnderTest = new JettyServerWrapper(
+				serverModelMock, new QueuedThreadPool());
+		try {
+			assertNull(contextModelMock.getRealmName());
+			jettyServerWrapperUnderTest.setDefaultRealmName(DEFAULT_REALM_NAME);
+			jettyServerWrapperUnderTest.start();
+			HttpServiceContext context = jettyServerWrapperUnderTest.getOrCreateContext(contextModelMock);
+			context.start();
+			assertTrue(DEFAULT_REALM_NAME.equals(contextModelMock.getRealmName()));
+		} finally {
+			jettyServerWrapperUnderTest.stop();
+		}
+	}
 }

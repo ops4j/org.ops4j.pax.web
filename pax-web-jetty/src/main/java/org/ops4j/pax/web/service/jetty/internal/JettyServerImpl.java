@@ -947,6 +947,26 @@ class JettyServerImpl implements JettyServer {
 	}
 
 	@Override
+	public void setDefaultAuthMethod(String defaultAuthMethod) {
+		server.setDefaultAuthMethod(defaultAuthMethod);
+	}
+
+	@Override
+	public String getDefaultAuthMethod() {
+		return server.getDefaultAuthMethod();
+	}
+
+	@Override
+	public void setDefaultRealmName(String defaultRealmName) {
+		server.setDefaultRealmName(defaultRealmName);
+	}
+
+	@Override
+	public String getDefaultRealmName() {
+		return server.getDefaultRealmName();
+	}
+
+	@Override
 	public JettyServerWrapper getServer() {
 		return server;
 	}
