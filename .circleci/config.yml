@@ -120,7 +120,7 @@ jobs:
         - v1-dep-
     - run:
         command: mvn -B -o -P tomcat integration-test verify
-        no_output_timeout: 30m
+        no_output_timeout: 29m
     - run:
         name: Save test results
         command: |
