@@ -332,12 +332,12 @@ class JettyServerWrapper extends Server {
 				modelSessionUrl, modelSessionCookieHttpOnly, modelSessionSecure, workerName, lazyLoad, storeDirectory,
 				maxAge);
 
-		if(this.defaultAuthMethod != null && model.getAuthMethod() == null){
-            model.setAuthMethod(this.defaultAuthMethod);
-        }
-        if(this.defaultRealmName != null && model.getRealmName() == null){
-            model.setRealmName(this.defaultRealmName);
-        }
+		if (this.defaultAuthMethod != null && model.getAuthMethod() == null) {
+			model.setAuthMethod(this.defaultAuthMethod);
+		}
+		if (this.defaultRealmName != null && model.getRealmName() == null) {
+			model.setRealmName(this.defaultRealmName);
+		}
 		if (model.getRealmName() != null && model.getAuthMethod() != null) {
 			configureSecurity(context, model.getRealmName(), model.getAuthMethod(), model.getFormLoginPage(),
 					model.getFormErrorPage());
@@ -634,13 +634,14 @@ class JettyServerWrapper extends Server {
 		this.serverConfigURL = serverConfigURL;
 	}
 
-	public String getDefaultAuthMethod(){
-	    return defaultAuthMethod;
-    }
+	public String getDefaultAuthMethod() {
+		return defaultAuthMethod;
+	}
 
 	public void setDefaultAuthMethod(String defaultAuthMethod) {
 		this.defaultAuthMethod = defaultAuthMethod;
 	}
+
 	public String getDefaultRealmName() {
 		return defaultRealmName;
 	}
@@ -648,4 +649,5 @@ class JettyServerWrapper extends Server {
 	public void setDefaultRealmName(String defaultRealmName) {
 		this.defaultRealmName = defaultRealmName;
 	}
+
 }

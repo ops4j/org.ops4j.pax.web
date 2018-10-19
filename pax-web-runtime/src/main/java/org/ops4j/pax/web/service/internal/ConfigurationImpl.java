@@ -904,12 +904,16 @@ public class ConfigurationImpl extends PropertyStore implements Configuration, C
     public String getEncSuffix() {
         return getResolvedStringProperty(PROPERTY_ENC_SUFFIX);
     }
-    
-	@Override
-	public String getDefaultAuthMethod() {return getResolvedStringProperty(PROPERTY_DEFAULT_AUTHMETHOD); }
 
 	@Override
-	public String getDefaultRealmName() {return getResolvedStringProperty(PROPERTY_DEFAULT_REALMNAME); }
+	public String getDefaultAuthMethod() {
+		return getResolvedStringProperty(PROPERTY_DEFAULT_AUTHMETHOD);
+	}
+
+	@Override
+	public String getDefaultRealmName() {
+		return getResolvedStringProperty(PROPERTY_DEFAULT_REALMNAME);
+	}
 
     private String decryptPassword(String password) {
         if (this.encryptor == null && isEncEnabled()) {
