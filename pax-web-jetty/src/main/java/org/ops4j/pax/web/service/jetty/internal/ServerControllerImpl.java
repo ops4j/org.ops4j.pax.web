@@ -621,7 +621,10 @@ class ServerControllerImpl implements ServerController {
 											configuration.isValidatePeerCerts(),
 											configuration.isEnableOCSP(),
 											configuration.getOcspResponderURL(),
-											configuration.checkForwardedHeaders());
+											configuration.checkForwardedHeaders(),
+											configuration.getSslKeystoreProvider(),
+											configuration.getSslTrustStoreProvider(),
+											configuration.getSslProvider());
 							if (httpSecureConnector == null) {
 								httpSecureConnector = (ServerConnector) secureConnector;
 							}

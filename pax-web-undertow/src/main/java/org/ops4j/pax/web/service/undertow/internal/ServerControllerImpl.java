@@ -659,12 +659,15 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
                                        boolean validateCerts, String crlPath,
                                        String secureRandomAlgorithm,
                                        boolean validatePeerCerts, boolean enableCRLDP,
-                                       boolean enableOCSP, String ocspResponderURL) {
+                                       boolean enableOCSP, String ocspResponderURL,
+                                       String sslKeystoreProvider,
+                                       String sslTruststoreProvider,
+                                       String sslProvider) {
         try {
             URL keyStoreURL = loadResource(keystorePath);
             KeyStore keyStore = getKeyStore(keyStoreURL,
                     keystoreType != null ? keystoreType : "JKS",
-                    keystorePassword);
+                    keystorePassword, sslKeystoreProvider);
 
             // key managers
             String _keyManagerFactoryAlgorithm = Security.getProperty("ssl.KeyManagerFactory.algorithm") == null
@@ -681,7 +684,7 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
                 URL trustStoreURL = loadResource(truststorePath);
                 KeyStore trustStore = getKeyStore(trustStoreURL,
                         truststoreType != null ? truststoreType : "JKS",
-                        truststorePassword);
+                        truststorePassword, sslTruststoreProvider);
 
                 String _trustManagerFactoryAlgorithm = Security.getProperty("ssl.TrustManagerFactory.algorithm") == null
                         ? TrustManagerFactory.getDefaultAlgorithm()
@@ -746,7 +749,13 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
                 }
             }
 
-            SSLContext context = SSLContext.getInstance("TLS");
+            SSLContext context;
+            if (null == sslProvider || sslProvider.isEmpty()) {
+                context = SSLContext.getInstance("TLS");
+            } else {
+                context = SSLContext.getInstance("TLS", sslProvider);
+            }
+
             context.init(keyManagers, trustManagers, random);
 
             return context;
@@ -769,7 +778,10 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
                 configuration.isValidateCerts(), configuration.getCrlPath(),
                 null,
                 configuration.isValidatePeerCerts(), configuration.isEnableCRLDP(), configuration.isEnableOCSP(),
-                configuration.getOcspResponderURL());
+                configuration.getOcspResponderURL(),
+                configuration.getSslKeystoreProvider(),
+                configuration.getSslTrustStoreProvider(),
+                configuration.getSslProvider());
     }
 
     /**
@@ -801,7 +813,10 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
                 configuration.isValidateCerts(), configuration.getCrlPath(),
                 null, // "SHA1PRNG", "NativePRNGNonBlocking", ...
                 configuration.isValidatePeerCerts(), configuration.isEnableCRLDP(), configuration.isEnableOCSP(),
-                configuration.getOcspResponderURL());
+                configuration.getOcspResponderURL(),
+                configuration.getSslKeystoreProvider(),
+                configuration.getSslTrustStoreProvider(),
+                configuration.getSslProvider());
     }
 
     private URL loadResource(String resource) throws MalformedURLException {
@@ -824,8 +839,14 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
         return url;
     }
 
-    private KeyStore getKeyStore(URL storePath, String storeType, String storePassword) throws Exception {
-        KeyStore keystore = KeyStore.getInstance(storeType);
+    private KeyStore getKeyStore(URL storePath, String storeType, String storePassword, String provider) throws Exception {
+        KeyStore keystore;
+        if (null == null || provider.isEmpty()) {
+            keystore = KeyStore.getInstance(storeType);
+        } else {
+            keystore = KeyStore.getInstance(storeType, provider);
+        }
+
         try (InputStream is = storePath.openStream()) {
             keystore.load(is, storePassword.toCharArray());
         }

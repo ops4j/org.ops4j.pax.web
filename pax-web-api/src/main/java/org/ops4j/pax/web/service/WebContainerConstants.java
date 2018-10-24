@@ -68,9 +68,12 @@ public interface WebContainerConstants {
 	String PROPERTY_HTTP_SECURE_ENABLED = "org.osgi.service.http.secure.enabled";
 	String PROPERTY_HTTP_SECURE_CONNECTOR_NAME = "org.osgi.service.http.secure.connector.name";
 
+	String PROPERTY_SSL_PROVIDER = PID + ".ssl.provider";
+
 	String PROPERTY_SSL_KEYSTORE = PID + ".ssl.keystore";
 	String PROPERTY_SSL_KEYSTORE_TYPE = PID + ".ssl.keystore.type";
 	String PROPERTY_SSL_KEYSTORE_PASSWORD = PID + ".ssl.keystore.password";
+	String PROPERTY_SSL_KEYSTORE_PROVIDER = PID + ".ssl.keystore.provider";
 	/**
 	 * @deprecated use PROPERTY_SSL_KEYSTORE_PASSWORD instead.
 	 */
@@ -87,6 +90,7 @@ public interface WebContainerConstants {
 	String PROPERTY_SSL_TRUST_STORE = PID + ".ssl.truststore";
 	String PROPERTY_SSL_TRUST_STORE_PASSWORD = PID + ".ssl.truststore.password";
 	String PROPERTY_SSL_TRUST_STORE_TYPE = PID + ".ssl.truststore.type";
+	String PROPERTY_SSL_TRUST_STORE_PROVIDER = PID + ".ssl.truststore.provider";
 
 	String PROPERTY_SSL_CLIENT_AUTH_WANTED = PID + ".ssl.clientauthwanted";
 	String PROPERTY_SSL_CLIENT_AUTH_NEEDED = PID + ".ssl.clientauthneeded";

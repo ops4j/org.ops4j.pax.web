@@ -269,4 +269,23 @@ public interface Configuration {
 	default String getDefaultRealmName(){
 		return null;
 	}
+
+    /**
+	 * Returns the name of SSL keystore provider.
+	 * @return the name of SSL keystore provider.
+	 */
+	String getSslKeystoreProvider();
+
+    /**
+     * Returns the name of SSL truststore provider.
+     * @return the name of SSL truststore provider.
+     */
+	String getSslTrustStoreProvider();
+
+    /**
+     * Returns the name of SSL provider.
+     * @return the name of SSL provider.
+     */
+	String getSslProvider();
+
 }

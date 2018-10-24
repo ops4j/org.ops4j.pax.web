@@ -302,6 +302,35 @@ class JettyFactoryImpl implements JettyFactory {
     }
 */
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ServerConnector createSecureConnector(Server server, String name, int port,
+                                                 String sslKeystore, String sslKeystorePassword, String sslKeyPassword,
+                                                 String host, String sslKeystoreType, String sslKeyAlias,
+                                                 String trustStore, String trustStorePassword, String trustStoreType,
+                                                 boolean isClientAuthNeeded, boolean isClientAuthWanted,
+                                                 List<String> cipherSuitesIncluded, List<String> cipherSuitesExcluded,
+                                                 List<String> protocolsIncluded, List<String> protocolsExcluded,
+                                                 Boolean sslRenegotiationAllowed,
+                                                 String crlPath,
+                                                 Boolean enableCRLDP,
+                                                 Boolean validateCerts,
+                                                 Boolean validatePeerCerts,
+                                                 Boolean enableOCSP,
+                                                 String ocspResponderURL,
+                                                 Boolean checkForwaredHeaders) {
+      return createSecureConnector(server, name, port,
+          sslKeystore, sslKeystorePassword, sslKeyPassword, host, sslKeystoreType, sslKeyAlias,
+          trustStore, trustStorePassword, trustStoreType,
+          isClientAuthNeeded, isClientAuthWanted,
+          cipherSuitesIncluded, cipherSuitesExcluded, protocolsIncluded, protocolsExcluded,
+          sslRenegotiationAllowed, crlPath, enableCRLDP, validateCerts, validatePeerCerts,
+          enableOCSP, ocspResponderURL, checkForwaredHeaders,
+          null, null, null);
+    }
+
+    /**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -319,10 +348,18 @@ class JettyFactoryImpl implements JettyFactory {
 												 Boolean validatePeerCerts,
 												 Boolean enableOCSP,
 												 String ocspResponderURL,
-												 Boolean checkForwaredHeaders) {
+												 Boolean checkForwaredHeaders,
+												 String sslKeystoreProvider,
+												 String sslTrustStoreProvider,
+												 String sslProvider) {
 
 		// SSL Context Factory for HTTPS and SPDY
 		SslContextFactory sslContextFactory = new SslContextFactory();
+
+		if (null != null && (!"".equals(sslProvider))) {
+		  sslContextFactory.setProvider(sslProvider);
+		}
+
 		sslContextFactory.setKeyStorePath(sslKeystore);
 		sslContextFactory.setKeyStorePassword(sslKeystorePassword);
 		sslContextFactory.setKeyManagerPassword(sslKeyPassword);
@@ -341,6 +378,10 @@ class JettyFactoryImpl implements JettyFactory {
 		if (sslKeystoreType != null) {
 			sslContextFactory.setKeyStoreType(sslKeystoreType);
 		}
+		if (null != sslKeystoreProvider && (!"".equals(sslKeystoreProvider))) {
+		  sslContextFactory.setKeyStoreProvider(sslKeystoreProvider);
+		}
+
 		// Java key stores may contain more than one private key entry.
 		// Specifying the alias tells jetty which one to use.
 		if ((null != sslKeyAlias) && (!"".equals(sslKeyAlias))) {
@@ -357,6 +398,9 @@ class JettyFactoryImpl implements JettyFactory {
 		if ((null != trustStoreType) && (!"".equals(trustStoreType))) {
 			sslContextFactory.setTrustStoreType(trustStoreType);
 		}
+        if (null != sslTrustStoreProvider && (!"".equals(sslTrustStoreProvider))) {
+          sslContextFactory.setTrustStoreProvider(sslTrustStoreProvider);
+        }
 
 		// In light of well-known attacks against weak encryption algorithms such as RC4,
 		// it is usefull to be able to include or exclude certain ciphersuites.
