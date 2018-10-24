@@ -213,7 +213,7 @@ public class DefaultServletMapping implements ServletMapping {
 				",urlPatterns=" + Arrays.deepToString(urlPatterns) +
 				",initParams=" + initParams +
 				",servlet=" + servlet + ", alias=" + alias +
-				", servletName" + servletName + "}";
+				", servletName=" + servletName + "}";
 	}
 
 }
