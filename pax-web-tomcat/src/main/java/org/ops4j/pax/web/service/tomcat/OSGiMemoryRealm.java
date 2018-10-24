@@ -77,6 +77,12 @@ public class OSGiMemoryRealm extends MemoryRealm {
 				//CHECKSTYLE:ON
 			} finally {
 				digester.reset();
+				if (inputStream != null) {
+					try {
+						inputStream.close();
+					} catch (IOException e1) {
+					}
+				}
 			}
 
 	        if (getCredentialHandler() == null) {
