@@ -276,16 +276,16 @@ public interface Configuration {
 	 */
 	String getSslKeystoreProvider();
 
-    /**
-     * Returns the name of SSL truststore provider.
-     * @return the name of SSL truststore provider.
-     */
+	/**
+	 * Returns the name of SSL truststore provider.
+	 * @return the name of SSL truststore provider.
+	 */
 	String getSslTrustStoreProvider();
 
-    /**
-     * Returns the name of SSL provider.
-     * @return the name of SSL provider.
-     */
+	/**
+	 * Returns the name of SSL provider.
+	 * @return the name of SSL provider.
+	 */
 	String getSslProvider();
 
 }

@@ -238,10 +238,10 @@ public class ConfigurationImpl extends PropertyStore implements Configuration, C
 		return getResolvedBooleanProperty(PROPERTY_HTTP_SECURE_ENABLED);
 	}
 
-    @Override
-    public String getSslProvider() {
-        return getResolvedStringProperty(PROPERTY_SSL_PROVIDER);
-    }
+	@Override
+	public String getSslProvider() {
+		return getResolvedStringProperty(PROPERTY_SSL_PROVIDER);
+	}
 
 	/**
 	 * @see Configuration#getSslKeystore()
@@ -259,10 +259,10 @@ public class ConfigurationImpl extends PropertyStore implements Configuration, C
 		return getResolvedStringProperty(PROPERTY_SSL_KEYSTORE_TYPE);
 	}
 
-    @Override
-    public String getSslKeystoreProvider() {
-        return getResolvedStringProperty(PROPERTY_SSL_KEYSTORE_PROVIDER);
-    }
+	@Override
+	public String getSslKeystoreProvider() {
+		return getResolvedStringProperty(PROPERTY_SSL_KEYSTORE_PROVIDER);
+	}
 
 	/**
 	 * @see Configuration#getSslKeystorePassword()
@@ -334,10 +334,10 @@ public class ConfigurationImpl extends PropertyStore implements Configuration, C
 		return getResolvedStringProperty(PROPERTY_SSL_TRUST_STORE_TYPE);
 	}
 
-    @Override
-    public String getSslTrustStoreProvider() {
-        return getResolvedStringProperty(PROPERTY_SSL_TRUST_STORE_PROVIDER);
-    }
+	@Override
+	public String getSslTrustStoreProvider() {
+		return getResolvedStringProperty(PROPERTY_SSL_TRUST_STORE_PROVIDER);
+	}
 
 	@Override
 	public Boolean isSslRenegotiationAllowed() {

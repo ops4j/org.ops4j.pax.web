@@ -356,8 +356,8 @@ class JettyFactoryImpl implements JettyFactory {
 		// SSL Context Factory for HTTPS and SPDY
 		SslContextFactory sslContextFactory = new SslContextFactory();
 
-		if (null != null && (!"".equals(sslProvider))) {
-		  sslContextFactory.setProvider(sslProvider);
+		if (null != sslProvider && !"".equals(sslProvider.trim())) {
+			sslContextFactory.setProvider(sslProvider);
 		}
 
 		sslContextFactory.setKeyStorePath(sslKeystore);
@@ -378,7 +378,7 @@ class JettyFactoryImpl implements JettyFactory {
 		if (sslKeystoreType != null) {
 			sslContextFactory.setKeyStoreType(sslKeystoreType);
 		}
-		if (null != sslKeystoreProvider && (!"".equals(sslKeystoreProvider))) {
+		if (null != sslKeystoreProvider && (!"".equals(sslKeystoreProvider.trim()))) {
 		  sslContextFactory.setKeyStoreProvider(sslKeystoreProvider);
 		}
 
@@ -398,7 +398,7 @@ class JettyFactoryImpl implements JettyFactory {
 		if ((null != trustStoreType) && (!"".equals(trustStoreType))) {
 			sslContextFactory.setTrustStoreType(trustStoreType);
 		}
-        if (null != sslTrustStoreProvider && (!"".equals(sslTrustStoreProvider))) {
+        if (null != sslTrustStoreProvider && (!"".equals(sslTrustStoreProvider.trim()))) {
           sslContextFactory.setTrustStoreProvider(sslTrustStoreProvider);
         }
 

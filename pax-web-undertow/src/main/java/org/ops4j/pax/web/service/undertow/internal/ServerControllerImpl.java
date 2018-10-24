@@ -841,7 +841,7 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
 
     private KeyStore getKeyStore(URL storePath, String storeType, String storePassword, String provider) throws Exception {
         KeyStore keystore;
-        if (null == null || provider.isEmpty()) {
+        if (provider == null || provider.isEmpty()) {
             keystore = KeyStore.getInstance(storeType);
         } else {
             keystore = KeyStore.getInstance(storeType, provider);
