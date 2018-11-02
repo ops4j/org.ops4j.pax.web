@@ -46,7 +46,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-
 import javax.net.ssl.CertPathTrustManagerParameters;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -65,6 +64,8 @@ import io.undertow.security.idm.Credential;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.servlet.api.ServletContainer;
+import io.undertow.servlet.api.SessionPersistenceManager;
+import io.undertow.servlet.util.InMemorySessionPersistence;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
 import org.ops4j.pax.web.service.WebContainerConstants;
@@ -87,6 +88,7 @@ import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.ops4j.pax.web.service.undertow.internal.configuration.ResolvingContentHandler;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.SecurityRealm;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.Server;
+import org.ops4j.pax.web.service.undertow.internal.configuration.model.ServletContainer.PersistentSessionsConfig;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowConfiguration;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowSubsystem;
 import org.ops4j.pax.web.service.undertow.internal.security.JaasIdentityManager;
@@ -137,6 +139,8 @@ public class ServerControllerImpl implements ServerController, ServerControllerE
     private final Set<ServerListener> listeners = new CopyOnWriteArraySet<>();
     private State state = State.Unconfigured;
     private IdentityManager identityManager;
+    private SessionPersistenceManager sessionPersistenceManager;
+    private int defaultSessionTimeoutInMinutes;
 
     // Standard URI -> HttpHandler map - may be wrapped by access log, filters, etc. later
     private final ContextAwarePathHandler path = new ContextAwarePathHandler(Handlers.path());
@@ -580,6 +584,38 @@ public class ServerControllerImpl implements ServerController, ServerControllerE
                 rootHandler = new AccessLogHandler(rootHandler, logReceiver, accessLog.getPattern(),
                         AccessLogHandler.class.getClassLoader());
             }
+
+            // session configuration and persistence
+            this.defaultSessionTimeoutInMinutes = 30;
+            try {
+                if (cfg.getSubsystem().getServletContainer() != null) {
+                    String defaultSessionTimeout = cfg.getSubsystem().getServletContainer().getDefaultSessionTimeout();
+                    if (defaultSessionTimeout != null && !"".equals(defaultSessionTimeout)) {
+                        this.defaultSessionTimeoutInMinutes = Integer.parseInt(defaultSessionTimeout);
+                    }
+                }
+            } catch (NumberFormatException ignored) {
+            }
+
+            PersistentSessionsConfig persistentSessions = cfg.getSubsystem().getServletContainer() == null ? null
+                    : cfg.getSubsystem().getServletContainer().getPersistentSessions();
+            if (persistentSessions == null) {
+                // no sessions, but let's use InMemorySessionPersistence
+                LOG.info("Using in-memory session persistence");
+                sessionPersistenceManager = new InMemorySessionPersistence();
+            } else {
+                if (persistentSessions.getPath() != null && !"".equals(persistentSessions.getPath().trim())) {
+                    // file persistence manager
+                    File sessionsDir = new File(persistentSessions.getPath());
+                    sessionsDir.mkdirs();
+                    LOG.info("Using file session persistence. Location: " + sessionsDir.getCanonicalPath());
+                    sessionPersistenceManager = new FileSessionPersistence(sessionsDir);
+                } else {
+                    // in memory persistence manager
+                    LOG.info("No path configured for persistent-sessions. Using in-memory session persistence.");
+                    sessionPersistenceManager = new InMemorySessionPersistence();
+                }
+            }
         } catch (Exception e) {
             throw new IllegalArgumentException("Problem configuring Undertow server using \"" + undertowResource + "\": " + e.getMessage(), e);
         }
@@ -899,6 +935,8 @@ public class ServerControllerImpl implements ServerController, ServerControllerE
             }
             Context newCtx = new Context(this, path, contextModel);
             newCtx.setConfiguration(configuration);
+            newCtx.setDefaultSessionTimeoutInMinutes(defaultSessionTimeoutInMinutes);
+            newCtx.setSessionPersistenceManager(sessionPersistenceManager);
             contextMap.put(contextModel.getHttpContext(), newCtx);
             final Servlet servlet = createResourceServlet(contextModel, "/", "default");
             final ResourceModel model = new ResourceModel(contextModel, servlet, "/", "default");

@@ -23,10 +23,10 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlType;
 
 import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_UNDERTOW;
-import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_WILDFLY;
 
 @XmlType(name = "servletContainerType", namespace = NS_UNDERTOW, propOrder = {
 		"jspConfig",
+		"persistentSessions",
 		"websockets",
 		"welcomeFiles"
 })
@@ -35,8 +35,14 @@ public class ServletContainer {
 	@XmlAttribute
 	private String name;
 
+	@XmlAttribute(name = "default-session-timeout")
+	private String defaultSessionTimeout = "30";
+
 	@XmlElement(name = "jsp-config")
 	private JspConfig jspConfig;
+
+	@XmlElement(name = "persistent-sessions")
+	private PersistentSessionsConfig persistentSessions;
 
 	@XmlElement
 	private Websockets websockets;
@@ -53,12 +59,28 @@ public class ServletContainer {
 		this.name = name;
 	}
 
+	public String getDefaultSessionTimeout() {
+		return defaultSessionTimeout;
+	}
+
+	public void setDefaultSessionTimeout(String defaultSessionTimeout) {
+		this.defaultSessionTimeout = defaultSessionTimeout;
+	}
+
 	public JspConfig getJspConfig() {
 		return jspConfig;
 	}
 
 	public void setJspConfig(JspConfig jspConfig) {
 		this.jspConfig = jspConfig;
+	}
+
+	public PersistentSessionsConfig getPersistentSessions() {
+		return persistentSessions;
+	}
+
+	public void setPersistentSessions(PersistentSessionsConfig persistentSessions) {
+		this.persistentSessions = persistentSessions;
 	}
 
 	public Websockets getWebsockets() {
@@ -77,6 +99,7 @@ public class ServletContainer {
 	public String toString() {
 		final StringBuilder sb = new StringBuilder("{ ");
 		sb.append("name: ").append(name);
+		sb.append(", default session timeout: ").append(defaultSessionTimeout);
 		sb.append(", jsp config: ").append(jspConfig);
 		sb.append(", websockets: ").append(websockets);
 		sb.append(", welcome files: ").append(welcomeFiles);
@@ -89,6 +112,32 @@ public class ServletContainer {
 		@Override
 		public String toString() {
 			final StringBuilder sb = new StringBuilder("{ ");
+			sb.append("}");
+			return sb.toString();
+		}
+	}
+
+	@XmlType(name = "persistent-sessionsType", namespace = NS_UNDERTOW)
+	public static class PersistentSessionsConfig {
+		@XmlAttribute
+		private String path;
+
+		/**
+		 * The path to store the session data. If not specified the data will just be stored in memory only.
+		 * @return
+		 */
+		public String getPath() {
+			return path;
+		}
+
+		public void setPath(String path) {
+			this.path = path;
+		}
+
+		@Override
+		public String toString() {
+			final StringBuilder sb = new StringBuilder("{ ");
+			sb.append("path: ").append(path);
 			sb.append("}");
 			return sb.toString();
 		}

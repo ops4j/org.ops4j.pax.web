@@ -354,11 +354,6 @@
 				<artifactId>http2-hpack</artifactId>
 				<version>${dependency.jetty.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty.http2</groupId>
-				<artifactId>http2-common</artifactId>
-				<version>${dependency.jetty.version}</version>
-			</dependency>
 
 			<dependency>
 				<groupId>org.apache.geronimo.specs</groupId>

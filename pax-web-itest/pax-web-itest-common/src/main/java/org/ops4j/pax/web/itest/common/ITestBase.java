@@ -59,7 +59,7 @@ public abstract class ITestBase extends AbstractControlledTestBase {
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-servlet").version(asInProject()));
 	}
-	
+
 	public static Option[] configureJettyBundle() {
 		return combine(
 				baseConfigure(),
@@ -69,7 +69,7 @@ public abstract class ITestBase extends AbstractControlledTestBase {
 				.artifactId("pax-web-jetty-bundle").version(asInProject())
 			);
 	}
-	
+
 	public static Option[] configureSpdyJetty() {
 	    
 	    String alpnBoot = System.getProperty("alpn-boot");
@@ -171,7 +171,6 @@ public abstract class ITestBase extends AbstractControlledTestBase {
 		);
 	}
 
-	
 	public static Option[] configureUndertow() {
 		return combine(
 				baseConfigure(),
@@ -203,7 +202,7 @@ public abstract class ITestBase extends AbstractControlledTestBase {
 				mavenBundle().groupId("com.sun.jersey").artifactId("jersey-servlet").version("1.19"),
 				mavenBundle().groupId("javax.ws.rs").artifactId("jsr311-api").version("1.1.1"));
 	}
-	
+
 	@Override
 	protected BundleContext getBundleContext() {
 		return bundleContext;

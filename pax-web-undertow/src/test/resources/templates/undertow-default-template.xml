@@ -53,8 +53,9 @@
                 <filter-ref name="x-powered-by-header" />
             </host>
         </server>
-        <servlet-container name="default">
+        <servlet-container name="default" default-session-timeout="30">
             <jsp-config />
+            <persistent-sessions path="${karaf.data}/web-sessions" />
             <websockets />
             <welcome-files>
                 <welcome-file name="index.html" />
