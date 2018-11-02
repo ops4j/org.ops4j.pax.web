@@ -131,6 +131,11 @@
 								<descriptor>mvn:org.ops4j.pax.keycloak/pax-keycloak-features/${dependency.pax-keycloak.version}/xml/features</descriptor>
 								<descriptor>file:${project.build.directory}/classes/features.xml</descriptor>
 							</descriptors>
+							<blacklistedDescriptors>
+								<!-- we don't want to transitively use any pax-web-features - only the one specified above using file:// -->
+								<!-- mvn:${project.groupId}/${project.artifactId} is blacklisted implicitly -->
+								<descriptor>mvn:org.ops4j.pax.web/pax-web-features</descriptor>
+							</blacklistedDescriptors>
 							<distribution>org.apache.karaf.features:framework</distribution>
 							<javase>1.8</javase>
 							<framework>
