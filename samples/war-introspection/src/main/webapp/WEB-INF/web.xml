@@ -38,6 +38,15 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>introspection-session-servlet</servlet-name>
+		<servlet-class>org.ops4j.pax.web.introspection.SessionServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>introspection-session-servlet</servlet-name>
+		<url-pattern>/sessions/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>introspection-broken-servlet</servlet-name>
 		<servlet-class>org.ops4j.pax.web.introspection.BrokenServlet</servlet-class>
 	</servlet>
@@ -83,4 +92,5 @@
 		<param-name>my.param</param-name>
 		<param-value>my.value</param-value>
 	</context-param>
+
 </web-app>

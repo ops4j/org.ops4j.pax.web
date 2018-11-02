@@ -123,12 +123,12 @@ public class WarExtendedIntegrationTest extends ITestBase {
 
 		assertThat("There should be single ServletContext disposal",
 				events1.stream().filter(s -> s.equals("contextDestroyed: /war1")).count(), equalTo(1L));
-		assertThat("war1 should have 5 registration, 5 unregistration, and 1 parameter found events recorded",
-				events1.size(), equalTo(11));
+		assertThat("war1 should have 6 registration, 6 unregistration, and 1 parameter found events recorded",
+				events1.size(), equalTo(13));
 		assertTrue("There should be no ServletContext disposal",
 				events2.stream().noneMatch(s -> s.equals("contextDestroyed: /war2")));
-		assertThat("war2 should have only 5 registration and 1 parameter found events recorded",
-				events2.size(), equalTo(6));
+		assertThat("war2 should have only 6 registration and 1 parameter found events recorded",
+				events2.size(), equalTo(7));
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(HttpServletResponse.SC_NOT_FOUND)
