@@ -605,7 +605,7 @@ class JettyServerWrapper extends Server {
 				sessionHandler.setSessionIdPathParameterName(url);
 				LOG.debug("Session URL set to {} for context [{}]", url, context);
 			}
-			if (workerName != null) {
+			if (workerName != null && sessionHandler.getSessionIdManager() != null) {
 				((DefaultSessionIdManager) sessionHandler.getSessionIdManager()).setWorkerName(workerName);
 				LOG.debug("Worker name set to {} for context [{}]", workerName, context);
 			}
