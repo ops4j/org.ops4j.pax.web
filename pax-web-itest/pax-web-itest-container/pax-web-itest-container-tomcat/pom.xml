@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.core</artifactId>
-			<scope>test</scope>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
@@ -60,7 +60,7 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.scr</artifactId>
@@ -101,28 +101,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
-			<artifactId>war</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
-			<artifactId>fragment</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>test-jetty-webapp</artifactId>
-			<type>war</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.myfaces.commons</groupId>
-			<artifactId>myfaces-commons-facelets-examples20</artifactId>
-			<type>war</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-resources-extender</artifactId>
 			<scope>test</scope>
@@ -145,6 +123,28 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>jsf-resourcehandler-resourcebundle-override</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
+			<artifactId>war</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
+			<artifactId>fragment</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>test-jetty-webapp</artifactId>
+			<type>war</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.myfaces.commons</groupId>
+			<artifactId>myfaces-commons-facelets-examples20</artifactId>
+			<type>war</type>
 			<scope>test</scope>
 		</dependency>
 		<!-- pax-url -->
@@ -240,14 +240,9 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.geronimo.specs</groupId>
-			<artifactId>geronimo-atinject_1.0_spec</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>${servlet.spec.groupId}</groupId>
 			<artifactId>${servlet.spec.artifactId}</artifactId>
-			<version>${servlet.spec.version}</version>
+			<version>${servlet.spec4.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -347,7 +342,6 @@
 			<artifactId>primefaces</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		
 		<dependency>
 			<groupId>javax.enterprise</groupId>
 			<artifactId>cdi-api</artifactId>
@@ -362,6 +356,10 @@
 			<artifactId>javax.security.auth.message-api</artifactId>
 			<version>${dependency.jaspic.version}</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+		    <groupId>javax.el</groupId>
+		    <artifactId>javax.el-api</artifactId>
 		</dependency>
 
 		<dependency>
@@ -546,26 +544,23 @@
             <scope>test</scope>
         </dependency>
 
-		<!-- Test-Client -->
 		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-client</artifactId>
-			<scope>provided</scope>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore-osgi</artifactId>
+			<version>${dependency.httpcore.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-util</artifactId>
-			<scope>provided</scope>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient-osgi</artifactId>
+			<version>${dependency.httpclient.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-io</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-http</artifactId>
-			<scope>provided</scope>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpasyncclient-osgi</artifactId>
+			<version>${dependency.httpasyncclient.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
@@ -588,20 +583,6 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-			<plugin>
-                <groupId>org.ops4j.pax.exam</groupId>
-                <artifactId>exam-maven-plugin</artifactId>
-                <version>${version.pax-exam}</version>
-                <executions>
-                    <execution>
-                        <id>dependencies</id>
-                        <phase>generate-test-resources</phase>
-                        <goals>
-                            <goal>generate-link-files</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
@@ -653,6 +634,22 @@
 					</execution>
 				</executions>
 			</plugin>
+
+			<plugin>
+				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>exam-maven-plugin</artifactId>
+				<version>${version.pax-exam}</version>
+				<executions>
+					<execution>
+						<id>dependencies</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>generate-link-files</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
@@ -672,6 +669,8 @@
 						<coverage.command>${jcoverage.command}</coverage.command>
 						<ProjectVersion>${project.version}</ProjectVersion>
 						<MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
+						<!-- to configure pax-exam with pax.exam.system=default which gives us more control over installed bundles -->
+						<pax.exam.configuration>file:../../pax-web-itest-base/src/main/resources/controlled-exam.properties</pax.exam.configuration>
 					</systemPropertyVariables>
 					<argLine>${jcoverage.command}</argLine>
 					<forkMode>pertest</forkMode>

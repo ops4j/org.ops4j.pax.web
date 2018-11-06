@@ -152,11 +152,6 @@ public abstract class ITestBase extends AbstractControlledTestBase {
 				mavenBundle().groupId("org.apache.servicemix.specs").artifactId("org.apache.servicemix.specs.jaxb-api-2.2").version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.specs").artifactId("geronimo-jaxws_2.2_spec").version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.specs").artifactId("geronimo-jaxrpc_1.1_spec").version(asInProject()),
-				/*
-				mavenBundle().groupId("javax.websocket")
-						.artifactId("javax.websocket-api")
-						.versionAsInProject(),
-				*/
 				mavenBundle().groupId("org.apache.geronimo.specs").artifactId("geronimo-jta_1.1_spec").versionAsInProject(),
 				mavenBundle().groupId("org.apache.servicemix.specs").artifactId("org.apache.servicemix.specs.jsr303-api-1.0.0").version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.specs").artifactId("geronimo-activation_1.1_spec").version(asInProject()),
@@ -164,10 +159,7 @@ public abstract class ITestBase extends AbstractControlledTestBase {
 				mavenBundle().groupId("org.apache.geronimo.specs").artifactId("geronimo-ejb_3.1_spec").version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.specs").artifactId("geronimo-jpa_2.0_spec").version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.specs").artifactId("geronimo-javamail_1.4_spec").version(asInProject()),
-				// mavenBundle().groupId("org.apache.geronimo.specs").artifactId("geronimo-osgi-registry").version(asInProject()),
-				mavenBundle().groupId("javax.security.auth.message").artifactId("javax.security.auth.message-api").version(asInProject()),
-				systemProperty("org.ops4j.pax.url.war.importPaxLoggingPackages").value("true"),
-				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value("logs")
+				mavenBundle().groupId("javax.security.auth.message").artifactId("javax.security.auth.message-api").version(asInProject())
 		);
 	}
 
