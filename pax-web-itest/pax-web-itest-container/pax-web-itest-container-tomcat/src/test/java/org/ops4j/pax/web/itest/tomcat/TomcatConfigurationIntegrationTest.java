@@ -30,6 +30,7 @@ import org.osgi.framework.BundleException;
 
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.web.itest.common.ITestBase.configureTomcat;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -139,7 +140,7 @@ public class TomcatConfigurationIntegrationTest extends ITestBase {
 	}
 
 	private static File getLogDir() {
-	    File logDir = new File("target/logs");
+	    File logDir = new File("target/target/logs");
 	    if (logDir.exists() && !logDir.isDirectory()) {
 	        logDir.delete();
 	    }

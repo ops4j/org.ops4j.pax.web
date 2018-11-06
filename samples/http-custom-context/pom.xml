@@ -47,6 +47,11 @@
 						<Bundle-Activator>org.ops4j.pax.web.samples.custom.context.Activator</Bundle-Activator>
 						<Embed-Dependency>*; artifactId=!org.osgi.compendium; scope=compile; type=!pom; inline=true</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
+                        <Import-Package>
+                            javax.servlet;version="[3.1,5)",
+                            javax.servlet.http;version="[3.1,5)",
+                            *
+                        </Import-Package>
 					</instructions>
 				</configuration>
 				<executions>

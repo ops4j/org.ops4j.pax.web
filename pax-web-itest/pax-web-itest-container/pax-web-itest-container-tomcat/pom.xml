@@ -232,6 +232,14 @@
 			<artifactId>pax-web-itest-base</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.web.itest</groupId>
+            <artifactId>pax-web-itest-common</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
 		<dependency>
 			<groupId>org.ops4j.pax.web.itest</groupId>
 			<artifactId>pax-web-itest-common</artifactId>
@@ -282,6 +290,16 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-resources-extender</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-resources-jsf</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>jsf-resourcehandler-myfaces</artifactId>
 			<scope>test</scope>
@@ -294,6 +312,28 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>jsf-resourcehandler-resourcebundle-override</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
+			<artifactId>war</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
+			<artifactId>fragment</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>test-jetty-webapp</artifactId>
+			<type>war</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.myfaces.commons</groupId>
+			<artifactId>myfaces-commons-facelets-examples20</artifactId>
+			<type>war</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -452,6 +492,10 @@
 			<groupId>javax.security.auth.message</groupId>
 			<artifactId>javax.security.auth.message-api</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+		    <groupId>javax.el</groupId>
+		    <artifactId>javax.el-api</artifactId>
 		</dependency>
 
 		<dependency>

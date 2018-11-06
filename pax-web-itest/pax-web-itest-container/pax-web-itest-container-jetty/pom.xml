@@ -332,6 +332,16 @@
 		</dependency>
 
 		<dependency>
+			<groupId>biz.aQute.bnd</groupId>
+			<artifactId>bndlib</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.osgi</groupId>
+					<artifactId>org.osgi.core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
 			<groupId>org.ops4j.pax.url</groupId>
 			<artifactId>pax-url-war</artifactId>
 			<classifier>uber</classifier>

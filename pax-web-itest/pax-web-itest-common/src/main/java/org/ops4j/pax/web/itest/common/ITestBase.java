@@ -181,10 +181,7 @@ public abstract class ITestBase extends AbstractControlledTestBase {
 				mavenBundle().groupId("org.apache.geronimo.specs").artifactId("geronimo-ejb_3.1_spec").version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.specs").artifactId("geronimo-jpa_2.0_spec").version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.specs").artifactId("geronimo-javamail_1.4_spec").version(asInProject()),
-				// mavenBundle().groupId("org.apache.geronimo.specs").artifactId("geronimo-osgi-registry").version(asInProject()),
-				mavenBundle().groupId("javax.security.auth.message").artifactId("javax.security.auth.message-api").version(asInProject()),
-				systemProperty("org.ops4j.pax.url.war.importPaxLoggingPackages").value("true"),
-				systemProperty("org.ops4j.pax.web.log.ncsa.directory").value("logs")
+				mavenBundle().groupId("javax.security.auth.message").artifactId("javax.security.auth.message-api").version(asInProject())
 		);
 	}
 
