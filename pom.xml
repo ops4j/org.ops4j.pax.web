@@ -243,7 +243,7 @@
 		<dependency.joda-time.version>2.3</dependency.joda-time.version>
 		<dependency.jsf.myfaces.version>2.2.12</dependency.jsf.myfaces.version>
 		<dependency.jsf.myfaces-facelets-examples20.version>1.0.2.1</dependency.jsf.myfaces-facelets-examples20.version>
-		<dependency.jsf.primefaces.version>5.1</dependency.jsf.primefaces.version>
+		<dependency.jsf.primefaces.version>6.3-SNAPSHOT</dependency.jsf.primefaces.version>
 		<dependency.junit.version>4.11</dependency.junit.version>
 		<dependency.karaf.version>4.2.1</dependency.karaf.version>
 		<dependency.log4j2.version>2.11.1</dependency.log4j2.version>

@@ -64,6 +64,7 @@
 					<systemPropertyVariables>
 						<ProjectVersion>${project.version}</ProjectVersion>
 						<MyFacesVersion>${dependency.jsf.myfaces.version}</MyFacesVersion>
+						<PaxCdiVersion>${dependency.pax-cdi.version}</PaxCdiVersion>
 						<coverage.command>${jcoverage.command}</coverage.command>
 						<!-- to configure pax-exam with pax.exam.system=default which gives us more control over installed bundles -->
 						<pax.exam.configuration>file:../../pax-web-itest-base/src/main/resources/controlled-exam.properties</pax.exam.configuration>

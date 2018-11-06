@@ -32,10 +32,6 @@ import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 
 public abstract class AbstractWarJsfCdiIntegrationTest extends ITestBase {
 
-    // 1.0.0.RC2 misses pax-cdi-servlet
-    // 1.0.0.RC1 has requirement: (&(osgi.wiring.package=org.ops4j.pax.web.service)(version>=3.0.0)(!(version>=5.0.0)))
-    private static final String VERSION_PAX_CDI = "1.0.0";
-
     protected static Option[] configureJsfAndCdi() {
         return options(
                 systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("INFO"),
@@ -52,8 +48,8 @@ public abstract class AbstractWarJsfCdiIntegrationTest extends ITestBase {
 
                 // JSF
                 mavenBundle().groupId("org.ops4j.pax.web").artifactId("pax-web-jsp").version(asInProject()),
-                mavenBundle("org.apache.myfaces.core", "myfaces-api").version("2.2.12"),
-                mavenBundle("org.apache.myfaces.core", "myfaces-impl").version("2.2.12"),
+                mavenBundle("org.apache.myfaces.core", "myfaces-api").version("2.3.3-SNAPSHOT"),
+                mavenBundle("org.apache.myfaces.core", "myfaces-impl").version("2.3.3-SNAPSHOT"),
                 // Weld
                 mavenBundle("org.jboss.classfilewriter", "jboss-classfilewriter").version("1.1.2.Final"),
                 mavenBundle("org.jboss.weld", "weld-osgi-bundle").version("2.4.5.Final")
@@ -63,13 +59,21 @@ public abstract class AbstractWarJsfCdiIntegrationTest extends ITestBase {
     @Before
     public void setUp() throws Exception {
         // Pax-CDI started later, because order is important
-        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-api").version(VERSION_PAX_CDI).getURL());
-        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-spi").version(VERSION_PAX_CDI).getURL());
-        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-extender").version(VERSION_PAX_CDI).getURL());
-        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-extension").version(VERSION_PAX_CDI).getURL());
-        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-web").version(VERSION_PAX_CDI).getURL());
-        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId(cdiWebBundleArtifact()).version(VERSION_PAX_CDI).getURL());
-        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-weld").version(VERSION_PAX_CDI).getURL());
+        String paxCdiVersion = System.getProperty("PaxCdiVersion");
+        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-api")
+                .version(paxCdiVersion).getURL());
+        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-spi")
+                .version(paxCdiVersion).getURL());
+        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-extender")
+                .version(paxCdiVersion).getURL());
+        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-extension")
+                .version(paxCdiVersion).getURL());
+        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-web")
+                .version(paxCdiVersion).getURL());
+        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId(cdiWebBundleArtifact())
+                .version(paxCdiVersion).getURL());
+        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-weld")
+                .version(paxCdiVersion).getURL());
     }
 
     protected abstract String cdiWebBundleArtifact();
