@@ -106,12 +106,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>test-jetty-webapp</artifactId>
-			<type>war</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.myfaces.commons</groupId>
 			<artifactId>myfaces-commons-facelets-examples20</artifactId>
 			<type>war</type>
@@ -607,26 +601,23 @@
 			<artifactId>geronimo-stax-api_1.2_spec</artifactId>
 		</dependency>
 
-		<!-- Test-Client -->
 		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-client</artifactId>
-			<scope>provided</scope>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore-osgi</artifactId>
+			<version>${dependency.httpcore.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-util</artifactId>
-			<scope>provided</scope>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient-osgi</artifactId>
+			<version>${dependency.httpclient.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-io</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-http</artifactId>
-			<scope>provided</scope>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpasyncclient-osgi</artifactId>
+			<version>${dependency.httpasyncclient.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	<properties>
@@ -767,11 +758,6 @@
 		</plugins>
 	</build>
 	<repositories>
-		<repository>
-			<id>jetty-releases</id>
-			<name>Jetty Releases</name>
-			<url>https://oss.sonatype.org/content/repositories/jetty-releases</url>
-		</repository>
 		<repository>
 			<id>prime-repo</id>
 			<name>PrimeFaces Maven Repository</name>
