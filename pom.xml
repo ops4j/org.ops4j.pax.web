@@ -175,9 +175,9 @@
 		<dependency.httpasyncclient.version>4.1.4</dependency.httpasyncclient.version>
 		<dependency.httpclient.version>4.5.6</dependency.httpclient.version>
 		<dependency.httpcore.version>4.4.10</dependency.httpcore.version>
-		<dependency.felix.framework.version>5.6.12</dependency.felix.framework.version>
-		<dependency.configadmin.version>1.9.16</dependency.configadmin.version>
-		<dependency.fileinstall.version>3.5.4</dependency.fileinstall.version>
+		<dependency.felix.framework.version>5.6.10</dependency.felix.framework.version>
+		<dependency.configadmin.version>1.8.14</dependency.configadmin.version>
+		<dependency.fileinstall.version>3.5.0</dependency.fileinstall.version>
 		<dependency.gatling.version>2.0.1</dependency.gatling.version>
 		<dependency.log4j2.version>2.11.1</dependency.log4j2.version>
 		<dependency.logback.version>1.0.6</dependency.logback.version>
