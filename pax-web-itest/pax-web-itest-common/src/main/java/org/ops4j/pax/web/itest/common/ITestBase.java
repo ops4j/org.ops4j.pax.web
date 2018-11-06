@@ -43,6 +43,15 @@ public abstract class ITestBase extends AbstractControlledTestBase {
 		return combine(
 				baseConfigure(),
 				mavenBundle().groupId("org.ops4j.pax.web.itest").artifactId("pax-web-itest-common").versionAsInProject(),
+
+				// previously used for all containers - as jetty-client
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-http").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-util").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-io").version(asInProject()),
+
 				mavenBundle().groupId("org.ops4j.pax.web")
 						.artifactId("pax-web-jetty").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web")

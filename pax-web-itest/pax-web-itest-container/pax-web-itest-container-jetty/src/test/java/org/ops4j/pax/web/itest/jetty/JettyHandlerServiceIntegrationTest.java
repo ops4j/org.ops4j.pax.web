@@ -33,6 +33,8 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.ops4j.pax.web.itest.common.ITestBase.configureJetty;
+
 /**
  * @author Achim Nierbeck
  */

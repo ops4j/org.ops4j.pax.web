@@ -35,6 +35,7 @@ import java.util.Hashtable;
 
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.web.itest.common.ITestBase.configureJetty;
 
 /**
  * @author Toni Menzel (tonit)
