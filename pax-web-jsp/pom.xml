@@ -67,9 +67,9 @@
 						<Import-Package>
 							org.ops4j.pax.web.service.spi.util; version="${pax-web.osgi.version}",
 							${bundle.namespace}; version="${pax-web.osgi.version}",
-							javax.servlet; version="[2.3.0,4.0.0)",
-							javax.servlet.http; version="[2.3.0,4.0.0)",
-							javax.servlet.descriptor;version="[2.3.0,4.0.0)",
+							javax.servlet; version="[3.1,5)",
+							javax.servlet.http; version="[3.1,5)",
+							javax.servlet.descriptor;version="[3.1,5)",
 							javax.naming,
 							org.w3c.dom,
 							org.w3c.dom.ls; resolution:=optional,
