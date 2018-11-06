@@ -91,6 +91,11 @@
                             Embed-Transitive,
                             Ignore-Package
                         </_removeheaders>
+                        <Import-Package>
+                            javax.servlet;version="[3.1,5)",
+                            javax.servlet.http;version="[3.1,5)",
+                            *
+                        </Import-Package>
                     </instructions>
                 </configuration>
                 <executions>

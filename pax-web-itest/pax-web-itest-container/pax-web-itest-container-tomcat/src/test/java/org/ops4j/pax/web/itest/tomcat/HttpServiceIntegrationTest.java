@@ -56,7 +56,7 @@ public class HttpServiceIntegrationTest extends AbstractHttpServiceIntegrationTe
 
 		String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 		//access_log.2013-06-13.log
-		final File logFile = new File("target/logs/access_log." + date + ".log");
+		final File logFile = new File("target/target/logs/access_log." + date + ".log");
 
 		logger.info("Log-File: {}", logFile.getAbsoluteFile());
 
