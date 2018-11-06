@@ -39,7 +39,6 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
@@ -343,6 +342,8 @@ class JettyTestClient implements HttpTestClient {
 		if (httpState != null) {
 			httpClientBuilder.setDefaultCookieStore(httpState.getCookieStore());
 		}
+
+		httpClientBuilder.setRedirectStrategy(new LaxRedirectStrategy());
 
 		RequestConfig requestConfig = RequestConfig.custom()
 				.setSocketTimeout((int) TimeUnit.SECONDS.toMillis(timeoutInSeconds))

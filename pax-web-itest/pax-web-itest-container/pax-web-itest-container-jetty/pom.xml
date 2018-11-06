@@ -352,7 +352,6 @@
 			<artifactId>javax-websocket-client-impl</artifactId>
 		</dependency>
 
-
 		<dependency>
 			<groupId>org.eclipse.jetty.http2</groupId>
 			<artifactId>http2-http-client-transport</artifactId>
@@ -844,6 +843,7 @@
 					<systemPropertyVariables>
 						<ProjectVersion>${project.version}</ProjectVersion>
 						<MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
+						<PaxCdiVersion>${dependency.pax-cdi.version}</PaxCdiVersion>
 						<coverage.command>${jcoverage.command}</coverage.command>
 						<alpn-boot>${settings.localRepository}/org/mortbay/jetty/alpn/alpn-boot/${alpn-version}/alpn-boot-${alpn-version}.jar</alpn-boot>
 						<!-- to configure pax-exam with pax.exam.system=default which gives us more control over installed bundles -->

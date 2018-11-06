@@ -49,7 +49,6 @@ public class JettyHandlerServiceIntegrationTest extends ITestBase {
 	@Configuration
 	public static Option[] configure() {
 		return configureJetty();
-
 	}
 
 	@Before

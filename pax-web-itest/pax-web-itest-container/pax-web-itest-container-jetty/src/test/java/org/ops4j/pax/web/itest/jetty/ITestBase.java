@@ -57,7 +57,7 @@ public class ITestBase extends AbstractControlledTestBase {
 				.artifactId("pax-web-jetty-bundle").version(asInProject())
 			);
 	}
-	
+
 	public static Option[] configureSpdyJetty() {
 	    
 	    String alpnBoot = System.getProperty("alpn-boot");
