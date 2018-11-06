@@ -128,6 +128,7 @@
 		<dependency.osgi.version>6.0.0</dependency.osgi.version>
 		<dependency.paxurl.version>2.5.2</dependency.paxurl.version>
 		<dependency.pax-logging.version>1.10.0</dependency.pax-logging.version>
+		<dependency.primefaces.version>6.3-SNAPSHOT</dependency.primefaces.version>
 		<dependency.slf4j>1.7.12</dependency.slf4j>
 		<dependency.scr.version>2.0.12</dependency.scr.version>
 		<dependency.swissbox.version>1.8.2</dependency.swissbox.version>
@@ -140,12 +141,12 @@
 		<dependency.undertow-websockets.version>2.0.15.Final</dependency.undertow-websockets.version>
 		<dependency.jboss-logging>3.3.0.Final</dependency.jboss-logging>
 	    <dependency.jasypt>1.9.2</dependency.jasypt>
-		<dependency.pax-cdi.version>1.0.0</dependency.pax-cdi.version>
+		<dependency.pax-cdi.version>1.0.1-SNAPSHOT</dependency.pax-cdi.version>
 		<dependency.pax-keycloak.version>0.2.0</dependency.pax-keycloak.version>
 		<version.pax-exam>4.9.2</version.pax-exam>
 
 		<tipi.tomcat.version>9.0.12.1-SNAPSHOT</tipi.tomcat.version>
-		<jsf-myfaces.version>2.2.12</jsf-myfaces.version>
+		<jsf-myfaces.version>2.3.3-SNAPSHOT</jsf-myfaces.version>
 
 		<dependency.junit.version>4.11</dependency.junit.version>
 

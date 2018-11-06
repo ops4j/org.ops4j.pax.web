@@ -39,7 +39,6 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
@@ -47,6 +46,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.apache.http.nio.conn.ssl.SSLIOSessionStrategy;
@@ -245,6 +245,8 @@ class JettyTestClient implements HttpTestClient {
 				httpClientBuilder.setDefaultCookieStore(httpState.getCookieStore());
 			}
 
+			httpClientBuilder.setRedirectStrategy(new LaxRedirectStrategy());
+
 			RequestConfig requestConfig = RequestConfig.custom()
 					.setSocketTimeout((int) TimeUnit.SECONDS.toMillis(timeoutInSeconds))
 					.setConnectTimeout((int) TimeUnit.SECONDS.toMillis(timeoutInSeconds))
@@ -283,9 +285,11 @@ class JettyTestClient implements HttpTestClient {
 			try {
 				LOG.info("calling synchronous");
 				CloseableHttpResponse response = httpClient.execute(request);
-				resultWrapper.content = EntityUtils.toString(response.getEntity());
-				resultWrapper.contentType = ContentType.get(response.getEntity()) == null ? null
-						: ContentType.get(response.getEntity()).getMimeType();
+				if (response.getEntity() != null) {
+					resultWrapper.content = EntityUtils.toString(response.getEntity());
+					resultWrapper.contentType = ContentType.get(response.getEntity()) == null ? null
+							: ContentType.get(response.getEntity()).getMimeType();
+				}
 				resultWrapper.httpStatus = response.getStatusLine().getStatusCode();
 				resultWrapper.headers = new LinkedHashMap<>();
 				Arrays.stream(response.getAllHeaders())
@@ -338,6 +342,8 @@ class JettyTestClient implements HttpTestClient {
 		if (httpState != null) {
 			httpClientBuilder.setDefaultCookieStore(httpState.getCookieStore());
 		}
+
+		httpClientBuilder.setRedirectStrategy(new LaxRedirectStrategy());
 
 		RequestConfig requestConfig = RequestConfig.custom()
 				.setSocketTimeout((int) TimeUnit.SECONDS.toMillis(timeoutInSeconds))
