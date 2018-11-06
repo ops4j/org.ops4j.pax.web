@@ -30,6 +30,7 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.web.itest.common.ITestBase.configureJetty;
 
 import java.io.File;
 
@@ -49,26 +50,6 @@ public class ITestBase extends AbstractControlledTestBase {
 		return bundleContext;
 	}
 
-	public static Option[] configureJetty() {
-		return combine(
-				baseConfigure(),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-jetty").version(asInProject()),
-				mavenBundle().groupId("org.ops4j.pax.web")
-						.artifactId("pax-web-runtime").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-continuation")
-						.version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-server").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-security").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-xml").version(asInProject()),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-servlet").version(asInProject()));
-	}
-	
 	public static Option[] configureJettyBundle() {
 		return combine(
 				baseConfigure(),

@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.web.itest.common.ITestBase.configureJetty;
 
 /**
  * Tests Web-Connectors and Web-VirtualHosts MANIFEST headers. Based on

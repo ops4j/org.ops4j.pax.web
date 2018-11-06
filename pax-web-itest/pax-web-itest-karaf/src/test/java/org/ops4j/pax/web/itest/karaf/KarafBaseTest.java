@@ -134,8 +134,11 @@ public class KarafBaseTest extends AbstractControlledTestBase {
 						.artifactId(
 								"org.apache.servicemix.specs.jsr303-api-1.0.0")
 						.version(asInProject()),
-				// Jetty HttpClient for testing
-				mavenBundle().groupId("org.eclipse.jetty").artifactId("jetty-client").versionAsInProject()
+
+				// httpcomponents HttpClient for testing
+				mavenBundle().groupId("org.apache.httpcomponents").artifactId("httpcore-osgi").versionAsInProject(),
+				mavenBundle().groupId("org.apache.httpcomponents").artifactId("httpclient-osgi").versionAsInProject(),
+				mavenBundle().groupId("org.apache.httpcomponents").artifactId("httpasyncclient-osgi").versionAsInProject()
 		};
 	}
 

@@ -15,41 +15,48 @@
  */
 package org.ops4j.pax.web.itest.base.client;
 
-import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.api.ContentResponse;
-import org.eclipse.jetty.client.api.Request;
-import org.eclipse.jetty.client.api.Response;
-import org.eclipse.jetty.client.api.Result;
-import org.eclipse.jetty.client.util.BasicAuthentication;
-import org.eclipse.jetty.client.util.BufferingResponseListener;
-import org.eclipse.jetty.client.util.FormContentProvider;
-import org.eclipse.jetty.http.HttpField;
-import org.eclipse.jetty.util.Fields;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.FrameworkUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+import javax.net.ssl.SSLContext;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.RequestBuilder;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.entity.ContentType;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.LaxRedirectStrategy;
+import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
+import org.apache.http.nio.conn.ssl.SSLIOSessionStrategy;
+import org.apache.http.ssl.SSLContexts;
+import org.apache.http.util.EntityUtils;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.ops4j.pax.web.itest.base.assertion.Assert.assertTrue;
 
@@ -69,16 +76,14 @@ class JettyTestClient implements HttpTestClient {
 	private boolean doPOST;
 	private Map<String, String> requestParameters = new HashMap<>();
 	private int timeoutInSeconds = 100;
-	private Optional<CookieState> httpState = Optional.empty();
+	private CookieState httpState = null;
 
-        private String keystorePassword = "password";
+	private String keystorePassword = "password";
 
-        private String keyManagerPassword = "password";
-
+	private String keyManagerPassword = "password";
 
 	JettyTestClient() {
 	}
-
 
 	@Override
 	public HttpTestClient withExternalKeystore(String keystoreLocation) {
@@ -89,7 +94,7 @@ class JettyTestClient implements HttpTestClient {
 		if (keystoreLocation.startsWith("${")) {
 			int indexOfPlaceHolder = keystoreLocation.indexOf("}");
 			String placeHolder = keystoreLocation.substring(0, indexOfPlaceHolder);
-			placeHolder = placeHolder.substring(2, placeHolder.length());
+			placeHolder = placeHolder.substring(2);
 			String property = System.getProperty(placeHolder);
 			keystoreFilename = property + keystoreLocation.substring(indexOfPlaceHolder + 1);
 		} else {
@@ -151,7 +156,7 @@ class JettyTestClient implements HttpTestClient {
 
 	@Override
 	public HttpTestClient useCookieState(CookieState cookieState) {
-		this.httpState = Optional.of(cookieState);
+		this.httpState = cookieState;
 		return this;
 	}
 
@@ -216,89 +221,186 @@ class JettyTestClient implements HttpTestClient {
 
 	@Override
 	public String executeTest() throws Exception {
-		final HttpClient httpClient;
-		if (keystoreLocationURL != null) {
-			SslContextFactory sslContextFactory = new SslContextFactory.Client(true);
-			sslContextFactory.setKeyStorePath(keystoreLocationURL.toString());
-			sslContextFactory.setKeyStorePassword(keystorePassword);
-			sslContextFactory.setKeyManagerPassword(keyManagerPassword);
-			sslContextFactory.setKeyStoreType(KeyStore.getDefaultType());
-			httpClient = new HttpClient(sslContextFactory);
+		if (async) {
+			return executeAsyncTest();
 		} else {
-			httpClient = new HttpClient();
+			HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+			CloseableHttpClient httpClient = null;
+
+			if (keystoreLocationURL != null) {
+				// Trust own CA and all self-signed certs
+				SSLContext sslcontext = SSLContexts.custom()
+						.loadTrustMaterial(keystoreLocationURL, keystorePassword.toCharArray(), new TrustSelfSignedStrategy())
+						.loadKeyMaterial(keystoreLocationURL, keystorePassword.toCharArray(), keyManagerPassword.toCharArray())
+						.build();
+				// Allow TLSv1.2 protocol only
+				SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+						sslcontext,
+						new String[] { "TLSv1.2" },
+						null,
+						new NoopHostnameVerifier());
+				httpClientBuilder.setSSLSocketFactory(sslsf);
+			}
+
+			if (httpState != null) {
+				httpClientBuilder.setDefaultCookieStore(httpState.getCookieStore());
+			}
+
+			httpClientBuilder.setRedirectStrategy(new LaxRedirectStrategy());
+
+			RequestConfig requestConfig = RequestConfig.custom()
+					.setSocketTimeout((int) TimeUnit.SECONDS.toMillis(timeoutInSeconds))
+					.setConnectTimeout((int) TimeUnit.SECONDS.toMillis(timeoutInSeconds))
+					.setConnectionRequestTimeout((int) TimeUnit.SECONDS.toMillis(timeoutInSeconds))
+					.build();
+
+			HttpRequestBase request = null;
+			RequestBuilder requestBuilder = null;
+
+			if (doGET && !doPOST) {
+				requestBuilder = RequestBuilder.get(pathToTest);
+			} else if (doPOST && !doGET) {
+				requestBuilder = RequestBuilder.post(pathToTest);
+			} else {
+				throw new IllegalStateException("Test must be configured either with GET or POST!");
+			}
+
+			requestParameters.forEach(requestBuilder::addParameter);
+			httpHeaders.forEach(requestBuilder::addHeader);
+
+			request = (HttpRequestBase) requestBuilder.build();
+			request.setConfig(requestConfig);
+
+			if (authDefinition != null) {
+				CredentialsProvider credsProvider = new BasicCredentialsProvider();
+				credsProvider.setCredentials(
+						new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT, authDefinition.realm, AuthScope.ANY_SCHEME),
+						new UsernamePasswordCredentials(authDefinition.user, authDefinition.password));
+				httpClientBuilder.setDefaultCredentialsProvider(credsProvider);
+			}
+
+			LOG.info("starting httpClient");
+			httpClient = httpClientBuilder.build();
+
+			final ResultWrapper resultWrapper = new ResultWrapper();
+			try {
+				LOG.info("calling synchronous");
+				CloseableHttpResponse response = httpClient.execute(request);
+				if (response.getEntity() != null) {
+					resultWrapper.content = EntityUtils.toString(response.getEntity());
+					resultWrapper.contentType = ContentType.get(response.getEntity()) == null ? null
+							: ContentType.get(response.getEntity()).getMimeType();
+				}
+				resultWrapper.httpStatus = response.getStatusLine().getStatusCode();
+				resultWrapper.headers = new LinkedHashMap<>();
+				Arrays.stream(response.getAllHeaders())
+						.forEach(h -> resultWrapper.headers.put(h.getName(), h.getValue()));
+			} catch (Exception e) {
+				LOG.info("caught exception from client call: ", e);
+				throw (Exception) e.getCause();
+			} finally {
+				LOG.info("stopping client");
+				httpClient.close();
+			}
+
+			// only log text-content if available on INFO
+			if (LOG.isInfoEnabled() && resultWrapper.contentType != null && resultWrapper.contentType.startsWith("text") && !resultWrapper.content.trim().isEmpty()) {
+				LOG.info(
+						"---------------- Response with content received from '{}' ----------------\n" +
+								"---------------- START Response-Body ----------------\n" +
+								"{}\n" +
+								"---------------- END Response-Body ----------------"
+						, request.getURI(), resultWrapper.content);
+			}
+
+			doAssertion(resultWrapper);
+
+			return resultWrapper.content;
 		}
-		if (httpState.isPresent()) {
-			httpClient.setCookieStore(httpState.get().getCookieStore());
+	}
+
+	private String executeAsyncTest() throws Exception {
+		HttpAsyncClientBuilder httpClientBuilder = HttpAsyncClientBuilder.create();
+		CloseableHttpAsyncClient httpClient = null;
+
+		if (keystoreLocationURL != null) {
+
+			// Trust own CA and all self-signed certs
+			SSLContext sslcontext = SSLContexts.custom()
+					.loadTrustMaterial(keystoreLocationURL, keystorePassword.toCharArray(), new TrustSelfSignedStrategy())
+					.loadKeyMaterial(keystoreLocationURL, keystorePassword.toCharArray(), keyManagerPassword.toCharArray())
+					.build();
+			// Allow TLSv1 protocol only
+			SSLIOSessionStrategy sslSessionStrategy = new SSLIOSessionStrategy(
+					sslcontext,
+					new String[] { "TLSv1.2" },
+					null,
+					new NoopHostnameVerifier());
+
+			httpClientBuilder.setSSLStrategy(sslSessionStrategy);
 		}
 
-		Request request;
+		if (httpState != null) {
+			httpClientBuilder.setDefaultCookieStore(httpState.getCookieStore());
+		}
+
+		RequestConfig requestConfig = RequestConfig.custom()
+				.setSocketTimeout((int) TimeUnit.SECONDS.toMillis(timeoutInSeconds))
+				.setConnectTimeout((int) TimeUnit.SECONDS.toMillis(timeoutInSeconds))
+				.setConnectionRequestTimeout((int) TimeUnit.SECONDS.toMillis(timeoutInSeconds))
+				.build();
+
+		HttpRequestBase request = null;
+		RequestBuilder requestBuilder = null;
+
 		if (doGET && !doPOST) {
-			request = httpClient.newRequest(pathToTest);
-			requestParameters.entrySet().forEach(entry -> request.param(entry.getKey(), entry.getValue()));
+			requestBuilder = RequestBuilder.get(pathToTest);
 		} else if (doPOST && !doGET) {
-			final Fields fields = new Fields();
-			requestParameters.entrySet().forEach(entry -> fields.add(entry.getKey(), entry.getValue()));
-			request = httpClient.POST(pathToTest);
-			request.content(new FormContentProvider(fields));
-
+			requestBuilder = RequestBuilder.post(pathToTest);
 		} else {
 			throw new IllegalStateException("Test must be configured either with GET or POST!");
 		}
 
-		request.timeout(timeoutInSeconds, TimeUnit.SECONDS);
+		requestParameters.forEach(requestBuilder::addParameter);
+		httpHeaders.forEach(requestBuilder::addHeader);
 
-		for (Map.Entry<String, String> headerEntry : httpHeaders.entrySet()) {
-			request.header(headerEntry.getKey(), headerEntry.getValue());
-		}
+		request = (HttpRequestBase) requestBuilder.build();
+		request.setConfig(requestConfig);
 
 		if (authDefinition != null) {
-			httpClient.getAuthenticationStore().addAuthentication(
-					new BasicAuthentication(
-							request.getURI(),
-							authDefinition.realm,
-							authDefinition.user,
-							authDefinition.password));
+			CredentialsProvider credsProvider = new BasicCredentialsProvider();
+			credsProvider.setCredentials(
+					new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT, authDefinition.realm, AuthScope.ANY_SCHEME),
+					new UsernamePasswordCredentials("user", "passwd"));
+			httpClientBuilder.setDefaultCredentialsProvider(credsProvider);
 		}
+
 		LOG.info("starting httpClient");
+		httpClient = httpClientBuilder.build();
 		httpClient.start();
+
 		final ResultWrapper resultWrapper = new ResultWrapper();
 		try {
-
-			if (async) {
-				LOG.info("calling asynchronous ... ");
-				CompletableFuture<Result> future = new CompletableFuture<>();
-				request.send(new BufferingResponseListener() {
-					@Override
-					public void onComplete(Result result) {
-						resultWrapper.content = new String(getContent());
-						resultWrapper.contentType = getMediaType() != null ? getMediaType() : "";
-						future.complete(result);
-					}
-				});
-
-				Result result = future.get();
-				resultWrapper.httpStatus = result.getResponse().getStatus();
-				resultWrapper.headers = extractHeadersFromResponse(result.getResponse());
-
-			} else {
-				LOG.info("calling synchronous");
-				ContentResponse contentResponse = request.send();
-				resultWrapper.content = new String(contentResponse.getContent());
-				resultWrapper.contentType = contentResponse.getMediaType() != null ? contentResponse.getMediaType() : "";
-				resultWrapper.httpStatus = contentResponse.getStatus();
-				resultWrapper.headers = extractHeadersFromResponse(contentResponse);
-
-			}
-		} catch (ExecutionException e) {
+			LOG.info("calling asynchronous");
+			Future<HttpResponse> asyncResponse = httpClient.execute(request, null);
+			HttpResponse response = asyncResponse.get();
+			resultWrapper.content = EntityUtils.toString(response.getEntity());
+			resultWrapper.contentType = ContentType.get(response.getEntity()) == null ? null
+					: ContentType.get(response.getEntity()).getMimeType();
+			resultWrapper.httpStatus = response.getStatusLine().getStatusCode();
+			resultWrapper.headers = new LinkedHashMap<>();
+			Arrays.stream(response.getAllHeaders())
+					.forEach(h -> resultWrapper.headers.put(h.getName(), h.getValue()));
+		} catch (Exception e) {
 			LOG.info("caught exception from client call: ", e);
 			throw (Exception) e.getCause();
 		} finally {
 			LOG.info("stopping client");
-			httpClient.stop();
+			httpClient.close();
 		}
 
 		// only log text-content if available on INFO
-		if (LOG.isInfoEnabled() && resultWrapper.contentType.startsWith("text") && !resultWrapper.content.trim().isEmpty()) {
+		if (LOG.isInfoEnabled() && resultWrapper.contentType != null && resultWrapper.contentType.startsWith("text") && !resultWrapper.content.trim().isEmpty()) {
 			LOG.info(
 					"---------------- Response with content received from '{}' ----------------\n" +
 							"---------------- START Response-Body ----------------\n" +
@@ -310,19 +412,6 @@ class JettyTestClient implements HttpTestClient {
 		doAssertion(resultWrapper);
 
 		return resultWrapper.content;
-	}
-
-
-	private Map<String, String> extractHeadersFromResponse(final Response response) {
-		return StreamSupport.stream(
-				Spliterators.spliteratorUnknownSize(
-						response.getHeaders().iterator(), Spliterator.ORDERED), false)
-//				.filter(httpField -> !httpField.getName().equals("Set-Cookie"))
-				.collect(Collectors.toMap(HttpField::getName, HttpField::getValue,
-						(key1, key2) -> {
-							LOG.warn("Dupplicate key '{}' found! Using first occurece.", key1);
-							return key1;
-						}));
 	}
 
 	private void doAssertion(ResultWrapper result) {
@@ -340,7 +429,6 @@ class JettyTestClient implements HttpTestClient {
 								result.httpStatus));
 			}
 		}
-
 
 		for (AssertionDefinition<String> wrapper : responseContentAssertion) {
 			final boolean assertionResult = assertTrue(result.content != null ? result.content : "", wrapper.predicate);
@@ -360,9 +448,7 @@ class JettyTestClient implements HttpTestClient {
 			throw new AssertionError(
 					"Result is not conforming to expected definitions!\n" + String.join("\n\t", assertionErrors));
 		}
-
 	}
-
 
 	private static final class AssertionDefinition<T> {
 		private final String message;
@@ -403,4 +489,5 @@ class JettyTestClient implements HttpTestClient {
         this.keyManagerPassword = keyManagerPassword;
         return withBundleKeystore(bundleSymbolicName, keystoreLocation);
     }
+
 }

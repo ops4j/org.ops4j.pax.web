@@ -15,8 +15,8 @@
  */
 package org.ops4j.pax.web.itest.base.client;
 
-import java.net.CookieManager;
-import java.net.CookieStore;
+import org.apache.http.client.CookieStore;
+import org.apache.http.impl.client.BasicCookieStore;
 
 /**
  * Stores Cookie-Data for further Requests.
@@ -25,9 +25,10 @@ import java.net.CookieStore;
  */
 public class CookieState {
 
-	private CookieStore cookieStore = new CookieManager().getCookieStore();
+	private CookieStore cookieStore = new BasicCookieStore();
 
 	CookieStore getCookieStore() {
 		return cookieStore;
 	}
+
 }

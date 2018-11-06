@@ -69,16 +69,18 @@ public class WebContainerSpdyIntegrationTest extends ITestBase {
 	@Configuration
 	public static Option[] configure() {
 		return OptionUtils.combine(
-		        configureSpdyJetty(),
-		        mavenBundle().groupId("org.eclipse.jetty.http2")
-                        .artifactId("http2-http-client-transport").version(asInProject()),
-                mavenBundle().groupId("org.eclipse.jetty.http2")
-                        .artifactId("http2-client").version(asInProject()),
-                mavenBundle().groupId("org.eclipse.jetty")
-                        .artifactId("jetty-io").version(asInProject()),
-                mavenBundle().groupId("org.eclipse.jetty")
-                        .artifactId("jetty-alpn-client").version(asInProject()),
-		        systemProperty("org.osgi.service.http.secure.enabled").value(
+				configureSpdyJetty(),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-client").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty.http2")
+						.artifactId("http2-http-client-transport").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty.http2")
+						.artifactId("http2-client").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-io").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-alpn-client").version(asInProject()),
+				systemProperty("org.osgi.service.http.secure.enabled").value(
 						"true"),
 				systemProperty("org.ops4j.pax.web.ssl.keystore").value(
 						WebContainerSpdyIntegrationTest.class.getClassLoader().getResource("keystore").getFile()),

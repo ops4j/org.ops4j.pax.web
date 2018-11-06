@@ -705,6 +705,22 @@
 			<artifactId>guava</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore-osgi</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient-osgi</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpasyncclient-osgi</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- Testing -->
 
 		<dependency>
@@ -761,7 +777,7 @@
 
 	<!--
 		The following profiles can be used to switch between Felix (default)
-		and Equinox. They also address incompatibilities between Java 6 and Java 
+		and Equinox. They also address incompatibilities between Java 6 and Java
 		7 and a glitch in Eclipse/m2e. org.osgi.core:4.3.0 is compiled with inofficial 
 		JDK 6 options which cause compile time errors for generics on JDK 7. This 
 		was fixed in org.osgi.core:4.3.1. Equinox 3.7.0 and Felix 4.0.3 appear to 

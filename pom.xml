@@ -172,9 +172,12 @@
 		<dependency.commons-collection.version>4.4</dependency.commons-collection.version>
 		<dependency.commons-lang.version>3.9</dependency.commons-lang.version>
 		<dependency.commons-logging.version>1.1.1</dependency.commons-logging.version>
+		<dependency.httpasyncclient.version>4.1.4</dependency.httpasyncclient.version>
+		<dependency.httpclient.version>4.5.6</dependency.httpclient.version>
+		<dependency.httpcore.version>4.4.10</dependency.httpcore.version>
 		<dependency.felix.framework.version>5.6.12</dependency.felix.framework.version>
 		<dependency.configadmin.version>1.9.16</dependency.configadmin.version>
-		<dependency.fileinstall.version>3.6.4</dependency.fileinstall.version>
+		<dependency.fileinstall.version>3.5.4</dependency.fileinstall.version>
 		<dependency.gatling.version>2.0.1</dependency.gatling.version>
 		<dependency.log4j2.version>2.11.1</dependency.log4j2.version>
 		<dependency.logback.version>1.0.6</dependency.logback.version>
@@ -1902,6 +1905,27 @@
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
 				<version>15.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore-osgi</artifactId>
+				<version>${dependency.httpcore.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient-osgi</artifactId>
+				<version>${dependency.httpclient.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpasyncclient</artifactId>
+				<version>${dependency.httpasyncclient.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpasyncclient-osgi</artifactId>
+				<version>${dependency.httpasyncclient.version}</version>
 			</dependency>
 
 			<!-- Testing -->

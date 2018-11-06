@@ -150,6 +150,19 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- Other -->
+
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient-osgi</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpasyncclient</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
 		<!-- Testing -->
 
 		<dependency>
