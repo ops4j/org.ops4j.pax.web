@@ -81,8 +81,8 @@
 						<_wab>src/main/webapp</_wab>
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
 						<Import-Package>
-							javax.servlet;version="[3.0,3.2.0)",
-							javax.servlet.http;version="[3.0,3.2.0)",
+							javax.servlet;version="[3.1,5)",
+							javax.servlet.http;version="[3.1,5)",
 							javax.servlet.jsp,
 							javax.servlet.jsp.jstl.core,
 							javax.servlet.jsp.jstl.fmt,

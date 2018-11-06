@@ -104,8 +104,8 @@
 								<Embed-Dependency>*;scope=compile</Embed-Dependency>
 
 								<Import-Package>
-									javax.servlet,
-									javax.servlet.http
+									javax.servlet;version="[3.1,5)",
+									javax.servlet.http;version="[3.1,5)"
 								</Import-Package>
 								<Export-Package />
 								<Private-Package />

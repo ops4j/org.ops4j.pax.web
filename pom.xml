@@ -132,9 +132,9 @@
 		<dependency.xbean.version>4.6</dependency.xbean.version>
 		<dependency.xnio-api.version>3.3.8.Final</dependency.xnio-api.version>
 		<dependency.xnio.version>3.3.8.Final</dependency.xnio.version>
-		<dependency.undertow-core.version>1.4.23.Final</dependency.undertow-core.version>
-		<dependency.undertow-servlet.version>1.4.23.Final</dependency.undertow-servlet.version>
-		<dependency.undertow-websockets.version>1.4.23.Final</dependency.undertow-websockets.version>
+		<dependency.undertow-core.version>2.0.15.Final</dependency.undertow-core.version>
+		<dependency.undertow-servlet.version>2.0.15.Final</dependency.undertow-servlet.version>
+		<dependency.undertow-websockets.version>2.0.15.Final</dependency.undertow-websockets.version>
 		<dependency.jboss-logging>3.3.0.Final</dependency.jboss-logging>
 	    <dependency.jasypt>1.9.2</dependency.jasypt>
 		<dependency.pax-cdi.version>1.0.0</dependency.pax-cdi.version>
@@ -161,6 +161,7 @@
 		<servlet.spec.groupId>javax.servlet</servlet.spec.groupId>
 		<servlet.spec.artifactId>javax.servlet-api</servlet.spec.artifactId>
 		<servlet.spec.version>3.1.0</servlet.spec.version>
+		<servlet.spec4.version>4.0.1</servlet.spec4.version>
 		<servlet-jsp.spec.version>2.3.1</servlet-jsp.spec.version>
 		<servlet-jstl.spec.version>1.2.1</servlet-jstl.spec.version>
 		<dependency.el-api.version>3.0.0</dependency.el-api.version>

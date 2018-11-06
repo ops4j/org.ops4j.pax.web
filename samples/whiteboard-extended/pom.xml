@@ -46,7 +46,7 @@
 						<Bundle-Activator>${bundle.namespace}.internal.Activator</Bundle-Activator>
 						<Export-Package>${bundle.namespace}.internal.*</Export-Package>
 						<Import-Package>
-							javax.servlet.*; version="2.5",
+							javax.servlet.*; version="[3.1,5)",
 							*
 						</Import-Package>
 					</instructions>
