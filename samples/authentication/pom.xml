@@ -45,6 +45,10 @@
 				<configuration>
 					<instructions>
 						<Bundle-Activator>org.ops4j.pax.web.samples.authentication.internal.Activator</Bundle-Activator>
+						<Import-Package>
+							javax.servlet.*;version="[3.1,5)",
+							*
+						</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>

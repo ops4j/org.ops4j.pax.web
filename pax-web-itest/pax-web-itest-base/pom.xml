@@ -57,9 +57,9 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-							javax.servlet;version="[2.5,4)",
-							javax.servlet.annotation;version="[2.5,4)",
-							javax.servlet.http;version="[2.5,4)",
+							javax.servlet;version="[3.1,5)",
+							javax.servlet.annotation;version="[3.1,5)",
+							javax.servlet.http;version="[3.1,5)",
 							*
 						</Import-Package>
 					</instructions>

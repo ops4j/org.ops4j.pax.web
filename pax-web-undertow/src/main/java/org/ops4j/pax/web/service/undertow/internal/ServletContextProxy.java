@@ -467,4 +467,61 @@ class ServletContextProxy implements ServletContext {
         }
         return servletContextRef.get().getVirtualServerName();
     }
+
+    @Override
+    public ServletRegistration.Dynamic addJspFile(String servletName, String jspFile) {
+        if (servletContextRef.get() == null) {
+            initServletContext();
+        }
+        return servletContextRef.get().addJspFile(servletName, jspFile);
+    }
+
+    @Override
+    public int getSessionTimeout() {
+        if (servletContextRef.get() == null) {
+            initServletContext();
+        }
+        return servletContextRef.get().getSessionTimeout();
+    }
+
+    @Override
+    public void setSessionTimeout(int sessionTimeout) {
+        if (servletContextRef.get() == null) {
+            initServletContext();
+        }
+        servletContextRef.get().setSessionTimeout(sessionTimeout);
+    }
+
+    @Override
+    public String getRequestCharacterEncoding() {
+        if (servletContextRef.get() == null) {
+            initServletContext();
+        }
+        return servletContextRef.get().getRequestCharacterEncoding();
+    }
+
+    @Override
+    public void setRequestCharacterEncoding(String encoding) {
+        if (servletContextRef.get() == null) {
+            initServletContext();
+        }
+        servletContextRef.get().setRequestCharacterEncoding(encoding);
+    }
+
+    @Override
+    public String getResponseCharacterEncoding() {
+        if (servletContextRef.get() == null) {
+            initServletContext();
+        }
+        return servletContextRef.get().getResponseCharacterEncoding();
+    }
+
+    @Override
+    public void setResponseCharacterEncoding(String encoding) {
+        if (servletContextRef.get() == null) {
+            initServletContext();
+        }
+        servletContextRef.get().setResponseCharacterEncoding(encoding);
+    }
+
 }

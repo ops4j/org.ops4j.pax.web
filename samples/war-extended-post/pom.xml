@@ -56,6 +56,7 @@
 							org.ops4j.pax.web.jettyconftest.*
 						</Export-Package>
 						<Import-Package>
+							javax.servlet.*;version="[3.1,5)",
 							*
 						</Import-Package>
 						<Embed-Dependency>*;scope=compile|runtime;</Embed-Dependency>

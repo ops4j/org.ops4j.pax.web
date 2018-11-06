@@ -46,6 +46,10 @@
 					<instructions>
 						<Bundle-Activator>org.ops4j.pax.web.samples.jersey.TestActivator</Bundle-Activator>
 						<Embed-Dependency>*; artifactId=!org.osgi.compendium; scope=compile; type=!pom; inline=true</Embed-Dependency>
+                        <Import-Package>
+                            javax.servlet.*;version="[3.1,5)",
+                            *
+                        </Import-Package>
 						<Embed-Transitive>true</Embed-Transitive>
 					</instructions>
 				</configuration>

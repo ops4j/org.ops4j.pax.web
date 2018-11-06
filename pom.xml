@@ -223,7 +223,7 @@
 		<dependency.javax.jaspic.version>1.1</dependency.javax.jaspic.version>
 		<dependency.javax.json-api.version>1.0</dependency.javax.json-api.version>
 		<dependency.javax.mail.version>1.4.7</dependency.javax.mail.version>
-		<dependency.javax.servlet-api.version>3.1.0</dependency.javax.servlet-api.version>
+		<dependency.javax.servlet-api.version>4.0.1</dependency.javax.servlet-api.version>
 		<dependency.javax.servlet.jsp-api.version>2.3.3</dependency.javax.servlet.jsp-api.version>
 		<dependency.javax.servlet.jsp.jstl-api.version>1.2.2</dependency.javax.servlet.jsp.jstl-api.version>
 		<dependency.javax.websocket-api.version>1.1</dependency.javax.websocket-api.version>
@@ -235,7 +235,7 @@
 
 		<dependency.jboss.logging.version>3.3.0.Final</dependency.jboss.logging.version>
 		<dependency.jboss.spec.jstl>1.1.4.Final</dependency.jboss.spec.jstl>
-		<dependency.jboss.undertow.version>1.4.23.Final</dependency.jboss.undertow.version>
+		<dependency.jboss.undertow.version>2.0.15.Final</dependency.jboss.undertow.version>
 		<dependency.jboss.weld.version>2.4.5.Final</dependency.jboss.weld.version>
 		<dependency.jboss.xnio.version>3.3.8.Final</dependency.jboss.xnio.version>
 

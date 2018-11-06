@@ -49,7 +49,7 @@
 						<Import-Package>
 							org.osgi.framework;version="[1.0.0,2.0.0)",
 							org.osgi.service.http;version="[1.0.0,2.0.0)",
-							javax.servlet.*;version="[2.6,3.2)",
+							javax.servlet.*;version="[3.1,5)",
 							*
 						</Import-Package>
 						<Export-Package>!*</Export-Package>

@@ -46,7 +46,7 @@
 						<Bundle-Activator>org.ops4j.pax.web.extender.samples.whiteboard.internal.Activator</Bundle-Activator>
 						<Export-Package>org.ops4j.pax.web.extender.samples.whiteboard.internal.*</Export-Package>
 						<Import-Package>
-							javax.servlet.*; version="2.5",
+							javax.servlet.*; version="[3.1,5)",
 							*
 						</Import-Package>
 					</instructions>

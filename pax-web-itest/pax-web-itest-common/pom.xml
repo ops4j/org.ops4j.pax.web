@@ -47,9 +47,9 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-							javax.servlet;version="[2.5,4)",
-							javax.servlet.annotation;version="[2.5,4)",
-							javax.servlet.http;version="[2.5,4)",
+							javax.servlet;version="[3.1,5)",
+							javax.servlet.annotation;version="[3.1,5)",
+							javax.servlet.http;version="[3.1,5)",
 							javax.inject,
 							org.ops4j.pax.web.extender.whiteboard.runtime,
 							org.ops4j.pax.web.itest.base,

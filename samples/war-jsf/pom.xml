@@ -62,8 +62,8 @@
 						<Import-Package>
 							javax.el,
 							javax.faces.webapp,
-							javax.servlet;version="[2.6.0,4.0.0)",
-							javax.servlet.http;version="[2.6.0,4.0.0)",
+							javax.servlet;version="[3.1,5)",
+							javax.servlet.http;version="[3.1,5)",
 							javax.servlet.jsp;version="2.2.0",
 							javax.servlet.jsp.jstl.core;version="1.2",
 							javax.servlet.jsp.jstl.fmt;version="1.2",

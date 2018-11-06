@@ -51,8 +51,8 @@
 					<instructions>
 						<_wab>src/main/webapp</_wab>
 						<Import-Package>
-							javax.servlet;version="[3.0,4.0.0)",
-							javax.servlet.http;version="[3.0,4.0.0)",
+							javax.servlet;version="[3.1,5)",
+							javax.servlet.http;version="[3.1,5)",
 							javax.servlet.jsp,
 							javax.servlet.jsp.jstl.core,
 							javax.servlet.jsp.jstl.fmt,

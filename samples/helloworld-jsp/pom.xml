@@ -56,8 +56,8 @@
 							org.apache.jasper.compiler,
 							org.apache.taglibs.standard.tag.rt.core,
 							javax.el,
-							javax.servlet,
-							javax.servlet.http,
+							javax.servlet;version="[3.1,5)",
+							javax.servlet.http;version="[3.1,5)",
 							javax.servlet.jsp,
 							javax.servlet.jsp.tagext,
 							org.apache.tomcat; resolution:=optional

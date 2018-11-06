@@ -62,8 +62,8 @@
 						<_wab>src/main/webapp/</_wab>
 						<Web-ContextPath>websocket</Web-ContextPath>
 						<Import-Package>
-							javax.servlet,
-							*
+							*, 
+							javax.servlet;version="[3.1,5)"
 						</Import-Package>
 						<Bundle-Classpath>
 							WEB-INF/classes

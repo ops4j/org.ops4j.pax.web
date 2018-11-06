@@ -46,8 +46,8 @@
 					<instructions>
 						<Bundle-Activator>org.ops4j.pax.web.samples.helloworld.hs.internal.Activator</Bundle-Activator>
 						<Import-Package>
-							javax.servlet;version="[2.5,4)",
-							javax.servlet.http;version="[2.5,4)",
+							javax.servlet;version="[3.1,5)",
+							javax.servlet.http;version="[3.1,5)",
 							org.osgi.framework;version="[1.0.0,2.0.0)",
 							org.osgi.service.http;version="[1.0.0,2.0.0)",
 							org.osgi.util.tracker;version="[1.5,2)"

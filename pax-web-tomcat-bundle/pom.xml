@@ -53,7 +53,7 @@
 						<Bundle-Activator>org.ops4j.pax.web.service.tomcat.internal.CompositeActivator</Bundle-Activator>
 						<Import-Package>
 							javax.net.ssl; resolution:=optional,
-							javax.servlet.*; version="[2.3.0,3.1.0)",
+							javax.servlet.*; version="[3.1,5)",
 							javax.transaction;
 							resolution:=optional,
 							javax.security.auth,
@@ -81,11 +81,11 @@
 							javax.servlet.descriptor;version="2.6.0",
 							javax.servlet.http;version="2.6.0",
 							javax.servlet.resources;version="2.6.0",
-							javax.servlet;version="3.0.0",
-							javax.servlet.annotation;version="3.0.0",
-							javax.servlet.descriptor;version="3.0.0",
-							javax.servlet.http;version="3.0.0",
-							javax.servlet.resources;version="3.0.0",
+							javax.servlet;version="3.1.0",
+							javax.servlet.annotation;version="3.1.0",
+							javax.servlet.descriptor;version="3.1.0",
+							javax.servlet.http;version="3.1.0",
+							javax.servlet.resources;version="3.1.0",
 							org.ops4j.pax.web.utils;
 							version="${pax-web.osgi.version}"; -split-package:=merge-first,
 							org.ops4j.pax.web.service;

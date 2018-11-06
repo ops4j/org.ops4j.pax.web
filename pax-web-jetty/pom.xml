@@ -72,7 +72,7 @@
 							javax.security.auth.callback,
 							javax.security.auth.login,
 							javax.servlet.jsp-api; version="[2.2,3)"; resolution:=optional,
-							javax.servlet.*; version="[2.3.0,4.0.0)",
+							javax.servlet.*; version="[3.1,5)",
 							javax.net.ssl; resolution:=optional,
 							javax.security.cert; resolution:=optional,
 							javax.xml.parsers,

@@ -70,10 +70,10 @@
 							org.ops4j.pax.web.service.spi.util; version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.utils; version="${pax-web.osgi.version}",
 							<!-- mvn:javax.servlet/javax.servlet-api/3.1.0 (only imported) -->
-							javax.servlet; version="[2.3,4.0)",
-							javax.servlet.annotation; version="[2.3,4.0)",
-							javax.servlet.descriptor; version="[2.3,4.0)",
-							javax.servlet.http; version="[2.3,4.0)",
+							javax.servlet; version="[3.1,5)",
+							javax.servlet.annotation; version="[3.1,5)",
+							javax.servlet.descriptor; version="[3.1,5)",
+							javax.servlet.http; version="[3.1,5)",
 							<!-- mvn:javax.servlet.jsp/javax.servlet.jsp-api/2.3.3 (also exported) -->
 							javax.servlet.jsp; version="[2.3,3.0)",
 							javax.servlet.jsp.el; version="[2.3,3.0)",
