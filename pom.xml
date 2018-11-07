@@ -2036,8 +2036,8 @@
 			</snapshots>
 		</repository>
 		<repository>
-			<id>sonatype-nexus-snapshots</id>
-			<name>Sonatype Nexus Snapshots</name>
+			<id>sonatype-ops4j-snapshots</id>
+			<name>Sonatype OPS4J Snapshots</name>
 			<url>https://oss.sonatype.org/content/repositories/ops4j-snapshots</url>
 			<releases>
 				<enabled>false</enabled>
@@ -2066,9 +2066,9 @@
 			</snapshots>
 		</pluginRepository>
 		<pluginRepository>
-			<id>sonatype-nexus-snapshots</id>
-			<name>Sonatype Nexus Snapshots</name>
-			<url>https://oss.sonatype.org/content/repositories/ops4j-snapshots</url>
+			<id>sonatype-snapshots</id>
+			<name>Sonatype Snapshots</name>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 			<releases>
 				<enabled>false</enabled>
 			</releases>
