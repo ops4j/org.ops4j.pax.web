@@ -52,24 +52,25 @@ public class SpringOsgiKarafTest extends KarafBaseTest {
 
 				// Karaf 4 no longer provides spring-dm feature
 
-				mavenBundle().groupId("org.springframework")
-						.artifactId("org.springframework.beans").versionAsInProject().start(true),
-				mavenBundle().groupId("org.springframework")
-						.artifactId("org.springframework.core").versionAsInProject().start(true),
-				mavenBundle().groupId("org.springframework")
-						.artifactId("org.springframework.context").versionAsInProject().start(true),
-				mavenBundle().groupId("org.springframework")
-						.artifactId("org.springframework.context.support").versionAsInProject().start(true),
-				mavenBundle().groupId("org.aopalliance")
-						.artifactId("com.springsource.org.aopalliance").versionAsInProject().start(true),
-				mavenBundle().groupId("org.springframework")
-						.artifactId("org.springframework.aop").versionAsInProject().start(true),
-				mavenBundle().groupId("org.springframework")
-						.artifactId("org.springframework.expression").versionAsInProject().start(true),
-				mavenBundle().groupId("org.springframework")
-						.artifactId("org.springframework.web").versionAsInProject().start(true),
-				mavenBundle().groupId("org.springframework")
-						.artifactId("org.springframework.web.servlet").versionAsInProject().start(true),
+				mavenBundle().groupId("org.apache.servicemix.bundles")
+						.artifactId("org.apache.servicemix.bundles.aopalliance").versionAsInProject().start(true),
+				mavenBundle().groupId("org.apache.servicemix.bundles")
+						.artifactId("org.apache.servicemix.bundles.spring-beans").versionAsInProject().start(true),
+				mavenBundle().groupId("org.apache.servicemix.bundles")
+						.artifactId("org.apache.servicemix.bundles.spring-core").versionAsInProject().start(true),
+				mavenBundle().groupId("org.apache.servicemix.bundles")
+						.artifactId("org.apache.servicemix.bundles.spring-context").versionAsInProject().start(true),
+				mavenBundle().groupId("org.apache.servicemix.bundles")
+						.artifactId("org.apache.servicemix.bundles.spring-context-support").versionAsInProject().start(true),
+				mavenBundle().groupId("org.apache.servicemix.bundles")
+						.artifactId("org.apache.servicemix.bundles.spring-aop").versionAsInProject().start(true),
+				mavenBundle().groupId("org.apache.servicemix.bundles")
+						.artifactId("org.apache.servicemix.bundles.spring-expression").versionAsInProject().start(true),
+				mavenBundle().groupId("org.apache.servicemix.bundles")
+						.artifactId("org.apache.servicemix.bundles.spring-web").versionAsInProject().start(true),
+				mavenBundle().groupId("org.apache.servicemix.bundles")
+						.artifactId("org.apache.servicemix.bundles.spring-webmvc").versionAsInProject().start(true),
+
 				mavenBundle().groupId("org.springframework.osgi")
 						.artifactId("spring-osgi-web").versionAsInProject().start(true),
 				mavenBundle().groupId("org.springframework.osgi")

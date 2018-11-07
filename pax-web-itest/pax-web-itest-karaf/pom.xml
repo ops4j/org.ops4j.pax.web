@@ -300,14 +300,50 @@
 			<artifactId>spring-expression</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context-support</artifactId>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
+			<version>${smx.aopalliance.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-beans</artifactId>
+			<version>${smx.spring.version}</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-core</artifactId>
+			<version>${smx.spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-aop</artifactId>
+			<version>${smx.spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-context</artifactId>
+			<version>${smx.spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-context-support</artifactId>
+			<version>${smx.spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-expression</artifactId>
+			<version>${smx.spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-web</artifactId>
+			<version>${smx.spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-webmvc</artifactId>
+			<version>${smx.spring.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.osgi</groupId>
 			<artifactId>spring-osgi-web</artifactId>
