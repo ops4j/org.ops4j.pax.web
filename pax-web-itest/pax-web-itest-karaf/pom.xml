@@ -373,6 +373,25 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore-osgi</artifactId>
+			<version>${dependency.httpcore.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient-osgi</artifactId>
+			<version>${dependency.httpclient.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpasyncclient-osgi</artifactId>
+			<version>${dependency.httpasyncclient.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- Karaf itself as dependency -->
+		<dependency>
 			<groupId>commons-collections</groupId>
 			<artifactId>commons-collections</artifactId>
 			<scope>test</scope>

@@ -56,7 +56,6 @@
 							javax.servlet.annotation;version="[3.1,5)",
 							javax.servlet.descriptor;version="[3.1,5)",
 							javax.servlet.http;version="[3.1,5)",
-							javax.servlet;version="[3.1,5)",
 							org.springframework.osgi.web.context.support,
 							org.springframework.web.servlet.view,
 							org.springframework.web.servlet,
