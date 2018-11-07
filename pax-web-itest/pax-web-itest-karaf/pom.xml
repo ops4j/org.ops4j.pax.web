@@ -31,7 +31,8 @@
 		<karaf.version>${dependency.karaf.version}</karaf.version>
 		<karaf-manual.version>4.0.1</karaf-manual.version>
 		<spring-dm.version>1.2.1</spring-dm.version>
-		<spring.version>3.2.3.RELEASE</spring.version>
+		<smx.aopalliance.version>1.0_6</smx.aopalliance.version>
+		<smx.spring.version>3.2.18.RELEASE_1</smx.spring.version>
 		<sonar.jacoco.itReportPath>${project.basedir}/../../target/jacoco-it.exec</sonar.jacoco.itReportPath>
 	</properties>
 
@@ -289,17 +290,50 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>org.springframework.web</artifactId>
-			<version>${spring.version}</version>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
+			<version>${smx.aopalliance.version}</version>
 		</dependency>
-
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>org.springframework.web.servlet</artifactId>
-			<version>${spring.version}</version>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-beans</artifactId>
+			<version>${smx.spring.version}</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-core</artifactId>
+			<version>${smx.spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-aop</artifactId>
+			<version>${smx.spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-context</artifactId>
+			<version>${smx.spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-context-support</artifactId>
+			<version>${smx.spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-expression</artifactId>
+			<version>${smx.spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-web</artifactId>
+			<version>${smx.spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-webmvc</artifactId>
+			<version>${smx.spring.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.osgi</groupId>
 			<artifactId>spring-osgi-web</artifactId>
@@ -388,16 +422,6 @@
 					<artifactId>org.apache.karaf.client</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>org.springframework.expression</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>org.springframework.context.support</artifactId>
-			<version>${spring.version}</version>
 		</dependency>
 	</dependencies>
 
