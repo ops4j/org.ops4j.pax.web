@@ -35,6 +35,8 @@ import org.slf4j.LoggerFactory;
 import static org.ops4j.pax.exam.CoreOptions.*;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.web.itest.base.TestConfiguration.*;
+import static org.ops4j.pax.web.itest.common.ITestBase.configureJetty;
 
 /**
  * @author Marc Schlegel
