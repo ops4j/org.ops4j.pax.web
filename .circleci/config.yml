@@ -157,7 +157,7 @@ jobs:
         - v1-dep-
     - deploy:
         command: |
-          if [ "${CIRCLE_BRANCH}" == "pax-web-7.2.x" ]; then
+          if [ "${CIRCLE_BRANCH}" == "pax-web-7.3.x" ]; then
             mvn -s .circleci/settings.xml -Dmaven.install.skip=true -DskipTests deploy 
           fi
 workflows:
