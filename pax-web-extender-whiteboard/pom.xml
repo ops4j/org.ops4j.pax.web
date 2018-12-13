@@ -84,6 +84,11 @@
 						<Private-Package>${bundle.namespace}.internal.*</Private-Package>
 						<Embed-Dependency>*; scope=compile; type=!pom; inline=true</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
+            <Provide-Capability>
+              osgi.contract;osgi.contract=JavaEL;version:Version="3";uses:="javax.el",
+              osgi.contract;osgi.contract=JavaJSP;version:Version="2.3";uses!="javax.servlet.jsp,javax.servlet.jsp.el,javax.servlet.jsp.tagext",
+              osgi.contract;osgi.contract=JavaJSTL;version:Version="1.2";uses:="javax.servlet.jsp.jstl.core,javax.servlet.jsp.jstl.fmt,javax.servlet.jsp.jstl.sql,javax.servlet.jsp.jstl.tlv"
+            </Provide-Capability>
 						<_removeheaders>
 							Include-Resource,
 							Private-Package,
