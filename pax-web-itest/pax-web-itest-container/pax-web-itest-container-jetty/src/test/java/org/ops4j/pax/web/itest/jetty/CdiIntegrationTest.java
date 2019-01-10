@@ -21,7 +21,6 @@
 package org.ops4j.pax.web.itest.jetty;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -34,30 +33,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.ops4j.pax.exam.CoreOptions.*;
+import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.OptionUtils.combine;
-import static org.ops4j.pax.web.itest.base.TestConfiguration.*;
 
 /**
  * @author Marc Schlegel
  */
 @RunWith(PaxExam.class)
-@Ignore
 public class CdiIntegrationTest extends ITestBase {
 
     Logger LOG = LoggerFactory.getLogger(CdiIntegrationTest.class);
-//    private static String VERSION_PAX_CDI = "1.0.0.RC2";
+    private static final String VERSION_PAX_CDI = "1.0.0";
 
     private Option[] configureJsfAndCdi() {
         return options(
                 systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("INFO"),
-                // SCR
-                mavenBundle("org.apache.felix", "org.apache.felix.scr").version("1.8.2"),
                 // API
-                mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.javax-inject").version("1_2"),
-                mavenBundle("javax.enterprise", "cdi-api").version("1.2"),
-                mavenBundle("javax.validation", "validation-api").version("1.1.0.Final"),
                 mavenBundle("javax.annotation", "javax.annotation-api").version("1.2"),
+                mavenBundle("javax.el", "javax.el-api").version("3.0.0"),
+                mavenBundle("javax.enterprise", "cdi-api").version("1.2"),
                 mavenBundle("javax.interceptor", "javax.interceptor-api").version("1.2"),
+                mavenBundle("javax.validation", "validation-api").version("1.1.0.Final"),
                 // Common
                 mavenBundle("com.google.guava", "guava").version("19.0"),
                 mavenBundle("commons-io", "commons-io").version("1.4"),
@@ -67,13 +63,12 @@ public class CdiIntegrationTest extends ITestBase {
                 mavenBundle("commons-digester", "commons-digester").version("1.8.1"),
                 mavenBundle("org.apache.commons", "commons-lang3").version("3.4"),
                 // JSF
-                mavenBundle("org.glassfish", "javax.faces").version("2.2.13"),
-                paxCdiSharedBundles(),
-                paxCdiWithWeldBundles()
+                mavenBundle().groupId("org.ops4j.pax.web").artifactId("pax-web-jsp").version(asInProject()),
+                mavenBundle("org.apache.myfaces.core", "myfaces-api").version("2.2.12"),
+                mavenBundle("org.apache.myfaces.core", "myfaces-impl").version("2.2.12"),
                 // Weld
-//                mavenBundle("org.jboss.classfilewriter", "jboss-classfilewriter").version("1.1.2.Final"),
-//                mavenBundle("org.jboss.logging", "jboss-logging").version("3.3.0.Final"),
-//                mavenBundle("org.jboss.weld", "weld-osgi-bundle").version("2.3.1.Final")
+                mavenBundle("org.jboss.classfilewriter", "jboss-classfilewriter").version("1.1.2.Final"),
+                mavenBundle("org.jboss.weld", "weld-osgi-bundle").version("2.4.5.Final")
         );
     }
 
@@ -85,13 +80,13 @@ public class CdiIntegrationTest extends ITestBase {
     @Before
     public void setUp() throws Exception{
         // Pax-CDI started later, because order is important
-//        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-api").version(VERSION_PAX_CDI).getURL());
-//        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-spi").version(VERSION_PAX_CDI).getURL());
-//        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-extender").version(VERSION_PAX_CDI).getURL());
-//        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-extension").version(VERSION_PAX_CDI).getURL());
-//        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-web").version(VERSION_PAX_CDI).getURL());
-//        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-web-weld").version(VERSION_PAX_CDI).getURL());
-//        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-weld").version(VERSION_PAX_CDI).getURL());
+        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-api").version(VERSION_PAX_CDI).getURL());
+        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-spi").version(VERSION_PAX_CDI).getURL());
+        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-extender").version(VERSION_PAX_CDI).getURL());
+        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-extension").version(VERSION_PAX_CDI).getURL());
+        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-web").version(VERSION_PAX_CDI).getURL());
+        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-jetty-weld").version(VERSION_PAX_CDI).getURL());
+        installAndStartBundle(mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-weld").version(VERSION_PAX_CDI).getURL());
     }
 
     @Test
@@ -101,8 +96,9 @@ public class CdiIntegrationTest extends ITestBase {
         initWebListener();
         final Bundle webAppBundle = installAndStartBundle(mavenBundle()
                 .groupId("org.ops4j.pax.web.samples")
-                .artifactId("war-jsf-cdi")
+                .artifactId("war-jsf22-cdi")
                 .versionAsInProject()
+                .type("war")
                 .getURL());
 
 //      final Bundle webAppBundle = installAndStartBundle(mavenBundle()
@@ -123,7 +119,7 @@ public class CdiIntegrationTest extends ITestBase {
         // 1. Call Http-Request which involves a CDI bean
         HttpTestClientFactory.createDefaultTestClient()
             .withResponseAssertion("Hello from CDI Managed bean expected", resp -> resp.contains("Hello from CDI-Managed SessionBean"))
-            .doGET("http://localhost:8181/war-jsf-cdi/index.xhtml")
+            .doGET("http://localhost:8181/war-jsf22-cdi/start.xhtml")
             .executeTest();
             
 //        .testWebPath("http://localhost:8181/war-jsf-cdi/index.xhtml", "Hello from CDI-Managed SessionBean");
@@ -151,7 +147,7 @@ public class CdiIntegrationTest extends ITestBase {
 //        testClient.testWebPath("http://127.0.0.1:8181/war-jsf-cdi/index.xhtml", "Hello from CDI-Managed SessionBean");
         HttpTestClientFactory.createDefaultTestClient()
         .withResponseAssertion("Hello from CDI Managed bean expected", resp -> resp.contains("Hello from CDI-Managed SessionBean"))
-        .doGET("http://127.0.0.1:8181/war-jsf-cdi/index.xhtml")
+        .doGET("http://127.0.0.1:8181/war-jsf22-cdi/start.xhtml")
         .executeTest();
 //      testClient.testWebPath("http://127.0.0.1:8181/sample4/poll.jsf", "Which OSGi framework do you prefer");
     }
