@@ -43,7 +43,7 @@
 		<javax.annotation.version>1.2</javax.annotation.version>
         <geronimo.jaspic-spec.version>1.1</geronimo.jaspic-spec.version>
 		<geronimo.servlet.version>1.1.2</geronimo.servlet.version>
-        <javax.mail.version>1.4.4</javax.mail.version>
+        <javax.mail.version>1.4.7</javax.mail.version>
 		<pax.url.version>${dependency.paxurl.version}</pax.url.version>
         <servicemix.specs.version>2.5.0</servicemix.specs.version>
         <dependency.websocket.version>1.1</dependency.websocket.version>
