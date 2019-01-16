@@ -298,13 +298,37 @@
 			<optional>true</optional>
 		</dependency>
 
+		<!--
+			PAXWEB-1188:
+			I wasn't able to use org.apache.taglibs:taglibs-standard-*:1.2.5, because it lacks
+			org.apache.taglibs.standard.extra.spath package.
+			However org.jboss.spec.javax.servlet.jstl:jboss-jstl-api_1.2_spec:1.1.4.Final is based on
+			Apache taglibs 1.2.5 - check its org.apache.taglibs.standard.Version class
+		-->
 		<dependency>
-			<groupId>org.apache.geronimo.bundles</groupId>
-			<artifactId>jstl</artifactId>
-			<version>1.2_1</version>
-			<scope>compile</scope>
+			<groupId>org.jboss.spec.javax.servlet.jstl</groupId>
+			<artifactId>jboss-jstl-api_1.2_spec</artifactId>
+			<version>1.1.4.Final</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.jboss.spec.javax.servlet.jsp</groupId>
+					<artifactId>jboss-jsp-api_2.3_spec</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xalan</groupId>
+					<artifactId>xalan</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.jboss.spec.javax.el</groupId>
+					<artifactId>jboss-el-api_3.0_spec</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.jboss.spec.javax.servlet</groupId>
+					<artifactId>jboss-servlet-api_3.1_spec</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.tomcat.embed</groupId>
   			<artifactId>tomcat-embed-el</artifactId>
