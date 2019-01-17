@@ -133,10 +133,14 @@ class JettyServerWrapper extends Server {
 	private Bundle jettyBundle;
 	private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
 
+	private HandlerCollection rootCollections;
+
 	JettyServerWrapper(ServerModel serverModel, ThreadPool threadPool) {
 		super(threadPool);
 		this.serverModel = serverModel;
-		setHandler(new JettyServerHandlerCollection(serverModel));
+
+		rootCollections = new JettyServerHandlerCollection(serverModel);
+		setHandler(rootCollections);
 
 		jettyBundle = FrameworkUtil.getBundle(getClass());
 
@@ -153,6 +157,10 @@ class JettyServerWrapper extends Server {
 			packageAdminTracker.open();
 		}
 
+	}
+
+	public HandlerCollection getRootHandlerCollection() {
+		return rootCollections;
 	}
 
 	public void configureContext(final Map<String, Object> attributes, final Integer timeout, final String cookie,
@@ -264,7 +272,7 @@ class JettyServerWrapper extends Server {
 			sch.getSecurityHandler().setServer(null);
 			sch.getSessionHandler().setServer(null);
 			sch.getErrorHandler().setServer(null);
-			((HandlerCollection) getHandler()).removeHandler(sch);
+			rootCollections.removeHandler(sch);
 			sch.destroy();
 		}
 	}
@@ -284,7 +292,7 @@ class JettyServerWrapper extends Server {
 			scanner.scanBundles(containerInitializers);
 		}
 
-		HttpServiceContext context = new HttpServiceContext((HandlerContainer) getHandler(), model.getContextParams(),
+		HttpServiceContext context = new HttpServiceContext(rootCollections, model.getContextParams(),
 				getContextAttributes(bundleContext), model.getContextName(), model.getHttpContext(),
 				model.getAccessControllerContext(), model.getContainerInitializers(), model.getJettyWebXmlURL(),
 				model.getVirtualHosts());

@@ -274,7 +274,7 @@ class JettyServerImpl implements JettyServer {
 	
 	@Override
 	public void addHandler(Handler handler) {
-		HandlerCollection handlerCollection = (HandlerCollection) server.getHandler();
+		HandlerCollection handlerCollection = server.getRootHandlerCollection();
 		handlerCollection.addHandler(handler);
 		if (priorityComparator != null) {
 			Handler[] handlers = handlerCollection.getHandlers();
@@ -286,12 +286,12 @@ class JettyServerImpl implements JettyServer {
 
 	@Override
 	public Handler[] getHandlers() {
-		return ((HandlerCollection) server.getHandler()).getHandlers();
+		return server.getRootHandlerCollection().getHandlers();
 	}
 
 	@Override
 	public void removeHandler(Handler handler) {
-		((HandlerCollection) server.getHandler()).removeHandler(handler);
+		server.getRootHandlerCollection().removeHandler(handler);
 	}
 
 	@Override
@@ -925,7 +925,7 @@ class JettyServerImpl implements JettyServer {
 		requestLog.setLogServer(configureRequestParameters.logServer);
 		requestLogHandler.setRequestLog(requestLog);
 
-		((HandlerCollection) server.getHandler()).addHandler(requestLogHandler);
+		server.getRootHandlerCollection().addHandler(requestLogHandler);
 	}
 
 	@Override
