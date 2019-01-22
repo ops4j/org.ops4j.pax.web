@@ -54,7 +54,7 @@ public interface ServletMapping {
 	/**
 	 * Getter.
 	 *
-	 * @return resource alias
+	 * @return resource alias - effectively changed into 1-element array of urlPatterns
 	 */
 	String getAlias();
 

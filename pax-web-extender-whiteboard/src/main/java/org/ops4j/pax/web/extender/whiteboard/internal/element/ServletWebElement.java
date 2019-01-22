@@ -19,6 +19,7 @@
 package org.ops4j.pax.web.extender.whiteboard.internal.element;
 
 import java.util.Collection;
+import java.util.Dictionary;
 import java.util.List;
 
 import javax.servlet.Servlet;
@@ -34,6 +35,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.ops4j.pax.web.service.WebContainerConstants.SERVLET_NAME;
 
 /**
  * Registers/unregisters {@link ServletMapping} with {@link WebContainer}.
@@ -85,9 +88,15 @@ public class ServletWebElement<T extends Servlet> extends WebElement<T> implemen
 	public void register(final WebContainer webContainer,
 						 final HttpContext httpContext) throws Exception {
 		if (servletMapping.getAlias() != null) {
+			Dictionary<String, String> initParams = DictionaryUtils.adapt(servletMapping.getInitParams());
+			// PAXWEB-961 - using plain org.osgi.service.http.HttpService doesn't allow passing servlet name,
+			// so let's pass via init params
+			if (initParams.get(SERVLET_NAME) == null && servletMapping.getServletName() != null) {
+				initParams.put(SERVLET_NAME, servletMapping.getServletName());
+			}
 			webContainer.registerServlet(servletMapping.getAlias(),
 					servletMapping.getServlet(),
-					DictionaryUtils.adapt(servletMapping.getInitParams()),
+					initParams,
 					httpContext);
 		} else {
 				webContainer.registerServlet(
@@ -117,7 +126,7 @@ public class ServletWebElement<T extends Servlet> extends WebElement<T> implemen
 		if (servletMapping.getAlias() != null) {
 			webContainer.unregister(servletMapping.getAlias());
 		} else {
-				webContainer.unregisterServlet(servletMapping.getServlet());
+			webContainer.unregisterServlet(servletMapping.getServlet());
 		}
 	}
 
@@ -145,4 +154,4 @@ public class ServletWebElement<T extends Servlet> extends WebElement<T> implemen
 	public boolean isAliasRegistration() {
 		return servletMapping.getAlias() != null && servletMapping.getUrlPatterns() == null;
 	}
-}
+}
