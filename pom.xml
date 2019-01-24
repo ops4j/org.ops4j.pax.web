@@ -1255,6 +1255,8 @@
 				</plugins>
 			</build>
 		</profile>
+
+		<!-- Checkstyle: `mvn -Pcode-analysis validate` -->
 		<profile>
 			<id>code-analysis</id>
 			<activation>
@@ -1265,32 +1267,72 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-checkstyle-plugin</artifactId>
-						<version>2.16</version>
+						<version>3.0.0</version>
 						<executions>
 							<execution>
 								<id>verify-style</id>
-								<phase>verify</phase>
+								<phase>validate</phase>
 								<goals>
 									<goal>check</goal>
 								</goals>
+								<configuration>
+									<configLocation>pax-web-checks.xml</configLocation>
+									<includes>org/ops4j/pax/web/**/*.java</includes>
+									<encoding>UTF-8</encoding>
+									<consoleOutput>true</consoleOutput>
+									<failsOnError>true</failsOnError>
+									<logViolationsToConsole>true</logViolationsToConsole>
+									<includeTestSourceDirectory>true</includeTestSourceDirectory>
+								</configuration>
 							</execution>
 						</executions>
-						<configuration>
-							<configLocation>pax-web-checks.xml</configLocation>
-						</configuration>
+						<dependencies>
+							<dependency>
+								<groupId>com.puppycrawl.tools</groupId>
+								<artifactId>checkstyle</artifactId>
+								<version>8.7</version>
+							</dependency>
+						</dependencies>
 					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<!-- License generation: `mvn -Plicense process-sources` -->
+		<profile>
+			<id>license</id>
+			<build>
+				<plugins>
 					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>findbugs-maven-plugin</artifactId>
-						<version>3.0.4</version>
+						<groupId>com.mycila</groupId>
+						<artifactId>license-maven-plugin</artifactId>
+						<version>3.0</version>
 						<configuration>
-							<excludeFilterFile>pax-web-findbugs-exclude.xml</excludeFilterFile>
-							<xmlOutput>true</xmlOutput>
-							<xmlOutputDirectory>target/findbugs</xmlOutputDirectory>
-							<failOnError>false</failOnError>
+							<aggregate>true</aggregate>
+							<useDefaultExcludes>true</useDefaultExcludes>
+							<header>license-header.txt</header>
+							<includes>
+								<!--<include>src/main/java/**/*.java</include>-->
+								<!--<include>src/test/java/**/*.java</include>-->
+								<include>pom.xml</include>
+								<include>**/*.xml</include>
+								<!--<include>**/*.cfg</include>-->
+								<include>**/*.properties</include>
+							</includes>
+							<excludes />
+							<mapping />
 						</configuration>
 						<executions>
 							<execution>
+								<id>license-format</id>
+								<phase>process-sources</phase>
+								<goals>
+									<goal>format</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>license-check</id>
+								<!-- This is the phase this plugin runs by default. Just an explicit information -->
 								<phase>verify</phase>
 								<goals>
 									<goal>check</goal>
