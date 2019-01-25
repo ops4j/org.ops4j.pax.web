@@ -1,145 +1,114 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 <!--
 
-	Licensed under the Apache License, Version 2.0 (the "License");
-	you may not use this file except in compliance with the License.
-	You may obtain a copy of the License at
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
 
-	    http://www.apache.org/licenses/LICENSE-2.0
+      http://www.apache.org/licenses/LICENSE-2.0
 
-	Unless required by applicable law or agreed to in writing, software
-	distributed under the License is distributed on an "AS IS" BASIS,
-	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	See the License for the specific language governing permissions and
-	limitations under the License.
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
 
 -->
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <artifactId>samples</artifactId>
-        <groupId>org.ops4j.pax.web</groupId>
-        <version>8.0.0-SNAPSHOT</version>
-    </parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-    <groupId>org.ops4j.pax.web.samples</groupId>
-    <artifactId>war-spring-osgi</artifactId>
-    <packaging>war</packaging>
+	<modelVersion>4.0.0</modelVersion>
 
-    <name>OPS4J Pax Web - Samples - OSGi Spring War sample</name>
-    <url>http://maven.apache.org</url>
+	<parent>
+		<groupId>org.ops4j.pax.web</groupId>
+		<artifactId>samples</artifactId>
+		<version>8.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
 
-    <properties>
-        <bundle.symbolicName>org.ops4j.pax.web.samples.spring</bundle.symbolicName>
-        <bundle.namespace>org.ops4j.pax.web.samples</bundle.namespace>
-        <spring.version>3.1.0.RELEASE</spring.version>
-    </properties>
+	<groupId>org.ops4j.pax.web.samples</groupId>
+	<artifactId>war-spring-osgi</artifactId>
+	<packaging>war</packaging>
 
-    <dependencies>
-        <!-- Spring core & mvc -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>${spring.version}</version>
-            <scope>provided</scope>
-        </dependency>
+	<name>OPS4J Pax Web - Samples - OSGi Spring War sample</name>
 
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <version>${spring.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-orm</artifactId>
-            <version>${spring.version}</version>
-            <type>jar</type>
-            <scope>provided</scope>
-        </dependency>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<supportedProjectTypes>
+						<supportedProjectType>jar</supportedProjectType>
+						<supportedProjectType>bundle</supportedProjectType>
+						<supportedProjectType>war</supportedProjectType>
+					</supportedProjectTypes>
+					<instructions>
+						<_wab>src/main/webapp</_wab>
+						<Web-ContextPath>war-spring</Web-ContextPath>
+						<Import-Package>
+							org.springframework.osgi.web.context.support,
+							org.springframework.web.servlet.view,
+							org.springframework.web.servlet,
+							*; resolution:=optional
+						</Import-Package>
+						<Export-Package>org.ops4j.pax.web.samples.spring.controller,!*</Export-Package>
+						<Bundle-ClassPath>
+							WEB-INF/classes
+						</Bundle-ClassPath>
+						<Embed-Dependency>*; artifactId=!org.osgi.compendium; scope=compile; type=!pom; inline=true</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>${spring.version}</version>
-            <type>jar</type>
-            <scope>test</scope>
-        </dependency>
+	<dependencies>
 
-        <!-- Servlet Spec -->
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet.jsp</groupId>
-            <artifactId>jsp-api</artifactId>
-            <version>2.1</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+		<!-- JavaEE -->
 
-    <build>
-        <finalName>war-spring</finalName>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <supportedProjectTypes>
-                        <supportedProjectType>jar</supportedProjectType>
-                        <supportedProjectType>bundle</supportedProjectType>
-                        <supportedProjectType>war</supportedProjectType>
-                    </supportedProjectTypes>
-                    <instructions>
-                        <_wab>src/main/webapp</_wab>
-                        <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-                        <Import-Package>
-                        	org.springframework.osgi.web.context.support,
-                        	org.springframework.web.servlet.view,
-                        	org.springframework.web.servlet,
-                            *; resolution:=optional
-                        </Import-Package>
-                        <Export-Package>org.ops4j.pax.web.samples.spring.controller,!*</Export-Package>
-                        <Bundle-ClassPath>
-                            WEB-INF/classes
-                        </Bundle-ClassPath>
-                        <Web-ContextPath>war-spring</Web-ContextPath>
-                        <Embed-Dependency>*; artifactId=!org.osgi.compendium; scope=compile; type=!pom; inline=true</Embed-Dependency>
-                        <Embed-Transitive>true</Embed-Transitive>
-                        <_removeheaders>
-                            Include-Resource,
-                            Private-Package,
-                            Embed-Dependency,
-                            Embed-Transitive,
-                            Ignore-Package
-                        </_removeheaders>
-                    </instructions>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>generate-manifest</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>manifest</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-war-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-                    </archive>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>javax.servlet.jsp-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Spring -->
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+
 </project>

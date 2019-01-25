@@ -39,7 +39,7 @@
         <bundle dependency="true">mvn:org.ow2.asm/asm-analysis/${dependency.asm.version}</bundle>
         <bundle dependency="true">mvn:org.ow2.asm/asm-commons/${dependency.asm.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/${servicemix.specs.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:${servlet.spec.groupId}/${servlet.spec.artifactId}/${servlet.spec.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:javax.servlet/javax.servlet-api/${servlet.spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:javax.mail/mail/${javax.mail.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:javax.annotation/javax.annotation-api/${javax.annotation.version}</bundle>
@@ -137,7 +137,7 @@
 
     <feature name="pax-http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}">
         <feature version="[8.0,8.1)">pax-http</feature>
-        <bundle dependency="true" start-level="30">mvn:${dependency.jdt.groupId}/${dependency.jdt.artifactId}/${dependency.jdt.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.eclipse.jdt/ecj/${dependency.jdt.version}</bundle>
         <bundle start-level="30" dependency="true">mvn:javax.el/javax.el-api/${dependency.el-api.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${project.version}</bundle>
@@ -176,8 +176,8 @@
         <bundle dependency="true" start-level="30">mvn:javax.validation/validation-api/${dependency.validation-api.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.tomcat-embed-core/${tipi.tomcat.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.tomcat-embed-websocket/${tipi.tomcat.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:${servlet.spec.groupId}/${servlet.spec.artifactId}/${servlet.spec.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-atinject_1.0_spec/${dependency.atinject.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:javax.servlet/javax.servlet-api/${servlet.spec.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_2</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jsr305/${dependency.jsr305.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/${servicemix.specs.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.java-persistence-api-2.0/${servicemix.specs.version}</bundle>
@@ -248,7 +248,7 @@
     </feature>
 
     <feature name="undertow" version="${dependency.undertow-core.version}">
-        <bundle dependency="true" start-level="30">mvn:${servlet.spec.groupId}/${servlet.spec.artifactId}/${servlet.spec.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:javax.servlet/javax.servlet-api/${servlet.spec.version}</bundle>
         <bundle dependency="true">mvn:javax.annotation/javax.annotation-api/1.3</bundle>
         <bundle dependency="true">mvn:org.jboss.logging/jboss-logging/${dependency.jboss-logging}</bundle>
         <bundle dependency="true">mvn:javax.websocket/javax.websocket-api/${dependency.websocket.version}</bundle>

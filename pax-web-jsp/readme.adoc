@@ -1,0 +1,47 @@
+= Information about JSP / JSTL implementations
+
+Taking into account JavaEE 5 - 8 specifications, we have:
+
+* JavaEE 5: JSP 2.1, JSTL 1.2
+* JavaEE 6: JSP 2.2, JSTL 1.2
+* JavaEE 7: JSP 2.3, JSTL 1.2
+* JavaEE 8: JSP 2.3, JSTL 1.2
+
+By looking at 3 containers used by pax-web, the _implementations_ of JSP/JSTL used are:
+
+* Tomcat 8.5.x:
+** mvn:org.apache.tomcat/tomcat-servlet-api - just servlet API (javax.servlet, javax.servlet.annotation,
+   javax.servlet.descriptor, javax.servlet.http, javax.servlet.resources)
+** mvn:org.apache.tomcat/tomcat-jsp-api - just JSP API (javax.servlet.jsp, javax.servlet.jsp.el,
+   javax.servlet.jsp.resources, javax.servlet.jsp.tagext)
+** mvn:org.apache.tomcat/tomcat-el-api - just EL API (javax.el)
+** mvn:org.apache.tomcat/tomcat-jasper (org.apache.jasper.*)
+** mvn:org.apache.tomcat/tomcat-jasper-el (org.apache.el.*)
+** mvn:org.apache.tomcat.embed/tomcat-embed-jasper (tomcat-jasper + JSP API)
+** mvn:org.apache.tomcat.embed/tomcat-embed-el (tomcat-jasper-el + EL API)
+** mvn:org.apache.tomcat.embed/tomcat-embed-core (tomcat JARs + Servlet API)
+** mvn:org.apache.taglibs/taglibs-standard-spec (javax.servlet.jsp.jstl.[core|fmt|sql|tlv])
+** mvn:org.apache.taglibs/taglibs-standard-jstlel (org.apache.taglibs.standard.[lang|tag|tlv])
+** mvn:org.apache.taglibs/taglibs-standard-compat (org.apache.taglibs.standard.[tag|tlv])
+** mvn:org.apache.taglibs/taglibs-standard-impl (org.apache.taglibs.standard.[functions|resources|tag|tei|tlv|util])
+
+* Jetty <9.2: Glassfish implementation
+** mvn:javax.servlet.jsp/javax.servlet.jsp-api
+** mvn:org.glassfish/javax.el
+** mvn:org.glassfish.web/javax.servlet.jsp
+** mvn:org.glassfish.web/javax.servlet.jsp.jstl
+* Jetty >=9.2: Apache (Tomcat) implementation
+** mvn:org.mortbay.jasper/apache-jsp - actually shaded mvn:org.apache.tomcat/tomcat-jasper
+
+* Undertow 1.4.x (https://github.com/undertow-io/jastow) - a fork (with Tomcat deps removed) of tomcat-jasper
+
+About JSTL (https://tomcat.apache.org/taglibs.html):
+* Using the -jstlel jar supports JSTL 1.0 EL expressions by using the EL implementation originally defined by JSTL itself.
+* Using the -compat jar supports JSTL 1.0 EL expressions by using the container's implementation of EL to take advantage of newer functionality and potential performance improvements in more modern versions.
+
+JSTL descriptors:
+
+* taglibs-standard-compat: c-1_0.tld, fmt-1_0.tld, sql-1_0.tld, x-1_0.tld
+* taglibs-standard-impl: c-1_0-rt.tld, c-1_1.tld, c.tld, fmt-1_0-rt.tld, fmt.tld, fn.tld, permittedTaglibs.tld, scriptfree.tld, sql-1_0-rt.tld, sql.tld, x-1_0-rt.tld, x.tld,
+* taglibs-standard-jstlel:  c-1_0.tld, fmt-1_0.tld, sql-1_0.tld, x-1_0.tld
+* taglibs-standard-spec: none

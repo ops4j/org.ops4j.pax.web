@@ -1,14 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<!--
 
-	<!-- Licensed under the Apache License, Version 2.0 (the "License"); you 
-		may not use this file except in compliance with the License. You may obtain 
-		a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless 
-		required by applicable law or agreed to in writing, software distributed 
-		under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES 
-		OR CONDITIONS OF ANY KIND, either express or implied. See the License for 
-		the specific language governing permissions and limitations under the License. -->
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -25,20 +36,19 @@
 
 	<name>OPS4J Pax Web</name>
 
-	<description>Pax Web - OPS4J implementation of OSGi HTTP service using Jetty 9 or Tomcat 7.
-    Detailed information to be found at http://team.ops4j.org/wiki/display/paxweb/.</description>
+	<description>Pax Web - OPS4J implementation of OSGi HTTP service and OSGi HTTP Whiteboard service</description>
 
-	<url>http://team.ops4j.org/wiki/display/paxweb/</url>
+	<url>https://ops4j1.jira.com/wiki/spaces/PAXWEB/overview</url>
 
 	<issueManagement>
 		<system>jira</system>
-		<url>https://ops4j1.jira.com/projects/PAXWEB</url>
+		<url>https://ops4j1.jira.com/projects/PAXWEB/summary/statistics</url>
 	</issueManagement>
 
 	<scm>
 		<connection>scm:git:git@github.com:ops4j/org.ops4j.pax.web.git</connection>
 		<developerConnection>scm:git:git@github.com:ops4j/org.ops4j.pax.web.git</developerConnection>
-		<url>http://github.com/ops4j/org.ops4j.pax.web/tree/master</url>
+		<url>https://github.com/ops4j/org.ops4j.pax.web/tree/master</url>
 		<tag>HEAD</tag>
 	</scm>
 
@@ -87,15 +97,75 @@
 			<roles>
 				<role>Developer</role>
 			</roles>
-			<timezone>UTC-1</timezone>
+			<timezone>UTC+1</timezone>
 		</developer>
 	</developers>
 
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<!-- project properties -->
+
+		<session.executionRootDirectory />
+
+		<!-- Tells Sonar to use JaCoCo as the code coverage tool -->
+		<sonar.skippedModules>pax-web-itest-load</sonar.skippedModules>
+		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+		<jacoco.dest.folder>${session.executionRootDirectory}/target</jacoco.dest.folder>
+		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+		<sonar.jacoco.itReportPath>${project.basedir}/target/jacoco-it.exec</sonar.jacoco.itReportPath>
+		<sonar.language>java</sonar.language>
+
+		<!-- version to compare this version to for baselineing -->
+		<baseline.version>6.0.7</baseline.version>
+
+		<!-- versions of Maven plugins -->
+
+		<!-- Plugins from org.apache.maven.plugins -->
+		<version.plugin.maven-antrun-plugin>1.8</version.plugin.maven-antrun-plugin>
+		<version.plugin.maven-archetype-plugin>3.0.1</version.plugin.maven-archetype-plugin>
+		<version.plugin.maven-assembly-plugin>3.1.0</version.plugin.maven-assembly-plugin>
+		<version.plugin.maven-checkstyle-plugin>3.0.0</version.plugin.maven-checkstyle-plugin>
+		<version.com.puppycrawl.tools.checkstyle>8.9</version.com.puppycrawl.tools.checkstyle>
+		<version.plugin.maven-clean-plugin>3.0.0</version.plugin.maven-clean-plugin>
+		<version.plugin.maven-compiler-plugin>3.7.0</version.plugin.maven-compiler-plugin>
+		<version.plugin.maven-deploy-plugin>2.8.2</version.plugin.maven-deploy-plugin>
+		<version.plugin.maven-dependency-plugin>3.0.1</version.plugin.maven-dependency-plugin>
+		<version.plugin.maven-enforcer-plugin>3.0.0-M1</version.plugin.maven-enforcer-plugin>
+		<version.org.commonjava.maven.enforcer>1.3</version.org.commonjava.maven.enforcer>
+		<version.plugin.maven-failsafe-plugin>2.20.1</version.plugin.maven-failsafe-plugin>
+		<version.plugin.maven-gpg-plugin>1.6</version.plugin.maven-gpg-plugin>
+		<version.plugin.maven-install-plugin>2.5.2</version.plugin.maven-install-plugin>
+		<version.plugin.maven-jar-plugin>3.0.2</version.plugin.maven-jar-plugin>
+		<version.plugin.maven-javadoc-plugin>3.0.1</version.plugin.maven-javadoc-plugin>
+		<version.plugin.maven-release-plugin>2.5.3</version.plugin.maven-release-plugin>
+		<version.plugin.maven-remote-resources-plugin>1.5</version.plugin.maven-remote-resources-plugin>
+		<version.plugin.maven-resources-plugin>3.1.0</version.plugin.maven-resources-plugin>
+		<version.plugin.maven-site-plugin>3.6</version.plugin.maven-site-plugin>
+		<version.plugin.maven-source-plugin>3.0.1</version.plugin.maven-source-plugin>
+		<version.plugin.maven-surefire-plugin>2.22.1</version.plugin.maven-surefire-plugin>
+		<version.plugin.maven-war-plugin>3.1.0</version.plugin.maven-war-plugin>
+
+		<!-- versions of Maven plugins (and their important dependencies) -->
+		<version.plugin.apache.apache-rat-plugin>0.13</version.plugin.apache.apache-rat-plugin>
+		<version.plugin.asciidoctor-maven-plugin>1.5.6</version.plugin.asciidoctor-maven-plugin>
+		<version.org.asciidoctor>1.5.8</version.org.asciidoctor>
+		<version.plugin.felix.maven-scr-plugin>1.26.0</version.plugin.felix.maven-scr-plugin>
+		<version.plugin.felix.maven-bundle-plugin>3.5.1</version.plugin.felix.maven-bundle-plugin>
+		<version.plugin.gatling.gatling-maven-plugin>2.0.0</version.plugin.gatling.gatling-maven-plugin>
+		<version.plugin.jacoco.jacoco-maven-plugin>0.8.2</version.plugin.jacoco.jacoco-maven-plugin>
+		<version.plugin.mojo.build-helper-maven-plugin>3.0.0</version.plugin.mojo.build-helper-maven-plugin>
+		<version.plugin.mojo.sonar-maven-plugin>4.5.1</version.plugin.mojo.sonar-maven-plugin>
+		<version.plugin.mycila.license-maven-plugin>3.0</version.plugin.mycila.license-maven-plugin>
+		<version.plugin.servicemix.depends-maven-plugin>1.4.0</version.plugin.servicemix.depends-maven-plugin>
+		<version.plugin.sonatype.nexus-staging-maven-plugin>1.6.8</version.plugin.sonatype.nexus-staging-maven-plugin>
+
+		<!-- versions of Maven dependencies -->
+
 		<dependency.asm.version>7.2</dependency.asm.version>
-		<dependency.atinject.version>1.1</dependency.atinject.version>
 		<dependency.base.version>1.5.1</dependency.base.version>
-		<dependency.bndlib.version>2.4.0</dependency.bndlib.version>
+		<dependency.bndlib.version>3.5.0</dependency.bndlib.version>
 		<dependency.commons-beanutils.version>1.9.4</dependency.commons-beanutils.version>
 		<dependency.commons-codec.version>1.13</dependency.commons-codec.version>
 		<dependency.commons-collection3.version>3.2.2</dependency.commons-collection3.version>
@@ -106,10 +176,10 @@
 		<dependency.configadmin.version>1.9.16</dependency.configadmin.version>
 		<dependency.fileinstall.version>3.6.4</dependency.fileinstall.version>
 		<dependency.gatling.version>2.0.1</dependency.gatling.version>
+		<dependency.log4j2.version>2.11.1</dependency.log4j2.version>
 		<dependency.logback.version>1.0.6</dependency.logback.version>
-		<dependency.jdt.groupId>org.eclipse.jdt.core.compiler</dependency.jdt.groupId>
-		<dependency.jdt.artifactId>ecj</dependency.jdt.artifactId>
-		<dependency.jdt.version>4.5.1</dependency.jdt.version>
+		<dependency.jdt.core.version>4.5.1</dependency.jdt.core.version>
+		<dependency.jdt.version>3.16.0</dependency.jdt.version>
 		<dependency.jetty.version>9.4.22.v20191022</dependency.jetty.version>
 		<dependency.jsr303.version>1.8.0</dependency.jsr303.version>
 		<dependency.jsr305.version>1.3.9_1</dependency.jsr305.version>
@@ -130,7 +200,7 @@
 		<dependency.undertow-websockets.version>1.4.23.Final</dependency.undertow-websockets.version>
 		<dependency.jboss-logging>3.3.0.Final</dependency.jboss-logging>
 	    <dependency.jasypt>1.9.3</dependency.jasypt>
-		<dependency.pax-cdi.version>1.0.0</dependency.pax-cdi.version>
+		<dependency.pax-cdi.version>1.1.0</dependency.pax-cdi.version>
 		<dependency.pax-keycloak.version>0.2.0</dependency.pax-keycloak.version>
 		<version.pax-exam>4.11.0</version.pax-exam>
 
@@ -145,166 +215,166 @@
 		<dependency.primefaces.version>5.1</dependency.primefaces.version>
 		<dependency.logback.version>1.0.6</dependency.logback.version>
 
+		<spring.version>5.1.4.RELEASE</spring.version>
 
 		<!-- Plugins -->
-		<gatling-plugin.version>2.0.0</gatling-plugin.version>
 		<bundle-plugin.version>3.3.0</bundle-plugin.version>
 
 		<surefire-plugin.version>2.20.1</surefire-plugin.version>
 		<failsafe-plugin.version>2.20.1</failsafe-plugin.version>
 
-		<servlet.spec.groupId>javax.servlet</servlet.spec.groupId>
-		<servlet.spec.artifactId>javax.servlet-api</servlet.spec.artifactId>
 		<servlet.spec.version>3.1.0</servlet.spec.version>
 		<servlet-jsp.spec.version>2.3.3</servlet-jsp.spec.version>
 		<servlet-jstl.spec.version>1.2.2</servlet-jstl.spec.version>
+		<jsf-ri.version>1.2_13</jsf-ri.version>
 		<dependency.el-api.version>3.0.0</dependency.el-api.version>
 		<dependency.validation-api.version>1.1.0.Final</dependency.validation-api.version>
 		<dependency.jaspic.version>1.1</dependency.jaspic.version>
-
-		<!-- Tells Sonar to use JaCoCo as the code coverage tool -->
-		<sonar.skippedModules>pax-web-itest-load</sonar.skippedModules>
-		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-		<jacoco.dest.folder>${session.executionRootDirectory}/target</jacoco.dest.folder>
-		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-		<sonar.jacoco.itReportPath>${project.basedir}/target/jacoco-it.exec</sonar.jacoco.itReportPath>
-		<sonar.language>java</sonar.language>
 	</properties>
 
 	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<inherited>true</inherited>
-				<executions>
-					<execution>
-						<id>prepare-agent-tests</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-						<phase>process-sources</phase>
-						<configuration>
-							<includes>
-								<include>org.ops4j.pax.web.*</include>
-							</includes>
-							<propertyName>jcoverage.command</propertyName>
-							<excludes>
-								<exclude>org.apache.jasper</exclude>
-								<exclude>org.apache.jasper.compiler</exclude>
-								<exclude>org.apache.jasper.servlet</exclude>
-								<exclude>org.apache.myfaces.test</exclude>
-								<exclude>org.ops4j.pax.web.extender.samples.*</exclude>
-								<exclude>org.ops4j.pax.web.itest.*</exclude>
-								<exclude>org.ops4j.pax.web.samples.*</exclude>
-								<exclude>org.apache.xbean.*</exclude>
-							</excludes>
-							<append>true</append>
-						</configuration>
-					</execution>
-					<execution>
-						<id>prepare-agent-integration</id>
-						<goals>
-							<goal>prepare-agent-integration</goal>
-						</goals>
-						<phase>pre-integration-test</phase>
-						<configuration>
-							<propertyName>jcoverage.command</propertyName>
-							<destFile>${sonar.jacoco.itReportPath}</destFile>
-							<includes>
-								<include>org.ops4j.pax.web.*</include>
-							</includes>
-							<excludes>
-								<exclude>org.apache.jasper</exclude>
-								<exclude>org.apache.jasper.compiler</exclude>
-								<exclude>org.apache.jasper.servlet</exclude>
-								<exclude>org.apache.myfaces.test</exclude>
-								<exclude>org.ops4j.pax.web.utils.ClassPathUtil</exclude>
-								<exclude>org.ops4j.pax.web.extender.samples.*</exclude>
-								<exclude>org.ops4j.pax.web.itest.*</exclude>
-								<exclude>org.ops4j.pax.web.samples.*</exclude>
-								<exclude>org.apache.xbean.*</exclude>
-								<exclude>org.objectweb.asm.*</exclude>
-							</excludes>
-							<append>true</append>
-						</configuration>
-					</execution>
-					<execution>
-						<id>report-test</id>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-							<goal>test-jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-							<goal>test-javadoc</goal>
-						</goals>
-						<configuration>
-							<additionalparam>${javadoc.opts}</additionalparam>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.surefire</groupId>
-				<artifactId>surefire-junit4</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.surefire</groupId>
-				<artifactId>surefire-junit3</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-			</plugin>
-		</plugins>
 		<pluginManagement>
 			<plugins>
+
+				<!-- Core plugins -->
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>${version.plugin.maven-clean-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>${version.plugin.maven-compiler-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>${version.plugin.maven-deploy-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>${version.plugin.maven-failsafe-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-install-plugin</artifactId>
+					<version>${version.plugin.maven-install-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>${version.plugin.maven-resources-plugin}</version>
+					<dependencies>
+						<dependency>
+							<!-- Fix org.ops4j:master:4.3.0 -->
+							<groupId>org.apache.maven.shared</groupId>
+							<artifactId>maven-filtering</artifactId>
+							<version>3.1.1</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>${version.plugin.maven-site-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>${version.plugin.maven-surefire-plugin}</version>
+				</plugin>
+
+				<!-- Packaging types/tools -->
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>${version.plugin.maven-jar-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>${version.plugin.maven-war-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>${version.plugin.maven-source-plugin}</version>
+				</plugin>
+
+				<!-- Reporting plugins -->
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-checkstyle-plugin</artifactId>
+					<version>${version.plugin.maven-checkstyle-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>${version.plugin.maven-javadoc-plugin}</version>
+				</plugin>
+
+				<!-- Tools -->
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>${version.plugin.maven-antrun-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-archetype-plugin</artifactId>
+					<version>${version.plugin.maven-archetype-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>${version.plugin.maven-assembly-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>${version.plugin.maven-dependency-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>${version.plugin.maven-enforcer-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<version>${version.plugin.maven-gpg-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>${version.plugin.maven-release-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-remote-resources-plugin</artifactId>
+					<version>${version.plugin.maven-remote-resources-plugin}</version>
+				</plugin>
+
+				<!-- Felix plugins -->
+
 				<plugin>
 					<groupId>org.apache.felix</groupId>
 					<artifactId>maven-bundle-plugin</artifactId>
-					<version>${bundle-plugin.version}</version>
+					<version>${version.plugin.felix.maven-bundle-plugin}</version>
+					<extensions>true</extensions>
+					<configuration>
+						<obrRepository>NONE</obrRepository>
+					</configuration>
 					<dependencies>
 						<dependency>
 							<groupId>biz.aQute.bnd</groupId>
-							<artifactId>bndlib</artifactId>
+							<artifactId>biz.aQute.bndlib</artifactId>
 							<version>${dependency.bndlib.version}</version>
 						</dependency>
 					</dependencies>
@@ -315,7 +385,10 @@
 								<goal>bundle</goal>
 							</goals>
 							<configuration>
-								<obrRepository>NONE</obrRepository>
+								<instructions>
+									<Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
+									<_removeheaders>Include-Resource, Private-Package, Embed-Dependency, Embed-Transitive</_removeheaders>
+								</instructions>
 							</configuration>
 						</execution>
 						<execution>
@@ -333,61 +406,262 @@
 					</executions>
 				</plugin>
 				<plugin>
-					<artifactId>maven-eclipse-plugin</artifactId>
-					<version>2.8</version>
+					<groupId>org.apache.felix</groupId>
+					<artifactId>maven-scr-plugin</artifactId>
+					<version>${version.plugin.felix.maven-scr-plugin}</version>
 					<extensions>true</extensions>
+				</plugin>
+
+				<!-- Karaf plugins -->
+
+				<plugin>
+					<groupId>org.apache.karaf.tooling</groupId>
+					<artifactId>karaf-maven-plugin</artifactId>
+					<version>${dependency.karaf.version}</version>
+				</plugin>
+
+				<!-- ServiceMix plugins -->
+
+				<plugin>
+					<groupId>org.apache.servicemix.tooling</groupId>
+					<artifactId>depends-maven-plugin</artifactId>
+					<version>${version.plugin.servicemix.depends-maven-plugin}</version>
+				</plugin>
+
+				<!-- MojoHaus plugins -->
+
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>${version.plugin.mojo.build-helper-maven-plugin}</version>
+				</plugin>
+
+				<!-- Other plugins -->
+
+				<plugin>
+					<groupId>org.sonatype.plugins</groupId>
+					<artifactId>nexus-staging-maven-plugin</artifactId>
+					<version>${version.plugin.sonatype.nexus-staging-maven-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>io.gatling</groupId>
 					<artifactId>gatling-maven-plugin</artifactId>
-					<version>${gatling-plugin.version}</version>
+					<version>${version.plugin.gatling.gatling-maven-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.7.0.201403182114</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>${surefire-plugin.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>${failsafe-plugin.version}</version>
+					<version>${version.plugin.jacoco.jacoco-maven-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.sonar</groupId>
 					<artifactId>sonar-maven-plugin</artifactId>
-					<version>4.5.1</version>
+					<version>${version.plugin.mojo.sonar-maven-plugin}</version>
 				</plugin>
 				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-gpg-plugin</artifactId>
-					<version>1.6</version>
+					<groupId>com.mycila</groupId>
+					<artifactId>license-maven-plugin</artifactId>
+					<version>${version.plugin.mycila.license-maven-plugin}</version>
 				</plugin>
 				<plugin>
-					<groupId>org.apache.servicemix.tooling</groupId>
-					<artifactId>depends-maven-plugin</artifactId>
-					<version>1.4.0</version>
+					<groupId>org.asciidoctor</groupId>
+					<artifactId>asciidoctor-maven-plugin</artifactId>
+					<version>${version.plugin.asciidoctor-maven-plugin}</version>
 				</plugin>
 				<plugin>
-					<groupId>org.apache.maven.surefire</groupId>
-					<artifactId>surefire-junit4</artifactId>
-					<version>2.20.1</version>
+					<groupId>org.apache.rat</groupId>
+					<artifactId>apache-rat-plugin</artifactId>
+					<version>${version.plugin.apache.apache-rat-plugin}</version>
 				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.surefire</groupId>
-					<artifactId>surefire-junit3</artifactId>
-					<version>2.20.1</version>
-				</plugin>
+
 			</plugins>
 		</pluginManagement>
+
+		<plugins>
+
+			<!-- Core plugins -->
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<configuration>
+					<escapeString>\</escapeString>
+				</configuration>
+			</plugin>
+
+			<!-- Tools -->
+
+			<!-- Require maven 3.3 or above, Java 1.8 or above. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<dependencies>
+					<dependency>
+						<groupId>org.commonjava.maven.enforcer</groupId>
+						<artifactId>enforce-managed-deps-rule</artifactId>
+						<version>${version.org.commonjava.maven.enforcer}</version>
+					</dependency>
+				</dependencies>
+				<executions>
+					<execution>
+						<id>enforce-maven</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<banDuplicatePomDependencyVersions />
+								<requirePluginVersions>
+									<banSnapshots>false</banSnapshots>
+								</requirePluginVersions>
+								<requireMavenVersion>
+									<version>[3.3.9,4)</version>
+								</requireMavenVersion>
+								<requireJavaVersion>
+									<version>[1.8,)</version>
+								</requireJavaVersion>
+								<requireManagedDeps implementation="org.commonjava.maven.enforcer.rule.EnforceManagedDepsRule">
+									<checkProfiles>true</checkProfiles>
+									<failOnViolation>true</failOnViolation>
+								</requireManagedDeps>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
 	</build>
 
 	<dependencyManagement>
 		<dependencies>
+
+			<!-- pax-web own artifacts -->
+
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-spi</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-jsp</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-runtime</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-descriptor</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-jetty</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-jetty-bundle</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-tomcat</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-undertow</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-extender-war</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-extender-whiteboard</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-resources-jsf</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-resources-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-resources-extender</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ops4j.pax.web.itest.container</groupId>
+				<artifactId>pax-web-itest-container-jetty</artifactId>
+				<classifier>test-sources</classifier>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>helloworld-wc</artifactId>
+				<version>${project.parent.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>war-introspection</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>war-introspection</artifactId>
+				<version>${project.version}</version>
+				<classifier>classes</classifier>
+			</dependency>
+
+			<!-- OPS4J dependencies -->
+
 			<dependency>
 				<groupId>org.ops4j.base</groupId>
 				<artifactId>ops4j-base-lang</artifactId>
@@ -412,6 +686,7 @@
 				<version>${dependency.base.version}</version>
 				<optional>true</optional>
 			</dependency>
+
 			<dependency>
 				<groupId>org.ops4j.pax.swissbox</groupId>
 				<artifactId>pax-swissbox-core</artifactId>
@@ -448,6 +723,7 @@
 				<version>${dependency.swissbox.version}</version>
 				<optional>true</optional>
 			</dependency>
+
 			<dependency>
 				<groupId>org.ops4j.pax.url</groupId>
 				<artifactId>pax-url-war</artifactId>
@@ -467,6 +743,339 @@
 				<version>${dependency.paxurl.version}</version>
 				<optional>true</optional>
 			</dependency>
+
+			<dependency>
+				<groupId>org.ops4j.pax.logging</groupId>
+				<artifactId>pax-logging-api</artifactId>
+				<version>${dependency.pax-logging.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.logging</groupId>
+				<artifactId>pax-logging-service</artifactId>
+				<version>${dependency.pax-logging.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.logging</groupId>
+				<artifactId>pax-logging-log4j2</artifactId>
+				<version>${dependency.pax-logging.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ops4j.pax.tipi</groupId>
+				<artifactId>org.ops4j.pax.tipi.tomcat-embed-core</artifactId>
+				<version>${tipi.tomcat.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.tipi</groupId>
+				<artifactId>org.ops4j.pax.tipi.tomcat-embed-websocket</artifactId>
+				<version>${tipi.tomcat.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ops4j.pax.cdi</groupId>
+				<artifactId>pax-cdi-api</artifactId>
+				<version>${dependency.pax-cdi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.cdi</groupId>
+				<artifactId>pax-cdi-extender</artifactId>
+				<version>${dependency.pax-cdi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.cdi</groupId>
+				<artifactId>pax-cdi-extension</artifactId>
+				<version>${dependency.pax-cdi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.cdi</groupId>
+				<artifactId>pax-cdi-spi</artifactId>
+				<version>${dependency.pax-cdi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.cdi</groupId>
+				<artifactId>pax-cdi-web</artifactId>
+				<version>${dependency.pax-cdi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.cdi</groupId>
+				<artifactId>pax-cdi-weld</artifactId>
+				<version>${dependency.pax-cdi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.cdi</groupId>
+				<artifactId>pax-cdi-jetty-weld</artifactId>
+				<version>${dependency.pax-cdi.version}</version>
+			</dependency>
+
+			<!-- OSGi -->
+
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>osgi.core</artifactId>
+				<version>${dependency.osgi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>osgi.cmpn</artifactId>
+				<version>${dependency.osgi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>osgi.annotation</artifactId>
+				<version>${dependency.osgi.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.jaxrs</artifactId>
+				<version>1.0.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.framework</artifactId>
+				<version>${dependency.felix.framework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.fileinstall</artifactId>
+				<version>${dependency.fileinstall.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.configadmin</artifactId>
+				<version>${dependency.configadmin.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.scr</artifactId>
+				<version>${dependency.scr.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bndlib</artifactId>
+				<version>${dependency.bndlib.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.karaf.features</groupId>
+				<artifactId>framework</artifactId>
+				<version>${dependency.karaf.version}</version>
+				<type>kar</type>
+			</dependency>
+
+			<!-- JavaEE -->
+
+			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>javax.servlet-api</artifactId>
+				<version>${servlet.spec.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.servlet.jsp</groupId>
+				<artifactId>javax.servlet.jsp-api</artifactId>
+				<version>${servlet-jsp.spec.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.servlet.jsp.jstl</groupId>
+				<artifactId>javax.servlet.jsp.jstl-api</artifactId>
+				<version>${servlet-jstl.spec.version}</version>
+			</dependency>
+			<!--<dependency>-->
+				<!--<groupId>javax.servlet</groupId>-->
+				<!--<artifactId>jstl</artifactId>-->
+				<!--<version>${dependency.jstl.version}</version>-->
+				<!--<optional>true</optional>-->
+			<!--</dependency>-->
+			<dependency>
+				<groupId>org.jboss.spec.javax.servlet.jstl</groupId>
+				<artifactId>jboss-jstl-api_1.2_spec</artifactId>
+				<version>1.1.4.Final</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.jboss.spec.javax.servlet.jsp</groupId>
+						<artifactId>jboss-jsp-api_2.3_spec</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>xalan</groupId>
+						<artifactId>xalan</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.jboss.spec.javax.el</groupId>
+						<artifactId>jboss-el-api_3.0_spec</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.jboss.spec.javax.servlet</groupId>
+						<artifactId>jboss-servlet-api_3.1_spec</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.el</groupId>
+				<artifactId>javax.el-api</artifactId>
+				<version>${dependency.el-api.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.websocket</groupId>
+				<artifactId>javax.websocket-api</artifactId>
+				<version>1.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.ws.rs</groupId>
+				<artifactId>jsr311-api</artifactId>
+				<version>1.1.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.enterprise</groupId>
+				<artifactId>cdi-api</artifactId>
+				<version>1.2</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.json</groupId>
+				<artifactId>javax.json-api</artifactId>
+				<version>1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish</groupId>
+				<artifactId>javax.json</artifactId>
+				<version>1.0.4</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.ws.rs</groupId>
+				<artifactId>javax.ws.rs-api</artifactId>
+				<version>2.0.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.geronimo.specs</groupId>
+				<artifactId>geronimo-annotation_1.1_spec</artifactId>
+				<version>1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.geronimo.specs</groupId>
+				<artifactId>geronimo-stax-api_1.2_spec</artifactId>
+				<version>1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.geronimo.specs</groupId>
+				<artifactId>geronimo-activation_1.1_spec</artifactId>
+				<version>1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.geronimo.specs</groupId>
+				<artifactId>geronimo-ejb_3.1_spec</artifactId>
+				<version>1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.geronimo.specs</groupId>
+				<artifactId>geronimo-jpa_2.0_spec</artifactId>
+				<version>1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.geronimo.specs</groupId>
+				<artifactId>geronimo-javamail_1.4_spec</artifactId>
+				<version>1.7</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.geronimo.specs</groupId>
+				<artifactId>geronimo-jaxws_2.2_spec</artifactId>
+				<version>1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.geronimo.specs</groupId>
+				<artifactId>geronimo-osgi-registry</artifactId>
+				<version>1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.geronimo.specs</groupId>
+				<artifactId>geronimo-jaxrpc_1.1_spec</artifactId>
+				<version>2.1</version>
+			</dependency>
+
+			<!-- SMX -->
+
+			<dependency>
+				<groupId>org.apache.servicemix.bundles</groupId>
+				<artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
+				<version>1_2</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.servicemix.specs</groupId>
+				<artifactId>org.apache.servicemix.specs.jaxb-api-2.2</artifactId>
+				<version>2.0.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.servicemix.specs</groupId>
+				<artifactId>org.apache.servicemix.specs.saaj-api-1.3</artifactId>
+				<version>1.8.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.servicemix.specs</groupId>
+				<artifactId>org.apache.servicemix.specs.jsr303-api-1.0.0</artifactId>
+				<version>1.8.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.servicemix.bundles</groupId>
+				<artifactId>org.apache.servicemix.bundles.jsr305</artifactId>
+				<version>1.3.9_1</version>
+			</dependency>
+
+			<!-- Logging -->
+
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${dependency.slf4j}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-jdk14</artifactId>
+				<version>${dependency.slf4j}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>jcl-over-slf4j</artifactId>
+				<version>${dependency.slf4j}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>jul-to-slf4j</artifactId>
+				<version>${dependency.slf4j}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-simple</artifactId>
+				<version>${dependency.slf4j}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-core</artifactId>
+				<version>${dependency.logback.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-classic</artifactId>
+				<version>${dependency.logback.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-slf4j-impl</artifactId>
+				<version>${dependency.log4j2.version}</version>
+			</dependency>
+
+			<!-- Jetty -->
+
 			<dependency>
 				<groupId>org.eclipse.jetty.aggregate</groupId>
 				<artifactId>jetty-all</artifactId>
@@ -488,7 +1097,17 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-alpn-server</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-alpn-client</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.osgi</groupId>
+				<artifactId>jetty-osgi-alpn</artifactId>
 				<version>${dependency.jetty.version}</version>
 			</dependency>
 			<dependency>
@@ -497,181 +1116,123 @@
 				<version>${dependency.jetty.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.mortbay.jetty.alpn</groupId>
+				<artifactId>alpn-boot</artifactId>
+				<version>8.1.2.v20141202</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.http2</groupId>
+				<artifactId>http2-server</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+
+			<!-- Tomcat -->
+
+			<dependency>
+				<groupId>org.apache.tomcat.embed</groupId>
+				<artifactId>tomcat-embed-jasper</artifactId>
+				<version>${dependency.tomcat.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.tomcat.embed</groupId>
+						<artifactId>tomcat-embed-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.eclipse.jdt</groupId>
+						<artifactId>core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.eclipse.jdt</groupId>
+						<artifactId>ecj</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat.embed</groupId>
+				<artifactId>tomcat-embed-core</artifactId>
+				<version>${dependency.tomcat.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat.embed</groupId>
+				<artifactId>tomcat-embed-logging-juli</artifactId>
+				<version>${dependency.tomcat.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat.embed</groupId>
+				<artifactId>tomcat-embed-el</artifactId>
+				<version>${dependency.tomcat.version}</version>
+			</dependency>
+
+			<!-- Undertow -->
+
+			<dependency>
 				<groupId>io.undertow</groupId>
 				<artifactId>undertow-servlet</artifactId>
 				<version>${dependency.undertow-servlet.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>javax.servlet</groupId>
-				<artifactId>jstl</artifactId>
-				<version>${dependency.jstl.version}</version>
-				<optional>true</optional>
-			</dependency>
-			<!-- Dependencies to slf4j -->
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-api</artifactId>
-				<version>${dependency.slf4j}</version>
-				<scope>provided</scope>
+				<groupId>io.undertow</groupId>
+				<artifactId>undertow-core</artifactId>
+				<version>${dependency.undertow-core.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-jdk14</artifactId>
-				<version>${dependency.slf4j}</version>
-				<scope>provided</scope>
+				<groupId>io.undertow</groupId>
+				<artifactId>undertow-websockets-jsr</artifactId>
+				<version>${dependency.undertow-websockets.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>jcl-over-slf4j</artifactId>
-				<version>${dependency.slf4j}</version>
-				<scope>provided</scope>
+				<groupId>org.jboss.xnio</groupId>
+				<artifactId>xnio-api</artifactId>
+				<version>${dependency.xnio-api.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>jul-to-slf4j</artifactId>
-				<version>${dependency.slf4j}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-simple</artifactId>
-				<version>${dependency.slf4j}</version>
-			</dependency>
-			<!-- Dependencies to submodules -->
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-api</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-spi</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-jsp</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-runtime</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-jetty</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-jetty-bundle</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-tomcat</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-undertow</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-extender-war</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-extender-whiteboard</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<!-- Provided dependencies -->
-			<dependency>
-				<groupId>org.osgi</groupId>
-				<artifactId>osgi.core</artifactId>
-				<version>${dependency.osgi.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.osgi</groupId>
-				<artifactId>osgi.cmpn</artifactId>
-				<version>${dependency.osgi.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.osgi</groupId>
-				<artifactId>osgi.enterprise</artifactId>
-				<version>${dependency.osgi.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.osgi</groupId>
-				<artifactId>osgi.annotation</artifactId>
-				<version>${dependency.osgi.version}</version>
-				<scope>provided</scope>
+				<groupId>org.jboss.xnio</groupId>
+				<artifactId>xnio-nio</artifactId>
+				<version>${dependency.xnio.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>${servlet.spec.groupId}</groupId>
-				<artifactId>${servlet.spec.artifactId}</artifactId>
-				<version>${servlet.spec.version}</version>
-				<scope>provided</scope>
+				<groupId>org.jboss.logging</groupId>
+				<artifactId>jboss-logging</artifactId>
+				<version>${dependency.jboss-logging}</version>
+			</dependency>
+
+			<!-- Spring -->
+
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-webmvc</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-orm</artifactId>
+				<version>${spring.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>javax.servlet.jsp</groupId>
-				<artifactId>javax.servlet.jsp-api</artifactId>
-				<version>${servlet-jsp.spec.version}</version>
-				<scope>provided</scope>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-test</artifactId>
+				<version>${spring.version}</version>
+				<scope>test</scope>
 			</dependency>
 
-			<dependency>
-				<groupId>javax.servlet.jsp.jstl</groupId>
-				<artifactId>javax.servlet.jsp.jstl-api</artifactId>
-				<version>${servlet-jstl.spec.version}</version>
-				<scope>provided</scope>
-			</dependency>
+			<!-- Other -->
 
-			<dependency>
-				<groupId>javax.enterprise</groupId>
-				<artifactId>cdi-api</artifactId>
-				<version>1.2</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>org.apache.felix.framework</artifactId>
-				<version>${dependency.felix.framework.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>org.apache.felix.fileinstall</artifactId>
-				<version>${dependency.fileinstall.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>org.apache.felix.configadmin</artifactId>
-				<version>${dependency.configadmin.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>biz.aQute.bnd</groupId>
-				<artifactId>bndlib</artifactId>
-				<version>${dependency.bndlib.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>commons-collections</groupId>
 				<artifactId>commons-collections</artifactId>
 				<version>${dependency.commons-collection3.version}</version>
-				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-collections4</artifactId>
 				<version>${dependency.commons-collection.version}</version>
-				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>commons-beanutils</groupId>
@@ -689,44 +1250,6 @@
 				<version>${dependency.commons-lang.version}</version>
 			</dependency>
 
-			<!-- testing dependencies -->
-			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>${dependency.junit.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.easymock</groupId>
-				<artifactId>easymock</artifactId>
-				<version>2.3</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.easymock</groupId>
-				<artifactId>easymockclassextension</artifactId>
-				<version>2.3</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.logging</groupId>
-				<artifactId>pax-logging-api</artifactId>
-				<version>${dependency.pax-logging.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.logging</groupId>
-				<artifactId>pax-logging-service</artifactId>
-				<version>${dependency.pax-logging.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.logging</groupId>
-				<artifactId>pax-logging-log4j2</artifactId>
-				<version>${dependency.pax-logging.version}</version>
-				<scope>provided</scope>
-			</dependency>
-
 			<dependency>
 				<groupId>org.apache.xbean</groupId>
 				<artifactId>xbean-finder</artifactId>
@@ -742,6 +1265,7 @@
 				<artifactId>xbean-bundleutils</artifactId>
 				<version>${dependency.xbean.version}</version>
 			</dependency>
+
 			<dependency>
 				<groupId>org.ow2.asm</groupId>
 				<artifactId>asm</artifactId>
@@ -769,164 +1293,16 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.primefaces</groupId>
-				<artifactId>primefaces</artifactId>
-				<version>${dependency.primefaces.version}</version>
-			</dependency>
-			
-			<dependency>
-				<groupId>ch.qos.logback</groupId>
-				<artifactId>logback-core</artifactId>
-				<version>${dependency.logback.version}</version>
+				<groupId>javax.faces</groupId>
+				<artifactId>jsf-api</artifactId>
+				<version>${jsf-ri.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>ch.qos.logback</groupId>
-				<artifactId>logback-classic</artifactId>
-				<version>${dependency.logback.version}</version>
+				<groupId>javax.faces</groupId>
+				<artifactId>jsf-impl</artifactId>
+				<version>${jsf-ri.version}</version>
 			</dependency>
 
-			<!-- Load-Test Dependencies -->
-			<dependency>
-				<groupId>com.excilys.ebi.gatling.highcharts</groupId>
-				<artifactId>gatling-charts-highcharts</artifactId>
-				<version>${dependency.gatling.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>${dependency.jdt.groupId}</groupId>
-				<artifactId>${dependency.jdt.artifactId}</artifactId>
-				<version>${dependency.jdt.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.tipi</groupId>
-				<artifactId>
-					org.ops4j.pax.tipi.tomcat-embed-core
-				</artifactId>
-				<version>${tipi.tomcat.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.tipi</groupId>
-				<artifactId>
-					org.ops4j.pax.tipi.tomcat-embed-websocket
-				</artifactId>
-				<version>${tipi.tomcat.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.geronimo.specs</groupId>
-				<artifactId>geronimo-atinject_1.0_spec</artifactId>
-				<version>${dependency.atinject.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.servicemix.specs</groupId>
-				<artifactId>
-					org.apache.servicemix.specs.jsr303-api-1.0.0
-				</artifactId>
-				<version>1.8.0</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.servicemix.bundles</groupId>
-				<artifactId>
-					org.apache.servicemix.bundles.jsr305
-				</artifactId>
-				<version>1.3.9_1</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.geronimo.specs</groupId>
-				<artifactId>geronimo-annotation_1.1_spec</artifactId>
-				<version>1.0.1</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.geronimo.specs</groupId>
-				<artifactId>geronimo-stax-api_1.2_spec</artifactId>
-				<version>1.2</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.geronimo.specs</groupId>
-				<artifactId>geronimo-activation_1.1_spec</artifactId>
-				<version>1.1</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.geronimo.specs</groupId>
-				<artifactId>geronimo-ejb_3.1_spec</artifactId>
-				<version>1.0</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.geronimo.specs</groupId>
-				<artifactId>geronimo-jpa_2.0_spec</artifactId>
-				<version>1.1</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.geronimo.specs</groupId>
-				<artifactId>geronimo-javamail_1.4_spec</artifactId>
-				<version>1.7</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.geronimo.specs</groupId>
-				<artifactId>geronimo-jaxws_2.2_spec</artifactId>
-				<version>1.2</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.geronimo.specs</groupId>
-				<artifactId>geronimo-osgi-registry</artifactId>
-				<version>1.1</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.servicemix.specs</groupId>
-				<artifactId>
-					org.apache.servicemix.specs.jaxb-api-2.2
-				</artifactId>
-				<version>2.0.0</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.servicemix.specs</groupId>
-				<artifactId>
-					org.apache.servicemix.specs.saaj-api-1.3
-				</artifactId>
-				<version>1.8.0</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.geronimo.specs</groupId>
-				<artifactId>geronimo-jaxrpc_1.1_spec</artifactId>
-				<version>2.1</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>org.apache.felix.scr</artifactId>
-				<version>${dependency.scr.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.osgi</groupId>
-				<artifactId>org.osgi.annotation</artifactId>
-				<version>6.0.0</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>javax.el</groupId>
-				<artifactId>javax.el-api</artifactId>
-				<version>${dependency.el-api.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.tomcat.embed</groupId>
-				<artifactId>tomcat-embed-jasper</artifactId>
-				<version>${dependency.tomcat.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.tomcat.embed</groupId>
-				<artifactId>tomcat-embed-core</artifactId>
-				<version>${dependency.tomcat.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.tomcat.embed</groupId>
-				<artifactId>tomcat-embed-logging-juli</artifactId>
-				<version>${dependency.tomcat.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.tomcat.embed</groupId>
-				<artifactId>tomcat-embed-el</artifactId>
-				<version>${dependency.tomcat.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>org.apache.myfaces.core</groupId>
 				<artifactId>myfaces-api</artifactId>
@@ -937,222 +1313,203 @@
 				<artifactId>myfaces-impl</artifactId>
 				<version>${jsf-myfaces.version}</version>
 			</dependency>
+
 			<dependency>
-				<groupId>javax.websocket</groupId>
-				<artifactId>javax.websocket-api</artifactId>
-				<version>1.1</version>
+				<groupId>org.primefaces</groupId>
+				<artifactId>primefaces</artifactId>
+				<version>${dependency.primefaces.version}</version>
 			</dependency>
+
+			<!--<dependency>-->
+				<!--<groupId>org.eclipse.jdt.core.compiler</groupId>-->
+				<!--<artifactId>ecj</artifactId>-->
+				<!--<version>${dependency.jdt.version}</version>-->
+			<!--</dependency>-->
 			<dependency>
-				<groupId>io.undertow</groupId>
-				<artifactId>undertow-core</artifactId>
-				<version>${dependency.undertow-core.version}</version>
+				<groupId>org.eclipse.jdt</groupId>
+				<artifactId>ecj</artifactId>
+				<version>${dependency.jdt.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>io.undertow</groupId>
-				<artifactId>undertow-websockets-jsr</artifactId>
-				<version>${dependency.undertow-websockets.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.xnio</groupId>
-				<artifactId>xnio-api</artifactId>
-				<version>${dependency.xnio-api.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.xnio</groupId>
-				<artifactId>xnio-nio</artifactId>
-				<version>${dependency.xnio.version}</version>
-			</dependency>
+
 			<dependency>
 				<groupId>org.jasypt</groupId>
 				<artifactId>jasypt</artifactId>
 				<version>${dependency.jasypt}</version>
 			</dependency>
+
 			<dependency>
-				<groupId>org.jboss.logging</groupId>
-				<artifactId>jboss-logging</artifactId>
-				<version>${dependency.jboss-logging}</version>
+				<groupId>org.jboss.weld</groupId>
+				<artifactId>weld-core</artifactId>
+				<version>2.4.5.Final</version>
 			</dependency>
+			<dependency>
+				<groupId>org.jboss.weld</groupId>
+				<artifactId>weld-core-jsf</artifactId>
+				<version>2.4.5.Final</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.sun.jersey</groupId>
+				<artifactId>jersey-core</artifactId>
+				<version>1.19</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.jersey</groupId>
+				<artifactId>jersey-server</artifactId>
+				<version>1.19</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.jersey</groupId>
+				<artifactId>jersey-servlet</artifactId>
+				<version>1.19</version>
+			</dependency>
+
+			<!-- Testing -->
+
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${dependency.junit.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.easymock</groupId>
+				<artifactId>easymock</artifactId>
+				<version>2.3</version>
+			</dependency>
+			<dependency>
+				<groupId>org.easymock</groupId>
+				<artifactId>easymockclassextension</artifactId>
+				<version>2.3</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-all</artifactId>
+				<version>1.9.5</version>
+			</dependency>
+
+			<!-- Load-Test Dependencies -->
+
+			<dependency>
+				<groupId>com.excilys.ebi.gatling.highcharts</groupId>
+				<artifactId>gatling-charts-highcharts</artifactId>
+				<version>${dependency.gatling.version}</version>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 
 	<repositories>
 		<repository>
-			<id>com.springsource.repository.bundles.external</id>
-			<name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
-			<url>http://repository.springsource.com/maven/bundles/external</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</repository>
-		<repository>
-			<id>com.springsource.repository.bundles.release</id>
-			<name>SpringSource Enterprise Bundle Repository - Release Bundles</name>
-			<url>http://repository.springsource.com/maven/bundles/release</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</repository>
-		<repository>
-			<id>jetty-releases</id>
-			<name>Jetty Releases</name>
-			<url>https://oss.sonatype.org/content/repositories/jetty-releases</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</repository>
-		<repository>
-			<id>jetty-snapshots</id>
-			<name>Jetty Snapshots</name>
-			<url>https://oss.sonatype.org/content/repositories/jetty-snapshots</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-		<repository>
-			<id>apache-snapshot</id>
+			<id>apache-snapshots</id>
 			<name>Apache Snapshots</name>
 			<url>https://repository.apache.org/content/groups/snapshots-group</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-		<repository>
-			<id>osgi-releases-and-snapshots</id>
-			<url>https://oss.sonatype.org/content/groups/osgi/</url>
-			<layout>default</layout>
-		</repository>
-		<repository>
 			<releases>
 				<enabled>false</enabled>
 			</releases>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
+		</repository>
+		<repository>
 			<id>sonatype-nexus-snapshots</id>
 			<name>Sonatype Nexus Snapshots</name>
 			<url>https://oss.sonatype.org/content/repositories/ops4j-snapshots</url>
-		</repository>
-		<repository>
 			<releases>
 				<enabled>false</enabled>
 			</releases>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
-			<id>sonatype-snapshots</id>
-			<name>Sonatype Snapshots</name>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</repository>
 	</repositories>
 
 	<pluginRepositories>
 		<pluginRepository>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<id>sonatype-snapshots</id>
-			<name>Sonatype Snapshots</name>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</pluginRepository>
-		<pluginRepository>
-			<id>ops4j</id>
-			<name>OPS4J</name>
-			<url>https://oss.sonatype.org/content/repositories/ops4j</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</pluginRepository>
-		<pluginRepository>
-			<id>apache-snapshot</id>
+			<id>apache-snapshots</id>
 			<name>Apache Snapshots</name>
 			<url>https://repository.apache.org/content/groups/snapshots-group</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
 			<releases>
 				<enabled>false</enabled>
 			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+		<pluginRepository>
+			<id>sonatype-nexus-snapshots</id>
+			<name>Sonatype Nexus Snapshots</name>
+			<url>https://oss.sonatype.org/content/repositories/ops4j-snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</pluginRepository>
 	</pluginRepositories>
 
 	<modules>
 		<module>pax-web-api</module>
 		<module>pax-web-spi</module>
-		<module>pax-web-runtime</module>
 		<module>pax-web-jsp</module>
+		<module>pax-web-runtime</module>
+		<module>pax-web-descriptor</module>
 		<module>pax-web-extender-war</module>
 		<module>pax-web-extender-whiteboard</module>
 		<module>pax-web-deployer</module>
+		<module>pax-web-jetty</module>
+		<module>pax-web-jetty-bundle</module>
+		<module>pax-web-tomcat</module>
+		<module>pax-web-tomcat-bundle</module>
+		<module>pax-web-undertow</module>
 		<module>pax-web-features</module>
 		<module>pax-web-archetypes</module>
 		<module>samples</module>
+		<module>pax-web-resources</module>
 		<module>pax-web-itest</module>
 		<module>pax-web-manual</module>
 		<module>pax-web-jaas</module>
-		<module>pax-web-descriptor</module>
-		<module>pax-web-resources</module>
 	</modules>
 
 	<profiles>
+
 		<profile>
-			<id>tomcat</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<modules>
-				<module>pax-web-tomcat</module>
-				<module>pax-web-tomcat-bundle</module>
-			</modules>
+			<id>release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar-no-fork</goal>
+									<goal>test-jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+									<goal>test-javadoc</goal>
+								</goals>
+								<configuration>
+									<doclint>none</doclint>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
-		<profile>
-			<id>jetty</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<modules>
-				<module>pax-web-jetty</module>
-				<module>pax-web-jetty-bundle</module>
-			</modules>
-		</profile>
-		<profile>
-			<id>undertow</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<modules>
-				<module>pax-web-undertow</module>
-			</modules>
-		</profile>
-		<profile>
-			<id>doclint-java8-disable</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<properties>
-				<javadoc.opts>-Xdoclint:none</javadoc.opts>
-			</properties>
-		</profile>
+
 		<profile>
 			<id>rat</id>
 			<activation>
@@ -1163,7 +1520,7 @@
 					<plugin>
 						<groupId>org.apache.rat</groupId>
 						<artifactId>apache-rat-plugin</artifactId>
-						<version>0.12</version>
+						<version>${version.plugin.apache.apache-rat-plugin}</version>
 						<executions>
 							<execution>
 								<phase>verify</phase>
@@ -1267,7 +1624,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-checkstyle-plugin</artifactId>
-						<version>3.0.0</version>
 						<executions>
 							<execution>
 								<id>verify-style</id>
@@ -1298,6 +1654,78 @@
 			</build>
 		</profile>
 
+		<profile>
+			<id>code-coverage</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<inherited>true</inherited>
+						<executions>
+							<execution>
+								<id>prepare-agent-tests</id>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+								<phase>process-sources</phase>
+								<configuration>
+									<includes>
+										<include>org.ops4j.pax.web.*</include>
+									</includes>
+									<propertyName>jcoverage.command</propertyName>
+									<excludes>
+										<exclude>org.apache.jasper</exclude>
+										<exclude>org.apache.jasper.compiler</exclude>
+										<exclude>org.apache.jasper.servlet</exclude>
+										<exclude>org.apache.myfaces.test</exclude>
+										<exclude>org.ops4j.pax.web.extender.samples.*</exclude>
+										<exclude>org.ops4j.pax.web.itest.*</exclude>
+										<exclude>org.ops4j.pax.web.samples.*</exclude>
+										<exclude>org.apache.xbean.*</exclude>
+									</excludes>
+									<append>true</append>
+								</configuration>
+							</execution>
+							<execution>
+								<id>prepare-agent-integration</id>
+								<goals>
+									<goal>prepare-agent-integration</goal>
+								</goals>
+								<phase>pre-integration-test</phase>
+								<configuration>
+									<propertyName>jcoverage.command</propertyName>
+									<destFile>${sonar.jacoco.itReportPath}</destFile>
+									<includes>
+										<include>org.ops4j.pax.web.*</include>
+									</includes>
+									<excludes>
+										<exclude>org.apache.jasper</exclude>
+										<exclude>org.apache.jasper.compiler</exclude>
+										<exclude>org.apache.jasper.servlet</exclude>
+										<exclude>org.apache.myfaces.test</exclude>
+										<exclude>org.ops4j.pax.web.utils.ClassPathUtil</exclude>
+										<exclude>org.ops4j.pax.web.extender.samples.*</exclude>
+										<exclude>org.ops4j.pax.web.itest.*</exclude>
+										<exclude>org.ops4j.pax.web.samples.*</exclude>
+										<exclude>org.apache.xbean.*</exclude>
+										<exclude>org.objectweb.asm.*</exclude>
+									</excludes>
+									<append>true</append>
+								</configuration>
+							</execution>
+							<execution>
+								<id>report-test</id>
+								<goals>
+									<goal>report</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
 		<!-- License generation: `mvn -Plicense process-sources` -->
 		<profile>
 			<id>license</id>
@@ -1306,7 +1734,6 @@
 					<plugin>
 						<groupId>com.mycila</groupId>
 						<artifactId>license-maven-plugin</artifactId>
-						<version>3.0</version>
 						<configuration>
 							<aggregate>true</aggregate>
 							<useDefaultExcludes>true</useDefaultExcludes>
@@ -1343,10 +1770,7 @@
 				</plugins>
 			</build>
 		</profile>
+
 	</profiles>
 
-	<ciManagement>
-		<system>Jenkins</system>
-		<url>http://ci.ops4j.org/jenkins/</url>
-	</ciManagement>
 </project>

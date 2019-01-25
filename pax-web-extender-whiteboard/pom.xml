@@ -1,28 +1,33 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
 
-	<!-- 
-	
-	Licensed under the Apache License, Version 2.0 (the "License");
-	you may not use this file except in compliance with the License.
-	You may obtain a copy of the License at
-	 
-	    http://www.apache.org/licenses/LICENSE-2.0
-	 
-	Unless required by applicable law or agreed to in writing, software
-	distributed under the License is distributed on an "AS IS" BASIS,
-	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	See the License for the specific language governing permissions and
-	limitations under the License.
-	
-	 -->
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<relativePath>../pom.xml</relativePath>
 		<groupId>org.ops4j.pax</groupId>
 		<artifactId>web</artifactId>
 		<version>8.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.ops4j.pax.web</groupId>
@@ -30,16 +35,9 @@
 	<packaging>bundle</packaging>
 
 	<name>OPS4J Pax Web - Extender - Whiteboard</name>
-	<description>
-    Facilitates easy http context/servlet/resources/filters/listeners registered.
-    Detailed information to be found at http://wiki.ops4j.org/confluence/x/LAJN.
-  </description>
 
 	<properties>
-		<bundle.symbolicName>org.ops4j.pax.web.pax-web-extender-whiteboard</bundle.symbolicName>
-		<bundle.namespace>org.ops4j.pax.web.extender.whiteboard</bundle.namespace>
 		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
-		<additionalparam>-Xdoclint:none</additionalparam>
 	</properties>
 
 	<build>
@@ -47,14 +45,13 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<_dsannotations>*</_dsannotations>
-						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-						<Bundle-Activator>${bundle.namespace}.internal.Activator</Bundle-Activator>
+						<Bundle-Activator>org.ops4j.pax.web.extender.whiteboard.internal.Activator</Bundle-Activator>
 						<Import-Package>
-							${bundle.namespace}; version="${pax-web.osgi.version}",
-							${bundle.namespace}.runtime; version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.extender.whiteboard; version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.extender.whiteboard.runtime; version="${pax-web.osgi.version}",
 							javax.xml.parsers,
 							org.slf4j; version="[1.5,2.0)",
 							org.ops4j.pax.web.service; version="${pax-web.osgi.version}",
@@ -76,25 +73,20 @@
 							!javax.microedition.io,
 							!javax.security.auth.x500
 						</Import-Package>
+						<Private-Package>org.ops4j.pax.web.extender.whiteboard.internal.*</Private-Package>
 						<Export-Package>
-							${bundle.namespace}; version="${pax-web.osgi.version}",
-							${bundle.namespace}.runtime; version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.extender.whiteboard; version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.extender.whiteboard.runtime; version="${pax-web.osgi.version}",
                             org.osgi.service.http.whiteboard
 						</Export-Package>
-						<Private-Package>${bundle.namespace}.internal.*</Private-Package>
 						<Embed-Dependency>*; scope=compile; type=!pom; inline=true</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
-            <Provide-Capability>
-              osgi.contract;osgi.contract=JavaEL;version:Version="3";uses:="javax.el",
-              osgi.contract;osgi.contract=JavaJSP;version:Version="2.3";uses!="javax.servlet.jsp,javax.servlet.jsp.el,javax.servlet.jsp.tagext",
-              osgi.contract;osgi.contract=JavaJSTL;version:Version="1.2";uses:="javax.servlet.jsp.jstl.core,javax.servlet.jsp.jstl.fmt,javax.servlet.jsp.jstl.sql,javax.servlet.jsp.jstl.tlv"
-            </Provide-Capability>
-						<_removeheaders>
-							Include-Resource,
-							Private-Package,
-							Embed-Dependency,
-							Embed-Transitive
-						</_removeheaders>
+						<Provide-Capability>
+							osgi.contract;osgi.contract=JavaEL;version:Version="3";uses:="javax.el",
+							osgi.contract;osgi.contract=JavaJSP;version:Version="2.3";uses!="javax.servlet.jsp,javax.servlet.jsp.el,javax.servlet.jsp.tagext",
+							osgi.contract;osgi.contract=JavaJSTL;version:Version="1.2";uses:="javax.servlet.jsp.jstl.core,javax.servlet.jsp.jstl.fmt,javax.servlet.jsp.jstl.sql,javax.servlet.jsp.jstl.tlv"
+						</Provide-Capability>
+						<_dsannotations>*</_dsannotations>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -102,6 +94,17 @@
 	</build>
 
 	<dependencies>
+
+		<!-- pax-web own artifacts -->
+
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- OPS4J dependencies -->
+
 		<dependency>
 			<groupId>org.ops4j.base</groupId>
 			<artifactId>ops4j-base-lang</artifactId>
@@ -114,27 +117,30 @@
 			<groupId>org.ops4j.pax.swissbox</groupId>
 			<artifactId>pax-swissbox-optional-jcl</artifactId>
 		</dependency>
-		<!-- Provided dependencies -->
+
+		<!-- OSGi -->
+
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.cmpn</artifactId>
+			<scope>provided</scope>
 		</dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>osgi.annotation</artifactId>
+			<scope>provided</scope>
         </dependency>
-        
+
+		<!-- JavaEE -->
+
 		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>osgi.cmpn</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>${servlet.spec.groupId}</groupId>
-			<artifactId>${servlet.spec.artifactId}</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-api</artifactId>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -142,40 +148,38 @@
 			<artifactId>javax.websocket-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<!-- Test dependencies -->
+
+		<!-- Logging -->
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Testing -->
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.easymock</groupId>
 			<artifactId>easymock</artifactId>
+			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
-			<version>1.9.5</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<type>jar</type>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-core</artifactId>
-			<version>1.0.6</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>1.0.6</version>
-			<scope>test</scope>
-		</dependency>
+
 	</dependencies>
 
 </project>

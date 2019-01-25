@@ -1,29 +1,33 @@
-<?xml version='1.0' encoding='UTF-8' ?>
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	
-	<!-- 
-	
-	Licensed under the Apache License, Version 2.0 (the "License");
-	you may not use this file except in compliance with the License.
-	You may obtain a copy of the License at
-	 
-	    http://www.apache.org/licenses/LICENSE-2.0
-	 
-	Unless required by applicable law or agreed to in writing, software
-	distributed under the License is distributed on an "AS IS" BASIS,
-	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	See the License for the specific language governing permissions and
-	limitations under the License.
-	
-	 -->
-	
+
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<relativePath>../pom.xml</relativePath>
 		<groupId>org.ops4j.pax</groupId>
 		<artifactId>web</artifactId>
 		<version>8.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.ops4j.pax.web</groupId>
@@ -31,14 +35,10 @@
 	<packaging>bundle</packaging>
 
 	<name>OPS4J Pax Web - Jsp Support</name>
-	<description>
-    Pax Web Jsp Support via Tomcat Jasper 2.
-    Detailed information to be found at http://wiki.ops4j.org/confluence/x/CgNN.
-  </description>
+
+	<description>Pax Web JSP Support via Tomcat Jasper 2.</description>
 
 	<properties>
-		<bundle.symbolicName>org.ops4j.pax.web.pax-web-jsp</bundle.symbolicName>
-		<bundle.namespace>org.ops4j.pax.web.jsp</bundle.namespace>
 		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
 	</properties>
 
@@ -61,12 +61,12 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
 						<Import-Package>
 							org.ops4j.pax.web.service.spi.util; version="${pax-web.osgi.version}",
-							${bundle.namespace}; version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.jsp; version="${pax-web.osgi.version}",
 							javax.servlet; version="[2.3.0,4.0.0)",
 							javax.servlet.http; version="[2.3.0,4.0.0)",
 							javax.servlet.descriptor;version="[2.3.0,4.0.0)",
@@ -174,7 +174,7 @@
 							org.apache.juli.logging
 						</Private-Package>
 						<Export-Package>
-							${bundle.namespace}; version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.jsp; version="${pax-web.osgi.version}",
 							javax.servlet.jsp; version="2.3.1",
 							javax.servlet.jsp.el; version="2.3.1",
 							javax.servlet.jsp.tagext; version="2.3.1",
@@ -229,15 +229,9 @@
 							org/apache/jasper/JspCompilationContext.class=target/classes/org/apache/jasper/JspCompilationContext.class,
 							org/apache/tomcat/util/descriptor/tagplugin/TagPluginParser.class=target/classes/org/apache/tomcat/util/descriptor/tagplugin/TagPluginParser.class
 						</Include-Resource>
-						<Embed-Dependency>*; scope=compile; type=!pom;
+						<Embed-Dependency>*;scope=compile;type=!pom;
 							inline=**/*.class|**/*.ico|**/*.dtd|**/*.xml|**/*.properties|**/*.map|**/*.default|**/*.providers|**/*.tld|**/*.rsc</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
-						<_removeheaders>
-							Include-Resource,
-							Private-Package,
-							Embed-Dependency,
-							Embed-Transitive
-						</_removeheaders>
 						<_nouses>true</_nouses>
 					</instructions>
 				</configuration>
@@ -268,10 +262,7 @@
 
 	<dependencies>
 
-		<dependency>
-			<groupId>org.ops4j.base</groupId>
-			<artifactId>ops4j-base-util-xml</artifactId>
-		</dependency>
+		<!-- pax-web own artifacts -->
 
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
@@ -284,18 +275,85 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- Embeded dependencies (not transitive) -->
+		<!-- OPS4J dependencies -->
+
+		<dependency>
+			<groupId>org.ops4j.base</groupId>
+			<artifactId>ops4j-base-util-xml</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.swissbox</groupId>
 			<artifactId>pax-swissbox-core</artifactId>
-			<scope>compile</scope>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.swissbox</groupId>
 			<artifactId>pax-swissbox-optional-jcl</artifactId>
-			<scope>compile</scope>
 			<optional>true</optional>
+		</dependency>
+
+		<!-- OSGi -->
+
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.annotation</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- JavaEE -->
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Tomcat -->
+
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-jasper</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-el</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Other -->
+
+		<!--<dependency>-->
+			<!--<groupId>org.eclipse.jdt.core.compiler</groupId>-->
+			<!--<artifactId>ecj</artifactId>-->
+			<!--<scope>provided</scope>-->
+		<!--</dependency>-->
+		<dependency>
+			<groupId>org.eclipse.jdt</groupId>
+			<artifactId>ecj</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Logging -->
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 		<!--
@@ -308,93 +366,6 @@
 		<dependency>
 			<groupId>org.jboss.spec.javax.servlet.jstl</groupId>
 			<artifactId>jboss-jstl-api_1.2_spec</artifactId>
-			<version>1.1.4.Final</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.jboss.spec.javax.servlet.jsp</groupId>
-					<artifactId>jboss-jsp-api_2.3_spec</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xalan</groupId>
-					<artifactId>xalan</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.jboss.spec.javax.el</groupId>
-					<artifactId>jboss-el-api_3.0_spec</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.jboss.spec.javax.servlet</groupId>
-					<artifactId>jboss-servlet-api_3.1_spec</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.tomcat.embed</groupId>
-  			<artifactId>tomcat-embed-el</artifactId>
-  			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.tomcat.embed</groupId>
-			<artifactId>tomcat-embed-jasper</artifactId>
-			<scope>compile</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.tomcat.embed</groupId>
-					<artifactId>tomcat-embed-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<artifactId>core</artifactId>
-					<groupId>org.eclipse.jdt</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>ecj</artifactId>
-					<groupId>org.eclipse.jdt</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.tomcat.embed</groupId>
-			<artifactId>tomcat-embed-core</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.eclipse.jdt.core.compiler</groupId>
-			<artifactId>ecj</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- <dependency> -->
-		<!-- <groupId>org.eclipse.jetty.orbit</groupId> -->
-		<!-- <artifactId>org.eclipse.jdt.core</artifactId> -->
-		<!-- <version>3.7.1</version> -->
-		<!-- <scope>provided</scope> -->
-		<!-- </dependency> -->
-
-		<!-- Provided dependencies (not transitive) -->
-
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>osgi.core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>osgi.annotation</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>${servlet.spec.groupId}</groupId>
-			<artifactId>${servlet.spec.artifactId}</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<type>jar</type>
-			<scope>provided</scope>
 		</dependency>
 
 	</dependencies>

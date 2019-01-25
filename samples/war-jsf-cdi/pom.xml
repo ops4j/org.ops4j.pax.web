@@ -1,20 +1,28 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-	Licensed under the Apache License, Version 2.0 (the "License");
-	you may not use this file except in compliance with the License.
-	You may obtain a copy of the License at
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
 
-	    http://www.apache.org/licenses/LICENSE-2.0
+      http://www.apache.org/licenses/LICENSE-2.0
 
-	Unless required by applicable law or agreed to in writing, software
-	distributed under the License is distributed on an "AS IS" BASIS,
-	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	See the License for the specific language governing permissions and
-	limitations under the License.
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
 
 -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
 		<groupId>org.ops4j.pax.web</groupId>
 		<artifactId>samples</artifactId>
@@ -22,29 +30,75 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>war-jsf-cdi</artifactId>
 	<groupId>org.ops4j.pax.web.samples</groupId>
+	<artifactId>war-jsf-cdi</artifactId>
+
 	<name>OPS4J Pax Web - Samples - WAR Extender - JSF and CDI</name>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<_wab>src/main/webapp</_wab>
+						<_sources>true</_sources>
+						<Web-ContextPath>war-jsf-cdi</Web-ContextPath>
+						<Include-Resource>{maven-resources}</Include-Resource>
+						<_dsannotations>*</_dsannotations>
+						<!-- Export only necessary for integration-test in pax-web -->
+						<Export-Package>
+							org.ops4j.pax.web.samples.whiteboard.ds.jaxrs
+						</Export-Package>
+						<Import-Package>
+							org.apache.taglibs.standard.tlv;version=1.1.2,\
+							org.apache.taglibs.standard.tei;version=1.1.2,\
+							org.apache.taglibs.standard.tag.rt.core;version=1.1.2,\
+							org.apache.taglibs.standard.tag.common.core;version=1.1.2,\
+							org.apache.taglibs.standard.resources;version=1.1.2,\
+							javax.faces,\
+							javax.faces.application,\
+							javax.faces.bean,\
+							javax.faces.component,\
+							javax.faces.component.behavior,\
+							javax.faces.component.html,\
+							javax.faces.component.visit,\
+							javax.faces.context,\
+							javax.faces.convert,\
+							javax.faces.el,\
+							javax.faces.event,\
+							javax.faces.lifecycle,\
+							javax.faces.model,\
+							javax.faces.render,\
+							javax.faces.validator,\
+							javax.faces.view,\
+							javax.faces.view.facelets,\
+							javax.faces.webapp,\
+							javax.servlet.jsp;version='[2.2.0,3.0.0)',\
+							javax.servlet.jsp.jstl.tlv;version=1.2,\
+							javax.servlet.jsp.jstl.fmt;version=1.2,\
+							javax.servlet.jsp.jstl.core;version=1.2,\
+							javax.servlet,\
+							javax.el,\
+							*
+						</Import-Package>
+						<Require-Bundle>org.glassfish.javax.faces</Require-Bundle>
+						<Require-Capability>
+							osgi.extender; filter:="(osgi.extender=pax.cdi)",
+							org.ops4j.pax.cdi.extension; filter:="(extension=pax-cdi-extension)"
+						</Require-Capability>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 	<dependencies>
-		<dependency>
-			<groupId>org.apache.myfaces.core</groupId>
-			<artifactId>myfaces-impl</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.inject</groupId>
-			<artifactId>javax.inject</artifactId>
-			<version>1</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.enterprise</groupId>
-			<artifactId>cdi-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-		</dependency>
+
+		<!-- OPS4J dependencies -->
+
 		<dependency>
 			<groupId>org.ops4j.pax.logging</groupId>
 			<artifactId>pax-logging-api</artifactId>
@@ -57,71 +111,63 @@
 		<dependency>
 			<groupId>org.ops4j.pax.cdi</groupId>
 			<artifactId>pax-cdi-extender</artifactId>
-			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.cdi</groupId>
 			<artifactId>pax-cdi-extension</artifactId>
-			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.cdi</groupId>
 			<artifactId>pax-cdi-spi</artifactId>
-			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.cdi</groupId>
 			<artifactId>pax-cdi-web</artifactId>
-			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.cdi</groupId>
 			<artifactId>pax-cdi-weld</artifactId>
-			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.cdi</groupId>
 			<artifactId>pax-cdi-jetty-weld</artifactId>
-			<version>1.0.0</version>
+		</dependency>
+
+		<!-- JavaEE -->
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.enterprise</groupId>
+			<artifactId>cdi-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- SMX -->
+
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
+		</dependency>
+
+		<!-- Other -->
+
+		<dependency>
+			<groupId>org.apache.myfaces.core</groupId>
+			<artifactId>myfaces-impl</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.weld</groupId>
 			<artifactId>weld-core</artifactId>
-			<version>2.4.5.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.weld</groupId>
 			<artifactId>weld-core-jsf</artifactId>
-			<version>2.4.5.Final</version>
 		</dependency>
+
 	</dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<!-- Workaround until jar-plugin keeps Manifest -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.6</version>
-				<configuration>
-					<archive>
-						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-					</archive>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>biz.aQute.bnd</groupId>
-				<artifactId>bnd-maven-plugin</artifactId>
-				<!-- TODO extract version -->
-				<version>3.2.0</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>bnd-process</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
 </project>

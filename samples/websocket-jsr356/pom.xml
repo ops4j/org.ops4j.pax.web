@@ -1,33 +1,40 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-	Licensed under the Apache License, Version 2.0 (the "License");
-	you may not use this file except in compliance with the License.
-	You may obtain a copy of the License at
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
 
-	    http://www.apache.org/licenses/LICENSE-2.0
+      http://www.apache.org/licenses/LICENSE-2.0
 
-	Unless required by applicable law or agreed to in writing, software
-	distributed under the License is distributed on an "AS IS" BASIS,
-	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	See the License for the specific language governing permissions and
-	limitations under the License.
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
 
 -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
 		<groupId>org.ops4j.pax.web</groupId>
 		<artifactId>samples</artifactId>
 		<version>8.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
+
 	<groupId>org.ops4j.pax.web.samples</groupId>
 	<artifactId>websocket-jsr356</artifactId>
 	<packaging>war</packaging>
 
-	<properties>
-		<bundle.symbolicName>org.ops4j.pax.web.samples.websocket-jsr356</bundle.symbolicName>
-		<bundle.namespace>org.ops4j.pax.web.samples.websocket-jsr356</bundle.namespace>
-	</properties>
+	<name>OPS4J Pax Web - Samples - Websocket JSR 356 Sample</name>
 
 	<build>
 		<plugins>
@@ -36,10 +43,10 @@
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
 					<failOnMissingWebXml>false</failOnMissingWebXml>
-                    <archive>
-                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-                    </archive>
-                </configuration>
+					<archive>
+						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+					</archive>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.felix</groupId>
@@ -47,38 +54,39 @@
 				<extensions>true</extensions>
 				<configuration>
 					<supportedProjectTypes>
-	                    <supportedProjectType>jar</supportedProjectType>
-	                    <supportedProjectType>bundle</supportedProjectType>
-	                    <supportedProjectType>war</supportedProjectType>
-	                </supportedProjectTypes>
+						<supportedProjectType>jar</supportedProjectType>
+						<supportedProjectType>bundle</supportedProjectType>
+						<supportedProjectType>war</supportedProjectType>
+					</supportedProjectTypes>
 					<instructions>
 						<_wab>src/main/webapp/</_wab>
 						<Web-ContextPath>websocket</Web-ContextPath>
-						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
 						<Import-Package>
-                            javax.servlet,
+							javax.servlet,
 							*
 						</Import-Package>
 						<Bundle-Classpath>
-                            WEB-INF/classes
-                        </Bundle-Classpath>
+							WEB-INF/classes
+						</Bundle-Classpath>
 					</instructions>
 				</configuration>
 				<executions>
-                    <execution>
-                        <id>generate-manifest</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>manifest</goal>
-                        </goals>
-                    </execution>
-                </executions>
+					<execution>
+						<id>generate-manifest</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>manifest</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
 
 	<dependencies>
-		<!-- Provided dependencies -->
+
+		<!-- OSGi -->
+
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.core</artifactId>
@@ -89,9 +97,12 @@
 			<artifactId>osgi.cmpn</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
+		<!-- JavaEE -->
+
 		<dependency>
-			<groupId>${servlet.spec.groupId}</groupId>
-			<artifactId>${servlet.spec.artifactId}</artifactId>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -99,24 +110,31 @@
 			<artifactId>javax.websocket-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>javax.json</groupId>
 			<artifactId>javax.json-api</artifactId>
-			<version>1.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-		    <groupId>org.glassfish</groupId>
-		    <artifactId>javax.json</artifactId>
-		    <version>1.0.4</version>
-		    <scope>provided</scope>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.json</artifactId>
+			<scope>provided</scope>
 		</dependency>
+
+		<!-- Logging -->
+
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
-	
-	<name>OPS4J Pax Web - Samples - Websocket JSR 356 Sample</name>
+
 </project>

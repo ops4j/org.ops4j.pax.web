@@ -33,6 +33,7 @@ import org.osgi.framework.Bundle;
  *
  * @author Harald Wellmann
  */
+// TODO: org.ops4j.pax.swissbox.core.BundleClassLoader is private-packaged!
 public class ResourceDelegatingBundleClassLoader extends BundleClassLoader {
 
 	private List<Bundle> bundles;

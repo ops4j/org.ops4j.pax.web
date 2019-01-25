@@ -1,103 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 <!--
 
-	Licensed under the Apache License, Version 2.0 (the "License");
-	you may not use this file except in compliance with the License.
-	You may obtain a copy of the License at
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
 
-	    http://www.apache.org/licenses/LICENSE-2.0
+      http://www.apache.org/licenses/LICENSE-2.0
 
-	Unless required by applicable law or agreed to in writing, software
-	distributed under the License is distributed on an "AS IS" BASIS,
-	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	See the License for the specific language governing permissions and
-	limitations under the License.
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
 
 -->
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-  <parent>
-    <groupId>org.ops4j.pax</groupId>
-    <artifactId>web</artifactId>
-    <version>8.0.0-SNAPSHOT</version>
-  </parent>
+	<modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.ops4j.pax.web</groupId>
-  <artifactId>samples</artifactId>
-  <packaging>pom</packaging>
+	<parent>
+		<groupId>org.ops4j.pax</groupId>
+		<artifactId>web</artifactId>
+		<version>8.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
 
-  <name>OPS4J Pax Web - Samples</name>
-  <description>
-    Pax Web Samples
-  </description>
+	<groupId>org.ops4j.pax.web</groupId>
+	<artifactId>samples</artifactId>
+	<packaging>pom</packaging>
 
-  <dependencyManagement>
-  	<dependencies>
-  		<dependency>
-	      <groupId>org.ops4j.pax.web.samples</groupId>
-	      <artifactId>helloworld-wc</artifactId>
-	      <version>${project.parent.version}</version>
-	    </dependency>
-      <dependency>
-        <groupId>org.ops4j.pax.cdi</groupId>
-        <artifactId>pax-cdi-api</artifactId>
-        <version>${dependency.pax-cdi.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.myfaces.core</groupId>
-        <artifactId>myfaces-impl</artifactId>
-        <version>${jsf-myfaces.version}</version>
-      </dependency>
-  	</dependencies>
-  </dependencyManagement>
-  <modules>
-    <module>helloworld-hs</module>
-    <module>helloworld-jsp</module>
-    <module>helloworld-jsp-noclasses</module>
-    <module>helloworld-wc</module>
-    <module>authentication</module>
-    <module>war</module>
-    <module>war-dispatch-jsp</module>
-    <module>whiteboard</module>
-    <module>whiteboard-extended</module>
-    <module>whiteboard-blueprint</module>
-	<module>whiteboard-ds</module>
-	<module>whiteboard-ds-jaxrs</module>
-    <module>provision</module>
-    <module>features</module>
-    <module>jetty-config-fragment</module>
-    <module>war-authentication</module>
-    <module>jetty-auth-config-fragment</module>
-    <module>tomcat-config-fragment</module>
-    <module>tomcat-auth-config-fragment</module>
-    <module>undertow-auth-config-fragment</module>
-    <module>war-formauth</module>
-    <module>war-introspection</module>
-    <module>war-introspection-bundle</module>
-    <module>war-jsf</module>
-    <module>war-jsf22</module>
-    <module>war-jsf22-cdi</module>
-	<module>war-jsf-cdi</module>
-    <module>war-jsf-primefaces</module>
-    <module>helloworld-servlet3</module>
-    <module>jsp-filter</module>
-    <module>simple-filter</module>
-    <module>war-jetty-web</module>
-    <module>war-tomcat-resource</module>
-    <module>war-simple</module>
-    <module>war-spring</module>
-    <module>war-spring-osgi</module>
-    <module>web-fragment</module>
-    <module>wab-jetty-web</module>
-    <module>websocket-jsr356</module>
-    <module>war-extended-post</module>
-    <module>web-jersey</module>
-    <module>http-custom-context</module>
-    <module>jsf-resourcehandler</module>
-  </modules>
+	<name>OPS4J Pax Web - Samples</name>
 
-  <properties>
-  	<sonar.jacoco.itReportPath>${project.basedir}/../../target/jacoco-it.exec</sonar.jacoco.itReportPath>
-  </properties>
+	<description>Pax Web Samples</description>
+
+	<modules>
+		<module>helloworld-hs</module>
+		<module>helloworld-jsp</module>
+		<module>helloworld-jsp-noclasses</module>
+		<module>helloworld-wc</module>
+		<module>authentication</module>
+		<module>war</module>
+		<module>war-dispatch-jsp</module>
+		<module>whiteboard</module>
+		<module>whiteboard-extended</module>
+		<module>whiteboard-blueprint</module>
+		<module>whiteboard-ds</module>
+		<module>whiteboard-ds-jaxrs</module>
+		<module>provision</module>
+		<module>features</module>
+		<module>jetty-config-fragment</module>
+		<module>war-authentication</module>
+		<module>jetty-auth-config-fragment</module>
+		<module>tomcat-config-fragment</module>
+		<module>tomcat-auth-config-fragment</module>
+		<module>undertow-auth-config-fragment</module>
+		<module>war-formauth</module>
+		<module>war-introspection</module>
+		<module>war-introspection-bundle</module>
+		<module>war-jsf</module>
+		<module>war-jsf22</module>
+		<module>war-jsf22-cdi</module>
+		<module>war-jsf-cdi</module>
+		<module>war-jsf-primefaces</module>
+		<module>helloworld-servlet3</module>
+		<module>jsp-filter</module>
+		<module>simple-filter</module>
+		<module>war-jetty-web</module>
+		<module>war-tomcat-resource</module>
+		<module>war-simple</module>
+		<module>war-spring</module>
+		<module>war-spring-osgi</module>
+		<module>web-fragment</module>
+		<module>wab-jetty-web</module>
+		<module>websocket-jsr356</module>
+		<module>war-extended-post</module>
+		<module>web-jersey</module>
+		<module>http-custom-context</module>
+		<module>jsf-resourcehandler</module>
+	</modules>
+
 </project>
