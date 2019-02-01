@@ -239,11 +239,11 @@
 		    <groupId>org.eclipse.jetty.websocket</groupId>
 		    <artifactId>javax-websocket-client-impl</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.geronimo.specs</groupId>
-			<artifactId>geronimo-atinject_1.0_spec</artifactId>
-			<scope>provided</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
+            <scope>provided</scope>
+        </dependency>
 		<dependency>
 			<groupId>${servlet.spec.groupId}</groupId>
 			<artifactId>${servlet.spec.artifactId}</artifactId>

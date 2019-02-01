@@ -209,6 +209,8 @@
 
 		<dependency.junit.version>4.11</dependency.junit.version>
 
+		<alpn-version>8.1.2.v20141202</alpn-version>
+
 		<aries.spifly.version>1.2.3</aries.spifly.version>
 		<aries.util.version>1.1.3</aries.util.version>
 		
@@ -216,6 +218,7 @@
 		<dependency.logback.version>1.0.6</dependency.logback.version>
 
 		<spring.version>5.1.4.RELEASE</spring.version>
+		<spring-dm.version>1.2.1</spring-dm.version>
 
 		<!-- Plugins -->
 		<bundle-plugin.version>3.3.0</bundle-plugin.version>
@@ -473,6 +476,11 @@
 					<artifactId>apache-rat-plugin</artifactId>
 					<version>${version.plugin.apache.apache-rat-plugin}</version>
 				</plugin>
+				<plugin>
+					<groupId>org.ops4j.pax.exam</groupId>
+					<artifactId>exam-maven-plugin</artifactId>
+					<version>${version.pax-exam}</version>
+				</plugin>
 
 			</plugins>
 		</pluginManagement>
@@ -615,10 +623,15 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-extender-war</artifactId>
+				<version>${project.version}</version>
+				<classifier>uber</classifier>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-extender-whiteboard</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-resources-jsf</artifactId>
@@ -634,11 +647,34 @@
 				<artifactId>pax-web-resources-extender</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-manual</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-features</artifactId>
+				<version>${project.version}</version>
+				<type>xml</type>
+				<classifier>features</classifier>
+			</dependency>
 
 			<dependency>
 				<groupId>org.ops4j.pax.web.itest.container</groupId>
 				<artifactId>pax-web-itest-container-jetty</artifactId>
+				<version>${project.version}</version>
 				<classifier>test-sources</classifier>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.itest</groupId>
+				<artifactId>pax-web-itest-base</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.itest</groupId>
+				<artifactId>pax-web-itest-common</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -658,6 +694,80 @@
 				<artifactId>war-introspection</artifactId>
 				<version>${project.version}</version>
 				<classifier>classes</classifier>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>war</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>helloworld-hs</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>helloworld-servlet3</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>whiteboard</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>whiteboard-ds</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>whiteboard-ds-jaxrs</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>authentication</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
+				<artifactId>fragment</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>jsf-resourcehandler-myfaces</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>jsf-resourcehandler-resourcebundle</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>jsf-resourcehandler-resourcebundle-override</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>war-jsf22-cdi</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
+				<artifactId>war</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>war-simple</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
 			</dependency>
 
 			<!-- OPS4J dependencies -->
@@ -743,6 +853,22 @@
 				<version>${dependency.paxurl.version}</version>
 				<optional>true</optional>
 			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.url</groupId>
+				<artifactId>pax-url-wrap</artifactId>
+				<version>${dependency.paxurl.version}</version>
+				<classifier>uber</classifier>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.url</groupId>
+				<artifactId>pax-url-link</artifactId>
+				<version>${dependency.paxurl.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.url</groupId>
+				<artifactId>pax-url-classpath</artifactId>
+				<version>${dependency.paxurl.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.ops4j.pax.logging</groupId>
@@ -807,6 +933,52 @@
 				<version>${dependency.pax-cdi.version}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>pax-exam-link-mvn</artifactId>
+				<version>${version.pax-exam}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>pax-exam-link-assembly</artifactId>
+				<version>${version.pax-exam}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>pax-exam-container-karaf</artifactId>
+				<version>${version.pax-exam}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>pax-exam-junit4</artifactId>
+				<version>${version.pax-exam}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>pax-exam-invoker-junit</artifactId>
+				<version>${version.pax-exam}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>pax-exam-container-native</artifactId>
+				<version>${version.pax-exam}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>pax-exam-inject</artifactId>
+				<version>${version.pax-exam}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>pax-exam-extender-service</artifactId>
+				<version>${version.pax-exam}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>pax-exam</artifactId>
+				<version>${version.pax-exam}</version>
+			</dependency>
+
 			<!-- OSGi -->
 
 			<dependency>
@@ -851,11 +1023,34 @@
 				<artifactId>org.apache.felix.scr</artifactId>
 				<version>${dependency.scr.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.eventadmin</artifactId>
+				<version>1.3.2</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.webconsole</artifactId>
+				<version>3.1.8</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>org.eclipse.osgi</artifactId>
+				<version>3.10.100.v20150529-1857</version>
+			</dependency>
 
 			<dependency>
 				<groupId>biz.aQute.bnd</groupId>
-				<artifactId>bndlib</artifactId>
+				<artifactId>biz.aQute.bndlib</artifactId>
 				<version>${dependency.bndlib.version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>org.osgi.core</artifactId>
+						<groupId>org.osgi</groupId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<dependency>
@@ -863,6 +1058,84 @@
 				<artifactId>framework</artifactId>
 				<version>${dependency.karaf.version}</version>
 				<type>kar</type>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.karaf</groupId>
+				<artifactId>manual</artifactId>
+				<version>${dependency.karaf.version}</version>
+				<type>war</type>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.karaf.system</groupId>
+				<artifactId>org.apache.karaf.system.core</artifactId>
+				<version>${dependency.karaf.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.karaf.features</groupId>
+				<artifactId>org.apache.karaf.features.core</artifactId>
+				<version>${dependency.karaf.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.karaf.management</groupId>
+				<artifactId>org.apache.karaf.management.server</artifactId>
+				<version>${dependency.karaf.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.karaf.features</groupId>
+				<artifactId>standard</artifactId>
+				<version>${dependency.karaf.version}</version>
+				<type>xml</type>
+				<classifier>features</classifier>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.karaf.features</groupId>
+				<artifactId>spring</artifactId>
+				<version>${dependency.karaf.version}</version>
+				<type>xml</type>
+				<classifier>features</classifier>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.karaf</groupId>
+				<artifactId>apache-karaf</artifactId>
+				<version>${dependency.karaf.version}</version>
+				<type>tar.gz</type>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.karaf.shell</groupId>
+						<artifactId>org.apache.karaf.shell.dev</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.osgi</groupId>
+						<artifactId>org.osgi.core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.osgi</groupId>
+						<artifactId>org.osgi.compendium</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.ops4j.pax.logging</groupId>
+						<artifactId>pax-logging-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.ops4j.pax.logging</groupId>
+						<artifactId>pax-logging-log4j2</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.karaf</groupId>
+						<artifactId>org.apache.karaf.client</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.aries.spifly</groupId>
+				<artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
+				<version>${aries.spifly.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.aries</groupId>
+				<artifactId>org.apache.aries.util</artifactId>
+				<version>${aries.util.version}</version>
 			</dependency>
 
 			<!-- JavaEE -->
@@ -925,6 +1198,12 @@
 			</dependency>
 
 			<dependency>
+				<groupId>javax.validation</groupId>
+				<artifactId>validation-api</artifactId>
+				<version>${dependency.validation-api.version}</version>
+			</dependency>
+
+			<dependency>
 				<groupId>javax.ws.rs</groupId>
 				<artifactId>jsr311-api</artifactId>
 				<version>1.1.1</version>
@@ -933,6 +1212,11 @@
 			<dependency>
 				<groupId>javax.enterprise</groupId>
 				<artifactId>cdi-api</artifactId>
+				<version>1.2</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.interceptor</groupId>
+				<artifactId>javax.interceptor-api</artifactId>
 				<version>1.2</version>
 			</dependency>
 
@@ -951,6 +1235,23 @@
 				<groupId>javax.ws.rs</groupId>
 				<artifactId>javax.ws.rs-api</artifactId>
 				<version>2.0.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.faces</groupId>
+				<artifactId>jsf-api</artifactId>
+				<version>${jsf-ri.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.faces</groupId>
+				<artifactId>jsf-impl</artifactId>
+				<version>${jsf-ri.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.security.auth.message</groupId>
+				<artifactId>javax.security.auth.message-api</artifactId>
+				<version>${dependency.jaspic.version}</version>
 			</dependency>
 
 			<dependency>
@@ -998,6 +1299,11 @@
 				<artifactId>geronimo-jaxrpc_1.1_spec</artifactId>
 				<version>2.1</version>
 			</dependency>
+			<dependency>
+				<groupId>org.apache.geronimo.specs</groupId>
+				<artifactId>geronimo-jta_1.1_spec</artifactId>
+				<version>1.1.1</version>
+			</dependency>
 
 			<!-- SMX -->
 
@@ -1006,7 +1312,41 @@
 				<artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
 				<version>1_2</version>
 			</dependency>
+			<dependency>
+				<groupId>org.apache.servicemix.bundles</groupId>
+				<artifactId>org.apache.servicemix.bundles.jsr305</artifactId>
+				<version>1.3.9_1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.servicemix.bundles</groupId>
+				<artifactId>org.apache.servicemix.bundles.commons-digester</artifactId>
+				<version>1.8_4</version>
+				<exclusions>
+					<exclusion>
+						<groupId>log4j</groupId>
+						<artifactId>log4j</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>logkit</groupId>
+						<artifactId>logkit</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.servlet</groupId>
+						<artifactId>servlet-api</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
 
+			<dependency>
+				<groupId>org.apache.servicemix.specs</groupId>
+				<artifactId>org.apache.servicemix.specs.jsr250-1.0</artifactId>
+				<version>2.0.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.servicemix.specs</groupId>
+				<artifactId>org.apache.servicemix.specs.jsr303-api-1.0.0</artifactId>
+				<version>${dependency.jsr303.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.apache.servicemix.specs</groupId>
 				<artifactId>org.apache.servicemix.specs.jaxb-api-2.2</artifactId>
@@ -1016,17 +1356,6 @@
 				<groupId>org.apache.servicemix.specs</groupId>
 				<artifactId>org.apache.servicemix.specs.saaj-api-1.3</artifactId>
 				<version>1.8.0</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.apache.servicemix.specs</groupId>
-				<artifactId>org.apache.servicemix.specs.jsr303-api-1.0.0</artifactId>
-				<version>1.8.0</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.servicemix.bundles</groupId>
-				<artifactId>org.apache.servicemix.bundles.jsr305</artifactId>
-				<version>1.3.9_1</version>
 			</dependency>
 
 			<!-- Logging -->
@@ -1083,6 +1412,7 @@
 				<version>${dependency.jetty.version}</version>
 				<optional>true</optional>
 			</dependency>
+
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-jaas</artifactId>
@@ -1097,12 +1427,59 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-alpn-server</artifactId>
+				<artifactId>jetty-continuation</artifactId>
 				<version>${dependency.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>test-jetty-webapp</artifactId>
+				<version>${dependency.jetty.version}</version>
+				<type>war</type>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-util</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-io</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-http</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-server</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-security</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-servlet</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-xml</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-alpn-client</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-alpn-server</artifactId>
 				<version>${dependency.jetty.version}</version>
 			</dependency>
 			<dependency>
@@ -1111,18 +1488,87 @@
 				<version>${dependency.jetty.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-continuation</artifactId>
-				<version>${dependency.jetty.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.mortbay.jetty.alpn</groupId>
 				<artifactId>alpn-boot</artifactId>
-				<version>8.1.2.v20141202</version>
+				<version>${alpn-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.eclipse.jetty.osgi</groupId>
+				<artifactId>jetty-osgi-npn</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.eclipse.jetty.http2</groupId>
+				<artifactId>http2-common</artifactId>
+				<version>${dependency.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.http2</groupId>
 				<artifactId>http2-server</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.http2</groupId>
+				<artifactId>http2-http-client-transport</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.http2</groupId>
+				<artifactId>http2-client</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.http2</groupId>
+				<artifactId>http2-hpack</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.eclipse.jetty.spdy</groupId>
+				<artifactId>spdy-server</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.spdy</groupId>
+				<artifactId>spdy-http-server</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.eclipse.jetty.websocket</groupId>
+				<artifactId>websocket-api</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.websocket</groupId>
+				<artifactId>websocket-common</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.websocket</groupId>
+				<artifactId>websocket-server</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.websocket</groupId>
+				<artifactId>websocket-client</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.websocket</groupId>
+				<artifactId>websocket-servlet</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.websocket</groupId>
+				<artifactId>javax-websocket-server-impl</artifactId>
+				<version>${dependency.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.websocket</groupId>
+				<artifactId>javax-websocket-client-impl</artifactId>
 				<version>${dependency.jetty.version}</version>
 			</dependency>
 
@@ -1169,6 +1615,20 @@
 				<groupId>io.undertow</groupId>
 				<artifactId>undertow-servlet</artifactId>
 				<version>${dependency.undertow-servlet.version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>xnio-nio</artifactId>
+						<groupId>org.jboss.xnio</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>xnio-api</artifactId>
+						<groupId>org.jboss.xnio</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>undertow-core</artifactId>
+						<groupId>io.undertow</groupId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>io.undertow</groupId>
@@ -1214,12 +1674,58 @@
 				<artifactId>spring-orm</artifactId>
 				<version>${spring.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-expression</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context-support</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-web</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-test</artifactId>
 				<version>${spring.version}</version>
-				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.osgi</groupId>
+				<artifactId>spring-osgi-web</artifactId>
+				<version>${spring-dm.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>javax.servlet</groupId>
+						<artifactId>com.springsource.javax.servlet</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.osgi</groupId>
+				<artifactId>spring-osgi-io</artifactId>
+				<version>${spring-dm.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.osgi</groupId>
+				<artifactId>spring-osgi-core</artifactId>
+				<version>${spring-dm.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.osgi</groupId>
+				<artifactId>spring-osgi-extender</artifactId>
+				<version>${spring-dm.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.osgi</groupId>
+				<artifactId>spring-osgi-annotation</artifactId>
+				<version>${spring-dm.version}</version>
 			</dependency>
 
 			<!-- Other -->
@@ -1248,6 +1754,17 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
 				<version>${dependency.commons-lang.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>1.4</version>
+			</dependency>
+
+			<dependency>
+				<groupId>joda-time</groupId>
+				<artifactId>joda-time</artifactId>
+				<version>2.3</version>
 			</dependency>
 
 			<dependency>
@@ -1293,17 +1810,6 @@
 			</dependency>
 
 			<dependency>
-				<groupId>javax.faces</groupId>
-				<artifactId>jsf-api</artifactId>
-				<version>${jsf-ri.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>javax.faces</groupId>
-				<artifactId>jsf-impl</artifactId>
-				<version>${jsf-ri.version}</version>
-			</dependency>
-
-			<dependency>
 				<groupId>org.apache.myfaces.core</groupId>
 				<artifactId>myfaces-api</artifactId>
 				<version>${jsf-myfaces.version}</version>
@@ -1312,6 +1818,12 @@
 				<groupId>org.apache.myfaces.core</groupId>
 				<artifactId>myfaces-impl</artifactId>
 				<version>${jsf-myfaces.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.myfaces.commons</groupId>
+				<artifactId>myfaces-commons-facelets-examples20</artifactId>
+				<version>1.0.2.1</version>
+				<type>war</type>
 			</dependency>
 
 			<dependency>
@@ -1329,6 +1841,12 @@
 				<groupId>org.eclipse.jdt</groupId>
 				<artifactId>ecj</artifactId>
 				<version>${dependency.jdt.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.geronimo.bundles</groupId>
+				<artifactId>commons-discovery</artifactId>
+				<version>0.4_1</version>
 			</dependency>
 
 			<dependency>
@@ -1364,6 +1882,28 @@
 				<version>1.19</version>
 			</dependency>
 
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+				<version>2.3.0</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>2.3.0</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+				<version>2.3.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>15.0</version>
+			</dependency>
+
 			<!-- Testing -->
 
 			<dependency>
@@ -1385,6 +1925,16 @@
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-all</artifactId>
 				<version>1.9.5</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hamcrest</groupId>
+				<artifactId>hamcrest-core</artifactId>
+				<version>1.3</version>
+			</dependency>
+			<dependency>
+				<groupId>org.objenesis</groupId>
+				<artifactId>objenesis</artifactId>
+				<version>3.0.1</version>
 			</dependency>
 
 			<!-- Load-Test Dependencies -->
@@ -1421,6 +1971,11 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
+		<repository>
+			<id>prime-repo</id>
+			<name>PrimeFaces Maven Repository</name>
+			<url>http://repository.primefaces.org</url>
+		</repository>
 	</repositories>
 
 	<pluginRepositories>
@@ -1449,6 +2004,7 @@
 	</pluginRepositories>
 
 	<modules>
+		<module>pax-web-report</module>
 		<module>pax-web-api</module>
 		<module>pax-web-spi</module>
 		<module>pax-web-jsp</module>

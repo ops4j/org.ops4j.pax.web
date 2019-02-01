@@ -96,9 +96,9 @@
 					<execution>
 						<id>verify</id>
 						<phase>process-resources</phase>
-						<goals>
-							<goal>verify</goal>
-						</goals>
+<!--						<goals>-->
+<!--							<goal>verify</goal>-->
+<!--						</goals>-->
 						<configuration>
 							<descriptors>
 								<descriptor>mvn:org.apache.karaf.features/framework/${dependency.karaf.version}/xml/features</descriptor>
