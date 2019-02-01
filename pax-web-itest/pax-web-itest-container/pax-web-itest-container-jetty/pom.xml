@@ -435,12 +435,12 @@
 			<artifactId>biz.aQute.bndlib</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.apache.karaf</groupId>
-			<artifactId>manual</artifactId>
-			<type>war</type>
-			<scope>test</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.apache.karaf</groupId>-->
+<!--			<artifactId>manual</artifactId>-->
+<!--			<type>war</type>-->
+<!--			<scope>test</scope>-->
+<!--		</dependency>-->
 
 		<dependency>
 			<groupId>org.apache.aries.spifly</groupId>
@@ -540,12 +540,12 @@
 
 		<!-- Jetty -->
 
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>test-jetty-webapp</artifactId>
-			<type>war</type>
-			<scope>test</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.eclipse.jetty</groupId>-->
+<!--			<artifactId>test-jetty-webapp</artifactId>-->
+<!--			<type>war</type>-->
+<!--			<scope>test</scope>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-util</artifactId>

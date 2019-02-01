@@ -74,7 +74,7 @@ public class CdiIntegrationTest extends ITestBase {
 
     @Configuration
     public Option[] config() {
-        return combine(configureJetty(), configureJsfAndCdi());
+        return combine(org.ops4j.pax.web.itest.common.ITestBase.configureJetty(), configureJsfAndCdi());
     }
 
     @Before

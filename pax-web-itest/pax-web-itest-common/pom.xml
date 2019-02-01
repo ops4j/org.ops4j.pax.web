@@ -203,26 +203,26 @@
 
 		<!-- Jetty -->
 
-<!--		<dependency>-->
-<!--			<groupId>org.eclipse.jetty.websocket</groupId>-->
-<!--			<artifactId>websocket-api</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.eclipse.jetty.websocket</groupId>-->
-<!--			<artifactId>websocket-common</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.eclipse.jetty.websocket</groupId>-->
-<!--			<artifactId>websocket-server</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.eclipse.jetty.websocket</groupId>-->
-<!--			<artifactId>websocket-client</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-common</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-server</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-client</artifactId>
+			<scope>provided</scope>
+		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>org.eclipse.jetty.websocket</groupId>-->
 <!--			<artifactId>websocket-servlet</artifactId>-->
@@ -254,14 +254,12 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<scope>test</scope>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>com.cedarsoft.commons</groupId>-->
-<!--			<artifactId>test-utils</artifactId>-->
-<!--			<version>6.0.1</version>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>com.cedarsoft.commons</groupId>
+			<artifactId>test-utils</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 	</dependencies>
 

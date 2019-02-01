@@ -45,18 +45,16 @@
 				<configuration>
 					<instructions>
 						<_sources>true</_sources>
-						<Bundle-Activator>org.ops4j.pax.web.resources.extender.internal.WebresourcesExtender</Bundle-Activator>
+						<Import-Package>
+							org.apache.commons.lang3;version='[3.0,4)',\
+							*
+						</Import-Package>
 						<Export-Package>
-							org.ops4j.pax.web.resources.extender,\
-							org.ops4j.pax.web.resources.api,\
-							org.ops4j.pax.web.resources.api.query
+							org.ops4j.pax.web.resources.jsf
 						</Export-Package>
 						<Private-Package>
-							org.ops4j.pax.web.resources.extender.internal
+							org.ops4j.pax.web.jsf.resourcehandler.internal
 						</Private-Package>
-						<Provide-Capability>
-							osgi.extender; osgi.extender="pax.web.resources"; version:Version=${version;====;${replace;${project.version};-;.}}
-						</Provide-Capability>
 					</instructions>
 				</configuration>
 			</plugin>

@@ -140,7 +140,6 @@
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>whiteboard-blueprint</artifactId>
 			<scope>provided</scope>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
@@ -208,12 +207,12 @@
 			<classifier>features</classifier>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.karaf</groupId>
-			<artifactId>manual</artifactId>
-			<type>war</type>
-			<scope>test</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.apache.karaf</groupId>-->
+<!--			<artifactId>manual</artifactId>-->
+<!--			<type>war</type>-->
+<!--			<scope>test</scope>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.apache.karaf.features</groupId>
 			<artifactId>spring</artifactId>

@@ -547,12 +547,12 @@
 
 		<!-- Jetty -->
 
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>test-jetty-webapp</artifactId>
-			<type>war</type>
-			<scope>test</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.eclipse.jetty</groupId>-->
+<!--			<artifactId>test-jetty-webapp</artifactId>-->
+<!--			<type>war</type>-->
+<!--			<scope>test</scope>-->
+<!--		</dependency>-->
 
 		<!-- Tomcat -->
 

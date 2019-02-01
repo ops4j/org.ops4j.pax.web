@@ -772,6 +772,11 @@
 				<version>${project.version}</version>
 				<type>war</type>
 			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>whiteboard-blueprint</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 			<!-- OPS4J dependencies -->
 
@@ -1959,6 +1964,11 @@
 				<groupId>org.objenesis</groupId>
 				<artifactId>objenesis</artifactId>
 				<version>3.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>com.cedarsoft.commons</groupId>
+				<artifactId>test-utils</artifactId>
+				<version>6.0.1</version>
 			</dependency>
 
 			<!-- Load-Test Dependencies -->
