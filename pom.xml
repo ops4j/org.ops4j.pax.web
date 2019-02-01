@@ -118,7 +118,7 @@
 		<sonar.language>java</sonar.language>
 
 		<!-- version to compare this version to for baselineing -->
-		<baseline.version>6.0.7</baseline.version>
+		<baseline.version>7.0.0</baseline.version>
 
 		<!-- versions of Maven plugins -->
 
@@ -436,6 +436,17 @@
 									<Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
 									<_removeheaders>Include-Resource, Private-Package, Embed-Dependency, Embed-Transitive</_removeheaders>
 								</instructions>
+							</configuration>
+						</execution>
+						<execution>
+							<id>baseline</id>
+							<goals>
+								<goal>baseline</goal>
+							</goals>
+							<configuration>
+								<comparisonVersion>${baseline.version}</comparisonVersion>
+								<failOnWarning>false</failOnWarning>
+								<logResults>false</logResults>
 							</configuration>
 						</execution>
 						<execution>

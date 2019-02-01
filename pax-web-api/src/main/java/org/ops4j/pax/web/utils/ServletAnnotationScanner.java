@@ -38,26 +38,26 @@ public class ServletAnnotationScanner {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public ServletAnnotationScanner(Class<?> clazz) {
-		WebServlet annotation = (WebServlet) clazz.getAnnotation(WebServlet.class);
+		WebServlet servletAnnotation = clazz.getAnnotation(WebServlet.class);
 
-		if (annotation == null) {
+		if (servletAnnotation == null) {
 			return;
 		}
 
 		scanned = true;
 
-		multiPartConfigAnnotation = (MultipartConfig) clazz.getAnnotation(MultipartConfig.class);
+		multiPartConfigAnnotation = clazz.getAnnotation(MultipartConfig.class);
 
-		if (annotation.urlPatterns().length > 0
-				&& annotation.value().length > 0) {
+		if (servletAnnotation.urlPatterns().length > 0
+				&& servletAnnotation.value().length > 0) {
 			log.warn(clazz.getName()
 					+ " defines both @WebServlet.value and @WebServlet.urlPatterns");
 			return;
 		}
 
-		urlPatterns = annotation.value();
+		urlPatterns = servletAnnotation.value();
 		if (urlPatterns.length == 0) {
-			urlPatterns = annotation.urlPatterns();
+			urlPatterns = servletAnnotation.urlPatterns();
 		}
 
 		if (urlPatterns.length == 0) {
@@ -66,14 +66,14 @@ public class ServletAnnotationScanner {
 			return;
 		}
 
-		servletName = (annotation.name().equals("") ? clazz
+		servletName = (servletAnnotation.name().equals("") ? clazz
 				.getName()
-				: annotation.name());
+				: servletAnnotation.name());
 
-		webInitParams = annotation.initParams();
+		webInitParams = servletAnnotation.initParams();
 
-		asyncSupported = annotation.asyncSupported();
-		loadOnStartup = annotation.loadOnStartup();
+		asyncSupported = servletAnnotation.asyncSupported();
+		loadOnStartup = servletAnnotation.loadOnStartup();
 
 	}
 

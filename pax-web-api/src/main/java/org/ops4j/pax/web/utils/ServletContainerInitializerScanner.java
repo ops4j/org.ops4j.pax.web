@@ -106,6 +106,7 @@ public class ServletContainerInitializerScanner {
 							try {
 								BundleAnnotationFinder baf = new BundleAnnotationFinder(
 										packageAdminService, bundle);
+								@SuppressWarnings("unchecked")
 								List<Class<?>> annotatedClasses = baf
 										.findAnnotatedClasses((Class<? extends Annotation>) klass);
 								setOfClasses.addAll(annotatedClasses);

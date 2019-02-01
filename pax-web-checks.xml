@@ -119,9 +119,7 @@
     <module name="LeftCurly">
       <property name="option" value="eol" />
     </module>
-    <module name="RightCurly">
-      <property name="option" value="alone" />
-    </module>
+    <module name="RightCurly" />
 
     <!-- Checks for common coding problems -->
     <!-- See http://checkstyle.sf.net/config_coding.html -->
@@ -148,7 +146,7 @@
     <module name="VisibilityModifier">
       <property name="packageAllowed" value="true" />
       <property name="protectedAllowed" value="true" />
-      <property name="publicMemberPattern" value="^serialVersionUID|.*Rule$" />
+      <property name="publicMemberPattern" value="^.*$" />
       <property name="severity" value="warning" />
     </module>
 
@@ -184,7 +182,7 @@
     </module>
 
 
-    <module name="IllegalCatch" />
+<!--    <module name="IllegalCatch" />-->
     <module name="IllegalInstantiation" />
     <module name="IllegalThrows" />
     <module name="MultipleVariableDeclarations" />
