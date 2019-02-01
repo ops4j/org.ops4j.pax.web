@@ -49,7 +49,7 @@
 					</includes>
 					<systemPropertyVariables>
 						<ProjectVersion>${project.version}</ProjectVersion>
-						<MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
+						<MyFacesVersion>${dependency.jsf.myfaces.version}</MyFacesVersion>
 						<KarafVersion>${karaf.version}</KarafVersion>
 						<pax.exam.framework>${pax.exam.framework}</pax.exam.framework>
 						<coverage.command>${jcoverage.command}</coverage.command>

@@ -117,7 +117,7 @@
 							org.osgi.service.http.runtime; version="1.0",
 							org.osgi.service.http.runtime.dto; version="1.0",
 							org.osgi.service.http.whiteboard; version="1.0",
-							org.eclipse.jetty.*; version="${dependency.jetty.version}";
+							org.eclipse.jetty.*; version="${dependency.eclipse.jetty.version}";
 							-split-package:=merge-first
 						</Export-Package>
 						<Embed-Dependency>*; scope=compile; type=!pom;

@@ -96,8 +96,8 @@
 							osgi.service;effective:=active;objectClass=org.ops4j.pax.web.service.WebContainer,
 							osgi.implementation;osgi.implementation="osgi.http";version:Version="1.0";uses:="javax.servlet,javax.servlet.http,org.osgi.service.http.context,org.osgi.service.http.whiteboard",
 							osgi.service;objectClass:List&lt;String&gt;="org.osgi.service.http.runtime.HttpServiceRuntime";uses:="org.osgi.service.http.runtime,org.osgi.service.http.runtime.dto",
-              osgi.contract;osgi.contract=JavaServlet;version:Version="${servlet.spec.version}";uses:="javax.servlet,javax.servlet.http,javax.servlet.descriptor,javax.servlet.annotation",
-              osgi.contract;osgi.contract=JavaWebSockets;version:Version="1";uses:="javax.websocket,javax.websocket.server"
+							osgi.contract;osgi.contract=JavaServlet;version:Version="${dependency.javax.servlet-api.version}";uses:="javax.servlet,javax.servlet.http,javax.servlet.descriptor,javax.servlet.annotation",
+							osgi.contract;osgi.contract=JavaWebSockets;version:Version="1";uses:="javax.websocket,javax.websocket.server"
 						</Provide-Capability>
 						<Require-Capability>
 							osgi.service;effective:=active;filter:="(objectClass=org.ops4j.pax.web.service.spi.ServerController)"

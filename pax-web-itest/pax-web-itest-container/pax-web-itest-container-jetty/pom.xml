@@ -68,9 +68,9 @@
 					</excludes>
 					<systemPropertyVariables>
 						<ProjectVersion>${project.version}</ProjectVersion>
-						<MyFacesVersion>${jsf-myfaces.version}</MyFacesVersion>
+						<MyFacesVersion>${dependency.jsf.myfaces.version}</MyFacesVersion>
 						<coverage.command>${jcoverage.command}</coverage.command>
-						<alpn-boot>${settings.localRepository}/org/mortbay/jetty/alpn/alpn-boot/${alpn-version}/alpn-boot-${alpn-version}.jar</alpn-boot>
+						<alpn-boot>${settings.localRepository}/org/mortbay/jetty/alpn/alpn-boot/${dependency.alpn.version}/alpn-boot-${dependency.alpn.version}.jar</alpn-boot>
 						<!-- to configure pax-exam with pax.exam.system=default which gives us more control over installed bundles -->
 						<pax.exam.configuration>file:../../pax-web-itest-base/src/main/resources/controlled-exam.properties</pax.exam.configuration>
 					</systemPropertyVariables>

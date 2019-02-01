@@ -38,6 +38,7 @@
         <bundle dependency="true">mvn:org.ow2.asm/asm-tree/${dependency.asm.version}</bundle>
         <bundle dependency="true">mvn:org.ow2.asm/asm-analysis/${dependency.asm.version}</bundle>
         <bundle dependency="true">mvn:org.ow2.asm/asm-commons/${dependency.asm.version}</bundle>
+<<<<<<< HEAD
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/${servicemix.specs.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:javax.servlet/javax.servlet-api/${servlet.spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:javax.mail/mail/${javax.mail.version}</bundle>
@@ -66,20 +67,50 @@
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-deploy/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-jmx/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-proxy/${dependency.jetty.version}</bundle>
+=======
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/${dependency.servicemix.specs.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:javax.servlet/javax.servlet-api/${dependency.javax.servlet-api.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:javax.mail/mail/${dependency.javax.mail.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${dependency.geronimo.specs.jta.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:javax.annotation/javax.annotation-api/${dependency.javax.annotation-api.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jaspic_1.0_spec/${dependency.geronimo.specs.jaspic.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.aries.spifly/org.apache.aries.spifly.dynamic.bundle/${dependency.aries.spifly.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${dependency.aries.util.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-continuation/${dependency.eclipse.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-http/${dependency.eclipse.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-io/${dependency.eclipse.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-jaspi/${dependency.eclipse.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-plus/${dependency.eclipse.jetty.version}</bundle>
+       	<bundle start-level="30">mvn:org.eclipse.jetty/jetty-jndi/${dependency.eclipse.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-rewrite/${dependency.eclipse.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-security/${dependency.eclipse.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-server/${dependency.eclipse.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-servlet/${dependency.eclipse.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-servlets/${dependency.eclipse.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-util/${dependency.eclipse.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-util-ajax/${dependency.eclipse.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-webapp/${dependency.eclipse.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-jaas/${dependency.eclipse.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-xml/${dependency.eclipse.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-client/${dependency.eclipse.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-deploy/${dependency.eclipse.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-jmx/${dependency.eclipse.jetty.version}</bundle>
+
+>>>>>>> 90d0c86d3... [PAXWEB-1191] Sort and externalize versions
         <conditional>
             <condition>pax-http-whiteboard</condition>
-            <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-server/${dependency.jetty.version}</bundle>
-            <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-client/${dependency.jetty.version}</bundle>
-            <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-common/${dependency.jetty.version}</bundle>
-            <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-servlet/${dependency.jetty.version}</bundle>
-            <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-api/${dependency.jetty.version}</bundle>
-            <bundle start-level="30">mvn:org.eclipse.jetty.websocket/javax-websocket-server-impl/${dependency.jetty.version}</bundle>
-            <bundle start-level="30">mvn:org.eclipse.jetty.websocket/javax-websocket-client-impl/${dependency.jetty.version}</bundle>
+            <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-server/${dependency.eclipse.jetty.version}</bundle>
+            <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-client/${dependency.eclipse.jetty.version}</bundle>
+            <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-common/${dependency.eclipse.jetty.version}</bundle>
+            <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-servlet/${dependency.eclipse.jetty.version}</bundle>
+            <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-api/${dependency.eclipse.jetty.version}</bundle>
+            <bundle start-level="30">mvn:org.eclipse.jetty.websocket/javax-websocket-server-impl/${dependency.eclipse.jetty.version}</bundle>
+            <bundle start-level="30">mvn:org.eclipse.jetty.websocket/javax-websocket-client-impl/${dependency.eclipse.jetty.version}</bundle>
             <bundle start-level="30">mvn:javax.websocket/javax.websocket-api/${dependency.websocket.version}</bundle>
         </conditional>
 
         <capability>
-            osgi.contract;osgi.contract=JavaServlet;version:Version="${servlet.spec.version}";uses:="javax.servlet,javax.servlet.http,javax.servlet.descriptor,javax.servlet.annotation",
+			osgi.contract;osgi.contract=JavaServlet;version:Version="${dependency.javax.servlet-api.version}";uses:="javax.servlet,javax.servlet.http,javax.servlet.descriptor,javax.servlet.annotation",
             osgi.contract;osgi.contract=JavaWebSockets;version:Version="1";uses:="javax.websocket, javax.websocket.server"
         </capability>
     </feature>
@@ -95,12 +126,12 @@
         </details>
         <library type="extension">mvn:org.mortbay.jetty.alpn/alpn-boot/8.1.4.v20150727</library>
         <feature version="[9.3,10.0)">pax-jetty</feature>
-        <bundle start-level="1">mvn:org.eclipse.jetty.osgi/jetty-osgi-alpn/${dependency.jetty.version}</bundle>
+        <bundle start-level="1">mvn:org.eclipse.jetty.osgi/jetty-osgi-alpn/${dependency.eclipse.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.alpn/alpn-api/${dependency.alpn.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-server/${dependency.jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty.http2/http2-server/${dependency.jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty.http2/http2-common/${dependency.jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty.http2/http2-hpack/${dependency.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-server/${dependency.eclipse.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty.http2/http2-server/${dependency.eclipse.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty.http2/http2-common/${dependency.eclipse.jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty.http2/http2-hpack/${dependency.eclipse.jetty.version}</bundle>
     </feature>
 
     <feature name="pax-http-jetty" version="${project.version}">
@@ -137,8 +168,8 @@
 
     <feature name="pax-http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}">
         <feature version="[8.0,8.1)">pax-http</feature>
-        <bundle dependency="true" start-level="30">mvn:org.eclipse.jdt/ecj/${dependency.jdt.version}</bundle>
-        <bundle start-level="30" dependency="true">mvn:javax.el/javax.el-api/${dependency.el-api.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.eclipse.jdt/ecj/${dependency.eclipse.jdt.version}</bundle>
+        <bundle start-level="30" dependency="true">mvn:javax.el/javax.el-api/${dependency.javax.el-api.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${project.version}</bundle>
 
@@ -158,7 +189,7 @@
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-war/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-deployer/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.pax.url/pax-url-war/${pax.url.version}/jar/uber</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.url/pax-url-war/${dependency.pax-url.version}/jar/uber</bundle>
     </feature>
 
     <feature name="pax-http-tomcat" description="Provide Tomcat support" version="${project.version}">
@@ -171,32 +202,32 @@
         </config>
         <feature>scr</feature>
         <feature version="[8.0,8.1)">pax-http</feature>
-        <bundle dependency="true" start-level="30">mvn:javax.el/javax.el-api/3.0.0</bundle>
-        <bundle dependency="true" start-level="30">mvn:javax.security.auth.message/javax.security.auth.message-api/${dependency.jaspic.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:javax.validation/validation-api/${dependency.validation-api.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.tomcat-embed-core/${tipi.tomcat.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.tomcat-embed-websocket/${tipi.tomcat.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:javax.servlet/javax.servlet-api/${servlet.spec.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_2</bundle>
+        <bundle dependency="true" start-level="30">mvn:javax.el/javax.el-api/${dependency.javax.el-api.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:javax.security.auth.message/javax.security.auth.message-api/${dependency.javax.jaspic.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:javax.validation/validation-api/${dependency.javax.validation-api.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.tomcat-embed-core/${dependency.pax-tipi.tomcat.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ops4j.pax.tipi/org.ops4j.pax.tipi.tomcat-embed-websocket/${dependency.pax-tipi.tomcat.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:javax.servlet/javax.servlet-api/${dependency.javax.servlet-api.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/${dependency.servicemix.bundles.javax-inject.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jsr305/${dependency.jsr305.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/${servicemix.specs.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.java-persistence-api-2.0/${servicemix.specs.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.javamail-api-1.4/${servicemix.specs.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/${dependency.servicemix.specs.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.java-persistence-api-2.0/${dependency.servicemix.specs.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.javamail-api-1.4/${dependency.servicemix.specs.version}</bundle>
 
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-stax-api_1.2_spec/1.1</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-ejb_3.1_spec/1.0</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-osgi-registry/1.1</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jaxws_2.2_spec/1.0</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jaxrpc_1.1_spec/2.1</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-stax-api_1.2_spec/${dependency.geronimo.specs.stax.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-ejb_3.1_spec/${dependency.geronimo.specs.ejb.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-osgi-registry/${dependency.geronimo.specs.osgi-registry.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jaxws_2.2_spec/${dependency.geronimo.specs.jaxws.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jaxrpc_1.1_spec/${dependency.geronimo.specs.jaxrpc.version}</bundle>
 
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.saaj-api-1.3/${servicemix.specs.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jaxb-api-2.2/${servicemix.specs.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.saaj-api-1.3/${dependency.servicemix.specs.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jaxb-api-2.2/${dependency.servicemix.specs.version}</bundle>
 
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jaspic_1.0_spec/${geronimo.jaspic-spec.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${dependency.geronimo.specs.jta.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jaspic_1.0_spec/${dependency.geronimo.specs.jaspic.version}</bundle>
 
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jaxp-api-1.3/${servicemix.specs.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-annotation_1.1_spec/1.0.1</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jaxp-api-1.3/${dependency.servicemix.specs.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-annotation_1.1_spec/${dependency.geronimo.specs.annotation.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:javax.websocket/javax.websocket-api/${dependency.websocket.version}</bundle>
 
         <feature>pax-web-core</feature>
@@ -206,7 +237,7 @@
 
         <capability>
             pax.http.provider;provider:=tomcat
-            osgi.contract;osgi.contract=JavaServlet;version:Version="${servlet.spec.version}";uses:="javax.servlet,javax.servlet.http,javax.servlet.descriptor,javax.servlet.annotation",
+			osgi.contract;osgi.contract=JavaServlet;version:Version="${dependency.javax.servlet-api.version}";uses:="javax.servlet,javax.servlet.http,javax.servlet.descriptor,javax.servlet.annotation",
             osgi.contract;osgi.contract=JavaWebSockets;version:Version="1";uses:="javax.websocket, javax.websocket.server"
         </capability>
 
@@ -223,19 +254,19 @@
 
     <feature name="pax-jsf-support" version="${project.version}">
         <feature version="[8.0,8.1)">pax-war</feature>
-        <bundle dependency="true">mvn:javax.enterprise/cdi-api/1.2</bundle>
-        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_2</bundle>
-        <bundle dependency="true">mvn:javax.interceptor/javax.interceptor-api/1.2</bundle>
-        <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr250-1.0/${servicemix.specs.version}</bundle>
-        <bundle dependency="true">mvn:javax.validation/validation-api/${dependency.validation-api.version}</bundle>
-        <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr303-api-1.0.0/${servicemix.specs.version}</bundle>
+        <bundle dependency="true">mvn:javax.enterprise/cdi-api/${dependency.javax.cdi-api.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/${dependency.servicemix.bundles.javax-inject.version}</bundle>
+        <bundle dependency="true">mvn:javax.interceptor/javax.interceptor-api/${dependency.javax.interceptor-api.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr250-1.0/${dependency.servicemix.specs.version}</bundle>
+        <bundle dependency="true">mvn:javax.validation/validation-api/${dependency.javax.validation-api.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr303-api-1.0.0/${dependency.servicemix.specs.version}</bundle>
         <bundle dependency="true">mvn:commons-beanutils/commons-beanutils/${dependency.commons-beanutils.version}</bundle>
-        <bundle dependency="true">mvn:commons-collections/commons-collections/3.2.2</bundle>
-        <bundle dependency="true">mvn:commons-codec/commons-codec/1.8</bundle>
-        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-digester/1.8_4</bundle>
-        <bundle dependency="true">mvn:org.apache.geronimo.bundles/commons-discovery/0.4_1</bundle>
-        <bundle>mvn:org.apache.myfaces.core/myfaces-api/${jsf-myfaces.version}</bundle>
-        <bundle>mvn:org.apache.myfaces.core/myfaces-impl/${jsf-myfaces.version}</bundle>
+        <bundle dependency="true">mvn:commons-collections/commons-collections/${dependency.commons-collection3.version}</bundle>
+        <bundle dependency="true">mvn:commons-codec/commons-codec/${dependency.commons-codec.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-digester/${dependency.servicemix.bundles.commons-digester.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.geronimo.bundles/commons-discovery/${dependency.geronimo.bundles.commons-discovery.version}</bundle>
+        <bundle>mvn:org.apache.myfaces.core/myfaces-api/${dependency.jsf.myfaces.version}</bundle>
+        <bundle>mvn:org.apache.myfaces.core/myfaces-impl/${dependency.jsf.myfaces.version}</bundle>
         <capability>
             osgi.contract;osgi.contract=JavaJSF;version:Version="2.2";uses:="javax.faces, javax.faces.application, javax.faces.bean, javax.faces.component, javax.faces.component.behavior, javax.faces.component.html, javax.faces.component.visit, javax.faces.context, javax.faces.convert, javax.faces.el, javax.faces.event, javax.faces.flow, javax.faces.flow.builder, javax.faces.lifecycle, javax.faces.model, javax.faces.render, javax.faces.validator, javax.faces.view, javax.faces.view.facelets, javax.faces.webapp"
         </capability>
@@ -248,18 +279,18 @@
     </feature>
 
     <feature name="undertow" version="${dependency.undertow-core.version}">
-        <bundle dependency="true" start-level="30">mvn:javax.servlet/javax.servlet-api/${servlet.spec.version}</bundle>
-        <bundle dependency="true">mvn:javax.annotation/javax.annotation-api/1.3</bundle>
-        <bundle dependency="true">mvn:org.jboss.logging/jboss-logging/${dependency.jboss-logging}</bundle>
+        <bundle dependency="true" start-level="30">mvn:javax.servlet/javax.servlet-api/${dependency.javax.servlet-api.version}</bundle>
+        <bundle dependency="true">mvn:javax.annotation/javax.annotation-api/${dependency.javax.annotation-api.version}</bundle>
+        <bundle dependency="true">mvn:org.jboss.logging/jboss-logging/${dependency.jboss.logging.version}</bundle>
         <bundle dependency="true">mvn:javax.websocket/javax.websocket-api/${dependency.websocket.version}</bundle>
 
-        <bundle>mvn:org.jboss.xnio/xnio-api/${dependency.xnio-api.version}</bundle>
+        <bundle>mvn:org.jboss.xnio/xnio-api/${dependency.jboss.xnio.version}</bundle>
         <bundle>mvn:org.jboss.xnio/xnio-nio/${dependency.xnio.version}</bundle>
         <bundle>mvn:io.undertow/undertow-core/${dependency.undertow-core.version}</bundle>
         <bundle>mvn:io.undertow/undertow-servlet/${dependency.undertow-servlet.version}</bundle>
-        <bundle>mvn:io.undertow/undertow-websockets-jsr/${dependency.undertow-websockets.version}</bundle>
+        <bundle>mvn:io.undertow/undertow-websockets-jsr/${dependency.jboss.undertow.version}</bundle>
         <capability>
-            osgi.contract;osgi.contract=JavaServlet;version:Version="${servlet.spec.version}";uses:="javax.servlet,javax.servlet.http,javax.servlet.descriptor,javax.servlet.annotation",
+			osgi.contract;osgi.contract=JavaServlet;version:Version="${dependency.javax.servlet-api.version}";uses:="javax.servlet,javax.servlet.http,javax.servlet.descriptor,javax.servlet.annotation",
             osgi.contract;osgi.contract=JavaWebSockets;version:Version="1";uses:="javax.websocket, javax.websocket.server"
         </capability>
     </feature>

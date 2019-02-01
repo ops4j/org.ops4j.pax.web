@@ -122,120 +122,161 @@
 
 		<!-- versions of Maven plugins -->
 
-		<!-- Plugins from org.apache.maven.plugins -->
-		<version.plugin.maven-antrun-plugin>1.8</version.plugin.maven-antrun-plugin>
-		<version.plugin.maven-archetype-plugin>3.0.1</version.plugin.maven-archetype-plugin>
-		<version.plugin.maven-assembly-plugin>3.1.0</version.plugin.maven-assembly-plugin>
-		<version.plugin.maven-checkstyle-plugin>3.0.0</version.plugin.maven-checkstyle-plugin>
-		<version.com.puppycrawl.tools.checkstyle>8.9</version.com.puppycrawl.tools.checkstyle>
-		<version.plugin.maven-clean-plugin>3.0.0</version.plugin.maven-clean-plugin>
-		<version.plugin.maven-compiler-plugin>3.7.0</version.plugin.maven-compiler-plugin>
-		<version.plugin.maven-deploy-plugin>2.8.2</version.plugin.maven-deploy-plugin>
-		<version.plugin.maven-dependency-plugin>3.0.1</version.plugin.maven-dependency-plugin>
-		<version.plugin.maven-enforcer-plugin>3.0.0-M1</version.plugin.maven-enforcer-plugin>
-		<version.org.commonjava.maven.enforcer>1.3</version.org.commonjava.maven.enforcer>
-		<version.plugin.maven-failsafe-plugin>2.20.1</version.plugin.maven-failsafe-plugin>
-		<version.plugin.maven-gpg-plugin>1.6</version.plugin.maven-gpg-plugin>
-		<version.plugin.maven-install-plugin>2.5.2</version.plugin.maven-install-plugin>
-		<version.plugin.maven-jar-plugin>3.0.2</version.plugin.maven-jar-plugin>
-		<version.plugin.maven-javadoc-plugin>3.0.1</version.plugin.maven-javadoc-plugin>
-		<version.plugin.maven-release-plugin>2.5.3</version.plugin.maven-release-plugin>
-		<version.plugin.maven-remote-resources-plugin>1.5</version.plugin.maven-remote-resources-plugin>
-		<version.plugin.maven-resources-plugin>3.1.0</version.plugin.maven-resources-plugin>
-		<version.plugin.maven-site-plugin>3.6</version.plugin.maven-site-plugin>
-		<version.plugin.maven-source-plugin>3.0.1</version.plugin.maven-source-plugin>
-		<version.plugin.maven-surefire-plugin>2.22.1</version.plugin.maven-surefire-plugin>
-		<version.plugin.maven-war-plugin>3.1.0</version.plugin.maven-war-plugin>
+		<!-- Maven plugins from org.apache.maven.plugins (and their dependencies) -->
+		<plugin.maven-antrun-plugin>1.8</plugin.maven-antrun-plugin>
+		<plugin.maven-archetype-plugin>3.0.1</plugin.maven-archetype-plugin>
+		<plugin.maven-assembly-plugin>3.1.0</plugin.maven-assembly-plugin>
+		<plugin.maven-checkstyle-plugin>3.0.0</plugin.maven-checkstyle-plugin>
+		<plugin.dependency.com.puppycrawl.tools.checkstyle>8.9</plugin.dependency.com.puppycrawl.tools.checkstyle>
+		<plugin.maven-clean-plugin>3.0.0</plugin.maven-clean-plugin>
+		<plugin.maven-compiler-plugin>3.7.0</plugin.maven-compiler-plugin>
+		<plugin.maven-dependency-plugin>3.0.1</plugin.maven-dependency-plugin>
+		<plugin.maven-deploy-plugin>2.8.2</plugin.maven-deploy-plugin>
+		<plugin.maven-enforcer-plugin>3.0.0-M1</plugin.maven-enforcer-plugin>
+		<plugin.dependency.org.commonjava.maven.enforcer>1.3</plugin.dependency.org.commonjava.maven.enforcer>
+		<plugin.maven-failsafe-plugin>2.20.1</plugin.maven-failsafe-plugin>
+		<plugin.maven-gpg-plugin>1.6</plugin.maven-gpg-plugin>
+		<plugin.maven-install-plugin>2.5.2</plugin.maven-install-plugin>
+		<plugin.maven-jar-plugin>3.0.2</plugin.maven-jar-plugin>
+		<plugin.maven-javadoc-plugin>3.0.1</plugin.maven-javadoc-plugin>
+		<plugin.maven-release-plugin>2.5.3</plugin.maven-release-plugin>
+		<plugin.maven-remote-resources-plugin>1.5</plugin.maven-remote-resources-plugin>
+		<plugin.maven-resources-plugin>3.1.0</plugin.maven-resources-plugin>
+		<plugin.dependency.maven-filtering>3.1.1</plugin.dependency.maven-filtering>
+		<plugin.maven-site-plugin>3.6</plugin.maven-site-plugin>
+		<plugin.maven-source-plugin>3.0.1</plugin.maven-source-plugin>
+		<plugin.maven-surefire-plugin>2.22.1</plugin.maven-surefire-plugin>
+		<plugin.maven-war-plugin>3.1.0</plugin.maven-war-plugin>
 
-		<!-- versions of Maven plugins (and their important dependencies) -->
-		<version.plugin.apache.apache-rat-plugin>0.13</version.plugin.apache.apache-rat-plugin>
-		<version.plugin.asciidoctor-maven-plugin>1.5.6</version.plugin.asciidoctor-maven-plugin>
-		<version.org.asciidoctor>1.5.8</version.org.asciidoctor>
-		<version.plugin.felix.maven-scr-plugin>1.26.0</version.plugin.felix.maven-scr-plugin>
-		<version.plugin.felix.maven-bundle-plugin>3.5.1</version.plugin.felix.maven-bundle-plugin>
-		<version.plugin.gatling.gatling-maven-plugin>2.0.0</version.plugin.gatling.gatling-maven-plugin>
-		<version.plugin.jacoco.jacoco-maven-plugin>0.8.2</version.plugin.jacoco.jacoco-maven-plugin>
-		<version.plugin.mojo.build-helper-maven-plugin>3.0.0</version.plugin.mojo.build-helper-maven-plugin>
-		<version.plugin.mojo.sonar-maven-plugin>4.5.1</version.plugin.mojo.sonar-maven-plugin>
-		<version.plugin.mycila.license-maven-plugin>3.0</version.plugin.mycila.license-maven-plugin>
-		<version.plugin.servicemix.depends-maven-plugin>1.4.0</version.plugin.servicemix.depends-maven-plugin>
-		<version.plugin.sonatype.nexus-staging-maven-plugin>1.6.8</version.plugin.sonatype.nexus-staging-maven-plugin>
+		<!-- Other Maven plugins (and their dependencies) -->
+		<plugin.apache.apache-rat-plugin>0.13</plugin.apache.apache-rat-plugin>
+		<plugin.asciidoctor-maven-plugin>1.5.6</plugin.asciidoctor-maven-plugin>
+		<plugin.dependency.org.asciidoctor>1.5.8</plugin.dependency.org.asciidoctor>
+		<plugin.felix.maven-bundle-plugin>3.5.1</plugin.felix.maven-bundle-plugin>
+		<plugin.felix.maven-scr-plugin>1.26.0</plugin.felix.maven-scr-plugin>
+		<plugin.gatling.gatling-maven-plugin>2.0.0</plugin.gatling.gatling-maven-plugin>
+		<plugin.jacoco.jacoco-maven-plugin>0.8.2</plugin.jacoco.jacoco-maven-plugin>
+		<plugin.mojo.build-helper-maven-plugin>3.0.0</plugin.mojo.build-helper-maven-plugin>
+		<plugin.mojo.sonar-maven-plugin>4.5.1</plugin.mojo.sonar-maven-plugin>
+		<plugin.mycila.license-maven-plugin>3.0</plugin.mycila.license-maven-plugin>
+		<plugin.servicemix.depends-maven-plugin>1.4.0</plugin.servicemix.depends-maven-plugin>
+		<plugin.sonatype.nexus-staging-maven-plugin>1.6.8</plugin.sonatype.nexus-staging-maven-plugin>
 
-		<!-- versions of Maven dependencies -->
+		<!-- versions of Maven dependencies (sorted and groupped)  -->
 
+		<dependency.alpn.version>8.1.2.v20141202</dependency.alpn.version>
+        <dependency.aries.spifly.version>1.2.3</dependency.aries.spifly.version>
+		<dependency.aries.util.version>1.1.3</dependency.aries.util.version>
 		<dependency.asm.version>7.2</dependency.asm.version>
-		<dependency.base.version>1.5.1</dependency.base.version>
 		<dependency.bndlib.version>3.5.0</dependency.bndlib.version>
+		<dependency.cedarsoft.test-utils.version>6.0.1</dependency.cedarsoft.test-utils.version>
+
 		<dependency.commons-beanutils.version>1.9.4</dependency.commons-beanutils.version>
 		<dependency.commons-codec.version>1.13</dependency.commons-codec.version>
-		<dependency.commons-collection3.version>3.2.2</dependency.commons-collection3.version>
 		<dependency.commons-collection.version>4.4</dependency.commons-collection.version>
+		<dependency.commons-collection3.version>3.2.2</dependency.commons-collection3.version>
+		<dependency.commons-io.version>1.4</dependency.commons-io.version>
 		<dependency.commons-lang.version>3.9</dependency.commons-lang.version>
 		<dependency.commons-logging.version>1.1.1</dependency.commons-logging.version>
+
+		<dependency.easymock.version>2.3</dependency.easymock.version>
+
+		<dependency.eclipse.jdt.version>3.16.0</dependency.eclipse.jdt.version>
+		<dependency.eclipse.jetty.version>9.4.22.v20191022</dependency.eclipse.jetty.version>
+		<dependency.eclipse.tycho.version>3.10.100.v20150529-1857</dependency.eclipse.tycho.version>
+
+		<dependency.felix.configadmin.version>1.8.14</dependency.felix.configadmin.version>
+		<dependency.felix.eventadmin.version>1.3.2</dependency.felix.eventadmin.version>
+		<dependency.felix.fileinstall.version>3.5.0</dependency.felix.fileinstall.version>
+		<dependency.felix.framework.version>5.6.10</dependency.felix.framework.version>
+		<dependency.felix.scr.version>2.1.16</dependency.felix.scr.version>
+		<dependency.felix.webconsole.version>3.1.8</dependency.felix.webconsole.version>
+
+		<dependency.gatling.version>2.0.1</dependency.gatling.version>
+
+		<dependency.geronimo.bundles.commons-discovery.version>0.4_1</dependency.geronimo.bundles.commons-discovery.version>
+		<dependency.geronimo.specs.activation.version>1.1</dependency.geronimo.specs.activation.version>
+		<dependency.geronimo.specs.annotation.version>1.0.1</dependency.geronimo.specs.annotation.version>
+		<dependency.geronimo.specs.ejb.version>1.0</dependency.geronimo.specs.ejb.version>
+		<dependency.geronimo.specs.jaspic.version>1.1</dependency.geronimo.specs.jaspic.version>
+		<dependency.geronimo.specs.jaxrpc.version>2.1</dependency.geronimo.specs.jaxrpc.version>
+		<dependency.geronimo.specs.jaxws.version>1.0</dependency.geronimo.specs.jaxws.version>
+		<dependency.geronimo.specs.jpa2.version>1.1</dependency.geronimo.specs.jpa2.version>
+		<dependency.geronimo.specs.jta.version>1.1.1</dependency.geronimo.specs.jta.version>
+		<dependency.geronimo.specs.mail.version>1.7</dependency.geronimo.specs.mail.version>
+		<dependency.geronimo.specs.osgi-registry.version>1.1</dependency.geronimo.specs.osgi-registry.version>
+		<dependency.geronimo.specs.stax.version>1.1</dependency.geronimo.specs.stax.version>
+
+		<dependency.glassfish.json>1.0.4</dependency.glassfish.json>
+		<dependency.guava.version>15.0</dependency.guava.version>
+		<dependency.hamcrest.version>1.3</dependency.hamcrest.version>
 		<dependency.httpasyncclient.version>4.1.4</dependency.httpasyncclient.version>
 		<dependency.httpclient.version>4.5.6</dependency.httpclient.version>
 		<dependency.httpcore.version>4.4.10</dependency.httpcore.version>
-		<dependency.felix.framework.version>5.6.10</dependency.felix.framework.version>
-		<dependency.configadmin.version>1.8.14</dependency.configadmin.version>
-		<dependency.fileinstall.version>3.5.0</dependency.fileinstall.version>
-		<dependency.gatling.version>2.0.1</dependency.gatling.version>
+		<dependency.jasypt.version>1.9.3</dependency.jasypt.version>
+
+		<dependency.javax.annotation-api.version>1.2</dependency.javax.annotation-api.version>
+		<dependency.javax.cdi-api.version>1.2</dependency.javax.cdi-api.version>
+		<dependency.javax.el-api.version>3.0.0</dependency.javax.el-api.version>
+		<dependency.javax.faces.version>1.2_13</dependency.javax.faces.version>
+		<dependency.javax.interceptor-api.version>1.2</dependency.javax.interceptor-api.version>
+		<dependency.javax.jaspic.version>1.1</dependency.javax.jaspic.version>
+		<dependency.javax.json-api.version>1.0</dependency.javax.json-api.version>
+		<dependency.javax.jstl.version>1.2.2</dependency.javax.jstl.version>
+		<dependency.javax.mail.version>1.4.7</dependency.javax.mail.version>
+		<dependency.javax.servlet-api.version>3.1.0</dependency.javax.servlet-api.version>
+		<dependency.javax.servlet.jsp-api.version>2.3.3</dependency.javax.servlet.jsp-api.version>
+		<dependency.javax.websocket-api.version>1.1</dependency.javax.websocket-api.version>
+		<dependency.javax.ws.rs1-api.version>1.1.1</dependency.javax.ws.rs1-api.version>
+		<dependency.javax.ws.rs2-api.version>2.0.1</dependency.javax.ws.rs2-api.version>
+		<dependency.javax.validation-api.version>1.1.0.Final</dependency.javax.validation-api.version>
+
+		<dependency.jackson.version>2.3.0</dependency.jackson.version>
+
+		<dependency.jboss.logging.version>3.3.0.Final</dependency.jboss.logging.version>
+		<dependency.jboss.spec.jstl>1.1.4.Final</dependency.jboss.spec.jstl>
+		<dependency.jboss.undertow.version>1.4.23.Final</dependency.jboss.undertow.version>
+		<dependency.jboss.weld.version>2.4.5.Final</dependency.jboss.weld.version>
+		<dependency.jboss.xnio.version>3.3.8.Final</dependency.jboss.xnio.version>
+
+		<dependency.jersey.version>1.19</dependency.jersey.version>
+		<dependency.joda-time.version>2.3</dependency.joda-time.version>
+		<dependency.jsf.myfaces.version>2.2.12</dependency.jsf.myfaces.version>
+		<dependency.jsf.myfaces-facelets-examples20.version>1.0.2.1</dependency.jsf.myfaces-facelets-examples20.version>
+		<dependency.jsf.primefaces.version>5.1</dependency.jsf.primefaces.version>
+		<dependency.junit.version>4.11</dependency.junit.version>
+		<dependency.karaf.version>4.2.1</dependency.karaf.version>
 		<dependency.log4j2.version>2.11.1</dependency.log4j2.version>
 		<dependency.logback.version>1.0.6</dependency.logback.version>
-		<dependency.jdt.core.version>4.5.1</dependency.jdt.core.version>
-		<dependency.jdt.version>3.16.0</dependency.jdt.version>
-		<dependency.jetty.version>9.4.22.v20191022</dependency.jetty.version>
-		<dependency.jsr303.version>1.8.0</dependency.jsr303.version>
-		<dependency.jsr305.version>1.3.9_1</dependency.jsr305.version>
-		<dependency.jstl.version>1.2</dependency.jstl.version>
-		<dependency.karaf.version>4.2.1</dependency.karaf.version>
+		<dependency.mockito.version>1.9.5</dependency.mockito.version>
+		<dependency.objenesis.version>3.0.1</dependency.objenesis.version>
+
+		<dependency.ops4j.base.version>1.5.1</dependency.ops4j.base.version>
+		<dependency.ops4j.swissbox.version>1.8.3</dependency.ops4j.swissbox.version>
+
+		<dependency.osgi.service.jaxrs>1.0.0</dependency.osgi.service.jaxrs>
 		<dependency.osgi.version>6.0.0</dependency.osgi.version>
-		<dependency.paxurl.version>2.5.2</dependency.paxurl.version>
+
+		<dependency.pax-cdi.version>1.1.0</dependency.pax-cdi.version>
+		<dependency.pax-exam.version>4.11.0</dependency.pax-exam.version>
 		<dependency.pax-logging.version>1.11.2</dependency.pax-logging.version>
-		<dependency.slf4j>1.7.12</dependency.slf4j>
-		<dependency.scr.version>2.1.16</dependency.scr.version>
-		<dependency.swissbox.version>1.8.3</dependency.swissbox.version>
+		<dependency.pax-tipi.tomcat.version>8.5.32.1</dependency.pax-tipi.tomcat.version>
+		<dependency.pax-url.version>2.5.2</dependency.pax-url.version>
+
+		<dependency.servicemix.bundles.commons-digester.version>1.8_4</dependency.servicemix.bundles.commons-digester.version>
+		<dependency.servicemix.bundles.javax-inject.version>1_2</dependency.servicemix.bundles.javax-inject.version>
+		<dependency.servicemix.bundles.jsr305.version>1.3.9_1</dependency.servicemix.bundles.jsr305.version>
+		<dependency.servicemix.specs.jaxb.version>2.0.0</dependency.servicemix.specs.jaxb.version>
+		<dependency.servicemix.specs.jsr250.version>2.0.0</dependency.servicemix.specs.jsr250.version>
+		<dependency.servicemix.specs.jsr303.version>1.8.0</dependency.servicemix.specs.jsr303.version>
+		<dependency.servicemix.specs.saaj.version>1.8.0</dependency.servicemix.specs.saaj.version>
+		<dependency.servicemix.specs.version>2.9.0</dependency.servicemix.specs.version>
+
+		<dependency.slf4j.version>1.7.12</dependency.slf4j.version>
+		<dependency.spring.version>5.1.4.RELEASE</dependency.spring.version>
+		<dependency.spring-dm.version>1.2.1</dependency.spring-dm.version>
 		<dependency.tomcat.version>8.5.32</dependency.tomcat.version>
 		<dependency.xbean.version>4.14</dependency.xbean.version>
-		<dependency.xnio-api.version>3.3.8.Final</dependency.xnio-api.version>
-		<dependency.xnio.version>3.3.8.Final</dependency.xnio.version>
-		<dependency.undertow-core.version>1.4.23.Final</dependency.undertow-core.version>
-		<dependency.undertow-servlet.version>1.4.23.Final</dependency.undertow-servlet.version>
-		<dependency.undertow-websockets.version>1.4.23.Final</dependency.undertow-websockets.version>
-		<dependency.jboss-logging>3.3.0.Final</dependency.jboss-logging>
-	    <dependency.jasypt>1.9.3</dependency.jasypt>
-		<dependency.pax-cdi.version>1.1.0</dependency.pax-cdi.version>
-		<dependency.pax-keycloak.version>0.2.0</dependency.pax-keycloak.version>
-		<version.pax-exam>4.11.0</version.pax-exam>
-
-		<tipi.tomcat.version>8.5.32.1</tipi.tomcat.version>
-		<jsf-myfaces.version>2.2.12</jsf-myfaces.version>
-
-		<dependency.junit.version>4.11</dependency.junit.version>
-
-		<alpn-version>8.1.2.v20141202</alpn-version>
-
-		<aries.spifly.version>1.2.3</aries.spifly.version>
-		<aries.util.version>1.1.3</aries.util.version>
-		
-		<dependency.primefaces.version>5.1</dependency.primefaces.version>
-		<dependency.logback.version>1.0.6</dependency.logback.version>
-
-		<spring.version>5.1.4.RELEASE</spring.version>
-		<spring-dm.version>1.2.1</spring-dm.version>
-
-		<!-- Plugins -->
-		<bundle-plugin.version>3.3.0</bundle-plugin.version>
-
-		<surefire-plugin.version>2.20.1</surefire-plugin.version>
-		<failsafe-plugin.version>2.20.1</failsafe-plugin.version>
-
-		<servlet.spec.version>3.1.0</servlet.spec.version>
-		<servlet-jsp.spec.version>2.3.3</servlet-jsp.spec.version>
-		<servlet-jstl.spec.version>1.2.2</servlet-jstl.spec.version>
-		<jsf-ri.version>1.2_13</jsf-ri.version>
-		<dependency.el-api.version>3.0.0</dependency.el-api.version>
-		<dependency.validation-api.version>1.1.0.Final</dependency.validation-api.version>
-		<dependency.jaspic.version>1.1</dependency.jaspic.version>
 	</properties>
 
 	<build>
@@ -247,50 +288,50 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
-					<version>${version.plugin.maven-clean-plugin}</version>
+					<version>${plugin.maven-clean-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>${version.plugin.maven-compiler-plugin}</version>
+					<version>${plugin.maven-compiler-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-deploy-plugin</artifactId>
-					<version>${version.plugin.maven-deploy-plugin}</version>
+					<version>${plugin.maven-deploy-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>${version.plugin.maven-failsafe-plugin}</version>
+					<version>${plugin.maven-failsafe-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-install-plugin</artifactId>
-					<version>${version.plugin.maven-install-plugin}</version>
+					<version>${plugin.maven-install-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
-					<version>${version.plugin.maven-resources-plugin}</version>
+					<version>${plugin.maven-resources-plugin}</version>
 					<dependencies>
 						<dependency>
 							<!-- Fix org.ops4j:master:4.3.0 -->
 							<groupId>org.apache.maven.shared</groupId>
 							<artifactId>maven-filtering</artifactId>
-							<version>3.1.1</version>
+							<version>${plugin.dependency.maven-filtering}</version>
 						</dependency>
 					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>${version.plugin.maven-site-plugin}</version>
+					<version>${plugin.maven-site-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>${version.plugin.maven-surefire-plugin}</version>
+					<version>${plugin.maven-surefire-plugin}</version>
 				</plugin>
 
 				<!-- Packaging types/tools -->
@@ -298,17 +339,17 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>${version.plugin.maven-jar-plugin}</version>
+					<version>${plugin.maven-jar-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>
-					<version>${version.plugin.maven-war-plugin}</version>
+					<version>${plugin.maven-war-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>${version.plugin.maven-source-plugin}</version>
+					<version>${plugin.maven-source-plugin}</version>
 				</plugin>
 
 				<!-- Reporting plugins -->
@@ -316,12 +357,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>${version.plugin.maven-checkstyle-plugin}</version>
+					<version>${plugin.maven-checkstyle-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>${version.plugin.maven-javadoc-plugin}</version>
+					<version>${plugin.maven-javadoc-plugin}</version>
 				</plugin>
 
 				<!-- Tools -->
@@ -329,42 +370,42 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-antrun-plugin</artifactId>
-					<version>${version.plugin.maven-antrun-plugin}</version>
+					<version>${plugin.maven-antrun-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-archetype-plugin</artifactId>
-					<version>${version.plugin.maven-archetype-plugin}</version>
+					<version>${plugin.maven-archetype-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-assembly-plugin</artifactId>
-					<version>${version.plugin.maven-assembly-plugin}</version>
+					<version>${plugin.maven-assembly-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>${version.plugin.maven-dependency-plugin}</version>
+					<version>${plugin.maven-dependency-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-enforcer-plugin</artifactId>
-					<version>${version.plugin.maven-enforcer-plugin}</version>
+					<version>${plugin.maven-enforcer-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-gpg-plugin</artifactId>
-					<version>${version.plugin.maven-gpg-plugin}</version>
+					<version>${plugin.maven-gpg-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-release-plugin</artifactId>
-					<version>${version.plugin.maven-release-plugin}</version>
+					<version>${plugin.maven-release-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-remote-resources-plugin</artifactId>
-					<version>${version.plugin.maven-remote-resources-plugin}</version>
+					<version>${plugin.maven-remote-resources-plugin}</version>
 				</plugin>
 
 				<!-- Felix plugins -->
@@ -372,7 +413,7 @@
 				<plugin>
 					<groupId>org.apache.felix</groupId>
 					<artifactId>maven-bundle-plugin</artifactId>
-					<version>${version.plugin.felix.maven-bundle-plugin}</version>
+					<version>${plugin.felix.maven-bundle-plugin}</version>
 					<extensions>true</extensions>
 					<configuration>
 						<obrRepository>NONE</obrRepository>
@@ -414,7 +455,7 @@
 				<plugin>
 					<groupId>org.apache.felix</groupId>
 					<artifactId>maven-scr-plugin</artifactId>
-					<version>${version.plugin.felix.maven-scr-plugin}</version>
+					<version>${plugin.felix.maven-scr-plugin}</version>
 					<extensions>true</extensions>
 				</plugin>
 
@@ -431,7 +472,7 @@
 				<plugin>
 					<groupId>org.apache.servicemix.tooling</groupId>
 					<artifactId>depends-maven-plugin</artifactId>
-					<version>${version.plugin.servicemix.depends-maven-plugin}</version>
+					<version>${plugin.servicemix.depends-maven-plugin}</version>
 				</plugin>
 
 				<!-- MojoHaus plugins -->
@@ -439,7 +480,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>build-helper-maven-plugin</artifactId>
-					<version>${version.plugin.mojo.build-helper-maven-plugin}</version>
+					<version>${plugin.mojo.build-helper-maven-plugin}</version>
 				</plugin>
 
 				<!-- Other plugins -->
@@ -447,42 +488,42 @@
 				<plugin>
 					<groupId>org.sonatype.plugins</groupId>
 					<artifactId>nexus-staging-maven-plugin</artifactId>
-					<version>${version.plugin.sonatype.nexus-staging-maven-plugin}</version>
+					<version>${plugin.sonatype.nexus-staging-maven-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>io.gatling</groupId>
 					<artifactId>gatling-maven-plugin</artifactId>
-					<version>${version.plugin.gatling.gatling-maven-plugin}</version>
+					<version>${plugin.gatling.gatling-maven-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>${version.plugin.jacoco.jacoco-maven-plugin}</version>
+					<version>${plugin.jacoco.jacoco-maven-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.sonar</groupId>
 					<artifactId>sonar-maven-plugin</artifactId>
-					<version>${version.plugin.mojo.sonar-maven-plugin}</version>
+					<version>${plugin.mojo.sonar-maven-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>com.mycila</groupId>
 					<artifactId>license-maven-plugin</artifactId>
-					<version>${version.plugin.mycila.license-maven-plugin}</version>
+					<version>${plugin.mycila.license-maven-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.asciidoctor</groupId>
 					<artifactId>asciidoctor-maven-plugin</artifactId>
-					<version>${version.plugin.asciidoctor-maven-plugin}</version>
+					<version>${plugin.asciidoctor-maven-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.rat</groupId>
 					<artifactId>apache-rat-plugin</artifactId>
-					<version>${version.plugin.apache.apache-rat-plugin}</version>
+					<version>${plugin.apache.apache-rat-plugin}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.ops4j.pax.exam</groupId>
 					<artifactId>exam-maven-plugin</artifactId>
-					<version>${version.pax-exam}</version>
+					<version>${dependency.pax-exam.version}</version>
 				</plugin>
 
 			</plugins>
@@ -534,7 +575,7 @@
 					<dependency>
 						<groupId>org.commonjava.maven.enforcer</groupId>
 						<artifactId>enforce-managed-deps-rule</artifactId>
-						<version>${version.org.commonjava.maven.enforcer}</version>
+						<version>${plugin.dependency.org.commonjava.maven.enforcer}</version>
 					</dependency>
 				</dependencies>
 				<executions>
@@ -783,99 +824,99 @@
 			<dependency>
 				<groupId>org.ops4j.base</groupId>
 				<artifactId>ops4j-base-lang</artifactId>
-				<version>${dependency.base.version}</version>
+				<version>${dependency.ops4j.base.version}</version>
 				<optional>true</optional>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.base</groupId>
 				<artifactId>ops4j-base-util-property</artifactId>
-				<version>${dependency.base.version}</version>
+				<version>${dependency.ops4j.base.version}</version>
 				<optional>true</optional>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.base</groupId>
 				<artifactId>ops4j-base-util-xml</artifactId>
-				<version>${dependency.base.version}</version>
+				<version>${dependency.ops4j.base.version}</version>
 				<optional>true</optional>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.base</groupId>
 				<artifactId>ops4j-base-spi</artifactId>
-				<version>${dependency.base.version}</version>
+				<version>${dependency.ops4j.base.version}</version>
 				<optional>true</optional>
 			</dependency>
 
 			<dependency>
 				<groupId>org.ops4j.pax.swissbox</groupId>
 				<artifactId>pax-swissbox-core</artifactId>
-				<version>${dependency.swissbox.version}</version>
+				<version>${dependency.ops4j.swissbox.version}</version>
 				<optional>true</optional>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.swissbox</groupId>
 				<artifactId>pax-swissbox-extender</artifactId>
-				<version>${dependency.swissbox.version}</version>
+				<version>${dependency.ops4j.swissbox.version}</version>
 				<optional>true</optional>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.swissbox</groupId>
 				<artifactId>pax-swissbox-optional-jcl</artifactId>
-				<version>${dependency.swissbox.version}</version>
+				<version>${dependency.ops4j.swissbox.version}</version>
 				<optional>true</optional>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.swissbox</groupId>
 				<artifactId>pax-swissbox-property</artifactId>
-				<version>${dependency.swissbox.version}</version>
+				<version>${dependency.ops4j.swissbox.version}</version>
 				<optional>true</optional>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.swissbox</groupId>
 				<artifactId>pax-swissbox-tracker</artifactId>
-				<version>${dependency.swissbox.version}</version>
+				<version>${dependency.ops4j.swissbox.version}</version>
 				<optional>true</optional>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.swissbox</groupId>
 				<artifactId>pax-swissbox-bnd</artifactId>
-				<version>${dependency.swissbox.version}</version>
+				<version>${dependency.ops4j.swissbox.version}</version>
 				<optional>true</optional>
 			</dependency>
 
 			<dependency>
 				<groupId>org.ops4j.pax.url</groupId>
 				<artifactId>pax-url-war</artifactId>
-				<version>${dependency.paxurl.version}</version>
+				<version>${dependency.pax-url.version}</version>
 				<classifier>uber</classifier>
 				<optional>true</optional>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.url</groupId>
 				<artifactId>pax-url-commons</artifactId>
-				<version>${dependency.paxurl.version}</version>
+				<version>${dependency.pax-url.version}</version>
 				<optional>true</optional>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.url</groupId>
 				<artifactId>pax-url-aether</artifactId>
-				<version>${dependency.paxurl.version}</version>
+				<version>${dependency.pax-url.version}</version>
 				<optional>true</optional>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.url</groupId>
 				<artifactId>pax-url-wrap</artifactId>
-				<version>${dependency.paxurl.version}</version>
+				<version>${dependency.pax-url.version}</version>
 				<classifier>uber</classifier>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.url</groupId>
 				<artifactId>pax-url-link</artifactId>
-				<version>${dependency.paxurl.version}</version>
+				<version>${dependency.pax-url.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.url</groupId>
 				<artifactId>pax-url-classpath</artifactId>
-				<version>${dependency.paxurl.version}</version>
+				<version>${dependency.pax-url.version}</version>
 			</dependency>
 
 			<dependency>
@@ -897,12 +938,12 @@
 			<dependency>
 				<groupId>org.ops4j.pax.tipi</groupId>
 				<artifactId>org.ops4j.pax.tipi.tomcat-embed-core</artifactId>
-				<version>${tipi.tomcat.version}</version>
+				<version>${dependency.pax-tipi.tomcat.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.tipi</groupId>
 				<artifactId>org.ops4j.pax.tipi.tomcat-embed-websocket</artifactId>
-				<version>${tipi.tomcat.version}</version>
+				<version>${dependency.pax-tipi.tomcat.version}</version>
 			</dependency>
 
 			<dependency>
@@ -944,47 +985,47 @@
 			<dependency>
 				<groupId>org.ops4j.pax.exam</groupId>
 				<artifactId>pax-exam-link-mvn</artifactId>
-				<version>${version.pax-exam}</version>
+				<version>${dependency.pax-exam.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.exam</groupId>
 				<artifactId>pax-exam-link-assembly</artifactId>
-				<version>${version.pax-exam}</version>
+				<version>${dependency.pax-exam.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.exam</groupId>
 				<artifactId>pax-exam-container-karaf</artifactId>
-				<version>${version.pax-exam}</version>
+				<version>${dependency.pax-exam.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.exam</groupId>
 				<artifactId>pax-exam-junit4</artifactId>
-				<version>${version.pax-exam}</version>
+				<version>${dependency.pax-exam.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.exam</groupId>
 				<artifactId>pax-exam-invoker-junit</artifactId>
-				<version>${version.pax-exam}</version>
+				<version>${dependency.pax-exam.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.exam</groupId>
 				<artifactId>pax-exam-container-native</artifactId>
-				<version>${version.pax-exam}</version>
+				<version>${dependency.pax-exam.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.exam</groupId>
 				<artifactId>pax-exam-inject</artifactId>
-				<version>${version.pax-exam}</version>
+				<version>${dependency.pax-exam.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.exam</groupId>
 				<artifactId>pax-exam-extender-service</artifactId>
-				<version>${version.pax-exam}</version>
+				<version>${dependency.pax-exam.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.exam</groupId>
 				<artifactId>pax-exam</artifactId>
-				<version>${version.pax-exam}</version>
+				<version>${dependency.pax-exam.version}</version>
 			</dependency>
 
 			<!-- OSGi -->
@@ -1004,11 +1045,10 @@
 				<artifactId>osgi.annotation</artifactId>
 				<version>${dependency.osgi.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.service.jaxrs</artifactId>
-				<version>1.0.0</version>
+				<version>${dependency.osgi.service.jaxrs}</version>
 			</dependency>
 
 			<dependency>
@@ -1019,34 +1059,34 @@
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.fileinstall</artifactId>
-				<version>${dependency.fileinstall.version}</version>
+				<version>${dependency.felix.fileinstall.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.configadmin</artifactId>
-				<version>${dependency.configadmin.version}</version>
+				<version>${dependency.felix.configadmin.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.scr</artifactId>
-				<version>${dependency.scr.version}</version>
+				<version>${dependency.felix.scr.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.eventadmin</artifactId>
-				<version>1.3.2</version>
+				<version>${dependency.felix.eventadmin.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.webconsole</artifactId>
-				<version>3.1.8</version>
+				<version>${dependency.felix.webconsole.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>org.eclipse.osgi</artifactId>
-				<version>3.10.100.v20150529-1857</version>
+				<version>${dependency.eclipse.tycho.version}</version>
 			</dependency>
 
 			<dependency>
@@ -1138,12 +1178,12 @@
 			<dependency>
 				<groupId>org.apache.aries.spifly</groupId>
 				<artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
-				<version>${aries.spifly.version}</version>
+				<version>${dependency.aries.spifly.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.aries</groupId>
 				<artifactId>org.apache.aries.util</artifactId>
-				<version>${aries.util.version}</version>
+				<version>${dependency.aries.util.version}</version>
 			</dependency>
 
 			<!-- JavaEE -->
@@ -1151,28 +1191,27 @@
 			<dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>javax.servlet-api</artifactId>
-				<version>${servlet.spec.version}</version>
+				<version>${dependency.javax.servlet-api.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet.jsp</groupId>
 				<artifactId>javax.servlet.jsp-api</artifactId>
-				<version>${servlet-jsp.spec.version}</version>
+				<version>${dependency.javax.servlet.jsp-api.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet.jsp.jstl</groupId>
 				<artifactId>javax.servlet.jsp.jstl-api</artifactId>
-				<version>${servlet-jstl.spec.version}</version>
+				<version>${dependency.javax.jstl.version}</version>
 			</dependency>
-			<!--<dependency>-->
-				<!--<groupId>javax.servlet</groupId>-->
-				<!--<artifactId>jstl</artifactId>-->
-				<!--<version>${dependency.jstl.version}</version>-->
-				<!--<optional>true</optional>-->
-			<!--</dependency>-->
+<!--			<dependency>-->
+<!--				<groupId>javax.servlet</groupId>-->
+<!--				<artifactId>jstl</artifactId>-->
+<!--				<version>${dependency.jstl.version}</version>-->
+<!--			</dependency>-->
 			<dependency>
 				<groupId>org.jboss.spec.javax.servlet.jstl</groupId>
 				<artifactId>jboss-jstl-api_1.2_spec</artifactId>
-				<version>1.1.4.Final</version>
+				<version>${dependency.jboss.spec.jstl}</version>
 				<exclusions>
 					<exclusion>
 						<groupId>org.jboss.spec.javax.servlet.jsp</groupId>
@@ -1196,121 +1235,125 @@
 			<dependency>
 				<groupId>javax.el</groupId>
 				<artifactId>javax.el-api</artifactId>
-				<version>${dependency.el-api.version}</version>
+				<version>${dependency.javax.el-api.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>javax.websocket</groupId>
 				<artifactId>javax.websocket-api</artifactId>
-				<version>1.1</version>
+				<version>${dependency.javax.websocket-api.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>javax.validation</groupId>
 				<artifactId>validation-api</artifactId>
-				<version>${dependency.validation-api.version}</version>
+				<version>${dependency.javax.validation-api.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>javax.ws.rs</groupId>
 				<artifactId>jsr311-api</artifactId>
-				<version>1.1.1</version>
+				<version>${dependency.javax.ws.rs1-api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.ws.rs</groupId>
+				<artifactId>javax.ws.rs-api</artifactId>
+				<version>${dependency.javax.ws.rs2-api.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>javax.enterprise</groupId>
 				<artifactId>cdi-api</artifactId>
-				<version>1.2</version>
+				<version>${dependency.javax.cdi-api.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.interceptor</groupId>
 				<artifactId>javax.interceptor-api</artifactId>
-				<version>1.2</version>
+				<version>${dependency.javax.interceptor-api.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>javax.json</groupId>
 				<artifactId>javax.json-api</artifactId>
-				<version>1.0</version>
+				<version>${dependency.javax.json-api.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish</groupId>
 				<artifactId>javax.json</artifactId>
-				<version>1.0.4</version>
-			</dependency>
-
-			<dependency>
-				<groupId>javax.ws.rs</groupId>
-				<artifactId>javax.ws.rs-api</artifactId>
-				<version>2.0.1</version>
+				<version>${dependency.glassfish.json}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>javax.faces</groupId>
 				<artifactId>jsf-api</artifactId>
-				<version>${jsf-ri.version}</version>
+				<version>${dependency.javax.faces.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.faces</groupId>
 				<artifactId>jsf-impl</artifactId>
-				<version>${jsf-ri.version}</version>
+				<version>${dependency.javax.faces.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>javax.security.auth.message</groupId>
 				<artifactId>javax.security.auth.message-api</artifactId>
-				<version>${dependency.jaspic.version}</version>
+				<version>${dependency.javax.jaspic.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.apache.geronimo.specs</groupId>
 				<artifactId>geronimo-annotation_1.1_spec</artifactId>
-				<version>1.0</version>
+				<version>${dependency.geronimo.specs.annotation.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.geronimo.specs</groupId>
 				<artifactId>geronimo-stax-api_1.2_spec</artifactId>
-				<version>1.1</version>
+				<version>${dependency.geronimo.specs.stax.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.geronimo.specs</groupId>
 				<artifactId>geronimo-activation_1.1_spec</artifactId>
-				<version>1.1</version>
+				<version>${dependency.geronimo.specs.activation.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.geronimo.specs</groupId>
 				<artifactId>geronimo-ejb_3.1_spec</artifactId>
-				<version>1.0</version>
+				<version>${dependency.geronimo.specs.ejb.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.geronimo.specs</groupId>
 				<artifactId>geronimo-jpa_2.0_spec</artifactId>
-				<version>1.1</version>
+				<version>${dependency.geronimo.specs.jpa2.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.geronimo.specs</groupId>
+				<artifactId>geronimo-jaspic_1.0_spec</artifactId>
+				<version>${dependency.geronimo.specs.jaspic.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.geronimo.specs</groupId>
 				<artifactId>geronimo-javamail_1.4_spec</artifactId>
-				<version>1.7</version>
+				<version>${dependency.geronimo.specs.mail.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.geronimo.specs</groupId>
 				<artifactId>geronimo-jaxws_2.2_spec</artifactId>
-				<version>1.0</version>
+				<version>${dependency.geronimo.specs.jaxws.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.geronimo.specs</groupId>
 				<artifactId>geronimo-osgi-registry</artifactId>
-				<version>1.1</version>
+				<version>${dependency.geronimo.specs.osgi-registry.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.geronimo.specs</groupId>
 				<artifactId>geronimo-jaxrpc_1.1_spec</artifactId>
-				<version>2.1</version>
+				<version>${dependency.geronimo.specs.jaxrpc.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.geronimo.specs</groupId>
 				<artifactId>geronimo-jta_1.1_spec</artifactId>
-				<version>1.1.1</version>
+				<version>${dependency.geronimo.specs.jta.version}</version>
 			</dependency>
 
 			<!-- SMX -->
@@ -1318,17 +1361,17 @@
 			<dependency>
 				<groupId>org.apache.servicemix.bundles</groupId>
 				<artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
-				<version>1_2</version>
+				<version>${dependency.servicemix.bundles.javax-inject.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.servicemix.bundles</groupId>
 				<artifactId>org.apache.servicemix.bundles.jsr305</artifactId>
-				<version>1.3.9_1</version>
+				<version>${dependency.servicemix.bundles.jsr305.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.servicemix.bundles</groupId>
 				<artifactId>org.apache.servicemix.bundles.commons-digester</artifactId>
-				<version>1.8_4</version>
+				<version>${dependency.servicemix.bundles.commons-digester.version}</version>
 				<exclusions>
 					<exclusion>
 						<groupId>log4j</groupId>
@@ -1348,22 +1391,22 @@
 			<dependency>
 				<groupId>org.apache.servicemix.specs</groupId>
 				<artifactId>org.apache.servicemix.specs.jsr250-1.0</artifactId>
-				<version>2.0.0</version>
+				<version>${dependency.servicemix.specs.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.servicemix.specs</groupId>
 				<artifactId>org.apache.servicemix.specs.jsr303-api-1.0.0</artifactId>
-				<version>${dependency.jsr303.version}</version>
+				<version>${dependency.servicemix.specs.jsr303.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.servicemix.specs</groupId>
 				<artifactId>org.apache.servicemix.specs.jaxb-api-2.2</artifactId>
-				<version>2.0.0</version>
+				<version>${dependency.servicemix.specs.jaxb.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.servicemix.specs</groupId>
 				<artifactId>org.apache.servicemix.specs.saaj-api-1.3</artifactId>
-				<version>1.8.0</version>
+				<version>${dependency.servicemix.specs.saaj.version}</version>
 			</dependency>
 
 			<!-- Logging -->
@@ -1371,27 +1414,27 @@
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
-				<version>${dependency.slf4j}</version>
+				<version>${dependency.slf4j.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-jdk14</artifactId>
-				<version>${dependency.slf4j}</version>
+				<version>${dependency.slf4j.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>jcl-over-slf4j</artifactId>
-				<version>${dependency.slf4j}</version>
+				<version>${dependency.slf4j.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>jul-to-slf4j</artifactId>
-				<version>${dependency.slf4j}</version>
+				<version>${dependency.slf4j.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-simple</artifactId>
-				<version>${dependency.slf4j}</version>
+				<version>${dependency.slf4j.version}</version>
 			</dependency>
 
 			<dependency>
@@ -1417,167 +1460,167 @@
 				<groupId>org.eclipse.jetty.aggregate</groupId>
 				<artifactId>jetty-all</artifactId>
 				<classifier>uber</classifier>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 				<optional>true</optional>
 			</dependency>
 
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-jaas</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 				<optional>true</optional>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-client</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 				<optional>true</optional>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-continuation</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>test-jetty-webapp</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 				<type>war</type>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-util</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-io</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-http</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-server</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-security</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-servlet</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-xml</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-alpn-client</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-alpn-server</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.osgi</groupId>
 				<artifactId>jetty-osgi-alpn</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mortbay.jetty.alpn</groupId>
 				<artifactId>alpn-boot</artifactId>
-				<version>${alpn-version}</version>
+				<version>${dependency.alpn.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.eclipse.jetty.osgi</groupId>
 				<artifactId>jetty-osgi-npn</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.eclipse.jetty.http2</groupId>
 				<artifactId>http2-common</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.http2</groupId>
 				<artifactId>http2-server</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.http2</groupId>
 				<artifactId>http2-http-client-transport</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.http2</groupId>
 				<artifactId>http2-client</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.http2</groupId>
 				<artifactId>http2-hpack</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.eclipse.jetty.spdy</groupId>
 				<artifactId>spdy-server</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.spdy</groupId>
 				<artifactId>spdy-http-server</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
 				<artifactId>websocket-api</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
 				<artifactId>websocket-common</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
 				<artifactId>websocket-server</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
 				<artifactId>websocket-client</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
 				<artifactId>websocket-servlet</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
 				<artifactId>javax-websocket-server-impl</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
 				<artifactId>javax-websocket-client-impl</artifactId>
-				<version>${dependency.jetty.version}</version>
+				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 
 			<!-- Tomcat -->
@@ -1622,47 +1665,33 @@
 			<dependency>
 				<groupId>io.undertow</groupId>
 				<artifactId>undertow-servlet</artifactId>
-				<version>${dependency.undertow-servlet.version}</version>
-				<exclusions>
-					<exclusion>
-						<artifactId>xnio-nio</artifactId>
-						<groupId>org.jboss.xnio</groupId>
-					</exclusion>
-					<exclusion>
-						<artifactId>xnio-api</artifactId>
-						<groupId>org.jboss.xnio</groupId>
-					</exclusion>
-					<exclusion>
-						<artifactId>undertow-core</artifactId>
-						<groupId>io.undertow</groupId>
-					</exclusion>
-				</exclusions>
+				<version>${dependency.jboss.undertow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.undertow</groupId>
 				<artifactId>undertow-core</artifactId>
-				<version>${dependency.undertow-core.version}</version>
+				<version>${dependency.jboss.undertow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.undertow</groupId>
 				<artifactId>undertow-websockets-jsr</artifactId>
-				<version>${dependency.undertow-websockets.version}</version>
+				<version>${dependency.jboss.undertow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.xnio</groupId>
 				<artifactId>xnio-api</artifactId>
-				<version>${dependency.xnio-api.version}</version>
+				<version>${dependency.jboss.xnio.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.xnio</groupId>
 				<artifactId>xnio-nio</artifactId>
-				<version>${dependency.xnio.version}</version>
+				<version>${dependency.jboss.xnio.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.jboss.logging</groupId>
 				<artifactId>jboss-logging</artifactId>
-				<version>${dependency.jboss-logging}</version>
+				<version>${dependency.jboss.logging.version}</version>
 			</dependency>
 
 			<!-- Spring -->
@@ -1670,44 +1699,44 @@
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-context</artifactId>
-				<version>${spring.version}</version>
+				<version>${dependency.spring.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-webmvc</artifactId>
-				<version>${spring.version}</version>
+				<version>${dependency.spring.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-orm</artifactId>
-				<version>${spring.version}</version>
+				<version>${dependency.spring.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-expression</artifactId>
-				<version>${spring.version}</version>
+				<version>${dependency.spring.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-context-support</artifactId>
-				<version>${spring.version}</version>
+				<version>${dependency.spring.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-web</artifactId>
-				<version>${spring.version}</version>
+				<version>${dependency.spring.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-test</artifactId>
-				<version>${spring.version}</version>
+				<version>${dependency.spring.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.springframework.osgi</groupId>
 				<artifactId>spring-osgi-web</artifactId>
-				<version>${spring-dm.version}</version>
+				<version>${dependency.spring-dm.version}</version>
 				<exclusions>
 					<exclusion>
 						<groupId>javax.servlet</groupId>
@@ -1718,22 +1747,22 @@
 			<dependency>
 				<groupId>org.springframework.osgi</groupId>
 				<artifactId>spring-osgi-io</artifactId>
-				<version>${spring-dm.version}</version>
+				<version>${dependency.spring-dm.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.osgi</groupId>
 				<artifactId>spring-osgi-core</artifactId>
-				<version>${spring-dm.version}</version>
+				<version>${dependency.spring-dm.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.osgi</groupId>
 				<artifactId>spring-osgi-extender</artifactId>
-				<version>${spring-dm.version}</version>
+				<version>${dependency.spring-dm.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.osgi</groupId>
 				<artifactId>spring-osgi-annotation</artifactId>
-				<version>${spring-dm.version}</version>
+				<version>${dependency.spring-dm.version}</version>
 			</dependency>
 
 			<!-- Other -->
@@ -1766,13 +1795,13 @@
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
-				<version>1.4</version>
+				<version>${dependency.commons-io.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>joda-time</groupId>
 				<artifactId>joda-time</artifactId>
-				<version>2.3</version>
+				<version>${dependency.joda-time.version}</version>
 			</dependency>
 
 			<dependency>
@@ -1820,96 +1849,96 @@
 			<dependency>
 				<groupId>org.apache.myfaces.core</groupId>
 				<artifactId>myfaces-api</artifactId>
-				<version>${jsf-myfaces.version}</version>
+				<version>${dependency.jsf.myfaces.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.myfaces.core</groupId>
 				<artifactId>myfaces-impl</artifactId>
-				<version>${jsf-myfaces.version}</version>
+				<version>${dependency.jsf.myfaces.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.myfaces.commons</groupId>
 				<artifactId>myfaces-commons-facelets-examples20</artifactId>
-				<version>1.0.2.1</version>
+				<version>${dependency.jsf.myfaces-facelets-examples20.version}</version>
 				<type>war</type>
 			</dependency>
 
 			<dependency>
 				<groupId>org.primefaces</groupId>
 				<artifactId>primefaces</artifactId>
-				<version>${dependency.primefaces.version}</version>
+				<version>${dependency.jsf.primefaces.version}</version>
 			</dependency>
 
-			<!--<dependency>-->
-				<!--<groupId>org.eclipse.jdt.core.compiler</groupId>-->
-				<!--<artifactId>ecj</artifactId>-->
-				<!--<version>${dependency.jdt.version}</version>-->
-			<!--</dependency>-->
+<!--			<dependency>-->
+<!--				<groupId>org.eclipse.jdt.core.compiler</groupId>-->
+<!--				<artifactId>ecj</artifactId>-->
+<!--				<version>${dependency.jdt.version}</version>-->
+<!--			</dependency>-->
 			<dependency>
 				<groupId>org.eclipse.jdt</groupId>
 				<artifactId>ecj</artifactId>
-				<version>${dependency.jdt.version}</version>
+				<version>${dependency.eclipse.jdt.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.apache.geronimo.bundles</groupId>
 				<artifactId>commons-discovery</artifactId>
-				<version>0.4_1</version>
+				<version>${dependency.geronimo.bundles.commons-discovery.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.jasypt</groupId>
 				<artifactId>jasypt</artifactId>
-				<version>${dependency.jasypt}</version>
+				<version>${dependency.jasypt.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.jboss.weld</groupId>
 				<artifactId>weld-core</artifactId>
-				<version>2.4.5.Final</version>
+				<version>${dependency.jboss.weld.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.weld</groupId>
 				<artifactId>weld-core-jsf</artifactId>
-				<version>2.4.5.Final</version>
+				<version>${dependency.jboss.weld.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.sun.jersey</groupId>
 				<artifactId>jersey-core</artifactId>
-				<version>1.19</version>
+				<version>${dependency.jersey.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.sun.jersey</groupId>
 				<artifactId>jersey-server</artifactId>
-				<version>1.19</version>
+				<version>${dependency.jersey.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.sun.jersey</groupId>
 				<artifactId>jersey-servlet</artifactId>
-				<version>1.19</version>
+				<version>${dependency.jersey.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-core</artifactId>
-				<version>2.3.0</version>
+				<version>${dependency.jackson.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
-				<version>2.3.0</version>
+				<version>${dependency.jackson.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-annotations</artifactId>
-				<version>2.3.0</version>
+				<version>${dependency.jackson.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>15.0</version>
+				<version>${dependency.guava.version}</version>
 			</dependency>
 
 			<dependency>
@@ -1943,32 +1972,32 @@
 			<dependency>
 				<groupId>org.easymock</groupId>
 				<artifactId>easymock</artifactId>
-				<version>2.3</version>
+				<version>${dependency.easymock.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.easymock</groupId>
 				<artifactId>easymockclassextension</artifactId>
-				<version>2.3</version>
+				<version>${dependency.easymock.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-all</artifactId>
-				<version>1.9.5</version>
+				<version>${dependency.mockito.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hamcrest</groupId>
 				<artifactId>hamcrest-core</artifactId>
-				<version>1.3</version>
+				<version>${dependency.hamcrest.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.objenesis</groupId>
 				<artifactId>objenesis</artifactId>
-				<version>3.0.1</version>
+				<version>${dependency.objenesis.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.cedarsoft.commons</groupId>
 				<artifactId>test-utils</artifactId>
-				<version>6.0.1</version>
+				<version>${dependency.cedarsoft.test-utils.version}</version>
 			</dependency>
 
 			<!-- Load-Test Dependencies -->
@@ -2110,7 +2139,7 @@
 					<plugin>
 						<groupId>org.apache.rat</groupId>
 						<artifactId>apache-rat-plugin</artifactId>
-						<version>${version.plugin.apache.apache-rat-plugin}</version>
+						<version>${plugin.apache.apache-rat-plugin}</version>
 						<executions>
 							<execution>
 								<phase>verify</phase>
@@ -2236,7 +2265,7 @@
 							<dependency>
 								<groupId>com.puppycrawl.tools</groupId>
 								<artifactId>checkstyle</artifactId>
-								<version>8.7</version>
+								<version>${plugin.dependency.com.puppycrawl.tools.checkstyle}</version>
 							</dependency>
 						</dependencies>
 					</plugin>

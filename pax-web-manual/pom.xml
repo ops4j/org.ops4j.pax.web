@@ -94,12 +94,12 @@
 								<sourcedir>../../../target/test-sources</sourcedir>
 								<docVersion>${project.version}</docVersion>
 								<tomcatVersion>${dependency.tomcat.version}</tomcatVersion>
-								<jettyVersion>${dependency.jetty.version}</jettyVersion>
+								<jettyVersion>${dependency.eclipse.jetty.version}</jettyVersion>
 								<undertowVersion>${dependency.undertow-core.version}</undertowVersion>
 								<latestStableVersion>${baseline.version}</latestStableVersion>
-								<servletVersion>${servlet.spec.version}</servletVersion>
-								<jspVersion>${servlet-jsp.spec.version}</jspVersion>
-								<jsfVersion>${jsf-myfaces.version}</jsfVersion>
+								<servletVersion>${dependency.javax.servlet-api.version}</servletVersion>
+								<jspVersion>${dependency.javax.servlet.jsp-api.version}</jspVersion>
+								<jsfVersion>${dependency.jsf.myfaces.version}</jsfVersion>
 							</attributes>
 						</configuration>
 					</execution>
