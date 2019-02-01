@@ -260,7 +260,7 @@ public interface Configuration {
 	 *
 	 * @return the default auth method, null if not implemented
 	 */
-	default String getDefaultAuthMethod(){
+	default String getDefaultAuthMethod() {
 		return null;
 	}
 
@@ -270,7 +270,7 @@ public interface Configuration {
 	 *
 	 * @return the default realm name, null if not implemented
 	 */
-	default String getDefaultRealmName(){
+	default String getDefaultRealmName() {
 		return null;
 	}
 

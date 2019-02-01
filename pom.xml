@@ -427,7 +427,7 @@
 					</dependencies>
 					<executions>
 						<execution>
-							<id>bundle</id>
+							<id>default-bundle</id>
 							<goals>
 								<goal>bundle</goal>
 							</goals>

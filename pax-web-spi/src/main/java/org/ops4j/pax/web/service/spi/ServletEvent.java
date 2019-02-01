@@ -205,6 +205,8 @@ public class ServletEvent {
 			case WAITING:
 				name = "WAITING";
 				break;
+			default:
+				break;
 		}
 		return name;
 	}

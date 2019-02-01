@@ -176,12 +176,6 @@
     <module name="ModifierOrder" />
     <module name="RedundantModifier" />
 
-    <module name="HiddenField">
-      <property name="ignoreConstructorParameter" value="true" />
-      <property name="ignoreSetter" value="true" />
-    </module>
-
-
 <!--    <module name="IllegalCatch" />-->
     <module name="IllegalInstantiation" />
     <module name="IllegalThrows" />

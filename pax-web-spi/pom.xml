@@ -61,13 +61,14 @@
 							org.apache.commons.collections4.iterators,
 							org.apache.commons.collections4.map,
 							org.ops4j.lang.*,
-							org.ops4j.pax.swissbox.*
+							org.ops4j.pax.swissbox.*,
+							org.ops4j.pax.web.service.spi.internal
 						</Private-Package>
 						<Export-Package>
-							org.ops4j.pax.web.service.spi.*;version="${pax-web.osgi.version}"
+							org.ops4j.pax.web.service.spi;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.model;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.util;version="${pax-web.osgi.version}"
 						</Export-Package>
-						<!--<Embed-Dependency>*;scope=compile;type=!pom;inline=true</Embed-Dependency>-->
-						<!--<Embed-Transitive>true</Embed-Transitive>-->
 					</instructions>
 				</configuration>
 			</plugin>
