@@ -9,39 +9,327 @@ Taking into account JavaEE 5 - 8 specifications, we have:
 
 By looking at 3 containers used by pax-web, the _implementations_ of JSP/JSTL used are:
 
+* Official JavaEE (recently repackaged under jakarta groupId) bundles for APIs (not for implementations!):
+** mvn:javax.servlet/javax.servlet-api/3.1.0
++
+[options=nowrap]
+----
+Contains:
+    javax.servlet
+    javax.servlet.annotation
+    javax.servlet.descriptor
+    javax.servlet.http
+
+Export-Package:
+    javax.servlet;            version="3.1.0"; uses:="javax.servlet.annotation,javax.servlet.descriptor",
+    javax.servlet.annotation; version="3.1.0"; uses:="javax.servlet",
+    javax.servlet.descriptor; version="3.1.0",
+    javax.servlet.http;       version="3.1.0"; uses:="javax.servlet"
+Import-Package:
+    javax.servlet;            version="3.1.0",
+    javax.servlet.annotation; version="3.1.0",
+    javax.servlet.descriptor; version="3.1.0",
+    javax.servlet.http;       version="3.1.0"
+----
+** mvn:javax.servlet/javax.servlet-api/4.0.1
++
+[options=nowrap]
+----
+Contains:
+    javax.servlet
+    javax.servlet.annotation
+    javax.servlet.descriptor
+    javax.servlet.http
+
+Export-Package:
+    javax.servlet;            version="4.0.0"; uses:="javax.servlet.annotation,javax.servlet.descriptor",
+    javax.servlet.annotation; version="4.0.0"; uses:="javax.servlet",
+    javax.servlet.descriptor; version="4.0.0",
+    javax.servlet.http;       version="4.0.0"; uses:="javax.servlet"
+Import-Package:
+    javax.servlet;            version="4.0.0",
+    javax.servlet.annotation; version="4.0.0",
+    javax.servlet.descriptor; version="4.0.0",
+    javax.servlet.http;       version="4.0.0"
+----
+** mvn:jakarta.servlet/jakarta.servlet-api/4.0.2
++
+[options=nowrap]
+----
+Contains:
+    javax.servlet
+    javax.servlet.annotation
+    javax.servlet.descriptor
+    javax.servlet.http
+
+Export-Package:
+    javax.servlet;            version="4.0.0"; uses:="javax.servlet.annotation,javax.servlet.descriptor",
+    javax.servlet.annotation; version="4.0.0"; uses:="javax.servlet",
+    javax.servlet.descriptor; version="4.0.0",
+    javax.servlet.http;       version="4.0.0"; uses:="javax.servlet"
+Import-Package:
+    javax.servlet,
+    javax.servlet.annotation,
+    javax.servlet.descriptor
+----
+** mvn:javax.servlet.jsp/javax.servlet.jsp-api/2.3.3
++
+[options=nowrap]
+----
+Contains:
+    javax.servlet.jsp
+    javax.servlet.jsp.el
+    javax.servlet.jsp.tagext
+
+Export-Package:
+    javax.servlet.jsp;        version="2.3.3"; uses:="javax.servlet,javax.el,javax.servlet.jsp.el,javax.servlet.jsp.tagext,javax.servlet.http"
+    javax.servlet.jsp.el;     version="2.3.3"; uses:="javax.servlet,javax.el,javax.servlet.jsp,javax.servlet.http",
+    javax.servlet.jsp.tagext; version="2.3.3"; uses:="javax.servlet.jsp",
+Import-Package:
+    javax.el,
+    javax.servlet,
+    javax.servlet.http,
+    javax.servlet.jsp;        version="2.3.3",
+    javax.servlet.jsp.el;     version="2.3.3",
+    javax.servlet.jsp.tagext; version="2.3.3"
+----
+** mvn:jakarta.servlet.jsp/jakarta.servlet.jsp-api/2.3.5
++
+[options=nowrap]
+----
+Contains:
+    javax.servlet.jsp
+    javax.servlet.jsp.el
+    javax.servlet.jsp.tagext
+
+Export-Package:
+    javax.servlet.jsp;        version="2.3.5"; uses:="javax.servlet,javax.el,javax.servlet.jsp.el,javax.servlet.jsp.tagext,javax.servlet.http",
+    javax.servlet.jsp.el;     version="2.3.5"; uses:="javax.servlet,javax.el,javax.servlet.jsp,javax.servlet.http",
+    javax.servlet.jsp.tagext; version="2.3.5"; uses:="javax.servlet.jsp"
+Import-Package:
+    javax.el,
+    javax.servlet,
+    javax.servlet.http,
+    javax.servlet.jsp;        version="2.3.5",
+    javax.servlet.jsp.el;     version="2.3.5",
+    javax.servlet.jsp.tagext; version="2.3.5"
+----
+** mvn:javax.servlet.jsp.jstl/javax.servlet.jsp.jstl-api/1.2.2
++
+[options=nowrap]
+----
+Contains:
+    javax.servlet.jsp.jstl.core
+    javax.servlet.jsp.jstl.fmt
+    javax.servlet.jsp.jstl.sql
+    javax.servlet.jsp.jstl.tlv
+
+Export-Package:
+    javax.servlet.jsp.jstl.core; version="1.2.2"; uses:="javax.servlet,javax.el,javax.servlet.jsp.tagext,javax.servlet.jsp,javax.servlet.http",
+    javax.servlet.jsp.jstl.fmt;  version="1.2.2"; uses:="javax.servlet,javax.servlet.jsp.jstl.core,javax.servlet.jsp,javax.servlet.http",
+    javax.servlet.jsp.jstl.sql;  version="1.2.2",
+    javax.servlet.jsp.jstl.tlv;  version="1.2.2"; uses:="javax.xml.parsers,javax.servlet.jsp.tagext,org.xml.sax.helpers,org.xml.sax"
+Import-Package:
+    javax.el,
+    javax.servlet,
+    javax.servlet.http,
+    javax.servlet.jsp,
+    javax.servlet.jsp.jstl.core; version="1.2.2",
+    javax.servlet.jsp.jstl.fmt;  version="1.2.2",
+    javax.servlet.jsp.jstl.sql;  version="1.2.2",
+    javax.servlet.jsp.jstl.tlv;  version="1.2.2",
+    javax.servlet.jsp.tagext,
+    javax.xml.parsers,
+    org.xml.sax,
+    org.xml.sax.helpers
+----
+** mvn:jakarta.servlet.jsp.jstl/jakarta.servlet.jsp.jstl-api/1.2.4
++
+[options=nowrap]
+----
+Contains:
+    javax.servlet.jsp.jstl.core
+    javax.servlet.jsp.jstl.fmt
+    javax.servlet.jsp.jstl.sql
+    javax.servlet.jsp.jstl.tlv
+
+Export-Package:
+    javax.servlet.jsp.jstl.core; version="1.2.4";uses:="javax.servlet,javax.servlet.http,javax.servlet.jsp.tagext,javax.el,javax.servlet.jsp",
+    javax.servlet.jsp.jstl.fmt;  version="1.2.4";uses:="javax.servlet,javax.servlet.jsp.jstl.core,javax.servlet.http,javax.servlet.jsp",
+    javax.servlet.jsp.jstl.sql;  version="1.2.4",
+    javax.servlet.jsp.jstl.tlv;  version="1.2.4";uses:="org.xml.sax.helpers,org.xml.sax,javax.servlet.jsp.tagext,javax.xml.parsers"
+Import-Package:
+    javax.el;                    version="3.0",
+    javax.servlet;               version="4.0",
+    javax.servlet.http;          version="4.0",
+    javax.servlet.jsp,
+    javax.servlet.jsp.jstl.core; version="1.2.4",
+    javax.servlet.jsp.jstl.fmt;  version="1.2.4",
+    javax.servlet.jsp.jstl.sql;  version="1.2.4",
+    javax.servlet.jsp.jstl.tlv;  version="1.2.4",
+    javax.servlet.jsp.tagext,
+    javax.xml.parsers,
+    org.xml.sax,
+    org.xml.sax.helpers
+----
+** mvn:javax.el/javax.el-api/3.0.0
++
+[options=nowrap]
+----
+Contains:
+    javax.el
+
+Export-Package:
+    javax.el; version="3.0.0"
+----
+** mvn:jakarta.el/jakarta.el-api/3.0.2
++
+[options=nowrap]
+----
+Contains:
+    javax.el
+
+Export-Package:
+    javax.el; version="3.0.2"
+----
+
 * Tomcat 8.5.x:
-** mvn:org.apache.tomcat/tomcat-servlet-api - just servlet API (javax.servlet, javax.servlet.annotation,
-   javax.servlet.descriptor, javax.servlet.http, javax.servlet.resources)
-** mvn:org.apache.tomcat/tomcat-jsp-api - just JSP API (javax.servlet.jsp, javax.servlet.jsp.el,
-   javax.servlet.jsp.resources, javax.servlet.jsp.tagext)
-** mvn:org.apache.tomcat/tomcat-el-api - just EL API (javax.el)
-** mvn:org.apache.tomcat/tomcat-jasper (org.apache.jasper.*)
-** mvn:org.apache.tomcat/tomcat-jasper-el (org.apache.el.*)
-** mvn:org.apache.tomcat.embed/tomcat-embed-jasper (tomcat-jasper + JSP API)
-** mvn:org.apache.tomcat.embed/tomcat-embed-el (tomcat-jasper-el + EL API)
+** mvn:org.apache.tomcat/tomcat-servlet-api - just Servlet API
++
+----
+javax.servlet
+javax.servlet.annotation
+javax.servlet.descriptor
+javax.servlet.http
+javax.servlet.resources
+----
+** mvn:org.apache.tomcat/tomcat-jsp-api - just JSP API
++
+----
+javax.servlet.jsp
+javax.servlet.jsp.el
+javax.servlet.jsp.resources
+javax.servlet.jsp.tagext
+----
+** mvn:org.apache.tomcat/tomcat-el-api - just EL API
++
+----
+javax.el
+----
+** mvn:org.apache.tomcat/tomcat-jasper - JSP Impl
++
+----
+org.apache.jasper.*
+----
+** mvn:org.apache.tomcat/tomcat-jasper-el - EL Impl
++
+----
+org.apache.el.*
+----
 ** mvn:org.apache.tomcat.embed/tomcat-embed-core (tomcat JARs + Servlet API)
-** mvn:org.apache.taglibs/taglibs-standard-spec (javax.servlet.jsp.jstl.[core|fmt|sql|tlv])
-** mvn:org.apache.taglibs/taglibs-standard-jstlel (org.apache.taglibs.standard.[lang|tag|tlv])
-** mvn:org.apache.taglibs/taglibs-standard-compat (org.apache.taglibs.standard.[tag|tlv])
-** mvn:org.apache.taglibs/taglibs-standard-impl (org.apache.taglibs.standard.[functions|resources|tag|tei|tlv|util])
+** mvn:org.apache.tomcat.embed/tomcat-embed-jasper (tomcat-jasper, JSP Impl + JSP API)
+** mvn:org.apache.tomcat.embed/tomcat-embed-el (tomcat-jasper-el, EL Impl + EL API)
+** mvn:org.apache.taglibs/taglibs-standard-spec - just JSTL API
++
+----
+Contains:
+    javax.servlet.jsp.jstl.core
+    javax.servlet.jsp.jstl.fmt
+    javax.servlet.jsp.jstl.sql
+    javax.servlet.jsp.jstl.tlv
+
+Export-Package:
+    javax.servlet.jsp.jstl.core; version="1.2"; uses:="javax.servlet.jsp.tagext,javax.servlet.jsp,javax.servlet,javax.servlet.http,javax.el",
+    javax.servlet.jsp.jstl.fmt;  version="1.2"; uses:="javax.servlet,javax.servlet.jsp.jstl.core,javax.servlet.jsp,javax.servlet.http",
+    javax.servlet.jsp.jstl.sql;  version="1.2",
+    javax.servlet.jsp.jstl.tlv;  version="1.2"; uses:="javax.xml.parsers,javax.servlet.jsp.tagext,org.xml.sax.helpers,org.xml.sax"
+Import-Package:
+    javax.el,
+    javax.servlet,
+    javax.servlet.http,
+    javax.servlet.jsp,
+    javax.servlet.jsp.jstl.core; version="1.2",
+    javax.servlet.jsp.jstl.fmt;  version="1.2",
+    javax.servlet.jsp.jstl.sql;  version="1.2",
+    javax.servlet.jsp.jstl.tlv;  version="1.2",
+    javax.servlet.jsp.tagext,
+    javax.xml.parsers,
+    org.xml.sax,
+    org.xml.sax.helpers
+----
+** mvn:org.apache.taglibs/taglibs-standard-jstlel
++
+----
+org.apache.taglibs.standard.lang
+org.apache.taglibs.standard.tag
+org.apache.taglibs.standard.tlv
+----
+** mvn:org.apache.taglibs/taglibs-standard-compat
++
+----
+org.apache.taglibs.standard.tag
+org.apache.taglibs.standard.tlv
+----
+** mvn:org.apache.taglibs/taglibs-standard-impl
++
+----
+org.apache.taglibs.standard.functions
+org.apache.taglibs.standard.resources
+org.apache.taglibs.standard.tag
+org.apache.taglibs.standard.tei
+org.apache.taglibs.standard.tlv
+org.apache.taglibs.standard.util
+----
 
 * Jetty <9.2: Glassfish implementation
 ** mvn:javax.servlet.jsp/javax.servlet.jsp-api
 ** mvn:org.glassfish/javax.el
 ** mvn:org.glassfish.web/javax.servlet.jsp
 ** mvn:org.glassfish.web/javax.servlet.jsp.jstl
+
 * Jetty >=9.2: Apache (Tomcat) implementation
 ** mvn:org.mortbay.jasper/apache-jsp - actually shaded mvn:org.apache.tomcat/tomcat-jasper
 
 * Undertow 1.4.x (https://github.com/undertow-io/jastow) - a fork (with Tomcat deps removed) of tomcat-jasper
 
+* Glassfish 5.1 (https://github.com/eclipse-ee4j/glassfish) - it uses many Jakarta-branded JavaEE APIs - mostly from
+`org.glassfish.web` groupId
+** Servlet API: mvn:javax.servlet/javax.servlet-api/4.0.1 → mvn:jakarta.servlet/jakarta.servlet-api/4.0.2
+** JSP API: mvn:javax.servlet.jsp/javax.servlet.jsp-api/2.3.4-SNAPSHOT → mvn:jakarta.servlet.jsp/jakarta.servlet.jsp-api/2.3.4-SNAPSHOT
+** JSP Impl: mvn:org.glassfish.web/javax.servlet.jsp/2.3.4 - based on org.apache.tomcat/tomcat-jasper
+** JSTL API: mvn:javax.servlet.jsp.jstl/javax.servlet.jsp.jstl-api/1.2.2 → mvn:jakarta.servlet.jsp.jstl/jakarta.servlet.jsp.jstl-api/1.2.4
+** JSTL Impl: mvn:org.glassfish.web/javax.servlet.jsp.jstl/1.2.6-SNAPSHOT → mvn:org.glassfish.web/jakarta.servlet.jsp.jstl/1.2.6 - based on org.apache.taglibs/taglibs-standard-impl
+** EL API: mvn:javax.el/javax.el-api/3.0.0 → mvn:jakarta.el/jakarta.el-api/3.0.2
+** EL Impl: mvn:org.glassfish/javax.el.impl/3.0.1-SNAPSHOT
+** EL API + Impl: mvn:org.glassfish/javax.el/3.0.1-SNAPSHOT
+
+
 About JSTL (https://tomcat.apache.org/taglibs.html):
+
 * Using the -jstlel jar supports JSTL 1.0 EL expressions by using the EL implementation originally defined by JSTL itself.
 * Using the -compat jar supports JSTL 1.0 EL expressions by using the container's implementation of EL to take advantage of newer functionality and potential performance improvements in more modern versions.
+* -impl jar supports EL expressions as defined in JSP 2.1+ (separate specification - JSR 341)
+
+There are three flavors of JSTL Impl from org.apache.taglibs (see: https://tomcat.apache.org/taglibs.html):
+
+* taglibs-standard-impl
+* taglibs-standard-compat (EL 1.0 from Tomcat impl)
+* taglibs-standard-jstlel (EL 1.0 from JSTL spec)
+
+taglibs-standard-impl provides different version of TLDs:
+
+ * c.tld (http://java.sun.com/jsp/jstl/core, 1.2)
+ * c-1_1.tld (http://java.sun.com/jsp/jstl/core_1_1, 1.1)
+ * c-1_0_rt.tld (http://java.sun.com/jstl/core_rt, 1.0 - old, allowing RT expressions in tags, irrelevant now)
+ * fmt.tld (http://java.sun.com/jsp/jstl/fmt, 1.1)
+ * fmt-1_0_rt.tld (http://java.sun.com/jstl/fmt_rt, 1.0 - old, allowing RT expressions in tags, irrelevant now)
+ * sql.tld (http://java.sun.com/jsp/jstl/sql, 1.1)
+ * sql-1_0_rt.tld (http://java.sun.com/jstl/sql_rt, 1.0 - old, allowing RT expressions in tags, irrelevant now)
+ * x.tld (http://java.sun.com/jsp/jstl/xml, 1.1)
+ * x-1_0_rt.tld (http://java.sun.com/jstl/xml_rt, 1.0 - old, allowing RT expressions in tags, irrelevant now)
 
 JSTL descriptors:
 
 * taglibs-standard-compat: c-1_0.tld, fmt-1_0.tld, sql-1_0.tld, x-1_0.tld
-* taglibs-standard-impl: c-1_0-rt.tld, c-1_1.tld, c.tld, fmt-1_0-rt.tld, fmt.tld, fn.tld, permittedTaglibs.tld, scriptfree.tld, sql-1_0-rt.tld, sql.tld, x-1_0-rt.tld, x.tld,
 * taglibs-standard-jstlel:  c-1_0.tld, fmt-1_0.tld, sql-1_0.tld, x-1_0.tld
-* taglibs-standard-spec: none
+* taglibs-standard-impl: c-1_0-rt.tld, c-1_1.tld, c.tld, fmt-1_0-rt.tld, fmt.tld, fn.tld, permittedTaglibs.tld, scriptfree.tld, sql-1_0-rt.tld, sql.tld, x-1_0-rt.tld, x.tld,

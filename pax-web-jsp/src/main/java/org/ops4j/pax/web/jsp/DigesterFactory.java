@@ -145,6 +145,9 @@ public class DigesterFactory {
 		SERVLET_API_SYSTEM_IDS = Collections.unmodifiableMap(systemIds);
 	}
 
+	private DigesterFactory() {
+	}
+
 	private static void addSelf(Map<String, String> ids, String id) {
 		String location = locationFor(id);
 		if (location != null) {

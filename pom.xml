@@ -222,10 +222,10 @@
 		<dependency.javax.interceptor-api.version>1.2</dependency.javax.interceptor-api.version>
 		<dependency.javax.jaspic.version>1.1</dependency.javax.jaspic.version>
 		<dependency.javax.json-api.version>1.0</dependency.javax.json-api.version>
-		<dependency.javax.jstl.version>1.2.2</dependency.javax.jstl.version>
 		<dependency.javax.mail.version>1.4.7</dependency.javax.mail.version>
 		<dependency.javax.servlet-api.version>3.1.0</dependency.javax.servlet-api.version>
 		<dependency.javax.servlet.jsp-api.version>2.3.3</dependency.javax.servlet.jsp-api.version>
+		<dependency.javax.servlet.jsp.jstl-api.version>1.2.2</dependency.javax.servlet.jsp.jstl-api.version>
 		<dependency.javax.websocket-api.version>1.1</dependency.javax.websocket-api.version>
 		<dependency.javax.ws.rs1-api.version>1.1.1</dependency.javax.ws.rs1-api.version>
 		<dependency.javax.ws.rs2-api.version>2.0.1</dependency.javax.ws.rs2-api.version>
@@ -1212,7 +1212,7 @@
 			<dependency>
 				<groupId>javax.servlet.jsp.jstl</groupId>
 				<artifactId>javax.servlet.jsp.jstl-api</artifactId>
-				<version>${dependency.javax.jstl.version}</version>
+				<version>${dependency.javax.servlet.jsp.jstl-api.version}</version>
 			</dependency>
 <!--			<dependency>-->
 <!--				<groupId>javax.servlet</groupId>-->
@@ -1638,25 +1638,6 @@
 
 			<dependency>
 				<groupId>org.apache.tomcat.embed</groupId>
-				<artifactId>tomcat-embed-jasper</artifactId>
-				<version>${dependency.tomcat.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.apache.tomcat.embed</groupId>
-						<artifactId>tomcat-embed-core</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.eclipse.jdt</groupId>
-						<artifactId>core</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.eclipse.jdt</groupId>
-						<artifactId>ecj</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.tomcat.embed</groupId>
 				<artifactId>tomcat-embed-core</artifactId>
 				<version>${dependency.tomcat.version}</version>
 			</dependency>
@@ -1665,9 +1646,29 @@
 				<artifactId>tomcat-embed-logging-juli</artifactId>
 				<version>${dependency.tomcat.version}</version>
 			</dependency>
+
 			<dependency>
-				<groupId>org.apache.tomcat.embed</groupId>
-				<artifactId>tomcat-embed-el</artifactId>
+				<groupId>org.apache.tomcat</groupId>
+				<artifactId>tomcat-jasper</artifactId>
+				<version>${dependency.tomcat.version}</version>
+<!--				<exclusions>-->
+<!--					<exclusion>-->
+<!--						<groupId>org.apache.tomcat.embed</groupId>-->
+<!--						<artifactId>tomcat-embed-core</artifactId>-->
+<!--					</exclusion>-->
+<!--					<exclusion>-->
+<!--						<groupId>org.eclipse.jdt</groupId>-->
+<!--						<artifactId>core</artifactId>-->
+<!--					</exclusion>-->
+<!--					<exclusion>-->
+<!--						<groupId>org.eclipse.jdt</groupId>-->
+<!--						<artifactId>ecj</artifactId>-->
+<!--					</exclusion>-->
+<!--				</exclusions>-->
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat</groupId>
+				<artifactId>tomcat-jasper-el</artifactId>
 				<version>${dependency.tomcat.version}</version>
 			</dependency>
 

@@ -65,44 +65,54 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-							org.ops4j.pax.web.service.spi.util; version="${pax-web.osgi.version}",
+							<!-- pax-web -->
 							org.ops4j.pax.web.jsp; version="${pax-web.osgi.version}",
-							javax.servlet; version="[2.3.0,4.0.0)",
-							javax.servlet.http; version="[2.3.0,4.0.0)",
-							javax.servlet.descriptor;version="[2.3.0,4.0.0)",
+							org.ops4j.pax.web.service.spi.util; version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.utils; version="${pax-web.osgi.version}",
+							<!-- mvn:javax.servlet/javax.servlet-api/3.1.0 (only imported) -->
+							javax.servlet; version="[2.3,4.0)",
+							javax.servlet.annotation; version="[2.3,4.0)",
+							javax.servlet.descriptor; version="[2.3,4.0)",
+							javax.servlet.http; version="[2.3,4.0)",
+							<!-- mvn:javax.servlet.jsp/javax.servlet.jsp-api/2.3.3 (also exported) -->
+							javax.servlet.jsp; version="[2.3,3.0)",
+							javax.servlet.jsp.el; version="[2.3,3.0)",
+							javax.servlet.jsp.tagext; version="[2.3,3.0)",
+							<!-- mvn:javax.el/javax.el-api/3.0.0 (only imported) -->
+							javax.el; version="[3.0,4.0)",
+							<!-- mvn:javax.servlet.jsp.jstl/javax.servlet.jsp.jstl-api/1.2.2 (also exported) -->
+							javax.servlet.jsp.jstl.core; version="${dependency.javax.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.fmt; version="${dependency.javax.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.sql; version="${dependency.javax.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.tlv; version="${dependency.javax.servlet.jsp.jstl-api.version}",
+							<!-- other packages -->
+							javax.annotation.*,
 							javax.naming,
-							org.w3c.dom,
-							org.w3c.dom.ls; resolution:=optional,
-							org.w3c.dom.traversal; resolution:=optional,
-							org.xml.sax.*,
-							org.slf4j; version="[1.5,2.0)",
-							org.apache.tools.ant.*; resolution:=optional,
-							org.eclipse.*; resolution:=optional,
-							org.eclipse.jdt.internal.compiler.parser; resolution:=optional,
-							org.osgi.service.http,
-							org.osgi.framework; version="[1.0.0,2.0.0)",
-							org.osgi.service.packageadmin; resolution:=optional,
-							org.osgi.framework.wiring, 
-							org.ops4j.pax.web.utils,
 							javax.sql; resolution:=optional,
+							<!--javax.tools,-->
 							javax.xml.parsers,
 							javax.xml.stream,
 							javax.xml.validation; resolution:=optional,
 							javax.xml.namespace; resolution:=optional,
 							javax.xml.transform.*; resolution:=optional,
 							javax.xml.xpath; resolution:=optional,
-							javax.annotation.*,
-							javax.tools,
+							org.w3c.dom,
+							org.w3c.dom.ls; resolution:=optional,
+							org.w3c.dom.traversal; resolution:=optional,
+							org.xml.sax.*,
+							org.slf4j; version="[1.5,2.0)",
+							org.osgi.framework; version="[1.0,2.0)",
+							org.osgi.framework.wiring,
+							org.osgi.service.http,
+							org.osgi.service.packageadmin; resolution:=optional,
 							org.osgi.util.tracker,
-							javax.el.*; version="[3.0, 4.0)",
-							javax.servlet.jsp; version="2.3.1",
-							javax.servlet.jsp.el; version="2.3.1",
-							javax.servlet.jsp.tagext; version="2.3.1",
-							javax.servlet.jsp.jstl.core; version="1.2.1",
-							javax.servlet.jsp.jstl.fmt; version="1.2.1",
-							javax.servlet.jsp.jstl.sql; version="1.2.1",
-							javax.servlet.jsp.jstl.tlv; version="1.2.1",
-							javax.servlet.jsp.resources; version="2.2",
+
+							org.apache.tools.ant.*; resolution:=optional,
+							org.eclipse.*; resolution:=optional,
+							org.eclipse.jdt.internal.compiler.parser; resolution:=optional,
+
+							org.apache.catalina.loader;resolution:=optional,
+							org.apache.juli.logging,
 							org.apache.tomcat;resolution:=optional; -split-package:="merge-last",
 							org.apache.tomcat.util; resolution:=optional; -split-package:="merge-last",
 							org.apache.tomcat.util.scan; resolution:=optional; -split-package:="merge-last",
@@ -110,58 +120,85 @@
 							org.apache.tomcat.util.file; resolution:=optional; -split-package:="merge-last",
 							org.apache.tomcat.util.digester;resolution:=optional; -split-package:="merge-last",
 							org.apache.tomcat.util.descriptor.tld;resolution:=optional; -split-package:="merge-last",
-							org.apache.tomcat.util.security;resolution:=optional; -split-package:="merge-last",
-							org.apache.catalina.loader;resolution:=optional,
-							org.apache.juli.logging,
-							!org.eclipse.jdt.core.index,
-							!org.eclipse.jdt.core.util,
-							!com.sun.tools.javac,
-							!sun.tools.javac,
-							!com.sun.org.apache.*,
-							!javax.management.*,
-							!javax.naming.directory,
-							!org.apache.env,
-							!org.apache.geronimo.osgi.registry.api,
-							!sun.rmi.rmic,
-							!org.ops4j.pax.web.jsp
+							org.apache.tomcat.util.security;resolution:=optional; -split-package:="merge-last"
 						</Import-Package>
-						<Private-Package>
-							org.ops4j.pax.web.jsp.*,
-							javax.servlet.resources,
-							org.apache.el.*; version="2.2",
+						<Export-Package>
+							<!-- pax-web -->
+							org.ops4j.pax.web.jsp; version="${pax-web.osgi.version}",
+							<!-- re-export JSP API -->
+							javax.servlet.jsp; version="${dependency.javax.servlet.jsp-api.version}",
+							javax.servlet.jsp.el; version="${dependency.javax.servlet.jsp-api.version}",
+							javax.servlet.jsp.tagext; version="${dependency.javax.servlet.jsp-api.version}",
+							<!-- re-export JSTL API -->
+							javax.servlet.jsp.jstl.core; version="${dependency.javax.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.fmt; version="${dependency.javax.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.sql; version="${dependency.javax.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.tlv; version="${dependency.javax.servlet.jsp.jstl-api.version}",
+							<!-- re-export JSP Impl - from mvn:org.apache.tomcat/tomcat-jasper -->
 							org.apache.jasper; version="2.2",
-							org.apache.jasper.compiler;	version="2.2",
+							org.apache.jasper.compiler; version="2.2",
 							org.apache.jasper.compiler.tagplugin; version="2.2",
 							org.apache.jasper.el; version="2.2",
-							org.apache.jasper.resources; version="2.2",
 							org.apache.jasper.runtime; version="2.2",
 							org.apache.jasper.security; version="2.2",
 							org.apache.jasper.servlet; version="2.2",
 							org.apache.jasper.tagplugins.jstl; version="2.2",
+							org.apache.jasper.tagplugins.jstl.core; version="2.2",
+							org.apache.jasper.util; version="2.2",
 							org.apache.jasper.xmlparser; version="2.2",
+							<!-- re-export EL Impl - from mvn:org.apache.tomcat/tomcat-jasper-el -->
+							org.apache.el; version="2.2",
+							org.apache.el.lang; version="2.2",
+							org.apache.el.parser; version="2.2",
+							org.apache.el.stream; version="2.2",
+							org.apache.el.util; version="2.2",
+							<!--
+								re-export JSTL Impl from mvn:org.apache.taglibs/taglibs-standard-impl
+
+								even if Glassfish and JBoss versions of JSTL impl (both based on org.apache.taglibs)
+								export org.apache.taglibs.standard.extra.spath package, it was removed from standard
+								impl in 2010 (http://svn.apache.org/viewvc?view=revision&revision=1026635)
+							-->
 							org.apache.taglibs.standard,
-							org.apache.taglibs.standard.extra.spath,
 							org.apache.taglibs.standard.functions,
-							org.apache.taglibs.standard.lang.jstl,
-							org.apache.taglibs.standard.lang.jstl.parser,
-							org.apache.taglibs.standard.lang.jstl.test,
-							org.apache.taglibs.standard.lang.jstl.test.beans,
-							org.apache.taglibs.standard.lang.support,
 							org.apache.taglibs.standard.resources,
 							org.apache.taglibs.standard.tag.common.core,
 							org.apache.taglibs.standard.tag.common.fmt,
 							org.apache.taglibs.standard.tag.common.sql,
 							org.apache.taglibs.standard.tag.common.xml,
-							org.apache.taglibs.standard.tag.el.core,
-							org.apache.taglibs.standard.tag.el.fmt,
-							org.apache.taglibs.standard.tag.el.sql,
-							org.apache.taglibs.standard.tag.el.xml,
 							org.apache.taglibs.standard.tag.rt.core,
 							org.apache.taglibs.standard.tag.rt.fmt,
 							org.apache.taglibs.standard.tag.rt.sql,
 							org.apache.taglibs.standard.tag.rt.xml,
 							org.apache.taglibs.standard.tei,
 							org.apache.taglibs.standard.tlv,
+							org.apache.taglibs.standard.util,
+							<!-- don't re-export JSTL Impl from mvn:org.apache.taglibs/taglibs-standard-compat -->
+							!org.apache.taglibs.standard.tag.compat.core,
+							!org.apache.taglibs.standard.tag.compat.fmt,
+							!org.apache.taglibs.standard.tag.compat.sql,
+							!org.apache.taglibs.standard.tag.compat.xml,
+							!org.apache.taglibs.standard.tlv.compat,
+							<!-- don't re-export JSTL Impl from mvn:org.apache.taglibs/taglibs-standard-jstlel -->
+							!org.apache.taglibs.standard.lang.jstl,
+							!org.apache.taglibs.standard.lang.jstl.parser,
+							!org.apache.taglibs.standard.lang.support,
+							!org.apache.taglibs.standard.tag.el.core,
+							!org.apache.taglibs.standard.tag.el.fmt,
+							!org.apache.taglibs.standard.tag.el.sql,
+							!org.apache.taglibs.standard.tag.el.xml,
+							!org.apache.taglibs.standard.tlv.el,
+
+							org.apache.tomcat.util.descriptor.tld
+						</Export-Package>
+						<Private-Package>
+							<!-- resources from mvn:org.apache.tomcat.embed/tomcat-embed-core -->
+							javax.servlet.resources,
+							<!-- resources from mvn:org.apache.tomcat.embed/tomcat-embed-jasper -->
+							javax.servlet.jsp.resources,
+							<!-- resources from mvn:org.apache.tomcat/tomcat-jasper -->
+							org.apache.jasper.resources,
+
 							org.apache.tomcat,
 							org.apache.tomcat.util,
 							org.apache.tomcat.util.scan,
@@ -173,64 +210,17 @@
 							org.apache.tomcat.util.security,
 							org.apache.juli.logging
 						</Private-Package>
-						<Export-Package>
-							org.ops4j.pax.web.jsp; version="${pax-web.osgi.version}",
-							javax.servlet.jsp; version="2.3.1",
-							javax.servlet.jsp.el; version="2.3.1",
-							javax.servlet.jsp.tagext; version="2.3.1",
-							javax.servlet.jsp.jstl.core; version="1.2.1",
-							javax.servlet.jsp.jstl.fmt; version="1.2.1",
-							javax.servlet.jsp.jstl.sql; version="1.2.1",
-							javax.servlet.jsp.jstl.tlv; version="1.2.1",
-							javax.servlet.jsp.resources; version="2.2",
-							org.apache.el; version="2.2",
-							org.apache.el.lang; version="2.2",
-							org.apache.el.parser; version="2.2",
-							org.apache.el.stream; version="2.2",
-							org.apache.el.util; version="2.2",
-							org.apache.jasper; version="2.2"; -split-package:="merge-first",
-							org.apache.jasper.compiler; version="2.2"; -split-package:=merge-first,
-							org.apache.jasper.compiler.tagplugin; version="2.2"; -split-package:=merge-first,
-							org.apache.jasper.el; version="2.2"; -split-package:=merge-first,
-							org.apache.jasper.resources; version="2.2"; -split-package:=merge-first,
-							org.apache.jasper.runtime; version="2.2"; -split-package:=merge-first,
-							org.apache.jasper.security; version="2.2"; -split-package:=merge-first,
-							org.apache.jasper.servlet; version="2.2"; -split-package:=merge-first,
-							org.apache.jasper.tagplugins.jstl; version="2.2"; -split-package:=merge-first,
-							org.apache.jasper.xmlparser; version="2.2"; -split-package:=merge-first,
-							org.apache.taglibs.standard,
-							org.apache.taglibs.standard.extra.spath,
-							org.apache.taglibs.standard.functions,
-							org.apache.taglibs.standard.lang.jstl,
-							org.apache.taglibs.standard.lang.jstl.parser,
-							org.apache.taglibs.standard.lang.jstl.test,
-							org.apache.taglibs.standard.lang.jstl.test.beans,
-							org.apache.taglibs.standard.lang.support,
-							org.apache.taglibs.standard.resources,
-							org.apache.taglibs.standard.tag.common.core,
-							org.apache.taglibs.standard.tag.common.fmt,
-							org.apache.taglibs.standard.tag.common.sql,
-							org.apache.taglibs.standard.tag.common.xml,
-							org.apache.taglibs.standard.tag.el.core,
-							org.apache.taglibs.standard.tag.el.fmt,
-							org.apache.taglibs.standard.tag.el.sql,
-							org.apache.taglibs.standard.tag.el.xml,
-							org.apache.taglibs.standard.tag.rt.core,
-							org.apache.taglibs.standard.tag.rt.fmt,
-							org.apache.taglibs.standard.tag.rt.sql,
-							org.apache.taglibs.standard.tag.rt.xml,
-							org.apache.taglibs.standard.tei,
-							org.apache.taglibs.standard.tlv,
-							org.apache.tomcat.util.descriptor.tld
-						</Export-Package>
-						<Include-Resource> {maven-dependencies},
+						<Include-Resource>
+							{maven-dependencies},
 							{maven-resources},
 							org/apache/jasper/compiler/TldCache.class=target/classes/org/apache/jasper/compiler/TldCache.class,
 							org/apache/jasper/JspCompilationContext.class=target/classes/org/apache/jasper/JspCompilationContext.class,
 							org/apache/tomcat/util/descriptor/tagplugin/TagPluginParser.class=target/classes/org/apache/tomcat/util/descriptor/tagplugin/TagPluginParser.class
 						</Include-Resource>
-						<Embed-Dependency>*;scope=compile;type=!pom;
-							inline=**/*.class|**/*.ico|**/*.dtd|**/*.xml|**/*.properties|**/*.map|**/*.default|**/*.providers|**/*.tld|**/*.rsc</Embed-Dependency>
+						<Embed-Dependency>
+							*;scope=compile;type=!pom;
+							inline=**/*.class|**/*.ico|**/*.dtd|**/*.xml|**/*.properties|**/*.map|**/*.default|**/*.providers|**/*.tld|**/*.rsc
+						</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<_nouses>true</_nouses>
 					</instructions>
@@ -262,6 +252,8 @@
 
 	<dependencies>
 
+		<!-- Important: https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Dependency_Scope -->
+
 		<!-- pax-web own artifacts -->
 
 		<dependency>
@@ -280,15 +272,18 @@
 		<dependency>
 			<groupId>org.ops4j.base</groupId>
 			<artifactId>ops4j-base-util-xml</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.swissbox</groupId>
 			<artifactId>pax-swissbox-core</artifactId>
+			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.swissbox</groupId>
 			<artifactId>pax-swissbox-optional-jcl</artifactId>
+			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
 
@@ -310,23 +305,37 @@
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>javax.servlet.jsp-api</artifactId>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet.jsp.jstl</groupId>
+			<artifactId>javax.servlet.jsp.jstl-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.el</groupId>
+			<artifactId>javax.el-api</artifactId>
 		</dependency>
 
 		<!-- Tomcat -->
 
 		<dependency>
 			<groupId>org.apache.tomcat.embed</groupId>
-			<artifactId>tomcat-embed-jasper</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat.embed</groupId>
 			<artifactId>tomcat-embed-core</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.tomcat.embed</groupId>
-			<artifactId>tomcat-embed-el</artifactId>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-jasper</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-jasper-el</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -366,6 +375,7 @@
 		<dependency>
 			<groupId>org.jboss.spec.javax.servlet.jstl</groupId>
 			<artifactId>jboss-jstl-api_1.2_spec</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 	</dependencies>

@@ -39,6 +39,7 @@
 	<description>Integration test base module for Pax Web</description>
 
 	<modules>
+		<module>pax-web-itest-jsp</module>
 		<module>pax-web-itest-base</module>
 		<module>pax-web-itest-common</module>
 		<module>pax-web-itest-container</module>

@@ -300,7 +300,7 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 		private final Class<?>[] paramTypes;
 		private final AnnotationCacheEntryType type;
 
-		public AnnotationCacheEntry(String accessibleObjectName,
+		AnnotationCacheEntry(String accessibleObjectName,
 									Class<?>[] paramTypes, String name,
 									AnnotationCacheEntryType type) {
 			this.accessibleObjectName = accessibleObjectName;
