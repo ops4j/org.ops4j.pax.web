@@ -49,8 +49,8 @@ public abstract class AbstractWarJsfCdiIntegrationTest extends ITestBase {
 
                 // JSF
                 mavenBundle().groupId("org.ops4j.pax.web").artifactId("pax-web-jsp").version(asInProject()),
-                mavenBundle("org.apache.myfaces.core", "myfaces-api").version("2.3.3-SNAPSHOT"),
-                mavenBundle("org.apache.myfaces.core", "myfaces-impl").version("2.3.3-SNAPSHOT"),
+                mavenBundle("org.apache.myfaces.core", "myfaces-api").version("2.3.3"),
+                mavenBundle("org.apache.myfaces.core", "myfaces-impl").version("2.3.3"),
                 // Weld
                 mavenBundle("org.jboss.classfilewriter", "jboss-classfilewriter").version("1.1.2.Final"),
                 mavenBundle("org.jboss.weld", "weld-osgi-bundle").version("2.4.5.Final")

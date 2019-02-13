@@ -146,7 +146,7 @@
 		<version.pax-exam>4.9.2</version.pax-exam>
 
 		<tipi.tomcat.version>9.0.16.2</tipi.tomcat.version>
-		<jsf-myfaces.version>2.3.3-SNAPSHOT</jsf-myfaces.version>
+		<jsf-myfaces.version>2.3.3</jsf-myfaces.version>
 
 		<dependency.junit.version>4.11</dependency.junit.version>
 
