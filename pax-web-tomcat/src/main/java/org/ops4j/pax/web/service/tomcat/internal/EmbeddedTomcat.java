@@ -42,9 +42,11 @@ import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.startup.Catalina;
+import org.apache.catalina.startup.CatalinaBaseConfigurationSource;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.valves.AccessLogValve;
 import org.apache.tomcat.util.digester.Digester;
+import org.apache.tomcat.util.file.ConfigFileLoader;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
@@ -163,6 +165,14 @@ public class EmbeddedTomcat extends Tomcat {
 
 	static EmbeddedTomcat newEmbeddedTomcat(Configuration configuration) {
 		EmbeddedTomcat result = new EmbeddedTomcat();
+		File catalinaBaseFile = null;
+		String catalinaBase = System.getProperty("catalina.base");
+		if (catalinaBase != null) {
+			catalinaBaseFile = new File(catalinaBase);
+		} else {
+			catalinaBaseFile = new File(System.getProperty("user.dir"));
+		}
+		ConfigFileLoader.setSource(new CatalinaBaseConfigurationSource(catalinaBaseFile, Catalina.SERVER_XML));
 		result.configure(configuration);
 		return result;
 	}
