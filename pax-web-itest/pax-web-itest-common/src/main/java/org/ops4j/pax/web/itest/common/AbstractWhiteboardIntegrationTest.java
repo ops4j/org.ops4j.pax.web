@@ -210,14 +210,15 @@ public abstract class AbstractWhiteboardIntegrationTest extends ITestBase {
             ServiceRegistration<ServletMapping> servletRegistration = bundleContext
                     .registerService(ServletMapping.class,
                             servletMapping, null);
-            
-            ServiceReference<HttpServiceRuntime> serviceReference = bundleContext.getServiceReference(HttpServiceRuntime.class);
+
+            ServiceReference<HttpServiceRuntime> serviceReference = null;
             try {
                 HttpTestClientFactory.createDefaultTestClient()
                         .withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
                                 resp -> resp.contains("Hello Whiteboard Extender"))
                         .doGETandExecuteTest("http://127.0.0.1:8181/dtocheck/dtocheck");
-                
+
+                serviceReference = bundleContext.getServiceReference(HttpServiceRuntime.class);
                 HttpServiceRuntime httpServiceRuntime = bundleContext.getService(serviceReference);
                 
                 RuntimeDTO runtimeDTO = httpServiceRuntime.getRuntimeDTO();
@@ -231,7 +232,9 @@ public abstract class AbstractWhiteboardIntegrationTest extends ITestBase {
                 assertTrue(1 == count);
                 
             } finally {
-                bundleContext.ungetService(serviceReference);
+                if (serviceReference != null) {
+                    bundleContext.ungetService(serviceReference);
+                }
                 servletRegistration.unregister();
             }
         } finally {
