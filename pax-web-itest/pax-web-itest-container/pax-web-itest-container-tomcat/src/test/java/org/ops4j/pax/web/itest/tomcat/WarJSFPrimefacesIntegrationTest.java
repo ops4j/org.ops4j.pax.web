@@ -32,6 +32,7 @@ import org.ops4j.pax.web.itest.common.AbstractWarJSFPrimefacesIntegrationTest;
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
+@Ignore("github/primefaces/primefaces#4210: Compatibility with Servlet API 4.0")
 public class WarJSFPrimefacesIntegrationTest extends AbstractWarJSFPrimefacesIntegrationTest {
 
 	@Configuration

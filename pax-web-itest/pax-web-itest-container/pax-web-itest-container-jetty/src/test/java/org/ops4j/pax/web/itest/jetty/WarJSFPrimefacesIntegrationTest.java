@@ -18,6 +18,7 @@ package org.ops4j.pax.web.itest.jetty;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -30,6 +31,7 @@ import org.ops4j.pax.web.itest.common.AbstractWarJSFPrimefacesIntegrationTest;
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
+@Ignore("github/primefaces/primefaces#4210: Compatibility with Servlet API 4.0")
 public class WarJSFPrimefacesIntegrationTest extends AbstractWarJSFPrimefacesIntegrationTest {
 
 	@Configuration
