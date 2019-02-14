@@ -44,6 +44,9 @@ public class FileSessionPersistence implements SessionPersistenceManager {
 
 	@Override
 	public void persistSessions(String deploymentName, Map<String, PersistentSession> sessionData) {
+		if (deploymentName == null || "".equals(deploymentName.trim())) {
+			deploymentName = "_ROOT_deployment";
+		}
 		Map<String, Object> map = new LinkedHashMap<>();
 		for (Map.Entry<String, PersistentSession> e : sessionData.entrySet()) {
 			Map<String, Object> mps = new LinkedHashMap<>();
@@ -51,16 +54,23 @@ public class FileSessionPersistence implements SessionPersistenceManager {
 			mps.put("data", e.getValue().getSessionData());
 			map.put(e.getKey(), mps);
 		}
-		try (ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(new File(sessionsDir, deploymentName))))) {
-			oos.writeObject(map);
-		} catch (Exception e) {
-			LOG.info("Error persisting sessions for deployment " + deploymentName, e);
+		if (sessionData.size() > 0) {
+			try (ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(new File(sessionsDir, deploymentName))))) {
+				oos.writeObject(map);
+			} catch (Exception e) {
+				LOG.info("Error persisting sessions for deployment " + deploymentName, e);
+			}
+		} else {
+			LOG.debug("No sessions to persist for deployment " + deploymentName);
 		}
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public Map<String, PersistentSession> loadSessionAttributes(String deploymentName, ClassLoader classLoader) {
+		if (deploymentName == null || "".equals(deploymentName.trim())) {
+			deploymentName = "_ROOT_deployment";
+		}
 		Map<String, PersistentSession> sessionData = new LinkedHashMap<>();
 		try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(new File(sessionsDir, deploymentName))))) {
 			Map<String, Map<String, Object>> map = (Map<String, Map<String, Object>>) ois.readObject();
