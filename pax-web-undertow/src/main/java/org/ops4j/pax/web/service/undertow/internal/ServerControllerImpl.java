@@ -182,12 +182,22 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
         configuration = config;
         switch (state) {
         case Unconfigured:
+            doConfigure();
             state = State.Stopped;
             notifyListeners(ServerEvent.CONFIGURED);
             break;
         case Started:
+            // reconfigure first
+            doConfigure();
+            state = State.Stopped;
+            notifyListeners(ServerEvent.CONFIGURED);
+            // and restart
             doStop();
+            state = State.Stopped;
+            notifyListeners(ServerEvent.STOPPED);
             doStart();
+            state = State.Started;
+            notifyListeners(ServerEvent.STARTED);
             break;
         }
     }
@@ -248,7 +258,7 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
      * Here's where Undertow is being rebuild at {@link Undertow} level (not {@link ServletContainer} level).
      * This is were <em>global</em> objects are configured (listeners, global filters, ...)
      */
-    void doStart() {
+    private void doConfigure() {
         Undertow.Builder builder = Undertow.builder();
 
         // if no configuration method change root handler, simple path->HttpHandler will be used
@@ -273,8 +283,25 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
                 break;
         }
 
+        for (Context context : contextMap.values()) {
+            try {
+                context.setSessionPersistenceManager(sessionPersistenceManager);
+                context.setDefaultSessionTimeoutInMinutes(defaultSessionTimeoutInMinutes);
+                context.start();
+            } catch (Exception e) {
+                LOG.error("Could not start the servlet context for context path [" + context.getContextModel().getContextName() + "]", e);
+            }
+        }
+
         builder.setHandler(rootHandler);
         server = builder.build();
+    }
+
+    /**
+     * This method requires previously configured {@link Undertow.Builder} instance used to create {@link Undertow}
+     * instance. The remaining task is to start the server.
+     */
+    void doStart() {
         server.start();
     }
 
