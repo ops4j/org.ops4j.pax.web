@@ -71,6 +71,7 @@
 							io.undertow.servlet.spec;version="[1.2,2)",
 							io.undertow.servlet.util;version="[1.2,2)",
  							io.undertow.util;version="[1.2,2)",
+                                                        io.undertow.servlet.sse;version="[2.0,2.1)";resolution:=optional,
 							io.undertow.websockets.jsr;version="[1.2,2)";resolution:=optional,
 							io.undertow.websockets.jsr.annotated;version="[1.2,2)";resolution:=optional,
 							io.undertow.websockets.jsr.handshake;version="[1.2,2)";resolution:=optional,
