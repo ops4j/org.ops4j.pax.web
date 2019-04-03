@@ -185,7 +185,7 @@ public class Activator implements BundleActivator {
 			eventServiceTracker.open();
 			context.registerService(ServletListener.class, adminHandler,
 					null);
-			LOG.info("EventAdmin support enabled, servlet events will be postet to topics.");
+			LOG.info("EventAdmin support enabled, servlet events will be posted to topics.");
 		} else {
 			LOG.info("EventAdmin support is not available, no servlet events will be posted!");
 		}
