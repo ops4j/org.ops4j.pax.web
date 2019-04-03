@@ -170,6 +170,10 @@ public class ContextAwarePathHandler extends PathHandler {
 		return this;
 	}
 
+	public synchronized void safeReplace(HttpHandler handler) {
+		pathMatcher.safeReplace(handler);
+	}
+
 	public HttpHandler getDefaultHandler() {
 		return pathMatcher.getDefaultHandler();
 	}

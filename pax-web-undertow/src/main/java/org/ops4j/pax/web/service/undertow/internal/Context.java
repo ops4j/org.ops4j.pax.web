@@ -130,6 +130,15 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	public Context(IdentityManager identityManager, ContextAwarePathHandler path, ContextModel contextModel) {
 		this.identityManager = identityManager;
 		this.path = path;
+
+		/*
+		 * Explicitly replaces the default context handler set by default on the ContextAwarePathHandler. By doing it
+		 * this way, it avoids a warning message issued by the PathMatcher stating that the default handler is being
+		 * replaced
+ 		 */
+
+		path.safeReplace(this);
+
 		this.contextModel = contextModel;
 
 		ClassLoader classLoader = contextModel.getClassLoader();

@@ -94,6 +94,21 @@ public class PathMatcher<T> {
 	}
 
 	/**
+	 * Explicitly replace of the default handler. It is meant for situations where replacing
+	 * it is desired by the calling code and prevents the warning message that appears when
+	 * the replacement happens implicitly (ie.: via addPrefixPath)
+	 * @param handler The handler that will replace the current default handler
+	 */
+	public synchronized void safeReplace(final T handler) {
+		if (this.defaultHandler != null) {
+			LOG.debug("Explicitly overwriting existing default context {} with a new one {}",
+					this.defaultHandler, handler);
+		}
+
+		this.defaultHandler = handler;
+	}
+
+	/**
 	 * Adds a path prefix and a handler for that path. If the path does not start
 	 * with a / then one will be prepended.
 	 * <p>
