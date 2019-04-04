@@ -95,8 +95,6 @@ public class JasperClassLoader extends URLClassLoader {
 		return super.findResources(name);
 	}
 
-	;
-
 	/**
 	 * Delegate to bundle class loader.
 	 *
