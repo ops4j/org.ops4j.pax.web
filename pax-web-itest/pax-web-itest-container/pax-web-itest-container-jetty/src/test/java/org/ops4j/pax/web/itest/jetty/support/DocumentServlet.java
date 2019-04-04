@@ -42,6 +42,7 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Component(immediate = true, provide = Servlet.class, properties = "alias=/document")
@@ -724,7 +725,7 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 			return;
 		}
 
-		data = dir.getBytes("UTF-8");
+		data = dir.getBytes(StandardCharsets.UTF_8);
 		response.setContentType("text/html; charset=UTF-8");
 		response.setContentLength(data.length);
 		response.getOutputStream().write(data);
