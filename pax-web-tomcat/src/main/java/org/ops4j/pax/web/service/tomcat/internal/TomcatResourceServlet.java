@@ -391,7 +391,7 @@ public class TomcatResourceServlet extends HttpServlet {
 
 		// Copy the input stream to the output stream
 		IOException exception = null;
-		byte buffer[] = new byte[input];
+		byte[] buffer = new byte[input];
 		int len = buffer.length;
 		while (true) {
 			try {
