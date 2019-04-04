@@ -325,7 +325,7 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 		}
 	}
 
-	private static enum AnnotationCacheEntryType {
+	private enum AnnotationCacheEntryType {
 		FIELD, SETTER, POST_CONSTRUCT, PRE_DESTROY
 	}
 
