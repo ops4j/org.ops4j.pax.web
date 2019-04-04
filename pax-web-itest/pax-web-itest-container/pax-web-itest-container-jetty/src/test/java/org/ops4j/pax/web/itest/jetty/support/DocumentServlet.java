@@ -493,7 +493,7 @@ public class DocumentServlet extends HttpServlet implements ResourceFactory {
 			if (content != null) {
 				content.release();
 			} else if (resource != null) {
-				resource.release();
+				resource.close();
 			}
 		}
 
