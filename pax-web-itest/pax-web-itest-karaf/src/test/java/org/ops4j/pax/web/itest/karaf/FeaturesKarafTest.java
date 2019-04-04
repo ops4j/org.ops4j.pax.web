@@ -79,8 +79,7 @@ public class FeaturesKarafTest extends KarafBaseTest {
 		Hashtable<String, Object> env = new Hashtable<>();
 		String[] credentials = new String[]{"karaf", "karaf"};
 		env.put("jmx.remote.credentials", credentials);
-		JMXConnector connector = JMXConnectorFactory.connect(url, env);
-		return connector;
+		return JMXConnectorFactory.connect(url, env);
 	}
 
 }
