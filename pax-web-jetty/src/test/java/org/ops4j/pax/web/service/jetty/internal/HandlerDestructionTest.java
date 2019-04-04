@@ -50,7 +50,6 @@ import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Version;
-import org.osgi.service.http.HttpContext;
 
 public class HandlerDestructionTest {
 

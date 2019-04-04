@@ -25,7 +25,6 @@ import org.ops4j.pax.cdi.api.Component;
 import org.ops4j.pax.cdi.api.Dynamic;
 import org.ops4j.pax.cdi.api.Filter;
 import org.ops4j.pax.cdi.api.Immediate;
-import org.ops4j.pax.cdi.api.PrototypeScoped;
 import org.ops4j.pax.cdi.api.Service;
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.osgi.service.url.URLStreamHandlerService;

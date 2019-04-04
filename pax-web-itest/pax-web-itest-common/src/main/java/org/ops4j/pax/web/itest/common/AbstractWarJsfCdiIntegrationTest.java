@@ -26,7 +26,6 @@ import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
