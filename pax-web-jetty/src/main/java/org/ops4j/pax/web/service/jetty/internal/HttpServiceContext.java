@@ -368,7 +368,7 @@ class HttpServiceContext extends ServletContextHandler {
 				if (ex instanceof RuntimeException) {
 					throw (RuntimeException) ex;
 				}
-				LOG.error("Ignored exception during listener registration", e);
+				LOG.error("Ignored exception during listener registration: {}", ex.getMessage(), e);
 			}
 
 		} finally {

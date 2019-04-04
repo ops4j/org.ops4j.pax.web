@@ -286,7 +286,7 @@ class HttpServiceStarted implements StoppableHttpService {
 								  final HttpContext httpContext) throws NamespaceException {
 		synchronized (lock) {
 			final ContextModel contextModel = getOrCreateContext(httpContext);
-			LOG.debug("Register resources (alias={}). Using context [" + contextModel + "]");
+			LOG.debug("Register resources (alias={}). Using context [{}]", alias, contextModel);
 
 			// PAXWEB-1085, OSGi Enterprise R6 140.6 "Registering Resources", JavaEE Servlet spec "12.2 Specification of Mappings"
 			// "A string beginning with a ‘ / ’ character and ending with a ‘ /* ’ suffix is used for path mapping."

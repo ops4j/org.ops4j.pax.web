@@ -43,7 +43,7 @@ public class WebFilterAnnotationConfigurer extends
 		Class<?> clazz = loadClass();
 
 		if (clazz == null) {
-			log.warn("Class %s wasn't loaded", this.className);
+			log.warn("Class {} wasn't loaded", this.className);
 			return;
 		}
 
