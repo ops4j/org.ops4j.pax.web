@@ -332,7 +332,7 @@ class TomcatServerWrapper implements ServerWrapper {
 				server.stop();
 				server.destroy();
 			} catch (final Throwable e) {
-				LOG.error("LifecycleException caught {}", e);
+				LOG.error("LifecycleException caught {}", e.getMessage(), e);
 			}
 			//CHECKSTYLE:ON
 		}
@@ -765,7 +765,7 @@ class TomcatServerWrapper implements ServerWrapper {
 	@Override
 	public Servlet createResourceServlet(final ContextModel contextModel,
 										 final String alias, final String name) {
-		LOG.debug("createResourceServlet( contextModel: {}, alias: {}, name: {})");
+		LOG.debug("createResourceServlet( contextModel: {}, alias: {}, name: {})", contextModel, alias, name);
 		final Context context = findOrCreateContext(contextModel);
 		return new TomcatResourceServlet(contextModel.getHttpContext(),
 				contextModel.getContextName(), alias, name, context);
@@ -1142,10 +1142,10 @@ class TomcatServerWrapper implements ServerWrapper {
             if (errorHandler.getWarnings().size() > 0 ||
                     errorHandler.getErrors().size() > 0) {
                 for (SAXParseException e : errorHandler.getWarnings()) {
-                    LOG.warn("Warning in XML processing", e.getMessage(), source);
+                    LOG.warn("Warning in XML processing: {}", e.getMessage(), source);
                 }
                 for (SAXParseException e : errorHandler.getErrors()) {
-                    LOG.warn("Error in XML processing", e.getMessage(), source);
+                    LOG.warn("Error in XML processing: {}", e.getMessage(), source);
                 }
             }
             if (LOG.isDebugEnabled()) {

@@ -351,7 +351,8 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 					&& webContextPath.equals(reg.getReference().getProperty(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH)))
 					.findFirst();
 			if (serviceReg.isPresent()) {
-				LOG.debug("Unregistered ServletContext with ServletContext Name: ", serviceReg.get().getReference().getProperty(WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME));
+				LOG.debug("Unregistered ServletContext with ServletContext Name: {}",
+						serviceReg.get().getReference().getProperty(WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME));
 
 					serviceReg.get().unregister();
 			}
