@@ -96,7 +96,7 @@ public class TldCache {
         if (cacheEntry == null) {
             return null;
         }
-        long lastModified[] = getLastModified(tldResourcePath);
+        long[] lastModified = getLastModified(tldResourcePath);
         if (lastModified[0] != cacheEntry.getWebAppPathLastModified() ||
                 lastModified[1] != cacheEntry.getEntryLastModified()) {
             synchronized (cacheEntry) {
