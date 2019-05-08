@@ -23,6 +23,7 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
+import org.ops4j.pax.web.itest.base.client.HttpTestClient;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -118,8 +119,8 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 	@Test
 	public void testStaticContent() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain '<A HREF=\"/static-content/'",
-						resp -> resp.contains("<A HREF=\"/static-content/"))
+				.withResponseAssertion("Response must contain '<a href=\"/static-content/'",
+						resp -> resp.contains("<a href=\"/static-content/"))
 				.doGETandExecuteTest("http://localhost:8181/static-content/");
 	}
 }
