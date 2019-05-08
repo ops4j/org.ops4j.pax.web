@@ -78,8 +78,8 @@ public class WhiteboardAliasIntegrationTest extends ITestBase {
 	@Test
 	public void testWhiteBoardSlash() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain '<H1>Directory: /</H1>'",
-						resp -> resp.contains("<H1>Directory: /</H1>"))
+				.withResponseAssertion("Response must contain '<h1 class=\"title\">Directory: /</h1>'",
+						resp -> resp.contains("<h1 class=\"title\">Directory: /</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181");
 	}
 

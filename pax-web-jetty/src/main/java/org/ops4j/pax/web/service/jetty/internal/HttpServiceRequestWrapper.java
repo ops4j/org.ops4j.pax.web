@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.jetty.internal;
 import java.security.Principal;
 
 import javax.security.auth.Subject;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
@@ -224,6 +225,11 @@ class HttpServiceRequestWrapper extends HttpServletRequestWrapper {
 
 		@Override
 		public void logout() {
+		}
+
+		@Override
+		public Authentication logout(ServletRequest request) {
+			return this;
 		}
 	}
 
