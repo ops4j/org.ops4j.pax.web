@@ -1279,6 +1279,7 @@
                                 <exclude>**/*.jar</exclude>
                                 <!-- travis et al -->
                                 <exclude>**/*.yml</exclude>
+								<exclude>**/travis_wait*.log</exclude>
                                 <!-- versions.properties -->
                                 <exclude>**/versions.properties</exclude>
                                 <exclude>**/pax-web-version.properties</exclude>
