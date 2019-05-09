@@ -3,7 +3,16 @@ language: java
 before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
-script: mvn --quiet -Ptravis,!load-test clean install
+install: true
+jobs:
+  include:
+    - stage: build
+      script: mvn --quiet -B -DskipTests clean install dependency:resolve-plugins dependency:go-offline
+    - stage: test
+      script: mvn --quiet -B -DskipTests -P!rat,!code-analysis -Dmaven.javadoc.skip=true install dependency:resolve-plugins dependency:go-offline && mvn -B -P jetty,!undertow,!tomcat,!rat,!code-analysis,!karaf-test -Dmaven.javadoc.skip=true integration-test verify
+    - script: mvn --quiet -B -DskipTests -P!rat,!code-analysis -Dmaven.javadoc.skip=true install dependency:resolve-plugins dependency:go-offline && mvn -B -P undertow,!jetty,!tomcat,!rat,!code-analysis,!karaf-test -Dmaven.javadoc.skip=true integration-test verify
+    - script: mvn --quiet -B -DskipTests -P!rat,!code-analysis -Dmaven.javadoc.skip=true install dependency:resolve-plugins dependency:go-offline && mvn -B -P tomcat,!undertow,!jetty,!rat,!code-analysis,!karaf-test -Dmaven.javadoc.skip=true integration-test verify
+    - script: mvn --quiet -B -DskipTests -P!rat,!code-analysis -Dmaven.javadoc.skip=true install dependency:resolve-plugins dependency:go-offline && mvn -B -P !tomcat,!undertow,!jetty,!rat,!code-analysis -Dmaven.javadoc.skip=true integration-test verify
 jdk:
   - oraclejdk8
 notifications:
