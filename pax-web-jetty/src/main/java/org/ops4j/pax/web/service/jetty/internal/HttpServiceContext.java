@@ -313,29 +313,6 @@ class HttpServiceContext extends ServletContextHandler {
 		}
 	}
 
-	/**
-	 * If the listener is a servlet context listener and the context is already
-	 * started, notify the servlet context listener about the fact that context
-	 * is started. This has to be done separately as the listener could be added
-	 * after the context is already started, case when servlet context listeners
-	 * are not notified anymore.
-	 *
-	 * @param listener to be notified.
-	 */
-	@Override
-	public void addEventListener(final EventListener listener) {
-		super.addEventListener(listener);
-		if ((listener instanceof HttpSessionActivationListener)
-				|| (listener instanceof HttpSessionAttributeListener)
-				|| (listener instanceof HttpSessionBindingListener)
-				|| (listener instanceof HttpSessionListener)) {
-			if (_sessionHandler != null) {
-				_sessionHandler.addEventListener(listener);
-			}
-		}
-
-	}
-
 	@Override
 	public void callContextInitialized(final ServletContextListener l,
 									   final ServletContextEvent e) {
