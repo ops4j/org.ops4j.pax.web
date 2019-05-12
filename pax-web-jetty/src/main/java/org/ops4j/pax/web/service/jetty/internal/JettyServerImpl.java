@@ -356,7 +356,8 @@ class JettyServerImpl implements JettyServer {
 					ServerConnector.class.getClassLoader().loadClass("org.eclipse.jetty.util.FutureCallback");
 					// load some other required classes
 					QueuedThreadPool.class.getClassLoader().loadClass("org.eclipse.jetty.util.thread.QueuedThreadPool$1");
-					QueuedThreadPool.class.getClassLoader().loadClass("org.eclipse.jetty.util.thread.QueuedThreadPool$2");
+					// org.eclipse.jetty.util.thread.QueuedThreadPool$2 doesn't exist anymore since 9.4.18
+					// QueuedThreadPool.class.getClassLoader().loadClass("org.eclipse.jetty.util.thread.QueuedThreadPool$2");
 				} finally {
 					Thread.currentThread().setContextClassLoader(loader);
 				}
