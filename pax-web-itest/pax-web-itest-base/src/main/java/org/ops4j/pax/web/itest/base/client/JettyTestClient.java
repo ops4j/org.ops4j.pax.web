@@ -218,7 +218,7 @@ class JettyTestClient implements HttpTestClient {
 	public String executeTest() throws Exception {
 		final HttpClient httpClient;
 		if (keystoreLocationURL != null) {
-			SslContextFactory sslContextFactory = new SslContextFactory(true);
+			SslContextFactory sslContextFactory = new SslContextFactory.Client(true);
 			sslContextFactory.setKeyStorePath(keystoreLocationURL.toString());
 			sslContextFactory.setKeyStorePassword(keystorePassword);
 			sslContextFactory.setKeyManagerPassword(keyManagerPassword);

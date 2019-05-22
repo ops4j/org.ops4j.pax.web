@@ -354,7 +354,7 @@ class JettyFactoryImpl implements JettyFactory {
 												 String sslProvider) {
 
 		// SSL Context Factory for HTTPS and SPDY
-		SslContextFactory sslContextFactory = new SslContextFactory();
+		SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
 
 		if (null != sslProvider && !"".equals(sslProvider.trim())) {
 			sslContextFactory.setProvider(sslProvider);
