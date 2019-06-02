@@ -148,7 +148,7 @@ public class WebContainerSpdyIntegrationTest extends ITestBase {
 	@Ignore("org.eclipse.jetty.io.NegotiatingClientConnectionFactory not found by org.eclipse.jetty.alpn.client")
 	public void testWebContextPath() throws Exception {
 	    HTTP2Client client = new HTTP2Client();
-        SslContextFactory sslContextFactory = new SslContextFactory(true);
+        SslContextFactory sslContextFactory = new SslContextFactory.Client(true);
         client.addBean(sslContextFactory);
         client.start();
         
