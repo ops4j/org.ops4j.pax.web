@@ -322,7 +322,7 @@ class JettyFactoryImpl implements JettyFactory {
 												 Boolean checkForwaredHeaders) {
 
 		// SSL Context Factory for HTTPS and SPDY
-		SslContextFactory sslContextFactory = new SslContextFactory();
+		SslContextFactory sslContextFactory = new SslContextFactory.Server();
 		sslContextFactory.setKeyStorePath(sslKeystore);
 		sslContextFactory.setKeyStorePassword(sslKeystorePassword);
 		sslContextFactory.setKeyManagerPassword(sslKeyPassword);
