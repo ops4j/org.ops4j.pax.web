@@ -110,8 +110,8 @@ public class JettyHandlerServiceIntegrationTest extends ITestBase {
 		waitForServer("http://localhost:8181/");
 
 		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain '<A HREF=\"/static-content/'",
-						resp -> resp.contains("<A HREF=\"/static-content/"))
+				.withResponseAssertion("Response must contain '<a href=\"/static-content/'",
+						resp -> resp.contains("<a href=\"/static-content/"))
 				.doGETandExecuteTest("http://localhost:8181/static-content/");
 
 		registerService.unregister();
