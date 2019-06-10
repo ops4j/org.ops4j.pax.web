@@ -210,7 +210,7 @@
         <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr250-1.0/${servicemix.specs.version}</bundle>
         <bundle dependency="true">mvn:javax.validation/validation-api/${dependency.validation-api.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr303-api-1.0.0/${servicemix.specs.version}</bundle>
-        <bundle dependency="true">mvn:commons-beanutils/commons-beanutils/1.8.3</bundle>
+        <bundle dependency="true">mvn:commons-beanutils/commons-beanutils/${dependency.commons-beanutils.version}</bundle>
         <bundle dependency="true">mvn:commons-collections/commons-collections/3.2.1</bundle>
         <bundle dependency="true">mvn:commons-codec/commons-codec/1.8</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-digester/1.8_4</bundle>

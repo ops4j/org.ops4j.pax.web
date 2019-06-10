@@ -48,7 +48,7 @@ public abstract class AbstractWarJsfCdiIntegrationTest extends ITestBase {
                 mavenBundle("javax.interceptor", "javax.interceptor-api").version("1.2"),
                 mavenBundle("javax.validation", "validation-api").version("1.1.0.Final"),
                 mavenBundle("commons-codec", "commons-codec").version("1.10"),
-                mavenBundle("commons-beanutils", "commons-beanutils").version("1.8.3"),
+                mavenBundle("commons-beanutils", "commons-beanutils").version("1.9.3"),
                 mavenBundle("commons-collections", "commons-collections").version("3.2.1"),
                 mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.commons-digester").version("1.8_4"),
 
