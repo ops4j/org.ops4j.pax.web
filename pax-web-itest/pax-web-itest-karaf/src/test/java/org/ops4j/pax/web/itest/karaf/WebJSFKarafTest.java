@@ -64,7 +64,7 @@ public class WebJSFKarafTest extends KarafBaseTest {
 				mavenBundle("javax.interceptor", "javax.interceptor-api").version("1.2"),
 				mavenBundle("commons-io", "commons-io").version("1.4"),
 				mavenBundle("commons-codec", "commons-codec").version("1.10"),
-				mavenBundle("commons-beanutils", "commons-beanutils").version("1.8.3"),
+				mavenBundle("commons-beanutils", "commons-beanutils").version("1.9.3"),
 				new VMOption("-DMyFacesVersion=" + getMyFacesVersion())
 		);
 	}
