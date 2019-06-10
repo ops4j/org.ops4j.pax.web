@@ -120,7 +120,7 @@ public class TestConfiguration {
 				// Commons
 				mavenBundle("commons-io", "commons-io").version("1.4"),
 				mavenBundle("commons-codec", "commons-codec").version("1.10"),
-				mavenBundle("commons-beanutils", "commons-beanutils").version("1.8.3"),
+				mavenBundle("commons-beanutils", "commons-beanutils").version("1.9.3"),
 				mavenBundle("commons-collections", "commons-collections").version("3.2.1"),
 				mavenBundle("commons-digester", "commons-digester").version("1.8.1"),
 				mavenBundle("org.apache.commons", "commons-lang3").version("3.4")
