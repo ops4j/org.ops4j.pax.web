@@ -65,7 +65,7 @@
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-client/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-deploy/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-jmx/${dependency.jetty.version}</bundle>
-
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-proxy/${dependency.jetty.version}</bundle>
         <conditional>
             <condition>pax-http-whiteboard</condition>
             <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-server/${dependency.jetty.version}</bundle>
