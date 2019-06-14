@@ -149,6 +149,15 @@ public class JspCompilationContext {
 
     /* ==================== Methods to override ==================== */
 
+    /** ---------- Add getters and setters for field basePackageName required by Tomcat 9 ---- */
+    public String getBasePackageName() {
+		return basePackageName;
+	}
+    public void setBasePackageName(String basePackageName) {
+		this.basePackageName = basePackageName;
+	}
+    
+    
     /** ---------- Class path and loader ---------- */
 
     /**
