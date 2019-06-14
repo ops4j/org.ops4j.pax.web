@@ -112,7 +112,7 @@
 							org.apache.tomcat.util.descriptor.tld;resolution:=optional; -split-package:="merge-last",
 							org.apache.tomcat.util.security;resolution:=optional; -split-package:="merge-last",
 							org.apache.catalina.loader;resolution:=optional,
-							org.apache.juli.logging,
+							!org.apache.juli.logging,
 							!org.eclipse.jdt.core.index,
 							!org.eclipse.jdt.core.util,
 							!com.sun.tools.javac,
