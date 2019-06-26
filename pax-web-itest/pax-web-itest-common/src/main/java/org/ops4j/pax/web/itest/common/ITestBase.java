@@ -109,6 +109,10 @@ public abstract class ITestBase extends AbstractControlledTestBase {
 	public static Option[] configureWebSocketJetty() {
 		return combine(
 				configureJetty(),
+				// needed for websocket-client
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-client").version(asInProject()),
+
 				mavenBundle().groupId("org.eclipse.jetty.websocket")
 						.artifactId("websocket-server").version(asInProject()),
 						
@@ -131,6 +135,10 @@ public abstract class ITestBase extends AbstractControlledTestBase {
 						.artifactId("javax-websocket-client-impl").version(asInProject()),
 						
 				mavenBundle().groupId("org.glassfish").artifactId("javax.json")
+						.versionAsInProject(),
+
+				mavenBundle().groupId("javax.websocket")
+						.artifactId("javax.websocket-api")
 						.versionAsInProject(),
 
 				mavenBundle().groupId("javax.json")
@@ -161,6 +169,11 @@ public abstract class ITestBase extends AbstractControlledTestBase {
 				mavenBundle().groupId("org.apache.servicemix.specs").artifactId("org.apache.servicemix.specs.jaxb-api-2.2").version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.specs").artifactId("geronimo-jaxws_2.2_spec").version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.specs").artifactId("geronimo-jaxrpc_1.1_spec").version(asInProject()),
+
+				mavenBundle().groupId("javax.websocket")
+						.artifactId("javax.websocket-api")
+						.versionAsInProject(),
+
 				mavenBundle().groupId("org.apache.geronimo.specs").artifactId("geronimo-jta_1.1_spec").versionAsInProject(),
 				mavenBundle().groupId("org.apache.servicemix.specs").artifactId("org.apache.servicemix.specs.jsr303-api-1.0.0").version(asInProject()),
 				mavenBundle().groupId("org.apache.geronimo.specs").artifactId("geronimo-activation_1.1_spec").version(asInProject()),
