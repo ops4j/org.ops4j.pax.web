@@ -16,14 +16,21 @@
 package org.ops4j.pax.web.itest.undertow;
 
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
+import javax.websocket.WebSocketContainer;
+
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.common.AbstractWebSocketIntegrationTest;
+
+import io.undertow.websockets.jsr.UndertowContainerProvider;
 
 
 /**
@@ -36,11 +43,29 @@ public class WebSocketIntegrationTest extends AbstractWebSocketIntegrationTest {
 	public static Option[] configure() {
 		return combine(
 				configureWebSocketUndertow(),
+                systemProperty("org.ops4j.pax.web.samples.websocket.register.programatically")
+                    .value("true"),
 				mavenBundle().groupId("org.ops4j.pax.web.samples")
 						.artifactId("websocket-jsr356")
 						.type("war")
 						.version(VersionUtil.getProjectVersion()),
-				mavenBundle().groupId("javax.json")
-						.artifactId("javax.json-api").versionAsInProject());
+				mavenBundle().groupId("org.glassfish")
+						.artifactId("javax.json").versionAsInProject());
+	}
+
+	@Test
+	@Ignore (value = "PAXWEB-1027")
+	public void testWebsocket() throws Exception {
+		super.testWebsocket();
+	}
+
+	protected WebSocketContainer getWebSocketContainer() {
+		ClassLoader orig = Thread.currentThread().getContextClassLoader();
+		try {
+			Thread.currentThread().setContextClassLoader(UndertowContainerProvider.class.getClassLoader());
+			return UndertowContainerProvider.getWebSocketContainer();
+		} finally {
+			Thread.currentThread().setContextClassLoader(orig);
+		}
 	}
 }

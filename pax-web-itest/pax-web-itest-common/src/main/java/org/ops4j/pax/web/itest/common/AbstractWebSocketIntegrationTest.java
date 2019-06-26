@@ -18,6 +18,7 @@ package org.ops4j.pax.web.itest.common;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.util.concurrent.CountDownLatch;
@@ -25,17 +26,16 @@ import java.util.concurrent.TimeUnit;
 
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.websocket.ClientEndpoint;
+import javax.websocket.CloseReason;
+import javax.websocket.CloseReason.CloseCodes;
+import javax.websocket.OnClose;
+import javax.websocket.OnMessage;
+import javax.websocket.OnOpen;
+import javax.websocket.Session;
+import javax.websocket.WebSocketContainer;
 
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.StatusCode;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
-import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
-import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 import org.osgi.framework.BundleException;
@@ -64,18 +64,14 @@ public abstract class AbstractWebSocketIntegrationTest extends ITestBase {
 	}
 
 	@Test
-	@Ignore (value = "PAXWEB-1027")
 	public void testWebsocket() throws Exception {
+        WebSocketContainer cc = getWebSocketContainer();
+		URI uri = new URI("ws://127.0.0.1:8181/websocket/chat/scala");
+		SimpleChatSocket socket = new SimpleChatSocket();		
+        Session session = cc.connectToServer(socket, uri);
 
-		WebSocketClient client = new WebSocketClient();
-		SimpleChatSocket socket = new SimpleChatSocket();
-		URI uri = new URI("ws://0.0.0.0:8181/websocket/chat/scala");
-
-		client.start();
-		ClientUpgradeRequest request = new ClientUpgradeRequest();
-		client.connect(socket, uri, request);
 		socket.awaitClose(5, TimeUnit.SECONDS);
-		client.stop();
+        session.close();
 
 		JsonObject obj = Json.createReader(new
 				StringReader(socket.getAnswer()))
@@ -85,31 +81,39 @@ public abstract class AbstractWebSocketIntegrationTest extends ITestBase {
 		assertThat(obj.getString("sender"), equalTo("me"));
 	}
 
-	@WebSocket
+	abstract protected WebSocketContainer getWebSocketContainer();
+
+	@ClientEndpoint
 	public class SimpleChatSocket {
 
 		private final CountDownLatch closeLatch = new CountDownLatch(1);
 		private String answer;
+		private Session session;
 
-		@OnWebSocketConnect
+		@OnOpen
 		public void onConnect(Session session) throws Exception {
 			System.out.printf("Got connect: %s%n",session);
-			session.getRemote()
-					.sendStringByFuture("{'message':'test', 'sender':'me'}")
-					.get(2, TimeUnit.SECONDS);
-			session.close(StatusCode.NORMAL, "Done");
+			session.getBasicRemote()
+					.sendText("{\"message\":\"test\", \"sender\":\"me\"}");
+			this.session = session;
 		}
 
-		@OnWebSocketMessage
-		public void onMessage(final String session, final String message) {
+		@OnMessage
+		public void onMessage(final String message) {
 			System.out.printf("Message received: %s", message);
 			this.answer = message;
+			// close the connection once a message is received
+			try {
+				session.close(new CloseReason(CloseCodes.NORMAL_CLOSURE, "Done"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
-		@OnWebSocketClose
-		public void onClose(int statusCode, String reason) {
-			System.out.printf("Connection closed: %d - %s%n", statusCode,
-					reason);
+		@OnClose
+		public void onClose(CloseReason reason) {
+			System.out.printf("Connection closed: %d - %s%n", reason.getCloseCode().getCode(),
+					reason.getReasonPhrase());
 			this.closeLatch.countDown();
 		}
 
