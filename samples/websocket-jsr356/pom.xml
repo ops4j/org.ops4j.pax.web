@@ -56,8 +56,8 @@
 						<Web-ContextPath>websocket</Web-ContextPath>
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
 						<Import-Package>
-							*, 
-							javax.servlet
+                            javax.servlet,
+							*
 						</Import-Package>
 						<Bundle-Classpath>
                             WEB-INF/classes
