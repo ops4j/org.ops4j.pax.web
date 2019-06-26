@@ -18,6 +18,9 @@ package org.ops4j.pax.web.itest.jetty;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
+import javax.websocket.WebSocketContainer;
+
+import org.eclipse.jetty.websocket.jsr356.JettyClientContainerProvider;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -40,7 +43,17 @@ public class WebSocketIntegrationTest extends AbstractWebSocketIntegrationTest {
 						.artifactId("websocket-jsr356")
 						.type("war")
 						.version(VersionUtil.getProjectVersion()),
-				mavenBundle().groupId("javax.json")
-						.artifactId("javax.json-api").versionAsInProject());
+				mavenBundle().groupId("org.glassfish")
+						.artifactId("javax.json").versionAsInProject());
+	}
+
+	protected WebSocketContainer getWebSocketContainer() {
+		ClassLoader orig = Thread.currentThread().getContextClassLoader();
+		try {
+			Thread.currentThread().setContextClassLoader(JettyClientContainerProvider.class.getClassLoader());
+			return JettyClientContainerProvider.getWebSocketContainer();
+		} finally {
+			Thread.currentThread().setContextClassLoader(orig);
+		}
 	}
 }

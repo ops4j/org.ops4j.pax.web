@@ -545,6 +545,12 @@
         <!-- test framework -->
         <!-- Rules for using within tests -->
         <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
+            <version>1.0.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.cedarsoft.commons</groupId>
             <artifactId>test-utils</artifactId>
             <version>6.0.1</version>
