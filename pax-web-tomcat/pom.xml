@@ -76,6 +76,8 @@
 							javax.servlet.descriptor; version="[2.5.0,4.0)",
 							javax.servlet.jsp.*;version="[2.2,2.3)",
 							javax.servlet.*; version="[2.5.0,4.0)",
+                            javax.websocket,
+                            javax.websocket.server,
 							javax.xml.parsers,
 							org.osgi.framework; version="[1.0.0,2.0.0)",
 							org.osgi.service.http; version="[1.0.0,2.0.0)",
