@@ -67,9 +67,9 @@ public class ServletContainerInitializerScanner {
 			try {
 				InputStream is = u.openStream();
 				BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-				// only the first line is read, it contains the name of the
-				// class.
-				String className = reader.readLine();
+				// only the first non-empty and non-comment line is read, it contains
+				// the name of the class.
+				String className = parseServiceConfig(reader);
 				log.info("will add {} to ServletContainerInitializers", className);
 
 				if (className.endsWith("JasperInitializer")) {
@@ -137,4 +137,24 @@ public class ServletContainerInitializerScanner {
 			}
 		}
 	}
+
+	private String parseServiceConfig(BufferedReader r) throws IOException  {
+		String ln;
+		do {
+			ln = r.readLine();
+			if (ln == null) {
+				// no more lines, abort
+				return null;
+			}
+			// remove comments
+			int ci = ln.indexOf('#');
+			if (ci >= 0) {
+				ln = ln.substring(0, ci);
+			}
+			ln = ln.trim();
+			// if the line is empty read the next one
+		} while (ln.isEmpty());
+		return ln;
+	}
+
 }
