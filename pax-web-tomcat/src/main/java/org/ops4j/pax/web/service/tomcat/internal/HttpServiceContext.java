@@ -29,6 +29,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.Filter;
+import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 import javax.servlet.SessionCookieConfig;
 
@@ -36,7 +38,11 @@ import org.apache.catalina.Globals;
 import org.apache.catalina.Host;
 import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.core.ApplicationContext;
+import org.apache.catalina.core.ApplicationFilterRegistration;
 import org.apache.catalina.core.StandardContext;
+import org.apache.tomcat.util.descriptor.web.FilterDef;
+import org.apache.tomcat.websocket.server.Constants;
+import org.apache.tomcat.websocket.server.WsServerContainer;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,6 +151,19 @@ public class HttpServiceContext extends StandardContext {
 
 		public ServletApplicationContext(StandardContext context) {
 			super(context);
+		}
+
+	    @Override
+		public FilterRegistration.Dynamic addFilter(String filterName, Filter filter) {
+			FilterRegistration.Dynamic fr = super.addFilter(filterName, filter);
+			// Workaround for duplicate WsFilter registration after bundle restart
+			if (fr == null) {
+				FilterDef filterDef = getContext().findFilterDef(filterName);
+				if (filterDef != null) {
+					fr = new ApplicationFilterRegistration(filterDef, getContext());
+				}
+			}
+			return fr;
 		}
 
 		@Override
@@ -306,7 +325,15 @@ public class HttpServiceContext extends StandardContext {
 			return sessionCookieConfig;
 		}
 
-		public void setSessionCookieConfig(SessionCookieConfig sessionCookieConfig) {
+	    @Override
+		public void setAttribute(String name, Object value) {
+			super.setAttribute(name, value);
+			if (Constants.SERVER_CONTAINER_SERVLET_CONTEXT_ATTRIBUTE.equals(name) && value instanceof WsServerContainer) {
+				sc = (WsServerContainer) value;
+			}
+		}
+
+	    public void setSessionCookieConfig(SessionCookieConfig sessionCookieConfig) {
 			this.sessionCookieConfig = sessionCookieConfig;
 		}
 	}
@@ -319,6 +346,8 @@ public class HttpServiceContext extends StandardContext {
 	private final AccessControlContext accessControllerContext;
 
 	private Map<String, Object> contextAttributes = Collections.emptyMap();
+
+    private WsServerContainer sc;
 
 	/**
 	 * @param host
@@ -344,6 +373,10 @@ public class HttpServiceContext extends StandardContext {
 
 			if (getAltDDName() != null) {
 				context.setAttribute(Globals.ALT_DD_ATTR, getAltDDName());
+			}
+			// Preserve websocket server container over restart
+			if (sc != null) {
+				context.setAttribute(Constants.SERVER_CONTAINER_SERVLET_CONTEXT_ATTRIBUTE, sc);
 			}
 			for (Map.Entry<String, Object> attribute : contextAttributes.entrySet()) {
 				context.setAttribute(attribute.getKey(), attribute.getValue());
