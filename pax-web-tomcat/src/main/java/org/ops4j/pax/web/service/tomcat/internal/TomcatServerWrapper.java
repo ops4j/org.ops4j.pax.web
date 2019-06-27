@@ -34,12 +34,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import javax.servlet.FilterRegistration.Dynamic;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextEvent;
@@ -103,11 +105,17 @@ import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
+import org.ops4j.pax.web.utils.ServletContainerInitializerScanner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
+import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
@@ -291,11 +299,32 @@ class TomcatServerWrapper implements ServerWrapper {
 
 	private Map<String, Object> contextAttributes;
 
+	private Bundle tomcatBundle;
+	@SuppressWarnings("deprecation")
+	private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
+	
+
 	private TomcatServerWrapper(final EmbeddedTomcat server) {
 		NullArgumentException.validateNotNull(server, "server");
 		this.server = server;
 		((ContainerBase) server.getHost()).setStartChildren(false);
 		TomcatURLStreamHandlerFactory.disable();
+
+		tomcatBundle = FrameworkUtil.getBundle(getClass());
+
+		if (tomcatBundle != null) {
+			Filter filterPackage = null;
+			try {
+				filterPackage = tomcatBundle.getBundleContext()
+						.createFilter("(objectClass=org.osgi.service.packageadmin.PackageAdmin)");
+			} catch (InvalidSyntaxException e) {
+				LOG.error("InvalidSyntaxException while waiting for PackageAdmin Service", e);
+			}
+			packageAdminTracker = new ServiceTracker<>(tomcatBundle.getBundleContext(),
+					filterPackage, null);
+			// FIXME: move to start/stop?
+			packageAdminTracker.open();
+		}
 	}
 
 	static ServerWrapper getInstance(final EmbeddedTomcat server) {
@@ -458,7 +487,12 @@ class TomcatServerWrapper implements ServerWrapper {
 							+ httpContext);
 		}
 		try {
-			context.stop();
+			final LifecycleState state = context.getState();
+			if (LifecycleState.STOPPING != state
+					&& LifecycleState.STOPPED != state
+					&& LifecycleState.STOPPING_PREP != state) {
+				context.stop();
+			}
 		} catch (LifecycleException e) {
 			throw new RemoveContextException("cannot stop the context: "
 					+ httpContext, e);
@@ -467,7 +501,7 @@ class TomcatServerWrapper implements ServerWrapper {
 		try {
 			final LifecycleState state = context.getState();
 			if (LifecycleState.DESTROYED != state
-					|| LifecycleState.DESTROYING != state) {
+					&& LifecycleState.DESTROYING != state) {
 				context.destroy();
 			}
 		} catch (final LifecycleException e) {
@@ -905,6 +939,18 @@ class TomcatServerWrapper implements ServerWrapper {
 		final Bundle bundle = contextModel.getBundle();
 		final BundleContext bundleContext = BundleUtils
 				.getBundleContext(bundle);
+
+		if (packageAdminTracker != null) {
+			ServletContainerInitializerScanner scanner = new ServletContainerInitializerScanner(bundle, tomcatBundle, packageAdminTracker.getService());
+			Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = contextModel.getContainerInitializers();
+			if (containerInitializers == null) {
+				containerInitializers = new HashMap<>();
+				contextModel.setContainerInitializers(containerInitializers);
+			}
+			scanner.scanBundles(containerInitializers);
+		}
+
+		
 		final WebContainerContext httpContext = contextModel.getHttpContext();
 
 		final Context context = server.addContext(
