@@ -20,7 +20,6 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
 
-import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 

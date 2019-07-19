@@ -19,7 +19,6 @@ package org.ops4j.pax.web.service.undertow.internal;
 import java.io.IOException;
 import javax.servlet.ServletException;
 
-import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.resource.Resource;
 import io.undertow.server.handlers.resource.ResourceManager;
 import org.junit.Test;

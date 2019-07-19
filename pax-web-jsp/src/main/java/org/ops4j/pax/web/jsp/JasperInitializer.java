@@ -43,7 +43,7 @@ public class JasperInitializer implements ServletContainerInitializer {
 	private static final String MSG = "org.apache.jasper.servlet.JasperInitializer";
 	private static final Logger LOG = LoggerFactory.getLogger(JasperInitializer.class);
 
-	/**
+	/*
 	 * Preload classes required at runtime by a JSP servlet so that
 	 * we don't get a defineClassInPackage security exception.
 	 */

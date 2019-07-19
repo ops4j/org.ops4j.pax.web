@@ -16,7 +16,6 @@
 package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;

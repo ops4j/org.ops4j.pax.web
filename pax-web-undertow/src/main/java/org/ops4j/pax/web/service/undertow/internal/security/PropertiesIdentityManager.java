@@ -17,7 +17,6 @@ package org.ops4j.pax.web.service.undertow.internal.security;
 
 import java.security.Principal;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
