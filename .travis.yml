@@ -14,7 +14,7 @@ jobs:
     - script: mvn --quiet -B -DskipTests -P!rat,!code-analysis -Dmaven.javadoc.skip=true install dependency:resolve-plugins dependency:go-offline && mvn -B -P tomcat,!undertow,!jetty,!rat,!code-analysis,!karaf-test -Dmaven.javadoc.skip=true integration-test verify
     - script: mvn --quiet -B -DskipTests -P!rat,!code-analysis -Dmaven.javadoc.skip=true install dependency:resolve-plugins dependency:go-offline && mvn -B -P !tomcat,!undertow,!jetty,!rat,!code-analysis -Dmaven.javadoc.skip=true integration-test verify
 jdk:
-  - oraclejdk8
+  - openjdk8
 notifications:
   email:
       - bcanhome@googlemail.com
