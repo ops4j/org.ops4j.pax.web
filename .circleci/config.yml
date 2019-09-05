@@ -16,7 +16,6 @@ jobs:
         - v1-dep-{{ .Branch }}-
         - v1-dep-master-
         - v1-dep-
-    - run: mvn -B dependency:resolve-plugins dependency:go-offline
     - run: mvn -B -T 4 -DskipTests clean install
     - save_cache:
         key: v1-dep-{{ .Branch }}-{{ epoch }}
