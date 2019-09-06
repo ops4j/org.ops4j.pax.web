@@ -16,7 +16,7 @@ jobs:
         - v1-dep-{{ .Branch }}-
         - v1-dep-master-
         - v1-dep-
-    - run: mvn -B -DskipTests clean install
+    - run: mvn -B clean install
     - save_cache:
         key: v1-dep-{{ .Branch }}-{{ epoch }}
         paths:
@@ -161,22 +161,7 @@ jobs:
             mvn -B -s .circleci/settings.xml -Dmaven.install.skip=true -DskipTests deploy 
           fi
 workflows:
-  version: 2
+  version: 3
   build-test:
     jobs:
     - build
-    - test_jetty:
-        requires:
-        - build
-    - test_undertow:
-        requires:
-        - build
-    - test_tomcat:
-        requires:
-        - build
-    - deploy:
-        requires:
-        - test_jetty
-        - test_undertow
-        - test_tomcat
-
