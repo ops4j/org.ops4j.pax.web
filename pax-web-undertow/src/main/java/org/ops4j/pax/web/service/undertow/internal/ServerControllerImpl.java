@@ -59,6 +59,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.UnmarshallerHandler;
 import javax.xml.parsers.SAXParserFactory;
 
+import io.undertow.UndertowOptions;
 import io.undertow.security.idm.Account;
 import io.undertow.security.idm.Credential;
 import io.undertow.server.handlers.resource.FileResourceManager;
@@ -477,12 +478,18 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
                 throw new IllegalArgumentException("No listener configuration available in \"" + undertowResource + "\". Please configure http and/or https listeners.");
             }
 
+            // PAXWEB-1232
+            boolean recordRequestStartTime = false;
+
             // http listener
             if (http != null) {
                 UndertowConfiguration.BindingInfo binding = cfg.bindingInfo(http.getSocketBindingName());
                 for (String address : binding.getAddresses()) {
                     LOG.info("Starting undertow http listener on " + address + ":" + binding.getPort());
                     builder.addHttpListener(binding.getPort(), address);
+                    if (http.isRecordRequestStartTime()) {
+                        recordRequestStartTime = true;
+                    }
                 }
             }
 
@@ -499,6 +506,9 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
                     SSLContext sslContext = buildSSLContext(realm);
 
                     builder.addHttpsListener(binding.getPort(), address, sslContext);
+                    if (https.isRecordRequestStartTime()) {
+                        recordRequestStartTime = true;
+                    }
 
                     // options - see io.undertow.protocols.ssl.UndertowAcceptingSslChannel()
                     // one of NOT_REQUESTED, REQUESTED, REQUIRED
@@ -518,6 +528,8 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
                     }
                 }
             }
+
+            builder.setServerOption(UndertowOptions.RECORD_REQUEST_START_TIME, recordRequestStartTime);
 
             // identity manager - looked up in "default" security realm
             SecurityRealm defaultRealm = cfg.securityRealm("default");

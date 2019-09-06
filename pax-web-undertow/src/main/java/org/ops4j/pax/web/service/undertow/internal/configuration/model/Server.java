@@ -187,6 +187,8 @@ public class Server {
 		protected String urlCharset = "UTF-8";
 		@XmlAttribute
 		protected boolean secure = false;
+		@XmlAttribute(name = "record-request-start-time")
+		protected boolean recordRequestStartTime = false;
 
 		//<xs:attribute name="worker" type="xs:string" default="default"/>
 		//<xs:attribute name="resolve-peer-address" type="xs:boolean" default="false"/>
@@ -200,7 +202,6 @@ public class Server {
 		//<xs:attribute name="decode-url" type="xs:boolean" default="true"/>
 		//<xs:attribute name="always-set-keep-alive" type="xs:boolean" default="true"/>
 		//<xs:attribute name="max-buffered-request-size" type="xs:long" default="16384"/>
-		//<xs:attribute name="record-request-start-time" type="xs:boolean" default="false"/>
 		//<xs:attribute name="allow-equals-in-cookie-value" type="xs:boolean" default="false"/>
 		//<xs:attribute name="no-request-timeout" type="xs:int" default="60000"/>
 		//<xs:attribute name="request-parse-timeout" type="xs:int"/>
@@ -253,6 +254,14 @@ public class Server {
 
 		public void setSecure(boolean secure) {
 			this.secure = secure;
+		}
+
+		public boolean isRecordRequestStartTime() {
+			return recordRequestStartTime;
+		}
+
+		public void setRecordRequestStartTime(boolean recordRequestStartTime) {
+			this.recordRequestStartTime = recordRequestStartTime;
 		}
 	}
 
