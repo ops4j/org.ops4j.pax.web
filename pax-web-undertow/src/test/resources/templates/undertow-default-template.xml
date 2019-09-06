@@ -32,6 +32,7 @@
                     enabled="true" secure="false"
                     buffer-pool="default"
                     url-charset="UTF-8"
+                    record-request-start-time="true"
                     receive-buffer="0" send-buffer="0" tcp-backlog="10000" max-connections="0" />
             <!-- verify-client: org.xnio.SslClientAuthMode.NOT_REQUESTED, org.xnio.SslClientAuthMode.REQUESTED, org.xnio.SslClientAuthMode.REQUIRED -->
             <https-listener name="https" socket-binding="https"
@@ -41,6 +42,7 @@
                     enabled-protocols="TLSv1 TLSv1.1 TLSv1.2" enabled-cipher-suites="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384 TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"
                     buffer-pool="default"
                     url-charset="UTF-8"
+                    record-request-start-time="true"
                     receive-buffer="0" send-buffer="0" tcp-backlog="10000" max-connections="0" />
             <host name="default-host" alias="localhost">
                 <location name="/" handler="welcome-content" />
