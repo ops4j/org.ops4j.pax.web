@@ -129,7 +129,7 @@
 		<dependency.undertow-servlet.version>1.4.23.Final</dependency.undertow-servlet.version>
 		<dependency.undertow-websockets.version>1.4.23.Final</dependency.undertow-websockets.version>
 		<dependency.jboss-logging>3.3.0.Final</dependency.jboss-logging>
-	    <dependency.jasypt>1.9.2</dependency.jasypt>
+	    <dependency.jasypt>1.9.3</dependency.jasypt>
 		<dependency.pax-cdi.version>1.0.0</dependency.pax-cdi.version>
 		<dependency.pax-keycloak.version>0.2.0</dependency.pax-keycloak.version>
 		<version.pax-exam>4.11.0</version.pax-exam>
