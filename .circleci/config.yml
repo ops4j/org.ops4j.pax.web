@@ -47,7 +47,7 @@ jobs:
         - v1-dep-{{ .Branch }}-
         - v1-dep-master-
         - v1-dep-
-    - run: mvn -o -B -P jetty integration-test verify
+    - run: mvn -B -P jetty integration-test verify
     - run:
         name: Save test results
         command: |
@@ -83,7 +83,7 @@ jobs:
         - v1-dep-{{ .Branch }}-
         - v1-dep-master-
         - v1-dep-
-    - run: mvn -o -B -P undertow integration-test verify
+    - run: mvn -B -P undertow integration-test verify
     - run:
         name: Save test results
         command: |
@@ -119,7 +119,7 @@ jobs:
         - v1-dep-master-
         - v1-dep-
     - run:
-        command: mvn -B -o -P tomcat integration-test verify
+        command: mvn -B -P tomcat integration-test verify
         no_output_timeout: 30m
     - run:
         name: Save test results
@@ -158,7 +158,7 @@ jobs:
     - deploy:
         command: |
           if [ "${CIRCLE_BRANCH}" == "master" ]; then
-            mvn -o -B -s .circleci/settings.xml -Dmaven.install.skip=true -DskipTests deploy 
+            mvn -B -s .circleci/settings.xml -Dmaven.install.skip=true -DskipTests deploy 
           fi
 workflows:
   version: 2
