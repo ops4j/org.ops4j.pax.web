@@ -1193,6 +1193,7 @@
 								<exclude>**/target/**/*</exclude>
 								<!-- circle ci files -->
 								<exclude>**/.circleci/**/*</exclude>
+								<exclude>**/.circleci.old/**/*</exclude>
 								<!-- GIT files -->
 								<exclude>**/.git/**/*</exclude>
 								<!-- IDEA files -->
