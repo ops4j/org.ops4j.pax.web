@@ -62,6 +62,7 @@ import javax.xml.parsers.SAXParserFactory;
 import io.undertow.UndertowOptions;
 import io.undertow.security.idm.Account;
 import io.undertow.security.idm.Credential;
+import io.undertow.server.handlers.ProxyPeerAddressHandler;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.servlet.api.ServletContainer;
@@ -391,6 +392,10 @@ public class ServerControllerImpl implements ServerController, ServerControllerE
             }
         }
 
+        if (configuration.checkForwardedHeaders()) {
+            rootHandler = new ProxyPeerAddressHandler(rootHandler);
+        }
+
         return rootHandler;
     }
 
@@ -479,6 +484,9 @@ public class ServerControllerImpl implements ServerController, ServerControllerE
                 throw new IllegalArgumentException("No listener configuration available in \"" + undertowResource + "\". Please configure http and/or https listeners.");
             }
 
+            // PAXWEB-1233
+            boolean forwardHeaders = false;
+
             // PAXWEB-1232
             boolean recordRequestStartTime = false;
 
@@ -490,6 +498,9 @@ public class ServerControllerImpl implements ServerController, ServerControllerE
                     builder.addHttpListener(binding.getPort(), address);
                     if (http.isRecordRequestStartTime()) {
                         recordRequestStartTime = true;
+                    }
+                    if ("true".equalsIgnoreCase(http.getProxyAddressForwarding())) {
+                        forwardHeaders = true;
                     }
                 }
             }
@@ -509,6 +520,9 @@ public class ServerControllerImpl implements ServerController, ServerControllerE
                     builder.addHttpsListener(binding.getPort(), address, sslContext);
                     if (https.isRecordRequestStartTime()) {
                         recordRequestStartTime = true;
+                    }
+                    if ("true".equalsIgnoreCase(https.getProxyAddressForwarding())) {
+                        forwardHeaders = true;
                     }
 
                     // options - see io.undertow.protocols.ssl.UndertowAcceptingSslChannel()
@@ -654,6 +668,10 @@ public class ServerControllerImpl implements ServerController, ServerControllerE
                     LOG.info("No path configured for persistent-sessions. Using in-memory session persistence.");
                     sessionPersistenceManager = new InMemorySessionPersistence();
                 }
+            }
+
+            if (forwardHeaders) {
+                rootHandler = new ProxyPeerAddressHandler(rootHandler);
             }
         } catch (Exception e) {
             throw new IllegalArgumentException("Problem configuring Undertow server using \"" + undertowResource + "\": " + e.getMessage(), e);
