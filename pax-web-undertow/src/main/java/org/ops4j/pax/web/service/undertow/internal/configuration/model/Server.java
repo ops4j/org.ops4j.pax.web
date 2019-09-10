@@ -271,7 +271,8 @@ public class Server {
 		private String redirectSocket;
 		//<xs:attribute name="certificate-forwarding" use="optional" type="xs:string" default="false">
 		//<xs:attribute name="redirect-socket" use="optional" type="xs:string">
-		//<xs:attribute name="proxy-address-forwarding" use="optional" type="xs:string" default="false">
+		@XmlAttribute(name = "proxy-address-forwarding")
+		private String proxyAddressForwarding;
 		//<xs:attribute name="enable-http2" use="optional" type="xs:string">
 		//<xs:attribute name="http2-enable-push" type="xs:boolean" use="optional" />
 		//<xs:attribute name="http2-header-table-size" type="xs:int" use="optional" />
@@ -287,6 +288,14 @@ public class Server {
 
 		public void setRedirectSocket(String redirectSocket) {
 			this.redirectSocket = redirectSocket;
+		}
+
+		public String getProxyAddressForwarding() {
+			return proxyAddressForwarding;
+		}
+
+		public void setProxyAddressForwarding(String proxyAddressForwarding) {
+			this.proxyAddressForwarding = proxyAddressForwarding;
 		}
 
 		@Override
@@ -306,6 +315,7 @@ public class Server {
 			sb.append(", url charset: ").append(urlCharset);
 			sb.append(", secure: ").append(secure);
 			sb.append(", redirect socket: ").append(redirectSocket);
+			sb.append(", proxy address forwarding: ").append(proxyAddressForwarding);
 			sb.append(" }");
 			return sb.toString();
 		}
@@ -326,7 +336,8 @@ public class Server {
 		@XmlAttribute(name="enabled-protocols")
 		private List<String> enabledProtocols = new ArrayList<>();
 		//<xs:attribute name="certificate-forwarding" use="optional" type="xs:string" default="false">
-		//<xs:attribute name="proxy-address-forwarding" use="optional" type="xs:string" default="false">
+		@XmlAttribute(name = "proxy-address-forwarding")
+		private String proxyAddressForwarding;
 		//<xs:attribute name="enable-http2" use="optional" type="xs:string">
 		//<xs:attribute name="enable-spdy" use="optional" type="xs:string">
 		//<xs:attribute name="ssl-session-cache-size" use="optional" type="xs:string"/>
@@ -372,6 +383,16 @@ public class Server {
 		}
 
 		@Override
+		public String getProxyAddressForwarding() {
+			return proxyAddressForwarding;
+		}
+
+		@Override
+		public void setProxyAddressForwarding(String proxyAddressForwarding) {
+			this.proxyAddressForwarding = proxyAddressForwarding;
+		}
+
+		@Override
 		public String toString() {
 			final StringBuilder sb = new StringBuilder("{ ");
 			sb.append("name: ").append(name);
@@ -391,6 +412,7 @@ public class Server {
 			sb.append(", verify client: ").append(verifyClient);
 			sb.append(", enabled cipher suites: ").append(enabledCipherSuites);
 			sb.append(", enabled protocols: ").append(enabledProtocols);
+			sb.append(", proxy address forwarding: ").append(proxyAddressForwarding);
 			sb.append(" }");
 			return sb.toString();
 		}
