@@ -120,7 +120,7 @@
 		<dependency.pax-logging.version>1.10.0</dependency.pax-logging.version>
 		<dependency.slf4j>1.7.12</dependency.slf4j>
 		<dependency.scr.version>2.0.12</dependency.scr.version>
-		<dependency.swissbox.version>1.8.2</dependency.swissbox.version>
+		<dependency.swissbox.version>1.8.3</dependency.swissbox.version>
 		<dependency.tomcat.version>8.5.32</dependency.tomcat.version>
 		<dependency.xbean.version>4.14</dependency.xbean.version>
 		<dependency.xnio-api.version>3.3.8.Final</dependency.xnio-api.version>
