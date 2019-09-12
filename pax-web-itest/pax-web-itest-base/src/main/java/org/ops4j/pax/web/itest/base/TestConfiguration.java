@@ -125,7 +125,7 @@ public class TestConfiguration {
 				mavenBundle("commons-beanutils", "commons-beanutils").version("1.9.3"),
 				mavenBundle("commons-collections", "commons-collections").version("3.2.2"),
 				mavenBundle("commons-digester", "commons-digester").version("1.8.1"),
-				mavenBundle("org.apache.commons", "commons-lang3").version("3.4")
+				mavenBundle("org.apache.commons", "commons-lang3").versionAsInProject()
 		);
 
 	}
