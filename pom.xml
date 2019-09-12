@@ -117,7 +117,7 @@
 		<dependency.karaf.version>4.2.1</dependency.karaf.version>
 		<dependency.osgi.version>6.0.0</dependency.osgi.version>
 		<dependency.paxurl.version>2.5.2</dependency.paxurl.version>
-		<dependency.pax-logging.version>1.10.0</dependency.pax-logging.version>
+		<dependency.pax-logging.version>1.11.2</dependency.pax-logging.version>
 		<dependency.slf4j>1.7.12</dependency.slf4j>
 		<dependency.scr.version>2.0.12</dependency.scr.version>
 		<dependency.swissbox.version>1.8.3</dependency.swissbox.version>
