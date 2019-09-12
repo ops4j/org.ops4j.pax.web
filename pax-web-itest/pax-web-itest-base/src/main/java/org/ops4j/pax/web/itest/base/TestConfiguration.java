@@ -73,6 +73,8 @@ public class TestConfiguration {
 
 	public static Option paxWebBundles() {
 		return composite(
+				mavenBundle("org.osgi", "org.osgi.util.function").versionAsInProject(),
+				mavenBundle("org.osgi", "org.osgi.util.promise").versionAsInProject(),
 				linkBundle("org.apache.felix.scr"),
 				linkBundle("org.apache.xbean.bundleutils"),
 				linkBundle("org.apache.xbean.finder"),
