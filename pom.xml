@@ -27,7 +27,7 @@
 
 	<groupId>org.ops4j.pax</groupId>
 	<artifactId>web</artifactId>
-	<version>7.3.4-SNAPSHOT</version>
+	<version>7.3.4</version>
 	<packaging>pom</packaging>
 
 	<name>OPS4J Pax Web</name>
@@ -46,7 +46,7 @@
 		<connection>scm:git:git@github.com:ops4j/org.ops4j.pax.web.git</connection>
 		<developerConnection>scm:git:git@github.com:ops4j/org.ops4j.pax.web.git</developerConnection>
 		<url>http://github.com/ops4j/org.ops4j.pax.web/tree/pax-web-7.2.x</url>
-		<tag>web-7.2.8</tag>
+		<tag>web-7.3.4</tag>
 	</scm>
 
 	<developers>
