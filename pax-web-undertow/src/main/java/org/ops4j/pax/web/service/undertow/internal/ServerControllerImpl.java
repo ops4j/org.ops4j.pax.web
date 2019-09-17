@@ -115,6 +115,7 @@ import io.undertow.Undertow;
 import io.undertow.security.idm.IdentityManager;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.PathHandler;
+import io.undertow.server.handlers.PeerNameResolvingHandler;
 import io.undertow.server.handlers.accesslog.AccessLogHandler;
 import io.undertow.server.handlers.accesslog.AccessLogReceiver;
 import io.undertow.server.handlers.accesslog.DefaultAccessLogReceiver;
@@ -488,7 +489,10 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
 
             // PAXWEB-1232
             boolean recordRequestStartTime = false;
-
+            
+            // PAXWEB-1236
+            boolean peerHostLookup = false;
+ 
             // http listener
             if (http != null) {
                 UndertowConfiguration.BindingInfo binding = cfg.bindingInfo(http.getSocketBindingName());
@@ -500,6 +504,9 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
                     }
                     if ("true".equalsIgnoreCase(http.getProxyAddressForwarding())) {
                         forwardHeaders = true;
+                    }
+                    if ("true".equalsIgnoreCase(http.getPeerHostLookup())) {
+                        peerHostLookup = true;
                     }
                 }
             }
@@ -522,6 +529,9 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
                     }
                     if ("true".equalsIgnoreCase(https.getProxyAddressForwarding())) {
                         forwardHeaders = true;
+                    }
+                    if ("true".equalsIgnoreCase(https.getPeerHostLookup())) {
+                        peerHostLookup = true;
                     }
 
                     // options - see io.undertow.protocols.ssl.UndertowAcceptingSslChannel()
@@ -671,6 +681,10 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
 
             if (forwardHeaders) {
                 rootHandler = new ProxyPeerAddressHandler(rootHandler);
+            }
+            
+            if (peerHostLookup) {
+                rootHandler = new PeerNameResolvingHandler(rootHandler);
             }
         } catch (Exception e) {
             throw new IllegalArgumentException("Problem configuring Undertow server using \"" + undertowResource + "\": " + e.getMessage(), e);
