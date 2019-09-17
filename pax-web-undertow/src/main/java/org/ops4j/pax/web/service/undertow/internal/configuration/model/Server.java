@@ -273,6 +273,8 @@ public class Server {
 		//<xs:attribute name="redirect-socket" use="optional" type="xs:string">
 		@XmlAttribute(name = "proxy-address-forwarding")
 		private String proxyAddressForwarding;
+		@XmlAttribute(name = "peer-host-lookup")
+                private String peerHostLookup;
 		//<xs:attribute name="enable-http2" use="optional" type="xs:string">
 		//<xs:attribute name="http2-enable-push" type="xs:boolean" use="optional" />
 		//<xs:attribute name="http2-header-table-size" type="xs:int" use="optional" />
@@ -298,6 +300,15 @@ public class Server {
 			this.proxyAddressForwarding = proxyAddressForwarding;
 		}
 
+		public String getPeerHostLookup() {
+	                return peerHostLookup;
+	        }
+
+	        public void setPeerHostLookup(String peerHostLookup) {
+	                this.peerHostLookup = peerHostLookup;
+	        }
+	        
+		
 		@Override
 		public String toString() {
 			final StringBuilder sb = new StringBuilder("{ ");
@@ -316,9 +327,11 @@ public class Server {
 			sb.append(", secure: ").append(secure);
 			sb.append(", redirect socket: ").append(redirectSocket);
 			sb.append(", proxy address forwarding: ").append(proxyAddressForwarding);
+			sb.append(", peer host lookup: ").append(peerHostLookup);
 			sb.append(" }");
 			return sb.toString();
 		}
+
 	}
 
 	@XmlType(name = "https-listener-type", namespace = NS_UNDERTOW)
@@ -338,6 +351,8 @@ public class Server {
 		//<xs:attribute name="certificate-forwarding" use="optional" type="xs:string" default="false">
 		@XmlAttribute(name = "proxy-address-forwarding")
 		private String proxyAddressForwarding;
+		@XmlAttribute(name = "peer-host-lookup")
+                private String peerHostLookup;
 		//<xs:attribute name="enable-http2" use="optional" type="xs:string">
 		//<xs:attribute name="enable-spdy" use="optional" type="xs:string">
 		//<xs:attribute name="ssl-session-cache-size" use="optional" type="xs:string"/>
@@ -391,6 +406,16 @@ public class Server {
 		public void setProxyAddressForwarding(String proxyAddressForwarding) {
 			this.proxyAddressForwarding = proxyAddressForwarding;
 		}
+		
+		@Override
+		public String getPeerHostLookup() {
+                    return peerHostLookup;
+                }
+
+		@Override
+                public void setPeerHostLookup(String peerHostLookup) {
+                    this.peerHostLookup = peerHostLookup;
+                }
 
 		@Override
 		public String toString() {
@@ -413,6 +438,7 @@ public class Server {
 			sb.append(", enabled cipher suites: ").append(enabledCipherSuites);
 			sb.append(", enabled protocols: ").append(enabledProtocols);
 			sb.append(", proxy address forwarding: ").append(proxyAddressForwarding);
+			sb.append(", peer host lookup: ").append(peerHostLookup);
 			sb.append(" }");
 			return sb.toString();
 		}
