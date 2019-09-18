@@ -273,7 +273,7 @@ public class Server {
 		//<xs:attribute name="redirect-socket" use="optional" type="xs:string">
 		@XmlAttribute(name = "proxy-address-forwarding")
 		private String proxyAddressForwarding;
-		@XmlAttribute(name = "peer-host-lookup")
+		@XmlAttribute(name = "resolve-peer-address")
                 private String peerHostLookup;
 		//<xs:attribute name="enable-http2" use="optional" type="xs:string">
 		//<xs:attribute name="http2-enable-push" type="xs:boolean" use="optional" />
@@ -351,7 +351,7 @@ public class Server {
 		//<xs:attribute name="certificate-forwarding" use="optional" type="xs:string" default="false">
 		@XmlAttribute(name = "proxy-address-forwarding")
 		private String proxyAddressForwarding;
-		@XmlAttribute(name = "peer-host-lookup")
+		@XmlAttribute(name = "resolve-peer-address")
                 private String peerHostLookup;
 		//<xs:attribute name="enable-http2" use="optional" type="xs:string">
 		//<xs:attribute name="enable-spdy" use="optional" type="xs:string">
