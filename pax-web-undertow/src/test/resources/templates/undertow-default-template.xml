@@ -34,7 +34,7 @@
                     url-charset="UTF-8"
                     record-request-start-time="true"
                     proxy-address-forwarding="false"
-                    peer-host-lookup="false"
+                    resolve-peer-address="false"
                     receive-buffer="0" send-buffer="0" tcp-backlog="10000" max-connections="0" />
             <!-- verify-client: org.xnio.SslClientAuthMode.NOT_REQUESTED, org.xnio.SslClientAuthMode.REQUESTED, org.xnio.SslClientAuthMode.REQUIRED -->
             <https-listener name="https" socket-binding="https"
@@ -46,7 +46,7 @@
                     url-charset="UTF-8"
                     record-request-start-time="true"
                     proxy-address-forwarding="false"
-                    peer-host-lookup="false"
+                    resolve-peer-address="false"
                     receive-buffer="0" send-buffer="0" tcp-backlog="10000" max-connections="0" />
             <host name="default-host" alias="localhost">
                 <location name="/" handler="welcome-content" />

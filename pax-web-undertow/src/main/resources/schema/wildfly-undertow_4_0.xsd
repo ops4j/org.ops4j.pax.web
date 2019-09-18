@@ -143,15 +143,6 @@
                         </xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
-                <xs:attribute name="peer-host-lookup" use="optional" type="xs:string" default="false">
-                    <xs:annotation>
-                        <xs:documentation>
-                            <![CDATA[
-                              enables peer hostname lookup from ip address
-                               ]]>
-                        </xs:documentation>
-                    </xs:annotation>
-                </xs:attribute>
                 <xs:attribute name="enable-http2" use="optional" type="xs:string">
                     <xs:annotation>
                         <xs:documentation>
@@ -203,15 +194,6 @@
                             <![CDATA[
                                               enables x-forwarded-host and similar headers and set a remote ip address and hostname
                                                ]]>
-                        </xs:documentation>
-                    </xs:annotation>
-                </xs:attribute>
-                <xs:attribute name="peer-host-lookup" use="optional" type="xs:string" default="false">
-                    <xs:annotation>
-                        <xs:documentation>
-                            <![CDATA[
-                              enables peer hostname lookup from ip address
-                               ]]>
                         </xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
