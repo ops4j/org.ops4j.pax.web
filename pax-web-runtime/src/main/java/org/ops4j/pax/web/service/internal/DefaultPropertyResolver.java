@@ -53,9 +53,8 @@ class DefaultPropertyResolver extends DictionaryPropertyResolver {
 	private static Dictionary<String, String> getDefaltProperties() {
 		Dictionary<String, String> properties = new Hashtable<>();
 
-		InputStream stream = DefaultPropertyResolver.class.getClassLoader()
-				.getResourceAsStream("OSGI-INF/metatype/metatype.xml");
-		try {
+		try (InputStream stream = DefaultPropertyResolver.class.getClassLoader()
+				.getResourceAsStream("OSGI-INF/metatype/metatype.xml")) {
 			Element rootElement = getRootElement(stream);
 			Element[] children = getChildren(rootElement, "AD");
 			for (Element element : children) {
