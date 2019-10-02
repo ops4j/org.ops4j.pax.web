@@ -374,8 +374,7 @@ public class TomcatResourceServlet extends HttpServlet {
 
 	/**
 	 * Copy the contents of the specified input stream to the specified output
-	 * stream, and ensure that both streams are closed before returning (even in
-	 * the face of an exception).
+	 * stream.
 	 *
 	 * @param istream The input stream to read from
 	 * @param ostream The output stream to write to
