@@ -29,7 +29,7 @@ limitations under the License.
 		<AD name="Session cookie domain" id="org.ops4j.pax.web.session.domain" type="String" default=""/>
 		<AD name="Session cookie path" id="org.ops4j.pax.web.session.path" type="String" default=""/>
 		<AD name="Session URL" id="org.ops4j.pax.web.session.url" type="String" default="jsessionid"/>
-        <AD name="Session cookie HttpOnly" id="org.ops4j.pax.web.session.cookie.httpOnly" type="String" default="false" />
+        <AD name="Session cookie HttpOnly" id="org.ops4j.pax.web.session.cookie.httpOnly" type="String" default="true" />
         <AD name="Session cookie secure" id="org.ops4j.pax.web.session.cookie.secure" type="String" default="false" />
         <AD name="Session lazy load" id="org.ops4j.pax.web.session.lazyload" type="String" default="false" />
         <AD name="Session store directory" id="org.ops4j.pax.web.session.storedirectory" type="String" default="" />
