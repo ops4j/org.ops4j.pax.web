@@ -111,6 +111,8 @@ import org.ops4j.util.property.PropertyStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.ops4j.pax.web.service.WebContainerConstants.*;
+
 /**
  * Service Configuration implementation.
  *
@@ -164,6 +166,14 @@ public class ConfigurationImpl extends PropertyStore implements Configuration, C
 	@Override
 	public Integer getHttpPort() {
 		return getResolvedIntegerProperty(PROPERTY_HTTP_PORT);
+	}
+
+	/**
+	 * @see Configuration#getConnectorIdleTimeout()
+	 */
+	@Override
+	public Integer getConnectorIdleTimeout() {
+		return getResolvedIntegerProperty(PROPERTY_CONNECTOR_IDLE_TIMEOUT);
 	}
 
 	/**

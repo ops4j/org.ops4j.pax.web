@@ -273,6 +273,7 @@ public class EmbeddedTomcat extends Tomcat {
 
 		Integer httpPort = configuration.getHttpPort();
 		Integer httpSecurePort = configuration.getHttpSecurePort();
+		Integer idleTimeout = configuration.getConnectorIdleTimeout();
 
         for (String address : addresses) {
             if (configuration.isHttpEnabled()) {
@@ -309,7 +310,7 @@ public class EmbeddedTomcat extends Tomcat {
                 }
 
                 if (!masterConnectorFound) {
-                    httpConnector = createConnector(configuration, httpConnector, address, httpPort);
+                    httpConnector = createConnector(configuration, httpConnector, address, httpPort, idleTimeout);
                 }
             } else {
                 // remove maybe already configured connectors through server.xml,
@@ -415,7 +416,7 @@ public class EmbeddedTomcat extends Tomcat {
         return httpSecureConnector == null ? secureConnector : httpSecureConnector;
     }
 
-    private Connector createConnector(Configuration configuration, Connector httpConnector, String address, Integer httpPort) {
+    private Connector createConnector(Configuration configuration, Connector httpConnector, String address, Integer httpPort, Integer idleTimeout) {
         LOG.debug("No Master connector found create a new one");
         Connector connector = new Connector("HTTP/1.1");
         LOG.debug("Reconfiguring master connector");
@@ -436,6 +437,10 @@ public class EmbeddedTomcat extends Tomcat {
         if (address != null) {
             connector.setAttribute("address", address);
         }
+
+        if (idleTimeout != null) {
+        	connector.setProperty("connectionTimeout", idleTimeout.toString());
+		}
 
         LOG.debug("configuration done: {}", connector);
         getService().addConnector(connector);

@@ -35,6 +35,8 @@ public interface Configuration {
 
 	Boolean isHttpEnabled();
 
+	Integer getConnectorIdleTimeout();
+
 	Integer getHttpSecurePort();
 
 	String getHttpSecureConnectorName();

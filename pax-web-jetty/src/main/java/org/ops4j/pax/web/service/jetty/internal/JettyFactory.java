@@ -25,7 +25,7 @@ public interface JettyFactory {
 
 	JettyServer createServer(Integer maxThreads, Integer minThreads, Integer threadIdleTimeout);
 
-	Connector createConnector(Server server, String name, int port, int httpSecurePort, String host,
+	Connector createConnector(Server server, String name, int port, Integer idleTimeout, int httpSecurePort, String host,
 							  Boolean checkForwaredHeaders);
 
 	/**
@@ -33,6 +33,7 @@ public interface JettyFactory {
 	 *
 	 * @param name                    the name to give to this connector
 	 * @param port                    the port on which the secure port should run
+	 * @param idleTimeout             the server connector idle timeout
 	 * @param sslKeystore             the path to the keystore
 	 * @param sslKeystorePassword     the keystore password
 	 * @param sslKeyPassword          the password of the server SSL/TLS private key entry in the key store.
@@ -53,7 +54,7 @@ public interface JettyFactory {
 	 * @return a secure connector
 	 * @since 0.2.1
 	 */
-	Connector createSecureConnector(Server server, String name, int port,
+	Connector createSecureConnector(Server server, String name, int port, Integer idleTimeout,
 									String sslKeystore, String sslKeystorePassword, String sslKeyPassword,
 									String host, String sslKeystoreType, String sslKeyAlias,
 									String trustStore, String trustStorePassword, String trustStoreType,

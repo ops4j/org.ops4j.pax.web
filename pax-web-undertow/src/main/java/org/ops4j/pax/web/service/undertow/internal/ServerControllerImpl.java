@@ -554,6 +554,9 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
             }
 
             builder.setServerOption(UndertowOptions.RECORD_REQUEST_START_TIME, recordRequestStartTime);
+            if (configuration.getConnectorIdleTimeout() != null) {
+                builder.setServerOption(UndertowOptions.IDLE_TIMEOUT, configuration.getConnectorIdleTimeout());
+            }
 
             // identity manager - looked up in "default" security realm
             SecurityRealm defaultRealm = cfg.securityRealm("default");

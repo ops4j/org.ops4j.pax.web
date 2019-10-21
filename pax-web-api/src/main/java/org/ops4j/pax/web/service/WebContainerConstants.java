@@ -150,6 +150,7 @@ public interface WebContainerConstants {
 	String PROPERTY_MIN_THREADS = "org.ops4j.pax.web.server.minThreads";
 
 	String PROPERTY_IDLE_TIMEOUT = "org.ops4j.pax.web.server.idleTimeout";
+	String PROPERTY_CONNECTOR_IDLE_TIMEOUT = "org.ops4j.pax.web.server.connector.idleTimeout";
 
 	/**
 	 * Servlet context attribute containing the bundle context of the bundle
