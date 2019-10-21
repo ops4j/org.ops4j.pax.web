@@ -17,78 +17,6 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CONNECTOR_LIST;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_CONNECTOR_NAME;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_ENABLED;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_PORT;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_CONNECTOR_NAME;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_ENABLED;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_PORT;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_USE_NIO;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_CHECK_FORWARDED_HEADERS;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LISTENING_ADDRESSES;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_APPEND;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_COOKIES;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_DISPATCH;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_ENABLED;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_EXTENDED;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_FORMAT;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_LATENCY;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_LOGDIR;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_LOGTIMEZONE;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_RETAINDAYS;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_LOG_NCSA_SERVER;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVER_CONFIGURATION_FILE;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SERVER_CONFIGURATION_URL;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE_MAX_AGE;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_DOMAIN;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_PATH;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE_HTTP_ONLY;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE_SECURE;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_LAZY_LOAD;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_STORE_DIRECTORY;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_TIMEOUT;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_URL;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_CLIENT_AUTH_NEEDED;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_CLIENT_AUTH_WANTED;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYPASSWORD;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE_TYPE;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEYSTORE_PASSWORD;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEY_ALIAS;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_KEY_PASSWORD;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_PASSWORD;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_TRUST_STORE;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_TRUST_STORE_PASSWORD;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_TRUST_STORE_TYPE;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CIPHERSUITE_INCLUDED;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CIPHERSUITE_EXCLUDED;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CIPHERSUITES_INCLUDED;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CIPHERSUITES_EXCLUDED;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_PROTOCOLS_INCLUDED;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_PROTOCOLS_EXCLUDED;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_TEMP_DIR;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_VIRTUAL_HOST_LIST;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_WORKER_NAME;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_MAX_THREADS;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_MIN_THREADS;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_IDLE_TIMEOUT;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SSL_RENEGOTIATION_ALLOWED;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_CRL_PATH;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENABLE_CRLDP;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_VALIDATE_CERTS;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_VALIDATE_PEER_CERTS;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENABLE_OCSP;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_OCSP_RESPONDER_URL;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_MASTERPASSWORD;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_ALGORITHM;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_ENABLED;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_PREFIX;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_ENC_SUFFIX;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_DEFAULT_AUTHMETHOD;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_DEFAULT_REALMNAME;
-
 import java.io.File;
 import java.net.URI;
 import java.net.URL;
@@ -107,6 +35,8 @@ import org.ops4j.util.property.PropertyResolver;
 import org.ops4j.util.property.PropertyStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.ops4j.pax.web.service.WebContainerConstants.*;
 
 /**
  * Service Configuration implementation.
@@ -161,6 +91,14 @@ public class ConfigurationImpl extends PropertyStore implements Configuration, C
 	@Override
 	public Integer getHttpPort() {
 		return getResolvedIntegerProperty(PROPERTY_HTTP_PORT);
+	}
+
+	/**
+	 * @see Configuration#getConnectorIdleTimeout()
+	 */
+	@Override
+	public Integer getConnectorIdleTimeout() {
+		return getResolvedIntegerProperty(PROPERTY_CONNECTOR_IDLE_TIMEOUT);
 	}
 
 	/**

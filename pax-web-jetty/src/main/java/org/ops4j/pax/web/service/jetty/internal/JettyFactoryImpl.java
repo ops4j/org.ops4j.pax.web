@@ -94,7 +94,8 @@ class JettyFactoryImpl implements JettyFactory {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ServerConnector createConnector(final Server server, final String name, final int port, int securePort, final String host,
+	public ServerConnector createConnector(final Server server, final String name, final int port,
+										   Integer idleTimeout, int securePort, final String host,
 										   final Boolean checkForwaredHeaders) {
 
         HttpConfiguration httpConfig = getHttpConfiguration(securePort, checkForwaredHeaders, server);
@@ -142,12 +143,16 @@ class JettyFactoryImpl implements JettyFactory {
 		http.setPort(port);
 		http.setHost(host);
 		http.setName(name);
-		http.setIdleTimeout(30000);
+		if (idleTimeout != null) {
+			http.setIdleTimeout(idleTimeout);
+		} else {
+			http.setIdleTimeout(30000);
+		}
 
 		return http;
 	}
 
-    private HttpConfiguration getHttpConfiguration(int securePort, Boolean checkForwaredHeaders, Server server) {
+    private HttpConfiguration getHttpConfiguration(int securePort, Boolean checkForwardedHeaders, Server server) {
 
         File serverConfigDir = ((JettyServerWrapper) server).getServerConfigDir();
         URL jettyResource = ((JettyServerWrapper) server).getServerConfigURL();
@@ -192,7 +197,7 @@ class JettyFactoryImpl implements JettyFactory {
         if (httpConfig.getOutputBufferSize() == 0)
             httpConfig.setOutputBufferSize(32768);
 
-        if (checkForwaredHeaders != null && checkForwaredHeaders) {
+        if (checkForwardedHeaders != null && checkForwardedHeaders) {
             httpConfig.addCustomizer(new ForwardedRequestCustomizer());
             if (priorityComparator != null) {
             	@SuppressWarnings("unchecked")
@@ -305,7 +310,7 @@ class JettyFactoryImpl implements JettyFactory {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ServerConnector createSecureConnector(Server server, String name, int port,
+	public ServerConnector createSecureConnector(Server server, String name, int port, Integer idleTimeout,
 												 String sslKeystore, String sslKeystorePassword, String sslKeyPassword,
 												 String host, String sslKeystoreType, String sslKeyAlias,
 												 String trustStore, String trustStorePassword, String trustStoreType,
@@ -477,7 +482,11 @@ class JettyFactoryImpl implements JettyFactory {
 		https.setPort(port);
 		https.setName(name);
 		https.setHost(host);
-		https.setIdleTimeout(500000);
+		if (idleTimeout != null) {
+			https.setIdleTimeout(idleTimeout);
+		} else {
+			https.setIdleTimeout(500000);
+		}
 
 		/*
 		 
