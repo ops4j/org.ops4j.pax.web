@@ -180,9 +180,6 @@
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
 		<sonar.jacoco.itReportPath>${project.basedir}/target/jacoco-it.exec</sonar.jacoco.itReportPath>
 		<sonar.language>java</sonar.language>
-
-		<!-- version to compare this version to for baselineing -->
-		<baseline.version>7.2.0</baseline.version>
 	</properties>
 
 	<build>
@@ -322,16 +319,6 @@
 							</goals>
 							<configuration>
 								<obrRepository>NONE</obrRepository>
-							</configuration>
-						</execution>
-						<execution>
-							<id>baseline</id>
-							<goals>
-								<goal>baseline</goal>
-							</goals>
-							<configuration>
-								<comparisonVersion>${baseline.version}</comparisonVersion>
-								<failOnWarning>false</failOnWarning>
 							</configuration>
 						</execution>
 						<execution>
