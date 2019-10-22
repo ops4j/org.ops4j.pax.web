@@ -98,7 +98,7 @@ will be done
 
 Sets worker name for use with Apache mod_proxy_balancer sticky
 sessions. +
- See: http://docs.codehaus.org/display/JETTY/Configuring+mod_proxy +
+ See: https://wiki.eclipse.org/Jetty/Howto/Configure_mod_proxy +
  Defaults to null.
 
 [[BasicConfiguration-org.ops4j.pax.web.config.file]]

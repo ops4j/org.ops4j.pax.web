@@ -23,7 +23,7 @@ compilation, these can be used to customize Pax Web. If not specified
 otherwise, the property is available since
 Pax Web - 1.0.0. +
  These properties are send to the underlying JSP servlet Container
-http://docs.codehaus.org/display/JETTY/Jsp+Configuration[see]
+https://www.eclipse.org/jetty/documentation/current/configuring-jsp.html[see]
 
 The default configuration used can be seen via the MetaTypeService or in
 the metatype.xml of the runtime bundle.

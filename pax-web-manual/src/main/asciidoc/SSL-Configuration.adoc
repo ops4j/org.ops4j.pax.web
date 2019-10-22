@@ -19,7 +19,7 @@
 
 Pax Web supports SSL (https) via Jetty built
 in SSL support. To get used with Jetty support you may read
-http://docs.codehaus.org/display/JETTY/How+to+configure+SSL[How to
+https://www.eclipse.org/jetty/documentation/current/configuring-ssl.html[How to
 configure SSL in Jetty] and skip step 4 from that page, as the
 configuration part must be done in link:Configuration.html[Pax
 Web specific way].
@@ -32,12 +32,12 @@ used. If not set the default path *${user.home}/.keystore* is used.
 * *org.ops4j.pax.web.ssl.password* to the password used for keystore
 integrity check. The value can be in plain text or obfuscated ( starting
 with OBF: ) as described in
-http://docs.codehaus.org/display/JETTY/How+to+configure+SSL#HowtoconfigureSSL-step4[step
+https://www.eclipse.org/jetty/documentation/current/configuring-ssl.html#configuring-sslcontextfactory[step
 4 of jetty docummentation]
 * *org.ops4j.pax.web.ssl.keypassword* to the password used for keystore.
 The value can be in plain text or obfuscated ( starting with OBF: ) as
 described in
-http://docs.codehaus.org/display/JETTY/How+to+configure+SSL#HowtoconfigureSSL-step4[step
+https://www.eclipse.org/jetty/documentation/current/configuring-ssl.html#configuring-sslcontextfactory[step
 4 of jetty docummentation]
 
 You may also set the following:
