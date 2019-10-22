@@ -310,7 +310,7 @@ class JettyFactoryImpl implements JettyFactory {
      * {@inheritDoc}
      */
     @Override
-    public ServerConnector createSecureConnector(Server server, String name, int port,
+    public ServerConnector createSecureConnector(Server server, String name, int port, Integer idleTimeout,
                                                  String sslKeystore, String sslKeystorePassword, String sslKeyPassword,
                                                  String host, String sslKeystoreType, String sslKeyAlias,
                                                  String trustStore, String trustStorePassword, String trustStoreType,
@@ -325,7 +325,7 @@ class JettyFactoryImpl implements JettyFactory {
                                                  Boolean enableOCSP,
                                                  String ocspResponderURL,
                                                  Boolean checkForwaredHeaders) {
-      return createSecureConnector(server, name, port,
+      return createSecureConnector(server, name, port, idleTimeout,
           sslKeystore, sslKeystorePassword, sslKeyPassword, host, sslKeystoreType, sslKeyAlias,
           trustStore, trustStorePassword, trustStoreType,
           isClientAuthNeeded, isClientAuthWanted,
