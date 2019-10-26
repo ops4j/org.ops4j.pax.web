@@ -79,7 +79,7 @@ public interface JettyServer {
 						  String sessionPath, String sessionUrl, Boolean sessionCookieHttpOnly,
 						  Boolean sessionCookieSecure, String sessionWorkerName,
 						  Boolean lazyLoad, String storeDirectory,
-						  Integer maxAge);
+						  Integer maxAge, Boolean showStacks);
 
 	void removeContext(HttpContext httpContext);
 

@@ -31,49 +31,49 @@ public class ServletModelTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void registerServletWithNullAlias() {
 		new ServletModel(new ContextModel(createMock(WebContainerContext.class), null,
-				getClass().getClassLoader()), createMock(Servlet.class), null,
+				getClass().getClassLoader(), null), createMock(Servlet.class), null,
 				new Hashtable<>(), null, null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void registerServletWithNullServlet() {
 		new ServletModel(new ContextModel(createMock(WebContainerContext.class), null,
-				getClass().getClassLoader()), null, "/test",
+				getClass().getClassLoader(), null), null, "/test",
 				new Hashtable<>(), null, null);
 	}
 
 	@Test
 	public void registerServletWithNullInitParams() {
 		new ServletModel(new ContextModel(createMock(WebContainerContext.class), null,
-				getClass().getClassLoader()), createMock(Servlet.class),
+				getClass().getClassLoader(), null), createMock(Servlet.class),
 				"/test", null, null, null);
 	}
 
 	@Test
 	public void registerServletWithOnlySlashInAlias() {
 		new ServletModel(new ContextModel(createMock(WebContainerContext.class), null,
-				getClass().getClassLoader()), createMock(Servlet.class), "/",
+				getClass().getClassLoader(), null), createMock(Servlet.class), "/",
 				new Hashtable<>(), null, null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void registerServletWithEndSlashInAlias() {
 		new ServletModel(new ContextModel(createMock(WebContainerContext.class), null,
-				getClass().getClassLoader()), createMock(Servlet.class),
+				getClass().getClassLoader(), null), createMock(Servlet.class),
 				"/test/", new Hashtable<>(), null, null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void registerServletWithoutStartingSlashInAlias() {
 		new ServletModel(new ContextModel(createMock(WebContainerContext.class), null,
-				getClass().getClassLoader()), createMock(Servlet.class),
+				getClass().getClassLoader(), null), createMock(Servlet.class),
 				"test", new Hashtable<>(), null, null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void registerServletWithoutStartingSlashAndWithEndingSlashInAlias() {
 		new ServletModel(new ContextModel(createMock(WebContainerContext.class), null,
-				getClass().getClassLoader()), createMock(Servlet.class),
+				getClass().getClassLoader(), null), createMock(Servlet.class),
 				"test/", new Hashtable<>(), null, null);
 	}
 }

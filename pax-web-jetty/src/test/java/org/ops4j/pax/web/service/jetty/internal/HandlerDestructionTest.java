@@ -411,7 +411,7 @@ public class HandlerDestructionTest {
 		{
 			Servlet servlet = new DefaultServlet();
 			ContextModel contextModel = new ContextModel(httpContext,
-					testBundle, getClass().getClassLoader());
+					testBundle, getClass().getClassLoader(), null);
 			ServletModel servletModel = new ServletModel(contextModel, servlet,
 					"/", null, null, null);
 			server.addServlet(servletModel);
@@ -422,7 +422,7 @@ public class HandlerDestructionTest {
 
 		Servlet servlet = new DefaultServlet();
 		ContextModel contextModel = new ContextModel(httpContext,
-				testBundle, getClass().getClassLoader());
+				testBundle, getClass().getClassLoader(), null);
 		ServletModel servletModel = new ServletModel(contextModel, servlet,
 				"/", null, null, null);
 		server.addServlet(servletModel);

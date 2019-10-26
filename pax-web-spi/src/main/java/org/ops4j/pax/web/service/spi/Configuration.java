@@ -34,6 +34,8 @@ public interface Configuration {
 
 	Integer getConnectorIdleTimeout();
 
+	Boolean isShowStacks();
+
 	Integer getHttpSecurePort();
 
 	String getHttpSecureConnectorName();
