@@ -199,7 +199,7 @@ public class JettyServerWrapperTest {
 		try {
 			Bundle testBundle = mock(Bundle.class);
 			ContextModel contextModel = new ContextModel(httpContextMock,
-					testBundle, getClass().getClassLoader());
+					testBundle, getClass().getClassLoader(), null);
 			ServletModel servletModel1 = new ServletModel(contextModel, new DefaultServlet(),
 					"/s1", null, null, null);
 			ServletModel servletModel2 = new ServletModel(contextModel, new DefaultServlet(),

@@ -112,6 +112,7 @@ class JettyServerWrapper extends Server {
 	private String sessionWorkerName;
 	private Boolean lazyLoad;
 	private String storeDirectory;
+	private Boolean showStacks;
 
 	private File serverConfigDir;
 
@@ -165,7 +166,7 @@ class JettyServerWrapper extends Server {
 	public void configureContext(final Map<String, Object> attributes, final Integer timeout, final String cookie,
 								 final String domain, final String path, final String url, final Boolean cookieHttpOnly,
 								 final Boolean sessionCookieSecure, final String workerName, final Boolean lazy, final String directory,
-								 Integer maxAge) {
+								 Integer maxAge, final Boolean showStacks) {
 		this.contextAttributes = attributes;
 		this.sessionTimeout = timeout;
 		this.sessionCookie = cookie;
@@ -178,6 +179,7 @@ class JettyServerWrapper extends Server {
 		lazyLoad = lazy;
 		this.storeDirectory = directory;
 		this.sessionCookieMaxAge = maxAge;
+		this.showStacks = showStacks;
 	}
 
 	HttpServiceContext getContext(final HttpContext httpContext) {
@@ -294,7 +296,7 @@ class JettyServerWrapper extends Server {
 		HttpServiceContext context = new HttpServiceContext(rootCollections, model.getContextParams(),
 				getContextAttributes(bundleContext), model.getContextName(), model.getHttpContext(),
 				model.getAccessControllerContext(), model.getContainerInitializers(), model.getJettyWebXmlURL(),
-				model.getVirtualHosts());
+				model.getVirtualHosts(), model.isShowStacks());
 		context.setClassLoader(model.getClassLoader());
 		Integer modelSessionTimeout = model.getSessionTimeout();
 		if (modelSessionTimeout == null) {

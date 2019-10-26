@@ -97,6 +97,7 @@ limitations under the License.
         <AD name="Suffix for Encrypted password" id="org.ops4j.pax.web.enc.suffix"     type="String" default=")" /> 
         <AD name="Default Auth" id="org.ops4j.pax.web.default.authmethod" required="false" type="String" default=""/>
         <AD name="Default Realm" id="org.ops4j.pax.web.default.realmname" required="false" type="String" default=""/>
+		<AD name="Display stack trace when error occurs" id="org.ops4j.pax.web.server.showStacks" required="false" type="Boolean" default="true"/>
 	</OCD>
 	<Designate pid="org.ops4j.pax.web">
         <Object ocdref="org.ops4j.pax.web"/>

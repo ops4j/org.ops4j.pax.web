@@ -106,7 +106,7 @@ class HttpServiceContext extends ServletContextHandler {
 			final WebContainerContext httpContext,
 			final AccessControlContext accessControllerContext,
 			final Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers,
-			URL jettyWebXmlUrl, List<String> virtualHosts) {
+			URL jettyWebXmlUrl, List<String> virtualHosts, Boolean showStacks) {
 		super(parent, "/" + contextName, SESSIONS | SECURITY);
 		LOG.info("registering context {}, with context-name: {}", httpContext,
 				contextName);
@@ -128,7 +128,11 @@ class HttpServiceContext extends ServletContextHandler {
 		_scontext.setAttribute("org.eclipse.jetty.server.session.timer", executorScheduler);
 
 		setServletHandler(new HttpServiceServletHandler(httpContext));
-		setErrorHandler(new ErrorPageErrorHandler());
+		ErrorPageErrorHandler errorPageErrorHandler = new ErrorPageErrorHandler();
+		if (showStacks != null) {
+			errorPageErrorHandler.setShowStacks(showStacks);
+		}
+		setErrorHandler(errorPageErrorHandler);
 
 	}
 

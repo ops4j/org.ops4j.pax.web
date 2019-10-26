@@ -110,6 +110,7 @@ class HttpServiceStarted implements StoppableHttpService {
 	private final ServiceModel serviceModel;
 	private final ServerListener serverListener;
 	private final ServletListener eventDispatcher;
+	private final Boolean showStacks;
 
 	private final Object lock = new Object();
 
@@ -119,7 +120,8 @@ class HttpServiceStarted implements StoppableHttpService {
 
 	HttpServiceStarted(final Bundle bundle,
 					   final ServerController srvController,
-					   final ServerModel serverModel, final ServletListener eventDispatcher) {
+					   final ServerModel serverModel, final ServletListener eventDispatcher,
+					   final Boolean showStacks) {
 		LOG.debug("Creating http service for: " + bundle);
 
 		NullArgumentException.validateNotNull(bundle, "Bundle");
@@ -138,6 +140,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		this.serverController = srvController;
 		this.serverModel = serverModel;
 		this.eventDispatcher = eventDispatcher;
+		this.showStacks = showStacks;
 		this.serviceModel = new ServiceModel();
 		this.serverListener = new ServerListener() {
 			@Override
@@ -1218,7 +1221,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		ContextModel contextModel = serviceModel.getContextModel(context);
 		if (contextModel == null) {
 			contextModel = new ContextModel(context, serviceBundle,
-					bundleClassLoader);
+					bundleClassLoader, showStacks);
 			contextModel.setVirtualHosts(serverController.getConfiguration()
 					.getVirtualHosts());
 		}

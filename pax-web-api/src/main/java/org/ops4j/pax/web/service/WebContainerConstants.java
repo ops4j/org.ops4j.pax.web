@@ -151,6 +151,7 @@ public interface WebContainerConstants {
 
 	String PROPERTY_IDLE_TIMEOUT = "org.ops4j.pax.web.server.idleTimeout";
 	String PROPERTY_CONNECTOR_IDLE_TIMEOUT = "org.ops4j.pax.web.server.connector.idleTimeout";
+	String PROPERTY_SHOW_STACKS = "org.ops4j.pax.web.server.showStacks";
 
 	/**
 	 * Servlet context attribute containing the bundle context of the bundle

@@ -176,6 +176,11 @@ public class ConfigurationImpl extends PropertyStore implements Configuration, C
 		return getResolvedIntegerProperty(PROPERTY_CONNECTOR_IDLE_TIMEOUT);
 	}
 
+	@Override
+	public Boolean isShowStacks() {
+		return getResolvedBooleanProperty(PROPERTY_SHOW_STACKS);
+	}
+
 	/**
 	 * @see Configuration#getHttpConnectorName()
 	 */
