@@ -41,7 +41,7 @@ public class FilterModelTest {
 	public void registerWithNoDispatcherInitParams() {
 		FilterModel fm = new FilterModel(new ContextModel(
 				createMock(WebContainerContext.class), null, getClass()
-				.getClassLoader()), createMock(Filter.class),
+				.getClassLoader(), null), createMock(Filter.class),
 				new String[]{"/*"}, null, new Hashtable<>(), false);
 
 		System.out.println(Arrays.asList(fm.getDispatcher()));
@@ -51,7 +51,7 @@ public class FilterModelTest {
 	public void registerWithCorrectSubsetOfDispatcherInitParams() {
 		FilterModel fm = new FilterModel(new ContextModel(
 				createMock(WebContainerContext.class), null, getClass()
-				.getClassLoader()), createMock(Filter.class),
+				.getClassLoader(), null), createMock(Filter.class),
 				new String[]{"/*"}, null, new Hashtable<String, String>() {
 			/**
 			 *
@@ -71,7 +71,7 @@ public class FilterModelTest {
 	public void registerWithFullComplimentOfDispatcherInitParams() {
 		FilterModel fm = new FilterModel(new ContextModel(
 				createMock(WebContainerContext.class), null, getClass()
-				.getClassLoader()), createMock(Filter.class),
+				.getClassLoader(), null), createMock(Filter.class),
 				new String[]{"/*"}, null, new Hashtable<String, String>() {
 			/**
 			 *
@@ -90,7 +90,7 @@ public class FilterModelTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void registerWithErrorInDispatcherInitParams() {
 		new FilterModel(new ContextModel(createMock(WebContainerContext.class), null,
-				getClass().getClassLoader()), createMock(Filter.class),
+				getClass().getClassLoader(), null), createMock(Filter.class),
 				new String[]{"/*"}, null, new Hashtable<String, String>() {
 			/**
 			 *

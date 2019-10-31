@@ -100,6 +100,7 @@ public class ContextModel extends Identity {
 	 * Bundle that used the http context to register an web element.
 	 */
 	private final Bundle bundle;
+	private final Boolean showStacks;
 	/**
 	 * The realm name to use with the http context.
 	 */
@@ -165,7 +166,7 @@ public class ContextModel extends Identity {
 	 * @param classLoader
 	 */
 	public ContextModel(final WebContainerContext httpContext, final Bundle bundle,
-						final ClassLoader classLoader) {
+						final ClassLoader classLoader, final Boolean showStacks) {
 		this.bundle = bundle;
 		NullArgumentException.validateNotNull(httpContext, "Http context");
 		NullArgumentException.validateNotNull(classLoader, "Class loader");
@@ -181,6 +182,7 @@ public class ContextModel extends Identity {
 		this.virtualHosts = new ArrayList<>();
 		this.connectors = new ArrayList<>();
 		this.webBundle = false;
+		this.showStacks = showStacks;
 	}
 
 	public WebContainerContext getHttpContext() {
@@ -427,6 +429,10 @@ public class ContextModel extends Identity {
 	 */
 	public Bundle getBundle() {
 		return bundle;
+	}
+
+	public Boolean isShowStacks() {
+		return showStacks;
 	}
 
 	@Override
