@@ -167,7 +167,11 @@ public class FilterTracker extends AbstractTracker<Filter, FilterWebElement> {
 			try {
 				String value = serviceReference.getProperty(key) == null ? ""
 						: serviceReference.getProperty(key).toString();
-				initParams.put(key, value);
+				if (key.startsWith(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX)) {
+					initParams.put(key.replaceFirst(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX, ""), value);
+				} else {
+					initParams.put(key, value);
+				}
 				// CHECKSTYLE:OFF
 			} catch (Exception ignore) {
 				// ignore
