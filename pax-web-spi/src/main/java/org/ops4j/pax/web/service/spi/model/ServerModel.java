@@ -310,6 +310,11 @@ public class ServerModel {
 											toDelete = pattern;
 											break;
 									}
+									Object filterInstance = filterModel.getFilter();
+									if (filterInstance != null && filterInstance == model.getFilter()) {
+										toDelete = pattern;
+										break;
+									}
 							}
 							urlSet.remove(toDelete);
 					}
