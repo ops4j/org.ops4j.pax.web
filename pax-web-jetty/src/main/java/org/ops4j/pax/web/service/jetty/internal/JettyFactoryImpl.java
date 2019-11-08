@@ -16,11 +16,50 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import static org.ops4j.util.xml.ElementHelper.getAttribute;
+import static org.ops4j.util.xml.ElementHelper.getChild;
+import static org.ops4j.util.xml.ElementHelper.getChildren;
+import static org.ops4j.util.xml.ElementHelper.getRootElement;
+import static org.ops4j.util.xml.ElementHelper.getValue;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.eclipse.jetty.alpn.ALPN;
+import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory;
 import org.eclipse.jetty.http.HttpScheme;
-import org.eclipse.jetty.server.*;
+import org.eclipse.jetty.http.HttpVersion;
+import org.eclipse.jetty.server.AbstractConnectionFactory;
+import org.eclipse.jetty.server.ConnectionFactory;
+import org.eclipse.jetty.server.ForwardedRequestCustomizer;
+import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConfiguration.Customizer;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.NegotiatingServerConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
@@ -31,22 +70,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.NoSuchAlgorithmException;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.ops4j.util.xml.ElementHelper.*;
 
 
 class JettyFactoryImpl implements JettyFactory {
@@ -415,7 +438,6 @@ class JettyFactoryImpl implements JettyFactory {
 		HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);
 		httpsConfig.addCustomizer(new SecureRequestCustomizer());
 
-
 		List<AbstractConnectionFactory> connectionFactories = new ArrayList<>();
 
 		HttpConnectionFactory httpConFactory = new HttpConnectionFactory(httpsConfig);
@@ -434,24 +456,19 @@ class JettyFactoryImpl implements JettyFactory {
 				Comparator<String> cipherComparator = (Comparator<String>) FieldUtils.readDeclaredStaticField(comparatorClass, "COMPARATOR");
 				sslContextFactory.setCipherComparator(cipherComparator);
 
-				sslFactory = new SslConnectionFactory(sslContextFactory, "h2");
+				sslFactory = new SslConnectionFactory(sslContextFactory, "alpn");
 				connectionFactories.add(sslFactory);
-
 
 				//org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory
 				Class<?> loadClass = bundle.loadClass("org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory");
-//				
-//				//ALPNServerConnectionFactory alpn = new ALPNServerConnectionFactory("spdy/3", "http/1.1");
-//				alpnFactory = (NegotiatingServerConnectionFactory) ConstructorUtils.invokeConstructor(loadClass, (Object) new String[] {"ssl", "http/2", "http/1.1"});
-//				alpnFactory.setDefaultProtocol("http/1.1");
-//				connectionFactories.add(alpnFactory);
-
-				//HTTPSPDYServerConnectionFactory spdy = new HTTPSPDYServerConnectionFactory(SPDY.V3, httpConfig);
-//				loadClass = bundle.loadClass("org.eclipse.jetty.spdy.server.http.HTTPSPDYServerConnectionFactory");
-//				loadClass = bundle.loadClass("org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory");
-
 				http2Factory = (AbstractConnectionFactory) ConstructorUtils.invokeConstructor(loadClass, httpsConfig);
 				connectionFactories.add(http2Factory);
+
+				loadClass = bundle.loadClass("org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory");
+				alpnFactory = (NegotiatingServerConnectionFactory) ConstructorUtils.invokeConstructor(loadClass, (Object) new String[] {"ssl", "h2", "http/1.1"});
+				alpnFactory.setDefaultProtocol("h2");
+				
+				connectionFactories.add(alpnFactory);
 
 			} catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalArgumentException | IllegalAccessException | InstantiationException e) {
 				// TODO Auto-generated catch block
@@ -508,7 +525,6 @@ class JettyFactoryImpl implements JettyFactory {
 
 		} catch (ClassNotFoundException e) {
 			log.info("No ALPN class available");
-			return false;
 		}
 
 		try {
