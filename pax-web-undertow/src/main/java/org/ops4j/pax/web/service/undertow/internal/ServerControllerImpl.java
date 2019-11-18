@@ -685,7 +685,7 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
             if (forwardHeaders) {
                 rootHandler = new ProxyPeerAddressHandler(rootHandler);
             }
-            
+
             if (peerHostLookup) {
                 rootHandler = new PeerNameResolvingHandler(rootHandler);
             }
@@ -778,6 +778,26 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
             KeyStore keyStore = getKeyStore(keyStoreURL,
                     keystoreType != null ? keystoreType : "JKS",
                     keystorePassword, sslKeystoreProvider);
+
+            if (keystoreCertAlias != null) {
+                // just as in org.jboss.as.domain.management.security.FileKeystore#load(), we have to
+                // create temporary, single key entry keystore
+                KeyStore newKeystore = KeyStore.getInstance(keystoreType != null ? keystoreType : "JKS");
+                newKeystore.load(null);
+
+                if (keyStore.containsAlias(keystoreCertAlias)) {
+                    KeyStore.ProtectionParameter password = new KeyStore.PasswordProtection(keystoreKeyPassword == null ? null : keystoreKeyPassword.toCharArray());
+                    if (keyStore.isKeyEntry(keystoreCertAlias)) {
+                        KeyStore.Entry entry = keyStore.getEntry(keystoreCertAlias, password);
+                        newKeystore.setEntry(keystoreCertAlias, entry, password);
+                        keyStore = newKeystore;
+                    } else {
+                        throw new IllegalArgumentException("Entry \"keystoreCertAlias\" is not private key entry in keystore " + keystorePath);
+                    }
+                } else {
+                    throw new IllegalArgumentException("Entry \"keystoreCertAlias\" not found in keystore " + keystorePath);
+                }
+            }
 
             // key managers
             String _keyManagerFactoryAlgorithm = Security.getProperty("ssl.KeyManagerFactory.algorithm") == null
