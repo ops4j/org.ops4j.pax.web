@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>org.ops4j.pax.web.itest</groupId>
 		<artifactId>pax-web-itest-container</artifactId>
-		<version>7.3.5</version>
+		<version>7.3.6-SNAPSHOT</version>
 	</parent>
 	<artifactId>pax-web-itest-container-undertow</artifactId>
 	<packaging>jar</packaging>
