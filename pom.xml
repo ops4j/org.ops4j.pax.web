@@ -260,7 +260,7 @@
 		<dependency.pax-cdi.version>1.1.0</dependency.pax-cdi.version>
 		<dependency.pax-exam.version>4.11.0</dependency.pax-exam.version>
 		<dependency.pax-logging.version>1.11.2</dependency.pax-logging.version>
-		<dependency.pax-tipi.tomcat.version>8.5.32.1</dependency.pax-tipi.tomcat.version>
+		<dependency.pax-tipi.tomcat.version>9.0.12.1</dependency.pax-tipi.tomcat.version>
 		<dependency.pax-url.version>2.5.2</dependency.pax-url.version>
 
 		<dependency.servicemix.bundles.commons-digester.version>1.8_4</dependency.servicemix.bundles.commons-digester.version>
