@@ -33,6 +33,7 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConfiguration.Customizer;
 import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.MultiPartFormDataCompliance;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.ops4j.pax.web.service.spi.Configuration;
@@ -489,7 +490,6 @@ class ServerControllerImpl implements ServerController, ServerControllerEx {
 				Integer httpPort = configuration.getHttpPort();
 				// Boolean useNIO = configuration.useNIO();
 				Integer httpSecurePort = configuration.getHttpSecurePort();
-
 				// Server should listen to std. http.
 				if (configuration.isHttpEnabled()) {
 					Connector[] connectors = jettyServer.getConnectors();
@@ -499,11 +499,10 @@ class ServerControllerImpl implements ServerController, ServerControllerEx {
 					if (connectors != null && connectors.length > 0) {
 						// Combine the configurations if they do match
 						ServerConnector backupConnector = null;
-
 						for (Connector connector : connectors) {
-							if ((connector instanceof ServerConnector)
-									&& (connector
-									.getConnectionFactory(SslConnectionFactory.class)) == null) {
+							if ((connector instanceof ServerConnector) && (connector.getConnectionFactory(SslConnectionFactory.class)) == null) {
+								// set RFC7578 for each connector
+								connector.getConnectionFactory(HttpConnectionFactory.class).getHttpConfiguration().setMultiPartFormDataCompliance(MultiPartFormDataCompliance.RFC7578);
 								if (match(address, httpPort, connector)) {
 									// the same connection as configured through
 									// property/config-admin already is
@@ -546,12 +545,8 @@ class ServerControllerImpl implements ServerController, ServerControllerEx {
 					Connector[] connectors = jettyServer.getConnectors();
 					if (connectors != null) {
 						for (Connector connector : connectors) {
-							if ((connector instanceof Connector)
-									&& (connector
-									.getConnectionFactory(SslConnectionFactory.class)) == null) {
-								LOG.warn(String
-										.format("HTTP is not enabled in Pax Web configuration - removing connector: %s",
-												connector));
+							if ((connector instanceof Connector) && (connector.getConnectionFactory(SslConnectionFactory.class)) == null) {
+								LOG.warn(String.format("HTTP is not enabled in Pax Web configuration - removing connector: %s", connector));
 								jettyServer.removeConnector(connector);
 							}
 						}
@@ -567,9 +562,10 @@ class ServerControllerImpl implements ServerController, ServerControllerEx {
 						// Combine the configurations if they do match
 						ServerConnector backupConnector = null;
 						for (Connector connector : connectors) {
-							if (connector
-									.getConnectionFactory(SslConnectionFactory.class) != null) {
+							if (connector.getConnectionFactory(SslConnectionFactory.class) != null) {
 								ServerConnector sslCon = (ServerConnector) connector;
+								// add RFC RFC7578 compliance
+								sslCon.getConnectionFactory(HttpConnectionFactory.class).getHttpConfiguration().setMultiPartFormDataCompliance(MultiPartFormDataCompliance.RFC7578);
 								String[] split = connector.getName().split(":");
 								if (split.length == 2 && httpSecurePort == Integer.valueOf(split[1])
 										.intValue()
@@ -586,8 +582,7 @@ class ServerControllerImpl implements ServerController, ServerControllerEx {
 								}
 							}
 						}
-						if (httpSecureConnector == null
-								&& backupConnector != null) {
+						if (httpSecureConnector == null && backupConnector != null) {
 							httpSecureConnector = backupConnector;
 						}
 					}
@@ -641,18 +636,14 @@ class ServerControllerImpl implements ServerController, ServerControllerEx {
 					Connector[] connectors = jettyServer.getConnectors();
 					if (connectors != null) {
 						for (Connector connector : connectors) {
-							if (connector
-									.getConnectionFactory(SslConnectionFactory.class) != null) {
-								LOG.warn(String
-										.format("HTTPS is not enabled in Pax Web configuration - removing connector: %s",
-												connector));
+							if (connector.getConnectionFactory(SslConnectionFactory.class) != null) {
+								LOG.warn(String.format("HTTPS is not enabled in Pax Web configuration - removing connector: %s", connector));
 								jettyServer.removeConnector(connector);
 							}
 						}
 					}
 				}
 			}
-
 			state = new Started();
 			notifyListeners(ServerEvent.STARTED);
 		}
