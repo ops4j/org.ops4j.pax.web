@@ -62,9 +62,9 @@ public abstract class AbstractWhiteboardDeregisteringContextIntegrationTest exte
 				mavenBundle().groupId("com.cedarsoft.commons").artifactId("crypt").versionAsInProject(),
 				mavenBundle().groupId("com.cedarsoft.commons").artifactId("xml-commons").versionAsInProject(),
 				mavenBundle("commons-codec", "commons-codec").versionAsInProject(),
-				mavenBundle().groupId("com.fasterxml.jackson.core").artifactId("jackson-core").version("2.3.0"),
-				mavenBundle().groupId("com.fasterxml.jackson.core").artifactId("jackson-databind").version("2.3.0"),
-				mavenBundle().groupId("com.fasterxml.jackson.core").artifactId("jackson-annotations").version("2.3.0"),
+				mavenBundle().groupId("com.fasterxml.jackson.core").artifactId("jackson-core").version("2.9.10"),
+				mavenBundle().groupId("com.fasterxml.jackson.core").artifactId("jackson-databind").version("2.9.10.2"),
+				mavenBundle().groupId("com.fasterxml.jackson.core").artifactId("jackson-annotations").version("2.9.10"),
 				mavenBundle().groupId("com.google.guava").artifactId("guava").version("15.0"),
 
 				wrappedBundle(mavenBundle("org.mockito", "mockito-core").version("1.9.5")),
