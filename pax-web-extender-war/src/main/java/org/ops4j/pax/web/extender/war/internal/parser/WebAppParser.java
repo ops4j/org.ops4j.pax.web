@@ -256,9 +256,8 @@ public class WebAppParser {
                 //Descripton Type  or Display Name Type contains no valueable information for pax web, so just ignore it
                 //and make sure there is no warning about it
 			} else {
-				LOG.warn("unhandled element [{}] of type [{}]", jaxbElement.getName(), value.getClass().getSimpleName());
+				LOG.debug("unhandled element [{}] of type [{}]", jaxbElement.getName(), value.getClass().getSimpleName());
 			}
-
 		}
 	}
 
