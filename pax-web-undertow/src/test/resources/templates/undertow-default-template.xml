@@ -57,9 +57,10 @@
                 <access-log directory="${karaf.data}/log" pattern="common" prefix="access_log." suffix="log" rotate="true" />
                 <filter-ref name="server-header" />
                 <filter-ref name="x-powered-by-header" />
+                <filter-ref name="ex-filter-1" predicate="method(POST)" />
             </host>
         </server>
-        <servlet-container name="default" default-session-timeout="30">
+        <servlet-container name="default" default-session-timeout="31">
             <jsp-config />
             <persistent-sessions path="${karaf.data}/web-sessions" />
             <websockets />
@@ -78,6 +79,8 @@
             <response-header name="x-docs" header-name="X-Docs" header-value="Pax-Undertow-Docs/1" />
             <error-page name="custom-error-page-1" code="404" path="/error" />
             <filter name="custom-filter-1" class-name="fully.qualified.filter.class.Name" module="irrelevant JBoss Module" />
+            <!-- undertow-core-2.0.26.Final.jar!/META-INF/services/io.undertow.server.handlers.builder.HandlerBuilder -->
+            <expression-filter name="ex-filter-1" expression="redirect(http://localhost)" />
         </filters>
     </subsystem>
 

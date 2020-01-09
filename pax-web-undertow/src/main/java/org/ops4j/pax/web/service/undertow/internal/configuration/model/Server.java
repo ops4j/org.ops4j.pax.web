@@ -620,6 +620,8 @@ public class Server {
 		public static class FilterRef {
 			@XmlAttribute
 			private String name;
+			@XmlAttribute
+			private String predicate;
 
 			public String getName() {
 				return name;
@@ -629,10 +631,19 @@ public class Server {
 				this.name = name;
 			}
 
+			public String getPredicate() {
+				return predicate;
+			}
+
+			public void setPredicate(String predicate) {
+				this.predicate = predicate;
+			}
+
 			@Override
 			public String toString() {
 				final StringBuilder sb = new StringBuilder("{ ");
 				sb.append("name: ").append(name);
+				sb.append("predicate: ").append(predicate);
 				sb.append(" }");
 				return sb.toString();
 			}

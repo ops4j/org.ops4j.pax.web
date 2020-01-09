@@ -94,6 +94,9 @@ public class UndertowConfiguration {
 				for (UndertowSubsystem.CustomFilter filter : subsystem.getFilters().getCustomFilters()) {
 					filtersMap.put(filter.getName(), filter);
 				}
+				for (UndertowSubsystem.ExpressionFilter filter : subsystem.getFilters().getExpressionFilters()) {
+					filtersMap.put(filter.getName(), filter);
+				}
 			}
 		}
 	}
