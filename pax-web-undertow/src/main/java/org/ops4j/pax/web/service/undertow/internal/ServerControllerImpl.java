@@ -626,7 +626,7 @@ public class ServerControllerImpl implements ServerController, ServerControllerE
                     if (filter == null) {
                         throw new IllegalArgumentException("No filter with name \"" + fr.getName() + "\" available.");
                     }
-                    rootHandler = filter.configure(rootHandler);
+                    rootHandler = filter.configure(rootHandler, fr.getPredicate());
                 }
             }
 

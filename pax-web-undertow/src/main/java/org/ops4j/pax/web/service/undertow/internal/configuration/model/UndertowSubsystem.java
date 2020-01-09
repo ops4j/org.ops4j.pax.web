@@ -22,8 +22,14 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlType;
 
+import io.undertow.Handlers;
+import io.undertow.predicate.Predicate;
+import io.undertow.predicate.Predicates;
+import io.undertow.server.HandlerWrapper;
 import io.undertow.server.HttpHandler;
+import io.undertow.server.handlers.ResponseCodeHandler;
 import io.undertow.server.handlers.SetHeaderHandler;
+import io.undertow.server.handlers.builder.HandlerParser;
 
 import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_UNDERTOW;
 
@@ -180,7 +186,8 @@ public class UndertowSubsystem {
 	@XmlType(name = "filterType", namespace = NS_UNDERTOW, propOrder = {
 			"responseHeaders",
 			"errorPages",
-			"customFilters"
+			"customFilters",
+			"expressionFilters"
 	})
 	public static class Filters {
 		@XmlElement(name = "response-header")
@@ -189,6 +196,8 @@ public class UndertowSubsystem {
 		private List<ErrorPageFilter> errorPages = new ArrayList<>();
 		@XmlElement(name = "filter")
 		private List<CustomFilter> customFilters = new ArrayList<>();
+		@XmlElement(name = "expression-filter")
+		private List<ExpressionFilter> expressionFilters = new ArrayList<>();
 
 		public List<ResponseHeaderFilter> getResponseHeaders() {
 			return responseHeaders;
@@ -200,6 +209,10 @@ public class UndertowSubsystem {
 
 		public List<CustomFilter> getCustomFilters() {
 			return customFilters;
+		}
+
+		public List<ExpressionFilter> getExpressionFilters() {
+			return expressionFilters;
 		}
 	}
 
@@ -219,9 +232,10 @@ public class UndertowSubsystem {
 		/**
 		 * Configures given filter using <code>handler</code> as <em>next</em> {@link HttpHandler}
 		 * @param handler
+		 * @param predicate
 		 * @return
 		 */
-		public abstract HttpHandler configure(HttpHandler handler);
+		public abstract HttpHandler configure(HttpHandler handler, String predicate);
 	}
 
 	@XmlType(name = "response-headerType", namespace = NS_UNDERTOW)
@@ -232,8 +246,14 @@ public class UndertowSubsystem {
 		private String value;
 
 		@Override
-		public HttpHandler configure(HttpHandler handler) {
-			return new SetHeaderHandler(handler, header, value);
+		public HttpHandler configure(HttpHandler handler, String predicate) {
+			SetHeaderHandler setHeaderHandler = new SetHeaderHandler(handler, header, value);
+			if (predicate == null) {
+				return setHeaderHandler;
+			}
+			Predicate p = Predicates.parse(predicate, HttpHandler.class.getClassLoader());
+			// predicate means "apply SetHeaderHandler if predicate matches, otherwise forward to passed handler"
+			return Handlers.predicate(p, setHeaderHandler, handler);
 		}
 
 		public String getHeader() {
@@ -261,7 +281,7 @@ public class UndertowSubsystem {
 		private String path;
 
 		@Override
-		public HttpHandler configure(HttpHandler handler) {
+		public HttpHandler configure(HttpHandler handler, String predicate) {
 			// TODO: not sure what to do here
 			return handler;
 		}
@@ -291,7 +311,7 @@ public class UndertowSubsystem {
 		private String module;
 
 		@Override
-		public HttpHandler configure(HttpHandler handler) {
+		public HttpHandler configure(HttpHandler handler, String predicate) {
 			// TODO: use javax.servlet filters or just generic io.undertow.server.HttpHandler?
 			return handler;
 		}
@@ -302,6 +322,41 @@ public class UndertowSubsystem {
 
 		public void setClassName(String className) {
 			this.className = className;
+		}
+
+		public String getModule() {
+			return module;
+		}
+
+		public void setModule(String module) {
+			this.module = module;
+		}
+	}
+
+	@XmlType(name = "expressionFilterType", namespace = NS_UNDERTOW)
+	public static class ExpressionFilter extends AbstractFilter {
+		@XmlAttribute(name = "expression")
+		private String expression;
+		@XmlAttribute
+		private String module;
+
+		@Override
+		public HttpHandler configure(HttpHandler handler, String predicate) {
+			HandlerWrapper wrapper = HandlerParser.parse(expression, HttpHandler.class.getClassLoader());
+			if (predicate == null) {
+				return wrapper.wrap(handler);
+			}
+			Predicate p = Predicates.parse(predicate, HttpHandler.class.getClassLoader());
+			// predicate means "apply expression if predicate matches, otherwise forward to passed handler withour processing"
+			return Handlers.predicate(p, wrapper.wrap(handler), handler);
+		}
+
+		public String getExpression() {
+			return expression;
+		}
+
+		public void setExpression(String expression) {
+			this.expression = expression;
 		}
 
 		public String getModule() {
