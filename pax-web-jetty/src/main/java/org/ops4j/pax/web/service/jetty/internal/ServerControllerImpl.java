@@ -501,8 +501,6 @@ class ServerControllerImpl implements ServerController, ServerControllerEx {
 						ServerConnector backupConnector = null;
 						for (Connector connector : connectors) {
 							if ((connector instanceof ServerConnector) && (connector.getConnectionFactory(SslConnectionFactory.class)) == null) {
-								// set RFC7578 for each connector
-								connector.getConnectionFactory(HttpConnectionFactory.class).getHttpConfiguration().setMultiPartFormDataCompliance(MultiPartFormDataCompliance.RFC7578);
 								if (match(address, httpPort, connector)) {
 									// the same connection as configured through
 									// property/config-admin already is
@@ -564,8 +562,6 @@ class ServerControllerImpl implements ServerController, ServerControllerEx {
 						for (Connector connector : connectors) {
 							if (connector.getConnectionFactory(SslConnectionFactory.class) != null) {
 								ServerConnector sslCon = (ServerConnector) connector;
-								// add RFC RFC7578 compliance
-								sslCon.getConnectionFactory(HttpConnectionFactory.class).getHttpConfiguration().setMultiPartFormDataCompliance(MultiPartFormDataCompliance.RFC7578);
 								String[] split = connector.getName().split(":");
 								if (split.length == 2 && httpSecurePort == Integer.valueOf(split[1])
 										.intValue()
