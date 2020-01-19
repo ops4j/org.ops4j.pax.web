@@ -206,6 +206,9 @@ class JettyFactoryImpl implements JettyFactory {
             	Collections.sort(customizers, comparator);
             }
         }
+
+        httpConfig.setMultiPartFormDataCompliance(MultiPartFormDataCompliance.RFC7578);
+
         return httpConfig;
     }
 
@@ -275,6 +278,8 @@ class JettyFactoryImpl implements JettyFactory {
         } else {
             httpConfig = finalHttpConfig;
         }
+
+        httpConfig.setMultiPartFormDataCompliance(MultiPartFormDataCompliance.RFC7578);
 
         return httpConfig;
     }
