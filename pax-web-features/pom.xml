@@ -190,14 +190,14 @@
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-jetty</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-tomcat</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-undertow</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-tomcat</artifactId>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-undertow</artifactId>-->
+<!--		</dependency>-->
 
 		<!-- Jetty -->
 

@@ -61,7 +61,7 @@
                             javax.servlet.http;version="[3.1,5)",
                             *; resolution:=optional
                         </Import-Package>
-						<Bundle-Classpath>
+						<Bundle-ClassPath>
 							WEB-INF/classes,
 							WEB-INF/lib/aopalliance-1.0.jar,
 							WEB-INF/lib/commons-logging-1.1.1.jar,
@@ -77,7 +77,7 @@
 							WEB-INF/lib/spring-tx-3.1.0.RELEASE.jar,
 							WEB-INF/lib/spring-web-3.1.0.RELEASE.jar,
 							WEB-INF/lib/spring-webmvc-3.1.0.RELEASE.jar
-						</Bundle-Classpath>
+						</Bundle-ClassPath>
 						<Embed-Dependency>*; artifactId=!org.osgi.compendium; scope=compile; type=!pom; inline=true</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 					</instructions>

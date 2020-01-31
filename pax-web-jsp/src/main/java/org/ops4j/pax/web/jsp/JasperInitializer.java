@@ -36,7 +36,11 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 /**
- * Initializer for the Jasper JSP Engine.
+ * <p>Initializer for the Jasper JSP Engine.</p>
+ * <p>It's task is to prepare servlet context attributes required by Jasper:<ul>
+ *     <li>org.apache.tomcat.InstanceManager</li>
+ *     <li>org.apache.jasper.compiler.TldCache </li>
+ * </ul></p>
  */
 public class JasperInitializer implements ServletContainerInitializer {
 

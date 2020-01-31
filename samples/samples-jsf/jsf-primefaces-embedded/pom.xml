@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+	Copyright 2019 OPS4J.
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+		http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.ops4j.pax.web.samples</groupId>
+		<artifactId>samples-jsf</artifactId>
+		<version>8.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<groupId>org.ops4j.pax.web.samples</groupId>
+	<artifactId>jsf-primefaces-embedded</artifactId>
+	<packaging>war</packaging>
+
+	<name>OPS4J Pax Web - Samples - JSF with Primefaces (embedded)</name>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<!-- non-OSGi specific configuration of WAR resource filtering -->
+					<webResources>
+						<resource>
+							<directory>src/main/webapp</directory>
+							<filtering>true</filtering>
+						</resource>
+					</webResources>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<supportedProjectTypes>
+						<supportedProjectType>jar</supportedProjectType>
+						<supportedProjectType>war</supportedProjectType>
+						<supportedProjectType>bundle</supportedProjectType>
+					</supportedProjectTypes>
+					<instructions>
+						<!--
+							Another kind of "wire" between this war bundle and other bundle to check
+							if we can access resources across wires
+						-->
+						<Require-Bundle>org.ops4j.pax.web.samples.jsf-primefaces-commons1</Require-Bundle>
+						<Import-Package>
+							org.osgi.framework;version="[1.8,2)",
+							javax.servlet;version="[3.1,5)"
+							javax.servlet.http;version="[3.1,5)",
+							org.ops4j.pax.web.samples.jsf3
+						</Import-Package>
+						<DynamicImport-Package>*</DynamicImport-Package>
+<!--						<Import-Package>-->
+<!--							javax.el,-->
+<!--							javax.faces.webapp,-->
+<!--							javax.servlet.jsp;version="[2.2,3.0)",-->
+<!--							javax.servlet.jsp.jstl.core;version="1.2",-->
+<!--							javax.servlet.jsp.jstl.fmt;version="1.2",-->
+<!--							javax.servlet.jsp.jstl.tlv;version="1.2",-->
+<!--							org.apache.taglibs.standard.resources;version="1.1.2",-->
+<!--							org.apache.taglibs.standard.tag.common.core;version="1.1.2",-->
+<!--							org.apache.taglibs.standard.tag.rt.core;version="1.1.2",-->
+<!--							org.apache.taglibs.standard.tei;version="1.1.2",-->
+<!--							org.apache.taglibs.standard.tlv;version="1.1.2",-->
+<!--							javax.faces.*,-->
+<!--							org.apache.myfaces.webapp,-->
+<!--							org.apache.myfaces.config,-->
+<!--							org.apache.myfaces.config.impl,-->
+<!--							org.apache.myfaces.config.impl.digester,-->
+<!--							org.apache.myfaces.config.impl.digester.elements,-->
+<!--							*-->
+<!--						</Import-Package>-->
+						<Private-Package />
+						<Export-Package>!*</Export-Package>
+						<!--
+							https://bnd.bndtools.org/instructions/wab.html
+							The -wab instruction:
+							 - instructs bnd to move the root of the created archive to WEB-INF/classes.
+							 - adds Bundle-ClassPath header to point to WEB-INF/classes
+							 - should point to directories that'll be part of resulting archive
+
+							pointing _wab to output directory used by maven-war-plugin is a little "trick", because
+							we can (see see https://maven.apache.org/plugins/maven-war-plugin/war-mojo.html#webappDirectory):
+							 - take src/main/webapp resources already filtered by maven-war-plugin
+							 - not use <_wablib> at all, because the target will already contain WEB-INF/lib jars
+
+							however, this "trick" doesn't add /WEB-INF/lib/*.jar libraries to Bundle-ClassPath,
+							we need:
+							 - Embed-Directory and Embed-Dependency, or
+							 - <_wablib>, but we need explicit list of jars then
+						-->
+						<_wab>${project.build.directory}/${project.build.finalName}</_wab>
+						<!--
+							This header is specified by "OSGi Cmpn, 128.3 Web Application Bundle" chapter (since OSGi 4.3)
+						-->
+						<Web-ContextPath>/jsf-primefaces</Web-ContextPath>
+						<!--
+							http://felix.apache.org/documentation/subprojects/apache-felix-maven-bundle-plugin-bnd.html#embedding-dependencies
+							Embed-Dependency packages the dependencies inside the bundle (jar or wab)
+							We have to somehow repeat the work of maven-war-plugin, because the structure of
+							WAR is already prepared in ${project.build.directory}/${project.build.finalName} and <_wab>
+							points to this structure.
+							But without Embed-Dependency, bndlib won't be able to alter Bundle-ClassPath header
+						-->
+						<Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
+						<!--
+							Last step is to configure Embed-Directory, so all libs included with Embed-Dependency
+							will have correct directory base within Bundle-ClassPath header
+						-->
+						<Embed-Directory>WEB-INF/lib</Embed-Directory>
+						<Embed-Transitive>true</Embed-Transitive>
+						<!--
+							By default, the value of Include-Resource is "{maven-resources}", additionally
+							"{maven-dependencies}" part is added by <Embed-Dependency> instruction.
+							However, when using the trick with pointing <_wab> to already prepared WAR content (prepared
+							by maven-war-plugin), we don't need "{maven-resources}" here. We only need to keep
+							"{maven-dependencies}". Otherwise "src/main/resources" would go both under "/WEB-INF/classes"
+							and into the root of created WAR.
+							So we either use empty Include-Resource or Include-Resource={maven-dependencies}
+						-->
+						<Include-Resource />
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+
+		<!--
+			Scopes impact what's being package by maven-war-plugin
+			See:
+			 - org.apache.maven.plugins.war.packaging.ArtifactsPackagingTask#performPackaging()
+			 - org.apache.maven.artifact.resolver.filter.AbstractScopeArtifactFilter#addScopeInternal()
+			    - compile -> compile, system, provided
+			    - runtime -> compile, runtime
+			    - compile+runtime -> compile, runtime, system, provided
+			    - runtime+system -> compile, runtime, system
+			    - test -> compile, runtime, system, provided, test
+			   and ArtifactsPackagingTask#performPackaging uses "runtime", so only compile + runtime scoped artifacts
+			   are packaged in WAR
+		-->
+
+		<!-- pax-web own artifacts -->
+
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>jsf-primefaces-commons1</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>jsf-primefaces-jar</artifactId>
+		</dependency>
+
+		<!-- OSGi -->
+
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- JavaEE -->
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Other -->
+
+		<dependency>
+			<groupId>org.apache.myfaces.core</groupId>
+			<artifactId>myfaces-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.myfaces.core</groupId>
+			<artifactId>myfaces-impl</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.primefaces</groupId>
+			<artifactId>primefaces</artifactId>
+		</dependency>
+
+	</dependencies>
+
+</project>

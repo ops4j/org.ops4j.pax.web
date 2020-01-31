@@ -15,9 +15,13 @@
  */
 package org.ops4j.pax.web.service.spi.util;
 
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class NamedThreadFactory implements java.util.concurrent.ThreadFactory {
+/**
+ * Handy {@link ThreadFactory} for threads with standardized name.
+ */
+public class NamedThreadFactory implements ThreadFactory {
 
     private static final AtomicInteger POOL_NUMBER = new AtomicInteger(1);
     private final ThreadGroup group;

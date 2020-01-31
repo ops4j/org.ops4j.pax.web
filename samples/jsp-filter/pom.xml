@@ -65,7 +65,7 @@
 							org.slf4j
 						</Import-Package>
 						<Export-Package>!*</Export-Package>
-						<Bundle-Classpath>WEB-INF/classes</Bundle-Classpath>
+						<Bundle-ClassPath>WEB-INF/classes</Bundle-ClassPath>
 						<Web-ContextPath>jsp-filter</Web-ContextPath>
 					</instructions>
 				</configuration>

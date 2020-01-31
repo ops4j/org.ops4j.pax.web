@@ -26,13 +26,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.ServletContext;
 import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.servlet.descriptor.TaglibDescriptor;
 
 import org.apache.jasper.compiler.Localizer;
 import org.apache.tomcat.util.descriptor.tld.TaglibXml;
+import org.apache.tomcat.util.descriptor.tld.TldParser;
 import org.apache.tomcat.util.descriptor.tld.TldResourcePath;
 import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
 import org.osgi.framework.Bundle;
@@ -238,10 +238,12 @@ public class TldScanner {
             classLoader = (ResourceDelegatingBundleClassLoader) webappLoader;
         } else if (parentLoader instanceof ResourceDelegatingBundleClassLoader) {
             classLoader = (ResourceDelegatingBundleClassLoader) parentLoader;
-        } else if (isTomcatWebLoader()) {
-            ClassLoader parent = ((org.apache.catalina.loader.WebappClassLoader) webappLoader).getParent();
-            if (parent instanceof ResourceDelegatingBundleClassLoader) {
-                classLoader = (ResourceDelegatingBundleClassLoader) parent;
+        } else {
+            if ("org.apache.catalina.loader".equals(webappLoader.getClass().getPackage().getName())) {
+                ClassLoader parent = webappLoader.getParent();
+                if (parent instanceof ResourceDelegatingBundleClassLoader) {
+                    classLoader = (ResourceDelegatingBundleClassLoader) parent;
+                }
             }
         }
 
@@ -275,15 +277,6 @@ public class TldScanner {
                     }
                 }
             }
-        }
-    }
-
-    private boolean isTomcatWebLoader() {
-        try {
-            return (org.apache.catalina.loader.WebappClassLoader.class != null);
-        } catch (NoClassDefFoundError e) {
-            // ignore
-            return false;
         }
     }
 

@@ -38,34 +38,38 @@
 
 	<description>Container integration tests for Pax Web</description>
 
+	<modules>
+		<module>pax-web-itest-container-any</module>
+	</modules>
+
 	<profiles>
-		<profile>
-			<id>jetty</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<modules>
-				<module>pax-web-itest-container-jetty</module>
-			</modules>
-		</profile>
-		<profile>
-			<id>tomcat</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<modules>
-				<module>pax-web-itest-container-tomcat</module>
-			</modules>
-		</profile>
-		<profile>
-			<id>undertow</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<modules>
-				<module>pax-web-itest-container-undertow</module>
-			</modules>
-		</profile>
+<!--		<profile>-->
+<!--			<id>jetty</id>-->
+<!--			<activation>-->
+<!--				<activeByDefault>true</activeByDefault>-->
+<!--			</activation>-->
+<!--			<modules>-->
+<!--				<module>pax-web-itest-container-jetty</module>-->
+<!--			</modules>-->
+<!--		</profile>-->
+<!--		<profile>-->
+<!--			<id>tomcat</id>-->
+<!--			<activation>-->
+<!--				<activeByDefault>true</activeByDefault>-->
+<!--			</activation>-->
+<!--			<modules>-->
+<!--				<module>pax-web-itest-container-tomcat</module>-->
+<!--			</modules>-->
+<!--		</profile>-->
+<!--		<profile>-->
+<!--			<id>undertow</id>-->
+<!--			<activation>-->
+<!--				<activeByDefault>true</activeByDefault>-->
+<!--			</activation>-->
+<!--			<modules>-->
+<!--				<module>pax-web-itest-container-undertow</module>-->
+<!--			</modules>-->
+<!--		</profile>-->
 	</profiles>
 
 </project>

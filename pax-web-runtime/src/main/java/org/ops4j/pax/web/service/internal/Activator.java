@@ -18,18 +18,18 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_CHECK_INTERVAL;
-import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_DEBUG_INFO;
-import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_DEVELOPMENT;
-import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_ENABLE_POOLING;
-import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_IE_CLASS_ID;
-import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_JAVA_ENCODING;
-import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_KEEP_GENERATED;
-import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_LOG_VERBOSITY_LEVEL;
-import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_MAPPED_FILE;
-import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_PRECOMPILATION;
-import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_SCRATCH_DIR;
-import static org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_TAGPOOL_MAX_SIZE;
+import static org.ops4j.pax.web.jsp.PaxWebConstants.PROPERTY_JSP_CHECK_INTERVAL;
+import static org.ops4j.pax.web.jsp.PaxWebConstants.PROPERTY_JSP_DEBUG_INFO;
+import static org.ops4j.pax.web.jsp.PaxWebConstants.PROPERTY_JSP_DEVELOPMENT;
+import static org.ops4j.pax.web.jsp.PaxWebConstants.PROPERTY_JSP_ENABLE_POOLING;
+import static org.ops4j.pax.web.jsp.PaxWebConstants.PROPERTY_JSP_IE_CLASS_ID;
+import static org.ops4j.pax.web.jsp.PaxWebConstants.PROPERTY_JSP_JAVA_ENCODING;
+import static org.ops4j.pax.web.jsp.PaxWebConstants.PROPERTY_JSP_KEEP_GENERATED;
+import static org.ops4j.pax.web.jsp.PaxWebConstants.PROPERTY_JSP_LOG_VERBOSITY_LEVEL;
+import static org.ops4j.pax.web.jsp.PaxWebConstants.PROPERTY_JSP_MAPPED_FILE;
+import static org.ops4j.pax.web.jsp.PaxWebConstants.PROPERTY_JSP_PRECOMPILATION;
+import static org.ops4j.pax.web.jsp.PaxWebConstants.PROPERTY_JSP_SCRATCH_DIR;
+import static org.ops4j.pax.web.jsp.PaxWebConstants.PROPERTY_JSP_TAGPOOL_MAX_SIZE;
 import static org.ops4j.pax.web.service.WebContainerConstants.*;
 
 import java.io.File;

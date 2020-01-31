@@ -53,6 +53,8 @@ import org.apache.tomcat.util.descriptor.tld.TldResourcePath;
  * Most of the path-related stuff is here - mangling names, versions, dirs,
  * loading resources and dealing with uris.
  *
+ * Pax-Web info: file based on org.apache.tomcat/tomcat-jasper/9.0.29
+ *
  * @author Anil K. Vijendran
  * @author Harish Prabandham
  * @author Pierre Delisle
@@ -85,7 +87,9 @@ public class JspCompilationContext {
 
     private volatile boolean removed = false;
 
-    private URLClassLoader jspLoader;
+    // volatile so changes are visible when multiple threads request a JSP file
+    // that has been modified
+    private volatile URLClassLoader jspLoader;
     private URL baseUrl;
     private Class<?> servletClass;
 
@@ -149,7 +153,7 @@ public class JspCompilationContext {
 
     /* ==================== Methods to override ==================== */
 
-    /* ---------- Class path and loader ---------- */
+    /** ---------- Class path and loader ---------- */
 
     /**
      * @return the classpath that is passed off to the Java compiler.
@@ -200,7 +204,7 @@ public class JspCompilationContext {
     }
 
 
-    /* ---------- Input/Output  ---------- */
+    /** ---------- Input/Output  ---------- */
 
     /**
      * The output directory to generate code into.  The output directory
@@ -268,7 +272,7 @@ public class JspCompilationContext {
         return jspCompiler;
     }
 
-    /* ---------- Access resources in the webapp ---------- */
+    /** ---------- Access resources in the webapp ---------- */
 
     /**
      * Get the full value of a URI relative to this compilations context
@@ -456,7 +460,7 @@ public class JspCompilationContext {
     }
 
     /**
-     * Package name for the generated class is make up of the base package
+     * Package name for the generated class is made up of the base package
      * name, which is user settable, and the derived package name.  The
      * derived package name directly mirrors the file hierarchy of the JSP page.
      * @return the package name
@@ -465,11 +469,11 @@ public class JspCompilationContext {
         if (isTagFile()) {
             String className = tagInfo.getTagClassName();
             int lastIndex = className.lastIndexOf('.');
-            String pkgName = "";
+            String packageName = "";
             if (lastIndex != -1) {
-                pkgName = className.substring(0, lastIndex);
+                packageName = className.substring(0, lastIndex);
             }
-            return pkgName;
+            return packageName;
         } else {
             String dPackageName = getDerivedPackageName();
             if (dPackageName.length() == 0) {
@@ -500,11 +504,19 @@ public class JspCompilationContext {
     }
 
     /**
-     * The package name into which the servlet class is generated.
-     * @param servletPackageName The package name to use
+     * @return The base package name into which all servlet and associated code
+     *         is generated
      */
-    public void setServletPackageName(String servletPackageName) {
-        this.basePackageName = servletPackageName;
+    public String getBasePackageName() {
+        return basePackageName;
+    }
+
+    /**
+     * The package name into which the servlet class is generated.
+     * @param basePackageName The package name to use
+     */
+    public void setBasePackageName(String basePackageName) {
+        this.basePackageName = basePackageName;
     }
 
     /**
@@ -781,4 +793,3 @@ public class JspCompilationContext {
         return result.toString();
     }
 }
-

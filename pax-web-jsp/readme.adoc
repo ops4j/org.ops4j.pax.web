@@ -1,4 +1,44 @@
-= Information about JSP / JSTL implementations
+= pax-web-jsp
+
+== Motivation
+
+There are *four* specifications related roughly to JSP:
+
+* Servlets API (3.1 - JSR 340 and 4.0 - JSR 369)
+* JSP API (2.3 - JSR 245)
+* JSTL (1.2 - JSR 52)
+* EL API (3.0 - JSR 341)
+
+I won't mention JSF (2.3 - JSR 372) and WebSockets (1.1 - JSR 356) here.
+
+While Pax-Web JSP (and Pax-Web in general) assumes Servlets API and EL API to be exported by separate bundles:
+
+* usually official `mvn:javax.servlet/javax.servlet-api/*`
+* usually official `mvn:javax.el/javax.el-api/3.0.0`
+
+These will be embedded (and in case of API also exported) within pax-web-jsp itself:
+
+* JSP API
+* JSP implementation
+* JSTL API
+* JSTL implementation
+* EL implementation
+
+Servlets API implementation is provided by pax-web-tomcat, pax-web-jetty and pax-web-undertow bundles as _container implementations_.
+
+== Entry points
+
+`pax-web-jsp` doesn't provide any OSGi _entry points_ like bundle activators, SCR components or blueprint descriptors. This bundle's classes have to be used explicitly.
+
+`pax-web-jsp` however provides several JavaEE/JavaSE _entry points_:
+
+* `/META-INF/services/javax.el.ExpressionFactory` with `org.apache.el.ExpressionFactoryImpl` service
+* `/META-INF/services/javax.servlet.ServletContainerInitializer` with `org.apache.jasper.servlet.JasperInitializer` service
+* `org.ops4j.pax.web.jsp.JasperInitializer` used directly by pax-web-runtime
+
+(I'll try to make it less confusing and more clear.)
+
+== Information about JSP / JSTL implementations
 
 Taking into account JavaEE 5 - 8 specifications, we have:
 
@@ -7,7 +47,7 @@ Taking into account JavaEE 5 - 8 specifications, we have:
 * JavaEE 7: JSP 2.3, JSTL 1.2
 * JavaEE 8: JSP 2.3, JSTL 1.2
 
-By looking at 3 containers used by pax-web, the _implementations_ of JSP/JSTL used are:
+List of Maven artifacts providing APIs and implementations related to Servlets/JSP/EL/JSTL specifications.
 
 * Official JavaEE (recently repackaged under jakarta groupId) bundles for APIs (not for implementations!):
 ** mvn:javax.servlet/javax.servlet-api/3.1.0
@@ -193,7 +233,7 @@ Export-Package:
     javax.el; version="3.0.2"
 ----
 
-* Tomcat 8.5.x:
+* Tomcat 8.5.x/9.0.x:
 ** mvn:org.apache.tomcat/tomcat-servlet-api - just Servlet API
 +
 ----
@@ -302,7 +342,6 @@ org.apache.taglibs.standard.util
 ** EL API: mvn:javax.el/javax.el-api/3.0.0 → mvn:jakarta.el/jakarta.el-api/3.0.2
 ** EL Impl: mvn:org.glassfish/javax.el.impl/3.0.1-SNAPSHOT
 ** EL API + Impl: mvn:org.glassfish/javax.el/3.0.1-SNAPSHOT
-
 
 About JSTL (https://tomcat.apache.org/taglibs.html):
 

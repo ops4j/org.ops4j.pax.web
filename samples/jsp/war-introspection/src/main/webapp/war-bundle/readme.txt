@@ -1,0 +1,1 @@
+Some directory with WAR resources.

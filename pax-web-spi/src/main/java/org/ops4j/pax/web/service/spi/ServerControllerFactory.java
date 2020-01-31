@@ -19,8 +19,17 @@ package org.ops4j.pax.web.service.spi;
 
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 
+/**
+ * Main SPI interface used by pax-web-runtime to control actual implementation of HTTP server
+ * using provided configuration.
+ */
 public interface ServerControllerFactory {
 
+	/**
+	 * Creates an instance of {@link ServerController} that controls actual server runtime (Jetty, Tomcat, Undertow)
+	 * @param serverModel
+	 * @return
+	 */
 	ServerController createServerController(ServerModel serverModel);
 
 }

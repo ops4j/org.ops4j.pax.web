@@ -1,0 +1,178 @@
+= pax-web-tomcat-common
+
+So far, Pax-Web was providing Tomcat support in two different, non-exclusive ways:
+
+* in `pax-web-tomcat` bundle providing Tomcat server and implementation of HttpService
+* in `pax-web-jsp` bundle, since JSP implementation comes from Tomcat/Jasper project
+
+The confusing and problematic issues were:
+
+* `pax-web-jsp` should not require installation of `pax-web-tomcat` bundle, but
+* `pax-web-jsp` included (Private-Package or sometimes Export-Package) some (random, not obvious) packages from different Tomcat libraries (`tomcat-api`, `tomcat-util-scanner`, ...)
+* Most of the Tomcat classes were coming not from official Tomcat libraries, but from pax-tipi project which is quite cumbersome to use (and to release)
+
+New idea (since pax-web-8.0.0) is to introduce two changes:
+
+* New `pax-web-tomcat-common` bundle provides classes required both by `pax-web-jsp` and by `pax-web-tomcat`
+* No longer require Tomcat bundles from Pax TIPI project and embed (Private-Package) Tomcat libraries inside `pax-web-tomcat`.
+
+== Packages and Tomcat JARs
+
+Here are Tomcat packages and their respective JARs (not real bundles):
+
+org.apache.tomcat:tomcat-api::
+
+* org.apache.tomcat
+
+org.apache.tomcat:tomcat-catalina::
+
+* org.apache.tomcat.catalina
+* org.apache.tomcat.catalina.authenticator
+* org.apache.tomcat.catalina.authenticator.jaspic
+* org.apache.tomcat.catalina.connector
+* org.apache.tomcat.catalina.core
+* org.apache.tomcat.catalina.deploy
+* org.apache.tomcat.catalina.filters
+* org.apache.tomcat.catalina.loader
+* org.apache.tomcat.catalina.manager
+* org.apache.tomcat.catalina.manager.host
+* org.apache.tomcat.catalina.manager.util
+* org.apache.tomcat.catalina.mapper
+* org.apache.tomcat.catalina.mbeans
+* org.apache.tomcat.catalina.realm
+* org.apache.tomcat.catalina.security
+* org.apache.tomcat.catalina.servlets
+* org.apache.tomcat.catalina.session
+* org.apache.tomcat.catalina.ssi
+* org.apache.tomcat.catalina.startup
+* org.apache.tomcat.catalina.users
+* org.apache.tomcat.catalina.util
+* org.apache.tomcat.catalina.valves
+* org.apache.tomcat.catalina.valves.rewrite
+* org.apache.tomcat.catalina.webresources
+* org.apache.tomcat.catalina.webresources.war
+* org.apache.tomcat.naming
+* org.apache.tomcat.naming.factory
+* org.apache.tomcat.naming.factory.webservices
+* org.apache.tomcat.naming.java
+
+org.apache.tomcat:tomcat-coyote::
+
+* org.apache.coyote
+* org.apache.coyote.ajp
+* org.apache.coyote.http11
+* org.apache.coyote.http11.filters
+* org.apache.coyote.http11.upgrade
+* org.apache.coyote.http2
+* org.apache.tomcat.util.bcel
+* org.apache.tomcat.util.bcel.classfile
+* org.apache.tomcat.util.http
+* org.apache.tomcat.util.http.fileupload
+* org.apache.tomcat.util.http.fileupload.disk
+* org.apache.tomcat.util.http.fileupload.servlet
+* org.apache.tomcat.util.http.fileupload.util
+* org.apache.tomcat.util.http.fileupload.util.mime
+* org.apache.tomcat.util.http.parser
+* org.apache.tomcat.util.http.res (no *.class files here. packages not exported and not embedded in pax-tip tomcat-embed-core!)
+* org.apache.tomcat.util.log
+* org.apache.tomcat.util.modeler
+* org.apache.tomcat.util.modeler.modules
+* org.apache.tomcat.util.net
+* org.apache.tomcat.util.net.jsse
+* org.apache.tomcat.util.net.openssl
+* org.apache.tomcat.util.net.openssl.ciphers
+
+org.apache.tomcat:tomcat-jni::
+
+* org.apache.tomcat.jni
+
+org.apache.tomcat:tomcat-juli::
+
+* org.apache.juli
+* org.apache.juli.logging
+
+org.apache.tomcat:tomcat-util::
+
+* org.apache.tomcat.util
+* org.apache.tomcat.util.buf
+* org.apache.tomcat.util.codec.binary
+* org.apache.tomcat.util.collections
+* org.apache.tomcat.util.compat
+* org.apache.tomcat.util.file
+* org.apache.tomcat.util.json
+* org.apache.tomcat.util.res
+* org.apache.tomcat.util.security
+* org.apache.tomcat.util.threads
+* org.apache.tomcat.util.threads.res
+
+org.apache.tomcat:tomcat-util-scan::
+
+* org.apache.tomcat.util.descriptor
+* org.apache.tomcat.util.descriptor.tagplugin
+* org.apache.tomcat.util.descriptor.tld
+* org.apache.tomcat.util.descriptor.web
+* org.apache.tomcat.util.digester
+* org.apache.tomcat.util.scan
+
+== Finding ultimate combination of imports, exports and bundles
+
+`maven-bundle-plugin` analyzes what you add to `Export-Package`/`Private-Package` and adds required `Import-Package`. So exporting:
+
+* EL Implementation
+* JSP API + Implementation
+* JSTL API + Implementation
+
+and having `Import-Package: org.apache.tomcat.*` instruction in pax-web-jsp, I got these required Tomcat packages:
+
+* org.apache.tomcat
+* org.apache.tomcat.util.descriptor
+* org.apache.tomcat.util.descriptor.tagplugin
+* org.apache.tomcat.util.descriptor.tld
+* org.apache.tomcat.util.descriptor.web
+* org.apache.tomcat.util.digester
+* org.apache.tomcat.util.res
+* org.apache.tomcat.util.scan
+* org.apache.tomcat.util.security
+
+With `Import-Package: org.apache.*` in pax-web-jsp I got (in addition to the above):
+
+* org.apache.catalina.loader
+* org.apache.tools.ant
+* org.apache.tools.ant.taskdefs
+* org.apache.tools.ant.types
+* org.apache.tools.ant.util
+
+Seeing the above, I know what to export from `pax-web-tomcat-common` (skipping ANT requirement).
+
+`org.apache.catalina.loader` comes from `org.ops4j.pax.web.jsp.TldScanner.scanJars()` and I suspect it can be changed.
+
+For now (2019-11-27) I think `pax-web-tomcat-common` can embed just:
+
+* tomcat-api
+* tomcat-util
+* tomcat-util-scan
+
+Again, creating a bundle with re-export of the packages from the 3 above jars and adding `Import-Package: *` gives me the list of imports I need to satisfy the exported packages (in the scope of what maven-bundle-plugin + bndlib can analyze of course).
+In this case I have (imports without self-imports, i.e., without packages that are at the same time exported by the same bundle):
+
+----
+Bundle-SymbolicName = org.ops4j.pax.web.pax-web-tomcat-common
+...
+Import-Package =
+	javax.naming,
+	javax.net.ssl,
+	javax.servlet,
+	javax.servlet.annotation,
+	javax.servlet.descriptor,
+	javax.servlet.jsp,
+	javax.servlet.jsp.tagext,
+	javax.xml.parsers,
+	org.apache.juli.logging,
+	org.graalvm.nativeimage,
+	org.xml.sax,
+	org.xml.sax.ext,
+	org.xml.sax.helpers,
+	sun.misc
+----
+
+So, almost ok, but I can adjust them manually - this iteration step is to avoid `Import-Package: *` entirely and list required packages, don't list not required packages and make some packages optional.

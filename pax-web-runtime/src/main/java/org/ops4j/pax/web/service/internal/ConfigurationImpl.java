@@ -103,6 +103,7 @@ import java.util.List;
 
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.ops4j.lang.NullArgumentException;
+import org.ops4j.pax.web.jsp.PaxWebConstants;
 import org.ops4j.pax.web.service.internal.util.SupportUtils;
 import org.ops4j.pax.web.service.spi.Configuration;
 import org.ops4j.pax.web.service.spi.ConfigurationSource;
@@ -592,7 +593,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration, C
 		}
 
 		// Only when JSPs are available the constants can be read.
-		return getResolvedStringProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_SCRATCH_DIR);
+		return getResolvedStringProperty(PaxWebConstants.PROPERTY_JSP_SCRATCH_DIR);
 	}
 
 	@Override
@@ -603,7 +604,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration, C
 		}
 
 		// Only when JSPs are available the constants can be read.
-		return getResolvedIntegerProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_CHECK_INTERVAL);
+		return getResolvedIntegerProperty(PaxWebConstants.PROPERTY_JSP_CHECK_INTERVAL);
 	}
 
 	@Override
@@ -614,7 +615,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration, C
 		}
 
 		// Only when JSPs are available the constants can be read.
-		return getResolvedBooleanProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_DEBUG_INFO);
+		return getResolvedBooleanProperty(PaxWebConstants.PROPERTY_JSP_DEBUG_INFO);
 	}
 
 	@Override
@@ -625,7 +626,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration, C
 		}
 
 		// Only when JSPs are available the constants can be read.
-		return getResolvedBooleanProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_DEVELOPMENT);
+		return getResolvedBooleanProperty(PaxWebConstants.PROPERTY_JSP_DEVELOPMENT);
 	}
 
 	@Override
@@ -636,7 +637,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration, C
 		}
 
 		// Only when JSPs are available the constants can be read.
-		return getResolvedBooleanProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_ENABLE_POOLING);
+		return getResolvedBooleanProperty(PaxWebConstants.PROPERTY_JSP_ENABLE_POOLING);
 	}
 
 	@Override
@@ -647,7 +648,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration, C
 		}
 
 		// Only when JSPs are available the constants can be read.
-		return getResolvedStringProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_IE_CLASS_ID);
+		return getResolvedStringProperty(PaxWebConstants.PROPERTY_JSP_IE_CLASS_ID);
 	}
 
 	@Override
@@ -658,7 +659,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration, C
 		}
 
 		// Only when JSPs are available the constants can be read.
-		return getResolvedStringProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_JAVA_ENCODING);
+		return getResolvedStringProperty(PaxWebConstants.PROPERTY_JSP_JAVA_ENCODING);
 	}
 
 	@Override
@@ -669,7 +670,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration, C
 		}
 
 		// Only when JSPs are available the constants can be read.
-		return getResolvedBooleanProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_KEEP_GENERATED);
+		return getResolvedBooleanProperty(PaxWebConstants.PROPERTY_JSP_KEEP_GENERATED);
 	}
 
 	@Override
@@ -680,7 +681,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration, C
 		}
 
 		// Only when JSPs are available the constants can be read.
-		return getResolvedStringProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_LOG_VERBOSITY_LEVEL);
+		return getResolvedStringProperty(PaxWebConstants.PROPERTY_JSP_LOG_VERBOSITY_LEVEL);
 	}
 
 	@Override
@@ -691,7 +692,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration, C
 		}
 
 		// Only when JSPs are available the constants can be read.
-		return getResolvedBooleanProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_MAPPED_FILE);
+		return getResolvedBooleanProperty(PaxWebConstants.PROPERTY_JSP_MAPPED_FILE);
 	}
 
 	@Override
@@ -702,7 +703,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration, C
 		}
 
 		// Only when JSPs are available the constants can be read.
-		return getResolvedIntegerProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_TAGPOOL_MAX_SIZE);
+		return getResolvedIntegerProperty(PaxWebConstants.PROPERTY_JSP_TAGPOOL_MAX_SIZE);
 	}
 
 	@Override
@@ -712,7 +713,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration, C
 			return null;
 		}
 
-		return getResolvedBooleanProperty(org.ops4j.pax.web.jsp.JspWebdefaults.PROPERTY_JSP_PRECOMPILATION);
+		return getResolvedBooleanProperty(PaxWebConstants.PROPERTY_JSP_PRECOMPILATION);
 	}
 
 	@Override

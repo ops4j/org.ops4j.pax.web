@@ -17,17 +17,34 @@
 package org.ops4j.pax.web.test.jsp;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.LinkedList;
 import java.util.UUID;
+import java.util.Vector;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
 import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.servlet.http.HttpServletResponse;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.stubbing.Answer;
+import org.ops4j.pax.web.jsp.JasperInitializer;
+import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.FileSystemResourceLoader;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
@@ -37,25 +54,31 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class JspTest {
 
     public static Logger log = LoggerFactory.getLogger(JspTest.class);
 
+    private Servlet jspServlet;
+    private ServletContext context;
+    private Bundle paxWebJsp;
+
     @BeforeClass
-    @SuppressWarnings("all")
-    public static void init() throws Exception {
+    public static void initStatic() throws Exception {
         Class<?> jspFactoryClass = Class.forName("javax.servlet.jsp.JspFactory");
         Method setDefaultFactory = jspFactoryClass.getDeclaredMethod("setDefaultFactory", jspFactoryClass);
         Class<?> jspFactoryImplClass = Class.forName("org.apache.jasper.runtime.JspFactoryImpl");
-        setDefaultFactory.invoke(null, jspFactoryImplClass.newInstance());
+        setDefaultFactory.invoke(null, jspFactoryClass.cast(jspFactoryImplClass.newInstance()));
     }
 
-    @Test
-    public void insstantiateServlet() throws Exception {
+    @Before
+    public void init() throws Exception {
         Class<?> servletClass = Class.forName("org.apache.jasper.servlet.JspServlet");
         Constructor<?> c = servletClass.getConstructor();
-        Servlet jspServlet = (Servlet) c.newInstance();
+        jspServlet = (Servlet) c.newInstance();
         assertNotNull(jspServlet);
 
         File scratchDir = new File("target", UUID.randomUUID().toString());
@@ -92,14 +115,48 @@ public class JspTest {
          * - trimSpaces - Should template text that consists entirely of whitespace be removed? true or false, default false.
          * - xpoweredBy - Determines whether X-Powered-By response header is added by generated servlet. true or false, default false.
          */
-        MockServletContext context = new MockServletContext("jsps") {
+        MockServletContext context = new MockServletContext("src/test/resources/web", new FileSystemResourceLoader()) {
             @Override
             public JspConfigDescriptor getJspConfigDescriptor() {
                 return null;
             }
         };
-        Object instanceManager = Class.forName("org.apache.tomcat.SimpleInstanceManager").newInstance();
-        context.setAttribute("org.apache.tomcat.InstanceManager", instanceManager);
+
+        // mocking to return META-INF/*.tld files from pax-web-jsp jar dependency (no OSGi here)
+
+        paxWebJsp = mock(Bundle.class);
+        BundleWiring paxWebJspWiring = mock(BundleWiring.class);
+        when(paxWebJsp.adapt(BundleWiring.class)).thenReturn(paxWebJspWiring);
+
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(getClass().getClassLoader());
+        final Vector<URL> urls = Arrays.stream(resolver.getResources("classpath*:/META-INF/*.tld")).map(r -> {
+            try {
+                return r.getURL();
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage(), e);
+            }
+        }).collect(Vector::new, Vector::add, Vector::addAll);
+        when(paxWebJsp.findEntries("META-INF", "*.tld", true)).thenReturn(urls.elements());
+        when(paxWebJsp.getResources(anyString())).thenAnswer((Answer<Enumeration<URL>>) invocation -> {
+            String name = (String) invocation.getArguments()[0];
+            Vector<URL> v = new Vector<>(1);
+            v.add(new URL(name));
+            return v.elements();
+        });
+        when(paxWebJspWiring.listResources("META-INF", "*.tld", BundleWiring.LISTRESOURCES_RECURSE))
+                .thenAnswer((Answer<Collection<String>>) invocation ->
+                        urls.stream()
+                                .map(URL::toString)
+                                .collect(LinkedList::new, LinkedList::add, LinkedList::addAll));
+
+        ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(new ResourceDelegatingBundleClassLoader(Collections.singletonList(paxWebJsp)));
+        try {
+            // setup org.apache.jasper.compiler.TldCache and org.apache.tomcat.InstanceManager
+            new JasperInitializer().onStartup(null, context);
+        } finally {
+            Thread.currentThread().setContextClassLoader(tccl);
+        }
 
         MockServletConfig config = new MockServletConfig(context, "jsp");
         config.addInitParameter("compilerClassName", "org.apache.jasper.compiler.JDTCompiler"); // default
@@ -110,8 +167,11 @@ public class JspTest {
         config.addInitParameter("trimSpaces", "true");
         config.addInitParameter("xpoweredBy", "true");
         jspServlet.init(config);
+    }
 
-        MockHttpServletRequest req = req(new MockHttpServletRequest(context), "/", "index.jsp");
+    @Test
+    public void simpleJspWithEl() throws Exception {
+        MockHttpServletRequest req = req(new MockHttpServletRequest(context), "/", "simple.jsp");
         req.setMethod("GET");
         req.setAttribute("user", new User("Grzegorz"));
         MockHttpServletResponse res = new MockHttpServletResponse();
@@ -124,6 +184,81 @@ public class JspTest {
 
         assertTrue(response.contains("<p id=\"p1\">Welcome Grzegorz"));
         assertTrue(response.contains("<p id=\"p2\">[hello Grzegorz]"));
+    }
+
+    @Test
+    public void jspWithElFunctions() throws Exception {
+        MockHttpServletRequest req = req(new MockHttpServletRequest(context), "/", "functions.jsp");
+        req.setMethod("GET");
+        req.setAttribute("user", new User("Grzegorz"));
+        MockHttpServletResponse res = new MockHttpServletResponse();
+
+        jspServlet.service(req, res);
+
+        assertThat(res.getStatus(), equalTo(HttpServletResponse.SC_OK));
+        String response = res.getContentAsString();
+        log.info("Response: {}", response);
+
+        assertTrue(response.contains("<p id=\"p1\">size: 8</p>"));
+    }
+
+    @Test
+    public void jspWithScripts() throws Exception {
+        MockHttpServletRequest req = req(new MockHttpServletRequest(context), "/", "rt.jsp");
+        req.setMethod("GET");
+        MockHttpServletResponse res = new MockHttpServletResponse();
+
+        jspServlet.service(req, res);
+
+        assertThat(res.getStatus(), equalTo(HttpServletResponse.SC_OK));
+        String response = res.getContentAsString();
+        log.info("Response: {}", response);
+
+        assertTrue(response.contains("<p id=\"p1\">It's 02:03 o'clock"));
+    }
+
+    @Test
+    public void jspWithPageInclude() throws Exception {
+        MockHttpServletRequest req = req(new MockHttpServletRequest(context), "/", "including.jsp");
+        req.setMethod("GET");
+        req.setAttribute("user", new User("Grzegorz"));
+        MockHttpServletResponse res = new MockHttpServletResponse();
+
+        jspServlet.service(req, res);
+
+        assertThat(res.getStatus(), equalTo(HttpServletResponse.SC_OK));
+        String response = res.getContentAsString();
+        log.info("Response: {}", response);
+
+        assertTrue(response.contains("Hello Grzegorz"));
+    }
+
+    @Test
+    public void jspWithTagFiles() throws Exception {
+        MockHttpServletRequest req = req(new MockHttpServletRequest(context), "/", "tagfiles.jsp");
+        req.setMethod("GET");
+        req.setAttribute("user", new User("Grzegorz"));
+        MockHttpServletResponse res = new MockHttpServletResponse();
+
+        jspServlet.service(req, res);
+
+        assertThat(res.getStatus(), equalTo(HttpServletResponse.SC_OK));
+        String response = res.getContentAsString();
+        log.info("Response: {}", response);
+
+        assertTrue(response.contains("<input type=\"text\" name=\"firstName\" value=\"Kun\" maxlength=\"30\" />"));
+        assertTrue(response.contains("<input type=\"text\" name=\"lastName\" value=\"Grzegorz\"  />"));
+
+        req.setAttribute("RO", Boolean.TRUE);
+
+        jspServlet.service(req, res);
+
+        assertThat(res.getStatus(), equalTo(HttpServletResponse.SC_OK));
+        response = res.getContentAsString();
+        log.info("Response: {}", response);
+
+        assertTrue(response.contains("<span style=\"color: blue;\">Kun&#160;</span>"));
+        assertTrue(response.contains("<span style=\"color: blue;\">Grzegorz&#160;</span>"));
     }
 
     private MockHttpServletRequest req(MockHttpServletRequest req, String s, String s1) {

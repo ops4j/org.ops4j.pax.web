@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.ops4j.pax</groupId>
+		<artifactId>web</artifactId>
+		<version>8.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<groupId>org.ops4j.pax.web</groupId>
+	<artifactId>pax-web-tomcat-common</artifactId>
+	<packaging>bundle</packaging>
+
+	<name>OPS4J Pax Web - Tomcat Common</name>
+
+	<description>Pax Web bundle to export packages required by pax-web-jsp and pax-web-tomcat.</description>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Import-Package>
+							javax.naming,
+							javax.net.ssl,
+							javax.xml.parsers,
+							org.xml.sax,
+							org.xml.sax.ext,
+							org.xml.sax.helpers,
+
+							javax.servlet; version="[2.3,5.0)",
+							javax.servlet.annotation; version="[2.3,5.0)",
+							javax.servlet.descriptor; version="[2.3,5.0)",
+							javax.servlet.jsp; version="${dependency.javax.servlet.jsp-api.version}",
+							javax.servlet.jsp.el; version="${dependency.javax.servlet.jsp-api.version}",
+							javax.servlet.jsp.tagext; version="${dependency.javax.servlet.jsp-api.version}",
+
+							<!-- provided by pax-logging-api -->
+							org.apache.juli.logging,
+
+							org.graalvm.nativeimage; resolution:=optional,
+							sun.misc; resolution:=optional
+						</Import-Package>
+						<!--
+							Without empty Private-Package, bndlib warns:
+							The JAR is empty: The instructions for the JAR named
+							org.ops4j.pax.web.pax-web-tomcat-common did not cause any content to be included,
+							this is likely wrong
+						-->
+						<Private-Package />
+						<Export-Package>
+							<!-- tomcat-api -->
+							org.apache.tomcat; version="${dependency.tomcat.version}",
+							<!-- tomcat-util -->
+							org.apache.tomcat.util; version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.buf; version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.codec.binary; version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.collections; version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.compat; version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.file; version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.json; version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.res; version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.security; version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.threads; version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.threads.res; version="${dependency.tomcat.version}",
+							<!-- tomcat-util-scan -->
+							org.apache.tomcat.util.descriptor; version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.descriptor.tagplugin; version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.descriptor.tld; version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.descriptor.web; version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.digester; version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.scan; version="${dependency.tomcat.version}"
+						</Export-Package>
+						<_nouses>true</_nouses>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+
+		<!-- Tomcat -->
+
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-util</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-util-scan</artifactId>
+		</dependency>
+
+	</dependencies>
+
+</project>
