@@ -22,6 +22,7 @@ import java.io.StringWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.UUID;
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -415,6 +416,209 @@ public class EmbeddedJettyTest {
 	}
 
 	@Test
+	public void jettyUrlMapping() throws Exception {
+		Server server = new Server();
+		ServerConnector connector = new ServerConnector(server, 1, 1, new HttpConnectionFactory());
+		connector.setPort(0);
+		server.setConnectors(new Connector[] { connector });
+
+		ContextHandlerCollection chc = new ContextHandlerCollection();
+
+		Servlet servlet = new HttpServlet() {
+			@Override
+			protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				resp.setContentType("text/plain");
+				resp.setCharacterEncoding("UTF-8");
+
+				String response = String.format("| %s | %s | %s |", req.getContextPath(), req.getServletPath(), req.getPathInfo());
+				resp.getWriter().write(response);
+				resp.getWriter().close();
+			}
+		};
+
+		ServletContextHandler handler1 = new ServletContextHandler(chc, "", ServletContextHandler.NO_SESSIONS);
+		handler1.setAllowNullPathInfo(true);
+		handler1.getServletHandler().addServlet(new ServletHolder("default-servlet", servlet));
+		map(handler1, "default-servlet", new String[] {
+				"/p/*",
+				"*.action",
+				"",
+//				"/",
+				"/x"
+		});
+
+		ServletContextHandler handler2 = new ServletContextHandler(chc, "/c1", ServletContextHandler.NO_SESSIONS);
+		handler2.setAllowNullPathInfo(true);
+		handler2.getServletHandler().addServlet(new ServletHolder("default-servlet", servlet));
+		map(handler2, "default-servlet", new String[] {
+				"/p/*",
+				"*.action",
+				"",
+//				"/",
+				"/x"
+		});
+
+		server.setHandler(chc);
+		server.start();
+
+		int port = connector.getLocalPort();
+
+		// Jetty mapping is done in 3 stages:
+		// - host finding:
+		//    - in Jetty, vhost is checked at the level of each handler from the collection
+		//    - org.eclipse.jetty.server.handler.ContextHandler.checkVirtualHost() returns a match based on
+		//      javax.servlet.ServletRequest.getServerName() ("Host" HTTP header)
+		// - context finding:
+		//    - on each handler from the collection, org.eclipse.jetty.server.handler.ContextHandler.checkContextPath()
+		//      is called
+		//    - if there are many ContextHandlers in the collection, it's the collection that first matches
+		//      request URI to a context. Virtual Host seems to be checked later...
+		// - servlet finding:
+		//    - org.eclipse.jetty.servlet.ServletHandler.getMappedServlet() where ServletHandler is a field of
+		//      ServletContextHandler
+
+		String response;
+
+		// ROOT context
+		response = send(connector.getLocalPort(), "/p/anything");
+		assertTrue(response.endsWith("|  | /p | /anything |"));
+		response = send(connector.getLocalPort(), "/anything.action");
+		assertTrue(response.endsWith("|  | /anything.action | null |"));
+		// just can't send `GET  HTTP/1.1` request
+//		response = send(connector.getLocalPort(), "");
+		response = send(connector.getLocalPort(), "/");
+		// Looks like Jetty handle it incorrectly. path info should be "/". Tomcat handles it
+		// according to specification
+//		assertTrue("Special, strange Servlet API 4 mapping rule", response.endsWith("|  |  | / |"));
+		assertTrue("Special, strange Servlet API 4 mapping rule", response.endsWith("|  |  | null |"));
+		response = send(connector.getLocalPort(), "/x");
+		assertTrue(response.endsWith("|  | /x | null |"));
+		response = send(connector.getLocalPort(), "/y");
+		assertTrue(response.contains("HTTP/1.1 404"));
+
+		// ROOT context
+		response = send(connector.getLocalPort(), "/c1/p/anything");
+		assertTrue(response.endsWith("| /c1 | /p | /anything |"));
+		response = send(connector.getLocalPort(), "/c1/anything.action");
+		assertTrue(response.endsWith("| /c1 | /anything.action | null |"));
+		response = send(connector.getLocalPort(), "/c1");
+		// if org.eclipse.jetty.server.handler.ContextHandler.setAllowNullPathInfo(false):
+//		assertTrue(response.contains("HTTP/1.1 302"));
+		// Tomcat returns 404 when not sending (after configuration) a redirect
+//		assertTrue(response.contains("HTTP/1.1 404"));
+		// still, treating as special "" mapping rule, it should be |  |  | / |
+//		assertTrue(response.endsWith("|  |  | / |"));
+		assertTrue(response.endsWith("| /c1 |  | null |"));
+		response = send(connector.getLocalPort(), "/c1/");
+		// Tomcat returns (still incorrectly) | /c1 |  | / |
+//		assertTrue("Special, strange Servlet API 4 mapping rule", response.endsWith("|  |  | / |"));
+		assertTrue("Special, strange Servlet API 4 mapping rule", response.endsWith("| /c1 |  | null |"));
+		response = send(connector.getLocalPort(), "/c1/x");
+		assertTrue(response.endsWith("| /c1 | /x | null |"));
+		response = send(connector.getLocalPort(), "/c1/y");
+		assertTrue(response.contains("HTTP/1.1 404"));
+
+		server.stop();
+		server.join();
+	}
+
+	@Test
+	public void embeddedServerWithServletContextHandlerAddedAfterServerHasStarted() throws Exception {
+		Server server = new Server();
+		ServerConnector connector = new ServerConnector(server, 1, 1, new HttpConnectionFactory());
+		connector.setPort(0);
+		server.setConnectors(new Connector[] { connector });
+
+		ContextHandlerCollection chc = new ContextHandlerCollection();
+
+		ServletContextHandler handler1 = new ServletContextHandler(chc, "/c1", ServletContextHandler.NO_SESSIONS);
+		handler1.addServlet(new ServletHolder("default-servlet", new HttpServlet() {
+			@Override
+			protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				resp.setContentType("text/plain");
+				resp.setCharacterEncoding("UTF-8");
+				resp.getWriter().write("OK1\n");
+				resp.getWriter().close();
+			}
+		}), "/");
+
+		server.setHandler(chc);
+		server.start();
+
+		int port = connector.getLocalPort();
+
+		Socket s1 = new Socket();
+		s1.connect(new InetSocketAddress("127.0.0.1", port));
+
+		s1.getOutputStream().write((
+				"GET /c1/ HTTP/1.1\r\n" +
+				"Host: 127.0.0.1:" + connector.getLocalPort() + "\r\n" +
+				"Connection: close\r\n\r\n").getBytes());
+
+		byte[] buf = new byte[64];
+		int read = -1;
+		StringWriter sw = new StringWriter();
+		while ((read = s1.getInputStream().read(buf)) > 0) {
+			sw.append(new String(buf, 0, read));
+		}
+		s1.close();
+
+		assertTrue(sw.toString().endsWith("\r\n\r\nOK1\n"));
+
+		Socket s2 = new Socket();
+		s2.connect(new InetSocketAddress("127.0.0.1", port));
+
+		s2.getOutputStream().write((
+				"GET /c2/ HTTP/1.1\r\n" +
+				"Host: 127.0.0.1:" + connector.getLocalPort() + "\r\n" +
+				"Connection: close\r\n\r\n").getBytes());
+
+		buf = new byte[64];
+		read = -1;
+		sw = new StringWriter();
+		while ((read = s2.getInputStream().read(buf)) > 0) {
+			sw.append(new String(buf, 0, read));
+		}
+		s2.close();
+
+		assertTrue(sw.toString().contains("HTTP/1.1 404"));
+
+		ServletContextHandler handler2 = new ServletContextHandler(chc, "/c2", ServletContextHandler.NO_SESSIONS);
+		handler2.setAllowNullPathInfo(true);
+		handler2.addServlet(new ServletHolder("default-servlet", new HttpServlet() {
+			@Override
+			protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				resp.setContentType("text/plain");
+				resp.setCharacterEncoding("UTF-8");
+				resp.getWriter().write("OK2\n");
+				resp.getWriter().close();
+			}
+		}), "/");
+		handler2.start();
+
+		Socket s3 = new Socket();
+		s3.connect(new InetSocketAddress("127.0.0.1", port));
+
+		s3.getOutputStream().write((
+				"GET /c2/ HTTP/1.1\r\n" +
+				"Host: 127.0.0.1:" + connector.getLocalPort() + "\r\n" +
+				"Connection: close\r\n\r\n").getBytes());
+
+		buf = new byte[64];
+		read = -1;
+		sw = new StringWriter();
+		while ((read = s3.getInputStream().read(buf)) > 0) {
+			sw.append(new String(buf, 0, read));
+		}
+		s3.close();
+
+		assertTrue(sw.toString().endsWith("\r\n\r\nOK2\n"));
+
+		server.stop();
+		server.join();
+	}
+
+	@Test
 	public void embeddedServerWithWebAppContext() throws Exception {
 		Server server = new Server();
 		ServerConnector connector = new ServerConnector(server, 1, 1, new HttpConnectionFactory());
@@ -559,6 +763,33 @@ public class EmbeddedJettyTest {
 			resp.getWriter().write("OK\n");
 			resp.getWriter().close();
 		}
+	}
+
+	private void map(ServletContextHandler h, String name, String[] uris) {
+		ServletMapping mapping = new ServletMapping();
+		mapping.setServletName(name);
+		mapping.setPathSpecs(uris);
+		h.getServletHandler().addServletMapping(mapping);
+	}
+
+	private String send(int port, String request) throws IOException {
+		Socket s = new Socket();
+		s.connect(new InetSocketAddress("127.0.0.1", port));
+
+		s.getOutputStream().write((
+				"GET " + request + " HTTP/1.1\r\n" +
+				"Host: 127.0.0.1:" + port + "\r\n" +
+				"Connection: close\r\n\r\n").getBytes());
+
+		byte[] buf = new byte[64];
+		int read = -1;
+		StringWriter sw = new StringWriter();
+		while ((read = s.getInputStream().read(buf)) > 0) {
+			sw.append(new String(buf, 0, read));
+		}
+		s.close();
+
+		return sw.toString();
 	}
 
 }

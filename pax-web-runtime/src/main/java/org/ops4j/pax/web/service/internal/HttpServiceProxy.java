@@ -43,10 +43,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * <p>This is the proxy registered as {@link org.osgi.framework.Constants#SCOPE_BUNDLE bundle scoped}
- * {@link org.osgi.framework.ServiceFactory}</p>
+ * {@link org.osgi.framework.ServiceFactory} for {@link org.osgi.service.http.HttpService}.</p>
  * <p>Registered OSGi service should not be <em>replaced</em>, so when bundle will be stopping and
  * {@link org.osgi.framework.BundleContext#ungetService(ServiceReference)} will be called, the actual service
- * will be replaced by <em>stopped</em> service preventing further manipulation (like new servlet registration).</p>
+ * will be replaced by <em>stopped</em> service preventing further manipulation (like new servlet registration).
+ * This is to prevent other (possible) threads to use no longer valid {@link org.osgi.service.http.HttpService}.</p>
  */
 public class HttpServiceProxy implements StoppableHttpService {
 

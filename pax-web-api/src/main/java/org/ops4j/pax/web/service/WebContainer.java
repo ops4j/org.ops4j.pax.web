@@ -36,7 +36,7 @@ import org.osgi.service.http.runtime.dto.RequestInfoDTO;
 import org.osgi.service.http.runtime.dto.RuntimeDTO;
 
 /**
- * <p>This interfaces extends {@link HttpService} defined in OSGi CMPN R7, chapter 102 "Http Service
+ * <p>This interface extends {@link HttpService} defined in OSGi CMPN R7, chapter 102 "Http Service
  * specification".</p>
  * <p>In addition to basic registration methods from {@link HttpService}, here we can register all remaining
  * <em>web components</em> defined in Java Servlet Specification 4:<ul>
