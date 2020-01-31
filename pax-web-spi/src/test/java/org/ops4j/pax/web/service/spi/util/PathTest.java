@@ -16,9 +16,10 @@
  */
 package org.ops4j.pax.web.service.spi.util;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class PathTest {
 
@@ -28,7 +29,7 @@ public class PathTest {
 	 */
 	@Test
 	public void replaceSlashesWithNull() {
-		assertEquals("Replaced", null, Path.replaceSlashes(null));
+		assertNull("Replaced", Path.replaceSlashes(null));
 	}
 
 	/**
@@ -86,8 +87,7 @@ public class PathTest {
 	 */
 	@Test
 	public void replaceSlashes07() {
-		assertEquals("Replaced", "/foo/bar/car/",
-				Path.replaceSlashes("/foo////bar//car//"));
+		assertEquals("Replaced", "/foo/bar/car/", Path.replaceSlashes("/foo////bar//car//"));
 	}
 
 	/**

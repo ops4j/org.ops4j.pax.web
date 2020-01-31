@@ -12,95 +12,111 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  -->
-<metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0">
-	<OCD description="PAX-WEB" name="Pax Web Runtime" id="org.ops4j.pax.web">
-		<AD name="Use NIO" id="org.osgi.service.http.useNIO" required="false" type="String" default="true" />
-		<AD name="Check for X-Forwareded-* headers" id="org.osgi.service.http.checkForwardedHeaders" required="false" type="String" default="false" />
-		<AD name="HTTP Port"  id="org.osgi.service.http.port" required="true" type="String" default="8080"/>
-		<AD name="HTTP Connector Name"   id="org.osgi.service.http.connector.name" required="true" type="String" default="default"/>
-		<AD name="HTTP Port Secure" id="org.osgi.service.http.port.secure" required="false" type="String" default="8443" />
-		<AD name="HTTP Secure Connector Name" id="org.osgi.service.http.secure.connector.name" required="false" type="String" default="secureDefault"/>
-		<AD name="HTTP enabled" id="org.osgi.service.http.enabled" required="false" type="String" default="true"/>
-		<AD name="HTTP Secure enabled" id="org.osgi.service.http.secure.enabled" required="false" type="String" default="false"/>
-		<AD name="Temp dir" id="javax.servlet.context.tempdir" required="false" type="String" default=""/>
-		<AD name="Session Timeout" id="org.ops4j.pax.web.session.timeout" type="String" default="5" />
-		<AD name="Listening Addresses" id="org.ops4j.pax.web.listening.addresses" type="String" default="0.0.0.0" />
-		<AD name="Session cookie name" id="org.ops4j.pax.web.session.cookie" type="String" default="JSESSIONID"/>
-		<AD name="Session cookie domain" id="org.ops4j.pax.web.session.domain" type="String" default=""/>
-		<AD name="Session cookie path" id="org.ops4j.pax.web.session.path" type="String" default=""/>
-		<AD name="Session URL" id="org.ops4j.pax.web.session.url" type="String" default="jsessionid"/>
-        <AD name="Session cookie HttpOnly" id="org.ops4j.pax.web.session.cookie.httpOnly" type="String" default="true" />
-        <AD name="Session cookie secure" id="org.ops4j.pax.web.session.cookie.secure" type="String" default="false" />
-        <AD name="Session lazy load" id="org.ops4j.pax.web.session.lazyload" type="String" default="false" />
-        <AD name="Session store directory" id="org.ops4j.pax.web.session.storedirectory" type="String" default="" />
-        <AD name="worker name" id="org.ops4j.pax.web.worker.name" type="String" default=""/>
-		<AD name="SSL Keystore" id="org.ops4j.pax.web.ssl.keystore" type="String" default=".keystore"/>
-		<AD name="Keystore Type" id="org.ops4j.pax.web.ssl.keystore.type" type="String" default="" />
-		<AD name="Keystore Integrity Password (deprecated, use org.ops4j.pax.web.ssl.keystore.password instead)"
-			id="org.ops4j.pax.web.ssl.password" type="String" default="" />
-		<AD name="Keystore Password" id="org.ops4j.pax.web.ssl.keystore.password" type="String" default="" />
-		<AD name="Keystore Private Key Entry Alias" id="org.ops4j.pax.web.ssl.key.alias" type="String" default="" />
-		<AD name="Keystore Password (deprecated, use org.ops4j.pax.web.ssl.key.password instead)"
-			id="org.ops4j.pax.web.ssl.keypassword" type="String" default="" />
-		<AD name="Keystore Private Key Entry Password" id="org.ops4j.pax.web.ssl.key.password" type="String" default="" />
-		<AD name="SSL Truststore" id="org.ops4j.pax.web.ssl.truststore" type="String" default="" />
-		<AD name="Truststore Password" id="org.ops4j.pax.web.ssl.truststore.password" type="String" default="" />
-		<AD name="Truststore Type" id="org.ops4j.pax.web.ssl.truststore.type" type="String" default="" />
-		<AD name="Client Authentication Wanted" id="org.ops4j.pax.web.ssl.clientauthwanted"	type="String" default="false" />
-		<AD name="Client Authentication Needed" id="org.ops4j.pax.web.ssl.clientauthneeded" type="String" default="false" />
-		<AD name="Included SSL/TLS Cipher Suites Regular Expressions" id="org.ops4j.pax.web.ssl.ciphersuites.included" type="String" default="" />
-		<AD name="Excluded SSL/TLS Cipher Suites Regular Expressions" id="org.ops4j.pax.web.ssl.ciphersuites.excluded" type="String" default="" />
-		<AD name="Included SSL/TLS Protocols" id="org.ops4j.pax.web.ssl.protocols.included" type="String" default="" />
-		<AD name="Excluded SSL/TLS Protocols" id="org.ops4j.pax.web.ssl.protocols.excluded" type="String" default="" />
-		<AD name="SSL Renegotiation allowed" id="org.ops4j.pax.web.ssl.renegotiationAllowed" required="false" type="String" default="true" />
-		<AD name="Configuration File for Jetty" id="org.ops4j.pax.web.config.file" type="String" default=""/>
-		<AD name="JSP scratchdir" id="org.ops4j.pax.web.jsp.scratch.dir" type="String" default="" />
-		<AD name="JSP checkInterval" id="org.ops4j.pax.web.jsp.check.interval" type="String" default="300" />
-		<AD name="JSP classdebuginfo" id="org.ops4j.pax.web.jsp.debug.info" type="String" default="true" />
-		<AD name="JSP development" id="org.ops4j.pax.web.jsp.development" type="String" default="true" />
-		<AD name="JSP enablePooling" id="org.ops4j.pax.web.jsp.enable.pooling" type="String" default="true" />
-		<AD name="JSP ieClassId" id="org.ops4j.pax.web.jsp.ie.classid" type="String" default="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" />
-		<AD name="JSP javaEncoding" id="org.ops4j.pax.web.jsp.java.encoding" type="String" default="UTF-8" />
-		<AD name="JSP keepgenerated" id="org.ops4j.pax.web.jsp.keep.generated" type="String" default="true" />
-		<AD name="JSP logVerbosityLevel" id="org.ops4j.pax.web.jsp.log.verbosity.level" type="String" default="WARNING" />
-		<AD name="JSP mappedfile" id="org.ops4j.pax.web.jsp.mapped.file" type="String" default="false" />
-		<AD name="JSP tagpoolMaxSize" id="org.ops4j.pax.web.jsp.tagpool.max.size" type="String" default="5" />
-        <AD name="JSP usePrecompiled" id="org.ops4j.pax.web.jsp.precompilation" type="String" default="false" />
-        <AD name="NCSA Log Format Enable" id="org.ops4j.pax.web.log.ncsa.enabled" type="String" default="false" />
-        <AD name="NCSA Log Format" id="org.ops4j.pax.web.log.ncsa.format" type="String" default="yyyy_mm_dd.request.log" />
-        <AD name="NCSA Log RetainDays" id="org.ops4j.pax.web.log.ncsa.retaindays" type="String" default="90" />
-        <AD name="NCSA Log Append" id="org.ops4j.pax.web.log.ncsa.append" type="String" default="true" />
-        <AD name="NCSA Log Expended" id="org.ops4j.pax.web.log.ncsa.extended" type="String" default="true" />
-        <AD name="NCSA Log Dispatch" id="org.ops4j.pax.web.log.ncsa.dispatch" type="String" default="false" />
-        <AD name="NCSA Log Time Zone" id="org.ops4j.pax.web.log.ncsa.logtimezone" type="String" default="GMT" />
-        <AD name="NCSA Log Directory" id="org.ops4j.pax.web.log.ncsa.directory" type="String" default="" />
-        <AD name="NCSA Log Dispatch" id="org.ops4j.pax.web.log.ncsa.latency" type="String" default="false" />
-        <AD name="NCSA Log Dispatch" id="org.ops4j.pax.web.log.ncsa.cookies" type="String" default="false" />
-        <AD name="NCSA Log Dispatch" id="org.ops4j.pax.web.log.ncsa.server" type="String" default="false" />
-        <AD name="Default Virtual Hosts" id="org.ops4j.pax.web.default.virtualhosts" required="false" type="String" default="" />
-        <AD name="Default Connectors" id="org.ops4j.pax.web.default.connectors" required="false" type="String" default="" />
-        <AD name="Server MaxThreads" id="org.ops4j.pax.web.server.maxThreads" required="false" type="String" default="" />
-        <AD name="Server MinThreads" id="org.ops4j.pax.web.server.minThreads" required="false" type="String" default="" />
-        <AD name="Server Idle Timeout" id="org.ops4j.pax.web.server.idleTimeout" required="false" type="String" default="" />
-		<AD name="Server Connector Idle Timeout" id="org.ops4j.pax.web.server.connector.idleTimeout" required="false" type="String" default=""/>
+<metatype:MetaData
+		xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.4.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.osgi.org/xmlns/metatype/v1.4.0 https://osgi.org/xmlns/metatype/v1.4.0/metatype.xsd">
 
-        <AD name="CRL Path" id="org.ops4j.pax.web.crlPath" type="String" default="" />
-        <AD name="Enable CRLDP" id="org.ops4j.pax.web.enableCRLDP"     type="String" default="false" />
-        <AD name="Validate Certs " id="org.ops4j.pax.web.validateCerts"     type="String" default="false" />
-        <AD name="Validate Peer Certs" id="org.ops4j.pax.web.validatePeerCerts"     type="String" default="false" />
-        <AD name="OCSP Responder URL" id="org.ops4j.pax.web.ocspResponderURL" type="String" default="" />
-        <AD name="Enable OCSP" id="org.ops4j.pax.web.enableOCSP"     type="String" default="false" />
-        <AD name="Enable Encrypted password" id="org.ops4j.pax.web.enc.enabled"     type="String" default="false" />
-        <AD name="Master Password for Encrypted password" id="org.ops4j.pax.web.enc.masterpassword"     type="String" default="" />
-        <AD name="Algorithm for Encrypted password" id="org.ops4j.pax.web.enc.algorithm"     type="String" default="PBEWithMD5AndDES" />
-        <AD name="Prefix for Encrypted password" id="org.ops4j.pax.web.enc.prefix"     type="String" default="ENC(" />
-        <AD name="Suffix for Encrypted password" id="org.ops4j.pax.web.enc.suffix"     type="String" default=")" /> 
-        <AD name="Default Auth" id="org.ops4j.pax.web.default.authmethod" required="false" type="String" default=""/>
-        <AD name="Default Realm" id="org.ops4j.pax.web.default.realmname" required="false" type="String" default=""/>
-		<AD name="Display stack trace when error occurs" id="org.ops4j.pax.web.server.showStacks" required="false" type="Boolean" default="true"/>
-	</OCD>
+	<!-- Association between PID and defined OCD -->
 	<Designate pid="org.ops4j.pax.web">
-        <Object ocdref="org.ops4j.pax.web"/>
-    </Designate>
-	
+		<Object ocdref="org.ops4j.pax.web" />
+	</Designate>
+
+	<!-- Definition of "Pax Web Runtime" object - all supported properties -->
+	<OCD description="PAX-WEB" name="Pax Web Runtime" id="org.ops4j.pax.web">
+
+		<!-- Properties for entire Web server -->
+		<AD id="javax.servlet.context.tempdir" required="false" type="String" default="${java.io.tmpdir}"
+				name="Temp dir" description="Temporary directory for entire Pax Web runtime. Each servlet context should have own unique directory." />
+
+		<!-- Properties related to Security/SSL/TLS -->
+		<!-- Properties related to JSP -->
+		<!-- Properties related to Sessions -->
+		<!-- Properties related to Logging -->
+
+<!--		<AD name="Use NIO" id="org.osgi.service.http.useNIO" required="false" type="String" default="true" />-->
+<!--		<AD name="Check for X-Forwareded-* headers" id="org.osgi.service.http.checkForwardedHeaders" required="false" type="String" default="false" />-->
+<!--		<AD name="HTTP Port" id="org.osgi.service.http.port" required="true" type="String" default="8080" />-->
+<!--		<AD name="HTTP Connector Name" id="org.osgi.service.http.connector.name" required="true" type="String" default="default" />-->
+<!--		<AD name="HTTP Port Secure" id="org.osgi.service.http.port.secure" required="false" type="String" default="8443" />-->
+<!--		<AD name="HTTP Secure Connector Name" id="org.osgi.service.http.secure.connector.name" required="false" type="String" default="secureDefault" />-->
+<!--		<AD name="HTTP enabled" id="org.osgi.service.http.enabled" required="false" type="String" default="true" />-->
+<!--		<AD name="HTTP Secure enabled" id="org.osgi.service.http.secure.enabled" required="false" type="String" default="false" />-->
+<!--		<AD name="Session Timeout" id="org.ops4j.pax.web.session.timeout" type="String" default="5" />-->
+<!--		<AD name="Listening Addresses" id="org.ops4j.pax.web.listening.addresses" type="String" default="0.0.0.0" />-->
+<!--		<AD name="Session cookie name" id="org.ops4j.pax.web.session.cookie" type="String" default="JSESSIONID" />-->
+<!--		<AD name="Session cookie domain" id="org.ops4j.pax.web.session.domain" type="String" default="" />-->
+<!--		<AD name="Session cookie path" id="org.ops4j.pax.web.session.path" type="String" default="" />-->
+<!--		<AD name="Session URL" id="org.ops4j.pax.web.session.url" type="String" default="jsessionid" />-->
+<!--		<AD name="Session cookie HttpOnly" id="org.ops4j.pax.web.session.cookie.httpOnly" type="String" default="true" />-->
+<!--		<AD name="Session cookie secure" id="org.ops4j.pax.web.session.cookie.secure" type="String" default="false" />-->
+<!--		<AD name="Session lazy load" id="org.ops4j.pax.web.session.lazyload" type="String" default="false" />-->
+<!--		<AD name="Session store directory" id="org.ops4j.pax.web.session.storedirectory" type="String" default="" />-->
+<!--		<AD name="worker name" id="org.ops4j.pax.web.worker.name" type="String" default="" />-->
+<!--		<AD name="SSL Keystore" id="org.ops4j.pax.web.ssl.keystore" type="String" default=".keystore" />-->
+<!--		<AD name="Keystore Type" id="org.ops4j.pax.web.ssl.keystore.type" type="String" default="" />-->
+<!--		<AD name="Keystore Integrity Password (deprecated, use org.ops4j.pax.web.ssl.keystore.password instead)"-->
+<!--				id="org.ops4j.pax.web.ssl.password" type="String" default="" />-->
+<!--		<AD name="Keystore Password" id="org.ops4j.pax.web.ssl.keystore.password" type="String" default="" />-->
+<!--		<AD name="Keystore Private Key Entry Alias" id="org.ops4j.pax.web.ssl.key.alias" type="String" default="" />-->
+<!--		<AD name="Keystore Password (deprecated, use org.ops4j.pax.web.ssl.key.password instead)"-->
+<!--				id="org.ops4j.pax.web.ssl.keypassword" type="String" default="" />-->
+<!--		<AD name="Keystore Private Key Entry Password" id="org.ops4j.pax.web.ssl.key.password" type="String" default="" />-->
+<!--		<AD name="SSL Truststore" id="org.ops4j.pax.web.ssl.truststore" type="String" default="" />-->
+<!--		<AD name="Truststore Password" id="org.ops4j.pax.web.ssl.truststore.password" type="String" default="" />-->
+<!--		<AD name="Truststore Type" id="org.ops4j.pax.web.ssl.truststore.type" type="String" default="" />-->
+<!--		<AD name="Client Authentication Wanted" id="org.ops4j.pax.web.ssl.clientauthwanted" type="String" default="false" />-->
+<!--		<AD name="Client Authentication Needed" id="org.ops4j.pax.web.ssl.clientauthneeded" type="String" default="false" />-->
+<!--		<AD name="Included SSL/TLS Cipher Suites Regular Expressions" id="org.ops4j.pax.web.ssl.ciphersuites.included" type="String" default="" />-->
+<!--		<AD name="Excluded SSL/TLS Cipher Suites Regular Expressions" id="org.ops4j.pax.web.ssl.ciphersuites.excluded" type="String" default="" />-->
+<!--		<AD name="Included SSL/TLS Protocols" id="org.ops4j.pax.web.ssl.protocols.included" type="String" default="" />-->
+<!--		<AD name="Excluded SSL/TLS Protocols" id="org.ops4j.pax.web.ssl.protocols.excluded" type="String" default="" />-->
+<!--		<AD name="SSL Renegotiation allowed" id="org.ops4j.pax.web.ssl.renegotiationAllowed" required="false" type="String" default="true" />-->
+<!--		<AD name="Configuration File for Jetty" id="org.ops4j.pax.web.config.file" type="String" default="" />-->
+<!--		<AD name="JSP scratchdir" id="org.ops4j.pax.web.jsp.scratch.dir" type="String" default="" />-->
+<!--		<AD name="JSP checkInterval" id="org.ops4j.pax.web.jsp.check.interval" type="String" default="300" />-->
+<!--		<AD name="JSP classdebuginfo" id="org.ops4j.pax.web.jsp.debug.info" type="String" default="true" />-->
+<!--		<AD name="JSP development" id="org.ops4j.pax.web.jsp.development" type="String" default="true" />-->
+<!--		<AD name="JSP enablePooling" id="org.ops4j.pax.web.jsp.enable.pooling" type="String" default="true" />-->
+<!--		<AD name="JSP ieClassId" id="org.ops4j.pax.web.jsp.ie.classid" type="String" default="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" />-->
+<!--		<AD name="JSP javaEncoding" id="org.ops4j.pax.web.jsp.java.encoding" type="String" default="UTF-8" />-->
+<!--		<AD name="JSP keepgenerated" id="org.ops4j.pax.web.jsp.keep.generated" type="String" default="true" />-->
+<!--		<AD name="JSP logVerbosityLevel" id="org.ops4j.pax.web.jsp.log.verbosity.level" type="String" default="WARNING" />-->
+<!--		<AD name="JSP mappedfile" id="org.ops4j.pax.web.jsp.mapped.file" type="String" default="false" />-->
+<!--		<AD name="JSP tagpoolMaxSize" id="org.ops4j.pax.web.jsp.tagpool.max.size" type="String" default="5" />-->
+<!--		<AD name="JSP usePrecompiled" id="org.ops4j.pax.web.jsp.precompilation" type="String" default="false" />-->
+<!--		<AD name="NCSA Log Format Enable" id="org.ops4j.pax.web.log.ncsa.enabled" type="String" default="false" />-->
+<!--		<AD name="NCSA Log Format" id="org.ops4j.pax.web.log.ncsa.format" type="String" default="yyyy_mm_dd.request.log" />-->
+<!--		<AD name="NCSA Log RetainDays" id="org.ops4j.pax.web.log.ncsa.retaindays" type="String" default="90" />-->
+<!--		<AD name="NCSA Log Append" id="org.ops4j.pax.web.log.ncsa.append" type="String" default="true" />-->
+<!--		<AD name="NCSA Log Expended" id="org.ops4j.pax.web.log.ncsa.extended" type="String" default="true" />-->
+<!--		<AD name="NCSA Log Dispatch" id="org.ops4j.pax.web.log.ncsa.dispatch" type="String" default="false" />-->
+<!--		<AD name="NCSA Log Time Zone" id="org.ops4j.pax.web.log.ncsa.logtimezone" type="String" default="GMT" />-->
+<!--		<AD name="NCSA Log Directory" id="org.ops4j.pax.web.log.ncsa.directory" type="String" default="" />-->
+<!--		<AD name="NCSA Log Dispatch" id="org.ops4j.pax.web.log.ncsa.latency" type="String" default="false" />-->
+<!--		<AD name="NCSA Log Dispatch" id="org.ops4j.pax.web.log.ncsa.cookies" type="String" default="false" />-->
+<!--		<AD name="NCSA Log Dispatch" id="org.ops4j.pax.web.log.ncsa.server" type="String" default="false" />-->
+<!--		<AD name="Default Virtual Hosts" id="org.ops4j.pax.web.default.virtualhosts" required="false" type="String" default="" />-->
+<!--		<AD name="Default Connectors" id="org.ops4j.pax.web.default.connectors" required="false" type="String" default="" />-->
+<!--		<AD name="Server MaxThreads" id="org.ops4j.pax.web.server.maxThreads" required="false" type="String" default="" />-->
+<!--		<AD name="Server MinThreads" id="org.ops4j.pax.web.server.minThreads" required="false" type="String" default="" />-->
+<!--		<AD name="Server Idle Timeout" id="org.ops4j.pax.web.server.idleTimeout" required="false" type="String" default="" />-->
+<!--		<AD name="Server Connector Idle Timeout" id="org.ops4j.pax.web.server.connector.idleTimeout" required="false" type="String" default="" />-->
+
+<!--		<AD name="CRL Path" id="org.ops4j.pax.web.crlPath" type="String" default="" />-->
+<!--		<AD name="Enable CRLDP" id="org.ops4j.pax.web.enableCRLDP" type="String" default="false" />-->
+<!--		<AD name="Validate Certs " id="org.ops4j.pax.web.validateCerts" type="String" default="false" />-->
+<!--		<AD name="Validate Peer Certs" id="org.ops4j.pax.web.validatePeerCerts" type="String" default="false" />-->
+<!--		<AD name="OCSP Responder URL" id="org.ops4j.pax.web.ocspResponderURL" type="String" default="" />-->
+<!--		<AD name="Enable OCSP" id="org.ops4j.pax.web.enableOCSP" type="String" default="false" />-->
+<!--		<AD name="Enable Encrypted password" id="org.ops4j.pax.web.enc.enabled" type="String" default="false" />-->
+<!--		<AD name="Master Password for Encrypted password" id="org.ops4j.pax.web.enc.masterpassword" type="String" default="" />-->
+<!--		<AD name="Algorithm for Encrypted password" id="org.ops4j.pax.web.enc.algorithm" type="String" default="PBEWithMD5AndDES" />-->
+<!--		<AD name="Prefix for Encrypted password" id="org.ops4j.pax.web.enc.prefix" type="String" default="ENC(" />-->
+<!--		<AD name="Suffix for Encrypted password" id="org.ops4j.pax.web.enc.suffix" type="String" default=")" />-->
+<!--		<AD name="Default Auth" id="org.ops4j.pax.web.default.authmethod" required="false" type="String" default="" />-->
+<!--		<AD name="Default Realm" id="org.ops4j.pax.web.default.realmname" required="false" type="String" default="" />-->
+<!--		<AD name="Display stack trace when error occurs" id="org.ops4j.pax.web.server.showStacks" required="false" type="Boolean" default="true" />-->
+	</OCD>
+
 </metatype:MetaData>

@@ -22,6 +22,7 @@ package org.ops4j.pax.web.service.internal.util;
  */
 @SuppressWarnings("ConstantConditions")
 public class SupportUtils {
+
 	private SupportUtils() {
 		// utils class
 	}
@@ -40,17 +41,26 @@ public class SupportUtils {
 		}
 	}
 
+	public static boolean isConfigurationAdminAvailable() {
+		try {
+			SupportUtils.class.getClassLoader().loadClass("org.osgi.service.cm.ConfigurationAdmin");
+			return true;
+		} catch (ClassNotFoundException e) {
+			return false;
+		}
+	}
+
 	/**
 	 * Verify if jsp support is available.
 	 *
 	 * @return true if WebContainer is available
 	 */
 	public static boolean isJSPAvailable() {
-		try {
-			return (org.ops4j.pax.web.jsp.JspServletWrapper.class != null);
-		} catch (NoClassDefFoundError ignore) {
+//		try {
+//			return (org.ops4j.pax.web.jsp.JspServletWrapper.class != null);
+//		} catch (NoClassDefFoundError ignore) {
 			return false;
-		}
+//		}
 	}
 
 	/**
@@ -80,4 +90,20 @@ public class SupportUtils {
 			return false;
 		}
 	}
+
+	/**
+	 * Check if {@link org.osgi.service.log.LogService} is available
+	 *
+	 * @return <code>true</code> if LogService class can be loaded,
+	 * <code>false</code> otherwhise
+	 */
+	public static boolean isLogServiceAvailable2() {
+		try {
+			SupportUtils.class.getClassLoader().loadClass(org.osgi.service.log.LogService.class.getName());
+			return true;
+		} catch (ClassNotFoundException ignore) {
+			return false;
+		}
+	}
+
 }

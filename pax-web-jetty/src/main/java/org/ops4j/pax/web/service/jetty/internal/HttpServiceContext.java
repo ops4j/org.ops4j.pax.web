@@ -61,7 +61,7 @@ import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
-import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.jetty.internal.util.DOMJettyWebXmlParser;
 import org.osgi.framework.Bundle;
@@ -390,10 +390,10 @@ class HttpServiceContext extends ServletContextHandler {
 	protected void startContext() throws Exception {
 		super.startContext();
 		LOG.debug("Registering ServletContext as service. ");
-		BundleContext bundleContext = (BundleContext) this.attributes.get(WebContainerConstants.BUNDLE_CONTEXT_ATTRIBUTE);
+		BundleContext bundleContext = (BundleContext) this.attributes.get(PaxWebConstants.BUNDLE_CONTEXT_ATTRIBUTE);
 		Bundle bundle = bundleContext.getBundle();
 		Dictionary<String, String> properties = new Hashtable<>();
-		properties.put(WebContainerConstants.PROPERTY_SYMBOLIC_NAME, bundle.getSymbolicName());
+		properties.put(PaxWebConstants.PROPERTY_SYMBOLIC_NAME, bundle.getSymbolicName());
 
 		Dictionary<?, ?> headers = bundle.getHeaders();
 		String version = (String) headers
@@ -406,12 +406,12 @@ class HttpServiceContext extends ServletContextHandler {
 		if (webContextPath != null && !webContextPath.startsWith("/")) {
 			webContextPath = "/" + webContextPath;
 		} else if (webContextPath == null) {
-			LOG.warn(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH +
+			LOG.warn(PaxWebConstants.PROPERTY_SERVLETCONTEXT_PATH +
 					" couldn't be set, it's not configured. Assuming '/'");
 			webContextPath = "/";
 		}
-		properties.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
-		properties.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME, getServletContext().getServletContextName());
+		properties.put(PaxWebConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
+		properties.put(PaxWebConstants.PROPERTY_SERVLETCONTEXT_NAME, getServletContext().getServletContextName());
 
 		registerService(bundleContext, properties);
 		LOG.debug("ServletContext registered as service. ");

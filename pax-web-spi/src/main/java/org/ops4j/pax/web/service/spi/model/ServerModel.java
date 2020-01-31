@@ -41,16 +41,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Holds web elements in a global context accross all services (all bundles
- * using the Http Service).
+ * <p>Holds web elements in a global context accross all services (all bundles using the Http Service).</p>
+ * <p>This model represents entire web server and holds all web components (servlets, filters, mappings, ...) for
+ * quick access. This allows to resolve conflicts, when e.g., two different bundles (by default operating on separate
+ * <em>servlet contexts</em>) want to register servlets using the same alias / URL mapping.</p>
  *
  * @author Alin Dreghiciu
  */
 public class ServerModel {
 
-	/**
-	 * Logger.
-	 */
 	private static final Logger LOG = LoggerFactory.getLogger(ServerModel.class);
 
     /**

@@ -46,7 +46,7 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.valves.AccessLogValve;
 import org.apache.tomcat.util.digester.Digester;
 import org.ops4j.pax.web.service.WebContainerContext;
-import org.ops4j.pax.web.service.spi.Configuration;
+import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
@@ -189,12 +189,12 @@ public class EmbeddedTomcat extends Tomcat {
 		Digester digester = new FakeCatalina().createStartDigester();
 		digester.push(this);
 
-		URL tomcatResource = configuration.getConfigurationURL();
+		URL tomcatResource = configuration.server().getConfigurationURL();
 		if (tomcatResource == null) {
 			tomcatResource = getClass().getResource("/tomcat-server.xml");
 		}
 
-		configurationDir = configuration.getConfigurationDir();
+		configurationDir = configuration.server().getConfigurationDir();
 		File configurationFile = new File(configurationDir,
 				SERVER_CONFIG_FILE_NAME);
 		if (configurationFile.exists()) {
@@ -239,20 +239,20 @@ public class EmbeddedTomcat extends Tomcat {
 		LOG.debug("Start merging configuration");
 		Connector httpConnector = null;
 		Connector httpSecureConnector = null;
-        String[] addresses = configuration.getListeningAddresses();
+        String[] addresses = configuration.server().getListeningAddresses();
         if (addresses == null || addresses.length == 0) {
             addresses = new String[]{null};
         }
 
 		// Fix for PAXWEB-193
-		configurationSessionTimeout = configuration.getSessionTimeout();
-		configurationSessionCookie = configuration.getSessionCookie();
-		configurationSessionCookieMaxAge = configuration.getSessionCookieMaxAge();
+		configurationSessionTimeout = configuration.session().getSessionTimeout();
+		configurationSessionCookie = configuration.session().getSessionCookie();
+		configurationSessionCookieMaxAge = configuration.session().getSessionCookieMaxAge();
 		configurationSessionCookieHttpOnly = configuration
-				.getSessionCookieHttpOnly();
+				.session().getSessionCookieHttpOnly();
 
 		// NCSA Logger --> AccessLogValve
-		if (configuration.isLogNCSAFormatEnabled()) {
+		if (configuration.logging().isLogNCSAFormatEnabled()) {
 			AccessLog ncsaLogger = new AccessLogValve();
 			boolean modifiedValve = false;
 			for (Valve valve : getHost().getPipeline().getValves()) {
@@ -264,19 +264,19 @@ public class EmbeddedTomcat extends Tomcat {
 
 			((AccessLogValve) ncsaLogger).setPattern("common");
 			((AccessLogValve) ncsaLogger).setDirectory(configuration
-					.getLogNCSADirectory());
+					.logging().getLogNCSADirectory());
 			((AccessLogValve) ncsaLogger).setSuffix(".log"); // ncsaLogge
 			if (!modifiedValve) {
 				getHost().getPipeline().addValve((Valve) ncsaLogger);
 			}
 		}
 
-		Integer httpPort = configuration.getHttpPort();
-		Integer httpSecurePort = configuration.getHttpSecurePort();
-		Integer idleTimeout = configuration.getConnectorIdleTimeout();
+		Integer httpPort = configuration.server().getHttpPort();
+		Integer httpSecurePort = configuration.server().getHttpSecurePort();
+		Integer idleTimeout = configuration.server().getConnectorIdleTimeout();
 
         for (String address : addresses) {
-            if (configuration.isHttpEnabled()) {
+            if (configuration.server().isHttpEnabled()) {
                 LOG.debug("HttpEnabled");
                 Connector[] connectors = getService().findConnectors();
                 boolean masterConnectorFound = false;
@@ -326,9 +326,9 @@ public class EmbeddedTomcat extends Tomcat {
                     }
                 }
             }
-            if (configuration.isHttpSecureEnabled()) {
-                final String sslPassword = configuration.getSslKeystorePassword();
-                final String sslKeyPassword = configuration.getSslKeyPassword();
+            if (configuration.server().isHttpSecureEnabled()) {
+                final String sslPassword = configuration.security().getSslKeystorePassword();
+                final String sslKeyPassword = configuration.security().getSslKeyPassword();
 
                 Connector[] connectors = getService().findConnectors();
                 boolean masterSSLConnectorFound = false;
@@ -392,17 +392,17 @@ public class EmbeddedTomcat extends Tomcat {
             secureConnector.setProperty("SSLEnabled", "true");
 
             secureConnector.setProperty("keystoreFile",
-            		configuration.getSslKeystore());
+            		configuration.security().getSslKeystore());
             secureConnector.setProperty("keystorePass",
-            		configuration.getSslKeyPassword());
+            		configuration.security().getSslKeyPassword());
             secureConnector.setProperty("clientAuth", "false");
             secureConnector.setProperty("sslProtocol", "TLS");
 
-            if (configuration.getServerMaxThreads() != null) {
-            	secureConnector.setAttribute("maxThreads", configuration.getServerMaxThreads());
+            if (configuration.server().getServerMaxThreads() != null) {
+            	secureConnector.setAttribute("maxThreads", configuration.server().getServerMaxThreads());
             }
-            if (configuration.getServerMinThreads() != null) {
-            	secureConnector.setAttribute("minSpareThreads", configuration.getServerMinThreads());
+            if (configuration.server().getServerMinThreads() != null) {
+            	secureConnector.setAttribute("minSpareThreads", configuration.server().getServerMinThreads());
             }
 
             if (address != null) {
@@ -423,15 +423,15 @@ public class EmbeddedTomcat extends Tomcat {
         LOG.debug("Configuring connector {}", connector);
         connector.setScheme("http");
         connector.setPort(httpPort);
-        if (configuration.isHttpSecureEnabled()) {
-        	connector.setRedirectPort(configuration.getHttpSecurePort());
+        if (configuration.server().isHttpSecureEnabled()) {
+        	connector.setRedirectPort(configuration.server().getHttpSecurePort());
         }
 
-        if (configuration.getServerMaxThreads() != null) {
-        	connector.setAttribute("maxThreads", configuration.getServerMaxThreads());
+        if (configuration.server().getServerMaxThreads() != null) {
+        	connector.setAttribute("maxThreads", configuration.server().getServerMaxThreads());
         }
-        if (configuration.getServerMinThreads() != null) {
-        	connector.setAttribute("minSpareThreads", configuration.getServerMinThreads());
+        if (configuration.server().getServerMinThreads() != null) {
+        	connector.setAttribute("minSpareThreads", configuration.server().getServerMinThreads());
         }
 
         if (address != null) {
@@ -449,7 +449,7 @@ public class EmbeddedTomcat extends Tomcat {
 
 	private void initBaseDir(Configuration configuration) {
 		if (System.getProperty(Globals.CATALINA_HOME_PROP) == null) {
-			setBaseDir(configuration.getTemporaryDirectory().getAbsolutePath());
+			setBaseDir(configuration.server().getTemporaryDirectory().getAbsolutePath());
 		}
 		initBaseDir();
 	}

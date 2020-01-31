@@ -16,51 +16,38 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import org.junit.Before;
-import org.junit.Test;
 import org.osgi.framework.Bundle;
 
 public class DefaultHttpContextTest {
 
 	private Bundle bundle;
 	private DefaultHttpContext contextUnderTest;
-
-	@Before
-	public void setUp() {
-		bundle = createMock(Bundle.class);
-		contextUnderTest = new DefaultHttpContext(bundle, null);
-	}
-
-	@Test
-	public void handleSecurity() throws IOException {
-		// always returns true, request and response does not matter
-		assertTrue(contextUnderTest.handleSecurity(null, null));
-	}
-
-	@Test
-	public void getMimeType() {
-		// always returns null, name does not matter
-		assertEquals(null, contextUnderTest.getMimeType(null));
-	}
-
-	@Test
-	public void getResource() throws MalformedURLException {
-		URL url = new URL("file://");
-		expect(bundle.getResource("test")).andReturn(url);
-		replay(bundle);
-		contextUnderTest.getResource("test");
-		verify(bundle);
-	}
+//
+//	@Before
+//	public void setUp() {
+//		bundle = createMock(Bundle.class);
+//		contextUnderTest = new DefaultHttpContext(bundle, null);
+//	}
+//
+//	@Test
+//	public void handleSecurity() throws IOException {
+//		// always returns true, request and response does not matter
+//		assertTrue(contextUnderTest.handleSecurity(null, null));
+//	}
+//
+//	@Test
+//	public void getMimeType() {
+//		// always returns null, name does not matter
+//		assertEquals(null, contextUnderTest.getMimeType(null));
+//	}
+//
+//	@Test
+//	public void getResource() throws MalformedURLException {
+//		URL url = new URL("file://");
+//		expect(bundle.getResource("test")).andReturn(url);
+//		replay(bundle);
+//		contextUnderTest.getResource("test");
+//		verify(bundle);
+//	}
 
 }

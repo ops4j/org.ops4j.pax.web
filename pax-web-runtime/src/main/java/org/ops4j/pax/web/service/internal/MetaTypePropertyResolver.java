@@ -17,7 +17,6 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Dictionary;
@@ -37,19 +36,19 @@ import org.xml.sax.SAXException;
  * @author Alin Dreghiciu
  * @since 0.3.0 January 23, 2008
  */
-class DefaultPropertyResolver extends DictionaryPropertyResolver {
+class MetaTypePropertyResolver extends DictionaryPropertyResolver {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DefaultPropertyResolver.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MetaTypePropertyResolver.class);
 	private static final String METATYPE = "OSGI-INF/metatype/metatype.xml";
 
-	public DefaultPropertyResolver() {
+	public MetaTypePropertyResolver() {
 		super(getDefaltProperties());
 	}
 
 	private static Dictionary<String, String> getDefaltProperties() {
 		Dictionary<String, String> properties = new Hashtable<>();
 
-		try (InputStream stream = DefaultPropertyResolver.class.getClassLoader().getResourceAsStream(METATYPE)) {
+		try (InputStream stream = MetaTypePropertyResolver.class.getClassLoader().getResourceAsStream(METATYPE)) {
 			Element rootElement = ElementHelper.getRootElement(stream);
 			Element[] children = ElementHelper.getChildren(rootElement, "AD");
 			for (Element element : children) {

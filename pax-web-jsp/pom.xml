@@ -38,25 +38,21 @@
 
 	<description>Pax Web JSP/EL/JSTL Support via Tomcat Jasper 2.</description>
 
-	<properties>
-		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
-	</properties>
-
 	<build>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-			</resource>
-			<resource>
-				<directory>target/dependency</directory>
-				<excludes>
-					<exclude>org/apache/jasper/compiler/TldCache.java</exclude>
-					<exclude>org/apache/jasper/compiler/JspConfig.java</exclude>
-					<exclude>org/apache/jasper/JspCompilationContext.java</exclude>
-					<exclude>org/apache/tomcat/util/descriptor/tagplugin/TagPluginParser.java</exclude>
-				</excludes>
-			</resource>
-		</resources>
+<!--		<resources>-->
+<!--			<resource>-->
+<!--				<directory>src/main/resources</directory>-->
+<!--			</resource>-->
+<!--			<resource>-->
+<!--				<directory>target/dependency</directory>-->
+<!--				<excludes>-->
+<!--					<exclude>org/apache/jasper/compiler/TldCache.java</exclude>-->
+<!--					<exclude>org/apache/jasper/compiler/JspConfig.java</exclude>-->
+<!--					<exclude>org/apache/jasper/JspCompilationContext.java</exclude>-->
+<!--					<exclude>org/apache/tomcat/util/descriptor/tagplugin/TagPluginParser.java</exclude>-->
+<!--				</excludes>-->
+<!--			</resource>-->
+<!--		</resources>-->
 		<plugins>
 			<plugin>
 				<groupId>org.apache.felix</groupId>
@@ -65,49 +61,60 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-							<!-- pax-web -->
-							org.ops4j.pax.web.*; version="${pax-web.osgi.version}",
-							<!-- mvn:javax.el/javax.el-api (only imported) -->
-							javax.el; version="[3.0,4.0)",
-							<!-- mvn:javax.servlet/javax.servlet-api (only imported) -->
-							javax.servlet; version="[2.3,5.0)",
-							javax.servlet.annotation; version="[2.3,5.0)",
-							javax.servlet.descriptor; version="[2.3,5.0)",
-							javax.servlet.http; version="[2.3,5.0)",
+							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
+							javax.servlet;version="[3.1,5)",
+							javax.servlet.annotation;version="[3.1,5)",
+							javax.servlet.descriptor;version="[3.1,5)",
+							javax.servlet.http;version="[3.1,5)",
+
 							<!-- JSP API (exported from pax-web-jsp) -->
-							javax.servlet.jsp; version="${dependency.javax.servlet.jsp-api.version}",
-							javax.servlet.jsp.el; version="${dependency.javax.servlet.jsp-api.version}",
-							javax.servlet.jsp.tagext; version="${dependency.javax.servlet.jsp-api.version}",
+							javax.servlet.jsp;version="${dependency.javax.servlet.jsp-api.version}",
+							javax.servlet.jsp.el;version="${dependency.javax.servlet.jsp-api.version}",
+							javax.servlet.jsp.tagext;version="${dependency.javax.servlet.jsp-api.version}",
+
 							<!-- JSTL API (exported from pax-web-jsp) -->
-							javax.servlet.jsp.jstl.core; version="${dependency.javax.servlet.jsp.jstl-api.version}",
-							javax.servlet.jsp.jstl.fmt; version="${dependency.javax.servlet.jsp.jstl-api.version}",
-							javax.servlet.jsp.jstl.sql; version="${dependency.javax.servlet.jsp.jstl-api.version}",
-							javax.servlet.jsp.jstl.tlv; version="${dependency.javax.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.core;version="${dependency.javax.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.fmt;version="${dependency.javax.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.sql;version="${dependency.javax.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.tlv;version="${dependency.javax.servlet.jsp.jstl-api.version}",
+
+							<!-- EL API (only imported) -->
+							javax.el;version="[3.0,4)",
+
+							<!-- ranges indicate we can work with OSGi Core R6+ -->
+							org.osgi.framework;version="[1.8,2)",
+							org.osgi.framework.wiring;version="[1.2,2)",
+							org.osgi.util.tracker;version="[1.5,2)",
+
+							<!-- OSGi cmpn -->
+							org.osgi.service.http;version="[1.2,2)",
+<!--							org.osgi.service.packageadmin;resolution:=optional,-->
+
+							<!-- from pax-web -->
+							org.ops4j.pax.web.*;version="${pax-web.osgi.version}",
+
+							<!-- from pax-logging-api -->
+							org.slf4j;version="[1.7,2)",
+							org.apache.juli.logging,
+
+							<!-- to check -->
+
 							<!-- other standard packages -->
 							javax.annotation.*,
 							javax.naming,
-							javax.sql; resolution:=optional,
+							javax.sql;resolution:=optional,
 							javax.xml.parsers,
 							javax.xml.stream,
-							javax.xml.validation; resolution:=optional,
-							javax.xml.namespace; resolution:=optional,
-							javax.xml.transform.*; resolution:=optional,
-							javax.xml.xpath; resolution:=optional,
+							javax.xml.validation;resolution:=optional,
+							javax.xml.namespace;resolution:=optional,
+							javax.xml.transform.*;resolution:=optional,
+							javax.xml.xpath;resolution:=optional,
 							org.w3c.dom,
-							org.w3c.dom.ls; resolution:=optional,
-							org.w3c.dom.traversal; resolution:=optional,
+							org.w3c.dom.ls;resolution:=optional,
+							org.w3c.dom.traversal;resolution:=optional,
 							org.xml.sax.*,
-							<!-- OSGi -->
-							org.osgi.framework; version="[1.0,2.0)",
-							org.osgi.framework.wiring,
-							org.osgi.service.http,
-							org.osgi.service.packageadmin; resolution:=optional,
-							org.osgi.util.tracker,
-							<!-- Logging packages from pax-logging - even JULI logging -->
-							org.slf4j; version="[1.5,2.0)",
-							org.apache.juli.logging,
-							org.eclipse.*; resolution:=optional,
-							org.eclipse.jdt.internal.compiler.parser; resolution:=optional,
+							org.eclipse.*;resolution:=optional,
+							org.eclipse.jdt.internal.compiler.parser;resolution:=optional,
 							<!-- packages required by Jasper/EL implementation and exported from pax-web-tomcat-common -->
 							org.apache.tomcat;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util;version=${dependency.tomcat.version},
@@ -121,19 +128,19 @@
 						</Import-Package>
 						<Export-Package>
 							<!-- pax-web -->
-							org.ops4j.pax.web.jsp; version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.jsp;version="${pax-web.osgi.version}",
 							<!--
 								re-export JSP API - from mvn:org.apache.tomcat/tomcat-jsp-api
 								(instead of from mvn:javax.servlet.jsp/javax.servlet.jsp-api)
 							-->
-							javax.servlet.jsp; version="${dependency.javax.servlet.jsp-api.version}",
-							javax.servlet.jsp.el; version="${dependency.javax.servlet.jsp-api.version}",
-							javax.servlet.jsp.tagext; version="${dependency.javax.servlet.jsp-api.version}",
+							javax.servlet.jsp;version="${dependency.javax.servlet.jsp-api.version}",
+							javax.servlet.jsp.el;version="${dependency.javax.servlet.jsp-api.version}",
+							javax.servlet.jsp.tagext;version="${dependency.javax.servlet.jsp-api.version}",
 							<!-- re-export JSTL API from mvn:javax.servlet.jsp.jstl/javax.servlet.jsp.jstl-api -->
-							javax.servlet.jsp.jstl.core; version="${dependency.javax.servlet.jsp.jstl-api.version}",
-							javax.servlet.jsp.jstl.fmt; version="${dependency.javax.servlet.jsp.jstl-api.version}",
-							javax.servlet.jsp.jstl.sql; version="${dependency.javax.servlet.jsp.jstl-api.version}",
-							javax.servlet.jsp.jstl.tlv; version="${dependency.javax.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.core;version="${dependency.javax.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.fmt;version="${dependency.javax.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.sql;version="${dependency.javax.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.tlv;version="${dependency.javax.servlet.jsp.jstl-api.version}",
 							<!--
 								re-export EL Impl - from mvn:org.apache.tomcat/tomcat-jasper-el
 								for broader picture:
@@ -148,42 +155,42 @@
 								 - org.glassfish/javax.el/3.0.0 (EL 3.0) exports com.sun.el.* and imports javax.el
 								   at version 3.0.0
 							-->
-							org.apache.el; version="3.0",
-							org.apache.el.lang; version="3.0",
-							org.apache.el.parser; version="3.0",
-							org.apache.el.stream; version="3.0",
-							org.apache.el.util; version="3.0",
+							org.apache.el;version="3.0",
+							org.apache.el.lang;version="3.0",
+							org.apache.el.parser;version="3.0",
+							org.apache.el.stream;version="3.0",
+							org.apache.el.util;version="3.0",
 							<!-- re-export JSP Impl - from mvn:org.apache.tomcat/tomcat-jasper -->
-							org.apache.jasper; version="${dependency.tomcat.version}",
-							org.apache.jasper.compiler; version="${dependency.tomcat.version}",
-							org.apache.jasper.compiler.tagplugin; version="${dependency.tomcat.version}",
-							org.apache.jasper.el; version="${dependency.tomcat.version}",
-							org.apache.jasper.runtime; version="${dependency.tomcat.version}",
-							org.apache.jasper.security; version="${dependency.tomcat.version}",
-							org.apache.jasper.servlet; version="${dependency.tomcat.version}",
-							org.apache.jasper.tagplugins.jstl; version="${dependency.tomcat.version}",
-							org.apache.jasper.tagplugins.jstl.core; version="${dependency.tomcat.version}",
-							org.apache.jasper.util; version="${dependency.tomcat.version}",
+							org.apache.jasper;version="${dependency.tomcat.version}",
+							org.apache.jasper.compiler;version="${dependency.tomcat.version}",
+							org.apache.jasper.compiler.tagplugin;version="${dependency.tomcat.version}",
+							org.apache.jasper.el;version="${dependency.tomcat.version}",
+							org.apache.jasper.runtime;version="${dependency.tomcat.version}",
+							org.apache.jasper.security;version="${dependency.tomcat.version}",
+							org.apache.jasper.servlet;version="${dependency.tomcat.version}",
+							org.apache.jasper.tagplugins.jstl;version="${dependency.tomcat.version}",
+							org.apache.jasper.tagplugins.jstl.core;version="${dependency.tomcat.version}",
+							org.apache.jasper.util;version="${dependency.tomcat.version}",
 							<!--
 								re-export JSTL Impl from mvn:org.apache.taglibs/taglibs-standard-impl
 								even if Glassfish and JBoss versions of JSTL impl (both based on org.apache.taglibs)
 								export org.apache.taglibs.standard.extra.spath package, it was removed from standard
 								impl in 2010 (http://svn.apache.org/viewvc?view=revision&revision=1026635)
 							-->
-							org.apache.taglibs.standard; version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.functions; version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.resources; version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.tag.common.core; version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.tag.common.fmt; version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.tag.common.sql; version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.tag.common.xml; version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.tag.rt.core; version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.tag.rt.fmt; version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.tag.rt.sql; version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.tag.rt.xml; version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.tei; version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.tlv; version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.util; version="${dependency.taglibs.version}",
+							org.apache.taglibs.standard;version="${dependency.taglibs.version}",
+							org.apache.taglibs.standard.functions;version="${dependency.taglibs.version}",
+							org.apache.taglibs.standard.resources;version="${dependency.taglibs.version}",
+							org.apache.taglibs.standard.tag.common.core;version="${dependency.taglibs.version}",
+							org.apache.taglibs.standard.tag.common.fmt;version="${dependency.taglibs.version}",
+							org.apache.taglibs.standard.tag.common.sql;version="${dependency.taglibs.version}",
+							org.apache.taglibs.standard.tag.common.xml;version="${dependency.taglibs.version}",
+							org.apache.taglibs.standard.tag.rt.core;version="${dependency.taglibs.version}",
+							org.apache.taglibs.standard.tag.rt.fmt;version="${dependency.taglibs.version}",
+							org.apache.taglibs.standard.tag.rt.sql;version="${dependency.taglibs.version}",
+							org.apache.taglibs.standard.tag.rt.xml;version="${dependency.taglibs.version}",
+							org.apache.taglibs.standard.tei;version="${dependency.taglibs.version}",
+							org.apache.taglibs.standard.tlv;version="${dependency.taglibs.version}",
+							org.apache.taglibs.standard.util;version="${dependency.taglibs.version}",
 							<!-- don't re-export JSTL Impl from mvn:org.apache.taglibs/taglibs-standard-compat -->
 							!org.apache.taglibs.standard.tag.compat.*,
 							<!-- don't re-export JSTL Impl from mvn:org.apache.taglibs/taglibs-standard-jstlel -->
@@ -221,14 +228,14 @@
 					<dumpInstructions>target/dump</dumpInstructions>
 				</configuration>
 			</plugin>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>**/JspConfig.java</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
+<!--			<plugin>-->
+<!--				<artifactId>maven-compiler-plugin</artifactId>-->
+<!--				<configuration>-->
+<!--					<excludes>-->
+<!--						<exclude>**/JspConfig.java</exclude>-->
+<!--					</excludes>-->
+<!--				</configuration>-->
+<!--			</plugin>-->
 		</plugins>
 	</build>
 

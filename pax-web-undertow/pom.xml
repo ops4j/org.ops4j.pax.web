@@ -36,20 +36,16 @@
 
 	<name>OPS4J Pax Web - Undertow</name>
 
-	<properties>
-		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
-	</properties>
-
 	<build>
 		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>**/ServerConnectorWrapper.java</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
+<!--			<plugin>-->
+<!--				<artifactId>maven-compiler-plugin</artifactId>-->
+<!--				<configuration>-->
+<!--					<excludes>-->
+<!--						<exclude>**/ServerConnectorWrapper.java</exclude>-->
+<!--					</excludes>-->
+<!--				</configuration>-->
+<!--			</plugin>-->
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
@@ -57,13 +53,20 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
+							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
+							javax.servlet;version="[3.1,5)",
+							javax.servlet.annotation;version="[3.1,5)",
+							javax.servlet.descriptor;version="[3.1,5)",
+							javax.servlet.http;version="[3.1,5)",
+
+							<!-- to check -->
+
 							org.ops4j.pax.web.utils; version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service; version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.*; version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.jsp; version="${pax-web.osgi.version}"; resolution:=optional,
 							org.apache.jasper.servlet; resolution:=optional,
 							javax.management.*; resolution:=optional,
-							javax.servlet.*; version="[3.1,5)",
 							javax.websocket.*; resolution:=optional,
 							io.undertow;version="[2.0,2.1)",
 							io.undertow.connector;version="[2.0,2.1)",
@@ -95,19 +98,19 @@
 							org.apache.el.util; version="2.2"; resolution:=optional,
 							*
 						</Import-Package>
-						<Private-Package>
-							!org.apache.commons.logging,
-							org.ops4j.pax.web.service.undertow.internal.*,
-							org.apache.commons.lang3.reflect,
-						</Private-Package>
 						<Provide-Capability>
 							osgi.service;objectClass=javax.servlet.ServletContext,
 							osgi.service;effective:=active;objectClass=org.ops4j.pax.web.service.spi.ServerController
 						</Provide-Capability>
-						<Embed-Dependency>*;
-							artifactId=!org.osgi.compendium;
-							scope=compile; type=!pom; inline=true</Embed-Dependency>
-						<Embed-Transitive>true</Embed-Transitive>
+						<Private-Package>
+<!--							!org.apache.commons.logging,-->
+							org.ops4j.pax.web.service.undertow.internal.*,
+<!--							org.apache.commons.lang3.reflect,-->
+						</Private-Package>
+<!--						<Embed-Dependency>-->
+<!--							*;artifactId=!org.osgi.compendium;scope=compile;type=!pom;inline=true-->
+<!--						</Embed-Dependency>-->
+<!--						<Embed-Transitive>true</Embed-Transitive>-->
 						<_dsannotations>*</_dsannotations>
 					</instructions>
 				</configuration>
@@ -187,10 +190,11 @@
 		<!-- JavaEE -->
 
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>javax.websocket</groupId>
 			<artifactId>javax.websocket-api</artifactId>
@@ -210,19 +214,6 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- Logging -->
-
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
-			<scope>test</scope>
-		</dependency>
-
 		<!-- Other -->
 
 		<dependency>
@@ -239,11 +230,18 @@
 			<artifactId>xbean-finder</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		
+
+		<!-- Logging -->
+
 		<dependency>
-			<groupId>${servlet.spec.groupId}</groupId>
-			<artifactId>${servlet.spec.artifactId}</artifactId>
-			<version>${servlet.spec4.version}</version>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 		<!-- Testing -->
@@ -254,18 +252,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.easymock</groupId>
-			<artifactId>easymock</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.easymock</groupId>
-			<artifactId>easymockclassextension</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
+			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 

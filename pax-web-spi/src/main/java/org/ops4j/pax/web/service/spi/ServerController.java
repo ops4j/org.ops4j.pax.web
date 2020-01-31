@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service.spi;
 
 import javax.servlet.Servlet;
 
+import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.ErrorPageModel;

@@ -22,7 +22,6 @@ import java.util.Dictionary;
 import java.util.EventListener;
 import java.util.Iterator;
 import java.util.List;
-
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
@@ -34,6 +33,7 @@ import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerDTO;
 import org.ops4j.pax.web.service.whiteboard.WhiteboardElement;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.service.http.runtime.dto.RequestInfoDTO;
@@ -41,10 +41,19 @@ import org.osgi.service.http.runtime.dto.RuntimeDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * <p>This is the proxy registered as {@link org.osgi.framework.Constants#SCOPE_BUNDLE bundle scoped}
+ * {@link org.osgi.framework.ServiceFactory}</p>
+ * <p>Registered OSGi service should not be <em>replaced</em>, so when bundle will be stopping and
+ * {@link org.osgi.framework.BundleContext#ungetService(ServiceReference)} will be called, the actual service
+ * will be replaced by <em>stopped</em> service preventing further manipulation (like new servlet registration).</p>
+ */
 public class HttpServiceProxy implements StoppableHttpService {
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(HttpServiceProxy.class);
+	private static final Logger LOG = LoggerFactory.getLogger(HttpServiceProxy.class);
+
+	// actual service that may be replaced by "stopped" http service preventing further registration
+	// of web components
 	private StoppableHttpService delegate;
 
 	public HttpServiceProxy(final StoppableHttpService delegate) {
@@ -53,13 +62,6 @@ public class HttpServiceProxy implements StoppableHttpService {
 		this.delegate = delegate;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.service.http.HttpService#registerServlet(java.lang.String,
-	 * javax.servlet.Servlet, java.util.Dictionary,
-	 * org.osgi.service.http.HttpContext)
-	 */
 	@Override
 	public void registerServlet(final String alias, final Servlet servlet,
 								@SuppressWarnings("rawtypes") final Dictionary initParams,
@@ -98,6 +100,11 @@ public class HttpServiceProxy implements StoppableHttpService {
 	public synchronized void stop() {
 		LOG.debug("Stopping http service: [" + this + " -> " + delegate + "]");
 		final StoppableHttpService stopping = delegate;
+
+		// PAXWEB-1077: ServletContext becomes unavailable on restart when using Whiteboard and CustomContexts
+		// TODO: maybe we should get back to replacing a delegate with "stopped" HttpService?
+		//       maybe only for registerXXX() methods?
+
 		/*
 		if (stopping instanceof HttpServiceStarted) {
 			delegate = new HttpServiceStopped((HttpServiceStarted) stopping);
@@ -105,6 +112,7 @@ public class HttpServiceProxy implements StoppableHttpService {
 			delegate = new HttpServiceStopped();
 		}
 		*/
+
 		stopping.stop();
 	}
 

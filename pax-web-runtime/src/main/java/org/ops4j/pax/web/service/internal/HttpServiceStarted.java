@@ -54,14 +54,14 @@ import javax.servlet.ServletException;
 import javax.websocket.DeploymentException;
 
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.jsp.JspServletWrapper;
+//import org.ops4j.pax.web.jsp.JspServletWrapper;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.WebContainerDTO;
 import org.ops4j.pax.web.service.internal.util.SupportUtils;
-import org.ops4j.pax.web.service.spi.Configuration;
+import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
@@ -561,18 +561,18 @@ class HttpServiceStarted implements StoppableHttpService {
 		final FilterModel model = new FilterModel(contextModel, filter,
 				urlPatterns, servletNames, initParams, asyncSupported);
 		if (initParams != null && !initParams.isEmpty()
-				&& initParams.get(WebContainerConstants.FILTER_RANKING) != null
+				&& initParams.get(PaxWebConstants.FILTER_RANKING) != null
 				&& serviceModel.getFilterModels().length > 0) {
-			String filterRankingString = initParams.get(WebContainerConstants.FILTER_RANKING);
+			String filterRankingString = initParams.get(PaxWebConstants.FILTER_RANKING);
 			Integer filterRanking = Integer.valueOf(filterRankingString);
 			FilterModel[] filterModels = serviceModel.getFilterModels();
-			Integer firstRanking = Integer.valueOf(filterModels[0].getInitParams().get(WebContainerConstants.FILTER_RANKING));
+			Integer firstRanking = Integer.valueOf(filterModels[0].getInitParams().get(PaxWebConstants.FILTER_RANKING));
 			Integer lastRanking;
 
 			if (filterModels.length == 1) {
 				lastRanking = firstRanking;
 			} else {
-				lastRanking = Integer.valueOf(filterModels[filterModels.length - 1].getInitParams().get(WebContainerConstants.FILTER_RANKING));
+				lastRanking = Integer.valueOf(filterModels[filterModels.length - 1].getInitParams().get(PaxWebConstants.FILTER_RANKING));
 			}
 
 			//DO ordering of filters ...
@@ -588,7 +588,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			} else {
 				//unregister all filters ranked lower
 				List<FilterModel> filteredModels = Arrays.stream(filterModels)
-						.filter(removableFilterModel -> Integer.valueOf(removableFilterModel.getInitParams().get(WebContainerConstants.FILTER_RANKING)) > filterRanking)
+						.filter(removableFilterModel -> Integer.valueOf(removableFilterModel.getInitParams().get(PaxWebConstants.FILTER_RANKING)) > filterRanking)
 						.collect(Collectors.toList());
 				filteredModels.forEach(this::unregister);
 
@@ -789,26 +789,26 @@ class HttpServiceStarted implements StoppableHttpService {
 	public void registerJspServlet(final String[] urlPatterns,
 								   Dictionary<String, ?> initParams, final HttpContext httpContext,
 								   final String jspFile) {
-		if (!SupportUtils.isJSPAvailable()) {
-			throw new UnsupportedOperationException(
-					"Jsp support is not enabled. Is org.ops4j.pax.web.jsp bundle installed?");
-		}
-		final Servlet jspServlet = new JspServletWrapper(serviceBundle, jspFile);
-		final ContextModel contextModel = getOrCreateContext(httpContext);
-		//CHECKSTYLE:OFF
-		initParams = createInitParams(contextModel, initParams == null ? new Hashtable<>() : initParams);
-		//CHECKSTYLE:ON
-		serviceModel.addContextModel(contextModel);
-		try {
-			registerServlet(jspServlet, getJspServletName(jspFile),
-					urlPatterns == null ? new String[]{"*.jsp"}
-							: urlPatterns, initParams, httpContext);
-		} catch (ServletException ignore) {
-			// this should never happen
-			LOG.error("Internal error. Please report.", ignore);
-		}
-		Map<Servlet, String[]> jspServlets = contextModel.getJspServlets();
-		jspServlets.put(jspServlet, urlPatterns);
+//		if (!SupportUtils.isJSPAvailable()) {
+//			throw new UnsupportedOperationException(
+//					"Jsp support is not enabled. Is org.ops4j.pax.web.jsp bundle installed?");
+//		}
+//		final Servlet jspServlet = new JspServletWrapper(serviceBundle, jspFile);
+//		final ContextModel contextModel = getOrCreateContext(httpContext);
+//		//CHECKSTYLE:OFF
+//		initParams = createInitParams(contextModel, initParams == null ? new Hashtable<>() : initParams);
+//		//CHECKSTYLE:ON
+//		serviceModel.addContextModel(contextModel);
+//		try {
+//			registerServlet(jspServlet, getJspServletName(jspFile),
+//					urlPatterns == null ? new String[]{"*.jsp"}
+//							: urlPatterns, initParams, httpContext);
+//		} catch (ServletException ignore) {
+//			// this should never happen
+//			LOG.error("Internal error. Please report.", ignore);
+//		}
+//		Map<Servlet, String[]> jspServlets = contextModel.getJspServlets();
+//		jspServlets.put(jspServlet, urlPatterns);
 
 	}
 
@@ -829,9 +829,9 @@ class HttpServiceStarted implements StoppableHttpService {
 
 		configurations.add(serverControllerConfiguration);
 		for (Configuration configuration : configurations) {
-			String scratchDir = configuration.getJspScratchDir();
+			String scratchDir = configuration.jsp().getJspScratchDir();
 			if (scratchDir == null) {
-				File temporaryDirectory = configuration.getTemporaryDirectory();
+				File temporaryDirectory = configuration.server().getTemporaryDirectory();
 				if (temporaryDirectory != null) {
 					scratchDir = temporaryDirectory.toString();
 				}
@@ -845,17 +845,17 @@ class HttpServiceStarted implements StoppableHttpService {
 				scratchDir = tempDir.toString();
 			}
 
-			Integer jspCheckInterval = configuration.getJspCheckInterval();
-			Boolean jspClassDebugInfo = configuration.getJspClassDebugInfo();
-			Boolean jspDevelopment = configuration.getJspDevelopment();
-			Boolean jspEnablePooling = configuration.getJspEnablePooling();
-			String jspIeClassId = configuration.getJspIeClassId();
-			String jspJavaEncoding = configuration.getJspJavaEncoding();
-			Boolean jspKeepgenerated = configuration.getJspKeepgenerated();
-			String jspLogVerbosityLevel = configuration.getJspLogVerbosityLevel();
-			Boolean jspMappedfile = configuration.getJspMappedfile();
-			Integer jspTagpoolMaxSize = configuration.getJspTagpoolMaxSize();
-			Boolean jspPrecompilation = configuration.getJspPrecompilation();
+			Integer jspCheckInterval = configuration.jsp().getJspCheckInterval();
+			Boolean jspClassDebugInfo = configuration.jsp().getJspClassDebugInfo();
+			Boolean jspDevelopment = configuration.jsp().getJspDevelopment();
+			Boolean jspEnablePooling = configuration.jsp().getJspEnablePooling();
+			String jspIeClassId = configuration.jsp().getJspIeClassId();
+			String jspJavaEncoding = configuration.jsp().getJspJavaEncoding();
+			Boolean jspKeepgenerated = configuration.jsp().getJspKeepgenerated();
+			String jspLogVerbosityLevel = configuration.jsp().getJspLogVerbosityLevel();
+			Boolean jspMappedfile = configuration.jsp().getJspMappedfile();
+			Integer jspTagpoolMaxSize = configuration.jsp().getJspTagpoolMaxSize();
+			Boolean jspPrecompilation = configuration.jsp().getJspPrecompilation();
 
 			// TODO: fix this with PAXWEB-226
 			Map<String, Object> params = new HashMap<>(12);
@@ -1223,7 +1223,7 @@ class HttpServiceStarted implements StoppableHttpService {
 			contextModel = new ContextModel(context, serviceBundle,
 					bundleClassLoader, showStacks);
 			contextModel.setVirtualHosts(serverController.getConfiguration()
-					.getVirtualHosts());
+					.server().getVirtualHosts());
 		}
 		return contextModel;
 	}
@@ -1288,7 +1288,7 @@ class HttpServiceStarted implements StoppableHttpService {
 		}
 		if (realVirtualHosts.size() == 0) {
 			realVirtualHosts = this.serverController.getConfiguration()
-					.getVirtualHosts();
+					.server().getVirtualHosts();
 		}
 		if (LOG.isDebugEnabled()) {
 			StringBuilder sb = new StringBuilder("VirtualHostList=[");
@@ -1470,7 +1470,7 @@ class HttpServiceStarted implements StoppableHttpService {
         
         dto.port = serverController.getHttpPort();
         dto.securePort = serverController.getHttpSecurePort();
-        dto.listeningAddresses = serverController.getConfiguration().getListeningAddresses();
+        dto.listeningAddresses = serverController.getConfiguration().server().getListeningAddresses();
         
         return dto;
     }

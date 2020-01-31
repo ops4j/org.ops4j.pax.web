@@ -14,282 +14,57 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.spi;
-
-import java.io.File;
-import java.net.URL;
-import java.util.List;
+package org.ops4j.pax.web.service.spi.config;
 
 import org.osgi.annotation.versioning.ProviderType;
 
+/**
+ * <p>Interface for accessing configuration that's normally available/provided using Configuration Admin
+ * properties or Meta Type information. If possible, server implementations should access Pax Web properties
+ * through methods of this interface, not through general property names in some dictionary.</p>
+ * <p>Splitting original {@code Configuration} object into <em>groups</em> should help with
+ * future extensibility.</p>
+ * <p>Actual server implementations should access <strong>entire</strong> configuration using this interface
+ * without a need to create extra {@link org.ops4j.util.property.PropertyResolver} instances.</p>
+ */
 @ProviderType
 public interface Configuration {
 
-	Boolean useNIO();
-
-	Boolean checkForwardedHeaders();
-
-	Integer getHttpPort();
-
-	String getHttpConnectorName();
-
-	Boolean isHttpEnabled();
-
-	Integer getConnectorIdleTimeout();
-
-	Boolean isShowStacks();
-
-	Integer getHttpSecurePort();
-
-	String getHttpSecureConnectorName();
-
-	Boolean isHttpSecureEnabled();
+	/**
+	 * Accesses server-wide configuration that covers listeners, directory locations, ports, etc.
+	 * @return
+	 */
+	ServerConfiguration server();
 
 	/**
-	 * Set the value of the needClientAuth property
-	 *
-	 * @return true if we require client certificate authentication
+	 * Accesses security related configuration for SSL/TLS, certificates and authentication.
+	 * @return
 	 */
-	Boolean isClientAuthNeeded();
+	SecurityConfiguration security();
 
 	/**
-	 * Set the value of the _wantClientAuth property. This property is used when
-	 * opening server sockets.
-	 *
-	 * @return true if we want client certificate authentication
+	 * Accesses JSP related configuration used for Tomcat/Jasper engine configuration
+	 * @return
 	 */
-	Boolean isClientAuthWanted();
+	JspConfiguration jsp();
 
 	/**
-	 * Returns the path to the keystore.
-	 *
-	 * @return path to the keystore.
+	 * Accesses session related configuration
+	 * @return
 	 */
-	String getSslKeystore();
+	SessionConfiguration session();
 
 	/**
-	 * Returns the keystore type.
-	 *
-	 * @return keystore type.
+	 * Accesses configuration related to server logging and access logging.
+	 * @return
 	 */
-	String getSslKeystoreType();
+	LogConfiguration logging();
 
 	/**
-	 * Returns the password for the keystore.
-	 *
-	 * @return the password for the keystore.
+	 * Accesses single typed property by name.
+	 * @param property
+	 * @return
 	 */
-	String getSslKeystorePassword();
-
-	/**
-	 * Returns the password for keystore integrity check.
-	 *
-	 * @return the password for keystore integrity check
-	 * @deprecated use getSslKeystorePassword() instead.
-	 */
-	@Deprecated
-	String getSslPassword();
-
-	/**
-	 * Returns the alias of the ssl private key.
-	 *
-	 * @return the alias of the ssl private key.
-	 */
-	String getSslKeyAlias();
-
-	/**
-	 * Returns the password for ssl private key.
-	 *
-	 * @return the password for ssl private key.
-	 */
-	String getSslKeyPassword();
-
-	/**
-	 * Returns the temporary directory, directory that will be set as
-	 * javax.servlet.context.tempdir.
-	 *
-	 * @return the temporary directory
-	 */
-	File getTemporaryDirectory();
-
-	/**
-	 * Returns the time in minutes after which an incative settion times out. If
-	 * returned value is null then no time out will be set (in jetty this will
-	 * mean that there will be no timeout)
-	 *
-	 * @return timeout in minutes
-	 */
-	Integer getSessionTimeout();
-
-	String getSessionCookie();
-
-	String getSessionDomain();
-
-	String getSessionPath();
-
-	String getSessionUrl();
-
-	Boolean getSessionCookieHttpOnly();
-
-	Boolean getSessionCookieSecure();
-
-	Integer getSessionCookieMaxAge();
-
-	String getSessionStoreDirectory();
-
-	Boolean getSessionLazyLoad();
-
-	String getWorkerName();
-
-	/**
-	 * Returns the addresses to bind to
-	 *
-	 * @return addresses
-	 */
-	String[] getListeningAddresses();
-
-	/**
-	 * Returns the directory containing the external configuration
-	 *
-	 * @return configuration directory
-	 */
-	File getConfigurationDir();
-
-	/**
-	 * Returns the URL of external web server configuration
-	 *
-	 * @return configuration URL
-	 */
-	URL getConfigurationURL();
-
-	String getJspScratchDir();
-
-	Integer getJspCheckInterval();
-
-	Boolean getJspClassDebugInfo();
-
-	Boolean getJspDevelopment();
-
-	Boolean getJspEnablePooling();
-
-	String getJspIeClassId();
-
-	String getJspJavaEncoding();
-
-	Boolean getJspKeepgenerated();
-
-	String getJspLogVerbosityLevel();
-
-	Boolean getJspMappedfile();
-
-	Integer getJspTagpoolMaxSize();
-
-	Boolean isLogNCSAFormatEnabled();
-
-	String getLogNCSAFormat();
-
-	String getLogNCSARetainDays();
-
-	Boolean isLogNCSAAppend();
-
-	Boolean isLogNCSAExtended();
-
-	Boolean isLogNCSADispatch();
-
-	String getLogNCSATimeZone();
-
-	String getLogNCSADirectory();
-
-	Boolean getJspPrecompilation();
-
-	List<String> getVirtualHosts();
-
-	Boolean isLogNCSALatency();
-
-	Boolean isLogNCSACookies();
-
-	Boolean isLogNCSAServer();
-
-	List<String> getCiphersuiteIncluded();
-
-	List<String> getCiphersuiteExcluded();
-
-	List<String> getProtocolsIncluded();
-
-	List<String> getProtocolsExcluded();
-
-	Integer getServerMaxThreads();
-
-	Integer getServerMinThreads();
-
-	Integer getServerIdleTimeout();
-
-	String getTrustStore();
-
-	String getTrustStorePassword();
-
-	String getTrustStoreType();
-
-	Boolean isSslRenegotiationAllowed();
-	
-	String getCrlPath();
-	
-	Boolean isEnableCRLDP();
-	
-	Boolean isValidateCerts();
-	
-	Boolean isValidatePeerCerts();
-	
-	Boolean isEnableOCSP();
-	
-	String getOcspResponderURL();
-	
-	Boolean isEncEnabled();
-	
-	String getEncMasterPassword();
-	
-	String getEncAlgorithm();
-	
-	String getEncPrefix();
-	
-	String getEncSuffix();
-
-	/**
-	 * The default implementation will be removed on next major release - 8.0.0
-	 * No default auth method with be used if implementation is not provided.
-	 *
-	 * @return the default auth method, null if not implemented
-	 */
-	default String getDefaultAuthMethod() {
-		return null;
-	}
-
-	/**
-	 * The default implementation will be removed on next major release - 8.0.0
-	 * No default realm name with be used if implementation is not provided.
-	 *
-	 * @return the default realm name, null if not implemented
-	 */
-	default String getDefaultRealmName() {
-		return null;
-	}
-
-    /**
-	 * Returns the name of SSL keystore provider.
-	 * @return the name of SSL keystore provider.
-	 */
-	String getSslKeystoreProvider();
-
-	/**
-	 * Returns the name of SSL truststore provider.
-	 * @return the name of SSL truststore provider.
-	 */
-	String getSslTrustStoreProvider();
-
-	/**
-	 * Returns the name of SSL provider.
-	 * @return the name of SSL provider.
-	 */
-	String getSslProvider();
+	<T> T get(String property, Class<T> clazz);
 
 }

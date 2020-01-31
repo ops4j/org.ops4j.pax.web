@@ -39,10 +39,11 @@
 	<description>Integration test base module for Pax Web</description>
 
 	<modules>
-		<module>pax-web-itest-jsp</module>
-		<module>pax-web-itest-base</module>
-		<module>pax-web-itest-common</module>
-		<module>pax-web-itest-container</module>
+<!--		<module>pax-web-itest-jsp</module>-->
+<!--		<module>pax-web-itest-base</module>-->
+<!--		<module>pax-web-itest-common</module>-->
+		<module>pax-web-itest-osgi</module>
+<!--		<module>pax-web-itest-container</module>-->
 	</modules>
 
 	<profiles>
@@ -55,15 +56,15 @@
 				<module>pax-web-itest-load</module>
 			</modules>
 		</profile>
-		<profile>
-			<id>karaf-test</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<modules>
-				<module>pax-web-itest-karaf</module>
-			</modules>
-		</profile>
+<!--		<profile>-->
+<!--			<id>karaf-test</id>-->
+<!--			<activation>-->
+<!--				<activeByDefault>true</activeByDefault>-->
+<!--			</activation>-->
+<!--			<modules>-->
+<!--				<module>pax-web-itest-karaf</module>-->
+<!--			</modules>-->
+<!--		</profile>-->
 	</profiles>
 
 </project>

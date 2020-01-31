@@ -36,10 +36,6 @@
 
 	<name>OPS4J Pax Web - API</name>
 
-	<properties>
-		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
-	</properties>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -49,24 +45,36 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-							javax.servlet.*;version="[3.1,5)",
-							org.osgi.framework;version="[1.0.0,2.0.0)",
-							org.osgi.framework.wiring;version="[1.0,2.0)",
-							org.osgi.service.http;version="[1.0.0,2.0.0)",
-							org.osgi.service.http.context;version="[1.0.0,2.0.0)",
-							org.slf4j;version="[1.5,2.0)",
-							org.osgi.service.packageadmin;resolution:=optional,
-							org.apache.xbean.finder;version="[4.4,5)",
-							*
+							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
+							javax.servlet;version="[3.1,5)",
+							javax.servlet.annotation;version="[3.1,5)",
+							javax.servlet.http;version="[3.1,5)",
+
+							<!-- ranges indicate we can work with OSGi Core R6+ -->
+							org.osgi.dto;version="[1.0,2)",
+							org.osgi.framework;version="[1.8,2)",
+<!--							org.osgi.framework.dto;version="[1.8,2)",-->
+							org.osgi.framework.wiring;version="[1.2,2)",
+
+							<!-- from pax-logging-api -->
+							org.slf4j;version="[1.7,2)"
 						</Import-Package>
 						<Export-Package>
+							<!-- pax-web-api -->
 							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.whiteboard;version="${pax-web.osgi.version}",
-							org.osgi.service.http,
-							org.osgi.service.http.context,
-							org.osgi.service.http.runtime,
-							org.osgi.service.http.runtime.dto,
-							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}"
+							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
+
+							<!-- re-export OSGi CMPN R7 102 HTTP Service packages -->
+							org.osgi.service.http;version="1.2",
+
+							<!-- re-export OSGi CMPN R7 140 HTTP Whiteboard packages -->
+							org.osgi.service.http.context;version="1.1",
+							org.osgi.service.http.runtime;version="1.1",
+							org.osgi.service.http.runtime.dto;version="1.1",
+							org.osgi.service.http.whiteboard;version="1.1",
+							org.osgi.service.http.whiteboard.annotations;version="1.1",
+							org.osgi.service.http.whiteboard.propertytypes;version="1.1"
 						</Export-Package>
 					</instructions>
 				</configuration>
@@ -97,8 +105,8 @@
 		<!-- JavaEE -->
 
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -109,23 +117,18 @@
 			<artifactId>slf4j-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
-
-		<!-- Other -->
-
 		<dependency>
-			<groupId>org.apache.xbean</groupId>
-			<artifactId>xbean-finder</artifactId>
-			<scope>provided</scope>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+			<scope>test</scope>
 		</dependency>
+
+		<!-- Testing -->
+
 		<dependency>
-			<groupId>org.apache.xbean</groupId>
-			<artifactId>xbean-reflect</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.xbean</groupId>
-			<artifactId>xbean-bundleutils</artifactId>
-			<scope>provided</scope>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>

@@ -23,13 +23,10 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import javax.servlet.ServletContainerInitializer;
 
 import org.eclipse.jetty.security.Authenticator;
 import org.eclipse.jetty.security.SecurityHandler;
@@ -37,7 +34,6 @@ import org.eclipse.jetty.security.authentication.BasicAuthenticator;
 import org.eclipse.jetty.security.authentication.ClientCertAuthenticator;
 import org.eclipse.jetty.security.authentication.DigestAuthenticator;
 import org.eclipse.jetty.security.authentication.FormAuthenticator;
-import org.eclipse.jetty.security.authentication.SpnegoAuthenticator;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerCollection;
@@ -53,11 +49,9 @@ import org.eclipse.jetty.util.thread.ThreadPool;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.AuthenticatorService;
 import org.ops4j.pax.web.service.SharedWebContainerContext;
-import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
 import org.ops4j.pax.web.service.spi.model.Model;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
-import org.ops4j.pax.web.utils.ServletContainerInitializerScanner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
@@ -283,15 +277,15 @@ class JettyServerWrapper extends Server {
 		Bundle bundle = model.getBundle();
 		BundleContext bundleContext = BundleUtils.getBundleContext(bundle);
 
-		if (packageAdminTracker != null) {
-			ServletContainerInitializerScanner scanner = new ServletContainerInitializerScanner(bundle, jettyBundle, packageAdminTracker.getService());
-			Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = model.getContainerInitializers();
-			if (containerInitializers == null) {
-				containerInitializers = new HashMap<>();
-				model.setContainerInitializers(containerInitializers);
-			}
-			scanner.scanBundles(containerInitializers);
-		}
+//		if (packageAdminTracker != null) {
+//			ServletContainerInitializerScanner scanner = new ServletContainerInitializerScanner(bundle, jettyBundle, packageAdminTracker.getService());
+//			Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = model.getContainerInitializers();
+//			if (containerInitializers == null) {
+//				containerInitializers = new HashMap<>();
+//				model.setContainerInitializers(containerInitializers);
+//			}
+//			scanner.scanBundles(containerInitializers);
+//		}
 
 		HttpServiceContext context = new HttpServiceContext(rootCollections, model.getContextParams(),
 				getContextAttributes(bundleContext), model.getContextName(), model.getHttpContext(),
@@ -502,9 +496,9 @@ class JettyServerWrapper extends Server {
 				case Constraint.__CERT_AUTH2:
 					authenticator = new ClientCertAuthenticator();
 					break;
-				case Constraint.__SPNEGO_AUTH:
-					authenticator = new SpnegoAuthenticator();
-					break;
+//				case Constraint.__SPNEGO_AUTH:
+//					authenticator = new SpnegoAuthenticator();
+//					break;
 				default:
 					authenticator = getAuthenticator(authMethod);
 					break;
@@ -545,7 +539,7 @@ class JettyServerWrapper extends Server {
 		if (contextAttributes != null) {
 			attributes.putAll(contextAttributes);
 		}
-		attributes.put(WebContainerConstants.BUNDLE_CONTEXT_ATTRIBUTE, bundleContext);
+//		attributes.put(WebContainerConstants.BUNDLE_CONTEXT_ATTRIBUTE, bundleContext);
 		attributes.put("org.springframework.osgi.web.org.osgi.framework.BundleContext", bundleContext);
 		return attributes;
 	}

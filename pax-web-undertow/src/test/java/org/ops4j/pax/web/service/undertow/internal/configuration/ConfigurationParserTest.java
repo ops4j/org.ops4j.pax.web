@@ -25,6 +25,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +34,6 @@ import org.xml.sax.XMLReader;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_PORT;
-import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_HTTP_SECURE_PORT;
 
 public class ConfigurationParserTest {
 
@@ -53,8 +52,8 @@ public class ConfigurationParserTest {
 		Unmarshaller unmarshaller = context.createUnmarshaller();
 
 		Properties pid = new Properties();
-		pid.put(PROPERTY_HTTP_PORT, "8123");
-		pid.put(PROPERTY_HTTP_SECURE_PORT, "8423");
+		pid.put(PaxWebConfig.PID_CFG_HTTP_PORT, "8123");
+		pid.put(PaxWebConfig.PID_CFG_HTTP_PORT_SECURE, "8423");
 		pid.put("karaf.etc", "/data/tmp");
 		pid.put("karaf.data", "/data/tmp/data");
 		pid.put("http.read.timeout", "5000");

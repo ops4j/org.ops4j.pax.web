@@ -1,0 +1,214 @@
+= pax-web-api
+
+This bundle has these purposes:
+
+* re-export packages specified in OSGi CMPN R7 102 "Http Service Specification"
+** `org.osgi.service.http` 1.2
+* re-export packages specified in OSGi CMPN R7 140 "Http Whiteboard Specification"
+** `org.osgi.service.http.context` 1.1
+** `org.osgi.service.http.runtime` 1.1
+** `org.osgi.service.http.runtime.dto` 1.1
+** `org.osgi.service.http.whiteboard` 1.1
+** `org.osgi.service.http.whiteboard.annotations` 1.1
+** `org.osgi.service.http.whiteboard.propertytypes` 1.1
+* provide additional interfaces (like `org.ops4j.pax.web.service.WebContainer`) extending standard specification
+* provide some utilities used throughout PAX WEB (`org.ops4j.pax.web.utils` package)
+
+== Resource management utilities
+
+One of most important requirements in PAX WEB is to be able to scan through archives in search for web-related artifacts (like annotated classes, TLD descriptors or JSF configurations).
+
+In order to do that we can use several OSGi core methods and even core Java methods. OSGi environment specifics have to be considered as well.
+
+So it's important to divide the scanning into two levels:
+
+Class Space::
+
+In JavaSE environments, a _class space_ is usually equal to `$CLASSPATH` and the most fundamental method, which is `java.lang.ClassLoader.getResources()` works with these rules:
+
+* possible hierarchy of classloaders (AppClassLoader, ExtClassLoader, BootClassPath) is taken into account
+* getting `""` resource doesn't work with JARs on classpath - no URLs are returned for such resource. Only directory based classpath entries are considered
+* for standard entries on app/ext/boot classpath, there's `meta-index` file used which is used (at least by OpenJDK) to pre-cache content of jars
+* for jars, only entries explicitly added to jar/zip can be found! For example, if there's `java/lang/Object.class` resource in `rt.jar`, it doesn't mean we can get `java` (or `java/`) resource (zip entry). That's the reason why we don't get resource for `""` name. It depends on how jar/zip was created.
+* the most used `URLClassLoader` uses `sun.misc.URLClassPath.findResources()` which delegates to either `sun.misc.URLClassPath.JarLoader` (which delegates to `java.util.jar.JarFile.getInputStream()`) or `sun.misc.URLClassPath.FileLoader` (which uses `java.io.FileInputStream`)
+
+In OSGi, there's no single classpath and we have to think about getting resources starting from single bundle. Single bundle, when treated as _entry point_ to some _class space_, may have these additional elements:
+
+* bundles wired using `Import-Package`
+* bundles wired using `Require-Bundle`
+* bundles wired using `Fragment-Host` (though OSGi wiring implementation should automatically treat attached fragments as _part_ of given bundle)
+* additional bundles or jars available on classpath defined by `Bundle-ClassPath` manifest header.
+
+Actual scanning for resources::
+
+That's very important to know when to _reach_ to additional bundles/jars when, for example, installing WAR bundle and processing it by pax-extender-war. There's really lots of things to do including annotation scanning, resource finding, etc.
+
+=== Standard JavaSE mechanisms
+
+In simplest, JavaSE scenario the runtime environment has these features (usually):
+
+* `$CLASSPATH` definiting roots to load classes and resources from
+* an instance of `java.lang.ClassLoader` to use for class and resource loading
+
+When running simple class, the class' ClassLoader is `sun.misc.Launcher.AppClassLoader` (OpenJDK). Its parent is `sun.misc.Launcher.ExtClassLoader` which in turn doesn't have a parent. There's also out-of-hierarchy `sun.misc.Launcher.BootClassPathHolder`.
+
+`AppClassLoader` and `ExtClassLoader` extend `java.net.URLClassLoader`. `BootClassPathHolder` doesn't extend anything. However all 3 contain an instance of `sun.misc.URLClassPath`.
+
+`sun.misc.URLClassPath` contains two tables:
+
+* `sun.misc.URLClassPath.path` contains URLs
+* `sun.misc.URLClassPath.loaders` contains the same number of `sun.misc.URLClassPath.Loader` instances
+
+There are two built-in loaders. Both use _base_ URL, call `java.net.URL(base, path)` URL constructor and call `java.net.URL.openConnection()`:
+
+* `sun.misc.URLClassPath.JarLoader` - uses `new URL("jar", "", -1, url + "!/", java.net.URLStreamHandlerFactory.createURLStreamHandler("jar"))` (handler is `sun.net.www.protocol.jar.Handler`)
+* `sun.misc.URLClassPath.FileLoader` - uses `new File(base, path)`
+
+When calling `java.lang.ClassLoader.getResources()`, eventually all loaders from all class loaders in the hierarchy are checked (top-bottom).
+
+=== Spring Framework
+
+For the completeness, here's how the above fundamental mechanisms are used inside Spring Framework. Spring allows to use resource expressions like `classpath*:/**/MANIFEST.MF` which means _find resources named `MANIFEST.MF` anywhere and any deep on the class path_. The main method is `org.springframework.core.io.support.ResourcePatternResolver#getResources()` implemented as `org.springframework.core.io.support.PathMatchingResourcePatternResolver#getResources()`.
+
+When using paths without `classpath*:` (less interesting in case of Pax Web), Spring:
+
+* when the specification is pattern, calls `org.springframework.core.io.support.PathMatchingResourcePatternResolver#findPathMatchingResources()`
+* when the specification is not a pattern, just returns single `ClassPathResource`, `FileUrlResource` or `UrlResource`.
+
+When using paths with `classpath*:`, Spring:
+
+* when the specification is pattern, calls `org.springframework.core.io.support.PathMatchingResourcePatternResolver#findPathMatchingResources()`
+* when the specification is not a pattern, just calls `java.lang.ClassLoader.getResources()`. Additionally, if the resource is `""`, Spring explicitly calls `org.springframework.core.io.support.PathMatchingResourcePatternResolver#addAllClassLoaderJarRoots()` to collect all the roots from class path by checking
+** `java.net.URLClassLoader.getURLs()` (if class loader is URL class loader)
+** `-Djava.class.path`
+
+`PathMatchingResourcePatternResolver.findPathMatchingResources()` gets resource roots for the base path from the pattern. This again calls `PathMatchingResourcePatternResolver#getResources()`, but this time without a pattern. Then for each of the roots found, resources are searched using methods different for files, jars and `vfs:`.
+
+Summarizing, Spring splits the parameter to `ResourcePatternResolver#getResources()` to get _base_ and _subpattern_ (if it's a pattern) and then iterates over the roots from class path.
+
+=== OSGi
+
+As mentioned before, in OSGi, there's no 1st level concept of class path. There are bundles and their contexts. So the equivalent of `java.lang.ClassLoader.getResources()` is `org.osgi.framework.Bundle.getResources()` which roughly emphasizes that the _starting point_ isn't the _class path_, but single bundle.
+
+Methods involving class loader (this requiring resolved bundle):
+
+* `Enumeration<URL> org.osgi.framework.Bundle.getResources()`
+* `Collection<String> org.osgi.framework.wiring.BundleWiring.listResources()`
+* `URL org.osgi.framework.Bundle.getResource()`
+
+Methods that don't involve class loader:
+
+* `Enumeration<URL> org.osgi.framework.Bundle.findEntries()`
+* `List<URL> org.osgi.framework.wiring.BundleWiring.findEntries()`
+* `Enumeration<String> org.osgi.framework.Bundle.getEntryPaths()`
+* `URL org.osgi.framework.Bundle.getEntry()`
+
+Additionally, these methods may be called on a class loader returned for `BundleWiring`:
+
+* `Enumeration<URL> java.lang.ClassLoader.getResources()`
+* `URL java.lang.ClassLoader.getResource()`
+
+.Summary of resource related methods involving class loaders
+|===
+|Method |Description |Implementation details
+
+|`Bundle.getResources()`
+a|
+* if the package of retrieved resource is on `Import-Package` list, wired bundles are checked and current bundle is *not* checked.
+* otherwise:
+** bundles wired using `Require-Bundle` are checked
+** _local resources_ are checked which are roots from `Bundle-ClassPath` (e.g., embedded jars) *and* attached fragments
+** only if still none found, bundles for `DynamicImport-Package` are checked
+a|
+* Felix:
+** `org.apache.felix.framework.BundleWiringImpl.findResourcesByDelegation()` - called for bundle that's provider of imported package or a provider of _require bundle_ wire.
+** `org.apache.felix.framework.BundleRevisionImpl.getResourcesLocal()` that checks `org.apache.felix.framework.BundleRevisionImpl.m_contentPath`
+** `org.apache.felix.framework.cache.ContentDirectoryContent` for `WEB-INF/classes` on `Bundle-ClassPath`
+** `org.apache.felix.framework.cache.JarContent` for `WEB-INF/lib/*.jar` on `Bundle-ClassPath` or for attached fragments.
+* Equinox:
+** `org.eclipse.osgi.internal.loader.BundleLoader.findResources()`
+** `org.eclipse.osgi.internal.loader.BundleLoader.importedSources`
+** `org.eclipse.osgi.internal.loader.BundleLoader.requiredSources`
+** `org.eclipse.osgi.internal.loader.classpath.ClasspathManager.findLocalResources()`
+** `org.eclipse.osgi.internal.loader.classpath.ClasspathManager.entries` contains roots from `Bundle-ClassPath`
+** `org.eclipse.osgi.internal.loader.classpath.ClasspathManager.fragments` contains attached fragments
+
+|`ClassLoader.getResources()`
+|Just as `Bundle.getResources()`
+|Calls `org.apache.felix.framework.BundleWiringImpl.findResourcesByDelegation()` internally.
+
+|`BundleWiring.listResources()`
+a|
+* the returned object is `Collection<String>` containing unique names
+* the duplicates are rejected, so even if multiple resources could be available via fragments or `Bundle-ClassPath`, we can't access them
+* the returned names can be used as parameter to `ClassLoader.getResource()`, but again - without knowing which actual resource will be returned if multiple are available
+* wires from `osgi.wiring.package` and `osgi.wiring.bundle` namespaces are checked
+* for `Import-Package` wires (`osgi.wiring.package` namespace), only imported packages are checked
+* for `Require-Bundle` wires (`osgi.wiring.bundle` namespace), all exported packages from the target bundle are checked. Additionally if the required bundle requires other bundles with `visibility:="reexport"`, those bundles' exported packages are checked as well.
+* local resources are considered - in imported, required and current bundle
+a|
+* Felix:
+** `java.util.TreeSet` is used as result of `listResources()`
+** `org.apache.felix.framework.BundleWiringImpl.listResourcesInternal()` is called for imported, required and current bundle. For non-current bundle only relevant packages are considered when looking for the resource. Local resources are searched in `org.apache.felix.framework.BundleRevisionImpl.m_contentPath` (entries from `Bundle-ClassPath` and attached fragments).
+
+|`Bundle.getResource()`
+|Works like `Bundle.getResources()`. First imports are checked, then local resources, finally (if still not found), dynamic imports.
+a|
+* Felix:
+** `org.apache.felix.framework.BundleWiringImpl.findClassOrResourceByDelegation()`
+** `org.apache.felix.framework.BundleRevisionImpl.m_contentPath`
+
+|`ClassLoader.getResource()`
+|Same as `Bundle.getResources()` - uses wiring to get resources
+a|
+* Felix:
+** `org.apache.felix.framework.BundleWiringImpl.findClassOrResourceByDelegation()`
+** `org.apache.felix.framework.BundleRevisionImpl.m_contentPath`
+|===
+
+.Summary of resource related methods that don't involve class loaders
+|===
+|Method |Description |Implementation details
+
+|`Bundle.findEntries()`
+a|
+* For any bundle, its revision and attached fragments' revisions are checked
+* For a bundle with `Bundle-ClassPath`, the entries are *not* checked only main bundle content (which, in case of WAR bundles, may not be on class path).
+a|
+* Felix:
+** `org.apache.felix.framework.Felix.findBundleEntries()`
+** `org.apache.felix.framework.EntryFilterEnumeration(rev, includeFragments = true, path, pattern, recurse, isURLValues = true)`
+
+|`Bundle.getEntryPaths()`
+|Same as `Bundle.findEntries()` but different (no recursion, no URLs, `"*"` pattern) args for underlying enumeration.
+a|
+* Felix:
+** `org.apache.felix.framework.Felix.getBundleEntryPaths()`
+** `org.apache.felix.framework.EntryFilterEnumeration(rev, includeFragments = false, path, "*", recurse = false, isURLValues = false)`
+
+|`BundleWiring.findEntries()`
+|Same as `Bundle.findEntries()`
+a|
+* Felix:
+** `org.apache.felix.framework.Felix.findBundleEntries()`
+
+|`Bundle.getEntry()`
+|Checks only bundles main content. No contents from `Bundle-ClassPath` and *no attached fragments*.
+a|
+* Felix:
+** `org.apache.felix.framework.BundleRevisionImpl.m_content` used. No fragments, no `Bundle-ClassPath`
+|===
+
+=== (Geronimo) XBean
+
+http://geronimo.apache.org/xbean/[Geronimo XBean] project provides some bundles with low-level utilities.
+
+* `org.apache.xbean.osgi.bundle.util.BundleClassLoader` from `xbean-bundleutils` helps with `Bundle.getResource[s]()` when we want to get resources from wired bundles, when the provider doesn't export given package
+* `org.apache.xbean.osgi.bundle.util.BundleResourceHelper` from `xbean-bundleutils` is used internally in `BundleClassLoader`
+* `org.apache.xbean.osgi.bundle.util.BundleResourceFinder` from `xbean-bundleutils` scans `Bundle-ClassPath` and attached fragments
+* `xbean-finder` contains utilities that use `xbean-bundleutils` to provide classes for finding different kinds of resources (e.g., classes assignable to some interface).
+
+These helper bundles do not use _new_ BundleWiring API:
+
+* `org.osgi.framework.wiring.BundleWiring.listResources()`
+* `org.osgi.framework.wiring.BundleWiring.findEntries()`

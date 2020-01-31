@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. 
  */
-package org.ops4j.pax.web.utils;
+package org.ops4j.pax.web.service.spi.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,6 +33,7 @@ import javax.servlet.annotation.HandlesTypes;
 
 import org.apache.xbean.finder.BundleAnnotationFinder;
 import org.apache.xbean.finder.BundleAssignableClassFinder;
+import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.slf4j.Logger;
@@ -62,7 +63,7 @@ public class ServletContainerInitializerScanner {
 			ClassPathUtil.getBundlesInClassSpace(serverBundle, bundlesInClassSpace);
 		}
 
-		for (URL u : ClassPathUtil.findResources(bundlesInClassSpace, "/META-INF/services",
+		for (URL u : ClassPathUtil.listResources(bundlesInClassSpace, "/META-INF/services",
 				"javax.servlet.ServletContainerInitializer", true)) {
 			try {
 				InputStream is = u.openStream();

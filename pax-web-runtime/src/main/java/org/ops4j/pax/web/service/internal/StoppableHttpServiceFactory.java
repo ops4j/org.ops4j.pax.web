@@ -23,26 +23,25 @@ import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class HttpServiceFactoryImpl implements
-		ServiceFactory<HttpService> {
+/**
+ * {@link ServiceFactory} that manages bundle-scoped lifecycle of {@link HttpService}.
+ */
+public abstract class StoppableHttpServiceFactory implements ServiceFactory<StoppableHttpService> {
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(HttpServiceFactoryImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(StoppableHttpServiceFactory.class);
 
 	@Override
-	public HttpService getService(final Bundle bundle,
-								  final ServiceRegistration<HttpService> serviceRegistration) {
-		LOG.info("Binding bundle: [" + bundle + "] to http service");
+	public StoppableHttpService getService(final Bundle bundle, final ServiceRegistration<StoppableHttpService> serviceRegistration) {
+		LOG.info("Binding HTTP Service for bundle: [{}]", bundle);
 		return createService(bundle);
 	}
 
 	@Override
-	public void ungetService(final Bundle bundle,
-							 final ServiceRegistration<HttpService> serviceRegistration,
-							 final HttpService httpService) {
-		LOG.info("Unbinding bundle: [" + bundle + "]");
-		((StoppableHttpService) httpService).stop();
+	public void ungetService(final Bundle bundle, final ServiceRegistration<StoppableHttpService> serviceRegistration, final StoppableHttpService httpService) {
+		LOG.info("Unbinding HTTP Service from bundle: [{}]", bundle);
+		httpService.stop();
 	}
 
-	abstract HttpService createService(Bundle bundle);
+	abstract StoppableHttpService createService(Bundle bundle);
+
 }

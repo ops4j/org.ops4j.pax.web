@@ -1,0 +1,61 @@
+= pax-web-itest-osgi
+
+This new Maven module contains PaxExam integration tests showing some aspects of PaxWeb that were not covered by existing integration tests for Jetty, Tomcat and Undertow containers.
+
+== Logging configuration in PaxExam tests
+
+When using PaxExam native conainer (not Karaf container), we have two JVM instances:
+
+* One when `mvn` build runs
+* One starter by `maven-failsafe-plugin` (can be configured to run in the above JVM, but that's not default configuration)
+
+PaxExam itself (before even starting any implementation of `org.ops4j.pax.exam.TestContainer`) uses Slf4J API, so we definitiely want two Maven dependencies in `test` scope:
+
+* org.slf4j:slf4j-api
+* org.apache.logging.log4j:log4j-slf4j-impl
+
+And configuration file like `src/test/resources/log4j2-test.properties`.
+
+First ever call to `org.slf4j.LoggerFactory.getLogger()` is when constructing static logger in `org.ops4j.pax.exam.spi.reactors.ReactorManager`. And as expected (from `test` scoped Maven dependencies), the `org.slf4j.ILoggerFactory` instance found is `org.apache.logging.slf4j.Log4jLoggerFactory`.
+
+First evet call to `org.slf4j.Logger.info()` is done from `org.ops4j.pax.exam.spi.DefaultExamSystem.create()`.
+
+Finally, in Exam's native container Felix starts and starts bundles according to start level.
+At start level `5`, `org.ops4j.pax.exam.extender.service` bundle is started. `org.ops4j.pax.swissbox.extender.BundleWatcher` constructor is the first one that uses Slf4J API. This bundle has start level `2`, while `pax-logging-api` bundle has start level `4` - anyway, it already can provide _classes_ (not yet services and configuration), that's why `org.ops4j.pax.exam.extender.service` works and is resolved - it has access to Slf4J classes from `pax-logging-api`.
+
+`org.ops4j.pax.logging.slf4j.Slf4jLogger.m_delegate` is still an instance of `org.ops4j.pax.logging.spi.support.DefaultServiceLog`.
+
+With PAXLOGGING-274 fixed, I can specify the level (threshold) used by `org.ops4j.pax.logging.spi.support.DefaultServiceLog` even before `pax-logging-api` activates, by specifying `-Dorg.ops4j.pax.logging.DefaultServiceLog.level=INFO` system property.
+
+Potential resolution problems are caught by exactly 3 implementations of `org.osgi.framework.FrameworkListener.frameworkEvent()`:
+
+* anonymous one set in `org.ops4j.pax.exam.nat.internal.NativeTestContainer.setFrameworkStartLevel()`
+* anonymous one set in `org.ops4j.pax.exam.nat.internal.NativeTestContainer.start()` - this one logs the even with `ERROR` level and is handled by Log4J2 using configuration from `src/test/resources/log4j2-test.properties` and logs the problem like this:
++
+[listing,options=nowrap]
+----
+- EXAM - 08:48:37.433 [FelixDispatchQueue] ERROR (NativeTestContainer.java:198) org.ops4j.pax.exam.nat.internal.NativeTestContainer - Framework ERROR event org.osgi.framework.FrameworkEvent[source=org.ops4j.pax.web.pax-web-api [17]]
+org.osgi.framework.BundleException: Unable to resolve org.ops4j.pax.web.pax-web-api [17](R 17.0): missing requirement [org.ops4j.pax.web.pax-web-api [17](R 17.0)] osgi.wiring.package; (&(osgi.wiring.package=javax.servlet)(version>=2.3.0)(!(version>=4.0.0))) Unresolved requirements: [[org.ops4j.pax.web.pax-web-api [17](R 17.0)] osgi.wiring.package; (&(osgi.wiring.package=javax.servlet)(version>=2.3.0)(!(version>=4.0.0)))]
+	at org.apache.felix.framework.Felix.resolveBundleRevision(Felix.java:4149) ~[org.apache.felix.framework-5.6.10.jar:?]
+	at org.apache.felix.framework.Felix.startBundle(Felix.java:2119) ~[org.apache.felix.framework-5.6.10.jar:?]
+	at org.apache.felix.framework.Felix.setActiveStartLevel(Felix.java:1373) ~[org.apache.felix.framework-5.6.10.jar:?]
+	at org.apache.felix.framework.FrameworkStartLevelImpl.run(FrameworkStartLevelImpl.java:308) ~[org.apache.felix.framework-5.6.10.jar:?]
+	at java.lang.Thread.run(Thread.java:748) [?:1.8.0_231]
+----
+* `org.ops4j.pax.logging.spi.support.FrameworkHandler.frameworkEvent()` which doesn't log the error because of PaxExam configuration:
++
+[listing,options=nowrap]
+----
+// level at which OSGi R6 Compendium 101.6 logging statements will be printed
+// (from framework/bundle/service events)
+frameworkProperty(PaxLoggingConstants.LOGGING_CFG_FRAMEWORK_EVENTS_LOG_LEVEL).value("DISABLED"),
+----
+
+However, when error is caught in `org.apache.felix.framework.Felix.setActiveStartLevel()`, Felix calls `org.apache.felix.framework.Logger.log()`, which isn't backed (yet) by actual instance of `org.osgi.service.log.LogService` because `pax-logging-api` is not yet started, so it prints the error again to `System.out`.
+
+It's however enough to decrease `org.apache.felix.resolver.Logger.m_logLevel` using:
+
+[code,options=nowrap]
+----
+asd
+----

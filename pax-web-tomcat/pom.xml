@@ -36,21 +36,16 @@
 
 	<name>OPS4J Pax Web - Tomcat</name>
 
-	<properties>
-		<paxrunnerversion>1.7.4</paxrunnerversion>
-		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
-	</properties>
-
 	<build>
 		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>**/HttpServiceRequestWrapper.java</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
+<!--			<plugin>-->
+<!--				<artifactId>maven-compiler-plugin</artifactId>-->
+<!--				<configuration>-->
+<!--					<excludes>-->
+<!--						<exclude>**/HttpServiceRequestWrapper.java</exclude>-->
+<!--					</excludes>-->
+<!--				</configuration>-->
+<!--			</plugin>-->
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
@@ -59,6 +54,14 @@
 					<instructions>
 						<Bundle-Activator>org.ops4j.pax.web.service.tomcat.internal.Activator</Bundle-Activator>
 						<Import-Package>
+							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
+							javax.servlet;version="[3.1,5)",
+							javax.servlet.annotation;version="[3.1,5)",
+							javax.servlet.descriptor;version="[3.1,5)",
+							javax.servlet.http;version="[3.1,5)",
+
+							<!-- to check -->
+
 							org.ops4j.pax.web.service; version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.*; version="${pax-web.osgi.version}",
 							org.ops4j.pax.swissbox.*,
@@ -66,9 +69,7 @@
 							javax.security.auth,
 							javax.security.auth.callback,
 							javax.security.auth.login,
-							javax.servlet.descriptor; version="[3.1,5)",
 							javax.servlet.jsp.*;version="[2.2,2.3)",
-							javax.servlet.*; version="[3.1,5)",
 							javax.websocket,
 							javax.websocket.server,
 							javax.xml.parsers,
@@ -122,14 +123,17 @@
 							!javax.microedition.io,
 							!javax.security.auth.x500,
 						</Import-Package>
-						<Private-Package>org.ops4j.pax.web.service.tomcat.internal.*</Private-Package>
-						<Embed-Dependency>*; artifactId=!org.osgi.compendium;
-							scope=compile; type=!pom; inline=true</Embed-Dependency>
-						<Embed-Transitive>true</Embed-Transitive>
 						<Provide-Capability>
 							osgi.service;objectClass=javax.servlet.ServletContext,
 							osgi.service;effective:=active;objectClass=org.ops4j.pax.web.service.spi.ServerController
 						</Provide-Capability>
+						<Private-Package>
+							org.ops4j.pax.web.service.tomcat.internal.*
+						</Private-Package>
+<!--						<Embed-Dependency>-->
+<!--							*; rtifactId=!org.osgi.compendium;scope=compile;type=!pom;inline=true-->
+<!--						</Embed-Dependency>-->
+<!--						<Embed-Transitive>true</Embed-Transitive>-->
 					</instructions>
 				</configuration>
 			</plugin>
@@ -179,17 +183,17 @@
 			<optional>true</optional>
 		</dependency>
 
-		<dependency>
-			<groupId>org.ops4j.pax.url</groupId>
-			<artifactId>pax-url-war</artifactId>
-			<classifier>uber</classifier>
-			<scope>provided</scope>
-		</dependency>
-        <dependency>
-            <groupId>javax.websocket</groupId>
-            <artifactId>javax.websocket-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.url</groupId>-->
+<!--			<artifactId>pax-url-war</artifactId>-->
+<!--			<classifier>uber</classifier>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>javax.websocket</groupId>-->
+<!--            <artifactId>javax.websocket-api</artifactId>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
 
 		<!-- OSGi -->
 
@@ -207,10 +211,16 @@
 		<!-- JavaEE -->
 
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
+<!--		<dependency>-->
+<!--			<groupId>javax.servlet</groupId>-->
+<!--			<artifactId>javax.servlet-api</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.apache.servicemix.bundles</groupId>
 			<artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
@@ -289,15 +299,26 @@
 		<!-- Tomcat -->
 
 		<dependency>
-			<groupId>org.ops4j.pax.tipi</groupId>
-			<artifactId>org.ops4j.pax.tipi.tomcat-embed-core</artifactId>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-core</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.ops4j.pax.tipi</groupId>
-			<artifactId>org.ops4j.pax.tipi.tomcat-embed-websocket</artifactId>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-websocket</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.tipi</groupId>-->
+<!--			<artifactId>org.ops4j.pax.tipi.tomcat-embed-core</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.tipi</groupId>-->
+<!--			<artifactId>org.ops4j.pax.tipi.tomcat-embed-websocket</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
 
 		<dependency>
 			<groupId>org.eclipse.jdt</groupId>
@@ -313,8 +334,26 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jul-to-slf4j</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-slf4j-impl</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Testing -->
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 

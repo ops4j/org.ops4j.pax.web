@@ -17,7 +17,7 @@ package org.ops4j.pax.web.service.tomcat.internal;
 
 import static org.ops4j.pax.web.service.tomcat.internal.ServerState.States.INITIALIZED;
 
-import org.ops4j.pax.web.service.spi.Configuration;
+import org.ops4j.pax.web.service.spi.config.Configuration;
 
 /**
  * @author Romaim Gilles

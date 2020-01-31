@@ -33,7 +33,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.util.NamedThreadFactory;
@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 public class HttpContextProcessing implements ManagedServiceFactory {
 
 	public static Logger LOG = LoggerFactory.getLogger(HttpContextProcessing.class);
-	public static final String PID = WebContainerConstants.PID + ".context";
+	public static final String PID = PaxWebConstants.PID + ".context";
 
 	private static final String KEY_CONTEXT_ID = "context.id";
 	private static final String KEY_BUNDLE_SN = "bundle.symbolicName";

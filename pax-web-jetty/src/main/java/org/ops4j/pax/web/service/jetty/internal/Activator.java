@@ -53,9 +53,9 @@ public class Activator implements BundleActivator {
 			if (element1 != element2) {
 				comparison = null;
 				for (Object element : Arrays.asList(element1, element2)) {
-					javax.annotation.Priority annotation = element.getClass().getAnnotation(javax.annotation.Priority.class);
-					int priority = annotation == null ? 0 : annotation.value();
-					comparison = comparison == null ? priority : comparison - priority; 
+//					javax.annotation.Priority annotation = element.getClass().getAnnotation(javax.annotation.Priority.class);
+//					int priority = annotation == null ? 0 : annotation.value();
+//					comparison = comparison == null ? priority : comparison - priority;
 				}
 			}
 			return comparison;

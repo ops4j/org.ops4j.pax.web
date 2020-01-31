@@ -17,7 +17,7 @@ package org.ops4j.pax.web.service.tomcat.internal;
 
 import static org.ops4j.pax.web.service.tomcat.internal.ServerState.States.INSTALLED;
 
-import org.ops4j.pax.web.service.spi.Configuration;
+import org.ops4j.pax.web.service.spi.config.Configuration;
 
 /**
  * @author Romain Gilles

@@ -20,7 +20,7 @@ import static org.ops4j.pax.web.service.tomcat.internal.ServerState.States.INITI
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.ops4j.pax.web.service.spi.Configuration;
+import org.ops4j.pax.web.service.spi.config.Configuration;
 
 /**
  * @author Romain Gilles
@@ -79,12 +79,12 @@ class InitializedServerState extends InstalledServerState {
 
 	@Override
 	public Integer getHttpPort() {
-		return configuration.getHttpPort();
+		return configuration.server().getHttpPort();
 	}
 
 	@Override
 	public Integer getHttpSecurePort() {
-		return configuration.getHttpSecurePort();
+		return configuration.server().getHttpSecurePort();
 	}
 
 	@Override

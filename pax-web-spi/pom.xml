@@ -36,10 +36,6 @@
 
 	<name>OPS4J Pax Web - Service SPI</name>
 
-	<properties>
-		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
-	</properties>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -49,23 +45,49 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-							javax.servlet.*;version="[3.1,5)",
-							org.osgi.framework;version="[1.0.0,2.0.0)",
-							org.osgi.service.http;version="[1.0.0,2.0.0)",
-							org.slf4j;version="[1.5,2.0)",
-							org.osgi.service.packageadmin;resolution:=optional,
-							org.ops4j.pax.web.service;version="${pax-web.osgi.version}"
+							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
+							javax.servlet;version="[3.1,5)",
+							javax.servlet.annotation;version="[3.1,5)",
+							javax.servlet.http;version="[3.1,5)",
+
+							<!-- ranges indicate we can work with OSGi Core R6+ -->
+							org.osgi.dto;version="[1.0,2)",
+							org.osgi.framework;version="[1.8,2)",
+							org.osgi.framework.wiring;version="[1.2,2)",
+
+							<!-- OSGi cmpn -->
+							org.osgi.service.http;version="[1.2,2)",
+
+							<!-- from pax-web-api -->
+							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
+
+							<!-- from pax-logging-api -->
+							org.slf4j;version="[1.7,2)",
+
+							<!-- to check -->
+
+							org.apache.commons.logging;version="[1.0,2)";resolution:=optional,
+
+							org.apache.xbean.finder;version="[4.15,5)";resolution:=optional,
+							org.eclipse.osgi.service.urlconversion;resolution:=optional,
+
+							<!-- manual reduction of requirements from private-packaged libraries -->
+							!org.apache.commons.collections4.*,
+							*
 						</Import-Package>
 						<Private-Package>
+							org.ops4j.pax.web.service.spi.internal,
 							org.apache.commons.collections4,
 							org.apache.commons.collections4.iterators,
 							org.apache.commons.collections4.map,
 							org.ops4j.lang.*,
 							org.ops4j.pax.swissbox.*,
-							org.ops4j.pax.web.service.spi.internal
 						</Private-Package>
 						<Export-Package>
+							<!-- pax-web-spi -->
 							org.ops4j.pax.web.service.spi;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.config;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.model;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.util;version="${pax-web.osgi.version}"
 						</Export-Package>
@@ -124,8 +146,8 @@
 		<!-- JavaEE -->
 
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -145,8 +167,46 @@
 		<!-- Other -->
 
 		<dependency>
+			<groupId>org.apache.xbean</groupId>
+			<artifactId>xbean-finder</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.xbean</groupId>
+			<artifactId>xbean-reflect</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.xbean</groupId>
+			<artifactId>xbean-bundleutils</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.xbean</groupId>
+			<artifactId>xbean-asm7-shaded</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm-commons</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm-tree</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Testing -->
@@ -157,8 +217,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.easymock</groupId>
-			<artifactId>easymock</artifactId>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 

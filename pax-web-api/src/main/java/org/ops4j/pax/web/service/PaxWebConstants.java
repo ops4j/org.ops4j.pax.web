@@ -19,28 +19,26 @@ package org.ops4j.pax.web.service;
 import javax.servlet.ServletContext;
 
 /**
- * <p>Different constants used across Pax Web.</p>
+ * <p>Different constants used across Pax Web but not related to configuration that may be specified using
+ * {@code org.ops4j.pax.web} PID or system/bundle context properties. For configuration related constants, see
+ * {@link PaxWebConfig}.</p>
  * <p>Constants names use the following prefixes:<ul>
- *     <li>{@code WEB_CFG_} - for system or context property names</li>
- *     <li>{@code PID_CFG_} - for property names found in {@code org.ops4j.pax.web} PID</li>
- *     <li>!! {@code PROPERTY_JSP_} - for property names found in {@code org.ops4j.pax.web} PID</li>
  *     <li>{@code SERVICE_PROPERTY_} - for names of OSGi service properties</li>
  * </ul></p>
  *
  * @author Alin Dreghiciu
  * @since 0.3.0, December 27, 2007
  */
-public interface WebContainerConstants {
+public interface PaxWebConstants {
 
-	/**
-	 * Service PID used for configuration.
-	 */
+	/** Service PID used for configuration. */
 	String PID = "org.ops4j.pax.web";
 
-	/**
-	 * Servlet API 4, 4.8.1 "Temporary Working Directories". Should be different for each {@link ServletContext}.
-	 */
-	String PROPERTY_TEMP_DIR = ServletContext.TEMPDIR;
+	/** Actual OSGi Http Service will be registered under these {@code objectClass} names. */
+	String[] HTTPSERVICE_REGISTRATION_NAMES = {
+			org.osgi.service.http.HttpService.class.getName(),
+			org.ops4j.pax.web.service.WebContainer.class.getName()
+	};
 
 	/**
 	 * Init param name for specifying a context name.
@@ -73,9 +71,7 @@ public interface WebContainerConstants {
 
 	String PROPERTY_HTTP_USE_NIO = "org.osgi.service.http.useNIO";
 	String PROPERTY_HTTP_CHECK_FORWARDED_HEADERS = "org.osgi.service.http.checkForwardedHeaders";
-	String PROPERTY_HTTP_PORT = "org.osgi.service.http.port";
 	String PROPERTY_HTTP_CONNECTOR_NAME = "org.osgi.service.http.connector.name";
-	String PROPERTY_HTTP_SECURE_PORT = "org.osgi.service.http.port.secure";
 	String PROPERTY_HTTP_ENABLED = "org.osgi.service.http.enabled";
 	String PROPERTY_HTTP_SECURE_ENABLED = "org.osgi.service.http.secure.enabled";
 	String PROPERTY_HTTP_SECURE_CONNECTOR_NAME = "org.osgi.service.http.secure.connector.name";

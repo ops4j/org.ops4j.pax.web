@@ -39,9 +39,9 @@ import io.undertow.servlet.api.SessionPersistenceManager;
 import io.undertow.util.CanonicalPathUtils;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.service.AuthenticatorService;
-import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
-import org.ops4j.pax.web.service.spi.Configuration;
+import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
@@ -53,7 +53,7 @@ import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
-import org.ops4j.pax.web.utils.ServletContainerInitializerScanner;
+import org.ops4j.pax.web.service.spi.util.ServletContainerInitializerScanner;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
@@ -348,10 +348,10 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		try {
 			// find ServiceRegistration which matches the given ServletContext
 			serviceReg = registeredServletContexts.stream().filter(reg -> reg.getReference() != null
-					&& webContextPath.equals(reg.getReference().getProperty(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH)))
+					&& webContextPath.equals(reg.getReference().getProperty(PaxWebConstants.PROPERTY_SERVLETCONTEXT_PATH)))
 					.findFirst();
 			if (serviceReg.isPresent()) {
-				LOG.debug("Unregistered ServletContext with ServletContext Name: ", serviceReg.get().getReference().getProperty(WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME));
+				LOG.debug("Unregistered ServletContext with ServletContext Name: ", serviceReg.get().getReference().getProperty(PaxWebConstants.PROPERTY_SERVLETCONTEXT_NAME));
 
 					serviceReg.get().unregister();
 			}
@@ -367,7 +367,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		String webContextPath = getContextPathForOsgi(servletContext);
 		// Undertows ServletContextImpl maps "/" to "". In OSGi path must start with /
 		String filter = String.format("(%s=%s)",
-				WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
+				PaxWebConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
 		Optional<ServiceReference<ServletContext>> first;
 		try {
 			first = bundle.getBundleContext().getServiceReferences(ServletContext.class, filter).stream().findFirst();
@@ -377,9 +377,9 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		}
 		if (!first.isPresent()) {
 				Dictionary<String, String> props = new Hashtable<>(2);
-				props.put(WebContainerConstants.PROPERTY_SYMBOLIC_NAME, bundle.getSymbolicName());
-				props.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
-				props.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME, servletContext.getServletContextName());
+				props.put(PaxWebConstants.PROPERTY_SYMBOLIC_NAME, bundle.getSymbolicName());
+				props.put(PaxWebConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
+				props.put(PaxWebConstants.PROPERTY_SERVLETCONTEXT_NAME, servletContext.getServletContextName());
 				ServiceRegistration<ServletContext> serviceReg = bundle.getBundleContext().registerService(
 						ServletContext.class,
 						new ServletContextProxy(this),
@@ -400,7 +400,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		deployment.setClassLoader(classLoader);
 		BundleContext bundleContext = contextModel.getBundle().getBundleContext();
 		if (bundleContext != null) {
-			deployment.addServletContextAttribute(WebContainerConstants.BUNDLE_CONTEXT_ATTRIBUTE, bundleContext);
+			deployment.addServletContextAttribute(PaxWebConstants.BUNDLE_CONTEXT_ATTRIBUTE, bundleContext);
 			deployment.addServletContextAttribute("org.springframework.osgi.web.org.osgi.framework.BundleContext", bundleContext);
 		}
 		deployment.setResourceManager(this);
@@ -636,33 +636,33 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		ServletSessionConfig ssc = new ServletSessionConfig();
 		if (contextModel.getSessionDomain() != null) {
 			ssc.setDomain(contextModel.getSessionDomain());
-		} else if (configuration != null && configuration.getSessionDomain() != null) {
-			ssc.setDomain(configuration.getSessionDomain());
+		} else if (configuration != null && configuration.session().getSessionDomain() != null) {
+			ssc.setDomain(configuration.session().getSessionDomain());
 		}
 		if (contextModel.getSessionCookie() != null) {
 			ssc.setName(contextModel.getSessionCookie());
-		} else if (configuration != null && configuration.getSessionCookie() != null) {
-			ssc.setName(configuration.getSessionCookie());
+		} else if (configuration != null && configuration.session().getSessionCookie() != null) {
+			ssc.setName(configuration.session().getSessionCookie());
 		}
 		if (contextModel.getSessionCookieHttpOnly() != null) {
 			ssc.setHttpOnly(contextModel.getSessionCookieHttpOnly());
-		} else if (configuration != null && configuration.getSessionCookieHttpOnly() != null) {
-			ssc.setHttpOnly(configuration.getSessionCookieHttpOnly());
+		} else if (configuration != null && configuration.session().getSessionCookieHttpOnly() != null) {
+			ssc.setHttpOnly(configuration.session().getSessionCookieHttpOnly());
 		}
 		if (contextModel.getSessionCookieSecure() != null) {
 			ssc.setSecure(contextModel.getSessionCookieSecure());
-		} else if (configuration != null && configuration.getSessionCookieSecure() != null) {
-			ssc.setSecure(configuration.getSessionCookieSecure());
+		} else if (configuration != null && configuration.session().getSessionCookieSecure() != null) {
+			ssc.setSecure(configuration.session().getSessionCookieSecure());
 		}
 		if (contextModel.getSessionCookieMaxAge() != null) {
 			ssc.setMaxAge(contextModel.getSessionCookieMaxAge());
-		} else if (configuration != null && configuration.getSessionCookieMaxAge() != null) {
-			ssc.setMaxAge(configuration.getSessionCookieMaxAge());
+		} else if (configuration != null && configuration.session().getSessionCookieMaxAge() != null) {
+			ssc.setMaxAge(configuration.session().getSessionCookieMaxAge());
 		}
 		if (contextModel.getSessionPath() != null) {
 			ssc.setPath(contextModel.getSessionPath());
-		} else if (configuration != null && configuration.getSessionPath() != null) {
-			ssc.setPath(configuration.getSessionPath());
+		} else if (configuration != null && configuration.session().getSessionPath() != null) {
+			ssc.setPath(configuration.session().getSessionPath());
 		}
 		deployment.setServletSessionConfig(ssc);
 		deployment.setDefaultSessionTimeout(defaultSessionTimeoutInMinutes * 60);
@@ -1043,10 +1043,10 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	private class FilterRankComparator implements Comparator<FilterModel> {
 		@Override
 		public int compare(FilterModel fm1, FilterModel fm2) {
-			int r1 = ((fm1.getInitParams() == null) || (fm1.getInitParams().get(WebContainerConstants.FILTER_RANKING) == null))
-					? 0 : Integer.parseInt(fm1.getInitParams().get(WebContainerConstants.FILTER_RANKING));
-			int r2 = ((fm2.getInitParams() == null) || (fm2.getInitParams().get(WebContainerConstants.FILTER_RANKING) == null))
-					? 0 : Integer.parseInt(fm2.getInitParams().get(WebContainerConstants.FILTER_RANKING));
+			int r1 = ((fm1.getInitParams() == null) || (fm1.getInitParams().get(PaxWebConstants.FILTER_RANKING) == null))
+					? 0 : Integer.parseInt(fm1.getInitParams().get(PaxWebConstants.FILTER_RANKING));
+			int r2 = ((fm2.getInitParams() == null) || (fm2.getInitParams().get(PaxWebConstants.FILTER_RANKING) == null))
+					? 0 : Integer.parseInt(fm2.getInitParams().get(PaxWebConstants.FILTER_RANKING));
 
 			if (r1 == r2) {
 				return fm1.getName().compareTo(fm2.getName());

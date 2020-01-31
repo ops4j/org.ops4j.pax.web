@@ -16,7 +16,7 @@
 
 package org.ops4j.pax.web.service.tomcat.internal;
 
-import org.ops4j.pax.web.service.spi.Configuration;
+import org.ops4j.pax.web.service.spi.config.Configuration;
 
 /**
  * @author Romaim Gilles

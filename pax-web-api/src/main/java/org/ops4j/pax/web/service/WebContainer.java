@@ -36,10 +36,22 @@ import org.osgi.service.http.runtime.dto.RequestInfoDTO;
 import org.osgi.service.http.runtime.dto.RuntimeDTO;
 
 /**
- * WebContainer allows bundles to dynamically:
- * register and unregister event listeners, for better control over the life
- * cycle of ServletContext, HttpSession and ServletRequest;
- * register and unregister filters into the URI namespace of Http Service
+ * <p>This interfaces extends {@link HttpService} defined in OSGi CMPN R7, chapter 102 "Http Service
+ * specification".</p>
+ * <p>In addition to basic registration methods from {@link HttpService}, here we can register all remaining
+ * <em>web components</em> defined in Java Servlet Specification 4:<ul>
+ *     <li>servlets (using more options)</li>
+ *     <li>filters</li>
+ *     <li>JSPs (as specialization of servlet)</li>
+ *     <li>error pages</li>
+ *     <li>welcome files</li>
+ *     <li>login configurations</li>
+ *     <li>security constraints</li>
+ *     <li>servlet container initializers</li>
+ *     <li>web sockets</li>
+ * </ul></p>
+ * <p>Additionally this interface allows to configure some parameters that are normally specified via
+ * {@code web.xml}.</p>
  *
  * @author Alin Dreghiciu
  * @since 0.5.2

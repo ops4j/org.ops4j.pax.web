@@ -93,7 +93,6 @@ import org.apache.tomcat.util.digester.RuleSet;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.AuthenticatorService;
-import org.ops4j.pax.web.service.WebContainerConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.model.ContextModel;
@@ -105,7 +104,7 @@ import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
-import org.ops4j.pax.web.utils.ServletContainerInitializerScanner;
+import org.ops4j.pax.web.service.spi.util.ServletContainerInitializerScanner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -1021,7 +1020,7 @@ class TomcatServerWrapper implements ServerWrapper {
 
 			LOG.debug("Registering ServletContext as service. ");
 			final Dictionary<String, String> properties = new Hashtable<>();
-			properties.put(WebContainerConstants.PROPERTY_SYMBOLIC_NAME, bundle.getSymbolicName());
+//			properties.put(WebContainerConstants.PROPERTY_SYMBOLIC_NAME, bundle.getSymbolicName());
 
 			final Dictionary<String, String> headers = bundle.getHeaders();
 			final String version = headers.get(Constants.BUNDLE_VERSION);
@@ -1069,13 +1068,13 @@ class TomcatServerWrapper implements ServerWrapper {
 				webContextPath = "/" + webContextPath;
 			}
 			if (webContextPath == null) {
-				LOG.warn(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH +
-						" couldn't be set, it's not configured. Assuming '/'");
+//				LOG.warn(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH +
+//						" couldn't be set, it's not configured. Assuming '/'");
 				webContextPath = "/";
 			}
 
-			properties.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
-			properties.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME, context.getServletContext().getServletContextName());
+//			properties.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
+//			properties.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME, context.getServletContext().getServletContextName());
 
 			servletContextService = bundleContext.registerService(
 					ServletContext.class, servletContext, properties);
@@ -1305,8 +1304,8 @@ class TomcatServerWrapper implements ServerWrapper {
 		if (contextAttributes != null) {
 			attributes.putAll(contextAttributes);
 		}
-		attributes.put(WebContainerConstants.BUNDLE_CONTEXT_ATTRIBUTE,
-				bundleContext);
+//		attributes.put(WebContainerConstants.BUNDLE_CONTEXT_ATTRIBUTE,
+//				bundleContext);
 		attributes
 				.put("org.springframework.osgi.web.org.osgi.framework.BundleContext",
 						bundleContext);

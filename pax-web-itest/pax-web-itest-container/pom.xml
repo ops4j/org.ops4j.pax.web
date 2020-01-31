@@ -38,10 +38,6 @@
 
 	<description>Container integration tests for Pax Web</description>
 
-	<modules>
-		<module>pax-web-itest-container-any</module>
-	</modules>
-
 	<profiles>
 <!--		<profile>-->
 <!--			<id>jetty</id>-->

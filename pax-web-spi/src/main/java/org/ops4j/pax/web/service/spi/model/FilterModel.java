@@ -28,7 +28,7 @@ import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.util.ConversionUtil;
 import org.ops4j.pax.web.service.spi.util.Path;
 
@@ -87,12 +87,12 @@ public class FilterModel extends Model {
 		}
 
 		this.initParams = ConversionUtil.convertToMap(initParameter);
-		String idName = initParams.get(WebContainerConstants.FILTER_NAME);
+		String idName = initParams.get(PaxWebConstants.FILTER_NAME);
 		if (idName == null) {
 			idName = getId();
 		}
 		this.name = idName;
-		initParams.remove(WebContainerConstants.FILTER_NAME);
+		initParams.remove(PaxWebConstants.FILTER_NAME);
 		this.asyncSupported = asyncSupported;
 		setupDispatcher();
 	}
@@ -102,8 +102,8 @@ public class FilterModel extends Model {
      */
 	private void setupDispatcher() {
 		String dispatches = initParams
-				.get(WebContainerConstants.FILTER_MAPPING_DISPATCHER);
-		initParams.remove(WebContainerConstants.FILTER_MAPPING_DISPATCHER);
+				.get(PaxWebConstants.FILTER_MAPPING_DISPATCHER);
+		initParams.remove(PaxWebConstants.FILTER_MAPPING_DISPATCHER);
 		if (dispatches != null && dispatches.trim().length() > 0) {
 			if (dispatches.indexOf(",") > -1) {
 				// parse

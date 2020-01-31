@@ -1,0 +1,564 @@
+/*
+ * Copyright 2020 OPS4J.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.ops4j.pax.web.service.jetty.internal;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.util.UUID;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.server.handler.ErrorHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.servlet.ServletMapping;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.webapp.WebAppContext;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static org.junit.Assert.assertTrue;
+
+public class EmbeddedJettyTest {
+
+	public static Logger LOG = LoggerFactory.getLogger(EmbeddedJettyTest.class);
+
+	@Test
+	public void embeddedServerWithTrivialHandler() throws Exception {
+		QueuedThreadPool qtp = new QueuedThreadPool(10);
+		qtp.setName("jetty-qtp");
+
+		// main class for a "server" in Jetty. It:
+		// - contains connectors (http receivers)
+		// - contains request handlers (being a handler itself)
+		// - contains a thread pool used by connectors to run request handlers
+		Server server = new Server(qtp);
+
+		// "connector" accepts remote connections and data. ServerConnector is the main, NIO based connector
+		// that can handle HTTP, HTTP/2, SSL and websocket connections
+		ServerConnector connector = new ServerConnector(server, 1, 1, new HttpConnectionFactory());
+		connector.setPort(0);
+		LOG.info("Local port before start: {}", connector.getLocalPort());
+
+		// initially server doesn't have connectors, so we have to set them
+		server.setConnectors(new Connector[] { connector });
+
+		// this is done implicitly anyway
+		server.setErrorHandler(new ErrorHandler());
+
+		// "handler" is invoked by connector when request is received. Jetty comes with this nice
+		// hierarchy of handlers and Pax Web itself adds few more:
+		//
+		// Handler (org.eclipse.jetty.server)
+		//   AbstractHandler (org.eclipse.jetty.server.handler)
+		//     AbstractHandlerContainer (org.eclipse.jetty.server.handler)
+		//       HandlerCollection (org.eclipse.jetty.server.handler)
+		//         ContextHandlerCollection (org.eclipse.jetty.server.handler)
+		//         HandlerList (org.eclipse.jetty.server.handler)
+		//         JettyServerHandlerCollection (org.ops4j.pax.web.service.jetty.internal)
+		//       HandlerWrapper (org.eclipse.jetty.server.handler)
+		//         AsyncDelayHandler (org.eclipse.jetty.server.handler)
+		//         BufferedResponseHandler (org.eclipse.jetty.server.handler)
+		//         DebugHandler (org.eclipse.jetty.server.handler)
+		//         GzipHandler (org.eclipse.jetty.server.handler.gzip)
+		//         IdleTimeoutHandler (org.eclipse.jetty.server.handler)
+		//         InetAccessHandler (org.eclipse.jetty.server.handler)
+		//         IPAccessHandler (org.eclipse.jetty.server.handler)
+		//         RequestLogHandler (org.eclipse.jetty.server.handler)
+		//         ResourceHandler (org.eclipse.jetty.server.handler)
+		//         ScopedHandler (org.eclipse.jetty.server.handler)
+		//           ContextHandler (org.eclipse.jetty.server.handler)
+		//             MovedContextHandler (org.eclipse.jetty.server.handler)
+		//             ServletContextHandler (org.eclipse.jetty.servlet)
+		//               HttpServiceContext (org.ops4j.pax.web.service.jetty.internal)
+		//               WebAppContext (org.eclipse.jetty.webapp)
+		//           ServletHandler (org.eclipse.jetty.servlet)
+		//             HttpServiceServletHandler (org.ops4j.pax.web.service.jetty.internal)
+		//           SessionHandler (org.eclipse.jetty.server.session)
+		//         SecurityHandler (org.eclipse.jetty.security)
+		//           ConstraintSecurityHandler (org.eclipse.jetty.security)
+		//         Server (org.eclipse.jetty.server)
+		//           JettyServerWrapper (org.ops4j.pax.web.service.jetty.internal)
+		//         ShutdownHandler (org.eclipse.jetty.server.handler)
+		//         StatisticsHandler (org.eclipse.jetty.server.handler)
+		//         ThreadLimitHandler (org.eclipse.jetty.server.handler)
+		//       HotSwapHandler (org.eclipse.jetty.server.handler)
+		//   DefaultHandler (org.eclipse.jetty.server.handler)
+		//   ErrorDispatchHandler in AbstractHandler (org.eclipse.jetty.server.handler)
+		//   ErrorHandler (org.eclipse.jetty.server.handler)
+		//     ErrorPageErrorHandler (org.eclipse.jetty.servlet)
+		//   Redirector in MovedContextHandler (org.eclipse.jetty.server.handler)
+		//   SecuredRedirectHandler (org.eclipse.jetty.server.handler)
+		server.setHandler(new AbstractHandler() {
+			@Override
+			protected void doStart() throws Exception {
+				LOG.info("Starting custom handler during server startup");
+			}
+
+			@Override
+			public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+				response.setContentType("text/plain");
+				response.setCharacterEncoding("UTF-8");
+				response.getWriter().write("OK\n");
+				response.getWriter().close();
+			}
+		});
+
+		// starting Jetty server performs these tasks:
+		// - ensuring that org.eclipse.jetty.server.handler.ErrorHandler is available
+		// - all beans () are started. With the above setup, these are the beans:
+		//   _beans = {java.util.concurrent.CopyOnWriteArrayList@2151}  size = 4
+		//     0 = "{QueuedThreadPool[jetty-qtp]@45efd90f{STOPPED,8<=0<=10,i=0,r=-1,q=0}[NO_TRY],AUTO}"
+		//     1 = "{ServerConnector@398dada8{HTTP/1.1,[http/1.1]}{0.0.0.0:0},AUTO}"
+		//       _beans: java.util.List  = {java.util.concurrent.CopyOnWriteArrayList@2260}  size = 6
+		//         0 = "{Server@2812b107{STARTING}[9.4.26.v20200117],UNMANAGED}"
+		//           _beans: java.util.List  = {java.util.concurrent.CopyOnWriteArrayList@2207}  size = 1
+		//             0 = {org.eclipse.jetty.util.component.ContainerLifeCycle$Bean@2739} "{ReservedThreadExecutor@352c1b98{s=0/1,p=0},AUTO}"
+		//         1 = "{QueuedThreadPool[jetty-qtp]@45efd90f{STOPPED,8<=0<=10,i=0,r=-1,q=0}[NO_TRY],UNMANAGED}"
+		//         2 = "{ScheduledExecutorScheduler@6ee4d9ab{STOPPED},AUTO}"
+		//         3 = "{org.eclipse.jetty.io.ArrayByteBufferPool@5a5338df,POJO}"
+		//         4 = "{HttpConnectionFactory@61eaec38[HTTP/1.1],AUTO}"
+		//           _beans: java.util.List  = {java.util.concurrent.CopyOnWriteArrayList@2489}  size = 1
+		//             0 = "{HttpConfiguration@332729ad{32768/8192,8192/8192,https://:0,[]},POJO}"
+		//         5 = "{SelectorManager@ServerConnector@398dada8{HTTP/1.1,[http/1.1]}{0.0.0.0:0},MANAGED}"
+		//     2 = "{ErrorHandler@df6620a{STOPPED},AUTO}"
+		//     3 = "{AbstractHandler@4416d64f{STOPPED},MANAGED}"
+		// - in the above lifecycle, lifecycle objects with org.eclipse.jetty.server.Connector interface are delayed,
+		//   they'll be started last
+		// - after all org.eclipse.jetty.util.component.ContainerLifeCycle._beans are started, Server starts
+		//   all org.eclipse.jetty.server.Server._connectors
+		// - local port of the connector is set in org.eclipse.jetty.server.ServerConnector.open()
+		server.start();
+
+		LOG.info("Local port after start: {}", connector.getLocalPort());
+
+		Socket s = new Socket();
+		s.connect(new InetSocketAddress("127.0.0.1", connector.getLocalPort()));
+
+		s.getOutputStream().write((
+				"GET / HTTP/1.1\r\n" +
+				"Host: 127.0.0.1:" + connector.getLocalPort() + "\r\n" +
+				"Connection: close\r\n\r\n").getBytes());
+
+		byte[] buf = new byte[64];
+		int read = -1;
+		StringWriter sw = new StringWriter();
+		while ((read = s.getInputStream().read(buf)) > 0) {
+			sw.append(new String(buf, 0, read));
+		}
+		s.close();
+
+		assertTrue(sw.toString().endsWith("\r\n\r\nOK\n"));
+
+		server.stop();
+		server.join();
+	}
+
+	@Test
+	public void embeddedServerWithServletHandler() throws Exception {
+		Server server = new Server();
+		ServerConnector connector = new ServerConnector(server, 1, 1, new HttpConnectionFactory());
+		connector.setPort(0);
+		server.setConnectors(new Connector[] { connector });
+
+		// empty ServletHandler has empty org.eclipse.jetty.servlet.ServletHandler._servletMappings
+		// so (if org.eclipse.jetty.servlet.ServletHandler._ensureDefaultServlet == true),
+		// org.eclipse.jetty.servlet.ServletHandler.Default404Servlet is mapped to "/"
+		ServletHandler handler = new ServletHandler();
+		handler.setEnsureDefaultServlet(false);
+
+		// this method just adds servlet to org.eclipse.jetty.servlet.ServletHandler._servlets, it's not enough
+		// servlet needs a name (in ServletHolder) to allow its mapping
+		handler.addServlet(new ServletHolder("default-servlet", new HttpServlet() {
+			@Override
+			protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				resp.setContentType("text/plain");
+				resp.setCharacterEncoding("UTF-8");
+				resp.getWriter().write("OK\n");
+				resp.getWriter().close();
+			}
+		}));
+
+		// adding a mapping ensures proper entry in org.eclipse.jetty.servlet.ServletHandler._servletMappings
+		// when ServletHandler starts, org.eclipse.jetty.servlet.ServletHandler._servletNameMap is also updated
+		ServletMapping mapping = new ServletMapping();
+		mapping.setServletName("default-servlet");
+		mapping.setPathSpec("/");
+		handler.addServletMapping(mapping);
+
+		server.setHandler(handler);
+		server.start();
+
+		int port = connector.getLocalPort();
+
+		Socket s = new Socket();
+		s.connect(new InetSocketAddress("127.0.0.1", port));
+
+		s.getOutputStream().write((
+				"GET / HTTP/1.1\r\n" +
+				"Host: 127.0.0.1:" + connector.getLocalPort() + "\r\n" +
+				"Connection: close\r\n\r\n").getBytes());
+
+		byte[] buf = new byte[64];
+		int read = -1;
+		StringWriter sw = new StringWriter();
+		while ((read = s.getInputStream().read(buf)) > 0) {
+			sw.append(new String(buf, 0, read));
+		}
+		s.close();
+
+		assertTrue(sw.toString().endsWith("\r\n\r\nOK\n"));
+
+		server.stop();
+		server.join();
+	}
+
+	@Test
+	public void embeddedServerWithContextHandler() throws Exception {
+		Server server = new Server();
+		ServerConnector connector = new ServerConnector(server, 1, 1, new HttpConnectionFactory());
+		connector.setPort(0);
+		server.setConnectors(new Connector[] { connector });
+
+		// ServletHandler requires ServletContextHandler, so we need more primitive handlers
+		Handler plainHandler1 = new AbstractHandler() {
+			@Override
+			public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+				response.setContentType("text/plain");
+				response.setCharacterEncoding("UTF-8");
+				response.getWriter().write("OK1\n");
+				response.getWriter().close();
+			}
+		};
+
+		Handler plainHandler2 = new AbstractHandler() {
+			@Override
+			public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+				response.setContentType("text/plain");
+				response.setCharacterEncoding("UTF-8");
+				response.getWriter().write("OK2\n");
+				response.getWriter().close();
+			}
+		};
+
+		// context handler sets "context" for the request. "Context" consists of class loader, context path, ...
+		ContextHandler handler1 = new ContextHandler("/c1");
+		handler1.setHandler(plainHandler1);
+		// without it, we'll need "GET /c1/ HTTP/1.1" requests
+		// or just follow `HTTP/1.1 302 Found` redirect from /c1 to /c1/
+		handler1.setAllowNullPathInfo(true);
+		ContextHandler handler2 = new ContextHandler("/c2");
+		handler2.setHandler(plainHandler2);
+		// without it, we'll need "GET /c2/ HTTP/1.1" requests
+		handler2.setAllowNullPathInfo(true);
+
+		ContextHandlerCollection chc = new ContextHandlerCollection(handler1, handler2);
+
+		server.setHandler(chc);
+		server.start();
+
+		int port = connector.getLocalPort();
+
+		Socket s1 = new Socket();
+		s1.connect(new InetSocketAddress("127.0.0.1", port));
+
+		s1.getOutputStream().write((
+				"GET /c1 HTTP/1.1\r\n" +
+				"Host: 127.0.0.1:" + connector.getLocalPort() + "\r\n" +
+				"Connection: close\r\n\r\n").getBytes());
+
+		byte[] buf = new byte[64];
+		int read = -1;
+		StringWriter sw = new StringWriter();
+		while ((read = s1.getInputStream().read(buf)) > 0) {
+			sw.append(new String(buf, 0, read));
+		}
+		s1.close();
+
+		assertTrue(sw.toString().endsWith("\r\n\r\nOK1\n"));
+
+		Socket s2 = new Socket();
+		s2.connect(new InetSocketAddress("127.0.0.1", port));
+
+		s2.getOutputStream().write((
+				"GET /c2 HTTP/1.1\r\n" +
+				"Host: 127.0.0.1:" + connector.getLocalPort() + "\r\n" +
+				"Connection: close\r\n\r\n").getBytes());
+
+		buf = new byte[64];
+		read = -1;
+		sw = new StringWriter();
+		while ((read = s2.getInputStream().read(buf)) > 0) {
+			sw.append(new String(buf, 0, read));
+		}
+		s2.close();
+
+		assertTrue(sw.toString().endsWith("\r\n\r\nOK2\n"));
+
+		server.stop();
+		server.join();
+	}
+
+	@Test
+	public void embeddedServerWithServletContextHandler() throws Exception {
+		Server server = new Server();
+		ServerConnector connector = new ServerConnector(server, 1, 1, new HttpConnectionFactory());
+		connector.setPort(0);
+		server.setConnectors(new Connector[] { connector });
+
+		// passing chc to ServletContextHandler is a bit confusing, because it's not kept as field there. It's
+		// only used to call chc.addHandler()
+		ContextHandlerCollection chc = new ContextHandlerCollection();
+
+		// servlet context handler extends ContextHandler for easier ContextHandler with _handler = ServletHandler
+		// created ServletContextHandler will already have session, security handlers (depending on options) and
+		// ServletHandler and we can add servlets/filters through ServletContextHandler
+		ServletContextHandler handler1 = new ServletContextHandler(chc, "/c1", ServletContextHandler.NO_SESSIONS);
+		handler1.setAllowNullPathInfo(true);
+		// this single method adds both ServletHolder and ServletMapping
+		// calling org.eclipse.jetty.servlet.ServletHandler.addServletWithMapping()
+		handler1.addServlet(new ServletHolder("default-servlet", new HttpServlet() {
+			@Override
+			protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				resp.setContentType("text/plain");
+				resp.setCharacterEncoding("UTF-8");
+				resp.getWriter().write("OK1\n");
+				resp.getWriter().close();
+			}
+		}), "/");
+
+		ServletContextHandler handler2 = new ServletContextHandler(chc, "/c2", ServletContextHandler.NO_SESSIONS);
+		handler2.setAllowNullPathInfo(true);
+		handler2.addServlet(new ServletHolder("default-servlet", new HttpServlet() {
+			@Override
+			protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				resp.setContentType("text/plain");
+				resp.setCharacterEncoding("UTF-8");
+				resp.getWriter().write("OK2\n");
+				resp.getWriter().close();
+			}
+		}), "/");
+
+		server.setHandler(chc);
+		server.start();
+
+		int port = connector.getLocalPort();
+
+		Socket s1 = new Socket();
+		s1.connect(new InetSocketAddress("127.0.0.1", port));
+
+		s1.getOutputStream().write((
+				"GET /c1 HTTP/1.1\r\n" +
+				"Host: 127.0.0.1:" + connector.getLocalPort() + "\r\n" +
+				"Connection: close\r\n\r\n").getBytes());
+
+		byte[] buf = new byte[64];
+		int read = -1;
+		StringWriter sw = new StringWriter();
+		while ((read = s1.getInputStream().read(buf)) > 0) {
+			sw.append(new String(buf, 0, read));
+		}
+		s1.close();
+
+		assertTrue(sw.toString().endsWith("\r\n\r\nOK1\n"));
+
+		Socket s2 = new Socket();
+		s2.connect(new InetSocketAddress("127.0.0.1", port));
+
+		s2.getOutputStream().write((
+				"GET /c2 HTTP/1.1\r\n" +
+				"Host: 127.0.0.1:" + connector.getLocalPort() + "\r\n" +
+				"Connection: close\r\n\r\n").getBytes());
+
+		buf = new byte[64];
+		read = -1;
+		sw = new StringWriter();
+		while ((read = s2.getInputStream().read(buf)) > 0) {
+			sw.append(new String(buf, 0, read));
+		}
+		s2.close();
+
+		assertTrue(sw.toString().endsWith("\r\n\r\nOK2\n"));
+
+		server.stop();
+		server.join();
+	}
+
+	@Test
+	public void embeddedServerWithWebAppContext() throws Exception {
+		Server server = new Server();
+		ServerConnector connector = new ServerConnector(server, 1, 1, new HttpConnectionFactory());
+		connector.setPort(0);
+		server.setConnectors(new Connector[] { connector });
+
+		ContextHandlerCollection chc = new ContextHandlerCollection();
+
+		// and finally an extension of ServletContextHandler - WebAppContext, which is again a ServletContextHandler
+		// but objects (filters, servlets, ...) are added by org.eclipse.jetty.webapp.Configuration and
+		// org.eclipse.jetty.webapp.DescriptorProcessor processors
+		WebAppContext wac1 = new WebAppContext();
+		wac1.setContextPath("/app1");
+		// by default, null path info is not allowed and redirect (with added "/") is sent when requesting just
+		// the context URL
+		wac1.setAllowNullPathInfo(false);
+		// when we don't pass handler collection (or handler wrapper) in constructor, we have to add this
+		// specialized context handler manually
+		chc.addHandler(wac1);
+
+		// org.eclipse.jetty.webapp.StandardDescriptorProcessor.end() just adds 4 component lists to WebAppContext's
+		// org.eclipse.jetty.servlet.ServletContextHandler._servletHandler:
+		// - servlets
+		// - filters
+		// - servlet mappings
+		// - filter mappings
+		//
+		// when WebAppContext.doStart() calls org.eclipse.jetty.webapp.WebAppContext.preConfigure(), all
+		// org.eclipse.jetty.webapp.WebAppContext._configurationClasses are turned into actual configurators
+		// default configuration classes are org.eclipse.jetty.webapp.WebAppContext.DEFAULT_CONFIGURATION_CLASSES
+		wac1.setConfigurationClasses(new String[] {
+				"org.eclipse.jetty.webapp.WebXmlConfiguration"
+		});
+
+		// to impact WebXmlConfiguration, we need few settings
+		wac1.setDefaultsDescriptor(null); // to override "org/eclipse/jetty/webapp/webdefault.xml"
+
+		// prepare pure web.xml without any web app structure
+		File webXml = new File("target/web-" + UUID.randomUUID().toString() + ".xml");
+		webXml.delete();
+
+		try (FileWriter writer = new FileWriter(webXml)) {
+			writer.write("<web-app xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+					"    xsi:schemaLocation=\"http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd\"\n" +
+					"    version=\"4.0\">\n" +
+					"\n" +
+					"    <servlet>\n" +
+					"        <servlet-name>test-servlet</servlet-name>\n" +
+					"        <servlet-class>org.ops4j.pax.web.service.jetty.internal.EmbeddedJettyTest$TestServlet</servlet-class>\n" +
+					"    </servlet>\n" +
+					"\n" +
+					"    <servlet-mapping>\n" +
+					"        <servlet-name>test-servlet</servlet-name>\n" +
+					"        <url-pattern>/ts</url-pattern>\n" +
+					"    </servlet-mapping>\n" +
+					"\n" +
+					"</web-app>\n");
+		}
+
+		// all the metadata from different (webdefaults.xml, web.xml, ...) descriptors are kept in
+		// org.eclipse.jetty.webapp.MetaData object inside org.eclipse.jetty.webapp.WebAppContext._metadata
+		wac1.setDescriptor(webXml.toURI().toURL().toString());
+
+		// when WebAppContext is started, registered descriptor processors process the descriptors
+		// org.eclipse.jetty.webapp.StandardDescriptorProcessor.start():
+		//  - populates org.eclipse.jetty.webapp.StandardDescriptorProcessor._filterHolderMap with existing filters
+		//    from ServletContextHandler._servletHandler
+		//  - populates org.eclipse.jetty.webapp.StandardDescriptorProcessor._filterHolders with existing filters
+		//    from ServletContextHandler._servletHandler
+		//  - populates org.eclipse.jetty.webapp.StandardDescriptorProcessor._filterMappings with existing filters
+		//    from ServletContextHandler._servletHandler
+		//  - populates org.eclipse.jetty.webapp.StandardDescriptorProcessor._servletHolderMap with existing servlets
+		//    from ServletContextHandler._servletHandler
+		//  - populates org.eclipse.jetty.webapp.StandardDescriptorProcessor._servletHolders with existing servlets
+		//    from ServletContextHandler._servletHandler
+		//  - populates org.eclipse.jetty.webapp.StandardDescriptorProcessor._servletMappings with existing servlets
+		//    from ServletContextHandler._servletHandler
+		//
+		// org.eclipse.jetty.webapp.StandardDescriptorProcessor.visit() calls one of 19 visitors:
+		// _visitors = {java.util.HashMap@2792}  size = 19
+		//  - "servlet-mapping" -> "StandardDescriptorProcessor.visitServletMapping()"
+		//  - "mime-mapping" -> "StandardDescriptorProcessor.visitMimeMapping()"
+		//  - "distributable" -> "StandardDescriptorProcessor.visitDistributable()"
+		//  - "locale-encoding-mapping-list" -> "StandardDescriptorProcessor.visitLocaleEncodingList()"
+		//  - "servlet" -> "StandardDescriptorProcessor.visitServlet()"
+		//  - "security-role" -> "StandardDescriptorProcessor.visitSecurityRole()"
+		//  - "listener" -> "StandardDescriptorProcessor.visitListener()"
+		//  - "jsp-config" -> "StandardDescriptorProcessor.visitJspConfig()"
+		//  - "context-param" -> "StandardDescriptorProcessor.visitContextParam()"
+		//  - "filter" -> "StandardDescriptorProcessor.visitFilter()"
+		//  - "welcome-file-list" -> "StandardDescriptorProcessor.visitWelcomeFileList()"
+		//  - "taglib" -> "StandardDescriptorProcessor.visitTagLib()"
+		//  - "deny-uncovered-http-methods" -> "StandardDescriptorProcessor.visitDenyUncoveredHttpMethods()"
+		//  - "login-config" -> "StandardDescriptorProcessor.visitLoginConfig() throws java.lang.Exception"
+		//  - "display-name" -> "StandardDescriptorProcessor.visitDisplayName()"
+		//  - "error-page" -> "StandardDescriptorProcessor.visitErrorPage()"
+		//  - "session-config" -> "StandardDescriptorProcessor.visitSessionConfig()"
+		//  - "security-constraint" -> "StandardDescriptorProcessor.visitSecurityConstraint()"
+		//  - "filter-mapping" -> "StandardDescriptorProcessor.visitFilterMapping()"
+		// org.eclipse.jetty.webapp.StandardDescriptorProcessor.end() calls
+		// (on org.eclipse.jetty.servlet.ServletContextHandler._servletHandler):
+		//  - org.eclipse.jetty.servlet.ServletHandler.setFilters()
+		//  - org.eclipse.jetty.servlet.ServletHandler.setServlets()
+		//  - org.eclipse.jetty.servlet.ServletHandler.setFilterMappings()
+		//  - org.eclipse.jetty.servlet.ServletHandler.setServletMappings()
+		//
+		// visitServlet()        creates new org.eclipse.jetty.servlet.ServletHolder
+		// visitServletMapping() creates new org.eclipse.jetty.servlet.ServletMapping
+
+		server.setHandler(chc);
+		server.start();
+
+		int port = connector.getLocalPort();
+
+		Socket s1 = new Socket();
+		s1.connect(new InetSocketAddress("127.0.0.1", port));
+
+		s1.getOutputStream().write((
+				"GET /app1/ts HTTP/1.1\r\n" +
+				"Host: 127.0.0.1:" + connector.getLocalPort() + "\r\n" +
+				"Connection: close\r\n\r\n").getBytes());
+
+		byte[] buf = new byte[64];
+		int read = -1;
+		StringWriter sw = new StringWriter();
+		while ((read = s1.getInputStream().read(buf)) > 0) {
+			sw.append(new String(buf, 0, read));
+		}
+		s1.close();
+
+		assertTrue(sw.toString().endsWith("\r\n\r\nOK\n"));
+
+		server.stop();
+		server.join();
+	}
+
+	public static class TestServlet extends HttpServlet {
+		@Override
+		protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			resp.setContentType("text/plain");
+			resp.setCharacterEncoding("UTF-8");
+			resp.getWriter().write("OK\n");
+			resp.getWriter().close();
+		}
+	}
+
+}

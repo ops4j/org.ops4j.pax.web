@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+
+	Copyright 2020 OPS4J.
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+		http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+
+-->
+<!-- org.apache.catalina.startup.Catalina.setServer() -->
+<Server className="org.apache.catalina.core.StandardServer" portOffset="0">
+
+	<!-- org.apache.catalina.core.StandardServer.setGlobalNamingResources() -->
+	<!-- org.apache.catalina.startup.NamingRuleSet -->
+	<GlobalNamingResources className="org.apache.catalina.deploy.NamingResourcesImpl">
+
+		<!-- org.apache.tomcat.util.descriptor.web.ContextEjb -->
+		<!-- org.apache.catalina.deploy.NamingResourcesImpl.addEjb() -->
+		<Ejb />
+
+		<!-- org.apache.tomcat.util.descriptor.web.ContextEnvironment -->
+		<!-- org.apache.catalina.deploy.NamingResourcesImpl.addEnvironment() -->
+		<Environment />
+
+		<!-- org.apache.tomcat.util.descriptor.web.ContextLocalEjb -->
+		<!-- org.apache.catalina.deploy.NamingResourcesImpl.addLocalEjb() -->
+		<LocalEjb />
+
+		<!-- org.apache.tomcat.util.descriptor.web.ContextResource -->
+		<!-- org.apache.catalina.deploy.NamingResourcesImpl.addResource() -->
+		<Resource />
+
+		<!-- org.apache.tomcat.util.descriptor.web.ContextResourceEnvRef -->
+		<!-- org.apache.catalina.deploy.NamingResourcesImpl.addResourceEnvRef() -->
+		<ResourceEnvRef />
+
+		<!-- org.apache.tomcat.util.descriptor.web.ContextService -->
+		<!-- org.apache.catalina.deploy.NamingResourcesImpl.addService() -->
+		<ServiceRef />
+
+		<!-- org.apache.tomcat.util.descriptor.web.ContextTransaction -->
+		<!-- org.apache.catalina.deploy.NamingResourcesImpl.setTransaction() -->
+		<Transaction />
+
+	</GlobalNamingResources>
+
+	<!-- org.apache.catalina.startup.ListenerCreateRule -->
+	<!-- org.apache.catalina.core.StandardServer.addLifecycleListener() -->
+	<Listener className="derived from org.apache.catalina.LifecycleListener" />
+
+	<!-- org.apache.catalina.core.StandardServer.addService() -->
+	<Service className="org.apache.catalina.core.StandardService">
+
+		<!-- org.apache.catalina.core.StandardService.addLifecycleListener() -->
+		<Listener className="derived from org.apache.catalina.LifecycleListener" />
+
+		<!-- org.apache.catalina.core.StandardService.addExecutor() -->
+		<Executor name="e1" className="org.apache.catalina.core.StandardThreadExecutor" />
+
+		<!-- org.apache.catalina.startup.ConnectorCreateRule -->
+		<!-- org.apache.catalina.core.StandardService.addConnector() -->
+		<!-- org.apache.catalina.connector.Connector -->
+		<!--
+			"protocol" constructor parameter:
+			 - HTTP/1.1 (or null):
+			    - org.apache.coyote.http11.Http11AprProtocol (if APR available), or
+			    - org.apache.coyote.http11.Http11NioProtocol
+			 - AJP/1.3
+			    - org.apache.coyote.ajp.AjpAprProtocol (if APR available), or
+			    - org.apache.coyote.ajp.AjpNioProtocol
+			 - any class implementing org.apache.coyote.ProtocolHandler
+			"sslImplementationName" attribute:
+			 - any class implementing org.apache.tomcat.util.net.SSLImplementation
+			    - org.apache.tomcat.util.net.jsse.JSSEImplementation
+			    - org.apache.tomcat.util.net.openssl.OpenSSLImplementation
+			 - settable on appropriate connectors
+		-->
+		<Connector protocol="protocol" executor="e1" sslImplementationName="">
+
+			<!-- org.apache.tomcat.util.net.SSLHostConfig -->
+			<!-- org.apache.catalina.connector.Connector.addSslHostConfig() -->
+			<SSLHostConfig className="org.apache.tomcat.util.net.SSLHostConfig">
+
+				<!-- org.apache.tomcat.util.net.SSLHostConfig.addCertificate() -->
+				<!-- org.apache.tomcat.util.net.SSLHostConfigCertificate -->
+				<!--
+					"type":
+					 - UNDEFINED
+					 - RSA
+					 - DSA
+					 - EC
+				-->
+				<Certificate type="RSA" />
+
+				<!-- org.apache.tomcat.util.net.openssl.OpenSSLConf -->
+				<!-- org.apache.tomcat.util.net.SSLHostConfig.setOpenSslConf() -->
+				<OpenSSLConf className="org.apache.tomcat.util.net.openssl.OpenSSLConf">
+					<!-- org.apache.tomcat.util.net.openssl.OpenSSLConfCmd -->
+					<!-- org.apache.tomcat.util.net.openssl.OpenSSLConf.addCmd() -->
+					<OpenSSLConfCmd className="org.apache.tomcat.util.net.openssl.OpenSSLConfCmd" />
+				</OpenSSLConf>
+
+			</SSLHostConfig>
+
+			<!-- org.apache.catalina.connector.Connector.addLifecycleListener() -->
+			<Listener className="derived from org.apache.catalina.LifecycleListener" />
+
+			<!-- org.apache.catalina.connector.Connector.addUpgradeProtocol() -->
+			<!--
+				org.apache.coyote.UpgradeProtocol:
+				 - org.apache.coyote.http2.Http2Protocol
+			-->
+			<UpgradeProtocol className="implementation of org.apache.coyote.UpgradeProtocol" />
+
+		</Connector>
+
+		<!-- org.apache.catalina.startup.EngineRuleSet -->
+		<!-- org.apache.catalina.core.StandardEngine -->
+		<!-- org.apache.catalina.core.StandardService.setContainer() -->
+		<Engine className="org.apache.catalina.core.StandardEngine">
+
+			<!-- default listener: org.apache.catalina.startup.EngineConfig -->
+
+			<!-- org.apache.catalina.core.ContainerBase.setCluster() -->
+			<Cluster className="implementation of org.apache.catalina.Cluster" />
+
+			<!-- org.apache.catalina.core.StandardEngine.addLifecycleListener() -->
+			<Listener className="derived from org.apache.catalina.LifecycleListener" />
+
+			<!-- org.apache.catalina.startup.RealmRuleSet -->
+			<!-- org.apache.catalina.core.StandardEngine.setRealm() -->
+			<Realm className="implementation of org.apache.catalina.Realm">
+				<!-- org.apache.catalina.startup.CredentialHandlerRuleSet -->
+				<!-- org.apache.catalina.Realm.setCredentialHandler() -->
+				<CredentialHandler className="implementation of org.apache.catalina.CredentialHandler" />
+				<CredentialHandler className="org.apache.catalina.realm.NestedCredentialHandler">
+					<!-- org.apache.catalina.realm.NestedCredentialHandler.addCredentialHandler -->
+					<CredentialHandler />
+				</CredentialHandler>
+			</Realm>
+			<Realm className="org.apache.catalina.realm.CombinedRealm">
+				<!-- for combined realm, we can have nested realms -->
+				<!-- org.apache.catalina.realm.CombinedRealm.addRealm() -->
+				<Realm />
+			</Realm>
+
+			<!-- org.apache.catalina.core.StandardEngine.addValve() -->
+			<Valve className="implementation of org.apache.catalina.Valve" />
+
+			<!-- org.apache.catalina.startup.HostRuleSet -->
+			<!-- org.apache.catalina.core.StandardEngine.addChild(org.apache.catalina.Host) -->
+			<Host className="org.apache.catalina.core.StandardHost">
+
+				<!-- default listener: org.apache.catalina.startup.HostConfig -->
+
+				<!-- org.apache.catalina.core.StandardHost.addAlias() -->
+				<Alias />
+
+				<!-- org.apache.catalina.core.StandardHost.setCluster() -->
+				<Cluster className="" />
+
+				<!-- org.apache.catalina.core.StandardHost.addLifecycleListener() -->
+				<Listener className="derived from org.apache.catalina.LifecycleListener" />
+
+				<!-- org.apache.catalina.startup.RealmRuleSet -->
+				<!-- org.apache.catalina.core.StandardHost.setRealm() -->
+				<Realm className="implementation of org.apache.catalina.Realm" />
+
+				<!-- org.apache.catalina.core.StandardHost.addValve() -->
+				<Valve className="implementation of org.apache.catalina.Valve" />
+
+				<!-- org.apache.catalina.startup.ContextRuleSet -->
+				<!-- org.apache.catalina.core.StandardHost.addChild(org.apache.catalina.Context) -->
+				<Context className="org.apache.catalina.core.StandardContext">
+
+					<!-- default listener: org.apache.catalina.startup.ContextConfig -->
+
+					<!-- org.apache.catalina.core.StandardContext.addLifecycleListener() -->
+					<Listener className="derived from org.apache.catalina.LifecycleListener" />
+
+					<!-- org.apache.catalina.core.StandardContext.setLoader() -->
+					<Loader className="org.apache.catalina.loader.WebappLoader" />
+
+					<!-- org.apache.catalina.core.StandardContext.setManager() -->
+					<Manager className="org.apache.catalina.session.StandardManager">
+						<!-- org.apache.catalina.session.PersistentManagerBase.setStore() -->
+						<Store className="implementation of org.apache.catalina.Store" />
+
+						<!-- org.apache.catalina.session.ManagerBase.setSessionIdGenerator() -->
+						<SessionIdGenerator className="org.apache.catalina.util.StandardSessionIdGenerator" />
+					</Manager>
+
+					<!-- org.apache.tomcat.util.descriptor.web.ApplicationParameter -->
+					<!-- org.apache.catalina.core.StandardContext.addApplicationParameter() -->
+					<Parameter />
+
+					<!-- org.apache.catalina.startup.RealmRuleSet -->
+					<!-- org.apache.catalina.core.StandardContext.setRealm() -->
+					<Realm className="implementation of org.apache.catalina.Realm" />
+
+					<!-- org.apache.catalina.core.StandardContext.setResources() -->
+					<Resources className="org.apache.catalina.webresources.StandardRoot">
+
+						<!-- org.apache.catalina.WebResourceRoot.addPreResources() -->
+						<PreResources className="implementation of org.apache.catalina.WebResourceSet" />
+
+						<!-- org.apache.catalina.WebResourceRoot.addJarResources() -->
+						<JarResources className="implementation of org.apache.catalina.WebResourceSet" />
+
+						<!-- org.apache.catalina.WebResourceRoot.addPreResources() -->
+						<PostResources className="implementation of org.apache.catalina.WebResourceSet" />
+
+					</Resources>
+
+					<!-- org.apache.tomcat.util.descriptor.web.ContextResourceLink -->
+					<!-- org.apache.catalina.deploy.NamingResourcesImpl.addResourceLink() -->
+					<ResourceLink />
+
+					<!-- org.apache.catalina.core.StandardContext.addValve() -->
+					<Valve className="implementation of org.apache.catalina.Valve" />
+
+					<!-- org.apache.catalina.core.StandardContext.addWatchedResource() -->
+					<WatchedResource />
+
+					<!-- org.apache.catalina.core.StandardContext.addWrapperLifecycle() -->
+					<WrapperLifecycle />
+
+					<!-- org.apache.catalina.core.StandardContext.addWrapperListener() -->
+					<WrapperListener />
+
+					<!-- org.apache.catalina.core.StandardContext.setJarScanner() -->
+					<JarScanner className="org.apache.tomcat.util.scan.StandardJarScanner">
+						<!-- org.apache.tomcat.util.scan.StandardJarScanner.setJarScanFilter() -->
+						<JarScanFilter className="org.apache.tomcat.util.scan.StandardJarScanFilter" />
+					</JarScanner>
+
+					<!-- org.apache.catalina.core.StandardContext.setCookieProcessor() -->
+					<CookieProcessor className="org.apache.tomcat.util.http.Rfc6265CookieProcessor" />
+
+					<!-- org.apache.catalina.startup.NamingRuleSet -->
+					<Ejb />
+					<Environment />
+					<LocalEjb />
+					<Resource />
+					<ResourceEnvRef />
+					<ServiceRef />
+					<Transaction />
+
+				</Context>
+
+			</Host>
+
+		</Engine>
+
+	</Service>
+
+</Server>

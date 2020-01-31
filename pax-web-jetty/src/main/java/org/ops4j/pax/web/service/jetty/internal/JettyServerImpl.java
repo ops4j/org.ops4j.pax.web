@@ -19,17 +19,14 @@ package org.ops4j.pax.web.service.jetty.internal;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.EventListener;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-
 import javax.servlet.ServletException;
 
 import org.eclipse.jetty.jmx.MBeanContainer;
@@ -38,7 +35,6 @@ import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.NCSARequestLog;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.RequestLogHandler;
@@ -53,7 +49,6 @@ import org.eclipse.jetty.util.ArrayUtil;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
-import org.eclipse.jetty.xml.XmlConfiguration;
 import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.service.spi.LifeCycle;
@@ -147,15 +142,15 @@ class JettyServerImpl implements JettyServer {
 					// TCCL to perform static initialization of XmlConfiguration
 					Thread.currentThread().setContextClassLoader(jettyXmlCl);
 					LOG.debug("Configure using resource " + jettyResource);
-					XmlConfiguration configuration = new XmlConfiguration(
-							jettyResource);
-					// TCCL to run configure (this is where objects defined in jetty.xml are created)
-					Thread.currentThread().setContextClassLoader(
-							getClass().getClassLoader());
-					// configuration.configure(m_server);
-					Method method = XmlConfiguration.class.getMethod(
-							"configure", Object.class);
-					method.invoke(configuration, server);
+//					XmlConfiguration configuration = new XmlConfiguration(
+//							jettyResource);
+//					// TCCL to run configure (this is where objects defined in jetty.xml are created)
+//					Thread.currentThread().setContextClassLoader(
+//							getClass().getClassLoader());
+//					// configuration.configure(m_server);
+//					Method method = XmlConfiguration.class.getMethod(
+//							"configure", Object.class);
+//					method.invoke(configuration, server);
 				} finally {
 					Thread.currentThread().setContextClassLoader(loader);
 				}
@@ -535,13 +530,13 @@ class JettyServerImpl implements JettyServer {
 			return; // Obviously context is already destroyed
 		}
 
-		final List<EventListener> listeners = new ArrayList<>(
-				Arrays.asList(context.getEventListeners()));
-		EventListener listener = model.getEventListener();
-
-		listeners.remove(listener);
-		context.setEventListeners(listeners.toArray(new EventListener[listeners
-				.size()]));
+//		final List<EventListener> listeners = new ArrayList<>(
+//				Arrays.asList(context.getEventListeners()));
+//		EventListener listener = model.getEventListener();
+//
+//		listeners.remove(listener);
+//		context.setEventListeners(listeners.toArray(new EventListener[listeners
+//				.size()]));
 		removeContext(model.getContextModel().getHttpContext());
 	}
 
@@ -912,16 +907,16 @@ class JettyServerImpl implements JettyServer {
 			directory += "/";
 		}
 
-		NCSARequestLog requestLog = new NCSARequestLog(directory + configureRequestParameters.format);
-		requestLog.setRetainDays(Integer.parseInt(configureRequestParameters.retainDays));
-		requestLog.setAppend(configureRequestParameters.append);
-		requestLog.setExtended(configureRequestParameters.extend);
-		requestLog.setLogDispatch(configureRequestParameters.dispatch);
-		requestLog.setLogTimeZone(configureRequestParameters.timeZone);
-		requestLog.setLogLatency(configureRequestParameters.logLatency);
-		requestLog.setLogCookies(configureRequestParameters.logCookies);
-		requestLog.setLogServer(configureRequestParameters.logServer);
-		requestLogHandler.setRequestLog(requestLog);
+//		NCSARequestLog requestLog = new NCSARequestLog(directory + configureRequestParameters.format);
+//		requestLog.setRetainDays(Integer.parseInt(configureRequestParameters.retainDays));
+//		requestLog.setAppend(configureRequestParameters.append);
+//		requestLog.setExtended(configureRequestParameters.extend);
+//		requestLog.setLogDispatch(configureRequestParameters.dispatch);
+//		requestLog.setLogTimeZone(configureRequestParameters.timeZone);
+//		requestLog.setLogLatency(configureRequestParameters.logLatency);
+//		requestLog.setLogCookies(configureRequestParameters.logCookies);
+//		requestLog.setLogServer(configureRequestParameters.logServer);
+//		requestLogHandler.setRequestLog(requestLog);
 
 		server.getRootHandlerCollection().addHandler(requestLogHandler);
 	}

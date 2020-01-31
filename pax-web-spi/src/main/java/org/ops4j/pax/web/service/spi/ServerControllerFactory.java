@@ -26,7 +26,10 @@ import org.ops4j.pax.web.service.spi.model.ServerModel;
 public interface ServerControllerFactory {
 
 	/**
-	 * Creates an instance of {@link ServerController} that controls actual server runtime (Jetty, Tomcat, Undertow)
+	 * <p>Creates an instance of {@link ServerController} that will control actual server runtime
+	 * (Jetty, Tomcat, Undertow)</p>
+	 * <p>The configuration is passed via {@link ServerModel} instance.</p>
+	 *
 	 * @param serverModel
 	 * @return
 	 */

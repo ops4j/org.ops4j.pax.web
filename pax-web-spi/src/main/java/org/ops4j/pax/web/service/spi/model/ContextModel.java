@@ -33,7 +33,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
@@ -221,7 +221,7 @@ public class ContextModel extends Identity {
 				}
 				contextParams.put((String) key, (String) value);
 			}
-			contextName = contextParams.get(WebContainerConstants.CONTEXT_NAME);
+			contextName = contextParams.get(PaxWebConstants.CONTEXT_NAME);
 		}
 		if (contextName != null) {
 			contextName = contextName.trim();

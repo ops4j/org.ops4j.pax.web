@@ -71,7 +71,7 @@ import org.osgi.service.http.runtime.dto.RuntimeDTO;
 import org.osgi.service.http.runtime.dto.ServletContextDTO;
 import org.osgi.service.http.runtime.dto.ServletDTO;
 
-@Component(immediate = true, service = WhiteboardDtoService.class)
+//@Component(immediate = true, service = WhiteboardDtoService.class)
 public class WhiteboardDtoService {
 
     private volatile Map<ServiceReference<ServletContext>, ServletContext> servletContexts = new ConcurrentHashMap<>(5);

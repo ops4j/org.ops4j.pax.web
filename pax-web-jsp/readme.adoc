@@ -24,7 +24,7 @@ These will be embedded (and in case of API also exported) within pax-web-jsp its
 * JSTL implementation
 * EL implementation
 
-Servlets API implementation is provided by pax-web-tomcat, pax-web-jetty and pax-web-undertow bundles as _container implementations_.
+Servlet API implementation is provided by pax-web-tomcat, pax-web-jetty and pax-web-undertow bundles which play role of _container implementations_.
 
 == Entry points
 
@@ -45,11 +45,11 @@ Taking into account JavaEE 5 - 8 specifications, we have:
 * JavaEE 5: JSP 2.1, JSTL 1.2
 * JavaEE 6: JSP 2.2, JSTL 1.2
 * JavaEE 7: JSP 2.3, JSTL 1.2
-* JavaEE 8: JSP 2.3, JSTL 1.2
+* JavaEE 8 (and JakartaEE 8): JSP 2.3, JSTL 1.2
 
 List of Maven artifacts providing APIs and implementations related to Servlets/JSP/EL/JSTL specifications.
 
-* Official JavaEE (recently repackaged under jakarta groupId) bundles for APIs (not for implementations!):
+* Official JavaEE (recently repackaged under `jakarta` groupId) bundles for APIs (not for implementations!):
 ** mvn:javax.servlet/javax.servlet-api/3.1.0
 +
 [options=nowrap]
@@ -92,7 +92,7 @@ Import-Package:
     javax.servlet.descriptor; version="4.0.0",
     javax.servlet.http;       version="4.0.0"
 ----
-** mvn:jakarta.servlet/jakarta.servlet-api/4.0.2
+** mvn:jakarta.servlet/jakarta.servlet-api/4.0.3
 +
 [options=nowrap]
 ----
@@ -133,7 +133,7 @@ Import-Package:
     javax.servlet.jsp.el;     version="2.3.3",
     javax.servlet.jsp.tagext; version="2.3.3"
 ----
-** mvn:jakarta.servlet.jsp/jakarta.servlet.jsp-api/2.3.5
+** mvn:jakarta.servlet.jsp/jakarta.servlet.jsp-api/2.3.6
 +
 [options=nowrap]
 ----
@@ -143,16 +143,16 @@ Contains:
     javax.servlet.jsp.tagext
 
 Export-Package:
-    javax.servlet.jsp;        version="2.3.5"; uses:="javax.servlet,javax.el,javax.servlet.jsp.el,javax.servlet.jsp.tagext,javax.servlet.http",
-    javax.servlet.jsp.el;     version="2.3.5"; uses:="javax.servlet,javax.el,javax.servlet.jsp,javax.servlet.http",
-    javax.servlet.jsp.tagext; version="2.3.5"; uses:="javax.servlet.jsp"
+    javax.servlet.jsp;        version="2.3.6"; uses:="javax.servlet,javax.el,javax.servlet.jsp.el,javax.servlet.jsp.tagext,javax.servlet.http",
+    javax.servlet.jsp.el;     version="2.3.6"; uses:="javax.servlet,javax.el,javax.servlet.jsp,javax.servlet.http",
+    javax.servlet.jsp.tagext; version="2.3.6"; uses:="javax.servlet.jsp"
 Import-Package:
     javax.el,
     javax.servlet,
     javax.servlet.http,
-    javax.servlet.jsp;        version="2.3.5",
-    javax.servlet.jsp.el;     version="2.3.5",
-    javax.servlet.jsp.tagext; version="2.3.5"
+    javax.servlet.jsp;        version="2.3.6",
+    javax.servlet.jsp.el;     version="2.3.6",
+    javax.servlet.jsp.tagext; version="2.3.6"
 ----
 ** mvn:javax.servlet.jsp.jstl/javax.servlet.jsp.jstl-api/1.2.2
 +
@@ -183,7 +183,7 @@ Import-Package:
     org.xml.sax,
     org.xml.sax.helpers
 ----
-** mvn:jakarta.servlet.jsp.jstl/jakarta.servlet.jsp.jstl-api/1.2.4
+** mvn:jakarta.servlet.jsp.jstl/jakarta.servlet.jsp.jstl-api/1.2.7
 +
 [options=nowrap]
 ----
@@ -194,19 +194,19 @@ Contains:
     javax.servlet.jsp.jstl.tlv
 
 Export-Package:
-    javax.servlet.jsp.jstl.core; version="1.2.4";uses:="javax.servlet,javax.servlet.http,javax.servlet.jsp.tagext,javax.el,javax.servlet.jsp",
-    javax.servlet.jsp.jstl.fmt;  version="1.2.4";uses:="javax.servlet,javax.servlet.jsp.jstl.core,javax.servlet.http,javax.servlet.jsp",
-    javax.servlet.jsp.jstl.sql;  version="1.2.4",
-    javax.servlet.jsp.jstl.tlv;  version="1.2.4";uses:="org.xml.sax.helpers,org.xml.sax,javax.servlet.jsp.tagext,javax.xml.parsers"
+    javax.servlet.jsp.jstl.core; version="1.2.7";uses:="javax.servlet,javax.servlet.http,javax.servlet.jsp.tagext,javax.el,javax.servlet.jsp",
+    javax.servlet.jsp.jstl.fmt;  version="1.2.7";uses:="javax.servlet,javax.servlet.jsp.jstl.core,javax.servlet.http,javax.servlet.jsp",
+    javax.servlet.jsp.jstl.sql;  version="1.2.7",
+    javax.servlet.jsp.jstl.tlv;  version="1.2.7";uses:="org.xml.sax.helpers,org.xml.sax,javax.servlet.jsp.tagext,javax.xml.parsers"
 Import-Package:
     javax.el;                    version="3.0",
     javax.servlet;               version="4.0",
     javax.servlet.http;          version="4.0",
     javax.servlet.jsp,
-    javax.servlet.jsp.jstl.core; version="1.2.4",
-    javax.servlet.jsp.jstl.fmt;  version="1.2.4",
-    javax.servlet.jsp.jstl.sql;  version="1.2.4",
-    javax.servlet.jsp.jstl.tlv;  version="1.2.4",
+    javax.servlet.jsp.jstl.core; version="1.2.7",
+    javax.servlet.jsp.jstl.fmt;  version="1.2.7",
+    javax.servlet.jsp.jstl.sql;  version="1.2.7",
+    javax.servlet.jsp.jstl.tlv;  version="1.2.7",
     javax.servlet.jsp.tagext,
     javax.xml.parsers,
     org.xml.sax,
@@ -222,7 +222,7 @@ Contains:
 Export-Package:
     javax.el; version="3.0.0"
 ----
-** mvn:jakarta.el/jakarta.el-api/3.0.2
+** mvn:jakarta.el/jakarta.el-api/3.0.3
 +
 [options=nowrap]
 ----
@@ -230,7 +230,7 @@ Contains:
     javax.el
 
 Export-Package:
-    javax.el; version="3.0.2"
+    javax.el; version="3.0.3"
 ----
 
 * Tomcat 8.5.x/9.0.x:

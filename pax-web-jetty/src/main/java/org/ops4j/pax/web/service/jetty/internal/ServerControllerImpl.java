@@ -36,7 +36,7 @@ import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.MultiPartFormDataCompliance;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
-import org.ops4j.pax.web.service.spi.Configuration;
+import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
@@ -214,7 +214,7 @@ class ServerControllerImpl implements ServerController {
 		if (httpConnector != null && httpConnector.isStarted()) {
 			return httpConnector.getLocalPort();
 		}
-		return configuration.getHttpPort();
+		return configuration.server().getHttpPort();
 	}
 
 	@Override
@@ -222,7 +222,7 @@ class ServerControllerImpl implements ServerController {
 		if (httpSecureConnector != null && httpSecureConnector.isStarted()) {
 			return httpSecureConnector.getLocalPort();
 		}
-		return configuration.getHttpSecurePort();
+		return configuration.server().getHttpSecurePort();
 	}
 
 	@Override
@@ -445,52 +445,52 @@ class ServerControllerImpl implements ServerController {
 
 		@Override
 		public void start() {
-			jettyServer = jettyFactory.createServer(configuration.getServerMaxThreads(), configuration.getServerMinThreads(), configuration.getServerIdleTimeout());
+			jettyServer = jettyFactory.createServer(configuration.server().getServerMaxThreads(), configuration.server().getServerMinThreads(), configuration.server().getServerIdleTimeout());
 
 			httpConnector = null;
 			httpSecureConnector = null;
-			String[] addresses = configuration.getListeningAddresses();
+			String[] addresses = configuration.server().getListeningAddresses();
 			if (addresses == null || addresses.length == 0) {
 				addresses = new String[]{null};
 			}
 			Map<String, Object> attributes = new HashMap<>();
 			attributes.put("javax.servlet.context.tempdir",
-					configuration.getTemporaryDirectory());
+					configuration.server().getTemporaryDirectory());
 
 			// Fix for PAXWEB-193
-			jettyServer.setServerConfigDir(configuration.getConfigurationDir());
-			jettyServer.setServerConfigURL(configuration.getConfigurationURL());
-			jettyServer.setDefaultAuthMethod(configuration.getDefaultAuthMethod());
-			jettyServer.setDefaultRealmName(configuration.getDefaultRealmName());
+			jettyServer.setServerConfigDir(configuration.server().getConfigurationDir());
+			jettyServer.setServerConfigURL(configuration.server().getConfigurationURL());
+			jettyServer.setDefaultAuthMethod(configuration.security().getDefaultAuthMethod());
+			jettyServer.setDefaultRealmName(configuration.security().getDefaultRealmName());
 			jettyServer.configureContext(attributes,
-					configuration.getSessionTimeout(),
-					configuration.getSessionCookie(),
-					configuration.getSessionDomain(),
-					configuration.getSessionPath(),
-					configuration.getSessionUrl(),
-					configuration.getSessionCookieHttpOnly(),
-					configuration.getSessionCookieSecure(),
-					configuration.getWorkerName(),
-					configuration.getSessionLazyLoad(),
-					configuration.getSessionStoreDirectory(),
-					configuration.getSessionCookieMaxAge(),
-					configuration.isShowStacks());
+					configuration.session().getSessionTimeout(),
+					configuration.session().getSessionCookie(),
+					configuration.session().getSessionDomain(),
+					configuration.session().getSessionPath(),
+					configuration.session().getSessionUrl(),
+					configuration.session().getSessionCookieHttpOnly(),
+					configuration.session().getSessionCookieSecure(),
+					configuration.server().getWorkerName(),
+					configuration.session().getSessionLazyLoad(),
+					configuration.session().getSessionStoreDirectory(),
+					configuration.session().getSessionCookieMaxAge(),
+					configuration.server().isShowStacks());
 
 			// Configure NCSA RequestLogHandler
-			if (configuration.isLogNCSAFormatEnabled()) {
+			if (configuration.logging().isLogNCSAFormatEnabled()) {
 				jettyServer.configureRequestLog(
-						new ConfigureRequestLogParameter(configuration.getLogNCSAFormat(), configuration.getLogNCSARetainDays(),
-								configuration.isLogNCSAAppend(), configuration.isLogNCSAExtended(), configuration.isLogNCSADispatch(), configuration.getLogNCSATimeZone(),
-								configuration.getLogNCSADirectory(), configuration.isLogNCSALatency(), configuration.isLogNCSACookies(), configuration.isLogNCSAServer()));
+						new ConfigureRequestLogParameter(configuration.logging().getLogNCSAFormat(), configuration.logging().getLogNCSARetainDays(),
+								configuration.logging().isLogNCSAAppend(), configuration.logging().isLogNCSAExtended(), configuration.logging().isLogNCSADispatch(), configuration.logging().getLogNCSATimeZone(),
+								configuration.logging().getLogNCSADirectory(), configuration.logging().isLogNCSALatency(), configuration.logging().isLogNCSACookies(), configuration.logging().isLogNCSAServer()));
 			}
 
 			jettyServer.start();
 			for (String address : addresses) {
-				Integer httpPort = configuration.getHttpPort();
+				Integer httpPort = configuration.server().getHttpPort();
 				// Boolean useNIO = configuration.useNIO();
-				Integer httpSecurePort = configuration.getHttpSecurePort();
+				Integer httpSecurePort = configuration.server().getHttpSecurePort();
 				// Server should listen to std. http.
-				if (configuration.isHttpEnabled()) {
+				if (configuration.server().isHttpEnabled()) {
 					Connector[] connectors = jettyServer.getConnectors();
 					// Flag is set if the same connector has been found
 					// through xml config and properties
@@ -528,8 +528,8 @@ class ServerControllerImpl implements ServerController {
 					if (!masterConnectorFound) {
 						final Connector connector = jettyFactory
 								.createConnector(jettyServer.getServer(),
-										configuration.getHttpConnectorName(),
-										httpPort, configuration.getConnectorIdleTimeout(), httpSecurePort, address, configuration.checkForwardedHeaders());
+										configuration.server().getHttpConnectorName(),
+										httpPort, configuration.server().getConnectorIdleTimeout(), httpSecurePort, address, configuration.server().checkForwardedHeaders());
 						if (httpConnector == null) {
 							httpConnector = (ServerConnector) connector;
 						}
@@ -549,9 +549,9 @@ class ServerControllerImpl implements ServerController {
 						}
 					}
 				}
-				if (configuration.isHttpSecureEnabled()) {
-					final String sslKeystorePassword = configuration.getSslKeystorePassword();
-					final String sslKeyPassword = configuration.getSslKeyPassword();
+				if (configuration.server().isHttpSecureEnabled()) {
+					final String sslKeystorePassword = configuration.security().getSslKeystorePassword();
+					final String sslKeyPassword = configuration.security().getSslKeyPassword();
 
 					Connector[] connectors = jettyServer.getConnectors();
 					boolean masterSSLConnectorFound = false;
@@ -589,35 +589,35 @@ class ServerControllerImpl implements ServerController {
 							final Connector secureConnector = jettyFactory
 									.createSecureConnector(jettyServer
 													.getServer(),
-											configuration.getHttpSecureConnectorName(),
+											configuration.server().getHttpSecureConnectorName(),
 											httpSecurePort,
-											configuration.getConnectorIdleTimeout(),
-											configuration.getSslKeystore(),
+											configuration.server().getConnectorIdleTimeout(),
+											configuration.security().getSslKeystore(),
 											sslKeystorePassword,
 											sslKeyPassword,
 											address,
-											configuration.getSslKeystoreType(),
-											configuration.getSslKeyAlias(),
-											configuration.getTrustStore(),
-											configuration.getTrustStorePassword(),
-											configuration.getTrustStoreType(),
-											configuration.isClientAuthNeeded(),
-											configuration.isClientAuthWanted(),
-											configuration.getCiphersuiteIncluded(),
-											configuration.getCiphersuiteExcluded(),
-											configuration.getProtocolsIncluded(),
-											configuration.getProtocolsExcluded(),
-											configuration.isSslRenegotiationAllowed(),
-											configuration.getCrlPath(),
-											configuration.isEnableCRLDP(),
-											configuration.isValidateCerts(),
-											configuration.isValidatePeerCerts(),
-											configuration.isEnableOCSP(),
-											configuration.getOcspResponderURL(),
-											configuration.checkForwardedHeaders(),
-											configuration.getSslKeystoreProvider(),
-											configuration.getSslTrustStoreProvider(),
-											configuration.getSslProvider());
+											configuration.security().getSslKeystoreType(),
+											configuration.security().getSslKeyAlias(),
+											configuration.security().getTrustStore(),
+											configuration.security().getTrustStorePassword(),
+											configuration.security().getTrustStoreType(),
+											configuration.security().isClientAuthNeeded(),
+											configuration.security().isClientAuthWanted(),
+											configuration.security().getCiphersuiteIncluded(),
+											configuration.security().getCiphersuiteExcluded(),
+											configuration.security().getProtocolsIncluded(),
+											configuration.security().getProtocolsExcluded(),
+											configuration.security().isSslRenegotiationAllowed(),
+											configuration.security().getCrlPath(),
+											configuration.security().isEnableCRLDP(),
+											configuration.security().isValidateCerts(),
+											configuration.security().isValidatePeerCerts(),
+											configuration.security().isEnableOCSP(),
+											configuration.security().getOcspResponderURL(),
+											configuration.server().checkForwardedHeaders(),
+											configuration.security().getSslKeystoreProvider(),
+											configuration.security().getSslTrustStoreProvider(),
+											configuration.security().getSslProvider());
 							if (httpSecureConnector == null) {
 								httpSecureConnector = (ServerConnector) secureConnector;
 							}

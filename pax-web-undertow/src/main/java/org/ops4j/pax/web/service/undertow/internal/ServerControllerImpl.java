@@ -70,9 +70,10 @@ import io.undertow.servlet.api.SessionPersistenceManager;
 import io.undertow.servlet.util.InMemorySessionPersistence;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
-import org.ops4j.pax.web.service.WebContainerConstants;
-import org.ops4j.pax.web.service.spi.Configuration;
-import org.ops4j.pax.web.service.spi.ConfigurationSource;
+import org.ops4j.pax.web.service.PaxWebConfig;
+import org.ops4j.pax.web.service.PaxWebConstants;
+import org.ops4j.pax.web.service.spi.config.Configuration;
+import org.ops4j.pax.web.service.spi.config.ConfigurationSource;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
@@ -239,7 +240,7 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
         if (config == null) {
             throw new IllegalStateException("Not configured");
         }
-        return config.getHttpPort();
+        return config.server().getHttpPort();
     }
 
     @Override
@@ -248,7 +249,7 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
         if (config == null) {
             throw new IllegalStateException("Not configured");
         }
-        return config.getHttpSecurePort();
+        return config.server().getHttpSecurePort();
     }
 
     void notifyListeners(ServerEvent event) {
@@ -350,9 +351,9 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
      * @return
      */
     private HttpHandler configureUndertow(Configuration configuration, Undertow.Builder builder, HttpHandler rootHandler) {
-        if (configuration.isLogNCSAFormatEnabled()) {
-            String logNCSADirectory = configuration.getLogNCSADirectory();
-            String logNCSAFormat = configuration.getLogNCSAFormat();
+        if (configuration.logging().isLogNCSAFormatEnabled()) {
+            String logNCSADirectory = configuration.logging().getLogNCSADirectory();
+            String logNCSAFormat = configuration.logging().getLogNCSAFormat();
 
             Bundle bundle = FrameworkUtil.getBundle(ServerControllerImpl.class);
             ClassLoader loader = bundle.adapt(BundleWiring.class).getClassLoader();
@@ -366,7 +367,7 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
                     .setLogNameSuffix("log").setRotate(true).build();
 
             String format;
-            if (configuration.isLogNCSAExtended()) {
+            if (configuration.logging().isLogNCSAExtended()) {
                 format = "combined";
             } else {
                 format = "common";
@@ -379,20 +380,20 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
                     AccessLogHandler.class.getClassLoader());
         }
 
-        for (String address : configuration.getListeningAddresses()) {
-            if (configuration.isHttpEnabled()) {
-                LOG.info("Starting undertow http listener on " + address + ":" + configuration.getHttpPort());
-                builder.addHttpListener(configuration.getHttpPort(), address);
+        for (String address : configuration.server().getListeningAddresses()) {
+            if (configuration.server().isHttpEnabled()) {
+                LOG.info("Starting undertow http listener on " + address + ":" + configuration.server().getHttpPort());
+                builder.addHttpListener(configuration.server().getHttpPort(), address);
             }
-            if (configuration.isHttpSecureEnabled()) {
-                LOG.info("Starting undertow https listener on " + address + ":" + configuration.getHttpSecurePort());
+            if (configuration.server().isHttpSecureEnabled()) {
+                LOG.info("Starting undertow https listener on " + address + ":" + configuration.server().getHttpSecurePort());
                 // TODO: could this be shared across interface:port bindings?
                 SSLContext context = buildSSLContext();
-                builder.addHttpsListener(configuration.getHttpSecurePort(), address, context);
+                builder.addHttpsListener(configuration.server().getHttpSecurePort(), address, context);
             }
         }
 
-        if (configuration.checkForwardedHeaders()) {
+        if (configuration.server().checkForwardedHeaders()) {
             rootHandler = new ProxyPeerAddressHandler(rootHandler);
         }
 
@@ -428,11 +429,11 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
                     }
                 }
             }
-            if (properties.get(WebContainerConstants.PROPERTY_HTTP_PORT) == null && configuration.getHttpPort() != null) {
-                properties.put(WebContainerConstants.PROPERTY_HTTP_PORT, Integer.toString(configuration.getHttpPort()));
+            if (properties.get(PaxWebConfig.PID_CFG_HTTP_PORT) == null && configuration.server().getHttpPort() != null) {
+                properties.put(PaxWebConfig.PID_CFG_HTTP_PORT, Integer.toString(configuration.server().getHttpPort()));
             }
-            if (properties.get(WebContainerConstants.PROPERTY_HTTP_SECURE_PORT) == null && configuration.getHttpSecurePort() != null) {
-                properties.put(WebContainerConstants.PROPERTY_HTTP_SECURE_PORT, Integer.toString(configuration.getHttpSecurePort()));
+            if (properties.get(PaxWebConfig.PID_CFG_HTTP_PORT_SECURE) == null && configuration.server().getHttpSecurePort() != null) {
+                properties.put(PaxWebConfig.PID_CFG_HTTP_PORT_SECURE, Integer.toString(configuration.server().getHttpSecurePort()));
             }
 
             // BundleContextPropertyResolver gives access to e.g., ${karaf.base}
@@ -554,8 +555,8 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
             }
 
             builder.setServerOption(UndertowOptions.RECORD_REQUEST_START_TIME, recordRequestStartTime);
-            if (configuration.getConnectorIdleTimeout() != null) {
-                builder.setServerOption(UndertowOptions.IDLE_TIMEOUT, configuration.getConnectorIdleTimeout());
+            if (configuration.server().getConnectorIdleTimeout() != null) {
+                builder.setServerOption(UndertowOptions.IDLE_TIMEOUT, configuration.server().getConnectorIdleTimeout());
             }
 
             // identity manager - looked up in "default" security realm
@@ -713,10 +714,10 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
      * @return
      */
     private URL detectUndertowConfiguration() {
-        URL undertowResource = configuration.getConfigurationURL();
+        URL undertowResource = configuration.server().getConfigurationURL();
         // even if it's "dir" it may point to "file"
         // (same as in o.o.p.w.s.jetty.internal.JettyFactoryImpl.getHttpConfiguration())
-        File serverConfigDir = configuration.getConfigurationDir();
+        File serverConfigDir = configuration.server().getConfigurationDir();
 
         try {
             if (undertowResource == null && serverConfigDir != null) {
@@ -899,19 +900,19 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
      * @return
      */
     private SSLContext buildSSLContext() {
-        String keyANDkeystorePassword = configuration.getSslKeyPassword() == null ? configuration.getSslPassword() : configuration.getSslKeyPassword();
-        return buildSSLContext(configuration.getSslKeystore(), configuration.getSslKeystoreType(),
+        String keyANDkeystorePassword = configuration.security().getSslKeyPassword() == null ? configuration.security().getSslPassword() : configuration.security().getSslKeyPassword();
+        return buildSSLContext(configuration.security().getSslKeystore(), configuration.security().getSslKeystoreType(),
                 keyANDkeystorePassword, keyANDkeystorePassword,
-                configuration.getSslKeyAlias(),
-                configuration.getTrustStore(), configuration.getTrustStoreType(),
-                configuration.getTrustStorePassword(),
-                configuration.isValidateCerts(), configuration.getCrlPath(),
+                configuration.security().getSslKeyAlias(),
+                configuration.security().getTrustStore(), configuration.security().getTrustStoreType(),
+                configuration.security().getTrustStorePassword(),
+                configuration.security().isValidateCerts(), configuration.security().getCrlPath(),
                 null,
-                configuration.isValidatePeerCerts(), configuration.isEnableCRLDP(), configuration.isEnableOCSP(),
-                configuration.getOcspResponderURL(),
-                configuration.getSslKeystoreProvider(),
-                configuration.getSslTrustStoreProvider(),
-                configuration.getSslProvider());
+                configuration.security().isValidatePeerCerts(), configuration.security().isEnableCRLDP(), configuration.security().isEnableOCSP(),
+                configuration.security().getOcspResponderURL(),
+                configuration.security().getSslKeystoreProvider(),
+                configuration.security().getSslTrustStoreProvider(),
+                configuration.security().getSslProvider());
     }
 
     /**
@@ -940,13 +941,13 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
                 keystore.getAlias(),
                 truststore.getPath(), truststore.getProvider(),
                 truststore.getPassword(),
-                configuration.isValidateCerts(), configuration.getCrlPath(),
+                configuration.security().isValidateCerts(), configuration.security().getCrlPath(),
                 null, // "SHA1PRNG", "NativePRNGNonBlocking", ...
-                configuration.isValidatePeerCerts(), configuration.isEnableCRLDP(), configuration.isEnableOCSP(),
-                configuration.getOcspResponderURL(),
-                configuration.getSslKeystoreProvider(),
-                configuration.getSslTrustStoreProvider(),
-                configuration.getSslProvider());
+                configuration.security().isValidatePeerCerts(), configuration.security().isEnableCRLDP(), configuration.security().isEnableOCSP(),
+                configuration.security().getOcspResponderURL(),
+                configuration.security().getSslKeystoreProvider(),
+                configuration.security().getSslTrustStoreProvider(),
+                configuration.security().getSslProvider());
     }
 
     private URL loadResource(String resource) throws MalformedURLException {

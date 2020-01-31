@@ -36,20 +36,16 @@
 
 	<name>OPS4J Pax Web - Jetty</name>
 
-	<properties>
-		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
-	</properties>
-
 	<build>
 		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>**/ServerConnectorWrapper.java</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
+<!--			<plugin>-->
+<!--				<artifactId>maven-compiler-plugin</artifactId>-->
+<!--				<configuration>-->
+<!--					<excludes>-->
+<!--						<exclude>**/ServerConnectorWrapper.java</exclude>-->
+<!--					</excludes>-->
+<!--				</configuration>-->
+<!--			</plugin>-->
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
@@ -58,93 +54,109 @@
 					<instructions>
 						<Bundle-Activator>org.ops4j.pax.web.service.jetty.internal.Activator</Bundle-Activator>
 						<Import-Package>
-							org.w3c.dom,
-							org.xml.sax,
-							org.ops4j.pax.web.utils; version="${pax-web.osgi.version}",
-							org.ops4j.pax.web.service; version="${pax-web.osgi.version}",
-							org.ops4j.pax.web.service.spi.*; version="${pax-web.osgi.version}",
-							org.ops4j.pax.web.jsp; version="${pax-web.osgi.version}"; resolution:=optional,
-							org.apache.jasper.servlet; resolution:=optional,
-							org.apache.commons.logging,
-							javax.annotation; version="[1.2,2)"; resolution:=optional,
-							javax.management.*; resolution:=optional,
-							javax.security.auth,
-							javax.security.auth.callback,
-							javax.security.auth.login,
-							javax.servlet.jsp-api; version="[2.2,3)"; resolution:=optional,
-							javax.servlet.*; version="[3.1,5)",
-							javax.net.ssl; resolution:=optional,
-							javax.security.cert; resolution:=optional,
-							javax.xml.parsers,
-							javax.websocket.*; resolution:=optional,
-							org.eclipse.jetty.jaas; version="[7.1.0,10.0.0)";resolution:=optional,
-							org.eclipse.jetty.jmx;version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.alpn; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.alpn.server; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.api; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.api.anotations; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.api.extensions; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.api.util; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.client; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.client.io; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.client.masks; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.common; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.common.events; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.common.events.annotated; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.common.extensions; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.common.extensions.compress; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.common.extensions.fragment; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.common.frames; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.common.io; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.common.io.http; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.common.io.payload; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.common.message; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.common.util; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.jsr356; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.jsr356.annotations; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.jsr356.client; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.jsr356.decoders; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.jsr356.encoders; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.jsr356.endpoints; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.jsr356.messages; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.jsr356.metadata; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.jsr356.server; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.jsr356.server.deploy; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.jsr356.server.pathmap; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.jsr356.utils; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.server; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.server.pathmap; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.websocket.servlet; version="[7.1.0,10.0.0)"; resolution:=optional,
-							org.eclipse.jetty.*; version="[7.1.0,10.0.0)",
-							org.osgi.framework; version="[1.0.0,2.0.0)",
-							org.osgi.framework.wiring; version="[1.0.0,2.0.0)",
-							org.osgi.service.http; version="[1.0.0,2.0.0)",
-							org.osgi.service.packageadmin;resolution:=optional,
-							org.osgi.util.tracker;version="[1.3.0,2.0.0)",
-							org.apache.xbean.finder.*,
-							org.slf4j; version="[1.5,2)",
-							javax.el; version="[2.1.0,4.0.0)";resolution:=optional,
-							org.apache.el; version="2.2"; resolution:=optional,
-							org.apache.el.lang; version="2.2"; resolution:=optional,
-							org.apache.el.parser; version="2.2"; resolution:=optional,
-							org.apache.el.stream; version="2.2"; resolution:=optional,
-							org.apache.el.util; version="2.2"; resolution:=optional,
+							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
+							javax.servlet;version="[3.1,5)",
+							javax.servlet.annotation;version="[3.1,5)",
+							javax.servlet.http;version="[3.1,5)",
+
+							<!-- ranges indicate we can work with OSGi Core R6+ -->
+							org.osgi.framework;version="[1.8,2)",
+							org.osgi.framework.wiring;version="[1.2,2)",
+							org.osgi.util.tracker;version="[1.5,2)",
+
+							<!-- OSGi cmpn -->
+							org.osgi.service.http;version="[1.2,2)",
+<!--							org.osgi.service.packageadmin;resolution:=optional,-->
+
+							<!-- from pax-web-api -->
+							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
+							<!-- from pax-web-spi -->
+							org.ops4j.pax.web.service.spi.*;version="${pax-web.osgi.version}",
+							<!-- from pax-web-jsp -->
+							org.ops4j.pax.web.jsp;version="${pax-web.osgi.version}";resolution:=optional,
+
+							<!-- from pax-logging-api -->
+							org.slf4j;version="[1.7,2)",
+
+							<!-- to check -->
+
+<!--							org.w3c.dom,-->
+<!--							org.xml.sax,-->
+<!--							org.apache.jasper.servlet; resolution:=optional,-->
+<!--							org.apache.commons.logging,-->
+<!--							javax.annotation;version="[1.2,2)"; resolution:=optional,-->
+<!--							javax.management.*; resolution:=optional,-->
+<!--							javax.security.auth,-->
+<!--							javax.security.auth.callback,-->
+<!--							javax.security.auth.login,-->
+<!--							javax.servlet.jsp-api;version="[2.2,3)"; resolution:=optional,-->
+<!--							javax.net.ssl; resolution:=optional,-->
+<!--							javax.security.cert; resolution:=optional,-->
+<!--							javax.xml.parsers,-->
+<!--							javax.websocket.*; resolution:=optional,-->
+<!--							org.eclipse.jetty.jaas;version="[7.1.0,10.0.0)";resolution:=optional,-->
+<!--							org.eclipse.jetty.jmx;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.alpn;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.alpn.server;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.api;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.api.anotations;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.api.extensions;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.api.util;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.client;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.client.io;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.client.masks;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.common;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.common.events;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.common.events.annotated;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.common.extensions;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.common.extensions.compress;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.common.extensions.fragment;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.common.frames;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.common.io;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.common.io.http;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.common.io.payload;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.common.message;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.common.util;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.jsr356;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.jsr356.annotations;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.jsr356.client;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.jsr356.decoders;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.jsr356.encoders;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.jsr356.endpoints;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.jsr356.messages;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.jsr356.metadata;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.jsr356.server;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.jsr356.server.deploy;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.jsr356.server.pathmap;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.jsr356.utils;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.server;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.server.pathmap;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.servlet;version="[7.1.0,10.0.0)"; resolution:=optional,-->
+<!--							org.eclipse.jetty.*;version="[7.1.0,10.0.0)",-->
+<!--							org.apache.xbean.finder.*,-->
+<!--							javax.el;version="[2.1.0,4.0.0)";resolution:=optional,-->
+<!--							org.apache.el;version="2.2"; resolution:=optional,-->
+<!--							org.apache.el.lang;version="2.2"; resolution:=optional,-->
+<!--							org.apache.el.parser;version="2.2"; resolution:=optional,-->
+<!--							org.apache.el.stream;version="2.2"; resolution:=optional,-->
+<!--							org.apache.el.util;version="2.2"; resolution:=optional,-->
 						</Import-Package>
-						<DynamicImport-Package>org.eclipse.jetty.*</DynamicImport-Package>
-						<Private-Package>
-							!org.apache.commons.logging,
-							!org.apache.http.*,
-							org.ops4j.pax.web.service.jetty.internal.*,
-							org.apache.commons.lang3.reflect,
-						</Private-Package>
-						<Embed-Dependency>*;
-							artifactId=!org.osgi.compendium;
-							scope=compile; type=!pom; inline=true</Embed-Dependency>
-						<Embed-Transitive>true</Embed-Transitive>
 						<Provide-Capability>
 							osgi.service;objectClass=javax.servlet.ServletContext,
 							osgi.service;effective:=active;objectClass=org.ops4j.pax.web.service.spi.ServerController
 						</Provide-Capability>
+<!--						<DynamicImport-Package>org.eclipse.jetty.*</DynamicImport-Package>-->
+						<Private-Package>
+<!--							!org.apache.commons.logging,-->
+<!--							!org.apache.http.*,-->
+							org.ops4j.pax.web.service.jetty.internal.*,
+<!--							org.apache.commons.lang3.reflect,-->
+						</Private-Package>
+<!--						<Embed-Dependency>-->
+<!--							*;artifactId=!org.osgi.compendium;scope=compile;type=!pom;inline=true-->
+<!--						</Embed-Dependency>-->
+<!--						<Embed-Transitive>true</Embed-Transitive>-->
 						<_dsannotations>*</_dsannotations>
 					</instructions>
 				</configuration>
@@ -172,14 +184,19 @@
 			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-runtime</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- OPS4J dependencies -->
 
-		<dependency>
-			<groupId>org.ops4j.base</groupId>
-			<artifactId>ops4j-base-lang</artifactId>
-			<optional>true</optional>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.base</groupId>-->
+<!--			<artifactId>ops4j-base-lang</artifactId>-->
+<!--			<optional>true</optional>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.ops4j.base</groupId>
 			<artifactId>ops4j-base-util-xml</artifactId>
@@ -188,14 +205,14 @@
 			<groupId>org.ops4j.pax.swissbox</groupId>
 			<artifactId>pax-swissbox-core</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.swissbox</groupId>
-			<artifactId>pax-swissbox-optional-jcl</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.swissbox</groupId>
-			<artifactId>pax-swissbox-tracker</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.swissbox</groupId>-->
+<!--			<artifactId>pax-swissbox-optional-jcl</artifactId>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.swissbox</groupId>-->
+<!--			<artifactId>pax-swissbox-tracker</artifactId>-->
+<!--		</dependency>-->
 
 		<!-- OSGi -->
 
@@ -210,39 +227,67 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<!-- JavaEE -->
+
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
 		<!-- Jetty -->
 
 		<dependency>
-			<groupId>org.eclipse.jetty.aggregate</groupId>
-			<artifactId>jetty-all</artifactId>
-			<classifier>uber</classifier>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-jaas</artifactId>
+			<artifactId>jetty-servlet</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-alpn-server</artifactId>
+			<artifactId>jetty-xml</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty.osgi</groupId>
-			<artifactId>jetty-osgi-alpn</artifactId>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-jmx</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.mortbay.jetty.alpn</groupId>
-			<artifactId>alpn-boot</artifactId>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-webapp</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty.http2</groupId>
-			<artifactId>http2-server</artifactId>
-			<scope>provided</scope>
-		</dependency>
+
+<!--		<dependency>-->
+<!--			<groupId>org.eclipse.jetty</groupId>-->
+<!--			<artifactId>jetty-jaas</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.eclipse.jetty</groupId>-->
+<!--			<artifactId>jetty-alpn-server</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.eclipse.jetty.osgi</groupId>-->
+<!--			<artifactId>jetty-osgi-alpn</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.mortbay.jetty.alpn</groupId>-->
+<!--			<artifactId>alpn-boot</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.eclipse.jetty.http2</groupId>-->
+<!--			<artifactId>http2-server</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
 
 		<!-- Logging -->
 
@@ -263,16 +308,16 @@
 			<groupId>org.apache.commons</groupId>
     		<artifactId>commons-lang3</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.xbean</groupId>
-			<artifactId>xbean-finder</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ow2.asm</groupId>
-			<artifactId>asm</artifactId>
-			<scope>provided</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.apache.xbean</groupId>-->
+<!--			<artifactId>xbean-finder</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ow2.asm</groupId>-->
+<!--			<artifactId>asm</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
 
 		<!-- Testing -->
 
@@ -281,14 +326,14 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.easymock</groupId>
-			<artifactId>easymock</artifactId>
-			<scope>test</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.easymock</groupId>-->
+<!--			<artifactId>easymock</artifactId>-->
+<!--			<scope>test</scope>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
+			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 

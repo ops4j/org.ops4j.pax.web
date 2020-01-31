@@ -22,6 +22,8 @@ import java.util.Map;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 
+import org.ops4j.pax.web.service.PaxWebConstants;
+
 /**
  * Filter mapping.
  *
@@ -78,7 +80,7 @@ public interface FilterMapping {
 	 * Getter
 	 *
 	 * @return an array of DispatcherTypes the filter was registered for
-	 * @see org.ops4j.pax.web.service.WebContainerConstants#FILTER_MAPPING_DISPATCHER
+	 * @see PaxWebConstants#FILTER_MAPPING_DISPATCHER
 	 */
     DispatcherType[] getDispatcherType();
 
