@@ -158,12 +158,12 @@
                 <enabled>true</enabled>
             </snapshots>
             <id>apache-maven-snapshots</id>
-            <url>http://people.apache.org/repo/m2-snapshot-repository</url>
+            <url>https://people.apache.org/repo/m2-snapshot-repository</url>
         </repository>
         <repository>
             <id>prime-repo</id>
             <name>PrimeFaces Maven Repository</name>
-            <url>http://repository.primefaces.org</url>
+            <url>https://repository.primefaces.org</url>
             <layout>default</layout>
         </repository>
     </repositories>

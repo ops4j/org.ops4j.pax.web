@@ -95,13 +95,13 @@
 		<repository>
 			<id>prime-repo</id>
 			<name>PrimeFaces Maven Repository</name>
-			<url>http://repository.primefaces.org</url>
+			<url>https://repository.primefaces.org</url>
 			<layout>default</layout>
 		</repository>
 		<repository>
 			<id>apache-snapshot</id>
 			<name>Apache Snapshots</name>
-			<url>http://repository.apache.org/snapshots</url>
+			<url>https://repository.apache.org/snapshots</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>

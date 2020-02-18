@@ -159,7 +159,7 @@
 				<enabled>true</enabled>
 			</snapshots>
 			<id>apache-maven-snapshots</id>
-			<url>http://people.apache.org/repo/m2-snapshot-repository</url>
+			<url>https://people.apache.org/repo/m2-snapshot-repository</url>
 		</repository>
 	</repositories>
 
