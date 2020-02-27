@@ -1,16 +1,15 @@
-/* Copyright 2013 Christoph Läubrich.
+/*
+ * Copyright 2013 Christoph Läubrich.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.
- *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -51,55 +50,55 @@ public class EventAdminHandler implements ServletListener,
 
 	@Override
 	public void servletEvent(ServletEvent servletEvent) {
-		EventAdmin eventAdmin = eventAdminReference.get();
-		if (eventAdmin != null) {
-			final String topic;
-			switch (servletEvent.getType()) {
-				case WebEvent.DEPLOYING:
-					topic = WebTopic.DEPLOYING.toString();
-					break;
-				case WebEvent.DEPLOYED:
-					topic = WebTopic.DEPLOYED.toString();
-					break;
-				case WebEvent.UNDEPLOYING:
-					topic = WebTopic.UNDEPLOYING.toString();
-					break;
-				case WebEvent.UNDEPLOYED:
-					topic = WebTopic.UNDEPLOYED.toString();
-					break;
-				case WebEvent.WAITING:
-					// A Waiting Event is not supported by the specification
-					// therefore it is mapped to FAILED, because of collision.
-					//$FALL-THROUGH$
-				case WebEvent.FAILED:
-					//$FALL-THROUGH$
-				default:
-					topic = WebTopic.FAILED.toString();
-			}
-			Dictionary<String, Object> properties = new Hashtable<>();
-			properties.put(
-					"servlet.alias",
-					servletEvent.getAlias() == null ? "" : servletEvent
-							.getAlias());
-			properties.put(
-					"servlet.name",
-					servletEvent.getServletName() == null ? "" : servletEvent
-							.getServletName());
-			properties.put(
-					"servlet.urlparameter",
-					servletEvent.getUrlParameter() == null ? "" : servletEvent
-							.getUrlParameter());
-			if (servletEvent.getServletClassName() != null) {
-				properties.put("servlet.servlet", servletEvent.getServletClassName());
-			}
-			properties.put("timestamp", servletEvent.getTimestamp());
-			if (servletEvent.getHttpContext() != null) {
-				properties.put("servlet.httpcontext",
-						servletEvent.getHttpContext());
-			}
-			Event event = new Event(topic, properties);
-			eventAdmin.postEvent(event);
-		}
+//		EventAdmin eventAdmin = eventAdminReference.get();
+//		if (eventAdmin != null) {
+//			final String topic;
+//			switch (servletEvent.getType()) {
+//				case WebEvent.DEPLOYING:
+//					topic = WebTopic.DEPLOYING.toString();
+//					break;
+//				case WebEvent.DEPLOYED:
+//					topic = WebTopic.DEPLOYED.toString();
+//					break;
+//				case WebEvent.UNDEPLOYING:
+//					topic = WebTopic.UNDEPLOYING.toString();
+//					break;
+//				case WebEvent.UNDEPLOYED:
+//					topic = WebTopic.UNDEPLOYED.toString();
+//					break;
+//				case WebEvent.WAITING:
+//					// A Waiting Event is not supported by the specification
+//					// therefore it is mapped to FAILED, because of collision.
+//					//$FALL-THROUGH$
+//				case WebEvent.FAILED:
+//					//$FALL-THROUGH$
+//				default:
+//					topic = WebTopic.FAILED.toString();
+//			}
+//			Dictionary<String, Object> properties = new Hashtable<>();
+//			properties.put(
+//					"servlet.alias",
+//					servletEvent.getAlias() == null ? "" : servletEvent
+//							.getAlias());
+//			properties.put(
+//					"servlet.name",
+//					servletEvent.getServletName() == null ? "" : servletEvent
+//							.getServletName());
+//			properties.put(
+//					"servlet.urlparameter",
+//					servletEvent.getUrlParameter() == null ? "" : servletEvent
+//							.getUrlParameter());
+//			if (servletEvent.getServletClassName() != null) {
+//				properties.put("servlet.servlet", servletEvent.getServletClassName());
+//			}
+//			properties.put("timestamp", servletEvent.getTimestamp());
+//			if (servletEvent.getHttpContext() != null) {
+//				properties.put("servlet.httpcontext",
+//						servletEvent.getHttpContext());
+//			}
+//			Event event = new Event(topic, properties);
+//			eventAdmin.postEvent(event);
+//		}
 	}
 
 	@Override

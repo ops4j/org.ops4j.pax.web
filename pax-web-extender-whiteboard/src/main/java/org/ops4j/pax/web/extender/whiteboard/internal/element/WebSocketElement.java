@@ -46,12 +46,12 @@ public class WebSocketElement extends WebElement {
 
 	@Override
 	public void register(WebContainer webContainer, HttpContext httpContext) throws Exception {
-		webContainer.registerWebSocket(mapping.getWebSocket(), httpContext);
+//		webContainer.registerWebSocket(mapping.getWebSocket(), httpContext);
 	}
 
 	@Override
 	public void unregister(WebContainer webContainer, HttpContext httpContext) {
-		webContainer.unregisterWebSocket(mapping.getWebSocket(), httpContext);
+//		webContainer.unregisterWebSocket(mapping.getWebSocket(), httpContext);
 	}
 
 	@Override

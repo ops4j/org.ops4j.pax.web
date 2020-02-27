@@ -45,9 +45,10 @@ import org.apache.catalina.startup.Catalina;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.valves.AccessLogValve;
 import org.apache.tomcat.util.digester.Digester;
+import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.config.Configuration;
-import org.ops4j.pax.web.service.spi.model.ContextModel;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -235,6 +236,7 @@ public class EmbeddedTomcat extends Tomcat {
         initBaseDir(configuration);
 	}
 
+	@Review("A bit different than Jetty - here \"context\" is not configured, but this method is called during configure/start")
 	private void mergeConfiguration(Configuration configuration) {
 		LOG.debug("Start merging configuration");
 		Connector httpConnector = null;
@@ -462,7 +464,7 @@ public class EmbeddedTomcat extends Tomcat {
 		return configurationDir;
 	}
 
-	public Context findContext(ContextModel contextModel) {
+	public Context findContext(OsgiContextModel contextModel) {
 		String name = generateContextName(contextModel.getContextName(),
 				contextModel.getHttpContext());
 		return findContext(name);

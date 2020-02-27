@@ -32,10 +32,6 @@ public interface ExtenderConstants {
 	 */
 	String PROPERTY_ALIAS = "alias";
 	/**
-	 * The http context id property key.
-	 */
-	String PROPERTY_HTTP_CONTEXT_ID = "httpContext.id";
-	/**
 	 * The flag for a shared http context.
 	 */
 	String PROPERTY_HTTP_CONTEXT_SHARED = "httpContext.shared";

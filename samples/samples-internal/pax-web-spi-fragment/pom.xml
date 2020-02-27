@@ -31,7 +31,7 @@
 	<artifactId>pax-web-spi-fragment</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web - Samples - Fragment for pax-web-spi</name>
+	<name>OPS4J Pax Web Internal Samples - SPI Fragment</name>
 
 	<build>
 		<plugins>

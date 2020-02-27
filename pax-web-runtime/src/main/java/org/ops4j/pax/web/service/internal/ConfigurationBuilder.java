@@ -15,6 +15,8 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.util.Map;
+
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.util.property.PropertyResolver;
 
@@ -27,10 +29,11 @@ public class ConfigurationBuilder {
 	 *
 	 * @param resolver a {@link PropertyResolver} to access properties by name, but without a way to get all
 	 *        of the properties as dictionary
+	 * @param sourceProperties usually available from passed {@code resolver}, but may be useful as Map.
 	 * @return
 	 */
-	public static Configuration getConfiguration(PropertyResolver resolver) {
-		return new ConfigurationImpl(resolver);
+	public static Configuration getConfiguration(PropertyResolver resolver, Map<String, String> sourceProperties) {
+		return new ConfigurationImpl(resolver, sourceProperties);
 	}
 
 }

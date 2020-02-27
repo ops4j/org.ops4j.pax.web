@@ -95,14 +95,14 @@ import org.ops4j.pax.swissbox.core.BundleUtils;
 import org.ops4j.pax.web.service.AuthenticatorService;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.LifeCycle;
-import org.ops4j.pax.web.service.spi.model.ContextModel;
-import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
-import org.ops4j.pax.web.service.spi.model.EventListenerModel;
-import org.ops4j.pax.web.service.spi.model.FilterModel;
-import org.ops4j.pax.web.service.spi.model.Model;
-import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
-import org.ops4j.pax.web.service.spi.model.ServletModel;
-import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
+import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingModel;
+import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
 import org.ops4j.pax.web.service.spi.util.ServletContainerInitializerScanner;
 import org.osgi.framework.Bundle;
@@ -796,7 +796,7 @@ class TomcatServerWrapper implements ServerWrapper {
 	}
 
 	@Override
-	public Servlet createResourceServlet(final ContextModel contextModel,
+	public Servlet createResourceServlet(final OsgiContextModel contextModel,
 										 final String alias, final String name) {
 		LOG.debug("createResourceServlet( contextModel: {}, alias: {}, name: {})");
 		final Context context = findOrCreateContext(contextModel);
@@ -871,7 +871,7 @@ class TomcatServerWrapper implements ServerWrapper {
 	}
 
 	@Override
-	public LifeCycle getContext(final ContextModel model) {
+	public LifeCycle getContext(final OsgiContextModel model) {
 		final Context context = findOrCreateContext(model);
 		return new LifeCycle() {
 			@Override
@@ -916,12 +916,12 @@ class TomcatServerWrapper implements ServerWrapper {
 		}
 	}
 
-	private Context findOrCreateContext(final Model model) {
-		NullArgumentException.validateNotNull(model, "model");
-		return findOrCreateContext(model.getContextModel());
+	private Context findOrCreateContext(final ElementModel elementModel) {
+		NullArgumentException.validateNotNull(elementModel, "model");
+		return findOrCreateContext(elementModel.getContextModel());
 	}
 
-	private Context findOrCreateContext(final ContextModel contextModel) {
+	private Context findOrCreateContext(final OsgiContextModel contextModel) {
 		HttpContext httpContext = contextModel.getHttpContext();
 		Context context = contextMap.get(httpContext);
 
@@ -934,7 +934,7 @@ class TomcatServerWrapper implements ServerWrapper {
 		return context;
 	}
 
-	private Context createContext(final ContextModel contextModel) {
+	private Context createContext(final OsgiContextModel contextModel) {
 		final Bundle bundle = contextModel.getBundle();
 		final BundleContext bundleContext = BundleUtils
 				.getBundleContext(bundle);
@@ -1216,7 +1216,7 @@ class TomcatServerWrapper implements ServerWrapper {
         }
     }
 
-	private void configureJspConfigDescriptor(Context context, ContextModel model) {
+	private void configureJspConfigDescriptor(Context context, OsgiContextModel model) {
 
 		Boolean elIgnored = model.getJspElIgnored();
 		Boolean isXml = model.getJspIsXml();
@@ -1282,12 +1282,12 @@ class TomcatServerWrapper implements ServerWrapper {
 		}
 	}
 
-	private Context findContext(final ContextModel contextModel) {
+	private Context findContext(final OsgiContextModel contextModel) {
 		return server.findContext(contextModel);
 	}
 
-	private Context findContext(final Model model) {
-		return findContext(model.getContextModel());
+	private Context findContext(final ElementModel elementModel) {
+		return findContext(elementModel.getContextModel());
 	}
 
 	/**

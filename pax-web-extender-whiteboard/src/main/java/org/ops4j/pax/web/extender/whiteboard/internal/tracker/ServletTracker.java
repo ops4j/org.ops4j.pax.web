@@ -33,7 +33,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.element.ServletWebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultErrorPageMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultServletMapping;
-import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.utils.ServletAnnotationScanner;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -93,7 +93,7 @@ public class ServletTracker<T extends Servlet> extends AbstractTracker<T, Servle
 			initPrefixProp = ExtenderConstants.DEFAULT_INIT_PREFIX_PROP;
 		}
 		String servletName = ServicePropertiesUtils.getStringProperty(serviceReference,
-				WebContainerConstants.SERVLET_NAME);
+				PaxWebConstants.SERVLET_NAME);
 
 		if (urlPatternsProp == null) {
 			urlPatternsProp = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN);

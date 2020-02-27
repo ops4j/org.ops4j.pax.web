@@ -247,7 +247,9 @@ public class ClassPathUtil {
 
 	/**
 	 * This method uses {@link BundleWiring#findEntries} that doesn't involve classloaders. This way we can find
-	 * multiple resources with the same path.
+	 * multiple resources with the same path. Normally {@link BundleWiring#findEntries} doesn't check JARs listed
+	 * on {@code Bundle-ClassPath} (because it doesn't work at classloader level), however we can explicitly tell
+	 * it to do so.
 	 *
 	 * @param bundles
 	 * @param path

@@ -15,114 +15,224 @@
  */
 package org.ops4j.pax.web.service.spi.config;
 
-import java.util.List;
-
 public interface SecurityConfiguration {
 
 	/**
-	 * Set the value of the needClientAuth property
-	 *
-	 * @return true if we require client certificate authentication
+	 * Returns the name of SSL provider to use with <em>secure</em> connector/listener.
+	 * @return the name of SSL provider.
 	 */
-	Boolean isClientAuthNeeded();
+	String getSslProvider();
 
 	/**
-	 * Set the value of the _wantClientAuth property. This property is used when
-	 * opening server sockets.
-	 *
-	 * @return true if we want client certificate authentication
-	 */
-	Boolean isClientAuthWanted();
-
-	/**
-	 * Returns the path to the keystore.
-	 *
+	 * Returns the file path or URL to server keystore.
 	 * @return path to the keystore.
 	 */
 	String getSslKeystore();
 
 	/**
-	 * Returns the keystore type.
-	 *
-	 * @return keystore type.
-	 */
-	String getSslKeystoreType();
-
-	/**
-	 * Returns the password for the keystore.
-	 *
+	 * Returns the password for entire keystore (not for the key inside it). Can be encrypted using Jasypt.
 	 * @return the password for the keystore.
 	 */
 	String getSslKeystorePassword();
 
 	/**
-	 * Returns the password for keystore integrity check.
-	 *
-	 * @return the password for keystore integrity check
-	 * @deprecated use getSslKeystorePassword() instead.
-	 */
-	@Deprecated
-	String getSslPassword();
-
-	/**
-	 * Returns the alias of the ssl private key.
-	 *
-	 * @return the alias of the ssl private key.
-	 */
-	String getSslKeyAlias();
-
-	/**
-	 * Returns the password for ssl private key.
-	 *
+	 * Returns the password for ssl private key inside a keystore specified by {@link #getSslKeystore()}.
+	 * Can be encrypted using Jasypt.
 	 * @return the password for ssl private key.
 	 */
 	String getSslKeyPassword();
 
-	List<String> getCiphersuiteIncluded();
-
-	List<String> getCiphersuiteExcluded();
-
-	List<String> getProtocolsIncluded();
-
-	List<String> getProtocolsExcluded();
-
-	String getTrustStore();
-
-	String getTrustStorePassword();
-
-	String getTrustStoreType();
-
-	Boolean isSslRenegotiationAllowed();
-
-	String getCrlPath();
-
-	Boolean isEnableCRLDP();
-
-	Boolean isValidateCerts();
-
-	Boolean isValidatePeerCerts();
-
-	Boolean isEnableOCSP();
-
-	String getOcspResponderURL();
+	/**
+	 * Returns the server keystore type as specifed by {@link java.security.KeyStore#getInstance(String, String)}
+	 * @return keystore type.
+	 */
+	String getSslKeystoreType();
 
 	/**
-	 * Returns the name of SSL keystore provider.
+	 * Returns the server keystore provider as specifed by {@link java.security.KeyStore#getInstance(String, String)}
 	 * @return the name of SSL keystore provider.
 	 */
 	String getSslKeystoreProvider();
 
 	/**
-	 * Returns the name of SSL truststore provider.
-	 * @return the name of SSL truststore provider.
+	 * Returns the algorithm for private key. If not specified,
+	 * {@link javax.net.ssl.KeyManagerFactory#getDefaultAlgorithm()} will be used (OpenJDK: {@code SunX509}).
+	 * @return
 	 */
-	String getSslTrustStoreProvider();
+	String getSslKeyAlgorithm();
 
 	/**
-	 * Returns the name of SSL provider.
-	 * @return the name of SSL provider.
+	 * Returns the alias of the ssl private key inside server keystore.
+	 * @return the alias of the ssl private key.
 	 */
-	String getSslProvider();
+	String getSslKeyAlias();
+
+	/**
+	 * Gets location of server truststore. Not mandatory. In such case, JVM default truststore will be used.
+	 * @return
+	 */
+	String getTruststore();
+
+	/**
+	 * Returns the password for entire truststore. Can be encrypted using Jasypt.
+	 * @return
+	 */
+	String getTruststorePassword();
+
+	/**
+	 * Returns the server truststore type as specifed by {@link java.security.KeyStore#getInstance(String, String)}
+	 * @return truststore type.
+	 */
+	String getTruststoreType();
+
+	/**
+	 * Returns the server truststore provider as specifed by {@link java.security.KeyStore#getInstance(String, String)}
+	 * @return the name of SSL truststore provider.
+	 */
+	String getTruststoreProvider();
+
+	/**
+	 * Returns the algorithm for truststore entries. If not specified,
+	 * {@link javax.net.ssl.TrustManagerFactory#getDefaultAlgorithm()} will be used (OpenJDK: {@code SunX509}).
+	 * @return
+	 */
+	String getTrustManagerFactoryAlgorithm();
+
+	/**
+	 * Set <em>client auth wanted</em> flag as in {@link javax.net.ssl.SSLEngine#setWantClientAuth(boolean)}
+	 * @return true if we want client certificate authentication
+	 */
+	Boolean isClientAuthWanted();
+
+	/**
+	 * Set <em>client auth needed</em> flag as in {@link javax.net.ssl.SSLEngine#setNeedClientAuth(boolean)}
+	 * @return
+	 */
+	Boolean isClientAuthNeeded();
+
+	/**
+	 * Returns protocol name to use in {@link javax.net.ssl.SSLContext#getInstance(String)}. Defaults to {@code TLSv1.2}
+	 * @return
+	 */
+	String getSslProtocol();
+
+	/**
+	 * Returns algorithm name to use in {@link java.security.SecureRandom#getInstance(String)}
+	 * @return
+	 */
+	String getSecureRandomAlgorithm();
+
+	/**
+	 * Get included protocols to specify in {@link javax.net.ssl.SSLEngine#setEnabledProtocols(String[])}
+	 * @return
+	 */
+	String[] getProtocolsIncluded();
+
+	/**
+	 * Get excluded protocols to not pass to {@link javax.net.ssl.SSLEngine#setEnabledProtocols(String[])}
+	 * Jetty: {@code org.eclipse.jetty.util.ssl.SslContextFactory#DEFAULT_EXCLUDED_PROTOCOLS}
+	 * @return
+	 */
+	String[] getProtocolsExcluded();
+
+	/**
+	 * Get included cipher suites to specify in {@link javax.net.ssl.SSLEngine#setEnabledCipherSuites(String[])}
+	 * @return
+	 */
+	String[] getCiphersuiteIncluded();
+
+	/**
+	 * Get excluded cipher suites to not pass to {@link javax.net.ssl.SSLEngine#setEnabledCipherSuites(String[])}
+	 * Jetty: {@code org.eclipse.jetty.util.ssl.SslContextFactory#DEFAULT_EXCLUDED_CIPHER_SUITES}
+	 * @return
+	 */
+	String[] getCiphersuiteExcluded();
+
+	/**
+	 * Is SSL renegotiation allowed?
+	 * @return
+	 */
+	Boolean isSslRenegotiationAllowed();
+
+	/**
+	 * Get limit of SSL renegotiations
+	 * @return
+	 */
+	Integer getSslRenegotiationLimit();
+
+	/**
+	 * Is SSL Session creation enabled? (as hint to {@link javax.net.ssl.SSLEngine}.
+	 * @return
+	 */
+	Boolean getSslSessionsEnabled();
+
+	/**
+	 * Cache size for SSL Sessions as in {@link javax.net.ssl.SSLSessionContext#setSessionCacheSize(int)}
+	 * @return
+	 */
+	Integer getSslSessionCacheSize();
+
+	/**
+	 * Timeout for SSL Sessions as in {@link javax.net.ssl.SSLSessionContext#setSessionTimeout(int)}
+	 * @return
+	 */
+	Integer getSslSessionTimeout();
+
+	/**
+	 * Should certificates in server keystore be validated when keystore is loaded? If {@code true}:<ul>
+	 *     <li>Jetty will use {@code org.eclipse.jetty.util.security.CertificateValidator}, which underneath uses
+	 *     {@link java.security.cert.CertPathValidator#validate)}.</li>
+	 * </ul>
+	 * @return
+	 */
+	Boolean isValidateCerts();
+
+	/**
+	 * Should certificates in server truststore be validated when truststore is loaded?
+	 * @return
+	 */
+	Boolean isValidatePeerCerts();
+
+	/**
+	 * Should On-Line Certificate Status Protocol (OCSP) be enabled?<ul>
+	 *     <li>Jetty calls {@link java.security.Security#setProperty} to set {@code ocsp.enable} property</li>
+	 * </ul>
+	 * @return
+	 */
+	Boolean isEnableOCSP();
+
+	/**
+	 * Should Certificate Revocation List Distribution Points support (CRLDP) be enabled?<ul>
+	 *     <li>Jetty sets {@code com.sun.security.enableCRLDP} system property</li>
+	 * </ul>
+	 * @return
+	 */
+	Boolean isEnableCRLDP();
+
+	/**
+	 * Get location of CRL list. The list is loaded using {@link java.security.cert.CertificateFactory#generateCRLs}
+	 * for {@code X.509} {@link java.security.cert.CertificateFactory}.
+	 * @return
+	 */
+	String getCrlPath();
+
+	/**
+	 * Return URL for OCSP responder, though it doesn't seem to be used by Jetty.
+	 * @return
+	 */
+	String getOcspResponderURL();
+
+	/**
+	 * Return max length of cert path to use during certificate validation
+	 * @return
+	 */
+	Integer getMaxCertPathLength();
+
+
+
+
+
+
 
 	/**
 	 * The default implementation will be removed on next major release - 8.0.0

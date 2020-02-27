@@ -19,21 +19,131 @@ import java.io.File;
 import java.net.URL;
 import java.util.List;
 
+import org.ops4j.pax.web.service.PaxWebConfig;
+
 public interface ServerConfiguration {
 
 	/**
-	 * Get a TCP port to use for HTTP protocol. Uses {@link org.ops4j.pax.web.service.PaxWebConfig#PID_CFG_HTTP_PORT}
+	 * Returns the temporary directory, directory that will be set as {@link javax.servlet.ServletContext#TEMPDIR}.
+	 *
+	 * @return the temporary directory
+	 */
+	File getTemporaryDirectory();
+
+	/**
+	 * Returns the files to read external server configuration from. It's super useful for Jetty, where
+	 * we can easily simulate {@code JETTY_HOME/etc} directory. Files must be in correct order (as enforced by
+	 * given runtime). It can also be single file location or even {@code null} to let the runtime be configured
+	 * using only PID configuration.
+	 *
+	 * @since Pax Web 8
+	 * @return configuration directory
+	 */
+	File[] getConfigurationFiles();
+
+	/**
+	 * Get a TCP port to use for HTTP protocol. Uses {@link PaxWebConfig#PID_CFG_HTTP_PORT}
 	 * property.
 	 * @return
 	 */
 	Integer getHttpPort();
 
 	/**
-	 * Get a TCP port to use for HTTPS protocol. Uses {@link org.ops4j.pax.web.service.PaxWebConfig#PID_CFG_HTTP_PORT_SECURE}
+	 * Get a TCP port to use for HTTPS protocol. Uses {@link PaxWebConfig#PID_CFG_HTTP_PORT_SECURE}
 	 * property.
 	 * @return
 	 */
 	Integer getHttpSecurePort();
+
+	/**
+	 * Is default http connector/listener enabled? Uses {@link PaxWebConfig#PID_CFG_HTTP_ENABLED}
+	 * @return
+	 */
+	Boolean isHttpEnabled();
+
+	/**
+	 * Is default https connector/listener enabled? Uses {@link PaxWebConfig#PID_CFG_HTTP_SECURE_ENABLED}
+	 * @return
+	 */
+	Boolean isHttpSecureEnabled();
+
+	/**
+	 * Returns the addresses to bind connector/listener to. Defaults to one element array with {@code 0.0.0.0}.
+	 * @return
+	 */
+	String[] getListeningAddresses();
+
+	/**
+	 * Gets the name to use for <em>default</em> connector/listener.
+	 * @return
+	 */
+	String getHttpConnectorName();
+
+	/**
+	 * Gets the name to use for <em>secure</em> connector/listener.
+	 * @return
+	 */
+	String getHttpSecureConnectorName();
+
+	/**
+	 * <p>Gets the <em>idle timeout</em> to be used with server connectors. <em>Idle timeout</em> is like
+	 * <em>socket read timeout</em>, but on server side.<ul>
+	 *     <li>Jetty: {@code org.eclipse.jetty.server.AbstractConnector#setIdleTimeout(long)}</li>
+	 * </ul></p>
+	 * @return
+	 */
+	Integer getConnectorIdleTimeout();
+
+	/**
+	 * <p>Gets the server thread idle timeout.
+	 * <ul>
+	 *     <li>Jetty: {@code org.eclipse.jetty.util.thread.QueuedThreadPool#setIdleTimeout(int)}</li>
+	 * </ul></p>
+	 * @return
+	 */
+	Integer getServerIdleTimeout();
+
+	/**
+	 * <p>Gets maximum number of threads to use in server runtime. This value MAY mean something different in
+	 * different runtimes.<ul>
+	 *     <li>Jetty: {@code org.eclipse.jetty.util.thread.QueuedThreadPool#setMaxThreads(int)}</li>
+	 * </ul></p>
+	 * @return
+	 */
+	Integer getServerMaxThreads();
+
+	/**
+	 * <p>Gets minimum number of threads to use in server runtime. This value MAY mean something different in
+	 * different runtimes.<ul>
+	 *     <li>Jetty: {@code org.eclipse.jetty.util.thread.QueuedThreadPool#setMinThreads(int)}</li>
+	 * </ul></p>
+	 * @return
+	 */
+	Integer getServerMinThreads();
+
+	/**
+	 * If target container allows, this method specifies a prefix for thread names to use.<ul>
+	 *     <li>Jetty: {@code org.eclipse.jetty.util.thread.QueuedThreadPool#setName(java.lang.String)} (defaults
+	 *     to "qtp" + hashcode).</li>
+	 * </ul>
+	 * @return
+	 */
+	String getServerThreadNamePrefix();
+
+	/**
+	 * Should the connector handle {@code X-Forwarded-*} / {@code X-Proxied-*} headers?<ul>
+	 *     <li>Jetty: {@code org.eclipse.jetty.server.ForwardedRequestCustomizer}</li>
+	 * </ul>
+	 * @return
+	 */
+	Boolean checkForwardedHeaders();
+
+
+
+
+
+
+
 
 
 
@@ -41,56 +151,7 @@ public interface ServerConfiguration {
 
 	Boolean useNIO();
 
-	Boolean checkForwardedHeaders();
-
-
-	String getHttpConnectorName();
-
-	Boolean isHttpEnabled();
-
-	Integer getConnectorIdleTimeout();
-
 	Boolean isShowStacks();
-
-
-	String getHttpSecureConnectorName();
-
-	Boolean isHttpSecureEnabled();
-
-	/**
-	 * Returns the temporary directory, directory that will be set as
-	 * javax.servlet.context.tempdir.
-	 *
-	 * @return the temporary directory
-	 */
-	File getTemporaryDirectory();
-
-	/**
-	 * Returns the addresses to bind to
-	 *
-	 * @return addresses
-	 */
-	String[] getListeningAddresses();
-
-	/**
-	 * Returns the directory containing the external configuration
-	 *
-	 * @return configuration directory
-	 */
-	File getConfigurationDir();
-
-	/**
-	 * Returns the URL of external web server configuration
-	 *
-	 * @return configuration URL
-	 */
-	URL getConfigurationURL();
-
-	Integer getServerMaxThreads();
-
-	Integer getServerMinThreads();
-
-	Integer getServerIdleTimeout();
 
 	List<String> getVirtualHosts();
 

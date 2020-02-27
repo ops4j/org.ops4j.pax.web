@@ -146,7 +146,7 @@ next: {io.undertow.server.handlers.PathHandler@10199}
 ----
 <1> The role of `io.undertow.servlet.handlers.ServletDispatchingHandler` is to fetch attachment from
 `io.undertow.server.HttpServerExchange` and call `io.undertow.server.HttpHandler.handleRequest()` on its handler, see next drill-down
-<2> Path matching withing single web application
+<2> Path matching within single web application
 <3> Servlets of web application
 <4> The actual instance of one of the the servlets
 <5> Resource manager for calls to e.g., `javax.servlet.ServletContext.getResource()`

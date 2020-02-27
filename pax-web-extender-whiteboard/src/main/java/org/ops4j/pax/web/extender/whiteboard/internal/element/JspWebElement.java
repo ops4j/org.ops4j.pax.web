@@ -22,7 +22,7 @@ import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.DictionaryUtils;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.whiteboard.JspMapping;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardJspMapping;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardJspMapping;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 
@@ -49,16 +49,16 @@ public class JspWebElement extends WebElement<JspMapping> implements WhiteboardJ
 
 	@Override
 	public void register(final WebContainer webContainer, final HttpContext httpContext) throws Exception {
-		webContainer.registerJsps(
-					jspMapping.getUrlPatterns(),
-					DictionaryUtils.adapt(jspMapping.getInitParams()),
-					httpContext);
+//		webContainer.registerJsps(
+//					jspMapping.getUrlPatterns(),
+//					DictionaryUtils.adapt(jspMapping.getInitParams()),
+//					httpContext);
 	}
 
 	@Override
 	public void unregister(final WebContainer webContainer, final HttpContext httpContext) {
-			webContainer.unregisterJsps(
-					jspMapping.getUrlPatterns(), httpContext);
+//			webContainer.unregisterJsps(
+//					jspMapping.getUrlPatterns(), httpContext);
 	}
 
 	@Override

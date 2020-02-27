@@ -31,7 +31,7 @@
 	<artifactId>war-simplest-osgi</artifactId>
 	<packaging>war</packaging>
 
-	<name>OPS4J Pax Web - Samples - WAR with OSGi</name>
+	<name>OPS4J Pax Web WAR Samples - OSGi</name>
 
 	<build>
 		<plugins>

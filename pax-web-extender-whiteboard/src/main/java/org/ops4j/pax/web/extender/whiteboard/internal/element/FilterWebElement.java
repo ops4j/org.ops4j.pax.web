@@ -24,7 +24,7 @@ import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.DictionaryUtils;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.whiteboard.FilterMapping;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardFilter;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardFilter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 
@@ -58,20 +58,20 @@ public class FilterWebElement<T extends Filter> extends WebElement<T> implements
 	public void register(final WebContainer webContainer, final HttpContext httpContext) throws Exception {
 		//TODO: DispatcherTypes EnumSet !!
 		//--> this might be done by adding those to the initParams as it's interpreted by the whiteboard-extender
-		webContainer.registerFilter(
-					filterMapping.getFilter()/*.getClass()*/,
-					filterMapping.getUrlPatterns(),
-					filterMapping.getServletNames(),
-					DictionaryUtils.adapt(filterMapping.getInitParams()),
-					filterMapping.getAsyncSupported(),
-					httpContext);
+//		webContainer.registerFilter(
+//					filterMapping.getFilter()/*.getClass()*/,
+//					filterMapping.getUrlPatterns(),
+//					filterMapping.getServletNames(),
+//					DictionaryUtils.adapt(filterMapping.getInitParams()),
+//					filterMapping.getAsyncSupported(),
+//					httpContext);
 	}
 
 
 	@Override
 	public void unregister(final WebContainer webContainer, final HttpContext httpContext) {
 		Filter filter = filterMapping.getFilter();
-		webContainer.unregisterFilter(filter);
+//		webContainer.unregisterFilter(filter);
 	}
 
 	@Override

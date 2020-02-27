@@ -130,7 +130,7 @@ abstract class AbstractHttpContextTracker<T> implements ServiceTrackerCustomizer
 		// only prepare WebApplication if context is valid
 		if (mapping != null && contextElement.isValid()) {
 			final WebApplication webApplication = extenderContext.getWebApplication(serviceReference.getBundle(),
-					mapping.getHttpContextId(), sharedHttpContext);
+					mapping.getContextId(), sharedHttpContext);
 			webApplication.setHttpContextMapping(mapping);
 		}
 
@@ -155,7 +155,7 @@ abstract class AbstractHttpContextTracker<T> implements ServiceTrackerCustomizer
 
 			final WebApplication webApplication = extenderContext.getExistingWebApplication(
 					serviceReference.getBundle(),
-					unpublished.getHttpContextMapping().getHttpContextId(),
+					unpublished.getHttpContextMapping().getContextId(),
 					sharedHttpContext);
 
 			boolean remove = true;

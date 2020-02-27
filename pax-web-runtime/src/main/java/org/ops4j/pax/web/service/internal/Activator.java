@@ -1,4 +1,5 @@
-/* Copyright 2007 Niclas Hedhman.
+/*
+ * Copyright 2007 Niclas Hedhman.
  * Copyright 2007 Alin Dreghiciu.
  * Copyright 2011 Achim Nierbeck.
  *
@@ -6,13 +7,11 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.
- *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -21,10 +20,12 @@ package org.ops4j.pax.web.service.internal;
 import java.io.File;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.concurrent.ExecutorService;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -32,13 +33,14 @@ import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.util.SupportUtils;
-import org.ops4j.pax.web.service.internal.util.Utils;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
+import org.ops4j.pax.web.service.spi.ServerState;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.util.NamedThreadFactory;
+import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.ops4j.util.property.PropertyResolver;
 import org.osgi.framework.Bundle;
@@ -50,11 +52,14 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.http.HttpService;
+import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.ops4j.pax.web.service.PaxWebConstants.HTTPSERVICE_REGISTRATION_NAMES;
 
 /**
  * <p>Main entry point to Pax-Web.</p>
@@ -77,13 +82,13 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	// registered by one of server bundles (pax-web-jetty, pax-web-undertow, pax-web-tomcat)
 
 	/** Current Configuration Admin configuration (PID = {@code org.ops4j.pax.web}) */
-	private Dictionary<String, ?> currentConfiguration;
+	private Dictionary<String, ?> configuration;
 
 	/** Current {@link ServerControllerFactory} tracked from OSGi registry */
-	private ServerControllerFactory currentServerControllerFactory;
+	private ServerControllerFactory serverControllerFactory;
 
-	/** Current {@link ServerController} created using {@link #currentServerControllerFactory} */
-	private ServerController currentServerController;
+	/** Current {@link ServerController} created using {@link #serverControllerFactory} */
+	private ServerController serverController;
 
 	/**
 	 * {@link ServletEventDispatcher} bound to lifecycle of this pax-web-runtime bundle, not to configuration
@@ -103,6 +108,9 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	/** Registration of {@link org.osgi.service.cm.ManagedService} for {@code org.ops4j.pax.web} PID. */
 	private ServiceRegistration<?> managedServiceReg;
 
+	/** Registration of default {@link ServletContextHelper} */
+	private ServiceRegistration<ServletContextHelper> servletContextHelperReg;
+
 //	/**
 //	 * Registration of MSF for {@code org.ops4j.pax.web.context} factory PID for current
 //	 * {@link ServerControllerFactory}. When {@link ServerControllerFactory} changes, this MSF is re-registered.
@@ -118,10 +126,14 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	/** Tracker for optional LogService, but because Slf4J comes from pax-logging anyway, this service is usually available */
 	private ServiceTracker<LogService, LogService> logServiceTracker;
 
-	private AtomicBoolean initialConfigSet = new AtomicBoolean(false);
+	private final AtomicBoolean initialConfigSet = new AtomicBoolean(false);
 
-	/** Single thread pool to process all configuration changes and {@link ServerControllerFactory} (re)registrations */
-	private final ExecutorService configExecutor = Executors.newSingleThreadExecutor(new NamedThreadFactory("paxweb-config"));
+	/**
+	 * Single thread pool to process all configuration changes, {@link ServerControllerFactory} (re)registrations
+	 * and (since Pax Web 8) also actual registrations of web elements.
+	 */
+	private final ScheduledExecutorService runtimeExecutor
+			= Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("paxweb-config"));
 
 	@Override
 	public void start(final BundleContext context) throws Exception {
@@ -181,6 +193,10 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 		if (serverControllerFactoryTracker != null) {
 			serverControllerFactoryTracker.close();
 		}
+		if (servletContextHelperReg != null) {
+			servletContextHelperReg.unregister();
+			servletContextHelperReg = null;
+		}
 //		if (logServiceTracker != null) {
 //			logServiceTracker.close();
 //		}
@@ -199,10 +215,10 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 //		}
 		// Wait up to 20 seconds, otherwhise
 		try {
-			configExecutor.shutdown();
+			runtimeExecutor.shutdown();
 			LOG.debug("...entering 20 seconds grace period...");
-			configExecutor.awaitTermination(20, TimeUnit.SECONDS);
-			configExecutor.shutdownNow();
+			runtimeExecutor.awaitTermination(20, TimeUnit.SECONDS);
+			runtimeExecutor.shutdownNow();
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			// Ignore, we are done anyways...
@@ -256,7 +272,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	public void updateConfiguration(final Dictionary<String, ?> configuration) {
 		LOG.info("Scheduling Pax Web reconfiguration because configuration has changed");
 		// change configuration using new properties (possibly from configadmin) and current ServerControllerFactory
-		configExecutor.submit(() -> updateController(configuration, currentServerControllerFactory));
+		runtimeExecutor.submit(() -> updateController(configuration, serverControllerFactory));
 	}
 
 	/**
@@ -267,7 +283,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	private void updateServerControllerFactory(final ServerControllerFactory controllerFactory) {
 		LOG.info("Scheduling Pax Web reconfiguration because ServerControllerFactory has been (re)registered");
 		// change configuration using new (or null when not available) ServerControllerFactory and current configuration
-		Future<?> future = configExecutor.submit(() -> updateController(currentConfiguration, controllerFactory));
+		Future<?> future = runtimeExecutor.submit(() -> updateController(configuration, controllerFactory));
 
 		// Make sure that when destroying the configuration (factory == null), we do things synchronously
 		if (controllerFactory == null) {
@@ -294,15 +310,15 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	 * @param dictionary
 	 * @param controllerFactory
 	 */
-	protected void updateController(Dictionary<String, ?> dictionary, ServerControllerFactory controllerFactory) {
+	private void updateController(Dictionary<String, ?> dictionary, ServerControllerFactory controllerFactory) {
 		// We want to make sure the configuration is known before starting the
 		// service tracker, else the configuration could be set after the
 		// service is found which would cause a restart of the service
 		if (!initialConfigSet.get()) {
 			LOG.debug("Initial configuration of pax-web-runtime, registration of ServerControllerFactory tracker");
 			initialConfigSet.compareAndSet(false, true);
-			this.currentConfiguration = dictionary;
-			this.currentServerControllerFactory = controllerFactory; // should always be null here
+			this.configuration = dictionary;
+			this.serverControllerFactory = controllerFactory; // should always be null here
 
 			// the only place where tracker of ServerControllerFactory services is created and opened
 			serverControllerFactoryTracker = new ServiceTracker<>(bundleContext, ServerControllerFactory.class, new ServerControllerFactoryCustomizer());
@@ -315,7 +331,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			return;
 		}
 
-		if (Utils.same(dictionary, this.currentConfiguration) && Utils.same(controllerFactory, this.currentServerControllerFactory)) {
+		if (Utils.same(dictionary, this.configuration) && Utils.same(controllerFactory, this.serverControllerFactory)) {
 			LOG.debug("No change in configuration of Pax Web Runtime.");
 			return;
 		}
@@ -329,18 +345,22 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 //			managedServiceFactoryReg.unregister();
 //			managedServiceFactoryReg = null;
 //		}
-		if (currentServerController != null) {
-			LOG.info("Stopping current server controller {}", currentServerController);
-			currentServerController.stop();
-			currentServerController = null;
+		if (serverController != null) {
+			LOG.info("Stopping current server controller {}", serverController);
+			try {
+				serverController.stop();
+			} catch (Exception e) {
+				LOG.error("Problem stopping server controller: " + e.getMessage(), e);
+			}
+			serverController = null;
 		}
 
-		boolean hadSCF = this.currentServerControllerFactory != null;
+		boolean hadSCF = this.serverControllerFactory != null;
 
-		this.currentConfiguration = dictionary;
-		this.currentServerControllerFactory = controllerFactory;
+		this.configuration = dictionary;
+		this.serverControllerFactory = controllerFactory;
 
-		if (controllerFactory == null) {
+		if (serverControllerFactory == null) {
 			if (hadSCF) {
 				LOG.info("ServerControllerFactory is gone, HTTP Service is not available now.");
 			}
@@ -349,42 +369,72 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 
 		// proceed with possibly non-empty (non-default) configuration and with available ServerControllerFactory
 		// configuration from PID (if available) has higher priority than properties from BundleContext / MetaType
+		performConfiguration();
+	}
 
+	/**
+	 * Actual configuration method called only when {@link ServerControllerFactory} is added.
+	 */
+	private void performConfiguration() {
 		try {
 			// chained PropertyResolver to get properties from Config Admin, Bundle Context, Meta Type information
-			// (in such order)
-			PropertyResolver defaultResolver = new MetaTypePropertyResolver();
-			PropertyResolver tmpResolver = new BundleContextPropertyResolver(bundleContext, defaultResolver);
-			PropertyResolver resolver = this.currentConfiguration != null ? new DictionaryPropertyResolver(this.currentConfiguration, tmpResolver) : tmpResolver;
+			// (in such order).
+			// Properties as map will also be available in proper order
 
-			final Configuration configuration = ConfigurationBuilder.getConfiguration(resolver);
+			Map<String, String> allProperties = new HashMap<>(System.getenv());
+			allProperties.putAll(Utils.toMap(System.getProperties()));
+
+			MetaTypePropertyResolver defaultResolver = new MetaTypePropertyResolver();
+			allProperties.putAll(Utils.toMap(defaultResolver.getProperties()));
+
+			// can't get all bundle context properties as map...
+			PropertyResolver tmpResolver = new BundleContextPropertyResolver(bundleContext, defaultResolver);
+
+			PropertyResolver resolver = this.configuration != null ? new DictionaryPropertyResolver(this.configuration, tmpResolver) : tmpResolver;
+			allProperties.putAll(Utils.toMap(this.configuration));
+
+			final Configuration configuration = ConfigurationBuilder.getConfiguration(resolver, allProperties);
 
 			// global, single representation of web server state
-			final ServerModel serverModel = new ServerModel();
+			final ServerModel serverModel = new ServerModel(runtimeExecutor);
+
+			// for now, let's think about doing the below in pax-web-extender-whiteboard
+//			// default ServletContextHelper - registered for all virtual hosts
+//			// should be a service factory to ensure proper resource delegation
+//			DefaultServletContextHelper defaultServletContextHelper = new DefaultServletContextHelper(bundleContext.getBundle());
+//			Dictionary<String, Object> props = new Hashtable<>();
+//			props.put(HTTP_WHITEBOARD_CONTEXT_NAME, HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME);
+//			props.put(HTTP_WHITEBOARD_CONTEXT_PATH, "/");
+//			props.put(PaxWebConstants.SERVICE_PROPERTY_VIRTUAL_HOSTS, new String[] { "*" });
+//			servletContextHelperReg = bundleContext.registerService(ServletContextHelper.class,
+//					defaultServletContextHelper, props);
+//
+//			// it should be immediately registered in server model
+//			serverModel.addContextHelper(HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME, "/",
+//					0, servletContextHelperReg.getReference().getProperty(Constants.SERVICE_ID),
+//					defaultServletContextHelper);
 
 			// create a controller object to operate on any supported web server
-			currentServerController = controllerFactory.createServerController(serverModel);
+			serverController = serverControllerFactory.createServerController(configuration);
 
 			// first step is to configure the server without actually starting it
-			currentServerController.configure(configuration);
-
-			Dictionary<String, Object> props = determineServiceProperties(currentConfiguration, configuration);
+			serverController.configure();
 
 			// this is where org.osgi.service.http.HttpService bundle-scoped service is registered in OSGi
-			// register a SCOPE_BUNDLE ServiceFactory - every bundle will have their own HttpService/WebContainer
+			Dictionary<String, Object> props = determineServiceProperties(this.configuration, configuration);
 			ServiceFactory<StoppableHttpService> factory = new StoppableHttpServiceFactory() {
 				@Override
 				StoppableHttpService createService(Bundle bundle) {
-					return new HttpServiceProxy(new HttpServiceStarted(
-							bundle, currentServerController, serverModel,
-							servletEventDispatcher, configuration.get(PaxWebConstants.PROPERTY_SHOW_STACKS, Boolean.class)));
+					HttpServiceEnabled enabledService =
+							new HttpServiceEnabled(bundle, serverController, serverModel, servletEventDispatcher, configuration);
+					return new HttpServiceProxy(bundle, enabledService);
 				}
 			};
-			httpServiceFactoryReg = bundleContext.registerService(PaxWebConstants.HTTPSERVICE_REGISTRATION_NAMES,
-					factory, props);
+			httpServiceFactoryReg = bundleContext.registerService(HTTPSERVICE_REGISTRATION_NAMES, factory, props);
 
-			if (!currentServerController.isStarted()) {
-				while (!currentServerController.isConfigured()) {
+			// TODO: for Jetty it's started even if it isn't!
+			if (serverController.getState() != ServerState.STARTED) {
+				while (serverController.getState() == ServerState.UNCONFIGURED) {
 					try {
 						Thread.sleep(100);
 					} catch (InterruptedException e) {
@@ -393,8 +443,8 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 						return;
 					}
 				}
-				LOG.info("Starting server controller {}", currentServerController.getClass().getName());
-				currentServerController.start();
+				LOG.info("Starting server controller {}", serverController.getClass().getName());
+				serverController.start();
 			}
 
 			// ManagedServiceFactory for org.ops4j.pax.web.context factory PID

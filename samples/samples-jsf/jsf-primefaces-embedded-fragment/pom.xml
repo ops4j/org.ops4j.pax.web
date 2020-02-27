@@ -31,7 +31,7 @@
 	<artifactId>jsf-primefaces-embedded-fragment</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web - Samples - JSF with Primefaces (embedded) - fragment</name>
+	<name>OPS4J Pax Web JSF Samples - embedded, fragment</name>
 
 	<build>
 		<plugins>

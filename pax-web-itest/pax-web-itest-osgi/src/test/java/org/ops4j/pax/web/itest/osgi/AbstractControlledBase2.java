@@ -45,6 +45,7 @@ import static org.ops4j.pax.exam.CoreOptions.frameworkStartLevel;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.linkBundle;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemTimeout;
 import static org.ops4j.pax.exam.CoreOptions.url;
 import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
@@ -122,7 +123,9 @@ public class AbstractControlledBase2 {
 				mavenBundle("org.ops4j.pax.logging", "pax-logging-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.ops4j.pax.logging", "pax-logging-log4j2")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+
+				systemProperty("org.ops4j.pax.logging.property.file").value("target/test-classes/log4j2-osgi.properties")
 		};
 
 		Option[] loggingOptions = defaultLoggingConfig();

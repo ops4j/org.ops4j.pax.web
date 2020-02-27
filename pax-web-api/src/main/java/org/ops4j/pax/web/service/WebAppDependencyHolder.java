@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service;
 
 import javax.servlet.ServletContainerInitializer;
 
+import org.ops4j.pax.web.annotations.Review;
 import org.osgi.service.http.HttpService;
 
 /**
@@ -28,6 +29,8 @@ import org.osgi.service.http.HttpService;
  *
  * @author Harald Wellmann
  */
+@Review("Should it be part of API?" +
+		"Maybe together with AuthenticatorService is should be part of some \"extension\" package?")
 public interface WebAppDependencyHolder {
 
 	/**

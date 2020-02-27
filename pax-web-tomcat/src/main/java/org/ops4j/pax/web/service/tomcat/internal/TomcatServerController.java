@@ -25,14 +25,14 @@ import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
-import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
-import org.ops4j.pax.web.service.spi.model.ContextModel;
-import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
-import org.ops4j.pax.web.service.spi.model.EventListenerModel;
-import org.ops4j.pax.web.service.spi.model.FilterModel;
-import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
-import org.ops4j.pax.web.service.spi.model.ServletModel;
-import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
+import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingModel;
+import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -150,7 +150,7 @@ class TomcatServerController implements ServerController {
 	}
 
 	@Override
-	public LifeCycle getContext(ContextModel model) {
+	public LifeCycle getContext(OsgiContextModel model) {
 		return serverState.getContext(model);
 	}
 
@@ -165,7 +165,7 @@ class TomcatServerController implements ServerController {
 	}
 
 	@Override
-	public Servlet createResourceServlet(ContextModel contextModel,
+	public Servlet createResourceServlet(OsgiContextModel contextModel,
 										 String alias, String name) {
 		return serverState.createResourceServlet(contextModel, alias, name);
 	}

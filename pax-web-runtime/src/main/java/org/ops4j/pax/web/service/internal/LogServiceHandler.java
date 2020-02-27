@@ -1,16 +1,15 @@
-/* Copyright 2013 Christoph Läubrich.
+/*
+ * Copyright 2013 Christoph Läubrich.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.
- *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -48,35 +47,35 @@ public class LogServiceHandler implements
 
 	@Override
 	public void servletEvent(ServletEvent servletEvent) {
-		final String topic;
-		switch (servletEvent.getType()) {
-			case WebEvent.DEPLOYING:
-				topic = WebTopic.DEPLOYING.toString();
-				break;
-			case WebEvent.DEPLOYED:
-				topic = WebTopic.DEPLOYED.toString();
-				break;
-			case WebEvent.UNDEPLOYING:
-				topic = WebTopic.UNDEPLOYING.toString();
-				break;
-			case WebEvent.UNDEPLOYED:
-				topic = WebTopic.UNDEPLOYED.toString();
-				break;
-			case WebEvent.WAITING:
-				// A Waiting Event is not supported by the specification
-				// therefore it is mapped to FAILED, because of collision.
-				//$FALL-THROUGH$
-			case WebEvent.FAILED:
-				//$FALL-THROUGH$
-			default:
-				topic = WebTopic.FAILED.toString();
-		}
-		LogService logService = logServiceReference.get();
-		if (logService != null) {
-			logService.log(LogService.LOG_DEBUG, topic);
-		} else {
-			LOG.debug(topic);
-		}
+//		final String topic;
+//		switch (servletEvent.getType()) {
+//			case WebEvent.DEPLOYING:
+//				topic = WebTopic.DEPLOYING.toString();
+//				break;
+//			case WebEvent.DEPLOYED:
+//				topic = WebTopic.DEPLOYED.toString();
+//				break;
+//			case WebEvent.UNDEPLOYING:
+//				topic = WebTopic.UNDEPLOYING.toString();
+//				break;
+//			case WebEvent.UNDEPLOYED:
+//				topic = WebTopic.UNDEPLOYED.toString();
+//				break;
+//			case WebEvent.WAITING:
+//				// A Waiting Event is not supported by the specification
+//				// therefore it is mapped to FAILED, because of collision.
+//				//$FALL-THROUGH$
+//			case WebEvent.FAILED:
+//				//$FALL-THROUGH$
+//			default:
+//				topic = WebTopic.FAILED.toString();
+//		}
+//		LogService logService = logServiceReference.get();
+//		if (logService != null) {
+//			logService.log(LogService.LOG_DEBUG, topic);
+//		} else {
+//			LOG.debug(topic);
+//		}
 
 	}
 

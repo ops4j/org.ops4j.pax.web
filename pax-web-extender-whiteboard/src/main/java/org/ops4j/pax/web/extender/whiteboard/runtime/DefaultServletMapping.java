@@ -216,4 +216,24 @@ public class DefaultServletMapping implements ServletMapping {
 				", servletName=" + servletName + "}";
 	}
 
+				@Override
+				public Class<? extends Servlet> getServletClass() {
+					return null;
+				}
+
+				@Override
+				public String[] getErrorPages() {
+					return new String[0];
+				}
+
+				@Override
+				public String getContextSelectFilter() {
+					return null;
+				}
+
+				@Override
+				public String getContextId() {
+					return null;
+				}
+
 }

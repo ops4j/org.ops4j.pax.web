@@ -30,13 +30,13 @@ import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultErrorPageMapping;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.whiteboard.ErrorPageMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletMapping;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardServlet;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardServlet;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.ops4j.pax.web.service.WebContainerConstants.SERVLET_NAME;
+import static org.ops4j.pax.web.service.PaxWebConstants.SERVLET_NAME;
 
 /**
  * Registers/unregisters {@link ServletMapping} with {@link WebContainer}.
@@ -113,9 +113,9 @@ public class ServletWebElement<T extends Servlet> extends WebElement<T> implemen
 		//special handling for OSGi R6 registration of Servlet as ErrorHandler
 		if (errorMappings != null) {
 			for (DefaultErrorPageMapping errorPageMapping : errorMappings) {
-				webContainer.registerErrorPage(
-						errorPageMapping.getError(),
-						servletMapping.getAlias(), httpContext);
+//				webContainer.registerErrorPage(
+//						errorPageMapping.getError(),
+//						servletMapping.getAlias(), httpContext);
 			}
 		}
 	}
@@ -132,7 +132,7 @@ public class ServletWebElement<T extends Servlet> extends WebElement<T> implemen
 
 	@Override
 	public String getHttpContextId() {
-		return servletMapping.getHttpContextId();
+		return servletMapping.getContextId();
 	}
 
 	@Override

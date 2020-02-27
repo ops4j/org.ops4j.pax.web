@@ -229,29 +229,29 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 			httpContext = wc.createDefaultHttpContext(contextId);
 
 			contextParams = collectContextParams(properties);
-			if (contextParams != null && !contextParams.isEmpty()) {
-				LOG.info("Setting context parameters in WebContainer for bundle \"" + symbolicName + "\": {}", contextParams);
-				wc.setContextParam(contextParams, httpContext);
-			}
+//			if (contextParams != null && !contextParams.isEmpty()) {
+//				LOG.info("Setting context parameters in WebContainer for bundle \"" + symbolicName + "\": {}", contextParams);
+//				wc.setContextParam(contextParams, httpContext);
+//			}
 
 			loginConfiguration = collectLoginConfiguration(properties);
-			if (loginConfiguration != null) {
-				LOG.info("Registering login configuration in WebContainer for bundle \"" + symbolicName + "\": method={}, realm={}",
-						loginConfiguration.authMethod, loginConfiguration.realmName);
-				wc.registerLoginConfig(loginConfiguration.authMethod,
-						loginConfiguration.realmName,
-						loginConfiguration.formLoginPage,
-						loginConfiguration.formErrorPage,
-						httpContext);
-			}
+//			if (loginConfiguration != null) {
+//				LOG.info("Registering login configuration in WebContainer for bundle \"" + symbolicName + "\": method={}, realm={}",
+//						loginConfiguration.authMethod, loginConfiguration.realmName);
+//				wc.registerLoginConfig(loginConfiguration.authMethod,
+//						loginConfiguration.realmName,
+//						loginConfiguration.formLoginPage,
+//						loginConfiguration.formErrorPage,
+//						httpContext);
+//			}
 
 			securityMappings = collectSecurityMappings(properties);
-			if (securityMappings != null && !securityMappings.isEmpty()) {
-				for (SecurityConstraintsMapping scm: securityMappings) {
-					LOG.info("Registering security mappings in WebContainer for bundle \"" + symbolicName + "\": " + scm);
-					wc.registerConstraintMapping(scm.name, scm.method, scm.url, null, true, scm.roles, httpContext);
-				}
-			}
+//			if (securityMappings != null && !securityMappings.isEmpty()) {
+//				for (SecurityConstraintsMapping scm: securityMappings) {
+//					LOG.info("Registering security mappings in WebContainer for bundle \"" + symbolicName + "\": " + scm);
+//					wc.registerConstraintMapping(scm.name, scm.method, scm.url, null, true, scm.roles, httpContext);
+//				}
+//			}
 
 			// altering the context required stopping it - let's (knowing the details) start it again
 			wc.end(httpContext);
@@ -270,19 +270,19 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 
 			// we have to revert previous configuration - but current WebContainer interface doesn't allow
 			// us to clean everything correctly
-			if (securityMappings.size() > 0) {
-				wc.unregisterConstraintMapping(httpContext);
-				securityMappings.clear();
-			}
-			if (loginConfiguration != null) {
-				// even if before processing there could be another login configuration applied...
-				wc.unregisterLoginConfig(httpContext);
-				loginConfiguration = null;
-			}
-			if (contextParams != null && !contextParams.isEmpty()) {
-				wc.setContextParam(null, httpContext);
-				contextParams = null;
-			}
+//			if (securityMappings.size() > 0) {
+//				wc.unregisterConstraintMapping(httpContext);
+//				securityMappings.clear();
+//			}
+//			if (loginConfiguration != null) {
+//				// even if before processing there could be another login configuration applied...
+//				wc.unregisterLoginConfig(httpContext);
+//				loginConfiguration = null;
+//			}
+//			if (contextParams != null && !contextParams.isEmpty()) {
+//				wc.setContextParam(null, httpContext);
+//				contextParams = null;
+//			}
 
 			// cleaning the context required stopping it - let's (knowing the details) start it again
 			wc.end(httpContext);

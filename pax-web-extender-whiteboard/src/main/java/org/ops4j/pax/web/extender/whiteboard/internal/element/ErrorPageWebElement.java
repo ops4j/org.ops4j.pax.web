@@ -18,7 +18,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal.element;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.whiteboard.ErrorPageMapping;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardErrorPage;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardErrorPage;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 
@@ -48,15 +48,15 @@ public class ErrorPageWebElement extends WebElement<ErrorPageMapping> implements
 	@Override
 	public void register(WebContainer webContainer, HttpContext httpContext)
 			throws Exception {
-			webContainer.registerErrorPage(
-					errorPageMapping.getError(),
-					errorPageMapping.getLocation(), httpContext);
+//			webContainer.registerErrorPage(
+//					errorPageMapping.getError(),
+//					errorPageMapping.getLocation(), httpContext);
 	}
 
 	@Override
 	public void unregister(WebContainer webContainer, HttpContext httpContext) {
-			webContainer.unregisterErrorPage(
-					errorPageMapping.getError(), httpContext);
+//			webContainer.unregisterErrorPage(
+//					errorPageMapping.getError(), httpContext);
 	}
 
 	@Override

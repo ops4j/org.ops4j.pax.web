@@ -43,15 +43,15 @@ import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.LifeCycle;
-import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
-import org.ops4j.pax.web.service.spi.model.ContextModel;
-import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
-import org.ops4j.pax.web.service.spi.model.EventListenerModel;
-import org.ops4j.pax.web.service.spi.model.FilterModel;
-import org.ops4j.pax.web.service.spi.model.ResourceModel;
-import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
-import org.ops4j.pax.web.service.spi.model.ServletModel;
-import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
+import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.model.elements.ResourceModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingModel;
+import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
 import org.ops4j.pax.web.service.spi.util.ServletContainerInitializerScanner;
 import org.osgi.framework.*;
@@ -101,7 +101,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 	private final IdentityManager identityManager;
 	private final ContextAwarePathHandler path;
-	private final ContextModel contextModel;
+	private final OsgiContextModel contextModel;
 	private final Set<ServletModel> servlets = new LinkedHashSet<>();
 	private final Set<WelcomeFileModel> welcomeFiles = new LinkedHashSet<>();
 	private final Set<ErrorPageModel> errorPages = new LinkedHashSet<>();
@@ -127,7 +127,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	private int defaultSessionTimeoutInMinutes;
 	private SessionPersistenceManager sessionPersistenceManager;
 
-	public Context(IdentityManager identityManager, ContextAwarePathHandler path, ContextModel contextModel) {
+	public Context(IdentityManager identityManager, ContextAwarePathHandler path, OsgiContextModel contextModel) {
 		this.identityManager = identityManager;
 		this.path = path;
 		this.contextModel = contextModel;
@@ -155,7 +155,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		}
 	}
 
-	public ContextModel getContextModel() {
+	public OsgiContextModel getContextModel() {
 		return contextModel;
 	}
 
@@ -727,7 +727,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	@Override
 	public Resource getResource(String path) throws IOException {
 		WebContainerContext context = contextModel.getHttpContext();
-		if (context != null && context.isDefaultOrSharedContext()) { // FIXME why is this special treatment necessary
+		if (context != null/* && context.isDefaultOrSharedContext()*/) { // FIXME why is this special treatment necessary
 			final URL resource = context.getResource(path);
 			if (resource == null) {
 				return null;

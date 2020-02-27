@@ -18,12 +18,18 @@ package org.ops4j.pax.web.service;
 
 import javax.servlet.ServletContext;
 
+import org.ops4j.pax.web.service.whiteboard.ContextMapping;
+
 /**
  * <p>Different constants used across Pax Web but not related to configuration that may be specified using
  * {@code org.ops4j.pax.web} PID or system/bundle context properties. For configuration related constants, see
  * {@link PaxWebConfig}.</p>
  * <p>Constants names use the following prefixes:<ul>
- *     <li>{@code SERVICE_PROPERTY_} - for names of OSGi service properties</li>
+ *     <li>{@code SERVICE_PROPERTY_} - for names of OSGi service registration properties</li>
+ *     <li>{@code INIT_PARAM_} - for legacy init parameters passed to {@link org.osgi.service.http.HttpService}
+ *     registration methods that are handled in special way by Pax Web.</li>
+ *     <li>{@code DEFAULT_} - for miscellaneous <em>default</em> values (default VHost, default name, default context,
+ *     ...</li>
  * </ul></p>
  *
  * @author Alin Dreghiciu
@@ -40,15 +46,62 @@ public interface PaxWebConstants {
 			org.ops4j.pax.web.service.WebContainer.class.getName()
 	};
 
+	/** Default name for <em>context</em> (e.g., {@link org.osgi.service.http.context.ServletContextHelper}) */
+	String DEFAULT_CONTEXT_NAME = "default";
+
+	/** Default name for <em>virtual host</em> */
+	String DEFAULT_VIRTUAL_HOST_NAME = "default";
+
+	/** Default {@link ServletContext#getContextPath() context path} */
+	String DEFAULT_CONTEXT_PATH = "/";
+
+	/**
+	 * <p>Pax Web specific service property used when registering:<ul>
+	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping}</li>
+	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.HttpContextMapping}</li>
+	 *     <li>{@link org.osgi.service.http.context.ServletContextHelper}</li>
+	 * </ul>
+	 * services to indicate <em>virtual hosts</em> with which this context should be associated (though for the two
+	 * Pax Web specific mappings, {@link ContextMapping#getVirtualHosts()} takes precedence).</p>
+	 *
+	 * <p>The value should be String, array of Strings or Collection of Strings. When missing, <em>context</em>
+	 * is assumed to be associated with <strong>all</strong> virtual hosts.</p>
+	 */
+	String SERVICE_PROPERTY_VIRTUAL_HOSTS = "httpContext.virtualhosts";
+
+	/**
+	 * Legacy service property for context ID.
+	 * @deprecated Use {@link org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_CONTEXT_NAME}
+	 */
+	@Deprecated
+	String SERVICE_PROPERTY_HTTP_CONTEXT_ID = "httpContext.id";
+
+	/**
+	 * <p>Init parameter that can be used to specify servlet name.</p>
+	 *
+	 * <p>{@link WebContainer} provides registration methods, where servlet name can be specified directly. Also
+	 * according to Http Service and Whiteboard Service specifications, servlet name defaults to FQCN of the servlet.
+	 * </p>
+	 */
+	@Deprecated
+	String INIT_PARAM_SERVLET_NAME = "servlet-name";
+
+
+
+
+
+
+
+
+
+
+
+
+
 	/**
 	 * Init param name for specifying a context name.
 	 */
 	String CONTEXT_NAME = "webapp.context";
-
-	/**
-	 * Servlet init param name for specifying a servlet name.
-	 */
-	String SERVLET_NAME = "servlet-name";
 
 	/**
 	 * Filter init param name for specifying a filter name.
@@ -70,55 +123,12 @@ public interface PaxWebConstants {
 	String FILTER_MAPPING_DISPATCHER = "filter-mapping-dispatcher";
 
 	String PROPERTY_HTTP_USE_NIO = "org.osgi.service.http.useNIO";
-	String PROPERTY_HTTP_CHECK_FORWARDED_HEADERS = "org.osgi.service.http.checkForwardedHeaders";
-	String PROPERTY_HTTP_CONNECTOR_NAME = "org.osgi.service.http.connector.name";
-	String PROPERTY_HTTP_ENABLED = "org.osgi.service.http.enabled";
-	String PROPERTY_HTTP_SECURE_ENABLED = "org.osgi.service.http.secure.enabled";
-	String PROPERTY_HTTP_SECURE_CONNECTOR_NAME = "org.osgi.service.http.secure.connector.name";
 
-	String PROPERTY_SSL_PROVIDER = PID + ".ssl.provider";
 
-	String PROPERTY_SSL_KEYSTORE = PID + ".ssl.keystore";
-	String PROPERTY_SSL_KEYSTORE_TYPE = PID + ".ssl.keystore.type";
-	String PROPERTY_SSL_KEYSTORE_PASSWORD = PID + ".ssl.keystore.password";
-	String PROPERTY_SSL_KEYSTORE_PROVIDER = PID + ".ssl.keystore.provider";
-	/**
-	 * @deprecated use PROPERTY_SSL_KEYSTORE_PASSWORD instead.
-	 */
-	@Deprecated
-	String PROPERTY_SSL_PASSWORD = PID + ".ssl.password";
-	/**
-	 * @deprecated use PROPERTY_SSL_KEY_PASSWORD instead.
-	 */
-	@Deprecated
-	String PROPERTY_SSL_KEYPASSWORD = PID + ".ssl.keypassword";
-	String PROPERTY_SSL_KEY_ALIAS = PID + ".ssl.key.alias";
-	String PROPERTY_SSL_KEY_PASSWORD = PID + ".ssl.key.password";
 
-	String PROPERTY_SSL_TRUST_STORE = PID + ".ssl.truststore";
-	String PROPERTY_SSL_TRUST_STORE_PASSWORD = PID + ".ssl.truststore.password";
-	String PROPERTY_SSL_TRUST_STORE_TYPE = PID + ".ssl.truststore.type";
-	String PROPERTY_SSL_TRUST_STORE_PROVIDER = PID + ".ssl.truststore.provider";
 
-	String PROPERTY_SSL_CLIENT_AUTH_WANTED = PID + ".ssl.clientauthwanted";
-	String PROPERTY_SSL_CLIENT_AUTH_NEEDED = PID + ".ssl.clientauthneeded";
 
-	/**
-	 * @deprecated use PROPERTY_CIPHERSUITES_INCLUDED instead.
-	 */
-	@Deprecated
-	String PROPERTY_CIPHERSUITE_INCLUDED = PID + "ssl.cyphersuites.included";
-	/**
-	 * @deprecated use PROPERTY_CIPHERSUITES_EXCLUDED instead.
-	 */
-	@Deprecated
-	String PROPERTY_CIPHERSUITE_EXCLUDED = PID + "ssl.cyphersuites.excluded";
 
-	String PROPERTY_PROTOCOLS_INCLUDED = PID + ".ssl.protocols.included";
-	String PROPERTY_PROTOCOLS_EXCLUDED = PID + ".ssl.protocols.excluded";
-	String PROPERTY_CIPHERSUITES_INCLUDED = PID + ".ssl.ciphersuites.included";
-	String PROPERTY_CIPHERSUITES_EXCLUDED = PID + ".ssl.ciphersuites.excluded";
-	String PROPERTY_SSL_RENEGOTIATION_ALLOWED = PID + ".ssl.renegotiationAllowed";
 
 	String PROPERTY_SESSION_TIMEOUT = PID + ".session.timeout";
 	String PROPERTY_SESSION_COOKIE = PID + ".session.cookie";
@@ -132,31 +142,13 @@ public interface PaxWebConstants {
 	String PROPERTY_SESSION_LAZY_LOAD = PID + ".session.lazyload";
 	String PROPERTY_SESSION_STORE_DIRECTORY = PID + ".session.storedirectory";
 
-	String PROPERTY_LISTENING_ADDRESSES = PID + ".listening.addresses";
-
-	String PROPERTY_LOG_NCSA_ENABLED = "org.ops4j.pax.web.log.ncsa.enabled";
-	String PROPERTY_LOG_NCSA_FORMAT = "org.ops4j.pax.web.log.ncsa.format";
-	String PROPERTY_LOG_NCSA_RETAINDAYS = "org.ops4j.pax.web.log.ncsa.retaindays";
-	String PROPERTY_LOG_NCSA_APPEND = "org.ops4j.pax.web.log.ncsa.append";
-	String PROPERTY_LOG_NCSA_EXTENDED = "org.ops4j.pax.web.log.ncsa.extended";
-	String PROPERTY_LOG_NCSA_DISPATCH = "org.ops4j.pax.web.log.ncsa.dispatch";
-	String PROPERTY_LOG_NCSA_LOGTIMEZONE = "org.ops4j.pax.web.log.ncsa.logtimezone";
-	String PROPERTY_LOG_NCSA_LOGDIR = "org.ops4j.pax.web.log.ncsa.directory";
-	String PROPERTY_LOG_NCSA_LATENCY = "org.ops4j.pax.web.log.ncsa.latency";
-	String PROPERTY_LOG_NCSA_COOKIES = "org.ops4j.pax.web.log.ncsa.cookies";
-	String PROPERTY_LOG_NCSA_SERVER = "org.ops4j.pax.web.log.ncsa.server";
 
 	String PROPERTY_VIRTUAL_HOST_LIST = "org.ops4j.pax.web.default.virtualhosts";
 	String PROPERTY_CONNECTOR_LIST = "org.ops4j.pax.web.default.connectors";
     String PROPERTY_DEFAULT_AUTHMETHOD = "org.ops4j.pax.web.default.authmethod";
     String PROPERTY_DEFAULT_REALMNAME = "org.ops4j.pax.web.default.realmname";
 
-	String PROPERTY_MAX_THREADS = "org.ops4j.pax.web.server.maxThreads";
 
-	String PROPERTY_MIN_THREADS = "org.ops4j.pax.web.server.minThreads";
-
-	String PROPERTY_IDLE_TIMEOUT = "org.ops4j.pax.web.server.idleTimeout";
-	String PROPERTY_CONNECTOR_IDLE_TIMEOUT = "org.ops4j.pax.web.server.connector.idleTimeout";
 	String PROPERTY_SHOW_STACKS = "org.ops4j.pax.web.server.showStacks";
 
 	/**
@@ -165,10 +157,6 @@ public interface PaxWebConstants {
 	 */
 	String BUNDLE_CONTEXT_ATTRIBUTE = "osgi-bundlecontext";
 
-	String PROPERTY_SERVER_CONFIGURATION_FILE = PID + ".config.file";
-
-	String PROPERTY_SERVER_CONFIGURATION_URL = PID + ".config.url";
-
 	/**
 	 * Manifest header key for web application bundles.
 	 */
@@ -176,18 +164,7 @@ public interface PaxWebConstants {
 
 	String FILTER_RANKING = "filterRank";
 	
-	String PROPERTY_CRL_PATH = PID + ".crlPath";
-	
-	String PROPERTY_ENABLE_CRLDP = PID + ".enableCRLDP";
-	
-	String PROPERTY_VALIDATE_CERTS = PID + ".validateCerts";
-	
-	String PROPERTY_VALIDATE_PEER_CERTS = PID + ".validatePeerCerts";
-	
-	String PROPERTY_ENABLE_OCSP = PID + ".enableOCSP";
-	
-	String PROPERTY_OCSP_RESPONDER_URL = PID + ".ocspResponderURL";
-	
+
 	String PROPERTY_ENC_MASTERPASSWORD = PID + ".enc.masterpassword";
 	
 	String PROPERTY_ENC_ALGORITHM = PID + ".enc.algorithm";

@@ -31,7 +31,7 @@
 	<artifactId>samples-war</artifactId>
 	<packaging>pom</packaging>
 
-	<name>OPS4J Pax Web - Samples packages as WAR archives</name>
+	<name>OPS4J Pax Web WAR Samples</name>
 
 	<modules>
 		<module>war-simplest-javaee</module>

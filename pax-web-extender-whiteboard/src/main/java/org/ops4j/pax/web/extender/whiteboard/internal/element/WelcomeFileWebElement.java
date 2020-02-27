@@ -18,7 +18,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal.element;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardWelcomeFile;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWelcomeFile;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 
@@ -46,14 +46,14 @@ public class WelcomeFileWebElement extends WebElement<WelcomeFileMapping> implem
 	@Override
 	public void register(WebContainer webContainer, HttpContext httpContext)
 			throws Exception {
-		webContainer.registerWelcomeFiles(
-				welcomeFileMapping.getWelcomeFiles(),
-				welcomeFileMapping.isRedirect(), httpContext);
+//		webContainer.registerWelcomeFiles(
+//				welcomeFileMapping.getWelcomeFiles(),
+//				welcomeFileMapping.isRedirect(), httpContext);
 	}
 
 	@Override
 	public void unregister(WebContainer webContainer, HttpContext httpContext) {
-		webContainer.unregisterWelcomeFiles(welcomeFileMapping.getWelcomeFiles(), httpContext);
+//		webContainer.unregisterWelcomeFiles(welcomeFileMapping.getWelcomeFiles(), httpContext);
 	}
 
 	@Override

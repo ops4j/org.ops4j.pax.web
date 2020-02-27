@@ -94,10 +94,36 @@ public class Path {
 		if (pattern == null || "".equals(pattern.trim())) {
 			return "/";
 		}
-		if (pattern.length() > 0 && !pattern.startsWith("/")
-				&& !pattern.startsWith("*")) {
+		if (!pattern.startsWith("/") && !pattern.startsWith("*")) {
 			return "/" + pattern;
 		}
 		return pattern;
 	}
+
+	/**
+	 * Alias should always be "exact" path
+	 *
+	 * @param alias
+	 * @return
+	 */
+	public static String normalizeAlias(String alias) {
+		if (alias == null) {
+			return null;
+		}
+		if (alias.equals("/")) {
+			return alias;
+		}
+		if (alias.startsWith("*.")) {
+			throw new IllegalArgumentException("Alias can't be in the form of \"*.alias\"");
+		}
+		if (!alias.startsWith("/")) {
+			alias = "/" + alias;
+		}
+		while (alias.length() > 1 && alias.endsWith("/")) {
+			alias = alias.substring(0, alias.length() - 1);
+		}
+
+		return alias;
+	}
+
 }

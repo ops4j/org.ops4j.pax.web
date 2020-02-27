@@ -53,23 +53,23 @@ public class DefaultHttpContextMapping implements HttpContextMapping {
 	private Boolean sharedHttpContext = false;
 
 	/**
-	 * @see HttpContextMapping#getHttpContextId()
+	 * @see HttpContextMapping#getContextId()
 	 */
-	public String getHttpContextId() {
+	public String getContextId() {
 		return httpContextId;
 	}
 
 	/**
-	 * @see HttpContextMapping#getPath()
+	 * @see HttpContextMapping#getContextPath()
 	 */
-	public String getPath() {
+	public String getContextPath() {
 		return path;
 	}
 
 	/**
 	 * @see HttpContextMapping#getParameters()
 	 */
-	public Map<String, String> getParameters() {
+	public Map<String, String> getInitParameters() {
 		return parameters;
 	}
 
@@ -141,4 +141,6 @@ public class DefaultHttpContextMapping implements HttpContextMapping {
                 ", sharedHttpContext=" + sharedHttpContext +
                 '}';
     }
+
+
 }

@@ -31,7 +31,7 @@
 	<artifactId>samples-jsf</artifactId>
 	<packaging>pom</packaging>
 
-	<name>OPS4J Pax Web - Samples related to JSF</name>
+	<name>OPS4J Pax Web JSF Samples</name>
 
 	<modules>
 		<module>jsf-primefaces-jar</module>

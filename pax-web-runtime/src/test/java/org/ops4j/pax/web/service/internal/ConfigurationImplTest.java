@@ -17,6 +17,7 @@ package org.ops4j.pax.web.service.internal;
 
 import java.lang.reflect.Field;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
 
 import org.junit.Test;
@@ -37,7 +38,7 @@ public class ConfigurationImplTest {
 		props.put(PaxWebConfig.PID_CFG_HTTP_PORT, "1234");
 		PropertyResolver resolver = new DictionaryPropertyResolver(props);
 
-		Configuration config = ConfigurationBuilder.getConfiguration(resolver);
+		Configuration config = ConfigurationBuilder.getConfiguration(resolver, new HashMap<>());
 		Field f = ConfigurationImpl.class.getDeclaredField("propertyResolver");
 		f.setAccessible(true);
 		f.set(config, null);

@@ -31,7 +31,7 @@
 	<artifactId>jsf-primefaces-embedded</artifactId>
 	<packaging>war</packaging>
 
-	<name>OPS4J Pax Web - Samples - JSF with Primefaces (embedded)</name>
+	<name>OPS4J Pax Web JSF Samples - embedded</name>
 
 	<build>
 		<resources>

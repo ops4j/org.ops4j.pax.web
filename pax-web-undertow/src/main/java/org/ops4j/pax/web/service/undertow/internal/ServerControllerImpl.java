@@ -71,22 +71,21 @@ import io.undertow.servlet.util.InMemorySessionPersistence;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
 import org.ops4j.pax.web.service.PaxWebConfig;
-import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.ConfigurationSource;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
-import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
-import org.ops4j.pax.web.service.spi.model.ContextModel;
-import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
-import org.ops4j.pax.web.service.spi.model.EventListenerModel;
-import org.ops4j.pax.web.service.spi.model.FilterModel;
-import org.ops4j.pax.web.service.spi.model.ResourceModel;
-import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
-import org.ops4j.pax.web.service.spi.model.ServletModel;
-import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
+import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.model.elements.ResourceModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingModel;
+import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.undertow.internal.configuration.ResolvingContentHandler;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.SecurityRealm;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.Server;
@@ -1008,7 +1007,7 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
     }
 
     @Override
-    public synchronized LifeCycle getContext(ContextModel model) {
+    public synchronized LifeCycle getContext(OsgiContextModel model) {
         assertNotState(State.Unconfigured);
         return findOrCreateContext(model);
     }
@@ -1036,13 +1035,13 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
         }
     }
 
-    private Context findContext(final ContextModel contextModel) {
+    private Context findContext(final OsgiContextModel contextModel) {
         NullArgumentException.validateNotNull(contextModel, "contextModel");
         HttpContext httpContext = contextModel.getHttpContext();
         return contextMap.get(httpContext);
     }
 
-    private Context findOrCreateContext(final ContextModel contextModel) {
+    private Context findOrCreateContext(final OsgiContextModel contextModel) {
         NullArgumentException.validateNotNull(contextModel, "contextModel");
         synchronized (contextMap) {
             if (contextMap.containsKey(contextModel.getHttpContext())) {
@@ -1177,7 +1176,7 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
     }
 
     @Override
-    public Servlet createResourceServlet(ContextModel contextModel, String alias, String name) {
+    public Servlet createResourceServlet(OsgiContextModel contextModel, String alias, String name) {
         final Context context = findOrCreateContext(contextModel);
         return new ResourceServlet(context, alias, name);
     }

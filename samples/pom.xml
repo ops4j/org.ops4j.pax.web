@@ -34,7 +34,7 @@
 	<artifactId>samples</artifactId>
 	<packaging>pom</packaging>
 
-	<name>OPS4J Pax Web - Samples</name>
+	<name>OPS4J Pax Web Samples</name>
 
 	<description>Pax Web Samples</description>
 

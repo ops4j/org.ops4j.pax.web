@@ -1,44 +1,41 @@
-/* Copyright 2011 Achim Nierbeck.
+/*
+ * Copyright 2011 Achim Nierbeck.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.
- *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.ops4j.pax.web.service.spi;
 
 import java.util.Arrays;
-
 import javax.servlet.Servlet;
 
+import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.service.http.HttpContext;
 
 /**
+ * Event related to registration of single {@link Servlet}.
+ *
  * @author Achim Nierbeck
  */
 public class ServletEvent {
 
-	public static final int DEPLOYING = 1;
-	public static final int DEPLOYED = 2;
-	public static final int UNDEPLOYING = 3;
-	public static final int UNDEPLOYED = 4;
-	public static final int FAILED = 5;
-	public static final int WAITING = 6;
+	public enum State {
+		DEPLOYING, DEPLOYED, UNDEPLOYING, UNDEPLOYED, FAILED, WAITING
+	}
 
 	private final boolean replay;
-	private final int type;
+	private final State type;
 	private final Bundle bundle;
 	private final long bundleId;
 	private final String bundleName;
@@ -67,7 +64,7 @@ public class ServletEvent {
 		this.replay = replay;
 	}
 
-	public ServletEvent(int type, Bundle bundle, String alias,
+	public ServletEvent(State type, Bundle bundle, String alias,
 						String servletName, String[] urlParameter,
 						Servlet servlet,
 						Class<? extends Servlet> servletClass, HttpContext httpContext) {
@@ -84,10 +81,19 @@ public class ServletEvent {
 			this.urlParameter = null;
 		}
 		this.servlet = servlet;
-		this.servletClassName = servletClass.getCanonicalName();
+		if (servletClass != null) {
+			this.servletClassName = servletClass.getCanonicalName();
+		} else {
+			this.servletClassName = servlet.getClass().getCanonicalName();
+		}
 		this.httpContext = httpContext;
 		this.timestamp = System.currentTimeMillis();
 		this.replay = false;
+	}
+
+	public ServletEvent(State type, Bundle bundle, ServletModel model) {
+		this(type, bundle, model.getAlias(), model.getName(),
+				model.getUrlPatterns(), model.getServlet(), model.getServletClass(), null);
 	}
 
 	/**
@@ -100,7 +106,7 @@ public class ServletEvent {
 	/**
 	 * @return the type
 	 */
-	public int getType() {
+	public State getType() {
 		return type;
 	}
 
@@ -176,39 +182,12 @@ public class ServletEvent {
 	 */
 	@Override
 	public String toString() {
-		return "ServletEvent [replay=" + replay + ", type=" + type(type)
+		return "ServletEvent [replay=" + replay + ", type=" + type
 				+ ", bundle=" + bundleId + "-" + bundleName + ", timestamp=" + timestamp
 				+ ", alias=" + alias + ", servletName=" + servletName
 				+ ", urlParameter=" + (urlParameter == null ? "null" : Arrays.asList(urlParameter))
 				+ ", servletClass=" + servletClassName + "]" + ", httpContext="
 				+ httpContext + "]";
-	}
-
-	private String type(int type) {
-		String name = "UNKNOWN";
-		switch (type) {
-			case DEPLOYING:
-				name = "DEPLOYING";
-				break;
-			case DEPLOYED:
-				name = "DEPLOYED";
-				break;
-			case UNDEPLOYING:
-				name = "UNDEPLOYING";
-				break;
-			case UNDEPLOYED:
-				name = "UNDEPLOYED";
-				break;
-			case FAILED:
-				name = "FAILED";
-				break;
-			case WAITING:
-				name = "WAITING";
-				break;
-			default:
-				break;
-		}
-		return name;
 	}
 
 }

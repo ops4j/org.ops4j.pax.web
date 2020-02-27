@@ -31,7 +31,7 @@
 	<artifactId>jsf-primefaces-commons2</artifactId>
 	<packaging>jar</packaging>
 
-	<name>OPS4J Pax Web - Samples - JSF with Primefaces (bundle dependency 2)</name>
+	<name>OPS4J Pax Web JSF Samples - bundle dependency 2</name>
 
 	<build>
 		<plugins>

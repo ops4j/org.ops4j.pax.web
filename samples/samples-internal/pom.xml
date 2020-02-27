@@ -31,7 +31,7 @@
 	<artifactId>samples-internal</artifactId>
 	<packaging>pom</packaging>
 
-	<name>OPS4J Pax Web - Samples used to test Pax Web itself</name>
+	<name>OPS4J Pax Web Internal Samples</name>
 
 	<modules>
 		<module>pax-web-spi-fragment</module>

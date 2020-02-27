@@ -20,7 +20,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal.element;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardHttpContext;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardHttpContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -41,7 +41,7 @@ public class HttpContextElement implements WhiteboardHttpContext {
         this.contextMapping = contextMapping;
 
         // validate
-        String httpContextId = contextMapping.getHttpContextId();
+        String httpContextId = contextMapping.getContextId();
         if ( httpContextId == null || httpContextId.trim().length() == 0) {
             LOG.warn("Registered http context [" + getPusblishedPID() + "] did not contain a valid http context id");
             valid = false;

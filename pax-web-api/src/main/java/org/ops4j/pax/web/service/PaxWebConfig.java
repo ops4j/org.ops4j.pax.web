@@ -15,6 +15,8 @@
  */
 package org.ops4j.pax.web.service;
 
+import java.security.cert.CertStoreParameters;
+import javax.net.ssl.SSLContext;
 import javax.servlet.ServletContext;
 
 /**
@@ -24,6 +26,13 @@ import javax.servlet.ServletContext;
  *     <li>{@code WEB_CFG_} - for system or context property names</li>
  *     <li>{@code PID_CFG_} - for property names found in {@code org.ops4j.pax.web} PID</li>
  *     <li>!! {@code PROPERTY_JSP_} - for property names found in {@code org.ops4j.pax.web} PID</li>
+ * </ul></p>
+ *
+ * <p>When adding new properties, remember to add them in more places:<ul>
+ *     <li>Constant name in this interface</li>
+ *     <li>Relevant method (if needed) in {@code org.ops4j.pax.web.service.spi.config.Configuration}</li>
+ *     <li>Metatype information for default values (if needed) in
+ *     {@code pax-web-runtime/src/main/resources/OSGI-INF/metatype/metatype.xml}</li>
  * </ul></p>
  */
 public interface PaxWebConfig {
@@ -36,20 +45,228 @@ public interface PaxWebConfig {
 	 */
 	String PID_CFG_TEMP_DIR = ServletContext.TEMPDIR;
 
-	// 102.9 Configuration Properties - not specified in any interface/class
+	/**
+	 * Backward compatible option to specify single external configuration file.
+	 * @deprecated specify {@link #PID_CFG_SERVER_CONFIGURATION_FILES} instead
+	 */
+	@Deprecated
+	String PID_CFG_SERVER_CONFIGURATION_FILE = "org.ops4j.pax.web.config.file";
+
+	/**
+	 * Specify comma-separated list of external, server-specific config locations.
+	 * @since Pax Web 8
+	 */
+	String PID_CFG_SERVER_CONFIGURATION_FILES = "org.ops4j.pax.web.config.files";
+
+	// 102.9 Configuration Properties - the below two properties are not specified in any interface/class
 
 	/**
 	 * This property specifies the port used for servlets and resources accessible via HTTP.
-	 * The default value for this property is {@code 80}.
+	 * The default value for this property is {@code 80} according to specification, but we'll use {@code 8080}.
 	 */
 	String PID_CFG_HTTP_PORT = "org.osgi.service.http.port";
 
 	/**
 	 * This property specifies the port used for servlets and resources accessible via HTTPS.
-	 * The default value for this property is {@code 443}.
+	 * The default value for this property is {@code 443} according to specificaton, but we'll use {@code 8443}.
 	 */
 	String PID_CFG_HTTP_PORT_SECURE = "org.osgi.service.http.port.secure";
 
+	/** Should the default non-secure port be enabled? */
+	String PID_CFG_HTTP_ENABLED = "org.osgi.service.http.enabled";
+
+	/** Should the default secure port be enabled? */
+	String PID_CFG_HTTP_SECURE_ENABLED = "org.osgi.service.http.secure.enabled";
+
+	/** Comma-separated list of addresses to bind listeners/connectors to. Defaults to {@code 0.0.0.0} */
+	String PID_CFG_LISTENING_ADDRESSES = "org.ops4j.pax.web.listening.addresses";
+
+	/** Name to use as <em>default</em> (non-secure) connector, defaults to {@code default}. */
+	String PID_CFG_HTTP_CONNECTOR_NAME = "org.osgi.service.http.connector.name";
+
+	/** Name to use as <em>secure</em> connector, defaults to {@code secureDefault}. */
+	String PID_CFG_HTTP_SECURE_CONNECTOR_NAME = "org.osgi.service.http.secure.connector.name";
+
+	/**
+	 * Jetty: {@code org.eclipse.jetty.server.AbstractConnector#setIdleTimeout(long)}
+	 */
+	String PID_CFG_CONNECTOR_IDLE_TIMEOUT = "org.ops4j.pax.web.server.connector.idleTimeout";
+
+	/**
+	 * Jetty: {@code org.eclipse.jetty.util.thread.QueuedThreadPool#setIdleTimeout(int)}
+	 */
+	String PID_CFG_SERVER_IDLE_TIMEOUT = "org.ops4j.pax.web.server.idleTimeout";
+
+	/**
+	 * Gets maximum number of threads to use in server runtime.
+	 * Jetty: {@code org.eclipse.jetty.util.thread.QueuedThreadPool#setMaxThreads(int)}
+	 */
+	String PID_CFG_SERVER_MAX_THREADS = "org.ops4j.pax.web.server.maxThreads";
+
+	/**
+	 * Gets minimum number of threads to use in server runtime.
+	 * Jetty: {@code org.eclipse.jetty.util.thread.QueuedThreadPool#setMinThreads(int)}
+	 */
+	String PID_CFG_SERVER_MIN_THREADS = "org.ops4j.pax.web.server.minThreads";
+
+	/**
+	 * Prefix to use for server thread names.
+	 * Jetty: {@code org.eclipse.jetty.util.thread.QueuedThreadPool#setName(java.lang.String)}
+	 */
+	String PID_CFG_SERVER_THREAD_NAME_PREFIX = "org.ops4j.pax.web.server.threadNamePrefix";
+
+	/**
+	 * Jetty: adds {@code org.eclipse.jetty.server.ForwardedRequestCustomizer} to {@code HttpConfiguration}
+	 */
+	String PID_CFG_HTTP_CHECK_FORWARDED_HEADERS = "org.osgi.service.http.checkForwardedHeaders";
+
 	// --- security configuration properties
+
+	/**
+	 * <p>Property to specify SSL provider to use for <em>secure</em> connector.</p>
+	 *
+	 * <p>Jetty: {@code org.eclipse.jetty.util.ssl.SslContextFactory#setProvider()}. Used in:<ul>
+	 *     <li>{@link java.security.cert.CertificateFactory#getInstance(String, String)} - default {@code SUN}</li>
+	 *     <li>{@link java.security.cert.CertStore#getInstance(String, CertStoreParameters, String)} - default {@code SUN}</li>
+	 *     <li>{@link javax.net.ssl.KeyManagerFactory#getInstance(String, String)} - default {@code SunJSSE}</li>
+	 *     <li>{@link java.security.SecureRandom#getInstance(String, String)} - default {@code SUN}</li>
+	 *     <li>{@link javax.net.ssl.SSLContext#getInstance(String, String)} - default {@code SunJSSE}</li>
+	 *     <li>{@link javax.net.ssl.TrustManagerFactory#getInstance(String, String)} - default {@code SunJSSE}</li>
+	 * </ul></p>
+	 */
+	String PID_CFG_SSL_PROVIDER = "org.ops4j.pax.web.ssl.provider";
+
+	/** File or URL to location of Keystore with server certificate and private key. */
+	String PID_CFG_SSL_KEYSTORE = "org.ops4j.pax.web.ssl.keystore";
+	/** Password for entire server keystore */
+	String PID_CFG_SSL_KEYSTORE_PASSWORD = "org.ops4j.pax.web.ssl.keystore.password";
+	/** Type of server keystore to use as specified by {@link java.security.KeyStore#getInstance(String, String)} */
+	String PID_CFG_SSL_KEYSTORE_TYPE = "org.ops4j.pax.web.ssl.keystore.type";
+	/** Provider of server keystore as specified by {@link java.security.KeyStore#getInstance(String, String)} */
+	String PID_CFG_SSL_KEYSTORE_PROVIDER = "org.ops4j.pax.web.ssl.keystore.provider";
+
+	/** Password for private key entry inside server keystore */
+	String PID_CFG_SSL_KEY_PASSWORD = "org.ops4j.pax.web.ssl.key.password";
+	/** Algorithm to use for {@link javax.net.ssl.KeyManagerFactory#getInstance(String)} */
+	String PID_CFG_SSL_KEY_ALGORITHM = "org.ops4j.pax.web.ssl.key.algorithm";
+	/** Alias of private key entry in server keystore to use of no SNI is enabled */
+	String PID_CFG_SSL_KEY_ALIAS = "org.ops4j.pax.web.ssl.key.alias";
+
+	/** File or URL to location of server truststore. */
+	String PID_CFG_SSL_TRUSTSTORE = "org.ops4j.pax.web.ssl.truststore";
+	/** Password for entire server truststore */
+	String PID_CFG_SSL_TRUSTSTORE_PASSWORD = "org.ops4j.pax.web.ssl.truststore.password";
+	/** Type of server truststore to use as specified by {@link java.security.KeyStore#getInstance(String, String)} */
+	String PID_CFG_SSL_TRUSTSTORE_TYPE = "org.ops4j.pax.web.ssl.truststore.type";
+	/** Provider of server truststore as specified by {@link java.security.KeyStore#getInstance(String, String)} */
+	String PID_CFG_SSL_TRUSTSTORE_PROVIDER = "org.ops4j.pax.web.ssl.truststore.provider";
+	/** Algorithm to use for {@link javax.net.ssl.TrustManagerFactory#getInstance(String)} */
+	String PID_CFG_SSL_TRUST_MANAGER_FACTORY_ALGORITHM = "org.ops4j.pax.web.ssl.trustManagerFactory.algorithm";
+
+	/** Flag for {@link javax.net.ssl.SSLEngine#setWantClientAuth(boolean)} */
+	String PID_CFG_SSL_CLIENT_AUTH_WANTED = "org.ops4j.pax.web.ssl.clientauth.wanted";
+	/** Flag for {@link javax.net.ssl.SSLEngine#setNeedClientAuth(boolean)} */
+	String PID_CFG_SSL_CLIENT_AUTH_NEEDED = "org.ops4j.pax.web.ssl.clientauth.needed";
+
+	/** Protocol to use with {@link javax.net.ssl.SSLContext#getInstance(String)}. Defaults to {@code TLSv1.2} */
+	String PID_CFG_SSL_PROTOCOL = "org.ops4j.pax.web.ssl.protocol";
+
+	/** Algorithm to use with {@link java.security.SecureRandom#getInstance(String)}. */
+	String PID_CFG_SSL_SECURE_RANDOM_ALGORITHM = "org.ops4j.pax.web.ssl.secureRandom.algorithm";
+
+	/**
+	 * Comma separated list of included protocol names, as in
+	 * {@link javax.net.ssl.SSLEngine#setEnabledProtocols(String[])}. Protocol names are taken from
+	 * {@code sun.security.ssl.ProtocolVersion}
+	 */
+	String PID_CFG_PROTOCOLS_INCLUDED = "org.ops4j.pax.web.ssl.protocols.included";
+	/**
+	 * Comma separated list of excluded protocol names. All supported without excluded will be used in
+	 * {@link javax.net.ssl.SSLEngine#setEnabledProtocols(String[])}
+	 */
+	String PID_CFG_PROTOCOLS_EXCLUDED = "org.ops4j.pax.web.ssl.protocols.excluded";
+	/**
+	 * Comma separated list of included cipher suite names, as in
+	 * {@link javax.net.ssl.SSLEngine#setEnabledCipherSuites(String[])}. Cipher suite names are taken from
+	 * {@code sun.security.ssl.CipherSuite}
+	 */
+	String PID_CFG_CIPHERSUITES_INCLUDED = "org.ops4j.pax.web.ssl.ciphersuites.included";
+	/**
+	 * Comma separated list of excluded cipher suite names. All supported without excluded will be used in
+	 * {@link javax.net.ssl.SSLEngine#setEnabledCipherSuites(String[])}
+	 */
+	String PID_CFG_CIPHERSUITES_EXCLUDED = "org.ops4j.pax.web.ssl.ciphersuites.excluded";
+
+	/** Allow SSL renegotiation */
+	String PID_CFG_SSL_RENEGOTIATION_ALLOWED = "org.ops4j.pax.web.ssl.renegotiationAllowed";
+	/** SSL renegotiation limit */
+	String PID_CFG_SSL_RENEGOTIATION_LIMIT = "org.ops4j.pax.web.ssl.renegotiationLimit";
+
+	/**
+	 * Are SSL Sessions enabled? If {@code true} (which is default), such hint is passed to
+	 * {@link SSLContext#createSSLEngine(String, int)}.
+	 */
+	String PID_CFG_SSL_SESSION_ENABLED = "org.ops4j.pax.web.ssl.session.enabled";
+	/** SSL Session cache size. Defaults to {@code -1} */
+	String PID_CFG_SSL_SESSION_CACHE_SIZE = "org.ops4j.pax.web.ssl.session.cacheSize";
+	/** SSL Session timeout. Defaults to {@code -1} */
+	String PID_CFG_SSL_SESSION_TIMEOUT = "org.ops4j.pax.web.ssl.session.timeout";
+
+	/** Whether certificates in server keystore should be validated on load */
+	String PID_CFG_VALIDATE_CERTS = "org.ops4j.pax.web.validateCerts";
+	/** Whether certificates in server truststore should be validated on load */
+	String PID_CFG_VALIDATE_PEER_CERTS = "org.ops4j.pax.web.validatePeerCerts";
+
+	/** Should On-Line Certificate Status Protocol (OCSP) be enabled? */
+	String PID_CFG_ENABLE_OCSP = "org.ops4j.pax.web.enableOCSP";
+	/** Should Certificate Revocation List Distribution Points support (CRLDP) be enabled? */
+	String PID_CFG_ENABLE_CRLDP = "org.ops4j.pax.web.enableCRLDP";
+	/** Location of CRL file to use with {@link java.security.cert.CertificateFactory#generateCRLs} for X.509 factory */
+	String PID_CFG_CRL_PATH = "org.ops4j.pax.web.crlPath";
+	/** OCSP responder URL, though it doesn't seem to be used by Jetty. */
+	String PID_CFG_OCSP_RESPONDER_URL = "org.ops4j.pax.web.ocspResponderURL";
+	/** Return max length of cert path to use during certificate validation */
+	String PID_CFG_MAX_CERT_PATH_LENGTH = "org.ops4j.pax.web.maxCertPathLength";
+
+	// --- logging configuration properties
+
+	/** Should we enable "NCSA Logger"? */
+	String PID_CFG_LOG_NCSA_ENABLED = "org.ops4j.pax.web.log.ncsa.enabled";
+
+	/** Directory to store request log files */
+	String PID_CFG_LOG_NCSA_LOGDIR = "org.ops4j.pax.web.log.ncsa.directory";
+
+	/**
+	 * Jetty: defaults to "yyyy_mm_dd.request.log", should contain {@code yyyy_mm_dd}.
+	 */
+	String PID_CFG_LOG_NCSA_LOGFILE = "org.ops4j.pax.web.log.ncsa.file";
+
+	/**
+	 * Date format to use when current file is renamed during rollover
+	 * Jetty: org.eclipse.jetty.util.RolloverFileOutputStream._fileDateFormat = ROLLOVER_FILE_DATE_FORMAT
+	 */
+	String PID_CFG_LOG_NCSA_LOGFILE_DATE_FORMAT = "org.ops4j.pax.web.log.ncsa.file.date.format";
+
+	/**
+	 * Whether to append to log file
+	 */
+	String PID_CFG_LOG_NCSA_APPEND = "org.ops4j.pax.web.log.ncsa.append";
+
+	/**
+	 * Number of days to retain request files
+	 * Jetty: org.eclipse.jetty.server.RequestLogWriter._retainDays
+	 */
+	String PID_CFG_LOG_NCSA_RETAINDAYS = "org.ops4j.pax.web.log.ncsa.retaindays";
+
+	/**
+	 * Jetty whether to use CustomRequestLog#EXTENDED_NCSA_FORMAT or CustomRequestLog#NCSA_FORMAT
+	 */
+	String PID_CFG_LOG_NCSA_EXTENDED = "org.ops4j.pax.web.log.ncsa.extended";
+
+	/**
+	 * Timezone to use in logs
+	 * Jetty: org.eclipse.jetty.server.RequestLogWriter#_timeZone
+	 */
+	String PID_CFG_LOG_NCSA_LOGTIMEZONE = "org.ops4j.pax.web.log.ncsa.logtimezone";
 
 }

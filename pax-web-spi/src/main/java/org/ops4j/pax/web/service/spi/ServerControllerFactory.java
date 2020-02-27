@@ -17,22 +17,26 @@
  */
 package org.ops4j.pax.web.service.spi;
 
-import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.ops4j.pax.web.service.spi.config.Configuration;
 
 /**
- * Main SPI interface used by pax-web-runtime to control actual implementation of HTTP server
- * using provided configuration.
+ * <p>Main SPI interface used by pax-web-runtime to create {@link ServerController} which will be the only
+ * way to configure and control targe server runtime.</p>
  */
 public interface ServerControllerFactory {
 
 	/**
 	 * <p>Creates an instance of {@link ServerController} that will control actual server runtime
-	 * (Jetty, Tomcat, Undertow)</p>
-	 * <p>The configuration is passed via {@link ServerModel} instance.</p>
+	 * (Jetty, Tomcat, Undertow). Can be invoked multiple times for different configurations, but
+	 * actual implementation has to decide if the controller is always created or possibly cached.</p>
 	 *
-	 * @param serverModel
+	 * <p>Returned {@link ServerController} should always be associated with given configuration, but
+	 * {@link ServerController#configure()} method still has to be called to give the controller a chance
+	 * for some explicit initialization before it actually starts.</p>
+	 *
+	 * @param configuration Pax Web configuration that specifies global aspects of target runtime
 	 * @return
 	 */
-	ServerController createServerController(ServerModel serverModel);
+	ServerController createServerController(Configuration configuration);
 
 }

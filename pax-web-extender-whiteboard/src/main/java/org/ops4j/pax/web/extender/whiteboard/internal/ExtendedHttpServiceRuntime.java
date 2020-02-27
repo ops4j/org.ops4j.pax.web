@@ -31,7 +31,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.util.WebContainerUtils;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.tracker.ReplaceableService;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.tracker.ReplaceableServiceListener;
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardElement;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardElement;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
@@ -78,12 +78,14 @@ public class ExtendedHttpServiceRuntime implements HttpServiceRuntime, Replaceab
 
     @Override
     public RuntimeDTO getRuntimeDTO() {
-        return webContainer.createWhiteboardRuntimeDTO(whiteboardElements.iterator());
+//        return webContainer.createWhiteboardRuntimeDTO(whiteboardElements.iterator());
+		return null;
     }
 
     @Override
     public RequestInfoDTO calculateRequestInfoDTO(String path) {
-        return webContainer.calculateRequestInfoDTO(path, whiteboardElements.iterator());
+//        return webContainer.calculateRequestInfoDTO(path, whiteboardElements.iterator());
+		return null;
     }
 
     /**
@@ -129,11 +131,11 @@ public class ExtendedHttpServiceRuntime implements HttpServiceRuntime, Replaceab
         Long id = (Long) serviceProperties.get("service.id");
         String endpointString = "";
         
-        if (newService.getWebcontainerDTO().listeningAddresses != null && newService.getWebcontainerDTO().listeningAddresses.length > 0) {
-            endpointString = newService.getWebcontainerDTO().listeningAddresses[0] + ":";
-        }
-        
-        endpointString += newService.getWebcontainerDTO().port;
+//        if (newService.getWebcontainerDTO().listeningAddresses != null && newService.getWebcontainerDTO().listeningAddresses.length > 0) {
+//            endpointString = newService.getWebcontainerDTO().listeningAddresses[0] + ":";
+//        }
+//
+//        endpointString += newService.getWebcontainerDTO().port;
         
         List<Long> idList = new ArrayList<>();
         idList.add(id);

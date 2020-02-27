@@ -36,13 +36,18 @@ import org.xml.sax.SAXException;
  * @author Alin Dreghiciu
  * @since 0.3.0 January 23, 2008
  */
-class MetaTypePropertyResolver extends DictionaryPropertyResolver {
+public class MetaTypePropertyResolver extends DictionaryPropertyResolver {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MetaTypePropertyResolver.class);
 	private static final String METATYPE = "OSGI-INF/metatype/metatype.xml";
 
+	private final Dictionary<String, String> properties;
+
 	public MetaTypePropertyResolver() {
-		super(getDefaltProperties());
+		super(null);
+
+		properties = getDefaltProperties();
+		setProperties(properties);
 	}
 
 	private static Dictionary<String, String> getDefaltProperties() {
@@ -57,15 +62,15 @@ class MetaTypePropertyResolver extends DictionaryPropertyResolver {
 				String defaultAttribute = element.getAttribute("default");
 				if (Boolean.parseBoolean(required)) {
 					// it's a mandatory field initialize it even with a null
-					properties.put(id, defaultAttribute);
+					properties.put(id, defaultAttribute != null && !"".equals(defaultAttribute.trim())
+							? defaultAttribute : null);
 				} else {
 					if (defaultAttribute != null && defaultAttribute.length() > 0) {
-						// it's no mandatory but it is configured, use it anyway
+						// it's no mandatory but it is configured, use it anyway if not empty
 						properties.put(id, defaultAttribute);
 					}
 				}
 			}
-
 		} catch (ParserConfigurationException | IOException | SAXException e) {
 			LOG.error("Could not parse metatype.xml. Reason: " + e.getMessage(), e);
 			return properties;
@@ -100,6 +105,10 @@ class MetaTypePropertyResolver extends DictionaryPropertyResolver {
 //			//CHECKSTYLE:ON
 //		}
 
+		return properties;
+	}
+
+	public Dictionary<String, String> getProperties() {
 		return properties;
 	}
 

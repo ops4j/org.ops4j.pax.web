@@ -37,7 +37,7 @@ import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.whiteboard.ListenerMapping;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardListener;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
@@ -103,13 +103,13 @@ public class ListenerMappingWebElement extends WebElement<ListenerMapping> imple
 	@Override
 	public void register(final WebContainer webContainer,
 						 final HttpContext httpContext) throws Exception {
-		webContainer.registerEventListener(listenerMapping.getListener(), httpContext);
+//		webContainer.registerEventListener(listenerMapping.getListener(), httpContext);
 	}
 
 	@Override
 	public void unregister(final WebContainer webContainer,
 						   final HttpContext httpContext) {
-		webContainer.unregisterEventListener(listenerMapping.getListener());
+//		webContainer.unregisterEventListener(listenerMapping.getListener());
 	}
 
 	@Override

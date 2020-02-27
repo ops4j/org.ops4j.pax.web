@@ -23,7 +23,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.HttpContextElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
-import org.ops4j.pax.web.service.SharedWebContainerContext;
+import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
@@ -79,9 +79,9 @@ public class HttpContextTracker extends AbstractHttpContextTracker<HttpContext> 
 		mapping.setHttpContextId(httpContextId);
 
 
-		if (!httpContextShared && published instanceof SharedWebContainerContext) {
+		if (!httpContextShared && published instanceof MultiBundleWebContainerContext) {
 			httpContextShared = true; // in case it's a shared HttpContext make sure the flag ist set.
-		} else if (httpContextShared && !(published instanceof SharedWebContainerContext)) {
+		} else if (httpContextShared && !(published instanceof MultiBundleWebContainerContext)) {
 			httpContextShared = false; // this shouldn't happen but make sure it doesn't
 		}
 

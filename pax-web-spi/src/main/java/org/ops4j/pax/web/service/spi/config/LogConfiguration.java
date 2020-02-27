@@ -17,26 +17,52 @@ package org.ops4j.pax.web.service.spi.config;
 
 public interface LogConfiguration {
 
+	/**
+	 * Whether request logging (at entire server level) should be enabled.
+	 * @return
+	 */
 	Boolean isLogNCSAFormatEnabled();
 
-	String getLogNCSAFormat();
-
-	String getLogNCSARetainDays();
-
-	Boolean isLogNCSAAppend();
-
-	Boolean isLogNCSAExtended();
-
-	Boolean isLogNCSADispatch();
-
-	String getLogNCSATimeZone();
-
+	/**
+	 * Returns a directory to store request log files
+	 * @return
+	 */
 	String getLogNCSADirectory();
 
-	Boolean isLogNCSALatency();
+	/**
+	 * Returns a filename to keep current request log file
+	 * @return
+	 */
+	String getLogNCSAFile();
 
-	Boolean isLogNCSACookies();
+	/**
+	 * Whether request log file should be opened in append mode
+	 * @return
+	 */
+	Boolean isLogNCSAAppend();
 
-	Boolean isLogNCSAServer();
+	/**
+	 * Date format to use when current file is renamed during rollover
+	 * @return
+	 */
+	String getLogNCSAFilenameDateFormat();
+
+	/**
+	 * How many files to keep during rollover
+	 * @return
+	 */
+	Integer getLogNCSARetainDays();
+
+	/**
+	 * Whether to use <em>extended</em> request log format (including {@code Referer} and {@code User-Agent} headers)
+	 * @return
+	 */
+	Boolean isLogNCSAExtended();
+
+	/**
+	 * Timezone to use for request log file, when formatting timestamps
+	 * @return
+	 */
+	String getLogNCSATimeZone();
 
 }

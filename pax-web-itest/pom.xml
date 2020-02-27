@@ -43,6 +43,7 @@
 <!--		<module>pax-web-itest-base</module>-->
 <!--		<module>pax-web-itest-common</module>-->
 		<module>pax-web-itest-osgi</module>
+		<module>pax-web-itest-server</module>
 <!--		<module>pax-web-itest-container</module>-->
 	</modules>
 

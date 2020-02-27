@@ -31,7 +31,7 @@
 	<artifactId>initializers-fragment2</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web - Samples - Fragment with initializer 2</name>
+	<name>OPS4J Pax Web Internal Samples - Fragment 2</name>
 
 	<build>
 		<plugins>

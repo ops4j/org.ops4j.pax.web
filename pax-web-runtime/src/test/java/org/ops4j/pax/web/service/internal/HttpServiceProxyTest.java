@@ -23,7 +23,7 @@ public class HttpServiceProxyTest {
 	// expect that it does not accept a null delegate
 	@Test(expected = IllegalArgumentException.class)
 	public void constructorWithNullDelegate() {
-		new HttpServiceProxy(null);
+		new HttpServiceProxy(null, null);
 	}
 
 //	// expect that everything gets smooth

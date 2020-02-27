@@ -1,649 +1,1185 @@
-/* Copyright 2007 Alin Dreghiciu.
+/*
+ * Copyright 2007 Alin Dreghiciu.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.
- *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.File;
-import java.net.URL;
+import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.function.Supplier;
+import javax.servlet.ServletException;
 
-import org.eclipse.jetty.security.Authenticator;
+import org.eclipse.jetty.jmx.MBeanContainer;
+import org.eclipse.jetty.security.ConstraintMapping;
+import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.SecurityHandler;
-import org.eclipse.jetty.security.authentication.BasicAuthenticator;
-import org.eclipse.jetty.security.authentication.ClientCertAuthenticator;
-import org.eclipse.jetty.security.authentication.DigestAuthenticator;
-import org.eclipse.jetty.security.authentication.FormAuthenticator;
+import org.eclipse.jetty.server.ConnectionFactory;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.CustomRequestLog;
 import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.RequestLogWriter;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.server.session.DefaultSessionIdManager;
-import org.eclipse.jetty.server.session.SessionHandler;
+import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler.JspConfig;
-import org.eclipse.jetty.servlet.ServletContextHandler.JspPropertyGroup;
-import org.eclipse.jetty.servlet.ServletContextHandler.TagLib;
-import org.eclipse.jetty.util.MultiException;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.servlet.ServletMapping;
+import org.eclipse.jetty.util.ArrayUtil;
+import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.security.Constraint;
-import org.eclipse.jetty.util.thread.ThreadPool;
-import org.ops4j.pax.swissbox.core.BundleUtils;
-import org.ops4j.pax.web.service.AuthenticatorService;
-import org.ops4j.pax.web.service.SharedWebContainerContext;
-import org.ops4j.pax.web.service.spi.model.ContextModel;
-import org.ops4j.pax.web.service.spi.model.Model;
-import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.xml.XmlConfiguration;
+import org.ops4j.pax.swissbox.core.BundleClassLoader;
+import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
+import org.ops4j.pax.web.annotations.Review;
+import org.ops4j.pax.web.service.spi.LifeCycle;
+import org.ops4j.pax.web.service.spi.config.Configuration;
+import org.ops4j.pax.web.service.spi.config.LogConfiguration;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
+import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.model.elements.ResourceModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingModel;
+import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.task.BatchVisitor;
+import org.ops4j.pax.web.service.spi.task.OpCode;
+import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
+import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
+import org.ops4j.pax.web.service.spi.task.ServletModelChange;
+import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Filter;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Jetty server with a handler collection specific to Pax Web.
+ * <p>A <em>wrapper</em> or <em>holder</em> of actual Jetty server. This class perform two kinds of tasks:<ul>
+ *     <li>controls the state of Jetty by configuring, starting and stopping it</li>
+ *     <li>translates model changes into registration of Jetty-specific contexts, holders and handlers</li>
+ * </ul></p>
+ *
+ * <p>Having a wrapper around {@link PaxWebJettyServer} that extends {@link org.eclipse.jetty.server.Server}
+ * allows us to add some logging and additional processing without a need to override all interesting
+ * methods of {@link org.eclipse.jetty.server.Server} in {@link PaxWebJettyServer}.</p>
+ *
+ * <p>This wrapper implements {@link BatchVisitor} to process batch operations related to model changes.</p>
  */
-@SuppressWarnings("deprecation")
-class JettyServerWrapper extends Server {
+class JettyServerWrapper implements BatchVisitor {
 
 	private static final Logger LOG = LoggerFactory.getLogger(JettyServerWrapper.class);
 
-	private static final class ServletContextInfo {
+	/** An <em>entry</em> to OSGi runtime to lookup other bundles if needed (to get their ClassLoader) */
+	private final Bundle paxWebJettyBundle;
+	/** Outsidge of OSGi, let's use passed ClassLoader */
+	private final ClassLoader classLoader;
 
-		private final HttpServiceContext handler;
-		private final AtomicInteger refCount = new AtomicInteger(1);
+	/** Actual instance of {@link org.eclipse.jetty.server.Server} */
+	private PaxWebJettyServer server;
 
-		public ServletContextInfo(HttpServiceContext handler) {
-			super();
-			this.handler = handler;
-		}
+	/** Server's pool which is added as UNMANAGED */
+	private QueuedThreadPool qtp;
 
-		public int incrementRefCount() {
-			return refCount.incrementAndGet();
-		}
+	/** If JMX support is enabled, this will be the Jetty bean for JMX management */
+	private MBeanContainer mbeanContainer;
 
-		public int decrementRefCount() {
-			return refCount.decrementAndGet();
-		}
+	/** Main handler collection for Jetty server */
+	private ContextHandlerCollection mainHandler;
 
-		public HttpServiceContext getHandler() {
-			return handler;
-		}
+	/** If {@code jetty*.xml} files create instances of {@link HttpConfiguration}, these are collected here. */
+	private final Map<String, HttpConfiguration> httpConfigs = new LinkedHashMap<>();
+
+	private final JettyFactory jettyFactory;
+
+	/** Single map of context path to {@link ServletContextHandler} for fast access */
+	private final Map<String, ServletContextHandler> contextHandlers = new HashMap<>();
+
+	/**
+	 * Global {@link Configuration} passed from pax-web-runtime through
+	 * {@link org.ops4j.pax.web.service.spi.ServerController}
+	 */
+	private final Configuration configuration;
+
+	public JettyServerWrapper(Configuration config, JettyFactory jettyFactory, Bundle paxWebJettyBundle, ClassLoader classLoader) {
+		this.configuration = config;
+		this.jettyFactory = jettyFactory;
+		this.paxWebJettyBundle = paxWebJettyBundle;
+		this.classLoader = classLoader;
 	}
 
-	@SuppressWarnings("unused")
-	private final ServerModel serverModel;
-	private final Map<HttpContext, ServletContextInfo> contexts = new IdentityHashMap<>();
-	private Map<String, Object> contextAttributes;
-	private Integer sessionTimeout;
-	private String sessionCookie;
-	private String sessionDomain;
-	private String sessionPath;
-	private String sessionUrl;
-	private String sessionWorkerName;
-	private Boolean lazyLoad;
-	private String storeDirectory;
-	private Boolean showStacks;
+	// --- lifecycle and configuration methods
 
-	private File serverConfigDir;
+	/**
+	 * One-time configuration of Jetty
+	 */
+	public void configure() throws Exception {
+		// for now, we have nothing. We can do many things using external jetty-*.xml files, but the creation
+		// of Server itself should be done manually here.
+		LOG.info("Creating Jetty server instance using configuration properties.");
+		createServer();
 
-	private URL serverConfigURL;
+		// No external configuration should replace our "Server" object
+		applyJettyConfiguration();
 
-	private String defaultAuthMethod;
-	private String defaultRealmName;
+		// If external configuration added some connectors, we have to ensure they match declaration from
+		// PID config: org.osgi.service.http.enabled and org.osgi.service.http.secure.enabled
+		verifyConnectorConfiguration();
 
-	private Boolean sessionCookieHttpOnly;
+		// PAXWEB-1084 - start QTP before starting the server. When QTP is added as a bean to
+		// org.eclipse.jetty.server.Server, it'll become UNMANAGED bean, so we can and have to manage its
+		// lifecycle manually, which is exactly what we want.
+		// see org.eclipse.jetty.util.component.ContainerLifeCycle for details
+		qtp = (QueuedThreadPool) server.getThreadPool();
+		LOG.info("Eagerly starting Jetty thread pool {}", qtp);
+		qtp.start();
 
-	private Boolean sessionCookieSecure;
-
-	private Integer sessionCookieMaxAge;
-
-	private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
-	private final Lock readLock = rwLock.readLock();
-	private final Lock writeLock = rwLock.writeLock();
-	private Bundle jettyBundle;
-	private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
-
-	private HandlerCollection rootCollections;
-
-	JettyServerWrapper(ServerModel serverModel, ThreadPool threadPool) {
-		super(threadPool);
-		this.serverModel = serverModel;
-
-		rootCollections = new JettyServerHandlerCollection(serverModel);
-		setHandler(rootCollections);
-
-		jettyBundle = FrameworkUtil.getBundle(getClass());
-
-		if (jettyBundle != null) {
-			Filter filterPackage = null;
-			try {
-				filterPackage = jettyBundle.getBundleContext()
-						.createFilter("(objectClass=org.osgi.service.packageadmin.PackageAdmin)");
-			} catch (InvalidSyntaxException e) {
-				LOG.error("InvalidSyntaxException while waiting for PackageAdmin Service", e);
-			}
-			packageAdminTracker = new ServiceTracker<>(jettyBundle.getBundleContext(),
-					filterPackage, null);
-			packageAdminTracker.open();
+		if (server.getErrorHandler() == null) {
+			server.setErrorHandler(new ErrorHandler());
 		}
 
-	}
-
-	public HandlerCollection getRootHandlerCollection() {
-		return rootCollections;
-	}
-
-	public void configureContext(final Map<String, Object> attributes, final Integer timeout, final String cookie,
-								 final String domain, final String path, final String url, final Boolean cookieHttpOnly,
-								 final Boolean sessionCookieSecure, final String workerName, final Boolean lazy, final String directory,
-								 Integer maxAge, final Boolean showStacks) {
-		this.contextAttributes = attributes;
-		this.sessionTimeout = timeout;
-		this.sessionCookie = cookie;
-		this.sessionDomain = domain;
-		this.sessionPath = path;
-		this.sessionUrl = url;
-		this.sessionCookieHttpOnly = cookieHttpOnly;
-		this.sessionCookieSecure = sessionCookieSecure;
-		this.sessionWorkerName = workerName;
-		lazyLoad = lazy;
-		this.storeDirectory = directory;
-		this.sessionCookieMaxAge = maxAge;
-		this.showStacks = showStacks;
-	}
-
-	HttpServiceContext getContext(final HttpContext httpContext) {
-		readLock.lock();
-		try {
-			ServletContextInfo servletContextInfo = contexts.get(httpContext);
-			if (servletContextInfo != null) {
-				return servletContextInfo.getHandler();
-			}
-			return null;
-		} finally {
-			readLock.unlock();
-		}
-	}
-
-	HttpServiceContext getOrCreateContext(final Model model) {
-		return getOrCreateContext(model.getContextModel());
-	}
-
-	HttpServiceContext getOrCreateContext(final ContextModel model) {
-		final HttpContext httpContext = model.getHttpContext();
-		ServletContextInfo context = null;
-		try {
-			readLock.lock();
-			if (contexts.containsKey(httpContext)) {
-				context = contexts.get(httpContext);
-				context.incrementRefCount();
-			} else {
-				try {
-					readLock.unlock();
-					writeLock.lock();
-					if (!contexts.containsKey(httpContext)) {
-						LOG.debug("Creating new ServletContextHandler for HTTP context [{}] and model [{}]",
-								httpContext, model);
-
-						context = new ServletContextInfo(this.addContext(model));
-						contexts.put(httpContext, context);
-						// don't increment! - it's already == 1 after creation
-//						context.incrementRefCount();
-					} else {
-						context = contexts.get(httpContext);
-						context.incrementRefCount();
-					}
-				} finally {
-					readLock.lock();
-					writeLock.unlock();
-				}
-			}
-		} finally {
-			readLock.unlock();
-		}
-		return context.getHandler();
-	}
-
-	void removeContext(final HttpContext httpContext, boolean force) {
-		ServletContextInfo context;
-		try {
-			readLock.lock();
-			context = contexts.get(httpContext);
-			if (context == null) {
-				return;
-			}
-			int nref = context.decrementRefCount();
-			if ((force && !(httpContext instanceof SharedWebContainerContext)) || nref <= 0) {
-				try {
-					readLock.unlock();
-					writeLock.lock();
-					LOG.debug("Removing ServletContextHandler for HTTP context [{}].", httpContext);
-					context = contexts.remove(httpContext);
-				} finally {
-					readLock.lock();
-					writeLock.unlock();
-				}
-			} else {
-				LOG.debug("ServletContextHandler for HTTP context [{}] referenced [{}] times.", httpContext, nref);
-				return;
-			}
-		} finally {
-			readLock.unlock();
-		}
-		// Destroy the context outside of the locking region
-		if (context != null) {
-			HttpServiceContext sch = context.getHandler();
-			sch.unregisterService();
-			try {
-				sch.stop();
-			} catch (Throwable t) { // CHECKSTYLE:SKIP
-				// Ignore
-			}
-			sch.getServletHandler().setServer(null);
-			sch.getSecurityHandler().setServer(null);
-			sch.getSessionHandler().setServer(null);
-			sch.getErrorHandler().setServer(null);
-			rootCollections.removeHandler(sch);
-			sch.destroy();
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private HttpServiceContext addContext(final ContextModel model) {
-		Bundle bundle = model.getBundle();
-		BundleContext bundleContext = BundleUtils.getBundleContext(bundle);
-
-//		if (packageAdminTracker != null) {
-//			ServletContainerInitializerScanner scanner = new ServletContainerInitializerScanner(bundle, jettyBundle, packageAdminTracker.getService());
-//			Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = model.getContainerInitializers();
-//			if (containerInitializers == null) {
-//				containerInitializers = new HashMap<>();
-//				model.setContainerInitializers(containerInitializers);
-//			}
-//			scanner.scanBundles(containerInitializers);
-//		}
-
-		HttpServiceContext context = new HttpServiceContext(rootCollections, model.getContextParams(),
-				getContextAttributes(bundleContext), model.getContextName(), model.getHttpContext(),
-				model.getAccessControllerContext(), model.getContainerInitializers(), model.getJettyWebXmlURL(),
-				model.getVirtualHosts(), model.isShowStacks());
-		context.setClassLoader(model.getClassLoader());
-		Integer modelSessionTimeout = model.getSessionTimeout();
-		if (modelSessionTimeout == null) {
-			modelSessionTimeout = sessionTimeout;
-		}
-		String modelSessionCookie = model.getSessionCookie();
-		if (modelSessionCookie == null) {
-			modelSessionCookie = sessionCookie;
-		}
-		String modelSessionDomain = model.getSessionDomain();
-		if (modelSessionDomain == null) {
-			modelSessionDomain = sessionDomain;
-		}
-		String modelSessionPath = model.getSessionPath();
-		if (modelSessionPath == null) {
-			modelSessionPath = sessionPath;
-		}
-		String modelSessionUrl = model.getSessionUrl();
-		if (modelSessionUrl == null) {
-			modelSessionUrl = sessionUrl;
-		}
-		Boolean modelSessionCookieHttpOnly = model.getSessionCookieHttpOnly();
-		if (modelSessionCookieHttpOnly == null) {
-			modelSessionCookieHttpOnly = sessionCookieHttpOnly;
-		}
-		Boolean modelSessionSecure = model.getSessionCookieSecure();
-		if (modelSessionSecure == null) {
-			modelSessionSecure = sessionCookieSecure;
-		}
-		String workerName = model.getSessionWorkerName();
-		if (workerName == null) {
-			workerName = sessionWorkerName;
-		}
-		Integer maxAge = model.getSessionCookieMaxAge();
-		if (maxAge == null) {
-			maxAge = sessionCookieMaxAge;
-		}
-		if (maxAge == null) {
-			maxAge = -1;
-		}
-		configureSessionManager(context, modelSessionTimeout, modelSessionCookie, modelSessionDomain, modelSessionPath,
-				modelSessionUrl, modelSessionCookieHttpOnly, modelSessionSecure, workerName, lazyLoad, storeDirectory,
-				maxAge);
-
-		if(this.defaultAuthMethod != null && model.getAuthMethod() == null){
-            model.setAuthMethod(this.defaultAuthMethod);
-        }
-        if(this.defaultRealmName != null && model.getRealmName() == null){
-            model.setRealmName(this.defaultRealmName);
-        }
-		if (model.getRealmName() != null && model.getAuthMethod() != null) {
-			configureSecurity(context, model.getRealmName(), model.getAuthMethod(), model.getFormLoginPage(),
-					model.getFormErrorPage());
+		// Configure NCSA RequestLogHandler if needed
+		if (configuration.logging().isLogNCSAFormatEnabled() && server.getRequestLog() == null) {
+			configureRequestLog();
 		}
 
-		configureJspConfigDescriptor(context, model);
+		mbeanContainer = jettyFactory.enableJmxIfPossible(server);
 
-		LOG.debug("Added servlet context: " + context);
-
-		if (isStarted()) {
-			try {
-				LOG.debug("(Re)starting servlet contexts...");
-				// start the server handler if not already started
-				Handler serverHandler = getHandler();
-				if (!serverHandler.isStarted() && !serverHandler.isStarting()) {
-					serverHandler.start();
-				}
-//				// if the server handler is a handler collection, seems like
-//				// jetty will not automatically
-//				// start inner handlers. So, force the start of the created
-//				// context
-//				if (!context.isStarted() && !context.isStarting()) {
-//					LOG.debug("Registering ServletContext as service. ");
-//					Dictionary<String, String> properties = new Hashtable<String, String>();
-//					properties.put("osgi.web.symbolicname", bundle.getSymbolicName());
-//
-//					Dictionary<?, ?> headers = bundle.getHeaders();
-//					String version = (String) headers.get(Constants.BUNDLE_VERSION);
-//					if (version != null && version.length() > 0) {
-//						properties.put("osgi.web.version", version);
-//					}
-//
-//					// Context servletContext = context.getServletContext();
-//					String webContextPath = context.getContextPath();
-//
-//					properties.put("osgi.web.contextpath", webContextPath);
-//
-//					context.registerService(bundleContext, properties);
-//					LOG.debug("ServletContext registered as service. ");
-//
-//				}
-				// CHECKSTYLE:OFF
-			} catch (Exception ignore) {
-				LOG.error("Could not start the servlet context for http context [" + model.getHttpContext() + "]",
-						ignore);
-				if (ignore instanceof MultiException) {
-					LOG.error("MultiException found: ");
-					MultiException mex = (MultiException) ignore;
-					List<Throwable> throwables = mex.getThrowables();
-					for (Throwable throwable : throwables) {
-						LOG.error(throwable.getMessage());
-					}
-				}
-			}
-			// CHECKSTYLE:ON
-		}
-		return context;
-	}
-
-	private void configureJspConfigDescriptor(HttpServiceContext context, ContextModel model) {
-
-		Boolean elIgnored = model.getJspElIgnored();
-		Boolean isXml = model.getJspIsXml();
-		Boolean scriptingInvalid = model.getJspScriptingInvalid();
-
-		JspPropertyGroup jspPropertyGroup = null;
-
-		if (elIgnored != null || isXml != null || scriptingInvalid != null
-				|| model.getJspIncludeCodes() != null
-				|| model.getJspUrlPatterns() != null
-				|| model.getJspIncludePreludes() != null) {
-			jspPropertyGroup = new JspPropertyGroup();
-
-			if (model.getJspIncludeCodes() != null) {
-				for (String includeCoda : model.getJspIncludeCodes()) {
-					jspPropertyGroup.addIncludeCoda(includeCoda);
-				}
-			}
-
-			if (model.getJspUrlPatterns() != null) {
-				for (String urlPattern : model.getJspUrlPatterns()) {
-					jspPropertyGroup.addUrlPattern(urlPattern);
-				}
-			}
-
-			if (model.getJspIncludePreludes() != null) {
-				for (String prelude : model.getJspIncludePreludes()) {
-					jspPropertyGroup.addIncludePrelude(prelude);
-				}
-			}
-
-			if (elIgnored != null) {
-				jspPropertyGroup.setElIgnored(elIgnored.toString());
-			}
-			if (isXml != null) {
-				jspPropertyGroup.setIsXml(isXml.toString());
-			}
-			if (scriptingInvalid != null) {
-				jspPropertyGroup.setScriptingInvalid(scriptingInvalid.toString());
-			}
-
-		}
-
-		TagLib tagLibDescriptor = null;
-
-		if (model.getTagLibLocation() != null || model.getTagLibUri() != null) {
-			tagLibDescriptor = new TagLib();
-			tagLibDescriptor.setTaglibLocation(model.getTagLibLocation());
-			tagLibDescriptor.setTaglibURI(model.getTagLibUri());
-		}
-
-		if (jspPropertyGroup != null || tagLibDescriptor != null) {
-			JspConfig jspConfig = new JspConfig();
-			jspConfig.addJspPropertyGroup(jspPropertyGroup);
-			jspConfig.addTaglibDescriptor(tagLibDescriptor);
-			context.getServletContext().setJspConfigDescriptor(jspConfig);
-		}
+		// most important part - a handler.
+		// TODO: my initial idea was to have this hierarchy:
+		//  server:
+		//   - handler collection
+		//      - handler collection to store custom handlers with @Priority > 0
+		//      - context handler collection to store context handlers
+		//      - handler collection to store custom handlers with @Priority < 0
+		//
+		// for now, let's have it like before Pax Web 8
+		this.mainHandler = new ContextHandlerCollection();
+		server.setHandler(this.mainHandler);
 	}
 
 	/**
-	 * Sets the security authentication method and the realm name on the
-	 * security handler. This has to be done before the context is started.
+	 * <p>Create Jetty server using provided {@link Configuration}. The only <em>bean</em> inside Jetty server
+	 * will be {@link QueuedThreadPool}, which can be reconfigured later (using XMLs).</p>
 	 *
-	 * @param context
-	 * @param realmName
-	 * @param authMethod
-	 * @param formLoginPage
-	 * @param formErrorPage
+	 * @return
 	 */
-	private void configureSecurity(ServletContextHandler context, String realmName, String authMethod,
-								   String formLoginPage, String formErrorPage) {
-		final SecurityHandler securityHandler = context.getSecurityHandler();
+	private void createServer() throws Exception {
+		QueuedThreadPool qtp = jettyFactory.createThreadPool(configuration);
 
-		Authenticator authenticator = null;
-		if (authMethod == null) {
-			LOG.warn("UNKNOWN AUTH METHOD: " + authMethod);
+		// actual org.eclipse.jetty.server.Server
+		this.server = new PaxWebJettyServer(qtp);
+	}
+
+	/**
+	 * <p>This method parses existing {@code jetty*.xml} files and should <strong>not</strong> create an instance
+	 * of {@link Server}. Existing {@link PaxWebJettyServer} is passed as {@code Server} object ID.</p>
+	 *
+	 * <p>Besides the {@link Server}, XML configuration may alter any aspect of Jetty server. Additionally, if
+	 * XML configurations create instances of {@link org.eclipse.jetty.server.HttpConfiguration}, these
+	 * are collected and remembered for future use (if there's a need to create a {@link ServerConnector}).</p>
+	 */
+	private void applyJettyConfiguration() throws Exception {
+		File[] locations = configuration.server().getConfigurationFiles();
+		if (locations.length == 0) {
+			LOG.info("No external Jetty configuration files specified. Default/PID configuration will be used.");
+			// no return, we'll handle the below mentioned TCCL leaks
 		} else {
-			switch (authMethod) {
-				case Constraint.__FORM_AUTH:
-					authenticator = new FormAuthenticator();
-					securityHandler.setInitParameter(FormAuthenticator.__FORM_LOGIN_PAGE, formLoginPage);
-					securityHandler.setInitParameter(FormAuthenticator.__FORM_ERROR_PAGE, formErrorPage);
-					break;
-				case Constraint.__BASIC_AUTH:
-					authenticator = new BasicAuthenticator();
-					break;
-				case Constraint.__DIGEST_AUTH:
-					authenticator = new DigestAuthenticator();
-					break;
-				case Constraint.__CERT_AUTH:
-					authenticator = new ClientCertAuthenticator();
-					break;
-				case Constraint.__CERT_AUTH2:
-					authenticator = new ClientCertAuthenticator();
-					break;
-//				case Constraint.__SPNEGO_AUTH:
-//					authenticator = new SpnegoAuthenticator();
-//					break;
-				default:
-					authenticator = getAuthenticator(authMethod);
-					break;
-			}
+			LOG.info("Processing Jetty configuration from files: {}", Arrays.asList(locations));
 		}
 
-		securityHandler.setAuthenticator(authenticator);
-
-		securityHandler.setRealmName(realmName);
-
-	}
-
-	private Authenticator getAuthenticator(String method) {
-		ServiceLoader<AuthenticatorService> sl = ServiceLoader.load(AuthenticatorService.class, getClass().getClassLoader());
-		for (AuthenticatorService svc : sl) {
-			try {
-				Authenticator auth = svc.getAuthenticatorService(method, Authenticator.class);
-				if (auth != null) {
-					return auth;
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		try {
+			// PAXWEB-1112 - classloader leak prevention:
+			// first find XmlConfiguration class' CL to set it as TCCL when performing static
+			// initialization of XmlConfiguration in order to not leak
+			// org.eclipse.jetty.xml.XmlConfiguration.__factoryLoader.loader
+			ClassLoader jettyXmlCl = null;
+			if (paxWebJettyBundle != null) {
+				for (Bundle b : paxWebJettyBundle.getBundleContext().getBundles()) {
+					if ("org.eclipse.jetty.xml".equals(b.getSymbolicName())) {
+						jettyXmlCl = b.adapt(BundleWiring.class).getClassLoader();
+						break;
+					}
 				}
-			} catch (Throwable t) {
-				LOG.debug("Unable to load AuthenticatorService for: " + method, t);
 			}
+
+			// TCCL to perform static initialization of XmlConfiguration with proper TCCL
+			Thread.currentThread().setContextClassLoader(jettyXmlCl);
+			XmlConfiguration configuration
+					= new XmlConfiguration(Resource.newResource(getClass().getResource("/jetty-empty.xml")));
+
+			// When parsing, TCCL will be set to CL of pax-web-jetty bundle
+			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+
+			XmlConfiguration previous = null;
+			Map<String, Object> objects = new LinkedHashMap<>();
+
+			// the only existing objects. Names as found in JETTY_HOME/etc/jetty*.xml files
+			objects.put("Server", server);
+			objects.put("threadPool", server.getThreadPool());
+
+			for (File location : locations) {
+				LOG.debug("Parsing {}", location);
+				configuration = new XmlConfiguration(Resource.newResource(location));
+
+				// add objects created in previous file, so they're available when parsing next one
+				configuration.getIdMap().putAll(previous == null ? objects : previous.getIdMap());
+				// configuration will be available for Jetty when using <Property />
+				configuration.getProperties().putAll(this.configuration.all());
+
+				configuration.configure();
+
+				// collect all created objects
+				objects.putAll(configuration.getIdMap());
+
+				// collect all created HttpConfigurations
+				configuration.getIdMap().forEach((id, v) -> {
+					if (HttpConfiguration.class.isAssignableFrom(v.getClass())) {
+						httpConfigs.put(id, (HttpConfiguration) v);
+					}
+				});
+
+				previous = configuration;
+			}
+
+			if (locations.length > 0) {
+				// the "Server" object should not be redefined
+				objects.values().forEach(bean -> {
+					if (Server.class.isAssignableFrom(bean.getClass())) {
+						if (bean != server) {
+							String msg = "Can't create instance of Jetty server in external configuration files.";
+							throw new IllegalArgumentException(msg);
+						}
+					}
+				});
+
+				// summary about found connectors
+				Connector[] connectors = server.getConnectors();
+				if (connectors != null && connectors.length > 0) {
+					for (Connector connector : connectors) {
+						String host = ((ServerConnector) connector).getHost();
+						if (host == null) {
+							host = "0.0.0.0";
+						}
+						int port = ((ServerConnector) connector).getPort();
+						LOG.info("Found configured connector \"{}\": {}:{}", connector.getName(), host, port);
+					}
+				} else {
+					LOG.debug("No connectors configured in external Jetty configuration files.");
+				}
+			}
+		} finally {
+			Thread.currentThread().setContextClassLoader(loader);
 		}
-		return null;
 	}
 
 	/**
-	 * Returns a list of servlet context attributes out of configured properties
-	 * and attribues containing the bundle context associated with the bundle
-	 * that created the model (web element).
+	 * External configuration may specify connectors (as in JETTY_HOME/etc/jetty-http.xml)
+	 * but we may have to add default ones if they're missing
+	 */
+	private void verifyConnectorConfiguration() {
+		boolean httpEnabled = configuration.server().isHttpEnabled();
+		Integer httpPort = configuration.server().getHttpPort();
+
+		boolean httpsEnabled = configuration.server().isHttpSecureEnabled();
+		Integer httpsPort = configuration.server().getHttpSecurePort();
+
+		String[] addresses = configuration.server().getListeningAddresses();
+
+		// review connectors possibly configured from jetty.xml and check if they match configadmin configuration
+		for (String address : addresses) {
+			// If configured (org.osgi.service.http.enabled), Jetty should have a connector
+			// with org.eclipse.jetty.server.HttpConnectionFactory
+			verifyConnector(address, HttpConnectionFactory.class, httpPort, httpEnabled, false,
+					() -> jettyFactory.createDefaultConnector(server, httpConfigs, address, configuration));
+
+			// If configured (org.osgi.service.http.secure.enabled), Jetty should have a connector
+			// with org.eclipse.jetty.server.SslConnectionFactory
+			verifyConnector(address, SslConnectionFactory.class, httpsPort, httpsEnabled, true,
+					() -> jettyFactory.createSecureConnector(server, httpConfigs, address, configuration));
+		}
+	}
+
+	/**
+	 * Verify if current server configuration, possibly created from external {@code jetty.xml} matches the
+	 * declaration from PID ({@link org.ops4j.pax.web.service.PaxWebConfig#PID_CFG_HTTP_ENABLED} and
+	 * {@link org.ops4j.pax.web.service.PaxWebConfig#PID_CFG_HTTP_SECURE_ENABLED}).
 	 *
-	 * @param bundleContext bundle context to be set as attribute
-	 * @return context attributes map
+	 * @param address
+	 * @param cfClass {@link ConnectionFactory} class to determine the <em>nature</em> of the connector
+	 * @param port
+	 * @param enabled
+	 * @param secure
+	 * @param connectorProvider {@link Supplier} used if connector has to be added to match PID configuration
 	 */
-	private Map<String, Object> getContextAttributes(final BundleContext bundleContext) {
-		final Map<String, Object> attributes = new HashMap<>();
-		if (contextAttributes != null) {
-			attributes.putAll(contextAttributes);
+	private void verifyConnector(String address, Class<? extends ConnectionFactory> cfClass, Integer port,
+			boolean enabled, boolean secure, Supplier<Connector> connectorProvider) {
+		ServerConnector expectedConnector = null;
+
+		boolean connectorFound = false;
+		ServerConnector backupConnector = null;
+
+		Connector[] currentConnectors = server.getConnectors();
+		if (currentConnectors == null) {
+			currentConnectors = new Connector[0];
 		}
-//		attributes.put(WebContainerConstants.BUNDLE_CONTEXT_ATTRIBUTE, bundleContext);
-		attributes.put("org.springframework.osgi.web.org.osgi.framework.BundleContext", bundleContext);
-		return attributes;
+
+		for (Connector connector : currentConnectors) {
+			if (connector.getConnectionFactory(cfClass) != null) {
+				if (match(address, port, connector)) {
+					if (expectedConnector == null) {
+						expectedConnector = (ServerConnector) connector;
+					}
+					connectorFound = true;
+				} else {
+					if (backupConnector == null) {
+						backupConnector = (ServerConnector) connector;
+					}
+				}
+			}
+		}
+		if (expectedConnector == null && backupConnector != null) {
+			expectedConnector = backupConnector;
+		}
+		if (connectorFound) {
+			if (enabled) {
+				LOG.info("Using configured {} as {} connector for address: {}:{}", expectedConnector,
+						(secure ? "secure" : "non secure"), address, port);
+			} else {
+				for (Connector connector : currentConnectors) {
+					if (connector.getConnectionFactory(cfClass) != null) {
+						LOG.warn("Connector defined in external configuration will be removed, "
+										+ "because it's not enabled: {}", expectedConnector);
+						server.removeConnector(connector);
+					}
+				}
+			}
+		} else if (enabled) {
+			LOG.info("Creating {} connector for address {}:{}", (secure ? "secure" : "non secure"), address, port);
+			// we have to create a connector
+			Connector connector = connectorProvider.get();
+			server.addConnector(connector);
+		}
 	}
 
 	/**
-	 * Configures the session time out by extracting the session
-	 * handlers->sessionManager for the context.
+	 * Check if the passed {@link Connector} can be treated as one <em>matching</em> the connector
+	 * declared using PID properties.
 	 *
-	 * @param context        the context for which the session timeout should be configured
-	 * @param minutes        timeout in minutes
-	 * @param cookie         Session cookie name. Defaults to JSESSIONID. If set to null or
-	 *                       "none" no cookies will be used.
-	 * @param domain         Session cookie domain name. Default to the current host.
-	 * @param path           Session cookie path. default to the current servlet context
-	 *                       path.
-	 * @param url            session URL parameter name. Defaults to jsessionid. If set to
-	 *                       null or "none" no URL rewriting will be done.
-	 * @param cookieHttpOnly configures if the Cookie is valid for http only and therefore
-	 *                       not available to javascript.
-	 * @param secure         Configures if the session cookie is only transfered via https
-	 *                       even if its created during a non-secure request. Defaults to
-	 *                       false which means the session cookie is set to be secure if
-	 *                       its created during a https request.
-	 * @param workerName     name appended to session id, used to assist session affinity
-	 *                       in a load balancer
-	 * @param maxAge         session cookie maxAge
+	 * @param address1
+	 * @param port1
+	 * @param connector
+	 * @return
 	 */
-	private void configureSessionManager(final ServletContextHandler context, final Integer minutes,
-										 final String cookie, String domain, String path, final String url, final Boolean cookieHttpOnly,
-										 final Boolean secure, final String workerName, final Boolean lazy, final String directory,
-										 final int maxAge) {
-		LOG.debug("configureSessionManager for context [" + context + "] using - timeout:" + minutes + ", cookie:"
-				+ cookie + ", url:" + url + ", cookieHttpOnly:" + cookieHttpOnly + ", workerName:" + workerName
-				+ ", lazyLoad:" + lazy + ", storeDirectory: " + directory);
+	private boolean match(String address1, Integer port1, Connector connector) {
+		if (!(connector instanceof ServerConnector)) {
+			// strange, but lets do it like it was done before
+			LOG.warn(connector + " is not an instance of ServerConnector");
+			return false;
+		}
 
-		final SessionHandler sessionHandler = context.getSessionHandler();
-		if (sessionHandler != null) {
-			if (minutes != null) {
-				sessionHandler.setMaxInactiveInterval(minutes * 60);
-				LOG.debug("Session timeout set to {} minutes for context [{}]", minutes, context);
-			}
-			if (cookie != null && !"none".equals(cookie)) {
-				sessionHandler.getSessionCookieConfig().setName(cookie);
-				LOG.debug("Session cookie set to {} for context [{}]", cookie, context);
-				sessionHandler.getSessionCookieConfig().setHttpOnly(cookieHttpOnly);
-				LOG.debug("Session cookieHttpOnly set to {} for context [{}]", cookieHttpOnly, context);
-			}
-			if (domain != null && domain.length() > 0) {
-				sessionHandler.getSessionCookieConfig().setDomain(domain);
-				LOG.debug("Session cookie domain set to {} for context [{]]", domain, context);
-			}
-			if (path != null && path.length() > 0) {
-				sessionHandler.getSessionCookieConfig().setPath(path);
-				LOG.debug("Session cookie path set to {} for context [{}]", path, context);
-			}
-			if (secure != null) {
-				sessionHandler.getSessionCookieConfig().setSecure(secure);
-				LOG.debug("Session cookie secure set to {} for context [{]}]", secure, context);
-			}
-			if (url != null) {
-				sessionHandler.setSessionIdPathParameterName(url);
-				LOG.debug("Session URL set to {} for context [{}]", url, context);
-			}
-			if (workerName != null && sessionHandler.getSessionIdManager() != null) {
-				((DefaultSessionIdManager) sessionHandler.getSessionIdManager()).setWorkerName(workerName);
-				LOG.debug("Worker name set to {} for context [{}]", workerName, context);
+		ServerConnector sc = (ServerConnector) connector;
+
+		String address2 = sc.getHost();
+		int port2 = sc.getPort();
+
+		InetSocketAddress isa1 = address1 != null ? new InetSocketAddress(address1, port1)
+				: new InetSocketAddress(port1);
+		InetSocketAddress isa2 = address2 != null ? new InetSocketAddress(address2, port2)
+				: new InetSocketAddress(port2);
+
+		return isa1.equals(isa2);
+	}
+
+	/**
+	 * Configure request logging (AKA <em>NCSA logging</em>) for Jetty, using configuration properties.
+	 */
+	public void configureRequestLog() {
+		LogConfiguration lc = configuration.logging();
+
+		if (lc.getLogNCSADirectory() == null) {
+			throw new IllegalArgumentException("Log directory for NCSA logging is not specified. Please set"
+					+ " org.ops4j.pax.web.log.ncsa.directory property.");
+		}
+		File logDir = new File(lc.getLogNCSADirectory());
+		if (logDir.isFile()) {
+			throw new IllegalArgumentException(logDir + " is not a valid directory to store request logs");
+		}
+
+		RequestLogWriter writer = new RequestLogWriter();
+
+		// org.eclipse.jetty.util.RolloverFileOutputStream._append
+		writer.setAppend(lc.isLogNCSAAppend());
+		// org.eclipse.jetty.util.RolloverFileOutputStream._filename, should contain "yyyy_mm_dd"
+		if (lc.getLogNCSAFile() != null) {
+			writer.setFilename(new File(lc.getLogNCSADirectory(), lc.getLogNCSAFile()).getAbsolutePath());
+		} else {
+			writer.setFilename(new File(lc.getLogNCSADirectory(), "yyyy_mm_dd.request.log").getAbsolutePath());
+		}
+		// org.eclipse.jetty.util.RolloverFileOutputStream._fileDateFormat, defaults to "yyyy_mm_dd"
+		writer.setFilenameDateFormat(lc.getLogNCSAFilenameDateFormat());
+		// org.eclipse.jetty.util.RolloverFileOutputStream._retainDays
+		writer.setRetainDays(lc.getLogNCSARetainDays());
+		// org.eclipse.jetty.server.RequestLogWriter._timeZone, defaults to "GMT"
+		writer.setTimeZone(lc.getLogNCSATimeZone());
+
+		CustomRequestLog requestLog = new CustomRequestLog(writer,
+				lc.isLogNCSAExtended() ? CustomRequestLog.EXTENDED_NCSA_FORMAT : CustomRequestLog.EXTENDED_NCSA_FORMAT);
+
+		// original approach from PAXWEB-269 - http://wiki.eclipse.org/Jetty/Howto/Configure_Request_Logs:
+//		server.getRootHandlerCollection().addHandler(requestLogHandler);
+		// since https://bugs.eclipse.org/bugs/show_bug.cgi?id=446564 we can do better:
+		server.setRequestLog(requestLog);
+
+		LOG.info("NCSARequestlogging is using directory {}", lc.getLogNCSADirectory());
+	}
+
+	/**
+	 * Simply start Jetty server
+	 * @throws Exception
+	 */
+	public void start() throws Exception {
+		LOG.info("Starting {}", server);
+
+		server.start();
+	}
+
+	/**
+	 * One-time operation. After stopping Jetty, we should not be able to start it again, so it has to be
+	 * terminal operation with full clean up of resources.
+	 *
+	 * @throws Exception
+	 */
+	public void stop() throws Exception {
+		LOG.info("Stopping {}", server);
+
+		if (mbeanContainer != null) {
+			LOG.info("Destroying Jetty JMX MBean container");
+			// see https://github.com/eclipse/jetty.project/issues/851 for explanation
+			server.removeBean(mbeanContainer);
+			mbeanContainer.destroy();
+			mbeanContainer = null;
+		}
+
+		server.stop();
+
+		Handler[] childHandlers = server.getChildHandlers();
+		for (Handler handler : childHandlers) {
+			handler.stop();
+		}
+
+		// PAXWEB-1127 - stop qtp after stopping server, as we've started it manually
+		LOG.info("Stopping Jetty thread pool {}", qtp);
+		qtp.stop();
+
+		LOG.info("Destroying Jetty server {}", server);
+		server.destroy();
+	}
+
+	// --- connector/handler/customizer methods
+
+//	@Override
+	@Review("Log says about opened port, but the port is not yet opened")
+	public void addConnector(final Connector connector) {
+		LOG.info("Pax Web available at [{}]:[{}]",
+				((ServerConnector) connector).getHost() == null ? "0.0.0.0"
+						: ((ServerConnector) connector).getHost(),
+				((ServerConnector) connector).getPort());
+		server.addConnector(connector);
+//		if (priorityComparator != null) {
+//			Connector[] connectors = server.getConnectors();
+//			@SuppressWarnings("unchecked")
+//			Comparator<Connector> comparator = (Comparator<Connector>) priorityComparator;
+//			Arrays.sort(connectors, comparator);
+//		}
+	}
+
+//	@Override
+	public void addHandler(Handler handler) {
+		HandlerCollection handlerCollection = server.getRootHandlerCollection();
+		handlerCollection.addHandler(handler);
+//		if (priorityComparator != null) {
+//			Handler[] handlers = handlerCollection.getHandlers();
+//			@SuppressWarnings("unchecked")
+//			Comparator<Handler> comparator = (Comparator<Handler>) priorityComparator;
+//			Arrays.sort(handlers, comparator);
+//		}
+	}
+
+//	@Override
+	public Handler[] getHandlers() {
+		return server.getRootHandlerCollection().getHandlers();
+	}
+
+//	@Override
+	public void removeHandler(Handler handler) {
+		server.getRootHandlerCollection().removeHandler(handler);
+	}
+
+	// --- visitor methods for model changes
+
+	@Override
+	public void visit(ServletContextModelChange change) {
+		ServletContextModel model = change.getServletContextModel();
+		if (change.getKind() == OpCode.ADD) {
+			LOG.info("Creating new Jetty context for {}", model);
+
+			ServletContextHandler sch = new ServletContextHandler(null, model.getContextPath(), true, true);
+			sch.setServletHandler(new PaxWebServletHandler());
+//			ServletContextHandler sch = new PaxWebServletContextHandler(null, model.getContextPath(), true, true);
+			// setting "false" here will trigger 302 redirect when browsing to context without trailing "/"
+			sch.setAllowNullPathInfo(false);
+
+			// many OsgiContextModels may refer to single ServletContextModel and servlets, when calling
+			// ServletContext.getServletContextName() will be getting OsgiContextModel specific name
+//			sch.setDisplayName(model.getContextPath());
+
+			mainHandler.addHandler(sch);
+			mainHandler.mapContexts();
+
+			contextHandlers.put(model.getContextPath(), sch);
+
+			try {
+				sch.start();
+			} catch (Exception e) {
+				LOG.error(e.getMessage(), e);
 			}
 		}
 	}
 
-	/**
-	 * @param serverConfigDir the serverConfigDir to set
-	 */
-	public void setServerConfigDir(File serverConfigDir) {
-		this.serverConfigDir = serverConfigDir;
+	@Override
+	public void visit(OsgiContextModelChange change) {
 	}
 
-	/**
-	 * @return the serverConfigDir
-	 */
-	public File getServerConfigDir() {
-		return serverConfigDir;
+	@Override
+	public void visit(ServletModelChange change) {
+		ServletModel model = change.getServletModel();
+		if (change.getKind() == OpCode.ADD) {
+			LOG.info("Adding servlet {}", model);
+
+			// the same servlet should be added to all relevant contexts
+			// for each unique ServletContextModel, a servlet should be associated with the "best"
+			// OsgiContextModel. Usually there should be one, but here's example of a conflict:
+			// ServletContextModel with "/c1"
+			//     OsgiContextModel with name "ocm1" and rank 1
+			//     OsgiContextModel with name "ocm2" and rank 2
+			//     OsgiContextModel with name "ocm3" and rank 3
+			// ServletContextModel with "/c2"
+			//     OsgiContextModel with name "ocm4" and rank 1 and service.id 1
+			//     OsgiContextModel with name "ocm5" and rank 1 and service.id 2
+			// ServletContextModel with "/c3"
+			//     OsgiContextModel with name "ocm6"
+			//
+			// now ServletModel with /s1 mapping is associated with ocm1, ocm2, ocm4 and ocm5 osgi contexts. It should
+			// be available under:
+			//  - /c1/s1 and associated with ocm2 (due to rank of ocm2)
+			//  - /c2/s1 and associated with ocm4 (due to service.id of ocm4)
+
+			Set<String> done = new HashSet<>();
+
+			// proper order ensures that (assuming above scenario), for /c1, ocm2 will be chosen and ocm1 skipped
+			model.getContextModels().forEach(osgiContext -> {
+				ServletContextModel servletContext = osgiContext.getServletContextModel();
+				String contextPath = servletContext.getContextPath();
+
+				if (!done.add(contextPath)) {
+					// servlet was already added to given ServletContextHandler
+					// in association with the highest ranked OsgiContextModel (and its supporting
+					// ServletContextHelper or HttpContext)
+					return;
+				}
+
+				LOG.debug("Adding servlet {} to {}", model.getName(), servletContext);
+
+				// there may be many instances of ServletHolder using the same instance of servlet (added to
+				// different org.eclipse.jetty.servlet.ServletContextHandler._servletHandler in different context
+				// paths, so we have the opportunity to provide specification-defined behavior at _this_ level
+				//
+				// 140.3 Common Whiteboard Properties says:
+				//     ...
+				//     If multiple Servlet Context Helper services match the osgi.http.whiteboard.context.select
+				//     property the servlet, filter, resource or listener will be registered with all these Servlet
+				//     Context Helpers. To avoid multiple init and destroy calls on the same instance, servlets and
+				//     filters should be registered as Prototype Service Factory.
+				//
+				// we just have to create an instance of ServletHolder with proper OsgiContextModel, which in
+				// turn may specify related HttpContext/ServletContextHelper directly or as ServiceReference, so
+				// actual instance can be obtained as bundle-scoped service if the ServletContextHelper service
+				// was registered as service factory
+				//
+				// same for the servlet itself. Specification recommends registration of Whiteboard servlets as
+				// prototype service factories to avoid duplicate init() methods.
+
+				// there should already be a ServletContextHandler
+				ServletContextHandler sch = contextHandlers.get(contextPath);
+
+				// <servlet>
+				PaxWebServletHolder holder = new PaxWebServletHolder(sch, model, osgiContext);
+
+				// <servlet-mapping>
+				ServletMapping mapping = new ServletMapping();
+				mapping.setServletName(model.getName());
+				mapping.setPathSpecs(model.getUrlPatterns());
+
+//					if (model instanceof ResourceModel && "default".equalsIgnoreCase(model.getName())) {
+//						// this is a default resource
+				// TODO: "default" means "declared from "org/eclipse/jetty/webapp/webdefault.xml" in jetty-webapp.jar
+//						mapping.setDefault(true);
+//					}
+
+				sch.getServletHandler().addServlet(holder);
+				sch.getServletHandler().addServletMapping(mapping);
+			});
+		}
 	}
 
-	public URL getServerConfigURL() {
-		return serverConfigURL;
+//	@Override
+	@Review("the returned Lifecycle object's start is called during registration of servlet.... This is where actual" +
+			"Jetty server starts.")
+	public LifeCycle getContext(final OsgiContextModel model) {
+		final ServletContextHandler context = server.getOrCreateContext(model);
+		return new LifeCycle() {
+			@Override
+			public void start() throws Exception {
+				// PAXWEB-1084 - start qtp before starting first context
+				if (server.getThreadPool() instanceof org.eclipse.jetty.util.component.LifeCycle) {
+					((org.eclipse.jetty.util.component.LifeCycle) server.getThreadPool()).start();
+				}
+
+				// Fixfor PAXWEB-725
+				ClassLoader classLoader = context.getClassLoader();
+				List<Bundle> bundles = ((ResourceDelegatingBundleClassLoader) classLoader).getBundles();
+				BundleClassLoader parentClassLoader
+						= new BundleClassLoader(paxWebJettyBundle);
+				ResourceDelegatingBundleClassLoader containerSpecificClassLoader = new ResourceDelegatingBundleClassLoader(bundles, parentClassLoader);
+				context.setClassLoader(containerSpecificClassLoader);
+				if (!context.isStarted()) {
+					context.start();
+				}
+
+				boolean hasDefault = false;
+				for (ServletMapping mapping : context.getServletHandler().getServletMappings()) {
+					if (mapping.isDefault()) {
+						hasDefault = true;
+						break;
+					}
+				}
+				if (!hasDefault) {
+					ResourceServlet servlet = new ResourceServlet(model.getHttpContext(), /*model.getContextName()*/"TODO", "/", "default");
+					ResourceModel resourceModel = new ResourceModel(model, servlet, "/", "default");
+					addServlet(resourceModel);
+				}
+
+				// Fixfor PAXWEB-751
+				ClassLoader loader = Thread.currentThread().getContextClassLoader();
+				try {
+					Thread.currentThread().setContextClassLoader(
+							getClass().getClassLoader());
+					server.start();
+				} finally {
+					Thread.currentThread().setContextClassLoader(loader);
+				}
+				for (Connector connector : server.getConnectors()) {
+					if (connector.isStopped()) {
+						connector.start();
+					}
+				}
+			}
+
+			@Override
+			public void stop() throws Exception {
+				context.stop();
+			}
+		};
 	}
 
-	public void setServerConfigURL(URL serverConfigURL) {
-		this.serverConfigURL = serverConfigURL;
+//	@Override
+	public synchronized void addServlet(final ServletModel model) {
+//
+//		final ServletContextHandler context = server.getOrCreateContext(model);
+//		final ServletHandler servletHandler = context.getServletHandler();
+//		if (servletHandler == null) {
+//			throw new IllegalStateException(
+//					"Internal error: Cannot find the servlet holder");
+//		}
+//
+//
+//		// Jetty does not set the context class loader on adding the filters so
+//		// we do that instead
+//		try {
+//			ContextClassLoaderUtils.doWithClassLoader(context.getClassLoader(),
+//					new Callable<Void>() {
+//
+//						@Override
+//						public Void call() {
+//							servletHandler.addServlet(holder);
+//							servletHandler.addServletMapping(mapping);
+//							return null;
+//						}
+//
+//					});
+//			if (holder.isStarted()) {
+//				// initialize servlet
+//				holder.getServlet();
+//			}
+//			//CHECKSTYLE:OFF
+//		} catch (Exception e) {
+//			if (e instanceof RuntimeException) {
+//				throw (RuntimeException) e;
+//			}
+//			LOG.error("Ignored exception during servlet registration", e);
+//		}
+//		//CHECKSTYLE:ON
 	}
 
-	public String getDefaultAuthMethod(){
-	    return defaultAuthMethod;
-    }
+//	@Override
+	public synchronized void removeServlet(final ServletModel model) {
+		LOG.debug("Removing servlet [" + model + "]");
+		// jetty does not provide a method for removing a servlet so we have to
+		// do it by our own
+		// the facts below are found by analyzing ServletHolder implementation
+		boolean removed = false;
+		final ServletContextHandler context = null;/*server.getContext(model
+				.getContextModel().getHttpContext());*/
+		if (context == null) {
+			return; // context is already removed so no need for deregistration
+		}
 
-	public void setDefaultAuthMethod(String defaultAuthMethod) {
-		this.defaultAuthMethod = defaultAuthMethod;
-	}
-	public String getDefaultRealmName() {
-		return defaultRealmName;
+		final ServletHandler servletHandler = context.getServletHandler();
+		final ServletHolder[] holders = servletHandler.getServlets();
+		if (holders != null) {
+			final ServletHolder holder = servletHandler.getServlet(model
+					.getName());
+			if (holder != null) {
+				servletHandler.setServlets(ArrayUtil.removeFromArray(holders, holder));
+				// we have to find the servlet mapping by hand :( as there is no
+				// method provided by jetty
+				// and the remove is done based on equals, that is not
+				// implemented by servletmapping
+				// so it is == based.
+				ServletMapping[] mappings = servletHandler.getServletMappings();
+				if (mappings != null) {
+					ServletMapping mapping = null;
+					for (ServletMapping item : mappings) {
+						if (holder.getName().equals(item.getServletName())) {
+							mapping = item;
+							break;
+						}
+					}
+					if (mapping != null) {
+						servletHandler
+								.setServletMappings(ArrayUtil.removeFromArray(mappings, mapping));
+						removed = true;
+					}
+				}
+				// if servlet is still started stop the servlet holder
+				// (=servlet.destroy()) as Jetty will not do that
+				LOG.debug("Stopping servlet in Holder");
+				try {
+					ContextClassLoaderUtils.doWithClassLoader(
+							context.getClassLoader(), new Callable<Void>() {
+
+								@Override
+								public Void call() throws Exception {
+									holder.stop();
+									return null;
+								}
+
+							});
+					//CHECKSTYLE:OFF
+				} catch (Exception e) {
+					if (e instanceof RuntimeException) {
+						throw (RuntimeException) e;
+					}
+					LOG.warn("Exception during unregistering of servlet ["
+							+ model + "]");
+				}
+				//CHECKSTYLE:ON
+			}
+		}
+//		removeContext(model.getContextModel().getHttpContext());
+		if (!removed) {
+			throw new IllegalStateException(model + " was not found");
+		}
 	}
 
-	public void setDefaultRealmName(String defaultRealmName) {
-		this.defaultRealmName = defaultRealmName;
+//	@Override
+	public synchronized void addEventListener(final EventListenerModel model) {
+		server.getOrCreateContext(model).addEventListener(
+				model.getEventListener());
 	}
+
+//	@Override
+	public synchronized void removeEventListener(final EventListenerModel model) {
+//		final ServletContextHandler context = server.getContext(model
+//				.getContextModel().getHttpContext());
+//
+//		if (context == null) {
+//			return; // Obviously context is already destroyed
+//		}
+//
+////		final List<EventListener> listeners = new ArrayList<>(
+////				Arrays.asList(context.getEventListeners()));
+////		EventListener listener = model.getEventListener();
+////
+////		listeners.remove(listener);
+////		context.setEventListeners(listeners.toArray(new EventListener[listeners
+////				.size()]));
+//		removeContext(model.getContextModel().getHttpContext());
+	}
+
+//	@Override
+	public synchronized void addFilter(final FilterModel model) {
+		LOG.debug("Adding filter model [" + model + "]");
+		final FilterMapping mapping = new FilterMapping();
+		mapping.setFilterName(model.getName());
+		if (model.getUrlPatterns() != null && model.getUrlPatterns().length > 0) {
+			mapping.setPathSpecs(model.getUrlPatterns());
+		}
+		if (model.getServletNames() != null
+				&& model.getServletNames().length > 0) {
+			mapping.setServletNames(model.getServletNames());
+		}
+		// set-up dispatcher
+		int dispatcher = FilterMapping.DEFAULT;
+		for (String d : model.getDispatcher()) {
+			//dispatcher = FilterMapping.dispatch(baseRequest.getDispatcherType());
+			/*
+			DispatcherType type = DispatcherType.valueOf(d);
+			dispatcher |= FilterMapping.dispatch(type);
+			*/
+			if ("ALL".equalsIgnoreCase(d)) {
+				dispatcher |= FilterMapping.ALL;
+			} else if ("ASYNC".equalsIgnoreCase(d)) {
+				dispatcher |= FilterMapping.ASYNC;
+			} else if ("DEFAULT".equalsIgnoreCase(d)) {
+				dispatcher |= FilterMapping.DEFAULT;
+			} else if ("ERROR".equalsIgnoreCase(d)) {
+				dispatcher |= FilterMapping.ERROR;
+			} else if ("FORWARD".equalsIgnoreCase(d)) {
+				dispatcher |= FilterMapping.FORWARD;
+			} else if ("INCLUDE".equalsIgnoreCase(d)) {
+				dispatcher |= FilterMapping.INCLUDE;
+			} else if ("REQUEST".equalsIgnoreCase(d)) {
+				dispatcher |= FilterMapping.REQUEST;
+			}
+		}
+		mapping.setDispatches(dispatcher);
+
+		final ServletContextHandler context = server.getOrCreateContext(model);
+		final ServletHandler servletHandler = context.getServletHandler();
+		if (servletHandler == null) {
+			throw new IllegalStateException(
+					"Internal error: Cannot find the servlet holder");
+		}
+
+		final FilterHolder holder;
+		if (model.getFilter() == null) {
+			holder = new FilterHolder(model.getFilterClass());
+		} else {
+			holder = new FilterHolder(model.getFilter());
+		}
+		holder.setName(model.getName());
+		if (model.getInitParams() != null) {
+			holder.setInitParameters(model.getInitParams());
+		}
+		holder.setAsyncSupported(model.isAsyncSupported());
+
+		// Jetty does not set the context class loader on adding the filters so
+		// we do that instead
+		try {
+			ContextClassLoaderUtils.doWithClassLoader(context.getClassLoader(),
+					new Callable<Void>() {
+
+						@Override
+						public Void call() {
+							servletHandler.addFilter(holder, mapping);
+							return null;
+						}
+
+					});
+			//CHECKSTYLE:OFF
+		} catch (Exception e) {
+			if (e instanceof RuntimeException) {
+				throw (RuntimeException) e;
+			}
+			LOG.error("Ignored exception during filter registration", e);
+		}
+		//CHECKSTYLE:OFF
+	}
+
+//	@Override
+	public synchronized void removeFilter(FilterModel model) {
+//		LOG.debug("Removing filter model [" + model + "]");
+//		final ServletContextHandler context = server.getContext(model
+//				.getContextModel().getHttpContext());
+//		if (context == null) {
+//			return; // Obviously no context available anymore the server is
+//			// already down
+//		}
+//
+//		final ServletHandler servletHandler = context.getServletHandler();
+//		// first remove filter mappings for the removed filter
+//		final FilterMapping[] filterMappings = servletHandler
+//				.getFilterMappings();
+//		final List<FilterMapping> newFilterMappings = new ArrayList<>();
+//		for (FilterMapping filterMapping : filterMappings) {
+//			if (filterMapping.getFilterName().equals(model.getName())) {
+//				if (newFilterMappings.isEmpty()) {
+//					Collections.addAll(newFilterMappings, filterMappings);
+//				}
+//				newFilterMappings.remove(filterMapping);
+//			}
+//		}
+//		// Jetty does not set the context class loader on adding the filters so
+//		// we do that instead
+//		try {
+//			ContextClassLoaderUtils.doWithClassLoader(context.getClassLoader(),
+//					new Callable<Void>() {
+//
+//						@Override
+//						public Void call() {
+//							servletHandler.setFilterMappings(newFilterMappings
+//									.toArray(new FilterMapping[newFilterMappings
+//											.size()]));
+//							return null;
+//						}
+//
+//					});
+//			// CHECKSTYLE:OFF
+//		} catch (Exception e) {
+//			if (e instanceof RuntimeException) {
+//				throw (RuntimeException) e;
+//			}
+//			LOG.error("Ignored exception during filter registration", e);
+//		}
+//		// CHECKSTYLE:OFF
+//
+//		// then remove the filter
+//		final FilterHolder filterHolder = servletHandler.getFilter(model
+//				.getName());
+//		if (filterHolder == null) {
+//			return; // The filter has already been removed so nothing do to anymore
+//		}
+//		final FilterHolder[] filterHolders = servletHandler.getFilters();
+//		final FilterHolder[] newFilterHolders = ArrayUtil.removeFromArray(filterHolders, filterHolder);
+//		servletHandler.setFilters(newFilterHolders);
+//		// if filter is still started stop the filter (=filter.destroy()) as
+//		// Jetty will not do that
+//		if (filterHolder.isStarted()) {
+//			try {
+//				ContextClassLoaderUtils.doWithClassLoader(
+//						context.getClassLoader(), new Callable<Void>() {
+//
+//							@Override
+//							public Void call() throws Exception {
+//								filterHolder.stop();
+//								return null;
+//							}
+//
+//						});
+//				//CHECKSTYLE:OFF
+//			} catch (Exception e) {
+//				if (e instanceof RuntimeException) {
+//					throw (RuntimeException) e;
+//				}
+//				LOG.warn("Exception during unregistering of filter ["
+//						+ filterHolder.getFilter() + "]");
+//			}
+//			//CHECKSTYLE:ON
+//		}
+//		removeContext(model.getContextModel().getHttpContext());
+	}
+
+//	@Override
+	public synchronized void addErrorPage(final ErrorPageModel model) {
+		final ServletContextHandler context = server.getOrCreateContext(model);
+		final ErrorPageErrorHandler errorPageHandler = (ErrorPageErrorHandler) context
+				.getErrorHandler();
+		if (errorPageHandler == null) {
+			throw new IllegalStateException(
+					"Internal error: Cannot find the error handler. Please report.");
+		}
+
+		try {
+			int code = Integer.parseInt(model.getError());
+			errorPageHandler.addErrorPage(code, model.getLocation());
+		} catch (NumberFormatException nfe) {
+			if (ErrorPageModel.ERROR_PAGE.equalsIgnoreCase(model.getError())) {
+				errorPageHandler.addErrorPage(ErrorPageErrorHandler.GLOBAL_ERROR_PAGE, model.getLocation());
+			} else {
+				// 140.4.1 Error Pages
+				if ("4xx".equals(model.getError())) {
+					errorPageHandler
+							.addErrorPage(400, 499, model.getLocation());
+				} else if ("5xx".equals(model.getError())) {
+					errorPageHandler
+							.addErrorPage(500, 599, model.getLocation());
+				} else {
+					// OK, not a number must be a class then
+					errorPageHandler
+							.addErrorPage(model.getError(), model.getLocation());
+				}
+			}
+		}
+	}
+
+//	@Override
+	public synchronized void removeErrorPage(final ErrorPageModel model) {
+//		final ServletContextHandler context = server.getContext(model
+//				.getContextModel().getHttpContext());
+//		if (context == null) {
+//			return;// Obviously context is already removed
+//		}
+//		final ErrorPageErrorHandler errorPageHandler = (ErrorPageErrorHandler) context
+//				.getErrorHandler();
+//		if (errorPageHandler == null) {
+//			throw new IllegalStateException(
+//					"Internal error: Cannot find the error handler. Please report.");
+//		}
+//		final Map<String, String> errorPages = errorPageHandler.getErrorPages();
+//		if (errorPages != null) {
+//			errorPages.remove(model.getError());
+//		}
+//		removeContext(model.getContextModel().getHttpContext());
+	}
+
+	// PAXWEB-123: try to register WelcomeFiles differently
+//	@Override
+	public synchronized void addWelcomeFiles(final WelcomeFileModel model) {
+		final ServletContextHandler context = server
+				.getOrCreateContext(model);
+
+		context.setWelcomeFiles(model.getWelcomeFiles());
+
+		if (context.getServletHandler() == null || context.getServletHandler().getServletMappings() == null) {
+			return;
+		}
+		for (ServletMapping mapping : context.getServletHandler().getServletMappings()) {
+			ServletHolder servlet = context.getServletHandler().getServlet(mapping.getServletName());
+			try {
+				if (servlet.getServlet() instanceof ResourceServlet) {
+					LOG.debug("Reinitializing {} with new welcome files {}", servlet, Arrays.asList(model.getWelcomeFiles()));
+					servlet.getServlet().init(servlet.getServlet().getServletConfig());
+				}
+			} catch (ServletException e) {
+				LOG.warn("Problem reinitializing welcome files of default servlet", e);
+			}
+		}
+	}
+
+//	@Override
+	public synchronized void removeWelcomeFiles(final WelcomeFileModel model) {
+//		final ServletContextHandler context = server.getContext(model
+//				.getContextModel().getHttpContext());
+//		if (context == null) {
+//			return;// Obviously context is already removed
+//		}
+//		String[] welcomeFiles = context.getWelcomeFiles();
+//		List<String> welcomeFileList = new ArrayList<>(Arrays.asList(welcomeFiles));
+//		welcomeFileList.removeAll(Arrays.asList(model.getWelcomeFiles()));
+//		removeContext(model.getContextModel().getHttpContext());
+	}
+	// PAXWEB-123: done
+
+	// PAXWEB-210: create security constraints
+//	@Override
+	public void addSecurityConstraintMappings(
+			final SecurityConstraintMappingModel model) {
+		final ServletContextHandler context = server.getOrCreateContext(model);
+		final SecurityHandler securityHandler = context.getSecurityHandler();
+		if (securityHandler == null) {
+			throw new IllegalStateException(
+					"Internal error: Cannot find the security handler. Please report.");
+		}
+		String mappingMethod = model.getMapping();
+		String constraintName = model.getConstraintName();
+		String url = model.getUrl();
+		String dataConstraint = model.getDataConstraint();
+		List<String> roles = model.getRoles();
+		boolean authentication = model.isAuthentication();
+
+		ConstraintMapping newConstraintMapping = new ConstraintMapping();
+		newConstraintMapping.setMethod(mappingMethod);
+		newConstraintMapping.setPathSpec(url);
+		Constraint constraint = new Constraint();
+		constraint.setAuthenticate(authentication);
+		constraint.setName(constraintName);
+		constraint.setRoles(roles.toArray(new String[roles.size()]));
+
+		if (dataConstraint == null || "NONE".equals(dataConstraint)) {
+			constraint.setDataConstraint(Constraint.DC_NONE);
+		} else if ("INTEGRAL".equals(dataConstraint)) {
+			constraint.setDataConstraint(Constraint.DC_INTEGRAL);
+		} else if ("CONFIDENTIAL".equals(dataConstraint)) {
+			constraint.setDataConstraint(Constraint.DC_CONFIDENTIAL);
+		} else {
+			LOG.warn("Unknown user-data-constraint:" + dataConstraint);
+			constraint.setDataConstraint(Constraint.DC_CONFIDENTIAL);
+		}
+
+		newConstraintMapping.setConstraint(constraint);
+
+		((ConstraintSecurityHandler) securityHandler)
+				.addConstraintMapping(newConstraintMapping);
+	}
+
+//	@Override
+	public void removeSecurityConstraintMappings(
+			final SecurityConstraintMappingModel model) {
+//		final ServletContextHandler context = server.getContext(model
+//				.getContextModel().getHttpContext());
+//		if (context == null) {
+//			return; // context already gone
+//		}
+//		final SecurityHandler securityHandler = context.getSecurityHandler();
+//		if (securityHandler == null) {
+//			throw new IllegalStateException(
+//					"Internal error: Cannot find the security handler. Please report.");
+//		}
+//
+//		List<ConstraintMapping> constraintMappings = ((ConstraintSecurityHandler) securityHandler)
+//				.getConstraintMappings();
+//		for (ConstraintMapping constraintMapping : constraintMappings) {
+//			boolean urlMatch = constraintMapping.getPathSpec()
+//					.equalsIgnoreCase(model.getUrl());
+//			boolean methodMatch = (constraintMapping.getMethod() == null && model.getMapping() == null)
+//					|| (constraintMapping.getMethod().equalsIgnoreCase(model.getMapping()));
+//			if (urlMatch && methodMatch) {
+//				constraintMappings.remove(constraintMapping);
+//			}
+//		}
+//		removeContext(model.getContextModel().getHttpContext());
+	}
+
 }

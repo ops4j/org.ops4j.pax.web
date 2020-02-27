@@ -31,6 +31,6 @@
 	<artifactId>jsf-primefaces-jar</artifactId>
 	<packaging>jar</packaging>
 
-	<name>OPS4J Pax Web - Samples - JSF with Primefaces (embedded dependency)</name>
+	<name>OPS4J Pax Web JSF Samples - embedded dependency</name>
 
 </project>

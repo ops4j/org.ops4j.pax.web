@@ -19,14 +19,14 @@ import javax.servlet.Servlet;
 
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.LifeCycle;
-import org.ops4j.pax.web.service.spi.model.ContainerInitializerModel;
-import org.ops4j.pax.web.service.spi.model.ContextModel;
-import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
-import org.ops4j.pax.web.service.spi.model.EventListenerModel;
-import org.ops4j.pax.web.service.spi.model.FilterModel;
-import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
-import org.ops4j.pax.web.service.spi.model.ServletModel;
-import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
+import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingModel;
+import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.osgi.service.http.HttpContext;
 
 /**
@@ -67,7 +67,7 @@ interface ServerState {
 
 	Integer getHttpSecurePort();
 
-	Servlet createResourceServlet(ContextModel contextModel, String alias,
+	Servlet createResourceServlet(OsgiContextModel contextModel, String alias,
 								  String name);
 
 	void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
@@ -76,7 +76,7 @@ interface ServerState {
 
 	void addContainerInitializerModel(ContainerInitializerModel model);
 
-	LifeCycle getContext(ContextModel model);
+	LifeCycle getContext(OsgiContextModel model);
 
 	enum States {
 		INSTALLED, INITIALIZED, ACTIVE

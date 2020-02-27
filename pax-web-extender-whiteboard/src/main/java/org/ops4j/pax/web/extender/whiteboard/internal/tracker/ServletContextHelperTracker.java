@@ -153,7 +153,7 @@ public class ServletContextHelperTracker<T extends ServletContextHelper> impleme
 		mapping.setHttpContextId(servletCtxtName);
 		mapping.setHttpContextShared(true);
 		mapping.setPath(ctxtPath);
-		Map<String, String> parameters = mapping.getParameters();
+		Map<String, String> parameters = mapping.getInitParameters();
 		if (parameters == null) {
 			parameters = new HashMap<>();
 		}
@@ -196,7 +196,7 @@ public class ServletContextHelperTracker<T extends ServletContextHelper> impleme
 
 			final WebApplication webApplication = extenderContext.getExistingWebApplication(
 					serviceReference.getBundle(),
-					unpublished.getHttpContextMapping().getHttpContextId(),
+					unpublished.getHttpContextMapping().getContextId(),
 					sharedHttpContext);
 
 			boolean remove = true;

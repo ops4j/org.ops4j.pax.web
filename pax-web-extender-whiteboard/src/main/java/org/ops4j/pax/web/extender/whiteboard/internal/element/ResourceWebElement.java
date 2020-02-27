@@ -21,7 +21,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal.element;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardResource;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardResource;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;

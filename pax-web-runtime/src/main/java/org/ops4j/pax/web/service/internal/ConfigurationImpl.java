@@ -1,35 +1,37 @@
 /*
  * Copyright 2008 Alin Dreghiciu.
  *
- * Licensed  under the  Apache License,  Version 2.0  (the "License");
- * you may not use  this file  except in  compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed  under the  License is distributed on an "AS IS" BASIS,
- * WITHOUT  WARRANTIES OR CONDITIONS  OF ANY KIND, either  express  or
- * implied.
- *
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 package org.ops4j.pax.web.service.internal;
 
 import java.io.File;
-import java.net.URL;
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.spi.config.Configuration;
+import org.ops4j.pax.web.service.spi.config.JettyConfiguration;
 import org.ops4j.pax.web.service.spi.config.JspConfiguration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
 import org.ops4j.pax.web.service.spi.config.SecurityConfiguration;
 import org.ops4j.pax.web.service.spi.config.ServerConfiguration;
 import org.ops4j.pax.web.service.spi.config.SessionConfiguration;
+import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.util.property.PropertyResolver;
 import org.ops4j.util.property.PropertyStore;
 import org.slf4j.Logger;
@@ -37,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * <p>Service Configuration implementation.</p>
+ *
  * <p>This configuration object is a {@link PropertyStore} filled up by resolving properties from
  * underlying {@link PropertyResolver}.</p>
  *
@@ -47,12 +50,20 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 
 	public static Logger LOG = LoggerFactory.getLogger(ConfigurationImpl.class);
 
+	private final String id;
+
 	// configuration groups initialized immediately. Configurations may eagerly resolve some properties
 
 	private final ServerConfiguration serverConfiguration;
+	private final SecurityConfiguration securityConfiguration;
+	private final SessionConfiguration sessionConfiguration;
+	private final LogConfiguration logConfiguration;
 
 	/** Property resolver. Cannot be null. */
 	private PropertyResolver propertyResolver;
+
+	/** Low level access to as many source properties as possible */
+	private final Map<String, String> sourceProperties;
 
 //	/**
 //	 * encryptor to decrypt the password
@@ -64,12 +75,24 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	 * Creates a new service configuration.
 	 *
 	 * @param propertyResolver propertyResolver used to resolve properties
+	 * @param sourceProperties
 	 */
-	ConfigurationImpl(final PropertyResolver propertyResolver) {
+	ConfigurationImpl(final PropertyResolver propertyResolver, Map<String, String> sourceProperties) {
 		NullArgumentException.validateNotNull(propertyResolver, "Property resolver");
 		this.propertyResolver = propertyResolver;
+		this.sourceProperties = Collections.unmodifiableMap(sourceProperties);
+
+		id = UUID.randomUUID().toString();
 
 		serverConfiguration = new ServerConfigurationImpl();
+		securityConfiguration = new SecurityConfigurationImpl();
+		sessionConfiguration = new SessionConfigurationImpl();
+		logConfiguration = new LogConfigurationImpl();
+	}
+
+	@Override
+	public String id() {
+		return id;
 	}
 
 	@Override
@@ -79,7 +102,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 
 	@Override
 	public SecurityConfiguration security() {
-		return null;
+		return securityConfiguration;
 	}
 
 	@Override
@@ -89,11 +112,16 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 
 	@Override
 	public SessionConfiguration session() {
-		return null;
+		return sessionConfiguration;
 	}
 
 	@Override
 	public LogConfiguration logging() {
+		return logConfiguration;
+	}
+
+	@Override
+	public JettyConfiguration jetty() {
 		return null;
 	}
 
@@ -112,7 +140,12 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		}
 	}
 
-//	@Override
+	@Override
+	public Map<String, String> all() {
+		return this.sourceProperties;
+	}
+
+	//	@Override
 //	public Dictionary<String, Object> getConfiguration() {
 //		return (Dictionary<String, Object>) this.dictionary;
 //	}
@@ -121,25 +154,9 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 //		this.dictionary = dictionary;
 //	}
 //
-//	/**
-//	 * @see Configuration#getConnectorIdleTimeout()
-//	 */
-//	@Override
-//	public Integer getConnectorIdleTimeout() {
-//		return getResolvedIntegerProperty(PROPERTY_CONNECTOR_IDLE_TIMEOUT);
-//	}
-//
 //	@Override
 //	public Boolean isShowStacks() {
 //		return getResolvedBooleanProperty(PROPERTY_SHOW_STACKS);
-//	}
-//
-//	/**
-//	 * @see Configuration#getHttpConnectorName()
-//	 */
-//	@Override
-//	public String getHttpConnectorName() {
-//		return getResolvedStringProperty(PROPERTY_HTTP_CONNECTOR_NAME);
 //	}
 //
 //	/**
@@ -148,80 +165,6 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 //	@Override
 //	public Boolean useNIO() {
 //		return getResolvedBooleanProperty(PROPERTY_HTTP_USE_NIO);
-//	}
-//
-//	/**
-//	 * @see Configuration#checkForwardedHeaders()
-//	 */
-//	@Override
-//	public Boolean checkForwardedHeaders() {
-//		return getResolvedBooleanProperty(PROPERTY_HTTP_CHECK_FORWARDED_HEADERS);
-//	}
-//
-//	/**
-//	 * @see Configuration#isClientAuthNeeded()
-//	 */
-//	@Override
-//	public Boolean isClientAuthNeeded() {
-//		return getResolvedBooleanProperty(PROPERTY_SSL_CLIENT_AUTH_NEEDED);
-//	}
-//
-//	/**
-//	 * @see Configuration#isClientAuthWanted()
-//	 */
-//	@Override
-//	public Boolean isClientAuthWanted() {
-//		return getResolvedBooleanProperty(PROPERTY_SSL_CLIENT_AUTH_WANTED);
-//	}
-//
-//	/**
-//	 * @see Configuration#isHttpEnabled()
-//	 */
-//	@Override
-//	public Boolean isHttpEnabled() {
-//		return getResolvedBooleanProperty(PROPERTY_HTTP_ENABLED);
-//	}
-//
-//	/**
-//	 * @see Configuration#getHttpSecureConnectorName()
-//	 */
-//	@Override
-//	public String getHttpSecureConnectorName() {
-//		return getResolvedStringProperty(PROPERTY_HTTP_SECURE_CONNECTOR_NAME);
-//	}
-//
-//	/**
-//	 * @see Configuration#isHttpSecureEnabled()
-//	 */
-//	@Override
-//	public Boolean isHttpSecureEnabled() {
-//		return getResolvedBooleanProperty(PROPERTY_HTTP_SECURE_ENABLED);
-//	}
-//
-//	@Override
-//	public String getSslProvider() {
-//		return getResolvedStringProperty(PROPERTY_SSL_PROVIDER);
-//	}
-//
-//	/**
-//	 * @see Configuration#getSslKeystore()
-//	 */
-//	@Override
-//	public String getSslKeystore() {
-//		return getResolvedStringProperty(PROPERTY_SSL_KEYSTORE);
-//	}
-//
-//	/**
-//	 * @see Configuration#getSslKeystoreType()
-//	 */
-//	@Override
-//	public String getSslKeystoreType() {
-//		return getResolvedStringProperty(PROPERTY_SSL_KEYSTORE_TYPE);
-//	}
-//
-//	@Override
-//	public String getSslKeystoreProvider() {
-//		return getResolvedStringProperty(PROPERTY_SSL_KEYSTORE_PROVIDER);
 //	}
 //
 //	/**
@@ -238,25 +181,6 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 //	}
 //
 //	/**
-//	 * @see Configuration#getSslPassword()
-//	 */
-//	@Override
-//	public String getSslPassword() {
-//	        String password =  getSslKeystorePassword();
-//	        return decryptPassword(password);
-//	}
-//
-//
-//	/**
-//	 * @see Configuration#getSslKeyPassword()
-//	 */
-//	@Override
-//	public String getSslKeyAlias() {
-//		return getResolvedStringProperty(PROPERTY_SSL_KEY_ALIAS);
-//
-//	}
-//
-//	/**
 //	 * @see Configuration#getSslKeyPassword()
 //	 */
 //	@Override
@@ -267,105 +191,6 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 //			privateKeyPassword = getResolvedStringProperty(PROPERTY_SSL_KEYPASSWORD);
 //		}
 //		return this.decryptPassword(privateKeyPassword);
-//	}
-//
-//	/**
-//	 * @see Configuration#getTrustStore()
-//	 */
-//	@Override
-//	public String getTrustStore() {
-//		return getResolvedStringProperty(PROPERTY_SSL_TRUST_STORE);
-//	}
-//
-//	/**
-//	 * @see Configuration#getTrustStorePassword()
-//	 */
-//	@Override
-//	public String getTrustStorePassword() {
-//		String password = getResolvedStringProperty(PROPERTY_SSL_TRUST_STORE_PASSWORD);
-//		return this.decryptPassword(password);
-//	}
-//
-//	/**
-//	 * @see Configuration#getTrustStoreType()
-//	 */
-//	@Override
-//	public String getTrustStoreType() {
-//		return getResolvedStringProperty(PROPERTY_SSL_TRUST_STORE_TYPE);
-//	}
-//
-//	@Override
-//	public String getSslTrustStoreProvider() {
-//		return getResolvedStringProperty(PROPERTY_SSL_TRUST_STORE_PROVIDER);
-//	}
-//
-//	@Override
-//	public Boolean isSslRenegotiationAllowed() {
-//		return getResolvedBooleanProperty(PROPERTY_SSL_RENEGOTIATION_ALLOWED);
-//	}
-//
-//	/**
-//	 * @see Configuration#getCiphersuiteIncluded()
-//	 */
-//	@Override
-//	public List<String> getCiphersuiteIncluded() {
-//		String cipherIncludeString = getResolvedStringProperty(PROPERTY_CIPHERSUITES_INCLUDED);
-//		// Try the deprecated property.
-//		if ((null == cipherIncludeString) || ("".equals(cipherIncludeString))) {
-//			cipherIncludeString = getResolvedStringProperty(PROPERTY_CIPHERSUITE_INCLUDED);
-//		}
-//		if (cipherIncludeString == null) {
-//			return Collections.emptyList();
-//		}
-//
-//		final String[] split = cipherIncludeString.split(",");
-//		return Arrays.asList(split);
-//	}
-//
-//	/**
-//	 * @see Configuration#getCiphersuiteExcluded()
-//	 */
-//	@Override
-//	public List<String> getCiphersuiteExcluded() {
-//		String cipherExcludeString = getResolvedStringProperty(PROPERTY_CIPHERSUITES_EXCLUDED);
-//		// Try the deprecated property.
-//		if ((null == cipherExcludeString) || ("".equals(cipherExcludeString))) {
-//			cipherExcludeString = getResolvedStringProperty(PROPERTY_CIPHERSUITE_EXCLUDED);
-//		}
-//		if (cipherExcludeString == null) {
-//			return Collections.emptyList();
-//		}
-//
-//		final String[] split = cipherExcludeString.split(",");
-//		return Arrays.asList(split);
-//	}
-//
-//	/**
-//	 * @see Configuration#getProtocolsIncluded()
-//	 */
-//	@Override
-//	public List<String> getProtocolsIncluded() {
-//		String protocolsIncludedString = getResolvedStringProperty(PROPERTY_PROTOCOLS_INCLUDED);
-//		if (protocolsIncludedString == null) {
-//			return Collections.emptyList();
-//		}
-//
-//		String[] split = protocolsIncludedString.split(",");
-//		return Arrays.asList(split);
-//	}
-//
-//	/**
-//	 * @see Configuration#getProtocolsExcluded()
-//	 */
-//	@Override
-//	public List<String> getProtocolsExcluded() {
-//		String protocolsExcludedString = getResolvedStringProperty(PROPERTY_PROTOCOLS_EXCLUDED);
-//		if (protocolsExcludedString == null) {
-//			return Collections.emptyList();
-//		}
-//
-//		String[] split = protocolsExcludedString.split(",");
-//		return Arrays.asList(split);
 //	}
 //
 //
@@ -507,28 +332,6 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 //		return getResolvedStringProperty(PROPERTY_WORKER_NAME);
 //	}
 //
-//	/**
-//	 * @see Configuration#getListeningAddresses()
-//	 */
-//	@Override
-//	public String[] getListeningAddresses() {
-//		try {
-//			if (!contains(PROPERTY_LISTENING_ADDRESSES)) {
-//				String interfacesString = propertyResolver
-//						.get(PROPERTY_LISTENING_ADDRESSES);
-//				String[] interfaces = interfacesString == null ? new String[0]
-//						: interfacesString.split(",");
-//				return set(PROPERTY_LISTENING_ADDRESSES, interfaces);
-//			}
-//			//CHECKSTYLE:OFF
-//		} catch (Exception ignore) {
-//			LOG.debug("Reading configuration property "
-//					+ PROPERTY_LISTENING_ADDRESSES + " has failed");
-//		}
-//		//CHECKSTYLE:ON
-//		return get(PROPERTY_LISTENING_ADDRESSES);
-//	}
-//
 //	@Override
 //	public String getJspScratchDir() {
 //		// Just in case JSP is not available this parameter is useless
@@ -659,97 +462,6 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 //
 //		return getResolvedBooleanProperty(PaxWebConstants.PROPERTY_JSP_PRECOMPILATION);
 //	}
-//
-//	@Override
-//	public Boolean isLogNCSAFormatEnabled() {
-//		return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_ENABLED);
-//	}
-//
-//	@Override
-//	public String getLogNCSAFormat() {
-//		return getResolvedStringProperty(PROPERTY_LOG_NCSA_FORMAT);
-//	}
-//
-//	@Override
-//	public String getLogNCSARetainDays() {
-//		return getResolvedStringProperty(PROPERTY_LOG_NCSA_RETAINDAYS);
-//	}
-//
-//	@Override
-//	public Boolean isLogNCSAAppend() {
-//		return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_APPEND);
-//	}
-//
-//	@Override
-//	public Boolean isLogNCSAExtended() {
-//		return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_EXTENDED);
-//	}
-//
-//	@Override
-//	public Boolean isLogNCSADispatch() {
-//		return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_DISPATCH);
-//	}
-//
-//	@Override
-//	public String getLogNCSATimeZone() {
-//		return getResolvedStringProperty(PROPERTY_LOG_NCSA_LOGTIMEZONE);
-//	}
-//
-//	@Override
-//	public String getLogNCSADirectory() {
-//		return getResolvedStringProperty(PROPERTY_LOG_NCSA_LOGDIR);
-//	}
-//
-//	@Override
-//	public String toString() {
-//		return new StringBuilder().append(this.getClass().getSimpleName())
-//				.append("{").append("http enabled=").append(isHttpEnabled())
-//				.append(",http port=").append(getHttpPort())
-//				.append(",http secure enabled=").append(isHttpSecureEnabled())
-//				.append(",http secure port=").append(getHttpSecurePort())
-//				.append(",ssl keystore=").append(getSslKeystore())
-//				.append(",ssl keystoreType=").append(getSslKeystoreType())
-//				.append(",session timeout=").append(getSessionTimeout())
-//				.append(",session url=").append(getSessionUrl())
-//				.append(",session cookie=").append(getSessionCookie())
-//				.append(",session cookie httpOnly=")
-//				.append(getSessionCookieHttpOnly()).append(",worker name=")
-//				.append(getWorkerName()).append(",listening addresses=")
-//				.append(Arrays.toString(getListeningAddresses())).append("}")
-//				.toString();
-//	}
-//
-//	private String getResolvedStringProperty(String property) {
-//		try {
-//			if (!contains(property)) {
-//				return set(property, propertyResolver.get(property));
-//			}
-//			//CHECKSTYLE:OFF
-//		} catch (Exception ignore) {
-//			LOG.debug("Reading configuration property " + property
-//					+ " has failed");
-//		}
-//		//CHECKSTYLE:ON
-//		return get(property);
-//	}
-//
-//	private Boolean getResolvedBooleanProperty(String property) {
-//		try {
-//			if (!contains(property)) {
-//				String resolvedProperty = propertyResolver.get(property);
-//				return set(
-//						property,
-//						resolvedProperty == null ? null : Boolean
-//								.valueOf(resolvedProperty));
-//			}
-//			//CHECKSTYLE:OFF
-//		} catch (Exception ignore) {
-//			LOG.debug("Reading configuration property " + property
-//					+ " has failed");
-//		}
-//		//CHECKSTYLE:ON
-//		return get(property);
-//	}
 
 //	@Override
 //	public List<String> getVirtualHosts() {
@@ -773,66 +485,6 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 //		}
 //		return virtualHosts;
 //	}
-//
-//	@Override
-//	public Boolean isLogNCSALatency() {
-//		return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_LATENCY);
-//	}
-//
-//	@Override
-//	public Boolean isLogNCSACookies() {
-//		return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_COOKIES);
-//	}
-//
-//	@Override
-//	public Boolean isLogNCSAServer() {
-//		return getResolvedBooleanProperty(PROPERTY_LOG_NCSA_SERVER);
-//	}
-//
-//	@Override
-//	public Integer getServerMaxThreads() {
-//		return getResolvedIntegerProperty(PROPERTY_MAX_THREADS);
-//	}
-//
-//	@Override
-//	public Integer getServerMinThreads() {
-//		return getResolvedIntegerProperty(PROPERTY_MIN_THREADS);
-//	}
-//
-//	@Override
-//	public Integer getServerIdleTimeout() {
-//		return getResolvedIntegerProperty(PROPERTY_IDLE_TIMEOUT);
-//	}
-//
-//    @Override
-//    public String getCrlPath() {
-//        return getResolvedStringProperty(PROPERTY_CRL_PATH);
-//    }
-//
-//    @Override
-//    public Boolean isEnableCRLDP() {
-//        return getResolvedBooleanProperty(PROPERTY_ENABLE_CRLDP);
-//    }
-//
-//    @Override
-//    public Boolean isValidateCerts() {
-//        return getResolvedBooleanProperty(PROPERTY_VALIDATE_CERTS);
-//    }
-//
-//    @Override
-//    public Boolean isValidatePeerCerts() {
-//        return getResolvedBooleanProperty(PROPERTY_VALIDATE_PEER_CERTS);
-//    }
-//
-//    @Override
-//    public Boolean isEnableOCSP() {
-//        return getResolvedBooleanProperty(PROPERTY_ENABLE_OCSP);
-//    }
-//
-//    @Override
-//    public String getOcspResponderURL() {
-//        return getResolvedStringProperty(PROPERTY_OCSP_RESPONDER_URL);
-//    }
 //
 //    @Override
 //    public Boolean isEncEnabled() {
@@ -918,6 +570,10 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		return super.get(property);
 	}
 
+	private Boolean eagerBooleanProperty(String property) {
+		return super.get(property);
+	}
+
 	private Boolean resolveBooleanProperty(String property) {
 		if (!contains(property)) {
 			ensurePropertyResolver(property);
@@ -952,10 +608,77 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 
 	private class ServerConfigurationImpl implements ServerConfiguration {
 
+		private File tmpDir = null;
+		private String[] listeningAddresses = null;
+		private File[] externalConfigurations = null;
+
 		private ServerConfigurationImpl() {
 			// eager resolution of some important properties
 			resolveIntegerProperty(PaxWebConfig.PID_CFG_HTTP_PORT);
 			resolveIntegerProperty(PaxWebConfig.PID_CFG_HTTP_PORT_SECURE);
+			resolveBooleanProperty(PaxWebConfig.PID_CFG_HTTP_ENABLED);
+			resolveBooleanProperty(PaxWebConfig.PID_CFG_HTTP_SECURE_ENABLED);
+
+			// tmp directory
+			String tmpDir = resolveStringProperty(PaxWebConfig.PID_CFG_TEMP_DIR);
+			if (tmpDir == null) {
+				tmpDir = resolveStringProperty("java.io.tmpdir");
+			}
+			if (tmpDir == null) {
+				throw new IllegalStateException("Can't determine java.io.tmpdir property");
+			}
+			tmpDir = Utils.resolve(tmpDir);
+			File possibleTmpDir = null;
+			if (tmpDir.startsWith("file:")) {
+				possibleTmpDir = new File(URI.create(tmpDir));
+			} else {
+				possibleTmpDir = new File(tmpDir);
+			}
+			if (possibleTmpDir.isFile()) {
+				throw new IllegalStateException(possibleTmpDir + " can't be used as temporary directory");
+			}
+			if (!possibleTmpDir.isDirectory()) {
+				possibleTmpDir.mkdirs();
+			}
+			this.tmpDir = possibleTmpDir;
+
+			// listening address(es)
+			String listeningAddresses = resolveStringProperty(PaxWebConfig.PID_CFG_LISTENING_ADDRESSES);
+			if (listeningAddresses == null || "".equals(listeningAddresses.trim())) {
+				listeningAddresses = "0.0.0.0";
+			}
+			this.listeningAddresses = listeningAddresses.split("\\s*,\\s*");
+
+			// external config location
+			String externalFile = resolveStringProperty(PaxWebConfig.PID_CFG_SERVER_CONFIGURATION_FILES);
+			if (externalFile == null) {
+				externalFile = resolveStringProperty(PaxWebConfig.PID_CFG_SERVER_CONFIGURATION_FILES);
+			}
+			if (externalFile == null) {
+				this.externalConfigurations = new File[0];
+			} else {
+				String[] locations = externalFile.split("\\s*,\\s*");
+				File[] fileLocations = new File[locations.length];
+				int idx = 0;
+				for (String location : locations) {
+					File f = new File(location);
+					if (!f.isFile()) {
+						throw new IllegalArgumentException("External configuration " + f + " is not available");
+					}
+					fileLocations[idx++] = f;
+				}
+				this.externalConfigurations = fileLocations;
+			}
+		}
+
+		@Override
+		public File getTemporaryDirectory() {
+			return tmpDir;
+		}
+
+		@Override
+		public File[] getConfigurationFiles() {
+			return externalConfigurations;
 		}
 
 		@Override
@@ -969,77 +692,73 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		}
 
 		@Override
+		public Boolean isHttpEnabled() {
+			return eagerBooleanProperty(PaxWebConfig.PID_CFG_HTTP_ENABLED);
+		}
+
+		@Override
+		public Boolean isHttpSecureEnabled() {
+			return eagerBooleanProperty(PaxWebConfig.PID_CFG_HTTP_SECURE_ENABLED);
+		}
+
+		@Override
+		public String[] getListeningAddresses() {
+			return listeningAddresses;
+		}
+
+		@Override
+		public Integer getConnectorIdleTimeout() {
+			return resolveIntegerProperty(PaxWebConfig.PID_CFG_CONNECTOR_IDLE_TIMEOUT);
+		}
+
+		@Override
+		public String getHttpConnectorName() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_HTTP_CONNECTOR_NAME);
+		}
+
+		@Override
+		public String getHttpSecureConnectorName() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_HTTP_SECURE_CONNECTOR_NAME);
+		}
+
+		@Override
+		public Integer getServerIdleTimeout() {
+			return resolveIntegerProperty(PaxWebConfig.PID_CFG_SERVER_IDLE_TIMEOUT);
+		}
+
+		@Override
+		public Integer getServerMaxThreads() {
+			return resolveIntegerProperty(PaxWebConfig.PID_CFG_SERVER_MAX_THREADS);
+		}
+
+		@Override
+		public Integer getServerMinThreads() {
+			return resolveIntegerProperty(PaxWebConfig.PID_CFG_SERVER_MIN_THREADS);
+		}
+
+		@Override
+		public String getServerThreadNamePrefix() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SERVER_THREAD_NAME_PREFIX);
+		}
+
+		@Override
+		public Boolean checkForwardedHeaders() {
+			return resolveBooleanProperty(PaxWebConfig.PID_CFG_HTTP_CHECK_FORWARDED_HEADERS);
+		}
+
+
+
+
+
+
+
+		@Override
 		public Boolean useNIO() {
 			return null;
 		}
 
 		@Override
-		public Boolean checkForwardedHeaders() {
-			return null;
-		}
-
-		@Override
-		public String getHttpConnectorName() {
-			return null;
-		}
-
-		@Override
-		public Boolean isHttpEnabled() {
-			return null;
-		}
-
-		@Override
-		public Integer getConnectorIdleTimeout() {
-			return null;
-		}
-
-		@Override
 		public Boolean isShowStacks() {
-			return null;
-		}
-
-		@Override
-		public String getHttpSecureConnectorName() {
-			return null;
-		}
-
-		@Override
-		public Boolean isHttpSecureEnabled() {
-			return null;
-		}
-
-		@Override
-		public File getTemporaryDirectory() {
-			return null;
-		}
-
-		@Override
-		public String[] getListeningAddresses() {
-			return new String[0];
-		}
-
-		@Override
-		public File getConfigurationDir() {
-			return null;
-		}
-
-		@Override
-		public URL getConfigurationURL() {
-			return null;
-		}
-
-		@Override
-		public Integer getServerMaxThreads() {
-			return null;
-		}
-
-		@Override
-		public Integer getServerMinThreads() {
-			return null;
-		}
-
-		@Override
-		public Integer getServerIdleTimeout() {
 			return null;
 		}
 
@@ -1076,6 +795,303 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		@Override
 		public String getEncSuffix() {
 			return null;
+		}
+	}
+
+	private class SecurityConfigurationImpl implements SecurityConfiguration {
+		private String[] includedProtocols = null;
+		private String[] excludedProtocols = null;
+		private String[] includedCipherSuites = null;
+		private String[] excludedCipherSuites = null;
+
+		public SecurityConfigurationImpl() {
+			String includedProtocols = resolveStringProperty(PaxWebConfig.PID_CFG_PROTOCOLS_INCLUDED);
+			String excludedProtocols = resolveStringProperty(PaxWebConfig.PID_CFG_PROTOCOLS_EXCLUDED);
+			String includedCipherSuites = resolveStringProperty(PaxWebConfig.PID_CFG_CIPHERSUITES_INCLUDED);
+			String excludedCipherSuites = resolveStringProperty(PaxWebConfig.PID_CFG_CIPHERSUITES_EXCLUDED);
+
+			if (includedProtocols != null && !"".equals(includedProtocols.trim())) {
+				this.includedProtocols = includedProtocols.split("\\s*,\\s*");
+			}
+			if (excludedProtocols != null && !"".equals(excludedProtocols.trim())) {
+				this.excludedProtocols = excludedProtocols.split("\\s*,\\s*");
+			}
+			if (includedCipherSuites != null && !"".equals(includedCipherSuites.trim())) {
+				this.includedCipherSuites = includedCipherSuites.split("\\s*,\\s*");
+			}
+			if (excludedCipherSuites != null && !"".equals(excludedCipherSuites.trim())) {
+				this.excludedCipherSuites = excludedCipherSuites.split("\\s*,\\s*");
+			}
+		}
+
+		@Override
+		public String getSslProvider() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SSL_PROVIDER);
+		}
+
+		@Override
+		public String getSslKeystore() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SSL_KEYSTORE);
+		}
+
+		@Override
+		public String getSslKeystorePassword() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SSL_KEYSTORE_PASSWORD);
+		}
+
+		@Override
+		public String getSslKeystoreType() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SSL_KEYSTORE_TYPE);
+		}
+
+		@Override
+		public String getSslKeystoreProvider() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SSL_KEYSTORE_PROVIDER);
+		}
+
+		@Override
+		public String getSslKeyPassword() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SSL_KEY_PASSWORD);
+		}
+
+		@Override
+		public String getSslKeyAlgorithm() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SSL_KEY_ALGORITHM);
+		}
+
+		@Override
+		public String getSslKeyAlias() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SSL_KEY_ALIAS);
+		}
+
+		@Override
+		public String getTruststore() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SSL_TRUSTSTORE);
+		}
+
+		@Override
+		public String getTruststorePassword() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SSL_TRUSTSTORE_PASSWORD);
+		}
+
+		@Override
+		public String getTruststoreType() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SSL_TRUSTSTORE_TYPE);
+		}
+
+		@Override
+		public String getTruststoreProvider() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SSL_TRUSTSTORE_PROVIDER);
+		}
+
+		@Override
+		public String getTrustManagerFactoryAlgorithm() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SSL_TRUST_MANAGER_FACTORY_ALGORITHM);
+		}
+
+		@Override
+		public Boolean isClientAuthWanted() {
+			return resolveBooleanProperty(PaxWebConfig.PID_CFG_SSL_CLIENT_AUTH_WANTED);
+		}
+
+		@Override
+		public Boolean isClientAuthNeeded() {
+			return resolveBooleanProperty(PaxWebConfig.PID_CFG_SSL_CLIENT_AUTH_NEEDED);
+		}
+
+		@Override
+		public String getSslProtocol() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SSL_PROTOCOL);
+		}
+
+		@Override
+		public String getSecureRandomAlgorithm() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SSL_SECURE_RANDOM_ALGORITHM);
+		}
+
+		@Override
+		public String[] getProtocolsIncluded() {
+			return this.includedProtocols;
+		}
+
+		@Override
+		public String[] getProtocolsExcluded() {
+			return this.excludedProtocols;
+		}
+
+		@Override
+		public String[] getCiphersuiteIncluded() {
+			return this.includedCipherSuites;
+		}
+
+		@Override
+		public String[] getCiphersuiteExcluded() {
+			return this.excludedCipherSuites;
+		}
+
+		@Override
+		public Boolean isSslRenegotiationAllowed() {
+			return resolveBooleanProperty(PaxWebConfig.PID_CFG_SSL_RENEGOTIATION_ALLOWED);
+		}
+
+		@Override
+		public Integer getSslRenegotiationLimit() {
+			return resolveIntegerProperty(PaxWebConfig.PID_CFG_SSL_RENEGOTIATION_LIMIT);
+		}
+
+		@Override
+		public Boolean getSslSessionsEnabled() {
+			return resolveBooleanProperty(PaxWebConfig.PID_CFG_SSL_SESSION_ENABLED);
+		}
+
+		@Override
+		public Integer getSslSessionCacheSize() {
+			return resolveIntegerProperty(PaxWebConfig.PID_CFG_SSL_SESSION_CACHE_SIZE);
+		}
+
+		@Override
+		public Integer getSslSessionTimeout() {
+			return resolveIntegerProperty(PaxWebConfig.PID_CFG_SSL_SESSION_TIMEOUT);
+		}
+
+		@Override
+		public Boolean isValidateCerts() {
+			return resolveBooleanProperty(PaxWebConfig.PID_CFG_VALIDATE_CERTS);
+		}
+
+		@Override
+		public Boolean isValidatePeerCerts() {
+			return resolveBooleanProperty(PaxWebConfig.PID_CFG_VALIDATE_PEER_CERTS);
+		}
+
+		@Override
+		public Boolean isEnableOCSP() {
+			return resolveBooleanProperty(PaxWebConfig.PID_CFG_ENABLE_OCSP);
+		}
+
+		@Override
+		public Boolean isEnableCRLDP() {
+			return resolveBooleanProperty(PaxWebConfig.PID_CFG_ENABLE_CRLDP);
+		}
+
+		@Override
+		public String getCrlPath() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_CRL_PATH);
+		}
+
+		@Override
+		public String getOcspResponderURL() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_OCSP_RESPONDER_URL);
+		}
+
+		@Override
+		public Integer getMaxCertPathLength() {
+			return resolveIntegerProperty(PaxWebConfig.PID_CFG_MAX_CERT_PATH_LENGTH);
+		}
+	}
+
+	private class SessionConfigurationImpl implements SessionConfiguration {
+
+		private SessionConfigurationImpl() {
+			// eager resolution of some important properties
+		}
+
+		@Override
+		public Integer getSessionTimeout() {
+			return null;
+		}
+
+		@Override
+		public String getSessionCookie() {
+			return null;
+		}
+
+		@Override
+		public String getSessionDomain() {
+			return null;
+		}
+
+		@Override
+		public String getSessionPath() {
+			return null;
+		}
+
+		@Override
+		public String getSessionUrl() {
+			return null;
+		}
+
+		@Override
+		public Boolean getSessionCookieHttpOnly() {
+			return null;
+		}
+
+		@Override
+		public Boolean getSessionCookieSecure() {
+			return null;
+		}
+
+		@Override
+		public Integer getSessionCookieMaxAge() {
+			return null;
+		}
+
+		@Override
+		public String getSessionStoreDirectory() {
+			return null;
+		}
+
+		@Override
+		public Boolean getSessionLazyLoad() {
+			return null;
+		}
+	}
+
+	private class LogConfigurationImpl implements LogConfiguration {
+
+		private LogConfigurationImpl() {
+			// eager resolution of some important properties
+			resolveBooleanProperty(PaxWebConfig.PID_CFG_LOG_NCSA_ENABLED);
+		}
+
+		@Override
+		public Boolean isLogNCSAFormatEnabled() {
+			return eagerBooleanProperty(PaxWebConfig.PID_CFG_LOG_NCSA_ENABLED);
+		}
+
+		@Override
+		public String getLogNCSADirectory() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_LOG_NCSA_LOGDIR);
+		}
+
+		@Override
+		public String getLogNCSAFile() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_LOG_NCSA_LOGFILE);
+		}
+
+		@Override
+		public Boolean isLogNCSAAppend() {
+			return resolveBooleanProperty(PaxWebConfig.PID_CFG_LOG_NCSA_APPEND);
+		}
+
+		@Override
+		public String getLogNCSAFilenameDateFormat() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_LOG_NCSA_LOGFILE_DATE_FORMAT);
+		}
+
+		@Override
+		public Integer getLogNCSARetainDays() {
+			return resolveIntegerProperty(PaxWebConfig.PID_CFG_LOG_NCSA_RETAINDAYS);
+		}
+
+		@Override
+		public Boolean isLogNCSAExtended() {
+			return resolveBooleanProperty(PaxWebConfig.PID_CFG_LOG_NCSA_EXTENDED);
+		}
+
+		@Override
+		public String getLogNCSATimeZone() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_LOG_NCSA_LOGTIMEZONE);
 		}
 	}
 

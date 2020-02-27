@@ -31,7 +31,7 @@
 	<artifactId>war-simplest-javaee</artifactId>
 	<packaging>war</packaging>
 
-	<name>OPS4J Pax Web - Samples - WAR without OSGi</name>
+	<name>OPS4J Pax Web WAR Samples - no OSGi</name>
 
 	<dependencies>
 

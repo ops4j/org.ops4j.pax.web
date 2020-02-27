@@ -79,13 +79,16 @@
 							<!-- from pax-logging-api -->
 							org.slf4j;version="[1.7,2)",
 
+							<!-- other -->
+
+							javax.annotation;version="[1.2,2)"; resolution:=optional,
+
 							<!-- to check -->
 
 <!--							org.w3c.dom,-->
 <!--							org.xml.sax,-->
 <!--							org.apache.jasper.servlet; resolution:=optional,-->
 <!--							org.apache.commons.logging,-->
-<!--							javax.annotation;version="[1.2,2)"; resolution:=optional,-->
 <!--							javax.management.*; resolution:=optional,-->
 <!--							javax.security.auth,-->
 <!--							javax.security.auth.callback,-->
@@ -151,7 +154,6 @@
 <!--							!org.apache.commons.logging,-->
 <!--							!org.apache.http.*,-->
 							org.ops4j.pax.web.service.jetty.internal.*,
-<!--							org.apache.commons.lang3.reflect,-->
 						</Private-Package>
 <!--						<Embed-Dependency>-->
 <!--							*;artifactId=!org.osgi.compendium;scope=compile;type=!pom;inline=true-->
@@ -230,6 +232,10 @@
 		<!-- JavaEE -->
 
 		<dependency>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
@@ -239,38 +245,60 @@
 
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-util</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-io</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-http</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-xml</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-jmx</artifactId>
 			<scope>provided</scope>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-webapp</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.jetty.http2</groupId>
+			<artifactId>http2-server</artifactId>
 			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-alpn-server</artifactId>
+			<scope>provided</scope>
+			<optional>true</optional>
 		</dependency>
 
 <!--		<dependency>-->
 <!--			<groupId>org.eclipse.jetty</groupId>-->
 <!--			<artifactId>jetty-jaas</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.eclipse.jetty</groupId>-->
-<!--			<artifactId>jetty-alpn-server</artifactId>-->
 <!--			<scope>provided</scope>-->
 <!--		</dependency>-->
 <!--		<dependency>-->
@@ -304,10 +332,6 @@
 
 		<!-- Other -->
 
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-    		<artifactId>commons-lang3</artifactId>
-		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>org.apache.xbean</groupId>-->
 <!--			<artifactId>xbean-finder</artifactId>-->
@@ -326,11 +350,6 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>org.easymock</groupId>-->
-<!--			<artifactId>easymock</artifactId>-->
-<!--			<scope>test</scope>-->
-<!--		</dependency>-->
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>

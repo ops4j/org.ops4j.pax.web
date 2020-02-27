@@ -1,16 +1,15 @@
-/* Copyright 2016 Marc Schlegel, Achim Nierbeck
+/*
+ * Copyright 2016 Marc Schlegel, Achim Nierbeck
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.
- *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -32,26 +31,24 @@ import java.util.stream.Collectors;
 import javax.servlet.ServletContext;
 
 import org.ops4j.pax.web.service.WebContainerContext;
-import org.ops4j.pax.web.service.spi.model.ContextModel;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
-import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.whiteboard.ErrorPageMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletMapping;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardElement;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardErrorPage;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardFilter;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardHttpContext;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardJspMapping;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardListener;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardResource;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardServlet;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardWelcomeFile;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardElement;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardErrorPage;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardFilter;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardHttpContext;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardJspMapping;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardListener;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardResource;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardServlet;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWelcomeFile;
 import org.osgi.dto.DTO;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -100,7 +97,7 @@ public class WhiteboardDtoService {
         return servletContextPath.equals(comparePath);
     }
 
-    RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator, ServerModel serverModel, ServiceModel serviceModel) {
+    RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator, ServerModel serverModel) {
         // TODO not complete
 
         RuntimeDTO runtimeDto = new RuntimeDTO();
@@ -125,21 +122,21 @@ public class WhiteboardDtoService {
                 WhiteboardHttpContext whiteboardHttpContext = (WhiteboardHttpContext) element;
                 Optional<Map.Entry<ServiceReference<ServletContext>, ServletContext>> matchingServletContextEntry =
                         servletContexts.entrySet().stream()
-                                .filter(entry -> compareContextroot(entry.getValue(), whiteboardHttpContext.getHttpContextMapping().getPath()))
+                                .filter(entry -> compareContextroot(entry.getValue(), whiteboardHttpContext.getHttpContextMapping().getContextPath()))
                                 .findFirst();
                 // TODO name missing
                 if (!whiteboardHttpContext.isValid()) {
                     FailedServletContextDTO dto = new FailedServletContextDTO();
                     dto.failureReason = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
                     dto.serviceId = whiteboardHttpContext.getServiceID();
-                    dto.contextPath = whiteboardHttpContext.getHttpContextMapping().getPath();
+                    dto.contextPath = whiteboardHttpContext.getHttpContextMapping().getContextPath();
                     failedServletContextDTOs.add(dto);
                 } else if (!matchingServletContextEntry.isPresent()) {
                     // element is valid, but no actual ServletContext exist
                     FailedServletContextDTO dto = new FailedServletContextDTO();
                     dto.failureReason = DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT;
                     dto.serviceId = whiteboardHttpContext.getServiceID();
-                    dto.contextPath = whiteboardHttpContext.getHttpContextMapping().getPath();
+                    dto.contextPath = whiteboardHttpContext.getHttpContextMapping().getContextPath();
                     failedServletContextDTOs.add(dto);
                 } else {
                     // all fine
@@ -217,10 +214,10 @@ public class WhiteboardDtoService {
     }
 
 
-    RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator, ServerModel serverModel, ServiceModel serviceModel) {
+    RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator, ServerModel serverModel) {
         RequestInfoDTO dto = new RequestInfoDTO();
         dto.path = path;
-        ContextModel contextModel = serverModel.matchPathToContext(path);
+        OsgiContextModel contextModel = serverModel.matchPathToContext(path);
         if (contextModel != null) {
 
             Optional<Map.Entry<ServiceReference<ServletContext>, ServletContext>> matchingServletContextEntry =
@@ -236,7 +233,7 @@ public class WhiteboardDtoService {
 
             iterator.forEachRemaining(element -> {
                 if (element  instanceof WhiteboardServlet && ( ((WhiteboardServlet) element).getErrorPageMappings() == null || ((WhiteboardServlet) element).getErrorPageMappings().isEmpty())) {
-                    if (isContextModelMatchedByContextId(contextModel, ((WhiteboardServlet) element).getServletMapping().getHttpContextId())) {
+                    if (isContextModelMatchedByContextId(contextModel, ((WhiteboardServlet) element).getServletMapping().getContextId())) {
                         mapServlet((WhiteboardServlet) element, servletDTOs, new ArrayList<>()); // dont care about failureDTOs, just reuse this
                     }
                 }  else if (element instanceof WhiteboardFilter) {
@@ -262,7 +259,7 @@ public class WhiteboardDtoService {
     }
 
 
-    private boolean isContextModelMatchedByContextId(ContextModel model, String contextId) {
+    private boolean isContextModelMatchedByContextId(OsgiContextModel model, String contextId) {
         String modelId = model.getHttpContext().getContextId();
         // FIXME is check for DEFAULT sufficeient or should SHARED be included as well
         return Objects.equals(contextId, modelId)
@@ -306,7 +303,7 @@ public class WhiteboardDtoService {
         dto.asyncSupported = servletMapping.getAsyncSupported() != null ? servletMapping.getAsyncSupported() : false;
 
         Optional<Map.Entry<ServiceReference<ServletContext>, ServletContext>> matchingServletContextEntry = findMatchingServletContext(
-                servletMapping.getHttpContextId());
+                servletMapping.getContextId());
 
         if (matchingServletContextEntry.isPresent()) {
             dto.servletContextId = (long) matchingServletContextEntry.get().getKey().getProperty(Constants.SERVICE_ID);
@@ -336,7 +333,7 @@ public class WhiteboardDtoService {
         ServletMapping servletMapping = whiteboardErrorPage.getServletMapping();
 
         Optional<Map.Entry<ServiceReference<ServletContext>, ServletContext>> matchingServletContextEntry = findMatchingServletContext(
-                servletMapping.getHttpContextId());
+                servletMapping.getContextId());
 
         if (matchingServletContextEntry.isPresent()) {
             dto.servletContextId = (long) matchingServletContextEntry.get().getKey().getProperty(Constants.SERVICE_ID);

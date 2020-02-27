@@ -19,13 +19,13 @@ package org.ops4j.pax.web.service.tomcat.internal;
 import javax.servlet.Servlet;
 
 import org.ops4j.pax.web.service.spi.LifeCycle;
-import org.ops4j.pax.web.service.spi.model.ContextModel;
-import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
-import org.ops4j.pax.web.service.spi.model.EventListenerModel;
-import org.ops4j.pax.web.service.spi.model.FilterModel;
-import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
-import org.ops4j.pax.web.service.spi.model.ServletModel;
-import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
+import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingModel;
+import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.osgi.service.http.HttpContext;
 
 /**
@@ -55,14 +55,14 @@ public interface ServerWrapper {
 
 	void removeEventListener(EventListenerModel eventListenerModel);
 
-	Servlet createResourceServlet(ContextModel contextModel, String alias,
+	Servlet createResourceServlet(OsgiContextModel contextModel, String alias,
 								  String name);
 
 	void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
 
 	void removeSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
 
-	LifeCycle getContext(ContextModel model);
+	LifeCycle getContext(OsgiContextModel model);
 
 	void addWelcomeFiles(WelcomeFileModel model);
 

@@ -31,7 +31,7 @@
 	<artifactId>initializers</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web - Samples - Servlet initializer (host)</name>
+	<name>OPS4J Pax Web Internal Samples - Servlet Initializer</name>
 
 	<properties>
 		<bundle.symbolic.name>pax-web-initializers</bundle.symbolic.name>

@@ -167,6 +167,124 @@ public class EmbeddedTomcatTest {
 	}
 
 	@Test
+	public void addContextAfterServerHasStarted() throws Exception {
+		Server server = new StandardServer();
+		server.setCatalinaBase(new File("target"));
+
+		Service service = new StandardService();
+		service.setName("Catalina");
+		server.addService(service);
+
+		Executor executor = new StandardThreadExecutor();
+		service.addExecutor(executor);
+
+		Connector connector = new Connector("HTTP/1.1");
+		connector.setPort(0);
+		service.addConnector(connector);
+
+		Engine engine = new StandardEngine();
+		engine.setName("Catalina");
+		engine.setDefaultHost("localhost");
+		service.setContainer(engine);
+
+		Host host = new StandardHost();
+		host.setName("localhost");
+		host.setAppBase(".");
+		engine.addChild(host);
+
+		Servlet servlet = new HttpServlet() {
+			@Override
+			protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				LOG.info("Handling request: {}", req.toString());
+				resp.setContentType("text/plain");
+				resp.setCharacterEncoding("UTF-8");
+
+				String response = String.format("| %s | %s | %s |", req.getContextPath(), req.getServletPath(), req.getPathInfo());
+				resp.getWriter().write(response);
+				resp.getWriter().close();
+			}
+		};
+
+		Context c1 = new StandardContext();
+		c1.setName("c1");
+		// org.apache.catalina.core.StandardContext.setPath()
+		//  - "/" or null - warning, conversion to ""
+		//  - "" or "/<path>" - ok
+		//  - if path ends with "/", warning, slash is trimmed
+		c1.setPath("/c1");
+		c1.setMapperContextRootRedirectEnabled(false);
+		c1.addLifecycleListener((event) -> {
+			if (event.getType().equals(Lifecycle.CONFIGURE_START_EVENT)) {
+				c1.setConfigured(true);
+			}
+		});
+		host.addChild(c1);
+
+		Wrapper wrapper1 = new StandardWrapper();
+		wrapper1.setServlet(servlet);
+		wrapper1.setName("s1");
+
+		c1.addChild(wrapper1);
+		c1.addServletMappingDecoded("/s1", wrapper1.getName(), false);
+
+		server.start();
+
+		LOG.info("Local port after start: {}", connector.getLocalPort());
+
+		String response;
+
+		response = send(connector.getLocalPort(), "/c1/s1");
+		assertTrue(response.endsWith("| /c1 | /s1 | null |"));
+
+		response = send(connector.getLocalPort(), "/c1/s2");
+		assertTrue(response.contains("HTTP/1.1 404"));
+
+		response = send(connector.getLocalPort(), "/c2/s1");
+		assertTrue(response.contains("HTTP/1.1 404"));
+
+		// add new context
+
+		Context c2 = new StandardContext();
+		c2.setName("c2");
+		c2.setPath("/c2");
+		c2.setMapperContextRootRedirectEnabled(false);
+		c2.addLifecycleListener((event) -> {
+			if (event.getType().equals(Lifecycle.CONFIGURE_START_EVENT)) {
+				c2.setConfigured(true);
+			}
+		});
+		host.addChild(c2);
+
+		Wrapper wrapper2 = new StandardWrapper();
+		wrapper2.setServlet(servlet);
+		wrapper2.setName("s1");
+
+		c2.addChild(wrapper2);
+		c2.addServletMappingDecoded("/s1", wrapper2.getName(), false);
+
+		// add new servlet to existing context
+
+		Wrapper wrapper3 = new StandardWrapper();
+		wrapper3.setServlet(servlet);
+		wrapper3.setName("s2");
+
+		c1.addChild(wrapper3);
+		c1.addServletMappingDecoded("/s2", wrapper3.getName(), false);
+
+		response = send(connector.getLocalPort(), "/c1/s1");
+		assertTrue(response.endsWith("| /c1 | /s1 | null |"));
+
+		response = send(connector.getLocalPort(), "/c1/s2");
+		assertTrue(response.endsWith("| /c1 | /s2 | null |"));
+
+		response = send(connector.getLocalPort(), "/c2/s1");
+		assertTrue(response.endsWith("| /c2 | /s1 | null |"));
+
+		server.stop();
+		server.destroy();
+	}
+
+	@Test
 	public void tomcatUrlMapping() throws Exception {
 		Server server = new StandardServer();
 		server.setCatalinaBase(new File("target"));
@@ -195,6 +313,7 @@ public class EmbeddedTomcatTest {
 		Context rootContext = new StandardContext();
 		rootContext.setName("");
 		rootContext.setPath("");
+		rootContext.setMapperContextRootRedirectEnabled(false);
 		rootContext.addLifecycleListener((event) -> {
 			if (event.getType().equals(Lifecycle.CONFIGURE_START_EVENT)) {
 				rootContext.setConfigured(true);
@@ -297,7 +416,7 @@ public class EmbeddedTomcatTest {
 		//       - host is chosed directly from javax.servlet.ServletRequest.getLocalName()
 		//    - org.apache.catalina.connector.Connector.getUseIPVHosts() == false
 		//       - host is chosed directly from javax.servlet.ServletRequest.getServerName()
-		//    - it defaults to wat's set in org.apache.catalina.Engine.setDefaultHost()
+		//    - it defaults to what's set in org.apache.catalina.Engine.setDefaultHost()
 		// - context finding: org.apache.catalina.mapper.Mapper.internalMap()
 		//    - org.apache.catalina.mapper.Mapper.MappedHost.contextList is searched
 		//    - we have two:
@@ -354,7 +473,7 @@ public class EmbeddedTomcatTest {
 		response = send(connector.getLocalPort(), "/y");
 		assertTrue(response.contains("HTTP/1.1 404"));
 
-		// ROOT context
+		// /c1 context
 		response = send(connector.getLocalPort(), "/c1/p/anything");
 		assertTrue(response.endsWith("| /c1 | /p | /anything |"));
 		response = send(connector.getLocalPort(), "/c1/anything.action");

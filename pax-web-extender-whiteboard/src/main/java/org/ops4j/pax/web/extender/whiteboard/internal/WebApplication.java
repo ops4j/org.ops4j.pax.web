@@ -43,15 +43,14 @@ import org.ops4j.pax.web.extender.whiteboard.internal.element.ResourceWebElement
 import org.ops4j.pax.web.extender.whiteboard.internal.element.ServletWebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.WebElement;
 import org.ops4j.pax.web.extender.whiteboard.internal.element.WelcomeFileWebElement;
-import org.ops4j.pax.web.extender.whiteboard.internal.util.DictionaryUtils;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.WebContainerUtils;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.tracker.ReplaceableService;
 import org.ops4j.pax.web.extender.whiteboard.internal.util.tracker.ReplaceableServiceListener;
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
-import org.ops4j.pax.web.service.whiteboard.WhiteboardElement;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardElement;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -266,20 +265,20 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 			getHttpContext();
 			if (WebContainerUtils.isWebContainer(webContainer)) {
 				final Map<String, String> contextparams = new HashMap<>();
-				if (httpContextMapping.getPath() != null) {
-					contextparams.put(WebContainerConstants.CONTEXT_NAME,
-							httpContextMapping.getPath());
+				if (httpContextMapping.getContextPath() != null) {
+					contextparams.put(PaxWebConstants.CONTEXT_NAME,
+							httpContextMapping.getContextPath());
 				}
-				if (httpContextMapping.getParameters() != null) {
-					contextparams.putAll(httpContextMapping.getParameters());
+				if (httpContextMapping.getInitParameters() != null) {
+					contextparams.putAll(httpContextMapping.getInitParameters());
 					String virtualHosts = contextparams.remove(ExtenderConstants.PROPERTY_HTTP_VIRTUAL_HOSTS);
 					List<String> virtualHostsList = convertToList(virtualHosts);
 					String connectors = contextparams.remove(ExtenderConstants.PROPERTY_HTTP_CONNECTORS);
 					List<String> connectorsList = convertToList(connectors);
-					webContainer.setConnectorsAndVirtualHosts(connectorsList, virtualHostsList, httpContext);
+//					webContainer.setConnectorsAndVirtualHosts(connectorsList, virtualHostsList, httpContext);
 				}
-				webContainer.setContextParam(
-						DictionaryUtils.adapt(contextparams), httpContext);
+//				webContainer.setContextParam(
+//						DictionaryUtils.adapt(contextparams), httpContext);
 			}
 			registerWebElements();
 		}
@@ -317,8 +316,8 @@ public class WebApplication implements ReplaceableServiceListener<HttpService> {
 				};
 			} else {
 				String sharedContext = null;
-				if (httpContextMapping != null && httpContextMapping.getParameters() != null) {
-					sharedContext = httpContextMapping.getParameters().get(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED);
+				if (httpContextMapping != null && httpContextMapping.getInitParameters() != null) {
+					sharedContext = httpContextMapping.getInitParameters().get(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED);
 				}
 
 				if (Boolean.parseBoolean(sharedContext) && WebContainerUtils.isWebContainer(webContainer)) {

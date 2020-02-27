@@ -15,6 +15,9 @@
  */
 package org.ops4j.pax.web.service;
 
+import org.ops4j.pax.web.annotations.Review;
+
+@Review("We have to check and describe actual integration scenarios. Mostly related to Keycloak.")
 public interface AuthenticatorService {
 
     /**

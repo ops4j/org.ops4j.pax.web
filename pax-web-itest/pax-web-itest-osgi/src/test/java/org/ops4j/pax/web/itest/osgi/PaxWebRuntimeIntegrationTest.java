@@ -15,26 +15,35 @@
  */
 package org.ops4j.pax.web.itest.osgi;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 import javax.inject.Inject;
+import javax.servlet.Servlet;
 import javax.servlet.http.HttpServlet;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.tinybundles.core.TinyBundles;
 import org.ops4j.pax.web.itest.osgi.support.MockServerController;
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
-import org.ops4j.pax.web.service.spi.model.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.task.Batch;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceEvent;
@@ -42,18 +51,22 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
+import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.metatype.AttributeDefinition;
 import org.osgi.service.metatype.MetaTypeInformation;
 import org.osgi.service.metatype.MetaTypeService;
 import org.osgi.service.metatype.ObjectClassDefinition;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
@@ -70,7 +83,9 @@ public class PaxWebRuntimeIntegrationTest extends AbstractControlledBase2 {
 	private MetaTypeService metaTypeService;
 
 	@Configuration
-	public Option[] configure() {
+	public Option[] configure() throws IOException {
+		prepareBundles();
+
 		return combine(baseConfigure(), combine(paxWebCore(), paxWebRuntime(), metaTypeService()));
 	}
 
@@ -121,14 +136,15 @@ public class PaxWebRuntimeIntegrationTest extends AbstractControlledBase2 {
 		};
 		context.addServiceListener(sl1);
 
+		// don't change to lambda, otherwise maven-failsafe-plugin fails
+		@SuppressWarnings("Convert2Lambda")
 		ServiceRegistration<ServerControllerFactory> reg = context.registerService(ServerControllerFactory.class, new ServerControllerFactory() {
 			@Override
-			public ServerController createServerController(ServerModel serverModel) {
+			public ServerController createServerController(org.ops4j.pax.web.service.spi.config.Configuration config) {
 				return new MockServerController() {
 					@Override
-					public void addServlet(ServletModel model) {
+					public void sendBatch(Batch batch) {
 						latch2.countDown();
-						super.addServlet(model);
 					}
 				};
 			}
@@ -160,6 +176,118 @@ public class PaxWebRuntimeIntegrationTest extends AbstractControlledBase2 {
 
 		ref = context.getServiceReference(HttpService.class);
 		assertNull("HttpService should no longer be available", ref);
+	}
+
+	/**
+	 * Register and unregister {@link ServerControllerFactory} to check if {@link HttpService} is available.
+	 * @throws Exception
+	 */
+	@Test
+	public void checkTrackersForHttpServiceFactory() throws Exception {
+		final CountDownLatch latch1 = new CountDownLatch(1);
+		final CountDownLatch latch2 = new CountDownLatch(1);
+		final CountDownLatch latch3 = new CountDownLatch(1);
+
+		ServiceListener sl1 = (event) -> {
+			if (event.getType() == ServiceEvent.REGISTERED) {
+				String[] classes = (String[]) event.getServiceReference().getProperty(Constants.OBJECTCLASS);
+				if (Arrays.asList(classes).contains("org.osgi.service.http.HttpService")) {
+					latch1.countDown();
+				}
+			}
+		};
+		context.addServiceListener(sl1);
+
+		ServiceRegistration<ServerControllerFactory> reg = context.registerService(ServerControllerFactory.class, new ServerControllerFactory() {
+			@Override
+			public ServerController createServerController(org.ops4j.pax.web.service.spi.config.Configuration config) {
+				return new MockServerController() {
+					@Override
+					public void sendBatch(Batch batch) {
+						super.sendBatch(batch);
+						latch2.countDown();
+					}
+				};
+			}
+		}, null);
+
+		assertTrue(latch1.await(5, TimeUnit.SECONDS));
+		context.removeServiceListener(sl1);
+
+		// take 2 different bundles
+		File f1 = new File("target/bundles/empty-bundle1.jar");
+		File f2 = new File("target/bundles/empty-bundle2.jar");
+		Bundle b1 = context.installBundle(f1.toURI().toURL().toString(), new FileInputStream(f1));
+		Bundle b2 = context.installBundle(f2.toURI().toURL().toString(), new FileInputStream(f2));
+		b1.start();
+		b2.start();
+
+		// service tracker for HttpService - it will trigger once. Not for both bundle-scoped HttpService services,
+		// but for single ServiceFactory that produces bundle-scoped HttpService instances
+		ServiceTracker<HttpService, HttpService> tracker = new ServiceTracker<>(context, HttpService.class, new ServiceTrackerCustomizer<HttpService, HttpService>() {
+			@Override
+			public HttpService addingService(ServiceReference<HttpService> reference) {
+				boolean factory = !reference.getProperty(Constants.SERVICE_SCOPE).equals(Constants.SCOPE_SINGLETON);
+				LOG.info("adding service {}{}", reference, factory ? " (factory)" : "");
+				latch3.countDown();
+				return null;
+			}
+
+			@Override
+			public void modifiedService(ServiceReference<HttpService> reference, HttpService service) {
+				LOG.info("modified service {} / {}", reference, service);
+			}
+
+			@Override
+			public void removedService(ServiceReference<HttpService> reference, HttpService service) {
+				LOG.info("removed service {} / {}", reference, service);
+			}
+		});
+		tracker.open();
+
+		// we can retrieve HttpService OSGi services now - it is bundle scoped, so we can
+		// retrieve different services from single reference.
+		ServiceReference<HttpService> ref1 = b1.getBundleContext().getServiceReference(HttpService.class);
+		ServiceReference<HttpService> ref2 = b2.getBundleContext().getServiceReference(HttpService.class);
+		HttpService http1 = b1.getBundleContext().getService(ref1);
+		HttpService http2 = b2.getBundleContext().getService(ref2);
+		assertNotNull(http1);
+		assertNotNull(http2);
+		assertSame(ref1, ref2);
+		assertNotSame(http1, http2);
+
+		b1.stop();
+		b2.stop();
+
+		reg.unregister();
+
+		tracker.close();
+
+		assertTrue(latch3.await(5, TimeUnit.SECONDS));
+		assertThat(latch3.getCount(), equalTo(0L));
+
+		ServiceReference<HttpService> ref = context.getServiceReference(HttpService.class);
+		assertNull("HttpService should no longer be available", ref);
+	}
+
+	/**
+	 * Method called by surefire/failsafe, not to be used by @Test method inside OSGi container (even if native)
+	 * @throws IOException
+	 */
+	public static void prepareBundles() throws IOException {
+		InputStream bundle1 = TinyBundles.bundle()
+				.set("Bundle-ManifestVersion", "2")
+				.set("Bundle-SymbolicName", "b1")
+				.build();
+		new File("target/bundles").mkdirs();
+		IOUtils.copy(bundle1, new FileOutputStream("target/bundles/empty-bundle1.jar"));
+
+		InputStream bundle2 = TinyBundles.bundle()
+				.set("Bundle-ManifestVersion", "2")
+				.set("Bundle-SymbolicName", "b2")
+				.build();
+		new File("target/bundles").mkdirs();
+		IOUtils.copy(bundle2, new FileOutputStream("target/bundles/empty-bundle2.jar"));
 	}
 
 }

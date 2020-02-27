@@ -45,7 +45,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 public class Activator implements BundleActivator {
 
 	private static class PriorityComparator implements Comparator<Object> {
-
 		@Override
 		public int compare(Object element1, Object element2)
 		{
@@ -60,16 +59,15 @@ public class Activator implements BundleActivator {
 			}
 			return comparison;
 		}
-		
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	private ServiceRegistration registration;
 	private ServiceTracker<Handler, Handler> handlerTracker;
 	private BundleContext bundleContext;
 	private ServiceTracker<Connector, Connector> connectorTracker;
 	private ServiceTracker<Customizer, Customizer> customizerTracker;
-	private ServerControllerFactoryImpl serverControllerFactory;
+	private JettyServerControllerFactory serverControllerFactory;
 
 	@Override
 	public void start(BundleContext bundleContext) throws Exception {
@@ -89,16 +87,14 @@ public class Activator implements BundleActivator {
 			}
 		}
 
-
-		Bundle bundle = bundleContext.getBundle();
-		Comparator<?> comparator;
-		try {
-			bundle.loadClass("javax.annotation.Priority");
-			comparator = new PriorityComparator();
-		} catch (ClassNotFoundException e) {
-			comparator = null;
-		}
-		serverControllerFactory = new ServerControllerFactoryImpl(bundle, comparator);
+		// TODO: should be automatic - @Priority or service ranking
+//		Bundle bundle = bundleContext.getBundle();
+//		serverControllerFactory = new JettyServerControllerFactory(bundle.adapt(BundleWiring.class).getClassLoader());
+//		try {
+//			bundle.loadClass("javax.annotation.Priority");
+//			serverControllerFactory.setPriorityComparator(new PriorityComparator());
+//		} catch (ClassNotFoundException ignored) {
+//		}
 
 		handlerTracker = new ServiceTracker<>(bundleContext, Handler.class, new HandlerCustomizer());
 		handlerTracker.open();
@@ -139,7 +135,7 @@ public class Activator implements BundleActivator {
                 registration.unregister();
             }
 			
-			serverControllerFactory.addHandler(handler, ranking == null ? 0 : ranking);
+//			serverControllerFactory.addHandler(handler, ranking == null ? 0 : ranking);
 
             registration = bundleContext.registerService(
                     ServerControllerFactory.class,
@@ -158,11 +154,11 @@ public class Activator implements BundleActivator {
 		public void removedService(ServiceReference<Handler> reference, Handler handler) {
 			// What ever happens: We un-get the service first
 			bundleContext.ungetService(reference);
-			try {
-				serverControllerFactory.removeHandler(handler);
-			} catch (NoClassDefFoundError e) {
-				// we should never go here, but if this happens silently ignore it
-			}
+//			try {
+//				serverControllerFactory.removeHandler(handler);
+//			} catch (NoClassDefFoundError e) {
+//				// we should never go here, but if this happens silently ignore it
+//			}
 		}
 
 	}
@@ -178,7 +174,7 @@ public class Activator implements BundleActivator {
 				registration.unregister();
 			}
 			Integer ranking = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
-			serverControllerFactory.addConnector(connector, ranking == null ? 0 : ranking);
+//			serverControllerFactory.addConnector(connector, ranking == null ? 0 : ranking);
 
 
 			registration = bundleContext.registerService(
@@ -204,7 +200,7 @@ public class Activator implements BundleActivator {
 					registration.unregister();
 				}
 
-				serverControllerFactory.removeConnector(connector);
+//				serverControllerFactory.removeConnector(connector);
 
 
 				registration = bundleContext.registerService(
@@ -224,7 +220,7 @@ public class Activator implements BundleActivator {
 		public Customizer addingService(ServiceReference<Customizer> reference) {
 			Customizer customizer = bundleContext.getService(reference);
 			Integer ranking = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
-			serverControllerFactory.addCustomizer(customizer, ranking == null ? 0 : ranking);
+//			serverControllerFactory.addCustomizer(customizer, ranking == null ? 0 : ranking);
 
 			return customizer;
 		}
@@ -238,13 +234,13 @@ public class Activator implements BundleActivator {
 		public void removedService(ServiceReference<Customizer> reference, Customizer customizer) {
 			// What ever happens: We un-get the service first
 			bundleContext.ungetService(reference);
-			try {
-
-				serverControllerFactory.removeCustomizer(customizer);
-				
-			} catch (NoClassDefFoundError e) {
-				// we should never go here, but if this happens silently ignore it
-			}
+//			try {
+//
+//				serverControllerFactory.removeCustomizer(customizer);
+//
+//			} catch (NoClassDefFoundError e) {
+//				// we should never go here, but if this happens silently ignore it
+//			}
 		}
 
 	}

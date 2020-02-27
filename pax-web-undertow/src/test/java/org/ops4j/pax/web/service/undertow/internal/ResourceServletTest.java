@@ -20,13 +20,13 @@ import java.io.IOException;
 
 import io.undertow.server.handlers.resource.Resource;
 import io.undertow.server.handlers.resource.ResourceManager;
-import org.ops4j.pax.web.service.spi.model.ContextModel;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 
 public class ResourceServletTest {
 
 	private ResourceManager resourceManager;
 	private Context context;
-	private ContextModel contextModel;
+	private OsgiContextModel contextModel;
 
 //	public void setUp() {
 //		context = createMock(Context.class);
@@ -141,7 +141,7 @@ public class ResourceServletTest {
 	private class MockContext extends Context {
 		private ResourceManager manager = null;
 
-		public MockContext(ResourceManager resourceManager, ContextAwarePathHandler path, ContextModel contextModel) {
+		public MockContext(ResourceManager resourceManager, ContextAwarePathHandler path, OsgiContextModel contextModel) {
 			super(null, path, contextModel);
 			this.manager = resourceManager;
 		}

@@ -77,6 +77,7 @@
 							*
 						</Import-Package>
 						<Private-Package>
+							org.apache.felix.utils,
 							org.ops4j.pax.web.service.spi.internal,
 							org.apache.commons.collections4,
 							org.apache.commons.collections4.iterators,
@@ -89,7 +90,11 @@
 							org.ops4j.pax.web.service.spi;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.config;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.model;version="${pax-web.osgi.version}",
-							org.ops4j.pax.web.service.spi.util;version="${pax-web.osgi.version}"
+							org.ops4j.pax.web.service.spi.model.elements;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.util;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.servlet;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.task;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.whiteboard;version="${pax-web.osgi.version}"
 						</Export-Package>
 					</instructions>
 				</configuration>
@@ -130,17 +135,19 @@
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.core</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.cmpn</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.annotation</artifactId>
-			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.utils</artifactId>
 		</dependency>
 
 		<!-- JavaEE -->

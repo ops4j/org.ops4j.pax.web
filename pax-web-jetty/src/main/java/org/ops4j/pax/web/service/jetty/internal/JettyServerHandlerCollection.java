@@ -28,7 +28,7 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.service.spi.model.ContextModel;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,16 +62,16 @@ class JettyServerHandlerCollection extends HandlerCollection {
 			return;
 		}
 
-		final ContextModel matched = serverModel.matchPathToContext(request.getServerName(),target);
+		final OsgiContextModel matched = serverModel.matchPathToContext(request.getServerName(),target);
 		if (matched != null) {
 			// check for nulls and start complaining
-			NullArgumentException.validateNotNull(matched.getHttpContext(),
-					"The http Context of " + matched.getContextName()
-							+ " is null");
+//			NullArgumentException.validateNotNull(matched.getHttpContext(),
+//					"The http Context of " + matched.getContextName()
+//							+ " is null");
 			NullArgumentException.validateNotNull(getServer(),
 					"The server is null!");
 
-			final ContextHandler context = ((JettyServerWrapper) getServer())
+			final ContextHandler context = ((PaxWebJettyServer) getServer())
 					.getContext(matched.getHttpContext());
 
 			try {
@@ -105,9 +105,9 @@ class JettyServerHandlerCollection extends HandlerCollection {
 		}
 	}
 
-	private boolean matchedContextEqualsHandler(ContextModel matched,
+	private boolean matchedContextEqualsHandler(OsgiContextModel matched,
 												Handler handler) {
-		return handler == ((JettyServerWrapper) getServer())
+		return handler == ((PaxWebJettyServer) getServer())
 				.getContext(matched.getHttpContext());
 	}
 
@@ -115,7 +115,7 @@ class JettyServerHandlerCollection extends HandlerCollection {
 	public boolean addBean(Object o) {
 		LOG.debug("Adding bean: {}", o);
 
-		if (!(o instanceof HttpServiceContext)) {
+		if (!(o instanceof PaxWebServletContextHandler)) {
 			LOG.debug("calling supper add bean ...");
 			return super.addBean(o);
 		}
