@@ -185,7 +185,7 @@
 		<dependency.easymock.version>2.3</dependency.easymock.version>
 
 		<dependency.eclipse.jdt.version>3.19.0</dependency.eclipse.jdt.version>
-		<dependency.eclipse.jetty.version>9.4.26.v20200117</dependency.eclipse.jetty.version>
+		<dependency.eclipse.jetty.version>9.4.27.v20200227</dependency.eclipse.jetty.version>
 		<dependency.eclipse.platform.version>3.12.100</dependency.eclipse.platform.version>
 		<dependency.eclipse.tycho.version>3.10.100.v20150529-1857</dependency.eclipse.tycho.version>
 
@@ -245,7 +245,7 @@
 
 		<dependency.jboss.logging.version>3.3.0.Final</dependency.jboss.logging.version>
 		<dependency.jboss.spec.jstl>1.1.4.Final</dependency.jboss.spec.jstl>
-		<dependency.jboss.undertow.version>2.0.15.Final</dependency.jboss.undertow.version>
+		<dependency.jboss.undertow.version>2.0.30.Final</dependency.jboss.undertow.version>
 		<dependency.jboss.weld.version>2.4.5.Final</dependency.jboss.weld.version>
 		<dependency.jboss.xnio.version>3.3.8.Final</dependency.jboss.xnio.version>
 
@@ -289,7 +289,7 @@
 		<dependency.spring.version>5.1.4.RELEASE</dependency.spring.version>
 		<dependency.spring-dm.version>1.2.1</dependency.spring-dm.version>
 		<dependency.taglibs.version>1.2.5</dependency.taglibs.version>
-		<dependency.tomcat.version>9.0.30</dependency.tomcat.version>
+		<dependency.tomcat.version>9.0.33</dependency.tomcat.version>
 		<dependency.xbean.version>4.15</dependency.xbean.version>
 	</properties>
 
@@ -1784,11 +1784,23 @@
 				<groupId>org.apache.tomcat</groupId>
 				<artifactId>tomcat-jsp-api</artifactId>
 				<version>${dependency.tomcat.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.tomcat</groupId>
+						<artifactId>tomcat-servlet-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.tomcat</groupId>
 				<artifactId>tomcat-api</artifactId>
 				<version>${dependency.tomcat.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.tomcat</groupId>
+						<artifactId>tomcat-servlet-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.tomcat</groupId>
