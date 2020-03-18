@@ -17,12 +17,15 @@ package org.ops4j.pax.web.service.spi.task;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.osgi.service.http.HttpContext;
 
@@ -107,6 +110,24 @@ public class Batch {
 	}
 
 	/**
+	 * Add {@link FilterModel} to {@link ServiceModel}
+	 * @param serviceModel
+	 * @param model
+	 */
+	public void addFilterModel(ServiceModel serviceModel, FilterModel model) {
+		operations.add(new FilterModelChange(OpCode.ADD, serviceModel, model));
+	}
+
+	/**
+	 * Add {@link FilterModel} to {@link ServerModel}
+	 * @param serverModel
+	 * @param model
+	 */
+	public void addFilterModel(ServerModel serverModel, FilterModel model) {
+		operations.add(new FilterModelChange(OpCode.ADD, serverModel, model));
+	}
+
+	/**
 	 * Add {@link ServletModel} to {@link ServerModel} but as <em>disabled</em> model, which can't be registered
 	 * because other model is registered for the same URL pattern. Disabled models can later be registered of
 	 * existing model with higher ranking is unregistered.
@@ -116,6 +137,16 @@ public class Batch {
 	 */
 	public void addDisabledServletModel(ServerModel serverModel, ServletModel model) {
 		operations.add(new ServletModelChange(OpCode.ADD, serverModel, model, true));
+	}
+
+	/**
+	 * Add {@link FilterModel} to {@link FilterModel} but as <em>disabled</em> model
+	 *
+	 * @param filterModel
+	 * @param model
+	 */
+	public void addDisabledFilterModel(ServerModel serverModel, FilterModel model) {
+		operations.add(new FilterModelChange(OpCode.ADD, serverModel, model, true));
 	}
 
 	/**
@@ -139,6 +170,36 @@ public class Batch {
 	}
 
 	/**
+	 * Disable {@link FilterModel} from {@link ServerModel}
+	 *
+	 * @param serverModel
+	 * @param model
+	 */
+	public void disableFilterModel(ServerModel serverModel, FilterModel model) {
+		operations.add(new FilterModelChange(OpCode.DISABLE, serverModel, model));
+	}
+
+	/**
+	 * Enable {@link FilterModel}
+	 *
+	 * @param serverModel
+	 * @param model
+	 */
+	public void enableFilterModel(ServerModel serverModel, FilterModel model) {
+		operations.add(new FilterModelChange(OpCode.ENABLE, serverModel, model));
+	}
+
+	/**
+	 * Batch (inside batch...) method that passes full information about all filters that should be enabled
+	 * in a set of contexts. To be handled by Server Controller only
+	 *
+	 * @param contextFilters
+	 */
+	public void updateFilters(Map<String, Set<FilterModel>> contextFilters) {
+		operations.add(new FilterStateChange(contextFilters));
+	}
+
+	/**
 	 * Assuming everything is ok, this method simply invokes all the collected operations which will:<ul>
 	 *     <li>alter global {@link ServerModel} sequentially.</li>
 	 *     <li>alter actual server runtime</li>
@@ -155,4 +216,5 @@ public class Batch {
 	public String toString() {
 		return "Batch{\"" + description + "\"}";
 	}
+
 }

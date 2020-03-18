@@ -16,14 +16,15 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.util.Dictionary;
+import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.service.views.PaxWebContainerView;
-import org.ops4j.pax.web.service.ReferencedWebContainerContext;
 import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
+import org.ops4j.pax.web.service.ReferencedWebContainerContext;
+import org.ops4j.pax.web.service.views.PaxWebContainerView;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
@@ -218,6 +219,53 @@ class HttpServiceProxy implements StoppableHttpService {
 	@Override
 	public void registerResources(String alias, String name, HttpContext context) throws NamespaceException {
 		delegate.registerResources(alias, name, context);
+	}
+
+	// --- methods used to register a Filter
+
+	@Override
+	public void registerFilter(Filter filter, String[] urlPatterns, String[] servletNames,
+			Dictionary<String, String> initParams, HttpContext httpContext) throws ServletException {
+		delegate.registerFilter(filter, urlPatterns, servletNames, initParams, httpContext);
+	}
+
+	@Override
+	public void registerFilter(Filter filter, String filterName, String[] urlPatterns, String[] servletNames,
+			Dictionary<String, String> initParams, Boolean asyncSupported,
+			HttpContext httpContext) throws ServletException {
+		delegate.registerFilter(filter, filterName, urlPatterns, servletNames, initParams,
+				asyncSupported, httpContext);
+	}
+
+	@Override
+	public void registerFilter(Class<? extends Filter> filterClass, String[] urlPatterns, String[] servletNames,
+			Dictionary<String, String> initParams, HttpContext httpContext) throws ServletException {
+		delegate.registerFilter(filterClass, urlPatterns, servletNames, initParams, httpContext);
+	}
+
+	@Override
+	public void registerFilter(Class<? extends Filter> filterClass, String filterName, String[] urlPatterns,
+			String[] servletNames, Dictionary<String, String> initParams, Boolean asyncSupported,
+			HttpContext httpContext) throws ServletException {
+		delegate.registerFilter(filterClass, filterName, urlPatterns, servletNames, initParams,
+				asyncSupported, httpContext);
+	}
+
+	// --- methods used to unregister a Filter
+
+	@Override
+	public void unregisterFilter(Filter filter) {
+		delegate.unregisterFilter(filter);
+	}
+
+	@Override
+	public void unregisterFilter(String filterName) {
+		delegate.unregisterFilter(filterName);
+	}
+
+	@Override
+	public void unregisterFilters(Class<? extends Filter> filterClass) {
+		delegate.unregisterFilters(filterClass);
 	}
 
 //	@Override

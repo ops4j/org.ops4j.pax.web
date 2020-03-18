@@ -108,22 +108,4 @@ public class SecurityConstraintMappingModel extends ElementModel {
 		this.dataConstraint = dataConstraint;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		SecurityConstraintMappingModel that = (SecurityConstraintMappingModel) o;
-		return Objects.equals(constraintName, that.constraintName) /*&&
-				Objects.equals(getContextModel().getContextName(), that.getContextModel().getContextName())*/;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(constraintName/*, getContextModel().getContextName()*/);
-	}
-
 }

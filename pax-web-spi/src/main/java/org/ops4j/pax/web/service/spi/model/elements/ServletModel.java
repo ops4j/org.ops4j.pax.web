@@ -32,6 +32,7 @@ import org.ops4j.pax.web.service.spi.util.Path;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 
 /**
  * Set of parameters describing everything that's required to register a {@link Servlet}.
@@ -85,27 +86,27 @@ public class ServletModel extends ElementModel<Servlet> {
 	public ServletModel(String alias, Servlet servlet, Dictionary<?,?> initParams, Integer loadOnStartup, Boolean asyncSupported) {
 		this(alias, null, null, Utils.toMap(initParams),
 				loadOnStartup, asyncSupported, null,
-				servlet, null);
+				servlet, null, null);
 	}
 
 	public ServletModel(String servletName, String[] urlPatterns, Servlet servlet, Dictionary<String, String> initParams,
 			Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multiPartConfig) {
 		this(null, urlPatterns, servletName, Utils.toMap(initParams),
 				loadOnStartup, asyncSupported, multiPartConfig,
-				servlet, null);
+				servlet, null, null);
 	}
 
 	public ServletModel(String[] urlPatterns, Class<? extends Servlet> servletClass, Dictionary<String, String> initParams,
 			Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multiPartConfig) {
 		this(null, urlPatterns, null, Utils.toMap(initParams),
 				loadOnStartup, asyncSupported, multiPartConfig,
-				null, servletClass);
+				null, servletClass, null);
 	}
 
 	@SuppressWarnings("deprecation")
 	private ServletModel(String alias, String[] urlPatterns, String name, Map<String, String> initParams,
 			Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multipartConfigElement,
-			Servlet servlet, Class<? extends Servlet> servletClass) {
+			Servlet servlet, Class<? extends Servlet> servletClass, ServiceReference<? extends Servlet> reference) {
 		this.alias = alias;
 		this.urlPatterns = Path.normalizePatterns(urlPatterns);
 		this.name = name;
@@ -115,6 +116,7 @@ public class ServletModel extends ElementModel<Servlet> {
 		this.multipartConfigElement = multipartConfigElement;
 		this.servlet = servlet;
 		this.servletClass = servletClass;
+		setElementReference(reference);
 
 		int sources = 0;
 		sources += (servlet != null ? 1 : 0);
@@ -132,6 +134,7 @@ public class ServletModel extends ElementModel<Servlet> {
 		if (this.name == null) {
 			// legacy method first
 			this.name = this.initParams.get(PaxWebConstants.INIT_PARAM_SERVLET_NAME);
+			this.initParams.remove(PaxWebConstants.INIT_PARAM_SERVLET_NAME);
 		}
 		if (this.name == null) {
 			// Whiteboard Specification 140.4 Registering Servlets
@@ -185,6 +188,16 @@ public class ServletModel extends ElementModel<Servlet> {
 	}
 
 	@Override
+	public int compareTo(ElementModel o) {
+		int superCompare = super.compareTo(o);
+		if (superCompare == 0 && o instanceof ServletModel) {
+			// this happens in non-Whiteboard scenario
+			return this.name.compareTo(((ServletModel)o).name);
+		}
+		return superCompare;
+	}
+
+	@Override
 	public String toString() {
 		return "ServletModel{id=" + getId()
 				+ ",name='" + name + "'"
@@ -195,29 +208,6 @@ public class ServletModel extends ElementModel<Servlet> {
 				+ ",contexts=" + getContextModels()
 				+ "}";
 	}
-
-//	/*
-//	 * From web app XSD:
-//	 * The servlet-name element contains the canonical name of the
-//	 * servlet. Each servlet name is unique within the web application.
-//	 */
-//	@Override
-//	public boolean equals(Object o) {
-//		if (this == o) {
-//		    return true;
-//		}
-//		if (o == null || getClass() != o.getClass()) {
-//		    return false;
-//		}
-//		ServletModel that = (ServletModel) o;
-//		return Objects.equals(getName(), that.getName()) &&
-//				Objects.equals(getContextModel().getContextName(), that.getContextModel().getContextName());
-//	}
-//
-//	@Override
-//	public int hashCode() {
-//		return Objects.hash(getName(), getContextModel().getContextName());
-//	}
 
 	public String getAlias() {
 		return alias;
@@ -266,6 +256,7 @@ public class ServletModel extends ElementModel<Servlet> {
 		private MultipartConfigElement multipartConfigElement;
 		private Servlet servlet;
 		private Class<? extends Servlet> servletClass;
+		private ServiceReference<? extends Servlet> reference;
 		private final List<OsgiContextModel> list = new LinkedList<>();
 		private Bundle bundle;
 
@@ -314,6 +305,11 @@ public class ServletModel extends ElementModel<Servlet> {
 			return this;
 		}
 
+		public Builder withServletReference(ServiceReference<? extends Servlet> reference) {
+			this.reference = reference;
+			return this;
+		}
+
 		public Builder withOsgiContextModel(OsgiContextModel osgiContextModel) {
 			this.list.add(osgiContextModel);
 			return this;
@@ -325,7 +321,8 @@ public class ServletModel extends ElementModel<Servlet> {
 		}
 
 		public ServletModel build() {
-			ServletModel model = new ServletModel(alias, urlPatterns, servletName, initParams, loadOnStartup, asyncSupported, multipartConfigElement, servlet, servletClass);
+			ServletModel model = new ServletModel(alias, urlPatterns, servletName, initParams,
+					loadOnStartup, asyncSupported, multipartConfigElement, servlet, servletClass, reference);
 			list.forEach(model::addContextModel);
 			model.setRegisteringBundle(this.bundle);
 			return model;

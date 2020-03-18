@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.FilterChain;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -31,9 +32,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.ServletRequestHttpWrapper;
 import org.eclipse.jetty.server.ServletResponseHttpWrapper;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.ops4j.pax.web.annotations.Review;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiFilterChain;
 import org.osgi.service.http.whiteboard.Preprocessor;
 import org.slf4j.Logger;
@@ -60,6 +64,11 @@ public class PaxWebServletHandler extends ServletHandler {
 
 	private static final Servlet default404Servlet = new Default404Servlet();
 
+	/** Default {@link ServletContext} to use for chains without target servlet (e.g., filters only) */
+	private ServletContext defaultServletContext;
+	/** Default {@link OsgiContextModel} to use for chains without target servlet (e.g., filters only) */
+	private OsgiContextModel defaultOsgiContextModel;
+
 	@Review("Move this comment to server-agnostic code")
 	PaxWebServletHandler() {
 		// we need default servlet for these reasons:
@@ -70,13 +79,29 @@ public class PaxWebServletHandler extends ServletHandler {
 		//    which case we should skip OSGi Whiteboard Preprocessors and handleSecurity() (Specification doesn't
 		//    say anything about it)
 		setEnsureDefaultServlet(true);
+
+		// that's important, we will use the cache but on OSGi-specific terms (different key)
+		setFilterChainsCached(true);
+		// a bit more than default, because we're also caching by context-specific cache key
+		int cacheSize = getMaxFilterChainsCacheSize();
+		setMaxFilterChainsCacheSize(2 * cacheSize);
+
+		setFilters(new PaxWebFilterHolder[0]);
+	}
+
+	public void setDefaultServletContext(ServletContext defaultServletContext) {
+		this.defaultServletContext = defaultServletContext;
+	}
+
+	public void setDefaultOsgiContextModel(OsgiContextModel defaultOsgiContextModel) {
+		this.defaultOsgiContextModel = defaultOsgiContextModel;
 	}
 
 	@Override
 	protected synchronized void doStart() throws Exception {
 		// our version of default, fallback servlet registration
 		if (getServletMapping("/") == null && isEnsureDefaultServlet()) {
-			addServletWithMapping(new PaxWebServletHolder("default", default404Servlet), "/");
+			addServletWithMapping(new PaxWebServletHolder("default", default404Servlet, true), "/");
 			getServletMapping("/").setDefault(true);
 		}
 
@@ -125,18 +150,20 @@ public class PaxWebServletHandler extends ServletHandler {
 			PaxWebServletHolder servletHolder = (PaxWebServletHolder)baseRequest.getUserIdentityScope();
 
 			try {
-				// we always create the chain
+				// we always create the chain, because we have to call handleSecurity()/finishSecurity()
 				FilterChain chain = getFilterChain(baseRequest, target, servletHolder);
 
 				// unwrap any tunnelling of base Servlet request/responses
 				ServletRequest req = request;
-				if (req instanceof ServletRequestHttpWrapper)
+				if (req instanceof ServletRequestHttpWrapper) {
 					req = ((ServletRequestHttpWrapper) req).getRequest();
+				}
 				ServletResponse res = response;
-				if (res instanceof ServletResponseHttpWrapper)
+				if (res instanceof ServletResponseHttpWrapper) {
 					res = ((ServletResponseHttpWrapper) res).getResponse();
+				}
 
-				// Do the filter/handling thang
+				// set some attributes in the request
 				servletHolder.prepare(baseRequest, req, res);
 
 				// chain still can be null if the servlet is default404Servlet
@@ -157,34 +184,118 @@ public class PaxWebServletHandler extends ServletHandler {
 		}
 	}
 
-	@Override
-	protected FilterChain getFilterChain(final Request baseRequest, String pathInContext, ServletHolder servletHolder) {
+//	@Override
+	protected FilterChain getOsgiFilterChain(final Request baseRequest, String pathInContext, ServletHolder servletHolder) {
 		PaxWebServletHolder holder = (PaxWebServletHolder) servletHolder;
 
 		// either super.getFilterChain() will return a chain that should be invoked once (which will provide
 		// proper behavior filter -> filter -> ... -> filter -> servlet)
 		// or we'll get null and servletHolder will be everything we have
-		FilterChain chain = super.getFilterChain(baseRequest, pathInContext, servletHolder);
 
-		if (chain == null && holder.isInstance() && holder.getInstance() == default404Servlet) {
-			// no need to do OSGi Http / Whiteboard stuff. Jetty will just call default404Servlet
-			return null;
-		}
+		// remember - if we want to leverage Jetty's filter caching, we have to wrap every filter
+		// with a wrapper that decides if the filter should actually be called, because of "140.5 Registering Servlet
+		// Filters":
+		//
+		//     Servlet filters are only applied to servlet requests if they are bound to the same Servlet Context
+		//     Helper and the same Http Whiteboard implementation.
+		//
+		// otherwise we'd have to construct the chain on every call.
+		// also, we have to handle case where filters are called in a chain that doesn't have a target servlet at all
+
+		FilterChain chain = getFilterChain(baseRequest, pathInContext, servletHolder);
+
+		// 140.5.1 Servlet Pre-Processors
+		// A Preprocessor is invoked before request dispatching is performed. If multiple pre-processors
+		// are registered they are invoked in the order as described for servlet filters.
+		//
+		// this means that even if there's no matching target servlet or filters, we HAVE to call preprocessors
+		// felix.http doesn't call handleSecurity() if there's no mapped servlet
+		// (see org.apache.felix.http.base.internal.dispatch.Dispatcher#dispatch())
 
 		// We need different FilterChain that will invoke (in this order):
 		// 1. all org.osgi.service.http.whiteboard.Preprocessors
 		// 2. handleSecurity() (on HttpContext or ServletContextHelper)
 		// 3. original chain
-		if (chain == null) { // 3a. (even if there's only a ServletHolder there)
+		if (chain == null && !holder.is404()) {
+			// 3a. (even if there's only a ServletHolder there)
+			// 3b. if the holder is for known 404 servlet, we'll end with null chain, which means ONLY preprocessors
+			//     will be called
 			chain = (request, response) -> holder.handle(baseRequest, request, response);
 		}
-		return new OsgiFilterChain(preprocessors, holder.getServletContext(), holder.getOsgiContextModel(), chain);
+		if (!holder.is404()) {
+			return new OsgiFilterChain(preprocessors, holder.getServletContext(), holder.getOsgiContextModel(), chain);
+		} else {
+			return new OsgiFilterChain(preprocessors, defaultServletContext, defaultOsgiContextModel, chain);
+		}
+	}
+
+	/**
+	 * Overriden, because we want our own cache management, where key includes proper OSGi context
+	 * @param baseRequest
+	 * @param pathInContext
+	 * @param servletHolder
+	 * @return
+	 */
+	@Override
+	protected FilterChain getFilterChain(Request baseRequest, String pathInContext, ServletHolder servletHolder) {
+		PaxWebServletHolder holder = (PaxWebServletHolder) servletHolder;
+
+		OsgiContextModel contextModel = holder.getOsgiContextModel();
+		if (contextModel == null) {
+			contextModel = defaultOsgiContextModel;
+		}
+		String prefix = contextModel.getHttpContext().getContextId();
+		String contextlessKey = pathInContext == null ? holder.getName() : pathInContext;
+		String key = prefix + "|" + contextlessKey;
+
+		int dispatch = FilterMapping.dispatch(baseRequest.getDispatcherType());
+
+		FilterChain chain = _chainCache[dispatch].get(key);
+		if (chain != null)
+			return chain;
+
+		chain = super.getFilterChain(baseRequest, pathInContext, servletHolder);
+
+		// the above chain:
+		// 1) may be null if there are no filters at all
+		// 2) may be not null, but all the filters may have to be removed because they could not match target servlet
+		// 3) created new cache entry which we don't want directly, but it can be useful when accessing
+		//    a servlet through different OSGi context
+
+		if (chain != null) {
+			_chainCache[dispatch].put(key, chain);
+			_chainLRU[dispatch].add(key);
+		}
+
+		return chain;
+	}
+
+	@Override
+	public CachedChain newCachedChain(List<FilterHolder> filters, ServletHolder servletHolder) {
+		// This is where we can narrow the list of filters, which Jetty decided to map to given servlet
+		// we can additionally take OSGi context into account
+		PaxWebServletHolder holder = (PaxWebServletHolder) servletHolder;
+
+		OsgiContextModel targetContext = holder.getOsgiContextModel();
+		if (targetContext == null)
+			targetContext = defaultOsgiContextModel;
+
+		List<FilterHolder> osgiScopedFilters = new LinkedList<>();
+		for (FilterHolder filter : filters) {
+			PaxWebFilterHolder fHolder = (PaxWebFilterHolder) filter;
+			if (fHolder.matches(targetContext)) {
+				osgiScopedFilters.add(filter);
+			}
+		}
+
+		return super.newCachedChain(osgiScopedFilters, servletHolder);
 	}
 
 	private static class Default404Servlet extends HttpServlet {
 		@Override
 		protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+//			Request.getBaseRequest(req).setHandled(true);
 		}
 	}
 

@@ -38,4 +38,18 @@ public interface BatchVisitor {
 	 */
 	void visit(ServletModelChange change);
 
+	/**
+	 * Processing a change related to {@link org.ops4j.pax.web.service.spi.model.elements.FilterModel}. Related
+	 * to registration or unregistration of filter.
+	 * @param change
+	 */
+	void visit(FilterModelChange change);
+
+	/**
+	 * Processing full change of registered filters for all the affected contexts. It's necessary for filters,
+	 * because registration of single filter may require reorganization (ordering) of currently registered filters.
+	 * @param filterStateChange
+	 */
+	void visit(FilterStateChange filterStateChange);
+
 }

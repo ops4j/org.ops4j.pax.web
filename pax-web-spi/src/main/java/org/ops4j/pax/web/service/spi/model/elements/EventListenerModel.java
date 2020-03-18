@@ -37,22 +37,4 @@ public class EventListenerModel extends ElementModel {
 		return eventListener;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-		    return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-		    return false;
-		}
-		EventListenerModel that = (EventListenerModel) o;
-		return Objects.equals(eventListener, that.eventListener) /*&&
-				Objects.equals(getContextModel().getContextName(), that.getContextModel().getContextName())*/;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(eventListener/*, getContextModel().getContextName()*/);
-	}
-
 }

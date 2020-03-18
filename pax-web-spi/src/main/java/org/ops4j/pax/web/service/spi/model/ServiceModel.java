@@ -22,6 +22,8 @@ import java.util.Set;
 
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
+import org.ops4j.pax.web.service.spi.task.FilterModelChange;
+import org.ops4j.pax.web.service.spi.task.FilterStateChange;
 import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
@@ -71,9 +73,7 @@ public class ServiceModel implements BatchVisitor {
 	 */
 	private final Map<String, Map<String, ServletModel>> aliasMapping = new HashMap<>();
 
-	/**
-	 * All servlet models registered by given bundle-scoped {@link HttpService}.
-	 */
+	/** All servlet models registered by given bundle-scoped {@link HttpService}. */
 	private final Set<ServletModel> servletModels = new HashSet<>();
 
 	public ServiceModel(ServerModel serverModel) {
@@ -140,7 +140,27 @@ public class ServiceModel implements BatchVisitor {
 		}
 	}
 
-	//	public synchronized ServletModel getServletModelWithAlias(final String alias) {
+	@Override
+	public void visit(FilterModelChange change) {
+
+	}
+
+	@Override
+	public void visit(FilterStateChange change) {
+		// no op here
+	}
+
+
+
+
+
+
+
+
+
+
+
+//	public synchronized ServletModel getServletModelWithAlias(final String alias) {
 //		NullArgumentException.validateNotEmpty(alias, "Alias");
 //		return aliasMapping.get(alias);
 //	}

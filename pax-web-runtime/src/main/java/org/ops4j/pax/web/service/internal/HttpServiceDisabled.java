@@ -15,22 +15,14 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import java.net.URL;
 import java.util.Dictionary;
-import java.util.EventListener;
-import java.util.List;
-
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 
 import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
 import org.ops4j.pax.web.service.ReferencedWebContainerContext;
-import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
-import org.ops4j.pax.web.service.spi.whiteboard.WebContainerDTO;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
@@ -206,6 +198,51 @@ class HttpServiceDisabled implements StoppableHttpService {
 	@Override
 	public void registerResources(String alias, String name, HttpContext context) throws NamespaceException {
 		LOG.warn("Http service has already been stopped");
+	}
+
+	// --- methods used to register a Filter
+
+	@Override
+	public void registerFilter(Filter filter, String[] urlPatterns, String[] servletNames,
+			Dictionary<String, String> initParams, HttpContext httpContext) throws ServletException {
+		LOG.warn("");
+	}
+
+	@Override
+	public void registerFilter(Filter filter, String filterName, String[] urlPatterns, String[] servletNames,
+			Dictionary<String, String> initParams, Boolean asyncSupported,
+			HttpContext httpContext) throws ServletException {
+		LOG.warn("");
+	}
+
+	@Override
+	public void registerFilter(Class<? extends Filter> filterClass, String[] urlPatterns, String[] servletNames,
+			Dictionary<String, String> initParams, HttpContext httpContext) throws ServletException {
+		LOG.warn("");
+	}
+
+	@Override
+	public void registerFilter(Class<? extends Filter> filterClass, String filterName, String[] urlPatterns,
+			String[] servletNames, Dictionary<String, String> initParams, Boolean asyncSupported,
+			HttpContext httpContext) throws ServletException {
+		LOG.warn("");
+	}
+
+	// --- methods used to unregister a Filter
+
+	@Override
+	public void unregisterFilter(Filter filter) {
+		LOG.warn("");
+	}
+
+	@Override
+	public void unregisterFilter(String filterName) {
+		LOG.warn("");
+	}
+
+	@Override
+	public void unregisterFilters(Class<? extends Filter> filterClass) {
+		LOG.warn("");
 	}
 
 //	/**

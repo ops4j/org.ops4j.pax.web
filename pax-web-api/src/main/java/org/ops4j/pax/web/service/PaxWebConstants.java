@@ -86,6 +86,31 @@ public interface PaxWebConstants {
 	@Deprecated
 	String INIT_PARAM_SERVLET_NAME = "servlet-name";
 
+	/**
+	 * <p>Init parameter that can be used to specify filter name.</p>
+	 *
+	 * <p>{@link WebContainer} provides registration methods, where filter name can be specified directly. Also
+	 * according to Http Service and Whiteboard Service specifications, filter name defaults to FQCN of the servlet.
+	 * </p>
+	 */
+	@Deprecated
+	String INIT_PARAM_FILTER_NAME = "filter-name";
+
+	/**
+	 * Filter init param name for specifying a filter-mapping dispatch behaviour Must be a comma delimited string of:
+	 * <ul>
+	 *     <li>{@link javax.servlet.DispatcherType#REQUEST}</li>
+	 *     <li>{@link javax.servlet.DispatcherType#FORWARD}</li>
+	 *     <li>{@link javax.servlet.DispatcherType#INCLUDE}</li>
+	 *     <li>{@link javax.servlet.DispatcherType#ERROR}</li>
+	 *     <li>{@link javax.servlet.DispatcherType#ASYNC}</li>
+	 * </ul>
+	 * <p>
+	 * values are not case sensitive.
+	 */
+	@Deprecated
+	String FILTER_MAPPING_DISPATCHER = "filter-mapping-dispatcher";
+
 
 
 
@@ -102,25 +127,6 @@ public interface PaxWebConstants {
 	 * Init param name for specifying a context name.
 	 */
 	String CONTEXT_NAME = "webapp.context";
-
-	/**
-	 * Filter init param name for specifying a filter name.
-	 */
-	String FILTER_NAME = "filter-name";
-
-	/**
-	 * Filter init param name for specifying a filter-mapping dispatch behaviour
-	 * Must be a comma delimited string of:
-	 * <ol>
-	 * <li>request</li>
-	 * <li>forward</li>
-	 * <li>include</li>
-	 * <li>error</li>
-	 * </ol>
-	 * <p>
-	 * values are not case sensitive.
-	 */
-	String FILTER_MAPPING_DISPATCHER = "filter-mapping-dispatcher";
 
 	String PROPERTY_HTTP_USE_NIO = "org.osgi.service.http.useNIO";
 
@@ -162,8 +168,6 @@ public interface PaxWebConstants {
 	 */
 	String CONTEXT_PATH_KEY = "Web-ContextPath";
 
-	String FILTER_RANKING = "filterRank";
-	
 
 	String PROPERTY_ENC_MASTERPASSWORD = PID + ".enc.masterpassword";
 	

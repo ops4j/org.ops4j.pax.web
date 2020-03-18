@@ -16,6 +16,7 @@
 package org.ops4j.pax.web.service;
 
 import java.util.Dictionary;
+import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -345,20 +346,108 @@ public interface WebContainer extends HttpService {
 
 	/**
 	 * Unregister a previously registered servlet by its name. If more servlets were registered using the same name,
-	 * all off them will be unregistered.
+	 * all of them will be unregistered.
 	 *
 	 * @param servletName the servlet identified by it's name.
 	 */
 	void unregisterServlet(String servletName);
 
 	/**
-	 * Unregisters all previously registered servlet with the given class. If more servlets were registered with
+	 * Unregisters all previously registered servlets with given class. If more servlets were registered with
 	 * the same class, all of them will be unregistered.
 	 *
 	 * @param servletClass the servlet class to be unregistered
 	 */
 	void unregisterServlets(Class<? extends Servlet> servletClass);
 
+	// --- methods used to register a Filter
+
+	/**
+	 * <p>Registers a filter with filter URL mappings and/or servlet names to map the filter to.</p>
+	 *
+	 * @param filter the filter object to register
+	 * @param urlPatterns url patterns for filter mapping
+	 * @param servletNames servlet names for filter mapping
+	 * @param initParams initialization arguments for the filter or {@code null} if there are none.
+	 * @param httpContext {@link HttpContext} to use for registered filter. If {@code null}, default will be created.
+	 * @throws ServletException
+	 */
+	void registerFilter(Filter filter, String[] urlPatterns, String[] servletNames,
+			Dictionary<String, String> initParams, HttpContext httpContext) throws ServletException;
+
+	/**
+	 * <p>Registers a filter with filter URL mappings, servlet names to map the filter to and async-support flag.</p>
+	 *
+	 * @param filter the filter object to register
+	 * @param filterName
+	 * @param urlPatterns url patterns for filter mapping
+	 * @param servletNames servlet names for filter mapping
+	 * @param initParams initialization arguments for the filter or {@code null} if there are none.
+	 * @param asyncSupported
+	 * @param httpContext {@link HttpContext} to use for registered filter. If {@code null}, default will be created.
+	 * @throws ServletException
+	 */
+	void registerFilter(Filter filter, String filterName, String[] urlPatterns, String[] servletNames,
+			Dictionary<String, String> initParams, Boolean asyncSupported,
+			HttpContext httpContext) throws ServletException;
+
+	/**
+	 * <p>Registers a filter by class name, with filter URL mappings and/or servlet names to map the filter to.</p>
+	 *
+	 * @param filterClass the filter class to register
+	 * @param urlPatterns url patterns for filter mapping
+	 * @param servletNames servlet names for filter mapping
+	 * @param initParams initialization arguments for the filter or {@code null} if there are none.
+	 * @param httpContext {@link HttpContext} to use for registered filter. If {@code null}, default will be created.
+	 * @throws ServletException
+	 */
+	void registerFilter(Class<? extends Filter> filterClass, String[] urlPatterns, String[] servletNames,
+			Dictionary<String, String> initParams, HttpContext httpContext) throws ServletException;
+
+	/**
+	 * <p>Registers a filter by class name, with filter URL mappings, servlet names to map the filter to and
+	 * async-support flag.</p>
+	 *
+	 * @param filterClass the filter class to register
+	 * @param filterName
+	 * @param urlPatterns url patterns for filter mapping
+	 * @param servletNames servlet names for filter mapping
+	 * @param initParams initialization arguments for the filter or {@code null} if there are none.
+	 * @param asyncSupported
+	 * @param httpContext {@link HttpContext} to use for registered filter. If {@code null}, default will be created.
+	 * @throws ServletException
+	 */
+	void registerFilter(Class<? extends Filter> filterClass, String filterName, String[] urlPatterns,
+			String[] servletNames, Dictionary<String, String> initParams, Boolean asyncSupported,
+			HttpContext httpContext) throws ServletException;
+
+	// --- methods used to unregister a Filter
+
+	/**
+	 * Unregisters a previously registered servlet filter.
+	 *
+	 * @param filter the servlet filter to be unregistered
+	 * @throws IllegalArgumentException if the filter is unknown to the http service
+	 */
+	void unregisterFilter(Filter filter);
+
+	/**
+	 * Unregisters a previously registered servlet filter by its name. If more filters were registered using the same
+	 * name, all of them will be unregistered.
+	 *
+	 * @param filterName the servlet filter name to be unregistered
+	 * @throws IllegalArgumentException if the filter is unknown to the http service
+	 */
+	void unregisterFilter(String filterName);
+
+	/**
+	 * Unregisters a previously registered servlet filters with given class. If more filters were registered with
+	 * the same class, all of them will be unregistered.
+	 *
+	 * @param filterClass the servlet filter to be unregistered, found by the Filter class
+	 * @throws IllegalArgumentException if the filter is unknown to the http service
+	 */
+	void unregisterFilters(Class<? extends Filter> filterClass);
 
 
 
@@ -390,87 +479,7 @@ public interface WebContainer extends HttpService {
 //	 */
 //	void unregisterEventListener(EventListener listener);
 //
-//	/**
-//	 * Registers a servlet filter.
-//	 *
-//	 * @param filter       a servlet filter. If null an IllegalArgumentException is
-//	 *                     thrown.
-//	 * @param urlPatterns  url patterns this filter maps to
-//	 * @param servletNames servlet names this filter maps to
-//	 * @param initparams   initialization arguments for the filter or null if there are
-//	 *                     none. This argument is used by the filters FilterConfig
-//	 *                     object.
-//	 * @param httpContext  the http context this filter is for. If null a default http
-//	 *                     context will be used.
-//	 */
-//	void registerFilter(Filter filter, String[] urlPatterns,
-//						String[] servletNames, Dictionary<String, ?> initparams, HttpContext httpContext);
 //
-//
-//	void registerFilter(Filter filter, String[] urlPatterns, String[] servletNames,
-//	Dictionary<String, String> initParams,
-//						Boolean asyncSupported, HttpContext httpContext);
-//
-//	/**
-//	 * Registers a servlet filter.
-//	 *
-//	 * @param filterClass  a servlet filter class. If null an IllegalArgumentException is
-//	 *                     thrown.
-//	 * @param urlPatterns  url patterns this filter maps to
-//	 * @param servletNames servlet names this filter maps to
-//	 * @param initParams   initialization arguments for the filter or null if there are
-//	 *                     none. This argument is used by the filters FilterConfig
-//	 *                     object.
-//	 * @param httpContext  the http context this filter is for. If null a default http
-//	 *                     context will be used.
-//	 */
-//	void registerFilter(Class<? extends Filter> filterClass,
-//						String[] urlPatterns, String[] servletNames,
-//						Dictionary<String, String> initParams, HttpContext httpContext);
-//
-//	/**
-//	 * Registers a servlet filter.
-//	 *
-//	 * @param filterClass    a servlet filter class. If null an IllegalArgumentException is
-//	 *                       thrown.
-//	 * @param urlPatterns    url patterns this filter maps to
-//	 * @param servletNames   servlet names this filter maps to
-//	 * @param initParams     initialization arguments for the filter or null if there are
-//	 *                       none. This argument is used by the filters FilterConfig
-//	 *                       object.
-//	 * @param asyncSupported flag if the filter supports async calls.
-//	 * @param httpContext    the http context this filter is for. If null a default http
-//	 *                       context will be used.
-//	 */
-//	void registerFilter(Class<? extends Filter> filterClass, String[] urlPatterns, String[] servletNames,
-//						Dictionary<String, String> initParams, boolean asyncSupported, HttpContext httpContext);
-//
-//	/**
-//	 * Unregisters a previously registered servlet filter.
-//	 *
-//	 * @param filter the servlet filter to be unregistered
-//	 * @throws IllegalArgumentException if the filter is unknown to the http service (never
-//	 *                                  registered or unregistered before) or the filter is null
-//	 */
-//	void unregisterFilter(Filter filter);
-//
-//	/**
-//	 * Unregisters a previously registered servlet filter.
-//	 *
-//	 * @param filterClass the servlet filter to be unregistered, found by the Filter class
-//	 * @throws IllegalArgumentException if the filter is unknown to the http service (never
-//	 *                                  registered or unregistered before) or the filter is null
-//	 */
-//	void unregisterFilter(Class<? extends Filter> filterClass);
-//
-//	/**
-//	 * Unregisters a previously registered servlet filter.
-//	 *
-//	 * @param filterName the servlet filter name to be unregistered
-//	 * @throws IllegalArgumentException if the filter is unknown to the http service (never
-//	 *                                  registered or unregistered before) or the filter is null
-//	 */
-//	void unregisterFilter(String filterName);
 //
 //	/**
 //	 * Sets context paramaters to be used in the servlet context corresponding

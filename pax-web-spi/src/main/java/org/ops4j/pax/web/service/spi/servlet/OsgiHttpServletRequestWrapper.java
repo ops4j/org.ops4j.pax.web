@@ -52,7 +52,7 @@ public class OsgiHttpServletRequestWrapper extends HttpServletRequestWrapper {
 	private String remoteUser = null;
 
 	/** {@link ServletContext} that'll delegate resource access to proper OSGi context */
-	private final OsgiServletContext context;
+	private final ServletContext context;
 
 	/**
 	 * {@link HttpSession} that ensures session separation between OSGi contexts and proper {@link ServletContext}
@@ -68,7 +68,7 @@ public class OsgiHttpServletRequestWrapper extends HttpServletRequestWrapper {
 	 * @param originalServletContext
 	 * @throws IllegalArgumentException if the request is null
 	 */
-	public OsgiHttpServletRequestWrapper(HttpServletRequest request, OsgiServletContext context) {
+	public OsgiHttpServletRequestWrapper(HttpServletRequest request, ServletContext context) {
 		super(request);
 		this.context = context;
 	}

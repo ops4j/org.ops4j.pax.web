@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
-import org.osgi.framework.Bundle;
 import org.osgi.service.http.whiteboard.Preprocessor;
 
 /**
@@ -46,7 +45,7 @@ public class OsgiFilterChain implements FilterChain {
 	private final List<Preprocessor> preprocessors = new LinkedList<>();
 
 	private final OsgiContextModel contextModel;
-	private final OsgiServletContext servletContext;
+	private final ServletContext servletContext;
 	private final WebContainerContext webContext;
 
 	private final FilterChain chain;
@@ -62,11 +61,11 @@ public class OsgiFilterChain implements FilterChain {
 	 * @param contextModel
 	 * @param chain
 	 */
-	public OsgiFilterChain(List<Preprocessor> preprocessors, OsgiServletContext servletContext,
+	public OsgiFilterChain(List<Preprocessor> preprocessors, ServletContext servletContext,
 			OsgiContextModel contextModel, FilterChain chain) {
 		this.preprocessors.addAll(preprocessors);
 		this.contextModel = contextModel;
-		this.webContext = contextModel.getHttpContext();
+		this.webContext = contextModel == null ? null : contextModel.getHttpContext();
 		this.servletContext = servletContext;
 		this.chain = chain;
 	}
@@ -85,10 +84,10 @@ public class OsgiFilterChain implements FilterChain {
 			// still something left
 			Preprocessor filter = preprocessors.get(index++);
 			filter.doFilter(req, res, this);
-		} else {
-			// nothing left - time to call security
+		} else if (chain != null) {
+			// nothing left - time to call security - if there is a chain to call of course
 			try {
-				if (webContext.handleSecurity(req, res)) {
+				if (webContext == null || webContext.handleSecurity(req, res)) {
 					// continue normally with normal filters and target servlet
 					chain.doFilter(req, res);
 				} else {
@@ -103,7 +102,9 @@ public class OsgiFilterChain implements FilterChain {
 					}
 				}
 			} finally {
-				webContext.finishSecurity(req, res);
+				if (webContext != null) {
+					webContext.finishSecurity(req, res);
+				}
 			}
 		}
 	}

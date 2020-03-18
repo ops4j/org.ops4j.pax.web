@@ -24,8 +24,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 import org.eclipse.jetty.jmx.MBeanContainer;
@@ -72,7 +74,10 @@ import org.ops4j.pax.web.service.spi.model.elements.ResourceModel;
 import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
+import org.ops4j.pax.web.service.spi.task.FilterModelChange;
+import org.ops4j.pax.web.service.spi.task.FilterStateChange;
 import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
@@ -101,7 +106,7 @@ class JettyServerWrapper implements BatchVisitor {
 
 	/** An <em>entry</em> to OSGi runtime to lookup other bundles if needed (to get their ClassLoader) */
 	private final Bundle paxWebJettyBundle;
-	/** Outsidge of OSGi, let's use passed ClassLoader */
+	/** Outside of OSGi, let's use passed ClassLoader */
 	private final ClassLoader classLoader;
 
 	/** Actual instance of {@link org.eclipse.jetty.server.Server} */
@@ -123,6 +128,20 @@ class JettyServerWrapper implements BatchVisitor {
 
 	/** Single map of context path to {@link ServletContextHandler} for fast access */
 	private final Map<String, ServletContextHandler> contextHandlers = new HashMap<>();
+
+	/**
+	 * 1:1 mapping between {@link OsgiContextModel} and {@link org.osgi.service.http.context.ServletContextHelper}'s
+	 * specific {@link javax.servlet.ServletContext}.
+	 */
+	private final Map<OsgiContextModel, OsgiServletContext> osgiServletContexts = new HashMap<>();
+
+	/**
+	 * 1:N mapping between context path and sorted (by ranking rules) set of {@link OsgiContextModel}. This helps
+	 * finding proper {@link org.osgi.service.http.context.ServletContextHelper} (1:1 with {@link OsgiContextModel})
+	 * to use for filters, when the invocation chain doesn't contain target servlet (which otherwise would
+	 * determine the ServletContextHelper to use).
+	 */
+	private final Map<String, TreeSet<OsgiContextModel>> osgiContextModels = new HashMap<>();
 
 	/**
 	 * Global {@link Configuration} passed from pax-web-runtime through
@@ -554,9 +573,10 @@ class JettyServerWrapper implements BatchVisitor {
 		if (change.getKind() == OpCode.ADD) {
 			LOG.info("Creating new Jetty context for {}", model);
 
-			ServletContextHandler sch = new ServletContextHandler(null, model.getContextPath(), true, true);
-			sch.setServletHandler(new PaxWebServletHandler());
 //			ServletContextHandler sch = new PaxWebServletContextHandler(null, model.getContextPath(), true, true);
+			ServletContextHandler sch = new ServletContextHandler(null, model.getContextPath(), true, true);
+			// special, OSGi-aware org.eclipse.jetty.servlet.ServletHandler
+			sch.setServletHandler(new PaxWebServletHandler());
 			// setting "false" here will trigger 302 redirect when browsing to context without trailing "/"
 			sch.setAllowNullPathInfo(false);
 
@@ -567,7 +587,9 @@ class JettyServerWrapper implements BatchVisitor {
 			mainHandler.addHandler(sch);
 			mainHandler.mapContexts();
 
+			// explicit no check for existing mapping under given physical context path
 			contextHandlers.put(model.getContextPath(), sch);
+			osgiContextModels.put(model.getContextPath(), new TreeSet<>());
 
 			try {
 				sch.start();
@@ -579,6 +601,35 @@ class JettyServerWrapper implements BatchVisitor {
 
 	@Override
 	public void visit(OsgiContextModelChange change) {
+		OsgiContextModel osgiModel = change.getOsgiContextModel();
+		String contextPath = osgiModel.getServletContextModel().getContextPath();
+		ServletContextHandler sch = contextHandlers.get(contextPath);
+
+		if (sch == null) {
+			throw new IllegalStateException(osgiModel + " refers to unknown ServletContext for path " + contextPath);
+		}
+
+		if (change.getKind() == OpCode.ADD) {
+			LOG.info("Adding {} to {}", osgiModel, sch);
+
+			// new OsgiContextModelChange was created 1:1 with some HttpContext/ServletContextHelper.
+			// because Whiteboard ServletContext is scoped to single ServletContextHelper and has unique
+			// set of attributes, that's the good place to remember such association.
+			// Later, when servlets will be registered with such OsgiContextModel, they need to get
+			// special facade for ServletContext
+			osgiServletContexts.put(osgiModel, new OsgiServletContext(sch.getServletContext(), osgiModel));
+
+			// a physical context just got a new OSGi context
+			osgiContextModels.get(contextPath).add(osgiModel);
+
+			// there may be a change in what's the "best" (highest ranked) OsgiContextModel for given
+			// ServletContextModel. This will became the "fallback" OsgiContextModel for chains without
+			// target servlet (with filters only)
+			OsgiContextModel highestRankedModel = osgiContextModels.get(contextPath).iterator().next();
+			ServletContext highestRankedContext = osgiServletContexts.get(highestRankedModel);
+			((PaxWebServletHandler)sch.getServletHandler()).setDefaultOsgiContextModel(highestRankedModel);
+			((PaxWebServletHandler)sch.getServletHandler()).setDefaultServletContext(highestRankedContext);
+		}
 	}
 
 	@Override
@@ -604,6 +655,13 @@ class JettyServerWrapper implements BatchVisitor {
 			// be available under:
 			//  - /c1/s1 and associated with ocm2 (due to rank of ocm2)
 			//  - /c2/s1 and associated with ocm4 (due to service.id of ocm4)
+			//
+			//    140.2 The Servlet Context
+			//    [...] In the case of two Servlet Context Helpers with the same path, the service with the highest
+			//    ranking is searched first for a match. In the case of a tie, the lowest service ID is searched first.
+			//
+			// The above is only about locating "matching servlet or resource" when processing requests, not
+			// about initial registration...
 
 			Set<String> done = new HashSet<>();
 
@@ -616,6 +674,11 @@ class JettyServerWrapper implements BatchVisitor {
 					// servlet was already added to given ServletContextHandler
 					// in association with the highest ranked OsgiContextModel (and its supporting
 					// ServletContextHelper or HttpContext)
+					//
+					// there may be other servlets registered only to this OsgiContextModel (which, in this case,
+					// turned out to be "lower ranked" within given ServletContextModel), so at any moment we
+					// may have many "active" OsgiContextModels associated with single physical context path
+					// we remember them in this.osgiContextModels
 					return;
 				}
 
@@ -643,19 +706,20 @@ class JettyServerWrapper implements BatchVisitor {
 				// there should already be a ServletContextHandler
 				ServletContextHandler sch = contextHandlers.get(contextPath);
 
-				// <servlet>
-				PaxWebServletHolder holder = new PaxWebServletHolder(sch, model, osgiContext);
+				// <servlet> - always associated with one of ServletModel's OsgiContextModels
+				OsgiServletContext context = osgiServletContexts.get(osgiContext);
+				PaxWebServletHolder holder = new PaxWebServletHolder(model, osgiContext, context);
 
 				// <servlet-mapping>
 				ServletMapping mapping = new ServletMapping();
 				mapping.setServletName(model.getName());
 				mapping.setPathSpecs(model.getUrlPatterns());
 
-//					if (model instanceof ResourceModel && "default".equalsIgnoreCase(model.getName())) {
-//						// this is a default resource
-				// TODO: "default" means "declared from "org/eclipse/jetty/webapp/webdefault.xml" in jetty-webapp.jar
-//						mapping.setDefault(true);
-//					}
+//				if (model instanceof ResourceModel && "default".equalsIgnoreCase(model.getName())) {
+//					// this is a default resource
+//					// TODO: "default" means "declared from "org/eclipse/jetty/webapp/webdefault.xml" in jetty-webapp.jar
+//					mapping.setDefault(true);
+//				}
 
 				sch.getServletHandler().addServlet(holder);
 				sch.getServletHandler().addServletMapping(mapping);
@@ -663,7 +727,98 @@ class JettyServerWrapper implements BatchVisitor {
 		}
 	}
 
-//	@Override
+	@Override
+	public void visit(FilterModelChange change) {
+		// no op here - will be handled with FilterStateChange
+	}
+
+	@Override
+	public void visit(FilterStateChange change) {
+		// there's no separate add filter, add filter, remove filter, ... set of operations
+		// everything is passed in single "change"
+
+		Map<String, Set<FilterModel>> contextFilters = change.getContextFilters();
+
+		for (Map.Entry<String, Set<FilterModel>> entry : contextFilters.entrySet()) {
+			String contextPath = entry.getKey();
+			Set<FilterModel> filters = entry.getValue();
+
+			LOG.info("Changing filter configuration for context {}", contextPath);
+
+			// there should already be a ServletContextHandler
+			ServletContextHandler sch = contextHandlers.get(contextPath);
+
+			// all the filters should be added to org.ops4j.pax.web.service.jetty.internal.PaxWebServletHandler
+			// of ServletContextHandler - regardles of the "OSGi context" with which the filter was registered.
+			//
+			//    140.5 Registering Servlet Filters
+			//    [...] Servlet filters are only applied to servlet requests if they are bound to the same Servlet
+			//    Context Helper and the same Http Whiteboard implementation.
+			//
+			// this means that we don't know upfront which filters are actually needed during request processing.
+			// Having some servlet registered with ServletContextHelper sch1 and two filters mapped to '/*' URL but
+			// registered with sch1 and sch2, only one filter should be invoked even if both sch1 and sch2 may lead
+			// to single ServletContext (and single unique context path)
+			// however, when there's no servlet in a chain, both filters should be invoked - at least I think so
+			//
+			// neither specification, nor felix.http implementation doesn't handle single filter scenario - such
+			// filter is not called. That's quite logical - ServletContext associated with a filter (through
+			// FilterConfig or request.getServletContext()) should be the same as the one associated with target
+			// servlet. If there's no servlet, we can still have filters associated with different
+			// ServletContextHelpers. If those ServletContextHelpers are associated with single physical
+			// context path, we can't tell which actual ServletContext given filter should use.
+			//
+			// For Pax Web purposes, we'll try to handle such scenario and all the filters in a chain without servlet
+			// will use OsgiServletContext which is "best" (wrt service ranking) for given physical context path
+
+			// the main problem here is that we can have for example 4 existing filters, register one that should
+			// be "inserted" at position 2, unregister another one and change registration properties of yet
+			// another one. It'd be easier to just destroy() them all and init() new ones, but why not do it properly?
+
+			PaxWebFilterHolder[] filterHolders = (PaxWebFilterHolder[]) sch.getServletHandler().getFilters();
+			PaxWebFilterMapping[] filterMappings = (PaxWebFilterMapping[]) sch.getServletHandler().getFilterMappings();
+
+			// TODO: lifecycle
+			PaxWebFilterHolder[] newFilterHolders = new PaxWebFilterHolder[filters.size()];
+			PaxWebFilterMapping[] newFilterMappings = new PaxWebFilterMapping[filters.size()];
+
+			// filters are sorted by ranking. for Jetty, this order should be reflected in the array of FilterMappings
+			// order of FilterHolders is irrelevant
+			int pos = 0;
+			for (FilterModel model : filters) {
+				// <filter> - FilterModel's OsgiContextModels only determine with which servlets such filter may
+				// be associated.
+				//  - when filter is running in a chain ending with some servlet, it'll get this servlet's OsgiContextModel
+				//    and associated HttpContext/ServletContextHelper
+				//  - when filter is running in a chain without target servlet, it'll get the "best" OsgiContextModel
+				//    for given physical context path taken from this.osgiContextModels - this case (filters without
+				//    servlet doesn't seem to be described by Whiteboard Service spec and isn't implemented by felix.http)
+				PaxWebFilterHolder holder = new PaxWebFilterHolder(sch, model);
+				PaxWebFilterMapping mapping = new PaxWebFilterMapping(model);
+
+				newFilterHolders[pos] = holder;
+				newFilterMappings[pos] = mapping;
+			}
+
+			sch.getServletHandler().setFilters(newFilterHolders);
+			sch.getServletHandler().setFilterMappings(newFilterMappings);
+		}
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	//	@Override
 	@Review("the returned Lifecycle object's start is called during registration of servlet.... This is where actual" +
 			"Jetty server starts.")
 	public LifeCycle getContext(final OsgiContextModel model) {
@@ -872,7 +1027,7 @@ class JettyServerWrapper implements BatchVisitor {
 		}
 		// set-up dispatcher
 		int dispatcher = FilterMapping.DEFAULT;
-		for (String d : model.getDispatcher()) {
+		for (String d : model.getDispatcherTypes()) {
 			//dispatcher = FilterMapping.dispatch(baseRequest.getDispatcherType());
 			/*
 			DispatcherType type = DispatcherType.valueOf(d);
@@ -913,7 +1068,7 @@ class JettyServerWrapper implements BatchVisitor {
 		if (model.getInitParams() != null) {
 			holder.setInitParameters(model.getInitParams());
 		}
-		holder.setAsyncSupported(model.isAsyncSupported());
+		holder.setAsyncSupported(model.getAsyncSupported());
 
 		// Jetty does not set the context class loader on adding the filters so
 		// we do that instead

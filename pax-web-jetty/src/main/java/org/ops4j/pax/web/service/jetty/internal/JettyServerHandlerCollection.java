@@ -28,6 +28,7 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.ops4j.lang.NullArgumentException;
+import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.slf4j.Logger;
@@ -41,6 +42,7 @@ import org.slf4j.LoggerFactory;
  * @author Alin Dreghiciu
  * @since 0.2.3, December 22, 2007
  */
+@Review("There should be better collection - that could look forward next context handlers and handle welcome files")
 class JettyServerHandlerCollection extends HandlerCollection {
 
 	private static final Logger LOG = LoggerFactory

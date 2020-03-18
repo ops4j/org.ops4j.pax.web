@@ -1,137 +1,201 @@
-/* Copyright 2007 Alin Dreghiciu.
+/*
+ * Copyright 2007 Alin Dreghiciu.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.
- *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 package org.ops4j.pax.web.service.spi.model.elements;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Dictionary;
-import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.StringTokenizer;
-
+import java.util.UUID;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
+import javax.servlet.FilterConfig;
 
-import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.util.Path;
 import org.ops4j.pax.web.service.spi.util.Utils;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 
-public class FilterModel extends ElementModel {
+/**
+ * Set of parameters describing everything that's required to register a {@link Filter}.
+ */
+public class FilterModel extends ElementModel<Filter> {
 
-	private final Filter filter;
+	/**
+	 * <p>URL patterns as specified by:<ul>
+	 *     <li>Pax Web specific extensions to {@link org.osgi.service.http.HttpService}</li>
+	 *     <li>Whiteboard Service specification</li>
+	 *     <li>Servlet API specification</li>
+	 * </ul></p>
+	 */
 	private final String[] urlPatterns;
+
+	/** Servlet names for filter mapping. {@code <filter-mapping>/<servlet-name>} */
 	private final String[] servletNames;
+
+	/** Regex mapping from OSGi Whiteboard Service specification. Not available in Servet specification. */
+	private final String[] regexMapping;
+
+	/** {@link DispatcherType Dispatcher types} for filter mapping. {@code <filter-mapping>/<dispatcher>} */
+	private String[] dispatcherTypes;
+
+	/** Filter name that defaults to FQCN of the {@link Filter}. {@code <filter>/<filter-name>} */
+	private String name;
+
+	/**
+	 * Init parameters of the filter as specified by {@link FilterConfig#getInitParameterNames()} and
+	 * {@code <filter>/<init-param>} elements in {@code web.xml}.
+	 */
 	private final Map<String, String> initParams;
-	private final String name;
-	private final Set<String> dispatcher = new HashSet<>();
+
+	/** {@code <filter>/<async-supported>} */
+	private final Boolean asyncSupported;
+
+	/**
+	 * Both Http Service and Whiteboard service allows registration of filters using existing instance.
+	 */
+	private final Filter filter;
+
+	/**
+	 * Actual class of the filer, to be instantiated by servlet container itself. {@code <filter>/<filter-class>}.
+	 * This can only be set when registering Pax Web specific
+	 * {@link org.ops4j.pax.web.service.whiteboard.FilterMapping} "direct Whiteboard" service.
+	 */
 	private final Class<? extends Filter> filterClass;
-	private final boolean asyncSupported;
 
-	public FilterModel(final OsgiContextModel contextModel, final Filter filter,
-					   final String[] urlPatterns, final String[] servletNames,
-					   final Dictionary<String, ?> initParameter, final boolean asyncSupported) {
-		this(contextModel, filter, null, urlPatterns, servletNames, initParameter, asyncSupported);
+	public FilterModel(String filterName, String[] urlPatterns, String[] servletNames, String[] regexMapping,
+			Filter filter, Dictionary<String, String> initParams, Boolean asyncSupported) {
+		this(urlPatterns, servletNames, regexMapping, null,
+				filterName, Utils.toMap(initParams), asyncSupported, filter, null);
 	}
 
-	public FilterModel(final OsgiContextModel contextModel, final Class<? extends Filter> filterClass,
-					   final String[] urlPatterns, final String[] servletNames,
-					   final Dictionary<String, ?> initParameter, final boolean asyncSupported) {
-		this(contextModel, null, filterClass, urlPatterns, servletNames, initParameter, asyncSupported);
+	public FilterModel(String filterName, String[] urlPatterns, String[] servletNames, String[] regexMapping,
+			Class<? extends Filter> filterClass, Dictionary<String, String> initParams, Boolean asyncSupported) {
+		this(urlPatterns, servletNames, regexMapping, null,
+				filterName, Utils.toMap(initParams), asyncSupported, null, filterClass);
 	}
 
-	public FilterModel(final OsgiContextModel contextModel, final Filter filter,
-					   final Class<? extends Filter> filterClass,
-					   final String[] urlPatterns, final String[] servletNames,
-					   final Dictionary<String, ?> initParameter,
-					   final boolean asyncSupported) {
-//		super(contextModel);
-		if (filterClass == null) {
-			NullArgumentException.validateNotNull(filter, "Filter");
-		}
-		if (filter == null) {
-			NullArgumentException.validateNotNull(filterClass, "FilterClass");
-		}
+	@SuppressWarnings("deprecation")
+	private FilterModel(String[] urlPatterns, String[] servletNames, String[] regexMapping, String[] dispatcherTypes,
+			String name, Map<String, String> initParams, Boolean asyncSupported, Filter filter,
+			Class<? extends Filter> filterClass) {
 
-		if (urlPatterns == null && servletNames == null) {
-			throw new IllegalArgumentException(
-					"Registered filter must have at least one url pattern or servlet name mapping");
-		}
+		this.urlPatterns = Path.normalizePatterns(urlPatterns);
+		this.servletNames = servletNames != null ? Arrays.copyOf(servletNames, servletNames.length) : null;
+		this.regexMapping = regexMapping != null ? Arrays.copyOf(regexMapping, regexMapping.length) : null;
 
+		this.initParams = initParams == null ? Collections.emptyMap() : initParams;
+		this.asyncSupported = asyncSupported;
 		this.filter = filter;
 		this.filterClass = filterClass;
-		if (urlPatterns != null) {
-			this.urlPatterns = Path.normalizePatterns(Arrays.copyOf(urlPatterns, urlPatterns.length));
-		} else {
-			this.urlPatterns = null;
+
+		int sources = 0;
+		sources += (filter != null ? 1 : 0);
+		sources += (filterClass != null ? 1 : 0);
+		sources += (getElementReference() != null ? 1 : 0);
+		if (sources == 0) {
+			throw new IllegalArgumentException("Filter Model must specify one of: filter instance, filter class"
+					+ " or service reference");
 		}
-		if (servletNames != null) {
-			this.servletNames = Arrays.copyOf(servletNames, servletNames.length);
-		} else {
-			this.servletNames = null;
+		if (sources != 1) {
+			throw new IllegalArgumentException("Filter Model should specify a filter uniquely as instance, class"
+					+ " or service reference");
 		}
 
-		this.initParams = Utils.toMap(initParameter);
-		String idName = initParams.get(PaxWebConstants.FILTER_NAME);
-		if (idName == null) {
-			idName = getId();
+		if (name == null) {
+			// legacy method first
+			name = this.initParams.get(PaxWebConstants.INIT_PARAM_FILTER_NAME);
+			this.initParams.remove(PaxWebConstants.INIT_PARAM_FILTER_NAME);
 		}
-		this.name = idName;
-		initParams.remove(PaxWebConstants.FILTER_NAME);
-		this.asyncSupported = asyncSupported;
-		setupDispatcher();
-	}
+		if (name == null) {
+			// Whiteboard Specification 140.5 Registering Servlet Filters
+			Class<? extends Filter> c = null;
+			if (this.filterClass != null) {
+				c = this.filterClass;
+			} else if (this.filter != null) {
+				c = this.filter.getClass();
+			}
+			if (c != null) {
+				this.name = c.getName();
+			} else if (getElementReference() != null) {
+				Object objectClass = getElementReference().getProperty(Constants.OBJECTCLASS);
+				if (objectClass instanceof String) {
+					this.name = (String) objectClass;
+				} else if (objectClass instanceof String[] && ((String[]) objectClass).length > 0) {
+					this.name = ((String[]) objectClass)[0];
+				}
+			}
+		}
+		if (name == null) {
+			// no idea how to obtain the class, but this should not happen
+			name = UUID.randomUUID().toString();
+		}
+		this.name = name;
 
-	/*
+		sources = 0;
+		sources += (this.servletNames != null && this.servletNames.length > 0 ? 1 : 0);
+		sources += (this.urlPatterns != null && this.urlPatterns.length > 0 ? 1 : 0);
+		sources += (this.regexMapping != null && this.regexMapping.length > 0 ? 1 : 0);
 
-     */
-	private void setupDispatcher() {
-		String dispatches = initParams
-				.get(PaxWebConstants.FILTER_MAPPING_DISPATCHER);
-		initParams.remove(PaxWebConstants.FILTER_MAPPING_DISPATCHER);
-		if (dispatches != null && dispatches.trim().length() > 0) {
-			if (dispatches.indexOf(",") > -1) {
-				// parse
-				StringTokenizer tok = new StringTokenizer(dispatches.trim(),
-						",");
-				while (tok.hasMoreTokens()) {
-					String element = tok.nextToken();
-					if (element != null && element.trim().length() > 0) {
-						dispatcher.add(DispatcherType.valueOf(element.trim().toUpperCase()).name());
-					}
+		if (sources == 0) {
+			throw new IllegalArgumentException("Please specify one of: servlet name mapping, url pattern mapping"
+					+ " or regex mapping");
+		}
+
+		this.dispatcherTypes = dispatcherTypes;
+		if (this.dispatcherTypes == null || this.dispatcherTypes.length == 0) {
+			String dispatchers = this.initParams.remove(PaxWebConstants.FILTER_MAPPING_DISPATCHER);
+			if (dispatchers != null) {
+				String[] types = dispatchers.split("\\s*,\\s*");
+				this.dispatcherTypes = new String[types.length];
+				int i = 0;
+				for (String t : types) {
+					this.dispatcherTypes[i++] = DispatcherType.valueOf(t.toUpperCase()).name();
 				}
 			} else {
-				dispatcher.add(DispatcherType.valueOf(dispatches.trim().toUpperCase()).name());
+				this.dispatcherTypes = new String[] { DispatcherType.REQUEST.name() };
 			}
 		}
 	}
 
-	public Filter getFilter() {
-		return filter;
+	@Override
+	public int compareTo(ElementModel o) {
+		int superCompare = super.compareTo(o);
+		if (superCompare == 0 && o instanceof FilterModel) {
+			// this happens in non-Whiteboard scenario
+			return this.name.compareTo(((FilterModel)o).name);
+		}
+		return superCompare;
 	}
 
-	public Class<? extends Filter> getFilterClass() {
-		return filterClass;
-	}
-
-	public String getName() {
-		return name;
+	@Override
+	public String toString() {
+		return "FilterModel{id=" + getId()
+				+ ",name='" + name + "'"
+				+ (urlPatterns == null ? "" : ",urlPatterns=" + Arrays.toString(urlPatterns))
+				+ (servletNames == null ? "" : ",servletNames=" + Arrays.toString(servletNames))
+				+ (regexMapping == null ? "" : ",regexMapping=" + Arrays.toString(regexMapping))
+				+ (filter == null ? "" : ",filter=" + filter)
+				+ (filterClass == null ? "" : ",servletClass=" + filterClass)
+				+ ",contexts=" + getContextModels()
+				+ "}";
 	}
 
 	public String[] getUrlPatterns() {
@@ -142,50 +206,110 @@ public class FilterModel extends ElementModel {
 		return servletNames;
 	}
 
+	public String[] getRegexMapping() {
+		return regexMapping;
+	}
+
+	public String[] getDispatcherTypes() {
+		return dispatcherTypes;
+	}
+
+	public String getName() {
+		return name;
+	}
+
 	public Map<String, String> getInitParams() {
 		return initParams;
 	}
 
-	public String[] getDispatcher() {
-		return dispatcher.toArray(new String[dispatcher.size()]);
-	}
-
-	public boolean isAsyncSupported() {
+	public Boolean getAsyncSupported() {
 		return asyncSupported;
 	}
 
-	/*
-	 * From web app XSD:
-	 * The logical name of the filter is declare by using filter-nameType. This name is used to map the
-	 * filter. Each filter name is unique within the web application.
-	 */
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-		    return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-		    return false;
-		}
-		FilterModel that = (FilterModel) o;
-		return Objects.equals(name, that.name) /*&&
-				Objects.equals(getContextModel().getContextName(), that.getContextModel().getContextName())*/;
+	public Filter getFilter() {
+		return filter;
 	}
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(name/*, getContextModel().getContextName()*/);
+	public Class<? extends Filter> getFilterClass() {
+		return filterClass;
 	}
 
-	@Override
-	public String toString() {
-		return new StringBuilder().append(this.getClass().getSimpleName())
-				.append("{").append("id=").append(getId())
-				.append(",urlPatterns=").append(Arrays.toString(urlPatterns))
-				.append(",servletNames=").append(Arrays.toString(servletNames))
-				.append(",filter=").append(filter)
-				.append(",filterClass=").append(filterClass)
-				.append(",context=")./*append(getContextModel()).append("}").*/toString();
+	public static class Builder {
+
+		private String[] urlPatterns;
+		private String[] servletNames;
+		private String[] regexMapping;
+		private String[] dispatcherTypes;
+		private String filterName;
+		private Map<String, String> initParams;
+		private Boolean asyncSupported;
+		private Filter filter;
+		private Class<? extends Filter> filterClass;
+		private final List<OsgiContextModel> list = new LinkedList<>();
+		private Bundle bundle;
+
+		public FilterModel.Builder withUrlPatterns(String[] urlPatterns) {
+			this.urlPatterns = urlPatterns;
+			return this;
+		}
+
+		public FilterModel.Builder withServletNames(String[] servletNames) {
+			this.servletNames = servletNames;
+			return this;
+		}
+
+		public FilterModel.Builder withRegexMapping(String[] regexMapping) {
+			this.regexMapping = regexMapping;
+			return this;
+		}
+
+		public FilterModel.Builder withDispatcherTypes(String[] dispatcherTypes) {
+			this.dispatcherTypes = dispatcherTypes;
+			return this;
+		}
+
+		public FilterModel.Builder withFilterName(String filterName) {
+			this.filterName = filterName;
+			return this;
+		}
+
+		public FilterModel.Builder withInitParams(Map<String, String> initParams) {
+			this.initParams = initParams;
+			return this;
+		}
+
+		public FilterModel.Builder withAsyncSupported(Boolean asyncSupported) {
+			this.asyncSupported = asyncSupported;
+			return this;
+		}
+
+		public FilterModel.Builder withFilter(Filter filter) {
+			this.filter = filter;
+			return this;
+		}
+
+		public FilterModel.Builder withFilterClass(Class<? extends Filter> filterClass) {
+			this.filterClass = filterClass;
+			return this;
+		}
+
+		public FilterModel.Builder withOsgiContextModel(OsgiContextModel osgiContextModel) {
+			this.list.add(osgiContextModel);
+			return this;
+		}
+
+		public FilterModel.Builder withRegisteringBundle(Bundle bundle) {
+			this.bundle = bundle;
+			return this;
+		}
+
+		public FilterModel build() {
+			FilterModel model = new FilterModel(urlPatterns, servletNames, regexMapping, dispatcherTypes,
+					filterName, initParams, asyncSupported, filter, filterClass);
+			list.forEach(model::addContextModel);
+			model.setRegisteringBundle(this.bundle);
+			return model;
+		}
 	}
 
 }

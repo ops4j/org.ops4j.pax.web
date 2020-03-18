@@ -30,12 +30,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
+import org.ops4j.pax.web.annotations.PaxWebConfiguration;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.util.SupportUtils;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
-import org.ops4j.pax.web.service.spi.ServerState;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
@@ -297,8 +297,10 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 
 	/**
 	 * <p>This method is the only place which is allowed to modify the config and factory fields.</p>
+	 *
 	 * <p>Here a new {@link org.osgi.framework.ServiceFactory} for {@link HttpService} and {@link WebContainer}
 	 * is registered for {@code org.ops4j.pax.web} PID.</p>
+	 *
 	 * <p>This method may be called in 3 cases:<ul>
 	 *     <li>when {@link org.osgi.service.cm.ConfigurationAdmin} passes changed {@code org.ops4j.pax.web}
 	 *     PID config</li>
@@ -310,6 +312,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	 * @param dictionary
 	 * @param controllerFactory
 	 */
+	@PaxWebConfiguration
 	private void updateController(Dictionary<String, ?> dictionary, ServerControllerFactory controllerFactory) {
 		// We want to make sure the configuration is known before starting the
 		// service tracker, else the configuration could be set after the
@@ -375,6 +378,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	/**
 	 * Actual configuration method called only when {@link ServerControllerFactory} is added.
 	 */
+	@PaxWebConfiguration
 	private void performConfiguration() {
 		try {
 			// chained PropertyResolver to get properties from Config Admin, Bundle Context, Meta Type information
@@ -393,6 +397,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			PropertyResolver resolver = this.configuration != null ? new DictionaryPropertyResolver(this.configuration, tmpResolver) : tmpResolver;
 			allProperties.putAll(Utils.toMap(this.configuration));
 
+			// full configuration with all required properties. That's all that is needed down the stream
 			final Configuration configuration = ConfigurationBuilder.getConfiguration(resolver, allProperties);
 
 			// global, single representation of web server state
@@ -432,20 +437,8 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			};
 			httpServiceFactoryReg = bundleContext.registerService(HTTPSERVICE_REGISTRATION_NAMES, factory, props);
 
-			// TODO: for Jetty it's started even if it isn't!
-			if (serverController.getState() != ServerState.STARTED) {
-				while (serverController.getState() == ServerState.UNCONFIGURED) {
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						LOG.warn("caught interruptexception while waiting for configuration", e);
-						Thread.currentThread().interrupt();
-						return;
-					}
-				}
-				LOG.info("Starting server controller {}", serverController.getClass().getName());
-				serverController.start();
-			}
+			LOG.info("Starting server controller {}", serverController.getClass().getName());
+			serverController.start();
 
 			// ManagedServiceFactory for org.ops4j.pax.web.context factory PID
 			// we need registered WebContainer for this MSF to work

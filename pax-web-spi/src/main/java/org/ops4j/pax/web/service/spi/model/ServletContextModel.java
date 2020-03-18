@@ -23,8 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import javax.servlet.ServletContext;
 
+import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.JspConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.LoginConfigModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
@@ -63,7 +65,9 @@ public final class ServletContextModel extends Identity {
 
 	/**
 	 * 1:N relation to OSGi-specific contexts pointing to this server-specific context. This list may change
-	 * dynamically.
+	 * dynamically, because some existing {@link OsgiContextModel} may have its
+	 * {@link org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_CONTEXT_PATH} changed, switching
+	 * it to entirely different {@link ServletContextModel}.
 	 */
 	private final Set<OsgiContextModel> osgiContextModels = new HashSet<>();
 
@@ -76,15 +80,11 @@ public final class ServletContextModel extends Identity {
 	/** JSP configuration as defined in {@link ServletContext#getJspConfigDescriptor()} */
 	private JspConfigurationModel jspConfiguration;
 
-	/**
-	 * Login configurations as specified by {@code <login-config>} element from {@code web.xml}.
-	 */
+	/** Login configurations as specified by {@code <login-config>} element from {@code web.xml}. */
 	private final List<LoginConfigModel> loginConfigurations = new ArrayList<>();
 
-	/**
-	 * Servlet name mapping enforces servlet name uniqueness within a context.
-	 */
-	private final Map<String, ServletModel> nameMapping = new HashMap<>();
+	/** Servlet name mapping enforces servlet name uniqueness within a context. */
+	private final Map<String, ServletModel> servletNameMapping = new HashMap<>();
 
 	/**
 	 * <p>Http Service specification ({@link org.osgi.service.http.HttpService#registerServlet}) uses the concept
@@ -95,8 +95,8 @@ public final class ServletContextModel extends Identity {
 	 * the server. And we have to take into account virtual hosts (not available in specification) and
 	 * context paths (mentioned only in Whiteboard Service specification).</p>
 	 *
-	 * <p>This map also includes those URL patterns from {@link #servletUrlPatternMapping} which are defined
-	 * as <em>exact</em> mappings in Servlet API specification.</p>
+	 * <p>TODO: This map also includes those URL patterns from {@link #servletUrlPatternMapping} which are defined
+	 *     as <em>exact</em> mappings in Servlet API specification.</p>
 	 */
 	private final Map<String, ServletModel> aliasMapping = new HashMap<>();
 
@@ -108,6 +108,16 @@ public final class ServletContextModel extends Identity {
 	 * <p>This map also includes aliases from {@link #aliasMapping}.</p>
 	 */
 	private final Map<String, ServletModel> servletUrlPatternMapping = new HashMap<>();
+
+	/** Filter name mapping enforces filter name uniqueness within a context. */
+	private final Map<String, FilterModel> filterNameMapping = new HashMap<>();
+
+	/**
+	 * Sorted set (by service rank desc, service id asc, name asc) mapped to <em>any</em> servlet or URL pattern.
+	 * These filters are then mapped to required servlets or URLs at server controller level. Even if most of the
+	 * requests won't involve calling all the filters, the order kept here is preserved.
+	 */
+	private final Set<FilterModel> filterModels = new TreeSet<>();
 
 //	/**
 //	 * Mapping between full registration url patterns and filter model. Full url
@@ -131,15 +141,14 @@ public final class ServletContextModel extends Identity {
 	public void enableServletModel(ServletModel model) {
 		if (model.getAlias() != null) {
 			aliasMapping.put(model.getAlias(), model);
-		} else {
-			Arrays.stream(model.getUrlPatterns()).forEach(p -> servletUrlPatternMapping.put(p, model));
 		}
-		nameMapping.put(model.getName(), model);
+		Arrays.stream(model.getUrlPatterns()).forEach(p -> servletUrlPatternMapping.put(p, model));
+		servletNameMapping.put(model.getName(), model);
 	}
 
 	/**
-	 * <p>Marks given {@link ServletModel} as disabled, which means it should no longer be available on active mappings,
-	 * and should be moved to list of <em>disabled</em> servlets.</p>
+	 * <p>Marks given {@link ServletModel} as disabled, which means it should no longer be available on active
+	 * mappings, and should be moved to list of <em>disabled</em> servlets.</p>
 	 *
 	 * <p>This method just removes the model from {@link ServletContextModel}, but special care should be taken,
 	 * because given {@link ServletModel} has to be remembered as <em>disabled</em> in {@link ServerModel}.</p>
@@ -149,10 +158,9 @@ public final class ServletContextModel extends Identity {
 	public void disableServletModel(ServletModel model) {
 		if (model.getAlias() != null) {
 			aliasMapping.remove(model.getAlias());
-		} else {
-			servletUrlPatternMapping.entrySet().removeIf(e -> e.getValue().equals(model));
 		}
-		nameMapping.remove(model.getName());
+		servletUrlPatternMapping.entrySet().removeIf(e -> e.getValue().equals(model));
+		servletNameMapping.remove(model.getName());
 	}
 
 	public String getContextPath() {
@@ -179,8 +187,12 @@ public final class ServletContextModel extends Identity {
 		this.jspConfiguration = jspConfiguration;
 	}
 
-	public Map<String, ServletModel> getNameMapping() {
-		return nameMapping;
+	public Map<String, ServletModel> getServletNameMapping() {
+		return servletNameMapping;
+	}
+
+	public Map<String, FilterModel> getFilterNameMapping() {
+		return filterNameMapping;
 	}
 
 	public Map<String, ServletModel> getAliasMapping() {

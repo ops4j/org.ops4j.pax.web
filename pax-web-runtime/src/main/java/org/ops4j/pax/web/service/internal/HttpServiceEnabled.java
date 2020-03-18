@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.internal;
 
 import java.util.Dictionary;
 import java.util.concurrent.Executor;
+import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -36,6 +37,7 @@ import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
+import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
@@ -66,8 +68,8 @@ class HttpServiceEnabled implements StoppableHttpService {
 	private final ServerModel serverModel;
 
 	/**
-	 * A view into global {@link ServerModel} from the perspective of bundle-scoped {@link HttpService} or
-	 * bundle-related Whiteboard service registrations.
+	 * A view into global {@link ServerModel} from the perspective of bundle-scoped
+	 * {@link org.osgi.service.http.HttpService} or bundle-related Whiteboard service registrations.
 	 */
 	private final ServiceModel serviceModel;
 
@@ -363,15 +365,19 @@ class HttpServiceEnabled implements StoppableHttpService {
 				serverController.sendBatch(batch);
 
 				// if server runtime has accepted the changes (hoping it'll be in clean state if it didn't), lets
-				// actually apply the changes to global model
+				// actually apply the changes to global model (through ServiceModel)
 				batch.accept(serviceModel);
 
 				return null;
 			});
 
 			servletEvent(ServletEvent.State.DEPLOYED, serviceBundle, model);
+		} catch (ServletException | NamespaceException e) {
+			servletEvent(ServletEvent.State.FAILED, serviceBundle, model);
+			throw e;
 		} catch (Exception e) {
 			servletEvent(ServletEvent.State.FAILED, serviceBundle, model);
+			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
 
@@ -464,6 +470,104 @@ class HttpServiceEnabled implements StoppableHttpService {
 //						throw new NamespaceException("Resource cant be resolved: ", e);
 //					}
 //				}
+	}
+
+	// --- methods used to register a Filter
+
+	@Override
+	public void registerFilter(Filter filter, String[] urlPatterns, String[] servletNames,
+			Dictionary<String, String> initParams, HttpContext httpContext) throws ServletException {
+		registerFilter(filter, null, urlPatterns, servletNames, initParams, null, httpContext);
+	}
+
+	@Override
+	public void registerFilter(Filter filter, String filterName, String[] urlPatterns, String[] servletNames,
+			Dictionary<String, String> initParams, Boolean asyncSupported,
+			HttpContext httpContext) throws ServletException {
+		// final stage of a path where we know about filter registration using an instance
+		FilterModel filterModel = new FilterModel(filterName, urlPatterns, servletNames, null, filter,
+				initParams, asyncSupported);
+
+		doRegisterFilter(httpContext, filterModel);
+	}
+
+	@Override
+	public void registerFilter(Class<? extends Filter> filterClass, String[] urlPatterns, String[] servletNames,
+			Dictionary<String, String> initParams, HttpContext httpContext) throws ServletException {
+		registerFilter(filterClass, null, urlPatterns, servletNames, initParams, null, httpContext);
+	}
+
+	@Override
+	public void registerFilter(Class<? extends Filter> filterClass, String filterName, String[] urlPatterns,
+			String[] servletNames, Dictionary<String, String> initParams, Boolean asyncSupported,
+			HttpContext httpContext) throws ServletException {
+		// final stage of a path where we register filter using a class name
+		FilterModel filterModel = new FilterModel(filterName, urlPatterns, servletNames, null, filterClass,
+				initParams, asyncSupported);
+
+		doRegisterFilter(httpContext, filterModel);
+	}
+
+	/**
+	 * <p>Main, internal method to register given, fully defined {@link FilterModel} within an {@link OsgiContextModel}
+	 * associated with given {@link HttpContext}.</p>
+	 *
+	 * <p>Method checks if the association is possible or creates one if there no {@link OsgiContextModel}
+	 * available yet.</p>
+	 *
+	 * <p>Method runs semi transactionally - in single configuration/registration thread of Pax Web runtime.</p>
+	 *
+	 * @param httpContext
+	 * @param model
+	 * @throws ServletException
+	 */
+	@PaxWebConfiguration
+	private void doRegisterFilter(HttpContext httpContext, FilterModel model) throws ServletException {
+		LOG.debug("Passing registration of {} to configuration thread", model);
+
+		final Batch batch = new Batch("Registration of " + model);
+		final WebContainerContext webContext = unify(httpContext);
+
+		try {
+			serverModel.run(() -> {
+				LOG.info("Registering {}", model);
+
+				OsgiContextModel contextModel
+						= serverModel.getOrCreateOsgiContextModel(webContext, serviceBundle, batch);
+				model.getContextModels().add(contextModel);
+
+				// we don't care about ranking here. Filters will be reorganized on every change anyway
+
+				// batch change of entire model
+				serverModel.addFilterModel(model, batch);
+
+				// batch change of the model scoped to given service
+				batch.addFilterModel(serviceModel, model);
+
+				// send batch to Jetty/Tomcat/Undertow
+				serverController.sendBatch(batch);
+
+				// process the batch if server accepted == apply changes to the model
+				batch.accept(serviceModel);
+
+				return null;
+			});
+		} catch (NamespaceException cantHappenWheAddingFilters) {
+		}
+	}
+
+	// --- methods used to unregister a Filter
+
+	@Override
+	public void unregisterFilter(Filter filter) {
+	}
+
+	@Override
+	public void unregisterFilter(String filterName) {
+	}
+
+	@Override
+	public void unregisterFilters(Class<? extends Filter> filterClass) {
 	}
 
 	// --- private support methods

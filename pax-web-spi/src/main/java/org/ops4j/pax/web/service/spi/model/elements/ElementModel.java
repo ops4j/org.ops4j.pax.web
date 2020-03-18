@@ -52,7 +52,7 @@ import org.osgi.service.http.HttpContext;
  * <em>element</em> when it uses conflicting URL mapping but has lower ranking or service id. Such conflicts lead
  * to trivial {@link org.osgi.service.http.NamespaceException} when using Http Service.</p>
  */
-public abstract class ElementModel<T> extends Identity implements Comparable<ElementModel> {
+public abstract class ElementModel<T> extends Identity implements Comparable<ElementModel<T>> {
 
 	/**
 	 * List of {@link OsgiContextModel osgi contexts} with which given {@link ElementModel} is associated.
@@ -65,6 +65,9 @@ public abstract class ElementModel<T> extends Identity implements Comparable<Ele
 
 	private int serviceRank = 0;
 	private int serviceId = 0;
+
+	/** Timestamp at which given element was created/updated */
+	private long timestamp = 0;
 
 	/**
 	 * When an element is registered as Whiteboard service, we have to keep the reference here, so we can
@@ -129,6 +132,14 @@ public abstract class ElementModel<T> extends Identity implements Comparable<Ele
 		this.serviceId = serviceId;
 	}
 
+	public long getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
+	}
+
 	public ServiceReference<? extends T> getElementReference() {
 		return elementReference;
 	}
@@ -158,14 +169,30 @@ public abstract class ElementModel<T> extends Identity implements Comparable<Ele
 	 * @return
 	 */
 	@Override
-	public final int compareTo(ElementModel o) {
-		int c1 = serviceRank - o.serviceRank;
+	public int compareTo(ElementModel o) {
+		int c1 = this.serviceRank - o.serviceRank;
 		if (c1 != 0) {
 			// higher rank - "lesser" service in terms of order
 			return -c1;
 		}
 		// higher service id - "greater" service in terms of order
-		return serviceId - o.serviceId;
+		return this.serviceId - o.serviceId;
+	}
+
+	// ---+ equals() and hashCode() become final in ElementModel because this class requires strong identity
+	//    |  - they can be kept in "disabled" collections
+	//    |  - checking for uniqueness as before (for example by servlet name within context) is done explicitly
+	//    |    during registration
+	//    | don't make these methods non-final!
+
+	@Override
+	public final boolean equals(Object o) {
+		return super.equals(o);
+	}
+
+	@Override
+	public final int hashCode() {
+		return super.hashCode();
 	}
 
 }

@@ -155,6 +155,12 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		this.ownerBundle = ownerBundle;
 	}
 
+	public OsgiContextModel(WebContainerContext httpContext, Bundle ownerBundle, ServletContextModel context) {
+		this.httpContext = httpContext;
+		this.ownerBundle = ownerBundle;
+		this.servletContextModel = context;
+	}
+
 	public WebContainerContext getHttpContext() {
 		return httpContext;
 	}

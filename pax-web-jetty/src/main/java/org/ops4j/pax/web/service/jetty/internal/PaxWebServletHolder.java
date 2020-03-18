@@ -27,11 +27,11 @@ import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
 
 import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.osgi.framework.ServiceReference;
 
@@ -47,9 +47,19 @@ public class PaxWebServletHolder extends ServletHolder {
 
 	private final ServletModel servletModel;
 	private final OsgiContextModel osgiContextModel;
+
 	private ServiceReference<? extends Servlet> serviceReference;
 
-	private final OsgiServletContext servletContext;
+	/** This {@link ServletContext} is scoped to single {@link org.osgi.service.http.context.ServletContextHelper} */
+	private final OsgiServletContext osgiServletContext;
+	/** This {@link ServletContext} is scoped to particular Whiteboard servlet */
+	private final OsgiScopedServletContext servletContext;
+
+	/**
+	 * Special flag to mark the holder is one with 404 servlet. In such case we don't run OSGi specific
+	 * security methods and we have to tweak filter config to return proper {@link ServletContext}.
+	 */
+	private boolean is404;
 
 	/**
 	 * Constructor to use when wrapping internal {@link Servlet servlets} which won't use OSGi machinery.
@@ -57,26 +67,30 @@ public class PaxWebServletHolder extends ServletHolder {
 	 * @param name
 	 * @param servlet
 	 */
-	PaxWebServletHolder(String name, Servlet servlet) {
+	PaxWebServletHolder(String name, Servlet servlet, boolean is404) {
 		super(name, servlet);
 		servletModel = null;
 		osgiContextModel = null;
+		osgiServletContext = null;
 		servletContext = null;
+		this.is404 = is404;
 	}
 
 	/**
 	 * Initialize {@link PaxWebServletHolder} with {@link ServletModel} and this particular {@link OsgiContextModel}
 	 * in which' context we're adding given servlet to Jetty.
 	 *
-	 * @param sch
 	 * @param servletModel
 	 * @param osgiContextModel
+	 * @param osgiServletContext {@link org.osgi.service.http.context.ServletContextHelper} specific
+	 *        {@link ServletContext}
 	 */
-	public PaxWebServletHolder(ServletContextHandler sch, ServletModel servletModel,
-			OsgiContextModel osgiContextModel) {
+	public PaxWebServletHolder(ServletModel servletModel, OsgiContextModel osgiContextModel,
+			OsgiServletContext osgiServletContext) {
 
 		this.servletModel = servletModel;
 		this.osgiContextModel = osgiContextModel;
+		this.osgiServletContext = osgiServletContext;
 
 		// name that binds a servlet with its mapping
 		setName(servletModel.getName());
@@ -96,20 +110,30 @@ public class PaxWebServletHolder extends ServletHolder {
 		getRegistration().setMultipartConfig(servletModel.getMultipartConfigElement());
 
 		// setup proper delegation for ServletContext
-		servletContext = new OsgiServletContext(sch.getServletContext(),
-				osgiContextModel, servletModel.getRegisteringBundle());
+		servletContext = new OsgiScopedServletContext(this.osgiServletContext, servletModel.getRegisteringBundle());
 	}
 
 	public OsgiContextModel getOsgiContextModel() {
 		return osgiContextModel;
 	}
 
-	public WebContainerContext getWebContainerContext() {
-		return osgiContextModel.getHttpContext();
+	public ServletContext getServletContext() {
+		return servletContext;
 	}
 
-	public OsgiServletContext getServletContext() {
-		return servletContext;
+	public boolean is404() {
+		return is404;
+	}
+
+	@Override
+	public void doStart() throws Exception {
+		if (serviceReference != null) {
+			// Jetty's ServletHolder needs a servlet class to do some verification. We have to provide it if
+			// using ServiceReference<Servlet>. Fortunately this satisfies Jetty.
+			setHeldClass(Servlet.class);
+		}
+
+		super.doStart();
 	}
 
 	/*
@@ -132,8 +156,6 @@ public class PaxWebServletHolder extends ServletHolder {
 	 *  - org.eclipse.jetty.servlet.ServletHolder.initialize(ServletHolder.java:425)
 	 *  - org.eclipse.jetty.servlet.ServletHolder.initServlet(ServletHolder.java:568)
 	 *  - org.eclipse.jetty.servlet.BaseHolder.getInstance(BaseHolder.java:177)
-	 *
-	 * we can change behavior of HttpServletRequest
 	 */
 
 	/**
@@ -202,9 +224,10 @@ public class PaxWebServletHolder extends ServletHolder {
 	 * {@link Servlet} wrapper that uses correct {@link ServletConfig} wrapper that returns correct wrapper
 	 * for {@link javax.servlet.ServletContext}
 	 */
+	@Review("Move to pax-web-spi")
 	private class OsgiInitializedServlet implements Servlet {
 
-		final Servlet servlet;
+		private final Servlet servlet;
 
 		public OsgiInitializedServlet(Servlet servlet) {
 			this.servlet = servlet;
