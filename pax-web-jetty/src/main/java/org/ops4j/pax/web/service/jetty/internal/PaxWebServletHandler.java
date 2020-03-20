@@ -36,8 +36,11 @@ import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.servlet.ServletMapping;
+import org.eclipse.jetty.util.ArrayUtil;
 import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiFilterChain;
 import org.osgi.service.http.whiteboard.Preprocessor;
 import org.slf4j.Logger;
@@ -120,6 +123,57 @@ public class PaxWebServletHandler extends ServletHandler {
 	}
 
 	/**
+	 * Special method that makes it easier later to remove given holder with associated mapping
+	 * @param holder
+	 * @param mapping
+	 */
+	public void addServletWithMapping(PaxWebServletHolder holder, ServletMapping mapping) {
+		holder.setMapping(mapping);
+		addServlet(holder);
+		addServletMapping(mapping);
+	}
+
+	/**
+	 * Removes {@link PaxWebServletHolder} and its associated mapping associated with given {@link ServletModel}
+	 * @param model
+	 */
+	public void removeServletWithMapping(ServletModel model) {
+		ServletHolder[] holders = getServlets();
+		ServletMapping[] mappings = getServletMappings();
+
+		if (holders != null && mappings != null) {
+			// there's only one servlet with given name - ensured by many classes in Pax Web
+			PaxWebServletHolder holder = (PaxWebServletHolder) getServlet(model.getName());
+			if (holder == null) {
+				throw new IllegalArgumentException("Can't unregister servlet named \"" + model.getName() + "\" "
+						+ "from Jetty servlet handler of " + getServletContext().getContextPath() + " context");
+			}
+
+			ServletMapping mapping = holder.getMapping();
+			setServlets(ArrayUtil.removeFromArray(holders, holder));
+			setServletMappings(ArrayUtil.removeFromArray(mappings, mapping));
+
+			// if servlet is still started stop the servlet holder (=servlet.destroy()) as Jetty will not do that
+			LOG.debug("Stopping servlet holder {}", holder);
+			try {
+//				ContextClassLoaderUtils.doWithClassLoader(
+//						context.getClassLoader(), new Callable<Void>() {
+//
+//							@Override
+//							public Void call() throws Exception {
+//								holder.stop();
+//								return null;
+//							}
+//
+//						});
+				holder.stop();
+			} catch (Exception e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
+		}
+	}
+
+	/**
 	 * Jetty {@link ServletHandler#doHandle(String, Request, HttpServletRequest, HttpServletResponse)} is not just
 	 * about calling a servlet. It's about preparation of entire chain of invocation and mapping of incoming request
 	 * into some target servlet + associated filters.
@@ -151,7 +205,7 @@ public class PaxWebServletHandler extends ServletHandler {
 
 			try {
 				// we always create the chain, because we have to call handleSecurity()/finishSecurity()
-				FilterChain chain = getFilterChain(baseRequest, target, servletHolder);
+				FilterChain chain = getOsgiFilterChain(baseRequest, target, servletHolder);
 
 				// unwrap any tunnelling of base Servlet request/responses
 				ServletRequest req = request;
@@ -178,13 +232,10 @@ public class PaxWebServletHandler extends ServletHandler {
 			}
 		} else {
 			// filters are present, so super.doHandle() will call our getFilterChain()
-			// TODO: Jetty ensures mapped filters in the chain, but OSGi CPMN spec requires that these should
-			//       be only the filters registered with the same context...
 			super.doHandle(target, baseRequest, request, response);
 		}
 	}
 
-//	@Override
 	protected FilterChain getOsgiFilterChain(final Request baseRequest, String pathInContext, ServletHolder servletHolder) {
 		PaxWebServletHolder holder = (PaxWebServletHolder) servletHolder;
 
@@ -216,10 +267,9 @@ public class PaxWebServletHandler extends ServletHandler {
 		// 1. all org.osgi.service.http.whiteboard.Preprocessors
 		// 2. handleSecurity() (on HttpContext or ServletContextHelper)
 		// 3. original chain
-		if (chain == null && !holder.is404()) {
-			// 3a. (even if there's only a ServletHolder there)
-			// 3b. if the holder is for known 404 servlet, we'll end with null chain, which means ONLY preprocessors
-			//     will be called
+		if (chain == null) {
+			// 3a. even if there's only a ServletHolder there == null chain
+			// 3b. if the holder is for known 404 servlet, we still need a chain that calls 404 servlet
 			chain = (request, response) -> holder.handle(baseRequest, request, response);
 		}
 		if (!holder.is404()) {

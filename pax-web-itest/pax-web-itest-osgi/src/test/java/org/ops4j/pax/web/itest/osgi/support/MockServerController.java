@@ -51,6 +51,11 @@ public class MockServerController implements ServerController {
 		state = ServerState.STOPPED;
 	}
 
+	@Override
+	public Configuration getConfiguration() {
+		return null;
+	}
+
 	// --- listener related methods
 
 	@Override

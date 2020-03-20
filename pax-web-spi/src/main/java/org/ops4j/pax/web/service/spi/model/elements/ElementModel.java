@@ -56,15 +56,15 @@ public abstract class ElementModel<T> extends Identity implements Comparable<Ele
 
 	/**
 	 * List of {@link OsgiContextModel osgi contexts} with which given {@link ElementModel} is associated.
-	 * This list may be altered using {@link #addContextModel()}, but on first invocation of
+	 * This list may be altered using {@link #addContextModel(OsgiContextModel)} ()}, but on first invocation of
 	 * {@link #getContextModels()}, this list is <em>latched</em>, sorted and can't be modified any further.
 	 */
-	private List<OsgiContextModel> contextModels = new ArrayList<>();
+	protected List<OsgiContextModel> contextModels = new ArrayList<>();
 
 	private volatile boolean closed = false;
 
 	private int serviceRank = 0;
-	private int serviceId = 0;
+	private long serviceId = 0;
 
 	/** Timestamp at which given element was created/updated */
 	private long timestamp = 0;
@@ -124,11 +124,11 @@ public abstract class ElementModel<T> extends Identity implements Comparable<Ele
 		this.serviceRank = serviceRank;
 	}
 
-	public int getServiceId() {
+	public long getServiceId() {
 		return serviceId;
 	}
 
-	public void setServiceId(int serviceId) {
+	public void setServiceId(long serviceId) {
 		this.serviceId = serviceId;
 	}
 
@@ -176,7 +176,13 @@ public abstract class ElementModel<T> extends Identity implements Comparable<Ele
 			return -c1;
 		}
 		// higher service id - "greater" service in terms of order
-		return this.serviceId - o.serviceId;
+		int c2 = (int)(this.serviceId - o.serviceId);
+		if (c2 != 0) {
+			return c2;
+		}
+
+		// we need some fallback here - prefer model created earlier
+		return this.getNumericId() - o.getNumericId();
 	}
 
 	// ---+ equals() and hashCode() become final in ElementModel because this class requires strong identity

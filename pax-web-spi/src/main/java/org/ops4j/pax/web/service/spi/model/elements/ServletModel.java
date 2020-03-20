@@ -60,16 +60,16 @@ public class ServletModel extends ElementModel<Servlet> {
 	 * Init parameters of the servlet as specified by {@link ServletConfig#getInitParameterNames()} and
 	 * {@code <servlet>/<init-param>} elements in {@code web.xml}.
 	 */
-	private final Map<String, String> initParams;
+	private Map<String, String> initParams;
 
 	/** {@code <servlet>/<load-on-startup>} */
-	private final Integer loadOnStartup;
+	private Integer loadOnStartup;
 
 	/** {@code <servlet>/<async-supported>} */
-	private final Boolean asyncSupported;
+	private Boolean asyncSupported;
 
 	/** {@code <servlet>/<multipart-config>} */
-	private final MultipartConfigElement multipartConfigElement;
+	private MultipartConfigElement multipartConfigElement;
 
 	/**
 	 * Both Http Service and Whiteboard service allows registration of servlets using existing instance.
@@ -82,6 +82,23 @@ public class ServletModel extends ElementModel<Servlet> {
 	 * {@link org.ops4j.pax.web.service.whiteboard.ServletMapping} "direct Whiteboard" service.
 	 */
 	private final Class<? extends Servlet> servletClass;
+
+	/**
+	 * Constructor used for servlet unregistration
+	 * @param alias
+	 * @param servletName
+	 * @param servlet
+	 * @param servletClass
+	 * @param reference
+	 */
+	public ServletModel(String alias, String servletName, Servlet servlet,
+			Class<? extends Servlet> servletClass, ServiceReference<? extends Servlet> reference) {
+		this.alias = alias;
+		this.name = servletName;
+		this.servlet = servlet;
+		this.servletClass = servletClass;
+		this.setElementReference(reference);
+	}
 
 	public ServletModel(String alias, Servlet servlet, Dictionary<?,?> initParams, Integer loadOnStartup, Boolean asyncSupported) {
 		this(alias, null, null, Utils.toMap(initParams),
@@ -187,6 +204,7 @@ public class ServletModel extends ElementModel<Servlet> {
 		}
 	}
 
+
 	@Override
 	public int compareTo(ElementModel o) {
 		int superCompare = super.compareTo(o);
@@ -205,7 +223,7 @@ public class ServletModel extends ElementModel<Servlet> {
 				+ (urlPatterns == null ? "" : ",urlPatterns=" + Arrays.toString(urlPatterns))
 				+ (servlet == null ? "" : ",servlet=" + servlet)
 				+ (servletClass == null ? "" : ",servletClass=" + servletClass)
-				+ ",contexts=" + getContextModels()
+				+ ",contexts=" + contextModels
 				+ "}";
 	}
 
@@ -259,6 +277,8 @@ public class ServletModel extends ElementModel<Servlet> {
 		private ServiceReference<? extends Servlet> reference;
 		private final List<OsgiContextModel> list = new LinkedList<>();
 		private Bundle bundle;
+		private int rank;
+		private long serviceId;
 
 		public Builder withAlias(String alias) {
 			this.alias = alias;
@@ -320,11 +340,29 @@ public class ServletModel extends ElementModel<Servlet> {
 			return this;
 		}
 
+		public Builder withServiceRankAndId(int rank, long id) {
+			this.rank = rank;
+			this.serviceId = id;
+			return this;
+		}
+
 		public ServletModel build() {
 			ServletModel model = new ServletModel(alias, urlPatterns, servletName, initParams,
 					loadOnStartup, asyncSupported, multipartConfigElement, servlet, servletClass, reference);
 			list.forEach(model::addContextModel);
 			model.setRegisteringBundle(this.bundle);
+			model.setServiceRank(this.rank);
+			model.setServiceId(this.serviceId);
+			return model;
+		}
+
+		/**
+		 * Special builder finishing method to prepare {@link ServletModel} for removal (with disabled validation)
+		 * @return
+		 */
+		public ServletModel remove() {
+			ServletModel model = new ServletModel(alias, servletName, servlet, servletClass, reference);
+			list.forEach(model::addContextModel);
 			return model;
 		}
 	}

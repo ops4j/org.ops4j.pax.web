@@ -186,6 +186,7 @@ class HttpServiceDisabled implements StoppableHttpService {
 
 	@Override
 	public void unregisterServlet(String servletName) {
+		LOG.warn("");
 	}
 
 	@Override

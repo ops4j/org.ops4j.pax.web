@@ -17,9 +17,11 @@ package org.ops4j.pax.web.service.spi.model;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.FilterModelChange;
@@ -49,16 +51,16 @@ public class ServiceModel implements BatchVisitor {
 	/**
 	 * Full {@link ServerModel}, while this {@link ServiceModel} collects elements registered within the scope
 	 * of single bundle-scoped {@link org.osgi.service.http.HttpService} or (using Whiteboard) single
-	 * {@link org.osgi.framework.BundleContext#registerService(Class, Object, Dictionary) bundle context}.
+	 * {@link org.osgi.framework.BundleContext#registerService bundle context}.
 	 */
 	private final ServerModel serverModel;
 
 	/**
 	 * <p>Servlets registered under alias in given context path (exact URL pattern) by given bundle-scoped
-	 * {@link HttpService}. Group of disjoint slices of
+	 * {@link org.osgi.service.http.HttpService}. Group of disjoint slices of
 	 * {@link org.ops4j.pax.web.service.spi.model.ServletContextModel#aliasMapping} for all context mappings.</p>
 	 *
-	 * <p>Kept to fulfil contract of {@link org.osgi.service.http.HttpService#unregister(String)}, which
+	 * <p>Kept to fulfill the contract of {@link org.osgi.service.http.HttpService#unregister(String)}, which
 	 * doesn't distinguish servlets registered under the same alias into different <em>contexts</em>.</p>
 	 *
 	 * <p>Two different servlets can be registered into two different context paths ({@link ServletContextModel})
@@ -73,14 +75,16 @@ public class ServiceModel implements BatchVisitor {
 	 */
 	private final Map<String, Map<String, ServletModel>> aliasMapping = new HashMap<>();
 
-	/** All servlet models registered by given bundle-scoped {@link HttpService}. */
+	/** All servlet models registered by given bundle-scoped {@link org.osgi.service.http.HttpService}. */
 	private final Set<ServletModel> servletModels = new HashSet<>();
+
+	/** All filter models registered by given bundle-scoped {@link org.osgi.service.http.HttpService}. */
+	private final Set<FilterModel> filterModels = new HashSet<>();
 
 	public ServiceModel(ServerModel serverModel) {
 		this.serverModel = serverModel;
 	}
 
-//	private final Map<String, FilterModel> filterModels;
 //	private final Map<EventListener, EventListenerModel> eventListenerModels;
 //	private final Map<String, ErrorPageModel> errorPageModels;
 //	private final Map<String, WelcomeFileModel> welcomeFileModels;
@@ -91,6 +95,14 @@ public class ServiceModel implements BatchVisitor {
 
 	public Map<String, Map<String, ServletModel>> getAliasMapping() {
 		return aliasMapping;
+	}
+
+	public Set<ServletModel> getServletModels() {
+		return servletModels;
+	}
+
+	public Set<FilterModel> getFilterModels() {
+		return filterModels;
 	}
 
 	@Override
@@ -112,37 +124,63 @@ public class ServiceModel implements BatchVisitor {
 
 	@Override
 	public void visit(ServletModelChange change) {
-		ServletModel model = change.getServletModel();
-
 		if (change.getKind() == OpCode.ADD) {
-			if (change.getServiceModel() == this) {
-				// apply the change at ServiceModel level - whether it's disabled or not
+			ServletModel model = change.getServletModel();
 
-				if (model.getAlias() != null) {
-					// alias mapping - remember model under each alias->contextPath
-					Map<String, ServletModel> contexts = aliasMapping.computeIfAbsent(model.getAlias(), alias -> new HashMap<>());
+			// apply the change at ServiceModel level - whether it's disabled or not
+			if (model.getAlias() != null) {
+				// alias mapping - remember model under each alias->contextPath
+				Map<String, ServletModel> contexts = aliasMapping.computeIfAbsent(model.getAlias(), alias -> new HashMap<>());
 
-					for (OsgiContextModel context : change.getServletModel().getContextModels()) {
-						String contextPath = context.getServletContextModel().getContextPath();
-						contexts.put(contextPath, model);
-					}
+				for (OsgiContextModel context : change.getServletModel().getContextModels()) {
+					String contextPath = context.getServletContextModel().getContextPath();
+					contexts.put(contextPath, model);
 				}
-
-				servletModels.add(model);
-			} else if (change.getServerModel() != null) {
-				// the change should be processed at serverModel level
-				serverModel.visit(change);
 			}
+			servletModels.add(model);
+
+			// and the change should be processed at serverModel level
+			serverModel.visit(change);
+			return;
+		}
+
+		if (change.getKind() == OpCode.DELETE) {
+			List<ServletModel> modelsToRemove = change.getServletModels();
+
+			// apply the change at ServiceModel level - whether it's disabled or not
+			for (ServletModel model : modelsToRemove) {
+				if (model.getAlias() != null) {
+					aliasMapping.remove(model.getAlias());
+				}
+				this.servletModels.remove(model);
+			}
+
+			// the change should be processed at serverModel level as well
+			serverModel.visit(change);
+			return;
 		}
 
 		if (change.getKind() == OpCode.ENABLE || change.getKind() == OpCode.DISABLE) {
+			// only alter server model - enabled or disabled model stays "registered" at serviceModel level
 			serverModel.visit(change);
 		}
 	}
 
 	@Override
 	public void visit(FilterModelChange change) {
+		FilterModel model = change.getFilterModel();
 
+		if (change.getKind() == OpCode.ADD) {
+			// apply the change at ServiceModel level - whether it's disabled or not
+			filterModels.add(model);
+			// the change should also be processed at serverModel level
+			serverModel.visit(change);
+			return;
+		}
+
+		if (change.getKind() == OpCode.ENABLE || change.getKind() == OpCode.DISABLE) {
+			serverModel.visit(change);
+		}
 	}
 
 	@Override

@@ -61,12 +61,14 @@ public class Activator implements BundleActivator {
 		}
 	}
 
-	@SuppressWarnings("rawtypes")
-	private ServiceRegistration registration;
-	private ServiceTracker<Handler, Handler> handlerTracker;
 	private BundleContext bundleContext;
+
+	private ServiceRegistration<ServerControllerFactory> registration;
+
+	private ServiceTracker<Handler, Handler> handlerTracker;
 	private ServiceTracker<Connector, Connector> connectorTracker;
 	private ServiceTracker<Customizer, Customizer> customizerTracker;
+
 	private JettyServerControllerFactory serverControllerFactory;
 
 	@Override
@@ -105,10 +107,8 @@ public class Activator implements BundleActivator {
 		customizerTracker = new ServiceTracker<>(bundleContext, Customizer.class, new CustomizerCustomizer());
 		customizerTracker.open();
 
-		registration = bundleContext.registerService(
-				ServerControllerFactory.class,
-				serverControllerFactory,
-				new Hashtable<>());
+		registration = bundleContext.registerService(ServerControllerFactory.class,
+				serverControllerFactory, new Hashtable<>());
 	}
 
 	@Override

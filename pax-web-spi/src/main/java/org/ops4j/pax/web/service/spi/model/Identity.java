@@ -28,14 +28,20 @@ public abstract class Identity {
 
 	private static final AtomicInteger next = new AtomicInteger(0);
 
+	private final int _id;
 	private final String id;
 
 	protected Identity() {
-		id = (this.getClass().getSimpleName() + "-" + next.incrementAndGet()).intern();
+		_id = next.incrementAndGet();
+		id = (this.getClass().getSimpleName() + "-" + _id).intern();
 	}
 
 	public String getId() {
 		return id;
+	}
+
+	protected int getNumericId() {
+		return _id;
 	}
 
 	@Override

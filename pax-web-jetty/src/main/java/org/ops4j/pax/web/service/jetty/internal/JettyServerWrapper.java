@@ -512,14 +512,14 @@ class JettyServerWrapper implements BatchVisitor {
 
 		server.stop();
 
+		// PAXWEB-1127 - stop qtp after stopping server, as we've started it manually
+		LOG.info("Stopping Jetty thread pool {}", qtp);
+		qtp.stop();
+
 		Handler[] childHandlers = server.getChildHandlers();
 		for (Handler handler : childHandlers) {
 			handler.stop();
 		}
-
-		// PAXWEB-1127 - stop qtp after stopping server, as we've started it manually
-		LOG.info("Stopping Jetty thread pool {}", qtp);
-		qtp.stop();
 
 		LOG.info("Destroying Jetty server {}", server);
 		server.destroy();
@@ -635,7 +635,7 @@ class JettyServerWrapper implements BatchVisitor {
 	@Override
 	public void visit(ServletModelChange change) {
 		ServletModel model = change.getServletModel();
-		if (change.getKind() == OpCode.ADD) {
+		if ((change.getKind() == OpCode.ADD && !change.isDisabled()) || change.getKind() == OpCode.ENABLE) {
 			LOG.info("Adding servlet {}", model);
 
 			// the same servlet should be added to all relevant contexts
@@ -721,8 +721,24 @@ class JettyServerWrapper implements BatchVisitor {
 //					mapping.setDefault(true);
 //				}
 
-				sch.getServletHandler().addServlet(holder);
-				sch.getServletHandler().addServletMapping(mapping);
+				((PaxWebServletHandler) sch.getServletHandler()).addServletWithMapping(holder, mapping);
+			});
+			return;
+		}
+
+		if (change.getKind() == OpCode.DISABLE || change.getKind() == OpCode.DELETE) {
+			LOG.info("Removing servlet {}", model);
+
+			// proper order ensures that (assuming above scenario), for /c1, ocm2 will be chosen and ocm1 skipped
+			model.getServletContextModels().forEach(servletContext -> {
+				String contextPath = servletContext.getContextPath();
+
+				LOG.debug("Removing servlet {} from {}", model.getName(), servletContext);
+
+				// there should already be a ServletContextHandler
+				ServletContextHandler sch = contextHandlers.get(contextPath);
+
+				((PaxWebServletHandler) sch.getServletHandler()).removeServletWithMapping(model);
 			});
 		}
 	}
@@ -778,7 +794,7 @@ class JettyServerWrapper implements BatchVisitor {
 			PaxWebFilterHolder[] filterHolders = (PaxWebFilterHolder[]) sch.getServletHandler().getFilters();
 			PaxWebFilterMapping[] filterMappings = (PaxWebFilterMapping[]) sch.getServletHandler().getFilterMappings();
 
-			// TODO: lifecycle
+			// TODO: lifecycle - destroy existing filters which are not present in new array
 			PaxWebFilterHolder[] newFilterHolders = new PaxWebFilterHolder[filters.size()];
 			PaxWebFilterMapping[] newFilterMappings = new PaxWebFilterMapping[filters.size()];
 

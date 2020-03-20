@@ -15,23 +15,12 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import java.net.InetSocketAddress;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.eclipse.jetty.server.ConnectionFactory;
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConfiguration.Customizer;
-import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.SslConnectionFactory;
-import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
@@ -43,7 +32,6 @@ import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
-import org.ops4j.pax.web.service.spi.model.elements.LoginConfigModel;
 import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
@@ -140,6 +128,11 @@ class JettyServerController implements ServerController {
 
 		state = ServerState.STOPPED;
 		notifyListeners(ServerEvent.STOPPED);
+	}
+
+	@Override
+	public Configuration getConfiguration() {
+		return configuration;
 	}
 
 	// --- listener related methods

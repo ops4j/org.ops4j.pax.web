@@ -15,23 +15,30 @@
  */
 package org.ops4j.pax.web.service.spi.task;
 
+import java.util.List;
+
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 
 public class ServletModelChange extends Change {
 
-	private final ServerModel serverModel;
-	private final ServiceModel serviceModel;
-	private final ServletModel servletModel;
-	private final boolean disabled;
+	private ServerModel serverModel;
+	private ServiceModel serviceModel;
+	private ServletModel servletModel;
+	private List<ServletModel> servletModels;
+	private boolean disabled;
 
 	public ServletModelChange(OpCode op, ServiceModel serviceModel, ServletModel servletModel) {
 		super(op);
-		this.serverModel = null;
 		this.serviceModel = serviceModel;
 		this.servletModel = servletModel;
-		this.disabled = false;
+	}
+
+	public ServletModelChange(OpCode op, ServiceModel serviceModel, List<ServletModel> servletModels) {
+		super(op);
+		this.serviceModel = serviceModel;
+		this.servletModels = servletModels;
 	}
 
 	public ServletModelChange(OpCode op, ServerModel serverModel, ServletModel servletModel) {
@@ -41,7 +48,6 @@ public class ServletModelChange extends Change {
 	public ServletModelChange(OpCode op, ServerModel serverModel, ServletModel servletModel, boolean disabled) {
 		super(op);
 		this.serverModel = serverModel;
-		this.serviceModel = null;
 		this.servletModel = servletModel;
 		this.disabled = disabled;
 	}
@@ -56,6 +62,10 @@ public class ServletModelChange extends Change {
 
 	public ServletModel getServletModel() {
 		return servletModel;
+	}
+
+	public List<ServletModel> getServletModels() {
+		return servletModels;
 	}
 
 	public boolean isDisabled() {

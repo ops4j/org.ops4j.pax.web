@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,6 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.ReferencedWebContainerContext;
 import org.ops4j.pax.web.service.WebContainerContext;
@@ -43,6 +43,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.task.Batch;
+import org.ops4j.pax.web.service.spi.task.FilterModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
 import org.ops4j.pax.web.service.whiteboard.ContextMapping;
@@ -220,16 +221,6 @@ public class ServerModel {
 
 	// TODO: Should listeners, security constraints, login configs, welcome files, security roles, error pages and
 	//       and mime types be checked for unique registration?
-
-	/**
-	 * Each registration (through {@link org.osgi.service.http.HttpService} and Whiteboard), after passing initial
-	 * tests, is turned into an {@link ElementModel} and put into this global map. That's how we later revert the
-	 * registrations (unregister elements) with full conflict detection - like preventing unregistration of servlet
-	 * by alias, when given alias was registered by different bundle-scoped {@link org.osgi.service.http.HttpService}
-	 *  - we can precisely warn about existing registration details.
-	 */
-	@Review("To check if it's needed")
-	private final Map<ElementModel, RegistrationInfo> registrations = new HashMap<>();
 
 	public ServerModel(Executor executor) {
 		this.executor = executor;
@@ -445,7 +436,13 @@ public class ServerModel {
 			return existing;
 		}
 
-		OsgiContextModel osgiContextModel = createNewContextModel(context, serviceBundle, batch);
+		// if there was no existing association, this means no Whiteboard service for ServletContextHelper
+		// (or Pax-Web specific org.ops4j.pax.web.service.whiteboard.ContextMapping derived service) was registered
+		// before. This means we use default path
+		// TODO: When Whiteboard and HttpService (pax-web-runtime) start, there have to be default HttpContext
+		//       and ServletContextWrapper associated to default model
+		OsgiContextModel osgiContextModel = createNewContextModel(context, PaxWebConstants.DEFAULT_CONTEXT_PATH,
+				serviceBundle, batch);
 
 		batch.associateOsgiContextModel(context, osgiContextModel);
 
@@ -482,11 +479,11 @@ public class ServerModel {
 	 * @param batch
 	 * @return
 	 */
-	private OsgiContextModel createNewContextModel(WebContainerContext webContext, Bundle serviceBundle, Batch batch) {
+	public OsgiContextModel createNewContextModel(WebContainerContext webContext, String contextPath,
+			Bundle serviceBundle, Batch batch) {
 		OsgiContextModel osgiContextModel = new OsgiContextModel(webContext, serviceBundle);
 
-		ServletContextModel scModel
-				= getOrCreateServletContextModel(PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
+		ServletContextModel scModel = getOrCreateServletContextModel(contextPath, batch);
 		scModel.getOsgiContextModels().add(osgiContextModel);
 
 		osgiContextModel.setServletContextModel(scModel);
@@ -502,7 +499,7 @@ public class ServerModel {
 		// name however will be taken from WebContainerContext
 		registration.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, webContext.getContextId());
 		registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, webContext.getContextId());
-		registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, PaxWebConstants.DEFAULT_CONTEXT_PATH);
+		registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
 
 		// artificial service registration properties
 		registration.put(Constants.SERVICE_ID, 0);
@@ -604,6 +601,7 @@ public class ServerModel {
 
 			// no alias or name conflicts, add to batch
 			batch.addServletModel(this, model);
+			return;
 		}
 
 		// URL mapping checking: 140.4 "Registering Servlets". Service ranking/id check in case of conflict
@@ -611,8 +609,8 @@ public class ServerModel {
 		//
 		// model can be registered in each of target contexts. But sometimes given context already
 		// contains a model for given pattern. We should still register such model, but as "disabled", which
-		// means that if existing mapping (with higher ranking) is unregistered, the "waiting" mapping
-		// "jumps in" as next active one
+		// means that if existing mapping (with higher ranking) is unregistered (or somehow disabled), the
+		// "waiting" mapping "jumps in" as next active one
 		// however, if new model wins, the "losing" models should be disabled in all contexts - even if new
 		// model has "beaten" the old one only in few of them. This scenario is not well specified in Whiteboard
 		// Service specification.
@@ -621,7 +619,7 @@ public class ServerModel {
 		// translated into "/alias/*" URL Mapping
 
 		boolean register = true;
-		Set<ServletModel> modelsToDisable = new LinkedHashSet<>();
+		Set<ServletModel> modelsToDisable = new HashSet<>();
 
 		for (ServletContextModel sc : targetServletContexts) {
 			for (String pattern : model.getUrlPatterns()) {
@@ -629,7 +627,7 @@ public class ServerModel {
 				if (existing != null) {
 					// service.ranking/service.id checking
 					if (model.compareTo(existing) < 0) {
-						// we won, but still can lose, because it's not the only pattern
+						// we won, but still can lose, because it's not the only pattern (or the only context)
 						modelsToDisable.add(existing);
 					} else {
 						LOG.warn("{} can't be registered now in context {} under \"{}\" mapping. Conflict with {}.",
@@ -654,7 +652,7 @@ public class ServerModel {
 		}
 
 		// if there were existing URL mappings used by this ServletModel, new model "won" with all of them
-		// (didn't lose with any of them), so we have to unregister existing models according to
+		// (didn't lose with any of them), so we have to unregister (deactivate) existing models according to
 		// Whiteboard specification.
 		//
 		//    140.4 Registering Servlets
@@ -689,59 +687,144 @@ public class ServerModel {
 			return;
 		}
 
-		// nothing prevents us from registering new model for all required contexts
-		batch.addServletModel(this, model);
+		if (modelsToDisable.isEmpty()) {
+			// nothing prevents us from registering new model for all required contexts, because when nothing
+			// was disabled, nothing should be enabled except the new model
+			batch.addServletModel(this, model);
+			return;
+		}
 
-		if (!modelsToDisable.isEmpty()) {
-			// some model have beed disabled. It means that maybe some currently disabled models
-			// may be enabled?
+		// some models have beed disabled. It means that maybe some currently disabled models
+		// may be enabled? Our new model is also potentially disabled
+		Set<ServletModel> pendingDisabledModels = new TreeSet<>(disabledServletModels);
+		// our model could stay disabled, because some better-ranked, currently disabled model may be ranked
+		// higher than our new model
+		pendingDisabledModels.add(model);
 
-			// it's quite problematic part. we're in the method that only prepares the batch, but doesn't
-			// yet change the model itself. Before the model is affected, we'll send this batch to
-			// target runtime, so we already need to perform a refresh here, so controller sees the changes.
+		// it's quite problematic part. we're in the method that only prepares the batch, but doesn't
+		// yet change the model itself. Before the model is affected, we'll send this batch to
+		// target runtime, so we already need to perform more complex calculation here, using temporary collections
 
-			// each disabled servletModel may be a reason to enable other models. Currently disabled
-			// ServerModel may be enabled ONLY if it can be enabled in ALL associated contexts
-			for (ServletModel disabled : disabledServletModels) {
-				Set<ServletContextModel> contextsOfCurrentlyDisabledServlet = disabled.getServletContextModels();
+		// each disabled servletModel may be a reason to enable other models. Currently disabled
+		// ServerModels (+ our new model) may be enabled ONLY if they can be enabled in ALL associated contexts
 
-				boolean canBeEnabled = !hasAnyNameConflict(disabled.getName(), model.getName(), disabled, model);
-				if (!canBeEnabled) {
-					continue;
-				}
+		reEnableServletModels(pendingDisabledModels, modelsToDisable, model, batch);
 
-				// we can try enabling a ServletModel if neither of its mappings is used
-				// by other enabled models or by model that's being registered
-				for (ServletContextModel sc : contextsOfCurrentlyDisabledServlet) {
-					for (String pattern : disabled.getUrlPatterns()) {
-						ServletModel existingMapping = sc.getServletUrlPatternMapping().get(pattern);
-						if (existingMapping != null && !modelsToDisable.contains(existingMapping)) {
+		if (pendingDisabledModels.contains(model)) {
+			batch.addDisabledServletModel(this, model);
+		}
+	}
+
+	/**
+	 * Adds relevant batch operations related to unregistration of {@link ServletModel servlet models}. Due to
+	 * complexity of specification, simple "unregistration of servlet" may cause registration of one or more
+	 * existing, but currently disabled servlets.
+	 *
+	 * @param models servlet models to unregister from all associated {@link OsgiContextModel}
+	 * @param batch
+	 * @throws IllegalStateException if anything goes wrong
+	 */
+	public void removeServletModels(List<ServletModel> models, Batch batch) {
+		// each of the servlet models that we're unregistering may be registered in many servlet contexts
+		// and in each of them, such unregistration may lead to reactivation of some existing, currently disabled
+		// servlet models - similar situation to servlet registration that may disable some models which in turn
+		// may lead to re-registration of other models
+
+		// this is straightforward
+		for (ServletModel model : models) {
+			batch.removeServletModels(this, model);
+		}
+
+		// review all disabled servlet models (in ranking order) to verify if they can be enabled again
+		reEnableServletModels(new TreeSet<>(disabledServletModels), new HashSet<>(models), null, batch);
+	}
+
+	/**
+	 * Fragile method used both during servlet registration and unregistration. Starting with set of currently
+	 * disabled models, this methods prepares batch operations that may enable some of them.
+	 *
+	 * @param pendingDisabledModels currently disabled models - this collection will be altered by this method
+	 * @param modelsToDisable newly disabled models
+	 * @param modelToEnable newly added model (could be {@code null})
+	 * @param batch
+	 */
+	private void reEnableServletModels(Set<ServletModel> pendingDisabledModels, Set<ServletModel> modelsToDisable,
+			ServletModel modelToEnable, Batch batch) {
+		// for each servlet context we'll check name and URL conflicts - using existing name/url
+		// mapping, which will include newly enabled model too
+		// this map is temporary copy of all such mappings from all servlet contexts. The main key is context path
+		Map<String, Map<String, ServletModel>> pendingEnabledByName = new HashMap<>();
+		Map<String, Map<String, ServletModel>> pendingEnabledByPattern = new HashMap<>();
+
+		// reviewed using TreeSet, i.e., by proper ranking
+		for (Iterator<ServletModel> iterator = pendingDisabledModels.iterator(); iterator.hasNext(); ) {
+			ServletModel disabled = iterator.next();
+
+			Set<ServletContextModel> contextsOfDisabledModel = disabled.getServletContextModels();
+			boolean canBeEnabled = true;
+
+			// check for conflicts in all its contexts
+			for (ServletContextModel sc : contextsOfDisabledModel) {
+				String cp = sc.getContextPath();
+
+				pendingEnabledByName.computeIfAbsent(sc.getContextPath(), p -> new HashMap<>())
+						.putAll(sc.getServletNameMapping());
+				pendingEnabledByPattern.computeIfAbsent(sc.getContextPath(), p -> new HashMap<>())
+						.putAll(sc.getServletUrlPatternMapping());
+
+				// name conflict check
+				for (Map.Entry<String, ServletModel> enabled : pendingEnabledByName.get(cp).entrySet()) {
+					if (modelsToDisable.contains(enabled.getValue())) {
+						continue;
+					}
+					boolean nameConflict = hasAnyNameConflict(disabled.getName(), enabled.getKey(),
+							disabled, enabled.getValue());
+					if (nameConflict) {
+						// name conflict with existing, enabled model. BUT currently disabled model may have
+						// higher ranking...
+						if (disabled.compareTo(enabled.getValue()) < 0) {
+
+						} else {
 							canBeEnabled = false;
-							break;
-						}
-						for (String p : model.getUrlPatterns()) {
-							// this check doesn't handle conflict like "/xx/*" vs. "/xx/yy/*", only full match
-							// is checked
-							if (p.equals(pattern)) {
-								canBeEnabled = false;
-								break;
-							}
-						}
-						if (!canBeEnabled) {
-							break;
 						}
 					}
 					if (!canBeEnabled) {
 						break;
 					}
 				}
+				if (!canBeEnabled) {
+					break;
+				}
 
-				// disabled model can be enabled again
-				if (canBeEnabled) {
+				// URL mapping check
+				for (String pattern : disabled.getUrlPatterns()) {
+					ServletModel existingMapping = pendingEnabledByPattern.get(cp).get(pattern);
+					if (existingMapping != null && !modelsToDisable.contains(existingMapping)) {
+						canBeEnabled = false;
+						break;
+					}
+				}
+				if (!canBeEnabled) {
+					break;
+				}
+			} // end of check for the conflicts in all the contexts
+
+			// disabled model can be enabled again - in all its contexts
+			if (canBeEnabled) {
+				for (ServletContextModel sc : contextsOfDisabledModel) {
+					pendingEnabledByName.get(sc.getContextPath()).put(disabled.getName(), disabled);
+					Arrays.stream(disabled.getUrlPatterns())
+							.forEach(p -> pendingEnabledByPattern.get(sc.getContextPath()).put(p, disabled));
+				}
+				if (modelToEnable != null && modelToEnable.equals(disabled)) {
+					batch.addServletModel(this, disabled);
+				} else {
 					batch.enableServletModel(this, disabled);
 				}
-			} // end of "for" loop that checks disabled models that can potentially be enabled
-		} // end of "if" that checks what can be done after some models were disabled
+				// remove - to check if our new model should later be added as disabled
+				iterator.remove();
+			}
+		} // end of "for" loop that checks all currently disabled models that can potentially be enabled
 	}
 
 	/**
@@ -943,10 +1026,10 @@ public class ServerModel {
 	}
 
 	public void visit(ServletModelChange change) {
-		ServletModel model = change.getServletModel();
-
 		switch (change.getKind()) {
 			case ADD: {
+				ServletModel model = change.getServletModel();
+
 				// add new ServletModel to all target contexts
 				Set<ServletContextModel> servletContexts = model.getServletContextModels();
 				servletContexts.forEach(sc -> {
@@ -967,11 +1050,33 @@ public class ServerModel {
 				}
 				break;
 			}
-			case MODIFY:
+			case DELETE: {
+				List<ServletModel> models = change.getServletModels();
+
+				models.forEach(model -> {
+					if (model.getServlet() != null) {
+						servlets.remove(model.getServlet(), model);
+					}
+					// could be among disabled ones
+					boolean wasDisabled = disabledServletModels.remove(model);
+
+					if (!wasDisabled) {
+						// remove ServletModel from all target contexts. disabled model was not available there
+						Set<ServletContextModel> servletContexts = model.getServletContextModels();
+						servletContexts.forEach(sc -> {
+							// use special, 2-arg version of map.remove()
+							sc.getServletNameMapping().remove(model.getName(), model);
+							if (model.getAlias() != null) {
+								sc.getAliasMapping().remove(model.getAlias(), model);
+							}
+							Arrays.stream(model.getUrlPatterns()).forEach(p -> sc.getServletUrlPatternMapping().remove(p, model));
+						});
+					}
+				});
 				break;
-			case DELETE:
-				break;
+			}
 			case ENABLE: {
+				ServletModel model = change.getServletModel();
 				// enable a servlet in all associated contexts
 				Set<ServletContextModel> servletContexts = model.getServletContextModels();
 				servletContexts.forEach(sc -> sc.enableServletModel(model));
@@ -979,17 +1084,62 @@ public class ServerModel {
 				break;
 			}
 			case DISABLE: {
+				ServletModel model = change.getServletModel();
 				disabledServletModels.add(model);
 				// disable a servlet in all associated contexts
 				Set<ServletContextModel> servletContexts = model.getServletContextModels();
 				servletContexts.forEach(sc -> sc.disableServletModel(model));
 				break;
 			}
+			case MODIFY:
 			default:
 				break;
 		}
 	}
 
+	public void visit(FilterModelChange change) {
+		FilterModel model = change.getFilterModel();
+
+		switch (change.getKind()) {
+			case ADD: {
+				// add new FilterModel to all target contexts
+				Set<ServletContextModel> servletContexts = model.getServletContextModels();
+				servletContexts.forEach(sc -> {
+					if (change.isDisabled()) {
+						// registered initially as disabled
+						disabledFilterModels.add(model);
+					} else {
+						sc.getFilterNameMapping().put(model.getName(), model);
+					}
+				});
+
+				if (model.getFilter() != null) {
+					filters.put(model.getFilter(), model);
+				}
+				break;
+			}
+			case MODIFY:
+				break;
+			case DELETE:
+				break;
+			case ENABLE: {
+				// enable a filter in all associated contexts
+				Set<ServletContextModel> servletContexts = model.getServletContextModels();
+				servletContexts.forEach(sc -> sc.enableFilterModel(model));
+				disabledFilterModels.remove(model);
+				break;
+			}
+			case DISABLE: {
+				disabledFilterModels.add(model);
+				// disable a filter in all associated contexts
+				Set<ServletContextModel> servletContexts = model.getServletContextModels();
+				servletContexts.forEach(sc -> sc.disableFilterModel(model));
+				break;
+			}
+			default:
+				break;
+		}
+	}
 
 
 

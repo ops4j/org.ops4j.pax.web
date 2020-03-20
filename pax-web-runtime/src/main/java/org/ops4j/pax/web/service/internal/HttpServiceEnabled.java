@@ -17,14 +17,21 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import org.ops4j.pax.web.annotations.PaxWebConfiguration;
+import org.ops4j.pax.web.annotations.PaxWebTesting;
 import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
 import org.ops4j.pax.web.service.ReferencedWebContainerContext;
@@ -42,6 +49,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
@@ -54,7 +62,7 @@ import org.slf4j.LoggerFactory;
  * (for which the Http Service is scoped) is stopped, all available references to this service will switch
  * to <em>disabled</em> {@link org.osgi.service.http.HttpService} delegate to prevent further registration.</p>
  */
-class HttpServiceEnabled implements StoppableHttpService {
+public class HttpServiceEnabled implements StoppableHttpService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(HttpServiceEnabled.class);
 //	private static final String PAX_WEB_JSP_SERVLET = "jsp";
@@ -92,7 +100,7 @@ class HttpServiceEnabled implements StoppableHttpService {
 	}
 
 	@Review("Should ServerListener be registered here?")
-	HttpServiceEnabled(final Bundle bundle, final ServerController srvController,
+	public HttpServiceEnabled(final Bundle bundle, final ServerController srvController,
 			final ServerModel serverModel, final ServletListener eventDispatcher, final Configuration configuration) {
 		LOG.debug("Creating active Http Service for: {}", bundle);
 
@@ -151,6 +159,11 @@ class HttpServiceEnabled implements StoppableHttpService {
 //					}
 //				};
 //				this.serverController.addListener(serverListener);
+	}
+
+	@PaxWebTesting
+	public ServiceModel getServiceModel() {
+		return serviceModel;
 	}
 
 	// --- StoppableHttpService
@@ -241,7 +254,7 @@ class HttpServiceEnabled implements StoppableHttpService {
 		// final stage of a path where we know about servlet registration using "alias" (the "old" HttpService way)
 		ServletModel servletModel = new ServletModel(alias, servlet, initParams, loadOnStartup, asyncSupported);
 
-		doRegisterServlet(httpContext, servletModel);
+		doRegisterServlet(Collections.singletonList(httpContext), servletModel);
 	}
 
 	@Override
@@ -313,7 +326,7 @@ class HttpServiceEnabled implements StoppableHttpService {
 	 */
 	private void doRegisterServletWithoutAlias(HttpContext httpContext, ServletModel model) throws ServletException {
 		try {
-			doRegisterServlet(httpContext, model);
+			doRegisterServlet(Collections.singletonList(httpContext), model);
 		} catch (NamespaceException ignored) {
 		}
 	}
@@ -327,39 +340,39 @@ class HttpServiceEnabled implements StoppableHttpService {
 	 *
 	 * <p>Method runs semi transactionally - in single configuration/registration thread of Pax Web runtime.</p>
 	 *
-	 * @param httpContext
+	 * @param httpContexts
 	 * @param model
 	 * @throws ServletException
 	 * @throws NamespaceException
 	 */
 	@PaxWebConfiguration
-	private void doRegisterServlet(HttpContext httpContext, ServletModel model) throws ServletException, NamespaceException {
-		LOG.debug("Passing registration of {} to configuration thread", model);
+	public void doRegisterServlet(Collection<HttpContext> httpContexts, ServletModel model) throws ServletException, NamespaceException {
+		LOG.debug("Passing registration of {} in {} to configuration thread", model, httpContexts);
+
+		model.setRegisteringBundle(this.serviceBundle);
 
 		final Batch batch = new Batch("Registration of " + model);
-		final WebContainerContext webContext = unify(httpContext);
+		final Collection<WebContainerContext> webContexts
+				= httpContexts.stream().map(this::unify).collect(Collectors.toList());
 
 		try {
 			servletEvent(ServletEvent.State.DEPLOYING, serviceBundle, model);
 
 			serverModel.run(() -> {
-				LOG.info("Registering {}", model);
-
 				// each servlet registered through Http Service should be registered within single osgiContext
-				// identified by given httpContext
-				// TODO: for Whiteboard Service it's not that easy and OsgiContextModels are added during whiteboard
-				//       service tracking
-				OsgiContextModel contextModel
-						= serverModel.getOrCreateOsgiContextModel(webContext, serviceBundle, batch);
-				model.getContextModels().add(contextModel);
+				// identified by given httpContext. For Whiteboard Service there may be many such OSGi contexts
+				webContexts.forEach(wc -> {
+					OsgiContextModel contextModel
+							= serverModel.getOrCreateOsgiContextModel(wc, serviceBundle, batch);
+					model.addContextModel(contextModel);
+				});
+
+				LOG.info("Registering {}", model);
 
 				// if the above association was correct, validate servlet model through server model
 				// adding servlet model may lead to unregistration of some other, lower-ranked models, so batch
 				// may have some unregistration changes added
 				serverModel.addServletModel(model, batch);
-
-				// just batch adding ServletModel to ServiceModel - no more validation needed
-				batch.addServletModel(serviceModel, model);
 
 				// only if validation was fine, pass the batch to ServerController, where the batch may fail again
 				serverController.sendBatch(batch);
@@ -381,63 +394,137 @@ class HttpServiceEnabled implements StoppableHttpService {
 		}
 	}
 
-	// --- methods used to unregister a Servlet
+	// --- methods used to unregister a Servlet - again
 
 	@Override
 	public void unregister(final String alias) {
-//				synchronized (lock) {
-//					LOG.debug("Unregister servlet (alias={})", alias);
-//					final ServletModel model = serviceModel.getServletModelWithAlias(alias);
-//					if (model == null) {
-//						throw new IllegalArgumentException("Alias [" + alias
-//								+ "] was never registered");
-//					}
-//					servletEvent(ServletEvent.State.UNDEPLOYING, serviceBundle, model);
-//					serverModel.removeServletModel(model);
-//					serviceModel.removeServletModel(model);
-//					serverController.removeServlet(model);
-//					servletEvent(ServletEvent.State.UNDEPLOYED, serviceBundle, model);
-//				}
+		ServletModel model = new ServletModel(alias, null, null, null, (ServiceReference<? extends Servlet>)null);
+		doUnregisterServlet(model);
 	}
 
 	@Override
 	public void unregisterServlet(final Servlet servlet) {
-//				final ServletModel model = serviceModel.removeServlet(servlet);
-//				if (model != null) {
-//					LOG.debug("Unregister servlet (servlet={})", servlet);
-//					servletEvent(ServletEvent.State.UNDEPLOYING, serviceBundle, model);
-//					serverModel.removeServletModel(model);
-//					serverController.removeServlet(model);
-//					servletEvent(ServletEvent.State.UNDEPLOYED, serviceBundle, model);
-//				}
+		ServletModel model = new ServletModel(null, null, servlet, null, null);
+		doUnregisterServlet(model);
 	}
 
 	@Override
 	public void unregisterServlet(String servletName) {
-//				ServletModel model = serviceModel.removeServlet(servletName);
-//				if (model != null) {
-//					LOG.debug("Unregister servlet (name={})", servletName);
-//					servletEvent(ServletEvent.State.UNDEPLOYING, serviceBundle, model);
-//					serverModel.removeServletModel(model);
-//					serverController.removeServlet(model);
-//					servletEvent(ServletEvent.State.UNDEPLOYED, serviceBundle, model);
-//				}
+		ServletModel model = new ServletModel(null, servletName, null, null, null);
+		doUnregisterServlet(model);
 	}
 
 	@Override
 	public void unregisterServlets(Class<? extends Servlet> servletClass) {
-//				final Set<ServletModel> models = serviceModel.removeServletClass(servletClass);
-//				if (models != null) {
-//					for (ServletModel model : models) {
-//						if (model != null) {
-//							LOG.debug("Unregister servlet (servlet={})", model.getServlet());
-//							servletEvent(ServletEvent.State.UNDEPLOYING, serviceBundle, model);
-//							serverModel.removeServletModel(model);
-//							serverController.removeServlet(model);
-//							servletEvent(ServletEvent.State.UNDEPLOYED, serviceBundle, model);
-//						}
-//					}serverModel.
-//				}
+		ServletModel model = new ServletModel(null, null, null, servletClass, null);
+		doUnregisterServlet(model);
+	}
+
+	/**
+	 * Actual servlet unregistration methods - for all supported criteria
+	 * @param model
+	 */
+	public void doUnregisterServlet(ServletModel model) {
+		final String alias = model.getAlias();
+		final String name = model.getName();
+		final Servlet instance = model.getServlet();
+		final Class<? extends Servlet> servletClass = model.getServletClass();
+		final ServiceReference<? extends Servlet> reference = model.getElementReference();
+
+		try {
+			servletEvent(ServletEvent.State.UNDEPLOYING, serviceBundle, model);
+
+			serverModel.run(() -> {
+				List<ServletModel> toUnregister = new LinkedList<>();
+
+				if (alias != null) {
+					LOG.info("Unregistering servlet by alias \"{}\"", alias);
+
+					ServletModel found = null;
+					for (ServletModel existing : serviceModel.getServletModels()) {
+						if (existing.getAlias().equals(alias)) {
+							found = existing;
+							break;
+						}
+					}
+					Map<String, ServletModel> mapping = serviceModel.getAliasMapping().get(alias);
+					if (mapping == null || mapping.size() == 0 || found == null) {
+						throw new IllegalArgumentException("Alias \"" + alias + "\" was never registered by "
+								+ serviceBundle);
+					}
+					toUnregister.add(found);
+				} else if (name != null) {
+					LOG.info("Unregistering servlet by name \"{}\"", name);
+
+					for (ServletModel existing : serviceModel.getServletModels()) {
+						if (existing.getName().equals(name)) {
+							toUnregister.add(existing);
+						}
+					}
+					if (toUnregister.size() == 0) {
+						throw new IllegalArgumentException("Servlet named \"" + name + "\" was never registered by "
+								+ serviceBundle);
+					}
+				} else if (servletClass != null) {
+					LOG.info("Unregistering servlet by class \"{}\"", servletClass);
+
+					for (ServletModel existing : serviceModel.getServletModels()) {
+						if (existing.getServletClass().equals(servletClass)) {
+							toUnregister.add(existing);
+						}
+					}
+					if (toUnregister.size() == 0) {
+						throw new IllegalArgumentException("Servlet of \"" + servletClass.getName() + "\" class "
+								+ "was never registered by " + serviceBundle);
+					}
+				} else if (instance != null) {
+					LOG.info("Unregistering servlet \"{}\"", instance);
+
+					for (ServletModel existing : serviceModel.getServletModels()) {
+						if (existing.getServlet().equals(instance)) {
+							toUnregister.add(existing);
+						}
+					}
+					if (toUnregister.size() == 0) {
+						throw new IllegalArgumentException("Servlet \"" + instance + "\" "
+								+ "was never registered by " + serviceBundle);
+					}
+				} else if (reference != null) {
+					LOG.info("Unregistering servlet by refernce \"{}\"", reference);
+
+					for (ServletModel existing : serviceModel.getServletModels()) {
+						if (existing.getElementReference().equals(reference)) {
+							toUnregister.add(existing);
+						}
+					}
+					if (toUnregister.size() == 0) {
+						throw new IllegalArgumentException("Servlet with reference \"" + reference + "\" "
+								+ "was never registered by " + serviceBundle);
+					}
+				} else {
+					throw new IllegalArgumentException("No criteria for servlet unregistration specified");
+				}
+
+				final Batch batch = new Batch("Unregistration of servlets: " + toUnregister);
+
+				// removing servlet model may lead to reactivation of some previously disabled models
+				serverModel.removeServletModels(toUnregister, batch);
+
+				// only if validation was fine, pass the batch to ServerController, where the batch may fail again
+				serverController.sendBatch(batch);
+
+				// if server runtime has accepted the changes (hoping it'll be in clean state if it didn't), lets
+				// actually apply the changes to global model (through ServiceModel)
+				batch.accept(serviceModel);
+
+				return null;
+			});
+
+			servletEvent(ServletEvent.State.UNDEPLOYED, serviceBundle, model);
+		} catch (Exception e) {
+			servletEvent(ServletEvent.State.FAILED, serviceBundle, model);
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	// --- methods used to register resources
@@ -488,7 +575,7 @@ class HttpServiceEnabled implements StoppableHttpService {
 		FilterModel filterModel = new FilterModel(filterName, urlPatterns, servletNames, null, filter,
 				initParams, asyncSupported);
 
-		doRegisterFilter(httpContext, filterModel);
+		doRegisterFilter(Collections.singletonList(httpContext), filterModel);
 	}
 
 	@Override
@@ -505,7 +592,7 @@ class HttpServiceEnabled implements StoppableHttpService {
 		FilterModel filterModel = new FilterModel(filterName, urlPatterns, servletNames, null, filterClass,
 				initParams, asyncSupported);
 
-		doRegisterFilter(httpContext, filterModel);
+		doRegisterFilter(Collections.singletonList(httpContext), filterModel);
 	}
 
 	/**
@@ -517,32 +604,37 @@ class HttpServiceEnabled implements StoppableHttpService {
 	 *
 	 * <p>Method runs semi transactionally - in single configuration/registration thread of Pax Web runtime.</p>
 	 *
-	 * @param httpContext
+	 * @param httpContexts
 	 * @param model
 	 * @throws ServletException
 	 */
 	@PaxWebConfiguration
-	private void doRegisterFilter(HttpContext httpContext, FilterModel model) throws ServletException {
+	public void doRegisterFilter(Collection<HttpContext> httpContexts, FilterModel model) throws ServletException {
 		LOG.debug("Passing registration of {} to configuration thread", model);
 
+		model.setRegisteringBundle(this.serviceBundle);
+
 		final Batch batch = new Batch("Registration of " + model);
-		final WebContainerContext webContext = unify(httpContext);
+		final Collection<WebContainerContext> webContexts
+				= httpContexts.stream().map(this::unify).collect(Collectors.toList());
 
 		try {
 			serverModel.run(() -> {
 				LOG.info("Registering {}", model);
 
-				OsgiContextModel contextModel
-						= serverModel.getOrCreateOsgiContextModel(webContext, serviceBundle, batch);
-				model.getContextModels().add(contextModel);
+				webContexts.forEach(wc -> {
+					OsgiContextModel contextModel
+							= serverModel.getOrCreateOsgiContextModel(wc, serviceBundle, batch);
+					model.addContextModel(contextModel);
+				});
 
 				// we don't care about ranking here. Filters will be reorganized on every change anyway
 
 				// batch change of entire model
 				serverModel.addFilterModel(model, batch);
 
-				// batch change of the model scoped to given service
-				batch.addFilterModel(serviceModel, model);
+//				// batch change of the model scoped to given service
+//				batch.addFilterModel(serviceModel, model);
 
 				// send batch to Jetty/Tomcat/Undertow
 				serverController.sendBatch(batch);
@@ -573,11 +665,9 @@ class HttpServiceEnabled implements StoppableHttpService {
 	// --- private support methods
 
 	private void servletEvent(ServletEvent.State type, Bundle bundle, ServletModel model) {
-		Class<? extends Servlet> servletClass = model.getServletClass();
-		if (servletClass == null) {
-			servletClass = model.getServlet().getClass();
+		if (eventDispatcher != null) {
+			eventDispatcher.servletEvent(new ServletEvent(type, bundle, model));
 		}
-		eventDispatcher.servletEvent(new ServletEvent(type, bundle, model));
 	}
 
 	/**
@@ -599,18 +689,6 @@ class HttpServiceEnabled implements StoppableHttpService {
 		}
 
 		return context;
-	}
-
-	/**
-	 * Called to tell global {@link ServerModel} that given {@link OsgiContextModel} was initiated/created
-	 * by given {@link WebContainerContext}.
-	 * This method is not expected to throw any exception.
-	 *
-	 * @param webContext
-	 * @param contextModel
-	 */
-	private void associateContextModel(WebContainerContext webContext, OsgiContextModel contextModel) {
-		serverModel.associateHttpContext(webContext, contextModel);
 	}
 
 

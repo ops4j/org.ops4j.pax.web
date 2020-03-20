@@ -163,6 +163,25 @@ public final class ServletContextModel extends Identity {
 		servletNameMapping.remove(model.getName());
 	}
 
+
+	/**
+	 * <p>Marks given {@link FilterModel} as enabled.</p>
+	 *
+	 * @param model
+	 */
+	public void enableFilterModel(FilterModel model) {
+		filterNameMapping.put(model.getName(), model);
+	}
+
+	/**
+	 * <p>Marks given {@link FilterModel} as disabled.</p>
+	 *
+	 * @param model
+	 */
+	public void disableFilterModel(FilterModel model) {
+		filterNameMapping.remove(model.getName());
+	}
+
 	public String getContextPath() {
 		return contextPath;
 	}

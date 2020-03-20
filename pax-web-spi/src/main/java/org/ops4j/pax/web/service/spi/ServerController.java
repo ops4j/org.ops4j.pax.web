@@ -64,6 +64,12 @@ public interface ServerController {
 	 */
 	void stop() throws Exception;
 
+	/**
+	 * Returns {@link Configuration} associated with this {@link ServerController}
+	 * @return
+	 */
+	Configuration getConfiguration();
+
 	// --- listener related methods
 
 	/**

@@ -1,0 +1,788 @@
+/*
+ * Copyright 2020 OPS4J.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.ops4j.pax.web.itest.server;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpFilter;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
+import org.ops4j.pax.web.service.PaxWebConfig;
+import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.service.internal.ConfigurationBuilder;
+import org.ops4j.pax.web.service.internal.DefaultHttpContext;
+import org.ops4j.pax.web.service.internal.HttpServiceEnabled;
+import org.ops4j.pax.web.service.internal.MetaTypePropertyResolver;
+import org.ops4j.pax.web.service.jetty.internal.JettyServerControllerFactory;
+import org.ops4j.pax.web.service.spi.ServerController;
+import org.ops4j.pax.web.service.spi.ServerControllerFactory;
+import org.ops4j.pax.web.service.spi.config.Configuration;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.task.Batch;
+import org.ops4j.util.property.DictionaryPropertyResolver;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.HttpContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static org.hamcrest.CoreMatchers.endsWith;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+@RunWith(Parameterized.class)
+public class ServerControllerTest {
+
+	public static Logger LOG = LoggerFactory.getLogger(ServerControllerTest.class);
+
+	private int port;
+
+	@Parameter
+	public Runtime runtime;
+
+	@Parameters(name = "{0}")
+	public static Collection<Object[]> data() {
+		return Arrays.asList(new Object[][] {
+				{ Runtime.JETTY },
+//				{ Runtime.TOMCAT },
+//				{ Runtime.UNDERTOW }
+		});
+	}
+
+	@Before
+	public void init() throws Exception {
+		ServerSocket serverSocket = new ServerSocket(0);
+		port = serverSocket.getLocalPort();
+		serverSocket.close();
+	}
+
+	@Test
+	public void justInstantiateWithoutOsgi() throws Exception {
+		ServerController controller = create(properties -> {
+			new File("target/ncsa").mkdirs();
+			properties.put(PaxWebConfig.PID_CFG_LOG_NCSA_ENABLED, "true");
+			properties.put(PaxWebConfig.PID_CFG_LOG_NCSA_LOGDIR, "target/ncsa");
+
+			// this file should be used to reconfigure thread pool already set inside Pax Web version of Jetty Server
+			properties.put(PaxWebConfig.PID_CFG_SERVER_CONFIGURATION_FILES, "target/test-classes/jetty-server.xml");
+		});
+
+		controller.configure();
+		controller.start();
+		controller.stop();
+	}
+
+	@Test
+	public void registerSingleServletUsingExplicitBatch() throws Exception {
+		ServerController controller = create(properties -> {
+			new File("target/ncsa").mkdirs();
+			properties.put(PaxWebConfig.PID_CFG_LOG_NCSA_ENABLED, "true");
+			properties.put(PaxWebConfig.PID_CFG_LOG_NCSA_LOGDIR, "target/ncsa");
+
+			// this file should be used to reconfigure thread pool already set inside Pax Web version of Jetty Server
+			properties.put(PaxWebConfig.PID_CFG_SERVER_CONFIGURATION_FILES, "target/test-classes/jetty-server.xml");
+		});
+		controller.configure();
+		controller.start();
+
+		Bundle bundle = mock(Bundle.class);
+
+		WebContainerContext wcc = new DefaultHttpContext(bundle) {
+			@Override
+			public URL getResource(String name) {
+				// this should be used when calling ServletContext.getResource
+				try {
+					return new URL("file://" + name);
+				} catch (MalformedURLException ignored) {
+					return null;
+				}
+			}
+
+			@Override
+			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+				LOG.info("handleSecurity(" + request + ")");
+				return request.getHeader("Let-Me-In") != null;
+			}
+		};
+
+		Servlet servlet = new HttpServlet() {
+			private ServletConfig config;
+
+			private final Map<ServletContext, Boolean> contexts = new IdentityHashMap<>();
+
+			@Override
+			public void init(ServletConfig config) throws ServletException {
+				super.init(config);
+				assertThat(config.getInitParameter("p1"), equalTo("v1"));
+				assertThat(super.getInitParameter("p1"), equalTo("v1"));
+				contexts.put(config.getServletContext(), true);
+				this.config = config;
+			}
+
+			@Override
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				resp.setContentType("text/plain");
+
+				contexts.put(getServletContext(), true);
+				contexts.put(req.getServletContext(), true);
+				contexts.put(req.getSession().getServletContext(), true);
+				contexts.put(config.getServletContext(), true);
+				contexts.put(getServletConfig().getServletContext(), true);
+
+				assertThat(contexts.size(), equalTo(1));
+
+				assertThat(super.getInitParameter("p1"), equalTo("v1"));
+
+				// this should give us "file:/something"
+				resp.getWriter().print(req.getServletContext().getResource("/something").toString());
+			}
+		};
+
+		Batch batch = new Batch("Register Single Servlet");
+
+		ServerModel server = new ServerModel(new SameThreadExecutor());
+		ServletContextModel context = new ServletContextModel("/c");
+		batch.addServletContextModel(server, context);
+
+		OsgiContextModel osgiContext = new OsgiContextModel(wcc, bundle);
+		osgiContext.setServletContextModel(context);
+		batch.addOsgiContextModel(osgiContext);
+
+		Map<String, String> initParams = new HashMap<>();
+		initParams.put("p1", "v1");
+
+		batch.addServletModel(server, new ServletModel.Builder()
+				.withServletName("my-servlet")
+				.withUrlPatterns(new String[] { "/s/*" })
+				.withServlet(servlet)
+				.withInitParams(initParams)
+				.withOsgiContextModel(osgiContext)
+				.withRegisteringBundle(bundle)
+				.build());
+
+		controller.sendBatch(batch);
+
+		String response = get(port, "/c/s/1", "Let-Me-In: true");
+		assertTrue(response.endsWith("file:/something"));
+
+		response = get(port, "/c/s/1");
+		assertTrue(response.contains("HTTP/1.1 403"));
+
+		controller.stop();
+	}
+
+	@Test
+	public void registerSingleServletUsingWebContainer() throws Exception {
+		ServerController controller = create(null);
+		controller.configure();
+		controller.start();
+
+		Bundle bundle = mock(Bundle.class);
+		ServerModel server = new ServerModel(new SameThreadExecutor());
+
+		WebContainer wc = new HttpServiceEnabled(bundle, controller, server, null, controller.getConfiguration());
+
+		HttpContext context = new HttpContext() {
+			@Override
+			public URL getResource(String name) {
+				// this should be used when calling ServletContext.getResource
+				try {
+					return new URL("file://" + name);
+				} catch (MalformedURLException ignored) {
+					return null;
+				}
+			}
+
+			@Override
+			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+				LOG.info("handleSecurity(" + request + ")");
+				return request.getHeader("Let-Me-In") != null;
+			}
+
+			@Override
+			public String getMimeType(String name) {
+				return null;
+			}
+		};
+
+		Servlet servlet = new HttpServlet() {
+			private ServletConfig config;
+
+			private final Map<ServletContext, Boolean> contexts = new IdentityHashMap<>();
+
+			@Override
+			public void init(ServletConfig config) throws ServletException {
+				super.init(config);
+				assertThat(config.getInitParameter("p1"), equalTo("v1"));
+				assertThat(super.getInitParameter("p1"), equalTo("v1"));
+				contexts.put(config.getServletContext(), true);
+				this.config = config;
+			}
+
+			@Override
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				resp.setContentType("text/plain");
+
+				contexts.put(getServletContext(), true);
+				contexts.put(req.getServletContext(), true);
+				contexts.put(req.getSession().getServletContext(), true);
+				contexts.put(config.getServletContext(), true);
+				contexts.put(getServletConfig().getServletContext(), true);
+
+				assertThat(contexts.size(), equalTo(1));
+
+				assertThat(super.getInitParameter("p1"), equalTo("v1"));
+
+				// this should give us "file:/something"
+				resp.getWriter().print(req.getServletContext().getResource("/something").toString());
+			}
+		};
+
+		Dictionary<String, String> initParams = new Hashtable<>();
+		initParams.put("p1", "v1");
+
+		wc.registerServlet(servlet, "my-servlet", new String[] { "/s/*" }, initParams, context);
+
+		String response = get(port, "/s/1", "Let-Me-In: true");
+		assertTrue(response.endsWith("file:/something"));
+
+		response = get(port, "/s/1");
+		assertTrue(response.contains("HTTP/1.1 403"));
+
+		controller.stop();
+	}
+
+	@Test
+	public void registerFilterAndServletUsingExcplicitBatch() throws Exception {
+		ServerController controller = create(null);
+		controller.configure();
+		controller.start();
+
+		Bundle bundle = mock(Bundle.class);
+		BundleContext context = mock(BundleContext.class);
+		when(bundle.getBundleContext()).thenReturn(context);
+
+		WebContainerContext wcc1 = new DefaultHttpContext(bundle);
+		WebContainerContext wcc2 = new DefaultHttpContext(bundle, "special");
+
+		// when single instance is added more than once (passed in ServletModel), init(ServletConfig)
+		// operates on single instance and even the Whiteboard Service specification suggests using Prototype
+		// Service. Otherwise, init() would be called more than once on single instance providing different
+		// ServletConfig objects (with different - and usually wrong ServletContext)
+		@SuppressWarnings("unchecked")
+		ServiceReference<Servlet> ref = mock(ServiceReference.class);
+		when(context.getService(ref)).thenReturn(new MyHttpServlet());
+
+		Filter filter = new HttpFilter() {
+			@Override
+			protected void doFilter(HttpServletRequest req, HttpServletResponse resp, FilterChain chain) throws IOException, ServletException {
+				resp.setStatus(HttpServletResponse.SC_OK);
+				resp.getWriter().write(getFilterName() + "1");
+				if (!"/d".equals(req.getServletContext().getContextPath())) {
+					// in /d we know we don't map to any servlet
+					chain.doFilter(req, resp);
+				}
+				resp.getWriter().write(getFilterName() + "2");
+				resp.getWriter().close();
+			}
+		};
+
+		Batch batch = new Batch("Register Servlet and Filter");
+
+		// two contexts. servlet will be registered to /c, filter - to /c and /d
+		ServerModel server = new ServerModel(new SameThreadExecutor());
+
+		ServletContextModel contextC = new ServletContextModel("/c");
+		ServletContextModel contextD = new ServletContextModel("/d");
+		ServletContextModel contextE = new ServletContextModel("/e");
+		batch.addServletContextModel(server, contextC);
+		batch.addServletContextModel(server, contextD);
+		batch.addServletContextModel(server, contextE);
+
+		OsgiContextModel osgiContextC = new OsgiContextModel(wcc1, bundle, contextC);
+		OsgiContextModel osgiContextC2 = new OsgiContextModel(wcc2, bundle, contextC);
+		OsgiContextModel osgiContextD = new OsgiContextModel(wcc1, bundle, contextD);
+		OsgiContextModel osgiContextE = new OsgiContextModel(wcc1, bundle, contextE);
+		batch.addOsgiContextModel(osgiContextC);
+		batch.addOsgiContextModel(osgiContextC2);
+		batch.addOsgiContextModel(osgiContextD);
+		batch.addOsgiContextModel(osgiContextE);
+
+		Map<String, String> initParams = new HashMap<>();
+		initParams.put("p1", "v1");
+
+		batch.addServletModel(server, new ServletModel.Builder()
+				.withServletName("my-servlet1")
+				.withUrlPatterns(new String[] { "/s/*" }) // responds to /*/s/* depending on context selector
+				.withServletReference(ref)
+				.withInitParams(initParams)
+				.withOsgiContextModel(osgiContextC) // responds to /c/s/*
+				.withOsgiContextModel(osgiContextE) // responds to /e/s/*
+				.withRegisteringBundle(bundle)
+				.build());
+		batch.addServletModel(server, new ServletModel.Builder()
+				.withServletName("my-servlet2")
+				.withUrlPatterns(new String[] { "/s2/*" }) // responds to /*/s2/* depending on context selector
+				.withServletReference(ref)
+				.withInitParams(initParams)
+				.withOsgiContextModel(osgiContextC2) // responds to /c/s2/*
+				.withRegisteringBundle(bundle)
+				.build());
+
+		Map<String, Set<FilterModel>> filters = new HashMap<>();
+		Set<FilterModel> set = new TreeSet<>();
+		// this filter is NOT registered to osgiContextC2, so should NOT be mapped to /c/s2/*
+		set.add(new FilterModel.Builder()
+				.withFilterName("my-filter")
+				.withUrlPatterns(new String[] { "/*" }) // maps to /*/* depending on associated contexts
+				.withFilter(filter)
+				.withOsgiContextModel(osgiContextC) // maps to /c/*
+				.withOsgiContextModel(osgiContextD) // maps to /d/*
+				.withRegisteringBundle(bundle)
+				.build());
+		filters.put("/c", set);
+		filters.put("/d", set);
+		batch.updateFilters(filters);
+
+		controller.sendBatch(batch);
+
+		// filter -> servlet
+		String response;
+		response = get(port, "/c/s/1");
+		System.out.println(response);
+		assertTrue(response.contains("my-filter1my-servlet1[/c]my-filter2"));
+
+		// just one filter in the chain, without target servlet
+		response = get(port, "/d/s/1");
+		System.out.println(response);
+		assertTrue(response.contains("my-filter1my-filter2"));
+
+		// just servlet, because /* filter doesn't use servlet's ServletContextHelper
+		response = get(port, "/c/s2/1");
+		System.out.println(response);
+		assertTrue(response.contains("\r\nmy-servlet2[/c]"));
+
+		// just servlet, because /* filter isn't associated with OsgiContext for /e
+		response = get(port, "/e/s/1");
+		System.out.println(response);
+		assertTrue(response.contains("\r\nmy-servlet1[/e]"));
+
+		controller.stop();
+	}
+
+	@Test
+	public void registerFilterAndServletUsingWebContainer() throws Exception {
+		ServerController controller = create(null);
+		controller.configure();
+		controller.start();
+
+		Bundle bundle = mock(Bundle.class);
+		BundleContext context = mock(BundleContext.class);
+		when(bundle.getBundleContext()).thenReturn(context);
+
+		ServerModel server = new ServerModel(new SameThreadExecutor());
+
+		Configuration config = controller.getConfiguration();
+		HttpServiceEnabled wc = new HttpServiceEnabled(bundle, controller, server, null, config);
+
+		// 3 physical servlet context models
+		Batch batch = new Batch("Initialization Batch");
+		server.getOrCreateServletContextModel("/c", batch);
+		server.getOrCreateServletContextModel("/d", batch);
+		server.getOrCreateServletContextModel("/e", batch);
+		batch.accept(wc.getServiceModel());
+		controller.sendBatch(batch);
+
+		WebContainerContext wccC1 = wc.createDefaultHttpContext("wccC1");
+		WebContainerContext wccC2 = wc.createDefaultHttpContext("wccC2");
+		WebContainerContext wccD1 = wc.createDefaultHttpContext("wccD1");
+		WebContainerContext wccE1 = wc.createDefaultHttpContext("wccE1");
+
+		// 4 logical OSGi context models
+		batch = new Batch("Initialization Batch");
+		server.associateHttpContext(wccC1, server.createNewContextModel(wccC1, "/c", bundle, batch));
+		server.associateHttpContext(wccC2, server.createNewContextModel(wccC2, "/c", bundle, batch));
+		server.associateHttpContext(wccD1, server.createNewContextModel(wccD1, "/d", bundle, batch));
+		server.associateHttpContext(wccE1, server.createNewContextModel(wccE1, "/e", bundle, batch));
+		batch.accept(wc.getServiceModel());
+		controller.sendBatch(batch);
+
+		@SuppressWarnings("unchecked")
+		ServiceReference<Servlet> ref = mock(ServiceReference.class);
+		when(context.getService(ref)).thenReturn(new MyHttpServlet());
+
+		Filter filter = new HttpFilter() {
+			@Override
+			protected void doFilter(HttpServletRequest req, HttpServletResponse resp, FilterChain chain) throws IOException, ServletException {
+				resp.setStatus(HttpServletResponse.SC_OK);
+				resp.getWriter().write(getFilterName() + "1");
+				if (!"/d".equals(req.getServletContext().getContextPath())) {
+					// in /d we know we don't map to any servlet
+					chain.doFilter(req, resp);
+				}
+				resp.getWriter().write(getFilterName() + "2");
+				resp.getWriter().close();
+			}
+		};
+
+		Map<String, String> initParams = new HashMap<>();
+		initParams.put("p1", "v1");
+
+		wc.doRegisterServlet(Arrays.asList(wccC1, wccE1), new ServletModel.Builder()
+				.withServletName("my-servlet1")
+				.withUrlPatterns(new String[] { "/s/*" }) // responds to /c/s/* or /e/s/* depending on context selector
+				.withServletReference(ref)
+				.withInitParams(initParams)
+				.build());
+		wc.doRegisterServlet(Collections.singletonList(wccC2), new ServletModel.Builder()
+				.withServletName("my-servlet2")
+				.withUrlPatterns(new String[] { "/s2/*" }) // responds to /c/s2/* depending on context selector
+				.withServletReference(ref)
+				.withInitParams(initParams)
+				.build());
+
+		// this filter is NOT registered to osgiContextC2, so should NOT be mapped to /c/s2/*
+		wc.doRegisterFilter(Arrays.asList(wccC1, wccD1), new FilterModel.Builder()
+				.withFilterName("my-filter")
+				.withUrlPatterns(new String[] { "/*" }) // maps to /c/* or /d/* depending on associated contexts
+				.withFilter(filter)
+				.withRegisteringBundle(bundle)
+				.build());
+
+		// filter -> servlet
+		String response;
+		response = get(port, "/c/s/1");
+		System.out.println(response);
+		assertTrue(response.contains("my-filter1my-servlet1[/c]my-filter2"));
+
+		// just one filter in the chain, without target servlet
+		response = get(port, "/d/s/1");
+		System.out.println(response);
+		assertTrue(response.contains("my-filter1my-filter2"));
+
+		// just servlet, because /* filter doesn't use my-servlet2's ServletContextHelper
+		response = get(port, "/c/s2/1");
+		System.out.println(response);
+		assertTrue(response.contains("\r\nmy-servlet2[/c]"));
+
+		// just servlet, because /* filter isn't associated with OsgiContext for /e
+		response = get(port, "/e/s/1");
+		System.out.println(response);
+		assertTrue(response.contains("\r\nmy-servlet1[/e]"));
+
+		controller.stop();
+	}
+
+	/**
+	 * <p>Test for Whiteboard service registration of servlets to different OSGi contexts and handling name
+	 * conflicts.</p>
+	 *
+	 * <p>Have 3 contexts (each with single OSGi context associated):<ul>
+	 *     <li>/c1</li>
+	 *     <li>/c2</li>
+	 *     <li>/c3</li>
+	 *     <li>/c4</li>
+	 * </ul>
+	 * Servlet registration plan (newer servlet has higher service.id):<ul>
+	 *     <li>"s1"(1) with rank=0 ragistered to /c1 and /c2 - should be OK</li>
+	 *     <li>"s1"(2) with rank=3 registered to /c3 - should be OK</li>
+	 *     <li>"s1"(3) with rank=0 registered to /c1 - should be registered as disabled</li>
+	 *     <li>"s1"(4) with rank=2 registered to /c2 and /c3 - should be registered as disabled because of "s1"(2)</li>
+	 *     <li>"s1"(5) with rank=1 registered to /c2 and /c4 - should deactivate "s1"(1) from /c1 and /c2, should
+	 *     reactivate "s1"(3) in /c1, which was previously disabled, should activate "s1"(4) in /c2 instead of "s1"(5),
+	 *     but "s1"(4) is still shadowed in /c3 by "s1"(2), so "s1"(5) is the one active in /c2</li>
+	 *     <li>"s1"(6) with rank=0 registered to /c4 - as disabled, because shadowed by "s1"(5)</li>
+	 *     <li>"s1"(2) is unregistered from /c3 - should activate "s1"(4) in /c3 and even in /c2, because in /c2
+	 *     "s1"(5) is active, but with lower rank - this has to change just as if "s1"(4) was newly registered. so
+	 *     "s1"(5) is deactivated - in both /c2 and /c4, so leading to reactivation of "s1"(6) in /c4</li>
+	 * </ul></p>
+	 *
+	 * @throws Exception
+	 */
+	@Test
+	public void registerServletsConflictingByName() throws Exception {
+		ServerController controller = create(null);
+		controller.configure();
+		controller.start();
+
+		Bundle bundle = mock(Bundle.class);
+		BundleContext context = mock(BundleContext.class);
+		when(bundle.getBundleContext()).thenReturn(context);
+
+		ServerModel server = new ServerModel(new SameThreadExecutor());
+
+		Configuration config = controller.getConfiguration();
+		HttpServiceEnabled wc = new HttpServiceEnabled(bundle, controller, server, null, config);
+
+		Batch batch = new Batch("Initialization Batch");
+		server.getOrCreateServletContextModel("/c1", batch);
+		server.getOrCreateServletContextModel("/c2", batch);
+		server.getOrCreateServletContextModel("/c3", batch);
+		server.getOrCreateServletContextModel("/c4", batch);
+		batch.accept(wc.getServiceModel());
+		controller.sendBatch(batch);
+
+		WebContainerContext wcc1 = wc.createDefaultHttpContext("wcc1");
+		WebContainerContext wcc2 = wc.createDefaultHttpContext("wcc2");
+		WebContainerContext wcc3 = wc.createDefaultHttpContext("wcc3");
+		WebContainerContext wcc4 = wc.createDefaultHttpContext("wcc4");
+
+		// 4 logical OSGi context models
+		batch = new Batch("Initialization Batch");
+		OsgiContextModel cm1 = server.createNewContextModel(wcc1, "/c1", bundle, batch);
+		OsgiContextModel cm2 = server.createNewContextModel(wcc2, "/c2", bundle, batch);
+		OsgiContextModel cm3 = server.createNewContextModel(wcc3, "/c3", bundle, batch);
+		OsgiContextModel cm4 = server.createNewContextModel(wcc3, "/c4", bundle, batch);
+		server.associateHttpContext(wcc1, cm1);
+		server.associateHttpContext(wcc2, cm2);
+		server.associateHttpContext(wcc3, cm3);
+		server.associateHttpContext(wcc4, cm4);
+		batch.accept(wc.getServiceModel());
+		controller.sendBatch(batch);
+
+		Servlet s11 = new MyIdServlet("1");
+		Servlet s12 = new MyIdServlet("2");
+		Servlet s13 = new MyIdServlet("3");
+		Servlet s14 = new MyIdServlet("4");
+		Servlet s15 = new MyIdServlet("5");
+		Servlet s16 = new MyIdServlet("6");
+
+		long serviceId = 0;
+
+		// servlet#1 registered in /c1 and /c2
+		wc.doRegisterServlet(Arrays.asList(wcc1, wcc2), new ServletModel.Builder()
+				.withServletName("s1")
+				.withUrlPatterns(new String[] { "/s" })
+				.withServlet(s11)
+				.withServiceRankAndId(0, ++serviceId)
+				.build());
+
+		assertThat(get(port, "/c1/s"), endsWith("my.id=1"));
+		assertThat(get(port, "/c2/s"), endsWith("my.id=1"));
+		assertThat(get(port, "/c3/s"), startsWith("HTTP/1.1 404"));
+
+		// servlet#2 registered in /c3 - no conflict
+		wc.doRegisterServlet(Collections.singletonList(wcc3), new ServletModel.Builder()
+				.withServletName("s1")
+				.withUrlPatterns(new String[] { "/s" })
+				.withServlet(s12)
+				.withServiceRankAndId(3, ++serviceId)
+				.build());
+
+		assertThat(get(port, "/c1/s"), endsWith("my.id=1"));
+		assertThat(get(port, "/c2/s"), endsWith("my.id=1"));
+		assertThat(get(port, "/c3/s"), endsWith("my.id=2"));
+
+		// servlet#3 registered to /c1, but with higher service ID - should be marked as disabled
+		wc.doRegisterServlet(Collections.singletonList(wcc1), new ServletModel.Builder()
+				.withServletName("s1")
+				.withUrlPatterns(new String[] { "/s" })
+				.withServlet(s13)
+				.withServiceRankAndId(0, ++serviceId)
+				.build());
+
+		assertThat(get(port, "/c1/s"), endsWith("my.id=1"));
+		assertThat(get(port, "/c2/s"), endsWith("my.id=1"));
+		assertThat(get(port, "/c3/s"), endsWith("my.id=2"));
+
+		// servlet#4 registered to /c2 and /c3 - ranked higher than s#1 in /c2, but ranked lower than s#2 in /c3
+		wc.doRegisterServlet(Arrays.asList(wcc2, wcc3), new ServletModel.Builder()
+				.withServletName("s1")
+				.withUrlPatterns(new String[] { "/s" })
+				.withServlet(s14)
+				.withServiceRankAndId(2, ++serviceId)
+				.build());
+
+		assertThat(get(port, "/c1/s"), endsWith("my.id=1"));
+		assertThat(get(port, "/c2/s"), endsWith("my.id=1"));
+		assertThat(get(port, "/c3/s"), endsWith("my.id=2"));
+
+		// servlet#5 registered to /c2 and /c4 - ranked higher than s#1 in /c2, so:
+		//  - s#1 is deactivated in /c1 and /c2
+		//  - s#3 is activated in /c1
+		//  - s#5 MAY be activated in /c2 and /c4, but in /c2, s#4 is ranked higher than s#5
+		//  - s#4 is ranked lower than s#2 in /c3, so it won't be activated ANYWHERE
+		//  - s#5 will thus be activated in /c2 and /c4
+		wc.doRegisterServlet(Arrays.asList(wcc2, wcc4), new ServletModel.Builder()
+				.withServletName("s1")
+				.withUrlPatterns(new String[] { "/s" })
+				.withServlet(s15)
+				.withServiceRankAndId(1, ++serviceId)
+				.build());
+
+		assertThat(get(port, "/c1/s"), endsWith("my.id=3"));
+		assertThat(get(port, "/c2/s"), endsWith("my.id=5"));
+		assertThat(get(port, "/c3/s"), endsWith("my.id=2"));
+		assertThat(get(port, "/c4/s"), endsWith("my.id=5"));
+
+		// servlet#6 registered to /c4 - ranked lower than s#5 in /c4, so added as disabled
+		wc.doRegisterServlet(Collections.singletonList(wcc4), new ServletModel.Builder()
+				.withServletName("s1")
+				.withUrlPatterns(new String[] { "/s" })
+				.withServlet(s16)
+				.withServiceRankAndId(0, ++serviceId)
+				.build());
+
+		assertThat(get(port, "/c1/s"), endsWith("my.id=3"));
+		assertThat(get(port, "/c2/s"), endsWith("my.id=5"));
+		assertThat(get(port, "/c3/s"), endsWith("my.id=2"));
+		assertThat(get(port, "/c4/s"), endsWith("my.id=5"));
+
+		// servlet#2 unregistered, s#4 activated in /c3, so also in /c2, so s#5 disabled in /c2 because it's ranked
+		// lower than s#4, so also s#5 disabled in /c4, so s#6 enabled in /c4
+		wc.doUnregisterServlet(new ServletModel.Builder()
+				.withServlet(s12)
+				.withOsgiContextModel(cm3)
+				.remove());
+
+		assertTrue(get(port, "/c1/s").endsWith("my.id=3"));
+		assertTrue(get(port, "/c2/s").endsWith("my.id=4"));
+		assertTrue(get(port, "/c3/s").endsWith("my.id=4"));
+		assertTrue(get(port, "/c4/s").endsWith("my.id=6"));
+
+		controller.stop();
+	}
+
+	private ServerController create(Consumer<Hashtable<Object, Object>> callback) {
+		Hashtable<Object, Object> properties = new Hashtable<>(System.getProperties());
+		properties.put(PaxWebConfig.PID_CFG_TEMP_DIR, "target/tmp");
+		properties.put(PaxWebConfig.PID_CFG_HTTP_PORT, Integer.toString(port));
+
+		if (callback != null) {
+			callback.accept(properties);
+		}
+
+		// it wouldn't work in OSGi because MetaTypePropertyResolver's package is not exported
+		MetaTypePropertyResolver metatypeResolver = new MetaTypePropertyResolver();
+		DictionaryPropertyResolver resolver = new DictionaryPropertyResolver(properties, metatypeResolver);
+		Configuration config = ConfigurationBuilder.getConfiguration(resolver, new HashMap<>());
+
+		switch (runtime) {
+			case JETTY:
+				ServerControllerFactory factory = new JettyServerControllerFactory(null, this.getClass().getClassLoader());
+				return factory.createServerController(config);
+			case TOMCAT:
+			case UNDERTOW:
+			default:
+				throw new IllegalArgumentException("Not supported: " + runtime);
+		}
+	}
+
+	private String get(int port, String request, String ... headers) throws IOException {
+		Socket s = new Socket();
+		s.connect(new InetSocketAddress("127.0.0.1", port));
+
+		s.getOutputStream().write((
+				"GET " + request + " HTTP/1.1\r\n" +
+				"Host: 127.0.0.1:" + port + "\r\n").getBytes());
+		for (String header : headers) {
+			s.getOutputStream().write((header + "\r\n").getBytes());
+		}
+		s.getOutputStream().write(("Connection: close\r\n\r\n").getBytes());
+
+		byte[] buf = new byte[64];
+		int read = -1;
+		StringWriter sw = new StringWriter();
+		while ((read = s.getInputStream().read(buf)) > 0) {
+			sw.append(new String(buf, 0, read));
+		}
+		s.getOutputStream().close();
+		s.close();
+
+		return sw.toString();
+	}
+
+	private static class SameThreadExecutor implements Executor {
+		@Override
+		public void execute(Runnable command) {
+			command.run();
+		}
+	}
+
+	private static class MyHttpServlet extends HttpServlet {
+		@Override
+		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			resp.getWriter().print(getServletName() + "[" + getServletConfig().getServletContext().getContextPath() + "]");
+		}
+	}
+
+	private static class MyIdServlet extends HttpServlet {
+
+		private final String id;
+
+		public MyIdServlet(String id) {
+			this.id = id;
+		}
+
+		@Override
+		public void destroy() {
+			LOG.info("Servlet {} destroyed", this);
+		}
+
+		@Override
+		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			resp.getWriter().print("my.id=" + id);
+		}
+
+		@Override
+		public String toString() {
+			return "S(" + id + ")";
+		}
+	}
+
+}

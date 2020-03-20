@@ -91,13 +91,12 @@ public class Batch {
 	}
 
 	/**
-	 * Add {@link ServletModel} to {@link ServiceModel}
-	 *
+	 * Remove {@link ServletModel servlet models} from {@link ServiceModel}
 	 * @param serviceModel
-	 * @param model
+	 * @param toUnregister
 	 */
-	public void addServletModel(ServiceModel serviceModel, ServletModel model) {
-		operations.add(new ServletModelChange(OpCode.ADD, serviceModel, model));
+	public void removeServletModels(ServiceModel serviceModel, List<ServletModel> toUnregister) {
+		operations.add(new ServletModelChange(OpCode.DELETE, serviceModel, toUnregister));
 	}
 
 	/**
@@ -107,6 +106,15 @@ public class Batch {
 	 */
 	public void addServletModel(ServerModel serverModel, ServletModel model) {
 		operations.add(new ServletModelChange(OpCode.ADD, serverModel, model));
+	}
+
+	/**
+	 * Remove {@link ServletModel} from {@link ServerModel}
+	 * @param serverModel
+	 * @param model
+	 */
+	public void removeServletModels(ServerModel serverModel, ServletModel model) {
+		operations.add(new ServletModelChange(OpCode.DELETE, serverModel, model));
 	}
 
 	/**

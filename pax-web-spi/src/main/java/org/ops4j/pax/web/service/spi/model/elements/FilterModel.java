@@ -194,7 +194,7 @@ public class FilterModel extends ElementModel<Filter> {
 				+ (regexMapping == null ? "" : ",regexMapping=" + Arrays.toString(regexMapping))
 				+ (filter == null ? "" : ",filter=" + filter)
 				+ (filterClass == null ? "" : ",servletClass=" + filterClass)
-				+ ",contexts=" + getContextModels()
+				+ ",contexts=" + contextModels
 				+ "}";
 	}
 

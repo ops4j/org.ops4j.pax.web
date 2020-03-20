@@ -28,6 +28,7 @@ import javax.servlet.UnavailableException;
 
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.servlet.ServletMapping;
 import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
@@ -47,6 +48,8 @@ public class PaxWebServletHolder extends ServletHolder {
 
 	private final ServletModel servletModel;
 	private final OsgiContextModel osgiContextModel;
+
+	private ServletMapping mapping;
 
 	private ServiceReference<? extends Servlet> serviceReference;
 
@@ -218,6 +221,23 @@ public class PaxWebServletHolder extends ServletHolder {
 	@Override
 	public void prepare(Request baseRequest, ServletRequest request, ServletResponse response) throws ServletException, UnavailableException {
 		super.prepare(baseRequest, request, response);
+	}
+
+	/**
+	 * Allows keeping {@link ServletMapping} that was used together with this {@link ServletHolder}
+	 * @param mapping
+	 */
+	public void setMapping(ServletMapping mapping) {
+		this.mapping = mapping;
+	}
+
+	/**
+	 * Gets a {@link ServletMapping} that was used during registration of this {@link ServletHolder} in single
+	 * {@link PaxWebServletHandler}.
+	 * @return
+	 */
+	public ServletMapping getMapping() {
+		return mapping;
 	}
 
 	/**
