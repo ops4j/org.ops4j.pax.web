@@ -87,6 +87,7 @@ import org.ops4j.pax.web.service.spi.model.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.ServletModel;
 import org.ops4j.pax.web.service.spi.model.WelcomeFileModel;
 import org.ops4j.pax.web.service.undertow.internal.configuration.ResolvingContentHandler;
+import org.ops4j.pax.web.service.undertow.internal.configuration.model.IoSubsystem;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.SecurityRealm;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.Server;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.ServletContainer.PersistentSessionsConfig;
@@ -105,9 +106,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
+import org.xnio.OptionMap;
 import org.xnio.Options;
 import org.xnio.Sequence;
 import org.xnio.SslClientAuthMode;
+import org.xnio.Xnio;
 import org.xnio.XnioWorker;
 
 import io.undertow.Handlers;
@@ -477,6 +480,37 @@ public class ServerControllerImpl implements ServerController, IdentityManager {
 
             // ok, we have everything unmarshalled from XML to config object
             // we can configure all/some aspects of Undertow now
+
+            IoSubsystem io = cfg.getIoSubsystem();
+            if (io != null) {
+                Xnio xnio = Xnio.getInstance(Undertow.class.getClassLoader());
+
+                // PAXWEB-1255 only "default" worker and buffer pool are supported for now
+                IoSubsystem.Worker worker = cfg.worker("default");
+                IoSubsystem.BufferPool bufferPool = cfg.bufferPool("default");
+
+                if (worker != null) {
+                    OptionMap.Builder b = OptionMap.builder();
+                    b.set(Options.CONNECTION_HIGH_WATER, 1000000);
+                    b.set(Options.CONNECTION_LOW_WATER, 1000000);
+                    b.set(Options.TCP_NODELAY, true);
+                    b.set(Options.CORK, true);
+                    b.set(Options.WORKER_IO_THREADS, worker.getIoThreads());
+                    b.set(Options.WORKER_TASK_MAX_THREADS, worker.getTaskMaxThreads());
+                    b.set(Options.WORKER_TASK_CORE_THREADS, worker.getTaskCoreThreads());
+                    XnioWorker w = xnio.createWorker(b.getMap());
+                    builder.setWorker(w);
+                }
+
+                if (bufferPool != null) {
+                    if (bufferPool.getDirectBuffers() != null) {
+                        builder.setDirectBuffers(bufferPool.getDirectBuffers());
+                    }
+                    if (bufferPool.getBufferSize() != null) {
+                        builder.setBufferSize(bufferPool.getBufferSize());
+                    }
+                }
+            }
 
             Server.HttpListener http = cfg.getSubsystem().getServer().getHttpListener();
             Server.HttpsListener https = cfg.getSubsystem().getServer().getHttpsListener();
