@@ -17,9 +17,35 @@
 <undertow xmlns="urn:org.ops4j.pax.web:undertow:1.0"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns:w="urn:jboss:domain:5.0"
+        xmlns:io="urn:jboss:domain:io:3.0"
         xsi:schemaLocation="
+            urn:jboss:domain:io:3.0 http://www.jboss.org/schema/jbossas/wildfly-io_3_0.xsd
             urn:jboss:domain:undertow:4.0 http://www.jboss.org/schema/jbossas/wildfly-undertow_4_0.xsd
             urn:jboss:domain:5.0 http://www.jboss.org/schema/jbossas/wildfly-config_5_0.xsd">
+
+    <!--
+        Only "default" worker and buffer-pool are supported and can be used to override the default values
+        used by all listeners
+
+        buffer-pool:
+         - buffer-size defaults to:
+            - when < 64MB of Xmx: 512
+            - when < 128MB of Xmx: 1024
+            - when >= 128MB of Xmx: 16K - 20
+         - direct-buffers defaults to:
+            - when < 64MB of Xmx: false
+            - when >= 64MB of Xmx: true
+
+        worker:
+         - io-threads defaults to Math.max(Runtime.getRuntime().availableProcessors(), 2);
+         - task-core-threads and task-max-threads default to io-threads * 8
+    -->
+    <!--
+    <subsystem xmlns="urn:jboss:domain:io:3.0">
+        <buffer-pool name="default" buffer-size="16364" direct-buffers="true" />
+        <worker name="default" io-threads="8" task-core-threads="64" task-max-threads="64" />
+    </subsystem>
+    -->
 
     <!-- https://docs.jboss.org/author/display/WFLY/Undertow+subsystem+configuration -->
     <subsystem xmlns="urn:jboss:domain:undertow:4.0">

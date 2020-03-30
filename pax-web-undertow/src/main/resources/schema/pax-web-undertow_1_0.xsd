@@ -17,6 +17,7 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
         targetNamespace="urn:org.ops4j.pax.web:undertow:1.0"
         xmlns="urn:org.ops4j.pax.web:undertow:1.0" xmlns:tns="urn:org.ops4j.pax.web:undertow:1.0"
+        xmlns:io="urn:jboss:domain:io:3.0"
         xmlns:wildfly="urn:jboss:domain:5.0"
         xmlns:undertow="urn:jboss:domain:undertow:4.0"
         elementFormDefault="qualified" attributeFormDefault="unqualified"
@@ -28,6 +29,7 @@
         </xs:documentation>
     </xs:annotation>
 
+    <xs:import namespace="urn:jboss:domain:io:3.0" schemaLocation="http://www.jboss.org/schema/jbossas/wildfly-io_3_0.xsd" />
     <xs:import namespace="urn:jboss:domain:undertow:4.0" schemaLocation="http://www.jboss.org/schema/jbossas/wildfly-undertow_4_0.xsd" />
     <xs:import namespace="urn:jboss:domain:5.0" schemaLocation="http://www.jboss.org/schema/jbossas/wildfly-config_5_0.xsd" />
 
@@ -35,6 +37,7 @@
 
     <xs:complexType name="UndertowType">
         <xs:sequence>
+            <xs:element ref="io:subsystem" minOccurs="0" />
             <xs:element ref="undertow:subsystem" />
             <xs:element name="security-realm" type="tns:security-realmType" minOccurs="0" maxOccurs="unbounded" />
             <xs:element name="interface" type="wildfly:named-interfaceType" minOccurs="0" maxOccurs="unbounded" />

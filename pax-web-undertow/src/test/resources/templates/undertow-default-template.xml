@@ -16,15 +16,51 @@
 -->
 <undertow xmlns="urn:org.ops4j.pax.web:undertow:1.0"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:io="urn:jboss:domain:5.0"
         xmlns:w="urn:jboss:domain:5.0"
         xsi:schemaLocation="
             urn:org.ops4j.pax.web:undertow:1.0 file://../../../main/resources/schema/pax-web-undertow_1_0.xsd
+            urn:jboss:domain:io:3.0 http://www.jboss.org/schema/jbossas/wildfly-io_3_0.xsd
             urn:jboss:domain:undertow:4.0 http://www.jboss.org/schema/jbossas/wildfly-undertow_4_0.xsd
             urn:jboss:domain:5.0 http://www.jboss.org/schema/jbossas/wildfly-config_5_0.xsd">
+
+    <!--
+        IO subsystem may be used to configure "default" buffer pool and default worker. In Wildfly, many
+        such objects may be configured, because Wildfly doesn't use Undertow.Builder directly. Here, we'
+        can only override the default versions.
+        This also means that "worker" and "buffer-pool" attributes of the listeners do not work
+    -->
+    <subsystem xmlns="urn:jboss:domain:io:3.0">
+        <!--
+            buffer-pool may be referenced from the listener and websocket
+             - buffer-size defaults to:
+                - when < 64MB of Xmx: 512
+                - when < 128MB of Xmx: 1024
+                - when >= 128MB of Xmx: 16K - 20
+             - direct-buffers defaults to:
+                - when < 64MB of Xmx: false
+                - when >= 64MB of Xmx: true
+             - buffers-per-slice doesn't seem to be used...
+                - when < 128MB of Xmx: 10
+                - when >= 128MB of Xmx: 20
+        -->
+        <buffer-pool name="default" buffer-size="1024" direct-buffers="true" buffers-per-slice="32" />
+        <buffer-pool name="bp2" buffer-size="1024" direct-buffers="true" buffers-per-slice="32" />
+        <!--
+            worker may be referenced from the listener, access-log and websocket
+             - io-threads defaults to Math.max(Runtime.getRuntime().availableProcessors(), 2);
+             - task-core-threads and task-max-threads default to io-threads * 8
+        -->
+        <worker name="default" io-threads="128" stack-size="0" task-core-threads="12" task-keepalive="60000"
+                task-max-threads="4" />
+        <worker name="w2" io-threads="128" stack-size="0" task-core-threads="12" task-keepalive="60000"
+                task-max-threads="4" />
+    </subsystem>
 
     <!-- https://docs.jboss.org/author/display/WFLY/Undertow+subsystem+configuration -->
     <subsystem xmlns="urn:jboss:domain:undertow:4.0">
         <!-- org.wildfly.extension.undertow.BufferCacheDefinition -->
+        <!-- https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/7.2/html-single/performance_tuning_guide/index#undertow_buffer_caches -->
         <buffer-cache name="default" buffer-size="1024" buffers-per-region="1024" max-regions="10" />
         <server name="default-server">
             <http-listener name="http" socket-binding="http" redirect-socket="https"

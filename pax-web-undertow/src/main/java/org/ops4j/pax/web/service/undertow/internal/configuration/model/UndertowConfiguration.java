@@ -26,11 +26,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
-import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_PAXWEB_UNDERTOW;
-import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_UNDERTOW;
+import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.*;
 
 @XmlRootElement(name = "undertow")
 @XmlType(name = "UndertowType", propOrder = {
+		"ioSubsystem",
 		"subsystem",
 		"securityRealms",
 		"interfaces",
@@ -38,6 +38,9 @@ import static org.ops4j.pax.web.service.undertow.internal.configuration.model.Ob
 })
 @XmlAccessorType(XmlAccessType.FIELD)
 public class UndertowConfiguration {
+
+	@XmlElement(name = "subsystem", namespace = NS_IO)
+	private IoSubsystem ioSubsystem;
 
 	@XmlElement(namespace = NS_UNDERTOW)
 	private UndertowSubsystem subsystem;
@@ -65,6 +68,12 @@ public class UndertowConfiguration {
 
 	@XmlTransient
 	private Map<String, UndertowSubsystem.AbstractFilter> filtersMap = new HashMap<>();
+
+	@XmlTransient
+	private Map<String, IoSubsystem.Worker> workers = new HashMap<>();
+
+	@XmlTransient
+	private Map<String, IoSubsystem.BufferPool> bufferPools = new HashMap<>();
 
 	/**
 	 * Initializes various maps speeding up access to different configuration parts
@@ -97,6 +106,14 @@ public class UndertowConfiguration {
 				for (UndertowSubsystem.ExpressionFilter filter : subsystem.getFilters().getExpressionFilters()) {
 					filtersMap.put(filter.getName(), filter);
 				}
+			}
+		}
+		if (ioSubsystem != null) {
+			for (IoSubsystem.Worker worker : ioSubsystem.getWorkers()) {
+				workers.put(worker.getName(), worker);
+			}
+			for (IoSubsystem.BufferPool pool : ioSubsystem.getBuferPools()) {
+				bufferPools.put(pool.getName(), pool);
 			}
 		}
 	}
@@ -149,6 +166,24 @@ public class UndertowConfiguration {
 	}
 
 	/**
+	 * Returns {@link IoSubsystem.Worker} by name
+	 * @param name
+	 * @return
+	 */
+	public IoSubsystem.Worker worker(String name) {
+		return workers.get(name);
+	}
+
+	/**
+	 * Returns {@link IoSubsystem.BufferPool} by name
+	 * @param name
+	 * @return
+	 */
+	public IoSubsystem.BufferPool bufferPool(String name) {
+		return bufferPools.get(name);
+	}
+
+	/**
 	 * Returns valid information about interfaces+port to listen on
 	 * @param socketBindingName
 	 * @return
@@ -178,6 +213,14 @@ public class UndertowConfiguration {
 		return subsystem;
 	}
 
+	public IoSubsystem getIoSubsystem() {
+		return ioSubsystem;
+	}
+
+	public void setIoSubsystem(IoSubsystem ioSubsystem) {
+		this.ioSubsystem = ioSubsystem;
+	}
+
 	public List<SecurityRealm> getSecurityRealms() {
 		return securityRealms;
 	}
@@ -205,6 +248,14 @@ public class UndertowConfiguration {
 		sb.append("\n\t}\n\tsocket bindings: {");
 		for (SocketBinding b : socketBindings) {
 			sb.append("\n\t\t" + b);
+		}
+		sb.append("\n\t}\n\tworkers: {");
+		for (IoSubsystem.Worker w : workers.values()) {
+			sb.append("\n\t\t" + w);
+		}
+		sb.append("\n\t}\n\tbuffer pools: {");
+		for (IoSubsystem.BufferPool bp : bufferPools.values()) {
+			sb.append("\n\t\t" + bp);
 		}
 		sb.append("\n\t}\n}\n");
 		return sb.toString();
