@@ -30,6 +30,12 @@ public class UndertowUtil {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UndertowUtil.class);
 
+	/**
+	 * Create an {@link XnioWorker} to be used by access log. It won't be configured using {@code <worker>}
+	 * in {@code undertow.xml}
+	 * @param loader
+	 * @return
+	 */
 	public static XnioWorker createWorker(ClassLoader loader) {
 		try {
 			if (loader == null) {

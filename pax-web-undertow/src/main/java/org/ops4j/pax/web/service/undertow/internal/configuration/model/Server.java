@@ -274,7 +274,7 @@ public class Server {
 		@XmlAttribute(name = "proxy-address-forwarding")
 		private String proxyAddressForwarding;
 		@XmlAttribute(name = "resolve-peer-address")
-                private String peerHostLookup;
+		private String peerHostLookup;
 		//<xs:attribute name="enable-http2" use="optional" type="xs:string">
 		//<xs:attribute name="http2-enable-push" type="xs:boolean" use="optional" />
 		//<xs:attribute name="http2-header-table-size" type="xs:int" use="optional" />
