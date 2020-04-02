@@ -16,7 +16,7 @@
 -->
 <undertow xmlns="urn:org.ops4j.pax.web:undertow:1.0"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:io="urn:jboss:domain:5.0"
+        xmlns:io="urn:jboss:domain:io:3.0"
         xmlns:w="urn:jboss:domain:5.0"
         xsi:schemaLocation="
             urn:org.ops4j.pax.web:undertow:1.0 file://../../../main/resources/schema/pax-web-undertow_1_0.xsd
