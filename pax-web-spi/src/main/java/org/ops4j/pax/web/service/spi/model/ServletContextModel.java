@@ -42,6 +42,13 @@ import org.ops4j.pax.web.service.spi.model.elements.SessionConfigurationModel;
  * contributed possibly by many bundles (bundle-scoped {@link org.osgi.service.http.HttpService} services or
  * whiteboard service registrations).</p>
  *
+ * <p>Normally, web applications are represented by {@code web.xml} files which are parsed by server-specific
+ * parsers:<ul>
+ *     <li>Jetty:  {@code org.eclipse.jetty.webapp.StandardDescriptorProcessor.visit()}</li>
+ *     <li>Tomcat: {@code org.apache.catalina.startup.ContextConfig#configureContext()},
+ *                 {@code org.apache.tomcat.util.descriptor.web.WebXmlParser#parseWebXml()}</li>
+ * </ul></p>
+ *
  * <p>When user registers (through {@link org.osgi.service.http.HttpService} or Whiteboard) a <em>web element</em>
  * (like servlet), the registration seems unique, but physically, given servlet has to be explicitly registered
  * to all related {@link ServletContextModel} (and eventually - {@link ServletContext}). It is even more important

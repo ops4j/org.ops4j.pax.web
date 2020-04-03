@@ -37,28 +37,28 @@ import org.osgi.service.http.HttpContext;
 /**
  * @author Romain Gilles
  */
-abstract class AbstractServerState implements ServerState {
-	private final ServerStateFactory serverStateFactory;
-
-	public AbstractServerState(ServerStateFactory serverStateFactory) {
-		this.serverStateFactory = serverStateFactory;
-	}
-
-	ServerStateFactory getServerStateFactory() {
-		return serverStateFactory;
-	}
-
-	<T> T throwIllegalState() {
-		return throwIllegalState(getState(), getSupportedOperations());
-	}
-
-	private <T> T throwIllegalState(States serverState,
-									Collection<String> supportedOperations) {
-		throw new IllegalStateException(
-				String.format(
-						"server current state is: %s. The only supported operation(s): %s",
-						serverState, supportedOperations));
-	}
+abstract class AbstractServerState /*implements ServerState */{
+//	private final TomcatServerStateFactory serverStateFactory;
+//
+//	public AbstractServerState(TomcatServerStateFactory serverStateFactory) {
+//		this.serverStateFactory = serverStateFactory;
+//	}
+//
+//	TomcatServerStateFactory getServerStateFactory() {
+//		return serverStateFactory;
+//	}
+//
+//	<T> T throwIllegalState() {
+//		return throwIllegalState(getState(), getSupportedOperations());
+//	}
+//
+//	private <T> T throwIllegalState(States serverState,
+//									Collection<String> supportedOperations) {
+//		throw new IllegalStateException(
+//				String.format(
+//						"server current state is: %s. The only supported operation(s): %s",
+//						serverState, supportedOperations));
+//	}
 
 	Collection<String> getSupportedOperations() {
 		ArrayList<String> result = new ArrayList<>();
@@ -80,103 +80,6 @@ abstract class AbstractServerState implements ServerState {
 		}
 		result.append(')');
 		return result.toString();
-	}
-
-	@Override
-	public Configuration getConfiguration() {
-		return throwIllegalState();
-	}
-
-	@Override
-	public void removeContext(HttpContext httpContext) {
-		throwIllegalState();
-	}
-
-	@Override
-	public void addServlet(ServletModel model) {
-		throwIllegalState();
-	}
-
-	@Override
-	public void removeServlet(ServletModel model) {
-		throwIllegalState();
-	}
-
-	@Override
-	public void addEventListener(EventListenerModel eventListenerModel) {
-		throwIllegalState();
-	}
-
-	@Override
-	public void removeEventListener(EventListenerModel eventListenerModel) {
-		throwIllegalState();
-	}
-
-	@Override
-	public void addFilter(FilterModel filterModel) {
-		throwIllegalState();
-	}
-
-	@Override
-	public void removeFilter(FilterModel filterModel) {
-		throwIllegalState();
-	}
-
-	@Override
-	public void addErrorPage(ErrorPageModel model) {
-		throwIllegalState();
-	}
-
-	@Override
-	public void removeErrorPage(ErrorPageModel model) {
-		throwIllegalState();
-	}
-
-	@Override
-	public Integer getHttpPort() {
-		return throwIllegalState();
-	}
-
-	@Override
-	public Integer getHttpSecurePort() {
-		return throwIllegalState();
-	}
-
-	@Override
-	public Servlet createResourceServlet(OsgiContextModel contextModel,
-										 String alias, String name) {
-		return throwIllegalState();
-	}
-
-	@Override
-	public void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel) {
-		throwIllegalState();
-	}
-
-	@Override
-	public void removeSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel) {
-		throwIllegalState();
-	}
-
-	@Override
-	public void addContainerInitializerModel(ContainerInitializerModel model) {
-		throwIllegalState();
-	}
-
-	@Override
-	public LifeCycle getContext(OsgiContextModel model) {
-		return throwIllegalState();
-	}
-
-
-	@Override
-	public void addWelcomeFiles(WelcomeFileModel model) {
-		throwIllegalState();
-	}
-
-	@Override
-	public void removeWelcomeFiles(WelcomeFileModel model) {
-		throwIllegalState();
 	}
 
 }

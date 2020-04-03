@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.spi.util;
 
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -98,8 +99,17 @@ public class Utils {
 	}
 
 	public static String resolve(String value) {
+		return resolve(value, null);
+	}
+
+	public static String resolve(String value, String defaultValue) {
+		return resolve(Collections.emptyMap(), value, defaultValue);
+	}
+
+	public static String resolve(Map<String, String> properties, String value, String defaultValue) {
 		Map<String, String> props = new HashMap<>();
 		props.put("_v", value);
+		props.putAll(properties);
 		InterpolationHelper.performSubstitution(props, bundle == null ? null : bundle.getBundleContext());
 		return props.get("_v");
 	}

@@ -25,7 +25,7 @@ public class ConfigurationBuilder {
 	/**
 	 * Produces {@link Configuration} object with properties coming from passed {@code resolver}. Returned
 	 * {@link Configuration} may be prepopulated (having properties resolved immediately), however, when using
-	 * {@link Configuration#get(String)}, resolvers may be used on demand.
+	 * {@link Configuration#get(String, Class)}, resolvers may be used on demand.
 	 *
 	 * @param resolver a {@link PropertyResolver} to access properties by name, but without a way to get all
 	 *        of the properties as dictionary

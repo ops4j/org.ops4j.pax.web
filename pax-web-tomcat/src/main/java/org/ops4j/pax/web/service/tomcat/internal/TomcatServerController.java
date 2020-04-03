@@ -1,101 +1,133 @@
 /*
+ * Copyright 2020 OPS4J.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.
- *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 package org.ops4j.pax.web.service.tomcat.internal;
 
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-import javax.servlet.Servlet;
-
-import org.ops4j.pax.web.service.spi.config.Configuration;
-import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
-import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
-import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
-import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
-import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
-import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
-import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingModel;
-import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
-import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
-import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.spi.ServerState;
+import org.ops4j.pax.web.service.spi.config.Configuration;
+import org.ops4j.pax.web.service.spi.task.Batch;
+import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Manage a single instance of embedded Tomcat server. As with Jetty, "controller" holds a refrence to a "wrapper"
+ * which in turn holds an instance of actual "Tomcat"
+ *
  * @author Romain Gilles
  */
 class TomcatServerController implements ServerController {
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(TomcatServerController.class);
-	private ServerState serverState;
+	private static final Logger LOG = LoggerFactory.getLogger(TomcatServerController.class);
 
-	private final Set<ServerListener> listeners = newThreadSafeSet();
+	private final Bundle paxWebTomcatBundle;
+	private final ClassLoader classLoader;
 
-	private TomcatServerController(ServerState initialState) {
-		this.serverState = initialState;
+	private final Configuration configuration;
+	private org.ops4j.pax.web.service.spi.ServerState state;
+
+	private final List<ServerListener> listeners;
+
+	private final TomcatFactory tomcatFactory;
+
+	/**
+	 * An instance of Tomcat Wrapper (and wrapped {@link org.apache.catalina.core.StandardServer} inside) that's
+	 * managed by this {@link ServerController}.
+	 */
+	private TomcatServerWrapper tomcatServerWrapper;
+
+	public TomcatServerController(Bundle paxWebTomcatBundle, ClassLoader classLoader,
+			TomcatFactory tomcatFactory, Configuration configuration) {
+		this.paxWebTomcatBundle = paxWebTomcatBundle;
+		this.classLoader = classLoader;
+		this.tomcatFactory = tomcatFactory;
+		this.configuration = configuration;
+		this.state = ServerState.UNCONFIGURED;
+
+		this.listeners = new CopyOnWriteArrayList<>();
 	}
 
-	private Set<ServerListener> newThreadSafeSet() {
-		// return new ConcurrentSkipListSet<ServerListener>();
-		return new CopyOnWriteArraySet<>();
+	// --- lifecycle methods
+
+	@Override
+	public ServerState getState() {
+		return state;
 	}
 
 	@Override
-	public void start() {
-		LOG.debug("start server");
-		serverState = serverState.start();
-		fireStateChange(ServerEvent.STARTED);
+	public void configure() throws Exception {
+		LOG.info("Configuring {}", this);
+
+		// controller can be configured only once
+		if (state != ServerState.UNCONFIGURED) {
+			throw new IllegalStateException("Can't configure Tomcat server controller in state " + state);
+		}
+
+		tomcatServerWrapper = new TomcatServerWrapper(configuration, tomcatFactory, paxWebTomcatBundle, classLoader);
+		tomcatServerWrapper.configure();
+
+		state = ServerState.STOPPED;
+		notifyListeners(ServerEvent.CONFIGURED);
 	}
 
 	@Override
-	public void stop() {
-		LOG.debug("stop server");
-		serverState = serverState.stop();
-		fireStateChange(ServerEvent.STOPPED);
+	public void start() throws Exception {
+		LOG.info("Starting {}", this);
+
+		if (state != ServerState.STOPPED) {
+			throw new IllegalStateException("Can't start Tomcat server controller in state " + state);
+		}
+
+		tomcatServerWrapper.start();
+
+		state = ServerState.STARTED;
+		notifyListeners(ServerEvent.STARTED);
 	}
 
 	@Override
-	public boolean isStarted() {
-		return serverState.isStarted();
-	}
+	public void stop() throws Exception {
+		LOG.info("Stopping {}", this);
 
-	@Override
-	public boolean isConfigured() {
-		return serverState.isConfigured();
-	}
+		if (state != ServerState.STARTED) {
+			throw new IllegalStateException("Can't stop Tomcat server controller in state " + state);
+		}
 
-	@Override
-	public void configure(Configuration configuration) {
-		LOG.debug("set configuration");
-		serverState = serverState.configure(configuration);
-		fireStateChange(ServerEvent.CONFIGURED);
-		this.start();
+		tomcatServerWrapper.stop();
+
+		state = ServerState.STOPPED;
+		notifyListeners(ServerEvent.STOPPED);
 	}
 
 	@Override
 	public Configuration getConfiguration() {
-		return serverState.getConfiguration();
+		return configuration;
 	}
+
+	// --- listener related methods
 
 	@Override
 	public void addListener(ServerListener listener) {
+		if (listener == null) {
+			throw new IllegalArgumentException("ServerListener is null");
+		}
 		listeners.add(listener);
 	}
 
@@ -104,105 +136,127 @@ class TomcatServerController implements ServerController {
 		listeners.remove(listener);
 	}
 
-	@Override
-	public void removeContext(HttpContext httpContext) {
-		serverState.removeContext(httpContext);
-	}
-
-	@Override
-	public void addServlet(ServletModel model) {
-		serverState.addServlet(model);
-	}
-
-	@Override
-	public void removeServlet(ServletModel model) {
-		serverState.removeServlet(model);
-	}
-
-	@Override
-	public void addEventListener(EventListenerModel eventListenerModel) {
-		serverState.addEventListener(eventListenerModel);
-	}
-
-	@Override
-	public void removeEventListener(EventListenerModel eventListenerModel) {
-		serverState.removeEventListener(eventListenerModel);
-	}
-
-	@Override
-	public void addFilter(FilterModel filterModel) {
-		serverState.addFilter(filterModel);
-	}
-
-	@Override
-	public void removeFilter(FilterModel filterModel) {
-		serverState.removeFilter(filterModel);
-	}
-
-	@Override
-	public void addErrorPage(ErrorPageModel model) {
-		serverState.addErrorPage(model);
-	}
-
-	@Override
-	public void removeErrorPage(ErrorPageModel model) {
-		serverState.removeErrorPage(model);
-	}
-
-	@Override
-	public LifeCycle getContext(OsgiContextModel model) {
-		return serverState.getContext(model);
-	}
-
-	@Override
-	public Integer getHttpPort() {
-		return serverState.getHttpPort();
-	}
-
-	@Override
-	public Integer getHttpSecurePort() {
-		return serverState.getHttpSecurePort();
-	}
-
-	@Override
-	public Servlet createResourceServlet(OsgiContextModel contextModel,
-										 String alias, String name) {
-		return serverState.createResourceServlet(contextModel, alias, name);
-	}
-
-	@Override
-	public void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel) {
-		serverState.addSecurityConstraintMapping(secMapModel);
-	}
-
-	@Override
-	public void removeSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel) {
-		serverState.removeSecurityConstraintMapping(secMapModel);
-	}
-
-	@Override
-	public void addContainerInitializerModel(ContainerInitializerModel model) {
-		serverState.addContainerInitializerModel(model);
-	}
-
-	private void fireStateChange(ServerEvent event) {
+	void notifyListeners(ServerEvent event) {
 		for (ServerListener listener : listeners) {
 			listener.stateChanged(event);
 		}
 	}
 
-	static ServerController newInstance(ServerState serverState) {
-		return new TomcatServerController(serverState);
+	@Override
+	public void sendBatch(Batch batch) {
+		LOG.info("Receiving {}", batch);
+
+		if (state == ServerState.UNCONFIGURED) {
+			throw new IllegalStateException("Can't process batch in Tomcat server controller in state " + state);
+		}
+
+		batch.accept(tomcatServerWrapper);
 	}
 
-	@Override
-	public void addWelcomFiles(WelcomeFileModel model) {
-		serverState.addWelcomeFiles(model);
-	}
+//	@Override
+//	public void removeContext(HttpContext httpContext) {
+//		serverState.removeContext(httpContext);
+//	}
+//
+//	@Override
+//	public void addServlet(ServletModel model) {
+//		serverState.addServlet(model);
+//	}
+//
+//	@Override
+//	public void removeServlet(ServletModel model) {
+//		serverState.removeServlet(model);
+//	}
+//
+//	@Override
+//	public void addEventListener(EventListenerModel eventListenerModel) {
+//		serverState.addEventListener(eventListenerModel);
+//	}
+//
+//	@Override
+//	public void removeEventListener(EventListenerModel eventListenerModel) {
+//		serverState.removeEventListener(eventListenerModel);
+//	}
+//
+//	@Override
+//	public void addFilter(FilterModel filterModel) {
+//		serverState.addFilter(filterModel);
+//	}
+//
+//	@Override
+//	public void removeFilter(FilterModel filterModel) {
+//		serverState.removeFilter(filterModel);
+//	}
+//
+//	@Override
+//	public void addErrorPage(ErrorPageModel model) {
+//		serverState.addErrorPage(model);
+//	}
+//
+//	@Override
+//	public void removeErrorPage(ErrorPageModel model) {
+//		serverState.removeErrorPage(model);
+//	}
+//
+//	@Override
+//	public LifeCycle getContext(OsgiContextModel model) {
+//		return serverState.getContext(model);
+//	}
+//
+//	@Override
+//	public Integer getHttpPort() {
+//		return serverState.getHttpPort();
+//	}
+//
+//	@Override
+//	public Integer getHttpSecurePort() {
+//		return serverState.getHttpSecurePort();
+//	}
+//
+//	@Override
+//	public Servlet createResourceServlet(OsgiContextModel contextModel,
+//										 String alias, String name) {
+//		return serverState.createResourceServlet(contextModel, alias, name);
+//	}
+//
+//	@Override
+//	public void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel) {
+//		serverState.addSecurityConstraintMapping(secMapModel);
+//	}
+//
+//	@Override
+//	public void removeSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel) {
+//		serverState.removeSecurityConstraintMapping(secMapModel);
+//	}
+//
+//	@Override
+//	public void addContainerInitializerModel(ContainerInitializerModel model) {
+//		serverState.addContainerInitializerModel(model);
+//	}
+//
+//	private void fireStateChange(ServerEvent event) {
+//		for (ServerListener listener : listeners) {
+//			listener.stateChanged(event);
+//		}
+//	}
+//
+//	static ServerController newInstance(ServerState serverState) {
+//		return new TomcatServerController(serverState);
+//	}
+//
+//	@Override
+//	public void addWelcomFiles(WelcomeFileModel model) {
+//		serverState.addWelcomeFiles(model);
+//	}
+//
+//	@Override
+//	public void removeWelcomeFiles(WelcomeFileModel model) {
+//		serverState.removeWelcomeFiles(model);
+//	}
 
 	@Override
-	public void removeWelcomeFiles(WelcomeFileModel model) {
-		serverState.removeWelcomeFiles(model);
+	public String toString() {
+		return "TomcatServerController{configuration=" + configuration.id() + ",state=" + state + "}";
 	}
 
 }

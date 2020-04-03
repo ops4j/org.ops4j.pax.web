@@ -61,7 +61,7 @@ public class JettyServerControllerFactory implements ServerControllerFactory {
 	 *
 	 * @param paxWebJettyBundle bundle that instantiated this factory. Not required (e.g., in tests)
 	 * @param classLoader used to detect server capabilities which can be enabled if some classes are present
-	 *        on the classpath
+	 *        on the classpath - at runtime (not in tests), this should be the classloader of the bundle
 	 */
 	public JettyServerControllerFactory(Bundle paxWebJettyBundle, ClassLoader classLoader) {
 		this.paxWebJettyBundle = paxWebJettyBundle;

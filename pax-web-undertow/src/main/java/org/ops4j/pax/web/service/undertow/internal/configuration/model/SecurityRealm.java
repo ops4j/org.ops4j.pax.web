@@ -225,19 +225,20 @@ public class SecurityRealm {
 
 	@XmlType(name = "realmKeyStoreType", namespace = NS_WILDFLY)
 	public static class Truststore {
-		@XmlAttribute
-		private String provider;
+		// Watch out for provider vs. type confusion
+		@XmlAttribute(name = "provider")
+		private String type;
 		@XmlAttribute
 		private String path;
 		@XmlAttribute(name = "keystore-password")
 		private String password;
 
-		public String getProvider() {
-			return provider;
+		public String getType() {
+			return type;
 		}
 
-		public void setProvider(String provider) {
-			this.provider = provider;
+		public void setType(String type) {
+			this.type = type;
 		}
 
 		public String getPath() {
@@ -259,7 +260,7 @@ public class SecurityRealm {
 		@Override
 		public String toString() {
 			final StringBuilder sb = new StringBuilder("{ ");
-			sb.append("provider: ").append(provider);
+			sb.append("provider: ").append(type);
 			sb.append(", path: ").append(path);
 			sb.append(" }");
 			return sb.toString();
@@ -302,7 +303,7 @@ public class SecurityRealm {
 		@Override
 		public String toString() {
 			final StringBuilder sb = new StringBuilder("{ ");
-			sb.append("provider: ").append(getProvider());
+			sb.append("provider: ").append(getType());
 			sb.append(", path: ").append(getPath());
 			sb.append(", alias: ").append(alias);
 			sb.append(" }");

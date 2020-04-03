@@ -16,10 +16,13 @@
 package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -43,7 +46,9 @@ import org.apache.catalina.core.StandardServer;
 import org.apache.catalina.core.StandardService;
 import org.apache.catalina.core.StandardThreadExecutor;
 import org.apache.catalina.core.StandardWrapper;
+import org.apache.catalina.startup.Catalina;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.tomcat.util.digester.Digester;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -51,6 +56,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class EmbeddedTomcatTest {
@@ -83,6 +90,8 @@ public class EmbeddedTomcatTest {
 		// - org.apache.catalina.startup.Catalina.start()
 		//    - org.apache.catalina.core.StandardServer.startInternal()
 
+		// even if in theory Service could be running without server, it is required by different components, e.g.,
+		// connectors that want to access utility thread pool
 		Server server = new StandardServer();
 		server.setCatalinaBase(new File("target"));
 
@@ -95,6 +104,7 @@ public class EmbeddedTomcatTest {
 
 		Connector connector = new Connector("HTTP/1.1");
 		connector.setPort(0);
+		connector.setProperty("address", "127.0.0.1");
 		service.addConnector(connector);
 
 		Engine engine = new StandardEngine();
@@ -144,23 +154,8 @@ public class EmbeddedTomcatTest {
 
 		LOG.info("Local port after start: {}", connector.getLocalPort());
 
-		Socket s = new Socket();
-		s.connect(new InetSocketAddress("127.0.0.1", connector.getLocalPort()));
-
-		s.getOutputStream().write((
-				"GET / HTTP/1.1\r\n" +
-				"Host: 127.0.0.1:" + connector.getLocalPort() + "\r\n" +
-				"Connection: close\r\n\r\n").getBytes());
-
-		byte[] buf = new byte[64];
-		int read = -1;
-		StringWriter sw = new StringWriter();
-		while ((read = s.getInputStream().read(buf)) > 0) {
-			sw.append(new String(buf, 0, read));
-		}
-		s.close();
-
-		assertTrue(sw.toString().endsWith("\r\n\r\nOK\n"));
+		String response = send(connector.getLocalPort(), "/");
+		assertTrue(response.endsWith("\r\n\r\nOK\n"));
 
 		server.stop();
 		server.destroy();
@@ -538,26 +533,74 @@ public class EmbeddedTomcatTest {
 
 		LOG.info("Local port after start: {}", tomcat.getConnector().getLocalPort());
 
-		Socket s = new Socket();
-		s.connect(new InetSocketAddress("127.0.0.1", tomcat.getConnector().getLocalPort()));
-
-		s.getOutputStream().write((
-				"GET / HTTP/1.1\r\n" +
-				"Host: 127.0.0.1:" + tomcat.getConnector().getLocalPort() + "\r\n" +
-				"Connection: close\r\n\r\n").getBytes());
-
-		byte[] buf = new byte[64];
-		int read = -1;
-		StringWriter sw = new StringWriter();
-		while ((read = s.getInputStream().read(buf)) > 0) {
-			sw.append(new String(buf, 0, read));
-		}
-		s.close();
-
-		assertTrue(sw.toString().endsWith("\r\n\r\nOK\n"));
+		String response = send(tomcat.getConnector().getLocalPort(), "/");
+		assertTrue(response.endsWith("\r\n\r\nOK\n"));
 
 		tomcat.stop();
 		tomcat.destroy();
+	}
+
+	@Test
+	public void embeddedServerWithExternalConfiguration() throws Exception {
+		File webXml = new File("target/WEB-INF/web.xml");
+		webXml.getParentFile().mkdirs();
+		webXml.delete();
+
+		try (FileWriter writer = new FileWriter(webXml)) {
+			writer.write("<web-app xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+					"    xsi:schemaLocation=\"http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd\"\n" +
+					"    version=\"4.0\">\n" +
+					"\n" +
+					"    <servlet>\n" +
+					"        <servlet-name>test-servlet</servlet-name>\n" +
+					"        <servlet-class>org.ops4j.pax.web.service.tomcat.internal.EmbeddedTomcatTest$TestServlet</servlet-class>\n" +
+					"    </servlet>\n" +
+					"\n" +
+					"    <servlet-mapping>\n" +
+					"        <servlet-name>test-servlet</servlet-name>\n" +
+					"        <url-pattern>/ts</url-pattern>\n" +
+					"    </servlet-mapping>\n" +
+					"\n" +
+					"</web-app>\n");
+		}
+
+		// loop taken from org.apache.catalina.startup.Catalina.load()
+
+		Digester digester = (new Catalina() {
+			@Override
+			public Digester createStartDigester() {
+				return super.createStartDigester();
+			}
+		}).createStartDigester();
+
+		ServerHolder holder = new ServerHolder();
+		digester.push(holder);
+
+		// properties that are fortunately used from within tomcat-*.xml
+		System.setProperty("docbase", new File("target").getAbsolutePath());
+		System.setProperty("workdir", new File("target/test-classes").getAbsolutePath());
+		digester.parse(new File("target/test-classes/etc/tomcat-webapp1.xml"));
+
+		// web.xml will be processed by org.apache.catalina.startup.ContextConfig.configureStart()
+		// in response to org.apache.catalina.core.StandardContext.startInternal() sending
+		// org.apache.catalina.Lifecycle.CONFIGURE_START_EVENT event.
+		// org.apache.catalina.startup.ContextConfig is the default listener in StandardContext
+		// org.apache.catalina.startup.ContextConfig.configureContext() is simply iterating over elements
+		// in web.xml
+
+		StandardServer server = (StandardServer) holder.getServer();
+		Service catalina = server.findService("Catalina");
+		Connector connector = catalina.findConnectors()[0];
+		assertThat(((StandardThreadExecutor)catalina.getExecutor("default")).getNamePrefix(), equalTo("tomcat-pool-"));
+
+		server.start();
+
+		int port = connector.getLocalPort();
+		String response = send(port, "/app1/ts");
+		assertTrue(response.endsWith("\r\n\r\nOK\n"));
+
+		server.stop();
+		server.destroy();
 	}
 
 	private String send(int port, String request) throws IOException {
@@ -578,6 +621,36 @@ public class EmbeddedTomcatTest {
 		s.close();
 
 		return sw.toString();
+	}
+
+	/**
+	 * A class on which Tomcat digester can call {@link #setServer(Server)}
+	 */
+	public static class ServerHolder {
+		private Server server;
+
+		public Server getServer() {
+			return server;
+		}
+
+		public void setServer(Server server) {
+			this.server = server;
+		}
+	}
+
+	public static class TestServlet extends HttpServlet {
+
+		public TestServlet() {
+			System.out.println("Creating TestServlet");
+		}
+
+		@Override
+		protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			resp.setContentType("text/plain");
+			resp.setCharacterEncoding("UTF-8");
+			resp.getWriter().write("OK\n");
+			resp.getWriter().close();
+		}
 	}
 
 }

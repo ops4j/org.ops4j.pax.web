@@ -1,15 +1,15 @@
 /*
+ * Copyright 2020 OPS4J.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.
- *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -159,9 +159,6 @@ public class EmbeddedTomcat extends Tomcat {
 
 	private File configurationDir;
 
-	private EmbeddedTomcat() {
-	}
-
 	static EmbeddedTomcat newEmbeddedTomcat(Configuration configuration) {
 		EmbeddedTomcat result = new EmbeddedTomcat();
 		result.configure(configuration);
@@ -190,50 +187,50 @@ public class EmbeddedTomcat extends Tomcat {
 		Digester digester = new FakeCatalina().createStartDigester();
 		digester.push(this);
 
-		URL tomcatResource = configuration.server().getConfigurationURL();
-		if (tomcatResource == null) {
-			tomcatResource = getClass().getResource("/tomcat-server.xml");
-		}
-
-		configurationDir = configuration.server().getConfigurationDir();
-		File configurationFile = new File(configurationDir,
-				SERVER_CONFIG_FILE_NAME);
-		if (configurationFile.exists()) {
-			try {
-				tomcatResource = configurationFile.toURI().toURL();
-			} catch (MalformedURLException e) {
-				LOG.error("Exception while starting Tomcat:", e);
-				throw new RuntimeException("Exception while starting Tomcat", e);
-			}
-		}
-		if (tomcatResource != null) {
-			ClassLoader loader = Thread.currentThread().getContextClassLoader();
-			try {
-				Thread.currentThread().setContextClassLoader(
-						getClass().getClassLoader());
-				LOG.debug("Configure using resource " + tomcatResource);
-
-				digester.parse(tomcatResource.openStream());
-				long elapsed = start - System.nanoTime();
-				if (LOG.isInfoEnabled()) {
-					LOG.info("configuration processed in {} ms",
-							(elapsed / 1000000));
-				}
-			} catch (IOException | SAXException e) {
-				LOG.error("Exception while starting Tomcat:", e);
-				throw new RuntimeException("Exception while starting Tomcat", e);
-			} finally {
-				Thread.currentThread().setContextClassLoader(loader);
-			}
-		} else {
-		    getServer().setCatalina(new FakeCatalina());
-		    getService().setName("Catalina");
-		    getEngine().setName("Catalina");
-		}
+//		URL tomcatResource = configuration.server().getConfigurationURL();
+//		if (tomcatResource == null) {
+//			tomcatResource = getClass().getResource("/tomcat-server.xml");
+//		}
+//
+//		configurationDir = configuration.server().getConfigurationDir();
+//		File configurationFile = new File(configurationDir,
+//				SERVER_CONFIG_FILE_NAME);
+//		if (configurationFile.exists()) {
+//			try {
+//				tomcatResource = configurationFile.toURI().toURL();
+//			} catch (MalformedURLException e) {
+//				LOG.error("Exception while starting Tomcat:", e);
+//				throw new RuntimeException("Exception while starting Tomcat", e);
+//			}
+//		}
+//		if (tomcatResource != null) {
+//			ClassLoader loader = Thread.currentThread().getContextClassLoader();
+//			try {
+//				Thread.currentThread().setContextClassLoader(
+//						getClass().getClassLoader());
+//				LOG.debug("Configure using resource " + tomcatResource);
+//
+//				digester.parse(tomcatResource.openStream());
+//				long elapsed = start - System.nanoTime();
+//				if (LOG.isInfoEnabled()) {
+//					LOG.info("configuration processed in {} ms",
+//							(elapsed / 1000000));
+//				}
+//			} catch (IOException | SAXException e) {
+//				LOG.error("Exception while starting Tomcat:", e);
+//				throw new RuntimeException("Exception while starting Tomcat", e);
+//			} finally {
+//				Thread.currentThread().setContextClassLoader(loader);
+//			}
+//		} else {
+//		    getServer().setCatalina(new FakeCatalina());
+//		    getService().setName("Catalina");
+//		    getEngine().setName("Catalina");
+//		}
 
 		mergeConfiguration(configuration);
 
-        initBaseDir(configuration);
+//        initBaseDir(configuration);
 	}
 
 	@Review("A bit different than Jetty - here \"context\" is not configured, but this method is called during configure/start")
@@ -252,209 +249,14 @@ public class EmbeddedTomcat extends Tomcat {
 		configurationSessionCookieMaxAge = configuration.session().getSessionCookieMaxAge();
 		configurationSessionCookieHttpOnly = configuration
 				.session().getSessionCookieHttpOnly();
-
-		// NCSA Logger --> AccessLogValve
-		if (configuration.logging().isLogNCSAFormatEnabled()) {
-			AccessLog ncsaLogger = new AccessLogValve();
-			boolean modifiedValve = false;
-			for (Valve valve : getHost().getPipeline().getValves()) {
-				if (valve instanceof AccessLogValve) {
-					modifiedValve = true;
-					ncsaLogger = (AccessLog) valve;
-				}
-			}
-
-			((AccessLogValve) ncsaLogger).setPattern("common");
-			((AccessLogValve) ncsaLogger).setDirectory(configuration
-					.logging().getLogNCSADirectory());
-			((AccessLogValve) ncsaLogger).setSuffix(".log"); // ncsaLogge
-			if (!modifiedValve) {
-				getHost().getPipeline().addValve((Valve) ncsaLogger);
-			}
-		}
-
-		Integer httpPort = configuration.server().getHttpPort();
-		Integer httpSecurePort = configuration.server().getHttpSecurePort();
-		Integer idleTimeout = configuration.server().getConnectorIdleTimeout();
-
-        for (String address : addresses) {
-            if (configuration.server().isHttpEnabled()) {
-                LOG.debug("HttpEnabled");
-                Connector[] connectors = getService().findConnectors();
-                boolean masterConnectorFound = false;
-                // Flag is set if the same connector has been found through xml config and properties
-                if (connectors != null && connectors.length > 0) {
-                    // Combine the configurations if they do match
-                    Connector backupConnector = null;
-                    for (Connector connector : connectors) {
-                        if (!connector.getSecure()) {
-                            if (matches(address, httpPort, connector)) {
-                                //CHECKSTYLE:OFF
-                                if (httpConnector == null) {
-                                    httpConnector = connector;
-                                }
-                                //CHECKSTYLE:ON
-                                masterConnectorFound = true;
-                                LOG.debug("master connector found, will alter it");
-                            } else {
-                                if (backupConnector == null) {
-                                    backupConnector = connector;
-                                    LOG.debug("backup connector found");
-                                }
-                            }
-                        }
-                    }
-
-                    if (httpConnector == null && backupConnector != null) {
-                        LOG.debug("No master connector found will use backup one");
-                        httpConnector = backupConnector;
-                    }
-                }
-
-                if (!masterConnectorFound) {
-                    httpConnector = createConnector(configuration, httpConnector, address, httpPort, idleTimeout);
-                }
-            } else {
-                // remove maybe already configured connectors through server.xml,
-                // the config-property/config-admin service is master configuration
-                LOG.debug("Http is disabled any existing http connector will be removed");
-                Connector[] connectors = getService().findConnectors();
-                if (connectors != null) {
-                    for (Connector connector : connectors) {
-                        if (!connector.getSecure()) {
-                            LOG.debug("Removing connector {}", connector);
-                            getService().removeConnector(connector);
-                        }
-                    }
-                }
-            }
-            if (configuration.server().isHttpSecureEnabled()) {
-                final String sslPassword = configuration.security().getSslKeystorePassword();
-                final String sslKeyPassword = configuration.security().getSslKeyPassword();
-
-                Connector[] connectors = getService().findConnectors();
-                boolean masterSSLConnectorFound = false;
-                if (connectors != null && connectors.length > 0) {
-                    // Combine the configurations if they do match
-                    Connector backupConnector = null;
-                    for (Connector connector : connectors) {
-                        if (connector.getSecure()) {
-                            Connector sslCon = connector;
-                            if (matches(address, httpSecurePort, connector)) {
-                                httpSecureConnector = sslCon;
-                                masterSSLConnectorFound = true;
-                            } else {
-                                // default behaviour
-                                if (backupConnector == null) {
-                                    backupConnector = connector;
-                                }
-                            }
-                        }
-                    }
-                    if (httpSecureConnector == null && backupConnector != null) {
-                        httpSecureConnector = backupConnector;
-                    }
-                }
-
-                if (!masterSSLConnectorFound) {
-                    httpSecureConnector = createSSLConnector(configuration, httpSecureConnector, address, httpSecurePort, sslPassword,
-                            sslKeyPassword);
-                }
-            } else {
-                // remove maybe already configured connectors through tomcat-config.xml, the
-                // config-property/config-admin service is master configuration
-                Connector[] connectors = getService().findConnectors();
-                if (connectors != null) {
-                    for (Connector connector : connectors) {
-                        if (connector.getSecure()) {
-                            getService().removeConnector(connector);
-                        }
-                    }
-                }
-            }
-        }
 	}
 
-    private boolean matches(String address, Integer port, Connector connector) {
-        InetSocketAddress isa1 = address != null ? new InetSocketAddress(address, port) : new InetSocketAddress(port);
-        InetSocketAddress isa2 = connector.getAttribute("address") != null
-                ? new InetSocketAddress(connector.getAttribute("address").toString(), connector.getPort())
-                : new InetSocketAddress(connector.getPort());
-        return isa1.equals(isa2) && connector.getProtocol() != null && connector.getProtocol().toLowerCase(Locale.ROOT).startsWith("http");
-    }
-
-    private Connector createSSLConnector(Configuration configuration, Connector httpSecureConnector, String address, Integer httpSecurePort,
-            final String sslPassword, final String sslKeyPassword) {
-        Connector secureConnector  = null;
-        if (sslPassword != null && sslKeyPassword != null) {
-        	secureConnector = new Connector("HTTP/1.1");
-        	secureConnector.setPort(httpSecurePort);
-            secureConnector.setSecure(true);
-            secureConnector.setScheme("https");
-            secureConnector.setProperty("SSLEnabled", "true");
-
-            secureConnector.setProperty("keystoreFile",
-            		configuration.security().getSslKeystore());
-            secureConnector.setProperty("keystorePass",
-            		configuration.security().getSslKeyPassword());
-            secureConnector.setProperty("clientAuth", "false");
-            secureConnector.setProperty("sslProtocol", "TLS");
-
-            if (configuration.server().getServerMaxThreads() != null) {
-            	secureConnector.setAttribute("maxThreads", configuration.server().getServerMaxThreads());
-            }
-            if (configuration.server().getServerMinThreads() != null) {
-            	secureConnector.setAttribute("minSpareThreads", configuration.server().getServerMinThreads());
-            }
-
-            if (address != null) {
-                secureConnector.setAttribute("address", address);
-            }
-        	getService().addConnector(secureConnector);
-        } else {
-        	LOG.warn("SSL password and SSL keystore password must be set in order to enable SSL.");
-        	LOG.warn("SSL connector will not be started");
-        }
-        return httpSecureConnector == null ? secureConnector : httpSecureConnector;
-    }
-
-    private Connector createConnector(Configuration configuration, Connector httpConnector, String address, Integer httpPort, Integer idleTimeout) {
-        LOG.debug("No Master connector found create a new one");
-        Connector connector = new Connector("HTTP/1.1");
-        LOG.debug("Reconfiguring master connector");
-        LOG.debug("Configuring connector {}", connector);
-        connector.setScheme("http");
-        connector.setPort(httpPort);
-        if (configuration.server().isHttpSecureEnabled()) {
-        	connector.setRedirectPort(configuration.server().getHttpSecurePort());
-        }
-
-        if (configuration.server().getServerMaxThreads() != null) {
-        	connector.setAttribute("maxThreads", configuration.server().getServerMaxThreads());
-        }
-        if (configuration.server().getServerMinThreads() != null) {
-        	connector.setAttribute("minSpareThreads", configuration.server().getServerMinThreads());
-        }
-
-        if (address != null) {
-            connector.setAttribute("address", address);
-        }
-
-        if (idleTimeout != null) {
-        	connector.setProperty("connectionTimeout", idleTimeout.toString());
-		}
-
-        LOG.debug("configuration done: {}", connector);
-        getService().addConnector(connector);
-        return httpConnector == null ? connector : httpConnector;
-    }
-
-	private void initBaseDir(Configuration configuration) {
-		if (System.getProperty(Globals.CATALINA_HOME_PROP) == null) {
-			setBaseDir(configuration.server().getTemporaryDirectory().getAbsolutePath());
-		}
-		initBaseDir();
-	}
+//	private void initBaseDir(Configuration configuration) {
+//		if (System.getProperty(Globals.CATALINA_HOME_PROP) == null) {
+//			setBaseDir(configuration.server().getTemporaryDirectory().getAbsolutePath());
+//		}
+//		initBaseDir();
+//	}
 
 	String getBasedir() {
 		return basedir;
@@ -465,9 +267,10 @@ public class EmbeddedTomcat extends Tomcat {
 	}
 
 	public Context findContext(OsgiContextModel contextModel) {
-		String name = generateContextName(contextModel.getContextName(),
-				contextModel.getHttpContext());
-		return findContext(name);
+//		String name = generateContextName(contextModel.getContextName(),
+//				contextModel.getHttpContext());
+//		return findContext(name);
+		return null;
 	}
 
 	Context findContext(String contextName) {

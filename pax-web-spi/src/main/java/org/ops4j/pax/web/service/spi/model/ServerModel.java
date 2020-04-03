@@ -619,7 +619,7 @@ public class ServerModel {
 		// translated into "/alias/*" URL Mapping
 
 		boolean register = true;
-		Set<ServletModel> modelsToDisable = new HashSet<>();
+		Set<ServletModel> newlyDisabled = new HashSet<>();
 
 		for (ServletContextModel sc : targetServletContexts) {
 			for (String pattern : model.getUrlPatterns()) {
@@ -628,7 +628,7 @@ public class ServerModel {
 					// service.ranking/service.id checking
 					if (model.compareTo(existing) < 0) {
 						// we won, but still can lose, because it's not the only pattern (or the only context)
-						modelsToDisable.add(existing);
+						newlyDisabled.add(existing);
 					} else {
 						LOG.warn("{} can't be registered now in context {} under \"{}\" mapping. Conflict with {}.",
 								model, sc.getContextPath(), pattern, existing);
@@ -664,7 +664,7 @@ public class ServerModel {
 		//
 		// We can't delete the models entirely - they should await for possible future re-registration and also be
 		// available for DTO purposes
-		for (ServletModel existing : modelsToDisable) {
+		for (ServletModel existing : newlyDisabled) {
 			// disable it even if it can stay active in some context(s)
 			batch.disableServletModel(this, existing);
 
@@ -687,19 +687,12 @@ public class ServerModel {
 			return;
 		}
 
-		if (modelsToDisable.isEmpty()) {
+		if (newlyDisabled.isEmpty()) {
 			// nothing prevents us from registering new model for all required contexts, because when nothing
 			// was disabled, nothing should be enabled except the new model
 			batch.addServletModel(this, model);
 			return;
 		}
-
-		// some models have beed disabled. It means that maybe some currently disabled models
-		// may be enabled? Our new model is also potentially disabled
-		Set<ServletModel> pendingDisabledModels = new TreeSet<>(disabledServletModels);
-		// our model could stay disabled, because some better-ranked, currently disabled model may be ranked
-		// higher than our new model
-		pendingDisabledModels.add(model);
 
 		// it's quite problematic part. we're in the method that only prepares the batch, but doesn't
 		// yet change the model itself. Before the model is affected, we'll send this batch to
@@ -708,9 +701,15 @@ public class ServerModel {
 		// each disabled servletModel may be a reason to enable other models. Currently disabled
 		// ServerModels (+ our new model) may be enabled ONLY if they can be enabled in ALL associated contexts
 
-		reEnableServletModels(pendingDisabledModels, modelsToDisable, model, batch);
+		final Map<String, Map<String, ServletModel>> currentlyEnabledByName = new HashMap<>();
+		final Map<String, Map<String, ServletModel>> currentlyEnabledByPattern = new HashMap<>();
+		Set<ServletModel> currentlyDisabled = new TreeSet<>();
+		prepareSnapshot(currentlyEnabledByName, currentlyEnabledByPattern, currentlyDisabled,
+				model, newlyDisabled);
 
-		if (pendingDisabledModels.contains(model)) {
+		reEnableServletModels(currentlyDisabled, currentlyEnabledByName, currentlyEnabledByPattern, model, batch);
+
+		if (currentlyDisabled.contains(model)) {
 			batch.addDisabledServletModel(this, model);
 		}
 	}
@@ -731,65 +730,123 @@ public class ServerModel {
 		// may lead to re-registration of other models
 
 		// this is straightforward
-		for (ServletModel model : models) {
-			batch.removeServletModels(this, model);
-		}
+		batch.removeServletModels(this, models);
+
+		Map<String, Map<String, ServletModel>> currentlyEnabledByName = new HashMap<>();
+		Map<String, Map<String, ServletModel>> currentlyEnabledByPattern = new HashMap<>();
+		Set<ServletModel> currentlyDisabled = new TreeSet<>();
+		prepareSnapshot(currentlyEnabledByName, currentlyEnabledByPattern, currentlyDisabled,
+				null, new HashSet<>(models));
 
 		// review all disabled servlet models (in ranking order) to verify if they can be enabled again
-		reEnableServletModels(new TreeSet<>(disabledServletModels), new HashSet<>(models), null, batch);
+		reEnableServletModels(currentlyDisabled, currentlyEnabledByName, currentlyEnabledByPattern, null, batch);
 	}
 
 	/**
-	 * Fragile method used both during servlet registration and unregistration. Starting with set of currently
-	 * disabled models, this methods prepares batch operations that may enable some of them.
+	 * Preparation for {@link #reEnableServletModels(Set, Set, Map, Map, ServletModel, Batch)} that does
+	 * proper copy of current state of all {@link ServletContextModel}
 	 *
-	 * @param pendingDisabledModels currently disabled models - this collection will be altered by this method
-	 * @param modelsToDisable newly disabled models
-	 * @param modelToEnable newly added model (could be {@code null})
-	 * @param batch
+	 * @param currentlyEnabledByName
+	 * @param currentlyEnabledByPattern
+	 * @param currentlyDisabled
+	 * @param newlyAdded prepared snapshot will include newly added model as currentlyDisabled
+	 *        (to enable it potentially)
+	 * @param newlyDisabled prepared snapshot will already have newlyDisabled models removed from snapshot mappings
 	 */
-	private void reEnableServletModels(Set<ServletModel> pendingDisabledModels, Set<ServletModel> modelsToDisable,
+	private void prepareSnapshot(Map<String, Map<String, ServletModel>> currentlyEnabledByName,
+			Map<String, Map<String, ServletModel>> currentlyEnabledByPattern,
+			Set<ServletModel> currentlyDisabled,
+			ServletModel newlyAdded, Set<ServletModel> newlyDisabled) {
+
+		servletContexts.values().forEach(scm -> {
+			currentlyDisabled.addAll(disabledServletModels);
+
+			String path = scm.getContextPath();
+			// deep copies
+			HashMap<String, ServletModel> enabledByName = new HashMap<>(scm.getServletNameMapping());
+			HashMap<String, ServletModel> enabledByPattern = new HashMap<>(scm.getServletUrlPatternMapping());
+			currentlyEnabledByName.put(path, enabledByName);
+			currentlyEnabledByPattern.put(path, enabledByPattern);
+
+			// newlyDisabled are scheduled for disabling (in batch), so let's remove them from the snapshot
+			if (newlyDisabled != null) {
+				newlyDisabled.forEach(sm -> {
+					sm.getServletContextModels().forEach(scm2 -> {
+						if (scm.equals(scm2)) {
+							enabledByName.remove(sm.getName(), sm);
+							Arrays.stream(sm.getUrlPatterns()).forEach(pattern -> {
+								enabledByPattern.remove(pattern, sm);
+							});
+						}
+					});
+				});
+			}
+		});
+
+		// newlyAdded is only "offered" to be registered as active
+		if (newlyAdded != null) {
+			currentlyDisabled.add(newlyAdded);
+		}
+	}
+
+	/**
+	 * <p>Fragile method used both during servlet registration and unregistration. Starting with set of currently
+	 * disabled models, this methods prepares batch operations that may enable some of them.</p>
+	 *
+	 * <p>This method has to be provided with current snapshot of all disabled and registered servlets and will
+	 * be called recursively because every "woken up" model may lead to disabling of other models, which again
+	 * may enable other models and so on...</p>
+	 *
+	 * @param currentlyDisabled currently disabled models - this collection may be shrunk in this method. Every
+	 *        model removed from this collection will be batched for enabling
+	 * @param currentlyEnabledByName temporary state of by-name servlets - may be altered during invocation
+	 * @param currentlyEnabledByPattern temporary state of by-URL-pattern servlets - may be altered during invocation
+	 * @param modelToEnable newly added model (could be {@code null}) - needed because when adding new servlet, it
+	 *        is initialy treated as disabled. We have to decide then whether to enable existing model or add a new one
+	 * @param batch this {@link Batch} will collect avalanche of possible disable/enable operations
+	 */
+	private void reEnableServletModels(Set<ServletModel> currentlyDisabled,
+			Map<String, Map<String, ServletModel>> currentlyEnabledByName,
+			Map<String, Map<String, ServletModel>> currentlyEnabledByPattern,
 			ServletModel modelToEnable, Batch batch) {
-		// for each servlet context we'll check name and URL conflicts - using existing name/url
-		// mapping, which will include newly enabled model too
-		// this map is temporary copy of all such mappings from all servlet contexts. The main key is context path
-		Map<String, Map<String, ServletModel>> pendingEnabledByName = new HashMap<>();
-		Map<String, Map<String, ServletModel>> pendingEnabledByPattern = new HashMap<>();
+
+		Set<ServletModel> newlyDisabled = new LinkedHashSet<>();
+		boolean change = false;
 
 		// reviewed using TreeSet, i.e., by proper ranking
-		for (Iterator<ServletModel> iterator = pendingDisabledModels.iterator(); iterator.hasNext(); ) {
+		for (Iterator<ServletModel> iterator = currentlyDisabled.iterator(); iterator.hasNext(); ) {
+			// this is the highest ranked, currently disabled servlet model
 			ServletModel disabled = iterator.next();
+			boolean canBeEnabled = true;
+			newlyDisabled.clear();
 
 			Set<ServletContextModel> contextsOfDisabledModel = disabled.getServletContextModels();
-			boolean canBeEnabled = true;
 
-			// check for conflicts in all its contexts
+			// check for name and URL pattern conflicts in all its contexts. There are two outcomes:
+			//  - any conflict - model won't be enabled and won't cause any changes
+			//  - no conflict (or winning over active, but lower ranked models) - model will be enabled
+			//    and some active model (or models) will be disabled
+			//  - the good thing is (I hope) that if some active model gets disabled, it can't be enabled in the
+			//    same review due to deactivation of yet another model
+
 			for (ServletContextModel sc : contextsOfDisabledModel) {
 				String cp = sc.getContextPath();
 
-				pendingEnabledByName.computeIfAbsent(sc.getContextPath(), p -> new HashMap<>())
-						.putAll(sc.getServletNameMapping());
-				pendingEnabledByPattern.computeIfAbsent(sc.getContextPath(), p -> new HashMap<>())
-						.putAll(sc.getServletUrlPatternMapping());
-
 				// name conflict check
-				for (Map.Entry<String, ServletModel> enabled : pendingEnabledByName.get(cp).entrySet()) {
-					if (modelsToDisable.contains(enabled.getValue())) {
-						continue;
-					}
-					boolean nameConflict = hasAnyNameConflict(disabled.getName(), enabled.getKey(),
-							disabled, enabled.getValue());
+				for (Map.Entry<String, ServletModel> entry : currentlyEnabledByName.get(cp).entrySet()) {
+					ServletModel enabled = entry.getValue();
+					boolean nameConflict = hasAnyNameConflict(disabled.getName(), enabled.getName(), disabled, enabled);
 					if (nameConflict) {
 						// name conflict with existing, enabled model. BUT currently disabled model may have
 						// higher ranking...
-						if (disabled.compareTo(enabled.getValue()) < 0) {
-
+						if (disabled.compareTo(enabled) < 0) {
+							// still can be enabled (but we have to check everything) and currently disabled
+							// may potentially get disabled
+							newlyDisabled.add(enabled);
 						} else {
 							canBeEnabled = false;
+							break;
 						}
-					}
-					if (!canBeEnabled) {
-						break;
 					}
 				}
 				if (!canBeEnabled) {
@@ -798,10 +855,18 @@ public class ServerModel {
 
 				// URL mapping check
 				for (String pattern : disabled.getUrlPatterns()) {
-					ServletModel existingMapping = pendingEnabledByPattern.get(cp).get(pattern);
-					if (existingMapping != null && !modelsToDisable.contains(existingMapping)) {
-						canBeEnabled = false;
-						break;
+					ServletModel existingMapping = currentlyEnabledByPattern.get(cp).get(pattern);
+					if (existingMapping != null) {
+						// URL conflict with existing, enabled model. BUT currently disabled model may have
+						// higher ranking...
+						if (disabled.compareTo(existingMapping) < 0) {
+							// still can be enabled (but we have to check everything) and currently disabled
+							// may potentially get disabled
+							newlyDisabled.add(existingMapping);
+						} else {
+							canBeEnabled = false;
+							break;
+						}
 					}
 				}
 				if (!canBeEnabled) {
@@ -811,10 +876,27 @@ public class ServerModel {
 
 			// disabled model can be enabled again - in all its contexts
 			if (canBeEnabled) {
+				newlyDisabled.forEach(model -> {
+					// disable the one that have lost
+					batch.disableServletModel(ServerModel.this, model);
+
+					// and forget about it in the snapshot
+					model.getServletContextModels().forEach(scm -> {
+						currentlyEnabledByName.get(scm.getContextPath()).remove(model.getName(), model);
+						Arrays.stream(model.getUrlPatterns()).forEach(p -> {
+							currentlyEnabledByPattern.get(scm.getContextPath()).remove(p, model);
+						});
+					});
+
+					// do NOT add newlyDisabled to "currentlyDisabled" - we don't want to check if they can be enabled!
+				});
+
+				// update the snapshot - newly enabled model should be visible as the one registered
+				// under its name and patterns
 				for (ServletContextModel sc : contextsOfDisabledModel) {
-					pendingEnabledByName.get(sc.getContextPath()).put(disabled.getName(), disabled);
+					currentlyEnabledByName.get(sc.getContextPath()).put(disabled.getName(), disabled);
 					Arrays.stream(disabled.getUrlPatterns())
-							.forEach(p -> pendingEnabledByPattern.get(sc.getContextPath()).put(p, disabled));
+							.forEach(p -> currentlyEnabledByPattern.get(sc.getContextPath()).put(p, disabled));
 				}
 				if (modelToEnable != null && modelToEnable.equals(disabled)) {
 					batch.addServletModel(this, disabled);
@@ -823,8 +905,18 @@ public class ServerModel {
 				}
 				// remove - to check if our new model should later be added as disabled
 				iterator.remove();
+				change = true;
+			}
+			if (change) {
+				// exit the loop (leaving some currently disabled models not checked) and get ready for recursion
+				break;
 			}
 		} // end of "for" loop that checks all currently disabled models that can potentially be enabled
+
+		if (change) {
+			reEnableServletModels(currentlyDisabled, currentlyEnabledByName, currentlyEnabledByPattern,
+					modelToEnable, batch);
+		}
 	}
 
 	/**

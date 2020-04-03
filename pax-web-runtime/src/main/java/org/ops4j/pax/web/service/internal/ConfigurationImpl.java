@@ -652,9 +652,9 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 			// external config location
 			String externalFile = resolveStringProperty(PaxWebConfig.PID_CFG_SERVER_CONFIGURATION_FILES);
 			if (externalFile == null) {
-				externalFile = resolveStringProperty(PaxWebConfig.PID_CFG_SERVER_CONFIGURATION_FILES);
+				externalFile = resolveStringProperty(PaxWebConfig.PID_CFG_SERVER_CONFIGURATION_FILE);
 			}
-			if (externalFile == null) {
+			if (externalFile == null || "".equals(externalFile.trim())) {
 				this.externalConfigurations = new File[0];
 			} else {
 				String[] locations = externalFile.split("\\s*,\\s*");
@@ -688,7 +688,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 
 		@Override
 		public Integer getHttpSecurePort() {
-			return eagerIntegerProperty(PaxWebConfig.PID_CFG_HTTP_PORT_SECURE);
+			return resolveIntegerProperty(PaxWebConfig.PID_CFG_HTTP_PORT_SECURE);
 		}
 
 		@Override
@@ -799,10 +799,10 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	}
 
 	private class SecurityConfigurationImpl implements SecurityConfiguration {
-		private String[] includedProtocols = null;
-		private String[] excludedProtocols = null;
-		private String[] includedCipherSuites = null;
-		private String[] excludedCipherSuites = null;
+		private String[] includedProtocols = new String[0];
+		private String[] excludedProtocols = new String[0];
+		private String[] includedCipherSuites = new String[0];
+		private String[] excludedCipherSuites = new String[0];
 
 		public SecurityConfigurationImpl() {
 			String includedProtocols = resolveStringProperty(PaxWebConfig.PID_CFG_PROTOCOLS_INCLUDED);
@@ -855,8 +855,8 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		}
 
 		@Override
-		public String getSslKeyAlgorithm() {
-			return resolveStringProperty(PaxWebConfig.PID_CFG_SSL_KEY_ALGORITHM);
+		public String getSslKeyManagerFactoryAlgorithm() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SSL_KEY_MANAGER_FACTORY_ALGORITHM);
 		}
 
 		@Override

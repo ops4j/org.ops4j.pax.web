@@ -15,9 +15,10 @@
  */
 package org.ops4j.pax.web.service.undertow.internal.configuration;
 
-import java.util.Properties;
+import java.util.Map;
 
-import org.ops4j.util.collections.PropertyResolver;
+import org.ops4j.pax.web.service.spi.config.Configuration;
+import org.ops4j.pax.web.service.spi.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -30,11 +31,11 @@ public class ResolvingContentHandler implements ContentHandler {
 
 	public static Logger LOG = LoggerFactory.getLogger(ResolvingContentHandler.class);
 
-	private Properties properties;
-	private ContentHandler target;
+	private final Map<String, String> config;
+	private final ContentHandler target;
 
-	public ResolvingContentHandler(Properties properties, ContentHandler target) {
-		this.properties = properties;
+	public ResolvingContentHandler(Map<String, String> config, ContentHandler target) {
+		this.config = config;
 		this.target = target;
 	}
 
@@ -68,7 +69,7 @@ public class ResolvingContentHandler implements ContentHandler {
 		AttributesImpl resolvedAttributes = new AttributesImpl(atts);
 		for (int i = 0; i < atts.getLength(); i++) {
 			resolvedAttributes.setAttribute(i, atts.getURI(i), atts.getLocalName(i), atts.getQName(i),
-					atts.getType(i), PropertyResolver.resolve(properties, atts.getValue(i)));
+					atts.getType(i), Utils.resolve(config, atts.getValue(i), null));
 		}
 		target.startElement(uri, localName, qName, resolvedAttributes);
 	}

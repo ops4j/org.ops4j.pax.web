@@ -134,7 +134,7 @@ public class PaxWebServletHandler extends ServletHandler {
 	}
 
 	/**
-	 * Removes {@link PaxWebServletHolder} and its associated mapping associated with given {@link ServletModel}
+	 * Removes {@link PaxWebServletHolder} and its mapping - both associated with given {@link ServletModel}
 	 * @param model
 	 */
 	public void removeServletWithMapping(ServletModel model) {

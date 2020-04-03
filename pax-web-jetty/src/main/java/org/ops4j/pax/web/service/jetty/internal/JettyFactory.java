@@ -80,6 +80,7 @@ class JettyFactory {
 		try {
 			classLoader.loadClass("org.eclipse.jetty.alpn.ALPN");
 			classLoader.loadClass("org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory");
+			// TODO: check JDK9+ support for ALPN
 			alpnAvailable = true;
 		} catch (ClassNotFoundException e) {
 			alpnAvailable = false;
@@ -104,6 +105,7 @@ class JettyFactory {
 		ServerConfiguration sc = configuration.server();
 
 		// org.eclipse.jetty.util.thread.ThreadPool required by org.eclipse.jetty.server.Server
+		// defaults taken from org.eclipse.jetty.util.thread.QueuedThreadPool
 		Integer maxThreads = sc.getServerMaxThreads();
 		if (maxThreads == null) {
 			maxThreads = 200;
@@ -247,7 +249,6 @@ class JettyFactory {
 	 */
 	public Connector createSecureConnector(Server server, Map<String, HttpConfiguration> httpConfigs,
 			String address, Configuration configuration) {
-
 		ServerConfiguration sc = configuration.server();
 		SecurityConfiguration secc = configuration.security();
 
@@ -289,8 +290,8 @@ class JettyFactory {
 		sslContextFactory.setKeyStorePassword(secc.getSslKeystorePassword());
 		sslContextFactory.setKeyManagerPassword(secc.getSslKeyPassword());
 
-		if (secc.getSslKeyAlgorithm() != null) {
-			sslContextFactory.setKeyManagerFactoryAlgorithm(secc.getSslKeyAlgorithm());
+		if (secc.getSslKeyManagerFactoryAlgorithm() != null) {
+			sslContextFactory.setKeyManagerFactoryAlgorithm(secc.getSslKeyManagerFactoryAlgorithm());
 		}
 		if (secc.getSslKeyAlias() != null) {
 			sslContextFactory.setCertAlias(secc.getSslKeyAlias());
@@ -331,7 +332,9 @@ class JettyFactory {
 
 		// https://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html#jssenames
 		// javax.net.ssl.SSLParameters.setEndpointIdentificationAlgorithm()
-		sslContextFactory.setEndpointIdentificationAlgorithm("HTTPS");
+		// setEndpointIdentificationAlgorithm turns on sun.security.ssl.X509TrustManagerImpl.checkIdentity()
+		// invocation in trust manager which requires SAN extension in client certificate
+//		sslContextFactory.setEndpointIdentificationAlgorithm("HTTPS");
 		sslContextFactory.setTrustAll(false);
 		// if endpointIdentificationAlgorithm == null, HostnameVerifier has to be passed instead
 		sslContextFactory.setHostnameVerifier(null);
@@ -422,7 +425,7 @@ class JettyFactory {
 
 		// whew. org.eclipse.jetty.util.ssl.SslContextFactory.Server is configured now
 
-		ServerConnector secureConnector = new ServerConnector(server);
+		ServerConnector secureConnector = new ServerConnector(server, null, null, null, -1, -1);
 		secureConnector.clearConnectionFactories();
 
 		secureConnector.setHost(address);

@@ -15,100 +15,124 @@
    limitations under the License.
 -->
 <undertow xmlns="urn:org.ops4j.pax.web:undertow:1.0"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:w="urn:jboss:domain:5.0"
-        xsi:schemaLocation="
-            urn:jboss:domain:undertow:4.0 http://www.jboss.org/schema/jbossas/wildfly-undertow_4_0.xsd
-            urn:jboss:domain:5.0 http://www.jboss.org/schema/jbossas/wildfly-config_5_0.xsd">
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:w="urn:jboss:domain:5.0"
+		xmlns:io="urn:jboss:domain:io:3.0"
+		xsi:schemaLocation="
+			urn:jboss:domain:io:3.0 http://www.jboss.org/schema/jbossas/wildfly-io_3_0.xsd
+			urn:jboss:domain:undertow:4.0 http://www.jboss.org/schema/jbossas/wildfly-undertow_4_0.xsd
+			urn:jboss:domain:5.0 http://www.jboss.org/schema/jbossas/wildfly-config_5_0.xsd">
 
-    <!-- https://docs.jboss.org/author/display/WFLY/Undertow+subsystem+configuration -->
-    <subsystem xmlns="urn:jboss:domain:undertow:4.0">
-        <!-- org.wildfly.extension.undertow.BufferCacheDefinition -->
-        <buffer-cache name="default" buffer-size="1024" buffers-per-region="1024" max-regions="10" />
-        <server name="default-server">
-            <!-- HTTP(S) Listener references Socket Binding (and indirectly - Interfaces) -->
-            <http-listener name="http" socket-binding="http" />
-            <!-- verify-client: org.xnio.SslClientAuthMode.NOT_REQUESTED, org.xnio.SslClientAuthMode.REQUESTED, org.xnio.SslClientAuthMode.REQUIRED -->
-            <!--<https-listener name="https" socket-binding="https"-->
-                    <!--security-realm="https" verify-client="NOT_REQUESTED" />-->
-            <host name="default-host" alias="localhost">
-                <!--<location name="/" handler="welcome-content" />-->
-                <!--<location name="/docs" handler="docs-content" />-->
-                <access-log directory="${karaf.data}/log" pattern="common" prefix="access_log." suffix="log" rotate="true" />
-                <filter-ref name="server-header" />
-                <filter-ref name="x-powered-by-header" />
-            </host>
-        </server>
-        <servlet-container name="default">
-            <jsp-config />
-            <websockets />
-            <welcome-files>
-                <welcome-file name="index.html" />
-                <welcome-file name="index.txt" />
-            </welcome-files>
-        </servlet-container>
-        <handlers>
-            <file name="welcome-content" path="${karaf.home}/welcome" />
-            <!--<file name="docs-content" path="${karaf.home}/docs" />-->
-        </handlers>
-        <filters>
-            <!-- filters for reference from /host/filter-ref and /host/location/filter-ref -->
-            <response-header name="server-header" header-name="Server" header-value="Pax-HTTP-Undertow" />
-            <response-header name="x-powered-by-header" header-name="X-Powered-By" header-value="Pax-HTTP-Undertow/${project.version}" />
-        </filters>
-    </subsystem>
+	<!--
+	 Only "default" worker and buffer-pool are supported and can be used to override the default values
+	 used by all listeners
 
-    <!-- https://docs.jboss.org/author/display/WFLY/Security+Realms -->
-    <!--
-        we'll use "default" security realm by default to configure jaas/properties authentication
-        (io.undertow.security.idm.IdentityManager):
-         - w:jaas - org.ops4j.pax.web.service.undertow.internal.security.JaasIdentityManager
-         - w:properties - org.ops4j.pax.web.service.undertow.internal.security.PropertiesIdentityManager
-    -->
-    <security-realm name="default">
-        <w:authentication>
-            <!-- JaasIdentityManager for given realm -->
-            <w:jaas name="karaf" />
-            <!-- OR PropertiesIdentityManager (mutually exclusive with <w:jaas>) -->
-            <!--<w:properties path="users.properties" />-->
-        </w:authentication>
-        <user-principal-class-name>org.apache.karaf.jaas.boot.principal.UserPrincipal</user-principal-class-name>
-        <role-principal-class-name>org.apache.karaf.jaas.boot.principal.RolePrincipal</role-principal-class-name>
-        <!--<role-principal-class-name>...</role-principal-class-name>-->
-    </security-realm>
-    <!--
-        Any security realm may be referenced by https-listener to define trust/keystore, protocols and cipher suites
-    -->
-    <security-realm name="https">
-        <w:server-identities>
-            <w:ssl>
-                <!-- sun.security.ssl.ProtocolVersion -->
-                <!-- sun.security.ssl.CipherSuite -->
-                <!-- openssl ciphers 'ALL:eNULL' | sed -e 's/:/\n/g' | sort -->
-                <w:engine
-                        enabled-cipher-suites="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384 TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"
-                        enabled-protocols="TLSv1 TLSv1.1 TLSv1.2" />
-                <w:keystore path="${karaf.etc}/certs/server.keystore" provider="JKS" alias="server"
-                        keystore-password="secret" key-password="secret"
-                        generate-self-signed-certificate-host="localhost" />
-            </w:ssl>
-        </w:server-identities>
-        <w:authentication>
-            <w:truststore path="${karaf.etc}/certs/server.truststore" provider="JKS" keystore-password="secret" />
-        </w:authentication>
-    </security-realm>
+	buffer-pool may be referenced from the listener and websocket
+	 - buffer-size defaults to:
+		- when < 64MB of Xmx: 512
+		- when < 128MB of Xmx: 1024
+		- when >= 128MB of Xmx: 16K - 20
+	 - direct-buffers defaults to:
+		- when < 64MB of Xmx: false
+		- when >= 64MB of Xmx: true
 
-    <!-- Interface lists IP addresses to bind to -->
-    <interface name="default">
-        <w:inet-address value="0.0.0.0" />
-        <!--<w:inet-address value="127.0.0.1" />-->
-    </interface>
-    <interface name="secure">
-        <w:inet-address value="127.0.0.1" />
-    </interface>
+	worker may be referenced from the listener, access-log and websocket
+	 - io-threads defaults to Math.max(Runtime.getRuntime().availableProcessors(), 2);
+	 - task-core-threads and task-max-threads default to io-threads * 8
+	-->
+	<subsystem xmlns="urn:jboss:domain:io:3.0">
+		<buffer-pool name="default" buffer-size="16364" direct-buffers="true" />
+		<worker name="default" io-threads="8" task-core-threads="64" task-max-threads="64" />
+	</subsystem>
 
-    <!-- Socket Binding adds port for each IP from referenced Interface -->
-    <socket-binding name="http" interface="default" port="${org.osgi.service.http.port}" />
-    <socket-binding name="https" interface="secure" port="${org.osgi.service.http.port.secure}" />
+	<!-- https://docs.jboss.org/author/display/WFLY/Undertow+subsystem+configuration -->
+	<subsystem xmlns="urn:jboss:domain:undertow:4.0">
+		<!-- org.wildfly.extension.undertow.BufferCacheDefinition -->
+		<buffer-cache name="default" buffer-size="1024" buffers-per-region="1024" max-regions="10" />
+		<server name="default-server">
+			<!-- HTTP(S) Listener references Socket Binding (and indirectly - Interfaces) -->
+			<http-listener name="http" socket-binding="http" />
+			<!-- verify-client: org.xnio.SslClientAuthMode.NOT_REQUESTED, org.xnio.SslClientAuthMode.REQUESTED, org.xnio.SslClientAuthMode.REQUIRED -->
+			<!--<https-listener name="https" socket-binding="https"-->
+			<!--security-realm="https" verify-client="NOT_REQUESTED" />-->
+			<host name="default-host" alias="localhost">
+				<!--<location name="/" handler="welcome-content" />-->
+				<!--<location name="/docs" handler="docs-content" />-->
+				<access-log directory="${karaf.data}/log" pattern="common" prefix="access_log." suffix="log" rotate="true" />
+				<filter-ref name="server-header" />
+				<filter-ref name="x-powered-by-header" />
+			</host>
+		</server>
+		<servlet-container name="default">
+			<jsp-config />
+			<websockets />
+			<welcome-files>
+				<welcome-file name="index.html" />
+				<welcome-file name="index.txt" />
+			</welcome-files>
+		</servlet-container>
+		<handlers>
+			<file name="welcome-content" path="${karaf.home}/welcome" />
+			<!--<file name="docs-content" path="${karaf.home}/docs" />-->
+		</handlers>
+		<filters>
+			<!-- filters for reference from /host/filter-ref and /host/location/filter-ref -->
+			<response-header name="server-header" header-name="Server" header-value="Pax-HTTP-Undertow" />
+			<response-header name="x-powered-by-header" header-name="X-Powered-By" header-value="Pax-HTTP-Undertow/${project.version}" />
+		</filters>
+	</subsystem>
+
+	<!-- https://docs.jboss.org/author/display/WFLY/Security+Realms -->
+	<!--
+		we'll use "default" security realm by default to configure jaas/properties authentication
+		(io.undertow.security.idm.IdentityManager):
+		 - w:jaas - org.ops4j.pax.web.service.undertow.internal.security.JaasIdentityManager
+		 - w:properties - org.ops4j.pax.web.service.undertow.internal.security.PropertiesIdentityManager
+	-->
+	<security-realm name="default">
+		<w:authentication>
+			<!-- JaasIdentityManager for given realm -->
+			<w:jaas name="karaf" />
+			<!-- OR PropertiesIdentityManager (mutually exclusive with <w:jaas>) -->
+			<!--<w:properties path="users.properties" />-->
+		</w:authentication>
+		<user-principal-class-name>org.apache.karaf.jaas.boot.principal.UserPrincipal</user-principal-class-name>
+		<role-principal-class-name>org.apache.karaf.jaas.boot.principal.RolePrincipal</role-principal-class-name>
+		<!--<role-principal-class-name>...</role-principal-class-name>-->
+	</security-realm>
+	<!--
+		Any security realm may be referenced by https-listener to define trust/keystore, protocols and cipher suites
+	-->
+	<security-realm name="https">
+		<w:server-identities>
+			<w:ssl>
+				<!-- sun.security.ssl.ProtocolVersion -->
+				<!-- sun.security.ssl.CipherSuite -->
+				<!-- openssl ciphers 'ALL:eNULL' | sed -e 's/:/\n/g' | sort -->
+				<w:engine
+						enabled-cipher-suites="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384 TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"
+						enabled-protocols="TLSv1.1 TLSv1.2" />
+				<w:keystore path="${karaf.etc}/certs/server.keystore" provider="JKS" alias="server"
+						keystore-password="secret" key-password="secret"
+						generate-self-signed-certificate-host="localhost" />
+			</w:ssl>
+		</w:server-identities>
+		<w:authentication>
+			<w:truststore path="${karaf.etc}/certs/server.truststore" provider="JKS" keystore-password="secret" />
+		</w:authentication>
+	</security-realm>
+
+	<!-- Interface lists IP addresses to bind to -->
+	<interface name="default">
+		<w:inet-address value="0.0.0.0" />
+		<!--<w:inet-address value="127.0.0.1" />-->
+	</interface>
+	<interface name="secure">
+		<w:inet-address value="127.0.0.1" />
+	</interface>
+
+	<!-- Socket Binding adds port for each IP from referenced Interface -->
+	<socket-binding name="http" interface="default" port="${org.osgi.service.http.port}" />
+	<socket-binding name="https" interface="secure" port="${org.osgi.service.http.port.secure}" />
 
 </undertow>

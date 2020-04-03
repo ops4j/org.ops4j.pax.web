@@ -36,10 +36,12 @@ import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceFactory;
+import org.ops4j.pax.web.annotations.Review;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Review("This should be universal as template class (for Jetty/Tomcat/Undertow) with server specific extensions/delegates")
 class ResourceServlet extends HttpServlet implements ResourceFactory {
 
 	private static final int SECOND = 1000;

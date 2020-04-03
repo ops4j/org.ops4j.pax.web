@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.spi.task;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.ops4j.pax.web.service.spi.model.ServerModel;
@@ -26,29 +27,37 @@ public class ServletModelChange extends Change {
 	private ServerModel serverModel;
 	private ServiceModel serviceModel;
 	private ServletModel servletModel;
-	private List<ServletModel> servletModels;
+	private final List<ServletModel> servletModels = new LinkedList<>();
 	private boolean disabled;
 
 	public ServletModelChange(OpCode op, ServiceModel serviceModel, ServletModel servletModel) {
 		super(op);
 		this.serviceModel = serviceModel;
 		this.servletModel = servletModel;
+		this.servletModels.add(servletModel);
 	}
 
 	public ServletModelChange(OpCode op, ServiceModel serviceModel, List<ServletModel> servletModels) {
 		super(op);
 		this.serviceModel = serviceModel;
-		this.servletModels = servletModels;
+		this.servletModels.addAll(servletModels);
 	}
 
 	public ServletModelChange(OpCode op, ServerModel serverModel, ServletModel servletModel) {
 		this(op, serverModel, servletModel, false);
 	}
 
+	public ServletModelChange(OpCode op, ServerModel serverModel, List<ServletModel> servletModels) {
+		super(op);
+		this.serverModel = serverModel;
+		this.servletModels.addAll(servletModels);
+	}
+
 	public ServletModelChange(OpCode op, ServerModel serverModel, ServletModel servletModel, boolean disabled) {
 		super(op);
 		this.serverModel = serverModel;
 		this.servletModel = servletModel;
+		this.servletModels.add(servletModel);
 		this.disabled = disabled;
 	}
 

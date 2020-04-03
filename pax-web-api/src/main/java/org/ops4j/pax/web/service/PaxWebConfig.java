@@ -148,7 +148,7 @@ public interface PaxWebConfig {
 	/** Password for private key entry inside server keystore */
 	String PID_CFG_SSL_KEY_PASSWORD = "org.ops4j.pax.web.ssl.key.password";
 	/** Algorithm to use for {@link javax.net.ssl.KeyManagerFactory#getInstance(String)} */
-	String PID_CFG_SSL_KEY_ALGORITHM = "org.ops4j.pax.web.ssl.key.algorithm";
+	String PID_CFG_SSL_KEY_MANAGER_FACTORY_ALGORITHM = "org.ops4j.pax.web.ssl.keyManagerFactory.algorithm";
 	/** Alias of private key entry in server keystore to use of no SNI is enabled */
 	String PID_CFG_SSL_KEY_ALIAS = "org.ops4j.pax.web.ssl.key.alias";
 
@@ -238,6 +238,7 @@ public interface PaxWebConfig {
 
 	/**
 	 * Jetty: defaults to "yyyy_mm_dd.request.log", should contain {@code yyyy_mm_dd}.
+	 * Tomcat: it should NOT contain {@code yyyy_mm_dd}, so please specify your own name.
 	 */
 	String PID_CFG_LOG_NCSA_LOGFILE = "org.ops4j.pax.web.log.ncsa.file";
 

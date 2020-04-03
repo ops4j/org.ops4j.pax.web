@@ -26,11 +26,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
+import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_IO;
 import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_PAXWEB_UNDERTOW;
 import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_UNDERTOW;
 
 @XmlRootElement(name = "undertow")
 @XmlType(name = "UndertowType", propOrder = {
+		"ioSubsystem",
 		"subsystem",
 		"securityRealms",
 		"interfaces",
@@ -39,32 +41,41 @@ import static org.ops4j.pax.web.service.undertow.internal.configuration.model.Ob
 @XmlAccessorType(XmlAccessType.FIELD)
 public class UndertowConfiguration {
 
+	@XmlElement(name = "subsystem", namespace = NS_IO)
+	private IoSubsystem ioSubsystem;
+
 	@XmlElement(namespace = NS_UNDERTOW)
 	private UndertowSubsystem subsystem;
 
 	@XmlElement(name = "security-realm", namespace = NS_PAXWEB_UNDERTOW)
-	private List<SecurityRealm> securityRealms = new ArrayList<>();
+	private final List<SecurityRealm> securityRealms = new ArrayList<>();
 
 	@XmlElement(name = "interface")
-	private List<Interface> interfaces = new ArrayList<>();
+	private final List<Interface> interfaces = new ArrayList<>();
 
 	@XmlElement(name = "socket-binding")
-	private List<SocketBinding> socketBindings = new ArrayList<>();
+	private final List<SocketBinding> socketBindings = new ArrayList<>();
 
 	@XmlTransient
-	private Map<String, SecurityRealm> securityRealmsMap = new HashMap<>();
+	private final Map<String, SecurityRealm> securityRealmsMap = new HashMap<>();
 
 	@XmlTransient
-	private Map<String, Interface> interfacesMap = new HashMap<>();
+	private final Map<String, Interface> interfacesMap = new HashMap<>();
 
 	@XmlTransient
-	private Map<String, SocketBinding> socketBindingsMap = new HashMap<>();
+	private final Map<String, SocketBinding> socketBindingsMap = new HashMap<>();
 
 	@XmlTransient
-	private Map<String, UndertowSubsystem.FileHandler> handlersMap = new HashMap<>();
+	private final Map<String, UndertowSubsystem.FileHandler> handlersMap = new HashMap<>();
 
 	@XmlTransient
-	private Map<String, UndertowSubsystem.AbstractFilter> filtersMap = new HashMap<>();
+	private final Map<String, UndertowSubsystem.AbstractFilter> filtersMap = new HashMap<>();
+
+	@XmlTransient
+	private final Map<String, IoSubsystem.Worker> workers = new HashMap<>();
+
+	@XmlTransient
+	private final Map<String, IoSubsystem.BufferPool> bufferPools = new HashMap<>();
 
 	/**
 	 * Initializes various maps speeding up access to different configuration parts
@@ -97,6 +108,14 @@ public class UndertowConfiguration {
 				for (UndertowSubsystem.ExpressionFilter filter : subsystem.getFilters().getExpressionFilters()) {
 					filtersMap.put(filter.getName(), filter);
 				}
+			}
+		}
+		if (ioSubsystem != null) {
+			for (IoSubsystem.Worker worker : ioSubsystem.getWorkers()) {
+				workers.put(worker.getName(), worker);
+			}
+			for (IoSubsystem.BufferPool pool : ioSubsystem.getBuferPools()) {
+				bufferPools.put(pool.getName(), pool);
 			}
 		}
 	}
@@ -149,6 +168,24 @@ public class UndertowConfiguration {
 	}
 
 	/**
+	 * Returns {@link IoSubsystem.Worker} by name
+	 * @param name
+	 * @return
+	 */
+	public IoSubsystem.Worker worker(String name) {
+		return workers.get(name);
+	}
+
+	/**
+	 * Returns {@link IoSubsystem.BufferPool} by name
+	 * @param name
+	 * @return
+	 */
+	public IoSubsystem.BufferPool bufferPool(String name) {
+		return bufferPools.get(name);
+	}
+
+	/**
 	 * Returns valid information about interfaces+port to listen on
 	 * @param socketBindingName
 	 * @return
@@ -176,6 +213,14 @@ public class UndertowConfiguration {
 
 	public UndertowSubsystem getSubsystem() {
 		return subsystem;
+	}
+
+	public IoSubsystem getIoSubsystem() {
+		return ioSubsystem;
+	}
+
+	public void setIoSubsystem(IoSubsystem ioSubsystem) {
+		this.ioSubsystem = ioSubsystem;
 	}
 
 	public List<SecurityRealm> getSecurityRealms() {
@@ -206,6 +251,14 @@ public class UndertowConfiguration {
 		for (SocketBinding b : socketBindings) {
 			sb.append("\n\t\t" + b);
 		}
+		sb.append("\n\t}\n\tworkers: {");
+		for (IoSubsystem.Worker w : workers.values()) {
+			sb.append("\n\t\t" + w);
+		}
+		sb.append("\n\t}\n\tbuffer pools: {");
+		for (IoSubsystem.BufferPool bp : bufferPools.values()) {
+			sb.append("\n\t\t" + bp);
+		}
 		sb.append("\n\t}\n}\n");
 		return sb.toString();
 	}
@@ -215,8 +268,8 @@ public class UndertowConfiguration {
 	 */
 	public static class BindingInfo {
 
-		private List<String> addresses = new ArrayList<>();
-		private int port;
+		private final List<String> addresses = new ArrayList<>();
+		private final int port;
 
 		public BindingInfo(int port) {
 			this.port = port;

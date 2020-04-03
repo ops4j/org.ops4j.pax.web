@@ -113,8 +113,8 @@ public class Batch {
 	 * @param serverModel
 	 * @param model
 	 */
-	public void removeServletModels(ServerModel serverModel, ServletModel model) {
-		operations.add(new ServletModelChange(OpCode.DELETE, serverModel, model));
+	public void removeServletModels(ServerModel serverModel, List<ServletModel> toUnregister) {
+		operations.add(new ServletModelChange(OpCode.DELETE, serverModel, toUnregister));
 	}
 
 	/**

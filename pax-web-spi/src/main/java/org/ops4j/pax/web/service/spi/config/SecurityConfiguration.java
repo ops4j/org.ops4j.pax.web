@@ -59,7 +59,7 @@ public interface SecurityConfiguration {
 	 * {@link javax.net.ssl.KeyManagerFactory#getDefaultAlgorithm()} will be used (OpenJDK: {@code SunX509}).
 	 * @return
 	 */
-	String getSslKeyAlgorithm();
+	String getSslKeyManagerFactoryAlgorithm();
 
 	/**
 	 * Returns the alias of the ssl private key inside server keystore.
@@ -173,7 +173,7 @@ public interface SecurityConfiguration {
 	Integer getSslSessionCacheSize();
 
 	/**
-	 * Timeout for SSL Sessions as in {@link javax.net.ssl.SSLSessionContext#setSessionTimeout(int)}
+	 * Timeout for SSL Sessions (in seconds) as in {@link javax.net.ssl.SSLSessionContext#setSessionTimeout(int)}
 	 * @return
 	 */
 	Integer getSslSessionTimeout();

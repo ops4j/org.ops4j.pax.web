@@ -15,17 +15,23 @@
  */
 package org.ops4j.pax.web.service.undertow.internal.configuration.model;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
+import io.undertow.protocols.http2.Http2Channel;
+import org.xnio.SslClientAuthMode;
+
 import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_UNDERTOW;
 
 @XmlType(name = "serverType", namespace = NS_UNDERTOW, propOrder = {
-		"httpListener",
-		"httpsListener",
+		"httpListeners",
+		"httpsListeners",
 		"host"
 })
 public class Server {
@@ -34,10 +40,10 @@ public class Server {
 	private String name;
 
 	@XmlElement(name = "http-listener")
-	private HttpListener httpListener;
+	private final List<HttpListener> httpListeners = new LinkedList<>();
 
 	@XmlElement(name = "https-listener")
-	private HttpsListener httpsListener;
+	private final List<HttpsListener> httpsListeners = new LinkedList<>();
 
 	@XmlElement
 	private Host host;
@@ -50,20 +56,12 @@ public class Server {
 		this.name = name;
 	}
 
-	public HttpListener getHttpListener() {
-		return httpListener;
+	public List<HttpListener> getHttpListeners() {
+		return httpListeners;
 	}
 
-	public void setHttpListener(HttpListener httpListener) {
-		this.httpListener = httpListener;
-	}
-
-	public HttpsListener getHttpsListener() {
-		return httpsListener;
-	}
-
-	public void setHttpsListener(HttpsListener httpsListener) {
-		this.httpsListener = httpsListener;
+	public List<HttpsListener> getHttpsListeners() {
+		return httpsListeners;
 	}
 
 	public Host getHost() {
@@ -78,29 +76,76 @@ public class Server {
 	public String toString() {
 		final StringBuilder sb = new StringBuilder("{\n");
 		sb.append("\t\t\tname: ").append(name);
-		sb.append("\n\t\t\thttp listener: ").append(httpListener);
-		sb.append("\n\t\t\thttps listener: ").append(httpsListener);
+		sb.append("\n\t\t\thttp listeners: ").append(httpListeners);
+		sb.append("\n\t\t\thttps listeners: ").append(httpsListeners);
 		sb.append("\n\t\t\thost: ").append(host);
 		sb.append("\n\t\t}");
 		return sb.toString();
 	}
 
+	// In Wildfly, org.wildfly.extension.undertow.ListenerResourceDefinition (and derived
+	// HttpListenerResourceDefinition and HttpsListenerResourceDefinition) describe XML structure of listeners
+	// org.wildfly.extension.undertow.UndertowSubsystemParser_4_0#listenerBuilder() declares common attributes
+
+	// socket-options-type:
+	//  - BACKLOG = OptionAttributeDefinition.builder("tcp-backlog", Options.BACKLOG).setDefaultValue(new ModelNode(10000)).setAllowExpression(true).setValidator(new IntRangeValidator(1)).build();
+	//  - RECEIVE_BUFFER = OptionAttributeDefinition.builder("receive-buffer", Options.RECEIVE_BUFFER).setAllowExpression(true).setValidator(new IntRangeValidator(1)).build();
+	//  - SEND_BUFFER = OptionAttributeDefinition.builder("send-buffer", Options.SEND_BUFFER).setAllowExpression(true).setValidator(new IntRangeValidator(1)).build();
+	//  - KEEP_ALIVE = OptionAttributeDefinition.builder("tcp-keep-alive", Options.KEEP_ALIVE).setAllowExpression(true).build();
+	//  - READ_TIMEOUT = OptionAttributeDefinition.builder("read-timeout", Options.READ_TIMEOUT).setAllowExpression(true).setMeasurementUnit(MeasurementUnit.MILLISECONDS).build();
+	//  - WRITE_TIMEOUT = OptionAttributeDefinition.builder("write-timeout", Options.WRITE_TIMEOUT).setAllowExpression(true).setMeasurementUnit(MeasurementUnit.MILLISECONDS).build();
+	//  - MAX_CONNECTIONS = OptionAttributeDefinition.builder(Constants.MAX_CONNECTIONS, Options.CONNECTION_HIGH_WATER).setValidator(new IntRangeValidator(1)).setAllowExpression(true).build();
+
 	@XmlType(name = "socket-options-type", namespace = NS_UNDERTOW)
 	public static abstract class SocketOptions {
+
+		// org.wildfly.extension.undertow.ListenerResourceDefinition#SOCKET_OPTIONS
+
+		/**
+		 * XNIO: org.xnio.Options#RECEIVE_BUFFER, Java: java.net.ServerSocket#setReceiveBufferSize(int),
+		 * java.net.SocketOptions#SO_RCVBUF, default: 0x10000 (org.xnio.nio.AbstractNioChannel#DEFAULT_BUFFER_SIZE)
+		 */
 		@XmlAttribute(name="receive-buffer")
-		protected int receiveBuffer = 0;
+		protected int receiveBuffer = 0x10000;
+
+		/**
+		 * XNIO: org.xnio.Options#SEND_BUFFER, Java: java.net.Socket#setSendBufferSize(int),
+		 * java.net.SocketOptions#SO_SNDBUF, default: 0x10000 (org.xnio.nio.AbstractNioChannel#DEFAULT_BUFFER_SIZE)
+		 */
 		@XmlAttribute(name="send-buffer")
-		protected int sendBuffer = 0;
+		protected int sendBuffer = 0x10000;
+
+		/**
+		 * XNIO: org.xnio.Options#BACKLOG, Java: 2nd parameter of
+		 * java.net.ServerSocket#bind(java.net.SocketAddress, int), default: 128 or 50 when using 1-arg bind().
+		 */
 		@XmlAttribute(name="tcp-backlog")
-		protected int tcpBacklog = 10000;
+		protected int tcpBacklog = 128;
+
+		/**
+		 * XNIO: org.xnio.Options#KEEP_ALIVE, Java: java.net.Socket#setKeepAlive(boolean),
+		 * java.net.SocketOptions#SO_KEEPALIVE, default: false
+		 */
 		@XmlAttribute(name="tcp-keep-alive")
 		protected boolean tcpKeepAlive = false;
+
+		/**
+		 * XNIO: org.xnio.Options#READ_TIMEOUT (in ms), default: 0
+		 */
 		@XmlAttribute(name="read-timeout")
-		protected long readTimeoout = 0L;
+		protected int readTimeout = 0;
+
+		/**
+		 * XNIO: org.xnio.Options#WRITE_TIMEOUT (in ms), default: 0
+		 */
 		@XmlAttribute(name="write-timeout")
-		protected long writeTimeoout = 0L;
+		protected int writeTimeout = 0;
+
+		/**
+		 * XNIO: org.xnio.Options#CONNECTION_HIGH_WATER
+		 */
 		@XmlAttribute(name="max-connections")
-		protected int maxConnections = 0;
+		protected int maxConnections = Integer.MAX_VALUE;
 
 		public int getReceiveBuffer() {
 			return receiveBuffer;
@@ -134,20 +179,20 @@ public class Server {
 			this.tcpKeepAlive = tcpKeepAlive;
 		}
 
-		public long getReadTimeoout() {
-			return readTimeoout;
+		public int getReadTimeout() {
+			return readTimeout;
 		}
 
-		public void setReadTimeoout(long readTimeoout) {
-			this.readTimeoout = readTimeoout;
+		public void setReadTimeout(int readTimeout) {
+			this.readTimeout = readTimeout;
 		}
 
-		public long getWriteTimeoout() {
-			return writeTimeoout;
+		public int getWriteTimeout() {
+			return writeTimeout;
 		}
 
-		public void setWriteTimeoout(long writeTimeoout) {
-			this.writeTimeoout = writeTimeoout;
+		public void setWriteTimeout(int writeTimeout) {
+			this.writeTimeout = writeTimeout;
 		}
 
 		public int getMaxConnections() {
@@ -161,52 +206,165 @@ public class Server {
 		@Override
 		public String toString() {
 			final StringBuilder sb = new StringBuilder("{ ");
+			sb.append(toStringParameters());
+			sb.append(" }");
+			return sb.toString();
+		}
+
+		protected String toStringParameters() {
+			final StringBuilder sb = new StringBuilder();
 			sb.append("receive buffer: ").append(receiveBuffer);
 			sb.append(", send buffer: ").append(sendBuffer);
 			sb.append(", tcp backlog: ").append(tcpBacklog);
 			sb.append(", tcp KeepAlive: ").append(tcpKeepAlive);
-			sb.append(", read timeoout: ").append(readTimeoout);
-			sb.append(", write timeoout: ").append(writeTimeoout);
+			sb.append(", read timeoout: ").append(readTimeout);
+			sb.append(", write timeoout: ").append(writeTimeout);
 			sb.append(", max connections: ").append(maxConnections);
-			sb.append(" }");
 			return sb.toString();
 		}
 	}
 
+	// listener-type:
+	//  - MAX_HEADER_SIZE = OptionAttributeDefinition.builder("max-header-size", UndertowOptions.MAX_HEADER_SIZE).setDefaultValue(new ModelNode(UndertowOptions.DEFAULT_MAX_HEADER_SIZE)).setAllowExpression(true).setMeasurementUnit(MeasurementUnit.BYTES).setValidator(new IntRangeValidator(1)).build();
+	//  - MAX_ENTITY_SIZE = OptionAttributeDefinition.builder(Constants.MAX_POST_SIZE, UndertowOptions.MAX_ENTITY_SIZE).setDefaultValue(new ModelNode(10485760L)).setValidator(new LongRangeValidator(0)).setMeasurementUnit(MeasurementUnit.BYTES).setAllowExpression(true).build();
+	//  - BUFFER_PIPELINED_DATA = OptionAttributeDefinition.builder("buffer-pipelined-data", UndertowOptions.BUFFER_PIPELINED_DATA).setDefaultValue(ModelNode.FALSE).setAllowExpression(true).build();
+	//  - MAX_PARAMETERS = OptionAttributeDefinition.builder("max-parameters", UndertowOptions.MAX_PARAMETERS).setDefaultValue(new ModelNode(1000)).setValidator(new IntRangeValidator(1)).setAllowExpression(true).build();
+	//  - MAX_HEADERS = OptionAttributeDefinition.builder("max-headers", UndertowOptions.MAX_HEADERS).setDefaultValue(new ModelNode(200)).setValidator(new IntRangeValidator(1)).setAllowExpression(true).build();
+	//  - MAX_COOKIES = OptionAttributeDefinition.builder("max-cookies", UndertowOptions.MAX_COOKIES).setDefaultValue(new ModelNode(200)).setValidator(new IntRangeValidator(1)).setAllowExpression(true).build();
+	//  - ALLOW_ENCODED_SLASH = OptionAttributeDefinition.builder("allow-encoded-slash", UndertowOptions.ALLOW_ENCODED_SLASH).setDefaultValue(ModelNode.FALSE).setAllowExpression(true).build();
+	//  - DECODE_URL = OptionAttributeDefinition.builder("decode-url", UndertowOptions.DECODE_URL).setDefaultValue(ModelNode.TRUE).setAllowExpression(true).build();
+	//  - URL_CHARSET = OptionAttributeDefinition.builder("url-charset", UndertowOptions.URL_CHARSET).setDefaultValue(new ModelNode("UTF-8")).setAllowExpression(true).build();
+	//  - ALWAYS_SET_KEEP_ALIVE = OptionAttributeDefinition.builder("always-set-keep-alive", UndertowOptions.ALWAYS_SET_KEEP_ALIVE).setDefaultValue(ModelNode.TRUE).setAllowExpression(true).build();
+	//  - MAX_BUFFERED_REQUEST_SIZE = OptionAttributeDefinition.builder(Constants.MAX_BUFFERED_REQUEST_SIZE, UndertowOptions.MAX_BUFFERED_REQUEST_SIZE).setDefaultValue(new ModelNode(16384)).setValidator(new IntRangeValidator(1)).setMeasurementUnit(MeasurementUnit.BYTES).setAllowExpression(true).build();
+	//  - RECORD_REQUEST_START_TIME = OptionAttributeDefinition.builder("record-request-start-time", UndertowOptions.RECORD_REQUEST_START_TIME).setDefaultValue(ModelNode.FALSE).setAllowExpression(true).build();
+	//  - ALLOW_EQUALS_IN_COOKIE_VALUE = OptionAttributeDefinition.builder("allow-equals-in-cookie-value", UndertowOptions.ALLOW_EQUALS_IN_COOKIE_VALUE).setDefaultValue(ModelNode.FALSE).setAllowExpression(true).build();
+	//  - NO_REQUEST_TIMEOUT = OptionAttributeDefinition.builder("no-request-timeout", UndertowOptions.NO_REQUEST_TIMEOUT).setDefaultValue(new ModelNode(60000)).setMeasurementUnit(MeasurementUnit.MILLISECONDS).setRequired(false).setAllowExpression(true).build();
+	//  - REQUEST_PARSE_TIMEOUT = OptionAttributeDefinition.builder("request-parse-timeout", UndertowOptions.REQUEST_PARSE_TIMEOUT).setMeasurementUnit(MeasurementUnit.MILLISECONDS).setRequired(false).setAllowExpression(true).build();
+	//  - RFC6265_COOKIE_VALIDATION = OptionAttributeDefinition.builder("rfc6265-cookie-validation", UndertowOptions.ENABLE_RFC6265_COOKIE_VALIDATION).setDefaultValue(ModelNode.FALSE).setRequired(false).setAllowExpression(true).build();
+	//  - ALLOW_UNESCAPED_CHARACTERS_IN_URL = OptionAttributeDefinition.builder("allow-unescaped-characters-in-url", UndertowOptions.ALLOW_UNESCAPED_CHARACTERS_IN_URL).setDefaultValue(ModelNode.FALSE).setRequired(false).setAllowExpression(true).build();
+
 	@XmlType(name = "listener-type", namespace = NS_UNDERTOW)
 	public static abstract class Listener extends SocketOptions {
+
 		@XmlAttribute
 		protected String name;
+
+		// meta information
+		// generic attributes defined in static block of org.wildfly.extension.undertow.ListenerResourceDefinition
+		// ATTRIBUTES = new LinkedHashSet<>(Arrays.asList(SOCKET_BINDING, WORKER, BUFFER_POOL, ENABLED, RESOLVE_PEER_ADDRESS, DISALLOWED_METHODS, SECURE));
+
 		@XmlAttribute(name = "socket-binding")
 		protected String socketBindingName;
+		@XmlAttribute(name = "worker")
+		protected String workerName = "default";
 		@XmlAttribute(name = "buffer-pool")
 		protected String bufferPoolName = "default";
 		@XmlAttribute
 		protected boolean enabled = true;
-		@XmlAttribute(name = "url-charset")
-		protected String urlCharset = "UTF-8";
+		@XmlAttribute(name = "resolve-peer-address")
+		protected boolean resolvePeerAddress = false;
+		@XmlAttribute(name = "disallowed-methods")
+		protected List<String> disallowedMethods = new LinkedList<>(Collections.singletonList("TRACE"));
 		@XmlAttribute
 		protected boolean secure = false;
+
+		// org.wildfly.extension.undertow.ListenerResourceDefinition#LISTENER_OPTIONS
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#MAX_ENTITY_SIZE
+		 */
+		@XmlAttribute(name = "max-post-size")
+		protected long maxPostSize = 10485760L;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#BUFFER_PIPELINED_DATA
+		 */
+		@XmlAttribute(name = "buffer-pipelined-data")
+		protected boolean bufferPipelinedData = false;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#MAX_HEADER_SIZE
+		 */
+		@XmlAttribute(name = "max-header-size")
+		protected int maxHeaderSize = 1048576;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#MAX_PARAMETERS
+		 */
+		@XmlAttribute(name = "max-parameters")
+		protected int maxParameters = 1000;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#MAX_HEADERS
+		 */
+		@XmlAttribute(name = "max-headers")
+		protected int maxHeaders = 200;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#MAX_COOKIES
+		 */
+		@XmlAttribute(name = "max-cookies")
+		protected int maxCookies = 200;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#ALLOW_ENCODED_SLASH
+		 */
+		@XmlAttribute(name = "allow-encoded-slash")
+		protected boolean allowEncodedSlash = false;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#DECODE_URL
+		 */
+		@XmlAttribute(name = "decode-url")
+		protected boolean decodeUrl = true;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#URL_CHARSET
+		 */
+		@XmlAttribute(name = "url-charset")
+		protected String urlCharset = StandardCharsets.UTF_8.name();
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#ALWAYS_SET_KEEP_ALIVE
+		 */
+		@XmlAttribute(name = "always-set-keep-alive")
+		protected boolean alwaysSetKeepAlive = true;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#MAX_BUFFERED_REQUEST_SIZE
+		 */
+		@XmlAttribute(name = "max-buffered-request-size")
+		protected int maxBufferedRequestSize = 16384;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#RECORD_REQUEST_START_TIME
+		 */
 		@XmlAttribute(name = "record-request-start-time")
 		protected boolean recordRequestStartTime = false;
 
-		//<xs:attribute name="worker" type="xs:string" default="default"/>
-		//<xs:attribute name="resolve-peer-address" type="xs:boolean" default="false"/>
-		//<xs:attribute name="max-post-size" type="xs:long" default="10485760"/>
-		//<xs:attribute name="buffer-pipelined-data" type="xs:boolean" default="false"/>
-		//<xs:attribute name="max-header-size" type="xs:long" default="1048576"/>
-		//<xs:attribute name="max-parameters" type="xs:long" default="1000"/>
-		//<xs:attribute name="max-headers" type="xs:long" default="200"/>
-		//<xs:attribute name="max-cookies" type="xs:long" default="200"/>
-		//<xs:attribute name="allow-encoded-slash" type="xs:boolean" default="false"/>
-		//<xs:attribute name="decode-url" type="xs:boolean" default="true"/>
-		//<xs:attribute name="always-set-keep-alive" type="xs:boolean" default="true"/>
-		//<xs:attribute name="max-buffered-request-size" type="xs:long" default="16384"/>
-		//<xs:attribute name="allow-equals-in-cookie-value" type="xs:boolean" default="false"/>
-		//<xs:attribute name="no-request-timeout" type="xs:int" default="60000"/>
-		//<xs:attribute name="request-parse-timeout" type="xs:int"/>
-		//<xs:attribute name="disallowed-methods" type="stringList" default="TRACE"/>
-		//<xs:attribute name="rfc6265-cookie-validation" type="xs:boolean" default="false"/>
+		/**
+		 * Undertow: io.undertow.UndertowOptions#ALLOW_EQUALS_IN_COOKIE_VALUE
+		 */
+		@XmlAttribute(name = "allow-equals-in-cookie-value")
+		protected boolean allowEqualsInCookieValue = false;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#NO_REQUEST_TIMEOUT
+		 */
+		@XmlAttribute(name = "no-request-timeout")
+		protected int noRequestTimeout = 60000;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#REQUEST_PARSE_TIMEOUT
+		 */
+		@XmlAttribute(name = "request-parse-timeout")
+		protected int requestParseTimeout = 60000;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#ENABLE_RFC6265_COOKIE_VALIDATION
+		 */
+		@XmlAttribute(name = "rfc6265-cookie-validation")
+		protected boolean rfc6265CookieValidation = false;
 
 		public String getName() {
 			return name;
@@ -222,6 +380,14 @@ public class Server {
 
 		public void setSocketBindingName(String socketBindingName) {
 			this.socketBindingName = socketBindingName;
+		}
+
+		public String getWorkerName() {
+			return workerName;
+		}
+
+		public void setWorkerName(String workerName) {
+			this.workerName = workerName;
 		}
 
 		public String getBufferPoolName() {
@@ -240,12 +406,20 @@ public class Server {
 			this.enabled = enabled;
 		}
 
-		public String getUrlCharset() {
-			return urlCharset;
+		public boolean isResolvePeerAddress() {
+			return resolvePeerAddress;
 		}
 
-		public void setUrlCharset(String urlCharset) {
-			this.urlCharset = urlCharset;
+		public void setResolvePeerAddress(boolean resolvePeerAddress) {
+			this.resolvePeerAddress = resolvePeerAddress;
+		}
+
+		public List<String> getDisallowedMethods() {
+			return disallowedMethods;
+		}
+
+		public void setDisallowedMethods(List<String> disallowedMethods) {
+			this.disallowedMethods = disallowedMethods;
 		}
 
 		public boolean isSecure() {
@@ -256,6 +430,94 @@ public class Server {
 			this.secure = secure;
 		}
 
+		public long getMaxPostSize() {
+			return maxPostSize;
+		}
+
+		public void setMaxPostSize(long maxPostSize) {
+			this.maxPostSize = maxPostSize;
+		}
+
+		public boolean isBufferPipelinedData() {
+			return bufferPipelinedData;
+		}
+
+		public void setBufferPipelinedData(boolean bufferPipelinedData) {
+			this.bufferPipelinedData = bufferPipelinedData;
+		}
+
+		public int getMaxHeaderSize() {
+			return maxHeaderSize;
+		}
+
+		public void setMaxHeaderSize(int maxHeaderSize) {
+			this.maxHeaderSize = maxHeaderSize;
+		}
+
+		public int getMaxParameters() {
+			return maxParameters;
+		}
+
+		public void setMaxParameters(int maxParameters) {
+			this.maxParameters = maxParameters;
+		}
+
+		public int getMaxHeaders() {
+			return maxHeaders;
+		}
+
+		public void setMaxHeaders(int maxHeaders) {
+			this.maxHeaders = maxHeaders;
+		}
+
+		public int getMaxCookies() {
+			return maxCookies;
+		}
+
+		public void setMaxCookies(int maxCookies) {
+			this.maxCookies = maxCookies;
+		}
+
+		public boolean isAllowEncodedSlash() {
+			return allowEncodedSlash;
+		}
+
+		public void setAllowEncodedSlash(boolean allowEncodedSlash) {
+			this.allowEncodedSlash = allowEncodedSlash;
+		}
+
+		public boolean isDecodeUrl() {
+			return decodeUrl;
+		}
+
+		public void setDecodeUrl(boolean decodeUrl) {
+			this.decodeUrl = decodeUrl;
+		}
+
+		public String getUrlCharset() {
+			return urlCharset;
+		}
+
+		public void setUrlCharset(String urlCharset) {
+			this.urlCharset = urlCharset;
+		}
+
+		public boolean isAlwaysSetKeepAlive() {
+			return alwaysSetKeepAlive;
+		}
+
+		public void setAlwaysSetKeepAlive(boolean alwaysSetKeepAlive) {
+			this.alwaysSetKeepAlive = alwaysSetKeepAlive;
+		}
+
+		public int getMaxBufferedRequestSize() {
+			return maxBufferedRequestSize;
+		}
+
+		public void setMaxBufferedRequestSize(int maxBufferedRequestSize) {
+			this.maxBufferedRequestSize = maxBufferedRequestSize;
+		}
+
 		public boolean isRecordRequestStartTime() {
 			return recordRequestStartTime;
 		}
@@ -263,26 +525,162 @@ public class Server {
 		public void setRecordRequestStartTime(boolean recordRequestStartTime) {
 			this.recordRequestStartTime = recordRequestStartTime;
 		}
+
+		public boolean isAllowEqualsInCookieValue() {
+			return allowEqualsInCookieValue;
+		}
+
+		public void setAllowEqualsInCookieValue(boolean allowEqualsInCookieValue) {
+			this.allowEqualsInCookieValue = allowEqualsInCookieValue;
+		}
+
+		public int getNoRequestTimeout() {
+			return noRequestTimeout;
+		}
+
+		public void setNoRequestTimeout(int noRequestTimeout) {
+			this.noRequestTimeout = noRequestTimeout;
+		}
+
+		public int getRequestParseTimeout() {
+			return requestParseTimeout;
+		}
+
+		public void setRequestParseTimeout(int requestParseTimeout) {
+			this.requestParseTimeout = requestParseTimeout;
+		}
+
+		public boolean isRfc6265CookieValidation() {
+			return rfc6265CookieValidation;
+		}
+
+		public void setRfc6265CookieValidation(boolean rfc6265CookieValidation) {
+			this.rfc6265CookieValidation = rfc6265CookieValidation;
+		}
+
+		public abstract boolean isProxyAddressForwarding();
+
+		public abstract boolean isCertificateForwarding();
+
+		public abstract boolean isRequireHostHttp11();
+
+		public abstract boolean isEnableHttp2();
+
+		public abstract boolean isHttp2EnablePush();
+
+		public abstract int getHttp2HeaderTableSize();
+
+		public abstract int getHttp2InitialWindowSize();
+
+		public abstract Integer getHttp2MaxConcurrentStreams();
+
+		public abstract int getHttp2MaxFrameSize();
+
+		public abstract Integer getHttp2MaxHeaderListSize();
+
+		@Override
+		protected String toStringParameters() {
+			final StringBuilder sb = new StringBuilder();
+			sb.append("name: ").append(name);
+			sb.append(", ").append(super.toStringParameters());
+			sb.append(", socket binding name: ").append(socketBindingName);
+			sb.append(", worker name: ").append(workerName);
+			sb.append(", buffer pool name: ").append(bufferPoolName);
+			sb.append(", enabled: ").append(enabled);
+			sb.append(", resolve peer address: ").append(resolvePeerAddress);
+			sb.append(", disallowed methods: ").append(disallowedMethods);
+			sb.append(", secure: ").append(isSecure());
+			sb.append(", max post size: ").append(maxPostSize);
+			sb.append(", buffer pipelined data: ").append(bufferPipelinedData);
+			sb.append(", max header size: ").append(maxHeaderSize);
+			sb.append(", max parameters: ").append(maxParameters);
+			sb.append(", max headers: ").append(maxHeaders);
+			sb.append(", max cookies: ").append(maxCookies);
+			sb.append(", allow encoded slash: ").append(allowEncodedSlash);
+			sb.append(", decode url: ").append(decodeUrl);
+			sb.append(", url charset: ").append(urlCharset);
+			sb.append(", always set keep alive: ").append(alwaysSetKeepAlive);
+			sb.append(", max buffered request size: ").append(maxBufferedRequestSize);
+			sb.append(", record request start time: ").append(recordRequestStartTime);
+			sb.append(", allow equals in cookie value: ").append(allowEqualsInCookieValue);
+			sb.append(", no request timeout: ").append(noRequestTimeout);
+			sb.append(", request parse timeout: ").append(requestParseTimeout);
+			sb.append(", rfc6265 cookie validation: ").append(rfc6265CookieValidation);
+			return sb.toString();
+		}
 	}
+
+	// http-listener-type (some atrributes have different type in XSD and different in Wildfly extension model)
 
 	@XmlType(name = "http-listener-type", namespace = NS_UNDERTOW)
 	public static class HttpListener extends Listener {
+		@XmlAttribute(name = "certificate-forwarding")
+		private boolean certificateForwarding = false;
+
 		@XmlAttribute(name = "redirect-socket")
 		private String redirectSocket;
-		//<xs:attribute name="certificate-forwarding" use="optional" type="xs:string" default="false">
-		//<xs:attribute name="redirect-socket" use="optional" type="xs:string">
+
 		@XmlAttribute(name = "proxy-address-forwarding")
-		private String proxyAddressForwarding;
-		@XmlAttribute(name = "resolve-peer-address")
-                private String peerHostLookup;
-		//<xs:attribute name="enable-http2" use="optional" type="xs:string">
-		//<xs:attribute name="http2-enable-push" type="xs:boolean" use="optional" />
-		//<xs:attribute name="http2-header-table-size" type="xs:int" use="optional" />
-		//<xs:attribute name="http2-initial-window-size" type="xs:int" use="optional" />
-		//<xs:attribute name="http2-max-concurrent-streams" type="xs:int" use="optional" />
-		//<xs:attribute name="http2-max-frame-size" type="xs:int" use="optional" />
-		//<xs:attribute name="http2-max-header-list-size" type="xs:int" use="optional" />
-		//<xs:attribute name="require-host-http11" type="xs:boolean" use="optional" default="false"/>
+		private boolean proxyAddressForwarding = false;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#ENABLE_HTTP2
+		 */
+		@XmlAttribute(name = "enable-http2")
+		private boolean enableHttp2 = false;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_ENABLE_PUSH
+		 */
+		@XmlAttribute(name = "http2-enable-push")
+		private boolean http2EnablePush = false;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_HEADER_TABLE_SIZE, defaults to
+		 * io.undertow.UndertowOptions#HTTP2_SETTINGS_HEADER_TABLE_SIZE_DEFAULT
+		 */
+		@XmlAttribute(name = "http2-header-table-size")
+		private int http2HeaderTableSize = io.undertow.UndertowOptions.HTTP2_SETTINGS_HEADER_TABLE_SIZE_DEFAULT;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_INITIAL_WINDOW_SIZE, defaults to
+		 * io.undertow.protocols.http2.Http2Channel#DEFAULT_INITIAL_WINDOW_SIZE
+		 */
+		@XmlAttribute(name = "http2-initial-window-size")
+		private int http2InitialWindowSize = Http2Channel.DEFAULT_INITIAL_WINDOW_SIZE;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_MAX_CONCURRENT_STREAMS
+		 */
+		@XmlAttribute(name = "http2-max-concurrent-streams")
+		private Integer http2MaxConcurrentStreams;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_MAX_FRAME_SIZE
+		 */
+		@XmlAttribute(name = "http2-max-frame-size")
+		private int http2MaxFrameSize = Http2Channel.DEFAULT_MAX_FRAME_SIZE;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_MAX_HEADER_LIST_SIZE
+		 */
+		@XmlAttribute(name = "http2-max-header-list-size")
+		private Integer http2MaxHeaderListSize;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#REQUIRE_HOST_HTTP11
+		 */
+		@XmlAttribute(name = "require-host-http11")
+		private boolean requireHostHttp11 = false;
+
+		@Override
+		public boolean isCertificateForwarding() {
+			return certificateForwarding;
+		}
+
+		public void setCertificateForwarding(boolean certificateForwarding) {
+			this.certificateForwarding = certificateForwarding;
+		}
 
 		public String getRedirectSocket() {
 			return redirectSocket;
@@ -292,78 +690,210 @@ public class Server {
 			this.redirectSocket = redirectSocket;
 		}
 
-		public String getProxyAddressForwarding() {
+		@Override
+		public boolean isProxyAddressForwarding() {
 			return proxyAddressForwarding;
 		}
 
-		public void setProxyAddressForwarding(String proxyAddressForwarding) {
+		public void setProxyAddressForwarding(boolean proxyAddressForwarding) {
 			this.proxyAddressForwarding = proxyAddressForwarding;
 		}
 
-		public String getPeerHostLookup() {
-	                return peerHostLookup;
-	        }
+		public boolean isEnableHttp2() {
+			return enableHttp2;
+		}
 
-	        public void setPeerHostLookup(String peerHostLookup) {
-	                this.peerHostLookup = peerHostLookup;
-	        }
-	        
-		
+		public void setEnableHttp2(boolean enableHttp2) {
+			this.enableHttp2 = enableHttp2;
+		}
+
+		public boolean isHttp2EnablePush() {
+			return http2EnablePush;
+		}
+
+		public void setHttp2EnablePush(boolean http2EnablePush) {
+			this.http2EnablePush = http2EnablePush;
+		}
+
+		public int getHttp2HeaderTableSize() {
+			return http2HeaderTableSize;
+		}
+
+		public void setHttp2HeaderTableSize(int http2HeaderTableSize) {
+			this.http2HeaderTableSize = http2HeaderTableSize;
+		}
+
+		public int getHttp2InitialWindowSize() {
+			return http2InitialWindowSize;
+		}
+
+		public void setHttp2InitialWindowSize(int http2InitialWindowSize) {
+			this.http2InitialWindowSize = http2InitialWindowSize;
+		}
+
+		public Integer getHttp2MaxConcurrentStreams() {
+			return http2MaxConcurrentStreams;
+		}
+
+		public void setHttp2MaxConcurrentStreams(Integer http2MaxConcurrentStreams) {
+			this.http2MaxConcurrentStreams = http2MaxConcurrentStreams;
+		}
+
+		public int getHttp2MaxFrameSize() {
+			return http2MaxFrameSize;
+		}
+
+		public void setHttp2MaxFrameSize(int http2MaxFrameSize) {
+			this.http2MaxFrameSize = http2MaxFrameSize;
+		}
+
+		public Integer getHttp2MaxHeaderListSize() {
+			return http2MaxHeaderListSize;
+		}
+
+		public void setHttp2MaxHeaderListSize(Integer http2MaxHeaderListSize) {
+			this.http2MaxHeaderListSize = http2MaxHeaderListSize;
+		}
+
+		@Override
+		public boolean isRequireHostHttp11() {
+			return requireHostHttp11;
+		}
+
+		public void setRequireHostHttp11(boolean requireHostHttp11) {
+			this.requireHostHttp11 = requireHostHttp11;
+		}
+
 		@Override
 		public String toString() {
 			final StringBuilder sb = new StringBuilder("{ ");
-			sb.append("name: ").append(name);
-			sb.append(", receive buffer: ").append(receiveBuffer);
-			sb.append(", send buffer: ").append(sendBuffer);
-			sb.append(", tcp backlog: ").append(tcpBacklog);
-			sb.append(", tcp KeepAlive: ").append(tcpKeepAlive);
-			sb.append(", read timeoout: ").append(readTimeoout);
-			sb.append(", write timeoout: ").append(writeTimeoout);
-			sb.append(", max connections: ").append(maxConnections);
-			sb.append(", socket binding name: ").append(socketBindingName);
-			sb.append(", buffer pool name: ").append(bufferPoolName);
-			sb.append(", enabled: ").append(enabled);
-			sb.append(", url charset: ").append(urlCharset);
-			sb.append(", secure: ").append(secure);
-			sb.append(", redirect socket: ").append(redirectSocket);
-			sb.append(", proxy address forwarding: ").append(proxyAddressForwarding);
-			sb.append(", peer host lookup: ").append(peerHostLookup);
+			sb.append(toStringParameters());
 			sb.append(" }");
 			return sb.toString();
 		}
 
+		@Override
+		protected String toStringParameters() {
+			final StringBuilder sb = new StringBuilder();
+			sb.append(super.toStringParameters());
+			sb.append(", certificate forwarding: ").append(certificateForwarding);
+			sb.append(", redirect socket: ").append(redirectSocket);
+			sb.append(", proxy address forwarding: ").append(proxyAddressForwarding);
+			sb.append(", enable http2: ").append(enableHttp2);
+			sb.append(", http2 enable push: ").append(http2EnablePush);
+			sb.append(", http2 header table size: ").append(http2HeaderTableSize);
+			sb.append(", http2 initial window size: ").append(http2InitialWindowSize);
+			sb.append(", http2 max concurrent streams: ").append(http2MaxConcurrentStreams);
+			sb.append(", http2 max frame size: ").append(http2MaxFrameSize);
+			sb.append(", http2 max header list size: ").append(http2MaxHeaderListSize);
+			sb.append(", require host http11: ").append(requireHostHttp11);
+			return sb.toString();
+		}
 	}
 
 	@XmlType(name = "https-listener-type", namespace = NS_UNDERTOW)
-	public static class HttpsListener extends HttpListener {
-		// new in urn:jboss:domain:undertow:4.0 - but unimplemented in pax-web-undertow
+	public static class HttpsListener extends Listener {
+
 		@XmlAttribute(name="ssl-context")
 		private String sslContext;
+
+		@XmlAttribute(name = "certificate-forwarding")
+		private boolean certificateForwarding = false;
+
+		@XmlAttribute(name = "proxy-address-forwarding")
+		private boolean proxyAddressForwarding = false;
+
 		// legacy in urn:jboss:domain:undertow:4.0 - but still used in pax-web
 		@XmlAttribute(name="security-realm")
 		private String securityRealm;
+
+		/**
+		 * XNIO: org.xnio.Options#SSL_CLIENT_AUTH_MODE
+		 */
 		@XmlAttribute(name="verify-client")
-		private String verifyClient;
+		private SslClientAuthMode verifyClient = SslClientAuthMode.NOT_REQUESTED;
+
+		/**
+		 * XNIO: org.xnio.Options#SSL_ENABLED_CIPHER_SUITES
+		 */
 		@XmlAttribute(name="enabled-cipher-suites")
 		private List<String> enabledCipherSuites = new ArrayList<>();
+
+		/**
+		 * XNIO: org.xnio.Options#SSL_ENABLED_PROTOCOLS
+		 */
 		@XmlAttribute(name="enabled-protocols")
 		private List<String> enabledProtocols = new ArrayList<>();
-		//<xs:attribute name="certificate-forwarding" use="optional" type="xs:string" default="false">
-		@XmlAttribute(name = "proxy-address-forwarding")
-		private String proxyAddressForwarding;
-		@XmlAttribute(name = "resolve-peer-address")
-                private String peerHostLookup;
-		//<xs:attribute name="enable-http2" use="optional" type="xs:string">
-		//<xs:attribute name="enable-spdy" use="optional" type="xs:string">
-		//<xs:attribute name="ssl-session-cache-size" use="optional" type="xs:string"/>
-		//<xs:attribute name="ssl-session-timeout" use="optional" type="xs:string"/>
-		//<xs:attribute name="http2-enable-push" type="xs:boolean" use="optional" />
-		//<xs:attribute name="http2-header-table-size" type="xs:int" use="optional" />
-		//<xs:attribute name="http2-initial-window-size" type="xs:int" use="optional" />
-		//<xs:attribute name="http2-max-concurrent-streams" type="xs:int" use="optional" />
-		//<xs:attribute name="http2-max-frame-size" type="xs:int" use="optional" />
-		//<xs:attribute name="http2-max-header-list-size" type="xs:int" use="optional" />
-		//<xs:attribute name="require-host-http11" type="xs:boolean" use="optional" default="false"/>
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#ENABLE_HTTP2
+		 */
+		@XmlAttribute(name = "enable-http2")
+		private boolean enableHttp2 = false;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#ENABLE_SPDY
+		 */
+		@XmlAttribute(name = "enable-spdy")
+		@Deprecated
+		private boolean enableSpdy = false;
+
+		/**
+		 * XNIO: org.xnio.Options#SSL_SERVER_SESSION_CACHE_SIZE
+		 */
+		@XmlAttribute(name = "ssl-session-cache-size")
+		private int sslSessionCacheSize = 0;
+
+		//<xs:attribute name="" use="optional" type="xs:string"/>
+		/**
+		 * XNIO: org.xnio.Options#SSL_SERVER_SESSION_TIMEOUT
+		 */
+		@XmlAttribute(name = "ssl-session-timeout")
+		private int sslSessionTimeout = 0;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_ENABLE_PUSH
+		 */
+		@XmlAttribute(name = "http2-enable-push")
+		private boolean http2EnablePush = false;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_HEADER_TABLE_SIZE, defaults to
+		 * io.undertow.UndertowOptions#HTTP2_SETTINGS_HEADER_TABLE_SIZE_DEFAULT
+		 */
+		@XmlAttribute(name = "http2-header-table-size")
+		private int http2HeaderTableSize = io.undertow.UndertowOptions.HTTP2_SETTINGS_HEADER_TABLE_SIZE_DEFAULT;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_INITIAL_WINDOW_SIZE, defaults to
+		 * io.undertow.protocols.http2.Http2Channel#DEFAULT_INITIAL_WINDOW_SIZE
+		 */
+		@XmlAttribute(name = "http2-initial-window-size")
+		private int http2InitialWindowSize = Http2Channel.DEFAULT_INITIAL_WINDOW_SIZE;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_MAX_CONCURRENT_STREAMS
+		 */
+		@XmlAttribute(name = "http2-max-concurrent-streams")
+		private Integer http2MaxConcurrentStreams;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_MAX_FRAME_SIZE
+		 */
+		@XmlAttribute(name = "http2-max-frame-size")
+		private int http2MaxFrameSize = Http2Channel.DEFAULT_MAX_FRAME_SIZE;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_MAX_HEADER_LIST_SIZE
+		 */
+		@XmlAttribute(name = "http2-max-header-list-size")
+		private Integer http2MaxHeaderListSize;
+
+		/**
+		 * Undertow: io.undertow.UndertowOptions#REQUIRE_HOST_HTTP11
+		 */
+		@XmlAttribute(name = "require-host-http11")
+		private boolean requireHostHttp11 = false;
 
 		public String getSslContext() {
 			return sslContext;
@@ -371,6 +901,24 @@ public class Server {
 
 		public void setSslContext(String sslContext) {
 			this.sslContext = sslContext;
+		}
+
+		@Override
+		public boolean isCertificateForwarding() {
+			return certificateForwarding;
+		}
+
+		public void setCertificateForwarding(boolean certificateForwarding) {
+			this.certificateForwarding = certificateForwarding;
+		}
+
+		@Override
+		public boolean isProxyAddressForwarding() {
+			return proxyAddressForwarding;
+		}
+
+		public void setProxyAddressForwarding(boolean proxyAddressForwarding) {
+			this.proxyAddressForwarding = proxyAddressForwarding;
 		}
 
 		public String getSecurityRealm() {
@@ -381,11 +929,11 @@ public class Server {
 			this.securityRealm = securityRealm;
 		}
 
-		public String getVerifyClient() {
+		public SslClientAuthMode getVerifyClient() {
 			return verifyClient;
 		}
 
-		public void setVerifyClient(String verifyClient) {
+		public void setVerifyClient(SslClientAuthMode verifyClient) {
 			this.verifyClient = verifyClient;
 		}
 
@@ -393,53 +941,142 @@ public class Server {
 			return enabledCipherSuites;
 		}
 
+		public void setEnabledCipherSuites(List<String> enabledCipherSuites) {
+			this.enabledCipherSuites = enabledCipherSuites;
+		}
+
 		public List<String> getEnabledProtocols() {
 			return enabledProtocols;
 		}
 
-		@Override
-		public String getProxyAddressForwarding() {
-			return proxyAddressForwarding;
+		public void setEnabledProtocols(List<String> enabledProtocols) {
+			this.enabledProtocols = enabledProtocols;
+		}
+
+		public boolean isEnableHttp2() {
+			return enableHttp2;
+		}
+
+		public void setEnableHttp2(boolean enableHttp2) {
+			this.enableHttp2 = enableHttp2;
+		}
+
+		public boolean isEnableSpdy() {
+			return enableSpdy;
+		}
+
+		public void setEnableSpdy(boolean enableSpdy) {
+			this.enableSpdy = enableSpdy;
+		}
+
+		public int getSslSessionCacheSize() {
+			return sslSessionCacheSize;
+		}
+
+		public void setSslSessionCacheSize(int sslSessionCacheSize) {
+			this.sslSessionCacheSize = sslSessionCacheSize;
+		}
+
+		public int getSslSessionTimeout() {
+			return sslSessionTimeout;
+		}
+
+		public void setSslSessionTimeout(int sslSessionTimeout) {
+			this.sslSessionTimeout = sslSessionTimeout;
+		}
+
+		public boolean isHttp2EnablePush() {
+			return http2EnablePush;
+		}
+
+		public void setHttp2EnablePush(boolean http2EnablePush) {
+			this.http2EnablePush = http2EnablePush;
+		}
+
+		public int getHttp2HeaderTableSize() {
+			return http2HeaderTableSize;
+		}
+
+		public void setHttp2HeaderTableSize(int http2HeaderTableSize) {
+			this.http2HeaderTableSize = http2HeaderTableSize;
+		}
+
+		public int getHttp2InitialWindowSize() {
+			return http2InitialWindowSize;
+		}
+
+		public void setHttp2InitialWindowSize(int http2InitialWindowSize) {
+			this.http2InitialWindowSize = http2InitialWindowSize;
+		}
+
+		public Integer getHttp2MaxConcurrentStreams() {
+			return http2MaxConcurrentStreams;
+		}
+
+		public void setHttp2MaxConcurrentStreams(Integer http2MaxConcurrentStreams) {
+			this.http2MaxConcurrentStreams = http2MaxConcurrentStreams;
+		}
+
+		public int getHttp2MaxFrameSize() {
+			return http2MaxFrameSize;
+		}
+
+		public void setHttp2MaxFrameSize(int http2MaxFrameSize) {
+			this.http2MaxFrameSize = http2MaxFrameSize;
+		}
+
+		public Integer getHttp2MaxHeaderListSize() {
+			return http2MaxHeaderListSize;
+		}
+
+		public void setHttp2MaxHeaderListSize(Integer http2MaxHeaderListSize) {
+			this.http2MaxHeaderListSize = http2MaxHeaderListSize;
 		}
 
 		@Override
-		public void setProxyAddressForwarding(String proxyAddressForwarding) {
-			this.proxyAddressForwarding = proxyAddressForwarding;
+		public boolean isRequireHostHttp11() {
+			return requireHostHttp11;
 		}
-		
-		@Override
-		public String getPeerHostLookup() {
-                    return peerHostLookup;
-                }
+
+		public void setRequireHostHttp11(boolean requireHostHttp11) {
+			this.requireHostHttp11 = requireHostHttp11;
+		}
 
 		@Override
-                public void setPeerHostLookup(String peerHostLookup) {
-                    this.peerHostLookup = peerHostLookup;
-                }
+		public boolean isSecure() {
+			return true;
+		}
 
 		@Override
 		public String toString() {
 			final StringBuilder sb = new StringBuilder("{ ");
-			sb.append("name: ").append(name);
-			sb.append(", receive buffer: ").append(receiveBuffer);
-			sb.append(", send buffer: ").append(sendBuffer);
-			sb.append(", tcp backlog: ").append(tcpBacklog);
-			sb.append(", tcp KeepAlive: ").append(tcpKeepAlive);
-			sb.append(", read timeoout: ").append(readTimeoout);
-			sb.append(", write timeoout: ").append(writeTimeoout);
-			sb.append(", max connections: ").append(maxConnections);
-			sb.append(", socket binding name: ").append(socketBindingName);
-			sb.append(", buffer pool name: ").append(bufferPoolName);
-			sb.append(", enabled: ").append(enabled);
-			sb.append(", url charset: ").append(urlCharset);
-			sb.append(", secure: ").append(secure);
+			sb.append(toStringParameters());
+			sb.append(" }");
+			return sb.toString();
+		}
+
+		@Override
+		protected String toStringParameters() {
+			final StringBuilder sb = new StringBuilder();
+			sb.append(super.toStringParameters());
+			sb.append(", ssl context: ").append(sslContext);
+			sb.append(", certificate forwarding: ").append(certificateForwarding);
+			sb.append(", proxy address forwarding: ").append(proxyAddressForwarding);
 			sb.append(", security realm: ").append(securityRealm);
 			sb.append(", verify client: ").append(verifyClient);
 			sb.append(", enabled cipher suites: ").append(enabledCipherSuites);
 			sb.append(", enabled protocols: ").append(enabledProtocols);
-			sb.append(", proxy address forwarding: ").append(proxyAddressForwarding);
-			sb.append(", peer host lookup: ").append(peerHostLookup);
-			sb.append(" }");
+			sb.append(", enable http2: ").append(enableHttp2);
+			sb.append(", enable spdy: ").append(enableSpdy);
+			sb.append(", ssl session cache size: ").append(sslSessionCacheSize);
+			sb.append(", ssl session timeout: ").append(sslSessionTimeout);
+			sb.append(", http2 enable push: ").append(http2EnablePush);
+			sb.append(", http2 header table size: ").append(http2HeaderTableSize);
+			sb.append(", http2 initial window size: ").append(http2InitialWindowSize);
+			sb.append(", http2 max concurrent streams: ").append(http2MaxConcurrentStreams);
+			sb.append(", http2 max frame size: ").append(http2MaxFrameSize);
+			sb.append(", http2 max header list size: ").append(http2MaxHeaderListSize);
+			sb.append(", require host http11: ").append(requireHostHttp11);
 			return sb.toString();
 		}
 	}
@@ -455,11 +1092,11 @@ public class Server {
 		@XmlAttribute
 		private String alias;
 		@XmlElement
-		private List<Location> location = new ArrayList<>();
+		private final List<Location> location = new ArrayList<>();
 		@XmlElement(name = "access-log")
 		private AccessLog accessLog;
 		@XmlElement(name = "filter-ref")
-		private List<FilterRef> filterRef = new ArrayList<>();
+		private final List<FilterRef> filterRef = new ArrayList<>();
 
 		public String getName() {
 			return name;
@@ -512,7 +1149,7 @@ public class Server {
 			@XmlAttribute
 			private String handler;
 			@XmlElement(name = "filter-ref")
-			private List<FilterRef> filterRef = new ArrayList<>();
+			private final List<FilterRef> filterRef = new ArrayList<>();
 
 			public String getName() {
 				return name;

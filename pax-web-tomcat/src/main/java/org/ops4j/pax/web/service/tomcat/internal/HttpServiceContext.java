@@ -41,8 +41,6 @@ import org.apache.catalina.core.ApplicationContext;
 import org.apache.catalina.core.ApplicationFilterRegistration;
 import org.apache.catalina.core.StandardContext;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
-import org.apache.tomcat.websocket.server.Constants;
-import org.apache.tomcat.websocket.server.WsServerContainer;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -328,9 +326,9 @@ public class HttpServiceContext extends StandardContext {
 	    @Override
 		public void setAttribute(String name, Object value) {
 			super.setAttribute(name, value);
-			if (Constants.SERVER_CONTAINER_SERVLET_CONTEXT_ATTRIBUTE.equals(name) && value instanceof WsServerContainer) {
-				sc = (WsServerContainer) value;
-			}
+//			if (Constants.SERVER_CONTAINER_SERVLET_CONTEXT_ATTRIBUTE.equals(name) && value instanceof WsServerContainer) {
+//				sc = (WsServerContainer) value;
+//			}
 		}
 
 	    public void setSessionCookieConfig(SessionCookieConfig sessionCookieConfig) {
@@ -347,7 +345,7 @@ public class HttpServiceContext extends StandardContext {
 
 	private Map<String, Object> contextAttributes = Collections.emptyMap();
 
-    private WsServerContainer sc;
+//    private WsServerContainer sc;
 
 	/**
 	 * @param host
@@ -375,9 +373,9 @@ public class HttpServiceContext extends StandardContext {
 				context.setAttribute(Globals.ALT_DD_ATTR, getAltDDName());
 			}
 			// Preserve websocket server container over restart
-			if (sc != null) {
-				context.setAttribute(Constants.SERVER_CONTAINER_SERVLET_CONTEXT_ATTRIBUTE, sc);
-			}
+//			if (sc != null) {
+//				context.setAttribute(Constants.SERVER_CONTAINER_SERVLET_CONTEXT_ATTRIBUTE, sc);
+//			}
 			for (Map.Entry<String, Object> attribute : contextAttributes.entrySet()) {
 				context.setAttribute(attribute.getKey(), attribute.getValue());
 			}

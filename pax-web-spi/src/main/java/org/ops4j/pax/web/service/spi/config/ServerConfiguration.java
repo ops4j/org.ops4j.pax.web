@@ -16,7 +16,6 @@
 package org.ops4j.pax.web.service.spi.config;
 
 import java.io.File;
-import java.net.URL;
 import java.util.List;
 
 import org.ops4j.pax.web.service.PaxWebConfig;
@@ -86,18 +85,20 @@ public interface ServerConfiguration {
 	String getHttpSecureConnectorName();
 
 	/**
-	 * <p>Gets the <em>idle timeout</em> to be used with server connectors. <em>Idle timeout</em> is like
-	 * <em>socket read timeout</em>, but on server side.<ul>
+	 * <p>Gets the <em>idle timeout</em> (in milliseconds) to be used with server connectors.
+	 * <em>Idle timeout</em> is like <em>socket read timeout</em>, but on server side.<ul>
 	 *     <li>Jetty: {@code org.eclipse.jetty.server.AbstractConnector#setIdleTimeout(long)}</li>
+	 *     <li>Tomcat: {@code org.apache.coyote.AbstractProtocol#setConnectionTimeout(int)}</li>
 	 * </ul></p>
 	 * @return
 	 */
 	Integer getConnectorIdleTimeout();
 
 	/**
-	 * <p>Gets the server thread idle timeout.
+	 * <p>Gets the server thread idle timeout in milliseconds.
 	 * <ul>
 	 *     <li>Jetty: {@code org.eclipse.jetty.util.thread.QueuedThreadPool#setIdleTimeout(int)}</li>
+	 *     <li>Tomcat: {@code org.apache.catalina.core.StandardThreadExecutor#setMaxIdleTime(int)}</li>
 	 * </ul></p>
 	 * @return
 	 */
@@ -107,6 +108,7 @@ public interface ServerConfiguration {
 	 * <p>Gets maximum number of threads to use in server runtime. This value MAY mean something different in
 	 * different runtimes.<ul>
 	 *     <li>Jetty: {@code org.eclipse.jetty.util.thread.QueuedThreadPool#setMaxThreads(int)}</li>
+	 *     <li>Tomcat: {@code org.apache.catalina.core.StandardThreadExecutor#setMaxThreads(int)}</li>
 	 * </ul></p>
 	 * @return
 	 */
@@ -116,6 +118,7 @@ public interface ServerConfiguration {
 	 * <p>Gets minimum number of threads to use in server runtime. This value MAY mean something different in
 	 * different runtimes.<ul>
 	 *     <li>Jetty: {@code org.eclipse.jetty.util.thread.QueuedThreadPool#setMinThreads(int)}</li>
+	 *     <li>Tomcat: {@code org.apache.catalina.core.StandardThreadExecutor#setMinSpareThreads(int)}</li>
 	 * </ul></p>
 	 * @return
 	 */
@@ -125,6 +128,7 @@ public interface ServerConfiguration {
 	 * If target container allows, this method specifies a prefix for thread names to use.<ul>
 	 *     <li>Jetty: {@code org.eclipse.jetty.util.thread.QueuedThreadPool#setName(java.lang.String)} (defaults
 	 *     to "qtp" + hashcode).</li>
+	 *     <li>Tomcat: {@code org.apache.catalina.core.StandardThreadExecutor#setNamePrefix(java.lang.String)}</li>
 	 * </ul>
 	 * @return
 	 */
@@ -133,6 +137,7 @@ public interface ServerConfiguration {
 	/**
 	 * Should the connector handle {@code X-Forwarded-*} / {@code X-Proxied-*} headers?<ul>
 	 *     <li>Jetty: {@code org.eclipse.jetty.server.ForwardedRequestCustomizer}</li>
+	 *     <li>Undertow: {@code io.undertow.server.handlers.ProxyPeerAddressHandler}</li>
 	 * </ul>
 	 * @return
 	 */

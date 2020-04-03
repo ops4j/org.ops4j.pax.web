@@ -15,29 +15,17 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.eclipse.jetty.server.HttpConfiguration.Customizer;
-import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
 import org.ops4j.pax.web.service.spi.ServerState;
 import org.ops4j.pax.web.service.spi.config.Configuration;
-import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
-import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
-import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
-import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
-import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
-import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingModel;
-import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
-import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.osgi.framework.Bundle;
-import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +57,8 @@ class JettyServerController implements ServerController {
 
 						private Comparator<?> priorityComparator;
 
-	JettyServerController(Bundle paxWebJettyBundle, ClassLoader classLoader, JettyFactory jettyFactory, Configuration configuration) {
+	JettyServerController(Bundle paxWebJettyBundle, ClassLoader classLoader,
+			JettyFactory jettyFactory, Configuration configuration) {
 		this.paxWebJettyBundle = paxWebJettyBundle;
 		this.classLoader = classLoader;
 		this.jettyFactory = jettyFactory;
@@ -92,7 +81,7 @@ class JettyServerController implements ServerController {
 
 		// controller can be configured only once
 		if (state != ServerState.UNCONFIGURED) {
-			throw new IllegalStateException("Can't configure server controller in state " + state);
+			throw new IllegalStateException("Can't configure Jetty server controller in state " + state);
 		}
 
 		jettyServerWrapper = new JettyServerWrapper(configuration, jettyFactory, paxWebJettyBundle, classLoader);
@@ -107,7 +96,7 @@ class JettyServerController implements ServerController {
 		LOG.info("Starting {}", this);
 
 		if (state != ServerState.STOPPED) {
-			throw new IllegalStateException("Can't start server controller in state " + state);
+			throw new IllegalStateException("Can't start Jetty server controller in state " + state);
 		}
 
 		jettyServerWrapper.start();
@@ -121,7 +110,7 @@ class JettyServerController implements ServerController {
 		LOG.info("Stopping {}", this);
 
 		if (state != ServerState.STARTED) {
-			throw new IllegalStateException("Can't stop server controller in state " + state);
+			throw new IllegalStateException("Can't stop Jetty server controller in state " + state);
 		}
 
 		jettyServerWrapper.stop();
@@ -140,7 +129,7 @@ class JettyServerController implements ServerController {
 	@Override
 	public void addListener(ServerListener listener) {
 		if (listener == null) {
-			throw new IllegalArgumentException("listener == null");
+			throw new IllegalArgumentException("ServerListener is null");
 		}
 		listeners.add(listener);
 	}
@@ -161,7 +150,7 @@ class JettyServerController implements ServerController {
 		LOG.info("Receiving {}", batch);
 
 		if (state == ServerState.UNCONFIGURED) {
-			throw new IllegalStateException("Can't process batch in server controller in state " + state);
+			throw new IllegalStateException("Can't process batch in Jetty server controller in state " + state);
 		}
 
 		batch.accept(jettyServerWrapper);
@@ -288,50 +277,50 @@ class JettyServerController implements ServerController {
 		return "JettyServerController{configuration=" + configuration.id() + ",state=" + state + "}";
 	}
 
-	private interface State {
-
-		void start();
-
-		void removeWelcomeFiles(WelcomeFileModel model);
-
-		void addWelcomeFiles(WelcomeFileModel model);
-
-		void addContainerInitializerModel(ContainerInitializerModel model);
-
-		void addSecurityConstraintMapping(SecurityConstraintMappingModel model);
-
-		void removeSecurityConstraintMappings(
-				SecurityConstraintMappingModel model);
-
-		void stop();
-
-		void configure();
-
-		void addServlet(ServletModel model);
-
-		void removeServlet(ServletModel model);
-
-		void addEventListener(EventListenerModel eventListenerModel);
-
-		void removeEventListener(EventListenerModel eventListenerModel);
-
-		void removeContext(HttpContext httpContext);
-
-		void addFilter(FilterModel filterModel);
-
-		void removeFilter(FilterModel filterModel);
-
-		void addErrorPage(ErrorPageModel model);
-
-		void removeErrorPage(ErrorPageModel model);
-
-		LifeCycle getContext(OsgiContextModel model);
-		
-		void addCustomizers(Collection<Customizer> customizers);
-		
-		void removeCustomizers(Collection<Customizer> customizers);
-
-	}
+//	private interface State {
+//
+//		void start();
+//
+//		void removeWelcomeFiles(WelcomeFileModel model);
+//
+//		void addWelcomeFiles(WelcomeFileModel model);
+//
+//		void addContainerInitializerModel(ContainerInitializerModel model);
+//
+//		void addSecurityConstraintMapping(SecurityConstraintMappingModel model);
+//
+//		void removeSecurityConstraintMappings(
+//				SecurityConstraintMappingModel model);
+//
+//		void stop();
+//
+//		void configure();
+//
+//		void addServlet(ServletModel model);
+//
+//		void removeServlet(ServletModel model);
+//
+//		void addEventListener(EventListenerModel eventListenerModel);
+//
+//		void removeEventListener(EventListenerModel eventListenerModel);
+//
+//		void removeContext(HttpContext httpContext);
+//
+//		void addFilter(FilterModel filterModel);
+//
+//		void removeFilter(FilterModel filterModel);
+//
+//		void addErrorPage(ErrorPageModel model);
+//
+//		void removeErrorPage(ErrorPageModel model);
+//
+//		LifeCycle getContext(OsgiContextModel model);
+//
+//		void addCustomizers(Collection<Customizer> customizers);
+//
+//		void removeCustomizers(Collection<Customizer> customizers);
+//
+//	}
 
 //	private class Started implements State {
 //

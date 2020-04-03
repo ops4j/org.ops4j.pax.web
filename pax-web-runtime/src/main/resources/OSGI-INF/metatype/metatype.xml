@@ -80,7 +80,7 @@
 
 		<AD id="org.ops4j.pax.web.ssl.key.password" type="String" default=""
 				name="Keystore Private Key Entry Password" />
-		<AD id="org.ops4j.pax.web.ssl.key.algorithm" type="String" default=""
+		<AD id="org.ops4j.pax.web.ssl.keyManagerFactory.algorithm" type="String" default=""
 				name="Keystore Private Key Entry Algorithm. Defaults to SunX509" />
 		<AD id="org.ops4j.pax.web.ssl.key.alias" type="String" default=""
 				name="Keystore Private Key Entry Alias" />

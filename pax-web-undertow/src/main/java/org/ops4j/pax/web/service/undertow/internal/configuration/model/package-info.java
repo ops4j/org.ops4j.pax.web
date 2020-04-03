@@ -13,6 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * <p>Undertow itself doesn't define means to parse {@code undertow.xml} file. This is done by Wildfly using class
+ * like {@code org.wildfly.extension.undertow.UndertowSubsystemParser_10_0}.</p>
+ */
 @XmlSchema(namespace = "urn:org.ops4j.pax.web:undertow:1.0",
 		elementFormDefault = XmlNsForm.QUALIFIED, attributeFormDefault = XmlNsForm.UNQUALIFIED,
 		xmlns = {

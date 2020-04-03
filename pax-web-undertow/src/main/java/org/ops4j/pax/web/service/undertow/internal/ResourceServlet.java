@@ -86,10 +86,10 @@ public class ResourceServlet extends HttpServlet implements ResourceManager {
 		// remember - differently than in org.ops4j.pax.web.service.jetty.internal.ResourceServlet.service(),
 		// here path is already relative to context!
 
-		String contextName = context.getContextModel().getContextName();
-		if (contextName.isEmpty()) {
-			contextName = "/";
-		}
+//		String contextName = context.getContextModel().getContextName();
+//		if (contextName.isEmpty()) {
+//			contextName = "/";
+//		}
 		String mapping = path;
 		if (!"/".equals(alias)) {
 			mapping = mapping.substring(alias.length());

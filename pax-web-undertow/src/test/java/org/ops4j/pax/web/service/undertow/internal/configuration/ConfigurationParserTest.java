@@ -15,7 +15,8 @@
  */
 package org.ops4j.pax.web.service.undertow.internal.configuration;
 
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -51,7 +52,7 @@ public class ConfigurationParserTest {
 //		StreamSource source = new StreamSource(getClass().getResourceAsStream("/templates/undertow-default-template.xml"));
 		Unmarshaller unmarshaller = context.createUnmarshaller();
 
-		Properties pid = new Properties();
+		Map<String, String> pid = new HashMap<>();
 		pid.put(PaxWebConfig.PID_CFG_HTTP_PORT, "8123");
 		pid.put(PaxWebConfig.PID_CFG_HTTP_PORT_SECURE, "8423");
 		pid.put("karaf.etc", "/data/tmp");

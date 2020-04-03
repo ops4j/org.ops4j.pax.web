@@ -152,6 +152,9 @@ public abstract class AbstractControlledTestBase {
 				systemProperty("ProjectVersion").value(TestConfiguration.PAX_WEB_VERSION),
 //				systemProperty("org.ops4j.pax.url.mvn.certificateCheck").value("false"),
 
+				systemProperty("org.ops4j.pax.url.mvn.useFallbackRepositories").value("false"),
+				systemProperty("org.ops4j.pax.url.mvn.repositories").value("https://repo1.maven.org/maven2@id=central"),
+
 //				addCodeCoverageOption(),
 
 				mavenBundle().groupId("org.ops4j.pax.web.itest").artifactId("pax-web-itest-base").versionAsInProject(),

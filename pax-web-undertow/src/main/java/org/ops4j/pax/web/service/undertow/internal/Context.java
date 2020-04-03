@@ -37,7 +37,6 @@ import io.undertow.servlet.api.ServletSessionConfig;
 import io.undertow.servlet.ServletExtension;
 import io.undertow.servlet.api.SessionPersistenceManager;
 import io.undertow.util.CanonicalPathUtils;
-import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.web.service.AuthenticatorService;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
@@ -112,7 +111,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	private final List<ServiceRegistration<ServletContext>> registeredServletContexts = new ArrayList<>();
 	private final ServletContainer container = ServletContainer.Factory.newInstance();
 	private final AtomicBoolean started = new AtomicBoolean();
-	private final ClassLoader classLoader;
+	private /*final */ClassLoader classLoader;
 	private volatile HttpHandler handler;
 
 	private DeploymentManager manager;
@@ -132,27 +131,27 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		this.path = path;
 		this.contextModel = contextModel;
 
-		ClassLoader classLoader = contextModel.getClassLoader();
-		List<Bundle> bundles = ((ResourceDelegatingBundleClassLoader) classLoader).getBundles();
-		BundleClassLoader parentClassLoader = new BundleClassLoader(FrameworkUtil.getBundle(getClass()));
-		this.classLoader = new ResourceDelegatingBundleClassLoader(bundles, parentClassLoader);
-
-		LOG.info("registering context {}, with context path: /{}", contextModel.getHttpContext(), contextModel.getContextName());
-
-		undertowBundle = FrameworkUtil.getBundle(getClass());
-
-		if (undertowBundle != null) {
-			Filter filterPackage = null;
-			try {
-				filterPackage = undertowBundle.getBundleContext()
-						.createFilter("(objectClass=org.osgi.service.packageadmin.PackageAdmin)");
-			} catch (InvalidSyntaxException e) {
-				LOG.error("InvalidSyntaxException while waiting for PackageAdmin Service", e);
-			}
-			packageAdminTracker = new ServiceTracker<>(undertowBundle.getBundleContext(),
-					filterPackage, null);
-			packageAdminTracker.open();
-		}
+//		ClassLoader classLoader = contextModel.getClassLoader();
+//		List<Bundle> bundles = ((ResourceDelegatingBundleClassLoader) classLoader).getBundles();
+//		BundleClassLoader parentClassLoader = new BundleClassLoader(FrameworkUtil.getBundle(getClass()));
+//		this.classLoader = new ResourceDelegatingBundleClassLoader(bundles, parentClassLoader);
+//
+//		LOG.info("registering context {}, with context path: /{}", contextModel.getHttpContext(), contextModel.getContextName());
+//
+//		undertowBundle = FrameworkUtil.getBundle(getClass());
+//
+//		if (undertowBundle != null) {
+//			Filter filterPackage = null;
+//			try {
+//				filterPackage = undertowBundle.getBundleContext()
+//						.createFilter("(objectClass=org.osgi.service.packageadmin.PackageAdmin)");
+//			} catch (InvalidSyntaxException e) {
+//				LOG.error("InvalidSyntaxException while waiting for PackageAdmin Service", e);
+//			}
+//			packageAdminTracker = new ServiceTracker<>(undertowBundle.getBundleContext(),
+//					filterPackage, null);
+//			packageAdminTracker.open();
+//		}
 	}
 
 	public OsgiContextModel getContextModel() {
@@ -161,19 +160,19 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 	@Override
 	public synchronized void start() throws Exception {
-		if (started.compareAndSet(false, true)) {
- 			LOG.info("Starting context /{}", contextModel.getContextName());
-			for (ServletModel servlet : servlets) {
-				doStart(servlet);
-			}
-			createHandler(null);
-		}
+//		if (started.compareAndSet(false, true)) {
+// 			LOG.info("Starting context /{}", contextModel.getContextName());
+//			for (ServletModel servlet : servlets) {
+//				doStart(servlet);
+//			}
+//			createHandler(null);
+//		}
 	}
 
 	@Override
 	public synchronized void stop() throws Exception {
 		if (started.compareAndSet(true, false)) {
-			LOG.info("Stopping context /{}", contextModel.getContextName());
+//			LOG.info("Stopping context /{}", contextModel.getContextName());
 			for (ServletModel servlet : servlets) {
 				doStop(servlet);
 			}
@@ -201,9 +200,9 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	private void withPatterns(String[] patterns,
 							  BiConsumer<String, HttpHandler> forPrefixPath, BiConsumer<String, HttpHandler> forExactPath) {
 		String contextPath = "";
-		if (!contextModel.getContextName().isEmpty()) {
-			contextPath = "/" + contextModel.getContextName();
-		}
+//		if (!contextModel.getContextName().isEmpty()) {
+//			contextPath = "/" + contextModel.getContextName();
+//		}
 		for (String pattern : patterns) {
 			// after org.ops4j.pax.web.service.spi.util.Path.normalizePattern() we have patterns
 			// starting with either "/" or "*"
@@ -229,7 +228,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 	public synchronized void destroy() {
 		try {
-			LOG.info("destroying context {}, with context path: {}", contextModel.getHttpContext(), contextModel.getContextName());
+//			LOG.info("destroying context {}, with context path: {}", contextModel.getHttpContext(), contextModel.getContextName());
 			destroyHandler(false);
 		} catch (ServletException e) {
 			LOG.error(e.getMessage(), e);
@@ -267,9 +266,9 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		if (h != null) {
 			// Put back original request path
 			String path = exchange.getRequestPath();
-			if (!contextModel.getContextName().isEmpty()) {
-				path = path.substring(contextModel.getContextName().length() + 1);
-			}
+//			if (!contextModel.getContextName().isEmpty()) {
+//				path = path.substring(contextModel.getContextName().length() + 1);
+//			}
 			exchange.setRelativePath(path);
 			h.handleRequest(exchange);
 		} else {
@@ -315,13 +314,13 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 	private synchronized void destroyHandler(boolean keepProxy) throws ServletException {
 		if (manager != null) {
-			LOG.debug("Destroying handler for context /{}", contextModel.getContextName());
+//			LOG.debug("Destroying handler for context /{}", contextModel.getContextName());
 			if (!keepProxy) {
 				unregisterServletContext(manager.getDeployment().getServletContext());
 			}
-			LOG.debug("Stopping manager for context /{}", contextModel.getContextName());
+//			LOG.debug("Stopping manager for context /{}", contextModel.getContextName());
 			manager.stop();
-			LOG.debug("Undeploying manager for context /{}", contextModel.getContextName());
+//			LOG.debug("Undeploying manager for context /{}", contextModel.getContextName());
 			manager.undeploy();
 			manager = null;
 			handler = null;
@@ -390,34 +389,37 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	}
 
 	private void doCreateHandler(Consumer<ServletContext> consumer) throws ServletException {
-		LOG.debug("Creating handler for context /{}", contextModel.getContextName());
+//		LOG.debug("Creating handler for context /{}", contextModel.getContextName());
 		final WebContainerContext httpContext = contextModel.getHttpContext();
+		// org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService#createServletConfig
 		DeploymentInfo deployment = new DeploymentInfo();
 		deployment.setEagerFilterInit(true);
-		deployment.setDeploymentName(contextModel.getContextName());
+//		deployment.setDeploymentName(contextModel.getContextName());
 		deployment.setDisplayName(httpContext.getContextId());
-		deployment.setContextPath('/' + contextModel.getContextName());
-		deployment.setClassLoader(classLoader);
-		BundleContext bundleContext = contextModel.getBundle().getBundleContext();
-		if (bundleContext != null) {
-			deployment.addServletContextAttribute(PaxWebConstants.BUNDLE_CONTEXT_ATTRIBUTE, bundleContext);
-			deployment.addServletContextAttribute("org.springframework.osgi.web.org.osgi.framework.BundleContext", bundleContext);
-		}
+//		deployment.setConfidentialPortManager(getConfidentialPortManager());
+		// d.setServletStackTraces(servletContainer.getStackTraces());
+//		deployment.setContextPath('/' + contextModel.getContextName());
+//		deployment.setClassLoader(classLoader);
+//		BundleContext bundleContext = contextModel.getBundle().getBundleContext();
+//		if (bundleContext != null) {
+//			deployment.addServletContextAttribute(PaxWebConstants.BUNDLE_CONTEXT_ATTRIBUTE, bundleContext);
+//			deployment.addServletContextAttribute("org.springframework.osgi.web.org.osgi.framework.BundleContext", bundleContext);
+//		}
 		deployment.setResourceManager(this);
 		// TODO: move to XML configuration
 		deployment.setIdentityManager(identityManager);
-		if (contextModel.getRealmName() != null && contextModel.getAuthMethod() != null) {
-			ServletExtension authenticator = getAuthenticator(contextModel.getAuthMethod());
-			if (authenticator != null) {
-				deployment.getServletExtensions().add(authenticator);
-			}
-			LoginConfig cfg = new LoginConfig(
-					contextModel.getAuthMethod(),
-					contextModel.getRealmName(),
-					contextModel.getFormLoginPage(),
-					contextModel.getFormErrorPage());
-			deployment.setLoginConfig(cfg);
-		}
+//		if (contextModel.getRealmName() != null && contextModel.getAuthMethod() != null) {
+//			ServletExtension authenticator = getAuthenticator(contextModel.getAuthMethod());
+//			if (authenticator != null) {
+//				deployment.getServletExtensions().add(authenticator);
+//			}
+//			LoginConfig cfg = new LoginConfig(
+//					contextModel.getAuthMethod(),
+//					contextModel.getRealmName(),
+//					contextModel.getFormLoginPage(),
+//					contextModel.getFormErrorPage());
+//			deployment.setLoginConfig(cfg);
+//		}
 		boolean defaultServletAdded = false;
 		ServletModel fallbackDefaultServlet = null;
 		for (ServletModel servlet : servlets) {
@@ -500,22 +502,22 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 			}
 		}
 
-		Bundle bundle = contextModel.getBundle();
-		ServletContainerInitializerScanner scanner = new ServletContainerInitializerScanner(bundle, undertowBundle, packageAdminTracker.getService());
-		Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = contextModel.getContainerInitializers();
-		if (containerInitializers == null) {
-			containerInitializers = new HashMap<>();
-			contextModel.setContainerInitializers(containerInitializers);
-		}
-		scanner.scanBundles(containerInitializers);
+//		Bundle bundle = contextModel.getBundle();
+//		ServletContainerInitializerScanner scanner = new ServletContainerInitializerScanner(bundle, undertowBundle, packageAdminTracker.getService());
+//		Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = contextModel.getContainerInitializers();
+//		if (containerInitializers == null) {
+//			containerInitializers = new HashMap<>();
+//			contextModel.setContainerInitializers(containerInitializers);
+//		}
+//		scanner.scanBundles(containerInitializers);
 
-		for (Entry<ServletContainerInitializer, Set<Class<?>>> entry : contextModel.getContainerInitializers().entrySet()) {
-			deployment.addServletContainerInitalizer(new ServletContainerInitializerInfo(
-					clazz(null, entry.getKey()),
-					factory(null, entry.getKey()),
-					entry.getValue()
-			));
-		}
+//		for (Entry<ServletContainerInitializer, Set<Class<?>>> entry : contextModel.getContainerInitializers().entrySet()) {
+//			deployment.addServletContainerInitalizer(new ServletContainerInitializerInfo(
+//					clazz(null, entry.getKey()),
+//					factory(null, entry.getKey()),
+//					entry.getValue()
+//			));
+//		}
 
 		for (FilterModel filter : filters) {
 			FilterInfo info = new FilterInfo(filter.getName(),
@@ -524,28 +526,28 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 			for (Map.Entry<String, String> param : filter.getInitParams().entrySet()) {
 				info.addInitParam(param.getKey(), param.getValue());
 			}
-			info.setAsyncSupported(filter.isAsyncSupported());
+//			info.setAsyncSupported(filter.isAsyncSupported());
 
 			deployment.addFilter(info);
-			String[] dispatchers = filter.getDispatcher();
-			if (dispatchers == null || dispatchers.length == 0) {
-				dispatchers = new String[]{"request"};
-			}
-			for (String dispatcher : dispatchers) {
-				DispatcherType dt = DispatcherType.valueOf(dispatcher.toUpperCase());
-				String[] servletNames = filter.getServletNames();
-				if (servletNames != null) {
-					for (String servletName : servletNames) {
-						deployment.addFilterServletNameMapping(filter.getName(), servletName, dt);
-					}
-				}
-				String[] urlPatterns = filter.getUrlPatterns();
-				if (urlPatterns != null) {
-					for (String urlPattern : urlPatterns) {
-						deployment.addFilterUrlMapping(filter.getName(), urlPattern, dt);
-					}
-				}
-			}
+//			String[] dispatchers = filter.getDispatcher();
+//			if (dispatchers == null || dispatchers.length == 0) {
+//				dispatchers = new String[]{"request"};
+//			}
+//			for (String dispatcher : dispatchers) {
+//				DispatcherType dt = DispatcherType.valueOf(dispatcher.toUpperCase());
+//				String[] servletNames = filter.getServletNames();
+//				if (servletNames != null) {
+//					for (String servletName : servletNames) {
+//						deployment.addFilterServletNameMapping(filter.getName(), servletName, dt);
+//					}
+//				}
+//				String[] urlPatterns = filter.getUrlPatterns();
+//				if (urlPatterns != null) {
+//					for (String urlPattern : urlPatterns) {
+//						deployment.addFilterUrlMapping(filter.getName(), urlPattern, dt);
+//					}
+//				}
+//			}
 		}
 		for (SecurityConstraintMappingModel securityConstraintMapping : securityConstraintMappings) {
 			SecurityConstraint info = new SecurityConstraint();
@@ -592,15 +594,15 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		}
 
 		if (isWebSocketAvailable()) {
-			wsXnioWorker = UndertowUtil.createWorker(contextModel.getClassLoader());
-			if (wsXnioWorker != null) {
-				deployment.addServletContextAttribute(
-						io.undertow.websockets.jsr.WebSocketDeploymentInfo.ATTRIBUTE_NAME,
-						new io.undertow.websockets.jsr.WebSocketDeploymentInfo()
-								.setWorker(wsXnioWorker)
-								.setBuffers(new DefaultByteBufferPool(true, 100))
-				);
-			}
+//			wsXnioWorker = UndertowUtil.createWorker(contextModel.getClassLoader());
+//			if (wsXnioWorker != null) {
+//				deployment.addServletContextAttribute(
+//						io.undertow.websockets.jsr.WebSocketDeploymentInfo.ATTRIBUTE_NAME,
+//						new io.undertow.websockets.jsr.WebSocketDeploymentInfo()
+//								.setWorker(wsXnioWorker)
+//								.setBuffers(new DefaultByteBufferPool(true, 100))
+//				);
+//			}
 		}
 
 		// Add HttpContext security support
@@ -634,54 +636,54 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		});
 
 		ServletSessionConfig ssc = new ServletSessionConfig();
-		if (contextModel.getSessionDomain() != null) {
-			ssc.setDomain(contextModel.getSessionDomain());
-		} else if (configuration != null && configuration.session().getSessionDomain() != null) {
-			ssc.setDomain(configuration.session().getSessionDomain());
-		}
-		if (contextModel.getSessionCookie() != null) {
-			ssc.setName(contextModel.getSessionCookie());
-		} else if (configuration != null && configuration.session().getSessionCookie() != null) {
-			ssc.setName(configuration.session().getSessionCookie());
-		}
-		if (contextModel.getSessionCookieHttpOnly() != null) {
-			ssc.setHttpOnly(contextModel.getSessionCookieHttpOnly());
-		} else if (configuration != null && configuration.session().getSessionCookieHttpOnly() != null) {
-			ssc.setHttpOnly(configuration.session().getSessionCookieHttpOnly());
-		}
-		if (contextModel.getSessionCookieSecure() != null) {
-			ssc.setSecure(contextModel.getSessionCookieSecure());
-		} else if (configuration != null && configuration.session().getSessionCookieSecure() != null) {
-			ssc.setSecure(configuration.session().getSessionCookieSecure());
-		}
-		if (contextModel.getSessionCookieMaxAge() != null) {
-			ssc.setMaxAge(contextModel.getSessionCookieMaxAge());
-		} else if (configuration != null && configuration.session().getSessionCookieMaxAge() != null) {
-			ssc.setMaxAge(configuration.session().getSessionCookieMaxAge());
-		}
-		if (contextModel.getSessionPath() != null) {
-			ssc.setPath(contextModel.getSessionPath());
-		} else if (configuration != null && configuration.session().getSessionPath() != null) {
-			ssc.setPath(configuration.session().getSessionPath());
-		}
+//		if (contextModel.getSessionDomain() != null) {
+//			ssc.setDomain(contextModel.getSessionDomain());
+//		} else if (configuration != null && configuration.session().getSessionDomain() != null) {
+//			ssc.setDomain(configuration.session().getSessionDomain());
+//		}
+//		if (contextModel.getSessionCookie() != null) {
+//			ssc.setName(contextModel.getSessionCookie());
+//		} else if (configuration != null && configuration.session().getSessionCookie() != null) {
+//			ssc.setName(configuration.session().getSessionCookie());
+//		}
+//		if (contextModel.getSessionCookieHttpOnly() != null) {
+//			ssc.setHttpOnly(contextModel.getSessionCookieHttpOnly());
+//		} else if (configuration != null && configuration.session().getSessionCookieHttpOnly() != null) {
+//			ssc.setHttpOnly(configuration.session().getSessionCookieHttpOnly());
+//		}
+//		if (contextModel.getSessionCookieSecure() != null) {
+//			ssc.setSecure(contextModel.getSessionCookieSecure());
+//		} else if (configuration != null && configuration.session().getSessionCookieSecure() != null) {
+//			ssc.setSecure(configuration.session().getSessionCookieSecure());
+//		}
+//		if (contextModel.getSessionCookieMaxAge() != null) {
+//			ssc.setMaxAge(contextModel.getSessionCookieMaxAge());
+//		} else if (configuration != null && configuration.session().getSessionCookieMaxAge() != null) {
+//			ssc.setMaxAge(configuration.session().getSessionCookieMaxAge());
+//		}
+//		if (contextModel.getSessionPath() != null) {
+//			ssc.setPath(contextModel.getSessionPath());
+//		} else if (configuration != null && configuration.session().getSessionPath() != null) {
+//			ssc.setPath(configuration.session().getSessionPath());
+//		}
 		deployment.setServletSessionConfig(ssc);
 		deployment.setDefaultSessionTimeout(defaultSessionTimeoutInMinutes * 60);
 		deployment.setSessionPersistenceManager(sessionPersistenceManager);
 
 		manager = container.addDeployment(deployment);
-		LOG.info("Creating undertow servlet deployment for context path /{}...", contextModel.getContextName());
+//		LOG.info("Creating undertow servlet deployment for context path /{}...", contextModel.getContextName());
 		manager.deploy();
-		LOG.info("Creating undertow servlet deployment for context path /{} - done", contextModel.getContextName());
+//		LOG.info("Creating undertow servlet deployment for context path /{} - done", contextModel.getContextName());
 
 		LOG.info("Registering {} as OSGi service...", manager.getDeployment().getServletContext());
-		registerServletContext(manager.getDeployment().getServletContext(), bundle);
+//		registerServletContext(manager.getDeployment().getServletContext(), bundle);
 		LOG.info("Registering {} as OSGi service - done", manager.getDeployment().getServletContext());
 
 		if(consumer != null){
 			consumer.accept(manager.getDeployment().getServletContext());
 		}
 
-		LOG.info("Starting Undertow web application for context path /{}", contextModel.getContextName());
+//		LOG.info("Starting Undertow web application for context path /{}", contextModel.getContextName());
 		handler = manager.start();
 	}
 
@@ -1043,16 +1045,18 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	private class FilterRankComparator implements Comparator<FilterModel> {
 		@Override
 		public int compare(FilterModel fm1, FilterModel fm2) {
-			int r1 = ((fm1.getInitParams() == null) || (fm1.getInitParams().get(PaxWebConstants.FILTER_RANKING) == null))
-					? 0 : Integer.parseInt(fm1.getInitParams().get(PaxWebConstants.FILTER_RANKING));
-			int r2 = ((fm2.getInitParams() == null) || (fm2.getInitParams().get(PaxWebConstants.FILTER_RANKING) == null))
-					? 0 : Integer.parseInt(fm2.getInitParams().get(PaxWebConstants.FILTER_RANKING));
+//			int r1 = ((fm1.getInitParams() == null) || (fm1.getInitParams().get(PaxWebConstants.FILTER_RANKING) == null))
+//					? 0 : Integer.parseInt(fm1.getInitParams().get(PaxWebConstants.FILTER_RANKING));
+//			int r2 = ((fm2.getInitParams() == null) || (fm2.getInitParams().get(PaxWebConstants.FILTER_RANKING) == null))
+//					? 0 : Integer.parseInt(fm2.getInitParams().get(PaxWebConstants.FILTER_RANKING));
+//
+//			if (r1 == r2) {
+//				return fm1.getName().compareTo(fm2.getName());
+//			}
+//
+//			return Integer.compare(r1, r2);
 
-			if (r1 == r2) {
-				return fm1.getName().compareTo(fm2.getName());
-			}
-
-			return Integer.compare(r1, r2);
+		return 0;
 		}
 	}
 
