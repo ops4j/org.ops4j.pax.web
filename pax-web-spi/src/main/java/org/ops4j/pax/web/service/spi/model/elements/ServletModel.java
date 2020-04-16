@@ -54,7 +54,7 @@ public class ServletModel extends ElementModel<Servlet> {
 	private String[] urlPatterns;
 
 	/** Servlet name that defaults to FQCN of the {@link Servlet}. {@code <servlet>/<servlet-name>} */
-	private String name;
+	private final String name;
 
 	/**
 	 * Init parameters of the servlet as specified by {@link ServletConfig#getInitParameterNames()} and
@@ -126,7 +126,6 @@ public class ServletModel extends ElementModel<Servlet> {
 			Servlet servlet, Class<? extends Servlet> servletClass, ServiceReference<? extends Servlet> reference) {
 		this.alias = alias;
 		this.urlPatterns = Path.normalizePatterns(urlPatterns);
-		this.name = name;
 		this.initParams = initParams == null ? Collections.emptyMap() : initParams;
 		this.loadOnStartup = loadOnStartup;
 		this.asyncSupported = asyncSupported;
@@ -148,34 +147,23 @@ public class ServletModel extends ElementModel<Servlet> {
 					+ " or service reference");
 		}
 
-		if (this.name == null) {
+		if (name == null) {
 			// legacy method first
-			this.name = this.initParams.get(PaxWebConstants.INIT_PARAM_SERVLET_NAME);
+			name = this.initParams.get(PaxWebConstants.INIT_PARAM_SERVLET_NAME);
 			this.initParams.remove(PaxWebConstants.INIT_PARAM_SERVLET_NAME);
 		}
-		if (this.name == null) {
+		if (name == null) {
 			// Whiteboard Specification 140.4 Registering Servlets
-			Class<? extends Servlet> c = null;
-			if (this.servletClass != null) {
-				c = this.servletClass;
-			} else if (this.servlet != null) {
-				c = this.servlet.getClass();
-			}
+			Class<? extends Servlet> c = getActualClass();
 			if (c != null) {
-				this.name = c.getName();
-			} else if (getElementReference() != null) {
-				Object objectClass = getElementReference().getProperty(Constants.OBJECTCLASS);
-				if (objectClass instanceof String) {
-					this.name = (String) objectClass;
-				} else if (objectClass instanceof String[] && ((String[]) objectClass).length > 0) {
-					this.name = ((String[]) objectClass)[0];
-				}
+				name = c.getName();
 			}
 		}
-		if (this.name == null) {
+		if (name == null) {
 			// no idea how to obtain the class, but this should not happen
-			this.name = UUID.randomUUID().toString();
+			name = UUID.randomUUID().toString();
 		}
+		this.name = name;
 
 		if (this.alias == null && this.urlPatterns == null) {
 			throw new IllegalArgumentException("Neither alias nor URL patterns is specified");
@@ -261,6 +249,40 @@ public class ServletModel extends ElementModel<Servlet> {
 
 	public Class<? extends Servlet> getServletClass() {
 		return servletClass;
+	}
+
+	/**
+	 * Returns a {@link Class} of the servlet whether it is registered as instance, class or reference.
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public Class<? extends Servlet> getActualClass() {
+		if (this.servletClass != null) {
+			return this.servletClass;
+		} else if (this.servlet != null) {
+			return this.servlet.getClass();
+		}
+		if (getElementReference() != null) {
+			Object objectClass = getElementReference().getProperty(Constants.OBJECTCLASS);
+			String className = null;
+			if (objectClass instanceof String) {
+				className = (String) objectClass;
+			} else if (objectClass instanceof String[] && ((String[]) objectClass).length > 0) {
+				className = ((String[]) objectClass)[0];
+			}
+			if (className != null) {
+				try {
+					return (Class<? extends Servlet>) getRegisteringBundle().loadClass(className);
+				} catch (ClassNotFoundException e) {
+					throw new RuntimeException("Can't load a class for the servlet: " + e.getMessage(), e);
+				}
+			} else {
+				// sane default, accepted by Undertow - especially if it has instance factory
+				return Servlet.class;
+			}
+		}
+
+		return null; // even if it can't happen
 	}
 
 	public static class Builder {

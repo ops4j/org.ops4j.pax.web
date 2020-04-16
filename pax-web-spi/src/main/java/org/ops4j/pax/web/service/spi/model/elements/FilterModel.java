@@ -57,7 +57,7 @@ public class FilterModel extends ElementModel<Filter> {
 	private String[] dispatcherTypes;
 
 	/** Filter name that defaults to FQCN of the {@link Filter}. {@code <filter>/<filter-name>} */
-	private String name;
+	private final String name;
 
 	/**
 	 * Init parameters of the filter as specified by {@link FilterConfig#getInitParameterNames()} and
@@ -126,21 +126,9 @@ public class FilterModel extends ElementModel<Filter> {
 		}
 		if (name == null) {
 			// Whiteboard Specification 140.5 Registering Servlet Filters
-			Class<? extends Filter> c = null;
-			if (this.filterClass != null) {
-				c = this.filterClass;
-			} else if (this.filter != null) {
-				c = this.filter.getClass();
-			}
+			Class<? extends Filter> c = getActualClass();
 			if (c != null) {
-				this.name = c.getName();
-			} else if (getElementReference() != null) {
-				Object objectClass = getElementReference().getProperty(Constants.OBJECTCLASS);
-				if (objectClass instanceof String) {
-					this.name = (String) objectClass;
-				} else if (objectClass instanceof String[] && ((String[]) objectClass).length > 0) {
-					this.name = ((String[]) objectClass)[0];
-				}
+				name = c.getName();
 			}
 		}
 		if (name == null) {
@@ -193,7 +181,7 @@ public class FilterModel extends ElementModel<Filter> {
 				+ (servletNames == null ? "" : ",servletNames=" + Arrays.toString(servletNames))
 				+ (regexMapping == null ? "" : ",regexMapping=" + Arrays.toString(regexMapping))
 				+ (filter == null ? "" : ",filter=" + filter)
-				+ (filterClass == null ? "" : ",servletClass=" + filterClass)
+				+ (filterClass == null ? "" : ",filterClass=" + filterClass)
 				+ ",contexts=" + contextModels
 				+ "}";
 	}
@@ -208,6 +196,10 @@ public class FilterModel extends ElementModel<Filter> {
 
 	public String[] getRegexMapping() {
 		return regexMapping;
+	}
+
+	public void setDispatcherTypes(String[] dispatcherTypes) {
+		this.dispatcherTypes = dispatcherTypes;
 	}
 
 	public String[] getDispatcherTypes() {
@@ -232,6 +224,40 @@ public class FilterModel extends ElementModel<Filter> {
 
 	public Class<? extends Filter> getFilterClass() {
 		return filterClass;
+	}
+
+	/**
+	 * Returns a {@link Class} of the filter whether it is registered as instance, class or reference.
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public Class<? extends Filter> getActualClass() {
+		if (this.filterClass != null) {
+			return this.filterClass;
+		} else if (this.filter != null) {
+			return this.filter.getClass();
+		}
+		if (getElementReference() != null) {
+			Object objectClass = getElementReference().getProperty(Constants.OBJECTCLASS);
+			String className = null;
+			if (objectClass instanceof String) {
+				className = (String) objectClass;
+			} else if (objectClass instanceof String[] && ((String[]) objectClass).length > 0) {
+				className = ((String[]) objectClass)[0];
+			}
+			if (className != null) {
+				try {
+					return (Class<? extends Filter>) getRegisteringBundle().loadClass(className);
+				} catch (ClassNotFoundException e) {
+					throw new RuntimeException("Can't load a class for the filter: " + e.getMessage(), e);
+				}
+			} else {
+				// sane default, accepted by Undertow - especially if it has instance factory
+				return Filter.class;
+			}
+		}
+
+		return null; // even if it can't happen
 	}
 
 	public static class Builder {

@@ -25,7 +25,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -65,20 +64,28 @@ public class PaxWebServletHandler extends ServletHandler {
 	 */
 	private final List<Preprocessor> preprocessors = new LinkedList<>();
 
-	private static final Servlet default404Servlet = new Default404Servlet();
-
 	/** Default {@link ServletContext} to use for chains without target servlet (e.g., filters only) */
 	private ServletContext defaultServletContext;
 	/** Default {@link OsgiContextModel} to use for chains without target servlet (e.g., filters only) */
 	private OsgiContextModel defaultOsgiContextModel;
 
+	/**
+	 * Default servlet to be used when there's nothing mapped under "/" - this is to ensure that filter-only
+	 * chains will work without problems.
+	 */
+	private final Servlet default404Servlet;
+
+	/**
+	 * Create new {@link ServletHandler} for given {@link org.eclipse.jetty.servlet.ServletContextHandler}
+	 * @param default404Servlet this servlet will be used when there's no mapped servlet
+	 */
 	@Review("Move this comment to server-agnostic code")
-	PaxWebServletHandler() {
+	PaxWebServletHandler(Servlet default404Servlet) {
 		// we need default servlet for these reasons:
 		// 1. there HAS TO be something that'll send 404 if nothing is found within given ServletContextHandler
 		// 2. without mapped servlet, even 404 one, no filter chain will be created, so we won't be able
 		//    to configure a context with filters only.
-		// 3. we should now if the invocation pipeline (filters + servlet) consists only of default 404 servlet, in
+		// 3. we should know if the invocation pipeline (filters + servlet) consists only of default 404 servlet, in
 		//    which case we should skip OSGi Whiteboard Preprocessors and handleSecurity() (Specification doesn't
 		//    say anything about it)
 		setEnsureDefaultServlet(true);
@@ -90,6 +97,8 @@ public class PaxWebServletHandler extends ServletHandler {
 		setMaxFilterChainsCacheSize(2 * cacheSize);
 
 		setFilters(new PaxWebFilterHolder[0]);
+
+		this.default404Servlet = default404Servlet;
 	}
 
 	public void setDefaultServletContext(ServletContext defaultServletContext) {
@@ -301,8 +310,9 @@ public class PaxWebServletHandler extends ServletHandler {
 		int dispatch = FilterMapping.dispatch(baseRequest.getDispatcherType());
 
 		FilterChain chain = _chainCache[dispatch].get(key);
-		if (chain != null)
+		if (chain != null) {
 			return chain;
+		}
 
 		chain = super.getFilterChain(baseRequest, pathInContext, servletHolder);
 
@@ -327,8 +337,9 @@ public class PaxWebServletHandler extends ServletHandler {
 		PaxWebServletHolder holder = (PaxWebServletHolder) servletHolder;
 
 		OsgiContextModel targetContext = holder.getOsgiContextModel();
-		if (targetContext == null)
+		if (targetContext == null) {
 			targetContext = defaultOsgiContextModel;
+		}
 
 		List<FilterHolder> osgiScopedFilters = new LinkedList<>();
 		for (FilterHolder filter : filters) {
@@ -339,14 +350,6 @@ public class PaxWebServletHandler extends ServletHandler {
 		}
 
 		return super.newCachedChain(osgiScopedFilters, servletHolder);
-	}
-
-	private static class Default404Servlet extends HttpServlet {
-		@Override
-		protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-//			Request.getBaseRequest(req).setHandled(true);
-		}
 	}
 
 }

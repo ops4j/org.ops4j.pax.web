@@ -56,7 +56,7 @@ public abstract class ElementModel<T> extends Identity implements Comparable<Ele
 
 	/**
 	 * List of {@link OsgiContextModel osgi contexts} with which given {@link ElementModel} is associated.
-	 * This list may be altered using {@link #addContextModel(OsgiContextModel)} ()}, but on first invocation of
+	 * This list may be altered using {@link #addContextModel(OsgiContextModel)}, but on first invocation of
 	 * {@link #getContextModels()}, this list is <em>latched</em>, sorted and can't be modified any further.
 	 */
 	protected List<OsgiContextModel> contextModels = new ArrayList<>();
@@ -97,7 +97,7 @@ public abstract class ElementModel<T> extends Identity implements Comparable<Ele
 			// not yet visited ServletContextModel (with unique context path) is the "best" one according
 			// to service rank / service id
 			Collections.sort(contextModels);
-			// make ummutable
+			// make immutable
 			contextModels = Collections.unmodifiableList(contextModels);
 			closed = true;
 		}

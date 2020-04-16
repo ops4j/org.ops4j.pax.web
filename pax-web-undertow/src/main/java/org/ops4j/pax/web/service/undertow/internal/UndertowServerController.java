@@ -1,22 +1,20 @@
 /*
+ * Copyright 2020 OPS4J.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.
- *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 package org.ops4j.pax.web.service.undertow.internal;
 
-import java.io.File;
-import java.net.URL;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -170,40 +168,6 @@ public class UndertowServerController implements ServerController/*, IdentityMan
 	@Override
 	public String toString() {
 		return "UndertowServerController{configuration=" + configuration.id() + ",state=" + state + "}";
-	}
-
-	/**
-	 * Kind of configuration used
-	 */
-	private enum ConfigSource {
-		/** Configuration in undertow.xml */
-		XML,
-		/** Additional (merged with PID) configuration in undertow.properties */
-		PROPERTIES,
-		/** Configuration purely from Configadmin */
-		PID;
-
-		/**
-		 * Detect {@link ConfigSource} by the type of URL
-		 * @param undertowResource
-		 * @return
-		 */
-		public static ConfigSource kind(URL undertowResource) {
-			if (undertowResource == null) {
-				return PID;
-			}
-			String path = undertowResource.getPath();
-			if (path == null) {
-				return PID;
-			}
-			String name = new File(path).getName();
-			if (name.endsWith(".properties")) {
-				return PROPERTIES;
-			} else if (name.endsWith(".xml")) {
-				return XML;
-			}
-			return PID;
-		}
 	}
 
 }

@@ -33,6 +33,7 @@ import javax.servlet.SessionCookieConfig;
 import javax.servlet.SessionTrackingMode;
 import javax.servlet.descriptor.JspConfigDescriptor;
 
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
 
@@ -51,6 +52,10 @@ public class OsgiScopedServletContext implements ServletContext {
 	public OsgiScopedServletContext(OsgiServletContext osgiContext, Bundle bundle) {
 		this.osgiContext = osgiContext;
 		this.bundle = bundle;
+	}
+
+	public OsgiContextModel getOsgiContextModel() {
+		return osgiContext.getOsgiContextModel();
 	}
 
 	// --- methods that throw UnsupportedOperationException

@@ -128,20 +128,6 @@ public class UndertowFactory {
 				.set(Options.BALANCING_CONNECTIONS, 2)
 				.getMap();
 
-
-		// default worker if not specified in XML
-		IoSubsystem.Worker defaultWorkerDefinition = new IoSubsystem.Worker();
-		// this name will be used as org.xnio.XnioWorker.name
-		// which will impact names of:
-		//  - worker threads: String.format("%s I/O-%d", workerName, worker idx + 1)
-		//  - task threads: String.format("%s task-%d", workerName, seq)
-		defaultWorkerDefinition.setName("XNIO-default");
-		try {
-			defaultWorker = createWorker(defaultWorkerDefinition);
-		} catch (IOException e) {
-			throw new IllegalStateException("Can't create default worker for Undertow: " + e.getMessage(), e);
-		}
-
 		IoSubsystem.BufferPool defaultBufferPoolDefinition = new IoSubsystem.BufferPool();
 		defaultBufferPoolDefinition.setName("default");
 		defaultBufferPool = createBufferPool(defaultBufferPoolDefinition);
@@ -212,7 +198,29 @@ public class UndertowFactory {
 		return new DefaultByteBufferPool(direct, bufferSize, maxPoolSize, threadLocalCacheSize, leakDetectionPercent);
 	}
 
-	public XnioWorker getDefaultWorker() {
+	public XnioWorker getDefaultWorker(Configuration configuration) {
+		if (defaultWorker == null) {
+			// default worker if not specified in XML
+			IoSubsystem.Worker defaultWorkerDefinition = new IoSubsystem.Worker();
+			// this name will be used as org.xnio.XnioWorker.name
+			// which will impact names of:
+			//  - worker threads: String.format("%s I/O-%d", workerName, worker idx + 1)
+			//  - task threads: String.format("%s task-%d", workerName, seq)
+			if (configuration.server().getServerThreadNamePrefix() != null) {
+				defaultWorkerDefinition.setName(configuration.server().getServerThreadNamePrefix());
+			} else {
+				defaultWorkerDefinition.setName("XNIO-default");
+			}
+			if (configuration.server().getServerMaxThreads() != null) {
+				defaultWorkerDefinition.setTaskCoreThreads(configuration.server().getServerMaxThreads());
+				defaultWorkerDefinition.setTaskMaxThreads(configuration.server().getServerMaxThreads());
+			}
+			try {
+				defaultWorker = createWorker(defaultWorkerDefinition);
+			} catch (IOException e) {
+				throw new IllegalStateException("Can't create default worker for Undertow: " + e.getMessage(), e);
+			}
+		}
 		return defaultWorker;
 	}
 
@@ -261,7 +269,8 @@ public class UndertowFactory {
 			Configuration configuration, Server.Listener def, InetSocketAddress listenerAddress) {
 		AcceptingChannel<? extends StreamConnection> listener = null;
 		try {
-			listener = createListener(configuration, def, rootHandler, null, defaultWorker, defaultBufferPool, listenerAddress);
+			listener = createListener(configuration, def, rootHandler, null, getDefaultWorker(configuration),
+					defaultBufferPool, listenerAddress);
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}

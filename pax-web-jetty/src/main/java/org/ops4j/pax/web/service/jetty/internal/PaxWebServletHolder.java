@@ -15,11 +15,8 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Enumeration;
 import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -29,9 +26,9 @@ import javax.servlet.UnavailableException;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
-import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.osgi.framework.ServiceReference;
@@ -90,6 +87,7 @@ public class PaxWebServletHolder extends ServletHolder {
 	 */
 	public PaxWebServletHolder(ServletModel servletModel, OsgiContextModel osgiContextModel,
 			OsgiServletContext osgiServletContext) {
+		super();
 
 		this.servletModel = servletModel;
 		this.osgiContextModel = osgiContextModel;
@@ -177,11 +175,13 @@ public class PaxWebServletHolder extends ServletHolder {
 		Servlet instance = super.getInstance();
 		if (instance == null && servletModel.getElementReference() != null) {
 			// obtain Servlet using reference
-			instance =  servletModel.getRegisteringBundle().getBundleContext().getService(servletModel.getElementReference());
+			instance = servletModel.getRegisteringBundle().getBundleContext().getService(servletModel.getElementReference());
 		}
 
 		// if null, newInstance() will be called
-		return instance == null ? null : new OsgiInitializedServlet(instance);
+		// In Tomcat configuration is take from the StandardWrapper, here
+		// org.eclipse.jetty.servlet.ServletHolder._config is private, so we need special OsgiInitializedServlet
+		return instance == null ? null : new OsgiInitializedServlet(instance, servletContext);
 	}
 
 	@Override
@@ -205,8 +205,8 @@ public class PaxWebServletHolder extends ServletHolder {
 	 */
 	@Override
 	protected Servlet newInstance() throws ServletException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
-		// no need to do anything special, but we have a Bundle reference, so we can use it if needed
-		return new OsgiInitializedServlet(super.newInstance());
+		// no need to do anything special, but we have a Bundle reference, so we could use it if needed
+		return new OsgiInitializedServlet(super.newInstance(), servletContext);
 	}
 
 	/**
@@ -238,65 +238,6 @@ public class PaxWebServletHolder extends ServletHolder {
 	 */
 	public ServletMapping getMapping() {
 		return mapping;
-	}
-
-	/**
-	 * {@link Servlet} wrapper that uses correct {@link ServletConfig} wrapper that returns correct wrapper
-	 * for {@link javax.servlet.ServletContext}
-	 */
-	@Review("Move to pax-web-spi")
-	private class OsgiInitializedServlet implements Servlet {
-
-		private final Servlet servlet;
-
-		public OsgiInitializedServlet(Servlet servlet) {
-			this.servlet = servlet;
-		}
-
-		@Override
-		public void init(final ServletConfig config) throws ServletException {
-			servlet.init(new ServletConfig() {
-				@Override
-				public String getServletName() {
-					return config.getServletName();
-				}
-
-				@Override
-				public ServletContext getServletContext() {
-					return PaxWebServletHolder.this.servletContext;
-				}
-
-				@Override
-				public String getInitParameter(String name) {
-					return config.getInitParameter(name);
-				}
-
-				@Override
-				public Enumeration<String> getInitParameterNames() {
-					return config.getInitParameterNames();
-				}
-			});
-		}
-
-		@Override
-		public ServletConfig getServletConfig() {
-			return servlet.getServletConfig();
-		}
-
-		@Override
-		public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
-			servlet.service(req, res);
-		}
-
-		@Override
-		public String getServletInfo() {
-			return servlet.getServletInfo();
-		}
-
-		@Override
-		public void destroy() {
-			servlet.destroy();
-		}
 	}
 
 }

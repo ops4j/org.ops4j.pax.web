@@ -349,8 +349,10 @@ public class SSLUtils {
 		client2Builder.addExtension(Extension.authorityKeyIdentifier, false, new AuthorityKeyIdentifier(client2KeyId));
 		client2Builder.addExtension(Extension.extendedKeyUsage, false, new ExtendedKeyUsage(KeyPurposeId.id_kp_clientAuth));
 
+		// server1 and client1 are signed by CA
 		X509Certificate server1X509Certificate = converter.getCertificate(server1Builder.build(caContentSigner));
 		X509Certificate client1X509Certificate = converter.getCertificate(client1Builder.build(caContentSigner));
+		// server2 and client2 are self-signed
 		X509Certificate server2X509Certificate = converter.getCertificate(server2Builder.build(server2ContentSigner));
 		X509Certificate client2X509Certificate = converter.getCertificate(client2Builder.build(client2ContentSigner));
 

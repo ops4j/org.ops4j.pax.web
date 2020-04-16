@@ -17,13 +17,9 @@ package org.ops4j.pax.web.itest.server;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.URL;
-import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,10 +30,6 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.Executor;
-import java.util.function.Consumer;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.Servlet;
@@ -49,36 +41,19 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
-import org.apache.hc.client5.http.io.HttpClientConnectionManager;
-import org.apache.hc.client5.http.protocol.HttpClientContext;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
-import org.apache.hc.core5.http.Header;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.http.ssl.TLS;
-import org.apache.hc.core5.ssl.SSLContexts;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
-import org.ops4j.pax.web.itest.server.support.SSLUtils;
+import org.ops4j.pax.web.itest.server.support.Utils;
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerContext;
-import org.ops4j.pax.web.service.internal.ConfigurationBuilder;
 import org.ops4j.pax.web.service.internal.DefaultHttpContext;
 import org.ops4j.pax.web.service.internal.HttpServiceEnabled;
-import org.ops4j.pax.web.service.internal.MetaTypePropertyResolver;
-import org.ops4j.pax.web.service.jetty.internal.JettyServerControllerFactory;
 import org.ops4j.pax.web.service.spi.ServerController;
-import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
@@ -86,19 +61,14 @@ import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.task.Batch;
-import org.ops4j.pax.web.service.spi.util.Utils;
-import org.ops4j.pax.web.service.tomcat.internal.TomcatServerControllerFactory;
-import org.ops4j.pax.web.service.undertow.internal.UndertowServerControllerFactory;
-import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xnio.nio.NioXnioProvider;
 
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.startsWith;
@@ -106,11 +76,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.ops4j.pax.web.itest.server.support.Utils.get;
 
 @RunWith(Parameterized.class)
-public class ServerControllerTest {
+public class ServerControllerBasicRegistrationTest {
 
-	public static Logger LOG = LoggerFactory.getLogger(ServerControllerTest.class);
+	public static Logger LOG = LoggerFactory.getLogger(ServerControllerBasicRegistrationTest.class);
 
 	private int port;
 
@@ -134,227 +105,19 @@ public class ServerControllerTest {
 	}
 
 	@Test
-	public void justInstantiateWithoutOsgi() throws Exception {
-		ServerController controller = create(properties -> {
-			new File("target/ncsa").mkdirs();
-			properties.put(PaxWebConfig.PID_CFG_LOG_NCSA_ENABLED, "true");
-			properties.put(PaxWebConfig.PID_CFG_LOG_NCSA_LOGDIR, "target/ncsa");
-
-			if (runtime == Runtime.JETTY) {
-				// this file should be used to reconfigure thread pool already set inside Pax Web version of Jetty Server
-				properties.put(PaxWebConfig.PID_CFG_SERVER_CONFIGURATION_FILES, "target/test-classes/jetty-server.xml");
-			} else if (runtime == Runtime.UNDERTOW) {
-				properties.put(PaxWebConfig.PID_CFG_SERVER_CONFIGURATION_FILES, "target/test-classes/undertow-server-without-listener.xml");
-			}
-		});
-
-		controller.configure();
-		controller.start();
-
-		assertThat(get(port, "/"), containsString("HTTP/1.1 404"));
-
-		controller.stop();
-	}
-
-	@Test
-	public void sslConfiguration() throws Exception {
-		SSLUtils.generateKeyStores();
-
-		ServerController controller = create(properties -> {
-			new File("target/ncsa").mkdirs();
-			properties.put(PaxWebConfig.PID_CFG_LOG_NCSA_ENABLED, "true");
-			properties.put(PaxWebConfig.PID_CFG_LOG_NCSA_LOGDIR, "target/ncsa");
-			if (runtime == Runtime.TOMCAT) {
-				properties.put(PaxWebConfig.PID_CFG_LOG_NCSA_LOGFILE, "request");
-			} else if (runtime == Runtime.UNDERTOW) {
-				// tweak ciphers/protocols to check proper configuration
-				properties.put(PaxWebConfig.PID_CFG_PROTOCOLS_INCLUDED, "TLSv1.1");
-				properties.put(PaxWebConfig.PID_CFG_CIPHERSUITES_INCLUDED, "TLS_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_256_GCM_SHA384");
-			}
-
-			properties.put(PaxWebConfig.PID_CFG_HTTP_ENABLED, "false");
-			properties.remove(PaxWebConfig.PID_CFG_HTTP_PORT);
-			properties.put(PaxWebConfig.PID_CFG_HTTP_SECURE_ENABLED, "true");
-			properties.put(PaxWebConfig.PID_CFG_HTTP_PORT_SECURE, Integer.toString(port));
-
-//			properties.put(PaxWebConfig.PID_CFG_SSL_PROVIDER, "");
-
-			// entire keystore
-			properties.put(PaxWebConfig.PID_CFG_SSL_KEYSTORE, "target/server.jks");
-			properties.put(PaxWebConfig.PID_CFG_SSL_KEYSTORE_PASSWORD, "passw0rd");
-			properties.put(PaxWebConfig.PID_CFG_SSL_KEYSTORE_TYPE, "JKS");
-//			properties.put(PaxWebConfig.PID_CFG_SSL_KEYSTORE_PROVIDER, "SUN");
-			properties.put(PaxWebConfig.PID_CFG_SSL_KEY_MANAGER_FACTORY_ALGORITHM, "SunX509");
-			// single key entry in the keystore
-			properties.put(PaxWebConfig.PID_CFG_SSL_KEY_PASSWORD, "passw0rd");
-			properties.put(PaxWebConfig.PID_CFG_SSL_KEY_ALIAS, "server"); // to check if we can select one of many
-
-			// entire truststore
-			properties.put(PaxWebConfig.PID_CFG_SSL_TRUSTSTORE, "target/server.jks");
-			properties.put(PaxWebConfig.PID_CFG_SSL_TRUSTSTORE_PASSWORD, "passw0rd");
-			properties.put(PaxWebConfig.PID_CFG_SSL_TRUSTSTORE_TYPE, "JKS");
-//			properties.put(PaxWebConfig.PID_CFG_SSL_TRUSTSTORE_PROVIDER, "SUN");
-			properties.put(PaxWebConfig.PID_CFG_SSL_TRUST_MANAGER_FACTORY_ALGORITHM, "X509");
-
-			// remaining SSL parameters
-			properties.put(PaxWebConfig.PID_CFG_SSL_CLIENT_AUTH_WANTED, "false");
-			properties.put(PaxWebConfig.PID_CFG_SSL_CLIENT_AUTH_NEEDED, "true");
-			properties.put(PaxWebConfig.PID_CFG_SSL_PROTOCOL, "TLSv1.2");
-			properties.put(PaxWebConfig.PID_CFG_SSL_SECURE_RANDOM_ALGORITHM, "NativePRNGNonBlocking");
-			properties.put(PaxWebConfig.PID_CFG_SSL_RENEGOTIATION_ALLOWED, "true");
-//			properties.put(PaxWebConfig.PID_CFG_SSL_RENEGOTIATION_LIMIT, "");
-			properties.put(PaxWebConfig.PID_CFG_SSL_SESSION_ENABLED, "true");
-//			properties.put(PaxWebConfig.PID_CFG_SSL_SESSION_CACHE_SIZE, "");
-//			properties.put(PaxWebConfig.PID_CFG_SSL_SESSION_TIMEOUT, "");
-		});
-
-		controller.configure();
-		controller.start();
-
-		/*
-		 * With the above configuration (client auth required), we'll be able to access the server using curl:
-		 *
-		 * $ curl --cacert ca.cer.pem --cert-type DER --cert client1.cer --key-type DER --key client1-private.key -v https://127.0.0.1:42203/
-		 * *   Trying 127.0.0.1:42203...
-		 * * TCP_NODELAY set
-		 * * Connected to 127.0.0.1 (127.0.0.1) port 42203 (#0)
-		 * * ALPN, offering h2
-		 * * ALPN, offering http/1.1
-		 * * successfully set certificate verify locations:
-		 * *   CAfile: ca.cer.pem
-		 *   CApath: none
-		 * * TLSv1.3 (OUT), TLS handshake, Client hello (1):
-		 * * TLSv1.3 (IN), TLS handshake, Server hello (2):
-		 * * TLSv1.2 (IN), TLS handshake, Certificate (11):
-		 * * TLSv1.2 (IN), TLS handshake, Server key exchange (12):
-		 * * TLSv1.2 (IN), TLS handshake, Request CERT (13):
-		 * * TLSv1.2 (IN), TLS handshake, Server finished (14):
-		 * * TLSv1.2 (OUT), TLS handshake, Certificate (11):
-		 * * TLSv1.2 (OUT), TLS handshake, Client key exchange (16):
-		 * * TLSv1.2 (OUT), TLS handshake, CERT verify (15):
-		 * * TLSv1.2 (OUT), TLS change cipher, Change cipher spec (1):
-		 * * TLSv1.2 (OUT), TLS handshake, Finished (20):
-		 * * TLSv1.2 (IN), TLS handshake, Finished (20):
-		 * * SSL connection using TLSv1.2 / ECDHE-RSA-AES256-GCM-SHA384
-		 * * ALPN, server did not agree to a protocol
-		 * * Server certificate:
-		 * *  subject: CN=server1
-		 * *  start date: Dec 31 23:00:00 2018 GMT
-		 * *  expire date: Dec 31 23:00:00 2038 GMT
-		 * *  subjectAltName: host "127.0.0.1" matched cert's IP address!
-		 * *  issuer: CN=CA
-		 * *  SSL certificate verify ok.
-		 * > GET / HTTP/1.1
-		 * > Host: 127.0.0.1:42203
-		 * > User-Agent: curl/7.66.0
-		 * > Accept: * /*
-		 * >
-		 * * Mark bundle as not supporting multiuse
-		 * < HTTP/1.1 404 Not Found
-		 * < Cache-Control: must-revalidate,no-cache,no-store
-		 * < Content-Type: text/html;charset=iso-8859-1
-		 * < Content-Length: 352
-		 *
-		 * Or openssl:
-		 * $ openssl s_client -connect 127.0.0.1:42203 -CAfile ca.cer.pem -keyform der -key client1-private.key -certform der -cert client1.cer
-		 * CONNECTED(00000003)
-		 * Can't use SSL_get_servername
-		 * depth=1 CN = CA
-		 * verify return:1
-		 * depth=0 CN = server1
-		 * verify return:1
-		 * ---
-		 * Certificate chain
-		 *  0 s:CN = server1
-		 *    i:CN = CA
-		 * ---
-		 * Server certificate
-		 * -----BEGIN CERTIFICATE-----
-		 * MIIDGzCCAgOgAwIBAgIBATANBgkqhkiG9w0BAQUFADANMQswCQYDVQQDDAJDQTAe
-		 * Fw0xODEyMzEyMzAwMDBaFw0zODEyMzEyMzAwMDBaMBIxEDAOBgNVBAMMB3NlcnZl
-		 * cjEwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCT8n+ZzGpvPZGb0jl2
-		 * iInvKbeVDnDl5r887KAsQFwLm87/m3ooovyjRd+d2YfEgtIPvCdmiZobQb5YbMAo
-		 * +NhBLUJzXUGFvpoCKuNyLZ/g4XPlhiuw/nqgBRWDOEzc5OxuxcCJ21blhfPpAo4l
-		 * PMzOmkSuaLr14qvnS1Y1pjOMYrjiBxADqWAB3M5slTNkd2wmoOqMHE3AS/Fd5kWt
-		 * gSF8In9UHdr7dO1/d1OGgx409uaNAKU6y4eunRxgQDYuscxZ0NhQrZ7fOVU7lzt2
-		 * tGExb6YOcNrmciWwtHXOLqADXex0xRXm2Xkz4ltHha6N9hmKUnlZzEZws00aYRk1
-		 * Ry7/AgMBAAGjgYAwfjAJBgNVHRMEAjAAMAsGA1UdDwQEAwIF4DAfBgNVHSMEGDAW
-		 * gBSDj+8/EcYxjP7zN2CYnr4WCLZWdzAdBgNVHQ4EFgQUzoPWz4/KDg7nJgoY0AbZ
-		 * 4koQTdcwEwYDVR0lBAwwCgYIKwYBBQUHAwEwDwYDVR0RBAgwBocEfwAAATANBgkq
-		 * hkiG9w0BAQUFAAOCAQEAh92LnzsnKMMI39Xs8j13/H+oVCJh4bUhKR6D3oVqJ+8o
-		 * 7aG8FchYhwqDUtVnzKKvuL5uIUHf0Bs8X8jmhEoZeP6GtNGoA570aXsdWG/pI61Z
-		 * l5Cul6XObuFWrwQXjCDlXKcGqVDiAEnfv0cO/ymWmo3o8Cr/R5h5Ztcyp/47W16w
-		 * QUouyI1vqgbI9wf/Ombzt9Ju5jKsQunPzS5UWVIJYgbHt7H9spM1tAmsbBjufkIc
-		 * PTmjR5ZkOrgwzN/V04cBOeiZKjYxBrR2m0xv5YPNxEAJXL0Qji2vwcN8nipXe2ix
-		 * +4okmXBoHoMe9XNd3GNNRVbSw28CW+IiTvKNTEPvqQ==
-		 * -----END CERTIFICATE-----
-		 * subject=CN = server1
-		 *
-		 * issuer=CN = CA
-		 *
-		 * ---
-		 * Acceptable client certificate CA names
-		 * CN = server2
-		 * CN = server1
-		 * CN = CA
-		 * Client Certificate Types: RSA sign, DSA sign, ECDSA sign
-		 * Requested Signature Algorithms: ECDSA+SHA512:RSA+SHA512:ECDSA+SHA384:RSA+SHA384:ECDSA+SHA256:RSA+SHA256:DSA+SHA256:ECDSA+SHA224:RSA+SHA224:DSA+SHA224:ECDSA+SHA1:RSA+SHA1:DSA+SHA1
-		 * Shared Requested Signature Algorithms: ECDSA+SHA512:RSA+SHA512:ECDSA+SHA384:RSA+SHA384:ECDSA+SHA256:RSA+SHA256:DSA+SHA256:ECDSA+SHA224:RSA+SHA224:DSA+SHA224:ECDSA+SHA1:RSA+SHA1:DSA+SHA1
-		 * Peer signing digest: SHA256
-		 * Peer signature type: RSA
-		 * Server Temp Key: ECDH, P-256, 256 bits
-		 * ---
-		 * SSL handshake has read 1386 bytes and written 2225 bytes
-		 * Verification: OK
-		 * ---
-		 * New, TLSv1.2, Cipher is ECDHE-RSA-AES256-GCM-SHA384
-		 * Server public key is 2048 bit
-		 * Secure Renegotiation IS supported
-		 * Compression: NONE
-		 * Expansion: NONE
-		 * No ALPN negotiated
-		 * SSL-Session:
-		 *     Protocol  : TLSv1.2
-		 *     Cipher    : ECDHE-RSA-AES256-GCM-SHA384
-		 *     Session-ID: 5E831344113312A768A0B9F6ACA412F285718A28DECC66BB286023054CD49569
-		 *     Session-ID-ctx:
-		 *     Master-Key: 722813FE30E27C1068C80E123F395B943015EB9036652C40130CBAE73636EBFBF41D5311446D227DB40AB9CDE2D7EC4A
-		 *     PSK identity: None
-		 *     PSK identity hint: None
-		 *     SRP username: None
-		 *     Start Time: 1585648452
-		 *     Timeout   : 7200 (sec)
-		 *     Verify return code: 0 (ok)
-		 *     Extended master secret: yes
-		 * ---
-		 * GET / HTTP/1.1
-		 * Host: 127.0.0.1
-		 * Connection: close
-		 *
-		 * HTTP/1.1 404 Not Found
-		 * Connection: close
-		 * Cache-Control: must-revalidate,no-cache,no-store
-		 * Content-Type: text/html;charset=iso-8859-1
-		 * Content-Length: 352
-		 */
-
-		assertThat(gets(port, "/"), containsString("HTTP/1.1 404"));
-
-		controller.stop();
-	}
-
-	@Test
 	public void registerSingleServletUsingExplicitBatch() throws Exception {
-		ServerController controller = create(properties -> {
+		ServerController controller = Utils.create(properties -> {
 			new File("target/ncsa").mkdirs();
 			properties.put(PaxWebConfig.PID_CFG_LOG_NCSA_ENABLED, "true");
 			properties.put(PaxWebConfig.PID_CFG_LOG_NCSA_LOGDIR, "target/ncsa");
+
+			properties.put(PaxWebConfig.PID_CFG_SERVER_THREAD_NAME_PREFIX, "XNIO-registerSingleServletUsingExplicitBatch");
 
 			if (runtime == Runtime.JETTY) {
 				// this file should be used to reconfigure thread pool already set inside Pax Web version of Jetty Server
 				properties.put(PaxWebConfig.PID_CFG_SERVER_CONFIGURATION_FILES, "target/test-classes/jetty-server.xml");
 			}
-		});
+		}, port, runtime, getClass().getClassLoader());
 		controller.configure();
 		controller.start();
 
@@ -413,7 +176,7 @@ public class ServerControllerTest {
 
 		Batch batch = new Batch("Register Single Servlet");
 
-		ServerModel server = new ServerModel(new SameThreadExecutor());
+		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
 		ServletContextModel context = new ServletContextModel("/c");
 		batch.addServletContextModel(server, context);
 
@@ -435,10 +198,10 @@ public class ServerControllerTest {
 
 		controller.sendBatch(batch);
 
-		String response = get(port, "/c/s/1", "Let-Me-In: true");
+		String response = get(port, "/c/s/1/registerSingleServletUsingExplicitBatch", "Let-Me-In: true");
 		assertTrue(response.endsWith("file:/something"));
 
-		response = get(port, "/c/s/1");
+		response = get(port, "/c/s/1/registerSingleServletUsingExplicitBatch");
 		assertTrue(response.contains("HTTP/1.1 403"));
 
 		controller.stop();
@@ -446,12 +209,16 @@ public class ServerControllerTest {
 
 	@Test
 	public void registerSingleServletUsingWebContainer() throws Exception {
-		ServerController controller = create(null);
+		ServerController controller = Utils.create(null, port, runtime, getClass().getClassLoader());
 		controller.configure();
 		controller.start();
 
 		Bundle bundle = mock(Bundle.class);
-		ServerModel server = new ServerModel(new SameThreadExecutor());
+		BundleWiring wiring = mock(BundleWiring.class);
+		when(bundle.adapt(BundleWiring.class)).thenReturn(wiring);
+		when(wiring.getClassLoader()).thenReturn(this.getClass().getClassLoader());
+
+		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
 
 		WebContainer wc = new HttpServiceEnabled(bundle, controller, server, null, controller.getConfiguration());
 
@@ -516,10 +283,10 @@ public class ServerControllerTest {
 
 		wc.registerServlet(servlet, "my-servlet", new String[] { "/s/*" }, initParams, context);
 
-		String response = get(port, "/s/1", "Let-Me-In: true");
+		String response = get(port, "/s/1?t=registerSingleServletUsingWebContainer", "Let-Me-In: true");
 		assertTrue(response.endsWith("file:/something"));
 
-		response = get(port, "/s/1");
+		response = get(port, "/s/1?t=registerSingleServletUsingWebContainer");
 		assertTrue(response.contains("HTTP/1.1 403"));
 
 		controller.stop();
@@ -527,7 +294,7 @@ public class ServerControllerTest {
 
 	@Test
 	public void registerFilterAndServletUsingExcplicitBatch() throws Exception {
-		ServerController controller = create(null);
+		ServerController controller = Utils.create(null, port, runtime, getClass().getClassLoader());
 		controller.configure();
 		controller.start();
 
@@ -544,7 +311,7 @@ public class ServerControllerTest {
 		// ServletConfig objects (with different - and usually wrong ServletContext)
 		@SuppressWarnings("unchecked")
 		ServiceReference<Servlet> ref = mock(ServiceReference.class);
-		when(context.getService(ref)).thenReturn(new MyHttpServlet());
+		when(context.getService(ref)).thenReturn(new Utils.MyHttpServlet("1"));
 
 		Filter filter = new HttpFilter() {
 			@Override
@@ -563,7 +330,7 @@ public class ServerControllerTest {
 		Batch batch = new Batch("Register Servlet and Filter");
 
 		// two contexts. servlet will be registered to /c, filter - to /c and /d
-		ServerModel server = new ServerModel(new SameThreadExecutor());
+		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
 
 		ServletContextModel contextC = new ServletContextModel("/c");
 		ServletContextModel contextD = new ServletContextModel("/d");
@@ -621,22 +388,22 @@ public class ServerControllerTest {
 
 		// filter -> servlet
 		String response;
-		response = get(port, "/c/s/1");
+		response = get(port, "/c/s/1?t=registerFilterAndServletUsingExcplicitBatch");
 		System.out.println(response);
 		assertTrue(response.contains("my-filter1my-servlet1[/c]my-filter2"));
 
 		// just one filter in the chain, without target servlet
-		response = get(port, "/d/s/1");
+		response = get(port, "/d/s/1?t=registerFilterAndServletUsingExcplicitBatch");
 		System.out.println(response);
 		assertTrue(response.contains("my-filter1my-filter2"));
 
-		// just servlet, because /* filter doesn't use servlet's ServletContextHelper
-		response = get(port, "/c/s2/1");
+		// just servlet, because /* filter doesn't use my-servlet2's ServletContextHelper
+		response = get(port, "/c/s2/1?t=registerFilterAndServletUsingExcplicitBatch");
 		System.out.println(response);
 		assertTrue(response.contains("\r\nmy-servlet2[/c]"));
 
 		// just servlet, because /* filter isn't associated with OsgiContext for /e
-		response = get(port, "/e/s/1");
+		response = get(port, "/e/s/1?t=registerFilterAndServletUsingExcplicitBatch");
 		System.out.println(response);
 		assertTrue(response.contains("\r\nmy-servlet1[/e]"));
 
@@ -645,7 +412,7 @@ public class ServerControllerTest {
 
 	@Test
 	public void registerFilterAndServletUsingWebContainer() throws Exception {
-		ServerController controller = create(null);
+		ServerController controller = Utils.create(null, port, runtime, getClass().getClassLoader());
 		controller.configure();
 		controller.start();
 
@@ -653,7 +420,7 @@ public class ServerControllerTest {
 		BundleContext context = mock(BundleContext.class);
 		when(bundle.getBundleContext()).thenReturn(context);
 
-		ServerModel server = new ServerModel(new SameThreadExecutor());
+		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
 
 		Configuration config = controller.getConfiguration();
 		HttpServiceEnabled wc = new HttpServiceEnabled(bundle, controller, server, null, config);
@@ -680,11 +447,22 @@ public class ServerControllerTest {
 		batch.accept(wc.getServiceModel());
 		controller.sendBatch(batch);
 
+		final int[] id = { 1 };
 		@SuppressWarnings("unchecked")
 		ServiceReference<Servlet> ref = mock(ServiceReference.class);
-		when(context.getService(ref)).thenReturn(new MyHttpServlet());
+		when(context.getService(ref)).thenAnswer(invocation -> new Utils.MyHttpServlet(Integer.toString(id[0]++)));
 
 		Filter filter = new HttpFilter() {
+			@Override
+			public void init() {
+				LOG.info("Filter {} initialized in {}", System.identityHashCode(this), getServletContext().getContextPath());
+			}
+
+			@Override
+			public void destroy() {
+				LOG.info("Filter {} destroyed in {}", System.identityHashCode(this), getServletContext().getContextPath());
+			}
+
 			@Override
 			protected void doFilter(HttpServletRequest req, HttpServletResponse resp, FilterChain chain) throws IOException, ServletException {
 				resp.setStatus(HttpServletResponse.SC_OK);
@@ -774,7 +552,7 @@ public class ServerControllerTest {
 	 */
 	@Test
 	public void registerServletsConflictingByName() throws Exception {
-		ServerController controller = create(null);
+		ServerController controller = Utils.create(null, port, runtime, getClass().getClassLoader());
 		controller.configure();
 		controller.start();
 
@@ -782,7 +560,7 @@ public class ServerControllerTest {
 		BundleContext context = mock(BundleContext.class);
 		when(bundle.getBundleContext()).thenReturn(context);
 
-		ServerModel server = new ServerModel(new SameThreadExecutor());
+		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
 
 		Configuration config = controller.getConfiguration();
 		HttpServiceEnabled wc = new HttpServiceEnabled(bundle, controller, server, null, config);
@@ -813,12 +591,24 @@ public class ServerControllerTest {
 		batch.accept(wc.getServiceModel());
 		controller.sendBatch(batch);
 
-		Servlet s11 = new MyIdServlet("1");
-		Servlet s12 = new MyIdServlet("2");
-		Servlet s13 = new MyIdServlet("3");
-		Servlet s14 = new MyIdServlet("4");
-		Servlet s15 = new MyIdServlet("5");
-		Servlet s16 = new MyIdServlet("6");
+		@SuppressWarnings("unchecked")
+		ServiceReference<Servlet> s11 = mock(ServiceReference.class);
+		when(context.getService(s11)).thenAnswer(invocation -> new Utils.MyIdServlet("1"));
+		@SuppressWarnings("unchecked")
+		ServiceReference<Servlet> s12 = mock(ServiceReference.class);
+		when(context.getService(s12)).thenAnswer(invocation -> new Utils.MyIdServlet("2"));
+		@SuppressWarnings("unchecked")
+		ServiceReference<Servlet> s13 = mock(ServiceReference.class);
+		when(context.getService(s13)).thenAnswer(invocation -> new Utils.MyIdServlet("3"));
+		@SuppressWarnings("unchecked")
+		ServiceReference<Servlet> s14 = mock(ServiceReference.class);
+		when(context.getService(s14)).thenAnswer(invocation -> new Utils.MyIdServlet("4"));
+		@SuppressWarnings("unchecked")
+		ServiceReference<Servlet> s15 = mock(ServiceReference.class);
+		when(context.getService(s15)).thenAnswer(invocation -> new Utils.MyIdServlet("5"));
+		@SuppressWarnings("unchecked")
+		ServiceReference<Servlet> s16 = mock(ServiceReference.class);
+		when(context.getService(s16)).thenAnswer(invocation -> new Utils.MyIdServlet("6"));
 
 		long serviceId = 0;
 
@@ -826,7 +616,7 @@ public class ServerControllerTest {
 		wc.doRegisterServlet(Arrays.asList(wcc1, wcc2), new ServletModel.Builder()
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
-				.withServlet(s11)
+				.withServletReference(s11)
 				.withServiceRankAndId(0, ++serviceId)
 				.build());
 
@@ -838,7 +628,7 @@ public class ServerControllerTest {
 		wc.doRegisterServlet(Collections.singletonList(wcc3), new ServletModel.Builder()
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
-				.withServlet(s12)
+				.withServletReference(s12)
 				.withServiceRankAndId(3, ++serviceId)
 				.build());
 
@@ -850,7 +640,7 @@ public class ServerControllerTest {
 		wc.doRegisterServlet(Collections.singletonList(wcc1), new ServletModel.Builder()
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
-				.withServlet(s13)
+				.withServletReference(s13)
 				.withServiceRankAndId(0, ++serviceId)
 				.build());
 
@@ -862,7 +652,7 @@ public class ServerControllerTest {
 		wc.doRegisterServlet(Arrays.asList(wcc2, wcc3), new ServletModel.Builder()
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
-				.withServlet(s14)
+				.withServletReference(s14)
 				.withServiceRankAndId(2, ++serviceId)
 				.build());
 
@@ -879,7 +669,7 @@ public class ServerControllerTest {
 		wc.doRegisterServlet(Arrays.asList(wcc2, wcc4), new ServletModel.Builder()
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
-				.withServlet(s15)
+				.withServletReference(s15)
 				.withServiceRankAndId(1, ++serviceId)
 				.build());
 
@@ -892,7 +682,7 @@ public class ServerControllerTest {
 		wc.doRegisterServlet(Collections.singletonList(wcc4), new ServletModel.Builder()
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
-				.withServlet(s16)
+				.withServletReference(s16)
 				.withServiceRankAndId(0, ++serviceId)
 				.build());
 
@@ -904,7 +694,7 @@ public class ServerControllerTest {
 		// servlet#2 unregistered, s#4 can be activated in /c3 and can be activated in /c2 because s#5 in /c2 is ranked
 		// lower than s#4, so s#5 disabled in /c4, so s#6 enabled in /c4
 		wc.doUnregisterServlet(new ServletModel.Builder()
-				.withServlet(s12)
+				.withServletReference(s12)
 				.withOsgiContextModel(cm3)
 				.remove());
 
@@ -914,162 +704,6 @@ public class ServerControllerTest {
 		assertTrue(get(port, "/c4/s").endsWith("my.id=6"));
 
 		controller.stop();
-	}
-
-	private ServerController create(Consumer<Hashtable<Object, Object>> callback) {
-		Hashtable<Object, Object> properties = new Hashtable<>(System.getProperties());
-		properties.put(PaxWebConfig.PID_CFG_TEMP_DIR, "target/tmp");
-		properties.put(PaxWebConfig.PID_CFG_HTTP_PORT, Integer.toString(port));
-
-		if (callback != null) {
-			callback.accept(properties);
-		}
-
-		// it wouldn't work in OSGi because MetaTypePropertyResolver's package is not exported
-		MetaTypePropertyResolver metatypeResolver = new MetaTypePropertyResolver();
-		DictionaryPropertyResolver resolver = new DictionaryPropertyResolver(properties, metatypeResolver);
-		Configuration config = ConfigurationBuilder.getConfiguration(resolver, Utils.toMap(properties));
-
-		switch (runtime) {
-			case JETTY: {
-				ServerControllerFactory factory = new JettyServerControllerFactory(null, this.getClass().getClassLoader());
-				return factory.createServerController(config);
-			}
-			case TOMCAT: {
-				ServerControllerFactory factory = new TomcatServerControllerFactory(null, this.getClass().getClassLoader());
-				return factory.createServerController(config);
-			}
-			case UNDERTOW:
-				ServerControllerFactory factory = new UndertowServerControllerFactory(null, this.getClass().getClassLoader(), new NioXnioProvider());
-				return factory.createServerController(config);
-			default:
-				throw new IllegalArgumentException("Not supported: " + runtime);
-		}
-	}
-
-	private String get(int port, String request, String ... headers) throws IOException {
-		Socket s = new Socket();
-		s.connect(new InetSocketAddress("127.0.0.1", port));
-
-		s.getOutputStream().write((
-				"GET " + request + " HTTP/1.1\r\n" +
-				"Host: 127.0.0.1:" + port + "\r\n").getBytes());
-		for (String header : headers) {
-			s.getOutputStream().write((header + "\r\n").getBytes());
-		}
-		s.getOutputStream().write(("Connection: close\r\n\r\n").getBytes());
-
-		byte[] buf = new byte[64];
-		int read = -1;
-		StringWriter sw = new StringWriter();
-		while ((read = s.getInputStream().read(buf)) > 0) {
-			sw.append(new String(buf, 0, read));
-		}
-		s.getOutputStream().close();
-		s.close();
-
-		return sw.toString();
-	}
-
-	/**
-	 * GET over HTTPS
-	 * @param port
-	 * @param request
-	 * @param headers
-	 * @return
-	 * @throws IOException
-	 */
-	private String gets(int port, String request, String ... headers) throws Exception {
-		// Trust standard CA and those trusted by our custom strategy
-		final SSLContext sslcontext = SSLContexts.custom()
-				.loadTrustMaterial((chain, authType) -> {
-					final X509Certificate cert = chain[0];
-					return "CN=server1".equalsIgnoreCase(cert.getSubjectDN().getName());
-				})
-				.loadKeyMaterial(new File("target/client.jks"), "passw0rd".toCharArray(), "passw0rd".toCharArray(), (aliases, sslParameters) -> "client")
-				.build();
-
-		// Allow TLSv1.1 and TLSv1.2 protocol only
-		final SSLConnectionSocketFactory sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
-				.setSslContext(sslcontext)
-				.setTlsVersions(TLS.V_1_1, TLS.V_1_2)
-				.build();
-		final HttpClientConnectionManager cm = PoolingHttpClientConnectionManagerBuilder.create()
-				.setSSLSocketFactory(sslSocketFactory)
-				.build();
-		try (CloseableHttpClient httpclient = HttpClients.custom()
-				.setConnectionManager(cm)
-				.build()) {
-
-			final HttpGet httpget = new HttpGet("https://127.0.0.1:" + port + request);
-
-			final HttpClientContext clientContext = HttpClientContext.create();
-			try (CloseableHttpResponse response = httpclient.execute(httpget, clientContext)) {
-//				System.out.println("----------------------------------------");
-//				System.out.println(response.getCode() + " " + response.getReasonPhrase());
-//				System.out.println(EntityUtils.toString(response.getEntity()));
-
-				final SSLSession sslSession = clientContext.getSSLSession();
-				if (sslSession != null) {
-					LOG.info("SSL protocol " + sslSession.getProtocol());
-					LOG.info("SSL cipher suite " + sslSession.getCipherSuite());
-					for (javax.security.cert.X509Certificate cert : sslSession.getPeerCertificateChain()) {
-						LOG.info("Server cert: " + cert.getSubjectDN() + " (issuer: " + cert.getIssuerDN() + ")");
-					}
-				}
-
-				StringBuilder sb = new StringBuilder();
-				sb.append(response.getVersion()).append(" ")
-						.append(response.getCode()).append(" ")
-						.append(response.getReasonPhrase())
-						.append("\r\n");
-				for (Header header : response.getHeaders()) {
-					sb.append(header.getName()).append(header.getValue()).append("\r\n");
-				}
-				sb.append("\r\n");
-				sb.append(EntityUtils.toString(response.getEntity()));
-
-				return sb.toString();
-			}
-		}
-	}
-
-	private static class SameThreadExecutor implements Executor {
-		@Override
-		public void execute(Runnable command) {
-			command.run();
-		}
-	}
-
-	private static class MyHttpServlet extends HttpServlet {
-		@Override
-		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-			resp.getWriter().print(getServletName() + "[" + getServletConfig().getServletContext().getContextPath() + "]");
-		}
-	}
-
-	private static class MyIdServlet extends HttpServlet {
-
-		private final String id;
-
-		public MyIdServlet(String id) {
-			this.id = id;
-		}
-
-		@Override
-		public void destroy() {
-			LOG.info("Servlet {} destroyed", this);
-		}
-
-		@Override
-		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-			resp.getWriter().print("my.id=" + id);
-		}
-
-		@Override
-		public String toString() {
-			return "S(" + id + ")";
-		}
 	}
 
 }

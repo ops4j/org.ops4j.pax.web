@@ -59,6 +59,7 @@ import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
+import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.jetty.internal.util.DOMJettyWebXmlParser;
@@ -75,6 +76,7 @@ import org.slf4j.LoggerFactory;
  * deployed under unique <em>context path</em>, related 1:1 with single, unique
  * {@link org.ops4j.pax.web.service.spi.model.ServletContextModel}
  */
+@Review("Is it needed? Perhaps only for virtual host handling")
 public class PaxWebServletContextHandler extends ServletContextHandler {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PaxWebServletContextHandler.class);
@@ -103,7 +105,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 	public PaxWebServletContextHandler(HandlerContainer parent, String contextPath, boolean sessions, boolean security) {
 		super(parent, contextPath, sessions, security);
 
-		setServletHandler(new PaxWebServletHandler());
+		setServletHandler(new PaxWebServletHandler(null));
 	}
 
 	PaxWebServletContextHandler(
@@ -135,7 +137,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 				getClass().getClassLoader());
 		_scontext.setAttribute("org.eclipse.jetty.server.session.timer", executorScheduler);
 
-		setServletHandler(new PaxWebServletHandler());
+		setServletHandler(new PaxWebServletHandler(null));
 
 		ErrorPageErrorHandler errorPageErrorHandler = new ErrorPageErrorHandler();
 		if (showStacks != null) {

@@ -38,17 +38,17 @@ import org.osgi.service.http.whiteboard.Preprocessor;
  *     {@link org.osgi.service.http.context.ServletContextHelper#handleSecurity} +
  *     {@link org.osgi.service.http.context.ServletContextHelper#finishSecurity}</li>
  * </ul>
+ *
+ * TODO: ensure proper behavior in REQUEST, INCLUDE, FORWARD dispatches
  */
 public class OsgiFilterChain implements FilterChain {
 
-
 	private final List<Preprocessor> preprocessors = new LinkedList<>();
 
-	private final OsgiContextModel contextModel;
 	private final ServletContext servletContext;
 	private final WebContainerContext webContext;
 
-	private final FilterChain chain;
+	private FilterChain chain;
 
 	private int index = 0;
 
@@ -59,14 +59,17 @@ public class OsgiFilterChain implements FilterChain {
 	 * @param preprocessors
 	 * @param servletContext wrapped {@link ServletContext} with proper delegation
 	 * @param contextModel
-	 * @param chain
+	 * @param originalChain
 	 */
 	public OsgiFilterChain(List<Preprocessor> preprocessors, ServletContext servletContext,
-			OsgiContextModel contextModel, FilterChain chain) {
+			OsgiContextModel contextModel, FilterChain originalChain) {
 		this.preprocessors.addAll(preprocessors);
-		this.contextModel = contextModel;
 		this.webContext = contextModel == null ? null : contextModel.getHttpContext();
 		this.servletContext = servletContext;
+		this.chain = originalChain;
+	}
+
+	public void setChain(FilterChain chain) {
 		this.chain = chain;
 	}
 
@@ -84,27 +87,29 @@ public class OsgiFilterChain implements FilterChain {
 			// still something left
 			Preprocessor filter = preprocessors.get(index++);
 			filter.doFilter(req, res, this);
-		} else if (chain != null) {
-			// nothing left - time to call security - if there is a chain to call of course
-			try {
-				if (webContext == null || webContext.handleSecurity(req, res)) {
-					// continue normally with normal filters and target servlet
-					chain.doFilter(req, res);
-				} else {
-					// authentication failed
-					if (!res.isCommitted()) {
-						// Pax Web before 8.0.0 was sending HTTP 401 here, but the thing is that it should be
-						// the role of actual implementation of handleSecurity() to respond with 401 if there's
-						// a need (for example when returning "WWW-Authenticate: Basic Realm") which will make
-						// the response committed
-						// When it's not committed, we can assume that user has no chance to authenticate
-						res.sendError(HttpServletResponse.SC_FORBIDDEN);
-					}
+			return;
+		}
+
+		// nothing left - time to call security and if it passes - call the rest of the chain (normal filters
+		// and target servlet)
+		try {
+			if (webContext == null || webContext.handleSecurity(req, res)) {
+				// continue normally with normal filters and target servlet
+				chain.doFilter(req, res);
+			} else {
+				// authentication failed
+				if (!res.isCommitted()) {
+					// Pax Web before 8.0.0 was sending HTTP 401 here, but the thing is that it should be
+					// the role of actual implementation of handleSecurity() to respond with 401 if there's
+					// a need (for example when returning "WWW-Authenticate: Basic Realm") which will make
+					// the response committed
+					// When it's not committed, we can assume that user has no chance to authenticate
+					res.sendError(HttpServletResponse.SC_FORBIDDEN);
 				}
-			} finally {
-				if (webContext != null) {
-					webContext.finishSecurity(req, res);
-				}
+			}
+		} finally {
+			if (webContext != null) {
+				webContext.finishSecurity(req, res);
 			}
 		}
 	}

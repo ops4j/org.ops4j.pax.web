@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.ResponseFacade;
+import org.ops4j.pax.web.annotations.Review;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Romain Gilles Date: 7/26/12 Time: 10:41 AM
  */
+@Review("Unify with Jetty and Undertow")
 public class TomcatResourceServlet extends HttpServlet {
 	/**
 	 *

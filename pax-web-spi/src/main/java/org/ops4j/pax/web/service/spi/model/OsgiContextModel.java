@@ -238,7 +238,13 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		}
 
 		// service ID - lower is "first"
-		return this.getServiceId() - o.getServiceId();
+		int serviceId = this.getServiceId() - o.getServiceId();
+		if (serviceId != 0) {
+			return serviceId;
+		}
+
+		// fallback case - mostly in tests cases
+		return getId().compareTo(o.getId());
 	}
 
 

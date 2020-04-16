@@ -22,8 +22,12 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
+import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpFilter;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -33,15 +37,21 @@ import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
 import io.undertow.connector.ByteBufferPool;
 import io.undertow.server.DefaultByteBufferPool;
+import io.undertow.server.HandlerWrapper;
 import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
 import io.undertow.server.OpenListener;
 import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.protocol.http.HttpOpenListener;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
+import io.undertow.servlet.api.FilterInfo;
+import io.undertow.servlet.api.FilterMappingInfo;
 import io.undertow.servlet.api.ServletContainer;
 import io.undertow.servlet.api.ServletInfo;
+import io.undertow.servlet.handlers.ServletChain;
+import io.undertow.servlet.handlers.ServletRequestContext;
 import io.undertow.servlet.util.ImmediateInstanceFactory;
 import io.undertow.util.StatusCodes;
 import org.junit.Test;
@@ -57,6 +67,8 @@ import org.xnio.Xnio;
 import org.xnio.XnioWorker;
 import org.xnio.channels.AcceptingChannel;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class EmbeddedUndertowTest {
@@ -122,6 +134,182 @@ public class EmbeddedUndertowTest {
 	}
 
 	@Test
+	public void undertowWithRequestWrappers() throws Exception {
+		PathHandler path = Handlers.path();
+		Undertow server = Undertow.builder()
+				.addHttpListener(0, "0.0.0.0")
+				.setHandler(path)
+				.build();
+
+		HttpServlet servletInstance = new HttpServlet() {
+			@Override
+			protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				LOG.info("Handling request: {}", req.toString());
+				resp.setContentType("text/plain");
+				resp.setCharacterEncoding("UTF-8");
+
+				String response = String.format("| %s | %s | %s |", req.getContextPath(), req.getServletPath(), req.getPathInfo());
+				resp.getWriter().write(response);
+				resp.getWriter().close();
+			}
+		};
+
+		Filter filterInstance = new HttpFilter() {
+			@Override
+			protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
+				super.doFilter(req, res, chain);
+			}
+		};
+
+		ServletInfo servlet = Servlets.servlet("s1", servletInstance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servletInstance));
+		servlet.addMapping("/s1/*");
+
+		FilterInfo filter = Servlets.filter("f1", filterInstance.getClass(), new ImmediateInstanceFactory<>(filterInstance));
+
+		DeploymentInfo deploymentInfo = Servlets.deployment()
+				.setClassLoader(this.getClass().getClassLoader())
+				.setContextPath("/c1")
+				.setDisplayName("Default Application")
+				.setDeploymentName("")
+				.setUrlEncoding("UTF-8")
+				.addServlets(servlet)
+				.addFilters(filter)
+				.addFilterServletNameMapping("f1", "s1", DispatcherType.REQUEST);
+
+		deploymentInfo.addInnerHandlerChainWrapper(handler -> {
+			System.out.println("1. Wrapping " + handler);
+			return exchange -> {
+				System.out.println("1. Invoking on " + exchange);
+				handler.handleRequest(exchange);
+			};
+		});
+		deploymentInfo.addSecurityWrapper(handler -> {
+			System.out.println("2. Wrapping " + handler);
+			return exchange -> {
+				System.out.println("2. Invoking on " + exchange);
+				handler.handleRequest(exchange);
+			};
+		});
+		deploymentInfo.addOuterHandlerChainWrapper(handler -> {
+			System.out.println("3a. Wrapping " + handler);
+			return exchange -> {
+				// let's replace ServletChain here
+				ServletRequestContext src = exchange.getAttachment(ServletRequestContext.ATTACHMENT_KEY);
+				ServletChain currentServlet = src.getCurrentServlet();
+				System.out.println("3. Invoking on " + exchange);
+				handler.handleRequest(exchange);
+			};
+		});
+		// outer handler added later will be called earlier
+//		deploymentInfo.addOuterHandlerChainWrapper(handler -> {
+//			System.out.println("3b. Wrapping " + handler);
+//			return exchange -> {
+//				// let's replace ServletChain here
+//				ServletRequestContext src = exchange.getAttachment(ServletRequestContext.ATTACHMENT_KEY);
+//				ServletChain currentServlet = src.getCurrentServlet();
+//				System.out.println("3. Invoking on " + exchange);
+//				handler.handleRequest(exchange);
+//			};
+//		});
+		deploymentInfo.addInitialHandlerChainWrapper(handler -> {
+			System.out.println("4. Wrapping " + handler);
+			return exchange -> {
+				System.out.println("4. Invoking on " + exchange);
+				handler.handleRequest(exchange);
+			};
+		});
+
+		// when processing request, the stack trace will be:
+		// "XNIO-1 task-1@2434" prio=5 tid=0x17 nid=NA runnable
+		//  java.lang.Thread.State: RUNNABLE
+		//      at org.ops4j.pax.web.service.undertow.internal.EmbeddedUndertowTest$2.service(EmbeddedUndertowTest.java:139)
+		//      at javax.servlet.http.HttpServlet.service(HttpServlet.java:590)
+		//      at io.undertow.servlet.handlers.ServletHandler.handleRequest(ServletHandler.java:74)
+		//      at io.undertow.servlet.handlers.security.ServletSecurityRoleHandler.handleRequest(ServletSecurityRoleHandler.java:62)
+		//      at io.undertow.servlet.handlers.ServletChain$1.handleRequest(ServletChain.java:68)
+		//      at io.undertow.servlet.handlers.ServletDispatchingHandler.handleRequest(ServletDispatchingHandler.java:36)
+		// 1.   at org.ops4j.pax.web.service.undertow.internal.EmbeddedUndertowTest.lambda$null$0(EmbeddedUndertowTest.java:164)
+		//      at org.ops4j.pax.web.service.undertow.internal.EmbeddedUndertowTest$$Lambda$5.682910755.handleRequest(Unknown Source:-1)
+		//      at io.undertow.servlet.handlers.RedirectDirHandler.handleRequest(RedirectDirHandler.java:68)
+		//      at io.undertow.servlet.handlers.security.SSLInformationAssociationHandler.handleRequest(SSLInformationAssociationHandler.java:132)
+		//      at io.undertow.servlet.handlers.security.ServletAuthenticationCallHandler.handleRequest(ServletAuthenticationCallHandler.java:57)
+		// 2.   at org.ops4j.pax.web.service.undertow.internal.EmbeddedUndertowTest.lambda$null$2(EmbeddedUndertowTest.java:171)
+		//      at org.ops4j.pax.web.service.undertow.internal.EmbeddedUndertowTest$$Lambda$6.765242091.handleRequest(Unknown Source:-1)
+		//      at io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)
+		//      at io.undertow.security.handlers.AbstractConfidentialityHandler.handleRequest(AbstractConfidentialityHandler.java:46)
+		//      at io.undertow.servlet.handlers.security.ServletConfidentialityConstraintHandler.handleRequest(ServletConfidentialityConstraintHandler.java:64)
+		//      at io.undertow.security.handlers.AuthenticationMechanismsHandler.handleRequest(AuthenticationMechanismsHandler.java:60)
+		//      at io.undertow.servlet.handlers.security.CachedAuthenticatedSessionHandler.handleRequest(CachedAuthenticatedSessionHandler.java:77)
+		//      at io.undertow.security.handlers.AbstractSecurityContextAssociationHandler.handleRequest(AbstractSecurityContextAssociationHandler.java:43)
+		//      at io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)
+		// 3.   at org.ops4j.pax.web.service.undertow.internal.EmbeddedUndertowTest.lambda$null$4(EmbeddedUndertowTest.java:178)
+		//      at org.ops4j.pax.web.service.undertow.internal.EmbeddedUndertowTest$$Lambda$7.1719072416.handleRequest(Unknown Source:-1)
+		//      at io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)
+		//      at io.undertow.servlet.handlers.ServletInitialHandler.handleFirstRequest(ServletInitialHandler.java:269)
+		//      at io.undertow.servlet.handlers.ServletInitialHandler.access$100(ServletInitialHandler.java:78)
+		//      at io.undertow.servlet.handlers.ServletInitialHandler$2.call(ServletInitialHandler.java:133)
+		//      at io.undertow.servlet.handlers.ServletInitialHandler$2.call(ServletInitialHandler.java:130)
+		//      at io.undertow.servlet.core.ServletRequestContextThreadSetupAction$1.call(ServletRequestContextThreadSetupAction.java:48)
+		//      at io.undertow.servlet.core.ContextClassLoaderSetupAction$1.call(ContextClassLoaderSetupAction.java:43)
+		//      at io.undertow.servlet.handlers.ServletInitialHandler.dispatchRequest(ServletInitialHandler.java:249)
+		//      at io.undertow.servlet.handlers.ServletInitialHandler.access$000(ServletInitialHandler.java:78)
+		//      at io.undertow.servlet.handlers.ServletInitialHandler$1.handleRequest(ServletInitialHandler.java:99)
+		//      at io.undertow.server.Connectors.executeRootHandler(Connectors.java:376)
+		//      at io.undertow.server.HttpServerExchange$1.run(HttpServerExchange.java:830)
+		//      at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+		//      at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+		//      at java.lang.Thread.run(Thread.java:748)
+
+		// the 4th wrapper is called initially (before internal dispatching):
+		// "XNIO-1 I/O-2@2220" prio=5 tid=0xf nid=NA runnable
+		//  java.lang.Thread.State: RUNNABLE
+		//      at io.undertow.servlet.handlers.ServletInitialHandler.handleRequest(ServletInitialHandler.java:172)
+		// 4.   at org.ops4j.pax.web.service.undertow.internal.EmbeddedUndertowTest.lambda$null$6(EmbeddedUndertowTest.java:185)
+		//      at org.ops4j.pax.web.service.undertow.internal.EmbeddedUndertowTest$$Lambda$8.1520387953.handleRequest(Unknown Source:-1)
+		//      at io.undertow.server.handlers.HttpContinueReadHandler.handleRequest(HttpContinueReadHandler.java:65)
+		//      at io.undertow.server.handlers.URLDecodingHandler.handleRequest(URLDecodingHandler.java:68)
+		//      at io.undertow.server.handlers.PathHandler.handleRequest(PathHandler.java:91)
+		//      at io.undertow.server.Connectors.executeRootHandler(Connectors.java:376)
+		//      at io.undertow.server.protocol.http.HttpReadListener.handleEventWithNoRunningRequest(HttpReadListener.java:255)
+		//      at io.undertow.server.protocol.http.HttpReadListener.handleEvent(HttpReadListener.java:136)
+		//      at io.undertow.server.protocol.http.HttpOpenListener.handleEvent(HttpOpenListener.java:162)
+		//      at io.undertow.server.protocol.http.HttpOpenListener.handleEvent(HttpOpenListener.java:100)
+		//      at io.undertow.server.protocol.http.HttpOpenListener.handleEvent(HttpOpenListener.java:57)
+		//      at org.xnio.ChannelListeners.invokeChannelListener(ChannelListeners.java:92)
+		//      at org.xnio.ChannelListeners$10.handleEvent(ChannelListeners.java:291)
+		//      at org.xnio.ChannelListeners$10.handleEvent(ChannelListeners.java:286)
+		//      at org.xnio.ChannelListeners.invokeChannelListener(ChannelListeners.java:92)
+		//      at org.xnio.nio.QueuedNioTcpServer$1.run(QueuedNioTcpServer.java:129)
+		//      at org.xnio.nio.WorkerThread.safeRun(WorkerThread.java:582)
+		//      at org.xnio.nio.WorkerThread.run(WorkerThread.java:466)
+
+		// why 2 separate invocations?
+		// 1) io.undertow.server.Connectors.executeRootHandler() is called directly from Open/Read listener
+		// 2) then io.undertow.servlet.handlers.ServletInitialHandler.handleRequest(), after setting proper
+		//    io.undertow.servlet.handlers.ServletRequestContext.ATTACHMENT_KEY, dispatches the request further
+		//    using task thread
+
+		ServletContainer container = Servlets.newContainer();
+		DeploymentManager dm = container.addDeployment(deploymentInfo);
+		dm.deploy();
+		HttpHandler handler = dm.start();
+
+		path.addPrefixPath("/c1", handler);
+
+		server.start();
+
+		int port = ((InetSocketAddress) server.getListenerInfo().get(0).getAddress()).getPort();
+		LOG.info("Local port after start: {}", port);
+
+		String response;
+
+		response = send(port, "/c1/s1");
+		assertTrue(response.endsWith("| /c1 | /s1 | null |"));
+
+		server.stop();
+	}
+
+	@Test
 	public void undertowUsingLowLevelBuilders() throws Exception {
 		PathHandler path = Handlers.path();
 
@@ -147,10 +335,7 @@ public class EmbeddedUndertowTest {
 				.setType(Undertow.ListenerType.HTTP)
 				.setHost("0.0.0.0")
 				.setPort(0)
-				.setRootHandler(exchange -> {
-					exchange.setStatusCode(StatusCodes.NOT_FOUND);
-					exchange.endExchange();
-				})
+				.setRootHandler(path)
 				// org.xnio.Options
 				.setOverrideSocketOptions(OptionMap.builder()
 						.set(org.xnio.Options.RECEIVE_BUFFER, 1024)
@@ -187,12 +372,14 @@ public class EmbeddedUndertowTest {
 
 		ServletContainer container = Servlets.newContainer();
 		DeploymentManager dm = container.addDeployment(deploymentInfo);
+		// deploy() creates new io.undertow.servlet.spec.ServletContextImpl(), so it seems it can
+		// be called only once
 		dm.deploy();
 		HttpHandler handler = dm.start();
 
-		path.addPrefixPath("/c1", handler);
-
 		server.start();
+
+		path.addPrefixPath("/c1", handler);
 
 		int port = ((InetSocketAddress) server.getListenerInfo().get(0).getAddress()).getPort();
 		LOG.info("Local port after start: {}", port);
@@ -202,11 +389,27 @@ public class EmbeddedUndertowTest {
 		response = send(port, "/c1/s1");
 		assertTrue(response.endsWith("| /c1 | /s1 | null |"));
 
+		response = send(port, "/c2/s1");
+		assertTrue(response.contains("HTTP/1.1 404"));
+
 		response = send(port, "/c1/s2");
 		assertTrue(response.contains("HTTP/1.1 404"));
 
-		response = send(port, "/c2/s1");
-		assertTrue(response.contains("HTTP/1.1 404"));
+		ServletInfo servlet2 = Servlets.servlet("s2", servletInstance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servletInstance));
+		servlet2.addMapping("/s2/*");
+		// this is not necessary. Not even reasonable, because the deployment info is originally cloned inside
+		// the deployment
+//		deploymentInfo.addServlet(servlet2);
+		// this is where new definition has to be added
+		dm.getDeployment().getDeploymentInfo().addServlet(servlet2);
+		dm.getDeployment().getServlets().addServlet(servlet2);
+
+		// addServlet() has cleared io.undertow.servlet.handlers.ServletPathMatches.pathMatchCache LRU cache
+		// and io.undertow.servlet.handlers.ServletPathMatches.data mapping
+		// so io.undertow.servlet.handlers.ServletPathMatches.setupServletChains() will be called again
+
+		response = send(port, "/c1/s2");
+		assertTrue(response.endsWith("| /c1 | /s2 | null |"));
 
 		server.stop();
 	}
@@ -568,10 +771,21 @@ public class EmbeddedUndertowTest {
 			}
 		};
 
+		// io.undertow.servlet.api.ServletContainer is THE container in Undertow that maps context paths (and names)
+		// into "deployments" (contexts?) represented by io.undertow.servlet.api.DeploymentManager
+		// from transformation perspective, user adds a "deployment" as io.undertow.servlet.api.DeploymentInfo
+		// and it is turned into io.undertow.servlet.api.DeploymentManager (which holds the clone of original
+		// "deployment info")
+		ServletContainer container = Servlets.newContainer();
+
+		// another example of "info" like class. "servlet info" is added to "deployment info" (directly, not as clone)
+		// which means "servlet is registered inside servlet context"
 		ServletInfo servlet = Servlets.servlet("c1s1", servletInstance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servletInstance));
 		servlet.addMapping("/s1/*");
 
-		// io.undertow.servlet.api.DeploymentInfo is equivalent of javax.servlet.ServletContext
+		// "deployment info" represents a full information about single "servlet context" which can simply be
+		// treated as "JavaEE web application" with single context path
+		// this info is in 1:1 relation with single web.xml descriptor
 		DeploymentInfo deploymentInfo1 = Servlets.deployment()
 				.setClassLoader(this.getClass().getClassLoader())
 				.setContextPath("/c1")
@@ -580,15 +794,48 @@ public class EmbeddedUndertowTest {
 				.setUrlEncoding("UTF-8")
 				.addServlets(servlet);
 
-		ServletContainer container = Servlets.newContainer();
+		// we start the server already, it can already handle requests, but its root handler doesn't contain
+		// any mapping inside io.undertow.server.handlers.PathHandler
+		server.start();
 
+		// now the transformation time.
+		// io.undertow.servlet.api.ServletContainer.addDeployment() turns a "deployment info" into
+		// "deployment manager", which can be treated as "physical deployment" with some lifecycle.
+		// added "deployment info" is:
+		//  - cloned
+		//  - tracked under its unique name
+		//  - tracked under its unique context path
+		//  - returned as io.undertow.servlet.api.DeploymentManager object that controls the lifecycle of
+		//    associated "physical deployment"
 		DeploymentManager dm1 = container.addDeployment(deploymentInfo1);
+		assertThat(dm1.getState(), equalTo(DeploymentManager.State.UNDEPLOYED));
+
+		// "deploying" clones the already cloned "deployment info" again and turns it into "physical deployment"
+		// represented by io.undertow.servlet.api.Deployment, which allows read access to various aspects
+		// of "web application".
+		// the problem with Undertow is that while we can add new servlets to existing "deployment", we can't
+		// remove them...
+		// "deploy" does few important things:
+		//  - creates instance of io.undertow.servlet.spec.ServletContextImpl (THE javax.servlet.ServletContext)
+		//  - creates instance of io.undertow.servlet.core.DeploymentImpl
+		//  - prepares all the "web elements" by turning "info" into "physical representation" of e.g., servlet
+		//     - e.g., io.undertow.servlet.api.ServletInfo is turned into io.undertow.servlet.core.ManagedServlet
+		//       and io.undertow.servlet.handlers.ServletHandler
+		//  - starting from singleton io.undertow.servlet.handlers.ServletDispatchingHandler.INSTANCE, handlers
+		//    declared in deployment info (and other configuration) are created (wrappers of wrapeprs of ...)
+		//  - one of the important (fixed) handlers is io.undertow.servlet.handlers.ServletInitialHandler that
+		//    puts an exchange attachment in the form of io.undertow.servlet.handlers.ServletRequestContext
+		//  - this attachment is then taken in ServletDispatchingHandler and invoked
+		//  - the final handler is put as io.undertow.servlet.core.DeploymentImpl.initialHandler and then
+		//    returned from (as-is) io.undertow.servlet.api.DeploymentManager.start()
 		dm1.deploy();
+		assertThat(dm1.getState(), equalTo(DeploymentManager.State.DEPLOYED));
+
+		// "start" starts all lifecycle objects (servlets, filters, listeners)
 		HttpHandler handler = dm1.start();
+		assertThat(dm1.getState(), equalTo(DeploymentManager.State.STARTED));
 
 		path.addPrefixPath("/c1", handler);
-
-		server.start();
 
 		int port = ((InetSocketAddress) server.getListenerInfo().get(0).getAddress()).getPort();
 		LOG.info("Local port after start: {}", port);
@@ -629,9 +876,11 @@ public class EmbeddedUndertowTest {
 		ServletInfo servlet3 = Servlets.servlet("c1s2", servletInstance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servletInstance));
 		servlet3.addMapping("/s2/*");
 
-		deploymentInfo1.addServlet(servlet3);
+		response = send(port, "/c1/s2");
+		assertTrue(response.startsWith("HTTP/1.1 404"));
 
 		// either removal and addition of the same deployment:
+//		deploymentInfo1.addServlet(servlet3);
 //		container.getDeployment(deploymentInfo.getDeploymentName()).undeploy();
 //		container.removeDeployment(deploymentInfo);
 //		dm = container.addDeployment(deploymentInfo);
@@ -648,11 +897,11 @@ public class EmbeddedUndertowTest {
 		response = send(port, "/c1/s1");
 		assertTrue(response.endsWith("| /c1 | /s1 | null |"));
 
-		response = send(port, "/c1/s2");
-		assertTrue(response.endsWith("| /c1 | /s2 | null |"));
-
 		response = send(port, "/c2/s1");
 		assertTrue(response.endsWith("| /c2 | /s1 | null |"));
+
+		response = send(port, "/c1/s2");
+		assertTrue(response.endsWith("| /c1 | /s2 | null |"));
 
 		server.stop();
 	}

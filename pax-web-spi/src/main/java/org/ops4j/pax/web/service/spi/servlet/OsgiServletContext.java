@@ -51,7 +51,7 @@ import org.osgi.framework.wiring.BundleWiring;
  */
 public class OsgiServletContext implements ServletContext {
 
-	private final ServletContext container;
+	private ServletContext container;
 	private final OsgiContextModel contextModel;
 	private final WebContainerContext context;
 
@@ -61,6 +61,20 @@ public class OsgiServletContext implements ServletContext {
 		this.container = container;
 		this.contextModel = contextModel;
 		this.context = contextModel.getHttpContext();
+	}
+
+	public OsgiContextModel getOsgiContextModel() {
+		return contextModel;
+	}
+
+	/**
+	 * We have to be able to replace server-specific {@link ServletContext}, because we can't freely
+	 * replace web elements in Undertow. In Undertow we have to recreate entire context, thus getting new
+	 * {@link ServletContext}.
+	 * @param container
+	 */
+	public void setContainer(ServletContext container) {
+		this.container = container;
 	}
 
 	// --- methods that throw UnsupportedOperationException

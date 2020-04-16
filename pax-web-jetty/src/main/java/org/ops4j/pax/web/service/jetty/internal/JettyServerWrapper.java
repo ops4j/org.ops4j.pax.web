@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;
+import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
@@ -74,6 +75,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ResourceModel;
 import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.FilterModelChange;
@@ -148,6 +150,9 @@ class JettyServerWrapper implements BatchVisitor {
 	 * {@link org.ops4j.pax.web.service.spi.ServerController}
 	 */
 	private final Configuration configuration;
+
+	/** Servlet to use when no servlet is mapped - to ensure that preprocessors and filters are run correctly. */
+	private final Default404Servlet default404Servlet = new Default404Servlet();
 
 	public JettyServerWrapper(Configuration config, JettyFactory jettyFactory,
 			Bundle paxWebJettyBundle, ClassLoader classLoader) {
@@ -577,7 +582,7 @@ class JettyServerWrapper implements BatchVisitor {
 //			ServletContextHandler sch = new PaxWebServletContextHandler(null, model.getContextPath(), true, true);
 			ServletContextHandler sch = new ServletContextHandler(null, model.getContextPath(), true, true);
 			// special, OSGi-aware org.eclipse.jetty.servlet.ServletHandler
-			sch.setServletHandler(new PaxWebServletHandler());
+			sch.setServletHandler(new PaxWebServletHandler(default404Servlet));
 			// setting "false" here will trigger 302 redirect when browsing to context without trailing "/"
 			sch.setAllowNullPathInfo(false);
 
@@ -812,11 +817,46 @@ class JettyServerWrapper implements BatchVisitor {
 				//  - when filter is running in a chain without target servlet, it'll get the "best" OsgiContextModel
 				//    for given physical context path taken from this.osgiContextModels - this case (filters without
 				//    servlet doesn't seem to be described by Whiteboard Service spec and isn't implemented by felix.http)
-				PaxWebFilterHolder holder = new PaxWebFilterHolder(sch, model);
+
+				// TODO: filter and servlets conflict related to different target OsgiContextModels
+				// imagine:
+				// ServletContextModel with "/c1"
+				//     OsgiContextModel with name "ocm1" and rank 1
+				//     OsgiContextModel with name "ocm2" and rank 2
+				//     OsgiContextModel with name "ocm3" and rank 3
+				//
+				// if there's servlet registered under /s with ocm1 and ocm2 and a filter mapped to this servlet
+				// (by name or /* path) with ocm1 only, this filter:
+				//  - should get an OsgiServletContext associated with ocm1 during filter.init()
+				//  - should not be invoked when processing a request targeted at servlet /s, because /s is chosen
+				//    to be associated with higher ranked ocm2
+				//
+				// however, if there was some /s1 servlet associated with ocm1 only, filter should be invoked
+				// when targeting /s1 servlet
+
+				// we need highest ranked OsgiContextModel for current context path - chosen not among all
+				// associated OsgiContextModels, but among OsgiContextModels of the FilterModel
+				OsgiContextModel highestRankedModel = null;
+				// remember, this contextModels list is properly sorted
+				for (OsgiContextModel ocm : model.getContextModels()) {
+					if (ocm.getServletContextModel().getContextPath().equals(contextPath)) {
+						highestRankedModel = ocm;
+						break;
+					}
+				}
+				if (highestRankedModel == null) {
+					LOG.warn("(dev) Can't find proper OsgiContextModel for the filter. Falling back to "
+							+ "highest ranked OsgiContextModel for given ServletContextModel");
+					highestRankedModel = osgiContextModels.get(contextPath).iterator().next();
+				}
+
+				OsgiServletContext context = osgiServletContexts.get(highestRankedModel);
+				PaxWebFilterHolder holder = new PaxWebFilterHolder(model, context);
 				PaxWebFilterMapping mapping = new PaxWebFilterMapping(model);
 
 				newFilterHolders[pos] = holder;
 				newFilterMappings[pos] = mapping;
+				pos++;
 			}
 
 			sch.getServletHandler().setFilters(newFilterHolders);

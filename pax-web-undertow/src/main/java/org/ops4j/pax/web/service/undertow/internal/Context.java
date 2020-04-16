@@ -393,21 +393,6 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		final WebContainerContext httpContext = contextModel.getHttpContext();
 		// org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService#createServletConfig
 		DeploymentInfo deployment = new DeploymentInfo();
-		deployment.setEagerFilterInit(true);
-//		deployment.setDeploymentName(contextModel.getContextName());
-		deployment.setDisplayName(httpContext.getContextId());
-//		deployment.setConfidentialPortManager(getConfidentialPortManager());
-		// d.setServletStackTraces(servletContainer.getStackTraces());
-//		deployment.setContextPath('/' + contextModel.getContextName());
-//		deployment.setClassLoader(classLoader);
-//		BundleContext bundleContext = contextModel.getBundle().getBundleContext();
-//		if (bundleContext != null) {
-//			deployment.addServletContextAttribute(PaxWebConstants.BUNDLE_CONTEXT_ATTRIBUTE, bundleContext);
-//			deployment.addServletContextAttribute("org.springframework.osgi.web.org.osgi.framework.BundleContext", bundleContext);
-//		}
-		deployment.setResourceManager(this);
-		// TODO: move to XML configuration
-		deployment.setIdentityManager(identityManager);
 //		if (contextModel.getRealmName() != null && contextModel.getAuthMethod() != null) {
 //			ServletExtension authenticator = getAuthenticator(contextModel.getAuthMethod());
 //			if (authenticator != null) {
@@ -519,36 +504,6 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 //			));
 //		}
 
-		for (FilterModel filter : filters) {
-			FilterInfo info = new FilterInfo(filter.getName(),
-					clazz(filter.getFilterClass(), filter.getFilter()),
-					factory(filter.getFilterClass(), filter.getFilter()));
-			for (Map.Entry<String, String> param : filter.getInitParams().entrySet()) {
-				info.addInitParam(param.getKey(), param.getValue());
-			}
-//			info.setAsyncSupported(filter.isAsyncSupported());
-
-			deployment.addFilter(info);
-//			String[] dispatchers = filter.getDispatcher();
-//			if (dispatchers == null || dispatchers.length == 0) {
-//				dispatchers = new String[]{"request"};
-//			}
-//			for (String dispatcher : dispatchers) {
-//				DispatcherType dt = DispatcherType.valueOf(dispatcher.toUpperCase());
-//				String[] servletNames = filter.getServletNames();
-//				if (servletNames != null) {
-//					for (String servletName : servletNames) {
-//						deployment.addFilterServletNameMapping(filter.getName(), servletName, dt);
-//					}
-//				}
-//				String[] urlPatterns = filter.getUrlPatterns();
-//				if (urlPatterns != null) {
-//					for (String urlPattern : urlPatterns) {
-//						deployment.addFilterUrlMapping(filter.getName(), urlPattern, dt);
-//					}
-//				}
-//			}
-		}
 		for (SecurityConstraintMappingModel securityConstraintMapping : securityConstraintMappings) {
 			SecurityConstraint info = new SecurityConstraint();
 //            if (securityConstraintMapping.isAuthentication()) {
@@ -809,29 +764,11 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 	}
 
 	private boolean isWebSocketAvailable() {
-		try {
-			return (io.undertow.websockets.jsr.WebSocketDeploymentInfo.class != null);
-		} catch (NoClassDefFoundError ignore) {
+//		try {
+//			return (io.undertow.websockets.jsr.WebSocketDeploymentInfo.class != null);
+//		} catch (NoClassDefFoundError ignore) {
 			return false;
-		}
-	}
-
-	public synchronized void addServlet(ServletModel model) throws ServletException {
-		if (servlets.add(model)) {
-			if (started.get()) {
-				destroyHandler();
-				doStart(model);
-			}
-		}
-	}
-
-	public synchronized void removeServlet(ServletModel model) throws ServletException {
-		if (servlets.remove(model)) {
-			if (started.get()) {
-				destroyHandler();
-				doStop(model);
-			}
-		}
+//		}
 	}
 
 	public synchronized void addWelcomeFile(WelcomeFileModel welcomeFile) throws ServletException {
@@ -876,22 +813,6 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 	public void removeEventListener(EventListenerModel model) throws ServletException {
 		if (eventListeners.remove(model)) {
-			if (started.get()) {
-				destroyHandler();
-			}
-		}
-	}
-
-	public void addFilter(FilterModel model) throws ServletException {
-		if (filters.add(model)) {
-			if (started.get()) {
-				destroyHandler();
-			}
-		}
-	}
-
-	public void removeFilter(FilterModel model) throws ServletException {
-		if (filters.remove(model)) {
 			if (started.get()) {
 				destroyHandler();
 			}

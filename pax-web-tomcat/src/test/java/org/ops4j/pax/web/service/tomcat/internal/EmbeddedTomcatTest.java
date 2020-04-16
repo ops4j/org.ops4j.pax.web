@@ -21,14 +21,18 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.GenericFilter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.MappingMatch;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.Engine;
@@ -37,8 +41,11 @@ import org.apache.catalina.Host;
 import org.apache.catalina.Lifecycle;
 import org.apache.catalina.Server;
 import org.apache.catalina.Service;
+import org.apache.catalina.Valve;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.connector.Connector;
+import org.apache.catalina.connector.Request;
+import org.apache.catalina.connector.Response;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.core.StandardEngine;
 import org.apache.catalina.core.StandardHost;
@@ -48,6 +55,9 @@ import org.apache.catalina.core.StandardThreadExecutor;
 import org.apache.catalina.core.StandardWrapper;
 import org.apache.catalina.startup.Catalina;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.catalina.valves.ValveBase;
+import org.apache.tomcat.util.descriptor.web.FilterDef;
+import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.digester.Digester;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -156,6 +166,75 @@ public class EmbeddedTomcatTest {
 
 		String response = send(connector.getLocalPort(), "/");
 		assertTrue(response.endsWith("\r\n\r\nOK\n"));
+
+		server.stop();
+		server.destroy();
+	}
+
+	@Test
+	public void embeddedServerWithServletContextHandlerAndOnlyFilter() throws Exception {
+		Server server = new StandardServer();
+		server.setCatalinaBase(new File("target"));
+
+		Service service = new StandardService();
+		service.setName("Catalina");
+		server.addService(service);
+
+		Executor executor = new StandardThreadExecutor();
+		service.addExecutor(executor);
+
+		Connector connector = new Connector("HTTP/1.1");
+		connector.setPort(0);
+		service.addConnector(connector);
+
+		Engine engine = new StandardEngine();
+		engine.setName("Catalina");
+		engine.setDefaultHost("localhost");
+		service.setContainer(engine);
+
+		Host host = new StandardHost();
+		host.setName("localhost");
+		host.setAppBase(".");
+		engine.addChild(host);
+
+		Context rootContext = new StandardContext();
+		rootContext.setName("");
+		rootContext.setPath("");
+		rootContext.setMapperContextRootRedirectEnabled(false);
+		rootContext.addLifecycleListener((event) -> {
+			if (event.getType().equals(Lifecycle.CONFIGURE_START_EVENT)) {
+				rootContext.setConfigured(true);
+			}
+		});
+		host.addChild(rootContext);
+
+		FilterDef def = new FilterDef();
+		FilterMap map = new FilterMap();
+		def.setFilterName("f1");
+		def.setFilter(new Filter() {
+			@Override
+			public void init(FilterConfig filterConfig) throws ServletException {
+			}
+
+			@Override
+			public void doFilter(ServletRequest request, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
+				resp.setContentType("text/plain");
+				resp.setCharacterEncoding("UTF-8");
+				resp.getWriter().write("OK");
+				resp.getWriter().close();
+			}
+		});
+		map.setFilterName("f1");
+		map.addURLPattern("/*");
+		map.setDispatcher(DispatcherType.REQUEST.name());
+		rootContext.addFilterDef(def);
+		rootContext.addFilterMap(map);
+
+		server.start();
+
+		int port = connector.getLocalPort();
+		String response = send(connector.getLocalPort(), "/anything");
+		assertTrue(response.endsWith("OK"));
 
 		server.stop();
 		server.destroy();
@@ -306,6 +385,7 @@ public class EmbeddedTomcatTest {
 		engine.addChild(host);
 
 		Context rootContext = new StandardContext();
+//		rootContext.getPipeline().setBasic(new StandardContextValve());
 		rootContext.setName("");
 		rootContext.setPath("");
 		rootContext.setMapperContextRootRedirectEnabled(false);
@@ -345,6 +425,13 @@ public class EmbeddedTomcatTest {
 		};
 
 		Wrapper wrapper1 = new StandardWrapper();
+		final Valve basicWrapperValve = wrapper1.getPipeline().getBasic();
+		wrapper1.getPipeline().addValve(new ValveBase() {
+			@Override
+			public void invoke(Request request, Response response) throws IOException, ServletException {
+				basicWrapperValve.invoke(request, response);
+			}
+		});
 		wrapper1.setServlet(servlet);
 		wrapper1.setName("s1");
 
@@ -451,6 +538,25 @@ public class EmbeddedTomcatTest {
 		//       jspWildCard: boolean  = false
 		//       resourceOnly: boolean  = false
 		//       name: java.lang.String  = ""
+
+		// Tomcat invocation is performed using pipelines of valves. Interesting valves related to request
+		// processing are (in order of invocation):
+		// - org.apache.catalina.core.StandardEngineValve.invoke()
+		//    - requires existing org.apache.catalina.connector.Request.getHost()
+		// - org.apache.catalina.valves.ErrorReportValve.invoke()
+		// - org.apache.catalina.core.StandardHostValve.invoke()
+		//    - requires existing org.apache.catalina.connector.Request.getContext()
+		// - org.apache.catalina.core.StandardContextValve.invoke()
+		//    - requires existing org.apache.catalina.connector.Request.getWrapper()
+		// - org.apache.catalina.core.StandardWrapperValve.invoke()
+		//    - important org.apache.catalina.core.StandardWrapper.allocate() call that returns a javax.servlet.Servlet
+		//    - org.apache.catalina.connector.Request.getFilterChain() is called inside static
+		//      org.apache.catalina.core.ApplicationFilterFactory.createFilterChain(), so it'd be better to set
+		//      such filter chain earlier. the same static method determines the filters to use and calls
+		//      org.apache.catalina.core.ApplicationFilterChain.addFilter() for each matching - that's what Pax Web
+		//      has to do.
+		// - org.apache.catalina.core.ApplicationFilterChain.doFilter() is called - so Pax Web should definitely
+		//   prepare own FilterChain in custom StandardWrapperValve inside StandardContext
 
 		String response;
 
@@ -603,6 +709,71 @@ public class EmbeddedTomcatTest {
 		server.destroy();
 	}
 
+	@Test
+	public void embeddedServerWithExternalConfigurationFilterOnly() throws Exception {
+		File webXml = new File("target/WEB-INF/web-filter-only.xml");
+		webXml.getParentFile().mkdirs();
+		webXml.delete();
+
+		try (FileWriter writer = new FileWriter(webXml)) {
+			writer.write("<web-app xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+					"    xsi:schemaLocation=\"http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd\"\n" +
+					"    version=\"4.0\">\n" +
+					"\n" +
+					"    <filter>\n" +
+					"        <filter-name>test-filter</filter-name>\n" +
+					"        <filter-class>org.ops4j.pax.web.service.tomcat.internal.EmbeddedTomcatTest$TestFilter</filter-class>\n" +
+					"    </filter>\n" +
+					"\n" +
+					"    <filter-mapping>\n" +
+					"        <filter-name>test-filter</filter-name>\n" +
+					"        <url-pattern>/*</url-pattern>\n" +
+					"    </filter-mapping>\n" +
+					"\n" +
+					"</web-app>\n");
+		}
+
+		// loop taken from org.apache.catalina.startup.Catalina.load()
+
+		Digester digester = (new Catalina() {
+			@Override
+			public Digester createStartDigester() {
+				return super.createStartDigester();
+			}
+		}).createStartDigester();
+
+		ServerHolder holder = new ServerHolder();
+		digester.push(holder);
+
+		// properties that are fortunately used from within tomcat-*.xml
+		System.setProperty("docbase", new File("target").getAbsolutePath());
+		System.setProperty("workdir", new File("target/test-classes").getAbsolutePath());
+		digester.parse(new File("target/test-classes/etc/tomcat-webapp1.xml"));
+
+		// web.xml will be processed by org.apache.catalina.startup.ContextConfig.configureStart()
+		// in response to org.apache.catalina.core.StandardContext.startInternal() sending
+		// org.apache.catalina.Lifecycle.CONFIGURE_START_EVENT event.
+		// org.apache.catalina.startup.ContextConfig is the default listener in StandardContext
+		// org.apache.catalina.startup.ContextConfig.configureContext() is simply iterating over elements
+		// in web.xml
+
+		StandardServer server = (StandardServer) holder.getServer();
+		Service catalina = server.findService("Catalina");
+		Connector connector = catalina.findConnectors()[0];
+		assertThat(((StandardThreadExecutor)catalina.getExecutor("default")).getNamePrefix(), equalTo("tomcat-pool-"));
+
+		server.start();
+
+		int port = connector.getLocalPort();
+		String response = send(port, "/app1/anything");
+		// in Tomcat, you can't have filters only without "default" servlet, because that's how
+		// org.apache.catalina.core.StandardContextValve.invoke() works.
+		assertTrue(response.startsWith("HTTP/1.1 404"));
+
+		server.stop();
+		server.destroy();
+	}
+
 	private String send(int port, String request) throws IOException {
 		Socket s = new Socket();
 		s.connect(new InetSocketAddress("127.0.0.1", port));
@@ -644,12 +815,28 @@ public class EmbeddedTomcatTest {
 			System.out.println("Creating TestServlet");
 		}
 
+
 		@Override
 		protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			resp.setContentType("text/plain");
 			resp.setCharacterEncoding("UTF-8");
 			resp.getWriter().write("OK\n");
 			resp.getWriter().close();
+		}
+	}
+
+	public static class TestFilter extends GenericFilter {
+
+		public TestFilter() {
+			System.out.println("Creating TestFilter");
+		}
+
+		@Override
+		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+			response.setContentType("text/plain");
+			response.setCharacterEncoding("UTF-8");
+			response.getWriter().write("OK\n");
+			response.getWriter().close();
 		}
 	}
 
