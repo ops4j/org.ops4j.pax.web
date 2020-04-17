@@ -652,14 +652,90 @@ public class HttpServiceEnabled implements StoppableHttpService {
 
 	@Override
 	public void unregisterFilter(Filter filter) {
+		FilterModel model = new FilterModel(null, filter, null, null);
+		doUnregisterFilter(model);
 	}
 
 	@Override
 	public void unregisterFilter(String filterName) {
+		FilterModel model = new FilterModel(filterName, null, null, null);
+		doUnregisterFilter(model);
 	}
 
 	@Override
 	public void unregisterFilters(Class<? extends Filter> filterClass) {
+		FilterModel model = new FilterModel(null, null, filterClass, null);
+		doUnregisterFilter(model);
+	}
+
+	/**
+	 * Main method for {@link Filter} unregistration
+	 * @param model
+	 */
+	public void doUnregisterFilter(FilterModel model) {
+		final String name = model.getName();
+		final Filter instance = model.getFilter();
+		final Class<? extends Filter> filterClass = model.getFilterClass();
+
+		try {
+			serverModel.run(() -> {
+				List<FilterModel> toUnregister = new LinkedList<>();
+
+				if (name != null) {
+					LOG.info("Unregistering filter by name \"{}\"", name);
+
+					for (FilterModel existing : serviceModel.getFilterModels()) {
+						if (existing.getName().equals(name)) {
+							toUnregister.add(existing);
+						}
+					}
+					if (toUnregister.size() == 0) {
+						throw new IllegalArgumentException("Filter named \"" + name + "\" was never registered by "
+								+ serviceBundle);
+					}
+				} else if (filterClass != null) {
+					LOG.info("Unregistering filter by class \"{}\"", filterClass);
+
+					for (FilterModel existing : serviceModel.getFilterModels()) {
+						if (existing.getFilterClass().equals(filterClass)) {
+							toUnregister.add(existing);
+						}
+					}
+					if (toUnregister.size() == 0) {
+						throw new IllegalArgumentException("Servlet of \"" + filterClass.getName() + "\" class "
+								+ "was never registered by " + serviceBundle);
+					}
+				} else if (instance != null) {
+					LOG.info("Unregistering filter \"{}\"", instance);
+
+					for (FilterModel existing : serviceModel.getFilterModels()) {
+						if (existing.getFilter().equals(instance)) {
+							toUnregister.add(existing);
+						}
+					}
+					if (toUnregister.size() == 0) {
+						throw new IllegalArgumentException("Filter \"" + instance + "\" "
+								+ "was never registered by " + serviceBundle);
+					}
+				} else {
+					throw new IllegalArgumentException("No criteria for filter unregistration specified");
+				}
+
+				final Batch batch = new Batch("Unregistration of filters: " + toUnregister);
+
+				// removing filter model will never lead to reactivation of existing models - because filters
+				// do not shadow each other
+				serverModel.removeFilterModels(toUnregister, batch);
+
+				serverController.sendBatch(batch);
+
+				batch.accept(serviceModel);
+
+				return null;
+			});
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	// --- private support methods

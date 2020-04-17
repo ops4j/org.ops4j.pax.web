@@ -978,9 +978,9 @@ class UndertowServerWrapper implements BatchVisitor {
 
 	@Override
 	public void visit(FilterStateChange change) {
-		Map<String, Set<FilterModel>>contextFilters = change.getContextFilters();
+		Map<String, TreeSet<FilterModel>>contextFilters = change.getContextFilters();
 
-		for (Map.Entry<String, Set<FilterModel>> entry : contextFilters.entrySet()) {
+		for (Map.Entry<String, TreeSet<FilterModel>> entry : contextFilters.entrySet()) {
 			String contextPath = entry.getKey();
 			Set<FilterModel> filters = entry.getValue();
 
@@ -1006,7 +1006,7 @@ class UndertowServerWrapper implements BatchVisitor {
 			}
 
 			// remove all existing filters
-			deploymentInfo.getFilters().clear();
+			deploymentInfo = undertowFactory.clearFilters(deploymentInfo);
 
 			// this time we don't have to care about filters which are not "changed" or which should
 			// be destroyed, because unlike in Jetty and Tomcat, in Undertow we simply destroy entire

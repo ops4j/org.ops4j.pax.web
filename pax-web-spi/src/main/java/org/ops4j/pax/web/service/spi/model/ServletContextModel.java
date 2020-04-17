@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TreeSet;
 import javax.servlet.ServletContext;
 
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
@@ -118,22 +117,6 @@ public final class ServletContextModel extends Identity {
 
 	/** Filter name mapping enforces filter name uniqueness within a context. */
 	private final Map<String, FilterModel> filterNameMapping = new HashMap<>();
-
-	/**
-	 * Sorted set (by service rank desc, service id asc, name asc) mapped to <em>any</em> servlet or URL pattern.
-	 * These filters are then mapped to required servlets or URLs at server controller level. Even if most of the
-	 * requests won't involve calling all the filters, the order kept here is preserved.
-	 */
-	private final Set<FilterModel> filterModels = new TreeSet<>();
-
-//	/**
-//	 * Mapping between full registration url patterns and filter model. Full url
-//	 * pattern mean that it has the context name prepended (if context name is
-//	 * set) to the actual url pattern. Used to globally find (against all
-//	 * registered patterns) the right filter context for the pattern.
-//	 * The map is wrapped into map for virtual hosts.
-//	 */
-//	private final ConcurrentMap<String, ConcurrentMap<String, Set<ServerModel.UrlPattern>>> filterUrlPatterns;
 
 	public ServletContextModel(String contextPath) {
 		this.contextPath = contextPath;

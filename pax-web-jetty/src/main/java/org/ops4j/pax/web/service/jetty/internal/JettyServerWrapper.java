@@ -761,9 +761,9 @@ class JettyServerWrapper implements BatchVisitor {
 		// there's no separate add filter, add filter, remove filter, ... set of operations
 		// everything is passed in single "change"
 
-		Map<String, Set<FilterModel>> contextFilters = change.getContextFilters();
+		Map<String, TreeSet<FilterModel>> contextFilters = change.getContextFilters();
 
-		for (Map.Entry<String, Set<FilterModel>> entry : contextFilters.entrySet()) {
+		for (Map.Entry<String, TreeSet<FilterModel>> entry : contextFilters.entrySet()) {
 			String contextPath = entry.getKey();
 			Set<FilterModel> filters = entry.getValue();
 

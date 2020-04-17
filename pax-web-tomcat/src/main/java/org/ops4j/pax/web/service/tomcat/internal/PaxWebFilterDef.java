@@ -34,7 +34,6 @@ public class PaxWebFilterDef extends FilterDef {
 	/** Flag to mark the filter as "initial" - that handles preprocessors and security in difficult Tomcat env. */
 	private final boolean initialFilter;
 
-	// TODO: handle reference
 	private ServiceReference<? extends Filter> filterReference;
 
 	public PaxWebFilterDef(FilterModel filterModel, boolean initialFilter) {
@@ -54,11 +53,15 @@ public class PaxWebFilterDef extends FilterDef {
 			setFilter(filterModel.getFilter());
 		} else {
 			this.filterReference = filterModel.getElementReference();
+
+			if (filterReference != null) {
+				// TODO: ensure it's ungotten later
+				setFilter(filterModel.getRegisteringBundle().getBundleContext().getService(filterReference));
+			}
 		}
 
 		filterModel.getInitParams().forEach(this::addInitParameter);
 		setAsyncSupported(filterModel.getAsyncSupported() != null && filterModel.getAsyncSupported() ? "true" : "false");
-
 	}
 
 	/**
@@ -70,6 +73,10 @@ public class PaxWebFilterDef extends FilterDef {
 	 */
 	public boolean matches(OsgiContextModel targetContext) {
 		return initialFilter || filterModel.getContextModels().contains(targetContext);
+	}
+
+	public boolean isInitial() {
+		return initialFilter;
 	}
 
 }

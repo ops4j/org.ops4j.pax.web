@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.net.ssl.CertPathTrustManagerParameters;
 import javax.net.ssl.KeyManager;
@@ -58,6 +59,8 @@ import io.undertow.server.protocol.http.HttpOpenListener;
 import io.undertow.server.protocol.http2.Http2OpenListener;
 import io.undertow.server.protocol.http2.Http2UpgradeHandler;
 import io.undertow.server.protocol.proxy.ProxyProtocolOpenListener;
+import io.undertow.servlet.api.DeploymentInfo;
+import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.handlers.MarkSecureHandler;
 import io.undertow.util.HttpString;
 import org.ops4j.pax.web.service.spi.config.Configuration;
@@ -696,6 +699,114 @@ public class UndertowFactory {
 		}
 
 		return crlList;
+	}
+
+	/**
+	 * <p>Special method that has to clone existing {@link DeploymentInfo}, because we can't access original
+	 * filter mapping inside. This methods is used when unregistering filters.</p>
+	 *
+	 * <p>This is almost a copy of original {@link DeploymentInfo#clone()}</p>
+	 *
+	 * @param existing
+	 * @return
+	 */
+	public DeploymentInfo clearFilters(DeploymentInfo existing) {
+		final DeploymentInfo info = new DeploymentInfo()
+				.setClassLoader(existing.getClassLoader())
+				.setContextPath(existing.getContextPath())
+				.setResourceManager(existing.getResourceManager())
+				.setMajorVersion(existing.getMajorVersion())
+				.setMinorVersion(existing.getMinorVersion())
+				.setDeploymentName(existing.getDeploymentName())
+				.setClassIntrospecter(existing.getClassIntrospecter());
+
+		for (Map.Entry<String, ServletInfo> e : existing.getServlets().entrySet()) {
+			info.addServlet(e.getValue().clone());
+		}
+		// do NOT copy filters
+//		for (Map.Entry<String, FilterInfo> e : existing.getFilters().entrySet()) {
+//			info.addFilter(e.getValue().clone());
+//		}
+		// do NOT populate filter mappings
+
+		info.setDisplayName(existing.getDisplayName());
+		info.getListeners().addAll(existing.getListeners());
+		info.getServletContainerInitializers().addAll(existing.getServletContainerInitializers());
+		info.getThreadSetupActions().addAll(existing.getThreadSetupActions());
+		info.getInitParameters().putAll(existing.getInitParameters());
+		info.getServletContextAttributes().putAll(existing.getServletContextAttributes());
+		info.getWelcomePages().addAll(existing.getWelcomePages());
+		info.getErrorPages().addAll(existing.getErrorPages());
+		info.getMimeMappings().addAll(existing.getMimeMappings());
+		info.setExecutor(existing.getExecutor());
+		info.setAsyncExecutor(existing.getAsyncExecutor());
+		info.setTempDir(existing.getTempDir());
+		info.setJspConfigDescriptor(existing.getJspConfigDescriptor());
+		info.setDefaultServletConfig(existing.getDefaultServletConfig());
+		info.getLocaleCharsetMapping().putAll(existing.getLocaleCharsetMapping());
+		info.setSessionManagerFactory(existing.getSessionManagerFactory());
+		if (existing.getLoginConfig() != null) {
+			info.setLoginConfig(existing.getLoginConfig().clone());
+		}
+		info.setIdentityManager(existing.getIdentityManager());
+		info.setConfidentialPortManager(existing.getConfidentialPortManager());
+		info.setDefaultEncoding(existing.getDefaultEncoding());
+		info.setUrlEncoding(existing.getUrlEncoding());
+		info.getSecurityConstraints().addAll(existing.getSecurityConstraints());
+		info.getOuterHandlerChainWrappers().addAll(existing.getOuterHandlerChainWrappers());
+		info.getInnerHandlerChainWrappers().addAll(existing.getInnerHandlerChainWrappers());
+		info.setInitialSecurityWrapper(existing.getInitialSecurityWrapper());
+		info.getSecurityWrappers().addAll(existing.getSecurityWrappers());
+		info.getInitialHandlerChainWrappers().addAll(existing.getInitialHandlerChainWrappers());
+		info.getSecurityRoles().addAll(existing.getSecurityRoles());
+		info.getNotificationReceivers().addAll(existing.getNotificationReceivers());
+		info.setAllowNonStandardWrappers(existing.isAllowNonStandardWrappers());
+		info.setDefaultSessionTimeout(existing.getDefaultSessionTimeout());
+		info.setServletContextAttributeBackingMap(existing.getServletContextAttributeBackingMap());
+		info.setServletSessionConfig(existing.getServletSessionConfig());
+		info.setHostName(existing.getHostName());
+		info.setDenyUncoveredHttpMethods(existing.isDenyUncoveredHttpMethods());
+		info.setServletStackTraces(existing.getServletStackTraces());
+		info.setInvalidateSessionOnLogout(existing.isInvalidateSessionOnLogout());
+		info.setDefaultCookieVersion(existing.getDefaultCookieVersion());
+		info.setSessionPersistenceManager(existing.getSessionPersistenceManager());
+		for (Map.Entry<String, Set<String>> e : existing.getPrincipalVersusRolesMap().entrySet()) {
+			info.getPrincipalVersusRolesMap().put(e.getKey(), new HashSet<>(e.getValue()));
+		}
+		info.setIgnoreFlush(existing.isIgnoreFlush());
+		info.setAuthorizationManager(existing.getAuthorizationManager());
+		info.getAuthenticationMechanisms().putAll(existing.getAuthenticationMechanisms());
+		info.getServletExtensions().addAll(existing.getServletExtensions());
+		info.setJaspiAuthenticationMechanism(existing.getJaspiAuthenticationMechanism());
+		info.setSecurityContextFactory(existing.getSecurityContextFactory());
+		info.setServerName(existing.getServerName());
+		info.setMetricsCollector(existing.getMetricsCollector());
+		info.setSessionConfigWrapper(existing.getSessionConfigWrapper());
+		info.setEagerFilterInit(existing.isEagerFilterInit());
+		info.setDisableCachingForSecuredPages(existing.isDisableCachingForSecuredPages());
+		info.setExceptionHandler(existing.getExceptionHandler());
+		info.setEscapeErrorMessage(existing.isEscapeErrorMessage());
+		info.getSessionListeners().addAll(existing.getSessionListeners());
+		info.getLifecycleInterceptors().addAll(existing.getLifecycleInterceptors());
+		info.setAuthenticationMode(existing.getAuthenticationMode());
+		info.setDefaultMultipartConfig(existing.getDefaultMultipartConfig());
+		info.setContentTypeCacheSize(existing.getContentTypeCacheSize());
+		info.setSessionIdGenerator(existing.getSessionIdGenerator());
+		info.setSendCustomReasonPhraseOnError(existing.isSendCustomReasonPhraseOnError());
+		info.setChangeSessionIdOnLogin(existing.isChangeSessionIdOnLogin());
+		info.setCrawlerSessionManagerConfig(existing.getCrawlerSessionManagerConfig());
+		info.setSecurityDisabled(existing.isSecurityDisabled());
+		info.setUseCachedAuthenticationMechanism(existing.isUseCachedAuthenticationMechanism());
+		info.setCheckOtherSessionManagers(existing.isCheckOtherSessionManagers());
+		info.setDefaultRequestEncoding(existing.getDefaultRequestEncoding());
+		info.setDefaultResponseEncoding(existing.getDefaultResponseEncoding());
+		info.getPreCompressedResources().putAll(existing.getPreCompressedResources());
+		info.setContainerMajorVersion(existing.getContainerMajorVersion());
+		info.setContainerMinorVersion(existing.getContainerMinorVersion());
+		info.getDeploymentCompleteListeners().addAll(existing.getDeploymentCompleteListeners());
+		info.setPreservePathOnForward(existing.isPreservePathOnForward());
+
+		return info;
 	}
 
 	public static class AcceptingChannelWithAddress {

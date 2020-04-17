@@ -17,19 +17,21 @@ package org.ops4j.pax.web.service.spi.task;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 
 public class FilterStateChange extends Change {
 
-	private final Map<String, Set<FilterModel>> contextFilters;
+	/** Explicitly marked as mapping of {@link TreeSet} to highlight the importance of ordering */
+	private final Map<String, TreeSet<FilterModel>> contextFilters;
 
-	public FilterStateChange(Map<String, Set<FilterModel>> contextFilters) {
+	public FilterStateChange(Map<String, TreeSet<FilterModel>> contextFilters) {
 		super(OpCode.NONE);
 		this.contextFilters = contextFilters;
 	}
 
-	public Map<String, Set<FilterModel>> getContextFilters() {
+	public Map<String, TreeSet<FilterModel>> getContextFilters() {
 		return contextFilters;
 	}
 

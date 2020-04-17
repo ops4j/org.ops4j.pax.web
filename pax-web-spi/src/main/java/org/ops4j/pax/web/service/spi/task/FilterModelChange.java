@@ -15,34 +15,34 @@
  */
 package org.ops4j.pax.web.service.spi.task;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.ops4j.pax.web.service.spi.model.ServerModel;
-import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 
 public class FilterModelChange extends Change {
 
 	private final ServerModel serverModel;
-	private final ServiceModel serviceModel;
-	private final FilterModel filterModel;
-	private final boolean disabled;
-
-	public FilterModelChange(OpCode op, ServiceModel serviceModel, FilterModel filterModel) {
-		super(op);
-		this.serverModel = null;
-		this.serviceModel = serviceModel;
-		this.filterModel = filterModel;
-		this.disabled = false;
-	}
+	private FilterModel filterModel;
+	private final List<FilterModel> filterModels = new LinkedList<>();
+	private boolean disabled;
 
 	public FilterModelChange(OpCode op, ServerModel serverModel, FilterModel filterModel) {
 		this(op, serverModel, filterModel, false);
 	}
 
+	public FilterModelChange(OpCode op, ServerModel serverModel, List<FilterModel> filterModels) {
+		super(op);
+		this.serverModel = serverModel;
+		this.filterModels.addAll(filterModels);
+	}
+
 	public FilterModelChange(OpCode op, ServerModel serverModel, FilterModel filterModel, boolean disabled) {
 		super(op);
 		this.serverModel = serverModel;
-		this.serviceModel = null;
 		this.filterModel = filterModel;
+		this.filterModels.add(filterModel);
 		this.disabled = disabled;
 	}
 
@@ -50,12 +50,12 @@ public class FilterModelChange extends Change {
 		return serverModel;
 	}
 
-	public ServiceModel getServiceModel() {
-		return serviceModel;
-	}
-
 	public FilterModel getFilterModel() {
 		return filterModel;
+	}
+
+	public List<FilterModel> getFilterModels() {
+		return filterModels;
 	}
 
 	public boolean isDisabled() {

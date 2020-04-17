@@ -302,6 +302,13 @@ public class ServletModel extends ElementModel<Servlet> {
 		private int rank;
 		private long serviceId;
 
+		public Builder() {
+		}
+
+		public Builder(String servletName) {
+			this.servletName = servletName;
+		}
+
 		public Builder withAlias(String alias) {
 			this.alias = alias;
 			return this;
@@ -348,6 +355,12 @@ public class ServletModel extends ElementModel<Servlet> {
 		}
 
 		public Builder withServletReference(ServiceReference<? extends Servlet> reference) {
+			this.reference = reference;
+			return this;
+		}
+
+		public Builder withServletReference(Bundle bundle, ServiceReference<? extends Servlet> reference) {
+			this.bundle = bundle;
 			this.reference = reference;
 			return this;
 		}

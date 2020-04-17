@@ -26,7 +26,10 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpFilter;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -95,7 +98,7 @@ public class Utils {
 		}
 	}
 
-	public static String get(int port, String request, String ... headers) throws IOException {
+	public static String httpGET(int port, String request, String ... headers) throws IOException {
 		Socket s = new Socket();
 		s.connect(new InetSocketAddress("127.0.0.1", port));
 
@@ -127,7 +130,7 @@ public class Utils {
 	 * @return
 	 * @throws IOException
 	 */
-	public static String gets(int port, String request, String ... headers) throws Exception {
+	public static String httpsGET(int port, String request, String ... headers) throws Exception {
 		// Trust standard CA and those trusted by our custom strategy
 		final SSLContext sslcontext = SSLContexts.custom()
 				.loadTrustMaterial((chain, authType) -> {
@@ -238,12 +241,46 @@ public class Utils {
 
 		@Override
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-			resp.getWriter().print("my.id=" + id);
+			resp.getWriter().write(this.toString());
 		}
 
 		@Override
 		public String toString() {
 			return "S(" + id + ")";
+		}
+	}
+
+	public static class MyIdFilter extends HttpFilter {
+
+		private final String id;
+
+		public MyIdFilter(String id) {
+			this.id = id;
+		}
+
+		@Override
+		public void init() {
+			LOG.info("Filter {} ({}) initialized in {}", this, System.identityHashCode(this), getServletContext().getContextPath());
+		}
+
+		@Override
+		public void destroy() {
+			LOG.info("Filter {} ({}) destroyed in {}", this, System.identityHashCode(this), getServletContext().getContextPath());
+		}
+
+		@Override
+		protected void doFilter(HttpServletRequest req, HttpServletResponse resp, FilterChain chain) throws IOException, ServletException {
+			resp.setStatus(HttpServletResponse.SC_OK);
+			resp.getWriter().write(">" + this);
+			if (!id.equals(req.getParameter("terminate"))) {
+				chain.doFilter(req, resp);
+			}
+			resp.getWriter().write("<" + this);
+		}
+
+		@Override
+		public String toString() {
+			return "F(" + id + ")";
 		}
 	}
 

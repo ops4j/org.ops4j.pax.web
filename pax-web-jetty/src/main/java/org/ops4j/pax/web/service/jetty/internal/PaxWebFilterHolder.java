@@ -64,6 +64,15 @@ public class PaxWebFilterHolder extends FilterHolder {
 		setAsyncSupported(filterModel.getAsyncSupported() != null && filterModel.getAsyncSupported());
 	}
 
+	@Override
+	public void doStart() throws Exception {
+		if (filterReference != null) {
+			setHeldClass(Filter.class);
+		}
+
+		super.doStart();
+	}
+
 	/**
 	 * Method called by {@code org.eclipse.jetty.servlet.FilterHolder#initialize()} - single place where {@link Filter}
 	 * instance can be created. This is where we can get the filter from OSGi service registry.

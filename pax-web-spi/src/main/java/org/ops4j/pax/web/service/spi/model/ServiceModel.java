@@ -168,12 +168,24 @@ public class ServiceModel implements BatchVisitor {
 
 	@Override
 	public void visit(FilterModelChange change) {
-		FilterModel model = change.getFilterModel();
-
 		if (change.getKind() == OpCode.ADD) {
+			FilterModel model = change.getFilterModel();
+
 			// apply the change at ServiceModel level - whether it's disabled or not
 			filterModels.add(model);
 			// the change should also be processed at serverModel level
+			serverModel.visit(change);
+			return;
+		}
+
+		if (change.getKind() == OpCode.DELETE) {
+			List<FilterModel> modelsToRemove = change.getFilterModels();
+
+			// apply the change at ServiceModel level - whether it's disabled or not
+			for (FilterModel model : modelsToRemove) {
+				this.filterModels.remove(model);
+			}
+			// the change should be processed at serverModel level as well
 			serverModel.visit(change);
 			return;
 		}
@@ -185,7 +197,7 @@ public class ServiceModel implements BatchVisitor {
 
 	@Override
 	public void visit(FilterStateChange change) {
-		// no op here
+		// no op here. At model level (unlike in server controller level), filters are added/removed individually
 	}
 
 

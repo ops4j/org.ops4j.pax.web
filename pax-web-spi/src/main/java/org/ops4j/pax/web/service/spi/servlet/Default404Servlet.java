@@ -25,7 +25,9 @@ public class Default404Servlet extends HttpServlet {
 
 	@Override
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+		if (!resp.isCommitted()) {
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+		}
 	}
 
 }

@@ -244,7 +244,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		}
 
 		// fallback case - mostly in tests cases
-		return getId().compareTo(o.getId());
+		return this.getNumericId() - o.getNumericId();
 	}
 
 

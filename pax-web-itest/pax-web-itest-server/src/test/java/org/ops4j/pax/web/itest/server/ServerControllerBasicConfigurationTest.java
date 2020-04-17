@@ -16,53 +16,25 @@
 package org.ops4j.pax.web.itest.server;
 
 import java.io.File;
-import java.net.ServerSocket;
-import java.util.Arrays;
-import java.util.Collection;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
 import org.ops4j.pax.web.itest.server.support.SSLUtils;
 import org.ops4j.pax.web.itest.server.support.Utils;
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.spi.ServerController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.ops4j.pax.web.itest.server.support.Utils.get;
-import static org.ops4j.pax.web.itest.server.support.Utils.gets;
+import static org.ops4j.pax.web.itest.server.support.Utils.httpGET;
+import static org.ops4j.pax.web.itest.server.support.Utils.httpsGET;
 
+/**
+ * These tests show how to configure target runtime through {@link ServerController} interface.
+ */
 @RunWith(Parameterized.class)
-public class ServerControllerBasicConfigurationTest {
-
-	public static Logger LOG = LoggerFactory.getLogger(ServerControllerBasicConfigurationTest.class);
-
-	private int port;
-
-	@Parameter
-	public Runtime runtime;
-
-	@Parameters(name = "{0}")
-	public static Collection<Object[]> data() {
-		return Arrays.asList(new Object[][] {
-				{ Runtime.JETTY },
-				{ Runtime.TOMCAT },
-				{ Runtime.UNDERTOW }
-		});
-	}
-
-	@Before
-	public void init() throws Exception {
-		ServerSocket serverSocket = new ServerSocket(0);
-		port = serverSocket.getLocalPort();
-		serverSocket.close();
-	}
+public class ServerControllerBasicConfigurationTest extends MultiContainerTestSupport {
 
 	@Test
 	public void justInstantiateWithoutOsgi() throws Exception {
@@ -82,7 +54,7 @@ public class ServerControllerBasicConfigurationTest {
 		controller.configure();
 		controller.start();
 
-		assertThat(get(port, "/"), containsString("HTTP/1.1 404"));
+		assertThat(httpGET(port, "/"), containsString("HTTP/1.1 404"));
 
 		controller.stop();
 	}
@@ -269,7 +241,7 @@ public class ServerControllerBasicConfigurationTest {
 		 * Content-Length: 352
 		 */
 
-		assertThat(gets(port, "/"), containsString("HTTP/1.1 404"));
+		assertThat(httpsGET(port, "/"), containsString("HTTP/1.1 404"));
 
 		controller.stop();
 	}

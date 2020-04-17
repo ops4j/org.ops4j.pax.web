@@ -48,7 +48,7 @@ public class PaxWebServletHolder extends ServletHolder {
 
 	private ServletMapping mapping;
 
-	private ServiceReference<? extends Servlet> serviceReference;
+	private ServiceReference<? extends Servlet> filterReference;
 
 	/** This {@link ServletContext} is scoped to single {@link org.osgi.service.http.context.ServletContextHelper} */
 	private final OsgiServletContext osgiServletContext;
@@ -100,7 +100,7 @@ public class PaxWebServletHolder extends ServletHolder {
 		} else if (servletModel.getServlet() != null) {
 			setServlet(servletModel.getServlet());
 		} else {
-			this.serviceReference = servletModel.getElementReference();
+			this.filterReference = servletModel.getElementReference();
 		}
 
 		setInitParameters(servletModel.getInitParams());
@@ -128,7 +128,7 @@ public class PaxWebServletHolder extends ServletHolder {
 
 	@Override
 	public void doStart() throws Exception {
-		if (serviceReference != null) {
+		if (filterReference != null) {
 			// Jetty's ServletHolder needs a servlet class to do some verification. We have to provide it if
 			// using ServiceReference<Servlet>. Fortunately this satisfies Jetty.
 			setHeldClass(Servlet.class);

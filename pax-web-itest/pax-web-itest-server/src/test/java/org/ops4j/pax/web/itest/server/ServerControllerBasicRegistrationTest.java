@@ -18,10 +18,8 @@ package org.ops4j.pax.web.itest.server;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.ServerSocket;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -41,12 +39,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
 import org.ops4j.pax.web.itest.server.support.Utils;
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.WebContainer;
@@ -66,8 +61,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.HttpContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -76,33 +69,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.ops4j.pax.web.itest.server.support.Utils.get;
+import static org.ops4j.pax.web.itest.server.support.Utils.httpGET;
 
+/**
+ * These tests show basic usage for servlet and filter registration through {@link WebContainer} interface.
+ */
 @RunWith(Parameterized.class)
-public class ServerControllerBasicRegistrationTest {
-
-	public static Logger LOG = LoggerFactory.getLogger(ServerControllerBasicRegistrationTest.class);
-
-	private int port;
-
-	@Parameter
-	public Runtime runtime;
-
-	@Parameters(name = "{0}")
-	public static Collection<Object[]> data() {
-		return Arrays.asList(new Object[][] {
-				{ Runtime.JETTY },
-				{ Runtime.TOMCAT },
-				{ Runtime.UNDERTOW }
-		});
-	}
-
-	@Before
-	public void init() throws Exception {
-		ServerSocket serverSocket = new ServerSocket(0);
-		port = serverSocket.getLocalPort();
-		serverSocket.close();
-	}
+public class ServerControllerBasicRegistrationTest extends MultiContainerTestSupport {
 
 	@Test
 	public void registerSingleServletUsingExplicitBatch() throws Exception {
@@ -198,10 +171,10 @@ public class ServerControllerBasicRegistrationTest {
 
 		controller.sendBatch(batch);
 
-		String response = get(port, "/c/s/1/registerSingleServletUsingExplicitBatch", "Let-Me-In: true");
+		String response = httpGET(port, "/c/s/1/registerSingleServletUsingExplicitBatch", "Let-Me-In: true");
 		assertTrue(response.endsWith("file:/something"));
 
-		response = get(port, "/c/s/1/registerSingleServletUsingExplicitBatch");
+		response = httpGET(port, "/c/s/1/registerSingleServletUsingExplicitBatch");
 		assertTrue(response.contains("HTTP/1.1 403"));
 
 		controller.stop();
@@ -283,10 +256,10 @@ public class ServerControllerBasicRegistrationTest {
 
 		wc.registerServlet(servlet, "my-servlet", new String[] { "/s/*" }, initParams, context);
 
-		String response = get(port, "/s/1?t=registerSingleServletUsingWebContainer", "Let-Me-In: true");
+		String response = httpGET(port, "/s/1?t=registerSingleServletUsingWebContainer", "Let-Me-In: true");
 		assertTrue(response.endsWith("file:/something"));
 
-		response = get(port, "/s/1?t=registerSingleServletUsingWebContainer");
+		response = httpGET(port, "/s/1?t=registerSingleServletUsingWebContainer");
 		assertTrue(response.contains("HTTP/1.1 403"));
 
 		controller.stop();
@@ -369,8 +342,8 @@ public class ServerControllerBasicRegistrationTest {
 				.withRegisteringBundle(bundle)
 				.build());
 
-		Map<String, Set<FilterModel>> filters = new HashMap<>();
-		Set<FilterModel> set = new TreeSet<>();
+		Map<String, TreeSet<FilterModel>> filters = new HashMap<>();
+		TreeSet<FilterModel> set = new TreeSet<>();
 		// this filter is NOT registered to osgiContextC2, so should NOT be mapped to /c/s2/*
 		set.add(new FilterModel.Builder()
 				.withFilterName("my-filter")
@@ -388,22 +361,22 @@ public class ServerControllerBasicRegistrationTest {
 
 		// filter -> servlet
 		String response;
-		response = get(port, "/c/s/1?t=registerFilterAndServletUsingExcplicitBatch");
+		response = httpGET(port, "/c/s/1?t=registerFilterAndServletUsingExcplicitBatch");
 		System.out.println(response);
 		assertTrue(response.contains("my-filter1my-servlet1[/c]my-filter2"));
 
 		// just one filter in the chain, without target servlet
-		response = get(port, "/d/s/1?t=registerFilterAndServletUsingExcplicitBatch");
+		response = httpGET(port, "/d/s/1?t=registerFilterAndServletUsingExcplicitBatch");
 		System.out.println(response);
 		assertTrue(response.contains("my-filter1my-filter2"));
 
 		// just servlet, because /* filter doesn't use my-servlet2's ServletContextHelper
-		response = get(port, "/c/s2/1?t=registerFilterAndServletUsingExcplicitBatch");
+		response = httpGET(port, "/c/s2/1?t=registerFilterAndServletUsingExcplicitBatch");
 		System.out.println(response);
 		assertTrue(response.contains("\r\nmy-servlet2[/c]"));
 
 		// just servlet, because /* filter isn't associated with OsgiContext for /e
-		response = get(port, "/e/s/1?t=registerFilterAndServletUsingExcplicitBatch");
+		response = httpGET(port, "/e/s/1?t=registerFilterAndServletUsingExcplicitBatch");
 		System.out.println(response);
 		assertTrue(response.contains("\r\nmy-servlet1[/e]"));
 
@@ -502,22 +475,22 @@ public class ServerControllerBasicRegistrationTest {
 
 		// filter -> servlet
 		String response;
-		response = get(port, "/c/s/1");
+		response = httpGET(port, "/c/s/1");
 		System.out.println(response);
 		assertTrue(response.contains("my-filter1my-servlet1[/c]my-filter2"));
 
 		// just one filter in the chain, without target servlet
-		response = get(port, "/d/s/1");
+		response = httpGET(port, "/d/s/1");
 		System.out.println(response);
 		assertTrue(response.contains("my-filter1my-filter2"));
 
 		// just servlet, because /* filter doesn't use my-servlet2's ServletContextHelper
-		response = get(port, "/c/s2/1");
+		response = httpGET(port, "/c/s2/1");
 		System.out.println(response);
 		assertTrue(response.contains("\r\nmy-servlet2[/c]"));
 
 		// just servlet, because /* filter isn't associated with OsgiContext for /e
-		response = get(port, "/e/s/1");
+		response = httpGET(port, "/e/s/1");
 		System.out.println(response);
 		assertTrue(response.contains("\r\nmy-servlet1[/e]"));
 
@@ -620,9 +593,9 @@ public class ServerControllerBasicRegistrationTest {
 				.withServiceRankAndId(0, ++serviceId)
 				.build());
 
-		assertThat(get(port, "/c1/s"), endsWith("my.id=1"));
-		assertThat(get(port, "/c2/s"), endsWith("my.id=1"));
-		assertThat(get(port, "/c3/s"), startsWith("HTTP/1.1 404"));
+		assertThat(httpGET(port, "/c1/s"), endsWith("S(1)"));
+		assertThat(httpGET(port, "/c2/s"), endsWith("S(1)"));
+		assertThat(httpGET(port, "/c3/s"), startsWith("HTTP/1.1 404"));
 
 		// servlet#2 registered in /c3 - no conflict
 		wc.doRegisterServlet(Collections.singletonList(wcc3), new ServletModel.Builder()
@@ -632,9 +605,9 @@ public class ServerControllerBasicRegistrationTest {
 				.withServiceRankAndId(3, ++serviceId)
 				.build());
 
-		assertThat(get(port, "/c1/s"), endsWith("my.id=1"));
-		assertThat(get(port, "/c2/s"), endsWith("my.id=1"));
-		assertThat(get(port, "/c3/s"), endsWith("my.id=2"));
+		assertThat(httpGET(port, "/c1/s"), endsWith("S(1)"));
+		assertThat(httpGET(port, "/c2/s"), endsWith("S(1)"));
+		assertThat(httpGET(port, "/c3/s"), endsWith("S(2)"));
 
 		// servlet#3 registered to /c1, but with higher service ID - should be marked as disabled
 		wc.doRegisterServlet(Collections.singletonList(wcc1), new ServletModel.Builder()
@@ -644,9 +617,9 @@ public class ServerControllerBasicRegistrationTest {
 				.withServiceRankAndId(0, ++serviceId)
 				.build());
 
-		assertThat(get(port, "/c1/s"), endsWith("my.id=1"));
-		assertThat(get(port, "/c2/s"), endsWith("my.id=1"));
-		assertThat(get(port, "/c3/s"), endsWith("my.id=2"));
+		assertThat(httpGET(port, "/c1/s"), endsWith("S(1)"));
+		assertThat(httpGET(port, "/c2/s"), endsWith("S(1)"));
+		assertThat(httpGET(port, "/c3/s"), endsWith("S(2)"));
 
 		// servlet#4 registered to /c2 and /c3 - ranked higher than s#1 in /c2, but ranked lower than s#2 in /c3
 		wc.doRegisterServlet(Arrays.asList(wcc2, wcc3), new ServletModel.Builder()
@@ -656,9 +629,9 @@ public class ServerControllerBasicRegistrationTest {
 				.withServiceRankAndId(2, ++serviceId)
 				.build());
 
-		assertThat(get(port, "/c1/s"), endsWith("my.id=1"));
-		assertThat(get(port, "/c2/s"), endsWith("my.id=1"));
-		assertThat(get(port, "/c3/s"), endsWith("my.id=2"));
+		assertThat(httpGET(port, "/c1/s"), endsWith("S(1)"));
+		assertThat(httpGET(port, "/c2/s"), endsWith("S(1)"));
+		assertThat(httpGET(port, "/c3/s"), endsWith("S(2)"));
 
 		// servlet#5 registered to /c2 and /c4 - ranked higher than s#1 in /c2, so:
 		//  - s#1 is deactivated in /c1 and /c2
@@ -673,10 +646,10 @@ public class ServerControllerBasicRegistrationTest {
 				.withServiceRankAndId(1, ++serviceId)
 				.build());
 
-		assertThat(get(port, "/c1/s"), endsWith("my.id=3"));
-		assertThat(get(port, "/c2/s"), endsWith("my.id=5"));
-		assertThat(get(port, "/c3/s"), endsWith("my.id=2"));
-		assertThat(get(port, "/c4/s"), endsWith("my.id=5"));
+		assertThat(httpGET(port, "/c1/s"), endsWith("S(3)"));
+		assertThat(httpGET(port, "/c2/s"), endsWith("S(5)"));
+		assertThat(httpGET(port, "/c3/s"), endsWith("S(2)"));
+		assertThat(httpGET(port, "/c4/s"), endsWith("S(5)"));
 
 		// servlet#6 registered to /c4 - ranked lower than s#5 in /c4, so added as disabled
 		wc.doRegisterServlet(Collections.singletonList(wcc4), new ServletModel.Builder()
@@ -686,10 +659,10 @@ public class ServerControllerBasicRegistrationTest {
 				.withServiceRankAndId(0, ++serviceId)
 				.build());
 
-		assertThat(get(port, "/c1/s"), endsWith("my.id=3"));
-		assertThat(get(port, "/c2/s"), endsWith("my.id=5"));
-		assertThat(get(port, "/c3/s"), endsWith("my.id=2"));
-		assertThat(get(port, "/c4/s"), endsWith("my.id=5"));
+		assertThat(httpGET(port, "/c1/s"), endsWith("S(3)"));
+		assertThat(httpGET(port, "/c2/s"), endsWith("S(5)"));
+		assertThat(httpGET(port, "/c3/s"), endsWith("S(2)"));
+		assertThat(httpGET(port, "/c4/s"), endsWith("S(5)"));
 
 		// servlet#2 unregistered, s#4 can be activated in /c3 and can be activated in /c2 because s#5 in /c2 is ranked
 		// lower than s#4, so s#5 disabled in /c4, so s#6 enabled in /c4
@@ -698,10 +671,10 @@ public class ServerControllerBasicRegistrationTest {
 				.withOsgiContextModel(cm3)
 				.remove());
 
-		assertTrue(get(port, "/c1/s").endsWith("my.id=3"));
-		assertTrue(get(port, "/c2/s").endsWith("my.id=4"));
-		assertTrue(get(port, "/c3/s").endsWith("my.id=4"));
-		assertTrue(get(port, "/c4/s").endsWith("my.id=6"));
+		assertTrue(httpGET(port, "/c1/s").endsWith("S(3)"));
+		assertTrue(httpGET(port, "/c2/s").endsWith("S(4)"));
+		assertTrue(httpGET(port, "/c3/s").endsWith("S(4)"));
+		assertTrue(httpGET(port, "/c4/s").endsWith("S(6)"));
 
 		controller.stop();
 	}

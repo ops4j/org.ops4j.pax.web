@@ -19,29 +19,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.ops4j.pax.web.service.spi.model.ServerModel;
-import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 
 public class ServletModelChange extends Change {
 
-	private ServerModel serverModel;
-	private ServiceModel serviceModel;
+	private final ServerModel serverModel;
 	private ServletModel servletModel;
 	private final List<ServletModel> servletModels = new LinkedList<>();
 	private boolean disabled;
-
-	public ServletModelChange(OpCode op, ServiceModel serviceModel, ServletModel servletModel) {
-		super(op);
-		this.serviceModel = serviceModel;
-		this.servletModel = servletModel;
-		this.servletModels.add(servletModel);
-	}
-
-	public ServletModelChange(OpCode op, ServiceModel serviceModel, List<ServletModel> servletModels) {
-		super(op);
-		this.serviceModel = serviceModel;
-		this.servletModels.addAll(servletModels);
-	}
 
 	public ServletModelChange(OpCode op, ServerModel serverModel, ServletModel servletModel) {
 		this(op, serverModel, servletModel, false);
@@ -63,10 +48,6 @@ public class ServletModelChange extends Change {
 
 	public ServerModel getServerModel() {
 		return serverModel;
-	}
-
-	public ServiceModel getServiceModel() {
-		return serviceModel;
 	}
 
 	public ServletModel getServletModel() {

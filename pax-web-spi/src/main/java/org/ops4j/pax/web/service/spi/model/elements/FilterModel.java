@@ -32,6 +32,7 @@ import org.ops4j.pax.web.service.spi.util.Path;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 
 /**
  * Set of parameters describing everything that's required to register a {@link Filter}.
@@ -45,13 +46,13 @@ public class FilterModel extends ElementModel<Filter> {
 	 *     <li>Servlet API specification</li>
 	 * </ul></p>
 	 */
-	private final String[] urlPatterns;
+	private String[] urlPatterns;
 
 	/** Servlet names for filter mapping. {@code <filter-mapping>/<servlet-name>} */
-	private final String[] servletNames;
+	private String[] servletNames;
 
 	/** Regex mapping from OSGi Whiteboard Service specification. Not available in Servet specification. */
-	private final String[] regexMapping;
+	private String[] regexMapping;
 
 	/** {@link DispatcherType Dispatcher types} for filter mapping. {@code <filter-mapping>/<dispatcher>} */
 	private String[] dispatcherTypes;
@@ -63,10 +64,10 @@ public class FilterModel extends ElementModel<Filter> {
 	 * Init parameters of the filter as specified by {@link FilterConfig#getInitParameterNames()} and
 	 * {@code <filter>/<init-param>} elements in {@code web.xml}.
 	 */
-	private final Map<String, String> initParams;
+	private Map<String, String> initParams;
 
 	/** {@code <filter>/<async-supported>} */
-	private final Boolean asyncSupported;
+	private Boolean asyncSupported;
 
 	/**
 	 * Both Http Service and Whiteboard service allows registration of filters using existing instance.
@@ -80,22 +81,37 @@ public class FilterModel extends ElementModel<Filter> {
 	 */
 	private final Class<? extends Filter> filterClass;
 
+	/**
+	 * Constructor used for filter unregistration
+	 * @param filterName
+	 * @param filter
+	 * @param filterClass
+	 * @param reference
+	 */
+	public FilterModel(String filterName, Filter filter,
+			Class<? extends Filter> filterClass, ServiceReference<? extends Filter> reference) {
+		this.name = filterName;
+		this.filter = filter;
+		this.filterClass = filterClass;
+		this.setElementReference(reference);
+	}
+
 	public FilterModel(String filterName, String[] urlPatterns, String[] servletNames, String[] regexMapping,
 			Filter filter, Dictionary<String, String> initParams, Boolean asyncSupported) {
 		this(urlPatterns, servletNames, regexMapping, null,
-				filterName, Utils.toMap(initParams), asyncSupported, filter, null);
+				filterName, Utils.toMap(initParams), asyncSupported, filter, null, null);
 	}
 
 	public FilterModel(String filterName, String[] urlPatterns, String[] servletNames, String[] regexMapping,
 			Class<? extends Filter> filterClass, Dictionary<String, String> initParams, Boolean asyncSupported) {
 		this(urlPatterns, servletNames, regexMapping, null,
-				filterName, Utils.toMap(initParams), asyncSupported, null, filterClass);
+				filterName, Utils.toMap(initParams), asyncSupported, null, filterClass, null);
 	}
 
 	@SuppressWarnings("deprecation")
 	private FilterModel(String[] urlPatterns, String[] servletNames, String[] regexMapping, String[] dispatcherTypes,
 			String name, Map<String, String> initParams, Boolean asyncSupported, Filter filter,
-			Class<? extends Filter> filterClass) {
+			Class<? extends Filter> filterClass, ServiceReference<? extends Filter> reference) {
 
 		this.urlPatterns = Path.normalizePatterns(urlPatterns);
 		this.servletNames = servletNames != null ? Arrays.copyOf(servletNames, servletNames.length) : null;
@@ -105,6 +121,7 @@ public class FilterModel extends ElementModel<Filter> {
 		this.asyncSupported = asyncSupported;
 		this.filter = filter;
 		this.filterClass = filterClass;
+		setElementReference(reference);
 
 		int sources = 0;
 		sources += (filter != null ? 1 : 0);
@@ -271,8 +288,18 @@ public class FilterModel extends ElementModel<Filter> {
 		private Boolean asyncSupported;
 		private Filter filter;
 		private Class<? extends Filter> filterClass;
+		private ServiceReference<? extends Filter> reference;
 		private final List<OsgiContextModel> list = new LinkedList<>();
 		private Bundle bundle;
+		private int rank;
+		private long serviceId;
+
+		public Builder() {
+		}
+
+		public Builder(String filterName) {
+			this.filterName = filterName;
+		}
 
 		public FilterModel.Builder withUrlPatterns(String[] urlPatterns) {
 			this.urlPatterns = urlPatterns;
@@ -319,6 +346,17 @@ public class FilterModel extends ElementModel<Filter> {
 			return this;
 		}
 
+		public FilterModel.Builder withFilterReference(ServiceReference<? extends Filter> reference) {
+			this.reference = reference;
+			return this;
+		}
+
+		public FilterModel.Builder withFilterReference(Bundle bundle, ServiceReference<? extends Filter> reference) {
+			this.bundle = bundle;
+			this.reference = reference;
+			return this;
+		}
+
 		public FilterModel.Builder withOsgiContextModel(OsgiContextModel osgiContextModel) {
 			this.list.add(osgiContextModel);
 			return this;
@@ -329,11 +367,29 @@ public class FilterModel extends ElementModel<Filter> {
 			return this;
 		}
 
+		public FilterModel.Builder withServiceRankAndId(int rank, long id) {
+			this.rank = rank;
+			this.serviceId = id;
+			return this;
+		}
+
 		public FilterModel build() {
 			FilterModel model = new FilterModel(urlPatterns, servletNames, regexMapping, dispatcherTypes,
-					filterName, initParams, asyncSupported, filter, filterClass);
+					filterName, initParams, asyncSupported, filter, filterClass, reference);
 			list.forEach(model::addContextModel);
 			model.setRegisteringBundle(this.bundle);
+			model.setServiceRank(this.rank);
+			model.setServiceId(this.serviceId);
+			return model;
+		}
+
+		/**
+		 * Special builder finishing method to prepare {@link FilterModel} for removal (with disabled validation)
+		 * @return
+		 */
+		public FilterModel remove() {
+			FilterModel model = new FilterModel(filterName, filter, filterClass, reference);
+			list.forEach(model::addContextModel);
 			return model;
 		}
 	}

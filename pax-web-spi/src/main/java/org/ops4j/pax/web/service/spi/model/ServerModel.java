@@ -564,6 +564,7 @@ public class ServerModel {
 		// conflicting servlet name
 		Map<ServletContextModel, ServletModel> contextsWithNameConflicts = new HashMap<>();
 		for (ServletContextModel sc : targetServletContexts) {
+			// don't check ranking here - name conflict data is prepared for Http Service (alias) scenario
 			if (sc.getServletNameMapping().containsKey(model.getName())) {
 				contextsWithNameConflicts.put(sc, sc.getServletNameMapping().get(model.getName()));
 			}
@@ -678,8 +679,7 @@ public class ServerModel {
 		}
 
 		// only after disabling lower ranked models we can check the name conflicts, because servlet
-		// with conflicting name inside a context may have just been disabled
-		// exception thrown for the first conflict
+		// with conflicting name inside a context may have just been disabled.
 		if (!contextsWithNameConflicts.isEmpty()) {
 			LOG.warn("Skipped registration of {} because of existing mappings with name {}."
 					+ " Servlet will be added as \"awaiting registration\".", model, model.getName());
@@ -701,10 +701,10 @@ public class ServerModel {
 		// each disabled servletModel may be a reason to enable other models. Currently disabled
 		// ServerModels (+ our new model) may be enabled ONLY if they can be enabled in ALL associated contexts
 
-		final Map<String, Map<String, ServletModel>> currentlyEnabledByName = new HashMap<>();
-		final Map<String, Map<String, ServletModel>> currentlyEnabledByPattern = new HashMap<>();
+		Map<String, Map<String, ServletModel>> currentlyEnabledByName = new HashMap<>();
+		Map<String, Map<String, ServletModel>> currentlyEnabledByPattern = new HashMap<>();
 		Set<ServletModel> currentlyDisabled = new TreeSet<>();
-		prepareSnapshot(currentlyEnabledByName, currentlyEnabledByPattern, currentlyDisabled,
+		prepareServletsSnapshot(currentlyEnabledByName, currentlyEnabledByPattern, currentlyDisabled,
 				model, newlyDisabled);
 
 		reEnableServletModels(currentlyDisabled, currentlyEnabledByName, currentlyEnabledByPattern, model, batch);
@@ -725,9 +725,9 @@ public class ServerModel {
 	 */
 	public void removeServletModels(List<ServletModel> models, Batch batch) {
 		// each of the servlet models that we're unregistering may be registered in many servlet contexts
-		// and in each of them, such unregistration may lead to reactivation of some existing, currently disabled
-		// servlet models - similar situation to servlet registration that may disable some models which in turn
-		// may lead to re-registration of other models
+		// and in each of those contexts, such unregistration may lead to reactivation of some existing, currently
+		// disabled servlet models - similar situation to servlet registration, that may disable some models which in
+		// turn may lead to re-registration of other models
 
 		// this is straightforward
 		batch.removeServletModels(this, models);
@@ -735,7 +735,7 @@ public class ServerModel {
 		Map<String, Map<String, ServletModel>> currentlyEnabledByName = new HashMap<>();
 		Map<String, Map<String, ServletModel>> currentlyEnabledByPattern = new HashMap<>();
 		Set<ServletModel> currentlyDisabled = new TreeSet<>();
-		prepareSnapshot(currentlyEnabledByName, currentlyEnabledByPattern, currentlyDisabled,
+		prepareServletsSnapshot(currentlyEnabledByName, currentlyEnabledByPattern, currentlyDisabled,
 				null, new HashSet<>(models));
 
 		// review all disabled servlet models (in ranking order) to verify if they can be enabled again
@@ -743,7 +743,7 @@ public class ServerModel {
 	}
 
 	/**
-	 * Preparation for {@link #reEnableServletModels(Set, Set, Map, Map, ServletModel, Batch)} that does
+	 * Preparation for {@link #reEnableServletModels(Set, Map, Map, ServletModel, Batch)} that does
 	 * proper copy of current state of all {@link ServletContextModel}
 	 *
 	 * @param currentlyEnabledByName
@@ -753,14 +753,14 @@ public class ServerModel {
 	 *        (to enable it potentially)
 	 * @param newlyDisabled prepared snapshot will already have newlyDisabled models removed from snapshot mappings
 	 */
-	private void prepareSnapshot(Map<String, Map<String, ServletModel>> currentlyEnabledByName,
+	private void prepareServletsSnapshot(Map<String, Map<String, ServletModel>> currentlyEnabledByName,
 			Map<String, Map<String, ServletModel>> currentlyEnabledByPattern,
 			Set<ServletModel> currentlyDisabled,
 			ServletModel newlyAdded, Set<ServletModel> newlyDisabled) {
 
-		servletContexts.values().forEach(scm -> {
-			currentlyDisabled.addAll(disabledServletModels);
+		currentlyDisabled.addAll(disabledServletModels);
 
+		servletContexts.values().forEach(scm -> {
 			String path = scm.getContextPath();
 			// deep copies
 			HashMap<String, ServletModel> enabledByName = new HashMap<>(scm.getServletNameMapping());
@@ -783,7 +783,8 @@ public class ServerModel {
 			}
 		});
 
-		// newlyAdded is only "offered" to be registered as active
+		// newlyAdded is for now only "offered" to be registered as active, because if new model causes
+		// disabling of existing model, other (disabled) model may be better than the newly registered one
 		if (newlyAdded != null) {
 			currentlyDisabled.add(newlyAdded);
 		}
@@ -802,7 +803,8 @@ public class ServerModel {
 	 * @param currentlyEnabledByName temporary state of by-name servlets - may be altered during invocation
 	 * @param currentlyEnabledByPattern temporary state of by-URL-pattern servlets - may be altered during invocation
 	 * @param modelToEnable newly added model (could be {@code null}) - needed because when adding new servlet, it
-	 *        is initialy treated as disabled. We have to decide then whether to enable existing model or add a new one
+	 *        is initialy treated as disabled. We have to decide then whether to enable existing model or add
+	 *        this new one
 	 * @param batch this {@link Batch} will collect avalanche of possible disable/enable operations
 	 */
 	private void reEnableServletModels(Set<ServletModel> currentlyDisabled,
@@ -835,7 +837,7 @@ public class ServerModel {
 				// name conflict check
 				for (Map.Entry<String, ServletModel> entry : currentlyEnabledByName.get(cp).entrySet()) {
 					ServletModel enabled = entry.getValue();
-					boolean nameConflict = hasAnyNameConflict(disabled.getName(), enabled.getName(), disabled, enabled);
+					boolean nameConflict = haveAnyNameConflict(disabled.getName(), enabled.getName(), disabled, enabled);
 					if (nameConflict) {
 						// name conflict with existing, enabled model. BUT currently disabled model may have
 						// higher ranking...
@@ -950,14 +952,18 @@ public class ServerModel {
 		// by the new model
 
 		boolean register = true;
-		Set<FilterModel> modelsToDisable = new LinkedHashSet<>();
+		Set<FilterModel> newlyDisabled = new HashSet<>();
 
+		// in servlet case, name conflict resolution is done in 2 phases, because existing servlet that causes
+		// a conflict may stop doing so because it may be lower ranked wrt URL mapping
+		// with filters we can quickly determine the name conflict and potentially know which existing (currently
+		// enabled) servlets to disable
 		for (ServletContextModel sc : targetServletContexts) {
 			FilterModel existing = sc.getFilterNameMapping().get(model.getName());
 			if (existing != null) {
 				if (model.compareTo(existing) < 0) {
 					// new model wins the name conflict.
-					modelsToDisable.add(existing);
+					newlyDisabled.add(existing);
 				} else {
 					LOG.warn("{} can't be registered now in context {}. Name conflict with {}.",
 							model, sc.getContextPath(), existing);
@@ -977,7 +983,7 @@ public class ServerModel {
 			return;
 		}
 
-		// by adding new FilterModel we can disable and enable some existing ones, because such scenario is realistic:
+		// by adding new FilterModel we can disable and enable some existing ones. Imagine this scenario:
 		// - context /c1
 		//    - filter f1(a) with rank 5
 		// - context /c2
@@ -1010,75 +1016,180 @@ public class ServerModel {
 		// individual operations (disable, enable) are fine from ServerModel perspective, but we need special
 		// operation (all-at-once) to be sent to ServerController
 
-		// this map will contain ALL filters registered per context path - including currently enabled, newly
-		// registered and newly enabled. When set is TreeSet, ordering will be correct
-		Map<String, Set<FilterModel>> contextFilters = new HashMap<>();
-
-		for (ServletContextModel sc : targetServletContexts) {
-			// 1. newly registered
-			contextFilters.computeIfAbsent(sc.getContextPath(), path -> new TreeSet<>()).add(model);
-
-			// 2. currently enabled - only if not disabled during addition of new filter model
-			sc.getFilterNameMapping().values().forEach(filter -> {
-				if (!modelsToDisable.contains(filter)) {
-					contextFilters.get(sc.getContextPath()).add(filter);
-				}
-			});
-		}
-
-		batch.addFilterModel(this, model);
-
-		for (FilterModel existing : modelsToDisable) {
+		// first - each newly disabled FilterModel should be added to batch as disabled - for the purpose of
+		// model altering. Actual server will get list of the filters in one operation
+		for (FilterModel existing : newlyDisabled) {
 			// disable it even if it can stay active in some other context(s), not targeted by newly registered filter
 			batch.disableFilterModel(this, existing);
-
-			// if a filter is being disabled, it's disabled in all its contexts. This means that some OTHER
-			// contexts (not targeted by newly registered filter) may need a change in filter configuration
-			existing.getServletContextModels().forEach(scm -> {
-				if (!contextFilters.containsKey(scm.getContextPath())) {
-					final TreeSet<FilterModel> set = new TreeSet<>();
-					scm.getFilterNameMapping().values().forEach(f -> {
-						if (!modelsToDisable.contains(f)) {
-							set.add(f);
-						}
-					});
-					contextFilters.put(scm.getContextPath(), set);
-				}
-			});
 		}
 
-		// 3. checking if some currently disabled filters may be enabled
-		if (!modelsToDisable.isEmpty()) {
-			for (FilterModel disabled : disabledFilterModels) {
-				Set<ServletContextModel> contextsOfCurrentlyDisabledFilter = disabled.getServletContextModels();
+		// and also if we haven't disabled anything, new model will definitely be added as enabled - but it's NOT
+		// the end of processing in case of filters
+		if (newlyDisabled.isEmpty()) {
+			batch.addFilterModel(this, model);
+			// no return here! (unlike in case of servlets)
+		}
 
-				boolean canBeEnabled = !hasAnyNameConflict(disabled.getName(), model.getName(), disabled, model);
-				if (!canBeEnabled) {
-					continue;
-				}
+		// this map will contain ALL filters registered per context path - including currently enabled, newly
+		// registered and newly enabled. When set is TreeSet, ordering will be correct
+		Map<String, TreeSet<FilterModel>> currentlyEnabledByName = new HashMap<>();
+		Set<FilterModel> currentlyDisabled = new TreeSet<>();
+		prepareFiltersSnapshot(currentlyEnabledByName, currentlyDisabled, model, newlyDisabled);
 
-				// no name conflict with filter currently being registered. check name conflicts with
-				// currently enabled filters in all contexts
-				for (ServletContextModel sc : contextsOfCurrentlyDisabledFilter) {
-					FilterModel existingMapping = sc.getFilterNameMapping().get(disabled.getName());
-					if (existingMapping != null && !modelsToDisable.contains(existingMapping)) {
-						canBeEnabled = false;
-					}
-				}
-
-				// disabled model can be enabled again, because its name doesn't conflict with any enabled models
-				if (canBeEnabled) {
-					batch.enableFilterModel(this, disabled);
-					disabled.getServletContextModels().forEach(scm -> {
-						// TOCHECK: all servlets contexts of this filter model should be available in contextFilters
-						contextFilters.get(scm.getContextPath()).add(disabled);
-					});
-				}
-			} // end of "for" loop that checks disabled models that can potentially be enabled
-		} // end of "if" that checks what can be done after some models were disabled
+		reEnableFilterModels(currentlyDisabled, currentlyEnabledByName, model, batch);
 
 		// finally - full set of filter state changes in all affected servlet contexts
-		batch.updateFilters(contextFilters);
+		batch.updateFilters(currentlyEnabledByName);
+	}
+
+	public void removeFilterModels(List<FilterModel> models, Batch batch) {
+
+		// this is straightforward
+		batch.removeFilterModels(this, models);
+
+		Map<String, TreeSet<FilterModel>> currentlyEnabledByName = new HashMap<>();
+		Set<FilterModel> currentlyDisabled = new TreeSet<>();
+		prepareFiltersSnapshot(currentlyEnabledByName, currentlyDisabled, null, new HashSet<>(models));
+
+		// review all disabled filter models (in ranking order) to verify if they can be enabled again
+		reEnableFilterModels(currentlyDisabled, currentlyEnabledByName, null, batch);
+
+		// finally - full set of filter state changes in all affected servlet contexts
+		batch.updateFilters(currentlyEnabledByName);
+	}
+
+	/**
+	 * Preparation for {@link #reEnableFilterModels(Set, Map, FilterModel, Batch)} that does
+	 * proper copy of current state of all {@link ServletContextModel}
+	 *
+	 * @param currentlyEnabledByName
+	 * @param currentlyDisabled
+	 * @param newlyAdded prepared snapshot will include newly added model as currentlyDisabled
+	 *        (to enable it potentially)
+	 * @param newlyDisabled prepared snapshot will already have newlyDisabled models removed from snapshot mappings
+	 */
+	private void prepareFiltersSnapshot(Map<String, TreeSet<FilterModel>> currentlyEnabledByName,
+			Set<FilterModel> currentlyDisabled,
+			FilterModel newlyAdded, Set<FilterModel> newlyDisabled) {
+
+		currentlyDisabled.addAll(disabledFilterModels);
+
+		servletContexts.values().forEach(scm -> {
+			String path = scm.getContextPath();
+			// deep copies
+			TreeSet<FilterModel> enabledFilters = new TreeSet<>(scm.getFilterNameMapping().values());
+			currentlyEnabledByName.put(path, enabledFilters);
+
+			// newlyDisabled are scheduled for disabling (in batch), so let's remove them from the snapshot
+			if (newlyDisabled != null) {
+				newlyDisabled.forEach(fm -> {
+					fm.getServletContextModels().forEach(scm2 -> {
+						if (scm.equals(scm2)) {
+							enabledFilters.remove(fm);
+						}
+					});
+				});
+			}
+		});
+
+		// newlyAdded is for now only "offered" to be registered as active, because if new model causes
+		// disabling of existing model, other (disabled) model may be better than the newly registered one
+		if (newlyAdded != null) {
+			currentlyDisabled.add(newlyAdded);
+		}
+	}
+
+	/**
+	 * <p>Fragile method used both during filter registration and unregistration. Similar to (and simpler than)
+	 * equivalent method for servlets.</p>
+	 *
+	 * <p>This method has to be provided with current snapshot of all disabled and registered filters and will
+	 * be called recursively because every "woken up" model may lead to disabling of other models, which again
+	 * may enable other models and so on...</p>
+	 *
+	 * @param currentlyDisabled currently disabled models - this collection may be shrunk in this method. Every
+	 *        model removed from this collection will be batched for enabling
+	 * @param currentlyEnabledByName temporary state of by-name filters - may be altered during invocation
+	 * @param modelToEnable newly added model (could be {@code null}) - needed because when adding new filter, it
+	 *        is initialy treated as disabled. We have to decide then whether to enable existing model or add
+	 *        this new one
+	 * @param batch this {@link Batch} will collect avalanche of possible disable/enable operations
+	 */
+	private void reEnableFilterModels(Set<FilterModel> currentlyDisabled,
+			Map<String, TreeSet<FilterModel>> currentlyEnabledByName, FilterModel modelToEnable, Batch batch) {
+
+		Set<FilterModel> newlyDisabled = new LinkedHashSet<>();
+		boolean change = false;
+
+		// reviewed using TreeSet, i.e., by proper ranking
+		for (Iterator<FilterModel> iterator = currentlyDisabled.iterator(); iterator.hasNext(); ) {
+			// this is the highest ranked, currently disabled filter model
+			FilterModel disabled = iterator.next();
+			boolean canBeEnabled = true;
+			newlyDisabled.clear();
+
+			Set<ServletContextModel> contextsOfDisabledModel = disabled.getServletContextModels();
+
+			for (ServletContextModel sc : contextsOfDisabledModel) {
+				String cp = sc.getContextPath();
+
+				// name conflict check
+				for (FilterModel enabled : currentlyEnabledByName.get(cp)) {
+					boolean nameConflict = haveAnyNameConflict(disabled.getName(), enabled.getName(), disabled, enabled);
+					if (nameConflict) {
+						// name conflict with existing, enabled model. BUT currently disabled model may have
+						// higher ranking...
+						if (disabled.compareTo(enabled) < 0) {
+							// still can be enabled (but we have to check everything) and currently disabled
+							// may potentially get disabled
+							newlyDisabled.add(enabled);
+						} else {
+							canBeEnabled = false;
+							break;
+						}
+					}
+				}
+				if (!canBeEnabled) {
+					break;
+				}
+			} // end of check for the conflicts in all the contexts
+
+			// disabled model can be enabled again - in all its contexts
+			if (canBeEnabled) {
+				newlyDisabled.forEach(model -> {
+					// disable the one that have lost
+					batch.disableFilterModel(ServerModel.this, model);
+
+					// and forget about it in the snapshot
+					model.getServletContextModels().forEach(scm -> {
+						currentlyEnabledByName.get(scm.getContextPath()).remove(model);
+					});
+
+					// do NOT add newlyDisabled to "currentlyDisabled" - we don't want to check if they can be enabled!
+				});
+
+				// update the snapshot - newly enabled model should be visible as the one registered
+				for (ServletContextModel sc : contextsOfDisabledModel) {
+					currentlyEnabledByName.get(sc.getContextPath()).add(disabled);
+				}
+				if (modelToEnable != null && modelToEnable.equals(disabled)) {
+					batch.addFilterModel(this, disabled);
+				} else {
+					batch.enableFilterModel(this, disabled);
+				}
+				// remove - to check if our new model should later be added as disabled
+				iterator.remove();
+				change = true;
+			}
+			if (change) {
+				// exit the loop (leaving some currently disabled models not checked) and get ready for recursion
+				break;
+			}
+		} // end of "for" loop that checks all currently disabled models that can potentially be enabled
+
+		if (change) {
+			reEnableFilterModels(currentlyDisabled, currentlyEnabledByName, modelToEnable, batch);
+		}
 	}
 
 	/**
@@ -1094,7 +1205,7 @@ public class ServerModel {
 	 * @param <T>
 	 * @return
 	 */
-	private <T> boolean hasAnyNameConflict(String name1, String name2, ElementModel<T> model1, ElementModel<T> model2) {
+	private <T> boolean haveAnyNameConflict(String name1, String name2, ElementModel<T> model1, ElementModel<T> model2) {
 		// if one model has name conflict with other model, check whether the conflict
 		// is in disjoint servlet contexts
 		if (name1.equals(name2)) {
@@ -1190,10 +1301,10 @@ public class ServerModel {
 	}
 
 	public void visit(FilterModelChange change) {
-		FilterModel model = change.getFilterModel();
-
 		switch (change.getKind()) {
 			case ADD: {
+				FilterModel model = change.getFilterModel();
+
 				// add new FilterModel to all target contexts
 				Set<ServletContextModel> servletContexts = model.getServletContextModels();
 				servletContexts.forEach(sc -> {
@@ -1212,9 +1323,29 @@ public class ServerModel {
 			}
 			case MODIFY:
 				break;
-			case DELETE:
+			case DELETE: {
+				List<FilterModel> models = change.getFilterModels();
+
+				models.forEach(model -> {
+					if (model.getFilter() != null) {
+						filters.remove(model.getFilter(), model);
+					}
+					// could be among disabled ones
+					boolean wasDisabled = disabledFilterModels.remove(model);
+
+					if (!wasDisabled) {
+						// remove FilterModel from all target contexts. disabled model was not available there
+						Set<ServletContextModel> servletContexts = model.getServletContextModels();
+						servletContexts.forEach(sc -> {
+							// use special, 2-arg version of map.remove()
+							sc.getFilterNameMapping().remove(model.getName(), model);
+						});
+					}
+				});
 				break;
+			}
 			case ENABLE: {
+				FilterModel model = change.getFilterModel();
 				// enable a filter in all associated contexts
 				Set<ServletContextModel> servletContexts = model.getServletContextModels();
 				servletContexts.forEach(sc -> sc.enableFilterModel(model));
@@ -1222,6 +1353,7 @@ public class ServerModel {
 				break;
 			}
 			case DISABLE: {
+				FilterModel model = change.getFilterModel();
 				disabledFilterModels.add(model);
 				// disable a filter in all associated contexts
 				Set<ServletContextModel> servletContexts = model.getServletContextModels();
