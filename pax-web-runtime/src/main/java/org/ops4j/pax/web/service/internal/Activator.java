@@ -67,7 +67,8 @@ import static org.ops4j.pax.web.service.PaxWebConstants.HTTPSERVICE_REGISTRATION
  *     <li>servlet event dispatcher</li>
  *     <li>registration of {@link ServletListener}-{@link EventAdmin} bridge</li>
  *     <li>registration of {@link ServletListener}-{@link LogService} bridge</li>
- *     <li>registration of {@link ManagedService} to monitor {@code org.ops4j.pax.web} PID changes</li>
+ *     <li>registration of {@link org.osgi.service.cm.ManagedService} to monitor
+ *     {@code org.ops4j.pax.web} PID changes</li>
  * </ul></p>
  * <p></p>
  */
@@ -228,8 +229,8 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	}
 
 	/**
-	 * Registers a managed service to listen on configuration updates. Used only if {@link ConfigurationAdmin} is
-	 * available.
+	 * Registers a managed service to listen on configuration updates. Used only if
+	 * {@link org.osgi.service.cm.ConfigurationAdmin} is available.
 	 * @param context bundle context to use for registration
 	 */
 	private void registerManagedService(final BundleContext context) {
@@ -264,8 +265,8 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	// both methods schedule the reconfiguration in another thread from single thread pool
 
 	/**
-	 * Called directly or from {@link ManagedService#updated(Dictionary)}. Current {@link HttpService} has
-	 * to be re-registered because configuration has changed.
+	 * Called directly or from {@link org.osgi.service.cm.ManagedService#updated(Dictionary)}. Current
+	 * {@link HttpService} has to be re-registered because configuration has changed.
 	 * @param configuration
 	 */
 	@Override
@@ -296,7 +297,8 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	}
 
 	/**
-	 * <p>This method is the only place which is allowed to modify the config and factory fields.</p>
+	 * <p>This method is the only place which is allowed to modify the config and factory fields and it should
+	 * run only within single-threded {@link java.util.concurrent.ExecutorService}.</p>
 	 *
 	 * <p>Here a new {@link org.osgi.framework.ServiceFactory} for {@link HttpService} and {@link WebContainer}
 	 * is registered for {@code org.ops4j.pax.web} PID.</p>
@@ -381,8 +383,8 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	@PaxWebConfiguration
 	private void performConfiguration() {
 		try {
-			// chained PropertyResolver to get properties from Config Admin, Bundle Context, Meta Type information
-			// (in such order).
+			// Configure chained PropertyResolver to get properties from Config Admin, Bundle Context, Meta Type
+			// information (in such order).
 			// Properties as map will also be available in proper order
 
 			Map<String, String> allProperties = new HashMap<>(System.getenv());
@@ -400,50 +402,42 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			// full configuration with all required properties. That's all that is needed down the stream
 			final Configuration configuration = ConfigurationBuilder.getConfiguration(resolver, allProperties);
 
-			// global, single representation of web server state
+			// global, single representation of web server state. It's used
+			//  - in all bundle-scoped instances of HttpServiceEnabled
+			//  - also to reflect Whiteboard registrations (through pax-web-extender-whiteboard)
 			final ServerModel serverModel = new ServerModel(runtimeExecutor);
-
-			// for now, let's think about doing the below in pax-web-extender-whiteboard
-//			// default ServletContextHelper - registered for all virtual hosts
-//			// should be a service factory to ensure proper resource delegation
-//			DefaultServletContextHelper defaultServletContextHelper = new DefaultServletContextHelper(bundleContext.getBundle());
-//			Dictionary<String, Object> props = new Hashtable<>();
-//			props.put(HTTP_WHITEBOARD_CONTEXT_NAME, HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME);
-//			props.put(HTTP_WHITEBOARD_CONTEXT_PATH, "/");
-//			props.put(PaxWebConstants.SERVICE_PROPERTY_VIRTUAL_HOSTS, new String[] { "*" });
-//			servletContextHelperReg = bundleContext.registerService(ServletContextHelper.class,
-//					defaultServletContextHelper, props);
-//
-//			// it should be immediately registered in server model
-//			serverModel.addContextHelper(HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME, "/",
-//					0, servletContextHelperReg.getReference().getProperty(Constants.SERVICE_ID),
-//					defaultServletContextHelper);
 
 			// create a controller object to operate on any supported web server
 			serverController = serverControllerFactory.createServerController(configuration);
 
 			// first step is to configure the server without actually starting it
+			LOG.info("Configuring server controller {}", serverController.getClass().getName());
 			serverController.configure();
 
+			LOG.info("Starting server controller {}", serverController.getClass().getName());
+			serverController.start();
+
+			// create default ServletContextModel in ServerModel and propagate it to the controller
+			serverModel.createDefaultServletContextModel(serverController);
+
 			// this is where org.osgi.service.http.HttpService bundle-scoped service is registered in OSGi
+			// this is the most fundamental operation related to Http Service specification
 			Dictionary<String, Object> props = determineServiceProperties(this.configuration, configuration);
 			ServiceFactory<StoppableHttpService> factory = new StoppableHttpServiceFactory() {
 				@Override
 				StoppableHttpService createService(Bundle bundle) {
 					HttpServiceEnabled enabledService =
 							new HttpServiceEnabled(bundle, serverController, serverModel, servletEventDispatcher, configuration);
+
 					return new HttpServiceProxy(bundle, enabledService);
 				}
 			};
+			LOG.info("Registering HttpService factory");
 			httpServiceFactoryReg = bundleContext.registerService(HTTPSERVICE_REGISTRATION_NAMES, factory, props);
-
-			LOG.info("Starting server controller {}", serverController.getClass().getName());
-			serverController.start();
 
 			// ManagedServiceFactory for org.ops4j.pax.web.context factory PID
 			// we need registered WebContainer for this MSF to work
 //			createManagedServiceFactory(bundleContext);
-			//CHECKSTYLE:OFF
 		} catch (Throwable t) {
 			// TODO: ignore those exceptions if the bundle is being stopped
 			LOG.error("Unable to start Pax Web server: {}", t.getMessage(), t);

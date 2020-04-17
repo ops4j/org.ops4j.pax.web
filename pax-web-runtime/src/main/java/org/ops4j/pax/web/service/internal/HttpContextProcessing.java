@@ -32,9 +32,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.PaxWebConstants;
-import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.util.NamedThreadFactory;
 import org.osgi.framework.Bundle;
@@ -223,7 +222,7 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 			// we have all we need - it's finally the time to apply PID configuration to WebContainer
 			String contextId = (String) properties.get(KEY_CONTEXT_ID);
 			if (contextId == null) {
-				contextId = WebContainerContext.DefaultContextIds.DEFAULT.getValue();
+				contextId = PaxWebConstants.DEFAULT_CONTEXT_NAME;
 			}
 			// shared contexts are not supported for now...
 			httpContext = wc.createDefaultHttpContext(contextId);

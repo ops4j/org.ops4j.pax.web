@@ -89,5 +89,9 @@ public class SessionConfigurationModel extends ElementModel {
 	public void setSessionWorkerName(String sessionWorkerName) {
 		this.sessionWorkerName = sessionWorkerName;
 	}
+	@Override
+	public Boolean performValidation() {
+		return Boolean.TRUE;
+	}
 
 }

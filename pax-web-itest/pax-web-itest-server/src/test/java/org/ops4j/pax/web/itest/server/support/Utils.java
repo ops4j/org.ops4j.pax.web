@@ -26,7 +26,6 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
-import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpFilter;

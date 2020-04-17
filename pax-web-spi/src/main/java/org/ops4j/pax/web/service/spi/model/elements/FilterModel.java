@@ -16,12 +16,14 @@
 package org.ops4j.pax.web.service.spi.model.elements;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
@@ -31,7 +33,6 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.util.Path;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -123,19 +124,6 @@ public class FilterModel extends ElementModel<Filter> {
 		this.filterClass = filterClass;
 		setElementReference(reference);
 
-		int sources = 0;
-		sources += (filter != null ? 1 : 0);
-		sources += (filterClass != null ? 1 : 0);
-		sources += (getElementReference() != null ? 1 : 0);
-		if (sources == 0) {
-			throw new IllegalArgumentException("Filter Model must specify one of: filter instance, filter class"
-					+ " or service reference");
-		}
-		if (sources != 1) {
-			throw new IllegalArgumentException("Filter Model should specify a filter uniquely as instance, class"
-					+ " or service reference");
-		}
-
 		if (name == null) {
 			// legacy method first
 			name = this.initParams.get(PaxWebConstants.INIT_PARAM_FILTER_NAME);
@@ -154,18 +142,9 @@ public class FilterModel extends ElementModel<Filter> {
 		}
 		this.name = name;
 
-		sources = 0;
-		sources += (this.servletNames != null && this.servletNames.length > 0 ? 1 : 0);
-		sources += (this.urlPatterns != null && this.urlPatterns.length > 0 ? 1 : 0);
-		sources += (this.regexMapping != null && this.regexMapping.length > 0 ? 1 : 0);
-
-		if (sources == 0) {
-			throw new IllegalArgumentException("Please specify one of: servlet name mapping, url pattern mapping"
-					+ " or regex mapping");
-		}
-
 		this.dispatcherTypes = dispatcherTypes;
 		if (this.dispatcherTypes == null || this.dispatcherTypes.length == 0) {
+			// legacy method to get filter dispatcher types
 			String dispatchers = this.initParams.remove(PaxWebConstants.FILTER_MAPPING_DISPATCHER);
 			if (dispatchers != null) {
 				String[] types = dispatchers.split("\\s*,\\s*");
@@ -181,7 +160,35 @@ public class FilterModel extends ElementModel<Filter> {
 	}
 
 	@Override
-	public int compareTo(ElementModel o) {
+	public Boolean performValidation() {
+		int sources = 0;
+		sources += (filter != null ? 1 : 0);
+		sources += (filterClass != null ? 1 : 0);
+		sources += (getElementReference() != null ? 1 : 0);
+		if (sources == 0) {
+			throw new IllegalArgumentException("Filter Model must specify one of: filter instance, filter class"
+					+ " or service reference");
+		}
+		if (sources != 1) {
+			throw new IllegalArgumentException("Filter Model should specify a filter uniquely as instance, class"
+					+ " or service reference");
+		}
+
+		sources = 0;
+		sources += (this.servletNames != null && this.servletNames.length > 0 ? 1 : 0);
+		sources += (this.urlPatterns != null && this.urlPatterns.length > 0 ? 1 : 0);
+		sources += (this.regexMapping != null && this.regexMapping.length > 0 ? 1 : 0);
+
+		if (sources == 0) {
+			throw new IllegalArgumentException("Please specify one of: servlet name mapping, url pattern mapping"
+					+ " or regex mapping");
+		}
+
+		return Boolean.TRUE;
+	}
+
+	@Override
+	public int compareTo(ElementModel<Filter> o) {
 		int superCompare = super.compareTo(o);
 		if (superCompare == 0 && o instanceof FilterModel) {
 			// this happens in non-Whiteboard scenario
@@ -255,13 +262,7 @@ public class FilterModel extends ElementModel<Filter> {
 			return this.filter.getClass();
 		}
 		if (getElementReference() != null) {
-			Object objectClass = getElementReference().getProperty(Constants.OBJECTCLASS);
-			String className = null;
-			if (objectClass instanceof String) {
-				className = (String) objectClass;
-			} else if (objectClass instanceof String[] && ((String[]) objectClass).length > 0) {
-				className = ((String[]) objectClass)[0];
-			}
+			String className = Utils.getFirstObjectClass(getElementReference());
 			if (className != null) {
 				try {
 					return (Class<? extends Filter>) getRegisteringBundle().loadClass(className);
@@ -289,6 +290,7 @@ public class FilterModel extends ElementModel<Filter> {
 		private Filter filter;
 		private Class<? extends Filter> filterClass;
 		private ServiceReference<? extends Filter> reference;
+		private Supplier<? extends Filter> supplier;
 		private final List<OsgiContextModel> list = new LinkedList<>();
 		private Bundle bundle;
 		private int rank;
@@ -357,8 +359,18 @@ public class FilterModel extends ElementModel<Filter> {
 			return this;
 		}
 
+		public FilterModel.Builder withFilterSupplier(Supplier<? extends Filter> supplier) {
+			this.supplier = supplier;
+			return this;
+		}
+
 		public FilterModel.Builder withOsgiContextModel(OsgiContextModel osgiContextModel) {
 			this.list.add(osgiContextModel);
+			return this;
+		}
+
+		public FilterModel.Builder withOsgiContextModels(final Collection<OsgiContextModel> osgiContextModels) {
+			this.list.addAll(osgiContextModels);
 			return this;
 		}
 
@@ -380,16 +392,7 @@ public class FilterModel extends ElementModel<Filter> {
 			model.setRegisteringBundle(this.bundle);
 			model.setServiceRank(this.rank);
 			model.setServiceId(this.serviceId);
-			return model;
-		}
-
-		/**
-		 * Special builder finishing method to prepare {@link FilterModel} for removal (with disabled validation)
-		 * @return
-		 */
-		public FilterModel remove() {
-			FilterModel model = new FilterModel(filterName, filter, filterClass, reference);
-			list.forEach(model::addContextModel);
+			model.setElementSupplier(this.supplier);
 			return model;
 		}
 	}

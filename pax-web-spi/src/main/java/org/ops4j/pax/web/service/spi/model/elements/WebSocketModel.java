@@ -29,5 +29,9 @@ public class WebSocketModel extends ElementModel {
 	public Object getWebSocket() {
 		return webSocket;
 	}
+	@Override
+	public Boolean performValidation() {
+		return Boolean.TRUE;
+	}
 
 }

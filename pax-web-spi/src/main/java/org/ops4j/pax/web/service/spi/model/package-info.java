@@ -15,12 +15,12 @@
  */
 
 /**
- * <p>SPI model hierarchy contains classes for internal representation of all the information
+ * <p>SPI model hierarchy contains classes to internally represent all the information
  * required during registration (adding to running server) of web components (servlets, filters,
  * welcome files, error pages, security constraints, ...). Such hierarchy is completely unaware of request
  * mapping and it should be treated purely as static database of registrations.</p>
  *
- * <p>This package containing classes that try to hold server independent model of components, thought
+ * <p>This package containing classes that try to hold server independent model of components, though
  * it's modelled after actual capabilities of Jetty, Tomcat and Undertow.</p>
  *
  * <p>In Tomcat, we have these <em>concepts</em>:<ul>

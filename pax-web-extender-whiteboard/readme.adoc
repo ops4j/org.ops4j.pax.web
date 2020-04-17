@@ -1,0 +1,148 @@
+= pax-web-extender-whiteboard
+
+This bundle is the implementation of OSGi CMPN R7 Http Whiteboard specification.
+
+The actual processing of ready _web elements_, that build _web applications_ (the *model*) and control over target web server runtime is performed in pax-web-runtime bundle. Here, it's all about tracking OSGi services related to Whiteboard specification and translating them into lower-level invocations on Pax Web internal services.
+
+== Which services are tracked
+
+Here's a list of the interfaces that should be tracked (according to OSGi CMPN R7 Whiteboard specification):
+
+* `org.osgi.service.http.context.ServletContextHelper` for the _context_ tracking
+* `javax.servlet.Servlet` for servlet tracking (and error page tracking)
+* `javax.servlet.Filter` and specialized `org.osgi.service.http.whiteboard.Preprocessor` for filter and preprocessor tracking
+* any service with `osgi.http.whiteboard.resource.pattern` service property for resource tracking
+* `javax.servlet.ServletContextListener`, `javax.servlet.ServletContextAttributeListener`, `javax.servlet.ServletRequestListener`, `javax.servlet.ServletRequestAttributeListener`, `javax.servlet.HttpSessionListener`, `javax.servlet.HttpSessionAttributeListener`, `javax.servlet.HttpSessionIdListener` for listener tracking
+
+Pax Web tracks much more interfaces. These interfaces are defined in `org.ops4j.pax.web.service.whiteboard` package and the main goal is to allow publishing services, where all the information is contained in the objects themselves instead of service properties (as in Whiteboard Service specification).
+
+These Pax Web specific interfaces can be split into two categories:
+
+* _contexts_: interfaces derived from `org.ops4j.pax.web.service.whiteboard.ContextMapping` to register `org.osgi.service.http.HttpContext` and `org.osgi.service.http.context.ServletContextHelper` with associated information (like context path)
+* _web elements_: interfaces derived from `org.ops4j.pax.web.service.whiteboard.ContextRelated` to register elements like servlets, filters, listeners, where each of these elements refer to some _context_ (that's wht they're _related_).
+
+In addition to servlets, filters (and preprocessors) and listeners, Pax Web allows registration of:
+
+* `org.ops4j.pax.web.service.whiteboard.ErrorPageMapping` - error pages as separate service, not only as servlet registration properties
+* `org.ops4j.pax.web.service.whiteboard.JspMapping` - for JSP mappings
+* `org.ops4j.pax.web.service.whiteboard.WebSocketMapping` - for websockets
+* `org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping` - for welcome files
+
+Pax Web Whiteboard extender tracks the above mentioned services and turns them (as in the contract of `org.osgi.util.tracker.ServiceTrackerCustomizer.addingService()`, where reference of service with type `S` is transformed into (possibly the same) service of type `T`) into other (internal) interfaces.
+
+Here's a list of non Pax Web specific interfaces that are tracked:
+
+|===
+|Tracked interface |Internal interface from package `org.ops4j.pax.web.extender.whiteboard.internal.element`
+
+|`org.osgi.service.http.HttpContext`
+|`org.ops4j.pax.web.extender.whiteboard.internal.element.HttpContextElement`
+
+|`org.osgi.service.http.context.ServletContextHelper`
+|`org.ops4j.pax.web.extender.whiteboard.internal.element.ServletContextHelperElement`
+
+|`javax.servlet.Servlet`
+|`org.ops4j.pax.web.extender.whiteboard.internal.element.ServletWebElement`
+
+|`java.lang.Object`
+|`org.ops4j.pax.web.extender.whiteboard.internal.element.ResourceWebElement`
+
+|`javax.servlet.Filter`
+|`org.ops4j.pax.web.extender.whiteboard.internal.element.FilterWebElement`
+
+|`java.util.EventListener`
+|`org.ops4j.pax.web.extender.whiteboard.internal.element.ListenerWebElement`
+
+|`java.lang.Object`
+|`org.ops4j.pax.web.extender.whiteboard.internal.element.WebSocketElement`
+|===
+
+And additional tracked interfaces from `org.ops4j.pax.web.service.whiteboard` package:
+
+|===
+|Tracked interface |Internal interface from package `org.ops4j.pax.web.extender.whiteboard.internal.element`
+
+|`org.ops4j.pax.web.service.whiteboard.HttpContextMapping`
+|`org.ops4j.pax.web.extender.whiteboard.internal.element.HttpContextElement`
+
+|`org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping`
+|`org.ops4j.pax.web.extender.whiteboard.internal.element.ServletContextHelperElement`
+
+|`org.ops4j.pax.web.service.whiteboard.ErrorPageMapping`
+|`org.ops4j.pax.web.extender.whiteboard.internal.element.ErrorPageWebElement`
+
+|`org.ops4j.pax.web.service.whiteboard.FilterMapping`
+|`org.ops4j.pax.web.extender.whiteboard.internal.element.FilterMappingWebElement`
+
+|`org.ops4j.pax.web.service.whiteboard.JspMapping`
+|`org.ops4j.pax.web.extender.whiteboard.internal.element.JspWebElement`
+
+|`org.ops4j.pax.web.service.whiteboard.ListenerMapping`
+|`org.ops4j.pax.web.extender.whiteboard.internal.element.ListenerMappingWebElement`
+
+|`org.ops4j.pax.web.service.whiteboard.ResourceMapping`
+|`org.ops4j.pax.web.extender.whiteboard.internal.element.ResourceMappingWebElement`
+
+|`org.ops4j.pax.web.service.whiteboard.ServletMapping`
+|`org.ops4j.pax.web.extender.whiteboard.internal.element.ServletMappingWebElement`
+
+|`org.ops4j.pax.web.service.whiteboard.WebSocketMapping`
+|`??`
+
+|`org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping`
+|`org.ops4j.pax.web.extender.whiteboard.internal.element.WelcomeFileWebElement`
+|===
+
+The above is the current state of Pax Web before version 8.
+
+There's a bit of ambiguity here. For example `org.osgi.service.http.HttpContext` and `org.ops4j.pax.web.service.whiteboard.HttpContextMapping` are both represented internally by `org.ops4j.pax.web.extender.whiteboard.internal.element.HttpContextElement`, while `javax.servlet.Servlet` is represented by `org.ops4j.pax.web.extender.whiteboard.internal.element.ServletWebElement` and `org.ops4j.pax.web.service.whiteboard.ServletMapping` is represented by `org.ops4j.pax.web.extender.whiteboard.internal.element.legacy.ServletMappingWebElement`.
+
+In Pax Web 8 I'll try to unify this a bit.
+
+== Two stages of _tracking_
+
+Pax Web Whiteboard extender does its job in two stages:
+
+1. tracking and translating relevant OSGi services (e.g., translating `javax.servlet.Servlet` into `org.ops4j.pax.web.extender.whiteboard.internal.element.ServletWebElement`)
+2. using the internal representation of registered Whiteboard element to `register()` or `unregister()` itself in current `org.ops4j.pax.web.service.WebContainer`.
+
+== Pax Web 8 cleanup
+
+The goal is to not duplicate anything. We need only:
+
+* the interfaces to track (the ones from `org.ops4j.pax.web.service.whiteboard` package)
+* the internal representation of tracked interfaces (the classes returned from `org.osgi.util.tracker.ServiceTrackerCustomizer.addingService()`) - these should be treated as _internal_.
+* optionally, default (POJO) implementations of the interfaces from `org.ops4j.pax.web.service.whiteboard` package
+
+Currently (before Pax Web 8) we have a little duplication:
+
+* `org.ops4j.pax.web.service.spi.whiteboard` package contains interfaces implemented only by classes from `org.ops4j.pax.web.extender.whiteboard.internal.element` package
+* these classes from `org.ops4j.pax.web.extender.whiteboard.internal.element` package almost duplicate the _model_ classes from `org.ops4j.pax.web.service.spi.model.elements` package, but all they do (those classes from `org.ops4j.pax.web.extender.whiteboard.internal.element.FilterMappingWebElement`) package is they:
+** hold a reference to a registered service with interface from `org.ops4j.pax.web.service.whiteboard` package
+** register/unregister themselves in `org.ops4j.pax.web.service.WebContainer`.
+
+Internally, after implementing the batch aproach to registration, implementation of `org.ops4j.pax.web.service.WebContainer` accepts _model_ classes from `org.ops4j.pax.web.service.spi.model.elements` package anyway.
+
+So the goal for now (2020-04-21) is to let pax-web-extender-whiteboard to register _model_ classes into `WebContainer` directly (maybe through internal interface, a.k.a. a _view_).
+This in turn is a reason to have pax-web-extender-whiteboard trackers accept all currently handled interfaces to be registered as OSGi services (like `javax.servlet.Servlet` or `org.ops4j.pax.web.service.whiteboard.FilterMapping`) and translate (track) them (see `org.osgi.util.tracker.ServiceTrackerCustomizer.addingService()`) into classes from `org.ops4j.pax.web.service.spi.model.elements` package instead of the ones from `org.ops4j.pax.web.extender.whiteboard.internal.element` package.
+
+== Changes after Pax Web 7
+
+In Pax Web 6 and 7, the central concept of _Whiteboard_ was a map of `BundleWhiteboardApplication` keyed by _context id_ and a Bundle. Generally it meant that each bundle can register OSGi services into the Whiteboard and those services were _web elements_ that constituted a _web application_.
+The problem is that the _web application_ targeted by Whiteboard services in Pax Web is wrongly identified by the bundle from which given service was registered. In OSGi CMPN R6+ Whiteboard Service specification, servlets, filters, etc. are registered *not* into _web application_ but _in association with_ `ServletContextHelper` which roughly *is* a _web application_, with few important exceptions:
+
+* Services from many different bundles may be registered in association with the same `ServletContextHelper` (which itself could be a `ServiceFactory`)
+* Single service (e.g., a `javax.servlet.Servlet`) can be registered in association with more than one `ServletContextHelper` and while any `ServletContextHelper` may represent separate _physical servlet context_, single servlet may effectively be part of many _web applications_ (servlet contexts).
+
+The above reasoning lead to deep refactoring of Pax Web Extender Whiteboard bundle.
+
+=== `org.ops4j.pax.web.service.views.PaxWebContainerView`
+
+Before Pax Web 8, pax-web-extender-war was tracking some OSGi services, converted them (_customized_ them) in trackers to objects derived from `org.ops4j.pax.web.extender.whiteboard.internal.element.WebElement`, those elements had `register()` method that were using passed `WebContainer` instance and were calling _registration_ methods like `org.ops4j.pax.web.service.WebContainer#registerServlet()` - methods that accepted many separate arguments.
+
+In Pax Web 8 I've added special `org.ops4j.pax.web.service.WebContainer.adapt()` method that can be used to get a _view_ of the _web contaner_.
+Such view may be _internal_ to Pax Web and can allow some more generic or low level access. In Pax Web 8 there's special view implemented by pax-web-runtime, with interface defined in pax-web-spi to allow _direct_ registraion of _models_.
+
+Remember - pax-web-extender-whiteboard provides a set of _trackers_ with _customizers_ that change _incoming_ interfaces like `javax.servlet.Servlet` or Pax Web specific `org.ops4j.pax.web.service.whiteboard.ServletMapping` into objects of classes derived from `org.ops4j.pax.web.service.spi.model.elements.ElementModel` (in Pax Web 7 and earlier, the _customized_ objects had classes derived from `org.ops4j.pax.web.extender.whiteboard.internal.element.WebElement`).
+
+New internal _view_ of `WebContainer` allows to register the models directly.

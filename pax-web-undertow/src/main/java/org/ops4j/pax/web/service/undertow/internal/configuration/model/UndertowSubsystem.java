@@ -27,7 +27,6 @@ import io.undertow.predicate.Predicate;
 import io.undertow.predicate.Predicates;
 import io.undertow.server.HandlerWrapper;
 import io.undertow.server.HttpHandler;
-import io.undertow.server.handlers.ResponseCodeHandler;
 import io.undertow.server.handlers.SetHeaderHandler;
 import io.undertow.server.handlers.builder.HandlerParser;
 

@@ -113,8 +113,6 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 		}
 		setMultipartConfigElement(servletModel.getMultipartConfigElement());
 
-		// TODO: scan servlet for annotations
-
 		// setup proper delegation for ServletContext
 		servletContext = new OsgiScopedServletContext(this.osgiServletContext, servletModel.getRegisteringBundle());
 

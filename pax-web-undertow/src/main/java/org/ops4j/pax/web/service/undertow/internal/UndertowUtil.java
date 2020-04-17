@@ -17,14 +17,13 @@ package org.ops4j.pax.web.service.undertow.internal;
 
 import java.io.IOException;
 
+import io.undertow.Undertow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xnio.OptionMap;
 import org.xnio.Options;
 import org.xnio.Xnio;
 import org.xnio.XnioWorker;
-
-import io.undertow.Undertow;
 
 public class UndertowUtil {
 

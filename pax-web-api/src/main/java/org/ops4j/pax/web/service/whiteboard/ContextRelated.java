@@ -15,9 +15,6 @@
  */
 package org.ops4j.pax.web.service.whiteboard;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
 
 /**
@@ -61,10 +58,9 @@ import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
  * <p>In non-whiteboard approach, servlets are always registered together with associated
  * {@link org.osgi.service.http.HttpContext} when calling method like
  * {@link org.osgi.service.http.HttpService#registerServlet}. User may also provide
- * {@link org.ops4j.pax.web.service.WebContainerContext}, {@link MultiBundleWebContainerContext}
- * or {@link org.ops4j.pax.web.service.ReferencedWebContainerContext} when registering a servlet. That means
- * (assuming Pax Web specific <em>shared</em> contexts) it's hard to reference common context without using actual
- * instance of the context, so such instance has to be shared through OSGi registry.</p>
+ * {@link org.ops4j.pax.web.service.WebContainerContext} or {@link MultiBundleWebContainerContext} when registering
+ * a servlet. That means (assuming Pax Web specific <em>shared</em> contexts) it's hard to reference common context
+ * without using actual instance of the context, so such instance has to be shared through OSGi registry.</p>
  *
  * <p>To support real sharing of {@link org.osgi.service.http.HttpContext} when using <em>old</em>
  * {@link org.osgi.service.http.HttpService} methods, user first needs to register {@link HttpContextMapping}
@@ -72,21 +68,22 @@ import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
  * property:<pre>
  *     // register pure HttpContext service
  *     props.put("httpContext.id", "my-context");
- *     context.registerService(HttpContext.class, aContext, props);
+ *     bundleContext.registerService(HttpContext.class, aContext, props);
  *
  *     // or register HttpContextMapping using "explicit whiteboard approach"
  *     aContextMapping = new HttpContextMappingImpl();
  *     aContextMapping.setContextId("my-context");
  *     aContextMapping.setHttpContext(new HttpContext() { ... });
- *     context.registerService(HttpContextMapping.class, aContextMapping, props);
+ *     bundleContext.registerService(HttpContextMapping.class, aContextMapping, null);
  * </pre></p>
+ *
  * <p>Then, an element (like servlet) may be registered like this:<pre>
- *     context = new ReferencedWebContainerContext("my-context");
+ *     context = new DefaultHttpContext(bundleContext.getBundle(), "my-context");
  *     httpService.registerServlet("/alias", servlet, null, context);
  * </pre></p>
  *
- * <p>This trick separates <em>context identity</em> with <em>context behavior</em> (like
- * {@link org.osgi.service.http.HttpContext#handleSecurity(HttpServletRequest, HttpServletResponse)}), which
+ * <p>This trick is based on assumed identity of DefaultHttpContext, which is name+bundleseparates and separates
+ * the identity from <em>context behavior</em> ({@link org.osgi.service.http.HttpContext#handleSecurity}), which
  * should not be specified (or emphasized) in every registration.</p>
  */
 public interface ContextRelated {
@@ -143,11 +140,12 @@ public interface ContextRelated {
 	 * {@link org.osgi.service.http.context.ServletContextHelper}) is selected using an LDAP-like filter, see
 	 * {@link #getContextSelectFilter()}, which allows association with many servlet contexts. To simplify things,
 	 * this method may just indicate single {@link org.osgi.service.http.context.ServletContextHelper} by name.
-	 * It can be done using one of:<ul>
+	 * It can be done using one of (in order of decreasing priority):<ul>
 	 *     <li>standard (Whiteboard)
 	 *     {@code osgi.http.whiteboard.context.select=(osgi.http.whiteboard.context.name=name)} service registration
 	 *     property</li>
 	 *     <li>legacy (Pax Web specific) {@code httpContext.id=name} service registration property</li>
+	 *     <li>this method (if user registers an instance of {@link ContextRelated}.</li>
 	 * </ul></p>
 	 *
 	 * @return id of single <em>context</em> this whiteboard element should be associated with

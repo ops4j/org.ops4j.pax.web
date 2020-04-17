@@ -15,6 +15,13 @@
  */
 package org.ops4j.pax.web.service.undertow.internal.security;
 
+import java.io.IOException;
+import java.security.Principal;
+import java.security.cert.X509Certificate;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -23,13 +30,6 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
-import java.io.IOException;
-import java.security.Principal;
-import java.security.cert.X509Certificate;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 import io.undertow.security.idm.Account;
 import io.undertow.security.idm.Credential;

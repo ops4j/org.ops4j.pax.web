@@ -62,6 +62,7 @@
 						<Export-Package>
 							<!-- pax-web-api -->
 							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.views;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.whiteboard;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
 

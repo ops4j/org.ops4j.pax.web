@@ -17,16 +17,20 @@ package org.ops4j.pax.web.service.spi.task;
 
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 
 public class OsgiContextModelChange extends Change {
 
 	private final WebContainerContext context;
 	private final OsgiContextModel osgiContextModel;
+	private final ServletContextModel servletContextModel;
 
-	public OsgiContextModelChange(OpCode op, WebContainerContext context, OsgiContextModel osgiContextModel) {
+	public OsgiContextModelChange(OpCode op, WebContainerContext context, OsgiContextModel osgiContextModel,
+			ServletContextModel servletContextModel) {
 		super(op);
 		this.context = context;
 		this.osgiContextModel = osgiContextModel;
+		this.servletContextModel = servletContextModel;
 	}
 
 	public WebContainerContext getContext() {
@@ -35,6 +39,10 @@ public class OsgiContextModelChange extends Change {
 
 	public OsgiContextModel getOsgiContextModel() {
 		return osgiContextModel;
+	}
+
+	public ServletContextModel getServletContextModel() {
+		return servletContextModel;
 	}
 
 	@Override

@@ -1,239 +1,309 @@
 /*
  * Copyright 2007 Alin Dreghiciu.
  *
- * Licensed  under the  Apache License,  Version 2.0  (the "License");
- * you may not use  this file  except in  compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed  under the  License is distributed on an "AS IS" BASIS,
- * WITHOUT  WARRANTIES OR CONDITIONS  OF ANY KIND, either  express  or
- * implied.
- *
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
-
+import javax.servlet.GenericServlet;
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
-import javax.servlet.annotation.WebInitParam;
 import javax.servlet.http.HttpServlet;
 
-import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
-import org.ops4j.pax.web.extender.whiteboard.internal.element.ServletWebElement;
-import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
-import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultErrorPageMapping;
-import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultServletMapping;
 import org.ops4j.pax.web.service.PaxWebConstants;
+import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.utils.ServletAnnotationScanner;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * Tracks {@link Servlet}s.
+ * Tracks OSGi services that should result in registration of a {@link Servlet}. This tracker
+ * is <em>canonical</em> because it tracks services of a class specified in Whiteboard Service spec.
  *
  * @author Alin Dreghiciu
  * @author Thomas Joseph
+ * @author Grzegorz Grzybek
  * @since 0.4.0, April 05, 2008
  */
-@SuppressWarnings("rawtypes")
-public class ServletTracker<T extends Servlet> extends AbstractTracker<T, ServletWebElement> {
+public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, ServletModel> {
 
-	/**
-	 * Logger.
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(ServletTracker.class);
-
-	/**
-	 * Constructor.
-	 *
-	 * @param extenderContext
-	 *            extender context; cannot be null
-	 * @param bundleContext
-	 *            extender bundle context; cannot be null
-	 */
 	private ServletTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
 		super(extenderContext, bundleContext);
 	}
 
-	@SuppressWarnings("unchecked")
-	public static <T extends Servlet> ServiceTracker<T, ServletWebElement> createTracker(
-			final ExtenderContext extenderContext, final BundleContext bundleContext) {
-		return new ServletTracker<T>(extenderContext, bundleContext)
-				.create(new Class[] { Servlet.class, HttpServlet.class });
+	public static ServiceTracker<Servlet, ServletModel> createTracker(final ExtenderContext extenderContext,
+			final BundleContext bundleContext) {
+		return new ServletTracker(extenderContext, bundleContext)
+				.create(Servlet.class, GenericServlet.class, HttpServlet.class);
 	}
 
-	/**
-	 * @see AbstractTracker#createWebElement(ServiceReference, Object)
-	 */
 	@Override
-	ServletWebElement createWebElement(final ServiceReference<T> serviceReference, final T published) {
-		LOG.debug("Creating web element for service {} {} ({}).", serviceReference.getProperty(Constants.SERVICE_ID), serviceReference, published);
-        String alias = ServicePropertiesUtils.getStringProperty(serviceReference, ExtenderConstants.PROPERTY_ALIAS);
-		Object urlPatternsProp = serviceReference.getProperty(ExtenderConstants.PROPERTY_URL_PATTERNS);
+	@SuppressWarnings("deprecation")
+	protected ServletModel createElementModel(ServiceReference<Servlet> serviceReference, Integer rank, Long serviceId) {
+		LOG.debug("Creating servlet model from R7 whiteboard service {} (id={})", serviceReference, serviceId);
 
-		String[] initParamKeys = serviceReference.getPropertyKeys();
-		String initPrefixProp = ServicePropertiesUtils.getStringProperty(serviceReference,
-				ExtenderConstants.PROPERTY_INIT_PREFIX);
-		if (initPrefixProp == null) {
-			initPrefixProp = ExtenderConstants.DEFAULT_INIT_PREFIX_PROP;
+		// 1. legacy "alias" (for HttpService.registerServlet(alias, ...)
+		String alias = Utils.getStringProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_SERVLET_ALIAS);
+		if (alias != null) {
+			LOG.warn("Legacy {} property specified, alias should be used only for HttpService registrations",
+					PaxWebConstants.SERVICE_PROPERTY_SERVLET_ALIAS);
 		}
-		String servletName = ServicePropertiesUtils.getStringProperty(serviceReference,
-				PaxWebConstants.SERVLET_NAME);
 
-		if (urlPatternsProp == null) {
-			urlPatternsProp = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN);
+		// 2. URL patterns
+		String[] urlPatterns = Utils.getPaxWebProperty(serviceReference,
+				PaxWebConstants.SERVICE_PROPERTY_URL_PATTERNS, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN,
+				Utils::asStringArray);
+
+		// 3. servlet name
+		String name = Utils.getPaxWebProperty(serviceReference,
+				PaxWebConstants.INIT_PARAM_SERVLET_NAME, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME,
+				Utils::asString);
+
+		// 4. init params
+		Map<String, String> initParams = new LinkedHashMap<>();
+		String legacyInitPrefix = Utils.getStringProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_INIT_PREFIX);
+		if (legacyInitPrefix != null) {
+			LOG.warn("Legacy {} property found, servlet init parameters should be prefixed with {} instead",
+					PaxWebConstants.SERVICE_PROPERTY_INIT_PREFIX,
+					HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX);
+		}
+		// are there any service properties prefixed with legacy "init." prefix (or one specified by "init-prefix"?
+		final String[] prefix = new String[] { legacyInitPrefix == null ? PaxWebConstants.DEFAULT_INIT_PREFIX_PROP : legacyInitPrefix };
+		boolean hasLegacyInitProperty = Arrays.stream(serviceReference.getPropertyKeys())
+				.anyMatch(p -> p.startsWith(prefix[0]));
+		if (hasLegacyInitProperty) {
+			LOG.warn("Legacy servlet init parameters found (with prefix: {}), init parameters should be prefixed with"
+					+ " {} instead", prefix[0], HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX);
 		} else {
-			String[] whiteBoardProp = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference,
-					HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN);
-			if (whiteBoardProp != null) {
-				urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp,
-						Arrays.asList(whiteBoardProp));
-			}
+			prefix[0] = HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX;
 		}
 
-		if (servletName == null) {
-			servletName = ServicePropertiesUtils.getStringProperty(serviceReference,
-					HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME);
-		}
-
-		ServletAnnotationScanner annotationScan = new ServletAnnotationScanner(published.getClass());
-
-		if (annotationScan.scanned) {
-			if (urlPatternsProp == null) {
-				urlPatternsProp = annotationScan.urlPatterns;
-			} else {
-				List<String> annotationsUrlPatterns = Arrays.asList(annotationScan.urlPatterns);
-				urlPatternsProp = ServicePropertiesUtils.mergePropertyListOfStringsToArrayOfStrings(urlPatternsProp,
-						annotationsUrlPatterns);
-			}
-		}
-
-		// special Whiteboard Error-Servlet handling
-		String[] errorPageParams = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference,
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE);
-
-		if (errorPageParams != null) {
-			if (servletName == null) {
-				servletName = "errorServlet";
-			}
-			if (alias == null && urlPatternsProp == null) {
-				alias = "/errorServlet";
-			}
-		}
-
-		String[] urlPatterns = null;
-		if (urlPatternsProp != null) {
-			if (urlPatternsProp instanceof String && ((String) urlPatternsProp).trim().length() != 0) {
-				urlPatterns = new String[] { (String) urlPatternsProp };
-			} else if (urlPatternsProp instanceof String[]) {
-				urlPatterns = (String[]) urlPatternsProp;
-			}
-		}
-
-		String httpContextId = ServicePropertiesUtils.extractHttpContextId(serviceReference);
-
-		// make all the service parameters available as initParams to
-		// registering the Servlet
-		Map<String, String> initParams = new HashMap<>();
-		Integer loadOnStartup = null;
-		Boolean asyncSupported = null;
-		for (String key : initParamKeys) {
-			try {
-				String value = serviceReference.getProperty(key) == null ? ""
-						: serviceReference.getProperty(key).toString();
-
-				// if the prefix is null or empty, match is true, otherwise its
-				// only true if it matches the prefix
-				if (key.startsWith(initPrefixProp == null ? "" : initPrefixProp)) {
-					initParams.put(key.replaceFirst(initPrefixProp, ""), value);
-				} else if (key.startsWith(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX)) {
-					initParams.put(
-							key.replaceFirst(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX, ""),
-							value);
+		for (String key : serviceReference.getPropertyKeys()) {
+			if (key.startsWith(prefix[0])) {
+				String value = Utils.getStringProperty(serviceReference, key);
+				if (value != null) {
+					initParams.put(key.substring(prefix[0].length()), value);
 				}
-				if ("load-on-startup".equalsIgnoreCase(key) && value != null) {
-					loadOnStartup = Integer.parseInt(value);
+			}
+		}
+		if (initParams.isEmpty()) {
+			// TODO: this message should probably be removed at some point
+			LOG.info("Whiteboard servlet has no init parameters specified. In Pax Web 8, service registration "
+					+ "properties are no longer copied as init parameters.");
+		}
+
+		// 5. async-supported
+		Boolean asyncSupported = Utils.getPaxWebProperty(serviceReference,
+				PaxWebConstants.SERVICE_PROPERTY_ASYNC_SUPPORTED, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,
+				Utils::asBoolean);
+
+		// 6. load-on-startup
+		Integer loadOnStartup = Utils.getIntegerProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_LOAD_ON_STARTUP);
+		if (loadOnStartup != null) {
+			LOG.warn("Legacy {} property specified, load-on-startup should be specified using"
+							+ " @javax.servlet.annotation.WebServlet annotation",
+					PaxWebConstants.SERVICE_PROPERTY_LOAD_ON_STARTUP);
+		}
+
+		// 7. multipart configuration - not supported in Pax Web legacy
+		MultipartConfigElement multiPartConfig = null;
+		Boolean multiPartEnabled = Utils.getBooleanProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_MULTIPART_ENABLED);
+		if (multiPartEnabled != null && multiPartEnabled) {
+			// if location == null, it'll be resolved later in WebContainer, when org.ops4j.pax.web PID is available
+			String location = Utils.getStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_MULTIPART_LOCATION);
+			Long maxFileSize = Utils.getLongProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_MULTIPART_MAXFILESIZE);
+			Long maxRequestSize = Utils.getLongProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_MULTIPART_MAXREQUESTSIZE);
+			Integer fileSizeThreshold = Utils.getIntegerProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_MULTIPART_FILESIZETHRESHOLD);
+
+			multiPartConfig = new MultipartConfigElement(null,
+					maxFileSize == null ? -1L : maxFileSize,
+					maxRequestSize == null ? -1L : maxRequestSize,
+					fileSizeThreshold == null ? 0 : fileSizeThreshold);
+		}
+
+		// TODO: 8. error pages
+
+		//		// special Whiteboard Error-Servlet handling
+		//		String[] errorPageParams = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference,
+		//				HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE);
+		//
+		//		if (errorPageParams != null) {
+		//			if (servletName == null) {
+		//				servletName = "errorServlet";
+		//			}
+		//			if (alias == null && urlPatternsProp == null) {
+		//				alias = "/errorServlet";
+		//			}
+		//		}
+
+		//		List<DefaultErrorPageMapping> errorMappings = new ArrayList<>();
+		//
+		//		if (errorPageParams != null) {
+		//			for (String errorPageParam : errorPageParams) {
+		//				DefaultErrorPageMapping errorMapping = new DefaultErrorPageMapping();
+		//				errorMapping.setHttpContextId(httpContextId);
+		//				errorMapping.setLocation(alias);
+		//				errorMapping.setError(errorPageParam);
+		//				errorMappings.add(errorMapping);
+		//			}
+		//		}
+
+		//		return new ServletWebElement<>(serviceReference, mapping, errorMappings);
+
+		// 9. Check the servlet annotations - we need a class of actual servlet
+		Servlet service = null;
+		try {
+			service = bundleContext.getService(serviceReference);
+			if (service != null) {
+				ServletAnnotationScanner scanner = new ServletAnnotationScanner(service.getClass());
+				if (scanner.scanned) {
+					// 2. URL patterns
+					if (scanner.urlPatterns != null && scanner.urlPatterns.length > 0) {
+						if (urlPatterns != null && urlPatterns.length > 0) {
+							LOG.warn("Servlet URL patterns specified using both service property ({}) and annotation ({})."
+									+ " Choosing {}.", Arrays.asList(urlPatterns), Arrays.asList(scanner.urlPatterns),
+									Arrays.asList(urlPatterns));
+						} else {
+							urlPatterns = scanner.urlPatterns;
+						}
+					}
+					// 3. servlet name
+					if (scanner.servletName != null) {
+						if (name != null) {
+							LOG.warn("Servlet name specified using both service property ({}) and annotation ({})."
+									+ " Choosing {}.", name, scanner.servletName, name);
+						} else {
+							name = scanner.servletName;
+						}
+					}
+					// 4. init params
+					if (scanner.webInitParams != null) {
+						if (!initParams.isEmpty()) {
+							LOG.warn("Servlet init parameters specified using both service property ({}) and annotation ({})."
+									+ " Choosing {}.", initParams, scanner.webInitParams, initParams);
+						} else {
+							initParams.putAll(scanner.webInitParams);
+						}
+					}
+					// 5. async-supported
+					if (scanner.asyncSupported != null) {
+						if (asyncSupported != null && asyncSupported != scanner.asyncSupported) {
+							LOG.warn("Servlet async flag specified using both service property ({}) and annotation ({})."
+									+ " Choosing {}.", asyncSupported, scanner.asyncSupported, asyncSupported);
+						} else {
+							asyncSupported = scanner.asyncSupported;
+						}
+					}
+					// 6. load-on-startup
+					if (scanner.loadOnStartup != null) {
+						if (loadOnStartup != null) {
+							LOG.warn("Load-on-startup value specified using both service property ({}) and annotation ({})."
+									+ " Choosing {}.", loadOnStartup, scanner.loadOnStartup, loadOnStartup);
+						} else {
+							loadOnStartup = scanner.loadOnStartup;
+						}
+					}
+					// 7. multipart configuration - not supported in Pax Web legacy
+					if (scanner.multiPartConfigAnnotation != null) {
+						if (multiPartConfig != null) {
+							LOG.warn("Multipart configuration specified using both service property ({}) and annotation ({})."
+									+ " Choosing {}.", multiPartConfig, scanner.multiPartConfigAnnotation, multiPartConfig);
+						} else {
+							multiPartConfig = new MultipartConfigElement(scanner.multiPartConfigAnnotation);
+						}
+					}
 				}
-				if ("async-supported".equalsIgnoreCase(key) && value != null) {
-					asyncSupported = Boolean.parseBoolean(value);
-				}
-				// CHECKSTYLE:OFF
-			} catch (Exception ignore) {
-				// ignore
 			}
-			// CHECKSTYLE:ON
-		}
-
-		if (asyncSupported == null) {
-			asyncSupported = Boolean.FALSE;
-			// spec 140.16.2.21: "The value of this service property must be of type Boolean."
-			Object value = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED);
-			if (value instanceof Boolean) {
-				asyncSupported = (Boolean) value;
-			} else {
-				// let's relax the requirement and allow Strings as Booleans as well
-				// if that's not what we want, `git blame` will show you whom to contact
-				asyncSupported = ServicePropertiesUtils.getBooleanProperty(serviceReference,
-						HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED);
+		} finally {
+			if (service != null) {
+				bundleContext.ungetService(serviceReference);
 			}
 		}
 
-		if (annotationScan.scanned && annotationScan.webInitParams != null) {
-			for (WebInitParam param : annotationScan.webInitParams) {
-				String name = param.name();
-				String value = param.value();
-				initParams.put(name, value);
-			}
-		}
+		// pass everything to a handy builder
+		ServletModel.Builder builder = new ServletModel.Builder()
+				.withServiceRankAndId(rank, serviceId)
+				.withServletReference(serviceReference.getBundle(), serviceReference)
+				.withAlias(alias)
+				.withUrlPatterns(urlPatterns)
+				.withServletName(name)
+				.withInitParams(initParams)
+				.withAsyncSupported(asyncSupported)
+				.withLoadOnStartup(loadOnStartup)
+				.withMultipartConfigElement(multiPartConfig);
 
-		if (annotationScan.scanned && annotationScan.asyncSupported != null) {
-			asyncSupported = annotationScan.asyncSupported;
-		}
-
-		if (annotationScan.scanned && annotationScan.loadOnStartup != null) {
-			loadOnStartup = annotationScan.loadOnStartup;
-		}
-
-		DefaultServletMapping mapping = new DefaultServletMapping();
-		mapping.setHttpContextId(httpContextId);
-		mapping.setServlet(published);
-		if (servletName != null) {
-			mapping.setServletName(servletName.trim());
-		}
-		mapping.setAlias(alias);
-		mapping.setUrlPatterns(urlPatterns);
-		mapping.setInitParams(initParams);
-		mapping.setLoadOnStartup(loadOnStartup);
-		mapping.setAsyncSupported(asyncSupported);
-
-		List<DefaultErrorPageMapping> errorMappings = new ArrayList<>();
-
-		if (errorPageParams != null) {
-			for (String errorPageParam : errorPageParams) {
-				DefaultErrorPageMapping errorMapping = new DefaultErrorPageMapping();
-				errorMapping.setHttpContextId(httpContextId);
-				errorMapping.setLocation(alias);
-				errorMapping.setError(errorPageParam);
-				errorMappings.add(errorMapping);
-			}
-		}
-
-		return new ServletWebElement<>(serviceReference, mapping, errorMappings);
+		return builder.build();
 	}
+
+	// from removed ServletWebElement
+
+//	@Override
+//	public void register(final WebContainer webContainer,
+//						 final HttpContext httpContext) throws Exception {
+//		if (servletMapping.getAlias() != null) {
+//			Dictionary<String, String> initParams = DictionaryUtils.adapt(servletMapping.getInitParams());
+//			// PAXWEB-961 - using plain org.osgi.service.http.HttpService doesn't allow passing servlet name,
+//			// so let's pass via init params
+//			if (initParams.get(SERVLET_NAME) == null && servletMapping.getServletName() != null) {
+//				initParams.put(SERVLET_NAME, servletMapping.getServletName());
+//			}
+//			webContainer.registerServlet(servletMapping.getAlias(),
+//					servletMapping.getServlet(),
+//					initParams,
+//					httpContext);
+//		} else {
+//				webContainer.registerServlet(
+//						servletMapping.getServlet(),
+//						servletMapping.getServletName(),
+//						servletMapping.getUrlPatterns(),
+//						DictionaryUtils.adapt(servletMapping.getInitParams()),
+//						servletMapping.getLoadOnStartup(),
+//						servletMapping.getAsyncSupported(),
+//						servletMapping.getMultipartConfig(),
+//						httpContext);
+//				// ((WebContainer) httpService).end(httpContext);
+//		}
+//		//special handling for OSGi R6 registration of Servlet as ErrorHandler
+//		if (errorMappings != null) {
+//			for (DefaultErrorPageMapping errorPageMapping : errorMappings) {
+////				webContainer.registerErrorPage(
+////						errorPageMapping.getError(),
+////						servletMapping.getAlias(), httpContext);
+//			}
+//		}
+//	}
+//
+//	@Override
+//	public void unregister(final WebContainer webContainer,
+//						   final HttpContext httpContext) {
+//		if (servletMapping.getAlias() != null) {
+//			webContainer.unregister(servletMapping.getAlias());
+//		} else {
+//			webContainer.unregisterServlet(servletMapping.getServlet());
+//		}
+//	}
+//
+
+//	@Override
+//	public Collection<? extends ErrorPageMapping> getErrorPageMappings() {
+//		return errorMappings;
+//	}
 
 }

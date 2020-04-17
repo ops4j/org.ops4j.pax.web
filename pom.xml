@@ -291,7 +291,7 @@
 		<dependency.spring.version>5.1.4.RELEASE</dependency.spring.version>
 		<dependency.spring-dm.version>1.2.1</dependency.spring-dm.version>
 		<dependency.taglibs.version>1.2.5</dependency.taglibs.version>
-		<dependency.tomcat.version>9.0.34</dependency.tomcat.version>
+		<dependency.tomcat.version>9.0.35</dependency.tomcat.version>
 		<dependency.xbean.version>4.15</dependency.xbean.version>
 	</properties>
 
@@ -2315,7 +2315,7 @@
 
 <!--		<module>pax-web-descriptor</module>-->
 <!--		<module>pax-web-extender-war</module>-->
-<!--		<module>pax-web-extender-whiteboard</module>-->
+		<module>pax-web-extender-whiteboard</module>
 <!--		<module>pax-web-resources</module>-->
 <!--		<module>pax-web-deployer</module>-->
 		<module>pax-web-jetty</module>

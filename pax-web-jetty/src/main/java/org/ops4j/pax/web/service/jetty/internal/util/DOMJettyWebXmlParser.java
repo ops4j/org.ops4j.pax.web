@@ -17,11 +17,6 @@
 
 package org.ops4j.pax.web.service.jetty.internal.util;
 
-import static org.ops4j.util.xml.ElementHelper.getAttribute;
-import static org.ops4j.util.xml.ElementHelper.getChildren;
-import static org.ops4j.util.xml.ElementHelper.getRootElement;
-import static org.ops4j.util.xml.ElementHelper.getValue;
-
 import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -45,6 +40,11 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
+
+import static org.ops4j.util.xml.ElementHelper.getAttribute;
+import static org.ops4j.util.xml.ElementHelper.getChildren;
+import static org.ops4j.util.xml.ElementHelper.getRootElement;
+import static org.ops4j.util.xml.ElementHelper.getValue;
 
 /**
  * adapted and optimized JettyXmlConfiguration class for reading jetty-web.xml

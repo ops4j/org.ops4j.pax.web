@@ -23,6 +23,7 @@ import java.util.Hashtable;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,19 +32,27 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 import org.ops4j.pax.web.service.PaxWebConstants;
-import org.ops4j.pax.web.service.ReferencedWebContainerContext;
+import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.service.spi.ServerController;
+import org.ops4j.pax.web.service.spi.context.DefaultHttpContext;
+import org.ops4j.pax.web.service.spi.context.DefaultMultiBundleWebContainerContext;
+import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.task.Batch;
+import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.FilterModelChange;
+import org.ops4j.pax.web.service.spi.task.FilterStateChange;
+import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
 import org.ops4j.pax.web.service.whiteboard.ContextMapping;
@@ -64,8 +73,9 @@ import org.slf4j.LoggerFactory;
  * the same alias / URL mapping.</p>
  *
  * @author Alin Dreghiciu
+ * @author Grzegorz Grzybek
  */
-public class ServerModel {
+public class ServerModel implements BatchVisitor {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ServerModel.class);
 
@@ -76,6 +86,8 @@ public class ServerModel {
 
 	/** Unique identified of the Thread from (assumed) single thread pool executor. */
 	private final long registrationThreadId;
+
+	// --- Virtual Host model information
 
 	/**
 	 * <p>Map of all available virtual hosts. Each key is virtual host main name (no alias, no wildcard).</p>
@@ -96,6 +108,8 @@ public class ServerModel {
 	 */
 	private final VirtualHostModel defaultHost = new VirtualHostModel();
 
+	// --- Global context information - not related to any particular bundle
+
 	/**
 	 * <p>Global mapping between <em>context path</em> and {@link ServletContextModel}.</p>
 	 *
@@ -104,15 +118,30 @@ public class ServerModel {
 	 *     <li>have single {@link ServletContextModel} available <em>under</em> different virtual hosts with different
 	 *     context paths</li>
 	 *     <li>have two different {@link ServletContextModel} with the same path registered under different
-	 *     virtual hosts (though technically it's possible with Tomcat)</li>
+	 *     virtual hosts (though technically it's possible with Tomcat, where <em>virtual host</em> is more
+	 *     strictly defined than in Jetty and Undertow).</li>
 	 * </ul></p>
+	 *
+	 * <p>Also, {@link ServletContextModel} is available through many {@link OsgiContextModel} instances,
+	 * but the coupling is loose - only through context path.</p>
 	 */
 	private final Map<String, ServletContextModel> servletContexts = new HashMap<>();
 
+	// --- Bundle-bound context information - for Http Service scenarios, where OsgiContextModel is
+	//     identified by HttpContext/WebContainerContext passed to httpService.registerXXX(..., context)
+	//     OSGiContextModels created and managed at pax-web-extender-runtime level are not kept here, because
+	//     "default" context in Http Service and "default" context in Whiteboard Service should not clash
+
 	/**
-	 * <p>Global mapping between {@link WebContainerContext} (which can represent "old" {@link HttpContext} from
-	 * Http Service specification or "new" {@link org.osgi.service.http.context.ServletContextHelper} from
-	 * Whiteboard Service specification) and internal information about OSGi-specific <em>context</em>.</p>
+	 * <p>Global mapping between {@link WebContainerContext}, which represents "old" {@link HttpContext} from
+	 * Http Service specification and internal information about OSGi-specific <em>context</em>. In Whiteboard Service
+	 * scenario, the relation is reversed - from user point of view, name of <em>context</em> is used, this name
+	 * represents some {@link OsgiContextModel} and from this {@link OsgiContextModel} Pax Web obtains an instance
+	 * of {@link WebContainerContext} - because {@link org.osgi.service.http.context.ServletContextHelper}
+	 * may be registered as {@link org.osgi.framework.ServiceFactory}.</p>
+	 *
+	 * <p>Technically, in Http Service scenario, {@link HttpContext} is the entry point and the mapped
+	 * {@link OsgiContextModel} contains it (or rather its extension - {@link WebContainerContext}) directly.</p>
 	 *
 	 * <p>Several mapped {@link OsgiContextModel OSGi contexts} can refer to single {@link ServletContextModel} when
 	 * they use single <em>context path</em>. This is specified in OSGi CMPN Http Service and Whiteboard Service
@@ -121,55 +150,68 @@ public class ServerModel {
 	 *     to identify a <em>context</em> - there may be two contexts with "default" name, so there should be two
 	 *     different {@link OsgiContextModel OSGi contexts}, further pointing to single {@link ServletContextModel}.</li>
 	 *     <li>Pax Web introduces <em>shared</em> {@link HttpContext} where e.g., "default" <em>context</em>
-	 *     can be used by many bundles and supporting {@link HttpContext} loads resources from different bundles.</li>
+	 *     can be used by many bundles and can allow {@link HttpContext} to load resources from different bundles.</li>
 	 *     <li>"new" {@link org.osgi.service.http.context.ServletContextHelper} is by default shared by multiple
 	 *     bundles, and its name <strong>is</strong> the only distinguishing element, however web elements may
-	 *     refer (using a filter) to more than one {@link org.osgi.service.http.context.ServletContextHelper}
-	 *     (using wildcard filter or by filtering other service registration properties).</li>
+	 *     refer (using an LDAP filter) to more than one {@link org.osgi.service.http.context.ServletContextHelper}
+	 *     (using wildcard filter or when filtering by other service registration properties).</li>
 	 *     <li>"old" Http Service specification doesn't mention at all the concept of sharing {@link HttpContext}
 	 *     through service registry. That's Pax Web improvement and additional configuration method (like specifying
 	 *     <em>context path</em>).</li>
 	 *     <li>Registered <em>contexts</em> (and Whiteboard Service spec states this explicitly) may be instances
-	 *     of {@link org.osgi.framework.ServiceFactory} which add bundle identity aspect to the context.</li>
+	 *     of {@link org.osgi.framework.ServiceFactory} which add bundle identity aspect to the context. This means
+	 *     that even if two bundles register servlets with the same <em>context</em>, the {@code getResource()}
+	 *     method loads resources from relevant bundle - different for different servlets.</li>
 	 * </ul></p>
 	 *
-	 * <p>This mapping is not available for given virtual host, because in Pax Web the relation is reversed comparing
+	 * <p>This mapping is not kept at virtual host level, because in Pax Web the relation is reversed comparing
 	 * to Tomcat and reflects Jetty approach to virtual hosts (where hosts are <em>attributes</em> of a context).</p>
 	 *
-	 * <p>This map may be populated during registration of servlet using old {@link org.osgi.service.http.HttpService}
-	 * API, but can also be altered in Whiteboard service tracking (both Pax Web tracking of custom interfaces
-	 * and official OSGi CMPN Whiteboard tracking of web elements with service registration parameters), where
-	 * user registers actual <em>context</em> - also when registered <em>context</em> is a
-	 * {@link org.osgi.framework.ServiceFactory}.</p>
+	 * <p>This map stores only non-shared (which is default with Http Service specification)
+	 * {@link WebContainerContext} instances as keys.</p>
 	 *
-	 * <p>There may also be a case, where some servlet is registered using a context (by default using "/" path) and
-	 * then the same {@link HttpContext} itself is registered with path specification. This should lead to
-	 * re-registration of servlets (and filers and ...) to a new actual server-specific context.</p>
+	 * <p>There's very important decision made here, but also easy to change. In felix.http,
+	 * {@code org.apache.felix.http.base.internal.service.DefaultHttpContext} has default hashCode/equals, which
+	 * means that "default" {@link HttpContext} is always different. When user
+	 * calls {@code registerServlet(..., null)} many times, each servlet is registered to different "context"!.
+	 * Http Service specification says ("102.2 Registering Servlets"):
+	 * <blockquote>
+	 *     Thus, Servlet objects registered with the same HttpContext object must also share the same
+	 *     ServletContext object
+	 * </blockquote>
+	 * Specification doesn't precise what <em>the same</em> means - neither for HttpContext nor for the ServletContext.
+	 * In Pax Web, knowing that there's Whiteboard aspect of the "context", we'll distinguish <strong>three</strong>
+	 * contexts:<ul>
+	 *     <li>standard {@link HttpContext} from Http Service spec - <em>the same</em> will be defined as <em>having
+	 *     the same id and bundle</em></li>
+	 *     <li>Pax Web shared/multi-bundle variant of {@link HttpContext} - <em>the same</em> will be defined as
+	 *     <em>having the same id</em></li>
+	 *     <li>standard {@link org.osgi.service.http.context.ServletContextHelper} from Whiteboard Service spec -
+	 *     <em>the same</em> will be defined as <em>having the same name</em>, but also service ranking is taken into
+	 *     account (when needed). {@link OsgiContextModel} that uses
+	 *     {@link org.osgi.service.http.context.ServletContextHelper} is not tracked here.</li>
+	 * </ul></p>
 	 *
-	 * <p>This is mapping from user layer to Pax Web layer.</p>
+	 * <p>For now (2020-05-20) the decision is that if user registers a servlet with {@code null} {@link HttpContext},
+	 * (s)he doesn't expect them to be registered in <em>different</em> contexts. So underneath, the same
+	 * {@link OsgiContextModel} (and session and context attributes) is used. Which implies identity not by hashCode,
+	 * but by name + bundle (if not shared).</p>
 	 */
-	private final Map<WebContainerContext, OsgiContextModel> contexts = new HashMap<>();
+	private final Map<WebContainerContext, OsgiContextModel> bundleContexts = new HashMap<>();
 
 	/**
-	 * <p>If an {@link OsgiContextModel} is associated with shared {@link HttpContext} or with
-	 * {@link org.osgi.service.http.context.ServletContextHelper} (which is shared by default), such context
-	 * can be retrieved here by name, which should be unique.</p>
+	 * <p>If an {@link OsgiContextModel} is associated with shared/multi-bundle {@link HttpContext}, such context
+	 * can be retrieved here by name, which should be unique in Http Service namespace.</p>
 	 *
-	 * <p>When new shared context is registered (in any way) that should override existing one (e.g., by
-	 * service ranking), it should be replaced.</p>
-	 *
-	 * <p>See 140.2 The Servlet Context, description of {@code osgi.http.whiteboard.context.name} property.</p>
+	 * <p><em>Contexts</em> for Whiteboard Service should <strong>not</strong> be kept here. This implies that there's
+	 * no way to register a {@link Servlet} through {@link org.osgi.service.http.HttpService} in association with
+	 * a <em>context</em> created from Whiteboard trackers. What's surprising is that even if it's technically possible
+	 * to do the opposite, it's explicitly forbidden by Whiteboard Service specification. Only filters, listeners
+	 * and error pages can be registered to contexts created through {@link org.osgi.service.http.HttpService}.</p>
 	 */
 	private final Map<String, OsgiContextModel> sharedContexts = new HashMap<>();
 
-	/**
-	 * <p>If an {@link OsgiContextModel} is associated with non-shared {@link HttpContext}, such context
-	 * can be retrieved here by <em>reference</em> == ID + bundle.</p>
-	 *
-	 * <p>This map contains a subset of {@link #contexts} keyed by contexts that should provide
-	 * correct equality check with {@link ReferencedWebContainerContext}.</p>
-	 */
-	private final Map<WebContainerContext, OsgiContextModel> bundleContexts = new HashMap<>();
+	// -- Web Elements model information
 
 	/**
 	 * <p>Set of all registered servlets. Used to block registration of the same servlet more than once.
@@ -217,17 +259,22 @@ public class ServerModel {
 	 *
 	 * <p>This set is reviewed every time existing registration is changed.</p>
 	 */
-	private final Set<FilterModel> disabledFilterModels = new HashSet<>();
+	private final Set<FilterModel> disabledFilterModels = new TreeSet<>();
 
-	// TODO: Should listeners, security constraints, login configs, welcome files, security roles, error pages and
+	// TODO: Should listeners, security constraints, login configs, welcome files, security roles, error pages
 	//       and mime types be checked for unique registration?
 
+	/**
+	 * Creates new global model of all web applications with {@link Executor} to be used for configuration and
+	 * registration tasks.
+	 * @param executor
+	 */
 	public ServerModel(Executor executor) {
 		this.executor = executor;
 
 		try {
 			// check thread ID to detect whether we're running within it
-			registrationThreadId = CompletableFuture.supplyAsync(() -> Thread.currentThread().getId()).get();
+			registrationThreadId = CompletableFuture.supplyAsync(() -> Thread.currentThread().getId(), executor).get();
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new RuntimeException(e.getMessage(), e);
@@ -243,6 +290,63 @@ public class ServerModel {
 
 	public Executor getExecutor() {
 		return executor;
+	}
+
+	/**
+	 * After ServerModel is created, we need to create a {@link ServletContextModel} for "/" path and let
+	 * given {@lik ServerController} know about it.
+	 *
+	 * @param serverController
+	 */
+	public void createDefaultServletContextModel(final ServerController serverController) {
+		runSilently(() -> {
+			Batch batch = new Batch("Initialization of default servlet context model");
+
+			getOrCreateServletContextModel(PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
+
+			// OsgiContextModels are bundle-aware and will be created for ServiceModel and bundle-scoped
+			// HttpServiceEnabled instance. We'll however create one default shared model
+			String sharedContextName = PaxWebConstants.DEFAULT_SHARED_CONTEXT_NAME;
+			sharedContexts.put(sharedContextName, createDefaultSharedtHttpContext(sharedContextName));
+
+			// only if validation was fine, pass the batch to ServerController, where the batch may fail again
+			serverController.sendBatch(batch);
+
+			// if server runtime has accepted the changes (hoping it'll be in clean state if it didn't), lets
+			// actually apply the changes to global model (through ServiceModel)
+			batch.accept(this);
+
+			return null;
+		});
+	}
+
+	/**
+	 * Creates named {@link OsgiContextModel} as shared {@link OsgiContextModel}.
+	 * @param contextId
+	 * @return
+	 */
+	public OsgiContextModel createDefaultSharedtHttpContext(String contextId) {
+		return runSilently(() -> {
+			if (sharedContexts.containsKey(contextId)) {
+				// safe operation, because we should be in single threaded pool's thread
+				return sharedContexts.get(contextId);
+			}
+
+			// bundle-agnostic (a.k.a. "shared") context model with supplier from static DEFAULT_CONTEXT_MODEL
+			OsgiContextModel model = new OsgiContextModel(null, 0, 0L);
+			model.setContextSupplier(OsgiContextModel.DEFAULT_CONTEXT_MODEL.getContextSupplier());
+			model.setName(contextId);
+			// the behavioral aspects from the template
+			WebContainerContext wcc = model.getContextSupplier().apply(null, contextId);
+
+			// the multibundle aspects in new instance - we know what the DEFAULT_CONTEXT_MODEL supplier returns...
+			wcc = new DefaultMultiBundleWebContainerContext((WebContainerContextWrapper) wcc);
+
+			model = createNewContextModel(wcc, null, PaxWebConstants.DEFAULT_CONTEXT_PATH);
+			associateHttpContext(wcc, model);
+
+			return model;
+		});
 	}
 
 	/**
@@ -292,109 +396,26 @@ public class ServerModel {
 		return null;
 	}
 
-	// Important - all the methods here have to be run within single configuration thread from global
-	// thread pool of pax-web-runtime.
-	// org.ops4j.pax.web.service.spi.model.ServerModel.register() makes it easier
-
-	/**
-	 * <p>This method ensures that <strong>if</strong> given {@link WebContainerContext} is already mapped to some
-	 * {@link OsgiContextModel}, it is permitted to reference it by given bundle.</p>
-	 *
-	 * <p>There are several scenarios, including one where {@link org.osgi.service.http.HttpService}, scoped to
-	 * one bundle is used to register a servlet, while passed {@link HttpContext} is scoped to another bundle.</p>
-	 *
-	 * <p>With whiteboard approach, user can't trick the runtime with two different bundles (one from the passed
-	 * {@link HttpContext} and other - from the bundle scoped {@link org.osgi.service.http.HttpService}.</p>
-	 *
-	 * @param context existing extension of {@link HttpContext}, probably created from bundle-scoped
-	 *        {@link org.osgi.service.http.HttpService}
-	 * @param bundle actual bundle on behalf of each we try to perform a registration of web element - comes from
-	 *        the scope of {@link org.osgi.service.http.HttpService} through which the registration is made.
-	 * @return if the association exists and is valid, related {@link OsgiContextModel} is returned. {@code null}
-	 *         is returned if the association is possible
-	 * @throws IllegalStateException if there exists incompatible association
-	 */
-	public OsgiContextModel checkValidAssociation(final WebContainerContext context, final Bundle bundle)
-			throws IllegalStateException {
-		OsgiContextModel contextModel = null;
-
-		// quick check in case of references - first among shared contexts, then among bundle-scoped contexts
-		// here we don't care much about the bundle of HttpService used
-		if (context.isReference()) {
-			contextModel = sharedContexts.get(context.getContextId());
-			if (contextModel == null) {
-				contextModel = bundleContexts.get(context);
-			}
-
-			if (contextModel == null) {
-				throw new IllegalStateException(context + " doesn't refer to any existing context");
-			}
-
-			if (LOG.isTraceEnabled()) {
-				LOG.trace(context + " can be associated with " + contextModel);
-			}
-			return contextModel;
+	public <T> T runSilently(ModelRegistrationTask<T> task) {
+		try {
+			return run(task);
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage(), e);
 		}
-
-		// next check that's most common - registration when there's already a context present
-		contextModel = contexts.get(context);
-
-		if (contextModel != null) {
-			if (!contextModel.getHttpContext().getBundle().equals(bundle)) {
-				if (!contextModel.getHttpContext().isShared()) {
-					// context is OK, points to proper model, but looks like "stolen".
-					// bundle (scope of HttpService) is not correct, should be the same
-					throw new IllegalStateException("Existing " + contextModel
-							+ " is not shared and can't be used by bundle " + bundle);
-				}
-				if (!context.isShared()) {
-					// we could access shared contextModel, but we're using non-shared WebContainerContext to access it
-					throw new IllegalStateException("Existing " + contextModel
-							+ " is shared, but registration is perfomed using non-shared " + context);
-				}
-			}
-
-			if (LOG.isTraceEnabled()) {
-				LOG.trace(context + " can be associated with " + contextModel + " in the scope of " + bundle);
-			}
-
-			return contextModel;
-		}
-
-		// shared context check - enforced identity by contextId only
-		// according to 140.2 The Servlet Context, "osgi.http.whiteboard.context.name" description
-		if (context.isShared()) {
-			// whether there is shared context or not, it's ok - even if there are non-shared contexts
-			// with the same name
-			contextModel = sharedContexts.get(context.getContextId());
-
-			if (LOG.isTraceEnabled()) {
-				if (contextModel != null) {
-					LOG.trace(context + " can be associated with " + contextModel);
-				} else {
-					LOG.trace(context + " is not yet associated with any context model");
-				}
-			}
-
-			return contextModel;
-		}
-
-		// non shared context, no associated contextModel
-		// OK, even if there may be other (shared or non shared, but scoped for different bundle) contexts
-		// with the same name, but the thing is that given context+bundle has no associated ContextModel yet
-		if (LOG.isTraceEnabled()) {
-			LOG.trace(context + " is not yet associated with any context model");
-		}
-
-		return null;
 	}
+
+	// --- methods that operate on "web contexts"
 
 	/**
 	 * <p>Returns {@link ServletContextModel} uniquely identified by <em>context path</em> (as defined by
 	 * {@link ServletContext#getContextPath()}. There's single instance of {@link ServletContextModel} even if
-	 * it's available in multiple {@link VirtualHostModel virtual hosts}.</p>
+	 * it's available in multiple {@link VirtualHostModel virtual hosts} and referenced by many
+	 * {@link OsgiContextModel}.</p>
 	 *
 	 * <p>This method doesn't alter the global model, only adds relevant operation to the {@link Batch}.</p>
+	 *
+	 * <p>This method is used both in Http Service and Whiteboard Service scenarios because there really has to
+	 * be single {@link ServletContextModel} per <em>context path</em>.</p>
 	 *
 	 * @param contextPath
 	 * @param batch
@@ -414,39 +435,104 @@ public class ServerModel {
 	}
 
 	/**
-	 * <p>Returns {@link OsgiContextModel} associated with {@link HttpContext} and when the target
-	 * {@link OsgiContextModel} is already available, checks if it can be used with input {@link HttpContext}.</p>
+	 * <p>Returns (new or existing) {@link OsgiContextModel} associated with {@link HttpContext}. When the target
+	 * {@link OsgiContextModel} is already available, validation is performed to check if it can be used with
+	 * passed {@link HttpContext}. The returned {@link OsgiContextModel} is never
+	 * {@link OsgiContextModel#DEFAULT_CONTEXT_MODEL}, which however may be used as template.</p>
 	 *
-	 * <p>Single, bundle-scoped instance of {@link org.osgi.service.http.HttpService} (this class) may manage different
-	 * {@link OsgiContextModel servlet contexts} for different instances of {@link HttpContext}. But when
-	 * non-shared {@link HttpContext} is already associated with some {@link OsgiContextModel}, it'll be reused.</p>
+	 * <p>As mentioned in {@link #bundleContexts} doc, the identity is checked for {@link WebContainerContext}
+	 * and for "default" contexts (returned from {@code create} methods of
+	 * {@link org.ops4j.pax.web.service.WebContainer}) this identity is name+bundle (or only name for <em>shared</em>
+	 * contexts), but for user-provided contexts it can be anything.</p>
 	 *
 	 * <p>This method doesn't alter the global model, only adds relevant operation to the {@link Batch}.</p>
 	 *
 	 * @param context
 	 * @param serviceBundle
+	 * @param contextPath
 	 * @param batch
 	 * @return
 	 * @throws IllegalStateException if there exists incompatible association
 	 */
-	public OsgiContextModel getOrCreateOsgiContextModel(final WebContainerContext context, Bundle serviceBundle, Batch batch)
-			throws IllegalStateException {
-		OsgiContextModel existing = checkValidAssociation(context, serviceBundle);
+	public OsgiContextModel getOrCreateOsgiContextModel(WebContainerContext context,
+			Bundle serviceBundle, String contextPath, Batch batch) throws IllegalStateException {
+		OsgiContextModel existing = verifyExistingAssociation(context, serviceBundle);
 		if (existing != null) {
 			return existing;
 		}
 
-		// if there was no existing association, this means no Whiteboard service for ServletContextHelper
-		// (or Pax-Web specific org.ops4j.pax.web.service.whiteboard.ContextMapping derived service) was registered
-		// before. This means we use default path
-		// TODO: When Whiteboard and HttpService (pax-web-runtime) start, there have to be default HttpContext
-		//       and ServletContextWrapper associated to default model
-		OsgiContextModel osgiContextModel = createNewContextModel(context, PaxWebConstants.DEFAULT_CONTEXT_PATH,
-				serviceBundle, batch);
+		ServletContextModel servletContextModel = getOrCreateServletContextModel(contextPath, batch);
+		OsgiContextModel osgiContextModel = createNewContextModel(context, serviceBundle, contextPath);
 
+		batch.addOsgiContextModel(osgiContextModel, servletContextModel);
 		batch.associateOsgiContextModel(context, osgiContextModel);
 
 		return osgiContextModel;
+	}
+
+	/**
+	 * <p>This method ensures that <strong>if</strong> given {@link WebContainerContext} is already mapped to some
+	 * {@link OsgiContextModel}, it is permitted to reference it within a scope of a given bundle.</p>
+	 *
+	 * <p>There are several scenarios, including one where {@link org.osgi.service.http.HttpService}, scoped to
+	 * one bundle is used to register a servlet, while passed {@link HttpContext} is scoped to another bundle.</p>
+	 *
+	 * <p>With whiteboard approach, user can't trick the runtime with two different bundles (one from the passed
+	 * {@link HttpContext} and other - from the bundle scoped {@link org.osgi.service.http.HttpService} because
+	 * it's designed much better.</p>
+	 *
+	 * @param context existing extension of {@link HttpContext}, probably created from bundle-scoped
+	 *        {@link org.osgi.service.http.HttpService}
+	 * @param bundle actual bundle on behalf of each we try to perform a registration of web element - comes from
+	 *        the scope of {@link org.osgi.service.http.HttpService} through which the registration is made.
+	 * @return if the association exists and is valid, related {@link OsgiContextModel} is returned. {@code null}
+	 *         is returned if the association is possible
+	 * @throws IllegalStateException if there exists incompatible association
+	 */
+	public OsgiContextModel verifyExistingAssociation(final WebContainerContext context, final Bundle bundle)
+			throws IllegalStateException {
+		// quick check in case of references - first among shared contexts, then among bundle-scoped contexts
+		// here we don't care much about the bundle of HttpService used
+		OsgiContextModel contextModel = context.isShared() ? sharedContexts.get(context.getContextId())
+				: bundleContexts.get(context);
+
+		if (contextModel == null) {
+			if (LOG.isTraceEnabled()) {
+				LOG.trace(context + " is not yet associated with any context model");
+			}
+			return null;
+		}
+
+		if (!context.isShared()) {
+			// OsgiContextModel has to have direct reference to WebContainerContext (i.e., no supplier, no
+			// service reference - because these are used only in Whiteboard scenarios)
+			if (contextModel.getHttpContext() == null) {
+				throw new IllegalStateException("Existing " + contextModel
+						+ " doesn't have any HttpContext associated");
+			}
+			if (!bundle.equals(contextModel.getOwnerBundle())) {
+				if (contextModel.getOwnerBundle() != null) {
+					throw new IllegalStateException("Existing " + contextModel
+							+ " is not shared and can't be used by bundle " + bundle);
+				} else {
+					// we could access shared contextModel, but we're using non-shared WebContainerContext to access it
+					throw new IllegalStateException("Existing " + contextModel
+							+ " is shared, but registration is perfomed using non-shared " + context);
+				}
+			}
+		}
+
+		if (context.isShared() && contextModel.getOwnerBundle() != null) {
+			throw new IllegalStateException("Existing " + contextModel
+					+ " is owned by " + contextModel.getOwnerBundle() + ", but registration is perfomed using shared "
+					+ context);
+		}
+
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(context + " can be associated with " + contextModel + " in the scope of " + bundle);
+		}
+
+		return contextModel;
 	}
 
 	/**
@@ -455,59 +541,53 @@ public class ServerModel {
 	 *
 	 * <p>Dedicated method for this purpose emphasizes the importance and fragility of {@link OsgiContextModel}.
 	 * The only other way to create {@link OsgiContextModel} is the Whiteboard approach, when user registers one
-	 * of these services:<ul>
-	 *     <li>{@link org.osgi.service.http.context.ServletContextHelper} with annotations and/or service
-	 *     registration parameters</li>
-	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping}</li>
-	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.HttpContextMapping}</li>
+	 * of these OSGi services:<ul>
+	 *     <li>{@link org.osgi.service.http.context.ServletContextHelper} with service registration parameters</li>
+	 *     <li>{@link HttpContext} with service registration parameters - not recommended</li>
+	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping} - Pax Web Whiteboard</li>
+	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.HttpContextMapping} - Pax Web Whiteboard</li>
 	 * </ul></p>
 	 *
-	 * <p>The above Whiteboard methods allow to specify (annotations, service registration parameters, direct
+	 * <p>The above Whiteboard methods allow to specify (service registration parameters, direct
 	 * values in {@link org.ops4j.pax.web.service.whiteboard.ContextMapping}) additional information about
 	 * {@link OsgiContextModel}:<ul>
 	 *     <li>context path</li>
 	 *     <li>context (init) parameters</li>
 	 *     <li>virtual hosts</li>
-	 * </ul>Here, these attributes are not specified, so the resulting {@link OsgiContextModel} will be associated
-	 * with {@link ServletContextModel} having "/" path.</p>
-	 *
-	 * <p>Even if there may be more {@link OsgiContextModel} instances for single {@link ServletContextModel},
-	 * only one will be <em>active</em> wrt service ranking.</p>
+	 * </ul>Here, these attributes are not specified and the created {@link OsgiContextModel} is used only
+	 * for Http Service scenario.</p>
 	 *
 	 * @param webContext
 	 * @param serviceBundle
-	 * @param batch
+	 * @param contextPath
 	 * @return
 	 */
-	public OsgiContextModel createNewContextModel(WebContainerContext webContext, String contextPath,
-			Bundle serviceBundle, Batch batch) {
-		OsgiContextModel osgiContextModel = new OsgiContextModel(webContext, serviceBundle);
-
-		ServletContextModel scModel = getOrCreateServletContextModel(contextPath, batch);
-		scModel.getOsgiContextModels().add(osgiContextModel);
-
-		osgiContextModel.setServletContextModel(scModel);
+	public OsgiContextModel createNewContextModel(WebContainerContext webContext, Bundle serviceBundle,
+			String contextPath) {
+		OsgiContextModel osgiContextModel = new OsgiContextModel(webContext, serviceBundle, contextPath);
 
 		// this context is not registered using Whiteboard, so we have full right to make it parameterless
 		osgiContextModel.getContextParams().clear();
 		// explicit proof that no particular VHost is associated, thus context will be available through all VHosts
 		osgiContextModel.getVirtualHosts().clear();
 
-		// the context still should behave like it was registered
+		// the context still should behave (almos) like it was registered
 		Hashtable<String, Object> registration = osgiContextModel.getContextRegistrationProperties();
 		registration.clear();
-		// name however will be taken from WebContainerContext
+		// we pretend that this HttpContext/ServletContextModel was:
+		//  - registered to NOT represent the Whiteboard's context (org.osgi.service.http.context.ServletContextHelper)
+		registration.remove(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
+		//  - registered to represent the HttpService's context (org.osgi.service.http.HttpContext)
+		registration.put(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY, webContext.getContextId());
+		//  - registered with legacy context id parameter
 		registration.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, webContext.getContextId());
-		registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, webContext.getContextId());
-		registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
-
-		// artificial service registration properties
-		registration.put(Constants.SERVICE_ID, 0);
+		//  - registered by user as OSGi services
+		registration.put(Constants.SERVICE_ID, 0L);
+		osgiContextModel.setServiceId(0L);
 		registration.put(Constants.SERVICE_RANKING, 0);
-		osgiContextModel.setServiceId(0);
 		osgiContextModel.setServiceRank(0);
-
-		batch.addOsgiContextModel(osgiContextModel);
+		//  - registered with given context path
+		registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
 
 		LOG.trace("Created new {}", osgiContextModel);
 
@@ -515,22 +595,82 @@ public class ServerModel {
 	}
 
 	/**
-	 * <p>Simply mark {@lnk WebContainerContext} as the owner/creator/initiator of given {@link OsgiContextModel}.
+	 * <p>Simply mark {@link WebContainerContext} as the owner/creator/initiator of given {@link OsgiContextModel}
+	 * whether it's shared or bundle-related.</p>
 	 */
 	public void associateHttpContext(final WebContainerContext context, final OsgiContextModel osgiContextModel) {
-		contexts.put(context, osgiContextModel);
-
-		LOG.debug("Created association {} -> {}", context, osgiContextModel);
-
 		if (context.isShared()) {
 			sharedContexts.put(context.getContextId(), osgiContextModel);
+			LOG.debug("Configured shared context {} -> {}", context, osgiContextModel);
 		} else {
-			ReferencedWebContainerContext reference = new ReferencedWebContainerContext(context.getBundle(), context.getContextId());
-			// or:
-			//ReferencedWebContainerContext reference = new ReferencedWebContainerContext(osgiContextModel.getHttpContext().getBundle(), context.getContextId());
-			bundleContexts.put(reference, osgiContextModel);
+			bundleContexts.put(context, osgiContextModel);
+			LOG.debug("Created association {} -> {}", context, osgiContextModel);
 		}
 	}
+
+	/**
+	 * Returns (if exists) bundle-scoped {@link OsgiContextModel} with given name. This method retrieves only
+	 * "default" contexts created via {@link WebContainer#createDefaultHttpContext()}.
+	 * @param name
+	 * @param ownerBundle
+	 * @return
+	 */
+	public OsgiContextModel getBundleContextModel(String name, Bundle ownerBundle) {
+		// Using new DefaultHttpContext means that we'll retrieve only "default" contexts
+		return bundleContexts.get(new DefaultHttpContext(ownerBundle, name));
+	}
+
+	/**
+	 * Returns (if exists) bundle-scoped {@link OsgiContextModel} for given {@link WebContainerContext}. This
+	 * method can retrieve all the contexts - even ones created for entirely custom implementations of
+	 * {@link HttpContext} interface.
+	 * @param context
+	 * @return
+	 */
+	public OsgiContextModel getBundleContextModel(WebContainerContext context) {
+		return bundleContexts.get(context);
+	}
+
+	/**
+	 * Returns (if exists) bundle-agnostic (shared) {@link OsgiContextModel}
+	 * @param name
+	 * @return
+	 */
+	public OsgiContextModel getSharedContextModel(String name) {
+		return sharedContexts.get(name);
+	}
+
+	/**
+	 * <p>Returns {@link OsgiContextModel} contexts that can be used by given bundle - i.e., can be targets of
+	 * Whiteboard web element registered withing given bundle.</p>
+	 *
+	 * <p>None of the returned contexts will have a registration property named
+	 * {@link HttpWhiteboardConstants#HTTP_WHITEBOARD_CONTEXT_NAME} because they should match LDAP filters with
+	 * {@link HttpWhiteboardConstants#HTTP_SERVICE_CONTEXT_PROPERTY} property <strong>only</strong>.</p>
+	 *
+	 * @param bundle
+	 * @return
+	 */
+	public List<OsgiContextModel> getOsgiContextModels(Bundle bundle) {
+		final List<OsgiContextModel> contexts = new LinkedList<>();
+
+		// bundle contexts
+		runSilently(() -> {
+			bundleContexts.forEach((context, model) -> {
+				if (bundle.equals(context.getBundle())) {
+					contexts.add(model);
+				}
+			});
+			return null;
+		});
+
+		// shared contexts
+		contexts.addAll(sharedContexts.values());
+
+		return contexts;
+	}
+
+	// --- methods that operate on "web elements"
 
 	/**
 	 * Validates {@link ServletModel} and adds relevant batch operations if validation is successful. Due to
@@ -557,7 +697,7 @@ public class ServerModel {
 
 		// Even if a servlet is associated with more OsgiContextModels, eventually it is a set of unique
 		// ServletContextModels where the servlet is registered
-		Set<ServletContextModel> targetServletContexts = model.getServletContextModels();
+		Set<ServletContextModel> targetServletContexts = getServletContextModels(model);
 
 		// name checking, but remember that new model may replace existing model, so check should be performed
 		// after possible override. For each servlet context in this map we will have a ServletModel with
@@ -673,7 +813,7 @@ public class ServerModel {
 			contextsWithNameConflicts.entrySet().removeIf(e -> {
 				boolean nameMatches = e.getValue().getName().equals(existing.getName());
 				final boolean[] contextMatches = { false };
-				existing.getServletContextModels().forEach(scm -> contextMatches[0] |= e.getKey().equals(scm));
+				getServletContextModels(existing).forEach(scm -> contextMatches[0] |= e.getKey().equals(scm));
 				return nameMatches && contextMatches[0];
 			});
 		}
@@ -771,7 +911,7 @@ public class ServerModel {
 			// newlyDisabled are scheduled for disabling (in batch), so let's remove them from the snapshot
 			if (newlyDisabled != null) {
 				newlyDisabled.forEach(sm -> {
-					sm.getServletContextModels().forEach(scm2 -> {
+					getServletContextModels(sm).forEach(scm2 -> {
 						if (scm.equals(scm2)) {
 							enabledByName.remove(sm.getName(), sm);
 							Arrays.stream(sm.getUrlPatterns()).forEach(pattern -> {
@@ -822,7 +962,7 @@ public class ServerModel {
 			boolean canBeEnabled = true;
 			newlyDisabled.clear();
 
-			Set<ServletContextModel> contextsOfDisabledModel = disabled.getServletContextModels();
+			Set<ServletContextModel> contextsOfDisabledModel = getServletContextModels(disabled);
 
 			// check for name and URL pattern conflicts in all its contexts. There are two outcomes:
 			//  - any conflict - model won't be enabled and won't cause any changes
@@ -883,7 +1023,7 @@ public class ServerModel {
 					batch.disableServletModel(ServerModel.this, model);
 
 					// and forget about it in the snapshot
-					model.getServletContextModels().forEach(scm -> {
+					getServletContextModels(model).forEach(scm -> {
 						currentlyEnabledByName.get(scm.getContextPath()).remove(model.getName(), model);
 						Arrays.stream(model.getUrlPatterns()).forEach(p -> {
 							currentlyEnabledByPattern.get(scm.getContextPath()).remove(p, model);
@@ -943,7 +1083,7 @@ public class ServerModel {
 					+ " already been registered using " + filters.get(model.getFilter()));
 		}
 
-		Set<ServletContextModel> targetServletContexts = model.getServletContextModels();
+		Set<ServletContextModel> targetServletContexts = getServletContextModels(model);
 
 		// a bit easier than with servlets - there may be many filters mapped to the same URL patterns and
 		// servlet names (and regexps, as allowed by Whiteboard Service specification). Only filter name conflicts
@@ -1043,7 +1183,6 @@ public class ServerModel {
 	}
 
 	public void removeFilterModels(List<FilterModel> models, Batch batch) {
-
 		// this is straightforward
 		batch.removeFilterModels(this, models);
 
@@ -1083,7 +1222,7 @@ public class ServerModel {
 			// newlyDisabled are scheduled for disabling (in batch), so let's remove them from the snapshot
 			if (newlyDisabled != null) {
 				newlyDisabled.forEach(fm -> {
-					fm.getServletContextModels().forEach(scm2 -> {
+					getServletContextModels(fm).forEach(scm2 -> {
 						if (scm.equals(scm2)) {
 							enabledFilters.remove(fm);
 						}
@@ -1128,7 +1267,7 @@ public class ServerModel {
 			boolean canBeEnabled = true;
 			newlyDisabled.clear();
 
-			Set<ServletContextModel> contextsOfDisabledModel = disabled.getServletContextModels();
+			Set<ServletContextModel> contextsOfDisabledModel = getServletContextModels(disabled);
 
 			for (ServletContextModel sc : contextsOfDisabledModel) {
 				String cp = sc.getContextPath();
@@ -1161,7 +1300,7 @@ public class ServerModel {
 					batch.disableFilterModel(ServerModel.this, model);
 
 					// and forget about it in the snapshot
-					model.getServletContextModels().forEach(scm -> {
+					getServletContextModels(model).forEach(scm -> {
 						currentlyEnabledByName.get(scm.getContextPath()).remove(model);
 					});
 
@@ -1209,8 +1348,8 @@ public class ServerModel {
 		// if one model has name conflict with other model, check whether the conflict
 		// is in disjoint servlet contexts
 		if (name1.equals(name2)) {
-			for (ServletContextModel sc1 : model1.getServletContextModels()) {
-				for (ServletContextModel sc2 : model2.getServletContextModels()) {
+			for (ServletContextModel sc1 : getServletContextModels(model1)) {
+				for (ServletContextModel sc2 : getServletContextModels(model2)) {
 					if (sc1.equals(sc2)) {
 						return true;
 					}
@@ -1221,20 +1360,40 @@ public class ServerModel {
 		return false;
 	}
 
+	/**
+	 * Each {@link ElementModel} is associated with one ore more {@link OsgiContextModel} which are in turn
+	 * associated with {@link ServletContextModel} (by context path). Sometimes many {@link OsgiContextModel} models
+	 * are associated with the same target servlet context. This method returns unique set of
+	 * {@link ServletContextModel} contexts
+	 *
+	 * @param model
+	 * @return
+	 */
+	private Set<ServletContextModel> getServletContextModels(ElementModel<?> model) {
+		return model.getContextModels().stream()
+				.map(ocm -> servletContexts.get(ocm.getContextPath())).collect(Collectors.toSet());
+	}
+
 	// --- batch operation visit() methods performed without validation, because it was done earlier
 
+	@Override
 	public void visit(ServletContextModelChange change) {
 		ServletContextModel model = change.getServletContextModel();
 		this.servletContexts.put(model.getContextPath(), model);
 	}
 
+	@Override
+	public void visit(OsgiContextModelChange change) {
+	}
+
+	@Override
 	public void visit(ServletModelChange change) {
 		switch (change.getKind()) {
 			case ADD: {
 				ServletModel model = change.getServletModel();
 
 				// add new ServletModel to all target contexts
-				Set<ServletContextModel> servletContexts = model.getServletContextModels();
+				Set<ServletContextModel> servletContexts = getServletContextModels(model);
 				servletContexts.forEach(sc -> {
 					if (change.isDisabled()) {
 						// registered initially as disabled
@@ -1265,7 +1424,7 @@ public class ServerModel {
 
 					if (!wasDisabled) {
 						// remove ServletModel from all target contexts. disabled model was not available there
-						Set<ServletContextModel> servletContexts = model.getServletContextModels();
+						Set<ServletContextModel> servletContexts = getServletContextModels(model);
 						servletContexts.forEach(sc -> {
 							// use special, 2-arg version of map.remove()
 							sc.getServletNameMapping().remove(model.getName(), model);
@@ -1281,7 +1440,7 @@ public class ServerModel {
 			case ENABLE: {
 				ServletModel model = change.getServletModel();
 				// enable a servlet in all associated contexts
-				Set<ServletContextModel> servletContexts = model.getServletContextModels();
+				Set<ServletContextModel> servletContexts = getServletContextModels(model);
 				servletContexts.forEach(sc -> sc.enableServletModel(model));
 				disabledServletModels.remove(model);
 				break;
@@ -1290,7 +1449,7 @@ public class ServerModel {
 				ServletModel model = change.getServletModel();
 				disabledServletModels.add(model);
 				// disable a servlet in all associated contexts
-				Set<ServletContextModel> servletContexts = model.getServletContextModels();
+				Set<ServletContextModel> servletContexts = getServletContextModels(model);
 				servletContexts.forEach(sc -> sc.disableServletModel(model));
 				break;
 			}
@@ -1300,13 +1459,14 @@ public class ServerModel {
 		}
 	}
 
+	@Override
 	public void visit(FilterModelChange change) {
 		switch (change.getKind()) {
 			case ADD: {
 				FilterModel model = change.getFilterModel();
 
 				// add new FilterModel to all target contexts
-				Set<ServletContextModel> servletContexts = model.getServletContextModels();
+				Set<ServletContextModel> servletContexts = getServletContextModels(model);
 				servletContexts.forEach(sc -> {
 					if (change.isDisabled()) {
 						// registered initially as disabled
@@ -1335,7 +1495,7 @@ public class ServerModel {
 
 					if (!wasDisabled) {
 						// remove FilterModel from all target contexts. disabled model was not available there
-						Set<ServletContextModel> servletContexts = model.getServletContextModels();
+						Set<ServletContextModel> servletContexts = getServletContextModels(model);
 						servletContexts.forEach(sc -> {
 							// use special, 2-arg version of map.remove()
 							sc.getFilterNameMapping().remove(model.getName(), model);
@@ -1347,7 +1507,7 @@ public class ServerModel {
 			case ENABLE: {
 				FilterModel model = change.getFilterModel();
 				// enable a filter in all associated contexts
-				Set<ServletContextModel> servletContexts = model.getServletContextModels();
+				Set<ServletContextModel> servletContexts = getServletContextModels(model);
 				servletContexts.forEach(sc -> sc.enableFilterModel(model));
 				disabledFilterModels.remove(model);
 				break;
@@ -1356,13 +1516,17 @@ public class ServerModel {
 				FilterModel model = change.getFilterModel();
 				disabledFilterModels.add(model);
 				// disable a filter in all associated contexts
-				Set<ServletContextModel> servletContexts = model.getServletContextModels();
+				Set<ServletContextModel> servletContexts = getServletContextModels(model);
 				servletContexts.forEach(sc -> sc.disableFilterModel(model));
 				break;
 			}
 			default:
 				break;
 		}
+	}
+
+	@Override
+	public void visit(FilterStateChange filterStateChange) {
 	}
 
 

@@ -17,14 +17,6 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
-import org.ops4j.pax.web.extender.whiteboard.internal.element.ResourceWebElement;
-import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
-import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultResourceMapping;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class ResourceTracker extends AbstractTracker<Object, ResourceWebElement> {
+public class ResourceTracker /*extends AbstractElementTracker<Object, ResourceWebElement>*/ {
 
 	/**
 	 * Logger.
@@ -49,42 +41,55 @@ public class ResourceTracker extends AbstractTracker<Object, ResourceWebElement>
 	 * @param bundleContext
 	 *            extender bundle context; cannot be null
 	 */
-	private ResourceTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
-		super(extenderContext, bundleContext);
-	}
-
-	@SuppressWarnings("unchecked")
-	public static ServiceTracker<Object, ResourceWebElement> createTracker(final ExtenderContext extenderContext,
-			final BundleContext bundleContext) {
-		return new ResourceTracker(extenderContext, bundleContext).create("(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX + "=*)");
-	}
-
-	/**
-	 * @see AbstractTracker#createWebElement(ServiceReference, Object)
-	 */
-	@Override
-	ResourceWebElement createWebElement(final ServiceReference<Object> serviceReference, final Object published) {
-
-		String[] resourcePattern = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference,
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN);
-		String prefix = ServicePropertiesUtils.getStringProperty(serviceReference,
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX);
-
-		if (resourcePattern != null && prefix != null) {
-
-			String httpContextId = ServicePropertiesUtils.extractHttpContextId(serviceReference);
-
-			final DefaultResourceMapping mapping = new DefaultResourceMapping();
-			mapping.setHttpContextId(httpContextId);
-
-			mapping.setAlias(resourcePattern[0]); // TODO: make sure multiple
-													// patterns are supported
-			mapping.setPath(prefix);
-
-			return new ResourceWebElement(serviceReference, mapping);
-		} else {
-			return null;
-		}
-	}
+//	private ResourceTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
+//		super(extenderContext, bundleContext);
+//	}
+//
+//	public static ServiceTracker<Object, ResourceWebElement> createTracker(final ExtenderContext extenderContext,
+//			final BundleContext bundleContext) {
+//		return new ResourceTracker(extenderContext, bundleContext).create("(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX + "=*)");
+//	}
+//
+//	/**
+//	 * @see AbstractElementTracker#createElementModel(ServiceReference, Object)
+//	 */
+//	@Override
+//	ResourceWebElement createWebElement(final ServiceReference<Object> serviceReference, final Object published) {
+//
+//		String[] resourcePattern = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference,
+//				HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN);
+//		String prefix = ServicePropertiesUtils.getStringProperty(serviceReference,
+//				HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX);
+//
+//		if (resourcePattern != null && prefix != null) {
+//
+//			String httpContextId = ServicePropertiesUtils.extractHttpContextId(serviceReference);
+//
+//			final DefaultResourceMapping mapping = new DefaultResourceMapping();
+//			mapping.setHttpContextId(httpContextId);
+//
+//			mapping.setAlias(resourcePattern[0]); // TODO: make sure multiple
+//													// patterns are supported
+//			mapping.setPath(prefix);
+//
+//			return new ResourceWebElement(serviceReference, mapping);
+//		} else {
+//			return null;
+//		}
+//	}
+//	@Override
+//	public void register(final WebContainer webContainer,
+//						 final HttpContext httpContext) throws Exception {
+//		webContainer.registerResources(
+//				resourceMapping.getAlias(),
+//				resourceMapping.getPath(),
+//				httpContext);
+//	}
+//
+//	@Override
+//	public void unregister(final WebContainer webContainer,
+//						   final HttpContext httpContext) {
+//		webContainer.unregister(resourceMapping.getAlias());
+//	}
 
 }

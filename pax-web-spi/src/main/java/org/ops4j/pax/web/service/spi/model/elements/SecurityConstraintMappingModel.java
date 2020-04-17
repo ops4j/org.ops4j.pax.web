@@ -17,7 +17,6 @@
 package org.ops4j.pax.web.service.spi.model.elements;
 
 import java.util.List;
-import java.util.Objects;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 
@@ -106,6 +105,10 @@ public class SecurityConstraintMappingModel extends ElementModel {
 
 	public void setDataConstraint(String dataConstraint) {
 		this.dataConstraint = dataConstraint;
+	}
+	@Override
+	public Boolean performValidation() {
+		return Boolean.TRUE;
 	}
 
 }

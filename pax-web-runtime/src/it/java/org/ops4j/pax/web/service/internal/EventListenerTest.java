@@ -23,21 +23,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
-
-import static org.easymock.EasyMock.*;
-
-import org.junit.Before;
 import org.junit.Test;
-import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
-import org.ops4j.pax.web.service.DefaultHttpServiceConfiguration;
-import org.ops4j.pax.web.service.ExtendedHttpService;
-import org.ops4j.pax.web.service.HttpServiceConfigurer;
-import org.ops4j.pax.web.service.SimpleHttpServiceConfiguration;
+
+import static org.easymock.EasyMock.*;
 
 public class EventListenerTest
 		extends IntegrationTests {

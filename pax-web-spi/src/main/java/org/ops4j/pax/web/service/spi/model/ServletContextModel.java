@@ -18,11 +18,9 @@ package org.ops4j.pax.web.service.spi.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import javax.servlet.ServletContext;
 
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
@@ -68,14 +66,6 @@ public final class ServletContextModel extends Identity {
 
 	/** <em>Context path</em> as defined by {@link ServletContext#getContextPath()}. */
 	private final String contextPath;
-
-	/**
-	 * 1:N relation to OSGi-specific contexts pointing to this server-specific context. This list may change
-	 * dynamically, because some existing {@link OsgiContextModel} may have its
-	 * {@link org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_CONTEXT_PATH} changed, switching
-	 * it to entirely different {@link ServletContextModel}.
-	 */
-	private final Set<OsgiContextModel> osgiContextModels = new HashSet<>();
 
 	/**
 	 * Session configuration as defined by {@link ServletContext#getSessionTimeout()},
@@ -174,10 +164,6 @@ public final class ServletContextModel extends Identity {
 
 	public String getContextPath() {
 		return contextPath;
-	}
-
-	public Set<OsgiContextModel> getOsgiContextModels() {
-		return osgiContextModels;
 	}
 
 	public SessionConfigurationModel getSessionConfiguration() {

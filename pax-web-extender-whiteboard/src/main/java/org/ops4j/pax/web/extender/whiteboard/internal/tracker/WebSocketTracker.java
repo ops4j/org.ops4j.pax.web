@@ -15,59 +15,58 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
-import javax.websocket.Endpoint;
-import javax.websocket.server.ServerEndpoint;
-
-import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
-import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
-import org.ops4j.pax.web.extender.whiteboard.internal.element.WebSocketElement;
-import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
-import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultWebSocketMapping;
-import org.ops4j.pax.web.service.whiteboard.WebSocketMapping;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WebSocketTracker extends AbstractTracker<Object, WebSocketElement> {
+public class WebSocketTracker /*extends AbstractElementTracker<Object, WebSocketElement>*/ {
     private static final Logger LOG = LoggerFactory.getLogger(WebSocketTracker.class);
 
 	private BundleContext bundleContext;
 
-	WebSocketTracker(ExtenderContext extenderContext, BundleContext bundleContext) {
-		super(extenderContext, bundleContext);
-		this.bundleContext = bundleContext;
-	}
+//	WebSocketTracker(ExtenderContext extenderContext, BundleContext bundleContext) {
+//		super(extenderContext, bundleContext);
+//		this.bundleContext = bundleContext;
+//	}
+//
+//	public static ServiceTracker<Object, WebSocketElement> createTracker(final ExtenderContext extenderContext,
+//			final BundleContext bundleContext) {
+//		return new WebSocketTracker(extenderContext, bundleContext).create("(&(objectClass=" + Object.class.getName() + ")(" + ExtenderConstants.WEBSOCKET + "=true))");
+//	}
+//
+//	@Override
+//	WebSocketElement createWebElement(ServiceReference<Object> serviceReference, Object published) {
+//
+//		// FIXME Validation for WebSockets done here rather than in WebElement
+//		// because we're tracking Object
+//
+//		if (Endpoint.class.isAssignableFrom(published.getClass())) {
+//			LOG.warn(
+//					"WebSockets created as instances of Endpoint isn't supported, because it requires also to register ServerApplicationConfig");
+//			return null;
+//		}
+//
+//		ServerEndpoint serverEndpoint = published.getClass().getAnnotation(ServerEndpoint.class);
+//		if (serverEndpoint == null) {
+//			return null;
+//		}
+//
+//		LOG.info("found websocket endpoint!!");
+//
+//		WebSocketMapping mapping = new DefaultWebSocketMapping();
+//		mapping.setHttpContextId(ServicePropertiesUtils.extractHttpContextId(serviceReference));
+//		mapping.setWebSocket(published);
+//		return new WebSocketElement(serviceReference, mapping);
+//	}
 
-	public static ServiceTracker<Object, WebSocketElement> createTracker(final ExtenderContext extenderContext,
-			final BundleContext bundleContext) {
-		return new WebSocketTracker(extenderContext, bundleContext).create("(&(objectClass=" + Object.class.getName() + ")(" + ExtenderConstants.WEBSOCKET + "=true))");
-	}
-
-	@Override
-	WebSocketElement createWebElement(ServiceReference<Object> serviceReference, Object published) {
-
-		// FIXME Validation for WebSockets done here rather than in WebElement
-		// because we're tracking Object
-
-		if (Endpoint.class.isAssignableFrom(published.getClass())) {
-			LOG.warn(
-					"WebSockets created as instances of Endpoint isn't supported, because it requires also to register ServerApplicationConfig");
-			return null;
-		}
-
-		ServerEndpoint serverEndpoint = published.getClass().getAnnotation(ServerEndpoint.class);
-		if (serverEndpoint == null) {
-			return null;
-		}
-
-		LOG.info("found websocket endpoint!!");
-
-		WebSocketMapping mapping = new DefaultWebSocketMapping();
-		mapping.setHttpContextId(ServicePropertiesUtils.extractHttpContextId(serviceReference));
-		mapping.setWebSocket(published);
-		return new WebSocketElement(serviceReference, mapping);
-	}
+//	@Override
+//	public void register(WebContainer webContainer, HttpContext httpContext) throws Exception {
+////		webContainer.registerWebSocket(mapping.getWebSocket(), httpContext);
+//	}
+//
+//	@Override
+//	public void unregister(WebContainer webContainer, HttpContext httpContext) {
+////		webContainer.unregisterWebSocket(mapping.getWebSocket(), httpContext);
+//	}
 
 }

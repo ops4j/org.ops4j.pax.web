@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service;
 import javax.servlet.ServletContext;
 
 import org.ops4j.pax.web.service.whiteboard.ContextMapping;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 /**
  * <p>Different constants used across Pax Web but not related to configuration that may be specified using
@@ -47,7 +48,10 @@ public interface PaxWebConstants {
 	};
 
 	/** Default name for <em>context</em> (e.g., {@link org.osgi.service.http.context.ServletContextHelper}) */
-	String DEFAULT_CONTEXT_NAME = "default";
+	String DEFAULT_CONTEXT_NAME = HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME;
+
+	/** Name for default <em>shared</em> contexts - Pax Web specific */
+	String DEFAULT_SHARED_CONTEXT_NAME = "shared";
 
 	/** Default name for <em>virtual host</em> */
 	String DEFAULT_VIRTUAL_HOST_NAME = "default";
@@ -67,6 +71,7 @@ public interface PaxWebConstants {
 	 * <p>The value should be String, array of Strings or Collection of Strings. When missing, <em>context</em>
 	 * is assumed to be associated with <strong>all</strong> virtual hosts.</p>
 	 */
+	@Deprecated
 	String SERVICE_PROPERTY_VIRTUAL_HOSTS = "httpContext.virtualhosts";
 
 	/**
@@ -75,6 +80,62 @@ public interface PaxWebConstants {
 	 */
 	@Deprecated
 	String SERVICE_PROPERTY_HTTP_CONTEXT_ID = "httpContext.id";
+
+	/**
+	 * Legacy property name for a legacy "shared" flag for {@link org.osgi.service.http.HttpContext} services.
+	 * @deprecated User {@link org.osgi.service.http.context.ServletContextHelper} services which are "shared"
+	 * by default
+	 */
+	@Deprecated
+	String SERVICE_PROPERTY_HTTP_CONTEXT_SHARED = "httpContext.shared";
+
+	/**
+	 * Legacy context path.
+	 * @deprecated Use {@link org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_CONTEXT_PATH}
+	 */
+	@Deprecated
+	String SERVICE_PROPERTY_HTTP_CONTEXT_PATH = "httpContext.path";
+
+	/** The legacy registration property for the alias to be used by a servlet/resource registration. */
+	@Deprecated
+	String SERVICE_PROPERTY_SERVLET_ALIAS = "alias";
+
+	/** The legacy registration property for the url patterns to be used by a filter registration. */
+	@Deprecated
+	String SERVICE_PROPERTY_URL_PATTERNS = "urlPatterns";
+
+	/** The legacy registration property for the servlet names to be used by a filter registration. */
+	@Deprecated
+	String SERVICE_PROPERTY_SERVLET_NAMES = "servletNames";
+
+	/** Legacy registration property for {@code <async-supported>} configuration */
+	@Deprecated
+	String SERVICE_PROPERTY_ASYNC_SUPPORTED = "async-supported";
+
+	/** Legacy registration property for {@code <load-on-startup>} configuration */
+	@Deprecated
+	String SERVICE_PROPERTY_LOAD_ON_STARTUP = "load-on-startup";
+
+	/**
+	 * The registration property for filtering init parameters. All init parameters starting with something different
+	 * then the init-prefix will be ignored and not added to the init params of the servlet.
+	 */
+	@Deprecated
+	String SERVICE_PROPERTY_INIT_PREFIX = "init-prefix";
+
+	/**
+	 * Service registration property to mark services as <em>internal</em>, so they're not processed by Pax Web
+	 * Whiteboard extender as normal Whiteboard services.
+	 */
+	String SERVICE_PROPERTY_INTERNAL = "org.ops4j.pax.logging.internal";
+
+	/**
+	 * The default init-prefix.
+	 * @deprecated {@link org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX}
+	 *             should be used instead.
+	 */
+	@Deprecated
+	String DEFAULT_INIT_PREFIX_PROP = "init.";
 
 	/**
 	 * <p>Init parameter that can be used to specify servlet name.</p>
@@ -110,7 +171,6 @@ public interface PaxWebConstants {
 	 */
 	@Deprecated
 	String FILTER_MAPPING_DISPATCHER = "filter-mapping-dispatcher";
-
 
 
 

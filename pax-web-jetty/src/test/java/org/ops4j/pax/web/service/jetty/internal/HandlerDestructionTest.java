@@ -16,15 +16,18 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.security.cert.X509Certificate;
-import java.util.*;
-
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 import javax.servlet.Servlet;
 
 import org.eclipse.jetty.servlet.DefaultServlet;

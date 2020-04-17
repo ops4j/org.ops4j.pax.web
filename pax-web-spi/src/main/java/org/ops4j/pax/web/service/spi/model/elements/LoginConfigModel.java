@@ -73,5 +73,9 @@ public class LoginConfigModel extends ElementModel {
 	public void setFormErrorPage(String formErrorPage) {
 		this.formErrorPage = formErrorPage;
 	}
+	@Override
+	public Boolean performValidation() {
+		return Boolean.TRUE;
+	}
 
 }

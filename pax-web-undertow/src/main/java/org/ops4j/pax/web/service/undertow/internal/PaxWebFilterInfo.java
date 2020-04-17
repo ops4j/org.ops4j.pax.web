@@ -65,8 +65,6 @@ public class PaxWebFilterInfo extends FilterInfo {
 
 		filterModel.getInitParams().forEach(this::addInitParam);
 
-		// TODO: scan servlet for annotations
-
 		this.servletContext = ((FilterModelFactory)super.getInstanceFactory()).getServletContext();
 	}
 

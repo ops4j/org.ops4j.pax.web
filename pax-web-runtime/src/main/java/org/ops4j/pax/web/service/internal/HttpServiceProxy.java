@@ -23,7 +23,6 @@ import javax.servlet.ServletException;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
-import org.ops4j.pax.web.service.ReferencedWebContainerContext;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -46,7 +45,7 @@ class HttpServiceProxy implements StoppableHttpService {
 	private static final Logger LOG = LoggerFactory.getLogger(HttpServiceProxy.class);
 
 	// actual service that may be replaced by "stopped" http service preventing further registration of web components
-	private StoppableHttpService delegate;
+	private volatile StoppableHttpService delegate;
 
 	private final Bundle serviceBundle;
 
@@ -67,8 +66,10 @@ class HttpServiceProxy implements StoppableHttpService {
 
 		// PAXWEB-1077: ServletContext becomes unavailable on restart when using Whiteboard and CustomContexts
 
+		// first replace the delegate
 		delegate = new HttpServiceDisabled(serviceBundle);
 
+		// then cleanup the delegate without a risk of problems happening at user side
 		stopping.stop();
 	}
 
@@ -111,17 +112,6 @@ class HttpServiceProxy implements StoppableHttpService {
 	@Override
 	public MultiBundleWebContainerContext createDefaultSharedHttpContext(String contextId) {
 		return delegate.createDefaultSharedHttpContext(contextId);
-	}
-
-	@Override
-	@Deprecated
-	public MultiBundleWebContainerContext getDefaultSharedHttpContext() {
-		return delegate.getDefaultSharedHttpContext();
-	}
-
-	@Override
-	public ReferencedWebContainerContext createReferencedContext(String contextId) {
-		return delegate.createReferencedContext(contextId);
 	}
 
 	// --- methods used to register a Servlet - with more options than in original HttpService.registerServlet()

@@ -16,9 +16,6 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 
@@ -27,6 +24,9 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.Test;
 import org.ops4j.pax.web.service.jetty.internal.util.DOMJettyWebXmlParser;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author achim

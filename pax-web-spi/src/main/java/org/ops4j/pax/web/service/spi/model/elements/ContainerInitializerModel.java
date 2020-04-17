@@ -18,7 +18,6 @@ package org.ops4j.pax.web.service.spi.model.elements;
 
 import java.util.Arrays;
 import java.util.HashSet;
-
 import javax.servlet.ServletContainerInitializer;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
@@ -50,6 +49,11 @@ public class ContainerInitializerModel extends ElementModel {
 	 */
 	public HashSet<Class<?>> getClasses() {
 		return classes;
+	}
+
+	@Override
+	public Boolean performValidation() {
+		return Boolean.TRUE;
 	}
 
 }

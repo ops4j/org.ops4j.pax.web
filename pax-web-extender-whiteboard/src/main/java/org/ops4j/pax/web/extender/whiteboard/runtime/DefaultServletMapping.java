@@ -18,8 +18,8 @@
 package org.ops4j.pax.web.extender.whiteboard.runtime;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
-
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 
@@ -31,209 +31,125 @@ import org.ops4j.pax.web.service.whiteboard.ServletMapping;
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class DefaultServletMapping implements ServletMapping {
+public class DefaultServletMapping extends AbstractContextRelated implements ServletMapping {
 
-	/**
-	 * Http Context id.
-	 */
-	private String httpContextId;
-	/**
-	 * Servlet.
-	 */
 	private Servlet servlet;
-
-	/**
-	 * Servlet Name.
-	 */
+	private Class<? extends Servlet> servletClass;
 	private String servletName;
-
-	/**
-	 * Alias.
-	 */
+	private String[] urlPatterns = new String[0];
 	private String alias;
-	/**
-	 * Url patterns.
-	 */
-	private String[] urlPatterns;
-	/**
-	 * Initialization parameters.
-	 */
-	private Map<String, String> initParams;
-
+	private String[] errorPages = new String[0];
+	private Boolean asyncSupported;
+	private MultipartConfigElement multipartConfig;
+	private Map<String, String> initParameters = new HashMap<>();
 	private Integer loadOnStartup;
 
-	private Boolean asyncSupported;
-
-	private MultipartConfigElement multipartConfig;
-
-	private String[] errorPageParams;
-
-	/**
-	 * @see ServletMapping#getHttpContextId()
-	 */
-	public String getHttpContextId() {
-		return httpContextId;
-	}
-
-	/**
-	 * @see ServletMapping#getServlet()
-	 */
+	@Override
 	public Servlet getServlet() {
 		return servlet;
 	}
 
-	/**
-	 * @see ServletMapping#getServletName()
-	 */
+	@Override
+	public Class<? extends Servlet> getServletClass() {
+		return servletClass;
+	}
+
+	@Override
 	public String getServletName() {
 		return servletName;
 	}
 
-	/**
-	 * @see ServletMapping#getAlias()
-	 */
-	public String getAlias() {
-		return alias;
-	}
-
-	/**
-	 * @see ServletMapping#getUrlPatterns()
-	 */
+	@Override
 	public String[] getUrlPatterns() {
 		return urlPatterns;
 	}
 
-	/**
-	 * @see ServletMapping#getInitParams()
-	 */
-	public Map<String, String> getInitParams() {
-		return initParams;
+	@Override
+	public String getAlias() {
+		return alias;
 	}
 
-	/**
-	 * Setter.
-	 *
-	 * @param httpContextId id of the http context this servlet belongs to
-	 */
-	public void setHttpContextId(final String httpContextId) {
-		this.httpContextId = httpContextId;
+	@Override
+	public String[] getErrorPages() {
+		return errorPages;
 	}
 
-	/**
-	 * Setter.
-	 *
-	 * @param servlet mapped servlet
-	 */
-	public void setServlet(final Servlet servlet) {
-		this.servlet = servlet;
-	}
-
-	/**
-	 * Setter.
-	 *
-	 * @param servletName of the Servlet being mapped.
-	 */
-	public void setServletName(final String servletName) {
-		this.servletName = servletName;
-	}
-
-	/**
-	 * Setter.
-	 *
-	 * @param alias alias this servlet maps to
-	 */
-	public void setAlias(final String alias) {
-		this.alias = alias;
-	}
-
-	/**
-	 * Setter.
-	 *
-	 * @param urlPatterns array of url patterns
-	 */
-	public void setUrlPatterns(final String... urlPatterns) {
-		this.urlPatterns = urlPatterns;
-	}
-
-	/**
-	 * Seter.
-	 *
-	 * @param initParams map of initialization parameters
-	 */
-	public void setInitParams(final Map<String, String> initParams) {
-		this.initParams = initParams;
-	}
-
-	/**
-	 * @return the loadOnStartup
-	 */
-	public Integer getLoadOnStartup() {
-		return loadOnStartup;
-	}
-
-	/**
-	 * @param loadOnStartup the loadOnStartup to set
-	 */
-	public void setLoadOnStartup(Integer loadOnStartup) {
-		this.loadOnStartup = loadOnStartup;
-	}
-
-	/**
-	 * @return the asyncSupported
-	 */
+	@Override
 	public Boolean getAsyncSupported() {
 		return asyncSupported;
 	}
 
-	/**
-	 * @param asyncSupported the asyncSupported to set
-	 */
-	public void setAsyncSupported(Boolean asyncSupported) {
-		this.asyncSupported = asyncSupported;
-	}
-
-	/**
-	 * @return the multipartConfig
-	 */
+	@Override
 	public MultipartConfigElement getMultipartConfig() {
 		return multipartConfig;
 	}
 
-	/**
-	 * @param multipartConfig the multipartConfig to set
-	 */
+	@Override
+	public Map<String, String> getInitParameters() {
+		return initParameters;
+	}
+
+	@Override
+	public Integer getLoadOnStartup() {
+		return loadOnStartup;
+	}
+
+	public void setServlet(Servlet servlet) {
+		this.servlet = servlet;
+	}
+
+	public void setServletClass(Class<? extends Servlet> servletClass) {
+		this.servletClass = servletClass;
+	}
+
+	public void setServletName(String servletName) {
+		this.servletName = servletName;
+	}
+
+	public void setUrlPatterns(String[] urlPatterns) {
+		this.urlPatterns = urlPatterns;
+	}
+
+	public void setAlias(String alias) {
+		this.alias = alias;
+	}
+
+	public void setErrorPages(String[] errorPages) {
+		this.errorPages = errorPages;
+	}
+
+	public void setAsyncSupported(Boolean asyncSupported) {
+		this.asyncSupported = asyncSupported;
+	}
+
 	public void setMultipartConfig(MultipartConfigElement multipartConfig) {
 		this.multipartConfig = multipartConfig;
 	}
 
-	@Override
-	public String toString() {
-		return this.getClass().getSimpleName() +
-				"{" + "httpContextId=" + httpContextId +
-				",urlPatterns=" + Arrays.deepToString(urlPatterns) +
-				",initParams=" + initParams +
-				",servlet=" + servlet + ", alias=" + alias +
-				", servletName=" + servletName + "}";
+	public void setInitParameters(Map<String, String> initParameters) {
+		this.initParameters = initParameters;
 	}
 
-				@Override
-				public Class<? extends Servlet> getServletClass() {
-					return null;
-				}
+	public void setLoadOnStartup(Integer loadOnStartup) {
+		this.loadOnStartup = loadOnStartup;
+	}
 
-				@Override
-				public String[] getErrorPages() {
-					return new String[0];
-				}
-
-				@Override
-				public String getContextSelectFilter() {
-					return null;
-				}
-
-				@Override
-				public String getContextId() {
-					return null;
-				}
+	@Override
+	public String toString() {
+		return "DefaultServletMapping{"
+				+ "servlet=" + servlet
+				+ ", servletClass=" + servletClass
+				+ ", servletName='" + servletName + '\''
+				+ ", urlPatterns=" + Arrays.toString(urlPatterns)
+				+ ", alias='" + alias + '\''
+				+ ", errorPages=" + Arrays.toString(errorPages)
+				+ ", asyncSupported=" + asyncSupported
+				+ ", multipartConfig=" + multipartConfig
+				+ ", initParameters=" + initParameters
+				+ ", loadOnStartup=" + loadOnStartup
+				+ ", contextSelectFilter='" + contextSelectFilter + '\''
+				+ ", contextId='" + contextId + '\''
+				+ '}';
+	}
 
 }

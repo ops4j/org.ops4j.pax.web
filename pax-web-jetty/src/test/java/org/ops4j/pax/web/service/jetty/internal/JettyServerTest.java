@@ -17,19 +17,15 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.ops4j.pax.web.service.spi.model.ServerModel;
-
+import java.lang.management.ManagementFactory;
+import java.util.Set;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
-import java.lang.management.ManagementFactory;
-import java.util.Set;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 public class JettyServerTest {
 

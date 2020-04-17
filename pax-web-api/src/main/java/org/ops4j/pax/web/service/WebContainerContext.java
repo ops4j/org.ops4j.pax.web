@@ -29,6 +29,7 @@ import org.osgi.service.http.HttpContext;
  *     is part of the identity)</li>
  *     <li>missing resource-access method matching {@link javax.servlet.ServletContext#getResourcePaths(String)}
  *     method.</li>
+ *     <li><em>shared</em> flag</li>
  * </ul></p>
  *
  * <p>All methods returning a <em>context</em> in {@link WebContainer} extension of
@@ -65,9 +66,16 @@ public interface WebContainerContext extends HttpContext {
 	Set<String> getResourcePaths(String path);
 
 	/**
-	 * Method matching {@link javax.servlet.ServletContext#getRealPath(String)} and
+	 * <p>Method matching {@link javax.servlet.ServletContext#getRealPath(String)} and
 	 * {@link org.osgi.service.http.context.ServletContextHelper#getRealPath(String)}, but not available in
-	 * original {@link HttpContext}
+	 * original {@link HttpContext}.</p>
+	 *
+	 * <p>As in Javadoc for {@link javax.servlet.ServletContext#getRealPath(String)}:
+	 * Resources inside the <tt>/META-INF/resources</tt> directories of JAR files bundled in the application's
+	 * <tt>/WEB-INF/lib</tt> directory must be considered only if the container has unpacked them from their containing
+	 * JAR file, in which case the path to the unpacked location must be returned.
+	 * Thus default (in Pax Web) implementations of the contexts return {@code null}. There's no point to deal with
+	 * <em>real path</em> in OSGi environment.</p>
 	 *
 	 * @param path
 	 * @return
@@ -110,27 +118,17 @@ public interface WebContainerContext extends HttpContext {
 
 	/**
 	 * <p>Should this <em>context</em> (as defined in "102 Http Service" specification, not in "140 Whiteboard Service"
-	 * specification) be allowed to use by different bundles?</p>
+	 * specification) be allowed to be used by different bundles?</p>
 	 *
-	 * <p>Extension of this interface for Whiteboard Specification (to wrap
-	 * {@link org.osgi.service.http.context.ServletContextHelper}) should be shared by default.</p>
+	 * <p>In Whiteboard Service scenario (to wrap {@link org.osgi.service.http.context.ServletContextHelper})
+	 * the context should be shared by default and there's no real way to make a <em>context</em> not shared.</p>
+	 *
+	 * <p>In Http Service scenario, but default, a <em>context</em> is not shared. It means that if a web element
+	 * is being registered through such context, but with different bundle, exception should be thrown.</p>
 	 *
 	 * @return
 	 */
 	boolean isShared();
-
-	/**
-	 * <p>If context is a reference, this means we use tricky ways of Http Service registration without a need to
-	 * pass existing implementation of {@link HttpContext} around.</p>
-	 *
-	 * <p>Reference may point to shared or to bundle-scoped context. In latter case, it's important to ensure
-	 * context equality by ID and bundle <strong>only</strong>.</p>
-	 *
-	 * @return
-	 */
-	default boolean isReference() {
-		return false;
-	}
 
 	/**
 	 * Actual bundle on behalf of which the {@link WebContainerContext} was created. It SHOULD be {@code null} for
@@ -152,13 +150,7 @@ public interface WebContainerContext extends HttpContext {
 		/**
 		 * Used for {@link WebContainer#createDefaultSharedHttpContext()}
 		 */
-		SHARED("shared"),
-
-		/**
-		 * Used internally for all other contexts created to register servlets/filters/... where actual class
-		 * directly implements {@link HttpContext} (and not {@link WebContainerContext}).
-		 */
-		CUSTOM("custom");
+		SHARED("shared");
 
 		private final String value;
 

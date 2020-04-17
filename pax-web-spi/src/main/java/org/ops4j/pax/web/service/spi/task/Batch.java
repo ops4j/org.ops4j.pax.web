@@ -18,13 +18,11 @@ package org.ops4j.pax.web.service.spi.task;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeSet;
 
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
-import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
@@ -77,8 +75,8 @@ public class Batch {
 	 *
 	 * @param osgiContextModel
 	 */
-	public void addOsgiContextModel(OsgiContextModel osgiContextModel) {
-		operations.add(new OsgiContextModelChange(OpCode.ADD, null, osgiContextModel));
+	public void addOsgiContextModel(OsgiContextModel osgiContextModel, ServletContextModel servletContextModel) {
+		operations.add(new OsgiContextModelChange(OpCode.ADD, null, osgiContextModel, servletContextModel));
 	}
 
 	/**
@@ -88,7 +86,7 @@ public class Batch {
 	 * @param osgiContextModel
 	 */
 	public void associateOsgiContextModel(WebContainerContext context, OsgiContextModel osgiContextModel) {
-		operations.add(new OsgiContextModelChange(OpCode.ASSOCIATE, context, osgiContextModel));
+		operations.add(new OsgiContextModelChange(OpCode.ASSOCIATE, context, osgiContextModel, null));
 	}
 
 	/**

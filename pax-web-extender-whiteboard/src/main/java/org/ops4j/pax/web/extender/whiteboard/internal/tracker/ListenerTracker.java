@@ -19,26 +19,6 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import java.util.EventListener;
 
-import javax.servlet.AsyncListener;
-import javax.servlet.ReadListener;
-import javax.servlet.ServletContextAttributeListener;
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletRequestAttributeListener;
-import javax.servlet.ServletRequestListener;
-import javax.servlet.WriteListener;
-import javax.servlet.http.HttpSessionActivationListener;
-import javax.servlet.http.HttpSessionAttributeListener;
-import javax.servlet.http.HttpSessionBindingListener;
-import javax.servlet.http.HttpSessionIdListener;
-import javax.servlet.http.HttpSessionListener;
-
-import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
-import org.ops4j.pax.web.extender.whiteboard.internal.element.ListenerWebElement;
-import org.ops4j.pax.web.extender.whiteboard.internal.util.ServicePropertiesUtils;
-import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultListenerMapping;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class ListenerTracker extends AbstractTracker<EventListener, ListenerWebElement> {
+public class ListenerTracker /*extends AbstractElementTracker<EventListener, ListenerWebElement>*/ {
 
 	/**
 	 * Logger.
@@ -63,33 +43,88 @@ public class ListenerTracker extends AbstractTracker<EventListener, ListenerWebE
 	 * @param bundleContext
 	 *            extender bundle context; cannot be null
 	 */
-	private ListenerTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
-		super(extenderContext, bundleContext);
-	}
+//	private ListenerTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
+//		super(extenderContext, bundleContext);
+//	}
 
-	@SuppressWarnings("unchecked")
-	public static ServiceTracker<EventListener, ListenerWebElement> createTracker(final ExtenderContext extenderContext,
-			final BundleContext bundleContext) {
-		return new ListenerTracker(extenderContext, bundleContext).create(EventListener.class,
-				ServletContextListener.class, ServletContextAttributeListener.class, ServletRequestListener.class,
-				ServletRequestAttributeListener.class, HttpSessionListener.class, HttpSessionBindingListener.class,
-				HttpSessionAttributeListener.class, HttpSessionActivationListener.class, AsyncListener.class,
-				ReadListener.class, WriteListener.class, HttpSessionIdListener.class);
-	}
+//	/**
+//	 * Constructs a new ListenerWebElement
+//	 * @param ref the service-reference behind the registered http-whiteboard-service
+//	 * @param listenerMapping ListenerMapping containing all necessary information
+//	 */
+//	public ListenerWebElement(final ServiceReference<T> ref, final ListenerMapping listenerMapping) {
+//		super(ref);
+//		NullArgumentException.validateNotNull(listenerMapping, "Listener mapping");
+//		this.listenerMapping = listenerMapping;
+//
+//		// validate
+//		final EventListener listener = listenerMapping.getListener();
+//
+//		if (!(listener instanceof ServletContextListener ||
+//				listener instanceof ServletContextAttributeListener ||
+//				listener instanceof ServletRequestListener ||
+//				listener instanceof ServletRequestAttributeListener ||
+//				listener instanceof HttpSessionListener ||
+//				listener instanceof HttpSessionBindingListener ||
+//				listener instanceof HttpSessionAttributeListener ||
+//				listener instanceof HttpSessionActivationListener ||
+//				listener instanceof AsyncListener ||
+//				listener instanceof ReadListener ||
+//				listener instanceof WriteListener ||
+//				listener instanceof HttpSessionIdListener
+//		)) {
+//			valid = false;
+//		}
+//
+//		if (listenerMapping.getHttpContextId() != null && listenerMapping.getHttpContextId().trim().length() == 0) {
+//			LOG.warn("Registered listener [{}] did not contain a valid http context id.", getServiceID());
+//			valid = false;
+//		}
+//
+//		Boolean listenerEnabled = ServicePropertiesUtils.getBooleanProperty(
+//				serviceReference,
+//				HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER);
+//		if (!Boolean.TRUE.equals(listenerEnabled)) {
+//			LOG.warn("Registered listener [{}] is not enabled via 'osgi.http.whiteboard.listener' property.", getServiceID());
+//			valid = false;
+//		}
+//	}
+//
+//	@SuppressWarnings("unchecked")
+//	public static ServiceTracker<EventListener, ListenerWebElement> createTracker(final ExtenderContext extenderContext,
+//			final BundleContext bundleContext) {
+//		return new ListenerTracker(extenderContext, bundleContext).create(EventListener.class,
+//				ServletContextListener.class, ServletContextAttributeListener.class, ServletRequestListener.class,
+//				ServletRequestAttributeListener.class, HttpSessionListener.class, HttpSessionBindingListener.class,
+//				HttpSessionAttributeListener.class, HttpSessionActivationListener.class, AsyncListener.class,
+//				ReadListener.class, WriteListener.class, HttpSessionIdListener.class);
+//	}
+//
+//	/**
+//	 * @see AbstractElementTracker#createElementModel(ServiceReference, Object)
+//	 */
+//	@Override
+//	ListenerWebElement createWebElement(final ServiceReference<EventListener> serviceReference,
+//			final EventListener published) {
+//
+//		String httpContextId = ServicePropertiesUtils.extractHttpContextId(serviceReference);
+//
+//		final DefaultListenerMapping mapping = new DefaultListenerMapping();
+//		mapping.setHttpContextId(httpContextId);
+//		mapping.setListener(published);
+//		return new ListenerWebElement<>(serviceReference, mapping);
+//	}
 
-	/**
-	 * @see AbstractTracker#createWebElement(ServiceReference, Object)
-	 */
-	@Override
-	ListenerWebElement createWebElement(final ServiceReference<EventListener> serviceReference,
-			final EventListener published) {
-
-		String httpContextId = ServicePropertiesUtils.extractHttpContextId(serviceReference);
-
-		final DefaultListenerMapping mapping = new DefaultListenerMapping();
-		mapping.setHttpContextId(httpContextId);
-		mapping.setListener(published);
-		return new ListenerWebElement<>(serviceReference, mapping);
-	}
+//	@Override
+//	public void register(final WebContainer webContainer,
+//						 final HttpContext httpContext) throws Exception {
+////		webContainer.registerEventListener(listenerMapping.getListener(), httpContext);
+//	}
+//
+//	@Override
+//	public void unregister(final WebContainer webContainer,
+//						   final HttpContext httpContext) {
+////		webContainer.unregisterEventListener(listenerMapping.getListener());
+//	}
 
 }

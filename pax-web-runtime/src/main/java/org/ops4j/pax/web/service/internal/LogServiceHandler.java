@@ -19,8 +19,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;
-import org.ops4j.pax.web.service.spi.WebEvent;
-import org.ops4j.pax.web.service.spi.WebEvent.WebTopic;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;

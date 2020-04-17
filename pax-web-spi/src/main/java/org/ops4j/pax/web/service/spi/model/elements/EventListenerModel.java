@@ -17,7 +17,6 @@
 package org.ops4j.pax.web.service.spi.model.elements;
 
 import java.util.EventListener;
-import java.util.Objects;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
@@ -35,6 +34,10 @@ public class EventListenerModel extends ElementModel {
 
 	public EventListener getEventListener() {
 		return eventListener;
+	}
+	@Override
+	public Boolean performValidation() {
+		return Boolean.TRUE;
 	}
 
 }

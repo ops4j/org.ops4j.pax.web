@@ -19,19 +19,13 @@ package org.ops4j.pax.web.service.spi.model.elements;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Dictionary;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.servlet.Servlet;
+import java.util.function.Supplier;
 
 import org.ops4j.pax.web.service.spi.model.Identity;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
-import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpContext;
 
 /**
  * <p>Base class for all <em>models</em> representing actual elements of a <em>web application</em> (or
@@ -77,13 +71,55 @@ public abstract class ElementModel<T> extends Identity implements Comparable<Ele
 	private ServiceReference<? extends T> elementReference;
 
 	/**
+	 * Because user may specify Whiteboard service (e.g., {@link javax.servlet.Servlet}) using <em>legacy</em> service
+	 * like {@link org.ops4j.pax.web.service.whiteboard.ServletMapping} we can't assume if method returning this
+	 * servlet returns a singleton or an instance on each call. So we wrap such
+	 * {@link org.ops4j.pax.web.service.whiteboard.ServletMapping} inside this {@link Supplier} to delay
+	 * servlet creation to the moment when it's really needed.
+	 *
+	 * @param <T>
+	 */
+	private Supplier<? extends T> elementSupplier;
+
+	/**
 	 * Even if the element is not registered as Whiteboard service, we still need a bundle in which scope
 	 * the element was registered (for example using
-	 * {@link org.osgi.service.http.HttpService#registerServlet(String, Servlet, Dictionary, HttpContext)}), so
+	 * {@link org.osgi.service.http.HttpService#registerServlet}), so
 	 * we can use its {@link org.osgi.framework.BundleContext} to obtain proper reference to
 	 * {@link org.osgi.service.http.context.ServletContextHelper} if needed.
 	 */
 	private Bundle registeringBundle;
+
+	private Boolean isValid;
+
+	/**
+	 * <p>This method should be called from Whiteboard infrastructure to really perform the validation and set
+	 * <em>isValid</em> flag, which is then used for "Failure DTO" purposes.</p>
+	 *
+	 * TODO: maybe we should accept some callback for DTO purposes.
+	 */
+	public boolean isValid() {
+		if (isValid == null) {
+			try {
+				isValid = performValidation();
+			} catch (Exception ignored) {
+				isValid = false;
+			}
+		}
+		return isValid;
+	}
+
+	/**
+	 * <p>Perform element-specific validation and throws different exceptions for all element-specific validation
+	 * problems. This method should not be called fir Whiteboard purposes, where "failure DTO" has to be configured.
+	 * </p>
+	 *
+	 * <p>This method should be called in Http Service scenario where we immediately need strong feedback - with
+	 * exceptions thrown for all validation problems.</p>
+	 *
+	 * @return
+	 */
+	public abstract Boolean performValidation() throws Exception;
 
 	/**
 	 * Get unmodifiable list of {@link OsgiContextModel osgi models} with which given {@link ElementModel}
@@ -112,8 +148,8 @@ public abstract class ElementModel<T> extends Identity implements Comparable<Ele
 		}
 	}
 
-	public Set<ServletContextModel> getServletContextModels() {
-		return contextModels.stream().map(OsgiContextModel::getServletContextModel).collect(Collectors.toSet());
+	public boolean hasContextModels() {
+		return contextModels.size() > 0;
 	}
 
 	public int getServiceRank() {
@@ -148,6 +184,14 @@ public abstract class ElementModel<T> extends Identity implements Comparable<Ele
 		this.elementReference = elementReference;
 	}
 
+	public Supplier<? extends T> getElementSupplier() {
+		return elementSupplier;
+	}
+
+	public void setElementSupplier(Supplier<? extends T> elementSupplier) {
+		this.elementSupplier = elementSupplier;
+	}
+
 	public Bundle getRegisteringBundle() {
 		return registeringBundle;
 	}
@@ -169,7 +213,7 @@ public abstract class ElementModel<T> extends Identity implements Comparable<Ele
 	 * @return
 	 */
 	@Override
-	public int compareTo(ElementModel o) {
+	public int compareTo(ElementModel<T> o) {
 		int c1 = this.serviceRank - o.serviceRank;
 		if (c1 != 0) {
 			// higher rank - "lesser" service in terms of order

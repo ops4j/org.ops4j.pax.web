@@ -15,13 +15,13 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import org.junit.Before;
-import org.junit.After;
-import org.osgi.framework.Bundle;
 import org.apache.commons.httpclient.HttpClient;
+import org.junit.After;
+import org.junit.Before;
+import org.ops4j.pax.web.service.DefaultHttpServiceConfiguration;
 import org.ops4j.pax.web.service.HttpServiceConfigurer;
 import org.ops4j.pax.web.service.SimpleHttpServiceConfiguration;
-import org.ops4j.pax.web.service.DefaultHttpServiceConfiguration;
+import org.osgi.framework.Bundle;
 
 public class IntegrationTests {
 

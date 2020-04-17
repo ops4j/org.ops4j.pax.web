@@ -45,5 +45,9 @@ public class WelcomeFileModel extends ElementModel {
 	public String[] getWelcomeFiles() {
 		return welcomeFiles;
 	}
+	@Override
+	public Boolean performValidation() {
+		return Boolean.TRUE;
+	}
 
 }

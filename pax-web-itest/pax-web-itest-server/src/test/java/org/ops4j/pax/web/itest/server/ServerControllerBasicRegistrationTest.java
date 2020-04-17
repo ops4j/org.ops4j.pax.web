@@ -19,14 +19,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeSet;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -46,16 +43,17 @@ import org.ops4j.pax.web.itest.server.support.Utils;
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerContext;
-import org.ops4j.pax.web.service.internal.DefaultHttpContext;
 import org.ops4j.pax.web.service.internal.HttpServiceEnabled;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.config.Configuration;
+import org.ops4j.pax.web.service.spi.context.DefaultHttpContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.task.Batch;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -147,15 +145,16 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 			}
 		};
 
+		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
+		server.createDefaultServletContextModel(controller);
+
 		Batch batch = new Batch("Register Single Servlet");
 
-		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		ServletContextModel context = new ServletContextModel("/c");
-		batch.addServletContextModel(server, context);
+		ServletContextModel scm = new ServletContextModel("/c");
+		batch.addServletContextModel(server, scm);
 
-		OsgiContextModel osgiContext = new OsgiContextModel(wcc, bundle);
-		osgiContext.setServletContextModel(context);
-		batch.addOsgiContextModel(osgiContext);
+		OsgiContextModel osgiContext = new OsgiContextModel(wcc, bundle, "/c");
+		batch.addOsgiContextModel(osgiContext, scm);
 
 		Map<String, String> initParams = new HashMap<>();
 		initParams.put("p1", "v1");
@@ -192,7 +191,9 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		when(wiring.getClassLoader()).thenReturn(this.getClass().getClassLoader());
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
+		server.createDefaultServletContextModel(controller);
 
+		// no batch at all - everything will be done by HttpService itself
 		WebContainer wc = new HttpServiceEnabled(bundle, controller, server, null, controller.getConfiguration());
 
 		HttpContext context = new HttpContext() {
@@ -266,7 +267,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 	}
 
 	@Test
-	public void registerFilterAndServletUsingExcplicitBatch() throws Exception {
+	public void registerFilterAndServletsUsingExcplicitBatch() throws Exception {
 		ServerController controller = Utils.create(null, port, runtime, getClass().getClassLoader());
 		controller.configure();
 		controller.start();
@@ -300,26 +301,22 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 			}
 		};
 
-		Batch batch = new Batch("Register Servlet and Filter");
-
-		// two contexts. servlet will be registered to /c, filter - to /c and /d
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
+		server.createDefaultServletContextModel(controller);
 
-		ServletContextModel contextC = new ServletContextModel("/c");
-		ServletContextModel contextD = new ServletContextModel("/d");
-		ServletContextModel contextE = new ServletContextModel("/e");
-		batch.addServletContextModel(server, contextC);
-		batch.addServletContextModel(server, contextD);
-		batch.addServletContextModel(server, contextE);
+		Batch batch = new Batch("Register Servlets and Filter");
+		ServletContextModel contextC = server.getOrCreateServletContextModel("/c", batch);
+		ServletContextModel contextD = server.getOrCreateServletContextModel("/d", batch);
+		ServletContextModel contextE = server.getOrCreateServletContextModel("/e", batch);
 
-		OsgiContextModel osgiContextC = new OsgiContextModel(wcc1, bundle, contextC);
-		OsgiContextModel osgiContextC2 = new OsgiContextModel(wcc2, bundle, contextC);
-		OsgiContextModel osgiContextD = new OsgiContextModel(wcc1, bundle, contextD);
-		OsgiContextModel osgiContextE = new OsgiContextModel(wcc1, bundle, contextE);
-		batch.addOsgiContextModel(osgiContextC);
-		batch.addOsgiContextModel(osgiContextC2);
-		batch.addOsgiContextModel(osgiContextD);
-		batch.addOsgiContextModel(osgiContextE);
+		OsgiContextModel osgiContextC = new OsgiContextModel(wcc1, bundle, "/c");
+		OsgiContextModel osgiContextC2 = new OsgiContextModel(wcc2, bundle, "/c");
+		OsgiContextModel osgiContextD = new OsgiContextModel(wcc1, bundle, "/d");
+		OsgiContextModel osgiContextE = new OsgiContextModel(wcc1, bundle, "/e");
+		batch.addOsgiContextModel(osgiContextC, contextC);
+		batch.addOsgiContextModel(osgiContextC2, contextC);
+		batch.addOsgiContextModel(osgiContextD, contextD);
+		batch.addOsgiContextModel(osgiContextE, contextE);
 
 		Map<String, String> initParams = new HashMap<>();
 		initParams.put("p1", "v1");
@@ -384,7 +381,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 	}
 
 	@Test
-	public void registerFilterAndServletUsingWebContainer() throws Exception {
+	public void registerFilterAndServletsUsingWebContainer() throws Exception {
 		ServerController controller = Utils.create(null, port, runtime, getClass().getClassLoader());
 		controller.configure();
 		controller.start();
@@ -394,6 +391,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		when(bundle.getBundleContext()).thenReturn(context);
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
+		server.createDefaultServletContextModel(controller);
 
 		Configuration config = controller.getConfiguration();
 		HttpServiceEnabled wc = new HttpServiceEnabled(bundle, controller, server, null, config);
@@ -406,17 +404,17 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		batch.accept(wc.getServiceModel());
 		controller.sendBatch(batch);
 
-		WebContainerContext wccC1 = wc.createDefaultHttpContext("wccC1");
-		WebContainerContext wccC2 = wc.createDefaultHttpContext("wccC2");
-		WebContainerContext wccD1 = wc.createDefaultHttpContext("wccD1");
-		WebContainerContext wccE1 = wc.createDefaultHttpContext("wccE1");
+		WebContainerContext wccC1 = new DefaultHttpContext(bundle, "wccC1");
+		WebContainerContext wccC2 = new DefaultHttpContext(bundle, "wccC2");
+		WebContainerContext wccD1 = new DefaultHttpContext(bundle, "wccD1");
+		WebContainerContext wccE1 = new DefaultHttpContext(bundle, "wccE1");
 
 		// 4 logical OSGi context models
 		batch = new Batch("Initialization Batch");
-		server.associateHttpContext(wccC1, server.createNewContextModel(wccC1, "/c", bundle, batch));
-		server.associateHttpContext(wccC2, server.createNewContextModel(wccC2, "/c", bundle, batch));
-		server.associateHttpContext(wccD1, server.createNewContextModel(wccD1, "/d", bundle, batch));
-		server.associateHttpContext(wccE1, server.createNewContextModel(wccE1, "/e", bundle, batch));
+		OsgiContextModel ocmC1 = server.getOrCreateOsgiContextModel(wccC1, bundle, "/c", batch);
+		OsgiContextModel ocmC2 = server.getOrCreateOsgiContextModel(wccC2, bundle, "/c", batch);
+		OsgiContextModel ocmD1 = server.getOrCreateOsgiContextModel(wccD1, bundle, "/d", batch);
+		OsgiContextModel ocmE1 = server.getOrCreateOsgiContextModel(wccE1, bundle, "/e", batch);
 		batch.accept(wc.getServiceModel());
 		controller.sendBatch(batch);
 
@@ -452,25 +450,32 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		Map<String, String> initParams = new HashMap<>();
 		initParams.put("p1", "v1");
 
-		wc.doRegisterServlet(Arrays.asList(wccC1, wccE1), new ServletModel.Builder()
+		WhiteboardWebContainerView view = wc.adapt(WhiteboardWebContainerView.class);
+
+		view.registerServlet(new ServletModel.Builder()
 				.withServletName("my-servlet1")
 				.withUrlPatterns(new String[] { "/s/*" }) // responds to /c/s/* or /e/s/* depending on context selector
 				.withServletReference(ref)
 				.withInitParams(initParams)
+				.withOsgiContextModel(ocmC1)
+				.withOsgiContextModel(ocmE1)
 				.build());
-		wc.doRegisterServlet(Collections.singletonList(wccC2), new ServletModel.Builder()
+		view.registerServlet(new ServletModel.Builder()
 				.withServletName("my-servlet2")
 				.withUrlPatterns(new String[] { "/s2/*" }) // responds to /c/s2/* depending on context selector
 				.withServletReference(ref)
 				.withInitParams(initParams)
+				.withOsgiContextModel(ocmC2)
 				.build());
 
 		// this filter is NOT registered to osgiContextC2, so should NOT be mapped to /c/s2/*
-		wc.doRegisterFilter(Arrays.asList(wccC1, wccD1), new FilterModel.Builder()
+		view.registerFilter(new FilterModel.Builder()
 				.withFilterName("my-filter")
 				.withUrlPatterns(new String[] { "/*" }) // maps to /c/* or /d/* depending on associated contexts
 				.withFilter(filter)
 				.withRegisteringBundle(bundle)
+				.withOsgiContextModel(ocmC1)
+				.withOsgiContextModel(ocmD1)
 				.build());
 
 		// filter -> servlet
@@ -534,6 +539,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		when(bundle.getBundleContext()).thenReturn(context);
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
+		server.createDefaultServletContextModel(controller);
 
 		Configuration config = controller.getConfiguration();
 		HttpServiceEnabled wc = new HttpServiceEnabled(bundle, controller, server, null, config);
@@ -546,21 +552,17 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		batch.accept(wc.getServiceModel());
 		controller.sendBatch(batch);
 
-		WebContainerContext wcc1 = wc.createDefaultHttpContext("wcc1");
-		WebContainerContext wcc2 = wc.createDefaultHttpContext("wcc2");
-		WebContainerContext wcc3 = wc.createDefaultHttpContext("wcc3");
-		WebContainerContext wcc4 = wc.createDefaultHttpContext("wcc4");
+		WebContainerContext wcc1 = new DefaultHttpContext(bundle, "wcc1");
+		WebContainerContext wcc2 = new DefaultHttpContext(bundle, "wcc2");
+		WebContainerContext wcc3 = new DefaultHttpContext(bundle, "wcc3");
+		WebContainerContext wcc4 = new DefaultHttpContext(bundle, "wcc4");
 
 		// 4 logical OSGi context models
 		batch = new Batch("Initialization Batch");
-		OsgiContextModel cm1 = server.createNewContextModel(wcc1, "/c1", bundle, batch);
-		OsgiContextModel cm2 = server.createNewContextModel(wcc2, "/c2", bundle, batch);
-		OsgiContextModel cm3 = server.createNewContextModel(wcc3, "/c3", bundle, batch);
-		OsgiContextModel cm4 = server.createNewContextModel(wcc3, "/c4", bundle, batch);
-		server.associateHttpContext(wcc1, cm1);
-		server.associateHttpContext(wcc2, cm2);
-		server.associateHttpContext(wcc3, cm3);
-		server.associateHttpContext(wcc4, cm4);
+		OsgiContextModel cm1 = server.getOrCreateOsgiContextModel(wcc1, bundle, "/c1", batch);
+		OsgiContextModel cm2 = server.getOrCreateOsgiContextModel(wcc2, bundle, "/c2", batch);
+		OsgiContextModel cm3 = server.getOrCreateOsgiContextModel(wcc3, bundle, "/c3", batch);
+		OsgiContextModel cm4 = server.getOrCreateOsgiContextModel(wcc4, bundle, "/c4", batch);
 		batch.accept(wc.getServiceModel());
 		controller.sendBatch(batch);
 
@@ -585,12 +587,16 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 
 		long serviceId = 0;
 
+		WhiteboardWebContainerView view = wc.adapt(WhiteboardWebContainerView.class);
+
 		// servlet#1 registered in /c1 and /c2
-		wc.doRegisterServlet(Arrays.asList(wcc1, wcc2), new ServletModel.Builder()
+		view.registerServlet(new ServletModel.Builder()
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
 				.withServletReference(s11)
 				.withServiceRankAndId(0, ++serviceId)
+				.withOsgiContextModel(cm1)
+				.withOsgiContextModel(cm2)
 				.build());
 
 		assertThat(httpGET(port, "/c1/s"), endsWith("S(1)"));
@@ -598,11 +604,12 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		assertThat(httpGET(port, "/c3/s"), startsWith("HTTP/1.1 404"));
 
 		// servlet#2 registered in /c3 - no conflict
-		wc.doRegisterServlet(Collections.singletonList(wcc3), new ServletModel.Builder()
+		view.registerServlet(new ServletModel.Builder()
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
 				.withServletReference(s12)
 				.withServiceRankAndId(3, ++serviceId)
+				.withOsgiContextModel(cm3)
 				.build());
 
 		assertThat(httpGET(port, "/c1/s"), endsWith("S(1)"));
@@ -610,11 +617,12 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		assertThat(httpGET(port, "/c3/s"), endsWith("S(2)"));
 
 		// servlet#3 registered to /c1, but with higher service ID - should be marked as disabled
-		wc.doRegisterServlet(Collections.singletonList(wcc1), new ServletModel.Builder()
+		view.registerServlet(new ServletModel.Builder()
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
 				.withServletReference(s13)
 				.withServiceRankAndId(0, ++serviceId)
+				.withOsgiContextModel(cm1)
 				.build());
 
 		assertThat(httpGET(port, "/c1/s"), endsWith("S(1)"));
@@ -622,11 +630,13 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		assertThat(httpGET(port, "/c3/s"), endsWith("S(2)"));
 
 		// servlet#4 registered to /c2 and /c3 - ranked higher than s#1 in /c2, but ranked lower than s#2 in /c3
-		wc.doRegisterServlet(Arrays.asList(wcc2, wcc3), new ServletModel.Builder()
+		view.registerServlet(new ServletModel.Builder()
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
 				.withServletReference(s14)
 				.withServiceRankAndId(2, ++serviceId)
+				.withOsgiContextModel(cm2)
+				.withOsgiContextModel(cm3)
 				.build());
 
 		assertThat(httpGET(port, "/c1/s"), endsWith("S(1)"));
@@ -639,11 +649,13 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		//  - s#5 MAY be activated in /c2 and /c4, but in /c2, s#4 is ranked higher than s#5
 		//  - s#4 is ranked lower than s#2 in /c3, so it won't be activated ANYWHERE
 		//  - s#5 will thus be activated in /c2 and /c4
-		wc.doRegisterServlet(Arrays.asList(wcc2, wcc4), new ServletModel.Builder()
+		view.registerServlet(new ServletModel.Builder()
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
 				.withServletReference(s15)
 				.withServiceRankAndId(1, ++serviceId)
+				.withOsgiContextModel(cm2)
+				.withOsgiContextModel(cm4)
 				.build());
 
 		assertThat(httpGET(port, "/c1/s"), endsWith("S(3)"));
@@ -652,11 +664,12 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		assertThat(httpGET(port, "/c4/s"), endsWith("S(5)"));
 
 		// servlet#6 registered to /c4 - ranked lower than s#5 in /c4, so added as disabled
-		wc.doRegisterServlet(Collections.singletonList(wcc4), new ServletModel.Builder()
+		view.registerServlet(new ServletModel.Builder()
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
 				.withServletReference(s16)
 				.withServiceRankAndId(0, ++serviceId)
+				.withOsgiContextModel(cm4)
 				.build());
 
 		assertThat(httpGET(port, "/c1/s"), endsWith("S(3)"));
@@ -669,7 +682,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		wc.doUnregisterServlet(new ServletModel.Builder()
 				.withServletReference(s12)
 				.withOsgiContextModel(cm3)
-				.remove());
+				.build());
 
 		assertTrue(httpGET(port, "/c1/s").endsWith("S(3)"));
 		assertTrue(httpGET(port, "/c2/s").endsWith("S(4)"));

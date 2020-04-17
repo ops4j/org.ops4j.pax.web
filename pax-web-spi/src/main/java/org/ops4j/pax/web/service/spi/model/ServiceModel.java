@@ -21,8 +21,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.ops4j.pax.web.service.PaxWebConstants;
+import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.service.spi.context.DefaultHttpContext;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.FilterModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterStateChange;
@@ -30,6 +34,7 @@ import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
+import org.osgi.framework.Bundle;
 
 /**
  * <p>Service Model is kept at {@link org.osgi.service.http.HttpService} level, which is bundle-scoped in Pax Web
@@ -54,6 +59,8 @@ public class ServiceModel implements BatchVisitor {
 	 * {@link org.osgi.framework.BundleContext#registerService bundle context}.
 	 */
 	private final ServerModel serverModel;
+
+	private final Bundle serviceBundle;
 
 	/**
 	 * <p>Servlets registered under alias in given context path (exact URL pattern) by given bundle-scoped
@@ -81,8 +88,34 @@ public class ServiceModel implements BatchVisitor {
 	/** All filter models registered by given bundle-scoped {@link org.osgi.service.http.HttpService}. */
 	private final Set<FilterModel> filterModels = new HashSet<>();
 
-	public ServiceModel(ServerModel serverModel) {
+	public ServiceModel(ServerModel serverModel, Bundle serviceBundle) {
 		this.serverModel = serverModel;
+		this.serviceBundle = serviceBundle;
+
+		createDefaultHttpContext(PaxWebConstants.DEFAULT_CONTEXT_NAME);
+	}
+
+	/**
+	 * Creates named {@link OsgiContextModel} for the bundle from this {@link ServiceModel} and ensures that
+	 * this {@link OsgiContextModel} is stored at {@link ServerModel} level.
+	 * @param contextId
+	 * @return
+	 */
+	public OsgiContextModel createDefaultHttpContext(String contextId) {
+		// Just as ServerModel creates bundle-agnostic ServletContextModel, in ServiceModel we create/acquire
+		// bundle-aware OsgiContextModel - this time in a batch to preserve single-writer principle
+		Batch batch = new Batch("Initialization of HttpService for " + serviceBundle);
+		ServletContextModel scm = serverModel.getOrCreateServletContextModel(PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
+
+		WebContainerContext wcc = new DefaultHttpContext(serviceBundle, contextId);
+
+		// this will create and store new OsgiContextModel inside ServerModel (which doesn't/shouldn't track
+		// OsgiContextModels for Whiteboard)
+		OsgiContextModel model = serverModel.getOrCreateOsgiContextModel(wcc, serviceBundle,
+				PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
+		batch.accept(this);
+
+		return model;
 	}
 
 //	private final Map<EventListener, EventListenerModel> eventListenerModels;
@@ -133,7 +166,7 @@ public class ServiceModel implements BatchVisitor {
 				Map<String, ServletModel> contexts = aliasMapping.computeIfAbsent(model.getAlias(), alias -> new HashMap<>());
 
 				for (OsgiContextModel context : change.getServletModel().getContextModels()) {
-					String contextPath = context.getServletContextModel().getContextPath();
+					String contextPath = context.getContextPath();
 					contexts.put(contextPath, model);
 				}
 			}
@@ -199,16 +232,6 @@ public class ServiceModel implements BatchVisitor {
 	public void visit(FilterStateChange change) {
 		// no op here. At model level (unlike in server controller level), filters are added/removed individually
 	}
-
-
-
-
-
-
-
-
-
-
 
 //	public synchronized ServletModel getServletModelWithAlias(final String alias) {
 //		NullArgumentException.validateNotEmpty(alias, "Alias");

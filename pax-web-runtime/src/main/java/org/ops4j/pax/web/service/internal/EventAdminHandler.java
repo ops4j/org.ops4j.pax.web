@@ -15,17 +15,12 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;
-import org.ops4j.pax.web.service.spi.WebEvent;
-import org.ops4j.pax.web.service.spi.WebEvent.WebTopic;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;

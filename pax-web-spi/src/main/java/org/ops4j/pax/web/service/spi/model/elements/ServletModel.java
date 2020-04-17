@@ -16,12 +16,14 @@
 package org.ops4j.pax.web.service.spi.model.elements;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -31,7 +33,6 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.util.Path;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -134,19 +135,6 @@ public class ServletModel extends ElementModel<Servlet> {
 		this.servletClass = servletClass;
 		setElementReference(reference);
 
-		int sources = 0;
-		sources += (servlet != null ? 1 : 0);
-		sources += (servletClass != null ? 1 : 0);
-		sources += (getElementReference() != null ? 1 : 0);
-		if (sources == 0) {
-			throw new IllegalArgumentException("Servlet Model must specify one of: servlet instance, servlet class"
-					+ " or service reference");
-		}
-		if (sources != 1) {
-			throw new IllegalArgumentException("Servlet Model should specify a servlet uniquely as instance, class"
-					+ " or service reference");
-		}
-
 		if (name == null) {
 			// legacy method first
 			name = this.initParams.get(PaxWebConstants.INIT_PARAM_SERVLET_NAME);
@@ -165,23 +153,6 @@ public class ServletModel extends ElementModel<Servlet> {
 		}
 		this.name = name;
 
-		if (this.alias == null && this.urlPatterns == null) {
-			throw new IllegalArgumentException("Neither alias nor URL patterns is specified");
-		}
-		if (this.alias != null && this.urlPatterns != null && this.urlPatterns.length > 0) {
-			throw new IllegalArgumentException("Can't specify both alias and URL patterns");
-		}
-
-		if (this.alias != null) {
-			if (!this.alias.startsWith("/")) {
-				throw new IllegalArgumentException("Alias does not start with slash (/)");
-			}
-			// "/" must be allowed
-			if (alias.length() > 1 && alias.endsWith("/")) {
-				throw new IllegalArgumentException("Alias should not end with slash (/)");
-			}
-		}
-
 		if (this.urlPatterns == null) {
 			// Http Service specification 102.4 Mapping HTTP Requests to Servlet and Resource Registrations:
 			// [...]
@@ -192,9 +163,47 @@ public class ServletModel extends ElementModel<Servlet> {
 		}
 	}
 
+	@Override
+	public Boolean performValidation() throws Exception {
+		int sources = 0;
+		sources += (servlet != null ? 1 : 0);
+		sources += (servletClass != null ? 1 : 0);
+		sources += (getElementReference() != null ? 1 : 0);
+		sources += (getElementSupplier() != null ? 1 : 0);
+		if (sources == 0) {
+			throw new IllegalArgumentException("Servlet Model must specify one of: servlet instance, servlet class,"
+					+ " servlet supplier or service reference");
+		}
+		if (sources != 1) {
+			throw new IllegalArgumentException("Servlet Model should specify a servlet uniquely as instance, class,"
+					+ " supplier or service reference");
+		}
+
+		if (this.alias == null && (this.urlPatterns == null || this.urlPatterns.length == 0)) {
+			throw new IllegalArgumentException("Neither alias nor URL patterns array is specified");
+		}
+		if (this.alias != null && this.urlPatterns != null && this.urlPatterns.length > 0) {
+			throw new IllegalArgumentException("Can't specify both alias and URL patterns array");
+		}
+
+		if (this.alias != null) {
+			if (!this.alias.startsWith("/")) {
+				throw new IllegalArgumentException("Alias does not start with slash (/)");
+			}
+			// "/" must be allowed
+			if (alias.length() > 1 && alias.endsWith("/")) {
+				throw new IllegalArgumentException("Alias should not end with slash (/)");
+			}
+			if ("".equals(alias.trim())) {
+				throw new IllegalArgumentException("Alias should not be empty");
+			}
+		}
+
+		return Boolean.TRUE;
+	}
 
 	@Override
-	public int compareTo(ElementModel o) {
+	public int compareTo(ElementModel<Servlet> o) {
 		int superCompare = super.compareTo(o);
 		if (superCompare == 0 && o instanceof ServletModel) {
 			// this happens in non-Whiteboard scenario
@@ -263,13 +272,7 @@ public class ServletModel extends ElementModel<Servlet> {
 			return this.servlet.getClass();
 		}
 		if (getElementReference() != null) {
-			Object objectClass = getElementReference().getProperty(Constants.OBJECTCLASS);
-			String className = null;
-			if (objectClass instanceof String) {
-				className = (String) objectClass;
-			} else if (objectClass instanceof String[] && ((String[]) objectClass).length > 0) {
-				className = ((String[]) objectClass)[0];
-			}
+			String className = Utils.getFirstObjectClass(getElementReference());
 			if (className != null) {
 				try {
 					return (Class<? extends Servlet>) getRegisteringBundle().loadClass(className);
@@ -297,6 +300,7 @@ public class ServletModel extends ElementModel<Servlet> {
 		private Servlet servlet;
 		private Class<? extends Servlet> servletClass;
 		private ServiceReference<? extends Servlet> reference;
+		private Supplier<? extends Servlet> supplier;
 		private final List<OsgiContextModel> list = new LinkedList<>();
 		private Bundle bundle;
 		private int rank;
@@ -365,8 +369,18 @@ public class ServletModel extends ElementModel<Servlet> {
 			return this;
 		}
 
+		public Builder withServletSupplier(Supplier<? extends Servlet> supplier) {
+			this.supplier = supplier;
+			return this;
+		}
+
 		public Builder withOsgiContextModel(OsgiContextModel osgiContextModel) {
 			this.list.add(osgiContextModel);
+			return this;
+		}
+
+		public Builder withOsgiContextModels(final Collection<OsgiContextModel> osgiContextModels) {
+			this.list.addAll(osgiContextModels);
 			return this;
 		}
 
@@ -388,16 +402,7 @@ public class ServletModel extends ElementModel<Servlet> {
 			model.setRegisteringBundle(this.bundle);
 			model.setServiceRank(this.rank);
 			model.setServiceId(this.serviceId);
-			return model;
-		}
-
-		/**
-		 * Special builder finishing method to prepare {@link ServletModel} for removal (with disabled validation)
-		 * @return
-		 */
-		public ServletModel remove() {
-			ServletModel model = new ServletModel(alias, servletName, servlet, servletClass, reference);
-			list.forEach(model::addContextModel);
+			model.setElementSupplier(this.supplier);
 			return model;
 		}
 	}

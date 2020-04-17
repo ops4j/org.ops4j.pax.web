@@ -27,12 +27,11 @@ import javax.servlet.ServletResponse;
 
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
-
-import static org.easymock.EasyMock.*;
-
 import org.junit.Test;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
+
+import static org.easymock.EasyMock.*;
 
 public class FilterTest extends IntegrationTests {
 

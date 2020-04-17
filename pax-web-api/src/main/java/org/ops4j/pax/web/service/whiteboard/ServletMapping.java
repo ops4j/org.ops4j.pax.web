@@ -64,7 +64,6 @@ public interface ServletMapping extends ContextRelated {
 	 * <p>In <em>whiteboard</em> method, this can be specified as:<ul>
 	 *     <li>{@link org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_SERVLET_NAME}
 	 *     property</li>
-	 *     <li>{@link org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletName} annotation</li>
 	 *     <li>{@code servlet-name} service registration property (legacy Pax Web Whiteboard approach)</li>
 	 * </ul></p>
 	 * <p>If not specified, the name defaults to fully qualified class name of the servlet.</p>
@@ -154,7 +153,7 @@ public interface ServletMapping extends ContextRelated {
 	 *
 	 * @return map of initialization parameters.
 	 */
-	Map<String, String> getInitParams();
+	Map<String, String> getInitParameters();
 
 	/**
 	 * <p>Get <em>load on startup</em> value for the servlet being registered. It matches

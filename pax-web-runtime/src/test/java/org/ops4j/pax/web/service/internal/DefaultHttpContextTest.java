@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import org.ops4j.pax.web.service.spi.context.DefaultHttpContext;
 import org.osgi.framework.Bundle;
 
 public class DefaultHttpContextTest {

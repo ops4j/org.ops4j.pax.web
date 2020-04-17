@@ -17,8 +17,6 @@
  */
 package org.ops4j.pax.web.service.spi.model.elements;
 
-import java.util.Objects;
-
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 
@@ -76,6 +74,10 @@ public class ErrorPageModel extends ElementModel {
 				"{" + "id=" + getId() + ",error=" +
 				error + ",location=" + location +
 				/*",context=" + getContextModel() +*/ "}";
+	}
+	@Override
+	public Boolean performValidation() {
+		return Boolean.TRUE;
 	}
 
 }

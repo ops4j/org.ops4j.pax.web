@@ -115,7 +115,8 @@ public interface WebContainer extends HttpService {
 	 */
 	void end(HttpContext context);
 
-	// --- different methods used to retrieve HttpContext
+	// --- different methods used to retrieve HttpContext - all will be associated with "/" context
+	//     TOCHECK: other contexts are available only when using Whiteboard
 
 	/**
 	 * <p>Creates a default {@link HttpContext} as defined in original {@link HttpService#createDefaultHttpContext()},
@@ -128,7 +129,8 @@ public interface WebContainer extends HttpService {
 	 * <p>Of course such {@link HttpContext} can later be registered as OSGi service and referenced later using:<ul>
 	 *     <li>standard (Whiteboard)
 	 *     {@code osgi.http.whiteboard.context.select=(osgi.http.whiteboard.context.name=name)} service registration
-	 *     property even if this property is designed to reference {@link ServletContextHelper} instances</li>
+	 *     property even if this property is designed to reference
+	 *     {@link org.osgi.service.http.context.ServletContextHelper} instances</li>
 	 *     <li>legacy (Pax Web specific) {@code httpContext.id=name} service registration property</li>
 	 * </ul>
 	 * Legacy Pax Web Whiteboard implementation handles contexts registered with {@code httpContext.id} property.
@@ -163,32 +165,6 @@ public interface WebContainer extends HttpService {
 	 * @return
 	 */
 	MultiBundleWebContainerContext createDefaultSharedHttpContext(String contextId);
-
-	/**
-	 * Retrieves global (singleton), shared, default {@link HttpContext} which provides default behavior and may
-	 * be shared by different bundles. This method is deprecated, because shared contexts should be created on demand,
-	 * registered as OSGi services (possibly wrapped in {@link org.ops4j.pax.web.service.whiteboard.HttpContextMapping}
-	 * together with context path) and referenced by all bundles wanting to contribute web elements to shared context.
-	 *
-	 * @return the default, <em>global</em> shared {@link HttpContext}
-	 *
-	 * @deprecated applications should not rely on singleton {@link MultiBundleWebContainerContext}, they should (if
-	 *             not using Whiteboard approach) create named, shared context and probably register it as OSGi service
-	 *             to be used by different bundles.
-	 */
-	@Deprecated
-	MultiBundleWebContainerContext getDefaultSharedHttpContext();
-
-	/**
-	 * When using {@link HttpService} or {@link WebContainer} registration methods, a {@link HttpContext} instances
-	 * has to be passed with every call (unless {@code null} used meaning default context). Knowing that some named
-	 * {@link HttpContext} (whether shared or not) was created earlier, we can simply create a <em>referenced</em>
-	 * context to make things more convenient.
-	 *
-	 * @param contextId
-	 * @return
-	 */
-	ReferencedWebContainerContext createReferencedContext(String contextId);
 
 	// --- methods used to register a Servlet - with more options than in original HttpService.registerServlet()
 
@@ -478,9 +454,16 @@ public interface WebContainer extends HttpService {
 //	 *                                  registered or unregistered before) or the listener is null
 //	 */
 //	void unregisterEventListener(EventListener listener);
-//
-//
-//
+
+
+
+
+
+
+
+
+
+
 //	/**
 //	 * Sets context paramaters to be used in the servlet context corresponding
 //	 * to specified http context. This method must be used before any register
@@ -710,7 +693,6 @@ public interface WebContainer extends HttpService {
 //
 ////	WebContainerDTO getWebcontainerDTO();
 //
-//	void setSessionCookieConfig(String domain, String name, Boolean httpOnly, Boolean secure, String path,
-//	Integer maxAge, HttpContext httpContext);
+//	void setSessionCookieConfig(String domain, String name, Boolean httpOnly, Boolean secure, String path, Integer maxAge, HttpContext httpContext);
 
 }

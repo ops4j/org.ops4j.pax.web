@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;
-import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
@@ -71,7 +70,6 @@ import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
-import org.ops4j.pax.web.service.spi.model.elements.ResourceModel;
 import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
@@ -608,7 +606,9 @@ class JettyServerWrapper implements BatchVisitor {
 	@Override
 	public void visit(OsgiContextModelChange change) {
 		OsgiContextModel osgiModel = change.getOsgiContextModel();
-		String contextPath = osgiModel.getServletContextModel().getContextPath();
+		ServletContextModel servletModel = change.getServletContextModel();
+
+		String contextPath = osgiModel.getContextPath();
 		ServletContextHandler sch = contextHandlers.get(contextPath);
 
 		if (sch == null) {
@@ -623,7 +623,7 @@ class JettyServerWrapper implements BatchVisitor {
 			// set of attributes, that's the good place to remember such association.
 			// Later, when servlets will be registered with such OsgiContextModel, they need to get
 			// special facade for ServletContext
-			osgiServletContexts.put(osgiModel, new OsgiServletContext(sch.getServletContext(), osgiModel));
+			osgiServletContexts.put(osgiModel, new OsgiServletContext(sch.getServletContext(), osgiModel, servletModel));
 
 			// a physical context just got a new OSGi context
 			osgiContextModels.get(contextPath).add(osgiModel);
@@ -673,8 +673,7 @@ class JettyServerWrapper implements BatchVisitor {
 
 			// proper order ensures that (assuming above scenario), for /c1, ocm2 will be chosen and ocm1 skipped
 			model.getContextModels().forEach(osgiContext -> {
-				ServletContextModel servletContext = osgiContext.getServletContextModel();
-				String contextPath = servletContext.getContextPath();
+				String contextPath = osgiContext.getContextPath();
 
 				if (!done.add(contextPath)) {
 					// servlet was already added to given ServletContextHandler
@@ -688,7 +687,7 @@ class JettyServerWrapper implements BatchVisitor {
 					return;
 				}
 
-				LOG.debug("Adding servlet {} to {}", model.getName(), servletContext);
+				LOG.debug("Adding servlet {} to {}", model.getName(), contextPath);
 
 				// there may be many instances of ServletHolder using the same instance of servlet (added to
 				// different org.eclipse.jetty.servlet.ServletContextHandler._servletHandler in different context
@@ -737,10 +736,10 @@ class JettyServerWrapper implements BatchVisitor {
 				LOG.info("Removing servlet {}", model);
 
 				// proper order ensures that (assuming above scenario), for /c1, ocm2 will be chosen and ocm1 skipped
-				model.getServletContextModels().forEach(servletContext -> {
-					String contextPath = servletContext.getContextPath();
+				model.getContextModels().forEach(osgiContextModel -> {
+					String contextPath = osgiContextModel.getContextPath();
 
-					LOG.debug("Removing servlet {} from {}", model.getName(), servletContext);
+					LOG.debug("Removing servlet {} from context {}", model.getName(), contextPath);
 
 					// there should already be a ServletContextHandler
 					ServletContextHandler sch = contextHandlers.get(contextPath);
@@ -839,7 +838,7 @@ class JettyServerWrapper implements BatchVisitor {
 				OsgiContextModel highestRankedModel = null;
 				// remember, this contextModels list is properly sorted
 				for (OsgiContextModel ocm : model.getContextModels()) {
-					if (ocm.getServletContextModel().getContextPath().equals(contextPath)) {
+					if (ocm.getContextPath().equals(contextPath)) {
 						highestRankedModel = ocm;
 						break;
 					}
@@ -895,11 +894,11 @@ class JettyServerWrapper implements BatchVisitor {
 									break;
 								}
 							}
-							if (!hasDefault) {
-								ResourceServlet servlet = new ResourceServlet(model.getHttpContext(), /*model.getContextName()*/"TODO", "/", "default");
-								ResourceModel resourceModel = new ResourceModel(model, servlet, "/", "default");
-								addServlet(resourceModel);
-							}
+//							if (!hasDefault) {
+//								ResourceServlet servlet = new ResourceServlet(model.getHttpContext(), /*model.getContextName()*/"TODO", "/", "default");
+//								ResourceModel resourceModel = new ResourceModel(model, servlet, "/", "default");
+//								addServlet(resourceModel);
+//							}
 
 							// Fixfor PAXWEB-751
 							ClassLoader loader = Thread.currentThread().getContextClassLoader();

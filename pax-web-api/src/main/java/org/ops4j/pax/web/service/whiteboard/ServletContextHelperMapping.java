@@ -15,19 +15,20 @@
  */
 package org.ops4j.pax.web.service.whiteboard;
 
+import org.osgi.framework.Bundle;
 import org.osgi.service.http.context.ServletContextHelper;
 
 /**
  * <p><em>ServletContextHelper mapping</em> collects all the information required to register a
  * {@link ServletContextHelperMapping} to allow referencing it later.</p>
  *
- * <p>Registering a {@link ServletContextHelper} can be done in two ways:<li>
+ * <p>Registering a {@link ServletContextHelper} can be done in two ways:<ul>
  *     <li>registering a service with this interface - all the information is included in service itself
  *     (<em>explicit whiteboard approach</em>)</li>
  *     <li>registering a {@link ServletContextHelper} service, while required properties (mapping,
  *     name, parameters) are specified using service registration properties/annotations
  *     (OSGi CMPN Whiteboard approach)</li>
- * </li></p>
+ * </ul></p>
  *
  * <p>This interface doesn't extend {@link ContextRelated}, because it represents the <em>context</em> itself.</p>
  */
@@ -41,5 +42,19 @@ public interface ServletContextHelperMapping extends ContextMapping {
 	 * @return
 	 */
 	ServletContextHelper getServletContextHelper();
+
+	/**
+	 * <p>Get actual context help being registered. This version accepts {@link Bundle}, so it's possible to
+	 * return {@link ServletContextHelper} tied to given bundle. By default, {@link Bundle} argument is ignored and
+	 * {@link #getServletContextHelper()} is called.</p>
+	 *
+	 * <p>This method reflects Whiteboard Service specification, where {@link ServletContextHelper} is recommended
+	 * to be registered as {@link org.osgi.framework.ServiceFactory}.</p>
+	 *
+	 * @return
+	 */
+	default ServletContextHelper getServletContextHelper(Bundle bundle) {
+		return getServletContextHelper();
+	}
 
 }

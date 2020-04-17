@@ -52,4 +52,9 @@ public class JspConfigurationModel extends ElementModel implements JspConfigDesc
 		return jspPropertyGroupDescriptors;
 	}
 
+	@Override
+	public Boolean performValidation() {
+		return Boolean.TRUE;
+	}
+
 }

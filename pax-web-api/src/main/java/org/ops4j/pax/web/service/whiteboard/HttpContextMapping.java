@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.whiteboard;
 
+import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 
 /**
@@ -43,5 +44,25 @@ public interface HttpContextMapping extends ContextMapping {
 	 * @return associated HttpContext; can be null, case when a default http context will be created and used
 	 */
 	HttpContext getHttpContext();
+
+	/**
+	 * <p>Get actual context being registered. This version accepts {@link Bundle} argument to reflect
+	 * recommendations from Whiteboard Service specification, where
+	 * {@link org.osgi.service.http.context.ServletContextHelper} is suggested to be registered as
+	 * {@link org.osgi.framework.ServiceFactory}.</p>
+	 *
+	 * @param bundle
+	 * @return
+	 */
+	default HttpContext getHttpContext(Bundle bundle) {
+		return getHttpContext();
+	}
+
+	/**
+	 * Whether the context should be shared - Whiteboard contexts are always shared, but Http Service doesn't
+	 * define such flag at all.
+	 * @return
+	 */
+	boolean isShared();
 
 }

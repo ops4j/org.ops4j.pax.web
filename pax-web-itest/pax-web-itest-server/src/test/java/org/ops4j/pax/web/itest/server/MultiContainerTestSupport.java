@@ -38,7 +38,7 @@ public class MultiContainerTestSupport {
 		return Arrays.asList(new Object[][] {
 				{ Runtime.JETTY },
 				{ Runtime.TOMCAT },
-				{ Runtime.UNDERTOW }
+				{ Runtime.UNDERTOW },
 		});
 	}
 

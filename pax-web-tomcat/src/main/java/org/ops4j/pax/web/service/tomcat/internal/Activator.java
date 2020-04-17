@@ -19,7 +19,6 @@ import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Registers the ServletControllerFactory on startup

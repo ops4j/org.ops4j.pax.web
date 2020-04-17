@@ -38,6 +38,7 @@ import javax.servlet.descriptor.JspConfigDescriptor;
 
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.osgi.framework.wiring.BundleWiring;
 
@@ -53,13 +54,16 @@ public class OsgiServletContext implements ServletContext {
 
 	private ServletContext container;
 	private final OsgiContextModel contextModel;
+	private final ServletContextModel servletContextModel;
 	private final WebContainerContext context;
 
 	private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>();
 
-	public OsgiServletContext(ServletContext container, OsgiContextModel contextModel) {
+	public OsgiServletContext(ServletContext container, OsgiContextModel contextModel,
+			ServletContextModel servletContextModel) {
 		this.container = container;
 		this.contextModel = contextModel;
+		this.servletContextModel = servletContextModel;
 		this.context = contextModel.getHttpContext();
 	}
 
@@ -386,8 +390,8 @@ public class OsgiServletContext implements ServletContext {
 
 	@Override
 	public RequestDispatcher getRequestDispatcher(String path) {
-		// this should be narrowed to servlets registered only to the same ServletContextHelper
-		// but we cede the path resolution to the container, so we can't actually tell...
+		// TOCHECK: this should be narrowed to servlets registered only to the same ServletContextHelper
+		//          but we cede the path resolution to the container, so we can't actually tell...
 		//
 		// for example, if there are two servlets registered using two ServletContextHelpers that use the same
 		// context path:
@@ -402,7 +406,7 @@ public class OsgiServletContext implements ServletContext {
 
 	@Override
 	public RequestDispatcher getNamedDispatcher(String name) {
-		ServletModel servletModel = contextModel.getServletContextModel().getServletNameMapping().get(name);
+		ServletModel servletModel = servletContextModel.getServletNameMapping().get(name);
 		if (servletModel == null) {
 			return null;
 		}

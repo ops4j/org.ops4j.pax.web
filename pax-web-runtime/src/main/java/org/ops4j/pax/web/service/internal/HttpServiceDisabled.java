@@ -22,7 +22,6 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
-import org.ops4j.pax.web.service.ReferencedWebContainerContext;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
@@ -90,18 +89,6 @@ class HttpServiceDisabled implements StoppableHttpService {
 
 	@Override
 	public MultiBundleWebContainerContext createDefaultSharedHttpContext(String contextId) {
-		return null;
-	}
-
-	@Override
-	@Deprecated
-	public MultiBundleWebContainerContext getDefaultSharedHttpContext() {
-		LOG.warn("Http service has already been stopped");
-		return null;
-	}
-
-	@Override
-	public ReferencedWebContainerContext createReferencedContext(String contextId) {
 		return null;
 	}
 

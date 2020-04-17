@@ -16,7 +16,6 @@
 package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 
 import org.apache.catalina.Contained;

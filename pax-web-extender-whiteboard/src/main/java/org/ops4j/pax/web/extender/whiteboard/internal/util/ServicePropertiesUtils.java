@@ -18,7 +18,6 @@
 package org.ops4j.pax.web.extender.whiteboard.internal.util;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,9 +25,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
+import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,30 +51,8 @@ public class ServicePropertiesUtils {
 		// utility class
 	}
 
-	/**
-	 * Returns a property as String.
-	 *
-	 * @param serviceReference service reference; cannot be null
-	 * @param key              property key; cannot be null
-	 * @return property value; null if property is not set or property value is
-	 * not a String
-	 * @throws NullArgumentException - If service reference is null - If key is null
-	 */
-	public static String getStringProperty(
-			final ServiceReference<?> serviceReference, final String key) {
-		NullArgumentException.validateNotNull(serviceReference, "Service reference");
-		NullArgumentException.validateNotEmpty(key, true, "Property key");
-
-		Object value = serviceReference.getProperty(key);
-		if (value != null && !(value instanceof String)) {
-			LOG.error("Property [" + key + "] value must be a String");
-			return null;
-		}
-		return (String) value;
-	}
-
 	public static Boolean getBooleanProperty(final ServiceReference<?> serviceReference, final String key) {
-		String stringProperty = getStringProperty(serviceReference, key);
+		String stringProperty = Utils.getStringProperty(serviceReference, key);
 
 		return Boolean.parseBoolean(stringProperty);
 	}
@@ -107,31 +83,6 @@ public class ServicePropertiesUtils {
 		} else {
 			return null;
 		}
-	}
-
-	public static String[] getArrayOfStringProperty(final ServiceReference<?> serviceReference, final String key) {
-		NullArgumentException.validateNotNull(serviceReference, "Service reference");
-		NullArgumentException.validateNotEmpty(key, true, "Property key");
-
-		Object value = serviceReference.getProperty(key);
-
-		if (value instanceof String) {
-			return new String[]{((String) value).trim()};
-		} else if (value instanceof String[]) {
-			return (String[]) value;
-		} else if (value instanceof Collection<?>) {
-			Collection<?> collectionValues = (Collection<?>) value;
-			String[] values = new String[collectionValues.size()];
-
-			int i = 0;
-			for (Object current : collectionValues) {
-				values[i++] = current != null ? String.valueOf(current).trim() : null;
-			}
-
-			return values;
-		}
-
-		return null;
 	}
 
 	/**
@@ -169,46 +120,6 @@ public class ServicePropertiesUtils {
 			setToMerge.addAll(Arrays.asList((String[]) objectToMerge));
 		}
 		return setToMerge.toArray(new String[setToMerge.size()]);
-	}
-
-
-	/**
-	 * Utility method to extract the httpContextID from the service reference.
-	 * This can either be included with the "old" Pax-Web style or the new OSGi R6 Whiteboard style.
-	 *
-	 * @param serviceReference - service reference where the httpContextID needs to be extracted from.
-	 * @return the http context id
-	 */
-	public static String extractHttpContextId(final ServiceReference<?> serviceReference) {
-		String httpContextId = getStringProperty(serviceReference, ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID);
-
-		//TODO: Make sure the current HttpContextSelect works together with R6
-		if (httpContextId == null) {
-			String httpContextSelector = getStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT);
-			if (httpContextSelector != null) {
-				httpContextSelector = httpContextSelector.substring(1, httpContextSelector.length());
-				httpContextId = httpContextSelector.substring(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME.length() + 1);
-				httpContextId = httpContextId.substring(0, httpContextId.length() - 1);
-			}
-		}
-		return httpContextId;
-	}
-
-	/**
-	 * Utility method to extract the shared state of the HttpContext
-	 *
-	 * @param serviceReference
-	 * @return whether the context is shared
-	 */
-	public static Boolean extractSharedHttpContext(final ServiceReference<?> serviceReference) {
-		Boolean sharedHttpContext = Boolean
-				.parseBoolean((String) serviceReference
-						.getProperty(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED));
-
-		if (serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT) != null) {
-			sharedHttpContext = true;
-		}
-		return sharedHttpContext;
 	}
 
 

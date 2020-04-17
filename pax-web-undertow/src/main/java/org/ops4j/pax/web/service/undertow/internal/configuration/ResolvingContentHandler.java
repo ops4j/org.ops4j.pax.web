@@ -17,7 +17,6 @@ package org.ops4j.pax.web.service.undertow.internal.configuration;
 
 import java.util.Map;
 
-import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

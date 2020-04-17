@@ -15,7 +15,6 @@
  */
 package org.ops4j.pax.web.itest.server;
 
-import java.util.Collections;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
@@ -28,11 +27,13 @@ import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.internal.HttpServiceEnabled;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.config.Configuration;
+import org.ops4j.pax.web.service.spi.context.DefaultHttpContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.task.Batch;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -68,6 +69,7 @@ public class ServerControllerScopesTest extends MultiContainerTestSupport {
 		when(bundle.getBundleContext()).thenReturn(context);
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
+		server.createDefaultServletContextModel(controller);
 
 		Configuration config = controller.getConfiguration();
 		HttpServiceEnabled wc = new HttpServiceEnabled(bundle, controller, server, null, config);
@@ -77,11 +79,12 @@ public class ServerControllerScopesTest extends MultiContainerTestSupport {
 		batch.accept(wc.getServiceModel());
 		controller.sendBatch(batch);
 
-		WebContainerContext wcc1 = wc.createDefaultHttpContext("wcc1");
+		// wc.createDefaultHttpContext() will immediately associate the context with "/"-related OsgiContextModel
+//		WebContainerContext wcc1 = wc.createDefaultHttpContext("wcc1");
+		WebContainerContext wcc1 = new DefaultHttpContext(bundle, "wcc1");
 
 		batch = new Batch("Initialization Batch");
-		OsgiContextModel cm1 = server.createNewContextModel(wcc1, "/c1", bundle, batch);
-		server.associateHttpContext(wcc1, cm1);
+		OsgiContextModel cm1 = server.getOrCreateOsgiContextModel(wcc1, bundle, "/c1", batch);
 		batch.accept(wc.getServiceModel());
 		controller.sendBatch(batch);
 
@@ -95,23 +98,28 @@ public class ServerControllerScopesTest extends MultiContainerTestSupport {
 		ServiceReference<Filter> f2 = mock(ServiceReference.class);
 		when(context.getService(f2)).thenAnswer(invocation -> new Utils.MyIdFilter("2"));
 
-		wc.doRegisterServlet(Collections.singletonList(wcc1), new ServletModel.Builder("s1")
+		WhiteboardWebContainerView view = wc.adapt(WhiteboardWebContainerView.class);
+
+		view.registerServlet(new ServletModel.Builder("s1")
 				.withUrlPatterns(new String[] { "/s" })
 				.withServletReference(bundle, s1)
+				.withOsgiContextModel(cm1)
 				.build());
 
 		assertThat(httpGET(port, "/c1/s"), endsWith("S(1)"));
 
 		// two filters, but the 2nd one is ranked higher
-		wc.doRegisterFilter(Collections.singletonList(wcc1), new FilterModel.Builder("f1")
+		view.registerFilter(new FilterModel.Builder("f1")
 				.withUrlPatterns(new String[] { "/*" })
 				.withFilterReference(bundle, f1)
 				.withServiceRankAndId(10, 30)
+				.withOsgiContextModel(cm1)
 				.build());
-		wc.doRegisterFilter(Collections.singletonList(wcc1), new FilterModel.Builder("f2")
+		view.registerFilter(new FilterModel.Builder("f2")
 				.withUrlPatterns(new String[] { "/*" })
 				.withFilterReference(bundle, f2)
 				.withServiceRankAndId(15, 20)
+				.withOsgiContextModel(cm1)
 				.build());
 
 		// terminate=<id of the filter> is special request parameter telling the filters to NOT pass the control
@@ -123,17 +131,17 @@ public class ServerControllerScopesTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/c1/s"), endsWith(">F(2)>F(1)S(1)<F(1)<F(2)"));
 		assertThat(httpGET(port, "/c1/s2?terminate=1"), endsWith(">F(2)>F(1)<F(1)<F(2)"));
 
-		wc.doUnregisterFilter(new FilterModel.Builder("f1").remove());
+		wc.doUnregisterFilter(new FilterModel.Builder("f1").build());
 
 		assertThat(httpGET(port, "/c1/s"), endsWith(">F(2)S(1)<F(2)"));
 		assertThat(httpGET(port, "/c1/s2?terminate=2"), endsWith(">F(2)<F(2)"));
 
-		wc.doUnregisterFilter(new FilterModel.Builder("f2").remove());
+		wc.doUnregisterFilter(new FilterModel.Builder("f2").build());
 
 		assertThat(httpGET(port, "/c1/s"), endsWith("S(1)"));
 		assertThat(httpGET(port, "/c1/s2"), startsWith("HTTP/1.1 404"));
 
-		wc.doUnregisterServlet(new ServletModel.Builder("s1").remove());
+		wc.doUnregisterServlet(new ServletModel.Builder("s1").build());
 
 		assertThat(httpGET(port, "/c1/s"), startsWith("HTTP/1.1 404"));
 

@@ -15,11 +15,11 @@
  */
 package org.ops4j.pax.web.service.undertow.internal.configuration.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_IO;
 

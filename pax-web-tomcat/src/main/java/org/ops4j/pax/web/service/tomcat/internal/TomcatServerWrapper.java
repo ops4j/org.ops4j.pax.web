@@ -756,7 +756,9 @@ class TomcatServerWrapper implements BatchVisitor {
 	@Override
 	public void visit(OsgiContextModelChange change) {
 		OsgiContextModel osgiModel = change.getOsgiContextModel();
-		String contextPath = osgiModel.getServletContextModel().getContextPath();
+		ServletContextModel servletModel = change.getServletContextModel();
+
+		String contextPath = osgiModel.getContextPath();
 		PaxWebStandardContext realContext = contextHandlers.get(contextPath);
 
 		if (realContext == null) {
@@ -769,7 +771,7 @@ class TomcatServerWrapper implements BatchVisitor {
 			// as with Jetty (JettyServerWrapper.visit(task.OsgiContextModelChange),
 			// each unique OsgiServletContext (ServletContextHelper or HttpContext) is a facade for some, sometimes
 			// shared by many osgi contexts, real ServletContext
-			osgiServletContexts.put(osgiModel, new OsgiServletContext(realContext.getServletContext(), osgiModel));
+			osgiServletContexts.put(osgiModel, new OsgiServletContext(realContext.getServletContext(), osgiModel, servletModel));
 			osgiContextModels.get(contextPath).add(osgiModel);
 
 			// there may be a change in what's the "best" (highest ranked) OsgiContextModel for given
@@ -798,13 +800,12 @@ class TomcatServerWrapper implements BatchVisitor {
 			Set<String> done = new HashSet<>();
 
 			model.getContextModels().forEach(osgiContext -> {
-				ServletContextModel servletContext = osgiContext.getServletContextModel();
-				String contextPath = servletContext.getContextPath();
+				String contextPath = osgiContext.getContextPath();
 				if (!done.add(contextPath)) {
 					return;
 				}
 
-				LOG.debug("Adding servlet {} to {}", model.getName(), servletContext);
+				LOG.debug("Adding servlet {} to {}", model.getName(), contextPath);
 
 				// there should already be a context for this path
 				PaxWebStandardContext realContext = contextHandlers.get(contextPath);
@@ -828,10 +829,10 @@ class TomcatServerWrapper implements BatchVisitor {
 				LOG.info("Removing servlet {}", model);
 
 				// proper order ensures that (assuming above scenario), for /c1, ocm2 will be chosen and ocm1 skipped
-				model.getServletContextModels().forEach(servletContext -> {
-					String contextPath = servletContext.getContextPath();
+				model.getContextModels().forEach(osgiContextModel -> {
+					String contextPath = osgiContextModel.getContextPath();
 
-					LOG.debug("Removing servlet {} from {}", model.getName(), servletContext);
+					LOG.debug("Removing servlet {} from context {}", model.getName(), contextPath);
 
 					// there should already be a ServletContextHandler
 					Context realContext = contextHandlers.get(contextPath);

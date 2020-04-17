@@ -16,43 +16,21 @@
 package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.AccessControlContext;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
-import javax.servlet.ServletContainerInitializer;
-
-import org.apache.catalina.AccessLog;
-import org.apache.catalina.Container;
-import org.apache.catalina.Context;
 import org.apache.catalina.Engine;
-import org.apache.catalina.Globals;
 import org.apache.catalina.Host;
 import org.apache.catalina.Server;
 import org.apache.catalina.Service;
 import org.apache.catalina.Valve;
 import org.apache.catalina.connector.Connector;
-import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.startup.Catalina;
 import org.apache.catalina.startup.Tomcat;
-import org.apache.catalina.valves.AccessLogValve;
 import org.apache.tomcat.util.digester.Digester;
 import org.ops4j.pax.web.annotations.Review;
-import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.config.Configuration;
-import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
-import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 
 public class EmbeddedTomcat extends Tomcat {
 	public static final String SERVER_CONFIG_FILE_NAME = "tomcat-server.xml";

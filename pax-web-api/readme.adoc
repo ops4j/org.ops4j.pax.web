@@ -269,6 +269,7 @@ A Http Whiteboard service which should be registered with a Http Context from th
 ----
 
 Which means that the `ServletContextHelper` should be registered with `osgi.http.whiteboard.context.httpservice` property (and any value) and the whiteboard element should _select_ such context.
+
 [source]
 ----
 @HttpWhiteboardContextSelect("(osgi.http.whiteboard.context.httpservice=*)")

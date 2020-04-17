@@ -15,20 +15,6 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
-
-import java.util.Dictionary;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-import javax.servlet.ServletContext;
-
-import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +25,9 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JettyServerWrapperTest {

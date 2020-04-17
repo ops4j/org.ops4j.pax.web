@@ -25,7 +25,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.jar.Manifest;
-
 import javax.servlet.ServletContainerInitializer;
 
 import org.junit.Test;

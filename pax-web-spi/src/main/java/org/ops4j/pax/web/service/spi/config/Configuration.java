@@ -29,7 +29,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * future extensibility.</p>
  *
  * <p>Actual server implementations should access <strong>entire</strong> configuration using this interface
- * without a need to create extra {@link org.ops4j.util.property.PropertyResolver} instances.</p>
+ * without a need to create extra {@code org.ops4j.util.property.PropertyResolver} instances.</p>
  */
 @ProviderType
 public interface Configuration {

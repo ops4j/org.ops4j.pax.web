@@ -18,8 +18,8 @@
 package org.ops4j.pax.web.extender.whiteboard.runtime;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
-
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 
@@ -32,163 +32,114 @@ import org.ops4j.pax.web.service.whiteboard.FilterMapping;
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class DefaultFilterMapping implements FilterMapping {
+public class DefaultFilterMapping extends AbstractContextRelated implements FilterMapping {
 
-	/**
-	 * Http Context id.
-	 */
-	private String httpContextId;
-	/**
-	 * Filter.
-	 */
 	private Filter filter;
-	/**
-	 * Url patterns.
-	 */
-	private String[] urlPatterns;
-	/**
-	 * Servlets names the filter was registered for.
-	 */
-	private String[] servletNames;
-	/**
-	 * Initialization parameters.
-	 */
-	private Map<String, String> initParams;
+	private Class<? extends Filter> filterClass;
+	private String filterName;
+	private String[] urlPatterns = new String[0];
+	private String[] regexPatterns = new String[0];
+	private String[] servletNames = new String[0];
+	private DispatcherType[] dispatcherTypes = new DispatcherType[] { DispatcherType.REQUEST };
+	private Boolean asyncSupported;
+	private Map<String, String> initParameters = new HashMap<>();
 
-	/**
-	 * Filter supports async calls
-	 */
-	private boolean asyncSupported;
-
-	/**
-	 * Filter supports Dispatchers
-	 */
-	private DispatcherType[] dispatcherType;
-
-	/**
-	 * Name of this filter
-	 */
-	private String name;
-
-	/**
-	 * @see FilterMapping#getHttpContextId()
-	 */
-	public String getHttpContextId() {
-		return httpContextId;
-	}
-
-	/**
-	 * @see FilterMapping#getFilter()
-	 */
+	@Override
 	public Filter getFilter() {
 		return filter;
 	}
 
-	/**
-	 * @see FilterMapping#getUrlPatterns()
-	 */
+	@Override
+	public Class<? extends Filter> getFilterClass() {
+		return filterClass;
+	}
+
+	@Override
+	public String getFilterName() {
+		return filterName;
+	}
+
+	@Override
 	public String[] getUrlPatterns() {
 		return urlPatterns;
 	}
 
-	/**
-	 * @see FilterMapping#getServletNames()
-	 */
+	@Override
+	public String[] getRegexPatterns() {
+		return regexPatterns;
+	}
+
+	@Override
 	public String[] getServletNames() {
 		return servletNames;
 	}
 
-	/**
-	 * @see FilterMapping#getInitParams()
-	 */
-	public Map<String, String> getInitParams() {
-		return initParams;
+	@Override
+	public DispatcherType[] getDispatcherTypes() {
+		return dispatcherTypes;
 	}
 
+	@Override
 	public Boolean getAsyncSupported() {
 		return asyncSupported;
 	}
 
-	/**
-	 * Setter.
-	 *
-	 * @param httpContextId id of the http context this filter belongs to
-	 */
-	public void setHttpContextId(final String httpContextId) {
-		this.httpContextId = httpContextId;
+	@Override
+	public Map<String, String> getInitParameters() {
+		return initParameters;
 	}
 
-	/**
-	 * Setter.
-	 *
-	 * @param filter mapped filter
-	 */
-	public void setFilter(final Filter filter) {
+	public void setFilter(Filter filter) {
 		this.filter = filter;
 	}
 
-	/**
-	 * Setter.
-	 *
-	 * @param urlPatterns array of url patterns
-	 */
-	public void setUrlPatterns(final String... urlPatterns) {
+	public void setFilterClass(Class<? extends Filter> filterClass) {
+		this.filterClass = filterClass;
+	}
+
+	public void setFilterName(String filterName) {
+		this.filterName = filterName;
+	}
+
+	public void setUrlPatterns(String[] urlPatterns) {
 		this.urlPatterns = urlPatterns;
 	}
 
-	/**
-	 * Setter.
-	 *
-	 * @param servletNames array of servlet aliases
-	 */
-	public void setServletNames(final String... servletNames) {
+	public void setRegexPatterns(String[] regexPatterns) {
+		this.regexPatterns = regexPatterns;
+	}
+
+	public void setServletNames(String[] servletNames) {
 		this.servletNames = servletNames;
 	}
 
-	/**
-	 * Seter.
-	 *
-	 * @param initParams map of initialization parameters
-	 */
-	public void setInitParams(final Map<String, String> initParams) {
-		this.initParams = initParams;
+	public void setDispatcherTypes(DispatcherType[] dispatcherTypes) {
+		this.dispatcherTypes = dispatcherTypes;
 	}
 
 	public void setAsyncSupported(Boolean asyncSupported) {
-		if (asyncSupported == null) {
-			this.asyncSupported = false;
-		} else {
-		    this.asyncSupported = asyncSupported;
-		}
+		this.asyncSupported = asyncSupported;
 	}
 
+	public void setInitParameters(Map<String, String> initParameters) {
+		this.initParameters = initParameters;
+	}
 
 	@Override
 	public String toString() {
-		return "DefaultFilterMapping [httpContextId=" + httpContextId + ", filter=" + filter + ", urlPatterns="
-				+ Arrays.toString(urlPatterns) + ", servletNames=" + Arrays.toString(servletNames) + ", initParams="
-				+ initParams + ", asyncSupported=" + asyncSupported + "]";
+		return "DefaultFilterMapping{"
+				+ "filter=" + filter
+				+ ", filterClass=" + filterClass
+				+ ", filterName='" + filterName + '\''
+				+ ", urlPatterns=" + Arrays.toString(urlPatterns)
+				+ ", regexPatterns=" + Arrays.toString(regexPatterns)
+				+ ", servletNames=" + Arrays.toString(servletNames)
+				+ ", dispatcherTypes=" + Arrays.toString(dispatcherTypes)
+				+ ", asyncSupported=" + asyncSupported
+				+ ", initParameters=" + initParameters
+				+ ", contextSelectFilter='" + contextSelectFilter + '\''
+				+ ", contextId='" + contextId + '\''
+				+ '}';
 	}
 
-    public void setDispatcherType(DispatcherType[] dispatcherType) {
-		if (dispatcherType == null) {
-			this.dispatcherType = new DispatcherType [0];
-		} else {
-		    this.dispatcherType = dispatcherType;
-		}
-    }
-
-	@Override
-	public DispatcherType[] getDispatcherType() {
-		return dispatcherType;
-	}
-
-	@Override
-	public String getName() {
-		return this.name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
 }

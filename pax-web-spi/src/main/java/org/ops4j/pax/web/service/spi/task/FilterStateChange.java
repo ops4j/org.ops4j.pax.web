@@ -16,7 +16,6 @@
 package org.ops4j.pax.web.service.spi.task;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeSet;
 
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;

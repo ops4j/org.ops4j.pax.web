@@ -169,13 +169,13 @@ class UndertowServerWrapper implements BatchVisitor {
 	 * <em>Outer handlers</em> for all the contexts - responsible for setting proper request wrappers. This can
 	 * be done in cleaner way in Jetty and Tomcat.
 	 */
-	private Map<String, PaxWebOuterHandlerWrapper> wrappingHandlers = new HashMap<>();
+	private final Map<String, PaxWebOuterHandlerWrapper> wrappingHandlers = new HashMap<>();
 
 	/**
 	 * Handlers that call {@link org.osgi.service.http.HttpContext#handleSecurity} and/or
 	 * {@link org.osgi.service.http.context.ServletContextHelper#handleSecurity}.
 	 */
-	private Map<String, PaxWebSecurityHandler> securityHandlers = new HashMap<>();
+	private final Map<String, PaxWebSecurityHandler> securityHandlers = new HashMap<>();
 
 	// TODO: the three below fields are the same in Jetty, Tomcat and Undertow
 
@@ -834,7 +834,9 @@ class UndertowServerWrapper implements BatchVisitor {
 	@Override
 	public void visit(OsgiContextModelChange change) {
 		OsgiContextModel osgiModel = change.getOsgiContextModel();
-		String contextPath = osgiModel.getServletContextModel().getContextPath();
+		ServletContextModel servletModel = change.getServletContextModel();
+
+		String contextPath = osgiModel.getContextPath();
 		DeploymentManager deploymentManager = servletContainer.getDeploymentByPath(contextPath);
 
 		if (deploymentManager == null) {
@@ -849,7 +851,7 @@ class UndertowServerWrapper implements BatchVisitor {
 			// as with Jetty and Tomcat,
 			// each unique OsgiServletContext (ServletContextHelper or HttpContext) is a facade for some, sometimes
 			// shared by many osgi contexts, real ServletContext
-			osgiServletContexts.put(osgiModel, new OsgiServletContext(realServletContext, osgiModel));
+			osgiServletContexts.put(osgiModel, new OsgiServletContext(realServletContext, osgiModel, servletModel));
 			osgiContextModels.get(contextPath).add(osgiModel);
 
 			// there may be a change in what's the "best" (highest ranked) OsgiContextModel for given
@@ -889,13 +891,12 @@ class UndertowServerWrapper implements BatchVisitor {
 			Set<String> done = new HashSet<>();
 
 			model.getContextModels().forEach(osgiContext -> {
-				ServletContextModel servletContext = osgiContext.getServletContextModel();
-				String contextPath = servletContext.getContextPath();
+				String contextPath = osgiContext.getContextPath();
 				if (!done.add(contextPath)) {
 					return;
 				}
 
-				LOG.debug("Adding servlet {} to {}", model.getName(), servletContext);
+				LOG.debug("Adding servlet {} to {}", model.getName(), contextPath);
 
 				// manager (lifecycle manager of the deployment),
 				DeploymentManager manager = servletContainer.getDeploymentByPath(contextPath);
@@ -924,10 +925,10 @@ class UndertowServerWrapper implements BatchVisitor {
 				LOG.info("Removing servlet {}", model);
 
 				// proper order ensures that (assuming above scenario), for /c1, ocm2 will be chosen and ocm1 skipped
-				model.getServletContextModels().forEach(servletContext -> {
-					String contextPath = servletContext.getContextPath();
+				model.getContextModels().forEach(osgiContextModel -> {
+					String contextPath = osgiContextModel.getContextPath();
 
-					LOG.debug("Removing servlet {} from {}", model.getName(), servletContext);
+					LOG.debug("Removing servlet {} from context {}", model.getName(), contextPath);
 
 					// take existing deployment manager and the deployment info from its deployment
 					DeploymentManager manager = servletContainer.getDeploymentByPath(contextPath);
@@ -956,8 +957,8 @@ class UndertowServerWrapper implements BatchVisitor {
 					// we've changed the deployment for given context path - new ServletContext was created, so
 					// we have to propagate the change where needed
 					ServletContext newRealServletContext = manager.getDeployment().getServletContext();
-					this.osgiContextModels.get(contextPath).forEach(osgiContextModel
-							-> this.osgiServletContexts.get(osgiContextModel).setContainer(newRealServletContext));
+					this.osgiContextModels.get(contextPath).forEach(cm
+							-> this.osgiServletContexts.get(cm).setContainer(newRealServletContext));
 
 					try {
 						HttpHandler handler = manager.start();
@@ -1019,7 +1020,7 @@ class UndertowServerWrapper implements BatchVisitor {
 				OsgiContextModel highestRankedModel = null;
 				// remember, this contextModels list is properly sorted
 				for (OsgiContextModel ocm : model.getContextModels()) {
-					if (ocm.getServletContextModel().getContextPath().equals(contextPath)) {
+					if (ocm.getContextPath().equals(contextPath)) {
 						highestRankedModel = ocm;
 						break;
 					}

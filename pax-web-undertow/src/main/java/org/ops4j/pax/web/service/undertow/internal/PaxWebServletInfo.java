@@ -95,8 +95,6 @@ public class PaxWebServletInfo extends ServletInfo {
 		}
 		setMultipartConfig(servletModel.getMultipartConfigElement());
 
-		// TODO: scan servlet for annotations
-
 		this.servletContext = ((ServletModelFactory)super.getInstanceFactory()).getServletContext();
 	}
 
@@ -174,8 +172,6 @@ public class PaxWebServletInfo extends ServletInfo {
 					}
 				}
 			}
-
-			// TODO: process annotations
 
 			return new ImmediateInstanceHandle<Servlet>(new OsgiInitializedServlet(instance, this.osgiScopedServletContext));
 		}
