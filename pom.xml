@@ -99,7 +99,7 @@
 	</developers>
 
 	<properties>
-		<dependency.asm.version>7.2</dependency.asm.version>
+		<dependency.asm.version>8.0.1</dependency.asm.version>
 		<dependency.atinject.version>1.1</dependency.atinject.version>
 		<dependency.base.version>1.5.1</dependency.base.version>
 		<dependency.bndlib.version>2.4.0</dependency.bndlib.version>
@@ -132,7 +132,7 @@
 		<dependency.scr.version>2.1.16</dependency.scr.version>
 		<dependency.swissbox.version>1.8.3</dependency.swissbox.version>
 		<dependency.tomcat.version>8.5.32</dependency.tomcat.version>
-		<dependency.xbean.version>4.14</dependency.xbean.version>
+		<dependency.xbean.version>4.17</dependency.xbean.version>
 		<dependency.xnio-api.version>3.3.8.Final</dependency.xnio-api.version>
 		<dependency.xnio.version>3.3.8.Final</dependency.xnio.version>
 		<dependency.undertow-core.version>1.4.23.Final</dependency.undertow-core.version>
