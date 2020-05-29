@@ -46,10 +46,10 @@ public class PaxWebSecurityHandler implements HandlerWrapper {
 					HttpServletResponse res = (HttpServletResponse) context.getServletResponse();
 
 					WebContainerContext webContext;
-					if (paxWebServletInfo.is404()) {
-						webContext = defaultOsgiContextModel.getHttpContext();
+					if (!paxWebServletInfo.is404()) {
+						webContext = paxWebServletInfo.getOsgiContextModel().resolveHttpContext(paxWebServletInfo.getRegisteringBundle());
 					} else {
-						webContext = paxWebServletInfo.getOsgiContextModel().getHttpContext();
+						webContext = defaultOsgiContextModel.resolveHttpContext(defaultOsgiContextModel.getOwnerBundle());
 					}
 
 					try {

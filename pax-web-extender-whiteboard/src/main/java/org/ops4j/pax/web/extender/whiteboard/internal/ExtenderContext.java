@@ -43,15 +43,15 @@ import org.slf4j.LoggerFactory;
  *
  * <p>This class collects all the customized objects related to <em>whiteboard web elements</em> (like servlets,
  * filters, ...) and <em>whiteboard contexts</em> (like {@link org.osgi.service.http.HttpContext} or
- * {@link org.osgi.service.http.context.ServletContextHelper} objects). All such customized objects (internal
+ * {@link org.osgi.service.http.context.ServletContextHelper}). All such customized objects (internal
  * representation of user-registered OSGi services) are then somehow passed to current
  * {@link org.osgi.service.http.HttpService} which should rather be Pax Web's
  * {@link WebContainer} extension of {@link org.osgi.service.http.HttpService}. It's not
  * a requirement, but initially the tests focus on integrating pax-web-extender-whiteboard with pax-web-runtime.</p>
  *
- * <p>The biggest change is that incoming <em>web elements</em> are not registered in <em>web applications</em>, but
- * are directly passed to {@link WebContainer}, because in Pax Web 8 the model has changed,
- * allowing to associated single servlet (or filter, or ...) with more <em>contexts</em>.</p>
+ * <p>The biggest change in Pax Web 8 is that incoming <em>web elements</em> are not registered in <em>web
+ * applications</em>, but are directly passed to {@link WebContainer}, because in Pax Web 8 the model has changed,
+ * allowing to associate single servlet (or filter, or ...) with more <em>contexts</em>.</p>
  *
  * <p>Most of the methods are synchronized, because they're called from service tracking methods that register and
  * unregister Whiteboard elements and contexts and on the other hand - from service listener methods that may
@@ -287,7 +287,12 @@ public class ExtenderContext {
 	//     3) register given customized object in actual WebContainer from pax-web-runtime (if available)
 
 	public void addWebContext(Bundle bundle, OsgiContextModel model) {
-		if (model.getHttpContext() != null) {
+		getBundleApplication(bundle).addWebContext(model);
+
+		osgiContexts.computeIfAbsent(model.getName(), cp -> new TreeSet<>()).add(model);
+		osgiContextsList.add(model);
+
+		if (model.hasDirectHttpContextInstance()) {
 			// special handling. Whiteboard-registered service that's customized to OsgiContextModel, where
 			// HttpContext (WebContainerContext) is specified directly is an implementation of
 			// "140.10 Integration with Http Service Contexts" chapter to allow Whiteboard web elements (surprisingly,
@@ -298,31 +303,51 @@ public class ExtenderContext {
 			// (i.e., we can obtain only one HttpContext), then we pass such OsgiContextModel directly to
 			// WebContainer (HttpService) implementation and not store here.
 			LOG.info("{} will be passed directly to WebContainer service (when available)", model);
-		} else {
-			// normal Whiteboard scenario - context is remembered here, so when web elements are registered with
-			// context selectors, we search them using these lists/sets
-			osgiContexts.computeIfAbsent(model.getName(), cp -> new TreeSet<>()).add(model);
-			osgiContextsList.add(model);
+			WhiteboardWebContainerView view = this.whiteboardContainer;
+			if (view != null) {
+				view.addWhiteboardOsgiContextModel(model);
+			}
 		}
-
-		getBundleApplication(bundle).addWebContext(model);
 	}
 
 	public void removeWebContext(Bundle bundle, OsgiContextModel model) {
 		getBundleApplication(bundle).removeWebContext(model);
 
-		if (model.getHttpContext() == null) {
-			osgiContexts.get(model.getName()).remove(model);
-			osgiContextsList.remove(model);
+		osgiContexts.get(model.getName()).remove(model);
+		osgiContextsList.remove(model);
+
+		if (model.hasDirectHttpContextInstance()) {
+			LOG.info("{} will be removed from WebContainer servlce", model);
+			WhiteboardWebContainerView view = this.whiteboardContainer;
+			if (view != null) {
+				view.removeWhiteboardOsgiContextModel(model);
+			}
 		}
 	}
 
 	public <R, T extends ElementModel<R>> void addWebElement(Bundle bundle, T webElement) {
 		getBundleApplication(bundle).addWebElement(webElement);
+
+		WhiteboardWebContainerView view = this.whiteboardContainer;
+		if (view == null) {
+			LOG.debug("{} will be registered when WebContainer/HttpService is available", webElement);
+			return;
+		}
+
+		webElement.register(view);
 	}
 
 	public <R, T extends ElementModel<R>> void removeWebElement(Bundle bundle, T webElement) {
+		// TODO: only mark as "to remove" in case there's no WebContainer. But then - is it needed?
 		getBundleApplication(bundle).removeWebElement(webElement);
+
+		WhiteboardWebContainerView view = this.whiteboardContainer;
+		if (view == null) {
+			LOG.debug("{} will be unregistered when WebContainer/HttpService is available", webElement);
+			return;
+		}
+
+		webElement.unregister(view);
 	}
 
 	/**

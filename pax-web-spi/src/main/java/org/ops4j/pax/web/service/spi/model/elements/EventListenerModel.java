@@ -20,6 +20,7 @@ import java.util.EventListener;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 
 public class EventListenerModel extends ElementModel {
 
@@ -30,6 +31,14 @@ public class EventListenerModel extends ElementModel {
 //		super(contextModel);
 		NullArgumentException.validateNotNull(eventListener, "Listener");
 		this.eventListener = eventListener;
+	}
+
+	@Override
+	public void register(WhiteboardWebContainerView view) {
+	}
+
+	@Override
+	public void unregister(WhiteboardWebContainerView view) {
 	}
 
 	public EventListener getEventListener() {

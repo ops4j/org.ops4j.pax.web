@@ -21,6 +21,7 @@ import java.util.Arrays;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 
 /**
  * @author achim
@@ -37,6 +38,14 @@ public class WelcomeFileModel extends ElementModel {
 		} else {
 			this.welcomeFiles = null;
 		}
+	}
+
+	@Override
+	public void register(WhiteboardWebContainerView view) {
+	}
+
+	@Override
+	public void unregister(WhiteboardWebContainerView view) {
 	}
 
 	/**

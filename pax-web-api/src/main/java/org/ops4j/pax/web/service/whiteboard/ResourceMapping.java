@@ -17,12 +17,15 @@
  */
 package org.ops4j.pax.web.service.whiteboard;
 
+import org.ops4j.pax.web.annotations.Review;
+
 /**
  * Resource mapping.
  *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
+@Review("Not yet refactored")
 public interface ResourceMapping {
 
 	/**

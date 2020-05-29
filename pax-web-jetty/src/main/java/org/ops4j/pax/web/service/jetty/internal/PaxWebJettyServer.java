@@ -43,12 +43,9 @@ import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.AuthenticatorService;
 import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
-import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpContext;
-import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,7 +109,7 @@ class PaxWebJettyServer extends Server {
 				private final Lock readLock = rwLock.readLock();
 				private final Lock writeLock = rwLock.writeLock();
 				private Bundle jettyBundle;
-				private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
+//				private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
 
 				private HandlerCollection rootCollections;
 
@@ -176,44 +173,44 @@ class PaxWebJettyServer extends Server {
 		}
 	}
 
-	PaxWebServletContextHandler getOrCreateContext(final ElementModel elementModel) {
-		return getOrCreateContext((OsgiContextModel) null/*elementModel.getContextModel()*/);
-	}
+//	PaxWebServletContextHandler getOrCreateContext(final ElementModel elementModel) {
+//		return getOrCreateContext((OsgiContextModel) null/*elementModel.getContextModel()*/);
+//	}
 
-	PaxWebServletContextHandler getOrCreateContext(final OsgiContextModel model) {
-		final HttpContext httpContext = model.getHttpContext();
-		ServletContextInfo context = null;
-		try {
-			readLock.lock();
-			if (contexts.containsKey(httpContext)) {
-				context = contexts.get(httpContext);
-				context.incrementRefCount();
-			} else {
-				try {
-					readLock.unlock();
-					writeLock.lock();
-					if (!contexts.containsKey(httpContext)) {
-						LOG.debug("Creating new ServletContextHandler for HTTP context [{}] and model [{}]",
-								httpContext, model);
-
-						context = new ServletContextInfo(this.addContext(model));
-						contexts.put(httpContext, context);
-						// don't increment! - it's already == 1 after creation
+//	PaxWebServletContextHandler getOrCreateContext(final OsgiContextModel model) {
+//		final HttpContext httpContext = model.getHttpContext();
+//		ServletContextInfo context = null;
+//		try {
+//			readLock.lock();
+//			if (contexts.containsKey(httpContext)) {
+//				context = contexts.get(httpContext);
+//				context.incrementRefCount();
+//			} else {
+//				try {
+//					readLock.unlock();
+//					writeLock.lock();
+//					if (!contexts.containsKey(httpContext)) {
+//						LOG.debug("Creating new ServletContextHandler for HTTP context [{}] and model [{}]",
+//								httpContext, model);
+//
+//						context = new ServletContextInfo(this.addContext(model));
+//						contexts.put(httpContext, context);
+//						// don't increment! - it's already == 1 after creation
+////						context.incrementRefCount();
+//					} else {
+//						context = contexts.get(httpContext);
 //						context.incrementRefCount();
-					} else {
-						context = contexts.get(httpContext);
-						context.incrementRefCount();
-					}
-				} finally {
-					readLock.lock();
-					writeLock.unlock();
-				}
-			}
-		} finally {
-			readLock.unlock();
-		}
-		return context.getHandler();
-	}
+//					}
+//				} finally {
+//					readLock.lock();
+//					writeLock.unlock();
+//				}
+//			}
+//		} finally {
+//			readLock.unlock();
+//		}
+//		return context.getHandler();
+//	}
 
 	void removeContext(final HttpContext httpContext, boolean force) {
 		ServletContextInfo context;

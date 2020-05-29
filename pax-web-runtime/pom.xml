@@ -129,6 +129,7 @@
 <!--						<_dsannotations>*</_dsannotations>-->
 <!--						<_dsannotations />-->
 <!--						<_dsannotations-options>norequirements,nocapabilities,version;minimum=0.1</_dsannotations-options>-->
+						<!-- Nothing's exported from this bundle -->
 					</instructions>
 				</configuration>
 			</plugin>

@@ -36,6 +36,11 @@ import static org.ops4j.pax.web.itest.server.support.Utils.httpsGET;
 @RunWith(Parameterized.class)
 public class ServerControllerBasicConfigurationTest extends MultiContainerTestSupport {
 
+	@Override
+	public void initAll() throws Exception {
+		configurePort();
+	}
+
 	@Test
 	public void justInstantiateWithoutOsgi() throws Exception {
 		ServerController controller = Utils.create(properties -> {

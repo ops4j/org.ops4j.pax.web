@@ -851,6 +851,9 @@ class UndertowServerWrapper implements BatchVisitor {
 			// as with Jetty and Tomcat,
 			// each unique OsgiServletContext (ServletContextHelper or HttpContext) is a facade for some, sometimes
 			// shared by many osgi contexts, real ServletContext
+			if (osgiServletContexts.containsKey(osgiModel)) {
+				throw new IllegalStateException(osgiModel + " is already registered");
+			}
 			osgiServletContexts.put(osgiModel, new OsgiServletContext(realServletContext, osgiModel, servletModel));
 			osgiContextModels.get(contextPath).add(osgiModel);
 
@@ -958,7 +961,7 @@ class UndertowServerWrapper implements BatchVisitor {
 					// we have to propagate the change where needed
 					ServletContext newRealServletContext = manager.getDeployment().getServletContext();
 					this.osgiContextModels.get(contextPath).forEach(cm
-							-> this.osgiServletContexts.get(cm).setContainer(newRealServletContext));
+							-> this.osgiServletContexts.get(cm).setContainerServletContext(newRealServletContext));
 
 					try {
 						HttpHandler handler = manager.start();
@@ -1067,7 +1070,7 @@ class UndertowServerWrapper implements BatchVisitor {
 			// we have to propagate the change where needed
 			ServletContext newRealServletContext = manager.getDeployment().getServletContext();
 			this.osgiContextModels.get(contextPath).forEach(osgiContextModel
-					-> this.osgiServletContexts.get(osgiContextModel).setContainer(newRealServletContext));
+					-> this.osgiServletContexts.get(osgiContextModel).setContainerServletContext(newRealServletContext));
 
 			try {
 				HttpHandler handler = manager.start();

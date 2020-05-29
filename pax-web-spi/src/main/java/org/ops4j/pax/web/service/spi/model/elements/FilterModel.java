@@ -32,6 +32,7 @@ import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.util.Path;
 import org.ops4j.pax.web.service.spi.util.Utils;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
@@ -185,6 +186,16 @@ public class FilterModel extends ElementModel<Filter> {
 		}
 
 		return Boolean.TRUE;
+	}
+
+	@Override
+	public void register(WhiteboardWebContainerView view) {
+		view.registerFilter(this);
+	}
+
+	@Override
+	public void unregister(WhiteboardWebContainerView view) {
+		view.unregisterFilter(this);
 	}
 
 	@Override

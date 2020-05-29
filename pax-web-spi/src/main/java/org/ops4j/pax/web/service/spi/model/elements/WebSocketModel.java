@@ -16,6 +16,7 @@
 package org.ops4j.pax.web.service.spi.model.elements;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 
 public class WebSocketModel extends ElementModel {
 
@@ -24,6 +25,14 @@ public class WebSocketModel extends ElementModel {
 	public WebSocketModel(OsgiContextModel contextModel, Object webSocket) {
 //		super(contextModel);
 		this.webSocket = webSocket;
+	}
+
+	@Override
+	public void register(WhiteboardWebContainerView view) {
+	}
+
+	@Override
+	public void unregister(WhiteboardWebContainerView view) {
 	}
 
 	public Object getWebSocket() {

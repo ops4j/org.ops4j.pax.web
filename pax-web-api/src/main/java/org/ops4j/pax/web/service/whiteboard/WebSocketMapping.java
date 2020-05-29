@@ -15,6 +15,9 @@
  */
 package org.ops4j.pax.web.service.whiteboard;
 
+import org.ops4j.pax.web.annotations.Review;
+
+@Review("Not yet refactored")
 public interface WebSocketMapping {
 
 	/**

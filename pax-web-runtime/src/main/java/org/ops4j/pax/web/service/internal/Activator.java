@@ -417,7 +417,8 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			LOG.info("Starting server controller {}", serverController.getClass().getName());
 			serverController.start();
 
-			// create default ServletContextModel in ServerModel and propagate it to the controller
+			// create default ServletContextModel in ServerModel and propagate it to the controller.
+			// it's important to do it before registering ServiceFactory for HttpService/WebContainer
 			serverModel.createDefaultServletContextModel(serverController);
 
 			// this is where org.osgi.service.http.HttpService bundle-scoped service is registered in OSGi

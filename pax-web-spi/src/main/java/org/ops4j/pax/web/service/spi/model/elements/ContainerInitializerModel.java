@@ -21,6 +21,7 @@ import java.util.HashSet;
 import javax.servlet.ServletContainerInitializer;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 
 /**
  * @author achim
@@ -35,6 +36,14 @@ public class ContainerInitializerModel extends ElementModel {
 //		super(contextModel);
 		this.containerInitializer = containerInitializer;
 		this.classes = new HashSet<>(Arrays.asList(classes));
+	}
+
+	@Override
+	public void register(WhiteboardWebContainerView view) {
+	}
+
+	@Override
+	public void unregister(WhiteboardWebContainerView view) {
 	}
 
 	/**

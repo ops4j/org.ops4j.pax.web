@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.osgi.framework.Bundle;
 import org.osgi.service.http.whiteboard.Preprocessor;
 
 /**
@@ -59,12 +60,13 @@ public class OsgiFilterChain implements FilterChain {
 	 * @param preprocessors
 	 * @param servletContext wrapped {@link ServletContext} with proper delegation
 	 * @param contextModel
+	 * @param bundle {@link Bundle} to resolve {@link WebContainerContext} from {@link OsgiContextModel}
 	 * @param originalChain
 	 */
 	public OsgiFilterChain(List<Preprocessor> preprocessors, ServletContext servletContext,
-			OsgiContextModel contextModel, FilterChain originalChain) {
+			OsgiContextModel contextModel, Bundle bundle, FilterChain originalChain) {
 		this.preprocessors.addAll(preprocessors);
-		this.webContext = contextModel == null ? null : contextModel.getHttpContext();
+		this.webContext = contextModel == null ? null : contextModel.resolveHttpContext(bundle);
 		this.servletContext = servletContext;
 		this.chain = originalChain;
 	}

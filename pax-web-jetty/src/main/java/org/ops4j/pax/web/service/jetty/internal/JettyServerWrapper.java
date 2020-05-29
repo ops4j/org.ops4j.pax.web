@@ -21,19 +21,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 
 import org.eclipse.jetty.jmx.MBeanContainer;
-import org.eclipse.jetty.security.ConstraintMapping;
-import org.eclipse.jetty.security.ConstraintSecurityHandler;
-import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.server.ConnectionFactory;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.CustomRequestLog;
@@ -47,7 +42,6 @@ import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -56,13 +50,10 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
 import org.eclipse.jetty.util.ArrayUtil;
 import org.eclipse.jetty.util.resource.Resource;
-import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.xml.XmlConfiguration;
-import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.annotations.Review;
-import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
@@ -82,7 +73,6 @@ import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
-import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
@@ -623,6 +613,9 @@ class JettyServerWrapper implements BatchVisitor {
 			// set of attributes, that's the good place to remember such association.
 			// Later, when servlets will be registered with such OsgiContextModel, they need to get
 			// special facade for ServletContext
+			if (osgiServletContexts.containsKey(osgiModel)) {
+				throw new IllegalStateException(osgiModel + " is already registered");
+			}
 			osgiServletContexts.put(osgiModel, new OsgiServletContext(sch.getServletContext(), osgiModel, servletModel));
 
 			// a physical context just got a new OSGi context
@@ -672,8 +665,8 @@ class JettyServerWrapper implements BatchVisitor {
 			Set<String> done = new HashSet<>();
 
 			// proper order ensures that (assuming above scenario), for /c1, ocm2 will be chosen and ocm1 skipped
-			model.getContextModels().forEach(osgiContext -> {
-				String contextPath = osgiContext.getContextPath();
+			model.getContextModels().forEach(osgiContextModel -> {
+				String contextPath = osgiContextModel.getContextPath();
 
 				if (!done.add(contextPath)) {
 					// servlet was already added to given ServletContextHandler
@@ -712,8 +705,8 @@ class JettyServerWrapper implements BatchVisitor {
 				ServletContextHandler sch = contextHandlers.get(contextPath);
 
 				// <servlet> - always associated with one of ServletModel's OsgiContextModels
-				OsgiServletContext context = osgiServletContexts.get(osgiContext);
-				PaxWebServletHolder holder = new PaxWebServletHolder(model, osgiContext, context);
+				OsgiServletContext context = osgiServletContexts.get(osgiContextModel);
+				PaxWebServletHolder holder = new PaxWebServletHolder(model, osgiContextModel, context);
 
 				// <servlet-mapping>
 				ServletMapping mapping = new ServletMapping();
@@ -864,64 +857,64 @@ class JettyServerWrapper implements BatchVisitor {
 	}
 
 	//	@Override
-	@Review("the returned Lifecycle object's start is called during registration of servlet.... This is where actual" +
-			" Jetty server starts.")
-	public LifeCycle getContext(final OsgiContextModel model) {
-					final ServletContextHandler context = server.getOrCreateContext(model);
-					return new LifeCycle() {
-						@Override
-						public void start() throws Exception {
-							// PAXWEB-1084 - start qtp before starting first context
-							if (server.getThreadPool() instanceof org.eclipse.jetty.util.component.LifeCycle) {
-								((org.eclipse.jetty.util.component.LifeCycle) server.getThreadPool()).start();
-							}
-
-							// Fixfor PAXWEB-725
-							ClassLoader classLoader = context.getClassLoader();
-							List<Bundle> bundles = ((ResourceDelegatingBundleClassLoader) classLoader).getBundles();
-							BundleClassLoader parentClassLoader
-									= new BundleClassLoader(paxWebJettyBundle);
-							ResourceDelegatingBundleClassLoader containerSpecificClassLoader = new ResourceDelegatingBundleClassLoader(bundles, parentClassLoader);
-							context.setClassLoader(containerSpecificClassLoader);
-							if (!context.isStarted()) {
-								context.start();
-							}
-
-							boolean hasDefault = false;
-							for (ServletMapping mapping : context.getServletHandler().getServletMappings()) {
-								if (mapping.isDefault()) {
-									hasDefault = true;
-									break;
-								}
-							}
-//							if (!hasDefault) {
-//								ResourceServlet servlet = new ResourceServlet(model.getHttpContext(), /*model.getContextName()*/"TODO", "/", "default");
-//								ResourceModel resourceModel = new ResourceModel(model, servlet, "/", "default");
-//								addServlet(resourceModel);
+//	@Review("the returned Lifecycle object's start is called during registration of servlet.... This is where actual" +
+//			" Jetty server starts.")
+//	public LifeCycle getContext(final OsgiContextModel model) {
+//					final ServletContextHandler context = server.getOrCreateContext(model);
+//					return new LifeCycle() {
+//						@Override
+//						public void start() throws Exception {
+//							// PAXWEB-1084 - start qtp before starting first context
+//							if (server.getThreadPool() instanceof org.eclipse.jetty.util.component.LifeCycle) {
+//								((org.eclipse.jetty.util.component.LifeCycle) server.getThreadPool()).start();
 //							}
-
-							// Fixfor PAXWEB-751
-							ClassLoader loader = Thread.currentThread().getContextClassLoader();
-							try {
-								Thread.currentThread().setContextClassLoader(
-										getClass().getClassLoader());
-								server.start();
-							} finally {
-								Thread.currentThread().setContextClassLoader(loader);
-							}
-							for (Connector connector : server.getConnectors()) {
-								if (connector.isStopped()) {
-									connector.start();
-								}
-							}
-						}
-
-						@Override
-						public void stop() throws Exception {
-							context.stop();
-						}
-					};
-	}
+//
+//							// Fixfor PAXWEB-725
+//							ClassLoader classLoader = context.getClassLoader();
+//							List<Bundle> bundles = ((ResourceDelegatingBundleClassLoader) classLoader).getBundles();
+//							BundleClassLoader parentClassLoader
+//									= new BundleClassLoader(paxWebJettyBundle);
+//							ResourceDelegatingBundleClassLoader containerSpecificClassLoader = new ResourceDelegatingBundleClassLoader(bundles, parentClassLoader);
+//							context.setClassLoader(containerSpecificClassLoader);
+//							if (!context.isStarted()) {
+//								context.start();
+//							}
+//
+//							boolean hasDefault = false;
+//							for (ServletMapping mapping : context.getServletHandler().getServletMappings()) {
+//								if (mapping.isDefault()) {
+//									hasDefault = true;
+//									break;
+//								}
+//							}
+////							if (!hasDefault) {
+////								ResourceServlet servlet = new ResourceServlet(model.getHttpContext(), /*model.getContextName()*/"TODO", "/", "default");
+////								ResourceModel resourceModel = new ResourceModel(model, servlet, "/", "default");
+////								addServlet(resourceModel);
+////							}
+//
+//							// Fixfor PAXWEB-751
+//							ClassLoader loader = Thread.currentThread().getContextClassLoader();
+//							try {
+//								Thread.currentThread().setContextClassLoader(
+//										getClass().getClassLoader());
+//								server.start();
+//							} finally {
+//								Thread.currentThread().setContextClassLoader(loader);
+//							}
+//							for (Connector connector : server.getConnectors()) {
+//								if (connector.isStopped()) {
+//									connector.start();
+//								}
+//							}
+//						}
+//
+//						@Override
+//						public void stop() throws Exception {
+//							context.stop();
+//						}
+//					};
+//	}
 
 	//	@Override
 	public synchronized void addServlet(final ServletModel model) {
@@ -1035,8 +1028,8 @@ class JettyServerWrapper implements BatchVisitor {
 
 	//	@Override
 	public synchronized void addEventListener(final EventListenerModel model) {
-					server.getOrCreateContext(model).addEventListener(
-							model.getEventListener());
+//					server.getOrCreateContext(model).addEventListener(
+//							model.getEventListener());
 	}
 
 	//	@Override
@@ -1096,12 +1089,12 @@ class JettyServerWrapper implements BatchVisitor {
 					}
 					mapping.setDispatches(dispatcher);
 
-					final ServletContextHandler context = server.getOrCreateContext(model);
-					final ServletHandler servletHandler = context.getServletHandler();
-					if (servletHandler == null) {
-						throw new IllegalStateException(
-								"Internal error: Cannot find the servlet holder");
-					}
+//					final ServletContextHandler context = server.getOrCreateContext(model);
+//					final ServletHandler servletHandler = context.getServletHandler();
+//					if (servletHandler == null) {
+//						throw new IllegalStateException(
+//								"Internal error: Cannot find the servlet holder");
+//					}
 
 					final FilterHolder holder;
 					if (model.getFilter() == null) {
@@ -1117,24 +1110,24 @@ class JettyServerWrapper implements BatchVisitor {
 
 					// Jetty does not set the context class loader on adding the filters so
 					// we do that instead
-					try {
-						ContextClassLoaderUtils.doWithClassLoader(context.getClassLoader(),
-								new Callable<Void>() {
-
-									@Override
-									public Void call() {
-										servletHandler.addFilter(holder, mapping);
-										return null;
-									}
-
-								});
-						//CHECKSTYLE:OFF
-					} catch (Exception e) {
-						if (e instanceof RuntimeException) {
-							throw (RuntimeException) e;
-						}
-						LOG.error("Ignored exception during filter registration", e);
-					}
+//					try {
+//						ContextClassLoaderUtils.doWithClassLoader(context.getClassLoader(),
+//								new Callable<Void>() {
+//
+//									@Override
+//									public Void call() {
+//										servletHandler.addFilter(holder, mapping);
+//										return null;
+//									}
+//
+//								});
+//						//CHECKSTYLE:OFF
+//					} catch (Exception e) {
+//						if (e instanceof RuntimeException) {
+//							throw (RuntimeException) e;
+//						}
+//						LOG.error("Ignored exception during filter registration", e);
+//					}
 					//CHECKSTYLE:OFF
 	}
 
@@ -1223,35 +1216,35 @@ class JettyServerWrapper implements BatchVisitor {
 
 	//	@Override
 	public synchronized void addErrorPage(final ErrorPageModel model) {
-					final ServletContextHandler context = server.getOrCreateContext(model);
-					final ErrorPageErrorHandler errorPageHandler = (ErrorPageErrorHandler) context
-							.getErrorHandler();
-					if (errorPageHandler == null) {
-						throw new IllegalStateException(
-								"Internal error: Cannot find the error handler. Please report.");
-					}
-
-					try {
-						int code = Integer.parseInt(model.getError());
-						errorPageHandler.addErrorPage(code, model.getLocation());
-					} catch (NumberFormatException nfe) {
-						if (ErrorPageModel.ERROR_PAGE.equalsIgnoreCase(model.getError())) {
-							errorPageHandler.addErrorPage(ErrorPageErrorHandler.GLOBAL_ERROR_PAGE, model.getLocation());
-						} else {
-							// 140.4.1 Error Pages
-							if ("4xx".equals(model.getError())) {
-								errorPageHandler
-										.addErrorPage(400, 499, model.getLocation());
-							} else if ("5xx".equals(model.getError())) {
-								errorPageHandler
-										.addErrorPage(500, 599, model.getLocation());
-							} else {
-								// OK, not a number must be a class then
-								errorPageHandler
-										.addErrorPage(model.getError(), model.getLocation());
-							}
-						}
-					}
+//					final ServletContextHandler context = server.getOrCreateContext(model);
+//					final ErrorPageErrorHandler errorPageHandler = (ErrorPageErrorHandler) context
+//							.getErrorHandler();
+//					if (errorPageHandler == null) {
+//						throw new IllegalStateException(
+//								"Internal error: Cannot find the error handler. Please report.");
+//					}
+//
+//					try {
+//						int code = Integer.parseInt(model.getError());
+//						errorPageHandler.addErrorPage(code, model.getLocation());
+//					} catch (NumberFormatException nfe) {
+//						if (ErrorPageModel.ERROR_PAGE.equalsIgnoreCase(model.getError())) {
+//							errorPageHandler.addErrorPage(ErrorPageErrorHandler.GLOBAL_ERROR_PAGE, model.getLocation());
+//						} else {
+//							// 140.4.1 Error Pages
+//							if ("4xx".equals(model.getError())) {
+//								errorPageHandler
+//										.addErrorPage(400, 499, model.getLocation());
+//							} else if ("5xx".equals(model.getError())) {
+//								errorPageHandler
+//										.addErrorPage(500, 599, model.getLocation());
+//							} else {
+//								// OK, not a number must be a class then
+//								errorPageHandler
+//										.addErrorPage(model.getError(), model.getLocation());
+//							}
+//						}
+//					}
 	}
 
 	//	@Override
@@ -1277,25 +1270,25 @@ class JettyServerWrapper implements BatchVisitor {
 	// PAXWEB-123: try to register WelcomeFiles differently
 //	@Override
 	public synchronized void addWelcomeFiles(final WelcomeFileModel model) {
-					final ServletContextHandler context = server
-							.getOrCreateContext(model);
-
-					context.setWelcomeFiles(model.getWelcomeFiles());
-
-					if (context.getServletHandler() == null || context.getServletHandler().getServletMappings() == null) {
-						return;
-					}
-					for (ServletMapping mapping : context.getServletHandler().getServletMappings()) {
-						ServletHolder servlet = context.getServletHandler().getServlet(mapping.getServletName());
-						try {
-							if (servlet.getServlet() instanceof ResourceServlet) {
-								LOG.debug("Reinitializing {} with new welcome files {}", servlet, Arrays.asList(model.getWelcomeFiles()));
-								servlet.getServlet().init(servlet.getServlet().getServletConfig());
-							}
-						} catch (ServletException e) {
-							LOG.warn("Problem reinitializing welcome files of default servlet", e);
-						}
-					}
+//					final ServletContextHandler context = server
+//							.getOrCreateContext(model);
+//
+//					context.setWelcomeFiles(model.getWelcomeFiles());
+//
+//					if (context.getServletHandler() == null || context.getServletHandler().getServletMappings() == null) {
+//						return;
+//					}
+//					for (ServletMapping mapping : context.getServletHandler().getServletMappings()) {
+//						ServletHolder servlet = context.getServletHandler().getServlet(mapping.getServletName());
+//						try {
+//							if (servlet.getServlet() instanceof ResourceServlet) {
+//								LOG.debug("Reinitializing {} with new welcome files {}", servlet, Arrays.asList(model.getWelcomeFiles()));
+//								servlet.getServlet().init(servlet.getServlet().getServletConfig());
+//							}
+//						} catch (ServletException e) {
+//							LOG.warn("Problem reinitializing welcome files of default servlet", e);
+//						}
+//					}
 	}
 
 	//	@Override
@@ -1316,42 +1309,42 @@ class JettyServerWrapper implements BatchVisitor {
 //	@Override
 	public void addSecurityConstraintMappings(
 			final SecurityConstraintMappingModel model) {
-					final ServletContextHandler context = server.getOrCreateContext(model);
-					final SecurityHandler securityHandler = context.getSecurityHandler();
-					if (securityHandler == null) {
-						throw new IllegalStateException(
-								"Internal error: Cannot find the security handler. Please report.");
-					}
-					String mappingMethod = model.getMapping();
-					String constraintName = model.getConstraintName();
-					String url = model.getUrl();
-					String dataConstraint = model.getDataConstraint();
-					List<String> roles = model.getRoles();
-					boolean authentication = model.isAuthentication();
-
-					ConstraintMapping newConstraintMapping = new ConstraintMapping();
-					newConstraintMapping.setMethod(mappingMethod);
-					newConstraintMapping.setPathSpec(url);
-					Constraint constraint = new Constraint();
-					constraint.setAuthenticate(authentication);
-					constraint.setName(constraintName);
-					constraint.setRoles(roles.toArray(new String[roles.size()]));
-
-					if (dataConstraint == null || "NONE".equals(dataConstraint)) {
-						constraint.setDataConstraint(Constraint.DC_NONE);
-					} else if ("INTEGRAL".equals(dataConstraint)) {
-						constraint.setDataConstraint(Constraint.DC_INTEGRAL);
-					} else if ("CONFIDENTIAL".equals(dataConstraint)) {
-						constraint.setDataConstraint(Constraint.DC_CONFIDENTIAL);
-					} else {
-						LOG.warn("Unknown user-data-constraint:" + dataConstraint);
-						constraint.setDataConstraint(Constraint.DC_CONFIDENTIAL);
-					}
-
-					newConstraintMapping.setConstraint(constraint);
-
-					((ConstraintSecurityHandler) securityHandler)
-							.addConstraintMapping(newConstraintMapping);
+//					final ServletContextHandler context = server.getOrCreateContext(model);
+//					final SecurityHandler securityHandler = context.getSecurityHandler();
+//					if (securityHandler == null) {
+//						throw new IllegalStateException(
+//								"Internal error: Cannot find the security handler. Please report.");
+//					}
+//					String mappingMethod = model.getMapping();
+//					String constraintName = model.getConstraintName();
+//					String url = model.getUrl();
+//					String dataConstraint = model.getDataConstraint();
+//					List<String> roles = model.getRoles();
+//					boolean authentication = model.isAuthentication();
+//
+//					ConstraintMapping newConstraintMapping = new ConstraintMapping();
+//					newConstraintMapping.setMethod(mappingMethod);
+//					newConstraintMapping.setPathSpec(url);
+//					Constraint constraint = new Constraint();
+//					constraint.setAuthenticate(authentication);
+//					constraint.setName(constraintName);
+//					constraint.setRoles(roles.toArray(new String[roles.size()]));
+//
+//					if (dataConstraint == null || "NONE".equals(dataConstraint)) {
+//						constraint.setDataConstraint(Constraint.DC_NONE);
+//					} else if ("INTEGRAL".equals(dataConstraint)) {
+//						constraint.setDataConstraint(Constraint.DC_INTEGRAL);
+//					} else if ("CONFIDENTIAL".equals(dataConstraint)) {
+//						constraint.setDataConstraint(Constraint.DC_CONFIDENTIAL);
+//					} else {
+//						LOG.warn("Unknown user-data-constraint:" + dataConstraint);
+//						constraint.setDataConstraint(Constraint.DC_CONFIDENTIAL);
+//					}
+//
+//					newConstraintMapping.setConstraint(constraint);
+//
+//					((ConstraintSecurityHandler) securityHandler)
+//							.addConstraintMapping(newConstraintMapping);
 	}
 
 	//	@Override

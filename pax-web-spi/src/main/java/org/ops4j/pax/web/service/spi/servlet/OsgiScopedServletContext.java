@@ -33,6 +33,7 @@ import javax.servlet.SessionCookieConfig;
 import javax.servlet.SessionTrackingMode;
 import javax.servlet.descriptor.JspConfigDescriptor;
 
+import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
@@ -46,12 +47,24 @@ import org.osgi.framework.wiring.BundleWiring;
  */
 public class OsgiScopedServletContext implements ServletContext {
 
+	/**
+	 * {@link org.ops4j.pax.web.service.spi.servlet.OsgiServletContext} to which the target servlet is registered.
+	 * Servlet itself can be registered in the scope of different {@link Bundle}, so actual
+	 * {@link org.ops4j.pax.web.service.WebContainerContext} has to be obtained/resolved within the scope of proper
+	 * {@link Bundle}.
+	 */
 	private final OsgiServletContext osgiContext;
+
+	/** {@link Bundle} which was used to register target {@link javax.servlet.Servlet} */
 	private final Bundle bundle;
+
+	private final WebContainerContext webContainerContext;
 
 	public OsgiScopedServletContext(OsgiServletContext osgiContext, Bundle bundle) {
 		this.osgiContext = osgiContext;
 		this.bundle = bundle;
+
+		this.webContainerContext = osgiContext.getOsgiContextModel().resolveHttpContext(bundle);
 	}
 
 	public OsgiContextModel getOsgiContextModel() {
@@ -307,31 +320,36 @@ public class OsgiScopedServletContext implements ServletContext {
 	}
 
 	// --- methods backed by the ServletContextHelper.
+	//     some of them, that delegate to WebContainerContext have to use proper WebContainerContext - from
+	//     the bundle that was used to register the servlet, not from the bundle that registered target
+	//     HttpContext/ServletContextHelper
 
 	@Override
 	public String getMimeType(String file) {
-		return osgiContext.getMimeType(file);
+		return osgiContext.getMimeType(webContainerContext, file);
 	}
 
 	@Override
 	public String getRealPath(String path) {
-		return osgiContext.getRealPath(path);
+		return osgiContext.getRealPath(webContainerContext, path);
 	}
 
 	@Override
 	public URL getResource(String path) throws MalformedURLException {
-		return osgiContext.getResource(path);
+		return osgiContext.getResource(webContainerContext, path);
 	}
 
 	@Override
 	public InputStream getResourceAsStream(String path) {
-		return osgiContext.getResourceAsStream(path);
+		return osgiContext.getResourceAsStream(webContainerContext, path);
 	}
 
 	@Override
 	public Set<String> getResourcePaths(String path) {
-		return osgiContext.getResourcePaths(path);
+		return osgiContext.getResourcePaths(webContainerContext, path);
 	}
+
+	// --- methods backed by the OsgiContextModel (object "customized" by trackers from ServletContextHelper)
 
 	@Override
 	public String getInitParameter(String name) {

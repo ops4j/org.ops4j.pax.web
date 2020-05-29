@@ -82,10 +82,12 @@ public class PaxWebStandardContext extends StandardContext {
 			final OsgiFilterChain osgiChain;
 			if (!wrapper.is404()) {
 				osgiChain = new OsgiFilterChain(delegate.getPreprocessors(),
-						wrapper.getServletContext(), wrapper.getOsgiContextModel(), null);
+						wrapper.getServletContext(), wrapper.getOsgiContextModel(),
+						wrapper.getRegisteringBundle(), null);
 			} else {
 				osgiChain = new OsgiFilterChain(delegate.getPreprocessors(),
-						delegate.getDefaultServletContext(), delegate.getDefaultOsgiContextModel(), null);
+						delegate.getDefaultServletContext(), delegate.getDefaultOsgiContextModel(),
+						delegate.getDefaultOsgiContextModel().getOwnerBundle(), null);
 			}
 
 			// this chain will be called (or not)
@@ -94,7 +96,7 @@ public class PaxWebStandardContext extends StandardContext {
 		};
 
 		FilterModel filterModel = new FilterModel("__osgi@" + System.identityHashCode(osgiInitFilter),
-				null, new String[] { "*" }, null, osgiInitFilter, null, true);
+				new String[] { "*" }, null, null, osgiInitFilter, null, true);
 		filterModel.setDispatcherTypes(new String[] {
 				DispatcherType.ERROR.name(),
 				DispatcherType.FORWARD.name(),

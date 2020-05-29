@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service.spi.model.elements;
 import java.util.List;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 
 /**
  * <p>Set of parameters for login configuration parameters, referenced from {@link OsgiContextModel}.</p>
@@ -40,6 +41,14 @@ public class LoginConfigModel extends ElementModel {
 
 	LoginConfigModel(List<OsgiContextModel> contextModels) {
 //		super(contextModels);
+	}
+
+	@Override
+	public void register(WhiteboardWebContainerView view) {
+	}
+
+	@Override
+	public void unregister(WhiteboardWebContainerView view) {
 	}
 
 	public String getAuthMethod() {

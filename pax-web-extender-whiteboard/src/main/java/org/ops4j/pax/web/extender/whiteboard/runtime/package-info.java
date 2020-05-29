@@ -15,6 +15,10 @@
  */
 
 /**
- * This package contains default, ready to use implementations of "legacy whiteboard elements" for Pax Web.
+ * <p>This package contains default, ready to use implementations of "legacy whiteboard elements" for Pax Web.</p>
+ *
+ * <p>Users should rather register services with interfaces mentioned in Whiteboard Service specification, but these
+ * Pax Web specific classes/interfaces are handy, because all the information is included in the service itself,
+ * instead of spreading it in service registration properties.</p>
  */
 package org.ops4j.pax.web.extender.whiteboard.runtime;

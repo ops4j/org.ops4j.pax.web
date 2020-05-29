@@ -41,8 +41,13 @@ public class ServletAnnotationScanner {
 	public MultipartConfig multiPartConfigAnnotation;
 
 	public ServletAnnotationScanner(Class<? extends Servlet> clazz) {
-		WebServlet servletAnnotation = clazz.getAnnotation(WebServlet.class);
+		Class<?> c = clazz;
+		WebServlet servletAnnotation = null;
 
+		while (servletAnnotation == null && Servlet.class.isAssignableFrom(c)) {
+			servletAnnotation = c.getAnnotation(WebServlet.class);
+			c = c.getSuperclass();
+		}
 		if (servletAnnotation == null) {
 			return;
 		}

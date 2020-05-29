@@ -21,6 +21,7 @@ import javax.servlet.SessionCookieConfig;
 import javax.servlet.SessionTrackingMode;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 
 /**
  * <p>Set of parameters configuring HTTP Sessions, referenced from {@link OsgiContextModel}. Eventually
@@ -52,6 +53,14 @@ public class SessionConfigurationModel extends ElementModel {
 
 	SessionConfigurationModel(List<OsgiContextModel> contextModels) {
 //		super(contextModels);
+	}
+
+	@Override
+	public void register(WhiteboardWebContainerView view) {
+	}
+
+	@Override
+	public void unregister(WhiteboardWebContainerView view) {
 	}
 
 	public Integer getSessionTimeout() {

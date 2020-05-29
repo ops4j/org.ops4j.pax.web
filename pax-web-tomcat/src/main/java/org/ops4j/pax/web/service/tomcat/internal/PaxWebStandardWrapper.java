@@ -28,6 +28,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -120,6 +121,10 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 		// wrappers
 		// "basic" valve is org.apache.catalina.core.StandardWrapperValve
 		getPipeline().addValve(new PaxWebStandardWrapperValve((ValveBase) getPipeline().getBasic(), this, realContext));
+	}
+
+	public Bundle getRegisteringBundle() {
+		return servletModel.getRegisteringBundle();
 	}
 
 	@Override

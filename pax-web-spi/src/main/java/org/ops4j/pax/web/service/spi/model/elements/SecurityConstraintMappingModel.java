@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.spi.model.elements;
 import java.util.List;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 
 public class SecurityConstraintMappingModel extends ElementModel {
 
@@ -39,6 +40,14 @@ public class SecurityConstraintMappingModel extends ElementModel {
 		this.dataConstraint = dataConstraint;
 		this.authentication = authentication;
 		this.roles = roles;
+	}
+
+	@Override
+	public void register(WhiteboardWebContainerView view) {
+	}
+
+	@Override
+	public void unregister(WhiteboardWebContainerView view) {
 	}
 
 	/**

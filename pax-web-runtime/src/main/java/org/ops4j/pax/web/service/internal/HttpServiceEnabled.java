@@ -36,6 +36,7 @@ import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.service.internal.views.DirectWebContainerView;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerListener;
 import org.ops4j.pax.web.service.spi.ServletEvent;
@@ -94,6 +95,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 	private final ServletListener eventDispatcher;
 
 	private final WhiteboardWebContainerView whiteboardContainerView = new WhiteboardWebContainer();
+	private final DirectWebContainerView directContainerView = new DirectWebContainer();
 
 //	private final Boolean showStacks;
 
@@ -198,6 +200,11 @@ public class HttpServiceEnabled implements StoppableHttpService {
 			// give access to ServerModel and other bundle-agnostic internals of the runtime
 			return type.cast(whiteboardContainerView);
 		}
+		if (type == DirectWebContainerView.class) {
+			// direct HttpService like registration of models - mostly for test purpose, as DirectWebContainerView
+			// is not in exported package
+			return type.cast(directContainerView);
+		}
 		return null;
 	}
 
@@ -224,8 +231,8 @@ public class HttpServiceEnabled implements StoppableHttpService {
 	@Override
 	public WebContainerContext createDefaultHttpContext() {
 		OsgiContextModel context = serverModel.getBundleContextModel(PaxWebConstants.DEFAULT_CONTEXT_NAME, serviceBundle);
-		// no way it can be null
-		return new UniqueWebContainerContextWrapper(context.getHttpContext());
+		// no way it can be null. no way it contains indirect reference to HttpContext
+		return new UniqueWebContainerContextWrapper(context.resolveHttpContext(serviceBundle));
 	}
 
 	@Override
@@ -235,7 +242,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 			// create one in batch through ServiceModel and ensure its stored at ServerModel as well
 			context = serviceModel.createDefaultHttpContext(contextId);
 		}
-		return new UniqueWebContainerContextWrapper(context.getHttpContext());
+		return new UniqueWebContainerContextWrapper(context.resolveHttpContext(serviceBundle));
 	}
 
 	@Override
@@ -250,7 +257,8 @@ public class HttpServiceEnabled implements StoppableHttpService {
 			// create one in batch through ServerModel, as shared contexts are not associated with any "owner" bundle
 			context = serverModel.createDefaultSharedtHttpContext(contextId);
 		}
-		return new UniqueMultiBundleWebContainerContextWrapper((MultiBundleWebContainerContext) context.getHttpContext());
+		MultiBundleWebContainerContext sharedContext = (MultiBundleWebContainerContext) context.resolveHttpContext(serviceBundle);
+		return new UniqueMultiBundleWebContainerContextWrapper(sharedContext);
 	}
 
 	// --- methods used to register a Servlet - with more options than in original HttpService.registerServlet()
@@ -369,7 +377,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 		}
 
 		try {
-			servletEvent(ServletEvent.State.DEPLOYING, serviceBundle, model);
+			servletEvent(ServletEvent.State.DEPLOYING, model.getRegisteringBundle(), model);
 
 			model.performValidation();
 
@@ -394,12 +402,12 @@ public class HttpServiceEnabled implements StoppableHttpService {
 				return null;
 			});
 
-			servletEvent(ServletEvent.State.DEPLOYED, serviceBundle, model);
+			servletEvent(ServletEvent.State.DEPLOYED, model.getRegisteringBundle(), model);
 		} catch (ServletException | NamespaceException e) {
-			servletEvent(ServletEvent.State.FAILED, serviceBundle, model);
+			servletEvent(ServletEvent.State.FAILED, model.getRegisteringBundle(), model);
 			throw e;
 		} catch (Exception e) {
-			servletEvent(ServletEvent.State.FAILED, serviceBundle, model);
+			servletEvent(ServletEvent.State.FAILED, model.getRegisteringBundle(), model);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -434,15 +442,18 @@ public class HttpServiceEnabled implements StoppableHttpService {
 	 * Actual servlet unregistration methods - for all supported criteria
 	 * @param model
 	 */
-	public void doUnregisterServlet(ServletModel model) {
+	private void doUnregisterServlet(ServletModel model) {
 		final String alias = model.getAlias();
 		final String name = model.getName();
 		final Servlet instance = model.getServlet();
 		final Class<? extends Servlet> servletClass = model.getServletClass();
 		final ServiceReference<? extends Servlet> reference = model.getElementReference();
 
+		final Bundle registeringBundle = model.getRegisteringBundle() == null ?
+				serviceBundle : model.getRegisteringBundle();
+
 		try {
-			servletEvent(ServletEvent.State.UNDEPLOYING, serviceBundle, model);
+			servletEvent(ServletEvent.State.UNDEPLOYING, registeringBundle, model);
 
 			serverModel.run(() -> {
 				List<ServletModel> toUnregister = new LinkedList<>();
@@ -460,7 +471,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 					Map<String, ServletModel> mapping = serviceModel.getAliasMapping().get(alias);
 					if (mapping == null || mapping.size() == 0 || found == null) {
 						throw new IllegalArgumentException("Alias \"" + alias + "\" was never registered by "
-								+ serviceBundle);
+								+ registeringBundle);
 					}
 					toUnregister.add(found);
 				} else if (servletClass != null) {
@@ -473,7 +484,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 					}
 					if (toUnregister.size() == 0) {
 						throw new IllegalArgumentException("Servlet of \"" + servletClass.getName() + "\" class "
-								+ "was never registered by " + serviceBundle);
+								+ "was never registered by " + registeringBundle);
 					}
 				} else if (instance != null) {
 					LOG.info("Unregistering servlet \"{}\"", instance);
@@ -485,7 +496,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 					}
 					if (toUnregister.size() == 0) {
 						throw new IllegalArgumentException("Servlet \"" + instance + "\" "
-								+ "was never registered by " + serviceBundle);
+								+ "was never registered by " + registeringBundle);
 					}
 				} else if (reference != null) {
 					LOG.info("Unregistering servlet by refernce \"{}\"", reference);
@@ -497,7 +508,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 					}
 					if (toUnregister.size() == 0) {
 						throw new IllegalArgumentException("Servlet with reference \"" + reference + "\" "
-								+ "was never registered by " + serviceBundle);
+								+ "was never registered by " + registeringBundle);
 					}
 				} else if (name != null) {
 					LOG.info("Unregistering servlet by name \"{}\"", name);
@@ -509,7 +520,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 					}
 					if (toUnregister.size() == 0) {
 						throw new IllegalArgumentException("Servlet named \"" + name + "\" was never registered by "
-								+ serviceBundle);
+								+ registeringBundle);
 					}
 				} else {
 					throw new IllegalArgumentException("No criteria for servlet unregistration specified");
@@ -530,9 +541,9 @@ public class HttpServiceEnabled implements StoppableHttpService {
 				return null;
 			});
 
-			servletEvent(ServletEvent.State.UNDEPLOYED, serviceBundle, model);
+			servletEvent(ServletEvent.State.UNDEPLOYED, registeringBundle, model);
 		} catch (Exception e) {
-			servletEvent(ServletEvent.State.FAILED, serviceBundle, model);
+			servletEvent(ServletEvent.State.FAILED, registeringBundle, model);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -676,10 +687,13 @@ public class HttpServiceEnabled implements StoppableHttpService {
 	 * Main method for {@link Filter} unregistration
 	 * @param model
 	 */
-	public void doUnregisterFilter(FilterModel model) {
+	private void doUnregisterFilter(FilterModel model) {
 		final String name = model.getName();
 		final Filter instance = model.getFilter();
 		final Class<? extends Filter> filterClass = model.getFilterClass();
+
+		final Bundle registeringBundle = model.getRegisteringBundle() == null ?
+				serviceBundle : model.getRegisteringBundle();
 
 		try {
 			serverModel.run(() -> {
@@ -695,7 +709,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 					}
 					if (toUnregister.size() == 0) {
 						throw new IllegalArgumentException("Filter named \"" + name + "\" was never registered by "
-								+ serviceBundle);
+								+ registeringBundle);
 					}
 				} else if (filterClass != null) {
 					LOG.info("Unregistering filter by class \"{}\"", filterClass);
@@ -707,7 +721,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 					}
 					if (toUnregister.size() == 0) {
 						throw new IllegalArgumentException("Servlet of \"" + filterClass.getName() + "\" class "
-								+ "was never registered by " + serviceBundle);
+								+ "was never registered by " + registeringBundle);
 					}
 				} else if (instance != null) {
 					LOG.info("Unregistering filter \"{}\"", instance);
@@ -719,7 +733,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 					}
 					if (toUnregister.size() == 0) {
 						throw new IllegalArgumentException("Filter \"" + instance + "\" "
-								+ "was never registered by " + serviceBundle);
+								+ "was never registered by " + registeringBundle);
 					}
 				} else {
 					throw new IllegalArgumentException("No criteria for filter unregistration specified");
@@ -765,6 +779,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 	 */
 	private void translateContexts(Collection<HttpContext> httpContexts, ElementModel<?> model, Batch batch) {
 		if (httpContexts.size() > 0 && !model.hasContextModels()) {
+			// Http Service scenario - HttpContext(s)/WebContainerContext(s) are passed with the registration
 			final Collection<WebContainerContext> webContexts
 					= httpContexts.stream().map(this::unify).collect(Collectors.toList());
 			webContexts.forEach(wc -> {
@@ -772,6 +787,12 @@ public class HttpServiceEnabled implements StoppableHttpService {
 				OsgiContextModel contextModel = serverModel.getOrCreateOsgiContextModel(wc, serviceBundle,
 						PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
 				model.addContextModel(contextModel);
+			});
+		} else if (model.hasContextModels()) {
+			// Whiteboard Service scenario - OsgiContextModel(s) are passed together with the model, but we
+			// have to ensure they're registered in ServerModel and ServerController
+			model.getContextModels().forEach(ocm -> {
+				serverModel.registerOsgiContextModelIfNeeded(ocm, batch);
 			});
 		}
 	}
@@ -803,19 +824,73 @@ public class HttpServiceEnabled implements StoppableHttpService {
 	private class WhiteboardWebContainer implements WhiteboardWebContainerView {
 
 		@Override
-		public void registerServlet(ServletModel model)
-				throws ServletException, NamespaceException {
-			doRegisterServlet(Collections.emptyList(), model);
+		public void registerServlet(ServletModel model) {
+			try {
+				doRegisterServlet(Collections.emptyList(), model);
+			} catch (Exception e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
 		}
 
 		@Override
-		public void registerFilter(FilterModel model) throws ServletException {
-			doRegisterFilter(Collections.emptyList(), model);
+		public void unregisterServlet(ServletModel servletModel) {
+			doUnregisterServlet(servletModel);
+		}
+
+		@Override
+		public void registerFilter(FilterModel model) {
+			try {
+				doRegisterFilter(Collections.emptyList(), model);
+			} catch (ServletException e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
+		}
+
+		@Override
+		public void unregisterFilter(FilterModel filterModel) {
+			doUnregisterFilter(filterModel);
 		}
 
 		@Override
 		public List<OsgiContextModel> getOsgiContextModels(Bundle bundle) {
 			return serverModel.getOsgiContextModels(bundle);
+		}
+
+		@Override
+		public void addWhiteboardOsgiContextModel(OsgiContextModel model) {
+			if (!model.hasDirectHttpContextInstance()) {
+				throw new IllegalArgumentException("Can't pass OsgiContextModel without HttpContext to WebContainer."
+						+ " Only singleton, bundle-scoped or shared HttpContexts can be passed from Whiteboard to HttpService.");
+			}
+			// TODO: register OsgiContextModel in WebContainer
+		}
+
+		@Override
+		public void removeWhiteboardOsgiContextModel(OsgiContextModel model) {
+			// TODO: unregister OsgiContextModel from WebContainer
+		}
+	}
+
+	private class DirectWebContainer implements DirectWebContainerView {
+
+		@Override
+		public void registerServlet(Collection<HttpContext> contexts, ServletModel model) throws ServletException, NamespaceException {
+			doRegisterServlet(contexts, model);
+		}
+
+		@Override
+		public void registerFilter(Collection<HttpContext> contexts, FilterModel model) throws ServletException {
+			doRegisterFilter(contexts, model);
+		}
+
+		@Override
+		public void unregisterServlet(ServletModel model) {
+			doUnregisterServlet(model);
+		}
+
+		@Override
+		public void unregisterFilter(FilterModel model) {
+			doUnregisterFilter(model);
 		}
 	}
 

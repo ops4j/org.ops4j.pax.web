@@ -19,6 +19,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -44,6 +46,7 @@ import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.internal.HttpServiceEnabled;
+import org.ops4j.pax.web.service.internal.views.DirectWebContainerView;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.context.DefaultHttpContext;
@@ -53,7 +56,6 @@ import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.task.Batch;
-import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -74,6 +76,11 @@ import static org.ops4j.pax.web.itest.server.support.Utils.httpGET;
  */
 @RunWith(Parameterized.class)
 public class ServerControllerBasicRegistrationTest extends MultiContainerTestSupport {
+
+	@Override
+	public void initAll() throws Exception {
+		configurePort();
+	}
 
 	@Test
 	public void registerSingleServletUsingExplicitBatch() throws Exception {
@@ -450,32 +457,27 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		Map<String, String> initParams = new HashMap<>();
 		initParams.put("p1", "v1");
 
-		WhiteboardWebContainerView view = wc.adapt(WhiteboardWebContainerView.class);
+		DirectWebContainerView view = wc.adapt(DirectWebContainerView.class);
 
-		view.registerServlet(new ServletModel.Builder()
+		view.registerServlet(Arrays.asList(wccC1, wccE1), new ServletModel.Builder()
 				.withServletName("my-servlet1")
 				.withUrlPatterns(new String[] { "/s/*" }) // responds to /c/s/* or /e/s/* depending on context selector
 				.withServletReference(ref)
 				.withInitParams(initParams)
-				.withOsgiContextModel(ocmC1)
-				.withOsgiContextModel(ocmE1)
 				.build());
-		view.registerServlet(new ServletModel.Builder()
+		view.registerServlet(Collections.singletonList(wccC2), new ServletModel.Builder()
 				.withServletName("my-servlet2")
 				.withUrlPatterns(new String[] { "/s2/*" }) // responds to /c/s2/* depending on context selector
 				.withServletReference(ref)
 				.withInitParams(initParams)
-				.withOsgiContextModel(ocmC2)
 				.build());
 
 		// this filter is NOT registered to osgiContextC2, so should NOT be mapped to /c/s2/*
-		view.registerFilter(new FilterModel.Builder()
+		view.registerFilter(Arrays.asList(wccC1, wccD1), new FilterModel.Builder()
 				.withFilterName("my-filter")
 				.withUrlPatterns(new String[] { "/*" }) // maps to /c/* or /d/* depending on associated contexts
 				.withFilter(filter)
 				.withRegisteringBundle(bundle)
-				.withOsgiContextModel(ocmC1)
-				.withOsgiContextModel(ocmD1)
 				.build());
 
 		// filter -> servlet
@@ -587,16 +589,14 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 
 		long serviceId = 0;
 
-		WhiteboardWebContainerView view = wc.adapt(WhiteboardWebContainerView.class);
+		DirectWebContainerView view = wc.adapt(DirectWebContainerView.class);
 
 		// servlet#1 registered in /c1 and /c2
-		view.registerServlet(new ServletModel.Builder()
+		view.registerServlet(Arrays.asList(wcc1, wcc2), new ServletModel.Builder()
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
 				.withServletReference(s11)
 				.withServiceRankAndId(0, ++serviceId)
-				.withOsgiContextModel(cm1)
-				.withOsgiContextModel(cm2)
 				.build());
 
 		assertThat(httpGET(port, "/c1/s"), endsWith("S(1)"));
@@ -604,12 +604,11 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		assertThat(httpGET(port, "/c3/s"), startsWith("HTTP/1.1 404"));
 
 		// servlet#2 registered in /c3 - no conflict
-		view.registerServlet(new ServletModel.Builder()
+		view.registerServlet(Collections.singletonList(wcc3), new ServletModel.Builder()
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
 				.withServletReference(s12)
 				.withServiceRankAndId(3, ++serviceId)
-				.withOsgiContextModel(cm3)
 				.build());
 
 		assertThat(httpGET(port, "/c1/s"), endsWith("S(1)"));
@@ -617,12 +616,11 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		assertThat(httpGET(port, "/c3/s"), endsWith("S(2)"));
 
 		// servlet#3 registered to /c1, but with higher service ID - should be marked as disabled
-		view.registerServlet(new ServletModel.Builder()
+		view.registerServlet(Collections.singletonList(wcc1), new ServletModel.Builder()
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
 				.withServletReference(s13)
 				.withServiceRankAndId(0, ++serviceId)
-				.withOsgiContextModel(cm1)
 				.build());
 
 		assertThat(httpGET(port, "/c1/s"), endsWith("S(1)"));
@@ -630,13 +628,11 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		assertThat(httpGET(port, "/c3/s"), endsWith("S(2)"));
 
 		// servlet#4 registered to /c2 and /c3 - ranked higher than s#1 in /c2, but ranked lower than s#2 in /c3
-		view.registerServlet(new ServletModel.Builder()
+		view.registerServlet(Arrays.asList(wcc2, wcc3), new ServletModel.Builder()
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
 				.withServletReference(s14)
 				.withServiceRankAndId(2, ++serviceId)
-				.withOsgiContextModel(cm2)
-				.withOsgiContextModel(cm3)
 				.build());
 
 		assertThat(httpGET(port, "/c1/s"), endsWith("S(1)"));
@@ -649,13 +645,11 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		//  - s#5 MAY be activated in /c2 and /c4, but in /c2, s#4 is ranked higher than s#5
 		//  - s#4 is ranked lower than s#2 in /c3, so it won't be activated ANYWHERE
 		//  - s#5 will thus be activated in /c2 and /c4
-		view.registerServlet(new ServletModel.Builder()
+		view.registerServlet(Arrays.asList(wcc2, wcc4), new ServletModel.Builder()
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
 				.withServletReference(s15)
 				.withServiceRankAndId(1, ++serviceId)
-				.withOsgiContextModel(cm2)
-				.withOsgiContextModel(cm4)
 				.build());
 
 		assertThat(httpGET(port, "/c1/s"), endsWith("S(3)"));
@@ -664,12 +658,11 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		assertThat(httpGET(port, "/c4/s"), endsWith("S(5)"));
 
 		// servlet#6 registered to /c4 - ranked lower than s#5 in /c4, so added as disabled
-		view.registerServlet(new ServletModel.Builder()
+		view.registerServlet(Collections.singletonList(wcc4), new ServletModel.Builder()
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
 				.withServletReference(s16)
 				.withServiceRankAndId(0, ++serviceId)
-				.withOsgiContextModel(cm4)
 				.build());
 
 		assertThat(httpGET(port, "/c1/s"), endsWith("S(3)"));
@@ -679,7 +672,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 
 		// servlet#2 unregistered, s#4 can be activated in /c3 and can be activated in /c2 because s#5 in /c2 is ranked
 		// lower than s#4, so s#5 disabled in /c4, so s#6 enabled in /c4
-		wc.doUnregisterServlet(new ServletModel.Builder()
+		view.unregisterServlet(new ServletModel.Builder()
 				.withServletReference(s12)
 				.withOsgiContextModel(cm3)
 				.build());

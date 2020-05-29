@@ -771,6 +771,9 @@ class TomcatServerWrapper implements BatchVisitor {
 			// as with Jetty (JettyServerWrapper.visit(task.OsgiContextModelChange),
 			// each unique OsgiServletContext (ServletContextHelper or HttpContext) is a facade for some, sometimes
 			// shared by many osgi contexts, real ServletContext
+			if (osgiServletContexts.containsKey(osgiModel)) {
+				throw new IllegalStateException(osgiModel + " is already registered");
+			}
 			osgiServletContexts.put(osgiModel, new OsgiServletContext(realContext.getServletContext(), osgiModel, servletModel));
 			osgiContextModels.get(contextPath).add(osgiModel);
 
@@ -873,6 +876,7 @@ class TomcatServerWrapper implements BatchVisitor {
 			FilterMap[] filterMaps = context.findFilterMaps();
 
 			context.filterStop();
+			// remove all but "initial OSGi filter"
 			for (FilterDef def : filterDefs) {
 				if (!(def instanceof PaxWebFilterDef && ((PaxWebFilterDef) def).isInitial())) {
 					context.removeFilterDef(def);
@@ -888,10 +892,8 @@ class TomcatServerWrapper implements BatchVisitor {
 			PaxWebFilterDef[] newFilterDefs = new PaxWebFilterDef[filters.size() + 1];
 			PaxWebFilterMap[] newFilterMaps = new PaxWebFilterMap[filters.size() + 1];
 
-			// filters are sorted by ranking. for Jetty, this order should be reflected in the array of FilterMappings
-			// order of FilterHolders is irrelevant
-			context.addFilterDef(filterDefs[0]);
-			context.addFilterMap(filterMaps[0]);
+//			context.addFilterDef(filterDefs[0]);
+//			context.addFilterMap(filterMaps[0]);
 
 			for (FilterModel model : filters) {
 				PaxWebFilterDef def = new PaxWebFilterDef(model, false);

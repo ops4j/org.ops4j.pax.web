@@ -28,6 +28,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -96,6 +97,10 @@ public class PaxWebServletInfo extends ServletInfo {
 		setMultipartConfig(servletModel.getMultipartConfigElement());
 
 		this.servletContext = ((ServletModelFactory)super.getInstanceFactory()).getServletContext();
+	}
+
+	public Bundle getRegisteringBundle() {
+		return servletModel.getRegisteringBundle();
 	}
 
 	public boolean is404() {

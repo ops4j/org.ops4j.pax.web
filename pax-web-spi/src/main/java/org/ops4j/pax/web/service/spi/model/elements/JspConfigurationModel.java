@@ -23,6 +23,7 @@ import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 import javax.servlet.descriptor.TaglibDescriptor;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 
 /**
  * <p>Set of parameters to configure JSP parameters, referenced from {@link OsgiContextModel}. Eventually
@@ -40,6 +41,14 @@ public class JspConfigurationModel extends ElementModel implements JspConfigDesc
 
 	JspConfigurationModel(List<OsgiContextModel> contextModels) {
 //		super(contextModels);
+	}
+
+	@Override
+	public void register(WhiteboardWebContainerView view) {
+	}
+
+	@Override
+	public void unregister(WhiteboardWebContainerView view) {
 	}
 
 	@Override

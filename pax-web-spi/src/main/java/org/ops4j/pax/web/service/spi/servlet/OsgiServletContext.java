@@ -47,38 +47,61 @@ import org.osgi.framework.wiring.BundleWiring;
  * from OSGi CMPN R7 Whiteboard Service specification. That's the 1:1 mapping with single
  * {@link org.osgi.service.http.context.ServletContextHelper} (or {@link org.osgi.service.http.HttpContext}).</p>
  *
- * <p>When handling single servlet (or generally filters+servlet chain), we have to provide special facade even
- * for this {@link OsgiServletContext} - to provide required {@link ServletContext#getClassLoader()}.</p>
+ * <p>When handling single servlet (or generally filters+servlet chain), we have to provide special facade for
+ * {@link ServletContext} from Servlet API in the form of {@link OsgiServletContext}. And during actual request
+ * processing, we need yet another facade to provide required {@link ServletContext#getClassLoader()} behavior.</p>
  */
 public class OsgiServletContext implements ServletContext {
 
-	private ServletContext container;
-	private final OsgiContextModel contextModel;
+	private ServletContext containerServletContext;
+	private final OsgiContextModel osgiContextModel;
 	private final ServletContextModel servletContextModel;
-	private final WebContainerContext context;
+
+	/**
+	 * {@link WebContainerContext} obtained from {@link OsgiContextModel} in the context of the bundle registering
+	 * the <em>context</em> ({@link org.osgi.service.http.HttpContext} or
+	 * {@link org.osgi.service.http.context.ServletContextHelper}). This {@link WebContainerContext} is used by
+	 * default, but during actual request processing, different {@link WebContainerContext} should be used - the one
+	 * obtained (e.g., from OSGi service registry, {@link org.osgi.framework.ServiceFactory}) in the context of a
+	 * bundle that registered target {@link Servlet}.
+	 */
+	private final WebContainerContext defaultWebContainerContext;
 
 	private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>();
 
-	public OsgiServletContext(ServletContext container, OsgiContextModel contextModel,
+	/**
+	 * Constructor called when {@link OsgiContextModel} is passed to given
+	 * {@link org.ops4j.pax.web.service.spi.ServerController}. We still can't grab an instance of
+	 * {@link WebContainerContext} in the constructor, because it has to be resolved in the context of particular
+	 * web request invocation - target {@link Servlet} determines the {@link OsgiContextModel} used and the
+	 * {@link org.osgi.framework.Bundle} associated with the target {@link Servlet} is used to resolve actual
+	 * {@link WebContainerContext}.
+	 *
+	 * @param containerServletContext
+	 * @param osgiContextModel
+	 * @param servletContextModel
+	 */
+	public OsgiServletContext(ServletContext containerServletContext, OsgiContextModel osgiContextModel,
 			ServletContextModel servletContextModel) {
-		this.container = container;
-		this.contextModel = contextModel;
+		this.containerServletContext = containerServletContext;
+		this.osgiContextModel = osgiContextModel;
 		this.servletContextModel = servletContextModel;
-		this.context = contextModel.getHttpContext();
+
+		this.defaultWebContainerContext = osgiContextModel.resolveHttpContext(osgiContextModel.getOwnerBundle());
 	}
 
 	public OsgiContextModel getOsgiContextModel() {
-		return contextModel;
+		return osgiContextModel;
 	}
 
 	/**
 	 * We have to be able to replace server-specific {@link ServletContext}, because we can't freely
 	 * replace web elements in Undertow. In Undertow we have to recreate entire context, thus getting new
 	 * {@link ServletContext}.
-	 * @param container
+	 * @param containerServletContext
 	 */
-	public void setContainer(ServletContext container) {
-		this.container = container;
+	public void setContainerServletContext(ServletContext containerServletContext) {
+		this.containerServletContext = containerServletContext;
 	}
 
 	// --- methods that throw UnsupportedOperationException
@@ -195,171 +218,187 @@ public class OsgiServletContext implements ServletContext {
 		// This takes into account the osgi.http.whiteboard.context.path of the Servlet Context Helper and the path
 		// of the Http runtime.
 		// But this is the same
-		return container.getContextPath();
+		return containerServletContext.getContextPath();
 	}
 
 	@Override
 	public ServletContext getContext(String uripath) {
-		return container.getContext(uripath);
+		return containerServletContext.getContext(uripath);
 	}
 
 	@Override
 	public Set<SessionTrackingMode> getDefaultSessionTrackingModes() {
-		return container.getDefaultSessionTrackingModes();
+		return containerServletContext.getDefaultSessionTrackingModes();
 	}
 
 	@Override
 	public int getEffectiveMajorVersion() {
-		return container.getEffectiveMajorVersion();
+		return containerServletContext.getEffectiveMajorVersion();
 	}
 
 	@Override
 	public int getEffectiveMinorVersion() {
-		return container.getEffectiveMinorVersion();
+		return containerServletContext.getEffectiveMinorVersion();
 	}
 
 	@Override
 	public Set<SessionTrackingMode> getEffectiveSessionTrackingModes() {
-		return container.getEffectiveSessionTrackingModes();
+		return containerServletContext.getEffectiveSessionTrackingModes();
 	}
 
 	@Override
 	public FilterRegistration getFilterRegistration(String filterName) {
-		return container.getFilterRegistration(filterName);
+		return containerServletContext.getFilterRegistration(filterName);
 	}
 
 	@Override
 	public Map<String, ? extends FilterRegistration> getFilterRegistrations() {
-		return container.getFilterRegistrations();
+		return containerServletContext.getFilterRegistrations();
 	}
 
 	@Override
 	public int getMajorVersion() {
-		return container.getMajorVersion();
+		return containerServletContext.getMajorVersion();
 	}
 
 	@Override
 	public int getMinorVersion() {
-		return container.getMinorVersion();
+		return containerServletContext.getMinorVersion();
 	}
 
 	@Override
 	@SuppressWarnings("deprecation")
 	public Servlet getServlet(String name) throws ServletException {
-		return container.getServlet(name);
+		return containerServletContext.getServlet(name);
 	}
 
 	@Override
 	@SuppressWarnings("deprecation")
 	public Enumeration<String> getServletNames() {
-		return container.getServletNames();
+		return containerServletContext.getServletNames();
 	}
 
 	@Override
 	public ServletRegistration getServletRegistration(String servletName) {
-		return container.getServletRegistration(servletName);
+		return containerServletContext.getServletRegistration(servletName);
 	}
 
 	@Override
 	public Map<String, ? extends ServletRegistration> getServletRegistrations() {
-		return container.getServletRegistrations();
+		return containerServletContext.getServletRegistrations();
 	}
 
 	@Override
 	@SuppressWarnings("deprecation")
 	public Enumeration<Servlet> getServlets() {
-		return container.getServlets();
+		return containerServletContext.getServlets();
 	}
 
 	@Override
 	public String getVirtualServerName() {
-		return container.getVirtualServerName();
+		return containerServletContext.getVirtualServerName();
 	}
 
 	@Override
 	public String getServerInfo() {
-		return container.getServerInfo();
+		return containerServletContext.getServerInfo();
 	}
 
 	@Override
 	public void log(String msg) {
-		container.log(msg);
+		containerServletContext.log(msg);
 	}
 
 	@Override
 	@SuppressWarnings("deprecation")
 	public void log(Exception exception, String msg) {
-		container.log(exception, msg);
+		containerServletContext.log(exception, msg);
 	}
 
 	@Override
 	public void log(String message, Throwable throwable) {
-		container.log(message, throwable);
+		containerServletContext.log(message, throwable);
 	}
 
 	@Override
 	public SessionCookieConfig getSessionCookieConfig() {
-		return container.getSessionCookieConfig();
+		return containerServletContext.getSessionCookieConfig();
 	}
 
 	@Override
 	public JspConfigDescriptor getJspConfigDescriptor() {
 		// according to 140.2.6 "Behavior of the Servlet Context", this method should return null
 		// but I don't agree
-		return container.getJspConfigDescriptor();
+		return containerServletContext.getJspConfigDescriptor();
 	}
 
 	// --- methods also delegating to server-specific ServletContext, but added in Servlet spec 4.0
 
 	@Override
 	public int getSessionTimeout() {
-		return container.getSessionTimeout();
+		return containerServletContext.getSessionTimeout();
 	}
 
 	@Override
 	public void setSessionTimeout(int sessionTimeout) {
-		container.setSessionTimeout(sessionTimeout);
+		containerServletContext.setSessionTimeout(sessionTimeout);
 	}
 
 	@Override
 	public String getRequestCharacterEncoding() {
-		return container.getRequestCharacterEncoding();
+		return containerServletContext.getRequestCharacterEncoding();
 	}
 
 	@Override
 	public void setRequestCharacterEncoding(String encoding) {
-		container.setRequestCharacterEncoding(encoding);
+		containerServletContext.setRequestCharacterEncoding(encoding);
 	}
 
 	@Override
 	public String getResponseCharacterEncoding() {
-		return container.getResponseCharacterEncoding();
+		return containerServletContext.getResponseCharacterEncoding();
 	}
 
 	@Override
 	public void setResponseCharacterEncoding(String encoding) {
-		container.setResponseCharacterEncoding(encoding);
+		containerServletContext.setResponseCharacterEncoding(encoding);
 	}
 
 	// --- methods backed by the ServletContextHelper.
 
 	@Override
 	public String getMimeType(String file) {
+		return getMimeType(defaultWebContainerContext, file);
+	}
+
+	String getMimeType(WebContainerContext context, String file) {
 		return context.getMimeType(file);
 	}
 
 	@Override
 	public String getRealPath(String path) {
+		return getRealPath(defaultWebContainerContext, path);
+	}
+
+	String getRealPath(WebContainerContext context, String path) {
 		return context.getRealPath(path);
 	}
 
 	@Override
 	public URL getResource(String path) throws MalformedURLException {
+		return getResource(defaultWebContainerContext, path);
+	}
+
+	URL getResource(WebContainerContext context, String path) throws MalformedURLException {
 		return context.getResource(path);
 	}
 
 	@Override
 	public InputStream getResourceAsStream(String path) {
+		return getResourceAsStream(defaultWebContainerContext, path);
+	}
+
+	InputStream getResourceAsStream(WebContainerContext context, String path) {
 		URL resource = context.getResource(path);
 		if (resource != null) {
 			try {
@@ -373,19 +412,26 @@ public class OsgiServletContext implements ServletContext {
 
 	@Override
 	public Set<String> getResourcePaths(String path) {
+		return getResourcePaths(defaultWebContainerContext, path);
+	}
+
+	Set<String> getResourcePaths(WebContainerContext context, String path) {
 		return context.getResourcePaths(path);
 	}
+
+
+	// --- methods backed by the OsgiContextModel (object "customized" by trackers from ServletContextHelper)
 
 	@Override
 	public String getInitParameter(String name) {
 		// Mind the confusion between getInitParameter() method name and <context-param> web.xml element
 		// these are actually the same
-		return contextModel.getContextParams().get(name);
+		return osgiContextModel.getContextParams().get(name);
 	}
 
 	@Override
 	public Enumeration<String> getInitParameterNames() {
-		return Collections.enumeration(contextModel.getContextParams().keySet());
+		return Collections.enumeration(osgiContextModel.getContextParams().keySet());
 	}
 
 	@Override
@@ -401,7 +447,7 @@ public class OsgiServletContext implements ServletContext {
 		// full org.eclipse.jetty.server.handler.ContextHandler.handle() processing again.
 		// we don't have direct info that /s1/a/b/c should match servlet1 without calculating it
 
-		return container.getRequestDispatcher(path);
+		return containerServletContext.getRequestDispatcher(path);
 	}
 
 	@Override
@@ -411,9 +457,9 @@ public class OsgiServletContext implements ServletContext {
 			return null;
 		}
 
-		if (servletModel.getContextModels().contains(contextModel)) {
+		if (servletModel.getContextModels().contains(osgiContextModel)) {
 			// only if given servlet is registered using curent osgi context model (among others)
-			return container.getNamedDispatcher(name);
+			return containerServletContext.getNamedDispatcher(name);
 		}
 
 		return null;
@@ -421,7 +467,7 @@ public class OsgiServletContext implements ServletContext {
 
 	@Override
 	public String getServletContextName() {
-		return contextModel.getHttpContext().getContextId();
+		return osgiContextModel.getName();
 	}
 
 	// --- methods dependent on which actual servlet/filter uses the context
@@ -430,7 +476,7 @@ public class OsgiServletContext implements ServletContext {
 	public ClassLoader getClassLoader() {
 		// at Servlet (or Filter) level, this method returns classLoader of a bundle registering given Servlet
 		// (or Filter). Here, it's a bundle registering ServletContextHelper (or HttpContext)
-		return contextModel.getOwnerBundle().adapt(BundleWiring.class).getClassLoader();
+		return osgiContextModel.getOwnerBundle().adapt(BundleWiring.class).getClassLoader();
 	}
 
 }

@@ -22,6 +22,7 @@ import org.eclipse.jetty.servlet.FilterHolder;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedFilter;
+import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.osgi.framework.ServiceReference;
 
@@ -37,6 +38,8 @@ public class PaxWebFilterHolder extends FilterHolder {
 
 	/** This {@link ServletContext} is scoped to single {@link org.osgi.service.http.context.ServletContextHelper} */
 	private final OsgiServletContext osgiServletContext;
+	/** This {@link ServletContext} is scoped to particular Whiteboard filter */
+	private final OsgiScopedServletContext servletContext;
 
 	/**
 	 * Initialize {@link PaxWebFilterHolder} with {@link FilterModel}. All its
@@ -62,6 +65,9 @@ public class PaxWebFilterHolder extends FilterHolder {
 
 		setInitParameters(filterModel.getInitParams());
 		setAsyncSupported(filterModel.getAsyncSupported() != null && filterModel.getAsyncSupported());
+
+		// setup proper delegation for ServletContext
+		servletContext = new OsgiScopedServletContext(this.osgiServletContext, filterModel.getRegisteringBundle());
 	}
 
 	@Override
@@ -98,7 +104,7 @@ public class PaxWebFilterHolder extends FilterHolder {
 			}
 		}
 
-		return instance == null ? null : new OsgiInitializedFilter(instance, osgiServletContext);
+		return instance == null ? null : new OsgiInitializedFilter(instance, servletContext);
 	}
 
 	@Override

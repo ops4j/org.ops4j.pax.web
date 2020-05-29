@@ -31,6 +31,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -112,6 +113,10 @@ public class PaxWebServletHolder extends ServletHolder {
 
 		// setup proper delegation for ServletContext
 		servletContext = new OsgiScopedServletContext(this.osgiServletContext, servletModel.getRegisteringBundle());
+	}
+
+	public Bundle getRegisteringBundle() {
+		return servletModel.getRegisteringBundle();
 	}
 
 	public OsgiContextModel getOsgiContextModel() {

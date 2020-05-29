@@ -166,7 +166,13 @@ public abstract class AbstractElementTracker<S, R, T extends ElementModel<R>> im
 					//		Boolean sharedHttpContext = ServicePropertiesUtils.extractSharedHttpContext(serviceReference);
 
 		Integer rank = (Integer) serviceReference.getProperty(Constants.SERVICE_RANKING);
+		if (rank == null) {
+			rank = 0;
+		}
 		Long serviceId = (Long) serviceReference.getProperty(Constants.SERVICE_ID);
+		if (serviceId == null) {
+			serviceId = 0L;
+		}
 
 		// turn a ServiceReference into ElementModel<R> that can be passed to HttpService/WebContainer
 		// and contains almost _everything_ needed to process it later (for example after WebContainer becomes available)

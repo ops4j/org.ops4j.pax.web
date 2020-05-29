@@ -120,9 +120,15 @@ public class HttpContextMappingTracker extends AbstractContextTracker<HttpContex
 						}
 						model.setHttpContext(new WebContainerContextWrapper(serviceReference.getBundle(), h1, service.getContextId()));
 					}
+
+					// this means that such OsgiContextModel will be passed directly to HttpService, replacing
+					// HttpService-specific, bundle-scoped (or shared) context
+					// also this means that we should target such context using ONLY
+					// "osgi.http.whiteboard.context.httpservice" property only
+					model.getContextRegistrationProperties().remove(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
 				}
 			}
-			if (model.getHttpContext() == null) {
+			if (!model.hasDirectHttpContextInstance()) {
 				// supplier for later derefenrencing
 				model.setContextSupplier((bundleContext, ignoredName) -> {
 					HttpContextMapping mapping = null;

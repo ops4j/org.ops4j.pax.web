@@ -205,43 +205,38 @@ public class PaxWebServletHandler extends ServletHandler {
 			return;
 		}
 
-		if (getFilterMappings() == null || getFilterMappings().length == 0) {
-			// getFilterChain() won't be called in super.doHandle(), but we need it anyway.
-			// this if{} is based on super.doHandle()
+		// wheter there are filters or not, we *copy* code from super.doHandle() to ensure that
+		// getOsgiFilterChain() is called
 
-			// this should never be null because of ServletHandler.setEnsureDefaultServlet(true)
-			PaxWebServletHolder servletHolder = (PaxWebServletHolder)baseRequest.getUserIdentityScope();
+		// this should never be null because of ServletHandler.setEnsureDefaultServlet(true)
+		PaxWebServletHolder servletHolder = (PaxWebServletHolder)baseRequest.getUserIdentityScope();
 
-			try {
-				// we always create the chain, because we have to call handleSecurity()/finishSecurity()
-				FilterChain chain = getOsgiFilterChain(baseRequest, target, servletHolder);
+		try {
+			// we always create the chain, because we have to call handleSecurity()/finishSecurity()
+			FilterChain chain = getOsgiFilterChain(baseRequest, target, servletHolder);
 
-				// unwrap any tunnelling of base Servlet request/responses
-				ServletRequest req = request;
-				if (req instanceof ServletRequestHttpWrapper) {
-					req = ((ServletRequestHttpWrapper) req).getRequest();
-				}
-				ServletResponse res = response;
-				if (res instanceof ServletResponseHttpWrapper) {
-					res = ((ServletResponseHttpWrapper) res).getResponse();
-				}
-
-				// set some attributes in the request
-				servletHolder.prepare(baseRequest, req, res);
-
-				// chain still can be null if the servlet is default404Servlet
-				if (chain != null) {
-					chain.doFilter(req, res);
-				} else {
-					servletHolder.handle(baseRequest, req, res);
-				}
-			} finally {
-				if (servletHolder != null)
-					baseRequest.setHandled(true);
+			// unwrap any tunnelling of base Servlet request/responses
+			ServletRequest req = request;
+			if (req instanceof ServletRequestHttpWrapper) {
+				req = ((ServletRequestHttpWrapper) req).getRequest();
 			}
-		} else {
-			// filters are present, so super.doHandle() will call our getFilterChain()
-			super.doHandle(target, baseRequest, request, response);
+			ServletResponse res = response;
+			if (res instanceof ServletResponseHttpWrapper) {
+				res = ((ServletResponseHttpWrapper) res).getResponse();
+			}
+
+			// set some attributes in the request
+			servletHolder.prepare(baseRequest, req, res);
+
+			// chain still can be null if the servlet is default404Servlet
+			if (chain != null) {
+				chain.doFilter(req, res);
+			} else {
+				servletHolder.handle(baseRequest, req, res);
+			}
+		} finally {
+			if (servletHolder != null)
+				baseRequest.setHandled(true);
 		}
 	}
 
@@ -282,9 +277,11 @@ public class PaxWebServletHandler extends ServletHandler {
 			chain = (request, response) -> holder.handle(baseRequest, request, response);
 		}
 		if (!holder.is404()) {
-			return new OsgiFilterChain(preprocessors, holder.getServletContext(), holder.getOsgiContextModel(), chain);
+			return new OsgiFilterChain(preprocessors, holder.getServletContext(), holder.getOsgiContextModel(),
+					holder.getRegisteringBundle(), chain);
 		} else {
-			return new OsgiFilterChain(preprocessors, defaultServletContext, defaultOsgiContextModel, chain);
+			return new OsgiFilterChain(preprocessors, defaultServletContext, defaultOsgiContextModel,
+					defaultOsgiContextModel.getOwnerBundle(), chain);
 		}
 	}
 
@@ -303,7 +300,9 @@ public class PaxWebServletHandler extends ServletHandler {
 		if (contextModel == null) {
 			contextModel = defaultOsgiContextModel;
 		}
-		String prefix = contextModel.getHttpContext().getContextId();
+		// TOCHECK: potential conflict between shared and bundle-scoped contexts with the same name
+		String prefix = holder.getOsgiContextModel() == null ? ""
+				: contextModel.resolveHttpContext(holder.getOsgiContextModel().getOwnerBundle()).getContextId();
 		String contextlessKey = pathInContext == null ? holder.getName() : pathInContext;
 		String key = prefix + "|" + contextlessKey;
 

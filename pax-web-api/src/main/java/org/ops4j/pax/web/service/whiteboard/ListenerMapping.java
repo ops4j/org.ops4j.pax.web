@@ -19,12 +19,15 @@ package org.ops4j.pax.web.service.whiteboard;
 
 import java.util.EventListener;
 
+import org.ops4j.pax.web.annotations.Review;
+
 /**
  * Listener mapping.
  *
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
+@Review("Not yet refactored")
 public interface ListenerMapping {
 
 	/**

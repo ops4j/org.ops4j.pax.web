@@ -32,6 +32,7 @@ import org.osgi.service.http.HttpContext;
  * <p>This interface doesn't extend {@link ContextRelated}, because it represents the <em>context</em> itself.</p>
  *
  * @author Alin Dreghiciu
+ * @author Grzegorz Grzybek
  * @since 0.4.0, March 16, 2008
  */
 public interface HttpContextMapping extends ContextMapping {

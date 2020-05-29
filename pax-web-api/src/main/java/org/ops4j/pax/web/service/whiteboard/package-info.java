@@ -18,16 +18,13 @@
  * <p>This package of pax-web-api contains interfaces representing all the <em>web components</em> (or
  * <em>web elements</em>) that can be registered within running HTTP/Servlet engine.</p>
  *
- * <p>Pax Web allowed <em>whiteboard</em> approach before OSGi CMPN R6+ Whiteboard specification, so
+ * <p>Pax Web provided <em>Whiteboard</em> approach before OSGi CMPN R6+ Whiteboard specification, so
  * entire configuration of registered web elements (servlets, filters, ...) can be passed directly and not
- * only as service properties/annotations (Whiteboard specification allows only the latter).</p>
+ * only as service properties (Whiteboard specification allows only the latter).</p>
  *
  * <p>Summarizing, <em>whiteboard</em> implementation in Pax Web allows registration of:<ul>
  *     <li>actual {@code javax.servlet} elements (servlet, filters, ...), where additional configuration is specified
  *     as service registration properties - as described in OSGi CMPN Whiteboard specification.</li>
- *     <li>actual {@code javax.servlet} elements with annotations from
- *     {@code org.osgi.service.http.whiteboard.propertytypes} package - as described in OSGi CMPN Whiteboard
- *     specification.</li>
  *     <li>OSGi services with interfaces ({@link org.osgi.framework.Constants#OBJECTCLASS}) from this package. This
  *     method may be called <em>explicit whiteboard approach</em> and is specific to Pax Web itself.</li>
  * </ul></p>

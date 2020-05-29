@@ -196,8 +196,16 @@ public class ServerModel implements BatchVisitor {
 	 * (s)he doesn't expect them to be registered in <em>different</em> contexts. So underneath, the same
 	 * {@link OsgiContextModel} (and session and context attributes) is used. Which implies identity not by hashCode,
 	 * but by name + bundle (if not shared).</p>
+	 *
+	 * <p>This map's values are {@link TreeSet} collections, so we can also have rank-sorting here. Normally user
+	 * can't have more {@link OsgiContextModel} instances for single {@link WebContainerContext} when using
+	 * {@link WebContainer} directly, but when Whiteboard-registering legacy {@link HttpContext} or
+	 * {@link org.ops4j.pax.web.service.whiteboard.HttpContextMapping} services it's possible to override (shadow)
+	 * existing models - possibly with other model with the same name, but different context path. This behavior
+	 * is Pax Web specific, because Http Service specification doesn't mention at all about context paths and
+	 * rank-sorting.</p>
 	 */
-	private final Map<WebContainerContext, OsgiContextModel> bundleContexts = new HashMap<>();
+	private final Map<WebContainerContext, TreeSet<OsgiContextModel>> bundleContexts = new HashMap<>();
 
 	/**
 	 * <p>If an {@link OsgiContextModel} is associated with shared/multi-bundle {@link HttpContext}, such context
@@ -209,7 +217,19 @@ public class ServerModel implements BatchVisitor {
 	 * to do the opposite, it's explicitly forbidden by Whiteboard Service specification. Only filters, listeners
 	 * and error pages can be registered to contexts created through {@link org.osgi.service.http.HttpService}.</p>
 	 */
-	private final Map<String, OsgiContextModel> sharedContexts = new HashMap<>();
+	private final Map<String, TreeSet<OsgiContextModel>> sharedContexts = new HashMap<>();
+
+	/**
+	 * <p>Whiteboard web elements are also registered into target container through an instance of
+	 * {@link WebContainer} and {@link ServerModel}, though they have to be kept in separate map. What's important
+	 * is that {@link OsgiContextModel} instances created and managed in pax-web-extender-whiteboard have to be
+	 * passed to current {@link ServerController} and {@link ServerModel} is the class containing methods that
+	 * configure {@link Batch} instances that are passed to given {@link ServerController}.</p>
+	 *
+	 * <p>The key in this map is {@link OsgiContextModel#getId()}, because ranking is taken into account
+	 * at given {@link ServerController} level.</p>
+	 */
+	private final Map<String, OsgiContextModel> whiteboardContexts = new HashMap<>();
 
 	// -- Web Elements model information
 
@@ -307,7 +327,8 @@ public class ServerModel implements BatchVisitor {
 			// OsgiContextModels are bundle-aware and will be created for ServiceModel and bundle-scoped
 			// HttpServiceEnabled instance. We'll however create one default shared model
 			String sharedContextName = PaxWebConstants.DEFAULT_SHARED_CONTEXT_NAME;
-			sharedContexts.put(sharedContextName, createDefaultSharedtHttpContext(sharedContextName));
+			sharedContexts.computeIfAbsent(sharedContextName, name -> new TreeSet<>())
+					.add(createDefaultSharedtHttpContext(sharedContextName));
 
 			// only if validation was fine, pass the batch to ServerController, where the batch may fail again
 			serverController.sendBatch(batch);
@@ -329,7 +350,10 @@ public class ServerModel implements BatchVisitor {
 		return runSilently(() -> {
 			if (sharedContexts.containsKey(contextId)) {
 				// safe operation, because we should be in single threaded pool's thread
-				return sharedContexts.get(contextId);
+				OsgiContextModel model = getHighestRankedModel(sharedContexts.get(contextId));
+				if (model != null) {
+					return model;
+				}
 			}
 
 			// bundle-agnostic (a.k.a. "shared") context model with supplier from static DEFAULT_CONTEXT_MODEL
@@ -435,6 +459,19 @@ public class ServerModel implements BatchVisitor {
 	}
 
 	/**
+	 * Gets first {@link OsgiContextModel} from ranked set or {@code null} if not available.
+	 * @param rankedSet
+	 * @return
+	 */
+	private OsgiContextModel getHighestRankedModel(Set<OsgiContextModel> rankedSet) {
+		if (rankedSet == null) {
+			return null;
+		}
+		Iterator<OsgiContextModel> it = rankedSet.iterator();
+		return it.hasNext() ? it.next() : null;
+	}
+
+	/**
 	 * <p>Returns (new or existing) {@link OsgiContextModel} associated with {@link HttpContext}. When the target
 	 * {@link OsgiContextModel} is already available, validation is performed to check if it can be used with
 	 * passed {@link HttpContext}. The returned {@link OsgiContextModel} is never
@@ -471,6 +508,20 @@ public class ServerModel implements BatchVisitor {
 	}
 
 	/**
+	 * Ensures that {@link OsgiContextModel} created and managed in pax-web-extender-whiteboard and passed together
+	 * with {@link ElementModel} is correctly registered in this {@link ServerModel} and passed to
+	 * {@link ServerController}.
+	 * @param contextModel
+	 * @param batch
+	 */
+	public void registerOsgiContextModelIfNeeded(OsgiContextModel contextModel, Batch batch) {
+		if (!whiteboardContexts.containsKey(contextModel.getId())) {
+			ServletContextModel scm = getOrCreateServletContextModel(contextModel.getContextPath(), batch);
+			batch.addOsgiContextModel(contextModel, scm);
+		}
+	}
+
+	/**
 	 * <p>This method ensures that <strong>if</strong> given {@link WebContainerContext} is already mapped to some
 	 * {@link OsgiContextModel}, it is permitted to reference it within a scope of a given bundle.</p>
 	 *
@@ -493,8 +544,9 @@ public class ServerModel implements BatchVisitor {
 			throws IllegalStateException {
 		// quick check in case of references - first among shared contexts, then among bundle-scoped contexts
 		// here we don't care much about the bundle of HttpService used
-		OsgiContextModel contextModel = context.isShared() ? sharedContexts.get(context.getContextId())
-				: bundleContexts.get(context);
+		OsgiContextModel contextModel = context.isShared()
+				? getHighestRankedModel(sharedContexts.get(context.getContextId()))
+				: getHighestRankedModel(bundleContexts.get(context));
 
 		if (contextModel == null) {
 			if (LOG.isTraceEnabled()) {
@@ -506,7 +558,7 @@ public class ServerModel implements BatchVisitor {
 		if (!context.isShared()) {
 			// OsgiContextModel has to have direct reference to WebContainerContext (i.e., no supplier, no
 			// service reference - because these are used only in Whiteboard scenarios)
-			if (contextModel.getHttpContext() == null) {
+			if (!contextModel.hasDirectHttpContextInstance()) {
 				throw new IllegalStateException("Existing " + contextModel
 						+ " doesn't have any HttpContext associated");
 			}
@@ -600,10 +652,10 @@ public class ServerModel implements BatchVisitor {
 	 */
 	public void associateHttpContext(final WebContainerContext context, final OsgiContextModel osgiContextModel) {
 		if (context.isShared()) {
-			sharedContexts.put(context.getContextId(), osgiContextModel);
+			sharedContexts.computeIfAbsent(context.getContextId(), c -> new TreeSet<>()).add(osgiContextModel);
 			LOG.debug("Configured shared context {} -> {}", context, osgiContextModel);
 		} else {
-			bundleContexts.put(context, osgiContextModel);
+			bundleContexts.computeIfAbsent(context, c -> new TreeSet<>()).add(osgiContextModel);
 			LOG.debug("Created association {} -> {}", context, osgiContextModel);
 		}
 	}
@@ -617,7 +669,7 @@ public class ServerModel implements BatchVisitor {
 	 */
 	public OsgiContextModel getBundleContextModel(String name, Bundle ownerBundle) {
 		// Using new DefaultHttpContext means that we'll retrieve only "default" contexts
-		return bundleContexts.get(new DefaultHttpContext(ownerBundle, name));
+		return getHighestRankedModel(bundleContexts.get(new DefaultHttpContext(ownerBundle, name)));
 	}
 
 	/**
@@ -628,7 +680,7 @@ public class ServerModel implements BatchVisitor {
 	 * @return
 	 */
 	public OsgiContextModel getBundleContextModel(WebContainerContext context) {
-		return bundleContexts.get(context);
+		return getHighestRankedModel(bundleContexts.get(context));
 	}
 
 	/**
@@ -637,7 +689,7 @@ public class ServerModel implements BatchVisitor {
 	 * @return
 	 */
 	public OsgiContextModel getSharedContextModel(String name) {
-		return sharedContexts.get(name);
+		return getHighestRankedModel(sharedContexts.get(name));
 	}
 
 	/**
@@ -656,16 +708,16 @@ public class ServerModel implements BatchVisitor {
 
 		// bundle contexts
 		runSilently(() -> {
-			bundleContexts.forEach((context, model) -> {
+			bundleContexts.forEach((context, set) -> {
 				if (bundle.equals(context.getBundle())) {
-					contexts.add(model);
+					contexts.add(getHighestRankedModel(set));
 				}
 			});
 			return null;
 		});
 
 		// shared contexts
-		contexts.addAll(sharedContexts.values());
+		contexts.addAll(sharedContexts.values().stream().map(this::getHighestRankedModel).collect(Collectors.toSet()));
 
 		return contexts;
 	}
@@ -1384,6 +1436,17 @@ public class ServerModel implements BatchVisitor {
 
 	@Override
 	public void visit(OsgiContextModelChange change) {
+		switch (change.getKind()) {
+			case ADD: {
+				OsgiContextModel model = change.getOsgiContextModel();
+				if (!model.hasDirectHttpContextInstance()) {
+					// it's a whiteboard context
+					whiteboardContexts.put(model.getId(), model);
+				}
+			}
+			default:
+				break;
+		}
 	}
 
 	@Override

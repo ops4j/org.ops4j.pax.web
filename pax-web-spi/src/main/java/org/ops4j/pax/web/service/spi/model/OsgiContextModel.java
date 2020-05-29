@@ -129,6 +129,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 
 		DEFAULT_CONTEXT_MODEL = new OsgiContextModel(bundle, 0, 0L);
 		DEFAULT_CONTEXT_MODEL.setName(HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME);
+		DEFAULT_CONTEXT_MODEL.setContextPath(PaxWebConstants.DEFAULT_CONTEXT_PATH);
 
 		// the "instance" of the ServletContextHelper will be set as supplier, so it'll depend on the
 		// bundle context for which the web element (like servlet) is registered
@@ -146,10 +147,12 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		// We pretend that this ServletContextModel was:
 		//  - registered to represent the Whiteboard's "default" context (org.osgi.service.http.context.ServletContextHelper)
 		registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME);
-		//  - registered to represent the HttpService's "default" context (org.osgi.service.http.HttpContext)
-		registration.put(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY, HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME);
+		//  - NOT registered to represent the HttpService's "default" context (org.osgi.service.http.HttpContext)
+		registration.remove(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY);
 		registration.put(Constants.SERVICE_ID, 0L);
-		registration.put(Constants.SERVICE_RANKING, 0);
+		// tricky way to specify that Whiteboard's "context" is easily overrideable, but still much higher ranked
+		// than OsgiContextModels registered for name+bundle pairs from HttpService instance(s)
+		registration.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE / 2);
 		//  - registered with "/" context path
 		registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, PaxWebConstants.DEFAULT_CONTEXT_PATH);
 
@@ -177,7 +180,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	 * {@link ServletContextHelper} comes from single bundle that has <em>started</em>
 	 * configuration/population of given {@link OsgiContextModel}.</p>
 	 *
-	 * <p>This context may not be set directly. If it's {@code null}, then {@link #resolveHttpContext(BundleContext)}
+	 * <p>This context may not be set directly. If it's {@code null}, then {@link #resolveHttpContext(Bundle)}
 	 * should <em>resolve</em> the {@link WebContainerContext} on each call - to bind returned context with proper
 	 * bundle.</p>
 	 */
@@ -249,7 +252,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	 * {@link ServletContextHelper}. For old Pax Web Whiteboard, that can be a
 	 * bundle which registered <em>shared</em> {@link HttpContext}.
 	 */
-	private final Bundle ownerBundle;
+	private Bundle ownerBundle;
 
 	/** Registration rank of associated {@link HttpContext} or {@link ServletContextHelper} */
 	private int serviceRank = 0;
@@ -277,6 +280,8 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		this.ownerBundle = ownerBundle;
 		this.contextPath = contextPath;
 	}
+
+	public WebContainerContext getHttpContext() { return null; }
 
 	/**
 	 * <p>This method should be called from Whiteboard infrastructure to really perform the validation and set
@@ -330,10 +335,16 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	 * @param bundleContext
 	 * @return
 	 */
-	public WebContainerContext resolveHttpContext(BundleContext bundleContext) {
+	public WebContainerContext resolveHttpContext(Bundle bundle) {
 		if (httpContext != null) {
 			return httpContext;
 		}
+
+		BundleContext bundleContext = bundle != null ? bundle.getBundleContext() : null;
+		if (bundleContext == null) {
+			throw new IllegalArgumentException("Can't resolve WebContainerContext without Bundle argument");
+		}
+
 		if (contextSupplier != null) {
 			// HttpContextMapping and ServletContextHelperMapping cases are handled via contextSupplier
 			return contextSupplier.apply(bundleContext, getName());
@@ -396,6 +407,10 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		return ownerBundle;
 	}
 
+	public void setOwnerBundle(Bundle ownerBundle) {
+		this.ownerBundle = ownerBundle;
+	}
+
 	public String getContextPath() {
 		return contextPath;
 	}
@@ -440,14 +455,22 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		this.httpContext = httpContext;
 	}
 
-	public WebContainerContext getHttpContext() {
-		return httpContext;
+	/**
+	 * Checks if this {@link OsgiContextModel} has direct instance (not bound to any {@link Bundle}) of
+	 * {@link WebContainerContext}. Such {@link OsgiContextModel} represents the <em>context</em> from the point
+	 * of view of Http Service specification (in Whiteboard, <em>context</em> should be obtained from service registry
+	 * when needed, because it's recommended to register it as {@link org.osgi.framework.ServiceFactory}).
+	 * @return
+	 */
+	public boolean hasDirectHttpContextInstance() {
+		return httpContext != null;
 	}
 
 	@Override
 	public String toString() {
 		return "OsgiContextModel{id=" + getId()
-				+ ",contextPath='" + contextPath
+				+ ",name='" + name
+				+ "',contextPath='" + contextPath
 				+ "',context=" + httpContext
 				+ (ownerBundle == null ? ",shared=true" : ",bundle=" + ownerBundle)
 				+ "}";

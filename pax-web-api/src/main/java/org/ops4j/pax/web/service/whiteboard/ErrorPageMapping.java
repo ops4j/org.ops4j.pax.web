@@ -15,6 +15,8 @@
  */
 package org.ops4j.pax.web.service.whiteboard;
 
+import org.ops4j.pax.web.annotations.Review;
+
 /**
  * Registers an error page to customize the response sent back to the web client
  * in case that an exception or error propagates back to the web container, or
@@ -24,6 +26,7 @@ package org.ops4j.pax.web.service.whiteboard;
  * @author dsklyut
  * @since 0.7.0 Jun 23, 2009
  */
+@Review("Not yet refactored")
 public interface ErrorPageMapping {
 
 	/**

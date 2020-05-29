@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 
 import org.ops4j.pax.web.service.spi.model.Identity;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
@@ -123,7 +124,7 @@ public abstract class ElementModel<T> extends Identity implements Comparable<Ele
 
 	/**
 	 * Get unmodifiable list of {@link OsgiContextModel osgi models} with which given {@link ElementModel}
-	 * should be associated
+	 * should be associated during registration.
 	 *
 	 * @return
 	 */
@@ -147,6 +148,18 @@ public abstract class ElementModel<T> extends Identity implements Comparable<Ele
 			contextModels.add(model);
 		}
 	}
+
+	/**
+	 * Each {@link ElementModel} can register itself as Whiteboard element.
+	 * @param view
+	 */
+	public abstract void register(WhiteboardWebContainerView view);
+
+	/**
+	 * Each {@link ElementModel} can unregister itself as Whiteboard element.
+	 * @param view
+	 */
+	public abstract void unregister(WhiteboardWebContainerView view);
 
 	public boolean hasContextModels() {
 		return contextModels.size() > 0;

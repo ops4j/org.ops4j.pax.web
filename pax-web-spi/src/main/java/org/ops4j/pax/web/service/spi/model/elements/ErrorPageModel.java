@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.spi.model.elements;
 
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 
 /**
  * @author Alin Dreghiciu
@@ -48,6 +49,14 @@ public class ErrorPageModel extends ElementModel {
 		}
 		this.error = error;
 		this.location = location;
+	}
+
+	@Override
+	public void register(WhiteboardWebContainerView view) {
+	}
+
+	@Override
+	public void unregister(WhiteboardWebContainerView view) {
 	}
 
 	/**

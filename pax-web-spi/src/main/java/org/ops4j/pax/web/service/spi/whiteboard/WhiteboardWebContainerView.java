@@ -16,14 +16,12 @@
 package org.ops4j.pax.web.service.spi.whiteboard;
 
 import java.util.List;
-import javax.servlet.ServletException;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
 import org.osgi.framework.Bundle;
-import org.osgi.service.http.NamespaceException;
 
 /**
  * <p>SPI interface which is used by pax-web-extender-whiteboard to gain lower-level access to
@@ -43,21 +41,48 @@ public interface WhiteboardWebContainerView extends PaxWebContainerView {
 	List<OsgiContextModel> getOsgiContextModels(Bundle bundle);
 
 	/**
-	 * One-stop method to register a {@link Servlet} described using {@link ServletModel}. {@link ServletModel}
-	 * should always be associated with target (one or many) {@link OsgiContextModel}, because differently than with
-	 * {@link org.osgi.service.http.HttpService} scenario, contexts are targeted by logical name (or LDAP selector) and
-	 * not as any instance.
-	 * @param contexts
+	 * One-stop method to register a {@link javax.servlet.Servlet} described using {@link ServletModel}.
+	 * {@link ServletModel} should always be associated with target (one or many) {@link OsgiContextModel}, because
+	 * differently than with {@link org.osgi.service.http.HttpService} scenario, contexts are targeted by logical name
+	 * (or LDAP selector) and not as any instance.
 	 * @param servletModel
 	 */
-	void registerServlet(ServletModel servletModel) throws ServletException, NamespaceException;
+	void registerServlet(ServletModel servletModel);
 
 	/**
-	 * One-stop method to register a {@link Filter} described using {@link FilterModel}. {@link FilterModel}
-	 * should always be associated with target (one or many) {@link OsgiContextModel}.
-	 * @param contexts
+	 * Unregistration of {@link ServletModel} using any set criteria.
+	 * @param servletModel
+	 */
+	void unregisterServlet(ServletModel servletModel);
+
+	/**
+	 * One-stop method to register a {@link javax.servlet.Filter} described using {@link FilterModel}.
+	 * {@link FilterModel} should always be associated with target (one or many) {@link OsgiContextModel}.
 	 * @param filterModel
 	 */
-	void registerFilter(FilterModel filterModel) throws ServletException;
+	void registerFilter(FilterModel filterModel);
 
+	/**
+	 * Unregistration of {@link FilterModel} using any set criteria.
+	 * @param filterModel
+	 */
+	void unregisterFilter(FilterModel filterModel);
+
+	/**
+	 * Passes Whiteboard-registered (customized) {@link OsgiContextModel} to be managed in
+	 * {@link org.ops4j.pax.web.service.WebContainer}. Such {@link OsgiContextModel} should have
+	 * {@link org.osgi.service.http.HttpContext} / {@link org.ops4j.pax.web.service.WebContainerContext} configured
+	 * directly. That's the requirement, when Whiteboard cedes the management of such context from
+	 * pax-web-extender-whiteboard to pax-web-runtime.
+	 * @param model
+	 */
+	void addWhiteboardOsgiContextModel(OsgiContextModel model);
+
+	/**
+	 * Removes Whiteboard-registered (customized) {@link OsgiContextModel} from
+	 * {@link org.ops4j.pax.web.service.WebContainer}, which may then switch to using "default"
+	 * {@link org.osgi.service.http.HttpContext}
+	 * @param model
+	 */
+	void removeWhiteboardOsgiContextModel(OsgiContextModel model);
 }

@@ -73,7 +73,7 @@ class JettyServerHandlerCollection extends HandlerCollection {
 					"The server is null!");
 
 			final ContextHandler context = ((PaxWebJettyServer) getServer())
-					.getContext(matched.getHttpContext());
+					.getContext(/*matched.getHttpContext()*/null);
 
 			try {
 				NullArgumentException.validateNotNull(context,
@@ -99,18 +99,18 @@ class JettyServerHandlerCollection extends HandlerCollection {
 		//  - The first successful match is used with no further matches attempted
 		for (Handler handler : getHandlers()) {
 			if (matched != null
-					&& (handler instanceof ContextHandler || matchedContextEqualsHandler(matched, handler))) {
+					&& (handler instanceof ContextHandler/* || matchedContextEqualsHandler(matched, handler)*/)) {
 				continue;
 			}
 			handler.handle(target, baseRequest, request, response);
 		}
 	}
 
-	private boolean matchedContextEqualsHandler(OsgiContextModel matched,
-												Handler handler) {
-		return handler == ((PaxWebJettyServer) getServer())
-				.getContext(matched.getHttpContext());
-	}
+//	private boolean matchedContextEqualsHandler(OsgiContextModel matched,
+//												Handler handler) {
+//		return handler == ((PaxWebJettyServer) getServer())
+//				.getContext(matched.getHttpContext());
+//	}
 
 	@Override
 	public boolean addBean(Object o) {

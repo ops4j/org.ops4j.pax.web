@@ -17,7 +17,6 @@ package org.ops4j.pax.web.service.undertow.internal;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.nio.file.Path;
@@ -41,7 +40,6 @@ import java.util.function.Consumer;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
 
 import io.undertow.io.IoCallback;
 import io.undertow.io.Sender;
@@ -52,7 +50,6 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.resource.Resource;
 import io.undertow.server.handlers.resource.ResourceChangeListener;
 import io.undertow.server.handlers.resource.ResourceManager;
-import io.undertow.server.handlers.resource.URLResource;
 import io.undertow.servlet.ServletExtension;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
@@ -70,13 +67,11 @@ import io.undertow.servlet.api.WebResourceCollection;
 import io.undertow.servlet.handlers.ServletRequestContext;
 import io.undertow.servlet.util.ConstructorInstanceFactory;
 import io.undertow.servlet.util.ImmediateInstanceFactory;
-import io.undertow.util.CanonicalPathUtils;
 import io.undertow.util.ETag;
 import io.undertow.util.MimeMappings;
 import io.undertow.util.StatusCodes;
 import org.ops4j.pax.web.service.AuthenticatorService;
 import org.ops4j.pax.web.service.PaxWebConstants;
-import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
@@ -397,7 +392,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 	private void doCreateHandler(Consumer<ServletContext> consumer) throws ServletException {
 //		LOG.debug("Creating handler for context /{}", contextModel.getContextName());
-		final WebContainerContext httpContext = contextModel.getHttpContext();
+//		final WebContainerContext httpContext = contextModel.getHttpContext();
 		// org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService#createServletConfig
 		DeploymentInfo deployment = new DeploymentInfo();
 //		if (contextModel.getRealmName() != null && contextModel.getAuthMethod() != null) {
@@ -574,25 +569,25 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 				return exchange -> {
 					// Verify security
 					ServletRequestContext src = exchange.getAttachment(ServletRequestContext.ATTACHMENT_KEY);
-					if (contextModel.getHttpContext().handleSecurity(src.getOriginalRequest(), src.getOriginalResponse())) {
-						handler.handleRequest(exchange);
-					} else {
-						// on case of security constraints not fulfilled, handleSecurity is
-						// supposed to set the right
-						// headers but to be sure lets verify the response header for 401
-						// (unauthorized)
-						// because if the header is not set the processing will go on with
-						// the rest of the contexts
-						try {
-							src.getOriginalResponse().sendError(HttpServletResponse.SC_UNAUTHORIZED);
-						} catch (IllegalStateException e) {
-							try {
-								src.getOriginalResponse().setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-							} catch (IllegalStateException ee) {
-								// Ignore
-							}
-						}
-					}
+//					if (contextModel.getHttpContext().handleSecurity(src.getOriginalRequest(), src.getOriginalResponse())) {
+//						handler.handleRequest(exchange);
+//					} else {
+//						// on case of security constraints not fulfilled, handleSecurity is
+//						// supposed to set the right
+//						// headers but to be sure lets verify the response header for 401
+//						// (unauthorized)
+//						// because if the header is not set the processing will go on with
+//						// the rest of the contexts
+//						try {
+//							src.getOriginalResponse().sendError(HttpServletResponse.SC_UNAUTHORIZED);
+//						} catch (IllegalStateException e) {
+//							try {
+//								src.getOriginalResponse().setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//							} catch (IllegalStateException ee) {
+//								// Ignore
+//							}
+//						}
+//					}
 				};
 			}
 		});
@@ -690,56 +685,57 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 	@Override
 	public Resource getResource(String path) throws IOException {
-		WebContainerContext context = contextModel.getHttpContext();
-		if (context != null/* && context.isDefaultOrSharedContext()*/) { // FIXME why is this special treatment necessary
-			final URL resource = context.getResource(path);
-			if (resource == null) {
-				return null;
-			} else if (resource.toString().endsWith("/")) {
-				return new DirectoryResource(resource);
-			} else {
-				// let's check if this is maybe a directory. org.osgi.framework.Bundle.getResource()
-				// returns proper URL for directory entry and we can't tell if it's a directory or not
-				boolean possibleDirectoryBundleEntry = false;
-				try (InputStream peek = resource.openStream()) {
-					possibleDirectoryBundleEntry = peek.available() == 0;
-				}
-				if (possibleDirectoryBundleEntry) {
-				    // consult welcome files
-					String realBase;
-					if (path.endsWith("/")) {
-						realBase = path;
-					} else {
-						realBase = path + "/";
-					}
-					final URLResource[] indexResource = new URLResource[1];
-					welcomeFiles.forEach(wfm -> {
-						for (String wf : wfm.getWelcomeFiles()) {
-							URL index = context.getResource(CanonicalPathUtils.canonicalize(realBase + wf));
-							if (index != null) {
-								indexResource[0] = new URLResource(index, path);
-							}
-						}
-					});
-					if (indexResource[0] != null) {
-						return indexResource[0];
-					}
-				}
-				return new URLResource(resource, path);
-			}
-		} else {
-			String modPath = path;
-			if (modPath.startsWith("/")) {
-				modPath = path.substring(1);
-			}
-			final String realPath = modPath;
-			final URL resource = classLoader.getResource(realPath);
-			if (resource == null) {
-				return null;
-			} else {
-				return new URLResource(resource, path);
-			}
-		}
+//		WebContainerContext context = contextModel.getHttpContext();
+//		if (context != null/* && context.isDefaultOrSharedContext()*/) { // FIXME why is this special treatment necessary
+//			final URL resource = context.getResource(path);
+//			if (resource == null) {
+//				return null;
+//			} else if (resource.toString().endsWith("/")) {
+//				return new DirectoryResource(resource);
+//			} else {
+//				// let's check if this is maybe a directory. org.osgi.framework.Bundle.getResource()
+//				// returns proper URL for directory entry and we can't tell if it's a directory or not
+//				boolean possibleDirectoryBundleEntry = false;
+//				try (InputStream peek = resource.openStream()) {
+//					possibleDirectoryBundleEntry = peek.available() == 0;
+//				}
+//				if (possibleDirectoryBundleEntry) {
+//				    // consult welcome files
+//					String realBase;
+//					if (path.endsWith("/")) {
+//						realBase = path;
+//					} else {
+//						realBase = path + "/";
+//					}
+//					final URLResource[] indexResource = new URLResource[1];
+//					welcomeFiles.forEach(wfm -> {
+//						for (String wf : wfm.getWelcomeFiles()) {
+//							URL index = context.getResource(CanonicalPathUtils.canonicalize(realBase + wf));
+//							if (index != null) {
+//								indexResource[0] = new URLResource(index, path);
+//							}
+//						}
+//					});
+//					if (indexResource[0] != null) {
+//						return indexResource[0];
+//					}
+//				}
+//				return new URLResource(resource, path);
+//			}
+//		} else {
+//			String modPath = path;
+//			if (modPath.startsWith("/")) {
+//				modPath = path.substring(1);
+//			}
+//			final String realPath = modPath;
+//			final URL resource = classLoader.getResource(realPath);
+//			if (resource == null) {
+//				return null;
+//			} else {
+//				return new URLResource(resource, path);
+//			}
+//		}
+		return null;
 	}
 
 	@Override
@@ -911,15 +907,15 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		public List<Resource> list() {
 			try {
 				List<Resource> children = new ArrayList<>();
-				WebContainerContext ctx = contextModel.getHttpContext();
-				Set<String> rps = ctx.getResourcePaths(getPath());
-				if (rps != null) {
-					for (String child : rps) {
-						children.add(getResource(child));
-					}
-				}
+//				WebContainerContext ctx = contextModel.getHttpContext();
+//				Set<String> rps = ctx.getResourcePaths(getPath());
+//				if (rps != null) {
+//					for (String child : rps) {
+//						children.add(getResource(child));
+//					}
+//				}
 				return children;
-			} catch (IOException e) {
+			} catch (/*IO*/Exception e) {
 				throw new IllegalStateException(e);
 			}
 		}
