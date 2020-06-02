@@ -126,4 +126,8 @@ public class PaxWebFilterHolder extends FilterHolder {
 		return filterModel.getContextModels().contains(targetContext);
 	}
 
+	public FilterModel getFilterModel() {
+		return filterModel;
+	}
+
 }

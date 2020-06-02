@@ -598,154 +598,154 @@ class TomcatServerWrapper implements BatchVisitor {
 //								}
 //							}
 
-					//		final Bundle bundle = contextModel.getBundle();
-					//		final BundleContext bundleContext = BundleUtils
-					//				.getBundleContext(bundle);
-					//
-					//		if (packageAdminTracker != null) {
-					//			ServletContainerInitializerScanner scanner = new ServletContainerInitializerScanner(bundle, tomcatBundle, packageAdminTracker.getService());
-					//			Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = contextModel.getContainerInitializers();
-					//			if (containerInitializers == null) {
-					//				containerInitializers = new HashMap<>();
-					//				contextModel.setContainerInitializers(containerInitializers);
-					//			}
-					//			scanner.scanBundles(containerInitializers);
-					//		}
-					//
-					//
-					//		final WebContainerContext httpContext = contextModel.getHttpContext();
-					//
-					//		final Context context = server.addContext(
-					//				contextModel.getContextParams(),
-					//				getContextAttributes(bundleContext),
-					//				contextModel.getContextName(), contextModel.getHttpContext(),
-					//				contextModel.getAccessControllerContext(),
-					//				contextModel.getContainerInitializers(),
-					//				contextModel.getJettyWebXmlURL(),
-					//				contextModel.getVirtualHosts(), null /*contextModel.getConnectors() */,
-					//				server.getBasedir());
-					//
-					//		context.setDisplayName(httpContext.getContextId());
-					//		// Similar to the Jetty fix for PAXWEB-725
-					//		// Without this the el implementation is not found
-					//        ClassLoader classLoader = contextModel.getClassLoader();
-					//        List<Bundle> bundles = ((ResourceDelegatingBundleClassLoader) classLoader).getBundles();
-					//        ClassLoader parentClassLoader = getClass().getClassLoader();
-					//        ResourceDelegatingBundleClassLoader containerSpecificClassLoader = new ResourceDelegatingBundleClassLoader(bundles, parentClassLoader);
-					//        context.setParentClassLoader(containerSpecificClassLoader);
-					//
-					//		// support default context.xml in configurationDir or config fragment
-					//		URL defaultContextUrl = getDefaultContextXml();
-					//		// support MTA-INF/context.xml in war
-					//		URL configFile = bundle.getEntry(org.apache.catalina.startup.Constants.ApplicationContextXml);
-					//		if (defaultContextUrl != null || configFile != null) {
-					//			Digester digester = createContextDigester();
-					//			if (defaultContextUrl != null) {
-					//				processContextConfig(context, digester, defaultContextUrl);
-					//			}
-					//			if (configFile != null) {
-					//				context.setConfigFile(configFile);
-					//				processContextConfig(context, digester, configFile);
-					//			}
-					//		}
-					//
-					//		String authMethod = contextModel.getAuthMethod();
-					//		if (authMethod == null) {
-					//			authMethod = "NONE";
-					//		}
-					//		String realmName = contextModel.getRealmName();
-					//		String loginPage = contextModel.getFormLoginPage();
-					//		String errorPage = contextModel.getFormErrorPage();
-					//		LoginConfig loginConfig = new LoginConfig(authMethod, realmName, loginPage, errorPage);
-					//		context.setLoginConfig(loginConfig);
-					//		LOG.debug("loginConfig: method={} realm={}", authMethod, realmName);
-					//		// Custom Service Valve for checking authentication stuff ...
-					//		context.getPipeline().addValve(new ServiceValve(httpContext));
-					//		if (context.getAuthenticator() == null) {
-					//			// Authentication Valve according to configured authentication method
-					//			context.getPipeline().addValve(getAuthenticatorValve(authMethod));
-					//		}
-					//		if (contextModel.getContextParams() != null) {
-					//			for (Map.Entry<String, String> entry : contextModel.getContextParams().entrySet()) {
-					//				context.addParameter(entry.getKey(), entry.getValue());
-					//			}
-					//		}
-					//
-					//		// TODO: how about classloader?
-					//		// TODO: compare with JettyServerWrapper.addContext
-					//		// TODO: what about the init parameters?
-					//
-					//		configureJspConfigDescriptor(context, contextModel);
-					//
-					//		final LifecycleState state = context.getState();
-					//		if (state != LifecycleState.STARTED && state != LifecycleState.STARTING
-					//				&& state != LifecycleState.STARTING_PREP) {
-					//
-					//			LOG.debug("Registering ServletContext as service. ");
-					//			final Dictionary<String, String> properties = new Hashtable<>();
-					////			properties.put(WebContainerConstants.PROPERTY_SYMBOLIC_NAME, bundle.getSymbolicName());
-					//
-					//			final Dictionary<String, String> headers = bundle.getHeaders();
-					//			final String version = headers.get(Constants.BUNDLE_VERSION);
-					//			if (version != null && version.length() > 0) {
-					//				properties.put("osgi.web.version", version);
-					//			}
-					//
-					//			String webContextPath = headers.get(WEB_CONTEXT_PATH);
-					//			final String webappContext = headers.get("Webapp-Context");
-					//
-					//			final ServletContext servletContext = context.getServletContext();
-					//
-					//			// This is the default context, but shouldn't it be called default?
-					//			// See PAXWEB-209
-					//			if ("/".equalsIgnoreCase(context.getPath())
-					//					&& (webContextPath == null || webappContext == null)) {
-					//				webContextPath = context.getPath();
-					//			}
-					//
-					//			// PAXWEB-1147
-					//			SessionCookieConfig scc = servletContext.getSessionCookieConfig();
-					//			if (scc != null) {
-					//				if (contextModel.getSessionDomain() != null) {
-					//					scc.setDomain(contextModel.getSessionDomain());
-					//				}
-					//				if (contextModel.getSessionCookie() != null) {
-					//					scc.setName(contextModel.getSessionCookie());
-					//					context.setSessionCookieName(contextModel.getSessionCookie());
-					//				}
-					//				if (contextModel.getSessionCookieMaxAge() != null) {
-					//					scc.setMaxAge(contextModel.getSessionCookieMaxAge());
-					//				}
-					//				if (contextModel.getSessionCookieHttpOnly() != null) {
-					//					scc.setHttpOnly(contextModel.getSessionCookieHttpOnly());
-					//				}
-					//				if (contextModel.getSessionCookieSecure() != null) {
-					//					scc.setSecure(contextModel.getSessionCookieSecure());
-					//				}
-					//			}
-					//
-					//			// makes sure the servlet context contains a leading slash
-					//			webContextPath = webContextPath != null ? webContextPath
-					//					: webappContext;
-					//			if (webContextPath != null && !webContextPath.startsWith("/")) {
-					//				webContextPath = "/" + webContextPath;
-					//			}
-					//			if (webContextPath == null) {
-					////				LOG.warn(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH +
-					////						" couldn't be set, it's not configured. Assuming '/'");
-					//				webContextPath = "/";
-					//			}
-					//
-					////			properties.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
-					////			properties.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME, context.getServletContext().getServletContextName());
-					//
-					//			servletContextService = bundleContext.registerService(
-					//					ServletContext.class, servletContext, properties);
-					//			LOG.debug("ServletContext registered as service. ");
-					//		}
-					//		contextMap.put(contextModel.getHttpContext(), context);
-					//
-					//		return context;
+			//		final Bundle bundle = contextModel.getBundle();
+			//		final BundleContext bundleContext = BundleUtils
+			//				.getBundleContext(bundle);
+			//
+			//		if (packageAdminTracker != null) {
+			//			ServletContainerInitializerScanner scanner = new ServletContainerInitializerScanner(bundle, tomcatBundle, packageAdminTracker.getService());
+			//			Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = contextModel.getContainerInitializers();
+			//			if (containerInitializers == null) {
+			//				containerInitializers = new HashMap<>();
+			//				contextModel.setContainerInitializers(containerInitializers);
+			//			}
+			//			scanner.scanBundles(containerInitializers);
+			//		}
+			//
+			//
+			//		final WebContainerContext httpContext = contextModel.getHttpContext();
+			//
+			//		final Context context = server.addContext(
+			//				contextModel.getContextParams(),
+			//				getContextAttributes(bundleContext),
+			//				contextModel.getContextName(), contextModel.getHttpContext(),
+			//				contextModel.getAccessControllerContext(),
+			//				contextModel.getContainerInitializers(),
+			//				contextModel.getJettyWebXmlURL(),
+			//				contextModel.getVirtualHosts(), null /*contextModel.getConnectors() */,
+			//				server.getBasedir());
+			//
+			//		context.setDisplayName(httpContext.getContextId());
+			//		// Similar to the Jetty fix for PAXWEB-725
+			//		// Without this the el implementation is not found
+			//        ClassLoader classLoader = contextModel.getClassLoader();
+			//        List<Bundle> bundles = ((ResourceDelegatingBundleClassLoader) classLoader).getBundles();
+			//        ClassLoader parentClassLoader = getClass().getClassLoader();
+			//        ResourceDelegatingBundleClassLoader containerSpecificClassLoader = new ResourceDelegatingBundleClassLoader(bundles, parentClassLoader);
+			//        context.setParentClassLoader(containerSpecificClassLoader);
+			//
+			//		// support default context.xml in configurationDir or config fragment
+			//		URL defaultContextUrl = getDefaultContextXml();
+			//		// support MTA-INF/context.xml in war
+			//		URL configFile = bundle.getEntry(org.apache.catalina.startup.Constants.ApplicationContextXml);
+			//		if (defaultContextUrl != null || configFile != null) {
+			//			Digester digester = createContextDigester();
+			//			if (defaultContextUrl != null) {
+			//				processContextConfig(context, digester, defaultContextUrl);
+			//			}
+			//			if (configFile != null) {
+			//				context.setConfigFile(configFile);
+			//				processContextConfig(context, digester, configFile);
+			//			}
+			//		}
+			//
+			//		String authMethod = contextModel.getAuthMethod();
+			//		if (authMethod == null) {
+			//			authMethod = "NONE";
+			//		}
+			//		String realmName = contextModel.getRealmName();
+			//		String loginPage = contextModel.getFormLoginPage();
+			//		String errorPage = contextModel.getFormErrorPage();
+			//		LoginConfig loginConfig = new LoginConfig(authMethod, realmName, loginPage, errorPage);
+			//		context.setLoginConfig(loginConfig);
+			//		LOG.debug("loginConfig: method={} realm={}", authMethod, realmName);
+			//		// Custom Service Valve for checking authentication stuff ...
+			//		context.getPipeline().addValve(new ServiceValve(httpContext));
+			//		if (context.getAuthenticator() == null) {
+			//			// Authentication Valve according to configured authentication method
+			//			context.getPipeline().addValve(getAuthenticatorValve(authMethod));
+			//		}
+			//		if (contextModel.getContextParams() != null) {
+			//			for (Map.Entry<String, String> entry : contextModel.getContextParams().entrySet()) {
+			//				context.addParameter(entry.getKey(), entry.getValue());
+			//			}
+			//		}
+			//
+			//		// TODO: how about classloader?
+			//		// TODO: compare with JettyServerWrapper.addContext
+			//		// TODO: what about the init parameters?
+			//
+			//		configureJspConfigDescriptor(context, contextModel);
+			//
+			//		final LifecycleState state = context.getState();
+			//		if (state != LifecycleState.STARTED && state != LifecycleState.STARTING
+			//				&& state != LifecycleState.STARTING_PREP) {
+			//
+			//			LOG.debug("Registering ServletContext as service. ");
+			//			final Dictionary<String, String> properties = new Hashtable<>();
+			////			properties.put(WebContainerConstants.PROPERTY_SYMBOLIC_NAME, bundle.getSymbolicName());
+			//
+			//			final Dictionary<String, String> headers = bundle.getHeaders();
+			//			final String version = headers.get(Constants.BUNDLE_VERSION);
+			//			if (version != null && version.length() > 0) {
+			//				properties.put("osgi.web.version", version);
+			//			}
+			//
+			//			String webContextPath = headers.get(WEB_CONTEXT_PATH);
+			//			final String webappContext = headers.get("Webapp-Context");
+			//
+			//			final ServletContext servletContext = context.getServletContext();
+			//
+			//			// This is the default context, but shouldn't it be called default?
+			//			// See PAXWEB-209
+			//			if ("/".equalsIgnoreCase(context.getPath())
+			//					&& (webContextPath == null || webappContext == null)) {
+			//				webContextPath = context.getPath();
+			//			}
+			//
+			//			// PAXWEB-1147
+			//			SessionCookieConfig scc = servletContext.getSessionCookieConfig();
+			//			if (scc != null) {
+			//				if (contextModel.getSessionDomain() != null) {
+			//					scc.setDomain(contextModel.getSessionDomain());
+			//				}
+			//				if (contextModel.getSessionCookie() != null) {
+			//					scc.setName(contextModel.getSessionCookie());
+			//					context.setSessionCookieName(contextModel.getSessionCookie());
+			//				}
+			//				if (contextModel.getSessionCookieMaxAge() != null) {
+			//					scc.setMaxAge(contextModel.getSessionCookieMaxAge());
+			//				}
+			//				if (contextModel.getSessionCookieHttpOnly() != null) {
+			//					scc.setHttpOnly(contextModel.getSessionCookieHttpOnly());
+			//				}
+			//				if (contextModel.getSessionCookieSecure() != null) {
+			//					scc.setSecure(contextModel.getSessionCookieSecure());
+			//				}
+			//			}
+			//
+			//			// makes sure the servlet context contains a leading slash
+			//			webContextPath = webContextPath != null ? webContextPath
+			//					: webappContext;
+			//			if (webContextPath != null && !webContextPath.startsWith("/")) {
+			//				webContextPath = "/" + webContextPath;
+			//			}
+			//			if (webContextPath == null) {
+			////				LOG.warn(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH +
+			////						" couldn't be set, it's not configured. Assuming '/'");
+			//				webContextPath = "/";
+			//			}
+			//
+			////			properties.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
+			////			properties.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME, context.getServletContext().getServletContextName());
+			//
+			//			servletContextService = bundleContext.registerService(
+			//					ServletContext.class, servletContext, properties);
+			//			LOG.debug("ServletContext registered as service. ");
+			//		}
+			//		contextMap.put(contextModel.getHttpContext(), context);
+			//
+			//		return context;
 
 			// explicit no check for existing mapping under given physical context path
 			contextHandlers.put(model.getContextPath(), context);
@@ -875,35 +875,80 @@ class TomcatServerWrapper implements BatchVisitor {
 			FilterDef[] filterDefs = context.findFilterDefs();
 			FilterMap[] filterMaps = context.findFilterMaps();
 
-			context.filterStop();
-			// remove all but "initial OSGi filter"
-			for (FilterDef def : filterDefs) {
-				if (!(def instanceof PaxWebFilterDef && ((PaxWebFilterDef) def).isInitial())) {
-					context.removeFilterDef(def);
+			// 2020-06-02: it's not possible to simply add a filter to Tomcat and init() it without init()ing
+			// existing filters
+			if (true || !quickFilterChange(context, filterDefs, filters)) {
+				// the hard way - recreate entire array of filters/filter-mappings
+				context.filterStop();
+				// remove all but "initial OSGi filter"
+				for (FilterDef def : filterDefs) {
+					if (!(def instanceof PaxWebFilterDef && ((PaxWebFilterDef) def).isInitial())) {
+						context.removeFilterDef(def);
+					}
 				}
-			}
-			for (FilterMap map : filterMaps) {
-				if (!(map instanceof PaxWebFilterMap && ((PaxWebFilterMap) map).isInitial())) {
-					context.removeFilterMap(map);
+				for (FilterMap map : filterMaps) {
+					if (!(map instanceof PaxWebFilterMap && ((PaxWebFilterMap) map).isInitial())) {
+						context.removeFilterMap(map);
+					}
 				}
+
+				PaxWebFilterDef[] newFilterDefs = new PaxWebFilterDef[filters.size() + 1];
+				PaxWebFilterMap[] newFilterMaps = new PaxWebFilterMap[filters.size() + 1];
+
+				for (FilterModel model : filters) {
+					PaxWebFilterDef def = new PaxWebFilterDef(model, false);
+					PaxWebFilterMap map = new PaxWebFilterMap(model, false);
+
+					context.addFilterDef(def);
+					context.addFilterMap(map);
+				}
+				context.filterStart();
 			}
+		}
+	}
 
-			// TODO: lifecycle - destroy existing filters which are not present in new array
-			PaxWebFilterDef[] newFilterDefs = new PaxWebFilterDef[filters.size() + 1];
-			PaxWebFilterMap[] newFilterMaps = new PaxWebFilterMap[filters.size() + 1];
+	/**
+	 * <p>As with Jetty, there's some chance that there's only one new filter to be added to existing set of filters
+	 * <em>at the end of the list</em>. If it's not possible, filters have to be recreated (destroy + init)
+	 * entirely.</p>
+	 *
+	 * <p>TODO: Not possible to initialize only the added filter...</p>
+	 *
+	 * <p>Here we have to test for the <em>initial filter</em>.</p>
+	 *
+	 * @param context
+	 * @param existingFilterDefs
+	 * @param filters
+	 * @return
+	 */
+	private boolean quickFilterChange(PaxWebStandardContext context, FilterDef[] existingFilterDefs, Set<FilterModel> filters) {
+		int pos = 0;
+		FilterModel[] newModels = filters.toArray(new FilterModel[0]);
+		boolean quick = newModels.length >= existingFilterDefs.length - 1;
 
-//			context.addFilterDef(filterDefs[0]);
-//			context.addFilterMap(filterMaps[0]);
+		// by "quick" we mean - there are no removed filters and new filters come last
+		while (quick) {
+			if (pos >= existingFilterDefs.length - 1) {
+				break;
+			}
+			if (!(existingFilterDefs[pos + 1] instanceof PaxWebFilterDef
+					&& ((PaxWebFilterDef)existingFilterDefs[pos + 1]).getFilterModel().equals(newModels[pos]))) {
+				quick = false;
+				break;
+			}
+			pos++;
+		}
 
-			for (FilterModel model : filters) {
-				PaxWebFilterDef def = new PaxWebFilterDef(model, false);
-				PaxWebFilterMap map = new PaxWebFilterMap(model, false);
-
-				context.addFilterDef(def);
-				context.addFilterMap(map);
+		if (quick) {
+			for (int i = pos; i < newModels.length; i++) {
+				context.addFilterDef(new PaxWebFilterDef(newModels[pos], false));
+				context.addFilterMap(new PaxWebFilterMap(newModels[pos], false));
 			}
 			context.filterStart();
+			return true;
 		}
+
+		return false;
 	}
 
 //	@Override

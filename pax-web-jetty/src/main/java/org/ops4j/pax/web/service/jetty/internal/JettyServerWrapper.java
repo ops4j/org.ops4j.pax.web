@@ -777,7 +777,7 @@ class JettyServerWrapper implements BatchVisitor {
 			// to single ServletContext (and single unique context path)
 			// however, when there's no servlet in a chain, both filters should be invoked - at least I think so
 			//
-			// neither specification, nor felix.http implementation doesn't handle single filter scenario - such
+			// neither specification, nor felix.http implementation handle single filter scenario - such
 			// filter is not called. That's quite logical - ServletContext associated with a filter (through
 			// FilterConfig or request.getServletContext()) should be the same as the one associated with target
 			// servlet. If there's no servlet, we can still have filters associated with different
@@ -787,14 +787,9 @@ class JettyServerWrapper implements BatchVisitor {
 			// For Pax Web purposes, we'll try to handle such scenario and all the filters in a chain without servlet
 			// will use OsgiServletContext which is "best" (wrt service ranking) for given physical context path
 
-			// the main problem here is that we can have for example 4 existing filters, register one that should
-			// be "inserted" at position 2, unregister another one and change registration properties of yet
-			// another one. It'd be easier to just destroy() them all and init() new ones, but why not do it properly?
+			FilterHolder[] filterHolders = sch.getServletHandler().getFilters();
+			FilterMapping[] filterMappings = sch.getServletHandler().getFilterMappings();
 
-			PaxWebFilterHolder[] filterHolders = (PaxWebFilterHolder[]) sch.getServletHandler().getFilters();
-			PaxWebFilterMapping[] filterMappings = (PaxWebFilterMapping[]) sch.getServletHandler().getFilterMappings();
-
-			// TODO: lifecycle - destroy existing filters which are not present in new array
 			PaxWebFilterHolder[] newFilterHolders = new PaxWebFilterHolder[filters.size()];
 			PaxWebFilterMapping[] newFilterMappings = new PaxWebFilterMapping[filters.size()];
 
@@ -810,8 +805,7 @@ class JettyServerWrapper implements BatchVisitor {
 				//    for given physical context path taken from this.osgiContextModels - this case (filters without
 				//    servlet doesn't seem to be described by Whiteboard Service spec and isn't implemented by felix.http)
 
-				// TODO: filter and servlets conflict related to different target OsgiContextModels
-				// imagine:
+				// Filter and servlets conflict related to different target OsgiContextModels. Imagine:
 				// ServletContextModel with "/c1"
 				//     OsgiContextModel with name "ocm1" and rank 1
 				//     OsgiContextModel with name "ocm2" and rank 2
@@ -843,6 +837,7 @@ class JettyServerWrapper implements BatchVisitor {
 				}
 
 				OsgiServletContext context = osgiServletContexts.get(highestRankedModel);
+
 				PaxWebFilterHolder holder = new PaxWebFilterHolder(model, context);
 				PaxWebFilterMapping mapping = new PaxWebFilterMapping(model);
 
@@ -851,9 +846,61 @@ class JettyServerWrapper implements BatchVisitor {
 				pos++;
 			}
 
-			sch.getServletHandler().setFilters(newFilterHolders);
-			sch.getServletHandler().setFilterMappings(newFilterMappings);
+			if (!quickFilterChange(sch.getServletHandler(), newFilterHolders, newFilterMappings)) {
+				// the hard way - recreate entire array of filters/filter-mappings
+				for (FilterHolder holder : sch.getServletHandler().getFilters()) {
+					try {
+						holder.stop();
+					} catch (Exception e) {
+						LOG.error(e.getMessage(), e);
+					}
+				}
+
+				sch.getServletHandler().setFilters(newFilterHolders);
+				sch.getServletHandler().setFilterMappings(newFilterMappings);
+			}
 		}
+	}
+
+	/**
+	 * <p>This method tries to check if it's ok to just add new filters from {@code newFilterHolders} <em>at the end</em>
+	 * of current list of filters. This is quite special case, but not that uncommon - when new filters are
+	 * lower-ranked than all existing ones and there are no filters to be removed.</p>
+	 *
+	 * <p>TODO: with {@link ServletHandler#insertFilterMapping(FilterMapping, int, boolean)} we could
+	 *          optimize even more</p>
+	 *
+	 * @param servletHandler
+	 * @param newFilterHolders
+	 * @param newFilterMappings
+	 * @return
+	 */
+	private boolean quickFilterChange(ServletHandler servletHandler, PaxWebFilterHolder[] newFilterHolders, PaxWebFilterMapping[] newFilterMappings) {
+		PaxWebFilterHolder[] existingFilterHolders = (PaxWebFilterHolder[]) servletHandler.getFilters();
+
+		int pos = 0;
+		boolean quick = newFilterHolders.length >= existingFilterHolders.length;
+
+		// by "quick" we mean - there are no removed filters and new filters come last
+		while (quick) {
+			if (pos >= existingFilterHolders.length) {
+				break;
+			}
+			if (!existingFilterHolders[pos].getFilterModel().equals(newFilterHolders[pos].getFilterModel())) {
+				quick = false;
+				break;
+			}
+			pos++;
+		}
+
+		if (quick) {
+			for (int i = pos; i < newFilterHolders.length; i++) {
+				servletHandler.addFilter(newFilterHolders[pos], newFilterMappings[pos]);
+			}
+			return true;
+		}
+
+		return false;
 	}
 
 	//	@Override

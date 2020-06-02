@@ -80,6 +80,10 @@ public class PaxWebFilterInfo extends FilterInfo {
 		return info;
 	}
 
+	public FilterModel getFilterModel() {
+		return filterModel;
+	}
+
 	/**
 	 * An {@link InstanceFactory} that returns {@link Filter filter instance} from {@link FilterModel}.
 	 */

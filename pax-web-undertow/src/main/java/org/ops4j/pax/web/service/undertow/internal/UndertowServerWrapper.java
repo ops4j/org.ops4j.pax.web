@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,6 +53,9 @@ import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.ServletContainer;
 import io.undertow.servlet.api.ServletInfo;
+import io.undertow.servlet.core.ContextClassLoaderSetupAction;
+import io.undertow.servlet.core.ManagedFilter;
+import io.undertow.servlet.core.ManagedFilters;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
@@ -575,7 +579,7 @@ class UndertowServerWrapper implements BatchVisitor {
 		UndertowFactory.AcceptingChannelWithAddress expectedListener = null;
 
 		boolean listenerFound = false;
-		UndertowFactory.AcceptingChannelWithAddress  backupListener = null;
+		UndertowFactory.AcceptingChannelWithAddress backupListener = null;
 
 		for (Iterator<UndertowFactory.AcceptingChannelWithAddress> iterator = listeners.values().iterator(); iterator.hasNext(); ) {
 			UndertowFactory.AcceptingChannelWithAddress listener = iterator.next();
@@ -938,7 +942,6 @@ class UndertowServerWrapper implements BatchVisitor {
 					DeploymentInfo deploymentInfo = manager.getDeployment().getDeploymentInfo();
 
 					// let's immediately show that given context is no longer mapped
-					// TODO: remember that currently we may process hundreds of thousands of existing requests...
 					pathHandler.removePrefixPath(contextPath);
 
 					try {
@@ -982,7 +985,7 @@ class UndertowServerWrapper implements BatchVisitor {
 
 	@Override
 	public void visit(FilterStateChange change) {
-		Map<String, TreeSet<FilterModel>>contextFilters = change.getContextFilters();
+		Map<String, TreeSet<FilterModel>> contextFilters = change.getContextFilters();
 
 		for (Map.Entry<String, TreeSet<FilterModel>> entry : contextFilters.entrySet()) {
 			String contextPath = entry.getKey();
@@ -992,29 +995,35 @@ class UndertowServerWrapper implements BatchVisitor {
 
 			// take existing deployment manager and the deployment info from its deployment
 			DeploymentManager manager = servletContainer.getDeploymentByPath(contextPath);
+			DeploymentManager.State state = manager.getState();
 			DeploymentInfo deploymentInfo = manager.getDeployment().getDeploymentInfo();
 
-			// let's immediately show that given context is no longer mapped
-			// TODO: remember that currently we may process hundreds of thousands of existing requests...
-			pathHandler.removePrefixPath(contextPath);
+			boolean quick = canQuicklyAddFilter(deploymentInfo, filters);
 
-			try {
-				// manager needs to stop the deployment and get rid of it, because we
-				// can't replace a deployment info within deployment manager
-				LOG.trace("Stopping and undelopying the deployment for {}", contextPath);
-				manager.stop();
-				manager.undeploy();
-			} catch (ServletException e) {
-				throw new RuntimeException("Problem stopping the deployment of context " + contextPath
-						+ ": " + e.getMessage(), e);
+			if (!quick) {
+				// let's immediately show that given context is no longer mapped
+				pathHandler.removePrefixPath(contextPath);
+
+				try {
+					// manager needs to stop the deployment and get rid of it, because we
+					// can't replace a deployment info within deployment manager
+					LOG.trace("Stopping and undelopying the deployment for {}", contextPath);
+					manager.stop();
+					manager.undeploy();
+				} catch (ServletException e) {
+					throw new RuntimeException("Problem stopping the deployment of context " + contextPath
+							+ ": " + e.getMessage(), e);
+				}
+
+				// remove all existing filters
+				deploymentInfo = undertowFactory.clearFilters(deploymentInfo);
 			}
-
-			// remove all existing filters
-			deploymentInfo = undertowFactory.clearFilters(deploymentInfo);
 
 			// this time we don't have to care about filters which are not "changed" or which should
 			// be destroyed, because unlike in Jetty and Tomcat, in Undertow we simply destroy entire
 			// context (redeploy it)
+
+			List<FilterInfo> added = new LinkedList<>();
 
 			int pos = 1;
 			for (FilterModel model : filters) {
@@ -1037,49 +1046,114 @@ class UndertowServerWrapper implements BatchVisitor {
 
 				// filter definition
 				FilterInfo info = new PaxWebFilterInfo(model, context);
-				deploymentInfo.addFilter(info);
 
-				String filterName = model.getName();
-
-				// filter mapping
-				// TODO: we can't clear existing mapping - we need special clone() here
-				for (String type : model.getDispatcherTypes()) {
-					DispatcherType dt = DispatcherType.valueOf(type);
-
-					if (model.getRegexMapping() != null && model.getRegexMapping().length > 0) {
-						// TODO: handle regexp filter mapping
-						deploymentInfo.addFilterUrlMapping(filterName, "/*", dt);
-					} else if (model.getUrlPatterns() != null) {
-						for (String pattern : model.getUrlPatterns()) {
-							deploymentInfo.addFilterUrlMapping(filterName, pattern, dt);
+				if (quick) {
+					// we can operate on existing ManagedFilters object from current deployment
+					// if the deployment is not yet started, it's like normal, full redeployment
+					if (state == DeploymentManager.State.STARTED) {
+						ManagedFilters currentFilters = manager.getDeployment().getFilters();
+						ManagedFilter managedFilter = currentFilters.getManagedFilter(info.getName());
+						if (managedFilter == null) {
+							// add only if not already there
+							currentFilters.addFilter(info);
+							added.add(info);
+						} else {
+							FilterInfo currentFilter = managedFilter.getFilterInfo();
+							if (!(currentFilter instanceof PaxWebFilterInfo
+									&& ((PaxWebFilterInfo) currentFilter).getFilterModel().equals(model))) {
+								// add only if no filter for given FilterModel exists
+								currentFilters.addFilter(info);
+								added.add(info);
+							}
 						}
 					}
-					if (model.getServletNames() != null) {
-						for (String name : model.getServletNames()) {
-							deploymentInfo.addFilterServletNameMapping(filterName, name, dt);
+				}
+				if (!quick || added.size() > 0 || state != DeploymentManager.State.STARTED) {
+					deploymentInfo.addFilter(info);
+
+					String filterName = model.getName();
+
+					// filter mapping
+					for (String type : model.getDispatcherTypes()) {
+						DispatcherType dt = DispatcherType.valueOf(type);
+
+						if (model.getRegexMapping() != null && model.getRegexMapping().length > 0) {
+							// TODO: handle regexp filter mapping
+							deploymentInfo.addFilterUrlMapping(filterName, "/*", dt);
+						} else if (model.getUrlPatterns() != null) {
+							for (String pattern : model.getUrlPatterns()) {
+								deploymentInfo.addFilterUrlMapping(filterName, pattern, dt);
+							}
+						}
+						if (model.getServletNames() != null) {
+							for (String name : model.getServletNames()) {
+								deploymentInfo.addFilterServletNameMapping(filterName, name, dt);
+							}
 						}
 					}
 				}
 			}
 
-			LOG.trace("Redeploying {}", contextPath);
-			manager = servletContainer.addDeployment(deploymentInfo);
-			manager.deploy();
+			if (added.size() > 0) {
+				// just start newly added filters
+				for (ManagedFilter filter : manager.getDeployment().getFilters().getFilters().values()) {
+					try {
+						new ContextClassLoaderSetupAction(deploymentInfo.getClassLoader()).create((exchange, context) -> {
+							filter.createFilter();
+							return null;
+						}).call(null, null);
+					} catch (Exception e) {
+						throw new IllegalStateException("Can't start filter " + filter + ": " + e.getMessage(), e);
+					}
+				}
+			} else if (!quick || state != DeploymentManager.State.STARTED) {
+				LOG.trace("Redeploying {}", contextPath);
+				manager = servletContainer.addDeployment(deploymentInfo);
+				manager.deploy();
 
-			// we've changed the deployment for given context path - new ServletContext was created, so
-			// we have to propagate the change where needed
-			ServletContext newRealServletContext = manager.getDeployment().getServletContext();
-			this.osgiContextModels.get(contextPath).forEach(osgiContextModel
-					-> this.osgiServletContexts.get(osgiContextModel).setContainerServletContext(newRealServletContext));
+				// we've changed the deployment for given context path - new ServletContext was created, so
+				// we have to propagate the change where needed
+				ServletContext newRealServletContext = manager.getDeployment().getServletContext();
+				this.osgiContextModels.get(contextPath).forEach(osgiContextModel
+						-> this.osgiServletContexts.get(osgiContextModel).setContainerServletContext(newRealServletContext));
 
-			try {
-				HttpHandler handler = manager.start();
-				pathHandler.addPrefixPath(contextPath, handler);
-			} catch (ServletException e) {
-				throw new IllegalStateException("Can't redeploy Undertow context "
-						+ contextPath + ": " + e.getMessage(), e);
+				try {
+					HttpHandler handler = manager.start();
+					pathHandler.addPrefixPath(contextPath, handler);
+				} catch (ServletException e) {
+					throw new IllegalStateException("Can't redeploy Undertow context "
+							+ contextPath + ": " + e.getMessage(), e);
+				}
 			}
 		}
+	}
+
+	/**
+	 * Check if new set of filters contains only existing filters and possibly some new. When new filters come
+	 * in different order or there are removed filters, we'll have to recreate entire context...
+	 *
+	 * @param deploymentInfo
+	 * @param filters
+	 * @return
+	 */
+	private boolean canQuicklyAddFilter(DeploymentInfo deploymentInfo, Set<FilterModel> filters) {
+		FilterInfo[] existingFilters = deploymentInfo.getFilters().values().toArray(new FilterInfo[0]);
+		FilterModel[] newFilters = filters.toArray(new FilterModel[0]);
+		int pos = 0;
+		boolean quick = existingFilters.length <= newFilters.length;
+		while (quick) {
+			if (pos >= existingFilters.length) {
+				break;
+			}
+			if (!(existingFilters[pos] instanceof PaxWebFilterInfo
+					&& ((PaxWebFilterInfo) existingFilters[pos]).getFilterModel().equals(newFilters[pos]))) {
+				quick = false;
+				break;
+			}
+			pos++;
+		}
+
+		return quick;
 	}
 
 //	/**
@@ -1290,6 +1364,7 @@ class UndertowServerWrapper implements BatchVisitor {
 
 	// see org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService#getConfidentialPortManager
 	private class SimpleConfidentialPortManager implements ConfidentialPortManager {
+
 		@Override
 		public int getConfidentialPort(HttpServerExchange exchange) {
 			int port = exchange.getConnection().getLocalAddress(InetSocketAddress.class).getPort();

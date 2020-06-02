@@ -79,4 +79,8 @@ public class PaxWebFilterDef extends FilterDef {
 		return initialFilter;
 	}
 
+	public FilterModel getFilterModel() {
+		return filterModel;
+	}
+
 }
