@@ -16,6 +16,7 @@
 package org.ops4j.pax.web.itest.server;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Deque;
 import java.util.IdentityHashMap;
 import java.util.LinkedList;
@@ -25,6 +26,8 @@ import javax.servlet.FilterChain;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -36,6 +39,7 @@ import org.junit.runners.Parameterized;
 import org.ops4j.pax.web.itest.server.support.Utils;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
@@ -44,6 +48,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.ops4j.pax.web.itest.server.support.Utils.httpGET;
 
@@ -97,6 +102,7 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 		contexts1.putAll(contexts2);
 		assertThat("However and whenever (init() or service()) we obtain ServletContext it must be the same",
 				contexts1.size(), equalTo(1));
+		assertThat(contexts1.keySet().iterator().next().getClass(), equalTo(OsgiScopedServletContext.class));
 
 		getServletCustomizer().removedService(servletRef, model);
 		assertThat(httpGET(port, "/s"), startsWith("HTTP/1.1 404"));
@@ -126,6 +132,9 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 				contexts1.size(), equalTo(2));
 		assertThat("When processing request, there should be only one, Servlet-specific ServletContext",
 				contexts2.size(), equalTo(1));
+
+		contexts1.keySet().forEach(sc -> assertThat(sc.getClass(), equalTo(OsgiScopedServletContext.class)));
+		contexts2.keySet().forEach(sc -> assertThat(sc.getClass(), equalTo(OsgiScopedServletContext.class)));
 	}
 
 	@Test
@@ -158,7 +167,7 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 		 */
 
 		/*
-		 * 2020-06-02 (Jetty filters are destroyed, filter add optimization)
+		 * 2020-06-02 (Jetty filters are destroyed, optimization for filter addition)
 		 * Jetty:
 		 *  - non optimized: [reg(s1), s1.init(), reg(f1),               f1.init(), reg(f2), f1.destroy(), f1.init(), f2.init(),            unreg(f2), f1.destroy(), f2.destroy(),               f1.init(),            unreg(s1), s1.destroy(),                          unreg(f1), f1.destroy()]
 		 *  - optimized:     [reg(s1), s1.init(), reg(f1),               f1.init(), reg(f2),                          f2.init(),            unreg(f2), f1.destroy(), f2.destroy(),               f1.init(),            unreg(s1), s1.destroy(),                          unreg(f1), f1.destroy()]
@@ -257,7 +266,7 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 		assertThat(log.pop(), equalTo("unreg(s1)"));
 		assertThat(log.pop(), equalTo("s1.destroy()"));
 		if (runtime == Runtime.UNDERTOW) {
-			// For Undertow, when servlet is unregistered, we have to redeploy entire context and filers will be
+			// For Undertow, when servlet is unregistered, we have to redeploy entire context and filters will be
 			// reinitialized
 			assertThat(log.pop(), equalTo("f1.destroy()"));
 			assertThat(log.pop(), equalTo("f1.init()"));
@@ -388,6 +397,130 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 		assertThat(log.pop(), equalTo("unreg(f1)"));
 		assertThat(log.pop(), equalTo("f1.destroy()"));
 		assertTrue(log.isEmpty());
+	}
+
+	@Test
+	public void bundleResourceAccessInFiltersServletPipeline() throws Exception {
+		Bundle sampleS1 = mockBundle("sampleS1");
+		Bundle sampleF1 = mockBundle("sampleF1");
+		Bundle sampleF2 = mockBundle("sampleF2");
+
+		when(sampleS1.getEntry(anyString()))
+				.thenAnswer(inv -> new URL("file:///s1/" + inv.getArgument(0, String.class)));
+		when(sampleF1.getEntry(anyString()))
+				.thenAnswer(inv -> new URL("file:///f1/" + inv.getArgument(0, String.class)));
+		when(sampleF2.getEntry(anyString()))
+				.thenAnswer(inv -> new URL("file:///f2/" + inv.getArgument(0, String.class)));
+
+		Servlet servlet = new Utils.MyIdServlet("s1") {
+			@Override
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				if (req.getParameter("req").equals("true")) {
+					resp.getWriter().print(" " + req.getServletContext().getResource("s1").toString());
+				} else {
+					resp.getWriter().print(" " + getServletContext().getResource("s1").toString());
+				}
+			}
+		};
+		Filter filter1 = new Utils.MyIdFilter("f1") {
+			@Override
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+				if (request.getParameter("req").equals("true")) {
+					response.getWriter().print(" " + request.getServletContext().getResource("f1").toString());
+				} else {
+					response.getWriter().print(" " + getServletContext().getResource("f1").toString());
+				}
+				chain.doFilter(request, response);
+			}
+		};
+		Filter filter2 = new Utils.MyIdFilter("f2") {
+			@Override
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+				if (request.getParameter("req").equals("true")) {
+					response.getWriter().print(" " + request.getServletContext().getResource("f2").toString());
+				} else {
+					response.getWriter().print(" " + getServletContext().getResource("f2").toString());
+				}
+				chain.doFilter(request, response);
+			}
+		};
+
+		ServiceReference<Servlet> servletRef = mockServletReference(sampleS1, "servlet1", () -> servlet, 0L, 0, "/s");
+		ServletModel smodel = getServletCustomizer().addingService(servletRef);
+		ServiceReference<Filter> filter1Ref = mockFilterReference(sampleF1, "filter1", () -> filter1, 0L, 0, "/s");
+		FilterModel fmodel1 = getFilterCustomizer().addingService(filter1Ref);
+		ServiceReference<Filter> filter2Ref = mockFilterReference(sampleF2, "filter2", () -> filter2, 0L, 0, "/s");
+		FilterModel fmodel2 = getFilterCustomizer().addingService(filter2Ref);
+
+		// Even if single ServletContextHelper is used, these are actually bundle scoped instances, so related bundle
+		// is called to get the resource (entry)
+
+		// for ServletContext obtained from the request, there's only one ServletContext
+		assertThat(httpGET(port, "/s?req=true"), endsWith(new URL("file:///s1/f1").toString() + " "
+				+ new URL("file:///s1/f2").toString() + " "
+				+ new URL("file:///s1/s1").toString()));
+
+		// for ServletContext obtained from the servlet/filter's config, we have separate contexts
+		assertThat(httpGET(port, "/s?req=false"), endsWith(new URL("file:///f1/f1").toString() + " "
+				+ new URL("file:///f2/f2").toString() + " "
+				+ new URL("file:///s1/s1").toString()));
+	}
+
+	@Test
+	public void bundleResourceAccessInFiltersOnlyPipeline() throws Exception {
+		Bundle sampleF1 = mockBundle("sampleF1");
+		Bundle sampleF2 = mockBundle("sampleF2");
+
+		when(whiteboardBundle.getEntry(anyString()))
+				.thenAnswer(inv -> new URL("file:///wb/" + inv.getArgument(0, String.class)));
+		when(sampleF1.getEntry(anyString()))
+				.thenAnswer(inv -> new URL("file:///f1/" + inv.getArgument(0, String.class)));
+		when(sampleF2.getEntry(anyString()))
+				.thenAnswer(inv -> new URL("file:///f2/" + inv.getArgument(0, String.class)));
+
+		Filter filter1 = new Utils.MyIdFilter("f1") {
+			@Override
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+				if (request.getParameter("req").equals("true")) {
+					response.getWriter().print(" " + request.getServletContext().getResource("f1").toString());
+				} else {
+					response.getWriter().print(" " + getServletContext().getResource("f1").toString());
+				}
+				if (!id.equals(request.getParameter("terminate"))) {
+					chain.doFilter(request, response);
+				}
+			}
+		};
+		Filter filter2 = new Utils.MyIdFilter("f2") {
+			@Override
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+				if (request.getParameter("req").equals("true")) {
+					response.getWriter().print(" " + request.getServletContext().getResource("f2").toString());
+				} else {
+					response.getWriter().print(" " + getServletContext().getResource("f2").toString());
+				}
+				if (!id.equals(request.getParameter("terminate"))) {
+					chain.doFilter(request, response);
+				}
+			}
+		};
+
+		ServiceReference<Filter> filter1Ref = mockFilterReference(sampleF1, "filter1", () -> filter1, 0L, 0, "/s");
+		FilterModel fmodel1 = getFilterCustomizer().addingService(filter1Ref);
+		ServiceReference<Filter> filter2Ref = mockFilterReference(sampleF2, "filter2", () -> filter2, 0L, 0, "/s");
+		FilterModel fmodel2 = getFilterCustomizer().addingService(filter2Ref);
+
+		// Even if single ServletContextHelper is used, these are actually bundle scoped instances, so related bundle
+		// is called to get the resource (entry)
+
+		// for ServletContext obtained from the request, there's only one ServletContext - representing
+		// ServletContextHelper bundle-scoped to the bundle for which ServletContextHelper itself was registered
+		assertThat(httpGET(port, "/s?req=true&terminate=f2"), endsWith(new URL("file:///wb/f1").toString() + " "
+				+ new URL("file:///wb/f2").toString()));
+
+		// for ServletContext obtained from the servlet/filter's config, we have separate contexts
+		assertThat(httpGET(port, "/s?req=false&terminate=f2"), endsWith(new URL("file:///f1/f1").toString() + " "
+				+ new URL("file:///f2/f2").toString()));
 	}
 
 	@WebServlet(loadOnStartup = 1, urlPatterns = "/s")

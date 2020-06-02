@@ -16,10 +16,14 @@
 package org.ops4j.pax.web.service.tomcat.internal;
 
 import javax.servlet.Filter;
+import javax.servlet.ServletContext;
 
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedFilter;
+import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
+import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -36,32 +40,60 @@ public class PaxWebFilterDef extends FilterDef {
 
 	private ServiceReference<? extends Filter> filterReference;
 
-	public PaxWebFilterDef(FilterModel filterModel, boolean initialFilter) {
+	/** This {@link ServletContext} the highest ranked {@link OsgiServletContext} for given physical context */
+	private final OsgiServletContext osgiServletContext;
+	/** This {@link ServletContext} is scoped to particular Whiteboard filter */
+	private OsgiScopedServletContext servletContext = null;
+
+	public PaxWebFilterDef(FilterModel filterModel, boolean initialFilter, OsgiServletContext osgiContext) {
 		this.filterModel = filterModel;
 		this.initialFilter = initialFilter;
+		this.osgiServletContext = osgiContext;
 
 		// name that binds a servlet with its mapping
 		setFilterName(filterModel.getName());
 
+		Filter instance = null;
 		if (filterModel.getFilterClass() != null) {
 			try {
-				setFilter(filterModel.getFilterClass().newInstance());
+				instance = filterModel.getFilterClass().newInstance();
 			} catch (Exception e) {
 				throw new RuntimeException("Can't instantiate filter of class " + filterModel.getFilterClass());
 			}
 		} else if (filterModel.getFilter() != null) {
-			setFilter(filterModel.getFilter());
+			instance = filterModel.getFilter();
 		} else {
 			this.filterReference = filterModel.getElementReference();
 
 			if (filterReference != null) {
 				// TODO: ensure it's ungotten later
-				setFilter(filterModel.getRegisteringBundle().getBundleContext().getService(filterReference));
+				instance = filterModel.getRegisteringBundle().getBundleContext().getService(filterReference);
 			}
 		}
 
 		filterModel.getInitParams().forEach(this::addInitParameter);
 		setAsyncSupported(filterModel.getAsyncSupported() != null && filterModel.getAsyncSupported() ? "true" : "false");
+
+		// setup proper delegation for ServletContext
+		if (this.osgiServletContext != null) {
+			servletContext = new OsgiScopedServletContext(this.osgiServletContext, filterModel.getRegisteringBundle());
+		}
+
+		if (isInitial()) {
+			setFilter(instance);
+		} else {
+			setFilter(instance == null || servletContext == null ? null
+					: new OsgiInitializedFilter(instance, servletContext));
+		}
+	}
+
+	@Override
+	public void setFilter(Filter filter) {
+		if (isInitial()) {
+			super.setFilter(filter);
+		} else {
+			super.setFilter(filter == null ? null : new OsgiInitializedFilter(filter, servletContext));
+		}
 	}
 
 	/**

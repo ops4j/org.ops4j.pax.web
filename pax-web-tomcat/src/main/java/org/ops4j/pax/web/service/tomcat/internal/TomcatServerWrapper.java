@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Supplier;
-import javax.servlet.ServletContext;
 
 import org.apache.catalina.AccessLog;
 import org.apache.catalina.Context;
@@ -781,7 +780,7 @@ class TomcatServerWrapper implements BatchVisitor {
 			// ServletContextModel. This will became the "fallback" OsgiContextModel for chains without
 			// target servlet (with filters only)
 			OsgiContextModel highestRankedModel = osgiContextModels.get(contextPath).iterator().next();
-			ServletContext highestRankedContext = osgiServletContexts.get(highestRankedModel);
+			OsgiServletContext highestRankedContext = osgiServletContexts.get(highestRankedModel);
 			realContext.setDefaultOsgiContextModel(highestRankedModel);
 			realContext.setDefaultServletContext(highestRankedContext);
 		}
@@ -877,7 +876,7 @@ class TomcatServerWrapper implements BatchVisitor {
 
 			// 2020-06-02: it's not possible to simply add a filter to Tomcat and init() it without init()ing
 			// existing filters
-			if (true || !quickFilterChange(context, filterDefs, filters)) {
+			if (true || !quickFilterChange(context, filterDefs, filters, contextPath)) {
 				// the hard way - recreate entire array of filters/filter-mappings
 				context.filterStop();
 				// remove all but "initial OSGi filter"
@@ -896,7 +895,9 @@ class TomcatServerWrapper implements BatchVisitor {
 				PaxWebFilterMap[] newFilterMaps = new PaxWebFilterMap[filters.size() + 1];
 
 				for (FilterModel model : filters) {
-					PaxWebFilterDef def = new PaxWebFilterDef(model, false);
+					OsgiServletContext osgiContext = getHighestRankedContext(contextPath, model);
+
+					PaxWebFilterDef def = new PaxWebFilterDef(model, false, osgiContext);
 					PaxWebFilterMap map = new PaxWebFilterMap(model, false);
 
 					context.addFilterDef(def);
@@ -905,6 +906,24 @@ class TomcatServerWrapper implements BatchVisitor {
 				context.filterStart();
 			}
 		}
+	}
+
+	private OsgiServletContext getHighestRankedContext(String contextPath, FilterModel model) {
+		OsgiContextModel highestRankedModel = null;
+		// remember, this contextModels list is properly sorted
+		for (OsgiContextModel ocm : model.getContextModels()) {
+			if (ocm.getContextPath().equals(contextPath)) {
+				highestRankedModel = ocm;
+				break;
+			}
+		}
+		if (highestRankedModel == null) {
+			LOG.warn("(dev) Can't find proper OsgiContextModel for the filter. Falling back to "
+					+ "highest ranked OsgiContextModel for given ServletContextModel");
+			highestRankedModel = osgiContextModels.get(contextPath).iterator().next();
+		}
+
+		return osgiServletContexts.get(highestRankedModel);
 	}
 
 	/**
@@ -919,9 +938,11 @@ class TomcatServerWrapper implements BatchVisitor {
 	 * @param context
 	 * @param existingFilterDefs
 	 * @param filters
+	 * @param contextPath
 	 * @return
 	 */
-	private boolean quickFilterChange(PaxWebStandardContext context, FilterDef[] existingFilterDefs, Set<FilterModel> filters) {
+	private boolean quickFilterChange(PaxWebStandardContext context, FilterDef[] existingFilterDefs,
+			Set<FilterModel> filters, String contextPath) {
 		int pos = 0;
 		FilterModel[] newModels = filters.toArray(new FilterModel[0]);
 		boolean quick = newModels.length >= existingFilterDefs.length - 1;
@@ -941,7 +962,9 @@ class TomcatServerWrapper implements BatchVisitor {
 
 		if (quick) {
 			for (int i = pos; i < newModels.length; i++) {
-				context.addFilterDef(new PaxWebFilterDef(newModels[pos], false));
+				OsgiServletContext osgiContext = getHighestRankedContext(contextPath, newModels[pos]);
+
+				context.addFilterDef(new PaxWebFilterDef(newModels[pos], false, osgiContext));
 				context.addFilterMap(new PaxWebFilterMap(newModels[pos], false));
 			}
 			context.filterStart();

@@ -27,6 +27,7 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiFilterChain;
+import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.osgi.service.http.whiteboard.Preprocessor;
 
 /**
@@ -43,7 +44,7 @@ public class PaxWebStandardContext extends StandardContext {
 	public static final String PAXWEB_STANDARD_WRAPPER = ".paxweb.standard.wrapper";
 
 	/** Default {@link ServletContext} to use for chains without target servlet (e.g., filters only) */
-	private ServletContext defaultServletContext;
+	private OsgiServletContext defaultServletContext;
 	/** Default {@link OsgiContextModel} to use for chains without target servlet (e.g., filters only) */
 	private OsgiContextModel defaultOsgiContextModel;
 
@@ -105,13 +106,18 @@ public class PaxWebStandardContext extends StandardContext {
 				DispatcherType.ASYNC.name()
 		});
 		osgiInitFilterMap = new PaxWebFilterMap(filterModel, true);
-		osgiInitFilterDef = new PaxWebFilterDef(filterModel, true);
+		osgiInitFilterDef = new PaxWebFilterDef(filterModel, true, null);
 
 		addFilterDef(osgiInitFilterDef);
 		addFilterMapBefore(osgiInitFilterMap);
 	}
 
-	public void setDefaultServletContext(ServletContext defaultServletContext) {
+	/**
+	 * This method may be called long after initial filter was created. In Jetty and Undertow there's no
+	 * <em>initial</em> filter, because we can do it better, but with Tomcat we have to do it like this.
+	 * @param defaultServletContext
+	 */
+	public void setDefaultServletContext(OsgiServletContext defaultServletContext) {
 		this.defaultServletContext = defaultServletContext;
 	}
 

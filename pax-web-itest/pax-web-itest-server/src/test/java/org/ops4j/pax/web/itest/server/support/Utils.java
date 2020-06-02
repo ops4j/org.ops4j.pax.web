@@ -28,7 +28,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpFilter;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -252,7 +251,7 @@ public class Utils {
 
 	public static class MyIdFilter extends HttpFilter {
 
-		private final String id;
+		protected final String id;
 
 		public MyIdFilter(String id) {
 			this.id = id;
