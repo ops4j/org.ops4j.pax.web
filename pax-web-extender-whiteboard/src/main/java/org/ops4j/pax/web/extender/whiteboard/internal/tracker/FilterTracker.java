@@ -78,11 +78,27 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 
 		// 3. init params
 		Map<String, String> initParams = new LinkedHashMap<>();
+		String legacyInitPrefix = Utils.getStringProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_INIT_PREFIX);
+		if (legacyInitPrefix != null) {
+			LOG.warn("Legacy {} property found, filter init parameters should be prefixed with {} instead",
+					PaxWebConstants.SERVICE_PROPERTY_INIT_PREFIX,
+					HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX);
+		}
+		// are there any service properties prefixed with legacy "init." prefix (or one specified by "init-prefix"?
+		final String[] prefix = new String[] { legacyInitPrefix == null ? PaxWebConstants.DEFAULT_INIT_PREFIX_PROP : legacyInitPrefix };
+		boolean hasLegacyInitProperty = Arrays.stream(serviceReference.getPropertyKeys())
+				.anyMatch(p -> p.startsWith(prefix[0]));
+		if (hasLegacyInitProperty) {
+			LOG.warn("Legacy filter init parameters found (with prefix: {}), init parameters should be prefixed with"
+					+ " {} instead", prefix[0], HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX);
+		} else {
+			prefix[0] = HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX;
+		}
 		for (String key : serviceReference.getPropertyKeys()) {
-			if (key.startsWith(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX)) {
+			if (key.startsWith(prefix[0])) {
 				String value = Utils.getStringProperty(serviceReference, key);
 				if (value != null) {
-					initParams.put(key.substring(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX.length()), value);
+					initParams.put(key.substring(prefix[0].length()), value);
 				}
 			}
 		}

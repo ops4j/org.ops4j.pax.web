@@ -94,7 +94,6 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 		} else {
 			prefix[0] = HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX;
 		}
-
 		for (String key : serviceReference.getPropertyKeys()) {
 			if (key.startsWith(prefix[0])) {
 				String value = Utils.getStringProperty(serviceReference, key);

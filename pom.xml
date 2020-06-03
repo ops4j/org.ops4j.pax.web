@@ -252,7 +252,6 @@
 		<dependency.jboss.xnio.version>3.3.8.Final</dependency.jboss.xnio.version>
 
 		<dependency.jersey.version>1.19</dependency.jersey.version>
-		<dependency.jetbrains.annotations>18.0.0</dependency.jetbrains.annotations>
 		<dependency.joda-time.version>2.3</dependency.joda-time.version>
 		<dependency.jsf.myfaces.version>2.2.12</dependency.jsf.myfaces.version>
 		<dependency.jsf.myfaces-facelets-examples20.version>1.0.2.1</dependency.jsf.myfaces-facelets-examples20.version>

@@ -38,6 +38,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
 import org.eclipse.jetty.util.ArrayUtil;
 import org.ops4j.pax.web.annotations.Review;
+import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiFilterChain;
@@ -68,6 +69,8 @@ public class PaxWebServletHandler extends ServletHandler {
 	private ServletContext defaultServletContext;
 	/** Default {@link OsgiContextModel} to use for chains without target servlet (e.g., filters only) */
 	private OsgiContextModel defaultOsgiContextModel;
+	/** Default {@link WebContainerContext} for chains without target {@link Servlet} */
+	private WebContainerContext defaultWebContainerContext;
 
 	/**
 	 * Default servlet to be used when there's nothing mapped under "/" - this is to ensure that filter-only
@@ -106,7 +109,9 @@ public class PaxWebServletHandler extends ServletHandler {
 	}
 
 	public void setDefaultOsgiContextModel(OsgiContextModel defaultOsgiContextModel) {
+		// TODO: release previous WebContainerContext
 		this.defaultOsgiContextModel = defaultOsgiContextModel;
+		this.defaultWebContainerContext = defaultOsgiContextModel.resolveHttpContext(defaultOsgiContextModel.getOwnerBundle());
 	}
 
 	@Override
@@ -277,11 +282,10 @@ public class PaxWebServletHandler extends ServletHandler {
 			chain = (request, response) -> holder.handle(baseRequest, request, response);
 		}
 		if (!holder.is404()) {
-			return new OsgiFilterChain(preprocessors, holder.getServletContext(), holder.getOsgiContextModel(),
-					holder.getRegisteringBundle(), chain);
+			return new OsgiFilterChain(preprocessors, holder.getServletContext(),
+					holder.getWebContainerContext(), chain);
 		} else {
-			return new OsgiFilterChain(preprocessors, defaultServletContext, defaultOsgiContextModel,
-					defaultOsgiContextModel.getOwnerBundle(), chain);
+			return new OsgiFilterChain(preprocessors, defaultServletContext, defaultWebContainerContext, chain);
 		}
 	}
 
@@ -296,13 +300,12 @@ public class PaxWebServletHandler extends ServletHandler {
 	protected FilterChain getFilterChain(Request baseRequest, String pathInContext, ServletHolder servletHolder) {
 		PaxWebServletHolder holder = (PaxWebServletHolder) servletHolder;
 
-		OsgiContextModel contextModel = holder.getOsgiContextModel();
-		if (contextModel == null) {
-			contextModel = defaultOsgiContextModel;
+		// calculate caching key for filter chain
+		WebContainerContext wcc = holder.getWebContainerContext();
+		String prefix = wcc == null ? "" : wcc.getContextId();
+		if (wcc != null && wcc.isShared()) {
+			prefix = "~|" + prefix;
 		}
-		// TOCHECK: potential conflict between shared and bundle-scoped contexts with the same name
-		String prefix = holder.getOsgiContextModel() == null ? ""
-				: contextModel.resolveHttpContext(holder.getOsgiContextModel().getOwnerBundle()).getContextId();
 		String contextlessKey = pathInContext == null ? holder.getName() : pathInContext;
 		String key = prefix + "|" + contextlessKey;
 

@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.undertow.internal;
 
+import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -31,6 +32,9 @@ public class PaxWebSecurityHandler implements HandlerWrapper {
 	/** Default {@link OsgiContextModel} to use for chains without target servlet (e.g., filters only) */
 	private OsgiContextModel defaultOsgiContextModel;
 
+	/** Default {@link WebContainerContext} for chains without target {@link Servlet} */
+	private WebContainerContext defaultWebContainerContext;
+
 	@Override
 	@SuppressWarnings("Convert2Lambda")
 	public HttpHandler wrap(HttpHandler handler) {
@@ -45,11 +49,11 @@ public class PaxWebSecurityHandler implements HandlerWrapper {
 					HttpServletRequest req = (HttpServletRequest) context.getServletRequest();
 					HttpServletResponse res = (HttpServletResponse) context.getServletResponse();
 
-					WebContainerContext webContext;
+					WebContainerContext webContext = null;
 					if (!paxWebServletInfo.is404()) {
-						webContext = paxWebServletInfo.getOsgiContextModel().resolveHttpContext(paxWebServletInfo.getRegisteringBundle());
+						webContext = paxWebServletInfo.getWebContainerContext();
 					} else {
-						webContext = defaultOsgiContextModel.resolveHttpContext(defaultOsgiContextModel.getOwnerBundle());
+						webContext = defaultWebContainerContext;
 					}
 
 					try {
@@ -82,7 +86,9 @@ public class PaxWebSecurityHandler implements HandlerWrapper {
 	}
 
 	public void setDefaultOsgiContextModel(OsgiContextModel defaultOsgiContextModel) {
+		// TODO: release previous WebContainerContext
 		this.defaultOsgiContextModel = defaultOsgiContextModel;
+		this.defaultWebContainerContext = defaultOsgiContextModel.resolveHttpContext(defaultOsgiContextModel.getOwnerBundle());
 	}
 
 }

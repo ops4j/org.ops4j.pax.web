@@ -26,6 +26,7 @@ import javax.servlet.UnavailableException;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
+import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
@@ -57,6 +58,12 @@ public class PaxWebServletHolder extends ServletHolder {
 	private final OsgiScopedServletContext servletContext;
 
 	/**
+	 * Each servlet will be associated with {@link WebContainerContext} scoped to the bundle which registered
+	 * given {@link Servlet}.
+	 */
+	private final WebContainerContext webContainerContext;
+
+	/**
 	 * Special flag to mark the holder is one with 404 servlet. In such case we don't run OSGi specific
 	 * security methods and we have to tweak filter config to return proper {@link ServletContext}.
 	 */
@@ -74,6 +81,7 @@ public class PaxWebServletHolder extends ServletHolder {
 		osgiContextModel = null;
 		osgiServletContext = null;
 		servletContext = null;
+		webContainerContext = null;
 		this.is404 = is404;
 	}
 
@@ -113,6 +121,9 @@ public class PaxWebServletHolder extends ServletHolder {
 
 		// setup proper delegation for ServletContext
 		servletContext = new OsgiScopedServletContext(this.osgiServletContext, servletModel.getRegisteringBundle());
+
+		// instead of doing it once per request, we can get servlet-scoped WebContainerContext now
+		webContainerContext = osgiContextModel.resolveHttpContext(servletModel.getRegisteringBundle());
 	}
 
 	public Bundle getRegisteringBundle() {
@@ -125,6 +136,10 @@ public class PaxWebServletHolder extends ServletHolder {
 
 	public ServletContext getServletContext() {
 		return servletContext;
+	}
+
+	public WebContainerContext getWebContainerContext() {
+		return webContainerContext;
 	}
 
 	public boolean is404() {
@@ -195,6 +210,8 @@ public class PaxWebServletHolder extends ServletHolder {
 			servletModel.getRegisteringBundle().getBundleContext().ungetService(servletModel.getElementReference());
 		}
 		super.destroyInstance(o);
+
+
 	}
 
 	/**

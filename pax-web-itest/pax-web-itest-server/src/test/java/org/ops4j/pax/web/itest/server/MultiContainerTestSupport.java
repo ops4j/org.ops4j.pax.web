@@ -30,7 +30,11 @@ import org.junit.runners.Parameterized;
 import org.mockito.stubbing.Answer;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.FilterTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.HttpContextTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletContextHelperTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.HttpContextMappingTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletContextHelperMappingTracker;
 import org.ops4j.pax.web.itest.server.support.Utils;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.HttpServiceEnabled;
@@ -40,11 +44,15 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
+import org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -75,6 +83,11 @@ public class MultiContainerTestSupport {
 
 	@Parameterized.Parameter
 	public Runtime runtime;
+
+	private ServiceTrackerCustomizer<ServletContextHelper, OsgiContextModel> servletContextHelperCustomizer;
+	private ServiceTrackerCustomizer<ServletContextHelperMapping, OsgiContextModel> servletContextHelperMappingCustomizer;
+	private ServiceTrackerCustomizer<HttpContext, OsgiContextModel> httpContextCustomizer;
+	private ServiceTrackerCustomizer<HttpContextMapping, OsgiContextModel> httpContextMappingCustomizer;
 
 	private ServiceTrackerCustomizer<Servlet, ServletModel> servletCustomizer;
 	private ServiceTrackerCustomizer<Filter, FilterModel> filterCustomizer;
@@ -124,6 +137,11 @@ public class MultiContainerTestSupport {
 		whiteboard = new ExtenderContext(null, whiteboardBundleContext);
 		whiteboard.webContainerAdded(containerRef);
 
+		servletContextHelperCustomizer = getCustomizer(ServletContextHelperTracker.createTracker(whiteboard, whiteboardBundleContext));
+		servletContextHelperMappingCustomizer = getCustomizer(ServletContextHelperMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
+		httpContextCustomizer = getCustomizer(HttpContextTracker.createTracker(whiteboard, whiteboardBundleContext));
+		httpContextMappingCustomizer = getCustomizer(HttpContextMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
+
 		servletCustomizer = getCustomizer(ServletTracker.createTracker(whiteboard, whiteboardBundleContext));
 		filterCustomizer = getCustomizer(FilterTracker.createTracker(whiteboard, whiteboardBundleContext));
 	}
@@ -152,6 +170,32 @@ public class MultiContainerTestSupport {
 	}
 
 	/**
+	 * Creates mock {@link ServiceReference} to represent OSGi-registered {@link ServletContextHelper} instance
+	 * @param bundle
+	 * @param name
+	 * @param supplier
+	 * @param serviceId
+	 * @param rank
+	 * @param contextPath
+	 * @return
+	 */
+	protected ServiceReference<ServletContextHelper> mockServletContextHelperReference(Bundle bundle, String name,
+			Supplier<ServletContextHelper> supplier, Long serviceId, Integer rank, String contextPath) {
+		Hashtable<String, Object> props = new Hashtable<>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, name);
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
+
+		ServletContextHelper instance = supplier.get();
+
+		ServiceReference<ServletContextHelper> schRef
+				= mockReference(bundle, ServletContextHelper.class, props, null, serviceId, rank);
+		when(bundle.getBundleContext().getService(schRef)).thenReturn(instance);
+		when(whiteboardBundleContext.getService(schRef)).thenReturn(instance);
+
+		return schRef;
+	}
+
+	/**
 	 * Creates mock {@link ServiceReference} to represent OSGi-registered {@link Servlet} instance
 	 * @param bundle
 	 * @param name
@@ -167,19 +211,22 @@ public class MultiContainerTestSupport {
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, name);
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, patterns);
 
-		Servlet instance = supplier.get();
+		ServiceReference<Servlet> servletRef = mockReference(bundle, Servlet.class, props, null, serviceId, rank);
+
 		try {
-			when(bundle.loadClass(instance.getClass().getName()))
-					.thenAnswer((Answer<Class<?>>) invocation -> instance.getClass());
 			when(bundle.loadClass(Servlet.class.getName()))
 					.thenAnswer((Answer<Class<?>>) invocation -> Servlet.class);
+			if (supplier != null) {
+				Servlet instance = supplier.get();
+				when(bundle.loadClass(instance.getClass().getName()))
+						.thenAnswer((Answer<Class<?>>) invocation -> instance.getClass());
+
+				when(bundle.getBundleContext().getService(servletRef)).thenReturn(instance);
+				when(whiteboardBundleContext.getService(servletRef)).thenReturn(instance);
+			}
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
-
-		ServiceReference<Servlet> servletRef = mockReference(bundle, Servlet.class, props, serviceId, rank);
-		when(bundle.getBundleContext().getService(servletRef)).thenReturn(instance);
-		when(whiteboardBundleContext.getService(servletRef)).thenReturn(instance);
 
 		return servletRef;
 	}
@@ -210,21 +257,23 @@ public class MultiContainerTestSupport {
 			throw new RuntimeException(e.getMessage(), e);
 		}
 
-		ServiceReference<Filter> filterRef = mockReference(bundle, Filter.class, props, serviceId, rank);
+		ServiceReference<Filter> filterRef = mockReference(bundle, Filter.class, props, null, serviceId, rank);
 		when(bundle.getBundleContext().getService(filterRef)).thenReturn(instance);
 		when(whiteboardBundleContext.getService(filterRef)).thenReturn(instance);
 
 		return filterRef;
 	}
 
-	protected <S> ServiceReference<S> mockReference(Bundle bundle, Class<S> clazz, Hashtable<String, Object> props) {
-		return mockReference(bundle, clazz, props, 0L, 0);
+	protected <S> ServiceReference<S> mockReference(Bundle bundle, Class<S> clazz, Hashtable<String, Object> props,
+			Supplier<S> supplier) {
+		return mockReference(bundle, clazz, props, supplier, 0L, 0);
 	}
 
 	@SuppressWarnings("unchecked")
 	protected <S> ServiceReference<S> mockReference(Bundle bundle, Class<S> clazz, Hashtable<String, Object> props,
-			Long serviceId, Integer rank) {
+			Supplier<S> supplier, Long serviceId, Integer rank) {
 		ServiceReference<S> ref = mock(ServiceReference.class);
+		when(ref.toString()).thenReturn("ref:" + clazz.toString());
 
 		when(ref.getProperty(Constants.OBJECTCLASS)).thenReturn(new String[] { clazz.getName() });
 
@@ -233,10 +282,34 @@ public class MultiContainerTestSupport {
 
 		when(ref.getBundle()).thenReturn(bundle);
 
-		props.forEach((k, v) -> when(ref.getProperty(k)).thenReturn(v));
-		when(ref.getPropertyKeys()).thenReturn(props.keySet().toArray(new String[0]));
+		if (props != null) {
+			props.forEach((k, v) -> when(ref.getProperty(k)).thenReturn(v));
+			when(ref.getPropertyKeys()).thenReturn(props.keySet().toArray(new String[0]));
+			when(ref.getProperties()).thenReturn(props);
+		}
+		if (supplier != null) {
+			S instance = supplier.get();
+			when(bundle.getBundleContext().getService(ref)).thenReturn(instance);
+			when(whiteboardBundleContext.getService(ref)).thenReturn(instance);
+		}
 
 		return ref;
+	}
+
+	public ServiceTrackerCustomizer<ServletContextHelper, OsgiContextModel> getServletContextHelperCustomizer() {
+		return servletContextHelperCustomizer;
+	}
+
+	public ServiceTrackerCustomizer<ServletContextHelperMapping, OsgiContextModel> getServletContextHelperMappingCustomizer() {
+		return servletContextHelperMappingCustomizer;
+	}
+
+	public ServiceTrackerCustomizer<HttpContext, OsgiContextModel> getHttpContextCustomizer() {
+		return httpContextCustomizer;
+	}
+
+	public ServiceTrackerCustomizer<HttpContextMapping, OsgiContextModel> getHttpContextMappingCustomizer() {
+		return httpContextMappingCustomizer;
 	}
 
 	public ServiceTrackerCustomizer<Servlet, ServletModel> getServletCustomizer() {

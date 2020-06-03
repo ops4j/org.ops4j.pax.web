@@ -60,6 +60,12 @@ public interface PaxWebConstants {
 	String DEFAULT_CONTEXT_PATH = "/";
 
 	/**
+	 * Service registration property to mark services as <em>internal</em>, so they're not processed by Pax Web
+	 * Whiteboard extender as normal Whiteboard services.
+	 */
+	String SERVICE_PROPERTY_INTERNAL = "org.ops4j.pax.web.internal";
+
+	/**
 	 * <p>Pax Web specific service property used when registering:<ul>
 	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping}</li>
 	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.HttpContextMapping}</li>
@@ -118,21 +124,14 @@ public interface PaxWebConstants {
 
 	/**
 	 * The registration property for filtering init parameters. All init parameters starting with something different
-	 * then the init-prefix will be ignored and not added to the init params of the servlet.
+	 * then the init-prefix will be ignored and not added to the init params of the servlet/filter/context.
 	 */
 	@Deprecated
 	String SERVICE_PROPERTY_INIT_PREFIX = "init-prefix";
 
 	/**
-	 * Service registration property to mark services as <em>internal</em>, so they're not processed by Pax Web
-	 * Whiteboard extender as normal Whiteboard services.
-	 */
-	String SERVICE_PROPERTY_INTERNAL = "org.ops4j.pax.logging.internal";
-
-	/**
 	 * The default init-prefix.
-	 * @deprecated {@link org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX}
-	 *             should be used instead.
+	 * @deprecated {@code servlet.init./filter.init./context.init.} should be used instead.
 	 */
 	@Deprecated
 	String DEFAULT_INIT_PREFIX_PROP = "init.";

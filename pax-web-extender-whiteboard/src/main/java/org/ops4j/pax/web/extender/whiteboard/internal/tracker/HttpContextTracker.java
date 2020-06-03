@@ -15,6 +15,9 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
@@ -62,8 +65,22 @@ public class HttpContextTracker extends AbstractContextTracker<HttpContext> {
 		}
 		model.setContextPath(contextPath);
 
-		// 3. no context params here
+		// 3. context params - only with legacy prefix
+		Map<String, String> initParams = new LinkedHashMap<>();
+		String legacyInitPrefix = Utils.getStringProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_INIT_PREFIX);
+		if (legacyInitPrefix == null) {
+			legacyInitPrefix = PaxWebConstants.DEFAULT_INIT_PREFIX_PROP;
+		}
+		for (String key : serviceReference.getPropertyKeys()) {
+			if (key.startsWith(legacyInitPrefix)) {
+				String value = Utils.getStringProperty(serviceReference, key);
+				if (value != null) {
+					initParams.put(key.substring(legacyInitPrefix.length()), value);
+				}
+			}
+		}
 		model.getContextParams().clear();
+		model.getContextParams().putAll(initParams);
 
 		// 4. pass all service registration properties...
 		model.getContextRegistrationProperties().putAll(Utils.toMap(serviceReference.getProperties()));

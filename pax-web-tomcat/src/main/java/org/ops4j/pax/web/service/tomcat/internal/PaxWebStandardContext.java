@@ -19,10 +19,12 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
+import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.valves.ValveBase;
+import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
@@ -47,6 +49,8 @@ public class PaxWebStandardContext extends StandardContext {
 	private OsgiServletContext defaultServletContext;
 	/** Default {@link OsgiContextModel} to use for chains without target servlet (e.g., filters only) */
 	private OsgiContextModel defaultOsgiContextModel;
+	/** Default {@link WebContainerContext} for chains without target {@link Servlet} */
+	private WebContainerContext defaultWebContainerContext;
 
 	private String osgiInitFilterName;
 
@@ -83,12 +87,11 @@ public class PaxWebStandardContext extends StandardContext {
 			final OsgiFilterChain osgiChain;
 			if (!wrapper.is404()) {
 				osgiChain = new OsgiFilterChain(delegate.getPreprocessors(),
-						wrapper.getServletContext(), wrapper.getOsgiContextModel(),
-						wrapper.getRegisteringBundle(), null);
+						wrapper.getServletContext(), wrapper.getWebContainerContext(), null);
 			} else {
+				OsgiContextModel model = delegate.getDefaultOsgiContextModel();
 				osgiChain = new OsgiFilterChain(delegate.getPreprocessors(),
-						delegate.getDefaultServletContext(), delegate.getDefaultOsgiContextModel(),
-						delegate.getDefaultOsgiContextModel().getOwnerBundle(), null);
+						delegate.getDefaultServletContext(), delegate.getDefaultWebContainerContext(), null);
 			}
 
 			// this chain will be called (or not)
@@ -118,7 +121,9 @@ public class PaxWebStandardContext extends StandardContext {
 	 * @param defaultServletContext
 	 */
 	public void setDefaultServletContext(OsgiServletContext defaultServletContext) {
+		// TODO: release previous WebContainerContext
 		this.defaultServletContext = defaultServletContext;
+		this.defaultWebContainerContext = defaultOsgiContextModel.resolveHttpContext(defaultOsgiContextModel.getOwnerBundle());
 	}
 
 	public void setDefaultOsgiContextModel(OsgiContextModel defaultOsgiContextModel) {
@@ -131,6 +136,10 @@ public class PaxWebStandardContext extends StandardContext {
 
 	public OsgiContextModel getDefaultOsgiContextModel() {
 		return defaultOsgiContextModel;
+	}
+
+	public WebContainerContext getDefaultWebContainerContext() {
+		return defaultWebContainerContext;
 	}
 
 	public List<Preprocessor> getPreprocessors() {

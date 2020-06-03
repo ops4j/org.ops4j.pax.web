@@ -23,6 +23,7 @@ import io.undertow.servlet.api.InstanceHandle;
 import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.util.ImmediateInstanceFactory;
 import io.undertow.servlet.util.ImmediateInstanceHandle;
+import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
@@ -50,6 +51,11 @@ public class PaxWebServletInfo extends ServletInfo {
 	private final OsgiServletContext osgiServletContext;
 	/** This {@link ServletContext} is scoped to particular Whiteboard servlet */
 	private final OsgiScopedServletContext servletContext;
+	/**
+	 * Each servlet will be associated with {@link WebContainerContext} scoped to the bundle which registered
+	 * given {@link Servlet}.
+	 */
+	private final WebContainerContext webContainerContext;
 
 	/**
 	 * Special flag to mark the holder is one with 404 servlet. In such case we don't run OSGi specific
@@ -69,12 +75,14 @@ public class PaxWebServletInfo extends ServletInfo {
 		osgiContextModel = null;
 		osgiServletContext = null;
 		servletContext = null;
+		webContainerContext = null;
 		this.servlet = servlet;
 		this.is404 = is404;
 	}
 
 	public PaxWebServletInfo(ServletModel model, OsgiContextModel osgiContextModel,
 				OsgiServletContext osgiServletContext) {
+		// a bit tricky, because we have to call super() first
 		super(model.getName(), model.getActualClass(),
 				new ServletModelFactory(model,
 						new OsgiScopedServletContext(osgiServletContext, model.getRegisteringBundle())));
@@ -97,6 +105,7 @@ public class PaxWebServletInfo extends ServletInfo {
 		setMultipartConfig(servletModel.getMultipartConfigElement());
 
 		this.servletContext = ((ServletModelFactory)super.getInstanceFactory()).getServletContext();
+		this.webContainerContext = osgiContextModel.resolveHttpContext(servletModel.getRegisteringBundle());
 	}
 
 	public Bundle getRegisteringBundle() {
@@ -113,6 +122,10 @@ public class PaxWebServletInfo extends ServletInfo {
 
 	public OsgiContextModel getOsgiContextModel() {
 		return osgiContextModel;
+	}
+
+	public WebContainerContext getWebContainerContext() {
+		return webContainerContext;
 	}
 
 	@Override

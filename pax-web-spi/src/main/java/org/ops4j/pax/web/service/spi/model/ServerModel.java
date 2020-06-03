@@ -26,6 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
@@ -1423,7 +1424,9 @@ public class ServerModel implements BatchVisitor {
 	 */
 	private Set<ServletContextModel> getServletContextModels(ElementModel<?> model) {
 		return model.getContextModels().stream()
-				.map(ocm -> servletContexts.get(ocm.getContextPath())).collect(Collectors.toSet());
+				.map(ocm -> servletContexts.get(ocm.getContextPath()))
+				.filter(Objects::nonNull)
+				.collect(Collectors.toSet());
 	}
 
 	// --- batch operation visit() methods performed without validation, because it was done earlier

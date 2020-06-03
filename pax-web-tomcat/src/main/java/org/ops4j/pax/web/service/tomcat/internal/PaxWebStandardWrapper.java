@@ -23,6 +23,7 @@ import org.apache.catalina.Container;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.core.StandardWrapper;
 import org.apache.catalina.valves.ValveBase;
+import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
@@ -50,6 +51,12 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 	private final OsgiScopedServletContext servletContext;
 
 	/**
+	 * Each servlet will be associated with {@link WebContainerContext} scoped to the bundle which registered
+	 * given {@link Servlet}.
+	 */
+	private final WebContainerContext webContainerContext;
+
+	/**
 	 * Special flag to mark the holder is one with 404 servlet. In such case we don't run OSGi specific
 	 * security methods and we have to tweak filter config to return proper {@link ServletContext}.
 	 */
@@ -71,6 +78,7 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 		osgiServletContext = null;
 		realContext = container;
 		servletContext = null;
+		webContainerContext = null;
 		this.is404 = is404;
 
 		setServlet(servlet);
@@ -117,6 +125,9 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 		// setup proper delegation for ServletContext
 		servletContext = new OsgiScopedServletContext(this.osgiServletContext, servletModel.getRegisteringBundle());
 
+		// instead of doing it once per request, we can get servlet-scoped WebContainerContext now
+		webContainerContext = osgiContextModel.resolveHttpContext(servletModel.getRegisteringBundle());
+
 		// setup proper pipeline - that will invoke the servlet with proper filter chain and with proper req/res
 		// wrappers
 		// "basic" valve is org.apache.catalina.core.StandardWrapperValve
@@ -151,6 +162,10 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 	 */
 	public ServletContext getServletContext() {
 		return servletContext;
+	}
+
+	public WebContainerContext getWebContainerContext() {
+		return webContainerContext;
 	}
 
 	public boolean is404() {
