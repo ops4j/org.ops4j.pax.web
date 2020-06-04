@@ -39,6 +39,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
+import org.ops4j.pax.web.annotations.PaxWebConfiguration;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerContext;
@@ -56,6 +57,7 @@ import org.ops4j.pax.web.service.spi.task.FilterStateChange;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
+import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.whiteboard.ContextMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -64,6 +66,8 @@ import org.osgi.service.http.NamespaceException;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.ops4j.pax.web.service.spi.util.Utils.getHighestRankedModel;
 
 /**
  * <p>Holds web elements in a global context accross all services (all bundles using the Http Service).</p>
@@ -460,19 +464,6 @@ public class ServerModel implements BatchVisitor {
 	}
 
 	/**
-	 * Gets first {@link OsgiContextModel} from ranked set or {@code null} if not available.
-	 * @param rankedSet
-	 * @return
-	 */
-	private OsgiContextModel getHighestRankedModel(Set<OsgiContextModel> rankedSet) {
-		if (rankedSet == null) {
-			return null;
-		}
-		Iterator<OsgiContextModel> it = rankedSet.iterator();
-		return it.hasNext() ? it.next() : null;
-	}
-
-	/**
 	 * <p>Returns (new or existing) {@link OsgiContextModel} associated with {@link HttpContext}. When the target
 	 * {@link OsgiContextModel} is already available, validation is performed to check if it can be used with
 	 * passed {@link HttpContext}. The returned {@link OsgiContextModel} is never
@@ -519,6 +510,12 @@ public class ServerModel implements BatchVisitor {
 		if (!whiteboardContexts.containsKey(contextModel.getId())) {
 			ServletContextModel scm = getOrCreateServletContextModel(contextModel.getContextPath(), batch);
 			batch.addOsgiContextModel(contextModel, scm);
+		}
+	}
+
+	public void unregisterOsgiContextModel(OsgiContextModel contextModel, Batch batch) {
+		if (whiteboardContexts.containsKey(contextModel.getId())) {
+			batch.removeOsgiContextModel(contextModel);
 		}
 	}
 
@@ -662,6 +659,20 @@ public class ServerModel implements BatchVisitor {
 	}
 
 	/**
+	 * <p>Simply unmark {@link WebContainerContext} as the owner/creator/initiator of given {@link OsgiContextModel}
+	 * whether it's shared or bundle-related.</p>
+	 */
+	public void deassociateHttpContext(final WebContainerContext context, final OsgiContextModel osgiContextModel) {
+		if (context.isShared()) {
+			sharedContexts.get(context.getContextId()).remove(osgiContextModel);
+			LOG.debug("Unconfigured shared context {} -> {}", context, osgiContextModel);
+		} else {
+			bundleContexts.get(context).remove(osgiContextModel);
+			LOG.debug("Removed association {} -> {}", context, osgiContextModel);
+		}
+	}
+
+	/**
 	 * Returns (if exists) bundle-scoped {@link OsgiContextModel} with given name. This method retrieves only
 	 * "default" contexts created via {@link WebContainer#createDefaultHttpContext()}.
 	 * @param name
@@ -718,7 +729,7 @@ public class ServerModel implements BatchVisitor {
 		});
 
 		// shared contexts
-		contexts.addAll(sharedContexts.values().stream().map(this::getHighestRankedModel).collect(Collectors.toSet()));
+		contexts.addAll(sharedContexts.values().stream().map(Utils::getHighestRankedModel).collect(Collectors.toSet()));
 
 		return contexts;
 	}
@@ -738,6 +749,7 @@ public class ServerModel implements BatchVisitor {
 	 * @throws IllegalStateException if anything goes wrong
 	 * @throws IllegalArgumentException if validation fails
 	 */
+	@PaxWebConfiguration
 	public void addServletModel(final ServletModel model, Batch batch) throws NamespaceException, ServletException {
 		if (model.getContextModels().isEmpty()) {
 			throw new IllegalArgumentException("Can't register " + model + ", it is not associated with any context");
@@ -916,6 +928,7 @@ public class ServerModel implements BatchVisitor {
 	 * @param batch
 	 * @throws IllegalStateException if anything goes wrong
 	 */
+	@PaxWebConfiguration
 	public void removeServletModels(List<ServletModel> models, Batch batch) {
 		// each of the servlet models that we're unregistering may be registered in many servlet contexts
 		// and in each of those contexts, such unregistration may lead to reactivation of some existing, currently
@@ -1126,6 +1139,7 @@ public class ServerModel implements BatchVisitor {
 	 * @throws IllegalStateException if anything goes wrong
 	 * @throws IllegalArgumentException if validation fails
 	 */
+	@PaxWebConfiguration
 	public void addFilterModel(final FilterModel model, Batch batch) throws ServletException {
 		if (model.getContextModels().isEmpty()) {
 			throw new IllegalArgumentException("Can't register " + model + ", it is not associated with any context");
@@ -1443,9 +1457,26 @@ public class ServerModel implements BatchVisitor {
 			case ADD: {
 				OsgiContextModel model = change.getOsgiContextModel();
 				if (!model.hasDirectHttpContextInstance()) {
-					// it's a whiteboard context
+					// it's a normal, dynamic whiteboard context
 					whiteboardContexts.put(model.getId(), model);
+				} else {
+					// it's a whiteboard context that could be used for Http Service scenarios as well, because
+					// it has direct reference to bundleScoped or shared WebContainerContext
+					associateHttpContext(model.resolveHttpContext(null), model);
 				}
+				break;
+			}
+			case DELETE: {
+				OsgiContextModel model = change.getOsgiContextModel();
+				if (!model.hasDirectHttpContextInstance()) {
+					// it's a normal, dynamic whiteboard context
+					whiteboardContexts.remove(model.getId(), model);
+				} else {
+					// it's a whiteboard context that could be used for Http Service scenarios as well, because
+					// it has direct reference to bundleScoped or shared WebContainerContext
+					associateHttpContext(model.resolveHttpContext(null), model);
+				}
+				break;
 			}
 			default:
 				break;

@@ -367,7 +367,6 @@ public class HttpServiceEnabled implements StoppableHttpService {
 	 * @throws ServletException
 	 * @throws NamespaceException
 	 */
-	@PaxWebConfiguration
 	private void doRegisterServlet(Collection<HttpContext> httpContexts, ServletModel model) throws ServletException, NamespaceException {
 		LOG.debug("Passing registration of {} to configuration thread", model);
 
@@ -629,7 +628,6 @@ public class HttpServiceEnabled implements StoppableHttpService {
 	 * @param model
 	 * @throws ServletException
 	 */
-	@PaxWebConfiguration
 	private void doRegisterFilter(Collection<HttpContext> httpContexts, final FilterModel model) throws ServletException {
 		LOG.debug("Passing registration of {} to configuration thread", model);
 
@@ -777,6 +775,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 	 * @param model
 	 * @param batch
 	 */
+	@PaxWebConfiguration
 	private void translateContexts(Collection<HttpContext> httpContexts, ElementModel<?> model, Batch batch) {
 		if (httpContexts.size() > 0 && !model.hasContextModels()) {
 			// Http Service scenario - HttpContext(s)/WebContainerContext(s) are passed with the registration
@@ -789,11 +788,14 @@ public class HttpServiceEnabled implements StoppableHttpService {
 				model.addContextModel(contextModel);
 			});
 		} else if (model.hasContextModels()) {
-			// Whiteboard Service scenario - OsgiContextModel(s) are passed together with the model, but we
-			// have to ensure they're registered in ServerModel and ServerController
-			model.getContextModels().forEach(ocm -> {
-				serverModel.registerOsgiContextModelIfNeeded(ocm, batch);
-			});
+			// DON'T register OsgiContextModels carried with Whiteboard-registered WebElement. These should
+			// be registered explicitly, before servlet is registered
+			// keep the below code commented.
+//			// Whiteboard Service scenario - OsgiContextModel(s) are passed together with the model, but we
+//			// have to ensure they're registered in ServerModel and ServerController
+//			model.getContextModels().forEach(ocm -> {
+//				serverModel.registerOsgiContextModelIfNeeded(ocm, batch);
+//			});
 		}
 	}
 
@@ -858,16 +860,24 @@ public class HttpServiceEnabled implements StoppableHttpService {
 
 		@Override
 		public void addWhiteboardOsgiContextModel(OsgiContextModel model) {
-			if (!model.hasDirectHttpContextInstance()) {
-				throw new IllegalArgumentException("Can't pass OsgiContextModel without HttpContext to WebContainer."
-						+ " Only singleton, bundle-scoped or shared HttpContexts can be passed from Whiteboard to HttpService.");
-			}
-			// TODO: register OsgiContextModel in WebContainer
+			serverModel.runSilently(() -> {
+				Batch batch = new Batch("Registration of " + model);
+				serverModel.registerOsgiContextModelIfNeeded(model, batch);
+				serverController.sendBatch(batch);
+				batch.accept(serviceModel);
+				return null;
+			});
 		}
 
 		@Override
 		public void removeWhiteboardOsgiContextModel(OsgiContextModel model) {
-			// TODO: unregister OsgiContextModel from WebContainer
+			serverModel.runSilently(() -> {
+				Batch batch = new Batch("Unregistration of " + model);
+				serverModel.unregisterOsgiContextModel(model, batch);
+				serverController.sendBatch(batch);
+				batch.accept(serviceModel);
+				return null;
+			});
 		}
 	}
 

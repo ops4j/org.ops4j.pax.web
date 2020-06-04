@@ -64,7 +64,8 @@ public class FilterAnnotationScanner {
 			return;
 		}
 
-		filterName = (filterAnnotation.filterName().equals("") ? clazz.getName() : filterAnnotation.filterName());
+		// It'll default to FQCN anyway in FilterModel
+		filterName = (filterAnnotation.filterName().equals("") ? null : filterAnnotation.filterName());
 
 		dispatcherTypes = Arrays.stream(filterAnnotation.dispatcherTypes()).map(Enum::name).toArray(String[]::new);
 

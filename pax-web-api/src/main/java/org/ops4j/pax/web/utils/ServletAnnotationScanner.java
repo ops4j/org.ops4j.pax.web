@@ -67,7 +67,8 @@ public class ServletAnnotationScanner {
 			return;
 		}
 
-		servletName = (servletAnnotation.name().equals("") ? clazz.getName() : servletAnnotation.name());
+		// It'll default to FQCN anyway in ServletModel
+		servletName = (servletAnnotation.name().equals("") ? null : servletAnnotation.name());
 
 		WebInitParam[] initParams = servletAnnotation.initParams();
 		if (initParams.length > 0) {

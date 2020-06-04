@@ -80,6 +80,15 @@ public class Batch {
 	}
 
 	/**
+	 * Remove existing {@link OsgiContextModel}
+	 *
+	 * @param osgiContextModel
+	 */
+	public void removeOsgiContextModel(OsgiContextModel osgiContextModel) {
+		operations.add(new OsgiContextModelChange(OpCode.DELETE, null, osgiContextModel, null));
+	}
+
+	/**
 	 * Mark {@link OsgiContextModel} as associated with {@link WebContainerContext}
 	 *
 	 * @param context

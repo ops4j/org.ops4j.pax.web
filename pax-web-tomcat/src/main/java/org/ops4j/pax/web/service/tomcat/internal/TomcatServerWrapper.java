@@ -57,6 +57,7 @@ import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
+import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -529,7 +530,7 @@ class TomcatServerWrapper implements BatchVisitor {
 //							Context ctx = new HttpServiceContext(getHost(), accessControllerContext);
 			PaxWebStandardContext context = new PaxWebStandardContext(default404Servlet);
 			context.setName(model.getId());
-			context.setPath(model.getContextPath());
+			context.setPath("/".equals(model.getContextPath()) ? "" : model.getContextPath());
 			context.setWorkDir(configuration.server().getTemporaryDirectory().getAbsolutePath());
 //							ctx.setWebappVersion(name);
 //							ctx.setDocBase(basedir);
@@ -775,14 +776,28 @@ class TomcatServerWrapper implements BatchVisitor {
 			}
 			osgiServletContexts.put(osgiModel, new OsgiServletContext(realContext.getServletContext(), osgiModel, servletModel));
 			osgiContextModels.get(contextPath).add(osgiModel);
+		}
 
-			// there may be a change in what's the "best" (highest ranked) OsgiContextModel for given
-			// ServletContextModel. This will became the "fallback" OsgiContextModel for chains without
-			// target servlet (with filters only)
-			OsgiContextModel highestRankedModel = osgiContextModels.get(contextPath).iterator().next();
+		if (change.getKind() == OpCode.DELETE) {
+			LOG.info("Removing {} from {}", osgiModel, realContext);
+
+			// TOCHECK: are there web elements associated with removed mapping for OsgiServletContext?
+			osgiServletContexts.remove(osgiModel);
+			osgiContextModels.get(contextPath).remove(osgiModel);
+		}
+
+		// there may be a change in what's the "best" (highest ranked) OsgiContextModel for given
+		// ServletContextModel. This will became the "fallback" OsgiContextModel for chains without
+		// target servlet (with filters only)
+		OsgiContextModel highestRankedModel = Utils.getHighestRankedModel(osgiContextModels.get(contextPath));
+		if (highestRankedModel != null) {
 			OsgiServletContext highestRankedContext = osgiServletContexts.get(highestRankedModel);
 			realContext.setDefaultOsgiContextModel(highestRankedModel);
 			realContext.setDefaultServletContext(highestRankedContext);
+		} else {
+			// TOCHECK: there should be no more web elements in the context, no OSGi mechanisms, just 404 all the time
+			realContext.setDefaultOsgiContextModel(null);
+			realContext.setDefaultServletContext(null);
 		}
 	}
 
@@ -830,9 +845,14 @@ class TomcatServerWrapper implements BatchVisitor {
 			for (ServletModel model : change.getServletModels()) {
 				LOG.info("Removing servlet {}", model);
 
+				Set<String> done = new HashSet<>();
+
 				// proper order ensures that (assuming above scenario), for /c1, ocm2 will be chosen and ocm1 skipped
 				model.getContextModels().forEach(osgiContextModel -> {
 					String contextPath = osgiContextModel.getContextPath();
+					if (!done.add(contextPath)) {
+						return;
+					}
 
 					LOG.debug("Removing servlet {} from context {}", model.getName(), contextPath);
 

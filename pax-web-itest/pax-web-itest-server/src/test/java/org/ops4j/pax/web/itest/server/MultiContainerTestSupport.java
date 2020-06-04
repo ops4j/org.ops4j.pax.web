@@ -162,7 +162,8 @@ public class MultiContainerTestSupport {
 	protected Bundle mockBundle(String symbolicName) {
 		Bundle bundle = mock(Bundle.class);
 		BundleContext bundleContext = mock(BundleContext.class);
-		when(bundle.getSymbolicName()).thenReturn("sample1");
+		when(bundle.getSymbolicName()).thenReturn(symbolicName);
+		when(bundle.toString()).thenReturn("Bundle \"" + symbolicName + "\"");
 		when(bundle.getBundleContext()).thenReturn(bundleContext);
 		when(bundleContext.getBundle()).thenReturn(bundle);
 

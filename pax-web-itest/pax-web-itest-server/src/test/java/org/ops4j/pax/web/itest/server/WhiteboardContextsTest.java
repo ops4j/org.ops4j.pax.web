@@ -18,6 +18,7 @@ package org.ops4j.pax.web.itest.server;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Hashtable;
+import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -30,6 +31,8 @@ import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultServletContextHelperMapping;
 import org.ops4j.pax.web.itest.server.support.Utils;
 import org.ops4j.pax.web.service.PaxWebConstants;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping;
@@ -244,6 +247,76 @@ public class WhiteboardContextsTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/c4/s?token=4&get_a=true"), endsWith("}c4{"));
 
 		getServletCustomizer().removedService(servletRef, model);
+	}
+
+	@Test
+	public void servletAndFiltersInDifferentContexts() throws Exception {
+		// in all cases, there are three ServletContextHelpers: c1, c2 and c3
+		// servlet is registered to c1 and c2
+		// filter 1 is registered to c1 and c3
+		// filter 2 is registered to c2 and c3
+
+		// all contexts ranked equal, so first one is the best, servlet is registered to c1, so no filter 2 involved
+		servletAndFiltersInDifferentContexts(0, 0, 0, "/s", ">F(1)S(1)<F(1)");
+		// c3 is the best, but from servlet perspective, it's c2, so c2 is used, so no filter 1 involved
+		servletAndFiltersInDifferentContexts(1, 2, 3, "/s", ">F(2)S(1)<F(2)");
+		// c2 is the best, so no filter 1 involved
+		servletAndFiltersInDifferentContexts(1, 3, 2, "/s", ">F(2)S(1)<F(2)");
+
+		// all contexts ranked equal, but no servlet mapped to /t, so c1 is the best, so only filter 1
+		servletAndFiltersInDifferentContexts(0, 0, 0, "/t?terminate=1", ">F(1)<F(1)");
+		// c3 is the best, no /t mapping, filter 1 and 2 used
+		servletAndFiltersInDifferentContexts(1, 2, 3, "/t?terminate=2", ">F(1)>F(2)<F(2)<F(1)");
+		// c2 is the best, no /t mapping, filter 2 only
+		servletAndFiltersInDifferentContexts(1, 3, 2, "/t?terminate=2", ">F(2)<F(2)");
+	}
+
+	private void servletAndFiltersInDifferentContexts(int p1, int p2, int p3, String request, String expectedOutput)
+			throws IOException {
+		Bundle b = mockBundle("bundle-for-everything");
+
+		ServletContextHelper helper1 = new ServletContextHelper() {};
+		ServiceReference<ServletContextHelper> sr1 = mockServletContextHelperReference(b, "c1",
+				() -> helper1, 1L, p1, "/");
+		OsgiContextModel ocm1 = getServletContextHelperCustomizer().addingService(sr1);
+		ServletContextHelper helper2 = new ServletContextHelper() {};
+		ServiceReference<ServletContextHelper> sr2 = mockServletContextHelperReference(b, "c2",
+				() -> helper2, 2L, p2, "/");
+		OsgiContextModel ocm2 = getServletContextHelperCustomizer().addingService(sr2);
+		ServletContextHelper helper3 = new ServletContextHelper() {};
+		ServiceReference<ServletContextHelper> sr3 = mockServletContextHelperReference(b, "c3",
+				() -> helper3, 3L, p3, "/");
+		OsgiContextModel ocm3 = getServletContextHelperCustomizer().addingService(sr3);
+
+		// servlet will be registered in c1 and c2
+		ServiceReference<Servlet> servletRef = mockServletReference(b, "servlet1",
+				() -> new Utils.MyIdServlet("1"), 0L, 0, "/s");
+		when(servletRef.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT))
+				.thenReturn("(|(osgi.http.whiteboard.context.name=c1)(osgi.http.whiteboard.context.name=c2))");
+		ServletModel sm1 = getServletCustomizer().addingService(servletRef);
+
+		// filter1 will be registered in c1 and c3
+		ServiceReference<Filter> filter1Ref = mockFilterReference(b, "filter1",
+				() -> new Utils.MyIdFilter("1"), 0L, 0, "/*");
+		when(filter1Ref.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT))
+				.thenReturn("(|(osgi.http.whiteboard.context.name=c1)(osgi.http.whiteboard.context.name=c3))");
+		FilterModel fm1 = getFilterCustomizer().addingService(filter1Ref);
+
+		// filter2 will be registered in c2 and c3
+		ServiceReference<Filter> filter2Ref = mockFilterReference(b, "filter2",
+				() -> new Utils.MyIdFilter("2"), 0L, 0, "/*");
+		when(filter2Ref.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT))
+				.thenReturn("(|(osgi.http.whiteboard.context.name=c2)(osgi.http.whiteboard.context.name=c3))");
+		FilterModel fm2 = getFilterCustomizer().addingService(filter2Ref);
+
+		assertThat(httpGET(port, request), endsWith(expectedOutput));
+
+		getServletCustomizer().removedService(servletRef, sm1);
+		getFilterCustomizer().removedService(filter1Ref, fm1);
+		getFilterCustomizer().removedService(filter2Ref, fm2);
+		getServletContextHelperCustomizer().removedService(sr1, ocm1);
+		getServletContextHelperCustomizer().removedService(sr2, ocm2);
+		getServletContextHelperCustomizer().removedService(sr3, ocm3);
 	}
 
 	private static class TestServlet extends Utils.MyIdServlet {

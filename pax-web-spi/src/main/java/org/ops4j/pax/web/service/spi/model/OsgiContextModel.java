@@ -127,7 +127,9 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		// TOCHECK: what about filter-only pipeline? From which bundle the resources will be loaded?
 		Bundle bundle = FrameworkUtil.getBundle(OsgiContextModel.class);
 
-		DEFAULT_CONTEXT_MODEL = new OsgiContextModel(bundle, 0, 0L);
+		// tricky way to specify that Whiteboard's "context" is easily overrideable, but still much higher ranked
+		// than OsgiContextModels registered for name+bundle pairs from HttpService instance(s)
+		DEFAULT_CONTEXT_MODEL = new OsgiContextModel(bundle, Integer.MIN_VALUE / 2, 0L);
 		DEFAULT_CONTEXT_MODEL.setName(HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME);
 		DEFAULT_CONTEXT_MODEL.setContextPath(PaxWebConstants.DEFAULT_CONTEXT_PATH);
 
@@ -149,10 +151,8 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME);
 		//  - NOT registered to represent the HttpService's "default" context (org.osgi.service.http.HttpContext)
 		registration.remove(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY);
-		registration.put(Constants.SERVICE_ID, 0L);
-		// tricky way to specify that Whiteboard's "context" is easily overrideable, but still much higher ranked
-		// than OsgiContextModels registered for name+bundle pairs from HttpService instance(s)
-		registration.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE / 2);
+		registration.put(Constants.SERVICE_ID, DEFAULT_CONTEXT_MODEL.getServiceId());
+		registration.put(Constants.SERVICE_RANKING, DEFAULT_CONTEXT_MODEL.getServiceRank());
 		//  - registered with "/" context path
 		registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, PaxWebConstants.DEFAULT_CONTEXT_PATH);
 
@@ -280,8 +280,6 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		this.ownerBundle = ownerBundle;
 		this.contextPath = contextPath;
 	}
-
-	public WebContainerContext getHttpContext() { return null; }
 
 	/**
 	 * <p>This method should be called from Whiteboard infrastructure to really perform the validation and set

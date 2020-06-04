@@ -15,15 +15,9 @@
  */
 package org.ops4j.pax.web.service.undertow.internal;
 
-import java.io.IOException;
 import java.util.Map;
 import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 
 import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.InstanceFactory;
@@ -33,6 +27,7 @@ import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedFilter;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
+import org.ops4j.pax.web.service.spi.servlet.ScopedFilter;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -118,8 +113,6 @@ public class PaxWebFilterInfo extends FilterInfo {
 				}
 			}
 
-			// TODO: process annotations
-
 			Filter osgiInitializedFilter = new OsgiInitializedFilter(instance, this.osgiScopedServletContext);
 			Filter scopedFilter = new ScopedFilter(osgiInitializedFilter, model);
 
@@ -128,58 +121,6 @@ public class PaxWebFilterInfo extends FilterInfo {
 
 		public OsgiScopedServletContext getServletContext() {
 			return osgiScopedServletContext;
-		}
-	}
-
-	/**
-	 * <p>{@link Filter} wrapper that can skip delegate's invocation if
-	 * {@link org.ops4j.pax.web.service.spi.model.OsgiContextModel} doesn't match.</p>
-	 *
-	 * <p>This is important because of:
-	 * <blockquote>
-	 *     140.5 Registering Servlet Filters
-	 *      [...] Servlet filters are only applied to servlet requests if they are bound to the same Servlet
-	 *      Context Helper and the same Http Whiteboard implementation.
-	 * </blockquote></p>
-	 *
-	 * <p>In Jetty and in Tomcat we can configure the filters associated with invocation, but not in Undertow.</p>
-	 */
-	private static class ScopedFilter implements Filter {
-
-		private final Filter filter;
-		private final FilterModel model;
-
-		public ScopedFilter(Filter filter, FilterModel model) {
-			this.filter = filter;
-			this.model = model;
-		}
-
-		@Override
-		public void init(FilterConfig filterConfig) throws ServletException {
-			filter.init(filterConfig);
-		}
-
-		@Override
-		public void destroy() {
-			filter.destroy();
-		}
-
-		@Override
-		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-			ServletContext context = request.getServletContext();
-			boolean skip = false;
-			if (context instanceof OsgiScopedServletContext) {
-				if (!model.getContextModels().contains(((OsgiScopedServletContext)context).getOsgiContextModel())) {
-					skip = true;
-				}
-			}
-			if (!skip) {
-				// proceed with the filter
-				filter.doFilter(request, response, chain);
-			} else {
-				// skip the filter, proceed with the chain
-				chain.doFilter(request, response);
-			}
 		}
 	}
 

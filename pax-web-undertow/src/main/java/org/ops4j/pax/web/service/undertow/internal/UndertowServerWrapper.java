@@ -70,6 +70,7 @@ import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
+import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.undertow.internal.configuration.ResolvingContentHandler;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.IoSubsystem;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.SecurityRealm;
@@ -860,16 +861,30 @@ class UndertowServerWrapper implements BatchVisitor {
 			}
 			osgiServletContexts.put(osgiModel, new OsgiServletContext(realServletContext, osgiModel, servletModel));
 			osgiContextModels.get(contextPath).add(osgiModel);
+		}
 
-			// there may be a change in what's the "best" (highest ranked) OsgiContextModel for given
-			// ServletContextModel. This will became the "fallback" OsgiContextModel for chains without
-			// target servlet (with filters only)
-			OsgiContextModel highestRankedModel = osgiContextModels.get(contextPath).iterator().next();
+		if (change.getKind() == OpCode.DELETE) {
+			LOG.info("Removing {} from {}", osgiModel, contextPath);
+
+			// TOCHECK: are there web elements associated with removed mapping for OsgiServletContext?
+			osgiServletContexts.remove(osgiModel);
+			osgiContextModels.get(contextPath).remove(osgiModel);
+		}
+
+		// there may be a change in what's the "best" (highest ranked) OsgiContextModel for given
+		// ServletContextModel. This will became the "fallback" OsgiContextModel for chains without
+		// target servlet (with filters only)
+		OsgiContextModel highestRankedModel = Utils.getHighestRankedModel(osgiContextModels.get(contextPath));
+		if (highestRankedModel != null) {
 			OsgiServletContext highestRankedContext = osgiServletContexts.get(highestRankedModel);
-
 			// default "contexts" to handle security and class/resource loading
 			wrappingHandlers.get(contextPath).setDefaultServletContext(highestRankedContext);
 			securityHandlers.get(contextPath).setDefaultOsgiContextModel(highestRankedModel);
+		} else {
+			// TOCHECK: there should be no more web elements in the context, no OSGi mechanisms, just 404 all the time
+			wrappingHandlers.get(contextPath).setDefaultServletContext(null);
+			securityHandlers.get(contextPath).setDefaultOsgiContextModel(null);
+		}
 
 //			// manager (lifecycle manager of the deployment),
 //			DeploymentManager manager = servletContainer.getDeploymentByPath(contextPath);
@@ -884,7 +899,6 @@ class UndertowServerWrapper implements BatchVisitor {
 ////			servletContainer.getDeploymentByPath(contextPath).undeploy();
 ////			deploymentInfo.setClassLoader(classLoader);
 ////			servletContainer.getDeploymentByPath(contextPath).deploy();
-		}
 	}
 
 	@Override

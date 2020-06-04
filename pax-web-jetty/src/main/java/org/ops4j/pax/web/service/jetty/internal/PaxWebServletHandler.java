@@ -111,7 +111,9 @@ public class PaxWebServletHandler extends ServletHandler {
 	public void setDefaultOsgiContextModel(OsgiContextModel defaultOsgiContextModel) {
 		// TODO: release previous WebContainerContext
 		this.defaultOsgiContextModel = defaultOsgiContextModel;
-		this.defaultWebContainerContext = defaultOsgiContextModel.resolveHttpContext(defaultOsgiContextModel.getOwnerBundle());
+		if (defaultOsgiContextModel != null) {
+			this.defaultWebContainerContext = defaultOsgiContextModel.resolveHttpContext(defaultOsgiContextModel.getOwnerBundle());
+		}
 	}
 
 	@Override
@@ -302,12 +304,12 @@ public class PaxWebServletHandler extends ServletHandler {
 
 		// calculate caching key for filter chain
 		WebContainerContext wcc = holder.getWebContainerContext();
-		String prefix = wcc == null ? "" : wcc.getContextId();
+		String prefix = wcc == null ? "" : wcc.getContextId() + "|";
 		if (wcc != null && wcc.isShared()) {
 			prefix = "~|" + prefix;
 		}
 		String contextlessKey = pathInContext == null ? holder.getName() : pathInContext;
-		String key = prefix + "|" + contextlessKey;
+		String key = prefix + contextlessKey;
 
 		int dispatch = FilterMapping.dispatch(baseRequest.getDispatcherType());
 

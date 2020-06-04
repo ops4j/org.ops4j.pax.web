@@ -20,13 +20,16 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiFunction;
 import javax.servlet.ServletConfig;
 
 import org.apache.felix.utils.properties.InterpolationHelper;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -379,6 +382,19 @@ public class Utils {
 		}
 
 		return value;
+	}
+
+	/**
+	 * Gets first {@link OsgiContextModel} from ranked set or {@code null} if not available.
+	 * @param rankedSet
+	 * @return
+	 */
+	public static OsgiContextModel getHighestRankedModel(Set<OsgiContextModel> rankedSet) {
+		if (rankedSet == null) {
+			return null;
+		}
+		Iterator<OsgiContextModel> it = rankedSet.iterator();
+		return it.hasNext() ? it.next() : null;
 	}
 
 }

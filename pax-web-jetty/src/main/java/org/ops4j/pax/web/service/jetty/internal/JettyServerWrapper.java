@@ -73,6 +73,7 @@ import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
+import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
@@ -620,14 +621,28 @@ class JettyServerWrapper implements BatchVisitor {
 
 			// a physical context just got a new OSGi context
 			osgiContextModels.get(contextPath).add(osgiModel);
+		}
 
-			// there may be a change in what's the "best" (highest ranked) OsgiContextModel for given
-			// ServletContextModel. This will became the "fallback" OsgiContextModel for chains without
-			// target servlet (with filters only)
-			OsgiContextModel highestRankedModel = osgiContextModels.get(contextPath).iterator().next();
+		if (change.getKind() == OpCode.DELETE) {
+			LOG.info("Removing {} from {}", osgiModel, sch);
+
+			// TOCHECK: are there web elements associated with removed mapping for OsgiServletContext?
+			osgiServletContexts.remove(osgiModel);
+			osgiContextModels.get(contextPath).remove(osgiModel);
+		}
+
+		// there may be a change in what's the "best" (highest ranked) OsgiContextModel for given
+		// ServletContextModel. This will became the "fallback" OsgiContextModel for chains without
+		// target servlet (with filters only)
+		OsgiContextModel highestRankedModel = Utils.getHighestRankedModel(osgiContextModels.get(contextPath));
+		if (highestRankedModel != null) {
 			ServletContext highestRankedContext = osgiServletContexts.get(highestRankedModel);
 			((PaxWebServletHandler) sch.getServletHandler()).setDefaultOsgiContextModel(highestRankedModel);
 			((PaxWebServletHandler) sch.getServletHandler()).setDefaultServletContext(highestRankedContext);
+		} else {
+			// TOCHECK: there should be no more web elements in the context, no OSGi mechanisms, just 404 all the time
+			((PaxWebServletHandler) sch.getServletHandler()).setDefaultOsgiContextModel(null);
+			((PaxWebServletHandler) sch.getServletHandler()).setDefaultServletContext(null);
 		}
 	}
 
@@ -728,9 +743,15 @@ class JettyServerWrapper implements BatchVisitor {
 			for (ServletModel model : change.getServletModels()) {
 				LOG.info("Removing servlet {}", model);
 
+				Set<String> done = new HashSet<>();
+
 				// proper order ensures that (assuming above scenario), for /c1, ocm2 will be chosen and ocm1 skipped
 				model.getContextModels().forEach(osgiContextModel -> {
 					String contextPath = osgiContextModel.getContextPath();
+
+					if (!done.add(contextPath)) {
+						return;
+					}
 
 					LOG.debug("Removing servlet {} from context {}", model.getName(), contextPath);
 

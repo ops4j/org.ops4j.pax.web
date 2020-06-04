@@ -49,8 +49,6 @@ public class OsgiInitializedFilter implements Filter {
 
 			@Override
 			public ServletContext getServletContext() {
-				// TODO: this should come either from the servlet that's at the end of current chain or
-				//       be the "best" ServletContext for given ServletContextModel
 				return OsgiInitializedFilter.this.servletContext;
 			}
 

@@ -150,6 +150,7 @@ public class ServiceModel implements BatchVisitor {
 				serverModel.associateHttpContext(change.getContext(), change.getOsgiContextModel());
 				break;
 			case ADD:
+			case DELETE:
 				serverModel.visit(change);
 			default:
 				break;

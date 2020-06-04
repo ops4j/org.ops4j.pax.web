@@ -21,8 +21,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Source annotation highlighting that given method SHOULD perform its tasks in single configuration thread
- * of Pax Web runtime.
+ * Source annotation highlighting that given method SHOULD be called entirely inside Pax Web configuration thread.
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)

@@ -329,7 +329,8 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/s?terminate=f1"), endsWith(">F(f1)<F(f1)"));
 
 		log.add("reg(s1)");
-		ServiceReference<Servlet> servletRef = mockServletReference(sample1, "servlet1", () -> servlet, 0L, 0, "/s");
+		// mapping specified at annotation level
+		ServiceReference<Servlet> servletRef = mockServletReference(sample1, "servlet1", () -> servlet, 0L, 0);
 		ServletModel smodel = getServletCustomizer().addingService(servletRef);
 		assertThat(httpGET(port, "/s"), endsWith(">F(f1)S(s1)<F(f1)"));
 

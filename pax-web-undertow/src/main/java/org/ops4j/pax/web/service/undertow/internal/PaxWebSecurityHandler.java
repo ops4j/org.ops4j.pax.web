@@ -88,7 +88,9 @@ public class PaxWebSecurityHandler implements HandlerWrapper {
 	public void setDefaultOsgiContextModel(OsgiContextModel defaultOsgiContextModel) {
 		// TODO: release previous WebContainerContext
 		this.defaultOsgiContextModel = defaultOsgiContextModel;
-		this.defaultWebContainerContext = defaultOsgiContextModel.resolveHttpContext(defaultOsgiContextModel.getOwnerBundle());
+		if (defaultOsgiContextModel != null) {
+			this.defaultWebContainerContext = defaultOsgiContextModel.resolveHttpContext(defaultOsgiContextModel.getOwnerBundle());
+		}
 	}
 
 }

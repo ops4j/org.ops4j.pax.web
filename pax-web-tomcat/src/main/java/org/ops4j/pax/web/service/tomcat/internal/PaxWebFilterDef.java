@@ -24,6 +24,7 @@ import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedFilter;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
+import org.ops4j.pax.web.service.spi.servlet.ScopedFilter;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -82,8 +83,7 @@ public class PaxWebFilterDef extends FilterDef {
 		if (isInitial()) {
 			setFilter(instance);
 		} else {
-			setFilter(instance == null || servletContext == null ? null
-					: new OsgiInitializedFilter(instance, servletContext));
+			setFilter(instance == null || servletContext == null ? null : instance);
 		}
 	}
 
@@ -92,7 +92,8 @@ public class PaxWebFilterDef extends FilterDef {
 		if (isInitial()) {
 			super.setFilter(filter);
 		} else {
-			super.setFilter(filter == null ? null : new OsgiInitializedFilter(filter, servletContext));
+			Filter delegate = filter == null ? null : new ScopedFilter(new OsgiInitializedFilter(filter, servletContext), filterModel);
+			super.setFilter(delegate);
 		}
 	}
 
