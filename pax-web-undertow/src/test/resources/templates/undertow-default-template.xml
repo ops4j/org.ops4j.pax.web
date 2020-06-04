@@ -69,7 +69,7 @@
 					tcp-keep-alive="false"
 					read-timeout="${http.read.timeout}"
 					write-timeout="${http.write.timeout}"
-					max-connections="Integer.MAX_VALUE"
+					max-connections="5"
 
 					name="http"
 					socket-binding="http"
@@ -120,7 +120,7 @@
 					tcp-keep-alive="false"
 					read-timeout="${http.read.timeout}"
 					write-timeout="${http.write.timeout}"
-					max-connections="Integer.MAX_VALUE"
+					max-connections="5"
 
 					name="http"
 					socket-binding="https"
