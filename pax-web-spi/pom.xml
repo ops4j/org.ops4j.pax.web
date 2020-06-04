@@ -78,6 +78,7 @@
 						</Import-Package>
 						<Private-Package>
 							org.apache.felix.utils,
+							org.apache.felix.utils.properties,
 							org.ops4j.pax.web.service.spi.internal,
 							org.apache.commons.collections4,
 							org.apache.commons.collections4.iterators,
