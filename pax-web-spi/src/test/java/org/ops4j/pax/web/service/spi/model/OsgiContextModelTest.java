@@ -24,7 +24,9 @@ public class OsgiContextModelTest {
 	@Test
 	public void sortByRank() {
 		OsgiContextModel ocm1 = new OsgiContextModel(null, 0, 0L);
+		ocm1.setContextPath("/testPath");
 		OsgiContextModel ocm2 = new OsgiContextModel(null, 0, 0L);
+		ocm2.setContextPath("/testPath");
 
 		assertTrue("Comparing by static atomic id", ocm1.compareTo(ocm2) < 0);
 	}
