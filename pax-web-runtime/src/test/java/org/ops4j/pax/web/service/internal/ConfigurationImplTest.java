@@ -20,7 +20,9 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.util.property.DictionaryPropertyResolver;
@@ -31,11 +33,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
 public class ConfigurationImplTest {
+    
+    @Rule
+    public TemporaryFolder testFolder = new TemporaryFolder();
 
 	@Test
 	public void immediateProperties() throws NoSuchFieldException, IllegalAccessException {
 		Dictionary<String, String> props = new Hashtable<>();
 		props.put(PaxWebConfig.PID_CFG_HTTP_PORT, "1234");
+		props.put(PaxWebConfig.PID_CFG_TEMP_DIR, testFolder.getRoot().getName());
 		PropertyResolver resolver = new DictionaryPropertyResolver(props);
 
 		Configuration config = ConfigurationBuilder.getConfiguration(resolver, new HashMap<>());
