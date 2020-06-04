@@ -260,7 +260,7 @@
 		<dependency.karaf.version>4.2.1</dependency.karaf.version>
 		<dependency.log4j2.version>2.12.1</dependency.log4j2.version>
 		<dependency.logback.version>1.0.6</dependency.logback.version>
-		<dependency.mockito.version>3.2.4</dependency.mockito.version>
+		<dependency.mockito.version>3.3.3</dependency.mockito.version>
 		<dependency.objenesis.version>3.0.1</dependency.objenesis.version>
 
 		<dependency.ops4j.base.version>1.5.1</dependency.ops4j.base.version>
