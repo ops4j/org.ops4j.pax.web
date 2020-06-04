@@ -32,6 +32,7 @@ import javax.servlet.Servlet;
 
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.util.component.Container;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.osgi.framework.Bundle;
@@ -49,6 +50,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Version;
 
+@Ignore("Re-Enable after refactoring")
 public class HandlerDestructionTest {
 
 	//CHECKSTYLE:OFF
