@@ -18,7 +18,8 @@ package org.ops4j.pax.web.extender.whiteboard.internal;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
+//@RunWith(MockitoJUnitRunner.class)
+//TODO: Re-Enable or Delete
 public class WebApplicationTest {
 
 //	private static final int NUMBER_OF_CONCURRENT_EXECUTIONS = 15;
