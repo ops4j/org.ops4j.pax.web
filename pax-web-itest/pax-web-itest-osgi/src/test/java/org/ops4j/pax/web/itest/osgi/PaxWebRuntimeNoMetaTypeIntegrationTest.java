@@ -54,7 +54,7 @@ public class PaxWebRuntimeNoMetaTypeIntegrationTest extends AbstractControlledBa
 
 	@Configuration
 	public Option[] configure() {
-		return combine(baseConfigure(), combine(paxWebCore(), paxWebRuntime()));
+		return combine(baseConfigure(), combine(paxWebCore(), paxWebRuntime(), metaTypeService()));
 	}
 
 	@Test
