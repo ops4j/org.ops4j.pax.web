@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.jar.Manifest;
 import javax.servlet.ServletContainerInitializer;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -50,6 +51,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
  * to perform various tasks related to class/annotation discovery.
  */
 @RunWith(PaxExam.class)
+@Ignore("The pax-web-spi-fragment can't really be resolved")
 public class PaxWebSpiIntegrationTest extends AbstractControlledBase2 {
 
 	public static Logger LOG = LoggerFactory.getLogger(PaxWebSpiIntegrationTest.class);
