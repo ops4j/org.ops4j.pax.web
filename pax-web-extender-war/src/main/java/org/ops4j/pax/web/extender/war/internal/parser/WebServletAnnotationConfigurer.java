@@ -16,8 +16,10 @@
 package org.ops4j.pax.web.extender.war.internal.parser;
 
 import java.util.List;
+import java.util.Map.Entry;
 
 import javax.servlet.MultipartConfigElement;
+import javax.servlet.Servlet;
 import javax.servlet.annotation.WebInitParam;
 import javax.servlet.http.HttpServlet;
 
@@ -52,7 +54,8 @@ public class WebServletAnnotationConfigurer extends
 			return;
 		}
 
-		ServletAnnotationScanner annotationParameter = new ServletAnnotationScanner(clazz);
+		@SuppressWarnings("unchecked")
+        ServletAnnotationScanner annotationParameter = new ServletAnnotationScanner((Class<? extends Servlet>) clazz);
 
 		WebAppServlet webAppServlet = webApp
 				.findServlet(annotationParameter.servletName);
@@ -81,12 +84,12 @@ public class WebServletAnnotationConfigurer extends
 		// check if the existing servlet has each init-param from the
 		// annotation
 		// if not, add it
-		for (WebInitParam ip : annotationParameter.webInitParams) {
+		for (Entry<String, String> entrySet : annotationParameter.webInitParams.entrySet()) {
 			// if (holder.getInitParameter(ip.name()) == null)
-			if (!initParamsContain(initParams, ip.name())) {
+			if (!initParamsContain(initParams, entrySet.getKey())) {
 				WebAppInitParam initParam = new WebAppInitParam();
-				initParam.setParamName(ip.name());
-				initParam.setParamValue(ip.value());
+				initParam.setParamName(entrySet.getKey());
+				initParam.setParamValue(entrySet.getValue());
 				webAppServlet.addInitParam(initParam);
 			}
 		}

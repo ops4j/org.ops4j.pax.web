@@ -70,7 +70,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerIniti
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppTagLib;
 import org.ops4j.pax.web.extender.war.internal.util.ManifestUtil;
-import org.ops4j.pax.web.service.spi.model.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.ops4j.spi.SafeServiceLoader;
 import org.osgi.framework.Bundle;
@@ -307,13 +307,13 @@ public class WebAppParser {
 //			}
 //		}
 
-		for (URL u : ClassPathUtil.findResources(bundlesInClassSpace, "/META-INF", "*.taglib.xml", false)) {
+		for (URL u : ClassPathUtil.listResources(bundlesInClassSpace, "/META-INF", "*.taglib.xml", false)) {
 			LOG.info("found taglib {}", u.toString());
 			taglibs.add(u);
 		}
 
 		// TODO generalize name pattern according to JSF spec
-		for (URL u : ClassPathUtil.findResources(bundlesInClassSpace, "/META-INF", "faces-config.xml", false)) {
+		for (URL u : ClassPathUtil.listResources(bundlesInClassSpace, "/META-INF", "faces-config.xml", false)) {
 			LOG.info("found faces-config.xml {}", u.toString());
 			facesConfigs.add(u);
 		}
@@ -357,7 +357,7 @@ public class WebAppParser {
 		Set<Bundle> bundlesInClassSpace = ClassPathUtil.getBundlesInClassSpace(bundle, new HashSet<>());
 
 		List<URL> webFragments = new ArrayList<>();
-		for (URL webFragmentURL : ClassPathUtil.findResources(bundlesInClassSpace, "/META-INF", "web-fragment.xml", true)) {
+		for (URL webFragmentURL : ClassPathUtil.listResources(bundlesInClassSpace, "/META-INF", "web-fragment.xml", true)) {
 			webFragments.add(webFragmentURL);
 			WebAppType webAppType = parseWebXml(webFragmentURL);
 			parseApp(webAppType, webApp);

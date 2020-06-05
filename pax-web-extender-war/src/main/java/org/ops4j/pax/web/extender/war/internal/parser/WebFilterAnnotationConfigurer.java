@@ -53,12 +53,13 @@ public class WebFilterAnnotationConfigurer extends
 			return;
 		}
 
-		FilterAnnotationScanner annotationParam = new FilterAnnotationScanner(clazz);
+		@SuppressWarnings("unchecked")
+        FilterAnnotationScanner annotationParam = new FilterAnnotationScanner((Class<? extends Filter>) clazz);
 
-		WebAppFilter filter = webApp.findFilter(annotationParam.filterName);
+		//WebAppFilter filter = webApp.findFilter(annotationParam.filterName);
 
-		if (filter == null) {
-			filter = new WebAppFilter();
+		if (webApp.findFilter(annotationParam.filterName) == null) {
+			final WebAppFilter filter = new WebAppFilter();
 			filter.setFilterName(annotationParam.filterName);
 			filter.setFilterClass(className);
 			webApp.addFilter(filter);
@@ -67,14 +68,23 @@ public class WebFilterAnnotationConfigurer extends
 
 			// holder.setDisplayName(filterAnnotation.displayName());
 			// metaData.setOrigin(name+".filter.display-name");
+			
+			annotationParam.webInitParams.forEach((name,value) -> {
+			    WebAppInitParam initParam = new WebAppInitParam();
+                initParam.setParamName(name);
+                initParam.setParamValue(value);
+                filter.addInitParam(initParam);
+			});
 
-			for (WebInitParam ip : annotationParam.webInitParams) {
-				WebAppInitParam initParam = new WebAppInitParam();
-				initParam.setParamName(ip.name());
-				initParam.setParamValue(ip.value());
-				filter.addInitParam(initParam);
-			}
-
+			
+//			for (WebInitParam ip : annotationParam.webInitParams) {
+//				WebAppInitParam initParam = new WebAppInitParam();
+//				initParam.setParamName(ip.name());
+//				initParam.setParamValue(ip.value());
+//				filter.addInitParam(initParam);
+//			}
+			
+			
 			for (String urlPattern : annotationParam.urlPatterns) {
 				WebAppFilterMapping mapping = new WebAppFilterMapping();
 				mapping.setFilterName(annotationParam.filterName);
@@ -91,14 +101,15 @@ public class WebFilterAnnotationConfigurer extends
 
 			EnumSet<DispatcherType> dispatcherSet = EnumSet
 					.noneOf(DispatcherType.class);
-			for (DispatcherType d : annotationParam.dispatcherTypes) {
-				dispatcherSet.add(d);
+			for (String dispatcherString : annotationParam.dispatcherTypes) {
+				dispatcherSet.add(DispatcherType.valueOf(dispatcherString));
 			}
 			WebAppFilterMapping mapping = new WebAppFilterMapping();
 			mapping.setDispatcherTypes(dispatcherSet);
 			mapping.setFilterName(annotationParam.filterName);
 			webApp.addFilterMapping(mapping);
 		} else {
+		    final WebAppFilter filter = webApp.findFilter(annotationParam.filterName);
 			WebAppInitParam[] initParams = filter.getInitParams();
 			// A Filter definition for the same name already exists from web.xml
 			// ServletSpec 3.0 p81 if the Filter is already defined and has
@@ -108,15 +119,25 @@ public class WebFilterAnnotationConfigurer extends
 			// also overrides the annotation. Init-params are additive, but
 			// web.xml overrides
 			// init-params of the same name.
-			for (WebInitParam ip : annotationParam.webInitParams) {
-				// if (holder.getInitParameter(ip.name()) == null)
-				if (!initParamsContain(initParams, annotationParam.filterName)) {
-					WebAppInitParam initParam = new WebAppInitParam();
-					initParam.setParamName(ip.name());
-					initParam.setParamValue(ip.value());
-					filter.addInitParam(initParam);
-				}
-			}
+			
+			annotationParam.webInitParams.forEach((name,value) -> {
+			    if (!initParamsContain(initParams, annotationParam.filterName)) {
+                    WebAppInitParam initParam = new WebAppInitParam();
+                    initParam.setParamName(name);
+                    initParam.setParamValue(value);
+                    filter.addInitParam(initParam);
+                }
+			});
+			
+//			for (WebInitParam ip : annotationParam.webInitParams) {
+//				// if (holder.getInitParameter(ip.name()) == null)
+//				if (!initParamsContain(initParams, annotationParam.filterName)) {
+//					WebAppInitParam initParam = new WebAppInitParam();
+//					initParam.setParamName(ip.name());
+//					initParam.setParamValue(ip.value());
+//					filter.addInitParam(initParam);
+//				}
+//			}
 
 			List<WebAppFilterMapping> filterMappings = webApp
 					.getFilterMappings(annotationParam.filterName);
@@ -150,8 +171,8 @@ public class WebFilterAnnotationConfigurer extends
 
 				EnumSet<DispatcherType> dispatcherSet = EnumSet
 						.noneOf(DispatcherType.class);
-				for (DispatcherType d : annotationParam.dispatcherTypes) {
-					dispatcherSet.add(d);
+				for (String dispatcherString : annotationParam.dispatcherTypes) {
+					dispatcherSet.add(DispatcherType.valueOf(dispatcherString));
 				}
 				WebAppFilterMapping mapping = new WebAppFilterMapping();
 				mapping.setDispatcherTypes(dispatcherSet);

@@ -47,7 +47,7 @@ import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerIniti
 import org.ops4j.pax.web.extender.war.internal.model.WebAppTagLib;
 import org.ops4j.pax.web.service.WebAppDependencyHolder;
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.WebContainerConstants;
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
@@ -313,8 +313,8 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 					dispatcherTypeString.append(",");
 				}
 			}
-			initParams.put(WebContainerConstants.FILTER_MAPPING_DISPATCHER, dispatcherTypeString.toString());
-			initParams.put(WebContainerConstants.FILTER_NAME, filterName);
+			initParams.put(PaxWebConstants.FILTER_MAPPING_DISPATCHER, dispatcherTypeString.toString());
+			initParams.put(PaxWebConstants.FILTER_NAME, filterName);
 
 			webContainer.registerFilter(filterClass, urlPatterns, servletNames,
 					initParams, asyncSupported, httpContext);
