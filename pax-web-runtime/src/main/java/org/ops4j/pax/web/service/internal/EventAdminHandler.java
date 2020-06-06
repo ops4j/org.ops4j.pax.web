@@ -15,12 +15,16 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;
+import org.ops4j.pax.web.service.spi.WebEvent;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -45,55 +49,55 @@ public class EventAdminHandler implements ServletListener,
 
 	@Override
 	public void servletEvent(ServletEvent servletEvent) {
-//		EventAdmin eventAdmin = eventAdminReference.get();
-//		if (eventAdmin != null) {
-//			final String topic;
-//			switch (servletEvent.getType()) {
-//				case WebEvent.DEPLOYING:
-//					topic = WebTopic.DEPLOYING.toString();
-//					break;
-//				case WebEvent.DEPLOYED:
-//					topic = WebTopic.DEPLOYED.toString();
-//					break;
-//				case WebEvent.UNDEPLOYING:
-//					topic = WebTopic.UNDEPLOYING.toString();
-//					break;
-//				case WebEvent.UNDEPLOYED:
-//					topic = WebTopic.UNDEPLOYED.toString();
-//					break;
-//				case WebEvent.WAITING:
-//					// A Waiting Event is not supported by the specification
-//					// therefore it is mapped to FAILED, because of collision.
-//					//$FALL-THROUGH$
-//				case WebEvent.FAILED:
-//					//$FALL-THROUGH$
-//				default:
-//					topic = WebTopic.FAILED.toString();
-//			}
-//			Dictionary<String, Object> properties = new Hashtable<>();
-//			properties.put(
-//					"servlet.alias",
-//					servletEvent.getAlias() == null ? "" : servletEvent
-//							.getAlias());
-//			properties.put(
-//					"servlet.name",
-//					servletEvent.getServletName() == null ? "" : servletEvent
-//							.getServletName());
-//			properties.put(
-//					"servlet.urlparameter",
-//					servletEvent.getUrlParameter() == null ? "" : servletEvent
-//							.getUrlParameter());
-//			if (servletEvent.getServletClassName() != null) {
-//				properties.put("servlet.servlet", servletEvent.getServletClassName());
-//			}
-//			properties.put("timestamp", servletEvent.getTimestamp());
-//			if (servletEvent.getHttpContext() != null) {
-//				properties.put("servlet.httpcontext",
-//						servletEvent.getHttpContext());
-//			}
-//			Event event = new Event(topic, properties);
-//			eventAdmin.postEvent(event);
-//		}
+		EventAdmin eventAdmin = eventAdminReference.get();
+		if (eventAdmin != null) {
+			final String topic;
+			switch (servletEvent.getType()) {
+				case DEPLOYING:
+					topic = WebEvent.WebTopic.DEPLOYING.toString();
+					break;
+				case DEPLOYED:
+					topic = WebEvent.WebTopic.DEPLOYED.toString();
+					break;
+				case UNDEPLOYING:
+					topic = WebEvent.WebTopic.UNDEPLOYING.toString();
+					break;
+				case UNDEPLOYED:
+					topic = WebEvent.WebTopic.UNDEPLOYED.toString();
+					break;
+				case WAITING:
+					// A Waiting Event is not supported by the specification
+					// therefore it is mapped to FAILED, because of collision.
+					//$FALL-THROUGH$
+				case FAILED:
+					//$FALL-THROUGH$
+				default:
+					topic = WebEvent.WebTopic.FAILED.toString();
+			}
+			Dictionary<String, Object> properties = new Hashtable<>();
+			properties.put(
+					"servlet.alias",
+					servletEvent.getAlias() == null ? "" : servletEvent
+							.getAlias());
+			properties.put(
+					"servlet.name",
+					servletEvent.getServletName() == null ? "" : servletEvent
+							.getServletName());
+			properties.put(
+					"servlet.urlparameter",
+					servletEvent.getUrlParameter() == null ? "" : servletEvent
+							.getUrlParameter());
+			if (servletEvent.getServletClassName() != null) {
+				properties.put("servlet.servlet", servletEvent.getServletClassName());
+			}
+			properties.put("timestamp", servletEvent.getTimestamp());
+			if (servletEvent.getHttpContext() != null) {
+				properties.put("servlet.httpcontext",
+						servletEvent.getHttpContext());
+			}
+			Event event = new Event(topic, properties);
+			eventAdmin.postEvent(event);
+		}
 	}
 
 	@Override

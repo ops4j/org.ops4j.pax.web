@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
@@ -67,6 +68,7 @@ import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
+import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterStateChange;
 import org.ops4j.pax.web.service.spi.task.OpCode;
@@ -881,6 +883,13 @@ class JettyServerWrapper implements BatchVisitor {
 				sch.getServletHandler().setFilterMappings(newFilterMappings);
 			}
 		}
+	}
+	
+	@Override
+	public void visit(EventListenerModelChange change) {
+//	    change.getEventListenerModel().
+//	    ServletContextHandler sch = contextHandlers.get();
+//        sch.addEventListener(change.getEventListenerModel().getEventListener());
 	}
 
 	/**

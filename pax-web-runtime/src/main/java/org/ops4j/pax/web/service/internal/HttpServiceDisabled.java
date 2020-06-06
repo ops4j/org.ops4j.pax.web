@@ -16,9 +16,13 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.util.Dictionary;
+import java.util.EventListener;
+import java.util.List;
+
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 
 import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
@@ -233,79 +237,28 @@ class HttpServiceDisabled implements StoppableHttpService {
 		LOG.warn("");
 	}
 
-//	/**
-//	 * Does nothing.
-//	 *
-//	 * @see WebContainer#registerEventListener(java.util.EventListener,
-//	 * HttpContext)
-//	 */
-//	@Override
-//	public void registerEventListener(final EventListener listener,
-//									  final HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	/**
-//	 * Does nothing.
-//	 *
-//	 * @see WebContainer#unregisterEventListener(java.util.EventListener)
-//	 */
-//	@Override
-//	public void unregisterEventListener(final EventListener listener) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	/**
-//	 * @see WebContainer#registerFilter(Filter, String[], String[], Dictionary,
-//	 * HttpContext)
-//	 */
-//	@Override
-//	public void registerFilter(final Filter filter, final String[] urlPatterns,
-//							   final String[] servletNames,
-//							   final Dictionary<String, ?> initParams,
-//							   final HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//
-//	@Override
-//	public void registerFilter(Filter filter, String[] urlPatterns, String[] servletNames,
-//							   Dictionary<String, String> initParams, Boolean asyncSupported, HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	@Override
-//	public void registerFilter(Class<? extends Filter> filterClass,
-//							   String[] urlPatterns, String[] servletNames,
-//							   Dictionary<String, String> initParams, HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	@Override
-//	public void registerFilter(Class<? extends Filter> filterClass,
-//							   String[] urlPatterns, String[] servletNames,
-//							   Dictionary<String, String> initParams, boolean asyncSupported, HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	/**
-//	 * @see WebContainer#unregisterFilter(Filter)
-//	 */
-//	@Override
-//	public void unregisterFilter(final Filter filter) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	@Override
-//	public void unregisterFilter(Class<? extends Filter> filterClass) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	@Override
-//	public void unregisterFilter(String filterName) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
+	/**
+	 * Does nothing.
+	 *
+	 * @see WebContainer#registerEventListener(java.util.EventListener,
+	 * HttpContext)
+	 */
+	@Override
+	public void registerEventListener(final EventListener listener,
+									  final HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	/**
+	 * Does nothing.
+	 *
+	 * @see WebContainer#unregisterEventListener(java.util.EventListener)
+	 */
+	@Override
+	public void unregisterEventListener(final EventListener listener) {
+		LOG.warn("Http service has already been stopped");
+	}
+
 //	/**
 //	 * @see WebContainer#setContextParam(Dictionary, HttpContext)
 //	 */
@@ -450,10 +403,10 @@ class HttpServiceDisabled implements StoppableHttpService {
 //		LOG.warn("Http service has already been stopped");
 //	}
 //
-//	@Override
-//	public void registerJettyWebXml(URL jettyWebXmlURL, HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
+////	@Override
+////	public void registerJettyWebXml(URL jettyWebXmlURL, HttpContext httpContext) {
+////		LOG.warn("Http service has already been stopped");
+////	}
 //
 //	@Override
 //	public void registerJspServlet(String[] urlPatterns,
@@ -468,11 +421,11 @@ class HttpServiceDisabled implements StoppableHttpService {
 //		LOG.warn("Http service has already been stopped");
 //	}
 //
-//	@Override
-//	public void setConnectorsAndVirtualHosts(List<String> connectors, List<String> virtualHosts,
-//											 HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
+////	@Override
+////	public void setConnectorsAndVirtualHosts(List<String> connectors, List<String> virtualHosts,
+////											 HttpContext httpContext) {
+////		LOG.warn("Http service has already been stopped");
+////	}
 //
 //	@Override
 //	public void registerJspConfigTagLibs(String tagLibLocation, String tagLibUri, HttpContext httpContext) {
@@ -495,21 +448,21 @@ class HttpServiceDisabled implements StoppableHttpService {
 //	public void unregisterWebSocket(Object webSocket, HttpContext httpContext) {
 //		LOG.warn("Http service has already been stoped");
 //	}
-
-//	@Override
-//	public RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator) {
-//		LOG.warn("Http service has already been stoped");
-//		// FIXME check if null valid
-//		return null;
-//	}
 //
-//	@Override
-//	public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator) {
-//		LOG.warn("Http service has already been stoped");
-//		// FIXME check if null valid
-//		return null;
-//	}
-
+////	@Override
+////	public RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator) {
+////		LOG.warn("Http service has already been stoped");
+////		// FIXME check if null valid
+////		return null;
+////	}
+////
+////	@Override
+////	public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator) {
+////		LOG.warn("Http service has already been stoped");
+////		// FIXME check if null valid
+////		return null;
+////	}
+//
 //	@Override
 //	public String toString() {
 //		if (serviceBundle == null) {
@@ -519,10 +472,10 @@ class HttpServiceDisabled implements StoppableHttpService {
 //		}
 //	}
 //
-//    @Override
-//    public WebContainerDTO getWebcontainerDTO() {
-//        LOG.warn("Http service has already been stoped");
-//        return null;
-//    }
+////    @Override
+////    public WebContainerDTO getWebcontainerDTO() {
+////        LOG.warn("Http service has already been stoped");
+////        return null;
+////    }
 
 }

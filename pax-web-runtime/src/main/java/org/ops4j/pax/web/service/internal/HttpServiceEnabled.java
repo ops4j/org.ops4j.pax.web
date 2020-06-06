@@ -17,25 +17,49 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.io.File;
+import java.net.URL;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.EventListener;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
+
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.websocket.DeploymentException;
 
+import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.annotations.PaxWebConfiguration;
 import org.ops4j.pax.web.annotations.PaxWebTesting;
 import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
 import org.ops4j.pax.web.service.PaxWebConstants;
+import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.service.internal.util.SupportUtils;
 import org.ops4j.pax.web.service.internal.views.DirectWebContainerView;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerListener;
@@ -49,11 +73,18 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
+import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
+import org.ops4j.util.collections.PropertyResolver;
+import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
@@ -751,7 +782,67 @@ public class HttpServiceEnabled implements StoppableHttpService {
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
+	
+	
+	// --- EventListener 
+	
+	   
+    @Override
+    public void registerEventListener(final EventListener listener,
+                                      final HttpContext httpContext) {
+        doRegisterEventListener(Collections.singletonList(httpContext), new EventListenerModel(listener));
+    }
+    
 
+
+    @Override
+    public void unregisterEventListener(final EventListener listener) {
+        
+        try {
+            serverModel.run(() -> {
+                final Batch batch = new Batch("Unregistration of EventListener: " + listener);
+                serviceModel.removeEventListener(listener);
+                serverController.sendBatch(batch);
+
+                batch.accept(serviceModel);
+
+                return null;
+            });
+        } catch (ServletException | NamespaceException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+        
+    }
+
+	private void doRegisterEventListener(Collection<HttpContext> httpContexts, EventListenerModel model) {
+	    model.performValidation();
+
+        final Batch batch = new Batch("Registration of " + model);
+
+        try {
+            serverModel.run(() -> {
+                translateContexts(httpContexts, model, batch);
+
+                LOG.info("Registering {}", model);
+                
+                serviceModel.addEventListenerModel(model);
+
+                // only if validation was fine, pass the batch to ServerController, where the batch may fail again
+                serverController.sendBatch(batch);
+
+                // if server runtime has accepted the changes (hoping it'll be in clean state if it didn't), lets
+                // actually apply the changes to global model (through ServiceModel)
+                batch.accept(serviceModel);
+
+                return null;
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+	}
+	
+
+	
 	// --- private support methods
 
 	private void servletEvent(ServletEvent.State type, Bundle bundle, ServletModel model) {
@@ -933,41 +1024,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 //				.getName()
 //				.equals("org.ops4j.pax.web.extender.war.internal.WebAppWebContainerContext");
 //	}
-//	@Override
-//	public void registerEventListener(final EventListener listener,
-//									  final HttpContext httpContext) {
-//		final ContextModel contextModel = getOrCreateContext(httpContext);
-//		LOG.debug("Register event listener (listener={}). Using context [{}]", listener, contextModel);
-//		final EventListenerModel model = new EventListenerModel(contextModel,
-//				listener);
-//		boolean serviceSuccess = false;
-//		boolean controllerSuccess = false;
-//		try {
-//			serviceModel.addEventListenerModel(model);
-//			serviceSuccess = true;
-//			serverController.addEventListener(model);
-//			controllerSuccess = true;
-//		} finally {
-//			// as this compensatory actions to work the remove methods should
-//			// not throw exceptions.
-//			if (!controllerSuccess) {
-//				if (serviceSuccess) {
-//					serviceModel.removeEventListener(listener);
-//				}
-//			}
-//		}
-//	}
-//
-//	@Override
-//	public void unregisterEventListener(final EventListener listener) {
-//		final EventListenerModel model = serviceModel
-//				.removeEventListener(listener);
-//		if (model != null) {
-//			LOG.debug("Unegister event listener (listener={})", listener);
-//			serverController.removeEventListener(model);
-//		}
-//	}
-//
+
 //	/**
 //	 * @see WebContainer#setContextParam(Dictionary, HttpContext)
 //	 */
@@ -1024,7 +1081,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 //
 //		serviceModel.addContextModel(contextModel);
 //	}
-//
+
 //	/**
 //	 * @see WebContainer#registerJsps(String[], Dictionary, HttpContext)
 //	 */
@@ -1043,7 +1100,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 //							 final HttpContext httpContext) {
 //		registerJspServlet(urlPatterns, initParams, httpContext, null);
 //	}
-//
+
 //	@Override
 //	public void registerJspServlet(final String[] urlPatterns,
 //								   final HttpContext httpContext, final String jspFile) {
@@ -1054,34 +1111,34 @@ public class HttpServiceEnabled implements StoppableHttpService {
 //	public void registerJspServlet(final String[] urlPatterns,
 //								   Dictionary<String, ?> initParams, final HttpContext httpContext,
 //								   final String jspFile) {
-////		if (!SupportUtils.isJSPAvailable()) {
-////			throw new UnsupportedOperationException(
-////					"Jsp support is not enabled. Is org.ops4j.pax.web.jsp bundle installed?");
-////		}
-////		final Servlet jspServlet = new JspServletWrapper(serviceBundle, jspFile);
-////		final ContextModel contextModel = getOrCreateContext(httpContext);
-////		//CHECKSTYLE:OFF
-////		initParams = createInitParams(contextModel, initParams == null ? new Hashtable<>() : initParams);
-////		//CHECKSTYLE:ON
-////		serviceModel.addContextModel(contextModel);
-////		try {
-////			registerServlet(jspServlet, getJspServletName(jspFile),
-////					urlPatterns == null ? new String[]{"*.jsp"}
-////							: urlPatterns, initParams, httpContext);
-////		} catch (ServletException ignore) {
-////			// this should never happen
-////			LOG.error("Internal error. Please report.", ignore);
-////		}
-////		Map<Servlet, String[]> jspServlets = contextModel.getJspServlets();
-////		jspServlets.put(jspServlet, urlPatterns);
+//		if (!SupportUtils.isJSPAvailable()) {
+//			throw new UnsupportedOperationException(
+//					"Jsp support is not enabled. Is org.ops4j.pax.web.jsp bundle installed?");
+//		}
+//		final Servlet jspServlet = new JspServletWrapper(serviceBundle, jspFile);
+//		final ContextModel contextModel = getOrCreateContext(httpContext);
+//		//CHECKSTYLE:OFF
+//		initParams = createInitParams(contextModel, initParams == null ? new Hashtable<>() : initParams);
+//		//CHECKSTYLE:ON
+//		serviceModel.addContextModel(contextModel);
+//		try {
+//			registerServlet(jspServlet, getJspServletName(jspFile),
+//					urlPatterns == null ? new String[]{"*.jsp"}
+//							: urlPatterns, initParams, httpContext);
+//		} catch (ServletException ignore) {
+//			// this should never happen
+//			LOG.error("Internal error. Please report.", ignore);
+//		}
+//		Map<Servlet, String[]> jspServlets = contextModel.getJspServlets();
+//		jspServlets.put(jspServlet, urlPatterns);
 //
 //	}
-//
-//	private String getJspServletName(String jspFile) {
-//		return null;
-////		return jspFile == null ? PAX_WEB_JSP_SERVLET : null;
-//	}
-//
+
+	private String getJspServletName(String jspFile) {
+		return null;
+//		return jspFile == null ? PAX_WEB_JSP_SERVLET : null;
+	}
+
 //	@SuppressWarnings("unchecked")
 //	private Dictionary<String, ?> createInitParams(ContextModel contextModel,
 //												   Dictionary<String, ?> initParams) {
@@ -1162,7 +1219,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 //					"Jsp support is not enabled. Is org.ops4j.pax.web.jsp bundle installed?");
 //		}
 //		NullArgumentException.validateNotNull(httpContext, "Http context");
-//		final ContextModel contextModel = serviceModel
+//		final OsgiContextModel contextModel = serviceModel
 //				.getContextModel(httpContext);
 //		if (contextModel == null) {
 //			throw new IllegalArgumentException(
@@ -1468,7 +1525,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 //	public void unregisterServletContainerInitializer(HttpContext httpContext) {
 //		//nothing to do
 //	}
-//
+
 //	@Override
 //	public void begin(HttpContext httpContext) {
 //		final ContextModel contextModel = getOrCreateContext(httpContext);
@@ -1499,7 +1556,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 //		}
 //		//CHECKSTYLE:ON
 //	}
-//
+
 //	@Override
 //	public void setConnectorsAndVirtualHosts(List<String> connectors, List<String> virtualHosts,
 //											 HttpContext httpContext) {
@@ -1532,7 +1589,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 //		contextModel.setVirtualHosts(realVirtualHosts);
 //		serviceModel.addContextModel(contextModel);
 //	}
-//
+
 //	@Override
 //	public void registerJspConfigTagLibs(String tagLibLocation, String tagLibUri, HttpContext httpContext) {
 //		NullArgumentException.validateNotNull(httpContext, "Http context");
@@ -1656,18 +1713,18 @@ public class HttpServiceEnabled implements StoppableHttpService {
 //	public void unregisterWebSocket(Object webSocket, HttpContext httpContext) {
 //		// TODO Auto-generated method stub
 //	}
+
+//	@Override
+//	public RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator) {
+//		return withWhiteboardDtoService(service -> service.calculateRequestInfoDTO(path, iterator, serverModel, serviceModel));
+//	}
 //
-////	@Override
-////	public RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator) {
-////		return withWhiteboardDtoService(service -> service.calculateRequestInfoDTO(path, iterator, serverModel, serviceModel));
-////	}
-////
-////	@Override
-////	public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator) {
-////		return withWhiteboardDtoService(service -> service.createWhiteboardRuntimeDTO(iterator, serverModel, serviceModel));
-////	}
-//
-//
+//	@Override
+//	public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator) {
+//		return withWhiteboardDtoService(service -> service.createWhiteboardRuntimeDTO(iterator, serverModel, serviceModel));
+//	}
+
+
 //	/**
 //	 * WhiteboardDtoService is registered as DS component. Should be removed if this class gets full DS support
 //	 * @param function a function which is applied against WhiteboardDtoService
@@ -1689,11 +1746,11 @@ public class HttpServiceEnabled implements StoppableHttpService {
 //		}
 //		throw new IllegalStateException(String.format("Service '%s' could not be retrieved!", WhiteboardDtoService.class.getName()));
 //	}
-//
-//	@Override
-//	public String toString() {
-//		return super.toString() + " for bundle " + serviceBundle;
-//	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " for bundle " + serviceBundle;
+	}
 
 //    @Override
 //    public WebContainerDTO getWebcontainerDTO() {

@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,10 +25,12 @@ import java.util.Set;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.context.DefaultHttpContext;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
+import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterStateChange;
 import org.ops4j.pax.web.service.spi.task.OpCode;
@@ -118,7 +121,7 @@ public class ServiceModel implements BatchVisitor {
 		return model;
 	}
 
-//	private final Map<EventListener, EventListenerModel> eventListenerModels;
+	private final Map<EventListener, EventListenerModel> eventListenerModels = new HashMap<>();
 //	private final Map<String, ErrorPageModel> errorPageModels;
 //	private final Map<String, WelcomeFileModel> welcomeFileModels;
 //	private final Map<HttpContext, OsgiContextModel> contextModels;
@@ -311,28 +314,53 @@ public class ServiceModel implements BatchVisitor {
 //		return foundServletModels;
 //	}
 
-//	public synchronized void addEventListenerModel(
-//			final EventListenerModel model) {
-//		if (eventListenerModels.containsKey(model.getEventListener())) {
-//			throw new IllegalArgumentException("Listener ["
-//					+ model.getEventListener() + "] already registered.");
-//		}
-//		eventListenerModels.put(model.getEventListener(), model);
-//		addContextModel(model.getContextModels());
-//	}
-//
-//	public synchronized EventListenerModel removeEventListener(
-//			final EventListener listener) {
-//		final EventListenerModel model;
-//		model = eventListenerModels.get(listener);
-//		if (model == null) {
-//			throw new IllegalArgumentException("Listener [" + listener
-//					+ " is not currently registered in any context");
-//		}
-//		eventListenerModels.remove(listener);
-//		return model;
-//	}
-//
+	public synchronized void addEventListenerModel(
+			final EventListenerModel model) {
+		if (eventListenerModels.containsKey(model.getEventListener())) {
+			throw new IllegalArgumentException("Listener ["
+					+ model.getEventListener() + "] already registered.");
+		}
+		eventListenerModels.put(model.getEventListener(), model);
+	}
+
+	public synchronized EventListenerModel removeEventListener(
+			final EventListener listener) {
+		final EventListenerModel model;
+		model = eventListenerModels.get(listener);
+		if (model == null) {
+			throw new IllegalArgumentException("Listener [" + listener
+					+ " is not currently registered in any context");
+		}
+		eventListenerModels.remove(listener);
+		return model;
+	}
+
+    @Override
+    public void visit(EventListenerModelChange change) {
+        if (change.getKind() == OpCode.ADD) {
+            EventListenerModel model = change.getEventListenerModel();
+
+            // apply the change at ServiceModel level - whether it's disabled or not
+            eventListenerModels.put(model.getEventListener(), model);
+            // the change should also be processed at serverModel level
+            serverModel.visit(change);
+            return;
+        }
+
+        if (change.getKind() == OpCode.DELETE) {
+            EventListenerModel eventListenerModel = change.getEventListenerModel();
+
+            eventListenerModels.remove(eventListenerModel.getEventListener());
+            // the change should be processed at serverModel level as well
+            serverModel.visit(change);
+            return;
+        }
+
+        if (change.getKind() == OpCode.ENABLE || change.getKind() == OpCode.DISABLE) {
+            serverModel.visit(change);
+        }
+    }
+
 //	public synchronized void addFilterModel(final FilterModel model) {
 //		String name = model.getName();
 //

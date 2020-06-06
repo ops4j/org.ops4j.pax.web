@@ -16,6 +16,7 @@
 package org.ops4j.pax.web.service.spi;
 
 import org.ops4j.pax.web.service.spi.config.Configuration;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.task.Batch;
 
 /**

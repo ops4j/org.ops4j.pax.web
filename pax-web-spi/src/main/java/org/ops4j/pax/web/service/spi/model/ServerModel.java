@@ -48,10 +48,12 @@ import org.ops4j.pax.web.service.spi.context.DefaultHttpContext;
 import org.ops4j.pax.web.service.spi.context.DefaultMultiBundleWebContainerContext;
 import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
+import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterStateChange;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
@@ -288,7 +290,7 @@ public class ServerModel implements BatchVisitor {
 
 	// TODO: Should listeners, security constraints, login configs, welcome files, security roles, error pages
 	//       and mime types be checked for unique registration?
-
+	
 	/**
 	 * Creates new global model of all web applications with {@link Executor} to be used for configuration and
 	 * registration tasks.
@@ -1627,13 +1629,10 @@ public class ServerModel implements BatchVisitor {
 	}
 
 
-
-
-
-
-
-
-
+	@Override
+	public void visit(EventListenerModelChange change) {
+	    //nothing to do here, eventlisteners aren't checked
+	}
 
 
 

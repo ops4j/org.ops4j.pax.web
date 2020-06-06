@@ -19,16 +19,15 @@ package org.ops4j.pax.web.service.spi.model.elements;
 import java.util.EventListener;
 
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.ServerEvent;
+import org.ops4j.pax.web.service.spi.ServerListener;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 
-public class EventListenerModel extends ElementModel {
+public class EventListenerModel extends ElementModel<EventListener>{
 
 	private final EventListener eventListener;
 
-	public EventListenerModel(final OsgiContextModel contextModel,
-							  final EventListener eventListener) {
-//		super(contextModel);
+	public EventListenerModel(final EventListener eventListener) {
 		NullArgumentException.validateNotNull(eventListener, "Listener");
 		this.eventListener = eventListener;
 	}

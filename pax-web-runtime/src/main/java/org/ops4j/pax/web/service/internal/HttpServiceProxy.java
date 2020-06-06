@@ -15,10 +15,15 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.util.Arrays;
 import java.util.Dictionary;
+import java.util.EventListener;
+import java.util.List;
+
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 
 import org.ops4j.lang.NullArgumentException;
@@ -258,102 +263,25 @@ class HttpServiceProxy implements StoppableHttpService {
 		delegate.unregisterFilters(filterClass);
 	}
 
-//	@Override
-//	public void registerResources(final String alias, final String name,
-//			final HttpContext httpContext) throws NamespaceException {
-//		LOG.debug("Registering resource: [" + alias + "] -> " + name);
-//		delegate.registerResources(alias, name, httpContext);
-//	}
-//
-//	/**
-//	 * @see WebContainer#registerEventListener(EventListener, HttpContext) )
-//	 */
-//	@Override
-//	public void registerEventListener(final EventListener listener,
-//			final HttpContext httpContext) {
-//		LOG.debug("Registering event listener [" + listener + "]");
-//		delegate.registerEventListener(listener, httpContext);
-//	}
-//
-//	/**
-//	 * @see WebContainer#unregisterEventListener(EventListener)
-//	 */
-//	@Override
-//	public void unregisterEventListener(final EventListener listener) {
-//		LOG.debug("Unregistering event listener [" + listener + "]");
-//		delegate.unregisterEventListener(listener);
-//	}
-//
-//	/**
-//	 * @see WebContainer#registerFilter(Filter, String[], String[], Dictionary,
-//	 * HttpContext)
-//	 */
-//	@Override
-//	public void registerFilter(final Filter filter, final String[] urlPatterns,
-//			final String[] aliases, final Dictionary<String, ?> initParams,
-//			final HttpContext httpContext) {
-//		LOG.debug("Registering filter [" + filter + "]");
-//		delegate.registerFilter(filter, urlPatterns, aliases, initParams, httpContext);
-//	}
-//
-//	@Override
-//	public void registerFilter(Filter filter, String[] urlPatterns, String[] servletNames,
-//			Dictionary<String, String> initParams, Boolean asyncSupported, HttpContext httpContext) {
-//		LOG.debug("Registering filter [" + filter + "]");
-//		delegate.registerFilter(filter, urlPatterns, servletNames, initParams, asyncSupported, httpContext);
-//	}
-//
-//	/**
-//	 * @see WebContainer#registerFilter(Filter, String[], String[], Dictionary,
-//	 * HttpContext)
-//	 */
-//	@Override
-//	public void registerFilter(Class<? extends Filter> filterClass,
-//			String[] urlPatterns, String[] servletNames,
-//			Dictionary<String, String> initParams, HttpContext httpContext) {
-//		LOG.debug("Registering filter with class [" + filterClass + "]");
-//		delegate.registerFilter(filterClass, urlPatterns, servletNames, initParams, httpContext);
-//	}
-//
-//	/**
-//	 * @see WebContainer#registerFilter(Filter, String[], String[], Dictionary,
-//	 * HttpContext)
-//	 */
-//	@Override
-//	public void registerFilter(Class<? extends Filter> filterClass,
-//			String[] urlPatterns, String[] servletNames,
-//			Dictionary<String, String> initParams, boolean asyncSupported, HttpContext httpContext) {
-//		LOG.debug("Registering filter with class [" + filterClass + "]");
-//		delegate.registerFilter(filterClass, urlPatterns, servletNames, initParams, asyncSupported, httpContext);
-//	}
-//
-//	/**
-//	 * @see WebContainer#unregisterFilter(Filter)
-//	 */
-//	@Override
-//	public void unregisterFilter(final Filter filter) {
-//		LOG.debug("Unregistering filter [" + filter + "]");
-//		delegate.unregisterFilter(filter);
-//	}
-//
-//	/**
-//	 * @see WebContainer#unregisterFilter(Filter)
-//	 */
-//	@Override
-//	public void unregisterFilter(Class<? extends Filter> filterClass) {
-//		LOG.debug("Unregistering filter [" + filterClass + "]");
-//		delegate.unregisterFilter(filterClass);
-//	}
-//
-//	/**
-//	 * @see WebContainer#unregisterFilter(Filter)
-//	 */
-//	@Override
-//	public void unregisterFilter(final String filterName) {
-//		LOG.debug("Unregistering filter [" + filterName + "]");
-//		delegate.unregisterFilter(filterName);
-//	}
-//
+	/**
+	 * @see WebContainer#registerEventListener(EventListener, HttpContext) )
+	 */
+	@Override
+	public void registerEventListener(final EventListener listener,
+			final HttpContext httpContext) {
+		LOG.debug("Registering event listener [" + listener + "]");
+		delegate.registerEventListener(listener, httpContext);
+	}
+
+	/**
+	 * @see WebContainer#unregisterEventListener(EventListener)
+	 */
+	@Override
+	public void unregisterEventListener(final EventListener listener) {
+		LOG.debug("Unregistering event listener [" + listener + "]");
+		delegate.unregisterEventListener(listener);
+	}
+
 //	/**
 //	 * @see WebContainer#setContextParam(Dictionary, HttpContext)
 //	 */
@@ -494,10 +422,10 @@ class HttpServiceProxy implements StoppableHttpService {
 //		delegate.unregisterConstraintMapping(httpContext);
 //	}
 //
-//	@Override
-//	public SharedWebContainerContext getDefaultSharedHttpContext() {
-//		return delegate.getDefaultSharedHttpContext();
-//	}
+////	@Override
+////	public SharedWebContainerContext getDefaultSharedHttpContext() {
+////		return delegate.getDefaultSharedHttpContext();
+////	}
 //
 //	@Override
 //	public void registerServletContainerInitializer(
@@ -512,10 +440,10 @@ class HttpServiceProxy implements StoppableHttpService {
 //		delegate.unregisterServletContainerInitializer(httpContext);
 //	}
 //
-//	@Override
-//	public void registerJettyWebXml(URL jettyWebXmlURL, HttpContext httpContext) {
-//		delegate.registerJettyWebXml(jettyWebXmlURL, httpContext);
-//	}
+////	@Override
+////	public void registerJettyWebXml(URL jettyWebXmlURL, HttpContext httpContext) {
+////		delegate.registerJettyWebXml(jettyWebXmlURL, httpContext);
+////	}
 //
 //	@Override
 //	public void registerJspServlet(String[] urlPatterns,
@@ -531,10 +459,10 @@ class HttpServiceProxy implements StoppableHttpService {
 //				jspFile);
 //	}
 //
-//	@Override
-//	public void setConnectorsAndVirtualHosts(List<String> connectors, List<String> virtualHosts, HttpContext httpContext) {
-//		delegate.setConnectorsAndVirtualHosts(connectors, virtualHosts, httpContext);
-//	}
+////	@Override
+////	public void setConnectorsAndVirtualHosts(List<String> connectors, List<String> virtualHosts, HttpContext httpContext) {
+////		delegate.setConnectorsAndVirtualHosts(connectors, virtualHosts, httpContext);
+////	}
 //
 //	@Override
 //	public void registerJspConfigTagLibs(String tagLibLocation, String tagLibUri, HttpContext httpContext) {
@@ -557,7 +485,7 @@ class HttpServiceProxy implements StoppableHttpService {
 //	public void unregisterWebSocket(Object webSocket, HttpContext httpContext) {
 //		delegate.unregisterWebSocket(webSocket, httpContext);
 //	}
-//
+
 //	@Override
 //	public RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator) {
 //		return delegate.calculateRequestInfoDTO(path, iterator);

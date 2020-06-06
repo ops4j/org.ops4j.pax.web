@@ -90,21 +90,21 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 			LOG.warn("Unregistration exception. Skipping.", ignore);
 		}
 		// unregister welcome files
-		try {
-			webContainer.unregisterWelcomeFiles(webApp.getWelcomeFiles(), httpContext);
-		} catch (IllegalArgumentException badarg) {
-			// Ignore, we haven't registered anything
-		} catch (Exception ignore) {
-			LOG.warn("Unregistration exception. Skipping.", ignore);
-		}
-		// unregister JSP support
-		try {
-			webContainer.unregisterJsps(httpContext);
-		} catch (IllegalArgumentException | UnsupportedOperationException badarg) {
-			// Ignore, we haven't registered anything
-		} catch (Exception ignore) {
-			LOG.warn("Unregistration exception. Skipping.", ignore);
-		}
+//		try {
+//			webContainer.unregisterWelcomeFiles(webApp.getWelcomeFiles(), httpContext);
+//		} catch (IllegalArgumentException badarg) {
+//			// Ignore, we haven't registered anything
+//		} catch (Exception ignore) {
+//			LOG.warn("Unregistration exception. Skipping.", ignore);
+//		}
+//		// unregister JSP support
+//		try {
+//			webContainer.unregisterJsps(httpContext);
+//		} catch (IllegalArgumentException | UnsupportedOperationException badarg) {
+//			// Ignore, we haven't registered anything
+//		} catch (Exception ignore) {
+//			LOG.warn("Unregistration exception. Skipping.", ignore);
+//		}
 		//CHECKSTYLE:ON
 	}
 
@@ -188,35 +188,35 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 	 * @see WebAppVisitor#visit(WebAppErrorPage)
 	 */
 	public void visit(final WebAppErrorPage webAppErrorPage) {
-		NullArgumentException.validateNotNull(webAppErrorPage,
-				"Web app error page");
-		//CHECKSTYLE:OFF
-		try {
-			webContainer.unregisterErrorPage(webAppErrorPage.getError(),
-					httpContext);
-		} catch (Exception ignore) {
-			LOG.warn("Unregistration exception. Skipping.", ignore);
-		}
-		//CHECKSTYLE:ON
+//		NullArgumentException.validateNotNull(webAppErrorPage,
+//				"Web app error page");
+//		//CHECKSTYLE:OFF
+//		try {
+//			webContainer.unregisterErrorPage(webAppErrorPage.getError(),
+//					httpContext);
+//		} catch (Exception ignore) {
+//			LOG.warn("Unregistration exception. Skipping.", ignore);
+//		}
+//		//CHECKSTYLE:ON
 	}
 
 	public void visit(WebAppLoginConfig loginConfig) {
-		NullArgumentException.validateNotNull(loginConfig,
-				"Web app login config");
-		webContainer.unregisterLoginConfig(httpContext);
+//		NullArgumentException.validateNotNull(loginConfig,
+//				"Web app login config");
+//		webContainer.unregisterLoginConfig(httpContext);
 	}
 
 	public void visit(WebAppConstraintMapping constraintMapping) {
-		NullArgumentException.validateNotNull(constraintMapping,
-				"Web app constraint mapping");
-		webContainer.unregisterConstraintMapping(httpContext);
+//		NullArgumentException.validateNotNull(constraintMapping,
+//				"Web app constraint mapping");
+//		webContainer.unregisterConstraintMapping(httpContext);
 	}
 
 	public void visit(
 			WebAppServletContainerInitializer servletContainerInitializer) {
-		NullArgumentException.validateNotNull(servletContainerInitializer,
-				"Servlet Container Initializer");
-		webContainer.unregisterServletContainerInitializer(httpContext);
+//		NullArgumentException.validateNotNull(servletContainerInitializer,
+//				"Servlet Container Initializer");
+//		webContainer.unregisterServletContainerInitializer(httpContext);
 	}
 
 	public void end() {

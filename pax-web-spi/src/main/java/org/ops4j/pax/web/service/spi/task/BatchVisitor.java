@@ -52,4 +52,6 @@ public interface BatchVisitor {
 	 */
 	void visit(FilterStateChange filterStateChange);
 
+	//TODO: Fix documentation
+    void visit(EventListenerModelChange change);
 }

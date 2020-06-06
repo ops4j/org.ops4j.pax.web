@@ -1,5 +1,4 @@
 /*
- * Copyright 2007 Damian Golda.
  *
  * Licensed  under the  Apache License,  Version 2.0  (the "License");
  * you may not use  this file  except in  compliance with the License.
@@ -33,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppMimeMapping;
 import org.ops4j.pax.web.extender.war.internal.util.Path;
+import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * @author Alin Dreghiciu
  * @since 0.3.0, December 27, 2007
  */
-class WebAppHttpContext implements HttpContext {
+class WebAppHttpContext extends WebContainerContextWrapper {
 
     static final URL NO_URL;
 
@@ -95,8 +95,7 @@ class WebAppHttpContext implements HttpContext {
 	 */
 	WebAppHttpContext(final HttpContext httpContext, final String rootPath,
 					  final Bundle bundle, final WebAppMimeMapping[] webAppMimeMappings) {
-		NullArgumentException.validateNotNull(httpContext, "http context");
-		NullArgumentException.validateNotNull(bundle, "Bundle");
+        super(bundle, httpContext);
 		if (log.isDebugEnabled()) {
 			log.debug("Creating WebAppHttpContext for {}", httpContext);
 		}

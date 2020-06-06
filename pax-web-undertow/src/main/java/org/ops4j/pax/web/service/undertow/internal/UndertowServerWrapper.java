@@ -64,6 +64,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
+import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterStateChange;
 import org.ops4j.pax.web.service.spi.task.OpCode;
@@ -1140,6 +1141,11 @@ class UndertowServerWrapper implements BatchVisitor {
 				}
 			}
 		}
+	}
+	
+	@Override
+	public void visit(EventListenerModelChange change) {
+	    //TODO: needs implementation
 	}
 
 	/**
