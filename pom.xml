@@ -2321,7 +2321,7 @@
 		<module>pax-web-extender-war</module>
 		<module>pax-web-extender-whiteboard</module>
 <!-- 		<module>pax-web-resources</module> -->
-<!-- 		<module>pax-web-deployer</module> -->
+		<module>pax-web-deployer</module>
 		<module>pax-web-jetty</module>
 <!-- 		<module>pax-web-jetty-bundle</module> -->
 		<module>pax-web-tomcat</module>
