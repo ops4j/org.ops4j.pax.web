@@ -24,6 +24,7 @@ import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.osgi.service.http.HttpContext;
@@ -204,6 +205,10 @@ public class Batch {
 	 */
 	public void updateFilters(Map<String, TreeSet<FilterModel>> contextFilters) {
 		operations.add(new FilterStateChange(contextFilters));
+	}
+	
+	public void addEventListenerModel(ServerModel serverModel, EventListenerModel model) {
+	    operations.add(new EventListenerModelChange(OpCode.ENABLE, serverModel, model));
 	}
 
 	/**

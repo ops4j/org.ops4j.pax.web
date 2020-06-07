@@ -826,6 +826,8 @@ public class HttpServiceEnabled implements StoppableHttpService {
                 LOG.info("Registering {}", model);
                 
                 serviceModel.addEventListenerModel(model);
+                
+                serverModel.addEventListenerModel(model, batch);
 
                 // only if validation was fine, pass the batch to ServerController, where the batch may fail again
                 serverController.sendBatch(batch);

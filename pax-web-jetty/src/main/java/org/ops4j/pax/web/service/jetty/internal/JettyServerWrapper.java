@@ -18,9 +18,11 @@ package org.ops4j.pax.web.service.jetty.internal;
 import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -50,6 +52,7 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
 import org.eclipse.jetty.util.ArrayUtil;
+import org.eclipse.jetty.util.component.Container.Listener;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.xml.XmlConfiguration;
@@ -885,11 +888,16 @@ class JettyServerWrapper implements BatchVisitor {
 		}
 	}
 	
-	@Override
+	@SuppressWarnings("unlikely-arg-type")
+    @Override
 	public void visit(EventListenerModelChange change) {
-//	    change.getEventListenerModel().
-//	    ServletContextHandler sch = contextHandlers.get();
-//        sch.addEventListener(change.getEventListenerModel().getEventListener());
+	    EventListenerModel eventListenerModel = change.getEventListenerModel();
+	    List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
+	    contextModels.forEach((context)->{
+	        ServletContextHandler servletContextHandler = contextHandlers.get(context.getContextPath());
+            EventListener eventListener = eventListenerModel.getEventListener();
+            servletContextHandler.addEventListener(eventListener);
+	    });
 	}
 
 	/**

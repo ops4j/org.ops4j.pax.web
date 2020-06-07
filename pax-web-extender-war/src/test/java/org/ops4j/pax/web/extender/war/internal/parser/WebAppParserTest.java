@@ -17,7 +17,9 @@
 package org.ops4j.pax.web.extender.war.internal.parser;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.math.BigInteger;
@@ -41,13 +43,12 @@ public class WebAppParserTest {
     public void tearDown() throws Exception {
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testParseWebXml() throws Exception {
         WebAppParser parser = new WebAppParser(null);
         File file = new File("src/test/resources/web.xml");
         assertTrue(file.exists());
-        WebAppType parseWebXml = parser.parseWebXml(file.toURL());
+        WebAppType parseWebXml = parser.parseWebXml(file.toURI().toURL());
         assertNotNull(parseWebXml);
         List<JAXBElement<?>> list = parseWebXml.getModuleNameOrDescriptionAndDisplayName();
         for (JAXBElement<?> jaxbElement : list) {
