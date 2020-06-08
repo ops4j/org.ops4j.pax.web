@@ -563,11 +563,9 @@ public class EmbeddedJettyTest {
 		// just can't send `GET  HTTP/1.1` request
 //		response = send(connector.getLocalPort(), "");
 		response = send(connector.getLocalPort(), "/");
-		// Looks like Jetty handle it incorrectly. path info should be "/". Tomcat handles it
-		// according to specification
-//		assertTrue("Special, strange Servlet API 4 mapping rule", response.endsWith("|  |  | / |"));
-//TODO: this one failed
-//		assertTrue("Special, strange Servlet API 4 mapping rule", response.endsWith("|  |  | null |"));
+		// Jetty fixed https://github.com/eclipse-ee4j/servlet-api/issues/300
+		// with https://github.com/eclipse/jetty.project/issues/4542
+		assertTrue("Special, strange Servlet API 4 mapping rule", response.endsWith("|  |  | / |"));
 		response = send(connector.getLocalPort(), "/x");
 		assertTrue(response.endsWith("|  | /x | null |"));
 		response = send(connector.getLocalPort(), "/y");
@@ -582,14 +580,12 @@ public class EmbeddedJettyTest {
 		// if org.eclipse.jetty.server.handler.ContextHandler.setAllowNullPathInfo(false):
 //		assertTrue(response.contains("HTTP/1.1 302"));
 		// still, treating as special "" mapping rule, it should be |  |  | / |
-//		assertTrue(response.endsWith("|  |  | / |"));
-//TODO: This one failed also
-//		assertTrue(response.endsWith("| /c1 |  | null |"));
+		// but IMO specification is wrong - context path should not be "", but should be ... context path
+		assertTrue(response.endsWith("| /c1 |  | / |"));
 		response = send(connector.getLocalPort(), "/c1/");
-		// Tomcat returns (still incorrectly) | /c1 |  | / |
-//		assertTrue("Special, strange Servlet API 4 mapping rule", response.endsWith("|  |  | / |"));
-//TODO: This one failed
-//		assertTrue("Special, strange Servlet API 4 mapping rule", response.endsWith("| /c1 |  | null |"));
+		// Jetty and Tomcat return (still incorrectly according to Servlet 4 spec) | /c1 |  | / | - but at least
+		// consistently wrt findings from https://github.com/eclipse-ee4j/servlet-api/issues/300
+		assertTrue("Special, strange Servlet API 4 mapping rule", response.endsWith("| /c1 |  | / |"));
 		response = send(connector.getLocalPort(), "/c1/x");
 		assertTrue(response.endsWith("| /c1 | /x | null |"));
 		response = send(connector.getLocalPort(), "/c1/y");
