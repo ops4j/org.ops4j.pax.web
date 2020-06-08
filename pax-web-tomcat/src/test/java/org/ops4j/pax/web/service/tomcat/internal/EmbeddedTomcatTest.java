@@ -53,6 +53,7 @@ import org.apache.catalina.core.StandardServer;
 import org.apache.catalina.core.StandardService;
 import org.apache.catalina.core.StandardThreadExecutor;
 import org.apache.catalina.core.StandardWrapper;
+import org.apache.catalina.servlets.DefaultServlet;
 import org.apache.catalina.startup.Catalina;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.valves.ValveBase;
@@ -173,7 +174,7 @@ public class EmbeddedTomcatTest {
 	}
 
 	@Test
-	@Ignore("Obvisouly this test doesn't work anymore, needs thorough checks!")
+//	@Ignore("Obvisouly this test doesn't work anymore, needs thorough checks!")
 	public void embeddedServerWithServletContextHandlerAndOnlyFilter() throws Exception {
 		Server server = new StandardServer();
 		server.setCatalinaBase(new File("target"));
@@ -231,6 +232,13 @@ public class EmbeddedTomcatTest {
 		map.setDispatcher(DispatcherType.REQUEST.name());
 		rootContext.addFilterDef(def);
 		rootContext.addFilterMap(map);
+
+		// filter-only pipeline works in Tomcat only if there's at least "default" servlet.
+		StandardWrapper defaultWrapper = new StandardWrapper();
+		defaultWrapper.setName("default");
+		defaultWrapper.setServletClass(DefaultServlet.class.getName());
+		rootContext.addChild(defaultWrapper);
+		rootContext.addServletMappingDecoded("/", "default");
 
 		server.start();
 
