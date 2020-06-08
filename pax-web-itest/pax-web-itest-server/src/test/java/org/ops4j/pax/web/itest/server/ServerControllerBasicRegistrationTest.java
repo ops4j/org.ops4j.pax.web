@@ -15,38 +15,29 @@
  */
 package org.ops4j.pax.web.itest.server;
 
-import static org.hamcrest.CoreMatchers.endsWith;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.ops4j.pax.web.itest.server.support.Utils.httpGET;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.Dictionary;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.IdentityHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeSet;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequestAttributeEvent;
+import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.http.HttpFilter;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -82,7 +73,6 @@ import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -314,97 +304,73 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 
 		Bundle bundle = mock(Bundle.class);
 
-		WebContainerContext wcc = new DefaultHttpContext(bundle) {
-			@Override
-			public URL getResource(String name) {
-				// this should be used when calling ServletContext.getResource
-				try {
-					return new URL("file://" + name);
-				} catch (MalformedURLException ignored) {
-					return null;
-				}
-			}
-
-			@Override
-			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
-				LOG.info("handleSecurity(" + request + ")");
-				return request.getHeader("Let-Me-In") != null;
-			}
-		};
-
 		Servlet servlet = new HttpServlet() {
-			private ServletConfig config;
-
-			private final Map<ServletContext, Boolean> contexts = new IdentityHashMap<>();
-
-			@Override
-			public void init(ServletConfig config) throws ServletException {
-				super.init(config);
-				assertThat(config.getInitParameter("p1"), equalTo("v1"));
-				assertThat(super.getInitParameter("p1"), equalTo("v1"));
-				contexts.put(config.getServletContext(), true);
-				this.config = config;
-			}
-
 			@Override
 			protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
-				resp.setContentType("text/plain");
+				req.setAttribute("a", "a1");
+				req.setAttribute("a", "a2");
+				req.removeAttribute("a");
 
-				contexts.put(getServletContext(), true);
-				contexts.put(req.getServletContext(), true);
-				contexts.put(req.getSession().getServletContext(), true);
-				contexts.put(config.getServletContext(), true);
-				contexts.put(getServletConfig().getServletContext(), true);
-
-				assertThat(contexts.size(), equalTo(1));
-				assertThat(contexts.keySet().iterator().next().getClass(), equalTo(OsgiScopedServletContext.class));
-
-				assertThat(super.getInitParameter("p1"), equalTo("v1"));
-
-				// this should give us "file:/something"
-				resp.getWriter().print(req.getServletContext().getResource("/something").toString());
+				resp.getWriter().print("OK");
 			}
 		};
 
-		EventListener listener = new ServletContextListener() {
+		final Deque<String> events = new LinkedList<>();
+
+		EventListener listener = new ServletRequestAttributeListener() {
 			@Override
-			public void contextInitialized(ServletContextEvent sce) {
-				//TODO: never passed!!!
-				assertNotNull(sce);
-				ServletContextListener.super.contextInitialized(sce);
+			public void attributeAdded(ServletRequestAttributeEvent srae) {
+				events.add(srae.getName() + " ADD: " +  srae.getValue());
+			}
+
+			@Override
+			public void attributeRemoved(ServletRequestAttributeEvent srae) {
+				events.add(srae.getName() + " DEL: " + srae.getValue());
+			}
+
+			@Override
+			public void attributeReplaced(ServletRequestAttributeEvent srae) {
+				events.add(srae.getName() + " CHG: " + srae.getValue());
 			}
 		};
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
 		server.createDefaultServletContextModel(controller);
 
-		Batch batch = new Batch("Register Single Servlet");
+		Batch batch = new Batch("Register Servlet and Event Listener");
 
 		ServletContextModel scm = new ServletContextModel("/c");
 		batch.addServletContextModel(server, scm);
 
-		OsgiContextModel osgiContext = new OsgiContextModel(wcc, bundle, "/c");
+		OsgiContextModel osgiContext = new OsgiContextModel(new DefaultHttpContext(bundle), bundle, "/c");
 		batch.addOsgiContextModel(osgiContext, scm);
 
-		Map<String, String> initParams = new HashMap<>();
-		initParams.put("p1", "v1");
-
-		batch.addServletModel(server,
-				new ServletModel.Builder().withServletName("my-servlet").withUrlPatterns(new String[] { "/s/*" })
-						.withServlet(servlet).withInitParams(initParams).withOsgiContextModel(osgiContext)
-						.withRegisteringBundle(bundle).build());
+		batch.addServletModel(server, new ServletModel.Builder()
+				.withServletName("my-servlet")
+				.withUrlPatterns(new String[] { "/s/*" })
+				.withServlet(servlet)
+				.withOsgiContextModel(osgiContext)
+				.withRegisteringBundle(bundle)
+				.build());
 
 		EventListenerModel listenerModel = new EventListenerModel(listener);
+		listenerModel.addContextModel(osgiContext);
 		batch.addEventListenerModel(server, listenerModel);
 
 		controller.sendBatch(batch);
 
-		String response = httpGET(port, "/c/s/1/registerSingleServletUsingExplicitBatch", "Let-Me-In: true");
-		assertTrue(response.endsWith("file:/something"));
+		String response = httpGET(port, "/c/s/1");
+		assertTrue(response.endsWith("OK"));
 
-		response = httpGET(port, "/c/s/1/registerSingleServletUsingExplicitBatch");
-		assertTrue(response.contains("HTTP/1.1 403"));
+		while (events.peek() != null && !events.peek().startsWith("a ")) {
+			// skip Tomcat-specific attribute storage
+			events.pop();
+		}
+
+		assertThat(events.pop(), equalTo("a ADD: a1"));
+		assertThat(events.pop(), equalTo("a CHG: a1"));
+		assertThat(events.pop(), equalTo("a DEL: a2"));
 
 		controller.stop();
 	}
@@ -426,83 +392,51 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		// no batch at all - everything will be done by HttpService itself
 		WebContainer wc = new HttpServiceEnabled(bundle, controller, server, null, controller.getConfiguration());
 
-		HttpContext context = new HttpContext() {
-			@Override
-			public URL getResource(String name) {
-				// this should be used when calling ServletContext.getResource
-				try {
-					return new URL("file://" + name);
-				} catch (MalformedURLException ignored) {
-					return null;
-				}
-			}
-
-			@Override
-			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
-				LOG.info("handleSecurity(" + request + ")");
-				return request.getHeader("Let-Me-In") != null;
-			}
-
-			@Override
-			public String getMimeType(String name) {
-				return null;
-			}
-		};
-
 		Servlet servlet = new HttpServlet() {
-			private ServletConfig config;
-
-			private final Map<ServletContext, Boolean> contexts = new IdentityHashMap<>();
-
-			@Override
-			public void init(ServletConfig config) throws ServletException {
-				super.init(config);
-				assertThat(config.getInitParameter("p1"), equalTo("v1"));
-				assertThat(super.getInitParameter("p1"), equalTo("v1"));
-				contexts.put(config.getServletContext(), true);
-				this.config = config;
-			}
-
 			@Override
 			protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
-				resp.setContentType("text/plain");
+				req.setAttribute("a", "a1");
+				req.setAttribute("a", "a2");
+				req.removeAttribute("a");
 
-				contexts.put(getServletContext(), true);
-				contexts.put(req.getServletContext(), true);
-				contexts.put(req.getSession().getServletContext(), true);
-				contexts.put(config.getServletContext(), true);
-				contexts.put(getServletConfig().getServletContext(), true);
-
-				assertThat(contexts.size(), equalTo(1));
-				assertThat(contexts.keySet().iterator().next().getClass(), equalTo(OsgiScopedServletContext.class));
-
-				assertThat(super.getInitParameter("p1"), equalTo("v1"));
-
-				// this should give us "file:/something"
-				resp.getWriter().print(req.getServletContext().getResource("/something").toString());
+				resp.getWriter().print("OK");
 			}
 		};
 
-		EventListener listener = new ServletContextListener() {
+		final Deque<String> events = new LinkedList<>();
+
+		EventListener listener = new ServletRequestAttributeListener() {
 			@Override
-			public void contextInitialized(ServletContextEvent sce) {
-				assertNotNull(sce);
-				ServletContextListener.super.contextInitialized(sce);
+			public void attributeAdded(ServletRequestAttributeEvent srae) {
+				events.add(srae.getName() + " ADD: " +  srae.getValue());
+			}
+
+			@Override
+			public void attributeRemoved(ServletRequestAttributeEvent srae) {
+				events.add(srae.getName() + " DEL: " + srae.getValue());
+			}
+
+			@Override
+			public void attributeReplaced(ServletRequestAttributeEvent srae) {
+				events.add(srae.getName() + " CHG: " + srae.getValue());
 			}
 		};
 
-		Dictionary<String, String> initParams = new Hashtable<>();
-		initParams.put("p1", "v1");
+		// use "null" context to check if it'll be passed to ServerController
+		wc.registerServlet(servlet, "my-servlet", new String[] { "/s/*" }, null, null);
+		wc.registerEventListener(listener, null);
 
-		wc.registerServlet(servlet, "my-servlet", new String[] { "/s/*" }, initParams, context);
-		wc.registerEventListener(listener, context);
+		String response = httpGET(port, "/s/1");
+		assertTrue(response.endsWith("OK"));
 
-		String response = httpGET(port, "/s/1?t=registerSingleServletUsingWebContainer", "Let-Me-In: true");
-		assertTrue(response.endsWith("file:/something"));
+		while (events.peek() != null && !events.peek().startsWith("a ")) {
+			events.pop();
+		}
 
-		response = httpGET(port, "/s/1?t=registerSingleServletUsingWebContainer");
-		assertTrue(response.contains("HTTP/1.1 403"));
+		assertThat(events.pop(), equalTo("a ADD: a1"));
+		assertThat(events.pop(), equalTo("a CHG: a1"));
+		assertThat(events.pop(), equalTo("a DEL: a2"));
 
 		controller.stop();
 	}

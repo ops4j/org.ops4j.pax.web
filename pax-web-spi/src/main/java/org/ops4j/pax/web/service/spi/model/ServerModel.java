@@ -651,8 +651,9 @@ public class ServerModel implements BatchVisitor {
 		//  - registered by user as OSGi services
 		registration.put(Constants.SERVICE_ID, 0L);
 		osgiContextModel.setServiceId(0L);
-		registration.put(Constants.SERVICE_RANKING, 0);
-		osgiContextModel.setServiceRank(0);
+		// in Whiteboard, rank of "default" is Integer.MIN_VALUE / 2. Here it'll be lowest rank possible
+		registration.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE);
+		osgiContextModel.setServiceRank(Integer.MIN_VALUE);
 		//  - registered with given context path
 		registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
 

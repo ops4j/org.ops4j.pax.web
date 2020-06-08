@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.context.DefaultHttpContext;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
@@ -62,6 +63,7 @@ public class ServiceModel implements BatchVisitor {
 	 * {@link org.osgi.framework.BundleContext#registerService bundle context}.
 	 */
 	private final ServerModel serverModel;
+	private final ServerController serverController;
 
 	private final Bundle serviceBundle;
 
@@ -94,9 +96,10 @@ public class ServiceModel implements BatchVisitor {
 	/** ALl event listene models registered by given bundle-scoped {@link org.osgi.service.http.HttpService}. */
 	private final Map<EventListener, EventListenerModel> eventListenerModels = new HashMap<>();
 
-	public ServiceModel(ServerModel serverModel, Bundle serviceBundle) {
+	public ServiceModel(ServerModel serverModel, ServerController serverController, Bundle serviceBundle) {
 		this.serverModel = serverModel;
 		this.serviceBundle = serviceBundle;
+		this.serverController = serverController;
 
 		createDefaultHttpContext(PaxWebConstants.DEFAULT_CONTEXT_NAME);
 	}
@@ -115,11 +118,11 @@ public class ServiceModel implements BatchVisitor {
 
 		WebContainerContext wcc = new DefaultHttpContext(serviceBundle, contextId);
 
-		// this will create and store new OsgiContextModel inside ServerModel (which doesn't/shouldn't track
-		// OsgiContextModels for Whiteboard)
+		// this will create and store new OsgiContextModel inside ServerModel
 		OsgiContextModel model = serverModel.getOrCreateOsgiContextModel(wcc, serviceBundle,
 				PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
 		batch.accept(this);
+		serverController.sendBatch(batch);
 
 		return model;
 	}

@@ -17,9 +17,6 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import java.io.File;
-import java.net.URL;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -27,35 +24,19 @@ import java.util.EventListener;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
-
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.websocket.DeploymentException;
 
-import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.annotations.PaxWebConfiguration;
 import org.ops4j.pax.web.annotations.PaxWebTesting;
 import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
 import org.ops4j.pax.web.service.PaxWebConstants;
-import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerContext;
-import org.ops4j.pax.web.service.internal.util.SupportUtils;
 import org.ops4j.pax.web.service.internal.views.DirectWebContainerView;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerListener;
@@ -71,15 +52,10 @@ import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
-import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
-import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
-import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
-import org.ops4j.util.collections.PropertyResolver;
-import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
@@ -133,7 +109,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 		LOG.debug("Creating active Http Service for: {}", bundle);
 
 		this.serverModel = serverModel;
-		this.serviceModel = new ServiceModel(serverModel, bundle);
+		this.serviceModel = new ServiceModel(serverModel, srvController, bundle);
 		this.executor = serverModel.getExecutor();
 
 		this.serviceBundle = bundle;

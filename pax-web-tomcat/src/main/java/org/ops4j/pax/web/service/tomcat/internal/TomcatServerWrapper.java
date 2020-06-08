@@ -18,8 +18,10 @@ package org.ops4j.pax.web.service.tomcat.internal;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -46,6 +48,7 @@ import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
@@ -931,7 +934,16 @@ class TomcatServerWrapper implements BatchVisitor {
 
 	@Override
 	public void visit(EventListenerModelChange change) {
-		// TODO: must be implemented
+		EventListenerModel eventListenerModel = change.getEventListenerModel();
+		List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
+
+		if (change.getKind() == OpCode.ADD) {
+			contextModels.forEach((context) -> {
+				PaxWebStandardContext standardContext = contextHandlers.get(context.getContextPath());
+				EventListener eventListener = eventListenerModel.getEventListener();
+				standardContext.addApplicationEventListener(eventListener);
+			});
+		}
 	}
 
 	private OsgiServletContext getHighestRankedContext(String contextPath, FilterModel model) {

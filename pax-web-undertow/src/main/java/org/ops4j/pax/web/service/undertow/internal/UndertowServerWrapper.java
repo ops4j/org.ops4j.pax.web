@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -51,14 +52,18 @@ import io.undertow.servlet.api.Deployment;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.FilterInfo;
+import io.undertow.servlet.api.ListenerInfo;
 import io.undertow.servlet.api.ServletContainer;
 import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.core.ContextClassLoaderSetupAction;
 import io.undertow.servlet.core.ManagedFilter;
 import io.undertow.servlet.core.ManagedFilters;
+import io.undertow.servlet.core.ManagedListener;
+import io.undertow.servlet.util.ImmediateInstanceFactory;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
@@ -1145,18 +1150,22 @@ class UndertowServerWrapper implements BatchVisitor {
 
 	@Override
 	public void visit(EventListenerModelChange change) {
-		// TODO: somehow add the eventlisteners to undertow
-//		EventListenerModel eventListenerModel = change.getEventListenerModel();
-//		List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
-//
-//		contextModels.forEach((osgiContext) -> {
-//			// take existing deployment manager and the deployment info from its deployment
-//			DeploymentManager manager = servletContainer.getDeploymentByPath(osgiContext.getContextPath());
-//			DeploymentManager.State state = manager.getState();
-//			DeploymentInfo deploymentInfo = manager.getDeployment().getDeploymentInfo();
-//
-//			//
-//		});
+		EventListenerModel eventListenerModel = change.getEventListenerModel();
+		List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
+
+		if (change.getKind() == OpCode.ADD) {
+			contextModels.forEach((context) -> {
+				DeploymentManager manager = servletContainer.getDeploymentByPath(context.getContextPath());
+				DeploymentInfo deploymentInfo = manager.getDeployment().getDeploymentInfo();
+
+				EventListener eventListener = eventListenerModel.getEventListener();
+				ListenerInfo info = new ListenerInfo(eventListener.getClass(), new ImmediateInstanceFactory<>(eventListener));
+
+				// TOCHECK: workaround Undertow inflexibility related to removal of such elements
+				deploymentInfo.getListeners().add(info);
+				manager.getDeployment().getApplicationListeners().addListener(new ManagedListener(info, true));
+			});
+		}
 	}
 
 	/**

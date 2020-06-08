@@ -24,6 +24,9 @@ public class OsgiContextModelChange extends Change {
 	private final WebContainerContext context;
 	private final OsgiContextModel osgiContextModel;
 	private final ServletContextModel servletContextModel;
+	// flag indicating that the change is for "default" OsgiContextModel created during initialization
+	// of HttpServiceEnabled
+	private final boolean defaultHttpContext;
 
 	public OsgiContextModelChange(OpCode op, WebContainerContext context, OsgiContextModel osgiContextModel,
 			ServletContextModel servletContextModel) {
@@ -31,6 +34,16 @@ public class OsgiContextModelChange extends Change {
 		this.context = context;
 		this.osgiContextModel = osgiContextModel;
 		this.servletContextModel = servletContextModel;
+		this.defaultHttpContext = false;
+	}
+
+	public OsgiContextModelChange(OpCode op, WebContainerContext context, OsgiContextModel osgiContextModel,
+			ServletContextModel servletContextModel, boolean defaultHttpContext) {
+		super(op);
+		this.context = context;
+		this.osgiContextModel = osgiContextModel;
+		this.servletContextModel = servletContextModel;
+		this.defaultHttpContext = defaultHttpContext;
 	}
 
 	public WebContainerContext getContext() {
@@ -43,6 +56,10 @@ public class OsgiContextModelChange extends Change {
 
 	public ServletContextModel getServletContextModel() {
 		return servletContextModel;
+	}
+
+	public boolean isDefaultHttpContext() {
+		return defaultHttpContext;
 	}
 
 	@Override
