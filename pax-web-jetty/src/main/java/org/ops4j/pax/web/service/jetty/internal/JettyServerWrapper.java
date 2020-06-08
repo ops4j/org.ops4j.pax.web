@@ -24,7 +24,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
@@ -887,17 +886,19 @@ class JettyServerWrapper implements BatchVisitor {
 			}
 		}
 	}
-	
-	@SuppressWarnings("unlikely-arg-type")
-    @Override
+
+	@Override
 	public void visit(EventListenerModelChange change) {
-	    EventListenerModel eventListenerModel = change.getEventListenerModel();
-	    List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
-	    contextModels.forEach((context)->{
-	        ServletContextHandler servletContextHandler = contextHandlers.get(context.getContextPath());
-            EventListener eventListener = eventListenerModel.getEventListener();
-            servletContextHandler.addEventListener(eventListener);
-	    });
+		EventListenerModel eventListenerModel = change.getEventListenerModel();
+		List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
+
+		if (change.getKind() == OpCode.ADD) {
+			contextModels.forEach((context) -> {
+				ServletContextHandler servletContextHandler = contextHandlers.get(context.getContextPath());
+				EventListener eventListener = eventListenerModel.getEventListener();
+				servletContextHandler.addEventListener(eventListener);
+			});
+		}
 	}
 
 	/**

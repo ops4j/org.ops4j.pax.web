@@ -1251,6 +1251,7 @@ public class ServerModel implements BatchVisitor {
 		batch.updateFilters(currentlyEnabledByName);
 	}
 
+	@PaxWebConfiguration
 	public void removeFilterModels(List<FilterModel> models, Batch batch) {
 		// this is straightforward
 		batch.removeFilterModels(this, models);
@@ -1458,6 +1459,19 @@ public class ServerModel implements BatchVisitor {
 				.map(ocm -> servletContexts.get(ocm.getContextPath()))
 				.filter(Objects::nonNull)
 				.collect(Collectors.toSet());
+	}
+
+	@PaxWebConfiguration
+	public void addEventListenerModel(EventListenerModel model, Batch batch) {
+		if (model.getContextModels().isEmpty()) {
+			throw new IllegalArgumentException("Can't register " + model + ", it is not associated with any context");
+		}
+
+		if (model.getEventListener() == null) {
+			throw new IllegalArgumentException("Can't register EventLister, it has to be set");
+		}
+
+		batch.addEventListenerModel(this, model);
 	}
 
 	// --- batch operation visit() methods performed without validation, because it was done earlier

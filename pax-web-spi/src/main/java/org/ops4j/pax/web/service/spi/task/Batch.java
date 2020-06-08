@@ -212,6 +212,15 @@ public class Batch {
 	}
 
 	/**
+	 * Add new {@link EventListenerModel}
+	 * @param serverModel
+	 * @param model
+	 */
+	public void addEventListenerModel(ServerModel serverModel, EventListenerModel model) {
+		operations.add(new EventListenerModelChange(OpCode.ADD, serverModel, model));
+	}
+
+	/**
 	 * Assuming everything is ok, this method simply invokes all the collected operations which will:<ul>
 	 *     <li>alter global {@link ServerModel} sequentially.</li>
 	 *     <li>alter actual server runtime</li>

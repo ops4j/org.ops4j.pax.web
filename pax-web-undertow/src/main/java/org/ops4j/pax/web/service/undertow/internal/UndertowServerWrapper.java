@@ -1143,21 +1143,21 @@ class UndertowServerWrapper implements BatchVisitor {
 			}
 		}
 	}
-	
+
 	@Override
 	public void visit(EventListenerModelChange change) {
-	    EventListenerModel eventListenerModel = change.getEventListenerModel();
-	    List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
-	    
-	    contextModels.forEach((osgiContext) -> {
-	     // take existing deployment manager and the deployment info from its deployment
-            DeploymentManager manager = servletContainer.getDeploymentByPath(osgiContext.getContextPath());
-            DeploymentManager.State state = manager.getState();
-            DeploymentInfo deploymentInfo = manager.getDeployment().getDeploymentInfo();
-
-            //somehow add the eventlisteners to undertow
-	    });
-
+		// TODO: somehow add the eventlisteners to undertow
+//		EventListenerModel eventListenerModel = change.getEventListenerModel();
+//		List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
+//
+//		contextModels.forEach((osgiContext) -> {
+//			// take existing deployment manager and the deployment info from its deployment
+//			DeploymentManager manager = servletContainer.getDeploymentByPath(osgiContext.getContextPath());
+//			DeploymentManager.State state = manager.getState();
+//			DeploymentInfo deploymentInfo = manager.getDeployment().getDeploymentInfo();
+//
+//			//
+//		});
 	}
 
 	/**
