@@ -1400,21 +1400,6 @@ public class ServerModel implements BatchVisitor {
 			reEnableFilterModels(currentlyDisabled, currentlyEnabledByName, modelToEnable, batch);
 		}
 	}
-	
-	// --- event Listeners
-	@PaxWebConfiguration
-	public void addEventListenerModel(EventListenerModel model, Batch batch) {
-	    if (model.getContextModels().isEmpty()) {
-            throw new IllegalArgumentException("Can't register " + model + ", it is not associated with any context");
-        }
-
-        if (model.getEventListener() == null) {
-            throw new IllegalArgumentException("Can't register EventLister, it has to be set");
-        }
-
-        batch.addEventListenerModel(this, model);
-	}
-	
 
 	/**
 	 * Check conflict between named models. Name conflict is not a problem if it occurs in disjoint sets of
@@ -1657,10 +1642,9 @@ public class ServerModel implements BatchVisitor {
 	public void visit(FilterStateChange filterStateChange) {
 	}
 
-
 	@Override
 	public void visit(EventListenerModelChange change) {
-	    //nothing to do here, eventlisteners aren't checked
+	    // TOCHECK: nothing to do here, eventlisteners aren't checked
 	}
 
 

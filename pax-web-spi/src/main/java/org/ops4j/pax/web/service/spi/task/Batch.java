@@ -206,10 +206,6 @@ public class Batch {
 	public void updateFilters(Map<String, TreeSet<FilterModel>> contextFilters) {
 		operations.add(new FilterStateChange(contextFilters));
 	}
-	
-	public void addEventListenerModel(ServerModel serverModel, EventListenerModel model) {
-	    operations.add(new EventListenerModelChange(OpCode.ENABLE, serverModel, model));
-	}
 
 	/**
 	 * Add new {@link EventListenerModel}

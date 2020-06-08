@@ -17,12 +17,9 @@ package org.ops4j.pax.web.service;
 
 import java.util.Dictionary;
 import java.util.EventListener;
-import java.util.List;
-
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
@@ -80,605 +77,665 @@ import org.osgi.service.http.NamespaceException;
  */
 public interface WebContainer extends HttpService {
 
-    /**
-     * <p>
-     * Extension method to provide specialized <em>view</em> of a container to
-     * perform different tasks than registration of <em>web
-     * elements/components</em>.
-     * </p>
-     *
-     * <p>
-     * And even if that may sound weird, this method may be used internally by
-     * passing internal Pax Web interfaces. This way,
-     * pax-http-extender-whiteboard may use specialized registration methods for
-     * Whiteboard Service specific tasks (like batch registration of servlets to
-     * multiple contexts).
-     * </p>
-     *
-     * @param type
-     *            another interface defined in pax-web-api for container
-     *            manipulation/configuration.
-     * @param <T>
-     * @return
-     */
-    default <T extends PaxWebContainerView> T adapt(Class<T> type) {
-        return null;
-    }
+	/**
+	 * <p>
+	 * Extension method to provide specialized <em>view</em> of a container to
+	 * perform different tasks than registration of <em>web
+	 * elements/components</em>.
+	 * </p>
+	 *
+	 * <p>
+	 * And even if that may sound weird, this method may be used internally by
+	 * passing internal Pax Web interfaces. This way,
+	 * pax-http-extender-whiteboard may use specialized registration methods for
+	 * Whiteboard Service specific tasks (like batch registration of servlets to
+	 * multiple contexts).
+	 * </p>
+	 *
+	 * @param type
+	 *            another interface defined in pax-web-api for container
+	 *            manipulation/configuration.
+	 * @param <T>
+	 * @return
+	 */
+	default <T extends PaxWebContainerView> T adapt(Class<T> type) {
+		return null;
+	}
 
-    // --- transactional access to web container
+	// --- transactional access to web container
 
-    /**
-     * <p>
-     * Begins a <em>transaction</em> to group multiple registration calls for
-     * given {@link HttpContext}.
-     * </p>
-     *
-     * <p>
-     * No operation related to given <em>transaction</em> will be effective
-     * until {@link #end(HttpContext)} is called. The important thing is that
-     * even if some initial operations are added to transaction (like
-     * registration of servlet with alias "/alias"), the validation will be
-     * performed only at the end of <em>transaction</em>, so another
-     * registration of servlet for "/alias" may succeed and this transaction
-     * will eventually fail even if the "/alias" registration in given
-     * transaction was performed earlier.
-     * </p>
-     *
-     * <p>
-     * After this call, nothing will be passed to actual server implementation
-     * until {@link #end(HttpContext)} is called. There's no thread affinity for
-     * such <em>transaction</em>, so given {@link HttpContext} can be passed
-     * around between threads without problems. However, there's no timeout, so
-     * not finished transactions will hang until the bundle is stopped.
-     * </p>
-     *
-     * <p>
-     * Technically, given {@link HttpContext} is marked as participating in
-     * transaction and all registrations are done in single model of a context.
-     * {@link #end(HttpContext)} passes all registered elements and context
-     * parameters (like session configuration) to actual server, ending the
-     * transaction. The benefit of such approach is that we don't have to take
-     * care about the order of operations because when transaction is
-     * {@link #end(HttpContext) ended}, some ordering may be performed.
-     * </p>
-     *
-     * <p>
-     * Even using {@code null} as {@link HttpContext} will work, because the
-     * default (scoped to given bundle) context will be marked as participating
-     * in a <em>transaction</em>.
-     * </p>
-     *
-     * @param context
-     * @return
-     */
-    void begin(HttpContext context);
+	/**
+	 * <p>
+	 * Begins a <em>transaction</em> to group multiple registration calls for
+	 * given {@link HttpContext}.
+	 * </p>
+	 *
+	 * <p>
+	 * No operation related to given <em>transaction</em> will be effective
+	 * until {@link #end(HttpContext)} is called. The important thing is that
+	 * even if some initial operations are added to transaction (like
+	 * registration of servlet with alias "/alias"), the validation will be
+	 * performed only at the end of <em>transaction</em>, so another
+	 * registration of servlet for "/alias" may succeed and this transaction
+	 * will eventually fail even if the "/alias" registration in given
+	 * transaction was performed earlier.
+	 * </p>
+	 *
+	 * <p>
+	 * After this call, nothing will be passed to actual server implementation
+	 * until {@link #end(HttpContext)} is called. There's no thread affinity for
+	 * such <em>transaction</em>, so given {@link HttpContext} can be passed
+	 * around between threads without problems. However, there's no timeout, so
+	 * not finished transactions will hang until the bundle is stopped.
+	 * </p>
+	 *
+	 * <p>
+	 * Technically, given {@link HttpContext} is marked as participating in
+	 * transaction and all registrations are done in single model of a context.
+	 * {@link #end(HttpContext)} passes all registered elements and context
+	 * parameters (like session configuration) to actual server, ending the
+	 * transaction. The benefit of such approach is that we don't have to take
+	 * care about the order of operations because when transaction is
+	 * {@link #end(HttpContext) ended}, some ordering may be performed.
+	 * </p>
+	 *
+	 * <p>
+	 * Even using {@code null} as {@link HttpContext} will work, because the
+	 * default (scoped to given bundle) context will be marked as participating
+	 * in a <em>transaction</em>.
+	 * </p>
+	 *
+	 * @param context
+	 * @return
+	 */
+	void begin(HttpContext context);
 
-    /**
-     * <p>
-     * Ends a <em>transaction</em> related to given {@link HttpContext} (or
-     * default context if {@code null} is used). This method triggers invocation
-     * of all delayed operations.
-     * </p>
-     *
-     * @param context
-     */
-    void end(HttpContext context);
+	/**
+	 * <p>
+	 * Ends a <em>transaction</em> related to given {@link HttpContext} (or
+	 * default context if {@code null} is used). This method triggers invocation
+	 * of all delayed operations.
+	 * </p>
+	 *
+	 * @param context
+	 */
+	void end(HttpContext context);
 
-    // --- different methods used to retrieve HttpContext - all will be
-    // associated with "/" context
-    // TOCHECK: other contexts are available only when using Whiteboard
+	// --- different methods used to retrieve HttpContext - all will be
+	// associated with "/" context
+	// TOCHECK: other contexts are available only when using Whiteboard
 
-    /**
-     * <p>
-     * Creates a default {@link HttpContext} as defined in original
-     * {@link HttpService#createDefaultHttpContext()}, but allowing to specify a
-     * name. <em>Default</em> means <em>default behaviour</em> (security,
-     * resource access) and not the fact that it's <em>global</em> (or
-     * <em>shared</em>) context.
-     * </p>
-     *
-     * <p>
-     * This allows single bundle (working on
-     * {@link org.osgi.framework.Constants#SCOPE_BUNDLE bundle-scoped}
-     * {@link HttpService}) to register web elements into same context without
-     * passing {@link HttpContext} around.
-     * </p>
-     *
-     * <p>
-     * Of course such {@link HttpContext} can later be registered as OSGi
-     * service and referenced later using:
-     * <ul>
-     * <li>standard (Whiteboard)
-     * {@code osgi.http.whiteboard.context.select=(osgi.http.whiteboard.context.name=name)}
-     * service registration property even if this property is designed to
-     * reference {@link org.osgi.service.http.context.ServletContextHelper}
-     * instances</li>
-     * <li>legacy (Pax Web specific) {@code httpContext.id=name} service
-     * registration property</li>
-     * </ul>
-     * Legacy Pax Web Whiteboard implementation handles contexts registered with
-     * {@code httpContext.id} property. User can register a {@link HttpContext}
-     * with such property and then register a servlet (or filter, or ...) with
-     * the same property to associate it with given context.
-     * </p>
-     *
-     * <p>
-     * {@link HttpContext} retrieved this way can't be used between bundles and
-     * is <strong>not</strong> registered automatically as OSGi service.
-     * </p>
-     *
-     * <p>
-     * In OSGi CMPN Whiteboard implementation there's no special API to create
-     * instances of {@link org.osgi.service.http.context.ServletContextHelper}
-     * instances.
-     * </p>
-     *
-     * @param contextId
-     *            the ID of the context which is used while registering the
-     *            {@link HttpContext} as service.
-     * @return {@link HttpContext}
-     */
-    HttpContext createDefaultHttpContext(String contextId);
+	/**
+	 * <p>
+	 * Creates a default {@link HttpContext} as defined in original
+	 * {@link HttpService#createDefaultHttpContext()}, but allowing to specify a
+	 * name. <em>Default</em> means <em>default behaviour</em> (security,
+	 * resource access) and not the fact that it's <em>global</em> (or
+	 * <em>shared</em>) context.
+	 * </p>
+	 *
+	 * <p>
+	 * This allows single bundle (working on
+	 * {@link org.osgi.framework.Constants#SCOPE_BUNDLE bundle-scoped}
+	 * {@link HttpService}) to register web elements into same context without
+	 * passing {@link HttpContext} around.
+	 * </p>
+	 *
+	 * <p>
+	 * Of course such {@link HttpContext} can later be registered as OSGi
+	 * service and referenced later using:
+	 * <ul>
+	 * <li>standard (Whiteboard)
+	 * {@code osgi.http.whiteboard.context.select=(osgi.http.whiteboard.context.name=name)}
+	 * service registration property even if this property is designed to
+	 * reference {@link org.osgi.service.http.context.ServletContextHelper}
+	 * instances</li>
+	 * <li>legacy (Pax Web specific) {@code httpContext.id=name} service
+	 * registration property</li>
+	 * </ul>
+	 * Legacy Pax Web Whiteboard implementation handles contexts registered with
+	 * {@code httpContext.id} property. User can register a {@link HttpContext}
+	 * with such property and then register a servlet (or filter, or ...) with
+	 * the same property to associate it with given context.
+	 * </p>
+	 *
+	 * <p>
+	 * {@link HttpContext} retrieved this way can't be used between bundles and
+	 * is <strong>not</strong> registered automatically as OSGi service.
+	 * </p>
+	 *
+	 * <p>
+	 * In OSGi CMPN Whiteboard implementation there's no special API to create
+	 * instances of {@link org.osgi.service.http.context.ServletContextHelper}
+	 * instances.
+	 * </p>
+	 *
+	 * @param contextId
+	 *            the ID of the context which is used while registering the
+	 *            {@link HttpContext} as service.
+	 * @return {@link HttpContext}
+	 */
+	HttpContext createDefaultHttpContext(String contextId);
 
-    /**
-     * <p>
-     * Creates a default implementation of a
-     * {@link MultiBundleWebContainerContext} with default behavior and
-     * {@code shared} name. Each call creates new instance and may be registered
-     * as OSGi service and referenced later by different bundles.
-     * </p>
-     *
-     * @return {@link MultiBundleWebContainerContext}
-     */
-    MultiBundleWebContainerContext createDefaultSharedHttpContext();
+	/**
+	 * <p>
+	 * Creates a default implementation of a
+	 * {@link MultiBundleWebContainerContext} with default behavior and
+	 * {@code shared} name. Each call creates new instance and may be registered
+	 * as OSGi service and referenced later by different bundles.
+	 * </p>
+	 *
+	 * @return {@link MultiBundleWebContainerContext}
+	 */
+	MultiBundleWebContainerContext createDefaultSharedHttpContext();
 
-    /**
-     * Creates a default implementation of a
-     * {@link MultiBundleWebContainerContext} with default behavior and given
-     * name.
-     *
-     * @param contextId
-     * @return
-     */
-    MultiBundleWebContainerContext createDefaultSharedHttpContext(String contextId);
+	/**
+	 * Creates a default implementation of a
+	 * {@link MultiBundleWebContainerContext} with default behavior and given
+	 * name.
+	 *
+	 * @param contextId
+	 * @return
+	 */
+	MultiBundleWebContainerContext createDefaultSharedHttpContext(String contextId);
 
-    // --- methods used to register a Servlet - with more options than in
-    // original HttpService.registerServlet()
+	// --- methods used to register a Servlet - with more options than in
+	// original HttpService.registerServlet()
 
-    /**
-     * <p>
-     * Registers a servlet as in {@link HttpService#registerServlet} with two
-     * additional parameters:
-     * <ul>
-     * <li>load on startup ({@code <servlet>/<load-on-startup>} element from
-     * {@code web.xml})</li>
-     * <li>async supported ({@code <servlet>/<async-supported>} element from
-     * {@code web.xml})</li>
-     * </ul>
-     * </p>
-     *
-     * @param alias
-     *            name in the URI namespace at which the servlet is registered
-     *            (single, exact URI mapping)
-     * @param servlet
-     *            the servlet object to register
-     * @param initParams
-     *            initialization arguments for the servlet or {@code null} if
-     *            there are none.
-     * @param loadOnStartup
-     * @param asyncSupported
-     * @param httpContext
-     *            {@link HttpContext} to use for registered servlet. If
-     *            {@code null}, default will be created.
-     * @throws NamespaceException
-     *             if the registration fails because the alias is already in
-     *             use.
-     * @throws ServletException
-     */
-    void registerServlet(String alias, Servlet servlet, Dictionary<?, ?> initParams, Integer loadOnStartup,
-            Boolean asyncSupported, HttpContext httpContext) throws ServletException, NamespaceException;
+	/**
+	 * <p>
+	 * Registers a servlet as in {@link HttpService#registerServlet} with two
+	 * additional parameters:
+	 * <ul>
+	 * <li>load on startup ({@code <servlet>/<load-on-startup>} element from
+	 * {@code web.xml})</li>
+	 * <li>async supported ({@code <servlet>/<async-supported>} element from
+	 * {@code web.xml})</li>
+	 * </ul>
+	 * </p>
+	 *
+	 * @param alias
+	 *            name in the URI namespace at which the servlet is registered
+	 *            (single, exact URI mapping)
+	 * @param servlet
+	 *            the servlet object to register
+	 * @param initParams
+	 *            initialization arguments for the servlet or {@code null} if
+	 *            there are none.
+	 * @param loadOnStartup
+	 * @param asyncSupported
+	 * @param httpContext
+	 *            {@link HttpContext} to use for registered servlet. If
+	 *            {@code null}, default will be created.
+	 * @throws NamespaceException
+	 *             if the registration fails because the alias is already in
+	 *             use.
+	 * @throws ServletException
+	 */
+	void registerServlet(String alias, Servlet servlet, Dictionary<?, ?> initParams, Integer loadOnStartup,
+			Boolean asyncSupported, HttpContext httpContext) throws ServletException, NamespaceException;
 
-    /**
-     * <p>
-     * Registers a servlet as in {@link HttpService#registerServlet} but with
-     * servlet URL mappings (see Servlet API specification, chapter 12.2,
-     * "Specification of Mappings") instead of single <em>alias</em>.
-     * </p>
-     *
-     * @param servlet
-     *            the servlet object to register
-     * @param urlPatterns
-     *            url patterns for servlet mapping
-     * @param initParams
-     *            initialization arguments for the servlet or {@code null} if
-     *            there are none.
-     * @param httpContext
-     *            {@link HttpContext} to use for registered servlet. If
-     *            {@code null}, default will be created.
-     * @throws ServletException
-     */
-    void registerServlet(Servlet servlet, String[] urlPatterns, Dictionary<String, String> initParams,
-            HttpContext httpContext) throws ServletException;
+	/**
+	 * <p>
+	 * Registers a servlet as in {@link HttpService#registerServlet} but with
+	 * servlet URL mappings (see Servlet API specification, chapter 12.2,
+	 * "Specification of Mappings") instead of single <em>alias</em>.
+	 * </p>
+	 *
+	 * @param servlet
+	 *            the servlet object to register
+	 * @param urlPatterns
+	 *            url patterns for servlet mapping
+	 * @param initParams
+	 *            initialization arguments for the servlet or {@code null} if
+	 *            there are none.
+	 * @param httpContext
+	 *            {@link HttpContext} to use for registered servlet. If
+	 *            {@code null}, default will be created.
+	 * @throws ServletException
+	 */
+	void registerServlet(Servlet servlet, String[] urlPatterns, Dictionary<String, String> initParams,
+			HttpContext httpContext) throws ServletException;
 
-    /**
-     * Registers a servlet with servlet URL mappings, load-on-startup and
-     * async-support parameters.
-     *
-     * @param servlet
-     *            the servlet object to register
-     * @param urlPatterns
-     *            url patterns for servlet mapping
-     * @param initParams
-     *            initialization arguments for the servlet or {@code null} if
-     *            there are none.
-     * @param loadOnStartup
-     * @param asyncSupported
-     * @param httpContext
-     *            {@link HttpContext} to use for registered servlet. If
-     *            {@code null}, default will be created.
-     * @throws ServletException
-     */
-    void registerServlet(Servlet servlet, String[] urlPatterns, Dictionary<String, String> initParams,
-            Integer loadOnStartup, Boolean asyncSupported, HttpContext httpContext) throws ServletException;
+	/**
+	 * Registers a servlet with servlet URL mappings, load-on-startup and
+	 * async-support parameters.
+	 *
+	 * @param servlet
+	 *            the servlet object to register
+	 * @param urlPatterns
+	 *            url patterns for servlet mapping
+	 * @param initParams
+	 *            initialization arguments for the servlet or {@code null} if
+	 *            there are none.
+	 * @param loadOnStartup
+	 * @param asyncSupported
+	 * @param httpContext
+	 *            {@link HttpContext} to use for registered servlet. If
+	 *            {@code null}, default will be created.
+	 * @throws ServletException
+	 */
+	void registerServlet(Servlet servlet, String[] urlPatterns, Dictionary<String, String> initParams,
+			Integer loadOnStartup, Boolean asyncSupported, HttpContext httpContext) throws ServletException;
 
-    /**
-     * <p>
-     * Registers a servlet as in {@link HttpService#registerServlet} but with
-     * servlet name and URL mappings (see Servlet API specification, chapter
-     * 12.2, "Specification of Mappings") instead of single <em>alias</em>.
-     * </p>
-     *
-     * @param servlet
-     *            the servlet object to register
-     * @param servletName
-     *            name of the servlet. If not specified, fully qualified name of
-     *            servlet class will be used
-     * @param urlPatterns
-     *            url patterns for servlet mapping
-     * @param initParams
-     *            initialization arguments for the servlet or {@code null} if
-     *            there are none.
-     * @param httpContext
-     *            {@link HttpContext} to use for registered servlet. If
-     *            {@code null}, default will be created.
-     * @throws ServletException
-     */
-    void registerServlet(Servlet servlet, String servletName, String[] urlPatterns,
-            Dictionary<String, String> initParams, HttpContext httpContext) throws ServletException;
+	/**
+	 * <p>
+	 * Registers a servlet as in {@link HttpService#registerServlet} but with
+	 * servlet name and URL mappings (see Servlet API specification, chapter
+	 * 12.2, "Specification of Mappings") instead of single <em>alias</em>.
+	 * </p>
+	 *
+	 * @param servlet
+	 *            the servlet object to register
+	 * @param servletName
+	 *            name of the servlet. If not specified, fully qualified name of
+	 *            servlet class will be used
+	 * @param urlPatterns
+	 *            url patterns for servlet mapping
+	 * @param initParams
+	 *            initialization arguments for the servlet or {@code null} if
+	 *            there are none.
+	 * @param httpContext
+	 *            {@link HttpContext} to use for registered servlet. If
+	 *            {@code null}, default will be created.
+	 * @throws ServletException
+	 */
+	void registerServlet(Servlet servlet, String servletName, String[] urlPatterns,
+			Dictionary<String, String> initParams, HttpContext httpContext) throws ServletException;
 
-    /**
-     * Registers a servlet with servlet name, URL mappings, load-on-startup and
-     * async-support parameters.
-     *
-     * @param servlet
-     *            the servlet object to register
-     * @param servletName
-     *            name of the servlet. If not specified, fully qualified name of
-     *            servlet class will be used
-     * @param urlPatterns
-     *            url patterns for servlet mapping
-     * @param initParams
-     *            initialization arguments for the servlet or {@code null} if
-     *            there are none.
-     * @param loadOnStartup
-     * @param asyncSupported
-     * @param httpContext
-     *            {@link HttpContext} to use for registered servlet. If
-     *            {@code null}, default will be created.
-     * @throws ServletException
-     */
-    void registerServlet(Servlet servlet, String servletName, String[] urlPatterns,
-            Dictionary<String, String> initParams, Integer loadOnStartup, Boolean asyncSupported,
-            HttpContext httpContext) throws ServletException;
+	/**
+	 * Registers a servlet with servlet name, URL mappings, load-on-startup and
+	 * async-support parameters.
+	 *
+	 * @param servlet
+	 *            the servlet object to register
+	 * @param servletName
+	 *            name of the servlet. If not specified, fully qualified name of
+	 *            servlet class will be used
+	 * @param urlPatterns
+	 *            url patterns for servlet mapping
+	 * @param initParams
+	 *            initialization arguments for the servlet or {@code null} if
+	 *            there are none.
+	 * @param loadOnStartup
+	 * @param asyncSupported
+	 * @param httpContext
+	 *            {@link HttpContext} to use for registered servlet. If
+	 *            {@code null}, default will be created.
+	 * @throws ServletException
+	 */
+	void registerServlet(Servlet servlet, String servletName, String[] urlPatterns,
+			Dictionary<String, String> initParams, Integer loadOnStartup, Boolean asyncSupported,
+			HttpContext httpContext) throws ServletException;
 
-    /**
-     * Registers a servlet with servlet name, URL mappings, load-on-startup,
-     * async-support parameters and {@link MultipartConfigElement multipart
-     * configuration}.
-     *
-     * @param servlet
-     *            the servlet object to register
-     * @param servletName
-     *            name of the servlet. If not specified, fully qualified name of
-     *            servlet class will be used
-     * @param urlPatterns
-     *            url patterns for servlet mapping
-     * @param initParams
-     *            initialization arguments for the servlet or {@code null} if
-     *            there are none.
-     * @param loadOnStartup
-     * @param asyncSupported
-     * @param multiPartConfig
-     * @param httpContext
-     *            {@link HttpContext} to use for registered servlet. If
-     *            {@code null}, default will be created.
-     * @throws ServletException
-     */
-    void registerServlet(Servlet servlet, String servletName, String[] urlPatterns,
-            Dictionary<String, String> initParams, Integer loadOnStartup, Boolean asyncSupported,
-            MultipartConfigElement multiPartConfig, HttpContext httpContext) throws ServletException;
+	/**
+	 * Registers a servlet with servlet name, URL mappings, load-on-startup,
+	 * async-support parameters and {@link MultipartConfigElement multipart
+	 * configuration}.
+	 *
+	 * @param servlet
+	 *            the servlet object to register
+	 * @param servletName
+	 *            name of the servlet. If not specified, fully qualified name of
+	 *            servlet class will be used
+	 * @param urlPatterns
+	 *            url patterns for servlet mapping
+	 * @param initParams
+	 *            initialization arguments for the servlet or {@code null} if
+	 *            there are none.
+	 * @param loadOnStartup
+	 * @param asyncSupported
+	 * @param multiPartConfig
+	 * @param httpContext
+	 *            {@link HttpContext} to use for registered servlet. If
+	 *            {@code null}, default will be created.
+	 * @throws ServletException
+	 */
+	void registerServlet(Servlet servlet, String servletName, String[] urlPatterns,
+			Dictionary<String, String> initParams, Integer loadOnStartup, Boolean asyncSupported,
+			MultipartConfigElement multiPartConfig, HttpContext httpContext) throws ServletException;
 
-    /**
-     * Register a servlet using class instead of an instance and with URL
-     * mappings instead of alias.
-     *
-     * @param servletClass
-     *            the servlet class to instantiate and register
-     * @param urlPatterns
-     *            url patterns for servlet mapping
-     * @param initParams
-     *            initialization arguments for the servlet or {@code null} if
-     *            there are none.
-     * @param httpContext
-     *            {@link HttpContext} to use for registered servlet. If
-     *            {@code null}, default will be created.
-     * @throws ServletException
-     */
-    void registerServlet(Class<? extends Servlet> servletClass, String[] urlPatterns,
-            Dictionary<String, String> initParams, HttpContext httpContext) throws ServletException;
+	/**
+	 * Register a servlet using class instead of an instance and with URL
+	 * mappings instead of alias.
+	 *
+	 * @param servletClass
+	 *            the servlet class to instantiate and register
+	 * @param urlPatterns
+	 *            url patterns for servlet mapping
+	 * @param initParams
+	 *            initialization arguments for the servlet or {@code null} if
+	 *            there are none.
+	 * @param httpContext
+	 *            {@link HttpContext} to use for registered servlet. If
+	 *            {@code null}, default will be created.
+	 * @throws ServletException
+	 */
+	void registerServlet(Class<? extends Servlet> servletClass, String[] urlPatterns,
+			Dictionary<String, String> initParams, HttpContext httpContext) throws ServletException;
 
-    /**
-     * Register a servlet using class instead of an instance and with URL
-     * mappings instead of alias and with load-on-startup and async-support
-     * parameters.
-     *
-     * @param servletClass
-     *            the servlet class to instantiate and register
-     * @param urlPatterns
-     *            url patterns for servlet mapping
-     * @param initParams
-     *            initialization arguments for the servlet or {@code null} if
-     *            there are none.
-     * @param loadOnStartup
-     * @param asyncSupported
-     * @param httpContext
-     *            {@link HttpContext} to use for registered servlet. If
-     *            {@code null}, default will be created.
-     * @throws ServletException
-     */
-    void registerServlet(Class<? extends Servlet> servletClass, String[] urlPatterns,
-            Dictionary<String, String> initParams, Integer loadOnStartup, Boolean asyncSupported,
-            HttpContext httpContext) throws ServletException;
+	/**
+	 * Register a servlet using class instead of an instance and with URL
+	 * mappings instead of alias and with load-on-startup and async-support
+	 * parameters.
+	 *
+	 * @param servletClass
+	 *            the servlet class to instantiate and register
+	 * @param urlPatterns
+	 *            url patterns for servlet mapping
+	 * @param initParams
+	 *            initialization arguments for the servlet or {@code null} if
+	 *            there are none.
+	 * @param loadOnStartup
+	 * @param asyncSupported
+	 * @param httpContext
+	 *            {@link HttpContext} to use for registered servlet. If
+	 *            {@code null}, default will be created.
+	 * @throws ServletException
+	 */
+	void registerServlet(Class<? extends Servlet> servletClass, String[] urlPatterns,
+			Dictionary<String, String> initParams, Integer loadOnStartup, Boolean asyncSupported,
+			HttpContext httpContext) throws ServletException;
 
-    /**
-     * Register a servlet using class instead of an instance and with URL
-     * mappings instead of alias and with load-on-startup, async-support
-     * parameters and {@link MultipartConfigElement multipart configuration}.
-     *
-     * @param servletClass
-     *            the servlet class to instantiate and register
-     * @param urlPatterns
-     *            url patterns for servlet mapping
-     * @param initParams
-     *            initialization arguments for the servlet or {@code null} if
-     *            there are none.
-     * @param loadOnStartup
-     * @param asyncSupported
-     * @param multiPartConfig
-     * @param httpContext
-     *            {@link HttpContext} to use for registered servlet. If
-     *            {@code null}, default will be created.
-     * @throws ServletException
-     */
-    void registerServlet(Class<? extends Servlet> servletClass, String[] urlPatterns,
-            Dictionary<String, String> initParams, Integer loadOnStartup, Boolean asyncSupported,
-            MultipartConfigElement multiPartConfig, HttpContext httpContext) throws ServletException;
+	/**
+	 * Register a servlet using class instead of an instance and with URL
+	 * mappings instead of alias and with load-on-startup, async-support
+	 * parameters and {@link MultipartConfigElement multipart configuration}.
+	 *
+	 * @param servletClass
+	 *            the servlet class to instantiate and register
+	 * @param urlPatterns
+	 *            url patterns for servlet mapping
+	 * @param initParams
+	 *            initialization arguments for the servlet or {@code null} if
+	 *            there are none.
+	 * @param loadOnStartup
+	 * @param asyncSupported
+	 * @param multiPartConfig
+	 * @param httpContext
+	 *            {@link HttpContext} to use for registered servlet. If
+	 *            {@code null}, default will be created.
+	 * @throws ServletException
+	 */
+	void registerServlet(Class<? extends Servlet> servletClass, String[] urlPatterns,
+			Dictionary<String, String> initParams, Integer loadOnStartup, Boolean asyncSupported,
+			MultipartConfigElement multiPartConfig, HttpContext httpContext) throws ServletException;
 
-    // --- methods used to unregister a Servlet
+	// --- methods used to unregister a Servlet
 
-    /**
-     * Unregisters a previously registered servlet. If the same instance was
-     * registered in more contexts, it'll be removed from all of them.
-     *
-     * @param servlet
-     *            the servlet to be unregistered
-     */
-    void unregisterServlet(Servlet servlet);
+	/**
+	 * Unregisters a previously registered servlet. If the same instance was
+	 * registered in more contexts, it'll be removed from all of them.
+	 *
+	 * @param servlet
+	 *            the servlet to be unregistered
+	 */
+	void unregisterServlet(Servlet servlet);
 
-    /**
-     * Unregister a previously registered servlet by its name. If more servlets
-     * were registered using the same name, all of them will be unregistered.
-     *
-     * @param servletName
-     *            the servlet identified by it's name.
-     */
-    void unregisterServlet(String servletName);
+	/**
+	 * Unregister a previously registered servlet by its name. If more servlets
+	 * were registered using the same name, all of them will be unregistered.
+	 *
+	 * @param servletName
+	 *            the servlet identified by it's name.
+	 */
+	void unregisterServlet(String servletName);
 
-    /**
-     * Unregisters all previously registered servlets with given class. If more
-     * servlets were registered with the same class, all of them will be
-     * unregistered.
-     *
-     * @param servletClass
-     *            the servlet class to be unregistered
-     */
-    void unregisterServlets(Class<? extends Servlet> servletClass);
+	/**
+	 * Unregisters all previously registered servlets with given class. If more
+	 * servlets were registered with the same class, all of them will be
+	 * unregistered.
+	 *
+	 * @param servletClass
+	 *            the servlet class to be unregistered
+	 */
+	void unregisterServlets(Class<? extends Servlet> servletClass);
 
-    // --- methods used to register a Filter
+	// --- methods used to register a Filter
 
-    /**
-     * <p>
-     * Registers a filter with filter URL mappings and/or servlet names to map
-     * the filter to.
-     * </p>
-     *
-     * @param filter
-     *            the filter object to register
-     * @param urlPatterns
-     *            url patterns for filter mapping
-     * @param servletNames
-     *            servlet names for filter mapping
-     * @param initParams
-     *            initialization arguments for the filter or {@code null} if
-     *            there are none.
-     * @param httpContext
-     *            {@link HttpContext} to use for registered filter. If
-     *            {@code null}, default will be created.
-     * @throws ServletException
-     */
-    void registerFilter(Filter filter, String[] urlPatterns, String[] servletNames,
-            Dictionary<String, String> initParams, HttpContext httpContext) throws ServletException;
+	/**
+	 * <p>
+	 * Registers a filter with filter URL mappings and/or servlet names to map
+	 * the filter to.
+	 * </p>
+	 *
+	 * @param filter
+	 *            the filter object to register
+	 * @param urlPatterns
+	 *            url patterns for filter mapping
+	 * @param servletNames
+	 *            servlet names for filter mapping
+	 * @param initParams
+	 *            initialization arguments for the filter or {@code null} if
+	 *            there are none.
+	 * @param httpContext
+	 *            {@link HttpContext} to use for registered filter. If
+	 *            {@code null}, default will be created.
+	 * @throws ServletException
+	 */
+	void registerFilter(Filter filter, String[] urlPatterns, String[] servletNames,
+			Dictionary<String, String> initParams, HttpContext httpContext) throws ServletException;
 
-    /**
-     * <p>
-     * Registers a filter with filter URL mappings, servlet names to map the
-     * filter to and async-support flag.
-     * </p>
-     *
-     * @param filter
-     *            the filter object to register
-     * @param filterName
-     * @param urlPatterns
-     *            url patterns for filter mapping
-     * @param servletNames
-     *            servlet names for filter mapping
-     * @param initParams
-     *            initialization arguments for the filter or {@code null} if
-     *            there are none.
-     * @param asyncSupported
-     * @param httpContext
-     *            {@link HttpContext} to use for registered filter. If
-     *            {@code null}, default will be created.
-     * @throws ServletException
-     */
-    void registerFilter(Filter filter, String filterName, String[] urlPatterns, String[] servletNames,
-            Dictionary<String, String> initParams, Boolean asyncSupported, HttpContext httpContext)
-            throws ServletException;
+	/**
+	 * <p>
+	 * Registers a filter with filter URL mappings, servlet names to map the
+	 * filter to and async-support flag.
+	 * </p>
+	 *
+	 * @param filter
+	 *            the filter object to register
+	 * @param filterName
+	 * @param urlPatterns
+	 *            url patterns for filter mapping
+	 * @param servletNames
+	 *            servlet names for filter mapping
+	 * @param initParams
+	 *            initialization arguments for the filter or {@code null} if
+	 *            there are none.
+	 * @param asyncSupported
+	 * @param httpContext
+	 *            {@link HttpContext} to use for registered filter. If
+	 *            {@code null}, default will be created.
+	 * @throws ServletException
+	 */
+	void registerFilter(Filter filter, String filterName, String[] urlPatterns, String[] servletNames,
+			Dictionary<String, String> initParams, Boolean asyncSupported, HttpContext httpContext)
+			throws ServletException;
 
-    /**
-     * <p>
-     * Registers a filter by class name, with filter URL mappings and/or servlet
-     * names to map the filter to.
-     * </p>
-     *
-     * @param filterClass
-     *            the filter class to register
-     * @param urlPatterns
-     *            url patterns for filter mapping
-     * @param servletNames
-     *            servlet names for filter mapping
-     * @param initParams
-     *            initialization arguments for the filter or {@code null} if
-     *            there are none.
-     * @param httpContext
-     *            {@link HttpContext} to use for registered filter. If
-     *            {@code null}, default will be created.
-     * @throws ServletException
-     */
-    void registerFilter(Class<? extends Filter> filterClass, String[] urlPatterns, String[] servletNames,
-            Dictionary<String, String> initParams, HttpContext httpContext) throws ServletException;
+	/**
+	 * <p>
+	 * Registers a filter by class name, with filter URL mappings and/or servlet
+	 * names to map the filter to.
+	 * </p>
+	 *
+	 * @param filterClass
+	 *            the filter class to register
+	 * @param urlPatterns
+	 *            url patterns for filter mapping
+	 * @param servletNames
+	 *            servlet names for filter mapping
+	 * @param initParams
+	 *            initialization arguments for the filter or {@code null} if
+	 *            there are none.
+	 * @param httpContext
+	 *            {@link HttpContext} to use for registered filter. If
+	 *            {@code null}, default will be created.
+	 * @throws ServletException
+	 */
+	void registerFilter(Class<? extends Filter> filterClass, String[] urlPatterns, String[] servletNames,
+			Dictionary<String, String> initParams, HttpContext httpContext) throws ServletException;
 
-    /**
-     * <p>
-     * Registers a filter by class name, with filter URL mappings, servlet names
-     * to map the filter to and async-support flag.
-     * </p>
-     *
-     * @param filterClass
-     *            the filter class to register
-     * @param filterName
-     * @param urlPatterns
-     *            url patterns for filter mapping
-     * @param servletNames
-     *            servlet names for filter mapping
-     * @param initParams
-     *            initialization arguments for the filter or {@code null} if
-     *            there are none.
-     * @param asyncSupported
-     * @param httpContext
-     *            {@link HttpContext} to use for registered filter. If
-     *            {@code null}, default will be created.
-     * @throws ServletException
-     */
-    void registerFilter(Class<? extends Filter> filterClass, String filterName, String[] urlPatterns,
-            String[] servletNames, Dictionary<String, String> initParams, Boolean asyncSupported,
-            HttpContext httpContext) throws ServletException;
+	/**
+	 * <p>
+	 * Registers a filter by class name, with filter URL mappings, servlet names
+	 * to map the filter to and async-support flag.
+	 * </p>
+	 *
+	 * @param filterClass
+	 *            the filter class to register
+	 * @param filterName
+	 * @param urlPatterns
+	 *            url patterns for filter mapping
+	 * @param servletNames
+	 *            servlet names for filter mapping
+	 * @param initParams
+	 *            initialization arguments for the filter or {@code null} if
+	 *            there are none.
+	 * @param asyncSupported
+	 * @param httpContext
+	 *            {@link HttpContext} to use for registered filter. If
+	 *            {@code null}, default will be created.
+	 * @throws ServletException
+	 */
+	void registerFilter(Class<? extends Filter> filterClass, String filterName, String[] urlPatterns,
+			String[] servletNames, Dictionary<String, String> initParams, Boolean asyncSupported,
+			HttpContext httpContext) throws ServletException;
 
-    // --- methods used to unregister a Filter
+	// --- methods used to unregister a Filter
 
-    /**
-     * Unregisters a previously registered servlet filter.
-     *
-     * @param filter
-     *            the servlet filter to be unregistered
-     * @throws IllegalArgumentException
-     *             if the filter is unknown to the http service
-     */
-    void unregisterFilter(Filter filter);
+	/**
+	 * Unregisters a previously registered servlet filter.
+	 *
+	 * @param filter
+	 *            the servlet filter to be unregistered
+	 * @throws IllegalArgumentException
+	 *             if the filter is unknown to the http service
+	 */
+	void unregisterFilter(Filter filter);
 
-    /**
-     * Unregisters a previously registered servlet filter by its name. If more
-     * filters were registered using the same name, all of them will be
-     * unregistered.
-     *
-     * @param filterName
-     *            the servlet filter name to be unregistered
-     * @throws IllegalArgumentException
-     *             if the filter is unknown to the http service
-     */
-    void unregisterFilter(String filterName);
+	/**
+	 * Unregisters a previously registered servlet filter by its name. If more
+	 * filters were registered using the same name, all of them will be
+	 * unregistered.
+	 *
+	 * @param filterName
+	 *            the servlet filter name to be unregistered
+	 * @throws IllegalArgumentException
+	 *             if the filter is unknown to the http service
+	 */
+	void unregisterFilter(String filterName);
 
-    /**
-     * Unregisters a previously registered servlet filters with given class. If
-     * more filters were registered with the same class, all of them will be
-     * unregistered.
-     *
-     * @param filterClass
-     *            the servlet filter to be unregistered, found by the Filter
-     *            class
-     * @throws IllegalArgumentException
-     *             if the filter is unknown to the http service
-     */
-    void unregisterFilters(Class<? extends Filter> filterClass);
+	/**
+	 * Unregisters a previously registered servlet filters with given class. If
+	 * more filters were registered with the same class, all of them will be
+	 * unregistered.
+	 *
+	 * @param filterClass
+	 *            the servlet filter to be unregistered, found by the Filter
+	 *            class
+	 * @throws IllegalArgumentException
+	 *             if the filter is unknown to the http service
+	 */
+	void unregisterFilters(Class<? extends Filter> filterClass);
 
-    /**
-     * Registers an event listener. Depending on the listener type, the listener
-     * will be notified on different life cycle events. The following listeners
-     * are supported: HttpSessionActivationListener,
-     * HttpSessionAttributeListener, HttpSessionBindingListener,
-     * HttpSessionListener, ServletContextListener,
-     * ServletContextAttributeListener, ServletRequestListener,
-     * ServletRequestAttributeListener. Check out Servlet specification for
-     * details on what type of event the registered listener will be notified.
-     *
-     * @param listener
-     *            an event listener to be registered. If null an
-     *            IllegalArgumentException is thrown.
-     * @param httpContext
-     *            the http context this listener is for. If null a default http
-     *            context will be used.
-     */
-    void registerEventListener(EventListener listener, HttpContext httpContext);
+	// --- methods used to register an EventListener
 
-    /**
-     * Unregisters a previously registered listener.
-     *
-     * @param listener
-     *            the event listener to be unregistered.
-     * @throws IllegalArgumentException
-     *             if the listener is unknown to the http service (never
-     *             registered or unregistered before) or the listener is null
-     */
-    void unregisterEventListener(EventListener listener);
+	/**
+	 * <p>Registers an event listener. Depending on the listener type, the listener will be notified on different life
+	 * cycle events. The following listeners are supported:<ul>
+	 *     <li>{@link javax.servlet.http.HttpSessionActivationListener}</li>
+	 *     <li>{@link javax.servlet.http.HttpSessionAttributeListener}</li>
+	 *     <li>{@link javax.servlet.http.HttpSessionBindingListener}</li>
+	 *     <li>{@link javax.servlet.http.HttpSessionListener}</li>
+	 *     <li>{@link javax.servlet.ServletContextListener}</li>
+	 *     <li>{@link javax.servlet.ServletContextAttributeListener}</li>
+	 *     <li>{@link javax.servlet.ServletRequestListener}</li>
+	 *     <li>{@link javax.servlet.ServletRequestAttributeListener}</li>
+	 *     <li></li>
+	 * </ul>
+	 * Check out Servlet specification for details on what type of event the registered listener will be notified.</p>
+	 *
+	 * @param listener an event listener to be registered. If null an IllegalArgumentException is thrown.
+	 * @param httpContext the http context this listener is for. If null a default http context will be used.
+	 */
+	void registerEventListener(EventListener listener, HttpContext httpContext);
 
-//    /**
-//     * Sets context paramaters to be used in the servlet context corresponding
-//     * to specified http context. This method must be used before any register
-//     * method that uses the specified http context, otherwise an
-//     * IllegalStateException will be thrown.
-//     *
-//     * @param params
-//     *            context parameters for the servlet context corresponding to
-//     *            specified http context
-//     * @param httpContext
-//     *            http context. Cannot be null.
-//     * @throws IllegalArgumentException
-//     *             if http context is null
-//     * @throws IllegalStateException
-//     *             if the call is made after the http context was already used
-//     *             into a registration
-//     */
-//    void setContextParam(Dictionary<String, ?> params, HttpContext httpContext);
+	// --- methods used to unregister a EventListener
+
+	/**
+	 * <p>Unregisters a previously registered listener.</p>
+	 *
+	 * @param listener the event listener to be unregistered.
+	 * @throws IllegalArgumentException if the listener is unknown to the http service (never registered or
+	 *         unregistered before) or the listener is null
+	 */
+	void unregisterEventListener(EventListener listener);
+
+
+
+
+
+
+
+
+
+
+//	/**
+//	 * Sets context paramaters to be used in the servlet context corresponding
+//	 * to specified http context. This method must be used before any register
+//	 * method that uses the specified http context, otherwise an
+//	 * IllegalStateException will be thrown.
+//	 *
+//	 * @param params      context parameters for the servlet context corresponding to
+//	 *                    specified http context
+//	 * @param httpContext http context. Cannot be null.
+//	 * @throws IllegalArgumentException if http context is null
+//	 * @throws IllegalStateException    if the call is made after the http context was already used
+//	 *                                  into a registration
+//	 */
+//	void setContextParam(Dictionary<String, ?> params, HttpContext httpContext);
+//
+//	/**
+//	 * Sets the session timeout of the servlet context corresponding to
+//	 * specified http context. This method must be used before any register
+//	 * method that uses the specified http context, otherwise an
+//	 * IllegalStateException will be thrown.
+//	 *
+//	 * @param minutes     session timeout of the servlet context corresponding to
+//	 *                    specified http context
+//	 * @param httpContext http context. Cannot be null.
+//	 * @throws IllegalArgumentException if http context is null
+//	 * @throws IllegalStateException    if the call is made after the http context was already used
+//	 *                                  into a registration
+//	 */
+//	void setSessionTimeout(Integer minutes, HttpContext httpContext);
+//
+//	/**
+//	 * Enable jsp support.
+//	 *
+//	 * @param urlPatterns an array of url patterns this jsp support maps to. If null, a
+//	 *                    default "*.jsp" will be used
+//	 * @param httpContext the http context for which the jsp support should be enabled.
+//	 *                    If null a default http context will be used.
+//	 * @throws UnsupportedOperationException if optional org.ops4j.pax.web.jsp package is not resolved
+//	 * @since 0.3.0, January 07, 2007
+//	 */
+//	void registerJsps(String[] urlPatterns, HttpContext httpContext);
+//
+//	/**
+//	 * Enable jsp support.
+//	 *
+//	 * @param urlPatterns an array of url patterns this jsp support maps to. If null, a
+//	 *                    default "*.jsp" will be used
+//	 * @param initParams  initialization arguments or null if there are none.
+//	 * @param httpContext the http context for which the jsp support should be enabled.
+//	 *                    If null a default http context will be used.
+//	 * @throws UnsupportedOperationException if optional org.ops4j.pax.web.jsp package is not resolved
+//	 * @since 2.0.0
+//	 */
+//	void registerJsps(String[] urlPatterns, Dictionary<String, ?> initParams,
+//					  HttpContext httpContext);
+//
+//	/**
+//	 * Unregister jsps and disable jsp support.
+//	 *
+//	 * @param httpContext the http context for which the jsp support should be disabled
+//	 * @throws IllegalArgumentException      if http context is null or jsp support was not enabled for
+//	 *                                       the http context
+//	 * @throws UnsupportedOperationException if optional org.ops4j.pax.web.jsp package is not resolved
+//	 * @since 0.3.0, January 07, 2007
+//	 */
+//	void unregisterJsps(HttpContext httpContext);
 //
 //    /**
 //     * Sets the session timeout of the servlet context corresponding to

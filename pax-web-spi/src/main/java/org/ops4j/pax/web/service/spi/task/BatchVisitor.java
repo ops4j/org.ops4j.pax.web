@@ -52,6 +52,10 @@ public interface BatchVisitor {
 	 */
 	void visit(FilterStateChange filterStateChange);
 
-	//TODO: Fix documentation
-    void visit(EventListenerModelChange change);
+	/**
+	 * Processing a change related to {@link org.ops4j.pax.web.service.spi.model.elements.EventListenerModel}
+	 * @param change
+	 */
+	void visit(EventListenerModelChange change);
+
 }

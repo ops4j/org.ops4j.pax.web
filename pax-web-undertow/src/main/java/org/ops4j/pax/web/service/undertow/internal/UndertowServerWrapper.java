@@ -1143,6 +1143,11 @@ class UndertowServerWrapper implements BatchVisitor {
 			}
 		}
 	}
+	
+	@Override
+	public void visit(EventListenerModelChange change) {
+	    //TODO: needs implementation
+	}
 
 	@Override
 	public void visit(EventListenerModelChange change) {

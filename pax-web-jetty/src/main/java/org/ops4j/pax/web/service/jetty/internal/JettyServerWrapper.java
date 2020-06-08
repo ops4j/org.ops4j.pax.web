@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
@@ -51,7 +52,6 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
 import org.eclipse.jetty.util.ArrayUtil;
-import org.eclipse.jetty.util.component.Container.Listener;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.xml.XmlConfiguration;
@@ -886,6 +886,13 @@ class JettyServerWrapper implements BatchVisitor {
 			}
 		}
 	}
+	
+	@Override
+	public void visit(EventListenerModelChange change) {
+//	    change.getEventListenerModel().
+//	    ServletContextHandler sch = contextHandlers.get();
+//        sch.addEventListener(change.getEventListenerModel().getEventListener());
+	}
 
 	@Override
 	public void visit(EventListenerModelChange change) {
@@ -1043,73 +1050,73 @@ class JettyServerWrapper implements BatchVisitor {
 
 	//	@Override
 	public synchronized void removeServlet(final ServletModel model) {
-					LOG.debug("Removing servlet [" + model + "]");
-					// jetty does not provide a method for removing a servlet so we have to
-					// do it by our own
-					// the facts below are found by analyzing ServletHolder implementation
-					boolean removed = false;
-					final ServletContextHandler context = null;/*server.getContext(model
+		LOG.debug("Removing servlet [" + model + "]");
+		// jetty does not provide a method for removing a servlet so we have to
+		// do it by our own
+		// the facts below are found by analyzing ServletHolder implementation
+		boolean removed = false;
+		final ServletContextHandler context = null;/*server.getContext(model
 							.getContextModel().getHttpContext());*/
-					if (context == null) {
-						return; // context is already removed so no need for deregistration
-					}
+		if (context == null) {
+			return; // context is already removed so no need for deregistration
+		}
 
-					final ServletHandler servletHandler = context.getServletHandler();
-					final ServletHolder[] holders = servletHandler.getServlets();
-					if (holders != null) {
-						final ServletHolder holder = servletHandler.getServlet(model
-								.getName());
-						if (holder != null) {
-							servletHandler.setServlets(ArrayUtil.removeFromArray(holders, holder));
-							// we have to find the servlet mapping by hand :( as there is no
-							// method provided by jetty
-							// and the remove is done based on equals, that is not
-							// implemented by servletmapping
-							// so it is == based.
-							ServletMapping[] mappings = servletHandler.getServletMappings();
-							if (mappings != null) {
-								ServletMapping mapping = null;
-								for (ServletMapping item : mappings) {
-									if (holder.getName().equals(item.getServletName())) {
-										mapping = item;
-										break;
-									}
-								}
-								if (mapping != null) {
-									servletHandler
-											.setServletMappings(ArrayUtil.removeFromArray(mappings, mapping));
-									removed = true;
-								}
-							}
-							// if servlet is still started stop the servlet holder
-							// (=servlet.destroy()) as Jetty will not do that
-							LOG.debug("Stopping servlet in Holder");
-							try {
-								ContextClassLoaderUtils.doWithClassLoader(
-										context.getClassLoader(), new Callable<Void>() {
-
-											@Override
-											public Void call() throws Exception {
-												holder.stop();
-												return null;
-											}
-
-										});
-								//CHECKSTYLE:OFF
-							} catch (Exception e) {
-								if (e instanceof RuntimeException) {
-									throw (RuntimeException) e;
-								}
-								LOG.warn("Exception during unregistering of servlet ["
-										+ model + "]");
-							}
-							//CHECKSTYLE:ON
+		final ServletHandler servletHandler = context.getServletHandler();
+		final ServletHolder[] holders = servletHandler.getServlets();
+		if (holders != null) {
+			final ServletHolder holder = servletHandler.getServlet(model
+					.getName());
+			if (holder != null) {
+				servletHandler.setServlets(ArrayUtil.removeFromArray(holders, holder));
+				// we have to find the servlet mapping by hand :( as there is no
+				// method provided by jetty
+				// and the remove is done based on equals, that is not
+				// implemented by servletmapping
+				// so it is == based.
+				ServletMapping[] mappings = servletHandler.getServletMappings();
+				if (mappings != null) {
+					ServletMapping mapping = null;
+					for (ServletMapping item : mappings) {
+						if (holder.getName().equals(item.getServletName())) {
+							mapping = item;
+							break;
 						}
 					}
-			//		removeContext(model.getContextModel().getHttpContext());
-					if (!removed) {
-						throw new IllegalStateException(model + " was not found");
+					if (mapping != null) {
+						servletHandler
+								.setServletMappings(ArrayUtil.removeFromArray(mappings, mapping));
+						removed = true;
 					}
+				}
+				// if servlet is still started stop the servlet holder
+				// (=servlet.destroy()) as Jetty will not do that
+				LOG.debug("Stopping servlet in Holder");
+				try {
+					ContextClassLoaderUtils.doWithClassLoader(
+							context.getClassLoader(), new Callable<Void>() {
+
+								@Override
+								public Void call() throws Exception {
+									holder.stop();
+									return null;
+								}
+
+							});
+					//CHECKSTYLE:OFF
+				} catch (Exception e) {
+					if (e instanceof RuntimeException) {
+						throw (RuntimeException) e;
+					}
+					LOG.warn("Exception during unregistering of servlet ["
+							+ model + "]");
+				}
+				//CHECKSTYLE:ON
+			}
+		}
+		//		removeContext(model.getContextModel().getHttpContext());
+		if (!removed) {
+			throw new IllegalStateException(model + " was not found");
+		}
 	}
 
 	//	@Override
@@ -1139,41 +1146,41 @@ class JettyServerWrapper implements BatchVisitor {
 
 	//	@Override
 	public synchronized void addFilter(final FilterModel model) {
-					LOG.debug("Adding filter model [" + model + "]");
-					final FilterMapping mapping = new FilterMapping();
-					mapping.setFilterName(model.getName());
-					if (model.getUrlPatterns() != null && model.getUrlPatterns().length > 0) {
-						mapping.setPathSpecs(model.getUrlPatterns());
-					}
-					if (model.getServletNames() != null
-							&& model.getServletNames().length > 0) {
-						mapping.setServletNames(model.getServletNames());
-					}
-					// set-up dispatcher
-					int dispatcher = FilterMapping.DEFAULT;
-					for (String d : model.getDispatcherTypes()) {
-						//dispatcher = FilterMapping.dispatch(baseRequest.getDispatcherType());
+		LOG.debug("Adding filter model [" + model + "]");
+		final FilterMapping mapping = new FilterMapping();
+		mapping.setFilterName(model.getName());
+		if (model.getUrlPatterns() != null && model.getUrlPatterns().length > 0) {
+			mapping.setPathSpecs(model.getUrlPatterns());
+		}
+		if (model.getServletNames() != null
+				&& model.getServletNames().length > 0) {
+			mapping.setServletNames(model.getServletNames());
+		}
+		// set-up dispatcher
+		int dispatcher = FilterMapping.DEFAULT;
+		for (String d : model.getDispatcherTypes()) {
+			//dispatcher = FilterMapping.dispatch(baseRequest.getDispatcherType());
 						/*
 						DispatcherType type = DispatcherType.valueOf(d);
 						dispatcher |= FilterMapping.dispatch(type);
 						*/
-						if ("ALL".equalsIgnoreCase(d)) {
-							dispatcher |= FilterMapping.ALL;
-						} else if ("ASYNC".equalsIgnoreCase(d)) {
-							dispatcher |= FilterMapping.ASYNC;
-						} else if ("DEFAULT".equalsIgnoreCase(d)) {
-							dispatcher |= FilterMapping.DEFAULT;
-						} else if ("ERROR".equalsIgnoreCase(d)) {
-							dispatcher |= FilterMapping.ERROR;
-						} else if ("FORWARD".equalsIgnoreCase(d)) {
-							dispatcher |= FilterMapping.FORWARD;
-						} else if ("INCLUDE".equalsIgnoreCase(d)) {
-							dispatcher |= FilterMapping.INCLUDE;
-						} else if ("REQUEST".equalsIgnoreCase(d)) {
-							dispatcher |= FilterMapping.REQUEST;
-						}
-					}
-					mapping.setDispatches(dispatcher);
+			if ("ALL".equalsIgnoreCase(d)) {
+				dispatcher |= FilterMapping.ALL;
+			} else if ("ASYNC".equalsIgnoreCase(d)) {
+				dispatcher |= FilterMapping.ASYNC;
+			} else if ("DEFAULT".equalsIgnoreCase(d)) {
+				dispatcher |= FilterMapping.DEFAULT;
+			} else if ("ERROR".equalsIgnoreCase(d)) {
+				dispatcher |= FilterMapping.ERROR;
+			} else if ("FORWARD".equalsIgnoreCase(d)) {
+				dispatcher |= FilterMapping.FORWARD;
+			} else if ("INCLUDE".equalsIgnoreCase(d)) {
+				dispatcher |= FilterMapping.INCLUDE;
+			} else if ("REQUEST".equalsIgnoreCase(d)) {
+				dispatcher |= FilterMapping.REQUEST;
+			}
+		}
+		mapping.setDispatches(dispatcher);
 
 //					final ServletContextHandler context = server.getOrCreateContext(model);
 //					final ServletHandler servletHandler = context.getServletHandler();
@@ -1182,20 +1189,20 @@ class JettyServerWrapper implements BatchVisitor {
 //								"Internal error: Cannot find the servlet holder");
 //					}
 
-					final FilterHolder holder;
-					if (model.getFilter() == null) {
-						holder = new FilterHolder(model.getFilterClass());
-					} else {
-						holder = new FilterHolder(model.getFilter());
-					}
-					holder.setName(model.getName());
-					if (model.getInitParams() != null) {
-						holder.setInitParameters(model.getInitParams());
-					}
-					holder.setAsyncSupported(model.getAsyncSupported());
+		final FilterHolder holder;
+		if (model.getFilter() == null) {
+			holder = new FilterHolder(model.getFilterClass());
+		} else {
+			holder = new FilterHolder(model.getFilter());
+		}
+		holder.setName(model.getName());
+		if (model.getInitParams() != null) {
+			holder.setInitParameters(model.getInitParams());
+		}
+		holder.setAsyncSupported(model.getAsyncSupported());
 
-					// Jetty does not set the context class loader on adding the filters so
-					// we do that instead
+		// Jetty does not set the context class loader on adding the filters so
+		// we do that instead
 //					try {
 //						ContextClassLoaderUtils.doWithClassLoader(context.getClassLoader(),
 //								new Callable<Void>() {
@@ -1214,7 +1221,7 @@ class JettyServerWrapper implements BatchVisitor {
 //						}
 //						LOG.error("Ignored exception during filter registration", e);
 //					}
-					//CHECKSTYLE:OFF
+		//CHECKSTYLE:OFF
 	}
 
 	//	@Override

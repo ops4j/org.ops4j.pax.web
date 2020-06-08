@@ -17,12 +17,9 @@ package org.ops4j.pax.web.service.internal;
 
 import java.util.Dictionary;
 import java.util.EventListener;
-import java.util.List;
-
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 
 import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
@@ -237,23 +234,15 @@ class HttpServiceDisabled implements StoppableHttpService {
 		LOG.warn("");
 	}
 
-	/**
-	 * Does nothing.
-	 *
-	 * @see WebContainer#registerEventListener(java.util.EventListener,
-	 * HttpContext)
-	 */
+	// --- methods used to register an EventListener
+
 	@Override
-	public void registerEventListener(final EventListener listener,
-									  final HttpContext httpContext) {
+	public void registerEventListener(final EventListener listener, final HttpContext httpContext) {
 		LOG.warn("Http service has already been stopped");
 	}
 
-	/**
-	 * Does nothing.
-	 *
-	 * @see WebContainer#unregisterEventListener(java.util.EventListener)
-	 */
+	// --- methods used to unregister an EventListener
+
 	@Override
 	public void unregisterEventListener(final EventListener listener) {
 		LOG.warn("Http service has already been stopped");

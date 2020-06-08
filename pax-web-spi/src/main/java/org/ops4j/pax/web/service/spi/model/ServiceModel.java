@@ -91,6 +91,9 @@ public class ServiceModel implements BatchVisitor {
 	/** All filter models registered by given bundle-scoped {@link org.osgi.service.http.HttpService}. */
 	private final Set<FilterModel> filterModels = new HashSet<>();
 
+	/** ALl event listene models registered by given bundle-scoped {@link org.osgi.service.http.HttpService}. */
+	private final Map<EventListener, EventListenerModel> eventListenerModels = new HashMap<>();
+
 	public ServiceModel(ServerModel serverModel, Bundle serviceBundle) {
 		this.serverModel = serverModel;
 		this.serviceBundle = serviceBundle;
@@ -121,7 +124,6 @@ public class ServiceModel implements BatchVisitor {
 		return model;
 	}
 
-	private final Map<EventListener, EventListenerModel> eventListenerModels = new HashMap<>();
 //	private final Map<String, ErrorPageModel> errorPageModels;
 //	private final Map<String, WelcomeFileModel> welcomeFileModels;
 //	private final Map<HttpContext, OsgiContextModel> contextModels;
@@ -238,6 +240,32 @@ public class ServiceModel implements BatchVisitor {
 		// no op here. At model level (unlike in server controller level), filters are added/removed individually
 	}
 
+	@Override
+	public void visit(EventListenerModelChange change) {
+		if (change.getKind() == OpCode.ADD) {
+			EventListenerModel model = change.getEventListenerModel();
+
+			// apply the change at ServiceModel level - whether it's disabled or not
+			eventListenerModels.put(model.getEventListener(), model);
+			// the change should also be processed at serverModel level
+			serverModel.visit(change);
+			return;
+		}
+
+		if (change.getKind() == OpCode.DELETE) {
+			EventListenerModel eventListenerModel = change.getEventListenerModel();
+
+			eventListenerModels.remove(eventListenerModel.getEventListener());
+			// the change should be processed at serverModel level as well
+			serverModel.visit(change);
+			return;
+		}
+
+		if (change.getKind() == OpCode.ENABLE || change.getKind() == OpCode.DISABLE) {
+			serverModel.visit(change);
+		}
+	}
+
 //	public synchronized ServletModel getServletModelWithAlias(final String alias) {
 //		NullArgumentException.validateNotEmpty(alias, "Alias");
 //		return aliasMapping.get(alias);
@@ -313,53 +341,6 @@ public class ServiceModel implements BatchVisitor {
 //		}
 //		return foundServletModels;
 //	}
-
-	public synchronized void addEventListenerModel(
-			final EventListenerModel model) {
-		if (eventListenerModels.containsKey(model.getEventListener())) {
-			throw new IllegalArgumentException("Listener ["
-					+ model.getEventListener() + "] already registered.");
-		}
-		eventListenerModels.put(model.getEventListener(), model);
-	}
-
-	public synchronized EventListenerModel removeEventListener(
-			final EventListener listener) {
-		final EventListenerModel model;
-		model = eventListenerModels.get(listener);
-		if (model == null) {
-			throw new IllegalArgumentException("Listener [" + listener
-					+ " is not currently registered in any context");
-		}
-		eventListenerModels.remove(listener);
-		return model;
-	}
-
-    @Override
-    public void visit(EventListenerModelChange change) {
-        if (change.getKind() == OpCode.ADD) {
-            EventListenerModel model = change.getEventListenerModel();
-
-            // apply the change at ServiceModel level - whether it's disabled or not
-            eventListenerModels.put(model.getEventListener(), model);
-            // the change should also be processed at serverModel level
-            serverModel.visit(change);
-            return;
-        }
-
-        if (change.getKind() == OpCode.DELETE) {
-            EventListenerModel eventListenerModel = change.getEventListenerModel();
-
-            eventListenerModels.remove(eventListenerModel.getEventListener());
-            // the change should be processed at serverModel level as well
-            serverModel.visit(change);
-            return;
-        }
-
-        if (change.getKind() == OpCode.ENABLE || change.getKind() == OpCode.DISABLE) {
-            serverModel.visit(change);
-        }
-    }
 
 //	public synchronized void addFilterModel(final FilterModel model) {
 //		String name = model.getName();

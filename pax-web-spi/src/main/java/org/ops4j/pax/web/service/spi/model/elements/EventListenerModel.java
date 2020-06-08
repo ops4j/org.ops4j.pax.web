@@ -19,11 +19,9 @@ package org.ops4j.pax.web.service.spi.model.elements;
 import java.util.EventListener;
 
 import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.service.spi.ServerEvent;
-import org.ops4j.pax.web.service.spi.ServerListener;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 
-public class EventListenerModel extends ElementModel<EventListener>{
+public class EventListenerModel extends ElementModel<EventListener> {
 
 	private final EventListener eventListener;
 
@@ -43,8 +41,10 @@ public class EventListenerModel extends ElementModel<EventListener>{
 	public EventListener getEventListener() {
 		return eventListener;
 	}
+
 	@Override
 	public Boolean performValidation() {
+		// not much to validate
 		return Boolean.TRUE;
 	}
 

@@ -934,6 +934,11 @@ class TomcatServerWrapper implements BatchVisitor {
 	    //TODO must be implemented
 	}
 
+	@Override
+	public void visit(EventListenerModelChange change) {
+	    //TODO must be implemented
+	}
+
 	private OsgiServletContext getHighestRankedContext(String contextPath, FilterModel model) {
 		OsgiContextModel highestRankedModel = null;
 		// remember, this contextModels list is properly sorted

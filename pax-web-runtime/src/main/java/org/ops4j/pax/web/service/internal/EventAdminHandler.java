@@ -19,6 +19,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.WebEvent;
@@ -34,6 +35,7 @@ import org.slf4j.LoggerFactory;
  * This class listens to {@link ServletEvent}s and redirect them to the
  * {@link EventAdmin} service
  */
+@Review("Check EventAdmin lifecycle")
 public class EventAdminHandler implements ServletListener,
 		ServiceTrackerCustomizer<EventAdmin, EventAdmin> {
 

@@ -24,10 +24,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EventListener;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +69,6 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
-import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingModel;
@@ -782,69 +777,65 @@ public class HttpServiceEnabled implements StoppableHttpService {
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
-	
-	
-	// --- EventListener 
-	
-	   
-    @Override
-    public void registerEventListener(final EventListener listener,
-                                      final HttpContext httpContext) {
-        doRegisterEventListener(Collections.singletonList(httpContext), new EventListenerModel(listener));
-    }
-    
 
+	// --- methods used to register an EventListener
 
-    @Override
-    public void unregisterEventListener(final EventListener listener) {
-        
-        try {
-            serverModel.run(() -> {
-                final Batch batch = new Batch("Unregistration of EventListener: " + listener);
-                serviceModel.removeEventListener(listener);
-                serverController.sendBatch(batch);
-
-                batch.accept(serviceModel);
-
-                return null;
-            });
-        } catch (ServletException | NamespaceException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-        
-    }
+	@Override
+	public void registerEventListener(final EventListener listener, final HttpContext httpContext) {
+		doRegisterEventListener(Collections.singletonList(httpContext), new EventListenerModel(listener));
+	}
 
 	private void doRegisterEventListener(Collection<HttpContext> httpContexts, EventListenerModel model) {
-	    model.performValidation();
+		LOG.debug("Passing registration of {} to configuration thread", model);
 
-        final Batch batch = new Batch("Registration of " + model);
+		if (model.getRegisteringBundle() == null) {
+			model.setRegisteringBundle(this.serviceBundle);
+		}
 
-        try {
-            serverModel.run(() -> {
-                translateContexts(httpContexts, model, batch);
+		final Batch batch = new Batch("Registration of " + model);
 
-                LOG.info("Registering {}", model);
-                
-                serviceModel.addEventListenerModel(model);
-                
-                serverModel.addEventListenerModel(model, batch);
+		try {
+			model.performValidation();
 
-                // only if validation was fine, pass the batch to ServerController, where the batch may fail again
-                serverController.sendBatch(batch);
+			serverModel.run(() -> {
+				translateContexts(httpContexts, model, batch);
 
-                // if server runtime has accepted the changes (hoping it'll be in clean state if it didn't), lets
-                // actually apply the changes to global model (through ServiceModel)
-                batch.accept(serviceModel);
+				LOG.info("Registering {}", model);
 
-                return null;
-            });
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
+				serverModel.addEventListenerModel(model, batch);
+
+				serverController.sendBatch(batch);
+
+				batch.accept(serviceModel);
+
+				return null;
+			});
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
-	
 
-	
+	// --- methods used to unregister an EventListener
+
+	@Override
+	public void unregisterEventListener(final EventListener listener) {
+		try {
+			serverModel.run(() -> {
+				final Batch batch = new Batch("Unregistration of EventListener: " + listener);
+
+//				serverModel.removeEventListenerModel(listener, batch);
+
+				serverController.sendBatch(batch);
+
+				batch.accept(serviceModel);
+
+				return null;
+			});
+		} catch (ServletException | NamespaceException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
 	// --- private support methods
 
 	private void servletEvent(ServletEvent.State type, Bundle bundle, ServletModel model) {
