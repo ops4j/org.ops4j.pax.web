@@ -89,8 +89,10 @@ public class HttpContextTracker extends AbstractContextTracker<HttpContext> {
 		if (name != null) {
 			// property to allow Whiteboard elements to be registered for HttpService-related context
 			model.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY, name);
-			// allow old HttpContext to be target for new Whiteboard web elements
-			model.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, name);
+			// we could allow old HttpContext to be target for new Whiteboard web elements
+			// but we won't do it - user has to specify osgi.http.whiteboard.context.name directly.
+			// do not uncomment
+//			model.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, name);
 		}
 
 		// 5. TODO: virtual hosts

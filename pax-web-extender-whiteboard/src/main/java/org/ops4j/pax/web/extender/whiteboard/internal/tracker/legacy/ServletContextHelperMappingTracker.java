@@ -81,7 +81,7 @@ public class ServletContextHelperMappingTracker extends AbstractContextTracker<S
 			// ServletContexxtHelperMapping is legacy (Pax Web specific) method for registration of
 			// standard ServletContextMapping with the details specified directly and not as service registration
 			// properties
-			// event if the service registered is singleton and getServletContextHelper() returns the same instance
+			// even if the service registered is singleton and getServletContextHelper() returns the same instance
 			// all the time, we still configure a supplier, because ServletContexteHelper should never be
 			// treated as a context passed to httpService.registerServlet(..., context)
 			model.setContextSupplier((bundleContext, ignoredName) -> {

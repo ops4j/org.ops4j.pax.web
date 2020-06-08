@@ -847,16 +847,9 @@ public class HttpServiceEnabled implements StoppableHttpService {
 						PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
 				model.addContextModel(contextModel);
 			});
-		} else if (model.hasContextModels()) {
-			// DON'T register OsgiContextModels carried with Whiteboard-registered WebElement. These should
-			// be registered explicitly, before servlet is registered
-			// keep the below code commented.
-//			// Whiteboard Service scenario - OsgiContextModel(s) are passed together with the model, but we
-//			// have to ensure they're registered in ServerModel and ServerController
-//			model.getContextModels().forEach(ocm -> {
-//				serverModel.registerOsgiContextModelIfNeeded(ocm, batch);
-//			});
 		}
+		// DON'T register OsgiContextModels carried with Whiteboard-registered WebElement. These should
+		// be registered explicitly, before servlet is registered
 	}
 
 	/**

@@ -55,12 +55,7 @@ public class WhiteboardContextsTest extends MultiContainerTestSupport {
 	public void justServletWithCustomContext() throws Exception {
 		Bundle sample1 = mockBundle("sample1");
 
-		ServletContextHelper helper = new ServletContextHelper() {
-			@Override
-			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
-				return super.handleSecurity(request, response);
-			}
-		};
+		ServletContextHelper helper = new ServletContextHelper() {};
 		getServletContextHelperCustomizer().addingService(mockServletContextHelperReference(sample1, "c1",
 				() -> helper, 0L, 0, "/c"));
 

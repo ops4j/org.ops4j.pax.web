@@ -288,11 +288,17 @@ public class MultiContainerTestSupport {
 			when(ref.getPropertyKeys()).thenReturn(props.keySet().toArray(new String[0]));
 			when(ref.getProperties()).thenReturn(props);
 		}
+		boolean singleton = true;
 		if (supplier != null) {
 			S instance = supplier.get();
+			if (instance != supplier.get()) {
+				singleton = false;
+			}
 			when(bundle.getBundleContext().getService(ref)).thenReturn(instance);
 			when(whiteboardBundleContext.getService(ref)).thenReturn(instance);
 		}
+		when(ref.getProperty(Constants.SERVICE_SCOPE))
+				.thenReturn(singleton ? Constants.SCOPE_SINGLETON : Constants.SCOPE_BUNDLE);
 
 		return ref;
 	}

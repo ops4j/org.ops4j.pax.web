@@ -492,9 +492,9 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		}
 
 		// reverse check for ranking - higher rank is "first"
-		int serviceRank = o.getServiceRank() - this.getServiceRank();
+		long serviceRank = (long)o.getServiceRank() - (long)this.getServiceRank();
 		if (serviceRank != 0) {
-			return serviceRank;
+			return serviceRank > 0 ? 1 : -1;
 		}
 
 		// service ID - lower is "first"
