@@ -43,6 +43,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.ops4j.pax.exam.Constants.START_LEVEL_TEST_BUNDLE;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
@@ -65,6 +66,16 @@ public class PaxWebSpiIntegrationTest extends AbstractControlledBase2 {
 				// to do it's job (like scanning for resources)
 				mavenBundle("org.ops4j.pax.web.samples", "pax-web-spi-fragment").versionAsInProject().noStart(),
 
+				// pax-web-spi itself won't require XBean, but the above fragments still shows how it was used
+				// requirement from pax-web-spi
+				mavenBundle("org.apache.xbean", "xbean-finder").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				// xbean-finder requires xbean-bundleutils
+				mavenBundle("org.apache.xbean", "xbean-bundleutils").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				// xbean-finder requires asm and asm-commons, and asm-commons requires asm-tree
+				mavenBundle("org.ow2.asm", "asm").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ow2.asm", "asm-commons").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ow2.asm", "asm-tree").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+
 				// bundle and two fragments to perform searching of /META-INF/services/javax.servlet.ServletContainerInitializer
 				mavenBundle("org.ops4j.pax.web.samples", "initializers").versionAsInProject(),
 				mavenBundle("org.ops4j.pax.web.samples", "initializers-fragment1").versionAsInProject().noStart(),
@@ -73,7 +84,10 @@ public class PaxWebSpiIntegrationTest extends AbstractControlledBase2 {
 				// WARs to search their embedded content though Bundle/BundleWiring API
 				// pax-web-runtime will later construct ResourceDelegatingBundleClassLoader for them
 				mavenBundle("org.ops4j.pax.web.samples", "war-simplest-osgi").type("war").versionAsInProject(),
-				mavenBundle("org.ops4j.pax.web.samples", "jsf-primefaces-embedded").type("war").versionAsInProject()
+				mavenBundle("org.ops4j.pax.web.samples", "jsf-primefaces-embedded").type("war").versionAsInProject(),
+				mavenBundle("org.ops4j.pax.web.samples", "jsf-primefaces-commons1").versionAsInProject(),
+				mavenBundle("org.ops4j.pax.web.samples", "jsf-primefaces-commons2").versionAsInProject(),
+				mavenBundle("org.ops4j.pax.web.samples", "jsf-primefaces-commons3").versionAsInProject()
 		);
 	}
 

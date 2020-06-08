@@ -133,12 +133,15 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	 * Single thread pool to process all configuration changes, {@link ServerControllerFactory} (re)registrations
 	 * and (since Pax Web 8) also actual registrations of web elements.
 	 */
-	private final ScheduledExecutorService runtimeExecutor
-			= Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("paxweb-config"));
+	private ScheduledExecutorService runtimeExecutor;
+	private long registrationThreadId;
 
 	@Override
 	public void start(final BundleContext context) throws Exception {
 		LOG.debug("Starting Pax Web");
+
+		runtimeExecutor = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("paxweb-config"));
+		registrationThreadId = ServerModel.getThreadIdFromSingleThreadPool(runtimeExecutor);
 
 		bundleContext = context;
 
@@ -282,7 +285,16 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	 * @param controllerFactory
 	 */
 	private void updateServerControllerFactory(final ServerControllerFactory controllerFactory) {
-		LOG.info("Scheduling Pax Web reconfiguration because ServerControllerFactory has been (re)registered");
+		if (this.serverControllerFactory != null) {
+			if (controllerFactory == null) {
+				LOG.info("Scheduling Pax Web reconfiguration because ServerControllerFactory has been unregistered");
+			} else {
+				LOG.info("Scheduling Pax Web reconfiguration because ServerControllerFactory has been re-registered");
+			}
+		} else if (controllerFactory != null) {
+			LOG.info("Scheduling Pax Web reconfiguration because ServerControllerFactory has been registered");
+		}
+
 		// change configuration using new (or null when not available) ServerControllerFactory and current configuration
 		Future<?> future = runtimeExecutor.submit(() -> updateController(configuration, controllerFactory));
 
@@ -405,7 +417,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			// global, single representation of web server state. It's used
 			//  - in all bundle-scoped instances of HttpServiceEnabled
 			//  - also to reflect Whiteboard registrations (through pax-web-extender-whiteboard)
-			final ServerModel serverModel = new ServerModel(runtimeExecutor);
+			final ServerModel serverModel = new ServerModel(runtimeExecutor, registrationThreadId);
 
 			// create a controller object to operate on any supported web server
 			serverController = serverControllerFactory.createServerController(configuration);

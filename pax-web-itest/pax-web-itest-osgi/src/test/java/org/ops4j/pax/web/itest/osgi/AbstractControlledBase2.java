@@ -125,7 +125,9 @@ public class AbstractControlledBase2 {
 				mavenBundle("org.ops4j.pax.logging", "pax-logging-log4j2")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 
-				systemProperty("org.ops4j.pax.logging.property.file").value("target/test-classes/log4j2-osgi.properties")
+				systemProperty("org.ops4j.pax.logging.property.file").value("target/test-classes/log4j2-osgi.properties"),
+
+				metaTypeService()
 		};
 
 		Option[] loggingOptions = defaultLoggingConfig();
@@ -145,20 +147,6 @@ public class AbstractControlledBase2 {
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).start(),
 				mavenBundle("org.ops4j.pax.web", "pax-web-spi")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).start()
-
-//				// requirement from pax-web-spi
-//				mavenBundle("org.apache.xbean", "xbean-finder")
-//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-//				// xbean-finder requires xbean-bundleutils
-//				mavenBundle("org.apache.xbean", "xbean-bundleutils")
-//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-//				// xbean-finder requires asm and asm-commons, and asm-commons requires asm-tree
-//				mavenBundle("org.ow2.asm", "asm")
-//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-//				mavenBundle("org.ow2.asm", "asm-commons")
-//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-//				mavenBundle("org.ow2.asm", "asm-tree")
-//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 		};
 	}
 

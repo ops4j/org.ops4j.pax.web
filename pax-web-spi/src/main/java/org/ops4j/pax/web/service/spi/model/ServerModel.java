@@ -298,10 +298,14 @@ public class ServerModel implements BatchVisitor {
 	 */
 	public ServerModel(Executor executor) {
 		this.executor = executor;
+		// check thread ID to detect whether we're running within it
+		registrationThreadId = getThreadIdFromSingleThreadPool(executor);
+	}
 
+	public static long getThreadIdFromSingleThreadPool(Executor executor) {
 		try {
 			// check thread ID to detect whether we're running within it
-			registrationThreadId = CompletableFuture.supplyAsync(() -> Thread.currentThread().getId(), executor).get();
+			return CompletableFuture.supplyAsync(() -> Thread.currentThread().getId(), executor).get();
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new RuntimeException(e.getMessage(), e);
@@ -313,6 +317,17 @@ public class ServerModel implements BatchVisitor {
 				throw new RuntimeException(e.getCause().getMessage(), e.getCause());
 			}
 		}
+	}
+
+	/**
+	 * Creates new global model of all web applications with {@link Executor} to be used for configuration and
+	 * registration tasks and thread id specified for checking if tasks run with this (assumed) single thread
+	 * executor
+	 * @param executor
+	 */
+	public ServerModel(Executor executor, long threadId) {
+		this.executor = executor;
+		registrationThreadId = threadId;
 	}
 
 	public Executor getExecutor() {

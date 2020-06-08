@@ -43,6 +43,7 @@ public class ServletModel extends ElementModel<Servlet> {
 
 	/** Alias as defined by old {@link org.osgi.service.http.HttpService} registration methods */
 	private final String alias;
+	private boolean aliasCopiedToPatterns = false;
 
 	/**
 	 * <p>URL patterns as specified by:<ul>
@@ -154,13 +155,14 @@ public class ServletModel extends ElementModel<Servlet> {
 		}
 		this.name = name;
 
-		if (this.urlPatterns == null) {
+		if (this.urlPatterns == null && this.alias != null) {
 			// Http Service specification 102.4 Mapping HTTP Requests to Servlet and Resource Registrations:
 			// [...]
 			// 6. If there is no match, the Http Service must attempt to match sub-strings of the requested
 			//    URI to registered aliases. The sub-strings of the requested URI are selected by removing
 			//    the last "/" and everything to the right of the last "/".
 			this.urlPatterns = new String[] { this.alias + "/*" };
+			this.aliasCopiedToPatterns = true;
 		}
 	}
 
@@ -183,7 +185,7 @@ public class ServletModel extends ElementModel<Servlet> {
 		if (this.alias == null && (this.urlPatterns == null || this.urlPatterns.length == 0)) {
 			throw new IllegalArgumentException("Neither alias nor URL patterns array is specified");
 		}
-		if (this.alias != null && this.urlPatterns != null && this.urlPatterns.length > 0) {
+		if (this.alias != null && this.urlPatterns != null && this.urlPatterns.length > 0 && !aliasCopiedToPatterns) {
 			throw new IllegalArgumentException("Can't specify both alias and URL patterns array");
 		}
 
