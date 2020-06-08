@@ -59,7 +59,6 @@ import io.undertow.servlet.core.ManagedFilters;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
-import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
@@ -1142,11 +1141,6 @@ class UndertowServerWrapper implements BatchVisitor {
 				}
 			}
 		}
-	}
-	
-	@Override
-	public void visit(EventListenerModelChange change) {
-	    //TODO: needs implementation
 	}
 
 	@Override

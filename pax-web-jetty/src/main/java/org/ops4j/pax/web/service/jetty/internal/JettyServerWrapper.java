@@ -24,7 +24,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
@@ -885,13 +884,6 @@ class JettyServerWrapper implements BatchVisitor {
 				sch.getServletHandler().setFilterMappings(newFilterMappings);
 			}
 		}
-	}
-	
-	@Override
-	public void visit(EventListenerModelChange change) {
-//	    change.getEventListenerModel().
-//	    ServletContextHandler sch = contextHandlers.get();
-//        sch.addEventListener(change.getEventListenerModel().getEventListener());
 	}
 
 	@Override

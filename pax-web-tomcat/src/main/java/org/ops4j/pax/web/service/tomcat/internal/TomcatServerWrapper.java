@@ -928,15 +928,10 @@ class TomcatServerWrapper implements BatchVisitor {
 			}
 		}
 	}
-	
-	@Override
-	public void visit(EventListenerModelChange change) {
-	    //TODO must be implemented
-	}
 
 	@Override
 	public void visit(EventListenerModelChange change) {
-	    //TODO must be implemented
+		// TODO: must be implemented
 	}
 
 	private OsgiServletContext getHighestRankedContext(String contextPath, FilterModel model) {
