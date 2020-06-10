@@ -79,7 +79,7 @@ import org.slf4j.LoggerFactory;
  */
 class TomcatServerWrapper implements BatchVisitor {
 
-	public static Logger LOG = LoggerFactory.getLogger(TomcatServerWrapper.class);
+	public static final Logger LOG = LoggerFactory.getLogger(TomcatServerWrapper.class);
 
 	private static final String TOMCAT_CATALINA_NAME = "Catalina";
 
@@ -148,7 +148,7 @@ class TomcatServerWrapper implements BatchVisitor {
 //
 //				private final Map<ServletModel, LifecycleListener> servletLifecycleListenerMap = new ConcurrentHashMap<>();
 
-	public TomcatServerWrapper(Configuration config, TomcatFactory tomcatFactory,
+	TomcatServerWrapper(Configuration config, TomcatFactory tomcatFactory,
 			Bundle paxWebTomcatBundle, ClassLoader classLoader) {
 		this.configuration = config;
 		this.tomcatFactory = tomcatFactory;
@@ -900,35 +900,35 @@ class TomcatServerWrapper implements BatchVisitor {
 
 			// 2020-06-02: it's not possible to simply add a filter to Tomcat and init() it without init()ing
 			// existing filters
-			if (true || !quickFilterChange(context, filterDefs, filters, contextPath)) {
-				// the hard way - recreate entire array of filters/filter-mappings
-				context.filterStop();
-				// remove all but "initial OSGi filter"
-				for (FilterDef def : filterDefs) {
-					if (!(def instanceof PaxWebFilterDef && ((PaxWebFilterDef) def).isInitial())) {
-						context.removeFilterDef(def);
-					}
+//			if (true || !quickFilterChange(context, filterDefs, filters, contextPath)) {
+			// the hard way - recreate entire array of filters/filter-mappings
+			context.filterStop();
+			// remove all but "initial OSGi filter"
+			for (FilterDef def : filterDefs) {
+				if (!(def instanceof PaxWebFilterDef && ((PaxWebFilterDef) def).isInitial())) {
+					context.removeFilterDef(def);
 				}
-				for (FilterMap map : filterMaps) {
-					if (!(map instanceof PaxWebFilterMap && ((PaxWebFilterMap) map).isInitial())) {
-						context.removeFilterMap(map);
-					}
-				}
-
-				PaxWebFilterDef[] newFilterDefs = new PaxWebFilterDef[filters.size() + 1];
-				PaxWebFilterMap[] newFilterMaps = new PaxWebFilterMap[filters.size() + 1];
-
-				for (FilterModel model : filters) {
-					OsgiServletContext osgiContext = getHighestRankedContext(contextPath, model);
-
-					PaxWebFilterDef def = new PaxWebFilterDef(model, false, osgiContext);
-					PaxWebFilterMap map = new PaxWebFilterMap(model, false);
-
-					context.addFilterDef(def);
-					context.addFilterMap(map);
-				}
-				context.filterStart();
 			}
+			for (FilterMap map : filterMaps) {
+				if (!(map instanceof PaxWebFilterMap && ((PaxWebFilterMap) map).isInitial())) {
+					context.removeFilterMap(map);
+				}
+			}
+
+			PaxWebFilterDef[] newFilterDefs = new PaxWebFilterDef[filters.size() + 1];
+			PaxWebFilterMap[] newFilterMaps = new PaxWebFilterMap[filters.size() + 1];
+
+			for (FilterModel model : filters) {
+				OsgiServletContext osgiContext = getHighestRankedContext(contextPath, model);
+
+				PaxWebFilterDef def = new PaxWebFilterDef(model, false, osgiContext);
+				PaxWebFilterMap map = new PaxWebFilterMap(model, false);
+
+				context.addFilterDef(def);
+				context.addFilterMap(map);
+			}
+			context.filterStart();
+//			}
 		}
 	}
 

@@ -40,7 +40,7 @@ class HttpServiceDisabled implements StoppableHttpService {
 
 	final Bundle serviceBundle;
 
-	public HttpServiceDisabled(Bundle serviceBundle) {
+	HttpServiceDisabled(Bundle serviceBundle) {
 		this.serviceBundle = serviceBundle;
 		LOG.debug("Changing HttpService state to " + this);
 	}

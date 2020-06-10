@@ -67,8 +67,11 @@ import org.slf4j.LoggerFactory;
  */
 public class SSLUtils {
 
-	public static Logger LOG = LoggerFactory.getLogger(SSLUtils.class);
-	public static DateFormat DATE = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	public static final Logger LOG = LoggerFactory.getLogger(SSLUtils.class);
+	public static final DateFormat DATE = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+	private SSLUtils() {
+	}
 
 	public static void generateKeyStores() throws Exception {
 		File serverKeystoreFile = new File("target/server.jks");

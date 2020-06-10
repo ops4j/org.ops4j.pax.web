@@ -54,7 +54,7 @@ class TomcatServerController implements ServerController {
 	 */
 	private TomcatServerWrapper tomcatServerWrapper;
 
-	public TomcatServerController(Bundle paxWebTomcatBundle, ClassLoader classLoader,
+	TomcatServerController(Bundle paxWebTomcatBundle, ClassLoader classLoader,
 			TomcatFactory tomcatFactory, Configuration configuration) {
 		this.paxWebTomcatBundle = paxWebTomcatBundle;
 		this.classLoader = classLoader;

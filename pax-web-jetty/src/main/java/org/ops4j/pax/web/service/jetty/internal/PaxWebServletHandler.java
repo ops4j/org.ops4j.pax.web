@@ -242,8 +242,9 @@ public class PaxWebServletHandler extends ServletHandler {
 				servletHolder.handle(baseRequest, req, res);
 			}
 		} finally {
-			if (servletHolder != null)
+			if (servletHolder != null) {
 				baseRequest.setHandled(true);
+			}
 		}
 	}
 

@@ -15,18 +15,18 @@
  */
 package org.ops4j.pax.web.itest.base.support;
 
-import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import javax.servlet.Filter;
+import javax.servlet.Servlet;
+
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
-
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-import java.util.Dictionary;
-import java.util.Hashtable;
 
 public class Bundle1Activator implements BundleActivator {
 
@@ -46,33 +46,33 @@ public class Bundle1Activator implements BundleActivator {
 
 		WebContainer service = (WebContainer) context.getService(serviceReference);
 
-		HttpContext httpContext = service.getDefaultSharedHttpContext();
+		HttpContext httpContext = service.createDefaultSharedHttpContext();
 
 		Dictionary<String, String> props;
 
 		// register a custom http context that forbids access
 		props = new Hashtable<>();
-		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "shared");
+		props.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "shared");
 		httpContextReg =
 				context.registerService(HttpContext.class, httpContext, props);
 		// and an servlet that cannot be accessed due to the above context
 		props = new Hashtable<>();
-		props.put(ExtenderConstants.PROPERTY_ALIAS, Bundle1Servlet.ALIAS);
+		props.put(PaxWebConstants.SERVICE_PROPERTY_SERVLET_ALIAS, Bundle1Servlet.ALIAS);
 		props.put("servlet-name", "Bundle1Servlet");
-		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "shared");
+		props.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "shared");
 		bundle1ServletReg =
 				context.registerService(Servlet.class, new Bundle1Servlet(), props);
 
 		// register a filter
 		props = new Hashtable<>();
-		props.put(ExtenderConstants.PROPERTY_URL_PATTERNS, Bundle1Servlet.ALIAS + "/*");
-		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "shared");
+		props.put(PaxWebConstants.SERVICE_PROPERTY_URL_PATTERNS, Bundle1Servlet.ALIAS + "/*");
+		props.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "shared");
 		filterReg =
 				context.registerService(Filter.class, new Bundle1Filter(), props);
 
 		Dictionary<String, String> filterInit = new Hashtable<>();
 		filterInit.put("pattern", ".*");
-		filterInit.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "shared");
+		filterInit.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "shared");
 
 		service.registerFilter(new Bundle1SharedFilter(), new String[]{"/*"}, null, filterInit, (HttpContext) context.getService(httpContextReg.getReference()));
 

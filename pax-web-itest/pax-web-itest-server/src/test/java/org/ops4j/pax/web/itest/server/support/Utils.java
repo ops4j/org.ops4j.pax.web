@@ -63,7 +63,10 @@ import org.xnio.nio.NioXnioProvider;
 
 public class Utils {
 
-	public static Logger LOG = LoggerFactory.getLogger(Utils.class);
+	public static final Logger LOG = LoggerFactory.getLogger(Utils.class);
+
+	private Utils() {
+	}
 
 	public static ServerController create(Consumer<Hashtable<Object, Object>> callback, int port,
 			Runtime runtime, ClassLoader classLoader) {

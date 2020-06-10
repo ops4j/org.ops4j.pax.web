@@ -15,16 +15,16 @@
  */
 package org.ops4j.pax.web.itest.base.support;
 
-import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.Hashtable;
+
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
-
-import java.util.Collection;
-import java.util.Dictionary;
-import java.util.Hashtable;
 
 public class Bundle2Activator implements BundleActivator {
 
@@ -51,13 +51,13 @@ public class Bundle2Activator implements BundleActivator {
 
 		// register a custom http context that forbids access
 		props = new Hashtable<>();
-		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "shared");
-		props.put(ExtenderConstants.PROPERTY_ALIAS, Bundle2SharedServlet.ALIAS);
+		props.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "shared");
+		props.put(PaxWebConstants.SERVICE_PROPERTY_SERVLET_ALIAS, Bundle2SharedServlet.ALIAS);
 		service.registerServlet(new Bundle2SharedServlet(), new String[]{Bundle2SharedServlet.ALIAS}, props, httpContext);
 
 		Dictionary<String, String> filterInit = new Hashtable<>();
 		filterInit.put("pattern", ".*");
-		filterInit.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "shared");
+		filterInit.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "shared");
 
 		service.registerFilter(new Bundle2SharedFilter(), new String[]{"/*"}, null, filterInit, httpContext);
 

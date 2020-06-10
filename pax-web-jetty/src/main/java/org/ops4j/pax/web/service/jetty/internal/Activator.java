@@ -45,9 +45,9 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 public class Activator implements BundleActivator {
 
 	private static class PriorityComparator implements Comparator<Object> {
+
 		@Override
-		public int compare(Object element1, Object element2)
-		{
+		public int compare(Object element1, Object element2) {
 			Integer comparison = 0;
 			if (element1 != element2) {
 				comparison = null;

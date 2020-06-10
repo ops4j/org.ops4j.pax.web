@@ -476,6 +476,8 @@ public class OsgiServletContext implements ServletContext {
 	public ClassLoader getClassLoader() {
 		// at Servlet (or Filter) level, this method returns classLoader of a bundle registering given Servlet
 		// (or Filter). Here, it's a bundle registering ServletContextHelper (or HttpContext)
+		// TODO: (very important) this class loader should be "bundle delegating class loaders" - potentially
+		//       backed by more bundles and with mandatory caching.
 		return osgiContextModel.getOwnerBundle().adapt(BundleWiring.class).getClassLoader();
 	}
 

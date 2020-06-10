@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class ClassSpaceTest {
 
-	public static Logger LOG = LoggerFactory.getLogger(ClassSpaceTest.class);
+	public static final Logger LOG = LoggerFactory.getLogger(ClassSpaceTest.class);
 
 	@Test
 	public void classpath() {
@@ -133,14 +133,14 @@ public class ClassSpaceTest {
 
 		// for directory, sun.net.www.protocol.file.FileURLConnection.getInputStream() will get ...
 		// ... '\n'-separated list of directory entries returned from java.io.File.list()
-		InputStream is = getClass().getClassLoader().getResourceAsStream("org/ops4j");
+		InputStream is = getClass().getClassLoader().getResourceAsStream("org/ops4j/pax/web/service");
 		byte[] buf = new byte[1024];
 		int read = -1;
 		StringWriter sw = new StringWriter();
 		while (is != null && (read = is.read(buf)) > 0) {
 			sw.append(new String(buf, 0, read));
 		}
-		LOG.info("Content of directory: {}", sw.toString());
+		LOG.info("Content of directory:\n{}", sw.toString());
 	}
 
 }

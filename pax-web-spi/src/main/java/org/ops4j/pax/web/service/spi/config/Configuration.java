@@ -18,8 +18,6 @@ package org.ops4j.pax.web.service.spi.config;
 
 import java.util.Map;
 
-import org.osgi.annotation.versioning.ProviderType;
-
 /**
  * <p>Interface for accessing configuration that's normally available/provided using Configuration Admin
  * properties or Meta Type information. If possible, server implementations should access Pax Web properties
@@ -31,7 +29,6 @@ import org.osgi.annotation.versioning.ProviderType;
  * <p>Actual server implementations should access <strong>entire</strong> configuration using this interface
  * without a need to create extra {@code org.ops4j.util.property.PropertyResolver} instances.</p>
  */
-@ProviderType
 public interface Configuration {
 
 	/**

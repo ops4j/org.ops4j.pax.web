@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  */
 public class OsgiHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
-	public static Logger LOG = LoggerFactory.getLogger(OsgiHttpServletRequestWrapper.class);
+	public static final Logger LOG = LoggerFactory.getLogger(OsgiHttpServletRequestWrapper.class);
 
 	private String authType = null;
 	private String remoteUser = null;

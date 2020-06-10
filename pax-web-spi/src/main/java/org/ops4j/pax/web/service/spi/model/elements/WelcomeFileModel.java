@@ -19,7 +19,6 @@ package org.ops4j.pax.web.service.spi.model.elements;
 
 import java.util.Arrays;
 
-import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 
@@ -32,7 +31,6 @@ public class WelcomeFileModel extends ElementModel {
 
 	public WelcomeFileModel(final OsgiContextModel contextModel, String[] welcomeFiles) {
 //		super(contextModel);
-		NullArgumentException.validateNotNull(welcomeFiles, "WelcomeFiles");
 		if (welcomeFiles != null) {
 			this.welcomeFiles = Arrays.copyOf(welcomeFiles, welcomeFiles.length);
 		} else {

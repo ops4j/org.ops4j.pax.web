@@ -30,7 +30,7 @@
 	<groupId>org.ops4j.pax.web.itest</groupId>
 	<artifactId>pax-web-itest-server</artifactId>
 
-	<name>OPS4J Pax Web - non OSGi Integration Tests</name>
+	<name>OPS4J Pax Web - non-OSGi Integration Tests</name>
 
 	<description>Integration tests for Pax Web servers running without OSGi</description>
 
@@ -54,7 +54,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<redirectTestOutputToFile>false</redirectTestOutputToFile>
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 					<runOrder>alphabetical</runOrder>
 					<forkCount>1</forkCount>
 					<reuseForks>false</reuseForks>

@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Vector;
 
 import org.apache.commons.collections4.map.LRUMap;
-import org.ops4j.pax.swissbox.core.BundleClassLoader;
 import org.osgi.framework.Bundle;
 
 /**
@@ -35,11 +34,11 @@ import org.osgi.framework.Bundle;
  */
 public class InternalDelegatingBundleClassLoader extends BundleClassLoader {
 
-	private List<Bundle> bundles;
+	private final List<Bundle> bundles;
 
-	private int cacheSize = 100; //equals the default size of the LRUMap, might be changed in a later version.
+	private final int cacheSize = 100; //equals the default size of the LRUMap, might be changed in a later version.
 
-	private LRUMap<String, Vector<URL>> lruCache = new LRUMap<>(cacheSize);
+	private final LRUMap<String, Vector<URL>> lruCache = new LRUMap<>(cacheSize);
 
 	public InternalDelegatingBundleClassLoader(List<Bundle> bundles) {
 		super(bundles.get(0));

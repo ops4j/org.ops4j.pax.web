@@ -33,7 +33,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.osgi.framework.BundleContext;
@@ -65,7 +64,6 @@ public class ServletEventDispatcher implements ServletListener, BundleListener {
 	private final Map<Long, Map<String, ServletEvent>> states = new ConcurrentHashMap<>();
 
 	public ServletEventDispatcher(final BundleContext bundleContext) {
-		NullArgumentException.validateNotNull(bundleContext, "Bundle Context");
 		this.bundleContext = bundleContext;
 		this.executors = Executors.newScheduledThreadPool(THREAD_POOL_SIZE,
 				new ThreadFactory() {

@@ -69,9 +69,9 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
  * to perform various tasks related to class/annotation discovery.
  */
 @RunWith(PaxExam.class)
-public class PaxWebRuntimeIntegrationTest extends AbstractControlledBase2 {
+public class PaxWebRuntimeIntegrationTest extends AbstractControlledTestBase {
 
-	public static Logger LOG = LoggerFactory.getLogger(PaxWebRuntimeIntegrationTest.class);
+	public static final Logger LOG = LoggerFactory.getLogger(PaxWebRuntimeIntegrationTest.class);
 
 	@Inject
 	private MetaTypeService metaTypeService;
@@ -80,7 +80,7 @@ public class PaxWebRuntimeIntegrationTest extends AbstractControlledBase2 {
 	public Option[] configure() throws IOException {
 		prepareBundles();
 
-		return combine(baseConfigure(), combine(paxWebCore(), paxWebRuntime(), metaTypeService()));
+		return combine(baseConfigure(), combine(paxWebCore(), paxWebRuntime()));
 	}
 
 	@Test
@@ -120,8 +120,6 @@ public class PaxWebRuntimeIntegrationTest extends AbstractControlledBase2 {
 		final CountDownLatch latch2 = new CountDownLatch(1);
 		final CountDownLatch latch3 = new CountDownLatch(1);
 
-		LOG.info("------------------- registering servicelistener ");
-
 		ServiceListener sl1 = (event) -> {
 			if (event.getType() == ServiceEvent.REGISTERED) {
 				String[] classes = (String[]) event.getServiceReference().getProperty(Constants.OBJECTCLASS);
@@ -131,8 +129,6 @@ public class PaxWebRuntimeIntegrationTest extends AbstractControlledBase2 {
 			}
 		};
 		context.addServiceListener(sl1);
-
-		LOG.info("------------------- registering serviceregistration ");
 
 		// don't change to lambda, otherwise maven-failsafe-plugin fails
 		@SuppressWarnings("Convert2Lambda")
@@ -148,16 +144,13 @@ public class PaxWebRuntimeIntegrationTest extends AbstractControlledBase2 {
 			}
 		}, null);
 
-		LOG.info("------------------- awaiting service ");
-
 		assertTrue(latch1.await(5, TimeUnit.SECONDS));
 		context.removeServiceListener(sl1);
 
 		ServiceReference<HttpService> ref = context.getServiceReference(HttpService.class);
 		HttpService http = context.getService(ref);
 
-		http.registerServlet("/s1", new HttpServlet() {
-		}, null, null);
+		http.registerServlet("/s1", new HttpServlet() { }, null, null);
 		assertTrue(latch2.await(5, TimeUnit.SECONDS));
 
 		ServiceListener sl2 = (event) -> {

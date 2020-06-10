@@ -165,7 +165,7 @@ public class PaxWebServletInfo extends ServletInfo {
 		private final ServletModel model;
 		private final OsgiScopedServletContext osgiScopedServletContext;
 
-		public ServletModelFactory(ServletModel model, OsgiScopedServletContext osgiScopedServletContext) {
+		ServletModelFactory(ServletModel model, OsgiScopedServletContext osgiScopedServletContext) {
 			this.model = model;
 			this.osgiScopedServletContext = osgiScopedServletContext;
 		}

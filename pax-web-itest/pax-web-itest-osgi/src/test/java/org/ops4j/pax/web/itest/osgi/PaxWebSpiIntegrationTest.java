@@ -27,7 +27,6 @@ import java.util.Optional;
 import java.util.jar.Manifest;
 import javax.servlet.ServletContainerInitializer;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -40,8 +39,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.Constants.START_LEVEL_TEST_BUNDLE;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
@@ -52,10 +51,9 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
  * to perform various tasks related to class/annotation discovery.
  */
 @RunWith(PaxExam.class)
-@Ignore("The pax-web-spi-fragment can't really be resolved")
-public class PaxWebSpiIntegrationTest extends AbstractControlledBase2 {
+public class PaxWebSpiIntegrationTest extends AbstractControlledTestBase {
 
-	public static Logger LOG = LoggerFactory.getLogger(PaxWebSpiIntegrationTest.class);
+	public static final Logger LOG = LoggerFactory.getLogger(PaxWebSpiIntegrationTest.class);
 
 	@Configuration
 	public Option[] configure() {

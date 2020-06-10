@@ -26,14 +26,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class Identity {
 
-	private static final AtomicInteger next = new AtomicInteger(0);
+	private static final AtomicInteger NEXT = new AtomicInteger(0);
 
-	private final int _id;
+	private final int nid;
 	private final String id;
 
 	protected Identity() {
-		_id = next.incrementAndGet();
-		id = (this.getClass().getSimpleName() + "-" + _id).intern();
+		nid = NEXT.incrementAndGet();
+		id = (this.getClass().getSimpleName() + "-" + nid).intern();
 	}
 
 	public String getId() {
@@ -41,7 +41,7 @@ public abstract class Identity {
 	}
 
 	protected int getNumericId() {
-		return _id;
+		return nid;
 	}
 
 	@Override

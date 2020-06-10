@@ -16,7 +16,6 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -28,9 +27,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
 
-//TODO: Re-Enable tests again
 @RunWith(MockitoJUnitRunner.class)
 public class JettyServerWrapperTest {
 	private static final String KNOWN_CONTEXT_NAME = "TestContext";
@@ -67,8 +64,8 @@ public class JettyServerWrapperTest {
 //		when(bundleContextMock.getBundle()).thenReturn(bundleMock);
 	}
 
-    @Ignore
-	@SuppressWarnings("unchecked")
+//    @Ignore
+//	@SuppressWarnings("unchecked")
 	@Test
 	public void getOrCreateContextDoesNotRegisterMultipleServletContextsForSameContextModelSingleThreaded()
 			throws Exception {
@@ -89,8 +86,8 @@ public class JettyServerWrapperTest {
 //		}
 	}
 
-    @Ignore
-	@SuppressWarnings("unchecked")
+//    @Ignore
+//	@SuppressWarnings("unchecked")
 	@Test
 	public void getOrCreateContextDoesNotRegisterMultipleServletContextsForSameContextModelMultiThreaded()
 			throws Exception {
@@ -161,7 +158,7 @@ public class JettyServerWrapperTest {
 	}
 	//CHECKSTYLE:ON
 
-    @Ignore
+//    @Ignore
 	@Test
 	public void sequenceOfGetOrCreateContextGetContextRemoveContext()
 			throws Exception {
@@ -210,7 +207,7 @@ public class JettyServerWrapperTest {
 //		}
 //	}
 
-	@Ignore
+//	@Ignore
 	@Test
 	public void testDefaultAuthMethod()
 			throws Exception {
@@ -228,7 +225,7 @@ public class JettyServerWrapperTest {
 //		}
 	}
 
-    @Ignore
+//    @Ignore
 	@Test
 	public void testDefaultRealmName()
 			throws Exception {

@@ -141,7 +141,7 @@ public class ResourceServletTest {
 	private class MockContext extends Context {
 		private ResourceManager manager = null;
 
-		public MockContext(ResourceManager resourceManager, ContextAwarePathHandler path, OsgiContextModel contextModel) {
+		MockContext(ResourceManager resourceManager, ContextAwarePathHandler path, OsgiContextModel contextModel) {
 			super(null, path, contextModel);
 			this.manager = resourceManager;
 		}

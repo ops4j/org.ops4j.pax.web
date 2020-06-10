@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 public class TypeUtil {
 	private static final int SIXTEEN = 16;
 
-	private static final int _0XFF = 0xff;
+	private static final int N_0XFF = 0xff;
 
 	private static final int TEN = 10;
 
@@ -329,7 +329,7 @@ public class TypeUtil {
 		//CHECKSTYLE:ON
 
 		for (int i = 0; i < length; i++) {
-			char c = (char) (_0XFF & b[offset + i]);
+			char c = (char) (N_0XFF & b[offset + i]);
 
 			int digit = c - '0';
 			if (digit < 0 || digit >= base || digit >= TEN) {
@@ -359,7 +359,7 @@ public class TypeUtil {
 	public static String toString(byte[] bytes, int base) {
 		StringBuilder buf = new StringBuilder();
 		for (byte b : bytes) {
-			int bi = _0XFF & b;
+			int bi = N_0XFF & b;
 			int c = '0' + (bi / base) % base;
 			if (c > '9') {
 				c = 'a' + (c - '0' - TEN);
@@ -391,13 +391,13 @@ public class TypeUtil {
 			return (byte) (b - 'A' + TEN);
 		}
 		throw new IllegalArgumentException("!hex:"
-				+ Integer.toHexString(_0XFF & b));
+				+ Integer.toHexString(N_0XFF & b));
 	}
 
 	/* ------------------------------------------------------------ */
 	public static void toHex(byte b, Appendable buf) {
 		try {
-			int bi = _0XFF & b;
+			int bi = N_0XFF & b;
 			int c = '0' + (bi / SIXTEEN) % SIXTEEN;
 			if (c > '9') {
 				c = 'A' + (c - '0' - TEN);
@@ -427,7 +427,7 @@ public class TypeUtil {
 	public static String toHexString(byte[] b, int offset, int length) {
 		StringBuilder buf = new StringBuilder();
 		for (int i = offset; i < offset + length; i++) {
-			int bi = _0XFF & b[i];
+			int bi = N_0XFF & b[i];
 			int c = '0' + (bi / SIXTEEN) % SIXTEEN;
 			if (c > '9') {
 				c = 'A' + (c - '0' - TEN);
@@ -450,7 +450,7 @@ public class TypeUtil {
 		byte[] array = new byte[s.length() / 2];
 		for (int i = 0; i < array.length; i++) {
 			int b = Integer.parseInt(s.substring(i * 2, i * 2 + 2), SIXTEEN);
-			array[i] = (byte) (_0XFF & b);
+			array[i] = (byte) (N_0XFF & b);
 		}
 		return array;
 	}
@@ -472,8 +472,8 @@ public class TypeUtil {
 
 	/* ------------------------------------------------------------ */
 	public static byte[] readLine(InputStream in) throws IOException {
-		int BUFF_LENGTH = 256;
-		byte[] buf = new byte[BUFF_LENGTH];
+		int len = 256;
+		byte[] buf = new byte[len];
 
 		int i = 0;
 		int loops = 0;
@@ -497,7 +497,7 @@ public class TypeUtil {
 
 			if (i >= buf.length) {
 				byte[] oldBuf = buf;
-				buf = new byte[oldBuf.length + BUFF_LENGTH];
+				buf = new byte[oldBuf.length + len];
 				System.arraycopy(oldBuf, 0, buf, 0, oldBuf.length);
 			}
 			buf[i++] = (byte) ch;

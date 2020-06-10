@@ -50,6 +50,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 import static org.ops4j.pax.web.itest.server.support.Utils.httpGET;
 
+@SuppressWarnings("deprecation")
 @RunWith(Parameterized.class)
 public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 
@@ -390,7 +391,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 
 		private final List<OsgiContextModel> models;
 
-		public TestServlet(String id, List<OsgiContextModel> models) {
+		TestServlet(String id, List<OsgiContextModel> models) {
 			super(id);
 			this.models = models;
 		}

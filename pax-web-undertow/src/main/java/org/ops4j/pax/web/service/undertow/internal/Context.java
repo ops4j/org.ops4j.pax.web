@@ -87,8 +87,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xnio.XnioWorker;
@@ -120,7 +118,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 	private Bundle undertowBundle;
 
-	private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
+//	private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
 
 	private Configuration configuration;
 	private XnioWorker wsXnioWorker;
@@ -208,22 +206,23 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		for (String pattern : patterns) {
 			// after org.ops4j.pax.web.service.spi.util.Path.normalizePattern() we have patterns
 			// starting with either "/" or "*"
-			if (pattern.startsWith("/")) {
-				pattern = contextPath + pattern;
-			} else if (pattern.startsWith("*.")) {
+			String p = pattern;
+			if (p.startsWith("/")) {
+				p = contextPath + p;
+			} else if (p.startsWith("*.")) {
 				// for e.g., *.jsp we don't care about exactPath, as this won't map to JSP servlet anyway
 				// it'll be handled at io.undertow.servlet.handlers.ServletPathMatch level
 				// will simply map *.ext mappings as exact paths with contextPath only
 				// this.handler contains proper mappings handled by Undertow
-				pattern = contextPath;
+				p = contextPath;
 			}
-			if (pattern.endsWith("/*") || pattern.endsWith("/")) {
-				if (pattern.endsWith("/*")) {
-					pattern = pattern.substring(0, pattern.length() - 1);
+			if (p.endsWith("/*") || p.endsWith("/")) {
+				if (p.endsWith("/*")) {
+					p = p.substring(0, p.length() - 1);
 				}
-				forPrefixPath.accept(pattern, this);
+				forPrefixPath.accept(p, this);
 			} else {
-				forExactPath.accept(pattern, this);
+				forExactPath.accept(p, this);
 			}
 		}
 	}
@@ -329,7 +328,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		}
 	}
 
-	private String getContextPathForOsgi(final ServletContext servletContext){
+	private String getContextPathForOsgi(final ServletContext servletContext) {
 		String contextPath = servletContext.getContextPath();
 		// Undertows ServletContextImpl maps "/" to "". In OSGi path must start with /
 		if (contextPath != null && !contextPath.startsWith("/")) {
@@ -356,7 +355,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 
 					serviceReg.get().unregister();
 			}
-		} catch(IllegalStateException e){
+		} catch (IllegalStateException e) {
 			LOG.error("Error during unregistration of ServletContext service with path '{}'!",
 					webContextPath, e);
 		} finally {
@@ -542,7 +541,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 				@SuppressWarnings("unchecked")
 				Class<ServletContainerInitializer> clazz = (Class<ServletContainerInitializer>)
 						classLoader.loadClass("org.ops4j.pax.web.jsp.JasperInitializer");
-				deployment.addServletContainerInitalizer(new ServletContainerInitializerInfo(
+				deployment.addServletContainerInitializer(new ServletContainerInitializerInfo(
 						clazz, factory(clazz, null), null));
 			} catch (ClassNotFoundException e) {
 //                LOG.error("Unable to load JasperInitializer", e);
@@ -636,7 +635,7 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 //		registerServletContext(manager.getDeployment().getServletContext(), bundle);
 		LOG.info("Registering {} as OSGi service - done", manager.getDeployment().getServletContext());
 
-		if(consumer != null){
+		if (consumer != null) {
 			consumer.accept(manager.getDeployment().getServletContext());
 		}
 

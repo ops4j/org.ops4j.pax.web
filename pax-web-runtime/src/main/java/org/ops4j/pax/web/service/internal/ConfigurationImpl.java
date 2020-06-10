@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.JettyConfiguration;
@@ -48,7 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ConfigurationImpl extends PropertyStore implements Configuration {
 
-	public static Logger LOG = LoggerFactory.getLogger(ConfigurationImpl.class);
+	public static final Logger LOG = LoggerFactory.getLogger(ConfigurationImpl.class);
 
 	private final String id;
 
@@ -78,7 +77,6 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	 * @param sourceProperties
 	 */
 	ConfigurationImpl(final PropertyResolver propertyResolver, Map<String, String> sourceProperties) {
-		NullArgumentException.validateNotNull(propertyResolver, "Property resolver");
 		this.propertyResolver = propertyResolver;
 		this.sourceProperties = Collections.unmodifiableMap(sourceProperties);
 
@@ -612,6 +610,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		private String[] listeningAddresses = null;
 		private File[] externalConfigurations = null;
 
+		@SuppressWarnings("deprecation")
 		private ServerConfigurationImpl() {
 			// eager resolution of some important properties
 			resolveIntegerProperty(PaxWebConfig.PID_CFG_HTTP_PORT);
@@ -804,7 +803,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		private String[] includedCipherSuites = new String[0];
 		private String[] excludedCipherSuites = new String[0];
 
-		public SecurityConfigurationImpl() {
+		SecurityConfigurationImpl() {
 			String includedProtocols = resolveStringProperty(PaxWebConfig.PID_CFG_PROTOCOLS_INCLUDED);
 			String excludedProtocols = resolveStringProperty(PaxWebConfig.PID_CFG_PROTOCOLS_EXCLUDED);
 			String includedCipherSuites = resolveStringProperty(PaxWebConfig.PID_CFG_CIPHERSUITES_INCLUDED);

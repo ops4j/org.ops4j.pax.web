@@ -22,6 +22,9 @@ import org.ops4j.util.property.PropertyResolver;
 
 public class ConfigurationBuilder {
 
+	private ConfigurationBuilder() {
+	}
+
 	/**
 	 * Produces {@link Configuration} object with properties coming from passed {@code resolver}. Returned
 	 * {@link Configuration} may be prepopulated (having properties resolved immediately), however, when using

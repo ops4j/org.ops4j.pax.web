@@ -17,7 +17,6 @@
  */
 package org.ops4j.pax.web.service.spi.model.elements;
 
-import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 
@@ -41,8 +40,6 @@ public class ErrorPageModel extends ElementModel {
 	public ErrorPageModel(final OsgiContextModel contextModel, final String error,
 						  final String location) {
 //		super(contextModel);
-		NullArgumentException.validateNotEmpty(error, "Error");
-		NullArgumentException.validateNotEmpty(location, "Location");
 		if (!location.startsWith("/")) {
 			throw new IllegalArgumentException(
 					"Location must start with a slash (/)");

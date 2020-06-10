@@ -42,9 +42,9 @@ import org.slf4j.LoggerFactory;
 
 public class Utils {
 
-	public static Logger LOG = LoggerFactory.getLogger(Utils.class);
+	public static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 
-	private static final Bundle bundle = FrameworkUtil.getBundle(Utils.class);
+	private static final Bundle BUNDLE = FrameworkUtil.getBundle(Utils.class);
 
 	private Utils() { }
 
@@ -125,7 +125,7 @@ public class Utils {
 		Map<String, String> props = new HashMap<>();
 		props.put("_v", value);
 		props.putAll(properties);
-		InterpolationHelper.performSubstitution(props, bundle == null ? null : bundle.getBundleContext());
+		InterpolationHelper.performSubstitution(props, BUNDLE == null ? null : BUNDLE.getBundleContext());
 		return props.get("_v");
 	}
 

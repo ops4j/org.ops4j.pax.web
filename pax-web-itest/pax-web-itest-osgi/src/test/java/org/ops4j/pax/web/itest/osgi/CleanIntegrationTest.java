@@ -28,18 +28,22 @@ import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.ops4j.pax.exam.OptionUtils.combine;
+
 /**
  * Clean test without any pax-web bundles. Just simplest showcase of what's needed to run
  * manually controlled pax-exam test.
  */
 @RunWith(PaxExam.class)
-public class CleanIntegrationTest extends AbstractControlledBase2 {
+public class CleanIntegrationTest extends AbstractControlledTestBase {
 
-	public static Logger LOG = LoggerFactory.getLogger(CleanIntegrationTest.class);
+	public static final Logger LOG = LoggerFactory.getLogger(CleanIntegrationTest.class);
 
 	@Configuration
 	public Option[] configure() {
-		return baseConfigure();
+		return combine(baseConfigure(), paxWebCore());
 	}
 
 	@Test
@@ -51,6 +55,11 @@ public class CleanIntegrationTest extends AbstractControlledBase2 {
 					b.getBundleId(), b.getSymbolicName(), b.getVersion(), b.getLocation());
 			LOG.info(info);
 		}
+
+		Bundle api = bundle("org.ops4j.pax.web.pax-web-api");
+		Bundle spi = bundle("org.ops4j.pax.web.pax-web-spi");
+		assertThat(api.getState(), equalTo(Bundle.ACTIVE));
+		assertThat(spi.getState(), equalTo(Bundle.ACTIVE));
 	}
 
 }

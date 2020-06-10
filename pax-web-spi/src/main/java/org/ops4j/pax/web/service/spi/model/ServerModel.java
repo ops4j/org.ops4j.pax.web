@@ -301,6 +301,17 @@ public class ServerModel implements BatchVisitor {
 		registrationThreadId = getThreadIdFromSingleThreadPool(executor);
 	}
 
+	/**
+	 * Creates new global model of all web applications with {@link Executor} to be used for configuration and
+	 * registration tasks and thread id specified for checking if tasks run with this (assumed) single thread
+	 * executor
+	 * @param executor
+	 */
+	public ServerModel(Executor executor, long threadId) {
+		this.executor = executor;
+		registrationThreadId = threadId;
+	}
+
 	public static long getThreadIdFromSingleThreadPool(Executor executor) {
 		try {
 			// check thread ID to detect whether we're running within it
@@ -316,17 +327,6 @@ public class ServerModel implements BatchVisitor {
 				throw new RuntimeException(e.getCause().getMessage(), e.getCause());
 			}
 		}
-	}
-
-	/**
-	 * Creates new global model of all web applications with {@link Executor} to be used for configuration and
-	 * registration tasks and thread id specified for checking if tasks run with this (assumed) single thread
-	 * executor
-	 * @param executor
-	 */
-	public ServerModel(Executor executor, long threadId) {
-		this.executor = executor;
-		registrationThreadId = threadId;
 	}
 
 	public Executor getExecutor() {
@@ -632,6 +632,7 @@ public class ServerModel implements BatchVisitor {
 	 * @param contextPath
 	 * @return
 	 */
+	@SuppressWarnings("deprecation")
 	public OsgiContextModel createNewContextModel(WebContainerContext webContext, Bundle serviceBundle,
 			String contextPath) {
 		OsgiContextModel osgiContextModel = new OsgiContextModel(webContext, serviceBundle, contextPath);
@@ -2013,8 +2014,12 @@ public class ServerModel implements BatchVisitor {
 
 		@Override
 		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
 			ContextKey that = (ContextKey) o;
 			return Objects.equals(contextId, that.contextId) &&
 					Objects.equals(bundle, that.bundle);

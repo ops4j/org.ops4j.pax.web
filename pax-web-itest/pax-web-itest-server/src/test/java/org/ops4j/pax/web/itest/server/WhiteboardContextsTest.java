@@ -55,7 +55,7 @@ public class WhiteboardContextsTest extends MultiContainerTestSupport {
 	public void justServletWithCustomContext() throws Exception {
 		Bundle sample1 = mockBundle("sample1");
 
-		ServletContextHelper helper = new ServletContextHelper() {};
+		ServletContextHelper helper = new ServletContextHelper() { };
 		getServletContextHelperCustomizer().addingService(mockServletContextHelperReference(sample1, "c1",
 				() -> helper, 0L, 0, "/c"));
 
@@ -270,15 +270,15 @@ public class WhiteboardContextsTest extends MultiContainerTestSupport {
 			throws IOException {
 		Bundle b = mockBundle("bundle-for-everything");
 
-		ServletContextHelper helper1 = new ServletContextHelper() {};
+		ServletContextHelper helper1 = new ServletContextHelper() { };
 		ServiceReference<ServletContextHelper> sr1 = mockServletContextHelperReference(b, "c1",
 				() -> helper1, 1L, p1, "/");
 		OsgiContextModel ocm1 = getServletContextHelperCustomizer().addingService(sr1);
-		ServletContextHelper helper2 = new ServletContextHelper() {};
+		ServletContextHelper helper2 = new ServletContextHelper() { };
 		ServiceReference<ServletContextHelper> sr2 = mockServletContextHelperReference(b, "c2",
 				() -> helper2, 2L, p2, "/");
 		OsgiContextModel ocm2 = getServletContextHelperCustomizer().addingService(sr2);
-		ServletContextHelper helper3 = new ServletContextHelper() {};
+		ServletContextHelper helper3 = new ServletContextHelper() { };
 		ServiceReference<ServletContextHelper> sr3 = mockServletContextHelperReference(b, "c3",
 				() -> helper3, 3L, p3, "/");
 		OsgiContextModel ocm3 = getServletContextHelperCustomizer().addingService(sr3);
@@ -315,7 +315,7 @@ public class WhiteboardContextsTest extends MultiContainerTestSupport {
 	}
 
 	private static class TestServlet extends Utils.MyIdServlet {
-		public TestServlet(String id) {
+		TestServlet(String id) {
 			super(id);
 		}
 

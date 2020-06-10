@@ -124,7 +124,7 @@ public class WebContainerContextWrapper extends DefaultHttpContext {
 		return "WebContainerContextWrapper{"
 				+ (bundle == null ? "shared=true" : "bundle=" + bundle)
 				+ ",contextId='" + contextId
-				+ "',delegate="+ (servletContextHelper == null ? httpContext : servletContextHelper)
+				+ "',delegate=" + (servletContextHelper == null ? httpContext : servletContextHelper)
 				+ "}";
 	}
 

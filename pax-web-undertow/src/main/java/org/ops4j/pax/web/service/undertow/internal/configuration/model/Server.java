@@ -97,7 +97,7 @@ public class Server {
 	//  - MAX_CONNECTIONS = OptionAttributeDefinition.builder(Constants.MAX_CONNECTIONS, Options.CONNECTION_HIGH_WATER).setValidator(new IntRangeValidator(1)).setAllowExpression(true).build();
 
 	@XmlType(name = "socket-options-type", namespace = NS_UNDERTOW)
-	public static abstract class SocketOptions {
+	public abstract static class SocketOptions {
 
 		// org.wildfly.extension.undertow.ListenerResourceDefinition#SOCKET_OPTIONS
 
@@ -105,46 +105,46 @@ public class Server {
 		 * XNIO: org.xnio.Options#RECEIVE_BUFFER, Java: java.net.ServerSocket#setReceiveBufferSize(int),
 		 * java.net.SocketOptions#SO_RCVBUF, default: 0x10000 (org.xnio.nio.AbstractNioChannel#DEFAULT_BUFFER_SIZE)
 		 */
-		@XmlAttribute(name="receive-buffer")
+		@XmlAttribute(name = "receive-buffer")
 		protected int receiveBuffer = 0x10000;
 
 		/**
 		 * XNIO: org.xnio.Options#SEND_BUFFER, Java: java.net.Socket#setSendBufferSize(int),
 		 * java.net.SocketOptions#SO_SNDBUF, default: 0x10000 (org.xnio.nio.AbstractNioChannel#DEFAULT_BUFFER_SIZE)
 		 */
-		@XmlAttribute(name="send-buffer")
+		@XmlAttribute(name = "send-buffer")
 		protected int sendBuffer = 0x10000;
 
 		/**
 		 * XNIO: org.xnio.Options#BACKLOG, Java: 2nd parameter of
 		 * java.net.ServerSocket#bind(java.net.SocketAddress, int), default: 128 or 50 when using 1-arg bind().
 		 */
-		@XmlAttribute(name="tcp-backlog")
+		@XmlAttribute(name = "tcp-backlog")
 		protected int tcpBacklog = 128;
 
 		/**
 		 * XNIO: org.xnio.Options#KEEP_ALIVE, Java: java.net.Socket#setKeepAlive(boolean),
 		 * java.net.SocketOptions#SO_KEEPALIVE, default: false
 		 */
-		@XmlAttribute(name="tcp-keep-alive")
+		@XmlAttribute(name = "tcp-keep-alive")
 		protected boolean tcpKeepAlive = false;
 
 		/**
 		 * XNIO: org.xnio.Options#READ_TIMEOUT (in ms), default: 0
 		 */
-		@XmlAttribute(name="read-timeout")
+		@XmlAttribute(name = "read-timeout")
 		protected int readTimeout = 0;
 
 		/**
 		 * XNIO: org.xnio.Options#WRITE_TIMEOUT (in ms), default: 0
 		 */
-		@XmlAttribute(name="write-timeout")
+		@XmlAttribute(name = "write-timeout")
 		protected int writeTimeout = 0;
 
 		/**
 		 * XNIO: org.xnio.Options#CONNECTION_HIGH_WATER
 		 */
-		@XmlAttribute(name="max-connections")
+		@XmlAttribute(name = "max-connections")
 		protected int maxConnections = Integer.MAX_VALUE;
 
 		public int getReceiveBuffer() {
@@ -244,7 +244,7 @@ public class Server {
 	//  - ALLOW_UNESCAPED_CHARACTERS_IN_URL = OptionAttributeDefinition.builder("allow-unescaped-characters-in-url", UndertowOptions.ALLOW_UNESCAPED_CHARACTERS_IN_URL).setDefaultValue(ModelNode.FALSE).setRequired(false).setAllowExpression(true).build();
 
 	@XmlType(name = "listener-type", namespace = NS_UNDERTOW)
-	public static abstract class Listener extends SocketOptions {
+	public abstract static class Listener extends SocketOptions {
 
 		@XmlAttribute
 		protected String name;
@@ -614,6 +614,7 @@ public class Server {
 
 	@XmlType(name = "http-listener-type", namespace = NS_UNDERTOW)
 	public static class HttpListener extends Listener {
+
 		@XmlAttribute(name = "certificate-forwarding")
 		private boolean certificateForwarding = false;
 
@@ -794,7 +795,7 @@ public class Server {
 	@XmlType(name = "https-listener-type", namespace = NS_UNDERTOW)
 	public static class HttpsListener extends Listener {
 
-		@XmlAttribute(name="ssl-context")
+		@XmlAttribute(name = "ssl-context")
 		private String sslContext;
 
 		@XmlAttribute(name = "certificate-forwarding")
@@ -804,25 +805,25 @@ public class Server {
 		private boolean proxyAddressForwarding = false;
 
 		// legacy in urn:jboss:domain:undertow:4.0 - but still used in pax-web
-		@XmlAttribute(name="security-realm")
+		@XmlAttribute(name = "security-realm")
 		private String securityRealm;
 
 		/**
 		 * XNIO: org.xnio.Options#SSL_CLIENT_AUTH_MODE
 		 */
-		@XmlAttribute(name="verify-client")
+		@XmlAttribute(name = "verify-client")
 		private SslClientAuthMode verifyClient = SslClientAuthMode.NOT_REQUESTED;
 
 		/**
 		 * XNIO: org.xnio.Options#SSL_ENABLED_CIPHER_SUITES
 		 */
-		@XmlAttribute(name="enabled-cipher-suites")
+		@XmlAttribute(name = "enabled-cipher-suites")
 		private List<String> enabledCipherSuites = new ArrayList<>();
 
 		/**
 		 * XNIO: org.xnio.Options#SSL_ENABLED_PROTOCOLS
 		 */
-		@XmlAttribute(name="enabled-protocols")
+		@XmlAttribute(name = "enabled-protocols")
 		private List<String> enabledProtocols = new ArrayList<>();
 
 		/**
@@ -1087,6 +1088,7 @@ public class Server {
 			"filterRef"
 	})
 	public static class Host {
+
 		@XmlAttribute
 		private String name;
 		@XmlAttribute
@@ -1144,6 +1146,7 @@ public class Server {
 
 		@XmlType(name = "locationType", namespace = NS_UNDERTOW)
 		public static class Location {
+
 			@XmlAttribute
 			private String name;
 			@XmlAttribute
@@ -1184,6 +1187,7 @@ public class Server {
 
 		@XmlType(name = "accessLogType", namespace = NS_UNDERTOW)
 		public static class AccessLog {
+
 			@XmlAttribute
 			private String pattern = "common";
 			@XmlAttribute
@@ -1255,6 +1259,7 @@ public class Server {
 
 		@XmlType(name = "filter-refType", namespace = NS_UNDERTOW)
 		public static class FilterRef {
+
 			@XmlAttribute
 			private String name;
 			@XmlAttribute

@@ -171,29 +171,12 @@ public interface PaxWebConstants {
 	@Deprecated
 	String FILTER_MAPPING_DISPATCHER = "filter-mapping-dispatcher";
 
-
-
-
-
-
-
-
-
-
-
-
 	/**
 	 * Init param name for specifying a context name.
 	 */
 	String CONTEXT_NAME = "webapp.context";
 
 	String PROPERTY_HTTP_USE_NIO = "org.osgi.service.http.useNIO";
-
-
-
-
-
-
 
 	String PROPERTY_SESSION_TIMEOUT = PID + ".session.timeout";
 	String PROPERTY_SESSION_COOKIE = PID + ".session.cookie";
@@ -207,12 +190,10 @@ public interface PaxWebConstants {
 	String PROPERTY_SESSION_LAZY_LOAD = PID + ".session.lazyload";
 	String PROPERTY_SESSION_STORE_DIRECTORY = PID + ".session.storedirectory";
 
-
 	String PROPERTY_VIRTUAL_HOST_LIST = "org.ops4j.pax.web.default.virtualhosts";
 	String PROPERTY_CONNECTOR_LIST = "org.ops4j.pax.web.default.connectors";
-    String PROPERTY_DEFAULT_AUTHMETHOD = "org.ops4j.pax.web.default.authmethod";
-    String PROPERTY_DEFAULT_REALMNAME = "org.ops4j.pax.web.default.realmname";
-
+	String PROPERTY_DEFAULT_AUTHMETHOD = "org.ops4j.pax.web.default.authmethod";
+	String PROPERTY_DEFAULT_REALMNAME = "org.ops4j.pax.web.default.realmname";
 
 	String PROPERTY_SHOW_STACKS = "org.ops4j.pax.web.server.showStacks";
 
@@ -228,20 +209,21 @@ public interface PaxWebConstants {
 	String CONTEXT_PATH_KEY = "Web-ContextPath";
 
 
+
+
 	String PROPERTY_ENC_MASTERPASSWORD = PID + ".enc.masterpassword";
-	
+
 	String PROPERTY_ENC_ALGORITHM = PID + ".enc.algorithm";
-	
+
 	String PROPERTY_ENC_ENABLED = PID + ".enc.enabled";
-	
+
 	String PROPERTY_ENC_PREFIX = PID + ".enc.prefix";
-	
+
 	String PROPERTY_ENC_SUFFIX = PID + ".enc.suffix";
 
 	String PROPERTY_SERVLETCONTEXT_PATH = "osgi.web.contextpath";
 	String PROPERTY_SERVLETCONTEXT_NAME = "osgi.web.contextname";
 	String PROPERTY_SYMBOLIC_NAME = "osgi.web.symbolicname";
-
 
 	/**
 	 * Scratch directory for JSPs

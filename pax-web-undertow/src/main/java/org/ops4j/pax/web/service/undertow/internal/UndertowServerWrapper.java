@@ -216,7 +216,7 @@ class UndertowServerWrapper implements BatchVisitor {
 	/** Servlet to use when no servlet is mapped - to ensure that preprocessors and filters are run correctly. */
 	private final Default404Servlet default404Servlet = new Default404Servlet();
 
-	public UndertowServerWrapper(Configuration config, UndertowFactory undertowFactory,
+	UndertowServerWrapper(Configuration config, UndertowFactory undertowFactory,
 			Bundle paxWebUndertowBundle, ClassLoader classLoader) {
 		this.configuration = config;
 		this.undertowFactory = undertowFactory;

@@ -40,6 +40,7 @@
 
 	<modules>
 		<module>samples-internal</module>
+		<module>samples-httpservice</module>
 		<module>samples-war</module>
 		<module>samples-jsf</module>
 

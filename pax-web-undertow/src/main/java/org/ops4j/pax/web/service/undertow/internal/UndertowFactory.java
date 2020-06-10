@@ -402,6 +402,7 @@ public class UndertowFactory {
 	 * @param handler
 	 * @return
 	 */
+	@SuppressWarnings("deprecation")
 	private HttpHandler prepareUndertowOptionsBuilder(Configuration config, OptionMap.Builder undertowOptions,
 			Server.Listener listener, HttpHandler handler) {
 		undertowOptions.set(UndertowOptions.BUFFER_PIPELINED_DATA, listener.isBufferPipelinedData());

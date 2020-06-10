@@ -24,7 +24,6 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.util.Path;
@@ -42,7 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DefaultHttpContext implements WebContainerContext {
 
-	private final Logger LOG = LoggerFactory.getLogger(DefaultHttpContext.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DefaultHttpContext.class);
 
 	/** Bundle using the {@link HttpService}. */
 	protected final Bundle bundle;
@@ -55,7 +54,6 @@ public class DefaultHttpContext implements WebContainerContext {
 	 * @param bundle
 	 */
 	public DefaultHttpContext(final Bundle bundle) {
-		NullArgumentException.validateNotNull(bundle, "Bundle");
 		this.bundle = bundle;
 		this.contextId = PaxWebConstants.DEFAULT_CONTEXT_NAME;
 	}
@@ -144,8 +142,12 @@ public class DefaultHttpContext implements WebContainerContext {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
 		DefaultHttpContext that = (DefaultHttpContext) o;
 		return bundle.equals(that.bundle) &&
 				contextId.equals(that.contextId);

@@ -65,7 +65,10 @@ import static org.mockito.Mockito.when;
 
 public class MultiContainerTestSupport {
 
-	public static Logger LOG = LoggerFactory.getLogger(ServerControllerScopesTest.class);
+	public static final Logger LOG = LoggerFactory.getLogger(ServerControllerScopesTest.class);
+
+	@Parameterized.Parameter
+	public Runtime runtime;
 
 	protected int port;
 
@@ -80,9 +83,6 @@ public class MultiContainerTestSupport {
 	protected ServiceReference<WebContainer> containerRef;
 
 	protected ExtenderContext whiteboard;
-
-	@Parameterized.Parameter
-	public Runtime runtime;
 
 	private ServiceTrackerCustomizer<ServletContextHelper, OsgiContextModel> servletContextHelperCustomizer;
 	private ServiceTrackerCustomizer<ServletContextHelperMapping, OsgiContextModel> servletContextHelperMappingCustomizer;

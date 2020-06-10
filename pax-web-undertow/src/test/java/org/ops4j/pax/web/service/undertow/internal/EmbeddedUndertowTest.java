@@ -70,7 +70,7 @@ import static org.junit.Assert.assertTrue;
 
 public class EmbeddedUndertowTest {
 
-	public static Logger LOG = LoggerFactory.getLogger(EmbeddedUndertowTest.class);
+	public static final Logger LOG = LoggerFactory.getLogger(EmbeddedUndertowTest.class);
 
 	@Test
 	public void undertowWithSingleContextAndServlet() throws Exception {

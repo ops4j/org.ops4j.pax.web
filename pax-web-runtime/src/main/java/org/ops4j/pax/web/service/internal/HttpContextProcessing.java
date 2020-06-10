@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HttpContextProcessing implements ManagedServiceFactory {
 
-	public static Logger LOG = LoggerFactory.getLogger(HttpContextProcessing.class);
+	public static final Logger LOG = LoggerFactory.getLogger(HttpContextProcessing.class);
 	public static final String PID = PaxWebConstants.PID + ".context";
 
 	private static final String KEY_CONTEXT_ID = "context.id";
@@ -109,7 +109,7 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 		private final String pid;
 		private final Dictionary<String, ?> properties;
 
-		public ConfigurationChangeTask(String pid, Dictionary<String, ?> properties) {
+		ConfigurationChangeTask(String pid, Dictionary<String, ?> properties) {
 			this.pid = pid;
 			this.properties = properties;
 		}
@@ -152,7 +152,7 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 		private LoginConfiguration loginConfiguration;
 		private List<SecurityConstraintsMapping> securityMappings = new LinkedList<>();
 
-		public HttpContextTracker(String pid) {
+		HttpContextTracker(String pid) {
 			this.pid = pid;
 		}
 
@@ -386,13 +386,13 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 		 * @return
 		 */
 		private WebContainer getWebContainer() {
-			Bundle _bundle = bundle;
-			if (_bundle == null) {
+			Bundle currentBundle = bundle;
+			if (currentBundle == null) {
 				LOG.debug("Bundle context for {} bundle is no longer valid", symbolicName);
 				return null;
 			}
 
-			BundleContext context = _bundle.getBundleContext();
+			BundleContext context = currentBundle.getBundleContext();
 			try {
 				ServiceReference<WebContainer> sr = context.getServiceReference(WebContainer.class);
 				if (sr == null) {

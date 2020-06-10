@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -27,7 +26,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -46,7 +45,7 @@ public class TestActivator implements BundleActivator {
 		Dictionary<String, String> props;
 		// register a filter
 		props = new Hashtable<>();
-		props.put(ExtenderConstants.PROPERTY_URL_PATTERNS, "/filtered/*");
+		props.put(PaxWebConstants.SERVICE_PROPERTY_URL_PATTERNS, "/filtered/*");
 		filterReg = context.registerService(Filter.class,
 				new WhiteboardFilter(), props);
 

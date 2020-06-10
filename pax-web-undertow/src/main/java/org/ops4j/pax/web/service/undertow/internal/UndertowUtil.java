@@ -29,6 +29,9 @@ public class UndertowUtil {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UndertowUtil.class);
 
+	private UndertowUtil() {
+	}
+
 	public static XnioWorker createWorker(ClassLoader loader) {
 		try {
 			if (loader == null) {

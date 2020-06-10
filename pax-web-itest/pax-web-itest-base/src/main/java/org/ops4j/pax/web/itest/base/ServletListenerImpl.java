@@ -44,10 +44,10 @@ public class ServletListenerImpl implements ServletListener {
 		if (checkServletName) {
 			servletMatch = servletName.equalsIgnoreCase(servletEvent.getServletName());
 		}
-		if (servletEvent.getType() == ServletEvent.DEPLOYED && servletMatch) {
+		if (servletEvent.getType() == ServletEvent.State.DEPLOYED && servletMatch) {
 			LOG.info("servletEventMatched with checkServletName?{}", checkServletName);
 			this.event = true;
-		} else if (servletEvent.getType() == ServletEvent.UNDEPLOYED) {
+		} else if (servletEvent.getType() == ServletEvent.State.UNDEPLOYED) {
 			this.event = false;
 		}
 		this.replay = servletEvent.isReplay();

@@ -160,6 +160,7 @@ public class ServiceModel implements BatchVisitor {
 			case ADD:
 			case DELETE:
 				serverModel.visit(change);
+				break;
 			default:
 				break;
 		}

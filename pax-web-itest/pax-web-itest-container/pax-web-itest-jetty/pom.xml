@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2020 OPS4J.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.ops4j.pax.web.itest</groupId>
+		<artifactId>pax-web-itest-container</artifactId>
+		<version>8.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<groupId>org.ops4j.pax.web.itest</groupId>
+	<artifactId>pax-web-itest-jetty</artifactId>
+
+	<name>OPS4J Pax Web - Container Tests - Jetty</name>
+
+	<description>Integration tests for Jetty</description>
+
+	<dependencies>
+
+		<!-- pax-web own artifacts -->
+
+		<dependency>
+			<!-- With just this dependency, we should transitively get everything that's needed for Jetty tests -->
+			<groupId>org.ops4j.pax.web.itest</groupId>
+			<artifactId>pax-web-itest-container-common</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- OPS4J dependencies -->
+
+		<dependency>
+			<!--
+				can't be transtive dependency from pax-web-itest-container-common, because it has to be "runtime"
+				scoped, so it's not added to maven-failsafe-plugin classpath (duplicate SLF4J binding)
+			-->
+			<groupId>org.ops4j.pax.logging</groupId>
+			<artifactId>pax-logging-api</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+	</dependencies>
+
+</project>

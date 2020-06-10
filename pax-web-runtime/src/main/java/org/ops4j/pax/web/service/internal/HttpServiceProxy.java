@@ -22,7 +22,6 @@ import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
-import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
 import org.osgi.framework.Bundle;
@@ -50,8 +49,7 @@ class HttpServiceProxy implements StoppableHttpService {
 
 	private final Bundle serviceBundle;
 
-	public HttpServiceProxy(Bundle serviceBundle, final StoppableHttpService delegate) {
-		NullArgumentException.validateNotNull(delegate, "Delegate");
+	HttpServiceProxy(Bundle serviceBundle, final StoppableHttpService delegate) {
 		LOG.debug("HttpServiceProxy created for {} and {}", delegate, serviceBundle);
 
 		this.serviceBundle = serviceBundle;

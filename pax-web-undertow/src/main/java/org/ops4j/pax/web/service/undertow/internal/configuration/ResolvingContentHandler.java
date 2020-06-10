@@ -28,7 +28,7 @@ import org.xml.sax.helpers.AttributesImpl;
 
 public class ResolvingContentHandler implements ContentHandler {
 
-	public static Logger LOG = LoggerFactory.getLogger(ResolvingContentHandler.class);
+	public static final Logger LOG = LoggerFactory.getLogger(ResolvingContentHandler.class);
 
 	private final Map<String, String> config;
 	private final ContentHandler target;

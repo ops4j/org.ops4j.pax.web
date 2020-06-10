@@ -187,7 +187,7 @@ public class JettyServerControllerFactory implements ServerControllerFactory {
 		private final T value;
 		private final Integer priority;
 
-		public PriorityValue(T value, Integer priority) {
+		PriorityValue(T value, Integer priority) {
 			this.value = value;
 			this.priority = priority;
 		}

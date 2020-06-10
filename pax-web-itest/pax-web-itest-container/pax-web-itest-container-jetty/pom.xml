@@ -738,6 +738,7 @@
 			<groupId>org.ow2.asm</groupId>
 			<artifactId>asm-commons</artifactId>
 			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>

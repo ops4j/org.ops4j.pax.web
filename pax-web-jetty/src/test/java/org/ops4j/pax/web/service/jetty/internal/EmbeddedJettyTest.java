@@ -66,7 +66,7 @@ import static org.junit.Assert.assertTrue;
 
 public class EmbeddedJettyTest {
 
-	public static Logger LOG = LoggerFactory.getLogger(EmbeddedJettyTest.class);
+	public static final Logger LOG = LoggerFactory.getLogger(EmbeddedJettyTest.class);
 
 	@Test
 	public void embeddedServerWithTrivialHandler() throws Exception {
@@ -850,8 +850,9 @@ public class EmbeddedJettyTest {
 			File f = new File("target/test-classes/" + xml);
 			XmlConfiguration configuration = new XmlConfiguration(Resource.newResource(f));
 
-			if (last != null)
+			if (last != null) {
 				configuration.getIdMap().putAll(last.getIdMap());
+			}
 			configuration.getProperties().put("thread.name.prefix", "jetty-qtp");
 
 			configuration.configure();

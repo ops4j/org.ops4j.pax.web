@@ -80,7 +80,7 @@ public interface WebContainerContext extends HttpContext {
 	 * @param path
 	 * @return
 	 */
-	String getRealPath(final String path);
+	String getRealPath(String path);
 
 	/**
 	 * Method that backports {@link org.osgi.service.http.context.ServletContextHelper#finishSecurity}
@@ -89,7 +89,7 @@ public interface WebContainerContext extends HttpContext {
 	 * @param request
 	 * @param response
 	 */
-	void finishSecurity(final HttpServletRequest request, final HttpServletResponse response);
+	void finishSecurity(HttpServletRequest request, HttpServletResponse response);
 
 	/**
 	 * <p>Returns the name (identifier) of this <em>context</em>.</p>

@@ -228,11 +228,13 @@ public class OsgiScopedServletContext implements ServletContext {
 	}
 
 	@Override
+	@SuppressWarnings({ "deprecation", "RedundantSuppression" })
 	public Servlet getServlet(String name) throws ServletException {
 		return osgiContext.getServlet(name);
 	}
 
 	@Override
+	@SuppressWarnings({ "deprecation", "RedundantSuppression" })
 	public Enumeration<String> getServletNames() {
 		return osgiContext.getServletNames();
 	}
@@ -248,6 +250,7 @@ public class OsgiScopedServletContext implements ServletContext {
 	}
 
 	@Override
+	@SuppressWarnings({ "deprecation", "RedundantSuppression" })
 	public Enumeration<Servlet> getServlets() {
 		return osgiContext.getServlets();
 	}
@@ -268,6 +271,7 @@ public class OsgiScopedServletContext implements ServletContext {
 	}
 
 	@Override
+	@SuppressWarnings({ "deprecation", "RedundantSuppression" })
 	public void log(Exception exception, String msg) {
 		osgiContext.log(exception, msg);
 	}
@@ -380,6 +384,9 @@ public class OsgiScopedServletContext implements ServletContext {
 
 	@Override
 	public ClassLoader getClassLoader() {
+		// TODO: this should really be a classloader of a bundle that registered e.g., a servlet, but probably
+		//       it should be "bundle delegating classloader" with bundles constituting a "web application",
+		//       which is very important from e.g., point of view of JSF tag descriptor discovery
 		return bundle.adapt(BundleWiring.class).getClassLoader();
 	}
 

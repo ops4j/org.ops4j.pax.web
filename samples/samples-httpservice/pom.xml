@@ -31,13 +31,11 @@
 	<artifactId>samples-httpservice</artifactId>
 	<packaging>pom</packaging>
 
-	<name>OPS4J Pax Web - Samples used to test Pax Web itself</name>
+	<name>OPS4J Pax Web HttpService Samples</name>
+	<description>Samples related to OSGi CMPN 102 Http Service</description>
 
 	<modules>
-		<module>pax-web-spi-fragment</module>
-		<module>initializers</module>
-		<module>initializers-fragment1</module>
-		<module>initializers-fragment2</module>
+		<module>hs-helloworld</module>
 	</modules>
 
 </project>

@@ -120,7 +120,7 @@ public class JaasIdentityManager implements IdentityManager {
 		private final Set<String> roles;
 		private final Credential credential;
 
-		public AccountImpl(Subject subject, Principal principal, Set<String> roles, Credential credential) {
+		AccountImpl(Subject subject, Principal principal, Set<String> roles, Credential credential) {
 			this.subject = subject;
 			this.principal = principal;
 			this.roles = roles;

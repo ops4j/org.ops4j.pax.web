@@ -87,7 +87,7 @@ public class PaxWebFilterInfo extends FilterInfo {
 		private final FilterModel model;
 		private final OsgiScopedServletContext osgiScopedServletContext;
 
-		public FilterModelFactory(FilterModel model, OsgiScopedServletContext osgiScopedServletContext) {
+		FilterModelFactory(FilterModel model, OsgiScopedServletContext osgiScopedServletContext) {
 			this.model = model;
 			this.osgiScopedServletContext = osgiScopedServletContext;
 		}

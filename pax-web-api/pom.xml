@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
+    Copyright 2020 OPS4J.
 
-      http://www.apache.org/licenses/LICENSE-2.0
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-    KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -51,9 +48,7 @@
 							javax.servlet.http;version="[3.1,5)",
 
 							<!-- ranges indicate we can work with OSGi Core R6+ -->
-							org.osgi.dto;version="[1.0,2)",
 							org.osgi.framework;version="[1.8,2)",
-<!--							org.osgi.framework.dto;version="[1.8,2)",-->
 							org.osgi.framework.wiring;version="[1.2,2)",
 
 							<!-- from pax-logging-api -->
@@ -67,7 +62,7 @@
 							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
 
 							<!-- re-export OSGi CMPN R7 102 HTTP Service packages -->
-							org.osgi.service.http;version="1.2",
+							org.osgi.service.http;version="1.2.1",
 
 							<!-- re-export OSGi CMPN R7 140 HTTP Whiteboard packages -->
 							org.osgi.service.http.context;version="1.1",
@@ -85,6 +80,43 @@
 
 	<dependencies>
 
+		<!--
+			Good place to remind https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html
+			If we declare dependency with scope:
+			 - "compile"
+			    - transitive "compile" dependency becomes "compile" as well
+			    - transitive "provided" dependency is not visible
+			    - transitive "runtime" dependency becomes "runtime" as well
+			    - transitive "provided" dependency is not visible
+			 - "provided"
+			    - transitive "compile" dependency becomes "provided"
+			    - transitive "provided" dependency is not visible
+			    - transitive "runtime" dependency becomes "provided"
+			    - transitive "provided" dependency is not visible
+			 - "runtime"
+			    - transitive "compile" dependency becomes "runtime"
+			    - transitive "provided" dependency is not visible
+			    - transitive "runtime" dependency becomes "runtime"
+			    - transitive "provided" dependency is not visible
+			 - "test"
+			    - transitive "compile" dependency becomes "test"
+			    - transitive "provided" dependency is not visible
+			    - transitive "runtime" dependency becomes "test"
+			    - transitive "provided" dependency is not visible
+
+			Summarizing:
+			 - "compile": all classpaths, propagation to depending projects
+			 - "provided": compilation and test classpaths, but no propagation to depending projects
+			 - "runtime": not required for compilation, so runtime and test classpaths, propagation to depending projects
+			 - "test": test classpath, no propagation
+
+			Some explanations:
+			 - having OSGi Core and CMPN as "provided" means (here) that projects depending on pax-web-api will
+			   have to add explicit dependencies on OSGi jars if needed
+			 - having slf4j-api as "provided" means that projects depending on pax-web-api may provide different
+			   library that will satisfy it - e.g., pax-logging-api
+		-->
+
 		<!-- OSGi -->
 
 		<dependency>
@@ -95,11 +127,6 @@
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.cmpn</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>osgi.annotation</artifactId>
 			<scope>provided</scope>
 		</dependency>
 

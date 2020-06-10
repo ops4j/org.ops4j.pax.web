@@ -66,7 +66,7 @@ public class PropertiesIdentityManager implements IdentityManager {
 
 		private final String name;
 
-		public SimplePrincipal(String name) {
+		SimplePrincipal(String name) {
 			this.name = name;
 		}
 
@@ -81,7 +81,7 @@ public class PropertiesIdentityManager implements IdentityManager {
 		private final Principal principal;
 		private final Set<String> roles;
 
-		public AccountImpl(Principal principal, Set<String> roles) {
+		AccountImpl(Principal principal, Set<String> roles) {
 			this.principal = principal;
 			this.roles = roles;
 		}

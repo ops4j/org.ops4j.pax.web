@@ -34,12 +34,9 @@ import org.eclipse.jetty.security.authentication.DigestAuthenticator;
 import org.eclipse.jetty.security.authentication.FormAuthenticator;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.server.session.DefaultSessionIdManager;
-import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.thread.ThreadPool;
-import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.AuthenticatorService;
 import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
@@ -62,7 +59,7 @@ class PaxWebJettyServer extends Server {
 					private final PaxWebServletContextHandler handler;
 					private final AtomicInteger refCount = new AtomicInteger(1);
 
-					public ServletContextInfo(PaxWebServletContextHandler handler) {
+					ServletContextInfo(PaxWebServletContextHandler handler) {
 						super();
 						this.handler = handler;
 					}
@@ -140,25 +137,25 @@ class PaxWebJettyServer extends Server {
 		return rootCollections;
 	}
 
-	@Review("Called during startup, sets config common to all future contexts, which is a bit weird")
-	public void configureContext(final Map<String, Object> attributes, final Integer timeout, final String cookie,
-								 final String domain, final String path, final String url, final Boolean cookieHttpOnly,
-								 final Boolean sessionCookieSecure, final String workerName, final Boolean lazy, final String directory,
-								 Integer maxAge, final Boolean showStacks) {
-		this.contextAttributes = attributes;
-		this.sessionTimeout = timeout;
-		this.sessionCookie = cookie;
-		this.sessionDomain = domain;
-		this.sessionPath = path;
-		this.sessionUrl = url;
-		this.sessionCookieHttpOnly = cookieHttpOnly;
-		this.sessionCookieSecure = sessionCookieSecure;
-		this.sessionWorkerName = workerName;
-		lazyLoad = lazy;
-		this.storeDirectory = directory;
-		this.sessionCookieMaxAge = maxAge;
-		this.showStacks = showStacks;
-	}
+//	@Review("Called during startup, sets config common to all future contexts, which is a bit weird")
+//	public void configureContext(final Map<String, Object> attributes, final Integer timeout, final String cookie,
+//								 final String domain, final String path, final String url, final Boolean cookieHttpOnly,
+//								 final Boolean sessionCookieSecure, final String workerName, final Boolean lazy, final String directory,
+//								 Integer maxAge, final Boolean showStacks) {
+//		this.contextAttributes = attributes;
+//		this.sessionTimeout = timeout;
+//		this.sessionCookie = cookie;
+//		this.sessionDomain = domain;
+//		this.sessionPath = path;
+//		this.sessionUrl = url;
+//		this.sessionCookieHttpOnly = cookieHttpOnly;
+//		this.sessionCookieSecure = sessionCookieSecure;
+//		this.sessionWorkerName = workerName;
+//		lazyLoad = lazy;
+//		this.storeDirectory = directory;
+//		this.sessionCookieMaxAge = maxAge;
+//		this.showStacks = showStacks;
+//	}
 
 	PaxWebServletContextHandler getContext(final HttpContext httpContext) {
 		readLock.lock();
@@ -551,73 +548,73 @@ class PaxWebJettyServer extends Server {
 		return attributes;
 	}
 
-	/**
-	 * Configures the session time out by extracting the session
-	 * handlers->sessionManager for the context.
-	 *
-	 * @param context        the context for which the session timeout should be configured
-	 * @param minutes        timeout in minutes
-	 * @param cookie         Session cookie name. Defaults to JSESSIONID. If set to null or
-	 *                       "none" no cookies will be used.
-	 * @param domain         Session cookie domain name. Default to the current host.
-	 * @param path           Session cookie path. default to the current servlet context
-	 *                       path.
-	 * @param url            session URL parameter name. Defaults to jsessionid. If set to
-	 *                       null or "none" no URL rewriting will be done.
-	 * @param cookieHttpOnly configures if the Cookie is valid for http only and therefore
-	 *                       not available to javascript.
-	 * @param secure         Configures if the session cookie is only transfered via https
-	 *                       even if its created during a non-secure request. Defaults to
-	 *                       false which means the session cookie is set to be secure if
-	 *                       its created during a https request.
-	 * @param workerName     name appended to session id, used to assist session affinity
-	 *                       in a load balancer
-	 * @param maxAge         session cookie maxAge
-	 */
-	private void configureSessionManager(final ServletContextHandler context, final Integer minutes,
-										 final String cookie, String domain, String path, final String url, final Boolean cookieHttpOnly,
-										 final Boolean secure, final String workerName, final Boolean lazy, final String directory,
-										 final int maxAge) {
-		LOG.debug("configureSessionManager for context [" + context + "] using - timeout:" + minutes + ", cookie:"
-				+ cookie + ", url:" + url + ", cookieHttpOnly:" + cookieHttpOnly + ", workerName:" + workerName
-				+ ", lazyLoad:" + lazy + ", storeDirectory: " + directory);
+//	/**
+//	 * Configures the session time out by extracting the session
+//	 * handlers->sessionManager for the context.
+//	 *
+//	 * @param context        the context for which the session timeout should be configured
+//	 * @param minutes        timeout in minutes
+//	 * @param cookie         Session cookie name. Defaults to JSESSIONID. If set to null or
+//	 *                       "none" no cookies will be used.
+//	 * @param domain         Session cookie domain name. Default to the current host.
+//	 * @param path           Session cookie path. default to the current servlet context
+//	 *                       path.
+//	 * @param url            session URL parameter name. Defaults to jsessionid. If set to
+//	 *                       null or "none" no URL rewriting will be done.
+//	 * @param cookieHttpOnly configures if the Cookie is valid for http only and therefore
+//	 *                       not available to javascript.
+//	 * @param secure         Configures if the session cookie is only transfered via https
+//	 *                       even if its created during a non-secure request. Defaults to
+//	 *                       false which means the session cookie is set to be secure if
+//	 *                       its created during a https request.
+//	 * @param workerName     name appended to session id, used to assist session affinity
+//	 *                       in a load balancer
+//	 * @param maxAge         session cookie maxAge
+//	 */
+//	private void configureSessionManager(final ServletContextHandler context, final Integer minutes,
+//										 final String cookie, String domain, String path, final String url, final Boolean cookieHttpOnly,
+//										 final Boolean secure, final String workerName, final Boolean lazy, final String directory,
+//										 final int maxAge) {
+//		LOG.debug("configureSessionManager for context [" + context + "] using - timeout:" + minutes + ", cookie:"
+//				+ cookie + ", url:" + url + ", cookieHttpOnly:" + cookieHttpOnly + ", workerName:" + workerName
+//				+ ", lazyLoad:" + lazy + ", storeDirectory: " + directory);
+//
+//		final SessionHandler sessionHandler = context.getSessionHandler();
+//		if (sessionHandler != null) {
+//			if (minutes != null) {
+//				sessionHandler.setMaxInactiveInterval(minutes * 60);
+//				LOG.debug("Session timeout set to {} minutes for context [{}]", minutes, context);
+//			}
+//			if (cookie != null && !"none".equals(cookie)) {
+//				sessionHandler.getSessionCookieConfig().setName(cookie);
+//				LOG.debug("Session cookie set to {} for context [{}]", cookie, context);
+//				sessionHandler.getSessionCookieConfig().setHttpOnly(cookieHttpOnly);
+//				LOG.debug("Session cookieHttpOnly set to {} for context [{}]", cookieHttpOnly, context);
+//			}
+//			if (domain != null && domain.length() > 0) {
+//				sessionHandler.getSessionCookieConfig().setDomain(domain);
+//				LOG.debug("Session cookie domain set to {} for context [{]]", domain, context);
+//			}
+//			if (path != null && path.length() > 0) {
+//				sessionHandler.getSessionCookieConfig().setPath(path);
+//				LOG.debug("Session cookie path set to {} for context [{}]", path, context);
+//			}
+//			if (secure != null) {
+//				sessionHandler.getSessionCookieConfig().setSecure(secure);
+//				LOG.debug("Session cookie secure set to {} for context [{]}]", secure, context);
+//			}
+//			if (url != null) {
+//				sessionHandler.setSessionIdPathParameterName(url);
+//				LOG.debug("Session URL set to {} for context [{}]", url, context);
+//			}
+//			if (workerName != null && sessionHandler.getSessionIdManager() != null) {
+//				((DefaultSessionIdManager) sessionHandler.getSessionIdManager()).setWorkerName(workerName);
+//				LOG.debug("Worker name set to {} for context [{}]", workerName, context);
+//			}
+//		}
+//	}
 
-		final SessionHandler sessionHandler = context.getSessionHandler();
-		if (sessionHandler != null) {
-			if (minutes != null) {
-				sessionHandler.setMaxInactiveInterval(minutes * 60);
-				LOG.debug("Session timeout set to {} minutes for context [{}]", minutes, context);
-			}
-			if (cookie != null && !"none".equals(cookie)) {
-				sessionHandler.getSessionCookieConfig().setName(cookie);
-				LOG.debug("Session cookie set to {} for context [{}]", cookie, context);
-				sessionHandler.getSessionCookieConfig().setHttpOnly(cookieHttpOnly);
-				LOG.debug("Session cookieHttpOnly set to {} for context [{}]", cookieHttpOnly, context);
-			}
-			if (domain != null && domain.length() > 0) {
-				sessionHandler.getSessionCookieConfig().setDomain(domain);
-				LOG.debug("Session cookie domain set to {} for context [{]]", domain, context);
-			}
-			if (path != null && path.length() > 0) {
-				sessionHandler.getSessionCookieConfig().setPath(path);
-				LOG.debug("Session cookie path set to {} for context [{}]", path, context);
-			}
-			if (secure != null) {
-				sessionHandler.getSessionCookieConfig().setSecure(secure);
-				LOG.debug("Session cookie secure set to {} for context [{]}]", secure, context);
-			}
-			if (url != null) {
-				sessionHandler.setSessionIdPathParameterName(url);
-				LOG.debug("Session URL set to {} for context [{}]", url, context);
-			}
-			if (workerName != null && sessionHandler.getSessionIdManager() != null) {
-				((DefaultSessionIdManager) sessionHandler.getSessionIdManager()).setWorkerName(workerName);
-				LOG.debug("Worker name set to {} for context [{}]", workerName, context);
-			}
-		}
-	}
-
-	public String getDefaultAuthMethod(){
+	public String getDefaultAuthMethod() {
 	    return defaultAuthMethod;
     }
 

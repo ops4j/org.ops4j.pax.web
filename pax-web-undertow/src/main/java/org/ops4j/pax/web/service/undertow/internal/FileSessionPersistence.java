@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 public class FileSessionPersistence implements SessionPersistenceManager {
 
-	public static Logger LOG = LoggerFactory.getLogger(FileSessionPersistence.class);
+	public static final Logger LOG = LoggerFactory.getLogger(FileSessionPersistence.class);
 
 	private File sessionsDir;
 

@@ -530,11 +530,11 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 		private Map<ServletContext, Boolean> contexts1;
 		private Map<ServletContext, Boolean> contexts2;
 
-		public AnnotatedMyIdServlet(String id) {
+		AnnotatedMyIdServlet(String id) {
 			super(id);
 		}
 
-		public AnnotatedMyIdServlet(Map<ServletContext, Boolean> contexts1, Map<ServletContext, Boolean> contexts2) {
+		AnnotatedMyIdServlet(Map<ServletContext, Boolean> contexts1, Map<ServletContext, Boolean> contexts2) {
 			super("1");
 			this.contexts1 = contexts1;
 			this.contexts2 = contexts2;
@@ -568,7 +568,7 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 		private final Map<ServletContext, Boolean> contexts1;
 		private final Map<ServletContext, Boolean> contexts2;
 
-		public AnnotatedMyIdFilter(Map<ServletContext, Boolean> contexts1, Map<ServletContext, Boolean> contexts2) {
+		AnnotatedMyIdFilter(Map<ServletContext, Boolean> contexts1, Map<ServletContext, Boolean> contexts2) {
 			super("1");
 			this.contexts1 = contexts1;
 			this.contexts2 = contexts2;

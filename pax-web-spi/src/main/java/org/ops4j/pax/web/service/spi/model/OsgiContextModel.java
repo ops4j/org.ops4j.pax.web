@@ -115,7 +115,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class OsgiContextModel extends Identity implements Comparable<OsgiContextModel> {
 
-	public static Logger LOG = LoggerFactory.getLogger(OsgiContextModel.class);
+	public static final Logger LOG = LoggerFactory.getLogger(OsgiContextModel.class);
 
 	/** The singleton {@link OsgiContextModel} used both by pax-web-runtime and pax-web-extender-whiteboard */
 	public static final OsgiContextModel DEFAULT_CONTEXT_MODEL;

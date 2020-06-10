@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
+    Copyright 2020 OPS4J.
 
-      http://www.apache.org/licenses/LICENSE-2.0
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-    KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -34,38 +31,125 @@
 	<artifactId>pax-web-itest-container</artifactId>
 	<packaging>pom</packaging>
 
-	<name>OPS4J Pax Web - Integration Container Test</name>
+	<name>OPS4J Pax Web - Container Tests</name>
 
 	<description>Container integration tests for Pax Web</description>
 
+	<modules>
+		<module>pax-web-itest-container-common</module>
+	</modules>
+
+	<build>
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>true</filtering>
+			</testResource>
+			<testResource>
+				<directory>src/test/resources-binary</directory>
+				<filtering>false</filtering>
+			</testResource>
+		</testResources>
+
+		<plugins>
+
+			<!-- Core plugins -->
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<includes>
+						<include>**/*IntegrationTest.java</include>
+					</includes>
+					<systemPropertyVariables>
+						<!--
+							to configure pax-exam with pax.exam.system=default which gives us more control over installed bundles
+							see: org.ops4j.pax.exam.ConfigurationManager.ConfigurationManager()
+						-->
+						<pax.exam.configuration>file:../etc/controlled-exam.properties</pax.exam.configuration>
+					</systemPropertyVariables>
+					<redirectTestOutputToFile>false</redirectTestOutputToFile>
+					<runOrder>alphabetical</runOrder>
+					<!--
+						be careful to not load pax-logging-log4j1 and pax-logging-api through system class loader.
+						failsafe has to isolate running OSGi framework from these jars - they have to be installed
+						only as bundles
+					-->
+					<classpathDependencyScopeExclude>runtime</classpathDependencyScopeExclude>
+					<forkCount>1</forkCount>
+					<reuseForks>false</reuseForks>
+					<trimStackTrace>false</trimStackTrace>
+				</configuration>
+				<executions>
+					<execution>
+						<id>integration-test</id>
+						<goals>
+							<goal>integration-test</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>verify</id>
+						<goals>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+
+			<!-- ServiceMix plugins -->
+
+			<plugin>
+				<groupId>org.apache.servicemix.tooling</groupId>
+				<artifactId>depends-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>generate-depends-file</id>
+						<goals>
+							<goal>generate-depends-file</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+	</build>
+
 	<profiles>
-<!--		<profile>-->
-<!--			<id>jetty</id>-->
-<!--			<activation>-->
-<!--				<activeByDefault>true</activeByDefault>-->
-<!--			</activation>-->
-<!--			<modules>-->
-<!--				<module>pax-web-itest-container-jetty</module>-->
-<!--			</modules>-->
-<!--		</profile>-->
-<!--		<profile>-->
-<!--			<id>tomcat</id>-->
-<!--			<activation>-->
-<!--				<activeByDefault>true</activeByDefault>-->
-<!--			</activation>-->
-<!--			<modules>-->
-<!--				<module>pax-web-itest-container-tomcat</module>-->
-<!--			</modules>-->
-<!--		</profile>-->
-<!--		<profile>-->
-<!--			<id>undertow</id>-->
-<!--			<activation>-->
-<!--				<activeByDefault>true</activeByDefault>-->
-<!--			</activation>-->
-<!--			<modules>-->
-<!--				<module>pax-web-itest-container-undertow</module>-->
-<!--			</modules>-->
-<!--		</profile>-->
+		<profile>
+			<id>jetty</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<modules>
+				<module>pax-web-itest-jetty</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>tomcat</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<modules>
+				<module>pax-web-itest-tomcat</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>undertow</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<modules>
+				<module>pax-web-itest-undertow</module>
+			</modules>
+		</profile>
 	</profiles>
 
 </project>

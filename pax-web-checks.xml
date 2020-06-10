@@ -1,32 +1,25 @@
 <?xml version="1.0"?>
 <!--
 
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
+    Copyright 2020 OPS4J.
 
-      http://www.apache.org/licenses/LICENSE-2.0
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-    KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 -->
 <!DOCTYPE module PUBLIC
-        "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
-        "http://checkstyle.sourceforge.net/dtds/configuration_1_3.dtd">
-
-<!-- 
-  Checkstyle configuration that checks the Pax Web coding conventions.
--->
-
+    "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+    "https://checkstyle.org/dtds/configuration_1_3.dtd">
+<!-- Checkstyle configuration that checks the Pax Web coding conventions. -->
 <module name="Checker">
 
   <module name="SuppressionFilter">
@@ -34,7 +27,7 @@
   </module>
 
   <!-- We want yellow markers in Eclipse by default, not red ones. -->
-  <property name="severity" value="warning" />
+  <property name="severity" value="error" />
 
   <property name="fileExtensions" value="java, properties, xml" />
 
@@ -49,15 +42,18 @@
     <property name="fileExtensions" value="java" />
   </module>
 
-  <!-- Checks for whitespace -->
+  <!--
+    Checks for whitespace - we use tabs (legacy reasons? there were simply more tabs than spaces in the files and
+    I wanted to preserve git diffability.
+  -->
   <!-- See http://checkstyle.sf.net/config_whitespace.html -->
   <!--<module name="FileTabCharacter">-->
     <!--<property name="fileExtensions" value="java" />-->
   <!--</module>-->
 
-  <module name="TreeWalker">
+  <property name="cacheFile" value="${checkstyle.cache.file}" />
 
-    <property name="cacheFile" value="${checkstyle.cache.file}" />
+  <module name="TreeWalker">
 
     <!-- Checks for Javadoc comments. -->
     <!-- See http://checkstyle.sf.net/config_javadoc.html -->
@@ -68,13 +64,17 @@
 
     <!-- Checks for Naming Conventions. -->
     <!-- See http://checkstyle.sf.net/config_naming.html -->
-    <module name="MemberName"/>
+    <module name="MemberName">
+      <property name="format" value="^[a-z_][A-Za-z0-9_]*$" />
+    </module>
     <module name="ConstantName"/>
     <module name="LocalVariableName" />
     <module name="MethodName" />
     <module name="PackageName" />
     <module name="LocalFinalVariableName" />
-    <module name="StaticVariableName" />
+    <module name="StaticVariableName">
+      <property name="format" value="^[a-z_][A-Za-z0-9_]*$" />
+    </module>
     
     <!-- allow leading underscore on parameters to avoid variable hiding -->
     <module name="ParameterName">
@@ -105,7 +105,7 @@
       
       
     <module name="MethodLength">
-      <property name="max" value="200" />
+      <property name="max" value="500" />
     </module>
     <module name="ParameterNumber">
       <property name="max" value="10" />
@@ -140,7 +140,7 @@
     </module>
 
     <!-- module name="FinalClass"/ -->
-    <module name="InterfaceIsType"/>
+<!--    <module name="InterfaceIsType"/>-->
     
     <!-- allow public members fooRule for JUnit rules -->
     <module name="VisibilityModifier">
@@ -172,7 +172,7 @@
     <module name="DeclarationOrder" />
     <!--module name="MultipleStringLiterals"/ -->
     <module name="OneStatementPerLine" />
-    <module name="ExplicitInitialization" />
+<!--    <module name="ExplicitInitialization" />-->
     <module name="ModifierOrder" />
     <module name="RedundantModifier" />
 
@@ -181,16 +181,18 @@
     <module name="IllegalThrows" />
     <module name="MultipleVariableDeclarations" />
     <module name="PackageDeclaration" />
-    <module name="ParameterAssignment" />
-    <module name="SimplifyBooleanExpression" />
+<!--    <module name="ParameterAssignment" />-->
+<!--    <module name="SimplifyBooleanExpression" />-->
     <module name="SimplifyBooleanReturn" />
 
     <module name="NestedIfDepth">
       <property name="max" value="3" />
     </module>
 
-    <module name="NestedTryDepth" />
-    <module name="SuperClone" />
+    <module name="NestedTryDepth">
+      <property name="max" value="3" />
+    </module>
+<!--    <module name="SuperClone" />-->
     <module name="SuperFinalize" />
 
     <!-- allow usage of CHECKSTYLE:OFF and CHECKSTYLE:ON -->

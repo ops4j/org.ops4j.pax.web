@@ -18,7 +18,6 @@ package org.ops4j.pax.web.service.spi.model.elements;
 
 import javax.servlet.Servlet;
 
-import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 
 public class ResourceModel extends ServletModel {
@@ -28,7 +27,6 @@ public class ResourceModel extends ServletModel {
 	public ResourceModel(final OsgiContextModel contextModel,
 						 final Servlet servlet, final String alias, final String name) {
 		super(/*contextModel, */alias, servlet, null, null, null);
-		NullArgumentException.validateNotNull(name, "Name");
 		if (!"/".equals(name) && name.endsWith("/")) {
 			throw new IllegalArgumentException("name ends with slash (/)");
 		}

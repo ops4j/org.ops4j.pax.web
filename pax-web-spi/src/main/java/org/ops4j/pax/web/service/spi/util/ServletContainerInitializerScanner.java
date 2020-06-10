@@ -21,22 +21,21 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.annotation.HandlesTypes;
 
-import org.apache.xbean.finder.BundleAnnotationFinder;
-import org.apache.xbean.finder.BundleAssignableClassFinder;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
-import org.osgi.service.packageadmin.PackageAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+//import org.apache.xbean.finder.BundleAnnotationFinder;
+//import org.apache.xbean.finder.BundleAssignableClassFinder;
+//import org.osgi.service.packageadmin.PackageAdmin;
 
 public class ServletContainerInitializerScanner {
 
@@ -44,13 +43,13 @@ public class ServletContainerInitializerScanner {
 
 	private Bundle bundle;
 	private Bundle serverBundle;
-	private PackageAdmin packageAdminService;
+//	private PackageAdmin packageAdminService;
 
 
-	public ServletContainerInitializerScanner(Bundle bundle, Bundle serverBundle, PackageAdmin packageAdminService) {
+	public ServletContainerInitializerScanner(Bundle bundle, Bundle serverBundle/*, PackageAdmin packageAdminService*/) {
 		this.bundle = bundle;
 		this.serverBundle = serverBundle;
-		this.packageAdminService = packageAdminService;
+//		this.packageAdminService = packageAdminService;
 	}
 
 
@@ -102,33 +101,33 @@ public class ServletContainerInitializerScanner {
 						boolean isAnnotation = klass.isAnnotation();
 						boolean isInteraface = klass.isInterface();
 
-						if (isAnnotation) {
-							try {
-								BundleAnnotationFinder baf = new BundleAnnotationFinder(
-										packageAdminService, bundle);
-								@SuppressWarnings("unchecked")
-								List<Class<?>> annotatedClasses = baf
-										.findAnnotatedClasses((Class<? extends Annotation>) klass);
-								setOfClasses.addAll(annotatedClasses);
-							} catch (Exception e) {
-								log.warn("Failed to find annotated classes for ServletContainerInitializer");
-							}
-						} else if (isInteraface) {
-							BundleAssignableClassFinder basf = new BundleAssignableClassFinder(
-									packageAdminService, new Class[]{klass}, bundle);
-							Set<String> interfaces = basf.find();
-							for (String interfaceName : interfaces) {
-								setOfClasses.add(bundle.loadClass(interfaceName));
-							}
-						} else {
-							// class
-							BundleAssignableClassFinder basf = new BundleAssignableClassFinder(
-									packageAdminService, new Class[]{klass}, bundle);
-							Set<String> classNames = basf.find();
-							for (String klassName : classNames) {
-								setOfClasses.add(bundle.loadClass(klassName));
-							}
-						}
+//						if (isAnnotation) {
+//							try {
+//								BundleAnnotationFinder baf = new BundleAnnotationFinder(
+//										packageAdminService, bundle);
+//								@SuppressWarnings("unchecked")
+//								List<Class<?>> annotatedClasses = baf
+//										.findAnnotatedClasses((Class<? extends Annotation>) klass);
+//								setOfClasses.addAll(annotatedClasses);
+//							} catch (Exception e) {
+//								log.warn("Failed to find annotated classes for ServletContainerInitializer");
+//							}
+//						} else if (isInteraface) {
+//							BundleAssignableClassFinder basf = new BundleAssignableClassFinder(
+//									packageAdminService, new Class[]{klass}, bundle);
+//							Set<String> interfaces = basf.find();
+//							for (String interfaceName : interfaces) {
+//								setOfClasses.add(bundle.loadClass(interfaceName));
+//							}
+//						} else {
+//							// class
+//							BundleAssignableClassFinder basf = new BundleAssignableClassFinder(
+//									packageAdminService, new Class[]{klass}, bundle);
+//							Set<String> classNames = basf.find();
+//							for (String klassName : classNames) {
+//								setOfClasses.add(bundle.loadClass(klassName));
+//							}
+//						}
 					}
 				}
 				containerInitializers.put(initializer, setOfClasses);

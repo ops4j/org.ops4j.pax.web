@@ -146,7 +146,7 @@ class JettyServerWrapper implements BatchVisitor {
 	/** Servlet to use when no servlet is mapped - to ensure that preprocessors and filters are run correctly. */
 	private final Default404Servlet default404Servlet = new Default404Servlet();
 
-	public JettyServerWrapper(Configuration config, JettyFactory jettyFactory,
+	JettyServerWrapper(Configuration config, JettyFactory jettyFactory,
 			Bundle paxWebJettyBundle, ClassLoader classLoader) {
 		this.configuration = config;
 		this.jettyFactory = jettyFactory;

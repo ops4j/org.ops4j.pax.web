@@ -15,13 +15,13 @@
  */
 package org.ops4j.pax.web.itest.base.support;
 
-import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
+import java.util.Hashtable;
+import javax.servlet.Filter;
+
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-
-import javax.servlet.Filter;
-import java.util.Hashtable;
 
 public class FilterBundleActivator implements BundleActivator {
 
@@ -32,9 +32,9 @@ public class FilterBundleActivator implements BundleActivator {
 
 		// register a filter
 		Hashtable<String, String> props = new Hashtable<>();
-		props.put(ExtenderConstants.PROPERTY_URL_PATTERNS, "/sharedContext/*");
-		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "shared");
-		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED, "true");
+		props.put(PaxWebConstants.SERVICE_PROPERTY_URL_PATTERNS, "/sharedContext/*");
+		props.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "shared");
+		props.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_SHARED, "true");
 		filterReg = context.registerService(Filter.class,
 				new SimpleOnlyFilter(), props);
 

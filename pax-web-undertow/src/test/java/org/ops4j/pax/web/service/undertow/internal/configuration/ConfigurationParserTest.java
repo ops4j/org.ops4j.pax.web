@@ -34,11 +34,11 @@ import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ConfigurationParserTest {
 
-	public static Logger LOG = LoggerFactory.getLogger(ConfigurationParserTest.class);
+	public static final Logger LOG = LoggerFactory.getLogger(ConfigurationParserTest.class);
 	private static JAXBContext context;
 
 	@BeforeClass
