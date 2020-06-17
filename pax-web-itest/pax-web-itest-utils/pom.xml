@@ -44,10 +44,10 @@
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 			</resource>
-			<resource>
-				<directory>src/main/resources-binary</directory>
-				<filtering>false</filtering>
-			</resource>
+<!--			<resource>-->
+<!--				<directory>src/main/resources-binary</directory>-->
+<!--				<filtering>false</filtering>-->
+<!--			</resource>-->
 		</resources>
 
 		<plugins>
@@ -65,8 +65,24 @@
 							javax.servlet;version="[3.1,5)",
 							javax.servlet.annotation;version="[3.1,5)",
 							javax.servlet.http;version="[3.1,5)",
-							*
+
+							<!-- ranges indicate we can work with OSGi Core R6+ -->
+							org.osgi.framework;version="[1.8,2)",
+							org.osgi.framework.wiring;version="[1.2,2)",
+							org.osgi.util.tracker;version="[1.5,2)",
+
+							<!-- from pax-logging-api -->
+							org.slf4j;version="[1.7,2)",
+
+							<!-- other -->
+							javax.net.ssl
 						</Import-Package>
+						<Export-Package>
+							org.ops4j.pax.web.itest.utils.*
+						</Export-Package>
+						<Embed-Dependency>
+							httpclient5,httpcore5,httpcore5-h2,commons-codec
+						</Embed-Dependency>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -77,16 +93,16 @@
 
 		<!-- pax-web own artifacts -->
 
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-spi</artifactId>
-			<scope>provided</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-api</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-spi</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
 
 		<!-- OPS4J dependencies -->
 
@@ -131,6 +147,27 @@
 		</dependency>
 
 		<!-- Other -->
+
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents.client5</groupId>
+			<artifactId>httpclient5</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents.core5</groupId>
+			<artifactId>httpcore5</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents.core5</groupId>
+			<artifactId>httpcore5-h2</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 <!--		<dependency>-->
 <!--			<groupId>org.apache.httpcomponents</groupId>-->

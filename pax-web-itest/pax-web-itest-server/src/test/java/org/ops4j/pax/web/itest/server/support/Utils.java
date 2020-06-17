@@ -18,6 +18,7 @@ package org.ops4j.pax.web.itest.server.support;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.security.cert.X509Certificate;
@@ -68,7 +69,7 @@ public class Utils {
 	private Utils() {
 	}
 
-	public static ServerController create(Consumer<Hashtable<Object, Object>> callback, int port,
+	public static ServerController createServerController(Consumer<Hashtable<Object, Object>> callback, int port,
 			Runtime runtime, ClassLoader classLoader) {
 		Hashtable<Object, Object> properties = new Hashtable<>(System.getProperties());
 		properties.put(PaxWebConfig.PID_CFG_TEMP_DIR, "target/tmp");
@@ -185,6 +186,39 @@ public class Utils {
 				return sb.toString();
 			}
 		}
+	}
+
+	public static Object getField(Object object, String fieldName) {
+		String[] names = fieldName.split("\\.");
+		for (String name : names) {
+			Field f = null;
+			try {
+				f = object.getClass().getDeclaredField(name);
+			} catch (NoSuchFieldException e) {
+				try {
+					f = object.getClass().getSuperclass().getDeclaredField(name);
+				} catch (NoSuchFieldException ex) {
+					try {
+						f = object.getClass().getSuperclass().getSuperclass().getDeclaredField(name);
+					} catch (NoSuchFieldException exx) {
+						throw new RuntimeException(e.getMessage(), e);
+					}
+				}
+			}
+			f.setAccessible(true);
+			try {
+				object = f.get(object);
+			} catch (IllegalAccessException e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
+		}
+
+		return object;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T getField(Object object, String fieldName, Class<T> clazz) {
+		return (T) getField(object, fieldName);
 	}
 
 	public static class SameThreadExecutor implements Executor {

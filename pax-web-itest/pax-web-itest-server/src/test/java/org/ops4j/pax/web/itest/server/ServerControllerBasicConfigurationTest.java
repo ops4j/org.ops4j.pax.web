@@ -43,7 +43,7 @@ public class ServerControllerBasicConfigurationTest extends MultiContainerTestSu
 
 	@Test
 	public void justInstantiateWithoutOsgi() throws Exception {
-		ServerController controller = Utils.create(properties -> {
+		ServerController controller = Utils.createServerController(properties -> {
 			new File("target/ncsa").mkdirs();
 			properties.put(PaxWebConfig.PID_CFG_LOG_NCSA_ENABLED, "true");
 			properties.put(PaxWebConfig.PID_CFG_LOG_NCSA_LOGDIR, "target/ncsa");
@@ -68,7 +68,7 @@ public class ServerControllerBasicConfigurationTest extends MultiContainerTestSu
 	public void sslConfiguration() throws Exception {
 		SSLUtils.generateKeyStores();
 
-		ServerController controller = Utils.create(properties -> {
+		ServerController controller = Utils.createServerController(properties -> {
 			new File("target/ncsa").mkdirs();
 			properties.put(PaxWebConfig.PID_CFG_LOG_NCSA_ENABLED, "true");
 			properties.put(PaxWebConfig.PID_CFG_LOG_NCSA_LOGDIR, "target/ncsa");

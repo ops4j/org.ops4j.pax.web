@@ -114,7 +114,7 @@
 			 - having OSGi Core and CMPN as "provided" means (here) that projects depending on pax-web-api will
 			   have to add explicit dependencies on OSGi jars if needed
 			 - having slf4j-api as "provided" means that projects depending on pax-web-api may provide different
-			   library that will satisfy it - e.g., pax-logging-api
+			   library that will satisfy slf4j-api - e.g., pax-logging-api
 		-->
 
 		<!-- OSGi -->

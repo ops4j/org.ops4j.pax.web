@@ -1,19 +1,19 @@
 /*
+ * Copyright 2020 OPS4J.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.
- *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.base;
+package org.ops4j.pax.web.itest.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,17 +22,16 @@ import org.slf4j.LoggerFactory;
  * @author Marc Klinger - mklinger[at]nightlabs[dot]de
  */
 public abstract class WaitCondition {
+
 	private static final long RETRY_DURATION_MILLIS = 10000;
 	private static final long SLEEP_DURATION_MILLIS = 200;
 	private static final Logger LOG = LoggerFactory.getLogger(WaitCondition.class);
 
-
-	private String description;
+	private final String description;
 
 	protected WaitCondition(String description) {
 		this.description = description;
 	}
-
 
 	private String getDescription() {
 		return description;
@@ -68,12 +67,8 @@ public abstract class WaitCondition {
 	 * @throws InterruptedException interruption-policy propagated to caller
 	 */
 	public void waitForCondition(long retryDuration, long sleepDuration) throws InterruptedException {
-		waitForCondition(
-				retryDuration,
-				sleepDuration,
-				() -> LOG.warn("Waited for '{}' for {} ms but condition is still not fulfilled",
-						getDescription(),
-						retryDuration));
+		waitForCondition(retryDuration, sleepDuration,
+				() -> LOG.warn("Waited for '{}' for {}ms but condition is still not fulfilled", getDescription(), retryDuration));
 	}
 
 	/**
@@ -100,13 +95,14 @@ public abstract class WaitCondition {
 			if (!isFulfilled()) {
 				timeoutFunction.run();
 			} else {
-				LOG.info("Successfully waited for '{}' for {} ms", getDescription(), System.currentTimeMillis() - startTime);
+				LOG.info("Successfully waited for '{}' for {}ms", getDescription(), System.currentTimeMillis() - startTime);
 			}
 		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 			throw e;
 		} catch (Exception e) {
 			throw new RuntimeException("Error waiting for '" + getDescription() + "'", e);
 		}
-		//CHECKSTYLE:ON
 	}
+
 }

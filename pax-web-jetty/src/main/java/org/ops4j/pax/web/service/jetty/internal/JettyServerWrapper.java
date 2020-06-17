@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 import javax.servlet.ServletContext;
 
@@ -48,13 +47,10 @@ import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
-import org.eclipse.jetty.util.ArrayUtil;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.xml.XmlConfiguration;
-import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
@@ -743,7 +739,11 @@ class JettyServerWrapper implements BatchVisitor {
 		}
 
 		if (change.getKind() == OpCode.DISABLE || change.getKind() == OpCode.DELETE) {
-			for (ServletModel model : change.getServletModels()) {
+			for (Map.Entry<ServletModel, Boolean> entry : change.getServletModels().entrySet()) {
+				ServletModel model = entry.getKey();
+				if (!entry.getValue()) {
+					continue;
+				}
 				LOG.info("Removing servlet {}", model);
 
 				Set<String> done = new HashSet<>();
@@ -1042,73 +1042,73 @@ class JettyServerWrapper implements BatchVisitor {
 
 	//	@Override
 	public synchronized void removeServlet(final ServletModel model) {
-		LOG.debug("Removing servlet [" + model + "]");
-		// jetty does not provide a method for removing a servlet so we have to
-		// do it by our own
-		// the facts below are found by analyzing ServletHolder implementation
-		boolean removed = false;
-		final ServletContextHandler context = null;/*server.getContext(model
-							.getContextModel().getHttpContext());*/
-		if (context == null) {
-			return; // context is already removed so no need for deregistration
-		}
-
-		final ServletHandler servletHandler = context.getServletHandler();
-		final ServletHolder[] holders = servletHandler.getServlets();
-		if (holders != null) {
-			final ServletHolder holder = servletHandler.getServlet(model
-					.getName());
-			if (holder != null) {
-				servletHandler.setServlets(ArrayUtil.removeFromArray(holders, holder));
-				// we have to find the servlet mapping by hand :( as there is no
-				// method provided by jetty
-				// and the remove is done based on equals, that is not
-				// implemented by servletmapping
-				// so it is == based.
-				ServletMapping[] mappings = servletHandler.getServletMappings();
-				if (mappings != null) {
-					ServletMapping mapping = null;
-					for (ServletMapping item : mappings) {
-						if (holder.getName().equals(item.getServletName())) {
-							mapping = item;
-							break;
-						}
-					}
-					if (mapping != null) {
-						servletHandler
-								.setServletMappings(ArrayUtil.removeFromArray(mappings, mapping));
-						removed = true;
-					}
-				}
-				// if servlet is still started stop the servlet holder
-				// (=servlet.destroy()) as Jetty will not do that
-				LOG.debug("Stopping servlet in Holder");
-				try {
-					ContextClassLoaderUtils.doWithClassLoader(
-							context.getClassLoader(), new Callable<Void>() {
-
-								@Override
-								public Void call() throws Exception {
-									holder.stop();
-									return null;
-								}
-
-							});
-					//CHECKSTYLE:OFF
-				} catch (Exception e) {
-					if (e instanceof RuntimeException) {
-						throw (RuntimeException) e;
-					}
-					LOG.warn("Exception during unregistering of servlet ["
-							+ model + "]");
-				}
-				//CHECKSTYLE:ON
-			}
-		}
-		//		removeContext(model.getContextModel().getHttpContext());
-		if (!removed) {
-			throw new IllegalStateException(model + " was not found");
-		}
+//		LOG.debug("Removing servlet [" + model + "]");
+//		// jetty does not provide a method for removing a servlet so we have to
+//		// do it by our own
+//		// the facts below are found by analyzing ServletHolder implementation
+//		boolean removed = false;
+//		final ServletContextHandler context = null;/*server.getContext(model
+//							.getContextModel().getHttpContext());*/
+//		if (context == null) {
+//			return; // context is already removed so no need for deregistration
+//		}
+//
+//		final ServletHandler servletHandler = context.getServletHandler();
+//		final ServletHolder[] holders = servletHandler.getServlets();
+//		if (holders != null) {
+//			final ServletHolder holder = servletHandler.getServlet(model
+//					.getName());
+//			if (holder != null) {
+//				servletHandler.setServlets(ArrayUtil.removeFromArray(holders, holder));
+//				// we have to find the servlet mapping by hand :( as there is no
+//				// method provided by jetty
+//				// and the remove is done based on equals, that is not
+//				// implemented by servletmapping
+//				// so it is == based.
+//				ServletMapping[] mappings = servletHandler.getServletMappings();
+//				if (mappings != null) {
+//					ServletMapping mapping = null;
+//					for (ServletMapping item : mappings) {
+//						if (holder.getName().equals(item.getServletName())) {
+//							mapping = item;
+//							break;
+//						}
+//					}
+//					if (mapping != null) {
+//						servletHandler
+//								.setServletMappings(ArrayUtil.removeFromArray(mappings, mapping));
+//						removed = true;
+//					}
+//				}
+//				// if servlet is still started stop the servlet holder
+//				// (=servlet.destroy()) as Jetty will not do that
+//				LOG.debug("Stopping servlet in Holder");
+//				try {
+//					ContextClassLoaderUtils.doWithClassLoader(
+//							context.getClassLoader(), new Callable<Void>() {
+//
+//								@Override
+//								public Void call() throws Exception {
+//									holder.stop();
+//									return null;
+//								}
+//
+//							});
+//					//CHECKSTYLE:OFF
+//				} catch (Exception e) {
+//					if (e instanceof RuntimeException) {
+//						throw (RuntimeException) e;
+//					}
+//					LOG.warn("Exception during unregistering of servlet ["
+//							+ model + "]");
+//				}
+//				//CHECKSTYLE:ON
+//			}
+//		}
+//		//		removeContext(model.getContextModel().getHttpContext());
+//		if (!removed) {
+//			throw new IllegalStateException(model + " was not found");
+//		}
 	}
 
 	//	@Override

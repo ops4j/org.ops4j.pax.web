@@ -1,23 +1,22 @@
 /*
+ * Copyright 2020 OPS4J.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.
- *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.base.assertion;
+package org.ops4j.pax.web.itest.utils.assertion;
 
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-
 
 /**
  * Using functional assertions instead of Hamcrest
@@ -48,11 +47,9 @@ public class Assert {
 		assertThat(message, (Supplier<T>) () -> actual, expected);
 	}
 
-
 	public static <T> boolean assertTrue(T actual, Predicate<T> expected) {
 		return assertTrue((Supplier<T>) () -> actual, expected);
 	}
-
 
 	private static void notNull(Object object, String message) {
 		if (message == null) {
@@ -62,8 +59,8 @@ public class Assert {
 		}
 	}
 
-
 	private static void notNull(Object object) {
 		notNull(object, "[Assertion failed] - this argument is required; it must not be null");
 	}
+
 }

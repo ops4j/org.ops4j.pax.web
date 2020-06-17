@@ -216,7 +216,8 @@
 		<dependency.hamcrest.version>2.2</dependency.hamcrest.version>
 		<dependency.httpasyncclient.version>4.1.4</dependency.httpasyncclient.version>
 		<dependency.httpclient.version>4.5.6</dependency.httpclient.version>
-		<dependency.httpclient5.version>5.0</dependency.httpclient5.version>
+		<dependency.httpclient5.version>5.0.1</dependency.httpclient5.version>
+		<dependency.httpcore5.version>5.0.1</dependency.httpcore5.version>
 		<dependency.httpcore.version>4.4.10</dependency.httpcore.version>
 		<dependency.jasypt.version>1.9.3</dependency.jasypt.version>
 
@@ -682,6 +683,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-jetty-servlet-compatibility</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-jetty-bundle</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -769,65 +775,71 @@
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
 				<artifactId>pax-web-spi-fragment</artifactId>
-				<version>${project.parent.version}</version>
+				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
 				<artifactId>initializers</artifactId>
-				<version>${project.parent.version}</version>
+				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
 				<artifactId>initializers-fragment1</artifactId>
-				<version>${project.parent.version}</version>
+				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
 				<artifactId>initializers-fragment2</artifactId>
-				<version>${project.parent.version}</version>
+				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
 				<artifactId>war-simplest-osgi</artifactId>
-				<version>${project.parent.version}</version>
+				<version>${project.version}</version>
 				<type>war</type>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
 				<artifactId>jsf-primefaces-embedded</artifactId>
-				<version>${project.parent.version}</version>
+				<version>${project.version}</version>
 				<type>war</type>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
 				<artifactId>jsf-primefaces-embedded-fragment</artifactId>
-				<version>${project.parent.version}</version>
+				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
 				<artifactId>jsf-primefaces-commons1</artifactId>
-				<version>${project.parent.version}</version>
+				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
 				<artifactId>jsf-primefaces-commons2</artifactId>
-				<version>${project.parent.version}</version>
+				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
 				<artifactId>jsf-primefaces-commons3</artifactId>
-				<version>${project.parent.version}</version>
+				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
 				<artifactId>jsf-primefaces-jar</artifactId>
-				<version>${project.parent.version}</version>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>hs-helloworld</artifactId>
+				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
 				<artifactId>helloworld-wc</artifactId>
-				<version>${project.parent.version}</version>
+				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
@@ -2217,6 +2229,16 @@
 				<artifactId>httpclient5</artifactId>
 				<version>${dependency.httpclient5.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents.core5</groupId>
+				<version>${dependency.httpcore5.version}</version>
+				<artifactId>httpcore5</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents.core5</groupId>
+				<version>${dependency.httpcore5.version}</version>
+				<artifactId>httpcore5-h2</artifactId>
+			</dependency>
 
 			<!-- Testing -->
 
@@ -2335,6 +2357,7 @@
 <!--&lt;!&ndash; 		<module>pax-web-resources</module> &ndash;&gt;-->
 <!--		<module>pax-web-deployer</module>-->
 		<module>pax-web-jetty</module>
+		<module>pax-web-jetty-servlet-compatibility</module>
 <!--&lt;!&ndash; 		<module>pax-web-jetty-bundle</module> &ndash;&gt;-->
 		<module>pax-web-tomcat</module>
 <!--&lt;!&ndash;		<module>pax-web-tomcat-bundle</module>&ndash;&gt;-->
@@ -2344,7 +2367,7 @@
 <!--&lt;!&ndash; 		<module>pax-web-manual</module> &ndash;&gt;-->
 <!--		<module>pax-web-jaas</module>-->
 
-<!--		<module>samples</module>-->
+		<module>samples</module>
 
 		<module>pax-web-itest</module>
 	</modules>

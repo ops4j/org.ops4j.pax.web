@@ -30,6 +30,7 @@ import javax.servlet.FilterConfig;
 
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.events.FilterEventData;
 import org.ops4j.pax.web.service.spi.util.Path;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
@@ -39,7 +40,7 @@ import org.osgi.framework.ServiceReference;
 /**
  * Set of parameters describing everything that's required to register a {@link Filter}.
  */
-public class FilterModel extends ElementModel<Filter> {
+public class FilterModel extends ElementModel<Filter, FilterEventData> {
 
 	/**
 	 * <p>URL patterns as specified by:<ul>
@@ -199,7 +200,15 @@ public class FilterModel extends ElementModel<Filter> {
 	}
 
 	@Override
-	public int compareTo(ElementModel<Filter> o) {
+	public FilterEventData asEventData() {
+		FilterEventData data = new FilterEventData(name, urlPatterns,  servletNames, regexMapping, dispatcherTypes,
+				filter, filterClass);
+		setCommonEventProperties(data);
+		return data;
+	}
+
+	@Override
+	public int compareTo(ElementModel<Filter, FilterEventData> o) {
 		int superCompare = super.compareTo(o);
 		if (superCompare == 0 && o instanceof FilterModel) {
 			// this happens in non-Whiteboard scenario

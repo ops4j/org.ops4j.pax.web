@@ -81,14 +81,6 @@ public class Batch {
 	}
 
 	/**
-	 * Add new {@link OsgiContextModel} - but only to be sent to {@link org.ops4j.pax.web.service.spi.ServerController}
-	 *
-	 * @param osgiContextModel
-	 */
-	public void addDefaultOsgiContextModel(OsgiContextModel osgiContextModel, ServletContextModel servletContextModel) {
-		operations.add(new OsgiContextModelChange(OpCode.ADD, null, osgiContextModel, servletContextModel, true));
-	}
-	/**
 	 * Remove existing {@link OsgiContextModel}
 	 *
 	 * @param osgiContextModel
@@ -118,10 +110,11 @@ public class Batch {
 
 	/**
 	 * Remove {@link ServletModel} from {@link ServerModel}
-	 * @param serverModel
 	 * @param model
+	 * @param serverModel
+	 * @param toUnregister
 	 */
-	public void removeServletModels(ServerModel serverModel, List<ServletModel> toUnregister) {
+	public void removeServletModels(ServerModel serverModel, Map<ServletModel, Boolean> toUnregister) {
 		operations.add(new ServletModelChange(OpCode.DELETE, serverModel, toUnregister));
 	}
 

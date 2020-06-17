@@ -23,6 +23,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
+import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -40,16 +41,16 @@ import org.slf4j.LoggerFactory;
  * will be replaced by <em>stopped</em> service preventing further manipulation (like new servlet registration).
  * This is to prevent other (possible) threads to use no longer valid {@link org.osgi.service.http.HttpService}.</p>
  */
-class HttpServiceProxy implements StoppableHttpService {
+class HttpServiceProxy implements WebContainer, StoppableHttpService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(HttpServiceProxy.class);
 
 	// actual service that may be replaced by "stopped" http service preventing further registration of web components
-	private volatile StoppableHttpService delegate;
+	private volatile WebContainer delegate;
 
 	private final Bundle serviceBundle;
 
-	HttpServiceProxy(Bundle serviceBundle, final StoppableHttpService delegate) {
+	HttpServiceProxy(Bundle serviceBundle, final WebContainer delegate) {
 		LOG.debug("HttpServiceProxy created for {} and {}", delegate, serviceBundle);
 
 		this.serviceBundle = serviceBundle;
@@ -60,16 +61,20 @@ class HttpServiceProxy implements StoppableHttpService {
 
 	@Override
 	public void stop() {
-		LOG.debug("Stopping http service: [{} -> {}]", this, delegate);
-		final StoppableHttpService stopping = delegate;
+		if (delegate instanceof StoppableHttpService) {
+			LOG.debug("Stopping http service: [{} -> {}]", this, delegate);
+			final StoppableHttpService stopping = (StoppableHttpService) delegate;
 
-		// PAXWEB-1077: ServletContext becomes unavailable on restart when using Whiteboard and CustomContexts
+			// PAXWEB-1077: ServletContext becomes unavailable on restart when using Whiteboard and CustomContexts
 
-		// first replace the delegate
-		delegate = new HttpServiceDisabled(serviceBundle);
+			// first replace the delegate
+			delegate = new HttpServiceDisabled(serviceBundle);
 
-		// then cleanup the delegate without a risk of problems happening at user side
-		stopping.stop();
+			// then cleanup the delegate without a risk of problems happening at user side
+			stopping.stop();
+		} else {
+			LOG.warn("Http service has already been stopped");
+		}
 	}
 
 	// --- container views

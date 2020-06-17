@@ -16,7 +16,6 @@
 package org.ops4j.pax.web.service.internal.views;
 
 import java.util.Collection;
-
 import javax.servlet.ServletException;
 
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
@@ -29,7 +28,7 @@ import org.osgi.service.http.NamespaceException;
  * <p>{@link org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView} equivalent for <em>direct
  * Http Service-like registrations</em>.</p>
  *
- * <p>This interface should be treated as internal-only. Its package is not exported.</p>
+ * <p>This interface should be treated as internal-only (for test purposes). Its package is not exported.</p>
  */
 public interface DirectWebContainerView extends PaxWebContainerView {
 

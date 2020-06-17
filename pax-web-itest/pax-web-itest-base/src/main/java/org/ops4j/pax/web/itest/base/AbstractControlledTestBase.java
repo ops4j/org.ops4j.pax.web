@@ -20,24 +20,18 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
-import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.WebListener;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -246,21 +240,6 @@ public abstract class AbstractControlledTestBase {
 		}.waitForCondition();
 	}
 
-	protected Bundle installAndStartBundle(String bundlePath) {
-		try {
-			final Bundle bundle = getBundleContext().installBundle(bundlePath);
-			bundle.start();
-			new WaitCondition("bundle startup") {
-				@Override
-				protected boolean isFulfilled() {
-					return bundle.getState() == Bundle.ACTIVE;
-				}
-			}.waitForCondition();
-			return bundle;
-		} catch (BundleException | InterruptedException e) {
-			throw new RuntimeException(e);
-		}
-	}
 
 	protected static Option addCodeCoverageOption() {
 		String coverageCommand = System.getProperty(COVERAGE_COMMAND);
@@ -269,22 +248,6 @@ public abstract class AbstractControlledTestBase {
 			return CoreOptions.vmOption(coverageCommand);
 		}
 		return null;
-	}
-
-	public static HttpService getHttpService(final BundleContext bundleContext) {
-		ServiceReference<HttpService> ref = bundleContext.getServiceReference(HttpService.class);
-		Assert.assertNotNull("Failed to get HttpService", ref);
-		HttpService httpService = bundleContext.getService(ref);
-		Assert.assertNotNull("Failed to get HttpService", httpService);
-		return httpService;
-	}
-
-	public static WebContainer getWebContainer(final BundleContext bundleContext) {
-		ServiceReference<WebContainer> ref = bundleContext.getServiceReference(WebContainer.class);
-		Assert.assertNotNull("Failed to get WebContainer", ref);
-		WebContainer webContainer = bundleContext.getService(ref);
-		Assert.assertNotNull("Failed to get WebContainer", webContainer);
-		return webContainer;
 	}
 
 	/**

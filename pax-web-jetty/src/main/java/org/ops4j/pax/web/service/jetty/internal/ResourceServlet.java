@@ -18,13 +18,13 @@ package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,37 +35,28 @@ import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceFactory;
-import org.ops4j.pax.web.annotations.Review;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Review("This should be universal as template class (for Jetty/Tomcat/Undertow) with server specific extensions/delegates")
 class ResourceServlet extends HttpServlet implements ResourceFactory {
+
+	private static final long serialVersionUID = 1L;
 
 	private static final int SECOND = 1000;
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 1L;
+	private static final Logger LOG = LoggerFactory.getLogger(ResourceServlet.class);
 
 	// header constants
-	// CHECKSTYLE:OFF
 	private static final String IF_NONE_MATCH = "If-None-Match";
-	@SuppressWarnings("unused")
 	private static final String IF_MATCH = "If-Match";
 	private static final String IF_MODIFIED_SINCE = "If-Modified-Since";
-	@SuppressWarnings("unused")
 	private static final String IF_RANGE = "If-Range";
 	private static final String IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
-	@SuppressWarnings("unused")
 	private static final String KEEP_ALIVE = "Keep-Alive";
+
 	private static final String ETAG = "ETag";
 	// CHECKSTYLE:ON
-
-	private static final Logger LOG = LoggerFactory
-			.getLogger(ResourceServlet.class);
 
 	private final HttpContext httpContext;
 	private final String contextName;
@@ -76,7 +67,7 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 	private String[] welcomes;
 
 	ResourceServlet(final HttpContext httpContext, final String contextName,
-					final String alias, final String name) {
+			final String alias, final String name) {
 		this.httpContext = httpContext;
 		this.contextName = "/" + contextName;
 		this.alias = alias;
@@ -94,7 +85,7 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 		ContextHandler contextHandler = initContextHandler(servletContext);
 		welcomes = contextHandler.getWelcomeFiles();
 		if (welcomes == null) {
-			welcomes = new String[]{"index.html", "index.jsp"};
+			welcomes = new String[] { "index.html", "index.jsp" };
 		}
 	}
 
@@ -123,24 +114,20 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 			return ContextHandler.getCurrentContext().getContextHandler();
 		}
 	}
-	
-	
 
 	@SuppressWarnings("deprecation")
 	@Override
 	protected void service(final HttpServletRequest request,
-						 final HttpServletResponse response) throws ServletException,
+			final HttpServletResponse response) throws ServletException,
 			IOException {
 		if (response.isCommitted()) {
 			return;
 		}
 
-		String mapping;
-		Boolean included = request
-				.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null;
+		String mapping = null;
+		Boolean included = request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null;
 		String pathInfo = null;
-
-		if (included != null && included) {
+		if (included) {
 			String servletPath = (String) request
 					.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
 			pathInfo = (String) request
@@ -165,11 +152,11 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 			}
 		}
 
-		// String pathInContext = URIUtil.addPaths(mapping,pathInfo);
 		boolean endsWithSlash = (mapping == null ? request.getServletPath()
 				: mapping).endsWith(URIUtil.SLASH);
 
 		final URL url = httpContext.getResource(mapping);
+
 		if (url == null) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
@@ -206,6 +193,7 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 					possibleDirectoryBundleEntry = peek.available() == 0;
 				}
 			}
+
 			String welcome = possibleDirectoryBundleEntry ? getWelcomeFile(mapping) : null;
 			boolean redirect = false;
 
@@ -275,6 +263,7 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 
 			// set the etag
 			response.setHeader(ETAG, eTag);
+
 			String mimeType = httpContext.getMimeType(mapping);
 			if (mimeType == null) {
 				mimeType = mimeTypes.getMimeByExtension(mapping);
@@ -292,8 +281,7 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 			}
 
 			if (mimeType == null) {
-				ServletContext servletContext = getServletConfig()
-						.getServletContext();
+				ServletContext servletContext = getServletConfig().getServletContext();
 				mimeType = servletContext.getMimeType(mapping);
 			}
 
@@ -301,7 +289,7 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 				response.setContentType(mimeType);
 			}
 
-			OutputStream out = response.getOutputStream();
+			ServletOutputStream out = response.getOutputStream();
 			if (out != null) { // null should be just in unit testing
 				if (out instanceof HttpOutput) {
 					((HttpOutput) out).sendContent(resource.getInputStream());
@@ -331,8 +319,8 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 	 * @throws IOException
 	 * @throws MalformedURLException
 	 */
-	private String getWelcomeFile(String pathInContext)
-			throws MalformedURLException, IOException {
+	private String getWelcomeFile(String pathInContext) throws MalformedURLException, IOException {
+
 		if (welcomes == null) {
 			return null;
 		}

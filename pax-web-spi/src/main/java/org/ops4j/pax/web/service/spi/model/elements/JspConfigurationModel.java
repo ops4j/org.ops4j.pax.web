@@ -23,6 +23,7 @@ import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 import javax.servlet.descriptor.TaglibDescriptor;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 
 /**
@@ -49,6 +50,11 @@ public class JspConfigurationModel extends ElementModel implements JspConfigDesc
 
 	@Override
 	public void unregister(WhiteboardWebContainerView view) {
+	}
+
+	@Override
+	public ElementEventData asEventData() {
+		return null;
 	}
 
 	@Override

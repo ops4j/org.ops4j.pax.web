@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 
 import org.ops4j.pax.web.service.spi.model.Identity;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -47,7 +48,8 @@ import org.osgi.framework.ServiceReference;
  * <em>element</em> when it uses conflicting URL mapping but has lower ranking or service id. Such conflicts lead
  * to trivial {@link org.osgi.service.http.NamespaceException} when using Http Service.</p>
  */
-public abstract class ElementModel<T> extends Identity implements Comparable<ElementModel<T>> {
+public abstract class ElementModel<T, D extends ElementEventData>
+		extends Identity implements Comparable<ElementModel<T, D>> {
 
 	/**
 	 * List of {@link OsgiContextModel osgi contexts} with which given {@link ElementModel} is associated.
@@ -161,6 +163,28 @@ public abstract class ElementModel<T> extends Identity implements Comparable<Ele
 	 */
 	public abstract void unregister(WhiteboardWebContainerView view);
 
+	/**
+	 * When sending events related to {@link ElementModel} we can't use the same instance which is kept in
+	 * {@link org.ops4j.pax.web.service.spi.model.ServerModel}, we <strong>have to</strong> copy relevant
+	 * information to lightweight object.
+	 * @return
+	 */
+	public abstract D asEventData();
+
+	/**
+	 * Set {@link ElementModel} information in {@link ElementEventData} - to be called in specializations
+	 * of {@link #asEventData()} method.
+	 *
+	 * @param data
+	 */
+	protected void setCommonEventProperties(ElementEventData data) {
+		data.setServiceRank(this.serviceRank);
+		data.setServiceId(this.serviceId);
+		data.setElementReference(this.elementReference);
+		data.setOriginBundle(this.registeringBundle);
+		this.contextModels.forEach(cm -> data.getContextNames().add(cm.getName()));
+	}
+
 	public boolean hasContextModels() {
 		return contextModels.size() > 0;
 	}
@@ -226,7 +250,7 @@ public abstract class ElementModel<T> extends Identity implements Comparable<Ele
 	 * @return
 	 */
 	@Override
-	public int compareTo(ElementModel<T> o) {
+	public int compareTo(ElementModel<T, D> o) {
 		int c1 = this.serviceRank - o.serviceRank;
 		if (c1 != 0) {
 			// higher rank - "lesser" service in terms of order

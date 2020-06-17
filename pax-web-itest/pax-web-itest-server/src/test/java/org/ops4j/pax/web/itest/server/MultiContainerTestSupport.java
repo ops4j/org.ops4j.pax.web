@@ -19,7 +19,13 @@ import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Supplier;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
@@ -42,6 +48,8 @@ import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.ops4j.pax.web.service.spi.model.ServiceModel;
+import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
@@ -62,6 +70,7 @@ import org.slf4j.LoggerFactory;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.ops4j.pax.web.itest.server.support.Utils.getField;
 
 public class MultiContainerTestSupport {
 
@@ -112,14 +121,14 @@ public class MultiContainerTestSupport {
 	public void initAll() throws Exception {
 		configurePort();
 
-		controller = Utils.create(null, port, runtime, getClass().getClassLoader());
+		controller = Utils.createServerController(null, port, runtime, getClass().getClassLoader());
 		controller.configure();
 		controller.start();
 
 		config = controller.getConfiguration();
 
 		serverModel = new ServerModel(new Utils.SameThreadExecutor());
-		serverModel.createDefaultServletContextModel(controller);
+		serverModel.configureActiveServerController(controller);
 
 		whiteboardBundle = mockBundle("org.ops4j.pax.web.pax-web-extender-whiteboard");
 		whiteboardBundleContext = whiteboardBundle.getBundleContext();
@@ -148,9 +157,20 @@ public class MultiContainerTestSupport {
 
 	@After
 	public void cleanup() throws Exception {
-		if (container != null) {
+		if (controller != null) {
 			controller.stop();
+			controller = null;
+		}
+		stopWhiteboardService();
+	}
+
+	protected void stopWhiteboardService() {
+		if (containerRef != null) {
 			whiteboard.webContainerRemoved(containerRef);
+			containerRef = null;
+		}
+		if (container != null) {
+			container.stop();
 		}
 	}
 
@@ -336,6 +356,90 @@ public class MultiContainerTestSupport {
 			return (ServiceTrackerCustomizer<S, T>) f.get(tracker);
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
+	protected ServerModelInternals serverModelInternals(ServerModel serverModel) {
+		return new ServerModelInternals(serverModel);
+	}
+
+	protected ServiceModelInternals serviceModelInternals(WebContainer webContainer) {
+		return new ServiceModelInternals(getField(webContainer, "serviceModel", ServiceModel.class));
+	}
+
+	/**
+	 * Class to verify {@link ServerModel} after performing a test
+	 */
+	public static class ServerModelInternals {
+		private final ServerModel model;
+
+//		private final Map<String, VirtualHostModel> virtualHosts = new HashMap<>();
+//		private final VirtualHostModel defaultHost = new VirtualHostModel();
+		public final Map<String, ServletContextModel> servletContexts = new HashMap<>();
+		public final Map<ServerModel.ContextKey, TreeSet<OsgiContextModel>> bundleContexts = new HashMap<>();
+		public final Map<String, TreeSet<OsgiContextModel>> sharedContexts = new HashMap<>();
+		public final Map<String, OsgiContextModel> whiteboardContexts = new HashMap<>();
+		public final Map<Servlet, ServletModel> servlets = new IdentityHashMap<>();
+		public final Set<ServletModel> disabledServletModels = new TreeSet<>();
+		public final Map<Filter, FilterModel> filters = new IdentityHashMap<>();
+		public final Set<FilterModel> disabledFilterModels = new TreeSet<>();
+
+		@SuppressWarnings("unchecked")
+		public ServerModelInternals(ServerModel model) {
+			this.model = model;
+			servletContexts.putAll(getField(model, "servletContexts", Map.class));
+			bundleContexts.putAll(getField(model, "bundleContexts", Map.class));
+			sharedContexts.putAll(getField(model, "sharedContexts", Map.class));
+			whiteboardContexts.putAll(getField(model, "whiteboardContexts", Map.class));
+			servlets.putAll(getField(model, "servlets", Map.class));
+			disabledServletModels.addAll(getField(model, "disabledServletModels", Set.class));
+			filters.putAll(getField(model, "filters", Map.class));
+			disabledFilterModels.addAll(getField(model, "disabledFilterModels", Set.class));
+		}
+
+		/**
+		 * Checks whether the {@link ServerModel} is not tracking anything related to given {@link Bundle}
+		 * @param bundle
+		 * @return
+		 */
+		public boolean isClean(Bundle bundle) {
+			// there can be the default, bundle-scoped context for pax-web-extender-whiteboard bundle
+			boolean clean = bundleContexts.keySet().stream()
+					.filter(ck -> !(ck.bundle.equals(bundle) && "default".equals(ck.contextId)))
+					.noneMatch(ck -> ck.bundle.equals(bundle));
+			// there can be the default Whiteboard ServletContextModel (customized into OsgiContextModel)
+			clean &= whiteboardContexts.values().stream()
+					.filter(ocm -> ocm != OsgiContextModel.DEFAULT_CONTEXT_MODEL)
+					.noneMatch(ocm -> ocm.getOwnerBundle().equals(bundle));
+			clean &= servlets.values().stream().noneMatch(sm -> sm.getRegisteringBundle().equals(bundle));
+			clean &= filters.values().stream().noneMatch(fm -> fm.getRegisteringBundle().equals(bundle));
+			clean &= disabledServletModels.stream().noneMatch(sm -> sm.getRegisteringBundle().equals(bundle));
+			clean &= disabledFilterModels.stream().noneMatch(fm -> fm.getRegisteringBundle().equals(bundle));
+			return clean;
+		}
+	}
+
+	/**
+	 * Class to verify {@link ServiceModel} after performing a test
+	 */
+	public static class ServiceModelInternals {
+		private final ServiceModel model;
+
+		public final Map<String, Map<String, ServletModel>> aliasMapping = new HashMap<>();
+		public final Set<ServletModel> servletModels = new HashSet<>();
+		public final Set<FilterModel> filterModels = new HashSet<>();
+//		private final Map<EventListener, EventListenerModel> eventListenerModels = new HashMap<>();
+
+		@SuppressWarnings("unchecked")
+		public ServiceModelInternals(ServiceModel model) {
+			this.model = model;
+			aliasMapping.putAll(getField(model, "aliasMapping", Map.class));
+			servletModels.addAll(getField(model, "servletModels", Set.class));
+			filterModels.addAll(getField(model, "filterModels", Set.class));
+		}
+
+		public boolean isEmpty() {
+			return aliasMapping.isEmpty() && servletModels.isEmpty() && filterModels.isEmpty();
 		}
 	}
 

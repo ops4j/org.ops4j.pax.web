@@ -58,12 +58,29 @@
 							javax.servlet;version="[3.1,5)",
 							javax.servlet.annotation;version="[3.1,5)",
 							javax.servlet.http;version="[3.1,5)",
+
 							<!-- ranges indicate we can work with OSGi Core R6+ -->
 							org.osgi.framework;version="[1.8,2)",
 							org.osgi.framework.wiring;version="[1.2,2)",
 							org.osgi.util.tracker;version="[1.5,2)",
+
+							<!-- OSGi cmpn -->
+							org.osgi.service.http;version="[1.2,2)",
+
+							<!-- from pax-web-api -->
+							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
+
+							<!-- from pax-web-spi -->
+							org.ops4j.pax.web.service.spi.model.events,
+							<!-- from pax-web-itest-utils -->
+							org.ops4j.pax.web.itest.utils,
+							org.ops4j.pax.web.itest.utils.assertion,
+							org.ops4j.pax.web.itest.utils.client,
+							org.ops4j.pax.web.itest.utils.support,
+
 							<!-- from pax-logging-api -->
 							org.slf4j;version="[1.7,2)",
+
 							<!-- test dependencies -->
 							javax.inject
 						</Import-Package>
@@ -93,6 +110,20 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-spi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-runtime</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ops4j.pax.web.itest</groupId>
+			<artifactId>pax-web-itest-utils</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>hs-helloworld</artifactId>
 		</dependency>
 
 		<!-- OPS4J dependencies -->

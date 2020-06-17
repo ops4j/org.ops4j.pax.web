@@ -72,7 +72,6 @@ import io.undertow.util.MimeMappings;
 import io.undertow.util.StatusCodes;
 import org.ops4j.pax.web.service.AuthenticatorService;
 import org.ops4j.pax.web.service.PaxWebConstants;
-import org.ops4j.pax.web.service.spi.LifeCycle;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
@@ -94,7 +93,7 @@ import org.xnio.XnioWorker;
 /**
  * @author Guillaume Nodet
  */
-public class Context implements LifeCycle, HttpHandler, ResourceManager {
+public class Context implements /*org.ops4j.pax.web.service.spi.LifeCycle, */HttpHandler, ResourceManager {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Context.class);
 
@@ -158,27 +157,27 @@ public class Context implements LifeCycle, HttpHandler, ResourceManager {
 		return contextModel;
 	}
 
-	@Override
-	public synchronized void start() throws Exception {
-//		if (started.compareAndSet(false, true)) {
-// 			LOG.info("Starting context /{}", contextModel.getContextName());
-//			for (ServletModel servlet : servlets) {
-//				doStart(servlet);
-//			}
-//			createHandler(null);
-//		}
-	}
+//	@Override
+//	public synchronized void start() throws Exception {
+////		if (started.compareAndSet(false, true)) {
+//// 			LOG.info("Starting context /{}", contextModel.getContextName());
+////			for (ServletModel servlet : servlets) {
+////				doStart(servlet);
+////			}
+////			createHandler(null);
+////		}
+//	}
 
-	@Override
-	public synchronized void stop() throws Exception {
-		if (started.compareAndSet(true, false)) {
-//			LOG.info("Stopping context /{}", contextModel.getContextName());
-			for (ServletModel servlet : servlets) {
-				doStop(servlet);
-			}
-			destroy();
-		}
-	}
+//	@Override
+//	public synchronized void stop() throws Exception {
+//		if (started.compareAndSet(true, false)) {
+////			LOG.info("Stopping context /{}", contextModel.getContextName());
+//			for (ServletModel servlet : servlets) {
+//				doStop(servlet);
+//			}
+//			destroy();
+//		}
+//	}
 
 	private void doStart(ServletModel servlet) throws ServletException {
 		withPatterns(servlet.getUrlPatterns(),

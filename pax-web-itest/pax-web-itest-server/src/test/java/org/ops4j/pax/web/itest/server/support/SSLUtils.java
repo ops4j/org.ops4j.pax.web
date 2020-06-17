@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.security.KeyFactory;
@@ -406,39 +405,6 @@ public class SSLUtils {
 		serverKeystore.store(new FileOutputStream(serverKeystoreFile), "passw0rd".toCharArray());
 		clientKeystore.store(new FileOutputStream(clientKeystoreFile), "passw0rd".toCharArray());
 		clientP12Keystore.store(new FileOutputStream(clientKeystoreP12File), "passw0rd".toCharArray());
-	}
-
-	public static Object getField(Object object, String fieldName) {
-		String[] names = fieldName.split("\\.");
-		for (String name : names) {
-			Field f = null;
-			try {
-				f = object.getClass().getDeclaredField(name);
-			} catch (NoSuchFieldException e) {
-				try {
-					f = object.getClass().getSuperclass().getDeclaredField(name);
-				} catch (NoSuchFieldException ex) {
-					try {
-						f = object.getClass().getSuperclass().getSuperclass().getDeclaredField(name);
-					} catch (NoSuchFieldException exx) {
-						throw new RuntimeException(e.getMessage(), e);
-					}
-				}
-			}
-			f.setAccessible(true);
-			try {
-				object = f.get(object);
-			} catch (IllegalAccessException e) {
-				throw new RuntimeException(e.getMessage(), e);
-			}
-		}
-
-		return object;
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <T> T getField(Object object, String fieldName, Class<T> clazz) {
-		return (T) getField(object, fieldName);
 	}
 
 }

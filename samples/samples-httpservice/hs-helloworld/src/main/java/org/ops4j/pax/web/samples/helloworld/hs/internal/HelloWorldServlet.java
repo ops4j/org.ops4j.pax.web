@@ -49,11 +49,11 @@ public class HelloWorldServlet extends HttpServlet {
 		writer.println("<img src='/alt-images/logo.png' border='0'/>");
 		writer.println("<h1>" + getServletConfig().getInitParameter("from") + "</h1>");
 		writer.println("<p>");
-		writer.println("Served by servlet registered at: " + registrationPath);
+		writer.println("Served by servlet registered at: \"" + registrationPath + "\"");
 		writer.println("<br/>");
-		writer.println("Servlet Path: " + request.getServletPath());
+		writer.println("Servlet Path: \"" + request.getServletPath() + "\"");
 		writer.println("<br/>");
-		writer.println("Path Info: " + request.getPathInfo());
+		writer.println("Path Info: \"" + request.getPathInfo() + "\"");
 		writer.println("</p>");
 		writer.println("</body></html>");
 	}

@@ -478,6 +478,9 @@ public class OsgiServletContext implements ServletContext {
 		// (or Filter). Here, it's a bundle registering ServletContextHelper (or HttpContext)
 		// TODO: (very important) this class loader should be "bundle delegating class loaders" - potentially
 		//       backed by more bundles and with mandatory caching.
+		//       Before Pax Web 8, such class loader was created in HttpServiceActive class (bundle-scoped
+		//       implementation of HttpService/WebContainer) and included bundles from "wiring space" of the
+		//       bundle of the HttpService instance
 		return osgiContextModel.getOwnerBundle().adapt(BundleWiring.class).getClassLoader();
 	}
 

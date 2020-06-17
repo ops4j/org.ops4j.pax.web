@@ -36,9 +36,9 @@ import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.util.SupportUtils;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
-import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.ops4j.pax.web.service.spi.model.events.WebElementListener;
 import org.ops4j.pax.web.service.spi.util.NamedThreadFactory;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.util.property.DictionaryPropertyResolver;
@@ -65,8 +65,8 @@ import static org.ops4j.pax.web.service.PaxWebConstants.HTTPSERVICE_REGISTRATION
  * <p>Main entry point to Pax-Web.</p>
  * <p>This activator performs these actions:<ul>
  *     <li>servlet event dispatcher</li>
- *     <li>registration of {@link ServletListener}-{@link EventAdmin} bridge</li>
- *     <li>registration of {@link ServletListener}-{@link LogService} bridge</li>
+ *     <li>registration of {@link WebElementListener}-{@link EventAdmin} bridge</li>
+ *     <li>registration of {@link WebElementListener}-{@link LogService} bridge</li>
  *     <li>registration of {@link org.osgi.service.cm.ManagedService} to monitor
  *     {@code org.ops4j.pax.web} PID changes</li>
  * </ul></p>
@@ -92,10 +92,10 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	private ServerController serverController;
 
 	/**
-	 * {@link ServletEventDispatcher} bound to lifecycle of this pax-web-runtime bundle, not to configuration
+	 * {@link WebEventDispatcher} bound to lifecycle of this pax-web-runtime bundle, not to configuration
 	 * or {@link ServerControllerFactory}.
 	 */
-	private ServletEventDispatcher servletEventDispatcher;
+	private WebEventDispatcher servletEventDispatcher;
 
 //	/** Processor for instructions in {@code org.ops4j.pax.web.context} factory PID */
 //	private HttpContextProcessing httpContextProcessing;
@@ -144,8 +144,6 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 		registrationThreadId = ServerModel.getThreadIdFromSingleThreadPool(runtimeExecutor);
 
 		bundleContext = context;
-
-		servletEventDispatcher = new ServletEventDispatcher(context);
 
 //		if (SupportUtils.isEventAdminAvailable()) {
 //			// Do use the filters this way the eventadmin packages can be resolved optional!
@@ -414,6 +412,8 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			// full configuration with all required properties. That's all that is needed down the stream
 			final Configuration configuration = ConfigurationBuilder.getConfiguration(resolver, allProperties);
 
+			servletEventDispatcher = new WebEventDispatcher(bundleContext, configuration);
+
 			// global, single representation of web server state. It's used
 			//  - in all bundle-scoped instances of HttpServiceEnabled
 			//  - also to reflect Whiteboard registrations (through pax-web-extender-whiteboard)
@@ -431,7 +431,8 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 
 			// create default ServletContextModel in ServerModel and propagate it to the controller.
 			// it's important to do it before registering ServiceFactory for HttpService/WebContainer
-			serverModel.createDefaultServletContextModel(serverController);
+			// so bundles getting HttpService/WebContainer instance can operate on at least the default context
+			serverModel.configureActiveServerController(serverController);
 
 			// this is where org.osgi.service.http.HttpService bundle-scoped service is registered in OSGi
 			// this is the most fundamental operation related to Http Service specification

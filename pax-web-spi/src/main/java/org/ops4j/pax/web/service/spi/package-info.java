@@ -13,4 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * Main <em>SPI</em> package for Pax Web. It's not <em>pure</em> SPI defined as collection of provider interfaces.
+ * It's rather set of infrastructure classes/packages/mechanisms/interfaces to be used by different server
+ * environments (Jetty, Tomcat, Undertow) and specification implementations (HttpService, Whiteboard).
+ */
 package org.ops4j.pax.web.service.spi;

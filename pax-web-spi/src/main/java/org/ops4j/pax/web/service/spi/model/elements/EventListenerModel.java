@@ -18,9 +18,10 @@ package org.ops4j.pax.web.service.spi.model.elements;
 
 import java.util.EventListener;
 
+import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 
-public class EventListenerModel extends ElementModel<EventListener> {
+public class EventListenerModel extends ElementModel<EventListener, ElementEventData> {
 
 	private final EventListener eventListener;
 
@@ -34,6 +35,11 @@ public class EventListenerModel extends ElementModel<EventListener> {
 
 	@Override
 	public void unregister(WhiteboardWebContainerView view) {
+	}
+
+	@Override
+	public ElementEventData asEventData() {
+		return null;
 	}
 
 	public EventListener getEventListener() {

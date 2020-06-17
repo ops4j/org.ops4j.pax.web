@@ -846,7 +846,11 @@ class TomcatServerWrapper implements BatchVisitor {
 		}
 
 		if (change.getKind() == OpCode.DISABLE || change.getKind() == OpCode.DELETE) {
-			for (ServletModel model : change.getServletModels()) {
+			for (Map.Entry<ServletModel, Boolean> entry : change.getServletModels().entrySet()) {
+				ServletModel model = entry.getKey();
+				if (!entry.getValue()) {
+					continue;
+				}
 				LOG.info("Removing servlet {}", model);
 
 				Set<String> done = new HashSet<>();

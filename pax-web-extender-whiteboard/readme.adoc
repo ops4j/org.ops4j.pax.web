@@ -146,3 +146,43 @@ Such view may be _internal_ to Pax Web and can allow some more generic or low le
 Remember - pax-web-extender-whiteboard provides a set of _trackers_ with _customizers_ that change _incoming_ interfaces like `javax.servlet.Servlet` or Pax Web specific `org.ops4j.pax.web.service.whiteboard.ServletMapping` into objects of classes derived from `org.ops4j.pax.web.service.spi.model.elements.ElementModel` (in Pax Web 7 and earlier, the _customized_ objects had classes derived from `org.ops4j.pax.web.extender.whiteboard.internal.element.WebElement`).
 
 New internal _view_ of `WebContainer` allows to register the models directly.
+
+== Resources
+
+HttpService's `org.osgi.service.http.HttpService.registerResources()` and Whiteboard's registration of _resource_ are implicitly backed by servlets, because effectively, all requests in Java web containers are served by servlets.
+
+Currently Pax Web has these servlets:
+
+* `org.ops4j.pax.web.service.jetty.internal.ResourceServlet`
+* `org.ops4j.pax.web.service.tomcat.internal.TomcatResourceServlet`
+* `org.ops4j.pax.web.service.undertow.internal.ResourceServlet`
+
+Servlet containers themselves also have "default"/"resource" servlets to serve static resources and are usually by default mapped to "/" URI:
+
+* `org.eclipse.jetty.servlet.DefaultServlet`
+* `org.apache.catalina.servlets.DefaultServlet`
+* `io.undertow.servlet.handlers.DefaultServlet`
+
+ALl these servlets do several things like handling _index_ for directory access (or not), preventing access to `/WEB-INF/`, etc. For actual resource serving, another interface is used:
+
+* `org.eclipse.jetty.server.ResourceService.doGet()` → `org.eclipse.jetty.http.HttpContent.ContentFactory.getContent()`
+* `org.apache.catalina.WebResourceRoot.getResource()` → `org.apache.catalina.WebResourceSet.getResource()`
+* `io.undertow.server.handlers.resource.ResourceSupplier.getResource()` → `io.undertow.server.handlers.resource.ResourceManager.getResource()`
+
+All these resource suppliers/factories/roots handle production-grade caching:
+
+* `org.eclipse.jetty.server.CachedContentFactory`
+* `org.apache.catalina.webresources.Cache`
+* `io.undertow.server.handlers.resource.CachingResourceManager`
+
+Pax Web (pre 8) handles resource like this:
+
+* Jetty: call `org.osgi.service.http.HttpContext.getResource()` and if not available, handle _welcome files_.
+* Tomcat: call `org.osgi.service.http.HttpContext.getResource()` and if not available, handle _welcome files_.
+* Undertow: `org.ops4j.pax.web.service.undertow.internal.ResourceServlet` is also an `io.undertow.server.handlers.resource.ResourceManager`, which calls `org.osgi.service.http.HttpContext.getResource()` and as fallback, handle _welcome files_.
+
+_Welcome files_ are strictly related to _resource servlet_ and should be used when no resource is found using normal (`HttpContext` / `ServletContextHelper`) way. Remember - Whiteboard and HttpService specification don't mention _welcome files_ at all.
+
+* `org.eclipse.jetty.server.handler.ContextHandler.setWelcomeFiles()`
+* `org.apache.catalina.Context.addWelcomeFile()`
+* `org.ops4j.pax.web.service.undertow.internal.Context.welcomeFiles` (used then by `org.ops4j.pax.web.service.undertow.internal.Context.getResource()` which is implementation of `io.undertow.server.handlers.resource.ResourceManager.getResource()`)

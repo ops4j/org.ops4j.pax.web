@@ -26,12 +26,12 @@ import org.osgi.service.http.HttpService;
 public class WebEvent {
 
 	public enum WebTopic {
-		DEPLOYING("org/osgi/service/web/DEPLOYING"), DEPLOYED(
-				"org/osgi/service/web/DEPLOYED"), UNDEPLOYING(
-				"org/osgi/service/web/UNDEPLOYING"), UNDEPLOYED(
-				"org/osgi/service/web/UNDEPLOYED"), FAILED(
-				"org/osgi/service/web/FAILED"), WAITING(
-				"org/osgi/service/web/WAITING");
+		DEPLOYING("org/osgi/service/web/DEPLOYING"),
+		DEPLOYED("org/osgi/service/web/DEPLOYED"),
+		UNDEPLOYING("org/osgi/service/web/UNDEPLOYING"),
+		UNDEPLOYED("org/osgi/service/web/UNDEPLOYED"),
+		FAILED("org/osgi/service/web/FAILED"),
+		WAITING("org/osgi/service/web/WAITING");
 
 		private final String topic;
 

@@ -35,7 +35,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
@@ -57,11 +56,9 @@ import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
-import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
 import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
-import org.ops4j.pax.web.service.jetty.internal.util.DOMJettyWebXmlParser;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -218,52 +215,52 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 			list.addAll(remaining);
 
 			list.forEach(initializer -> {
-				try {
-					ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
-							new Callable<Void>() {
-								@Override
-								public Void call() throws IOException,
-										ServletException {
-									_scontext.setExtendedListenerTypes(true);
-									initializer.onStartup(servletContainerInitializers.get(initializer), _scontext);
-									return null;
-								}
-							});
-					// CHECKSTYLE:OFF
-				} catch (Exception e) {
-					if (e instanceof RuntimeException) {
-						throw (RuntimeException) e;
-					}
-					LOG.error("Ignored exception during listener registration",
-							e);
-				}
+//				try {
+//					ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
+//							new Callable<Void>() {
+//								@Override
+//								public Void call() throws IOException,
+//										ServletException {
+//									_scontext.setExtendedListenerTypes(true);
+//									initializer.onStartup(servletContainerInitializers.get(initializer), _scontext);
+//									return null;
+//								}
+//							});
+//					// CHECKSTYLE:OFF
+//				} catch (Exception e) {
+//					if (e instanceof RuntimeException) {
+//						throw (RuntimeException) e;
+//					}
+//					LOG.error("Ignored exception during listener registration",
+//							e);
+//				}
 			});
 		}
 
 		this.setVirtualHosts(virtualHosts.toArray(EMPTY_STRING_ARRAY));
 		if (jettyWebXmlURL != null) {
 
-			try {
-				ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
-						new Callable<Void>() {
-
-							@Override
-							public Void call() throws IOException {
-								//do parsing and altering of webApp here
-								DOMJettyWebXmlParser jettyWebXmlParser = new DOMJettyWebXmlParser();
-								jettyWebXmlParser.parse(PaxWebServletContextHandler.this, jettyWebXmlURL.openStream());
-
-								return null;
-							}
-
-						});
-				//CHECKSTYLE:OFF
-			} catch (Exception e) {
-				if (e instanceof RuntimeException) {
-					throw (RuntimeException) e;
-				}
-				LOG.error("Ignored exception during listener registration", e);
-			}
+//			try {
+//				ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
+//						new Callable<Void>() {
+//
+//							@Override
+//							public Void call() throws IOException {
+//								//do parsing and altering of webApp here
+//								DOMJettyWebXmlParser jettyWebXmlParser = new DOMJettyWebXmlParser();
+//								jettyWebXmlParser.parse(PaxWebServletContextHandler.this, jettyWebXmlURL.openStream());
+//
+//								return null;
+//							}
+//
+//						});
+//				//CHECKSTYLE:OFF
+//			} catch (Exception e) {
+//				if (e instanceof RuntimeException) {
+//					throw (RuntimeException) e;
+//				}
+//				LOG.error("Ignored exception during listener registration", e);
+//			}
 			//CHECKSTYLE:ON
 
 		}
@@ -339,24 +336,24 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 				LOG.debug("contextInitialized: {}->{}", e, l);
 			}
 
-			try {
-				ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
-						new Callable<Void>() {
-
-							@Override
-							public Void call() {
-								l.contextInitialized(e);
-								return null;
-							}
-
-						});
-				// CHECKSTYLE:OFF
-			} catch (Exception ex) {
-				if (ex instanceof RuntimeException) {
-					throw (RuntimeException) ex;
-				}
-				LOG.error("Ignored exception during listener registration", e);
-			}
+//			try {
+//				ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
+//						new Callable<Void>() {
+//
+//							@Override
+//							public Void call() {
+//								l.contextInitialized(e);
+//								return null;
+//							}
+//
+//						});
+//				// CHECKSTYLE:OFF
+//			} catch (Exception ex) {
+//				if (ex instanceof RuntimeException) {
+//					throw (RuntimeException) ex;
+//				}
+//				LOG.error("Ignored exception during listener registration", e);
+//			}
 
 		} finally {
 			// untoggle the state of the dynamic API

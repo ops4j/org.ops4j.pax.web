@@ -17,6 +17,12 @@ package org.ops4j.pax.web.itest.container;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.function.BiPredicate;
 import javax.inject.Inject;
 
 import org.junit.After;
@@ -29,11 +35,24 @@ import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.ops4j.pax.logging.PaxLoggingConstants;
+import org.ops4j.pax.web.itest.utils.VersionUtils;
+import org.ops4j.pax.web.itest.utils.WaitCondition;
+import org.ops4j.pax.web.service.PaxWebConstants;
+import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.spi.model.events.ElementEvent;
+import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
+import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
+import org.ops4j.pax.web.service.spi.model.events.WebElementListener;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.junit.Assert.assertNotNull;
 import static org.ops4j.pax.exam.Constants.START_LEVEL_SYSTEM_BUNDLES;
 import static org.ops4j.pax.exam.Constants.START_LEVEL_TEST_BUNDLE;
 import static org.ops4j.pax.exam.CoreOptions.bootDelegationPackage;
@@ -56,7 +75,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
  * Pax Web 8 refactoring ends.</p>
  */
 @ExamReactorStrategy(PerClass.class)
-public class AbstractControlledTestBase {
+public abstract class AbstractControlledTestBase {
 
 	public static final Logger LOG = LoggerFactory.getLogger(AbstractControlledTestBase.class);
 	public static final String PROBE_SYMBOLIC_NAME = "PaxExam-Probe";
@@ -71,6 +90,8 @@ public class AbstractControlledTestBase {
 
 	@Inject
 	protected BundleContext context;
+
+	protected WebElementListener webElementListener;
 
 	@Before
 	public void beforeEach() {
@@ -129,13 +150,16 @@ public class AbstractControlledTestBase {
 
 				// with PAXLOGGING-308 we can simply point to _native_ configuration file understood directly
 				// by selected pax-logging backend
-				systemProperty("org.ops4j.pax.logging.property.file").value("../etc/log4j2-osgi.properties")
+				systemProperty("org.ops4j.pax.logging.property.file").value("../etc/log4j2-osgi.properties"),
+
+				frameworkProperty("org.osgi.service.http.port").value("8181")
 		};
 
 		Option[] loggingOptions = defaultLoggingConfig();
 		Option[] infraOptions = combine(baseOptions, loggingOptions);
 		Option[] paxWebCoreOptions = combine(infraOptions, paxWebCore());
-		Option[] paxWebTestOptions = combine(paxWebCoreOptions, paxWebTestSupport());
+		Option[] paxWebHttpServiceOptions = combine(paxWebCoreOptions, paxWebRuntime());
+		Option[] paxWebTestOptions = combine(paxWebHttpServiceOptions, paxWebTestSupport());
 
 		return combine(paxWebTestOptions/*...*/);
 	}
@@ -196,6 +220,8 @@ public class AbstractControlledTestBase {
 		return new Option[] {
 				mavenBundle("org.ops4j.pax.web.itest", "pax-web-itest-container-common")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ops4j.pax.web.itest", "pax-web-itest-utils")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
 		};
 	}
 
@@ -209,6 +235,151 @@ public class AbstractControlledTestBase {
 	protected Option paxWebRuntime() {
 		return mavenBundle("org.ops4j.pax.web", "pax-web-runtime")
 				.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1);
+	}
+
+	/**
+	 * Installation of all the bundles required by {@code pax-web-jetty}
+	 * @return
+	 */
+	protected Option[] paxWebJetty() {
+		return new Option[] {
+				mavenBundle("org.ops4j.pax.web", "pax-web-jetty")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ops4j.pax.web", "pax-web-jetty-servlet-compatibility")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart(),
+
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-util").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-io").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-http").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-server").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-xml").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-servlet").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-security").versionAsInProject()
+//				mavenBundle().groupId("org.eclipse.jetty")
+//						.artifactId("jetty-continuation")
+//						.version(asInProject()),
+		};
+	}
+
+	// --- helper methods to be used in all the tests
+
+	/**
+	 * Returns {@code mvn:} URI with version set as current version of Pax Web. {@code groupAndArtifact} should
+	 * be in form of {@code mvn:group/artifact/}.
+	 *
+	 * @param groupAndArtifact
+	 * @return
+	 */
+	protected String sampleURI(String groupAndArtifact) {
+		return groupAndArtifact + VersionUtils.getProjectVersion();
+	}
+
+	protected Bundle installAndStartBundle(String uri) {
+		try {
+			final Bundle bundle = context.installBundle(uri);
+			bundle.start();
+			new WaitCondition("Starting bundle " + uri) {
+				@Override
+				protected boolean isFulfilled() {
+					return bundle.getState() == Bundle.ACTIVE;
+				}
+			}.waitForCondition();
+			return bundle;
+		} catch (InterruptedException | BundleException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Creates a listener for generic {@link ElementEvent} events with
+	 * associated {@link org.ops4j.pax.web.itest.utils.WaitCondition} fulfilled after satisfying passed
+	 * {@link java.util.function.BiPredicate} operating on single {@link ElementEvent}. This method sets up
+	 * the listener, calls the passed {@code action} and waits for the condition that's satisfied according
+	 * to passed {@code expectation}.
+	 */
+	protected void configureAndWait(Runnable action, final BiPredicate<ElementEvent.State, ElementEventData> expectation) {
+		final List<ElementEvent> events = new LinkedList<>();
+		webElementListener = events::add;
+		context.registerService(WebElementListener.class, webElementListener, null);
+
+		action.run();
+
+		try {
+			new WaitCondition("Waiting for " + expectation) {
+				@Override
+				protected boolean isFulfilled() throws Exception {
+					return events.stream().anyMatch(e -> expectation.test(e.getType(), e.getData()));
+				}
+			}.waitForCondition();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * Creates a listener for deployment of named {@link javax.servlet.Servlet}.
+	 * @param servletName
+	 * @param action
+	 */
+	protected <T> void configureAndWaitForNamedServlet(final String servletName, Callable<T> action) throws Exception {
+		final List<ElementEvent> events = new LinkedList<>();
+		webElementListener = events::add;
+		context.registerService(WebElementListener.class, webElementListener, null);
+
+		action.call();
+
+		try {
+			new WaitCondition("Waiting for " + servletName + " servlet") {
+				@Override
+				protected boolean isFulfilled() throws Exception {
+					return events.stream().anyMatch(e ->
+							e.getType() == ElementEvent.State.DEPLOYED
+									&& e.getData() instanceof ServletEventData
+									&& ((ServletEventData) e.getData()).getServletName().equals(servletName));
+				}
+			}.waitForCondition();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
+	public static HttpService getHttpService(final BundleContext bundleContext) {
+		ServiceReference<HttpService> ref = bundleContext.getServiceReference(HttpService.class);
+		assertNotNull("Failed to get HttpService", ref);
+		HttpService httpService = bundleContext.getService(ref);
+		assertNotNull("Failed to get HttpService", httpService);
+		return httpService;
+	}
+
+	public static WebContainer getWebContainer(final BundleContext bundleContext) {
+		ServiceReference<WebContainer> ref = bundleContext.getServiceReference(WebContainer.class);
+		assertNotNull("Failed to get WebContainer", ref);
+		WebContainer webContainer = bundleContext.getService(ref);
+		assertNotNull("Failed to get WebContainer", webContainer);
+		return webContainer;
+	}
+
+	/**
+	 * Creates {@link javax.servlet.Servlet} init parameters with legacy name that can be (which is deprecated, but
+	 * the only way with pure {@link HttpService} to specify servlet name) used to configure {@link javax.servlet.Servlet}
+	 * name.
+	 * @param servletName
+	 * @return
+	 */
+	@SuppressWarnings("deprecation")
+	protected Dictionary<?,?> legacyName(String servletName) {
+		Dictionary<String, Object> initParams = new Hashtable<>();
+		initParams.put(PaxWebConstants.INIT_PARAM_SERVLET_NAME, servletName);
+		return initParams;
 	}
 
 }

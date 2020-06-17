@@ -610,6 +610,8 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		private String[] listeningAddresses = null;
 		private File[] externalConfigurations = null;
 
+		private int eventDispatcherThreadCount;
+
 		@SuppressWarnings("deprecation")
 		private ServerConfigurationImpl() {
 			// eager resolution of some important properties
@@ -668,6 +670,8 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 				}
 				this.externalConfigurations = fileLocations;
 			}
+			Integer eventDispatcherThreadCount = resolveIntegerProperty(PaxWebConfig.PID_CFG_EVENT_DISPATCHER_THREAD_COUNT);
+			this.eventDispatcherThreadCount = eventDispatcherThreadCount == null ? 3 : eventDispatcherThreadCount;
 		}
 
 		@Override
@@ -743,6 +747,11 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		@Override
 		public Boolean checkForwardedHeaders() {
 			return resolveBooleanProperty(PaxWebConfig.PID_CFG_HTTP_CHECK_FORWARDED_HEADERS);
+		}
+
+		@Override
+		public Integer getEventDispatcherThreadCount() {
+			return this.eventDispatcherThreadCount;
 		}
 
 

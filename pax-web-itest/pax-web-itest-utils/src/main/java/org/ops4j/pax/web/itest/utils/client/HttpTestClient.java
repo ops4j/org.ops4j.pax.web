@@ -1,19 +1,19 @@
 /*
+ * Copyright 2020 OPS4J.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.
- *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.base.client;
+package org.ops4j.pax.web.itest.utils.client;
 
 import java.util.Map;
 import java.util.function.Predicate;
@@ -38,17 +38,17 @@ public interface HttpTestClient {
 	 * @return the HttpTestClient-instance
 	 */
 	HttpTestClient withBundleKeystore(String bundleSymbolicName, String keystoreLocation);
-	
+
 	/**
-         * Configures a keystore for SSL which is located within a bundle.
-         *
-         * @param bundleSymbolicName The bundle containing the keystore-file
-         * @param keystoreLocation   path to keystore-file within bundle
-         * @param keystorePassword   password to keystore within bundle
-         * @param keyManagerPassword   password to keyManager within bundle
-         * @return the HttpTestClient-instance
-         */
-        HttpTestClient withBundleKeystore(String bundleSymbolicName, String keystoreLocation, String keystorePassword, String keyManagerPassword);
+	 * Configures a keystore for SSL which is located within a bundle.
+	 *
+	 * @param bundleSymbolicName The bundle containing the keystore-file
+	 * @param keystoreLocation   path to keystore-file within bundle
+	 * @param keystorePassword   password to keystore within bundle
+	 * @param keyManagerPassword   password to keyManager within bundle
+	 * @return the HttpTestClient-instance
+	 */
+	HttpTestClient withBundleKeystore(String bundleSymbolicName, String keystoreLocation, String keystorePassword, String keyManagerPassword);
 
 	/**
 	 * Configures the seconds after which a request will get a TimeoutException
@@ -159,7 +159,6 @@ public interface HttpTestClient {
 	 */
 	HttpTestClient doPOST(String url);
 
-
 	/**
 	 * Depending on {@link #doGET(String)} or {@link #doPOST(String)}
 	 * the parameters are later added to the GET-URL or the POST-content.
@@ -179,4 +178,5 @@ public interface HttpTestClient {
 	 * @throws Exception      exceptions propagated from underlying client
 	 */
 	String executeTest() throws Exception;
+
 }

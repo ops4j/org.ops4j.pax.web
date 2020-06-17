@@ -61,15 +61,23 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 			// create a default context to share between registrations
 			final HttpContext httpContext = httpService.createDefaultHttpContext();
 
-			// register the hello world servlet
-			final Dictionary<String, Object> initParams = new Hashtable<>();
-			initParams.put("from", "HttpService");
 			try {
-				HelloWorldServlet helloWorldServlet = new HelloWorldServlet("/helloworld/hs");
-				httpService.registerServlet("/helloworld/hs", helloWorldServlet, initParams, httpContext);
+				// Pax Web 8:
+				//  - we can't have two servlets with the same name, but we can use legacy property passed
+				//    in legacy way as init parameter (HttpService.registerServlet() can't use same instance and
+				//    doesn't allow specification of servlet "name" - WebContainer extension allows it and of course
+				//    there's always Whiteboard service)
+				//  - alias can't be "/*"
 
-				HelloWorldServlet defaultServlet = new HelloWorldServlet("/");
-				httpService.registerServlet("/*", defaultServlet, initParams, httpContext);
+				Dictionary<String, Object> initParams = new Hashtable<>();
+				initParams.put("from", "HttpService");
+				initParams.put(/*PaxWebConstants.INIT_PARAM_SERVLET_NAME*/"servlet-name", "hws1");
+				httpService.registerServlet("/helloworld/hs", new HelloWorldServlet("/helloworld/hs"), initParams, httpContext);
+
+				initParams = new Hashtable<>();
+				initParams.put("from", "HttpService");
+				initParams.put(/*PaxWebConstants.INIT_PARAM_SERVLET_NAME*/"servlet-name", "hws2");
+				httpService.registerServlet("/", new HelloWorldServlet("/"), initParams, httpContext);
 
 				// register images as resources
 				httpService.registerResources("/images", "/images", httpContext);
@@ -77,6 +85,7 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 				httpService.registerResources("/alt-images", "/images", httpContext);
 			} catch (Exception e) {
 				e.printStackTrace();
+				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
 
@@ -93,7 +102,7 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 			HttpService service) {
 		try {
 			service.unregister("/helloworld/hs");
-			service.unregister("/*");
+			service.unregister("/");
 			service.unregister("/images");
 			service.unregister("/alt-images");
 		} catch (Exception ignored) {

@@ -18,11 +18,11 @@ package org.ops4j.pax.web.service.internal;
 import org.ops4j.pax.web.service.WebContainer;
 
 /**
- * Further extension of {@link org.osgi.service.http.HttpService} and {@link WebContainer} that can be stopped.
+ * Interface to be implemented by these {@link WebContainer} implementations that can be stopped.
  * This interface shuold not be part of {@code objectClass} property of OSGi service, because we don't want
  * users to stop the service.
  */
-public interface StoppableHttpService extends WebContainer {
+public interface StoppableHttpService {
 
 	/**
 	 * Stop the {@link org.osgi.service.http.HttpService}. It doesn't directly mean <em>stop the underlying

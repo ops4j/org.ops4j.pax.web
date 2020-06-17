@@ -32,27 +32,17 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.ResponseFacade;
-import org.ops4j.pax.web.annotations.Review;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * can be based on org.apache.catalina.servlets.DefaultServlet
- *
- * @author Romain Gilles Date: 7/26/12 Time: 10:41 AM
- */
-@Review("Unify with Jetty and Undertow")
 public class TomcatResourceServlet extends HttpServlet {
-	/**
-	 *
-	 */
+
 	private static final long serialVersionUID = 1L;
 
 	private static final int SECOND = 1000;
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(TomcatResourceServlet.class);
+	private static final Logger LOG = LoggerFactory.getLogger(TomcatResourceServlet.class);
 
 	// header constants
 	private static final String IF_NONE_MATCH = "If-None-Match";
@@ -76,9 +66,8 @@ public class TomcatResourceServlet extends HttpServlet {
 	private final Context context;
 	private String[] welcomes;
 
-	public TomcatResourceServlet(final HttpContext httpContext,
-								 final String contextName, final String alias, final String name,
-								 final Context context) {
+	public TomcatResourceServlet(final HttpContext httpContext, final String contextName,
+			final String alias, final String name, final Context context) {
 		this.httpContext = httpContext;
 		this.contextName = "/" + contextName;
 		this.alias = alias;
@@ -92,15 +81,15 @@ public class TomcatResourceServlet extends HttpServlet {
 
 	@Override
 	public void init() throws ServletException {
-	    welcomes = context.findWelcomeFiles();
-	    if (welcomes == null) {
-	        welcomes = new String[]{"index.html", "index.jsp"};
-	    }
+		welcomes = context.findWelcomeFiles();
+		if (welcomes == null) {
+			welcomes = new String[] { "index.html", "index.jsp" };
+		}
 	}
 
 	@Override
 	protected void doGet(HttpServletRequest request,
-						 HttpServletResponse response) throws ServletException, IOException {
+			HttpServletResponse response) throws ServletException, IOException {
 		if (response.isCommitted()) {
 			return;
 		}
@@ -133,8 +122,8 @@ public class TomcatResourceServlet extends HttpServlet {
 			}
 		}
 
-	    boolean endsWithSlash = (mapping == null ? request.getServletPath()
-	                : mapping).endsWith("/");
+		boolean endsWithSlash = (mapping == null ? request.getServletPath()
+				: mapping).endsWith("/");
 
 		final URL url = httpContext.getResource(mapping);
 
@@ -213,7 +202,8 @@ public class TomcatResourceServlet extends HttpServlet {
 			// if the request contains an etag and its the same for the
 			// resource, we deliver a NOT MODIFIED response
 			String eTag = String.valueOf(connection.getLastModified());
-			if ((request.getHeader(IF_NONE_MATCH) != null) && (eTag.equals(request.getHeader(IF_NONE_MATCH)))) {
+			if ((request.getHeader(IF_NONE_MATCH) != null)
+					&& (eTag.equals(request.getHeader(IF_NONE_MATCH)))) {
 				response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 				return;
 			} else if (request.getHeader(IF_MODIFIED_SINCE) != null) {
@@ -382,7 +372,7 @@ public class TomcatResourceServlet extends HttpServlet {
 	 * @return Exception which occurred during processing
 	 */
 	protected IOException copyRange(InputStream istream,
-									ServletOutputStream ostream) {
+			ServletOutputStream ostream) {
 
 		// first check if the istream is valid
 		if (istream == null) {

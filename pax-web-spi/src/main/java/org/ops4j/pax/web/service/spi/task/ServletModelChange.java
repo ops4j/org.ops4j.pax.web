@@ -15,8 +15,8 @@
  */
 package org.ops4j.pax.web.service.spi.task;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
@@ -25,24 +25,24 @@ public class ServletModelChange extends Change {
 
 	private final ServerModel serverModel;
 	private ServletModel servletModel;
-	private final List<ServletModel> servletModels = new LinkedList<>();
+	private final Map<ServletModel, Boolean> servletModels = new LinkedHashMap<>();
 	private boolean disabled;
 
 	public ServletModelChange(OpCode op, ServerModel serverModel, ServletModel servletModel) {
 		this(op, serverModel, servletModel, false);
 	}
 
-	public ServletModelChange(OpCode op, ServerModel serverModel, List<ServletModel> servletModels) {
+	public ServletModelChange(OpCode op, ServerModel serverModel, Map<ServletModel, Boolean> servletModels) {
 		super(op);
 		this.serverModel = serverModel;
-		this.servletModels.addAll(servletModels);
+		this.servletModels.putAll(servletModels);
 	}
 
 	public ServletModelChange(OpCode op, ServerModel serverModel, ServletModel servletModel, boolean disabled) {
 		super(op);
 		this.serverModel = serverModel;
 		this.servletModel = servletModel;
-		this.servletModels.add(servletModel);
+		this.servletModels.put(servletModel, !disabled);
 		this.disabled = disabled;
 	}
 
@@ -54,7 +54,7 @@ public class ServletModelChange extends Change {
 		return servletModel;
 	}
 
-	public List<ServletModel> getServletModels() {
+	public Map<ServletModel, Boolean> getServletModels() {
 		return servletModels;
 	}
 

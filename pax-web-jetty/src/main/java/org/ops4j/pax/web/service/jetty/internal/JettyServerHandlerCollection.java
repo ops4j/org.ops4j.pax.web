@@ -26,12 +26,13 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+//import org.ops4j.lang.NullArgumentException;
 
 /**
  * Jetty Handler collection that calls only the handler (=context) that matches
@@ -51,7 +52,7 @@ class JettyServerHandlerCollection extends HandlerCollection {
 
 	JettyServerHandlerCollection(final ServerModel serverModel) {
 		super(true);
-		NullArgumentException.validateNotNull(serverModel, "Server model");
+//		NullArgumentException.validateNotNull(serverModel, "Server model");
 		this.serverModel = serverModel;
 	}
 
@@ -69,15 +70,15 @@ class JettyServerHandlerCollection extends HandlerCollection {
 //			NullArgumentException.validateNotNull(matched.getHttpContext(),
 //					"The http Context of " + matched.getContextName()
 //							+ " is null");
-			NullArgumentException.validateNotNull(getServer(),
-					"The server is null!");
+//			NullArgumentException.validateNotNull(getServer(),
+//					"The server is null!");
 
 			final ContextHandler context = ((PaxWebJettyServer) getServer())
 					.getContext(/*matched.getHttpContext()*/null);
 
 			try {
-				NullArgumentException.validateNotNull(context,
-						"Context (handler) for " + target);
+//				NullArgumentException.validateNotNull(context,
+//						"Context (handler) for " + target);
 				context.handle(target, baseRequest, request, response);
 
 				//CHECKSTYLE:OFF

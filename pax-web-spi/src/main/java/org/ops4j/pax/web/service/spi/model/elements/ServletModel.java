@@ -30,6 +30,7 @@ import javax.servlet.ServletConfig;
 
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
 import org.ops4j.pax.web.service.spi.util.Path;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
@@ -39,7 +40,7 @@ import org.osgi.framework.ServiceReference;
 /**
  * Set of parameters describing everything that's required to register a {@link Servlet}.
  */
-public class ServletModel extends ElementModel<Servlet> {
+public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 
 	/** Alias as defined by old {@link org.osgi.service.http.HttpService} registration methods */
 	private final String alias;
@@ -161,7 +162,11 @@ public class ServletModel extends ElementModel<Servlet> {
 			// 6. If there is no match, the Http Service must attempt to match sub-strings of the requested
 			//    URI to registered aliases. The sub-strings of the requested URI are selected by removing
 			//    the last "/" and everything to the right of the last "/".
-			this.urlPatterns = new String[] { this.alias + "/*" };
+			if ("/".equals(this.alias)) {
+				this.urlPatterns = new String[] { "/*" };
+			} else {
+				this.urlPatterns = new String[] { this.alias + "/*" };
+			}
 			this.aliasCopiedToPatterns = true;
 		}
 	}
@@ -216,7 +221,14 @@ public class ServletModel extends ElementModel<Servlet> {
 	}
 
 	@Override
-	public int compareTo(ElementModel<Servlet> o) {
+	public ServletEventData asEventData() {
+		ServletEventData data = new ServletEventData(alias, name, urlPatterns, servlet);
+		setCommonEventProperties(data);
+		return data;
+	}
+
+	@Override
+	public int compareTo(ElementModel<Servlet, ServletEventData> o) {
 		int superCompare = super.compareTo(o);
 		if (superCompare == 0 && o instanceof ServletModel) {
 			// this happens in non-Whiteboard scenario

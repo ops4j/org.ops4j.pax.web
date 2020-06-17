@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.List;
 
 import org.ops4j.pax.web.service.PaxWebConfig;
+import org.ops4j.pax.web.service.spi.model.events.ElementEvent;
 
 public interface ServerConfiguration {
 
@@ -143,6 +144,12 @@ public interface ServerConfiguration {
 	 */
 	Boolean checkForwardedHeaders();
 
+	/**
+	 * Internal Pax Web configuration option to specify number of threads to dispatch
+	 * {@link ElementEvent} events.
+	 * @return
+	 */
+	Integer getEventDispatcherThreadCount();
 
 
 

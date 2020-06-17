@@ -18,6 +18,7 @@
 package org.ops4j.pax.web.service.spi.model.elements;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 
 /**
@@ -54,6 +55,11 @@ public class ErrorPageModel extends ElementModel {
 
 	@Override
 	public void unregister(WhiteboardWebContainerView view) {
+	}
+
+	@Override
+	public ElementEventData asEventData() {
+		return null;
 	}
 
 	/**

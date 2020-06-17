@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
+import java.util.Collection;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -111,20 +112,22 @@ public class ServiceModel implements BatchVisitor {
 	 * @return
 	 */
 	public OsgiContextModel createDefaultHttpContext(String contextId) {
-		// Just as ServerModel creates bundle-agnostic ServletContextModel, in ServiceModel we create/acquire
-		// bundle-aware OsgiContextModel - this time in a batch to preserve single-writer principle
-		Batch batch = new Batch("Initialization of HttpService for " + serviceBundle);
-		ServletContextModel scm = serverModel.getOrCreateServletContextModel(PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
+		return serverModel.runSilently(() -> {
+			// Just as ServerModel creates bundle-agnostic ServletContextModel, in ServiceModel we create/acquire
+			// bundle-aware OsgiContextModel - this time in a batch to comply to single-writer principle
+			Batch batch = new Batch("Initialization of HttpService for " + serviceBundle);
+			ServletContextModel scm = serverModel.getOrCreateServletContextModel(PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
 
-		WebContainerContext wcc = new DefaultHttpContext(serviceBundle, contextId);
+			WebContainerContext wcc = new DefaultHttpContext(serviceBundle, contextId);
 
-		// this will create and store new OsgiContextModel inside ServerModel
-		OsgiContextModel model = serverModel.getOrCreateOsgiContextModel(wcc, serviceBundle,
-				PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
-		batch.accept(this);
-		serverController.sendBatch(batch);
+			// this will create and store new OsgiContextModel inside ServerModel
+			OsgiContextModel model = serverModel.getOrCreateOsgiContextModel(wcc, serviceBundle,
+					PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
+			batch.accept(this);
+			serverController.sendBatch(batch);
 
-		return model;
+			return model;
+		});
 	}
 
 //	private final Map<String, ErrorPageModel> errorPageModels;
@@ -189,7 +192,7 @@ public class ServiceModel implements BatchVisitor {
 		}
 
 		if (change.getKind() == OpCode.DELETE) {
-			List<ServletModel> modelsToRemove = change.getServletModels();
+			Collection<ServletModel> modelsToRemove = change.getServletModels().keySet();
 
 			// apply the change at ServiceModel level - whether it's disabled or not
 			for (ServletModel model : modelsToRemove) {

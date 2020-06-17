@@ -107,6 +107,10 @@ public class Activator implements BundleActivator {
 		customizerTracker = new ServiceTracker<>(bundleContext, Customizer.class, new CustomizerCustomizer());
 		customizerTracker.open();
 
+		Bundle paxWebJettyBundle = bundleContext.getBundle();
+		ClassLoader loader = paxWebJettyBundle.adapt(BundleWiring.class).getClassLoader();
+
+		serverControllerFactory = new JettyServerControllerFactory(paxWebJettyBundle, loader);
 		registration = bundleContext.registerService(ServerControllerFactory.class,
 				serverControllerFactory, new Hashtable<>());
 	}

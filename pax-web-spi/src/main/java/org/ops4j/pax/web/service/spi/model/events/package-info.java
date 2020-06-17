@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Achim Nierbeck.
+ * Copyright 2020 OPS4J.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.spi;
 
 /**
- * Interface to use in order to get notified about lifecycle events related to {@link Servlet} registration.
+ * Package with DTO-like classes that are used to inform about registration/unregistration of web elements
+ * and contexts. These classes carry lighter version of properties from the model classes and are used for
+ * event delivery.
  */
-public interface ServletListener {
-
-	/**
-	 * Notification about {@link ServletEvent}.
-	 * @param event
-	 */
-	void servletEvent(ServletEvent event);
-
-}
+package org.ops4j.pax.web.service.spi.model.events;

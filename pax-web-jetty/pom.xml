@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
+    Copyright 2020 OPS4J.
 
-      http://www.apache.org/licenses/LICENSE-2.0
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-    KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -58,7 +55,7 @@
 
 							<!-- OSGi cmpn -->
 							org.osgi.service.http;version="[1.2,2)",
-<!--							org.osgi.service.packageadmin;resolution:=optional,-->
+							org.osgi.service.http.whiteboard;version="[1.1,2)",
 
 							<!-- from pax-web-api -->
 							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
@@ -66,68 +63,34 @@
 							<!-- from pax-web-spi -->
 							org.ops4j.pax.web.service.spi.*;version="${pax-web.osgi.version}",
 							<!-- from pax-web-jsp -->
-							org.ops4j.pax.web.jsp;version="${pax-web.osgi.version}";resolution:=optional,
+<!--							org.ops4j.pax.web.jsp;version="${pax-web.osgi.version}"; resolution:=optional,-->
 
 							<!-- from pax-logging-api -->
 							org.slf4j;version="[1.7,2)",
 
+							<!-- from Jetty bundles -->
+							org.eclipse.jetty.*,
+<!--							org.eclipse.jetty.alpn.*; resolution:=optional,-->
+<!--							org.eclipse.jetty.jaas.*; resolution:=optional,-->
+<!--							org.eclipse.jetty.jmx.*; resolution:=optional,-->
+<!--							org.eclipse.jetty.websocket.*; resolution:=optional,-->
+
 							<!-- other -->
-
 							javax.annotation;version="[1.2,2)"; resolution:=optional,
-*
-							<!-- to check -->
+							javax.management,
+							javax.net.ssl,
+							javax.xml.parsers,
+							org.w3c.dom,
+							org.xml.sax
 
-<!--							org.w3c.dom,-->
-<!--							org.xml.sax,-->
+							<!-- to check -->
 <!--							org.apache.jasper.servlet; resolution:=optional,-->
-<!--							org.apache.commons.logging,-->
-<!--							javax.management.*; resolution:=optional,-->
 <!--							javax.security.auth,-->
 <!--							javax.security.auth.callback,-->
 <!--							javax.security.auth.login,-->
-<!--							javax.servlet.jsp-api;version="[2.2,3)"; resolution:=optional,-->
-<!--							javax.net.ssl; resolution:=optional,-->
 <!--							javax.security.cert; resolution:=optional,-->
 <!--							javax.xml.parsers,-->
 <!--							javax.websocket.*; resolution:=optional,-->
-<!--							org.eclipse.jetty.jaas;version="[7.1.0,10.0.0)";resolution:=optional,-->
-<!--							org.eclipse.jetty.jmx;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.alpn;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.alpn.server;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.api;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.api.anotations;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.api.extensions;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.api.util;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.client;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.client.io;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.client.masks;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.common;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.common.events;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.common.events.annotated;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.common.extensions;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.common.extensions.compress;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.common.extensions.fragment;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.common.frames;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.common.io;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.common.io.http;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.common.io.payload;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.common.message;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.common.util;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.jsr356;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.jsr356.annotations;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.jsr356.client;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.jsr356.decoders;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.jsr356.encoders;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.jsr356.endpoints;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.jsr356.messages;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.jsr356.metadata;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.jsr356.server;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.jsr356.server.deploy;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.jsr356.server.pathmap;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.jsr356.utils;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.server;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.server.pathmap;version="[7.1.0,10.0.0)"; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.servlet;version="[7.1.0,10.0.0)"; resolution:=optional,-->
 <!--							org.eclipse.jetty.*;version="[7.1.0,10.0.0)",-->
 <!--							org.apache.xbean.finder.*,-->
 <!--							javax.el;version="[2.1.0,4.0.0)";resolution:=optional,-->
@@ -138,17 +101,20 @@
 <!--							org.apache.el.util;version="2.2"; resolution:=optional,-->
 						</Import-Package>
 						<Provide-Capability>
-							osgi.service;objectClass=javax.servlet.ServletContext,
-							osgi.service;effective:=active;objectClass=org.ops4j.pax.web.service.spi.ServerController
+							osgi.service;effective:=active;objectClass:List&lt;String&gt;="org.ops4j.pax.web.service.spi.ServerControllerFactory"
 						</Provide-Capability>
-<!--						<DynamicImport-Package>org.eclipse.jetty.*</DynamicImport-Package>-->
 						<Private-Package>
+							<!-- pax-web-jetty (internal) -->
 							org.ops4j.pax.web.service.jetty.internal.*,
+							<!-- supporting libraries -->
+<!--							org.ops4j.lang,-->
+<!--							org.ops4j.util.xml-->
 						</Private-Package>
-<!--						<Embed-Dependency>-->
-<!--							*;artifactId=!org.osgi.compendium;scope=compile;type=!pom;inline=true-->
-<!--						</Embed-Dependency>-->
-<!--						<Embed-Transitive>true</Embed-Transitive>-->
+						<Embed-Dependency>
+							ops4j-base-lang;inline=true,
+							ops4j-base-util-collections;inline=true,
+							ops4j-base-util-xml;inline=true
+						</Embed-Dependency>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -183,28 +149,16 @@
 
 		<!-- OPS4J dependencies -->
 
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.base</groupId>-->
-<!--			<artifactId>ops4j-base-lang</artifactId>-->
-<!--			<optional>true</optional>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>org.ops4j.base</groupId>
+			<artifactId>ops4j-base-lang</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.ops4j.base</groupId>
 			<artifactId>ops4j-base-util-xml</artifactId>
+			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.swissbox</groupId>
-			<artifactId>pax-swissbox-core</artifactId>
-			<optional>true</optional>
-		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.swissbox</groupId>-->
-<!--			<artifactId>pax-swissbox-optional-jcl</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.swissbox</groupId>-->
-<!--			<artifactId>pax-swissbox-tracker</artifactId>-->
-<!--		</dependency>-->
 
 		<!-- OSGi -->
 
@@ -221,10 +175,10 @@
 
 		<!-- JavaEE -->
 
-		<dependency>
-			<groupId>jakarta.annotation</groupId>
-			<artifactId>jakarta.annotation-api</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>jakarta.annotation</groupId>-->
+<!--			<artifactId>jakarta.annotation-api</artifactId>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
@@ -245,10 +199,10 @@
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-http</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-security</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.eclipse.jetty</groupId>-->
+<!--			<artifactId>jetty-security</artifactId>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
@@ -258,13 +212,12 @@
 			<artifactId>jetty-servlet</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-xml</artifactId>
+			<groupId>org.eclipse.jetty</groupId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-jmx</artifactId>
-			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
 		<dependency>

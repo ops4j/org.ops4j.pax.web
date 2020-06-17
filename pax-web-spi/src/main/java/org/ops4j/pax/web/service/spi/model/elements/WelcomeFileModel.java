@@ -20,6 +20,7 @@ package org.ops4j.pax.web.service.spi.model.elements;
 import java.util.Arrays;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 
 /**
@@ -44,6 +45,11 @@ public class WelcomeFileModel extends ElementModel {
 
 	@Override
 	public void unregister(WhiteboardWebContainerView view) {
+	}
+
+	@Override
+	public ElementEventData asEventData() {
+		return null;
 	}
 
 	/**

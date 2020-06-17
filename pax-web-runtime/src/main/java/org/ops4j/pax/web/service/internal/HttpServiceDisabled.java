@@ -23,6 +23,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
+import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
@@ -34,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * <em>Disabled</em> {@link org.osgi.service.http.HttpService} is set into actually registered, bundle-scoped
  * Http Service when the bundle stops.
  */
-class HttpServiceDisabled implements StoppableHttpService {
+class HttpServiceDisabled implements WebContainer {
 
 	private static final Logger LOG = LoggerFactory.getLogger(HttpServiceDisabled.class);
 
@@ -43,13 +44,6 @@ class HttpServiceDisabled implements StoppableHttpService {
 	HttpServiceDisabled(Bundle serviceBundle) {
 		this.serviceBundle = serviceBundle;
 		LOG.debug("Changing HttpService state to " + this);
-	}
-
-	// --- StoppableHttpService
-
-	@Override
-	public void stop() {
-		LOG.warn("Http service has already been stopped");
 	}
 
 	// --- container views

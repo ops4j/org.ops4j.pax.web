@@ -21,12 +21,14 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.container.httpservice.AbstractHttpServiceIntegrationTest;
 
+import static org.ops4j.pax.exam.OptionUtils.combine;
+
 @RunWith(PaxExam.class)
 public class HttpServiceIntegrationTest extends AbstractHttpServiceIntegrationTest {
 
 	@Configuration
 	public Option[] configure() {
-		return baseConfigure();
+		return combine(baseConfigure(), paxWebJetty());
 	}
 
 }

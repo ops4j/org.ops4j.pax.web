@@ -85,4 +85,5 @@ public interface WhiteboardWebContainerView extends PaxWebContainerView {
 	 * @param model
 	 */
 	void removeWhiteboardOsgiContextModel(OsgiContextModel model);
+
 }

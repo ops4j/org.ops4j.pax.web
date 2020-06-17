@@ -24,7 +24,6 @@ import java.util.EventListener;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
@@ -33,15 +32,12 @@ import javax.servlet.ServletException;
 
 import org.ops4j.pax.web.annotations.PaxWebConfiguration;
 import org.ops4j.pax.web.annotations.PaxWebTesting;
-import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
 import org.ops4j.pax.web.service.PaxWebConstants;
+import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.internal.views.DirectWebContainerView;
 import org.ops4j.pax.web.service.spi.ServerController;
-import org.ops4j.pax.web.service.spi.ServerListener;
-import org.ops4j.pax.web.service.spi.ServletEvent;
-import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.context.UniqueMultiBundleWebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.context.UniqueWebContainerContextWrapper;
@@ -53,6 +49,8 @@ import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.events.ElementEvent;
+import org.ops4j.pax.web.service.spi.model.events.WebElementListener;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
@@ -70,7 +68,7 @@ import org.slf4j.LoggerFactory;
  * (for which the Http Service is scoped) is stopped, all available references to this service will switch
  * to <em>disabled</em> {@link org.osgi.service.http.HttpService} delegate to prevent further registration.</p>
  */
-public class HttpServiceEnabled implements StoppableHttpService {
+public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(HttpServiceEnabled.class);
 //	private static final String PAX_WEB_JSP_SERVLET = "jsp";
@@ -86,83 +84,28 @@ public class HttpServiceEnabled implements StoppableHttpService {
 	 */
 	private final ServiceModel serviceModel;
 
-	private final Executor executor;
-
-	@Review("It'd be cleaner if serverController was used from ServerModel or a service operating on ServerModel")
 	private final ServerController serverController;
-	private ClassLoader bundleClassLoader;
-	private final Configuration configuration;
 
-	private ServerListener serverListener;
-	private final ServletListener eventDispatcher;
+	private final WebElementListener eventDispatcher;
 
 	private final WhiteboardWebContainerView whiteboardContainerView = new WhiteboardWebContainer();
 	private final DirectWebContainerView directContainerView = new DirectWebContainer();
 
 //	private final Boolean showStacks;
 
-//	private final Object lock = new Object();
-
-	@Review("Should ServerListener be registered here?")
 	public HttpServiceEnabled(final Bundle bundle, final ServerController srvController,
-			final ServerModel serverModel, final ServletListener eventDispatcher, final Configuration configuration) {
+			final ServerModel serverModel, final WebElementListener eventDispatcher, final Configuration configuration) {
 		LOG.debug("Creating active Http Service for: {}", bundle);
 
 		this.serverModel = serverModel;
 		this.serviceModel = new ServiceModel(serverModel, srvController, bundle);
-		this.executor = serverModel.getExecutor();
 
 		this.serviceBundle = bundle;
 
 		this.serverController = srvController;
 
+		// dispatcher to send events related to web element/context (un)registration
 		this.eventDispatcher = eventDispatcher;
-		this.configuration = configuration;
-
-//				Set<Bundle> wiredBundles = ClassPathUtil.getBundlesInClassSpace(bundle,
-//						new LinkedHashSet<>());
-//				ArrayList<Bundle> bundles = new ArrayList<>();
-//				bundles.add(bundle);
-//				bundles.addAll(wiredBundles);
-//				this.bundleClassLoader = new ResourceDelegatingBundleClassLoader(
-//						bundles);
-//				this.showStacks = configuration.server().isShowStacks();
-//
-//				this.serverListener = new ServerListener() {
-//					@Override
-//					@Review("Can't we do it better? Can we always register models via contoller and let it register them when needed?")
-//					public void stateChanged(final ServerEvent event) {
-//						LOG.debug("{}: Handling event: [{}]", this, event);
-//
-//						if (event == ServerEvent.STARTED) {
-//							for (ServletModel model : serviceModel.getServletModels()) {
-//								servletEvent(ServletEvent.State.DEPLOYING, serviceBundle,
-//										model);
-//								serverController.addServlet(model);
-//								servletEvent(ServletEvent.State.DEPLOYED, serviceBundle,
-//										model);
-//							}
-//							for (EventListenerModel model : serviceModel
-//									.getEventListenerModels()) {
-//								serverController.addEventListener(model);
-//							}
-//							for (FilterModel filterModel : serviceModel
-//									.getFilterModels()) {
-//								serverController.addFilter(filterModel);
-//							}
-//							for (ErrorPageModel model : serviceModel
-//									.getErrorPageModels()) {
-//								serverController.addErrorPage(model);
-//							}
-//						}
-//					}
-//
-//					@Override
-//					public String toString() {
-//						return "ServerListener for " + serviceBundle;
-//					}
-//				};
-//				this.serverController.addListener(serverListener);
 	}
 
 	@PaxWebTesting
@@ -173,25 +116,21 @@ public class HttpServiceEnabled implements StoppableHttpService {
 	// --- StoppableHttpService
 
 	@Override
-	@Review("Definitely good place to clean up things, but take care of shared contexts")
 	public void stop() {
 		LOG.debug("Stopping http service for: " + serviceBundle);
 
-		// TODO: cleanup all the OsgiContextModels in ServerModel associated with serviceBundle of this service
+		// TODO: make it transactional, so removal of two servlets won't restart the servlet context twice
 
-//		this.serverController.removeListener(serverListener);
-//		for (ServletModel model : serviceModel.getServletModels()) {
-//			servletEvent(ServletEvent.State.UNDEPLOYING, serviceBundle, model);
-//			serverModel.removeServletModel(model);
-//			servletEvent(ServletEvent.State.UNDEPLOYED, serviceBundle, model);
-//		}
-//		for (FilterModel model : serviceModel.getFilterModels()) {
-//			serverModel.removeFilterModel(model);
-//		}
-//		for (OsgiContextModel contextModel : serviceModel.getContextModels()) {
-//			serverController.removeContext(contextModel.getHttpContext());
-//		}
-//		serverModel.deassociateHttpContexts(serviceBundle);
+		// strange while loops, because "unregistration" may not necessarily end with removal of single web
+		// element. For example, when many servlets were registered by class name
+		while (!serviceModel.getFilterModels().isEmpty()) {
+			doUnregisterFilter(serviceModel.getFilterModels().iterator().next());
+		}
+		while (!serviceModel.getServletModels().isEmpty()) {
+			doUnregisterServlet(serviceModel.getServletModels().iterator().next());
+		}
+
+		serverModel.deassociateContexts(serviceBundle);
 	}
 
 	// --- container views
@@ -210,7 +149,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 		return null;
 	}
 
-	// --- transactional access to web container
+	// --- TODO: transactional access to web container
 
 	@Override
 	public void begin(HttpContext context) {
@@ -378,7 +317,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 		}
 
 		try {
-			servletEvent(ServletEvent.State.DEPLOYING, model.getRegisteringBundle(), model);
+			event(ElementEvent.State.DEPLOYING, model);
 
 			model.performValidation();
 
@@ -403,12 +342,12 @@ public class HttpServiceEnabled implements StoppableHttpService {
 				return null;
 			});
 
-			servletEvent(ServletEvent.State.DEPLOYED, model.getRegisteringBundle(), model);
-		} catch (ServletException | NamespaceException e) {
-			servletEvent(ServletEvent.State.FAILED, model.getRegisteringBundle(), model);
+			event(ElementEvent.State.DEPLOYED, model);
+		} catch (ServletException | NamespaceException | RuntimeException e) {
+			event(ElementEvent.State.FAILED, model, e);
 			throw e;
 		} catch (Exception e) {
-			servletEvent(ServletEvent.State.FAILED, model.getRegisteringBundle(), model);
+			event(ElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -450,11 +389,13 @@ public class HttpServiceEnabled implements StoppableHttpService {
 		final Class<? extends Servlet> servletClass = model.getServletClass();
 		final ServiceReference<? extends Servlet> reference = model.getElementReference();
 
-		final Bundle registeringBundle = model.getRegisteringBundle() == null ?
-				serviceBundle : model.getRegisteringBundle();
+		if (model.getRegisteringBundle() == null) {
+			model.setRegisteringBundle(serviceBundle);
+		}
+		Bundle registeringBundle = model.getRegisteringBundle();
 
 		try {
-			servletEvent(ServletEvent.State.UNDEPLOYING, registeringBundle, model);
+			event(ElementEvent.State.UNDEPLOYING, model);
 
 			serverModel.run(() -> {
 				List<ServletModel> toUnregister = new LinkedList<>();
@@ -542,9 +483,9 @@ public class HttpServiceEnabled implements StoppableHttpService {
 				return null;
 			});
 
-			servletEvent(ServletEvent.State.UNDEPLOYED, registeringBundle, model);
+			event(ElementEvent.State.UNDEPLOYED, model);
 		} catch (Exception e) {
-			servletEvent(ServletEvent.State.FAILED, registeringBundle, model);
+			event(ElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -553,32 +494,30 @@ public class HttpServiceEnabled implements StoppableHttpService {
 
 	@Override
 	public void registerResources(String alias, String name, HttpContext context) throws NamespaceException {
-//				synchronized (lock) {
-//					final OsgiContextModel contextModel = getOrCreateOsgiContextModel(httpContext);
-//					LOG.debug("Register resources (alias={}). Using context [" + contextModel + "]");
+//		final OsgiContextModel contextModel = getOrCreateOsgiContextModel(httpContext);
+//		LOG.debug("Register resources (alias={}). Using context [" + contextModel + "]");
 //
-//					// PAXWEB-1085, OSGi Enterprise R6 140.6 "Registering Resources", JavaEE Servlet spec "12.2 Specification of Mappings"
-//					// "A string beginning with a ‘ / ’ character and ending with a ‘ /* ’ suffix is used for path mapping."
-//					String osgiAlias = alias;
-//					if (osgiAlias != null && osgiAlias.endsWith("/*")) {
-//						osgiAlias = osgiAlias.substring(0, osgiAlias.length() - 2);
-//					}
-//					final Servlet servlet = serverController.createResourceServlet(contextModel, osgiAlias, name);
-//					String resourceModelName = name;
-//					if (!"default".equals(name)) {
-//						// PAXWEB-1099 - we should be able to register multiple "resources" for same name (==basePath)
-//						// but under different alias
-//						resourceModelName = String.format("%s:%s", alias, "/".equals(name) ? "" : name);
-//					}
-//					final ResourceModel model = new ResourceModel(contextModel, servlet,
-//							alias, resourceModelName);
-//					try {
-//						registerServlet(model);
-//					} catch (ServletException e) {
-//						LOG.error("Caught ServletException: ", e);
-//						throw new NamespaceException("Resource cant be resolved: ", e);
-//					}
-//				}
+//		// PAXWEB-1085, OSGi Enterprise R6 140.6 "Registering Resources", JavaEE Servlet spec "12.2 Specification of Mappings"
+//		// "A string beginning with a ‘ / ’ character and ending with a ‘ /* ’ suffix is used for path mapping."
+//		String osgiAlias = alias;
+//		if (osgiAlias != null && osgiAlias.endsWith("/*")) {
+//			osgiAlias = osgiAlias.substring(0, osgiAlias.length() - 2);
+//		}
+//		final Servlet servlet = serverController.createResourceServlet(contextModel, osgiAlias, name);
+//		String resourceModelName = name;
+//		if (!"default".equals(name)) {
+//			// PAXWEB-1099 - we should be able to register multiple "resources" for same name (==basePath)
+//			// but under different alias
+//			resourceModelName = String.format("%s:%s", alias, "/".equals(name) ? "" : name);
+//		}
+//		final ResourceModel model = new ResourceModel(contextModel, servlet,
+//				alias, resourceModelName);
+//		try {
+//			registerServlet(model);
+//		} catch (ServletException e) {
+//			LOG.error("Caught ServletException: ", e);
+//			throw new NamespaceException("Resource cant be resolved: ", e);
+//		}
 	}
 
 	// --- methods used to register a Filter
@@ -639,6 +578,8 @@ public class HttpServiceEnabled implements StoppableHttpService {
 		}
 
 		try {
+			event(ElementEvent.State.DEPLOYING, model);
+
 			model.performValidation();
 
 			final Batch batch = new Batch("Registration of " + model);
@@ -659,7 +600,15 @@ public class HttpServiceEnabled implements StoppableHttpService {
 
 				return null;
 			});
+
+			event(ElementEvent.State.DEPLOYED, model);
 		} catch (NamespaceException cantHappenWheAddingFilters) {
+		} catch (RuntimeException e) {
+			event(ElementEvent.State.FAILED, model, e);
+			throw e;
+		} catch (Exception e) {
+			event(ElementEvent.State.FAILED, model, e);
+			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
 
@@ -692,10 +641,14 @@ public class HttpServiceEnabled implements StoppableHttpService {
 		final Filter instance = model.getFilter();
 		final Class<? extends Filter> filterClass = model.getFilterClass();
 
-		final Bundle registeringBundle = model.getRegisteringBundle() == null ?
-				serviceBundle : model.getRegisteringBundle();
+		if (model.getRegisteringBundle() == null) {
+			model.setRegisteringBundle(serviceBundle);
+		}
+		Bundle registeringBundle = model.getRegisteringBundle();
 
 		try {
+			event(ElementEvent.State.UNDEPLOYING, model);
+
 			serverModel.run(() -> {
 				List<FilterModel> toUnregister = new LinkedList<>();
 
@@ -749,7 +702,10 @@ public class HttpServiceEnabled implements StoppableHttpService {
 
 				return null;
 			});
+
+			event(ElementEvent.State.UNDEPLOYED, model);
 		} catch (Exception e) {
+			event(ElementEvent.State.FAILED, model);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -799,6 +755,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 			serverModel.run(() -> {
 				final Batch batch = new Batch("Unregistration of EventListener: " + listener);
 
+				// TODO: removal of event listeners
 //				serverModel.removeEventListenerModel(listener, batch);
 
 				serverController.sendBatch(batch);
@@ -814,9 +771,15 @@ public class HttpServiceEnabled implements StoppableHttpService {
 
 	// --- private support methods
 
-	private void servletEvent(ServletEvent.State type, Bundle bundle, ServletModel model) {
+	private void event(ElementEvent.State type, ElementModel<?, ?> model) {
 		if (eventDispatcher != null) {
-			eventDispatcher.servletEvent(new ServletEvent(type, bundle, model));
+			eventDispatcher.registrationEvent(new ElementEvent(type, model.asEventData()));
+		}
+	}
+
+	private void event(ElementEvent.State type, ElementModel<?, ?> model, Exception exception) {
+		if (eventDispatcher != null) {
+			eventDispatcher.registrationEvent(new ElementEvent(type, model.asEventData(), exception));
 		}
 	}
 
@@ -836,7 +799,7 @@ public class HttpServiceEnabled implements StoppableHttpService {
 	 * @param batch
 	 */
 	@PaxWebConfiguration
-	private void translateContexts(Collection<HttpContext> httpContexts, ElementModel<?> model, Batch batch) {
+	private void translateContexts(Collection<HttpContext> httpContexts, ElementModel<?, ?> model, Batch batch) {
 		if (httpContexts.size() > 0 && !model.hasContextModels()) {
 			// Http Service scenario - HttpContext(s)/WebContainerContext(s) are passed with the registration
 			final Collection<WebContainerContext> webContexts

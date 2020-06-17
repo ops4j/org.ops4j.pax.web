@@ -26,6 +26,7 @@ import org.junit.runners.Parameterized;
 import org.ops4j.pax.web.itest.server.support.Utils;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.internal.HttpServiceEnabled;
+import org.ops4j.pax.web.service.internal.StoppableHttpService;
 import org.ops4j.pax.web.service.internal.views.DirectWebContainerView;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.config.Configuration;
@@ -42,6 +43,7 @@ import org.osgi.framework.ServiceReference;
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.ops4j.pax.web.itest.server.support.Utils.httpGET;
@@ -66,7 +68,7 @@ public class ServerControllerScopesTest extends MultiContainerTestSupport {
 	 */
 	@Test
 	public void singleServletContext() throws Exception {
-		ServerController controller = Utils.create(null, port, runtime, getClass().getClassLoader());
+		ServerController controller = Utils.createServerController(null, port, runtime, getClass().getClassLoader());
 		controller.configure();
 		controller.start();
 
@@ -75,7 +77,7 @@ public class ServerControllerScopesTest extends MultiContainerTestSupport {
 		when(bundle.getBundleContext()).thenReturn(context);
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.createDefaultServletContextModel(controller);
+		server.configureActiveServerController(controller);
 
 		Configuration config = controller.getConfiguration();
 		HttpServiceEnabled wc = new HttpServiceEnabled(bundle, controller, server, null, config);
@@ -148,7 +150,14 @@ public class ServerControllerScopesTest extends MultiContainerTestSupport {
 
 		assertThat(httpGET(port, "/c1/s"), startsWith("HTTP/1.1 404"));
 
+		((StoppableHttpService)wc).stop();
 		controller.stop();
+
+		ServerModelInternals serverModelInternals = serverModelInternals(server);
+		ServiceModelInternals serviceModelInternals = serviceModelInternals(wc);
+
+		assertTrue(serverModelInternals.isClean(bundle));
+		assertTrue(serviceModelInternals.isEmpty());
 	}
 
 }

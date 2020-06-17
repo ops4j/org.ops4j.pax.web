@@ -51,6 +51,7 @@ import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.internal.HttpServiceEnabled;
+import org.ops4j.pax.web.service.internal.StoppableHttpService;
 import org.ops4j.pax.web.service.internal.views.DirectWebContainerView;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.config.Configuration;
@@ -92,7 +93,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 
 	@Test
 	public void registerSingleServletUsingExplicitBatch() throws Exception {
-		ServerController controller = Utils.create(properties -> {
+		ServerController controller = Utils.createServerController(properties -> {
 			new File("target/ncsa").mkdirs();
 			properties.put(PaxWebConfig.PID_CFG_LOG_NCSA_ENABLED, "true");
 			properties.put(PaxWebConfig.PID_CFG_LOG_NCSA_LOGDIR, "target/ncsa");
@@ -162,7 +163,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		};
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.createDefaultServletContextModel(controller);
+		server.configureActiveServerController(controller);
 
 		Batch batch = new Batch("Register Single Servlet");
 
@@ -197,17 +198,18 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 
 	@Test
 	public void registerSingleServletUsingWebContainer() throws Exception {
-		ServerController controller = Utils.create(null, port, runtime, getClass().getClassLoader());
+		ServerController controller = Utils.createServerController(null, port, runtime, getClass().getClassLoader());
 		controller.configure();
 		controller.start();
 
 		Bundle bundle = mock(Bundle.class);
+		when(bundle.toString()).thenReturn("App Bundle");
 		BundleWiring wiring = mock(BundleWiring.class);
 		when(bundle.adapt(BundleWiring.class)).thenReturn(wiring);
 		when(wiring.getClassLoader()).thenReturn(this.getClass().getClassLoader());
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.createDefaultServletContextModel(controller);
+		server.configureActiveServerController(controller);
 
 		// no batch at all - everything will be done by HttpService itself
 		WebContainer wc = new HttpServiceEnabled(bundle, controller, server, null, controller.getConfiguration());
@@ -280,12 +282,19 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		response = httpGET(port, "/s/1?t=registerSingleServletUsingWebContainer");
 		assertTrue(response.contains("HTTP/1.1 403"));
 
+		((StoppableHttpService) wc).stop();
 		controller.stop();
+
+		ServerModelInternals serverModelInternals = serverModelInternals(server);
+		ServiceModelInternals serviceModelInternals = serviceModelInternals(wc);
+
+		assertTrue(serverModelInternals.isClean(bundle));
+		assertTrue(serviceModelInternals.isEmpty());
 	}
 
 	@Test
 	public void registerSingleServletWithEventListenerUsingExplicitBatch() throws Exception {
-		ServerController controller = Utils.create(properties -> {
+		ServerController controller = Utils.createServerController(properties -> {
 			new File("target/ncsa").mkdirs();
 			properties.put(PaxWebConfig.PID_CFG_LOG_NCSA_ENABLED, "true");
 			properties.put(PaxWebConfig.PID_CFG_LOG_NCSA_LOGDIR, "target/ncsa");
@@ -321,7 +330,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		EventListener listener = new ServletRequestAttributeListener() {
 			@Override
 			public void attributeAdded(ServletRequestAttributeEvent srae) {
-				events.add(srae.getName() + " ADD: " +  srae.getValue());
+				events.add(srae.getName() + " ADD: " + srae.getValue());
 			}
 
 			@Override
@@ -336,7 +345,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		};
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.createDefaultServletContextModel(controller);
+		server.configureActiveServerController(controller);
 
 		Batch batch = new Batch("Register Servlet and Event Listener");
 
@@ -377,7 +386,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 
 	@Test
 	public void registerSingleServletWithEventHandlerUsingWebContainer() throws Exception {
-		ServerController controller = Utils.create(null, port, runtime, getClass().getClassLoader());
+		ServerController controller = Utils.createServerController(null, port, runtime, getClass().getClassLoader());
 		controller.configure();
 		controller.start();
 
@@ -387,7 +396,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		when(wiring.getClassLoader()).thenReturn(this.getClass().getClassLoader());
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.createDefaultServletContextModel(controller);
+		server.configureActiveServerController(controller);
 
 		// no batch at all - everything will be done by HttpService itself
 		WebContainer wc = new HttpServiceEnabled(bundle, controller, server, null, controller.getConfiguration());
@@ -409,7 +418,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		EventListener listener = new ServletRequestAttributeListener() {
 			@Override
 			public void attributeAdded(ServletRequestAttributeEvent srae) {
-				events.add(srae.getName() + " ADD: " +  srae.getValue());
+				events.add(srae.getName() + " ADD: " + srae.getValue());
 			}
 
 			@Override
@@ -438,12 +447,19 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		assertThat(events.pop(), equalTo("a CHG: a1"));
 		assertThat(events.pop(), equalTo("a DEL: a2"));
 
+		((StoppableHttpService) wc).stop();
 		controller.stop();
+
+		ServerModelInternals serverModelInternals = serverModelInternals(server);
+		ServiceModelInternals serviceModelInternals = serviceModelInternals(wc);
+
+		assertTrue(serverModelInternals.isClean(bundle));
+		assertTrue(serviceModelInternals.isEmpty());
 	}
 
 	@Test
 	public void registerFilterAndServletsUsingExcplicitBatch() throws Exception {
-		ServerController controller = Utils.create(null, port, runtime, getClass().getClassLoader());
+		ServerController controller = Utils.createServerController(null, port, runtime, getClass().getClassLoader());
 		controller.configure();
 		controller.start();
 
@@ -477,7 +493,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		};
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.createDefaultServletContextModel(controller);
+		server.configureActiveServerController(controller);
 
 		Batch batch = new Batch("Register Servlets and Filter");
 		ServletContextModel contextC = server.getOrCreateServletContextModel("/c", batch);
@@ -557,7 +573,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 
 	@Test
 	public void registerFilterAndServletsUsingWebContainer() throws Exception {
-		ServerController controller = Utils.create(null, port, runtime, getClass().getClassLoader());
+		ServerController controller = Utils.createServerController(null, port, runtime, getClass().getClassLoader());
 		controller.configure();
 		controller.start();
 
@@ -566,7 +582,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		when(bundle.getBundleContext()).thenReturn(context);
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.createDefaultServletContextModel(controller);
+		server.configureActiveServerController(controller);
 
 		Configuration config = controller.getConfiguration();
 		HttpServiceEnabled wc = new HttpServiceEnabled(bundle, controller, server, null, config);
@@ -669,7 +685,14 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		System.out.println(response);
 		assertTrue(response.contains("\r\nmy-servlet1[/e]"));
 
+		((StoppableHttpService) wc).stop();
 		controller.stop();
+
+		ServerModelInternals serverModelInternals = serverModelInternals(server);
+		ServiceModelInternals serviceModelInternals = serviceModelInternals(wc);
+
+		assertTrue(serverModelInternals.isClean(bundle));
+		assertTrue(serviceModelInternals.isEmpty());
 	}
 
 	/**
@@ -700,7 +723,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 	 */
 	@Test
 	public void registerServletsConflictingByName() throws Exception {
-		ServerController controller = Utils.create(null, port, runtime, getClass().getClassLoader());
+		ServerController controller = Utils.createServerController(null, port, runtime, getClass().getClassLoader());
 		controller.configure();
 		controller.start();
 
@@ -709,7 +732,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		when(bundle.getBundleContext()).thenReturn(context);
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.createDefaultServletContextModel(controller);
+		server.configureActiveServerController(controller);
 
 		Configuration config = controller.getConfiguration();
 		HttpServiceEnabled wc = new HttpServiceEnabled(bundle, controller, server, null, config);
@@ -850,7 +873,14 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		assertTrue(httpGET(port, "/c3/s").endsWith("S(4)"));
 		assertTrue(httpGET(port, "/c4/s").endsWith("S(6)"));
 
+		((StoppableHttpService) wc).stop();
 		controller.stop();
+
+		ServerModelInternals serverModelInternals = serverModelInternals(server);
+		ServiceModelInternals serviceModelInternals = serviceModelInternals(wc);
+
+		assertTrue(serverModelInternals.isClean(bundle));
+		assertTrue(serviceModelInternals.isEmpty());
 	}
 
 }
