@@ -15,17 +15,23 @@
  */
 package org.ops4j.pax.web.service.tomcat.internal;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.GenericFilter;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -39,9 +45,11 @@ import org.apache.catalina.Engine;
 import org.apache.catalina.Executor;
 import org.apache.catalina.Host;
 import org.apache.catalina.Lifecycle;
+import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Server;
 import org.apache.catalina.Service;
 import org.apache.catalina.Valve;
+import org.apache.catalina.WebResourceSet;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.connector.Request;
@@ -57,6 +65,10 @@ import org.apache.catalina.servlets.DefaultServlet;
 import org.apache.catalina.startup.Catalina;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.valves.ValveBase;
+import org.apache.catalina.webresources.DirResourceSet;
+import org.apache.catalina.webresources.StandardRoot;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.digester.Digester;
@@ -69,6 +81,7 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class EmbeddedTomcatTest {
@@ -173,7 +186,6 @@ public class EmbeddedTomcatTest {
 	}
 
 	@Test
-//	@Ignore("Obvisouly this test doesn't work anymore, needs thorough checks!")
 	public void embeddedServerWithServletContextHandlerAndOnlyFilter() throws Exception {
 		Server server = new StandardServer();
 		server.setCatalinaBase(new File("target"));
@@ -244,6 +256,208 @@ public class EmbeddedTomcatTest {
 		int port = connector.getLocalPort();
 		String response = send(connector.getLocalPort(), "/anything");
 		assertTrue(response.endsWith("OK"));
+
+		server.stop();
+		server.destroy();
+	}
+
+	@Test
+	public void embeddedServerWithTomcatResourceServlet() throws Exception {
+		Server server = new StandardServer();
+		server.setCatalinaBase(new File("target"));
+
+		Service service = new StandardService();
+		service.setName("Catalina");
+		server.addService(service);
+
+		Executor executor = new StandardThreadExecutor();
+		service.addExecutor(executor);
+
+		Connector connector = new Connector("HTTP/1.1");
+		connector.setPort(0);
+		service.addConnector(connector);
+
+		Engine engine = new StandardEngine();
+		engine.setName("Catalina");
+		engine.setDefaultHost("localhost");
+		service.setContainer(engine);
+
+		Host host = new StandardHost();
+		host.setName("localhost");
+		host.setAppBase(".");
+		engine.addChild(host);
+
+		Context rootContext = new StandardContext();
+		rootContext.setName("");
+		rootContext.setPath("");
+//		rootContext.setDocBase(new File("target").getAbsolutePath());
+		StandardRoot standardRoot = new StandardRoot(rootContext) {
+			@Override
+			protected WebResourceSet createMainResourceSet() {
+				return new DirResourceSet(this, "/", new File("target").getAbsolutePath(), "/");
+			}
+		};
+		// setting resources here will make it available for DefaultServlet's which checks
+		// org.apache.catalina.Globals.RESOURCES_ATTR context attribute.
+		// if we want to have more "roots" (for more OSGi http "resources") we have to be clever about
+		// DefaultServlet customization
+		standardRoot.setCachingAllowed(true);
+//		standardRoot.setCacheMaxSize(-1L);
+//		standardRoot.setCacheObjectMaxSize(-1);
+//		standardRoot.setCacheTtl(-1L);
+		rootContext.setResources(standardRoot);
+		rootContext.setMapperContextRootRedirectEnabled(false);
+		rootContext.addLifecycleListener((event) -> {
+			if (event.getType().equals(Lifecycle.CONFIGURE_START_EVENT)) {
+				rootContext.setConfigured(true);
+			}
+		});
+		host.addChild(rootContext);
+
+		// filter-only pipeline works in Tomcat only if there's at least "default" servlet.
+		StandardWrapper defaultWrapper = new StandardWrapper();
+		defaultWrapper.setName("default");
+		defaultWrapper.setServletClass(DefaultServlet.class.getName());
+		defaultWrapper.addInitParameter("listings", "false");
+
+		rootContext.addChild(defaultWrapper);
+		rootContext.addServletMappingDecoded("/", "default");
+
+		server.start();
+
+		int port = connector.getLocalPort();
+
+		// Tomcat generates ETag using org.apache.catalina.webresources.AbstractResource.getETag()
+		// which is 'W/"' + length + '-' + lastModified + '"'
+
+		String response = send(port, "/test-classes/log4j2-test.properties");
+		Map<String, String> headers = extractHeaders(response);
+		assertTrue(response.contains("ETag: W/"));
+		assertTrue(response.contains("rootLogger.appenderRef.stdout.ref = stdout"));
+
+		response = send(port, "/test-classes/log4j2-test.properties",
+				"If-None-Match: " + headers.get("ETag"),
+				"If-Modified-Since: " + headers.get("Date"));
+		assertTrue(response.contains("HTTP/1.1 304"));
+		assertFalse(response.contains("rootLogger.appenderRef.stdout.ref = stdout"));
+
+		server.stop();
+		server.destroy();
+	}
+
+	@Test
+	public void twoResourceServletsWithDifferentBases() throws Exception {
+		Server server = new StandardServer();
+		server.setCatalinaBase(new File("target"));
+
+		Service service = new StandardService();
+		service.setName("Catalina");
+		server.addService(service);
+
+		Executor executor = new StandardThreadExecutor();
+		service.addExecutor(executor);
+
+		Connector connector = new Connector("HTTP/1.1");
+		connector.setPort(0);
+		service.addConnector(connector);
+
+		Engine engine = new StandardEngine();
+		engine.setName("Catalina");
+		engine.setDefaultHost("localhost");
+		service.setContainer(engine);
+
+		Host host = new StandardHost();
+		host.setName("localhost");
+		host.setAppBase(".");
+		engine.addChild(host);
+
+		Context rootContext = new StandardContext();
+		rootContext.setName("");
+		rootContext.setPath("");
+//		rootContext.setDocBase(new File("target").getAbsolutePath());
+		StandardRoot standardRoot = new StandardRoot(rootContext) {
+			@Override
+			protected WebResourceSet createMainResourceSet() {
+				return new DirResourceSet(this, "/", new File("target").getAbsolutePath(), "/");
+			}
+		};
+		// setting resources here will make it available for DefaultServlet's which checks
+		// org.apache.catalina.Globals.RESOURCES_ATTR context attribute.
+		// if we want to have more "roots" (for more OSGi http "resources") we have to be clever about
+		// DefaultServlet customization
+		standardRoot.setCachingAllowed(true);
+//		standardRoot.setCacheMaxSize(-1L);
+//		standardRoot.setCacheObjectMaxSize(-1);
+//		standardRoot.setCacheTtl(-1L);
+		rootContext.setResources(standardRoot);
+		rootContext.setMapperContextRootRedirectEnabled(false);
+		rootContext.addLifecycleListener((event) -> {
+			if (event.getType().equals(Lifecycle.CONFIGURE_START_EVENT)) {
+				rootContext.setConfigured(true);
+			}
+		});
+		host.addChild(rootContext);
+
+		File b1 = new File("target/b1");
+		FileUtils.deleteDirectory(b1);
+		b1.mkdirs();
+		FileWriter fw1 = new FileWriter(new File(b1, "hello.txt"));
+		IOUtils.write("b1", fw1);
+		fw1.close();
+
+		File b2 = new File("target/b2");
+		FileUtils.deleteDirectory(b2);
+		b2.mkdirs();
+		FileWriter fw2 = new FileWriter(new File(b2, "hello.txt"));
+		IOUtils.write("b2", fw2);
+		fw2.close();
+
+		StandardWrapper default1Wrapper = new StandardWrapper();
+		default1Wrapper.setName("default1");
+		default1Wrapper.setServletClass(FlexibleDefaultServlet.class.getName());
+		default1Wrapper.addInitParameter("listings", "false");
+		default1Wrapper.addInitParameter("base", b1.getAbsolutePath());
+
+		rootContext.addChild(default1Wrapper);
+		rootContext.addServletMappingDecoded("/d1/*", "default1");
+
+		StandardWrapper default2Wrapper = new StandardWrapper();
+		default2Wrapper.setName("default2");
+		default2Wrapper.setServletClass(FlexibleDefaultServlet.class.getName());
+		default2Wrapper.addInitParameter("listings", "false");
+		default2Wrapper.addInitParameter("base", b2.getAbsolutePath());
+
+		rootContext.addChild(default2Wrapper);
+		rootContext.addServletMappingDecoded("/d2/*", "default2");
+
+		server.start();
+
+		int port = connector.getLocalPort();
+
+		String response = send(port, "/hello.txt");
+		assertTrue(response.contains("HTTP/1.1 404"));
+
+		response = send(port, "/d1/hello.txt");
+		Map<String, String> headers = extractHeaders(response);
+		assertTrue(response.contains("ETag: W/"));
+		assertTrue(response.endsWith("b1"));
+
+		response = send(port, "/d1/hello.txt",
+				"If-None-Match: " + headers.get("ETag"),
+				"If-Modified-Since: " + headers.get("Date"));
+		assertTrue(response.contains("HTTP/1.1 304"));
+		assertFalse(response.endsWith("b1"));
+
+		response = send(port, "/d2/hello.txt");
+		headers = extractHeaders(response);
+		assertTrue(response.contains("ETag: W/"));
+		assertTrue(response.endsWith("b2"));
+
+		response = send(port, "/d2/hello.txt",
+				"If-None-Match: " + headers.get("ETag"),
+				"If-Modified-Since: " + headers.get("Date"));
+		assertTrue(response.contains("HTTP/1.1 304"));
+		assertFalse(response.endsWith("b2"));
 
 		server.stop();
 		server.destroy();
@@ -783,14 +997,17 @@ public class EmbeddedTomcatTest {
 		server.destroy();
 	}
 
-	private String send(int port, String request) throws IOException {
+	private String send(int port, String request, String ... headers) throws IOException {
 		Socket s = new Socket();
 		s.connect(new InetSocketAddress("127.0.0.1", port));
 
 		s.getOutputStream().write((
 				"GET " + request + " HTTP/1.1\r\n" +
-				"Host: 127.0.0.1:" + port + "\r\n" +
-				"Connection: close\r\n\r\n").getBytes());
+				"Host: 127.0.0.1:" + port + "\r\n").getBytes());
+		for (String header : headers) {
+			s.getOutputStream().write((header + "\r\n").getBytes());
+		}
+		s.getOutputStream().write(("Connection: close\r\n\r\n").getBytes());
 
 		byte[] buf = new byte[64];
 		int read = -1;
@@ -801,6 +1018,24 @@ public class EmbeddedTomcatTest {
 		s.close();
 
 		return sw.toString();
+	}
+
+	private Map<String, String> extractHeaders(String response) throws IOException {
+		Map<String, String> headers = new LinkedHashMap<>();
+		try (BufferedReader reader = new BufferedReader(new StringReader(response))) {
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				if (line.trim().equals("")) {
+					break;
+				}
+				// I know, security when parsing headers is very important...
+				String[] kv = line.split(": ");
+				String header = kv[0];
+				String value = String.join("", Arrays.asList(kv).subList(1, kv.length));
+				headers.put(header, value);
+			}
+		}
+		return headers;
 	}
 
 	/**
@@ -846,6 +1081,58 @@ public class EmbeddedTomcatTest {
 			response.setCharacterEncoding("UTF-8");
 			response.getWriter().write("OK\n");
 			response.getWriter().close();
+		}
+	}
+
+	public static class FlexibleDefaultServlet extends DefaultServlet {
+
+		@Override
+		public void init() throws ServletException {
+			super.init();
+			String base = getServletConfig().getInitParameter("base");
+
+			// and tweak org.apache.catalina.servlets.DefaultServlet.resources
+			resources = new StandardRoot(resources.getContext()) {
+				@Override
+				protected WebResourceSet createMainResourceSet() {
+					return new DirResourceSet(this, "/", new File(base).getAbsolutePath(), "/");
+				}
+			};
+			try {
+				resources.start();
+			} catch (LifecycleException e) {
+				throw new ServletException(e.getMessage(), e);
+			}
+		}
+
+		/**
+		 * Override {@link DefaultServlet#getRelativePath(HttpServletRequest, boolean)} to use only path info. Just
+		 * as {@link org.apache.catalina.servlets.WebdavServlet} and just as Jetty does it with {@code pathInfoOnly}
+		 * servlet init parameter.
+		 *
+		 * @param request
+		 * @param allowEmptyPath
+		 * @return
+		 */
+		@Override
+		protected String getRelativePath(HttpServletRequest request, boolean allowEmptyPath) {
+			String pathInfo;
+
+			if (request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null) {
+				pathInfo = (String) request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
+			} else {
+				pathInfo = request.getPathInfo();
+			}
+
+			StringBuilder result = new StringBuilder();
+			if (pathInfo != null) {
+				result.append(pathInfo);
+			}
+			if (result.length() == 0) {
+				result.append('/');
+			}
+
+			return result.toString();
 		}
 	}
 

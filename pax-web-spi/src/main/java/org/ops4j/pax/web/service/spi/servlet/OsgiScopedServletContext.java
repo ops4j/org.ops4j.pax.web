@@ -71,6 +71,10 @@ public class OsgiScopedServletContext implements ServletContext {
 		return osgiContext.getOsgiContextModel();
 	}
 
+	public ServletContext getContainerServletContext() {
+		return osgiContext.getContainerServletContext();
+	}
+
 	// --- methods that throw UnsupportedOperationException
 
 	@Override

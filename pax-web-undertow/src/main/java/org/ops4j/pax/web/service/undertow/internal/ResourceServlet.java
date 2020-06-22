@@ -28,15 +28,17 @@ import io.undertow.server.handlers.resource.Resource;
 import io.undertow.server.handlers.resource.ResourceChangeListener;
 import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.server.handlers.resource.ResourceManager;
-import io.undertow.servlet.handlers.DefaultServlet;
 import io.undertow.servlet.handlers.ServletRequestContext;
 import io.undertow.servlet.spec.HttpServletRequestImpl;
 
 /**
- * TODO: Undertow resource handling is done not by {@link DefaultServlet} but by {@link ResourceHandler}.
- * That means we can't e.g., custom error pages for (in particular) HTTP 403 error code set for directory request
- * (directory listing is disabled).
+ * Again, Undertow's DefaultServlet is very inflexible - we can't override crucial
+ * methods and we can't access private fields. Also, DefaultServlet.init() assumes certain implementation of
+ * javax.servlet.ServletContext and we'd get ClassCastException in Pax Web anyway. So we have to create
+ * new "resource servlet" from scratch
+ *
  * @author Guillaume Nodet
+ * @author Grzegorz Grzybek
  */
 public class ResourceServlet extends HttpServlet implements ResourceManager {
 

@@ -104,7 +104,11 @@ public class OsgiServletContext implements ServletContext {
 		this.containerServletContext = containerServletContext;
 	}
 
-	// --- methods that throw UnsupportedOperationException
+	public ServletContext getContainerServletContext() {
+		return containerServletContext;
+	}
+
+// --- methods that throw UnsupportedOperationException
 
 	@Override
 	public FilterRegistration.Dynamic addFilter(String filterName, String className) {

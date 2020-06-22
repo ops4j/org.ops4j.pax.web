@@ -54,6 +54,12 @@ public interface Configuration {
 	SecurityConfiguration security();
 
 	/**
+	 * Accesses configuration related to "resource handling" (default servlets per resource definition).
+	 * @return
+	 */
+	ResourceConfiguration resources();
+
+	/**
 	 * Accesses JSP related configuration used for Tomcat/Jasper engine configuration
 	 * @return
 	 */

@@ -276,4 +276,65 @@ public interface PaxWebConfig {
 	 */
 	String PID_CFG_LOG_NCSA_LOGTIMEZONE = "org.ops4j.pax.web.log.ncsa.logtimezone";
 
+	// --- default/resource servlet configuration - common properties for "default" servlets of all the containers
+
+	/**
+	 * <p>Boolean property to specify whether default servlet should reply with {@code Accept-Ranges: bytes} header.</p>
+	 * <p><ul>
+	 *     <li>Jetty: {@code acceptRanges} boolean init parameter</li>
+	 *     <li>Tomcat: {@code useAcceptRanges} boolean init parameter</li>
+	 * </ul></p>
+	 */
+	String PID_CFG_DEFAULT_SERVLET_ACCEPT_RANGES = "org.ops4j.pax.web.resource.acceptRanges";
+
+	/**
+	 * <p>Boolean property to specify whether <em>welcome file</em> should be served immediately, or by redirect.</p>
+	 * <p><ul>
+	 *     <li>Jetty: {@code redirectWelcome} boolean init parameter</li>
+	 * </ul></p>
+	 */
+	String PID_CFG_DEFAULT_SERVLET_REDIRECT_WELCOME = "org.ops4j.pax.web.resource.redirectWelcome";
+
+	/**
+	 * <p>Boolean property to specify whether <em>dir index</em> should be present when accessing <em>dir
+	 * resource</em>.</p>
+	 * <p><ul>
+	 *     <li>Jetty: {@code dirAllowed} boolean init parameter</li>
+	 *     <li>Tomcat: {@code listings} boolean init parameter</li>
+	 *     <li>Undertow: {@code directory-listing} boolean init parameter</li>
+	 * </ul></p>
+	 */
+	String PID_CFG_DEFAULT_SERVLET_DIR_LISTING = "org.ops4j.pax.web.resource.dirListing";
+
+	/**
+	 * <p>Integer property to specify maximum number of cache entries (per single <em>resource manager</em>).</p>
+	 * <p><ul>
+	 *     <li>Jetty: {@code maxCachedFiles} integer init parameter</li>
+	 *     <li>Tomcat: no such option (but there's default 5s TTL)</li>
+	 *     <li>Undertow: separate {@code io.undertow.server.handlers.cache.LRUCache#maxEntries} for <em>metadata</em>
+	 *     and "regions" + "slices" parameters in {@code LimitedBufferSlicePool}</li>
+	 * </ul></p>
+	 */
+	String PID_CFG_DEFAULT_SERVLET_CACHE_MAX_ENTRIES = "org.ops4j.pax.web.resource.cache.maxEntries";
+
+	/**
+	 * <p>Integer property to specify maximum size of single cache entry (file) (per single <em>resource manager</em>).</p>
+	 * <p><ul>
+	 *     <li>Jetty: {@code maxCachedFileSize} integer init parameter</li>
+	 *     <li>Tomcat: {@code org.apache.catalina.webresources.StandardRoot#setCacheObjectMaxSize()} (kB)</li>
+	 *     <li>Undertow: {@code io.undertow.server.handlers.resource.CachingResourceManager#maxFileSize()} (B)</li>
+	 * </ul></p>
+	 */
+	String PID_CFG_DEFAULT_SERVLET_CACHE_MAX_ENTRY_SIZE = "org.ops4j.pax.web.resource.cache.maxEntrySize";
+
+	/**
+	 * <p>Integer property to specify maximum total size of the cache (per single <em>resource manager</em>).</p>
+	 * <p><ul>
+	 *     <li>Jetty: {@code maxCacheSize} boolean init parameter</li>
+	 *     <li>Tomcat: {@code org.apache.catalina.webresources.StandardRoot#setCacheMaxSize()} (kB)</li>
+	 *     <li>Undertow: {@code new LimitedBufferSlicePool(bufferAllocator, sliceSize, sliceSize * slicesPerPage, maxMemory / (sliceSize * slicesPerPage))}</li>
+	 * </ul></p>
+	 */
+	String PID_CFG_DEFAULT_SERVLET_CACHE_MAX_TOTAL_SIZE = "org.ops4j.pax.web.resource.cache.maxTotalSize";
+
 }

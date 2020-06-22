@@ -286,6 +286,12 @@
 <!--			<scope>provided</scope>-->
 <!--		</dependency>-->
 
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- Testing -->
 
 		<dependency>

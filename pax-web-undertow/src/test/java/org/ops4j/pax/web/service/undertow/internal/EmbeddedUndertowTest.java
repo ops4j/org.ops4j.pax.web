@@ -15,13 +15,21 @@
  */
 package org.ops4j.pax.web.service.undertow.internal;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -40,6 +48,10 @@ import io.undertow.server.DefaultByteBufferPool;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.OpenListener;
 import io.undertow.server.handlers.PathHandler;
+import io.undertow.server.handlers.cache.DirectBufferCache;
+import io.undertow.server.handlers.resource.CachingResourceManager;
+import io.undertow.server.handlers.resource.FileResourceManager;
+import io.undertow.server.handlers.resource.ResourceManager;
 import io.undertow.server.protocol.http.HttpOpenListener;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
@@ -47,11 +59,16 @@ import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.ServletContainer;
 import io.undertow.servlet.api.ServletInfo;
+import io.undertow.servlet.handlers.DefaultServlet;
 import io.undertow.servlet.handlers.ServletChain;
 import io.undertow.servlet.handlers.ServletRequestContext;
 import io.undertow.servlet.util.ImmediateInstanceFactory;
+import io.undertow.util.ETag;
 import io.undertow.util.StatusCodes;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
+import org.ops4j.pax.web.service.undertow.internal.context.FlexibleDefaultServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xnio.ChannelListener;
@@ -66,6 +83,7 @@ import org.xnio.channels.AcceptingChannel;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class EmbeddedUndertowTest {
@@ -126,6 +144,173 @@ public class EmbeddedUndertowTest {
 
 		response = send(port, "/c2/s1");
 		assertTrue(response.contains("HTTP/1.1 404"));
+
+		server.stop();
+	}
+
+	@Test
+	public void embeddedServerWithUndertowResourceServlet() throws Exception {
+		PathHandler path = Handlers.path();
+		Undertow server = Undertow.builder()
+				.addHttpListener(0, "0.0.0.0")
+				.setHandler(path)
+				.build();
+
+		HttpServlet servletInstance = new DefaultServlet();
+
+		ServletInfo servlet = Servlets.servlet("default", servletInstance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servletInstance));
+		servlet.addInitParam("directory-listing", "true");
+
+		// with "/" mapping, io.undertow.servlet.handlers.ServletPathMatch is used with
+		// io.undertow.servlet.handlers.ServletPathMatchesData.PathMatch.requireWelcomeFileMatch = true, that's why
+		// resource provider is consulted already in io.undertow.servlet.handlers.ServletInitialHandler.handleRequest
+		// before even invoking DefaultServlet
+		servlet.addMapping("/");
+
+		DirectBufferCache cache = new DirectBufferCache(1024, 64, 1024 * 1024);
+		// this = {io.undertow.server.handlers.resource.FileResourceManager@1925}
+		//   base: java.io.File  = {java.io.File@1926} "target"
+		//   transferMinSize: long  = 1024 (0x400)
+		//   caseSensitive: boolean  = true
+		//   followLinks: boolean  = false
+		//   safePaths: java.lang.String[]  = null
+		ResourceManager fileResourceManager = FileResourceManager.builder()
+				.setBase(Paths.get("target"))
+				// taken from org.apache.catalina.webresources.AbstractResource.getETag()
+				.setETagFunction(path1 -> new ETag(true, path1.toFile().length() + "-" + path1.toFile().lastModified()))
+				.build();
+		CachingResourceManager manager = new CachingResourceManager(1024, 1024 * 1024, cache,
+				fileResourceManager, 3_600_000/*ms*/);
+
+		DeploymentInfo deploymentInfo = Servlets.deployment()
+				.setClassLoader(this.getClass().getClassLoader())
+				.setContextPath("/")
+				.setDisplayName("Default Application")
+				.setDeploymentName("")
+				.setUrlEncoding("UTF-8")
+				.setResourceManager(manager)
+				.addServlets(servlet);
+
+		ServletContainer container = Servlets.newContainer();
+		DeploymentManager dm = container.addDeployment(deploymentInfo);
+		dm.deploy();
+		HttpHandler handler = dm.start();
+
+		path.addPrefixPath("/", handler);
+
+		server.start();
+
+		int port = ((InetSocketAddress) server.getListenerInfo().get(0).getAddress()).getPort();
+
+		// Undertow doesn't generate ETag by default, so it depends on what we'll set in
+		// io.undertow.server.handlers.resource.PathResourceManager.Builder.setETagFunction
+
+		String response = send(port, "/test-classes/log4j2-test.properties");
+		Map<String, String> headers = extractHeaders(response);
+		assertTrue(response.contains("ETag: W/"));
+		assertTrue(response.contains("rootLogger.appenderRef.stdout.ref = stdout"));
+
+		response = send(port, "/test-classes/log4j2-test.properties",
+				"If-None-Match: " + headers.get("ETag"),
+				"If-Modified-Since: " + headers.get("Date"));
+		assertTrue(response.contains("HTTP/1.1 304"));
+		assertFalse(response.contains("rootLogger.appenderRef.stdout.ref = stdout"));
+
+		server.stop();
+	}
+
+	@Test
+	public void twoResourceServletsWithDifferentBases() throws Exception {
+		PathHandler path = Handlers.path();
+		Undertow server = Undertow.builder()
+				.addHttpListener(0, "0.0.0.0")
+				.setHandler(path)
+				.build();
+
+		File b1 = new File("target/b1");
+		FileUtils.deleteDirectory(b1);
+		b1.mkdirs();
+		FileWriter fw1 = new FileWriter(new File(b1, "hello.txt"));
+		IOUtils.write("b1", fw1);
+		fw1.close();
+
+		File b2 = new File("target/b2");
+		FileUtils.deleteDirectory(b2);
+		b2.mkdirs();
+		FileWriter fw2 = new FileWriter(new File(b2, "hello.txt"));
+		IOUtils.write("b2", fw2);
+		fw2.close();
+
+		DirectBufferCache cache1 = new DirectBufferCache(1024, 64, 1024 * 1024);
+		ResourceManager fileResourceManager1 = FileResourceManager.builder()
+				.setBase(Paths.get("target/b1"))
+				.setETagFunction(p -> new ETag(true, p.toFile().length() + "-" + p.toFile().lastModified()))
+				.build();
+		CachingResourceManager manager1 = new CachingResourceManager(1024, 1024 * 1024, cache1,
+				fileResourceManager1, 3_600_000/*ms*/);
+
+		DirectBufferCache cache2 = new DirectBufferCache(1024, 64, 1024 * 1024);
+		ResourceManager fileResourceManager2 = FileResourceManager.builder()
+				.setBase(Paths.get("target/b2"))
+				.setETagFunction(p -> new ETag(true, p.toFile().length() + "-" + p.toFile().lastModified()))
+				.build();
+		CachingResourceManager manager2 = new CachingResourceManager(1024, 1024 * 1024, cache2,
+				fileResourceManager2, 3_600_000/*ms*/);
+
+		HttpServlet servlet1Instance = new FlexibleDefaultServlet(manager1);
+		HttpServlet servlet2Instance = new FlexibleDefaultServlet(manager2);
+
+		ServletInfo servlet1 = Servlets.servlet("default1", servlet1Instance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servlet1Instance));
+		servlet1.addInitParam("directory-listing", "true");
+		ServletInfo servlet2 = Servlets.servlet("default2", servlet2Instance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servlet2Instance));
+		servlet2.addInitParam("directory-listing", "true");
+
+		servlet1.addMapping("/d1/*");
+		servlet2.addMapping("/d2/*");
+
+		DeploymentInfo deploymentInfo = Servlets.deployment()
+				.setClassLoader(this.getClass().getClassLoader())
+				.setContextPath("/")
+				.setDisplayName("Default Application")
+				.setDeploymentName("")
+				.setUrlEncoding("UTF-8")
+				.addServlets(servlet1, servlet2);
+
+		ServletContainer container = Servlets.newContainer();
+		DeploymentManager dm = container.addDeployment(deploymentInfo);
+		dm.deploy();
+		HttpHandler handler = dm.start();
+
+		path.addPrefixPath("/", handler);
+
+		server.start();
+
+		int port = ((InetSocketAddress) server.getListenerInfo().get(0).getAddress()).getPort();
+
+		String response = send(port, "/hello.txt");
+		assertTrue(response.contains("HTTP/1.1 404"));
+
+		response = send(port, "/d1/hello.txt");
+		Map<String, String> headers = extractHeaders(response);
+		assertTrue(response.contains("ETag: W/"));
+		assertTrue(response.endsWith("b1"));
+
+		response = send(port, "/d1/hello.txt",
+				"If-None-Match: " + headers.get("ETag"),
+				"If-Modified-Since: " + headers.get("Date"));
+		assertTrue(response.contains("HTTP/1.1 304"));
+		assertFalse(response.endsWith("b1"));
+
+		response = send(port, "/d2/hello.txt");
+		headers = extractHeaders(response);
+		assertTrue(response.contains("ETag: W/"));
+		assertTrue(response.endsWith("b2"));
+
+		response = send(port, "/d2/hello.txt",
+				"If-None-Match: " + headers.get("ETag"),
+				"If-Modified-Since: " + headers.get("Date"));
+		assertTrue(response.contains("HTTP/1.1 304"));
+		assertFalse(response.endsWith("b2"));
 
 		server.stop();
 	}
@@ -729,7 +914,7 @@ public class EmbeddedUndertowTest {
 		server.resumeAccepts();
 		channels.add(server);
 
-		int port = ((InetSocketAddress)server.getLocalAddress()).getPort();
+		int port = ((InetSocketAddress) server.getLocalAddress()).getPort();
 
 		String response = send(port, "/");
 		assertTrue(response.endsWith("\r\n\r\nHello!"));
@@ -926,7 +1111,6 @@ public class EmbeddedUndertowTest {
 
 		ServletInfo servletForRoot = Servlets.servlet("s1", servletInstance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servletInstance));
 
-
 		// Servlet API 4, 12.2 Specification of Mappings
 
 		// A string beginning with a '/' character and ending with a '/*' suffix is used for path mapping.
@@ -1049,14 +1233,17 @@ public class EmbeddedUndertowTest {
 		server.stop();
 	}
 
-	private String send(int port, String request) throws IOException {
+	private String send(int port, String request, String... headers) throws IOException {
 		Socket s = new Socket();
 		s.connect(new InetSocketAddress("127.0.0.1", port));
 
 		s.getOutputStream().write((
 				"GET " + request + " HTTP/1.1\r\n" +
-				"Host: 127.0.0.1:" + port + "\r\n" +
-				"Connection: close\r\n\r\n").getBytes());
+						"Host: 127.0.0.1:" + port + "\r\n").getBytes());
+		for (String header : headers) {
+			s.getOutputStream().write((header + "\r\n").getBytes());
+		}
+		s.getOutputStream().write(("Connection: close\r\n\r\n").getBytes());
 
 		byte[] buf = new byte[64];
 		int read = -1;
@@ -1067,6 +1254,24 @@ public class EmbeddedUndertowTest {
 		s.close();
 
 		return sw.toString();
+	}
+
+	private Map<String, String> extractHeaders(String response) throws IOException {
+		Map<String, String> headers = new LinkedHashMap<>();
+		try (BufferedReader reader = new BufferedReader(new StringReader(response))) {
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				if (line.trim().equals("")) {
+					break;
+				}
+				// I know, security when parsing headers is very important...
+				String[] kv = line.split(": ");
+				String header = kv[0];
+				String value = String.join("", Arrays.asList(kv).subList(1, kv.length));
+				headers.put(header, value);
+			}
+		}
+		return headers;
 	}
 
 }

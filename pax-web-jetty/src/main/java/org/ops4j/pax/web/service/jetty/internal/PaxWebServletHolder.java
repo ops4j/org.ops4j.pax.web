@@ -199,7 +199,7 @@ public class PaxWebServletHolder extends ServletHolder {
 		}
 
 		// if null, newInstance() will be called
-		// In Tomcat configuration is take from the StandardWrapper, here
+		// In Tomcat configuration is taken from the StandardWrapper, here
 		// org.eclipse.jetty.servlet.ServletHolder._config is private, so we need special OsgiInitializedServlet
 		return instance == null ? null : new OsgiInitializedServlet(instance, servletContext);
 	}

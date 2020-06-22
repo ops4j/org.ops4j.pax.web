@@ -27,6 +27,7 @@ import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.JettyConfiguration;
 import org.ops4j.pax.web.service.spi.config.JspConfiguration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
+import org.ops4j.pax.web.service.spi.config.ResourceConfiguration;
 import org.ops4j.pax.web.service.spi.config.SecurityConfiguration;
 import org.ops4j.pax.web.service.spi.config.ServerConfiguration;
 import org.ops4j.pax.web.service.spi.config.SessionConfiguration;
@@ -55,11 +56,12 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 
 	private final ServerConfiguration serverConfiguration;
 	private final SecurityConfiguration securityConfiguration;
+	private final ResourceConfiguration resourceConfiguration;
 	private final SessionConfiguration sessionConfiguration;
 	private final LogConfiguration logConfiguration;
 
 	/** Property resolver. Cannot be null. */
-	private PropertyResolver propertyResolver;
+	private final PropertyResolver propertyResolver;
 
 	/** Low level access to as many source properties as possible */
 	private final Map<String, String> sourceProperties;
@@ -84,6 +86,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 
 		serverConfiguration = new ServerConfigurationImpl();
 		securityConfiguration = new SecurityConfigurationImpl();
+		resourceConfiguration = new ResourceConfigurationImpl();
 		sessionConfiguration = new SessionConfigurationImpl();
 		logConfiguration = new LogConfigurationImpl();
 	}
@@ -101,6 +104,11 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	@Override
 	public SecurityConfiguration security() {
 		return securityConfiguration;
+	}
+
+	@Override
+	public ResourceConfiguration resources() {
+		return resourceConfiguration;
 	}
 
 	@Override
@@ -610,7 +618,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		private String[] listeningAddresses = null;
 		private File[] externalConfigurations = null;
 
-		private int eventDispatcherThreadCount;
+		private final int eventDispatcherThreadCount;
 
 		@SuppressWarnings("deprecation")
 		private ServerConfigurationImpl() {
@@ -995,6 +1003,39 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		@Override
 		public Integer getMaxCertPathLength() {
 			return resolveIntegerProperty(PaxWebConfig.PID_CFG_MAX_CERT_PATH_LENGTH);
+		}
+	}
+
+	private class ResourceConfigurationImpl implements ResourceConfiguration {
+
+		@Override
+		public boolean acceptRanges() {
+			return resolveBooleanProperty(PaxWebConfig.PID_CFG_DEFAULT_SERVLET_ACCEPT_RANGES);
+		}
+
+		@Override
+		public boolean redirectWelcome() {
+			return resolveBooleanProperty(PaxWebConfig.PID_CFG_DEFAULT_SERVLET_REDIRECT_WELCOME);
+		}
+
+		@Override
+		public boolean dirListing() {
+			return resolveBooleanProperty(PaxWebConfig.PID_CFG_DEFAULT_SERVLET_DIR_LISTING);
+		}
+
+		@Override
+		public int maxCacheEntries() {
+			return resolveIntegerProperty(PaxWebConfig.PID_CFG_DEFAULT_SERVLET_CACHE_MAX_ENTRIES);
+		}
+
+		@Override
+		public int maxCacheEntrySize() {
+			return resolveIntegerProperty(PaxWebConfig.PID_CFG_DEFAULT_SERVLET_CACHE_MAX_ENTRY_SIZE);
+		}
+
+		@Override
+		public int maxTotalCacheSize() {
+			return resolveIntegerProperty(PaxWebConfig.PID_CFG_DEFAULT_SERVLET_CACHE_MAX_TOTAL_SIZE);
 		}
 	}
 

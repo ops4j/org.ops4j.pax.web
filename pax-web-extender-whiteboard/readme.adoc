@@ -165,7 +165,10 @@ Servlet containers themselves also have "default"/"resource" servlets to serve s
 
 ALl these servlets do several things like handling _index_ for directory access (or not), preventing access to `/WEB-INF/`, etc. For actual resource serving, another interface is used:
 
-* `org.eclipse.jetty.server.ResourceService.doGet()` → `org.eclipse.jetty.http.HttpContent.ContentFactory.getContent()`
+* `org.eclipse.jetty.server.ResourceService.doGet()` → `org.eclipse.jetty.http.HttpContent.ContentFactory.getContent()` → `org.eclipse.jetty.util.resource.ResourceFactory.getResource()` → `org.eclipse.jetty.servlet.DefaultServlet.getResource()`
+** if `org.eclipse.jetty.servlet.DefaultServlet._resourceBase` is not `null`: org.eclipse.jetty.util.resource.Resource.addPath()`
+** `org.eclipse.jetty.server.handler.ContextHandler.getResource()` → `org.eclipse.jetty.util.resource.Resource.addPath()`
+** `javax.servlet.ServletContext.getResource()`
 * `org.apache.catalina.WebResourceRoot.getResource()` → `org.apache.catalina.WebResourceSet.getResource()`
 * `io.undertow.server.handlers.resource.ResourceSupplier.getResource()` → `io.undertow.server.handlers.resource.ResourceManager.getResource()`
 
@@ -181,7 +184,7 @@ Pax Web (pre 8) handles resource like this:
 * Tomcat: call `org.osgi.service.http.HttpContext.getResource()` and if not available, handle _welcome files_.
 * Undertow: `org.ops4j.pax.web.service.undertow.internal.ResourceServlet` is also an `io.undertow.server.handlers.resource.ResourceManager`, which calls `org.osgi.service.http.HttpContext.getResource()` and as fallback, handle _welcome files_.
 
-_Welcome files_ are strictly related to _resource servlet_ and should be used when no resource is found using normal (`HttpContext` / `ServletContextHelper`) way. Remember - Whiteboard and HttpService specification don't mention _welcome files_ at all.
+_Welcome files_ are strictly related to _resource servlet_ and should be used when no resource is found using normal (`HttpContext` / `ServletContextHelper`) way. Remember - Whiteboard and HttpService specifications don't mention _welcome files_ at all.
 
 * `org.eclipse.jetty.server.handler.ContextHandler.setWelcomeFiles()`
 * `org.apache.catalina.Context.addWelcomeFile()`

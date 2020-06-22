@@ -15,12 +15,15 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -37,6 +40,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -47,11 +52,13 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.ErrorHandler;
+import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
+import org.eclipse.jetty.util.resource.PathResource;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -62,6 +69,7 @@ import org.slf4j.LoggerFactory;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class EmbeddedJettyTest {
@@ -428,6 +436,141 @@ public class EmbeddedJettyTest {
 		s2.close();
 
 		assertTrue(sw.toString().endsWith("\r\n\r\nOK2\n"));
+
+		server.stop();
+		server.join();
+	}
+
+	@Test
+	public void embeddedServerWithJettyResourceServlet() throws Exception {
+		Server server = new Server();
+		ServerConnector connector = new ServerConnector(server, 1, 1, new HttpConnectionFactory());
+		connector.setPort(0);
+		server.setConnectors(new Connector[] { connector });
+
+		ContextHandlerCollection chc = new ContextHandlerCollection();
+		ServletContextHandler handler1 = new ServletContextHandler(null, "/", ServletContextHandler.NO_SESSIONS);
+		handler1.setAllowNullPathInfo(true);
+		handler1.setInitParameter(DefaultServlet.CONTEXT_INIT + "dirAllowed", "false");
+		handler1.setInitParameter(DefaultServlet.CONTEXT_INIT + "etags", "true");
+		handler1.setInitParameter(DefaultServlet.CONTEXT_INIT + "resourceBase", new File("target").getAbsolutePath());
+		handler1.setInitParameter(DefaultServlet.CONTEXT_INIT + "maxCachedFiles", "1000");
+
+		handler1.addServlet(new ServletHolder("default", new DefaultServlet()), "/");
+
+		chc.addHandler(handler1);
+		server.setHandler(chc);
+		server.start();
+
+		int port = connector.getLocalPort();
+
+		// Jetty generates ETag using org.eclipse.jetty.util.resource.Resource.getWeakETag(java.lang.String)
+		// which is 'W/"' + base64(hash of name ^ lastModified) + base64(hash of name ^ length) + '"'
+
+		String response = send(port, "/test-classes/log4j2-test.properties");
+		Map<String, String> headers = extractHeaders(response);
+		assertTrue(response.contains("ETag: W/"));
+		assertTrue(response.contains("rootLogger.appenderRef.file.ref = file"));
+
+		response = send(port, "/test-classes/log4j2-test.properties",
+				"If-None-Match: " + headers.get("ETag"),
+				"If-Modified-Since: " + headers.get("Date"));
+		assertTrue(response.contains("HTTP/1.1 304"));
+		assertFalse(response.contains("rootLogger.appenderRef.file.ref = file"));
+
+		server.stop();
+		server.join();
+	}
+
+	@Test
+	public void twoResourceServletsWithDifferentBases() throws Exception {
+		Server server = new Server();
+		ServerConnector connector = new ServerConnector(server, 1, 1, new HttpConnectionFactory());
+		connector.setPort(0);
+		server.setConnectors(new Connector[] { connector });
+
+		ContextHandlerCollection chc = new ContextHandlerCollection();
+		ServletContextHandler handler1 = new ServletContextHandler(null, "/", ServletContextHandler.NO_SESSIONS);
+		handler1.setAllowNullPathInfo(true);
+		handler1.setInitParameter(DefaultServlet.CONTEXT_INIT + "dirAllowed", "false");
+		handler1.setInitParameter(DefaultServlet.CONTEXT_INIT + "etags", "true");
+		handler1.setInitParameter(DefaultServlet.CONTEXT_INIT + "resourceBase", new File("target").getAbsolutePath());
+		handler1.setInitParameter(DefaultServlet.CONTEXT_INIT + "maxCachedFiles", "1000");
+		handler1.setInitParameter(DefaultServlet.CONTEXT_INIT + "pathInfoOnly", "true");
+
+		// in Jetty, DefaultServlet implements org.eclipse.jetty.util.resource.ResourceFactory used by the
+		// cache to populate in-memory storage. So org.eclipse.jetty.util.resource.ResourceFactory is actually
+		// the interface to load actual org.eclipse.jetty.util.resource.Resource when needed. Returned Resource
+		// should have metadata (lastModified) allowing it to be cached (and evicted) safely
+
+		File b1 = new File("target/b1");
+		FileUtils.deleteDirectory(b1);
+		b1.mkdirs();
+		FileWriter fw1 = new FileWriter(new File(b1, "hello.txt"));
+		IOUtils.write("b1", fw1);
+		fw1.close();
+
+		File b2 = new File("target/b2");
+		FileUtils.deleteDirectory(b2);
+		b2.mkdirs();
+		FileWriter fw2 = new FileWriter(new File(b2, "hello.txt"));
+		IOUtils.write("b2", fw2);
+		fw2.close();
+
+		final PathResource p1 = new PathResource(b1);
+		final PathResource p2 = new PathResource(b2);
+
+		handler1.addServlet(new ServletHolder("default1", new DefaultServlet() {
+			@Override
+			public Resource getResource(String pathInContext) {
+				try {
+					return p1.addPath(pathInContext);
+				} catch (IOException e) {
+					throw new RuntimeException(e.getMessage(), e);
+				}
+			}
+		}), "/d1/*");
+		handler1.addServlet(new ServletHolder("default2", new DefaultServlet() {
+			@Override
+			public Resource getResource(String pathInContext) {
+				try {
+					return p2.addPath(pathInContext);
+				} catch (IOException e) {
+					throw new RuntimeException(e.getMessage(), e);
+				}
+			}
+		}), "/d2/*");
+
+		chc.addHandler(handler1);
+		server.setHandler(chc);
+		server.start();
+
+		int port = connector.getLocalPort();
+
+		String response = send(port, "/hello.txt");
+		assertTrue(response.contains("HTTP/1.1 404"));
+
+		response = send(port, "/d1/hello.txt");
+		Map<String, String> headers = extractHeaders(response);
+		assertTrue(response.contains("ETag: W/"));
+		assertTrue(response.endsWith("b1"));
+
+		response = send(port, "/d1/hello.txt",
+				"If-None-Match: " + headers.get("ETag"),
+				"If-Modified-Since: " + headers.get("Date"));
+		assertTrue(response.contains("HTTP/1.1 304"));
+		assertFalse(response.endsWith("b1"));
+
+		response = send(port, "/d2/hello.txt");
+		headers = extractHeaders(response);
+		assertTrue(response.contains("ETag: W/"));
+		assertTrue(response.endsWith("b2"));
+
+		response = send(port, "/d2/hello.txt",
+				"If-None-Match: " + headers.get("ETag"),
+				"If-Modified-Since: " + headers.get("Date"));
+		assertTrue(response.contains("HTTP/1.1 304"));
+		assertFalse(response.endsWith("b2"));
 
 		server.stop();
 		server.join();
@@ -906,6 +1049,7 @@ public class EmbeddedJettyTest {
 	}
 
 	public static class TestServlet extends HttpServlet {
+
 		@Override
 		protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			resp.setContentType("text/plain");
@@ -922,14 +1066,17 @@ public class EmbeddedJettyTest {
 		h.getServletHandler().addServletMapping(mapping);
 	}
 
-	private String send(int port, String request) throws IOException {
+	private String send(int port, String request, String ... headers) throws IOException {
 		Socket s = new Socket();
 		s.connect(new InetSocketAddress("127.0.0.1", port));
 
 		s.getOutputStream().write((
 				"GET " + request + " HTTP/1.1\r\n" +
-				"Host: 127.0.0.1:" + port + "\r\n" +
-				"Connection: close\r\n\r\n").getBytes());
+				"Host: 127.0.0.1:" + port + "\r\n").getBytes());
+		for (String header : headers) {
+			s.getOutputStream().write((header + "\r\n").getBytes());
+		}
+		s.getOutputStream().write(("Connection: close\r\n\r\n").getBytes());
 
 		byte[] buf = new byte[64];
 		int read = -1;
@@ -940,6 +1087,24 @@ public class EmbeddedJettyTest {
 		s.close();
 
 		return sw.toString();
+	}
+
+	private Map<String, String> extractHeaders(String response) throws IOException {
+		Map<String, String> headers = new LinkedHashMap<>();
+		try (BufferedReader reader = new BufferedReader(new StringReader(response))) {
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				if (line.trim().equals("")) {
+					break;
+				}
+				// I know, security when parsing headers is very important...
+				String[] kv = line.split(": ");
+				String header = kv[0];
+				String value = String.join("", Arrays.asList(kv).subList(1, kv.length));
+				headers.put(header, value);
+			}
+		}
+		return headers;
 	}
 
 }
