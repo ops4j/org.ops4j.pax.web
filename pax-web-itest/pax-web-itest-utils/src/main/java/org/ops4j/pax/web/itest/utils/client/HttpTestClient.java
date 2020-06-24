@@ -118,7 +118,7 @@ public interface HttpTestClient {
 	 * @param assertion the assertion-predicate gets the response-body as parameter, which is never null
 	 * @return the HttpTestClient-instance
 	 */
-	HttpTestClient withResponseAssertion(final String message, final Predicate<String> assertion);
+	HttpTestClient withResponseAssertion(String message, Predicate<String> assertion);
 
 	/**
 	 * The given predicate is applied against the returned headers (stream of map-entries) when
@@ -129,7 +129,7 @@ public interface HttpTestClient {
 	 * @param assertion the assertion-predicate gets the response-headers as parameter
 	 * @return the HttpTestClient-instance
 	 */
-	HttpTestClient withResponseHeaderAssertion(final String message, final Predicate<Stream<Map.Entry<String, String>>> assertion);
+	HttpTestClient withResponseHeaderAssertion(String message, Predicate<Stream<Map.Entry<String, String>>> assertion);
 
 	/**
 	 * Prepares the client to execute a GET-request against the given URL.

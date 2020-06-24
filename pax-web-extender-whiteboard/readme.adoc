@@ -189,3 +189,9 @@ _Welcome files_ are strictly related to _resource servlet_ and should be used wh
 * `org.eclipse.jetty.server.handler.ContextHandler.setWelcomeFiles()`
 * `org.apache.catalina.Context.addWelcomeFile()`
 * `org.ops4j.pax.web.service.undertow.internal.Context.welcomeFiles` (used then by `org.ops4j.pax.web.service.undertow.internal.Context.getResource()` which is implementation of `io.undertow.server.handlers.resource.ResourceManager.getResource()`)
+
+=== Resource paths
+
+I checked that all servers have own methods for path _normalization_ to prevent accessing paths like `../../../../../../../etc/passwd`. Because we want unified behavior, we'll use `org.apache.commons.io.FilenameUtils.normalize()` function instead.
+
+The main requirement for _default servlets_ configured with some _resource base_ is that no path can go above the configured _base_ (which should be treated as `chroot`).

@@ -20,6 +20,7 @@ import javax.servlet.Filter;
 
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.model.events.FilterEventData;
 import org.ops4j.pax.web.service.whiteboard.FilterMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -34,7 +35,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * @author Grzegorz Grzybek
  * @since 0.4.0, April 05, 2008
  */
-public class FilterMappingTracker extends AbstractMappingTracker<FilterMapping, Filter, FilterModel> {
+public class FilterMappingTracker extends AbstractMappingTracker<FilterMapping, Filter, FilterEventData, FilterModel> {
 
 	private FilterMappingTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
 		super(extenderContext, bundleContext);

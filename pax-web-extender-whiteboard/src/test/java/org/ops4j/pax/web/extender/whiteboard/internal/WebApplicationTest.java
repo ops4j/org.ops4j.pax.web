@@ -15,9 +15,6 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal;
 
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-
 //@RunWith(MockitoJUnitRunner.class)
 //TODO: Re-Enable or Delete
 public class WebApplicationTest {

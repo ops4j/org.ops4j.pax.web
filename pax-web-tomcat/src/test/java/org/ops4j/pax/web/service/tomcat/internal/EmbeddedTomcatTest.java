@@ -31,7 +31,6 @@ import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.GenericFilter;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -45,7 +44,6 @@ import org.apache.catalina.Engine;
 import org.apache.catalina.Executor;
 import org.apache.catalina.Host;
 import org.apache.catalina.Lifecycle;
-import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Server;
 import org.apache.catalina.Service;
 import org.apache.catalina.Valve;
@@ -75,6 +73,7 @@ import org.apache.tomcat.util.digester.Digester;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.ops4j.pax.web.service.tomcat.internal.web.TomcatResourceServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -375,21 +374,21 @@ public class EmbeddedTomcatTest {
 		rootContext.setName("");
 		rootContext.setPath("");
 //		rootContext.setDocBase(new File("target").getAbsolutePath());
-		StandardRoot standardRoot = new StandardRoot(rootContext) {
-			@Override
-			protected WebResourceSet createMainResourceSet() {
-				return new DirResourceSet(this, "/", new File("target").getAbsolutePath(), "/");
-			}
-		};
+//		StandardRoot standardRoot = new StandardRoot(rootContext) {
+//			@Override
+//			protected WebResourceSet createMainResourceSet() {
+//				return new DirResourceSet(this, "/", new File("target").getAbsolutePath(), "/");
+//			}
+//		};
 		// setting resources here will make it available for DefaultServlet's which checks
 		// org.apache.catalina.Globals.RESOURCES_ATTR context attribute.
 		// if we want to have more "roots" (for more OSGi http "resources") we have to be clever about
 		// DefaultServlet customization
-		standardRoot.setCachingAllowed(true);
+//		standardRoot.setCachingAllowed(true);
 //		standardRoot.setCacheMaxSize(-1L);
 //		standardRoot.setCacheObjectMaxSize(-1);
 //		standardRoot.setCacheTtl(-1L);
-		rootContext.setResources(standardRoot);
+//		rootContext.setResources(standardRoot);
 		rootContext.setMapperContextRootRedirectEnabled(false);
 		rootContext.addLifecycleListener((event) -> {
 			if (event.getType().equals(Lifecycle.CONFIGURE_START_EVENT)) {
@@ -414,7 +413,7 @@ public class EmbeddedTomcatTest {
 
 		StandardWrapper default1Wrapper = new StandardWrapper();
 		default1Wrapper.setName("default1");
-		default1Wrapper.setServletClass(FlexibleDefaultServlet.class.getName());
+		default1Wrapper.setServlet(new TomcatResourceServlet(b1, null, null));
 		default1Wrapper.addInitParameter("listings", "false");
 		default1Wrapper.addInitParameter("base", b1.getAbsolutePath());
 
@@ -423,7 +422,7 @@ public class EmbeddedTomcatTest {
 
 		StandardWrapper default2Wrapper = new StandardWrapper();
 		default2Wrapper.setName("default2");
-		default2Wrapper.setServletClass(FlexibleDefaultServlet.class.getName());
+		default2Wrapper.setServlet(new TomcatResourceServlet(b2, null, null));
 		default2Wrapper.addInitParameter("listings", "false");
 		default2Wrapper.addInitParameter("base", b2.getAbsolutePath());
 
@@ -458,6 +457,23 @@ public class EmbeddedTomcatTest {
 				"If-Modified-Since: " + headers.get("Date"));
 		assertTrue(response.contains("HTTP/1.1 304"));
 		assertFalse(response.endsWith("b2"));
+
+		response = send(port, "/d1/../hello.txt");
+		assertTrue(response.contains("HTTP/1.1 404"));
+		response = send(port, "/d2/../../../../../../hello.txt");
+		assertTrue(response.contains("HTTP/1.1 400"));
+
+		response = send(port, "/d3/hello.txt");
+		assertTrue(response.contains("HTTP/1.1 404"));
+		response = send(port, "/d3/");
+		assertTrue(response.contains("HTTP/1.1 404"));
+		response = send(port, "/d3");
+		assertTrue(response.contains("HTTP/1.1 404"));
+		// directory access, but let's not suggest user that it's a directory. it's just 404
+		response = send(port, "/d2/");
+		assertTrue(response.contains("HTTP/1.1 404"));
+		response = send(port, "/d2");
+		assertTrue(response.contains("HTTP/1.1 404"));
 
 		server.stop();
 		server.destroy();
@@ -1084,56 +1100,56 @@ public class EmbeddedTomcatTest {
 		}
 	}
 
-	public static class FlexibleDefaultServlet extends DefaultServlet {
-
-		@Override
-		public void init() throws ServletException {
-			super.init();
-			String base = getServletConfig().getInitParameter("base");
-
-			// and tweak org.apache.catalina.servlets.DefaultServlet.resources
-			resources = new StandardRoot(resources.getContext()) {
-				@Override
-				protected WebResourceSet createMainResourceSet() {
-					return new DirResourceSet(this, "/", new File(base).getAbsolutePath(), "/");
-				}
-			};
-			try {
-				resources.start();
-			} catch (LifecycleException e) {
-				throw new ServletException(e.getMessage(), e);
-			}
-		}
-
-		/**
-		 * Override {@link DefaultServlet#getRelativePath(HttpServletRequest, boolean)} to use only path info. Just
-		 * as {@link org.apache.catalina.servlets.WebdavServlet} and just as Jetty does it with {@code pathInfoOnly}
-		 * servlet init parameter.
-		 *
-		 * @param request
-		 * @param allowEmptyPath
-		 * @return
-		 */
-		@Override
-		protected String getRelativePath(HttpServletRequest request, boolean allowEmptyPath) {
-			String pathInfo;
-
-			if (request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null) {
-				pathInfo = (String) request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
-			} else {
-				pathInfo = request.getPathInfo();
-			}
-
-			StringBuilder result = new StringBuilder();
-			if (pathInfo != null) {
-				result.append(pathInfo);
-			}
-			if (result.length() == 0) {
-				result.append('/');
-			}
-
-			return result.toString();
-		}
-	}
+//	public static class FlexibleDefaultServlet extends DefaultServlet {
+//
+//		@Override
+//		public void init() throws ServletException {
+//			super.init();
+//			String base = getServletConfig().getInitParameter("base");
+//
+//			// and tweak org.apache.catalina.servlets.DefaultServlet.resources
+//			resources = new StandardRoot(resources.getContext()) {
+//				@Override
+//				protected WebResourceSet createMainResourceSet() {
+//					return new DirResourceSet(this, "/", new File(base).getAbsolutePath(), "/");
+//				}
+//			};
+//			try {
+//				resources.start();
+//			} catch (LifecycleException e) {
+//				throw new ServletException(e.getMessage(), e);
+//			}
+//		}
+//
+//		/**
+//		 * Override {@link DefaultServlet#getRelativePath(HttpServletRequest, boolean)} to use only path info. Just
+//		 * as {@link org.apache.catalina.servlets.WebdavServlet} and just as Jetty does it with {@code pathInfoOnly}
+//		 * servlet init parameter.
+//		 *
+//		 * @param request
+//		 * @param allowEmptyPath
+//		 * @return
+//		 */
+//		@Override
+//		protected String getRelativePath(HttpServletRequest request, boolean allowEmptyPath) {
+//			String pathInfo;
+//
+//			if (request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null) {
+//				pathInfo = (String) request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
+//			} else {
+//				pathInfo = request.getPathInfo();
+//			}
+//
+//			StringBuilder result = new StringBuilder();
+//			if (pathInfo != null) {
+//				result.append(pathInfo);
+//			}
+//			if (result.length() == 0) {
+//				result.append('/');
+//			}
+//
+//			return result.toString();
+//		}
+//	}
 
 }

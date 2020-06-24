@@ -176,7 +176,7 @@
 		<dependency.commons-codec.version>1.13</dependency.commons-codec.version>
 		<dependency.commons-collection.version>4.4</dependency.commons-collection.version>
 		<dependency.commons-collection3.version>3.2.2</dependency.commons-collection3.version>
-		<dependency.commons-io.version>2.6</dependency.commons-io.version>
+		<dependency.commons-io.version>2.7</dependency.commons-io.version>
 		<dependency.commons-lang.version>3.9</dependency.commons-lang.version>
 		<dependency.commons-logging.version>1.1.1</dependency.commons-logging.version>
 
@@ -2353,18 +2353,18 @@
 
 <!--		<module>pax-web-descriptor</module>-->
 <!--		<module>pax-web-extender-war</module>-->
-<!--		<module>pax-web-extender-whiteboard</module>-->
-<!--&lt;!&ndash; 		<module>pax-web-resources</module> &ndash;&gt;-->
+		<module>pax-web-extender-whiteboard</module>
+<!-- 		<module>pax-web-resources</module> -->
 <!--		<module>pax-web-deployer</module>-->
 		<module>pax-web-jetty</module>
 		<module>pax-web-jetty-servlet-compatibility</module>
-<!--&lt;!&ndash; 		<module>pax-web-jetty-bundle</module> &ndash;&gt;-->
+<!-- 		<module>pax-web-jetty-bundle</module> -->
 		<module>pax-web-tomcat</module>
-<!--&lt;!&ndash;		<module>pax-web-tomcat-bundle</module>&ndash;&gt;-->
+<!--		<module>pax-web-tomcat-bundle</module>-->
 		<module>pax-web-undertow</module>
 <!--		<module>pax-web-features</module>-->
-<!--&lt;!&ndash;		<module>pax-web-archetypes</module>&ndash;&gt;-->
-<!--&lt;!&ndash; 		<module>pax-web-manual</module> &ndash;&gt;-->
+<!--		<module>pax-web-archetypes</module>-->
+<!-- 		<module>pax-web-manual</module> -->
 <!--		<module>pax-web-jaas</module>-->
 
 		<module>samples</module>

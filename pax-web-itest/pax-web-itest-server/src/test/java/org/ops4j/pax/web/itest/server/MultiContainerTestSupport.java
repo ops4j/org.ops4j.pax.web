@@ -371,10 +371,7 @@ public class MultiContainerTestSupport {
 	 * Class to verify {@link ServerModel} after performing a test
 	 */
 	public static class ServerModelInternals {
-		private final ServerModel model;
 
-//		private final Map<String, VirtualHostModel> virtualHosts = new HashMap<>();
-//		private final VirtualHostModel defaultHost = new VirtualHostModel();
 		public final Map<String, ServletContextModel> servletContexts = new HashMap<>();
 		public final Map<ServerModel.ContextKey, TreeSet<OsgiContextModel>> bundleContexts = new HashMap<>();
 		public final Map<String, TreeSet<OsgiContextModel>> sharedContexts = new HashMap<>();
@@ -383,6 +380,10 @@ public class MultiContainerTestSupport {
 		public final Set<ServletModel> disabledServletModels = new TreeSet<>();
 		public final Map<Filter, FilterModel> filters = new IdentityHashMap<>();
 		public final Set<FilterModel> disabledFilterModels = new TreeSet<>();
+
+		private final ServerModel model;
+//		private final Map<String, VirtualHostModel> virtualHosts = new HashMap<>();
+//		private final VirtualHostModel defaultHost = new VirtualHostModel();
 
 		@SuppressWarnings("unchecked")
 		public ServerModelInternals(ServerModel model) {
@@ -423,11 +424,12 @@ public class MultiContainerTestSupport {
 	 * Class to verify {@link ServiceModel} after performing a test
 	 */
 	public static class ServiceModelInternals {
-		private final ServiceModel model;
 
 		public final Map<String, Map<String, ServletModel>> aliasMapping = new HashMap<>();
 		public final Set<ServletModel> servletModels = new HashSet<>();
 		public final Set<FilterModel> filterModels = new HashSet<>();
+
+		private final ServiceModel model;
 //		private final Map<EventListener, EventListenerModel> eventListenerModels = new HashMap<>();
 
 		@SuppressWarnings("unchecked")

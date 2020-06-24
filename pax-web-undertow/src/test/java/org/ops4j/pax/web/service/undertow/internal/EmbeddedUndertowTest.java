@@ -68,7 +68,7 @@ import io.undertow.util.StatusCodes;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
-import org.ops4j.pax.web.service.undertow.internal.context.FlexibleDefaultServlet;
+import org.ops4j.pax.web.service.undertow.internal.web.UndertowResourceServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xnio.ChannelListener;
@@ -242,28 +242,21 @@ public class EmbeddedUndertowTest {
 		fw2.close();
 
 		DirectBufferCache cache1 = new DirectBufferCache(1024, 64, 1024 * 1024);
-		ResourceManager fileResourceManager1 = FileResourceManager.builder()
-				.setBase(Paths.get("target/b1"))
-				.setETagFunction(p -> new ETag(true, p.toFile().length() + "-" + p.toFile().lastModified()))
-				.build();
+		UndertowResourceServlet servlet1Instance = new UndertowResourceServlet(new File("target/b1"), null);
 		CachingResourceManager manager1 = new CachingResourceManager(1024, 1024 * 1024, cache1,
-				fileResourceManager1, 3_600_000/*ms*/);
+				servlet1Instance, 3_600_000/*ms*/);
+		servlet1Instance.setCachingResourceManager(manager1);
 
 		DirectBufferCache cache2 = new DirectBufferCache(1024, 64, 1024 * 1024);
-		ResourceManager fileResourceManager2 = FileResourceManager.builder()
-				.setBase(Paths.get("target/b2"))
-				.setETagFunction(p -> new ETag(true, p.toFile().length() + "-" + p.toFile().lastModified()))
-				.build();
+		UndertowResourceServlet servlet2Instance = new UndertowResourceServlet(new File("target/b2"), null);
 		CachingResourceManager manager2 = new CachingResourceManager(1024, 1024 * 1024, cache2,
-				fileResourceManager2, 3_600_000/*ms*/);
-
-		HttpServlet servlet1Instance = new FlexibleDefaultServlet(manager1);
-		HttpServlet servlet2Instance = new FlexibleDefaultServlet(manager2);
+				servlet2Instance, 3_600_000/*ms*/);
+		servlet2Instance.setCachingResourceManager(manager2);
 
 		ServletInfo servlet1 = Servlets.servlet("default1", servlet1Instance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servlet1Instance));
-		servlet1.addInitParam("directory-listing", "true");
+		servlet1.addInitParam("directory-listing", "false");
 		ServletInfo servlet2 = Servlets.servlet("default2", servlet2Instance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servlet2Instance));
-		servlet2.addInitParam("directory-listing", "true");
+		servlet2.addInitParam("directory-listing", "false");
 
 		servlet1.addMapping("/d1/*");
 		servlet2.addMapping("/d2/*");
@@ -311,6 +304,24 @@ public class EmbeddedUndertowTest {
 				"If-Modified-Since: " + headers.get("Date"));
 		assertTrue(response.contains("HTTP/1.1 304"));
 		assertFalse(response.endsWith("b2"));
+
+		// that's because of io.undertow.util.CanonicalPathUtils.canonicalize()
+		response = send(port, "/d1/../hello.txt");
+		assertTrue(response.endsWith("b1"));
+		response = send(port, "/d2/../../../../../../hello.txt");
+		assertTrue(response.endsWith("b2"));
+
+		response = send(port, "/d3/hello.txt");
+		assertTrue(response.contains("HTTP/1.1 404"));
+		response = send(port, "/d3/");
+		assertTrue(response.contains("HTTP/1.1 404"));
+		response = send(port, "/d3");
+		assertTrue(response.contains("HTTP/1.1 404"));
+		response = send(port, "/d2/");
+		// directory access, but let's not suggest user that it's a directory. it's just 404
+		assertTrue(response.contains("HTTP/1.1 404"));
+		response = send(port, "/d2");
+		assertTrue(response.contains("HTTP/1.1 404"));
 
 		server.stop();
 	}

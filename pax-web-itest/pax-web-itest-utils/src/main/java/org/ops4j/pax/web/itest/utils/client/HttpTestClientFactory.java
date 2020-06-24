@@ -17,6 +17,9 @@ package org.ops4j.pax.web.itest.utils.client;
 
 public class HttpTestClientFactory {
 
+	private HttpTestClientFactory() {
+	}
+
 	/**
 	 * creates a default HttpTestClient based on Jetty HttpClient with
 	 * some default configuration.

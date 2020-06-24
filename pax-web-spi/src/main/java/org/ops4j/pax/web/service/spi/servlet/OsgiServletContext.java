@@ -194,7 +194,12 @@ public class OsgiServletContext implements ServletContext {
 
 	@Override
 	public Object getAttribute(String name) {
-		return attributes.get(name);
+		Object value = attributes.get(name);
+		if (value == null) {
+			// let's check real context
+			value = containerServletContext.getAttribute(name);
+		}
+		return value;
 	}
 
 	@Override
@@ -430,7 +435,12 @@ public class OsgiServletContext implements ServletContext {
 	public String getInitParameter(String name) {
 		// Mind the confusion between getInitParameter() method name and <context-param> web.xml element
 		// these are actually the same
-		return osgiContextModel.getContextParams().get(name);
+		String param = osgiContextModel.getContextParams().get(name);
+		if (param == null) {
+			// let's check real context
+			param = containerServletContext.getInitParameter(name);
+		}
+		return param;
 	}
 
 	@Override

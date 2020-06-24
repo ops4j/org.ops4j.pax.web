@@ -39,16 +39,23 @@ public interface ResourceConfiguration {
 	/**
 	 * <p>Integer property to specify maximum number of cache entries (per single <em>resource manager</em>).</p>
 	 */
-	int maxCacheEntries();
+	Integer maxCacheEntries();
 
 	/**
-	 * <p>Integer property to specify maximum size of single cache entry (file) (per single <em>resource manager</em>).</p>
+	 * <p>Integer property to specify maximum size of single cache entry (file) (per single <em>resource manager</em>)
+	 * in kB.</p>
 	 */
-	int maxCacheEntrySize();
+	Integer maxCacheEntrySize();
 
 	/**
-	 * <p>Integer property to specify maximum total size of the cache (per single <em>resource manager</em>).</p>
+	 * <p>Integer property to specify maximum total size of the cache (per single <em>resource manager</em>) in kB.</p>
 	 */
-	int maxTotalCacheSize();
+	Integer maxTotalCacheSize();
+
+	/**
+	 * Integer property to specify TTL for resource cache entries (ms)
+	 * @return
+	 */
+	Integer maxCacheTTL();
 
 }

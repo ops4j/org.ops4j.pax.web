@@ -23,6 +23,9 @@ import java.util.function.Supplier;
  */
 public class Assert {
 
+	private Assert() {
+	}
+
 	public static <T> void assertThat(Supplier<T> actual, Predicate<T> expected) {
 		assertThat("Test failed", actual, expected);
 	}

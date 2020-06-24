@@ -318,7 +318,7 @@ public interface PaxWebConfig {
 	String PID_CFG_DEFAULT_SERVLET_CACHE_MAX_ENTRIES = "org.ops4j.pax.web.resource.cache.maxEntries";
 
 	/**
-	 * <p>Integer property to specify maximum size of single cache entry (file) (per single <em>resource manager</em>).</p>
+	 * <p>Integer property to specify maximum size (kB) of single cache entry (file) (per single <em>resource manager</em>).</p>
 	 * <p><ul>
 	 *     <li>Jetty: {@code maxCachedFileSize} integer init parameter</li>
 	 *     <li>Tomcat: {@code org.apache.catalina.webresources.StandardRoot#setCacheObjectMaxSize()} (kB)</li>
@@ -328,7 +328,7 @@ public interface PaxWebConfig {
 	String PID_CFG_DEFAULT_SERVLET_CACHE_MAX_ENTRY_SIZE = "org.ops4j.pax.web.resource.cache.maxEntrySize";
 
 	/**
-	 * <p>Integer property to specify maximum total size of the cache (per single <em>resource manager</em>).</p>
+	 * <p>Integer property to specify maximum total size (kB) of the cache (per single <em>resource manager</em>).</p>
 	 * <p><ul>
 	 *     <li>Jetty: {@code maxCacheSize} boolean init parameter</li>
 	 *     <li>Tomcat: {@code org.apache.catalina.webresources.StandardRoot#setCacheMaxSize()} (kB)</li>
@@ -336,5 +336,16 @@ public interface PaxWebConfig {
 	 * </ul></p>
 	 */
 	String PID_CFG_DEFAULT_SERVLET_CACHE_MAX_TOTAL_SIZE = "org.ops4j.pax.web.resource.cache.maxTotalSize";
+
+	/**
+	 * <p>Integer property to specify TTL for cache entries (ms)</p>
+	 * <p><ul>
+	 *     <li>Jetty: no such option, entries are evicted by last access time</li>
+	 *     <li>Tomcat: {@code org.apache.catalina.webresources.StandardRoot#setCacheTtl(long)} (ms)</li>
+	 *     <li>Undertow: {@code io.undertow.server.handlers.resource.CachingResourceManager#maxAge} and
+	 *         {@code io.undertow.server.handlers.cache.LRUCache#maxAge}</li>
+	 * </ul></p>
+	 */
+	String PID_CFG_DEFAULT_SERVLET_CACHE_TTL = "org.ops4j.pax.web.resource.cache.ttl";
 
 }

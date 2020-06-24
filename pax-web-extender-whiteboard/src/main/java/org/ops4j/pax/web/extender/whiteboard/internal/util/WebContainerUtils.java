@@ -53,11 +53,11 @@ public class WebContainerUtils {
 	}
 
 	private static boolean webSocketsAvailable() {
-		try {
-			return javax.websocket.Endpoint.class != null;
-		} catch (NoClassDefFoundError ignore) {
+//		try {
+//			return javax.websocket.Endpoint.class != null;
+//		} catch (NoClassDefFoundError ignore) {
 			return false;
-		}
+//		}
 	}
 
 	/**

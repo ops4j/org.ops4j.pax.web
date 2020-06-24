@@ -18,6 +18,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.AbstractElementTracker;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
+import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
 import org.ops4j.pax.web.service.whiteboard.ContextRelated;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -29,10 +30,11 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
  *
  * @param <S>
  * @param <R>
+ * @param <D>
  * @param <T>
  */
-public abstract class AbstractMappingTracker<S extends ContextRelated, R, T extends ElementModel<R>>
-		extends AbstractElementTracker<S, R, T> {
+public abstract class AbstractMappingTracker<S extends ContextRelated, R, D extends ElementEventData, T extends ElementModel<R, D>>
+		extends AbstractElementTracker<S, R, D, T> {
 
 	protected AbstractMappingTracker(ExtenderContext extenderContext, BundleContext bundleContext) {
 		super(extenderContext, bundleContext);
@@ -55,7 +57,7 @@ public abstract class AbstractMappingTracker<S extends ContextRelated, R, T exte
 
 				// repeated validation, but for id/selector from the mapping itself.
 				if (selector != null && legacyId != null) {
-					LOG.warn("Both context id={} and context selector={} are specified. Using {}.",
+					log.warn("Both context id={} and context selector={} are specified. Using {}.",
 							legacyId, selector, selector);
 					legacyId = null;
 				}
@@ -91,7 +93,7 @@ public abstract class AbstractMappingTracker<S extends ContextRelated, R, T exte
 		S service = null;
 		try {
 			service = dereference(serviceReference);
-			LOG.debug("Creating web element model from legacy whiteboard service {} (id={}): {}",
+			log.debug("Creating web element model from legacy whiteboard service {} (id={}): {}",
 					serviceReference, serviceId, service);
 
 			return doCreateElementModel(serviceReference.getBundle(), service, rank, serviceId);

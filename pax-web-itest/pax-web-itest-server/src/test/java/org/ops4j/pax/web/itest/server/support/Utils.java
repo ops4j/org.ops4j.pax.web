@@ -15,14 +15,19 @@
  */
 package org.ops4j.pax.web.itest.server.support;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import javax.net.ssl.SSLContext;
@@ -186,6 +191,24 @@ public class Utils {
 				return sb.toString();
 			}
 		}
+	}
+
+	public static Map<String, String> extractHeaders(String response) throws IOException {
+		Map<String, String> headers = new LinkedHashMap<>();
+		try (BufferedReader reader = new BufferedReader(new StringReader(response))) {
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				if (line.trim().equals("")) {
+					break;
+				}
+				// I know, security when parsing headers is very important...
+				String[] kv = line.split(": ");
+				String header = kv[0];
+				String value = String.join("", Arrays.asList(kv).subList(1, kv.length));
+				headers.put(header, value);
+			}
+		}
+		return headers;
 	}
 
 	public static Object getField(Object object, String fieldName) {

@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
+import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.osgi.framework.Bundle;
@@ -312,7 +313,7 @@ public class ExtenderContext {
 		}
 	}
 
-	public <R, T extends ElementModel<R>> void addWebElement(Bundle bundle, T webElement) {
+	public <R, D extends ElementEventData, T extends ElementModel<R, D>> void addWebElement(Bundle bundle, T webElement) {
 		getBundleApplication(bundle).addWebElement(webElement);
 
 		WhiteboardWebContainerView view = this.whiteboardContainer;
@@ -324,7 +325,7 @@ public class ExtenderContext {
 		webElement.register(view);
 	}
 
-	public <R, T extends ElementModel<R>> void removeWebElement(Bundle bundle, T webElement) {
+	public <R, D extends ElementEventData, T extends ElementModel<R, D>> void removeWebElement(Bundle bundle, T webElement) {
 		// TODO: only mark as "to remove" in case there's no WebContainer. But then - is it needed?
 		getBundleApplication(bundle).removeWebElement(webElement);
 
@@ -407,14 +408,14 @@ public class ExtenderContext {
 	 * This method is invoked after checking that element model {@link ElementModel#isValid() is valid}.
 	 * @param httpServiceRuntime
 	 */
-	public void configureDTOs(ElementModel<?> webElement) {
+	public void configureDTOs(ElementModel<?, ?> webElement) {
 	}
 
 	/**
 	 * This method is invoked after checking that element model {@link ElementModel#isValid() is not valid}.
 	 * @param httpServiceRuntime
 	 */
-	public void configureFailedDTOs(ElementModel<?> webElement) {
+	public void configureFailedDTOs(ElementModel<?, ?> webElement) {
 	}
 
 	/**

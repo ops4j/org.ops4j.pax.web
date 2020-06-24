@@ -15,6 +15,9 @@
  */
 package org.ops4j.pax.web.itest.osgi.support;
 
+import java.net.URL;
+import javax.servlet.Servlet;
+
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerListener;
 import org.ops4j.pax.web.service.spi.ServerState;
@@ -68,6 +71,11 @@ public class MockServerController implements ServerController {
 
 	@Override
 	public void sendBatch(Batch batch) {
+	}
+
+	@Override
+	public Servlet createResourceServlet(URL urlBase, String base) {
+		return null;
 	}
 
 //	@Override

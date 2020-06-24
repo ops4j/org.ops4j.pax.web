@@ -15,6 +15,10 @@
  */
 package org.ops4j.pax.web.service.spi.model.elements;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -86,6 +90,24 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	 * {@link org.ops4j.pax.web.service.whiteboard.ServletMapping} "direct Whiteboard" service.
 	 */
 	private final Class<? extends Servlet> servletClass;
+
+	/**
+	 * Flag that marks given {@link ServletModel} as "resource servlet" with slightly different processing.
+	 */
+	private boolean resourceServlet = false;
+
+	/**
+	 * For resource servlets, we have to specify <em>base path</em> which should be the "prefix" to prepend when
+	 * accessing resources through {@link org.osgi.service.http.context.ServletContextHelper} (in Whiteboard). But
+	 * Pax Web will happily allow to serve properties (without custom context) when basePath is absolute URI.
+	 */
+	private String basePath = null;
+
+	/**
+	 * If the "base" configured by user is valid absolute, non-opaque {@link URL} it can be used as a "base" not
+	 * related to any bundle.
+	 */
+	private URL baseFileUrl = null;
 
 	/**
 	 * Constructor used for servlet unregistration
@@ -207,7 +229,34 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			}
 		}
 
+		if (isResourceServlet()) {
+			if (basePath == null && baseFileUrl == null) {
+				throw new IllegalArgumentException("Base path or base directory is required for resource servlets");
+			}
+			if (basePath != null && baseFileUrl != null) {
+				throw new IllegalArgumentException("Only one base (resource base or base directory) is allowed for resource servlets");
+			}
+		}
+
 		return Boolean.TRUE;
+	}
+
+	/**
+	 * Returns {@link URL} if and only if the base is proper {@code file:} based absolute url.
+	 * @param base
+	 * @return
+	 */
+	public static URL getFileUrlIfAccessible(String base) {
+		try {
+			URL baseUrl = new URL(base);
+			File f = new File(baseUrl.toURI());
+			if (!f.isDirectory()) {
+				return null;
+			}
+			return f.toURI().toURL();
+		} catch (MalformedURLException | URISyntaxException e) {
+			return null;
+		}
 	}
 
 	@Override
@@ -311,6 +360,30 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		}
 
 		return null; // even if it can't happen
+	}
+
+	public boolean isResourceServlet() {
+		return resourceServlet;
+	}
+
+	public void setResourceServlet(boolean resourceServlet) {
+		this.resourceServlet = resourceServlet;
+	}
+
+	public String getBasePath() {
+		return basePath;
+	}
+
+	public void setBasePath(String basePath) {
+		this.basePath = basePath;
+	}
+
+	public void setBaseFileUrl(URL baseFileUrl) {
+		this.baseFileUrl = baseFileUrl;
+	}
+
+	public URL getBaseFileUrl() {
+		return baseFileUrl;
 	}
 
 	public static class Builder {

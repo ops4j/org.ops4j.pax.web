@@ -17,6 +17,11 @@
  */
 package org.ops4j.pax.web.service.spi.util;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import org.apache.commons.io.FilenameUtils;
+
 /**
  * Divers utilities related to request paths.
  *
@@ -49,6 +54,30 @@ public class Path {
 			normalizedPath = normalizedPath.substring(1);
 		}
 		return normalizedPath;
+	}
+
+	/**
+	 * <p>Make passed path securely appendable to some resource base path. Resource base path may (but doesn't have to)
+	 * be a String with trailing slash - the only requirement is that it should mean a <em>base directory</em> or
+	 * <em>chroot</em> that can't be escaped.</p>
+	 *
+	 * <p>The returned path may, but doesn't have to end with "/" which could be treated as file vs. directory
+	 * distinction.</p>
+	 *
+	 * <p>If {@code null} is returned, it means that path is invalid and/or it goes out of the chroot.</p>
+	 *
+	 * @param path
+	 * @return
+	 */
+	public static String securePath(final String path) {
+		String p = path == null ? "" : FilenameUtils.separatorsToUnix(path);
+		try {
+			URL url = new URL(p);
+			p = url.getPath();
+		} catch (MalformedURLException ignored) {
+		}
+
+		return FilenameUtils.normalize(p, true);
 	}
 
 	/**

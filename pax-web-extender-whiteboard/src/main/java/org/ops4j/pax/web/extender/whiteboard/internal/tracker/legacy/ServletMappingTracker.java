@@ -19,6 +19,7 @@ import javax.servlet.Servlet;
 
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
 import org.ops4j.pax.web.service.whiteboard.ServletMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -35,7 +36,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * @author Grzegorz Grzybek
  * @since 0.4.0, April 05, 2008
  */
-public class ServletMappingTracker extends AbstractMappingTracker<ServletMapping, Servlet, ServletModel> {
+public class ServletMappingTracker extends AbstractMappingTracker<ServletMapping, Servlet, ServletEventData, ServletModel> {
 
 	private ServletMappingTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
 		super(extenderContext, bundleContext);

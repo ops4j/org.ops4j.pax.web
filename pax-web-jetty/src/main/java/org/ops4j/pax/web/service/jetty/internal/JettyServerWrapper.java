@@ -43,6 +43,7 @@ import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -573,6 +574,26 @@ class JettyServerWrapper implements BatchVisitor {
 			sch.setServletHandler(new PaxWebServletHandler(default404Servlet));
 			// setting "false" here will trigger 302 redirect when browsing to context without trailing "/"
 			sch.setAllowNullPathInfo(false);
+
+			// for future (optional) resource servlets, let's define some common context init properties
+			// which are read in org.eclipse.jetty.servlet.DefaultServlet.init()
+			sch.setInitParameter(DefaultServlet.CONTEXT_INIT + "dirAllowed", "false");
+			sch.setInitParameter(DefaultServlet.CONTEXT_INIT + "etags", "true");
+			sch.setInitParameter(DefaultServlet.CONTEXT_INIT + "pathInfoOnly", "true");
+
+			// cache properties for default servlet (see org.eclipse.jetty.server.CachedContentFactory) passed
+			// through context init params
+			Integer totalCacheSize = configuration.resources().maxTotalCacheSize(); // kB
+			Integer maxEntrySize = configuration.resources().maxCacheEntrySize(); // kB
+			Integer maxEntries = configuration.resources().maxCacheEntries();
+			// the defaults in Jetty are quite high (256MB total, 128MB max entry size), but we can have more
+			// resource servlets, so we'll divide the defaults by 64
+			sch.setInitParameter(DefaultServlet.CONTEXT_INIT + "maxCacheSize",
+					totalCacheSize != null ? Integer.toString(totalCacheSize * 1024) : Integer.toString(256 * 1024 * 1024 / 64));
+			sch.setInitParameter(DefaultServlet.CONTEXT_INIT + "maxCachedFileSize",
+					maxEntrySize != null ? Integer.toString(maxEntrySize * 1024) : Integer.toString(128 * 1024 * 1024 / 64));
+			sch.setInitParameter(DefaultServlet.CONTEXT_INIT + "maxCachedFiles",
+					maxEntries != null ? Integer.toString(maxEntries) : "2048");
 
 			// many OsgiContextModels may refer to single ServletContextModel and servlets, when calling
 			// ServletContext.getServletContextName() will be getting OsgiContextModel specific name

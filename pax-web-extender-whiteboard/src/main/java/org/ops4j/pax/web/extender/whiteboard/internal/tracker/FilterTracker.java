@@ -25,6 +25,7 @@ import javax.servlet.http.HttpFilter;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.model.events.FilterEventData;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.utils.FilterAnnotationScanner;
 import org.osgi.framework.BundleContext;
@@ -40,7 +41,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * @author Grzegorz Grzybek
  * @since 0.4.0, April 05, 2008
  */
-public class FilterTracker extends AbstractElementTracker<Filter, Filter, FilterModel> {
+public class FilterTracker extends AbstractElementTracker<Filter, Filter, FilterEventData, FilterModel> {
 
 	private FilterTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
 		super(extenderContext, bundleContext);
@@ -55,7 +56,7 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 	@Override
 	@SuppressWarnings("deprecation")
 	protected FilterModel createElementModel(ServiceReference<Filter> serviceReference, Integer rank, Long serviceId) {
-		LOG.debug("Creating fiiter model from R7 whiteboard service {} (id={})", serviceReference, serviceId);
+		log.debug("Creating fiiter model from R7 whiteboard service {} (id={})", serviceReference, serviceId);
 
 		// 1. filter name
 		String name = Utils.getPaxWebProperty(serviceReference,
@@ -80,7 +81,7 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 		Map<String, String> initParams = new LinkedHashMap<>();
 		String legacyInitPrefix = Utils.getStringProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_INIT_PREFIX);
 		if (legacyInitPrefix != null) {
-			LOG.warn("Legacy {} property found, filter init parameters should be prefixed with {} instead",
+			log.warn("Legacy {} property found, filter init parameters should be prefixed with {} instead",
 					PaxWebConstants.SERVICE_PROPERTY_INIT_PREFIX,
 					HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX);
 		}
@@ -89,7 +90,7 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 		boolean hasLegacyInitProperty = Arrays.stream(serviceReference.getPropertyKeys())
 				.anyMatch(p -> p.startsWith(prefix[0]));
 		if (hasLegacyInitProperty) {
-			LOG.warn("Legacy filter init parameters found (with prefix: {}), init parameters should be prefixed with"
+			log.warn("Legacy filter init parameters found (with prefix: {}), init parameters should be prefixed with"
 					+ " {} instead", prefix[0], HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX);
 		} else {
 			prefix[0] = HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX;
@@ -104,7 +105,7 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 		}
 		if (initParams.isEmpty()) {
 			// TODO: this message should probably be removed at some point
-			LOG.info("Whiteboard filter has no init parameters specified. In Pax Web 8, service registration "
+			log.info("Whiteboard filter has no init parameters specified. In Pax Web 8, service registration "
 					+ "properties are no longer copied as init parameters.");
 		}
 
@@ -129,7 +130,7 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 					// 1. filter name
 					if (scanner.filterName != null) {
 						if (name != null) {
-							LOG.warn("Filter name specified using both service property ({}) and annotation ({})."
+							log.warn("Filter name specified using both service property ({}) and annotation ({})."
 									+ " Choosing {}.", name, scanner.filterName, name);
 						} else {
 							name = scanner.filterName;
@@ -138,7 +139,7 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 					// 2a. URL patterns
 					if (scanner.urlPatterns != null && scanner.urlPatterns.length > 0) {
 						if (urlPatterns != null && urlPatterns.length > 0) {
-							LOG.warn("Filter URL patterns specified using both service property ({}) and annotation ({})."
+							log.warn("Filter URL patterns specified using both service property ({}) and annotation ({})."
 									+ " Choosing {}.", Arrays.asList(urlPatterns), Arrays.asList(scanner.urlPatterns),
 									Arrays.asList(urlPatterns));
 						} else {
@@ -148,7 +149,7 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 					// 2c. Servlet names
 					if (scanner.servletNames != null && scanner.servletNames.length > 0) {
 						if (servletNames != null && servletNames.length > 0) {
-							LOG.warn("Filter servlet names specified using both service property ({}) and annotation ({})."
+							log.warn("Filter servlet names specified using both service property ({}) and annotation ({})."
 									+ " Choosing {}.", Arrays.asList(servletNames), Arrays.asList(scanner.servletNames),
 									Arrays.asList(servletNames));
 						} else {
@@ -158,7 +159,7 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 					// 3. init params
 					if (scanner.webInitParams != null) {
 						if (!initParams.isEmpty()) {
-							LOG.warn("Filter init parameters specified using both service property ({}) and annotation ({})."
+							log.warn("Filter init parameters specified using both service property ({}) and annotation ({})."
 									+ " Choosing {}.", initParams, scanner.webInitParams, initParams);
 						} else {
 							initParams.putAll(scanner.webInitParams);
@@ -167,7 +168,7 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 					// 5. async-supported
 					if (scanner.asyncSupported != null) {
 						if (asyncSupported != null && asyncSupported != scanner.asyncSupported) {
-							LOG.warn("Filter async flag specified using both service property ({}) and annotation ({})."
+							log.warn("Filter async flag specified using both service property ({}) and annotation ({})."
 									+ " Choosing {}.", asyncSupported, scanner.asyncSupported, asyncSupported);
 						} else {
 							asyncSupported = scanner.asyncSupported;

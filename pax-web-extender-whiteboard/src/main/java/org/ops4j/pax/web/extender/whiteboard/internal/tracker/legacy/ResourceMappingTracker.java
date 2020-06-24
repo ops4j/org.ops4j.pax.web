@@ -2,23 +2,29 @@
  * Copyright 2007 Alin Dreghiciu.
  * Copyright 2007 Damian Golda.
  *
- * Licensed  under the  Apache License,  Version 2.0  (the "License");
- * you may not use  this file  except in  compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed  under the  License is distributed on an "AS IS" BASIS,
- * WITHOUT  WARRANTIES OR CONDITIONS  OF ANY KIND, either  express  or
- * implied.
- *
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 
+import javax.servlet.Servlet;
+
+import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
+import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
 import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Tracks {@link ResourceMapping}s.
@@ -26,25 +32,22 @@ import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class ResourceMappingTracker /*extends AbstractElementTracker<ResourceMapping, ResourceMappingWebElement>*/ {
+public class ResourceMappingTracker extends AbstractMappingTracker<ResourceMapping, Servlet, ServletEventData, ServletModel> {
 
-	/**
-	 * Constructor.
-	 *
-	 * @param extenderContext
-	 *            extender context; cannot be null
-	 * @param bundleContext
-	 *            extender bundle context; cannot be null
-	 */
-//	private ResourceMappingTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
-//		super(extenderContext, bundleContext);
-//	}
-//
-//	public static ServiceTracker<ResourceMapping, ResourceMappingWebElement> createTracker(
-//			final ExtenderContext extenderContext, final BundleContext bundleContext) {
-//		return new ResourceMappingTracker(extenderContext, bundleContext).create(ResourceMapping.class);
-//	}
-//
+	private ResourceMappingTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
+		super(extenderContext, bundleContext);
+	}
+
+	public static ServiceTracker<ResourceMapping, ServletModel> createTracker(final ExtenderContext extenderContext,
+			final BundleContext bundleContext) {
+		return new ResourceMappingTracker(extenderContext, bundleContext).create(ResourceMapping.class);
+	}
+
+	@Override
+	protected ServletModel doCreateElementModel(Bundle bundle, ResourceMapping service, Integer rank, Long serviceId) {
+		return null;
+	}
+
 //	/**
 //	 * @see AbstractElementTracker#createWebElement(ServiceReference, Object)
 //	 */

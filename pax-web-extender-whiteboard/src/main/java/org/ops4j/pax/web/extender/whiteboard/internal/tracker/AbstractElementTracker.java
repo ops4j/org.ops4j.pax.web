@@ -21,6 +21,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
+import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.whiteboard.ContextRelated;
 import org.osgi.framework.BundleContext;
@@ -49,6 +50,8 @@ import org.slf4j.LoggerFactory;
  *        {@link javax.servlet.Servlet} and {@link org.ops4j.pax.web.service.whiteboard.ServletMapping} should be
  *        tracked as {@link org.ops4j.pax.web.service.spi.model.elements.ServletModel}, which is
  *        {@code ElementModel<Servlet>}.
+ * @param <D> type of {@link ElementEventData} representing DTO/read-only object carrying information about
+ *        {@link ElementModel} being registered.
  * @param <T> as in {@link ServiceTrackerCustomizer} is the type of the actual tracked object (transformed/customized
  *        service) as required by internal Pax Web mechanisms and it should be (in case of <em>web element</em>) an
  *        instance of {@link ElementModel}.
@@ -56,14 +59,15 @@ import org.slf4j.LoggerFactory;
  * @author Alin Dreghiciu
  * @since 0.2.0, August 21, 2007
  */
-public abstract class AbstractElementTracker<S, R, T extends ElementModel<R>> implements ServiceTrackerCustomizer<S, T> {
+public abstract class AbstractElementTracker<S, R, D extends ElementEventData, T extends ElementModel<R, D>>
+		implements ServiceTrackerCustomizer<S, T> {
 
 	private static final String LEGACY_MAPPING_PACKAGE = ContextRelated.class.getPackage().getName();
 
-	protected final Logger LOG = LoggerFactory.getLogger(getClass());
+	protected final Logger log = LoggerFactory.getLogger(getClass());
 
-	private final ExtenderContext extenderContext;
 	protected final BundleContext bundleContext;
+	private final ExtenderContext extenderContext;
 
 	protected AbstractElementTracker(ExtenderContext extenderContext, BundleContext bundleContext) {
 		this.extenderContext = extenderContext;
@@ -119,14 +123,14 @@ public abstract class AbstractElementTracker<S, R, T extends ElementModel<R>> im
 	 * @param rank
 	 * @return
 	 */
-	protected abstract T createElementModel(final ServiceReference<S> serviceReference, Integer rank, Long serviceId);
+	protected abstract T createElementModel(ServiceReference<S> serviceReference, Integer rank, Long serviceId);
 
 	// --- implementation of org.osgi.util.tracker.ServiceTrackerCustomizer
 
 	@Override
 	@SuppressWarnings("deprecation")
 	public T addingService(final ServiceReference<S> serviceReference) {
-		LOG.debug("Processing new Whiteboard service reference: {}", serviceReference);
+		log.debug("Processing new Whiteboard service reference: {}", serviceReference);
 
 		// each "element" should _always_ be associated with some _context_. This association is expressed directly
 		// in case of Http Service spec and its
@@ -182,13 +186,13 @@ public abstract class AbstractElementTracker<S, R, T extends ElementModel<R>> im
 		Object legacyIdProperty = serviceReference.getProperty(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID);
 		String legacyId = legacyIdProperty instanceof String ? ((String)legacyIdProperty) : null;
 		if (legacyId != null) {
-			LOG.warn("Legacy {} property used, please select context(s) using {} property.",
+			log.warn("Legacy {} property used, please select context(s) using {} property.",
 					PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID,
 					HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT);
 		}
 		Object selectorProperty = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT);
 		if (selectorProperty != null && !(selectorProperty instanceof String)) {
-			LOG.warn("{} context selection property is not of type String. Ignoring {}.",
+			log.warn("{} context selection property is not of type String. Ignoring {}.",
 					HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, serviceReference);
 			return null;
 		}
@@ -200,8 +204,8 @@ public abstract class AbstractElementTracker<S, R, T extends ElementModel<R>> im
 		String[] objectClasses = Utils.getObjectClasses(serviceReference);
 		for (String oc : objectClasses) {
 			if (oc.startsWith(LEGACY_MAPPING_PACKAGE)) {
-				oc = oc.substring(LEGACY_MAPPING_PACKAGE.length());
-				if (oc.startsWith(".") && oc.indexOf('.', 1) == -1) {
+				String oc2 = oc.substring(LEGACY_MAPPING_PACKAGE.length());
+				if (oc2.startsWith(".") && oc2.indexOf('.', 1) == -1) {
 					legacyMapping = true;
 					break;
 				}
@@ -214,7 +218,7 @@ public abstract class AbstractElementTracker<S, R, T extends ElementModel<R>> im
 		try {
 			contextFilter = bundleContext.createFilter(selector);
 		} catch (InvalidSyntaxException e) {
-			LOG.error("Can't register web element from reference {}, skipping registration."
+			log.error("Can't register web element from reference {}, skipping registration."
 							+ " Bad context selector: {}", serviceReference, selector, e);
 			return null;
 		}
@@ -225,7 +229,7 @@ public abstract class AbstractElementTracker<S, R, T extends ElementModel<R>> im
 
 		if (contexts.size() == 0) {
 			// TODO: should result in DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
-			LOG.warn("Can't resolve target context(s) for Whiteboard element {}. Filter: {}", serviceReference, selector);
+			log.warn("Can't resolve target context(s) for Whiteboard element {}. Filter: {}", serviceReference, selector);
 			return null;
 		}
 
@@ -249,7 +253,7 @@ public abstract class AbstractElementTracker<S, R, T extends ElementModel<R>> im
 
 	@Override
 	public void modifiedService(ServiceReference<S> reference, T service) {
-		LOG.debug("Processing Whiteboard service reference change: {}", reference);
+		log.debug("Processing Whiteboard service reference change: {}", reference);
 
 		// currently registered Whiteboard service had its service properties changed using
 		// org.osgi.framework.ServiceRegistration.setProperties()
@@ -267,7 +271,7 @@ public abstract class AbstractElementTracker<S, R, T extends ElementModel<R>> im
 
 	@Override
 	public void removedService(final ServiceReference<S> serviceReference, final T webElement) {
-		LOG.debug("Whiteboard service removed: {}", serviceReference);
+		log.debug("Whiteboard service removed: {}", serviceReference);
 
 		//		httpServiceRuntime.removeWhiteboardElement(model);
 		extenderContext.removeWebElement(serviceReference.getBundle(), webElement);
@@ -290,7 +294,7 @@ public abstract class AbstractElementTracker<S, R, T extends ElementModel<R>> im
 			ServiceReference<S> serviceReference) {
 
 		if (selector != null && legacyId != null) {
-			LOG.warn("Both legacy {} and R7 {} properties are specified. Using R7 property: {}.",
+			log.warn("Both legacy {} and R7 {} properties are specified. Using R7 property: {}.",
 					PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID,
 					HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, selector);
 			legacyId = null;

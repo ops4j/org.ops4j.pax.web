@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.jetty.internal;
+package org.ops4j.pax.web.service.jetty.internal.web;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,7 +39,7 @@ import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class ResourceServlet extends HttpServlet implements ResourceFactory {
+public class ResourceServlet extends HttpServlet implements ResourceFactory {
 
 	private static final long serialVersionUID = 1L;
 

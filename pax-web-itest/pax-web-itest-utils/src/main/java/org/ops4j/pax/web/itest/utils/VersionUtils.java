@@ -23,9 +23,9 @@ import java.util.Properties;
  */
 public class VersionUtils {
 
-	private static String PROJECT_VERSION;
-	private static String MY_FACES_VERSION;
-	private static String KARAF_VERSION;
+	private static final String PROJECT_VERSION;
+	private static final String MY_FACES_VERSION;
+	private static final String KARAF_VERSION;
 
 	static {
 		try {
@@ -36,6 +36,10 @@ public class VersionUtils {
 				PROJECT_VERSION = properties.getProperty("version.pax-web", "").trim();
 				MY_FACES_VERSION = properties.getProperty("version.myfaces", "").trim();
 				KARAF_VERSION = properties.getProperty("version.karaf", "").trim();
+			} else {
+				PROJECT_VERSION = null;
+				MY_FACES_VERSION = null;
+				KARAF_VERSION = null;
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage(), e);

@@ -23,7 +23,13 @@ import org.osgi.service.http.runtime.dto.RuntimeDTO;
 
 public class ExtendedHttpServiceRuntime implements HttpServiceRuntime /*, ReplaceableServiceListener<HttpService>*/ {
 
-    private final BundleContext bundleContext;
+	private final BundleContext bundleContext;
+
+	ExtendedHttpServiceRuntime(BundleContext bundleContext) {
+		this.bundleContext = bundleContext;
+//        this.httpServiceLock = new ReentrantReadWriteLock();
+//        this.httpServiceTracker = new ReplaceableService<>(bundleContext, HttpService.class, this, true);
+	}
 
 	@Override
 	public RuntimeDTO getRuntimeDTO() {
@@ -61,11 +67,6 @@ public class ExtendedHttpServiceRuntime implements HttpServiceRuntime /*, Replac
 //     */
 //    private ServiceRegistration<HttpServiceRuntime> serviceRuntimeService;
 //
-    ExtendedHttpServiceRuntime(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
-//        this.httpServiceLock = new ReentrantReadWriteLock();
-//        this.httpServiceTracker = new ReplaceableService<>(bundleContext, HttpService.class, this, true);
-    }
 //
 //    @Override
 //    public RuntimeDTO getRuntimeDTO() {
@@ -144,14 +145,13 @@ public class ExtendedHttpServiceRuntime implements HttpServiceRuntime /*, Replac
 //        }
 //    }
 
-    public void start() {
+	public void start() {
 //        httpServiceTracker.start();
-    }
+	}
 
-    public void stop() {
+	public void stop() {
 //        unregisterService();
 //        httpServiceTracker.stop();
-    }
+	}
 
-    
 }

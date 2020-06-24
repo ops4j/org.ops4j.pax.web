@@ -15,10 +15,16 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import javax.servlet.Servlet;
 
+import org.eclipse.jetty.util.resource.PathResource;
+import org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
 import org.ops4j.pax.web.service.spi.ServerListener;
@@ -157,11 +163,24 @@ class JettyServerController implements ServerController {
 	}
 
 	@Override
+	public Servlet createResourceServlet(final URL urlBase, final String base) {
+		final PathResource baseUrlResource;
+		try {
+			baseUrlResource = urlBase == null ? null : new PathResource(urlBase);
+		} catch (IOException | URISyntaxException notPossbleButStill) {
+			throw new IllegalArgumentException(notPossbleButStill.getMessage(), notPossbleButStill);
+		}
+		String chroot = baseUrlResource == null ? base : null;
+
+		return new JettyResourceServlet(baseUrlResource, chroot);
+	}
+
+	@Override
 	public String toString() {
 		return "JettyServerController{configuration=" + configuration.id() + ",state=" + state + "}";
 	}
 
-//	private class Started implements State {
+	//	private class Started implements State {
 //
 //		@Override
 //		public void addCustomizers(Collection<Customizer> customizers) {

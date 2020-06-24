@@ -1024,18 +1024,23 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		}
 
 		@Override
-		public int maxCacheEntries() {
+		public Integer maxCacheEntries() {
 			return resolveIntegerProperty(PaxWebConfig.PID_CFG_DEFAULT_SERVLET_CACHE_MAX_ENTRIES);
 		}
 
 		@Override
-		public int maxCacheEntrySize() {
+		public Integer maxCacheEntrySize() {
 			return resolveIntegerProperty(PaxWebConfig.PID_CFG_DEFAULT_SERVLET_CACHE_MAX_ENTRY_SIZE);
 		}
 
 		@Override
-		public int maxTotalCacheSize() {
+		public Integer maxTotalCacheSize() {
 			return resolveIntegerProperty(PaxWebConfig.PID_CFG_DEFAULT_SERVLET_CACHE_MAX_TOTAL_SIZE);
+		}
+
+		@Override
+		public Integer maxCacheTTL() {
+			return resolveIntegerProperty(PaxWebConfig.PID_CFG_DEFAULT_SERVLET_CACHE_TTL);
 		}
 	}
 

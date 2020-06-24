@@ -15,8 +15,12 @@
  */
 package org.ops4j.pax.web.service.tomcat.internal;
 
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import javax.servlet.Servlet;
 
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerEvent;
@@ -24,6 +28,7 @@ import org.ops4j.pax.web.service.spi.ServerListener;
 import org.ops4j.pax.web.service.spi.ServerState;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.task.Batch;
+import org.ops4j.pax.web.service.tomcat.internal.web.TomcatResourceServlet;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,6 +145,19 @@ class TomcatServerController implements ServerController {
 		for (ServerListener listener : listeners) {
 			listener.stateChanged(event);
 		}
+	}
+
+	@Override
+	public Servlet createResourceServlet(URL urlBase, String base) {
+		File baseDirectory;
+		try {
+			baseDirectory = urlBase == null ? null : new File(urlBase.toURI());
+		} catch (URISyntaxException notPossbleButStill) {
+			throw new IllegalArgumentException(notPossbleButStill.getMessage(), notPossbleButStill);
+		}
+		String chroot = baseDirectory == null ? base : null;
+
+		return new TomcatResourceServlet(baseDirectory, chroot, configuration.resources());
 	}
 
 	@Override

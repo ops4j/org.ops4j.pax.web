@@ -17,6 +17,7 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -24,6 +25,7 @@ import java.util.EventListener;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
@@ -52,6 +54,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.events.ElementEvent;
 import org.ops4j.pax.web.service.spi.model.events.WebElementListener;
 import org.ops4j.pax.web.service.spi.task.Batch;
+import org.ops4j.pax.web.service.spi.util.Path;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
 import org.osgi.framework.Bundle;
@@ -494,30 +497,84 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 	@Override
 	public void registerResources(String alias, String name, HttpContext context) throws NamespaceException {
-//		final OsgiContextModel contextModel = getOrCreateOsgiContextModel(httpContext);
-//		LOG.debug("Register resources (alias={}). Using context [" + contextModel + "]");
-//
-//		// PAXWEB-1085, OSGi Enterprise R6 140.6 "Registering Resources", JavaEE Servlet spec "12.2 Specification of Mappings"
-//		// "A string beginning with a ‘ / ’ character and ending with a ‘ /* ’ suffix is used for path mapping."
-//		String osgiAlias = alias;
-//		if (osgiAlias != null && osgiAlias.endsWith("/*")) {
-//			osgiAlias = osgiAlias.substring(0, osgiAlias.length() - 2);
-//		}
-//		final Servlet servlet = serverController.createResourceServlet(contextModel, osgiAlias, name);
-//		String resourceModelName = name;
-//		if (!"default".equals(name)) {
-//			// PAXWEB-1099 - we should be able to register multiple "resources" for same name (==basePath)
-//			// but under different alias
-//			resourceModelName = String.format("%s:%s", alias, "/".equals(name) ? "" : name);
-//		}
-//		final ResourceModel model = new ResourceModel(contextModel, servlet,
-//				alias, resourceModelName);
-//		try {
-//			registerServlet(model);
-//		} catch (ServletException e) {
-//			LOG.error("Caught ServletException: ", e);
-//			throw new NamespaceException("Resource cant be resolved: ", e);
-//		}
+		// "resources" is server-specific "default servlet" registered (in more flexible way than in JavaEE)
+		// under some "alias", which is effectively a "/path/*" URL pattern
+		// With Whiteboard, it's even more flexible, as we can have "resource" servlet registered for exteension
+		// or "/" patterns as well
+		//
+		// "default servlets" are tightly related to "welcome files" which are handled separately
+
+		URL urlBase = ServletModel.getFileUrlIfAccessible(name);
+
+		// We'll ask dedicated server controller to create "default servlet" for us. This servlet will later
+		// be managed as normal servlet with proper lifecycle. All that's needed now is the "name" (resource base)
+		// to configure the underlying "resource manager" for given "resource/default servlet"
+		// as Pax Web extension, we accept name to be absolute file: URL representing "web dir" (root dir) where
+		// resources can be served from directly
+
+		// if urlBase is null, then we have normal Http Service / Whiteboard Service scenario, where the "name"
+		// is actually a "base" to prepend to actual name to be passed to ServletContextHelper.getResource()
+		// this base should be "" == "/" or e.g., "/www" or "www"
+		// accessing "/alias/hello.txt" for these bases should result in ServletContextHelper.getResource() params:
+		// - base = "": hello.txt
+		// - base = "/": hello.txt
+		// - base = "www": www/hello.txt
+		// - base = "/www": www/hello.txt
+		// - base = "www/": www/hello.txt
+		// - and so on
+		// tl;dr: we have to normalize the base
+
+		String chrootBase = Path.securePath(name);
+		if (urlBase == null) {
+			if (chrootBase == null) {
+				LOG.warn("Can't use {} as resource base, changed to root of the bundle providing resources", name);
+				chrootBase = "";
+			} else {
+				// yes - we will replace "/" with "" which means "root of the bundle" or "just pass incoming
+				// path directly to ServletContextHelper.getResource()
+				if (chrootBase.startsWith("/")) {
+					chrootBase = chrootBase.substring(1);
+				}
+				if (chrootBase.endsWith("/")) {
+					chrootBase = chrootBase.substring(0, chrootBase.length() - 1);
+				}
+			}
+			LOG.info("Registering resources with alias {} and resource base \"{}\"", alias, chrootBase);
+		} else {
+			LOG.info("Registering resources with alias {} and absolute directory \"{}\"", alias, urlBase);
+			chrootBase = null;
+		}
+
+		Servlet resourceServlet = serverController.createResourceServlet(urlBase, chrootBase);
+
+		ServletModel servletModel = new ServletModel.Builder()
+				.withAlias(alias)
+				.withServletName(String.format("default-%s", UUID.randomUUID().toString()))
+				.withServlet(resourceServlet)
+				.withLoadOnStartup(1)
+				.withAsyncSupported(true)
+				.build();
+
+		servletModel.setResourceServlet(true);
+
+		// "name" is very misleading term here as it's the "base path" or "resource prefix". Also Pax Web allows it
+		// to be a file: URL to make it easier to expose a directory as the resource directory (web root directory)
+		if (urlBase != null) {
+			LOG.info("Configuring resource servlet to serve resources from {}", urlBase);
+			servletModel.setBaseFileUrl(urlBase);
+		} else {
+			LOG.info("Configuring resource servlet to serve resources from WebContainerContext");
+			servletModel.setBasePath(chrootBase);
+		}
+
+		// TODO: think about resource cache sharing between resource servlets. Now all resource servlets
+		//       configure their own resource cache
+
+		try {
+			doRegisterServlet(Collections.singletonList(context), servletModel);
+		} catch (ServletException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	// --- methods used to register a Filter

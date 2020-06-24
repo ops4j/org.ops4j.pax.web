@@ -25,10 +25,12 @@ import javax.servlet.Servlet;
 
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.FilterTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.HttpContextTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ResourceTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletContextHelperTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.FilterMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.HttpContextMappingTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ResourceMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletContextHelperMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletMappingTracker;
 import org.ops4j.pax.web.service.PaxWebConstants;
@@ -39,6 +41,7 @@ import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.whiteboard.FilterMapping;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
+import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletMapping;
 import org.osgi.framework.Bundle;
@@ -159,6 +162,7 @@ public class Activator implements BundleActivator {
 				case ServiceEvent.REGISTERED: {
 					// new WebContainer was registered
 					extenderContext.webContainerAdded((ServiceReference<WebContainer>) event.getServiceReference());
+					break;
 				}
 				case ServiceEvent.MODIFIED: {
 					// properties have changed - but there's nothing we care about - even if a HttpService/WebContainer
@@ -166,13 +170,18 @@ public class Activator implements BundleActivator {
 					// not the HttpService implementation
 					// "Whiteboard implementation" is represented by registered instance of
 					// org.osgi.service.http.runtime.HttpServiceRuntime, not by HttpService/WebContainer
+					break;
 				}
 				case ServiceEvent.MODIFIED_ENDMATCH: {
 					// no chance for this - we filter by objectClass and it can't change
+					break;
 				}
 				case ServiceEvent.UNREGISTERING: {
 					extenderContext.webContainerRemoved((ServiceReference<WebContainer>) event.getServiceReference());
+					break;
 				}
+				default:
+					break;
 			}
 		};
 		String filter = String.format("(%s=%s)", Constants.OBJECTCLASS, WebContainer.class.getName());
@@ -185,7 +194,7 @@ public class Activator implements BundleActivator {
 		// web elements
 		trackServlets();
 		trackFilters();
-//		trackResources(bundleContext);
+		trackResources();
 
 //		if (WebContainerUtils.WEB_CONATAINER_AVAILABLE) {
 //			trackListeners(bundleContext);
@@ -277,24 +286,24 @@ public class Activator implements BundleActivator {
 		trackers.add(servletMappingTracker);
 	}
 
-//
-//	/**
-//	 * Track resources.
-//	 *
-//	 * @param bundleContext the BundleContext associated with this bundle
-//	 */
-//	private void trackResources(final BundleContext bundleContext) {
-//		ServiceTracker<Object, ResourceWebElement> resourceTracker = ResourceTracker.createTracker(extenderContext, bundleContext);
-//
-//		resourceTracker.open();
-//		trackers.add(0, resourceTracker);
-//
-//		final ServiceTracker<ResourceMapping, ResourceMappingWebElement> resourceMappingTracker = ResourceMappingTracker
-//				.createTracker(extenderContext, bundleContext);
-//
-//		resourceMappingTracker.open();
-//		trackers.add(0, resourceMappingTracker);
-//	}
+	/**
+	 * <p>Track resources:<ul>
+	 *     <li>Any object from OSGi CPMN R7 Whiteboard Service specification with
+	 *     {@link HttpWhiteboardConstants#HTTP_WHITEBOARD_RESOURCE_PATTERN} registration property</li>
+	 *     <li>{@link ResourceMapping} from Pax Web</li>
+	 * </ul></p>
+	 */
+	private void trackResources() {
+		ServiceTracker<Object, ServletModel> resourceTracker
+				= ResourceTracker.createTracker(extenderContext, bundleContext);
+		resourceTracker.open();
+		trackers.add(resourceTracker);
+
+		ServiceTracker<ResourceMapping, ServletModel> resourceMappingTracker
+				= ResourceMappingTracker.createTracker(extenderContext, bundleContext);
+		resourceMappingTracker.open();
+		trackers.add(resourceMappingTracker);
+	}
 
 	/**
 	 * <p>Track filters:<ul>

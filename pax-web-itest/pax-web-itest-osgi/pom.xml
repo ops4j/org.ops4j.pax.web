@@ -198,6 +198,17 @@
 		<!-- OPS4J dependencies -->
 
 		<dependency>
+			<groupId>org.ops4j.base</groupId>
+			<artifactId>ops4j-base-lang</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.base</groupId>
+			<artifactId>ops4j-base-util-property</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>org.ops4j.pax.logging</groupId>
 			<artifactId>pax-logging-api</artifactId>
 			<scope>runtime</scope>

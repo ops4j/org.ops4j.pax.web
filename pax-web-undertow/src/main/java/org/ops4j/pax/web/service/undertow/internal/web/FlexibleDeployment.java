@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.undertow.internal.context;
+package org.ops4j.pax.web.service.undertow.internal.web;
 
 import java.nio.charset.Charset;
 import java.util.HashMap;

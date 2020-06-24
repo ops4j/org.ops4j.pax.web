@@ -69,7 +69,7 @@
 						-->
 						<pax.exam.configuration>file:../etc/controlled-exam.properties</pax.exam.configuration>
 					</systemPropertyVariables>
-					<redirectTestOutputToFile>false</redirectTestOutputToFile>
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 					<runOrder>alphabetical</runOrder>
 					<!--
 						be careful to not load pax-logging-log4j1 and pax-logging-api through system class loader.

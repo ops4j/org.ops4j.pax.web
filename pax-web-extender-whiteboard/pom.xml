@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
+    Copyright 2020 OPS4J.
 
-      http://www.apache.org/licenses/LICENSE-2.0
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-    KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -81,32 +78,35 @@
 
 							<!-- to check -->
 
-							org.ops4j.pax.web.extender.whiteboard; version="${pax-web.osgi.version}",
-							org.ops4j.pax.web.extender.whiteboard.runtime; version="${pax-web.osgi.version}",
-							javax.xml.parsers,
-							javax.security.auth,
-							javax.security.auth.callback,
-							javax.security.auth.login,
-							javax.websocket.*; resolution:=optional,,
-							!javax.microedition.io,
-							!javax.security.auth.x500
+<!--							org.ops4j.pax.web.extender.whiteboard; version="${pax-web.osgi.version}",-->
+<!--							org.ops4j.pax.web.extender.whiteboard.runtime; version="${pax-web.osgi.version}",-->
+<!--							javax.xml.parsers,-->
+<!--							javax.security.auth,-->
+<!--							javax.security.auth.callback,-->
+<!--							javax.security.auth.login,-->
+<!--							javax.websocket.*; resolution:=optional,,-->
+<!--							!javax.microedition.io,-->
+<!--							!javax.security.auth.x500-->
 						</Import-Package>
 						<Private-Package>
 							org.ops4j.pax.web.extender.whiteboard.internal.*
 						</Private-Package>
 						<Export-Package>
+							<!-- pax-web-spi -->
 							org.ops4j.pax.web.extender.whiteboard;version="${pax-web.osgi.version}",
-							org.ops4j.pax.web.extender.whiteboard.runtime;version="${pax-web.osgi.version}",
-                            org.osgi.service.http.whiteboard
+							org.ops4j.pax.web.extender.whiteboard.runtime;version="${pax-web.osgi.version}"
 						</Export-Package>
-						<Provide-Capability>
-							osgi.contract;osgi.contract=JavaEL;version:Version="3";uses:="javax.el",
-							osgi.contract;osgi.contract=JavaJSP;version:Version="2.3";uses!="javax.servlet.jsp,javax.servlet.jsp.el,javax.servlet.jsp.tagext",
-							osgi.contract;osgi.contract=JavaJSTL;version:Version="1.2";uses:="javax.servlet.jsp.jstl.core,javax.servlet.jsp.jstl.fmt,javax.servlet.jsp.jstl.sql,javax.servlet.jsp.jstl.tlv"
-						</Provide-Capability>
+<!--						<Provide-Capability>-->
+<!--							osgi.contract;osgi.contract=JavaEL;version:Version="3";uses:="javax.el",-->
+<!--							osgi.contract;osgi.contract=JavaJSP;version:Version="2.3";uses!="javax.servlet.jsp,javax.servlet.jsp.el,javax.servlet.jsp.tagext",-->
+<!--							osgi.contract;osgi.contract=JavaJSTL;version:Version="1.2";uses:="javax.servlet.jsp.jstl.core,javax.servlet.jsp.jstl.fmt,javax.servlet.jsp.jstl.sql,javax.servlet.jsp.jstl.tlv"-->
+<!--						</Provide-Capability>-->
 						<Embed-Dependency>
-							*; scope=compile; type=!pom; inline=true
+							ops4j-base-lang;inline=true
 						</Embed-Dependency>
+						<!--						<Embed-Dependency>-->
+<!--							*; scope=compile; type=!pom; inline=true-->
+<!--						</Embed-Dependency>-->
 <!--						<Embed-Transitive>true</Embed-Transitive>-->
 <!--						<_dsannotations>*</_dsannotations>-->
 					</instructions>
@@ -122,12 +122,10 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-api</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-spi</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 		<!-- OPS4J dependencies -->
@@ -137,26 +135,28 @@
 			<artifactId>ops4j-base-lang</artifactId>
 			<optional>true</optional>
 		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.swissbox</groupId>
-			<artifactId>pax-swissbox-core</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.swissbox</groupId>
-			<artifactId>pax-swissbox-optional-jcl</artifactId>
-			<optional>true</optional>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.swissbox</groupId>-->
+<!--			<artifactId>pax-swissbox-core</artifactId>-->
+<!--			<optional>true</optional>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.swissbox</groupId>-->
+<!--			<artifactId>pax-swissbox-optional-jcl</artifactId>-->
+<!--			<optional>true</optional>-->
+<!--		</dependency>-->
 
 		<!-- OSGi -->
 
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.core</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.cmpn</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
@@ -170,11 +170,11 @@
 			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>jakarta.websocket</groupId>
-			<artifactId>jakarta.websocket-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>jakarta.websocket</groupId>-->
+<!--			<artifactId>jakarta.websocket-api</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
 
 		<!-- Logging -->
 

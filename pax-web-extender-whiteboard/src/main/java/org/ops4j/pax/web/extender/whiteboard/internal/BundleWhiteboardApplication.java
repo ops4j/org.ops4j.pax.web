@@ -55,7 +55,7 @@ public class BundleWhiteboardApplication {
 	private final Bundle bundle;
 
 	/** List of <em>web elements</em> that are registered by given {@link Bundle}. */
-	private final List<ElementModel<?>> webElements;
+	private final List<ElementModel<?, ?>> webElements;
 
 	/** List of <em>web contexts</em> that are registered by given {@link Bundle}. */
 	private final List<OsgiContextModel> webContexts;
@@ -85,7 +85,7 @@ public class BundleWhiteboardApplication {
 	 * This method returns a snapshot of current {@link ElementModel} elements registered by given {@link Bundle}.
 	 * @return
 	 */
-	public List<ElementModel<?>> getWebElements() {
+	public List<ElementModel<?, ?>> getWebElements() {
 		return Collections.unmodifiableList(webElements);
 	}
 
@@ -102,7 +102,7 @@ public class BundleWhiteboardApplication {
 	 * Adds an {@link ElementModel} as the one associated with given {@link Bundle}
 	 * @param webElement
 	 */
-	public void addWebElement(final ElementModel<?> webElement) {
+	public void addWebElement(final ElementModel<?, ?> webElement) {
 		webElements.add(webElement);
 
 		// TOCHECK: Is it a good place to think about "transactions"?
@@ -180,7 +180,7 @@ public class BundleWhiteboardApplication {
 	 * Removes an {@link ElementModel} from the list of elements registered by given bundle.
 	 * @param webElement
 	 */
-	public void removeWebElement(final ElementModel<?> webElement) {
+	public void removeWebElement(final ElementModel<?, ?> webElement) {
 		webElements.remove(webElement);
 
 		//		Boolean sharedHttpContext = ServicePropertiesUtils.extractSharedHttpContext(serviceReference);

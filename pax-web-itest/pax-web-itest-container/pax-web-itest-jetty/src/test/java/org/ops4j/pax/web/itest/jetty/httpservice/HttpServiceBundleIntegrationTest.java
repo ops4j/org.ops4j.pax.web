@@ -13,19 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.undertow.internal.context;
+package org.ops4j.pax.web.itest.jetty.httpservice;
 
-import io.undertow.servlet.api.Deployment;
-import io.undertow.servlet.spec.ServletContextImpl;
+import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.container.httpservice.AbstractHttpServiceBundleIntegrationTest;
 
-/**
- * Special {@link ServletContextImpl} implementation to make it easier to reuse
- * {@link io.undertow.servlet.handlers.DefaultServlet} for resource handling.
- */
-public class FlexibleServletContextImpl extends ServletContextImpl {
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
-	public FlexibleServletContextImpl(Deployment deployment) {
-		super(null, deployment);
+@RunWith(PaxExam.class)
+public class HttpServiceBundleIntegrationTest extends AbstractHttpServiceBundleIntegrationTest {
+
+	@Configuration
+	public Option[] configure() {
+		return combine(baseConfigure(), paxWebJetty());
 	}
 
 }

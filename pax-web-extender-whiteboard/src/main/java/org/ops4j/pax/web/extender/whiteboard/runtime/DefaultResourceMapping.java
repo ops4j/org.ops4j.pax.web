@@ -17,6 +17,8 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.runtime;
 
+import java.util.Arrays;
+
 import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
 
 /**
@@ -25,122 +27,27 @@ import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class DefaultResourceMapping implements ResourceMapping {
+public class DefaultResourceMapping extends DefaultServletMapping implements ResourceMapping {
 
-	/**
-	 * Http Context id.
-	 */
-	private String httpContextId;
-	/**
-	 * Alias.
-	 */
-	private String alias;
-	/**
-	 * Url patterns.
-	 */
 	private String path;
 
-	/**
-	 * @see ResourceMapping#getHttpContextId()
-	 */
-	public String getHttpContextId() {
-		return httpContextId;
-	}
-
-	/**
-	 * @see ResourceMapping#getAlias()
-	 */
-	public String getAlias() {
-		return alias;
-	}
-
-	/**
-	 * @see ResourceMapping#getPath()
-	 */
+	@Override
 	public String getPath() {
 		return path;
 	}
 
-	/**
-	 * Setter.
-	 *
-	 * @param httpContextId id of the http context this resource belongs to
-	 */
-	public void setHttpContextId(final String httpContextId) {
-		this.httpContextId = httpContextId;
-	}
-
-	/**
-	 * Setter.
-	 *
-	 * @param alias alias this resource maps to
-	 */
-	public void setAlias(final String alias) {
-		this.alias = alias;
-	}
-
-	/**
-	 * Setter.
-	 *
-	 * @param path local path in the bundle
-	 */
-	public void setPath(final String path) {
+	public void setPath(String path) {
 		this.path = path;
 	}
 
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() +
-				"{" + "httpContextId=" + httpContextId +
-				",alias=" + alias + ",path=" + path +
-				"}";
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((alias == null) ? 0 : alias.hashCode());
-		result = prime * result
-				+ ((httpContextId == null) ? 0 : httpContextId.hashCode());
-		result = prime * result + ((path == null) ? 0 : path.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final DefaultResourceMapping other = (DefaultResourceMapping) obj;
-		if (alias == null) {
-			if (other.alias != null) {
-				return false;
-			}
-		} else if (!alias.equals(other.alias)) {
-			return false;
-		}
-		if (httpContextId == null) {
-			if (other.httpContextId != null) {
-				return false;
-			}
-		} else if (!httpContextId.equals(other.httpContextId)) {
-			return false;
-		}
-		if (path == null) {
-			if (other.path != null) {
-				return false;
-			}
-		} else if (!path.equals(other.path)) {
-			return false;
-		}
-		return true;
+		return "DefaultResourceMapping{"
+				+ ", urlPatterns=" + Arrays.toString(getUrlPatterns())
+				+ ", alias='" + getAlias() + '\''
+				+ ", contextSelectFilter='" + contextSelectFilter + '\''
+				+ ", contextId='" + contextId + '\''
+				+ '}';
 	}
 
 }

@@ -64,6 +64,7 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.xml.XmlConfiguration;
 import org.junit.Test;
+import org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -520,26 +521,8 @@ public class EmbeddedJettyTest {
 		final PathResource p1 = new PathResource(b1);
 		final PathResource p2 = new PathResource(b2);
 
-		handler1.addServlet(new ServletHolder("default1", new DefaultServlet() {
-			@Override
-			public Resource getResource(String pathInContext) {
-				try {
-					return p1.addPath(pathInContext);
-				} catch (IOException e) {
-					throw new RuntimeException(e.getMessage(), e);
-				}
-			}
-		}), "/d1/*");
-		handler1.addServlet(new ServletHolder("default2", new DefaultServlet() {
-			@Override
-			public Resource getResource(String pathInContext) {
-				try {
-					return p2.addPath(pathInContext);
-				} catch (IOException e) {
-					throw new RuntimeException(e.getMessage(), e);
-				}
-			}
-		}), "/d2/*");
+		handler1.addServlet(new ServletHolder("default1", new JettyResourceServlet(p1, null)), "/d1/*");
+		handler1.addServlet(new ServletHolder("default2", new JettyResourceServlet(p2, null)), "/d2/*");
 
 		chc.addHandler(handler1);
 		server.setHandler(chc);
@@ -571,6 +554,23 @@ public class EmbeddedJettyTest {
 				"If-Modified-Since: " + headers.get("Date"));
 		assertTrue(response.contains("HTTP/1.1 304"));
 		assertFalse(response.endsWith("b2"));
+
+		response = send(port, "/d1/../hello.txt");
+		assertTrue(response.contains("HTTP/1.1 404"));
+		response = send(port, "/d2/../../../../../../hello.txt");
+		assertTrue(response.contains("HTTP/1.1 400"));
+
+		response = send(port, "/d3/hello.txt");
+		assertTrue(response.contains("HTTP/1.1 404"));
+		response = send(port, "/d3/");
+		assertTrue(response.contains("HTTP/1.1 404"));
+		response = send(port, "/d3");
+		assertTrue(response.contains("HTTP/1.1 404"));
+		response = send(port, "/d2/");
+		// directory access, but let's not suggest user that it's a directory. it's just 404
+		assertTrue(response.contains("HTTP/1.1 404"));
+		response = send(port, "/d2");
+		assertTrue(response.contains("HTTP/1.1 404"));
 
 		server.stop();
 		server.join();

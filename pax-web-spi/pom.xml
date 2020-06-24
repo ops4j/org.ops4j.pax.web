@@ -69,6 +69,7 @@
 							<!-- pax-web-spi (internal) -->
 							org.ops4j.pax.web.service.spi.internal,
 							<!-- supporting libraries -->
+							org.apache.commons.io,
 							org.apache.commons.collections4,
 							org.apache.commons.collections4.iterators,
 							org.apache.commons.collections4.map,
@@ -100,7 +101,6 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-api</artifactId>
-			<scope>compile</scope>
 		</dependency>
 
 		<!-- OSGi -->
@@ -152,6 +152,11 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
 			<scope>provided</scope>
 		</dependency>
 

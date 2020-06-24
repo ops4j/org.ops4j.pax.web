@@ -22,6 +22,9 @@ import org.osgi.framework.BundleContext;
 
 public class BundleMatchers {
 
+	private BundleMatchers() {
+	}
+
 	public static void isBundleActive(String bundleSymbolicName, BundleContext bundleContext) {
 		Assert.assertThat(String.format("Bundle '%s' must be active", bundleSymbolicName),
 				Arrays.stream(bundleContext.getBundles()),

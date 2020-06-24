@@ -183,6 +183,10 @@ public abstract class ElementModel<T, D extends ElementEventData>
 		data.setElementReference(this.elementReference);
 		data.setOriginBundle(this.registeringBundle);
 		this.contextModels.forEach(cm -> data.getContextNames().add(cm.getName()));
+		if (this.contextModels.size() == 1 && this.contextModels.get(0).hasDirectHttpContextInstance()) {
+			// special case of "old" HttpContext associated with the model
+			data.setHttpContext(this.contextModels.get(0).resolveHttpContext(null));
+		}
 	}
 
 	public boolean hasContextModels() {

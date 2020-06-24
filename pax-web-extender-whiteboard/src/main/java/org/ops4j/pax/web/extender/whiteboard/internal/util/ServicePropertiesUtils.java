@@ -111,8 +111,7 @@ public class ServicePropertiesUtils {
 	}
 
 	public static Object mergePropertyListOfStringsToArrayOfStrings(final Object objectToMerge, final List<String> listOfStrings) {
-		Set<String> setToMerge = new HashSet<>();
-		setToMerge.addAll(listOfStrings);
+		Set<String> setToMerge = new HashSet<>(listOfStrings);
 		if (objectToMerge instanceof String
 				&& ((String) objectToMerge).trim().length() != 0) {
 			setToMerge.add((String) objectToMerge);

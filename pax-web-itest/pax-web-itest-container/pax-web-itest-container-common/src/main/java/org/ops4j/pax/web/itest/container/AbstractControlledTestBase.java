@@ -17,6 +17,7 @@ package org.ops4j.pax.web.itest.container;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -30,8 +31,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.ProbeBuilder;
-import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.ops4j.pax.logging.PaxLoggingConstants;
@@ -46,9 +45,9 @@ import org.ops4j.pax.web.service.spi.model.events.WebElementListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,7 +112,9 @@ public abstract class AbstractControlledTestBase {
 				frameworkStartLevel(START_LEVEL_TEST_BUNDLE),
 
 				workingDirectory("target/paxexam"),
-				cleanCaches(false),
+				// needed for PerClass strategy and I had problems running more test classes without cleaning
+				// caches (timeout waiting for ProbeInvoker with particular UUID)
+				cleanCaches(true),
 				systemTimeout(60 * 60 * 1000),
 
 				// set to "4" to see Felix wiring information
@@ -188,16 +189,16 @@ public abstract class AbstractControlledTestBase {
 		};
 	}
 
-	/**
-	 * Configuring symbolic name in test probe we can easily locate related log entries in the output.
-	 * @param builder
-	 * @return
-	 */
-	@ProbeBuilder
-	public TestProbeBuilder probeBuilder(TestProbeBuilder builder) {
-		builder.setHeader(Constants.BUNDLE_SYMBOLICNAME, PROBE_SYMBOLIC_NAME);
-		return builder;
-	}
+//	/**
+//	 * Configuring symbolic name in test probe we can easily locate related log entries in the output.
+//	 * @param builder
+//	 * @return
+//	 */
+//	@ProbeBuilder
+//	public TestProbeBuilder probeBuilder(TestProbeBuilder builder) {
+//		builder.setHeader(Constants.BUNDLE_SYMBOLICNAME, PROBE_SYMBOLIC_NAME);
+//		return builder;
+//	}
 
 	// --- methods that add logical sets of bundles (or just single bundles) to pax-exam-container-native
 
@@ -352,12 +353,43 @@ public abstract class AbstractControlledTestBase {
 		}
 	}
 
+	/**
+	 * Creates a listener for deployment of a {@link javax.servlet.Servlet} mapped to some URL.
+	 * @param mapping
+	 * @param action
+	 */
+	protected <T> void configureAndWaitForServletWithMapping(final String mapping, Callable<T> action) throws Exception {
+		final List<ElementEvent> events = new LinkedList<>();
+		webElementListener = events::add;
+		context.registerService(WebElementListener.class, webElementListener, null);
+
+		action.call();
+
+		try {
+			new WaitCondition("Waiting for servlet mapped to " + mapping) {
+				@Override
+				protected boolean isFulfilled() throws Exception {
+					return events.stream().anyMatch(e ->
+							e.getType() == ElementEvent.State.DEPLOYED
+									&& e.getData() instanceof ServletEventData
+									&& Arrays.asList(((ServletEventData) e.getData()).getUrlPatterns()).contains(mapping));
+				}
+			}.waitForCondition();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
 	public static HttpService getHttpService(final BundleContext bundleContext) {
-		ServiceReference<HttpService> ref = bundleContext.getServiceReference(HttpService.class);
-		assertNotNull("Failed to get HttpService", ref);
-		HttpService httpService = bundleContext.getService(ref);
-		assertNotNull("Failed to get HttpService", httpService);
-		return httpService;
+		ServiceTracker<HttpService, HttpService> tracker = new ServiceTracker<>(bundleContext, HttpService.class, null);
+		tracker.open();
+		try {
+			return tracker.waitForService(5000);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new IllegalStateException(e.getMessage(), e);
+		}
 	}
 
 	public static WebContainer getWebContainer(final BundleContext bundleContext) {

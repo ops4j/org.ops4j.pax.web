@@ -72,6 +72,8 @@
 
 							<!-- from pax-web-spi -->
 							org.ops4j.pax.web.service.spi.model.events,
+							org.ops4j.pax.web.service.spi.servlet,
+
 							<!-- from pax-web-itest-utils -->
 							org.ops4j.pax.web.itest.utils,
 							org.ops4j.pax.web.itest.utils.assertion,

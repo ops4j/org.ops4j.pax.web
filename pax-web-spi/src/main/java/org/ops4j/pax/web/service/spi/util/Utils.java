@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.spi.util;
 
+import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -395,6 +396,20 @@ public class Utils {
 		}
 		Iterator<OsgiContextModel> it = rankedSet.iterator();
 		return it.hasNext() ? it.next() : null;
+	}
+
+	/**
+	 * Checks whether given {@link URL} uses protocol used by {@link Bundle#getResource(String)} (at least for Felix
+	 * and Equinox).
+	 *
+	 * @param url
+	 */
+	public static boolean isBundleProtocol(URL url) {
+		if (url == null) {
+			return false;
+		}
+		String protocol = url.getProtocol();
+		return "bundle".equals(protocol) || "bundleresource".equals(protocol) || "bundleentry".equals(protocol);
 	}
 
 }

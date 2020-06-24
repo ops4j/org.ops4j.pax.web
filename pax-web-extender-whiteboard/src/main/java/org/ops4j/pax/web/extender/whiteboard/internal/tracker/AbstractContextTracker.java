@@ -49,10 +49,10 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomizer<S, OsgiContextModel> {
 
-	protected final Logger LOG = LoggerFactory.getLogger(AbstractElementTracker.class);
+	protected static final Logger LOG = LoggerFactory.getLogger(AbstractElementTracker.class);
 
-	private final ExtenderContext extenderContext;
 	protected final BundleContext bundleContext;
+	private final ExtenderContext extenderContext;
 
 	protected AbstractContextTracker(ExtenderContext extenderContext, BundleContext bundleContext) {
 		this.extenderContext = extenderContext;
@@ -77,7 +77,7 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 	 * @param model
 	 * @return
 	 */
-	protected abstract OsgiContextModel configureContextModel(final ServiceReference<S> serviceReference,
+	protected abstract OsgiContextModel configureContextModel(ServiceReference<S> serviceReference,
 			OsgiContextModel model);
 
 	// --- implementation of org.osgi.util.tracker.ServiceTrackerCustomizer

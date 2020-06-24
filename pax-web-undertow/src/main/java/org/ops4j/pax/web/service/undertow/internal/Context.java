@@ -27,7 +27,6 @@ import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -78,7 +77,6 @@ import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
-import org.ops4j.pax.web.service.spi.model.elements.ResourceModel;
 import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
@@ -408,18 +406,18 @@ public class Context implements /*org.ops4j.pax.web.service.spi.LifeCycle, */Htt
 		boolean defaultServletAdded = false;
 		ServletModel fallbackDefaultServlet = null;
 		for (ServletModel servlet : servlets) {
-			if (servlet instanceof ResourceModel
-					&& "default".equalsIgnoreCase(servlet.getName())) {
-				// this is a default resource, so ignore it
-				fallbackDefaultServlet = servlet;
-				// we have to configure webapp-wide welcome files here
-				List<String> welcomePages = new LinkedList<>();
-				welcomeFiles.forEach(model -> welcomePages.addAll(Arrays.asList(model.getWelcomeFiles())));
-				if (welcomePages.size() > 0) {
-					((ResourceServlet)servlet.getServlet()).configureWelcomeFiles(welcomePages);
-				}
-				continue;
-			}
+							//			if (servlet instanceof ResourceModel
+							//					&& "default".equalsIgnoreCase(servlet.getName())) {
+							//				// this is a default resource, so ignore it
+							//				fallbackDefaultServlet = servlet;
+							//				// we have to configure webapp-wide welcome files here
+							//				List<String> welcomePages = new LinkedList<>();
+							//				welcomeFiles.forEach(model -> welcomePages.addAll(Arrays.asList(model.getWelcomeFiles())));
+							//				if (welcomePages.size() > 0) {
+							//					((ResourceServlet)servlet.getServlet()).configureWelcomeFiles(welcomePages);
+							//				}
+							//				continue;
+							//			}
 			ServletInfo info = new ServletInfo(
 					servlet.getName(),
 					clazz(servlet.getServletClass(), servlet.getServlet()),

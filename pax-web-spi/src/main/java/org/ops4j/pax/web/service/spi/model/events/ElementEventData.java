@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service.spi.model.events;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.ops4j.pax.web.service.WebContainerContext;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
@@ -32,6 +33,9 @@ public abstract class ElementEventData {
 	private Bundle originBundle;
 	private ServiceReference<?> elementReference;
 	private final List<String> contextNames = new LinkedList<>();
+
+	// stored only if element is associated with single, directly specified HttpContext/WebContainerContext
+	private WebContainerContext httpContext;
 
 	public int getServiceRank() {
 		return serviceRank;
@@ -67,6 +71,14 @@ public abstract class ElementEventData {
 
 	public void setOriginBundle(Bundle originBundle) {
 		this.originBundle = originBundle;
+	}
+
+	public void setHttpContext(WebContainerContext httpContext) {
+		this.httpContext = httpContext;
+	}
+
+	public WebContainerContext getHttpContext() {
+		return httpContext;
 	}
 
 }

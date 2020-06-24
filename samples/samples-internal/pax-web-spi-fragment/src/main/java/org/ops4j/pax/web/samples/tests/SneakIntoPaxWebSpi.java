@@ -41,7 +41,10 @@ import org.slf4j.LoggerFactory;
 
 public class SneakIntoPaxWebSpi {
 
-	public static Logger LOG = LoggerFactory.getLogger(SneakIntoPaxWebSpi.class);
+	public static final Logger LOG = LoggerFactory.getLogger(SneakIntoPaxWebSpi.class);
+
+	private SneakIntoPaxWebSpi() {
+	}
 
 	public static Bundle whatsYourBundle() {
 		return FrameworkUtil.getBundle(SneakIntoPaxWebSpi.class);

@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServlet;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.utils.ServletAnnotationScanner;
 import org.osgi.framework.BundleContext;
@@ -42,7 +43,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * @author Grzegorz Grzybek
  * @since 0.4.0, April 05, 2008
  */
-public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, ServletModel> {
+public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, ServletEventData, ServletModel> {
 
 	private ServletTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
 		super(extenderContext, bundleContext);
@@ -57,12 +58,12 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 	@Override
 	@SuppressWarnings("deprecation")
 	protected ServletModel createElementModel(ServiceReference<Servlet> serviceReference, Integer rank, Long serviceId) {
-		LOG.debug("Creating servlet model from R7 whiteboard service {} (id={})", serviceReference, serviceId);
+		log.debug("Creating servlet model from R7 whiteboard service {} (id={})", serviceReference, serviceId);
 
 		// 1. legacy "alias" (for HttpService.registerServlet(alias, ...)
 		String alias = Utils.getStringProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_SERVLET_ALIAS);
 		if (alias != null) {
-			LOG.warn("Legacy {} property specified, alias should be used only for HttpService registrations",
+			log.warn("Legacy {} property specified, alias should be used only for HttpService registrations",
 					PaxWebConstants.SERVICE_PROPERTY_SERVLET_ALIAS);
 		}
 
@@ -80,7 +81,7 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 		Map<String, String> initParams = new LinkedHashMap<>();
 		String legacyInitPrefix = Utils.getStringProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_INIT_PREFIX);
 		if (legacyInitPrefix != null) {
-			LOG.warn("Legacy {} property found, servlet init parameters should be prefixed with {} instead",
+			log.warn("Legacy {} property found, servlet init parameters should be prefixed with {} instead",
 					PaxWebConstants.SERVICE_PROPERTY_INIT_PREFIX,
 					HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX);
 		}
@@ -89,7 +90,7 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 		boolean hasLegacyInitProperty = Arrays.stream(serviceReference.getPropertyKeys())
 				.anyMatch(p -> p.startsWith(prefix[0]));
 		if (hasLegacyInitProperty) {
-			LOG.warn("Legacy servlet init parameters found (with prefix: {}), init parameters should be prefixed with"
+			log.warn("Legacy servlet init parameters found (with prefix: {}), init parameters should be prefixed with"
 					+ " {} instead", prefix[0], HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX);
 		} else {
 			prefix[0] = HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX;
@@ -104,7 +105,7 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 		}
 		if (initParams.isEmpty()) {
 			// TODO: this message should probably be removed at some point
-			LOG.info("Whiteboard servlet has no init parameters specified. In Pax Web 8, service registration "
+			log.info("Whiteboard servlet has no init parameters specified. In Pax Web 8, service registration "
 					+ "properties are no longer copied as init parameters.");
 		}
 
@@ -116,7 +117,7 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 		// 6. load-on-startup
 		Integer loadOnStartup = Utils.getIntegerProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_LOAD_ON_STARTUP);
 		if (loadOnStartup != null) {
-			LOG.warn("Legacy {} property specified, load-on-startup should be specified using"
+			log.warn("Legacy {} property specified, load-on-startup should be specified using"
 							+ " @javax.servlet.annotation.WebServlet annotation",
 					PaxWebConstants.SERVICE_PROPERTY_LOAD_ON_STARTUP);
 		}
@@ -176,7 +177,7 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 					// 2. URL patterns
 					if (scanner.urlPatterns != null && scanner.urlPatterns.length > 0) {
 						if (urlPatterns != null && urlPatterns.length > 0) {
-							LOG.warn("Servlet URL patterns specified using both service property ({}) and annotation ({})."
+							log.warn("Servlet URL patterns specified using both service property ({}) and annotation ({})."
 									+ " Choosing {}.", Arrays.asList(urlPatterns), Arrays.asList(scanner.urlPatterns),
 									Arrays.asList(urlPatterns));
 						} else {
@@ -186,7 +187,7 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 					// 3. servlet name
 					if (scanner.servletName != null) {
 						if (name != null) {
-							LOG.warn("Servlet name specified using both service property ({}) and annotation ({})."
+							log.warn("Servlet name specified using both service property ({}) and annotation ({})."
 									+ " Choosing {}.", name, scanner.servletName, name);
 						} else {
 							name = scanner.servletName;
@@ -195,7 +196,7 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 					// 4. init params
 					if (scanner.webInitParams != null) {
 						if (!initParams.isEmpty()) {
-							LOG.warn("Servlet init parameters specified using both service property ({}) and annotation ({})."
+							log.warn("Servlet init parameters specified using both service property ({}) and annotation ({})."
 									+ " Choosing {}.", initParams, scanner.webInitParams, initParams);
 						} else {
 							initParams.putAll(scanner.webInitParams);
@@ -204,7 +205,7 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 					// 5. async-supported
 					if (scanner.asyncSupported != null) {
 						if (asyncSupported != null && asyncSupported != scanner.asyncSupported) {
-							LOG.warn("Servlet async flag specified using both service property ({}) and annotation ({})."
+							log.warn("Servlet async flag specified using both service property ({}) and annotation ({})."
 									+ " Choosing {}.", asyncSupported, scanner.asyncSupported, asyncSupported);
 						} else {
 							asyncSupported = scanner.asyncSupported;
@@ -213,7 +214,7 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 					// 6. load-on-startup
 					if (scanner.loadOnStartup != null) {
 						if (loadOnStartup != null) {
-							LOG.warn("Load-on-startup value specified using both service property ({}) and annotation ({})."
+							log.warn("Load-on-startup value specified using both service property ({}) and annotation ({})."
 									+ " Choosing {}.", loadOnStartup, scanner.loadOnStartup, loadOnStartup);
 						} else {
 							loadOnStartup = scanner.loadOnStartup;
@@ -222,7 +223,7 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 					// 7. multipart configuration - not supported in Pax Web legacy
 					if (scanner.multiPartConfigAnnotation != null) {
 						if (multiPartConfig != null) {
-							LOG.warn("Multipart configuration specified using both service property ({}) and annotation ({})."
+							log.warn("Multipart configuration specified using both service property ({}) and annotation ({})."
 									+ " Choosing {}.", multiPartConfig, scanner.multiPartConfigAnnotation, multiPartConfig);
 						} else {
 							multiPartConfig = new MultipartConfigElement(scanner.multiPartConfigAnnotation);

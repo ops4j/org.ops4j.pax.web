@@ -1,5 +1,6 @@
 /*
  * Copyright 2007 Alin Dreghiciu.
+ * Copyright 2020 Grzegorz Grzybek.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * limitations under the License.
  */
 package org.ops4j.pax.web.service.spi;
+
+import java.net.URL;
+import javax.servlet.Servlet;
 
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.task.Batch;
@@ -85,28 +89,13 @@ public interface ServerController {
 	 */
 	void removeListener(ServerListener listener);
 
-
-
-
-
-
 //	LifeCycle getContext(OsgiContextModel model);
 //
 //	void removeContext(HttpContext httpContext);
 //
-//	void addServlet(ServletModel model);
-//
-//	Servlet createResourceServlet(OsgiContextModel contextModel, String alias, String name);
-//
-//	void removeServlet(ServletModel model);
-//
 //	void addEventListener(EventListenerModel eventListenerModel);
 //
 //	void removeEventListener(EventListenerModel eventListenerModel);
-//
-//	void addFilter(FilterModel filterModel);
-//
-//	void removeFilter(FilterModel filterModel);
 //
 //	void addErrorPage(ErrorPageModel model);
 //
@@ -119,14 +108,33 @@ public interface ServerController {
 //	void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
 //
 //	void removeSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
-//
-//
-//
-//
-//
-//
-//
-//
+
+	/**
+	 * Each {@link ServerController} can be instructed to perform {@link Batch} of atomic operations.
+	 * @param batch
+	 */
 	void sendBatch(Batch batch);
+
+	/**
+	 * Each native Servlet container has own version of <em>default/resource servlet</em> usually implementing such
+	 * aspects as resource caching. Such servlet can be created using two (distinct) parameters:<ul>
+	 *     <li>{@code urlBase} - when the "base" is found to be proper, absolute path to existing, accessible
+	 *         directory</li>
+	 *     <li>{@code base} - if the "base" is not an absolute file: directory URL, this parameter will be treated
+	 *         as prefix for the resource access as defined in Http/Whiteboard Service specifications (access via
+	 *         {@link org.osgi.service.http.HttpContext#getResource(String)} or
+	 *         {@link org.osgi.service.http.context.ServletContextHelper#getResource(String)}.</li>
+	 * </ul>
+	 *
+	 * @param urlBase if the "base" is found to be proper, accessible {@code file:} based directory, it is passed
+	 *        to this creation method and {@code base} can be safely ignored
+	 * @param base According to HttpService and Whiteboard specifications, this is the <em>base</em> location for
+	 *        resource fetching. By default this <em>base</em> is prepended to a path and (combined) used as argument
+	 *        to {@link org.osgi.service.http.HttpContext#getResource(String)} or
+	 *        {@link org.osgi.service.http.context.ServletContextHelper#getResource(String)}. It should not end with
+	 *        slash ({@code /}) and can be an empty string (meaning root of the bundle).
+	 * @return
+	 */
+	Servlet createResourceServlet(URL urlBase, String base);
 
 }
