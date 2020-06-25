@@ -107,6 +107,7 @@ public abstract class AbstractControlledTestBase {
 
 		Option[] baseOptions = new Option[] {
 				// basic options
+				bootDelegationPackage("sun.*"),
 				bootDelegationPackage("com.sun.*"),
 
 				frameworkStartLevel(START_LEVEL_TEST_BUNDLE),
@@ -272,7 +273,7 @@ public abstract class AbstractControlledTestBase {
 	}
 
 	/**
-	 * Installation of all the bundles required by {@code pax-web-jetty}
+	 * Installation of all the bundles required by {@code pax-web-tomcat}
 	 * @return
 	 */
 	protected Option[] paxWebTomcat() {
@@ -282,6 +283,25 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle("org.ops4j.pax.web", "pax-web-tomcat")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("jakarta.security.auth.message", "jakarta.security.auth.message-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
+		};
+	}
+
+	/**
+	 * Installation of all the bundles required by {@code pax-web-undertow}
+	 * @return
+	 */
+	protected Option[] paxWebUndertow() {
+		return new Option[] {
+				mavenBundle("org.jboss.xnio", "xnio-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.jboss.xnio", "xnio-nio")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("io.undertow", "undertow-core")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("io.undertow", "undertow-servlet")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ops4j.pax.web", "pax-web-undertow")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
 		};
 	}

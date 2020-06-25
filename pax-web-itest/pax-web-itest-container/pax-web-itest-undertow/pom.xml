@@ -45,6 +45,47 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-undertow</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- OPS4J dependencies -->
+
+		<dependency>
+			<!--
+				can't be transtive dependency from pax-web-itest-container-common, because it has to be "runtime"
+				scoped, so it's not added to maven-failsafe-plugin classpath (duplicate SLF4J binding)
+			-->
+			<groupId>org.ops4j.pax.logging</groupId>
+			<artifactId>pax-logging-api</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- Undertow -->
+
+		<dependency>
+			<groupId>org.jboss.xnio</groupId>
+			<artifactId>xnio-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.xnio</groupId>
+			<artifactId>xnio-nio</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.undertow</groupId>
+			<artifactId>undertow-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.undertow</groupId>
+			<artifactId>undertow-servlet</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 </project>
