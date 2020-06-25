@@ -185,8 +185,16 @@
 		<!-- JavaEE -->
 
 		<dependency>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.security.auth.message</groupId>
+			<artifactId>jakarta.security.auth.message-api</artifactId>
 		</dependency>
 
 		<!-- ServiceMIX -->

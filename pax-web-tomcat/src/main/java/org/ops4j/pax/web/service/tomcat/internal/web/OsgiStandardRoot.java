@@ -15,39 +15,52 @@
  */
 package org.ops4j.pax.web.service.tomcat.internal.web;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.security.cert.Certificate;
 import java.util.Collections;
 import java.util.Set;
+import java.util.jar.Manifest;
 import javax.servlet.ServletContext;
 
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.WebResource;
 import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.WebResourceSet;
+import org.apache.catalina.webresources.AbstractResource;
 import org.apache.catalina.webresources.AbstractResourceSet;
 import org.apache.catalina.webresources.DirResourceSet;
 import org.apache.catalina.webresources.EmptyResource;
 import org.apache.catalina.webresources.FileResource;
 import org.apache.catalina.webresources.StandardRoot;
+import org.apache.juli.logging.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class OsgiStandardRoot extends StandardRoot {
+
+	public static final Logger LOG = LoggerFactory.getLogger(OsgiStandardRoot.class);
 
 	private final ServletContext osgiScopedServletContext;
 
 	private final File baseDirectory;
 	private final String chroot;
 	private final WebResourceRoot root;
+	private final int maxEntrySize;
 
-	OsgiStandardRoot(WebResourceRoot root, File baseDirectory, String chroot, ServletContext osgiScopedServletContext) {
+	OsgiStandardRoot(WebResourceRoot root, File baseDirectory, String chroot, ServletContext osgiScopedServletContext, int maxEntrySize) {
 		super(root.getContext());
 		this.root = root;
 		this.baseDirectory = baseDirectory;
 		this.chroot = chroot;
 		this.osgiScopedServletContext = osgiScopedServletContext;
+		this.maxEntrySize = maxEntrySize;
 	}
 
 	@Override
@@ -101,12 +114,17 @@ class OsgiStandardRoot extends StandardRoot {
 							}
 							return new FileResource(root, fullPath, file, true, null);
 						} catch (URISyntaxException e) {
-							TomcatResourceServlet.LOG.warn(e.getMessage(), e);
+							LOG.warn(e.getMessage(), e);
+							return new EmptyResource(root, path);
+						}
+					} else {
+						try {
+							return new UrlResource(OsgiStandardRoot.this, resource, fullPath, maxEntrySize);
+						} catch (IOException e) {
+							LOG.warn(e.getMessage(), e);
 							return new EmptyResource(root, path);
 						}
 					}
-
-					return new EmptyResource(root, path);
 				}
 
 				@Override
@@ -154,4 +172,160 @@ class OsgiStandardRoot extends StandardRoot {
 			};
 		}
 	}
+
+	/**
+	 * Based on org.eclipse.jetty.util.resource.URLResource
+	 */
+	private static class UrlResource extends AbstractResource {
+
+		private final URL url;
+		private final int maxEntrySize;
+
+		private URLConnection urlConnection;
+		private InputStream in;
+		private final File file;
+		private byte[] content;
+
+		UrlResource(WebResourceRoot root, URL url, String fullPath, int maxEntrySize) throws IOException {
+			super(root, fullPath);
+			this.url = url;
+			this.maxEntrySize = maxEntrySize;
+
+			doGetInputStream(false);
+
+			this.file = new File(url.getPath());
+		}
+
+		@Override
+		protected InputStream doGetInputStream() {
+			return doGetInputStream(true);
+		}
+
+		private synchronized InputStream doGetInputStream(boolean forceNew) {
+			if (urlConnection == null) {
+				try {
+					this.urlConnection = this.url.openConnection();
+					this.urlConnection.setUseCaches(true);
+					this.in = this.urlConnection.getInputStream();
+
+					if (getContentLength() <= maxEntrySize) {
+						// we can cache the content, as
+						// in org.eclipse.jetty.server.CachedContentFactory.CachedHttpContent.getDirectBuffer
+						byte[] buf = new byte[4096];
+						int read = -1;
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						try {
+							while ((read = this.in.read(buf)) > 0) {
+								baos.write(buf, 0, read);
+							}
+							content = baos.toByteArray();
+						} finally {
+							in.close();
+							in = null;
+						}
+					}
+				} catch (IOException e) {
+					LOG.warn(e.getMessage(), e);
+				}
+			}
+			InputStream result = in;
+			if (forceNew) {
+				in = null;
+				urlConnection = null;
+			}
+			return result;
+		}
+
+		@Override
+		protected Log getLog() {
+			return null;
+		}
+
+		@Override
+		public long getLastModified() {
+			return urlConnection.getLastModified();
+		}
+
+		@Override
+		public boolean exists() {
+			doGetInputStream(false);
+			return in != null || content != null;
+		}
+
+		@Override
+		public boolean isVirtual() {
+			return true;
+		}
+
+		@Override
+		public boolean isDirectory() {
+			return url.getPath().endsWith("/");
+		}
+
+		@Override
+		public boolean isFile() {
+			return !url.getPath().endsWith("/");
+		}
+
+		@Override
+		public boolean delete() {
+			return false;
+		}
+
+		@Override
+		public String getName() {
+			return file.getName();
+		}
+
+		@Override
+		public long getContentLength() {
+			return urlConnection.getContentLength();
+		}
+
+		@Override
+		public String getCanonicalPath() {
+			try {
+				return file.getCanonicalPath();
+			} catch (IOException e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
+		}
+
+		@Override
+		public boolean canRead() {
+			doGetInputStream(false);
+			return in != null || content != null;
+		}
+
+		@Override
+		public byte[] getContent() {
+			return content;
+		}
+
+		@Override
+		public long getCreation() {
+			return urlConnection.getLastModified();
+		}
+
+		@Override
+		public URL getURL() {
+			return url;
+		}
+
+		@Override
+		public URL getCodeBase() {
+			return null;
+		}
+
+		@Override
+		public Certificate[] getCertificates() {
+			return new Certificate[0];
+		}
+
+		@Override
+		public Manifest getManifest() {
+			return null;
+		}
+	}
+
 }

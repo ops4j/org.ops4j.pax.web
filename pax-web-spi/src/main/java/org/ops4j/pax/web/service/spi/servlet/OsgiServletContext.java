@@ -381,7 +381,12 @@ public class OsgiServletContext implements ServletContext {
 	}
 
 	String getMimeType(WebContainerContext context, String file) {
-		return context.getMimeType(file);
+		String mimeType = context.getMimeType(file);
+		if (mimeType == null) {
+			// let's check real context
+			mimeType = containerServletContext.getMimeType(file);
+		}
+		return mimeType;
 	}
 
 	@Override

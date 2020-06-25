@@ -222,6 +222,7 @@
 		<dependency.jasypt.version>1.9.3</dependency.jasypt.version>
 
 		<dependency.jakarta.annotation-api>1.3.5</dependency.jakarta.annotation-api>
+		<dependency.jakarta.jaspic-api.version>1.1.3</dependency.jakarta.jaspic-api.version>
 		<dependency.jakarta.servlet-api.version>4.0.3</dependency.jakarta.servlet-api.version>
 		<dependency.jakarta.websocket-api.version>1.1.2</dependency.jakarta.websocket-api.version>
 
@@ -1356,7 +1357,6 @@
 				<artifactId>jakarta.annotation-api</artifactId>
 				<version>${dependency.jakarta.annotation-api}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>jakarta.servlet</groupId>
 				<artifactId>jakarta.servlet-api</artifactId>
@@ -1366,6 +1366,11 @@
 				<groupId>jakarta.websocket</groupId>
 				<artifactId>jakarta.websocket-api</artifactId>
 				<version>${dependency.jakarta.websocket-api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.security.auth.message</groupId>
+				<artifactId>jakarta.security.auth.message-api</artifactId>
+				<version>${dependency.jakarta.jaspic-api.version}</version>
 			</dependency>
 
 			<dependency>
@@ -2346,7 +2351,7 @@
 		<module>pax-web-api</module>
 		<module>pax-web-spi</module>
 
-<!--		<module>pax-web-tomcat-common</module>-->
+		<module>pax-web-tomcat-common</module>
 <!--		<module>pax-web-jsp</module>-->
 
 		<module>pax-web-runtime</module>

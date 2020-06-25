@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
+    Copyright 2020 OPS4J.
 
-      http://www.apache.org/licenses/LICENSE-2.0
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-    KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -53,15 +50,18 @@
 							javax.servlet.descriptor;version="[3.1,5)",
 
 							<!-- from pax-web-jsp -->
-							javax.servlet.jsp;version="${dependency.javax.servlet.jsp-api.version}",
-							javax.servlet.jsp.el;version="${dependency.javax.servlet.jsp-api.version}",
-							javax.servlet.jsp.tagext;version="${dependency.javax.servlet.jsp-api.version}",
+							javax.servlet.jsp;version="${dependency.javax.servlet.jsp-api.version}";resolution:=optional,
+							javax.servlet.jsp.el;version="${dependency.javax.servlet.jsp-api.version}";resolution:=optional,
+							javax.servlet.jsp.tagext;version="${dependency.javax.servlet.jsp-api.version}";resolution:=optional,
 
 							<!-- from pax-logging-api -->
 							org.apache.juli.logging,
 
 							<!-- JavaSE -->
+							javax.management,
 							javax.naming,
+							javax.naming.spi,
+							javax.management.modelmbean,
 							javax.net.ssl,
 							javax.xml.parsers,
 							org.xml.sax,
@@ -100,7 +100,12 @@
 							org.apache.tomcat.util.descriptor.tld;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util.descriptor.web;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util.digester;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util.scan;version="${dependency.tomcat.version}"
+							org.apache.tomcat.util.scan;version="${dependency.tomcat.version}",
+							<!-- tomcat-embed-core - unfortunately these packages have to be here -->
+							org.apache.tomcat.util.modeler;version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.modeler.modules;version="${dependency.tomcat.version}",
+							<!-- tomcat-juli -->
+							org.apache.juli;version="${dependency.tomcat.version}"
 						</Export-Package>
 						<_nouses>true</_nouses>
 					</instructions>
@@ -113,17 +118,25 @@
 
 		<!-- Tomcat -->
 
+<!--		<dependency>-->
+<!--			<groupId>org.apache.tomcat</groupId>-->
+<!--			<artifactId>tomcat-api</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.apache.tomcat</groupId>-->
+<!--			<artifactId>tomcat-util</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.apache.tomcat</groupId>-->
+<!--			<artifactId>tomcat-util-scan</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
 		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-util</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-util-scan</artifactId>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-core</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 	</dependencies>

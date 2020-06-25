@@ -168,7 +168,13 @@ class TomcatServerController implements ServerController {
 			throw new IllegalStateException("Can't process batch in Tomcat server controller in state " + state);
 		}
 
-		batch.accept(tomcatServerWrapper);
+		ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+		try {
+			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+			batch.accept(tomcatServerWrapper);
+		} finally {
+			Thread.currentThread().setContextClassLoader(tccl);
+		}
 	}
 
 	@Override

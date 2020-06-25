@@ -59,12 +59,13 @@ public abstract class AbstractHttpServiceIntegrationTest extends AbstractControl
 					httpService.registerServlet("/test", servlet, legacyName("testRegisterServlet"), null);
 					return null;
 				});
-		assertTrue("Servlet.init(ServletConfig) was not called", servlet.isInitCalled());
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'TEST OK'",
 						resp -> resp.contains("TEST OK"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/test");
+
+		assertTrue("Servlet.init(ServletConfig) was not called", servlet.isInitCalled());
 
 		httpService.unregister("/test");
 	}
@@ -79,7 +80,6 @@ public abstract class AbstractHttpServiceIntegrationTest extends AbstractControl
 					httpService.registerServlet("/test1", servlet1, legacyName("t1"), null);
 					return null;
 				});
-		assertTrue("Servlet.init(ServletConfig) was not called", servlet1.isInitCalled());
 
 		final TestServlet servlet2 = new TestServlet();
 		configureAndWaitForNamedServlet("t2",
@@ -87,7 +87,6 @@ public abstract class AbstractHttpServiceIntegrationTest extends AbstractControl
 					httpService.registerServlet("/test2", servlet2, legacyName("t2"), null);
 					return null;
 				});
-		assertTrue("Servlet.init(ServletConfig) was not called", servlet2.isInitCalled());
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'TEST OK'",
@@ -98,6 +97,9 @@ public abstract class AbstractHttpServiceIntegrationTest extends AbstractControl
 				.withResponseAssertion("Response must contain 'TEST OK'",
 						resp -> resp.contains("TEST OK"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/test2");
+
+		assertTrue("Servlet.init(ServletConfig) was not called", servlet1.isInitCalled());
+		assertTrue("Servlet.init(ServletConfig) was not called", servlet2.isInitCalled());
 
 		httpService.unregister("/test1");
 		httpService.unregister("/test2");
@@ -136,18 +138,26 @@ public abstract class AbstractHttpServiceIntegrationTest extends AbstractControl
 
 		TestServlet servlet1 = new TestServlet();
 		httpService.registerServlet("/test1", servlet1, legacyName("test1"), null);
-		assertTrue("Servlet.init(ServletConfig) was not called", servlet1.isInitCalled());
 
-		assertTrue("Timeout waiting for test1 servlet registration", latch1.await(5, TimeUnit.SECONDS));
-
+		// init() will be called after first request
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'TEST OK'",
 						resp -> resp.contains("TEST OK"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/test1");
 
+		assertTrue("Servlet.init(ServletConfig) was not called", servlet1.isInitCalled());
+		assertTrue("Timeout waiting for test1 servlet registration", latch1.await(5, TimeUnit.SECONDS));
+
 		TestServlet servlet2 = new TestServlet();
 		httpService.registerServlet("/test2", servlet2, legacyName("test2"), httpContext1.get());
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'TEST OK'",
+						resp -> resp.contains("TEST OK"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/test2");
+
 		assertTrue("Servlet.init(ServletConfig) was not called", servlet2.isInitCalled());
+		assertTrue("Timeout waiting for test2 servlet registration", latch2.await(5, TimeUnit.SECONDS));
 
 		// register resources to different context
 		// "/" will be changed to "" anyway
@@ -156,8 +166,6 @@ public abstract class AbstractHttpServiceIntegrationTest extends AbstractControl
 		httpService.registerResources("/r3", "/", httpContext1.get());
 		httpService.registerResources("/r4", "", httpContext1.get());
 		httpService.registerResources("/", "/static", httpContext1.get());
-
-		assertTrue("Timeout waiting for test2 servlet registration", latch2.await(5, TimeUnit.SECONDS));
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'TEST OK'",

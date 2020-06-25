@@ -15,10 +15,14 @@
  */
 package org.ops4j.pax.web.service.tomcat.internal;
 
+import java.util.Hashtable;
+
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.wiring.BundleWiring;
 
 /**
  * Registers the ServletControllerFactory on startup
@@ -35,10 +39,14 @@ public class Activator implements BundleActivator {
 
 	@Override
 	public void start(BundleContext context) throws Exception {
-//		context.registerService(ServerControllerFactory.class,
-//				TomcatServerControllerFactory
-//						.newInstance(TomcatServerStateFactory
-//								.newInstance(new TomcatServerFactory())), null);
+		this.bundleContext = context;
+
+		Bundle paxWebTomcatBundle = bundleContext.getBundle();
+		ClassLoader loader = paxWebTomcatBundle.adapt(BundleWiring.class).getClassLoader();
+
+		serverControllerFactory = new TomcatServerControllerFactory(paxWebTomcatBundle, loader);
+		registration = bundleContext.registerService(ServerControllerFactory.class,
+				serverControllerFactory, new Hashtable<>());
 	}
 
 	@Override

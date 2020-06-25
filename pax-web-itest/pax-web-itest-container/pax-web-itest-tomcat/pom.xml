@@ -39,10 +39,33 @@
 		<!-- pax-web own artifacts -->
 
 		<dependency>
-			<!-- With just this dependency, we should transitively get everything that's needed for Tomcat tests -->
+			<!-- With just this dependency, we should transitively get everything that's needed for integration tests -->
 			<groupId>org.ops4j.pax.web.itest</groupId>
 			<artifactId>pax-web-itest-container-common</artifactId>
 			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-tomcat-common</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-tomcat</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- OPS4J dependencies -->
+
+		<dependency>
+			<!--
+				can't be transtive dependency from pax-web-itest-container-common, because it has to be "runtime"
+				scoped, so it's not added to maven-failsafe-plugin classpath (duplicate SLF4J binding)
+			-->
+			<groupId>org.ops4j.pax.logging</groupId>
+			<artifactId>pax-logging-api</artifactId>
+			<scope>runtime</scope>
 		</dependency>
 
 	</dependencies>

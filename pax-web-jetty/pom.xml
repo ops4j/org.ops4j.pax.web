@@ -106,15 +106,7 @@
 						<Private-Package>
 							<!-- pax-web-jetty (internal) -->
 							org.ops4j.pax.web.service.jetty.internal.*,
-							<!-- supporting libraries -->
-<!--							org.ops4j.lang,-->
-<!--							org.ops4j.util.xml-->
 						</Private-Package>
-						<Embed-Dependency>
-							ops4j-base-lang;inline=true,
-							ops4j-base-util-collections;inline=true,
-							ops4j-base-util-xml;inline=true
-						</Embed-Dependency>
 					</instructions>
 				</configuration>
 			</plugin>

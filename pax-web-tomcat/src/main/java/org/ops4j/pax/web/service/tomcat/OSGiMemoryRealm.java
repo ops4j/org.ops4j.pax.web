@@ -26,9 +26,11 @@ import org.apache.catalina.LifecycleState;
 import org.apache.catalina.realm.MemoryRealm;
 import org.apache.catalina.realm.MessageDigestCredentialHandler;
 import org.apache.tomcat.util.digester.Digester;
+import org.ops4j.pax.web.annotations.Review;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Review("Is it needed?")
 public class OSGiMemoryRealm extends MemoryRealm {
 
 	private static final Logger LOG = LoggerFactory.getLogger(OSGiMemoryRealm.class);

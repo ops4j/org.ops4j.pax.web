@@ -16,8 +16,10 @@
 package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.URL;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,8 +44,11 @@ import org.apache.catalina.core.StandardServer;
 import org.apache.catalina.core.StandardService;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.valves.AccessLogValve;
+import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
+import org.apache.tomcat.util.descriptor.web.WebXml;
+import org.apache.tomcat.util.descriptor.web.WebXmlParser;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
@@ -506,7 +511,14 @@ class TomcatServerWrapper implements BatchVisitor {
 		LOG.info("Starting {}", server);
 
 		long t1 = System.currentTimeMillis();
-		server.start();
+		ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+		try {
+			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+			TomcatURLStreamHandlerFactory.disable();
+			server.start();
+		} finally {
+			Thread.currentThread().setContextClassLoader(tccl);
+		}
 		long t2 = System.currentTimeMillis();
 		LOG.info("Tomcat server started in " + (t2 - t1) + " ms");
 	}
@@ -538,6 +550,7 @@ class TomcatServerWrapper implements BatchVisitor {
 			context.setWorkDir(configuration.server().getTemporaryDirectory().getAbsolutePath());
 //							ctx.setWebappVersion(name);
 //							ctx.setDocBase(basedir);
+			context.setParentClassLoader(getClass().getClassLoader());
 
 			// in this new context, we need "initial OSGi filter" which will:
 			// - call preprocessors
@@ -552,11 +565,24 @@ class TomcatServerWrapper implements BatchVisitor {
 
 			context.addLifecycleListener(new Tomcat.FixContextListener());
 
-			//							// add mimetypes here?
-			//							// MIME mappings
-			//							for (int i = 0; i < DEFAULT_MIME_MAPPINGS.length; i += 2) {
-			//								ctx.addMimeMapping(DEFAULT_MIME_MAPPINGS[i], DEFAULT_MIME_MAPPINGS[i + 1]);
-			//							}
+			// mime mappings from Tomcat's web.xml
+			WebXml webXml = new WebXml();
+			// TODO: think about Tomcat's DigesterFactory and how it loads the dtd/xsd resources
+			WebXmlParser webXmlParser = new WebXmlParser(true, false, true);
+			try {
+				URL internalXml = getClass().getResource("/org/ops4j/pax/web/service/tomcat/internal/web.xml");
+				if (internalXml != null) {
+					// resource from pax-web-tomcat bundle added using maven-dependency-plugin
+					webXmlParser.parseWebXml(internalXml, webXml, false);
+				} else {
+					// unit test/IDE case - no URL available
+					webXml.addMimeMapping("txt", "text/plain");
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
+
+			webXml.getMimeMappings().forEach(context::addMimeMapping);
 
 			// TODO: handle virtual hosts here. Context should be added to all declared virtual hosts.
 			//       Remember - it's much harder in Tomcat than in Jetty and Undertow

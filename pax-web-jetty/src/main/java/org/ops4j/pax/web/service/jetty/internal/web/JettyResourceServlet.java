@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import javax.servlet.ServletContext;
+import javax.servlet.UnavailableException;
 
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.servlet.DefaultServlet;
@@ -26,12 +27,16 @@ import org.eclipse.jetty.util.resource.PathResource;
 import org.eclipse.jetty.util.resource.Resource;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.util.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Extension of Jetty's <em>default servlet</em> to satisfy the resource contract from Http Service and Whiteboard
  * Service specifications.
  */
 public class JettyResourceServlet extends DefaultServlet {
+
+	public static final Logger LOG = LoggerFactory.getLogger(JettyResourceServlet.class);
 
 	/** If specified, this is the directory to fetch resource files from */
 	private final PathResource baseUrlResource;
@@ -45,6 +50,30 @@ public class JettyResourceServlet extends DefaultServlet {
 	public JettyResourceServlet(PathResource baseUrlResource, String chroot) {
 		this.baseUrlResource = baseUrlResource;
 		this.chroot = chroot;
+	}
+
+	@Override
+	public void init() throws UnavailableException {
+		super.init();
+
+		String maxCacheSize = getInitParameter("maxCacheSize");
+		String maxCachedFileSize = getInitParameter("maxCachedFileSize");
+		String maxCachedFiles = getInitParameter("maxCachedFiles");
+		if (maxCacheSize == null) {
+			maxCacheSize = Integer.toString(256 * 1024 * 1024 / 64);
+		}
+		if (maxCachedFileSize == null) {
+			maxCachedFileSize = Integer.toString(128 * 1024 * 1024 / 64);
+		}
+		if (maxCachedFiles == null) {
+			maxCachedFiles = "2048";
+		}
+
+		LOG.info("Initialized Jetty Resource Servlet for base=\"{}\" with cache maxSize={}kB, maxEntrySize={}kB, maxEntries={}",
+				baseUrlResource != null ? baseUrlResource.getPath() : chroot,
+				Integer.parseInt(maxCacheSize) / 1024,
+				Integer.parseInt(maxCachedFileSize) / 1024,
+				maxCachedFiles);
 	}
 
 	@Override

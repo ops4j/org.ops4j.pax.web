@@ -208,6 +208,8 @@ public abstract class AbstractControlledTestBase {
 	 */
 	protected Option[] paxWebCore() {
 		return new Option[] {
+				mavenBundle("jakarta.annotation", "jakarta.annotation-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("jakarta.servlet", "jakarta.servlet-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.ops4j.pax.web", "pax-web-api")
@@ -266,6 +268,21 @@ public abstract class AbstractControlledTestBase {
 //				mavenBundle().groupId("org.eclipse.jetty")
 //						.artifactId("jetty-continuation")
 //						.version(asInProject()),
+		};
+	}
+
+	/**
+	 * Installation of all the bundles required by {@code pax-web-jetty}
+	 * @return
+	 */
+	protected Option[] paxWebTomcat() {
+		return new Option[] {
+				mavenBundle("org.ops4j.pax.web", "pax-web-tomcat-common")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ops4j.pax.web", "pax-web-tomcat")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("jakarta.security.auth.message", "jakarta.security.auth.message-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
 		};
 	}
 

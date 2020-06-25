@@ -67,19 +67,25 @@ public class TomcatResourceServlet extends DefaultServlet {
 
 		final ServletContext osgiScopedServletContext = getServletContext();
 
+		int maxEntrySize = resourceConfig == null || resourceConfig.maxCacheEntrySize() == null
+						? (int) resources.getCacheMaxSize() / 20 : resourceConfig.maxCacheEntrySize();
+
 		// and tweak org.apache.catalina.servlets.DefaultServlet.resources
-		resources = new OsgiStandardRoot(this.resources, baseDirectory, chroot, osgiScopedServletContext);
+		resources = new OsgiStandardRoot(this.resources, baseDirectory, chroot, osgiScopedServletContext, maxEntrySize * 1024);
 
 		resources.setCachingAllowed(true);
 		// org.apache.catalina.webresources.Cache.maxSize
 		resources.setCacheMaxSize(resourceConfig == null || resourceConfig.maxTotalCacheSize() == null
 				? 10 * 1024 : resourceConfig.maxTotalCacheSize());
 		// org.apache.catalina.webresources.Cache.objectMaxSize
-		resources.setCacheObjectMaxSize(resourceConfig == null || resourceConfig.maxCacheEntrySize() == null
-				? (int) resources.getCacheMaxSize() / 20 : resourceConfig.maxCacheEntrySize());
+		resources.setCacheObjectMaxSize(maxEntrySize);
 		// org.apache.catalina.webresources.Cache.ttl
 		resources.setCacheTtl(resourceConfig == null || resourceConfig.maxCacheTTL() == null
 				? 5000 : resourceConfig.maxCacheTTL());
+
+		LOG.info("Initialized Tomcat Resource Servlet for base=\"{}\" with cache maxSize={}kB, maxEntrySize={}kB, TTL={}ms",
+				baseDirectory != null ? baseDirectory : chroot,
+				resources.getCacheMaxSize(), resources.getCacheObjectMaxSize(), resources.getCacheTtl());
 
 		try {
 			resources.start();
