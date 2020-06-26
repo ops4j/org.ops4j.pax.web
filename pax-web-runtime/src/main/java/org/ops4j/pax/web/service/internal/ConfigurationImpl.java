@@ -1103,9 +1103,13 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 
 	private class LogConfigurationImpl implements LogConfiguration {
 
+		private final Boolean ncsaBuffered;
+
 		private LogConfigurationImpl() {
 			// eager resolution of some important properties
 			resolveBooleanProperty(PaxWebConfig.PID_CFG_LOG_NCSA_ENABLED);
+			Boolean buffered = resolveBooleanProperty(PaxWebConfig.PID_CFG_LOG_NCSA_BUFFERED);
+			ncsaBuffered = buffered == null ? true : buffered;
 		}
 
 		@Override
@@ -1146,6 +1150,11 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		@Override
 		public String getLogNCSATimeZone() {
 			return resolveStringProperty(PaxWebConfig.PID_CFG_LOG_NCSA_LOGTIMEZONE);
+		}
+
+		@Override
+		public Boolean getLogNCSABuffered() {
+			return ncsaBuffered;
 		}
 	}
 

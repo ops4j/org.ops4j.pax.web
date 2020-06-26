@@ -65,4 +65,10 @@ public interface LogConfiguration {
 	 */
 	String getLogNCSATimeZone();
 
+	/**
+	 * Whether NCSA log file access should be buffered (by default it is buffered in Tomcat). Defaults to {@code true}.
+	 * @return
+	 */
+	Boolean getLogNCSABuffered();
+
 }

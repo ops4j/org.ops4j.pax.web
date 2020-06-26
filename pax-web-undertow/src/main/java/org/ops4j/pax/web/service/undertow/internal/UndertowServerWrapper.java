@@ -17,6 +17,7 @@ package org.ops4j.pax.web.service.undertow.internal;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -46,6 +47,9 @@ import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.OpenListener;
 import io.undertow.server.handlers.PathHandler;
+import io.undertow.server.handlers.accesslog.AccessLogHandler;
+import io.undertow.server.handlers.accesslog.AccessLogReceiver;
+import io.undertow.server.handlers.accesslog.DefaultAccessLogReceiver;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.ConfidentialPortManager;
 import io.undertow.servlet.api.Deployment;
@@ -61,6 +65,7 @@ import io.undertow.servlet.core.ManagedFilters;
 import io.undertow.servlet.core.ManagedListener;
 import io.undertow.servlet.util.ImmediateInstanceFactory;
 import org.ops4j.pax.web.service.spi.config.Configuration;
+import org.ops4j.pax.web.service.spi.config.LogConfiguration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
@@ -84,6 +89,8 @@ import org.ops4j.pax.web.service.undertow.internal.configuration.model.Server;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.SocketBinding;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowConfiguration;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
@@ -216,6 +223,9 @@ class UndertowServerWrapper implements BatchVisitor {
 	/** Servlet to use when no servlet is mapped - to ensure that preprocessors and filters are run correctly. */
 	private final Default404Servlet default404Servlet = new Default404Servlet();
 
+	// configuration read from undertow.xml
+	private UndertowConfiguration undertowConfiguration;
+
 	UndertowServerWrapper(Configuration config, UndertowFactory undertowFactory,
 			Bundle paxWebUndertowBundle, ClassLoader classLoader) {
 		this.configuration = config;
@@ -247,14 +257,14 @@ class UndertowServerWrapper implements BatchVisitor {
 			throw new IllegalArgumentException("Problem configuring Undertow server: " + e.getMessage(), e);
 		}
 
-		// If external configuration added some connectors, we have to ensure they match declaration from
-		// PID config: org.osgi.service.http.enabled and org.osgi.service.http.secure.enabled
-		verifyListenerConfiguration();
-
 		// Configure NCSA RequestLogHandler if needed
 		if (configuration.logging().isLogNCSAFormatEnabled()) {
 			configureRequestLog();
 		}
+
+		// If external configuration added some connectors, we have to ensure they match declaration from
+		// PID config: org.osgi.service.http.enabled and org.osgi.service.http.secure.enabled
+		verifyListenerConfiguration();
 
 //					for (Context context : contextMap.values()) {
 //						try {
@@ -312,7 +322,7 @@ class UndertowServerWrapper implements BatchVisitor {
 			xmlReader.parse(new InputSource(stream));
 		}
 
-		UndertowConfiguration cfg = (UndertowConfiguration) unmarshallerHandler.getResult();
+		this.undertowConfiguration = (UndertowConfiguration) unmarshallerHandler.getResult();
 //		if (cfg == null
 //				|| cfg.getSocketBindings().size() == 0
 //				|| cfg.getInterfaces().size() == 0
@@ -321,14 +331,14 @@ class UndertowServerWrapper implements BatchVisitor {
 //			throw new IllegalArgumentException("Problem configuring Undertow server using \"" + xmlConfig
 //					+ "\": incomplete XML configuration");
 //		}
-		cfg.init();
+		undertowConfiguration.init();
 
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Undertow XML configuration parsed correctly: {}", cfg);
+			LOG.debug("Undertow XML configuration parsed correctly: {}", undertowConfiguration);
 		}
 
 		// collect extra workers and byte buffer pools
-		IoSubsystem io = cfg.getIoSubsystem();
+		IoSubsystem io = undertowConfiguration.getIoSubsystem();
 		if (io != null) {
 			for (IoSubsystem.Worker worker : io.getWorkers()) {
 				workers.put(worker.getName(), undertowFactory.createWorker(worker));
@@ -341,9 +351,9 @@ class UndertowServerWrapper implements BatchVisitor {
 		// listeners will be checked by verifyConnectorConfiguration() later
 		List<Server.HttpListener> httpListeners = null;
 		List<Server.HttpsListener> httpsListeners = null;
-		if (cfg.getSubsystem() != null && cfg.getSubsystem().getServer() != null) {
-			httpListeners = cfg.getSubsystem().getServer().getHttpListeners();
-			httpsListeners = cfg.getSubsystem().getServer().getHttpsListeners();
+		if (undertowConfiguration.getSubsystem() != null && undertowConfiguration.getSubsystem().getServer() != null) {
+			httpListeners = undertowConfiguration.getSubsystem().getServer().getHttpListeners();
+			httpsListeners = undertowConfiguration.getSubsystem().getServer().getHttpsListeners();
 		}
 
 		// http listener(s)
@@ -354,7 +364,7 @@ class UndertowServerWrapper implements BatchVisitor {
 					LOG.debug("Skipping disabled Undertow http listener \"{}\"", listenerName);
 					continue;
 				}
-				UndertowConfiguration.BindingInfo binding = cfg.bindingInfo(http.getSocketBindingName());
+				UndertowConfiguration.BindingInfo binding = undertowConfiguration.bindingInfo(http.getSocketBindingName());
 				for (String address : binding.getAddresses()) {
 					LOG.info("Configuring Undertow http listener for address " + address + ":" + binding.getPort());
 
@@ -364,7 +374,7 @@ class UndertowServerWrapper implements BatchVisitor {
 					// this is specific to non-secure listener
 					// see org.wildfly.extension.undertow.Server#lookupSecurePort
 					if (http.getRedirectSocket() != null) {
-						SocketBinding secureSocketBinding = cfg.socketBinding(http.getRedirectSocket());
+						SocketBinding secureSocketBinding = undertowConfiguration.socketBinding(http.getRedirectSocket());
 						if (secureSocketBinding != null) {
 							this.securePortMapping.put(binding.getPort(), secureSocketBinding.getPort());
 						}
@@ -389,7 +399,7 @@ class UndertowServerWrapper implements BatchVisitor {
 					LOG.debug("Skipping disabled Undertow https listener \"{}\"", listenerName);
 					continue;
 				}
-				UndertowConfiguration.BindingInfo binding = cfg.bindingInfo(https.getSocketBindingName());
+				UndertowConfiguration.BindingInfo binding = undertowConfiguration.bindingInfo(https.getSocketBindingName());
 				for (String address : binding.getAddresses()) {
 					LOG.info("Configuring Undertow https listener for address " + address + ":" + binding.getPort());
 
@@ -400,7 +410,7 @@ class UndertowServerWrapper implements BatchVisitor {
 						LOG.warn("ssl-context reference attribute from https-listener listener is not supported"
 								+ " in Pax Web. Please use security-realm reference attribute instead.");
 					}
-					SecurityRealm realm = cfg.securityRealm(https.getSecurityRealm());
+					SecurityRealm realm = undertowConfiguration.securityRealm(https.getSecurityRealm());
 					if (realm == null) {
 						throw new IllegalArgumentException("No security realm with name \"" + https.getSecurityRealm()
 								+ "\" available for \"" + https.getName() + "\" https listener.");
@@ -643,98 +653,80 @@ class UndertowServerWrapper implements BatchVisitor {
 	/**
 	 * Configure request logging (AKA <em>NCSA logging</em>) for Undertow, using configuration properties.
 	 */
-	public void configureRequestLog() {
-//		LogConfiguration lc = configuration.logging();
-//
-//		if (lc.getLogNCSADirectory() == null) {
-//			throw new IllegalArgumentException("Log directory for NCSA logging is not specified. Please set"
-//					+ " org.ops4j.pax.web.log.ncsa.directory property.");
-//		}
-//		File logDir = new File(lc.getLogNCSADirectory());
-//		if (logDir.isFile()) {
-//			throw new IllegalArgumentException(logDir + " is not a valid directory to store request logs");
-//		}
-//
-//						RequestLogWriter writer = new RequestLogWriter();
-//
-//						// org.eclipse.jetty.util.RolloverFileOutputStream._append
-//						writer.setAppend(lc.isLogNCSAAppend());
-//						// org.eclipse.jetty.util.RolloverFileOutputStream._filename, should contain "yyyy_mm_dd"
-//						if (lc.getLogNCSAFile() != null) {
-//							writer.setFilename(new File(lc.getLogNCSADirectory(), lc.getLogNCSAFile()).getAbsolutePath());
-//						} else {
-//							writer.setFilename(new File(lc.getLogNCSADirectory(), "yyyy_mm_dd.request.log").getAbsolutePath());
-//						}
-//						// org.eclipse.jetty.util.RolloverFileOutputStream._fileDateFormat, defaults to "yyyy_mm_dd"
-//						writer.setFilenameDateFormat(lc.getLogNCSAFilenameDateFormat());
-//						// org.eclipse.jetty.util.RolloverFileOutputStream._retainDays
-//						writer.setRetainDays(lc.getLogNCSARetainDays());
-//						// org.eclipse.jetty.server.RequestLogWriter._timeZone, defaults to "GMT"
-//						writer.setTimeZone(lc.getLogNCSATimeZone());
-//
-//						CustomRequestLog requestLog = new CustomRequestLog(writer,
-//								lc.isLogNCSAExtended() ? CustomRequestLog.EXTENDED_NCSA_FORMAT : CustomRequestLog.EXTENDED_NCSA_FORMAT);
-//
-//						// original approach from PAXWEB-269 - http://wiki.eclipse.org/Jetty/Howto/Configure_Request_Logs:
-//				//		server.getRootHandlerCollection().addHandler(requestLogHandler);
-//						// since https://bugs.eclipse.org/bugs/show_bug.cgi?id=446564 we can do better:
-//						server.setRequestLog(requestLog);
-//
-//		LOG.info("NCSARequestlogging is using directory {}", lc.getLogNCSADirectory());
-//
-//// properties based log configuration:
-//
-//					if (configuration.logging().isLogNCSAFormatEnabled()) {
-//						String logNCSADirectory = configuration.logging().getLogNCSADirectory();
-//						String logNCSAFormat = configuration.logging().getLogNCSAFormat();
-//
-//						Bundle bundle = FrameworkUtil.getBundle(UndertowServerController.class);
-//						ClassLoader loader = bundle.adapt(BundleWiring.class).getClassLoader();
-//						xnioWorker = UndertowUtil.createWorker(loader);
-//
-//						// String logNameSuffix = logNCSAFormat.substring(logNCSAFormat.lastIndexOf("."));
-//						// String logBaseName = logNCSAFormat.substring(0, logNCSAFormat.lastIndexOf("."));
-//
-//						AccessLogReceiver logReceiver = DefaultAccessLogReceiver.builder().setLogWriteExecutor(xnioWorker)
-//								.setOutputDirectory(new File(logNCSADirectory).toPath()).setLogBaseName("request.")
-//								.setLogNameSuffix("log").setRotate(true).build();
-//
-//						String format;
-//						if (configuration.logging().isLogNCSAExtended()) {
-//							format = "combined";
-//						} else {
-//							format = "common";
-//						}
-//
-//						// String format = "%a - - [%t] \"%m %U %H\" %s ";
-//						// TODO: still need to find out how to add cookie etc.
-//
-//						rootHandler = new AccessLogHandler(rootHandler, logReceiver, format,
-//								AccessLogHandler.class.getClassLoader());
-//					}
-//
-//// XML based log configuration:
-//
-//					// access log
-//					if (cfg.getSubsystem().getServer().getHost() != null
-//							&& cfg.getSubsystem().getServer().getHost().getAccessLog() != null) {
-//						Server.Host.AccessLog accessLog = cfg.getSubsystem().getServer().getHost().getAccessLog();
-//
-//						Bundle bundle = FrameworkUtil.getBundle(UndertowServerController.class);
-//						ClassLoader loader = bundle.adapt(BundleWiring.class).getClassLoader();
-//						xnioWorker = UndertowUtil.createWorker(loader);
-//
-//						AccessLogReceiver logReceiver = DefaultAccessLogReceiver.builder()
-//								.setLogWriteExecutor(xnioWorker)
-//								.setOutputDirectory(new File(accessLog.getDirectory()).toPath())
-//								.setLogBaseName(accessLog.getPrefix())
-//								.setLogNameSuffix(accessLog.getSuffix())
-//								.setRotate(Boolean.parseBoolean(accessLog.getRotate()))
-//								.build();
-//
-//						rootHandler = new AccessLogHandler(rootHandler, logReceiver, accessLog.getPattern(),
-//								AccessLogHandler.class.getClassLoader());
-//					}
+	public void configureRequestLog() throws IOException {
+		// XML configuration
+		if (undertowConfiguration != null && undertowConfiguration.getSubsystem() != null
+				&& undertowConfiguration.getSubsystem().getServer() != null
+				&& undertowConfiguration.getSubsystem().getServer().getHost() != null
+				&& undertowConfiguration.getSubsystem().getServer().getHost().getAccessLog() != null) {
+			Server.Host.AccessLog accessLog = undertowConfiguration.getSubsystem().getServer().getHost().getAccessLog();
+
+			Bundle bundle = FrameworkUtil.getBundle(UndertowServerController.class);
+			ClassLoader loader = bundle.adapt(BundleWiring.class).getClassLoader();
+			XnioWorker xnioWorker = undertowFactory.createLogWorker();
+
+			AccessLogReceiver logReceiver = DefaultAccessLogReceiver.builder()
+					.setLogWriteExecutor(xnioWorker)
+					.setOutputDirectory(new File(accessLog.getDirectory()).toPath())
+					.setLogBaseName(accessLog.getPrefix())
+					.setLogNameSuffix(accessLog.getSuffix())
+					.setRotate(Boolean.parseBoolean(accessLog.getRotate()))
+					.build();
+
+			rootHandler = new AccessLogHandler(rootHandler, logReceiver, accessLog.getPattern(),
+					AccessLogHandler.class.getClassLoader());
+			return;
+		}
+
+		LogConfiguration lc = configuration.logging();
+		if (!lc.isLogNCSAFormatEnabled()) {
+			return;
+		}
+
+		if (lc.getLogNCSADirectory() == null) {
+			throw new IllegalArgumentException("Log directory for NCSA logging is not specified. Please set"
+					+ " org.ops4j.pax.web.log.ncsa.directory property.");
+		}
+		File logDir = new File(lc.getLogNCSADirectory());
+		if (logDir.isFile()) {
+			throw new IllegalArgumentException(logDir + " is not a valid directory to store request logs");
+		}
+
+		LOG.info("NCSARequestlogging is using directory {}", lc.getLogNCSADirectory());
+
+// properties based log configuration:
+
+		if (lc.isLogNCSAFormatEnabled()) {
+			String logNCSADirectory = lc.getLogNCSADirectory();
+			String baseName = lc.getLogNCSAFile();
+
+			Bundle bundle = FrameworkUtil.getBundle(UndertowServerController.class);
+			ClassLoader loader = bundle == null ? getClass().getClassLoader()
+					: bundle.adapt(BundleWiring.class).getClassLoader();
+			XnioWorker xnioWorker = undertowFactory.createLogWorker();
+
+			// String logNameSuffix = logNCSAFormat.substring(logNCSAFormat.lastIndexOf("."));
+			// String logBaseName = logNCSAFormat.substring(0, logNCSAFormat.lastIndexOf("."));
+
+			AccessLogReceiver logReceiver = DefaultAccessLogReceiver.builder()
+					.setLogWriteExecutor(xnioWorker)
+					.setOutputDirectory(new File(logNCSADirectory).toPath())
+					.setLogBaseName(baseName)
+					.setLogNameSuffix("log")
+					.setRotate(true)
+					.build();
+
+			String format;
+			// see io.undertow.server.handlers.accesslog.AccessLogHandler.handleCommonNames
+			if (lc.isLogNCSAExtended()) {
+				format = "combined";
+			} else {
+				format = "common";
+			}
+
+			rootHandler = new AccessLogHandler(rootHandler, logReceiver, format,
+					AccessLogHandler.class.getClassLoader());
+		}
 	}
 
 	/**

@@ -15,12 +15,24 @@
  */
 package org.ops4j.pax.web.itest.undertow.httpservice;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.container.httpservice.AbstractHttpServiceBundleIntegrationTest;
+import org.ops4j.pax.web.itest.utils.WaitCondition;
+import org.ops4j.pax.web.service.PaxWebConfig;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 @RunWith(PaxExam.class)
@@ -28,7 +40,48 @@ public class HttpServiceBundleIntegrationTest extends AbstractHttpServiceBundleI
 
 	@Configuration
 	public Option[] configure() {
-		return combine(baseConfigure(), paxWebUndertow());
+		Option[] serverOptions = combine(baseConfigure(), paxWebUndertow());
+		return combine(
+				serverOptions,
+				systemProperty(PaxWebConfig.PID_CFG_LOG_NCSA_ENABLED).value("true"),
+				systemProperty(PaxWebConfig.PID_CFG_LOG_NCSA_LOGFILE).value("access-attempts."),
+				systemProperty(PaxWebConfig.PID_CFG_LOG_NCSA_LOGDIR).value("target/logs")
+		);
+	}
+
+	@Test
+	// Logging depends on the container implementation and configuration
+	public void testNCSALogger() throws Exception {
+		testServletPath();
+
+		final File logFile = new File("target/logs/access-attempts.log");
+
+		if (!logFile.exists()) {
+			logFile.getParentFile().mkdirs();
+		}
+
+		LOG.info("Log-File: {}", logFile.getAbsoluteFile());
+
+		assertNotNull(logFile);
+
+		new WaitCondition("logfile") {
+			@Override
+			protected boolean isFulfilled() throws Exception {
+				return logFile.exists();
+			}
+		}.waitForCondition();
+
+		boolean exists = logFile.getAbsoluteFile().exists();
+
+		assertTrue(exists);
+
+		FileInputStream fstream = new FileInputStream(logFile.getAbsoluteFile());
+		DataInputStream in = new DataInputStream(fstream);
+		BufferedReader br = new BufferedReader(new InputStreamReader(in));
+		String strLine = br.readLine();
+		assertNotNull(strLine);
+		in.close();
+		fstream.close();
 	}
 
 }

@@ -478,6 +478,7 @@ class TomcatServerWrapper implements BatchVisitor {
 		ncsaLogger.setPrefix(lc.getLogNCSAFile());
 		ncsaLogger.setFileDateFormat("." + lc.getLogNCSAFilenameDateFormat());
 		ncsaLogger.setSuffix(".log");
+		ncsaLogger.setBuffered(lc.getLogNCSABuffered());
 
 		AccessLogAdapter adapter = null;
 		Valve[] valves = engine.getPipeline().getValves();

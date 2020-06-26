@@ -245,6 +245,7 @@ public interface PaxWebConfig {
 	/**
 	 * Jetty: defaults to "yyyy_mm_dd.request.log", should contain {@code yyyy_mm_dd}.
 	 * Tomcat: it should NOT contain {@code yyyy_mm_dd}, so please specify your own name.
+	 * Undertow: will be appended with "log" or "yyyy-MM-dd.log"
 	 */
 	String PID_CFG_LOG_NCSA_LOGFILE = "org.ops4j.pax.web.log.ncsa.file";
 
@@ -275,6 +276,9 @@ public interface PaxWebConfig {
 	 * Jetty: org.eclipse.jetty.server.RequestLogWriter#_timeZone
 	 */
 	String PID_CFG_LOG_NCSA_LOGTIMEZONE = "org.ops4j.pax.web.log.ncsa.logtimezone";
+
+	/** Whether NCSA log file access should be buffered. Defaults to {@code true}. */
+	String PID_CFG_LOG_NCSA_BUFFERED = "org.ops4j.pax.web.log.ncsa.buffered";
 
 	// --- default/resource servlet configuration - common properties for "default" servlets of all the containers
 
