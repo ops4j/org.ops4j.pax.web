@@ -15,6 +15,6 @@
  */
 
 /**
- * Main package of test subpackages, which are (roughly) structured in similar way as Pax Web samples.
+ * Tests related to WAR extender
  */
-package org.ops4j.pax.web.itest.container;
+package org.ops4j.pax.web.itest.container.war;

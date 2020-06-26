@@ -55,10 +55,7 @@ public abstract class AbstractHttpServiceIntegrationTest extends AbstractControl
 
 		final TestServlet servlet = new TestServlet();
 		configureAndWaitForNamedServlet("testRegisterServlet",
-				() -> {
-					httpService.registerServlet("/test", servlet, legacyName("testRegisterServlet"), null);
-					return null;
-				});
+				() -> httpService.registerServlet("/test", servlet, legacyName("testRegisterServlet"), null));
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'TEST OK'",
@@ -76,17 +73,11 @@ public abstract class AbstractHttpServiceIntegrationTest extends AbstractControl
 
 		final TestServlet servlet1 = new TestServlet();
 		configureAndWaitForNamedServlet("t1",
-				() -> {
-					httpService.registerServlet("/test1", servlet1, legacyName("t1"), null);
-					return null;
-				});
+				() -> httpService.registerServlet("/test1", servlet1, legacyName("t1"), null));
 
 		final TestServlet servlet2 = new TestServlet();
 		configureAndWaitForNamedServlet("t2",
-				() -> {
-					httpService.registerServlet("/test2", servlet2, legacyName("t2"), null);
-					return null;
-				});
+				() -> httpService.registerServlet("/test2", servlet2, legacyName("t2"), null));
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'TEST OK'",
@@ -361,7 +352,6 @@ public abstract class AbstractHttpServiceIntegrationTest extends AbstractControl
 			httpService.registerResources("/r3", "static/", null);
 			httpService.registerResources("/r4", "/", null);
 			httpService.registerResources("/r5", "", null);
-			return null;
 		});
 
 		// normal access

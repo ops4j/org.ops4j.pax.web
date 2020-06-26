@@ -22,7 +22,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.function.BiPredicate;
 import javax.inject.Inject;
 
@@ -367,12 +366,12 @@ public abstract class AbstractControlledTestBase {
 	 * @param servletName
 	 * @param action
 	 */
-	protected <T> void configureAndWaitForNamedServlet(final String servletName, Callable<T> action) throws Exception {
+	protected <T> void configureAndWaitForNamedServlet(final String servletName, Action action) throws Exception {
 		final List<ElementEvent> events = new LinkedList<>();
 		webElementListener = events::add;
 		context.registerService(WebElementListener.class, webElementListener, null);
 
-		action.call();
+		action.run();
 
 		try {
 			new WaitCondition("Waiting for " + servletName + " servlet") {
@@ -395,12 +394,12 @@ public abstract class AbstractControlledTestBase {
 	 * @param mapping
 	 * @param action
 	 */
-	protected <T> void configureAndWaitForServletWithMapping(final String mapping, Callable<T> action) throws Exception {
+	protected <T> void configureAndWaitForServletWithMapping(final String mapping, Action action) throws Exception {
 		final List<ElementEvent> events = new LinkedList<>();
 		webElementListener = events::add;
 		context.registerService(WebElementListener.class, webElementListener, null);
 
-		action.call();
+		action.run();
 
 		try {
 			new WaitCondition("Waiting for servlet mapped to " + mapping) {
@@ -430,11 +429,14 @@ public abstract class AbstractControlledTestBase {
 	}
 
 	public static WebContainer getWebContainer(final BundleContext bundleContext) {
-		ServiceReference<WebContainer> ref = bundleContext.getServiceReference(WebContainer.class);
-		assertNotNull("Failed to get WebContainer", ref);
-		WebContainer webContainer = bundleContext.getService(ref);
-		assertNotNull("Failed to get WebContainer", webContainer);
-		return webContainer;
+		ServiceTracker<WebContainer, WebContainer> tracker = new ServiceTracker<>(bundleContext, WebContainer.class, null);
+		tracker.open();
+		try {
+			return tracker.waitForService(5000);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new IllegalStateException(e.getMessage(), e);
+		}
 	}
 
 	/**
@@ -449,6 +451,11 @@ public abstract class AbstractControlledTestBase {
 		Dictionary<String, Object> initParams = new Hashtable<>();
 		initParams.put(PaxWebConstants.INIT_PARAM_SERVLET_NAME, servletName);
 		return initParams;
+	}
+
+	@FunctionalInterface
+	public interface Action {
+		void run() throws Exception;
 	}
 
 }

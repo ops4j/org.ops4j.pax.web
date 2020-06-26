@@ -28,10 +28,10 @@
 	</parent>
 
 	<groupId>org.ops4j.pax.web.samples</groupId>
-	<artifactId>hs-helloworld</artifactId>
+	<artifactId>wc-helloworld</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web HttpService Samples - Hello World</name>
+	<name>OPS4J Pax Web WebContainer Samples - Hello World</name>
 
 	<build>
 		<plugins>
@@ -41,7 +41,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Bundle-Activator>org.ops4j.pax.web.samples.helloworld.hs.internal.Activator</Bundle-Activator>
+						<Bundle-Activator>org.ops4j.pax.web.samples.helloworld.wc.internal.Activator</Bundle-Activator>
 						<Import-Package>
 							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
 							javax.servlet;version="[3.1,5)",
@@ -52,10 +52,13 @@
 							org.osgi.util.tracker;version="[1.5,2)",
 
 							<!-- OSGi cmpn -->
-							org.osgi.service.http;version="[1.2,2)"
+							org.osgi.service.http;version="[1.2,2)",
+
+							<!-- pax-web-api -->
+							org.ops4j.pax.web.service;version="${pax-web.osgi.version}"
 						</Import-Package>
 						<Export-Package />
-						<Private-Package>org.ops4j.pax.web.samples.helloworld.hs.internal</Private-Package>
+						<Private-Package>org.ops4j.pax.web.samples.helloworld.wc.internal</Private-Package>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -63,6 +66,14 @@
 	</build>
 
 	<dependencies>
+
+		<!-- pax-web own artifacts -->
+
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- OSGi -->
 

@@ -13,8 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.ops4j.pax.web.itest.jetty.httpservice;
 
-/**
- * Main package of test subpackages, which are (roughly) structured in similar way as Pax Web samples.
- */
-package org.ops4j.pax.web.itest.container;
+import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.web.itest.container.httpservice.AbstractAsyncServletIntegrationTest;
+
+import static org.ops4j.pax.exam.OptionUtils.combine;
+
+@RunWith(PaxExam.class)
+public class AsyncServletIntegrationTest extends AbstractAsyncServletIntegrationTest {
+
+	@Configuration
+	public Option[] configure() {
+		return combine(baseConfigure(), paxWebJetty());
+	}
+
+}

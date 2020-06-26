@@ -54,7 +54,6 @@ public class HttpServiceIntegrationTest extends AbstractHttpServiceIntegrationTe
 			httpService.registerResources("/r3", "static/", null);
 			httpService.registerResources("/r4", "/", null);
 			httpService.registerResources("/r5", "", null);
-			return null;
 		});
 
 		// normal access
