@@ -38,6 +38,7 @@
 		<module>hs-helloworld</module>
 		<module>wc-helloworld</module>
 		<module>authentication</module>
+		<module>http-custom-context</module>
 	</modules>
 
 </project>

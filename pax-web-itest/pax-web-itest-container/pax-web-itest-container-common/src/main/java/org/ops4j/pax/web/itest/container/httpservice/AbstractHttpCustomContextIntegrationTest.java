@@ -15,8 +15,13 @@
  */
 package org.ops4j.pax.web.itest.container.httpservice;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
 
 /**
  * @author Toni Menzel (tonit)
@@ -26,32 +31,29 @@ public abstract class AbstractHttpCustomContextIntegrationTest extends AbstractC
 
 	private Bundle installBundle;
 
-//	@Before
-//	public void setUp() throws BundleException, InterruptedException {
-//		initServletListener();
-//		String bundlePath = "mvn:org.ops4j.pax.web.samples/http-custom-context/"
-//				+ VersionUtil.getProjectVersion();
-//		installBundle = installAndStartBundle(bundlePath);
-//		waitForServletListener();
-//	}
-//
-//	@After
-//	public void tearDown() throws BundleException {
-//		if (installBundle != null) {
-//			installBundle.stop();
-//			installBundle.uninstall();
-//		}
-//	}
-//
-//
-//	@Test
-//	public void testRoot() throws Exception {
-//		HttpTestClientFactory.createDefaultTestClient()
-//				.withResponseAssertion("Response must contain 'Session:'", resp -> resp.contains("Session:"))
-//				.doGETandExecuteTest("http://127.0.0.1:8181/");
-//		// test image-serving
-//		HttpTestClientFactory.createDefaultTestClient()
-//				.doGETandExecuteTest("http://127.0.0.1:8181/www/logo.png");
-//	}
+	@Before
+	public void setUp() throws Exception {
+		configureAndWaitForServletWithMapping("/www/*",
+				() -> installBundle = installAndStartBundle(sampleURI("http-custom-context")));
+	}
+
+	@After
+	public void tearDown() throws BundleException {
+		if (installBundle != null) {
+			installBundle.stop();
+			installBundle.uninstall();
+		}
+	}
+
+
+	@Test
+	public void testRoot() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Session:'", resp -> resp.contains("Session:"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/");
+		// test image-serving
+		HttpTestClientFactory.createDefaultTestClient()
+				.doGETandExecuteTest("http://127.0.0.1:8181/www/logo.png");
+	}
 
 }

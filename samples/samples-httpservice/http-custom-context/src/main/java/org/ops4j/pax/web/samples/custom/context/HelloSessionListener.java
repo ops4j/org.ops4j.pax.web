@@ -31,6 +31,7 @@ import javax.servlet.http.HttpSessionListener;
  * @author Anaximandro de Godinho (Woody)
  */
 public class HelloSessionListener implements HttpSessionListener {
+
 	/**
 	 * Local session store, by id - synchronized.
 	 */
@@ -93,4 +94,5 @@ public class HelloSessionListener implements HttpSessionListener {
 	public static synchronized int getCounter() {
 		return counter;
 	}
+
 }

@@ -15,7 +15,6 @@
  */
 package org.ops4j.pax.web.samples.custom.context;
 
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,16 +27,14 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class Activator implements BundleActivator {
 
-	private Logger logger = Logger.getLogger(getClass().getName());
+	private final Logger logger = Logger.getLogger(getClass().getName());
 
 	private HttpService httpService;
 	private ServiceTracker<HttpService, HttpService> httpServiceTracker;
 
 	@Override
 	public void start(BundleContext context) {
-		logger.info("starting Jersey TestActivator");
 		httpServiceTracker = new ServiceTracker<HttpService, HttpService>(context, HttpService.class, null) {
-
 			@Override
 			public HttpService addingService(ServiceReference<HttpService> serviceRef) {
 				logger.info("registering servlet");
@@ -53,6 +50,8 @@ public class Activator implements BundleActivator {
 			@Override
 			public void removedService(ServiceReference<HttpService> ref, HttpService service) {
 				super.removedService(ref, service);
+				httpService.unregister("/www");
+				httpService.unregister("/");
 				httpService = null;
 			}
 		};
@@ -79,4 +78,5 @@ public class Activator implements BundleActivator {
 			logger.log(Level.SEVERE, "Registering Jersey servlet failed", e);
 		}
 	}
+
 }

@@ -19,7 +19,6 @@ package org.ops4j.pax.web.samples.custom.context;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -34,14 +33,9 @@ import javax.servlet.http.HttpSession;
  */
 public class HelloServlet extends HttpServlet {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 1633766459629276016L;
 
-	protected void doGet(final HttpServletRequest request,
-						 final HttpServletResponse response) throws ServletException,
-			IOException {
+	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 		/*
 		 * The container DOES NOT create the session if the servlet does not use
 		 * it at least once, so, we do need the line below in order to create
@@ -83,4 +77,5 @@ public class HelloServlet extends HttpServlet {
 
 		return s.toString();
 	}
+
 }
