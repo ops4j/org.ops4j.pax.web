@@ -37,6 +37,7 @@
 	<modules>
 		<module>hs-helloworld</module>
 		<module>wc-helloworld</module>
+		<module>authentication</module>
 	</modules>
 
 </project>

@@ -53,7 +53,7 @@ public abstract class AbstractHttpServiceBundleIntegrationTest extends AbstractC
 	@Before
 	public void setup() throws Exception {
 		configureAndWaitForServletWithMapping("/alt-images/*",
-				() -> hsBundle = installAndStartBundle(sampleURI("mvn:org.ops4j.pax.web.samples/hs-helloworld/")));
+				() -> hsBundle = installAndStartBundle(sampleURI("hs-helloworld")));
 	}
 
 	@After

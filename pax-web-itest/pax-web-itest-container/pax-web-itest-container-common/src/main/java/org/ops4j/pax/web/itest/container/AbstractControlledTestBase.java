@@ -44,13 +44,11 @@ import org.ops4j.pax.web.service.spi.model.events.WebElementListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.assertNotNull;
 import static org.ops4j.pax.exam.Constants.START_LEVEL_SYSTEM_BUNDLES;
 import static org.ops4j.pax.exam.Constants.START_LEVEL_TEST_BUNDLE;
 import static org.ops4j.pax.exam.CoreOptions.bootDelegationPackage;
@@ -308,14 +306,13 @@ public abstract class AbstractControlledTestBase {
 	// --- helper methods to be used in all the tests
 
 	/**
-	 * Returns {@code mvn:} URI with version set as current version of Pax Web. {@code groupAndArtifact} should
-	 * be in form of {@code mvn:group/artifact/}.
+	 * Returns {@code mvn:} URI for standard Pax Web sample with version set as current version of Pax Web.
 	 *
-	 * @param groupAndArtifact
+	 * @param artifactId
 	 * @return
 	 */
-	protected String sampleURI(String groupAndArtifact) {
-		return groupAndArtifact + VersionUtils.getProjectVersion();
+	protected String sampleURI(String artifactId) {
+		return "mvn:org.ops4j.pax.web.samples/" + artifactId + "/" + VersionUtils.getProjectVersion();
 	}
 
 	protected Bundle installAndStartBundle(String uri) {
