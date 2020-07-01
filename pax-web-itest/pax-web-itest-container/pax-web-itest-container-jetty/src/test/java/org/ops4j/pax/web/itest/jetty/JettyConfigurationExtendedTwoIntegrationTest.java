@@ -53,6 +53,7 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 			.getLogger(JettyConfigurationExtendedTwoIntegrationTest.class);
 
 	private Bundle installWarBundle;
+	private HttpService httpService;
 
 	@Configuration
 	public static Option[] configure() {
@@ -72,6 +73,9 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 	public void setUp() throws BundleException, InterruptedException, ServletException, NamespaceException {
 		LOG.info("Setting up test");
 
+		// wait for the web container to be available
+		getWebContainer(bundleContext);
+
 		initWebListener();
 
 		final String bundlePath = WEB_BUNDLE
@@ -82,7 +86,7 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 
 		waitForWebListener();
 
-		HttpService httpService = getHttpService(bundleContext);
+		httpService = getHttpService(bundleContext);
 
 		initServletListener(null);
 
@@ -99,7 +103,6 @@ public class JettyConfigurationExtendedTwoIntegrationTest extends ITestBase {
 			installWarBundle.stop();
 			installWarBundle.uninstall();
 		}
-		HttpService httpService = getHttpService(bundleContext);
 		httpService.unregister("/test2");
 	}
 

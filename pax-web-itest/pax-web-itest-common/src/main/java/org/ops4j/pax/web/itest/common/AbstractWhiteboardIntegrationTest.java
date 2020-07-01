@@ -34,7 +34,6 @@ import org.ops4j.pax.web.service.whiteboard.ServletMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.runtime.HttpServiceRuntime;
 import org.osgi.service.http.runtime.dto.RuntimeDTO;
@@ -49,11 +48,16 @@ public abstract class AbstractWhiteboardIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
+		// wait for the whiteboard extender runtime and the HTTP service to come up
+		waitForService(bundleContext, HttpServiceRuntime.class);
+		getHttpService(bundleContext);
 		initServletListener();
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard/"
 				+ VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
 		waitForServletListener();
+		// wait for the services to come up
+		Thread.sleep(2000);
 	}
 
 	@After
@@ -210,16 +214,14 @@ public abstract class AbstractWhiteboardIntegrationTest extends ITestBase {
             ServiceRegistration<ServletMapping> servletRegistration = bundleContext
                     .registerService(ServletMapping.class,
                             servletMapping, null);
-
-            ServiceReference<HttpServiceRuntime> serviceReference = null;
+            
             try {
                 HttpTestClientFactory.createDefaultTestClient()
                         .withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
                                 resp -> resp.contains("Hello Whiteboard Extender"))
                         .doGETandExecuteTest("http://127.0.0.1:8181/dtocheck/dtocheck");
-
-                serviceReference = bundleContext.getServiceReference(HttpServiceRuntime.class);
-                HttpServiceRuntime httpServiceRuntime = bundleContext.getService(serviceReference);
+                
+                HttpServiceRuntime httpServiceRuntime = waitForService(bundleContext, HttpServiceRuntime.class);
                 
                 RuntimeDTO runtimeDTO = httpServiceRuntime.getRuntimeDTO();
                 
@@ -232,9 +234,6 @@ public abstract class AbstractWhiteboardIntegrationTest extends ITestBase {
                 assertTrue(1 == count);
                 
             } finally {
-                if (serviceReference != null) {
-                    bundleContext.ungetService(serviceReference);
-                }
                 servletRegistration.unregister();
             }
         } finally {

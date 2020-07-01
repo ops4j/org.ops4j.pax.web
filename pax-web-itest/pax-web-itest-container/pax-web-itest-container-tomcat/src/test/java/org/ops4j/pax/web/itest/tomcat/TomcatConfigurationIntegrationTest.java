@@ -25,6 +25,7 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.base.VersionUtil;
 import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
+import org.ops4j.pax.web.itest.common.ITestBase;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
@@ -59,6 +60,8 @@ public class TomcatConfigurationIntegrationTest extends ITestBase {
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
 		logger.info("Setting up test");
+		// wait for web container
+		getWebContainer(bundleContext);
 
 		initWebListener();
 
