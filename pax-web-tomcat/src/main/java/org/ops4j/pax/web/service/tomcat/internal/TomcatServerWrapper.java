@@ -482,9 +482,10 @@ class TomcatServerWrapper implements ServerWrapper {
 
 		final Context context = contextMap.remove(httpContext);
 		if (context == null) {
-			throw new RemoveContextException(
+			LOG.warn(
 					"cannot remove the context because it does not exist: "
 							+ httpContext);
+			return;
 		}
 		try {
 			final LifecycleState state = context.getState();
@@ -692,6 +693,13 @@ class TomcatServerWrapper implements ServerWrapper {
 	@Override
 	public void removeFilter(final FilterModel filterModel) {
 		final Context context = findContext(filterModel);
+
+		// Don't throw a NPE if the context is already gone
+		if (context == null) {
+			LOG.warn("context already removed");
+			filterLifecycleListenerMap.remove(filterModel);
+			return;
+		}
 
 		LOG.info("removing ServletFilter: {}", filterModel);
 		((StandardContext) context).filterStop();

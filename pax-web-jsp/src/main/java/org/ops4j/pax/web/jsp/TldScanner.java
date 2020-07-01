@@ -239,7 +239,7 @@ public class TldScanner {
         } else if (parentLoader instanceof ResourceDelegatingBundleClassLoader) {
             classLoader = (ResourceDelegatingBundleClassLoader) parentLoader;
         } else if (isTomcatWebLoader()) {
-            ClassLoader parent = ((org.apache.catalina.loader.WebappClassLoader) webappLoader).getParent();
+            ClassLoader parent = ((org.apache.catalina.loader.WebappClassLoaderBase) webappLoader).getParent();
             if (parent instanceof ResourceDelegatingBundleClassLoader) {
                 classLoader = (ResourceDelegatingBundleClassLoader) parent;
             }
