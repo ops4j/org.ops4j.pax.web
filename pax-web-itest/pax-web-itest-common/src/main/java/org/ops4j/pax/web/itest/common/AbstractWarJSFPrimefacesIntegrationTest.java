@@ -51,6 +51,9 @@ public abstract class AbstractWarJSFPrimefacesIntegrationTest extends ITestBase 
 
 		LOG.info("Setting up test");
 
+		// Wait for the web container to recover after bundle restarts
+		getWebContainer(bundleContext);
+
 		initWebListener();
 
 		final String bundlePath = "mvn:org.ops4j.pax.web.samples/war-jsf-primefaces/"
@@ -73,7 +76,7 @@ public abstract class AbstractWarJSFPrimefacesIntegrationTest extends ITestBase 
 	@Test
 	public void testSlash() throws Exception {
 		// needed to wait for fully initializing the container
-		Thread.sleep(1000);
+		Thread.sleep(6000);
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Please enter your name'",
@@ -84,7 +87,7 @@ public abstract class AbstractWarJSFPrimefacesIntegrationTest extends ITestBase 
 	@Test
 	public void testJSF() throws Exception {
 		// needed to wait for fully initializing the container
-		Thread.sleep(1000);
+		Thread.sleep(3000);
 
 		// Session must be kept during test-requests
 		CookieState cookieState = new CookieState();
