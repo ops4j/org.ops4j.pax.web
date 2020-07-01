@@ -161,9 +161,7 @@ public interface WebContainer extends HttpService {
 	 */
 	void end(HttpContext context);
 
-	// --- different methods used to retrieve HttpContext - all will be
-	// associated with "/" context
-	// TOCHECK: other contexts are available only when using Whiteboard
+	// --- different methods used to retrieve HttpContext
 
 	/**
 	 * <p>
