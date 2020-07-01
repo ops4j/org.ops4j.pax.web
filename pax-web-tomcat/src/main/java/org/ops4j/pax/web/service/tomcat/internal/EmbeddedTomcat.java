@@ -375,8 +375,8 @@ public class EmbeddedTomcat extends Tomcat {
 
     private boolean matches(String address, Integer port, Connector connector) {
         InetSocketAddress isa1 = address != null ? new InetSocketAddress(address, port) : new InetSocketAddress(port);
-        InetSocketAddress isa2 = connector.getAttribute("address") != null
-                ? new InetSocketAddress(connector.getAttribute("address").toString(), connector.getPort())
+        InetSocketAddress isa2 = connector.getProperty("address") != null
+                ? new InetSocketAddress(connector.getProperty("address").toString(), connector.getPort())
                 : new InetSocketAddress(connector.getPort());
         return isa1.equals(isa2) && connector.getProtocol() != null && connector.getProtocol().toLowerCase(Locale.ROOT).startsWith("http");
     }
@@ -399,14 +399,14 @@ public class EmbeddedTomcat extends Tomcat {
             secureConnector.setProperty("sslProtocol", "TLS");
 
             if (configuration.getServerMaxThreads() != null) {
-            	secureConnector.setAttribute("maxThreads", configuration.getServerMaxThreads());
+            	secureConnector.setProperty("maxThreads", Integer.toString(configuration.getServerMaxThreads()));
             }
             if (configuration.getServerMinThreads() != null) {
-            	secureConnector.setAttribute("minSpareThreads", configuration.getServerMinThreads());
+            	secureConnector.setProperty("minSpareThreads", Integer.toString(configuration.getServerMinThreads()));
             }
 
             if (address != null) {
-                secureConnector.setAttribute("address", address);
+                secureConnector.setProperty("address", address);
             }
         	getService().addConnector(secureConnector);
         } else {
@@ -428,14 +428,14 @@ public class EmbeddedTomcat extends Tomcat {
         }
 
         if (configuration.getServerMaxThreads() != null) {
-        	connector.setAttribute("maxThreads", configuration.getServerMaxThreads());
+        	connector.setProperty("maxThreads", Integer.toString(configuration.getServerMaxThreads()));
         }
         if (configuration.getServerMinThreads() != null) {
-        	connector.setAttribute("minSpareThreads", configuration.getServerMinThreads());
+        	connector.setProperty("minSpareThreads", Integer.toString(configuration.getServerMinThreads()));
         }
 
         if (address != null) {
-            connector.setAttribute("address", address);
+            connector.setProperty("address", address);
         }
 
         if (idleTimeout != null) {
