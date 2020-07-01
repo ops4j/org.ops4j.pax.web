@@ -41,7 +41,6 @@ import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
@@ -278,21 +277,30 @@ public abstract class AbstractControlledTestBase {
 	}
 
 	public static HttpService getHttpService(final BundleContext bundleContext) {
-		ServiceReference<HttpService> ref = bundleContext.getServiceReference(HttpService.class);
-		Assert.assertNotNull("Failed to get HttpService", ref);
-		HttpService httpService = bundleContext.getService(ref);
+		HttpService httpService = waitForService(bundleContext, HttpService.class);
 		Assert.assertNotNull("Failed to get HttpService", httpService);
 		return httpService;
 	}
 
 	public static WebContainer getWebContainer(final BundleContext bundleContext) {
-		ServiceReference<WebContainer> ref = bundleContext.getServiceReference(WebContainer.class);
-		Assert.assertNotNull("Failed to get WebContainer", ref);
-		WebContainer webContainer = bundleContext.getService(ref);
+		WebContainer webContainer = waitForService(bundleContext, WebContainer.class);
 		Assert.assertNotNull("Failed to get WebContainer", webContainer);
 		return webContainer;
 	}
 
+	protected static <T> T waitForService(final BundleContext bundleContext, Class<T> clazz) {
+	    ServiceTracker<T, T> tracker = new ServiceTracker<>(bundleContext, clazz, null);
+	    tracker.open();
+	    T service = null;
+	    try {
+	    	service = tracker.waitForService(30000);
+	    } catch (InterruptedException e) {
+	        throw new IllegalStateException("Interrupted while waiting for the service " + HttpService.class.getName(), e);
+	    }
+	    tracker.close();
+		return service;
+	}
+	
 	/**
 	 * Callback to get access to the injected BundleContext
 	 *
