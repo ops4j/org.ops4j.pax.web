@@ -288,7 +288,7 @@ public abstract class AbstractControlledTestBase {
 		return webContainer;
 	}
 
-	private static <T> T waitForService(final BundleContext bundleContext, Class<T> clazz) {
+	protected static <T> T waitForService(final BundleContext bundleContext, Class<T> clazz) {
 	    ServiceTracker<T, T> tracker = new ServiceTracker<>(bundleContext, clazz, null);
 	    tracker.open();
 	    T service = null;
