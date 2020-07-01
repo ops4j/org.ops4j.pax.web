@@ -46,14 +46,15 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Xnio
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
+		if (xnioTracker != null) {
+			xnioTracker.close();
+		}
 		try {
 			if (registration != null) {
 				registration.unregister();
+				registration = null;
 			}
 		} catch (IllegalStateException ignored) {
-		}
-		if (xnioTracker != null) {
-			xnioTracker.close();
 		}
 	}
 
@@ -75,6 +76,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Xnio
 	public void removedService(ServiceReference<XnioProvider> reference, XnioProvider service) {
 		if (registration != null) {
 			registration.unregister();
+			registration = null;
 		}
 	}
 

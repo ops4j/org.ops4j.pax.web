@@ -22,7 +22,9 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -38,6 +40,7 @@ import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.ops4j.pax.web.service.spi.model.events.ServerListener;
 import org.ops4j.pax.web.service.spi.model.events.WebElementListener;
 import org.ops4j.pax.web.service.spi.util.NamedThreadFactory;
 import org.ops4j.pax.web.service.spi.util.Utils;
@@ -127,6 +130,9 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	/** Tracker for optional LogService, but because Slf4J comes from pax-logging anyway, this service is usually available */
 	private ServiceTracker<LogService, LogService> logServiceTracker;
 
+	private ServiceTracker<ServerListener, ServerListener> serverListenerTracker;
+	private final List<ServerListener> serverListeners = new CopyOnWriteArrayList<>();
+
 	private final AtomicBoolean initialConfigSet = new AtomicBoolean(false);
 
 	/**
@@ -176,6 +182,10 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 //			System.setProperty("org.apache.jasper.compiler.disablejsr199", Boolean.TRUE.toString());
 //		}
 
+		serverListenerTracker = new ServiceTracker<ServerListener, ServerListener>(bundleContext,
+				ServerListener.class, new ServerListenerCustomizer());
+		serverListenerTracker.open();
+
 		if (SupportUtils.isConfigurationAdminAvailable()) {
 			// ManagedService for org.ops4j.pax.web PID monitoring, so configuration won't happen yet
 			// (for example in FelixStartLevel thread), but only after Configuration Admin notifies us
@@ -192,8 +202,14 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	public void stop(final BundleContext context) {
 		LOG.debug("Stopping Pax Web...");
 
+		if (serverListenerTracker != null) {
+			serverListenerTracker.close();
+			serverListenerTracker = null;
+		}
+
 		if (serverControllerFactoryTracker != null) {
 			serverControllerFactoryTracker.close();
+			serverControllerFactoryTracker = null;
 		}
 		if (servletContextHelperReg != null) {
 			servletContextHelperReg.unregister();
@@ -211,6 +227,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 //		}
 		if (servletEventDispatcher != null) {
 			servletEventDispatcher.destroy();
+			servletEventDispatcher = null;
 		}
 //		if (httpContextProcessing != null) {
 //			httpContextProcessing.destroy();
@@ -421,6 +438,8 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 
 			// create a controller object to operate on any supported web server
 			serverController = serverControllerFactory.createServerController(configuration);
+			// immediately add current ServerListeners.
+			serverListeners.forEach(listener -> serverController.addListener(listener));
 
 			// first step is to configure the server without actually starting it
 			LOG.info("Configuring server controller {}", serverController.getClass().getName());
@@ -668,6 +687,36 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 				bundleContext.ungetService(reference);
 			}
 			updateServerControllerFactory(null);
+		}
+	}
+
+	private class ServerListenerCustomizer implements ServiceTrackerCustomizer<ServerListener, ServerListener> {
+
+		@Override
+		public ServerListener addingService(ServiceReference<ServerListener> reference) {
+			ServerListener service = bundleContext.getService(reference);
+			ServerController sc = serverController;
+			if (sc != null) {
+				sc.addListener(service);
+				serverListeners.add(service);
+			}
+			return service;
+		}
+
+		@Override
+		public void modifiedService(ServiceReference<ServerListener> reference, ServerListener service) {
+		}
+
+		@Override
+		public void removedService(ServiceReference<ServerListener> reference, ServerListener service) {
+			ServerController sc = serverController;
+			if (sc != null) {
+				sc.removeListener(service);
+				serverListeners.remove(service);
+			}
+			if (bundleContext != null) {
+				bundleContext.ungetService(reference);
+			}
 		}
 	}
 

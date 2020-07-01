@@ -17,6 +17,7 @@ package org.ops4j.pax.web.itest.container;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -39,11 +40,14 @@ import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.events.ElementEvent;
 import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
+import org.ops4j.pax.web.service.spi.model.events.ServerEvent;
+import org.ops4j.pax.web.service.spi.model.events.ServerListener;
 import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
 import org.ops4j.pax.web.service.spi.model.events.WebElementListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -179,24 +183,13 @@ public abstract class AbstractControlledTestBase {
 
 		return new Option[] {
 				// every log with level higher or equal to INFO (i.e., not DEBUG) will be logged
-				frameworkProperty(PaxLoggingConstants.LOGGING_CFG_DEFAULT_LOG_LEVEL).value("INFO"),
+				frameworkProperty(PaxLoggingConstants.LOGGING_CFG_DEFAULT_LOG_LEVEL).value("DEBUG"),
 				// threshold for R7 Compendium 101.8 logging statements (from framework/bundle/service events)
 				frameworkProperty(PaxLoggingConstants.LOGGING_CFG_FRAMEWORK_EVENTS_LOG_LEVEL).value("ERROR"),
 				// default log will be written to file
 				frameworkProperty(PaxLoggingConstants.LOGGING_CFG_USE_FILE_FALLBACK_LOGGER).value(fileName)
 		};
 	}
-
-//	/**
-//	 * Configuring symbolic name in test probe we can easily locate related log entries in the output.
-//	 * @param builder
-//	 * @return
-//	 */
-//	@ProbeBuilder
-//	public TestProbeBuilder probeBuilder(TestProbeBuilder builder) {
-//		builder.setHeader(Constants.BUNDLE_SYMBOLICNAME, PROBE_SYMBOLIC_NAME);
-//		return builder;
-//	}
 
 	// --- methods that add logical sets of bundles (or just single bundles) to pax-exam-container-native
 
@@ -303,6 +296,13 @@ public abstract class AbstractControlledTestBase {
 		};
 	}
 
+	protected Option[] configAdmin() {
+		return new Option[] {
+				mavenBundle("org.apache.felix", "org.apache.felix.configadmin")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
+		};
+	}
+
 	// --- helper methods to be used in all the tests
 
 	/**
@@ -363,7 +363,7 @@ public abstract class AbstractControlledTestBase {
 	 * @param servletName
 	 * @param action
 	 */
-	protected <T> void configureAndWaitForNamedServlet(final String servletName, Action action) throws Exception {
+	protected void configureAndWaitForNamedServlet(final String servletName, Action action) throws Exception {
 		final List<ElementEvent> events = new LinkedList<>();
 		webElementListener = events::add;
 		context.registerService(WebElementListener.class, webElementListener, null);
@@ -391,7 +391,7 @@ public abstract class AbstractControlledTestBase {
 	 * @param mapping
 	 * @param action
 	 */
-	protected <T> void configureAndWaitForServletWithMapping(final String mapping, Action action) throws Exception {
+	protected void configureAndWaitForServletWithMapping(final String mapping, Action action) throws Exception {
 		final List<ElementEvent> events = new LinkedList<>();
 		webElementListener = events::add;
 		context.registerService(WebElementListener.class, webElementListener, null);
@@ -411,6 +411,39 @@ public abstract class AbstractControlledTestBase {
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * Performs an action and waits for {@link org.ops4j.pax.web.service.spi.model.events.ServerEvent} related
+	 * to started container at given port
+	 * @param port
+	 * @param action
+	 */
+	protected void configureAndWaitForListener(int port, Action action) throws Exception {
+		final List<ServerEvent> events = new LinkedList<>();
+		ServerListener listener = events::add;
+		ServiceRegistration<ServerListener> reg = context.registerService(ServerListener.class, listener, null);
+
+		action.run();
+
+		try {
+			new WaitCondition("Waiting for server listening at " + port) {
+				@Override
+				protected boolean isFulfilled() throws Exception {
+					return events.stream().anyMatch(e ->
+							e.getState() == ServerEvent.State.STARTED
+									&& Arrays.stream(e.getAddresses()).map(InetSocketAddress::getPort)
+									.anyMatch(p -> p == port));
+				}
+			}.waitForCondition();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException(e.getMessage(), e);
+		} finally {
+			if (reg != null) {
+				reg.unregister();
+			}
 		}
 	}
 

@@ -18,10 +18,11 @@ package org.ops4j.pax.web.service.undertow.internal;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.List;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import javax.servlet.Servlet;
 
 import io.undertow.Handlers;
@@ -30,10 +31,10 @@ import io.undertow.server.handlers.cache.DirectBufferCache;
 import io.undertow.server.handlers.resource.CachingResourceManager;
 import io.undertow.servlet.api.SessionPersistenceManager;
 import org.ops4j.pax.web.service.spi.ServerController;
-import org.ops4j.pax.web.service.spi.ServerEvent;
-import org.ops4j.pax.web.service.spi.ServerListener;
 import org.ops4j.pax.web.service.spi.ServerState;
 import org.ops4j.pax.web.service.spi.config.Configuration;
+import org.ops4j.pax.web.service.spi.model.events.ServerEvent;
+import org.ops4j.pax.web.service.spi.model.events.ServerListener;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.undertow.internal.web.UndertowResourceServlet;
 import org.osgi.framework.Bundle;
@@ -55,7 +56,7 @@ public class UndertowServerController implements ServerController/*, IdentityMan
 	private final Configuration configuration;
 	private ServerState state;
 
-	private final List<ServerListener> listeners;
+	private final Set<ServerListener> listeners;
 
 	private final UndertowFactory undertowFactory;
 
@@ -81,7 +82,7 @@ public class UndertowServerController implements ServerController/*, IdentityMan
 		this.configuration = configuration;
 		this.state = ServerState.UNCONFIGURED;
 
-		this.listeners = new CopyOnWriteArrayList<>();
+		this.listeners = Collections.synchronizedSet(new LinkedHashSet<>());
 	}
 
 	// --- lifecycle methods
@@ -104,7 +105,7 @@ public class UndertowServerController implements ServerController/*, IdentityMan
 		undertowServerWrapper.configure();
 
 		state = ServerState.STOPPED;
-		notifyListeners(ServerEvent.CONFIGURED);
+		notifyListeners(new ServerEvent(ServerEvent.State.CONFIGURED, undertowServerWrapper.getAddresses(false)));
 	}
 
 	@Override
@@ -118,7 +119,7 @@ public class UndertowServerController implements ServerController/*, IdentityMan
 		undertowServerWrapper.start();
 
 		state = ServerState.STARTED;
-		notifyListeners(ServerEvent.STARTED);
+		notifyListeners(new ServerEvent(ServerEvent.State.STARTED, undertowServerWrapper.getAddresses(true)));
 	}
 
 	@Override
@@ -132,7 +133,7 @@ public class UndertowServerController implements ServerController/*, IdentityMan
 		undertowServerWrapper.stop();
 
 		state = ServerState.STOPPED;
-		notifyListeners(ServerEvent.STOPPED);
+		notifyListeners(new ServerEvent(ServerEvent.State.STOPPED, null));
 	}
 
 	@Override

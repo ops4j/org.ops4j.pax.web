@@ -18,18 +18,19 @@ package org.ops4j.pax.web.service.jetty.internal;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import javax.servlet.Servlet;
 
 import org.eclipse.jetty.util.resource.PathResource;
 import org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet;
 import org.ops4j.pax.web.service.spi.ServerController;
-import org.ops4j.pax.web.service.spi.ServerEvent;
-import org.ops4j.pax.web.service.spi.ServerListener;
 import org.ops4j.pax.web.service.spi.ServerState;
 import org.ops4j.pax.web.service.spi.config.Configuration;
+import org.ops4j.pax.web.service.spi.model.events.ServerEvent;
+import org.ops4j.pax.web.service.spi.model.events.ServerListener;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
@@ -51,7 +52,7 @@ class JettyServerController implements ServerController {
 	private final Configuration configuration;
 	private ServerState state;
 
-	private final List<ServerListener> listeners;
+	private final Set<ServerListener> listeners;
 
 	private final JettyFactory jettyFactory;
 
@@ -71,7 +72,7 @@ class JettyServerController implements ServerController {
 		this.configuration = configuration;
 		this.state = ServerState.UNCONFIGURED;
 
-		this.listeners = new CopyOnWriteArrayList<>();
+		this.listeners = Collections.synchronizedSet(new LinkedHashSet<>());
 	}
 
 	// --- lifecycle methods
@@ -94,7 +95,7 @@ class JettyServerController implements ServerController {
 		jettyServerWrapper.configure();
 
 		state = ServerState.STOPPED;
-		notifyListeners(ServerEvent.CONFIGURED);
+		notifyListeners(new ServerEvent(ServerEvent.State.CONFIGURED, jettyServerWrapper.getAddresses(false)));
 	}
 
 	@Override
@@ -108,7 +109,7 @@ class JettyServerController implements ServerController {
 		jettyServerWrapper.start();
 
 		state = ServerState.STARTED;
-		notifyListeners(ServerEvent.STARTED);
+		notifyListeners(new ServerEvent(ServerEvent.State.STARTED, jettyServerWrapper.getAddresses(true)));
 	}
 
 	@Override
@@ -122,7 +123,7 @@ class JettyServerController implements ServerController {
 		jettyServerWrapper.stop();
 
 		state = ServerState.STOPPED;
-		notifyListeners(ServerEvent.STOPPED);
+		notifyListeners(new ServerEvent(ServerEvent.State.STOPPED, null));
 	}
 
 	@Override

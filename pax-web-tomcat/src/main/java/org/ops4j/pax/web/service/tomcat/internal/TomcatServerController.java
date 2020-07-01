@@ -18,15 +18,16 @@ package org.ops4j.pax.web.service.tomcat.internal;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import javax.servlet.Servlet;
 
 import org.ops4j.pax.web.service.spi.ServerController;
-import org.ops4j.pax.web.service.spi.ServerEvent;
-import org.ops4j.pax.web.service.spi.ServerListener;
 import org.ops4j.pax.web.service.spi.ServerState;
 import org.ops4j.pax.web.service.spi.config.Configuration;
+import org.ops4j.pax.web.service.spi.model.events.ServerEvent;
+import org.ops4j.pax.web.service.spi.model.events.ServerListener;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.tomcat.internal.web.TomcatResourceServlet;
 import org.osgi.framework.Bundle;
@@ -47,9 +48,9 @@ class TomcatServerController implements ServerController {
 	private final ClassLoader classLoader;
 
 	private final Configuration configuration;
-	private org.ops4j.pax.web.service.spi.ServerState state;
+	private ServerState state;
 
-	private final List<ServerListener> listeners;
+	private final Set<ServerListener> listeners;
 
 	private final TomcatFactory tomcatFactory;
 
@@ -67,7 +68,7 @@ class TomcatServerController implements ServerController {
 		this.configuration = configuration;
 		this.state = ServerState.UNCONFIGURED;
 
-		this.listeners = new CopyOnWriteArrayList<>();
+		this.listeners = Collections.synchronizedSet(new LinkedHashSet<>());
 	}
 
 	// --- lifecycle methods
@@ -90,7 +91,7 @@ class TomcatServerController implements ServerController {
 		tomcatServerWrapper.configure();
 
 		state = ServerState.STOPPED;
-		notifyListeners(ServerEvent.CONFIGURED);
+		notifyListeners(new ServerEvent(ServerEvent.State.CONFIGURED, tomcatServerWrapper.getAddresses(false)));
 	}
 
 	@Override
@@ -104,7 +105,7 @@ class TomcatServerController implements ServerController {
 		tomcatServerWrapper.start();
 
 		state = ServerState.STARTED;
-		notifyListeners(ServerEvent.STARTED);
+		notifyListeners(new ServerEvent(ServerEvent.State.STARTED, tomcatServerWrapper.getAddresses(true)));
 	}
 
 	@Override
@@ -118,7 +119,7 @@ class TomcatServerController implements ServerController {
 		tomcatServerWrapper.stop();
 
 		state = ServerState.STOPPED;
-		notifyListeners(ServerEvent.STOPPED);
+		notifyListeners(new ServerEvent(ServerEvent.State.STOPPED, null));
 	}
 
 	@Override

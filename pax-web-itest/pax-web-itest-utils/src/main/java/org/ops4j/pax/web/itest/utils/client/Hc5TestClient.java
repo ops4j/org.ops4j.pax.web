@@ -289,7 +289,7 @@ class Hc5TestClient implements HttpTestClient {
 						.forEach(h -> resultWrapper.headers.put(h.getName(), h.getValue()));
 			} catch (Exception e) {
 				LOG.info("caught exception from client call: ", e);
-				throw (Exception) e.getCause();
+				throw e;
 			} finally {
 				LOG.info("stopping client");
 				httpClient.close();

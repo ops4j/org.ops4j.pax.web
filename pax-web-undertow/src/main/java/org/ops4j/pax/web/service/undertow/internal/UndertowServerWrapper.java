@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -760,7 +761,24 @@ class UndertowServerWrapper implements BatchVisitor {
 		});
 
 		this.workers.values().forEach(XnioWorker::shutdown);
-		undertowFactory.getDefaultWorker(configuration).shutdown();
+		this.workers.clear();
+		this.bufferPools.values().forEach(ByteBufferPool::close);
+		this.bufferPools.clear();
+		undertowFactory.closeDefaultPoolAndBuffer();
+	}
+
+	/**
+	 * If state allows, this methods returns currently configured/started addresses of the listeners.
+	 * @param useLocalPort
+	 * @return
+	 */
+	public InetSocketAddress[] getAddresses(boolean useLocalPort) {
+		if (listeners.size() == 0) {
+			return null;
+		}
+		final List<InetSocketAddress> result = new ArrayList<>(listeners.size());
+		listeners.values().forEach(ac -> result.add(ac.getAddress()));
+		return result.toArray(new InetSocketAddress[0]);
 	}
 
 	// --- visitor methods for model changes

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.spi;
+package org.ops4j.pax.web.service.spi.model.events;
 
 /**
  * Interface to use in order to get notified about container lifecycle events.

@@ -227,6 +227,19 @@ public class UndertowFactory {
 		return defaultWorker;
 	}
 
+	public void closeDefaultPoolAndBuffer() {
+		if (defaultWorker != null) {
+			defaultWorker.shutdown();
+			defaultWorker = null;
+		}
+		if (defaultBufferPool != null) {
+			defaultBufferPool.close();
+			IoSubsystem.BufferPool defaultBufferPoolDefinition = new IoSubsystem.BufferPool();
+			defaultBufferPoolDefinition.setName("default");
+			defaultBufferPool = createBufferPool(defaultBufferPoolDefinition);
+		}
+	}
+
 	public XnioWorker createLogWorker() throws IOException {
 		OptionMap workerOptions = OptionMap.builder()
 				.set(Options.WORKER_NAME, "log-xnio")

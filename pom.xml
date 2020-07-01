@@ -269,7 +269,7 @@
 
 		<dependency.pax-cdi.version>1.1.0</dependency.pax-cdi.version>
 		<dependency.pax-exam.version>4.13.1</dependency.pax-exam.version>
-		<dependency.pax-logging.version>2.0.2</dependency.pax-logging.version>
+		<dependency.pax-logging.version>2.0.4</dependency.pax-logging.version>
 		<dependency.pax-url.version>2.6.2</dependency.pax-url.version>
 		<dependency.pax-tinybundles.version>3.0.0</dependency.pax-tinybundles.version>
 

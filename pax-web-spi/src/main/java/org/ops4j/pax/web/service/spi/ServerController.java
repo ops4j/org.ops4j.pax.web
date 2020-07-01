@@ -20,6 +20,7 @@ import java.net.URL;
 import javax.servlet.Servlet;
 
 import org.ops4j.pax.web.service.spi.config.Configuration;
+import org.ops4j.pax.web.service.spi.model.events.ServerListener;
 import org.ops4j.pax.web.service.spi.task.Batch;
 
 /**

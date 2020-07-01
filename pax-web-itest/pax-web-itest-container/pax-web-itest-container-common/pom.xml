@@ -65,6 +65,7 @@
 							org.osgi.util.tracker;version="[1.5,2)",
 
 							<!-- OSGi cmpn -->
+							org.osgi.service.cm;resolution:=optional,
 							org.osgi.service.http;version="[1.2,2)",
 
 							<!-- from pax-web-api -->
@@ -180,6 +181,10 @@
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.metatype</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.configadmin</artifactId>
 		</dependency>
 
 		<!-- JavaEE -->

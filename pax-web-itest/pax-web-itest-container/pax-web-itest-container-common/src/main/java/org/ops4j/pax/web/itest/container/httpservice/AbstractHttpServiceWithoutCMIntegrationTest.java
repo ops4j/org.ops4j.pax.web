@@ -68,7 +68,7 @@ public abstract class AbstractHttpServiceWithoutCMIntegrationTest extends Abstra
 	public void testServletPath() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Servlet Path: \"\"'",
-						resp -> resp.contains("Servlet Path: "))
+						resp -> resp.contains("Servlet Path: \"\""))
 				.withResponseAssertion("Response must contain 'Path Info: \"/lall/blubb\"'",
 						resp -> resp.contains("Path Info: \"/lall/blubb\""))
 				.doGETandExecuteTest("http://127.0.0.1:8181/lall/blubb");

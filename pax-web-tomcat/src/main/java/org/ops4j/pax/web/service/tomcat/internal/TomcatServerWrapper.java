@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -534,6 +535,34 @@ class TomcatServerWrapper implements BatchVisitor {
 		} catch (final Throwable e) {
 			LOG.error("Problem stopping Tomcat server {}", e.getMessage(), e);
 		}
+	}
+
+	/**
+	 * If state allows, this methods returns currently configured/started addresses of the listeners.
+	 * @param useLocalPort
+	 * @return
+	 */
+	public InetSocketAddress[] getAddresses(boolean useLocalPort) {
+		Service service = server.findService(TOMCAT_CATALINA_NAME);
+		if (service == null) {
+			return null;
+		}
+		Connector[] currentConnectors = service.findConnectors();
+		if (currentConnectors == null) {
+			currentConnectors = new Connector[0];
+		}
+		final List<InetSocketAddress> result = new ArrayList<>(currentConnectors.length);
+		for (Connector connector : currentConnectors) {
+			InetAddress address = (InetAddress) connector.getProperty("address");
+			int port = useLocalPort ? connector.getLocalPort() : connector.getPort();
+			if (address == null) {
+				result.add(new InetSocketAddress(port));
+			} else {
+				result.add(new InetSocketAddress(address, port));
+			}
+		}
+
+		return result.toArray(new InetSocketAddress[0]);
 	}
 
 	// --- visitor methods for model changes

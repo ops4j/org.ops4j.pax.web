@@ -17,6 +17,7 @@ package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.File;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EventListener;
 import java.util.HashMap;
@@ -518,6 +519,31 @@ class JettyServerWrapper implements BatchVisitor {
 
 		LOG.info("Destroying Jetty server {}", server);
 		server.destroy();
+	}
+
+	/**
+	 * If state allows, this methods returns currently configured/started addresses of the listeners.
+	 * @param useLocalPort
+	 * @return
+	 */
+	public InetSocketAddress[] getAddresses(boolean useLocalPort) {
+		if (server == null || server.getConnectors() == null || server.getConnectors().length == 0) {
+			return null;
+		}
+		final List<InetSocketAddress> result = new ArrayList<>(server.getConnectors().length);
+		for (Connector connector : server.getConnectors()) {
+			if (connector instanceof ServerConnector) {
+				ServerConnector sc = (ServerConnector)connector;
+				int port = useLocalPort ? sc.getLocalPort() : sc.getPort();
+				if (sc.getHost() == null) {
+					result.add(new InetSocketAddress(port));
+				} else {
+					result.add(new InetSocketAddress(sc.getHost(), port));
+				}
+			}
+		}
+
+		return result.toArray(new InetSocketAddress[0]);
 	}
 
 	// --- connector/handler/customizer methods
