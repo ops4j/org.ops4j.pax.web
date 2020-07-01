@@ -15,11 +15,13 @@
  */
 package org.ops4j.pax.web.itest.tomcat;
 
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.common.AbstractWhiteboardIntegrationTest;
+import org.osgi.framework.BundleException;
 
 /**
  * @author Toni Menzel (tonit)
@@ -31,5 +33,13 @@ public class WhiteboardIntegrationTest extends AbstractWhiteboardIntegrationTest
 	@Configuration
 	public static Option[] configure() {
 		return configureTomcat();
+	}
+
+	@Before
+	public void setUp() throws BundleException, InterruptedException {
+		// These tests fail with Tomcat on the ci server, wait a bit longer for that container
+		Thread.sleep(2000);
+		super.setUp();
+		Thread.sleep(2000);
 	}
 }
