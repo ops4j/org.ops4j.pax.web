@@ -53,6 +53,10 @@ public abstract class AbstractWhiteboardIntegrationTest extends ITestBase {
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/whiteboard/"
 				+ VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
+		// wait for the HTTP service to come up
+		// this need not be there before the whiteboard bundle registers the servlet, 
+		// but it must be available before the test starts
+		getHttpService(bundleContext);
 		waitForServletListener();
 	}
 

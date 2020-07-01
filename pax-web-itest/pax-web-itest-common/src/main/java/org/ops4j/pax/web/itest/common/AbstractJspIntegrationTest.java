@@ -32,19 +32,10 @@ public abstract class AbstractJspIntegrationTest extends ITestBase {
 
 	@Before
 	public void setUp() throws BundleException, InterruptedException {
-		/*
-		 * Tomcat will start a default root context. This will not hurt, but if we initialize the 
-		 * ServletListener too early it will detect this startup and will start the test before the
-		 * Servlet configured here is registered. Therefore we wait for a second before we initialize
-		 * the ServletListener and register the configuration.
-		 */
-		Thread.sleep(1000);
-
-		initWebListener();
+		// Wait for the web container to be available
+		getWebContainer(bundleContext);
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-jsp/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
-		// TODO this is not a war bundle. web listener is never called
-		waitForWebListener();
 	}
 
 	@After

@@ -46,10 +46,13 @@ public abstract class AbstractSimultaneousWhiteboardIntegrationTest extends ITes
 		assertNotNull(simultaneousTestBundle);
 		assertNotNull(whiteBoardBundle);
 
+		// wait for the HTTP service to be available
+		getHttpService(bundleContext);
+
 		simultaneousTestBundle.start();
 		whiteBoardBundle.start();
 
-		// It make some time for the services to get registered
+		// It may take some time for the services to get registered
 		Thread.sleep(1000);
 	}
 

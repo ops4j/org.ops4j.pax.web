@@ -51,8 +51,8 @@ public abstract class AbstractWarJSFIntegrationTest extends ITestBase {
 
 		logger.info("Setting up test");
 
-		// Give the web container a second to recover after bundle restarts
-		Thread.sleep(1000);
+		// Wait for the web container to recover after bundle restarts
+		getWebContainer(bundleContext);
 
 		initWebListener();
 
@@ -76,7 +76,7 @@ public abstract class AbstractWarJSFIntegrationTest extends ITestBase {
 	@Test
 	public void testSlash() throws Exception {
 		// needed to wait for fully initializing the container
-		Thread.sleep(1000);
+		Thread.sleep(6000);
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Please enter your name'",
@@ -88,7 +88,7 @@ public abstract class AbstractWarJSFIntegrationTest extends ITestBase {
 	@Test
 	public void testJSF() throws Exception {
 		// needed to wait for fully initializing the container
-		Thread.sleep(1000);
+		Thread.sleep(3000);
 
 		CookieState cookieState = new CookieState();
 
