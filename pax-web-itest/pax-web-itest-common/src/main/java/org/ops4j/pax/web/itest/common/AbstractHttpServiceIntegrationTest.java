@@ -69,6 +69,8 @@ public abstract class AbstractHttpServiceIntegrationTest extends ITestBase {
 		initServletListener(null);
 		String bundlePath = "mvn:org.ops4j.pax.web.samples/helloworld-hs/" + VersionUtil.getProjectVersion();
 		installWarBundle = installAndStartBundle(bundlePath);
+		// Wait for the HTTP service to come up before doing any actual tests
+		getHttpService(bundleContext);
 		waitForServletListener();
 	}
 

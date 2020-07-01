@@ -31,6 +31,8 @@ public abstract class AbstractServletAnnotatedIntegrationTest extends ITestBase 
 
 	@Before
 	public void setUp() throws Exception {
+		// wait for the web container itself to be there
+		getWebContainer(bundleContext);
 		waitForServer("http://127.0.0.1:8181/");
 		initServletListener("test");
 		waitForServletListener();
