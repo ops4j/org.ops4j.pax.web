@@ -109,10 +109,10 @@ class OsgiStandardRoot extends StandardRoot {
 					if (resource.getProtocol().equals("file")) {
 						try {
 							File file = new File(resource.toURI());
-							if (!file.isFile()) {
-								return new EmptyResource(root, path);
+							if (file.isFile() || file.isDirectory()) {
+								return new FileResource(root, fullPath, file, true, null);
 							}
-							return new FileResource(root, fullPath, file, true, null);
+							return new EmptyResource(root, path);
 						} catch (URISyntaxException e) {
 							LOG.warn(e.getMessage(), e);
 							return new EmptyResource(root, path);

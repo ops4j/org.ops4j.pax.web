@@ -101,20 +101,18 @@ public class JettyResourceServlet extends DefaultServlet {
 				// Pax Web special - direct access to configured directory with proper metadata handling
 				// (size, lastModified) for caching purposes
 				if ("".equals(childPath)) {
-					// root directory access. We want 404.
-					return null;
+					// root directory access. Just return base resource and let super class handle welcome files
+					return baseUrlResource;
 				}
 				return baseUrlResource.addPath(childPath);
 			} else {
 				// HttpService/Whiteboard behavior - resourceBase is prepended to argument for context resource
 				// remember - under ServletContext there should be WebContainerContext that wraps
 				// HttpContext or ServletContextHelper
+				// before Pax Web 8 there was explicit delegation to HttpContext, but now, it's hidden
+				// under Osgi(Scoped)ServletContext
 				URL url = getServletContext().getResource(chroot + "/" + childPath);
 
-				// TOCHECK: I see Felix is returning proper time from org.osgi.framework.Bundle.getLastModified()
-//				if (Utils.isBundleProtocol(resource)) {
-//					// let's return URLResource, but with tweaked "last modified"
-//				}
 				if (url != null && url.getProtocol().equals("file")) {
 					if (new File(url.getPath()).isDirectory()) {
 						// we want 404, not 403

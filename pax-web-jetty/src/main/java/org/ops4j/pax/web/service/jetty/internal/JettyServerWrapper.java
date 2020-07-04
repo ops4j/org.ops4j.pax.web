@@ -606,6 +606,8 @@ class JettyServerWrapper implements BatchVisitor {
 			sch.setInitParameter(DefaultServlet.CONTEXT_INIT + "dirAllowed", "false");
 			sch.setInitParameter(DefaultServlet.CONTEXT_INIT + "etags", "true");
 			sch.setInitParameter(DefaultServlet.CONTEXT_INIT + "pathInfoOnly", "true");
+			// needed to comply with Servlets specification
+			sch.setInitParameter(DefaultServlet.CONTEXT_INIT + "welcomeServlets", "true");
 
 			// cache properties for default servlet (see org.eclipse.jetty.server.CachedContentFactory) passed
 			// through context init params

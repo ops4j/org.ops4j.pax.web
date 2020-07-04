@@ -72,13 +72,16 @@ import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.digester.Digester;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.ops4j.pax.web.service.tomcat.internal.web.TomcatResourceServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
+import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -415,7 +418,6 @@ public class EmbeddedTomcatTest {
 		default1Wrapper.setName("default1");
 		default1Wrapper.setServlet(new TomcatResourceServlet(b1, null, null));
 		default1Wrapper.addInitParameter("listings", "false");
-		default1Wrapper.addInitParameter("base", b1.getAbsolutePath());
 
 		rootContext.addChild(default1Wrapper);
 		rootContext.addServletMappingDecoded("/d1/*", "default1");
@@ -424,7 +426,6 @@ public class EmbeddedTomcatTest {
 		default2Wrapper.setName("default2");
 		default2Wrapper.setServlet(new TomcatResourceServlet(b2, null, null));
 		default2Wrapper.addInitParameter("listings", "false");
-		default2Wrapper.addInitParameter("base", b2.getAbsolutePath());
 
 		rootContext.addChild(default2Wrapper);
 		rootContext.addServletMappingDecoded("/d2/*", "default2");
@@ -469,11 +470,189 @@ public class EmbeddedTomcatTest {
 		assertTrue(response.contains("HTTP/1.1 404"));
 		response = send(port, "/d3");
 		assertTrue(response.contains("HTTP/1.1 404"));
-		// directory access, but let's not suggest user that it's a directory. it's just 404
+		// directory access, 404 with bundle access, 403 when the resource is a file: directory
 		response = send(port, "/d2/");
+		// Undertow sends 403, Tomcat - 404
 		assertTrue(response.contains("HTTP/1.1 404"));
 		response = send(port, "/d2");
 		assertTrue(response.contains("HTTP/1.1 404"));
+
+		server.stop();
+		server.destroy();
+	}
+
+	@Test
+	@Ignore("for now")
+	public void resourceServletWithWelcomePages() throws Exception {
+		Server server = new StandardServer();
+		server.setCatalinaBase(new File("target"));
+
+		Service service = new StandardService();
+		service.setName("Catalina");
+		server.addService(service);
+
+		Executor executor = new StandardThreadExecutor();
+		service.addExecutor(executor);
+
+		Connector connector = new Connector("HTTP/1.1");
+		connector.setPort(0);
+		service.addConnector(connector);
+
+		Engine engine = new StandardEngine();
+		engine.setName("Catalina");
+		engine.setDefaultHost("localhost");
+		service.setContainer(engine);
+
+		Host host = new StandardHost();
+		host.setName("localhost");
+		host.setAppBase(".");
+		engine.addChild(host);
+
+		Context rootContext = new StandardContext();
+		rootContext.setName("");
+		rootContext.setPath("");
+		rootContext.setMapperContextRootRedirectEnabled(false);
+		rootContext.addLifecycleListener((event) -> {
+			if (event.getType().equals(Lifecycle.CONFIGURE_START_EVENT)) {
+				rootContext.setConfigured(true);
+			}
+		});
+		host.addChild(rootContext);
+		rootContext.addWelcomeFile("index.txt");
+
+		File b1 = new File("target/b1");
+		FileUtils.deleteDirectory(b1);
+		b1.mkdirs();
+		new File(b1, "sub").mkdirs();
+		try (FileWriter fw1 = new FileWriter(new File(b1, "hello.txt"))) {
+			IOUtils.write("'hello.txt'", fw1);
+		}
+		try (FileWriter fw1 = new FileWriter(new File(b1, "sub/hello.txt"))) {
+			IOUtils.write("'sub/hello.txt'", fw1);
+		}
+		try (FileWriter fw1 = new FileWriter(new File(b1, "index.txt"))) {
+			IOUtils.write("'index.txt'", fw1);
+		}
+		try (FileWriter fw1 = new FileWriter(new File(b1, "sub/index.txt"))) {
+			IOUtils.write("'sub/index.txt'", fw1);
+		}
+
+		StandardWrapper default1Wrapper = new StandardWrapper();
+		default1Wrapper.setName("default1");
+		default1Wrapper.setServlet(new TomcatResourceServlet(b1, null, null));
+		default1Wrapper.addInitParameter("listings", "false");
+
+		rootContext.addChild(default1Wrapper);
+		rootContext.addServletMappingDecoded("/d1/*", "default1");
+
+		server.start();
+
+		int port = connector.getLocalPort();
+
+		String response = send(port, "/hello.txt");
+		assertTrue(response.contains("HTTP/1.1 404"));
+
+		response = send(port, "/d1/hello.txt");
+		assertThat(response, endsWith("'hello.txt'"));
+		response = send(port, "/d1/sub/hello.txt");
+		assertThat(response, endsWith("'sub/hello.txt'"));
+
+		response = send(port, "/d1/../hello.txt");
+		assertTrue(response.contains("HTTP/1.1 404"));
+
+		response = send(port, "/d1/");
+		assertThat(response, endsWith("'index.txt'"));
+		response = send(port, "/d1/sub/");
+		assertThat(response, endsWith("'sub/index.txt'"));
+		response = send(port, "/d1");
+		assertThat(response, startsWith("HTTP/1.1 302 Found"));
+		response = send(port, "/d1/sub");
+		assertThat(response, startsWith("HTTP/1.1 302 Found"));
+
+		server.stop();
+		server.destroy();
+	}
+
+	@Test
+	public void standardWelcomePages() throws Exception {
+		Server server = new StandardServer();
+		server.setCatalinaBase(new File("target"));
+
+		Service service = new StandardService();
+		service.setName("Catalina");
+		server.addService(service);
+
+		Executor executor = new StandardThreadExecutor();
+		service.addExecutor(executor);
+
+		Connector connector = new Connector("HTTP/1.1");
+		connector.setPort(0);
+		service.addConnector(connector);
+
+		Engine engine = new StandardEngine();
+		engine.setName("Catalina");
+		engine.setDefaultHost("localhost");
+		service.setContainer(engine);
+
+		Host host = new StandardHost();
+		host.setName("localhost");
+		host.setAppBase(".");
+		engine.addChild(host);
+
+		Context rootContext = new StandardContext();
+		rootContext.setName("");
+		rootContext.setPath("");
+		rootContext.setMapperContextRootRedirectEnabled(false);
+		rootContext.addLifecycleListener((event) -> {
+			if (event.getType().equals(Lifecycle.CONFIGURE_START_EVENT)) {
+				rootContext.setConfigured(true);
+			}
+		});
+		host.addChild(rootContext);
+		rootContext.addWelcomeFile("index.x");
+		rootContext.addWelcomeFile("indexx");
+
+		File b1 = new File("target/b1");
+		FileUtils.deleteDirectory(b1);
+		b1.mkdirs();
+		new File(b1, "sub").mkdirs();
+		try (FileWriter fw1 = new FileWriter(new File(b1, "sub/index.x"))) {
+			IOUtils.write("'sub/index'", fw1);
+		}
+
+		// important in StandardRoot.createMainResourceSet()
+		rootContext.setDocBase(b1.getAbsolutePath());
+
+		StandardWrapper defaultWrapper = new StandardWrapper();
+		defaultWrapper.setName("default");
+		defaultWrapper.setServlet(new DefaultServlet());
+		defaultWrapper.addInitParameter("listings", "false");
+
+		StandardWrapper indexxWrapper = new StandardWrapper();
+		indexxWrapper.setName("indexx");
+		indexxWrapper.setServlet(new HttpServlet() {
+			@Override
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				resp.getWriter().print("'indexx'");
+			}
+		});
+
+		rootContext.addChild(defaultWrapper);
+		rootContext.addServletMappingDecoded("/", "default");
+		rootContext.addChild(indexxWrapper);
+		// this mapping should be triggered at welcome file mapping stage, before dispatching to '/' servlet
+		rootContext.addServletMappingDecoded("/indexx/*", "indexx");
+
+		server.start();
+
+		int port = connector.getLocalPort();
+
+		String response = send(port, "/");
+		assertThat(response, endsWith("'indexx'"));
+		response = send(port, "/sub/");
+		assertThat(response, endsWith("'sub/index'"));
+		response = send(port, "/sub");
+		assertThat(response, startsWith("HTTP/1.1 302"));
 
 		server.stop();
 		server.destroy();

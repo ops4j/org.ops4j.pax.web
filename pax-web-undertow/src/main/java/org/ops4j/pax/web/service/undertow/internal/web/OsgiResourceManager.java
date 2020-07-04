@@ -86,7 +86,7 @@ public class OsgiResourceManager implements ResourceManager {
 		if (resource.getProtocol().equals("file")) {
 			try {
 				Path file = Paths.get(resource.toURI());
-				if (!file.toFile().isFile()) {
+				if (file.toFile().isFile() || file.toFile().isDirectory()) {
 					// we don't want directories, we want 404 instead
 					return null;
 				}

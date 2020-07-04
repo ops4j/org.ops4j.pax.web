@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.itest.osgi;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -27,6 +28,7 @@ import java.util.Optional;
 import java.util.jar.Manifest;
 import javax.servlet.ServletContainerInitializer;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -85,7 +87,9 @@ public class PaxWebSpiIntegrationTest extends AbstractControlledTestBase {
 				mavenBundle("org.ops4j.pax.web.samples", "jsf-primefaces-embedded").type("war").versionAsInProject(),
 				mavenBundle("org.ops4j.pax.web.samples", "jsf-primefaces-commons1").versionAsInProject(),
 				mavenBundle("org.ops4j.pax.web.samples", "jsf-primefaces-commons2").versionAsInProject(),
-				mavenBundle("org.ops4j.pax.web.samples", "jsf-primefaces-commons3").versionAsInProject()
+				mavenBundle("org.ops4j.pax.web.samples", "jsf-primefaces-commons3").versionAsInProject(),
+
+				mavenBundle("commons-io", "commons-io").versionAsInProject()
 		);
 	}
 
@@ -137,7 +141,7 @@ public class PaxWebSpiIntegrationTest extends AbstractControlledTestBase {
 		// org.osgi.framework.Bundle.getResource()
 		//  > org.apache.felix.framework.Felix.getBundleResource()
 		//     (wiring == null) > org.apache.felix.framework.BundleRevisionImpl.getResourceLocal()
-		//      > org.apache.felix.framework.cache.Content.hasEntry() == true ? URL : nu
+		//      > org.apache.felix.framework.cache.Content.hasEntry() == true ? URL : null
 		//        just as org.osgi.framework.Bundle.getEntry()
 		//     (wiring != null) > org.apache.felix.framework.BundleWiringImpl.getResourceByDelegation()
 		//        searches classloader, wiring, boot delegation...
@@ -269,6 +273,30 @@ public class PaxWebSpiIntegrationTest extends AbstractControlledTestBase {
 		m = new Manifest(bundle.getResource("/META-INF/MANIFEST.MF").openStream());
 		assertThat(m.getMainAttributes().getValue("Bundle-SymbolicName"), equalTo("org.ops4j.pax.web.pax-web-spi"));
 
+		// if system property "jdk.util.zip.ensureTrailingSlash" is not changed, failure to find named entry
+		// is followed by checking name + "/" entry
+		// Felix:
+		//  - native java.util.zip.ZipFile.getEntry(long, byte[], boolean) is called with "META-INF" name
+		//  - org.apache.felix.framework.BundleRevisionImpl.createURL() is called to create an URL - with unchanged
+		//    path, which means that trailing slash may not be present...
+		// Equinox:
+		//  - java.util.zip.ZipFile.getEntry(java.lang.String) is called with "META-INF" as name (just as in Felix)
+		//  - when creating URL, Equinox has special org.eclipse.osgi.storage.bundlefile.BundleFile.fixTrailingSlash()
+		//    method to match trailing slash with actual ZIP entry (or lack thereof)
+		LOG.info("Bundle.getResource(\"/META-INF\"): {}", bundle.getResource("/META-INF"));
+		LOG.info("Bundle.getResource(\"/META-INF/\"): {}", bundle.getResource("/META-INF/"));
+		LOG.info("Bundle.getResource(\"/META-INF\") - content length: {}", bundle.getResource("/META-INF").openConnection().getContentLength());
+		LOG.info("Bundle.getResource(\"/META-INF/\") - content length: {}", bundle.getResource("/META-INF/").openConnection().getContentLength());
+		LOG.info("Bundle.getResource(\"/META-INF\") - url: {}", bundle.getResource("/META-INF").openConnection().getURL());
+		LOG.info("Bundle.getResource(\"/META-INF/\") - url: {}", bundle.getResource("/META-INF/").openConnection().getURL());
+
+		ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
+		IOUtils.copy(bundle.getResource("/META-INF").openStream(), baos1);
+		LOG.info("/META-INF: \"{}\"", new String(baos1.toByteArray()));
+		ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
+		IOUtils.copy(bundle.getResource("/META-INF/").openStream(), baos2);
+		LOG.info("/META-INF/: \"{}\"", new String(baos2.toByteArray()));
+
 		e = bundle.getResources("/META-INF/MANIFEST.MF");
 		ok = 0;
 		while (e.hasMoreElements()) {
@@ -278,8 +306,28 @@ public class PaxWebSpiIntegrationTest extends AbstractControlledTestBase {
 		}
 		assertThat(ok, equalTo(2));
 
-		// - Bundle resource: bundle://19.0:1/META-INF/MANIFEST.MF
-		// - Bundle resource: bundle://19.0:2/META-INF/MANIFEST.MF
+		// Felix:
+		//  - Bundle.getResource("/META-INF"): bundle://19.0:1/META-INF
+		//  - Bundle.getResource("/META-INF/"): bundle://19.0:1/META-INF/
+		//  - /META-INF: ""
+		//  - /META-INF/: ""
+		//  - Bundle resource: bundle://19.0:1/META-INF/MANIFEST.MF
+		//  - Bundle resource: bundle://19.0:2/META-INF/MANIFEST.MF
+		//  - Bundle.getResource("/META-INF") - content length: 0
+		//  - Bundle.getResource("/META-INF/") - content length: 0
+		//  - Bundle.getResource("/META-INF") - url: bundle://19.0:1/META-INF
+		//  - Bundle.getResource("/META-INF/") - url: bundle://19.0:1/META-INF/
+		// Equinox:
+		//  - Bundle.getResource("/META-INF"): bundleresource://19.fwk1529115495/META-INF/
+		//  - Bundle.getResource("/META-INF/"): bundleresource://19.fwk1529115495/META-INF/
+		//  - /META-INF: ""
+		//  - /META-INF/: ""
+		//  - Bundle resource: bundleresource://19.fwk1529115495/META-INF/MANIFEST.MF
+		//  - Bundle resource: bundleresource://19.fwk1529115495:1/META-INF/MANIFEST.MF
+		//  - Bundle.getResource("/META-INF") - content length: 0
+		//  - Bundle.getResource("/META-INF/") - content length: 0
+		//  - Bundle.getResource("/META-INF") - url: bundleresource://19.fwk646910062/META-INF/
+		//  - Bundle.getResource("/META-INF/") - url: bundleresource://19.fwk646910062/META-INF/
 	}
 
 	@Test

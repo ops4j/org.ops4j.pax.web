@@ -195,3 +195,86 @@ _Welcome files_ are strictly related to _resource servlet_ and should be used wh
 I checked that all servers have own methods for path _normalization_ to prevent accessing paths like `../../../../../../../etc/passwd`. Because we want unified behavior, we'll use `org.apache.commons.io.FilenameUtils.normalize()` function instead.
 
 The main requirement for _default servlets_ configured with some _resource base_ is that no path can go above the configured _base_ (which should be treated as `chroot`).
+
+There's a little difference between runtimes. In Jetty and Tomcat, normalization of nasty URLs like `../../../../../etc/passwd` leads to HTTP 400 Bad Request, while in Undertow, simply we can't escape the `chroot` and end up with `/etc/passwd` path info.
+
+=== Welcome files
+
+First - there's nothing about _welcome files_ in both Http Service and Whiteboard Service specifications.
+
+Then, chapter 10.10 "Welcome Files" of Servlet specification says quite clearly:
+
+    The purpose of this mechanism is to allow the deployer to specify an ordered list of
+    partial URIs for the container to use for appending to URIs when there is a request
+    for a URI that corresponds to a directory entry in the WAR not mapped to a Web
+    component.
+
+So if there *is* a mapping of the _directory_ URI into a web component (like a servlet), then Welcome Files mechanism should not be used.
+
+Also, Servlet specification says:
+
+    If no match is found, the Web server MUST again append each
+    welcome file in the order specified in the deployment descriptor to the partial
+    request and check if a servlet is mapped to that request URI.
+
+Which means, that after getting a _directory request_, checking that it's not mapped to any web component and after appending a _welcome file_, the container again has to do the mapping, because the resulting URL may now be mapped to some servlet (that's what usually happens with `index.jsp` _welcome file_). In Tomcat, it's called _Rule 4a -- Welcome resources processing for exact macth_, _Rule 4b -- Welcome resources processing for prefix match_ and _Rule 4c -- Welcome resources processing for physical folder_.
+
+Chapter 12.1 "Use of URL Paths" says that "default" servlet is called when nothing can be mapped for incoming request.
+
+There's a little (?) difference in how _welcome files_ are handled by Jetty, Tomcat and Undertow. Tomcat and Undertow handles the _welcome files_ immediately in mapping stage (`org.apache.catalina.mapper.Mapper.internalMapWrapper` and `io.undertow.servlet.handlers.ServletPathMatches.getServletHandlerByPath` respectively), while in Jetty, this is done only after request is being processed by `org.eclipse.jetty.servlet.DefaultServlet` (seems like regardless of the way it's mapped - to `/` or different URI).
+
+In OSGi CMPN web specifications (Http and Whiteboard) and in practice - only in Pax Web, the problem is that there may be many "default" (or rather "resource") servlets that should be able to process _directory requests_. Each such servlet should have access to welcome files, but also (according to Servlet spec) should check if the concatenated path (URI + welcome file) matches to another web component.
+
+==== Mapping details
+
+.Tomcat
+
+In Tomcat, the incoming request is handled like this (`org.apache.catalina.mapper.Mapper.internalMapWrapper`):
+
+* exact wrappers are checked (i.e., those that don't start with `*.`, end with `/*` or are `/`)
+* wildcard wrappers are checked (those ending with `/*`)
+* now, depending on `org.apache.catalina.Context.getMapperContextRootRedirectEnabled()` if the path is empty, we may immediately get a redirect from context root to context root with trailing `/`
+* extension wrappers are checked (those starting with `*.`)
+* welcome files are checked. For each welcome file, original URI which has to end with `/` is appended with a welcome file value
+** again exact wrappers are checked (rule 4a)
+** again wildcard wrappers are checked (rule 4b)
+** physical resource is located and *only* if it exists (rule 4c):
+*** extension wrapper is checked and if not found
+*** the handling wrapper is set to the servlet mapped to `/` (the _default_ servlet)
+
+.Undertow
+
+In Undertow, the incoming request is handled like this (`io.undertow.servlet.handlers.ServletPathMatches.getServletHandlerByPath`):
+
+* exact path matches are checked
+* prefix path matches are checked
+* trimmed prefix patch matches are checked starting from original one, trimming last character at a time. This way Undertow handles extension mappings, changing `index.do` URI to `/index.do` first and eventually to `/index` prefix match
+* `io.undertow.servlet.handlers.ServletPathMatches.findWelcomeFile` is called
+* `io.undertow.servlet.handlers.ServletPathMatchesData.getServletHandlerByPath()` is called again with original URI appended with each of the welcome files at a time
+
+If `io.undertow.servlet.handlers.ServletPathMatches.setupServletChains()` detects no _default servlet_, it adds its own without any mapping, but associated with `/*` path.
+
+.Jetty
+
+In Jetty, `org.eclipse.jetty.servlet.ServletHandler.getMappedServlet()` doesn't check the welcome files at all.
+Welcome files are handled in `org.eclipse.jetty.server.ResourceService.doGet()` after directory resource is returned. Which may (?) mean that if no default servlet is mapped, no welcome files are checked at all... Jetty uses `javax.servlet.ServletContext.getRequestDispatcher()` after finding proper welcome file.
+
+.Observations
+
+Undertow doesn't need default servlet at all to handle all welcome files (those that eventually map to other servlet and those that map to resources), because default servlet is added anyway if none found.
+Tomcat doesn't need default servlet to handle welcome files that eventually map to servlets. To serve resources, explicit default servlet is needed.
+Jetty doesn't handle welcome files at all without default servlet. Even with `org.eclipse.jetty.servlet.ServletHandler.setEnsureDefaultServlet()`, because this flag adds `org.eclipse.jetty.servlet.ServletHandler.Default404Servlet`, not a real default servlet.
+
+==== Unification
+
+Let's collect the requirements, so all three containers behave similarly.
+
+First, we have these assumptions:
+
+* there's a need to have default 404 servlet, because initially, there has to be no default/resource servlet mapped to any URI (even `/`) and we want filter only pipelines to work.
+* without user calling `httpService.registerResources()` we can't register any resource servlets, so no resources are served from the bundle - both in Http Service and Whiteboard Service cases. None of these specifications say anything about "default servlet" or "default resource handling" - also there's nothing about _welcome files_.
+* when registering resources, we use "name" parameter to `httpService.registerResources()` or `osgi.http.whiteboard.resource.prefix` Whiteboard property, which is prefix for the incoming path info part of request URI. Pax Web allows to use external directory (bypassing any `HttpContext`/`ServletContextHelper`) if the `name`/`prefix` is absolute path to accessible directory. In this special mode, accessing a _directory_ when no welcome file is available results in 403 error instead of 404 one, because it's not that easy to handle directories obtained using `org.osgi.framework.Bundle.getResource()` (as in default implementation of `HttpContext`/`ServletContextHelper`).
+* when the above name/prefix is relative (and together with incoming path info is passed to `HttpContext`/`ServletContextHelper`), but still result in a `file:` URL, directory entries without welcome files still result in 403 error - but consistently across containers
+* Even if Tomcat and Undertow handle welcome files before dispatching to a servlet, while Jetty does it after dispatching to default servlet, Pax Web explicitly configures context-level welcome files as empty array. Welcome files are handled by individual "resource servlets", because there may be more of them - not necessarily mapped to `/` URI.
+* with pax-web-extender-war we should (or leave it as configuration option) configure `/` servlet if none is specified. Such servlet will be used to serve resources from the WAB bundle itself. The name/prefix should be empty (to serve resources from the root of the WAB).
+* Each resource servlet used should handle welcome files by first checking of real servlet is available after adding a welcome file to incoming _directory URI_ - even if by default only Jetty's default servlet does it.

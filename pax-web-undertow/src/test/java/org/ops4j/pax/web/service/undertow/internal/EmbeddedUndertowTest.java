@@ -33,6 +33,7 @@ import java.util.Map;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
+import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpFilter;
@@ -67,6 +68,7 @@ import io.undertow.util.ETag;
 import io.undertow.util.StatusCodes;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.ops4j.pax.web.service.undertow.internal.web.UndertowResourceServlet;
 import org.slf4j.Logger;
@@ -81,7 +83,9 @@ import org.xnio.Xnio;
 import org.xnio.XnioWorker;
 import org.xnio.channels.AcceptingChannel;
 
+import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -318,10 +322,156 @@ public class EmbeddedUndertowTest {
 		response = send(port, "/d3");
 		assertTrue(response.contains("HTTP/1.1 404"));
 		response = send(port, "/d2/");
-		// directory access, but let's not suggest user that it's a directory. it's just 404
-		assertTrue(response.contains("HTTP/1.1 404"));
+		// directory access, 404 with bundle access, 403 when the resource is a file: directory
+		assertTrue(response.contains("HTTP/1.1 403"));
 		response = send(port, "/d2");
+		// undertow doesn't send redirect. we'll get 403 immediately
+		assertTrue(response.contains("HTTP/1.1 403"));
+
+		server.stop();
+	}
+
+	@Test
+	@Ignore("for now")
+	public void resourceServletWithWelcomePages() throws Exception {
+		PathHandler path = Handlers.path();
+		Undertow server = Undertow.builder()
+				.addHttpListener(0, "0.0.0.0")
+				.setHandler(path)
+				.build();
+
+		File b1 = new File("target/b1");
+		FileUtils.deleteDirectory(b1);
+		b1.mkdirs();
+		new File(b1, "sub").mkdirs();
+		try (FileWriter fw1 = new FileWriter(new File(b1, "hello.txt"))) {
+			IOUtils.write("'hello.txt'", fw1);
+		}
+		try (FileWriter fw1 = new FileWriter(new File(b1, "sub/hello.txt"))) {
+			IOUtils.write("'sub/hello.txt'", fw1);
+		}
+		try (FileWriter fw1 = new FileWriter(new File(b1, "index.txt"))) {
+			IOUtils.write("'index.txt'", fw1);
+		}
+		try (FileWriter fw1 = new FileWriter(new File(b1, "sub/index.txt"))) {
+			IOUtils.write("'sub/index.txt'", fw1);
+		}
+
+		DirectBufferCache cache1 = new DirectBufferCache(1024, 64, 1024 * 1024);
+		UndertowResourceServlet servlet1Instance = new UndertowResourceServlet(new File("target/b1"), null);
+		CachingResourceManager manager1 = new CachingResourceManager(1024, 1024 * 1024, cache1,
+				servlet1Instance, 3_600_000/*ms*/);
+		servlet1Instance.setCachingResourceManager(manager1);
+
+		ServletInfo servlet1 = Servlets.servlet("default1", servlet1Instance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servlet1Instance));
+		servlet1.addInitParam("directory-listing", "false");
+		servlet1.addInitParam("resolve-against-context-root", "false");
+
+		servlet1.addMapping("/d1/*");
+
+		DeploymentInfo deploymentInfo = Servlets.deployment()
+				.setClassLoader(this.getClass().getClassLoader())
+				.setContextPath("/")
+				.setDisplayName("Default Application")
+				.setDeploymentName("")
+				.setUrlEncoding("UTF-8")
+				.addWelcomePage("index.txt")
+				.addServlets(servlet1);
+
+		ServletContainer container = Servlets.newContainer();
+		DeploymentManager dm = container.addDeployment(deploymentInfo);
+		dm.deploy();
+		HttpHandler handler = dm.start();
+
+		path.addPrefixPath("/", handler);
+
+		server.start();
+
+		int port = ((InetSocketAddress) server.getListenerInfo().get(0).getAddress()).getPort();
+
+		String response = send(port, "/hello.txt");
 		assertTrue(response.contains("HTTP/1.1 404"));
+
+		response = send(port, "/d1/hello.txt");
+		assertThat(response, endsWith("'hello.txt'"));
+		response = send(port, "/d1/sub/hello.txt");
+		assertThat(response, endsWith("'sub/hello.txt'"));
+
+		response = send(port, "/d1/../hello.txt");
+		// because Undertow canonicalizes the path without returning "bad request"
+		assertThat(response, endsWith("'hello.txt'"));
+
+		response = send(port, "/d1/");
+		assertThat(response, endsWith("'index.txt'"));
+		response = send(port, "/d1/sub/");
+		assertThat(response, endsWith("'sub/index.txt'"));
+		response = send(port, "/d1");
+		assertThat(response, startsWith("HTTP/1.1 302 Found"));
+		response = send(port, "/d1/sub");
+		assertThat(response, startsWith("HTTP/1.1 302 Found"));
+
+		server.stop();
+	}
+
+	@Test
+	public void standardWelcomePages() throws Exception {
+		PathHandler path = Handlers.path();
+		Undertow server = Undertow.builder()
+				.addHttpListener(0, "0.0.0.0")
+				.setHandler(path)
+				.build();
+
+		File b1 = new File("target/b1");
+		FileUtils.deleteDirectory(b1);
+		b1.mkdirs();
+		new File(b1, "sub").mkdirs();
+		try (FileWriter fw1 = new FileWriter(new File(b1, "sub/index.x"))) {
+			IOUtils.write("'sub/index'", fw1);
+		}
+
+		DefaultServlet servletInstance = new DefaultServlet();
+		ServletInfo servlet1 = Servlets.servlet("default", servletInstance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servletInstance));
+		servlet1.addInitParam("directory-listing", "false");
+		servlet1.addInitParam("resolve-against-context-root", "false");
+		servlet1.addMapping("/");
+
+		Servlet indexxInstance = new HttpServlet() {
+			@Override
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				resp.getWriter().print("'indexx'");
+			}
+		};
+		ServletInfo servlet2 = Servlets.servlet("indexx", indexxInstance.getClass(), new ImmediateInstanceFactory<Servlet>(indexxInstance));
+		servlet2.addMapping("/indexx/*");
+
+		DeploymentInfo deploymentInfo = Servlets.deployment()
+				.setClassLoader(this.getClass().getClassLoader())
+				.setContextPath("/")
+				.setDisplayName("Default Application")
+				.setDeploymentName("")
+				.setUrlEncoding("UTF-8")
+				.addWelcomePages("index.x", "indexx")
+				.setResourceManager(FileResourceManager.builder().setBase(b1.toPath()).build())
+				// seems like Undertow doesn't need default servlet to handle welcome files
+				.addServlets(/*servlet1, */servlet2);
+
+		ServletContainer container = Servlets.newContainer();
+		DeploymentManager dm = container.addDeployment(deploymentInfo);
+		dm.deploy();
+		HttpHandler handler = dm.start();
+
+		path.addPrefixPath("/", handler);
+
+		server.start();
+
+		int port = ((InetSocketAddress) server.getListenerInfo().get(0).getAddress()).getPort();
+
+		String response = send(port, "/");
+		assertThat(response, endsWith("'indexx'"));
+		response = send(port, "/sub/");
+		assertThat(response, endsWith("'sub/index'"));
+		response = send(port, "/sub");
+		assertThat(response, startsWith("HTTP/1.1 302"));
 
 		server.stop();
 	}

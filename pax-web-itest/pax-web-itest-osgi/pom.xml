@@ -61,7 +61,7 @@
 						<!-- to configure pax-exam with pax.exam.system=default which gives us more control over installed bundles -->
 						<pax.exam.configuration>file:./src/test/resources/controlled-exam.properties</pax.exam.configuration>
 					</systemPropertyVariables>
-					<redirectTestOutputToFile>true</redirectTestOutputToFile>
+					<redirectTestOutputToFile>false</redirectTestOutputToFile>
 					<runOrder>alphabetical</runOrder>
 					<!--
 						be careful to not load pax-logging-log4j1 and pax-logging-api through system class loader.

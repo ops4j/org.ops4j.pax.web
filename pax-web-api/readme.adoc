@@ -283,4 +283,4 @@ With `HttpService.registerServlet(..., HttpContext)`, the _context_ is always pa
 
 Extended `HttpContext` (in Pax Web `org.ops4j.pax.web.service.WebContainerContext`) with added identity and kind of _shared_ flag could potentially be shared between bundles (bundle-scoped `HttpService` services), but in theory two invocations of `HttpService.registerServlet(..., WebContainerContext)` could pass a context with same name, but different implementation of methods like `handleSecurity()`.
 
-To this end, special `ReferencedHttpContext` interface is provided. When using it in `HttpService.registerServlet()`, it is assumed that matching context was already created before.
+(this has changed!) To this end, special `ReferencedHttpContext` interface is provided. When using it in `HttpService.registerServlet()`, it is assumed that matching context was already created before.

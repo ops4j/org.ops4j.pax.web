@@ -18,6 +18,8 @@ package org.ops4j.pax.web.service.undertow.internal.web;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Enumeration;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -29,6 +31,8 @@ import io.undertow.server.handlers.resource.Resource;
 import io.undertow.server.handlers.resource.ResourceChangeListener;
 import io.undertow.server.handlers.resource.ResourceManager;
 import io.undertow.servlet.handlers.DefaultServlet;
+import io.undertow.servlet.handlers.ServletRequestContext;
+import io.undertow.servlet.spec.HttpServletRequestImpl;
 
 /**
  * <p>Extension of {@link DefaultServlet}, so we can use many of such servlets to serve resources from different bases
@@ -119,11 +123,29 @@ public class UndertowResourceServlet extends DefaultServlet implements ResourceM
 
 	@Override
 	public Resource getResource(String path) throws IOException {
-		Resource resource = resourceManager.getResource(path);
-		if (resource != null && resource.isDirectory()) {
-			// Just because we don't do it. Ever. Please use welcome files if needed.
-			return null;
+		HttpServletRequestImpl originalRequest = requireCurrentServletRequestContext().getOriginalRequest();
+		String pathInfo = originalRequest.getPathInfo();
+		if (pathInfo == null) {
+			// fix private io.undertow.servlet.handlers.DefaultServlet.getPath(), which returns servletPath
+			// when pathInfo is null - we never want the servletPath when accessing resources - we only
+			// need pathInfo.
+			// When resource servlet is mapped to /p, incoming request /p/ is handled correctly - "" resource is
+			// passed to this getResource(), but when the request is /p, "p" is passed here
+			String servletPath = originalRequest.getServletPath();
+			if (servletPath != null && servletPath.startsWith("/")) {
+				servletPath = servletPath.substring(1);
+			}
+			if (path.equals(servletPath)) {
+				// path was set to servletPath without leading slash - we need actual path info - path under
+				// the servlet path
+				path = "";
+			}
 		}
+		Resource resource = resourceManager.getResource(path);
+//		if (resource != null && resource.isDirectory()) {
+//			// Just because we don't do it. Ever. Please use welcome files if needed.
+//			return null;
+//		}
 		return resource;
 	}
 
@@ -145,6 +167,14 @@ public class UndertowResourceServlet extends DefaultServlet implements ResourceM
 	@Override
 	public void close() throws IOException {
 		resourceManager.close();
+	}
+
+	static ServletRequestContext requireCurrentServletRequestContext() {
+		if (System.getSecurityManager() == null) {
+			return ServletRequestContext.requireCurrent();
+		} else {
+			return AccessController.doPrivileged((PrivilegedAction<ServletRequestContext>) ServletRequestContext::requireCurrent);
+		}
 	}
 
 }
