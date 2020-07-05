@@ -33,6 +33,8 @@ import io.undertow.server.handlers.resource.ResourceManager;
 import io.undertow.servlet.handlers.DefaultServlet;
 import io.undertow.servlet.handlers.ServletRequestContext;
 import io.undertow.servlet.spec.HttpServletRequestImpl;
+import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
+import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 
 /**
  * <p>Extension of {@link DefaultServlet}, so we can use many of such servlets to serve resources from different bases
@@ -58,6 +60,11 @@ public class UndertowResourceServlet extends DefaultServlet implements ResourceM
 	/** The real {@link ResourceManager} configured in {@link javax.servlet.Servlet#init(ServletConfig)} */
 	private ResourceManager resourceManager;
 
+	private String[] welcomeFiles;
+
+	private boolean redirectWelcome = false;
+	private boolean pathInfoOnly = true;
+
 	public UndertowResourceServlet(File baseDirectory, String chroot) {
 		this.baseDirectory = baseDirectory;
 		this.chroot = chroot;
@@ -65,6 +72,10 @@ public class UndertowResourceServlet extends DefaultServlet implements ResourceM
 
 	public void setCachingResourceManager(CachingResourceManager cachingResourceManager) {
 		this.cachingResourceManager = cachingResourceManager;
+	}
+
+	public void setWelcomeFiles(String[] welcomeFiles) {
+		this.welcomeFiles = welcomeFiles;
 	}
 
 	@Override
@@ -106,6 +117,21 @@ public class UndertowResourceServlet extends DefaultServlet implements ResourceM
 				return config.getInitParameterNames();
 			}
 		});
+
+		redirectWelcome = "true".equalsIgnoreCase(getInitParameter("redirectWelcome"));
+		pathInfoOnly = !"false".equalsIgnoreCase(getInitParameter("pathInfoOnly"));
+
+		// TODO: Jetty needs the same way of welcome files configuration
+		ServletContext osgiScopedServletContext = config.getServletContext();
+		if (welcomeFiles == null) {
+			if (osgiScopedServletContext instanceof OsgiScopedServletContext) {
+				welcomeFiles = ((OsgiScopedServletContext) osgiScopedServletContext).getWelcomeFiles();
+			} else if (osgiScopedServletContext instanceof OsgiServletContext) {
+				welcomeFiles = ((OsgiServletContext) osgiScopedServletContext).getWelcomeFiles();
+			} else {
+				welcomeFiles = new String[0];
+			}
+		}
 
 		// not we can configure our pieces needed for io.undertow.server.handlers.resource.ResourceManager
 		if (baseDirectory != null) {

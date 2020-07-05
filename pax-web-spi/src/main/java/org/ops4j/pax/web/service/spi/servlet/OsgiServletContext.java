@@ -69,6 +69,9 @@ public class OsgiServletContext implements ServletContext {
 
 	private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>();
 
+	/** Welcome files are kept at this level - to be accessed by resource servlets, uniquely for each OSGi context */
+	private String[] welcomeFiles;
+
 	/**
 	 * Constructor called when {@link OsgiContextModel} is passed to given
 	 * {@link org.ops4j.pax.web.service.spi.ServerController}. We still can't grab an instance of
@@ -106,6 +109,14 @@ public class OsgiServletContext implements ServletContext {
 
 	public ServletContext getContainerServletContext() {
 		return containerServletContext;
+	}
+
+	public String[] getWelcomeFiles() {
+		return welcomeFiles;
+	}
+
+	public void setWelcomeFiles(String[] welcomeFiles) {
+		this.welcomeFiles = welcomeFiles;
 	}
 
 // --- methods that throw UnsupportedOperationException

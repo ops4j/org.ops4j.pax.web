@@ -665,6 +665,8 @@ class JettyServerWrapper implements BatchVisitor {
 			if (osgiServletContexts.containsKey(osgiModel)) {
 				throw new IllegalStateException(osgiModel + " is already registered");
 			}
+
+			// TODO: OsgiServletContext should be holding context-scoped welcome files
 			osgiServletContexts.put(osgiModel, new OsgiServletContext(sch.getServletContext(), osgiModel, servletModel));
 
 			// a physical context just got a new OSGi context
