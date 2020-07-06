@@ -62,12 +62,12 @@
 						<Bundle-Activator>${bundle.namespace}.internal.Activator</Bundle-Activator>
 						<Import-Package>
 							org.ops4j.pax.web.jsp; version="${pax-web.osgi.version}"; resolution:=optional,
-							org.ops4j.pax.web.service; version="${pax-web.osgi.version}"; resolution:=required,
-							org.ops4j.pax.web.service.whiteboard; version="${pax-web.osgi.version}"; resolution:=required,
-							org.ops4j.pax.web.utils; version="${pax-web.osgi.version}"; resolution:=required,
-							org.ops4j.pax.web.service.spi; version="${pax-web.osgi.version}"; resolution:=required,
-							org.ops4j.pax.web.service.spi.model; version="${pax-web.osgi.version}"; resolution:=required,
-							org.ops4j.pax.web.service.spi.util; version="${pax-web.osgi.version}"; resolution:=required,
+							org.ops4j.pax.web.service; version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.whiteboard; version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.utils; version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi; version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.model; version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.util; version="${pax-web.osgi.version}",
 							javax.servlet; version="[2.3.0,4.0.0)",
 							javax.servlet.http; version="[2.3.0,4.0.0)",
 							javax.xml.parsers,
@@ -126,55 +126,46 @@
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-api</artifactId>
 			<scope>provided</scope>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-spi</artifactId>
 			<scope>provided</scope>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.base</groupId>
 			<artifactId>ops4j-base-lang</artifactId>
 			<scope>compile</scope>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.base</groupId>
 			<artifactId>ops4j-base-util-property</artifactId>
 			<scope>compile</scope>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.swissbox</groupId>
 			<artifactId>pax-swissbox-core</artifactId>
 			<scope>compile</scope>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.swissbox</groupId>
 			<artifactId>pax-swissbox-optional-jcl</artifactId>
 			<scope>compile</scope>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.swissbox</groupId>
 			<artifactId>pax-swissbox-property</artifactId>
 			<scope>compile</scope>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.cmpn</artifactId>
 			<scope>provided</scope>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.base</groupId>
 			<artifactId>ops4j-base-util-xml</artifactId>
 			<scope>compile</scope>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- Provided dependencies (not transitive) -->
