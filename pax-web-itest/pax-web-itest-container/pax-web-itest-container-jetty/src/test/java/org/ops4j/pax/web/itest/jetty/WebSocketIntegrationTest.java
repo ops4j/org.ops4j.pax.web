@@ -48,6 +48,12 @@ public class WebSocketIntegrationTest extends AbstractWebSocketIntegrationTest {
 	}
 
 	protected WebSocketContainer getWebSocketContainer() {
+		// Wait for the websocket client container to become available
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// ignore
+		}
 		ClassLoader orig = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(JettyClientContainerProvider.class.getClassLoader());
