@@ -86,11 +86,14 @@ public class OsgiResourceManager implements ResourceManager {
 		if (resource.getProtocol().equals("file")) {
 			try {
 				Path file = Paths.get(resource.toURI());
-				if (file.toFile().isFile() || file.toFile().isDirectory()) {
-					// we don't want directories, we want 404 instead
+				if (file.toFile().isFile()) {
+					res = new PathResource(file, pathResourceManager, resource.getPath(), fileETagFunction.generate(file));
+				} else if (file.toFile().exists()) {
+					// could be a directory
+					res = new PathResource(file, pathResourceManager, resource.getPath(), null);
+				} else {
 					return null;
 				}
-				res = new PathResource(file, pathResourceManager, resource.getPath(), fileETagFunction.generate(file));
 			} catch (URISyntaxException e) {
 				LOG.warn(e.getMessage(), e);
 				return null;

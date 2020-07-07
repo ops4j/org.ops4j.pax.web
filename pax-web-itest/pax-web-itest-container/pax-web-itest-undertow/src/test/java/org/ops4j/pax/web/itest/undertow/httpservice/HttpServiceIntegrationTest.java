@@ -149,40 +149,40 @@ public class HttpServiceIntegrationTest extends AbstractHttpServiceIntegrationTe
 		// directory access
 
 		HttpTestClientFactory.createDefaultTestClient()
-				.withReturnCode(HttpServletResponse.SC_NOT_FOUND)
+				.withReturnCode(HttpServletResponse.SC_FORBIDDEN)
 				.doGETandExecuteTest("http://127.0.0.1:8181");
 		HttpTestClientFactory.createDefaultTestClient()
-				.withReturnCode(HttpServletResponse.SC_NOT_FOUND)
+				.withReturnCode(HttpServletResponse.SC_FORBIDDEN)
 				.doGETandExecuteTest("http://127.0.0.1:8181/");
 		HttpTestClientFactory.createDefaultTestClient()
-				.withReturnCode(HttpServletResponse.SC_NOT_FOUND)
+				.withReturnCode(HttpServletResponse.SC_FORBIDDEN)
 				.doGETandExecuteTest("http://127.0.0.1:8181/r1");
 		HttpTestClientFactory.createDefaultTestClient()
-				.withReturnCode(HttpServletResponse.SC_NOT_FOUND)
+				.withReturnCode(HttpServletResponse.SC_FORBIDDEN)
 				.doGETandExecuteTest("http://127.0.0.1:8181/r1/");
 		HttpTestClientFactory.createDefaultTestClient()
-				.withReturnCode(HttpServletResponse.SC_NOT_FOUND)
+				.withReturnCode(HttpServletResponse.SC_FORBIDDEN)
 				.doGETandExecuteTest("http://127.0.0.1:8181/r2");
 		HttpTestClientFactory.createDefaultTestClient()
-				.withReturnCode(HttpServletResponse.SC_NOT_FOUND)
+				.withReturnCode(HttpServletResponse.SC_FORBIDDEN)
 				.doGETandExecuteTest("http://127.0.0.1:8181/r2/");
 		HttpTestClientFactory.createDefaultTestClient()
-				.withReturnCode(HttpServletResponse.SC_NOT_FOUND)
+				.withReturnCode(HttpServletResponse.SC_FORBIDDEN)
 				.doGETandExecuteTest("http://127.0.0.1:8181/r3");
 		HttpTestClientFactory.createDefaultTestClient()
-				.withReturnCode(HttpServletResponse.SC_NOT_FOUND)
+				.withReturnCode(HttpServletResponse.SC_FORBIDDEN)
 				.doGETandExecuteTest("http://127.0.0.1:8181/r3/");
 		HttpTestClientFactory.createDefaultTestClient()
-				.withReturnCode(HttpServletResponse.SC_NOT_FOUND)
+				.withReturnCode(HttpServletResponse.SC_FORBIDDEN)
 				.doGETandExecuteTest("http://127.0.0.1:8181/r4");
 		HttpTestClientFactory.createDefaultTestClient()
-				.withReturnCode(HttpServletResponse.SC_NOT_FOUND)
+				.withReturnCode(HttpServletResponse.SC_FORBIDDEN)
 				.doGETandExecuteTest("http://127.0.0.1:8181/r4/");
 		HttpTestClientFactory.createDefaultTestClient()
-				.withReturnCode(HttpServletResponse.SC_NOT_FOUND)
+				.withReturnCode(HttpServletResponse.SC_FORBIDDEN)
 				.doGETandExecuteTest("http://127.0.0.1:8181/r5");
 		HttpTestClientFactory.createDefaultTestClient()
-				.withReturnCode(HttpServletResponse.SC_NOT_FOUND)
+				.withReturnCode(HttpServletResponse.SC_FORBIDDEN)
 				.doGETandExecuteTest("http://127.0.0.1:8181/r5/");
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(HttpServletResponse.SC_NOT_FOUND)

@@ -165,18 +165,8 @@ public class UnifiedUndertowTest {
 		response = send(port, "/d3");
 		assertTrue(response.contains("HTTP/1.1 404"));
 
-		// these 2 requests are different in 3 containers:
-		// - Jetty:
-		//    - /d2 - redirect to /d2/
-		//    - /d2/ - 403 for directory access without welcome file
-		// - Tomcat:
-		//    - /d2 - redirect to /d2/ thanks to TomcatResourceServlet.getRelativePath()
-		//    - /d2/ - 403 for directory access without welcome file (original DefaultServlet returns 404)
-		// - Undertow:
-		//    - /d2 - immediate 403 for directory access without welcome file
-		//    - /d2/ - immediate 403 for directory access without welcome file
 		response = send(port, "/d2");
-		assertTrue(response.contains("HTTP/1.1 403"));
+		assertTrue(response.contains("HTTP/1.1 302"));
 		response = send(port, "/d2/");
 		assertTrue(response.contains("HTTP/1.1 403"));
 
@@ -247,6 +237,78 @@ public class UnifiedUndertowTest {
 	}
 
 	@Test
+	public void standardWelcomePagesWithDifferentContext() throws Exception {
+		PathHandler path = Handlers.path();
+		Undertow server = Undertow.builder()
+				.addHttpListener(0, "0.0.0.0")
+				.setHandler(path)
+				.build();
+
+		File b1 = new File("target/b1");
+		FileUtils.deleteDirectory(b1);
+		b1.mkdirs();
+		new File(b1, "sub").mkdirs();
+		try (FileWriter fw1 = new FileWriter(new File(b1, "sub/index.x"))) {
+			IOUtils.write("'sub/index'", fw1);
+		}
+
+		DefaultServlet servletInstance = new DefaultServlet();
+		ServletInfo servlet1 = Servlets.servlet("default", servletInstance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servletInstance));
+		servlet1.addInitParam("directory-listing", "false");
+		servlet1.addInitParam("resolve-against-context-root", "false");
+		servlet1.addMapping("/");
+
+		Servlet indexxInstance = new HttpServlet() {
+			@Override
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				resp.getWriter().print("'indexx'");
+			}
+		};
+		ServletInfo servlet2 = Servlets.servlet("indexx", indexxInstance.getClass(), new ImmediateInstanceFactory<Servlet>(indexxInstance));
+		servlet2.addMapping("/indexx/*");
+
+		DeploymentInfo deploymentInfo = Servlets.deployment()
+				.setClassLoader(this.getClass().getClassLoader())
+				.setContextPath("/c")
+				.setDisplayName("Default Application")
+				.setDeploymentName("")
+				.setUrlEncoding("UTF-8")
+				.addWelcomePages("index.x", "indexx")
+				.setResourceManager(FileResourceManager.builder().setBase(b1.toPath()).build())
+				// seems like Undertow doesn't need default servlet to handle welcome files
+				.addServlets(/*servlet1, */servlet2);
+
+		ServletContainer container = Servlets.newContainer();
+		DeploymentManager dm = container.addDeployment(deploymentInfo);
+		dm.deploy();
+		HttpHandler handler = dm.start();
+
+		path.addPrefixPath("/c", handler);
+
+		server.start();
+
+		int port = ((InetSocketAddress) server.getListenerInfo().get(0).getAddress()).getPort();
+
+		String response = send(port, "/");
+		assertThat(response, startsWith("HTTP/1.1 404"));
+		response = send(port, "/sub/");
+		assertThat(response, startsWith("HTTP/1.1 404"));
+		response = send(port, "/sub");
+		assertThat(response, startsWith("HTTP/1.1 404"));
+
+		response = send(port, "/c");
+		assertThat(response, startsWith("HTTP/1.1 302"));
+		response = send(port, "/c/");
+		assertThat(response, endsWith("'indexx'"));
+		response = send(port, "/c/sub/");
+		assertThat(response, endsWith("'sub/index'"));
+		response = send(port, "/c/sub");
+		assertThat(response, startsWith("HTTP/1.1 302"));
+
+		server.stop();
+	}
+
+	@Test
 	public void resourceServletWithWelcomePages() throws Exception {
 		PathHandler path = Handlers.path();
 		Undertow server = Undertow.builder()
@@ -261,6 +323,9 @@ public class UnifiedUndertowTest {
 		try (FileWriter fw1 = new FileWriter(new File(b1, "hello.txt"))) {
 			IOUtils.write("'hello.txt'", fw1);
 		}
+		try (FileWriter fw1 = new FileWriter(new File(b1, "index.z"))) {
+			IOUtils.write("'index-z-b1'", fw1);
+		}
 		try (FileWriter fw1 = new FileWriter(new File(b1, "sub/hello.txt"))) {
 			IOUtils.write("'sub/hello.txt'", fw1);
 		}
@@ -273,6 +338,7 @@ public class UnifiedUndertowTest {
 
 		DirectBufferCache cache1 = new DirectBufferCache(1024, 64, 1024 * 1024);
 		UndertowResourceServlet servlet1Instance = new UndertowResourceServlet(new File("target/b1"), null);
+		servlet1Instance.setWelcomeFiles(new String[] { "index.txt" });
 		CachingResourceManager manager1 = new CachingResourceManager(1024, 1024 * 1024, cache1,
 				servlet1Instance, 3_600_000/*ms*/);
 		servlet1Instance.setCachingResourceManager(manager1);
@@ -323,9 +389,9 @@ public class UnifiedUndertowTest {
 		response = send(port, "/d1/sub/");
 		assertThat(response, endsWith("'sub/index.txt'"));
 		response = send(port, "/d1");
-		assertThat(response, startsWith("HTTP/1.1 302 Found"));
+		assertThat(response, startsWith("HTTP/1.1 302"));
 		response = send(port, "/d1/sub");
-		assertThat(response, startsWith("HTTP/1.1 302 Found"));
+		assertThat(response, startsWith("HTTP/1.1 302"));
 
 		server.stop();
 	}
@@ -344,6 +410,9 @@ public class UnifiedUndertowTest {
 		new File(b1, "sub").mkdirs();
 		try (FileWriter fw1 = new FileWriter(new File(b1, "sub/index.x"))) {
 			IOUtils.write("'sub/index-b1'", fw1);
+		}
+		try (FileWriter fw1 = new FileWriter(new File(b1, "index.z"))) {
+			IOUtils.write("'index-z-b1'", fw1);
 		}
 		File b2 = new File("target/b2");
 		FileUtils.deleteDirectory(b2);
@@ -371,6 +440,7 @@ public class UnifiedUndertowTest {
 		servlet1.addInitParam("directory-listing", "false");
 		// for Jetty and Tomcat, "/" resource servlet needs "yes" here (i.e., include servletPath)
 		servlet1.addInitParam("resolve-against-context-root", "true");
+		servlet1.addInitParam("pathInfoOnly", "false");
 		servlet1.addMapping("/");
 
 		// the "/r" resource servlet
@@ -472,9 +542,13 @@ public class UnifiedUndertowTest {
 
 		// --- resource access through "/" servlet
 
+		// sanity check for physical resource at root of resource servlet
+		String response = send(port, "/index.z");
+		assertTrue(response.endsWith("'index-z-b1'"));
+
 		// "/" - no "/index.x" or "/index.y" physical resource, but existing mapping for *.y to indexx servlet
 		// forward is performed implicitly by Tomcat's DefaultServlet
-		String response = send(port, "/");
+		response = send(port, "/");
 		assertTrue(response.contains("req.context_path=\"\""));
 		assertTrue(response.contains("req.request_uri=\"/index.y\""));
 		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/\""));
@@ -528,7 +602,7 @@ public class UnifiedUndertowTest {
 		//    [...]
 		//    The container may send the request to the welcome resource with a forward, a redirect, or a
 		//    container specific mechanism that is indistinguishable from a direct request.
-		// Tomcat detects /sub/index.y (first welcome file) can be mapped to indexx servlet, but continues the
+		// Undertow detects /sub/index.y (first welcome file) can be mapped to indexx servlet, but continues the
 		// search for physical resource. /sub/index.x is actual physical resource, so forward is chosen, which
 		// is eventually mapped to indexx again - with index.x, not index.y
 		response = send(port, "/sub/");
@@ -566,7 +640,7 @@ public class UnifiedUndertowTest {
 		assertTrue(response.endsWith(">>><<<"));
 
 		// "/r" - no "/index.x" or "/index.y" physical resource, but existing mapping for *.y to indexx servlet
-		// forward is performed implicitly by Tomcat's DefaultServlet (even if mapped to /r/*), forward URI is
+		// forward is performed implicitly by Undertow's DefaultServlet (even if mapped to /r/*), forward URI is
 		// "/r/index.y" (first welcome), but this time, "/r/*" is a mapping with higher priority than "*.y"
 		// (with "/" servlet, "*.y" had higher priority than "/"), so "resource" servlet is called, this time
 		// with full URI (no welcome files are checked). Such resource is not found, so we have 404
@@ -635,6 +709,324 @@ public class UnifiedUndertowTest {
 		assertTrue(response.startsWith("HTTP/1.1 302"));
 		assertTrue(extractHeaders(response).get("Location").endsWith("/s/sub/index.x?what=forward&where=/s/sub/"));
 		response = send(port, "/gateway/x?what=include&where=/s/sub/");
+		assertTrue(response.contains(">>><<<"));
+
+		server.stop();
+	}
+
+	@Test
+	public void paxWebWelcomePagesWithDifferentContext() throws Exception {
+		PathHandler path = Handlers.path();
+		Undertow server = Undertow.builder()
+				.addHttpListener(0, "0.0.0.0")
+				.setHandler(path)
+				.build();
+
+		File b1 = new File("target/b1");
+		FileUtils.deleteDirectory(b1);
+		b1.mkdirs();
+		new File(b1, "sub").mkdirs();
+		try (FileWriter fw1 = new FileWriter(new File(b1, "sub/index.x"))) {
+			IOUtils.write("'sub/index-b1'", fw1);
+		}
+		try (FileWriter fw1 = new FileWriter(new File(b1, "index.z"))) {
+			IOUtils.write("'index-z-b1'", fw1);
+		}
+		File b2 = new File("target/b2");
+		FileUtils.deleteDirectory(b2);
+		b2.mkdirs();
+		new File(b2, "sub").mkdirs();
+		try (FileWriter fw2 = new FileWriter(new File(b2, "sub/index.x"))) {
+			IOUtils.write("'sub/index-b2'", fw2);
+		}
+		File b3 = new File("target/b3");
+		FileUtils.deleteDirectory(b3);
+		b3.mkdirs();
+		new File(b3, "sub").mkdirs();
+		try (FileWriter fw3 = new FileWriter(new File(b3, "sub/index.x"))) {
+			IOUtils.write("'sub/index-b3'", fw3);
+		}
+
+		// the "/" default & resource servlet
+		DirectBufferCache cache1 = new DirectBufferCache(1024, 64, 1024 * 1024);
+		UndertowResourceServlet servlet1Instance = new UndertowResourceServlet(new File("target/b1"), null);
+		servlet1Instance.setWelcomeFiles(new String[] { "index.y", "index.x" });
+		CachingResourceManager manager1 = new CachingResourceManager(1024, 1024 * 1024, cache1,
+				servlet1Instance, 3_600_000/*ms*/);
+		servlet1Instance.setCachingResourceManager(manager1);
+		ServletInfo servlet1 = Servlets.servlet("default", servlet1Instance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servlet1Instance));
+		servlet1.addInitParam("directory-listing", "false");
+		// for Jetty and Tomcat, "/" resource servlet needs "yes" here (i.e., include servletPath)
+		servlet1.addInitParam("resolve-against-context-root", "true");
+		servlet1.addInitParam("pathInfoOnly", "false");
+		servlet1.addMapping("/");
+
+		// the "/r" resource servlet
+		DirectBufferCache cache2 = new DirectBufferCache(1024, 64, 1024 * 1024);
+		UndertowResourceServlet servlet2Instance = new UndertowResourceServlet(new File("target/b2"), null);
+		servlet2Instance.setWelcomeFiles(new String[] { "index.y", "index.x" });
+		CachingResourceManager manager2 = new CachingResourceManager(1024, 1024 * 1024, cache2,
+				servlet2Instance, 3_600_000/*ms*/);
+		servlet2Instance.setCachingResourceManager(manager2);
+		ServletInfo servlet2 = Servlets.servlet("resource", servlet2Instance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servlet2Instance));
+		servlet2.addInitParam("directory-listing", "false");
+		servlet2.addInitParam("resolve-against-context-root", "false");
+		servlet2.addMapping("/r/*");
+
+		// the "/s" resource servlet - with redirected welcome files
+		DirectBufferCache cache3 = new DirectBufferCache(1024, 64, 1024 * 1024);
+		UndertowResourceServlet servlet3Instance = new UndertowResourceServlet(new File("target/b3"), null);
+		servlet3Instance.setWelcomeFiles(new String[] { "index.y", "index.x" });
+		CachingResourceManager manager3 = new CachingResourceManager(1024, 1024 * 1024, cache3,
+				servlet3Instance, 3_600_000/*ms*/);
+		servlet3Instance.setCachingResourceManager(manager3);
+		ServletInfo servlet3 = Servlets.servlet("resource2", servlet3Instance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servlet3Instance));
+		servlet3.addInitParam("directory-listing", "false");
+		servlet3.addInitParam("resolve-against-context-root", "false");
+		servlet3.addInitParam("redirectWelcome", "true");
+		servlet3.addMapping("/s/*");
+
+		// the "/indexx/*" (and *.y and *.x) servlet which should be available through welcome files
+		HttpServlet indexxServlet = new HttpServlet() {
+			@Override
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				resp.getWriter().println("'indexx servlet'");
+				resp.getWriter().println("req.request_uri=\"" + req.getRequestURI() + "\"");
+				resp.getWriter().println("req.context_path=\"" + req.getContextPath() + "\"");
+				resp.getWriter().println("req.servlet_path=\"" + req.getServletPath() + "\"");
+				resp.getWriter().println("req.path_info=\"" + req.getPathInfo() + "\"");
+				resp.getWriter().println("req.query_string=\"" + req.getQueryString() + "\"");
+				resp.getWriter().println("javax.servlet.forward.mapping=\"" + req.getAttribute("javax.servlet.forward.mapping") + "\"");
+				resp.getWriter().println("javax.servlet.forward.request_uri=\"" + req.getAttribute("javax.servlet.forward.request_uri") + "\"");
+				resp.getWriter().println("javax.servlet.forward.context_path=\"" + req.getAttribute("javax.servlet.forward.context_path") + "\"");
+				resp.getWriter().println("javax.servlet.forward.servlet_path=\"" + req.getAttribute("javax.servlet.forward.servlet_path") + "\"");
+				resp.getWriter().println("javax.servlet.forward.path_info=\"" + req.getAttribute("javax.servlet.forward.path_info") + "\"");
+				resp.getWriter().println("javax.servlet.forward.query_string=\"" + req.getAttribute("javax.servlet.forward.query_string") + "\"");
+				resp.getWriter().println("javax.servlet.include.mapping=\"" + req.getAttribute("javax.servlet.include.mapping") + "\"");
+				resp.getWriter().println("javax.servlet.include.request_uri=\"" + req.getAttribute("javax.servlet.include.request_uri") + "\"");
+				resp.getWriter().println("javax.servlet.include.context_path=\"" + req.getAttribute("javax.servlet.include.context_path") + "\"");
+				resp.getWriter().println("javax.servlet.include.servlet_path=\"" + req.getAttribute("javax.servlet.include.servlet_path") + "\"");
+				resp.getWriter().println("javax.servlet.include.path_info=\"" + req.getAttribute("javax.servlet.include.path_info") + "\"");
+				resp.getWriter().println("javax.servlet.include.query_string=\"" + req.getAttribute("javax.servlet.include.query_string") + "\"");
+			}
+		};
+		ServletInfo indexxServletInfo = Servlets.servlet("indexx", indexxServlet.getClass(), new ImmediateInstanceFactory<HttpServlet>(indexxServlet));
+		indexxServletInfo.addMappings("*.x", "*.y");
+
+		// the "/gateway/*" servlet through which we'll forward to/include other servlets
+		HttpServlet gatewayServlet = new HttpServlet() {
+			@Override
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				String what = req.getParameter("what");
+				String where = req.getParameter("where");
+				switch (what) {
+					case "redirect":
+						resp.sendRedirect(where);
+						return;
+					case "forward":
+						// we can't send anything when forwarding
+						req.getRequestDispatcher(where).forward(req, resp);
+						return;
+					case "include":
+						resp.getWriter().print(">>>");
+						req.getRequestDispatcher(where).include(req, resp);
+						resp.getWriter().print("<<<");
+						return;
+					default:
+				}
+			}
+		};
+		ServletInfo gatewayServletInfo = Servlets.servlet("gateway", gatewayServlet.getClass(), new ImmediateInstanceFactory<HttpServlet>(gatewayServlet));
+		gatewayServletInfo.addMapping("/gateway/*");
+
+		DeploymentInfo deploymentInfo = Servlets.deployment()
+				.setClassLoader(this.getClass().getClassLoader())
+				.setContextPath("/c")
+				.setDisplayName("Default Application")
+				.setDeploymentName("")
+				.setUrlEncoding("UTF-8")
+				.addServlets(servlet1, servlet2, servlet3, indexxServletInfo, gatewayServletInfo);
+
+		ServletContainer container = Servlets.newContainer();
+		DeploymentManager dm = container.addDeployment(deploymentInfo);
+		dm.deploy();
+		HttpHandler handler = dm.start();
+
+		path.addPrefixPath("/c", handler);
+
+		server.start();
+
+		int port = ((InetSocketAddress) server.getListenerInfo().get(0).getAddress()).getPort();
+
+		// --- resource access through "/" servlet
+
+		// sanity check for physical resource at root of resource servlet
+		String response = send(port, "/c/index.z");
+		assertTrue(response.endsWith("'index-z-b1'"));
+
+		// "/" - no "/index.x" or "/index.y" physical resource, but existing mapping for *.y to indexx servlet
+		// forward is performed implicitly by Tomcat's DefaultServlet
+		response = send(port, "/c/");
+		assertTrue(response.contains("req.context_path=\"/c\""));
+		assertTrue(response.contains("req.request_uri=\"/c/index.y\""));
+		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/c/\""));
+
+		// Forward vs. Include:
+		// in forward method:
+		//  - original servletPath, pathInfo, requestURI are available ONLY through javax.servlet.forward.* attributes
+		//  - values used to obtain the dispatcher are available through request object
+		// in include method:
+		//  - original servletPath, pathInfo, requestURI are available through request object
+		//  - values used to obtain the dispatcher are available through javax.servlet.include.* attributes
+
+		// "/" (but through gateway) - similar forward, but performed explicitly by gateway servlet
+		// 9.4 The Forward Method:
+		//     The path elements of the request object exposed to the target servlet must reflect the
+		//     path used to obtain the RequestDispatcher.
+		// so "gateway" forwards to "/", "/" is handled by "default" which forwards to "/index.y"
+		response = send(port, "/c/gateway/x?what=forward&where=/");
+		assertTrue(response.contains("req.context_path=\"/c\""));
+		assertTrue(response.contains("req.request_uri=\"/c/index.y\""));
+		assertTrue(response.contains("javax.servlet.forward.context_path=\"/c\""));
+		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/c/gateway/x\""));
+		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/gateway\""));
+		assertTrue(response.contains("javax.servlet.forward.path_info=\"/x\""));
+
+		// "/", but included by gateway servlet
+		// "gateway" includes "/" which includes "/index.y"
+		response = send(port, "/c/gateway/x?what=include&where=/");
+		assertTrue(response.contains("req.context_path=\"/c\""));
+		assertTrue(response.contains("req.request_uri=\"/c/gateway/x\""));
+		assertTrue(response.contains("javax.servlet.include.context_path=\"/c\""));
+		assertTrue(response.contains("javax.servlet.include.request_uri=\"/c/index.y\""));
+		assertTrue(response.contains("javax.servlet.include.servlet_path=\"/index.y\""));
+		assertTrue(response.contains("javax.servlet.include.path_info=\"null\""));
+
+		response = send(port, "/c/sub");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		response = send(port, "/c/gateway/x?what=forward&where=/sub");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		// included servlet (here - "default") can't set Location header
+		response = send(port, "/c/gateway/x?what=include&where=/sub");
+		assertTrue(response.contains(">>><<<"));
+
+		// "/sub/" + "index.x" welcome files is forwarded and mapped to indexx servlet
+		// According to 10.10 "Welcome Files":
+		//    The Web server must append each welcome file in the order specified in the deployment descriptor to the
+		//    partial request and check whether a static resource in the WAR is mapped to that
+		//    request URI. If no match is found, the Web server MUST again append each
+		//    welcome file in the order specified in the deployment descriptor to the partial
+		//    request and check if a servlet is mapped to that request URI.
+		//    [...]
+		//    The container may send the request to the welcome resource with a forward, a redirect, or a
+		//    container specific mechanism that is indistinguishable from a direct request.
+		// Undertow detects /sub/index.y (first welcome file) can be mapped to indexx servlet, but continues the
+		// search for physical resource. /sub/index.x is actual physical resource, so forward is chosen, which
+		// is eventually mapped to indexx again - with index.x, not index.y
+		response = send(port, "/c/sub/");
+		assertTrue(response.contains("req.context_path=\"/c\""));
+		assertTrue(response.contains("req.request_uri=\"/c/sub/index.x\""));
+		assertTrue(response.contains("javax.servlet.forward.context_path=\"/c\""));
+		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/c/sub/\""));
+		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/sub/\"")); // TOCHECK: why not "/"?
+		assertTrue(response.contains("javax.servlet.forward.path_info=\"null\""));
+
+		response = send(port, "/c/gateway/x?what=forward&where=/sub/");
+		assertTrue(response.contains("req.context_path=\"/c\""));
+		assertTrue(response.contains("req.request_uri=\"/c/sub/index.x\""));
+		assertTrue(response.contains("javax.servlet.forward.context_path=\"/c\""));
+		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/c/gateway/x\""));
+		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/gateway\""));
+		assertTrue(response.contains("javax.servlet.forward.path_info=\"/x\""));
+
+		response = send(port, "/c/gateway/x?what=include&where=/sub/");
+		assertTrue(response.contains("req.context_path=\"/c\""));
+		assertTrue(response.contains("req.request_uri=\"/c/gateway/x\""));
+		assertTrue(response.contains("javax.servlet.include.context_path=\"/c\""));
+		assertTrue(response.contains("javax.servlet.include.request_uri=\"/c/sub/index.x\""));
+		assertTrue(response.contains("javax.servlet.include.servlet_path=\"/sub/index.x\""));
+		assertTrue(response.contains("javax.servlet.include.path_info=\"null\""));
+
+		// --- resource access through "/r" servlet
+
+		response = send(port, "/c/r");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		response = send(port, "/c/gateway/x?what=forward&where=/r");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		// included servlet/resource can't be redirected
+		response = send(port, "/c/gateway/x?what=include&where=/r");
+		assertTrue(response.endsWith(">>><<<"));
+
+		// "/r" - no "/index.x" or "/index.y" physical resource, but existing mapping for *.y to indexx servlet
+		// forward is performed implicitly by Undertow's DefaultServlet (even if mapped to /r/*), forward URI is
+		// "/r/index.y" (first welcome), but this time, "/r/*" is a mapping with higher priority than "*.y"
+		// (with "/" servlet, "*.y" had higher priority than "/"), so "resource" servlet is called, this time
+		// with full URI (no welcome files are checked). Such resource is not found, so we have 404
+		response = send(port, "/c/r/");
+		assertTrue(response.startsWith("HTTP/1.1 404"));
+
+		response = send(port, "/c/gateway/x?what=forward&where=/r/");
+		assertTrue(response.startsWith("HTTP/1.1 404"));
+		response = send(port, "/c/gateway/x?what=include&where=/r/");
+		// HTTP 500 according to 9.3 "The Include Method"
+		assertTrue(response.startsWith("HTTP/1.1 500"));
+
+		response = send(port, "/c/r/sub");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		response = send(port, "/c/gateway/x?what=forward&where=/r/sub");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		response = send(port, "/c/gateway/x?what=include&where=/r/sub");
+		assertTrue(response.contains(">>><<<"));
+
+		// this time, welcome file is /sub/index.x and even if it maps to existing servlet (*.x), physical
+		// resource exists and is returned
+		response = send(port, "/c/r/sub/");
+		assertTrue(response.endsWith("'sub/index-b2'"));
+		response = send(port, "/c/gateway/x?what=forward&where=/r/sub/");
+		assertTrue(response.endsWith("'sub/index-b2'"));
+		// https://github.com/eclipse/jetty.project/issues/5025
+//		response = send(port, "/gateway/x?what=include&where=/r/sub/");
+//		assertTrue(response.endsWith(">>>'sub/index-b2'<<<"));
+
+		// --- resource access through "/s" servlet - welcome files with redirect
+
+		response = send(port, "/c/s");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		response = send(port, "/c/gateway/x?what=forward&where=/s");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		// included servlet/resource can't be redirected
+		response = send(port, "/c/gateway/x?what=include&where=/s");
+		assertTrue(response.endsWith(">>><<<"));
+
+		response = send(port, "/c/s/");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		// redirect to first welcome page with found *.y mapping, but another mapping will be found using /s/*
+		assertTrue(extractHeaders(response).get("Location").endsWith("/c/s/index.y"));
+
+		response = send(port, "/c/gateway/x?what=forward&where=/s/");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		assertTrue(extractHeaders(response).get("Location").endsWith("/c/s/index.y?what=forward&where=/s/"));
+		response = send(port, "/c/gateway/x?what=include&where=/s/");
+		assertTrue(response.contains(">>><<<"));
+
+		response = send(port, "/c/s/sub");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		assertTrue(extractHeaders(response).get("Location").endsWith("/c/s/sub/"));
+		response = send(port, "/c/gateway/x?what=forward&where=/s/sub");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		assertTrue(extractHeaders(response).get("Location").endsWith("/c/s/sub/?what=forward&where=/s/sub"));
+		response = send(port, "/c/gateway/x?what=include&where=/s/sub");
+		assertTrue(response.contains(">>><<<"));
+
+		// this time, welcome file is /sub/index.x and even if it maps to existing servlet (*.x), physical
+		// resource exists and is returned
+		response = send(port, "/c/s/sub/");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		assertTrue(extractHeaders(response).get("Location").endsWith("/c/s/sub/index.x"));
+		response = send(port, "/c/gateway/x?what=forward&where=/s/sub/");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		assertTrue(extractHeaders(response).get("Location").endsWith("/c/s/sub/index.x?what=forward&where=/s/sub/"));
+		response = send(port, "/c/gateway/x?what=include&where=/s/sub/");
 		assertTrue(response.contains(">>><<<"));
 
 		server.stop();

@@ -600,12 +600,13 @@ class JettyServerWrapper implements BatchVisitor {
 			sch.setServletHandler(new PaxWebServletHandler(default404Servlet));
 			// setting "false" here will trigger 302 redirect when browsing to context without trailing "/"
 			sch.setAllowNullPathInfo(false);
+			// welcome files will be handled at default servlet level
+			sch.setWelcomeFiles(new String[0]);
 
 			// for future (optional) resource servlets, let's define some common context init properties
 			// which are read in org.eclipse.jetty.servlet.DefaultServlet.init()
 			sch.setInitParameter(DefaultServlet.CONTEXT_INIT + "dirAllowed", "false");
 			sch.setInitParameter(DefaultServlet.CONTEXT_INIT + "etags", "true");
-			sch.setInitParameter(DefaultServlet.CONTEXT_INIT + "pathInfoOnly", "true");
 			// needed to comply with Servlets specification
 			sch.setInitParameter(DefaultServlet.CONTEXT_INIT + "welcomeServlets", "true");
 
@@ -778,11 +779,11 @@ class JettyServerWrapper implements BatchVisitor {
 				mapping.setServletName(model.getName());
 				mapping.setPathSpecs(model.getUrlPatterns());
 
-//				if (model instanceof ResourceModel && "default".equalsIgnoreCase(model.getName())) {
-//					// this is a default resource
-//					// TODO: "default" means "declared from "org/eclipse/jetty/webapp/webdefault.xml" in jetty-webapp.jar
-//					mapping.setDefault(true);
-//				}
+				boolean isDefaultResourceServlet = model.isResourceServlet();
+				for (String pattern : model.getUrlPatterns()) {
+					isDefaultResourceServlet &= "/".equals(pattern);
+				}
+				holder.setInitParameter("pathInfoOnly", Boolean.toString(!isDefaultResourceServlet));
 
 				((PaxWebServletHandler) sch.getServletHandler()).addServletWithMapping(holder, mapping);
 			});

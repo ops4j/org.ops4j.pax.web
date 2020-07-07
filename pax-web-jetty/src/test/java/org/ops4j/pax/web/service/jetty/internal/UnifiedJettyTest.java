@@ -146,20 +146,9 @@ public class UnifiedJettyTest {
 		response = send(port, "/d3");
 		assertTrue(response.contains("HTTP/1.1 404"));
 
-		// these 2 requests are different in 3 containers:
-		// - Jetty:
-		//    - /d2 - redirect to /d2/
-		//    - /d2/ - 403 for directory access without welcome file
-		// - Tomcat:
-		//    - /d2 - redirect to /d2/ thanks to TomcatResourceServlet.getRelativePath()
-		//    - /d2/ - 403 for directory access without welcome file (original DefaultServlet returns 404)
-		// - Undertow:
-		//    - /d2 - immediate 403 for directory access without welcome file
-		//    - /d2/ - immediate 403 for directory access without welcome file
 		response = send(port, "/d2");
 		assertTrue(response.contains("HTTP/1.1 302"));
 		response = send(port, "/d2/");
-		// directory access, 404 with bundle access, 403 when the resource is a file: directory
 		assertTrue(response.contains("HTTP/1.1 403"));
 
 		server.stop();
@@ -349,9 +338,9 @@ public class UnifiedJettyTest {
 		response = send(port, "/d1/sub/");
 		assertThat(response, endsWith("'sub/index.txt'"));
 		response = send(port, "/d1");
-		assertThat(response, startsWith("HTTP/1.1 302 Found"));
+		assertThat(response, startsWith("HTTP/1.1 302"));
 		response = send(port, "/d1/sub");
-		assertThat(response, startsWith("HTTP/1.1 302 Found"));
+		assertThat(response, startsWith("HTTP/1.1 302"));
 
 		server.stop();
 		server.join();
@@ -383,6 +372,9 @@ public class UnifiedJettyTest {
 		new File(b1, "sub").mkdirs();
 		try (FileWriter fw1 = new FileWriter(new File(b1, "sub/index.x"))) {
 			IOUtils.write("'sub/index-b1'", fw1);
+		}
+		try (FileWriter fw1 = new FileWriter(new File(b1, "index.z"))) {
+			IOUtils.write("'index-z-b1'", fw1);
 		}
 		File b2 = new File("target/b2");
 		FileUtils.deleteDirectory(b2);
@@ -492,9 +484,13 @@ public class UnifiedJettyTest {
 
 		// --- resource access through "/" servlet
 
+		// sanity check for physical resource at root of resource servlet
+		String response = send(port, "/index.z");
+		assertTrue(response.endsWith("'index-z-b1'"));
+
 		// "/" - no "/index.x" or "/index.y" physical resource, but existing mapping for *.y to indexx servlet
 		// forward is performed implicitly by Jetty's DefaultServlet
-		String response = send(port, "/");
+		response = send(port, "/");
 		assertTrue(response.contains("req.context_path=\"\""));
 		assertTrue(response.contains("req.request_uri=\"/index.y\""));
 		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/\""));
@@ -535,7 +531,7 @@ public class UnifiedJettyTest {
 		assertTrue(response.startsWith("HTTP/1.1 302"));
 		response = send(port, "/gateway/x?what=forward&where=/sub");
 		assertTrue(response.startsWith("HTTP/1.1 302"));
-		// included servlet (here - "default") can't set Location header (org.eclipse.jetty.server.Response.isMutable() returns false)
+		// included servlet (here - "default") can't set Location header
 		response = send(port, "/gateway/x?what=include&where=/sub");
 		assertTrue(response.contains(">>><<<"));
 
@@ -598,7 +594,7 @@ public class UnifiedJettyTest {
 		assertTrue(response.startsWith("HTTP/1.1 404"));
 		// https://github.com/eclipse/jetty.project/issues/5025
 //		response = send(port, "/gateway/x?what=include&where=/r/");
-//		assertTrue(response.startsWith("HTTP/1.1 404"));
+//		assertTrue(response.startsWith("HTTP/1.1 500"));
 
 		response = send(port, "/r/sub");
 		assertTrue(response.startsWith("HTTP/1.1 302"));
@@ -689,6 +685,9 @@ public class UnifiedJettyTest {
 		try (FileWriter fw1 = new FileWriter(new File(b1, "sub/index.x"))) {
 			IOUtils.write("'sub/index-b1'", fw1);
 		}
+		try (FileWriter fw1 = new FileWriter(new File(b1, "index.z"))) {
+			IOUtils.write("'index-z-b1'", fw1);
+		}
 		File b2 = new File("target/b2");
 		FileUtils.deleteDirectory(b2);
 		b2.mkdirs();
@@ -797,9 +796,13 @@ public class UnifiedJettyTest {
 
 		// --- resource access through "/" servlet
 
+		// sanity check for physical resource at root of resource servlet
+		String response = send(port, "/c/index.z");
+		assertTrue(response.endsWith("'index-z-b1'"));
+
 		// "/" - no "/index.x" or "/index.y" physical resource, but existing mapping for *.y to indexx servlet
 		// forward is performed implicitly by Jetty's DefaultServlet
-		String response = send(port, "/c/");
+		response = send(port, "/c/");
 		assertTrue(response.contains("req.context_path=\"/c\""));
 		assertTrue(response.contains("req.request_uri=\"/c/index.y\""));
 		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/c/\""));

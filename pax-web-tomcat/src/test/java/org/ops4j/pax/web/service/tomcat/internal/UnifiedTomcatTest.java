@@ -181,16 +181,6 @@ public class UnifiedTomcatTest {
 		response = send(port, "/d3");
 		assertTrue(response.contains("HTTP/1.1 404"));
 
-		// these 2 requests are different in 3 containers:
-		// - Jetty:
-		//    - /d2 - redirect to /d2/
-		//    - /d2/ - 403 for directory access without welcome file
-		// - Tomcat:
-		//    - /d2 - redirect to /d2/ thanks to TomcatResourceServlet.getRelativePath()
-		//    - /d2/ - 403 for directory access without welcome file (original DefaultServlet returns 404)
-		// - Undertow:
-		//    - /d2 - immediate 403 for directory access without welcome file
-		//    - /d2/ - immediate 403 for directory access without welcome file
 		response = send(port, "/d2");
 		assertTrue(response.contains("HTTP/1.1 302"));
 		response = send(port, "/d2/");
@@ -521,6 +511,9 @@ public class UnifiedTomcatTest {
 		try (FileWriter fw1 = new FileWriter(new File(b1, "sub/index.x"))) {
 			IOUtils.write("'sub/index-b1'", fw1);
 		}
+		try (FileWriter fw1 = new FileWriter(new File(b1, "index.z"))) {
+			IOUtils.write("'index-z-b1'", fw1);
+		}
 		File b2 = new File("target/b2");
 		FileUtils.deleteDirectory(b2);
 		b2.mkdirs();
@@ -636,9 +629,13 @@ public class UnifiedTomcatTest {
 
 		// --- resource access through "/" servlet
 
+		// sanity check for physical resource at root of resource servlet
+		String response = send(port, "/index.z");
+		assertTrue(response.endsWith("'index-z-b1'"));
+
 		// "/" - no "/index.x" or "/index.y" physical resource, but existing mapping for *.y to indexx servlet
 		// forward is performed implicitly by Tomcat's DefaultServlet
-		String response = send(port, "/");
+		response = send(port, "/");
 		assertTrue(response.contains("req.context_path=\"\""));
 		assertTrue(response.contains("req.request_uri=\"/index.y\""));
 		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/\""));
@@ -849,6 +846,9 @@ public class UnifiedTomcatTest {
 		try (FileWriter fw1 = new FileWriter(new File(b1, "sub/index.x"))) {
 			IOUtils.write("'sub/index-b1'", fw1);
 		}
+		try (FileWriter fw1 = new FileWriter(new File(b1, "index.z"))) {
+			IOUtils.write("'index-z-b1'", fw1);
+		}
 		File b2 = new File("target/b2");
 		FileUtils.deleteDirectory(b2);
 		b2.mkdirs();
@@ -964,9 +964,13 @@ public class UnifiedTomcatTest {
 
 		// --- resource access through "/" servlet
 
+		// sanity check for physical resource at root of resource servlet
+		String response = send(port, "/c/index.z");
+		assertTrue(response.endsWith("'index-z-b1'"));
+
 		// "/" - no "/index.x" or "/index.y" physical resource, but existing mapping for *.y to indexx servlet
 		// forward is performed implicitly by Tomcat's DefaultServlet
-		String response = send(port, "/c/");
+		response = send(port, "/c/");
 		assertTrue(response.contains("req.context_path=\"/c\""));
 		assertTrue(response.contains("req.request_uri=\"/c/index.y\""));
 		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/c/\""));

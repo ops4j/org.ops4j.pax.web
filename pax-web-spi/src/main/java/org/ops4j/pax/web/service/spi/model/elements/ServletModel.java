@@ -129,27 +129,28 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	public ServletModel(String alias, Servlet servlet, Dictionary<?,?> initParams, Integer loadOnStartup, Boolean asyncSupported) {
 		this(alias, null, null, Utils.toMap(initParams),
 				loadOnStartup, asyncSupported, null,
-				servlet, null, null);
+				servlet, null, null, false);
 	}
 
 	public ServletModel(String servletName, String[] urlPatterns, Servlet servlet, Dictionary<String, String> initParams,
 			Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multiPartConfig) {
 		this(null, urlPatterns, servletName, Utils.toMap(initParams),
 				loadOnStartup, asyncSupported, multiPartConfig,
-				servlet, null, null);
+				servlet, null, null, false);
 	}
 
 	public ServletModel(String[] urlPatterns, Class<? extends Servlet> servletClass, Dictionary<String, String> initParams,
 			Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multiPartConfig) {
 		this(null, urlPatterns, null, Utils.toMap(initParams),
 				loadOnStartup, asyncSupported, multiPartConfig,
-				null, servletClass, null);
+				null, servletClass, null, false);
 	}
 
 	@SuppressWarnings("deprecation")
 	private ServletModel(String alias, String[] urlPatterns, String name, Map<String, String> initParams,
 			Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multipartConfigElement,
-			Servlet servlet, Class<? extends Servlet> servletClass, ServiceReference<? extends Servlet> reference) {
+			Servlet servlet, Class<? extends Servlet> servletClass, ServiceReference<? extends Servlet> reference,
+			boolean resourceServlet) {
 		this.alias = alias;
 		this.urlPatterns = Path.normalizePatterns(urlPatterns);
 		this.initParams = initParams == null ? Collections.emptyMap() : initParams;
@@ -159,6 +160,8 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		this.servlet = servlet;
 		this.servletClass = servletClass;
 		setElementReference(reference);
+
+		this.resourceServlet = resourceServlet;
 
 		if (name == null) {
 			// legacy method first
@@ -185,7 +188,12 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			//    URI to registered aliases. The sub-strings of the requested URI are selected by removing
 			//    the last "/" and everything to the right of the last "/".
 			if ("/".equals(this.alias)) {
-				this.urlPatterns = new String[] { "/*" };
+				// special case for resource servlet. We don't want "/" to change to "/*"
+				if (resourceServlet) {
+					this.urlPatterns = new String[] { "/" };
+				} else {
+					this.urlPatterns = new String[] { "/*" };
+				}
 			} else {
 				this.urlPatterns = new String[] { this.alias + "/*" };
 			}
@@ -366,10 +374,6 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		return resourceServlet;
 	}
 
-	public void setResourceServlet(boolean resourceServlet) {
-		this.resourceServlet = resourceServlet;
-	}
-
 	public String getBasePath() {
 		return basePath;
 	}
@@ -403,6 +407,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		private Bundle bundle;
 		private int rank;
 		private long serviceId;
+		private boolean resourceServlet = false;
 
 		public Builder() {
 		}
@@ -493,9 +498,15 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			return this;
 		}
 
+		public Builder resourceServlet(boolean resourceServlet) {
+			this.resourceServlet = resourceServlet;
+			return this;
+		}
+
 		public ServletModel build() {
 			ServletModel model = new ServletModel(alias, urlPatterns, servletName, initParams,
-					loadOnStartup, asyncSupported, multipartConfigElement, servlet, servletClass, reference);
+					loadOnStartup, asyncSupported, multipartConfigElement, servlet, servletClass, reference,
+					resourceServlet);
 			list.forEach(model::addContextModel);
 			model.setRegisteringBundle(this.bundle);
 			model.setServiceRank(this.rank);

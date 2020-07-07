@@ -104,7 +104,17 @@ class OsgiStandardRoot extends StandardRoot {
 						TomcatResourceServlet.LOG.warn(e.getMessage(), e);
 					}
 					if (resource == null) {
-						return new EmptyResource(root, path);
+						if (fullPath.equals("")) {
+							fullPath = "/";
+						}
+						try {
+							resource = osgiScopedServletContext.getResource(fullPath);
+						} catch (MalformedURLException e) {
+							TomcatResourceServlet.LOG.warn(e.getMessage(), e);
+						}
+						if (resource == null) {
+							return new EmptyResource(root, path);
+						}
 					}
 					if (resource.getProtocol().equals("file")) {
 						try {
@@ -117,6 +127,9 @@ class OsgiStandardRoot extends StandardRoot {
 							LOG.warn(e.getMessage(), e);
 							return new EmptyResource(root, path);
 						}
+					} else if (resource.getProtocol().equals("bundle") && "/".equals(resource.getPath())) {
+						// Felix, root of the bundle - return a resource which says it's a directory
+						return new RootBundleURLResource(OsgiStandardRoot.this, resource, fullPath);
 					} else {
 						try {
 							return new UrlResource(OsgiStandardRoot.this, resource, fullPath, maxEntrySize);
@@ -305,6 +318,106 @@ class OsgiStandardRoot extends StandardRoot {
 		@Override
 		public long getCreation() {
 			return urlConnection.getLastModified();
+		}
+
+		@Override
+		public URL getURL() {
+			return url;
+		}
+
+		@Override
+		public URL getCodeBase() {
+			return null;
+		}
+
+		@Override
+		public Certificate[] getCertificates() {
+			return new Certificate[0];
+		}
+
+		@Override
+		public Manifest getManifest() {
+			return null;
+		}
+	}
+
+	private static class RootBundleURLResource extends AbstractResource {
+
+		private final URL url;
+
+		RootBundleURLResource(WebResourceRoot root, URL url, String fullPath) {
+			super(root, fullPath);
+			this.url = url;
+		}
+
+		@Override
+		protected InputStream doGetInputStream() {
+			return null;
+		}
+
+		@Override
+		protected Log getLog() {
+			return null;
+		}
+
+		@Override
+		public long getLastModified() {
+			return 0;
+		}
+
+		@Override
+		public boolean exists() {
+			return true;
+		}
+
+		@Override
+		public boolean isVirtual() {
+			return false;
+		}
+
+		@Override
+		public boolean isDirectory() {
+			return true;
+		}
+
+		@Override
+		public boolean isFile() {
+			return false;
+		}
+
+		@Override
+		public boolean delete() {
+			return false;
+		}
+
+		@Override
+		public String getName() {
+			return "/";
+		}
+
+		@Override
+		public long getContentLength() {
+			return 0;
+		}
+
+		@Override
+		public String getCanonicalPath() {
+			return "/";
+		}
+
+		@Override
+		public boolean canRead() {
+			return false;
+		}
+
+		@Override
+		public byte[] getContent() {
+			return new byte[0];
+		}
+
+		@Override
+		public long getCreation() {
+			return 0;
 		}
 
 		@Override

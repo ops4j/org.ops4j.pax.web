@@ -21,8 +21,8 @@ import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiPredicate;
 import javax.inject.Inject;
 
@@ -40,6 +40,7 @@ import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.events.ElementEvent;
 import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
+import org.ops4j.pax.web.service.spi.model.events.FilterEventData;
 import org.ops4j.pax.web.service.spi.model.events.ServerEvent;
 import org.ops4j.pax.web.service.spi.model.events.ServerListener;
 import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
@@ -339,7 +340,7 @@ public abstract class AbstractControlledTestBase {
 	 * to passed {@code expectation}.
 	 */
 	protected void configureAndWait(Runnable action, final BiPredicate<ElementEvent.State, ElementEventData> expectation) {
-		final List<ElementEvent> events = new LinkedList<>();
+		final List<ElementEvent> events = new CopyOnWriteArrayList<>();
 		webElementListener = events::add;
 		context.registerService(WebElementListener.class, webElementListener, null);
 
@@ -364,7 +365,7 @@ public abstract class AbstractControlledTestBase {
 	 * @param action
 	 */
 	protected void configureAndWaitForNamedServlet(final String servletName, Action action) throws Exception {
-		final List<ElementEvent> events = new LinkedList<>();
+		final List<ElementEvent> events = new CopyOnWriteArrayList<>();
 		webElementListener = events::add;
 		context.registerService(WebElementListener.class, webElementListener, null);
 
@@ -392,7 +393,7 @@ public abstract class AbstractControlledTestBase {
 	 * @param action
 	 */
 	protected void configureAndWaitForServletWithMapping(final String mapping, Action action) throws Exception {
-		final List<ElementEvent> events = new LinkedList<>();
+		final List<ElementEvent> events = new CopyOnWriteArrayList<>();
 		webElementListener = events::add;
 		context.registerService(WebElementListener.class, webElementListener, null);
 
@@ -415,13 +416,41 @@ public abstract class AbstractControlledTestBase {
 	}
 
 	/**
+	 * Creates a listener for deployment of a {@link javax.servlet.Filter} mapped to some URL.
+	 * @param mapping
+	 * @param action
+	 */
+	protected void configureAndWaitForFilterWithMapping(final String mapping, Action action) throws Exception {
+		final List<ElementEvent> events = new CopyOnWriteArrayList<>();
+		webElementListener = events::add;
+		context.registerService(WebElementListener.class, webElementListener, null);
+
+		action.run();
+
+		try {
+			new WaitCondition("Waiting for filter mapped to " + mapping) {
+				@Override
+				protected boolean isFulfilled() throws Exception {
+					return events.stream().anyMatch(e ->
+							e.getType() == ElementEvent.State.DEPLOYED
+									&& e.getData() instanceof FilterEventData
+									&& Arrays.asList(((FilterEventData) e.getData()).getUrlPatterns()).contains(mapping));
+				}
+			}.waitForCondition();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
+	/**
 	 * Performs an action and waits for {@link org.ops4j.pax.web.service.spi.model.events.ServerEvent} related
 	 * to started container at given port
 	 * @param port
 	 * @param action
 	 */
 	protected void configureAndWaitForListener(int port, Action action) throws Exception {
-		final List<ServerEvent> events = new LinkedList<>();
+		final List<ServerEvent> events = new CopyOnWriteArrayList<>();
 		ServerListener listener = events::add;
 		ServiceRegistration<ServerListener> reg = context.registerService(ServerListener.class, listener, null);
 

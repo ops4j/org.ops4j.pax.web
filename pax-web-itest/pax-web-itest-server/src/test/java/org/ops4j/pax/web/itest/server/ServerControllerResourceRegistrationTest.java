@@ -139,11 +139,13 @@ public class ServerControllerResourceRegistrationTest extends MultiContainerTest
 		response = httpGET(port, "/r/s3");
 		assertTrue(response.contains("HTTP/1.1 404"));
 
-		// mapped servlet, but directory access without welcome files
+		// mapped servlet, but directory access without welcome files. Directory exists (file: URL)
+		// so explicit 403
 		response = httpGET(port, "/r/s2/");
-		assertTrue(response.contains("HTTP/1.1 404"));
+		assertTrue(response.contains("HTTP/1.1 403"));
 		response = httpGET(port, "/r/s2");
-		assertTrue(response.contains("HTTP/1.1 404"));
+		// 302 here, because file: URL is returned from custom context
+		assertTrue(response.contains("HTTP/1.1 302"));
 
 		((StoppableHttpService) wc).stop();
 		controller.stop();
@@ -218,10 +220,12 @@ public class ServerControllerResourceRegistrationTest extends MultiContainerTest
 		response = httpGET(port, "/r/s3");
 		assertTrue(response.contains("HTTP/1.1 404"));
 
-		// mapped servlet, but directory access without welcome files
+		// mapped servlet, but directory access without welcome files. bundle.getResource() not mocked
+		// for such path, so 404
 		response = httpGET(port, "/r/s2/");
 		assertTrue(response.contains("HTTP/1.1 404"));
 		response = httpGET(port, "/r/s2");
+		// 404 here, because we didn't mock accessing r/s2
 		assertTrue(response.contains("HTTP/1.1 404"));
 
 		((StoppableHttpService) wc).stop();

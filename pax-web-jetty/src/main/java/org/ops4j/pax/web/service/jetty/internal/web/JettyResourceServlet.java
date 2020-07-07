@@ -15,7 +15,6 @@
  */
 package org.ops4j.pax.web.service.jetty.internal.web;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import javax.servlet.ServletContext;
@@ -113,21 +112,18 @@ public class JettyResourceServlet extends DefaultServlet {
 				// under Osgi(Scoped)ServletContext
 				URL url = getServletContext().getResource(chroot + "/" + childPath);
 
-				if (url != null && url.getProtocol().equals("file")) {
-					if (new File(url.getPath()).isDirectory()) {
-						// we want 404, not 403
-						return null;
+				// we have to check if the URL points to the root of the bundle. Felix throws IOException
+				// when opening connection for URIs like "bundle://22.0:1/"
+				if (url != null) {
+					if ("bundle".equals(url.getProtocol()) && "/".equals(url.getPath())) {
+						// Felix, root of the bundle - return a resource which says it's a directory
+						return new RootBundleURLResource(Resource.newResource(url));
 					}
 				}
 
 				// resource can be provided by custom HttpContext/ServletContextHelper, so we can't really
 				// affect lastModified for caching purposes
-				Resource resource = Resource.newResource(url);
-				if (resource != null && resource.isDirectory()) {
-					// we want 404, not 403
-					return null;
-				}
-				return resource;
+				return Resource.newResource(url);
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage(), e);

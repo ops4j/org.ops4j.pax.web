@@ -549,13 +549,12 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 		ServletModel servletModel = new ServletModel.Builder()
 				.withAlias(alias)
-				.withServletName(String.format("default-%s", UUID.randomUUID().toString()))
+				.withServletName("/".equals(alias) ? "default" : String.format("default-%s", UUID.randomUUID().toString()))
 				.withServlet(resourceServlet)
 				.withLoadOnStartup(1)
 				.withAsyncSupported(true)
+				.resourceServlet(true)
 				.build();
-
-		servletModel.setResourceServlet(true);
 
 		// "name" is very misleading term here as it's the "base path" or "resource prefix". Also Pax Web allows it
 		// to be a file: URL to make it easier to expose a directory as the resource directory (web root directory)

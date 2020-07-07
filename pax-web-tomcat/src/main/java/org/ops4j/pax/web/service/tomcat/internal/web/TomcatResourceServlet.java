@@ -115,9 +115,10 @@ public class TomcatResourceServlet extends DefaultServlet {
 				welcomeFiles = ((OsgiScopedServletContext) osgiScopedServletContext).getWelcomeFiles();
 			} else if (osgiScopedServletContext instanceof OsgiServletContext) {
 				welcomeFiles = ((OsgiServletContext) osgiScopedServletContext).getWelcomeFiles();
-			} else {
-				welcomeFiles = new String[0];
 			}
+		}
+		if (welcomeFiles == null) {
+			welcomeFiles = new String[0];
 		}
 
 		try {
@@ -168,9 +169,6 @@ public class TomcatResourceServlet extends DefaultServlet {
 		if ("".equals(relativePath)) {
 			relativePath = "/";
 		}
-		if (!pathInfoOnly) {
-			relativePath = servletPath + relativePath;
-		}
 
 		// chapter 10.10 "Welcome files" of Servlet API specification defines two iterations. First, for
 		// all welcome files, we have to check whether existing physical resource exists and return it.
@@ -198,7 +196,8 @@ public class TomcatResourceServlet extends DefaultServlet {
 		RequestDispatcher dispatcher = null;
 		if (resolvedWelcome == null) {
 			for (String welcome : welcomeFiles) {
-				// path uses servlet path as well
+				// path uses servlet path as well - always - not only with !pathInfoOnly, but because
+				// pathInfoOnly=false is set ONLY for "/" servlet, it doesn't really matter
 				String path = servletPath + (servletPath.endsWith("/") ? "" : "/") + welcome;
 				dispatcher = request.getRequestDispatcher(path);
 				if (dispatcher != null) {
@@ -234,6 +233,18 @@ public class TomcatResourceServlet extends DefaultServlet {
 			return;
 		}
 
+		// last check - if resource ending with / is a file and really doesn't exist (as directory)
+		// we'll return 404, as 403 would suggest it exists
+		WebResource resource = resources.getResource(relativePath);
+		if (!resource.exists()) {
+			if (request.getDispatcherType() == DispatcherType.ERROR) {
+				response.sendError((Integer) request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE));
+			} else {
+				response.sendError(HttpServletResponse.SC_NOT_FOUND, requestURI);
+			}
+			return;
+		}
+
 		// no dispatch? consequently we'll return 403
 		if (request.getDispatcherType() == DispatcherType.ERROR) {
 			response.sendError((Integer) request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE));
@@ -243,9 +254,12 @@ public class TomcatResourceServlet extends DefaultServlet {
 	}
 
 	/**
-	 * Override {@link DefaultServlet#getRelativePath(HttpServletRequest, boolean)} to use only path info. Just
+	 * <p>Override {@link DefaultServlet#getRelativePath(HttpServletRequest, boolean)} to use only path info. Just
 	 * as {@link org.apache.catalina.servlets.WebdavServlet} and just as Jetty does it with {@code pathInfoOnly}
-	 * servlet init parameter.
+	 * servlet init parameter.</p>
+	 *
+	 * <p>As with Jetty, {@code pathInfoOnly} has to be {@code false} because servlet path and path info are
+	 * confusing when servlet is mapped to "/".</p>
 	 *
 	 * @param request
 	 * @param allowEmptyPath
@@ -254,18 +268,27 @@ public class TomcatResourceServlet extends DefaultServlet {
 	@Override
 	protected String getRelativePath(HttpServletRequest request, boolean allowEmptyPath) {
 		String pathInfo;
+		String servletPath;
 
 		if (request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null) {
 			pathInfo = (String) request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
 		} else {
 			pathInfo = request.getPathInfo();
 		}
-
-		StringBuilder result = new StringBuilder();
-		if (pathInfo != null) {
-			result.append(pathInfo);
+		if (pathInfo == null) {
+			pathInfo = "";
 		}
-		String pathInContext = result.toString();
+		if (request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH) != null) {
+			servletPath = (String) request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
+		} else {
+			servletPath = request.getServletPath();
+		}
+
+		String pathInContext = pathInfo;
+
+		if (!pathInfoOnly) {
+			pathInContext = servletPath + pathInfo;
+		}
 
 		// our (commons-io) normalized path
 		String childPath = Path.securePath(pathInContext);

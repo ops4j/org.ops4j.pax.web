@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -948,6 +949,13 @@ class UndertowServerWrapper implements BatchVisitor {
 				// new servlet info
 				ServletInfo info = new PaxWebServletInfo(model, osgiContext, context);
 
+				boolean isDefaultResourceServlet = model.isResourceServlet();
+				for (String pattern : model.getUrlPatterns()) {
+					isDefaultResourceServlet &= "/".equals(pattern);
+				}
+				info.addInitParam("pathInfoOnly", Boolean.toString(!isDefaultResourceServlet));
+				info.addInitParam("resolve-against-context-root", Boolean.toString(isDefaultResourceServlet));
+
 				// when only adding new servlet, we can simply alter existing deployment
 				// because this is possible (as required by methods like javax.servlet.ServletContext.addServlet())
 				// we can't go the easy way when _removing_ servlets
@@ -991,6 +999,11 @@ class UndertowServerWrapper implements BatchVisitor {
 					// but we can reuse the deployment info - this is the only object from which we can remove
 					// servlets
 					deploymentInfo.getServlets().remove(model.getName());
+					if (model.isResourceServlet() && Arrays.asList(model.getUrlPatterns()).contains("/")) {
+						// we need to replace "/" servlet
+						PaxWebServletInfo defaultServletInfo = new PaxWebServletInfo("default", default404Servlet, true);
+						deploymentInfo.addServlet(defaultServletInfo.addMapping("/"));
+					}
 					manager = servletContainer.addDeployment(deploymentInfo);
 					manager.deploy();
 

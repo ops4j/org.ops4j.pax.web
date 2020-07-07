@@ -18,6 +18,25 @@
 
 package org.ops4j.pax.web.service.undertow.internal.web;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import javax.servlet.DispatcherType;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import io.undertow.io.IoCallback;
 import io.undertow.io.Sender;
 import io.undertow.server.HttpServerExchange;
@@ -30,6 +49,7 @@ import io.undertow.server.handlers.resource.ResourceSupplier;
 import io.undertow.servlet.UndertowServletLogger;
 import io.undertow.servlet.api.DefaultServletConfig;
 import io.undertow.servlet.api.Deployment;
+import io.undertow.servlet.handlers.ServletRequestContext;
 import io.undertow.servlet.spec.ServletContextImpl;
 import io.undertow.util.ByteRange;
 import io.undertow.util.CanonicalPathUtils;
@@ -39,24 +59,10 @@ import io.undertow.util.ETagUtils;
 import io.undertow.util.Headers;
 import io.undertow.util.Methods;
 import io.undertow.util.StatusCodes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
+// CHECKSTYLE:OFF
 /**
  * Default servlet responsible for serving up resources. This is both a handler and a servlet. If no filters
  * match the current path then the resources will be served up asynchronously using the
@@ -78,6 +84,8 @@ import java.util.Set;
  */
 public class DefaultServlet extends HttpServlet {
 
+    public static final Logger LOG = LoggerFactory.getLogger(DefaultServlet.class);
+
     public static final String DIRECTORY_LISTING = "directory-listing";
     public static final String DEFAULT_ALLOWED = "default-allowed";
     public static final String ALLOWED_EXTENSIONS = "allowed-extensions";
@@ -89,7 +97,7 @@ public class DefaultServlet extends HttpServlet {
 
 
     private Deployment deployment;
-    private ResourceSupplier resourceSupplier;
+    protected ResourceSupplier resourceSupplier;
     private boolean directoryListingEnabled = false;
 
     private boolean defaultAllowed = true;
@@ -159,7 +167,7 @@ public class DefaultServlet extends HttpServlet {
             path = CanonicalPathUtils.canonicalize(path.replace(File.separatorChar, '/'));
         }
 
-        HttpServerExchange exchange = SecurityActions.requireCurrentServletRequestContext().getOriginalRequest().getExchange();
+        HttpServerExchange exchange = requireCurrentServletRequestContext().getOriginalRequest().getExchange();
         final Resource resource;
         //we want to disallow windows characters in the path
         if(File.separatorChar == '/' || !path.contains(File.separator)) {
@@ -192,7 +200,28 @@ public class DefaultServlet extends HttpServlet {
                 StringBuilder output = DirectoryUtils.renderDirectoryListing(req.getRequestURI(), resource);
                 resp.getWriter().write(output.toString());
             } else {
-                resp.sendError(StatusCodes.FORBIDDEN);
+                // Pax Web 8: directories without slash are redirected to make behavior consistent with
+                // Jetty and Tomcat
+                if (!path.endsWith("/")) {
+                    if (req.getDispatcherType() == DispatcherType.INCLUDE) {
+                        LOG.warn("Can't redirect to welcome page for INCLUDE dispatch");
+                        return;
+                    }
+
+                    StringBuilder location = new StringBuilder(req.getRequestURI());
+                    location.append('/');
+                    if (req.getQueryString() != null) {
+                        location.append('?');
+                        location.append(req.getQueryString());
+                    }
+                    // Avoid protocol relative redirects
+                    while (location.length() > 1 && location.charAt(1) == '/') {
+                        location.deleteCharAt(0);
+                    }
+                    resp.sendRedirect(resp.encodeRedirectURL(location.toString()));
+                } else {
+                    resp.sendError(StatusCodes.FORBIDDEN);
+                }
             }
         } else {
             if(path.endsWith("/")) {
@@ -384,7 +413,7 @@ public class DefaultServlet extends HttpServlet {
         };
     }
 
-    private String getPath(final HttpServletRequest request) {
+    protected String getPath(final HttpServletRequest request) {
         String servletPath;
         String pathInfo;
 
@@ -448,4 +477,13 @@ public class DefaultServlet extends HttpServlet {
         }
     }
 
+    protected static ServletRequestContext requireCurrentServletRequestContext() {
+        if (System.getSecurityManager() == null) {
+            return ServletRequestContext.requireCurrent();
+        } else {
+            return AccessController.doPrivileged((PrivilegedAction<ServletRequestContext>) ServletRequestContext::requireCurrent);
+        }
+    }
+
 }
+// CHECKSTYLE:ON

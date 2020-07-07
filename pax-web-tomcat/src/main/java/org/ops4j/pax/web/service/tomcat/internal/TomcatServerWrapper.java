@@ -890,6 +890,13 @@ class TomcatServerWrapper implements BatchVisitor {
 				// <servlet> - always associated with one of ServletModel's OsgiContextModels
 				OsgiServletContext context = osgiServletContexts.get(osgiContext);
 				PaxWebStandardWrapper wrapper = new PaxWebStandardWrapper(model, osgiContext, context, realContext);
+
+				boolean isDefaultResourceServlet = model.isResourceServlet();
+				for (String pattern : model.getUrlPatterns()) {
+					isDefaultResourceServlet &= "/".equals(pattern);
+				}
+				wrapper.addInitParameter("pathInfoOnly", Boolean.toString(!isDefaultResourceServlet));
+
 				realContext.addChild(wrapper);
 
 				// <servlet-mapping>
