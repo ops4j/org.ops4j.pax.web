@@ -1,7 +1,7 @@
 OPS4j Pax Web
 =============
 
-[![CircleCI](https://circleci.com/gh/ops4j/org.ops4j.pax.web.svg?style=svg)](https://circleci.com/gh/ops4j/org.ops4j.pax.web)
+[![Java CI](https://github.com/ops4j/org.ops4j.pax.web//workflows/Java%20CI/badge.svg)](https://github.com/ops4j/org.ops4j.pax.web/actions?query=workflow%3A%22Java+CI%22)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.ops4j.pax/web/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.ops4j.pax/web)
 [![License](https://img.shields.io/hexpm/l/plug.svg)](https://ops4j1.jira.com/wiki/display/ops4j/Licensing)
 
@@ -17,7 +17,7 @@ Currently it supports the following:
 * JSP 1.1.2   
 * JSF 2.1   
 * Jetty 9.x   
-* Tomcat 8.x  
+* Tomcat 8.5.x  
 * support of CDI (through [Pax CDI](https://github.com/ops4j/org.ops4j.pax.cdi))  
 * support of only Servlet 3.0 annotated Servlets in JAR   
 
