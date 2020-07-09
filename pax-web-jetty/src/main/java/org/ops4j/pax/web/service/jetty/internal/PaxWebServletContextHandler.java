@@ -277,11 +277,11 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 	}
 
 	private boolean isJspAvailable() {
-		try {
-			return (org.ops4j.pax.web.jsp.JspServletWrapper.class != null);
-		} catch (NoClassDefFoundError ignore) {
+//		try {
+//			return (org.ops4j.pax.web.jsp.JspServletWrapper.class != null);
+//		} catch (NoClassDefFoundError ignore) {
 			return false;
-		}
+//		}
 	}
 
 	@Override
