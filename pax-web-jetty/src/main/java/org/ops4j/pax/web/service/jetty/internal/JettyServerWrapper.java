@@ -23,11 +23,13 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Supplier;
+import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 
 import org.eclipse.jetty.jmx.MBeanContainer;
@@ -49,11 +51,13 @@ import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.xml.XmlConfiguration;
 import org.ops4j.pax.web.annotations.Review;
+import org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
@@ -65,6 +69,7 @@ import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingMod
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
+import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
@@ -74,6 +79,7 @@ import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
+import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
@@ -600,7 +606,7 @@ class JettyServerWrapper implements BatchVisitor {
 			sch.setServletHandler(new PaxWebServletHandler(default404Servlet));
 			// setting "false" here will trigger 302 redirect when browsing to context without trailing "/"
 			sch.setAllowNullPathInfo(false);
-			// welcome files will be handled at default servlet level
+			// welcome files will be handled at default/resource servlet level and OsgiServletContext
 			sch.setWelcomeFiles(new String[0]);
 
 			// for future (optional) resource servlets, let's define some common context init properties
@@ -948,6 +954,68 @@ class JettyServerWrapper implements BatchVisitor {
 				ServletContextHandler servletContextHandler = contextHandlers.get(context.getContextPath());
 				EventListener eventListener = eventListenerModel.getEventListener();
 				servletContextHandler.addEventListener(eventListener);
+			});
+		}
+	}
+
+	@Override
+	public void visit(WelcomeFileModelChange change) {
+		WelcomeFileModel model = change.getWelcomeFileModel();
+		List<OsgiContextModel> contextModels = model.getContextModels();
+
+		OpCode op = change.getKind();
+		if (op == OpCode.ADD || op == OpCode.DELETE) {
+			// we have to configure all contexts, or rather - all resource servlets in all the contexts.
+			// for Tomcat and Undertow we had to implement welcome file handling in "resource servlets" ourselves,
+			// but we could have them settable.
+			// in Jetty, we have no choice but to re-init the resource servlets after changing welcome files
+			// in context handler
+			contextModels.forEach((context) -> {
+				// this time we don't alter single ServletContext for path of the highest ranked OsgiContextModel -
+				// - we have to update all OsgiServletContexts because that's where welcome files are stored and
+				// that's where "resource servlets" take the welcome files from
+				OsgiServletContext osgiServletContext = osgiServletContexts.get(context);
+				ServletContextHandler servletContextHandler = contextHandlers.get(context.getContextPath());
+
+				Set<String> currentWelcomeFiles = osgiServletContext.getWelcomeFiles() == null
+						? new LinkedHashSet<>()
+						: new LinkedHashSet<>(Arrays.asList(osgiServletContext.getWelcomeFiles()));
+
+				if (op == OpCode.ADD) {
+					currentWelcomeFiles.addAll(Arrays.asList(model.getWelcomeFiles()));
+				} else {
+					if (model.getWelcomeFiles().length == 0) {
+						// special case of "remove all welcome files"
+						currentWelcomeFiles.clear();
+					} else {
+						currentWelcomeFiles.removeAll(Arrays.asList(model.getWelcomeFiles()));
+					}
+				}
+
+				// set welcome files at OsgiServletContext level. NOT at ServletContextHandler level
+				String[] newWelcomeFiles = currentWelcomeFiles.toArray(new String[0]);
+				osgiServletContext.setWelcomeFiles(newWelcomeFiles);
+
+				LOG.info("Reconfiguration of welcome files for all resource servlet in context \"{}\"", context);
+
+				// reconfigure welcome files in resource servlets without reinitialization (Pax Web 8 change)
+				for (ServletHolder sh : servletContextHandler.getServletHandler().getServlets()) {
+					PaxWebServletHolder pwsh = (PaxWebServletHolder) sh;
+					// restart the servlet ONLY if its holder uses given OsgiContextModel
+					if (pwsh.getServletModel() != null && pwsh.getServletModel().isResourceServlet()
+							&& context == pwsh.getOsgiContextModel()) {
+						try {
+							Servlet servlet = sh.getServlet();
+							if (servlet instanceof JettyResourceServlet) {
+								((JettyResourceServlet) servlet).setWelcomeFiles(newWelcomeFiles);
+							} else if (servlet instanceof OsgiInitializedServlet) {
+								((JettyResourceServlet) ((OsgiInitializedServlet) servlet).getDelegate()).setWelcomeFiles(newWelcomeFiles);
+							}
+						} catch (Exception e) {
+							LOG.warn("Problem reconfiguring welcome files in servlet {}", sh, e);
+						}
+					}
+				}
 			});
 		}
 	}

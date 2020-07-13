@@ -55,6 +55,8 @@ public class ServletContextHelperMappingTracker extends AbstractContextTracker<S
 			// TODO: check the get/unget lifecycle
 			service = dereference(serviceReference);
 
+			model.setShared(true);
+
 			// 1. context name
 			model.setName(service.getContextId());
 

@@ -27,8 +27,6 @@ import javax.servlet.Servlet;
 
 import io.undertow.Handlers;
 import io.undertow.security.idm.IdentityManager;
-import io.undertow.server.handlers.cache.DirectBufferCache;
-import io.undertow.server.handlers.resource.CachingResourceManager;
 import io.undertow.servlet.api.SessionPersistenceManager;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerState;
@@ -200,21 +198,7 @@ public class UndertowServerController implements ServerController/*, IdentityMan
 		// io.undertow.server.handlers.cache.LRUCache.maxEntries
 		int metadataCacheSize = maxEntries;
 
-		// io.undertow.server.handlers.file.FileHandlerStressTestCase#simpleFileStressTest uses "1024, 10, 10480"
-		// see:
-		// this.pool = new LimitedBufferSlicePool(..., sliceSize, sliceSize * slicesPerPage, maxMemory / (sliceSize * slicesPerPage));
-		int maxMemory = maxSize;
-		int maxRegions = 1;
-		int maxRegionSize = maxSize;
-		int slicePerPage = 32;
-		int sliceSize = maxSize / slicePerPage;
-		DirectBufferCache cache = new DirectBufferCache(sliceSize, slicePerPage, maxMemory);
-
-		// a little loop - CachingResourceManager uses the DefaultServlet as underlying resource manager, while
-		// it's also used as the high level resource manager used in doGet() of the DefaultServlet
-		CachingResourceManager resourceManager
-				= new CachingResourceManager(metadataCacheSize, maxEntrySize, cache, undertowResourceServlet, maxAge);
-		undertowResourceServlet.setCachingResourceManager(resourceManager);
+		undertowResourceServlet.setCachingConfiguration(metadataCacheSize, maxEntrySize, maxSize, maxAge);
 
 		return undertowResourceServlet;
 	}

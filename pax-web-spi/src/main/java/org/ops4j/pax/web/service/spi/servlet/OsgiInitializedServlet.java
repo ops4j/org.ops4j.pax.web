@@ -84,4 +84,8 @@ public class OsgiInitializedServlet implements Servlet {
 		servlet.destroy();
 	}
 
+	public Servlet getDelegate() {
+		return servlet;
+	}
+
 }

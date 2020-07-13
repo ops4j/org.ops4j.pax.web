@@ -21,7 +21,9 @@ import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 
+import org.apache.catalina.Container;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.valves.ValveBase;
 import org.ops4j.pax.web.service.WebContainerContext;
@@ -79,17 +81,26 @@ public class PaxWebStandardContext extends StandardContext {
 		// turn a chain into a filter - to satisfy Tomcat's static methods
 		Filter osgiInitFilter = (request, response, chain) -> {
 			// this is definitiely the first filter, so we should get these attributes
-			PaxWebStandardContext delegate = (PaxWebStandardContext) request.getAttribute(PAXWEB_STANDARD_CONTEXT);
+			PaxWebStandardContext delegate = PaxWebStandardContext.this;
 			PaxWebStandardWrapper wrapper = (PaxWebStandardWrapper) request.getAttribute(PAXWEB_STANDARD_WRAPPER);
-			request.removeAttribute(PAXWEB_STANDARD_CONTEXT);
 			request.removeAttribute(PAXWEB_STANDARD_WRAPPER);
 
+			if (wrapper == null) {
+				Container[] children = PaxWebStandardContext.this.findChildren();
+				for (Container c : children) {
+					if (c instanceof PaxWebStandardWrapper && request instanceof HttpServletRequest
+							&& c.getName() != null
+							&& c.getName().equals(((HttpServletRequest) request).getHttpServletMapping().getServletName())) {
+						wrapper = (PaxWebStandardWrapper) c;
+					}
+				}
+			}
+
 			final OsgiFilterChain osgiChain;
-			if (!wrapper.is404()) {
+			if (wrapper != null && !wrapper.is404()) {
 				osgiChain = new OsgiFilterChain(delegate.getPreprocessors(),
 						wrapper.getServletContext(), wrapper.getWebContainerContext(), null);
 			} else {
-				OsgiContextModel model = delegate.getDefaultOsgiContextModel();
 				osgiChain = new OsgiFilterChain(delegate.getPreprocessors(),
 						delegate.getDefaultServletContext(), delegate.getDefaultWebContainerContext(), null);
 			}

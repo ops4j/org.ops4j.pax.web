@@ -15,23 +15,13 @@
  */
 package org.ops4j.pax.web.service.whiteboard;
 
-import org.ops4j.pax.web.annotations.Review;
-
 /**
  * Welcome file mapping
  *
  * @author dsklyut
  * @since 0.7.0
  */
-@Review("Not yet refactored")
-public interface WelcomeFileMapping {
-
-	/**
-	 * Getter.
-	 *
-	 * @return id of the http context this jsp belongs to
-	 */
-	String getHttpContextId();
+public interface WelcomeFileMapping extends ContextRelated {
 
 	/**
 	 * Getter

@@ -51,6 +51,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.model.events.ElementEvent;
 import org.ops4j.pax.web.service.spi.model.events.WebElementListener;
 import org.ops4j.pax.web.service.spi.task.Batch;
@@ -132,6 +133,10 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		while (!serviceModel.getServletModels().isEmpty()) {
 			doUnregisterServlet(serviceModel.getServletModels().iterator().next());
 		}
+
+		// TODO: event listener unregistration
+
+		doUnregisterAllWelcomeFiles();
 
 		serverModel.deassociateContexts(serviceBundle);
 	}
@@ -783,6 +788,8 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		final Batch batch = new Batch("Registration of " + model);
 
 		try {
+			event(ElementEvent.State.DEPLOYING, model);
+
 			model.performValidation();
 
 			serverModel.run(() -> {
@@ -798,7 +805,10 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 				return null;
 			});
+
+			event(ElementEvent.State.DEPLOYED, model);
 		} catch (Exception e) {
+			event(ElementEvent.State.FAILED, model);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -808,6 +818,8 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 	@Override
 	public void unregisterEventListener(final EventListener listener) {
 		try {
+//			event(ElementEvent.State.UNDEPLOYING, ...);
+
 			serverModel.run(() -> {
 				final Batch batch = new Batch("Unregistration of EventListener: " + listener);
 
@@ -820,8 +832,110 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 				return null;
 			});
+
+//			event(ElementEvent.State.UNDEPLOYED, ...);
 		} catch (ServletException | NamespaceException e) {
+//			event(ElementEvent.State.FAILED, ...);
 			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
+	// --- methods used to register welcome pages
+
+	@Override
+	public void registerWelcomeFiles(String[] welcomeFiles, boolean redirect, HttpContext httpContext) {
+		doRegisterWelcomeFiles(Collections.singletonList(httpContext), new WelcomeFileModel(welcomeFiles, redirect));
+	}
+
+	/**
+	 * Actual registration of {@link WelcomeFileModel}
+	 *
+	 * @param httpContexts
+	 * @param model
+	 */
+	private void doRegisterWelcomeFiles(List<HttpContext> httpContexts, WelcomeFileModel model) {
+		LOG.debug("Passing registration of {} to configuration thread", model);
+
+		if (model.getRegisteringBundle() == null) {
+			model.setRegisteringBundle(this.serviceBundle);
+		}
+
+		final Batch batch = new Batch("Registration of " + model);
+
+		try {
+			event(ElementEvent.State.DEPLOYING, model);
+
+			model.performValidation();
+
+			serverModel.run(() -> {
+				translateContexts(httpContexts, model, batch);
+
+				LOG.info("Registering {}", model);
+
+				serverModel.addWelcomeFileModel(model, batch);
+
+				serverController.sendBatch(batch);
+
+				batch.accept(serviceModel);
+
+				return null;
+			});
+
+			event(ElementEvent.State.DEPLOYED, model);
+		} catch (Exception e) {
+			event(ElementEvent.State.FAILED, model);
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
+	// --- methods used to unregister welcome pages
+
+	@Override
+	public void unregisterWelcomeFiles(String[] welcomeFiles, HttpContext httpContext) {
+		// "redirect" flag is irrelevant when unregistering
+		WelcomeFileModel model = new WelcomeFileModel(welcomeFiles, false);
+		doUnregisterWelcomeFiles(Collections.singletonList(httpContext), model);
+	}
+
+	private void doUnregisterWelcomeFiles(List<HttpContext> httpContexts, WelcomeFileModel model) {
+		if (model.getRegisteringBundle() == null) {
+			model.setRegisteringBundle(serviceBundle);
+		}
+		Bundle registeringBundle = model.getRegisteringBundle();
+
+		final Batch batch = new Batch("Unregistration of " + model);
+
+		try {
+			event(ElementEvent.State.UNDEPLOYING, model);
+
+			serverModel.run(() -> {
+				// we have to "translate" contexts again, as unregistration by array doesn't tell us
+				// the actual context to which given "model" was registered, so we rely on the context passed
+				// to unregister() method
+				translateContexts(httpContexts, model, batch);
+
+				LOG.info("Unregistering {}", model);
+
+				serverModel.removeWelcomeFileModel(model, batch);
+
+				serverController.sendBatch(batch);
+
+				batch.accept(serviceModel);
+
+				return null;
+			});
+
+			event(ElementEvent.State.UNDEPLOYED, model);
+		} catch (Exception e) {
+			event(ElementEvent.State.FAILED, model);
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
+	private void doUnregisterAllWelcomeFiles() {
+		for (WelcomeFileModel model : serviceModel.getWelcomeFileModels()) {
+			// context(s) will be picked from the model
+			doUnregisterWelcomeFiles(Collections.emptyList(), model);
 		}
 	}
 
@@ -923,6 +1037,16 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		@Override
 		public void unregisterFilter(FilterModel filterModel) {
 			doUnregisterFilter(filterModel);
+		}
+
+		@Override
+		public void registerWelcomeFiles(WelcomeFileModel model) {
+			doRegisterWelcomeFiles(Collections.emptyList(), model);
+		}
+
+		@Override
+		public void unregisterWelcomeFiles(WelcomeFileModel model) {
+			doUnregisterWelcomeFiles(Collections.emptyList(), model);
 		}
 
 		@Override

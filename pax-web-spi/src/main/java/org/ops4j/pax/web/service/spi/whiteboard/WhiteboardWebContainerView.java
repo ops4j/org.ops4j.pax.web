@@ -18,8 +18,10 @@ package org.ops4j.pax.web.service.spi.whiteboard;
 import java.util.List;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
 import org.osgi.framework.Bundle;
 
@@ -67,6 +69,18 @@ public interface WhiteboardWebContainerView extends PaxWebContainerView {
 	 * @param filterModel
 	 */
 	void unregisterFilter(FilterModel filterModel);
+
+	/**
+	 * Registers welcome files into {@link ElementModel#getContextModels() associated contexts}
+	 * @param welcomeFileModel
+	 */
+	void registerWelcomeFiles(WelcomeFileModel welcomeFileModel);
+
+	/**
+	 * Unregisters welcome files
+	 * @param welcomeFileModel
+	 */
+	void unregisterWelcomeFiles(WelcomeFileModel welcomeFileModel);
 
 	/**
 	 * Passes Whiteboard-registered (customized) {@link OsgiContextModel} to be managed in

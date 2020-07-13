@@ -158,6 +158,170 @@ public class ServerControllerResourceRegistrationTest extends MultiContainerTest
 	}
 
 	@Test
+	public void registerResourcesWithCustomContextAndWelcomeFiles() throws Exception {
+		ServerController controller = Utils.createServerController(null, port, runtime, getClass().getClassLoader());
+		controller.configure();
+		controller.start();
+
+		Bundle bundle = mock(Bundle.class);
+		when(bundle.toString()).thenReturn("App Bundle");
+		BundleWiring wiring = mock(BundleWiring.class);
+		when(bundle.adapt(BundleWiring.class)).thenReturn(wiring);
+		when(wiring.getClassLoader()).thenReturn(this.getClass().getClassLoader());
+
+		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
+		server.configureActiveServerController(controller);
+
+		// no batch at all - everything will be done by HttpService itself
+		WebContainer wc = new HttpServiceEnabled(bundle, controller, server, null, controller.getConfiguration());
+
+		File base = new File("target/www");
+		FileUtils.deleteDirectory(base);
+		base.mkdirs();
+		new File(base, "s1").mkdirs();
+		new File(base, "s2").mkdirs();
+		try (FileWriter fw = new FileWriter(new File(base, "file.txt"))) {
+			IOUtils.write("hello1", fw);
+		}
+		try (FileWriter fw = new FileWriter(new File(base, "/s1/file.txt"))) {
+			IOUtils.write("hello2", fw);
+		}
+		try (FileWriter fw = new FileWriter(new File(base, "/s2/file.txt"))) {
+			IOUtils.write("hello3", fw);
+		}
+		try (FileWriter fw = new FileWriter(new File(base, "file.md"))) {
+			IOUtils.write("hello1.md", fw);
+		}
+		try (FileWriter fw = new FileWriter(new File(base, "/s1/file.md"))) {
+			IOUtils.write("hello2.md", fw);
+		}
+		try (FileWriter fw = new FileWriter(new File(base, "/s2/file.md"))) {
+			IOUtils.write("hello3.md", fw);
+		}
+
+		HttpContext context = new HttpContext() {
+			@Override
+			public URL getResource(String name) {
+				try {
+					// name should already be secured and normalized and relative to
+					return new File("target", name).toURI().toURL();
+				} catch (MalformedURLException ignored) {
+					return null;
+				}
+			}
+
+			@Override
+			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+				return true;
+			}
+
+			@Override
+			public String getMimeType(String name) {
+				return null;
+			}
+		};
+
+		wc.registerResources("/r", "www", context);
+
+		String response = httpGET(port, "/r");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		response = httpGET(port, "/r/");
+		assertTrue(response.startsWith("HTTP/1.1 403"));
+
+		response = httpGET(port, "/r/s1");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		response = httpGET(port, "/r/s1/");
+		assertTrue(response.startsWith("HTTP/1.1 403"));
+
+		response = httpGET(port, "/r/s2");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		response = httpGET(port, "/r/s2/");
+		assertTrue(response.startsWith("HTTP/1.1 403"));
+
+		response = httpGET(port, "/r/s3");
+		assertTrue(response.startsWith("HTTP/1.1 404"));
+		response = httpGET(port, "/r/s3/");
+		assertTrue(response.startsWith("HTTP/1.1 404"));
+
+		wc.registerWelcomeFiles(new String[] { "file.txt", "file.md" }, false, context);
+
+		response = httpGET(port, "/r");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		response = httpGET(port, "/r/");
+		assertTrue(response.endsWith("hello1"));
+
+		response = httpGET(port, "/r/s1");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		response = httpGET(port, "/r/s1/");
+		assertTrue(response.endsWith("hello2"));
+
+		response = httpGET(port, "/r/s2");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		response = httpGET(port, "/r/s2/");
+		assertTrue(response.endsWith("hello3"));
+
+		response = httpGET(port, "/r/s3");
+		assertTrue(response.startsWith("HTTP/1.1 404"));
+		// there's no www/s3/file.txt physical resource, so a dispatcher will be used for
+		// /r/s3/file.txt which will result in HTTP 404
+		response = httpGET(port, "/r/s3/");
+		assertTrue(response.startsWith("HTTP/1.1 404"));
+
+		wc.unregisterWelcomeFiles(new String[] { "file.txt" }, context);
+
+		response = httpGET(port, "/r");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		response = httpGET(port, "/r/");
+		assertTrue(response.endsWith("hello1.md"));
+
+		response = httpGET(port, "/r/s1");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		response = httpGET(port, "/r/s1/");
+		assertTrue(response.endsWith("hello2.md"));
+
+		response = httpGET(port, "/r/s2");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		response = httpGET(port, "/r/s2/");
+		assertTrue(response.endsWith("hello3.md"));
+
+		response = httpGET(port, "/r/s3");
+		assertTrue(response.startsWith("HTTP/1.1 404"));
+		response = httpGET(port, "/r/s3/");
+		assertTrue(response.startsWith("HTTP/1.1 404"));
+
+		wc.unregisterWelcomeFiles(new String[] { "file.md" }, context);
+
+		response = httpGET(port, "/r");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		response = httpGET(port, "/r/");
+		assertTrue(response.startsWith("HTTP/1.1 403"));
+
+		response = httpGET(port, "/r/s1");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		response = httpGET(port, "/r/s1/");
+		assertTrue(response.startsWith("HTTP/1.1 403"));
+
+		response = httpGET(port, "/r/s2");
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		response = httpGET(port, "/r/s2/");
+		assertTrue(response.startsWith("HTTP/1.1 403"));
+
+		response = httpGET(port, "/r/s3");
+		assertTrue(response.startsWith("HTTP/1.1 404"));
+		response = httpGET(port, "/r/s3/");
+		assertTrue(response.startsWith("HTTP/1.1 404"));
+
+		((StoppableHttpService) wc).stop();
+		controller.stop();
+
+		ServerModelInternals serverModelInternals = serverModelInternals(server);
+		ServiceModelInternals serviceModelInternals = serviceModelInternals(wc);
+
+		assertTrue(serverModelInternals.isClean(bundle));
+		assertTrue(serviceModelInternals.isEmpty());
+	}
+
+	@Test
 	public void registerResourcesWithDefaultContext() throws Exception {
 		ServerController controller = Utils.createServerController(null, port, runtime, getClass().getClassLoader());
 		controller.configure();

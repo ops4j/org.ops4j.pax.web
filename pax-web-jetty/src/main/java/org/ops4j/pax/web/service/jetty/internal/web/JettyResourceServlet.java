@@ -21,7 +21,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.UnavailableException;
 
 import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.util.resource.PathResource;
 import org.eclipse.jetty.util.resource.Resource;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
@@ -46,6 +45,9 @@ public class JettyResourceServlet extends DefaultServlet {
 	 */
 	private final String chroot;
 
+	// super._welcomes can be cleared after super.init()...
+	private String[] welcomeFiles;
+
 	public JettyResourceServlet(PathResource baseUrlResource, String chroot) {
 		this.baseUrlResource = baseUrlResource;
 		this.chroot = chroot;
@@ -54,6 +56,7 @@ public class JettyResourceServlet extends DefaultServlet {
 	@Override
 	public void init() throws UnavailableException {
 		super.init();
+		_welcomes = welcomeFiles;
 
 		String maxCacheSize = getInitParameter("maxCacheSize");
 		String maxCachedFileSize = getInitParameter("maxCachedFileSize");
@@ -73,6 +76,19 @@ public class JettyResourceServlet extends DefaultServlet {
 				Integer.parseInt(maxCacheSize) / 1024,
 				Integer.parseInt(maxCachedFileSize) / 1024,
 				maxCachedFiles);
+	}
+
+	/**
+	 * By making {@link DefaultServlet#_welcomes} protected, we can set those files without reinitializing the
+	 * servlet
+	 * @param welcomeFiles
+	 */
+	public void setWelcomeFiles(String[] welcomeFiles) {
+		this.welcomeFiles = welcomeFiles;
+		_welcomes = welcomeFiles;
+		if (_cache != null) {
+			_cache.flushCache();
+		}
 	}
 
 	@Override

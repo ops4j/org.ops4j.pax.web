@@ -238,7 +238,7 @@ class PaxWebJettyServer extends Server {
 		// Destroy the context outside of the locking region
 		if (context != null) {
 			PaxWebServletContextHandler sch = context.getHandler();
-			sch.unregisterService();
+//			sch.unregisterService();
 			try {
 				sch.stop();
 			} catch (Throwable t) { // CHECKSTYLE:SKIP

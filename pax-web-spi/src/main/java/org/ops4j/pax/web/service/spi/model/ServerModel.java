@@ -52,6 +52,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
@@ -61,6 +62,7 @@ import org.ops4j.pax.web.service.spi.task.FilterStateChange;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
+import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.whiteboard.ContextMapping;
 import org.osgi.framework.Bundle;
@@ -810,6 +812,22 @@ public class ServerModel implements BatchVisitor {
 		});
 	}
 
+	/**
+	 * Each {@link ElementModel} is associated with one ore more {@link OsgiContextModel} which are in turn
+	 * associated with {@link ServletContextModel} (by context path). Sometimes many {@link OsgiContextModel} models
+	 * are associated with the same target servlet context. This method returns unique set of
+	 * {@link ServletContextModel} contexts
+	 *
+	 * @param model
+	 * @return
+	 */
+	private Set<ServletContextModel> getServletContextModels(ElementModel<?, ?> model) {
+		return model.getContextModels().stream()
+				.map(ocm -> servletContexts.get(ocm.getContextPath()))
+				.filter(Objects::nonNull)
+				.collect(Collectors.toSet());
+	}
+
 	// --- methods that operate on "web elements"
 
 	/**
@@ -1512,22 +1530,6 @@ public class ServerModel implements BatchVisitor {
 		return false;
 	}
 
-	/**
-	 * Each {@link ElementModel} is associated with one ore more {@link OsgiContextModel} which are in turn
-	 * associated with {@link ServletContextModel} (by context path). Sometimes many {@link OsgiContextModel} models
-	 * are associated with the same target servlet context. This method returns unique set of
-	 * {@link ServletContextModel} contexts
-	 *
-	 * @param model
-	 * @return
-	 */
-	private Set<ServletContextModel> getServletContextModels(ElementModel<?, ?> model) {
-		return model.getContextModels().stream()
-				.map(ocm -> servletContexts.get(ocm.getContextPath()))
-				.filter(Objects::nonNull)
-				.collect(Collectors.toSet());
-	}
-
 	@PaxWebConfiguration
 	public void addEventListenerModel(EventListenerModel model, Batch batch) {
 		if (model.getContextModels().isEmpty()) {
@@ -1539,6 +1541,20 @@ public class ServerModel implements BatchVisitor {
 		}
 
 		batch.addEventListenerModel(this, model);
+	}
+
+	@PaxWebConfiguration
+	public void addWelcomeFileModel(WelcomeFileModel model, Batch batch) {
+		if (model.getContextModels().isEmpty()) {
+			throw new IllegalArgumentException("Can't register " + model + ", it is not associated with any context");
+		}
+
+		batch.addWelcomeFileModel(this, model);
+	}
+
+	@PaxWebConfiguration
+	public void removeWelcomeFileModel(WelcomeFileModel model, Batch batch) {
+		batch.removeWelcomeFileModel(this, model);
 	}
 
 	// --- batch operation visit() methods performed without validation, because it was done earlier
@@ -1723,13 +1739,19 @@ public class ServerModel implements BatchVisitor {
 	}
 
 	@Override
-	public void visit(FilterStateChange filterStateChange) {
+	public void visit(FilterStateChange change) {
 	}
 
 	@Override
 	public void visit(EventListenerModelChange change) {
-	    // TOCHECK: nothing to do here, eventlisteners aren't checked
+		// no need to store event listeners at ServerModel level, because we don't have to check for conflicts
 	}
+
+	@Override
+	public void visit(WelcomeFileModelChange change) {
+		// no need to store welcome files at ServerModel level, because we don't have to check for conflicts
+	}
+
 
 
 
@@ -2029,43 +2051,6 @@ public class ServerModel implements BatchVisitor {
 		public String toString() {
 			return new StringBuilder().append("{").append("pattern=").append(pattern.pattern()).append(",model=")
 					.append(elementModel).append("}").toString();
-		}
-	}
-
-	public static class ContextKey {
-		public String contextId;
-		public Bundle bundle;
-
-		private ContextKey(String contextId, Bundle bundle) {
-			this.contextId = contextId;
-			this.bundle = bundle;
-		}
-
-		public static ContextKey with(String contextId, Bundle bundle) {
-			return new ContextKey(contextId, bundle);
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) {
-				return true;
-			}
-			if (o == null || getClass() != o.getClass()) {
-				return false;
-			}
-			ContextKey that = (ContextKey) o;
-			return Objects.equals(contextId, that.contextId) &&
-					Objects.equals(bundle, that.bundle);
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(contextId, bundle);
-		}
-
-		@Override
-		public String toString() {
-			return "Key{" + contextId + ", " + bundle + "}";
 		}
 	}
 

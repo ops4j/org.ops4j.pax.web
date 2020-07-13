@@ -15,10 +15,13 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +33,7 @@ import org.ops4j.pax.web.service.spi.context.DefaultHttpContext;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
@@ -39,6 +43,7 @@ import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
+import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.osgi.framework.Bundle;
 
 /**
@@ -94,8 +99,14 @@ public class ServiceModel implements BatchVisitor {
 	/** All filter models registered by given bundle-scoped {@link org.osgi.service.http.HttpService}. */
 	private final Set<FilterModel> filterModels = new HashSet<>();
 
-	/** ALl event listene models registered by given bundle-scoped {@link org.osgi.service.http.HttpService}. */
+	/** All event listene models registered by given bundle-scoped {@link org.osgi.service.http.HttpService}. */
 	private final Map<EventListener, EventListenerModel> eventListenerModels = new HashMap<>();
+
+	/** Welcome files are just kept as a sets - separately for each {@link ContextKey}. */
+	private final Map<ContextKey, Set<String>> welcomeFiles = new LinkedHashMap<>();
+
+	/** But also we keep welcome file models directly, to be able to remove them when needed */
+	private final Set<WelcomeFileModel> welcomeFileModels = new HashSet<>();
 
 	public ServiceModel(ServerModel serverModel, ServerController serverController, Bundle serviceBundle) {
 		this.serverModel = serverModel;
@@ -147,6 +158,14 @@ public class ServiceModel implements BatchVisitor {
 
 	public Set<FilterModel> getFilterModels() {
 		return filterModels;
+	}
+
+	public Map<EventListener, EventListenerModel> getEventListenerModels() {
+		return eventListenerModels;
+	}
+
+	public Set<WelcomeFileModel> getWelcomeFileModels() {
+		return welcomeFileModels;
 	}
 
 	@Override
@@ -251,26 +270,40 @@ public class ServiceModel implements BatchVisitor {
 	public void visit(EventListenerModelChange change) {
 		if (change.getKind() == OpCode.ADD) {
 			EventListenerModel model = change.getEventListenerModel();
-
-			// apply the change at ServiceModel level - whether it's disabled or not
 			eventListenerModels.put(model.getEventListener(), model);
-			// the change should also be processed at serverModel level
-			serverModel.visit(change);
-			return;
+		} else if (change.getKind() == OpCode.DELETE) {
+			eventListenerModels.remove(change.getEventListenerModel().getEventListener());
 		}
 
-		if (change.getKind() == OpCode.DELETE) {
-			EventListenerModel eventListenerModel = change.getEventListenerModel();
+		// the change should be processed at serverModel level as well
+		serverModel.visit(change);
+	}
 
-			eventListenerModels.remove(eventListenerModel.getEventListener());
-			// the change should be processed at serverModel level as well
-			serverModel.visit(change);
-			return;
+	@Override
+	public void visit(WelcomeFileModelChange change) {
+		WelcomeFileModel model = change.getWelcomeFileModel();
+		if (change.getKind() == OpCode.ADD) {
+			welcomeFileModels.add(model);
+		} else if (change.getKind() == OpCode.DELETE) {
+			welcomeFileModels.remove(model);
 		}
 
-		if (change.getKind() == OpCode.ENABLE || change.getKind() == OpCode.DISABLE) {
-			serverModel.visit(change);
+		for (OsgiContextModel context : model.getContextModels()) {
+			// for each context, welcome files from the model are added/removed from a set
+			// of welcome files for this context
+			ContextKey key = ContextKey.with(context.getName(), context.isShared() ? null : context.getOwnerBundle());
+			Set<String> welcomes = welcomeFiles.computeIfAbsent(key, k -> new LinkedHashSet<>());
+			if (change.getKind() == OpCode.ADD) {
+				welcomes.addAll(Arrays.asList(model.getWelcomeFiles()));
+			} else if (change.getKind() == OpCode.DELETE) {
+				welcomes.removeAll(Arrays.asList(model.getWelcomeFiles()));
+				if (welcomes.isEmpty()) {
+					welcomeFiles.remove(key);
+				}
+			}
 		}
+
+		serverModel.visit(change);
 	}
 
 //	public synchronized ServletModel getServletModelWithAlias(final String alias) {

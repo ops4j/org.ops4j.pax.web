@@ -21,16 +21,20 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Supplier;
+import javax.servlet.Servlet;
 
 import org.apache.catalina.AccessLog;
+import org.apache.catalina.Container;
 import org.apache.catalina.Context;
 import org.apache.catalina.Engine;
 import org.apache.catalina.Executor;
@@ -57,7 +61,9 @@ import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
+import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
@@ -67,7 +73,9 @@ import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
+import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.ops4j.pax.web.service.spi.util.Utils;
+import org.ops4j.pax.web.service.tomcat.internal.web.TomcatResourceServlet;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1009,6 +1017,57 @@ class TomcatServerWrapper implements BatchVisitor {
 				PaxWebStandardContext standardContext = contextHandlers.get(context.getContextPath());
 				EventListener eventListener = eventListenerModel.getEventListener();
 				standardContext.addApplicationEventListener(eventListener);
+			});
+		}
+	}
+
+	@Override
+	public void visit(WelcomeFileModelChange change) {
+		WelcomeFileModel model = change.getWelcomeFileModel();
+		List<OsgiContextModel> contextModels = model.getContextModels();
+
+		OpCode op = change.getKind();
+		if (op == OpCode.ADD || op == OpCode.DELETE) {
+			contextModels.forEach((context) -> {
+				OsgiServletContext osgiServletContext = osgiServletContexts.get(context);
+				PaxWebStandardContext realContext = contextHandlers.get(context.getContextPath());
+
+				Set<String> currentWelcomeFiles = osgiServletContext.getWelcomeFiles() == null
+						? new LinkedHashSet<>()
+						: new LinkedHashSet<>(Arrays.asList(osgiServletContext.getWelcomeFiles()));
+
+				if (op == OpCode.ADD) {
+					currentWelcomeFiles.addAll(Arrays.asList(model.getWelcomeFiles()));
+				} else {
+					if (model.getWelcomeFiles().length == 0) {
+						// special case of "remove all welcome files"
+						currentWelcomeFiles.clear();
+					} else {
+						currentWelcomeFiles.removeAll(Arrays.asList(model.getWelcomeFiles()));
+					}
+				}
+
+				// set welcome files at OsgiServletContext level. NOT at ServletContextHandler level
+				String[] newWelcomeFiles = currentWelcomeFiles.toArray(new String[0]);
+				osgiServletContext.setWelcomeFiles(newWelcomeFiles);
+
+				LOG.info("Reconfiguration of welcome files for all resource servlet in context \"{}\"", context);
+
+				// reconfigure welcome files in resource servlets
+				for (Container child : realContext.findChildren()) {
+					if (child instanceof PaxWebStandardWrapper) {
+						ServletModel servletModel = ((PaxWebStandardWrapper) child).getServletModel();
+						if (servletModel != null && servletModel.isResourceServlet()
+								&& context == ((PaxWebStandardWrapper) child).getOsgiContextModel()) {
+							Servlet servlet = ((PaxWebStandardWrapper) child).getServlet();
+							if (servlet instanceof TomcatResourceServlet) {
+								((TomcatResourceServlet) servlet).setWelcomeFiles(newWelcomeFiles);
+							} else if (servlet instanceof OsgiInitializedServlet) {
+								((TomcatResourceServlet) ((OsgiInitializedServlet) servlet).getDelegate()).setWelcomeFiles(newWelcomeFiles);
+							}
+						}
+					}
+				}
 			});
 		}
 	}

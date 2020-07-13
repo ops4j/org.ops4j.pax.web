@@ -290,8 +290,6 @@ public class UnifiedJettyTest {
 		handler1.setAllowNullPathInfo(true);
 		handler1.setInitParameter(DefaultServlet.CONTEXT_INIT + "pathInfoOnly", "true");
 
-		handler1.setWelcomeFiles(new String[] { "index.txt" });
-
 		File b1 = new File("target/b1");
 		FileUtils.deleteDirectory(b1);
 		b1.mkdirs();
@@ -311,7 +309,9 @@ public class UnifiedJettyTest {
 
 		final PathResource p1 = new PathResource(b1);
 
-		handler1.addServlet(new ServletHolder("default1", new JettyResourceServlet(p1, null)), "/d1/*");
+		JettyResourceServlet servlet = new JettyResourceServlet(p1, null);
+		servlet.setWelcomeFiles(new String[] { "index.txt" });
+		handler1.addServlet(new ServletHolder("default1", servlet), "/d1/*");
 
 		chc.addHandler(handler1);
 		server.setHandler(chc);
@@ -359,13 +359,6 @@ public class UnifiedJettyTest {
 		// pathInfoOnly will be set at servlet level
 //		handler.setInitParameter(DefaultServlet.CONTEXT_INIT + "pathInfoOnly", "true");
 
-		// In Jetty, welcome pages are handled by default servlet anyway. We can set these at context level,
-		// because that's where DefaultServlet finds the welcome files
-		// In Tomcat and Undertow, welcome files are handled by mapper, so we'll need special changes to
-		// these default/resource servlets and each of them will have to get the welcome pages separately and
-		// we'll have to explicitly configure NO welcome pages at request mapper level
-		handler.setWelcomeFiles(new String[] { "index.y", "index.x" });
-
 		File b1 = new File("target/b1");
 		FileUtils.deleteDirectory(b1);
 		b1.mkdirs();
@@ -396,7 +389,9 @@ public class UnifiedJettyTest {
 		final PathResource p3 = new PathResource(b3);
 
 		// the "/" default & resource servlet
-		ServletHolder defaultServlet = new ServletHolder("default", new JettyResourceServlet(p1, null));
+		JettyResourceServlet jrs1 = new JettyResourceServlet(p1, null);
+		jrs1.setWelcomeFiles(new String[] { "index.y", "index.x" });
+		ServletHolder defaultServlet = new ServletHolder("default", jrs1);
 		defaultServlet.setInitParameter("redirectWelcome", "false");
 		defaultServlet.setInitParameter("welcomeServlets", "true");
 		// with "true" it leads to endless redirect... Also in Tomcat it has to be "false" because servletPath
@@ -406,7 +401,9 @@ public class UnifiedJettyTest {
 		handler.addServlet(defaultServlet, "/");
 
 		// the "/r" resource servlet
-		ServletHolder resourceServlet = new ServletHolder("resource", new JettyResourceServlet(p2, null));
+		JettyResourceServlet jrs2 = new JettyResourceServlet(p2, null);
+		jrs2.setWelcomeFiles(new String[] { "index.y", "index.x" });
+		ServletHolder resourceServlet = new ServletHolder("resource", jrs2);
 		resourceServlet.setInitParameter("redirectWelcome", "false");
 		resourceServlet.setInitParameter("welcomeServlets", "true");
 		resourceServlet.setInitParameter("pathInfoOnly", "true");
@@ -414,7 +411,9 @@ public class UnifiedJettyTest {
 		handler.addServlet(resourceServlet, "/r/*");
 
 		// the "/s" resource servlet - with redirected welcome files
-		ServletHolder resource2Servlet = new ServletHolder("resource2", new JettyResourceServlet(p3, null));
+		JettyResourceServlet jrs3 = new JettyResourceServlet(p3, null);
+		jrs3.setWelcomeFiles(new String[] { "index.y", "index.x" });
+		ServletHolder resource2Servlet = new ServletHolder("resource2", jrs3);
 		resource2Servlet.setInitParameter("redirectWelcome", "true");
 		resource2Servlet.setInitParameter("welcomeServlets", "true");
 		resource2Servlet.setInitParameter("pathInfoOnly", "true");
@@ -670,13 +669,7 @@ public class UnifiedJettyTest {
 		handler.setAllowNullPathInfo(false);
 		// pathInfoOnly will be set at servlet level
 //		handler.setInitParameter(DefaultServlet.CONTEXT_INIT + "pathInfoOnly", "true");
-
-		// In Jetty, welcome pages are handled by default servlet anyway. We can set these at context level,
-		// because that's where DefaultServlet finds the welcome files
-		// In Tomcat and Undertow, welcome files are handled by mapper, so we'll need special changes to
-		// these default/resource servlets and each of them will have to get the welcome pages separately and
-		// we'll have to explicitly configure NO welcome pages at request mapper level
-		handler.setWelcomeFiles(new String[] { "index.y", "index.x" });
+		handler.setInitParameter(DefaultServlet.CONTEXT_INIT + "dirAllowed", "false");
 
 		File b1 = new File("target/b1");
 		FileUtils.deleteDirectory(b1);
@@ -708,7 +701,9 @@ public class UnifiedJettyTest {
 		final PathResource p3 = new PathResource(b3);
 
 		// the "/" default & resource servlet
-		ServletHolder defaultServlet = new ServletHolder("default", new JettyResourceServlet(p1, null));
+		JettyResourceServlet jrs1 = new JettyResourceServlet(p1, null);
+		jrs1.setWelcomeFiles(new String[] { "index.y", "index.x" });
+		ServletHolder defaultServlet = new ServletHolder("default", jrs1);
 		defaultServlet.setInitParameter("redirectWelcome", "false");
 		defaultServlet.setInitParameter("welcomeServlets", "true");
 		// with "true" it leads to endless redirect... Also in Tomcat it has to be "false" because servletPath
@@ -718,7 +713,9 @@ public class UnifiedJettyTest {
 		handler.addServlet(defaultServlet, "/");
 
 		// the "/r" resource servlet
-		ServletHolder resourceServlet = new ServletHolder("resource", new JettyResourceServlet(p2, null));
+		JettyResourceServlet jrs2 = new JettyResourceServlet(p2, null);
+		jrs2.setWelcomeFiles(new String[] { "index.y", "index.x" });
+		ServletHolder resourceServlet = new ServletHolder("resource", jrs2);
 		resourceServlet.setInitParameter("redirectWelcome", "false");
 		resourceServlet.setInitParameter("welcomeServlets", "true");
 		resourceServlet.setInitParameter("pathInfoOnly", "true");
@@ -726,7 +723,9 @@ public class UnifiedJettyTest {
 		handler.addServlet(resourceServlet, "/r/*");
 
 		// the "/s" resource servlet - with redirected welcome files
-		ServletHolder resource2Servlet = new ServletHolder("resource2", new JettyResourceServlet(p3, null));
+		JettyResourceServlet jrs3 = new JettyResourceServlet(p3, null);
+		jrs3.setWelcomeFiles(new String[] { "index.y", "index.x" });
+		ServletHolder resource2Servlet = new ServletHolder("resource2", jrs3);
 		resource2Servlet.setInitParameter("redirectWelcome", "true");
 		resource2Servlet.setInitParameter("welcomeServlets", "true");
 		resource2Servlet.setInitParameter("pathInfoOnly", "true");

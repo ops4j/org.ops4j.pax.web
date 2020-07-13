@@ -71,6 +71,11 @@ public class TomcatResourceServlet extends DefaultServlet {
 	 */
 	public void setWelcomeFiles(String[] welcomeFiles) {
 		this.welcomeFiles = welcomeFiles;
+		if (resources != null) {
+			// strange, but it works like this...
+			resources.setCachingAllowed(false);
+			resources.setCachingAllowed(true);
+		}
 	}
 
 	@Override
@@ -198,7 +203,7 @@ public class TomcatResourceServlet extends DefaultServlet {
 			for (String welcome : welcomeFiles) {
 				// path uses servlet path as well - always - not only with !pathInfoOnly, but because
 				// pathInfoOnly=false is set ONLY for "/" servlet, it doesn't really matter
-				String path = servletPath + (servletPath.endsWith("/") ? "" : "/") + welcome;
+				String path = servletPath + relativePath + welcome;
 				dispatcher = request.getRequestDispatcher(path);
 				if (dispatcher != null) {
 					resolvedWelcome = path;

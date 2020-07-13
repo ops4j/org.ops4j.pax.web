@@ -48,14 +48,20 @@ public interface BatchVisitor {
 	/**
 	 * Processing full change of registered filters for all the affected contexts. It's necessary for filters,
 	 * because registration of single filter may require reorganization (ordering) of currently registered filters.
-	 * @param filterStateChange
+	 * @param change
 	 */
-	void visit(FilterStateChange filterStateChange);
+	void visit(FilterStateChange change);
 
 	/**
 	 * Processing a change related to {@link org.ops4j.pax.web.service.spi.model.elements.EventListenerModel}
 	 * @param change
 	 */
 	void visit(EventListenerModelChange change);
+
+	/**
+	 * Process a change related to <em>welcome files</em>.
+	 * @param change
+	 */
+	void visit(WelcomeFileModelChange change);
 
 }

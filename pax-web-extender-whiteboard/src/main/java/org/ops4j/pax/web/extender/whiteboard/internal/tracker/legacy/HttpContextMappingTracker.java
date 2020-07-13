@@ -64,6 +64,8 @@ public class HttpContextMappingTracker extends AbstractContextTracker<HttpContex
 			// TODO: check the get/unget lifecycle
 			service = dereference(serviceReference);
 
+			model.setShared(service.isShared());
+
 			// 1. context name
 			model.setName(service.getContextId());
 
@@ -113,6 +115,13 @@ public class HttpContextMappingTracker extends AbstractContextTracker<HttpContex
 						// of org.ops4j.pax.web.service.MultiBundleWebContainerContext and "shared" service
 						// registration property is not relevant
 						model.setHttpContext((WebContainerContext) h1);
+						boolean actuallyShared = ((WebContainerContext) h1).isShared();
+						if (model.isShared() && !actuallyShared) {
+							LOG.warn("contextMapping is registered as shared, but actual HttpContext is not shared. Switching to non-shared.");
+						} else if (!model.isShared() && actuallyShared) {
+							LOG.warn("contextMapping is registered as non-shared, but actual HttpContext is marked as shared. Switching to shared.");
+						}
+						model.setShared(actuallyShared);
 					} else {
 						if (contextMapping.isShared()) {
 							LOG.warn("contextMapping is registered as shared, but actual HttpContext is not an instance"

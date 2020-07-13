@@ -15,32 +15,22 @@
  */
 package org.ops4j.pax.web.service.spi.model.events;
 
-import java.net.InetSocketAddress;
+public class WelcomeFileEventData extends ElementEventData {
 
-/**
- * Event related to entire {@link org.ops4j.pax.web.service.spi.ServerController} state. After Pax Web 8, such
- * event carries more information.
- */
-public class ServerEvent {
+	private final String[] welcomeFiles;
+	private final boolean redirect;
 
-	public enum State {
-		STARTED, STOPPED, CONFIGURED
+	public WelcomeFileEventData(String[] welcomeFiles, boolean redirect) {
+		this.welcomeFiles = welcomeFiles;
+		this.redirect = redirect;
 	}
 
-	private final InetSocketAddress[] addresses;
-	private final State state;
-
-	public ServerEvent(State state, InetSocketAddress[] addresses) {
-		this.state = state;
-		this.addresses = addresses;
+	public String[] getWelcomeFiles() {
+		return welcomeFiles;
 	}
 
-	public State getState() {
-		return state;
-	}
-
-	public InetSocketAddress[] getAddresses() {
-		return addresses;
+	public boolean isRedirect() {
+		return redirect;
 	}
 
 }

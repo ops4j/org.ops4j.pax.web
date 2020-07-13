@@ -52,6 +52,8 @@ public class ServletContextHelperTracker extends AbstractContextTracker<ServletC
 	protected OsgiContextModel configureContextModel(ServiceReference<ServletContextHelper> serviceReference,
 			OsgiContextModel model) {
 
+		model.setShared(true);
+
 		// 1. context name
 		String name = Utils.getPaxWebProperty(serviceReference,
 				PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME,

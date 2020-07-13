@@ -1,45 +1,51 @@
 /*
+ * Copyright 2020 OPS4J.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.
- *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 
+import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
+import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.model.events.WelcomeFileEventData;
+import org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+
 /**
- * Tracks {@link org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping}.
+ * Tracks {@link org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping} services.
  *
  * @author Dmitry Sklyut
+ * @author Grzegorz Grzybek
  * @since 0.7.0
  */
-public class WelcomeFileMappingTracker /*extends AbstractElementTracker<WelcomeFileMapping, WelcomeFileWebElement>*/ {
+public class WelcomeFileMappingTracker extends AbstractMappingTracker<WelcomeFileMapping, WelcomeFileMapping, WelcomeFileEventData, WelcomeFileModel> {
 
-	/**
-	 * Constructor.
-	 *
-	 * @param extenderContext
-	 *            extender context; cannot be null
-	 * @param bundleContext
-	 *            extender bundle context; cannot be null
-	 */
-//	public WelcomeFileMappingTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
-//		super(extenderContext, bundleContext);
-//	}
-//
-//	public static ServiceTracker<WelcomeFileMapping, WelcomeFileWebElement> createTracker(
-//			final ExtenderContext extenderContext, final BundleContext bundleContext) {
-//		return new WelcomeFileMappingTracker(extenderContext, bundleContext).create(WelcomeFileMapping.class);
-//	}
-//
+	protected WelcomeFileMappingTracker(ExtenderContext extenderContext, BundleContext bundleContext) {
+		super(extenderContext, bundleContext);
+	}
+
+	public static ServiceTracker<WelcomeFileMapping, WelcomeFileModel> createTracker(final ExtenderContext extenderContext,
+			final BundleContext bundleContext) {
+		return new WelcomeFileMappingTracker(extenderContext, bundleContext).create(WelcomeFileMapping.class);
+	}
+
+	@Override
+	protected WelcomeFileModel doCreateElementModel(Bundle bundle, WelcomeFileMapping service, Integer rank, Long serviceId) {
+		return null;
+	}
+
 //	/**
 //	 * @see AbstractElementTracker#createWebElement(org.osgi.framework.ServiceReference
 //	 *      , Object)

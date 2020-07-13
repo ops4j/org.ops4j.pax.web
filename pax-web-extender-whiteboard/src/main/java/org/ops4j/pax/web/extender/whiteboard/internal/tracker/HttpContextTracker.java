@@ -54,6 +54,9 @@ public class HttpContextTracker extends AbstractContextTracker<HttpContext> {
 	protected OsgiContextModel configureContextModel(ServiceReference<HttpContext> serviceReference,
 			OsgiContextModel model) {
 
+		// false by default, unless there's special registration (checked later)
+		model.setShared(false);
+
 		// 1. context name - checked using only legacy property name
 		String name = Utils.getStringProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID);
 		model.setName(name);
@@ -114,11 +117,13 @@ public class HttpContextTracker extends AbstractContextTracker<HttpContext> {
 				// of org.ops4j.pax.web.service.MultiBundleWebContainerContext and "shared" service
 				// registration property is not relevant
 				model.setHttpContext((WebContainerContext) context);
+
+				model.setShared(((WebContainerContext)context).isShared());
 			} else {
 				Boolean shared = Utils.getBooleanProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_SHARED);
 				if (shared != null && shared) {
 					LOG.warn("{} property is true, but the service is not an instance of "
-							+ "WebContainerContext with \"shared\" property", context);
+							+ "WebContainerContext with \"shared\" property. Switching to non-shared.", context);
 				}
 				model.setHttpContext(new WebContainerContextWrapper(serviceReference.getBundle(), context, name));
 			}
@@ -130,6 +135,12 @@ public class HttpContextTracker extends AbstractContextTracker<HttpContext> {
 			model.getContextRegistrationProperties().remove(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
 		} else {
 			model.setContextReference(serviceReference);
+
+			// we have to believe the flag
+			Boolean shared = Utils.getBooleanProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_SHARED);
+			if (shared != null) {
+				model.setShared(shared);
+			}
 		}
 
 		return model;

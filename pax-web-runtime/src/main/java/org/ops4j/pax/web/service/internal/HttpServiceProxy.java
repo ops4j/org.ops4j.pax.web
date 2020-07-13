@@ -276,6 +276,21 @@ class HttpServiceProxy implements WebContainer, StoppableHttpService {
 		delegate.unregisterEventListener(listener);
 	}
 
+	// --- methods used to register welcome pages
+
+	@Override
+	public void registerWelcomeFiles(String[] welcomeFiles, boolean redirect, HttpContext httpContext) {
+		delegate.registerWelcomeFiles(welcomeFiles, redirect, httpContext);
+	}
+
+	// --- methods used to unregister welcome pages
+
+	@Override
+	public void unregisterWelcomeFiles(String[] welcomeFiles, HttpContext httpContext) {
+		delegate.unregisterWelcomeFiles(welcomeFiles, httpContext);
+	}
+
+
 //	/**
 //	 * @see WebContainer#setContextParam(Dictionary, HttpContext)
 //	 */

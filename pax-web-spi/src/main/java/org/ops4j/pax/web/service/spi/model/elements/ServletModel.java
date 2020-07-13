@@ -281,6 +281,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	public ServletEventData asEventData() {
 		ServletEventData data = new ServletEventData(alias, name, urlPatterns, servlet);
 		setCommonEventProperties(data);
+		data.setResourceServlet(this.resourceServlet);
 		return data;
 	}
 

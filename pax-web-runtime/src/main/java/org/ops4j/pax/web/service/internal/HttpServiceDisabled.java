@@ -242,6 +242,20 @@ class HttpServiceDisabled implements WebContainer {
 		LOG.warn("Http service has already been stopped");
 	}
 
+	// --- methods used to register welcome pages
+
+	@Override
+	public void registerWelcomeFiles(String[] welcomeFiles, boolean redirect, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	// --- methods used to unregister welcome pages
+
+	@Override
+	public void unregisterWelcomeFiles(String[] welcomeFiles, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
 //	/**
 //	 * @see WebContainer#setContextParam(Dictionary, HttpContext)
 //	 */

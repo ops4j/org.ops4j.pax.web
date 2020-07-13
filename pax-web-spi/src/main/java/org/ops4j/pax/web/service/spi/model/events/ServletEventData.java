@@ -24,6 +24,7 @@ public class ServletEventData extends ElementEventData {
 	private final String servletName;
 	private String[] urlPatterns;
 	private final Servlet servlet;
+	private boolean resourceServlet;
 
 	public ServletEventData(String alias, String servletName, String[] urlPatterns, Servlet servlet) {
 		this.alias = alias;
@@ -48,6 +49,14 @@ public class ServletEventData extends ElementEventData {
 
 	public Servlet getServlet() {
 		return servlet;
+	}
+
+	public boolean isResourceServlet() {
+		return resourceServlet;
+	}
+
+	public void setResourceServlet(boolean resourceServlet) {
+		this.resourceServlet = resourceServlet;
 	}
 
 }

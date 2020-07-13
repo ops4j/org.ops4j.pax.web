@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import io.undertow.server.HttpServerExchange;
+import io.undertow.server.handlers.cache.DirectBufferCache;
 import io.undertow.server.handlers.resource.CachingResourceManager;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.server.handlers.resource.Resource;
@@ -75,21 +76,50 @@ public class UndertowResourceServlet extends DefaultServlet implements ResourceM
 	private boolean redirectWelcome = false;
 	private boolean pathInfoOnly = true;
 
+	private boolean cacheConfigurable = false;
+	private int metadataCacheSize;
+	private Integer maxEntrySize;
+	private Integer maxSize;
+	private Integer maxAge;
+
 	public UndertowResourceServlet(File baseDirectory, String chroot) {
 		this.baseDirectory = baseDirectory;
 		this.chroot = chroot;
 	}
 
+	/**
+	 * This method can be used in tests to set ready, but not managable {@link CachingResourceManager}
+	 * @param cachingResourceManager
+	 */
 	public void setCachingResourceManager(CachingResourceManager cachingResourceManager) {
 		this.cachingResourceManager = cachingResourceManager;
 	}
 
+	/**
+	 * This method should be called if we want to be able to recreate (clean) the cache after setting new
+	 * welcome files.
+	 * @param metadataCacheSize
+	 * @param maxEntrySize
+	 * @param maxSize
+	 * @param maxAge
+	 */
+	public void setCachingConfiguration(int metadataCacheSize, Integer maxEntrySize, Integer maxSize, Integer maxAge) {
+		this.metadataCacheSize = metadataCacheSize;
+		this.maxEntrySize = maxEntrySize;
+		this.maxSize = maxSize;
+		this.maxAge = maxAge;
+		this.cacheConfigurable = true;
+	}
+
 	public void setWelcomeFiles(String[] welcomeFiles) {
 		this.welcomeFiles = welcomeFiles;
+		configureCache();
 	}
 
 	@Override
 	public void init(final ServletConfig config) throws ServletException {
+		configureCache();
+
 		// we need to call super.init() with:
 		//  - a config that returns proper servletContext implementation
 		//  - this servletContext has to return proper deployment
@@ -155,6 +185,22 @@ public class UndertowResourceServlet extends DefaultServlet implements ResourceM
 			// assuming that servletContext is Osgi[Scoped]ServletContext that delegate to WebContainerContext
 			// it's important to get ServletContext from the passed config!
 			this.resourceManager = new OsgiResourceManager(chroot, config.getServletContext());
+		}
+	}
+
+	private void configureCache() {
+		if (cacheConfigurable) {
+			// io.undertow.server.handlers.file.FileHandlerStressTestCase#simpleFileStressTest uses "1024, 10, 10480"
+			// see:
+			// this.pool = new LimitedBufferSlicePool(..., sliceSize, sliceSize * slicesPerPage, maxMemory / (sliceSize * slicesPerPage));
+			int maxMemory = maxSize;
+			int maxRegions = 1;
+			int maxRegionSize = maxSize;
+			int slicePerPage = 32;
+			int sliceSize = maxSize / slicePerPage;
+			DirectBufferCache cache = new DirectBufferCache(sliceSize, slicePerPage, maxMemory);
+			cachingResourceManager
+					= new CachingResourceManager(metadataCacheSize, maxEntrySize, cache, this, maxAge);
 		}
 	}
 
@@ -226,7 +272,7 @@ public class UndertowResourceServlet extends DefaultServlet implements ResourceM
 		if (resolvedWelcome == null) {
 			for (String welcome : welcomeFiles) {
 				// path uses servlet path as well
-				String path = servletPath + (servletPath.endsWith("/") ? "" : "/") + welcome;
+				String path = servletPath + relativePath + welcome;
 				dispatcher = req.getRequestDispatcher(path);
 				if (dispatcher != null) {
 					resolvedWelcome = path;

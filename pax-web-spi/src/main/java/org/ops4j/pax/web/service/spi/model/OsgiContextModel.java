@@ -261,6 +261,9 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 
 	private Boolean isValid;
 
+	/** Such model is shared, if underlying {@link WebContainerContext} is shared */
+	private Boolean shared = true;
+
 	public OsgiContextModel(Bundle ownerBundle, Integer rank, Long serviceId) {
 		this.ownerBundle = ownerBundle;
 		this.serviceRank = rank;
@@ -462,6 +465,20 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	 */
 	public boolean hasDirectHttpContextInstance() {
 		return httpContext != null;
+	}
+
+	/**
+	 * Returns {@code true} if the model represents Whiteboard context ({@link ServletContextHelper}) or
+	 * it represents old {@link HttpContext} provided as direct (not a service reference) and is an
+	 * instance of {@link org.ops4j.pax.web.service.MultiBundleWebContainerContext}.
+	 * @return
+	 */
+	public boolean isShared() {
+		return shared;
+	}
+
+	public void setShared(Boolean shared) {
+		this.shared = shared;
 	}
 
 	@Override

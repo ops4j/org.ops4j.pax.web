@@ -108,6 +108,10 @@ public class PaxWebServletInfo extends ServletInfo {
 		this.webContainerContext = osgiContextModel.resolveHttpContext(servletModel.getRegisteringBundle());
 	}
 
+	public ServletModel getServletModel() {
+		return servletModel;
+	}
+
 	public Bundle getRegisteringBundle() {
 		return servletModel.getRegisteringBundle();
 	}

@@ -27,6 +27,7 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.function.Supplier;
 import javax.servlet.DispatcherType;
+import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.xml.bind.JAXBContext;
@@ -65,6 +67,8 @@ import io.undertow.servlet.core.ContextClassLoaderSetupAction;
 import io.undertow.servlet.core.ManagedFilter;
 import io.undertow.servlet.core.ManagedFilters;
 import io.undertow.servlet.core.ManagedListener;
+import io.undertow.servlet.core.ManagedServlet;
+import io.undertow.servlet.handlers.ServletHandler;
 import io.undertow.servlet.util.ImmediateInstanceFactory;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
@@ -73,7 +77,9 @@ import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
+import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
@@ -83,6 +89,7 @@ import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
+import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.undertow.internal.configuration.ResolvingContentHandler;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.IoSubsystem;
@@ -90,6 +97,7 @@ import org.ops4j.pax.web.service.undertow.internal.configuration.model.SecurityR
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.Server;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.SocketBinding;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowConfiguration;
+import org.ops4j.pax.web.service.undertow.internal.web.UndertowResourceServlet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.wiring.BundleWiring;
@@ -1191,6 +1199,71 @@ class UndertowServerWrapper implements BatchVisitor {
 				// TOCHECK: workaround Undertow inflexibility related to removal of such elements
 				deploymentInfo.getListeners().add(info);
 				manager.getDeployment().getApplicationListeners().addListener(new ManagedListener(info, true));
+			});
+		}
+	}
+
+	@Override
+	public void visit(WelcomeFileModelChange change) {
+		WelcomeFileModel model = change.getWelcomeFileModel();
+		List<OsgiContextModel> contextModels = model.getContextModels();
+
+		OpCode op = change.getKind();
+		if (op == OpCode.ADD || op == OpCode.DELETE) {
+			contextModels.forEach((context) -> {
+				OsgiServletContext osgiServletContext = osgiServletContexts.get(context);
+
+				DeploymentManager manager = servletContainer.getDeploymentByPath(osgiServletContext.getContextPath());
+				Deployment deployment = manager.getDeployment();
+				DeploymentInfo deploymentInfo = deployment.getDeploymentInfo();
+
+				Set<String> currentWelcomeFiles = osgiServletContext.getWelcomeFiles() == null
+						? new LinkedHashSet<>()
+						: new LinkedHashSet<>(Arrays.asList(osgiServletContext.getWelcomeFiles()));
+
+				if (op == OpCode.ADD) {
+					currentWelcomeFiles.addAll(Arrays.asList(model.getWelcomeFiles()));
+				} else {
+					if (model.getWelcomeFiles().length == 0) {
+						// special case of "remove all welcome files"
+						currentWelcomeFiles.clear();
+					} else {
+						currentWelcomeFiles.removeAll(Arrays.asList(model.getWelcomeFiles()));
+					}
+				}
+
+				// set welcome files at OsgiServletContext level. NOT at ServletContextHandler level
+				String[] newWelcomeFiles = currentWelcomeFiles.toArray(new String[0]);
+				osgiServletContext.setWelcomeFiles(newWelcomeFiles);
+
+				LOG.info("Reconfiguration of welcome files for all resource servlet in context \"{}\"", context);
+
+				// reconfigure welcome files in resource servlets
+				for (ServletHandler sh : deployment.getServlets().getServletHandlers().values()) {
+					ManagedServlet ms = sh.getManagedServlet();
+					if (ms != null && ms.getServletInfo() != null &&
+							ms.getServletInfo() instanceof PaxWebServletInfo) {
+						PaxWebServletInfo info = (PaxWebServletInfo) ms.getServletInfo();
+						if (info.getServletModel() != null && info.getServletModel().isResourceServlet()
+								&& context == info.getOsgiContextModel()) {
+							if (ms.isStarted()) {
+								try {
+									Servlet servlet = ms.getServlet().getInstance();
+									if (servlet instanceof UndertowResourceServlet) {
+										((UndertowResourceServlet) servlet).setWelcomeFiles(newWelcomeFiles);
+									} else if (servlet instanceof OsgiInitializedServlet) {
+										((UndertowResourceServlet) ((OsgiInitializedServlet) servlet).getDelegate()).setWelcomeFiles(newWelcomeFiles);
+									}
+								} catch (ServletException e) {
+									LOG.warn("Problem reconfiguring welcome files in servlet {}", ms, e);
+								}
+							} else {
+								// no need to set it, because servlet is not yet initialized
+								LOG.debug("Welcome files will be set in {} when init() is called", ms);
+							}
+						}
+					}
+				}
 			});
 		}
 	}

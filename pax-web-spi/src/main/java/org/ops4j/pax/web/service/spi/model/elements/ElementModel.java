@@ -47,6 +47,11 @@ import org.osgi.framework.ServiceReference;
  * <p>Each <em>element</em>, when registered through Whiteboard Service, may turn out to unregister some existing
  * <em>element</em> when it uses conflicting URL mapping but has lower ranking or service id. Such conflicts lead
  * to trivial {@link org.osgi.service.http.NamespaceException} when using Http Service.</p>
+ *
+ * @param <T> type of the service that user registers to be processed by Whiteboard extender (whether standard
+ *            OSGi CMPN Whiteboard or Pax Web specific Whiteboard extender)
+ * @param <D> type of the DTO-like object that carries registration information of real service - to be able
+ *            to get notified about (un)registration without the way to change actual registration data
  */
 public abstract class ElementModel<T, D extends ElementEventData>
 		extends Identity implements Comparable<ElementModel<T, D>> {
@@ -114,11 +119,12 @@ public abstract class ElementModel<T, D extends ElementEventData>
 
 	/**
 	 * <p>Perform element-specific validation and throws different exceptions for all element-specific validation
-	 * problems. This method should not be called fir Whiteboard purposes, where "failure DTO" has to be configured.
-	 * </p>
+	 * problems. This method should not be called for Whiteboard purposes, where "failure DTO" has to be
+	 * configured.</p>
 	 *
 	 * <p>This method should be called in Http Service scenario where we immediately need strong feedback - with
-	 * exceptions thrown for all validation problems.</p>
+	 * exceptions thrown for all validation problems. In Whiteboard scenario, the exception is caught, logged and
+	 * it's the tracker that prevents further registration.</p>
 	 *
 	 * @return
 	 */

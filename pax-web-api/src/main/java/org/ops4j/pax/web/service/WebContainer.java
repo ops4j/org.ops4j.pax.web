@@ -659,6 +659,39 @@ public interface WebContainer extends HttpService {
 	 */
 	void unregisterEventListener(EventListener listener);
 
+	// --- methods used to register welcome pages
+
+	/**
+	 * <p>Registers an ordered list of partial URIs that conform to welcome pages definition from chapter 10.10
+	 * of Servlet 4 specification. They're mainly used to return "something" when sending requests for
+	 * <em>directories</em>, but a welcome file may also map to actual web component (a servlet) which is usually
+	 * the case with <em>welcome file</em> like {@code index.do} or {@code index.xhtml} (from JSF).</p>
+	 *
+	 * <p>Welcome files are strictly connected with <em>resource servlets</em> and without actual resources they're
+	 * useless. Welcome files are also registered per <em>context</em> and affect all the resource servlets
+	 * registered into (in association with) given context.</p>
+	 *
+	 * @param welcomeFiles an array of welcome files paths. Paths must not start or end with {@code "/"}
+	 * @param redirect true if the client should be redirected to welcome file or false if forwarded
+	 * @param httpContext the http context this error page is for. If null a default http context will be used.
+	 */
+	void registerWelcomeFiles(String[] welcomeFiles, boolean redirect, HttpContext httpContext);
+
+	// --- methods used to unregister welcome pages
+
+	/**
+	 * <p>Unregisters previously registered welcome files (whether redirected or not). This method should really only
+	 * remove the passed welcome files, so it may be confusing, as there's no way to register two sets of distinct
+	 * sets of welcome files. Each registered, single <em>welcome file</em> is simply added to a list of welcome files
+	 * available for given <em>context</em>.</p>
+	 *
+	 * <p>To make management easier, passing empty set of welcome files to this method will unregister all available
+	 * welcome files (for given context).</p>
+	 *
+	 * @param welcomeFiles
+	 * @param httpContext the http context from which the welcome files should be unregistered. Cannot be null.
+	 */
+	void unregisterWelcomeFiles(String[] welcomeFiles, HttpContext httpContext);
 
 
 
@@ -852,44 +885,6 @@ public interface WebContainer extends HttpService {
 //     * @since 0.3.0, January 12, 2007
 //     */
 //    void unregisterErrorPage(String error, HttpContext httpContext);
-//
-//    /**
-//     * Registers an ordered list of partial URIs. The purpose of this mechanism
-//     * is to allow the deployer to specify an ordered list of partial URIs for
-//     * the container to use for appending to URIs when there is a request for a
-//     * URI that corresponds to a directory entry in the WAR not mapped to a Web
-//     * component
-//     *
-//     * @param welcomeFiles
-//     *            an array of welcome files paths. Paths must not start or end
-//     *            with "/"
-//     * @param redirect
-//     *            true if the client should be redirected to welcome file or
-//     *            false if forwarded
-//     * @param httpContext
-//     *            the http context this error page is for. If null a default
-//     *            http context will be used.
-//     * @throws IllegalArgumentException
-//     *             if: welcome files param is null or empty entries in array are
-//     *             null or empty entries in array start or end with "/"
-//     * @throws IllegalStateException
-//     *             if welcome files are already registered
-//     * @since 0.3.0, January 16, 2007
-//     */
-//    void registerWelcomeFiles(String[] welcomeFiles, boolean redirect, HttpContext httpContext);
-//
-//    /**
-//     * Unregisters previous registered welcome files.
-//     *
-//     * @param httpContext
-//     *            the http context from which the welcome files should be
-//     *            unregistered. Cannot be null.
-//     * @throws IllegalArgumentException
-//     *             if httpContext is null
-//     * @since 0.3.0, January 16, 2007
-//     */
-//
-//    void unregisterWelcomeFiles(String[] welcomeFiles, HttpContext httpContext);
 //
 //    /**
 //     * Registers login configuration, with authorization method and realm name.

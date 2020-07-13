@@ -46,6 +46,7 @@ import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.HttpServiceEnabled;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.config.Configuration;
+import org.ops4j.pax.web.service.spi.model.ContextKey;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
@@ -373,7 +374,7 @@ public class MultiContainerTestSupport {
 	public static class ServerModelInternals {
 
 		public final Map<String, ServletContextModel> servletContexts = new HashMap<>();
-		public final Map<ServerModel.ContextKey, TreeSet<OsgiContextModel>> bundleContexts = new HashMap<>();
+		public final Map<ContextKey, TreeSet<OsgiContextModel>> bundleContexts = new HashMap<>();
 		public final Map<String, TreeSet<OsgiContextModel>> sharedContexts = new HashMap<>();
 		public final Map<String, OsgiContextModel> whiteboardContexts = new HashMap<>();
 		public final Map<Servlet, ServletModel> servlets = new IdentityHashMap<>();

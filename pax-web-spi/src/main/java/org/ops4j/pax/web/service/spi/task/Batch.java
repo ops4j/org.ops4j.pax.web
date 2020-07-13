@@ -27,6 +27,7 @@ import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.osgi.service.http.HttpContext;
 
 /**
@@ -215,6 +216,24 @@ public class Batch {
 	 */
 	public void addEventListenerModel(ServerModel serverModel, EventListenerModel model) {
 		operations.add(new EventListenerModelChange(OpCode.ADD, serverModel, model));
+	}
+
+	/**
+	 * Add new {@link WelcomeFileModel}
+	 * @param serverModel
+	 * @param model
+	 */
+	public void addWelcomeFileModel(ServerModel serverModel, WelcomeFileModel model) {
+		operations.add(new WelcomeFileModelChange(OpCode.ADD, serverModel, model));
+	}
+
+	/**
+	 * Remove {@link WelcomeFileModel}
+	 * @param serverModel
+	 * @param model
+	 */
+	public void removeWelcomeFileModel(ServerModel serverModel, WelcomeFileModel model) {
+		operations.add(new WelcomeFileModelChange(OpCode.DELETE, serverModel, model));
 	}
 
 	/**

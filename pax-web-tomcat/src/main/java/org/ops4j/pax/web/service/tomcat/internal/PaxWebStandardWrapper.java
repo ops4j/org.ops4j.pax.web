@@ -134,6 +134,10 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 		getPipeline().addValve(new PaxWebStandardWrapperValve((ValveBase) getPipeline().getBasic(), this, realContext));
 	}
 
+	public ServletModel getServletModel() {
+		return servletModel;
+	}
+
 	public Bundle getRegisteringBundle() {
 		return servletModel.getRegisteringBundle();
 	}
