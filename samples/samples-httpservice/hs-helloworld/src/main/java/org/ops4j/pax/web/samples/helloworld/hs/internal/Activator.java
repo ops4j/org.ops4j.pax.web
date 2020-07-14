@@ -98,8 +98,7 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 	}
 
 	@Override
-	public void removedService(ServiceReference<HttpService> reference,
-			HttpService service) {
+	public void removedService(ServiceReference<HttpService> reference, HttpService service) {
 		try {
 			service.unregister("/helloworld/hs");
 			service.unregister("/");

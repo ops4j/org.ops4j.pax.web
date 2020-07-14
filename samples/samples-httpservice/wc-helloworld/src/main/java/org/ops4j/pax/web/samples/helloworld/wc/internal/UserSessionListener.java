@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
@@ -31,20 +30,15 @@ import javax.servlet.http.HttpSessionListener;
  * @author Anaximandro de Godinho
  */
 public class UserSessionListener implements HttpSessionListener {
-	/**
-	 * The user name string, stored in the seesion.
-	 */
+
+	/** The user name string, stored in the seesion. */
 	private static final String P_USER_NAME = "userName";
 
-	/**
-	 * One counter, ONLY to see if the listener were fired.
-	 */
+	/** One counter, ONLY to see if the listener were fired. */
 	private static Integer fireCounter = 0;
 
-	/**
-	 * Our local session store, by id - synchronized.
-	 */
-	private static Map<String, HttpSession> sessions = new Hashtable<>();
+	/** Our local session store, by id - synchronized. */
+	private static final Map<String, HttpSession> SESSIONS = new Hashtable<>();
 
 	public void sessionCreated(final HttpSessionEvent event) {
 		final HttpSession session = event.getSession();
@@ -53,24 +47,25 @@ public class UserSessionListener implements HttpSessionListener {
 		session.setAttribute(P_USER_NAME, "sessionFired_" + fireCounter);
 
 		final String id = session.getId();
-		sessions.put(id, session);
+		SESSIONS.put(id, session);
 	}
 
 	public void sessionDestroyed(final HttpSessionEvent event) {
 		final HttpSession session = event.getSession();
 		final String id = session.getId();
-		sessions.remove(id);
+		SESSIONS.remove(id);
 	}
 
 	public List<String> getUserNames() {
 		final List<String> users = new ArrayList<>();
 
-		for (final String id : sessions.keySet()) {
-			final HttpSession session = sessions.get(id);
+		for (final String id : SESSIONS.keySet()) {
+			final HttpSession session = SESSIONS.get(id);
 			final String userName = (String) session.getAttribute(P_USER_NAME);
 			users.add(userName);
 		}
 
 		return users;
 	}
+
 }

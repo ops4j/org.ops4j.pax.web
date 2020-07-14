@@ -30,7 +30,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Supplier;
 import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
 
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.ConnectionFactory;
@@ -673,7 +672,6 @@ class JettyServerWrapper implements BatchVisitor {
 				throw new IllegalStateException(osgiModel + " is already registered");
 			}
 
-			// TODO: OsgiServletContext should be holding context-scoped welcome files
 			osgiServletContexts.put(osgiModel, new OsgiServletContext(sch.getServletContext(), osgiModel, servletModel));
 
 			// a physical context just got a new OSGi context
@@ -684,8 +682,10 @@ class JettyServerWrapper implements BatchVisitor {
 			LOG.info("Removing {} from {}", osgiModel, sch);
 
 			// TOCHECK: are there web elements associated with removed mapping for OsgiServletContext?
-			osgiServletContexts.remove(osgiModel);
+			OsgiServletContext removedOsgiServletContext = osgiServletContexts.remove(osgiModel);
 			osgiContextModels.get(contextPath).remove(osgiModel);
+
+			removedOsgiServletContext.unregister();
 		}
 
 		// there may be a change in what's the "best" (highest ranked) OsgiContextModel for given
@@ -693,9 +693,19 @@ class JettyServerWrapper implements BatchVisitor {
 		// target servlet (with filters only)
 		OsgiContextModel highestRankedModel = Utils.getHighestRankedModel(osgiContextModels.get(contextPath));
 		if (highestRankedModel != null) {
-			ServletContext highestRankedContext = osgiServletContexts.get(highestRankedModel);
+			OsgiServletContext highestRankedContext = osgiServletContexts.get(highestRankedModel);
 			((PaxWebServletHandler) sch.getServletHandler()).setDefaultOsgiContextModel(highestRankedModel);
 			((PaxWebServletHandler) sch.getServletHandler()).setDefaultServletContext(highestRankedContext);
+
+			// each highest ranked context should be registered as OSGi service (if it wasn't registered)
+			highestRankedContext.register();
+
+			// and we have to ensure that all other contexts are unregistered
+			osgiServletContexts.forEach((ocm, osc) -> {
+				if (osc != highestRankedContext) {
+					osc.unregister();
+				}
+			});
 		} else {
 			// TOCHECK: there should be no more web elements in the context, no OSGi mechanisms, just 404 all the time
 			((PaxWebServletHandler) sch.getServletHandler()).setDefaultOsgiContextModel(null);

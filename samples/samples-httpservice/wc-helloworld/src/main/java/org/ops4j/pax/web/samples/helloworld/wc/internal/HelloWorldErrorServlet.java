@@ -19,7 +19,6 @@ package org.ops4j.pax.web.samples.helloworld.wc.internal;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -33,14 +32,24 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class HelloWorldErrorServlet extends HttpServlet {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = -2179524669842453079L;
 
-	protected void doGet(final HttpServletRequest request,
-						 final HttpServletResponse response) throws ServletException,
-			IOException {
+	/**
+	 * Prints an error request attribute.
+	 *
+	 * @param writer    print writer to write to
+	 * @param request   servlet request
+	 * @param attribute attribute name
+	 */
+	private static void printAttribute(final PrintWriter writer, final HttpServletRequest request, final String attribute) {
+		writer.println("<tr>"
+				+ "<td>" + attribute + "</td>"
+				+ "<td>" + (request.getAttribute(attribute) != null ? request.getAttribute(attribute) : "") + "</td>"
+				+ "</tr>");
+	}
+
+	protected void doGet(final HttpServletRequest request, final HttpServletResponse response)
+			throws ServletException, IOException {
 		response.setContentType("text/html");
 
 		final PrintWriter writer = response.getWriter();
@@ -57,22 +66,6 @@ public class HelloWorldErrorServlet extends HttpServlet {
 		printAttribute(writer, request, "javax.servlet.error.status_code");
 		writer.println("</table>");
 		writer.println("</body></html>");
-	}
-
-	/**
-	 * Prints an error request attribute.
-	 *
-	 * @param writer    print writer to write to
-	 * @param request   servlet request
-	 * @param attribute attribute name
-	 */
-	private static void printAttribute(final PrintWriter writer,
-									   final HttpServletRequest request, final String attribute) {
-		writer.println("<tr><td>"
-				+ attribute
-				+ "</td><td>"
-				+ (request.getAttribute(attribute) != null ? request
-				.getAttribute(attribute) : "") + "</td></tr>");
 	}
 
 }

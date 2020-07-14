@@ -127,16 +127,39 @@ class OsgiStandardRoot extends StandardRoot {
 							LOG.warn(e.getMessage(), e);
 							return new EmptyResource(root, path);
 						}
-					} else if (resource.getProtocol().equals("bundle") && "/".equals(resource.getPath())) {
-						// Felix, root of the bundle - return a resource which says it's a directory
-						return new RootBundleURLResource(OsgiStandardRoot.this, resource, fullPath);
-					} else {
-						try {
-							return new UrlResource(OsgiStandardRoot.this, resource, fullPath, maxEntrySize);
-						} catch (IOException e) {
-							LOG.warn(e.getMessage(), e);
-							return new EmptyResource(root, path);
+					} else if (resource.getProtocol().equals("bundle")) {
+						if ("/".equals(resource.getPath())) {
+							// Felix, root of the bundle - return a resource which says it's a directory
+							return new RootBundleURLResource(OsgiStandardRoot.this, resource, fullPath);
+						} else if (!resource.getPath().endsWith("/")) {
+							// unfortunately, due to https://issues.apache.org/jira/browse/FELIX-6294
+							// we have to check ourselves if it's a directory and possibly append a slash
+							// just as org.eclipse.osgi.storage.bundlefile.BundleFile#fixTrailingSlash() does it
+							try {
+								UrlResource potentialDirectory = new UrlResource(OsgiStandardRoot.this, resource, fullPath, maxEntrySize);
+								if (potentialDirectory.exists()) {
+									try (InputStream is = potentialDirectory.getInputStream()) {
+										if (is == null || is.available() == 0) {
+											URL fixedURL = new URL(resource.toExternalForm() + "/");
+											UrlResource properDirectory = new UrlResource(OsgiStandardRoot.this, fixedURL, fullPath, maxEntrySize);
+											if (properDirectory.exists()) {
+												return properDirectory;
+											}
+										}
+									}
+								}
+							} catch (IOException e) {
+								LOG.warn("Problem checking directory bundle resource: {}", e.getMessage(), e);
+								return new EmptyResource(root, path);
+							}
 						}
+					}
+
+					try {
+						return new UrlResource(OsgiStandardRoot.this, resource, fullPath, maxEntrySize);
+					} catch (IOException e) {
+						LOG.warn(e.getMessage(), e);
+						return new EmptyResource(root, path);
 					}
 				}
 

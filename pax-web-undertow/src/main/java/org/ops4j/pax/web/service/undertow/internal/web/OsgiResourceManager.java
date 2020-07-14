@@ -16,6 +16,7 @@
 package org.ops4j.pax.web.service.undertow.internal.web;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -82,7 +83,7 @@ public class OsgiResourceManager implements ResourceManager {
 			return null;
 		}
 
-		Resource res;
+		Resource res = null;
 		if (resource.getProtocol().equals("file")) {
 			try {
 				Path file = Paths.get(resource.toURI());
@@ -98,7 +99,26 @@ public class OsgiResourceManager implements ResourceManager {
 				LOG.warn(e.getMessage(), e);
 				return null;
 			}
-		} else {
+		} else if (resource.getProtocol().equals("bundle") && !resource.getPath().endsWith("/")) {
+			// unfortunately, due to https://issues.apache.org/jira/browse/FELIX-6294
+			// we have to check ourselves if it's a directory and possibly append a slash
+			// just as org.eclipse.osgi.storage.bundlefile.BundleFile#fixTrailingSlash() does it
+			URLResource potentialDirectory = new URLResource(resource, resource.getPath());
+			if (potentialDirectory.getContentLength() == null || potentialDirectory.getContentLength() == 0L) {
+				try (InputStream is = potentialDirectory.getUrl().openStream()) {
+					if (is == null || is.available() == 0) {
+						URL fixedURL = new URL(resource.toExternalForm() + "/");
+						try (InputStream is2 = fixedURL.openStream()) {
+							if (is2 != null && is2.available() == 0) {
+								res = new URLResource(fixedURL, fixedURL.getPath());
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (res == null) {
 			res = new URLResource(resource, resource.getPath());
 		}
 

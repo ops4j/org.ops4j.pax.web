@@ -413,7 +413,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 					ServletModel found = null;
 					for (ServletModel existing : serviceModel.getServletModels()) {
-						if (existing.getAlias().equals(alias)) {
+						if (alias.equals(existing.getAlias())) {
 							found = existing;
 							break;
 						}

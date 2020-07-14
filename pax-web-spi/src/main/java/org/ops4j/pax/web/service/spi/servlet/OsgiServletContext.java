@@ -20,8 +20,10 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.EventListener;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,11 +38,16 @@ import javax.servlet.SessionCookieConfig;
 import javax.servlet.SessionTrackingMode;
 import javax.servlet.descriptor.JspConfigDescriptor;
 
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.wiring.BundleWiring;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>Implementation of {@link ServletContext} for the contract described in 140.2.6 "Behavior of the Servlet Context"
@@ -52,6 +59,8 @@ import org.osgi.framework.wiring.BundleWiring;
  * processing, we need yet another facade to provide required {@link ServletContext#getClassLoader()} behavior.</p>
  */
 public class OsgiServletContext implements ServletContext {
+
+	public static final Logger LOG = LoggerFactory.getLogger(OsgiServletContext.class);
 
 	private ServletContext containerServletContext;
 	private final OsgiContextModel osgiContextModel;
@@ -72,6 +81,9 @@ public class OsgiServletContext implements ServletContext {
 	/** Welcome files are kept at this level - to be accessed by resource servlets, uniquely for each OSGi context */
 	private String[] welcomeFiles;
 
+	/** If this context is registered as OSGi service, here's the registration */
+	private ServiceRegistration<ServletContext> registration;
+
 	/**
 	 * Constructor called when {@link OsgiContextModel} is passed to given
 	 * {@link org.ops4j.pax.web.service.spi.ServerController}. We still can't grab an instance of
@@ -91,6 +103,52 @@ public class OsgiServletContext implements ServletContext {
 		this.servletContextModel = servletContextModel;
 
 		this.defaultWebContainerContext = osgiContextModel.resolveHttpContext(osgiContextModel.getOwnerBundle());
+
+		// This attribute is defined in 128.6.1 "Bundle Context Access" in the context of WAB applications
+		// but we have to store bundle context of the bundle of the OsgiContextModel in all cases
+		// (WAB, Whiteboard, HttpService) anyway
+		if (osgiContextModel.getOwnerBundle() != null && osgiContextModel.getOwnerBundle().getBundleContext() != null) {
+			this.attributes.put(PaxWebConstants.CONTEXT_PARAM_BUNDLE_CONTEXT,
+					osgiContextModel.getOwnerBundle().getBundleContext());
+		}
+	}
+
+	/**
+	 * A server wrapper that finds this {@link OsgiServletContext} to be highest ranked for given
+	 * physical {@link ServletContext} should register it as OSGi service for given context path.
+	 */
+	public void register() {
+		if (registration == null) {
+			try {
+				LOG.info("Registering {} as OSGi service for {} context path", this, getContextPath());
+
+				BundleContext bc = osgiContextModel.getOwnerBundle().getBundleContext();
+				Dictionary<String, Object> properties = new Hashtable<>();
+				properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SYMBOLIC_NAME, bc.getBundle().getSymbolicName());
+				properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_VERSION, bc.getBundle().getVersion());
+				properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_PATH, getContextPath());
+				properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_NAME, osgiContextModel.getName());
+				registration = bc.registerService(ServletContext.class, this, properties);
+			} catch (Exception e) {
+				LOG.error("Error registering {} as OSGi service: {}", this, e.getMessage(), e);
+			}
+		}
+	}
+
+	/**
+	 * A server wrapper that finds this {@link OsgiServletContext} to no longer be highest ranked for given
+	 * physical {@link ServletContext} should unregister it from OSGi service registry.
+	 */
+	public void unregister() {
+		if (registration != null) {
+			try {
+				LOG.info("Registering {} as OSGi service for {} context path", this, getContextPath());
+
+				registration.unregister();
+			} catch (Exception e) {
+				LOG.error("Error unregistering {} from OSGi registry: {}", this, e.getMessage(), e);
+			}
+		}
 	}
 
 	public OsgiContextModel getOsgiContextModel() {
@@ -443,7 +501,6 @@ public class OsgiServletContext implements ServletContext {
 	Set<String> getResourcePaths(WebContainerContext context, String path) {
 		return context.getResourcePaths(path);
 	}
-
 
 	// --- methods backed by the OsgiContextModel (object "customized" by trackers from ServletContextHelper)
 

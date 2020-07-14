@@ -27,6 +27,7 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
 import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
@@ -124,6 +125,10 @@ public class PaxWebServletHolder extends ServletHolder {
 
 		// instead of doing it once per request, we can get servlet-scoped WebContainerContext now
 		webContainerContext = osgiContextModel.resolveHttpContext(servletModel.getRegisteringBundle());
+
+		if (servletModel.getServlet() != null && servletModel.isResourceServlet()) {
+			((JettyResourceServlet) servletModel.getServlet()).setWelcomeFiles(osgiServletContext.getWelcomeFiles());
+		}
 	}
 
 	public ServletModel getServletModel() {

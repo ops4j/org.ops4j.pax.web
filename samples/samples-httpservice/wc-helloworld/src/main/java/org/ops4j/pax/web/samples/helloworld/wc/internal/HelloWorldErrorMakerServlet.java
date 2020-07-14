@@ -18,7 +18,6 @@
 package org.ops4j.pax.web.samples.helloworld.wc.internal;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -34,22 +33,16 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class HelloWorldErrorMakerServlet extends HttpServlet {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = -8105406020181795765L;
 
-	protected void doGet(final HttpServletRequest request,
-						 final HttpServletResponse response) throws ServletException,
-			IOException {
+	protected void doGet(final HttpServletRequest request, final HttpServletResponse response)
+			throws ServletException, IOException {
 		final String exceptionType = request.getParameter("type");
 		if (exceptionType == null || exceptionType.trim().length() == 0) {
-			throw new IllegalArgumentException(
-					"Request parameter [type] is not set or is empty");
+			throw new IllegalArgumentException("Request parameter [type] is not set or is empty");
 		}
 		try {
-			final Exception exception = (Exception) Class
-					.forName(exceptionType).newInstance();
+			final Exception exception = (Exception) Class.forName(exceptionType).newInstance();
 			if (exception instanceof RuntimeException) {
 				throw (RuntimeException) exception;
 			}

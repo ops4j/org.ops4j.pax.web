@@ -53,7 +53,9 @@ public class WelcomeFileModel extends ElementModel<WelcomeFileMapping, WelcomeFi
 
 	@Override
 	public WelcomeFileEventData asEventData() {
-		return new WelcomeFileEventData(this.welcomeFiles, redirect);
+		WelcomeFileEventData welcomeFileEventData = new WelcomeFileEventData(this.welcomeFiles, redirect);
+		setCommonEventProperties(welcomeFileEventData);
+		return welcomeFileEventData;
 	}
 
 	public String[] getWelcomeFiles() {

@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
@@ -31,16 +30,41 @@ import javax.servlet.http.HttpSessionListener;
  * @author Anaximandro de Godinho (Woody)
  */
 public class HelloWorldSessionListener implements HttpSessionListener {
-	/**
-	 * Local session store, by id - synchronized.
-	 */
+
+	/** Local session store, by id - synchronized. */
 	private static final Map<String, HttpSession> SESSIONS = new Hashtable<>();
 
-	/**
-	 * Counter, good idea if you do need to ensure that this listener were
-	 * fired.
-	 */
+	/** Counter, good idea if you do need to ensure that this listener were fired. */
 	private static int counter;
+
+	/**
+	 * Return a list with all session values for a given attribute name.
+	 *
+	 * @return a list with all session values for a given attribute name.
+	 */
+	public static synchronized List<Object> getAttributes(final String name) {
+		final List<Object> data = new ArrayList<>();
+
+		for (final String id : SESSIONS.keySet()) {
+			final HttpSession session = SESSIONS.get(id);
+			try {
+				final Object o = session.getAttribute(name);
+				data.add(o);
+			} catch (final Exception ignored) {
+			}
+		}
+
+		return data;
+	}
+
+	/**
+	 * Return the current session counter.
+	 *
+	 * @return the current session counter.
+	 */
+	public static synchronized int getCounter() {
+		return counter;
+	}
 
 	/**
 	 * Fires whenever a new session is created.
@@ -62,35 +86,4 @@ public class HelloWorldSessionListener implements HttpSessionListener {
 		counter--;
 	}
 
-	/**
-	 * Return a list with all session values for a given attribute name.
-	 *
-	 * @return a list with all session values for a given attribute name.
-	 */
-	public static synchronized List<Object> getAttributes(final String name) {
-		final List<Object> data = new ArrayList<>();
-
-		for (final String id : SESSIONS.keySet()) {
-			final HttpSession session = SESSIONS.get(id);
-			try {
-				final Object o = session.getAttribute(name);
-				data.add(o);
-				//CHECKSTYLE:OFF
-			} catch (final Exception e) {
-				// no data for this object.
-			}
-			//CHECKSTYLE:ON
-		}
-
-		return data;
-	}
-
-	/**
-	 * Return the current session counter.
-	 *
-	 * @return the current session counter.
-	 */
-	public static synchronized int getCounter() {
-		return counter;
-	}
 }

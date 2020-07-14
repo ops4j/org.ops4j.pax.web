@@ -345,10 +345,10 @@ public class Context implements /*org.ops4j.pax.web.service.spi.LifeCycle, */Htt
 		try {
 			// find ServiceRegistration which matches the given ServletContext
 			serviceReg = registeredServletContexts.stream().filter(reg -> reg.getReference() != null
-					&& webContextPath.equals(reg.getReference().getProperty(PaxWebConstants.PROPERTY_SERVLETCONTEXT_PATH)))
+					&& webContextPath.equals(reg.getReference().getProperty(PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_PATH)))
 					.findFirst();
 			if (serviceReg.isPresent()) {
-				LOG.debug("Unregistered ServletContext with ServletContext Name: ", serviceReg.get().getReference().getProperty(PaxWebConstants.PROPERTY_SERVLETCONTEXT_NAME));
+				LOG.debug("Unregistered ServletContext with ServletContext Name: ", serviceReg.get().getReference().getProperty(PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_NAME));
 
 					serviceReg.get().unregister();
 			}
@@ -364,7 +364,7 @@ public class Context implements /*org.ops4j.pax.web.service.spi.LifeCycle, */Htt
 		String webContextPath = getContextPathForOsgi(servletContext);
 		// Undertows ServletContextImpl maps "/" to "". In OSGi path must start with /
 		String filter = String.format("(%s=%s)",
-				PaxWebConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
+				PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_PATH, webContextPath);
 		Optional<ServiceReference<ServletContext>> first;
 		try {
 			first = bundle.getBundleContext().getServiceReferences(ServletContext.class, filter).stream().findFirst();
@@ -374,9 +374,9 @@ public class Context implements /*org.ops4j.pax.web.service.spi.LifeCycle, */Htt
 		}
 		if (!first.isPresent()) {
 				Dictionary<String, String> props = new Hashtable<>(2);
-				props.put(PaxWebConstants.PROPERTY_SYMBOLIC_NAME, bundle.getSymbolicName());
-				props.put(PaxWebConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
-				props.put(PaxWebConstants.PROPERTY_SERVLETCONTEXT_NAME, servletContext.getServletContextName());
+				props.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SYMBOLIC_NAME, bundle.getSymbolicName());
+				props.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_PATH, webContextPath);
+				props.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_NAME, servletContext.getServletContextName());
 				ServiceRegistration<ServletContext> serviceReg = bundle.getBundleContext().registerService(
 						ServletContext.class,
 						new ServletContextProxy(this),

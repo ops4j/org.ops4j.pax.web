@@ -29,6 +29,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
  *     <li>{@code SERVICE_PROPERTY_} - for names of OSGi service registration properties</li>
  *     <li>{@code INIT_PARAM_} - for legacy init parameters passed to {@link org.osgi.service.http.HttpService}
  *     registration methods that are handled in special way by Pax Web.</li>
+ *     <li>{@code CONTEXT_PARAM_} - for {@link ServletContext} attributes set by Pax Web.</li>
  *     <li>{@code DEFAULT_} - for miscellaneous <em>default</em> values (default VHost, default name, default context,
  *     ...</li>
  * </ul></p>
@@ -172,6 +173,35 @@ public interface PaxWebConstants {
 	String FILTER_MAPPING_DISPATCHER = "filter-mapping-dispatcher";
 
 	/**
+	 * Servlet context attribute containing the bundle context of the bundle registering the http context
+	 * according to 128.6.1 "Bundle Context Access" chapter of OSGi CMPN 128 "Web Applications Specification"
+	 */
+	String CONTEXT_PARAM_BUNDLE_CONTEXT = "osgi-bundlecontext";
+
+	// --- 3 properties defined in 128.3.4 "Publishing the Servlet Context" (and one Pax Web specific)
+
+	/** Symbolic name of the WAB bundle or bundle registering OSGi servlet context */
+	String SERVICE_PROPERTY_WEB_SYMBOLIC_NAME = "osgi.web.symbolicname";
+
+	/** Version of the WAB bundle or bundle registering OSGi servlet context */
+	String SERVICE_PROPERTY_WEB_VERSION = "osgi.web.version";
+
+	/** Context path of the WAB bundle or bundle registering OSGi servlet context */
+	String SERVICE_PROPERTY_WEB_SERVLETCONTEXT_PATH = "osgi.web.contextpath";
+
+	/** Context name of the WAB bundle or bundle registering OSGi servlet context (Pax Web addition) */
+	String SERVICE_PROPERTY_WEB_SERVLETCONTEXT_NAME = "osgi.web.contextname";
+
+
+
+
+
+
+
+
+
+
+	/**
 	 * Init param name for specifying a context name.
 	 */
 	String CONTEXT_NAME = "webapp.context";
@@ -198,12 +228,6 @@ public interface PaxWebConstants {
 	String PROPERTY_SHOW_STACKS = "org.ops4j.pax.web.server.showStacks";
 
 	/**
-	 * Servlet context attribute containing the bundle context of the bundle
-	 * registering the http context.
-	 */
-	String BUNDLE_CONTEXT_ATTRIBUTE = "osgi-bundlecontext";
-
-	/**
 	 * Manifest header key for web application bundles.
 	 */
 	String CONTEXT_PATH_KEY = "Web-ContextPath";
@@ -220,10 +244,6 @@ public interface PaxWebConstants {
 	String PROPERTY_ENC_PREFIX = PID + ".enc.prefix";
 
 	String PROPERTY_ENC_SUFFIX = PID + ".enc.suffix";
-
-	String PROPERTY_SERVLETCONTEXT_PATH = "osgi.web.contextpath";
-	String PROPERTY_SERVLETCONTEXT_NAME = "osgi.web.contextname";
-	String PROPERTY_SYMBOLIC_NAME = "osgi.web.symbolicname";
 
 	/**
 	 * Scratch directory for JSPs

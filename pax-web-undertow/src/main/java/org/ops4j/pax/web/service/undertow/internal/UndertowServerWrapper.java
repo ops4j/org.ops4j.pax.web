@@ -892,8 +892,10 @@ class UndertowServerWrapper implements BatchVisitor {
 			LOG.info("Removing {} from {}", osgiModel, contextPath);
 
 			// TOCHECK: are there web elements associated with removed mapping for OsgiServletContext?
-			osgiServletContexts.remove(osgiModel);
+			OsgiServletContext removedOsgiServletContext = osgiServletContexts.remove(osgiModel);
 			osgiContextModels.get(contextPath).remove(osgiModel);
+
+			removedOsgiServletContext.unregister();
 		}
 
 		// there may be a change in what's the "best" (highest ranked) OsgiContextModel for given
@@ -905,6 +907,16 @@ class UndertowServerWrapper implements BatchVisitor {
 			// default "contexts" to handle security and class/resource loading
 			wrappingHandlers.get(contextPath).setDefaultServletContext(highestRankedContext);
 			securityHandlers.get(contextPath).setDefaultOsgiContextModel(highestRankedModel);
+
+			// each highest ranked context should be registered as OSGi service (if it wasn't registered)
+			highestRankedContext.register();
+
+			// and we have to ensure that all other contexts are unregistered
+			osgiServletContexts.forEach((ocm, osc) -> {
+				if (osc != highestRankedContext) {
+					osc.unregister();
+				}
+			});
 		} else {
 			// TOCHECK: there should be no more web elements in the context, no OSGi mechanisms, just 404 all the time
 			wrappingHandlers.get(contextPath).setDefaultServletContext(null);

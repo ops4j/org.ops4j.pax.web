@@ -18,7 +18,6 @@ package org.ops4j.pax.web.samples.helloworld.wc.internal;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -34,30 +33,24 @@ import javax.servlet.ServletResponse;
  */
 public class HelloWorldFilter implements Filter {
 
-	/**
-	 * Filter config.
-	 */
+	/** Filter config. */
 	private FilterConfig filterConfig;
 
 	private boolean haveBundleContext;
 
 	public void init(final FilterConfig config) throws ServletException {
 		filterConfig = config;
-		haveBundleContext = config.getServletContext().getAttribute(
-				"osgi-bundlecontext") != null;
+		haveBundleContext = config.getServletContext().getAttribute("osgi-bundlecontext") != null;
 	}
 
-	public void doFilter(final ServletRequest request,
-						 final ServletResponse response, final FilterChain chain)
+	public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
 			throws IOException, ServletException {
 		response.setContentType("text/html");
 
 		final PrintWriter writer = response.getWriter();
 		writer.println("<html>");
-		writer.println("<head><title>" + filterConfig.getInitParameter("title")
-				+ "</title></head>");
-		writer.println("<!-- Have bundle context in filter: "
-				+ haveBundleContext + " -->");
+		writer.println("<head><title>" + filterConfig.getInitParameter("title") + "</title></head>");
+		writer.println("<!-- Have bundle context in filter: " + haveBundleContext + " -->");
 
 		chain.doFilter(request, response);
 
@@ -67,4 +60,5 @@ public class HelloWorldFilter implements Filter {
 	public void destroy() {
 		// do nothing
 	}
+
 }

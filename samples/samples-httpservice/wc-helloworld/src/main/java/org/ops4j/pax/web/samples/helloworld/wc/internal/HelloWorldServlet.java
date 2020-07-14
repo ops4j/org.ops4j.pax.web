@@ -19,7 +19,6 @@ package org.ops4j.pax.web.samples.helloworld.wc.internal;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -34,14 +33,24 @@ import javax.servlet.http.HttpSession;
  */
 public class HelloWorldServlet extends HttpServlet {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 1633766459629276016L;
 
-	protected void doGet(final HttpServletRequest request,
-						 final HttpServletResponse response) throws ServletException,
-			IOException {
+	private static String getSessionListenerData() {
+		final StringBuilder s = new StringBuilder();
+
+		final List<Object> userNames = HelloWorldSessionListener.getAttributes("userName");
+		s.append(userNames.size()).append("<br>");
+
+		for (final Object userName : userNames) {
+			s.append(userName).append("<br>");
+		}
+
+		return s.toString();
+	}
+
+	protected void doGet(final HttpServletRequest request, final HttpServletResponse response)
+			throws ServletException, IOException {
+
 		/*
 		 * The container DOES NOT create the session if the servlet does not use
 		 * it at least once, so, we do need the line below in order to create
@@ -58,29 +67,13 @@ public class HelloWorldServlet extends HttpServlet {
 		final PrintWriter writer = response.getWriter();
 		writer.println("<body align='center'>");
 		writer.println("<h1>Hello World</h1>");
-		writer.println("<img src='" + request.getContextPath()
-				+ "/images/logo.png' border='0'/>");
-		writer.println("<h1>" + getServletConfig().getInitParameter("from")
-				+ "</h1>");
-		writer.print(getServletContext().getAttribute("requestCounter")
-				.toString() + " requests");
+		writer.println("<img src='" + request.getContextPath() + "/images/logo.png' border='0'/>");
+		writer.println("<h1>" + getServletConfig().getInitParameter("from") + "</h1>");
+		writer.print(getServletContext().getAttribute("requestCounter").toString() + " requests");
 		writer.println("<h1>Current User Name: " + userName + "</h1>");
 		writer.println("<h1>HttpSessionListener:</h1>");
 		writer.println(getSessionListenerData());
 		writer.println("</body>");
 	}
 
-	private static String getSessionListenerData() {
-		final StringBuilder s = new StringBuilder();
-
-		final List<Object> userNames = HelloWorldSessionListener
-				.getAttributes("userName");
-		s.append(userNames.size()).append("<br>");
-
-		for (final Object userName : userNames) {
-			s.append(userName).append("<br>");
-		}
-
-		return s.toString();
-	}
 }
