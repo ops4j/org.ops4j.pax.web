@@ -28,6 +28,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.net.ssl.SSLContext;
+
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.config.RequestConfig;
@@ -36,12 +38,24 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.client5.http.ssl.TrustSelfSignedStrategy;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
+import org.apache.hc.core5.http.ssl.TLS;
+import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
+import org.apache.hc.core5.pool.PoolReusePolicy;
+import org.apache.hc.core5.ssl.SSLContexts;
+import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,9 +83,9 @@ class Hc5TestClient implements HttpTestClient {
 	private int timeoutInSeconds = 100;
 	private CookieState httpState = null;
 
-	private String keystorePassword = "password";
+	private String keystorePassword = "passw0rd";
 
-	private String keyManagerPassword = "password";
+	private String keyManagerPassword = "passw0rd";
 
 	Hc5TestClient() {
 	}
@@ -109,26 +123,26 @@ class Hc5TestClient implements HttpTestClient {
 
 	@Override
 	public HttpTestClient withBundleKeystore(String bundleSymbolicName, String keystoreLocation) {
-//		Bundle result = null;
-//		for (Bundle candidate : FrameworkUtil.getBundle(getClass()).getBundleContext().getBundles()) {
-//			if (candidate.getSymbolicName().equals(bundleSymbolicName)) {
-//				if (result == null || result.getVersion().compareTo(candidate.getVersion()) < 0) {
-//					result = candidate;
-//				}
-//			}
-//		}
-//
-//		if (result == null) {
-//			LOG.error("Bundle with '{}' not found for keystore-lookup!", bundleSymbolicName);
-//			return this;
-//		}
-//
-//		this.keystoreLocationURL = result.getEntry(keystoreLocation);
-//
-//		if (this.keystoreLocationURL == null) {
-//			LOG.error("Keystore-Resource not found under '{}'!", keystoreLocation);
-//			return this;
-//		}
+		Bundle result = null;
+		for (Bundle candidate : FrameworkUtil.getBundle(getClass()).getBundleContext().getBundles()) {
+			if (candidate.getSymbolicName().equals(bundleSymbolicName)) {
+				if (result == null || result.getVersion().compareTo(candidate.getVersion()) < 0) {
+					result = candidate;
+				}
+			}
+		}
+
+		if (result == null) {
+			LOG.error("Bundle with '{}' not found for keystore-lookup!", bundleSymbolicName);
+			return this;
+		}
+
+		this.keystoreLocationURL = result.getEntry(keystoreLocation);
+
+		if (this.keystoreLocationURL == null) {
+			LOG.error("Keystore-Resource not found under '{}'!", keystoreLocation);
+			return this;
+		}
 
 		return this;
 	}
@@ -218,20 +232,28 @@ class Hc5TestClient implements HttpTestClient {
 			HttpClientBuilder httpClientBuilder = HttpClients.custom();
 			CloseableHttpClient httpClient;
 
-//			if (keystoreLocationURL != null) {
-//				// Trust own CA and all self-signed certs
-//				SSLContext sslcontext = SSLContexts.custom()
-//						.loadTrustMaterial(keystoreLocationURL, keystorePassword.toCharArray(), new TrustSelfSignedStrategy())
-//						.loadKeyMaterial(keystoreLocationURL, keystorePassword.toCharArray(), keyManagerPassword.toCharArray())
-//						.build();
-//				// Allow TLSv1.2 protocol only
-//				SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
-//						sslcontext,
-//						new String[] { "TLSv1.2" },
-//						null,
-//						new NoopHostnameVerifier());
-//				httpClientBuilder.setSSLSocketFactory(sslsf);
-//			}
+			if (keystoreLocationURL != null) {
+				// Trust own CA and all self-signed certs
+				SSLContext sslcontext = SSLContexts.custom()
+						.loadTrustMaterial(keystoreLocationURL, keystorePassword.toCharArray(), new TrustSelfSignedStrategy())
+						.loadKeyMaterial(keystoreLocationURL, keystorePassword.toCharArray(), keyManagerPassword.toCharArray())
+						.build();
+
+				PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+						.setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
+								.setSslContext(sslcontext)
+								.setTlsVersions(TLS.V_1_2)
+								.build())
+						.setDefaultSocketConfig(SocketConfig.custom()
+								.setSoTimeout(Timeout.ofSeconds(5))
+								.build())
+						.setPoolConcurrencyPolicy(PoolConcurrencyPolicy.STRICT)
+						.setConnPoolPolicy(PoolReusePolicy.LIFO)
+						.setConnectionTimeToLive(TimeValue.ofMinutes(1L))
+						.build();
+
+				httpClientBuilder.setConnectionManager(connectionManager);
+			}
 
 			if (httpState != null) {
 				httpClientBuilder.setDefaultCookieStore(httpState.getCookieStore());
@@ -424,7 +446,6 @@ class Hc5TestClient implements HttpTestClient {
 //	}
 
 	private void doAssertion(ResultWrapper result) {
-
 		final Collection<String> assertionErrors = new ArrayList<>();
 
 		if (returnCode != null) {

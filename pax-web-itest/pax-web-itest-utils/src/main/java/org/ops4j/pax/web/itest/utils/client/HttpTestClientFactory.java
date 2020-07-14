@@ -35,7 +35,7 @@ public class HttpTestClientFactory {
 	public static HttpTestClient createDefaultTestClient() {
 		return new Hc5TestClient()
 				.timeoutInSeconds(10)
-				.withBundleKeystore("org.ops4j.pax.web.itest.pax-web-itest-base", "keystore")
+				.withBundleKeystore("org.ops4j.pax.web.itest.pax-web-itest-utils", "server.jks")
 				.addRequestHeader("Accept-Language", "en")
 				.withReturnCode(200);
 	}
@@ -55,7 +55,7 @@ public class HttpTestClientFactory {
 	public static HttpTestClient createDefaultTestClientWithCRL() {
 		return new Hc5TestClient()
 				.timeoutInSeconds(10)
-				.withBundleKeystore("org.ops4j.pax.web.itest.pax-web-itest-base", "wss40rev.jks", "security", "security")
+				.withBundleKeystore("org.ops4j.pax.web.itest.pax-web-itest-utils", "server.jks")
 				.addRequestHeader("Accept-Language", "en")
 				.withReturnCode(200);
 	}

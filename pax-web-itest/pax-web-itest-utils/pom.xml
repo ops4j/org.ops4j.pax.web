@@ -75,11 +75,16 @@
 							org.slf4j;version="[1.7,2)",
 
 							<!-- other -->
+							javax.net,
 							javax.net.ssl
 						</Import-Package>
 						<Export-Package>
 							org.ops4j.pax.web.itest.utils.*
 						</Export-Package>
+						<Include-Resource>
+							{maven-resources},
+							server.jks=../pax-web-itest-container/etc/security/server.jks
+						</Include-Resource>
 						<Embed-Dependency>
 							httpclient5,httpcore5,httpcore5-h2,commons-codec
 						</Embed-Dependency>
