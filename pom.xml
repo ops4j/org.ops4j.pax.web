@@ -139,9 +139,9 @@
 		<dependency.xbean.version>4.17</dependency.xbean.version>
 		<dependency.xnio-api.version>3.3.8.Final</dependency.xnio-api.version>
 		<dependency.xnio.version>3.3.8.Final</dependency.xnio.version>
-		<dependency.undertow-core.version>2.0.26.Final</dependency.undertow-core.version>
-		<dependency.undertow-servlet.version>2.0.26.Final</dependency.undertow-servlet.version>
-		<dependency.undertow-websockets.version>2.0.26.Final</dependency.undertow-websockets.version>
+		<dependency.undertow-core.version>2.0.30.Final</dependency.undertow-core.version>
+		<dependency.undertow-servlet.version>2.0.30.Final</dependency.undertow-servlet.version>
+		<dependency.undertow-websockets.version>2.0.30.Final</dependency.undertow-websockets.version>
 		<dependency.jboss-logging>3.4.1.Final</dependency.jboss-logging>
 	    <dependency.jasypt>1.9.3</dependency.jasypt>
 		<dependency.pax-cdi.version>1.1.2</dependency.pax-cdi.version>
