@@ -171,7 +171,7 @@
 		<servlet-jsp.spec.version>2.3.3</servlet-jsp.spec.version>
 		<servlet-jstl.spec.version>1.2.2</servlet-jstl.spec.version>
 		<dependency.el-api.version>3.0.0</dependency.el-api.version>
-		<dependency.validation-api.version>1.1.0.Final</dependency.validation-api.version>
+		<dependency.validation-api.version>2.0.1.Final</dependency.validation-api.version>
 		<dependency.jaspic.version>1.1</dependency.jaspic.version>
 
 		<!-- Tells Sonar to use JaCoCo as the code coverage tool -->
