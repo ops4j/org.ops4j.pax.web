@@ -228,7 +228,7 @@
         <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr303-api-1.0.0/${servicemix.specs.version}</bundle>
         <bundle dependency="true">mvn:commons-beanutils/commons-beanutils/${dependency.commons-beanutils.version}</bundle>
         <bundle dependency="true">mvn:commons-collections/commons-collections/3.2.2</bundle>
-        <bundle dependency="true">mvn:commons-codec/commons-codec/1.11</bundle>
+        <bundle dependency="true">mvn:commons-codec/commons-codec/${dependency.commons-codec.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-digester/1.8_4</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.bundles/commons-discovery/0.4_1</bundle>
         <bundle>mvn:org.apache.myfaces.core/myfaces-api/${jsf-myfaces.version}</bundle>
