@@ -59,11 +59,14 @@ import io.undertow.servlet.api.ConfidentialPortManager;
 import io.undertow.servlet.api.Deployment;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
+import io.undertow.servlet.api.ErrorPage;
 import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.ListenerInfo;
 import io.undertow.servlet.api.ServletContainer;
 import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.core.ContextClassLoaderSetupAction;
+import io.undertow.servlet.core.DeploymentImpl;
+import io.undertow.servlet.core.ErrorPages;
 import io.undertow.servlet.core.ManagedFilter;
 import io.undertow.servlet.core.ManagedFilters;
 import io.undertow.servlet.core.ManagedListener;
@@ -74,6 +77,7 @@ import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
@@ -82,6 +86,8 @@ import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
+import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
+import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterStateChange;
@@ -1208,9 +1214,56 @@ class UndertowServerWrapper implements BatchVisitor {
 				EventListener eventListener = eventListenerModel.getEventListener();
 				ListenerInfo info = new ListenerInfo(eventListener.getClass(), new ImmediateInstanceFactory<>(eventListener));
 
-				// TOCHECK: workaround Undertow inflexibility related to removal of such elements
 				deploymentInfo.getListeners().add(info);
 				manager.getDeployment().getApplicationListeners().addListener(new ManagedListener(info, true));
+			});
+		}
+		if (change.getKind() == OpCode.DELETE) {
+			contextModels.forEach((context) -> {
+				String contextPath = context.getContextPath();
+				DeploymentManager manager = servletContainer.getDeploymentByPath(contextPath);
+				DeploymentInfo deploymentInfo = manager.getDeployment().getDeploymentInfo();
+
+				EventListener eventListener = eventListenerModel.getEventListener();
+
+				// unfortunately, one does not simply remove EventListener from existing context in Undertow
+
+				// let's immediately show that given context is no longer mapped
+				pathHandler.removePrefixPath(contextPath);
+
+				try {
+					manager.stop();
+					manager.undeploy();
+				} catch (ServletException e) {
+					throw new RuntimeException("Problem stopping the deployment of context " + contextPath
+							+ ": " + e.getMessage(), e);
+				}
+
+				deploymentInfo.getListeners().removeIf(li -> {
+					try {
+						return li.getInstanceFactory() instanceof ImmediateInstanceFactory
+								&& ((ImmediateInstanceFactory<?>) li.getInstanceFactory()).createInstance().getInstance() == eventListener;
+					} catch (InstantiationException ignored) {
+						return false;
+					}
+				});
+
+				manager = servletContainer.addDeployment(deploymentInfo);
+				manager.deploy();
+
+				// we've changed the deployment for given context path - new ServletContext was created, so
+				// we have to propagate the change where needed
+				ServletContext newRealServletContext = manager.getDeployment().getServletContext();
+				this.osgiContextModels.get(contextPath).forEach(cm
+						-> this.osgiServletContexts.get(cm).setContainerServletContext(newRealServletContext));
+
+				try {
+					HttpHandler handler = manager.start();
+					pathHandler.addPrefixPath(contextPath, handler);
+				} catch (ServletException e) {
+					throw new IllegalStateException("Can't redeploy Undertow context "
+							+ contextPath + ": " + e.getMessage(), e);
+				}
 			});
 		}
 	}
@@ -1277,6 +1330,69 @@ class UndertowServerWrapper implements BatchVisitor {
 					}
 				}
 			});
+		}
+	}
+
+	@Override
+	public void visit(ErrorPageModelChange change) {
+		// no op here
+	}
+
+	@Override
+	public void visit(ErrorPageStateChange change) {
+		Map<String, TreeSet<ErrorPageModel>> contextErrorPages = change.getContextErrorPages();
+
+		for (Map.Entry<String, TreeSet<ErrorPageModel>> entry : contextErrorPages.entrySet()) {
+			String contextPath = entry.getKey();
+			TreeSet<ErrorPageModel> errorPageModels = entry.getValue();
+
+			LOG.info("Changing error page configuration for context {}", contextPath);
+
+			// take existing deployment manager and the deployment info from its deployment
+			DeploymentManager manager = servletContainer.getDeploymentByPath(contextPath);
+			Deployment deployment = manager.getDeployment();
+			DeploymentInfo deploymentInfo = deployment.getDeploymentInfo();
+
+			deploymentInfo.getErrorPages().clear();
+
+			Map<Integer, String> errorCodeLocations = new HashMap<>();
+			Map<Class<? extends Throwable>, String> exceptionMappings = new HashMap<>();
+			ErrorPages pages = new ErrorPages(errorCodeLocations, exceptionMappings, null);
+
+			for (ErrorPageModel model : errorPageModels) {
+				String location = model.getLocation();
+				for (String ex : model.getExceptionClassNames()) {
+					try {
+						ClassLoader cl = model.getRegisteringBundle().adapt(BundleWiring.class).getClassLoader();
+						Class<Throwable> t = (Class<Throwable>) cl.loadClass(ex);
+						exceptionMappings.put(t, location);
+						deploymentInfo.addErrorPage(new ErrorPage(location, t));
+					} catch (ClassNotFoundException e) {
+						LOG.warn("Can't load exception class {}: {}", ex, e.getMessage(), e);
+					}
+				}
+				for (int code : model.getErrorCodes()) {
+					errorCodeLocations.put(code, location);
+					deploymentInfo.addErrorPage(new ErrorPage(location, code));
+				}
+				if (model.isXx4()) {
+					for (int c = 400; c < 500; c++) {
+						errorCodeLocations.put(c, location);
+						deploymentInfo.addErrorPage(new ErrorPage(location, c));
+					}
+				}
+				if (model.isXx5()) {
+					for (int c = 500; c < 600; c++) {
+						errorCodeLocations.put(c, location);
+						deploymentInfo.addErrorPage(new ErrorPage(location, c));
+					}
+				}
+			}
+
+			if (deployment instanceof DeploymentImpl) {
+				((DeploymentImpl)deployment).setErrorPages(pages);
+			}
+
 		}
 	}
 

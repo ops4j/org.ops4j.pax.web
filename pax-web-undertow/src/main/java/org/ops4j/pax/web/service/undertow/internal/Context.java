@@ -52,7 +52,6 @@ import io.undertow.server.handlers.resource.ResourceManager;
 import io.undertow.servlet.ServletExtension;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
-import io.undertow.servlet.api.ErrorPage;
 import io.undertow.servlet.api.InstanceFactory;
 import io.undertow.servlet.api.ListenerInfo;
 import io.undertow.servlet.api.SecurityConstraint;
@@ -449,36 +448,36 @@ public class Context implements /*org.ops4j.pax.web.service.spi.LifeCycle, */Htt
 		for (WelcomeFileModel welcomeFile : welcomeFiles) {
 			deployment.addWelcomePages(welcomeFile.getWelcomeFiles());
 		}
-		for (ErrorPageModel errorPage : errorPages) {
-			try {
-				int error = Integer.parseInt(errorPage.getError());
-				deployment.addErrorPage(new ErrorPage(errorPage.getLocation(), error));
-			} catch (NumberFormatException nfe) {
-				// for Nxx codes, we have to loop
-				// Undertow doesn't support error code range handlers, but
-				// in the end - it's just a io.undertow.servlet.core.ErrorPages.errorCodeLocations map of code -> location
-				if ("4xx".equals(errorPage.getError())) {
-					for (int c = 400; c < 500; c++) {
-						deployment.addErrorPage(new ErrorPage(errorPage.getLocation(), c));
-					}
-				} else if ("5xx".equals(errorPage.getError())) {
-					for (int c = 500; c < 600; c++) {
-						deployment.addErrorPage(new ErrorPage(errorPage.getLocation(), c));
-					}
-				} else {
-					// must be an exception then
-					try {
-						@SuppressWarnings("unchecked")
-						Class<? extends Throwable> clazz = (Class<? extends Throwable>)
-								classLoader.loadClass(errorPage.getError());
-						deployment.addErrorPage(new ErrorPage(errorPage.getLocation(), clazz));
-					} catch (ClassNotFoundException cnfe) {
-						cnfe.addSuppressed(nfe);
-						throw new IllegalArgumentException("Unsupported error: " + errorPage.getError(), cnfe);
-					}
-				}
-			}
-		}
+//		for (ErrorPageModel errorPage : errorPages) {
+//			try {
+//				int error = Integer.parseInt(errorPage.getError());
+//				deployment.addErrorPage(new ErrorPage(errorPage.getLocation(), error));
+//			} catch (NumberFormatException nfe) {
+//				// for Nxx codes, we have to loop
+//				// Undertow doesn't support error code range handlers, but
+//				// in the end - it's just a io.undertow.servlet.core.ErrorPages.errorCodeLocations map of code -> location
+//				if ("4xx".equals(errorPage.getError())) {
+//					for (int c = 400; c < 500; c++) {
+//						deployment.addErrorPage(new ErrorPage(errorPage.getLocation(), c));
+//					}
+//				} else if ("5xx".equals(errorPage.getError())) {
+//					for (int c = 500; c < 600; c++) {
+//						deployment.addErrorPage(new ErrorPage(errorPage.getLocation(), c));
+//					}
+//				} else {
+//					// must be an exception then
+//					try {
+//						@SuppressWarnings("unchecked")
+//						Class<? extends Throwable> clazz = (Class<? extends Throwable>)
+//								classLoader.loadClass(errorPage.getError());
+//						deployment.addErrorPage(new ErrorPage(errorPage.getLocation(), clazz));
+//					} catch (ClassNotFoundException cnfe) {
+//						cnfe.addSuppressed(nfe);
+//						throw new IllegalArgumentException("Unsupported error: " + errorPage.getError(), cnfe);
+//					}
+//				}
+//			}
+//		}
 		if (contextModel.getContextParams() != null) {
 			for (Map.Entry<String, String> entry : contextModel.getContextParams().entrySet()) {
 				deployment.addInitParameter(entry.getKey(), entry.getValue());

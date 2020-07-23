@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -51,8 +52,11 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping;
 import org.osgi.framework.Bundle;
@@ -372,7 +376,6 @@ public class MultiContainerTestSupport {
 	 * Class to verify {@link ServerModel} after performing a test
 	 */
 	public static class ServerModelInternals {
-
 		public final Map<String, ServletContextModel> servletContexts = new HashMap<>();
 		public final Map<ContextKey, TreeSet<OsgiContextModel>> bundleContexts = new HashMap<>();
 		public final Map<String, TreeSet<OsgiContextModel>> sharedContexts = new HashMap<>();
@@ -381,6 +384,7 @@ public class MultiContainerTestSupport {
 		public final Set<ServletModel> disabledServletModels = new TreeSet<>();
 		public final Map<Filter, FilterModel> filters = new IdentityHashMap<>();
 		public final Set<FilterModel> disabledFilterModels = new TreeSet<>();
+		public final Set<ErrorPageModel> disabledErrorPageModels = new TreeSet<>();
 
 		private final ServerModel model;
 //		private final Map<String, VirtualHostModel> virtualHosts = new HashMap<>();
@@ -397,6 +401,7 @@ public class MultiContainerTestSupport {
 			disabledServletModels.addAll(getField(model, "disabledServletModels", Set.class));
 			filters.putAll(getField(model, "filters", Map.class));
 			disabledFilterModels.addAll(getField(model, "disabledFilterModels", Set.class));
+			disabledErrorPageModels.addAll(getField(model, "disabledErrorPageModels", Set.class));
 		}
 
 		/**
@@ -417,6 +422,7 @@ public class MultiContainerTestSupport {
 			clean &= filters.values().stream().noneMatch(fm -> fm.getRegisteringBundle().equals(bundle));
 			clean &= disabledServletModels.stream().noneMatch(sm -> sm.getRegisteringBundle().equals(bundle));
 			clean &= disabledFilterModels.stream().noneMatch(fm -> fm.getRegisteringBundle().equals(bundle));
+			clean &= disabledErrorPageModels.stream().noneMatch(fm -> fm.getRegisteringBundle().equals(bundle));
 			return clean;
 		}
 	}
@@ -425,13 +431,15 @@ public class MultiContainerTestSupport {
 	 * Class to verify {@link ServiceModel} after performing a test
 	 */
 	public static class ServiceModelInternals {
-
 		public final Map<String, Map<String, ServletModel>> aliasMapping = new HashMap<>();
 		public final Set<ServletModel> servletModels = new HashSet<>();
 		public final Set<FilterModel> filterModels = new HashSet<>();
+		public final Map<EventListener, EventListenerModel> eventListenerModels = new HashMap<>();
+		private final Map<ContextKey, Set<String>> welcomeFiles = new HashMap<>();
+		private final Set<WelcomeFileModel> welcomeFileModels = new HashSet<>();
+		private final Set<ErrorPageModel> errorPageModels = new HashSet<>();
 
 		private final ServiceModel model;
-//		private final Map<EventListener, EventListenerModel> eventListenerModels = new HashMap<>();
 
 		@SuppressWarnings("unchecked")
 		public ServiceModelInternals(ServiceModel model) {
@@ -439,10 +447,16 @@ public class MultiContainerTestSupport {
 			aliasMapping.putAll(getField(model, "aliasMapping", Map.class));
 			servletModels.addAll(getField(model, "servletModels", Set.class));
 			filterModels.addAll(getField(model, "filterModels", Set.class));
+			eventListenerModels.putAll(getField(model, "eventListenerModels", Map.class));
+			welcomeFiles.putAll(getField(model, "welcomeFiles", Map.class));
+			welcomeFileModels.addAll(getField(model, "welcomeFileModels", Set.class));
+			errorPageModels.addAll(getField(model, "errorPageModels", Set.class));
 		}
 
 		public boolean isEmpty() {
-			return aliasMapping.isEmpty() && servletModels.isEmpty() && filterModels.isEmpty();
+			return aliasMapping.isEmpty() && servletModels.isEmpty() && filterModels.isEmpty()
+					&& eventListenerModels.isEmpty() && welcomeFiles.isEmpty() && welcomeFileModels.isEmpty()
+					&& errorPageModels.isEmpty();
 		}
 	}
 

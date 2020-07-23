@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service.internal.views;
 import java.util.Collection;
 import javax.servlet.ServletException;
 
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
@@ -34,10 +35,14 @@ public interface DirectWebContainerView extends PaxWebContainerView {
 
 	void registerServlet(Collection<HttpContext> contexts, ServletModel build) throws ServletException, NamespaceException;
 
-	void registerFilter(Collection<HttpContext> contexts, FilterModel model) throws ServletException;
-
 	void unregisterServlet(ServletModel model);
 
+	void registerFilter(Collection<HttpContext> contexts, FilterModel model) throws ServletException;
+
 	void unregisterFilter(FilterModel model);
+
+	void registerErrorPages(Collection<HttpContext> contexts, ErrorPageModel model);
+
+	void unregisterErrorPages(ErrorPageModel model);
 
 }

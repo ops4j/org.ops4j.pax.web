@@ -64,4 +64,16 @@ public interface BatchVisitor {
 	 */
 	void visit(WelcomeFileModelChange change);
 
+	/**
+	 * Process a change related to error pages
+	 * @param change
+	 */
+	void visit(ErrorPageModelChange change);
+
+	/**
+	 * Process full change of the state of error pages per context
+	 * @param change
+	 */
+	void visit(ErrorPageStateChange change);
+
 }

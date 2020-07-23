@@ -123,12 +123,14 @@ public class OsgiServletContext implements ServletContext {
 				LOG.info("Registering {} as OSGi service for {} context path", this, getContextPath());
 
 				BundleContext bc = osgiContextModel.getOwnerBundle().getBundleContext();
-				Dictionary<String, Object> properties = new Hashtable<>();
-				properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SYMBOLIC_NAME, bc.getBundle().getSymbolicName());
-				properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_VERSION, bc.getBundle().getVersion());
-				properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_PATH, getContextPath());
-				properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_NAME, osgiContextModel.getName());
-				registration = bc.registerService(ServletContext.class, this, properties);
+				if (bc != null && bc.getBundle() != null) {
+					Dictionary<String, Object> properties = new Hashtable<>();
+					properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SYMBOLIC_NAME, bc.getBundle().getSymbolicName());
+					properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_VERSION, bc.getBundle().getVersion());
+					properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_PATH, getContextPath());
+					properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_NAME, osgiContextModel.getName());
+					registration = bc.registerService(ServletContext.class, this, properties);
+				}
 			} catch (Exception e) {
 				LOG.error("Error registering {} as OSGi service: {}", this, e.getMessage(), e);
 			}

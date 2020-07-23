@@ -18,13 +18,16 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EventListener;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.servlet.Filter;
@@ -48,6 +51,7 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
@@ -133,8 +137,12 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		while (!serviceModel.getServletModels().isEmpty()) {
 			doUnregisterServlet(serviceModel.getServletModels().iterator().next());
 		}
-
-		// TODO: event listener unregistration
+		while (!serviceModel.getEventListenerModels().isEmpty()) {
+			unregisterEventListener(serviceModel.getEventListenerModels().keySet().iterator().next());
+		}
+		while (!serviceModel.getErrorPageModels().isEmpty()) {
+			doUnregisterErrorPages(serviceModel.getErrorPageModels().iterator().next());
+		}
 
 		doUnregisterAllWelcomeFiles();
 
@@ -817,14 +825,25 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 	@Override
 	public void unregisterEventListener(final EventListener listener) {
+		final EventListenerModel[] toUnregister = new EventListenerModel[] { null };
+		for (Map.Entry<EventListener, EventListenerModel> entry : serviceModel.getEventListenerModels().entrySet()) {
+			if (entry.getKey().equals(listener)) {
+				toUnregister[0] = entry.getValue();
+			}
+		}
+
 		try {
-//			event(ElementEvent.State.UNDEPLOYING, ...);
-
 			serverModel.run(() -> {
-				final Batch batch = new Batch("Unregistration of EventListener: " + listener);
+				if (toUnregister[0] == null) {
+					throw new IllegalArgumentException("EventListener \"" + listener + "\" "
+							+ "was never registered by " + HttpServiceEnabled.this.serviceBundle);
+				}
 
-				// TODO: removal of event listeners
-//				serverModel.removeEventListenerModel(listener, batch);
+				event(ElementEvent.State.UNDEPLOYING, toUnregister[0]);
+
+				final Batch batch = new Batch("Unregistration of EventListener: " + toUnregister[0]);
+
+				serverModel.removeEventListenerModel(toUnregister[0], batch);
 
 				serverController.sendBatch(batch);
 
@@ -833,9 +852,10 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				return null;
 			});
 
-//			event(ElementEvent.State.UNDEPLOYED, ...);
+			event(ElementEvent.State.UNDEPLOYED, toUnregister[0]);
 		} catch (ServletException | NamespaceException e) {
-//			event(ElementEvent.State.FAILED, ...);
+			// if toUnregister is null, IllegalArgumentException is thrown anyway
+			event(ElementEvent.State.FAILED, toUnregister[0]);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -892,7 +912,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 	@Override
 	public void unregisterWelcomeFiles(String[] welcomeFiles, HttpContext httpContext) {
-		// "redirect" flag is irrelevant when unregistering
+		// "redirect" flag is irrelevant when unregistering and the model may not be the one which is
+		// kept at ServiceModel level - it's used only to carry relevant information
+		// user may simply register 10 pages and then unregister 7 of them
 		WelcomeFileModel model = new WelcomeFileModel(welcomeFiles, false);
 		doUnregisterWelcomeFiles(Collections.singletonList(httpContext), model);
 	}
@@ -936,6 +958,138 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		for (WelcomeFileModel model : serviceModel.getWelcomeFileModels()) {
 			// context(s) will be picked from the model
 			doUnregisterWelcomeFiles(Collections.emptyList(), model);
+		}
+	}
+
+	// --- methods used to register error pages
+
+	@Override
+	public void registerErrorPage(String error, String location, HttpContext httpContext) {
+		registerErrorPages(new String[] { error }, location, httpContext);
+	}
+
+	@Override
+	public void registerErrorPages(String[] errors, String location, HttpContext httpContext) {
+		ErrorPageModel model = new ErrorPageModel(errors, location);
+		doRegisterErrorPages(Collections.singletonList(httpContext), model);
+	}
+
+	private void doRegisterErrorPages(Collection<HttpContext> httpContexts, ErrorPageModel model) {
+		LOG.debug("Passing registration of {} to configuration thread", model);
+
+		if (model.getRegisteringBundle() == null) {
+			model.setRegisteringBundle(this.serviceBundle);
+		}
+
+		try {
+			event(ElementEvent.State.DEPLOYING, model);
+
+			model.performValidation();
+
+			final Batch batch = new Batch("Registration of " + model);
+
+			serverModel.run(() -> {
+				translateContexts(httpContexts, model, batch);
+
+				LOG.info("Registering {}", model);
+
+				// error page models are a bit like servlets - there may be mapping conflicts and shadowing
+				// of error page models by service ranking
+				serverModel.addErrorPageModel(model, batch);
+
+				serverController.sendBatch(batch);
+
+				batch.accept(serviceModel);
+
+				return null;
+			});
+
+			event(ElementEvent.State.DEPLOYED, model);
+		} catch (Exception e) {
+			event(ElementEvent.State.FAILED, model, e);
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
+	// --- methods used to unregister error pages
+
+	@Override
+	public void unregisterErrorPage(String error, HttpContext httpContext) {
+		unregisterErrorPages(new String[] { error }, httpContext);
+	}
+
+	@Override
+	public void unregisterErrorPages(String[] errors, HttpContext httpContext) {
+		// remember - the constructed ErrorPageModel will not be equal() to any remembered ErrorPageModels. It's
+		// used only to carry the information, which is used to find actual (remembered) ErrorPageModel to unregister
+		ErrorPageModel model = new ErrorPageModel(errors);
+		doUnregisterErrorPages(model);
+	}
+
+	private void doUnregisterErrorPages(ErrorPageModel model) {
+		final String[] errorPages = model.getErrorPages();
+		final Set<String> errorPagesSet = new HashSet<>(Arrays.asList(errorPages));
+
+		if (model.getRegisteringBundle() == null) {
+			model.setRegisteringBundle(serviceBundle);
+		}
+		Bundle registeringBundle = model.getRegisteringBundle();
+
+		try {
+			event(ElementEvent.State.UNDEPLOYING, model);
+
+			// passed "error pages" will help us find actual ErrorPageModel objects registered so far for given
+			// httpService instance - both enabled and disabled (shadowed)
+
+			serverModel.run(() -> {
+				List<ErrorPageModel> toUnregister = new LinkedList<>();
+
+				LOG.info("Unregistering error page models for pages \"{}\"", Arrays.asList(errorPages));
+
+				// This loop checks Whiteboard unregistration - reference identity
+				for (ErrorPageModel existing : serviceModel.getErrorPageModels()) {
+					if (existing == model) {
+						// Whiteboard scenario, where actual "customized" object is unregistered
+						toUnregister.add(existing);
+						break;
+					}
+				}
+				// This loop checks if some model contains ALL error pages passed to unregistration method
+				// It's the http service unregistration scenario
+				if (toUnregister.isEmpty()) {
+					for (ErrorPageModel existing : serviceModel.getErrorPageModels()) {
+						if (existing == model) {
+							// Whiteboard scenario, where actual "customized" object is unregistered
+							toUnregister.add(existing);
+							break;
+						} else {
+							Set<String> existingPages = new HashSet<>(Arrays.asList(existing.getErrorPages()));
+							if (existingPages.containsAll(errorPagesSet)) {
+								toUnregister.add(existing);
+							}
+						}
+					}
+				}
+				if (toUnregister.size() == 0) {
+					throw new IllegalArgumentException("Error page(s) \"" + Arrays.asList(errorPages)
+							+ "\" were never registered by " + registeringBundle);
+				}
+
+				final Batch batch = new Batch("Unregistration of error pages: " + toUnregister);
+
+				serverModel.removeErrorPageModels(toUnregister, batch);
+
+				serverController.sendBatch(batch);
+
+				batch.accept(serviceModel);
+
+				return null;
+			});
+
+			event(ElementEvent.State.UNDEPLOYED, model);
+		} catch (Exception e) {
+			event(ElementEvent.State.FAILED, model);
+			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
 
@@ -1085,19 +1239,30 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 
 		@Override
-		public void registerFilter(Collection<HttpContext> contexts, FilterModel model) throws ServletException {
-			doRegisterFilter(contexts, model);
+		public void unregisterServlet(ServletModel model) {
+			doUnregisterServlet(model);
 		}
 
 		@Override
-		public void unregisterServlet(ServletModel model) {
-			doUnregisterServlet(model);
+		public void registerFilter(Collection<HttpContext> contexts, FilterModel model) throws ServletException {
+			doRegisterFilter(contexts, model);
 		}
 
 		@Override
 		public void unregisterFilter(FilterModel model) {
 			doUnregisterFilter(model);
 		}
+
+		@Override
+		public void registerErrorPages(Collection<HttpContext> contexts, ErrorPageModel model) {
+			doRegisterErrorPages(contexts, model);
+		}
+
+		@Override
+		public void unregisterErrorPages(ErrorPageModel model) {
+			doUnregisterErrorPages(model);
+		}
+
 	}
 
 

@@ -125,9 +125,9 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 						null, httpContext);
 
 				// register error page for any Exception
-//				webContainer.registerErrorPage("java.lang.Exception", "/helloworld/wc/error", httpContext);
+				webContainer.registerErrorPage("java.lang.Exception", "/helloworld/wc/error", httpContext);
 				// register error page for 404 (Page not found)
-//				webContainer.registerErrorPage("404", "/helloworld/wc/error", httpContext);
+				webContainer.registerErrorPage("404", "/helloworld/wc/error", httpContext);
 
 				webContainer.end(httpContext);
 			} catch (Exception e) {

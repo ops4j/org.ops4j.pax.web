@@ -30,12 +30,15 @@ import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.context.DefaultHttpContext;
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
+import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
+import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterStateChange;
@@ -108,6 +111,9 @@ public class ServiceModel implements BatchVisitor {
 	/** But also we keep welcome file models directly, to be able to remove them when needed */
 	private final Set<WelcomeFileModel> welcomeFileModels = new HashSet<>();
 
+	/** Error page models are kept as collection and processed for conflicts at {@link ServerModel} level */
+	private final Set<ErrorPageModel> errorPageModels = new HashSet<>();
+
 	public ServiceModel(ServerModel serverModel, ServerController serverController, Bundle serviceBundle) {
 		this.serverModel = serverModel;
 		this.serviceBundle = serviceBundle;
@@ -166,6 +172,10 @@ public class ServiceModel implements BatchVisitor {
 
 	public Set<WelcomeFileModel> getWelcomeFileModels() {
 		return welcomeFileModels;
+	}
+
+	public Set<ErrorPageModel> getErrorPageModels() {
+		return errorPageModels;
 	}
 
 	@Override
@@ -285,6 +295,10 @@ public class ServiceModel implements BatchVisitor {
 		if (change.getKind() == OpCode.ADD) {
 			welcomeFileModels.add(model);
 		} else if (change.getKind() == OpCode.DELETE) {
+			// this operation MAY not remove anything, because WelcomeFileModel is constructed during
+			// unregistration based on passed (the ones being unregistered) welcome files and identity is no
+			// preserved. However this operation will work in Whiteboard mode, when correct WelcomeFileModel
+			// object is passed to unregistration method
 			welcomeFileModels.remove(model);
 		}
 
@@ -306,308 +320,26 @@ public class ServiceModel implements BatchVisitor {
 		serverModel.visit(change);
 	}
 
-//	public synchronized ServletModel getServletModelWithAlias(final String alias) {
-//		NullArgumentException.validateNotEmpty(alias, "Alias");
-//		return aliasMapping.get(alias);
-//	}
-//
-//	public synchronized void removeServletModel(final ServletModel model) {
-//		if (model.getAlias() != null) {
-//			aliasMapping.remove(model.getAlias());
-//		}
-//		servletModels.remove(model);
-//	}
-//
-//	public synchronized ServletModel removeServlet(final Servlet servlet) {
-//		final ServletModel model = findServletModel(servlet);
-//		if (model == null) {
-//			throw new IllegalArgumentException("Servlet [" + servlet
-//					+ " is not currently registered in any context");
-//		}
-//		servletModels.remove(model);
-//		return model;
-//	}
-//
-//	public synchronized ServletModel removeServlet(final String servletName) {
-//		ServletModel model = findServletModel(servletName);
-//		if (model == null) {
-//			throw new IllegalArgumentException("Servlet with name [" + servletName + "] is currently not registered in any context");
-//		}
-//		servletModels.remove(model);
-//		return model;
-//	}
-//
-//	private synchronized ServletModel findServletModel(Servlet servlet) {
-//		for (ServletModel servletModel : servletModels) {
-//			if (servletModel.getServlet() != null
-//					&& servletModel.getServlet().equals(servlet)) {
-//				return servletModel;
-//			}
-//		}
-//		return null;
-//	}
-//
-//	private synchronized ServletModel findServletModel(String servletName) {
-//		for (ServletModel servletModel : servletModels) {
-//			if (servletModel.getName() != null && servletModel.getName().equalsIgnoreCase(servletName)) {
-//				return servletModel;
-//			}
-//		}
-//		return null;
-//	}
-//
-//	public synchronized Set<ServletModel> removeServletClass(
-//			final Class<? extends Servlet> servletClass) {
-//		final Set<ServletModel> models = findServletModels(servletClass);
-//		if (models == null) {
-//			throw new IllegalArgumentException("Servlet class [" + servletClass
-//					+ " is not currently registered in any context");
-//		}
-//		servletModels.removeAll(models);
-//		return models;
-//	}
-//
-//	private synchronized Set<ServletModel> findServletModels(
-//			final Class<? extends Servlet> servletClass) {
-//		Set<ServletModel> foundServletModels = null;
-//		for (ServletModel servletModel : servletModels) {
-//			if (servletModel.getServletClass() != null
-//					&& servletModel.getServletClass().equals(servletClass)) {
-//				if (foundServletModels == null) {
-//					foundServletModels = new HashSet<>();
-//				}
-//				foundServletModels.add(servletModel);
-//			}
-//		}
-//		return foundServletModels;
-//	}
+	@Override
+	public void visit(ErrorPageModelChange change) {
+		if (change.getKind() == OpCode.ADD) {
+			errorPageModels.add(change.getErrorPageModel());
+		}
 
-//	public synchronized void addFilterModel(final FilterModel model) {
-//		String name = model.getName();
-//
-//		Filter filter = model.getFilter();
-//		Class<? extends Filter> filterClass = model.getFilterClass();
-//
-//		if (filterModels.containsKey(name)) {
-//			if (filter != null) {
-//				throw new IllegalArgumentException("Filter [" + model.getFilter()
-//						+ "] is already registered.");
-//			}
-//			if (filterClass != null) {
-//				throw new IllegalArgumentException("FilterClass [" + filterClass
-//						+ "] is already registered.");
-//			}
-//		}
-//		filterModels.put(name, model);
-//		addContextModel(model.getContextModels());
-//	}
-//
-//	public synchronized FilterModel removeFilter(final Filter filter) {
-//		Set<FilterModel> models = findFilterModels(filter);
-//		if (models == null || models.isEmpty()) {
-//			throw new IllegalArgumentException("Filter [" + filter
-//					+ " is not currently registered in any context");
-//		}
-//		filterModels.values().removeAll(models);
-//		return models.iterator().next();
-//	}
-//
-//	public synchronized FilterModel removeFilter(final String filterName) {
-//		return filterModels.remove(filterName);
-//	}
-//
-//	public synchronized FilterModel removeFilter(
-//			final Class<? extends Filter> filterClass) {
-//		final Set<FilterModel> models = findFilterModels(filterClass);
-//		if (models == null || models.isEmpty()) {
-//			throw new IllegalArgumentException("Servlet class [" + filterClass
-//					+ " is not currently registered in any context");
-//		}
-//		filterModels.values().removeAll(models);
-//		return models.iterator().next();
-//	}
-	
-	/*
-	private synchronized Set<Filter> findFilter(
-			final Class<? extends Filter> filterClass) {
-		Set<Filter> foundFilterModels = null;
-		for (FilterModel filterModel : filterModels) {
-			if (filterModel.getFilterClass() != null
-					&& filterModel.getFilterClass().equals(filterClass)) {
-				if (foundFilterModels == null) {
-					foundFilterModels = new HashSet<Filter>();
-				}
-				foundFilterModels.add(filterModel.getFilter());
+		if (change.getKind() == OpCode.DELETE) {
+			for (ErrorPageModel model : change.getErrorPageModels()) {
+				this.errorPageModels.remove(model);
 			}
 		}
-		return foundFilterModels;
-	}
-	*/
 
-//	private synchronized Set<FilterModel> findFilterModels(
-//			final Class<? extends Filter> filterClass) {
-//		Set<FilterModel> foundFilterModels = null;
-//		for (FilterModel filterModel : filterModels.values()) {
-//			if (filterModel.getFilterClass() != null
-//					&& filterModel.getFilterClass().equals(filterClass)) {
-//				if (foundFilterModels == null) {
-//					foundFilterModels = new HashSet<>();
-//				}
-//				foundFilterModels.add(filterModel);
-//			}
-//		}
-//		return foundFilterModels;
-//	}
-//
-//	private synchronized Set<FilterModel> findFilterModels(
-//			final Filter filter) {
-//		Set<FilterModel> foundFilterModels = null;
-//		for (FilterModel filterModel : filterModels.values()) {
-//			if (filterModel.getFilter() != null
-//					&& filterModel.getFilter().equals(filter)) {
-//				if (foundFilterModels == null) {
-//					foundFilterModels = new HashSet<>();
-//				}
-//				foundFilterModels.add(filterModel);
-//			}
-//		}
-//		return foundFilterModels;
-//	}
-//
-//	public synchronized ServletModel[] getServletModels() {
-//		return servletModels.toArray(new ServletModel[servletModels.size()]);
-//	}
-//
-//	public synchronized EventListenerModel[] getEventListenerModels() {
-//		final Collection<EventListenerModel> models = eventListenerModels
-//				.values();
-//		return models.toArray(new EventListenerModel[models.size()]);
-//	}
-//
-//	public synchronized FilterModel[] getFilterModels() {
-//		final Collection<FilterModel> models = filterModels.values();
-//		return models.toArray(new FilterModel[models.size()]);
-//	}
-//
-//	public synchronized ErrorPageModel[] getErrorPageModels() {
-//		final Collection<ErrorPageModel> models = errorPageModels.values();
-//		return models.toArray(new ErrorPageModel[models.size()]);
-//	}
-//
-//	public synchronized void addContextModel(final List<OsgiContextModel> contextModels) {
-////		if (!contextModels.containsKey(contextModel.getHttpContext())) {
-////			contextModels.put(contextModel.getHttpContext(), contextModel);
-////		}
-//	}
-//
-//	public synchronized OsgiContextModel[] getContextModels() {
-//		final Collection<OsgiContextModel> contextModelValues = contextModels
-//				.values();
-//		if (contextModelValues.isEmpty()) {
-//			return new OsgiContextModel[0];
-//		}
-//		return contextModelValues.toArray(new OsgiContextModel[contextModelValues
-//				.size()]);
-//	}
-//
-//	public synchronized OsgiContextModel getContextModel(final HttpContext httpContext) {
-//		return contextModels.get(httpContext);
-//	}
-//
-//	public synchronized void addErrorPageModel(final ErrorPageModel model) {
-////		final String key = model.getError() + "|"
-////				+ model.getContextModel().getId();
-////		if (errorPageModels.containsKey(key)) {
-////			throw new IllegalArgumentException("Error page for ["
-////					+ model.getError() + "] already registered.");
-////		}
-////		errorPageModels.put(key, model);
-//		addContextModel(model.getContextModels());
-//	}
-//
-//	public synchronized ErrorPageModel removeErrorPage(final String error,
-//													   final OsgiContextModel contextModel) {
-//		final ErrorPageModel model;
-//		final String key = error + "|" + contextModel.getId();
-//		model = errorPageModels.get(key);
-//		if (model == null) {
-//			throw new IllegalArgumentException("Error page for [" + error
-//					+ "] cannot be found in the provided http context");
-//		}
-//		errorPageModels.remove(key);
-//		return model;
-//	}
-//
-//	public synchronized void addWelcomeFileModel(WelcomeFileModel model) {
-////		final String key = Arrays.toString(model.getWelcomeFiles()) + "|" + model.getContextModel().getId();
-////		if (welcomeFileModels.containsKey(key)) {
-////			throw new IllegalArgumentException("Welcom files for [" + Arrays.toString(model.getWelcomeFiles()) + "] already registered.");
-////		}
-////		welcomeFileModels.put(key, model);
-//		addContextModel(model.getContextModels());
-//	}
-//
-//	public synchronized WelcomeFileModel removeWelcomeFileModel(String welcomeFiles, OsgiContextModel contextModel) {
-//		final WelcomeFileModel model;
-//		final String key = welcomeFiles + "|" + contextModel.getId();
-//		model = welcomeFileModels.get(key);
-//		if (model == null) {
-//			throw new IllegalArgumentException("WelcomeFiles for [" + welcomeFiles
-//					+ "] cannot be found in the provided http context");
-//		}
-//		welcomeFileModels.remove(key);
-//		return model;
-//	}
-//
-//	public synchronized void addSecurityConstraintMappingModel(
-//			SecurityConstraintMappingModel model) {
-//		if (securityConstraintMappingModels.containsKey(model
-//				.getConstraintName())) {
-//			throw new IllegalArgumentException("Security Mapping ["
-//					+ model.getConstraintName() + "] is already registered.");
-//		}
-//		securityConstraintMappingModels.put(model.getConstraintName(), model);
-//		addContextModel(model.getContextModels());
-//	}
-//
-//	public synchronized SecurityConstraintMappingModel[] getSecurityConstraintMappings() {
-//		Collection<SecurityConstraintMappingModel> collection = securityConstraintMappingModels
-//				.values();
-//		return collection.toArray(new SecurityConstraintMappingModel[collection
-//				.size()]);
-//	}
-//
-//	public synchronized void removeSecurityConstraintMappingModel(SecurityConstraintMappingModel model) {
-//		securityConstraintMappingModels.remove(model.getConstraintName());
-//	}
-//
-//	public synchronized void addContainerInitializerModel(
-//			ContainerInitializerModel model) {
-//		if (containerInitializers.containsKey(model.getContainerInitializer())) {
-//			throw new IllegalArgumentException("ServletContainerInitializer "
-//					+ model.getContainerInitializer() + " already registered");
-//		}
-//		containerInitializers.put(model.getContainerInitializer(), model);
-//	}
-//
-//	public synchronized void removeContainerInitializerModel(
-//			ContainerInitializerModel model) {
-//		//NOOP
-//	}
-//
-//
-//	public void addWebSocketModel(WebSocketModel model) {
-//		if (webSockets.containsKey(model.getWebSocket())) {
-//			throw new IllegalArgumentException("WebSocket " + model.getWebSocket() + " already registered");
-//		}
-//		webSockets.put(model.getWebSocket(), model);
-//	}
-//
-//
-//	public void removeWebSocketModel(Object webSocket) {
-//		webSockets.remove(webSocket);
-//	}
-//
+		serverModel.visit(change);
+	}
+
+	@Override
+	public void visit(ErrorPageStateChange change) {
+		// no op here. At model level (unlike in server controller level), filters are added/removed individually
+	}
+
 //	/**
 //	 * Returns true if the context can still be configured. This is possible
 //	 * before any web components (servlets / filters / listeners / error pages)

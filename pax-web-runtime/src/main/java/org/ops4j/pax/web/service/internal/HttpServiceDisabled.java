@@ -256,6 +256,30 @@ class HttpServiceDisabled implements WebContainer {
 		LOG.warn("Http service has already been stopped");
 	}
 
+	// --- methods used to register error pages
+
+	@Override
+	public void registerErrorPage(String error, String location, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	@Override
+	public void registerErrorPages(String[] errors, String location, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	// --- methods used to unregister error pages
+
+	@Override
+	public void unregisterErrorPage(String error, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	@Override
+	public void unregisterErrorPages(String[] errors, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
 //	/**
 //	 * @see WebContainer#setContextParam(Dictionary, HttpContext)
 //	 */

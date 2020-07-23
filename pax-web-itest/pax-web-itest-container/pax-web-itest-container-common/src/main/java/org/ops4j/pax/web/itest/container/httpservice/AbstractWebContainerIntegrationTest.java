@@ -105,14 +105,14 @@ public abstract class AbstractWebContainerIntegrationTest extends AbstractContro
 		}
 	}
 
-//	@Test
-//	public void testErrorPage() throws Exception  {
-//	    HttpTestClientFactory.createDefaultTestClient()
-//            .withResponseAssertion("Response must contain '<h1>Hello World Error Page</h1>'",
-//                    resp -> resp.contains("<h1>Hello World Error Page</h1>"))
-//            .withReturnCode(404)
-//            .doGETandExecuteTest("http://127.0.0.1:8181/helloworld");
-//	}
+	@Test
+	public void testErrorPage() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h1>Hello World Error Page</h1>'",
+						resp -> resp.contains("<h1>Hello World Error Page</h1>"))
+				.withReturnCode(404)
+				.doGETandExecuteTest("http://127.0.0.1:8181/helloworld");
+	}
 
 	@Test
 	public void testWelcomFiles() throws Exception {

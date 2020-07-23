@@ -168,7 +168,7 @@ public class ServerControllerScopesTest extends MultiContainerTestSupport {
 	 * @throws Exception
 	 */
 	@Test
-	public void multipleServletContext() throws Exception {
+	public void multipleServletContexts() throws Exception {
 		ServerController controller = Utils.createServerController(null, port, runtime, getClass().getClassLoader());
 		controller.configure();
 		controller.start();

@@ -50,6 +50,7 @@ import org.apache.catalina.core.StandardService;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.valves.AccessLogValve;
 import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
+import org.apache.tomcat.util.descriptor.web.ErrorPage;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.descriptor.web.WebXml;
@@ -58,6 +59,7 @@ import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
@@ -66,6 +68,8 @@ import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
+import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
+import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterStateChange;
@@ -1031,6 +1035,20 @@ class TomcatServerWrapper implements BatchVisitor {
 				standardContext.addApplicationEventListener(eventListener);
 			});
 		}
+		if (change.getKind() == OpCode.DELETE) {
+			contextModels.forEach((context) -> {
+				PaxWebStandardContext standardContext = contextHandlers.get(context.getContextPath());
+				EventListener eventListener = eventListenerModel.getEventListener();
+				Object[] listeners = standardContext.getApplicationEventListeners();
+				List<Object> newListeners = new ArrayList<>();
+				for (Object l : listeners) {
+					if (l != eventListener) {
+						newListeners.add(l);
+					}
+				}
+				standardContext.setApplicationEventListeners(newListeners.toArray(new Object[newListeners.size()]));
+			});
+		}
 	}
 
 	@Override
@@ -1081,6 +1099,60 @@ class TomcatServerWrapper implements BatchVisitor {
 					}
 				}
 			});
+		}
+	}
+
+	@Override
+	public void visit(ErrorPageModelChange change) {
+		// no op here
+	}
+
+	@Override
+	public void visit(ErrorPageStateChange change) {
+		Map<String, TreeSet<ErrorPageModel>> contextErrorPages = change.getContextErrorPages();
+
+		for (Map.Entry<String, TreeSet<ErrorPageModel>> entry : contextErrorPages.entrySet()) {
+			String contextPath = entry.getKey();
+			TreeSet<ErrorPageModel> errorPageModels = entry.getValue();
+
+			LOG.info("Changing error page configuration for context {}", contextPath);
+
+			PaxWebStandardContext context = contextHandlers.get(contextPath);
+			for (ErrorPage ep : context.findErrorPages()) {
+				context.removeErrorPage(ep);
+			}
+
+			for (ErrorPageModel model : errorPageModels) {
+				String location = model.getLocation();
+				for (String ex : model.getExceptionClassNames()) {
+					ErrorPage errorPage = new ErrorPage();
+					errorPage.setExceptionType(ex);
+					errorPage.setLocation(location);
+					context.addErrorPage(errorPage);
+				}
+				for (int code : model.getErrorCodes()) {
+					ErrorPage errorPage = new ErrorPage();
+					errorPage.setErrorCode(code);
+					errorPage.setLocation(location);
+					context.addErrorPage(errorPage);
+				}
+				if (model.isXx4()) {
+					for (int c = 400; c < 500; c++) {
+						ErrorPage errorPage = new ErrorPage();
+						errorPage.setErrorCode(c);
+						errorPage.setLocation(location);
+						context.addErrorPage(errorPage);
+					}
+				}
+				if (model.isXx5()) {
+					for (int c = 500; c < 600; c++) {
+						ErrorPage errorPage = new ErrorPage();
+						errorPage.setErrorCode(c);
+						errorPage.setLocation(location);
+						context.addErrorPage(errorPage);
+					}
+				}
+			}
 		}
 	}
 

@@ -49,6 +49,7 @@ import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.context.DefaultMultiBundleWebContainerContext;
 import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
@@ -56,6 +57,8 @@ import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
+import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
+import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterStateChange;
@@ -296,9 +299,12 @@ public class ServerModel implements BatchVisitor {
 	 */
 	private final Set<FilterModel> disabledFilterModels = new TreeSet<>();
 
-	// TODO: Should listeners, security constraints, login configs, welcome files, security roles, error pages
-	//       and mime types be checked for unique registration?
-	
+	/**
+	 * {@link ErrorPageModel} instances may be disabled if different model is registered for overlapping
+	 * error codes / exception class names with higher service ranking.
+	 */
+	private final Set<ErrorPageModel> disabledErrorPageModels = new TreeSet<>();
+
 	/**
 	 * Creates new global model of all web applications with {@link Executor} to be used for configuration and
 	 * registration tasks.
@@ -1070,8 +1076,8 @@ public class ServerModel implements BatchVisitor {
 		servletContexts.values().forEach(scm -> {
 			String path = scm.getContextPath();
 			// deep copies
-			HashMap<String, ServletModel> enabledByName = new HashMap<>(scm.getServletNameMapping());
-			HashMap<String, ServletModel> enabledByPattern = new HashMap<>(scm.getServletUrlPatternMapping());
+			Map<String, ServletModel> enabledByName = new HashMap<>(scm.getServletNameMapping());
+			Map<String, ServletModel> enabledByPattern = new HashMap<>(scm.getServletUrlPatternMapping());
 			currentlyEnabledByName.put(path, enabledByName);
 			currentlyEnabledByPattern.put(path, enabledByPattern);
 
@@ -1186,7 +1192,7 @@ public class ServerModel implements BatchVisitor {
 			// disabled model can be enabled again - in all its contexts
 			if (canBeEnabled) {
 				newlyDisabled.forEach(model -> {
-					// disable the one that have lost
+					// disable the one that has lost
 					batch.disableServletModel(ServerModel.this, model);
 
 					// and forget about it in the snapshot
@@ -1340,14 +1346,14 @@ public class ServerModel implements BatchVisitor {
 
 		// this map will contain ALL filters registered per context path - including currently enabled, newly
 		// registered and newly enabled. When set is TreeSet, ordering will be correct
-		Map<String, TreeSet<FilterModel>> currentlyEnabledByName = new HashMap<>();
+		Map<String, TreeSet<FilterModel>> currentlyEnabledByPath = new HashMap<>();
 		Set<FilterModel> currentlyDisabled = new TreeSet<>();
-		prepareFiltersSnapshot(currentlyEnabledByName, currentlyDisabled, model, newlyDisabled);
+		prepareFiltersSnapshot(currentlyEnabledByPath, currentlyDisabled, model, newlyDisabled);
 
-		reEnableFilterModels(currentlyDisabled, currentlyEnabledByName, model, batch);
+		reEnableFilterModels(currentlyDisabled, currentlyEnabledByPath, model, batch);
 
 		// finally - full set of filter state changes in all affected servlet contexts
-		batch.updateFilters(currentlyEnabledByName);
+		batch.updateFilters(currentlyEnabledByPath);
 	}
 
 	@PaxWebConfiguration
@@ -1417,14 +1423,14 @@ public class ServerModel implements BatchVisitor {
 	 *
 	 * @param currentlyDisabled currently disabled models - this collection may be shrunk in this method. Every
 	 *        model removed from this collection will be batched for enabling
-	 * @param currentlyEnabledByName temporary state of by-name filters - may be altered during invocation
+	 * @param currentlyEnabledByPath temporary state of filters per context - may be altered during invocation
 	 * @param modelToEnable newly added model (could be {@code null}) - needed because when adding new filter, it
 	 *        is initialy treated as disabled. We have to decide then whether to enable existing model or add
 	 *        this new one
 	 * @param batch this {@link Batch} will collect avalanche of possible disable/enable operations
 	 */
 	private void reEnableFilterModels(Set<FilterModel> currentlyDisabled,
-			Map<String, TreeSet<FilterModel>> currentlyEnabledByName, FilterModel modelToEnable, Batch batch) {
+			Map<String, TreeSet<FilterModel>> currentlyEnabledByPath, FilterModel modelToEnable, Batch batch) {
 
 		Set<FilterModel> newlyDisabled = new LinkedHashSet<>();
 		boolean change = false;
@@ -1442,7 +1448,7 @@ public class ServerModel implements BatchVisitor {
 				String cp = sc.getContextPath();
 
 				// name conflict check
-				for (FilterModel enabled : currentlyEnabledByName.get(cp)) {
+				for (FilterModel enabled : currentlyEnabledByPath.get(cp)) {
 					boolean nameConflict = haveAnyNameConflict(disabled.getName(), enabled.getName(), disabled, enabled);
 					if (nameConflict) {
 						// name conflict with existing, enabled model. BUT currently disabled model may have
@@ -1465,12 +1471,12 @@ public class ServerModel implements BatchVisitor {
 			// disabled model can be enabled again - in all its contexts
 			if (canBeEnabled) {
 				newlyDisabled.forEach(model -> {
-					// disable the one that have lost
+					// disable the one that has lost
 					batch.disableFilterModel(ServerModel.this, model);
 
 					// and forget about it in the snapshot
 					getServletContextModels(model).forEach(scm -> {
-						currentlyEnabledByName.get(scm.getContextPath()).remove(model);
+						currentlyEnabledByPath.get(scm.getContextPath()).remove(model);
 					});
 
 					// do NOT add newlyDisabled to "currentlyDisabled" - we don't want to check if they can be enabled!
@@ -1478,7 +1484,7 @@ public class ServerModel implements BatchVisitor {
 
 				// update the snapshot - newly enabled model should be visible as the one registered
 				for (ServletContextModel sc : contextsOfDisabledModel) {
-					currentlyEnabledByName.get(sc.getContextPath()).add(disabled);
+					currentlyEnabledByPath.get(sc.getContextPath()).add(disabled);
 				}
 				if (modelToEnable != null && modelToEnable.equals(disabled)) {
 					batch.addFilterModel(this, disabled);
@@ -1496,7 +1502,7 @@ public class ServerModel implements BatchVisitor {
 		} // end of "for" loop that checks all currently disabled models that can potentially be enabled
 
 		if (change) {
-			reEnableFilterModels(currentlyDisabled, currentlyEnabledByName, modelToEnable, batch);
+			reEnableFilterModels(currentlyDisabled, currentlyEnabledByPath, modelToEnable, batch);
 		}
 	}
 
@@ -1544,6 +1550,11 @@ public class ServerModel implements BatchVisitor {
 	}
 
 	@PaxWebConfiguration
+	public void removeEventListenerModel(EventListenerModel model, Batch batch) {
+		batch.removeEventListenerModel(this, model);
+	}
+
+	@PaxWebConfiguration
 	public void addWelcomeFileModel(WelcomeFileModel model, Batch batch) {
 		if (model.getContextModels().isEmpty()) {
 			throw new IllegalArgumentException("Can't register " + model + ", it is not associated with any context");
@@ -1555,6 +1566,198 @@ public class ServerModel implements BatchVisitor {
 	@PaxWebConfiguration
 	public void removeWelcomeFileModel(WelcomeFileModel model, Batch batch) {
 		batch.removeWelcomeFileModel(this, model);
+	}
+
+	@PaxWebConfiguration
+	public void addErrorPageModel(ErrorPageModel model, Batch batch) {
+		if (model.getContextModels().isEmpty()) {
+			throw new IllegalArgumentException("Can't register " + model + ", it is not associated with any context");
+		}
+
+		// there's no problem having error page models using the same location - more error codes/exceptions
+		// can be handled by servlet mapped to e.g., "/error"
+
+		Set<ServletContextModel> targetServletContexts = getServletContextModels(model);
+
+		// conflicts are checked only by overlapping error codes / exception class names
+		// according to 140.4.2 "Error Pages"
+
+		// by adding new ErrorPageModel we can disable and enable some existing ones. As with filters, the "state"
+		// of error pages is sent in single operation.
+
+		// this map will contain ALL error page modesl registered per context path - including currently enabled, newly
+		// registered and newly enabled. When set is TreeSet, ordering will be correct
+		Map<String, TreeSet<ErrorPageModel>> currentlyEnabledByPath = new HashMap<>();
+		Set<ErrorPageModel> currentlyDisabled = new TreeSet<>();
+		Set<ErrorPageModel> newlyDisabled = new HashSet<>();
+		prepareErrorPageSnapshot(currentlyEnabledByPath, currentlyDisabled, model, newlyDisabled);
+
+		reEnableErrorPageModels(currentlyDisabled, currentlyEnabledByPath, model, batch);
+
+		// finally - full set of error pages state changes in all affected servlet contexts
+		batch.updateErrorPages(currentlyEnabledByPath);
+	}
+
+	@PaxWebConfiguration
+	public void removeErrorPageModels(List<ErrorPageModel> models, Batch batch) {
+		// this is straightforward
+		batch.removeErrorPageModels(this, models);
+
+		Map<String, TreeSet<ErrorPageModel>> currentlyEnabledByPath = new HashMap<>();
+		Set<ErrorPageModel> currentlyDisabled = new TreeSet<>();
+		prepareErrorPageSnapshot(currentlyEnabledByPath, currentlyDisabled, null, new HashSet<>(models));
+
+		// review all disabled error page models (in ranking order) to verify if they can be enabled again
+		reEnableErrorPageModels(currentlyDisabled, currentlyEnabledByPath, null, batch);
+
+		// finally - full set of error page state changes in all affected servlet contexts
+		batch.updateErrorPages(currentlyEnabledByPath);
+	}
+
+	/**
+	 * Preparation for {@link #reEnableErrorPageModels(Set, Map, ErrorPageModel, Batch)} that does
+	 * proper copy of current state of all {@link ServletContextModel}
+	 *
+	 * @param currentlyEnabledByPath
+	 * @param currentlyDisabled
+	 * @param newlyAdded prepared snapshot will include newly added model as currentlyDisabled
+	 *        (to enable it potentially)
+	 * @param newlyDisabled prepared snapshot will already have newlyDisabled models removed from snapshot mappings
+	 */
+	private void prepareErrorPageSnapshot(Map<String, TreeSet<ErrorPageModel>> currentlyEnabledByPath,
+			Set<ErrorPageModel> currentlyDisabled,
+			ErrorPageModel newlyAdded, Set<ErrorPageModel> newlyDisabled) {
+
+		currentlyDisabled.addAll(disabledErrorPageModels);
+
+		servletContexts.values().forEach(scm -> {
+			String path = scm.getContextPath();
+			// deep copies
+			TreeSet<ErrorPageModel> enabledErrorPages = new TreeSet<>(scm.getErrorPageMapping().values());
+			currentlyEnabledByPath.put(path, enabledErrorPages);
+
+			// newlyDisabled are scheduled for disabling (in batch), so let's remove them from the snapshot
+			if (newlyDisabled != null) {
+				newlyDisabled.forEach(fm -> {
+					getServletContextModels(fm).forEach(scm2 -> {
+						if (scm.equals(scm2)) {
+							enabledErrorPages.remove(fm);
+						}
+					});
+				});
+			}
+		});
+
+		// newlyAdded is for now only "offered" to be registered as active, because if new model causes
+		// disabling of existing model, other (disabled) model may be better than the newly registered one
+		if (newlyAdded != null) {
+			currentlyDisabled.add(newlyAdded);
+		}
+	}
+
+	/**
+	 * <p>Fragile method used both during error page registration and unregistration. Similar to equivalent method
+	 * for filters.</p>
+	 *
+	 * @param currentlyDisabled currently disabled models - this collection may be shrunk in this method. Every
+	 *        model removed from this collection will be batched for enabling
+	 * @param currentlyEnabledByPath temporary state of by-name filters - may be altered during invocation
+	 * @param modelToEnable newly added model (could be {@code null}) - needed because when adding new filter, it
+	 *        is initialy treated as disabled. We have to decide then whether to enable existing model or add
+	 *        this new one
+	 * @param batch this {@link Batch} will collect avalanche of possible disable/enable operations
+	 */
+	private void reEnableErrorPageModels(Set<ErrorPageModel> currentlyDisabled,
+			Map<String, TreeSet<ErrorPageModel>> currentlyEnabledByPath, ErrorPageModel modelToEnable, Batch batch) {
+
+		Set<ErrorPageModel> newlyDisabled = new LinkedHashSet<>();
+		boolean change = false;
+
+		// reviewed using TreeSet, i.e., by proper ranking
+		for (Iterator<ErrorPageModel> iterator = currentlyDisabled.iterator(); iterator.hasNext(); ) {
+			// this is the highest ranked, currently disabled error page model
+			ErrorPageModel disabled = iterator.next();
+			boolean canBeEnabled = true;
+			newlyDisabled.clear();
+
+			Set<ServletContextModel> contextsOfDisabledModel = getServletContextModels(disabled);
+
+			for (ServletContextModel sc : contextsOfDisabledModel) {
+				String cp = sc.getContextPath();
+
+				// conflict check by error page description (code, wildcard, fqcn of exception class)
+				for (ErrorPageModel enabled : currentlyEnabledByPath.get(cp)) {
+					boolean conflict = false;
+					for (String page1 : disabled.getErrorPages()) {
+						for (String page2 : enabled.getErrorPages()) {
+							if (page1.equals(page2)) {
+								conflict = true;
+								break;
+							}
+						}
+						if (conflict) {
+							break;
+						}
+					}
+					if (conflict) {
+						// conflict with existing, enabled model. BUT currently disabled model may have
+						// higher ranking...
+						if (disabled.compareTo(enabled) < 0) {
+							newlyDisabled.add(enabled);
+						} else {
+							canBeEnabled = false;
+							break;
+						}
+					}
+				}
+				if (!canBeEnabled) {
+					break;
+				}
+			} // end of check for the conflicts in all the contexts
+
+			// disabled model can be enabled again - in all its contexts
+			if (canBeEnabled) {
+				newlyDisabled.forEach(model -> {
+					// disable the one that has lost
+					batch.disableErrorPageModel(ServerModel.this, model);
+
+					// and forget about it in the snapshot
+					getServletContextModels(model).forEach(scm -> {
+						currentlyEnabledByPath.get(scm.getContextPath()).remove(model);
+					});
+
+					// do NOT add newlyDisabled to "currentlyDisabled" - we don't want to check if they can be enabled!
+				});
+
+				// update the snapshot - newly enabled model should be visible as the one registered
+				for (ServletContextModel sc : contextsOfDisabledModel) {
+					currentlyEnabledByPath.get(sc.getContextPath()).add(disabled);
+				}
+				if (modelToEnable != null && modelToEnable.equals(disabled)) {
+					batch.addErrorPageModel(this, disabled);
+				} else {
+					batch.enableErrorPageModel(this, disabled);
+				}
+				// remove - to check if our new model should later be added as disabled
+				iterator.remove();
+				change = true;
+			}
+
+			// if model to enable is still in the collection of currently disabled ones, it has to be added
+			// as disabled - just to know it was registered!
+			if (modelToEnable != null && currentlyDisabled.contains(modelToEnable)) {
+				batch.addDisabledErrorPageModel(this, modelToEnable);
+			}
+
+			if (change) {
+				// exit the loop (leaving some currently disabled models not checked) and get ready for recursion
+				break;
+			}
+		} // end of "for" loop that checks all currently disabled models that can potentially be enabled
+
+		if (change) {
+			reEnableErrorPageModels(currentlyDisabled, currentlyEnabledByPath, modelToEnable, batch);
+		}
 	}
 
 	// --- batch operation visit() methods performed without validation, because it was done earlier
@@ -1740,6 +1943,7 @@ public class ServerModel implements BatchVisitor {
 
 	@Override
 	public void visit(FilterStateChange change) {
+		// no op here - handled at ServerController level only
 	}
 
 	@Override
@@ -1749,8 +1953,83 @@ public class ServerModel implements BatchVisitor {
 
 	@Override
 	public void visit(WelcomeFileModelChange change) {
-		// no need to store welcome files at ServerModel level, because we don't have to check for conflicts
+		// no need to store welcome files at ServerModel level, because we don't have to check for any conflicts
 	}
+
+	@Override
+	public void visit(ErrorPageModelChange change) {
+		switch (change.getKind()) {
+			case ADD: {
+				ErrorPageModel model = change.getErrorPageModel();
+
+				// add new ErrorPageModel to all target contexts
+				Set<ServletContextModel> servletContexts = getServletContextModels(model);
+				servletContexts.forEach(sc -> {
+					if (change.isDisabled()) {
+						// registered initially as disabled
+						disabledErrorPageModels.add(model);
+					} else {
+						for (String page : model.getErrorPages()) {
+							sc.getErrorPageMapping().put(page, model);
+						}
+					}
+				});
+
+				break;
+			}
+			case MODIFY:
+				break;
+			case DELETE: {
+				List<ErrorPageModel> models = change.getErrorPageModels();
+
+				models.forEach(model -> {
+					// could be among disabled ones
+					boolean wasDisabled = disabledErrorPageModels.remove(model);
+
+					if (!wasDisabled) {
+						// remove from all target contexts. disabled model was not available there
+						Set<ServletContextModel> servletContexts = getServletContextModels(model);
+						servletContexts.forEach(sc -> {
+							for (String page : model.getErrorPages()) {
+								// use special, 2-arg version of map.remove()
+								sc.getErrorPageMapping().remove(page, model);
+							}
+						});
+					}
+				});
+				break;
+			}
+			case ENABLE: {
+				ErrorPageModel model = change.getErrorPageModel();
+				// enable in all associated contexts
+				Set<ServletContextModel> servletContexts = getServletContextModels(model);
+				servletContexts.forEach(sc -> sc.enableErrorPageModel(model));
+				disabledErrorPageModels.remove(model);
+				break;
+			}
+			case DISABLE: {
+				ErrorPageModel model = change.getErrorPageModel();
+				disabledErrorPageModels.add(model);
+				// disable in all associated contexts
+				Set<ServletContextModel> servletContexts = getServletContextModels(model);
+				servletContexts.forEach(sc -> sc.disableErrorPageModel(model));
+				break;
+			}
+			default:
+				break;
+		}
+	}
+
+	@Override
+	public void visit(ErrorPageStateChange change) {
+		// no op here - handled at ServerController level only
+	}
+
+
+
+
+
+
 
 
 
@@ -1807,67 +2086,6 @@ public class ServerModel implements BatchVisitor {
 //				bundlesByVirtualHost.remove(virtualHost);
 //			}
 		}
-	}
-
-	/**
-	 * Unregisters a servlet model.
-	 *
-	 * @param model servlet model to unregister
-	 */
-	public void removeServletModel(final ServletModel model) {
-//		try {
-//			deassociateBundle(model.getContextModel().getVirtualHosts(), model.getContextModel().getBundle());
-//			for (String virtualHost : resolveVirtualHosts(model)) {
-//				if (model.getAlias() != null) {
-////					aliasMapping.get(virtualHost).remove(getFullPath(model.getContextModel(), model.getAlias()));
-//				}
-//				if (model.getServlet() != null) {
-//					servlets.get(virtualHost).remove(model.getServlet());
-//				}
-//				if (model.getUrlPatterns() != null) {
-//					for (String urlPattern : model.getUrlPatterns()) {
-////						servletUrlPatterns.get(virtualHost).remove(getFullPath(model.getContextModel(), urlPattern));
-//					}
-//				}
-//			}
-//		} finally {
-//		}
-	}
-
-	/**
-	 * Unregister a filter model.
-	 *
-	 * @param model filter model to unregister
-	 */
-	public void removeFilterModel(final FilterModel model) {
-//		if (model.getUrlPatterns() != null) {
-//			try {
-//				deassociateBundle(model.getContextModel().getVirtualHosts(), model.getContextModel().getBundle());
-//				for (String virtualHost : resolveVirtualHosts(model)) {
-//					for (String urlPattern : model.getUrlPatterns()) {
-//						String fullPath = getFullPath(model.getContextModel(), urlPattern);
-//						Set<UrlPattern> urlSet = filterUrlPatterns.get(virtualHost).get(fullPath);
-//						UrlPattern toDelete = null;
-//						for (UrlPattern pattern : urlSet) {
-//							FilterModel filterModel = (FilterModel) pattern.getElementModel();
-//							Class<?> filter = filterModel.getFilterClass();
-//							Class<?> matchFilter = model.getFilterClass();
-//							if (filter != null && filter.equals(matchFilter)) {
-//								toDelete = pattern;
-//								break;
-//							}
-//							Object filterInstance = filterModel.getFilter();
-//							if (filterInstance != null && filterInstance == model.getFilter()) {
-//								toDelete = pattern;
-//								break;
-//							}
-//						}
-//						urlSet.remove(toDelete);
-//					}
-//				}
-//			} finally {
-//			}
-//		}
 	}
 
 	public OsgiContextModel matchPathToContext(final String path) {

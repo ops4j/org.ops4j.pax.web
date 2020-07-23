@@ -699,7 +699,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 	 * <p>Test for Whiteboard service registration of servlets to different OSGi contexts and handling name
 	 * conflicts.</p>
 	 *
-	 * <p>Have 3 contexts (each with single OSGi context associated):<ul>
+	 * <p>Have 4 contexts (each with single OSGi context associated):<ul>
 	 *     <li>/c1</li>
 	 *     <li>/c2</li>
 	 *     <li>/c3</li>

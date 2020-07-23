@@ -24,6 +24,7 @@ import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
@@ -111,7 +112,6 @@ public class Batch {
 
 	/**
 	 * Remove {@link ServletModel} from {@link ServerModel}
-	 * @param model
 	 * @param serverModel
 	 * @param toUnregister
 	 */
@@ -163,14 +163,14 @@ public class Batch {
 	/**
 	 * Remove {@link ServletModel} from {@link ServerModel}
 	 * @param serverModel
-	 * @param model
+	 * @param toUnregister
 	 */
 	public void removeFilterModels(ServerModel serverModel, List<FilterModel> toUnregister) {
 		operations.add(new FilterModelChange(OpCode.DELETE, serverModel, toUnregister));
 	}
 
 	/**
-	 * Add {@link FilterModel} to {@link FilterModel} but as <em>disabled</em> model
+	 * Add {@link FilterModel} to {@link ServerModel} but as <em>disabled</em> model
 	 *
 	 * @param filterModel
 	 * @param model
@@ -210,12 +210,79 @@ public class Batch {
 	}
 
 	/**
+	 * Add {@link ErrorPageModel} to {@link ServerModel}
+	 * @param serverModel
+	 * @param model
+	 */
+	public void addErrorPageModel(ServerModel serverModel, ErrorPageModel model) {
+		operations.add(new ErrorPageModelChange(OpCode.ADD, serverModel, model));
+	}
+
+	/**
+	 * Remove {@link ErrorPageModel} from {@link ServerModel}
+	 * @param serverModel
+	 * @param toUnregister
+	 */
+	public void removeErrorPageModels(ServerModel serverModel, List<ErrorPageModel> toUnregister) {
+		operations.add(new ErrorPageModelChange(OpCode.DELETE, serverModel, toUnregister));
+	}
+
+	/**
+	 * Add {@link ErrorPageModel} to {@link ServerModel} but as <em>disabled</em> model
+	 *
+	 * @param serverModel
+	 * @param model
+	 */
+	public void addDisabledErrorPageModel(ServerModel serverModel, ErrorPageModel model) {
+		operations.add(new ErrorPageModelChange(OpCode.ADD, serverModel, model, true));
+	}
+
+	/**
+	 * Enable {@link ErrorPageModel}
+	 *
+	 * @param serverModel
+	 * @param model
+	 */
+	public void enableErrorPageModel(ServerModel serverModel, ErrorPageModel model) {
+		operations.add(new ErrorPageModelChange(OpCode.ENABLE, serverModel, model));
+	}
+
+	/**
+	 * Disable {@link ErrorPageModel} in {@link ServerModel}
+	 *
+	 * @param serverModel
+	 * @param model
+	 */
+	public void disableErrorPageModel(ServerModel serverModel, ErrorPageModel model) {
+		operations.add(new ErrorPageModelChange(OpCode.DISABLE, serverModel, model));
+	}
+
+	/**
+	 * Batch (inside batch...) method that passes full information about all error page models
+	 * that should be enabled in a set of contexts. To be handled by Server Controller only
+	 *
+	 * @param contextErrorPageModels
+	 */
+	public void updateErrorPages(Map<String, TreeSet<ErrorPageModel>> contextErrorPageModels) {
+		operations.add(new ErrorPageStateChange(contextErrorPageModels));
+	}
+
+	/**
 	 * Add new {@link EventListenerModel}
 	 * @param serverModel
 	 * @param model
 	 */
 	public void addEventListenerModel(ServerModel serverModel, EventListenerModel model) {
 		operations.add(new EventListenerModelChange(OpCode.ADD, serverModel, model));
+	}
+
+	/**
+	 * Remove existing {@link EventListenerModel}
+	 * @param serverModel
+	 * @param model
+	 */
+	public void removeEventListenerModel(ServerModel serverModel, EventListenerModel model) {
+		operations.add(new EventListenerModelChange(OpCode.DELETE, serverModel, model));
 	}
 
 	/**

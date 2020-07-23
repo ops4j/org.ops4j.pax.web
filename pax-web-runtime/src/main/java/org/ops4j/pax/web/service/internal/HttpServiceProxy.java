@@ -290,6 +290,29 @@ class HttpServiceProxy implements WebContainer, StoppableHttpService {
 		delegate.unregisterWelcomeFiles(welcomeFiles, httpContext);
 	}
 
+	// --- methods used to register error pages
+
+	@Override
+	public void registerErrorPage(String error, String location, HttpContext httpContext) {
+		delegate.registerErrorPage(error, location, httpContext);
+	}
+
+	@Override
+	public void registerErrorPages(String[] errors, String location, HttpContext httpContext) {
+		delegate.registerErrorPages(errors, location, httpContext);
+	}
+
+	// --- methods used to unregister error pages
+
+	@Override
+	public void unregisterErrorPage(String error, HttpContext httpContext) {
+		delegate.unregisterErrorPage(error, httpContext);
+	}
+
+	@Override
+	public void unregisterErrorPages(String[] errors, HttpContext httpContext) {
+		delegate.unregisterErrorPages(errors, httpContext);
+	}
 
 //	/**
 //	 * @see WebContainer#setContextParam(Dictionary, HttpContext)

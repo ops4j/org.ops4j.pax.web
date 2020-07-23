@@ -46,6 +46,7 @@ import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -71,6 +72,8 @@ import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
+import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
+import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterStateChange;
@@ -608,6 +611,9 @@ class JettyServerWrapper implements BatchVisitor {
 			// welcome files will be handled at default/resource servlet level and OsgiServletContext
 			sch.setWelcomeFiles(new String[0]);
 
+			// error page handler will be configured later (optionally)
+			sch.setErrorHandler(new ErrorPageErrorHandler());
+
 			// for future (optional) resource servlets, let's define some common context init properties
 			// which are read in org.eclipse.jetty.servlet.DefaultServlet.init()
 			sch.setInitParameter(DefaultServlet.CONTEXT_INIT + "dirAllowed", "false");
@@ -966,6 +972,13 @@ class JettyServerWrapper implements BatchVisitor {
 				servletContextHandler.addEventListener(eventListener);
 			});
 		}
+		if (change.getKind() == OpCode.DELETE) {
+			contextModels.forEach((context) -> {
+				ServletContextHandler servletContextHandler = contextHandlers.get(context.getContextPath());
+				EventListener eventListener = eventListenerModel.getEventListener();
+				servletContextHandler.removeEventListener(eventListener);
+			});
+		}
 	}
 
 	@Override
@@ -1027,6 +1040,45 @@ class JettyServerWrapper implements BatchVisitor {
 					}
 				}
 			});
+		}
+	}
+
+	@Override
+	public void visit(ErrorPageModelChange change) {
+		// no op here
+	}
+
+	@Override
+	public void visit(ErrorPageStateChange change) {
+		Map<String, TreeSet<ErrorPageModel>> contextErrorPages = change.getContextErrorPages();
+
+		for (Map.Entry<String, TreeSet<ErrorPageModel>> entry : contextErrorPages.entrySet()) {
+			String contextPath = entry.getKey();
+			TreeSet<ErrorPageModel> errorPageModels = entry.getValue();
+
+			LOG.info("Changing error page configuration for context {}", contextPath);
+
+			// there should already be a ServletContextHandler
+			ServletContextHandler sch = contextHandlers.get(contextPath);
+
+			ErrorPageErrorHandler eph = (ErrorPageErrorHandler) sch.getErrorHandler();
+			eph.getErrorPages().clear();
+
+			for (ErrorPageModel model : errorPageModels) {
+				String location = model.getLocation();
+				for (String ex : model.getExceptionClassNames()) {
+					eph.addErrorPage(ex, location);
+				}
+				for (int code : model.getErrorCodes()) {
+					eph.addErrorPage(code, location);
+				}
+				if (model.isXx4()) {
+					eph.addErrorPage(400, 499, location);
+				}
+				if (model.isXx5()) {
+					eph.addErrorPage(500, 599, location);
+				}
+			}
 		}
 	}
 

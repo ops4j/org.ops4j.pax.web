@@ -667,6 +667,9 @@ public interface WebContainer extends HttpService {
 	 * <em>directories</em>, but a welcome file may also map to actual web component (a servlet) which is usually
 	 * the case with <em>welcome file</em> like {@code index.do} or {@code index.xhtml} (from JSF).</p>
 	 *
+	 * <p>Welcome files are <em>cumulative</em> - they're added to single set of welcome files specified for
+	 * given <em>context</em>.</p>
+	 *
 	 * <p>Welcome files are strictly connected with <em>resource servlets</em> and without actual resources they're
 	 * useless. Welcome files are also registered per <em>context</em> and affect all the resource servlets
 	 * registered into (in association with) given context.</p>
@@ -688,10 +691,75 @@ public interface WebContainer extends HttpService {
 	 * <p>To make management easier, passing empty set of welcome files to this method will unregister all available
 	 * welcome files (for given context).</p>
 	 *
+	 * <p>Also, differently than with servlets, filters and listeners, unregistration method requires passing
+	 * original {@link HttpContext}, because array of Strings is not enough to identify proper model. In normal
+	 * scenario, if exactly the same (element-wise, not reference wise) array of welcome files is passed, we
+	 * can properly clean up the models, but if user registers 3 welcome files, but unregisters only one,
+	 * it's not possible to clean up the state - it'll be cleaned when {@link HttpService} is destroyed.</p>
+	 *
 	 * @param welcomeFiles
 	 * @param httpContext the http context from which the welcome files should be unregistered. Cannot be null.
 	 */
 	void unregisterWelcomeFiles(String[] welcomeFiles, HttpContext httpContext);
+
+	// --- methods used to register error pages
+
+	/**
+	 * <p>Registers an error page to customize the response sent back to the web client in case that an exception or
+	 * error propagates back to the web container, or the servlet/filter calls sendError() on the response object for
+	 * a specific status code.</p>
+	 *
+	 * <p>This method was created before Pax Web implemented OSGi CMPN Whiteboard specification, where <em>error
+	 * pages</em> are <strong>always</strong> registered in association with concrete {@link Servlet} instance
+	 * that will be used to handle the errors, while the <em>mapping location</em> location of this servlet is not
+	 * important. Here, registering error page(s) should be made after registering actual servlet for given
+	 * mapping.</p>
+	 *
+	 * <p>The mapping location should be fixed <em>prefix</em> absolute location (i.e., no wildcard) and registered
+	 * error code (or FQCN of an exception) is added to a collection (set) of error pages mapped to given location.</p>
+	 *
+	 * <p>Single <em>error pages can't be associated with multiple locations. However in Whiteboard scenario, where
+	 * service ranking is available, it is possible to <em>shadow</em> one mapping with another having higher
+	 * service ranking.</p>
+	 *
+	 * @param error a fully qualified Exception class name or an error status code (or {@code 4xx} or {@code 5xx})
+	 * @param location the request path that will fill the response page. The location must start with an "/"
+	 * @param httpContext the http context this error page is for. If null a default http context will be used.
+	 * @since 0.3.0, January 12, 2007
+	 */
+	void registerErrorPage(String error, String location, HttpContext httpContext);
+
+	/**
+	 * <p>Register multiple <em>error pages</em> to be associated with given location</p>
+	 *
+	 * @param errors
+	 * @param location
+	 * @param httpContext
+	 */
+	void registerErrorPages(String[] errors, String location, HttpContext httpContext);
+
+	// --- methods used to unregister error pages
+
+	/**
+	 * <p>Unregisters a previously registered error page - it'll be removed from a set of <em>error pages</em> associated
+	 * with some mapping location.</p>
+	 *
+	 * <p>Also, differently than with servlets, filters and listeners, unregistration method requires passing
+	 * original {@link HttpContext}, because array of Strings is not enough to identify proper model.</p>
+	 *
+	 * @param error a fully qualified Exception class name or an error status code
+	 * @param httpContext the http context from which the error page should be unregistered. Cannot be null.
+	 * @since 0.3.0, January 12, 2007
+	 */
+	void unregisterErrorPage(String error, HttpContext httpContext);
+
+	/**
+	 * Unregisters multiple <em>error pages</em> associated with some mapping location.
+	 *
+	 * @param errors
+	 * @param httpContext
+	 */
+	void unregisterErrorPages(String[] errors, HttpContext httpContext);
 
 
 
@@ -850,41 +918,6 @@ public interface WebContainer extends HttpService {
 //     */
 //    void unregisterJsps(String[] urlPatterns, HttpContext httpContext);
 
-//    /**
-//     * Registers an error page to customize the response sent back to the web
-//     * client in case that an exception or error propagates back to the web
-//     * container, or the servlet/filter calls sendError() on the response object
-//     * for a specific status code.
-//     *
-//     * @param error
-//     *            a fully qualified Exception class name or an error status code
-//     * @param location
-//     *            the request path that will fill the response page. The
-//     *            location must start with an "/"
-//     * @param httpContext
-//     *            the http context this error page is for. If null a default
-//     *            http context will be used.
-//     * @throws IllegalArgumentException
-//     *             if: error is null or empty location is null location does not
-//     *             start with a slash "/"
-//     * @since 0.3.0, January 12, 2007
-//     */
-//    void registerErrorPage(String error, String location, HttpContext httpContext);
-//
-//    /**
-//     * Unregisters a previous registered error page.
-//     *
-//     * @param error
-//     *            a fully qualified Exception class name or an error status code
-//     * @param httpContext
-//     *            the http context from which the error page should be
-//     *            unregistered. Cannot be null.
-//     * @throws IllegalArgumentException
-//     *             if: error is null or empty error page was not registered
-//     *             before httpContext is null
-//     * @since 0.3.0, January 12, 2007
-//     */
-//    void unregisterErrorPage(String error, HttpContext httpContext);
 //
 //    /**
 //     * Registers login configuration, with authorization method and realm name.

@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 import javax.servlet.ServletContext;
 
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.JspConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.LoginConfigModel;
@@ -108,6 +109,12 @@ public final class ServletContextModel extends Identity {
 	/** Filter name mapping enforces filter name uniqueness within a context. */
 	private final Map<String, FilterModel> filterNameMapping = new HashMap<>();
 
+	/**
+	 * Mapping between error code / wildcard / exception class name and actual (enabled) {@link ErrorPageModel}
+	 * that is used for given error.
+	 */
+	private final Map<String, ErrorPageModel> errorPageMapping = new HashMap<>();
+
 	public ServletContextModel(String contextPath) {
 		this.contextPath = contextPath;
 	}
@@ -143,7 +150,6 @@ public final class ServletContextModel extends Identity {
 		servletNameMapping.remove(model.getName());
 	}
 
-
 	/**
 	 * <p>Marks given {@link FilterModel} as enabled.</p>
 	 *
@@ -160,6 +166,26 @@ public final class ServletContextModel extends Identity {
 	 */
 	public void disableFilterModel(FilterModel model) {
 		filterNameMapping.remove(model.getName());
+	}
+
+	/**
+	 * Mark given {@link ErrorPageModel} as enabled
+	 * @param model
+	 */
+	public void enableErrorPageModel(ErrorPageModel model) {
+		for (String page : model.getErrorPages()) {
+			errorPageMapping.put(page, model);
+		}
+	}
+
+	/**
+	 * Mark given {@link ErrorPageModel} as disabled
+	 * @param model
+	 */
+	public void disableErrorPageModel(ErrorPageModel model) {
+		for (String page : model.getErrorPages()) {
+			errorPageMapping.remove(page);
+		}
 	}
 
 	public String getContextPath() {
@@ -196,6 +222,10 @@ public final class ServletContextModel extends Identity {
 
 	public Map<String, ServletModel> getServletUrlPatternMapping() {
 		return servletUrlPatternMapping;
+	}
+
+	public Map<String, ErrorPageModel> getErrorPageMapping() {
+		return errorPageMapping;
 	}
 
 	@Override

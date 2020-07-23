@@ -278,3 +278,11 @@ First, we have these assumptions:
 * Even if Tomcat and Undertow handle welcome files before dispatching to a servlet, while Jetty does it after dispatching to default servlet, Pax Web explicitly configures context-level welcome files as empty array. Welcome files are handled by individual "resource servlets", because there may be more of them - not necessarily mapped to `/` URI.
 * with pax-web-extender-war we should (or leave it as configuration option) configure `/` servlet if none is specified. Such servlet will be used to serve resources from the WAB bundle itself. The name/prefix should be empty (to serve resources from the root of the WAB).
 * Each resource servlet used should handle welcome files by first checking of real servlet is available after adding a welcome file to incoming _directory URI_ - even if by default only Jetty's default servlet does it.
+
+== Error Pages
+
+_Error pages_ are (from `web.xml` point of view) mappings from error codes or FQCN of exceptions to locations:
+
+* `org.eclipse.jetty.servlet.ErrorPageErrorHandler._errorPages`
+* `org.apache.catalina.util.ErrorPageSupport.exceptionPages` and `org.apache.catalina.util.ErrorPageSupport.statusPages`
+* `io.undertow.servlet.api.DeploymentInfo.errorPages` and `io.undertow.servlet.core.DeploymentImpl.errorPages` (no specific Undertow `web.xml` parser. It's parsed in Wildfly by `org.jboss.metadata.parser.servlet.WebCommonMetaDataParser#parse()`)
