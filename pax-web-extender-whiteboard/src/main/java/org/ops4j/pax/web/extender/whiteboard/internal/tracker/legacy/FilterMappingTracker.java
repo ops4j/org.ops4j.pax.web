@@ -73,26 +73,4 @@ public class FilterMappingTracker extends AbstractMappingTracker<FilterMapping, 
 		return builder.build();
 	}
 
-	// from removed FilterMappingWebElement
-
-//	@Override
-//	public void register(final WebContainer webContainer, final HttpContext httpContext) throws Exception {
-//		//TODO: DispatcherTypes EnumSet !!
-//		//--> this might be done by adding those to the initParams as it's interpreted by the whiteboard-extender
-////		webContainer.registerFilter(
-////					filterMapping.getFilter()/*.getClass()*/,
-////					filterMapping.getUrlPatterns(),
-////					filterMapping.getServletNames(),
-////					DictionaryUtils.adapt(filterMapping.getInitParams()),
-////					filterMapping.getAsyncSupported(),
-////					httpContext);
-//	}
-//
-//
-//	@Override
-//	public void unregister(final WebContainer webContainer, final HttpContext httpContext) {
-//		Filter filter = filterMapping.getFilter();
-////		webContainer.unregisterFilter(filter);
-//	}
-
 }

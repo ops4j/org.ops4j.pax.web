@@ -64,41 +64,54 @@
 							<!-- from pax-web-spi -->
 							org.ops4j.pax.web.service.spi.*;version="${pax-web.osgi.version}",
 							<!-- from pax-web-jsp -->
-							org.ops4j.pax.web.jsp;version="${pax-web.osgi.version}";resolution:=optional,
+<!--							org.ops4j.pax.web.jsp;version="${pax-web.osgi.version}";resolution:=optional,-->
 
 							<!-- from pax-logging-api -->
 							org.slf4j;version="[1.7,2)",
 
+							<!-- undertow and xnio packages -->
+							org.xnio;version="[3.3,4)",
+							org.xnio.channels;version="[3.3,4)",
+							io.undertow;version="[2.0,3)",
+							io.undertow.connector;version="[2.0,3)",
+							io.undertow.io;version="[2.0,3)",
+							io.undertow.predicate;version="[2.0,3)",
+							io.undertow.protocols.ssl;version="[2.0,3)",
+							io.undertow.security.api;version="[2.0,3)",
+							io.undertow.security.idm;version="[2.0,3)",
+							io.undertow.server;version="[2.0,3)",
+							io.undertow.server.handlers;version="[2.0,3)",
+							io.undertow.server.handlers.accesslog;version="[2.0,3)",
+							io.undertow.server.handlers.builder;version="[2.0,3)",
+							io.undertow.server.handlers.cache;version="[2.0,3)",
+							io.undertow.server.handlers.resource;version="[2.0,3)",
+							io.undertow.server.protocol.http;version="[2.0,3)",
+							io.undertow.server.protocol.http2;version="[2.0,3)",
+							io.undertow.server.session;version="[2.0,3)",
+							io.undertow.servlet;version="[2.0,3)",
+							io.undertow.servlet.api;version="[2.0,3)",
+							io.undertow.servlet.core;version="[2.0,3)",
+							io.undertow.servlet.handlers;version="[2.0,3)",
+							io.undertow.servlet.spec;version="[2.0,3)",
+							io.undertow.servlet.util;version="[2.0,3)",
+							io.undertow.util;version="[2.0,3)",
+
 							<!-- other -->
 							javax.annotation;version="[1.2,2)";resolution:=optional,
-*
-							<!-- to check -->
+							javax.net.ssl,
+							javax.security.auth,
+							javax.security.auth.callback,
+							javax.security.auth.login,
+							javax.xml.bind,
+							javax.xml.bind.annotation,
+							javax.xml.parsers,
+							org.xml.sax,
+							org.xml.sax.helpers
 
+							<!-- to check -->
 <!--							org.apache.jasper.servlet; resolution:=optional,-->
 <!--							javax.management.*; resolution:=optional,-->
 <!--							javax.websocket.*; resolution:=optional,-->
-<!--							io.undertow;version="[2.0,2.1)",-->
-<!--							io.undertow.connector;version="[2.0,2.1)",-->
-<!--							io.undertow.io;version="[2.0,2.1)",-->
-<!--							io.undertow.security.idm;version="[2.0,2.1)",-->
-<!--							io.undertow.server;version="[2.0,2.1)",-->
-<!--							io.undertow.server.handlers;version="[2.0,2.1)",-->
-<!--							io.undertow.server.handlers.resource;version="[2.0,2.1)",-->
-<!--							io.undertow.servlet;version="[2.0,2.1)",-->
-<!--							io.undertow.servlet.api;version="[2.0,2.1)",-->
-<!--							io.undertow.servlet.handlers;version="[2.0,2.1)",-->
-<!--							io.undertow.servlet.spec;version="[2.0,2.1)",-->
-<!--							io.undertow.servlet.util;version="[2.0,2.1)",-->
-<!--							io.undertow.util;version="[2.0,2.1)",-->
-<!--							io.undertow.websockets.jsr;version="[2.0,2.1)";resolution:=optional,-->
-<!--							io.undertow.websockets.jsr.annotated;version="[2.0,2.1)";resolution:=optional,-->
-<!--							io.undertow.websockets.jsr.handshake;version="[2.0,2.1)";resolution:=optional,-->
-<!--							io.undertow.websockets.jsr.util;version="[2.0,2.1)";resolution:=optional,-->
-<!--							org.osgi.framework; version="[1.0.0,2.0.0)",-->
-<!--							org.osgi.service.http; version="[1.0.0,2.0.0)",-->
-<!--							org.osgi.service.packageadmin;resolution:=optional,-->
-<!--							org.osgi.util.tracker;version="[1.3.0,2.0.0)",-->
-<!--							org.slf4j; version="[1.5,2)",-->
 <!--							javax.el; version="[2.1.0,4.0.0)";resolution:=optional,-->
 <!--							org.apache.el; version="2.2"; resolution:=optional,-->
 <!--							org.apache.el.lang; version="2.2"; resolution:=optional,-->
@@ -108,8 +121,7 @@
 <!--							*-->
 						</Import-Package>
 						<Provide-Capability>
-							osgi.service;objectClass=javax.servlet.ServletContext,
-							osgi.service;effective:=active;objectClass=org.ops4j.pax.web.service.spi.ServerController
+							osgi.service;effective:=active;objectClass:List&lt;String&gt;="org.ops4j.pax.web.service.spi.ServerControllerFactory"
 						</Provide-Capability>
 						<Private-Package>
 							org.ops4j.pax.web.service.undertow.internal.*,

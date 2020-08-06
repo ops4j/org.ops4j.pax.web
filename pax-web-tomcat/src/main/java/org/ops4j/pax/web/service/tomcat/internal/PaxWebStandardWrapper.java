@@ -180,15 +180,18 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 	public synchronized Servlet loadServlet() throws ServletException {
 		Servlet instance = super.getServlet();
 		if (instance == null) {
-			if (servletModel.getElementReference() != null) {
+			if (serviceReference != null) {
 				// obtain Servlet using reference
-				instance = servletModel.getRegisteringBundle().getBundleContext().getService(servletModel.getElementReference());
+				// TODO: use org.osgi.framework.ServiceObjects
+				instance = servletModel.getRegisteringBundle().getBundleContext().getService(serviceReference);
 			} else if (servletClass != null) {
 				try {
 					instance = servletClass.newInstance();
 				} catch (Exception e) {
 					throw new ServletException(e.getMessage(), e);
 				}
+			} else if (servletModel != null && servletModel.getElementSupplier() != null) {
+				instance = servletModel.getElementSupplier().get();
 			}
 		}
 

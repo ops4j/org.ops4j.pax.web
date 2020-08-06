@@ -110,6 +110,8 @@ public class PaxWebFilterInfo extends FilterInfo {
 						instantiationException.initCause(e);
 						throw instantiationException;
 					}
+				} else if (model.getElementSupplier() != null) {
+					instance = model.getElementSupplier().get();
 				}
 			}
 

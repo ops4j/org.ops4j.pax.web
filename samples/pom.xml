@@ -40,13 +40,11 @@
 		<module>samples-httpservice</module>
 		<module>samples-war</module>
 		<module>samples-jsf</module>
+		<module>samples-whiteboard</module>
 
 <!--		<module>jsp/war-introspection</module>-->
-<!--		<module>helloworld-hs</module>-->
 <!--		<module>helloworld-jsp</module>-->
 <!--		<module>helloworld-jsp-noclasses</module>-->
-<!--		<module>helloworld-wc</module>-->
-<!--		<module>authentication</module>-->
 <!--		<module>war</module>-->
 <!--		<module>war-dispatch-jsp</module>-->
 <!--		<module>whiteboard</module>-->
@@ -83,7 +81,6 @@
 <!--		<module>websocket-jsr356</module>-->
 <!--		<module>war-extended-post</module>-->
 <!--		<module>web-jersey</module>-->
-<!--		<module>http-custom-context</module>-->
 <!--		<module>jsf-resourcehandler</module>-->
 	</modules>
 

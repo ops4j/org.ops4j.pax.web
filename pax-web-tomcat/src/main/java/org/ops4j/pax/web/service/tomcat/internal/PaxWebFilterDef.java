@@ -72,6 +72,10 @@ public class PaxWebFilterDef extends FilterDef {
 			}
 		}
 
+		if (instance == null && filterModel.getElementSupplier() != null) {
+			instance = filterModel.getElementSupplier().get();
+		}
+
 		filterModel.getInitParams().forEach(this::addInitParameter);
 		setAsyncSupported(filterModel.getAsyncSupported() != null && filterModel.getAsyncSupported() ? "true" : "false");
 

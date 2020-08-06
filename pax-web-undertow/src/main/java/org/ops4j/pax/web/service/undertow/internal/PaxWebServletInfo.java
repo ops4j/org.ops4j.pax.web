@@ -30,7 +30,6 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceReference;
 
 /**
  * Special {@link ServletInfo} that can be configured from {@link ServletModel}.
@@ -45,7 +44,6 @@ public class PaxWebServletInfo extends ServletInfo {
 	private Servlet servlet;
 
 	private Class<? extends Servlet> servletClass;
-	private ServiceReference<? extends Servlet> serviceReference;
 
 	/** This {@link ServletContext} is scoped to single {@link org.osgi.service.http.context.ServletContextHelper} */
 	private final OsgiServletContext osgiServletContext;
@@ -192,6 +190,8 @@ public class PaxWebServletInfo extends ServletInfo {
 						instantiationException.initCause(e);
 						throw instantiationException;
 					}
+				} else if (model.getElementSupplier() != null) {
+					instance = model.getElementSupplier().get();
 				}
 			}
 

@@ -63,6 +63,8 @@ public abstract class ElementModel<T, D extends ElementEventData>
 	 */
 	protected List<OsgiContextModel> contextModels = new ArrayList<>();
 
+	protected Boolean isValid;
+
 	private volatile boolean closed = false;
 
 	private int serviceRank = 0;
@@ -97,8 +99,6 @@ public abstract class ElementModel<T, D extends ElementEventData>
 	 * {@link org.osgi.service.http.context.ServletContextHelper} if needed.
 	 */
 	private Bundle registeringBundle;
-
-	private Boolean isValid;
 
 	/**
 	 * <p>This method should be called from Whiteboard infrastructure to really perform the validation and set

@@ -45,7 +45,19 @@ public class ResourceMappingTracker extends AbstractMappingTracker<ResourceMappi
 
 	@Override
 	protected ServletModel doCreateElementModel(Bundle bundle, ResourceMapping service, Integer rank, Long serviceId) {
-		return null;
+		// pass everything to a handy builder - there's no servlet/servletSupplier/servletReference/servletClass
+		// provided, which will trigger a call to ServerController.createResourceServlet()
+		ServletModel.Builder builder = new ServletModel.Builder()
+				.withServiceRankAndId(rank, serviceId)
+				.withRegisteringBundle(bundle)
+				.withAlias(service.getAlias())
+				.withUrlPatterns(service.getUrlPatterns())
+				.withRawPath(service.getPath()) // could be file: or a chroot inside a bundle - we'll check and validate later
+				.withLoadOnStartup(1)
+				.withAsyncSupported(true)
+				.resourceServlet(true);
+
+		return builder.build();
 	}
 
 //	/**

@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -112,6 +113,20 @@ public class Utils {
 		}
 
 		return converted;
+	}
+
+	/**
+	 * Special method to be called from R6 framwork ({@code ServiceReference#getProperties()} was
+	 * added in R7 == org.osgi.framework;version=1.9).
+	 * @param reference
+	 * @return
+	 */
+	public static Map<String, String> toMap(final ServiceReference<?> reference) {
+		Dictionary<String, Object> dict = new Hashtable<>();
+		for (String key : reference.getPropertyKeys()) {
+			dict.put(key, reference.getProperty(key));
+		}
+		return toMap(dict);
 	}
 
 	public static String resolve(String value) {
@@ -368,10 +383,13 @@ public class Utils {
 	public static <T> T getPaxWebProperty(ServiceReference<?> serviceReference, String legacyName, String whiteboardName,
 			BiFunction<String, Object, T> propertyProvider) {
 		T value = null;
-		Object propertyValue = serviceReference.getProperty(legacyName);
-		if (propertyValue != null) {
-			LOG.warn("Legacy {} property specified, R7 {} property should be used instead", legacyName, whiteboardName);
-			value = propertyProvider.apply(legacyName, propertyValue);
+		Object propertyValue = null;
+		if (legacyName != null) {
+			propertyValue = serviceReference.getProperty(legacyName);
+			if (propertyValue != null) {
+				LOG.warn("Legacy {} property specified, R7 {} property should be used instead", legacyName, whiteboardName);
+				value = propertyProvider.apply(legacyName, propertyValue);
+			}
 		}
 		propertyValue = serviceReference.getProperty(whiteboardName);
 		if (propertyValue != null) {

@@ -68,7 +68,7 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/s"), startsWith("HTTP/1.1 404"));
 
 		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);
-		ServiceModelInternals serviceModelInternals = serviceModelInternals(container);
+		ServiceModelInternals serviceModelInternals = serviceModelInternals(sample1);
 
 		assertTrue(serverModelInternals.isClean(whiteboardBundle));
 		assertTrue(serverModelInternals.isClean(sample1));
@@ -94,7 +94,7 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/s"), startsWith("HTTP/1.1 404"));
 
 		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);
-		ServiceModelInternals serviceModelInternals = serviceModelInternals(container);
+		ServiceModelInternals serviceModelInternals = serviceModelInternals(sample1);
 
 		assertTrue(serverModelInternals.isClean(whiteboardBundle));
 		assertTrue(serverModelInternals.isClean(sample1));
@@ -122,7 +122,7 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/s"), startsWith("HTTP/1.1 404"));
 
 		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);
-		ServiceModelInternals serviceModelInternals = serviceModelInternals(container);
+		ServiceModelInternals serviceModelInternals = serviceModelInternals(sample1);
 
 		assertTrue(serverModelInternals.isClean(whiteboardBundle));
 		assertTrue(serverModelInternals.isClean(sample1));
@@ -161,7 +161,7 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 		getFilterCustomizer().removedService(filterRef, fmodel);
 
 		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);
-		ServiceModelInternals serviceModelInternals = serviceModelInternals(container);
+		ServiceModelInternals serviceModelInternals = serviceModelInternals(sample1);
 
 		assertTrue(serverModelInternals.isClean(whiteboardBundle));
 		assertTrue(serverModelInternals.isClean(sample1));
@@ -308,7 +308,7 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 		assertTrue(log.isEmpty());
 
 		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);
-		ServiceModelInternals serviceModelInternals = serviceModelInternals(container);
+		ServiceModelInternals serviceModelInternals = serviceModelInternals(sample1);
 
 		assertTrue(serverModelInternals.isClean(whiteboardBundle));
 		assertTrue(serverModelInternals.isClean(sample1));
@@ -439,7 +439,7 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 		assertTrue(log.isEmpty());
 
 		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);
-		ServiceModelInternals serviceModelInternals = serviceModelInternals(container);
+		ServiceModelInternals serviceModelInternals = serviceModelInternals(sample1);
 
 		assertTrue(serverModelInternals.isClean(whiteboardBundle));
 		assertTrue(serverModelInternals.isClean(sample1));
@@ -517,13 +517,17 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 		getFilterCustomizer().removedService(filter2Ref, fmodel2);
 
 		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);
-		ServiceModelInternals serviceModelInternals = serviceModelInternals(container);
+		ServiceModelInternals serviceModelInternalsS1 = serviceModelInternals(sampleS1);
+		ServiceModelInternals serviceModelInternalsF1 = serviceModelInternals(sampleF1);
+		ServiceModelInternals serviceModelInternalsF2 = serviceModelInternals(sampleF2);
 
 		assertTrue(serverModelInternals.isClean(whiteboardBundle));
 		assertTrue(serverModelInternals.isClean(sampleS1));
 		assertTrue(serverModelInternals.isClean(sampleF1));
 		assertTrue(serverModelInternals.isClean(sampleF2));
-		assertTrue(serviceModelInternals.isEmpty());
+		assertTrue(serviceModelInternalsS1.isEmpty());
+		assertTrue(serviceModelInternalsF1.isEmpty());
+		assertTrue(serviceModelInternalsF2.isEmpty());
 	}
 
 	@Test
@@ -586,12 +590,14 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 		getFilterCustomizer().removedService(filter2Ref, fmodel2);
 
 		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);
-		ServiceModelInternals serviceModelInternals = serviceModelInternals(container);
+		ServiceModelInternals serviceModelInternals1 = serviceModelInternals(sampleF1);
+		ServiceModelInternals serviceModelInternals2 = serviceModelInternals(sampleF1);
 
 		assertTrue(serverModelInternals.isClean(whiteboardBundle));
 		assertTrue(serverModelInternals.isClean(sampleF1));
 		assertTrue(serverModelInternals.isClean(sampleF2));
-		assertTrue(serviceModelInternals.isEmpty());
+		assertTrue(serviceModelInternals1.isEmpty());
+		assertTrue(serviceModelInternals2.isEmpty());
 	}
 
 	@WebServlet(loadOnStartup = 1, urlPatterns = "/s")

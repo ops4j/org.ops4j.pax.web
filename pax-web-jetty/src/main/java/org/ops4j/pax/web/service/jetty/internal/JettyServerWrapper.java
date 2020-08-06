@@ -805,7 +805,9 @@ class JettyServerWrapper implements BatchVisitor {
 				for (String pattern : model.getUrlPatterns()) {
 					isDefaultResourceServlet &= "/".equals(pattern);
 				}
-				holder.setInitParameter("pathInfoOnly", Boolean.toString(!isDefaultResourceServlet));
+				if (model.isResourceServlet()) {
+					holder.setInitParameter("pathInfoOnly", Boolean.toString(!isDefaultResourceServlet));
+				}
 
 				((PaxWebServletHandler) sch.getServletHandler()).addServletWithMapping(holder, mapping);
 			});

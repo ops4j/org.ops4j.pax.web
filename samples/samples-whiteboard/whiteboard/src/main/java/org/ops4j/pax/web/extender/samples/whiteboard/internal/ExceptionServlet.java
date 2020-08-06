@@ -1,15 +1,15 @@
 /*
+ * Copyright 2020 OPS4J.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.
- *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -18,7 +18,6 @@ package org.ops4j.pax.web.extender.samples.whiteboard.internal;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -39,19 +38,12 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class ExceptionServlet extends HttpServlet {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = -58844579506172515L;
 
 	private static final Set<Integer> VALID_ERROR_CODES = new HashSet<Integer>() {
-		/**
-		 *
-		 */
 		private static final long serialVersionUID = -5608318022683417716L;
 
 		{
-
 			add(HttpServletResponse.SC_BAD_REQUEST);
 			add(HttpServletResponse.SC_UNAUTHORIZED);
 			add(HttpServletResponse.SC_FORBIDDEN);
@@ -79,8 +71,7 @@ public class ExceptionServlet extends HttpServlet {
 	};
 
 	@Override
-	protected void service(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
+	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String error = req.getParameter("errorCode");
 		if (error != null && error.trim().length() > 0) {
 			int errorCode = -1;
@@ -97,20 +88,15 @@ public class ExceptionServlet extends HttpServlet {
 		error = req.getParameter("errorException");
 		if (error != null && error.trim().length() > 0) {
 			try {
-				Class<?> exp = this.getClass().getClassLoader()
-						.loadClass(error.trim());
+				Class<?> exp = this.getClass().getClassLoader().loadClass(error.trim());
 				if (Throwable.class.isAssignableFrom(exp)) {
-					throw new ServletException("Rethrowing " + error,
-							(Throwable) exp.newInstance());
+					throw new ServletException("Rethrowing " + error, (Throwable) exp.newInstance());
 				}
-				//CHECKSTYLE:OFF
-			} catch (Exception ex) {
-				// ignore class not found
+			} catch (Exception ignored) {
 			}
-			//CHECKSTYLE:ON
 		}
 
-		throw new IllegalArgumentException(
-				"Just throwing IllegalArgumentException");
+		throw new IllegalArgumentException("Just throwing IllegalArgumentException");
 	}
+
 }

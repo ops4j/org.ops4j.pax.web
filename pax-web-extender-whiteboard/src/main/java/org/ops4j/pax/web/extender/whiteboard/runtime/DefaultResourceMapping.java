@@ -27,8 +27,10 @@ import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class DefaultResourceMapping extends DefaultServletMapping implements ResourceMapping {
+public class DefaultResourceMapping extends AbstractContextRelated implements ResourceMapping {
 
+	private String[] urlPatterns = new String[0];
+	private String alias;
 	private String path;
 
 	@Override
@@ -38,6 +40,24 @@ public class DefaultResourceMapping extends DefaultServletMapping implements Res
 
 	public void setPath(String path) {
 		this.path = path;
+	}
+
+	@Override
+	public String getAlias() {
+		return alias;
+	}
+
+	public void setAlias(String alias) {
+		this.alias = alias;
+	}
+
+	@Override
+	public String[] getUrlPatterns() {
+		return urlPatterns;
+	}
+
+	public void setUrlPatterns(String[] urlPatterns) {
+		this.urlPatterns = urlPatterns;
 	}
 
 	@Override

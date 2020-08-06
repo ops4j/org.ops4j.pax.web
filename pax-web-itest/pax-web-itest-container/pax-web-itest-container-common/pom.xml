@@ -67,9 +67,12 @@
 							<!-- OSGi cmpn -->
 							org.osgi.service.cm;resolution:=optional,
 							org.osgi.service.http;version="[1.2,2)",
+							org.osgi.service.http.runtime.dto;version="[1.1,2)",
+							org.osgi.service.http.runtime;version="[1.1,2)",
 
 							<!-- from pax-web-api -->
 							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.whiteboard;version="${pax-web.osgi.version}",
 
 							<!-- from pax-web-spi -->
 							org.ops4j.pax.web.service.spi.model.events,
@@ -91,7 +94,9 @@
 							org.junit,
 							org.junit.*,
 							org.ops4j.pax.exam,
-							org.ops4j.pax.exam.*
+							org.ops4j.pax.exam.*,
+							org.ops4j.pax.web.extender.whiteboard.runtime,
+							org.ops4j.pax.web.extender.samples.whiteboard.internal
 						</DynamicImport-Package>
 						<Export-Package>
 							org.ops4j.pax.web.itest.container.*
@@ -116,6 +121,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-extender-whiteboard</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-runtime</artifactId>
 		</dependency>
 
@@ -127,6 +136,10 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>hs-helloworld</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>whiteboard</artifactId>
 		</dependency>
 
 		<!-- OPS4J dependencies -->

@@ -333,8 +333,7 @@
 						</Export-Package>
 						<_nouses>true</_nouses>
 						<Provide-Capability>
-							osgi.service;objectClass=javax.servlet.ServletContext,
-							osgi.service;effective:=active;objectClass=org.ops4j.pax.web.service.spi.ServerController
+							osgi.service;effective:=active;objectClass:List&lt;String&gt;="org.ops4j.pax.web.service.spi.ServerControllerFactory"
 						</Provide-Capability>
 						<Private-Package>
 							org.ops4j.pax.web.service.tomcat.internal.*

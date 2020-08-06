@@ -784,6 +784,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 
 		// servlet#1 registered in /c1 and /c2
 		view.registerServlet(Arrays.asList(wcc1, wcc2), new ServletModel.Builder()
+				.withRegisteringBundle(bundle)
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
 				.withServletReference(s11)
@@ -796,6 +797,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 
 		// servlet#2 registered in /c3 - no conflict
 		view.registerServlet(Collections.singletonList(wcc3), new ServletModel.Builder()
+				.withRegisteringBundle(bundle)
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
 				.withServletReference(s12)
@@ -808,6 +810,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 
 		// servlet#3 registered to /c1, but with higher service ID - should be marked as disabled
 		view.registerServlet(Collections.singletonList(wcc1), new ServletModel.Builder()
+				.withRegisteringBundle(bundle)
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
 				.withServletReference(s13)
@@ -820,6 +823,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 
 		// servlet#4 registered to /c2 and /c3 - ranked higher than s#1 in /c2, but ranked lower than s#2 in /c3
 		view.registerServlet(Arrays.asList(wcc2, wcc3), new ServletModel.Builder()
+				.withRegisteringBundle(bundle)
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
 				.withServletReference(s14)
@@ -837,6 +841,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		//  - s#4 is ranked lower than s#2 in /c3, so it won't be activated ANYWHERE
 		//  - s#5 will thus be activated in /c2 and /c4
 		view.registerServlet(Arrays.asList(wcc2, wcc4), new ServletModel.Builder()
+				.withRegisteringBundle(bundle)
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
 				.withServletReference(s15)
@@ -850,6 +855,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 
 		// servlet#6 registered to /c4 - ranked lower than s#5 in /c4, so added as disabled
 		view.registerServlet(Collections.singletonList(wcc4), new ServletModel.Builder()
+				.withRegisteringBundle(bundle)
 				.withServletName("s1")
 				.withUrlPatterns(new String[] { "/s" })
 				.withServletReference(s16)
@@ -864,6 +870,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		// servlet#2 unregistered, s#4 can be activated in /c3 and can be activated in /c2 because s#5 in /c2 is ranked
 		// lower than s#4, so s#5 disabled in /c4, so s#6 enabled in /c4
 		view.unregisterServlet(new ServletModel.Builder()
+				.withRegisteringBundle(bundle)
 				.withServletReference(s12)
 				.withOsgiContextModel(cm3)
 				.build());

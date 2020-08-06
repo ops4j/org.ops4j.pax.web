@@ -102,19 +102,20 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 	public FilterModel(String filterName, String[] urlPatterns, String[] servletNames, String[] regexMapping,
 			Filter filter, Dictionary<String, String> initParams, Boolean asyncSupported) {
 		this(urlPatterns, servletNames, regexMapping, null,
-				filterName, Utils.toMap(initParams), asyncSupported, filter, null, null);
+				filterName, Utils.toMap(initParams), asyncSupported, filter, null, null, null, null);
 	}
 
 	public FilterModel(String filterName, String[] urlPatterns, String[] servletNames, String[] regexMapping,
 			Class<? extends Filter> filterClass, Dictionary<String, String> initParams, Boolean asyncSupported) {
 		this(urlPatterns, servletNames, regexMapping, null,
-				filterName, Utils.toMap(initParams), asyncSupported, null, filterClass, null);
+				filterName, Utils.toMap(initParams), asyncSupported, null, filterClass, null, null, null);
 	}
 
 	@SuppressWarnings("deprecation")
 	private FilterModel(String[] urlPatterns, String[] servletNames, String[] regexMapping, String[] dispatcherTypes,
 			String name, Map<String, String> initParams, Boolean asyncSupported, Filter filter,
-			Class<? extends Filter> filterClass, ServiceReference<? extends Filter> reference) {
+			Class<? extends Filter> filterClass, ServiceReference<? extends Filter> reference,
+			Supplier<? extends Filter> supplier, Bundle registeringBundle) {
 
 		this.urlPatterns = Path.normalizePatterns(urlPatterns);
 		this.servletNames = servletNames != null ? Arrays.copyOf(servletNames, servletNames.length) : null;
@@ -125,6 +126,8 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		this.filter = filter;
 		this.filterClass = filterClass;
 		setElementReference(reference);
+		setElementSupplier(supplier);
+		setRegisteringBundle(registeringBundle);
 
 		if (name == null) {
 			// legacy method first
@@ -167,6 +170,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		sources += (filter != null ? 1 : 0);
 		sources += (filterClass != null ? 1 : 0);
 		sources += (getElementReference() != null ? 1 : 0);
+		sources += (getElementSupplier() != null ? 1 : 0);
 		if (sources == 0) {
 			throw new IllegalArgumentException("Filter Model must specify one of: filter instance, filter class"
 					+ " or service reference");
@@ -274,20 +278,23 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 	 * Returns a {@link Class} of the filter whether it is registered as instance, class or reference.
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public Class<? extends Filter> getActualClass() {
 		if (this.filterClass != null) {
 			return this.filterClass;
 		} else if (this.filter != null) {
 			return this.filter.getClass();
+		} else if (this.getElementSupplier() != null) {
+			// TOCHECK: what if user decides to control lifecycle of this element?
+			Filter s = getElementSupplier().get();
+			return s.getClass();
 		}
 		if (getElementReference() != null) {
-			String className = Utils.getFirstObjectClass(getElementReference());
-			if (className != null) {
+			Filter f = getRegisteringBundle().getBundleContext().getService(getElementReference());
+			if (f != null) {
 				try {
-					return (Class<? extends Filter>) getRegisteringBundle().loadClass(className);
-				} catch (ClassNotFoundException e) {
-					throw new RuntimeException("Can't load a class for the filter: " + e.getMessage(), e);
+					return f.getClass();
+				} finally {
+					getRegisteringBundle().getBundleContext().ungetService(getElementReference());
 				}
 			} else {
 				// sane default, accepted by Undertow - especially if it has instance factory
@@ -407,12 +414,11 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 
 		public FilterModel build() {
 			FilterModel model = new FilterModel(urlPatterns, servletNames, regexMapping, dispatcherTypes,
-					filterName, initParams, asyncSupported, filter, filterClass, reference);
+					filterName, initParams, asyncSupported, filter, filterClass, reference, supplier,
+					bundle);
 			list.forEach(model::addContextModel);
-			model.setRegisteringBundle(this.bundle);
 			model.setServiceRank(this.rank);
 			model.setServiceId(this.serviceId);
-			model.setElementSupplier(this.supplier);
 			return model;
 		}
 	}

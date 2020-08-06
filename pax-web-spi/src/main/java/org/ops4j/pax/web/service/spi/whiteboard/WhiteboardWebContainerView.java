@@ -31,6 +31,10 @@ import org.osgi.framework.Bundle;
  *
  * <p>This is a loose (as loose as possible) coupling between pax-web-runtime (an implementation of HttpService
  * specification) and pax-web-extender-whiteboard (an implementation of Whiteboard Service specification).</p>
+ *
+ * <p>The most important difference with direct usage of {@link org.ops4j.pax.web.service.WebContainer} is that
+ * the passed models already have {@link OsgiContextModel}s associated, while in the {@code WebContainer} case
+ * these have to be translated from {@link org.osgi.service.http.HttpContext}.</p>
  */
 public interface WhiteboardWebContainerView extends PaxWebContainerView {
 
@@ -99,5 +103,18 @@ public interface WhiteboardWebContainerView extends PaxWebContainerView {
 	 * @param model
 	 */
 	void removeWhiteboardOsgiContextModel(OsgiContextModel model);
+
+	/**
+	 * Registers a {@link ServletModel} as a <em>resource servlet</em>, which means that first proper
+	 * <em>resource servlet</em> has to be created.
+	 * @param servletModel
+	 */
+	void registerResources(ServletModel servletModel);
+
+	/**
+	 * Unregisters a {@link ServletModel} as a <em>resource servlet</em>.
+	 * @param servletModel
+	 */
+	void unregisterResources(ServletModel servletModel);
 
 }

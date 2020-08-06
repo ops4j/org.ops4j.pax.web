@@ -43,6 +43,7 @@ import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.wiring.BundleWiring;
@@ -120,7 +121,7 @@ public class OsgiServletContext implements ServletContext {
 	public void register() {
 		if (registration == null) {
 			try {
-				LOG.info("Registering {} as OSGi service for {} context path", this, getContextPath());
+				LOG.info("Registering {} as OSGi service for \"{}\" context path", this, getContextPath());
 
 				BundleContext bc = osgiContextModel.getOwnerBundle().getBundleContext();
 				if (bc != null && bc.getBundle() != null) {
@@ -144,11 +145,15 @@ public class OsgiServletContext implements ServletContext {
 	public void unregister() {
 		if (registration != null) {
 			try {
-				LOG.info("Registering {} as OSGi service for {} context path", this, getContextPath());
+				LOG.info("Unegistering {} as OSGi service for \"{}\" context path", this, getContextPath());
 
 				registration.unregister();
 			} catch (Exception e) {
-				LOG.error("Error unregistering {} from OSGi registry: {}", this, e.getMessage(), e);
+				if (osgiContextModel.getOwnerBundle().getState() == Bundle.ACTIVE) {
+					LOG.error("Error unregistering {} from OSGi registry: {}", this, e.getMessage(), e);
+				}
+			} finally {
+				registration = null;
 			}
 		}
 	}
@@ -571,6 +576,11 @@ public class OsgiServletContext implements ServletContext {
 		//       implementation of HttpService/WebContainer) and included bundles from "wiring space" of the
 		//       bundle of the HttpService instance
 		return osgiContextModel.getOwnerBundle().adapt(BundleWiring.class).getClassLoader();
+	}
+
+	@Override
+	public String toString() {
+		return "OsgiServletContext{model=" + osgiContextModel + "}";
 	}
 
 }

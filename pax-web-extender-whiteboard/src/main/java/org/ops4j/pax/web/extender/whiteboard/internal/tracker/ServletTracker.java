@@ -257,29 +257,6 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 //	@Override
 //	public void register(final WebContainer webContainer,
 //						 final HttpContext httpContext) throws Exception {
-//		if (servletMapping.getAlias() != null) {
-//			Dictionary<String, String> initParams = DictionaryUtils.adapt(servletMapping.getInitParams());
-//			// PAXWEB-961 - using plain org.osgi.service.http.HttpService doesn't allow passing servlet name,
-//			// so let's pass via init params
-//			if (initParams.get(SERVLET_NAME) == null && servletMapping.getServletName() != null) {
-//				initParams.put(SERVLET_NAME, servletMapping.getServletName());
-//			}
-//			webContainer.registerServlet(servletMapping.getAlias(),
-//					servletMapping.getServlet(),
-//					initParams,
-//					httpContext);
-//		} else {
-//				webContainer.registerServlet(
-//						servletMapping.getServlet(),
-//						servletMapping.getServletName(),
-//						servletMapping.getUrlPatterns(),
-//						DictionaryUtils.adapt(servletMapping.getInitParams()),
-//						servletMapping.getLoadOnStartup(),
-//						servletMapping.getAsyncSupported(),
-//						servletMapping.getMultipartConfig(),
-//						httpContext);
-//				// ((WebContainer) httpService).end(httpContext);
-//		}
 //		//special handling for OSGi R6 registration of Servlet as ErrorHandler
 //		if (errorMappings != null) {
 //			for (DefaultErrorPageMapping errorPageMapping : errorMappings) {
@@ -289,17 +266,6 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 //			}
 //		}
 //	}
-//
-//	@Override
-//	public void unregister(final WebContainer webContainer,
-//						   final HttpContext httpContext) {
-//		if (servletMapping.getAlias() != null) {
-//			webContainer.unregister(servletMapping.getAlias());
-//		} else {
-//			webContainer.unregisterServlet(servletMapping.getServlet());
-//		}
-//	}
-//
 
 //	@Override
 //	public Collection<? extends ErrorPageMapping> getErrorPageMappings() {

@@ -86,23 +86,6 @@ public class ServletMappingTracker extends AbstractMappingTracker<ServletMapping
 //	@Override
 //	public void register(final WebContainer webContainer,
 //						 final HttpContext httpContext) throws Exception {
-//		if (servletMapping.getAlias() != null) {
-//			webContainer.registerServlet(servletMapping.getAlias(),
-//					servletMapping.getServlet(),
-//					DictionaryUtils.adapt(servletMapping.getInitParams()),
-//					httpContext);
-//		} else {
-//				webContainer.registerServlet(
-//						servletMapping.getServlet(),
-//						servletMapping.getServletName(),
-//						servletMapping.getUrlPatterns(),
-//						DictionaryUtils.adapt(servletMapping.getInitParams()),
-//						servletMapping.getLoadOnStartup(),
-//						servletMapping.getAsyncSupported(),
-//						servletMapping.getMultipartConfig(),
-//						httpContext);
-//				// ((WebContainer) httpService).end(httpContext);
-//		}
 //		//special handling for OSGi R6 registration of Servlet as ErrorHandler
 //		if (errorMappings != null) {
 //			for (DefaultErrorPageMapping errorPageMapping : errorMappings) {
@@ -110,16 +93,6 @@ public class ServletMappingTracker extends AbstractMappingTracker<ServletMapping
 ////						errorPageMapping.getError(),
 ////						servletMapping.getAlias(), httpContext);
 //			}
-//		}
-//	}
-//
-//	@Override
-//	public void unregister(final WebContainer webContainer,
-//						   final HttpContext httpContext) {
-//		if (servletMapping.getAlias() != null) {
-//			webContainer.unregister(servletMapping.getAlias());
-//		} else {
-//				webContainer.unregisterServlet(servletMapping.getServlet());
 //		}
 //	}
 

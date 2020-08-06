@@ -20,6 +20,7 @@ import javax.servlet.Servlet;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
+import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
@@ -49,49 +50,29 @@ public class ResourceTracker extends AbstractElementTracker<Object, Servlet, Ser
 	protected ServletModel createElementModel(ServiceReference<Object> serviceReference, Integer rank, Long serviceId) {
 		log.debug("Creating resource model from R7 whiteboard service {} (id={})", serviceReference, serviceId);
 
-		return null;
-	}
+		// URL patterns
+		String[] urlPatterns = Utils.getPaxWebProperty(serviceReference,
+				null, HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN,
+				Utils::asStringArray);
 
-//	/**
-//	 * @see AbstractElementTracker#createElementModel(ServiceReference, Object)
-//	 */
-//	@Override
-//	ResourceWebElement createWebElement(final ServiceReference<Object> serviceReference, final Object published) {
-//
-//		String[] resourcePattern = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference,
-//				HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN);
-//		String prefix = ServicePropertiesUtils.getStringProperty(serviceReference,
-//				HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX);
-//
-//		if (resourcePattern != null && prefix != null) {
-//
-//			String httpContextId = ServicePropertiesUtils.extractHttpContextId(serviceReference);
-//
-//			final DefaultResourceMapping mapping = new DefaultResourceMapping();
-//			mapping.setHttpContextId(httpContextId);
-//
-//			mapping.setAlias(resourcePattern[0]); // TODO: make sure multiple
-//													// patterns are supported
-//			mapping.setPath(prefix);
-//
-//			return new ResourceWebElement(serviceReference, mapping);
-//		} else {
-//			return null;
-//		}
-//	}
-//	@Override
-//	public void register(final WebContainer webContainer,
-//						 final HttpContext httpContext) throws Exception {
-//		webContainer.registerResources(
-//				resourceMapping.getAlias(),
-//				resourceMapping.getPath(),
-//				httpContext);
-//	}
-//
-//	@Override
-//	public void unregister(final WebContainer webContainer,
-//						   final HttpContext httpContext) {
-//		webContainer.unregister(resourceMapping.getAlias());
-//	}
+		// prefix
+		String path = Utils.getStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX);
+		if (path == null || "".equals(path.trim())) {
+			path = "/";
+		}
+
+		// pass everything to a handy builder - there's no servlet/servletSupplier/servletReference/servletClass
+		// provided, which will trigger a call to ServerController.createResourceServlet()
+		ServletModel.Builder builder = new ServletModel.Builder()
+				.withServiceRankAndId(rank, serviceId)
+				.withRegisteringBundle(serviceReference.getBundle())
+				.withUrlPatterns(urlPatterns)
+				.withLoadOnStartup(1)
+				.withAsyncSupported(true)
+				.withRawPath(path) // could be file: or a chroot inside a bundle - we'll check and validate later
+				.resourceServlet(true);
+
+		return builder.build();
+	}
 
 }

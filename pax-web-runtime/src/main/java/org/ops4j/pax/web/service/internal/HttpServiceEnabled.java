@@ -516,8 +516,46 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		// or "/" patterns as well
 		//
 		// "default servlets" are tightly related to "welcome files" which are handled separately
+		ResourceServlet resourceServlet = createResourceServlet(new String[] { alias }, name);
 
-		URL urlBase = ServletModel.getFileUrlIfAccessible(name);
+		ServletModel servletModel = new ServletModel.Builder()
+				.withAlias(alias)
+				.withServletName("/".equals(alias) ? "default" : String.format("default-%s", UUID.randomUUID().toString()))
+				.withServlet(resourceServlet.servlet)
+				.withLoadOnStartup(1)
+				.withAsyncSupported(true)
+				.resourceServlet(true)
+				.build();
+
+		// "name" is very misleading term here as it's the "base path" or "resource prefix". Also Pax Web allows it
+		// to be a file: URL to make it easier to expose a directory as the resource directory (web root directory)
+		if (resourceServlet.urlBase != null) {
+			LOG.info("Configuring resource servlet to serve resources from {}", resourceServlet.urlBase);
+			servletModel.setBaseFileUrl(resourceServlet.urlBase);
+		} else {
+			LOG.info("Configuring resource servlet to serve resources from WebContainerContext");
+			servletModel.setBasePath(resourceServlet.chrootBase);
+		}
+
+		// TODO: think about resource cache sharing between resource servlets. Now all resource servlets
+		//       configure their own resource cache
+
+		try {
+			doRegisterServlet(Collections.singletonList(context), servletModel);
+		} catch (ServletException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * Helper method to create a <em>resource servlet</em> using a <em>base</em> which may be either a <em>chroot</em>
+	 * for bundle-resource access of {@code file:} URL.
+	 * @param urlPatterns
+	 * @param rawBase
+	 * @return
+	 */
+	private ResourceServlet createResourceServlet(String[] urlPatterns, String rawBase) {
+		URL urlBase = ServletModel.getFileUrlIfAccessible(rawBase);
 
 		// We'll ask dedicated server controller to create "default servlet" for us. This servlet will later
 		// be managed as normal servlet with proper lifecycle. All that's needed now is the "name" (resource base)
@@ -537,10 +575,10 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		// - and so on
 		// tl;dr: we have to normalize the base
 
-		String chrootBase = Path.securePath(name);
+		String chrootBase = Path.securePath(rawBase);
 		if (urlBase == null) {
 			if (chrootBase == null) {
-				LOG.warn("Can't use {} as resource base, changed to root of the bundle providing resources", name);
+				LOG.warn("Can't use {} as resource base, changed to root of the bundle providing resources", rawBase);
 				chrootBase = "";
 			} else {
 				// yes - we will replace "/" with "" which means "root of the bundle" or "just pass incoming
@@ -552,41 +590,15 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 					chrootBase = chrootBase.substring(0, chrootBase.length() - 1);
 				}
 			}
-			LOG.info("Registering resources with alias {} and resource base \"{}\"", alias, chrootBase);
+			LOG.info("Registering resources with {} mapping(s) and resource base \"{}\"",
+					Arrays.asList(urlPatterns), chrootBase);
 		} else {
-			LOG.info("Registering resources with alias {} and absolute directory \"{}\"", alias, urlBase);
+			LOG.info("Registering resources with {} mapping(s) and absolute directory \"{}\"",
+					Arrays.asList(urlPatterns), urlBase);
 			chrootBase = null;
 		}
 
-		Servlet resourceServlet = serverController.createResourceServlet(urlBase, chrootBase);
-
-		ServletModel servletModel = new ServletModel.Builder()
-				.withAlias(alias)
-				.withServletName("/".equals(alias) ? "default" : String.format("default-%s", UUID.randomUUID().toString()))
-				.withServlet(resourceServlet)
-				.withLoadOnStartup(1)
-				.withAsyncSupported(true)
-				.resourceServlet(true)
-				.build();
-
-		// "name" is very misleading term here as it's the "base path" or "resource prefix". Also Pax Web allows it
-		// to be a file: URL to make it easier to expose a directory as the resource directory (web root directory)
-		if (urlBase != null) {
-			LOG.info("Configuring resource servlet to serve resources from {}", urlBase);
-			servletModel.setBaseFileUrl(urlBase);
-		} else {
-			LOG.info("Configuring resource servlet to serve resources from WebContainerContext");
-			servletModel.setBasePath(chrootBase);
-		}
-
-		// TODO: think about resource cache sharing between resource servlets. Now all resource servlets
-		//       configure their own resource cache
-
-		try {
-			doRegisterServlet(Collections.singletonList(context), servletModel);
-		} catch (ServletException e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
+		return new ResourceServlet(serverController.createResourceServlet(urlBase, chrootBase), urlBase, chrootBase);
 	}
 
 	// --- methods used to register a Filter
@@ -1180,6 +1192,31 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 
 		@Override
+		public void registerResources(ServletModel model) {
+			String[] mapping = model.getAlias() != null ? new String[] { model.getAlias() }
+					: model.getUrlPatterns();
+			ResourceServlet resourceServlet = createResourceServlet(mapping, model.getRawPath());
+
+			// unlike with HttpService.registerResources(), we already have a model here, but the servlet
+			// doesn't yet have a name
+			String name = Arrays.asList(mapping).contains("/")
+					? "default" : String.format("default-%s", UUID.randomUUID().toString());
+			model.setName(name);
+			model.setServlet(resourceServlet.servlet);
+
+			try {
+				doRegisterServlet(Collections.emptyList(), model);
+			} catch (Exception e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
+		}
+
+		@Override
+		public void unregisterResources(ServletModel servletModel) {
+			doUnregisterServlet(servletModel);
+		}
+
+		@Override
 		public void registerFilter(FilterModel model) {
 			try {
 				doRegisterFilter(Collections.emptyList(), model);
@@ -1231,6 +1268,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 	}
 
+	/**
+	 * Private view class for direct control (from tests) of the {@link WebContainer}.
+	 */
 	private class DirectWebContainer implements DirectWebContainerView {
 
 		@Override
@@ -1538,122 +1578,6 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 //				}
 //			}
 //		}
-//	}
-//
-//	/**
-//	 * @see WebContainer#registerErrorPage(String, String, HttpContext)
-//	 */
-//	@Override
-//	public void registerErrorPage(final String error, final String location,
-//								  final HttpContext httpContext) {
-//		final ContextModel contextModel = getOrCreateContext(httpContext);
-//		LOG.debug("Register error page (error={}, location={}). Using context [{}]", error, location, contextModel);
-//		final ErrorPageModel model = new ErrorPageModel(contextModel, error,
-//				location);
-//		boolean serviceSuccess = false;
-//		boolean controllerSuccess = false;
-//		try {
-//			serviceModel.addErrorPageModel(model);
-//			serviceSuccess = true;
-//			serverController.addErrorPage(model);
-//			controllerSuccess = true;
-//		} finally {
-//			// as this compensatory actions to work the remove methods should
-//			// not throw exceptions.
-//			if (!controllerSuccess) {
-//				if (serviceSuccess) {
-//					serviceModel.removeErrorPage(error, contextModel);
-//				}
-//			}
-//		}
-//	}
-//
-//	/**
-//	 * @see WebContainer#unregisterErrorPage(String, HttpContext)
-//	 */
-//	@Override
-//	public void unregisterErrorPage(final String error,
-//									final HttpContext httpContext) {
-//		NullArgumentException.validateNotNull(httpContext, "Http context");
-//		final ErrorPageModel model = serviceModel.removeErrorPage(error,
-//				serviceModel.getContextModel(httpContext));
-//		if (model != null) {
-//			LOG.debug("Unregister error page (error={})", error);
-//			serverController.removeErrorPage(model);
-//		}
-//	}
-//
-//	/**
-//	 * @see WebContainer#registerWelcomeFiles(String[], boolean, HttpContext)
-//	 */
-//	@Override
-//	public void registerWelcomeFiles(final String[] welcomeFiles,
-//									 final boolean redirect, final HttpContext httpContext) {
-//		ContextModel contextModel = serviceModel.getContextModel(httpContext);
-//		if (LOG.isDebugEnabled()) {
-//			LOG.debug("Register welcome files (welcomeFiles={}). Using context [{}]", Arrays.asList(welcomeFiles), contextModel);
-//		}
-//		//PAXWEB-123: try to use the setWelcomeFile method
-//		final WelcomeFileModel model = new WelcomeFileModel(contextModel, welcomeFiles);
-//
-//		boolean serviceSuccess = false;
-//		boolean controllerSuccess = false;
-//		try {
-//			serviceModel.addWelcomeFileModel(model);
-//			serviceSuccess = true;
-//			serverController.addWelcomFiles(model);
-//			controllerSuccess = true;
-//			if (model.getWelcomeFiles() != null && !isWebAppWebContainerContext(contextModel)) {
-//				try {
-//					serverController.getContext(contextModel).start();
-//					// CHECKSTYLE:OFF
-//				} catch (Exception e) {
-//					LOG.error("Could not start the servlet context for context path ["
-//							+ contextModel.getContextName() + "]", e);
-//				} //CHECKSTYLE:ON
-//			}
-//		} finally {
-//			// as this compensatory actions to work the remove methods should
-//			// not throw exceptions.
-//			if (!controllerSuccess) {
-//				if (serviceSuccess) {
-//					serviceModel.removeWelcomeFileModel(Arrays.toString(welcomeFiles), contextModel);
-//				}
-//			}
-//		}
-//	}
-//
-//	/**
-//	 * @see WebContainer#unregisterWelcomeFiles(String[], HttpContext)
-//	 */
-//	@Override
-//	public void unregisterWelcomeFiles(final String[] welcomeFiles, final HttpContext httpContext) {
-//		NullArgumentException.validateNotNull(httpContext, "Http context");
-//		NullArgumentException.validateNotNull(welcomeFiles, "WelcomeFiles");
-//		final ContextModel contextModel = serviceModel
-//				.getContextModel(httpContext);
-//		//PAXWEB-123: try to use the setWelcomeFile method
-//
-//		final WelcomeFileModel model = serviceModel.removeWelcomeFileModel(Arrays.toString(welcomeFiles), contextModel);
-//		if (model != null) {
-//			if (LOG.isDebugEnabled()) {
-//				LOG.debug("Unregister welcome files (welcomeFiles={})", Arrays.asList(welcomeFiles));
-//			}
-//			serverController.removeWelcomeFiles(model);
-//		}
-//		/*
-//		if (contextModel == null
-//				|| contextModel.getWelcomeFilesFilter() == null) {
-//			throw new IllegalArgumentException(
-//					"Welcome files are not registered for http context ["
-//							+ httpContext + "]");
-//		}
-//		try {
-//			unregisterFilter(contextModel.getWelcomeFilesFilter());
-//		} finally {
-//			contextModel.setWelcomeFilesFilter(null);
-//		}
-//		*/
 //	}
 //
 //	@Override
@@ -2032,5 +1956,17 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 //
 //        return dto;
 //    }
+
+	private static class ResourceServlet {
+		public final Servlet servlet;
+		public final URL urlBase;
+		public final String chrootBase;
+
+		ResourceServlet(Servlet servlet, URL urlBase, String chrootBase) {
+			this.servlet = servlet;
+			this.urlBase = urlBase;
+			this.chrootBase = chrootBase;
+		}
+	}
 
 }

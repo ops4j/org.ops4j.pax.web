@@ -51,7 +51,7 @@ public class PaxWebServletHolder extends ServletHolder {
 
 	private ServletMapping mapping;
 
-	private ServiceReference<? extends Servlet> filterReference;
+	private ServiceReference<? extends Servlet> servletReference;
 
 	/** This {@link ServletContext} is scoped to single {@link org.osgi.service.http.context.ServletContextHelper} */
 	private final OsgiServletContext osgiServletContext;
@@ -109,8 +109,9 @@ public class PaxWebServletHolder extends ServletHolder {
 			setHeldClass(servletModel.getServletClass());
 		} else if (servletModel.getServlet() != null) {
 			setServlet(servletModel.getServlet());
+			setHeldClass(servletModel.getServlet().getClass());
 		} else {
-			this.filterReference = servletModel.getElementReference();
+			this.servletReference = servletModel.getElementReference();
 		}
 
 		setInitParameters(servletModel.getInitParams());
@@ -157,10 +158,12 @@ public class PaxWebServletHolder extends ServletHolder {
 
 	@Override
 	public void doStart() throws Exception {
-		if (filterReference != null) {
+		if (servletReference != null) {
 			// Jetty's ServletHolder needs a servlet class to do some verification. We have to provide it if
 			// using ServiceReference<Servlet>. Fortunately this satisfies Jetty.
 			setHeldClass(Servlet.class);
+		} else if (servletModel != null && servletModel.getElementSupplier() != null) {
+			setHeldClass(servletModel.getElementSupplier().get().getClass());
 		}
 
 		super.doStart();
@@ -202,9 +205,12 @@ public class PaxWebServletHolder extends ServletHolder {
 	@Override
 	protected synchronized Servlet getInstance() {
 		Servlet instance = super.getInstance();
-		if (instance == null && servletModel.getElementReference() != null) {
+		if (instance == null && servletReference != null) {
 			// obtain Servlet using reference
-			instance = servletModel.getRegisteringBundle().getBundleContext().getService(servletModel.getElementReference());
+			instance = servletModel.getRegisteringBundle().getBundleContext().getService(servletReference);
+		}
+		if (instance == null && servletModel.getElementSupplier() != null) {
+			instance = servletModel.getElementSupplier().get();
 		}
 
 		// if null, newInstance() will be called
@@ -219,8 +225,6 @@ public class PaxWebServletHolder extends ServletHolder {
 			servletModel.getRegisteringBundle().getBundleContext().ungetService(servletModel.getElementReference());
 		}
 		super.destroyInstance(o);
-
-
 	}
 
 	/**

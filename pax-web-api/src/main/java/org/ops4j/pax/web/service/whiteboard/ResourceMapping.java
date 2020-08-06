@@ -18,8 +18,9 @@ package org.ops4j.pax.web.service.whiteboard;
 import org.osgi.service.http.HttpContext;
 
 /**
- * <p>Resource mapping. Because "resource handling" is perfomed by servlet container specific {@link javax.servlet.Servlet},
- * we extend {@link ServletMapping} and add single <em>path</em> property, which is:<ul>
+ * <p>Resource mapping. Even if "resource handling" is perfomed by servlet container specific {@link javax.servlet.Servlet},
+ * we don't extend {@link ServletMapping} because the servlet is provided by Pax Web itself. The most important field
+ * is single <em>path</em> property, which is:<ul>
  *     <li>For HttpService: 2nd parameter to
  *     {@link org.osgi.service.http.HttpService#registerResources(String, String, HttpContext)}</li>
  *     <li>For Whiteboard service:
@@ -33,7 +34,19 @@ import org.osgi.service.http.HttpContext;
  * @author Grzegorz Grzybek
  * @since 0.4.0, April 05, 2008
  */
-public interface ResourceMapping extends ServletMapping {
+public interface ResourceMapping extends ContextRelated {
+
+	/**
+	 * Alias for backward compatibility - effectively it's converted to one-element array of {@link #getUrlPatterns()}
+	 * @return
+	 */
+	String getAlias();
+
+	/**
+	 * URL mappings according to Servlet Specificication.
+	 * @return
+	 */
+	String[] getUrlPatterns();
 
 	/**
 	 * Getter.

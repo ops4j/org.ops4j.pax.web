@@ -62,7 +62,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	private String[] urlPatterns;
 
 	/** Servlet name that defaults to FQCN of the {@link Servlet}. {@code <servlet>/<servlet-name>} */
-	private final String name;
+	private String name;
 
 	/**
 	 * Init parameters of the servlet as specified by {@link ServletConfig#getInitParameterNames()} and
@@ -82,7 +82,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	/**
 	 * Both Http Service and Whiteboard service allows registration of servlets using existing instance.
 	 */
-	private final Servlet servlet;
+	private Servlet servlet;
 
 	/**
 	 * Actual class of the servlet, to be instantiated by servlet container itself. {@code <servlet>/<servlet-class>}.
@@ -110,6 +110,12 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	private URL baseFileUrl = null;
 
 	/**
+	 * If we don't know yet if the path provided from Whiteboard is a {@link #basePath} or {@link #baseFileUrl},
+	 * we can specify a <em>raw path</em> in order to check it later.
+	 */
+	private String rawPath = null;
+
+	/**
 	 * Constructor used for servlet unregistration
 	 * @param alias
 	 * @param servletName
@@ -129,28 +135,29 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	public ServletModel(String alias, Servlet servlet, Dictionary<?,?> initParams, Integer loadOnStartup, Boolean asyncSupported) {
 		this(alias, null, null, Utils.toMap(initParams),
 				loadOnStartup, asyncSupported, null,
-				servlet, null, null, false);
+				servlet, null, null, null, false, null);
 	}
 
 	public ServletModel(String servletName, String[] urlPatterns, Servlet servlet, Dictionary<String, String> initParams,
 			Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multiPartConfig) {
 		this(null, urlPatterns, servletName, Utils.toMap(initParams),
 				loadOnStartup, asyncSupported, multiPartConfig,
-				servlet, null, null, false);
+				servlet, null, null, null, false, null);
 	}
 
 	public ServletModel(String[] urlPatterns, Class<? extends Servlet> servletClass, Dictionary<String, String> initParams,
 			Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multiPartConfig) {
 		this(null, urlPatterns, null, Utils.toMap(initParams),
 				loadOnStartup, asyncSupported, multiPartConfig,
-				null, servletClass, null, false);
+				null, servletClass, null, null, false, null);
 	}
 
 	@SuppressWarnings("deprecation")
 	private ServletModel(String alias, String[] urlPatterns, String name, Map<String, String> initParams,
 			Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multipartConfigElement,
 			Servlet servlet, Class<? extends Servlet> servletClass, ServiceReference<? extends Servlet> reference,
-			boolean resourceServlet) {
+			Supplier<? extends Servlet> supplier, boolean resourceServlet,
+			Bundle registeringBundle) {
 		this.alias = alias;
 		this.urlPatterns = Path.normalizePatterns(urlPatterns);
 		this.initParams = initParams == null ? Collections.emptyMap() : initParams;
@@ -160,6 +167,8 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		this.servlet = servlet;
 		this.servletClass = servletClass;
 		setElementReference(reference);
+		setElementSupplier(supplier);
+		setRegisteringBundle(registeringBundle);
 
 		this.resourceServlet = resourceServlet;
 
@@ -175,13 +184,13 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 				name = c.getName();
 			}
 		}
-		if (name == null) {
+		if (name == null && !resourceServlet) {
 			// no idea how to obtain the class, but this should not happen
 			name = UUID.randomUUID().toString();
 		}
 		this.name = name;
 
-		if (this.urlPatterns == null && this.alias != null) {
+		if ((this.urlPatterns == null || this.urlPatterns.length == 0) && this.alias != null) {
 			// Http Service specification 102.4 Mapping HTTP Requests to Servlet and Resource Registrations:
 			// [...]
 			// 6. If there is no match, the Http Service must attempt to match sub-strings of the requested
@@ -203,18 +212,23 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 
 	@Override
 	public Boolean performValidation() throws Exception {
-		int sources = 0;
-		sources += (servlet != null ? 1 : 0);
-		sources += (servletClass != null ? 1 : 0);
-		sources += (getElementReference() != null ? 1 : 0);
-		sources += (getElementSupplier() != null ? 1 : 0);
-		if (sources == 0) {
-			throw new IllegalArgumentException("Servlet Model must specify one of: servlet instance, servlet class,"
-					+ " servlet supplier or service reference");
+		if (isValid != null) {
+			return isValid;
 		}
-		if (sources != 1) {
-			throw new IllegalArgumentException("Servlet Model should specify a servlet uniquely as instance, class,"
-					+ " supplier or service reference");
+		int sources = 0;
+		if (!resourceServlet) {
+			sources += (servlet != null ? 1 : 0);
+			sources += (servletClass != null ? 1 : 0);
+			sources += (getElementReference() != null ? 1 : 0);
+			sources += (getElementSupplier() != null ? 1 : 0);
+			if (sources == 0) {
+				throw new IllegalArgumentException("Servlet Model must specify one of: servlet instance, servlet class,"
+						+ " servlet supplier or service reference");
+			}
+			if (sources != 1) {
+				throw new IllegalArgumentException("Servlet Model should specify a servlet uniquely as instance, class,"
+						+ " supplier or service reference");
+			}
 		}
 
 		if (this.alias == null && (this.urlPatterns == null || this.urlPatterns.length == 0)) {
@@ -238,10 +252,14 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		}
 
 		if (isResourceServlet()) {
-			if (basePath == null && baseFileUrl == null) {
+			if (rawPath == null && basePath == null && baseFileUrl == null) {
 				throw new IllegalArgumentException("Base path or base directory is required for resource servlets");
 			}
-			if (basePath != null && baseFileUrl != null) {
+			sources = 0;
+			sources += (rawPath != null ? 1 : 0);
+			sources += (basePath != null ? 1 : 0);
+			sources += (baseFileUrl != null ? 1 : 0);
+			if (sources != 1) {
 				throw new IllegalArgumentException("Only one base (resource base or base directory) is allowed for resource servlets");
 			}
 		}
@@ -269,12 +287,20 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 
 	@Override
 	public void register(WhiteboardWebContainerView view) {
-		view.registerServlet(this);
+		if (!this.isResourceServlet()) {
+			view.registerServlet(this);
+		} else {
+			view.registerResources(this);
+		}
 	}
 
 	@Override
 	public void unregister(WhiteboardWebContainerView view) {
-		view.unregisterServlet(this);
+		if (!this.isResourceServlet()) {
+			view.unregisterServlet(this);
+		} else {
+			view.unregisterResources(this);
+		}
 	}
 
 	@Override
@@ -282,6 +308,15 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		ServletEventData data = new ServletEventData(alias, name, urlPatterns, servlet);
 		setCommonEventProperties(data);
 		data.setResourceServlet(this.resourceServlet);
+		if (resourceServlet) {
+			if (rawPath != null) {
+				data.setPath(this.rawPath);
+			} else if (basePath != null) {
+				data.setPath(this.basePath);
+			} else if (baseFileUrl != null) {
+				data.setPath(this.baseFileUrl.toExternalForm());
+			}
+		}
 		return data;
 	}
 
@@ -319,6 +354,10 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		return name;
 	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public Map<String, String> getInitParams() {
 		return initParams;
 	}
@@ -339,6 +378,10 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		return servlet;
 	}
 
+	public void setServlet(Servlet servlet) {
+		this.servlet = servlet;
+	}
+
 	public Class<? extends Servlet> getServletClass() {
 		return servletClass;
 	}
@@ -347,20 +390,22 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	 * Returns a {@link Class} of the servlet whether it is registered as instance, class or reference.
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public Class<? extends Servlet> getActualClass() {
 		if (this.servletClass != null) {
 			return this.servletClass;
 		} else if (this.servlet != null) {
 			return this.servlet.getClass();
-		}
-		if (getElementReference() != null) {
-			String className = Utils.getFirstObjectClass(getElementReference());
-			if (className != null) {
+		} else if (this.getElementSupplier() != null) {
+			// TOCHECK: what if user decides to control lifecycle of this element?
+			Servlet s = getElementSupplier().get();
+			return s.getClass();
+		} else if (getElementReference() != null) {
+			Servlet s = getRegisteringBundle().getBundleContext().getService(getElementReference());
+			if (s != null) {
 				try {
-					return (Class<? extends Servlet>) getRegisteringBundle().loadClass(className);
-				} catch (ClassNotFoundException e) {
-					throw new RuntimeException("Can't load a class for the servlet: " + e.getMessage(), e);
+					return s.getClass();
+				} finally {
+					getRegisteringBundle().getBundleContext().ungetService(getElementReference());
 				}
 			} else {
 				// sane default, accepted by Undertow - especially if it has instance factory
@@ -391,6 +436,14 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		return baseFileUrl;
 	}
 
+	public String getRawPath() {
+		return rawPath;
+	}
+
+	public void setRawPath(String rawPath) {
+		this.rawPath = rawPath;
+	}
+
 	public static class Builder {
 
 		private String alias;
@@ -409,6 +462,8 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		private int rank;
 		private long serviceId;
 		private boolean resourceServlet = false;
+		// only for resource servlet
+		private String resourcePath;
 
 		public Builder() {
 		}
@@ -504,15 +559,19 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			return this;
 		}
 
+		public Builder withRawPath(String path) {
+			this.resourcePath = path;
+			return this;
+		}
+
 		public ServletModel build() {
 			ServletModel model = new ServletModel(alias, urlPatterns, servletName, initParams,
 					loadOnStartup, asyncSupported, multipartConfigElement, servlet, servletClass, reference,
-					resourceServlet);
+					supplier, resourceServlet, bundle);
 			list.forEach(model::addContextModel);
-			model.setRegisteringBundle(this.bundle);
 			model.setServiceRank(this.rank);
 			model.setServiceId(this.serviceId);
-			model.setElementSupplier(this.supplier);
+			model.setRawPath(resourcePath);
 			return model;
 		}
 	}

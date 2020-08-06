@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultFilterMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultServletContextHelperMapping;
 import org.ops4j.pax.web.itest.server.support.Utils;
@@ -34,6 +35,7 @@ import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.whiteboard.FilterMapping;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping;
 import org.osgi.framework.Bundle;
@@ -207,7 +209,7 @@ public class WhiteboardContextsTest extends MultiContainerTestSupport {
 		ServiceReference<Servlet> servletRef = mockServletReference(sample1, "servlet1",
 				null, 0L, 0, "/s");
 		when(servletRef.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT))
-				.thenReturn("(!(|(osgi.http.whiteboard.context.name=default)(osgi.http.whiteboard.context.httpservice=shared)))");
+				.thenReturn("(!(osgi.http.whiteboard.context.path=/))");
 		// PrototypeServiceFactory/ServiceObjects simulation - new instance on each call
 		when(sample1.getBundleContext().getService(servletRef)).thenAnswer(invocation -> new TestServlet("1"));
 		when(whiteboardBundleContext.getService(servletRef)).thenAnswer(invocation -> new TestServlet("1"));
@@ -297,18 +299,20 @@ public class WhiteboardContextsTest extends MultiContainerTestSupport {
 				.thenReturn("(|(osgi.http.whiteboard.context.name=c1)(osgi.http.whiteboard.context.name=c3))");
 		FilterModel fm1 = getFilterCustomizer().addingService(filter1Ref);
 
-		// filter2 will be registered in c2 and c3
-		ServiceReference<Filter> filter2Ref = mockFilterReference(b, "filter2",
-				() -> new Utils.MyIdFilter("2"), 0L, 0, "/*");
-		when(filter2Ref.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT))
-				.thenReturn("(|(osgi.http.whiteboard.context.name=c2)(osgi.http.whiteboard.context.name=c3))");
-		FilterModel fm2 = getFilterCustomizer().addingService(filter2Ref);
+		// filter2 will be registered in c2 and c3 - using legacy mapping
+		DefaultFilterMapping fm = new DefaultFilterMapping();
+		fm.setFilter(new Utils.MyIdFilter("2"));
+		fm.setUrlPatterns(new String[] { "/*" });
+		fm.setContextSelectFilter("(|(osgi.http.whiteboard.context.name=c2)(osgi.http.whiteboard.context.name=c3))");
+		ServiceReference<FilterMapping> filterMappingRef = mockReference(b, FilterMapping.class,
+				null, () -> fm);
+		FilterModel fm2 = getFilterMappingCustomizer().addingService(filterMappingRef);
 
 		assertThat(httpGET(port, request), endsWith(expectedOutput));
 
 		getServletCustomizer().removedService(servletRef, sm1);
 		getFilterCustomizer().removedService(filter1Ref, fm1);
-		getFilterCustomizer().removedService(filter2Ref, fm2);
+		getFilterMappingCustomizer().removedService(filterMappingRef, fm2);
 		getServletContextHelperCustomizer().removedService(sr1, ocm1);
 		getServletContextHelperCustomizer().removedService(sr2, ocm2);
 		getServletContextHelperCustomizer().removedService(sr3, ocm3);

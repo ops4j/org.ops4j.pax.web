@@ -20,13 +20,16 @@
 package org.ops4j.pax.web.extender.whiteboard.internal;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +64,22 @@ public class BundleWhiteboardApplication {
 	private final List<OsgiContextModel> webContexts;
 
 	/**
+	 * <p>pax-web-extender-whiteboard operates on target {@link WebContainer} and special
+	 * {@link org.ops4j.pax.web.service.views.PaxWebContainerView} it provides for Whiteboard purposes.</p>
+	 *
+	 * <p>At any given time, we operate on single target {@link WebContainer} and when
+	 * new one is registered, we simply <em>move</em> current Whiteboard applications to new target runtime.
+	 * This view is kept at {@link BundleWhiteboardApplication} level, because it's bundle scoped.</p>
+	 */
+	private volatile WhiteboardWebContainerView whiteboardContainer;
+
+	/**
+	 * Current {@link ServiceReference} to unget it if there's new {@link WebContainer} added without removing
+	 * current one.
+	 */
+	private volatile ServiceReference<WebContainer> webContainerServiceRef;
+
+	/**
 	 * Constructor.
 	 */
 	public BundleWhiteboardApplication(Bundle bundle, ExtendedHttpServiceRuntime httpServiceRuntime) {
@@ -81,6 +100,15 @@ public class BundleWhiteboardApplication {
 		return Collections.unmodifiableList(webContexts);
 	}
 
+	public List<OsgiContextModel> getWebContainerOsgiContextModels() {
+		List<OsgiContextModel> models = new LinkedList<>();
+		WhiteboardWebContainerView view = this.whiteboardContainer;
+		if (view != null) {
+			models.addAll(view.getOsgiContextModels(bundle));
+		}
+		return models;
+	}
+
 	/**
 	 * This method returns a snapshot of current {@link ElementModel} elements registered by given {@link Bundle}.
 	 * @return
@@ -89,12 +117,69 @@ public class BundleWhiteboardApplication {
 		return Collections.unmodifiableList(webElements);
 	}
 
-	public void addWebContext(final OsgiContextModel webContext) {
-		webContexts.add(webContext);
+	/**
+	 * When (tracked at {@link ExtenderContext} level) new {@link WebContainer} {@link ServiceReference}
+	 * is added, it is passed to each {@link BundleWhiteboardApplication}, so it can (now and later)
+	 * managed its own bundle-scoped {@link WhiteboardWebContainerView} to install/uninstall web
+	 * elements and contexts
+	 * @param ref
+	 */
+	public void webContainerAdded(ServiceReference<WebContainer> ref) {
+		webContainerServiceRef = ref;
+		WebContainer container = bundle.getBundleContext().getService(webContainerServiceRef);
+		if (container != null) {
+			whiteboardContainer = container.adapt(WhiteboardWebContainerView.class);
+		}
+
+		// install all current contexts and elements. Lifecycle is managed at ExtenderContext level,
+		// so we don't have to care about uninstalling the contexts/elements from previous WebContainer
+		WhiteboardWebContainerView view = this.whiteboardContainer;
+		if (view != null) {
+			webContexts.forEach(view::addWhiteboardOsgiContextModel);
+			webElements.forEach(element -> element.register(view));
+		}
 	}
 
+	/**
+	 * {@link WebContainer} reference was untracked at {@link ExtenderContext} level.
+	 * @param ref
+	 */
+	public void webContainerRemoved(ServiceReference<WebContainer> ref) {
+		// uninstall all current contexts and elements
+		WhiteboardWebContainerView view = this.whiteboardContainer;
+		if (view != null) {
+			webElements.forEach(element -> element.unregister(view));
+			webContexts.forEach(view::removeWhiteboardOsgiContextModel);
+		}
 
+		bundle.getBundleContext().ungetService(webContainerServiceRef);
+		webContainerServiceRef = null;
+		whiteboardContainer = null;
+	}
+
+	/**
+	 * Associates given customized <em>context</em> in the form of {@link OsgiContextModel} with current
+	 * <em>bundle web application</em> and if the {@link WebContainer} is already available, register it there.
+	 * @param webContext
+	 */
+	public void addWebContext(final OsgiContextModel webContext) {
+		webContexts.add(webContext);
+		WhiteboardWebContainerView view = this.whiteboardContainer;
+		if (view != null) {
+			view.addWhiteboardOsgiContextModel(webContext);
+		}
+	}
+
+	/**
+	 * Deassociates given customized <em>context</em> from current <em>bundle web application</em> and unregisters
+	 * it from {@link WebContainer}.
+	 * @param webContext
+	 */
 	public void removeWebContext(final OsgiContextModel webContext) {
+		WhiteboardWebContainerView view = this.whiteboardContainer;
+		if (view != null) {
+			view.removeWhiteboardOsgiContextModel(webContext);
+		}
 		webContexts.remove(webContext);
 	}
 
@@ -104,6 +189,14 @@ public class BundleWhiteboardApplication {
 	 */
 	public void addWebElement(final ElementModel<?, ?> webElement) {
 		webElements.add(webElement);
+
+		WhiteboardWebContainerView view = this.whiteboardContainer;
+		if (view == null) {
+			LOG.debug("{} will be registered when WebContainer/HttpService is available", webElement);
+			return;
+		}
+
+		webElement.register(view);
 
 		// TOCHECK: Is it a good place to think about "transactions"?
 
@@ -183,6 +276,14 @@ public class BundleWhiteboardApplication {
 	public void removeWebElement(final ElementModel<?, ?> webElement) {
 		webElements.remove(webElement);
 
+		WhiteboardWebContainerView view = this.whiteboardContainer;
+		if (view == null) {
+			LOG.debug("{} will be unregistered when WebContainer/HttpService is available", webElement);
+			return;
+		}
+
+		webElement.unregister(view);
+
 		//		Boolean sharedHttpContext = ServicePropertiesUtils.extractSharedHttpContext(serviceReference);
 		//
 		//		final BundleWhiteboardApplication webApplication = extenderContext.getExistingWebApplication(serviceReference.getBundle(),
@@ -220,7 +321,24 @@ public class BundleWhiteboardApplication {
 		//		}
 	}
 
-			//	@Override
+	/**
+	 * <p>Method called after bundle has stopped. The only task to do here is to unget {@link WebContainer}, which
+	 * (being a {@link org.osgi.framework.ServiceFactory}) should stop the underlying bundle-scoped service and
+	 * unregister all the web contexts/elements.</p>
+	 *
+	 * <p>We don't have to iterate over our elements/contexts, because they're kept in
+	 * {@link org.ops4j.pax.web.service.spi.model.ServiceModel} anyway. Also it's not our task to unregister
+	 * Whiteboard {@link ServiceReference references}.</p>
+	 */
+	public void cleanup() {
+		this.webContexts.clear();
+		this.webElements.clear();
+		if (webContainerServiceRef != null) {
+			bundle.getBundleContext().ungetService(webContainerServiceRef);
+		}
+	}
+
+	//	@Override
 			//	public void serviceChanged(HttpService oldService, HttpService newService, Map<String, Object> serviceProperties) {
 			//		if (newService != null && !WebContainerUtils.isWebContainer(newService)) {
 			//			throw new IllegalStateException("HttpService must be implementing Pax-Web WebContainer!");

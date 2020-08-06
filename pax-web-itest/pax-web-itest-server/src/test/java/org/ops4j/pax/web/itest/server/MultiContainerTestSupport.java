@@ -38,10 +38,14 @@ import org.mockito.stubbing.Answer;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.FilterTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.HttpContextTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ResourceTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletContextHelperTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.FilterMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.HttpContextMappingTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ResourceMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletContextHelperMappingTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletMappingTracker;
 import org.ops4j.pax.web.itest.server.support.Utils;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.HttpServiceEnabled;
@@ -57,13 +61,17 @@ import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
+import org.ops4j.pax.web.service.whiteboard.FilterMapping;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
+import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping;
+import org.ops4j.pax.web.service.whiteboard.ServletMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Version;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
@@ -93,7 +101,7 @@ public class MultiContainerTestSupport {
 	protected Bundle whiteboardBundle;
 	protected BundleContext whiteboardBundleContext;
 
-	protected HttpServiceEnabled container;
+	protected Map<Bundle, HttpServiceEnabled> containers = new HashMap<>();
 	protected ServiceReference<WebContainer> containerRef;
 
 	protected ExtenderContext whiteboard;
@@ -105,6 +113,11 @@ public class MultiContainerTestSupport {
 
 	private ServiceTrackerCustomizer<Servlet, ServletModel> servletCustomizer;
 	private ServiceTrackerCustomizer<Filter, FilterModel> filterCustomizer;
+	private ServiceTrackerCustomizer<Object, ServletModel> resourceCustomizer;
+
+	private ServiceTrackerCustomizer<ServletMapping, ServletModel> servletMappingCustomizer;
+	private ServiceTrackerCustomizer<FilterMapping, FilterModel> filterMappingCustomizer;
+	private ServiceTrackerCustomizer<ResourceMapping, ServletModel> resourceMappingCustomizer;
 
 	@Parameterized.Parameters(name = "{0}")
 	public static Collection<Object[]> data() {
@@ -135,7 +148,7 @@ public class MultiContainerTestSupport {
 		serverModel = new ServerModel(new Utils.SameThreadExecutor());
 		serverModel.configureActiveServerController(controller);
 
-		whiteboardBundle = mockBundle("org.ops4j.pax.web.pax-web-extender-whiteboard");
+		whiteboardBundle = mockBundle("org.ops4j.pax.web.pax-web-extender-whiteboard", false);
 		whiteboardBundleContext = whiteboardBundle.getBundleContext();
 
 		OsgiContextModel.DEFAULT_CONTEXT_MODEL.setOwnerBundle(whiteboardBundle);
@@ -143,9 +156,12 @@ public class MultiContainerTestSupport {
 		when(whiteboardBundleContext.createFilter(anyString()))
 				.thenAnswer(invocation -> FrameworkUtil.createFilter(invocation.getArgument(0, String.class)));
 
-		container = new HttpServiceEnabled(whiteboardBundle, controller, serverModel, null, config);
+		// manually create mock for WebContainer service scoped to a pax-web-extender-whiteboard bundle
+		HttpServiceEnabled container = new HttpServiceEnabled(whiteboardBundle, controller, serverModel, null, config);
+		containers.put(whiteboardBundle, container);
 
 		containerRef = mock(ServiceReference.class);
+		when(containerRef.getProperty(Constants.SERVICE_ID)).thenReturn(42L);
 		when(whiteboardBundleContext.getService(containerRef)).thenReturn(container);
 
 		whiteboard = new ExtenderContext(null, whiteboardBundleContext);
@@ -158,6 +174,11 @@ public class MultiContainerTestSupport {
 
 		servletCustomizer = getCustomizer(ServletTracker.createTracker(whiteboard, whiteboardBundleContext));
 		filterCustomizer = getCustomizer(FilterTracker.createTracker(whiteboard, whiteboardBundleContext));
+		resourceCustomizer = getCustomizer(ResourceTracker.createTracker(whiteboard, whiteboardBundleContext));
+
+		servletMappingCustomizer = getCustomizer(ServletMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
+		filterMappingCustomizer = getCustomizer(FilterMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
+		resourceMappingCustomizer = getCustomizer(ResourceMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
 	}
 
 	@After
@@ -174,23 +195,37 @@ public class MultiContainerTestSupport {
 			whiteboard.webContainerRemoved(containerRef);
 			containerRef = null;
 		}
-		if (container != null) {
-			container.stop();
-		}
+		containers.values().forEach(HttpServiceEnabled::stop);
+		containers.clear();
+	}
+
+	protected Bundle mockBundle(String symbolicName) {
+		return mockBundle(symbolicName, true);
 	}
 
 	/**
 	 * Helper method to create mock {@link Bundle} with associated mock {@link BundleContext}.
 	 * @param symbolicName
+	 * @param obtainWebContainer whether to configure bundle-scoped {@link WebContainer} reference
+	 *                           for this bundle.
 	 * @return
 	 */
-	protected Bundle mockBundle(String symbolicName) {
+	protected Bundle mockBundle(String symbolicName, boolean obtainWebContainer) {
 		Bundle bundle = mock(Bundle.class);
 		BundleContext bundleContext = mock(BundleContext.class);
 		when(bundle.getSymbolicName()).thenReturn(symbolicName);
+		when(bundle.getVersion()).thenReturn(Version.parseVersion("1.0.0"));
 		when(bundle.toString()).thenReturn("Bundle \"" + symbolicName + "\"");
 		when(bundle.getBundleContext()).thenReturn(bundleContext);
 		when(bundleContext.getBundle()).thenReturn(bundle);
+
+		if (obtainWebContainer) {
+			// this.containerRef is single reference, but it may be passed to getService() for
+			// multiple bundle contexts (mocks)
+			HttpServiceEnabled container = new HttpServiceEnabled(bundle, controller, serverModel, null, config);
+			when(bundleContext.getService(containerRef)).thenReturn(container);
+			containers.put(bundle, container);
+		}
 
 		return bundle;
 	}
@@ -352,6 +387,22 @@ public class MultiContainerTestSupport {
 		return filterCustomizer;
 	}
 
+	public ServiceTrackerCustomizer<Object, ServletModel> getResourceCustomizer() {
+		return resourceCustomizer;
+	}
+
+	public ServiceTrackerCustomizer<ServletMapping, ServletModel> getServletMappingCustomizer() {
+		return servletMappingCustomizer;
+	}
+
+	public ServiceTrackerCustomizer<FilterMapping, FilterModel> getFilterMappingCustomizer() {
+		return filterMappingCustomizer;
+	}
+
+	public ServiceTrackerCustomizer<ResourceMapping, ServletModel> getResourceMappingCustomizer() {
+		return resourceMappingCustomizer;
+	}
+
 	@SuppressWarnings("unchecked")
 	protected <S, T> ServiceTrackerCustomizer<S, T> getCustomizer(ServiceTracker<S, T> tracker) {
 		tracker.open();
@@ -368,8 +419,12 @@ public class MultiContainerTestSupport {
 		return new ServerModelInternals(serverModel);
 	}
 
-	protected ServiceModelInternals serviceModelInternals(WebContainer webContainer) {
-		return new ServiceModelInternals(getField(webContainer, "serviceModel", ServiceModel.class));
+	protected ServiceModelInternals serviceModelInternals(Bundle bundle) {
+		return new ServiceModelInternals(getField(containers.get(bundle), "serviceModel", ServiceModel.class));
+	}
+
+	protected ServiceModelInternals serviceModelInternals(WebContainer httpService) {
+		return new ServiceModelInternals(getField(httpService, "serviceModel", ServiceModel.class));
 	}
 
 	/**

@@ -85,7 +85,7 @@ public class ServletContextHelperTracker extends AbstractContextTracker<ServletC
 		model.getContextParams().putAll(initParams);
 
 		// 4. pass all service registration properties...
-		model.getContextRegistrationProperties().putAll(Utils.toMap(serviceReference.getProperties()));
+		model.getContextRegistrationProperties().putAll(Utils.toMap(serviceReference));
 		// ... but in case there was no osgi.http.whiteboard.context.path property, let's set it now
 		model.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
 

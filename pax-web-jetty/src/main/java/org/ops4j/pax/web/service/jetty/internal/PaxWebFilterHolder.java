@@ -74,6 +74,8 @@ public class PaxWebFilterHolder extends FilterHolder {
 	public void doStart() throws Exception {
 		if (filterReference != null) {
 			setHeldClass(Filter.class);
+		} else if (filterModel != null && filterModel.getElementSupplier() != null) {
+			setHeldClass(filterModel.getElementSupplier().get().getClass());
 		}
 
 		super.doStart();
@@ -102,6 +104,10 @@ public class PaxWebFilterHolder extends FilterHolder {
 			} catch (Exception e) {
 				throw new IllegalStateException("Can't instantiate Filter with class " + filterClass, e);
 			}
+		}
+
+		if (instance == null && filterModel.getElementSupplier() != null) {
+			instance = filterModel.getElementSupplier().get();
 		}
 
 		return instance == null ? null : new OsgiInitializedFilter(instance, servletContext);

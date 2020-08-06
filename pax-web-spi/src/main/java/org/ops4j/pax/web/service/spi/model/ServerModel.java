@@ -426,28 +426,35 @@ public class ServerModel implements BatchVisitor {
 			return task.run();
 		}
 
+		final Throwable originalTrace = new Throwable();
+
 		try {
-			return CompletableFuture.supplyAsync(() -> {
-				try {
-					return task.run();
-				} catch (ServletException e) {
-					throw new ModelRegistrationException(e);
-				} catch (NamespaceException e) {
-					throw new ModelRegistrationException(e);
+			try {
+				return CompletableFuture.supplyAsync(() -> {
+					try {
+						return task.run();
+					} catch (ServletException e) {
+						throw new ModelRegistrationException(e);
+					} catch (NamespaceException e) {
+						throw new ModelRegistrationException(e);
+					}
+				}, executor).get();
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new IllegalStateException(e.getMessage(), e);
+			} catch (ExecutionException e) {
+				if (e.getCause() instanceof ModelRegistrationException) {
+					((ModelRegistrationException) e.getCause()).throwTheCause();
+				} else if (e.getCause() instanceof RuntimeException) {
+					throw (RuntimeException) e.getCause();
+				} else {
+					// no idea what went wrong
+					throw new RuntimeException(e.getCause().getMessage(), e.getCause());
 				}
-			}, executor).get();
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			throw new IllegalStateException(e.getMessage(), e);
-		} catch (ExecutionException e) {
-			if (e.getCause() instanceof ModelRegistrationException) {
-				((ModelRegistrationException)e.getCause()).throwTheCause();
-			} else if (e.getCause() instanceof RuntimeException) {
-				throw (RuntimeException)e.getCause();
-			} else {
-				// no idea what went wrong
-				throw new RuntimeException(e.getCause().getMessage(), e.getCause());
 			}
+		} catch (RuntimeException e) {
+			e.addSuppressed(originalTrace);
+			throw e;
 		}
 
 		// ??

@@ -76,7 +76,14 @@ public class WebContainerContextWrapper extends DefaultHttpContext {
 		if (servletContextHelper != null) {
 			return servletContextHelper.handleSecurity(request, response);
 		}
-		return httpContext.handleSecurity(request, response);
+		if (httpContext != null) {
+			return httpContext.handleSecurity(request, response);
+		}
+
+		// just return true, because user may have registered a HttpContextMapping or ServletContextHelperMapping
+		// without actual HttpContext or ServletContextHelper - maybe only to provide an alternative
+		// context path
+		return true;
 	}
 
 	@Override

@@ -182,6 +182,11 @@ public abstract class AbstractElementTracker<S, R, D extends ElementEventData, T
 		// and contains almost _everything_ needed to process it later (for example after WebContainer becomes available)
 		T webElement = createElementModel(serviceReference, rank, serviceId);
 
+		if (webElement == null) {
+			log.warn("No element model was created from reference {}", serviceReference);
+			return null;
+		}
+
 		// Get a filter for target _context(s)_ with which given _element_ is associated
 		Object legacyIdProperty = serviceReference.getProperty(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID);
 		String legacyId = legacyIdProperty instanceof String ? ((String)legacyIdProperty) : null;
