@@ -78,6 +78,10 @@ public class TomcatResourceServlet extends DefaultServlet {
 		}
 	}
 
+	public void setWelcomeFilesRedirect(boolean welcomeFilesRedirect) {
+		this.redirectWelcome = welcomeFilesRedirect;
+	}
+
 	@Override
 	public void init() throws ServletException {
 		super.init();

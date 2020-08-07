@@ -993,8 +993,9 @@ class JettyServerWrapper implements BatchVisitor {
 			// we have to configure all contexts, or rather - all resource servlets in all the contexts.
 			// for Tomcat and Undertow we had to implement welcome file handling in "resource servlets" ourselves,
 			// but we could have them settable.
-			// in Jetty, we have no choice but to re-init the resource servlets after changing welcome files
-			// in context handler
+			// in Jetty, initially we had no choice but to re-init the resource servlets after changing welcome files
+			// in context handler, but eventually we've shaded the DefaultServlet, so welcome files are
+			// settable
 			contextModels.forEach((context) -> {
 				// this time we don't alter single ServletContext for path of the highest ranked OsgiContextModel -
 				// - we have to update all OsgiServletContexts because that's where welcome files are stored and
@@ -1033,8 +1034,10 @@ class JettyServerWrapper implements BatchVisitor {
 							Servlet servlet = sh.getServlet();
 							if (servlet instanceof JettyResourceServlet) {
 								((JettyResourceServlet) servlet).setWelcomeFiles(newWelcomeFiles);
+								((JettyResourceServlet) servlet).setWelcomeFilesRedirect(model.isRedirect());
 							} else if (servlet instanceof OsgiInitializedServlet) {
 								((JettyResourceServlet) ((OsgiInitializedServlet) servlet).getDelegate()).setWelcomeFiles(newWelcomeFiles);
+								((JettyResourceServlet) ((OsgiInitializedServlet) servlet).getDelegate()).setWelcomeFilesRedirect(model.isRedirect());
 							}
 						} catch (Exception e) {
 							LOG.warn("Problem reconfiguring welcome files in servlet {}", sh, e);

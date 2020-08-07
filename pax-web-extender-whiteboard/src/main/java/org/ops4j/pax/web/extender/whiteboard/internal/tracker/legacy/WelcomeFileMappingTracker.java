@@ -43,29 +43,7 @@ public class WelcomeFileMappingTracker extends AbstractMappingTracker<WelcomeFil
 
 	@Override
 	protected WelcomeFileModel doCreateElementModel(Bundle bundle, WelcomeFileMapping service, Integer rank, Long serviceId) {
-		return null;
+		return new WelcomeFileModel(service.getWelcomeFiles(), service.isRedirect());
 	}
 
-//	/**
-//	 * @see AbstractElementTracker#createWebElement(org.osgi.framework.ServiceReference
-//	 *      , Object)
-//	 */
-//	@Override
-//	WelcomeFileWebElement createWebElement(final ServiceReference<WelcomeFileMapping> serviceReference,
-//			final WelcomeFileMapping published) {
-//		return new WelcomeFileWebElement(serviceReference, published);
-//	}
-
-//	@Override
-//	public void register(WebContainer webContainer, HttpContext httpContext)
-//			throws Exception {
-////		webContainer.registerWelcomeFiles(
-////				welcomeFileMapping.getWelcomeFiles(),
-////				welcomeFileMapping.isRedirect(), httpContext);
-//	}
-//
-//	@Override
-//	public void unregister(WebContainer webContainer, HttpContext httpContext) {
-////		webContainer.unregisterWelcomeFiles(welcomeFileMapping.getWelcomeFiles(), httpContext);
-//	}
 }

@@ -152,7 +152,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
 
     private static final long serialVersionUID = 4930458713846881193L;
 
-    private final ResourceService _resourceService;
+    protected final ResourceService _resourceService;
     private ServletContext _servletContext;
     private ContextHandler _contextHandler;
 

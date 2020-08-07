@@ -837,25 +837,6 @@ public interface WebContainer extends HttpService {
 //	void unregisterJsps(HttpContext httpContext);
 //
 //    /**
-//     * Sets the session timeout of the servlet context corresponding to
-//     * specified http context. This method must be used before any register
-//     * method that uses the specified http context, otherwise an
-//     * IllegalStateException will be thrown.
-//     *
-//     * @param minutes
-//     *            session timeout of the servlet context corresponding to
-//     *            specified http context
-//     * @param httpContext
-//     *            http context. Cannot be null.
-//     * @throws IllegalArgumentException
-//     *             if http context is null
-//     * @throws IllegalStateException
-//     *             if the call is made after the http context was already used
-//     *             into a registration
-//     */
-//    void setSessionTimeout(Integer minutes, HttpContext httpContext);
-//
-//    /**
 //     * Enable jsp support.
 //     *
 //     * @param urlPatterns

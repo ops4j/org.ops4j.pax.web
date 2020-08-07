@@ -31,8 +31,11 @@ import org.osgi.service.http.context.ServletContextHelper;
  */
 public class DefaultServletContextHelper extends ServletContextHelper {
 
+	private final Bundle bundle;
+
 	public DefaultServletContextHelper(Bundle runtimeBundle) {
 		super(runtimeBundle);
+		this.bundle = runtimeBundle;
 	}
 
 	@Override
@@ -49,6 +52,13 @@ public class DefaultServletContextHelper extends ServletContextHelper {
 	@Override
 	public URL getResource(String name) {
 		// 140.2.3 URL getResource(String)
+		// But there's one problem. Default implementation of ServletContextHelper (from osgi.cmpn)
+		// trims the leading "/" - even if the name equals to "/". CMPN Whiteboard specification
+		// doesn't care about "welcome files", but we do, so "/" can't be replaced with "", because it
+		// actually MAKES a difference when calling Bundle.getEntry()...
+		if ("/".equals(name) && bundle != null) {
+			return bundle.getEntry("/");
+		}
 		return super.getResource(name);
 	}
 

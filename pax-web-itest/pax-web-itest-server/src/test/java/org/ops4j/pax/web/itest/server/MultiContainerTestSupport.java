@@ -46,6 +46,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.HttpContext
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ResourceMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletContextHelperMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletMappingTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.WelcomeFileMappingTracker;
 import org.ops4j.pax.web.itest.server.support.Utils;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.HttpServiceEnabled;
@@ -66,6 +67,7 @@ import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletMapping;
+import org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -111,13 +113,19 @@ public class MultiContainerTestSupport {
 	private ServiceTrackerCustomizer<HttpContext, OsgiContextModel> httpContextCustomizer;
 	private ServiceTrackerCustomizer<HttpContextMapping, OsgiContextModel> httpContextMappingCustomizer;
 
+	// --- non "mapping" customizers
+
+
 	private ServiceTrackerCustomizer<Servlet, ServletModel> servletCustomizer;
 	private ServiceTrackerCustomizer<Filter, FilterModel> filterCustomizer;
 	private ServiceTrackerCustomizer<Object, ServletModel> resourceCustomizer;
 
+	// --- "mapping" customizers
+
 	private ServiceTrackerCustomizer<ServletMapping, ServletModel> servletMappingCustomizer;
 	private ServiceTrackerCustomizer<FilterMapping, FilterModel> filterMappingCustomizer;
 	private ServiceTrackerCustomizer<ResourceMapping, ServletModel> resourceMappingCustomizer;
+	private ServiceTrackerCustomizer<WelcomeFileMapping, WelcomeFileModel> welcomeFileMappingCustomizer;
 
 	@Parameterized.Parameters(name = "{0}")
 	public static Collection<Object[]> data() {
@@ -179,6 +187,7 @@ public class MultiContainerTestSupport {
 		servletMappingCustomizer = getCustomizer(ServletMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
 		filterMappingCustomizer = getCustomizer(FilterMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
 		resourceMappingCustomizer = getCustomizer(ResourceMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
+		welcomeFileMappingCustomizer = getCustomizer(WelcomeFileMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
 	}
 
 	@After
@@ -401,6 +410,10 @@ public class MultiContainerTestSupport {
 
 	public ServiceTrackerCustomizer<ResourceMapping, ServletModel> getResourceMappingCustomizer() {
 		return resourceMappingCustomizer;
+	}
+
+	public ServiceTrackerCustomizer<WelcomeFileMapping, WelcomeFileModel> getWelcomeFileMappingCustomizer() {
+		return welcomeFileMappingCustomizer;
 	}
 
 	@SuppressWarnings("unchecked")

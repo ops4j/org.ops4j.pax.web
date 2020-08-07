@@ -305,7 +305,7 @@ public class ServiceModel implements BatchVisitor {
 		for (OsgiContextModel context : model.getContextModels()) {
 			// for each context, welcome files from the model are added/removed from a set
 			// of welcome files for this context
-			ContextKey key = ContextKey.with(context.getName(), context.isShared() ? null : context.getOwnerBundle());
+			ContextKey key = ContextKey.of(context);
 			Set<String> welcomes = welcomeFiles.computeIfAbsent(key, k -> new LinkedHashSet<>());
 			if (change.getKind() == OpCode.ADD) {
 				welcomes.addAll(Arrays.asList(model.getWelcomeFiles()));

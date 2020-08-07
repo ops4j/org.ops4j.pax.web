@@ -74,7 +74,6 @@ public abstract class AbstractWhiteboardIntegrationTest extends AbstractControll
 	}
 
 	@Test
-	@Ignore("Whiteboard Welcome pages")
 	public void testWhiteboardSlash() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Welcome to the Welcome page'",

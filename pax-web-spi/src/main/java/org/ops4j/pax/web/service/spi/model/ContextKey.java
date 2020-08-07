@@ -33,6 +33,10 @@ public class ContextKey {
 		return new ContextKey(contextId, bundle);
 	}
 
+	public static ContextKey of(OsgiContextModel context) {
+		return new ContextKey(context.getName(), context.isShared() ? null : context.getOwnerBundle());
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {

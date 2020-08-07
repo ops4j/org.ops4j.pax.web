@@ -1316,8 +1316,10 @@ class UndertowServerWrapper implements BatchVisitor {
 									Servlet servlet = ms.getServlet().getInstance();
 									if (servlet instanceof UndertowResourceServlet) {
 										((UndertowResourceServlet) servlet).setWelcomeFiles(newWelcomeFiles);
+										((UndertowResourceServlet) servlet).setWelcomeFilesRedirect(model.isRedirect());
 									} else if (servlet instanceof OsgiInitializedServlet) {
 										((UndertowResourceServlet) ((OsgiInitializedServlet) servlet).getDelegate()).setWelcomeFiles(newWelcomeFiles);
+										((UndertowResourceServlet) ((OsgiInitializedServlet) servlet).getDelegate()).setWelcomeFilesRedirect(model.isRedirect());
 									}
 								} catch (ServletException e) {
 									LOG.warn("Problem reconfiguring welcome files in servlet {}", ms, e);

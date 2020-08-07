@@ -1092,8 +1092,10 @@ class TomcatServerWrapper implements BatchVisitor {
 							Servlet servlet = ((PaxWebStandardWrapper) child).getServlet();
 							if (servlet instanceof TomcatResourceServlet) {
 								((TomcatResourceServlet) servlet).setWelcomeFiles(newWelcomeFiles);
+								((TomcatResourceServlet) servlet).setWelcomeFilesRedirect(model.isRedirect());
 							} else if (servlet instanceof OsgiInitializedServlet) {
 								((TomcatResourceServlet) ((OsgiInitializedServlet) servlet).getDelegate()).setWelcomeFiles(newWelcomeFiles);
+								((TomcatResourceServlet) ((OsgiInitializedServlet) servlet).getDelegate()).setWelcomeFilesRedirect(model.isRedirect());
 							}
 						}
 					}

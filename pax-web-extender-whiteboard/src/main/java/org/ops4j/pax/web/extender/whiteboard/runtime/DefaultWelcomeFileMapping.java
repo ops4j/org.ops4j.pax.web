@@ -19,7 +19,6 @@ import java.util.Arrays;
 
 import org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping;
 
-
 /**
  * Default implementation of
  * {@link org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping}.

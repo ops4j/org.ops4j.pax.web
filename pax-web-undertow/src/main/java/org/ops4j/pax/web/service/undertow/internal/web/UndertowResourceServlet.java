@@ -116,6 +116,10 @@ public class UndertowResourceServlet extends DefaultServlet implements ResourceM
 		configureCache();
 	}
 
+	public void setWelcomeFilesRedirect(boolean welcomeFilesRedirect) {
+		this.redirectWelcome = welcomeFilesRedirect;
+	}
+
 	@Override
 	public void init(final ServletConfig config) throws ServletException {
 		configureCache();
