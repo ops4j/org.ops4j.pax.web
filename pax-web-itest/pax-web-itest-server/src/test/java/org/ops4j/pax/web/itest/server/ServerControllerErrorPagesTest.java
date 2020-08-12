@@ -16,21 +16,15 @@
 package org.ops4j.pax.web.itest.server;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collections;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.ops4j.pax.web.itest.server.support.ErrorServlet;
+import org.ops4j.pax.web.itest.server.support.ProblemServlet;
 import org.ops4j.pax.web.itest.server.support.Utils;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerContext;
@@ -241,56 +235,6 @@ public class ServerControllerErrorPagesTest extends MultiContainerTestSupport {
 
 		assertTrue(serverModelInternals.isClean(bundle));
 		assertTrue(serviceModelInternals.isEmpty());
-	}
-
-	private static class ErrorServlet extends HttpServlet {
-		@Override
-		protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-			String servletName = (String) req.getAttribute(RequestDispatcher.ERROR_SERVLET_NAME);
-			Throwable exception = (Throwable) req.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
-			Class<?> exceptionType = (Class<?>) req.getAttribute(RequestDispatcher.ERROR_EXCEPTION_TYPE);
-			String errorMessage = (String) req.getAttribute(RequestDispatcher.ERROR_MESSAGE);
-			String requestURI = (String) req.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
-			Integer statusCode = (Integer) req.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
-
-			resp.getWriter().print(String.format("%s: [%s][%s][%s][%s][%s][%d]",
-					req.getPathInfo(), // allows us to recognize error page model
-					servletName,
-					exception == null ? "null" : exception.getClass().getName(),
-					exceptionType == null ? "null" : exceptionType.getName(),
-					errorMessage, requestURI, statusCode));
-		}
-	}
-
-	private static class ProblemServlet extends HttpServlet {
-		@Override
-		protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-			String exception = req.getParameter("ex");
-			String message = req.getParameter("msg");
-			String code = req.getParameter("result");
-			if (exception != null && message != null) {
-				try {
-					Class<?> tc = Class.forName(exception);
-					Constructor<?> ct = tc.getConstructor(String.class);
-					if (RuntimeException.class.isAssignableFrom(tc)) {
-						throw (RuntimeException) ct.newInstance(message);
-					} else if (IOException.class.isAssignableFrom(tc)) {
-						throw (IOException) ct.newInstance(message);
-					} else {
-						throw new ServletException((Throwable)ct.newInstance(message));
-					}
-				} catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-					throw new RuntimeException("unexpected");
-				}
-			}
-			if (code != null) {
-				if (message != null) {
-					resp.sendError(Integer.parseInt(code), message);
-				} else {
-					resp.sendError(Integer.parseInt(code));
-				}
-			}
-		}
 	}
 
 }

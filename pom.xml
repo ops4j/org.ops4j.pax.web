@@ -141,8 +141,8 @@
 		<plugin.maven-javadoc-plugin>3.0.1</plugin.maven-javadoc-plugin>
 		<plugin.maven-release-plugin>2.5.3</plugin.maven-release-plugin>
 		<plugin.maven-remote-resources-plugin>1.5</plugin.maven-remote-resources-plugin>
-		<plugin.maven-resources-plugin>3.1.0</plugin.maven-resources-plugin>
-		<plugin.dependency.maven-filtering>3.1.1</plugin.dependency.maven-filtering>
+		<plugin.maven-resources-plugin>3.2.0</plugin.maven-resources-plugin>
+		<plugin.dependency.maven-filtering>3.2.0</plugin.dependency.maven-filtering>
 		<plugin.maven-site-plugin>3.6</plugin.maven-site-plugin>
 		<plugin.maven-source-plugin>3.0.1</plugin.maven-source-plugin>
 		<plugin.maven-surefire-plugin>2.22.1</plugin.maven-surefire-plugin>

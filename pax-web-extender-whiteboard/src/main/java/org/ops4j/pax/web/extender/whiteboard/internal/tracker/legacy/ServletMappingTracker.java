@@ -66,7 +66,8 @@ public class ServletMappingTracker extends AbstractMappingTracker<ServletMapping
 				.withInitParams(servletMapping.getInitParameters())
 				.withAsyncSupported(servletMapping.getAsyncSupported())
 				.withLoadOnStartup(servletMapping.getLoadOnStartup())
-				.withMultipartConfigElement(servletMapping.getMultipartConfig());
+				.withMultipartConfigElement(servletMapping.getMultipartConfig())
+				.withErrorDeclarations(servletMapping.getErrorPages());
 
 		// handle actual source of the servlet
 		if (servletMapping.getServletClass() != null) {
@@ -80,25 +81,5 @@ public class ServletMappingTracker extends AbstractMappingTracker<ServletMapping
 
 		return builder.build();
 	}
-
-	// from removed ServletMappingWebElement
-
-//	@Override
-//	public void register(final WebContainer webContainer,
-//						 final HttpContext httpContext) throws Exception {
-//		//special handling for OSGi R6 registration of Servlet as ErrorHandler
-//		if (errorMappings != null) {
-//			for (DefaultErrorPageMapping errorPageMapping : errorMappings) {
-////				webContainer.registerErrorPage(
-////						errorPageMapping.getError(),
-////						servletMapping.getAlias(), httpContext);
-//			}
-//		}
-//	}
-
-//	@Override
-//	public Collection<? extends ErrorPageMapping> getErrorPageMappings() {
-//		return errorMappings;
-//	}
 
 }

@@ -810,6 +810,32 @@ class JettyServerWrapper implements BatchVisitor {
 				}
 
 				((PaxWebServletHandler) sch.getServletHandler()).addServletWithMapping(holder, mapping);
+
+				// are there any error page declarations in the model?
+				ErrorPageModel epm = model.getErrorPageModel();
+				if (epm != null) {
+					// location will be the first URL mapping (even if there may be more)
+					// in pure OSGi CMPN Whiteboard case, initially there could be no mapping at all, but in such
+					// case a default would be generated for us to use
+					String location = epm.getLocation();
+
+					ErrorPageErrorHandler eph = (ErrorPageErrorHandler) sch.getErrorHandler();
+					// TODO: If there are many servlets (mapped to non conflicting URIs), they still may define
+					//       conflicting error pages, and these conflicts are NOT resolved at ServletModel
+					//       resolution time. For now, we simply override existing error pages
+					for (String ex : epm.getExceptionClassNames()) {
+						eph.addErrorPage(ex, location);
+					}
+					for (int code : epm.getErrorCodes()) {
+						eph.addErrorPage(code, location);
+					}
+					if (epm.isXx4()) {
+						eph.addErrorPage(400, 499, location);
+					}
+					if (epm.isXx5()) {
+						eph.addErrorPage(500, 599, location);
+					}
+				}
 			});
 			return;
 		}
@@ -838,6 +864,44 @@ class JettyServerWrapper implements BatchVisitor {
 					ServletContextHandler sch = contextHandlers.get(contextPath);
 
 					((PaxWebServletHandler) sch.getServletHandler()).removeServletWithMapping(model);
+
+					// are there any error page declarations in the model?
+					ErrorPageModel epm = model.getErrorPageModel();
+					if (epm != null) {
+						// location will be the first URL mapping (even if there may be more)
+						// in pure OSGi CMPN Whiteboard case, initially there could be no mapping at all, but in such
+						// case a default would be generated for us to use
+						String location = epm.getLocation();
+
+						ErrorPageErrorHandler eph = (ErrorPageErrorHandler) sch.getErrorHandler();
+						// TODO: If there are many servlets (mapped to non conflicting URIs), they still may define
+						//       conflicting error pages, and these conflicts are NOT resolved at ServletModel
+						//       resolution time. For now, we simply remove existing error pages
+						Map<String, String> existing = eph.getErrorPages();
+						for (String ex : epm.getExceptionClassNames()) {
+							existing.entrySet().removeIf(e -> e.getKey().equals(ex) && e.getValue().equals(location));
+						}
+						for (int code : epm.getErrorCodes()) {
+							existing.entrySet().removeIf(e -> e.getKey().equals(Integer.toString(code)) && e.getValue().equals(location));
+						}
+						if (epm.isXx4() || epm.isXx5()) {
+							// hmm, can't change existing ErrorPageErrorHandler
+							eph = new ErrorPageErrorHandler();
+							sch.setErrorHandler(eph);
+							if (epm.isXx4()) {
+								existing.entrySet().removeIf(e -> e.getKey().startsWith("4") && e.getKey().length() == 3
+								&& e.getValue().equals(location));
+							}
+							if (epm.isXx5()) {
+								existing.entrySet().removeIf(e -> e.getKey().startsWith("5") && e.getKey().length() == 3
+								&& e.getValue().equals(location));
+							}
+						}
+						// leave remaining (not removed) mappings
+						for (Map.Entry<String, String> e : existing.entrySet()) {
+							eph.addErrorPage(e.getKey(), e.getValue());
+						}
+					}
 				});
 			}
 		}

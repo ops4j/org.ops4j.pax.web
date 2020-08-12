@@ -41,6 +41,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.tracker.HttpContextTracker
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ResourceTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletContextHelperTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ErrorPageMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.FilterMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.HttpContextMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ResourceMappingTracker;
@@ -62,6 +63,7 @@ import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
+import org.ops4j.pax.web.service.whiteboard.ErrorPageMapping;
 import org.ops4j.pax.web.service.whiteboard.FilterMapping;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
@@ -126,6 +128,7 @@ public class MultiContainerTestSupport {
 	private ServiceTrackerCustomizer<FilterMapping, FilterModel> filterMappingCustomizer;
 	private ServiceTrackerCustomizer<ResourceMapping, ServletModel> resourceMappingCustomizer;
 	private ServiceTrackerCustomizer<WelcomeFileMapping, WelcomeFileModel> welcomeFileMappingCustomizer;
+	private ServiceTrackerCustomizer<ErrorPageMapping, ErrorPageModel> errorPageMappingCustomizer;
 
 	@Parameterized.Parameters(name = "{0}")
 	public static Collection<Object[]> data() {
@@ -188,6 +191,7 @@ public class MultiContainerTestSupport {
 		filterMappingCustomizer = getCustomizer(FilterMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
 		resourceMappingCustomizer = getCustomizer(ResourceMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
 		welcomeFileMappingCustomizer = getCustomizer(WelcomeFileMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
+		errorPageMappingCustomizer = getCustomizer(ErrorPageMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
 	}
 
 	@After
@@ -414,6 +418,10 @@ public class MultiContainerTestSupport {
 
 	public ServiceTrackerCustomizer<WelcomeFileMapping, WelcomeFileModel> getWelcomeFileMappingCustomizer() {
 		return welcomeFileMappingCustomizer;
+	}
+
+	public ServiceTrackerCustomizer<ErrorPageMapping, ErrorPageModel> getErrorPageMappingCustomizer() {
+		return errorPageMappingCustomizer;
 	}
 
 	@SuppressWarnings("unchecked")

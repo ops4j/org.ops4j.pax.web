@@ -138,34 +138,10 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 					fileSizeThreshold == null ? 0 : fileSizeThreshold);
 		}
 
-		// TODO: 8. error pages
-
-		//		// special Whiteboard Error-Servlet handling
-		//		String[] errorPageParams = ServicePropertiesUtils.getArrayOfStringProperty(serviceReference,
-		//				HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE);
-		//
-		//		if (errorPageParams != null) {
-		//			if (servletName == null) {
-		//				servletName = "errorServlet";
-		//			}
-		//			if (alias == null && urlPatternsProp == null) {
-		//				alias = "/errorServlet";
-		//			}
-		//		}
-
-		//		List<DefaultErrorPageMapping> errorMappings = new ArrayList<>();
-		//
-		//		if (errorPageParams != null) {
-		//			for (String errorPageParam : errorPageParams) {
-		//				DefaultErrorPageMapping errorMapping = new DefaultErrorPageMapping();
-		//				errorMapping.setHttpContextId(httpContextId);
-		//				errorMapping.setLocation(alias);
-		//				errorMapping.setError(errorPageParam);
-		//				errorMappings.add(errorMapping);
-		//			}
-		//		}
-
-		//		return new ServletWebElement<>(serviceReference, mapping, errorMappings);
+		// 8. error pages
+		String[] errorDeclarations = Utils.getPaxWebProperty(serviceReference,
+				null, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE,
+				Utils::asStringArray);
 
 		// 9. Check the servlet annotations - we need a class of actual servlet
 		Servlet service = null;
@@ -247,29 +223,10 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 				.withInitParams(initParams)
 				.withAsyncSupported(asyncSupported)
 				.withLoadOnStartup(loadOnStartup)
-				.withMultipartConfigElement(multiPartConfig);
+				.withMultipartConfigElement(multiPartConfig)
+				.withErrorDeclarations(errorDeclarations);
 
 		return builder.build();
 	}
-
-	// from removed ServletWebElement
-
-//	@Override
-//	public void register(final WebContainer webContainer,
-//						 final HttpContext httpContext) throws Exception {
-//		//special handling for OSGi R6 registration of Servlet as ErrorHandler
-//		if (errorMappings != null) {
-//			for (DefaultErrorPageMapping errorPageMapping : errorMappings) {
-////				webContainer.registerErrorPage(
-////						errorPageMapping.getError(),
-////						servletMapping.getAlias(), httpContext);
-//			}
-//		}
-//	}
-
-//	@Override
-//	public Collection<? extends ErrorPageMapping> getErrorPageMappings() {
-//		return errorMappings;
-//	}
 
 }

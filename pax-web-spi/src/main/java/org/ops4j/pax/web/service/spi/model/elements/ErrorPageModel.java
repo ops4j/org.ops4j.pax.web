@@ -39,7 +39,7 @@ public class ErrorPageModel extends ElementModel<ErrorPageMapping, ErrorPageMode
 	private final String[] errorPages;
 
 	/** Request path of the error handler. Starts with a "/". */
-	private final String location;
+	private String location;
 
 	private boolean xx4 = false;
 	private boolean xx5 = false;
@@ -53,7 +53,6 @@ public class ErrorPageModel extends ElementModel<ErrorPageMapping, ErrorPageMode
 	 */
 	public ErrorPageModel(String[] errorPages) {
 		this.errorPages = errorPages;
-		location = null;
 	}
 
 	public ErrorPageModel(final String[] errorPages, final String location) {
@@ -67,10 +66,12 @@ public class ErrorPageModel extends ElementModel<ErrorPageMapping, ErrorPageMode
 
 	@Override
 	public void register(WhiteboardWebContainerView view) {
+		view.registerErrorPages(this);
 	}
 
 	@Override
 	public void unregister(WhiteboardWebContainerView view) {
+		view.unregisterErrorPages(this);
 	}
 
 	@Override
@@ -86,6 +87,10 @@ public class ErrorPageModel extends ElementModel<ErrorPageMapping, ErrorPageMode
 
 	public String getLocation() {
 		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
 	}
 
 	@Override

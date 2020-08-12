@@ -28,6 +28,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.tracker.HttpContextTracker
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ResourceTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletContextHelperTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ErrorPageMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.FilterMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.HttpContextMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ResourceMappingTracker;
@@ -38,9 +39,11 @@ import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.context.DefaultServletContextHelper;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
+import org.ops4j.pax.web.service.whiteboard.ErrorPageMapping;
 import org.ops4j.pax.web.service.whiteboard.FilterMapping;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
@@ -199,11 +202,11 @@ public class Activator implements BundleActivator {
 		trackFilters();
 		trackResources();
 		trackWelcomeFiles();
+		trackErrorPages();
 
 //		if (WebContainerUtils.WEB_CONATAINER_AVAILABLE) {
 //			trackListeners(bundleContext);
 //			trackJspMappings(bundleContext);
-//			trackErrorPages(bundleContext);
 //			if (WebContainerUtils.WEBSOCKETS_AVAILABLE) {
 //				trackWebSockets(bundleContext);
 //			} else {
@@ -328,14 +331,22 @@ public class Activator implements BundleActivator {
 
 	/**
 	 * Track welcome files
-	 *
-	 * @param bundleContext the BundleContext associated with this bundle
 	 */
 	private void trackWelcomeFiles() {
 		final ServiceTracker<WelcomeFileMapping, WelcomeFileModel> welcomeFileTracker
 				= WelcomeFileMappingTracker.createTracker(extenderContext, bundleContext);
 		welcomeFileTracker.open();
 		trackers.add(welcomeFileTracker);
+	}
+
+	/**
+	 * Track error pages
+	 */
+	private void trackErrorPages() {
+		final ServiceTracker<ErrorPageMapping, ErrorPageModel> errorPagesTracker
+				= ErrorPageMappingTracker.createTracker(extenderContext, bundleContext);
+		errorPagesTracker.open();
+		trackers.add(0, errorPagesTracker);
 	}
 
 	/**
@@ -389,18 +400,6 @@ public class Activator implements BundleActivator {
 //
 //		jspMappingTracker.open();
 //		trackers.add(0, jspMappingTracker);
-//	}
-//
-//	/**
-//	 * Track error pages
-//	 *
-//	 * @param bundleContext the BundleContext associated with this bundle
-//	 */
-//	private void trackErrorPages(final BundleContext bundleContext) {
-//		final ServiceTracker<ErrorPageMapping, ErrorPageWebElement> errorPagesTracker = ErrorPageMappingTracker
-//				.createTracker(extenderContext, bundleContext);
-//		errorPagesTracker.open();
-//		trackers.add(0, errorPagesTracker);
 //	}
 //
 //	/**

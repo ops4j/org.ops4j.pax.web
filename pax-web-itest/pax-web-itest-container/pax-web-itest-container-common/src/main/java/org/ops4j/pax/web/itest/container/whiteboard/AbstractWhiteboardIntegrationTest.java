@@ -124,7 +124,6 @@ public abstract class AbstractWhiteboardIntegrationTest extends AbstractControll
 	}
 
 	@Test
-	@Ignore("Whiteboard Error pages")
 	public void test404() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)

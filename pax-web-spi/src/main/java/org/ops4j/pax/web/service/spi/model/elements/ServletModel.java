@@ -116,6 +116,21 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	private String rawPath = null;
 
 	/**
+	 * <p>A servlet may have error declarations specified, then it is used as the error servlet (and if it has own
+	 * mappings, it can be used as normal servlet as well).</p>
+	 *
+	 * <p>If Whiteboard-registered servlet doesn't have URI mappings specified (as OSGi CMPN Whiteboard specification
+	 * permits), single exact URI pattern will be added.</p>
+	 */
+	private String[] errorDeclarations;
+
+	/**
+	 * If {@link ServletModel} carries error page information, we'll keep it separately as embedded
+	 * {@link ErrorPageModel} - but only if it's valid.
+	 */
+	private ErrorPageModel errorPageModel;
+
+	/**
 	 * Constructor used for servlet unregistration
 	 * @param alias
 	 * @param servletName
@@ -197,8 +212,8 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			//    URI to registered aliases. The sub-strings of the requested URI are selected by removing
 			//    the last "/" and everything to the right of the last "/".
 			if ("/".equals(this.alias)) {
-				// special case for resource servlet. We don't want "/" to change to "/*"
 				if (resourceServlet) {
+					// special case for resource servlet. We don't want "/" to change to "/*"
 					this.urlPatterns = new String[] { "/" };
 				} else {
 					this.urlPatterns = new String[] { "/*" };
@@ -251,6 +266,24 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			}
 		}
 
+		if (urlPatterns != null) {
+			for (String url : urlPatterns) {
+				if ("/".equals(url) || "/*".equals(url)) {
+					continue;
+				}
+				if (url.endsWith("/*")) {
+					if (url.substring(0, url.length() - 2).contains("*") || !url.startsWith("/")) {
+						throw new IllegalArgumentException("URL Pattern \"" + url + "\" is not a valid path pattern");
+					}
+				}
+				if (url.startsWith("*.")) {
+					if (url.substring(2).contains("/") || url.substring(2).contains("*")) {
+						throw new IllegalArgumentException("URL Pattern \"" + url + "\" is not a valid extension pattern");
+					}
+				}
+			}
+		}
+
 		if (isResourceServlet()) {
 			if (rawPath == null && basePath == null && baseFileUrl == null) {
 				throw new IllegalArgumentException("Base path or base directory is required for resource servlets");
@@ -264,7 +297,49 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			}
 		}
 
+		if (errorDeclarations != null && errorDeclarations.length > 0) {
+			// a tricky way to validate such declaration - embed full ErrorPageModel
+			ErrorPageModel epm = new ErrorPageModel(errorDeclarations);
+			epm.setRegisteringBundle(getRegisteringBundle());
+			String errorPageExact = null;
+			String errorPagePrefix = null;
+			String errorPageExtension = null;
+			for (String url : urlPatterns) {
+				// this loop includes alias and validated url patterns
+				if (url.startsWith("/") && !url.endsWith("/*")) {
+					// the best mapping
+					errorPageExact = url;
+					break;
+				}
+				if (errorPagePrefix == null && url.startsWith("/") && url.endsWith("/*")) {
+					// not perfect, but it suffices
+					if ("/*".equals(url)) {
+						errorPagePrefix = generateRandomErrorPage();
+					} else {
+						errorPagePrefix = url.substring(0, url.length() - 2) + generateRandomErrorPage();
+					}
+				}
+				if (errorPageExtension == null && url.startsWith("*.")) {
+					errorPageExtension = "error" + url.substring(2);
+				}
+			}
+			if (errorPageExact != null) {
+				epm.setLocation(errorPageExact);
+			} else if (errorPagePrefix != null) {
+				epm.setLocation(errorPagePrefix);
+			} else if (errorPageExtension != null) {
+				epm.setLocation(errorPageExtension);
+			}
+			if (epm.performValidation()) {
+				errorPageModel = epm;
+			}
+		}
+
 		return Boolean.TRUE;
+	}
+
+	private String generateRandomErrorPage() {
+		return String.format("/error-%s", UUID.randomUUID().toString());
 	}
 
 	/**
@@ -328,18 +403,6 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			return this.name.compareTo(((ServletModel)o).name);
 		}
 		return superCompare;
-	}
-
-	@Override
-	public String toString() {
-		return "ServletModel{id=" + getId()
-				+ ",name='" + name + "'"
-				+ (alias == null ? "" : ",alias='" + alias + "'")
-				+ (urlPatterns == null ? "" : ",urlPatterns=" + Arrays.toString(urlPatterns))
-				+ (servlet == null ? "" : ",servlet=" + servlet)
-				+ (servletClass == null ? "" : ",servletClass=" + servletClass)
-				+ ",contexts=" + contextModels
-				+ "}";
 	}
 
 	public String getAlias() {
@@ -444,6 +507,30 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		this.rawPath = rawPath;
 	}
 
+	private void setErrorDeclarations(String[] errorDeclarations) {
+		// this method is private on purpose - to be invoked only via builder.
+		this.errorDeclarations = errorDeclarations;
+		if ((urlPatterns == null || urlPatterns.length == 0) && alias == null) {
+			urlPatterns = new String[] { generateRandomErrorPage() };
+		}
+	}
+
+	public ErrorPageModel getErrorPageModel() {
+		return errorPageModel;
+	}
+
+	@Override
+	public String toString() {
+		return "ServletModel{id=" + getId()
+				+ ",name='" + name + "'"
+				+ (alias == null ? "" : ",alias='" + alias + "'")
+				+ (urlPatterns == null ? "" : ",urlPatterns=" + Arrays.toString(urlPatterns))
+				+ (servlet == null ? "" : ",servlet=" + servlet)
+				+ (servletClass == null ? "" : ",servletClass=" + servletClass)
+				+ ",contexts=" + contextModels
+				+ "}";
+	}
+
 	public static class Builder {
 
 		private String alias;
@@ -453,6 +540,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		private Integer loadOnStartup;
 		private Boolean asyncSupported;
 		private MultipartConfigElement multipartConfigElement;
+		private String[] errorDeclarations;
 		private Servlet servlet;
 		private Class<? extends Servlet> servletClass;
 		private ServiceReference<? extends Servlet> reference;
@@ -564,6 +652,11 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			return this;
 		}
 
+		public Builder withErrorDeclarations(String[] errorDeclarations) {
+			this.errorDeclarations = errorDeclarations;
+			return this;
+		}
+
 		public ServletModel build() {
 			ServletModel model = new ServletModel(alias, urlPatterns, servletName, initParams,
 					loadOnStartup, asyncSupported, multipartConfigElement, servlet, servletClass, reference,
@@ -572,6 +665,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			model.setServiceRank(this.rank);
 			model.setServiceId(this.serviceId);
 			model.setRawPath(resourcePath);
+			model.setErrorDeclarations(errorDeclarations);
 			return model;
 		}
 	}

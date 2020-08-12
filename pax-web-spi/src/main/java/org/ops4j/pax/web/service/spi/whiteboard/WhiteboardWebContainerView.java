@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
@@ -85,6 +86,18 @@ public interface WhiteboardWebContainerView extends PaxWebContainerView {
 	 * @param welcomeFileModel
 	 */
 	void unregisterWelcomeFiles(WelcomeFileModel welcomeFileModel);
+
+	/**
+	 * Registers error pages into {@link ElementModel#getContextModels() associated contexts}
+	 * @param rrorPageModel
+	 */
+	void registerErrorPages(ErrorPageModel errorPageModel);
+
+	/**
+	 * Unregisters error pages
+	 * @param errorPageModel
+	 */
+	void unregisterErrorPages(ErrorPageModel errorPageModel);
 
 	/**
 	 * Passes Whiteboard-registered (customized) {@link OsgiContextModel} to be managed in

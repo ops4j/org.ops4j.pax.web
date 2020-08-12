@@ -96,13 +96,13 @@ public class Activator implements BundleActivator {
 
 		// register error pages for 404 and java.lang.Exception
 		DefaultErrorPageMapping errorpageMapping = new DefaultErrorPageMapping();
-		errorpageMapping.setError("404");
+		errorpageMapping.setErrors(new String[] { "404" });
 		errorpageMapping.setLocation("/404.html");
 		errorpage404Registration = bundleContext.registerService(ErrorPageMapping.class, errorpageMapping, null);
 
 		// java.lang.Exception
 		DefaultErrorPageMapping exceptionErrorMapping = new DefaultErrorPageMapping();
-		exceptionErrorMapping.setError(java.lang.Exception.class.getName());
+		exceptionErrorMapping.setErrors(new String[] { java.lang.Exception.class.getName() });
 		exceptionErrorMapping.setLocation("/uncaughtException.html");
 		uncaughtExceptionRegistration = bundleContext.registerService(ErrorPageMapping.class, exceptionErrorMapping, null);
 

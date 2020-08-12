@@ -1246,6 +1246,16 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 
 		@Override
+		public void registerErrorPages(ErrorPageModel model) {
+			doRegisterErrorPages(Collections.emptyList(), model);
+		}
+
+		@Override
+		public void unregisterErrorPages(ErrorPageModel model) {
+			doUnregisterErrorPages(model);
+		}
+
+		@Override
 		public void addWhiteboardOsgiContextModel(OsgiContextModel model) {
 			serverModel.runSilently(() -> {
 				Batch batch = new Batch("Registration of " + model);

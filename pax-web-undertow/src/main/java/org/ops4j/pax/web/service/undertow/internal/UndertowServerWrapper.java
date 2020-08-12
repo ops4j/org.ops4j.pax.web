@@ -66,7 +66,6 @@ import io.undertow.servlet.api.ServletContainer;
 import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.core.ContextClassLoaderSetupAction;
 import io.undertow.servlet.core.DeploymentImpl;
-import io.undertow.servlet.core.ErrorPages;
 import io.undertow.servlet.core.ManagedFilter;
 import io.undertow.servlet.core.ManagedFilters;
 import io.undertow.servlet.core.ManagedListener;
@@ -103,6 +102,7 @@ import org.ops4j.pax.web.service.undertow.internal.configuration.model.SecurityR
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.Server;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.SocketBinding;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowConfiguration;
+import org.ops4j.pax.web.service.undertow.internal.web.FlexibleErrorPages;
 import org.ops4j.pax.web.service.undertow.internal.web.UndertowResourceServlet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
@@ -241,6 +241,12 @@ class UndertowServerWrapper implements BatchVisitor {
 
 	// configuration read from undertow.xml
 	private UndertowConfiguration undertowConfiguration;
+
+	/**
+	 * Map that can be used to recal what error pages we had configured at the time when there's a need
+	 * to remove some of them.
+	 */
+	private Map<String, FlexibleErrorPages> errorPages = new HashMap<>();
 
 	UndertowServerWrapper(Configuration config, UndertowFactory undertowFactory,
 			Bundle paxWebUndertowBundle, ClassLoader classLoader) {
@@ -987,6 +993,44 @@ class UndertowServerWrapper implements BatchVisitor {
 				// we can't go the easy way when _removing_ servlets
 				deploymentInfo.addServlet(info);
 				deployment.getServlets().addServlet(info);
+
+				// are there any error page declarations in the model?
+				ErrorPageModel epm = model.getErrorPageModel();
+				if (epm != null) {
+					String location = epm.getLocation();
+					FlexibleErrorPages currentState = errorPages.computeIfAbsent(contextPath, cp -> new FlexibleErrorPages());
+					for (String ex : epm.getExceptionClassNames()) {
+						try {
+							ClassLoader cl = model.getRegisteringBundle().adapt(BundleWiring.class).getClassLoader();
+							Class<Throwable> t = (Class<Throwable>) cl.loadClass(ex);
+							currentState.getExceptionMappings().put(t, location);
+							deploymentInfo.addErrorPage(new ErrorPage(location, t));
+						} catch (ClassNotFoundException e) {
+							LOG.warn("Can't load exception class {}: {}", ex, e.getMessage(), e);
+						}
+					}
+					for (int code : epm.getErrorCodes()) {
+						currentState.getErrorCodeLocations().put(code, location);
+						deploymentInfo.addErrorPage(new ErrorPage(location, code));
+					}
+					if (epm.isXx4()) {
+						for (int c = 400; c < 500; c++) {
+							currentState.getErrorCodeLocations().put(c, location);
+							deploymentInfo.addErrorPage(new ErrorPage(location, c));
+						}
+					}
+					if (epm.isXx5()) {
+						for (int c = 500; c < 600; c++) {
+							currentState.getErrorCodeLocations().put(c, location);
+							deploymentInfo.addErrorPage(new ErrorPage(location, c));
+						}
+					}
+
+					// replace the error pages in actual deployment
+					if (deployment instanceof DeploymentImpl) {
+						((DeploymentImpl)deployment).setErrorPages(currentState);
+					}
+				}
 			});
 			return;
 		}
@@ -1030,6 +1074,45 @@ class UndertowServerWrapper implements BatchVisitor {
 						PaxWebServletInfo defaultServletInfo = new PaxWebServletInfo("default", default404Servlet, true);
 						deploymentInfo.addServlet(defaultServletInfo.addMapping("/"));
 					}
+
+					// are there any error page declarations in the model?
+					// we'll be redeploying the deployment info, so we don't have to change error pages
+					// in existing (the one being undeployed) deployment
+					ErrorPageModel epm = model.getErrorPageModel();
+					if (epm != null) {
+						String location = epm.getLocation();
+						FlexibleErrorPages currentState = errorPages.computeIfAbsent(contextPath, cp -> new FlexibleErrorPages());
+						for (String ex : epm.getExceptionClassNames()) {
+							try {
+								ClassLoader cl = model.getRegisteringBundle().adapt(BundleWiring.class).getClassLoader();
+								Class<Throwable> t = (Class<Throwable>) cl.loadClass(ex);
+								currentState.getExceptionMappings().remove(t, location);
+							} catch (ClassNotFoundException e) {
+								LOG.warn("Can't load exception class {}: {}", ex, e.getMessage(), e);
+							}
+						}
+						for (int code : epm.getErrorCodes()) {
+							currentState.getErrorCodeLocations().remove(code, location);
+						}
+						if (epm.isXx4()) {
+							for (int c = 400; c < 500; c++) {
+								currentState.getErrorCodeLocations().remove(c, location);
+							}
+						}
+						if (epm.isXx5()) {
+							for (int c = 500; c < 600; c++) {
+								currentState.getErrorCodeLocations().remove(c, location);
+							}
+						}
+
+						// keep only remaining, not removed pages
+						deploymentInfo.getErrorPages().clear();
+						currentState.getErrorCodeLocations()
+								.forEach((c, l) -> deploymentInfo.addErrorPage(new ErrorPage(location, c)));
+						currentState.getExceptionMappings()
+								.forEach((e, l) -> deploymentInfo.addErrorPage(new ErrorPage(location, e)));
+					}
+
 					manager = servletContainer.addDeployment(deploymentInfo);
 					manager.deploy();
 
@@ -1359,7 +1442,10 @@ class UndertowServerWrapper implements BatchVisitor {
 
 			Map<Integer, String> errorCodeLocations = new HashMap<>();
 			Map<Class<? extends Throwable>, String> exceptionMappings = new HashMap<>();
-			ErrorPages pages = new ErrorPages(errorCodeLocations, exceptionMappings, null);
+			FlexibleErrorPages pages = new FlexibleErrorPages(errorCodeLocations, exceptionMappings, null);
+			// after adding ErrorPage(s) to "deployment info" they'll be changed into non-flexible ErrorPages
+			// at deployment time, but at least we can keep it cached at the wrapper level
+			errorPages.put(contextPath, pages);
 
 			for (ErrorPageModel model : errorPageModels) {
 				String location = model.getLocation();

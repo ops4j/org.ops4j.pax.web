@@ -928,6 +928,40 @@ class TomcatServerWrapper implements BatchVisitor {
 				for (String pattern : model.getUrlPatterns()) {
 					realContext.addServletMappingDecoded(pattern, name, false);
 				}
+
+				// are there any error page declarations in the model?
+				ErrorPageModel epm = model.getErrorPageModel();
+				if (epm != null) {
+					String location = epm.getLocation();
+					for (String ex : epm.getExceptionClassNames()) {
+						ErrorPage errorPage = new ErrorPage();
+						errorPage.setExceptionType(ex);
+						errorPage.setLocation(location);
+						realContext.addErrorPage(errorPage);
+					}
+					for (int code : epm.getErrorCodes()) {
+						ErrorPage errorPage = new ErrorPage();
+						errorPage.setErrorCode(code);
+						errorPage.setLocation(location);
+						realContext.addErrorPage(errorPage);
+					}
+					if (epm.isXx4()) {
+						for (int c = 400; c < 500; c++) {
+							ErrorPage errorPage = new ErrorPage();
+							errorPage.setErrorCode(c);
+							errorPage.setLocation(location);
+							realContext.addErrorPage(errorPage);
+						}
+					}
+					if (epm.isXx5()) {
+						for (int c = 500; c < 600; c++) {
+							ErrorPage errorPage = new ErrorPage();
+							errorPage.setErrorCode(c);
+							errorPage.setLocation(location);
+							realContext.addErrorPage(errorPage);
+						}
+					}
+				}
 			});
 			return;
 		}
@@ -954,9 +988,30 @@ class TomcatServerWrapper implements BatchVisitor {
 					// there should already be a ServletContextHandler
 					Context realContext = contextHandlers.get(contextPath);
 
-					realContext.removeChild(realContext.findChild(model.getName()));
-					for (String pattern : model.getUrlPatterns()) {
-						realContext.removeServletMapping(pattern);
+					Container child = realContext.findChild(model.getName());
+					if (child != null) {
+						realContext.removeChild(child);
+						for (String pattern : model.getUrlPatterns()) {
+							realContext.removeServletMapping(pattern);
+						}
+					}
+
+					// are there any error page declarations in the model?
+					ErrorPageModel epm = model.getErrorPageModel();
+					if (epm != null) {
+						String location = model.getErrorPageModel().getLocation();
+						for (ErrorPage ep : realContext.findErrorPages()) {
+							if (ep.getExceptionType() != null && epm.getExceptionClassNames().contains(ep.getExceptionType())) {
+								realContext.removeErrorPage(ep);
+							}
+							if (ep.getErrorCode() > 0) {
+								if (epm.getErrorCodes().contains(ep.getErrorCode())
+										|| (epm.isXx4() && ep.getErrorCode() >= 400 && ep.getErrorCode() < 500)
+										|| (epm.isXx5() && ep.getErrorCode() >= 500 && ep.getErrorCode() < 600)) {
+									realContext.removeErrorPage(ep);
+								}
+							}
+						}
 					}
 				});
 			}

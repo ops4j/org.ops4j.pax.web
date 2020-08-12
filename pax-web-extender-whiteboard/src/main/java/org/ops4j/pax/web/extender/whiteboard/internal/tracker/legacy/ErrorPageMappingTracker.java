@@ -15,52 +15,36 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 
+import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.events.ErrorPageModelData;
+import org.ops4j.pax.web.service.whiteboard.ErrorPageMapping;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+
 /**
  * Tracks {@link org.ops4j.pax.web.service.whiteboard.ErrorPageMapping}.
  *
  * @author Dmitry Sklyut
  * @since 0.7.0
  */
-public class ErrorPageMappingTracker /*extends AbstractElementTracker<ErrorPageMapping, ErrorPageWebElement>*/ {
+public class ErrorPageMappingTracker extends AbstractMappingTracker<ErrorPageMapping, ErrorPageMapping, ErrorPageModelData, ErrorPageModel> {
 
-	/**
-	 * Constructor.
-	 *
-	 * @param extenderContext
-	 *            extender context; cannot be null
-	 * @param bundleContext
-	 *            extender bundle context; cannot be null
-	 */
-//	private ErrorPageMappingTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
-//		super(extenderContext, bundleContext);
-//	}
-//
-//	public static ServiceTracker<ErrorPageMapping, ErrorPageWebElement> createTracker(
-//			final ExtenderContext extenderContext, final BundleContext bundleContext) {
-//		return new ErrorPageMappingTracker(extenderContext, bundleContext).create(ErrorPageMapping.class);
-//	}
-//
-//	/**
-//	 * @see AbstractElementTracker#createWebElement(org.osgi.framework.ServiceReference
-//	 *      , Object)
-//	 */
-//	@Override
-//	ErrorPageWebElement createWebElement(final ServiceReference<ErrorPageMapping> serviceReference,
-//			final ErrorPageMapping published) {
-//		return new ErrorPageWebElement(serviceReference, published);
-//	}
+	protected ErrorPageMappingTracker(ExtenderContext extenderContext, BundleContext bundleContext) {
+		super(extenderContext, bundleContext);
+	}
 
-//	@Override
-//	public void register(WebContainer webContainer, HttpContext httpContext)
-//			throws Exception {
-////			webContainer.registerErrorPage(
-////					errorPageMapping.getError(),
-////					errorPageMapping.getLocation(), httpContext);
-//	}
-//
-//	@Override
-//	public void unregister(WebContainer webContainer, HttpContext httpContext) {
-////			webContainer.unregisterErrorPage(
-////					errorPageMapping.getError(), httpContext);
-//	}
+	public static ServiceTracker<ErrorPageMapping, ErrorPageModel> createTracker(final ExtenderContext extenderContext,
+			final BundleContext bundleContext) {
+		return new ErrorPageMappingTracker(extenderContext, bundleContext).create(ErrorPageMapping.class);
+	}
+
+	@Override
+	protected ErrorPageModel doCreateElementModel(Bundle bundle, ErrorPageMapping service, Integer rank, Long serviceId) {
+		ErrorPageModel errorPageModel = new ErrorPageModel(service.getErrors(), service.getLocation());
+		errorPageModel.setRegisteringBundle(bundle);
+		return errorPageModel;
+	}
+
 }

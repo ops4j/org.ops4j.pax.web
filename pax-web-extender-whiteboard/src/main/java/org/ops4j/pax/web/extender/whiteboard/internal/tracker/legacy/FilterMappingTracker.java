@@ -54,6 +54,7 @@ public class FilterMappingTracker extends AbstractMappingTracker<FilterMapping, 
 				.map(Enum::name).toArray(String[]::new);
 
 		FilterModel.Builder builder = new FilterModel.Builder()
+				.withRegisteringBundle(bundle)
 				.withServiceRankAndId(rank, serviceId)
 				.withUrlPatterns(filterMapping.getUrlPatterns())
 				.withServletNames(filterMapping.getServletNames())
