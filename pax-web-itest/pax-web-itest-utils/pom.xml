@@ -78,6 +78,10 @@
 							javax.net,
 							javax.net.ssl
 						</Import-Package>
+						<Dynamic-ImportPackage>
+							javax.websocket,
+							javax.websocket.*
+						</Dynamic-ImportPackage>
 						<Export-Package>
 							org.ops4j.pax.web.itest.utils.*
 						</Export-Package>
@@ -137,11 +141,11 @@
 			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>jakarta.websocket</groupId>-->
-<!--			<artifactId>jakarta.websocket-api</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>jakarta.websocket</groupId>
+			<artifactId>jakarta.websocket-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- Logging -->
 
