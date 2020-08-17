@@ -282,7 +282,8 @@ public class ServiceModel implements BatchVisitor {
 			EventListenerModel model = change.getEventListenerModel();
 			eventListenerModels.put(model.getEventListener(), model);
 		} else if (change.getKind() == OpCode.DELETE) {
-			eventListenerModels.remove(change.getEventListenerModel().getEventListener());
+			change.getEventListenerModels().forEach(el ->
+					eventListenerModels.entrySet().removeIf(e -> e.getValue() == el));
 		}
 
 		// the change should be processed at serverModel level as well

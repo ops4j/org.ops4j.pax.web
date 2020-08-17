@@ -32,6 +32,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Supplier;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContextAttributeListener;
+import javax.servlet.ServletContextListener;
+import javax.servlet.http.HttpSessionListener;
 
 import org.apache.catalina.AccessLog;
 import org.apache.catalina.Container;
@@ -39,6 +42,7 @@ import org.apache.catalina.Context;
 import org.apache.catalina.Engine;
 import org.apache.catalina.Executor;
 import org.apache.catalina.Host;
+import org.apache.catalina.LifecycleState;
 import org.apache.catalina.Service;
 import org.apache.catalina.Valve;
 import org.apache.catalina.connector.Connector;
@@ -250,9 +254,10 @@ class TomcatServerWrapper implements BatchVisitor {
 		service.setContainer(engine);
 
 		// single, default virtual host. Other hosts can be added later dynamically.
-		Host host = new StandardHost();
+		StandardHost host = new StandardHost();
 		host.setName("localhost");
 		host.setAppBase(".");
+		host.setStartChildren(false);
 		engine.addChild(host);
 
 		this.server = server;
@@ -962,6 +967,8 @@ class TomcatServerWrapper implements BatchVisitor {
 						}
 					}
 				}
+
+				ensureServletContextStarted(realContext);
 			});
 			return;
 		}
@@ -1038,6 +1045,8 @@ class TomcatServerWrapper implements BatchVisitor {
 
 			PaxWebStandardContext context = contextHandlers.get(contextPath);
 
+			ensureServletContextStarted(context);
+
 			// see implementation requirements in Jetty version of this visit() method
 			// here in Tomcat we have to remember about "initial OSGi filter"
 
@@ -1073,6 +1082,7 @@ class TomcatServerWrapper implements BatchVisitor {
 				context.addFilterDef(def);
 				context.addFilterMap(map);
 			}
+
 			context.filterStart();
 //			}
 		}
@@ -1080,29 +1090,58 @@ class TomcatServerWrapper implements BatchVisitor {
 
 	@Override
 	public void visit(EventListenerModelChange change) {
-		EventListenerModel eventListenerModel = change.getEventListenerModel();
-		List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
-
 		if (change.getKind() == OpCode.ADD) {
+			EventListenerModel eventListenerModel = change.getEventListenerModel();
+			List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
 			contextModels.forEach((context) -> {
 				PaxWebStandardContext standardContext = contextHandlers.get(context.getContextPath());
-				EventListener eventListener = eventListenerModel.getEventListener();
-				standardContext.addApplicationEventListener(eventListener);
+				EventListener eventListener = eventListenerModel.resolveEventListener();
+				if (eventListener instanceof ServletContextAttributeListener) {
+					// add it to accessible list to fire per-OsgiContext attribute changes
+					OsgiServletContext c = osgiServletContexts.get(context);
+					c.addServletContextAttributeListener((ServletContextAttributeListener)eventListener);
+				}
+				// add the listener to real context - even ServletContextAttributeListener
+				if (eventListener instanceof HttpSessionListener
+						|| eventListener instanceof ServletContextListener) {
+					standardContext.addApplicationLifecycleListener(eventListener);
+				} else {
+					standardContext.addApplicationEventListener(eventListener);
+				}
 			});
 		}
 		if (change.getKind() == OpCode.DELETE) {
-			contextModels.forEach((context) -> {
-				PaxWebStandardContext standardContext = contextHandlers.get(context.getContextPath());
-				EventListener eventListener = eventListenerModel.getEventListener();
-				Object[] listeners = standardContext.getApplicationEventListeners();
-				List<Object> newListeners = new ArrayList<>();
-				for (Object l : listeners) {
-					if (l != eventListener) {
-						newListeners.add(l);
+			List<EventListenerModel> eventListenerModels = change.getEventListenerModels();
+			for (EventListenerModel eventListenerModel : eventListenerModels) {
+				List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
+				contextModels.forEach((context) -> {
+					PaxWebStandardContext standardContext = contextHandlers.get(context.getContextPath());
+					EventListener eventListener = eventListenerModel.resolveEventListener();
+					if (eventListener instanceof ServletContextAttributeListener) {
+						// remove it from per-OsgiContext list
+						OsgiServletContext c = osgiServletContexts.get(context);
+						c.removeServletContextAttributeListener((ServletContextAttributeListener)eventListener);
 					}
-				}
-				standardContext.setApplicationEventListeners(newListeners.toArray(new Object[newListeners.size()]));
-			});
+					// remove the listener from real context - even ServletContextAttributeListener
+					Object[] elisteners = standardContext.getApplicationEventListeners();
+					Object[] llisteners = standardContext.getApplicationLifecycleListeners();
+					List<Object> newEListeners = new ArrayList<>();
+					List<Object> newLListeners = new ArrayList<>();
+					for (Object l : elisteners) {
+						if (l != eventListener) {
+							newEListeners.add(l);
+						}
+					}
+					for (Object l : llisteners) {
+						if (l != eventListener) {
+							newLListeners.add(l);
+						}
+					}
+					standardContext.setApplicationEventListeners(newEListeners.toArray(new Object[newEListeners.size()]));
+					standardContext.setApplicationLifecycleListeners(newLListeners.toArray(new Object[newLListeners.size()]));
+					eventListenerModel.ungetEventListener(eventListener);
+				});
+			}
 		}
 	}
 
@@ -1213,6 +1252,26 @@ class TomcatServerWrapper implements BatchVisitor {
 		}
 	}
 
+	/**
+	 * Registration of <em>active web element</em> should always start the context. On the other hand,
+	 * registration of <em>passive web element</em> should <strong>not</strong> start the context.
+	 * @param sch
+	 */
+	private void ensureServletContextStarted(PaxWebStandardContext context) {
+		if (context.getState() == LifecycleState.STARTED
+				|| context.getState() == LifecycleState.STARTING
+				|| context.getState() == LifecycleState.STARTING_PREP
+				|| context.getState() == LifecycleState.INITIALIZING) {
+			return;
+		}
+		try {
+			LOG.info("Starting Tomcat context \"" + (context.getPath().equals("") ? "/" : context.getPath()) + "\"");
+			context.start();
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
+	}
+
 	private OsgiServletContext getHighestRankedContext(String contextPath, FilterModel model) {
 		OsgiContextModel highestRankedModel = null;
 		// remember, this contextModels list is properly sorted
@@ -1258,7 +1317,7 @@ class TomcatServerWrapper implements BatchVisitor {
 				break;
 			}
 			if (!(existingFilterDefs[pos + 1] instanceof PaxWebFilterDef
-					&& ((PaxWebFilterDef)existingFilterDefs[pos + 1]).getFilterModel().equals(newModels[pos]))) {
+					&& ((PaxWebFilterDef) existingFilterDefs[pos + 1]).getFilterModel().equals(newModels[pos]))) {
 				quick = false;
 				break;
 			}

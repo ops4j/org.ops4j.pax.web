@@ -187,6 +187,11 @@ public class PaxWebServletHandler extends ServletHandler {
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
+
+		if (getServletMapping("/") == null && isEnsureDefaultServlet()) {
+			addServletWithMapping(new PaxWebServletHolder("default", default404Servlet, true), "/");
+			getServletMapping("/").setDefault(true);
+		}
 	}
 
 	/**

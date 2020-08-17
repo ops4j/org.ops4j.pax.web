@@ -281,8 +281,8 @@ public class Batch {
 	 * @param serverModel
 	 * @param model
 	 */
-	public void removeEventListenerModel(ServerModel serverModel, EventListenerModel model) {
-		operations.add(new EventListenerModelChange(OpCode.DELETE, serverModel, model));
+	public void removeEventListenerModels(ServerModel serverModel, List<EventListenerModel> models) {
+		operations.add(new EventListenerModelChange(OpCode.DELETE, serverModel, models));
 	}
 
 	/**

@@ -20,6 +20,7 @@ import java.util.List;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
@@ -52,52 +53,52 @@ public interface WhiteboardWebContainerView extends PaxWebContainerView {
 	 * {@link ServletModel} should always be associated with target (one or many) {@link OsgiContextModel}, because
 	 * differently than with {@link org.osgi.service.http.HttpService} scenario, contexts are targeted by logical name
 	 * (or LDAP selector) and not as any instance.
-	 * @param servletModel
+	 * @param model
 	 */
-	void registerServlet(ServletModel servletModel);
+	void registerServlet(ServletModel model);
 
 	/**
 	 * Unregistration of {@link ServletModel} using any set criteria.
-	 * @param servletModel
+	 * @param model
 	 */
-	void unregisterServlet(ServletModel servletModel);
+	void unregisterServlet(ServletModel model);
 
 	/**
 	 * One-stop method to register a {@link javax.servlet.Filter} described using {@link FilterModel}.
 	 * {@link FilterModel} should always be associated with target (one or many) {@link OsgiContextModel}.
-	 * @param filterModel
+	 * @param model
 	 */
-	void registerFilter(FilterModel filterModel);
+	void registerFilter(FilterModel model);
 
 	/**
 	 * Unregistration of {@link FilterModel} using any set criteria.
-	 * @param filterModel
+	 * @param model
 	 */
-	void unregisterFilter(FilterModel filterModel);
+	void unregisterFilter(FilterModel model);
 
 	/**
 	 * Registers welcome files into {@link ElementModel#getContextModels() associated contexts}
-	 * @param welcomeFileModel
+	 * @param model
 	 */
-	void registerWelcomeFiles(WelcomeFileModel welcomeFileModel);
+	void registerWelcomeFiles(WelcomeFileModel model);
 
 	/**
 	 * Unregisters welcome files
-	 * @param welcomeFileModel
+	 * @param model
 	 */
-	void unregisterWelcomeFiles(WelcomeFileModel welcomeFileModel);
+	void unregisterWelcomeFiles(WelcomeFileModel model);
 
 	/**
 	 * Registers error pages into {@link ElementModel#getContextModels() associated contexts}
 	 * @param rrorPageModel
 	 */
-	void registerErrorPages(ErrorPageModel errorPageModel);
+	void registerErrorPages(ErrorPageModel model);
 
 	/**
 	 * Unregisters error pages
-	 * @param errorPageModel
+	 * @param model
 	 */
-	void unregisterErrorPages(ErrorPageModel errorPageModel);
+	void unregisterErrorPages(ErrorPageModel model);
 
 	/**
 	 * Passes Whiteboard-registered (customized) {@link OsgiContextModel} to be managed in
@@ -120,14 +121,26 @@ public interface WhiteboardWebContainerView extends PaxWebContainerView {
 	/**
 	 * Registers a {@link ServletModel} as a <em>resource servlet</em>, which means that first proper
 	 * <em>resource servlet</em> has to be created.
-	 * @param servletModel
+	 * @param model
 	 */
-	void registerResources(ServletModel servletModel);
+	void registerResources(ServletModel model);
 
 	/**
 	 * Unregisters a {@link ServletModel} as a <em>resource servlet</em>.
+	 * @param model
+	 */
+	void unregisterResources(ServletModel model);
+
+	/**
+	 * Registers a {@link EventListenerModel}.
 	 * @param servletModel
 	 */
-	void unregisterResources(ServletModel servletModel);
+	void registerListener(EventListenerModel model);
+
+	/**
+	 * Unregisters a {@link EventListenerModel}.
+	 * @param model
+	 */
+	void unregisterListener(EventListenerModel model);
 
 }

@@ -28,14 +28,7 @@ import org.ops4j.pax.web.annotations.Review;
  * @since 0.4.0, April 05, 2008
  */
 @Review("Not yet refactored")
-public interface ListenerMapping {
-
-	/**
-	 * Getter.
-	 *
-	 * @return id of the http context this listener belongs to
-	 */
-	String getHttpContextId();
+public interface ListenerMapping extends ContextRelated {
 
 	/**
 	 * Getter.

@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.ops4j.pax.web.service.spi.model.events.ErrorPageModelData;
+import org.ops4j.pax.web.service.spi.model.events.ErrorPageEventData;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.ops4j.pax.web.service.whiteboard.ErrorPageMapping;
 import org.osgi.framework.wiring.BundleWiring;
@@ -31,7 +31,7 @@ import org.osgi.framework.wiring.BundleWiring;
  * @author Alin Dreghiciu
  * @since 0.3.0, January 12, 2008
  */
-public class ErrorPageModel extends ElementModel<ErrorPageMapping, ErrorPageModelData> {
+public class ErrorPageModel extends ElementModel<ErrorPageMapping, ErrorPageEventData> {
 
 	private static final Pattern ERROR_CODE = Pattern.compile("^\\d{3}$");
 
@@ -75,8 +75,8 @@ public class ErrorPageModel extends ElementModel<ErrorPageMapping, ErrorPageMode
 	}
 
 	@Override
-	public ErrorPageModelData asEventData() {
-		ErrorPageModelData data = new ErrorPageModelData(Arrays.copyOf(errorPages, errorPages.length), location);
+	public ErrorPageEventData asEventData() {
+		ErrorPageEventData data = new ErrorPageEventData(Arrays.copyOf(errorPages, errorPages.length), location);
 		setCommonEventProperties(data);
 		return data;
 	}

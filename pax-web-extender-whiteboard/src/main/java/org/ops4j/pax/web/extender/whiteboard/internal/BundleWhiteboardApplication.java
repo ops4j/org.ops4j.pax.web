@@ -334,7 +334,9 @@ public class BundleWhiteboardApplication {
 		this.webContexts.clear();
 		this.webElements.clear();
 		if (webContainerServiceRef != null) {
-			bundle.getBundleContext().ungetService(webContainerServiceRef);
+			if (bundle.getBundleContext() != null) {
+				bundle.getBundleContext().ungetService(webContainerServiceRef);
+			}
 		}
 	}
 

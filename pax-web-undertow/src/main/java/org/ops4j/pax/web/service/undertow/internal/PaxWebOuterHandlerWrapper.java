@@ -42,6 +42,10 @@ public class PaxWebOuterHandlerWrapper implements HandlerWrapper {
 			public void handleRequest(HttpServerExchange exchange) throws Exception {
 				ServletRequestContext context = exchange.getAttachment(ServletRequestContext.ATTACHMENT_KEY);
 				ServletInfo servletInfo = context.getCurrentServlet().getManagedServlet().getServletInfo();
+
+//				if (context.getDeployment().getDeploymentState() != DeploymentManager.State.STARTED) {
+//				}
+
 				if (servletInfo instanceof PaxWebServletInfo) {
 					PaxWebServletInfo paxWebServletInfo = (PaxWebServletInfo) servletInfo;
 

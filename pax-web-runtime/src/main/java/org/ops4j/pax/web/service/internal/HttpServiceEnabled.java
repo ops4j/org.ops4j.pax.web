@@ -372,7 +372,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 	@Override
 	public void unregister(final String alias) {
-		ServletModel model = new ServletModel(alias, null, null, null, (ServiceReference<? extends Servlet>)null);
+		ServletModel model = new ServletModel(alias, null, null, null, (ServiceReference<? extends Servlet>) null);
 		doUnregisterServlet(model);
 	}
 
@@ -416,72 +416,85 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			serverModel.run(() -> {
 				List<ServletModel> toUnregister = new LinkedList<>();
 
-				if (alias != null) {
-					LOG.info("Unregistering servlet by alias \"{}\"", alias);
+				// This loop checks Whiteboard unregistration - reference identity
+				for (ServletModel existing : serviceModel.getServletModels()) {
+					if (existing == model) {
+						// Whiteboard scenario, where actual "customized" object is unregistered
+						LOG.info("Unregistering servlet model \"{}\"", model);
+						toUnregister.add(existing);
+						break;
+					}
+				}
+				if (toUnregister.isEmpty()) {
+					// search by criteria
+					if (alias != null) {
+						LOG.info("Unregistering servlet by alias \"{}\"", alias);
 
-					ServletModel found = null;
-					for (ServletModel existing : serviceModel.getServletModels()) {
-						if (alias.equals(existing.getAlias())) {
-							found = existing;
-							break;
+						ServletModel found = null;
+						for (ServletModel existing : serviceModel.getServletModels()) {
+							if (alias.equals(existing.getAlias())) {
+								found = existing;
+								break;
+							}
+						}
+						Map<String, ServletModel> mapping = serviceModel.getAliasMapping().get(alias);
+						if (mapping == null || mapping.size() == 0 || found == null) {
+							throw new IllegalArgumentException("Alias \"" + alias + "\" was never registered by "
+									+ registeringBundle);
+						}
+						toUnregister.add(found);
+					} else if (servletClass != null) {
+						LOG.info("Unregistering servlet by class \"{}\"", servletClass);
+
+						for (ServletModel existing : serviceModel.getServletModels()) {
+							if (existing.getServletClass().equals(servletClass)) {
+								toUnregister.add(existing);
+							}
+						}
+						if (toUnregister.size() == 0) {
+							throw new IllegalArgumentException("Servlet of \"" + servletClass.getName() + "\" class "
+									+ "was never registered by " + registeringBundle);
+						}
+					} else if (instance != null) {
+						LOG.info("Unregistering servlet \"{}\"", instance);
+
+						for (ServletModel existing : serviceModel.getServletModels()) {
+							if (existing.getServlet().equals(instance)) {
+								toUnregister.add(existing);
+							}
+						}
+						if (toUnregister.size() == 0) {
+							throw new IllegalArgumentException("Servlet \"" + instance + "\" "
+									+ "was never registered by " + registeringBundle);
+						}
+					} else if (reference != null) {
+						LOG.info("Unregistering servlet by refernce \"{}\"", reference);
+
+						for (ServletModel existing : serviceModel.getServletModels()) {
+							if (existing.getElementReference().equals(reference)) {
+								toUnregister.add(existing);
+							}
+						}
+						if (toUnregister.size() == 0) {
+							throw new IllegalArgumentException("Servlet with reference \"" + reference + "\" "
+									+ "was never registered by " + registeringBundle);
+						}
+					} else if (name != null) {
+						LOG.info("Unregistering servlet by name \"{}\"", name);
+
+						for (ServletModel existing : serviceModel.getServletModels()) {
+							if (existing.getName().equals(name)) {
+								toUnregister.add(existing);
+							}
+						}
+						if (toUnregister.size() == 0) {
+							throw new IllegalArgumentException("Servlet named \"" + name + "\" was never registered by "
+									+ registeringBundle);
 						}
 					}
-					Map<String, ServletModel> mapping = serviceModel.getAliasMapping().get(alias);
-					if (mapping == null || mapping.size() == 0 || found == null) {
-						throw new IllegalArgumentException("Alias \"" + alias + "\" was never registered by "
-								+ registeringBundle);
-					}
-					toUnregister.add(found);
-				} else if (servletClass != null) {
-					LOG.info("Unregistering servlet by class \"{}\"", servletClass);
-
-					for (ServletModel existing : serviceModel.getServletModels()) {
-						if (existing.getServletClass().equals(servletClass)) {
-							toUnregister.add(existing);
-						}
-					}
-					if (toUnregister.size() == 0) {
-						throw new IllegalArgumentException("Servlet of \"" + servletClass.getName() + "\" class "
-								+ "was never registered by " + registeringBundle);
-					}
-				} else if (instance != null) {
-					LOG.info("Unregistering servlet \"{}\"", instance);
-
-					for (ServletModel existing : serviceModel.getServletModels()) {
-						if (existing.getServlet().equals(instance)) {
-							toUnregister.add(existing);
-						}
-					}
-					if (toUnregister.size() == 0) {
-						throw new IllegalArgumentException("Servlet \"" + instance + "\" "
-								+ "was never registered by " + registeringBundle);
-					}
-				} else if (reference != null) {
-					LOG.info("Unregistering servlet by refernce \"{}\"", reference);
-
-					for (ServletModel existing : serviceModel.getServletModels()) {
-						if (existing.getElementReference().equals(reference)) {
-							toUnregister.add(existing);
-						}
-					}
-					if (toUnregister.size() == 0) {
-						throw new IllegalArgumentException("Servlet with reference \"" + reference + "\" "
-								+ "was never registered by " + registeringBundle);
-					}
-				} else if (name != null) {
-					LOG.info("Unregistering servlet by name \"{}\"", name);
-
-					for (ServletModel existing : serviceModel.getServletModels()) {
-						if (existing.getName().equals(name)) {
-							toUnregister.add(existing);
-						}
-					}
-					if (toUnregister.size() == 0) {
-						throw new IllegalArgumentException("Servlet named \"" + name + "\" was never registered by "
-								+ registeringBundle);
-					}
-				} else {
-					throw new IllegalArgumentException("No criteria for servlet unregistration specified");
+				}
+				if (toUnregister.isEmpty()) {
+					throw new IllegalArgumentException("Can't find a servlet to unregister using criteria from " + model);
 				}
 
 				final Batch batch = new Batch("Unregistration of servlets: " + toUnregister);
@@ -717,10 +730,11 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 	 * Main method for {@link Filter} unregistration
 	 * @param model
 	 */
-	private void doUnregisterFilter(FilterModel model) {
+	private void doUnregisterFilter(final FilterModel model) {
 		final String name = model.getName();
 		final Filter instance = model.getFilter();
 		final Class<? extends Filter> filterClass = model.getFilterClass();
+		ServiceReference<? extends Filter> reference = model.getElementReference();
 
 		if (model.getRegisteringBundle() == null) {
 			model.setRegisteringBundle(serviceBundle);
@@ -733,44 +747,69 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			serverModel.run(() -> {
 				List<FilterModel> toUnregister = new LinkedList<>();
 
-				if (name != null) {
-					LOG.info("Unregistering filter by name \"{}\"", name);
+				// This loop checks Whiteboard unregistration - reference identity
+				for (FilterModel existing : serviceModel.getFilterModels()) {
+					if (existing == model) {
+						// Whiteboard scenario, where actual "customized" object is unregistered
+						LOG.info("Unregistering filter model \"{}\"", model);
+						toUnregister.add(existing);
+						break;
+					}
+				}
+				if (toUnregister.isEmpty()) {
+					// search by criteria
+					if (name != null) {
+						LOG.info("Unregistering filter by name \"{}\"", name);
 
-					for (FilterModel existing : serviceModel.getFilterModels()) {
-						if (existing.getName().equals(name)) {
-							toUnregister.add(existing);
+						for (FilterModel existing : serviceModel.getFilterModels()) {
+							if (existing.getName().equals(name)) {
+								toUnregister.add(existing);
+							}
+						}
+						if (toUnregister.size() == 0) {
+							throw new IllegalArgumentException("Filter named \"" + name + "\" was never registered by "
+									+ registeringBundle);
+						}
+					} else if (filterClass != null) {
+						LOG.info("Unregistering filter by class \"{}\"", filterClass);
+
+						for (FilterModel existing : serviceModel.getFilterModels()) {
+							if (existing.getFilterClass().equals(filterClass)) {
+								toUnregister.add(existing);
+							}
+						}
+						if (toUnregister.size() == 0) {
+							throw new IllegalArgumentException("Filter of \"" + filterClass.getName() + "\" class "
+									+ "was never registered by " + registeringBundle);
+						}
+					} else if (reference != null) {
+						LOG.info("Unregistering filter by refernce \"{}\"", reference);
+
+						for (FilterModel existing : serviceModel.getFilterModels()) {
+							if (existing.getElementReference().equals(reference)) {
+								toUnregister.add(existing);
+							}
+						}
+						if (toUnregister.size() == 0) {
+							throw new IllegalArgumentException("Filter with reference \"" + reference + "\" "
+									+ "was never registered by " + registeringBundle);
+						}
+					} else if (instance != null) {
+						LOG.info("Unregistering filter \"{}\"", instance);
+
+						for (FilterModel existing : serviceModel.getFilterModels()) {
+							if (existing.getFilter().equals(instance)) {
+								toUnregister.add(existing);
+							}
+						}
+						if (toUnregister.size() == 0) {
+							throw new IllegalArgumentException("Filter \"" + instance + "\" "
+									+ "was never registered by " + registeringBundle);
 						}
 					}
-					if (toUnregister.size() == 0) {
-						throw new IllegalArgumentException("Filter named \"" + name + "\" was never registered by "
-								+ registeringBundle);
-					}
-				} else if (filterClass != null) {
-					LOG.info("Unregistering filter by class \"{}\"", filterClass);
-
-					for (FilterModel existing : serviceModel.getFilterModels()) {
-						if (existing.getFilterClass().equals(filterClass)) {
-							toUnregister.add(existing);
-						}
-					}
-					if (toUnregister.size() == 0) {
-						throw new IllegalArgumentException("Servlet of \"" + filterClass.getName() + "\" class "
-								+ "was never registered by " + registeringBundle);
-					}
-				} else if (instance != null) {
-					LOG.info("Unregistering filter \"{}\"", instance);
-
-					for (FilterModel existing : serviceModel.getFilterModels()) {
-						if (existing.getFilter().equals(instance)) {
-							toUnregister.add(existing);
-						}
-					}
-					if (toUnregister.size() == 0) {
-						throw new IllegalArgumentException("Filter \"" + instance + "\" "
-								+ "was never registered by " + registeringBundle);
-					}
-				} else {
-					throw new IllegalArgumentException("No criteria for filter unregistration specified");
+				}
+				if (toUnregister.isEmpty()) {
+					throw new IllegalArgumentException("Can't find a filter to unregister using criteria from " + model);
 				}
 
 				final Batch batch = new Batch("Unregistration of filters: " + toUnregister);
@@ -837,25 +876,56 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 	@Override
 	public void unregisterEventListener(final EventListener listener) {
-		final EventListenerModel[] toUnregister = new EventListenerModel[] { null };
-		for (Map.Entry<EventListener, EventListenerModel> entry : serviceModel.getEventListenerModels().entrySet()) {
-			if (entry.getKey().equals(listener)) {
-				toUnregister[0] = entry.getValue();
-			}
+		EventListenerModel model = new EventListenerModel(listener);
+		doUnregisterEventListener(model);
+	}
+
+	private void doUnregisterEventListener(EventListenerModel model) {
+		final EventListener listener = model.getEventListener();
+		ServiceReference<? extends EventListener> reference = model.getElementReference();
+
+		if (model.getRegisteringBundle() == null) {
+			model.setRegisteringBundle(serviceBundle);
 		}
+		Bundle registeringBundle = model.getRegisteringBundle();
 
 		try {
+			event(ElementEvent.State.UNDEPLOYING, model);
+
 			serverModel.run(() -> {
-				if (toUnregister[0] == null) {
-					throw new IllegalArgumentException("EventListener \"" + listener + "\" "
-							+ "was never registered by " + HttpServiceEnabled.this.serviceBundle);
+				List<EventListenerModel> toUnregister = new LinkedList<>();
+
+				// This loop checks Whiteboard unregistration - reference identity
+				for (Map.Entry<EventListener, EventListenerModel> existing : serviceModel.getEventListenerModels().entrySet()) {
+					if (existing.getValue() == model) {
+						// Whiteboard scenario, where actual "customized" object is unregistered
+						toUnregister.add(model);
+						break;
+					}
+				}
+				if (toUnregister.isEmpty()) {
+					// search by criteria
+					if (listener != null) {
+						for (Map.Entry<EventListener, EventListenerModel> entry : serviceModel.getEventListenerModels().entrySet()) {
+							if (entry.getKey().equals(listener)) {
+								toUnregister.add(entry.getValue());
+							}
+						}
+					} else if (reference != null) {
+						for (Map.Entry<EventListener, EventListenerModel> entry : serviceModel.getEventListenerModels().entrySet()) {
+							if (entry.getValue().getElementReference() == reference) {
+								toUnregister.add(entry.getValue());
+							}
+						}
+					}
+				}
+				if (toUnregister.isEmpty()) {
+					throw new IllegalArgumentException("Can't find an event listener to unregister using criteria from " + model);
 				}
 
-				event(ElementEvent.State.UNDEPLOYING, toUnregister[0]);
+				final Batch batch = new Batch("Unregistration of EventListener: " + toUnregister);
 
-				final Batch batch = new Batch("Unregistration of EventListener: " + toUnregister[0]);
-
-				serverModel.removeEventListenerModel(toUnregister[0], batch);
+				serverModel.removeEventListenerModels(toUnregister, batch);
 
 				serverController.sendBatch(batch);
 
@@ -864,10 +934,10 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				return null;
 			});
 
-			event(ElementEvent.State.UNDEPLOYED, toUnregister[0]);
+			event(ElementEvent.State.UNDEPLOYED, model);
 		} catch (ServletException | NamespaceException e) {
 			// if toUnregister is null, IllegalArgumentException is thrown anyway
-			event(ElementEvent.State.FAILED, toUnregister[0]);
+			event(ElementEvent.State.FAILED, model);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -1082,9 +1152,8 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 						}
 					}
 				}
-				if (toUnregister.size() == 0) {
-					throw new IllegalArgumentException("Error page(s) \"" + Arrays.asList(errorPages)
-							+ "\" were never registered by " + registeringBundle);
+				if (toUnregister.isEmpty()) {
+					throw new IllegalArgumentException("Can't find error pages to unregister using criteria from " + model);
 				}
 
 				final Batch batch = new Batch("Unregistration of error pages: " + toUnregister);
@@ -1256,6 +1325,16 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 
 		@Override
+		public void registerListener(EventListenerModel model) {
+			doRegisterEventListener(Collections.emptyList(), model);
+		}
+
+		@Override
+		public void unregisterListener(EventListenerModel model) {
+			doUnregisterEventListener(model);
+		}
+
+		@Override
 		public void addWhiteboardOsgiContextModel(OsgiContextModel model) {
 			serverModel.runSilently(() -> {
 				Batch batch = new Batch("Registration of " + model);
@@ -1314,28 +1393,6 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //	private boolean isWebAppWebContainerContext(ContextModel contextModel) {
 //		return contextModel
@@ -1928,7 +1985,6 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 //		return withWhiteboardDtoService(service -> service.createWhiteboardRuntimeDTO(iterator, serverModel, serviceModel));
 //	}
 
-
 //	/**
 //	 * WhiteboardDtoService is registered as DS component. Should be removed if this class gets full DS support
 //	 * @param function a function which is applied against WhiteboardDtoService
@@ -1968,6 +2024,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 //    }
 
 	private static class ResourceServlet {
+
 		public final Servlet servlet;
 		public final URL urlBase;
 		public final String chrootBase;

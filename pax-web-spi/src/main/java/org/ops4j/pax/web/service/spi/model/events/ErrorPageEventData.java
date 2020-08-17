@@ -15,12 +15,12 @@
  */
 package org.ops4j.pax.web.service.spi.model.events;
 
-public class ErrorPageModelData extends ElementEventData {
+public class ErrorPageEventData extends ElementEventData {
 
 	private final String[] errorPages;
 	private final String location;
 
-	public ErrorPageModelData(String[] errorPages, String location) {
+	public ErrorPageEventData(String[] errorPages, String location) {
 		this.errorPages = errorPages;
 		this.location = location;
 	}

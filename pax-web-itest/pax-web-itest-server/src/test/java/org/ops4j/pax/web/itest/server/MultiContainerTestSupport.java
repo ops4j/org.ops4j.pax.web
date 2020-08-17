@@ -38,12 +38,14 @@ import org.mockito.stubbing.Answer;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.FilterTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.HttpContextTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ListenerTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ResourceTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletContextHelperTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ErrorPageMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.FilterMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.HttpContextMappingTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ListenerMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ResourceMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletContextHelperMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletMappingTracker;
@@ -66,6 +68,7 @@ import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.whiteboard.ErrorPageMapping;
 import org.ops4j.pax.web.service.whiteboard.FilterMapping;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
+import org.ops4j.pax.web.service.whiteboard.ListenerMapping;
 import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletMapping;
@@ -121,6 +124,7 @@ public class MultiContainerTestSupport {
 	private ServiceTrackerCustomizer<Servlet, ServletModel> servletCustomizer;
 	private ServiceTrackerCustomizer<Filter, FilterModel> filterCustomizer;
 	private ServiceTrackerCustomizer<Object, ServletModel> resourceCustomizer;
+	private ServiceTrackerCustomizer<EventListener, EventListenerModel> listenerCustomizer;
 
 	// --- "mapping" customizers
 
@@ -129,6 +133,7 @@ public class MultiContainerTestSupport {
 	private ServiceTrackerCustomizer<ResourceMapping, ServletModel> resourceMappingCustomizer;
 	private ServiceTrackerCustomizer<WelcomeFileMapping, WelcomeFileModel> welcomeFileMappingCustomizer;
 	private ServiceTrackerCustomizer<ErrorPageMapping, ErrorPageModel> errorPageMappingCustomizer;
+	private ServiceTrackerCustomizer<ListenerMapping, EventListenerModel> listenerMappingCustomizer;
 
 	@Parameterized.Parameters(name = "{0}")
 	public static Collection<Object[]> data() {
@@ -186,12 +191,14 @@ public class MultiContainerTestSupport {
 		servletCustomizer = getCustomizer(ServletTracker.createTracker(whiteboard, whiteboardBundleContext));
 		filterCustomizer = getCustomizer(FilterTracker.createTracker(whiteboard, whiteboardBundleContext));
 		resourceCustomizer = getCustomizer(ResourceTracker.createTracker(whiteboard, whiteboardBundleContext));
+		listenerCustomizer = getCustomizer(ListenerTracker.createTracker(whiteboard, whiteboardBundleContext));
 
 		servletMappingCustomizer = getCustomizer(ServletMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
 		filterMappingCustomizer = getCustomizer(FilterMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
 		resourceMappingCustomizer = getCustomizer(ResourceMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
 		welcomeFileMappingCustomizer = getCustomizer(WelcomeFileMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
 		errorPageMappingCustomizer = getCustomizer(ErrorPageMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
+		listenerMappingCustomizer = getCustomizer(ListenerMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
 	}
 
 	@After
@@ -343,13 +350,19 @@ public class MultiContainerTestSupport {
 		return mockReference(bundle, clazz, props, supplier, 0L, 0);
 	}
 
-	@SuppressWarnings("unchecked")
 	protected <S> ServiceReference<S> mockReference(Bundle bundle, Class<S> clazz, Hashtable<String, Object> props,
 			Supplier<S> supplier, Long serviceId, Integer rank) {
-		ServiceReference<S> ref = mock(ServiceReference.class);
-		when(ref.toString()).thenReturn("ref:" + clazz.toString());
+		return mockReference(bundle, new Class<?>[] { clazz }, props, supplier, serviceId, rank);
+	}
 
-		when(ref.getProperty(Constants.OBJECTCLASS)).thenReturn(new String[] { clazz.getName() });
+	@SuppressWarnings("unchecked")
+	protected <S> ServiceReference<S> mockReference(Bundle bundle, Class<?>[] classes, Hashtable<String, Object> props,
+			Supplier<S> supplier, Long serviceId, Integer rank) {
+		ServiceReference<S> ref = mock(ServiceReference.class);
+		when(ref.toString()).thenReturn("ref:" + Arrays.asList(classes).toString());
+
+		String[] names = Arrays.stream(classes).map(Class::getName).toArray(String[]::new);
+		when(ref.getProperty(Constants.OBJECTCLASS)).thenReturn(names);
 
 		when(ref.getProperty(Constants.SERVICE_ID)).thenReturn(serviceId);
 		when(ref.getProperty(Constants.SERVICE_RANKING)).thenReturn(rank);
@@ -404,6 +417,10 @@ public class MultiContainerTestSupport {
 		return resourceCustomizer;
 	}
 
+	public ServiceTrackerCustomizer<EventListener, EventListenerModel> getListenerCustomizer() {
+		return listenerCustomizer;
+	}
+
 	public ServiceTrackerCustomizer<ServletMapping, ServletModel> getServletMappingCustomizer() {
 		return servletMappingCustomizer;
 	}
@@ -422,6 +439,10 @@ public class MultiContainerTestSupport {
 
 	public ServiceTrackerCustomizer<ErrorPageMapping, ErrorPageModel> getErrorPageMappingCustomizer() {
 		return errorPageMappingCustomizer;
+	}
+
+	public ServiceTrackerCustomizer<ListenerMapping, EventListenerModel> getListenerMappingCustomizer() {
+		return listenerMappingCustomizer;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -461,6 +482,7 @@ public class MultiContainerTestSupport {
 		public final Map<Filter, FilterModel> filters = new IdentityHashMap<>();
 		public final Set<FilterModel> disabledFilterModels = new TreeSet<>();
 		public final Set<ErrorPageModel> disabledErrorPageModels = new TreeSet<>();
+		private final Map<EventListener, EventListenerModel> eventListeners = new IdentityHashMap<>();
 
 		private final ServerModel model;
 //		private final Map<String, VirtualHostModel> virtualHosts = new HashMap<>();
@@ -478,6 +500,7 @@ public class MultiContainerTestSupport {
 			filters.putAll(getField(model, "filters", Map.class));
 			disabledFilterModels.addAll(getField(model, "disabledFilterModels", Set.class));
 			disabledErrorPageModels.addAll(getField(model, "disabledErrorPageModels", Set.class));
+			eventListeners.putAll(getField(model, "eventListeners", Map.class));
 		}
 
 		/**
@@ -499,6 +522,7 @@ public class MultiContainerTestSupport {
 			clean &= disabledServletModels.stream().noneMatch(sm -> sm.getRegisteringBundle().equals(bundle));
 			clean &= disabledFilterModels.stream().noneMatch(fm -> fm.getRegisteringBundle().equals(bundle));
 			clean &= disabledErrorPageModels.stream().noneMatch(fm -> fm.getRegisteringBundle().equals(bundle));
+			clean &= eventListeners.values().stream().noneMatch(sm -> sm.getRegisteringBundle().equals(bundle));
 			return clean;
 		}
 	}
@@ -530,8 +554,12 @@ public class MultiContainerTestSupport {
 		}
 
 		public boolean isEmpty() {
-			return aliasMapping.isEmpty() && servletModels.isEmpty() && filterModels.isEmpty()
-					&& eventListenerModels.isEmpty() && welcomeFiles.isEmpty() && welcomeFileModels.isEmpty()
+			return aliasMapping.isEmpty()
+					&& servletModels.isEmpty()
+					&& filterModels.isEmpty()
+					&& eventListenerModels.isEmpty()
+					&& welcomeFiles.isEmpty()
+					&& welcomeFileModels.isEmpty()
 					&& errorPageModels.isEmpty();
 		}
 	}

@@ -38,6 +38,7 @@ import java.util.function.Supplier;
 import javax.servlet.DispatcherType;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -211,6 +212,14 @@ class UndertowServerWrapper implements BatchVisitor {
 	 */
 	private final Map<String, PaxWebSecurityHandler> securityHandlers = new HashMap<>();
 
+	/**
+	 * When constructing <em>deployment infos</em> we have to remember them separately before calling
+	 * {@link DeploymentManager#deploy()}, as it'll clone the {@link DeploymentInfo} (twice) and hide
+	 * the {@link Deployment} implementation in the {@link DeploymentManager} (...). This is important
+	 * to implement the "start the context only after first servlet/filter/resource has been registered".
+	 */
+	private final Map<String, DeploymentInfo> deploymentInfos = new HashMap<>();
+
 	// TODO: the three below fields are the same in Jetty, Tomcat and Undertow
 
 	/**
@@ -246,7 +255,7 @@ class UndertowServerWrapper implements BatchVisitor {
 	 * Map that can be used to recal what error pages we had configured at the time when there's a need
 	 * to remove some of them.
 	 */
-	private Map<String, FlexibleErrorPages> errorPages = new HashMap<>();
+	private final Map<String, FlexibleErrorPages> errorPages = new HashMap<>();
 
 	UndertowServerWrapper(Configuration config, UndertowFactory undertowFactory,
 			Bundle paxWebUndertowBundle, ClassLoader classLoader) {
@@ -776,10 +785,19 @@ class UndertowServerWrapper implements BatchVisitor {
 			String contextPath = deployment.getDeployment().getServletContext().getContextPath();
 			try {
 				deployment.stop();
+				deployment.undeploy();
 			} catch (ServletException e) {
 				LOG.warn("Problem stopping deployment for context " + contextPath + ": " + e.getMessage(), e);
 			}
 		});
+		deploymentInfos.clear();
+		// do not clear osgiContextModels and osgiServletContexts
+		// - they'll be cleared individually through HttpServiceEnabled
+//		osgiServletContexts.clear();
+//		osgiContextModels.clear();
+		securityHandlers.clear();
+		wrappingHandlers.clear();
+		errorPages.clear();
 
 		this.workers.values().forEach(XnioWorker::shutdown);
 		this.workers.clear();
@@ -855,20 +873,11 @@ class UndertowServerWrapper implements BatchVisitor {
 //							deployment.setResourceManager(this);
 //							deployment.setIdentityManager(identityManager);
 
-			DeploymentManager manager = servletContainer.addDeployment(deployment);
-			// here's where Undertow-specific instance of javax.servlet.ServletContext is created
-			manager.deploy();
+			// do NOT add&deploy&start the context here - only after registering first "active" web element
+			// only prepare the original (cloned later) DeploymentInfo
+			deploymentInfos.put(contextPath, deployment);
 
-			try {
-				HttpHandler handler = manager.start();
-				// actual registration of "context" in Undertow's path handler. There are no servlets,
-				// filters and anything yet
-				pathHandler.addPrefixPath(contextPath, handler);
-			} catch (ServletException e) {
-				throw new IllegalStateException("Can't create Undertow context "
-						+ contextPath + ": " + e.getMessage(), e);
-			}
-
+			// prepare mapping of sorted OsgiContextModel collections per context path
 			osgiContextModels.put(contextPath, new TreeSet<>());
 		}
 	}
@@ -879,13 +888,10 @@ class UndertowServerWrapper implements BatchVisitor {
 		ServletContextModel servletModel = change.getServletContextModel();
 
 		String contextPath = osgiModel.getContextPath();
-		DeploymentManager deploymentManager = servletContainer.getDeploymentByPath(contextPath);
 
-		if (deploymentManager == null) {
-			throw new IllegalStateException(osgiModel + " refers to unknown ServletContext for path " + contextPath);
+		if (change.getKind() == OpCode.ASSOCIATE) {
+			return;
 		}
-
-		ServletContext realServletContext = deploymentManager.getDeployment().getServletContext();
 
 		if (change.getKind() == OpCode.ADD) {
 			LOG.info("Adding {} to deployment info of {}", osgiModel, contextPath);
@@ -896,7 +902,7 @@ class UndertowServerWrapper implements BatchVisitor {
 			if (osgiServletContexts.containsKey(osgiModel)) {
 				throw new IllegalStateException(osgiModel + " is already registered");
 			}
-			osgiServletContexts.put(osgiModel, new OsgiServletContext(realServletContext, osgiModel, servletModel));
+			osgiServletContexts.put(osgiModel, new OsgiServletContext(getRealServletContext(contextPath), osgiModel, servletModel));
 			osgiContextModels.get(contextPath).add(osgiModel);
 		}
 
@@ -917,8 +923,12 @@ class UndertowServerWrapper implements BatchVisitor {
 		if (highestRankedModel != null) {
 			OsgiServletContext highestRankedContext = osgiServletContexts.get(highestRankedModel);
 			// default "contexts" to handle security and class/resource loading
-			wrappingHandlers.get(contextPath).setDefaultServletContext(highestRankedContext);
-			securityHandlers.get(contextPath).setDefaultOsgiContextModel(highestRankedModel);
+			if (wrappingHandlers.containsKey(contextPath)) {
+				wrappingHandlers.get(contextPath).setDefaultServletContext(highestRankedContext);
+			}
+			if (securityHandlers.containsKey(contextPath)) {
+				securityHandlers.get(contextPath).setDefaultOsgiContextModel(highestRankedModel);
+			}
 
 			// each highest ranked context should be registered as OSGi service (if it wasn't registered)
 			highestRankedContext.register();
@@ -931,8 +941,12 @@ class UndertowServerWrapper implements BatchVisitor {
 			});
 		} else {
 			// TOCHECK: there should be no more web elements in the context, no OSGi mechanisms, just 404 all the time
-			wrappingHandlers.get(contextPath).setDefaultServletContext(null);
-			securityHandlers.get(contextPath).setDefaultOsgiContextModel(null);
+			if (wrappingHandlers.containsKey(contextPath)) {
+				wrappingHandlers.get(contextPath).setDefaultServletContext(null);
+			}
+			if (securityHandlers.containsKey(contextPath)) {
+				securityHandlers.get(contextPath).setDefaultOsgiContextModel(null);
+			}
 		}
 
 //			// manager (lifecycle manager of the deployment),
@@ -965,6 +979,8 @@ class UndertowServerWrapper implements BatchVisitor {
 				if (!done.add(contextPath)) {
 					return;
 				}
+
+				ensureServletContextStarted(contextPath);
 
 				LOG.debug("Adding servlet {} to {}", model.getName(), contextPath);
 
@@ -1028,7 +1044,7 @@ class UndertowServerWrapper implements BatchVisitor {
 
 					// replace the error pages in actual deployment
 					if (deployment instanceof DeploymentImpl) {
-						((DeploymentImpl)deployment).setErrorPages(currentState);
+						((DeploymentImpl) deployment).setErrorPages(currentState);
 					}
 				}
 			});
@@ -1046,6 +1062,8 @@ class UndertowServerWrapper implements BatchVisitor {
 				// proper order ensures that (assuming above scenario), for /c1, ocm2 will be chosen and ocm1 skipped
 				model.getContextModels().forEach(osgiContextModel -> {
 					String contextPath = osgiContextModel.getContextPath();
+
+					// this time we just assume that the servlet context is started
 
 					LOG.debug("Removing servlet {} from context {}", model.getName(), contextPath);
 
@@ -1146,6 +1164,8 @@ class UndertowServerWrapper implements BatchVisitor {
 		for (Map.Entry<String, TreeSet<FilterModel>> entry : contextFilters.entrySet()) {
 			String contextPath = entry.getKey();
 			Set<FilterModel> filters = entry.getValue();
+
+			ensureServletContextStarted(contextPath);
 
 			LOG.info("Changing filter configuration for context {}", contextPath);
 
@@ -1286,68 +1306,86 @@ class UndertowServerWrapper implements BatchVisitor {
 
 	@Override
 	public void visit(EventListenerModelChange change) {
-		EventListenerModel eventListenerModel = change.getEventListenerModel();
-		List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
-
 		if (change.getKind() == OpCode.ADD) {
+			EventListenerModel eventListenerModel = change.getEventListenerModel();
+			List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
 			contextModels.forEach((context) -> {
-				DeploymentManager manager = servletContainer.getDeploymentByPath(context.getContextPath());
-				DeploymentInfo deploymentInfo = manager.getDeployment().getDeploymentInfo();
+				DeploymentManager manager = getDeploymentManager(context.getContextPath());
+				DeploymentInfo deploymentInfo = manager == null ? deploymentInfos.get(context.getContextPath())
+						: manager.getDeployment().getDeploymentInfo();
 
-				EventListener eventListener = eventListenerModel.getEventListener();
+				EventListener eventListener = eventListenerModel.resolveEventListener();
+				if (eventListener instanceof ServletContextAttributeListener) {
+					// add it to accessible list to fire per-OsgiContext attribute changes
+					OsgiServletContext c = osgiServletContexts.get(context);
+					c.addServletContextAttributeListener((ServletContextAttributeListener) eventListener);
+				}
+				// add the listener to real context - even ServletContextAttributeListener
 				ListenerInfo info = new ListenerInfo(eventListener.getClass(), new ImmediateInstanceFactory<>(eventListener));
 
-				deploymentInfo.getListeners().add(info);
-				manager.getDeployment().getApplicationListeners().addListener(new ManagedListener(info, true));
+				deploymentInfo.addListener(info);
+				if (manager != null) {
+					manager.getDeployment().getApplicationListeners().addListener(new ManagedListener(info, true));
+				}
 			});
 		}
 		if (change.getKind() == OpCode.DELETE) {
-			contextModels.forEach((context) -> {
-				String contextPath = context.getContextPath();
-				DeploymentManager manager = servletContainer.getDeploymentByPath(contextPath);
-				DeploymentInfo deploymentInfo = manager.getDeployment().getDeploymentInfo();
+			List<EventListenerModel> eventListenerModels = change.getEventListenerModels();
+			for (EventListenerModel eventListenerModel : eventListenerModels) {
+				List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
+				contextModels.forEach((context) -> {
+					String contextPath = context.getContextPath();
+					DeploymentManager manager = servletContainer.getDeploymentByPath(contextPath);
+					DeploymentInfo deploymentInfo = manager.getDeployment().getDeploymentInfo();
 
-				EventListener eventListener = eventListenerModel.getEventListener();
+					EventListener eventListener = eventListenerModel.resolveEventListener();
+					if (eventListener instanceof ServletContextAttributeListener) {
+						// remove it from per-OsgiContext list
+						OsgiServletContext c = osgiServletContexts.get(context);
+						c.removeServletContextAttributeListener((ServletContextAttributeListener) eventListener);
+					}
+					// remove the listener from real context - even ServletContextAttributeListener
+					// unfortunately, one does not simply remove EventListener from existing context in Undertow
 
-				// unfortunately, one does not simply remove EventListener from existing context in Undertow
+					// let's immediately show that given context is no longer mapped
+					pathHandler.removePrefixPath(contextPath);
 
-				// let's immediately show that given context is no longer mapped
-				pathHandler.removePrefixPath(contextPath);
-
-				try {
-					manager.stop();
-					manager.undeploy();
-				} catch (ServletException e) {
-					throw new RuntimeException("Problem stopping the deployment of context " + contextPath
-							+ ": " + e.getMessage(), e);
-				}
-
-				deploymentInfo.getListeners().removeIf(li -> {
 					try {
-						return li.getInstanceFactory() instanceof ImmediateInstanceFactory
-								&& ((ImmediateInstanceFactory<?>) li.getInstanceFactory()).createInstance().getInstance() == eventListener;
-					} catch (InstantiationException ignored) {
-						return false;
+						manager.stop();
+						manager.undeploy();
+					} catch (ServletException e) {
+						throw new RuntimeException("Problem stopping the deployment of context " + contextPath
+								+ ": " + e.getMessage(), e);
+					}
+
+					deploymentInfo.getListeners().removeIf(li -> {
+						try {
+							return li.getInstanceFactory() instanceof ImmediateInstanceFactory
+									&& ((ImmediateInstanceFactory<?>) li.getInstanceFactory()).createInstance().getInstance() == eventListener;
+						} catch (InstantiationException ignored) {
+							return false;
+						}
+					});
+					eventListenerModel.ungetEventListener(eventListener);
+
+					manager = servletContainer.addDeployment(deploymentInfo);
+					manager.deploy();
+
+					// we've changed the deployment for given context path - new ServletContext was created, so
+					// we have to propagate the change where needed
+					ServletContext newRealServletContext = manager.getDeployment().getServletContext();
+					this.osgiContextModels.get(contextPath).forEach(cm
+							-> this.osgiServletContexts.get(cm).setContainerServletContext(newRealServletContext));
+
+					try {
+						HttpHandler handler = manager.start();
+						pathHandler.addPrefixPath(contextPath, handler);
+					} catch (ServletException e) {
+						throw new IllegalStateException("Can't redeploy Undertow context "
+								+ contextPath + ": " + e.getMessage(), e);
 					}
 				});
-
-				manager = servletContainer.addDeployment(deploymentInfo);
-				manager.deploy();
-
-				// we've changed the deployment for given context path - new ServletContext was created, so
-				// we have to propagate the change where needed
-				ServletContext newRealServletContext = manager.getDeployment().getServletContext();
-				this.osgiContextModels.get(contextPath).forEach(cm
-						-> this.osgiServletContexts.get(cm).setContainerServletContext(newRealServletContext));
-
-				try {
-					HttpHandler handler = manager.start();
-					pathHandler.addPrefixPath(contextPath, handler);
-				} catch (ServletException e) {
-					throw new IllegalStateException("Can't redeploy Undertow context "
-							+ contextPath + ": " + e.getMessage(), e);
-				}
-			});
+			}
 		}
 	}
 
@@ -1361,9 +1399,7 @@ class UndertowServerWrapper implements BatchVisitor {
 			contextModels.forEach((context) -> {
 				OsgiServletContext osgiServletContext = osgiServletContexts.get(context);
 
-				DeploymentManager manager = servletContainer.getDeploymentByPath(osgiServletContext.getContextPath());
-				Deployment deployment = manager.getDeployment();
-				DeploymentInfo deploymentInfo = deployment.getDeploymentInfo();
+				Deployment deployment = getDeployment(osgiServletContext.getContextPath());
 
 				Set<String> currentWelcomeFiles = osgiServletContext.getWelcomeFiles() == null
 						? new LinkedHashSet<>()
@@ -1387,29 +1423,31 @@ class UndertowServerWrapper implements BatchVisitor {
 				LOG.info("Reconfiguration of welcome files for all resource servlet in context \"{}\"", context);
 
 				// reconfigure welcome files in resource servlets
-				for (ServletHandler sh : deployment.getServlets().getServletHandlers().values()) {
-					ManagedServlet ms = sh.getManagedServlet();
-					if (ms != null && ms.getServletInfo() != null &&
-							ms.getServletInfo() instanceof PaxWebServletInfo) {
-						PaxWebServletInfo info = (PaxWebServletInfo) ms.getServletInfo();
-						if (info.getServletModel() != null && info.getServletModel().isResourceServlet()
-								&& context == info.getOsgiContextModel()) {
-							if (ms.isStarted()) {
-								try {
-									Servlet servlet = ms.getServlet().getInstance();
-									if (servlet instanceof UndertowResourceServlet) {
-										((UndertowResourceServlet) servlet).setWelcomeFiles(newWelcomeFiles);
-										((UndertowResourceServlet) servlet).setWelcomeFilesRedirect(model.isRedirect());
-									} else if (servlet instanceof OsgiInitializedServlet) {
-										((UndertowResourceServlet) ((OsgiInitializedServlet) servlet).getDelegate()).setWelcomeFiles(newWelcomeFiles);
-										((UndertowResourceServlet) ((OsgiInitializedServlet) servlet).getDelegate()).setWelcomeFilesRedirect(model.isRedirect());
+				if (deployment != null) {
+					for (ServletHandler sh : deployment.getServlets().getServletHandlers().values()) {
+						ManagedServlet ms = sh.getManagedServlet();
+						if (ms != null && ms.getServletInfo() != null &&
+								ms.getServletInfo() instanceof PaxWebServletInfo) {
+							PaxWebServletInfo info = (PaxWebServletInfo) ms.getServletInfo();
+							if (info.getServletModel() != null && info.getServletModel().isResourceServlet()
+									&& context == info.getOsgiContextModel()) {
+								if (ms.isStarted()) {
+									try {
+										Servlet servlet = ms.getServlet().getInstance();
+										if (servlet instanceof UndertowResourceServlet) {
+											((UndertowResourceServlet) servlet).setWelcomeFiles(newWelcomeFiles);
+											((UndertowResourceServlet) servlet).setWelcomeFilesRedirect(model.isRedirect());
+										} else if (servlet instanceof OsgiInitializedServlet) {
+											((UndertowResourceServlet) ((OsgiInitializedServlet) servlet).getDelegate()).setWelcomeFiles(newWelcomeFiles);
+											((UndertowResourceServlet) ((OsgiInitializedServlet) servlet).getDelegate()).setWelcomeFilesRedirect(model.isRedirect());
+										}
+									} catch (ServletException e) {
+										LOG.warn("Problem reconfiguring welcome files in servlet {}", ms, e);
 									}
-								} catch (ServletException e) {
-									LOG.warn("Problem reconfiguring welcome files in servlet {}", ms, e);
+								} else {
+									// no need to set it, because servlet is not yet initialized
+									LOG.debug("Welcome files will be set in {} when init() is called", ms);
 								}
-							} else {
-								// no need to set it, because servlet is not yet initialized
-								LOG.debug("Welcome files will be set in {} when init() is called", ms);
 							}
 						}
 					}
@@ -1434,9 +1472,9 @@ class UndertowServerWrapper implements BatchVisitor {
 			LOG.info("Changing error page configuration for context {}", contextPath);
 
 			// take existing deployment manager and the deployment info from its deployment
-			DeploymentManager manager = servletContainer.getDeploymentByPath(contextPath);
-			Deployment deployment = manager.getDeployment();
-			DeploymentInfo deploymentInfo = deployment.getDeploymentInfo();
+			Deployment deployment = getDeployment(contextPath);
+			DeploymentInfo deploymentInfo = deployment == null ? deploymentInfos.get(contextPath)
+					: deployment.getDeploymentInfo();
 
 			deploymentInfo.getErrorPages().clear();
 
@@ -1478,10 +1516,95 @@ class UndertowServerWrapper implements BatchVisitor {
 			}
 
 			if (deployment instanceof DeploymentImpl) {
-				((DeploymentImpl)deployment).setErrorPages(pages);
+				((DeploymentImpl) deployment).setErrorPages(pages);
+			}
+		}
+	}
+
+	public void ensureServletContextStarted(final String contextPath) {
+		DeploymentManager manager = getDeploymentManager(contextPath);
+
+		if (manager != null) {
+			return;
+		}
+		try {
+			LOG.info("Starting Undertow context \"" + (contextPath.equals("") ? "/" : contextPath) + "\"");
+
+			// take previously created deployment (possibly with listeners and other "passive" configuration)
+			DeploymentInfo deployment = deploymentInfos.get(contextPath);
+			manager = servletContainer.addDeployment(deployment);
+
+			// here's where Undertow-specific instance of javax.servlet.ServletContext is created
+			manager.deploy();
+			final ServletContext context = manager.getDeployment().getServletContext();
+			osgiServletContexts.forEach((ocm, osc) -> {
+				if (ocm.getContextPath().equals(contextPath)) {
+					osc.setContainerServletContext(context);
+				}
+			});
+			HttpHandler handler = manager.start();
+
+			// after starting the real context, we have to register highest ranked OSGi context
+			OsgiContextModel highestRankedModel = Utils.getHighestRankedModel(osgiContextModels.get(contextPath));
+			if (highestRankedModel != null) {
+				OsgiServletContext highestRankedContext = osgiServletContexts.get(highestRankedModel);
+				highestRankedContext.register();
 			}
 
+			// actual registration of "context" in Undertow's path handler. There are no servlets,
+			// filters and anything yet
+			pathHandler.addPrefixPath(contextPath, handler);
+		} catch (ServletException e) {
+			throw new IllegalStateException("Can't create Undertow context "
+					+ contextPath + ": " + e.getMessage(), e);
 		}
+	}
+
+	/**
+	 * If the servlet context is already started ({@link DeploymentManager#deploy()} was called), return
+	 * it from current {@link Deployment}.
+	 * @param contextPath
+	 * @return
+	 */
+	private ServletContext getRealServletContext(String contextPath) {
+		Deployment deployment = getDeployment(contextPath);
+		return deployment == null ? null : deployment.getServletContext();
+	}
+
+	/**
+	 * Get {@link Deployment} associated with given context path - but only if related {@link DeploymentManager}
+	 * is started.
+	 * @param contextPath
+	 * @return
+	 */
+	private Deployment getDeployment(String contextPath) {
+		DeploymentManager deploymentManager = getDeploymentManager(contextPath);
+
+		if (deploymentManager == null || deploymentManager.getDeployment() == null) {
+			return null;
+		}
+
+		return deploymentManager.getDeployment();
+	}
+
+	/**
+	 * Get {@link DeploymentManager} for given context path - if available.
+	 * @param contextPath
+	 * @return
+	 */
+	private DeploymentManager getDeploymentManager(String contextPath) {
+		String path = contextPath.equals("") ? "/" : contextPath;
+		DeploymentManager deploymentManager = servletContainer.getDeploymentByPath(path);
+
+		if (deploymentManager == null || deploymentManager.getDeployment() == null) {
+			return null;
+		}
+		if (!deploymentManager.getDeployment().getDeploymentInfo().getContextPath().equals(path)) {
+			// io.undertow.servlet.api.ServletContainer.getDeploymentByPath "traverses up" the request path...
+			return null;
+		}
+
+		return deploymentManager;
 	}
 
 	/**

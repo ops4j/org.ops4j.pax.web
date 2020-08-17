@@ -15,22 +15,33 @@
  */
 package org.ops4j.pax.web.service.spi.task;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 
 public class EventListenerModelChange extends Change {
 
 	private final ServerModel serverModel;
-	private final EventListenerModel eventListenerModel;
-	private final boolean disabled;
+	private final List<EventListenerModel> eventListenerModels = new LinkedList<>();
+	private EventListenerModel eventListenerModel;
+	private boolean disabled;
 
 	public EventListenerModelChange(OpCode op, ServerModel serverModel, EventListenerModel eventListenerModel) {
 		this(op, serverModel, eventListenerModel, false);
 	}
 
+	public EventListenerModelChange(OpCode op, ServerModel serverModel, List<EventListenerModel> eventListenerModels) {
+		super(op);
+		this.serverModel = serverModel;
+		this.eventListenerModels.addAll(eventListenerModels);
+	}
+
 	public EventListenerModelChange(OpCode op, ServerModel serverModel, EventListenerModel eventListenerModel, boolean disabled) {
 		super(op);
 		this.serverModel = serverModel;
+		this.eventListenerModels.add(eventListenerModel);
 		this.eventListenerModel = eventListenerModel;
 		this.disabled = disabled;
 	}
@@ -41,6 +52,10 @@ public class EventListenerModelChange extends Change {
 
 	public EventListenerModel getEventListenerModel() {
 		return eventListenerModel;
+	}
+
+	public List<EventListenerModel> getEventListenerModels() {
+		return eventListenerModels;
 	}
 
 	public boolean isDisabled() {

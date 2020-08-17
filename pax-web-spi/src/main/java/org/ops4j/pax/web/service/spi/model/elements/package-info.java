@@ -15,7 +15,20 @@
  */
 
 /**
- * Model subpackage representing actual <em>web elements</em>, while <em>infrastructure elements</em>
- * (like contexts) are kept in the package above.
+ * <p>Model subpackage representing actual <em>web elements</em>, while <em>infrastructure elements</em>
+ * (like contexts) are kept in the package above.</p>
+ *
+ * <p><em>Web elements</em> may be divided into two groups:<ul>
+ *     <li><em>active web elements</em> (the ones that can handle requests): servlets, filters, resources, jsps
+ *     and websockets (I guess).</li>
+ *     <li><em>passive web elements</em> (the ones that play support role): connectors/virtual hosts, constraint
+ *     mappings, context params, error pages, event listeners, jsp configurations, login configs, servlet container
+ *     initializers, session cookie configs, session timeouts and welcome files.</li>
+ * </ul>
+ * This division is simple - only registration of <em>active</em> elements will ensure that the physical context
+ * is actually started. This is important when user wants to register configurations and e.g., context listeners.</p>
+ *
+ * <p>Welcome files may be confusing, but these (themselves) do NOT serve any content - these are used by resources
+ * (resource servlets) to adjust their behavior.</p>
  */
 package org.ops4j.pax.web.service.spi.model.elements;

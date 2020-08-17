@@ -27,38 +27,14 @@ import org.ops4j.pax.web.service.whiteboard.ListenerMapping;
  * @author Alin Dreghiciu
  * @since 0.4.0, April 05, 2008
  */
-public class DefaultListenerMapping implements ListenerMapping {
+public class DefaultListenerMapping extends AbstractContextRelated implements ListenerMapping {
 
-	/**
-	 * Http Context id.
-	 */
-	private String httpContextId;
-	/**
-	 * Listener.
-	 */
+	/** Actual Listener. */
 	private EventListener listener;
 
-	/**
-	 * @see ListenerMapping#getHttpContextId()
-	 */
-	public String getHttpContextId() {
-		return httpContextId;
-	}
-
-	/**
-	 * @see ListenerMapping#getListener() ()
-	 */
+	@Override
 	public EventListener getListener() {
 		return listener;
-	}
-
-	/**
-	 * Setter.
-	 *
-	 * @param httpContextId id of the http context this servlet belongs to
-	 */
-	public void setHttpContextId(final String httpContextId) {
-		this.httpContextId = httpContextId;
 	}
 
 	/**
@@ -72,9 +48,7 @@ public class DefaultListenerMapping implements ListenerMapping {
 
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() +
-				"{" + "httpContextId=" + httpContextId +
-				",listener=" + listener + "}";
+		return "DefaultListenerMapping{listener=" + listener + "}";
 	}
 
 }

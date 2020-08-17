@@ -45,6 +45,8 @@ public class WelcomeFileMappingTracker extends AbstractMappingTracker<WelcomeFil
 	protected WelcomeFileModel doCreateElementModel(Bundle bundle, WelcomeFileMapping service, Integer rank, Long serviceId) {
 		WelcomeFileModel welcomeFileModel = new WelcomeFileModel(service.getWelcomeFiles(), service.isRedirect());
 		welcomeFileModel.setRegisteringBundle(bundle);
+		welcomeFileModel.setServiceRank(rank);
+		welcomeFileModel.setServiceId(serviceId);
 		return welcomeFileModel;
 	}
 

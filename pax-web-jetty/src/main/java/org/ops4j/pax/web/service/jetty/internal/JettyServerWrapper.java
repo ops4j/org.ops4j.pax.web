@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Supplier;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContextAttributeListener;
 
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.ConnectionFactory;
@@ -646,11 +647,7 @@ class JettyServerWrapper implements BatchVisitor {
 			contextHandlers.put(model.getContextPath(), sch);
 			osgiContextModels.put(model.getContextPath(), new TreeSet<>());
 
-			try {
-				sch.start();
-			} catch (Exception e) {
-				LOG.error(e.getMessage(), e);
-			}
+			// do NOT start the context here - only after registering first "active" web element
 		}
 	}
 
@@ -808,6 +805,7 @@ class JettyServerWrapper implements BatchVisitor {
 				if (model.isResourceServlet()) {
 					holder.setInitParameter("pathInfoOnly", Boolean.toString(!isDefaultResourceServlet));
 				}
+				mapping.setDefault(isDefaultResourceServlet);
 
 				((PaxWebServletHandler) sch.getServletHandler()).addServletWithMapping(holder, mapping);
 
@@ -836,6 +834,8 @@ class JettyServerWrapper implements BatchVisitor {
 						eph.addErrorPage(500, 599, location);
 					}
 				}
+
+				ensureServletContextStarted(sch);
 			});
 			return;
 		}
@@ -1023,27 +1023,45 @@ class JettyServerWrapper implements BatchVisitor {
 				sch.getServletHandler().setFilters(newFilterHolders);
 				sch.getServletHandler().setFilterMappings(newFilterMappings);
 			}
+
+			ensureServletContextStarted(sch);
 		}
 	}
 
 	@Override
 	public void visit(EventListenerModelChange change) {
-		EventListenerModel eventListenerModel = change.getEventListenerModel();
-		List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
-
 		if (change.getKind() == OpCode.ADD) {
+			EventListenerModel eventListenerModel = change.getEventListenerModel();
+			List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
 			contextModels.forEach((context) -> {
 				ServletContextHandler servletContextHandler = contextHandlers.get(context.getContextPath());
-				EventListener eventListener = eventListenerModel.getEventListener();
+				EventListener eventListener = eventListenerModel.resolveEventListener();
+				if (eventListener instanceof ServletContextAttributeListener) {
+					// add it to accessible list to fire per-OsgiContext attribute changes
+					OsgiServletContext c = osgiServletContexts.get(context);
+					c.addServletContextAttributeListener((ServletContextAttributeListener)eventListener);
+				}
+				// add the listener to real context - even ServletContextAttributeListener
 				servletContextHandler.addEventListener(eventListener);
 			});
 		}
 		if (change.getKind() == OpCode.DELETE) {
-			contextModels.forEach((context) -> {
-				ServletContextHandler servletContextHandler = contextHandlers.get(context.getContextPath());
-				EventListener eventListener = eventListenerModel.getEventListener();
-				servletContextHandler.removeEventListener(eventListener);
-			});
+			List<EventListenerModel> eventListenerModels = change.getEventListenerModels();
+			for (EventListenerModel eventListenerModel : eventListenerModels) {
+				List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
+				contextModels.forEach((context) -> {
+					ServletContextHandler servletContextHandler = contextHandlers.get(context.getContextPath());
+					EventListener eventListener = eventListenerModel.resolveEventListener();
+					if (eventListener instanceof ServletContextAttributeListener) {
+						// remove it from per-OsgiContext list
+						OsgiServletContext c = osgiServletContexts.get(context);
+						c.removeServletContextAttributeListener((ServletContextAttributeListener)eventListener);
+					}
+					// remove the listener from real context - even ServletContextAttributeListener
+					servletContextHandler.removeEventListener(eventListener);
+					eventListenerModel.ungetEventListener(eventListener);
+				});
+			}
 		}
 	}
 
@@ -1148,6 +1166,23 @@ class JettyServerWrapper implements BatchVisitor {
 					eph.addErrorPage(500, 599, location);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Registration of <em>active web element</em> should always start the context. On the other hand,
+	 * registration of <em>passive web element</em> should <strong>not</strong> start the context.
+	 * @param sch
+	 */
+	private void ensureServletContextStarted(ServletContextHandler sch) {
+		if (sch.isStarted()) {
+			return;
+		}
+		try {
+			LOG.info("Starting Jetty context \"" + (sch.getContextPath().equals("") ? "/" : sch.getContextPath()) + "\"");
+			sch.start();
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
 		}
 	}
 

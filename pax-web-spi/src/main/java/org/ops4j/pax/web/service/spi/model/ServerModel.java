@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service.spi.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -304,6 +305,11 @@ public class ServerModel implements BatchVisitor {
 	 * error codes / exception class names with higher service ranking.
 	 */
 	private final Set<ErrorPageModel> disabledErrorPageModels = new TreeSet<>();
+
+	/**
+	 * Keep event listeners to check for conflicts.
+	 */
+	private final Map<EventListener, EventListenerModel> eventListeners = new IdentityHashMap<>();
 
 	/**
 	 * Creates new global model of all web applications with {@link Executor} to be used for configuration and
@@ -1549,16 +1555,17 @@ public class ServerModel implements BatchVisitor {
 			throw new IllegalArgumentException("Can't register " + model + ", it is not associated with any context");
 		}
 
-		if (model.getEventListener() == null) {
-			throw new IllegalArgumentException("Can't register EventLister, it has to be set");
+		if (model.getEventListener() != null && eventListeners.containsKey(model.getEventListener())) {
+			throw new IllegalArgumentException("Can't register EventLister " + model.getEventListener()
+					+ ", it is already registered");
 		}
 
 		batch.addEventListenerModel(this, model);
 	}
 
 	@PaxWebConfiguration
-	public void removeEventListenerModel(EventListenerModel model, Batch batch) {
-		batch.removeEventListenerModel(this, model);
+	public void removeEventListenerModels(List<EventListenerModel> models, Batch batch) {
+		batch.removeEventListenerModels(this, models);
 	}
 
 	@PaxWebConfiguration
@@ -1955,7 +1962,28 @@ public class ServerModel implements BatchVisitor {
 
 	@Override
 	public void visit(EventListenerModelChange change) {
-		// no need to store event listeners at ServerModel level, because we don't have to check for conflicts
+		switch (change.getKind()) {
+			case ADD: {
+				EventListenerModel model = change.getEventListenerModel();
+
+				if (model.getEventListener() != null) {
+					eventListeners.put(model.getEventListener(), model);
+				}
+				break;
+			}
+			case DELETE: {
+				Collection<EventListenerModel> models = change.getEventListenerModels();
+
+				models.forEach(model -> {
+					if (model.getEventListener() != null) {
+						eventListeners.remove(model.getEventListener(), model);
+					}
+				});
+				break;
+			}
+			default:
+				break;
+		}
 	}
 
 	@Override

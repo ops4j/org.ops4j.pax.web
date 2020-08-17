@@ -24,14 +24,18 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletContextAttributeEvent;
+import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 import javax.servlet.SessionCookieConfig;
@@ -85,6 +89,8 @@ public class OsgiServletContext implements ServletContext {
 	/** If this context is registered as OSGi service, here's the registration */
 	private ServiceRegistration<ServletContext> registration;
 
+	private final List<ServletContextAttributeListener> attributeListeners = new CopyOnWriteArrayList<>();
+
 	/**
 	 * Constructor called when {@link OsgiContextModel} is passed to given
 	 * {@link org.ops4j.pax.web.service.spi.ServerController}. We still can't grab an instance of
@@ -119,7 +125,7 @@ public class OsgiServletContext implements ServletContext {
 	 * physical {@link ServletContext} should register it as OSGi service for given context path.
 	 */
 	public void register() {
-		if (registration == null) {
+		if (registration == null && containerServletContext != null) {
 			try {
 				LOG.info("Registering {} as OSGi service for \"{}\" context path", this, getContextPath());
 
@@ -285,14 +291,60 @@ public class OsgiServletContext implements ServletContext {
 
 	@Override
 	public void setAttribute(String name, Object object) {
-		attributes.put(name, object);
-		// TODO: fire listeners
+		// inspired by org.eclipse.jetty.server.handler.ContextHandler.Context.setAttribute
+		Object oldValue = attributes.get(name);
+		if (object == null) {
+			attributes.remove(name);
+		} else {
+			attributes.put(name, object);
+		}
+
+		if (!attributeListeners.isEmpty()) {
+			ServletContextAttributeEvent event = new ServletContextAttributeEvent(this, name, oldValue == null ? object : oldValue);
+
+			for (ServletContextAttributeListener l : attributeListeners) {
+				if (oldValue == null) {
+					l.attributeAdded(event);
+				} else if (object == null) {
+					l.attributeRemoved(event);
+				} else {
+					l.attributeReplaced(event);
+				}
+			}
+		}
 	}
 
 	@Override
 	public void removeAttribute(String name) {
+		// inspired by org.eclipse.jetty.server.handler.ContextHandler.Context.setAttribute
+		Object oldValue = attributes.get(name);
 		attributes.remove(name);
-		// TODO: fire listeners
+
+		if (oldValue != null && !attributeListeners.isEmpty()) {
+			ServletContextAttributeEvent event = new ServletContextAttributeEvent(this, name, oldValue);
+
+			for (ServletContextAttributeListener l : attributeListeners) {
+				l.attributeRemoved(event);
+			}
+		}
+	}
+
+	/**
+	 * Non standard method, so we can handle {@link ServletContextAttributeListener} listeners in special,
+	 * per context way.
+	 * @param eventListener
+	 */
+	public void addServletContextAttributeListener(ServletContextAttributeListener eventListener) {
+		attributeListeners.add(eventListener);
+	}
+
+	/**
+	 * Non standard method, so we can handle {@link ServletContextAttributeListener} listeners in special,
+	 * per context way.
+	 * @param eventListener
+	 */
+	public void removeServletContextAttributeListener(ServletContextAttributeListener eventListener) {
+		attributeListeners.remove(eventListener);
 	}
 
 	// --- methods simply delegating to server-specific ServletContext. Backed by the Servlet Container.
