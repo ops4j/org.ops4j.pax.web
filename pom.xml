@@ -274,6 +274,7 @@
 						</goals>
 						<configuration>
 							<additionalparam>${javadoc.opts}</additionalparam>
+							<detectJavaApiLink>false</detectJavaApiLink>
 						</configuration>
 					</execution>
 				</executions>
