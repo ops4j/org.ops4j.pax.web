@@ -225,8 +225,6 @@ public interface PaxWebConstants {
 	String PROPERTY_DEFAULT_AUTHMETHOD = "org.ops4j.pax.web.default.authmethod";
 	String PROPERTY_DEFAULT_REALMNAME = "org.ops4j.pax.web.default.realmname";
 
-	String PROPERTY_SHOW_STACKS = "org.ops4j.pax.web.server.showStacks";
-
 	/**
 	 * Manifest header key for web application bundles.
 	 */

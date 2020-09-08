@@ -17,6 +17,7 @@ package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
@@ -26,6 +27,8 @@ import java.net.Socket;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.jar.JarOutputStream;
+import java.util.zip.ZipEntry;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -58,9 +61,14 @@ import org.apache.catalina.core.StandardThreadExecutor;
 import org.apache.catalina.core.StandardWrapper;
 import org.apache.catalina.servlets.DefaultServlet;
 import org.apache.catalina.startup.Catalina;
+import org.apache.catalina.startup.Constants;
+import org.apache.catalina.startup.ContextConfig;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.catalina.startup.VersionLoggerListener;
 import org.apache.catalina.webresources.DirResourceSet;
 import org.apache.catalina.webresources.StandardRoot;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.digester.Digester;
@@ -135,7 +143,7 @@ public class EmbeddedTomcatTest {
 
 		// org.apache.catalina.util.ContextName.ContextName(java.lang.String, boolean) explicitly
 		// changes "ROOT" name into
-		// org.apache.catalina.util.ContextName.path == org.apache.catalina.util.ContextName.name == ""
+		// org.apache.catalinah.util.ContextName.path == org.apache.catalina.util.ContextName.name == ""
 		Context context = new StandardContext();
 		context.setName("");
 		context.setPath("");
@@ -144,6 +152,7 @@ public class EmbeddedTomcatTest {
 //		context.addLifecycleListener(new Tomcat.FixContextListener());
 		context.addLifecycleListener((event) -> {
 			if (event.getType().equals(Lifecycle.CONFIGURE_START_EVENT)) {
+				// this is normally done by complex org.apache.catalina.startup.ContextConfig.configureStart()
 				context.setConfigured(true);
 			}
 		});
@@ -628,6 +637,209 @@ public class EmbeddedTomcatTest {
 		// in Tomcat, you can't have filters only without "default" servlet, because that's how
 		// org.apache.catalina.core.StandardContextValve.invoke() works.
 		assertTrue(response.startsWith("HTTP/1.1 404"));
+
+		server.stop();
+		server.destroy();
+	}
+
+	@Test
+	public void embeddedServerWithoutContext() throws Exception {
+		Digester digester = (new Catalina() {
+			@Override
+			public Digester createStartDigester() {
+				return super.createStartDigester();
+			}
+		}).createStartDigester();
+
+		ServerHolder holder = new ServerHolder();
+		digester.push(holder);
+
+		// properties that are fortunately used from within tomcat-*.xml
+		System.setProperty("docbase", new File("target").getAbsolutePath());
+		System.setProperty("workdir", new File("target/test-classes").getAbsolutePath());
+		digester.parse(new File("target/test-classes/etc/tomcat-webapp2.xml"));
+
+		StandardServer server = (StandardServer) holder.getServer();
+		// required by org.apache.catalina.core.StandardContext.postWorkDirectory() if
+		// org.apache.catalina.core.StandardContext.getWorkDir() returns null
+//		server.setCatalinaBase(tomcat);
+		Service catalina = server.findService("Catalina");
+		Connector connector = catalina.findConnectors()[0];
+
+		server.start();
+		int port = connector.getLocalPort();
+
+		Host host = (Host) catalina.getContainer().findChild("my-localhost");
+
+		Servlet servlet = new HttpServlet() {
+			@Override
+			protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				LOG.info("Handling request: {}", req.toString());
+				resp.setContentType("text/plain");
+				resp.setCharacterEncoding("UTF-8");
+
+				String response = String.format("| %s | %s | %s |", req.getContextPath(), req.getServletPath(), req.getPathInfo());
+				resp.getWriter().write(response);
+				resp.getWriter().close();
+			}
+		};
+
+		File tomcatC1 = new File("target/tomcat/c1");
+		File tomcatC1Base = new File(tomcatC1, "base");
+		File tomcatC1BaseClasses = new File(tomcatC1Base, "WEB-INF/classes");
+		File tomcatC1BaseLibs = new File(tomcatC1Base, "WEB-INF/lib");
+		File tomcatC1Work = new File(tomcatC1, "work");
+		FileUtils.deleteDirectory(tomcatC1);
+		tomcatC1BaseClasses.mkdirs();
+		tomcatC1BaseLibs.mkdirs();
+		tomcatC1Work.mkdirs();
+
+		// by default, context's work dir is:
+		// work/<engineName>/<hostName>/org.apache.catalina.util.ContextName.getBaseName()
+		// if host has its own work dire, it's:
+		// <hostWorkDir>/org.apache.catalina.util.ContextName.getBaseName()
+		//
+		// if the workdir is not absolute, org.apache.catalina.core.ContainerBase.getCatalinaBase() is required
+		Context context = new StandardContext();
+		context.setName("context1");
+		context.setPath("/c1");
+
+		// setConfigFile() is used by org.apache.catalina.startup.Tomcat.addWebapp() to pass /META-INF/context.xml
+		// to be used as context configuration parsed using the digester configured using
+		// org.apache.catalina.startup.HostConfig.createDigester()
+//		context.setConfigFile(...);
+
+		// without this, org.apache.catalina.startup.ContextConfig.fixDocBase() would set it to:
+		// org.apache.catalina.Host.getAppBaseFile()/c1
+		((StandardContext) context).setDocBase(tomcatC1Base.getCanonicalPath());
+		((StandardContext) context).setWorkDir(tomcatC1Work.getCanonicalPath());
+		((StandardContext) context).setDefaultWebXml(Constants.NoDefaultWebXml);
+
+		context.setMapperContextRootRedirectEnabled(false);
+
+//		context.addLifecycleListener((event) -> {
+//			if (event.getType().equals(Lifecycle.CONFIGURE_START_EVENT)) {
+//				context.setConfigured(true);
+//			}
+//		});
+		// this is first listener in the context, 2nd (org.apache.catalina.core.StandardHost.MemoryLeakTrackingListener)
+		// is added in host.addChild(), 3rd one (MapperListener) is added when host fires
+		// org.apache.catalina.Container.ADD_CHILD_EVENT and the host's MapperListener is also added as lifecycle
+		// listener to the context.
+		context.addLifecycleListener(new VersionLoggerListener());
+		context.addLifecycleListener(new ContextConfig());
+		host.addChild(context);
+
+		// there are other interesting listeners that "do something" with the container they listen to:
+		//  - org.apache.catalina.startup.Tomcat.DefaultWebXmlListener - adds "default" and "jsp" servlets
+		//  - org.apache.catalina.startup.Tomcat.FixContextListener - used when ContextConfig is not used to set
+		//    context as configured but also, calls o.a.c.startup.WebAnnotationSet.loadApplicationAnnotations()
+		//  - org.apache.catalina.mbeans.GlobalResourcesLifecycleListener - MBeans
+		//  - org.apache.catalina.mapper.MapperListener - configuration of org.apache.catalina.mapper.Mapper
+		//  - org.apache.catalina.core.NamingContextListener - JNDI
+		//  - org.apache.catalina.startup.VersionLoggerListener
+
+		// starting a context is related to parsing configuration files. It all starts in
+		//  - org.apache.catalina.startup.ContextConfig.webConfig()
+		//     - org.apache.catalina.startup.ContextConfig.getDefaultWebXmlFragment()
+		//        - org.apache.catalina.startup.ContextConfig.getGlobalWebXmlSource()
+		//           - XML file set by org.apache.catalina.core.StandardContext.setDefaultWebXml()
+		//           - "conf/web.xml" if the above is null (resolvable against catalina.base)
+		//           - ("org/apache/catalina/startup/NO_DEFAULT_XML" can suppress default web xml loading)
+		//        - org.apache.catalina.startup.ContextConfig.getHostWebXmlSource()
+		//           - conf/my-default/my-localhost/web.xml.default (resolvable against catalina.base)
+		//     - org.apache.catalina.startup.ContextConfig.getTomcatWebXmlFragment()
+		//        - /WEB-INF/tomcat-web.xml
+		//     - org.apache.catalina.startup.ContextConfig.getContextWebXmlSource()
+		//        - /WEB-INF/web.xml
+		//     - org.apache.catalina.startup.ContextConfig.processJarsForWebFragments()
+		//        - (uses org.apache.catalina.Context.getJarScanner())
+		//        - (this test finds 45 fragment jars... - all the jars from classpath)
+		//     - org.apache.catalina.startup.ContextConfig.processServletContainerInitializers()
+		//     - org.apache.catalina.startup.ContextConfig.processClasses()
+		//     - org.apache.catalina.startup.ContextConfig.processResourceJARs()
+		//        - (this finds those JARs that have `/META-INF/resources` entries - see 4.6 "Resources")
+		//     - Step 11. Apply the ServletContainerInitializer config to the context
+		//  - org.apache.catalina.startup.ContextConfig.applicationAnnotationsConfig()
+		//  - org.apache.catalina.startup.ContextConfig.validateSecurityRoles()
+		//  - org.apache.catalina.startup.ContextConfig.authenticatorConfig()
+		//  - eventually org.apache.catalina.startup.ContextConfig.configureContext() is called to apply data from
+		//    web.xml(s) into the StandardContext
+
+		Wrapper wrapper = new StandardWrapper();
+		wrapper.setServlet(servlet);
+		wrapper.setName("s1");
+
+		context.addChild(wrapper);
+		context.addServletMappingDecoded("/s1", wrapper.getName(), false);
+
+		String response = send(port, "/c1/s1");
+		assertTrue(response.startsWith("HTTP/1.1 200"));
+
+		server.stop();
+		server.destroy();
+	}
+
+	@Test
+	public void embeddedServerWithoutContextAndWithWebFragment() throws Exception {
+		Digester digester = (new Catalina() {
+			@Override
+			public Digester createStartDigester() {
+				return super.createStartDigester();
+			}
+		}).createStartDigester();
+
+		ServerHolder holder = new ServerHolder();
+		digester.push(holder);
+
+		// properties that are fortunately used from within tomcat-*.xml
+		System.setProperty("docbase", new File("target").getAbsolutePath());
+		System.setProperty("workdir", new File("target/test-classes").getAbsolutePath());
+		digester.parse(new File("target/test-classes/etc/tomcat-webapp2.xml"));
+
+		StandardServer server = (StandardServer) holder.getServer();
+		Service catalina = server.findService("Catalina");
+		Connector connector = catalina.findConnectors()[0];
+		server.start();
+		int port = connector.getLocalPort();
+
+		Host host = (Host) catalina.getContainer().findChild("my-localhost");
+
+		File tomcatC2 = new File("target/tomcat/c2");
+		File tomcatC2Base = new File(tomcatC2, "base");
+		File tomcatC2BaseClasses = new File(tomcatC2Base, "WEB-INF/classes");
+		File tomcatC2BaseLibs = new File(tomcatC2Base, "WEB-INF/lib");
+		File tomcatC2Work = new File(tomcatC2, "work");
+		FileUtils.deleteDirectory(tomcatC2);
+		tomcatC2BaseClasses.mkdirs();
+		tomcatC2BaseLibs.mkdirs();
+		tomcatC2Work.mkdirs();
+
+		try (JarOutputStream jos = new JarOutputStream(new FileOutputStream(new File(tomcatC2BaseLibs, "just-one.jar")))) {
+			ZipEntry e = new ZipEntry("META-INF/MANIFEST.MF");
+			jos.putNextEntry(e);
+			jos.write("Manifest-Version: 1.0\n".getBytes());
+			jos.closeEntry();
+			e = new ZipEntry("META-INF/web-fragment.xml");
+			jos.putNextEntry(e);
+			IOUtils.copy(getClass().getResourceAsStream("/etc/tomcat-webapp2-fragment.xml"), jos);
+			jos.closeEntry();
+		}
+
+		Context context = new StandardContext();
+		context.setName("context2");
+		context.setPath("/c2");
+		((StandardContext) context).setDocBase(tomcatC2Base.getCanonicalPath());
+		((StandardContext) context).setWorkDir(tomcatC2Work.getCanonicalPath());
+		((StandardContext) context).setDefaultWebXml(Constants.NoDefaultWebXml);
+		context.setMapperContextRootRedirectEnabled(false);
+
+		context.addLifecycleListener(new VersionLoggerListener());
+		context.addLifecycleListener(new ContextConfig());
+		host.addChild(context);
+
+		String response = send(port, "/c2/s1");
+		assertTrue(response.startsWith("HTTP/1.1 200"));
 
 		server.stop();
 		server.destroy();

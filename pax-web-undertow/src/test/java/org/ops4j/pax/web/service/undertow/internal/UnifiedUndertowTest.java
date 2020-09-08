@@ -579,7 +579,7 @@ public class UnifiedUndertowTest {
 		response = send(port, "/gateway/x?what=include&where=/");
 		assertTrue(response.contains("req.context_path=\"\""));
 		assertTrue(response.contains("req.request_uri=\"/gateway/x\""));
-		assertTrue(response.contains("javax.servlet.include.context_path=\"\"")); // Jetty gives "/" here
+		assertTrue(response.contains("javax.servlet.include.context_path=\"\""));
 		assertTrue(response.contains("javax.servlet.include.request_uri=\"/index.y\""));
 		assertTrue(response.contains("javax.servlet.include.servlet_path=\"/index.y\""));
 		assertTrue(response.contains("javax.servlet.include.path_info=\"null\""));
@@ -610,7 +610,7 @@ public class UnifiedUndertowTest {
 		assertTrue(response.contains("req.request_uri=\"/sub/index.x\""));
 		assertTrue(response.contains("javax.servlet.forward.context_path=\"\""));
 		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/sub/\""));
-		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/sub/\"")); // Jetty gives "/" here
+		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/sub/\""));
 		assertTrue(response.contains("javax.servlet.forward.path_info=\"null\""));
 
 		response = send(port, "/gateway/x?what=forward&where=/sub/");

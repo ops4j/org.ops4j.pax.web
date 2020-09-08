@@ -33,7 +33,9 @@ import java.util.stream.Collectors;
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
+import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 
 import org.ops4j.pax.web.annotations.PaxWebConfiguration;
 import org.ops4j.pax.web.annotations.PaxWebTesting;
@@ -50,6 +52,7 @@ import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
+import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
@@ -58,6 +61,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.model.events.ElementEvent;
 import org.ops4j.pax.web.service.spi.model.events.WebElementListener;
+import org.ops4j.pax.web.service.spi.servlet.DynamicJEEWebContainerView;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.util.Path;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
@@ -138,10 +142,13 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			doUnregisterServlet(serviceModel.getServletModels().iterator().next());
 		}
 		while (!serviceModel.getEventListenerModels().isEmpty()) {
-			unregisterEventListener(serviceModel.getEventListenerModels().keySet().iterator().next());
+			doUnregisterEventListener(serviceModel.getEventListenerModels().iterator().next());
 		}
 		while (!serviceModel.getErrorPageModels().isEmpty()) {
 			doUnregisterErrorPages(serviceModel.getErrorPageModels().iterator().next());
+		}
+		while (!serviceModel.getContainerInitializerModels().isEmpty()) {
+			doUnregisterServletContainerInitializer(serviceModel.getContainerInitializerModels().iterator().next());
 		}
 
 		doUnregisterAllWelcomeFiles();
@@ -154,13 +161,18 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 	@Override
 	public <T extends PaxWebContainerView> T adapt(Class<T> type) {
 		if (type == WhiteboardWebContainerView.class) {
-			// give access to ServerModel and other bundle-agnostic internals of the runtime
+			// gives access to ServerModel and other bundle-agnostic internals of the runtime
 			return type.cast(whiteboardContainerView);
 		}
 		if (type == DirectWebContainerView.class) {
-			// direct HttpService like registration of models - mostly for test purpose, as DirectWebContainerView
-			// is not in exported package
+			// direct HttpService-like registration of models - mostly for test purpose, as DirectWebContainerView
+			// is not available in any of the exported package
 			return type.cast(directContainerView);
+		}
+		if (type == DynamicJEEWebContainerView.class) {
+			// view used by javax.servlet.ServletContext.addServlet/Filter/Listener dynamic methods
+			// we'll reuse directContainerView, but cast it to different interface
+			return type.cast(whiteboardContainerView);
 		}
 		return null;
 	}
@@ -896,8 +908,8 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				List<EventListenerModel> toUnregister = new LinkedList<>();
 
 				// This loop checks Whiteboard unregistration - reference identity
-				for (Map.Entry<EventListener, EventListenerModel> existing : serviceModel.getEventListenerModels().entrySet()) {
-					if (existing.getValue() == model) {
+				for (EventListenerModel existing : serviceModel.getEventListenerModels()) {
+					if (existing == model) {
 						// Whiteboard scenario, where actual "customized" object is unregistered
 						toUnregister.add(model);
 						break;
@@ -906,15 +918,15 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				if (toUnregister.isEmpty()) {
 					// search by criteria
 					if (listener != null) {
-						for (Map.Entry<EventListener, EventListenerModel> entry : serviceModel.getEventListenerModels().entrySet()) {
-							if (entry.getKey().equals(listener)) {
-								toUnregister.add(entry.getValue());
+						for (EventListenerModel existing : serviceModel.getEventListenerModels()) {
+							if (existing.getEventListener() == listener) {
+								toUnregister.add(existing);
 							}
 						}
 					} else if (reference != null) {
-						for (Map.Entry<EventListener, EventListenerModel> entry : serviceModel.getEventListenerModels().entrySet()) {
-							if (entry.getValue().getElementReference() == reference) {
-								toUnregister.add(entry.getValue());
+						for (EventListenerModel existing : serviceModel.getEventListenerModels()) {
+							if (existing.getElementReference() == reference) {
+								toUnregister.add(existing);
 							}
 						}
 					}
@@ -1174,6 +1186,146 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 	}
 
+	// methods used to register / configure JSPs
+
+	@Override
+	public void registerJsps(String[] urlPatterns, Dictionary<String, String> initParams, HttpContext httpContext) {
+	}
+
+	@Override
+	public void registerJspServlet(String jspFile, String[] urlPatterns, Dictionary<String, String> initParams, HttpContext httpContext) {
+	}
+
+	@Override
+	public void registerJspConfigTagLibs(String tagLibLocation, String tagLibUri, HttpContext httpContext) {
+	}
+
+	@Override
+	public void registerJspConfigPropertyGroup(List<String> includeCodas, List<String> includePreludes,
+			List<String> urlPatterns, Boolean elIgnored, Boolean scriptingInvalid, Boolean isXml,
+			HttpContext httpContext) {
+	}
+
+	@Override
+	public void registerJspConfigPropertyGroup(JspPropertyGroupDescriptor descriptor, HttpContext httpContext) {
+	}
+
+	// methods used to unregister JSPs
+
+	@Override
+	public void unregisterJsps(HttpContext httpContext) {
+	}
+
+	@Override
+	public void unregisterJspServlet(String jspFile, HttpContext httpContext) {
+	}
+
+	// methods used to register ServletContainerInitializers
+
+	@Override
+	public void registerServletContainerInitializer(ServletContainerInitializer initializer, Class<?>[] classes, HttpContext httpContext) {
+		ContainerInitializerModel model = new ContainerInitializerModel(initializer, classes);
+		doRegisterServletContainerInitializer(Collections.singletonList(httpContext), model);
+	}
+
+	private void doRegisterServletContainerInitializer(List<HttpContext> httpContexts, ContainerInitializerModel model) {
+		LOG.debug("Passing registration of {} to configuration thread", model);
+
+		if (model.getRegisteringBundle() == null) {
+			model.setRegisteringBundle(this.serviceBundle);
+		}
+
+		final Batch batch = new Batch("Registration of " + model);
+
+		try {
+			event(ElementEvent.State.DEPLOYING, model);
+
+			model.performValidation();
+
+			serverModel.run(() -> {
+				translateContexts(httpContexts, model, batch);
+
+				LOG.info("Registering {}", model);
+
+				serverModel.addContainerInitializerModel(model, batch);
+
+				serverController.sendBatch(batch);
+
+				batch.accept(serviceModel);
+
+				return null;
+			});
+
+			event(ElementEvent.State.DEPLOYED, model);
+		} catch (Exception e) {
+			event(ElementEvent.State.FAILED, model);
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
+	// methods used to unregister ServletContainerInitializers
+
+	@Override
+	public void unregisterServletContainerInitializer(ServletContainerInitializer initializer, HttpContext httpContext) {
+		doUnregisterServletContainerInitializer(new ContainerInitializerModel(initializer, null));
+	}
+
+	private void doUnregisterServletContainerInitializer(ContainerInitializerModel model) {
+		final ServletContainerInitializer initializer = model.getContainerInitializer();
+
+		if (model.getRegisteringBundle() == null) {
+			model.setRegisteringBundle(serviceBundle);
+		}
+		Bundle registeringBundle = model.getRegisteringBundle();
+
+		try {
+			event(ElementEvent.State.UNDEPLOYING, model);
+
+			serverModel.run(() -> {
+				List<ContainerInitializerModel> toUnregister = new LinkedList<>();
+
+				// This loop checks Whiteboard unregistration - reference identity (though we don't support
+				// Whiteboard registration of ServletContainerInitializer(s) (yet?)
+				for (ContainerInitializerModel existing : serviceModel.getContainerInitializerModels()) {
+					if (existing == model) {
+						// Whiteboard scenario, where actual "customized" object is unregistered
+						toUnregister.add(existing);
+						break;
+					}
+				}
+				if (toUnregister.isEmpty()) {
+					// search by criteria
+					if (initializer != null) {
+						for (ContainerInitializerModel existing : serviceModel.getContainerInitializerModels()) {
+							if (existing.getContainerInitializer() == initializer) {
+								toUnregister.add(existing);
+							}
+						}
+					}
+				}
+				if (toUnregister.isEmpty()) {
+					throw new IllegalArgumentException("Can't find an servlet container initializer to unregister using criteria from " + model);
+				}
+
+				final Batch batch = new Batch("Unregistration of ServletContainerInitializer: " + toUnregister);
+
+				serverModel.removeContainerInitializerModels(toUnregister, batch);
+
+				serverController.sendBatch(batch);
+
+				batch.accept(serviceModel);
+
+				return null;
+			});
+
+			event(ElementEvent.State.UNDEPLOYED, model);
+		} catch (ServletException | NamespaceException e) {
+			// if toUnregister is null, IllegalArgumentException is thrown anyway
+			event(ElementEvent.State.FAILED, model);
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
 	// --- private support methods
 
 	private void event(ElementEvent.State type, ElementModel<?, ?> model) {
@@ -1244,7 +1396,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 	/**
 	 * Private <em>view class</em> for Whiteboard registration of web elements.
 	 */
-	private class WhiteboardWebContainer implements WhiteboardWebContainerView {
+	private class WhiteboardWebContainer implements WhiteboardWebContainerView, DynamicJEEWebContainerView {
 
 		@Override
 		public void registerServlet(ServletModel model) {
@@ -1391,7 +1543,6 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		public void unregisterErrorPages(ErrorPageModel model) {
 			doUnregisterErrorPages(model);
 		}
-
 	}
 
 //	private boolean isWebAppWebContainerContext(ContextModel contextModel) {
@@ -1457,31 +1608,6 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 //		contextModel.setSessionCookieMaxAge(maxAge);
 //
 //		serviceModel.addContextModel(contextModel);
-//	}
-
-//	/**
-//	 * @see WebContainer#registerJsps(String[], Dictionary, HttpContext)
-//	 */
-//	@Override
-//	public void registerJsps(final String[] urlPatterns,
-//							 final HttpContext httpContext) {
-//		registerJsps(urlPatterns, null, httpContext);
-//	}
-//
-//	/**
-//	 * @see WebContainer#registerJsps(String[], HttpContext)
-//	 */
-//	@Override
-//	public void registerJsps(final String[] urlPatterns,
-//							 final Dictionary<String, ?> initParams,
-//							 final HttpContext httpContext) {
-//		registerJspServlet(urlPatterns, initParams, httpContext, null);
-//	}
-
-//	@Override
-//	public void registerJspServlet(final String[] urlPatterns,
-//								   final HttpContext httpContext, final String jspFile) {
-//		registerJspServlet(urlPatterns, null, httpContext, jspFile);
 //	}
 //
 //	@Override

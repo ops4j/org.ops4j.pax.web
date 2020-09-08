@@ -24,6 +24,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.Hashtable;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -168,6 +169,10 @@ public class OsgiServletContext implements ServletContext {
 		return osgiContextModel;
 	}
 
+	public ServletContextModel getServletContextModel() {
+		return servletContextModel;
+	}
+
 	/**
 	 * We have to be able to replace server-specific {@link ServletContext}, because we can't freely
 	 * replace web elements in Undertow. In Undertow we have to recreate entire context, thus getting new
@@ -190,7 +195,8 @@ public class OsgiServletContext implements ServletContext {
 		this.welcomeFiles = welcomeFiles;
 	}
 
-// --- methods that throw UnsupportedOperationException
+	// --- methods that throw UnsupportedOperationException (we can add filters/servlets/listeners, but using
+	//     different context wrapper)
 
 	@Override
 	public FilterRegistration.Dynamic addFilter(String filterName, String className) {
@@ -237,6 +243,8 @@ public class OsgiServletContext implements ServletContext {
 		throw new UnsupportedOperationException("addServlet() is not supported.");
 	}
 
+	// --- methods that throw UnsupportedOperationException (always)
+
 	@Override
 	public <T extends Filter> T createFilter(Class<T> clazz) throws ServletException {
 		throw new UnsupportedOperationException("createFilter() is not supported.");
@@ -269,6 +277,8 @@ public class OsgiServletContext implements ServletContext {
 
 	@Override
 	public ServletRegistration.Dynamic addJspFile(String servletName, String jspFile) {
+		// TOCHECK: this could be treated as dynamic addServlet, allowed when context is not started, but
+		//          who uses "JSP files based servlets" nowadays?
 		throw new UnsupportedOperationException("addJspFile() is not supported.");
 	}
 
@@ -278,7 +288,9 @@ public class OsgiServletContext implements ServletContext {
 	public Object getAttribute(String name) {
 		Object value = attributes.get(name);
 		if (value == null) {
-			// let's check real context
+			// let's check real context - this delegation is important even if Whiteboard specification doesn't mention
+			// this. The problem is that many components rely on internal Jetty/Tomcat/Undertow attributes that
+			// may be set early during configuration
 			value = containerServletContext.getAttribute(name);
 		}
 		return value;
@@ -286,7 +298,14 @@ public class OsgiServletContext implements ServletContext {
 
 	@Override
 	public Enumeration<String> getAttributeNames() {
-		return Collections.enumeration(this.attributes.keySet());
+		Set<String> keys = new LinkedHashSet<>();
+		// first - containers attributes:
+		for (Enumeration<String> e = containerServletContext.getAttributeNames(); e.hasMoreElements(); ) {
+			keys.add(e.nextElement());
+		}
+		// scoped attributes
+		keys.addAll(this.attributes.keySet());
+		return Collections.enumeration(keys);
 	}
 
 	@Override
@@ -508,7 +527,7 @@ public class OsgiServletContext implements ServletContext {
 		return getMimeType(defaultWebContainerContext, file);
 	}
 
-	String getMimeType(WebContainerContext context, String file) {
+	public String getMimeType(WebContainerContext context, String file) {
 		String mimeType = context.getMimeType(file);
 		if (mimeType == null) {
 			// let's check real context
@@ -522,7 +541,7 @@ public class OsgiServletContext implements ServletContext {
 		return getRealPath(defaultWebContainerContext, path);
 	}
 
-	String getRealPath(WebContainerContext context, String path) {
+	public String getRealPath(WebContainerContext context, String path) {
 		return context.getRealPath(path);
 	}
 
@@ -531,7 +550,7 @@ public class OsgiServletContext implements ServletContext {
 		return getResource(defaultWebContainerContext, path);
 	}
 
-	URL getResource(WebContainerContext context, String path) throws MalformedURLException {
+	public URL getResource(WebContainerContext context, String path) throws MalformedURLException {
 		return context.getResource(path);
 	}
 
@@ -540,7 +559,7 @@ public class OsgiServletContext implements ServletContext {
 		return getResourceAsStream(defaultWebContainerContext, path);
 	}
 
-	InputStream getResourceAsStream(WebContainerContext context, String path) {
+	public InputStream getResourceAsStream(WebContainerContext context, String path) {
 		URL resource = context.getResource(path);
 		if (resource != null) {
 			try {
@@ -557,7 +576,7 @@ public class OsgiServletContext implements ServletContext {
 		return getResourcePaths(defaultWebContainerContext, path);
 	}
 
-	Set<String> getResourcePaths(WebContainerContext context, String path) {
+	public Set<String> getResourcePaths(WebContainerContext context, String path) {
 		return context.getResourcePaths(path);
 	}
 

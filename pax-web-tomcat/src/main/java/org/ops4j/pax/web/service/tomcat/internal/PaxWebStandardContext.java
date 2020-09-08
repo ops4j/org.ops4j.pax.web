@@ -15,12 +15,16 @@
  */
 package org.ops4j.pax.web.service.tomcat.internal;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.catalina.Container;
@@ -32,7 +36,10 @@ import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiFilterChain;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
+import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
 import org.osgi.service.http.whiteboard.Preprocessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Extension of {@link StandardContext} that keeps track of default
@@ -41,6 +48,8 @@ import org.osgi.service.http.whiteboard.Preprocessor;
  * required by filters which may be associated with such servlet-less chains.
  */
 public class PaxWebStandardContext extends StandardContext {
+
+	public static final Logger LOG = LoggerFactory.getLogger(PaxWebStandardContext.class);
 
 	/** Name of an attribute that indicates a {@link PaxWebStandardContext} for given request processing */
 	public static final String PAXWEB_STANDARD_CONTEXT = ".paxweb.standard.context";
@@ -67,6 +76,8 @@ public class PaxWebStandardContext extends StandardContext {
 	 * all available physical servlet contexts.
 	 */
 	private final List<Preprocessor> preprocessors = new LinkedList<>();
+
+	private final Collection<SCIWrapper> servletContainerInitializers = new LinkedList<>();
 
 	public PaxWebStandardContext(Default404Servlet defaultServlet) {
 		super();
@@ -137,6 +148,45 @@ public class PaxWebStandardContext extends StandardContext {
 		if (defaultServletContext != null) {
 			this.defaultWebContainerContext = defaultOsgiContextModel.resolveHttpContext(defaultOsgiContextModel.getOwnerBundle());
 		}
+	}
+
+	@Override
+	public void addServletContainerInitializer(ServletContainerInitializer sci, Set<Class<?>> classes) {
+		// we don't want initializers in Tomcat's context, because we manage them ourselves
+	}
+
+	public void setServletContainerInitializers(Collection<SCIWrapper> wrappers) {
+		this.servletContainerInitializers.addAll(wrappers);
+	}
+
+	@Override
+	public boolean listenerStart() {
+		// This is a method overriden JUST because it is invoked just after original
+		// org.apache.catalina.core.StandardContext.startInternal() invokes ServletContainerInitializers.
+		// We have to call SCIs ourselves to pass better OsgiServletContext there.
+
+		// I know listenerStart() is NOT the method which should invoke SCIs, but hey - we want to stay as consistent
+		// between Jetty, Tomcat and Undertow in Pax Web as possible
+
+		boolean ok = true;
+		for (SCIWrapper wrapper : servletContainerInitializers) {
+			ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+			try {
+				Thread.currentThread().setContextClassLoader(getParentClassLoader());
+				wrapper.onStartup();
+			} catch (ServletException e) {
+				LOG.error(sm.getString("standardContext.sciFail"), e);
+				ok = false;
+			} finally {
+				Thread.currentThread().setContextClassLoader(tccl);
+			}
+		}
+
+		if (ok) {
+			return super.listenerStart();
+		}
+
+		return false;
 	}
 
 	public void setDefaultOsgiContextModel(OsgiContextModel defaultOsgiContextModel) {

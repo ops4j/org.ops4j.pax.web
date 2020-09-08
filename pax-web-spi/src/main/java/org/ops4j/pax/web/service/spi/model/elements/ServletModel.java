@@ -131,6 +131,11 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	private ErrorPageModel errorPageModel;
 
 	/**
+	 * Flag used for models registered using {@link javax.servlet.ServletContext#addFilter}
+	 */
+	private boolean dynamic = false;
+
+	/**
 	 * Constructor used for servlet unregistration
 	 * @param alias
 	 * @param servletName
@@ -413,6 +418,10 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		return urlPatterns;
 	}
 
+	public void setUrlPatterns(String[] urlPatterns) {
+		this.urlPatterns = urlPatterns;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -429,12 +438,24 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		return loadOnStartup;
 	}
 
+	public void setLoadOnStartup(Integer loadOnStartup) {
+		this.loadOnStartup = loadOnStartup;
+	}
+
 	public Boolean getAsyncSupported() {
 		return asyncSupported;
 	}
 
+	public void setAsyncSupported(Boolean asyncSupported) {
+		this.asyncSupported = asyncSupported;
+	}
+
 	public MultipartConfigElement getMultipartConfigElement() {
 		return multipartConfigElement;
+	}
+
+	public void setMultipartConfigElement(MultipartConfigElement multipartConfigElement) {
+		this.multipartConfigElement = multipartConfigElement;
 	}
 
 	public Servlet getServlet() {
@@ -510,13 +531,21 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	private void setErrorDeclarations(String[] errorDeclarations) {
 		// this method is private on purpose - to be invoked only via builder.
 		this.errorDeclarations = errorDeclarations;
-		if ((urlPatterns == null || urlPatterns.length == 0) && alias == null) {
+		if (errorDeclarations != null && (urlPatterns == null || urlPatterns.length == 0) && alias == null) {
 			urlPatterns = new String[] { generateRandomErrorPage() };
 		}
 	}
 
 	public ErrorPageModel getErrorPageModel() {
 		return errorPageModel;
+	}
+
+	public void setDynamic(boolean dynamic) {
+		this.dynamic = dynamic;
+	}
+
+	public boolean isDynamic() {
+		return dynamic;
 	}
 
 	@Override

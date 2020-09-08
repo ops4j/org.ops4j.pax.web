@@ -38,8 +38,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.stubbing.Answer;
-import org.ops4j.pax.web.jsp.JasperInitializer;
-import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
@@ -55,7 +53,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -189,10 +187,10 @@ public class JspNoScriptingTest {
                                 .collect(LinkedList::new, LinkedList::add, LinkedList::addAll));
 
         ClassLoader tccl = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(new ResourceDelegatingBundleClassLoader(Collections.singletonList(paxWebJsp)));
+//        Thread.currentThread().setContextClassLoader(new ResourceDelegatingBundleClassLoader(Collections.singletonList(paxWebJsp)));
         try {
             // setup org.apache.jasper.compiler.TldCache and org.apache.tomcat.InstanceManager
-            new JasperInitializer().onStartup(null, context);
+//            new JasperInitializer().onStartup(null, context);
         } finally {
             Thread.currentThread().setContextClassLoader(tccl);
         }

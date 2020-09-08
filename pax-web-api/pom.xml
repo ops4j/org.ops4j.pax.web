@@ -88,22 +88,22 @@
 			    - transitive "compile" dependency becomes "compile" as well
 			    - transitive "provided" dependency is not visible
 			    - transitive "runtime" dependency becomes "runtime" as well
-			    - transitive "provided" dependency is not visible
+			    - transitive "test" dependency is not visible
 			 - "provided"
 			    - transitive "compile" dependency becomes "provided"
 			    - transitive "provided" dependency is not visible
 			    - transitive "runtime" dependency becomes "provided"
-			    - transitive "provided" dependency is not visible
+			    - transitive "test" dependency is not visible
 			 - "runtime"
 			    - transitive "compile" dependency becomes "runtime"
 			    - transitive "provided" dependency is not visible
 			    - transitive "runtime" dependency becomes "runtime"
-			    - transitive "provided" dependency is not visible
+			    - transitive "test" dependency is not visible
 			 - "test"
 			    - transitive "compile" dependency becomes "test"
 			    - transitive "provided" dependency is not visible
 			    - transitive "runtime" dependency becomes "test"
-			    - transitive "provided" dependency is not visible
+			    - transitive "test" dependency is not visible
 
 			Summarizing:
 			 - "compile": all classpaths, propagation to depending projects

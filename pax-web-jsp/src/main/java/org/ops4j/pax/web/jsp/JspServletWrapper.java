@@ -18,9 +18,6 @@ package org.ops4j.pax.web.jsp;
 
 import java.io.IOException;
 import java.net.URLClassLoader;
-import java.util.concurrent.Callable;
-
-import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -28,10 +25,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import org.apache.jasper.servlet.JspServlet;
-import org.ops4j.pax.swissbox.core.ContextClassLoaderUtils;
-import org.osgi.framework.Bundle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Wrapper of Jasper JspServlet that knows how to deal with resources loaded
@@ -42,51 +35,51 @@ import org.slf4j.LoggerFactory;
  */
 public class JspServletWrapper implements Servlet {
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 1L;
-	/**
-	 * Logger.
-	 */
-	private static final Logger LOG = LoggerFactory
-			.getLogger(JspServletWrapper.class);
-	/**
-	 * Jasper Servlet.
-	 */
-	private final JspServlet jasperServlet;
-	/**
-	 * Jasper specific class loader.
-	 */
-	private final URLClassLoader jasperClassLoader;
+//	/**
+//	 *
+//	 */
+//	private static final long serialVersionUID = 1L;
+//	/**
+//	 * Logger.
+//	 */
+//	private static final Logger LOG = LoggerFactory
+//			.getLogger(JspServletWrapper.class);
+//	/**
+//	 * Jasper Servlet.
+//	 */
+//	private final JspServlet jasperServlet;
+//	/**
+//	 * Jasper specific class loader.
+//	 */
+//	private final URLClassLoader jasperClassLoader;
+//
+//	private final String jspFile;
 
-	private final String jspFile;
+//	/**
+//	 * Constructor that provides a custom class loader, in order to be able to
+//	 * customize the behavior of Jasper with full control over the class loading
+//	 * mechanism. Only advanced users will need this, most others should simply
+//	 * use the other constructors that will provide a default class loader that
+//	 * delegates to the bundle.
+//	 *
+//	 * @param jspFile
+//	 * @param classLoader
+//	 */
+//	public JspServletWrapper(final String jspFile,
+//							 final URLClassLoader classLoader) {
+//		jasperServlet = new JspServlet();
+//		jasperClassLoader = classLoader;
+//		this.jspFile = jspFile;
+//	}
 
-	/**
-	 * Constructor that provides a custom class loader, in order to be able to
-	 * customize the behavior of Jasper with full control over the class loading
-	 * mechanism. Only advanced users will need this, most others should simply
-	 * use the other constructors that will provide a default class loader that
-	 * delegates to the bundle.
-	 *
-	 * @param jspFile
-	 * @param classLoader
-	 */
-	public JspServletWrapper(final String jspFile,
-							 final URLClassLoader classLoader) {
-		jasperServlet = new JspServlet();
-		jasperClassLoader = classLoader;
-		this.jspFile = jspFile;
-	}
+//	public JspServletWrapper(final Bundle bundle, final String jspFile) {
+//		this(jspFile, new JasperClassLoader(bundle,
+//				JasperClassLoader.class.getClassLoader()));
+//	}
 
-	public JspServletWrapper(final Bundle bundle, final String jspFile) {
-		this(jspFile, new JasperClassLoader(bundle,
-				JasperClassLoader.class.getClassLoader()));
-	}
-
-	public JspServletWrapper(final Bundle bundle) {
-		this(bundle, null);
-	}
+//	public JspServletWrapper(final Bundle bundle) {
+//		this(bundle, null);
+//	}
 
 	/**
 	 * Delegates to jasper servlet with a controlled context class loader.
@@ -95,29 +88,29 @@ public class JspServletWrapper implements Servlet {
 	 */
 	@Override
 	public void init(final ServletConfig config) throws ServletException {
-		try {
-			ContextClassLoaderUtils.doWithClassLoader(jasperClassLoader,
-					new Callable<Void>() {
-
-						@Override
-						public Void call() throws Exception {
-							config.getServletContext().setAttribute(
-									org.apache.tomcat.InstanceManager.class
-											.getName(), new InstanceManager());
-							jasperServlet.init(config);
-							return null;
-						}
-
-					});
-		} catch (ServletException e) {
-			// re-thrown
-			throw e;
-			//CHECKSTYLE:OFF
-		} catch (Exception ignore) {
-			// ignored as it should never happen
-			LOG.error("Ignored exception", ignore);
-		}
-		//CHECKSTYLE:ON
+//		try {
+//			ContextClassLoaderUtils.doWithClassLoader(jasperClassLoader,
+//					new Callable<Void>() {
+//
+//						@Override
+//						public Void call() throws Exception {
+//							config.getServletContext().setAttribute(
+//									org.apache.tomcat.InstanceManager.class
+//											.getName(), new InstanceManager());
+//							jasperServlet.init(config);
+//							return null;
+//						}
+//
+//					});
+//		} catch (ServletException e) {
+//			// re-thrown
+//			throw e;
+//			//CHECKSTYLE:OFF
+//		} catch (Exception ignore) {
+//			// ignored as it should never happen
+//			LOG.error("Ignored exception", ignore);
+//		}
+//		//CHECKSTYLE:ON
 	}
 
 	/**
@@ -127,7 +120,8 @@ public class JspServletWrapper implements Servlet {
 	 */
 	@Override
 	public ServletConfig getServletConfig() {
-		return jasperServlet.getServletConfig();
+//		return jasperServlet.getServletConfig();
+		return null;
 	}
 
 	/**
@@ -138,34 +132,34 @@ public class JspServletWrapper implements Servlet {
 	@Override
 	public void service(final ServletRequest req, final ServletResponse res)
 			throws ServletException, IOException {
-		if (jspFile != null) {
-			req.setAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH, jspFile);
-		}
-		String includeRequestUri = (String) req
-				.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
+//		if (jspFile != null) {
+//			req.setAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH, jspFile);
+//		}
+//		String includeRequestUri = (String) req
+//				.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
+//
+//		if (includeRequestUri != null) {
+//			req.removeAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
+//		}
 
-		if (includeRequestUri != null) {
-			req.removeAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
-		}
-
-		try {
-			ContextClassLoaderUtils.doWithClassLoader(jasperClassLoader,
-					new Callable<Void>() {
-
-						@Override
-						public Void call() throws Exception {
-							jasperServlet.service(req, res);
-							return null;
-						}
-
-					});
-		} catch (ServletException | IOException e) {
-			// re-thrown
-			throw e;
-		} catch (Exception ignore) {
-			// ignored as it should never happen
-			LOG.error("Ignored exception", ignore);
-		}
+//		try {
+//			ContextClassLoaderUtils.doWithClassLoader(jasperClassLoader,
+//					new Callable<Void>() {
+//
+//						@Override
+//						public Void call() throws Exception {
+//							jasperServlet.service(req, res);
+//							return null;
+//						}
+//
+//					});
+//		} catch (ServletException | IOException e) {
+//			// re-thrown
+//			throw e;
+//		} catch (Exception ignore) {
+//			// ignored as it should never happen
+//			LOG.error("Ignored exception", ignore);
+//		}
 		//CHECKSTYLE:ON
 	}
 
@@ -176,7 +170,8 @@ public class JspServletWrapper implements Servlet {
 	 */
 	@Override
 	public String getServletInfo() {
-		return jasperServlet.getServletInfo();
+//		return jasperServlet.getServletInfo();
+		return null;
 	}
 
 	/**
@@ -186,22 +181,22 @@ public class JspServletWrapper implements Servlet {
 	 */
 	@Override
 	public void destroy() {
-		try {
-			ContextClassLoaderUtils.doWithClassLoader(jasperClassLoader,
-					new Callable<Void>() {
-
-						@Override
-						public Void call() throws Exception {
-							jasperServlet.destroy();
-							return null;
-						}
-
-					});
-			//CHECKSTYLE:OFF
-		} catch (Exception ignore) {
-			// ignored as it should never happen
-			LOG.error("Ignored exception", ignore);
-		}
+//		try {
+//			ContextClassLoaderUtils.doWithClassLoader(jasperClassLoader,
+//					new Callable<Void>() {
+//
+//						@Override
+//						public Void call() throws Exception {
+//							jasperServlet.destroy();
+//							return null;
+//						}
+//
+//					});
+//			//CHECKSTYLE:OFF
+//		} catch (Exception ignore) {
+//			// ignored as it should never happen
+//			LOG.error("Ignored exception", ignore);
+//		}
 		//CHECKSTYLE:ON
 	}
 
@@ -213,6 +208,7 @@ public class JspServletWrapper implements Servlet {
 	 * Jasper servlet.
 	 */
 	public URLClassLoader getClassLoader() {
-		return jasperClassLoader;
+//		return jasperClassLoader;
+		return null;
 	}
 }

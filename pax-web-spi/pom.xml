@@ -68,6 +68,7 @@
 						<Private-Package>
 							<!-- pax-web-spi (internal) -->
 							org.ops4j.pax.web.service.spi.internal,
+							org.ops4j.pax.web.service.spi.servlet.dynamic,
 							<!-- supporting libraries -->
 							org.apache.commons.io,
 							org.apache.commons.collections4,

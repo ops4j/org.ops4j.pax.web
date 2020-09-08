@@ -17,10 +17,13 @@ package org.ops4j.pax.web.service.internal;
 
 import java.util.Dictionary;
 import java.util.EventListener;
+import java.util.List;
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
+import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 
 import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
@@ -314,6 +317,62 @@ class HttpServiceProxy implements WebContainer, StoppableHttpService {
 		delegate.unregisterErrorPages(errors, httpContext);
 	}
 
+	// methods used to register / configure JSPs
+
+	@Override
+	public void registerJsps(String[] urlPatterns, Dictionary<String, String> initParams, HttpContext httpContext) {
+		delegate.registerJsps(urlPatterns, initParams, httpContext);
+	}
+
+	@Override
+	public void registerJspServlet(String jspFile, String[] urlPatterns, Dictionary<String, String> initParams, HttpContext httpContext) {
+		delegate.registerJspServlet(jspFile, urlPatterns, initParams, httpContext);
+	}
+
+	@Override
+	public void registerJspConfigTagLibs(String tagLibLocation, String tagLibUri, HttpContext httpContext) {
+		delegate.registerJspConfigTagLibs(tagLibLocation, tagLibUri, httpContext);
+	}
+
+	@Override
+	public void registerJspConfigPropertyGroup(List<String> includeCodas, List<String> includePreludes,
+			List<String> urlPatterns, Boolean elIgnored, Boolean scriptingInvalid, Boolean isXml,
+			HttpContext httpContext) {
+		delegate.registerJspConfigPropertyGroup(includeCodas, includePreludes, urlPatterns,
+				elIgnored, scriptingInvalid, isXml, httpContext);
+	}
+
+	@Override
+	public void registerJspConfigPropertyGroup(JspPropertyGroupDescriptor descriptor, HttpContext httpContext) {
+		delegate.registerJspConfigPropertyGroup(descriptor, httpContext);
+	}
+
+	// methods used to unregister / unconfigure JSPs
+
+	@Override
+	public void unregisterJsps(HttpContext httpContext) {
+		delegate.unregisterJsps(httpContext);
+	}
+
+	@Override
+	public void unregisterJspServlet(String jspFile, HttpContext httpContext) {
+		delegate.unregisterJspServlet(jspFile, httpContext);
+	}
+
+	// methods used to register ServletContainerInitializers
+
+	@Override
+	public void registerServletContainerInitializer(ServletContainerInitializer initializer, Class<?>[] classes, HttpContext httpContext) {
+		delegate.registerServletContainerInitializer(initializer, classes, httpContext);
+	}
+
+	// methods used to unregister ServletContainerInitializers
+
+	@Override
+	public void unregisterServletContainerInitializer(ServletContainerInitializer initializer, HttpContext httpContext) {
+		delegate.unregisterServletContainerInitializer(initializer, httpContext);
+	}
+
 //	/**
 //	 * @see WebContainer#setContextParam(Dictionary, HttpContext)
 //	 */
@@ -341,86 +400,6 @@ class HttpServiceProxy implements WebContainer, StoppableHttpService {
 //		LOG.debug(String.format("Setting session cookie configuration to: domain=%s, name=%s, http-only=%b, secure=%b, path=%s, max-age=%d",
 //				domain, name, httpOnly, secure, path, maxAge));
 //		delegate.setSessionCookieConfig(domain, name, httpOnly, secure, path, maxAge, httpContext);
-//	}
-//
-//	/**
-//	 * @see WebContainer#registerJsps(String[], HttpContext)
-//	 */
-//	@Override
-//	public void registerJsps(final String[] urlPatterns,
-//			final HttpContext httpContext) {
-//		LOG.debug("Registering jsps");
-//		delegate.registerJsps(urlPatterns, httpContext);
-//	}
-//
-//	/**
-//	 * @see WebContainer#registerJsps(String[], Dictionary, HttpContext)
-//	 */
-//	@Override
-//	public void registerJsps(final String[] urlPatterns,
-//			final Dictionary<String, ?> initParams,
-//			final HttpContext httpContext) {
-//		LOG.debug("Registering jsps");
-//		delegate.registerJsps(urlPatterns, initParams, httpContext);
-//	}
-//
-//	/**
-//	 * @see WebContainer#unregisterJsps(HttpContext)
-//	 */
-//	@Override
-//	public void unregisterJsps(final HttpContext httpContext) {
-//		LOG.debug("Unregistering jsps");
-//		delegate.unregisterJsps(httpContext);
-//	}
-//
-//	/**
-//	 * @see WebContainer#unregisterJsps(HttpContext)
-//	 */
-//	@Override
-//	public void unregisterJsps(final String[] urlPatterns,
-//			final HttpContext httpContext) {
-//		LOG.debug("Unregistering jsps");
-//		delegate.unregisterJsps(urlPatterns, httpContext);
-//	}
-//
-//	/**
-//	 * @see WebContainer#registerErrorPage(String, String, HttpContext)
-//	 */
-//	@Override
-//	public void registerErrorPage(final String error, final String location,
-//			final HttpContext httpContext) {
-//		LOG.debug("Registering error page [" + error + "]");
-//		delegate.registerErrorPage(error, location, httpContext);
-//	}
-//
-//	/**
-//	 * @see WebContainer#unregisterErrorPage(String, HttpContext)
-//	 */
-//	@Override
-//	public void unregisterErrorPage(final String error,
-//			final HttpContext httpContext) {
-//		LOG.debug("Unregistering error page [" + error + "]");
-//		delegate.unregisterErrorPage(error, httpContext);
-//	}
-//
-//	/**
-//	 * @see WebContainer#registerWelcomeFiles(String[], boolean, HttpContext)
-//	 */
-//	@Override
-//	public void registerWelcomeFiles(final String[] welcomeFiles,
-//			final boolean redirect, final HttpContext httpContext) {
-//		LOG.debug("Registering welcome files [" + Arrays.toString(welcomeFiles)
-//				+ "]");
-//		delegate.registerWelcomeFiles(welcomeFiles, redirect, httpContext);
-//	}
-//
-//	/**
-//	 * @see WebContainer#unregisterWelcomeFiles(String[], HttpContext)
-//	 */
-//	@Override
-//	public void unregisterWelcomeFiles(final String[] welcomeFiles, final HttpContext httpContext) {
-//		LOG.debug("Unregistering welcome files");
-//		delegate.unregisterWelcomeFiles(welcomeFiles, httpContext);
 //	}
 //
 //	@Override
@@ -459,54 +438,15 @@ class HttpServiceProxy implements WebContainer, StoppableHttpService {
 ////		return delegate.getDefaultSharedHttpContext();
 ////	}
 //
-//	@Override
-//	public void registerServletContainerInitializer(
-//			ServletContainerInitializer servletContainerInitializer,
-//			Class<?>[] classes, final HttpContext httpContext) {
-//		delegate.registerServletContainerInitializer(
-//				servletContainerInitializer, classes, httpContext);
-//	}
-//
-//	@Override
-//	public void unregisterServletContainerInitializer(HttpContext httpContext) {
-//		delegate.unregisterServletContainerInitializer(httpContext);
-//	}
-//
 ////	@Override
 ////	public void registerJettyWebXml(URL jettyWebXmlURL, HttpContext httpContext) {
 ////		delegate.registerJettyWebXml(jettyWebXmlURL, httpContext);
 ////	}
 //
-//	@Override
-//	public void registerJspServlet(String[] urlPatterns,
-//			HttpContext httpContext, String jspFile) {
-//		delegate.registerJspServlet(urlPatterns, httpContext, jspFile);
-//	}
-//
-//	@Override
-//	public void registerJspServlet(String[] urlPatterns,
-//			Dictionary<String, ?> initParams, HttpContext httpContext,
-//			String jspFile) {
-//		delegate.registerJspServlet(urlPatterns, initParams, httpContext,
-//				jspFile);
-//	}
-//
 ////	@Override
 ////	public void setConnectorsAndVirtualHosts(List<String> connectors, List<String> virtualHosts, HttpContext httpContext) {
 ////		delegate.setConnectorsAndVirtualHosts(connectors, virtualHosts, httpContext);
 ////	}
-//
-//	@Override
-//	public void registerJspConfigTagLibs(String tagLibLocation, String tagLibUri, HttpContext httpContext) {
-//		delegate.registerJspConfigTagLibs(tagLibLocation, tagLibUri, httpContext);
-//	}
-//
-//	@Override
-//	public void registerJspConfigPropertyGroup(List<String> includeCodes,
-//			List<String> includePreludes, List<String> urlPatterns, Boolean elIgnored, Boolean scriptingInvalid,
-//			Boolean isXml, HttpContext httpContext) {
-//		delegate.registerJspConfigPropertyGroup(includeCodes, includePreludes, urlPatterns, elIgnored, scriptingInvalid, isXml, httpContext);
-//	}
 //
 //	@Override
 //	public void registerWebSocket(Object webSocket, HttpContext httpContext) {

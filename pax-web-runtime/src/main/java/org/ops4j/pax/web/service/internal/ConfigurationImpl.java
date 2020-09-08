@@ -620,6 +620,8 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 
 		private final int eventDispatcherThreadCount;
 
+		private final boolean showStacks;
+
 		@SuppressWarnings("deprecation")
 		private ServerConfigurationImpl() {
 			// eager resolution of some important properties
@@ -680,6 +682,9 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 			}
 			Integer eventDispatcherThreadCount = resolveIntegerProperty(PaxWebConfig.PID_CFG_EVENT_DISPATCHER_THREAD_COUNT);
 			this.eventDispatcherThreadCount = eventDispatcherThreadCount == null ? 3 : eventDispatcherThreadCount;
+
+			Boolean stacks = resolveBooleanProperty(PaxWebConfig.PID_CFG_SHOW_STACKS);
+			showStacks = stacks != null && stacks;
 		}
 
 		@Override
@@ -762,6 +767,11 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 			return this.eventDispatcherThreadCount;
 		}
 
+		@Override
+		public Boolean isShowStacks() {
+			return showStacks;
+		}
+
 
 
 
@@ -770,11 +780,6 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 
 		@Override
 		public Boolean useNIO() {
-			return null;
-		}
-
-		@Override
-		public Boolean isShowStacks() {
 			return null;
 		}
 

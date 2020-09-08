@@ -332,6 +332,11 @@
 							org.apache.tomcat.util.net.openssl.ciphers;version="${dependency.tomcat.version}"
 						</Export-Package>
 						<_nouses>true</_nouses>
+						<!--
+							https://bnd.bndtools.org/chapters/220-contracts.html
+							https://docs.osgi.org/reference/portable-java-contracts.html
+						-->
+						<_contract>!*</_contract>
 						<Provide-Capability>
 							osgi.service;effective:=active;objectClass:List&lt;String&gt;="org.ops4j.pax.web.service.spi.ServerControllerFactory"
 						</Provide-Capability>

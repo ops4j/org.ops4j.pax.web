@@ -33,7 +33,7 @@ Servlet API implementation is provided by pax-web-tomcat, pax-web-jetty and pax-
 `pax-web-jsp` however provides several JavaEE/JavaSE _entry points_:
 
 * `/META-INF/services/javax.el.ExpressionFactory` with `org.apache.el.ExpressionFactoryImpl` service
-* `/META-INF/services/javax.servlet.ServletContainerInitializer` with `org.apache.jasper.servlet.JasperInitializer` service
+* `/META-INF/services/javax.servlet.ServletContainerInitializer` with `org.apache.jasper.servlet.JasperInitializer` service (to check)
 * `org.ops4j.pax.web.jsp.JasperInitializer` used directly by pax-web-runtime
 
 (I'll try to make it less confusing and more clear.)
@@ -337,7 +337,7 @@ org.apache.taglibs.standard.util
 ** Servlet API: mvn:javax.servlet/javax.servlet-api/4.0.1 → mvn:jakarta.servlet/jakarta.servlet-api/4.0.2
 ** JSP API: mvn:javax.servlet.jsp/javax.servlet.jsp-api/2.3.4-SNAPSHOT → mvn:jakarta.servlet.jsp/jakarta.servlet.jsp-api/2.3.4-SNAPSHOT
 ** JSP Impl: mvn:org.glassfish.web/javax.servlet.jsp/2.3.4 - based on org.apache.tomcat/tomcat-jasper
-** JSTL API: mvn:javax.servlet.jsp.jstl/javax.servlet.jsp.jstl-api/1.2.2 → mvn:jakarta.servlet.jsp.jstl/jakarta.servlet.jsp.jstl-api/1.2.4
+** JSTL API: mvn:javax.servlet.jsp.jstl/javax.servlet.jsp.jstl-api/1.2.2 → mvn:jakarta.servlet.jsp.jstl/jakarta.servlet.jsp.jstl-api/1.2.7
 ** JSTL Impl: mvn:org.glassfish.web/javax.servlet.jsp.jstl/1.2.6-SNAPSHOT → mvn:org.glassfish.web/jakarta.servlet.jsp.jstl/1.2.6 - based on org.apache.taglibs/taglibs-standard-impl
 ** EL API: mvn:javax.el/javax.el-api/3.0.0 → mvn:jakarta.el/jakarta.el-api/3.0.2
 ** EL Impl: mvn:org.glassfish/javax.el.impl/3.0.1-SNAPSHOT
@@ -372,3 +372,25 @@ JSTL descriptors:
 * taglibs-standard-compat: c-1_0.tld, fmt-1_0.tld, sql-1_0.tld, x-1_0.tld
 * taglibs-standard-jstlel:  c-1_0.tld, fmt-1_0.tld, sql-1_0.tld, x-1_0.tld
 * taglibs-standard-impl: c-1_0-rt.tld, c-1_1.tld, c.tld, fmt-1_0-rt.tld, fmt.tld, fn.tld, permittedTaglibs.tld, scriptfree.tld, sql-1_0-rt.tld, sql.tld, x-1_0-rt.tld, x.tld,
+
+== Initialization
+
+The goal of pax-web-jsp from Pax Web perspective is to add "JSP support" to all the "contexts" that need it.
+
+By "JSP support" I don't mean actual Jasper Servlet (`org.apache.jasper.servlet.JspServlet`), but rather registration of `org.apache.jasper.servlet.JasperInitializer` in the context when pax-web-jsp is available.
+Original `org.apache.jasper.servlet.JasperInitializer` creates and runs `org.apache.jasper.servlet.TldScanner` which detects `*.tld` files and possibly reads `<taglib>/<listener>/<listener-class>` elements which are then called. For example, one of such listeners is `org.apache.myfaces.webapp.StartupServletContextListener`.
+
+Some well-known `javax.servlet.ServletContainerInitializer` services from `/META-INF/services/javax.servlet.ServletContainerInitializer`:
+
+* `org.apache.jasper.servlet.JasperInitializer`
+* `org.apache.tomcat.websocket.server.WsSci`
+* `org.apache.myfaces.ee6.MyFacesContainerInitializer`
+* `io.undertow.servlet.sse.ServerSentEventSCI`
+* `org.springframework.web.SpringServletContainerInitializer` (bridge to `org.springframework.web.WebApplicationInitializer` SPI)
+* `org.eclipse.jetty.websocket.server.NativeWebSocketServletContainerInitializer`
+* `org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer`
+* `com.sun.jersey.server.impl.container.servlet.JerseyServletContainerInitializer`
+
+What's most important for Jasper engine is that a JSP servlet requires one context attribute named `org.apache.tomcat.InstanceManager`. This implementation is used to create (and destroy) instances of classes - possibly with support for annotations like `@PostConstruct`. Such instance manager is set by `org.apache.jasper.servlet.JasperInitializer`. This initializer also sets `org.apache.jasper.compiler.TldCache` context attribute.
+
+So, `JasperInitializer` (possibly Pax Web implementation of it) will be used always when JSP servlet is going to be registered inside the context. But such servlet won't be registered by default all the time. I'll be registered implicitly only for WAR/WAB extender when pax-web-jsp is available. In plain HttpService/Whiteboard scenario, such initializer will be initialized only if JSP servlet is added to the context - but it'll have to restart the context, so the lifecycle (like registration of listeners from TLDs) is properly handled.

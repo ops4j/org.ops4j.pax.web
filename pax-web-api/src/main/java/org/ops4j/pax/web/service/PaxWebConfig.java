@@ -352,4 +352,9 @@ public interface PaxWebConfig {
 	 */
 	String PID_CFG_DEFAULT_SERVLET_CACHE_TTL = "org.ops4j.pax.web.resource.cache.ttl";
 
+	/**
+	 * Boolean property to configure the container to show or hide stack traces in <em>error handler</em>.
+	 */
+	String PID_CFG_SHOW_STACKS = "org.ops4j.pax.web.server.showStacks";
+
 }

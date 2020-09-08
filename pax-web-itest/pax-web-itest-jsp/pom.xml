@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
+    Copyright 2020 OPS4J.
 
-      http://www.apache.org/licenses/LICENSE-2.0
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-    KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -32,7 +29,6 @@
 
 	<groupId>org.ops4j.pax.web.itest</groupId>
 	<artifactId>pax-web-itest-jsp</artifactId>
-	<packaging>jar</packaging>
 
 	<name>OPS4J Pax Web - JSP Integration tests</name>
 
@@ -40,6 +36,11 @@
 
 		<!-- pax-web own artifacts -->
 
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-api</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-jsp</artifactId>
@@ -51,6 +52,24 @@
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.core</artifactId>
+		</dependency>
+
+		<!-- JavaEE -->
+
+		<dependency>
+			<groupId>jakarta.el</groupId>
+			<artifactId>jakarta.el-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.servlet.jsp</groupId>
+			<artifactId>jakarta.servlet.jsp-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Logging -->
@@ -96,7 +115,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
+			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 

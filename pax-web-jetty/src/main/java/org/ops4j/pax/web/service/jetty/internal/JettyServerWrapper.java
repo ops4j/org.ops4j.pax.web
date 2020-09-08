@@ -19,17 +19,20 @@ import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Supplier;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContextAttributeListener;
 
 import org.eclipse.jetty.jmx.MBeanContainer;
@@ -45,7 +48,6 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.ErrorHandler;
-import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
@@ -63,6 +65,7 @@ import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
@@ -70,9 +73,14 @@ import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingMod
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
+import org.ops4j.pax.web.service.spi.servlet.DynamicRegistrations;
+import org.ops4j.pax.web.service.spi.servlet.OsgiDynamicServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
+import org.ops4j.pax.web.service.spi.servlet.RegisteringContainerInitializer;
+import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
+import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
@@ -128,7 +136,7 @@ class JettyServerWrapper implements BatchVisitor {
 	private final JettyFactory jettyFactory;
 
 	/** Single map of context path to {@link ServletContextHandler} for fast access */
-	private final Map<String, ServletContextHandler> contextHandlers = new HashMap<>();
+	private final Map<String, PaxWebServletContextHandler> contextHandlers = new HashMap<>();
 
 	/**
 	 * 1:1 mapping between {@link OsgiContextModel} and {@link org.osgi.service.http.context.ServletContextHelper}'s
@@ -143,6 +151,18 @@ class JettyServerWrapper implements BatchVisitor {
 	 * determine the ServletContextHelper to use).
 	 */
 	private final Map<String, TreeSet<OsgiContextModel>> osgiContextModels = new HashMap<>();
+
+	/**
+	 * Jetty somehow doesn't manage {@link ServletContainerInitializer}s so nicely (or I didn't find a way to do
+	 * it properly), so we keep an ordered list of initializers per physical context here. Each initializer is
+	 * associated with single {@link OsgiContextModel}.
+	 */
+	private final Map<String, LinkedHashMap<Integer, SCIWrapper>> initializers = new HashMap<>();
+
+	/**
+	 * Keep dynamic configuration and use it during startup only.
+	 */
+	private final Map<String, DynamicRegistrations> dynamicRegistrations = new HashMap<>();
 
 	/**
 	 * Global {@link Configuration} passed from pax-web-runtime through
@@ -573,27 +593,27 @@ class JettyServerWrapper implements BatchVisitor {
 //		}
 	}
 
-	//	@Override
-	public void addHandler(Handler handler) {
-		HandlerCollection handlerCollection = server.getRootHandlerCollection();
-		handlerCollection.addHandler(handler);
+//	//	@Override
+//	public void addHandler(Handler handler) {
+//		HandlerCollection handlerCollection = server.getRootHandlerCollection();
+//		handlerCollection.addHandler(handler);
 //		if (priorityComparator != null) {
 //			Handler[] handlers = handlerCollection.getHandlers();
 //			@SuppressWarnings("unchecked")
 //			Comparator<Handler> comparator = (Comparator<Handler>) priorityComparator;
 //			Arrays.sort(handlers, comparator);
 //		}
-	}
+//	}
 
-	//	@Override
-	public Handler[] getHandlers() {
-		return server.getRootHandlerCollection().getHandlers();
-	}
-
-	//	@Override
-	public void removeHandler(Handler handler) {
-		server.getRootHandlerCollection().removeHandler(handler);
-	}
+//	//	@Override
+//	public Handler[] getHandlers() {
+//		return server.getRootHandlerCollection().getHandlers();
+//	}
+//
+//	//	@Override
+//	public void removeHandler(Handler handler) {
+//		server.getRootHandlerCollection().removeHandler(handler);
+//	}
 
 	// --- visitor methods for model changes
 
@@ -603,8 +623,7 @@ class JettyServerWrapper implements BatchVisitor {
 		if (change.getKind() == OpCode.ADD) {
 			LOG.info("Creating new Jetty context for {}", model);
 
-//			ServletContextHandler sch = new PaxWebServletContextHandler(null, model.getContextPath(), true, true);
-			ServletContextHandler sch = new ServletContextHandler(null, model.getContextPath(), true, true);
+			PaxWebServletContextHandler sch = new PaxWebServletContextHandler(null, model.getContextPath(), true, true, configuration);
 			// special, OSGi-aware org.eclipse.jetty.servlet.ServletHandler
 			sch.setServletHandler(new PaxWebServletHandler(default404Servlet));
 			// setting "false" here will trigger 302 redirect when browsing to context without trailing "/"
@@ -613,7 +632,9 @@ class JettyServerWrapper implements BatchVisitor {
 			sch.setWelcomeFiles(new String[0]);
 
 			// error page handler will be configured later (optionally)
-			sch.setErrorHandler(new ErrorPageErrorHandler());
+			ErrorPageErrorHandler errorHandler = new ErrorPageErrorHandler();
+			errorHandler.setShowStacks(configuration.server().isShowStacks());
+			sch.setErrorHandler(errorHandler);
 
 			// for future (optional) resource servlets, let's define some common context init properties
 			// which are read in org.eclipse.jetty.servlet.DefaultServlet.init()
@@ -647,6 +668,10 @@ class JettyServerWrapper implements BatchVisitor {
 			contextHandlers.put(model.getContextPath(), sch);
 			osgiContextModels.put(model.getContextPath(), new TreeSet<>());
 
+			// configure ordered map of initializers - Jetty doesn't let us configure it in a "context"...
+			initializers.put(model.getContextPath(), new LinkedHashMap<>());
+			dynamicRegistrations.put(model.getContextPath(), new DynamicRegistrations());
+
 			// do NOT start the context here - only after registering first "active" web element
 		}
 	}
@@ -654,7 +679,7 @@ class JettyServerWrapper implements BatchVisitor {
 	@Override
 	public void visit(OsgiContextModelChange change) {
 		OsgiContextModel osgiModel = change.getOsgiContextModel();
-		ServletContextModel servletModel = change.getServletContextModel();
+		ServletContextModel servletContextModel = change.getServletContextModel();
 
 		String contextPath = osgiModel.getContextPath();
 		ServletContextHandler sch = contextHandlers.get(contextPath);
@@ -675,7 +700,7 @@ class JettyServerWrapper implements BatchVisitor {
 				throw new IllegalStateException(osgiModel + " is already registered");
 			}
 
-			osgiServletContexts.put(osgiModel, new OsgiServletContext(sch.getServletContext(), osgiModel, servletModel));
+			osgiServletContexts.put(osgiModel, new OsgiServletContext(sch.getServletContext(), osgiModel, servletContextModel));
 
 			// a physical context just got a new OSGi context
 			osgiContextModels.get(contextPath).add(osgiModel);
@@ -702,6 +727,11 @@ class JettyServerWrapper implements BatchVisitor {
 
 			// each highest ranked context should be registered as OSGi service (if it wasn't registered)
 			highestRankedContext.register();
+
+			// TODO: very important question - here the classloader of entire context should be changed to the one
+			//       built around a bundle registering the highest ranked OsgiContextModel. But this class loader's
+			//       "space" should also include (somehow) all the reachable bundles (for example the bundles
+			//       that have registered any web elements into this context)...
 
 			// and we have to ensure that all other contexts are unregistered
 			osgiServletContexts.forEach((ocm, osc) -> {
@@ -787,7 +817,7 @@ class JettyServerWrapper implements BatchVisitor {
 				// prototype service factories to avoid duplicate init() methods.
 
 				// there should already be a ServletContextHandler
-				ServletContextHandler sch = contextHandlers.get(contextPath);
+				PaxWebServletContextHandler sch = contextHandlers.get(contextPath);
 
 				// <servlet> - always associated with one of ServletModel's OsgiContextModels
 				OsgiServletContext context = osgiServletContexts.get(osgiContextModel);
@@ -821,21 +851,12 @@ class JettyServerWrapper implements BatchVisitor {
 					// TODO: If there are many servlets (mapped to non conflicting URIs), they still may define
 					//       conflicting error pages, and these conflicts are NOT resolved at ServletModel
 					//       resolution time. For now, we simply override existing error pages
-					for (String ex : epm.getExceptionClassNames()) {
-						eph.addErrorPage(ex, location);
-					}
-					for (int code : epm.getErrorCodes()) {
-						eph.addErrorPage(code, location);
-					}
-					if (epm.isXx4()) {
-						eph.addErrorPage(400, 499, location);
-					}
-					if (epm.isXx5()) {
-						eph.addErrorPage(500, 599, location);
-					}
+					configureErrorPages(location, eph, epm);
 				}
 
-				ensureServletContextStarted(sch);
+				if (!change.isDynamic()) {
+					ensureServletContextStarted(sch);
+				}
 			});
 			return;
 		}
@@ -853,7 +874,6 @@ class JettyServerWrapper implements BatchVisitor {
 				// proper order ensures that (assuming above scenario), for /c1, ocm2 will be chosen and ocm1 skipped
 				model.getContextModels().forEach(osgiContextModel -> {
 					String contextPath = osgiContextModel.getContextPath();
-
 					if (!done.add(contextPath)) {
 						return;
 					}
@@ -926,7 +946,7 @@ class JettyServerWrapper implements BatchVisitor {
 			LOG.info("Changing filter configuration for context {}", contextPath);
 
 			// there should already be a ServletContextHandler
-			ServletContextHandler sch = contextHandlers.get(contextPath);
+			PaxWebServletContextHandler sch = contextHandlers.get(contextPath);
 
 			// all the filters should be added to org.ops4j.pax.web.service.jetty.internal.PaxWebServletHandler
 			// of ServletContextHandler - regardles of the "OSGi context" with which the filter was registered.
@@ -955,7 +975,8 @@ class JettyServerWrapper implements BatchVisitor {
 			FilterMapping[] filterMappings = sch.getServletHandler().getFilterMappings();
 
 			PaxWebFilterHolder[] newFilterHolders = new PaxWebFilterHolder[filters.size()];
-			PaxWebFilterMapping[] newFilterMappings = new PaxWebFilterMapping[filters.size()];
+			@SuppressWarnings("unchecked")
+			List<PaxWebFilterMapping>[] newFilterMappings = (List<PaxWebFilterMapping>[]) new LinkedList<?>[filters.size()];
 
 			// filters are sorted by ranking. for Jetty, this order should be reflected in the array of FilterMappings
 			// order of FilterHolders is irrelevant
@@ -1006,7 +1027,35 @@ class JettyServerWrapper implements BatchVisitor {
 				PaxWebFilterMapping mapping = new PaxWebFilterMapping(model);
 
 				newFilterHolders[pos] = holder;
-				newFilterMappings[pos] = mapping;
+				final LinkedList<PaxWebFilterMapping> paxWebFilterMappings = new LinkedList<>();
+				newFilterMappings[pos] = paxWebFilterMappings;
+				if (model.getDynamicServletNames().size() > 0 || model.getDynamicUrlPatterns().size() > 0) {
+					// this FilterModel was created in SCI using ServletContext.addFilter(), so it has ONLY
+					// dynamic mappings (potentially more than one)
+					model.getDynamicServletNames().forEach(dm -> {
+						if (!dm.isAfter()) {
+							paxWebFilterMappings.add(new PaxWebFilterMapping(model, dm));
+						}
+					});
+					model.getDynamicUrlPatterns().forEach(dm -> {
+						if (!dm.isAfter()) {
+							paxWebFilterMappings.add(new PaxWebFilterMapping(model, dm));
+						}
+					});
+					model.getDynamicServletNames().forEach(dm -> {
+						if (dm.isAfter()) {
+							paxWebFilterMappings.add(new PaxWebFilterMapping(model, dm));
+						}
+					});
+					model.getDynamicUrlPatterns().forEach(dm -> {
+						if (dm.isAfter()) {
+							paxWebFilterMappings.add(new PaxWebFilterMapping(model, dm));
+						}
+					});
+				} else {
+					// normal OSGi mapping
+					paxWebFilterMappings.add(new PaxWebFilterMapping(model));
+				}
 				pos++;
 			}
 
@@ -1021,10 +1070,14 @@ class JettyServerWrapper implements BatchVisitor {
 				}
 
 				sch.getServletHandler().setFilters(newFilterHolders);
-				sch.getServletHandler().setFilterMappings(newFilterMappings);
+				FilterMapping[] flatMappings = Arrays.stream(newFilterMappings)
+						.flatMap(Collection::stream).toArray(FilterMapping[]::new);
+				sch.getServletHandler().setFilterMappings(flatMappings);
 			}
 
-			ensureServletContextStarted(sch);
+			if (!change.isDynamic()) {
+				ensureServletContextStarted(sch);
+			}
 		}
 	}
 
@@ -1033,15 +1086,22 @@ class JettyServerWrapper implements BatchVisitor {
 		if (change.getKind() == OpCode.ADD) {
 			EventListenerModel eventListenerModel = change.getEventListenerModel();
 			List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
+			Set<String> done = new HashSet<>();
 			contextModels.forEach((context) -> {
-				ServletContextHandler servletContextHandler = contextHandlers.get(context.getContextPath());
+				String contextPath = context.getContextPath();
+				ServletContextHandler servletContextHandler = contextHandlers.get(contextPath);
 				EventListener eventListener = eventListenerModel.resolveEventListener();
 				if (eventListener instanceof ServletContextAttributeListener) {
 					// add it to accessible list to fire per-OsgiContext attribute changes
 					OsgiServletContext c = osgiServletContexts.get(context);
 					c.addServletContextAttributeListener((ServletContextAttributeListener)eventListener);
 				}
-				// add the listener to real context - even ServletContextAttributeListener
+				if (!done.add(contextPath)) {
+					return;
+				}
+
+				// add the listener to real context - even ServletContextAttributeListener (but only once - even
+				// if there are many OsgiServletContexts per ServletContext)
 				servletContextHandler.addEventListener(eventListener);
 			});
 		}
@@ -1153,36 +1213,105 @@ class JettyServerWrapper implements BatchVisitor {
 
 			for (ErrorPageModel model : errorPageModels) {
 				String location = model.getLocation();
-				for (String ex : model.getExceptionClassNames()) {
-					eph.addErrorPage(ex, location);
+				configureErrorPages(location, eph, model);
+			}
+		}
+	}
+
+	@Override
+	public void visit(ContainerInitializerModelChange change) {
+		if (change.getKind() == OpCode.ADD) {
+			ContainerInitializerModel model = change.getContainerInitializerModel();
+			List<OsgiContextModel> contextModels = model.getContextModels();
+			contextModels.forEach((context) -> {
+				String path = context.getContextPath();
+				ServletContextHandler sch = contextHandlers.get(context.getContextPath());
+				if (sch.isStarted()) {
+					// Jetty, Tomcat and Undertow all disable "addServlet()" method (and filter and listener
+					// equivalents) after the context has started, so we'll just print an error here
+					LOG.warn("ServletContainerInitializer {} can't be added, as the context {} is already started",
+							model.getContainerInitializer(), sch);
+				} else {
+					// no need to check whether there are more OsgiContextModels associated with
+					// ContainerInitializerModel, because (for now) there's no Whiteboard support, thus there can
+					// be only one OsgiContextModel
+
+					ServletContainerInitializer initializer = model.getContainerInitializer();
+					// Jetty doesn't handle ServletContainerInitializers directly... There's something in
+					// org.eclipse.jetty.annotations.AnnotationConfiguration and
+					// org.eclipse.jetty.servlet.listener.ContainerInitializer which turns initializer into a
+					// listener, but looks like in this case, ordering should be somehow managed manually
+					//
+					// but that's actually good, because we don't want Jetty to call the initializers - we want to
+					// call them ourselves - we want to pass correct ServletContext implementation there
+					DynamicRegistrations registrations = this.dynamicRegistrations.get(path);
+					OsgiDynamicServletContext dynamicContext = new OsgiDynamicServletContext(osgiServletContexts.get(context), registrations);
+					SCIWrapper wrapper = new SCIWrapper(dynamicContext, model);
+					initializers.get(path).put(System.identityHashCode(initializer), wrapper);
 				}
-				for (int code : model.getErrorCodes()) {
-					eph.addErrorPage(code, location);
-				}
-				if (model.isXx4()) {
-					eph.addErrorPage(400, 499, location);
-				}
-				if (model.isXx5()) {
-					eph.addErrorPage(500, 599, location);
-				}
+			});
+		}
+		if (change.getKind() == OpCode.DELETE) {
+			List<ContainerInitializerModel> models = change.getContainerInitializerModels();
+			for (ContainerInitializerModel model : models) {
+				List<OsgiContextModel> contextModels = model.getContextModels();
+				contextModels.forEach((context) -> {
+					String path = context.getContextPath();
+					ServletContainerInitializer initializer = model.getContainerInitializer();
+					LinkedHashMap<Integer, SCIWrapper> wrappers = this.initializers.get(path);
+					if (wrappers != null) {
+						wrappers.remove(System.identityHashCode(initializer));
+					}
+				});
 			}
 		}
 	}
 
 	/**
-	 * Registration of <em>active web element</em> should always start the context. On the other hand,
-	 * registration of <em>passive web element</em> should <strong>not</strong> start the context.
+	 * <p>Registration of <em>active web element</em> should always start the context. On the other hand,
+	 * registration of <em>passive web element</em> should <strong>not</strong> start the context.</p>
+	 *
+	 * <p>This method is always (should be) called withing the "configuration thread" of Pax Web Runtime, because
+	 * it's called in visit() methods for servlets (including resources) and filters, so we can safely access
+	 * {@link org.ops4j.pax.web.service.spi.model.ServerModel}.</p>
 	 * @param sch
 	 */
-	private void ensureServletContextStarted(ServletContextHandler sch) {
+	private void ensureServletContextStarted(PaxWebServletContextHandler sch) {
 		if (sch.isStarted()) {
 			return;
 		}
 		try {
-			LOG.info("Starting Jetty context \"" + (sch.getContextPath().equals("") ? "/" : sch.getContextPath()) + "\"");
+			String contextPath = sch.getContextPath().equals("") ? "/" : sch.getContextPath();
+			LOG.info("Starting Jetty context \"" + contextPath + "\"");
+
+			// this is when already collected initializers may be added as ordered collection to the servlet context
+			// handler (Pax Web specific) - we need control over them, because we have to pass correct
+			// ServletContext implementation there
+			Collection<SCIWrapper> initializers = new LinkedList<>(this.initializers.get(contextPath).values());
+			if (initializers.size() > 0) {
+				// add a final initializer that will take care of actual registration of potentially collected
+				// dynamic servlets, filters and listeners
+				initializers.add(new RegisteringContainerInitializer(this.dynamicRegistrations.get(contextPath)));
+				sch.setServletContainerInitializers(initializers);
+			}
 			sch.start();
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
+		}
+	}
+
+	private void configureErrorPages(String location, ErrorPageErrorHandler eph, ErrorPageModel epm) {
+		for (String ex : epm.getExceptionClassNames()) {
+			eph.addErrorPage(ex, location);
+		}
+		for (int code : epm.getErrorCodes()) {
+			eph.addErrorPage(code, location);
+		}
+		if (epm.isXx4()) {
+			eph.addErrorPage(400, 499, location);
+		}
+		if (epm.isXx5()) {
+			eph.addErrorPage(500, 599, location);
 		}
 	}
 
@@ -1199,7 +1328,7 @@ class JettyServerWrapper implements BatchVisitor {
 	 * @param newFilterMappings
 	 * @return
 	 */
-	private boolean quickFilterChange(ServletHandler servletHandler, PaxWebFilterHolder[] newFilterHolders, PaxWebFilterMapping[] newFilterMappings) {
+	private boolean quickFilterChange(ServletHandler servletHandler, PaxWebFilterHolder[] newFilterHolders, List<PaxWebFilterMapping>[] newFilterMappings) {
 		PaxWebFilterHolder[] existingFilterHolders = (PaxWebFilterHolder[]) servletHandler.getFilters();
 
 		int pos = 0;
@@ -1219,7 +1348,10 @@ class JettyServerWrapper implements BatchVisitor {
 
 		if (quick) {
 			for (int i = pos; i < newFilterHolders.length; i++) {
-				servletHandler.addFilter(newFilterHolders[pos], newFilterMappings[pos]);
+				// each holder may have many mappings
+				for (PaxWebFilterMapping paxWebFilterMapping : newFilterMappings[pos]) {
+					servletHandler.addFilter(newFilterHolders[pos], paxWebFilterMapping);
+				}
 			}
 			return true;
 		}

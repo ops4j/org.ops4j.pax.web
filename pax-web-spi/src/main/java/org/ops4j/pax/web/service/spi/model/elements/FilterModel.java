@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -51,8 +52,17 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 	 */
 	private String[] urlPatterns;
 
+	/**
+	 * When using {@link javax.servlet.ServletContext#addFilter(String, Filter)} and
+	 * {@link javax.servlet.FilterRegistration.Dynamic#addMappingForServletNames(EnumSet, boolean, String...)} we
+	 * need to store distinct sets of mappings separately for different dispatchers (and order)
+	 */
+	private final List<DynamicMapping> dynamicUrlPatterns = new LinkedList<>();
+
 	/** Servlet names for filter mapping. {@code <filter-mapping>/<servlet-name>} */
 	private String[] servletNames;
+
+	private final List<DynamicMapping> dynamicServletNames = new LinkedList<>();
 
 	/** Regex mapping from OSGi Whiteboard Service specification. Not available in Servet specification. */
 	private String[] regexMapping;
@@ -83,6 +93,11 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 	 * {@link org.ops4j.pax.web.service.whiteboard.FilterMapping} "direct Whiteboard" service.
 	 */
 	private final Class<? extends Filter> filterClass;
+
+	/**
+	 * Flag used for models registered using {@link javax.servlet.ServletContext#addFilter}
+	 */
+	private boolean dynamic = false;
 
 	/**
 	 * Constructor used for filter unregistration
@@ -242,6 +257,10 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		return servletNames;
 	}
 
+	public void setServletNames(String[] servletNames) {
+		this.servletNames = servletNames;
+	}
+
 	public String[] getRegexMapping() {
 		return regexMapping;
 	}
@@ -264,6 +283,10 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 
 	public Boolean getAsyncSupported() {
 		return asyncSupported;
+	}
+
+	public void setAsyncSupported(Boolean asyncSupported) {
+		this.asyncSupported = asyncSupported;
 	}
 
 	public Filter getFilter() {
@@ -303,6 +326,30 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		}
 
 		return null; // even if it can't happen
+	}
+
+	public List<DynamicMapping> getDynamicUrlPatterns() {
+		return dynamicUrlPatterns;
+	}
+
+	public List<DynamicMapping> getDynamicServletNames() {
+		return dynamicServletNames;
+	}
+
+	public void addDynamicServletNameMapping(EnumSet<DispatcherType> dispatcherTypes, String[] servletNames, boolean isMatchAfter) {
+		this.dynamicServletNames.add(DynamicMapping.forServletNames(dispatcherTypes, servletNames, isMatchAfter));
+	}
+
+	public void addDynamicUrlPatternMapping(EnumSet<DispatcherType> dispatcherTypes, String[] urlPatterns, boolean isMatchAfter) {
+		this.dynamicUrlPatterns.add(DynamicMapping.forUrlPatterns(dispatcherTypes, urlPatterns, isMatchAfter));
+	}
+
+	public void setDynamic(boolean dynamic) {
+		this.dynamic = dynamic;
+	}
+
+	public boolean isDynamic() {
+		return dynamic;
 	}
 
 	public static class Builder {
@@ -420,6 +467,45 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 			model.setServiceRank(this.rank);
 			model.setServiceId(this.serviceId);
 			return model;
+		}
+	}
+
+	public static class DynamicMapping {
+		private boolean after;
+		private DispatcherType[] dispatcherTypes;
+		private String[] servletNames;
+		private String[] urlPatterns;
+
+		public static DynamicMapping forServletNames(EnumSet<DispatcherType> dispatcherTypes, String[] servletNames, boolean isMatchAfter) {
+			DynamicMapping mapping = new DynamicMapping();
+			mapping.after = isMatchAfter;
+			mapping.dispatcherTypes = dispatcherTypes.toArray(new DispatcherType[dispatcherTypes.size()]);
+			mapping.servletNames = servletNames;
+			return mapping;
+		}
+
+		public static DynamicMapping forUrlPatterns(EnumSet<DispatcherType> dispatcherTypes, String[] urlPatterns, boolean isMatchAfter) {
+			DynamicMapping mapping = new DynamicMapping();
+			mapping.after = isMatchAfter;
+			mapping.dispatcherTypes = dispatcherTypes.toArray(new DispatcherType[dispatcherTypes.size()]);
+			mapping.urlPatterns = urlPatterns;
+			return mapping;
+		}
+
+		public boolean isAfter() {
+			return after;
+		}
+
+		public DispatcherType[] getDispatcherTypes() {
+			return dispatcherTypes;
+		}
+
+		public String[] getServletNames() {
+			return servletNames;
+		}
+
+		public String[] getUrlPatterns() {
+			return urlPatterns;
 		}
 	}
 

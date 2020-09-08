@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
@@ -49,6 +50,7 @@ import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.context.DefaultMultiBundleWebContainerContext;
 import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
+import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
@@ -58,6 +60,7 @@ import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
+import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
@@ -310,6 +313,11 @@ public class ServerModel implements BatchVisitor {
 	 * Keep event listeners to check for conflicts.
 	 */
 	private final Map<EventListener, EventListenerModel> eventListeners = new IdentityHashMap<>();
+
+	/**
+	 * Keep container initializers to check for conflicts.
+	 */
+	private final Map<ServletContainerInitializer, ContainerInitializerModel> containerInitializers = new IdentityHashMap<>();
 
 	/**
 	 * Creates new global model of all web applications with {@link Executor} to be used for configuration and
@@ -1366,7 +1374,7 @@ public class ServerModel implements BatchVisitor {
 		reEnableFilterModels(currentlyDisabled, currentlyEnabledByPath, model, batch);
 
 		// finally - full set of filter state changes in all affected servlet contexts
-		batch.updateFilters(currentlyEnabledByPath);
+		batch.updateFilters(currentlyEnabledByPath, model.isDynamic());
 	}
 
 	@PaxWebConfiguration
@@ -1382,7 +1390,7 @@ public class ServerModel implements BatchVisitor {
 		reEnableFilterModels(currentlyDisabled, currentlyEnabledByName, null, batch);
 
 		// finally - full set of filter state changes in all affected servlet contexts
-		batch.updateFilters(currentlyEnabledByName);
+		batch.updateFilters(currentlyEnabledByName, false);
 	}
 
 	/**
@@ -1566,6 +1574,25 @@ public class ServerModel implements BatchVisitor {
 	@PaxWebConfiguration
 	public void removeEventListenerModels(List<EventListenerModel> models, Batch batch) {
 		batch.removeEventListenerModels(this, models);
+	}
+
+	@PaxWebConfiguration
+	public void addContainerInitializerModel(ContainerInitializerModel model, Batch batch) {
+		if (model.getContextModels().isEmpty()) {
+			throw new IllegalArgumentException("Can't register " + model + ", it is not associated with any context");
+		}
+
+		if (model.getContainerInitializer() != null && containerInitializers.containsKey(model.getContainerInitializer())) {
+			throw new IllegalArgumentException("Can't register ContainerInitializer " + model.getContainerInitializer()
+					+ ", it is already registered");
+		}
+
+		batch.addContainerInitializerModel(this, model);
+	}
+
+	@PaxWebConfiguration
+	public void removeContainerInitializerModels(List<ContainerInitializerModel> models, Batch batch) {
+		batch.removeContainerInitializerModels(this, models);
 	}
 
 	@PaxWebConfiguration
@@ -2060,7 +2087,31 @@ public class ServerModel implements BatchVisitor {
 		// no op here - handled at ServerController level only
 	}
 
+	@Override
+	public void visit(ContainerInitializerModelChange change) {
+		switch (change.getKind()) {
+			case ADD: {
+				ContainerInitializerModel model = change.getContainerInitializerModel();
 
+				if (model.getContainerInitializer() != null) {
+					containerInitializers.put(model.getContainerInitializer(), model);
+				}
+				break;
+			}
+			case DELETE: {
+				Collection<ContainerInitializerModel> models = change.getContainerInitializerModels();
+
+				models.forEach(model -> {
+					if (model.getContainerInitializer() != null) {
+						containerInitializers.remove(model.getContainerInitializer(), model);
+					}
+				});
+				break;
+			}
+			default:
+				break;
+		}
+	}
 
 
 

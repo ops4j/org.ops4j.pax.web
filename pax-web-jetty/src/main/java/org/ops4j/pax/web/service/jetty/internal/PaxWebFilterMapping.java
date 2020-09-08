@@ -16,6 +16,7 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import javax.servlet.DispatcherType;
@@ -47,6 +48,31 @@ public class PaxWebFilterMapping extends FilterMapping {
 		this.setFilterName(filterModel.getName());
 		this.setPathSpecs(filterModel.getUrlPatterns());
 		this.setServletNames(filterModel.getServletNames());
+
+		// special mapping kind from Whiteboard Service spec
+		String[] regexMapping = filterModel.getRegexMapping();
+		if (regexMapping != null && regexMapping.length > 0) {
+			this.setPathSpecs(new String[] { "/*" });
+		}
+	}
+
+	/**
+	 * Version of the filter mapping that uses the dynamic part of FilterModel's mapping.
+	 * @param filterModel
+	 * @param dynamicMapping
+	 */
+	public PaxWebFilterMapping(FilterModel filterModel, FilterModel.DynamicMapping dynamicMapping) {
+		this.filterModel = filterModel;
+		// remember when given mapping was created to detect if associated filter should be destroyed and initialized
+		// again when configuration changes.
+		this.timestamp = filterModel.getTimestamp();
+
+		List<DispatcherType> types = Arrays.asList(dynamicMapping.getDispatcherTypes());
+		this.setDispatcherTypes(EnumSet.copyOf(types));
+
+		this.setFilterName(filterModel.getName());
+		this.setPathSpecs(dynamicMapping.getUrlPatterns());
+		this.setServletNames(dynamicMapping.getServletNames());
 
 		// special mapping kind from Whiteboard Service spec
 		String[] regexMapping = filterModel.getRegexMapping();

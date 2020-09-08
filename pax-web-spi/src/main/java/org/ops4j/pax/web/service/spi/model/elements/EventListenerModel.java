@@ -117,47 +117,4 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 		return Boolean.TRUE;
 	}
 
-//	/**
-//	 * Constructs a new ListenerWebElement
-//	 * @param ref the service-reference behind the registered http-whiteboard-service
-//	 * @param listenerMapping ListenerMapping containing all necessary information
-//	 */
-//	public ListenerWebElement(final ServiceReference<T> ref, final ListenerMapping listenerMapping) {
-//		super(ref);
-//		NullArgumentException.validateNotNull(listenerMapping, "Listener mapping");
-//		this.listenerMapping = listenerMapping;
-//
-//		// validate
-//		final EventListener listener = listenerMapping.getListener();
-//
-//		if (!(listener instanceof ServletContextListener ||
-//				listener instanceof ServletContextAttributeListener ||
-//				listener instanceof ServletRequestListener ||
-//				listener instanceof ServletRequestAttributeListener ||
-//				listener instanceof HttpSessionListener ||
-//				listener instanceof HttpSessionBindingListener ||
-//				listener instanceof HttpSessionAttributeListener ||
-//				listener instanceof HttpSessionActivationListener ||
-//				listener instanceof AsyncListener ||
-//				listener instanceof ReadListener ||
-//				listener instanceof WriteListener ||
-//				listener instanceof HttpSessionIdListener
-//		)) {
-//			valid = false;
-//		}
-//
-//		if (listenerMapping.getHttpContextId() != null && listenerMapping.getHttpContextId().trim().length() == 0) {
-//			LOG.warn("Registered listener [{}] did not contain a valid http context id.", getServiceID());
-//			valid = false;
-//		}
-//
-//		Boolean listenerEnabled = ServicePropertiesUtils.getBooleanProperty(
-//				serviceReference,
-//				HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER);
-//		if (!Boolean.TRUE.equals(listenerEnabled)) {
-//			LOG.warn("Registered listener [{}] is not enabled via 'osgi.http.whiteboard.listener' property.", getServiceID());
-//			valid = false;
-//		}
-//	}
-
 }

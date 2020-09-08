@@ -46,10 +46,6 @@ import static org.mockito.Mockito.when;
 import static org.ops4j.pax.web.itest.server.support.Utils.extractHeaders;
 import static org.ops4j.pax.web.itest.server.support.Utils.httpGET;
 
-/**
- * These tests show basic usage for servlet and filter registration through
- * {@link WebContainer} interface.
- */
 @RunWith(Parameterized.class)
 public class ServerControllerResourceRegistrationTest extends MultiContainerTestSupport {
 

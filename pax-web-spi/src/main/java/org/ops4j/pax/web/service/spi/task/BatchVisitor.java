@@ -76,4 +76,10 @@ public interface BatchVisitor {
 	 */
 	void visit(ErrorPageStateChange change);
 
+	/**
+	 * Process a change related to {@link org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel}
+	 * @param containerInitializerModelChange
+	 */
+	void visit(ContainerInitializerModelChange change);
+
 }

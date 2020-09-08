@@ -26,24 +26,18 @@ public class EventListenerModelChange extends Change {
 	private final ServerModel serverModel;
 	private final List<EventListenerModel> eventListenerModels = new LinkedList<>();
 	private EventListenerModel eventListenerModel;
-	private boolean disabled;
 
 	public EventListenerModelChange(OpCode op, ServerModel serverModel, EventListenerModel eventListenerModel) {
-		this(op, serverModel, eventListenerModel, false);
+		super(op);
+		this.serverModel = serverModel;
+		this.eventListenerModels.add(eventListenerModel);
+		this.eventListenerModel = eventListenerModel;
 	}
 
 	public EventListenerModelChange(OpCode op, ServerModel serverModel, List<EventListenerModel> eventListenerModels) {
 		super(op);
 		this.serverModel = serverModel;
 		this.eventListenerModels.addAll(eventListenerModels);
-	}
-
-	public EventListenerModelChange(OpCode op, ServerModel serverModel, EventListenerModel eventListenerModel, boolean disabled) {
-		super(op);
-		this.serverModel = serverModel;
-		this.eventListenerModels.add(eventListenerModel);
-		this.eventListenerModel = eventListenerModel;
-		this.disabled = disabled;
 	}
 
 	public ServerModel getServerModel() {
@@ -58,10 +52,6 @@ public class EventListenerModelChange extends Change {
 		return eventListenerModels;
 	}
 
-	public boolean isDisabled() {
-		return disabled;
-	}
-
 	@Override
 	public void accept(BatchVisitor visitor) {
 		visitor.visit(this);
@@ -69,7 +59,7 @@ public class EventListenerModelChange extends Change {
 
 	@Override
 	public String toString() {
-		return getKind() + ": " + eventListenerModel + (disabled ? " (disabled)" : " (enabled)");
+		return getKind() + ": " + eventListenerModel;
 	}
 
 }

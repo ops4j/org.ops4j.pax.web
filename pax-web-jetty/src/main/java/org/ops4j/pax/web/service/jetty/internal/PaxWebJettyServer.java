@@ -17,31 +17,17 @@ package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.File;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.ServiceLoader;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.eclipse.jetty.security.Authenticator;
-import org.eclipse.jetty.security.SecurityHandler;
-import org.eclipse.jetty.security.authentication.BasicAuthenticator;
-import org.eclipse.jetty.security.authentication.ClientCertAuthenticator;
-import org.eclipse.jetty.security.authentication.DigestAuthenticator;
-import org.eclipse.jetty.security.authentication.FormAuthenticator;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.thread.ThreadPool;
-import org.ops4j.pax.web.service.AuthenticatorService;
-import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
-import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,10 +118,10 @@ class PaxWebJettyServer extends Server {
 //					}
 
 	}
-
-	public HandlerCollection getRootHandlerCollection() {
-		return rootCollections;
-	}
+//
+//	public HandlerCollection getRootHandlerCollection() {
+//		return rootCollections;
+//	}
 
 //	@Review("Called during startup, sets config common to all future contexts, which is a bit weird")
 //	public void configureContext(final Map<String, Object> attributes, final Integer timeout, final String cookie,
@@ -156,19 +142,19 @@ class PaxWebJettyServer extends Server {
 //		this.sessionCookieMaxAge = maxAge;
 //		this.showStacks = showStacks;
 //	}
-
-	PaxWebServletContextHandler getContext(final HttpContext httpContext) {
-		readLock.lock();
-		try {
-			ServletContextInfo servletContextInfo = contexts.get(httpContext);
-			if (servletContextInfo != null) {
-				return servletContextInfo.getHandler();
-			}
-			return null;
-		} finally {
-			readLock.unlock();
-		}
-	}
+//
+//	PaxWebServletContextHandler getContext(final HttpContext httpContext) {
+//		readLock.lock();
+//		try {
+//			ServletContextInfo servletContextInfo = contexts.get(httpContext);
+//			if (servletContextInfo != null) {
+//				return servletContextInfo.getHandler();
+//			}
+//			return null;
+//		} finally {
+//			readLock.unlock();
+//		}
+//	}
 
 //	PaxWebServletContextHandler getOrCreateContext(final ElementModel elementModel) {
 //		return getOrCreateContext((OsgiContextModel) null/*elementModel.getContextModel()*/);
@@ -209,52 +195,52 @@ class PaxWebJettyServer extends Server {
 //		return context.getHandler();
 //	}
 
-	void removeContext(final HttpContext httpContext, boolean force) {
-		ServletContextInfo context;
-		try {
-			readLock.lock();
-			context = contexts.get(httpContext);
-			if (context == null) {
-				return;
-			}
-			int nref = context.decrementRefCount();
-			if ((force && !(httpContext instanceof MultiBundleWebContainerContext)) || nref <= 0) {
-				try {
-					readLock.unlock();
-					writeLock.lock();
-					LOG.debug("Removing ServletContextHandler for HTTP context [{}].", httpContext);
-					context = contexts.remove(httpContext);
-				} finally {
-					readLock.lock();
-					writeLock.unlock();
-				}
-			} else {
-				LOG.debug("ServletContextHandler for HTTP context [{}] referenced [{}] times.", httpContext, nref);
-				return;
-			}
-		} finally {
-			readLock.unlock();
-		}
-		// Destroy the context outside of the locking region
-		if (context != null) {
-			PaxWebServletContextHandler sch = context.getHandler();
-//			sch.unregisterService();
-			try {
-				sch.stop();
-			} catch (Throwable t) { // CHECKSTYLE:SKIP
-				// Ignore
-			}
-			sch.getServletHandler().setServer(null);
-			sch.getSecurityHandler().setServer(null);
-			sch.getSessionHandler().setServer(null);
-			sch.getErrorHandler().setServer(null);
-			rootCollections.removeHandler(sch);
-			sch.destroy();
-		}
-	}
+//	void removeContext(final HttpContext httpContext, boolean force) {
+//		ServletContextInfo context;
+//		try {
+//			readLock.lock();
+//			context = contexts.get(httpContext);
+//			if (context == null) {
+//				return;
+//			}
+//			int nref = context.decrementRefCount();
+//			if ((force && !(httpContext instanceof MultiBundleWebContainerContext)) || nref <= 0) {
+//				try {
+//					readLock.unlock();
+//					writeLock.lock();
+//					LOG.debug("Removing ServletContextHandler for HTTP context [{}].", httpContext);
+//					context = contexts.remove(httpContext);
+//				} finally {
+//					readLock.lock();
+//					writeLock.unlock();
+//				}
+//			} else {
+//				LOG.debug("ServletContextHandler for HTTP context [{}] referenced [{}] times.", httpContext, nref);
+//				return;
+//			}
+//		} finally {
+//			readLock.unlock();
+//		}
+//		// Destroy the context outside of the locking region
+//		if (context != null) {
+//			PaxWebServletContextHandler sch = context.getHandler();
+////			sch.unregisterService();
+//			try {
+//				sch.stop();
+//			} catch (Throwable t) { // CHECKSTYLE:SKIP
+//				// Ignore
+//			}
+//			sch.getServletHandler().setServer(null);
+//			sch.getSecurityHandler().setServer(null);
+//			sch.getSessionHandler().setServer(null);
+//			sch.getErrorHandler().setServer(null);
+//			rootCollections.removeHandler(sch);
+//			sch.destroy();
+//		}
+//	}
 
-	@SuppressWarnings("unchecked")
-	private PaxWebServletContextHandler addContext(final OsgiContextModel model) {
+//	@SuppressWarnings("unchecked")
+//	private PaxWebServletContextHandler addContext(final OsgiContextModel model) {
 //		Map<String, Object> attributes = new HashMap<>();
 //		attributes.put("javax.servlet.context.tempdir",
 //				configuration.server().getTemporaryDirectory());
@@ -401,10 +387,10 @@ class PaxWebJettyServer extends Server {
 //			}
 //			// CHECKSTYLE:ON
 //		}
-		return null;//context;
-	}
+//		return null;//context;
+//	}
 
-	private void configureJspConfigDescriptor(PaxWebServletContextHandler context, OsgiContextModel model) {
+//	private void configureJspConfigDescriptor(PaxWebServletContextHandler context, OsgiContextModel model) {
 
 //		Boolean elIgnored = model.getJspElIgnored();
 //		Boolean isXml = model.getJspIsXml();
@@ -462,91 +448,91 @@ class PaxWebJettyServer extends Server {
 //			jspConfig.addTaglibDescriptor(tagLibDescriptor);
 //			context.getServletContext().setJspConfigDescriptor(jspConfig);
 //		}
-	}
-
-	/**
-	 * Sets the security authentication method and the realm name on the
-	 * security handler. This has to be done before the context is started.
-	 *
-	 * @param context
-	 * @param realmName
-	 * @param authMethod
-	 * @param formLoginPage
-	 * @param formErrorPage
-	 */
-	private void configureSecurity(ServletContextHandler context, String realmName, String authMethod,
-								   String formLoginPage, String formErrorPage) {
-		final SecurityHandler securityHandler = context.getSecurityHandler();
-
-		Authenticator authenticator = null;
-		if (authMethod == null) {
-			LOG.warn("UNKNOWN AUTH METHOD: " + authMethod);
-		} else {
-			switch (authMethod) {
-				case Constraint.__FORM_AUTH:
-					authenticator = new FormAuthenticator();
-					securityHandler.setInitParameter(FormAuthenticator.__FORM_LOGIN_PAGE, formLoginPage);
-					securityHandler.setInitParameter(FormAuthenticator.__FORM_ERROR_PAGE, formErrorPage);
-					break;
-				case Constraint.__BASIC_AUTH:
-					authenticator = new BasicAuthenticator();
-					break;
-				case Constraint.__DIGEST_AUTH:
-					authenticator = new DigestAuthenticator();
-					break;
-				case Constraint.__CERT_AUTH:
-					authenticator = new ClientCertAuthenticator();
-					break;
-				case Constraint.__CERT_AUTH2:
-					authenticator = new ClientCertAuthenticator();
-					break;
-//				case Constraint.__SPNEGO_AUTH:
-//					authenticator = new SpnegoAuthenticator();
+//	}
+//
+//	/**
+//	 * Sets the security authentication method and the realm name on the
+//	 * security handler. This has to be done before the context is started.
+//	 *
+//	 * @param context
+//	 * @param realmName
+//	 * @param authMethod
+//	 * @param formLoginPage
+//	 * @param formErrorPage
+//	 */
+//	private void configureSecurity(ServletContextHandler context, String realmName, String authMethod,
+//								   String formLoginPage, String formErrorPage) {
+//		final SecurityHandler securityHandler = context.getSecurityHandler();
+//
+//		Authenticator authenticator = null;
+//		if (authMethod == null) {
+//			LOG.warn("UNKNOWN AUTH METHOD: " + authMethod);
+//		} else {
+//			switch (authMethod) {
+//				case Constraint.__FORM_AUTH:
+//					authenticator = new FormAuthenticator();
+//					securityHandler.setInitParameter(FormAuthenticator.__FORM_LOGIN_PAGE, formLoginPage);
+//					securityHandler.setInitParameter(FormAuthenticator.__FORM_ERROR_PAGE, formErrorPage);
 //					break;
-				default:
-					authenticator = getAuthenticator(authMethod);
-					break;
-			}
-		}
-
-		securityHandler.setAuthenticator(authenticator);
-
-		securityHandler.setRealmName(realmName);
-
-	}
-
-	private Authenticator getAuthenticator(String method) {
-		ServiceLoader<AuthenticatorService> sl = ServiceLoader.load(AuthenticatorService.class, getClass().getClassLoader());
-		for (AuthenticatorService svc : sl) {
-			try {
-				Authenticator auth = svc.getAuthenticatorService(method, Authenticator.class);
-				if (auth != null) {
-					return auth;
-				}
-			} catch (Throwable t) {
-				LOG.debug("Unable to load AuthenticatorService for: " + method, t);
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Returns a list of servlet context attributes out of configured properties
-	 * and attribues containing the bundle context associated with the bundle
-	 * that created the model (web element).
-	 *
-	 * @param bundleContext bundle context to be set as attribute
-	 * @return context attributes map
-	 */
-	private Map<String, Object> getContextAttributes(final BundleContext bundleContext) {
-		final Map<String, Object> attributes = new HashMap<>();
-		if (contextAttributes != null) {
-			attributes.putAll(contextAttributes);
-		}
-//		attributes.put(WebContainerConstants.BUNDLE_CONTEXT_ATTRIBUTE, bundleContext);
-		attributes.put("org.springframework.osgi.web.org.osgi.framework.BundleContext", bundleContext);
-		return attributes;
-	}
+//				case Constraint.__BASIC_AUTH:
+//					authenticator = new BasicAuthenticator();
+//					break;
+//				case Constraint.__DIGEST_AUTH:
+//					authenticator = new DigestAuthenticator();
+//					break;
+//				case Constraint.__CERT_AUTH:
+//					authenticator = new ClientCertAuthenticator();
+//					break;
+//				case Constraint.__CERT_AUTH2:
+//					authenticator = new ClientCertAuthenticator();
+//					break;
+////				case Constraint.__SPNEGO_AUTH:
+////					authenticator = new SpnegoAuthenticator();
+////					break;
+//				default:
+//					authenticator = getAuthenticator(authMethod);
+//					break;
+//			}
+//		}
+//
+//		securityHandler.setAuthenticator(authenticator);
+//
+//		securityHandler.setRealmName(realmName);
+//
+//	}
+//
+//	private Authenticator getAuthenticator(String method) {
+//		ServiceLoader<AuthenticatorService> sl = ServiceLoader.load(AuthenticatorService.class, getClass().getClassLoader());
+//		for (AuthenticatorService svc : sl) {
+//			try {
+//				Authenticator auth = svc.getAuthenticatorService(method, Authenticator.class);
+//				if (auth != null) {
+//					return auth;
+//				}
+//			} catch (Throwable t) {
+//				LOG.debug("Unable to load AuthenticatorService for: " + method, t);
+//			}
+//		}
+//		return null;
+//	}
+//
+//	/**
+//	 * Returns a list of servlet context attributes out of configured properties
+//	 * and attribues containing the bundle context associated with the bundle
+//	 * that created the model (web element).
+//	 *
+//	 * @param bundleContext bundle context to be set as attribute
+//	 * @return context attributes map
+//	 */
+//	private Map<String, Object> getContextAttributes(final BundleContext bundleContext) {
+//		final Map<String, Object> attributes = new HashMap<>();
+//		if (contextAttributes != null) {
+//			attributes.putAll(contextAttributes);
+//		}
+////		attributes.put(WebContainerConstants.BUNDLE_CONTEXT_ATTRIBUTE, bundleContext);
+//		attributes.put("org.springframework.osgi.web.org.osgi.framework.BundleContext", bundleContext);
+//		return attributes;
+//	}
 
 //	/**
 //	 * Configures the session time out by extracting the session
@@ -614,18 +600,19 @@ class PaxWebJettyServer extends Server {
 //		}
 //	}
 
-	public String getDefaultAuthMethod() {
-	    return defaultAuthMethod;
-    }
+//	public String getDefaultAuthMethod() {
+//	    return defaultAuthMethod;
+//    }
+//
+//	public void setDefaultAuthMethod(String defaultAuthMethod) {
+//		this.defaultAuthMethod = defaultAuthMethod;
+//	}
+//	public String getDefaultRealmName() {
+//		return defaultRealmName;
+//	}
+//
+//	public void setDefaultRealmName(String defaultRealmName) {
+//		this.defaultRealmName = defaultRealmName;
+//	}
 
-	public void setDefaultAuthMethod(String defaultAuthMethod) {
-		this.defaultAuthMethod = defaultAuthMethod;
-	}
-	public String getDefaultRealmName() {
-		return defaultRealmName;
-	}
-
-	public void setDefaultRealmName(String defaultRealmName) {
-		this.defaultRealmName = defaultRealmName;
-	}
 }

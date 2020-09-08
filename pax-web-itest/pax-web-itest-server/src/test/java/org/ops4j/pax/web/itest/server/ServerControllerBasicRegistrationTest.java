@@ -543,7 +543,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 				.build());
 		filters.put("/c", set);
 		filters.put("/d", set);
-		batch.updateFilters(filters);
+		batch.updateFilters(filters, false);
 
 		controller.sendBatch(batch);
 

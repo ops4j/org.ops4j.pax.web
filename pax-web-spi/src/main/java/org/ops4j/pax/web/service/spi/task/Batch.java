@@ -24,6 +24,7 @@ import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
@@ -204,9 +205,11 @@ public class Batch {
 	 * in a set of contexts. To be handled by Server Controller only
 	 *
 	 * @param contextFilters
+	 * @param dynamic should be set to {@code true} when adding a {@link FilterModel} related to
+	 *        {@link javax.servlet.ServletContext#addFilter}
 	 */
-	public void updateFilters(Map<String, TreeSet<FilterModel>> contextFilters) {
-		operations.add(new FilterStateChange(contextFilters));
+	public void updateFilters(Map<String, TreeSet<FilterModel>> contextFilters, boolean dynamic) {
+		operations.add(new FilterStateChange(contextFilters, dynamic));
 	}
 
 	/**
@@ -279,10 +282,28 @@ public class Batch {
 	/**
 	 * Remove existing {@link EventListenerModel}
 	 * @param serverModel
-	 * @param model
+	 * @param models
 	 */
 	public void removeEventListenerModels(ServerModel serverModel, List<EventListenerModel> models) {
 		operations.add(new EventListenerModelChange(OpCode.DELETE, serverModel, models));
+	}
+
+	/**
+	 * Add new {@link ContainerInitializerModel}
+	 * @param serverModel
+	 * @param model
+	 */
+	public void addContainerInitializerModel(ServerModel serverModel, ContainerInitializerModel model) {
+		operations.add(new ContainerInitializerModelChange(OpCode.ADD, serverModel, model));
+	}
+
+	/**
+	 * Remove existing {@link ContainerInitializerModel}
+	 * @param serverModel
+	 * @param models
+	 */
+	public void removeContainerInitializerModels(ServerModel serverModel, List<ContainerInitializerModel> models) {
+		operations.add(new ContainerInitializerModelChange(OpCode.DELETE, serverModel, models));
 	}
 
 	/**

@@ -25,9 +25,21 @@ public class FilterStateChange extends Change {
 	/** Explicitly marked as mapping of {@link TreeSet} to highlight the importance of ordering */
 	private final Map<String, TreeSet<FilterModel>> contextFilters;
 
-	public FilterStateChange(Map<String, TreeSet<FilterModel>> contextFilters) {
+	/**
+	 * Whether the change is caused by dynamic filter registration. In such case, we should NEVER attempt
+	 * to start the context after registering such filter (because most probably we're in the process of starting
+	 * the context and in particular - we're calling {@link javax.servlet.ServletContainerInitializer#onStartup}).
+	 */
+	private boolean dynamic = false;
+
+	public FilterStateChange(Map<String, TreeSet<FilterModel>> contextFilters, boolean dynamic) {
 		super(OpCode.NONE);
 		this.contextFilters = contextFilters;
+		this.dynamic = dynamic;
+	}
+
+	public boolean isDynamic() {
+		return dynamic;
 	}
 
 	public Map<String, TreeSet<FilterModel>> getContextFilters() {

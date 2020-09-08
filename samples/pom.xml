@@ -39,6 +39,7 @@
 		<module>samples-internal</module>
 		<module>samples-httpservice</module>
 		<module>samples-war</module>
+		<module>samples-jsp</module>
 		<module>samples-jsf</module>
 		<module>samples-whiteboard</module>
 

@@ -17,7 +17,6 @@ package org.ops4j.pax.web.service.spi.model;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -30,6 +29,7 @@ import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.context.DefaultHttpContext;
+import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
@@ -37,6 +37,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
+import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
@@ -102,8 +103,11 @@ public class ServiceModel implements BatchVisitor {
 	/** All filter models registered by given bundle-scoped {@link org.osgi.service.http.HttpService}. */
 	private final Set<FilterModel> filterModels = new HashSet<>();
 
-	/** All event listene models registered by given bundle-scoped {@link org.osgi.service.http.HttpService}. */
-	private final Map<EventListener, EventListenerModel> eventListenerModels = new HashMap<>();
+	/** All event listener models registered by given bundle-scoped {@link org.osgi.service.http.HttpService}. */
+	private final Set<EventListenerModel> eventListenerModels = new HashSet<>();
+
+	/** All container initializer models registered by given bundle-scoped {@link org.osgi.service.http.HttpService}. */
+	private final Set<ContainerInitializerModel> containerInitializerModels = new HashSet<>();
 
 	/** Welcome files are just kept as a sets - separately for each {@link ContextKey}. */
 	private final Map<ContextKey, Set<String>> welcomeFiles = new LinkedHashMap<>();
@@ -166,7 +170,7 @@ public class ServiceModel implements BatchVisitor {
 		return filterModels;
 	}
 
-	public Map<EventListener, EventListenerModel> getEventListenerModels() {
+	public Set<EventListenerModel> getEventListenerModels() {
 		return eventListenerModels;
 	}
 
@@ -176,6 +180,10 @@ public class ServiceModel implements BatchVisitor {
 
 	public Set<ErrorPageModel> getErrorPageModels() {
 		return errorPageModels;
+	}
+
+	public Set<ContainerInitializerModel> getContainerInitializerModels() {
+		return containerInitializerModels;
 	}
 
 	@Override
@@ -280,10 +288,22 @@ public class ServiceModel implements BatchVisitor {
 	public void visit(EventListenerModelChange change) {
 		if (change.getKind() == OpCode.ADD) {
 			EventListenerModel model = change.getEventListenerModel();
-			eventListenerModels.put(model.getEventListener(), model);
+			eventListenerModels.add(model);
 		} else if (change.getKind() == OpCode.DELETE) {
-			change.getEventListenerModels().forEach(el ->
-					eventListenerModels.entrySet().removeIf(e -> e.getValue() == el));
+			change.getEventListenerModels().forEach(eventListenerModels::remove);
+		}
+
+		// the change should be processed at serverModel level as well
+		serverModel.visit(change);
+	}
+
+	@Override
+	public void visit(ContainerInitializerModelChange change) {
+		if (change.getKind() == OpCode.ADD) {
+			ContainerInitializerModel model = change.getContainerInitializerModel();
+			containerInitializerModels.add(model);
+		} else if (change.getKind() == OpCode.DELETE) {
+			change.getContainerInitializerModels().forEach(containerInitializerModels::remove);
 		}
 
 		// the change should be processed at serverModel level as well

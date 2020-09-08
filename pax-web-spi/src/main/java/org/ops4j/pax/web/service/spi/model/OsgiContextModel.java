@@ -273,11 +273,6 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		contextRegistrationProperties.put(Constants.SERVICE_RANKING, rank);
 	}
 
-	public OsgiContextModel(WebContainerContext httpContext, Bundle ownerBundle) {
-		this.httpContext = httpContext;
-		this.ownerBundle = ownerBundle;
-	}
-
 	public OsgiContextModel(WebContainerContext httpContext, Bundle ownerBundle, String contextPath) {
 		this.httpContext = httpContext;
 		this.ownerBundle = ownerBundle;

@@ -17,10 +17,13 @@ package org.ops4j.pax.web.service.internal;
 
 import java.util.Dictionary;
 import java.util.EventListener;
+import java.util.List;
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
+import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 
 import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
@@ -280,6 +283,61 @@ class HttpServiceDisabled implements WebContainer {
 		LOG.warn("Http service has already been stopped");
 	}
 
+	// methods used to register / configure JSPs
+
+	@Override
+	public void registerJsps(String[] urlPatterns, Dictionary<String, String> initParams, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	@Override
+	public void registerJspServlet(String jspFile, String[] urlPatterns, Dictionary<String, String> initParams, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	@Override
+	public void registerJspConfigTagLibs(String tagLibLocation, String tagLibUri, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	@Override
+	public void registerJspConfigPropertyGroup(List<String> includeCodas, List<String> includePreludes,
+			List<String> urlPatterns, Boolean elIgnored, Boolean scriptingInvalid, Boolean isXml,
+			HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	@Override
+	public void registerJspConfigPropertyGroup(JspPropertyGroupDescriptor descriptor, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	// methods used to unregister / unconfigure JSPs
+
+	@Override
+	public void unregisterJsps(HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	@Override
+	public void unregisterJspServlet(String jspFile, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	// methods used to register ServletContainerInitializers
+
+	@Override
+	public void registerServletContainerInitializer(ServletContainerInitializer initializer, Class<?>[] classes, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	// methods used to unregister ServletContainerInitializers
+
+	@Override
+	public void unregisterServletContainerInitializer(ServletContainerInitializer initializer, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
 //	/**
 //	 * @see WebContainer#setContextParam(Dictionary, HttpContext)
 //	 */
@@ -300,78 +358,6 @@ class HttpServiceDisabled implements WebContainer {
 //
 //	@Override
 //	public void setSessionCookieConfig(String domain, String name, Boolean httpOnly, Boolean secure, String path, Integer maxAge, HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	/**
-//	 * @see WebContainer#registerJsps(String[], HttpContext)
-//	 */
-//	@Override
-//	public void registerJsps(final String[] urlPatterns,
-//							 final HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	/**
-//	 * @see WebContainer#registerJsps(String[], Dictionary, HttpContext)
-//	 */
-//	@Override
-//	public void registerJsps(final String[] urlPatterns,
-//							 final Dictionary<String, ?> initParams,
-//							 final HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	/**
-//	 * @see WebContainer#unregisterJsps(HttpContext)
-//	 */
-//	@Override
-//	public void unregisterJsps(final HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	/**
-//	 * @see WebContainer#unregisterJsps(HttpContext)
-//	 */
-//	@Override
-//	public void unregisterJsps(final String[] urlPatterns,
-//							   final HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	/**
-//	 * @see WebContainer#registerErrorPage(String, String, HttpContext)
-//	 */
-//	@Override
-//	public void registerErrorPage(final String error, final String location,
-//								  final HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	/**
-//	 * @see WebContainer#unregisterErrorPage(String, HttpContext)
-//	 */
-//	@Override
-//	public void unregisterErrorPage(final String error,
-//									final HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	/**
-//	 * @see WebContainer#registerWelcomeFiles(String[], boolean, HttpContext)
-//	 */
-//	@Override
-//	public void registerWelcomeFiles(final String[] welcomeFiles,
-//									 final boolean rediect, final HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	/**
-//	 * @see WebContainer#unregisterWelcomeFiles(String[], HttpContext)
-//	 */
-//	@Override
-//	public void unregisterWelcomeFiles(String[] welcomeFiles,
-//									   HttpContext httpContext) {
 //		LOG.warn("Http service has already been stopped");
 //	}
 //
@@ -412,53 +398,16 @@ class HttpServiceDisabled implements WebContainer {
 //		LOG.warn("Http service has already been stopped");
 //	}
 //
-//	@Override
-//	public void registerServletContainerInitializer(
-//			ServletContainerInitializer servletContainerInitializer,
-//			Class<?>[] classes, HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	@Override
-//	public void unregisterServletContainerInitializer(HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
 ////	@Override
 ////	public void registerJettyWebXml(URL jettyWebXmlURL, HttpContext httpContext) {
 ////		LOG.warn("Http service has already been stopped");
 ////	}
-//
-//	@Override
-//	public void registerJspServlet(String[] urlPatterns,
-//								   HttpContext httpContext, String jspFile) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	@Override
-//	public void registerJspServlet(String[] urlPatterns,
-//								   Dictionary<String, ?> initParams, HttpContext httpContext,
-//								   String jspFile) {
-//		LOG.warn("Http service has already been stopped");
-//	}
 //
 ////	@Override
 ////	public void setConnectorsAndVirtualHosts(List<String> connectors, List<String> virtualHosts,
 ////											 HttpContext httpContext) {
 ////		LOG.warn("Http service has already been stopped");
 ////	}
-//
-//	@Override
-//	public void registerJspConfigTagLibs(String tagLibLocation, String tagLibUri, HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	@Override
-//	public void registerJspConfigPropertyGroup(List<String> includeCodes,
-//											   List<String> includePreludes, List<String> urlPatterns, Boolean elIgnored, Boolean scriptingInvalid,
-//											   Boolean isXml, HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
 //
 //	@Override
 //	public void registerWebSocket(Object webSocket, HttpContext httpContext) {
@@ -483,16 +432,12 @@ class HttpServiceDisabled implements WebContainer {
 ////		// FIXME check if null valid
 ////		return null;
 ////	}
-//
-//	@Override
-//	public String toString() {
-//		if (serviceBundle == null) {
-//			return super.toString();
-//		} else {
-//			return super.toString() + " for bundle " + serviceBundle;
-//		}
-//	}
-//
+
+	@Override
+	public String toString() {
+		return super.toString() + " for bundle " + serviceBundle;
+	}
+
 ////    @Override
 ////    public WebContainerDTO getWebcontainerDTO() {
 ////        LOG.warn("Http service has already been stoped");

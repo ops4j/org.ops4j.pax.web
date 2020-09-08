@@ -21,7 +21,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.io.EofException;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.ContextHandler;
@@ -73,22 +72,22 @@ class JettyServerHandlerCollection extends HandlerCollection {
 //			NullArgumentException.validateNotNull(getServer(),
 //					"The server is null!");
 
-			final ContextHandler context = ((PaxWebJettyServer) getServer())
-					.getContext(/*matched.getHttpContext()*/null);
+//			final ContextHandler context = ((PaxWebJettyServer) getServer())
+//					.getContext(/*matched.getHttpContext()*/null);
 
-			try {
+//			try {
 //				NullArgumentException.validateNotNull(context,
 //						"Context (handler) for " + target);
-				context.handle(target, baseRequest, request, response);
+//				context.handle(target, baseRequest, request, response);
 
 				//CHECKSTYLE:OFF
-			} catch (EofException e) {
-				throw e;
-			} catch (RuntimeException e) {
-				throw e;
-			} catch (Exception e) {
-				throw new ServletException(e);
-			}
+//			} catch (EofException e) {
+//				throw e;
+//			} catch (RuntimeException e) {
+//				throw e;
+//			} catch (Exception e) {
+//				throw new ServletException(e);
+//			}
 			//CHECKSTYLE:ON
 
 		}

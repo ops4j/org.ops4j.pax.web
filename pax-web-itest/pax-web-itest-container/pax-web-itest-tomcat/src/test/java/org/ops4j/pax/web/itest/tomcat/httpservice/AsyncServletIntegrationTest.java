@@ -31,4 +31,14 @@ public class AsyncServletIntegrationTest extends AbstractAsyncServletIntegration
 		return combine(baseConfigure(), paxWebTomcat());
 	}
 
+	/*
+15:46:10.022 [FelixDispatchQueue] ERROR (NativeTestContainer.java:198) org.ops4j.pax.exam.nat.internal.NativeTestContainer - Framework ERROR event org.osgi.framework.FrameworkEvent[source=org.ops4j.pax.web.pax-web-tomcat [25]]
+org.osgi.framework.BundleException: Unable to resolve org.ops4j.pax.web.pax-web-tomcat [25](R 25.0): missing requirement [org.ops4j.pax.web.pax-web-tomcat [25](R 25.0)] osgi.contract; (&(osgi.contract=JavaJASPIC)(version=1.1.0)) Unresolved requirements: [[org.ops4j.pax.web.pax-web-tomcat [25](R 25.0)] osgi.contract; (&(osgi.contract=JavaJASPIC)(version=1.1.0))]
+	at org.apache.felix.framework.Felix.resolveBundleRevision(Felix.java:4149) ~[org.apache.felix.framework-5.6.12.jar:?]
+	at org.apache.felix.framework.Felix.startBundle(Felix.java:2119) ~[org.apache.felix.framework-5.6.12.jar:?]
+	at org.apache.felix.framework.Felix.setActiveStartLevel(Felix.java:1373) ~[org.apache.felix.framework-5.6.12.jar:?]
+	at org.apache.felix.framework.FrameworkStartLevelImpl.run(FrameworkStartLevelImpl.java:308) ~[org.apache.felix.framework-5.6.12.jar:?]
+	at java.lang.Thread.run(Thread.java:748) [?:1.8.0_261]
+	 */
+
 }

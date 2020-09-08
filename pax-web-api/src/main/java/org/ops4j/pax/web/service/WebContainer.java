@@ -17,10 +17,13 @@ package org.ops4j.pax.web.service;
 
 import java.util.Dictionary;
 import java.util.EventListener;
+import java.util.List;
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
+import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
 import org.osgi.service.http.HttpContext;
@@ -761,10 +764,117 @@ public interface WebContainer extends HttpService {
 	 */
 	void unregisterErrorPages(String[] errors, HttpContext httpContext);
 
+	// methods used to register / configure JSPs
 
+	/**
+	 * <p>Enable JSP support by configuring target runtime specific JSP servlet (which is Jasper in all the cases).
+	 * JSP servlet will be available under selected URL patterns which should be compliant to patterns specified
+	 * in Servlet API specification, chapter 12.2 "Specification of Mappings".</p>
+	 *
+	 * <p>Even if I can imagine registration of different JSP servlets with different init parameters, mapped
+	 * to different URL patterns, for now Pax Web 8 will just handle single JSP servlet per context (service
+	 * ranking rules still apply!).</p>
+	 *
+	 * @param urlPatterns an array of url patterns this jsp support maps to. If null, a
+	 *                    default "*.jsp" will be used
+	 * @param initParams an array of initialization parameters passed directly to Jasper servlet
+	 * @param httpContext the http context for which the jsp support should be enabled.
+	 *                    If null a default http context will be used.
+	 * @since 0.3.0, January 07, 2007
+	 */
+	void registerJsps(String[] urlPatterns, Dictionary<String, String> initParams, HttpContext httpContext);
 
+	/**
+	 * <p>>@code web.xml} allows registration of a {@code <servlet>} with {@link <jsp-file>} instead of
+	 * {@link <servlet-class>}.</p>
+	 *
+	 * <p>When Tomcat parses {@code web.xml} and finds such {@code <servlet>},
+	 * {@code org.apache.catalina.startup.ContextConfig#convertJsp()} sets the servlet class to
+	 * {@code org.apache.jasper.servlet.JspServlet} and the {@code <jsp-file>} is used as its init parameter
+	 * {@code jspFile}.</p>
+	 *
+	 * @param jspFile
+	 * @param urlPatterns
+	 * @param initParams
+	 * @param httpContext
+	 */
+	void registerJspServlet(String jspFile, String[] urlPatterns, Dictionary<String, String> initParams, HttpContext httpContext);
 
+	/**
+	 * Adds mapping of taglib to given context. The taglib matches {@code <jsp-config>/<taglib>} element(s) from
+	 * {@code web.xml}.
+	 *
+	 * @param tagLibLocation
+	 * @param tagLibUri
+	 * @param httpContext
+	 */
+	void registerJspConfigTagLibs(String tagLibLocation, String tagLibUri, HttpContext httpContext);
 
+	/**
+	 * Adds JSP configuration to given context. The configuration matches {@code <jsp-config></jsp-property-group>}
+	 * element(s) from {@code web.xml} - but only those used in Pax Web 8. For full configuration, check
+	 * {@link #registerJspConfigPropertyGroup(JspPropertyGroupDescriptor, HttpContext)}.
+	 *
+	 * @param includeCodas {@code <jsp-property-group>/<include-coda>}
+	 * @param includePreludes {@code <jsp-property-group>/<include-prelude>}
+	 * @param urlPatterns {@code <jsp-property-group>/<url-pattern>}
+	 * @param elIgnored {@code <jsp-property-group>/<el-ignored>}
+	 * @param scriptingInvalid {@code <jsp-property-group>/<scripting-invalid>}
+	 * @param isXml {@code <jsp-property-group>/<is-xml>}
+	 * @param httpContext
+	 */
+	void registerJspConfigPropertyGroup(List<String> includeCodas, List<String> includePreludes,
+			List<String> urlPatterns, Boolean elIgnored, Boolean scriptingInvalid, Boolean isXml,
+			HttpContext httpContext);
+
+	/**
+	 * Adds JSP configuration to given context using {@link JspPropertyGroupDescriptor}.
+	 *
+	 * @since Pax Web 8
+	 * @param descriptor
+	 * @param httpContext
+	 */
+	void registerJspConfigPropertyGroup(JspPropertyGroupDescriptor descriptor, HttpContext httpContext);
+
+	// methods used to unregister / unconfigure JSPs
+
+	/**
+	 * Unregisters JSP servlet from given context - the only possible servlet regardless of the related mappings.
+	 *
+	 * @param httpContext the http context for which the jsp support should be disabled
+	 * @since 0.3.0, January 07, 2007
+	 */
+	void unregisterJsps(HttpContext httpContext);
+
+	/**
+	 * Unregisters a servlet that's using {@link <jsp-file>} in {@code web.xml}.
+	 * @param jspFile
+	 * @param httpContext
+	 */
+	void unregisterJspServlet(String jspFile, HttpContext httpContext);
+
+	// methods used to register ServletContainerInitializers
+
+	/**
+	 * Register {@link ServletContainerInitializer} into a context. If there are any <em>active</em> web elements
+	 * already registered, the context <strong>must be restarted</strong>.
+	 *
+	 * @param initializer
+	 * @param classes
+	 * @param httpContext
+	 */
+	void registerServletContainerInitializer(ServletContainerInitializer initializer, Class<?>[] classes,
+			HttpContext httpContext);
+
+	// methods used to unregister ServletContainerInitializers
+
+	/**
+	 * Unregister a {@link ServletContainerInitializer} from a context.
+	 *
+	 * @param initializer
+	 * @param httpContext
+	 */
+	void unregisterServletContainerInitializer(ServletContainerInitializer initializer, HttpContext httpContext);
 
 
 
@@ -798,106 +908,6 @@ public interface WebContainer extends HttpService {
 //	 *                                  into a registration
 //	 */
 //	void setSessionTimeout(Integer minutes, HttpContext httpContext);
-//
-//	/**
-//	 * Enable jsp support.
-//	 *
-//	 * @param urlPatterns an array of url patterns this jsp support maps to. If null, a
-//	 *                    default "*.jsp" will be used
-//	 * @param httpContext the http context for which the jsp support should be enabled.
-//	 *                    If null a default http context will be used.
-//	 * @throws UnsupportedOperationException if optional org.ops4j.pax.web.jsp package is not resolved
-//	 * @since 0.3.0, January 07, 2007
-//	 */
-//	void registerJsps(String[] urlPatterns, HttpContext httpContext);
-//
-//	/**
-//	 * Enable jsp support.
-//	 *
-//	 * @param urlPatterns an array of url patterns this jsp support maps to. If null, a
-//	 *                    default "*.jsp" will be used
-//	 * @param initParams  initialization arguments or null if there are none.
-//	 * @param httpContext the http context for which the jsp support should be enabled.
-//	 *                    If null a default http context will be used.
-//	 * @throws UnsupportedOperationException if optional org.ops4j.pax.web.jsp package is not resolved
-//	 * @since 2.0.0
-//	 */
-//	void registerJsps(String[] urlPatterns, Dictionary<String, ?> initParams,
-//					  HttpContext httpContext);
-//
-//	/**
-//	 * Unregister jsps and disable jsp support.
-//	 *
-//	 * @param httpContext the http context for which the jsp support should be disabled
-//	 * @throws IllegalArgumentException      if http context is null or jsp support was not enabled for
-//	 *                                       the http context
-//	 * @throws UnsupportedOperationException if optional org.ops4j.pax.web.jsp package is not resolved
-//	 * @since 0.3.0, January 07, 2007
-//	 */
-//	void unregisterJsps(HttpContext httpContext);
-//
-//    /**
-//     * Enable jsp support.
-//     *
-//     * @param urlPatterns
-//     *            an array of url patterns this jsp support maps to. If null, a
-//     *            default "*.jsp" will be used
-//     * @param httpContext
-//     *            the http context for which the jsp support should be enabled.
-//     *            If null a default http context will be used.
-//     * @throws UnsupportedOperationException
-//     *             if optional org.ops4j.pax.web.jsp package is not resolved
-//     * @since 0.3.0, January 07, 2007
-//     */
-//    void registerJsps(String[] urlPatterns, HttpContext httpContext);
-//
-//    /**
-//     * Enable jsp support.
-//     *
-//     * @param urlPatterns
-//     *            an array of url patterns this jsp support maps to. If null, a
-//     *            default "*.jsp" will be used
-//     * @param initParams
-//     *            initialization arguments or null if there are none.
-//     * @param httpContext
-//     *            the http context for which the jsp support should be enabled.
-//     *            If null a default http context will be used.
-//     * @throws UnsupportedOperationException
-//     *             if optional org.ops4j.pax.web.jsp package is not resolved
-//     * @since 2.0.0
-//     */
-//    void registerJsps(String[] urlPatterns, Dictionary<String, ?> initParams, HttpContext httpContext);
-//
-//    /**
-//     * Unregister jsps and disable jsp support.
-//     *
-//     * @param httpContext
-//     *            the http context for which the jsp support should be disabled
-//     * @throws IllegalArgumentException
-//     *             if http context is null or jsp support was not enabled for
-//     *             the http context
-//     * @throws UnsupportedOperationException
-//     *             if optional org.ops4j.pax.web.jsp package is not resolved
-//     * @since 0.3.0, January 07, 2007
-//     */
-//    void unregisterJsps(HttpContext httpContext);
-//
-//    /**
-//     * Unregister jsps and disable jsp support.
-//     *
-//     * @param urlPatterns
-//     *            an array of url patterns this jsp support maps to. If null, a
-//     *            default "*.jsp" will be used
-//     * @param httpContext
-//     *            the http context for which the jsp support should be disabled
-//     * @throws IllegalArgumentException
-//     *             if http context is null or jsp support was not enabled for
-//     *             the http context
-//     * @throws UnsupportedOperationException
-//     *             if optional org.ops4j.pax.web.jsp package is not resolved
-//     * @since 2.0.0
-//     */
-//    void unregisterJsps(String[] urlPatterns, HttpContext httpContext);
 
 //
 //    /**
@@ -940,34 +950,7 @@ public interface WebContainer extends HttpService {
 //     */
 //    void unregisterConstraintMapping(HttpContext httpContext);
 //
-//    /**
-//     * Register ServletContainerInitializer....
-//     *
-//     * @param servletContainerInitializer
-//     * @param classes
-//     * @param httpContext
-//     */
-//    void registerServletContainerInitializer(ServletContainerInitializer servletContainerInitializer,
-//            Class<?>[] classes, HttpContext httpContext);
 //
-//    /**
-//     * Unregister method for {@link ServletContainerInitializer}s
-//     *
-//     * @param httpContext
-//     *            the http Context to unregister from
-//     */
-//    void unregisterServletContainerInitializer(HttpContext httpContext);
-//
-//    void registerJspServlet(String[] urlPatterns, HttpContext httpContext, String jspF);
-//
-//    void registerJspServlet(String[] urlPatterns, Dictionary<String, ?> dictionary, HttpContext httpContext,
-//            String jspF);
-//
-//    void registerJspConfigTagLibs(String tagLibLocation, String tagLibUri, HttpContext httpContext);
-//
-//    void registerJspConfigPropertyGroup(List<String> includeCodes, List<String> includePreludes,
-//            List<String> urlPatterns, Boolean elIgnored, Boolean scriptingInvalid, Boolean isXml,
-//            HttpContext httpContext);
 //
 //    void registerWebSocket(Object webSocket, HttpContext httpContext);
 //

@@ -19,29 +19,17 @@ package org.ops4j.pax.web.service.whiteboard;
 
 import java.util.Map;
 
-import org.ops4j.pax.web.annotations.Review;
-
 /**
  * Jsp mapping.
  *
  * @author Alin Dreghiciu
  * @since 0.4.0, March 15, 2008
  */
-@Review("Not yet refactored")
-public interface JspMapping {
+public interface JspMapping extends ContextRelated {
 
 	/**
-	 * Getter.
-	 *
-	 * @return id of the http context this jsp belongs to
-	 */
-	String getHttpContextId();
-
-	/**
-	 * Getter.
-	 *
-	 * @return an array of url patterns this jsp support maps to. If null, a
-	 * default "*.jsp" will be used.
+	 * Returns an array of URL patterns that map to JSP servlet.
+	 * @return
 	 */
 	String[] getUrlPatterns();
 
@@ -50,6 +38,10 @@ public interface JspMapping {
 	 *
 	 * @return map of initialization parameters.
 	 */
-	Map<String, String> getInitParams();
+	/**
+	 * Returns optional map of
+	 * @return
+	 */
+	Map<String, String> getInitParameters();
 
 }

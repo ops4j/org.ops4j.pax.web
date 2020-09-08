@@ -22,16 +22,20 @@ import java.net.InetSocketAddress;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Supplier;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextListener;
 import javax.servlet.http.HttpSessionListener;
@@ -63,15 +67,21 @@ import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
+import org.ops4j.pax.web.service.spi.servlet.DynamicRegistrations;
+import org.ops4j.pax.web.service.spi.servlet.OsgiDynamicServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
+import org.ops4j.pax.web.service.spi.servlet.RegisteringContainerInitializer;
+import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
+import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
@@ -156,6 +166,16 @@ class TomcatServerWrapper implements BatchVisitor {
 	private final Map<String, TreeSet<OsgiContextModel>> osgiContextModels = new HashMap<>();
 
 	/**
+	 * Even if Tomcat manages SCIs, we'll manage them here instead - to be able to remove them when needed.
+	 */
+	private final Map<String, LinkedHashMap<Integer, SCIWrapper>> initializers = new HashMap<>();
+
+	/**
+	 * Keep dynamic configuration and use it during startup only.
+	 */
+	private final Map<String, DynamicRegistrations> dynamicRegistrations = new HashMap<>();
+
+	/**
 	 * Global {@link Configuration} passed from pax-web-runtime through
 	 * {@link org.ops4j.pax.web.service.spi.ServerController}
 	 */
@@ -200,28 +220,10 @@ class TomcatServerWrapper implements BatchVisitor {
 		// PID config: org.osgi.service.http.enabled and org.osgi.service.http.secure.enabled
 		verifyConnectorConfiguration();
 
-//		if (server.getErrorHandler() == null) {
-//			server.setErrorHandler(new ErrorHandler());
-//		}
-
 		// Configure NCSA RequestLogHandler if needed
 		if (configuration.logging().isLogNCSAFormatEnabled()) {
 			configureRequestLog();
 		}
-
-//		mbeanContainer = jettyFactory.enableJmxIfPossible(server);
-
-//		// most important part - a handler.
-//		// TODO: my initial idea was to have this hierarchy:
-//		//  server:
-//		//   - handler collection
-//		//      - handler collection to store custom handlers with @Priority > 0
-//		//      - context handler collection to store context handlers
-//		//      - handler collection to store custom handlers with @Priority < 0
-//		//
-//		// for now, let's have it like before Pax Web 8
-//		this.mainHandler = new ContextHandlerCollection();
-//		server.setHandler(this.mainHandler);
 	}
 
 	/**
@@ -594,6 +596,7 @@ class TomcatServerWrapper implements BatchVisitor {
 			PaxWebStandardContext context = new PaxWebStandardContext(default404Servlet);
 			context.setName(model.getId());
 			context.setPath("/".equals(model.getContextPath()) ? "" : model.getContextPath());
+			// TODO: this should really be context specific
 			context.setWorkDir(configuration.server().getTemporaryDirectory().getAbsolutePath());
 //							ctx.setWebappVersion(name);
 //							ctx.setDocBase(basedir);
@@ -827,13 +830,17 @@ class TomcatServerWrapper implements BatchVisitor {
 			// explicit no check for existing mapping under given physical context path
 			contextHandlers.put(model.getContextPath(), context);
 			osgiContextModels.put(model.getContextPath(), new TreeSet<>());
+
+			// configure ordered map of initializers
+			initializers.put(model.getContextPath(), new LinkedHashMap<>());
+			dynamicRegistrations.put(model.getContextPath(), new DynamicRegistrations());
 		}
 	}
 
 	@Override
 	public void visit(OsgiContextModelChange change) {
 		OsgiContextModel osgiModel = change.getOsgiContextModel();
-		ServletContextModel servletModel = change.getServletContextModel();
+		ServletContextModel servletContextModel = change.getServletContextModel();
 
 		String contextPath = osgiModel.getContextPath();
 		PaxWebStandardContext realContext = contextHandlers.get(contextPath);
@@ -851,7 +858,7 @@ class TomcatServerWrapper implements BatchVisitor {
 			if (osgiServletContexts.containsKey(osgiModel)) {
 				throw new IllegalStateException(osgiModel + " is already registered");
 			}
-			osgiServletContexts.put(osgiModel, new OsgiServletContext(realContext.getServletContext(), osgiModel, servletModel));
+			osgiServletContexts.put(osgiModel, new OsgiServletContext(realContext.getServletContext(), osgiModel, servletContextModel));
 			osgiContextModels.get(contextPath).add(osgiModel);
 		}
 
@@ -1093,15 +1100,22 @@ class TomcatServerWrapper implements BatchVisitor {
 		if (change.getKind() == OpCode.ADD) {
 			EventListenerModel eventListenerModel = change.getEventListenerModel();
 			List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
+			Set<String> done = new HashSet<>();
 			contextModels.forEach((context) -> {
-				PaxWebStandardContext standardContext = contextHandlers.get(context.getContextPath());
+				String contextPath = context.getContextPath();
+				PaxWebStandardContext standardContext = contextHandlers.get(contextPath);
 				EventListener eventListener = eventListenerModel.resolveEventListener();
 				if (eventListener instanceof ServletContextAttributeListener) {
 					// add it to accessible list to fire per-OsgiContext attribute changes
 					OsgiServletContext c = osgiServletContexts.get(context);
 					c.addServletContextAttributeListener((ServletContextAttributeListener)eventListener);
 				}
-				// add the listener to real context - even ServletContextAttributeListener
+				if (!done.add(contextPath)) {
+					return;
+				}
+
+				// add the listener to real context - even ServletContextAttributeListener (but only once - even
+				// if there are many OsgiServletContexts per ServletContext)
 				if (eventListener instanceof HttpSessionListener
 						|| eventListener instanceof ServletContextListener) {
 					standardContext.addApplicationLifecycleListener(eventListener);
@@ -1252,24 +1266,78 @@ class TomcatServerWrapper implements BatchVisitor {
 		}
 	}
 
+	@Override
+	public void visit(ContainerInitializerModelChange change) {
+		if (change.getKind() == OpCode.ADD) {
+			ContainerInitializerModel model = change.getContainerInitializerModel();
+			List<OsgiContextModel> contextModels = model.getContextModels();
+			contextModels.forEach((context) -> {
+				String path = context.getContextPath();
+				PaxWebStandardContext ctx = contextHandlers.get(context.getContextPath());
+				if (isStarted(ctx)) {
+					LOG.warn("ServletContainerInitializer {} can't be added, as the context {} is already started",
+							model.getContainerInitializer(), ctx);
+				} else {
+					// even if there's org.apache.catalina.core.StandardContext.addServletContainerInitializer(),
+					// there's no "remove" equivalent and also we want to be able to pass correct implementation
+					// of ServletContext there
+					ServletContainerInitializer initializer = model.getContainerInitializer();
+					DynamicRegistrations registrations = this.dynamicRegistrations.get(path);
+					OsgiDynamicServletContext dynamicContext = new OsgiDynamicServletContext(osgiServletContexts.get(context), registrations);
+					SCIWrapper wrapper = new SCIWrapper(dynamicContext, model);
+					initializers.get(path).put(System.identityHashCode(initializer), wrapper);
+				}
+			});
+		}
+		if (change.getKind() == OpCode.DELETE) {
+			List<ContainerInitializerModel> models = change.getContainerInitializerModels();
+			for (ContainerInitializerModel model : models) {
+				List<OsgiContextModel> contextModels = model.getContextModels();
+				contextModels.forEach((context) -> {
+					String path = context.getContextPath();
+					ServletContainerInitializer initializer = model.getContainerInitializer();
+					LinkedHashMap<Integer, SCIWrapper> wrappers = this.initializers.get(path);
+					if (wrappers != null) {
+						wrappers.remove(System.identityHashCode(initializer));
+					}
+				});
+			}
+		}
+	}
+
 	/**
-	 * Registration of <em>active web element</em> should always start the context. On the other hand,
-	 * registration of <em>passive web element</em> should <strong>not</strong> start the context.
+	 * <p>Registration of <em>active web element</em> should always start the context. On the other hand,
+	 * registration of <em>passive web element</em> should <strong>not</strong> start the context.</p>
+	 *
+	 * <p>This method is always (should be) called withing the "configuration thread" of Pax Web Runtime, because
+	 * it's called in visit() methods for servlets (including resources) and filters, so we can safely access
+	 * {@link org.ops4j.pax.web.service.spi.model.ServerModel}.</p>
 	 * @param sch
 	 */
 	private void ensureServletContextStarted(PaxWebStandardContext context) {
-		if (context.getState() == LifecycleState.STARTED
-				|| context.getState() == LifecycleState.STARTING
-				|| context.getState() == LifecycleState.STARTING_PREP
-				|| context.getState() == LifecycleState.INITIALIZING) {
+		if (isStarted(context)) {
 			return;
 		}
 		try {
-			LOG.info("Starting Tomcat context \"" + (context.getPath().equals("") ? "/" : context.getPath()) + "\"");
+			String contextPath = context.getPath().equals("") ? "/" : context.getPath();
+			LOG.info("Starting Tomcat context \"" + contextPath + "\"");
+
+			Collection<SCIWrapper> initializers = new LinkedList<>(this.initializers.get(contextPath).values());
+			if (initializers.size() > 0) {
+				initializers.add(new RegisteringContainerInitializer(this.dynamicRegistrations.get(contextPath)));
+				context.setServletContainerInitializers(initializers);
+			}
 			context.start();
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
+	}
+
+	public boolean isStarted(PaxWebStandardContext context) {
+		return context.getState() == LifecycleState.STARTED
+						|| context.getState() == LifecycleState.STARTING
+						|| context.getState() == LifecycleState.STARTING_PREP
+						|| context.getState() == LifecycleState.INITIALIZING;
 	}
 
 	private OsgiServletContext getHighestRankedContext(String contextPath, FilterModel model) {

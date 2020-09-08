@@ -50,9 +50,9 @@
 							javax.servlet.descriptor;version="[3.1,5)",
 
 							<!-- from pax-web-jsp -->
-							javax.servlet.jsp;version="${dependency.javax.servlet.jsp-api.version}";resolution:=optional,
-							javax.servlet.jsp.el;version="${dependency.javax.servlet.jsp-api.version}";resolution:=optional,
-							javax.servlet.jsp.tagext;version="${dependency.javax.servlet.jsp-api.version}";resolution:=optional,
+							javax.servlet.jsp;version="${dependency.jakarta.servlet.jsp-api.version}";resolution:=optional,
+							javax.servlet.jsp.el;version="${dependency.jakarta.servlet.jsp-api.version}";resolution:=optional,
+							javax.servlet.jsp.tagext;version="${dependency.jakarta.servlet.jsp-api.version}";resolution:=optional,
 
 							<!-- from pax-logging-api -->
 							org.apache.juli.logging,
@@ -80,8 +80,14 @@
 						-->
 						<Private-Package />
 						<Export-Package>
+							<!--
+								Carefuly export packages from tomcat-embed-core and explain the actual (non "embed")
+								Tomcat library that originally contains given package
+							-->
+
 							<!-- tomcat-api -->
 							org.apache.tomcat;version="${dependency.tomcat.version}",
+
 							<!-- tomcat-util -->
 							org.apache.tomcat.util;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util.buf;version="${dependency.tomcat.version}",
@@ -94,6 +100,7 @@
 							org.apache.tomcat.util.security;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util.threads;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util.threads.res;version="${dependency.tomcat.version}",
+
 							<!-- tomcat-util-scan -->
 							org.apache.tomcat.util.descriptor;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util.descriptor.tagplugin;version="${dependency.tomcat.version}",
@@ -101,10 +108,12 @@
 							org.apache.tomcat.util.descriptor.web;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util.digester;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util.scan;version="${dependency.tomcat.version}",
+
 							<!-- tomcat-embed-core - unfortunately these packages have to be here -->
 							org.apache.tomcat.util.modeler;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util.modeler.modules;version="${dependency.tomcat.version}",
-							<!-- tomcat-juli -->
+
+							<!-- tomcat-juli (don't export org.apache.tomcat.juli.logging, which comes from pax-logging-api -->
 							org.apache.juli;version="${dependency.tomcat.version}"
 						</Export-Package>
 						<_nouses>true</_nouses>
@@ -118,25 +127,14 @@
 
 		<!-- Tomcat -->
 
-<!--		<dependency>-->
-<!--			<groupId>org.apache.tomcat</groupId>-->
-<!--			<artifactId>tomcat-api</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.apache.tomcat</groupId>-->
-<!--			<artifactId>tomcat-util</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.apache.tomcat</groupId>-->
-<!--			<artifactId>tomcat-util-scan</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
 		<dependency>
 			<groupId>org.apache.tomcat.embed</groupId>
 			<artifactId>tomcat-embed-core</artifactId>
-			<scope>provided</scope>
+			<!--
+				runtime scope means: not required for compilation, see as transitive dependency
+				with proper Export-Package, we control what actually is provided at runtime
+			-->
+			<scope>runtime</scope>
 		</dependency>
 
 	</dependencies>

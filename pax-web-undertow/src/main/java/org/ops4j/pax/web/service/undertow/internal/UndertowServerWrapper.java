@@ -23,10 +23,12 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,6 +39,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import javax.servlet.DispatcherType;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletException;
@@ -77,15 +80,20 @@ import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
+import org.ops4j.pax.web.service.spi.servlet.DynamicRegistrations;
+import org.ops4j.pax.web.service.spi.servlet.OsgiDynamicServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
+import org.ops4j.pax.web.service.spi.servlet.RegisteringContainerInitializer;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
+import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
@@ -104,6 +112,7 @@ import org.ops4j.pax.web.service.undertow.internal.configuration.model.Server;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.SocketBinding;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowConfiguration;
 import org.ops4j.pax.web.service.undertow.internal.web.FlexibleErrorPages;
+import org.ops4j.pax.web.service.undertow.internal.web.OsgiServletContainerInitializerInfo;
 import org.ops4j.pax.web.service.undertow.internal.web.UndertowResourceServlet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
@@ -235,6 +244,17 @@ class UndertowServerWrapper implements BatchVisitor {
 	 * determine the ServletContextHelper to use).
 	 */
 	private final Map<String, TreeSet<OsgiContextModel>> osgiContextModels = new HashMap<>();
+
+	/**
+	 * As with Tomcat and Jetty, we'll manually handle SCIs to be able to add/remove them and call them with
+	 * proper {@link ServletContext} implementation.
+	 */
+	private final Map<String, LinkedHashMap<Integer, OsgiServletContainerInitializerInfo>> initializers = new HashMap<>();
+
+	/**
+	 * Keep dynamic configuration and use it during startup only.
+	 */
+	private final Map<String, DynamicRegistrations> dynamicRegistrations = new HashMap<>();
 
 	/**
 	 * Global {@link Configuration} passed from pax-web-runtime through
@@ -725,7 +745,7 @@ class UndertowServerWrapper implements BatchVisitor {
 
 		LOG.info("NCSARequestlogging is using directory {}", lc.getLogNCSADirectory());
 
-// properties based log configuration:
+		// properties based log configuration:
 
 		if (lc.isLogNCSAFormatEnabled()) {
 			String logNCSADirectory = lc.getLogNCSADirectory();
@@ -879,13 +899,17 @@ class UndertowServerWrapper implements BatchVisitor {
 
 			// prepare mapping of sorted OsgiContextModel collections per context path
 			osgiContextModels.put(contextPath, new TreeSet<>());
+
+			// configure ordered map of initializers
+			initializers.put(model.getContextPath(), new LinkedHashMap<>());
+			dynamicRegistrations.put(model.getContextPath(), new DynamicRegistrations());
 		}
 	}
 
 	@Override
 	public void visit(OsgiContextModelChange change) {
 		OsgiContextModel osgiModel = change.getOsgiContextModel();
-		ServletContextModel servletModel = change.getServletContextModel();
+		ServletContextModel servletContextModel = change.getServletContextModel();
 
 		String contextPath = osgiModel.getContextPath();
 
@@ -902,7 +926,7 @@ class UndertowServerWrapper implements BatchVisitor {
 			if (osgiServletContexts.containsKey(osgiModel)) {
 				throw new IllegalStateException(osgiModel + " is already registered");
 			}
-			osgiServletContexts.put(osgiModel, new OsgiServletContext(getRealServletContext(contextPath), osgiModel, servletModel));
+			osgiServletContexts.put(osgiModel, new OsgiServletContext(getRealServletContext(contextPath), osgiModel, servletContextModel));
 			osgiContextModels.get(contextPath).add(osgiModel);
 		}
 
@@ -1059,9 +1083,14 @@ class UndertowServerWrapper implements BatchVisitor {
 				}
 				LOG.info("Removing servlet {}", model);
 
+				Set<String> done = new HashSet<>();
+
 				// proper order ensures that (assuming above scenario), for /c1, ocm2 will be chosen and ocm1 skipped
 				model.getContextModels().forEach(osgiContextModel -> {
 					String contextPath = osgiContextModel.getContextPath();
+					if (!done.add(contextPath)) {
+						return;
+					}
 
 					// this time we just assume that the servlet context is started
 
@@ -1309,8 +1338,10 @@ class UndertowServerWrapper implements BatchVisitor {
 		if (change.getKind() == OpCode.ADD) {
 			EventListenerModel eventListenerModel = change.getEventListenerModel();
 			List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
+			Set<String> done = new HashSet<>();
 			contextModels.forEach((context) -> {
-				DeploymentManager manager = getDeploymentManager(context.getContextPath());
+				String contextPath = context.getContextPath();
+				DeploymentManager manager = getDeploymentManager(contextPath);
 				DeploymentInfo deploymentInfo = manager == null ? deploymentInfos.get(context.getContextPath())
 						: manager.getDeployment().getDeploymentInfo();
 
@@ -1320,7 +1351,12 @@ class UndertowServerWrapper implements BatchVisitor {
 					OsgiServletContext c = osgiServletContexts.get(context);
 					c.addServletContextAttributeListener((ServletContextAttributeListener) eventListener);
 				}
-				// add the listener to real context - even ServletContextAttributeListener
+				if (!done.add(contextPath)) {
+					return;
+				}
+
+				// add the listener to real context - even ServletContextAttributeListener (but only once - even
+				// if there are many OsgiServletContexts per ServletContext)
 				ListenerInfo info = new ListenerInfo(eventListener.getClass(), new ImmediateInstanceFactory<>(eventListener));
 
 				deploymentInfo.addListener(info);
@@ -1521,7 +1557,59 @@ class UndertowServerWrapper implements BatchVisitor {
 		}
 	}
 
-	public void ensureServletContextStarted(final String contextPath) {
+	@Override
+	public void visit(ContainerInitializerModelChange change) {
+		if (change.getKind() == OpCode.ADD) {
+			ContainerInitializerModel model = change.getContainerInitializerModel();
+			List<OsgiContextModel> contextModels = model.getContextModels();
+			contextModels.forEach((context) -> {
+				String path = context.getContextPath();
+				DeploymentManager manager = getDeploymentManager(path);
+				if (manager != null) {
+					LOG.warn("ServletContainerInitializer {} can't be added, as the context \"{}\" is already started",
+							model.getContainerInitializer(), path);
+				} else {
+					// even if there's org.apache.catalina.core.StandardContext.addServletContainerInitializer(),
+					// there's no "remove" equivalent and also we want to be able to pass correct implementation
+					// of ServletContext there
+					ServletContainerInitializer initializer = model.getContainerInitializer();
+
+					// because of the quirks related to Undertow's deploymentInfo vs. deployment (and their
+					// clones), we'll prepare specia SCIInfo here
+					OsgiServletContext osgiServletContext = osgiServletContexts.get(context);
+					DynamicRegistrations registrations = this.dynamicRegistrations.get(path);
+					OsgiDynamicServletContext dynamicContext = new OsgiDynamicServletContext(osgiServletContexts.get(context), registrations);
+					OsgiServletContainerInitializerInfo info = new OsgiServletContainerInitializerInfo(model, dynamicContext);
+					initializers.get(path).put(System.identityHashCode(initializer), info);
+				}
+			});
+		}
+		if (change.getKind() == OpCode.DELETE) {
+			List<ContainerInitializerModel> models = change.getContainerInitializerModels();
+			for (ContainerInitializerModel model : models) {
+				List<OsgiContextModel> contextModels = model.getContextModels();
+				contextModels.forEach((context) -> {
+					String path = context.getContextPath();
+					ServletContainerInitializer initializer = model.getContainerInitializer();
+					LinkedHashMap<Integer, OsgiServletContainerInitializerInfo> initializers = this.initializers.get(path);
+					if (initializers != null) {
+						// just remove the ServletContainerInitializerInfo without _cleaning_ it, because it was
+						// _cleaned_ just after io.undertow.servlet.core.DeploymentManagerImpl.deploy() called
+						// javax.servlet.ServletContainerInitializer.onStartup()
+						initializers.remove(System.identityHashCode(initializer));
+					}
+				});
+			}
+		}
+	}
+
+	/**
+	 * <p>This method is always (should be) called withing the "configuration thread" of Pax Web Runtime, because
+	 * it's called in visit() methods for servlets (including resources) and filters, so we can safely access
+	 * {@link org.ops4j.pax.web.service.spi.model.ServerModel}.</p>
+	 * @param contextPath
+	 */
+	private void ensureServletContextStarted(final String contextPath) {
 		DeploymentManager manager = getDeploymentManager(contextPath);
 
 		if (manager != null) {
@@ -1532,10 +1620,28 @@ class UndertowServerWrapper implements BatchVisitor {
 
 			// take previously created deployment (possibly with listeners and other "passive" configuration)
 			DeploymentInfo deployment = deploymentInfos.get(contextPath);
+
+			// when starting (or, which is possible only with Pax Web, not Undertow itself - restarting), we'll
+			// clear all the SCIs in the deploymentInfo and add new ones (because some of them may have been removed)
+			deployment.getServletContainerInitializers().clear();
+
+			// add all configured initializers, but as special wrappers
+			Collection<OsgiServletContainerInitializerInfo> initializers = this.initializers.get(contextPath).values();
+			for (OsgiServletContainerInitializerInfo info : initializers) {
+				// with no Whiteboard support, we can have only one OsgiContextModel per ContainerInitializerModel
+				// but we'll still act as if there could be many
+				deployment.addServletContainerInitializers(info);
+			}
+			if (initializers.size() > 0) {
+				// and finally add the registering initializer
+				RegisteringContainerInitializer registeringSCI = new RegisteringContainerInitializer(this.dynamicRegistrations.get(contextPath));
+				deployment.addServletContainerInitializers(new OsgiServletContainerInitializerInfo(registeringSCI));
+			}
 			manager = servletContainer.addDeployment(deployment);
 
 			// here's where Undertow-specific instance of javax.servlet.ServletContext is created
 			manager.deploy();
+
 			final ServletContext context = manager.getDeployment().getServletContext();
 			osgiServletContexts.forEach((ocm, osc) -> {
 				if (ocm.getContextPath().equals(contextPath)) {

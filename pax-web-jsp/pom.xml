@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
+    Copyright 2020 OPS4J.
 
-      http://www.apache.org/licenses/LICENSE-2.0
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-    KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -34,7 +31,7 @@
 	<artifactId>pax-web-jsp</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web - Jsp Support</name>
+	<name>OPS4J Pax Web - JSP Support</name>
 
 	<description>Pax Web JSP/EL/JSTL Support via Tomcat Jasper 2.</description>
 
@@ -67,18 +64,18 @@
 							javax.servlet.descriptor;version="[3.1,5)",
 							javax.servlet.http;version="[3.1,5)",
 
-							<!-- JSP API (exported from pax-web-jsp) -->
-							javax.servlet.jsp;version="${dependency.javax.servlet.jsp-api.version}",
-							javax.servlet.jsp.el;version="${dependency.javax.servlet.jsp-api.version}",
-							javax.servlet.jsp.tagext;version="${dependency.javax.servlet.jsp-api.version}",
+							<!-- JSP API (also exported from pax-web-jsp - this bundle) -->
+							javax.servlet.jsp;version="${dependency.jakarta.servlet.jsp-api.version}",
+							javax.servlet.jsp.el;version="${dependency.jakarta.servlet.jsp-api.version}",
+							javax.servlet.jsp.tagext;version="${dependency.jakarta.servlet.jsp-api.version}",
 
-							<!-- JSTL API (exported from pax-web-jsp) -->
-							javax.servlet.jsp.jstl.core;version="${dependency.javax.servlet.jsp.jstl-api.version}",
-							javax.servlet.jsp.jstl.fmt;version="${dependency.javax.servlet.jsp.jstl-api.version}",
-							javax.servlet.jsp.jstl.sql;version="${dependency.javax.servlet.jsp.jstl-api.version}",
-							javax.servlet.jsp.jstl.tlv;version="${dependency.javax.servlet.jsp.jstl-api.version}",
+							<!-- JSTL API (also exported from pax-web-jsp - this bundle) -->
+							javax.servlet.jsp.jstl.core;version="${dependency.jakarta.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.fmt;version="${dependency.jakarta.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.sql;version="${dependency.jakarta.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.tlv;version="${dependency.jakarta.servlet.jsp.jstl-api.version}",
 
-							<!-- EL API (only imported) -->
+							<!-- EL API (only imported - from jakarta.el:jakarta.el-api) -->
 							javax.el;version="[3.0,4)",
 
 							<!-- ranges indicate we can work with OSGi Core R6+ -->
@@ -88,19 +85,28 @@
 
 							<!-- OSGi cmpn -->
 							org.osgi.service.http;version="[1.2,2)",
-<!--							org.osgi.service.packageadmin;resolution:=optional,-->
 
 							<!-- from pax-web -->
-							org.ops4j.pax.web.*;version="${pax-web.osgi.version}",
+<!--							org.ops4j.pax.web.*;version="${pax-web.osgi.version}",-->
 
 							<!-- from pax-logging-api -->
 							org.slf4j;version="[1.7,2)",
 							org.apache.juli.logging,
 
-							<!-- to check -->
+							<!-- packages required by Jasper/EL implementation and exported from pax-web-tomcat-common -->
+							org.apache.tomcat;version="${dependency.tomcat.version}",
+							org.apache.tomcat.util;version=${dependency.tomcat.version},
+							org.apache.tomcat.util.digester;version=${dependency.tomcat.version},
+							org.apache.tomcat.util.descriptor;version=${dependency.tomcat.version},
+							org.apache.tomcat.util.descriptor.tagplugin;version=${dependency.tomcat.version},
+<!--							org.apache.tomcat.util.descriptor.tld;version=${dependency.tomcat.version},-->
+							org.apache.tomcat.util.file;version=${dependency.tomcat.version},
+							org.apache.tomcat.util.res;version=${dependency.tomcat.version},
+							org.apache.tomcat.util.scan;version=${dependency.tomcat.version}
+							org.apache.tomcat.util.security;version=${dependency.tomcat.version},
 
 							<!-- other standard packages -->
-							javax.annotation.*,
+<!--							javax.annotation.*,-->
 							javax.naming,
 							javax.sql;resolution:=optional,
 							javax.xml.parsers,
@@ -114,33 +120,26 @@
 							org.w3c.dom.traversal;resolution:=optional,
 							org.xml.sax.*,
 							org.eclipse.*;resolution:=optional,
-							org.eclipse.jdt.internal.compiler.parser;resolution:=optional,
-							<!-- packages required by Jasper/EL implementation and exported from pax-web-tomcat-common -->
-							org.apache.tomcat;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util;version=${dependency.tomcat.version},
-							org.apache.tomcat.util.digester;version=${dependency.tomcat.version},
-							org.apache.tomcat.util.descriptor;version=${dependency.tomcat.version},
-							org.apache.tomcat.util.descriptor.tagplugin;version=${dependency.tomcat.version},
-							org.apache.tomcat.util.file;version=${dependency.tomcat.version},
-							org.apache.tomcat.util.res;version=${dependency.tomcat.version},
-							org.apache.tomcat.util.scan;version=${dependency.tomcat.version}
-							org.apache.tomcat.util.security;version=${dependency.tomcat.version},
+							org.eclipse.jdt.internal.compiler.parser;resolution:=optional
 						</Import-Package>
 						<Export-Package>
-							<!-- pax-web -->
+							<!-- pax-web-jsp - packages from this bundle -->
 							org.ops4j.pax.web.jsp;version="${pax-web.osgi.version}",
+
 							<!--
 								re-export JSP API - from mvn:org.apache.tomcat/tomcat-jsp-api
-								(instead of from mvn:javax.servlet.jsp/javax.servlet.jsp-api)
+								(instead of from mvn:jakarta.servlet.jsp/jakarta.servlet.jsp-api)
 							-->
-							javax.servlet.jsp;version="${dependency.javax.servlet.jsp-api.version}",
-							javax.servlet.jsp.el;version="${dependency.javax.servlet.jsp-api.version}",
-							javax.servlet.jsp.tagext;version="${dependency.javax.servlet.jsp-api.version}",
-							<!-- re-export JSTL API from mvn:javax.servlet.jsp.jstl/javax.servlet.jsp.jstl-api -->
-							javax.servlet.jsp.jstl.core;version="${dependency.javax.servlet.jsp.jstl-api.version}",
-							javax.servlet.jsp.jstl.fmt;version="${dependency.javax.servlet.jsp.jstl-api.version}",
-							javax.servlet.jsp.jstl.sql;version="${dependency.javax.servlet.jsp.jstl-api.version}",
-							javax.servlet.jsp.jstl.tlv;version="${dependency.javax.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp;version="2.3",
+							javax.servlet.jsp.el;version="2.3",
+							javax.servlet.jsp.tagext;version="2.3",
+
+							<!-- re-export JSTL API from mvn:jakarta.servlet.jsp.jstl/jakarta.servlet.jsp.jstl-api -->
+							javax.servlet.jsp.jstl.core;version="${dependency.jakarta.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.fmt;version="${dependency.jakarta.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.sql;version="${dependency.jakarta.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.tlv;version="${dependency.jakarta.servlet.jsp.jstl-api.version}",
+
 							<!--
 								re-export EL Impl - from mvn:org.apache.tomcat/tomcat-jasper-el
 								for broader picture:
@@ -154,14 +153,16 @@
 								   at version 2.2
 								 - org.glassfish/javax.el/3.0.0 (EL 3.0) exports com.sun.el.* and imports javax.el
 								   at version 3.0.0
+								version of implementation should be not the same as the version of specification
 							-->
-							org.apache.el;version="3.0",
-							org.apache.el.lang;version="3.0",
-							org.apache.el.parser;version="3.0",
-							org.apache.el.stream;version="3.0",
-							org.apache.el.util;version="3.0",
+							org.apache.el;version="${dependency.tomcat.version}",
+							org.apache.el.lang;version="${dependency.tomcat.version}",
+							org.apache.el.parser;version="${dependency.tomcat.version}",
+							org.apache.el.stream;version="${dependency.tomcat.version}",
+							org.apache.el.util;version="${dependency.tomcat.version}",
+
 							<!-- re-export JSP Impl - from mvn:org.apache.tomcat/tomcat-jasper -->
-							org.apache.jasper;version="${dependency.tomcat.version}",
+							org.apache.jasper;version="${dependency.tomcat.version}";-split-package:=merge-first,
 							org.apache.jasper.compiler;version="${dependency.tomcat.version}",
 							org.apache.jasper.compiler.tagplugin;version="${dependency.tomcat.version}",
 							org.apache.jasper.el;version="${dependency.tomcat.version}",
@@ -171,42 +172,44 @@
 							org.apache.jasper.tagplugins.jstl;version="${dependency.tomcat.version}",
 							org.apache.jasper.tagplugins.jstl.core;version="${dependency.tomcat.version}",
 							org.apache.jasper.util;version="${dependency.tomcat.version}",
+
 							<!--
 								re-export JSTL Impl from mvn:org.apache.taglibs/taglibs-standard-impl
 								even if Glassfish and JBoss versions of JSTL impl (both based on org.apache.taglibs)
 								export org.apache.taglibs.standard.extra.spath package, it was removed from standard
-								impl in 2010 (http://svn.apache.org/viewvc?view=revision&revision=1026635)
+								impl in 2010 (http://svn.apache.org/viewvc?view=revision&revision=1026635),
+								so we hopefuly clear the confusion in pax-web-jsp
 							-->
-							org.apache.taglibs.standard;version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.functions;version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.resources;version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.tag.common.core;version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.tag.common.fmt;version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.tag.common.sql;version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.tag.common.xml;version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.tag.rt.core;version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.tag.rt.fmt;version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.tag.rt.sql;version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.tag.rt.xml;version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.tei;version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.tlv;version="${dependency.taglibs.version}",
-							org.apache.taglibs.standard.util;version="${dependency.taglibs.version}",
+							org.apache.taglibs.standard;version="1.2",
+							org.apache.taglibs.standard.functions;version="1.2",
+							org.apache.taglibs.standard.tag.common.core;version="1.2",
+							org.apache.taglibs.standard.tag.common.fmt;version="1.2",
+							org.apache.taglibs.standard.tag.common.sql;version="1.2",
+							org.apache.taglibs.standard.tag.common.xml;version="1.2",
+							org.apache.taglibs.standard.tag.rt.core;version="1.2",
+							org.apache.taglibs.standard.tag.rt.fmt;version="1.2",
+							org.apache.taglibs.standard.tag.rt.sql;version="1.2",
+							org.apache.taglibs.standard.tag.rt.xml;version="1.2",
+							org.apache.taglibs.standard.tei;version="1.2",
+							org.apache.taglibs.standard.tlv;version="1.2",
+							org.apache.taglibs.standard.util;version="1.2",
+
 							<!-- don't re-export JSTL Impl from mvn:org.apache.taglibs/taglibs-standard-compat -->
 							!org.apache.taglibs.standard.tag.compat.*,
 							<!-- don't re-export JSTL Impl from mvn:org.apache.taglibs/taglibs-standard-jstlel -->
 							!org.apache.taglibs.standard.lang.*,
 							!org.apache.taglibs.standard.tag.el.*,
 							!org.apache.taglibs.standard.tlv.el
-							<!-- org.apache.tomcat.* imports required by the above JSP and EL implementations -->
-<!--							org.apache.tomcat.util.descriptor.tld-->
 						</Export-Package>
 						<Private-Package>
-							<!-- resources from mvn:org.apache.tomcat/tomcat-servlet-api, not available in javax.servlet/javax.servlet-api -->
+							<!-- resources from mvn:org.apache.tomcat/tomcat-servlet-api, not available in jakarta.servlet/jakarta.servlet-api -->
 							javax.servlet.resources,
-							<!-- resources from mvn:org.apache.tomcat/tomcat-jsp-api, not available in javax.servlet.jsp/javax.servlet-api -->
+							<!-- resources from mvn:org.apache.tomcat/tomcat-jsp-api, not available in jakarta.servlet.jsp/jakarta.servlet.jsp-api -->
 							javax.servlet.jsp.resources,
 							<!-- resources from mvn:org.apache.tomcat/tomcat-jasper which are not exported (no *.class there) -->
-							org.apache.jasper.resources
+							org.apache.jasper.resources,
+							<!-- resources from mvn:org.apache.taglibs/taglibs-standard-impl which are not exported (no *.class there) -->
+							org.apache.taglibs.standard.resources
 						</Private-Package>
 						<Include-Resource>
 							{maven-resources},
@@ -225,17 +228,8 @@
 <!--						<Embed-Transitive>true</Embed-Transitive>-->
 						<_nouses>true</_nouses>
 					</instructions>
-					<dumpInstructions>target/dump</dumpInstructions>
 				</configuration>
 			</plugin>
-<!--			<plugin>-->
-<!--				<artifactId>maven-compiler-plugin</artifactId>-->
-<!--				<configuration>-->
-<!--					<excludes>-->
-<!--						<exclude>**/JspConfig.java</exclude>-->
-<!--					</excludes>-->
-<!--				</configuration>-->
-<!--			</plugin>-->
 		</plugins>
 	</build>
 
@@ -245,21 +239,25 @@
 
 		<!-- pax-web own artifacts -->
 
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-spi</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-api</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-spi</artifactId>-->
+<!--		</dependency>-->
 		<dependency>
 			<!--
 				Classes/packages required by Jasper and Tomcat-EL are used from pax-web-tomcat-common
 				to distinguish between "server" bundle of pax-web-tomcat and "common" bundle groupping all utils,
 				scanners, digesters from tomcat.
-				Also it's better to use Tomat repackaged here instead of in pax-tipi
+				Also it's better to use Tomat repackaged here instead of in pax-tipi.
+				When using this dependency in IDE, we don't actually get anything from pax-web-tomcat-common,
+				because this was not yet packaged, so the only thing we get is transitive dependency - tomcat-embed-core,
+				which has scope=runtime, so here it's scope=provided
+				but below we explicitly set scopp=test for tomcat-embed-core to override this scope
 			-->
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-tomcat-common</artifactId>
@@ -268,23 +266,23 @@
 
 		<!-- OPS4J dependencies -->
 
-		<dependency>
-			<groupId>org.ops4j.base</groupId>
-			<artifactId>ops4j-base-util-xml</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.swissbox</groupId>
-			<artifactId>pax-swissbox-core</artifactId>
-			<scope>provided</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.swissbox</groupId>
-			<artifactId>pax-swissbox-optional-jcl</artifactId>
-			<scope>provided</scope>
-			<optional>true</optional>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.base</groupId>-->
+<!--			<artifactId>ops4j-base-util-xml</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.swissbox</groupId>-->
+<!--			<artifactId>pax-swissbox-core</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--			<optional>true</optional>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.swissbox</groupId>-->
+<!--			<artifactId>pax-swissbox-optional-jcl</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--			<optional>true</optional>-->
+<!--		</dependency>-->
 
 		<!-- OSGi -->
 
@@ -293,17 +291,17 @@
 			<artifactId>osgi.core</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>osgi.annotation</artifactId>
-			<scope>provided</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.osgi</groupId>-->
+<!--			<artifactId>osgi.annotation</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
 
 		<!-- JavaEE -->
 
 		<dependency>
 			<!--
-				This dependency is used instead of javax.servlet/javax.servlet-api to take javax.servlet.resources
+				This dependency is used instead of jakarta.servlet/jakarta.servlet-api to take javax.servlet.resources
 				package with XSDs/DTDs into pax-web-jsp
 			-->
 			<groupId>org.apache.tomcat</groupId>
@@ -312,7 +310,7 @@
 		</dependency>
 		<dependency>
 			<!--
-				This dependency is used instead of javax.servlet.jsp/javax.servlet.jsp-api to take javax.servlet.jsp.resources
+				This dependency is used instead of jakarta.servlet.jsp/jakarta.servlet.jsp-api to take javax.servlet.jsp.resources
 				package with XSDs/DTDs into pax-web-jsp and re-export these packages from pax-web-jsp:
 				 - javax.servlet.jsp
 				 - javax.servlet.jsp.el
@@ -324,24 +322,44 @@
 		</dependency>
 		<dependency>
 			<!--
-				This dependency provides packages to re-export from pax-web-jsp:
+				This dependency provides packages to re-export from pax-web-jsp. While jakarta.servlet-api and
+				jakarta.servlet.jsp-api can't be used (because they contain no resources), with JSTL we can use
+				jakarta.servlet.jsp.jstl-api - also because there's no analogous org.apache.tomcat JAR.
 				 - javax.servlet.jsp.jstl.core
 				 - javax.servlet.jsp.jstl.fmt
 				 - javax.servlet.jsp.jstl.sql
 				 - javax.servlet.jsp.jstl.tlv
 			-->
-			<groupId>javax.servlet.jsp.jstl</groupId>
-			<artifactId>javax.servlet.jsp.jstl-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.el</groupId>
-			<artifactId>javax.el-api</artifactId>
+			<groupId>jakarta.servlet.jsp.jstl</groupId>
+			<artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
 		<!-- Tomcat -->
 
+		<dependency>
+			<!--
+				The packages from this dependency come from pax-web-tomcat-common, but not when running
+				in IDE, because pax-web-tomcat-common is not packaged
+			-->
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<!--
+				This dependency (EL implementation) provides packages to re-export from pax-web-jsp:
+				 - org.apache.el
+				 - org.apache.el.lang
+				 - org.apache.el.parser
+				 - org.apache.el.stream
+				 - org.apache.el.util
+			-->
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-jasper-el</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<!--
 				This dependency (JSP implementation) provides packages to re-export from pax-web-jsp:
@@ -360,32 +378,13 @@
 			<artifactId>tomcat-jasper</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<!--
-				This dependency (EL implementation) provides packages to re-export from pax-web-jsp:
-				 - org.apache.el
-				 - org.apache.el.lang
-				 - org.apache.el.parser
-				 - org.apache.el.stream
-				 - org.apache.el.util
-			-->
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-jasper-el</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-juli</artifactId>
-			<scope>provided</scope>
-		</dependency>
 
 		<dependency>
 			<!--
 				This dependency (JSTL implementation) provides packages to re-export from pax-web-jsp:
 				 - org.apache.taglibs.standard
 				 - org.apache.taglibs.standard.functions
-				 - org.apache.taglibs.standard.resources
+				 - org.apache.taglibs.standard.resources (resources only)
 				 - org.apache.taglibs.standard.tag.common.core
 				 - org.apache.taglibs.standard.tag.common.fmt
 				 - org.apache.taglibs.standard.tag.common.sql
@@ -403,13 +402,31 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-core</artifactId>
+			<!--
+				scope=test to override transitive scope=runtime (which changes to scope=provided through provided
+				pax-web-tomcat-common dependency), so tomcat-embed-core is available for unit tests to run them in IDE
+			-->
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Spring -->
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- Other -->
 
-		<!--<dependency>-->
-			<!--<groupId>org.eclipse.jdt.core.compiler</groupId>-->
-			<!--<artifactId>ecj</artifactId>-->
-			<!--<scope>provided</scope>-->
-		<!--</dependency>-->
 		<dependency>
 			<groupId>org.eclipse.jdt</groupId>
 			<artifactId>ecj</artifactId>
@@ -426,6 +443,25 @@
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-slf4j-impl</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Testing -->
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 

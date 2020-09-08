@@ -67,6 +67,7 @@ public class RootBundleURLResource extends Resource {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public URL getURL() {
 		return delegate.getURL();
 	}

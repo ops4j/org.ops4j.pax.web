@@ -30,6 +30,7 @@ import java.util.TreeSet;
 import java.util.function.Supplier;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
 
 import org.junit.After;
 import org.junit.Before;
@@ -60,6 +61,7 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
@@ -119,7 +121,6 @@ public class MultiContainerTestSupport {
 	private ServiceTrackerCustomizer<HttpContextMapping, OsgiContextModel> httpContextMappingCustomizer;
 
 	// --- non "mapping" customizers
-
 
 	private ServiceTrackerCustomizer<Servlet, ServletModel> servletCustomizer;
 	private ServiceTrackerCustomizer<Filter, FilterModel> filterCustomizer;
@@ -483,6 +484,7 @@ public class MultiContainerTestSupport {
 		public final Set<FilterModel> disabledFilterModels = new TreeSet<>();
 		public final Set<ErrorPageModel> disabledErrorPageModels = new TreeSet<>();
 		private final Map<EventListener, EventListenerModel> eventListeners = new IdentityHashMap<>();
+		private final Map<ServletContainerInitializer, ContainerInitializerModel> containerInitializers = new IdentityHashMap<>();
 
 		private final ServerModel model;
 //		private final Map<String, VirtualHostModel> virtualHosts = new HashMap<>();
@@ -501,6 +503,7 @@ public class MultiContainerTestSupport {
 			disabledFilterModels.addAll(getField(model, "disabledFilterModels", Set.class));
 			disabledErrorPageModels.addAll(getField(model, "disabledErrorPageModels", Set.class));
 			eventListeners.putAll(getField(model, "eventListeners", Map.class));
+			containerInitializers.putAll(getField(model, "containerInitializers", Map.class));
 		}
 
 		/**
@@ -519,10 +522,11 @@ public class MultiContainerTestSupport {
 					.noneMatch(ocm -> ocm.getOwnerBundle().equals(bundle));
 			clean &= servlets.values().stream().noneMatch(sm -> sm.getRegisteringBundle().equals(bundle));
 			clean &= filters.values().stream().noneMatch(fm -> fm.getRegisteringBundle().equals(bundle));
-			clean &= disabledServletModels.stream().noneMatch(sm -> sm.getRegisteringBundle().equals(bundle));
-			clean &= disabledFilterModels.stream().noneMatch(fm -> fm.getRegisteringBundle().equals(bundle));
-			clean &= disabledErrorPageModels.stream().noneMatch(fm -> fm.getRegisteringBundle().equals(bundle));
-			clean &= eventListeners.values().stream().noneMatch(sm -> sm.getRegisteringBundle().equals(bundle));
+			clean &= disabledServletModels.stream().noneMatch(dsm -> dsm.getRegisteringBundle().equals(bundle));
+			clean &= disabledFilterModels.stream().noneMatch(dfm -> dfm.getRegisteringBundle().equals(bundle));
+			clean &= disabledErrorPageModels.stream().noneMatch(depm -> depm.getRegisteringBundle().equals(bundle));
+			clean &= eventListeners.values().stream().noneMatch(elm -> elm.getRegisteringBundle().equals(bundle));
+			clean &= containerInitializers.values().stream().noneMatch(cim -> cim.getRegisteringBundle().equals(bundle));
 			return clean;
 		}
 	}
@@ -534,10 +538,11 @@ public class MultiContainerTestSupport {
 		public final Map<String, Map<String, ServletModel>> aliasMapping = new HashMap<>();
 		public final Set<ServletModel> servletModels = new HashSet<>();
 		public final Set<FilterModel> filterModels = new HashSet<>();
-		public final Map<EventListener, EventListenerModel> eventListenerModels = new HashMap<>();
+		public final Set<EventListenerModel> eventListenerModels = new HashSet<>();
 		private final Map<ContextKey, Set<String>> welcomeFiles = new HashMap<>();
 		private final Set<WelcomeFileModel> welcomeFileModels = new HashSet<>();
 		private final Set<ErrorPageModel> errorPageModels = new HashSet<>();
+		private final Set<ContainerInitializerModel> containerInitializerModels = new HashSet<>();
 
 		private final ServiceModel model;
 
@@ -547,10 +552,11 @@ public class MultiContainerTestSupport {
 			aliasMapping.putAll(getField(model, "aliasMapping", Map.class));
 			servletModels.addAll(getField(model, "servletModels", Set.class));
 			filterModels.addAll(getField(model, "filterModels", Set.class));
-			eventListenerModels.putAll(getField(model, "eventListenerModels", Map.class));
+			eventListenerModels.addAll(getField(model, "eventListenerModels", Set.class));
 			welcomeFiles.putAll(getField(model, "welcomeFiles", Map.class));
 			welcomeFileModels.addAll(getField(model, "welcomeFileModels", Set.class));
 			errorPageModels.addAll(getField(model, "errorPageModels", Set.class));
+			containerInitializerModels.addAll(getField(model, "containerInitializerModels", Set.class));
 		}
 
 		public boolean isEmpty() {
@@ -560,7 +566,8 @@ public class MultiContainerTestSupport {
 					&& eventListenerModels.isEmpty()
 					&& welcomeFiles.isEmpty()
 					&& welcomeFileModels.isEmpty()
-					&& errorPageModels.isEmpty();
+					&& errorPageModels.isEmpty()
+					&& containerInitializerModels.isEmpty();
 		}
 	}
 

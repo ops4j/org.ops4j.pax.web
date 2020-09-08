@@ -62,6 +62,10 @@ public class ServletModelChange extends Change {
 		return disabled;
 	}
 
+	public boolean isDynamic() {
+		return servletModel.isDynamic();
+	}
+
 	@Override
 	public void accept(BatchVisitor visitor) {
 		visitor.visit(this);

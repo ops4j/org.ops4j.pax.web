@@ -1,12 +1,11 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Copyright 2020 OPS4J.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,121 +15,38 @@
  */
 package org.ops4j.pax.web.jsp;
 
-import java.io.IOException;
 import java.util.Set;
-
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.jsp.JspFactory;
 
-import org.apache.jasper.Constants;
-import org.apache.jasper.compiler.Localizer;
-import org.apache.jasper.compiler.TldCache;
-import org.apache.jasper.runtime.JspFactoryImpl;
-import org.apache.jasper.security.SecurityClassLoad;
-import org.apache.tomcat.InstanceManager;
+import org.apache.jasper.servlet.TldScanner;
 import org.apache.tomcat.SimpleInstanceManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 
 /**
- * <p>Initializer for the Jasper JSP Engine.</p>
- * <p>It's task is to prepare servlet context attributes required by Jasper:<ul>
- *     <li>org.apache.tomcat.InstanceManager</li>
- *     <li>org.apache.jasper.compiler.TldCache </li>
- * </ul></p>
+ * <p>Pax Web extends original initializer, so it is possible to override the {@link TldScanner}.</p>
+ *
+ * <p>This initializer is <strong>not</strong> declared in {@code /META-INF/services/javax.servlet.ServletContainerInitializer}
+ * and if needed, it is used directly by Pax Web to configure the context(s) when JSP support is required.</p>
+ *
+ * <p>According to Servlet specification 8.3 "JSP container pluggability", JSP processing/parsing/setup is no longer
+ * performed by "Servlet container" itself and instead can be delegated to "JSP container" using
+ * {@link ServletContainerInitializer} mechanism.</p>
  */
-public class JasperInitializer implements ServletContainerInitializer {
-
-	private static final String MSG = "org.apache.jasper.servlet.JasperInitializer";
-	private static final Logger LOG = LoggerFactory.getLogger(JasperInitializer.class);
-
-	/*
-	 * Preload classes required at runtime by a JSP servlet so that
-	 * we don't get a defineClassInPackage security exception.
-	 */
-	static {
-		JspFactoryImpl factory = new JspFactoryImpl();
-		SecurityClassLoad.securityClassLoad(factory.getClass().getClassLoader());
-		if (System.getSecurityManager() != null) {
-			String basePackage = "org.apache.jasper.";
-			try {
-				factory.getClass().getClassLoader().loadClass(basePackage +
-						"runtime.JspFactoryImpl$PrivilegedGetPageContext");
-				factory.getClass().getClassLoader().loadClass(basePackage +
-						"runtime.JspFactoryImpl$PrivilegedReleasePageContext");
-				factory.getClass().getClassLoader().loadClass(basePackage +
-						"runtime.JspRuntimeLibrary");
-				factory.getClass().getClassLoader().loadClass(basePackage +
-						"runtime.ServletResponseWrapperInclude");
-				factory.getClass().getClassLoader().loadClass(basePackage +
-						"servlet.JspServletWrapper");
-			} catch (ClassNotFoundException ex) {
-				throw new IllegalStateException(ex);
-			}
-		}
-
-		if (JspFactory.getDefaultFactory() == null) {
-			JspFactory.setDefaultFactory(factory);
-		}
-	}
+public class JasperInitializer extends org.apache.jasper.servlet.JasperInitializer {
 
 	@Override
 	public void onStartup(Set<Class<?>> types, ServletContext context) throws ServletException {
-		if (LOG.isDebugEnabled()) {
-			LOG.debug(Localizer.getMessage(MSG + ".onStartup", context.getServletContextName()));
-		}
+		// override the instance manager required by JasperServlet
+		context.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
 
-		// Setup a simple default Instance Manager
-		if (context.getAttribute(InstanceManager.class.getName()) == null) {
-			context.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
-		}
-
-		boolean validate = Boolean.parseBoolean(
-				context.getInitParameter(Constants.XML_VALIDATION_TLD_INIT_PARAM));
-		String blockExternalString = context.getInitParameter(
-				Constants.XML_BLOCK_EXTERNAL_INIT_PARAM);
-		boolean blockExternal;
-		if (blockExternalString == null) {
-			blockExternal = true;
-		} else {
-			blockExternal = Boolean.parseBoolean(blockExternalString);
-		}
-
-		// scan the application for TLDs
-		TldScanner scanner = newTldScanner(context, true, validate, blockExternal);
-		try {
-			scanner.scan();
-		} catch (IOException | SAXException e) {
-			throw new ServletException(e);
-		}
-
-		// add any listeners defined in TLDs
-		for (String listener : scanner.getListeners()) {
-			try {
-				context.addListener(listener);
-			} catch (RuntimeException e) {
-				if (e.getCause() instanceof ClassNotFoundException) {
-					LOG.error("Could not add listener from scanned TLD to context. " +
-							"The referenced class could not be found (missing import): {}", e.getMessage());
-				} else {
-					throw e;
-				}
-			}
-		}
-
-		context.setAttribute(TldCache.SERVLET_CONTEXT_ATTRIBUTE_NAME,
-				new TldCache(context, scanner.getUriTldResourcePathMap(),
-						scanner.getTldResourcePathTaglibXmlMap()));
-
-		// context.addServlet("jsp", JspServlet.class);
-		// context.getServletRegistration("jsp").addMapping("*.jsp");
+		// call to perform TLD scanning
+		super.onStartup(types, context);
 	}
 
-	protected TldScanner newTldScanner(ServletContext context, boolean namespaceAware,
-									   boolean validate, boolean blockExternal) {
-		return new TldScanner(context, namespaceAware, validate, blockExternal);
+	@Override
+	protected TldScanner newTldScanner(ServletContext context, boolean namespaceAware, boolean validate, boolean blockExternal) {
+		return super.newTldScanner(context, namespaceAware, validate, blockExternal);
 	}
+
 }

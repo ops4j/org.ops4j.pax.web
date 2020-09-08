@@ -28,75 +28,36 @@ import org.ops4j.pax.web.service.whiteboard.JspMapping;
  * @author Alin Dreghiciu
  * @since 0.4.0, March 15, 2008
  */
-public class DefaultJspMapping implements JspMapping {
+public class DefaultJspMapping extends AbstractContextRelated implements JspMapping {
 
-	/**
-	 * Http Context id.
-	 */
-	private String httpContextId;
-	/**
-	 * Url patterns.
-	 */
+	/** Url patterns. */
 	private String[] urlPatterns;
-	/**
-	 * Initialization parameters.
-	 */
-	private Map<String, String> initParams;
 
-	/**
-	 * @see JspMapping#getInitParams()
-	 */
-	public Map<String, String> getInitParams() {
-		return initParams;
+	/** Initialization parameters. */
+	private Map<String, String> initParameters;
+
+	@Override
+	public Map<String, String> getInitParameters() {
+		return initParameters;
 	}
 
-	/**
-	 * @see JspMapping#getHttpContextId()
-	 */
-	public String getHttpContextId() {
-		return httpContextId;
+	public void setInitParameters(Map<String, String> initParameters) {
+		this.initParameters = initParameters;
 	}
 
-	/**
-	 * @see JspMapping#getUrlPatterns()
-	 */
+	@Override
 	public String[] getUrlPatterns() {
 		return urlPatterns;
 	}
 
-	/**
-	 * Setter.
-	 *
-	 * @param httpContextId id of the http context this jsp belongs to
-	 */
-	public void setHttpContextId(final String httpContextId) {
-		this.httpContextId = httpContextId;
-	}
-
-	/**
-	 * Setter.
-	 *
-	 * @param urlPatterns array of url patterns
-	 */
-	public void setUrlPatterns(String... urlPatterns) {
+	public void setUrlPatterns(String ... urlPatterns) {
 		this.urlPatterns = urlPatterns;
-	}
-
-	/**
-	 * Seter.
-	 *
-	 * @param initParams map of initialization parameters
-	 */
-	public void setInitParams(final Map<String, String> initParams) {
-		this.initParams = initParams;
 	}
 
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() +
-				"{httpContextId=" + httpContextId +
-				",urlPatterns=" + Arrays.deepToString(urlPatterns) +
-				",initParams=" + initParams + "}";
+		return "DefaultJspMapping{urlPatterns=" + Arrays.deepToString(urlPatterns)
+				+ ",initParams=" + initParameters + "}";
 	}
 
 }
