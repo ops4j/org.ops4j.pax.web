@@ -78,11 +78,11 @@
 					</instructions>
 				</configuration>
 			</plugin>
+      <!--
 			<plugin>
-				<!-- This plugin used due to issues running on MacOS X and JDK7 -->
 				<groupId>org.jasig.mojo.jspc</groupId>
 				<artifactId>jspc-maven-plugin</artifactId>
-				<version>2.0.0</version>
+				<version>2.0.2</version>
 				<executions>
 					<execution>
 						<goals>
@@ -94,7 +94,6 @@
 					<packageName>org.apache.jsp</packageName>
 					<defaultSourcesDirectory>${project.basedir}/src/main/resources</defaultSourcesDirectory>
 				</configuration>
-				<!-- Use the Tomcat 8 JSP compiler -->
 				<dependencies>
 					<dependency>
 						<groupId>org.jasig.mojo.jspc</groupId>
@@ -164,6 +163,7 @@
 
 				</dependencies>
 			</plugin>
+      -->
 		</plugins>
 	</build>
 

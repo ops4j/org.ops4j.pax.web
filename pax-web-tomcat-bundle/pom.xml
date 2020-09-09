@@ -69,6 +69,7 @@
 							org.apache.coyote.*,
 							org.apache.naming.*,
 							org.apache.tomcat.*,
+              com.sun*;resolution:=optional,
 							*,
 							!javax.microedition.io,
 							!javax.security.auth.x500,

@@ -135,7 +135,7 @@
 		<dependency.slf4j>1.7.12</dependency.slf4j>
 		<dependency.scr.version>2.1.20</dependency.scr.version>
 		<dependency.swissbox.version>1.8.3</dependency.swissbox.version>
-		<dependency.tomcat.version>9.0.36</dependency.tomcat.version>
+		<dependency.tomcat.version>9.0.37</dependency.tomcat.version>
 		<dependency.xbean.version>4.17</dependency.xbean.version>
 		<dependency.xnio-api.version>3.3.8.Final</dependency.xnio-api.version>
 		<dependency.xnio.version>3.3.8.Final</dependency.xnio.version>
@@ -148,7 +148,7 @@
 		<dependency.pax-keycloak.version>0.2.0</dependency.pax-keycloak.version>
 		<version.pax-exam>4.9.2</version.pax-exam>
 
-		<tipi.tomcat.version>9.0.36.1</tipi.tomcat.version>
+		<tipi.tomcat.version>9.0.37.1-SNAPSHOT</tipi.tomcat.version>
 		<jsf-myfaces.version>2.3.3</jsf-myfaces.version>
 
 		<dependency.junit.version>4.11</dependency.junit.version>
