@@ -50,55 +50,41 @@
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
 						<Bundle-Activator>${bundle.namespace}.internal.CompositeActivator</Bundle-Activator>
 						<Import-Package>
-              !org.apache.catalina.tribes.util,
-              !javax.servlet*,
-              !javax.websocket*,
-              !org.apache.commons.collections4*,
-              !org.apache.xbean.finder,
-              !org.ops4j.pax.web.jsp,
-              sun.rmi.registry;resolution:=optional,
-              com.ibm.icu.text;resolution:=optional,
-              javax.annotation*;resolution:=optional,
-              javax.ejb*;resolution:=optional,
-              javax.mail*;resolution:=optional,
 							javax.net.ssl;resolution:=optional,
-              javax.persistence*;resolution:=optional,
-							javax.transaction;resolution:=optional,
+							javax.servlet.*;version="[3.1,5)",
+							javax.transaction;
+							resolution:=optional,
 							javax.security.auth,
 							javax.security.auth.callback,
 							javax.security.auth.login,
-              javax.security.auth.message*;resolution:=optional,
 							javax.security.cert;resolution:=optional;version="[2.3.0,3.1.0)",
-							javax.xml*;resolution:=optional,
-              javax.wsdl*;resolution:=optional,
+							javax.xml.parsers,
 							org.osgi.framework;version="[1.0.0,2.0.0)",
-							org.slf4j;version="[1.5,2)";resolution:=optional,
+							org.osgi.service.http;version="[1.0.0,2.0.0)",
+							org.slf4j;version="[1.5,2)",
 							javax.el;version="[2.1.0,3.1.0)";resolution:=optional,
 							org.apache.juli.logging,
 							org.apache.el.*;version="2.2",
+							org.apache.catalina.*,
 							org.apache.coyote.*,
 							org.apache.naming.*,
-              com.sun*;resolution:=optional,
+							org.apache.tomcat.*,
+              				com.sun*;resolution:=optional,
 							*,
 							!javax.microedition.io,
-							!javax.security.auth.x500
+							!javax.security.auth.x500,
 						</Import-Package>
 						<Export-Package>
-							javax.servlet*,
-              javax.servlet.jsp*,
-              javax.websocket*,
-							org.ops4j.pax.web*;version="${pax-web.osgi.version}";-split-package:=merge-first,
-							org.osgi.service.http,
+							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}"; -split-package:=merge-first,
+							org.ops4j.pax.web.service;version="${pax-web.osgi.version}";-split-package:=merge-first,
+							org.ops4j.pax.web.service.spi;version="${pax-web.osgi.version}"; -split-package:=merge-first,
+							org.ops4j.pax.web.service.spi.model;version="${pax-web.osgi.version}"; -split-package:=merge-first,
+							org.ops4j.pax.web.service.spi.util;version="${pax-web.osgi.version}";-split-package:=merge-first,
 							org.apache.catalina.*;version="${dependency.tomcat.version}";-split-package:=merge-first,
 							org.apache.coyote.*;version="${dependency.tomcat.version}";-split-package:=merge-first,
 							org.apache.naming.*;version="${dependency.tomcat.version}";-split-package:=merge-first,
 							org.apache.tomcat.*;version="${dependency.tomcat.version}";-split-package:=merge-first
 						</Export-Package>
-            <Private-Package>
-              org.apache.catalina.tribes.util,
-              org.apache.commons.collections4*,
-              org.apache.xbean.finder
-            </Private-Package>
 						<Embed-Dependency>*; scope=compile; type=!pom;
 							inline=**/*.class|**/*.ico|**/*.dtd|**/*.xml|**/*.properties|**/*.map|**/*.default|**/*.providers</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
@@ -139,18 +125,6 @@
 		<!-- Embeded dependencies (not transitive) -->
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-api</artifactId>
-			<scope>compile</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-spi</artifactId>
-			<scope>compile</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-runtime</artifactId>
 			<scope>compile</scope>
 			<optional>true</optional>
@@ -160,11 +134,6 @@
 			<artifactId>pax-web-tomcat</artifactId>
 			<scope>compile</scope>
 		</dependency>
-    <dependency>
-      <groupId>${servlet.spec.groupId}</groupId>
-      <artifactId>${servlet.spec.artifactId}</artifactId>
-      <scope>compile</scope>
-    </dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.tipi</groupId>
 			<artifactId>org.ops4j.pax.tipi.tomcat-embed-core</artifactId>
