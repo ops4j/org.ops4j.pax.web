@@ -53,7 +53,7 @@
   </dependencyManagement>
   <modules>
     <module>helloworld-hs</module>
-    <!-- <module>helloworld-jsp</module> -->
+    <module>helloworld-jsp</module>
     <module>helloworld-jsp-noclasses</module>
     <module>helloworld-wc</module>
     <module>authentication</module>
