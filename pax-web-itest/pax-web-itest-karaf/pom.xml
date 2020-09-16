@@ -20,7 +20,7 @@
 	<parent>
 		<artifactId>pax-web-itest</artifactId>
 		<groupId>org.ops4j.pax.web</groupId>
-		<version>7.2.19</version>
+		<version>7.2.20-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<groupId>org.ops4j.pax.web.itest</groupId>
