@@ -245,7 +245,7 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 
 			// if the request contains an etag and its the same for the
 			// resource, we deliver a NOT MODIFIED response
-			String eTag = String.valueOf(resource.lastModified());
+			String eTag = "\"" + String.valueOf(resource.lastModified()) + "\"";
 			if ((request.getHeader(IF_NONE_MATCH) != null)
 					&& (eTag.equals(request.getHeader(IF_NONE_MATCH)))) {
 				response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
