@@ -43,10 +43,9 @@
 	</issueManagement>
 
 	<scm>
-		<connection>scm:git:git@github.com:ops4j/org.ops4j.pax.web.git</connection>
-		<developerConnection>scm:git:git@github.com:ops4j/org.ops4j.pax.web.git</developerConnection>
-		<url>http://github.com/ops4j/org.ops4j.pax.web/tree/pax-web-7.2.x</url>
-		<tag>HEAD</tag>
+		<connection>scm:git:https://github.com/ops4j/org.ops4j.pax.web.git</connection>
+		<developerConnection>scm:git:https://github.com/ops4j/org.ops4j.pax.web.git</developerConnection>
+		<url>https://github.com/ops4j/org.ops4j.pax.web/tree/pax-web-7.2.x</url>
 	</scm>
 
 	<developers>
