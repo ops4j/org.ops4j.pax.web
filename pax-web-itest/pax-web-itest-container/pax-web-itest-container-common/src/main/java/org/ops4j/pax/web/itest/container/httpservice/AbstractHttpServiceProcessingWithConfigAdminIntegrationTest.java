@@ -15,9 +15,9 @@
  */
 package org.ops4j.pax.web.itest.container.httpservice;
 
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
-public abstract class AbstractHttpServiceProcessingWithConfigAdminIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractHttpServiceProcessingWithConfigAdminIntegrationTest extends AbstractContainerTestBase {
 
 //	private Bundle installWarBundle;
 //

@@ -18,13 +18,13 @@ package org.ops4j.pax.web.itest.container.war;
 
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
 /**
  * @author Grzegorz Grzybek
  */
 @RunWith(PaxExam.class)
-public abstract class AbstractWarWelcomeFilesIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractWarWelcomeFilesIntegrationTest extends AbstractContainerTestBase {
 
 //	private static final Logger LOG = LoggerFactory.getLogger(AbstractWarWelcomeFilesIntegrationTest.class);
 //

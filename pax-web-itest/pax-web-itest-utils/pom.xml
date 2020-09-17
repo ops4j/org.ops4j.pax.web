@@ -87,7 +87,7 @@
 						</Export-Package>
 						<Include-Resource>
 							{maven-resources},
-							server.jks=../pax-web-itest-container/etc/security/server.jks
+							server.jks=../etc/security/server.jks
 						</Include-Resource>
 						<Embed-Dependency>
 							httpclient5,httpcore5,httpcore5-h2,commons-codec

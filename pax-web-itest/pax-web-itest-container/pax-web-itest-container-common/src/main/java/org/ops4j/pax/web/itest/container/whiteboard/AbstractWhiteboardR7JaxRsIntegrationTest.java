@@ -15,9 +15,9 @@
  */
 package org.ops4j.pax.web.itest.container.whiteboard;
 
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
-public abstract class AbstractWhiteboardR7JaxRsIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractWhiteboardR7JaxRsIntegrationTest extends AbstractContainerTestBase {
 
 //    protected static Option[] configureJaxrs() {
 //        return options(

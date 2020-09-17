@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Dictionary;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,10 +32,12 @@ import java.util.function.Supplier;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
+import javax.servlet.ServletContext;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runners.Parameterized;
+import org.mockito.ArgumentMatchers;
 import org.mockito.stubbing.Answer;
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.FilterTracker;
@@ -80,6 +83,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Version;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.context.ServletContextHelper;
@@ -89,6 +93,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -173,6 +178,9 @@ public class MultiContainerTestSupport {
 		when(whiteboardBundleContext.createFilter(anyString()))
 				.thenAnswer(invocation -> FrameworkUtil.createFilter(invocation.getArgument(0, String.class)));
 
+		when(whiteboardBundleContext.registerService(ArgumentMatchers.eq(ServletContext.class), any(ServletContext.class), any(Dictionary.class)))
+				.thenReturn(mock(ServiceRegistration.class));
+
 		// manually create mock for WebContainer service scoped to a pax-web-extender-whiteboard bundle
 		HttpServiceEnabled container = new HttpServiceEnabled(whiteboardBundle, controller, serverModel, null, config);
 		containers.put(whiteboardBundle, container);
@@ -231,6 +239,7 @@ public class MultiContainerTestSupport {
 	 *                           for this bundle.
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	protected Bundle mockBundle(String symbolicName, boolean obtainWebContainer) {
 		Bundle bundle = mock(Bundle.class);
 		BundleContext bundleContext = mock(BundleContext.class);
@@ -239,6 +248,9 @@ public class MultiContainerTestSupport {
 		when(bundle.toString()).thenReturn("Bundle \"" + symbolicName + "\"");
 		when(bundle.getBundleContext()).thenReturn(bundleContext);
 		when(bundleContext.getBundle()).thenReturn(bundle);
+
+		when(bundleContext.registerService(ArgumentMatchers.eq(ServletContext.class), any(ServletContext.class), any(Dictionary.class)))
+				.thenReturn(mock(ServiceRegistration.class));
 
 		if (obtainWebContainer) {
 			// this.containerRef is single reference, but it may be passed to getService() for
@@ -496,7 +508,7 @@ public class MultiContainerTestSupport {
 			servletContexts.putAll(getField(model, "servletContexts", Map.class));
 			bundleContexts.putAll(getField(model, "bundleContexts", Map.class));
 			sharedContexts.putAll(getField(model, "sharedContexts", Map.class));
-			whiteboardContexts.putAll(getField(model, "whiteboardContexts", Map.class));
+//			whiteboardContexts.putAll(getField(model, "whiteboardContexts", Map.class));
 			servlets.putAll(getField(model, "servlets", Map.class));
 			disabledServletModels.addAll(getField(model, "disabledServletModels", Set.class));
 			filters.putAll(getField(model, "filters", Map.class));

@@ -15,13 +15,13 @@
  */
 package org.ops4j.pax.web.itest.container.whiteboard;
 
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
 /**
  * @author Achim Nierbeck (anierbeck)
  * @since Dec 30, 2012
  */
-public abstract class AbstractWhiteboardServletAnnotatedIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractWhiteboardServletAnnotatedIntegrationTest extends AbstractContainerTestBase {
 
 //	@Before
 //	public void setUp() throws Exception {

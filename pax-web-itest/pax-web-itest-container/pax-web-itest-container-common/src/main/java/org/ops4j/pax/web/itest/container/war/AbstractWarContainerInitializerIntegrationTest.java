@@ -15,13 +15,13 @@
  */
 package org.ops4j.pax.web.itest.container.war;
 
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
 
 /**
  * @author Marc Schlegel
  */
-public abstract class AbstractWarContainerInitializerIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractWarContainerInitializerIntegrationTest extends AbstractContainerTestBase {
 
 //	protected abstract Bundle installWarBundle(String webXml) throws Exception;
 //

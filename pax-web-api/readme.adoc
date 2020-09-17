@@ -41,7 +41,7 @@ In OSGi, there's no single classpath and we have to think about getting resource
 
 Actual scanning for resources::
 
-That's very important to know when to _reach_ to additional bundles/jars when, for example, installing WAR bundle and processing it by pax-extender-war. There's really lots of things to do including annotation scanning, resource finding, etc.
+That's very important to know when to _reach_ to additional bundles/jars when, for example, installing WAR bundle and processing it by pax-web-extender-war. There's really lots of things to do including annotation scanning, resource finding, etc.
 
 === Standard JavaSE mechanisms
 
@@ -68,7 +68,7 @@ When calling `java.lang.ClassLoader.getResources()`, eventually all loaders from
 
 === Spring Framework
 
-For the completeness, here's how the above fundamental mechanisms are used inside Spring Framework. Spring allows to use resource expressions like `classpath*:/**/MANIFEST.MF` which means _find resources named `MANIFEST.MF` anywhere and any deep on the class path_. The main method is `org.springframework.core.io.support.ResourcePatternResolver#getResources()` implemented as `org.springframework.core.io.support.PathMatchingResourcePatternResolver#getResources()`.
+For the completeness, here's how the above fundamental mechanisms are used inside Spring Framework. Spring allows to use resource expressions like `classpath*:/**/MANIFEST.MF` which means _find resources named `MANIFEST.MF` anywhere and at any depth on the class path_. The main method is `org.springframework.core.io.support.ResourcePatternResolver#getResources()` implemented as `org.springframework.core.io.support.PathMatchingResourcePatternResolver#getResources()`.
 
 When using paths without `classpath*:` (less interesting in case of Pax Web), Spring:
 
@@ -90,13 +90,13 @@ Summarizing, Spring splits the parameter to `ResourcePatternResolver#getResource
 
 As mentioned before, in OSGi, there's no 1st level concept of class path. There are bundles and their contexts. So the equivalent of `java.lang.ClassLoader.getResources()` is `org.osgi.framework.Bundle.getResources()` which roughly emphasizes that the _starting point_ isn't the _class path_, but single bundle.
 
-Methods involving class loader (this requiring resolved bundle):
+Methods involving class loader (thus requiring a resolved bundle):
 
 * `Enumeration<URL> org.osgi.framework.Bundle.getResources()`
 * `Collection<String> org.osgi.framework.wiring.BundleWiring.listResources()`
 * `URL org.osgi.framework.Bundle.getResource()`
 
-Methods that don't involve class loader:
+Methods that don't involve class loader (they operate directly on the _entries_):
 
 * `Enumeration<URL> org.osgi.framework.Bundle.findEntries()`
 * `List<URL> org.osgi.framework.wiring.BundleWiring.findEntries()`
@@ -199,6 +199,7 @@ a|
 ** `org.apache.felix.framework.BundleRevisionImpl.m_content` used. No fragments, no `Bundle-ClassPath`
 |===
 
+
 === (Geronimo) XBean
 
 http://geronimo.apache.org/xbean/[Geronimo XBean] project provides some bundles with low-level utilities.
@@ -212,6 +213,86 @@ These helper bundles do not use _new_ BundleWiring API:
 
 * `org.osgi.framework.wiring.BundleWiring.listResources()`
 * `org.osgi.framework.wiring.BundleWiring.findEntries()`
+
+=== Mapping to Servlet API
+
+`javax.servlet.ServletContext` also contains resource fetching methods:
+
+* `javax.servlet.ServletContext.getResourcePaths` - a directory listing for entries beginning with the passed argument which is a _base_. The _base_ is a directory directly stored in a WAR, but also a path inside _all_ the `/WEB-INF/lib/\*.jar!/META-INF/resources/`. This method returns _names_ and doesn't restrict access to `/WEB-INF` directory!
+* `javax.servlet.ServletContext.getResource` - this method returns a URL. Passed argument _must_ start with `/` and is a base inside a WAR or a base of each of the `/WEB-INF/lib/\*.jar!/META-INF/resources/`. According to JavaDoc, this method doesn't involve classloaders. Also this method doesn't prevent accessing `/WEB-INF/` or `/META-INF`!
+* `javax.servlet.ServletContext.getResourceAsStream`
+* `javax.servlet.ServletContext.getRealPath`
+
+Let's try to summarize:
+
+|===
+|`ServletContext` |CMPN Spec 128 |CMPN Spec 102+140 |Bundle Core API
+
+a|`getResourcePaths(path)`
+
+* offers _directory_ listing relative to context root, but also includes resources from `/WEB-INF/lib/*.jar!/META-INF/resources/`
+* path _must_ start with `/`
+
+a|
+
+* "128.6.3 Resource Lookup"
+** The `getResourcePaths` method must map to the `Bundle.getEntryPaths` method, its return type is a Set and can not handle multiples. However, the paths from the `getEntryPaths` method are relative while the methods of the `getResourcePaths` must be absolute.
+** This is a bit different than for `ServletContextHelper.getResourcePaths()` which uses `Bundle.findEntries()`
+** Also `Bundle.getEntryPaths` doesn't check fragments, while `Bundle.findEntries` checks them
+** Also there's confusion in WAB specification, because `ServletContext.getResource[AsStream]` is mapped to `Bundle.findEntries()`, while `ServletContext.getResourcePaths()` is mapped to `Bundle.getEntryPaths()`
+
+a|`getResourcePaths(path)`
+
+* default `ServletContextHelper` calls `Bundle.findEntries()` (non-recursive) and adds `java.net.URL.getPath()` to returned set
+* path _must_ start with `/`
+* no such method in `HttpContext`
+
+a|`Bundle.findEntries(path, ...)`
+
+* if bundle is `INSTALLED`, `findEntries()` attempts resolution
+* fragments are always checked
+* URLs are returned instead of names
+
+`Bundle.getEntryPaths()`
+
+* No fragments are checked
+* No classloaders involved
+* names are returned
+
+a|`getResource()`
+
+* path _must_ start with `/`
+* path is relative to WAR context root _or_ to any `/WEB-INF/lib/*.jar!/META-INF/resources/`
+* doesn't prevent access to `/WEB-INF/*` resources and doesn't take security constraints into account
+
+a|
+
+* "128.3.5 Static Content"
+** "Servlet Context resource access methods" must be used [...] based on the `findEntries` method (matching `ServletContextHelper` contract)
+** `WEB-INF/` and other restricted paths must _not_ be returned
+* "128.6.3 Resource Lookup"
+** For a WAB, these resources must be found according to the `findEntries` method, this method includes fragments
+
+a|`getResource(path)`
+
+* default `ServletContextHelper` calls `Bundle.getEntry()`
+* nothing mentioned about leading slash
+* default `HttpContext` should call (as in Javadoc of `HttpService`) `Bundle.getResource()`, so something completely different than what Javadoc for `ServletContextHelper` says.
+
+a|`Bundle.getEntry(path)`
+
+* path _may_ start with `/`
+* `/` means root of the bundle
+* _always_ relative to root of the bundle
+* while `findEntries()` checks the fragments, `getEntry()` doesn't do it!
+
+`Bundle.getResource()`
+
+* involves classloader
+* if bundle is unresolved (even after attempted resolution) only local content is checked (including fragments) and all the locations from `Bundle-ClassPath`
+* if bundle is resolved, OSGi resource loading is used (boot delegation, imported packages, local content, ...)
+|===
+
 
 == OSGi CMPN R7 140 Http Whiteboard Specification
 

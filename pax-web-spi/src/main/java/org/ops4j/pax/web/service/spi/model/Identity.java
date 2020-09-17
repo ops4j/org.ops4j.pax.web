@@ -33,7 +33,11 @@ public abstract class Identity {
 
 	protected Identity() {
 		nid = NEXT.incrementAndGet();
-		id = (this.getClass().getSimpleName() + "-" + nid).intern();
+		id = (getIdPrefix() + "-" + nid).intern();
+	}
+
+	protected String getIdPrefix() {
+		return this.getClass().getSimpleName();
 	}
 
 	public String getId() {

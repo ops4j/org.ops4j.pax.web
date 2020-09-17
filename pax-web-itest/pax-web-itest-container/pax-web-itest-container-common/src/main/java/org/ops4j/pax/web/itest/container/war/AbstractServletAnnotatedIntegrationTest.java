@@ -15,14 +15,14 @@
  */
 package org.ops4j.pax.web.itest.container.war;
 
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
 
 /**
  * @author Achim Nierbeck (anierbeck)
  * @since Dec 30, 2012
  */
-public abstract class AbstractServletAnnotatedIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractServletAnnotatedIntegrationTest extends AbstractContainerTestBase {
 
 //	@Before
 //	public void setUp() throws Exception {

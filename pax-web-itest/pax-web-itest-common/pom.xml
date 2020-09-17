@@ -31,227 +31,239 @@
 	<artifactId>pax-web-itest-common</artifactId>
 	<packaging>jar</packaging>
 
-	<name>OPS4J Pax Web - Integration test common</name>
+	<name>OPS4J Pax Web - Integration Tests - Common</name>
 
 	<description>Abstract Pax Web integration tests for all containers</description>
 
 	<build>
-		<plugins>
-
-			<!-- Felix plugins -->
-
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-						<Import-Package>
-							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
-							javax.servlet;version="[3.1,5)",
-							javax.servlet.annotation;version="[3.1,5)",
-							javax.servlet.http;version="[3.1,5)",
-
-							javax.inject,
-							org.ops4j.pax.web.extender.whiteboard.runtime,
-							org.ops4j.pax.web.itest.base,
-							org.ops4j.pax.web.itest.base.*,
-							org.ops4j.pax.web.service,
-							org.ops4j.pax.web.service.spi,
-							org.ops4j.pax.web.service.whiteboard,
-							org.osgi.*,
-							org.slf4j
-						</Import-Package>
-						<DynamicImport-Package>
-							*
-						</DynamicImport-Package>
-					</instructions>
-				</configuration>
-			</plugin>
-		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 	</build>
 
 	<dependencies>
 
-		<!-- pax-web own artifacts -->
+		<!-- All dependencies have scope=compile, which will become scope=test in Jetty/Tomcat/Undertow test projects -->
 
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-api</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-spi</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-extender-whiteboard</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-extender-war</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-jsp</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-resources-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-resources-extender</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-resources-jsf</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web.itest</groupId>
-			<artifactId>pax-web-itest-base</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.ops4j.pax.web.samples</groupId>
-			<artifactId>whiteboard</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web.samples</groupId>
-			<artifactId>whiteboard-ds</artifactId>
-			<scope>provided</scope>
+			<artifactId>pax-web-itest-utils</artifactId>
 		</dependency>
 
 		<!-- OPS4J dependencies -->
 
 		<dependency>
+			<groupId>org.ops4j.pax.logging</groupId>
+			<artifactId>pax-logging-log4j2</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ops4j.pax.exam</groupId>
+			<artifactId>pax-exam</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam-junit4</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
-		<!-- OSGi -->
-
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>osgi.core</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>osgi.cmpn</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- JavaEE -->
-
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.websocket</groupId>
-			<artifactId>javax.websocket-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.json</groupId>
-			<artifactId>javax.json-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- SMX -->
+		<!-- ServiceMIX -->
 
 		<dependency>
 			<groupId>org.apache.servicemix.bundles</groupId>
 			<artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
-		<!-- Logging -->
+<!--		&lt;!&ndash; pax-web own artifacts &ndash;&gt;-->
 
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<!-- Jetty -->
-
-		<dependency>
-			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-common</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-server</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-client</artifactId>
-			<scope>provided</scope>
-		</dependency>
 <!--		<dependency>-->
-<!--			<groupId>org.eclipse.jetty.websocket</groupId>-->
-<!--			<artifactId>websocket-servlet</artifactId>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-api</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-spi</artifactId>-->
 <!--			<scope>provided</scope>-->
 <!--		</dependency>-->
 
-		<!-- Other -->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-extender-whiteboard</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-extender-war</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-jsp</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-resources-api</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-resources-extender</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-resources-jsf</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web.itest</groupId>-->
+<!--			<artifactId>pax-web-itest-base</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>org.apache.xbean</groupId>
-			<artifactId>xbean-reflect</artifactId>
-			<scope>provided</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web.samples</groupId>-->
+<!--			<artifactId>whiteboard</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web.samples</groupId>-->
+<!--			<artifactId>whiteboard-ds</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<scope>provided</scope>
-		</dependency>
+<!--		&lt;!&ndash; OPS4J dependencies &ndash;&gt;-->
 
-		<dependency>
-			<groupId>org.apache.myfaces.core</groupId>
-			<artifactId>myfaces-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.exam</groupId>-->
+<!--			<artifactId>pax-exam-junit4</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
 
-		<!-- Testing -->
+<!--		&lt;!&ndash; OSGi &ndash;&gt;-->
 
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.cedarsoft.commons</groupId>
-			<artifactId>test-utils</artifactId>
-			<scope>provided</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.osgi</groupId>-->
+<!--			<artifactId>osgi.core</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.osgi</groupId>-->
+<!--			<artifactId>osgi.cmpn</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+
+<!--		&lt;!&ndash; JavaEE &ndash;&gt;-->
+
+<!--		<dependency>-->
+<!--			<groupId>javax.servlet</groupId>-->
+<!--			<artifactId>javax.servlet-api</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>javax.websocket</groupId>-->
+<!--			<artifactId>javax.websocket-api</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>javax.json</groupId>-->
+<!--			<artifactId>javax.json-api</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+
+<!--		&lt;!&ndash; SMX &ndash;&gt;-->
+
+<!--		<dependency>-->
+<!--			<groupId>org.apache.servicemix.bundles</groupId>-->
+<!--			<artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+
+<!--		&lt;!&ndash; Logging &ndash;&gt;-->
+
+<!--		<dependency>-->
+<!--			<groupId>org.slf4j</groupId>-->
+<!--			<artifactId>slf4j-api</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.apache.logging.log4j</groupId>-->
+<!--			<artifactId>log4j-slf4j-impl</artifactId>-->
+<!--			<scope>test</scope>-->
+<!--		</dependency>-->
+
+<!--		&lt;!&ndash; Jetty &ndash;&gt;-->
+
+<!--		<dependency>-->
+<!--			<groupId>org.eclipse.jetty.websocket</groupId>-->
+<!--			<artifactId>websocket-api</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.eclipse.jetty.websocket</groupId>-->
+<!--			<artifactId>websocket-common</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.eclipse.jetty.websocket</groupId>-->
+<!--			<artifactId>websocket-server</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.eclipse.jetty.websocket</groupId>-->
+<!--			<artifactId>websocket-client</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--&lt;!&ndash;		<dependency>&ndash;&gt;-->
+<!--&lt;!&ndash;			<groupId>org.eclipse.jetty.websocket</groupId>&ndash;&gt;-->
+<!--&lt;!&ndash;			<artifactId>websocket-servlet</artifactId>&ndash;&gt;-->
+<!--&lt;!&ndash;			<scope>provided</scope>&ndash;&gt;-->
+<!--&lt;!&ndash;		</dependency>&ndash;&gt;-->
+
+<!--		&lt;!&ndash; Other &ndash;&gt;-->
+
+<!--		<dependency>-->
+<!--			<groupId>org.apache.xbean</groupId>-->
+<!--			<artifactId>xbean-reflect</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+
+<!--		<dependency>-->
+<!--			<groupId>org.apache.commons</groupId>-->
+<!--			<artifactId>commons-lang3</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+
+<!--		<dependency>-->
+<!--			<groupId>org.apache.myfaces.core</groupId>-->
+<!--			<artifactId>myfaces-api</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+
+<!--		&lt;!&ndash; Testing &ndash;&gt;-->
+
+<!--		<dependency>-->
+<!--			<groupId>junit</groupId>-->
+<!--			<artifactId>junit</artifactId>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>com.cedarsoft.commons</groupId>-->
+<!--			<artifactId>test-utils</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
 
 	</dependencies>
 

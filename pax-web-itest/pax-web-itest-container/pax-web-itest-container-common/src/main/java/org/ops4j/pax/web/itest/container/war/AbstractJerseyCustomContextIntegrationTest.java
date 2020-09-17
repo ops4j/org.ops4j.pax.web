@@ -15,13 +15,13 @@
  */
 package org.ops4j.pax.web.itest.container.war;
 
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
 /**
  * @author Toni Menzel (tonit)
  * @since Mar 3, 2009
  */
-public abstract class AbstractJerseyCustomContextIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractJerseyCustomContextIntegrationTest extends AbstractContainerTestBase {
 //	private Bundle installWarBundle;
 //
 //	@Before

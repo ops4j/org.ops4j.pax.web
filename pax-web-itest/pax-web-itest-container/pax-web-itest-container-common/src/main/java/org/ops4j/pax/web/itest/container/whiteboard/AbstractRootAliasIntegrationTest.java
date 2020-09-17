@@ -15,13 +15,13 @@
  */
 package org.ops4j.pax.web.itest.container.whiteboard;
 
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
 /**
  * @author Toni Menzel (tonit)
  * @since Mar 3, 2009
  */
-public abstract class AbstractRootAliasIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractRootAliasIntegrationTest extends AbstractContainerTestBase {
 
 //	private ServiceRegistration<Servlet> servletRoot;
 //	private ServiceRegistration<Servlet> servletSecond;

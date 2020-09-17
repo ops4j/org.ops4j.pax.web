@@ -34,64 +34,65 @@ import static org.junit.Assert.assertNull;
 
 public class ElTest {
 
-    public static Logger log = LoggerFactory.getLogger(ElTest.class);
+	public static Logger log = LoggerFactory.getLogger(ElTest.class);
 
-    @Test
-    public void elApi() {
-        // Provides an API for using EL in a stand-alone environment. It evaluates expressions without ${}/#{}
-        ELProcessor processor = new ELProcessor();
+	@Test
+	public void elApi() {
+		// Provides an API for using EL in a stand-alone environment. It evaluates expressions without ${}/#{}
+		ELProcessor processor = new ELProcessor();
 
-        // Manages EL parsing and evaluation environment.
-        ELManager manager = processor.getELManager();
+		// Manages EL parsing and evaluation environment.
+		ELManager manager = processor.getELManager();
 
-        // Context information for expression parsing and evaluation.
-        ELContext context = manager.getELContext();
+		// Context information for expression parsing and evaluation.
+		ELContext context = manager.getELContext();
 
-        // Enables customization of variable, property, method call, and type conversion resolution behavior for EL expression evaluation.
-        ELResolver resolver = context.getELResolver();
+		// Enables customization of variable, property, method call, and type conversion resolution behavior for EL expression evaluation.
+		ELResolver resolver = context.getELResolver();
 
-        // Provides an implementation for creating and evaluating EL expressions.
-        ExpressionFactory expressionFactory = ExpressionFactory.newInstance();
-        assertThat(expressionFactory.getClass().getName(), equalTo("org.apache.el.ExpressionFactoryImpl"));
+		// Provides an implementation for creating and evaluating EL expressions.
+		ExpressionFactory expressionFactory = ExpressionFactory.newInstance();
+		assertThat(expressionFactory.getClass().getName(), equalTo("org.apache.el.ExpressionFactoryImpl"));
 
-        manager.defineBean("model", new Model());
+		manager.defineBean("model", new Model());
 
-        assertNotNull(processor.eval("model"));
-        assertNull(processor.eval("model.prop"));
-        processor.eval("model.prop = 'Grzegorz'");
-        assertThat(processor.eval("model.prop"), equalTo("Grzegorz"));
-        assertThat(processor.eval("model.hello()"), equalTo("Grzegorz"));
-        assertThat(processor.eval("model.hello(\"Grzegorz\")"), equalTo("[Grzegorz]"));
+		assertNotNull(processor.eval("model"));
+		assertNull(processor.eval("model.prop"));
+		processor.eval("model.prop = 'Grzegorz'");
+		assertThat(processor.eval("model.prop"), equalTo("Grzegorz"));
+		assertThat(processor.eval("model.hello()"), equalTo("Grzegorz"));
+		assertThat(processor.eval("model.hello(\"Grzegorz\")"), equalTo("[Grzegorz]"));
 
-        Model m = (Model) resolver.getValue(context, null, "model");
-        assertNotNull(m);
-        assertThat(m.hello(), equalTo("Grzegorz"));
+		Model m = (Model) resolver.getValue(context, null, "model");
+		assertNotNull(m);
+		assertThat(m.hello(), equalTo("Grzegorz"));
 
-        // immediate and deferred evaluation - not relevant in plain EL usage. It is relevant in JSP/JSF
-        ValueExpression ve = expressionFactory.createValueExpression(context, "${model.prop}", String.class);
-        assertThat(ve.getValue(context), equalTo("Grzegorz"));
-        ve = expressionFactory.createValueExpression(context, "#{model.prop}", String.class);
-        assertThat(ve.getValue(context), equalTo("Grzegorz"));
-    }
+		// immediate and deferred evaluation - not relevant in plain EL usage. It is relevant in JSP/JSF
+		ValueExpression ve = expressionFactory.createValueExpression(context, "${model.prop}", String.class);
+		assertThat(ve.getValue(context), equalTo("Grzegorz"));
+		ve = expressionFactory.createValueExpression(context, "#{model.prop}", String.class);
+		assertThat(ve.getValue(context), equalTo("Grzegorz"));
+	}
 
-    public static class Model {
-        private String prop;
+	public static class Model {
 
-        public String getProp() {
-            return prop;
-        }
+		private String prop;
 
-        public void setProp(String prop) {
-            this.prop = prop;
-        }
+		public String getProp() {
+			return prop;
+		}
 
-        public String hello(String arg) {
-            return String.format("[%s]", arg);
-        }
+		public void setProp(String prop) {
+			this.prop = prop;
+		}
 
-        public String hello() {
-            return prop;
-        }
-    }
+		public String hello(String arg) {
+			return String.format("[%s]", arg);
+		}
+
+		public String hello() {
+			return prop;
+		}
+	}
 
 }

@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.EventListener;
 import java.util.List;
@@ -24,6 +25,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
+import javax.servlet.descriptor.TaglibDescriptor;
 
 import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
 import org.ops4j.pax.web.service.WebContainer;
@@ -297,6 +299,11 @@ class HttpServiceDisabled implements WebContainer {
 
 	@Override
 	public void registerJspConfigTagLibs(String tagLibLocation, String tagLibUri, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	@Override
+	public void registerJspConfigTagLibs(Collection<TaglibDescriptor> tagLibs, HttpContext httpContext) {
 		LOG.warn("Http service has already been stopped");
 	}
 

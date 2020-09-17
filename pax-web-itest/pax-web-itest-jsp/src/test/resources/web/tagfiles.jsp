@@ -25,13 +25,13 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>JSP</title>
-    <meta charset="UTF-8">
+	<title>JSP</title>
+	<meta charset="UTF-8">
 </head>
 <body>
-<div>
-    <h:text label="L1:" path="firstName" value="Kun" maxlength="30" />
-    <h:text label="L2:" path="lastName" value="${user.name}" />
-</div>
+	<div>
+		<h:text label="L1:" path="firstName" value="Kun" maxlength="30" />
+		<h:text label="L2:" path="lastName" value="${user.name}" />
+	</div>
 </body>
 </html>

@@ -118,6 +118,9 @@ public class ServiceModel implements BatchVisitor {
 	/** Error page models are kept as collection and processed for conflicts at {@link ServerModel} level */
 	private final Set<ErrorPageModel> errorPageModels = new HashSet<>();
 
+//	private final Map<String, SecurityConstraintMappingModel> securityConstraintMappingModels;
+//	private final Map<Object, WebSocketModel> webSockets;
+
 	public ServiceModel(ServerModel serverModel, ServerController serverController, Bundle serviceBundle) {
 		this.serverModel = serverModel;
 		this.serviceBundle = serviceBundle;
@@ -150,13 +153,6 @@ public class ServiceModel implements BatchVisitor {
 			return model;
 		});
 	}
-
-//	private final Map<String, ErrorPageModel> errorPageModels;
-//	private final Map<String, WelcomeFileModel> welcomeFileModels;
-//	private final Map<HttpContext, OsgiContextModel> contextModels;
-//	private final Map<String, SecurityConstraintMappingModel> securityConstraintMappingModels;
-//	private final Map<ServletContainerInitializer, ContainerInitializerModel> containerInitializers;
-//	private final Map<Object, WebSocketModel> webSockets;
 
 	public Map<String, Map<String, ServletModel>> getAliasMapping() {
 		return aliasMapping;
@@ -360,33 +356,5 @@ public class ServiceModel implements BatchVisitor {
 	public void visit(ErrorPageStateChange change) {
 		// no op here. At model level (unlike in server controller level), filters are added/removed individually
 	}
-
-//	/**
-//	 * Returns true if the context can still be configured. This is possible
-//	 * before any web components (servlets / filters / listeners / error pages)
-//	 * are registered. TODO verify what happen once the web elements are
-//	 * registered and then unregistered. Can still be configured?
-//	 *
-//	 * @param httpContext created by the service of this model
-//	 * @return true, if context can be configured false otherwise
-//	 */
-//	public synchronized boolean canBeConfigured(HttpContext httpContext) {
-//		return canBeConfigured(httpContext, servletModels)
-//				&& canBeConfigured(httpContext, filterModels.values())
-//				&& canBeConfigured(httpContext, eventListenerModels.values())
-//				&& canBeConfigured(httpContext, errorPageModels.values());
-//	}
-//
-//	private boolean canBeConfigured(HttpContext httpContext,
-//									Collection<? extends ElementModel> models) {
-////		for (Model model : models) {
-////			OsgiContextModel contextModel = model.getContextModel();
-////			HttpContext candidateHttpContext = contextModel.getHttpContext();
-////			if (candidateHttpContext.equals(httpContext)) {
-////				return false;
-////			}
-////		}
-//		return true;
-//	}
 
 }

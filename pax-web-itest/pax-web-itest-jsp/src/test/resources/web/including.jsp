@@ -18,15 +18,17 @@
     under the License.
 
 --%>
-<%--@elvariable id="user" type="org.ops4j.pax.web.test.jsp.JspTest.User"--%>
+<%--@elvariable id="user" type="org.ops4j.pax.web.test.jsp.PaxWebJspIntegrationTest.User"--%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Hello JSP</title>
-    <meta charset="UTF-8">
+	<title>Hello JSP</title>
+	<meta charset="UTF-8">
 </head>
 <body>
-    <p id="p1"><%@ include file="included.jsp" %></p>
+	<p id="p1">
+		<%@ include file="included.jsp" %>
+	</p>
 </body>
 </html>

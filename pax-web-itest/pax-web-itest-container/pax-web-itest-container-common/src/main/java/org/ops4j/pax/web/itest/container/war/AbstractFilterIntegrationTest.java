@@ -15,12 +15,12 @@
  */
 package org.ops4j.pax.web.itest.container.war;
 
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
 /**
  * @author Achim Nierbeck
  */
-public abstract class AbstractFilterIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractFilterIntegrationTest extends AbstractContainerTestBase {
 
 //	@Test
 //	public void testSimpleFilter() throws Exception {

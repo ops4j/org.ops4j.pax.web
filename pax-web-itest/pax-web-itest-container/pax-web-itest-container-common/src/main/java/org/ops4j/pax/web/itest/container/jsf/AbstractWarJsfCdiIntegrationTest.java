@@ -20,9 +20,9 @@
  */
 package org.ops4j.pax.web.itest.container.jsf;
 
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
-public abstract class AbstractWarJsfCdiIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractWarJsfCdiIntegrationTest extends AbstractContainerTestBase {
 
 //    protected static Option[] configureJsfAndCdi() {
 //        return options(

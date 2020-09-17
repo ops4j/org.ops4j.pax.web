@@ -17,7 +17,6 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.AbstractContextTracker;
-import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping;
@@ -52,21 +51,16 @@ public class ServletContextHelperMappingTracker extends AbstractContextTracker<S
 		try {
 			// dereference here to get some information, but unget later.
 			// this reference will be dereferenced again in the (Bundle)Context of actual Whiteboard service
-			// TODO: check the get/unget lifecycle
 			service = dereference(serviceReference);
 
 			model.setShared(true);
 
 			// 1. context name
-			model.setName(service.getContextId());
+			String name = setupName(model, service);
 
 			// 2. context path
 			// NOTE: Pax Web 7 was stripping leading "/" and was mixing concepts of "name" and "path"
-			String contextPath = service.getContextPath();
-			if (contextPath == null || "".equals(contextPath.trim())) {
-				contextPath = PaxWebConstants.DEFAULT_CONTEXT_PATH;
-			}
-			model.setContextPath(contextPath);
+			String contextPath = setupContextPath(model, service);
 
 			// 3. context params
 			model.getContextParams().clear();
@@ -74,7 +68,7 @@ public class ServletContextHelperMappingTracker extends AbstractContextTracker<S
 
 			// 4. don't pass service registration properties...
 			// ... create ones instead (service.id and service.rank are already there)
-			setupArtificialServiceRegistrationProperties(model, service);
+			setupArtificialServiceRegistrationProperties(model, service, true);
 
 			// 5. TODO: virtual hosts
 //			service.getVirtualHosts();
@@ -92,9 +86,8 @@ public class ServletContextHelperMappingTracker extends AbstractContextTracker<S
 					mapping = bundleContext.getService(serviceReference);
 					// get the ServletContextHelperMapping again - within proper bundle context, but again - only to
 					// obtain all the information needed. The "factory" method also accepts a Bundle, so we pass it.
-					String name = mapping.getContextId();
 					ServletContextHelper helper = mapping.getServletContextHelper(bundleContext.getBundle());
-					return new WebContainerContextWrapper(bundleContext.getBundle(), helper, name);
+					return new WebContainerContextWrapper(bundleContext.getBundle(), helper, model.getName());
 				} finally {
 					// TOCHECK: hmm, won't the ServletContextHelper returned from the mapping go away if we unget
 					//          the mapping?

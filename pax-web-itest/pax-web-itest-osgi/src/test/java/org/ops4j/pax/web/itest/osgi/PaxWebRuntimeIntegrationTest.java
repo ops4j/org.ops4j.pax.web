@@ -69,7 +69,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
  * to perform various tasks related to class/annotation discovery.
  */
 @RunWith(PaxExam.class)
-public class PaxWebRuntimeIntegrationTest extends AbstractControlledTestBase {
+public class PaxWebRuntimeIntegrationTest extends AbstractOsgiTestBase {
 
 	public static final Logger LOG = LoggerFactory.getLogger(PaxWebRuntimeIntegrationTest.class);
 

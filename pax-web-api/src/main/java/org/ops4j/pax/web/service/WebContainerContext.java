@@ -59,7 +59,11 @@ public interface WebContainerContext extends HttpContext {
 	 * <p>The methods requires classLoader access, because embedded bundle JARs (listed in {@code Bundle-ClassPath}
 	 * manifest header) should be checked as well.</p>
 	 *
-	 * @param path the path name for which to return resource paths
+	 * <p>Even if not specified by OSGi CMPN, this method also returns resources relative to all
+	 * {@code /WEB-INF/lib/*.jar!/META-INF/resources/} if the bundle is WAB.</p>
+	 *
+	 * @param path the path name for which to return resource paths. Just as in
+	 *        {@link javax.servlet.ServletContext#getResourcePaths(String)}, the path <em>must</em> start with {@code /}
 	 * @return a set of the resource paths (String objects) or null if no resource paths could be found or if
 	 *         the caller does not have the appropriate permissions.
 	 */

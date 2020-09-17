@@ -60,13 +60,20 @@
 					<systemPropertyVariables>
 						<!-- to configure pax-exam with pax.exam.system=default which gives us more control over installed bundles -->
 						<pax.exam.configuration>file:./src/test/resources/controlled-exam.properties</pax.exam.configuration>
+						<!--
+							system properties that specify versions of bundles installed using
+							org.ops4j.pax.exam.CoreOptions.mavenBundle(), but for which we don't want to add
+							maven dependencies (otherwise required if using MavenArtifactProvisionOption.versionAsInProject())
+						-->
+						<version.asm>${dependency.asm.version}</version.asm>
+						<version.xbean>${dependency.xbean.version}</version.xbean>
 					</systemPropertyVariables>
 					<redirectTestOutputToFile>false</redirectTestOutputToFile>
 					<runOrder>alphabetical</runOrder>
 					<!--
 						be careful to not load pax-logging-log4j1 and pax-logging-api through system class loader.
 						failsafe has to isolate running OSGi framework from these jars - they have to be installed
-						only as bundles
+						only as bundles. That's why most of the dependencies have "runtime" instead of "test" scope
 					-->
 					<classpathDependencyScopeExclude>runtime</classpathDependencyScopeExclude>
 					<forkCount>1</forkCount>
@@ -142,6 +149,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.ops4j.pax.web.itest</groupId>
+			<artifactId>pax-web-itest-common</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>pax-web-spi-fragment</artifactId>
 			<scope>runtime</scope>
@@ -198,11 +211,13 @@
 		<!-- OPS4J dependencies -->
 
 		<dependency>
+			<!-- required by pax-exam -->
 			<groupId>org.ops4j.base</groupId>
 			<artifactId>ops4j-base-lang</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<!-- required by pax-exam -->
 			<groupId>org.ops4j.base</groupId>
 			<artifactId>ops4j-base-util-property</artifactId>
 			<scope>test</scope>
@@ -264,15 +279,21 @@
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.metatype</artifactId>
+			<!-- this has to be test scope, because it's related to how pax-exam analyzes the test classes -->
 			<scope>test</scope>
 		</dependency>
 
 		<!-- JavaEE -->
 
 		<dependency>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
-			<!-- it has to b "test" - Pax Exam needs javax.servlet classes when loading @Test classes -->
+			<!-- it has to be "test" - Pax Exam needs javax.servlet classes when loading @Test classes -->
 			<scope>test</scope>
 		</dependency>
 
@@ -300,30 +321,8 @@
 		<!-- Other -->
 
 		<dependency>
-			<groupId>org.ow2.asm</groupId>
-			<artifactId>asm</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ow2.asm</groupId>
-			<artifactId>asm-commons</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ow2.asm</groupId>
-			<artifactId>asm-tree</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.xbean</groupId>
-			<artifactId>xbean-finder</artifactId>
 			<scope>test</scope>
 		</dependency>
 

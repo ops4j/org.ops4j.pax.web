@@ -148,9 +148,9 @@ public class ServerModel implements BatchVisitor {
 	private final Map<String, ServletContextModel> servletContexts = new HashMap<>();
 
 	// --- Bundle-bound context information - for Http Service scenarios, where OsgiContextModel is
-	//     identified by HttpContext/WebContainerContext passed to httpService.registerXXX(..., context)
-	//     OSGiContextModels created and managed at pax-web-extender-runtime level are not kept here, because
-	//     "default" context in Http Service and "default" context in Whiteboard Service should not clash
+	//     identified by HttpContext/WebContainerContext passed to httpService.registerXXX(..., context).
+	//     OSGiContextModels created and managed at pax-web-extender-whiteboard level are not kept here, because
+	//     "default" context in Http Service and "default" context in Whiteboard Service should not clash.
 
 	/**
 	 * <p>Global mapping between {@link WebContainerContext}, which represents "old" {@link HttpContext} from
@@ -199,7 +199,7 @@ public class ServerModel implements BatchVisitor {
 	 *     Thus, Servlet objects registered with the same HttpContext object must also share the same
 	 *     ServletContext object
 	 * </blockquote>
-	 * Specification doesn't precise what <em>the same</em> means - neither for HttpContext nor for the ServletContext.
+	 * Specification doesn't precise what <em>the same</em> means - neither for HttpContext nor for the ServletContextHelepr.
 	 * In Pax Web, knowing that there's Whiteboard aspect of the "context", we'll distinguish <strong>three</strong>
 	 * contexts:<ul>
 	 *     <li>standard {@link HttpContext} from Http Service spec - <em>the same</em> will be defined as <em>having
@@ -208,8 +208,8 @@ public class ServerModel implements BatchVisitor {
 	 *     <em>having the same id</em></li>
 	 *     <li>standard {@link org.osgi.service.http.context.ServletContextHelper} from Whiteboard Service spec -
 	 *     <em>the same</em> will be defined as <em>having the same name</em>, but also service ranking is taken into
-	 *     account (when needed). {@link OsgiContextModel} that uses
-	 *     {@link org.osgi.service.http.context.ServletContextHelper} is not tracked here.</li>
+	 *     account (when needed). {@link OsgiContextModel}s that use
+	 *     {@link org.osgi.service.http.context.ServletContextHelper} are not tracked here.</li>
 	 * </ul></p>
 	 *
 	 * <p>For now (2020-05-20) the decision is that if user registers a servlet with {@code null} {@link HttpContext},
@@ -241,17 +241,17 @@ public class ServerModel implements BatchVisitor {
 	 */
 	private final Map<String, TreeSet<OsgiContextModel>> sharedContexts = new HashMap<>();
 
-	/**
-	 * <p>Whiteboard web elements are also registered into target container through an instance of
+	/*
+	 * Whiteboard web elements are also registered into target container through an instance of
 	 * {@link WebContainer} and {@link ServerModel}, though they have to be kept in separate map. What's important
 	 * is that {@link OsgiContextModel} instances created and managed in pax-web-extender-whiteboard have to be
 	 * passed to current {@link ServerController} and {@link ServerModel} is the class containing methods that
-	 * configure {@link Batch} instances that are passed to given {@link ServerController}.</p>
+	 * configure {@link Batch} instances that are passed to given {@link ServerController}.
 	 *
-	 * <p>The key in this map is {@link OsgiContextModel#getId()}, because ranking is taken into account
-	 * at given {@link ServerController} level.</p>
+	 * But even if Whiteboard contexts are processed by ServerModel, they are not stored here at all! When
+	 * an OsgiContextModel fulfills the requirements to be used with httpService.registerXXX(..., context) methods,
+	 * such context is associated with a id:bundle (or just id) and tracked in bundleContexts or sharedContexts map.
 	 */
-	private final Map<String, OsgiContextModel> whiteboardContexts = new HashMap<>();
 
 	// -- Web Elements model information
 
@@ -404,17 +404,20 @@ public class ServerModel implements BatchVisitor {
 				}
 			}
 
-			// bundle-agnostic (a.k.a. "shared") context model with supplier from static DEFAULT_CONTEXT_MODEL
-			OsgiContextModel model = new OsgiContextModel(null, 0, 0L);
-			model.setContextSupplier(OsgiContextModel.DEFAULT_CONTEXT_MODEL.getContextSupplier());
-			model.setName(contextId);
-			// the behavioral aspects from the template
-			WebContainerContext wcc = model.getContextSupplier().apply(null, contextId);
+			// we have to create an OsgiContextModel which is backed by direct (not provided by supplier or
+			// service reference) instance of org.ops4j.pax.web.service.MultiBundleWebContainerContext
+			// While we are creating new OsgiContextModel with "contextId" name and without a bundle associated
+			// (shared context), the behavioral aspects of the contexts are the same as ones defined in
+			// OsgiContextModel.DEFAULT_CONTEXT_MODEL. We will use OsgiContextModel.DEFAULT_CONTEXT_MODEL to
+			// call the supplier of the context, so we'll get nice delegate for our MultiBundleWebContainerContext
 
-			// the multibundle aspects in new instance - we know what the DEFAULT_CONTEXT_MODEL supplier returns...
+			// the behavioral aspects from the DEFAULT_CONTEXT_MODEL - wcc will have proper id/name
+			WebContainerContext wcc = OsgiContextModel.DEFAULT_CONTEXT_MODEL.getContextSupplier().apply(null, contextId);
+
+			// the multibundle aspects in new instance, the behavioral - in passed delegate
 			wcc = new DefaultMultiBundleWebContainerContext((WebContainerContextWrapper) wcc);
 
-			model = createNewContextModel(wcc, null, PaxWebConstants.DEFAULT_CONTEXT_PATH);
+			OsgiContextModel model = createNewContextModel(wcc, null, PaxWebConstants.DEFAULT_CONTEXT_PATH);
 			associateHttpContext(wcc, model);
 
 			return model;
@@ -550,27 +553,36 @@ public class ServerModel implements BatchVisitor {
 	}
 
 	/**
-	 * Ensures that {@link OsgiContextModel} created and managed in pax-web-extender-whiteboard and passed together
+	 * <p>Ensures that {@link OsgiContextModel} created and managed in pax-web-extender-whiteboard and passed together
 	 * with {@link ElementModel} is correctly registered in this {@link ServerModel} and passed to
-	 * {@link ServerController}.
+	 * {@link ServerController}.</p>
+	 *
+	 * <p>There is really no need to check if the context was already added/associated, because this method
+	 * is only called from {@link org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView} and we
+	 * control it. It doesn't mean there's no way to break it ;)</p>
+	 *
 	 * @param contextModel
 	 * @param batch
 	 */
 	public void registerOsgiContextModelIfNeeded(OsgiContextModel contextModel, Batch batch) {
-		if (!whiteboardContexts.containsKey(contextModel.getId())) {
-			ServletContextModel scm = getOrCreateServletContextModel(contextModel.getContextPath(), batch);
-			batch.addOsgiContextModel(contextModel, scm);
-			if (contextModel.hasDirectHttpContextInstance()) {
-				// additionally let it be available to use as the context for HttpService scenarios
-				batch.associateOsgiContextModel(contextModel.resolveHttpContext(null), contextModel);
-			}
+		ServletContextModel scm = getOrCreateServletContextModel(contextModel.getContextPath(), batch);
+		batch.addOsgiContextModel(contextModel, scm);
+		if (contextModel.hasDirectHttpContextInstance()) {
+			// additionally let it be available to use as the context for HttpService scenarios
+			batch.associateOsgiContextModel(contextModel.resolveHttpContext(null), contextModel);
 		}
 	}
 
+	/**
+	 * Called through {@link org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView} when the
+	 * {@link OsgiContextModel} managed in pax-web-extender-whiteboard should be removed from the target
+	 * {@link ServerController} and unassociated from any bundle.
+	 *
+	 * @param contextModel
+	 * @param batch
+	 */
 	public void unregisterOsgiContextModel(OsgiContextModel contextModel, Batch batch) {
-		if (whiteboardContexts.containsKey(contextModel.getId())) {
-			batch.removeOsgiContextModel(contextModel);
-		}
+		batch.removeOsgiContextModel(contextModel);
 	}
 
 	/**
@@ -677,7 +689,7 @@ public class ServerModel implements BatchVisitor {
 		// explicit proof that no particular VHost is associated, thus context will be available through all VHosts
 		osgiContextModel.getVirtualHosts().clear();
 
-		// the context still should behave (almos) like it was registered
+		// the context still should behave (almost) like it was registered
 		Hashtable<String, Object> registration = osgiContextModel.getContextRegistrationProperties();
 		registration.clear();
 		// we pretend that this HttpContext/ServletContextModel was:
@@ -687,14 +699,16 @@ public class ServerModel implements BatchVisitor {
 		registration.put(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY, webContext.getContextId());
 		//  - registered with legacy context id parameter
 		registration.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, webContext.getContextId());
-		//  - registered by user as OSGi services
-		registration.put(Constants.SERVICE_ID, 0L);
-		osgiContextModel.setServiceId(0L);
-		// in Whiteboard, rank of "default" is Integer.MIN_VALUE / 2. Here it'll be lowest rank possible
-		registration.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE);
-		osgiContextModel.setServiceRank(Integer.MIN_VALUE);
 		//  - registered with given context path
 		registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
+		registration.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, contextPath);
+
+		// in Whiteboard, rank of "default" context is Integer.MIN_VALUE / 2. Here it'll be lowest rank possible
+		registration.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE);
+		osgiContextModel.setServiceRank(Integer.MIN_VALUE);
+		// normally there's some service ID. Here it's 0L
+		registration.put(Constants.SERVICE_ID, 0L);
+		osgiContextModel.setServiceId(0L);
 
 		LOG.trace("Created new {}", osgiContextModel);
 
@@ -702,8 +716,8 @@ public class ServerModel implements BatchVisitor {
 	}
 
 	/**
-	 * <p>Simply mark {@link WebContainerContext} as the owner/creator/initiator of given {@link OsgiContextModel}
-	 * whether it's shared or bundle-related.</p>
+	 * <p>Mark {@link WebContainerContext} as the owner/creator/initiator of given {@link OsgiContextModel}
+	 * whether it's shared or bundle-scoped.</p>
 	 */
 	public void associateHttpContext(final WebContainerContext context, final OsgiContextModel osgiContextModel) {
 		if (context.isShared()) {
@@ -729,7 +743,7 @@ public class ServerModel implements BatchVisitor {
 			if (models.isEmpty()) {
 				sharedContexts.remove(key);
 			}
-			LOG.debug("Unconfigured shared context {} -> {}", context, osgiContextModel);
+			LOG.debug("Removed shared context {} -> {}", context, osgiContextModel);
 		} else {
 			ContextKey key = ContextKey.with(context.getContextId(), context.getBundle());
 			TreeSet<OsgiContextModel> models = bundleContexts.get(key);
@@ -749,7 +763,6 @@ public class ServerModel implements BatchVisitor {
 	 * @return
 	 */
 	public OsgiContextModel getBundleContextModel(String name, Bundle ownerBundle) {
-		// Using new DefaultHttpContext means that we'll retrieve only "default" contexts
 		return getHighestRankedModel(bundleContexts.get(ContextKey.with(name, ownerBundle)));
 	}
 
@@ -762,14 +775,6 @@ public class ServerModel implements BatchVisitor {
 	 */
 	public OsgiContextModel getBundleContextModel(WebContainerContext context) {
 		return getHighestRankedModel(bundleContexts.get(ContextKey.with(context.getContextId(), context.getBundle())));
-	}
-
-	private String contextKey(WebContainerContext context) {
-		return contextKey(context.getContextId(), context.getBundle());
-	}
-
-	private String contextKey(String contextId, Bundle bundle) {
-		return contextId + "|" + bundle.getSymbolicName() + "|" + bundle.getVersion();
 	}
 
 	/**
@@ -1815,24 +1820,18 @@ public class ServerModel implements BatchVisitor {
 			case ASSOCIATE: {
 				OsgiContextModel model = change.getOsgiContextModel();
 				// it's a whiteboard context that could be used for Http Service scenarios as well, because
-				// it has direct reference to bundleScoped or shared WebContainerContext
+				// it has direct reference to bundleScoped or shared WebContainerContext.
+				// if the model doesn't contain direct HttpContext reference, it can never be passed to associate
 				associateHttpContext(model.resolveHttpContext(null), model);
 				break;
 			}
 			case ADD: {
-				OsgiContextModel model = change.getOsgiContextModel();
-				if (!model.hasDirectHttpContextInstance()) {
-					// it's a normal, dynamic whiteboard context
-					whiteboardContexts.put(model.getId(), model);
-				}
+				// actuall it's NOOP at ServerModel level
 				break;
 			}
 			case DELETE: {
 				OsgiContextModel model = change.getOsgiContextModel();
-				if (!model.hasDirectHttpContextInstance()) {
-					// it's a normal, dynamic whiteboard context
-					whiteboardContexts.remove(model.getId(), model);
-				} else {
+				if (model.hasDirectHttpContextInstance()) {
 					// removal of HttpService context (bundle-scoped or shared)
 					deassociateHttpContext(model.resolveHttpContext(null), model);
 				}

@@ -29,7 +29,7 @@
 
 	<groupId>org.ops4j.pax.web.samples</groupId>
 	<artifactId>jsf-primefaces-commons2</artifactId>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 
 	<name>OPS4J Pax Web JSF Samples - bundle dependency 2</name>
 

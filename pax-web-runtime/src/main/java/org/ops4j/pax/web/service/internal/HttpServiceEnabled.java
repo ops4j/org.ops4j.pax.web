@@ -36,6 +36,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
+import javax.servlet.descriptor.TaglibDescriptor;
 
 import org.ops4j.pax.web.annotations.PaxWebConfiguration;
 import org.ops4j.pax.web.annotations.PaxWebTesting;
@@ -61,6 +62,8 @@ import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.model.events.ElementEvent;
 import org.ops4j.pax.web.service.spi.model.events.WebElementListener;
+import org.ops4j.pax.web.service.spi.servlet.DefaultJspPropertyGroupDescriptor;
+import org.ops4j.pax.web.service.spi.servlet.DefaultTaglibDescriptor;
 import org.ops4j.pax.web.service.spi.servlet.DynamicJEEWebContainerView;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.util.Path;
@@ -192,7 +195,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 	// --- different methods used to retrieve HttpContext
 	//     "102.10.3.1 public HttpContext createDefaultHttpContext()" says that "a new HttpContext object is created
 	//     each time this method is called", but we actually don't want "default" context to mean something
-	//     different each time it's "created".
+	//     different each time it's "created"!
 	//     That's why the "contexts" returned from the below methods are unique instances, but underneath they
 	//     delegate to something with "the same" concept precisely defined by Pax Web (Http Service specification
 	//     doesn't make the concept of "the same" precise).
@@ -1197,13 +1200,57 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 	}
 
 	@Override
-	public void registerJspConfigTagLibs(String tagLibLocation, String tagLibUri, HttpContext httpContext) {
+	public void registerJspConfigTagLibs(String taglibLocation, String tagLibUri, HttpContext httpContext) {
+		TaglibDescriptor descriptor = new DefaultTaglibDescriptor(tagLibUri, taglibLocation);
+		registerJspConfigTagLibs(Collections.singletonList(descriptor), httpContext);
+	}
+
+	@Override
+	public void registerJspConfigTagLibs(Collection<TaglibDescriptor> tagLibs, HttpContext httpContext) {
+		// This method contributes new TLD mappings to an OsgiServletContext associated with the passed httpContext.
+		// This is ineffective after the real context has started, but still the new list should be visible
+		// after calling javax.servlet.ServletContext.getJspConfigDescriptor().getTaglibs()
+
+		// this method (and #registerJspConfigPropertyGroup() and the methods that configure session parameters)
+		// do not have to pass anything to ServerController, because all they do is configuration of
+		// the OsgiContextModel associated with the passed httpContext. The OsgiContextModel will
+		// get the JSP configuration and will be used inside the actual OsgiServletContext associated with
+		// this OsgiContextModel.
+		//
+		// The actual place where this information is needed is in JasperInitializer.onStartup(), where the SCI
+		// checks the context for JSP configuration
+		//
+		// ServerModel keeps the association between HttpContext (shared or not) and rank-sorted list
+		// of OsgiContextModels, so remember that this scenario is possible:
+		//  1. ctx1 = this.createDefaultHttpContext()
+		//  2. this.registerJspConfigTagLibs(..., ctx1)
+		//  3. somehwere else a HttpContext[Mapping] is registered for given bundle and name, but higher rank
+		//  4. this.registerJsps(..., ctx1)
+		// but because HttpContext arg is translated into actual OsgiContextModel, in step #4 it may turn out
+		// that the actual OsgiContextModel and later - OsgiServletContext do NOT contain the passed JSP config!
+		//
+		// In case of WABs, where the OsgiContextModel is created at the start of web.xml parsing we
+		// can block the configuration thread, so entire web.xml parsing will be done with exactly the same OCM,
+		// but without WABs (and without not-yet-implemented (as of 2020-09-17) transactions), we can't
+		// ensure that the above scenario won't happen
+		serverModel.runSilently(() -> {
+			return null;
+		});
 	}
 
 	@Override
 	public void registerJspConfigPropertyGroup(List<String> includeCodas, List<String> includePreludes,
 			List<String> urlPatterns, Boolean elIgnored, Boolean scriptingInvalid, Boolean isXml,
 			HttpContext httpContext) {
+		DefaultJspPropertyGroupDescriptor descriptor = new DefaultJspPropertyGroupDescriptor();
+		descriptor.setIncludeCodas(includeCodas);
+		descriptor.setIncludePreludes(includePreludes);
+		descriptor.setUrlPatterns(urlPatterns);
+		descriptor.setElIgnored(elIgnored == null ? "false" : elIgnored.toString());
+		descriptor.setScriptingInvalid(scriptingInvalid == null ? "false" : scriptingInvalid.toString());
+		descriptor.setScriptingInvalid(isXml == null ? "false" : isXml.toString());
+
+		registerJspConfigPropertyGroup(descriptor, httpContext);
 	}
 
 	@Override
@@ -1362,7 +1409,8 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			final Collection<WebContainerContext> webContexts
 					= httpContexts.stream().map(this::unify).collect(Collectors.toList());
 			webContexts.forEach(wc -> {
-				// HttpService scenario, so only "/" context path
+				// HttpService scenario, so only "/" context path if there's a need to actually create
+				// an OsgiContextModel
 				OsgiContextModel contextModel = serverModel.getOrCreateOsgiContextModel(wc, serviceBundle,
 						PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
 				model.addContextModel(contextModel);
@@ -1637,11 +1685,6 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 //
 //	}
 
-	private String getJspServletName(String jspFile) {
-		return null;
-//		return jspFile == null ? PAX_WEB_JSP_SERVLET : null;
-	}
-
 //	@SuppressWarnings("unchecked")
 //	private Dictionary<String, ?> createInitParams(ContextModel contextModel,
 //												   Dictionary<String, ?> initParams) {
@@ -1862,35 +1905,6 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 //	}
 //
 //	@Override
-//	public void registerServletContainerInitializer(
-//			ServletContainerInitializer servletContainerInitializer,
-//			Class<?>[] classes, final HttpContext httpContext) {
-//		NullArgumentException.validateNotNull(httpContext, "Http context");
-//		final ContextModel contextModel = getOrCreateContext(httpContext);
-//		LOG.debug("Using context [" + contextModel + "]");
-//
-//		Set<Class<?>> clazzes = new HashSet<>();
-//		if (classes != null) {
-//			Collections.addAll(clazzes, classes);
-//		}
-//		Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = contextModel
-//				.getContainerInitializers();
-//		Set<Class<?>> containerInitializersClasses = containerInitializers == null ? null
-//				: containerInitializers.get(servletContainerInitializer);
-//		if (!clazzes.equals(containerInitializersClasses)) {
-//			if (!serviceModel.canBeConfigured(httpContext)) {
-//				throw new IllegalStateException(
-//						"Http context already used. ServletContainerInitializer can be set/changed only before first usage");
-//			}
-//			contextModel.addContainerInitializer(servletContainerInitializer,
-//					clazzes);
-//		}
-//
-//		serviceModel.addContextModel(contextModel);
-//
-//	}
-//
-//	@Override
 //	public void registerJettyWebXml(URL jettyWebXmlURL, HttpContext httpContext) {
 //		NullArgumentException.validateNotNull(httpContext, "Http context");
 //		final ContextModel contextModel = getOrCreateContext(httpContext);
@@ -1908,11 +1922,6 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 //
 //	}
 //
-//	@Override
-//	public void unregisterServletContainerInitializer(HttpContext httpContext) {
-//		//nothing to do
-//	}
-
 //	@Override
 //	public void begin(HttpContext httpContext) {
 //		final ContextModel contextModel = getOrCreateContext(httpContext);

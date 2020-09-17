@@ -19,20 +19,21 @@
 
 --%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="java.util.Date" %>
 <%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.util.Date" %>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Hello JSP</title>
-    <meta charset="UTF-8">
+	<title>Hello JSP</title>
+	<meta charset="UTF-8">
 </head>
 <body>
-    <%
-        Date d = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2019-02-11 02:03:04");
-        request.setAttribute("time", new SimpleDateFormat("HH:mm").format(d));
-    %>
-    <p id="p1">It's <%= request.getAttribute("time") %> o'clock</p>
+	<%
+		@SuppressWarnings("UnhandledExceptionInJSP")
+		Date d = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2019-02-11 02:03:04");
+		request.setAttribute("time", new SimpleDateFormat("HH:mm").format(d));
+	%>
+	<p id="p1">It's <%= request.getAttribute("time") %> o'clock</p>
 </body>
 </html>

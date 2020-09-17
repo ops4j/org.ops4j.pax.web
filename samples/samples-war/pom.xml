@@ -36,6 +36,7 @@
 	<modules>
 		<module>war-simplest-javaee</module>
 		<module>war-simplest-osgi</module>
+		<module>war-servlet-jsp-file</module>
 	</modules>
 
 </project>

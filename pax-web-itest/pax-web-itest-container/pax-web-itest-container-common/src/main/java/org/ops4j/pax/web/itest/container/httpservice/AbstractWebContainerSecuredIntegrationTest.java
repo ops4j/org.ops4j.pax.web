@@ -22,7 +22,7 @@ import javax.inject.Inject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.PaxWebConstants;
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Achim Nierbeck
  */
-public abstract class AbstractWebContainerSecuredIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractWebContainerSecuredIntegrationTest extends AbstractContainerTestBase {
 
 	public static final Logger LOG = LoggerFactory.getLogger(AbstractWebContainerSecuredIntegrationTest.class);
 
@@ -60,7 +60,7 @@ public abstract class AbstractWebContainerSecuredIntegrationTest extends Abstrac
 //		properties.put(PaxWebConfig.PID_CFG_CIPHERSUITES_INCLUDED, "TLS_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_256_GCM_SHA384");
 
 		// entire keystore
-		properties.put(PaxWebConfig.PID_CFG_SSL_KEYSTORE, "../etc/security/server.jks");
+		properties.put(PaxWebConfig.PID_CFG_SSL_KEYSTORE, "../../etc/security/server.jks");
 		properties.put(PaxWebConfig.PID_CFG_SSL_KEYSTORE_PASSWORD, "passw0rd");
 		properties.put(PaxWebConfig.PID_CFG_SSL_KEYSTORE_TYPE, "JKS");
 //			properties.put(PaxWebConfig.PID_CFG_SSL_KEYSTORE_PROVIDER, "SUN");
@@ -70,7 +70,7 @@ public abstract class AbstractWebContainerSecuredIntegrationTest extends Abstrac
 		properties.put(PaxWebConfig.PID_CFG_SSL_KEY_ALIAS, "server"); // to check if we can select one of many
 
 		// entire truststore
-		properties.put(PaxWebConfig.PID_CFG_SSL_TRUSTSTORE, "../etc/security/server.jks");
+		properties.put(PaxWebConfig.PID_CFG_SSL_TRUSTSTORE, "../../etc/security/server.jks");
 		properties.put(PaxWebConfig.PID_CFG_SSL_TRUSTSTORE_PASSWORD, "passw0rd");
 		properties.put(PaxWebConfig.PID_CFG_SSL_TRUSTSTORE_TYPE, "JKS");
 //			properties.put(PaxWebConfig.PID_CFG_SSL_TRUSTSTORE_PROVIDER, "SUN");

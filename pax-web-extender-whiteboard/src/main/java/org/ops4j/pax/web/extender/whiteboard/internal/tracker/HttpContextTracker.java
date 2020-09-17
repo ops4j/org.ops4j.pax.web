@@ -59,6 +59,9 @@ public class HttpContextTracker extends AbstractContextTracker<HttpContext> {
 
 		// 1. context name - checked using only legacy property name
 		String name = Utils.getStringProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID);
+		if (name == null || "".equals(name.trim())) {
+			name = HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME;
+		}
 		model.setName(name);
 
 		// 2. context path - only legacy property name
@@ -68,7 +71,7 @@ public class HttpContextTracker extends AbstractContextTracker<HttpContext> {
 		}
 		model.setContextPath(contextPath);
 
-		// 3. context params - only with legacy prefix
+		// 3. context params - with legacy prefix (and warning) and if none found - with Whiteboard prefix
 		Map<String, String> initParams = new LinkedHashMap<>();
 		String legacyInitPrefix = Utils.getStringProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_INIT_PREFIX);
 		if (legacyInitPrefix == null) {
@@ -82,21 +85,29 @@ public class HttpContextTracker extends AbstractContextTracker<HttpContext> {
 				}
 			}
 		}
+		if (initParams.size() == 0) {
+			// try with Whiteboard prefix
+			for (String key : serviceReference.getPropertyKeys()) {
+				if (key.startsWith(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX)) {
+					String value = Utils.getStringProperty(serviceReference, key);
+					if (value != null) {
+						initParams.put(key.substring(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX.length()), value);
+					}
+				}
+			}
+		}
 		model.getContextParams().clear();
 		model.getContextParams().putAll(initParams);
 
 		// 4. pass all service registration properties...
 		model.getContextRegistrationProperties().putAll(Utils.toMap(serviceReference));
-		// ... but in case there was no osgi.http.whiteboard.context.path property, let's set it now
+		// ... but in case there was no context path or name property, let's set them now
+		model.getContextRegistrationProperties().put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, name);
+		model.getContextRegistrationProperties().put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, contextPath);
+		// property to allow Whiteboard elements to be registered for HttpService-related context
+		model.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY, name);
+		// and additionally a whiteboard context path
 		model.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
-		if (name != null) {
-			// property to allow Whiteboard elements to be registered for HttpService-related context
-			model.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY, name);
-			// we could allow old HttpContext to be target for new Whiteboard web elements
-			// but we won't do it - user has to specify osgi.http.whiteboard.context.name directly.
-			// do not uncomment
-//			model.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, name);
-		}
 
 		// 5. TODO: virtual hosts
 //			service.getVirtualHosts();
@@ -112,12 +123,12 @@ public class HttpContextTracker extends AbstractContextTracker<HttpContext> {
 		if (Constants.SCOPE_SINGLETON.equals(scope)) {
 			LOG.debug("Dereferencing singleton service {}", serviceReference);
 			HttpContext context = bundleContext.getService(serviceReference);
+
 			if (context instanceof WebContainerContext) {
 				// assume that if user wants this context to be "shared", it's actually an instance
 				// of org.ops4j.pax.web.service.MultiBundleWebContainerContext and "shared" service
 				// registration property is not relevant
 				model.setHttpContext((WebContainerContext) context);
-
 				model.setShared(((WebContainerContext)context).isShared());
 			} else {
 				Boolean shared = Utils.getBooleanProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_SHARED);
@@ -126,15 +137,36 @@ public class HttpContextTracker extends AbstractContextTracker<HttpContext> {
 							+ "WebContainerContext with \"shared\" property. Switching to non-shared.", context);
 				}
 				model.setHttpContext(new WebContainerContextWrapper(serviceReference.getBundle(), context, name));
+				model.setShared(false);
 			}
 
-			// this means that such OsgiContextModel will be passed directly to HttpService, replacing
-			// HttpService-specific, bundle-scoped (or shared) context
-			// also this means that we should target such context using ONLY
-			// "osgi.http.whiteboard.context.httpservice" property only
+			// we have a "context" (HttpContext) which:
+			//  - is a singleton
+			//  - has a name
+			//  - has associated bundle (the one registering HttpContext)
+			// it means that such context is suitable to be used directly as a parameter to httpService.register()
+			// (pax-web-extender-whiteboard will pass such context to pax-web-runtime to store it as HttpService-
+			// related context - potentially overriding existing context created within the scope of HttpService)
+			// and it can be referenced during Whiteboard registrations of web elements with:
+			//    osgi.http.whiteboard.context.select = "(osgi.http.whiteboard.context.httpservice=<name>)"
+			// but not with:
+			//    osgi.http.whiteboard.context.select = "(osgi.http.whiteboard.context.name=<name>)"
+
+			// this property is not present, but we explicitly show that it CAN'T be present
 			model.getContextRegistrationProperties().remove(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
 		} else {
 			model.setContextReference(serviceReference);
+
+			// we have a "context" (HttpContext) which:
+			//  - is NOT a singleton
+			//  - has a name
+			//  - has associated bundle (the one registering HttpContext)
+			// it means that such context is NOT suitable to be used directly as a parameter to httpService.register()
+			// (pax-web-extender-whiteboard will not pass this context to pax-web-runtime)
+			// but it can be referenced during Whiteboard registrations of web elements with:
+			//    osgi.http.whiteboard.context.select = "(osgi.http.whiteboard.context.httpservice=<name>)"
+			// but not with:
+			//    osgi.http.whiteboard.context.select = "(osgi.http.whiteboard.context.name=<name>)"
 
 			// we have to believe the flag
 			Boolean shared = Utils.getBooleanProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_SHARED);

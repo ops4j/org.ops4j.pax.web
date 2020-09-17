@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultServletMapping;
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletMapping;
@@ -45,7 +45,7 @@ import static org.junit.Assert.assertEquals;
  * @author Toni Menzel (tonit)
  * @since Mar 3, 2009
  */
-public abstract class AbstractWhiteboardIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractWhiteboardIntegrationTest extends AbstractContainerTestBase {
 
 	public static final Logger LOG = LoggerFactory.getLogger(AbstractWhiteboardIntegrationTest.class);
 

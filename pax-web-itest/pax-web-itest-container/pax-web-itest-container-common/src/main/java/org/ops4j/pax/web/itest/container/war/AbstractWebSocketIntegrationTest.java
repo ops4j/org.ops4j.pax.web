@@ -15,13 +15,13 @@
  */
 package org.ops4j.pax.web.itest.container.war;
 
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
 
 /**
  * @author Achim Nierbeck
  */
-public abstract class AbstractWebSocketIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractWebSocketIntegrationTest extends AbstractContainerTestBase {
 
 //	@Before
 //	public void setUp() throws BundleException, InterruptedException {

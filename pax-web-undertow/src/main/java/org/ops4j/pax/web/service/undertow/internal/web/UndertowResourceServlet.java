@@ -165,7 +165,6 @@ public class UndertowResourceServlet extends DefaultServlet implements ResourceM
 		redirectWelcome = "true".equalsIgnoreCase(getInitParameter("redirectWelcome"));
 		pathInfoOnly = !"false".equalsIgnoreCase(getInitParameter("pathInfoOnly"));
 
-		// TODO: Jetty needs the same way of welcome files configuration
 		ServletContext osgiScopedServletContext = config.getServletContext();
 		if (welcomeFiles == null) {
 			if (osgiScopedServletContext instanceof OsgiScopedServletContext) {

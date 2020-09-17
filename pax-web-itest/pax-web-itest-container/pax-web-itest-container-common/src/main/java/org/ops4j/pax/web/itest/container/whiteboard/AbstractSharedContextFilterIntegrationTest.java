@@ -15,13 +15,13 @@
  */
 package org.ops4j.pax.web.itest.container.whiteboard;
 
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
 /**
  * @author Achim Nierbeck (anierbeck)
  * @since Dec 30, 2012
  */
-public abstract class AbstractSharedContextFilterIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractSharedContextFilterIntegrationTest extends AbstractContainerTestBase {
 
 //	protected static final String SERVLET_BUNDLE = "ServletBundleTest";
 //	protected static final String FILTER_BUNDLE = "FilterBundleTest";

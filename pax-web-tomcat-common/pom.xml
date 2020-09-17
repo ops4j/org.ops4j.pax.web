@@ -117,6 +117,7 @@
 							org.apache.juli;version="${dependency.tomcat.version}"
 						</Export-Package>
 						<_nouses>true</_nouses>
+						<_contract>!*</_contract>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -134,7 +135,7 @@
 				runtime scope means: not required for compilation, see as transitive dependency
 				with proper Export-Package, we control what actually is provided at runtime
 			-->
-			<scope>runtime</scope>
+			<scope>provided</scope>
 		</dependency>
 
 	</dependencies>

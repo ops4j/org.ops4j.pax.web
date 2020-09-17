@@ -34,7 +34,6 @@
 	<name>OPS4J Pax Web JSP Samples</name>
 
 	<modules>
-		<module>war-servlet-jsp-file</module>
 	</modules>
 
 </project>

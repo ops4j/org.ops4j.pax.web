@@ -15,13 +15,13 @@
  */
 package org.ops4j.pax.web.itest.container.httpservice;
 
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
 /**
  * @author Toni Menzel (tonit)
  * @since Mar 3, 2009
  */
-public abstract class AbstractWebConsoleIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractWebConsoleIntegrationTest extends AbstractContainerTestBase {
 
 //	@Before
 //	public void setUp() throws Exception {

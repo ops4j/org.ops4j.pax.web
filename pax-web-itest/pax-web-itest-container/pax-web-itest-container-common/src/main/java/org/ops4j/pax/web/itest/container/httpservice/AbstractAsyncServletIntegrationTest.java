@@ -19,15 +19,15 @@ import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
-import org.ops4j.pax.web.itest.utils.support.AsyncServlet;
+import org.ops4j.pax.web.itest.utils.web.AsyncServlet;
 import org.ops4j.pax.web.service.WebContainer;
 
 /**
  * @author Grzegorz Grzybek
  */
-public abstract class AbstractAsyncServletIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractAsyncServletIntegrationTest extends AbstractContainerTestBase {
 
 	@Before
 	public void setUp() throws Exception {

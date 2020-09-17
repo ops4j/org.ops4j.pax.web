@@ -132,7 +132,8 @@ public interface PaxWebConstants {
 
 	/**
 	 * The default init-prefix.
-	 * @deprecated {@code servlet.init./filter.init./context.init.} should be used instead.
+	 * @deprecated {@code servlet.init./filter.init./context.init.} should be used instead - see
+	 * {@link HttpWhiteboardConstants}.
 	 */
 	@Deprecated
 	String DEFAULT_INIT_PREFIX_PROP = "init.";

@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.itest.container.jsp;
 
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
 /**
  * The tests contained here will test the usage of the PAX Web Jsp directly with the HttpService, without
@@ -27,7 +27,7 @@ import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
  *
  * @author Serge Huber
  */
-public abstract class AbstractJspSelfRegistrationIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractJspSelfRegistrationIntegrationTest extends AbstractContainerTestBase {
 
 //	@Before
 //	public void setUp() throws Exception {

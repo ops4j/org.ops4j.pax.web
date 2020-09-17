@@ -303,7 +303,7 @@ public class DynamicRegistrations {
 			bundle = context.getOsgiContextModel().getOwnerBundle();
 		}
 		// this is important because the registering bundle is used to obtain bundle-scoped WebContainer instance
-		// later - during actual registration
+		// later - during actual registration of the model
 		model.setRegisteringBundle(bundle);
 	}
 

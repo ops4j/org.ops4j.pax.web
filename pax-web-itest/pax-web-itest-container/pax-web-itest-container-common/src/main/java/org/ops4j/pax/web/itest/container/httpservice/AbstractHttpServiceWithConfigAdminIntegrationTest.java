@@ -22,7 +22,7 @@ import javax.inject.Inject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.PaxWebConstants;
@@ -34,7 +34,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * @author Toni Menzel (tonit)
  * @since Mar 3, 2009
  */
-public abstract class AbstractHttpServiceWithConfigAdminIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractHttpServiceWithConfigAdminIntegrationTest extends AbstractContainerTestBase {
 
 	private Bundle hsBundle;
 

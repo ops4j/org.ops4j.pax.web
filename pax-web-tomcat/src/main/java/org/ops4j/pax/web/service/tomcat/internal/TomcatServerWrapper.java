@@ -839,6 +839,10 @@ class TomcatServerWrapper implements BatchVisitor {
 
 	@Override
 	public void visit(OsgiContextModelChange change) {
+		if (change.getKind() == OpCode.ASSOCIATE) {
+			return;
+		}
+
 		OsgiContextModel osgiModel = change.getOsgiContextModel();
 		ServletContextModel servletContextModel = change.getServletContextModel();
 
@@ -881,15 +885,15 @@ class TomcatServerWrapper implements BatchVisitor {
 			realContext.setDefaultOsgiContextModel(highestRankedModel);
 			realContext.setDefaultServletContext(highestRankedContext);
 
-			// each highest ranked context should be registered as OSGi service (if it wasn't registered)
-			highestRankedContext.register();
-
-			// and we have to ensure that all other contexts are unregistered
+			// we have to ensure that non-highest ranked contexts are unregistered
 			osgiServletContexts.forEach((ocm, osc) -> {
 				if (osc != highestRankedContext) {
 					osc.unregister();
 				}
 			});
+
+			// and the highest ranked context should be registered as OSGi service (if it wasn't registered)
+			highestRankedContext.register();
 		} else {
 			// TOCHECK: there should be no more web elements in the context, no OSGi mechanisms, just 404 all the time
 			realContext.setDefaultOsgiContextModel(null);

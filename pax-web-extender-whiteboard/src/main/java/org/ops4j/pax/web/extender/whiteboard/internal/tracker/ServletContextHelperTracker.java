@@ -52,12 +52,16 @@ public class ServletContextHelperTracker extends AbstractContextTracker<ServletC
 	protected OsgiContextModel configureContextModel(ServiceReference<ServletContextHelper> serviceReference,
 			OsgiContextModel model) {
 
+		// always shared
 		model.setShared(true);
 
 		// 1. context name
 		String name = Utils.getPaxWebProperty(serviceReference,
 				PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME,
 				Utils::asString);
+		if (name == null || "".equals(name.trim())) {
+			name = HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME;
+		}
 		model.setName(name);
 
 		// 2. context path
@@ -87,6 +91,7 @@ public class ServletContextHelperTracker extends AbstractContextTracker<ServletC
 		// 4. pass all service registration properties...
 		model.getContextRegistrationProperties().putAll(Utils.toMap(serviceReference));
 		// ... but in case there was no osgi.http.whiteboard.context.path property, let's set it now
+		model.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, name);
 		model.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
 
 		// 5. TODO: virtual hosts

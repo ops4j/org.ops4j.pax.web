@@ -25,4 +25,14 @@ public class ContextRankingTest extends MultiContainerTestSupport {
 
 	// TODO: write some tests...
 
+	// CP - context path
+	// SC - javax.servlet.ServletContext
+	// SCH - ServletContextHelper (CMPN 140)
+	// HC - HttpContext (CMPN 102)
+	// WCC - WebContainerContext (extension of HC)
+	// OCM - OsgiContextModel - mapped 1:1 with WCC/SCH and mapped N:1 with SC/CP
+	// OSC - OsgiServletContext - mapped 1:1 with OCM, but at ServerController level and mapped N:1 with SC/CP
+
+	// Scenarios:
+
 }

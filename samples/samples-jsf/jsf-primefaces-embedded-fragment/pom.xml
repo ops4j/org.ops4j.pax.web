@@ -65,6 +65,11 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>jsf-primefaces-embedded</artifactId>
+			<!--
+				This is required, but bndlib prints a warning about missing host dependency on classpath.
+				The reason is that org.apache.maven.artifact.handler.DefaultArtifactHandler for "war" role has
+				"addedToClasspath" set to false in maven-core.jar!/META-INF/plexus/artifact-handlers.xml
+			-->
 			<type>war</type>
 		</dependency>
 		<dependency>

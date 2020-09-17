@@ -57,11 +57,12 @@ public class WhiteboardResourcesTest extends MultiContainerTestSupport {
 
 		Hashtable<String, Object> properties = new Hashtable<>();
 		// OSGi CMPN Whiteboard properties
-		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN, "/files/*");
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN, new String[] { "/files/*", "/res/*" });
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX, "/resources");
 		ServiceReference<Object> resourcesRef = mockReference(sample1, Object.class, properties, Object::new, 0L, 0);
 		ServletModel model = getResourceCustomizer().addingService(resourcesRef);
 		assertThat(httpGET(port, "/files/file.txt"), endsWith("hello1"));
+		assertThat(httpGET(port, "/res/file.txt"), endsWith("hello1"));
 		assertThat(httpGET(port, "/files/other.txt"), startsWith("HTTP/1.1 404"));
 
 		getResourceCustomizer().removedService(resourcesRef, model);

@@ -15,12 +15,12 @@
  */
 package org.ops4j.pax.web.itest.container.jsp;
 
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
 /**
  * @author Achim Nierbeck
  */
-public abstract class AbstractJspIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractJspIntegrationTest extends AbstractContainerTestBase {
 
 //	private Bundle installWarBundle;
 //

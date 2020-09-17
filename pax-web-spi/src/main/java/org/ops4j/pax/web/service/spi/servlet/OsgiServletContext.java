@@ -50,6 +50,7 @@ import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
@@ -110,31 +111,55 @@ public class OsgiServletContext implements ServletContext {
 		this.osgiContextModel = osgiContextModel;
 		this.servletContextModel = servletContextModel;
 
-		this.defaultWebContainerContext = osgiContextModel.resolveHttpContext(osgiContextModel.getOwnerBundle());
+		Bundle ownerBundle = osgiContextModel.getOwnerBundle();
+		this.defaultWebContainerContext = osgiContextModel.resolveHttpContext(ownerBundle);
 
 		// This attribute is defined in 128.6.1 "Bundle Context Access" in the context of WAB applications
 		// but we have to store bundle context of the bundle of the OsgiContextModel in all cases
 		// (WAB, Whiteboard, HttpService) anyway
-		if (osgiContextModel.getOwnerBundle() != null && osgiContextModel.getOwnerBundle().getBundleContext() != null) {
-			this.attributes.put(PaxWebConstants.CONTEXT_PARAM_BUNDLE_CONTEXT,
-					osgiContextModel.getOwnerBundle().getBundleContext());
+		if (ownerBundle != null && ownerBundle.getBundleContext() != null) {
+			// remember - if a servlet, which is whiteboard-registered using different bundle accesses this attribute,
+			// it'll get a BundleContext associated with ServletContextHelper (OsgiContextModel) instead of own
+			// BundleContext!
+			// this is not specified by Whiteboard specification, but by "Web Applications" specification, so we
+			// have a little freedom here
+			this.attributes.put(PaxWebConstants.CONTEXT_PARAM_BUNDLE_CONTEXT, ownerBundle.getBundleContext());
 		}
 	}
 
 	/**
-	 * A server wrapper that finds this {@link OsgiServletContext} to be highest ranked for given
-	 * physical {@link ServletContext} should register it as OSGi service for given context path.
+	 * <p>A server wrapper that finds this {@link OsgiServletContext} to be highest ranked for given
+	 * physical {@link ServletContext} should register it as OSGi service for given context path.</p>
+	 *
+	 * <p>This behavior is defined in "128.3.4 Publishing the Servlet Context" and concerns only WAB contexts, but
+	 * I see no problems registering the current {@link OsgiServletContext} for given context path for all cases
+	 * (including HttpService and Whiteboard).</p>
 	 */
 	public void register() {
 		if (registration == null && containerServletContext != null) {
 			try {
 				LOG.info("Registering {} as OSGi service for \"{}\" context path", this, getContextPath());
 
-				BundleContext bc = osgiContextModel.getOwnerBundle().getBundleContext();
-				if (bc != null && bc.getBundle() != null) {
+				// osgiContextModel has an "owner bundle":
+				//  - when backed by ServletContextHelper from Whiteboard - always, even if such context is always
+				//    "shared"
+				//  - when backed by HttpContext registered as OSGi service - always, because there is some bundle
+				//    registering the service
+				//  - when backed by HttpContext passed to httpService.registerXXX(..., httpContext) - always, because
+				//    it's the bundle associated with the httpService instance
+				//  - when backed by shared (multi bundle) HttpContext passed to httpService.registerXXX(..., httpContext) -
+				//    never, because we can't choose any particular bundle, so we choose pax-web-spi bundle
+
+				Bundle bundle = osgiContextModel.getOwnerBundle();
+				if (bundle == null) {
+					bundle = FrameworkUtil.getBundle(OsgiServletContext.class);
+				}
+
+				BundleContext bc = bundle == null ? null : bundle.getBundleContext();
+				if (bc != null) {
 					Dictionary<String, Object> properties = new Hashtable<>();
-					properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SYMBOLIC_NAME, bc.getBundle().getSymbolicName());
-					properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_VERSION, bc.getBundle().getVersion());
+					properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SYMBOLIC_NAME, bundle.getSymbolicName());
+					properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_VERSION, bundle.getVersion());
 					properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_PATH, getContextPath());
 					properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_NAME, osgiContextModel.getName());
 					registration = bc.registerService(ServletContext.class, this, properties);
@@ -371,10 +396,7 @@ public class OsgiServletContext implements ServletContext {
 	@Override
 	public String getContextPath() {
 		// Return the web context path of the Servlet Context.
-		// This takes into account the osgi.http.whiteboard.context.path of the Servlet Context Helper and the path
-		// of the Http runtime.
-		// But this is the same
-		return containerServletContext.getContextPath();
+		return osgiContextModel.getContextPath();
 	}
 
 	@Override
@@ -485,6 +507,10 @@ public class OsgiServletContext implements ServletContext {
 	public JspConfigDescriptor getJspConfigDescriptor() {
 		// according to 140.2.6 "Behavior of the Servlet Context", this method should return null
 		// but I don't agree
+		// TODO: this method should return HttpContext-specific JspConfigDescriptor which may be registered
+		//       by user using:
+		//        - org.ops4j.pax.web.service.WebContainer.registerJspConfigPropertyGroup()
+		//        - org.ops4j.pax.web.service.WebContainer.registerJspConfigTagLibs()
 		return containerServletContext.getJspConfigDescriptor();
 	}
 
@@ -551,6 +577,16 @@ public class OsgiServletContext implements ServletContext {
 	}
 
 	public URL getResource(WebContainerContext context, String path) throws MalformedURLException {
+		// TODO: according to 128.3.5 Static Content, we can't return any restricted paths, even if
+		//       org.ops4j.pax.web.service.WebContainerContext.getResourcePaths and
+		//       org.osgi.service.http.context.ServletContextHelper.getResourcePaths allow that
+		// According to 128.6.3 Resource Lookup, in case of WAB, it is explicitly mentioned that
+		// Bundle.findEntries() method must be used.
+		// In Whiteboard/HttpService case, this delegates to ServletContextHelper/HttpContext, so it is clear that
+		// for WABs, if no ServletContextHelper is available with higher rank, we should use some default
+		// ServletContextHelper that acts accordingly to 128.6.3, but because default implementation of
+		// ServletContextHelper is roughly compatible, we'll leave it as is - but still we need to support a case
+		// when a WAB is installed, but then, higher-ranked ServletContextHelper is registered for WABs context path.
 		return context.getResource(path);
 	}
 
@@ -560,6 +596,9 @@ public class OsgiServletContext implements ServletContext {
 	}
 
 	public InputStream getResourceAsStream(WebContainerContext context, String path) {
+		// TODO: according to 128.3.5 Static Content, we can't return any restricted paths, even if
+		//       org.ops4j.pax.web.service.WebContainerContext.getResourcePaths and
+		//       org.osgi.service.http.context.ServletContextHelper.getResourcePaths allow that
 		URL resource = context.getResource(path);
 		if (resource != null) {
 			try {
@@ -577,6 +616,9 @@ public class OsgiServletContext implements ServletContext {
 	}
 
 	public Set<String> getResourcePaths(WebContainerContext context, String path) {
+		// TODO: according to 128.3.5 Static Content, we can't return any restricted paths, even if
+		//       org.ops4j.pax.web.service.WebContainerContext.getResourcePaths and
+		//       org.osgi.service.http.context.ServletContextHelper.getResourcePaths allow that
 		return context.getResourcePaths(path);
 	}
 
@@ -588,7 +630,7 @@ public class OsgiServletContext implements ServletContext {
 		// these are actually the same
 		String param = osgiContextModel.getContextParams().get(name);
 		if (param == null) {
-			// let's check real context
+			// let's check real context, as there may be some interesting parameters which are container-specific
 			param = containerServletContext.getInitParameter(name);
 		}
 		return param;
@@ -596,7 +638,14 @@ public class OsgiServletContext implements ServletContext {
 
 	@Override
 	public Enumeration<String> getInitParameterNames() {
-		return Collections.enumeration(osgiContextModel.getContextParams().keySet());
+		Set<String> keys = new LinkedHashSet<>();
+		// first - containers parameters:
+		for (Enumeration<String> e = containerServletContext.getInitParameterNames(); e.hasMoreElements(); ) {
+			keys.add(e.nextElement());
+		}
+		// scoped attributes
+		keys.addAll(osgiContextModel.getContextParams().keySet());
+		return Collections.enumeration(keys);
 	}
 
 	@Override

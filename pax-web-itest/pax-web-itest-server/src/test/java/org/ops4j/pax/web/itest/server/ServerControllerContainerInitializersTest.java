@@ -88,11 +88,6 @@ public class ServerControllerContainerInitializersTest extends MultiContainerTes
 		// ... so we need some "active" component
 		wc.registerResources("/", "", null);
 
-		// for now Tomcat works, Jetty fails, because I explicitly check for PaxWebServletHolder and Undertow
-		// has a non-failing check in org.ops4j.pax.web.service.undertow.internal.PaxWebOuterHandlerWrapper and
-		// org.ops4j.pax.web.service.undertow.internal.PaxWebSecurityHandler (which skips other infos than
-		// org.ops4j.pax.web.service.undertow.internal.PaxWebServletInfo)
-
 		String response = httpGET(port, "/s");
 		assertTrue(response.endsWith("OK"));
 

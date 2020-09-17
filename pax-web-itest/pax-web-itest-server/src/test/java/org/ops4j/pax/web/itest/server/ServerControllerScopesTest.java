@@ -173,15 +173,9 @@ public class ServerControllerScopesTest extends MultiContainerTestSupport {
 		controller.configure();
 		controller.start();
 
-		Bundle bundle1 = mock(Bundle.class);
-		BundleContext context1 = mock(BundleContext.class);
-		when(bundle1.getBundleContext()).thenReturn(context1);
-		Bundle bundle2 = mock(Bundle.class);
-		BundleContext context2 = mock(BundleContext.class);
-		when(bundle2.getBundleContext()).thenReturn(context2);
-		Bundle bundle3 = mock(Bundle.class);
-		BundleContext context3 = mock(BundleContext.class);
-		when(bundle3.getBundleContext()).thenReturn(context3);
+		Bundle bundle1 = mockBundle("b1", false);
+		Bundle bundle2 = mockBundle("b2", false);
+		Bundle bundle3 = mockBundle("b3", false);
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
 		server.configureActiveServerController(controller);
@@ -213,15 +207,14 @@ public class ServerControllerScopesTest extends MultiContainerTestSupport {
 
 		@SuppressWarnings("unchecked")
 		ServiceReference<Servlet> s1 = mock(ServiceReference.class);
-		when(context2.getService(s1)).thenAnswer(invocation -> new Utils.MyIdServlet("1"));
+		when(bundle2.getBundleContext().getService(s1)).thenAnswer(invocation -> new Utils.MyIdServlet("1"));
 		@SuppressWarnings("unchecked")
 		ServiceReference<Filter> f1 = mock(ServiceReference.class);
-		when(context3.getService(f1)).thenAnswer(invocation -> new Utils.MyIdFilter("1"));
+		when(bundle3.getBundleContext().getService(f1)).thenAnswer(invocation -> new Utils.MyIdFilter("1"));
 		@SuppressWarnings("unchecked")
 		ServiceReference<Filter> f2 = mock(ServiceReference.class);
-		when(context2.getService(f2)).thenAnswer(invocation -> new Utils.MyIdFilter("2"));
+		when(bundle2.getBundleContext().getService(f2)).thenAnswer(invocation -> new Utils.MyIdFilter("2"));
 
-		DirectWebContainerView view1 = wc1.adapt(DirectWebContainerView.class);
 		DirectWebContainerView view2 = wc2.adapt(DirectWebContainerView.class);
 		DirectWebContainerView view3 = wc3.adapt(DirectWebContainerView.class);
 
@@ -255,7 +248,8 @@ public class ServerControllerScopesTest extends MultiContainerTestSupport {
 		view2.unregisterFilter(new FilterModel.Builder("f2").build());
 
 		assertThat(httpGET(port, "/c1/s"), endsWith("S(1)"));
-		assertThat(httpGET(port, "/c1/s2"), startsWith("HTTP/1.1 404"));
+		// no filter, so "terminate" parameter is irrelevant
+		assertThat(httpGET(port, "/c1/s2?terminate=2"), startsWith("HTTP/1.1 404"));
 
 		view2.unregisterServlet(new ServletModel.Builder("s1").build());
 

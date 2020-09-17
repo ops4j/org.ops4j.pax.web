@@ -37,7 +37,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
  * manually controlled pax-exam test.
  */
 @RunWith(PaxExam.class)
-public class CleanIntegrationTest extends AbstractControlledTestBase {
+public class CleanIntegrationTest extends AbstractOsgiTestBase {
 
 	public static final Logger LOG = LoggerFactory.getLogger(CleanIntegrationTest.class);
 

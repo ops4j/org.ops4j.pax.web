@@ -20,12 +20,12 @@
  */
 package org.ops4j.pax.web.itest.container.jsf;
 
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
 /**
  * @author Marc Schlegel
  */
-public class AbstractWarJsfResourcehandlerIntegrationTest extends AbstractControlledTestBase {
+public class AbstractWarJsfResourcehandlerIntegrationTest extends AbstractContainerTestBase {
 //
 //	/**
 //	 * The default implementation {@link IndexedOsgiResourceLocator} is

@@ -37,6 +37,7 @@ import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.context.ServletContextHelper;
@@ -78,7 +79,14 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		getServletCustomizer().removedService(servletRef, model);
 		assertThat(httpGET(port, "/s"), startsWith("HTTP/1.1 404"));
 
-		// out of two "contexts", the above servlet should be registered to the Whiteboard one. Not the HttpService one
+		// out of two "contexts", the above servlet should be registered with the Whiteboard one. Not the HttpService
+		// one because of service ranking even if there are 4 contexts in total at this point:
+		//  - OsgiContextModel{id=OCM-2,name='default',path='/',bundle=org.ops4j.pax.web.pax-web-extender-whiteboard,context=(supplier)}"
+		//  - OsgiContextModel{id=OCM-3,name='shared',path='/',shared=true,context=DefaultMultiBundleHttpContext{contextId='shared'}}"
+		//  - OsgiContextModel{id=OCM-5,name='default',path='/',bundle=org.ops4j.pax.web.pax-web-extender-whiteboard,context=DefaultHttpContext{bundle=Bundle "org.ops4j.pax.web.pax-web-extender-whiteboard",contextId='default'}}"
+		//  - OsgiContextModel{id=OCM-6,name='default',path='/',bundle=sample1,context=DefaultHttpContext{bundle=Bundle "sample1",contextId='default'}}"
+		// from the above 4, OCM-2 (the "default" whiteboard context) and OCM-6 (the "default" httpService context) are
+		// considered. OCM-3 is "shared" and OCM-5 is associated with wrong bundle to be considered.
 		Hashtable<String, Object> props = models.get(0).getContextRegistrationProperties();
 		assertThat(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME), equalTo("default"));
 		assertNull(props.get(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY));
@@ -157,7 +165,8 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 
 		ServiceReference<Servlet> servletRef = mockServletReference(sample1, "servlet1",
 				() -> new TestServlet("1", models), 0L, 0, "/s");
-		// register to default HttpService context and to default Whiteboard context
+		// register to default HttpService context and to default Whiteboard context, but because all use
+		// "default" name, ranking will be used to pick up one and HttpContext-based context will be used
 		when(servletRef.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT))
 				.thenReturn("(|(osgi.http.whiteboard.context.httpservice=default)"
 						+ "(osgi.http.whiteboard.context.name=default))");
@@ -176,7 +185,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 
 		models.clear();
 
-		// register to whiteboard only (default selector)
+		// register to whiteboard only (default/empty selector)
 		when(servletRef.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT)).thenReturn(null);
 		model = getServletCustomizer().addingService(servletRef);
 		assertThat(httpGET(port, "/s"), startsWith("HTTP/1.1 403"));
@@ -250,7 +259,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		TestServlet servlet = new TestServlet("1", models);
 		// use "null" as HttpContext, so "default" will be used, but this has just "default" name and
 		// sample1Container's bundle as identity, so the overriden HttpService context will be used
-		// The spec is not quite clear about the definition of "same"
+		// The spec is not quite clear about the definition of "same"...
 		sample1Container.registerServlet(servlet, new String[] { "/s/*" }, null, null);
 		assertThat(httpGET(port, "/s"), startsWith("HTTP/1.1 403"));
 		assertThat(httpGET(port, "/s?token=1"), endsWith("S(1)"));
@@ -266,6 +275,96 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 
 		getHttpContextCustomizer().removedService(reference1, model1);
 		getServletContextHelperCustomizer().removedService(reference2, model2);
+	}
+
+	@Test
+	public void multipleWhiteboardContextsAndHttpServiceServlet() throws Exception {
+		Bundle sample1 = mockBundle("sample1");
+
+		HttpServiceEnabled wc = new HttpServiceEnabled(sample1, controller, serverModel, null, config);
+
+		HttpContext context1 = new HttpContext() {
+			@Override
+			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+				return "1".equals(request.getParameter("token"));
+			}
+
+			@Override
+			public URL getResource(String name) {
+				return null;
+			}
+
+			@Override
+			public String getMimeType(String name) {
+				return null;
+			}
+		};
+		Hashtable<String, Object> properties = new Hashtable<>();
+		properties.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "default");
+		properties.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, "/");
+		ServiceReference<HttpContext> reference1 = mockReference(sample1,
+				HttpContext.class, properties, () -> context1, 0L, 42);
+		OsgiContextModel model1 = getHttpContextCustomizer().addingService(reference1);
+
+		HttpContext context2 = new HttpContext() {
+			@Override
+			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+				return "2".equals(request.getParameter("token"));
+			}
+
+			@Override
+			public URL getResource(String name) {
+				return null;
+			}
+
+			@Override
+			public String getMimeType(String name) {
+				return null;
+			}
+		};
+		properties = new Hashtable<>();
+		properties.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "default");
+		properties.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, "/");
+		ServiceReference<HttpContext> reference2 = mockReference(sample1,
+				HttpContext.class, properties, () -> context2, 0L, 21);
+		OsgiContextModel model2 = getHttpContextCustomizer().addingService(reference2);
+
+		// after registering 2nd Whiteboard HttpContext (legacy), the list of contexts that can be used directly
+		// from HttpServiceEnabled for this bundle is:
+		// bundleContexts: java.util.Map  = {java.util.HashMap@4786}  size = 2
+		// {org.ops4j.pax.web.service.spi.model.ContextKey@4805} "Key{default, Bundle "sample1"}" -> {java.util.TreeSet@4806}  size = 3
+		//  key: org.ops4j.pax.web.service.spi.model.ContextKey  = {org.ops4j.pax.web.service.spi.model.ContextKey@4805} "Key{default, Bundle "sample1"}"
+		//  value: java.util.TreeSet  = {java.util.TreeSet@4806}  size = 3
+		//   0 = {org.ops4j.pax.web.service.spi.model.OsgiContextModel@3723} "OsgiContextModel{id=OCM-7,name='default',path='/',bundle=sample1,context=WebContainerContextWrapper{bundle=Bundle "sample1",contextId='default',delegate=org.ops4j.pax.web.itest.server.WhiteboardAndHttpServiceTest$5@2364305a}}"
+		//   1 = {org.ops4j.pax.web.service.spi.model.OsgiContextModel@4676} "OsgiContextModel{id=OCM-8,name='default',path='/',bundle=sample1,context=WebContainerContextWrapper{bundle=Bundle "sample1",contextId='default',delegate=org.ops4j.pax.web.itest.server.WhiteboardAndHttpServiceTest$6@63192798}}"
+		//   2 = {org.ops4j.pax.web.service.spi.model.OsgiContextModel@4811} "OsgiContextModel{id=OCM-6,name='default',path='/',bundle=sample1,context=DefaultHttpContext{bundle=Bundle "sample1",contextId='default'}}"
+		//
+		// the TreeSet is correctly sorted by priority, where OCM-6 is the really default context for this bundle
+		// and "default" name and its rank is -2147483648 (0x80000000)
+
+		final List<OsgiContextModel> models = new LinkedList<>();
+
+		TestServlet servlet = new TestServlet("1", models);
+
+		wc.registerServlet(servlet, new String[] { "/s/*" }, null, null);
+		assertThat(httpGET(port, "/s"), startsWith("HTTP/1.1 403"));
+		// context with rank 42 should be used
+		assertThat(httpGET(port, "/s?token=1"), endsWith("S(1)"));
+		assertThat(httpGET(port, "/s?token=2"), startsWith("HTTP/1.1 403"));
+
+		wc.unregisterServlet(servlet);
+
+		// servlet should be associated with HttpService context
+		Hashtable<String, Object> props = models.get(0).getContextRegistrationProperties();
+		assertThat(props.get(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
+		assertNull(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
+		assertThat(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH), equalTo("/"));
+		assertThat(props.get(Constants.SERVICE_RANKING), equalTo(42));
+
+		getHttpContextCustomizer().removedService(reference1, model1);
+		getHttpContextCustomizer().removedService(reference2, model2);
+
+		wc.stop();
 	}
 
 	@Test
@@ -298,12 +397,13 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 				HttpContext.class, properties, () -> context1, 0L, 1);
 		OsgiContextModel model1 = getHttpContextCustomizer().addingService(reference1);
 
-		// filter1 will be registered without any contexts - so should go to Whiteboard's default context
+		// filter1 will be registered without any context - so should go to Whiteboard's default context
 		// It won't be associated with servlet, becuase it'd have to target it using
 		// osgi.http.whiteboard.context.httpservice=default selector
 		ServiceReference<Filter> filter1Ref = mockFilterReference(sample1, "filter1",
 				() -> new Utils.MyIdFilter("1"), 0L, 0, "/*");
-		when(filter1Ref.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT)).thenReturn(null);
+		when(filter1Ref.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT))
+				.thenReturn(null);
 		FilterModel fm1 = getFilterCustomizer().addingService(filter1Ref);
 
 		// filter2 will be explicitly registered to HttpService context

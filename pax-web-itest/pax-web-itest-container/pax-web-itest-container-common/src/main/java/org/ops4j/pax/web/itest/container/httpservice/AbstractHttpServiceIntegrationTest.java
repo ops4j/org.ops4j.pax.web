@@ -22,10 +22,10 @@ import javax.servlet.Filter;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
-import org.ops4j.pax.web.itest.utils.support.SimpleOnlyFilter;
-import org.ops4j.pax.web.itest.utils.support.TestServlet;
+import org.ops4j.pax.web.itest.utils.web.SimpleOnlyFilter;
+import org.ops4j.pax.web.itest.utils.web.TestServlet;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.events.ElementEvent;
 import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
@@ -45,7 +45,7 @@ import static org.junit.Assert.assertTrue;
  * @author Toni Menzel (tonit)
  * @since Mar 3, 2009
  */
-public abstract class AbstractHttpServiceIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractHttpServiceIntegrationTest extends AbstractContainerTestBase {
 
 	public static final Logger LOG = LoggerFactory.getLogger(AbstractHttpServiceIntegrationTest.class);
 

@@ -50,7 +50,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
  * to perform various tasks involving xbean-finder and asm bundles (it's mostly about discovery).
  */
 @RunWith(PaxExam.class)
-public class ClassPathUtilIntegrationTest extends AbstractControlledTestBase {
+public class ClassPathUtilIntegrationTest extends AbstractOsgiTestBase {
 
 	public static final Logger LOG = LoggerFactory.getLogger(ClassPathUtilIntegrationTest.class);
 

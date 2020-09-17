@@ -203,7 +203,7 @@
 						</Export-Package>
 						<Private-Package>
 							<!-- resources from mvn:org.apache.tomcat/tomcat-servlet-api, not available in jakarta.servlet/jakarta.servlet-api -->
-							javax.servlet.resources,
+							javax.servlet.resources;-split-package:=merge-first,
 							<!-- resources from mvn:org.apache.tomcat/tomcat-jsp-api, not available in jakarta.servlet.jsp/jakarta.servlet.jsp-api -->
 							javax.servlet.jsp.resources,
 							<!-- resources from mvn:org.apache.tomcat/tomcat-jasper which are not exported (no *.class there) -->
@@ -239,15 +239,16 @@
 
 		<!-- pax-web own artifacts -->
 
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.web</groupId>-->
-<!--			<artifactId>pax-web-api</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.web</groupId>-->
-<!--			<artifactId>pax-web-spi</artifactId>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-spi</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<!--
 				Classes/packages required by Jasper and Tomcat-EL are used from pax-web-tomcat-common
@@ -255,9 +256,9 @@
 				scanners, digesters from tomcat.
 				Also it's better to use Tomat repackaged here instead of in pax-tipi.
 				When using this dependency in IDE, we don't actually get anything from pax-web-tomcat-common,
-				because this was not yet packaged, so the only thing we get is transitive dependency - tomcat-embed-core,
-				which has scope=runtime, so here it's scope=provided
-				but below we explicitly set scopp=test for tomcat-embed-core to override this scope
+				because this library was not packaged yet, so the only thing we get is transitive
+				dependency - tomcat-embed-core, which has scope=runtime, so here it's scope=provided
+				but later in this file we explicitly set scope=test for tomcat-embed-core to override this scope
 			-->
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-tomcat-common</artifactId>
@@ -291,6 +292,11 @@
 			<artifactId>osgi.core</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.cmpn</artifactId>
+			<scope>provided</scope>
+		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>org.osgi</groupId>-->
 <!--			<artifactId>osgi.annotation</artifactId>-->
@@ -299,6 +305,11 @@
 
 		<!-- JavaEE -->
 
+		<dependency>
+			<groupId>jakarta.el</groupId>
+			<artifactId>jakarta.el-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<!--
 				This dependency is used instead of jakarta.servlet/jakarta.servlet-api to take javax.servlet.resources
@@ -410,6 +421,21 @@
 				pax-web-tomcat-common dependency), so tomcat-embed-core is available for unit tests to run them in IDE
 			-->
 			<scope>test</scope>
+		</dependency>
+
+		<!--
+			because we've changed the scope of tomcat-embed-core, we need few more provided deps, required
+			to compile pax-web-jsp classes in IDE
+		-->
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-juli</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-util-scan</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Spring -->

@@ -15,14 +15,14 @@
  */
 package org.ops4j.pax.web.itest.container.jsp;
 
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
 /**
  * Regression test for PAXWEB-409.
  *
  * @author Harald Wellmann
  */
-public abstract class AbstractJspNoClassesIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractJspNoClassesIntegrationTest extends AbstractContainerTestBase {
 
 //	private Bundle installWarBundle;
 //

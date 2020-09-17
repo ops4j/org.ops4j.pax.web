@@ -67,7 +67,7 @@
 							to configure pax-exam with pax.exam.system=default which gives us more control over installed bundles
 							see: org.ops4j.pax.exam.ConfigurationManager.ConfigurationManager()
 						-->
-						<pax.exam.configuration>file:../etc/controlled-exam.properties</pax.exam.configuration>
+						<pax.exam.configuration>file:../../etc/controlled-exam.properties</pax.exam.configuration>
 					</systemPropertyVariables>
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 					<runOrder>alphabetical</runOrder>

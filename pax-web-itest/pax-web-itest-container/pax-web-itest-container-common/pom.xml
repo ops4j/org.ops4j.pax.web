@@ -82,7 +82,7 @@
 							org.ops4j.pax.web.itest.utils,
 							org.ops4j.pax.web.itest.utils.assertion,
 							org.ops4j.pax.web.itest.utils.client,
-							org.ops4j.pax.web.itest.utils.support,
+							org.ops4j.pax.web.itest.utils.web,
 
 							<!-- from pax-logging-api -->
 							org.slf4j;version="[1.7,2)",
@@ -95,10 +95,15 @@
 							org.junit.*,
 							org.ops4j.pax.exam,
 							org.ops4j.pax.exam.*,
+							<!--
+								These are dynamically imported, because we don't want refresh after installation
+								of the bundles that export these packages
+							-->
 							org.ops4j.pax.web.extender.whiteboard.runtime,
 							org.ops4j.pax.web.extender.samples.whiteboard.internal
 						</DynamicImport-Package>
 						<Export-Package>
+							org.ops4j.pax.web.itest,
 							org.ops4j.pax.web.itest.container.*
 						</Export-Package>
 					</instructions>
@@ -128,6 +133,10 @@
 			<artifactId>pax-web-runtime</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.ops4j.pax.web.itest</groupId>
+			<artifactId>pax-web-itest-common</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web.itest</groupId>
 			<artifactId>pax-web-itest-utils</artifactId>

@@ -53,7 +53,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
  * to perform various tasks related to class/annotation discovery.
  */
 @RunWith(PaxExam.class)
-public class PaxWebSpiIntegrationTest extends AbstractControlledTestBase {
+public class PaxWebSpiIntegrationTest extends AbstractOsgiTestBase {
 
 	public static final Logger LOG = LoggerFactory.getLogger(PaxWebSpiIntegrationTest.class);
 
@@ -67,14 +67,14 @@ public class PaxWebSpiIntegrationTest extends AbstractControlledTestBase {
 				mavenBundle("org.ops4j.pax.web.samples", "pax-web-spi-fragment").versionAsInProject().noStart(),
 
 				// pax-web-spi itself won't require XBean, but the above fragments still shows how it was used
-				// requirement from pax-web-spi
-				mavenBundle("org.apache.xbean", "xbean-finder").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				// before
+				mavenBundle("org.apache.xbean", "xbean-finder").version(System.getProperty("version.xbean")).startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				// xbean-finder requires xbean-bundleutils
-				mavenBundle("org.apache.xbean", "xbean-bundleutils").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.apache.xbean", "xbean-bundleutils").version(System.getProperty("version.xbean")).startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				// xbean-finder requires asm and asm-commons, and asm-commons requires asm-tree
-				mavenBundle("org.ow2.asm", "asm").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ow2.asm", "asm-commons").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ow2.asm", "asm-tree").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ow2.asm", "asm").version(System.getProperty("version.asm")).startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ow2.asm", "asm-commons").version(System.getProperty("version.asm")).startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ow2.asm", "asm-tree").version(System.getProperty("version.asm")).startLevel(START_LEVEL_TEST_BUNDLE - 1),
 
 				// bundle and two fragments to perform searching of /META-INF/services/javax.servlet.ServletContainerInitializer
 				mavenBundle("org.ops4j.pax.web.samples", "initializers").versionAsInProject(),

@@ -17,7 +17,6 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 
 import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.AbstractContextTracker;
-import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
@@ -53,7 +52,6 @@ public class HttpContextMappingTracker extends AbstractContextTracker<HttpContex
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	protected OsgiContextModel configureContextModel(ServiceReference<HttpContextMapping> serviceReference,
 			final OsgiContextModel model) {
 
@@ -61,21 +59,16 @@ public class HttpContextMappingTracker extends AbstractContextTracker<HttpContex
 		try {
 			// dereference here to get some information, but unget later.
 			// this reference will be dereferenced again in the (Bundle)Context of actual Whiteboard service
-			// TODO: check the get/unget lifecycle
 			service = dereference(serviceReference);
 
 			model.setShared(service.isShared());
 
 			// 1. context name
-			model.setName(service.getContextId());
+			String name = setupName(model, service);
 
 			// 2. context path
 			// NOTE: Pax Web 7 was stripping leading "/" and was mixing concepts of "name" and "path"
-			String contextPath = service.getContextPath();
-			if (contextPath == null || "".equals(contextPath.trim())) {
-				contextPath = PaxWebConstants.DEFAULT_CONTEXT_PATH;
-			}
-			model.setContextPath(contextPath);
+			String contextPath = setupContextPath(model, service);
 
 			// 3. context params
 			model.getContextParams().clear();
@@ -83,15 +76,11 @@ public class HttpContextMappingTracker extends AbstractContextTracker<HttpContex
 
 			// 4. don't pass service registration properties...
 			// ... create ones instead (service.id and service.rank are already there)
-			setupArtificialServiceRegistrationProperties(model, service);
-			if (service.getContextId() != null) {
-				// legacy ID
-				model.getContextRegistrationProperties().put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, service.getContextId());
-				// property to allow Whiteboard elements to be registered for HttpService-related context
-				model.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY, service.getContextId());
-				// allow old HttpContext to be target for new Whiteboard web elements
-				model.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, service.getContextId());
-			}
+			setupArtificialServiceRegistrationProperties(model, service, false);
+			// property to allow Whiteboard elements to be registered for HttpService-related context
+			model.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY, name);
+			// and additionally a whiteboard context path
+			model.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
 
 			// 5. TODO: virtual hosts
 //			service.getVirtualHosts();
@@ -106,6 +95,8 @@ public class HttpContextMappingTracker extends AbstractContextTracker<HttpContex
 			if (Constants.SCOPE_SINGLETON.equals(scope)) {
 				// for singletons, we don't care about unget()
 				HttpContextMapping contextMapping = bundleContext.getService(serviceReference);
+
+				// HttpContextMapping is singleton, but it may return different context on each call of getHttpContext
 				HttpContext h1 = contextMapping.getHttpContext(serviceReference.getBundle());
 				HttpContext h2 = contextMapping.getHttpContext(serviceReference.getBundle());
 				if (h1 == h2) {
@@ -123,17 +114,27 @@ public class HttpContextMappingTracker extends AbstractContextTracker<HttpContex
 						}
 						model.setShared(actuallyShared);
 					} else {
-						if (contextMapping.isShared()) {
+						if (model.isShared()) {
 							LOG.warn("contextMapping is registered as shared, but actual HttpContext is not an instance"
 									+ " of WebContainerContext with \"shared\" property");
 						}
-						model.setHttpContext(new WebContainerContextWrapper(serviceReference.getBundle(), h1, service.getContextId()));
+						model.setHttpContext(new WebContainerContextWrapper(serviceReference.getBundle(), h1, name));
+						model.setShared(false);
 					}
 
-					// this means that such OsgiContextModel will be passed directly to HttpService, replacing
-					// HttpService-specific, bundle-scoped (or shared) context
-					// also this means that we should target such context using ONLY
-					// "osgi.http.whiteboard.context.httpservice" property only
+					// we have a "context" (HttpContext) which:
+					//  - is a singleton
+					//  - has a name
+					//  - has associated bundle (the one registering HttpContext)
+					// it means that such context is suitable to be used directly as a parameter to httpService.register()
+					// (pax-web-extender-whiteboard will pass such context to pax-web-runtime to store it as HttpService-
+					// related context - potentially overriding existing context created within the scope of HttpService)
+					// and it can be referenced during Whiteboard registrations of web elements with:
+					//    osgi.http.whiteboard.context.select = "(osgi.http.whiteboard.context.httpservice=<name>)"
+					// but not with:
+					//    osgi.http.whiteboard.context.select = "(osgi.http.whiteboard.context.name=<name>)"
+
+					// this property is not present, but we explicitly show that it CAN'T be present
 					model.getContextRegistrationProperties().remove(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
 				}
 			}
@@ -145,20 +146,29 @@ public class HttpContextMappingTracker extends AbstractContextTracker<HttpContex
 						mapping = bundleContext.getService(serviceReference);
 						// get the HttpContextMapping again - within proper bundle context, but again - only to
 						// obtain all the information needed. The "factory" method also accepts a Bundle, so we pass it.
-						String name = mapping.getContextId();
 						HttpContext context = mapping.getHttpContext(bundleContext.getBundle());
-						return new WebContainerContextWrapper(bundleContext.getBundle(), context, name);
+						return new WebContainerContextWrapper(bundleContext.getBundle(), context, model.getName());
 					} finally {
 						if (mapping != null) {
 							bundleContext.ungetService(serviceReference);
 						}
 					}
 				});
+
+				// we have a "context" (HttpContext) which:
+				//  - is NOT a singleton
+				//  - has a name
+				//  - has associated bundle (the one registering HttpContext)
+				// it means that such context is NOT suitable to be used directly as a parameter to httpService.register()
+				// (pax-web-extender-whiteboard will not pass this context to pax-web-runtime)
+				// but it can be referenced during Whiteboard registrations of web elements with:
+				//    osgi.http.whiteboard.context.select = "(osgi.http.whiteboard.context.httpservice=<name>)"
+				// but not with:
+				//    osgi.http.whiteboard.context.select = "(osgi.http.whiteboard.context.name=<name>)"
 			}
 		} finally {
 			if (service != null) {
 				// the service was obtained only to extract the data out of it, so we have to unget()
-				// TOCHECK: should we really unget here?
 				bundleContext.ungetService(serviceReference);
 			}
 		}

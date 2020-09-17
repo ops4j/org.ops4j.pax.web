@@ -20,10 +20,9 @@ import javax.servlet.ServletContext;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.ops4j.pax.web.service.PaxWebConstants;
-import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -34,7 +33,7 @@ import static org.junit.Assert.fail;
 /**
  * @author Achim Nierbeck
  */
-public abstract class AbstractWebContainerIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractWebContainerIntegrationTest extends AbstractContainerTestBase {
 
 	public static final Logger LOG = LoggerFactory.getLogger(AbstractWebContainerIntegrationTest.class);
 
@@ -42,7 +41,13 @@ public abstract class AbstractWebContainerIntegrationTest extends AbstractContro
 
 	@Before
 	public void setUp() throws Exception {
-		WebContainer httpService = getWebContainer(context);
+		// if we grab a service using this class' bundle's context, there will be automatically created
+		// OsgiContextModel with "default" id and pax-web-itest-container-common bundle. And because we
+		// do it before installing wc-helloworld bundle, the OsgiServletContext that'll be associated with the
+		// servlets/filters from this wc-helloworld bundle will be the one from pax-web-itest-container-common
+		// and what's most important - after stopping wc-helloworld bundle, there'll still be OSGi service
+		// for ServletContext registered, related to pax-web-itest-container-common ;)
+//		WebContainer httpService = getWebContainer(context);
 
 		configureAndWaitForServletWithMapping("/helloworld/wc/error/create",
 				() -> hsBundle = installAndStartBundle(sampleURI("wc-helloworld")));
@@ -82,9 +87,9 @@ public abstract class AbstractWebContainerIntegrationTest extends AbstractContro
 	@Test
 	public void testServletContextRegistration() throws Exception {
 		// according to javax.servlet.ServletContext.getContextPath() javadoc, root context has
-		// "" context path, not "/"
+		// "" context path, not "/", but we'll unify it
 		String filter = String.format("(%s=%s)",
-				PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_PATH, "");
+				PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_PATH, "/");
 
 		if (context.getServiceReferences(ServletContext.class, filter).size() == 0) {
 			fail("ServletContext was not registered as Service.");

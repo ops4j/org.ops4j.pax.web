@@ -16,12 +16,12 @@
 
 package org.ops4j.pax.web.itest.container.war;
 
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
 /**
  * @author Grzegorz Grzybek
  */
-public abstract class AbstractWebAppSessionsIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractWebAppSessionsIntegrationTest extends AbstractContainerTestBase {
 
 //	private static final Logger LOG = LoggerFactory.getLogger(AbstractWebAppSessionsIntegrationTest.class);
 //

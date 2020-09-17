@@ -143,7 +143,7 @@ public class ExtenderContext {
 	 *
 	 * <p>Remember - target {@link WebContainer} may <strong>not</strong> be available yet, but web elements
 	 * tracked by pax-web-extender-whiteboard should know up front with which OSGi context models they'll
-	 * be associated with. It's cleary stated in specification (140.3 Common Whiteboard Properties):<blockquote>
+	 * be associated with. It's clearly stated in specification (140.3 Common Whiteboard Properties):<blockquote>
 	 *    An LDAP-style filter to select the associated ServletContextHelper service to use. Any service property of
 	 *    the Servlet Context Helper can be filtered on. If this property is missing the default Servlet Context Helper
 	 *    is used.
@@ -152,6 +152,7 @@ public class ExtenderContext {
 	 *    default Servlet Context Helper is used.
 	 * </blockquote></p>
 	 *
+	 * <p>If many {@link OsgiContextModel}s match, only highest ranked models for given name are returned.</p>
 	 *
 	 * @param bundle {@link Bundle} of the Whiteboard element for which we're looking for the associated contexts
 	 * @param selector
@@ -202,9 +203,7 @@ public class ExtenderContext {
 		// highest rank. Whiteboard and HttpService models are treated equally here.
 		Map<String, OsgiContextModel> uniqueContexts = new HashMap<>();
 		for (OsgiContextModel c : targetContexts) {
-			if (!uniqueContexts.containsKey(c.getName())) {
-				uniqueContexts.put(c.getName(), c);
-			} else if (uniqueContexts.get(c.getName()).compareTo(c) > 0) {
+			if (!uniqueContexts.containsKey(c.getName()) || uniqueContexts.get(c.getName()).compareTo(c) > 0) {
 				uniqueContexts.put(c.getName(), c);
 			}
 		}
@@ -279,8 +278,7 @@ public class ExtenderContext {
 
 		WhiteboardWebContainerView view = whiteboardContainer;
 		if (view != null) {
-			// install global, default OSGi Context Model
-			view.addWhiteboardOsgiContextModel(OsgiContextModel.DEFAULT_CONTEXT_MODEL);
+			view.removeWhiteboardOsgiContextModel(OsgiContextModel.DEFAULT_CONTEXT_MODEL);
 		}
 
 		bundleContext.ungetService(webContainerServiceRef);

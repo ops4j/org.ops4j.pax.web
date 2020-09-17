@@ -91,9 +91,10 @@ public class ClassSpaceTest {
 
 //		for (Enumeration<URL> e = getClass().getClassLoader().getResources("/META-INF/MANIFEST.MF"); e.hasMoreElements(); ) {
 //		for (Enumeration<URL> e = getClass().getClassLoader().getResources("META-INF/MANIFEST.MF"); e.hasMoreElements(); ) {
+		for (Enumeration<URL> e = getClass().getClassLoader().getResources("/"); e.hasMoreElements(); ) {
 //		for (Enumeration<URL> e = getClass().getClassLoader().getResources(""); e.hasMoreElements(); ) {
 //		for (Enumeration<URL> e = getClass().getClassLoader().getResources("META-INF/"); e.hasMoreElements(); ) {
-		for (Enumeration<URL> e = getClass().getClassLoader().getResources("META-INF"); e.hasMoreElements(); ) {
+//		for (Enumeration<URL> e = getClass().getClassLoader().getResources("META-INF"); e.hasMoreElements(); ) {
 //		for (Enumeration<URL> e = getClass().getClassLoader().getResources("java"); e.hasMoreElements(); ) {
 //		for (Enumeration<URL> e = getClass().getClassLoader().getResources("java/"); e.hasMoreElements(); ) {
 //		for (Enumeration<URL> e = getClass().getClassLoader().getResources("java/lang/Object.class"); e.hasMoreElements(); ) {
@@ -104,23 +105,35 @@ public class ClassSpaceTest {
 
 	@Test
 	public void classLoaderFindResources() throws Exception {
-		// ext classloader. meta-index file prevents returning META-INF/MANIFEST.MF
+		// java.net.URLClassLoader.findResources() is public while java.lang.ClassLoader.findResources() is protected
+		// cl.findResources() is called in cl.getResources() to fill the 2nd enumeration of resources, when the
+		// 1st enumeration comes from the parent (the famous parent-first Java delegation model)
+
+		// ext classloader. meta-index ($JAVA_HOME/jre/lib/meta-index) file prevents returning META-INF/MANIFEST.MF
 		for (Enumeration<URL> e = ((URLClassLoader)getClass().getClassLoader().getParent()).findResources("META-INF/MANIFEST.MF"); e.hasMoreElements(); ) {
-			LOG.info("URL 1: {}", e.nextElement());
+			LOG.info("URL 1a: {}", e.nextElement());
 		}
-		// but META-INF/services/java.nio.file.spi.FileSystemProvider is allowed
+		// but META-INF/services/java.nio.file.spi.FileSystemProvider is allowed ($JAVA_HOME/jre/lib/ext/meta-index)
 		for (Enumeration<URL> e = ((URLClassLoader)getClass().getClassLoader().getParent()).findResources("META-INF/services/java.nio.file.spi.FileSystemProvider"); e.hasMoreElements(); ) {
-			LOG.info("URL 1: {}", e.nextElement());
+			LOG.info("URL 1b: {}", e.nextElement());
 		}
+
 		// app classloader
 		for (Enumeration<URL> e = ((URLClassLoader)getClass().getClassLoader()).findResources("META-INF/MANIFEST.MF"); e.hasMoreElements(); ) {
 			LOG.info("URL 2a: {}", e.nextElement());
+		}
+		// findResources("") gives us less than expected.
+		// to this end, org.springframework.core.io.support.PathMatchingResourcePatternResolver.doFindAllClassPathResources()
+		// explicitly calls org.springframework.core.io.support.PathMatchingResourcePatternResolver.addAllClassLoaderJarRoots()
+		// to add missing entries by checking entire classpath
+		for (Enumeration<URL> e = ((URLClassLoader)getClass().getClassLoader()).findResources(""); e.hasMoreElements(); ) {
+			LOG.info("URL 2b: {}", e.nextElement());
 		}
 		// system classloader - usually same as app classloader. Taken from:
 		// 1) sun.misc.Launcher.getClassLoader() == sun.misc.Launcher.AppClassLoader.getAppClassLoader()
 		// 2) -Djava.system.class.loader
 		for (Enumeration<URL> e = ((URLClassLoader) ClassLoader.getSystemClassLoader()).findResources("META-INF/MANIFEST.MF"); e.hasMoreElements(); ) {
-			LOG.info("URL 2b: {}", e.nextElement());
+			LOG.info("URL 3: {}", e.nextElement());
 		}
 
 		LOG.info("System classloader: {}", System.getProperty("java.system.class.loader"));

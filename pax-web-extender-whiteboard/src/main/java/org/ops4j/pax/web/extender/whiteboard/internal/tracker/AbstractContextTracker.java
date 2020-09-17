@@ -203,13 +203,39 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 	 *
 	 * @param model
 	 * @param mapping
+	 * @param whiteboard whether OSGi CMPN Whiteboard or legacy whiteboar (pax-web) properties should be added
 	 */
-	protected void setupArtificialServiceRegistrationProperties(OsgiContextModel model, ContextMapping mapping) {
+	@SuppressWarnings("deprecation")
+	protected void setupArtificialServiceRegistrationProperties(OsgiContextModel model, ContextMapping mapping,
+			boolean whiteboard) {
 		final Hashtable<String, Object> registration = model.getContextRegistrationProperties();
-		registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, mapping.getContextId());
-		registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, mapping.getContextPath());
+		if (whiteboard) {
+			registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, mapping.getContextId());
+			registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, mapping.getContextPath());
+		} else {
+			registration.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, mapping.getContextId());
+			registration.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, mapping.getContextPath());
+		}
 		mapping.getInitParameters().forEach((k, v)
 				-> registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX + k, v));
+	}
+
+	protected String setupName(OsgiContextModel model, ContextMapping mapping) {
+		String name = mapping.getContextId();
+		if (name == null || "".equals(name.trim())) {
+			name = HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME;
+		}
+		model.setName(name);
+		return name;
+	}
+
+	protected String setupContextPath(OsgiContextModel model, ContextMapping mapping) {
+		String contextPath = mapping.getContextPath();
+		if (contextPath == null || "".equals(contextPath.trim())) {
+			contextPath = PaxWebConstants.DEFAULT_CONTEXT_PATH;
+		}
+		model.setContextPath(contextPath);
+		return contextPath;
 	}
 
 }

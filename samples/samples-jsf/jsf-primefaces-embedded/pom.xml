@@ -144,7 +144,7 @@
 							and into the root of created WAR.
 							So we either use empty Include-Resource or Include-Resource={maven-dependencies}
 						-->
-						<Include-Resource />
+						<Include-Resource>{maven-dependencies}</Include-Resource>
 					</instructions>
 				</configuration>
 			</plugin>

@@ -147,6 +147,7 @@ public class Activator implements BundleActivator {
 		// we'll add this special property to indicate that this _context_ is common for HttpService and
 		// Whiteboard service
 		properties.put(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY, defaultContextModel.getName());
+
 		properties.put(Constants.SERVICE_RANKING, defaultContextModel.getServiceRank());
 		properties.put(PaxWebConstants.SERVICE_PROPERTY_INTERNAL, true);
 		//		props.put(PaxWebConstants.SERVICE_PROPERTY_VIRTUAL_HOSTS, new String[] { "*" });

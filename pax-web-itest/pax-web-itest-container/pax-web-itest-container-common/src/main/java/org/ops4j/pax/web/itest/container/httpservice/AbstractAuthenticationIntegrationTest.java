@@ -18,7 +18,7 @@ package org.ops4j.pax.web.itest.container.httpservice;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -27,7 +27,7 @@ import org.osgi.framework.BundleException;
  * @author Toni Menzel (tonit)
  * @since Mar 3, 2009
  */
-public abstract class AbstractAuthenticationIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractAuthenticationIntegrationTest extends AbstractContainerTestBase {
 
 	private Bundle installWarBundle;
 

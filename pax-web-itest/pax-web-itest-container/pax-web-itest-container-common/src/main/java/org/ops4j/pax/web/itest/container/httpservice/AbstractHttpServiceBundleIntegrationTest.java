@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.Bundle;
@@ -44,7 +44,7 @@ import static org.junit.Assert.assertEquals;
  * @author Toni Menzel (tonit)
  * @since Mar 3, 2009
  */
-public abstract class AbstractHttpServiceBundleIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractHttpServiceBundleIntegrationTest extends AbstractContainerTestBase {
 
 	public static final Logger LOG = LoggerFactory.getLogger(AbstractHttpServiceBundleIntegrationTest.class);
 

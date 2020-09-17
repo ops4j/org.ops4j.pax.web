@@ -21,6 +21,7 @@ import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -115,11 +116,6 @@ public class DefaultHttpContext implements WebContainerContext {
 		return null;
 	}
 
-	/**
-	 * Search resource paths within the bundle jar as in
-	 * {@link org.osgi.service.http.context.ServletContextHelper#getResourcePaths}.
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Set<String> getResourcePaths(final String name) {
 		return getResourcePaths(bundle, name);
@@ -158,29 +154,102 @@ public class DefaultHttpContext implements WebContainerContext {
 		return Objects.hash(bundle, contextId);
 	}
 
+	/**
+	 * This method supports {@link ServletContext#getResource(String)}
+	 * @param bundle
+	 * @param name
+	 * @return
+	 */
 	protected URL getResource(Bundle bundle, String name) {
 		// "name" is passed from javax.servlet.ServletContext.getResource() which always should start with
 		// leading slash
-		final String normalizedname = Path.normalizeResourcePath(name);
-		LOG.debug("Searching bundle [" + bundle + "] for resource [" + normalizedname + "]");
-		return bundle.getResource(normalizedname);
+		final String normalizedName = Path.normalizeResourcePath(name);
+		if (isProtected(normalizedName)) {
+			return null;
+		}
+		LOG.debug("Searching bundle [" + bundle + "] for resource [" + normalizedName + "]");
+		return bundle.getResource(normalizedName);
 	}
 
+	/**
+	 * <p>This method is invoked by default when calling {@link ServletContext#getResourcePaths(String)} in OSGi
+	 * <em>context</em> backed by {@link HttpContext}.
+	 * Just as the Servlet API method, here we list only one level of entries (no recursive searching).</p>
+	 *
+	 * <p>Chapter 140.2.4 "Set<String> getResourcePaths(String)" of CMPN spec says:<blockquote>
+	 *     Default Behavior - Assumes the resources are in the bundle registering the Whiteboard service.
+	 *     Its Bundle.findEntries method is called to obtain the listing.
+	 * </blockquote>
+	 * Chapter 128.6.3 "Resource Lookup" says:<blockquote>
+	 *     The getResourcePaths method must map to the Bundle getEntryPaths method, its return type is a Set and can
+	 *     not handle multiples. However, the paths from the getEntryPaths method are relative while the methods of
+	 *     the getResourcePaths must be absolute.
+	 * </blockquote>
+	 * That's a bit contradictive... {@link Bundle#findEntries} returns URLs (and checks fragments and lets us choose
+	 * recurse flag), while {@link Bundle#getEntryPaths} returns names (and doesn't check fragments).... In Felix:<ul>
+	 *     <li>{@code findEntries}: {@code new EntryFilterEnumeration(revision, always-fragments, path, filePattern, recurse, url-values)} and
+	 *         (resolves a bundle if not resolved)</li>
+	 *     <li>{@code getEntryPaths}: {@code new EntryFilterEnumeration(revision, no-fragments, path, "*", no-recurse, no-url-values)}</li>
+	 * </ul></p>
+	 *
+	 * <p></p>
+	 *
+	 * Just as {@link ServletContext#getResourcePaths(String)} does, we <strong>have to</strong> include
+	 * 	 * resources available in {@code /WEB-INF/lib/*.jar!/META-INF/resources/} (which I think is good addition from
+	 * 	 * Servlet API to Whiteboard API).
+	 *
+	 * @param bundle
+	 * @param name
+	 * @return
+	 */
 	protected Set<String> getResourcePaths(Bundle bundle, String name) {
 		final String normalizedName = Path.normalizeResourcePath(name);
 		LOG.debug("Searching bundle [" + bundle + "] for resource paths of [" + normalizedName + "]");
 
 		if ((normalizedName != null) && (bundle != null)) {
+			int state = bundle.getState();
+			if (state == Bundle.INSTALLED || state == Bundle.STOPPING || state == Bundle.UNINSTALLED) {
+				// because org.osgi.framework.Bundle.findEntries() for INSTALLED bundle may lead to resolution of
+				// the bundle, I don't want to risk a deadlock when this method is called from any extender (different
+				// thread)
+				return null;
+			}
+			// TOCHECK: urls from findEntries() or names from getEntryPaths()?
 			final Enumeration<URL> e = bundle.findEntries(normalizedName, null, false);
 			if (e != null) {
 				final Set<String> result = new LinkedHashSet<String>();
 				while (e.hasMoreElements()) {
-					result.add(e.nextElement().getPath());
+					String path = e.nextElement().getPath();
+					if (!isProtected(path)) {
+						result.add(path);
+					}
 				}
 				return result;
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * According to "128.3.5 Static Content", some paths can't be retrieved by default. This method ensures this
+	 * TODO: check initial slashes or *.jar!/ URLs.
+	 * @param path
+	 * @return
+	 */
+	private boolean isProtected(String path) {
+		if (path == null) {
+			return false;
+		}
+		String p = path.toLowerCase();
+
+		if (p.startsWith("web-inf/")
+				|| p.startsWith("osgi-inf/")
+				|| p.startsWith("meta-inf/")
+				|| p.startsWith("osgi-opt/")) {
+			return true;
+		}
+
+		return false;
 	}
 
 }

@@ -16,12 +16,12 @@
 
 package org.ops4j.pax.web.itest.container.war;
 
-import org.ops4j.pax.web.itest.container.AbstractControlledTestBase;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
 /**
  * @author Achim Nierbeck
  */
-public abstract class AbstractWarIntegrationTest extends AbstractControlledTestBase {
+public abstract class AbstractWarIntegrationTest extends AbstractContainerTestBase {
 
 //	protected static final String TEST_BUNDLE_SYMBOLIC_NAME = "test-bundle";
 //

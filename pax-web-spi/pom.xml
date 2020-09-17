@@ -68,7 +68,6 @@
 						<Private-Package>
 							<!-- pax-web-spi (internal) -->
 							org.ops4j.pax.web.service.spi.internal,
-							org.ops4j.pax.web.service.spi.servlet.dynamic,
 							<!-- supporting libraries -->
 							org.apache.commons.io,
 							org.apache.commons.collections4,
@@ -85,6 +84,7 @@
 							org.ops4j.pax.web.service.spi.model.elements;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.model.events;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.servlet;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.servlet.dynamic;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.task;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.util;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.whiteboard;version="${pax-web.osgi.version}"

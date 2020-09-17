@@ -279,6 +279,11 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		this.contextPath = contextPath;
 	}
 
+	@Override
+	protected String getIdPrefix() {
+		return "OCM";
+	}
+
 	/**
 	 * <p>This method should be called from Whiteboard infrastructure to really perform the validation and set
 	 * <em>isValid</em> flag, which is then used for "Failure DTO" purposes.</li>
@@ -306,7 +311,20 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	public Boolean performValidation() throws Exception {
 		if (name == null || "".equals(name.trim())) {
 			if (contextReference != null) {
-				LOG.warn("Missing name property for context: {}", contextReference);
+				LOG.warn("Missing name property for context registered using {} reference", contextReference);
+			} else if (httpContext != null) {
+				LOG.warn("Missing name property for context {}", httpContext);
+			}
+			return Boolean.FALSE;
+		}
+
+		if (contextPath == null || !contextPath.startsWith("/")) {
+			if (contextReference != null) {
+				LOG.warn("Illegal context path (\"{}\") for context registered using {} reference. Should start with \"/\".",
+						contextPath, contextReference);
+			} else if (httpContext != null) {
+				LOG.warn("Illegal context path (\"{}\") for context {}. Should start with \"/\".",
+						contextPath, httpContext);
 			}
 			return Boolean.FALSE;
 		}
@@ -478,11 +496,19 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 
 	@Override
 	public String toString() {
+		String source = ",";
+		if (httpContext != null) {
+			source += "context=" + httpContext;
+		} else if (contextSupplier != null) {
+			source += "context=(supplier)";
+		} else if (contextReference != null) {
+			source += "ref=" + contextReference;
+		}
 		return "OsgiContextModel{id=" + getId()
 				+ ",name='" + name
-				+ "',contextPath='" + contextPath
-				+ "',context=" + httpContext
-				+ (ownerBundle == null ? ",shared=true" : ",bundle=" + ownerBundle)
+				+ "',path='" + contextPath
+				+ (ownerBundle == null ? "',shared=true" : "',bundle=" + ownerBundle.getSymbolicName())
+				+ source
 				+ "}";
 	}
 

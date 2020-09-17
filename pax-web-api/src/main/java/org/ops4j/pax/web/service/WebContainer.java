@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service;
 
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.EventListener;
 import java.util.List;
@@ -24,6 +25,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
+import javax.servlet.descriptor.TaglibDescriptor;
 
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
 import org.osgi.service.http.HttpContext;
@@ -801,14 +803,28 @@ public interface WebContainer extends HttpService {
 	void registerJspServlet(String jspFile, String[] urlPatterns, Dictionary<String, String> initParams, HttpContext httpContext);
 
 	/**
-	 * Adds mapping of taglib to given context. The taglib matches {@code <jsp-config>/<taglib>} element(s) from
-	 * {@code web.xml}.
+	 * <p>Adds mapping of taglib to given context. The taglib matches {@code <jsp-config>/<taglib>} element(s) from
+	 * {@code web.xml}.</p>
+	 *
+	 * <p>The location should be resolvable according to "JSP.7.3.2 TLD resource path" and "JSP.7.3.6.1 Computing TLD
+	 * Locations" chapters of JSR 245 JSP specification, which generally means that protocol-less URIs are resolved
+	 * against {@code /WEB-INF/} directory. In Pax Web, if the location is absolute URI with {@code file:} or
+	 * {@code jar:} schemes, we check for its existence (but not TLD copliance). If the location is relative or
+	 * protocol-less URI, an attempt to resolve it will be made only during {@link ServletContainerInitializer#onStartup}
+	 * of the JSP SCI.</p>
 	 *
 	 * @param tagLibLocation
 	 * @param tagLibUri
 	 * @param httpContext
 	 */
 	void registerJspConfigTagLibs(String tagLibLocation, String tagLibUri, HttpContext httpContext);
+
+	/**
+	 * Adds multiple URI - location mappings for TLDs.
+	 * @param tagLibs
+	 * @param httpContext
+	 */
+	void registerJspConfigTagLibs(Collection<TaglibDescriptor> tagLibs, HttpContext httpContext);
 
 	/**
 	 * Adds JSP configuration to given context. The configuration matches {@code <jsp-config></jsp-property-group>}

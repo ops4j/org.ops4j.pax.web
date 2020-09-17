@@ -27,13 +27,13 @@
 <%@ attribute name="maxlength" required="false" rtexprvalue="false" %>
 
 <td>
-   ${label}<br />
-   <c:choose>
-      <c:when test="${!RO}">
-         <input type="text" name="${path}" value="${value}" <c:if test="${maxlength != null}">maxlength="${maxlength}"</c:if> />
-      </c:when>
-      <c:otherwise>
-         <span style="color: blue;">${value}&#160;</span>
-      </c:otherwise>
-   </c:choose>
+	${label}<br />
+	<c:choose>
+		<c:when test="${!RO}">
+			<input type="text" name="${path}" value="${value}" <c:if test="${maxlength != null}">maxlength="${maxlength}"</c:if> />
+		</c:when>
+		<c:otherwise>
+			<span style="color: blue;">${value}&#160;</span>
+		</c:otherwise>
+	</c:choose>
 </td>
