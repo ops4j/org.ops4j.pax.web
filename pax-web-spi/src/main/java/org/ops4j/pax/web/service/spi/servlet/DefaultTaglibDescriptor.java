@@ -29,12 +29,12 @@ public class DefaultTaglibDescriptor implements TaglibDescriptor {
 
 	@Override
 	public String getTaglibURI() {
-		return null;
+		return taglibURI;
 	}
 
 	@Override
 	public String getTaglibLocation() {
-		return null;
+		return taglibLocation;
 	}
 
 }

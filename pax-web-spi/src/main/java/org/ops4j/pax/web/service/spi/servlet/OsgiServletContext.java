@@ -507,11 +507,7 @@ public class OsgiServletContext implements ServletContext {
 	public JspConfigDescriptor getJspConfigDescriptor() {
 		// according to 140.2.6 "Behavior of the Servlet Context", this method should return null
 		// but I don't agree
-		// TODO: this method should return HttpContext-specific JspConfigDescriptor which may be registered
-		//       by user using:
-		//        - org.ops4j.pax.web.service.WebContainer.registerJspConfigPropertyGroup()
-		//        - org.ops4j.pax.web.service.WebContainer.registerJspConfigTagLibs()
-		return containerServletContext.getJspConfigDescriptor();
+		return osgiContextModel.getJspConfigDescriptor();
 	}
 
 	// --- methods also delegating to server-specific ServletContext, but added in Servlet spec 4.0

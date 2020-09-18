@@ -1218,7 +1218,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		// this OsgiContextModel.
 		//
 		// The actual place where this information is needed is in JasperInitializer.onStartup(), where the SCI
-		// checks the context for JSP configuration
+		// checks the context for JSP configuration.
 		//
 		// ServerModel keeps the association between HttpContext (shared or not) and rank-sorted list
 		// of OsgiContextModels, so remember that this scenario is possible:
@@ -1227,13 +1227,31 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		//  3. somehwere else a HttpContext[Mapping] is registered for given bundle and name, but higher rank
 		//  4. this.registerJsps(..., ctx1)
 		// but because HttpContext arg is translated into actual OsgiContextModel, in step #4 it may turn out
-		// that the actual OsgiContextModel and later - OsgiServletContext do NOT contain the passed JSP config!
+		// that the actual OsgiContextModel and later - OsgiServletContext do NOT contain the passed JSP config
+		// because the OsgiContextModel is related to higher ranked "context" that shadowed "ctx1"
 		//
 		// In case of WABs, where the OsgiContextModel is created at the start of web.xml parsing we
 		// can block the configuration thread, so entire web.xml parsing will be done with exactly the same OCM,
 		// but without WABs (and without not-yet-implemented (as of 2020-09-17) transactions), we can't
 		// ensure that the above scenario won't happen
+
 		serverModel.runSilently(() -> {
+			final Batch batch = new Batch("Taglibs configuration");
+
+			WebContainerContext ctx = unify(httpContext);
+
+			// there's some chance that we'll actually get NEW OsgiContextModel, so we have to send it
+			// to ServerController. But the taglibs information is not relevant - only context creation
+			OsgiContextModel contextModel = serverModel.getOrCreateOsgiContextModel(ctx, serviceBundle,
+					PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
+
+			// we're in configuration thread, so no harm can be done
+			contextModel.addTagLibs(tagLibs);
+
+			// if there's a need to actually create the context
+			serverController.sendBatch(batch);
+
+			// no need to visit() the batch at service/serverModel level
 			return null;
 		});
 	}
@@ -1255,6 +1273,23 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 	@Override
 	public void registerJspConfigPropertyGroup(JspPropertyGroupDescriptor descriptor, HttpContext httpContext) {
+		serverModel.runSilently(() -> {
+			final Batch batch = new Batch("JSP configuration");
+
+			WebContainerContext ctx = unify(httpContext);
+
+			OsgiContextModel contextModel = serverModel.getOrCreateOsgiContextModel(ctx, serviceBundle,
+					PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
+
+			// we're in configuration thread, so no harm can be done
+			contextModel.addJspPropertyGroupDescriptor(descriptor);
+
+			// if there's a need to actually create the context
+			serverController.sendBatch(batch);
+
+			// no need to visit() the batch at service/serverModel level
+			return null;
+		});
 	}
 
 	// methods used to unregister JSPs

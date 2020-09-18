@@ -16,18 +16,24 @@
 package org.ops4j.pax.web.service.spi.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import javax.servlet.ServletContext;
+import javax.servlet.descriptor.JspConfigDescriptor;
+import javax.servlet.descriptor.JspPropertyGroupDescriptor;
+import javax.servlet.descriptor.TaglibDescriptor;
 
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.context.DefaultServletContextHelper;
 import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
+import org.ops4j.pax.web.service.spi.model.elements.JspConfigurationModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -264,6 +270,8 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	/** Such model is shared, if underlying {@link WebContainerContext} is shared */
 	private Boolean shared = true;
 
+	private final JspConfigurationModel jspConfiguration = new JspConfigurationModel();
+
 	public OsgiContextModel(Bundle ownerBundle, Integer rank, Long serviceId) {
 		this.ownerBundle = ownerBundle;
 		this.serviceRank = rank;
@@ -494,6 +502,52 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		this.shared = shared;
 	}
 
+	// --- methods that are used directly from web.xml (or fragment) parsing and from WebContainer methods
+	//     related to JSP configuration
+
+	public void addTagLibs(Collection<TaglibDescriptor> tagLibs) {
+		// that's trivial, no need to check duplicates for now
+		jspConfiguration.getTaglibs().addAll(tagLibs);
+	}
+
+	public void addJspPropertyGroupDescriptor(JspPropertyGroupDescriptor descriptor) {
+		// because javax.servlet.descriptor.JspConfigDescriptor may contain more property group descriptors, we
+		// should implement some kind of identification. So descriptors are "same" if they share at least one
+		// URI pattern. In such case the property group is replaced, otherwise it is added.
+		for (Iterator<JspPropertyGroupDescriptor> it = jspConfiguration.getJspPropertyGroups().iterator(); it.hasNext(); ) {
+			JspPropertyGroupDescriptor existing = it.next();
+			boolean match = false;
+			for (String p1 : existing.getUrlPatterns()) {
+				for (String p2 : descriptor.getUrlPatterns()) {
+					if (p1.equals(p2)) {
+						match = true;
+						break;
+					}
+				}
+				if (match) {
+					break;
+				}
+			}
+			if (match) {
+				it.remove();
+				break;
+			}
+		}
+
+		// whether some existing property group was removed or not, we'll add new one
+		jspConfiguration.getJspPropertyGroups().add(descriptor);
+	}
+
+	/**
+	 * Method to support {@link ServletContext#getJspConfigDescriptor()}
+	 * @return
+	 */
+	public JspConfigDescriptor getJspConfigDescriptor() {
+		// this object may be reconfigured during the lifetime of OsgiContextModel and the OsgiServletContext
+		// it is contained in
+		return this.jspConfiguration;
+	}
+
 	@Override
 	public String toString() {
 		String source = ",";
@@ -544,24 +598,6 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		// fallback case - mostly in tests cases
 		return this.getNumericId() - o.getNumericId();
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //	/** Access controller context of the bundle that registered the http context. */
 //	@Review("it's so rarely used - only in one resource access scenario, though there are many such scenarios.")

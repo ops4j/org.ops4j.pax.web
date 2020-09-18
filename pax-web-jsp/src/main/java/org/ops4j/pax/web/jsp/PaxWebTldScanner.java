@@ -74,7 +74,7 @@ public class PaxWebTldScanner extends TldScanner {
 		//    the fact that ServletContext.getResourcePaths() and ServletContext.getResource() methods are backed
 		//    by WebContainerContext/ServletContextHelper
 		LOG.info("Searching for TlDs in /WEB-INF/");
-		scanResourcePaths("/WEB_INF/");
+		scanResourcePaths("/WEB-INF/");
 
 		// 4. Tomcat calls javax.servlet.ServletContext.getResourcePaths("/WEB-INF/lib/") and processes
 		//    all the JARs found, but because WEB-INF/lib/*.jar entries are added to Bundle-ClassPath entry of
@@ -139,30 +139,23 @@ public class PaxWebTldScanner extends TldScanner {
 	 * Special Pax Web scanning for TLDs - the OSGi way
 	 * @param bundle
 	 */
-	private void scanBundle(Bundle bundle) {
+	private void scanBundle(Bundle bundle) throws IOException {
 		List<URL> tldURLs = new ArrayList<>(16);
 
 		// scan the bundle and it's fragments using org.osgi.framework.wiring.BundleWiring.findEntries() API. This
 		// method doesn't involve classloaders
-		try {
-			List<URL> bundleTLDs =
-					ClassPathUtil.findEntries(Collections.singletonList(bundle), "/META-INF", "*.tld", true, false);
-			tldURLs.addAll(bundleTLDs);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		List<Bundle> bundles = Collections.singletonList(bundle);
+		List<URL> bundleTLDs = ClassPathUtil.findEntries(bundles, "/META-INF", "*.tld", true, false);
+		tldURLs.addAll(bundleTLDs);
 
 		// JARs from Bundle-ClassPath - we'll scan them separately, because we want to use Bundle.findEntries()
 		// methods, which checks the fragments, but doesn't check classpath at all
-		try {
-			URL[] classPathJars = ClassPathUtil.getClassPathJars(bundle, false);
-			List<URL> jarTLDs = ClassPathUtil.findEntries(classPathJars, "/META-INF", "*.tld", true);
-			tldURLs.addAll(jarTLDs);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		URL[] jars = ClassPathUtil.getClassPathJars(bundle, false);
+		List<URL> jarTLDs = ClassPathUtil.findEntries(jars, "/META-INF", "*.tld", true);
+		tldURLs.addAll(jarTLDs);
 
-		// (note that two above calls can be changed to single ClassPathUtil.findEntries() call with true as last arg)
+		// (note that two above calls can be changed to single ClassPathUtil.findEntries(bundles, ...)
+		// call with true as 5th arg)
 
 		for (URL tld : tldURLs) {
 			try {
