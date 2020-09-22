@@ -399,8 +399,12 @@ class HttpServiceProxy implements WebContainer, StoppableHttpService {
 		delegate.setSessionCookieConfig(config, httpContext);
 	}
 
+	// methods used to alter context init parameters
 
-
+	@Override
+	public void setContextParams(Dictionary<String, Object> params, HttpContext httpContext) {
+		delegate.setContextParams(params, httpContext);
+	}
 
 //	/**
 //	 * @see WebContainer#setContextParam(Dictionary, HttpContext)

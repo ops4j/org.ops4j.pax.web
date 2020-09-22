@@ -923,23 +923,20 @@ public interface WebContainer extends HttpService {
 	 */
 	void setSessionCookieConfig(SessionCookieConfig config, HttpContext httpContext);
 
+	// methods used to alter context init parameters
+
+	/**
+	 * Sets context paramaters to be used in the servlet context corresponding to specified http context.
+	 * This method must be used before any register method that uses the specified http context, otherwise the context
+	 * initialization parameters won't be taken into account (for example in {@link ServletContainerInitializer}s.
+	 *
+	 * @param params context parameters for the servlet context corresponding to specified http context
+	 * @param httpContext http context
+	 */
+	void setContextParams(Dictionary<String, Object> params, HttpContext httpContext);
 
 
 
-//	/**
-//	 * Sets context paramaters to be used in the servlet context corresponding
-//	 * to specified http context. This method must be used before any register
-//	 * method that uses the specified http context, otherwise an
-//	 * IllegalStateException will be thrown.
-//	 *
-//	 * @param params      context parameters for the servlet context corresponding to
-//	 *                    specified http context
-//	 * @param httpContext http context. Cannot be null.
-//	 * @throws IllegalArgumentException if http context is null
-//	 * @throws IllegalStateException    if the call is made after the http context was already used
-//	 *                                  into a registration
-//	 */
-//	void setContextParam(Dictionary<String, ?> params, HttpContext httpContext);
 
 //
 //    /**
@@ -981,8 +978,6 @@ public interface WebContainer extends HttpService {
 //     * @param httpContext
 //     */
 //    void unregisterConstraintMapping(HttpContext httpContext);
-//
-//
 //
 //    void registerWebSocket(Object webSocket, HttpContext httpContext);
 //

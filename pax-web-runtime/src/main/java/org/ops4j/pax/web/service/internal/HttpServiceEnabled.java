@@ -69,6 +69,7 @@ import org.ops4j.pax.web.service.spi.servlet.DefaultTaglibDescriptor;
 import org.ops4j.pax.web.service.spi.servlet.DynamicJEEWebContainerView;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.util.Path;
+import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
 import org.osgi.framework.Bundle;
@@ -1462,6 +1463,31 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 			// we're in configuration thread, so no harm can be done
 			contextModel.setSessionCookieConfig(config);
+
+			// if there's a need to actually create the context
+			serverController.sendBatch(batch);
+
+			// no need to visit() the batch at service/serverModel level
+			return null;
+		});
+	}
+
+	// methods used to alter context init parameters
+
+	@Override
+	public void setContextParams(Dictionary<String, Object> params, HttpContext httpContext) {
+		serverModel.runSilently(() -> {
+			final Batch batch = new Batch("Context init parameters configuration");
+
+			WebContainerContext ctx = unify(httpContext);
+
+			OsgiContextModel contextModel = serverModel.getOrCreateOsgiContextModel(ctx, serviceBundle,
+					PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
+
+			LOG.info("Setting context init parameters in {}", contextModel);
+
+			// we're in configuration thread, so no harm can be done
+			contextModel.getContextParams().putAll(Utils.toMap(params));
 
 			// if there's a need to actually create the context
 			serverController.sendBatch(batch);

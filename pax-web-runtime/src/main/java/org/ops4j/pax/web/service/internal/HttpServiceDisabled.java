@@ -364,29 +364,19 @@ class HttpServiceDisabled implements WebContainer {
 		LOG.warn("Http service has already been stopped");
 	}
 
-//	/**
-//	 * @see WebContainer#setContextParam(Dictionary, HttpContext)
-//	 */
-//	@Override
-//	public void setContextParam(final Dictionary<String, ?> params,
-//								final HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	/**
-//	 * {@inheritDoc}
-//	 */
-//	@Override
-//	public void setSessionTimeout(final Integer minutes,
-//								  final HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	@Override
-//	public void setSessionCookieConfig(String domain, String name, Boolean httpOnly, Boolean secure, String path, Integer maxAge, HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
+	// methods used to alter context init parameters
+
+	@Override
+	public void setContextParams(Dictionary<String, Object> params, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+
+
+
+
+
+
 //	/**
 //	 * @see WebContainer#registerLoginConfig(String, String, String, String, HttpContext)
 //	 */
@@ -424,16 +414,16 @@ class HttpServiceDisabled implements WebContainer {
 //		LOG.warn("Http service has already been stopped");
 //	}
 //
-////	@Override
-////	public void registerJettyWebXml(URL jettyWebXmlURL, HttpContext httpContext) {
-////		LOG.warn("Http service has already been stopped");
-////	}
-//
-////	@Override
-////	public void setConnectorsAndVirtualHosts(List<String> connectors, List<String> virtualHosts,
-////											 HttpContext httpContext) {
-////		LOG.warn("Http service has already been stopped");
-////	}
+//	@Override
+//	public void registerJettyWebXml(URL jettyWebXmlURL, HttpContext httpContext) {
+//		LOG.warn("Http service has already been stopped");
+//	}
+
+//	@Override
+//	public void setConnectorsAndVirtualHosts(List<String> connectors, List<String> virtualHosts,
+//											 HttpContext httpContext) {
+//		LOG.warn("Http service has already been stopped");
+//	}
 //
 //	@Override
 //	public void registerWebSocket(Object webSocket, HttpContext httpContext) {
@@ -445,29 +435,29 @@ class HttpServiceDisabled implements WebContainer {
 //		LOG.warn("Http service has already been stoped");
 //	}
 //
-////	@Override
-////	public RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator) {
-////		LOG.warn("Http service has already been stoped");
-////		// FIXME check if null valid
-////		return null;
-////	}
-////
-////	@Override
-////	public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator) {
-////		LOG.warn("Http service has already been stoped");
-////		// FIXME check if null valid
-////		return null;
-////	}
+//	@Override
+//	public RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator) {
+//		LOG.warn("Http service has already been stoped");
+//		// FIXME check if null valid
+//		return null;
+//	}
+//
+//	@Override
+//	public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator) {
+//		LOG.warn("Http service has already been stoped");
+//		// FIXME check if null valid
+//		return null;
+//	}
 
 	@Override
 	public String toString() {
 		return super.toString() + " for bundle " + serviceBundle;
 	}
 
-////    @Override
-////    public WebContainerDTO getWebcontainerDTO() {
-////        LOG.warn("Http service has already been stoped");
-////        return null;
-////    }
+//    @Override
+//    public WebContainerDTO getWebcontainerDTO() {
+//        LOG.warn("Http service has already been stoped");
+//        return null;
+//    }
 
 }
