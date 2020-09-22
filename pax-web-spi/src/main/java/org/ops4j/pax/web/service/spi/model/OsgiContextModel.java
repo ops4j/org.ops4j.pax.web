@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import javax.servlet.ServletContext;
+import javax.servlet.SessionCookieConfig;
 import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 import javax.servlet.descriptor.TaglibDescriptor;
@@ -34,6 +35,7 @@ import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.context.DefaultServletContextHelper;
 import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.model.elements.JspConfigurationModel;
+import org.ops4j.pax.web.service.spi.model.elements.SessionConfigurationModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -270,7 +272,11 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	/** Such model is shared, if underlying {@link WebContainerContext} is shared */
 	private Boolean shared = true;
 
+	/** Per OSGi context configuration of JSP engine (taglibs, JSP property groups) */
 	private final JspConfigurationModel jspConfiguration = new JspConfigurationModel();
+
+	/** Per OSGi context configuration of sessions - standard config from Servlet spec + Server specific config */
+	private final SessionConfigurationModel sessionConfiguration = new SessionConfigurationModel();
 
 	public OsgiContextModel(Bundle ownerBundle, Integer rank, Long serviceId) {
 		this.ownerBundle = ownerBundle;
@@ -546,6 +552,20 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		// this object may be reconfigured during the lifetime of OsgiContextModel and the OsgiServletContext
 		// it is contained in
 		return this.jspConfiguration;
+	}
+
+	// --- methods invoked during web.xml (or fragment) parsing and from WebContainer's session configuration methods
+
+	public void setSessionTimeout(Integer minutes) {
+		this.sessionConfiguration.setSessionTimeout(minutes);
+	}
+
+	public void setSessionCookieConfig(SessionCookieConfig config) {
+		this.sessionConfiguration.setSessionCookieConfig(config);
+	}
+
+	public SessionConfigurationModel getSessionConfiguration() {
+		return sessionConfiguration;
 	}
 
 	@Override

@@ -38,6 +38,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextListener;
+import javax.servlet.SessionCookieConfig;
 import javax.servlet.http.HttpSessionListener;
 
 import org.apache.catalina.AccessLog;
@@ -55,6 +56,7 @@ import org.apache.catalina.core.StandardEngine;
 import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.core.StandardServer;
 import org.apache.catalina.core.StandardService;
+import org.apache.catalina.session.StandardManager;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.valves.AccessLogValve;
 import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
@@ -65,6 +67,7 @@ import org.apache.tomcat.util.descriptor.web.WebXml;
 import org.apache.tomcat.util.descriptor.web.WebXmlParser;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
+import org.ops4j.pax.web.service.spi.config.SessionConfiguration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
@@ -72,6 +75,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.SessionConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 import org.ops4j.pax.web.service.spi.servlet.DynamicRegistrations;
@@ -184,11 +188,7 @@ class TomcatServerWrapper implements BatchVisitor {
 	/** Servlet to use when no servlet is mapped - to ensure that preprocessors and filters are run correctly. */
 	private final Default404Servlet default404Servlet = new Default404Servlet();
 
-//				private final Map<HttpContext, Context> contextMap = new ConcurrentHashMap<>();
-//
-//				private final Map<FilterModel, FilterLifecycleListener> filterLifecycleListenerMap = new ConcurrentHashMap<>();
-//
-//				private final Map<ServletModel, LifecycleListener> servletLifecycleListenerMap = new ConcurrentHashMap<>();
+	private SessionCookieConfig defaultSessionCookieConfig;
 
 	TomcatServerWrapper(Configuration config, TomcatFactory tomcatFactory,
 			Bundle paxWebTomcatBundle, ClassLoader classLoader) {
@@ -196,9 +196,6 @@ class TomcatServerWrapper implements BatchVisitor {
 		this.tomcatFactory = tomcatFactory;
 		this.paxWebTomcatBundle = paxWebTomcatBundle;
 		this.classLoader = classLoader;
-
-//		((ContainerBase) server.getHost()).setStartChildren(false);
-//		TomcatURLStreamHandlerFactory.disable();
 	}
 
 	// --- lifecycle and configuration methods
@@ -224,6 +221,10 @@ class TomcatServerWrapper implements BatchVisitor {
 		if (configuration.logging().isLogNCSAFormatEnabled()) {
 			configureRequestLog();
 		}
+
+		// default session configuration is prepared, but not set in the server instance. It can be set
+		// only after first context is created
+		this.defaultSessionCookieConfig = configuration.session().getDefaultSessionCookieConfig();
 	}
 
 	/**
@@ -622,7 +623,8 @@ class TomcatServerWrapper implements BatchVisitor {
 			try {
 				URL internalXml = getClass().getResource("/org/ops4j/pax/web/service/tomcat/internal/web.xml");
 				if (internalXml != null) {
-					// resource from pax-web-tomcat bundle added using maven-dependency-plugin
+					// resource from pax-web-tomcat bundle added using maven-dependency-plugin - parsed only
+					// to get the MIME mappings
 					webXmlParser.parseWebXml(internalXml, webXml, false);
 				} else {
 					// unit test/IDE case - no URL available
@@ -638,50 +640,46 @@ class TomcatServerWrapper implements BatchVisitor {
 			//       Remember - it's much harder in Tomcat than in Jetty and Undertow
 			defaultHost.addChild(context);
 
-//							// Add Session config
-//							ctx.setSessionCookieName(configurationSessionCookie);
-//							// configurationSessionCookieHttpOnly
-//							ctx.setUseHttpOnly(configurationSessionCookieHttpOnly);
-//							// configurationSessionTimeout
-//							ctx.setSessionTimeout(configurationSessionTimeout);
-//							// configurationWorkerName //TODO: missing
-//
-//							// new OSGi methods
-//							((HttpServiceContext) ctx).setHttpContext(httpContext);
-//							((HttpServiceContext) ctx).setContextAttributes(contextAttributes);
-//							// TODO: what about the AccessControlContext?
-//							// TODO: the virtual host section below
-//							// TODO: what about the VirtualHosts?
-//							// TODO: what about the tomcat-web.xml config?
-//							// TODO: connectors are needed for virtual host?
-//							if (containerInitializers != null) {
-//								for (Map.Entry<ServletContainerInitializer, Set<Class<?>>> entry : containerInitializers
-//										.entrySet()) {
-//									ctx.addServletContainerInitializer(entry.getKey(),
-//											entry.getValue());
-//								}
-//							}
-//
-//							// Add default JSP ContainerInitializer
-//							if (isJspAvailable()) { // use JasperClassloader
-//								try {
-//									@SuppressWarnings("unchecked")
-//									Class<ServletContainerInitializer> loadClass = (Class<ServletContainerInitializer>) getClass()
-//											.getClassLoader().loadClass(
-//													"org.ops4j.pax.web.jsp.JasperInitializer");
-//									ctx.addServletContainerInitializer(loadClass.newInstance(),
-//											null);
-//								} catch (ClassNotFoundException e) {
-//									LOG.error("Unable to load JasperInitializer", e);
-//								} catch (InstantiationException | IllegalAccessException e) {
-//									LOG.error("Unable to instantiate JasperInitializer", e);
-//								}
-//							}
+			// session configuration - based on defaultSessionConfiguration, but may be later overriden in OsgiContext
+			SessionConfiguration sc = configuration.session();
+			context.setSessionTimeout(sc.getSessionTimeout());
+			context.setSessionCookieName(defaultSessionCookieConfig.getName());
+			context.setSessionCookieDomain(defaultSessionCookieConfig.getDomain());
+			// will default to context path if null
+			context.setSessionCookiePath(defaultSessionCookieConfig.getPath());
+			context.setUseHttpOnly(defaultSessionCookieConfig.isHttpOnly());
+			// false, because that configures the behavior to be the same in Jetty, Tomcat and Undertow
+			context.setSessionCookiePathUsesTrailingSlash(false);
+			context.setValidateClientProvidedNewSessionId(true);
 
-			//		final Bundle bundle = contextModel.getBundle();
-			//		final BundleContext bundleContext = BundleUtils
-			//				.getBundleContext(bundle);
+			if (sc.getSessionStoreDirectory() != null) {
+				StandardManager manager = new StandardManager();
+				manager.setPathname(new File(sc.getSessionStoreDirectory(), "SESSIONS.ser").getAbsolutePath());
+				context.setManager(manager);
+			}
+
+			//		// TODO: what about the AccessControlContext?
+			//		// TODO: the virtual host section below
+			//		// TODO: what about the VirtualHosts?
+			//		// TODO: what about the tomcat-web.xml config?
+			//		// TODO: connectors are needed for virtual host?
 			//
+			//		// Add default JSP ContainerInitializer
+			//		if (isJspAvailable()) { // use JasperClassloader
+			//			try {
+			//				@SuppressWarnings("unchecked")
+			//				Class<ServletContainerInitializer> loadClass = (Class<ServletContainerInitializer>) getClass()
+			//						.getClassLoader().loadClass(
+			//								"org.ops4j.pax.web.jsp.JasperInitializer");
+			//				ctx.addServletContainerInitializer(loadClass.newInstance(),
+			//						null);
+			//			} catch (ClassNotFoundException e) {
+			//				LOG.error("Unable to load JasperInitializer", e);
+			//			} catch (InstantiationException | IllegalAccessException e) {
+			//				LOG.error("Unable to instantiate JasperInitializer", e);
+			//			}
+			//		}
+
 			//		if (packageAdminTracker != null) {
 			//			ServletContainerInitializerScanner scanner = new ServletContainerInitializerScanner(bundle, tomcatBundle, packageAdminTracker.getService());
 			//			Map<ServletContainerInitializer, Set<Class<?>>> containerInitializers = contextModel.getContainerInitializers();
@@ -691,9 +689,6 @@ class TomcatServerWrapper implements BatchVisitor {
 			//			}
 			//			scanner.scanBundles(containerInitializers);
 			//		}
-			//
-			//
-			//		final WebContainerContext httpContext = contextModel.getHttpContext();
 			//
 			//		final Context context = server.addContext(
 			//				contextModel.getContextParams(),
@@ -745,87 +740,9 @@ class TomcatServerWrapper implements BatchVisitor {
 			//			// Authentication Valve according to configured authentication method
 			//			context.getPipeline().addValve(getAuthenticatorValve(authMethod));
 			//		}
-			//		if (contextModel.getContextParams() != null) {
-			//			for (Map.Entry<String, String> entry : contextModel.getContextParams().entrySet()) {
-			//				context.addParameter(entry.getKey(), entry.getValue());
-			//			}
-			//		}
 			//
 			//		// TODO: how about classloader?
 			//		// TODO: compare with JettyServerWrapper.addContext
-			//		// TODO: what about the init parameters?
-			//
-			//		configureJspConfigDescriptor(context, contextModel);
-			//
-			//		final LifecycleState state = context.getState();
-			//		if (state != LifecycleState.STARTED && state != LifecycleState.STARTING
-			//				&& state != LifecycleState.STARTING_PREP) {
-			//
-			//			LOG.debug("Registering ServletContext as service. ");
-			//			final Dictionary<String, String> properties = new Hashtable<>();
-			////			properties.put(WebContainerConstants.PROPERTY_SYMBOLIC_NAME, bundle.getSymbolicName());
-			//
-			//			final Dictionary<String, String> headers = bundle.getHeaders();
-			//			final String version = headers.get(Constants.BUNDLE_VERSION);
-			//			if (version != null && version.length() > 0) {
-			//				properties.put("osgi.web.version", version);
-			//			}
-			//
-			//			String webContextPath = headers.get(WEB_CONTEXT_PATH);
-			//			final String webappContext = headers.get("Webapp-Context");
-			//
-			//			final ServletContext servletContext = context.getServletContext();
-			//
-			//			// This is the default context, but shouldn't it be called default?
-			//			// See PAXWEB-209
-			//			if ("/".equalsIgnoreCase(context.getPath())
-			//					&& (webContextPath == null || webappContext == null)) {
-			//				webContextPath = context.getPath();
-			//			}
-			//
-			//			// PAXWEB-1147
-			//			SessionCookieConfig scc = servletContext.getSessionCookieConfig();
-			//			if (scc != null) {
-			//				if (contextModel.getSessionDomain() != null) {
-			//					scc.setDomain(contextModel.getSessionDomain());
-			//				}
-			//				if (contextModel.getSessionCookie() != null) {
-			//					scc.setName(contextModel.getSessionCookie());
-			//					context.setSessionCookieName(contextModel.getSessionCookie());
-			//				}
-			//				if (contextModel.getSessionCookieMaxAge() != null) {
-			//					scc.setMaxAge(contextModel.getSessionCookieMaxAge());
-			//				}
-			//				if (contextModel.getSessionCookieHttpOnly() != null) {
-			//					scc.setHttpOnly(contextModel.getSessionCookieHttpOnly());
-			//				}
-			//				if (contextModel.getSessionCookieSecure() != null) {
-			//					scc.setSecure(contextModel.getSessionCookieSecure());
-			//				}
-			//			}
-			//
-			//			// makes sure the servlet context contains a leading slash
-			//			webContextPath = webContextPath != null ? webContextPath
-			//					: webappContext;
-			//			if (webContextPath != null && !webContextPath.startsWith("/")) {
-			//				webContextPath = "/" + webContextPath;
-			//			}
-			//			if (webContextPath == null) {
-			////				LOG.warn(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH +
-			////						" couldn't be set, it's not configured. Assuming '/'");
-			//				webContextPath = "/";
-			//			}
-			//
-			////			properties.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_PATH, webContextPath);
-			////			properties.put(WebContainerConstants.PROPERTY_SERVLETCONTEXT_NAME, context.getServletContext().getServletContextName());
-			//
-			//			servletContextService = bundleContext.registerService(
-			//					ServletContext.class, servletContext, properties);
-			//			LOG.debug("ServletContext registered as service. ");
-			//		}
-			//		contextMap.put(contextModel.getHttpContext(), context);
-			//
-			//		return context;
 
 			// explicit no check for existing mapping under given physical context path
 			contextHandlers.put(model.getContextPath(), context);
@@ -862,7 +779,9 @@ class TomcatServerWrapper implements BatchVisitor {
 			if (osgiServletContexts.containsKey(osgiModel)) {
 				throw new IllegalStateException(osgiModel + " is already registered");
 			}
-			osgiServletContexts.put(osgiModel, new OsgiServletContext(realContext.getServletContext(), osgiModel, servletContextModel));
+			OsgiServletContext osgiContext = new OsgiServletContext(realContext.getServletContext(), osgiModel, servletContextModel,
+					defaultSessionCookieConfig);
+			osgiServletContexts.put(osgiModel, osgiContext);
 			osgiContextModels.get(contextPath).add(osgiModel);
 		}
 
@@ -1324,13 +1243,51 @@ class TomcatServerWrapper implements BatchVisitor {
 		}
 		try {
 			String contextPath = context.getPath().equals("") ? "/" : context.getPath();
-			LOG.info("Starting Tomcat context \"" + contextPath + "\"");
+			OsgiContextModel highestRanked = context.getDefaultOsgiContextModel();
+
+			LOG.info("Starting Tomcat context \"{}\" with default Osgi Context {}", context, highestRanked);
 
 			Collection<SCIWrapper> initializers = new LinkedList<>(this.initializers.get(contextPath).values());
+			// take only these SCIs, which are associated with highest ranked OCM
+			initializers.removeIf(w -> !w.getModel().getContextModels().contains(highestRanked));
 			if (initializers.size() > 0) {
 				initializers.add(new RegisteringContainerInitializer(this.dynamicRegistrations.get(contextPath)));
 				context.setServletContainerInitializers(initializers);
 			}
+
+			context.addLifecycleListener(event -> {
+				if (event.getLifecycle().getState() == LifecycleState.STARTING_PREP) {
+					// alter session configuration
+					SessionConfigurationModel sc = highestRanked.getSessionConfiguration();
+					if (sc != null) {
+						if (sc.getSessionTimeout() != null) {
+							context.setSessionTimeout(sc.getSessionTimeout());
+						}
+						SessionCookieConfig scc = sc.getSessionCookieConfig();
+						SessionCookieConfig config = context.getServletContext().getSessionCookieConfig();
+						if (scc != null && config != null) {
+							if (scc.getName() != null) {
+								context.setSessionCookieName(scc.getName());
+								config.setName(scc.getName());
+							}
+							if (scc.getDomain() != null) {
+								context.setSessionCookieDomain(scc.getDomain());
+								config.setDomain(scc.getDomain());
+							}
+							if (scc.getPath() != null) {
+								context.setSessionCookiePath(scc.getPath());
+								config.setPath(scc.getPath());
+							}
+							context.setUseHttpOnly(scc.isHttpOnly());
+							config.setHttpOnly(scc.isHttpOnly());
+							config.setSecure(scc.isSecure());
+							config.setMaxAge(scc.getMaxAge());
+							config.setComment(scc.getComment());
+						}
+					}
+				}
+			});
+
 			context.start();
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);

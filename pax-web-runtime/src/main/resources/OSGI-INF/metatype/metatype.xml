@@ -67,6 +67,9 @@
 		<AD id="org.osgi.service.http.checkForwardedHeaders" required="false" type="Boolean" default="false"
 				name="Check for X-Forwareded-* headers" />
 
+		<AD id="org.ops4j.pax.web.server.showStacks" required="false" type="Boolean" default="false"
+				name="Display stack trace when error occurs" />
+
 		<!-- Properties related to Security/SSL/TLS -->
 
 		<AD id="org.ops4j.pax.web.ssl.keystore" type="String" default=""
@@ -148,7 +151,44 @@
 
 		<!-- Properties related to JSP -->
 
+<!--		<AD name="JSP scratchdir" id="org.ops4j.pax.web.jsp.scratch.dir" type="String" default="" />-->
+<!--		<AD name="JSP checkInterval" id="org.ops4j.pax.web.jsp.check.interval" type="String" default="300" />-->
+<!--		<AD name="JSP classdebuginfo" id="org.ops4j.pax.web.jsp.debug.info" type="String" default="true" />-->
+<!--		<AD name="JSP development" id="org.ops4j.pax.web.jsp.development" type="String" default="true" />-->
+<!--		<AD name="JSP enablePooling" id="org.ops4j.pax.web.jsp.enable.pooling" type="String" default="true" />-->
+<!--		<AD name="JSP ieClassId" id="org.ops4j.pax.web.jsp.ie.classid" type="String" default="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" />-->
+<!--		<AD name="JSP javaEncoding" id="org.ops4j.pax.web.jsp.java.encoding" type="String" default="UTF-8" />-->
+<!--		<AD name="JSP keepgenerated" id="org.ops4j.pax.web.jsp.keep.generated" type="String" default="true" />-->
+<!--		<AD name="JSP logVerbosityLevel" id="org.ops4j.pax.web.jsp.log.verbosity.level" type="String" default="WARNING" />-->
+<!--		<AD name="JSP mappedfile" id="org.ops4j.pax.web.jsp.mapped.file" type="String" default="false" />-->
+<!--		<AD name="JSP tagpoolMaxSize" id="org.ops4j.pax.web.jsp.tagpool.max.size" type="String" default="5" />-->
+<!--		<AD name="JSP usePrecompiled" id="org.ops4j.pax.web.jsp.precompilation" type="String" default="false" />-->
+
 		<!-- Properties related to Sessions -->
+
+		<AD id="org.ops4j.pax.web.session.timeout" type="String" default="30"
+				name="Session Timeout in minutes" />
+		<AD id="org.ops4j.pax.web.session.cookie.name" type="String" default="JSESSIONID"
+				name="Session cookie name" />
+		<AD id="org.ops4j.pax.web.session.cookie.domain" required="false" type="String" default=""
+				name="Session cookie domain" />
+		<AD id="org.ops4j.pax.web.session.cookie.path" required="false" type="String" default=""
+				name="Session cookie path (defaults to path obtained from context path)" />
+		<AD id="org.ops4j.pax.web.session.cookie.comment" required="false" type="String" default=""
+				name="Session cookie comment" />
+		<AD id="org.ops4j.pax.web.session.cookie.httpOnly" type="Boolean" default="true"
+				name="Session cookie HttpOnly" />
+		<AD id="org.ops4j.pax.web.session.cookie.secure" type="Boolean" default="false"
+				name="Session cookie secure" />
+		<AD id="org.ops4j.pax.web.session.cookie.maxAge" type="Integer" default="-1"
+				name="Session cookie max age" />
+		<!-- path parameter name - configured only in Jetty -->
+		<AD id="org.ops4j.pax.web.session.url" type="String" default="jsessionid"
+				name="Session path parameter name for URL rewrite" />
+		<AD id="org.ops4j.pax.web.session.worker.name" required="false" type="String" default=""
+				name="Allows configuration of Jetty's SessionHandler.SessionIdManager.workerName" />
+		<AD id="org.ops4j.pax.web.session.storedirectory" required="false" type="String" default=""
+				name="Session store directory for file-based session persistence" />
 
 		<!-- Properties related to Logging -->
 
@@ -169,31 +209,7 @@
 		<AD id="org.ops4j.pax.web.log.ncsa.logtimezone" type="String" default="GMT"
 				name="NCSA Log Time Zone" />
 
-<!--		<AD name="Session Timeout" id="org.ops4j.pax.web.session.timeout" type="String" default="5" />-->
-<!--		<AD name="Session cookie name" id="org.ops4j.pax.web.session.cookie" type="String" default="JSESSIONID" />-->
-<!--		<AD name="Session cookie domain" id="org.ops4j.pax.web.session.domain" type="String" default="" />-->
-<!--		<AD name="Session cookie path" id="org.ops4j.pax.web.session.path" type="String" default="" />-->
-<!--		<AD name="Session URL" id="org.ops4j.pax.web.session.url" type="String" default="jsessionid" />-->
-<!--		<AD name="Session cookie HttpOnly" id="org.ops4j.pax.web.session.cookie.httpOnly" type="String" default="true" />-->
-<!--		<AD name="Session cookie secure" id="org.ops4j.pax.web.session.cookie.secure" type="String" default="false" />-->
-<!--		<AD name="Session lazy load" id="org.ops4j.pax.web.session.lazyload" type="String" default="false" />-->
-<!--		<AD name="Session store directory" id="org.ops4j.pax.web.session.storedirectory" type="String" default="" />-->
-
 <!--		<AD name="Configuration File for Jetty" id="org.ops4j.pax.web.config.file" type="String" default="" />-->
-
-<!--		<AD name="worker name" id="org.ops4j.pax.web.worker.name" type="String" default="" />-->
-<!--		<AD name="JSP scratchdir" id="org.ops4j.pax.web.jsp.scratch.dir" type="String" default="" />-->
-<!--		<AD name="JSP checkInterval" id="org.ops4j.pax.web.jsp.check.interval" type="String" default="300" />-->
-<!--		<AD name="JSP classdebuginfo" id="org.ops4j.pax.web.jsp.debug.info" type="String" default="true" />-->
-<!--		<AD name="JSP development" id="org.ops4j.pax.web.jsp.development" type="String" default="true" />-->
-<!--		<AD name="JSP enablePooling" id="org.ops4j.pax.web.jsp.enable.pooling" type="String" default="true" />-->
-<!--		<AD name="JSP ieClassId" id="org.ops4j.pax.web.jsp.ie.classid" type="String" default="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" />-->
-<!--		<AD name="JSP javaEncoding" id="org.ops4j.pax.web.jsp.java.encoding" type="String" default="UTF-8" />-->
-<!--		<AD name="JSP keepgenerated" id="org.ops4j.pax.web.jsp.keep.generated" type="String" default="true" />-->
-<!--		<AD name="JSP logVerbosityLevel" id="org.ops4j.pax.web.jsp.log.verbosity.level" type="String" default="WARNING" />-->
-<!--		<AD name="JSP mappedfile" id="org.ops4j.pax.web.jsp.mapped.file" type="String" default="false" />-->
-<!--		<AD name="JSP tagpoolMaxSize" id="org.ops4j.pax.web.jsp.tagpool.max.size" type="String" default="5" />-->
-<!--		<AD name="JSP usePrecompiled" id="org.ops4j.pax.web.jsp.precompilation" type="String" default="false" />-->
 
 <!--		<AD name="Default Virtual Hosts" id="org.ops4j.pax.web.default.virtualhosts" required="false" type="String" default="" />-->
 <!--		<AD name="Default Connectors" id="org.ops4j.pax.web.default.connectors" required="false" type="String" default="" />-->
@@ -207,7 +223,6 @@
 <!--		<AD name="Default Auth" id="org.ops4j.pax.web.default.authmethod" required="false" type="String" default="" />-->
 <!--		<AD name="Default Realm" id="org.ops4j.pax.web.default.realmname" required="false" type="String" default="" />-->
 
-<!--		<AD name="Display stack trace when error occurs" id="org.ops4j.pax.web.server.showStacks" required="false" type="Boolean" default="true" />-->
 	</OCD>
 
 </metatype:MetaData>

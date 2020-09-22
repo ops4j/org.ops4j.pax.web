@@ -15,33 +15,104 @@
  */
 package org.ops4j.pax.web.service.spi.config;
 
+import java.io.File;
+import javax.servlet.SessionCookieConfig;
+
+/**
+ * <p>While some session configuration parameters (those specified in {@code web.xml} and
+ * {@link javax.servlet.SessionCookieConfig}) can be specified through {@link org.ops4j.pax.web.service.WebContainer}
+ * and during WAR deployment, some server-specific options can be configured only globally through
+ * {@link org.ops4j.pax.web.service.PaxWebConstants#PID}.</p>
+ *
+ * <p>Global (this) configuration is also used when no context-specific session configuration is defined.</p>
+ */
 public interface SessionConfiguration {
 
+	// --- configuration that matches web.xml and javax.servlet.SessionCookieConfig
+
 	/**
-	 * Returns the time in minutes after which an incative settion times out. If
-	 * returned value is null then no time out will be set (in jetty this will
-	 * mean that there will be no timeout)
-	 *
+	 * {@code <session-config>/<session-timeout>} - returns the time in minutes after which an inative settion times out.
+	 * Defaults to 30 minutes (as in Tomcat).
 	 * @return timeout in minutes
 	 */
 	Integer getSessionTimeout();
 
-	String getSessionCookie();
+	/**
+	 * {@code <session-config>/<cookie-config>/<name>} - if not specified, defaults to {@code JSESSIONID}
+	 * @return
+	 */
+	String getSessionCookieName();
 
-	String getSessionDomain();
+	/**
+	 * {@code <session-config>/<cookie-config>/<domain>}
+	 * @return
+	 */
+	String getSessionCookieDomain();
 
-	String getSessionPath();
+	/**
+	 * {@code <session-config>/<cookie-config>/<path>} - if not specified, it will match the context path.
+	 * @return
+	 */
+	String getSessionCookiePath();
 
-	String getSessionUrl();
+	/**
+	 * {@code <session-config>/<cookie-config>/<comment>}
+	 * @return
+	 */
+	String getSessionCookieComment();
 
+	/**
+	 * {@code <session-config>/<cookie-config>/<http-only>}
+	 * @return
+	 */
 	Boolean getSessionCookieHttpOnly();
 
+	/**
+	 * {@code <session-config>/<cookie-config>/<secure>}
+	 * @return
+	 */
 	Boolean getSessionCookieSecure();
 
+	/**
+	 * {@code <session-config>/<cookie-config>/<max-age>}
+	 * @return
+	 */
 	Integer getSessionCookieMaxAge();
 
-	String getSessionStoreDirectory();
+	// --- configuration that's not related to web.xml or javax.servlet.SessionCookieConfig
 
-	Boolean getSessionLazyLoad();
+	/**
+	 * Allows configuration of Jetty's SessionHandler.SessionIdPathParameterName. By default it's {@code jsessionid}.
+	 * @return
+	 */
+	String getSessionUrlPathParameter();
+
+	/**
+	 * PAXWEB-144: Allows configuration of Jetty's SessionHandler.SessionIdManager.workerName to assist session
+	 * affinity in a load balancer.
+	 * @return
+	 */
+	String getSessionWorkerName();
+
+	/**
+	 * All server runtimes allow configuration of <em>file session persistence</em> and with this property we
+	 * can specify the persistent location (directory) of such session storage.
+	 * @return
+	 */
+	String getSessionStoreDirectoryLocation();
+
+	/**
+	 * If {@link #getSessionStoreDirectoryLocation()} returns valid location, this method returns the corresponding
+	 * {@link File} object
+	 * @return
+	 */
+	File getSessionStoreDirectory();
+
+	/**
+	 * This method gathers some of individual session configuration parameters and returns ready to use
+	 * {@link SessionCookieConfig} object.
+	 * @return
+	 */
+	SessionCookieConfig getDefaultSessionCookieConfig();
 
 }

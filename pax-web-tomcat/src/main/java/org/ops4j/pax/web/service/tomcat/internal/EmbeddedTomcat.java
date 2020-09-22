@@ -17,13 +17,9 @@ package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.File;
 
-import org.apache.catalina.Engine;
-import org.apache.catalina.Host;
 import org.apache.catalina.Server;
 import org.apache.catalina.Service;
-import org.apache.catalina.Valve;
 import org.apache.catalina.connector.Connector;
-import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.startup.Catalina;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.tomcat.util.digester.Digester;
@@ -138,42 +134,9 @@ public class EmbeddedTomcat extends Tomcat {
 
 		// Fix for PAXWEB-193
 		configurationSessionTimeout = configuration.session().getSessionTimeout();
-		configurationSessionCookie = configuration.session().getSessionCookie();
+		configurationSessionCookie = configuration.session().getSessionCookieName();
 		configurationSessionCookieMaxAge = configuration.session().getSessionCookieMaxAge();
 		configurationSessionCookieHttpOnly = configuration
 				.session().getSessionCookieHttpOnly();
-	}
-
-//	private void initBaseDir(Configuration configuration) {
-//		if (System.getProperty(Globals.CATALINA_HOME_PROP) == null) {
-//			setBaseDir(configuration.server().getTemporaryDirectory().getAbsolutePath());
-//		}
-//		initBaseDir();
-//	}
-
-	private boolean isJspAvailable() {
-//		try {
-//			return (org.ops4j.pax.web.jsp.JspServletWrapper.class != null);
-//		} catch (NoClassDefFoundError ignore) {
-			return false;
-//		}
-	}
-
-	@Override
-	public Host getHost() {
-		Engine engine = getEngine();
-		if (engine.findChildren().length > 0) {
-			return (Host) engine.findChildren()[0];
-		}
-		Host host = new StandardHost();
-		/*
-		 * This is almost a copy of super.getHost(), but if (and only if) a new host is created,
-		 * we need to set a new Basic Valve, that changes the dispatch logic
-		 */
-		Valve contextSelect = new ContextSelectionHostValve(host.getPipeline().getBasic(), getService().getMapper());
-		host.getPipeline().setBasic(contextSelect);
-		host.setName(hostname);
-		getEngine().addChild(host);
-		return host;
 	}
 }

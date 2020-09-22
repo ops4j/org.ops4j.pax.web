@@ -36,6 +36,7 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.ops4j.pax.web.annotations.Review;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +50,7 @@ import org.slf4j.LoggerFactory;
  * IMPORTANT: at least one of the above mechanisms *MUST* be configured and
  * operational, otherwise certificate validation *WILL FAIL* unconditionally.
  */
+@Review("Is it needed? It's a copy from Jetty...")
 public class CertificateValidator {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CertificateValidator.class);

@@ -15,10 +15,12 @@
  */
 package org.ops4j.pax.web.service.spi.model.elements;
 
+import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 
+@Review("Not refactored yet")
 public class WebSocketModel extends ElementModel {
 
 	private Object webSocket;

@@ -79,6 +79,7 @@ public class Utils {
 		Hashtable<Object, Object> properties = new Hashtable<>(System.getProperties());
 		properties.put(PaxWebConfig.PID_CFG_TEMP_DIR, "target/tmp");
 		properties.put(PaxWebConfig.PID_CFG_HTTP_PORT, Integer.toString(port));
+		properties.put(PaxWebConfig.PID_CFG_SHOW_STACKS, "true");
 
 		if (callback != null) {
 			callback.accept(properties);

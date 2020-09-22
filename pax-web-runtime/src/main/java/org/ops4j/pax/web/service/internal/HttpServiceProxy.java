@@ -24,6 +24,7 @@ import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
+import javax.servlet.SessionCookieConfig;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 import javax.servlet.descriptor.TaglibDescriptor;
 
@@ -380,6 +381,27 @@ class HttpServiceProxy implements WebContainer, StoppableHttpService {
 		delegate.unregisterServletContainerInitializer(initializer, httpContext);
 	}
 
+	// methods used to configure session
+
+	@Override
+	public void setSessionTimeout(Integer minutes, HttpContext httpContext) {
+		delegate.setSessionTimeout(minutes, httpContext);
+	}
+
+	@Override
+	public void setSessionCookieConfig(String domain, String name, Boolean httpOnly, Boolean secure, String path,
+			Integer maxAge, HttpContext httpContext) {
+		delegate.setSessionCookieConfig(domain, name, httpOnly, secure, path, maxAge, httpContext);
+	}
+
+	@Override
+	public void setSessionCookieConfig(SessionCookieConfig config, HttpContext httpContext) {
+		delegate.setSessionCookieConfig(config, httpContext);
+	}
+
+
+
+
 //	/**
 //	 * @see WebContainer#setContextParam(Dictionary, HttpContext)
 //	 */
@@ -389,24 +411,6 @@ class HttpServiceProxy implements WebContainer, StoppableHttpService {
 //		LOG.debug("Setting context paramters [" + params
 //				+ "] for http context [" + httpContext + "]");
 //		delegate.setContextParam(params, httpContext);
-//	}
-//
-//	/**
-//	 * {@inheritDoc}
-//	 */
-//	@Override
-//	public void setSessionTimeout(final Integer minutes,
-//			final HttpContext httpContext) {
-//		LOG.debug("Setting session timeout to " + minutes
-//				+ " minutes for http context [" + httpContext + "]");
-//		delegate.setSessionTimeout(minutes, httpContext);
-//	}
-//
-//	@Override
-//	public void setSessionCookieConfig(String domain, String name, Boolean httpOnly, Boolean secure, String path, Integer maxAge, HttpContext httpContext) {
-//		LOG.debug(String.format("Setting session cookie configuration to: domain=%s, name=%s, http-only=%b, secure=%b, path=%s, max-age=%d",
-//				domain, name, httpOnly, secure, path, maxAge));
-//		delegate.setSessionCookieConfig(domain, name, httpOnly, secure, path, maxAge, httpContext);
 //	}
 //
 //	@Override

@@ -55,9 +55,12 @@ import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletCont
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.WelcomeFileMappingTracker;
 import org.ops4j.pax.web.itest.server.support.Utils;
+import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.HttpServiceEnabled;
+import org.ops4j.pax.web.service.internal.StoppableHttpService;
 import org.ops4j.pax.web.service.spi.ServerController;
+import org.ops4j.pax.web.service.spi.ServerState;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.ContextKey;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
@@ -161,7 +164,13 @@ public class MultiContainerTestSupport {
 	public void initAll() throws Exception {
 		configurePort();
 
-		controller = Utils.createServerController(null, port, runtime, getClass().getClassLoader());
+		controller = Utils.createServerController(props -> {
+			String location = sessionPersistenceLocation();
+			if (location != null) {
+				props.put(PaxWebConfig.PID_CFG_SESSION_STORE_DIRECTORY, location);
+			}
+		}, port, runtime, getClass().getClassLoader());
+
 		controller.configure();
 		controller.start();
 
@@ -183,7 +192,7 @@ public class MultiContainerTestSupport {
 
 		// manually create mock for WebContainer service scoped to a pax-web-extender-whiteboard bundle
 		HttpServiceEnabled container = new HttpServiceEnabled(whiteboardBundle, controller, serverModel, null, config);
-		containers.put(whiteboardBundle, container);
+//		containers.put(whiteboardBundle, container);
 
 		containerRef = mock(ServiceReference.class);
 		when(containerRef.getProperty(Constants.SERVICE_ID)).thenReturn(42L);
@@ -212,11 +221,17 @@ public class MultiContainerTestSupport {
 
 	@After
 	public void cleanup() throws Exception {
+		stopWhiteboardService();
 		if (controller != null) {
-			controller.stop();
+			if (controller.getState() == ServerState.STARTED) {
+				controller.stop();
+			}
 			controller = null;
 		}
-		stopWhiteboardService();
+	}
+
+	protected String sessionPersistenceLocation() {
+		return null;
 	}
 
 	protected void stopWhiteboardService() {
@@ -261,6 +276,16 @@ public class MultiContainerTestSupport {
 		}
 
 		return bundle;
+	}
+
+	protected WebContainer container(Bundle bundle) {
+		return containers.get(bundle);
+	}
+
+	protected void stopContainer(Bundle bundle) {
+		HttpServiceEnabled wc = containers.remove(bundle);
+		((StoppableHttpService) wc).stop();
+		whiteboard.bundleStopped(bundle);
 	}
 
 	/**

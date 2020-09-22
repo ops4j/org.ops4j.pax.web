@@ -151,23 +151,27 @@ public interface ServerConfiguration {
 	 */
 	Integer getEventDispatcherThreadCount();
 
-
-
-
-
-
-
-
-
-
-
-	Boolean useNIO();
-
+	/**
+	 * Flag that specifies whether stack traces should be visible in error pages.
+	 * @return
+	 */
 	Boolean isShowStacks();
+
+
+
+
+
+
+
+
+
+
 
 	List<String> getVirtualHosts();
 
-	String getWorkerName();
+
+
+
 
 	Boolean isEncEnabled();
 

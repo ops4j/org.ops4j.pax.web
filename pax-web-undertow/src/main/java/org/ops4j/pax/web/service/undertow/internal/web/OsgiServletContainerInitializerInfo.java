@@ -31,12 +31,20 @@ import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
  */
 public class OsgiServletContainerInitializerInfo extends ServletContainerInitializerInfo {
 
+	private final ContainerInitializerModel model;
+
 	public OsgiServletContainerInitializerInfo(ContainerInitializerModel model, OsgiDynamicServletContext context) {
 		super(model.getContainerInitializer().getClass(), new SCIInstanceFactory(context, model), model.getClasses());
+		this.model = model;
 	}
 
 	public OsgiServletContainerInitializerInfo(RegisteringContainerInitializer initializer) {
 		super(initializer.getClass(), new ImmediateInstanceFactory<>(initializer), null);
+		this.model = null;
+	}
+
+	public ContainerInitializerModel getModel() {
+		return model;
 	}
 
 	private static final class SCIInstanceFactory implements InstanceFactory<ServletContainerInitializer> {
@@ -70,7 +78,6 @@ public class OsgiServletContainerInitializerInfo extends ServletContainerInitial
 				}
 			};
 		}
-
 	}
 
 }

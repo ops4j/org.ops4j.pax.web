@@ -16,11 +16,15 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import javax.servlet.SessionCookieConfig;
 
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.spi.config.Configuration;
@@ -31,6 +35,7 @@ import org.ops4j.pax.web.service.spi.config.ResourceConfiguration;
 import org.ops4j.pax.web.service.spi.config.SecurityConfiguration;
 import org.ops4j.pax.web.service.spi.config.ServerConfiguration;
 import org.ops4j.pax.web.service.spi.config.SessionConfiguration;
+import org.ops4j.pax.web.service.spi.servlet.DefaultSessionCookieConfig;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.util.property.PropertyResolver;
 import org.ops4j.util.property.PropertyStore;
@@ -772,25 +777,9 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 			return showStacks;
 		}
 
-
-
-
-
-
-
-		@Override
-		public Boolean useNIO() {
-			return null;
-		}
-
 		@Override
 		public List<String> getVirtualHosts() {
 			return Collections.emptyList();
-		}
-
-		@Override
-		public String getWorkerName() {
-			return null;
 		}
 
 		@Override
@@ -820,6 +809,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	}
 
 	private class SecurityConfigurationImpl implements SecurityConfiguration {
+
 		private String[] includedProtocols = new String[0];
 		private String[] excludedProtocols = new String[0];
 		private String[] includedCipherSuites = new String[0];
@@ -1051,58 +1041,136 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 
 	private class SessionConfigurationImpl implements SessionConfiguration {
 
-		private SessionConfigurationImpl() {
-			// eager resolution of some important properties
+		private final int sessionTimeout;
+		private final String sessionCookieName;
+		private final String sessionCookiePathName;
+		private final DefaultSessionCookieConfig defaultSessionCookieConfig;
+
+		SessionConfigurationImpl() {
+			Integer sessionTimeout = resolveIntegerProperty(PaxWebConfig.PID_CFG_SESSION_TIMEOUT);
+			if (sessionTimeout == null) {
+				sessionTimeout = 30;
+			}
+			this.sessionTimeout = sessionTimeout;
+			String sessionCookieName = resolveStringProperty(PaxWebConfig.PID_CFG_SESSION_COOKIE_NAME);
+			if (sessionCookieName == null) {
+				sessionCookieName = "JSESSIONID";
+			}
+			this.sessionCookieName = sessionCookieName;
+			String sessionCookiePathName = resolveStringProperty(PaxWebConfig.PID_CFG_SESSION_URL);
+			if (sessionCookiePathName == null) {
+				sessionCookiePathName = "jsessionid";
+			}
+			this.sessionCookiePathName = sessionCookiePathName;
+
+			this.defaultSessionCookieConfig = new DefaultSessionCookieConfig();
+			defaultSessionCookieConfig.setName(sessionCookieName);
+			if (getSessionCookieDomain() != null) {
+				defaultSessionCookieConfig.setDomain(getSessionCookieDomain());
+			}
+			if (getSessionCookiePath() != null) {
+				defaultSessionCookieConfig.setPath(getSessionCookiePath());
+			}
+			if (getSessionCookieComment() != null) {
+				defaultSessionCookieConfig.setComment(getSessionCookieComment());
+			}
+			// http only by default
+			defaultSessionCookieConfig.setHttpOnly(getSessionCookieHttpOnly() == null || getSessionCookieHttpOnly());
+			// not secure by default
+			defaultSessionCookieConfig.setSecure(getSessionCookieSecure() != null && getSessionCookieSecure());
+			if (getSessionCookieMaxAge() != null) {
+				defaultSessionCookieConfig.setMaxAge(getSessionCookieMaxAge());
+			}
 		}
 
 		@Override
 		public Integer getSessionTimeout() {
-			return null;
+			return sessionTimeout;
 		}
 
 		@Override
-		public String getSessionCookie() {
-			return null;
+		public String getSessionCookieName() {
+			return sessionCookieName;
 		}
 
 		@Override
-		public String getSessionDomain() {
-			return null;
+		public String getSessionCookieDomain() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SESSION_COOKIE_DOMAIN);
 		}
 
 		@Override
-		public String getSessionPath() {
-			return null;
+		public String getSessionCookiePath() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SESSION_COOKIE_PATH);
 		}
 
 		@Override
-		public String getSessionUrl() {
-			return null;
+		public String getSessionCookieComment() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SESSION_COOKIE_COMMENT);
 		}
 
 		@Override
 		public Boolean getSessionCookieHttpOnly() {
-			return null;
+			return resolveBooleanProperty(PaxWebConfig.PID_CFG_SESSION_COOKIE_HTTP_ONLY);
 		}
 
 		@Override
 		public Boolean getSessionCookieSecure() {
-			return null;
+			return resolveBooleanProperty(PaxWebConfig.PID_CFG_SESSION_COOKIE_SECURE);
 		}
 
 		@Override
 		public Integer getSessionCookieMaxAge() {
-			return null;
+			return resolveIntegerProperty(PaxWebConfig.PID_CFG_SESSION_COOKIE_MAX_AGE);
 		}
 
 		@Override
-		public String getSessionStoreDirectory() {
-			return null;
+		public String getSessionUrlPathParameter() {
+			return sessionCookiePathName;
 		}
 
 		@Override
-		public Boolean getSessionLazyLoad() {
-			return null;
+		public String getSessionWorkerName() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SESSION_WORKER_NAME);
+		}
+
+		@Override
+		public String getSessionStoreDirectoryLocation() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SESSION_STORE_DIRECTORY);
+		}
+
+		@Override
+		public File getSessionStoreDirectory() {
+			String location = getSessionStoreDirectoryLocation();
+			if (location == null || "".equals(location.trim())) {
+				return null;
+			}
+
+			File result = null;
+			if (location.startsWith("file:")) {
+				try {
+					URL locationUrl = new URL(location);
+					result = new File(locationUrl.toURI());
+				} catch (MalformedURLException | URISyntaxException e) {
+					LOG.warn("Invalid URL for session persistence: {}", location, e);
+				}
+			} else {
+				result = new File(location);
+			}
+
+			if (result != null) {
+				if (!result.isDirectory()) {
+					LOG.warn("Directory {} is not accessible, skipping configuration of file session persistence",
+							location);
+					return null;
+				}
+			}
+
+			return result;
+		}
+
+		@Override
+		public SessionCookieConfig getDefaultSessionCookieConfig() {
+			return defaultSessionCookieConfig;
 		}
 	}
 
@@ -1114,7 +1182,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 			// eager resolution of some important properties
 			resolveBooleanProperty(PaxWebConfig.PID_CFG_LOG_NCSA_ENABLED);
 			Boolean buffered = resolveBooleanProperty(PaxWebConfig.PID_CFG_LOG_NCSA_BUFFERED);
-			ncsaBuffered = buffered == null ? true : buffered;
+			ncsaBuffered = buffered == null || buffered;
 		}
 
 		@Override

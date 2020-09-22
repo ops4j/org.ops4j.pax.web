@@ -16,9 +16,6 @@
  */
 package org.ops4j.pax.web.service.undertow.internal;
 
-import java.io.IOException;
-
-import io.undertow.server.handlers.resource.Resource;
 import io.undertow.server.handlers.resource.ResourceManager;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 
@@ -137,19 +134,5 @@ public class ResourceServletTest {
 //		checkResourceNameSpaceMapping("fudd", "/fudd/bugs/x.gif", "tmp/y.gif",
 //				"/fudd/bugs/x.gif", "tmp/y.gif");
 //	}
-
-	private class MockContext extends Context {
-		private ResourceManager manager = null;
-
-		MockContext(ResourceManager resourceManager, ContextAwarePathHandler path, OsgiContextModel contextModel) {
-			super(null, path, contextModel);
-			this.manager = resourceManager;
-		}
-
-		@Override
-		public Resource getResource(String path) throws IOException {
-			return manager.getResource(path);
-		}
-	}
 
 }

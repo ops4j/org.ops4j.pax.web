@@ -21,13 +21,9 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import javax.servlet.Servlet;
 
-import io.undertow.Handlers;
 import io.undertow.security.idm.IdentityManager;
-import io.undertow.servlet.api.SessionPersistenceManager;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerState;
 import org.ops4j.pax.web.service.spi.config.Configuration;
@@ -36,7 +32,6 @@ import org.ops4j.pax.web.service.spi.model.events.ServerListener;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.undertow.internal.web.UndertowResourceServlet;
 import org.osgi.framework.Bundle;
-import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,12 +60,6 @@ public class UndertowServerController implements ServerController/*, IdentityMan
 	private UndertowServerWrapper undertowServerWrapper;
 
 				private IdentityManager identityManager;
-				private SessionPersistenceManager sessionPersistenceManager;
-				private int defaultSessionTimeoutInMinutes;
-			
-				// Standard URI -> HttpHandler map - may be wrapped by access log, filters, etc. later
-				private final ContextAwarePathHandler path = new ContextAwarePathHandler(Handlers.path());
-				private final ConcurrentMap<HttpContext, Context> contextMap = new ConcurrentHashMap<>();
 
 	public UndertowServerController(Bundle paxWebUndertowBundle, ClassLoader classLoader,
 			UndertowFactory undertowFactory, Configuration configuration) {

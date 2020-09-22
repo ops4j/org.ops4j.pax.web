@@ -155,7 +155,7 @@ Currently Pax Web has these servlets:
 
 * `org.ops4j.pax.web.service.jetty.internal.ResourceServlet`
 * `org.ops4j.pax.web.service.tomcat.internal.TomcatResourceServlet`
-* `org.ops4j.pax.web.service.undertow.internal.ResourceServlet`
+* `org.ops4j.pax.web.service.undertow.internal.ResourceServlet` (removed/refactored in Pax Web 8)
 
 Servlet containers themselves also have "default"/"resource" servlets to serve static resources and are usually by default mapped to "/" URI:
 

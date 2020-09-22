@@ -23,9 +23,7 @@ import javax.servlet.ServletContext;
  * <p>Dedicated interface with constants related to configuration. Other constants reside
  * in {@link PaxWebConstants}.</p>
  * <p>Constants names use the following prefixes:<ul>
- *     <li>{@code WEB_CFG_} - for system or context property names</li>
  *     <li>{@code PID_CFG_} - for property names found in {@code org.ops4j.pax.web} PID</li>
- *     <li>!! {@code PROPERTY_JSP_} - for property names found in {@code org.ops4j.pax.web} PID</li>
  * </ul></p>
  *
  * <p>When adding new properties, remember to add them in more places:<ul>
@@ -352,9 +350,34 @@ public interface PaxWebConfig {
 	 */
 	String PID_CFG_DEFAULT_SERVLET_CACHE_TTL = "org.ops4j.pax.web.resource.cache.ttl";
 
-	/**
-	 * Boolean property to configure the container to show or hide stack traces in <em>error handler</em>.
-	 */
+	/** Boolean property to configure the container to show or hide stack traces in <em>error handler</em>. */
 	String PID_CFG_SHOW_STACKS = "org.ops4j.pax.web.server.showStacks";
+
+	// --- session configuration properties - for all the contexts
+
+	/** Integer property that specifies timeout of sessions in minutes (defaults to 30) */
+	String PID_CFG_SESSION_TIMEOUT = "org.ops4j.pax.web.session.timeout";
+	/** String property that specifies session cookie name (defaults to {@code JSESSIONID}) */
+	String PID_CFG_SESSION_COOKIE_NAME = "org.ops4j.pax.web.session.cookie.name";
+	/** String property that specifies session cookie domain */
+	String PID_CFG_SESSION_COOKIE_DOMAIN = "org.ops4j.pax.web.session.cookie.domain";
+	/** String property that specifies session cookie path (defaults to context path) */
+	String PID_CFG_SESSION_COOKIE_PATH = "org.ops4j.pax.web.session.cookie.path";
+	/** String property that specifies session cookie comment */
+	String PID_CFG_SESSION_COOKIE_COMMENT = "org.ops4j.pax.web.session.cookie.comment";
+	/** Boolean property that specifies <em>http only</em> flag for session cookie. Defaults to {@code true} */
+	String PID_CFG_SESSION_COOKIE_HTTP_ONLY = "org.ops4j.pax.web.session.cookie.httpOnly";
+	/** Boolean property that specifies <em>secure</em> flag for session cookie. Defaults to {@code false} */
+	String PID_CFG_SESSION_COOKIE_SECURE = "org.ops4j.pax.web.session.cookie.secure";
+	/** Integer property that specifies max age of session cookie */
+	String PID_CFG_SESSION_COOKIE_MAX_AGE = "org.ops4j.pax.web.session.cookie.maxAge";
+
+	/** For Jetty, we can specify the URL path parameter for session URL rewriting. Defauts to {@code jsessionid}. */
+	String PID_CFG_SESSION_URL = "org.ops4j.pax.web.session.url";
+	/** Allows configuration of Jetty's SessionHandler.SessionIdManager.workerName */
+	String PID_CFG_SESSION_WORKER_NAME = "org.ops4j.pax.web.session.worker.name";
+
+	/** When specified and is a valid directory location, <em>file session persistence</em> will be enabled */
+	String PID_CFG_SESSION_STORE_DIRECTORY = "org.ops4j.pax.web.session.storedirectory";
 
 }

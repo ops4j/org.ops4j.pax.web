@@ -43,6 +43,7 @@ import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletException;
+import javax.servlet.SessionCookieConfig;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.UnmarshallerHandler;
@@ -68,6 +69,9 @@ import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.ListenerInfo;
 import io.undertow.servlet.api.ServletContainer;
 import io.undertow.servlet.api.ServletInfo;
+import io.undertow.servlet.api.ServletSessionConfig;
+import io.undertow.servlet.api.ServletStackTraces;
+import io.undertow.servlet.api.SessionPersistenceManager;
 import io.undertow.servlet.core.ContextClassLoaderSetupAction;
 import io.undertow.servlet.core.DeploymentImpl;
 import io.undertow.servlet.core.ManagedFilter;
@@ -76,8 +80,10 @@ import io.undertow.servlet.core.ManagedListener;
 import io.undertow.servlet.core.ManagedServlet;
 import io.undertow.servlet.handlers.ServletHandler;
 import io.undertow.servlet.util.ImmediateInstanceFactory;
+import io.undertow.servlet.util.InMemorySessionPersistence;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
+import org.ops4j.pax.web.service.spi.config.SessionConfiguration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
@@ -85,6 +91,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.SessionConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 import org.ops4j.pax.web.service.spi.servlet.DynamicRegistrations;
@@ -268,6 +275,9 @@ class UndertowServerWrapper implements BatchVisitor {
 	/** Servlet to use when no servlet is mapped - to ensure that preprocessors and filters are run correctly. */
 	private final Default404Servlet default404Servlet = new Default404Servlet();
 
+	private SessionCookieConfig defaultSessionCookieConfig;
+	private SessionPersistenceManager globalSessionPersistenceManager;
+
 	// configuration read from undertow.xml
 	private UndertowConfiguration undertowConfiguration;
 
@@ -317,18 +327,27 @@ class UndertowServerWrapper implements BatchVisitor {
 		// PID config: org.osgi.service.http.enabled and org.osgi.service.http.secure.enabled
 		verifyListenerConfiguration();
 
-//					for (Context context : contextMap.values()) {
-//						try {
-//							context.setSessionPersistenceManager(sessionPersistenceManager);
-//							context.setDefaultSessionTimeoutInMinutes(defaultSessionTimeoutInMinutes);
-//							context.start();
-//						} catch (Exception e) {
-//							LOG.error("Could not start the servlet context for context path [" + context.getContextModel().getContextName() + "]", e);
-//						}
-//					}
-//
-//					builder.setHandler(rootHandler);
-//					server = builder.build();
+		// default session configuration is prepared, but not set in the server instance. It can be set
+		// only after first context is created
+		this.defaultSessionCookieConfig = configuration.session().getDefaultSessionCookieConfig();
+
+		File dir = configuration.session().getSessionStoreDirectory();
+		if (dir != null) {
+			// configure or override session persistence manager that could've been configured in undertow.xml
+			if (globalSessionPersistenceManager != null) {
+				LOG.warn("Overriding session persistence manager {} configured in external XML file with new"
+								+ "manager configured using PID and location {}",
+						globalSessionPersistenceManager, configuration.session().getSessionStoreDirectory());
+			}
+
+			LOG.info("Using file session persistence. Location: " + dir.getCanonicalPath());
+			globalSessionPersistenceManager = new FileSessionPersistence(dir);
+		} else {
+			if (globalSessionPersistenceManager == null) {
+				LOG.info("Using in-memory session persistence");
+				globalSessionPersistenceManager = new InMemorySessionPersistence();
+			}
+		}
 	}
 
 	/**
@@ -851,18 +870,25 @@ class UndertowServerWrapper implements BatchVisitor {
 			LOG.info("Creating new Undertow context for {}", model);
 
 			// meta info about "servlet context deployment"
-			DeploymentInfo deployment = Servlets.deployment();
+			DeploymentInfo deploymentInfo = Servlets.deployment();
 
-			deployment.setDeploymentName(model.getId());
-			deployment.setDisplayName(model.getId());
-			deployment.setContextPath(contextPath);
-			deployment.setUrlEncoding(StandardCharsets.UTF_8.name());
-			deployment.setEagerFilterInit(true);
+			String deploymentName = "/".equals(model.getContextPath())
+					? "ROOT" : model.getContextPath().substring(1).replaceAll("/", "_");
+			deploymentInfo.setDeploymentName(deploymentName);
+			deploymentInfo.setDisplayName(model.getId());
+			deploymentInfo.setContextPath(contextPath);
+			deploymentInfo.setUrlEncoding(StandardCharsets.UTF_8.name());
+			deploymentInfo.setEagerFilterInit(true);
+			if (configuration.server().isShowStacks()) {
+				deploymentInfo.setServletStackTraces(ServletStackTraces.ALL);
+			} else {
+				deploymentInfo.setServletStackTraces(ServletStackTraces.NONE);
+			}
 
 			// that's only temporary class loader. It'll be changed when OsgiServletContext is created
-			deployment.setClassLoader(classLoader);
+			deploymentInfo.setClassLoader(classLoader);
 
-			deployment.addServlet(new PaxWebServletInfo("default", default404Servlet, true).addMapping("/"));
+			deploymentInfo.addServlet(new PaxWebServletInfo("default", default404Servlet, true).addMapping("/"));
 
 			// In Jetty and Tomcat we can operate on FilterChains, here we have to split the OsgiFilterChain's
 			// functionality into different HandlerWrappers:
@@ -872,7 +898,7 @@ class UndertowServerWrapper implements BatchVisitor {
 
 			PaxWebOuterHandlerWrapper outerWrapper = new PaxWebOuterHandlerWrapper();
 			this.wrappingHandlers.put(contextPath, outerWrapper);
-			deployment.addOuterHandlerChainWrapper(outerWrapper);
+			deploymentInfo.addOuterHandlerChainWrapper(outerWrapper);
 
 			// TODO: ensure preprocessors work
 //			PaxWebPreprocessorsHandler preprocessorWrapper = new PaxWebPreprocessorsHandler();
@@ -881,21 +907,31 @@ class UndertowServerWrapper implements BatchVisitor {
 
 			PaxWebSecurityHandler securityWrapper = new PaxWebSecurityHandler();
 			this.securityHandlers.put(contextPath, securityWrapper);
-			deployment.addSecurityWrapper(securityWrapper);
+			deploymentInfo.addSecurityWrapper(securityWrapper);
 
 //							deployment.setConfidentialPortManager(getConfidentialPortManager());
-//							// d.setServletStackTraces(servletContainer.getStackTraces());
-//							BundleContext bundleContext = contextModel.getBundle().getBundleContext();
-//							if (bundleContext != null) {
-//								deployment.addServletContextAttribute(PaxWebConstants.BUNDLE_CONTEXT_ATTRIBUTE, bundleContext);
-//								deployment.addServletContextAttribute("org.springframework.osgi.web.org.osgi.framework.BundleContext", bundleContext);
-//							}
 //							deployment.setResourceManager(this);
 //							deployment.setIdentityManager(identityManager);
 
+			// session configuration - based on defaultSessionConfiguration, but may be later overriden in OsgiContext
+			SessionConfiguration sc = configuration.session();
+			deploymentInfo.setDefaultSessionTimeout(sc.getSessionTimeout() * 60);
+			ServletSessionConfig ssc = new ServletSessionConfig();
+			ssc.setName(defaultSessionCookieConfig.getName());
+			ssc.setDomain(defaultSessionCookieConfig.getDomain());
+			// will default to context path if null
+			ssc.setPath(defaultSessionCookieConfig.getPath());
+			ssc.setMaxAge(defaultSessionCookieConfig.getMaxAge());
+			ssc.setHttpOnly(defaultSessionCookieConfig.isHttpOnly());
+			ssc.setSecure(defaultSessionCookieConfig.isSecure());
+			ssc.setComment(defaultSessionCookieConfig.getComment());
+			deploymentInfo.setServletSessionConfig(ssc);
+
+			deploymentInfo.setSessionPersistenceManager(globalSessionPersistenceManager);
+
 			// do NOT add&deploy&start the context here - only after registering first "active" web element
 			// only prepare the original (cloned later) DeploymentInfo
-			deploymentInfos.put(contextPath, deployment);
+			deploymentInfos.put(contextPath, deploymentInfo);
 
 			// prepare mapping of sorted OsgiContextModel collections per context path
 			osgiContextModels.put(contextPath, new TreeSet<>());
@@ -926,7 +962,9 @@ class UndertowServerWrapper implements BatchVisitor {
 			if (osgiServletContexts.containsKey(osgiModel)) {
 				throw new IllegalStateException(osgiModel + " is already registered");
 			}
-			osgiServletContexts.put(osgiModel, new OsgiServletContext(getRealServletContext(contextPath), osgiModel, servletContextModel));
+			OsgiServletContext osgiContext = new OsgiServletContext(getRealServletContext(contextPath), osgiModel, servletContextModel,
+					defaultSessionCookieConfig);
+			osgiServletContexts.put(osgiModel, osgiContext);
 			osgiContextModels.get(contextPath).add(osgiModel);
 		}
 
@@ -1042,6 +1080,7 @@ class UndertowServerWrapper implements BatchVisitor {
 					for (String ex : epm.getExceptionClassNames()) {
 						try {
 							ClassLoader cl = model.getRegisteringBundle().adapt(BundleWiring.class).getClassLoader();
+							@SuppressWarnings("unchecked")
 							Class<Throwable> t = (Class<Throwable>) cl.loadClass(ex);
 							currentState.getExceptionMappings().put(t, location);
 							deploymentInfo.addErrorPage(new ErrorPage(location, t));
@@ -1132,6 +1171,7 @@ class UndertowServerWrapper implements BatchVisitor {
 						for (String ex : epm.getExceptionClassNames()) {
 							try {
 								ClassLoader cl = model.getRegisteringBundle().adapt(BundleWiring.class).getClassLoader();
+								@SuppressWarnings("unchecked")
 								Class<Throwable> t = (Class<Throwable>) cl.loadClass(ex);
 								currentState.getExceptionMappings().remove(t, location);
 							} catch (ClassNotFoundException e) {
@@ -1526,6 +1566,7 @@ class UndertowServerWrapper implements BatchVisitor {
 				for (String ex : model.getExceptionClassNames()) {
 					try {
 						ClassLoader cl = model.getRegisteringBundle().adapt(BundleWiring.class).getClassLoader();
+						@SuppressWarnings("unchecked")
 						Class<Throwable> t = (Class<Throwable>) cl.loadClass(ex);
 						exceptionMappings.put(t, location);
 						deploymentInfo.addErrorPage(new ErrorPage(location, t));
@@ -1616,7 +1657,10 @@ class UndertowServerWrapper implements BatchVisitor {
 			return;
 		}
 		try {
-			LOG.info("Starting Undertow context \"" + (contextPath.equals("") ? "/" : contextPath) + "\"");
+			OsgiContextModel highestRanked = securityHandlers.get(contextPath).getDefaultOsgiContextModel();
+
+			LOG.info("Starting Undertow context \"{}\" with default Osgi Context {}",
+					(contextPath.equals("") ? "/" : contextPath), highestRanked);
 
 			// take previously created deployment (possibly with listeners and other "passive" configuration)
 			DeploymentInfo deployment = deploymentInfos.get(contextPath);
@@ -1626,7 +1670,10 @@ class UndertowServerWrapper implements BatchVisitor {
 			deployment.getServletContainerInitializers().clear();
 
 			// add all configured initializers, but as special wrappers
-			Collection<OsgiServletContainerInitializerInfo> initializers = this.initializers.get(contextPath).values();
+			Collection<OsgiServletContainerInitializerInfo> initializers = new LinkedList<>(this.initializers.get(contextPath).values());
+			// take only these SCIs, which are associated with highest ranked OCM
+			initializers.removeIf(info -> !info.getModel().getContextModels().contains(highestRanked));
+
 			for (OsgiServletContainerInitializerInfo info : initializers) {
 				// with no Whiteboard support, we can have only one OsgiContextModel per ContainerInitializerModel
 				// but we'll still act as if there could be many
@@ -1637,6 +1684,36 @@ class UndertowServerWrapper implements BatchVisitor {
 				RegisteringContainerInitializer registeringSCI = new RegisteringContainerInitializer(this.dynamicRegistrations.get(contextPath));
 				deployment.addServletContainerInitializers(new OsgiServletContainerInitializerInfo(registeringSCI));
 			}
+
+			// alter session configuration
+			SessionConfigurationModel sc = highestRanked.getSessionConfiguration();
+			if (sc != null) {
+				if (sc.getSessionTimeout() != null) {
+					deployment.setDefaultSessionTimeout(sc.getSessionTimeout() * 60);
+				}
+				SessionCookieConfig scc = sc.getSessionCookieConfig();
+				ServletSessionConfig ssc = deployment.getServletSessionConfig();
+				if (scc != null) {
+					if (ssc == null) {
+						ssc = new ServletSessionConfig();
+						deployment.setServletSessionConfig(ssc);
+					}
+					if (scc.getName() != null) {
+						ssc.setName(scc.getName());
+					}
+					if (scc.getDomain() != null) {
+						ssc.setDomain(scc.getDomain());
+					}
+					if (scc.getPath() != null) {
+						ssc.setPath(scc.getPath());
+					}
+					ssc.setMaxAge(scc.getMaxAge());
+					ssc.setHttpOnly(scc.isHttpOnly());
+					ssc.setSecure(scc.isSecure());
+					ssc.setComment(scc.getComment());
+				}
+			}
+
 			manager = servletContainer.addDeployment(deployment);
 
 			// here's where Undertow-specific instance of javax.servlet.ServletContext is created
@@ -1774,27 +1851,6 @@ class UndertowServerWrapper implements BatchVisitor {
 //			throw new RuntimeException("Exception while starting Undertow", e);
 //		}
 //	}
-
-//	@Override
-//	public synchronized LifeCycle getContext(OsgiContextModel model) {
-//		return findOrCreateContext(model);
-//	}
-//
-//	@Override
-//	public synchronized void removeContext(HttpContext httpContext) {
-//		final Context context = contextMap.remove(httpContext);
-//		if (context == null) {
-//			throw new IllegalStateException("Cannot remove the context because it does not exist: "
-//											+ httpContext);
-//		}
-//		context.destroy();
-//	}
-
-//	private Context findContext(final OsgiContextModel contextModel) {
-//		NullArgumentException.validateNotNull(contextModel, "contextModel");
-//		HttpContext httpContext = contextModel.getHttpContext();
-//		return contextMap.get(httpContext);
-//	}
 //
 //	private Context findOrCreateContext(final OsgiContextModel contextModel) {
 //		NullArgumentException.validateNotNull(contextModel, "contextModel");
@@ -1816,78 +1872,6 @@ class UndertowServerWrapper implements BatchVisitor {
 //			}
 //			return newCtx;
 //		}
-//	}
-
-//	@Override
-//	public void addEventListener(EventListenerModel model) {
-//		assertNotState(State.Unconfigured);
-//		try {
-//			final Context context = findOrCreateContext(model.getContextModel());
-//			context.addEventListener(model);
-//		} catch (ServletException e) {
-//			throw new RuntimeException("Unable to add event listener", e);
-//		}
-//	}
-//
-//	@Override
-//	public void removeEventListener(EventListenerModel model) {
-//		assertNotState(State.Unconfigured);
-//		try {
-//			final Context context = findOrCreateContext(model.getContextModel());
-//			context.removeEventListener(model);
-//		} catch (ServletException e) {
-//			throw new RuntimeException("Unable to add event listener", e);
-//		}
-//	}
-//
-//	@Override
-//	public void addErrorPage(ErrorPageModel model) {
-//		assertNotState(State.Unconfigured);
-//		try {
-//			final Context context = findOrCreateContext(model.getContextModel());
-//			context.addErrorPage(model);
-//		} catch (ServletException e) {
-//			throw new RuntimeException("Unable to add error page", e);
-//		}
-//	}
-//
-//	@Override
-//	public void removeErrorPage(ErrorPageModel model) {
-//		assertNotState(State.Unconfigured);
-//		try {
-//			final Context context = findOrCreateContext(model.getContextModel());
-//			context.removeErrorPage(model);
-//		} catch (ServletException e) {
-//			throw new RuntimeException("Unable to remove error page", e);
-//		}
-//	}
-//
-//	@Override
-//	public void addWelcomFiles(WelcomeFileModel model) {
-//		assertNotState(State.Unconfigured);
-//		try {
-//			final Context context = findOrCreateContext(model.getContextModel());
-//			context.addWelcomeFile(model);
-//		} catch (ServletException e) {
-//			throw new RuntimeException("Unable to add welcome files", e);
-//		}
-//	}
-//
-//	@Override
-//	public void removeWelcomeFiles(WelcomeFileModel model) {
-//		assertNotState(State.Unconfigured);
-//		try {
-//			final Context context = findOrCreateContext(model.getContextModel());
-//			context.removeWelcomeFile(model);
-//		} catch (ServletException e) {
-//			throw new RuntimeException("Unable to add welcome files", e);
-//		}
-//	}
-//
-//	@Override
-//	public Servlet createResourceServlet(OsgiContextModel contextModel, String alias, String name) {
-//		final Context context = findOrCreateContext(contextModel);
-//		return new ResourceServlet(context, alias, name);
 //	}
 //
 //	@Override
@@ -1921,30 +1905,6 @@ class UndertowServerWrapper implements BatchVisitor {
 //		} catch (ServletException e) {
 //			throw new RuntimeException("Unable to add welcome files", e);
 //		}
-//	}
-//
-//	@Override
-//	public Account verify(Account account) {
-//		if (identityManager != null) {
-//			return identityManager.verify(account);
-//		}
-//		throw new IllegalStateException("No identity manager configured");
-//	}
-//
-//	@Override
-//	public Account verify(String id, Credential credential) {
-//		if (identityManager != null) {
-//			return identityManager.verify(id, credential);
-//		}
-//		throw new IllegalStateException("No identity manager configured");
-//	}
-//
-//	@Override
-//	public Account verify(Credential credential) {
-//		if (identityManager != null) {
-//			return identityManager.verify(credential);
-//		}
-//		throw new IllegalStateException("No identity manager configured");
 //	}
 
 	// see org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService#getConfidentialPortManager

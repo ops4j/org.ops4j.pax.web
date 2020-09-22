@@ -35,6 +35,7 @@ import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
+import javax.servlet.SessionCookieConfig;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 import javax.servlet.descriptor.TaglibDescriptor;
 
@@ -63,6 +64,7 @@ import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.model.events.ElementEvent;
 import org.ops4j.pax.web.service.spi.model.events.WebElementListener;
 import org.ops4j.pax.web.service.spi.servlet.DefaultJspPropertyGroupDescriptor;
+import org.ops4j.pax.web.service.spi.servlet.DefaultSessionCookieConfig;
 import org.ops4j.pax.web.service.spi.servlet.DefaultTaglibDescriptor;
 import org.ops4j.pax.web.service.spi.servlet.DynamicJEEWebContainerView;
 import org.ops4j.pax.web.service.spi.task.Batch;
@@ -1408,6 +1410,67 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 	}
 
+	// methods used to configure session
+
+	@Override
+	public void setSessionTimeout(Integer minutes, HttpContext httpContext) {
+		serverModel.runSilently(() -> {
+			final Batch batch = new Batch("Session timeout configuration");
+
+			WebContainerContext ctx = unify(httpContext);
+
+			OsgiContextModel contextModel = serverModel.getOrCreateOsgiContextModel(ctx, serviceBundle,
+					PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
+
+			LOG.info("Setting session timeout for {}", contextModel);
+
+			// we're in configuration thread, so no harm can be done
+			contextModel.setSessionTimeout(minutes);
+
+			// if there's a need to actually create the context
+			serverController.sendBatch(batch);
+
+			// no need to visit() the batch at service/serverModel level
+			return null;
+		});
+	}
+
+	@Override
+	public void setSessionCookieConfig(String domain, String name, Boolean httpOnly, Boolean secure, String path,
+			Integer maxAge, HttpContext httpContext) {
+		DefaultSessionCookieConfig config = new DefaultSessionCookieConfig();
+		config.setDomain(domain);
+		config.setName(name);
+		config.setHttpOnly(httpOnly);
+		config.setSecure(secure);
+		config.setPath(path);
+		config.setMaxAge(maxAge);
+		setSessionCookieConfig(config, httpContext);
+	}
+
+	@Override
+	public void setSessionCookieConfig(SessionCookieConfig config, HttpContext httpContext) {
+		serverModel.runSilently(() -> {
+			final Batch batch = new Batch("Session Cookie configuration");
+
+			WebContainerContext ctx = unify(httpContext);
+
+			OsgiContextModel contextModel = serverModel.getOrCreateOsgiContextModel(ctx, serviceBundle,
+					PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
+
+			LOG.info("Setting session cookie configuration for {}", contextModel);
+
+			// we're in configuration thread, so no harm can be done
+			contextModel.setSessionCookieConfig(config);
+
+			// if there's a need to actually create the context
+			serverController.sendBatch(batch);
+
+			// no need to visit() the batch at service/serverModel level
+			return null;
+		});
+	}
+
 	// --- private support methods
 
 	private void event(ElementEvent.State type, ElementModel<?, ?> model) {
@@ -1452,7 +1515,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			});
 		}
 		// DON'T register OsgiContextModels carried with Whiteboard-registered WebElement. These should
-		// be registered explicitly, before servlet is registered
+		// be registered/configured explicitly by pax-web-extender-whiteboard, before servlet is registered
 	}
 
 	/**

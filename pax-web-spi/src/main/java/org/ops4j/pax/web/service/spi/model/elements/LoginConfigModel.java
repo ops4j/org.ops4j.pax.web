@@ -17,6 +17,7 @@ package org.ops4j.pax.web.service.spi.model.elements;
 
 import java.util.List;
 
+import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
@@ -26,6 +27,7 @@ import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
  *
  * <p>This model reflects {@code <login-config>} element from {@code web.xml}.</p>
  */
+@Review("Not refactored yet")
 public class LoginConfigModel extends ElementModel {
 
 	/** {@code <login-config>/<auth-method>} */

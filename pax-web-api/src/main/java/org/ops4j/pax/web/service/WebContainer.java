@@ -24,6 +24,7 @@ import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
+import javax.servlet.SessionCookieConfig;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 import javax.servlet.descriptor.TaglibDescriptor;
 
@@ -892,6 +893,36 @@ public interface WebContainer extends HttpService {
 	 */
 	void unregisterServletContainerInitializer(ServletContainerInitializer initializer, HttpContext httpContext);
 
+	// methods used to configure session
+
+	/**
+	 * Sets the session timeout of the servlet context corresponding to specified http context.
+	 *
+	 * @param minutes session timeout of the servlet context corresponding to specified http context
+	 * @param httpContext http context. Cannot be null.
+	 */
+	void setSessionTimeout(Integer minutes, HttpContext httpContext);
+
+	/**
+	 * Set session configuration. THe configuration matches the elements {@code <session-config>/<cookie-config>}
+	 * @param domain
+	 * @param name
+	 * @param httpOnly
+	 * @param secure
+	 * @param path
+	 * @param maxAge
+	 * @param httpContext
+	 */
+	void setSessionCookieConfig(String domain, String name, Boolean httpOnly, Boolean secure, String path,
+			Integer maxAge, HttpContext httpContext);
+
+	/**
+	 * Set session configuration. THe configuration matches the elements {@code <session-config>/<cookie-config>}
+	 * @param config
+	 * @param httpContext
+	 */
+	void setSessionCookieConfig(SessionCookieConfig config, HttpContext httpContext);
+
 
 
 
@@ -909,21 +940,6 @@ public interface WebContainer extends HttpService {
 //	 *                                  into a registration
 //	 */
 //	void setContextParam(Dictionary<String, ?> params, HttpContext httpContext);
-//
-//	/**
-//	 * Sets the session timeout of the servlet context corresponding to
-//	 * specified http context. This method must be used before any register
-//	 * method that uses the specified http context, otherwise an
-//	 * IllegalStateException will be thrown.
-//	 *
-//	 * @param minutes     session timeout of the servlet context corresponding to
-//	 *                    specified http context
-//	 * @param httpContext http context. Cannot be null.
-//	 * @throws IllegalArgumentException if http context is null
-//	 * @throws IllegalStateException    if the call is made after the http context was already used
-//	 *                                  into a registration
-//	 */
-//	void setSessionTimeout(Integer minutes, HttpContext httpContext);
 
 //
 //    /**
@@ -979,8 +995,5 @@ public interface WebContainer extends HttpService {
 //    // iterator);
 //
 //    // WebContainerDTO getWebcontainerDTO();
-//
-//    void setSessionCookieConfig(String domain, String name, Boolean httpOnly, Boolean secure, String path,
-//            Integer maxAge, HttpContext httpContext);
 
 }

@@ -116,6 +116,10 @@ public class PaxWebServletHandler extends ServletHandler {
 		}
 	}
 
+	public OsgiContextModel getDefaultOsgiContextModel() {
+		return defaultOsgiContextModel;
+	}
+
 	@Override
 	protected synchronized void doStart() throws Exception {
 		// our version of default, fallback servlet registration

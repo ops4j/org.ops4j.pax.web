@@ -27,9 +27,11 @@ import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.util.CopyOnWriteMap;
 import io.undertow.util.SubstringMap;
 import io.undertow.util.URLUtils;
+import org.ops4j.pax.web.annotations.Review;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Review("Is it needed?")
 public class PathMatcher<T> {
 
 	public static final Logger LOG = LoggerFactory.getLogger(PathMatcher.class);

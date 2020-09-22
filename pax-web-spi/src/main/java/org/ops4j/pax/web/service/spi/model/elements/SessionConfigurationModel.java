@@ -20,57 +20,51 @@ import java.util.List;
 import javax.servlet.SessionCookieConfig;
 import javax.servlet.SessionTrackingMode;
 
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
-import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
-import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 
 /**
- * <p>Set of parameters configuring HTTP Sessions, referenced from {@link OsgiContextModel}. Eventually
- * these parameters are used to configure server context session management, but nothing in practice prevents
- * the conflict, where different, bundle-scoped {@link org.ops4j.pax.web.service.WebContainer} services are used
- * to configure session parameters in the same target (wrt <em>context path</em>) server context.</p>
+ * <p>Set of parameters configuring HTTP Sessions, referenced from {@link OsgiContextModel}.</p>
  *
- * <p>This model reflects {@code <session-config>} element from {@code web.xml}.</p>
+ * <p>This model reflects {@code <session-config>} element from {@code web.xml}, while some server-specific
+ * information (like Jetty's {@code sessionIdPathParameterName}) can be specified globally through
+ * {@link org.ops4j.pax.web.service.spi.config.Configuration}.</p>
  */
-public class SessionConfigurationModel extends ElementModel {
+public class SessionConfigurationModel {
 
 	/** {@code <session-config>/<session-timeout>} */
-	private Integer sessionTimeout;
+	private Integer sessionTimeout = PaxWebConstants.DEFAULT_SESSION_TIMEOUT;
 
 	/** {@code <session-config>/<cookie-config>} */
-	private SessionCookieConfig sessionCookieConfig;
+	private SessionCookieConfig sessionCookieConfig = null;
 
 	/** {@code <session-config>/<tracking-mode>} */
 	private final List<SessionTrackingMode> trackingModes = new ArrayList<>(3);
 
-	/**
-	 * Name of URL parameter used for session URL rewriting.
-	 * See {@code org.eclipse.jetty.server.session.SessionHandler#_sessionIdPathParameterNamePrefix}
-	 */
-	private String sessionURLParameter;
-
-	/** PAXWEB-144: Name appended to session id, used to assist session affinity in a load balancer. */
-	private String sessionWorkerName;
-
-	SessionConfigurationModel(List<OsgiContextModel> contextModels) {
-//		super(contextModels);
-	}
-
-	@Override
-	public void register(WhiteboardWebContainerView view) {
-	}
-
-	@Override
-	public void unregister(WhiteboardWebContainerView view) {
-	}
-
-	@Override
-	public ElementEventData asEventData() {
-		return null;
-	}
+	// The configuration of sessions outside web.xml is server specific and covers:
+	// Jetty (org.eclipse.jetty.server.session.SessionHandler):
+	//  - CheckingRemoteSessionIdEncoding(boolean) - "if absolute URLs are check for remoteness before being session encoded"
+	//  - MaxInactiveInterval(int) - "max period of inactivity, after which the session is invalidated, in seconds"
+	//  - NodeIdInSessionId(boolean) - "if the cluster node id (worker id) will be returned as part of the session id by HttpSession#getId(). Default is false"
+	//  - RefreshCookieAge(int) - "time before a session cookie is re-set (in s)"
+	//  - SameSite(enum None/Strict/Lax) - "Session cookie sameSite mode. Currently this is encoded in the session comment until sameSite is supported by SessionCookieConfig"
+	//  - SecureRequestOnly(boolean) (different than SessionCookieConfig.setSecure()) - "if session cookie is to be marked as secure only on HTTPS requests"
+	//  - SessionIdPathParameterName(string), default "jsessionid" - "the URL path parameter name for session id URL rewriting (null or "none" for no rewriting)"
+	//  - UsingCookies(boolean), default true, set if javax.servlet.SessionTrackingMode.COOKIE is used
+	// Tomcat (org.apache.catalina.core.StandardContext):
+	//  - sessionCookiePathUsesTrailingSlash(boolean), default false - "Is a / added to the end of the session cookie path to ensure browsers, particularly IE, don't send a session cookie for context /foo with requests intended for context /foobar."
+	// Undertow:
+	//  - io.undertow.servlet.api.DeploymentInfo.servletSessionConfig
+	//  - io.undertow.servlet.api.DeploymentInfo.sessionManagerFactory
+	//  - io.undertow.servlet.api.DeploymentInfo.sessionPersistenceManager
+	//
+	// Additionaly we should be able to configure "file session persistence" - in all server runtimes:
+	//  - org.eclipse.jetty.server.session.FileSessionDataStoreFactory
+	//  - org.apache.catalina.session.StandardManager/org.apache.catalina.session.FileStore
+	//  - io.undertow.server.session.SessionManager/io.undertow.servlet.api.SessionPersistenceManager (no built-in file persistence manager in Undertow)
 
 	public Integer getSessionTimeout() {
-		return sessionTimeout;
+		return sessionTimeout == null ? PaxWebConstants.DEFAULT_SESSION_TIMEOUT : sessionTimeout;
 	}
 
 	public void setSessionTimeout(Integer sessionTimeout) {
@@ -87,26 +81,6 @@ public class SessionConfigurationModel extends ElementModel {
 
 	public List<SessionTrackingMode> getTrackingModes() {
 		return trackingModes;
-	}
-
-	public String getSessionURLParameter() {
-		return sessionURLParameter;
-	}
-
-	public void setSessionURLParameter(String sessionURLParameter) {
-		this.sessionURLParameter = sessionURLParameter;
-	}
-
-	public String getSessionWorkerName() {
-		return sessionWorkerName;
-	}
-
-	public void setSessionWorkerName(String sessionWorkerName) {
-		this.sessionWorkerName = sessionWorkerName;
-	}
-	@Override
-	public Boolean performValidation() {
-		return Boolean.TRUE;
 	}
 
 }

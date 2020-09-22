@@ -93,6 +93,8 @@ public class OsgiServletContext implements ServletContext {
 
 	private final List<ServletContextAttributeListener> attributeListeners = new CopyOnWriteArrayList<>();
 
+	private final SessionCookieConfig defaultSessionCookieConfig;
+
 	/**
 	 * Constructor called when {@link OsgiContextModel} is passed to given
 	 * {@link org.ops4j.pax.web.service.spi.ServerController}. We still can't grab an instance of
@@ -106,7 +108,7 @@ public class OsgiServletContext implements ServletContext {
 	 * @param servletContextModel
 	 */
 	public OsgiServletContext(ServletContext containerServletContext, OsgiContextModel osgiContextModel,
-			ServletContextModel servletContextModel) {
+			ServletContextModel servletContextModel, SessionCookieConfig defaultSessionCookieConfig) {
 		this.containerServletContext = containerServletContext;
 		this.osgiContextModel = osgiContextModel;
 		this.servletContextModel = servletContextModel;
@@ -124,7 +126,11 @@ public class OsgiServletContext implements ServletContext {
 			// this is not specified by Whiteboard specification, but by "Web Applications" specification, so we
 			// have a little freedom here
 			this.attributes.put(PaxWebConstants.CONTEXT_PARAM_BUNDLE_CONTEXT, ownerBundle.getBundleContext());
+			// Spring variant:
+			this.attributes.put(PaxWebConstants.CONTEXT_PARAM_SPRING_BUNDLE_CONTEXT, ownerBundle.getBundleContext());
 		}
+
+		this.defaultSessionCookieConfig = defaultSessionCookieConfig;
 	}
 
 	/**
@@ -500,7 +506,14 @@ public class OsgiServletContext implements ServletContext {
 
 	@Override
 	public SessionCookieConfig getSessionCookieConfig() {
-		return containerServletContext.getSessionCookieConfig();
+		// according to 140.2.6 "Behavior of the Servlet Context", this method should delegate to the container,
+		// but Pax Web does it better
+		SessionCookieConfig scc = osgiContextModel.getSessionConfiguration().getSessionCookieConfig();
+		if (scc == null) {
+			// return default
+			return defaultSessionCookieConfig;
+		}
+		return scc;
 	}
 
 	@Override
@@ -514,7 +527,9 @@ public class OsgiServletContext implements ServletContext {
 
 	@Override
 	public int getSessionTimeout() {
-		return containerServletContext.getSessionTimeout();
+		// according to 140.2.6 "Behavior of the Servlet Context", this method should delegate to the container,
+		// but Pax Web does it better
+		return osgiContextModel.getSessionConfiguration().getSessionTimeout();
 	}
 
 	@Override

@@ -22,6 +22,7 @@ import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 import javax.servlet.descriptor.TaglibDescriptor;
 
+import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 
 /**
@@ -32,6 +33,10 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
  *
  * <p>Differently than other <em>models</em> in this package, this class isn't an {@link ElementModel} - for now
  * it can't be registered via whiteboard and is used only internally by {@link OsgiContextModel}.</p>
+ *
+ * <p>The JSP configuration that can be found in {@code web.xml} is just tiny fraction of entire configuration that
+ * can be passed ton Jasper engine and servlet. The remaining JSP configuration can be specified globally via
+ * {@link Configuration#jsp()}.</p>
  */
 public class JspConfigurationModel implements JspConfigDescriptor {
 

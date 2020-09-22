@@ -546,7 +546,7 @@ class JettyFactory {
 	 *
 	 * @param server
 	 */
-	public MBeanContainer enableJmxIfPossible(PaxWebJettyServer server) {
+	public MBeanContainer enableJmxIfPossible(Server server) {
 		try {
 			ClassLoader cl = classLoader;
 			if (paxWebJettyBundle != null) {

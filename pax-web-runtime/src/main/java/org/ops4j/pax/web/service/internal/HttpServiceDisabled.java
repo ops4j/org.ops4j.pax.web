@@ -24,6 +24,7 @@ import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
+import javax.servlet.SessionCookieConfig;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 import javax.servlet.descriptor.TaglibDescriptor;
 
@@ -342,6 +343,24 @@ class HttpServiceDisabled implements WebContainer {
 
 	@Override
 	public void unregisterServletContainerInitializer(ServletContainerInitializer initializer, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	// methods used to configure session
+
+	@Override
+	public void setSessionTimeout(Integer minutes, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	@Override
+	public void setSessionCookieConfig(String domain, String name, Boolean httpOnly, Boolean secure, String path,
+			Integer maxAge, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
+
+	@Override
+	public void setSessionCookieConfig(SessionCookieConfig config, HttpContext httpContext) {
 		LOG.warn("Http service has already been stopped");
 	}
 

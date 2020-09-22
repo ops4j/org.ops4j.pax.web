@@ -60,6 +60,9 @@ public interface PaxWebConstants {
 	/** Default {@link ServletContext#getContextPath() context path} */
 	String DEFAULT_CONTEXT_PATH = "/";
 
+	/** Default session timeout */
+	Integer DEFAULT_SESSION_TIMEOUT = 30;
+
 	/**
 	 * Service registration property to mark services as <em>internal</em>, so they're not processed by Pax Web
 	 * Whiteboard extender as normal Whiteboard services.
@@ -179,6 +182,9 @@ public interface PaxWebConstants {
 	 */
 	String CONTEXT_PARAM_BUNDLE_CONTEXT = "osgi-bundlecontext";
 
+	/** For legacy Spring-DM support, {@link org.osgi.framework.BundleContext} should be available under this param */
+	String CONTEXT_PARAM_SPRING_BUNDLE_CONTEXT = "org.springframework.osgi.web.org.osgi.framework.BundleContext";
+
 	// --- 3 properties defined in 128.3.4 "Publishing the Servlet Context" (and one Pax Web specific)
 
 	/** Symbolic name of the WAB bundle or bundle registering OSGi servlet context */
@@ -208,18 +214,6 @@ public interface PaxWebConstants {
 	String CONTEXT_NAME = "webapp.context";
 
 	String PROPERTY_HTTP_USE_NIO = "org.osgi.service.http.useNIO";
-
-	String PROPERTY_SESSION_TIMEOUT = PID + ".session.timeout";
-	String PROPERTY_SESSION_COOKIE = PID + ".session.cookie";
-	String PROPERTY_SESSION_DOMAIN = PID + ".session.domain";
-	String PROPERTY_SESSION_PATH = PID + ".session.path";
-	String PROPERTY_SESSION_URL = PID + ".session.url";
-	String PROPERTY_WORKER_NAME = PID + ".worker.name";
-	String PROPERTY_SESSION_COOKIE_HTTP_ONLY = PID + ".session.cookie.httpOnly";
-	String PROPERTY_SESSION_COOKIE_SECURE = PID + ".session.cookie.secure";
-	String PROPERTY_SESSION_COOKIE_MAX_AGE = PID + ".session.cookie.maxAge";
-	String PROPERTY_SESSION_LAZY_LOAD = PID + ".session.lazyload";
-	String PROPERTY_SESSION_STORE_DIRECTORY = PID + ".session.storedirectory";
 
 	String PROPERTY_VIRTUAL_HOST_LIST = "org.ops4j.pax.web.default.virtualhosts";
 	String PROPERTY_CONNECTOR_LIST = "org.ops4j.pax.web.default.connectors";

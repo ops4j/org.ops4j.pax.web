@@ -34,6 +34,7 @@ import java.util.function.Supplier;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContextAttributeListener;
+import javax.servlet.SessionCookieConfig;
 
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.ConnectionFactory;
@@ -45,9 +46,13 @@ import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.RequestLogWriter;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SessionIdManager;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.ErrorHandler;
+import org.eclipse.jetty.server.session.DefaultSessionIdManager;
+import org.eclipse.jetty.server.session.FileSessionDataStoreFactory;
+import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
@@ -63,6 +68,7 @@ import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
+import org.ops4j.pax.web.service.spi.config.SessionConfiguration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
@@ -71,6 +77,7 @@ import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.SessionConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 import org.ops4j.pax.web.service.spi.servlet.DynamicRegistrations;
@@ -103,10 +110,6 @@ import org.slf4j.LoggerFactory;
  *     <li>translates model changes into registration of Jetty-specific contexts, holders and handlers</li>
  * </ul></p>
  *
- * <p>Having a wrapper around {@link PaxWebJettyServer} that extends {@link org.eclipse.jetty.server.Server}
- * allows us to add some logging and additional processing without a need to override all interesting
- * methods of {@link org.eclipse.jetty.server.Server} in {@link PaxWebJettyServer}.</p>
- *
  * <p>This wrapper implements {@link BatchVisitor} to process batch operations related to model changes.</p>
  */
 class JettyServerWrapper implements BatchVisitor {
@@ -119,7 +122,7 @@ class JettyServerWrapper implements BatchVisitor {
 	private final ClassLoader classLoader;
 
 	/** Actual instance of {@link org.eclipse.jetty.server.Server} */
-	private PaxWebJettyServer server;
+	private Server server;
 
 	/** Server's pool which is added as UNMANAGED */
 	private QueuedThreadPool qtp;
@@ -173,6 +176,8 @@ class JettyServerWrapper implements BatchVisitor {
 	/** Servlet to use when no servlet is mapped - to ensure that preprocessors and filters are run correctly. */
 	private final Default404Servlet default404Servlet = new Default404Servlet();
 
+	private SessionCookieConfig defaultSessionCookieConfig;
+
 	JettyServerWrapper(Configuration config, JettyFactory jettyFactory,
 			Bundle paxWebJettyBundle, ClassLoader classLoader) {
 		this.configuration = config;
@@ -216,6 +221,18 @@ class JettyServerWrapper implements BatchVisitor {
 			configureRequestLog();
 		}
 
+		// default session configuration is prepared, but not set in the server instance. It can be set
+		// only after first context is created
+		this.defaultSessionCookieConfig = configuration.session().getDefaultSessionCookieConfig();
+
+		// global session persistence configuration
+		if (configuration.session().getSessionStoreDirectory() != null) {
+			FileSessionDataStoreFactory dsFactory = new FileSessionDataStoreFactory();
+			dsFactory.setDeleteUnrestorableFiles(true);
+			dsFactory.setStoreDir(configuration.session().getSessionStoreDirectory());
+			server.addBean(dsFactory);
+		}
+
 		mbeanContainer = jettyFactory.enableJmxIfPossible(server);
 
 		// most important part - a handler.
@@ -241,12 +258,13 @@ class JettyServerWrapper implements BatchVisitor {
 		QueuedThreadPool qtp = jettyFactory.createThreadPool(configuration);
 
 		// actual org.eclipse.jetty.server.Server
-		this.server = new PaxWebJettyServer(qtp);
+		this.server = new Server(qtp);
+		this.server.setSessionIdManager(new DefaultSessionIdManager(this.server));
 	}
 
 	/**
 	 * <p>This method parses existing {@code jetty*.xml} files and should <strong>not</strong> create an instance
-	 * of {@link Server}. Existing {@link PaxWebJettyServer} is passed as {@code Server} object ID.</p>
+	 * of {@link Server}. Existing {@link Server} is passed as server object ID.</p>
 	 *
 	 * <p>Besides the {@link Server}, XML configuration may alter any aspect of Jetty server. Additionally, if
 	 * XML configurations create instances of {@link org.eclipse.jetty.server.HttpConfiguration}, these
@@ -664,6 +682,30 @@ class JettyServerWrapper implements BatchVisitor {
 			mainHandler.addHandler(sch);
 			mainHandler.mapContexts();
 
+			// session configuration - based on defaultSessionConfiguration, but may be later overriden in OsgiContext
+			SessionHandler sh = sch.getSessionHandler();
+			if (sh != null) {
+				SessionConfiguration sc = configuration.session();
+				sh.setMaxInactiveInterval(sc.getSessionTimeout() * 60);
+				sh.setSessionCookie(defaultSessionCookieConfig.getName());
+				sh.getSessionCookieConfig().setDomain(defaultSessionCookieConfig.getDomain());
+				// will default to context path if null
+				sh.getSessionCookieConfig().setPath(defaultSessionCookieConfig.getPath());
+				sh.getSessionCookieConfig().setMaxAge(defaultSessionCookieConfig.getMaxAge());
+				sh.getSessionCookieConfig().setHttpOnly(defaultSessionCookieConfig.isHttpOnly());
+				sh.getSessionCookieConfig().setSecure(defaultSessionCookieConfig.isSecure());
+				sh.getSessionCookieConfig().setComment(defaultSessionCookieConfig.getComment());
+				if (sc.getSessionUrlPathParameter() != null) {
+					sh.setSessionIdPathParameterName(sc.getSessionUrlPathParameter());
+				}
+				if (sc.getSessionWorkerName() != null) {
+					SessionIdManager sidManager = server.getSessionIdManager();
+					if (sidManager instanceof DefaultSessionIdManager) {
+						((DefaultSessionIdManager) sidManager).setWorkerName(sc.getSessionWorkerName());
+					}
+				}
+			}
+
 			// explicit no check for existing mapping under given physical context path
 			contextHandlers.put(model.getContextPath(), sch);
 			osgiContextModels.put(model.getContextPath(), new TreeSet<>());
@@ -704,7 +746,9 @@ class JettyServerWrapper implements BatchVisitor {
 				throw new IllegalStateException(osgiModel + " is already registered");
 			}
 
-			osgiServletContexts.put(osgiModel, new OsgiServletContext(sch.getServletContext(), osgiModel, servletContextModel));
+			OsgiServletContext osgiContext = new OsgiServletContext(sch.getServletContext(), osgiModel, servletContextModel,
+					defaultSessionCookieConfig);
+			osgiServletContexts.put(osgiModel, osgiContext);
 
 			// a physical context just got a new OSGi context
 			osgiContextModels.get(contextPath).add(osgiModel);
@@ -1286,18 +1330,48 @@ class JettyServerWrapper implements BatchVisitor {
 		}
 		try {
 			String contextPath = sch.getContextPath().equals("") ? "/" : sch.getContextPath();
-			LOG.info("Starting Jetty context \"" + contextPath + "\"");
+			OsgiContextModel highestRanked = ((PaxWebServletHandler) sch.getServletHandler()).getDefaultOsgiContextModel();
+
+			LOG.info("Starting Jetty context \"{}\" with default Osgi Context {}", contextPath, highestRanked);
 
 			// this is when already collected initializers may be added as ordered collection to the servlet context
 			// handler (Pax Web specific) - we need control over them, because we have to pass correct
 			// ServletContext implementation there
 			Collection<SCIWrapper> initializers = new LinkedList<>(this.initializers.get(contextPath).values());
+			// take only these SCIs, which are associated with highest ranked OCM
+			initializers.removeIf(w -> !w.getModel().getContextModels().contains(highestRanked));
 			if (initializers.size() > 0) {
 				// add a final initializer that will take care of actual registration of potentially collected
 				// dynamic servlets, filters and listeners
 				initializers.add(new RegisteringContainerInitializer(this.dynamicRegistrations.get(contextPath)));
 				sch.setServletContainerInitializers(initializers);
 			}
+
+			// alter session configuration
+			SessionHandler sh = sch.getSessionHandler();
+			SessionConfigurationModel sc = highestRanked.getSessionConfiguration();
+			if (sc != null) {
+				if (sc.getSessionTimeout() != null) {
+					sh.setMaxInactiveInterval(sc.getSessionTimeout() * 60);
+				}
+				SessionCookieConfig scc = sc.getSessionCookieConfig();
+				if (scc != null) {
+					if (scc.getName() != null) {
+						sh.setSessionCookie(scc.getName());
+					}
+					if (scc.getDomain() != null) {
+						sh.getSessionCookieConfig().setDomain(scc.getDomain());
+					}
+					if (scc.getPath() != null) {
+						sh.getSessionCookieConfig().setPath(scc.getPath());
+					}
+					sh.getSessionCookieConfig().setMaxAge(scc.getMaxAge());
+					sh.getSessionCookieConfig().setHttpOnly(scc.isHttpOnly());
+					sh.getSessionCookieConfig().setSecure(scc.isSecure());
+					sh.getSessionCookieConfig().setComment(scc.getComment());
+				}
+			}
+
 			sch.start();
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
