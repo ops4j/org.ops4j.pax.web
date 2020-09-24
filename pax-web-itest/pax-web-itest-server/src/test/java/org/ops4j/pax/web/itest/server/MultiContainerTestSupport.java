@@ -34,6 +34,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 
+import org.apache.jasper.servlet.JspServlet;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runners.Parameterized;
@@ -55,7 +56,9 @@ import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletCont
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.WelcomeFileMappingTracker;
 import org.ops4j.pax.web.itest.server.support.Utils;
+import org.ops4j.pax.web.jsp.JasperInitializer;
 import org.ops4j.pax.web.service.PaxWebConfig;
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.HttpServiceEnabled;
 import org.ops4j.pax.web.service.internal.StoppableHttpService;
@@ -88,6 +91,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Version;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
@@ -117,6 +121,7 @@ public class MultiContainerTestSupport {
 
 	protected Bundle whiteboardBundle;
 	protected BundleContext whiteboardBundleContext;
+	protected Bundle jspBundle;
 
 	protected Map<Bundle, HttpServiceEnabled> containers = new HashMap<>();
 	protected ServiceReference<WebContainer> containerRef;
@@ -170,6 +175,12 @@ public class MultiContainerTestSupport {
 				props.put(PaxWebConfig.PID_CFG_SESSION_STORE_DIRECTORY, location);
 			}
 		}, port, runtime, getClass().getClassLoader());
+
+		if (enableJSP()) {
+			jspBundle = mockBundle("org.ops4j.pax.web.pax-web-jsp", false);
+			when(jspBundle.loadClass(PaxWebConstants.DEFAULT_JSP_SERVLET_CLASS)).thenAnswer(inv -> JspServlet.class);
+			when(jspBundle.loadClass(PaxWebConstants.DEFAULT_JSP_SCI_CLASS)).thenAnswer(inv -> JasperInitializer.class);
+		}
 
 		controller.configure();
 		controller.start();
@@ -234,6 +245,10 @@ public class MultiContainerTestSupport {
 		return null;
 	}
 
+	protected boolean enableJSP() {
+		return false;
+	}
+
 	protected void stopWhiteboardService() {
 		if (containerRef != null) {
 			whiteboard.webContainerRemoved(containerRef);
@@ -264,6 +279,10 @@ public class MultiContainerTestSupport {
 		when(bundle.getBundleContext()).thenReturn(bundleContext);
 		when(bundleContext.getBundle()).thenReturn(bundle);
 
+		BundleWiring wiring = mock(BundleWiring.class);
+		when(bundle.adapt(BundleWiring.class)).thenReturn(wiring);
+		when(wiring.getClassLoader()).thenReturn(this.getClass().getClassLoader());
+
 		when(bundleContext.registerService(ArgumentMatchers.eq(ServletContext.class), any(ServletContext.class), any(Dictionary.class)))
 				.thenReturn(mock(ServiceRegistration.class));
 
@@ -273,6 +292,10 @@ public class MultiContainerTestSupport {
 			HttpServiceEnabled container = new HttpServiceEnabled(bundle, controller, serverModel, null, config);
 			when(bundleContext.getService(containerRef)).thenReturn(container);
 			containers.put(bundle, container);
+		}
+
+		if (enableJSP()) {
+			when(bundle.getBundleContext().getBundles()).thenReturn(new Bundle[] { bundle, jspBundle });
 		}
 
 		return bundle;

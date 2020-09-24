@@ -15,30 +15,38 @@
  */
 package org.ops4j.pax.web.service.spi.config;
 
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+
 public interface JspConfiguration {
 
-	String getJspScratchDir();
+	/**
+	 * What scratch directory should we use when compiling JSP pages? Default is the work directory for
+	 * the current web application.
+	 * @param model scratch dir should depend on the {@link OsgiContextModel} where the JSP servlet is installed
+	 * @return
+	 */
+	String getJspScratchDir(OsgiContextModel model);
 
-	Integer getJspCheckInterval();
-
-	Boolean getJspClassDebugInfo();
-
-	Boolean getJspDevelopment();
-
-	Boolean getJspEnablePooling();
-
-	String getJspIeClassId();
-
-	String getJspJavaEncoding();
-
-	Boolean getJspKeepgenerated();
-
-	String getJspLogVerbosityLevel();
-
-	Boolean getJspMappedfile();
-
-	Integer getJspTagpoolMaxSize();
-
-	Boolean getJspPrecompilation();
+//	Integer getJspCheckInterval();
+//
+//	Boolean getJspClassDebugInfo();
+//
+//	Boolean getJspDevelopment();
+//
+//	Boolean getJspEnablePooling();
+//
+//	String getJspIeClassId();
+//
+//	String getJspJavaEncoding();
+//
+//	Boolean getJspKeepgenerated();
+//
+//	String getJspLogVerbosityLevel();
+//
+//	Boolean getJspMappedfile();
+//
+//	Integer getJspTagpoolMaxSize();
+//
+//	Boolean getJspPrecompilation();
 
 }

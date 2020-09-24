@@ -164,9 +164,9 @@ public class DefaultHttpContext implements WebContainerContext {
 		// "name" is passed from javax.servlet.ServletContext.getResource() which always should start with
 		// leading slash
 		final String normalizedName = Path.normalizeResourcePath(name);
-		if (isProtected(normalizedName)) {
-			return null;
-		}
+//		if (isProtected(normalizedName)) {
+//			return null;
+//		}
 		LOG.debug("Searching bundle [" + bundle + "] for resource [" + normalizedName + "]");
 		return bundle.getResource(normalizedName);
 	}
@@ -194,9 +194,9 @@ public class DefaultHttpContext implements WebContainerContext {
 	 *
 	 * <p></p>
 	 *
-	 * Just as {@link ServletContext#getResourcePaths(String)} does, we <strong>have to</strong> include
-	 * 	 * resources available in {@code /WEB-INF/lib/*.jar!/META-INF/resources/} (which I think is good addition from
-	 * 	 * Servlet API to Whiteboard API).
+	 * TODO: Just as {@link ServletContext#getResourcePaths(String)} does, we <strong>have to</strong> include
+	 *       resources available in {@code /WEB-INF/lib/*.jar!/META-INF/resources/} (which I think is good addition from
+	 *       Servlet API to Whiteboard API).
 	 *
 	 * @param bundle
 	 * @param name
@@ -220,9 +220,9 @@ public class DefaultHttpContext implements WebContainerContext {
 				final Set<String> result = new LinkedHashSet<String>();
 				while (e.hasMoreElements()) {
 					String path = e.nextElement().getPath();
-					if (!isProtected(path)) {
+//					if (!isProtected(path)) {
 						result.add(path);
-					}
+//					}
 				}
 				return result;
 			}

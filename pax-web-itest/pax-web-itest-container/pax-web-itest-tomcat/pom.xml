@@ -39,6 +39,13 @@
 		<!-- pax-web own artifacts -->
 
 		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-jsp</artifactId>
+			<!-- so it's not added to failsafe classpath -->
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
 			<!-- With just this dependency, we should transitively get everything that's needed for integration tests -->
 			<groupId>org.ops4j.pax.web.itest</groupId>
 			<artifactId>pax-web-itest-container-common</artifactId>
@@ -65,6 +72,18 @@
 			-->
 			<groupId>org.ops4j.pax.logging</groupId>
 			<artifactId>pax-logging-api</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- JavaEE -->
+
+		<dependency>
+			<!--
+				can't be transtive dependency from pax-web-itest-container-common, because it has to be "runtime"
+				scoped, so it's not added to maven-failsafe-plugin classpath (duplicate SLF4J binding)
+			-->
+			<groupId>jakarta.el</groupId>
+			<artifactId>jakarta.el-api</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 

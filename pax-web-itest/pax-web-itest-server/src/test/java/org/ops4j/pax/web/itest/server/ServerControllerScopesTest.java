@@ -190,6 +190,8 @@ public class ServerControllerScopesTest extends MultiContainerTestSupport {
 		batch.accept(wc1.getServiceModel());
 		controller.sendBatch(batch);
 
+		// TODO: wcc1 will be "highest ranked" OsgiContextModel/OsgiServletContext and it'd be good if
+		//       it had _some_ bundle to be used as context's classloader
 		WebContainerContext wcc1 = new DefaultMultiBundleWebContainerContext(new DefaultHttpContext(null, "wcc1"));
 		WebContainerContext wcc2 = new DefaultHttpContext(bundle2, "wcc2");
 		WebContainerContext wcc3 = new DefaultHttpContext(bundle3, "wcc3");

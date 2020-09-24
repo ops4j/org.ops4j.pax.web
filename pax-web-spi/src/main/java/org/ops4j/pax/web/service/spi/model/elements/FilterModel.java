@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EnumSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -136,7 +137,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		this.servletNames = servletNames != null ? Arrays.copyOf(servletNames, servletNames.length) : null;
 		this.regexMapping = regexMapping != null ? Arrays.copyOf(regexMapping, regexMapping.length) : null;
 
-		this.initParams = initParams == null ? Collections.emptyMap() : initParams;
+		this.initParams = initParams == null ? Collections.emptyMap() : new LinkedHashMap<>(initParams);
 		this.asyncSupported = asyncSupported;
 		this.filter = filter;
 		this.filterClass = filterClass;

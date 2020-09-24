@@ -779,8 +779,9 @@ public interface WebContainer extends HttpService {
 	 * ranking rules still apply!).</p>
 	 *
 	 * @param urlPatterns an array of url patterns this jsp support maps to. If null, a
-	 *                    default "*.jsp" will be used
-	 * @param initParams an array of initialization parameters passed directly to Jasper servlet
+	 *                    default {@code *.jsp} will be used
+	 * @param initParams an array of initialization parameters passed directly to Jasper servlet. These parameters
+	 *                   can override the defaults and global configuration from {@code org.ops4j.pax.web} PID
 	 * @param httpContext the http context for which the jsp support should be enabled.
 	 *                    If null a default http context will be used.
 	 * @since 0.3.0, January 07, 2007

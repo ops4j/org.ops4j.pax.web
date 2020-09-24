@@ -200,10 +200,5 @@ public abstract class ITestBase /*extends AbstractControlledTestBase*/ {
 //				mavenBundle().groupId("com.sun.jersey").artifactId("jersey-servlet").version("1.19"),
 //				mavenBundle().groupId("javax.ws.rs").artifactId("jsr311-api").version("1.1.1"));
 //	}
-//
-//	@Override
-//	protected BundleContext getBundleContext() {
-//		return bundleContext;
-//	}
 
 }

@@ -99,6 +99,7 @@ import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.tomcat.internal.web.TomcatResourceServlet;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1246,6 +1247,16 @@ class TomcatServerWrapper implements BatchVisitor {
 			OsgiContextModel highestRanked = context.getDefaultOsgiContextModel();
 
 			LOG.info("Starting Tomcat context \"{}\" with default Osgi Context {}", context, highestRanked);
+
+			// first thing - only NOW we can set ServletContext's class loader! It affects many things, including
+			// the TCCL used for example by javax.el.ExpressionFactory.newInstance()
+			Bundle bundle = highestRanked.getOwnerBundle();
+			if (bundle != null) {
+				BundleWiring wiring = highestRanked.getOwnerBundle().adapt(BundleWiring.class);
+				if (wiring != null && wiring.getClassLoader() != null) {
+					context.setParentClassLoader(wiring.getClassLoader());
+				}
+			}
 
 			Collection<SCIWrapper> initializers = new LinkedList<>(this.initializers.get(contextPath).values());
 			// take only these SCIs, which are associated with highest ranked OCM

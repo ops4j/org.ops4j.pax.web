@@ -182,7 +182,7 @@
 
 		<dependency.easymock.version>2.3</dependency.easymock.version>
 
-		<dependency.eclipse.jdt.version>3.22.0</dependency.eclipse.jdt.version>
+		<dependency.eclipse.jdt.version>3.23.0</dependency.eclipse.jdt.version>
 		<dependency.eclipse.jetty.version>9.4.31.v20200723</dependency.eclipse.jetty.version>
 		<dependency.eclipse.platform.version>3.12.100</dependency.eclipse.platform.version>
 		<dependency.eclipse.tycho.version>3.10.100.v20150529-1857</dependency.eclipse.tycho.version>
@@ -544,6 +544,11 @@
 					<groupId>org.ops4j.pax.exam</groupId>
 					<artifactId>exam-maven-plugin</artifactId>
 					<version>${dependency.pax-exam.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.jetty</groupId>
+					<artifactId>jetty-jspc-maven-plugin</artifactId>
+					<version>${dependency.eclipse.jetty.version}</version>
 				</plugin>
 
 			</plugins>
@@ -1618,6 +1623,11 @@
 				<version>${dependency.logback.version}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-api</artifactId>
+				<version>${dependency.log4j2.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-slf4j-impl</artifactId>

@@ -34,6 +34,7 @@
 	<name>OPS4J Pax Web JSP Samples</name>
 
 	<modules>
+		<module>helloworld-jsp</module>
 	</modules>
 
 </project>

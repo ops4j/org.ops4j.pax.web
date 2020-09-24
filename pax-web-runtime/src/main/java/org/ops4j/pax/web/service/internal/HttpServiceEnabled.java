@@ -68,6 +68,7 @@ import org.ops4j.pax.web.service.spi.servlet.DefaultSessionCookieConfig;
 import org.ops4j.pax.web.service.spi.servlet.DefaultTaglibDescriptor;
 import org.ops4j.pax.web.service.spi.servlet.DynamicJEEWebContainerView;
 import org.ops4j.pax.web.service.spi.task.Batch;
+import org.ops4j.pax.web.service.spi.task.Change;
 import org.ops4j.pax.web.service.spi.util.Path;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
@@ -108,6 +109,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 	private final WhiteboardWebContainerView whiteboardContainerView = new WhiteboardWebContainer();
 	private final DirectWebContainerView directContainerView = new DirectWebContainer();
+	private final Configuration configuration;
 
 //	private final Boolean showStacks;
 
@@ -124,6 +126,8 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 		// dispatcher to send events related to web element/context (un)registration
 		this.eventDispatcher = eventDispatcher;
+
+		this.configuration = configuration;
 	}
 
 	@PaxWebTesting
@@ -353,12 +357,22 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		try {
 			event(ElementEvent.State.DEPLOYING, model);
 
-			model.performValidation();
-
 			final Batch batch = new Batch("Registration of " + model);
 
 			serverModel.run(() -> {
 				translateContexts(httpContexts, model, batch);
+
+				// this can be done only after translating the contexts ...
+				if (model.isJspServlet()) {
+					model.configureJspServlet(configuration.jsp());
+				}
+
+				try {
+					// ... that's why the validation is moved to the task
+					model.performValidation();
+				} catch (Exception e) {
+					throw new RuntimeException(e.getMessage(), e);
+				}
 
 				LOG.info("Registering {}", model);
 
@@ -366,12 +380,43 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				// may have some unregistration changes added
 				serverModel.addServletModel(model, batch);
 
+				// no exception, so we can alter the batch if needed (for JSPs)
+				Batch newBatch = batch;
+				if (model.isJspServlet()) {
+					// we need JSP SCI if it's not already there
+					boolean found = false;
+					for (ContainerInitializerModel cim : serviceModel.getContainerInitializerModels()) {
+						if (PaxWebConstants.DEFAULT_JSP_SCI_CLASS.equals(cim.getContainerInitializer().getClass().getName())) {
+							// fine, but is it for correct context?
+							found = true;
+							for (OsgiContextModel cm : cim.getContextModels()) {
+								if (!model.getContextModels().contains(cm)) {
+									found = false;
+									break;
+								}
+							}
+							if (found) {
+								break;
+							}
+						}
+					}
+					if (!found) {
+						ContainerInitializerModel cim = serverModel.createJSPServletContainerInitializerModel(serviceBundle);
+						model.getContextModels().forEach(cim::addContextModel);
+						newBatch = new Batch("JSP Configuration and registration of " + model);
+						serverModel.addContainerInitializerModel(cim, newBatch);
+						for (Change operation : batch.getOperations()) {
+							newBatch.getOperations().add(operation);
+						}
+					}
+				}
+
 				// only if validation was fine, pass the batch to ServerController, where the batch may fail again
-				serverController.sendBatch(batch);
+				serverController.sendBatch(newBatch);
 
 				// if server runtime has accepted the changes (hoping it'll be in clean state if it didn't), lets
 				// actually apply the changes to global model (through ServiceModel)
-				batch.accept(serviceModel);
+				newBatch.accept(serviceModel);
 
 				return null;
 			});
@@ -843,7 +888,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 			event(ElementEvent.State.UNDEPLOYED, model);
 		} catch (Exception e) {
-			event(ElementEvent.State.FAILED, model);
+			event(ElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -885,7 +930,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 			event(ElementEvent.State.DEPLOYED, model);
 		} catch (Exception e) {
-			event(ElementEvent.State.FAILED, model);
+			event(ElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -955,7 +1000,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			event(ElementEvent.State.UNDEPLOYED, model);
 		} catch (ServletException | NamespaceException e) {
 			// if toUnregister is null, IllegalArgumentException is thrown anyway
-			event(ElementEvent.State.FAILED, model);
+			event(ElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -1003,7 +1048,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 			event(ElementEvent.State.DEPLOYED, model);
 		} catch (Exception e) {
-			event(ElementEvent.State.FAILED, model);
+			event(ElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -1049,7 +1094,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 			event(ElementEvent.State.UNDEPLOYED, model);
 		} catch (Exception e) {
-			event(ElementEvent.State.FAILED, model);
+			event(ElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -1187,7 +1232,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 			event(ElementEvent.State.UNDEPLOYED, model);
 		} catch (Exception e) {
-			event(ElementEvent.State.FAILED, model);
+			event(ElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -1195,11 +1240,30 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 	// methods used to register / configure JSPs
 
 	@Override
-	public void registerJsps(String[] urlPatterns, Dictionary<String, String> initParams, HttpContext httpContext) {
+	public void registerJsps(String[] urlPatterns, Dictionary<String, String> initParams, HttpContext context) {
+		try {
+			ServletModel jspServletModel = serverModel.createJspServletModel(serviceBundle,
+					PaxWebConstants.DEFAULT_JSP_SERVLET_NAME, null, urlPatterns, initParams, configuration.jsp());
+			// there can be only one such servlet because of its fixed "jsp" name
+			doRegisterServlet(Collections.singletonList(context), jspServletModel);
+		} catch (NamespaceException | ServletException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	@Override
-	public void registerJspServlet(String jspFile, String[] urlPatterns, Dictionary<String, String> initParams, HttpContext httpContext) {
+	public void registerJspServlet(String jspFile, String[] urlPatterns, Dictionary<String, String> initParams, HttpContext context) {
+		try {
+			ServletModel model = serverModel.createJspServletModel(serviceBundle,
+					jspFile, jspFile, urlPatterns, initParams, configuration.jsp());
+			// "jsp servlet" is special servlet mapped to anything, but actually implemented using JSP file.
+			// Such servlet actually requires full JSP engine to be configured and ready, but it'll be added
+			// automatically
+			// jspFile will be an init param of JSP servlet - see org.apache.catalina.startup.ContextConfig.convertJsp()
+			doRegisterServlet(Collections.singletonList(context), model);
+		} catch (NamespaceException | ServletException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	@Override
@@ -1343,7 +1407,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 			event(ElementEvent.State.DEPLOYED, model);
 		} catch (Exception e) {
-			event(ElementEvent.State.FAILED, model);
+			event(ElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -1406,7 +1470,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			event(ElementEvent.State.UNDEPLOYED, model);
 		} catch (ServletException | NamespaceException e) {
 			// if toUnregister is null, IllegalArgumentException is thrown anyway
-			event(ElementEvent.State.FAILED, model);
+			event(ElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -1717,71 +1781,18 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 	}
 
-//	private boolean isWebAppWebContainerContext(ContextModel contextModel) {
-//		return contextModel
-//				.getHttpContext()
-//				.getClass()
-//				.getName()
-//				.equals("org.ops4j.pax.web.extender.war.internal.WebAppWebContainerContext");
-//	}
 
-//	/**
-//	 * @see WebContainer#setContextParam(Dictionary, HttpContext)
-//	 */
-//	@Override
-//	public void setContextParam(final Dictionary<String, ?> params,
-//								final HttpContext httpContext) {
-//		NullArgumentException.validateNotNull(httpContext, "Http context");
-//		final ContextModel contextModel = getOrCreateContext(httpContext);
-//		Map<String, String> contextParams = contextModel.getContextParams();
-//		if (!contextParams.equals(params)) {
-//			if (!serviceModel.canBeConfigured(httpContext)) {
-//				try {
-//					LOG.debug("Stopping context model {} to set context parameters", contextModel);
-//					serverController.getContext(contextModel).stop();
-//				} catch (Exception e) {
-//					LOG.info(e.getMessage(), e);
-//				}
-//			}
-//			contextModel.setContextParams(params);
-//		}
-//		serviceModel.addContextModel(contextModel);
-//	}
-//
-//	@Override
-//	public void setSessionTimeout(final Integer minutes,
-//								  final HttpContext httpContext) {
-//		NullArgumentException.validateNotNull(httpContext, "Http context");
-//		final ContextModel contextModel = getOrCreateContext(httpContext);
-//		Integer sessionTimeout = contextModel.getSessionTimeout();
-//		if ((sessionTimeout != null && !sessionTimeout.equals(minutes)) || minutes != null) {
-//			if (!serviceModel.canBeConfigured(httpContext)) {
-//				throw new IllegalStateException(
-//						"Http context already used. Session timeout can be set/changed only before first usage");
-//			}
-//			contextModel.setSessionTimeout(minutes);
-//		}
-//		serviceModel.addContextModel(contextModel);
-//	}
-//
-//	@Override
-//	public void setSessionCookieConfig(String domain, String name, Boolean httpOnly, Boolean secure, String path, Integer maxAge, HttpContext httpContext) {
-//		NullArgumentException.validateNotNull(httpContext, "Http context");
-//		final ContextModel contextModel = getOrCreateContext(httpContext);
-//		if (!serviceModel.canBeConfigured(httpContext)) {
-//			throw new IllegalStateException(
-//					"Http context already used. Session cookie configuration can be set/changed only before first usage");
-//		}
-//		contextModel.setSessionDomain(domain);
-//		contextModel.setSessionCookie(name);
-//		contextModel.setSessionCookieHttpOnly(httpOnly);
-//		contextModel.setSessionCookieSecure(secure);
-//		contextModel.setSessionPath(path);
-//		contextModel.setSessionCookieMaxAge(maxAge);
-//
-//		serviceModel.addContextModel(contextModel);
-//	}
-//
+
+
+
+
+
+
+
+
+
+
+
 //	@Override
 //	public void registerJspServlet(final String[] urlPatterns,
 //								   Dictionary<String, ?> initParams, final HttpContext httpContext,
@@ -2107,36 +2118,6 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 //			LOG.debug(sb.toString());
 //		}
 //		contextModel.setVirtualHosts(realVirtualHosts);
-//		serviceModel.addContextModel(contextModel);
-//	}
-
-//	@Override
-//	public void registerJspConfigTagLibs(String tagLibLocation, String tagLibUri, HttpContext httpContext) {
-//		NullArgumentException.validateNotNull(httpContext, "Http context");
-//		final ContextModel contextModel = getOrCreateContext(httpContext);
-//		LOG.debug("Using context [" + contextModel + "]");
-//
-//		contextModel.addTagLibLocation(tagLibLocation);
-//		contextModel.addTagLibUri(tagLibUri);
-//
-//		serviceModel.addContextModel(contextModel);
-//	}
-//
-//	@Override
-//	public void registerJspConfigPropertyGroup(List<String> includeCodes,
-//											   List<String> includePreludes, List<String> urlPatterns, Boolean elIgnored, Boolean scriptingInvalid,
-//											   Boolean isXml, HttpContext httpContext) {
-//		NullArgumentException.validateNotNull(httpContext, "Http context");
-//		final ContextModel contextModel = getOrCreateContext(httpContext);
-//		LOG.debug("Using context [" + contextModel + "]");
-//
-//		contextModel.addJspIncludeCodes(includeCodes);
-//		contextModel.addJspIncludePreludes(includePreludes);
-//		contextModel.addJspUrlPatterns(urlPatterns);
-//		contextModel.addJspElIgnored(elIgnored);
-//		contextModel.addJspScriptingInvalid(scriptingInvalid);
-//		contextModel.addJspIsXml(isXml);
-//
 //		serviceModel.addContextModel(contextModel);
 //	}
 //

@@ -38,18 +38,12 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 
 	private ServiceTracker<HttpService, HttpService> tracker;
 
-	/**
-	 * Called when the OSGi framework starts our bundle
-	 */
 	public void start(BundleContext bc) throws Exception {
 		bundleContext = bc;
 		tracker = new ServiceTracker<>(bc, HttpService.class, this);
 		tracker.open();
 	}
 
-	/**
-	 * Called when the OSGi framework stops our bundle
-	 */
 	public void stop(BundleContext bc) throws Exception {
 		tracker.close();
 	}

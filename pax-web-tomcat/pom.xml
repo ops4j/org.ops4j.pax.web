@@ -196,14 +196,6 @@
 <!--							javax.security.auth.spi-->
 <!--							javax.security.auth.x500-->
 <!--							javax.security.cert-->
-<!--							javax.servlet-->
-<!--							version = [3.1,5)-->
-<!--							javax.servlet.annotation-->
-<!--							version = [3.1,5)-->
-<!--							javax.servlet.descriptor-->
-<!--							version = [3.1,5)-->
-<!--							javax.servlet.http-->
-<!--							version = [3.1,5)-->
 <!--							javax.sql-->
 <!--							javax.wsdl-->
 <!--							javax.wsdl.extensions-->
@@ -218,61 +210,23 @@
 <!--							javax.xml.ws-->
 
 							<!-- to check -->
-
-<!--							org.ops4j.pax.swissbox.*,-->
 <!--							javax.security.auth,-->
 <!--							javax.security.auth.callback,-->
 <!--							javax.security.auth.login,-->
 <!--							javax.servlet.jsp.*;version="[2.2,2.3)",-->
 <!--							javax.websocket,-->
 <!--							javax.websocket.server,-->
-<!--							javax.xml.parsers,-->
 <!--							javax.el; version="[2.1.0,3.1.0)";resolution:=optional,-->
 <!--							org.apache.el; version="2.2"; resolution:=optional,-->
 <!--							org.apache.el.lang; version="2.2"; resolution:=optional,-->
 <!--							org.apache.el.parser; version="2.2"; resolution:=optional,-->
 <!--							org.apache.el.stream; version="2.2"; resolution:=optional,-->
 <!--							org.apache.el.util; version="2.2"; resolution:=optional-->
-<!--							org.apache.catalina,-->
-<!--							org.apache.catalina.authenticator,-->
-<!--							org.apache.catalina.authenticator.jaspic,-->
-<!--							org.apache.catalina.connector,-->
-<!--							org.apache.catalina.core,-->
-<!--							org.apache.catalina.deploy,-->
-<!--							org.apache.catalina.filters,-->
-<!--							org.apache.catalina.loader,-->
-<!--							org.apache.catalina.manager,-->
-<!--							org.apache.catalina.manager.host,-->
-<!--							org.apache.catalina.manager.util,-->
-<!--							org.apache.catalina.mbeans,-->
-<!--							org.apache.catalina.realm,-->
-<!--							org.apache.catalina.security,-->
-<!--							org.apache.catalina.servlets,-->
-<!--							org.apache.catalina.session,-->
 <!--							org.apache.catalina.ssi,-->
-<!--							org.apache.catalina.startup,-->
-<!--							org.apache.catalina.users,-->
-<!--							org.apache.catalina.util,-->
-<!--							org.apache.catalina.valves,-->
-<!--							org.apache.coyote,-->
-<!--							org.apache.coyote.ajp,-->
-<!--							org.apache.coyote.http11,-->
-<!--							org.apache.coyote.http11.filters,-->
-<!--							org.apache.coyote.http11.upgrade,-->
-<!--							org.apache.coyote.http2,-->
-<!--							org.apache.naming,-->
-<!--							org.apache.naming.factory,-->
-<!--							org.apache.naming.java,-->
-<!--							org.apache.tomcat.jni,-->
-<!--							org.apache.tomcat.util.net,-->
-<!--							org.apache.tomcat.util.net.jsse,-->
 <!--							org.apache.tomcat.util.digester,-->
 <!--							org.apache.tomcat.websocket,-->
 <!--							org.apache.tomcat.websocket.pojo,-->
 <!--							org.apache.tomcat.websocket.server,-->
-<!--							*,-->
-<!--							!javax.microedition.io,-->
-<!--							!javax.security.auth.x500,-->
 						</Import-Package>
 						<Export-Package>
 							<!-- Re-export everything from Tomcat, which after Pax Web 8 is not imported from TIPI -->
@@ -306,10 +260,10 @@
 							org.apache.catalina.webresources.war;version="${dependency.tomcat.version}",
 							org.apache.coyote;version="${dependency.tomcat.version}",
 							org.apache.coyote.ajp;version="${dependency.tomcat.version}",
-							org.apache.coyote.http2;version="${dependency.tomcat.version}",
 							org.apache.coyote.http11;version="${dependency.tomcat.version}",
 							org.apache.coyote.http11.filters;version="${dependency.tomcat.version}",
 							org.apache.coyote.http11.upgrade;version="${dependency.tomcat.version}",
+							org.apache.coyote.http2;version="${dependency.tomcat.version}",
 							org.apache.naming;version="${dependency.tomcat.version}",
 							org.apache.naming.factory;version="${dependency.tomcat.version}",
 							org.apache.naming.factory.webservices;version="${dependency.tomcat.version}",

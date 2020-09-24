@@ -208,6 +208,19 @@ public abstract class AbstractControlledTestBase {
 				.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1);
 	}
 
+	protected Option[] paxWebJsp() {
+		return new Option[] {
+				mavenBundle("jakarta.el", "jakarta.el-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ops4j.pax.web", "pax-web-tomcat-common")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.eclipse.jdt", "ecj")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ops4j.pax.web", "pax-web-jsp")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
+		};
+	}
+
 	/**
 	 * Installation of all the bundles required by {@code pax-web-jetty}
 	 * @return

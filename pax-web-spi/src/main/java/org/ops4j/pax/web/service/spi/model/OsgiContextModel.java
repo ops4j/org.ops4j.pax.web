@@ -619,6 +619,15 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		return this.getNumericId() - o.getNumericId();
 	}
 
+	/**
+	 * Each {@link OsgiContextModel} should have separate "working directory" and this method returns such relative
+	 * path depending on {@link #contextPath} and {@link #getNumericId()}
+	 * @return
+	 */
+	public String getTemporaryLocation() {
+		return String.format("%s/OCM%d", "/".equals(contextPath) ? "ROOT" : contextPath + "/", getNumericId());
+	}
+
 //	/** Access controller context of the bundle that registered the http context. */
 //	@Review("it's so rarely used - only in one resource access scenario, though there are many such scenarios.")
 //	private final AccessControlContext accessControllerContext;

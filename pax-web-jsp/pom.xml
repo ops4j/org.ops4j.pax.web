@@ -36,21 +36,74 @@
 	<description>Pax Web JSP/EL/JSTL Support via Tomcat Jasper 2.</description>
 
 	<build>
-<!--		<resources>-->
-<!--			<resource>-->
-<!--				<directory>src/main/resources</directory>-->
-<!--			</resource>-->
-<!--			<resource>-->
-<!--				<directory>target/dependency</directory>-->
-<!--				<excludes>-->
-<!--					<exclude>org/apache/jasper/compiler/TldCache.java</exclude>-->
-<!--					<exclude>org/apache/jasper/compiler/JspConfig.java</exclude>-->
-<!--					<exclude>org/apache/jasper/JspCompilationContext.java</exclude>-->
-<!--					<exclude>org/apache/tomcat/util/descriptor/tagplugin/TagPluginParser.java</exclude>-->
-<!--				</excludes>-->
-<!--			</resource>-->
-<!--		</resources>-->
 		<plugins>
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack-tomcat-servlet-api</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.apache.tomcat</groupId>
+									<artifactId>tomcat-servlet-api</artifactId>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>${project.build.directory}/unpack-deps/tomcat-servlet-api</outputDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>unpack-tomcat-jsp-api</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.apache.tomcat</groupId>
+									<artifactId>tomcat-jsp-api</artifactId>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>${project.build.directory}/unpack-deps/tomcat-jsp-api</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<!--
+							copy javax/servlet/resources to be used in javax/servlet/jsp/resources
+							to satisfy org.apache.tomcat.util.descriptor.DigesterFactory which uses class.getResources()
+							for two classes - javax.servlet.ServletContext and javax.servlet.jsp.JspContext,
+							but we repackage only the latter
+						-->
+						<id>copy-selected-resources</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.outputDirectory}/javax/servlet/jsp/resources</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.build.directory}/unpack-deps/tomcat-servlet-api/javax/servlet/resources</directory>
+									<includes>
+										<include>*.xsd</include>
+										<include>*.dtd</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
@@ -65,9 +118,9 @@
 							javax.servlet.http;version="[3.1,5)",
 
 							<!-- JSP API (also exported from pax-web-jsp - this bundle) -->
-							javax.servlet.jsp;version="${dependency.jakarta.servlet.jsp-api.version}",
-							javax.servlet.jsp.el;version="${dependency.jakarta.servlet.jsp-api.version}",
-							javax.servlet.jsp.tagext;version="${dependency.jakarta.servlet.jsp-api.version}",
+							javax.servlet.jsp;version="2.3",
+							javax.servlet.jsp.el;version="2.3",
+							javax.servlet.jsp.tagext;version="2.3",
 
 							<!-- JSTL API (also exported from pax-web-jsp - this bundle) -->
 							javax.servlet.jsp.jstl.core;version="${dependency.jakarta.servlet.jsp.jstl-api.version}",
@@ -87,7 +140,9 @@
 							org.osgi.service.http;version="[1.2,2)",
 
 							<!-- from pax-web -->
-<!--							org.ops4j.pax.web.*;version="${pax-web.osgi.version}",-->
+							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.model;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.servlet;version="${pax-web.osgi.version}",
 
 							<!-- from pax-logging-api -->
 							org.slf4j;version="[1.7,2)",
@@ -99,28 +154,41 @@
 							org.apache.tomcat.util.digester;version=${dependency.tomcat.version},
 							org.apache.tomcat.util.descriptor;version=${dependency.tomcat.version},
 							org.apache.tomcat.util.descriptor.tagplugin;version=${dependency.tomcat.version},
-<!--							org.apache.tomcat.util.descriptor.tld;version=${dependency.tomcat.version},-->
+							org.apache.tomcat.util.descriptor.tld;version=${dependency.tomcat.version},
+							org.apache.tomcat.util.descriptor.web;version=${dependency.tomcat.version},
 							org.apache.tomcat.util.file;version=${dependency.tomcat.version},
 							org.apache.tomcat.util.res;version=${dependency.tomcat.version},
-							org.apache.tomcat.util.scan;version=${dependency.tomcat.version}
+							org.apache.tomcat.util.scan;version=${dependency.tomcat.version},
 							org.apache.tomcat.util.security;version=${dependency.tomcat.version},
 
+							<!-- Eclipse ECJ compiler -->
+							org.eclipse.jdt.core.compiler,
+							org.eclipse.jdt.internal.compiler,
+							org.eclipse.jdt.internal.compiler.classfmt,
+							org.eclipse.jdt.internal.compiler.env,
+							org.eclipse.jdt.internal.compiler.impl,
+							org.eclipse.jdt.internal.compiler.problem,
+							<!--							org.eclipse.*;resolution:=optional,-->
+							<!--							org.eclipse.jdt.internal.compiler.parser;resolution:=optional-->
+							<!--							org.eclipse.jdt.internal.compiler.problem-->
+
 							<!-- other standard packages -->
-<!--							javax.annotation.*,-->
+							javax.annotation,
 							javax.naming,
 							javax.sql;resolution:=optional,
 							javax.xml.parsers,
 							javax.xml.stream,
+							javax.xml.transform.*;resolution:=optional,
 							javax.xml.validation;resolution:=optional,
 							javax.xml.namespace;resolution:=optional,
-							javax.xml.transform.*;resolution:=optional,
 							javax.xml.xpath;resolution:=optional,
 							org.w3c.dom,
 							org.w3c.dom.ls;resolution:=optional,
 							org.w3c.dom.traversal;resolution:=optional,
-							org.xml.sax.*,
-							org.eclipse.*;resolution:=optional,
-							org.eclipse.jdt.internal.compiler.parser;resolution:=optional
+							org.xml.sax,
+							org.xml.sax.ext,
+							org.xml.sax.helpers
+<!--							org.graalvm.nativeimage-->
 						</Import-Package>
 						<Export-Package>
 							<!-- pax-web-jsp - packages from this bundle -->
@@ -205,7 +273,7 @@
 							<!-- resources from mvn:org.apache.tomcat/tomcat-servlet-api, not available in jakarta.servlet/jakarta.servlet-api -->
 							javax.servlet.resources;-split-package:=merge-first,
 							<!-- resources from mvn:org.apache.tomcat/tomcat-jsp-api, not available in jakarta.servlet.jsp/jakarta.servlet.jsp-api -->
-							javax.servlet.jsp.resources,
+							javax.servlet.jsp.resources;-split-package:=merge-first,
 							<!-- resources from mvn:org.apache.tomcat/tomcat-jasper which are not exported (no *.class there) -->
 							org.apache.jasper.resources,
 							<!-- resources from mvn:org.apache.taglibs/taglibs-standard-impl which are not exported (no *.class there) -->
@@ -213,20 +281,13 @@
 						</Private-Package>
 						<Include-Resource>
 							{maven-resources},
-							{maven-dependencies},
-<!--							org/apache/jasper/compiler/TldCache.class=target/classes/org/apache/jasper/compiler/TldCache.class,-->
-<!--							org/apache/jasper/JspCompilationContext.class=target/classes/org/apache/jasper/JspCompilationContext.class,-->
-<!--							org/apache/tomcat/util/descriptor/tagplugin/TagPluginParser.class=target/classes/org/apache/tomcat/util/descriptor/tagplugin/TagPluginParser.class-->
+							{maven-dependencies}
 						</Include-Resource>
 						<Embed-Dependency>
 							artifactId=taglibs-standard-impl;inline=**/*.tld
 						</Embed-Dependency>
-<!--						<Embed-Dependency>-->
-<!--							*;scope=compile;type=!pom;-->
-<!--							inline=**/*.class|**/*.ico|**/*.dtd|**/*.xml|**/*.properties|**/*.map|**/*.default|**/*.providers|**/*.tld|**/*.rsc-->
-<!--						</Embed-Dependency>-->
-<!--						<Embed-Transitive>true</Embed-Transitive>-->
 						<_nouses>true</_nouses>
+						<_contract>!*</_contract>
 					</instructions>
 				</configuration>
 			</plugin>

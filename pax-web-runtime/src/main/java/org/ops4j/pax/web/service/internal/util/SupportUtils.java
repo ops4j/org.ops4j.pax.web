@@ -27,20 +27,6 @@ public class SupportUtils {
 		// utils class
 	}
 
-	/**
-	 * Check if {@link org.osgi.service.cm.ManagedService}s could be used
-	 *
-	 * @return <code>true</code> when ManagedService class could be loaded
-	 * <code>false</code> otherwhise
-	 */
-	public static boolean isManagedServiceAvailable() {
-		try {
-			return (org.osgi.service.cm.ManagedService.class != null);
-		} catch (NoClassDefFoundError ignore) {
-			return false;
-		}
-	}
-
 	public static boolean isConfigurationAdminAvailable() {
 		try {
 			SupportUtils.class.getClassLoader().loadClass("org.osgi.service.cm.ConfigurationAdmin");
@@ -48,19 +34,6 @@ public class SupportUtils {
 		} catch (ClassNotFoundException e) {
 			return false;
 		}
-	}
-
-	/**
-	 * Verify if jsp support is available.
-	 *
-	 * @return true if WebContainer is available
-	 */
-	public static boolean isJSPAvailable() {
-//		try {
-//			return (org.ops4j.pax.web.jsp.JspServletWrapper.class != null);
-//		} catch (NoClassDefFoundError ignore) {
-			return false;
-//		}
 	}
 
 	/**

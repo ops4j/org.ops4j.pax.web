@@ -50,9 +50,9 @@
 							javax.servlet.descriptor;version="[3.1,5)",
 
 							<!-- from pax-web-jsp -->
-							javax.servlet.jsp;version="${dependency.jakarta.servlet.jsp-api.version}";resolution:=optional,
-							javax.servlet.jsp.el;version="${dependency.jakarta.servlet.jsp-api.version}";resolution:=optional,
-							javax.servlet.jsp.tagext;version="${dependency.jakarta.servlet.jsp-api.version}";resolution:=optional,
+							javax.servlet.jsp;version="2.3";resolution:=optional,
+							javax.servlet.jsp.el;version="2.3";resolution:=optional,
+							javax.servlet.jsp.tagext;version="2.3";resolution:=optional,
 
 							<!-- from pax-logging-api -->
 							org.apache.juli.logging,

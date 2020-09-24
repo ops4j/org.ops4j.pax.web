@@ -57,6 +57,15 @@ public interface PaxWebConstants {
 	/** Default name for <em>virtual host</em> */
 	String DEFAULT_VIRTUAL_HOST_NAME = "default";
 
+	/** Default (not overrideable) JSP servlet name */
+	String DEFAULT_JSP_SERVLET_NAME = "jsp";
+
+	/** The only supported JSP servlet class name */
+	String DEFAULT_JSP_SERVLET_CLASS = "org.ops4j.pax.web.jsp.JspServlet";
+
+	/** The only supported {@link javax.servlet.ServletContainerInitializer} class that configures JSP engine */
+	String DEFAULT_JSP_SCI_CLASS = "org.ops4j.pax.web.jsp.JasperInitializer";
+
 	/** Default {@link ServletContext#getContextPath() context path} */
 	String DEFAULT_CONTEXT_PATH = "/";
 
@@ -237,32 +246,5 @@ public interface PaxWebConstants {
 	String PROPERTY_ENC_PREFIX = PID + ".enc.prefix";
 
 	String PROPERTY_ENC_SUFFIX = PID + ".enc.suffix";
-
-	/**
-	 * Scratch directory for JSPs
-	 */
-	String PROPERTY_JSP_SCRATCH_DIR = PID + ".jsp.scratch.dir";
-
-	String PROPERTY_JSP_CHECK_INTERVAL = PID + ".jsp.check.interval";
-
-	String PROPERTY_JSP_DEBUG_INFO = PID + ".jsp.debug.info";
-
-	String PROPERTY_JSP_DEVELOPMENT = PID + ".jsp.development";
-
-	String PROPERTY_JSP_ENABLE_POOLING = PID + ".jsp.enable.pooling";
-
-	String PROPERTY_JSP_IE_CLASS_ID = PID + ".jsp.ie.classid";
-
-	String PROPERTY_JSP_JAVA_ENCODING = PID + ".jsp.java.encoding";
-
-	String PROPERTY_JSP_KEEP_GENERATED = PID + ".jsp.keep.generated";
-
-	String PROPERTY_JSP_LOG_VERBOSITY_LEVEL = PID + ".jsp.log.verbosity.level";
-
-	String PROPERTY_JSP_MAPPED_FILE = PID + ".jsp.mapped.file";
-
-	String PROPERTY_JSP_TAGPOOL_MAX_SIZE = PID + ".jsp.tagpool.max.size";
-
-	String PROPERTY_JSP_PRECOMPILATION = PID + ".jsp.precompilation";
 
 }

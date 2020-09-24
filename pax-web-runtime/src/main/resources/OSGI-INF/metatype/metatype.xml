@@ -151,10 +151,12 @@
 
 		<!-- Properties related to JSP -->
 
-<!--		<AD name="JSP scratchdir" id="org.ops4j.pax.web.jsp.scratch.dir" type="String" default="" />-->
+		<AD id="org.ops4j.pax.web.jsp.scratch.dir" required="false" type="String" default=""
+				name="Global JSP scratchdir. It's preferred to leave this option empty and rely on context-dependent scratch dir." />
+		<AD id="org.ops4j.pax.web.jsp.development" required="false" type="String" default="false"
+				name="JSP development" />
 <!--		<AD name="JSP checkInterval" id="org.ops4j.pax.web.jsp.check.interval" type="String" default="300" />-->
 <!--		<AD name="JSP classdebuginfo" id="org.ops4j.pax.web.jsp.debug.info" type="String" default="true" />-->
-<!--		<AD name="JSP development" id="org.ops4j.pax.web.jsp.development" type="String" default="true" />-->
 <!--		<AD name="JSP enablePooling" id="org.ops4j.pax.web.jsp.enable.pooling" type="String" default="true" />-->
 <!--		<AD name="JSP ieClassId" id="org.ops4j.pax.web.jsp.ie.classid" type="String" default="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" />-->
 <!--		<AD name="JSP javaEncoding" id="org.ops4j.pax.web.jsp.java.encoding" type="String" default="UTF-8" />-->

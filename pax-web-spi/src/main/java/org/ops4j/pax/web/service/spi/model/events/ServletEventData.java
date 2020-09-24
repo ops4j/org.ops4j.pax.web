@@ -26,6 +26,9 @@ public class ServletEventData extends ElementEventData {
 	private final Servlet servlet;
 	private boolean resourceServlet;
 
+	private boolean jspServlet;
+	private String jspFile;
+
 	// used only by resource servlets
 	private String path;
 
@@ -62,12 +65,28 @@ public class ServletEventData extends ElementEventData {
 		this.resourceServlet = resourceServlet;
 	}
 
+	public void setJspServlet(boolean jspServlet) {
+		this.jspServlet = jspServlet;
+	}
+
+	public boolean isJspServlet() {
+		return jspServlet;
+	}
+
 	public String getPath() {
 		return path;
 	}
 
 	public void setPath(String path) {
 		this.path = path;
+	}
+
+	public String getJspFile() {
+		return jspFile;
+	}
+
+	public void setJspFile(String jspFile) {
+		this.jspFile = jspFile;
 	}
 
 }

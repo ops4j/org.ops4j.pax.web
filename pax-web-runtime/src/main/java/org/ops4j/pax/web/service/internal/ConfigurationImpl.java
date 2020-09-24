@@ -16,6 +16,7 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -35,6 +36,7 @@ import org.ops4j.pax.web.service.spi.config.ResourceConfiguration;
 import org.ops4j.pax.web.service.spi.config.SecurityConfiguration;
 import org.ops4j.pax.web.service.spi.config.ServerConfiguration;
 import org.ops4j.pax.web.service.spi.config.SessionConfiguration;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.servlet.DefaultSessionCookieConfig;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.util.property.PropertyResolver;
@@ -63,6 +65,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	private final SecurityConfiguration securityConfiguration;
 	private final ResourceConfiguration resourceConfiguration;
 	private final SessionConfiguration sessionConfiguration;
+	private final JspConfiguration jspConfiguration;
 	private final LogConfiguration logConfiguration;
 
 	/** Property resolver. Cannot be null. */
@@ -93,6 +96,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		securityConfiguration = new SecurityConfigurationImpl();
 		resourceConfiguration = new ResourceConfigurationImpl();
 		sessionConfiguration = new SessionConfigurationImpl();
+		jspConfiguration = new JspConfigurationImpl(serverConfiguration);
 		logConfiguration = new LogConfigurationImpl();
 	}
 
@@ -118,7 +122,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 
 	@Override
 	public JspConfiguration jsp() {
-		return null;
+		return jspConfiguration;
 	}
 
 	@Override
@@ -237,36 +241,6 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 //	}
 //
 //	@Override
-//	public File getConfigurationDir() {
-//		try {
-//			if (!contains(PROPERTY_SERVER_CONFIGURATION_FILE)) {
-//				final String serverConfigurationFileName = propertyResolver
-//						.get(PROPERTY_SERVER_CONFIGURATION_FILE);
-//				File configurationFile;
-//				if (serverConfigurationFileName.startsWith("file:")) {
-//					configurationFile = new File(new URI(
-//							serverConfigurationFileName));
-//				} else {
-//					configurationFile = new File(serverConfigurationFileName);
-//				}
-//				if (!configurationFile.exists()) {
-//					LOG.debug("Reading from configured path for the configuration property "
-//							+ PROPERTY_SERVER_CONFIGURATION_FILE
-//							+ " has failed");
-//				}
-//				return set(PROPERTY_SERVER_CONFIGURATION_FILE,
-//						configurationFile);
-//			}
-//			//CHECKSTYLE:OFF
-//		} catch (Exception ignore) {
-//			LOG.debug("Reading configuration property "
-//					+ PROPERTY_SERVER_CONFIGURATION_FILE + " has failed");
-//		}
-//		//CHECKSTYLE:ON
-//		return get(PROPERTY_SERVER_CONFIGURATION_FILE);
-//	}
-//
-//	@Override
 //	public URL getConfigurationURL() {
 //		try {
 //			if (!contains(PROPERTY_SERVER_CONFIGURATION_URL)) {
@@ -282,65 +256,6 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 //		}
 //		//CHECKSTYLE:ON
 //		return get(PROPERTY_SERVER_CONFIGURATION_URL);
-//	}
-//
-//	/**
-//	 * @see Configuration#getSessionTimeout()
-//	 */
-//	@Override
-//	public Integer getSessionTimeout() {
-//		return getResolvedIntegerProperty(PROPERTY_SESSION_TIMEOUT);
-//
-//	}
-//
-//	@Override
-//	public String getSessionCookie() {
-//		return getResolvedStringProperty(PROPERTY_SESSION_COOKIE);
-//	}
-//
-//	@Override
-//	public String getSessionDomain() {
-//		return getResolvedStringProperty(PROPERTY_SESSION_DOMAIN);
-//	}
-//
-//	@Override
-//	public String getSessionPath() {
-//		return getResolvedStringProperty(PROPERTY_SESSION_PATH);
-//	}
-//
-//	@Override
-//	public String getSessionUrl() {
-//		return getResolvedStringProperty(PROPERTY_SESSION_URL);
-//	}
-//
-//	@Override
-//	public Boolean getSessionCookieHttpOnly() {
-//		return getResolvedBooleanProperty(PROPERTY_SESSION_COOKIE_HTTP_ONLY);
-//	}
-//
-//	@Override
-//	public Boolean getSessionCookieSecure() {
-//		return getResolvedBooleanProperty(PROPERTY_SESSION_COOKIE_SECURE);
-//	}
-//
-//	@Override
-//	public Integer getSessionCookieMaxAge() {
-//		return getResolvedIntegerProperty(PROPERTY_SESSION_COOKIE_MAX_AGE);
-//	}
-//
-//	@Override
-//	public Boolean getSessionLazyLoad() {
-//		return getResolvedBooleanProperty(PROPERTY_SESSION_LAZY_LOAD);
-//	}
-//
-//	@Override
-//	public String getSessionStoreDirectory() {
-//		return getResolvedStringProperty(PROPERTY_SESSION_STORE_DIRECTORY);
-//	}
-//
-//	@Override
-//	public String getWorkerName() {
-//		return getResolvedStringProperty(PROPERTY_WORKER_NAME);
 //	}
 //
 //	@Override
@@ -1228,6 +1143,59 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		@Override
 		public Boolean getLogNCSABuffered() {
 			return ncsaBuffered;
+		}
+	}
+
+	private class JspConfigurationImpl implements JspConfiguration {
+
+		private final ServerConfiguration serverConfig;
+		private String globalScratchDir = null;
+
+		JspConfigurationImpl(ServerConfiguration serverConfiguration) {
+			this.serverConfig = serverConfiguration;
+
+			String location = resolveStringProperty(PaxWebConfig.PID_CFG_JSP_SCRATCH_DIR);
+			File result = null;
+			if (location != null) {
+				if (location.startsWith("file:")) {
+					try {
+						URL locationUrl = new URL(location);
+						result = new File(locationUrl.toURI());
+					} catch (MalformedURLException | URISyntaxException e) {
+						LOG.warn("Invalid URL for JSP global scratch directory: {}", location, e);
+					}
+				} else {
+					result = new File(location);
+				}
+			}
+
+			if (result != null) {
+				result.mkdirs();
+				if (!result.isDirectory()) {
+					LOG.warn("Directory {} is not accessible, JSP scratch dir will be relative to tmp dir and context dependent",
+							location);
+				}
+				try {
+					globalScratchDir = result.getCanonicalPath();
+				} catch (IOException e) {
+					LOG.warn("Unexpected problem when checking JSP scratch dir {}", result, e);
+				}
+			}
+		}
+
+		@Override
+		public String getJspScratchDir(OsgiContextModel context) {
+			if (globalScratchDir != null) {
+				return globalScratchDir;
+			}
+			File dir = new File(serverConfig.getTemporaryDirectory(), "jsp/" + context.getTemporaryLocation());
+			try {
+				dir.mkdirs();
+				return dir.getCanonicalPath();
+			} catch (IOException e) {
+				LOG.warn("Unexpected problem when checking JSP scratch dir {}", dir, e);
+				return dir.getAbsolutePath();
+			}
 		}
 	}
 

@@ -430,4 +430,13 @@ public class Utils {
 		return "bundle".equals(protocol) || "bundleresource".equals(protocol) || "bundleentry".equals(protocol);
 	}
 
+	public static Bundle getPaxWebJspBundle(BundleContext bundleContext) {
+		for (Bundle b : bundleContext.getBundles()) {
+			if ("org.ops4j.pax.web.pax-web-jsp".equals(b.getSymbolicName())) {
+				return b;
+			}
+		}
+		return null;
+	}
+
 }

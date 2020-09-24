@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,9 +13,16 @@
 	limitations under the License.
 
 -->
-<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-    version="3.0">
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-    <display-name>Hello World JSP</display-name>
-</web-app>
+<html>
+<body align='center'>
+    <c:set var="hello" value="Hello World"/>
+    <h1>
+    <c:out value="${hello}"/>
+    </h1>
+    <img src='/images/logo.png' border='0'/>
+
+    <h1>from jsp using TLD</h1>
+</body>
+</html>

@@ -78,6 +78,12 @@ public class ElementEvent {
 		this.replay = false;
 	}
 
+	@Override
+	public String toString() {
+		return String.format("%s (%s/%s): %s%s", type, bundleName, bundleVersion, data.toString(),
+				exception == null ? "" : " " + exception.getMessage());
+	}
+
 	public boolean isReplay() {
 		return replay;
 	}

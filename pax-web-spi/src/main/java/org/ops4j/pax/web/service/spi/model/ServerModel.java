@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service.spi.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Dictionary;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,6 +49,7 @@ import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.ServerController;
+import org.ops4j.pax.web.service.spi.config.JspConfiguration;
 import org.ops4j.pax.web.service.spi.context.DefaultMultiBundleWebContainerContext;
 import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
@@ -318,6 +320,7 @@ public class ServerModel implements BatchVisitor {
 	 * Keep container initializers to check for conflicts.
 	 */
 	private final Map<ServletContainerInitializer, ContainerInitializerModel> containerInitializers = new IdentityHashMap<>();
+
 
 	/**
 	 * Creates new global model of all web applications with {@link Executor} to be used for configuration and
@@ -1804,6 +1807,75 @@ public class ServerModel implements BatchVisitor {
 		if (change) {
 			reEnableErrorPageModels(currentlyDisabled, currentlyEnabledByPath, modelToEnable, batch);
 		}
+	}
+
+	/**
+	 * Method that creates {@link ServletModel} to be called when actually registering JSP support within
+	 * a {@link HttpContext} / {@link OsgiContextModel}, but also called when needed during registration of a servlet
+	 * backed by "JSP file".
+	 * @param serviceBundle
+	 * @param name
+	 * @param jspFile
+	 * @param urlPatterns
+	 * @param initParams
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public ServletModel createJspServletModel(Bundle serviceBundle, String name, String jspFile,
+			String[] urlPatterns, Dictionary<String, String> initParams, JspConfiguration config) {
+		// the bundle associated with this HttpServiceEnabled instance, doesn't need access to
+		// org.apache.jasper.servlet package from pax-web-jsp, we will search the bundle first and report an
+		// error if pax-web-jsp is not available
+
+		Bundle paxWebJsp = Utils.getPaxWebJspBundle(serviceBundle.getBundleContext());
+		if (paxWebJsp == null) {
+			throw new IllegalStateException("pax-web-jsp bundle is not installed. Can't register JSP servlet.");
+		}
+
+		Class<? extends Servlet> jspServletClass = null;
+		try {
+			jspServletClass = (Class<? extends Servlet>) paxWebJsp.loadClass(PaxWebConstants.DEFAULT_JSP_SERVLET_CLASS);
+		} catch (ClassNotFoundException e) {
+			throw new IllegalStateException("Can't load JSP servlet class " + PaxWebConstants.DEFAULT_JSP_SERVLET_CLASS
+					+ " from bundle " + paxWebJsp);
+		}
+
+		if (jspFile == null) {
+			// that's the "generic JSP servlet case"
+			if (urlPatterns == null || urlPatterns.length == 0) {
+				urlPatterns = new String[] { "*.jsp" };
+			}
+		}
+
+		return new ServletModel.Builder()
+				.withServletName(name)
+				.withServletClass(jspServletClass)
+				.withServletJspFile(jspFile)
+				.withLoadOnStartup(1)
+				.withAsyncSupported(true)
+				.withUrlPatterns(urlPatterns)
+				.withInitParams(Utils.toMap(initParams))
+				.jspServlet(true)
+				.build();
+	}
+
+	@SuppressWarnings("unchecked")
+	public ContainerInitializerModel createJSPServletContainerInitializerModel(Bundle serviceBundle) {
+		Bundle paxWebJsp = Utils.getPaxWebJspBundle(serviceBundle.getBundleContext());
+		if (paxWebJsp == null) {
+			throw new IllegalStateException("pax-web-jsp bundle is not installed. Can't register JSP servlet.");
+		}
+		Class<? extends ServletContainerInitializer> jspSCIClass = null;
+		ServletContainerInitializer sci = null;
+		try {
+			jspSCIClass = (Class<? extends ServletContainerInitializer>) paxWebJsp.loadClass(PaxWebConstants.DEFAULT_JSP_SCI_CLASS);
+			sci = jspSCIClass.newInstance();
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			throw new IllegalStateException("Can't create JSP SCI " + PaxWebConstants.DEFAULT_JSP_SCI_CLASS
+					+ " using bundle " + paxWebJsp);
+		}
+
+		return new ContainerInitializerModel(sci, null);
 	}
 
 	// --- batch operation visit() methods performed without validation, because it was done earlier

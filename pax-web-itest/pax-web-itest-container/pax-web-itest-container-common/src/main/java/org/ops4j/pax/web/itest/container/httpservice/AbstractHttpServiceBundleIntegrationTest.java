@@ -165,7 +165,7 @@ public abstract class AbstractHttpServiceBundleIntegrationTest extends AbstractC
 			if (method.getName().equals("getWriter")) {
 				return new PrintWriter(writer);
 			}
-			return null;
+			return method.invoke(proxy, args);
 		}), null);
 
 		// Check if our example filter do write the string to the writer...

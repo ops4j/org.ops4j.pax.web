@@ -1334,6 +1334,16 @@ class JettyServerWrapper implements BatchVisitor {
 
 			LOG.info("Starting Jetty context \"{}\" with default Osgi Context {}", contextPath, highestRanked);
 
+			// first thing - only NOW we can set ServletContext's class loader! It affects many things, including
+			// the TCCL used for example by javax.el.ExpressionFactory.newInstance()
+			Bundle bundle = highestRanked.getOwnerBundle();
+			if (bundle != null) {
+				BundleWiring wiring = bundle.adapt(BundleWiring.class);
+				if (wiring != null && wiring.getClassLoader() != null) {
+					sch.setClassLoader(wiring.getClassLoader());
+				}
+			}
+
 			// this is when already collected initializers may be added as ordered collection to the servlet context
 			// handler (Pax Web specific) - we need control over them, because we have to pass correct
 			// ServletContext implementation there
