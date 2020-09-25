@@ -72,6 +72,9 @@ public interface PaxWebConstants {
 	/** Default session timeout */
 	Integer DEFAULT_SESSION_TIMEOUT = 30;
 
+	/** Symbolic Name of pax-web-jsp bundle */
+	String DEFAULT_PAX_WEB_JSP_SYMBOLIC_NAME = "org.ops4j.pax.web.pax-web-jsp";
+
 	/**
 	 * Service registration property to mark services as <em>internal</em>, so they're not processed by Pax Web
 	 * Whiteboard extender as normal Whiteboard services.

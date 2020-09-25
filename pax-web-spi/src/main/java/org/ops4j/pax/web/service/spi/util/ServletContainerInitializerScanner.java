@@ -28,6 +28,7 @@ import java.util.Set;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.annotation.HandlesTypes;
 
+import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
 //import org.apache.xbean.finder.BundleAssignableClassFinder;
 //import org.osgi.service.packageadmin.PackageAdmin;
 
+@Review("Not refactored yet")
 public class ServletContainerInitializerScanner {
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());

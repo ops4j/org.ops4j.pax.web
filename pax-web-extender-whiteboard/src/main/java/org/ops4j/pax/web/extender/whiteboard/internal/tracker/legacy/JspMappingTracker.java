@@ -17,7 +17,13 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 
+import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
+import org.ops4j.pax.web.service.spi.model.elements.JspModel;
+import org.ops4j.pax.web.service.spi.model.events.JspEventData;
 import org.ops4j.pax.web.service.whiteboard.JspMapping;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Tracks {@link JspMapping}.
@@ -25,45 +31,24 @@ import org.ops4j.pax.web.service.whiteboard.JspMapping;
  * @author Alin Dreghiciu
  * @since 0.4.0, March 14, 2008
  */
-public class JspMappingTracker /*extends AbstractElementTracker<JspMapping, JspWebElement>*/ {
+public class JspMappingTracker extends AbstractMappingTracker<JspMapping, JspMapping, JspEventData, JspModel> {
 
-	/**
-	 * Constructor.
-	 *
-	 * @param extenderContext
-	 *            extender context; cannot be null
-	 * @param bundleContext
-	 *            extender bundle context; cannot be null
-	 */
-//	private JspMappingTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
-//		super(extenderContext, bundleContext);
-//	}
-//
-//	public static ServiceTracker<JspMapping, JspWebElement> createTracker(final ExtenderContext extenderContext,
-//			final BundleContext bundleContext) {
-//		return new JspMappingTracker(extenderContext, bundleContext).create(JspMapping.class);
-//	}
-//
-//	/**
-//	 * @see AbstractElementTracker#createWebElement(ServiceReference, Object)
-//	 */
-//	@Override
-//	JspWebElement createWebElement(final ServiceReference<JspMapping> serviceReference, final JspMapping published) {
-//		return new JspWebElement(serviceReference, published);
-//	}
+	protected JspMappingTracker(ExtenderContext extenderContext, BundleContext bundleContext) {
+		super(extenderContext, bundleContext);
+	}
 
-//	@Override
-//	public void register(final WebContainer webContainer, final HttpContext httpContext) throws Exception {
-////		webContainer.registerJsps(
-////					jspMapping.getUrlPatterns(),
-////					DictionaryUtils.adapt(jspMapping.getInitParams()),
-////					httpContext);
-//	}
-//
-//	@Override
-//	public void unregister(final WebContainer webContainer, final HttpContext httpContext) {
-////			webContainer.unregisterJsps(
-////					jspMapping.getUrlPatterns(), httpContext);
-//	}
+	public static ServiceTracker<JspMapping, JspModel> createTracker(final ExtenderContext extenderContext,
+			final BundleContext bundleContext) {
+		return new JspMappingTracker(extenderContext, bundleContext).create(JspMapping.class);
+	}
+
+	@Override
+	protected JspModel doCreateElementModel(Bundle bundle, JspMapping service, Integer rank, Long serviceId) {
+		JspModel model = new JspModel(service.getUrlPatterns(), service.getJspFile());
+		model.setRegisteringBundle(bundle);
+		model.setServiceRank(rank);
+		model.setServiceId(serviceId);
+		return model;
+	}
 
 }

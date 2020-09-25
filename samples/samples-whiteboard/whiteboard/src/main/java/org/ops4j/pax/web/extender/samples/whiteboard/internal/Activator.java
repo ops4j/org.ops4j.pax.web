@@ -33,6 +33,7 @@ import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
 import org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
@@ -70,12 +71,21 @@ public class Activator implements BundleActivator {
 
 	@SuppressWarnings("deprecation")
 	public void start(final BundleContext bundleContext) throws Exception {
-		Dictionary<String, String> props;
+		Dictionary<String, Object> props;
 
 		// register a custom http context that forbids access
 		props = new Hashtable<>();
 		props.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "forbidden");
+		// we don't want "forbidden" context to "take over" "/" context - it'll still be associated
+		// with servlets where referenced explicitly, but the JSPs registered further could
+		// register Jasper SCI to wrong context
+		props.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE);
 		httpContextReg = bundleContext.registerService(HttpContext.class, new WhiteboardContext(), props);
+
+		// register hello jsp first, because it'll lead to registration of Jasper SCI
+		DefaultJspMapping jspMapping = new DefaultJspMapping();
+		jspMapping.setUrlPatterns(new String[] { "/jsp/*" });
+		jspMappingRegistration = bundleContext.registerService(JspMapping.class, jspMapping, null);
 
 		// and an servlet that cannot be accessed due to the above context
 		props = new Hashtable<>();
@@ -83,8 +93,7 @@ public class Activator implements BundleActivator {
 		props.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "forbidden");
 		// legacy way to specify the name - it MUST be unique and it defaults to FQCN of the servlet
 		props.put(PaxWebConstants.INIT_PARAM_SERVLET_NAME, "forbidden-servlet");
-		forbiddenServletReg = bundleContext.registerService(Servlet.class,
-				new WhiteboardServlet("/forbidden"), props);
+		forbiddenServletReg = bundleContext.registerService(Servlet.class, new WhiteboardServlet("/forbidden"), props);
 
 		// first make sure all mappings are registered, servlets aren't notified of updates since jetty 9.3.5 upgrade
 
@@ -112,14 +121,12 @@ public class Activator implements BundleActivator {
 		// R6+ way to specify the name - it MUST be unique and it defaults to FQCN of the servlet
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "whiteboard-servlet");
 		// registering the servlet as service
-		servletReg = bundleContext.registerService(Servlet.class,
-				new WhiteboardServlet("/whiteboard"), props);
+		servletReg = bundleContext.registerService(Servlet.class, new WhiteboardServlet("/whiteboard"), props);
 
 		props = new Hashtable<>();
 		props.put(PaxWebConstants.SERVICE_PROPERTY_SERVLET_ALIAS, "/root");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "root-servlet");
-		rootServletReg = bundleContext.registerService(new String[] { HttpServlet.class.getName(), Servlet.class.getName() },
-				new WhiteboardServlet("/root"), props);
+		rootServletReg = bundleContext.registerService(Servlet.class, new WhiteboardServlet("/root"), props);
 
 		// Registering resource mappings as service
 		DefaultResourceMapping resourceMapping = new DefaultResourceMapping();
@@ -130,8 +137,7 @@ public class Activator implements BundleActivator {
 		props = new Hashtable<>();
 		props.put(PaxWebConstants.SERVICE_PROPERTY_SERVLET_ALIAS, "/filtered");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "filtered-servlet");
-		servlet1FilteredReg = bundleContext.registerService(Servlet.class,
-				new WhiteboardServlet("/filtered"), props);
+		servlet1FilteredReg = bundleContext.registerService(Servlet.class, new WhiteboardServlet("/filtered"), props);
 
 		// register a filter
 		props = new Hashtable<>();
@@ -144,8 +150,7 @@ public class Activator implements BundleActivator {
 		props = new Hashtable<>();
 		props.put(PaxWebConstants.SERVICE_PROPERTY_SERVLET_ALIAS, "/second");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "second-servlet");
-		servlet2FilteredReg = bundleContext.registerService(Servlet.class,
-				new WhiteboardServlet("/second"), props);
+		servlet2FilteredReg = bundleContext.registerService(Servlet.class, new WhiteboardServlet("/second"), props);
 
 		// register a filter
 		props = new Hashtable<>();
@@ -171,11 +176,6 @@ public class Activator implements BundleActivator {
 		rootResourceMapping.setAlias("/");
 		rootResourceMapping.setPath("");
 		rootResourceMappingRegistration = bundleContext.registerService(ResourceMapping.class, rootResourceMapping, null);
-
-		// register hello jsp
-		DefaultJspMapping jspMapping = new DefaultJspMapping();
-		jspMapping.setUrlPatterns("/jsp");
-		jspMappingRegistration = bundleContext.registerService(JspMapping.class, jspMapping, null);
 	}
 
 	public void stop(BundleContext bundleContext) throws Exception {

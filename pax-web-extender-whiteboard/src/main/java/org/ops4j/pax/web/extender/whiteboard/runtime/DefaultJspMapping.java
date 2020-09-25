@@ -32,13 +32,32 @@ public class DefaultJspMapping extends AbstractContextRelated implements JspMapp
 
 	/** Url patterns. */
 	private String[] urlPatterns;
-
+	/** JSP servlet */
+	private String jspFile;
 	/** Initialization parameters. */
 	private Map<String, String> initParameters;
 
 	@Override
+	public String[] getUrlPatterns() {
+		return urlPatterns;
+	}
+
+	@Override
+	public String getJspFile() {
+		return jspFile;
+	}
+
+	@Override
 	public Map<String, String> getInitParameters() {
 		return initParameters;
+	}
+
+	public void setUrlPatterns(String[] urlPatterns) {
+		this.urlPatterns = urlPatterns;
+	}
+
+	public void setJspFile(String jspFile) {
+		this.jspFile = jspFile;
 	}
 
 	public void setInitParameters(Map<String, String> initParameters) {
@@ -46,18 +65,13 @@ public class DefaultJspMapping extends AbstractContextRelated implements JspMapp
 	}
 
 	@Override
-	public String[] getUrlPatterns() {
-		return urlPatterns;
-	}
-
-	public void setUrlPatterns(String ... urlPatterns) {
-		this.urlPatterns = urlPatterns;
-	}
-
-	@Override
 	public String toString() {
-		return "DefaultJspMapping{urlPatterns=" + Arrays.deepToString(urlPatterns)
-				+ ",initParams=" + initParameters + "}";
+		return "DefaultJspMapping{"
+				+ "urlPatterns=" + Arrays.toString(urlPatterns)
+				+ ", jspFile='" + jspFile + '\''
+				+ ", contextSelectFilter='" + contextSelectFilter + '\''
+				+ ", contextId='" + contextId + '\''
+				+ '}';
 	}
 
 }

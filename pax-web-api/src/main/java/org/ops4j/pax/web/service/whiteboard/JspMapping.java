@@ -34,12 +34,13 @@ public interface JspMapping extends ContextRelated {
 	String[] getUrlPatterns();
 
 	/**
-	 * Getter.
-	 *
-	 * @return map of initialization parameters.
+	 * Returns a "jsp servlet file" as in {@code <servlet>/<jsp-file>} in {@code web.xml}
+	 * @return
 	 */
+	String getJspFile();
+
 	/**
-	 * Returns optional map of
+	 * Returns optional map of initialization parameters, that may be used to configure Jasper servlet
 	 * @return
 	 */
 	Map<String, String> getInitParameters();

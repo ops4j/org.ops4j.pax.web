@@ -56,6 +56,8 @@ import org.apache.catalina.core.StandardEngine;
 import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.core.StandardServer;
 import org.apache.catalina.core.StandardService;
+import org.apache.catalina.loader.ParallelWebappClassLoader;
+import org.apache.catalina.loader.WebappLoader;
 import org.apache.catalina.session.StandardManager;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.valves.AccessLogValve;
@@ -82,6 +84,7 @@ import org.ops4j.pax.web.service.spi.servlet.DynamicRegistrations;
 import org.ops4j.pax.web.service.spi.servlet.OsgiDynamicServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
+import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
 import org.ops4j.pax.web.service.spi.servlet.RegisteringContainerInitializer;
 import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
@@ -99,7 +102,6 @@ import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.tomcat.internal.web.TomcatResourceServlet;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -602,7 +604,6 @@ class TomcatServerWrapper implements BatchVisitor {
 			context.setWorkDir(configuration.server().getTemporaryDirectory().getAbsolutePath());
 //							ctx.setWebappVersion(name);
 //							ctx.setDocBase(basedir);
-			context.setParentClassLoader(getClass().getClassLoader());
 
 			// in this new context, we need "initial OSGi filter" which will:
 			// - call preprocessors
@@ -780,8 +781,17 @@ class TomcatServerWrapper implements BatchVisitor {
 			if (osgiServletContexts.containsKey(osgiModel)) {
 				throw new IllegalStateException(osgiModel + " is already registered");
 			}
+
+			// this (and similar Jetty and Undertow places) should be the only place where
+			// org.ops4j.pax.web.service.spi.servlet.OsgiServletContext is created and we have everything ready
+			// to create proper classloader for this OsgiServletContext
+			OsgiServletContextClassLoader loader = new OsgiServletContextClassLoader();
+			loader.addBundle(osgiModel.getOwnerBundle());
+			loader.addBundle(paxWebTomcatBundle);
+			loader.addBundle(Utils.getPaxWebJspBundle(paxWebTomcatBundle));
+			loader.makeImmutable();
 			OsgiServletContext osgiContext = new OsgiServletContext(realContext.getServletContext(), osgiModel, servletContextModel,
-					defaultSessionCookieConfig);
+					defaultSessionCookieConfig, loader);
 			osgiServletContexts.put(osgiModel, osgiContext);
 			osgiContextModels.get(contextPath).add(osgiModel);
 		}
@@ -1245,18 +1255,22 @@ class TomcatServerWrapper implements BatchVisitor {
 		try {
 			String contextPath = context.getPath().equals("") ? "/" : context.getPath();
 			OsgiContextModel highestRanked = context.getDefaultOsgiContextModel();
+			OsgiServletContext highestRankedContext = context.getDefaultServletContext();
 
 			LOG.info("Starting Tomcat context \"{}\" with default Osgi Context {}", context, highestRanked);
 
 			// first thing - only NOW we can set ServletContext's class loader! It affects many things, including
 			// the TCCL used for example by javax.el.ExpressionFactory.newInstance()
-			Bundle bundle = highestRanked.getOwnerBundle();
-			if (bundle != null) {
-				BundleWiring wiring = highestRanked.getOwnerBundle().adapt(BundleWiring.class);
-				if (wiring != null && wiring.getClassLoader() != null) {
-					context.setParentClassLoader(wiring.getClassLoader());
-				}
-			}
+
+			// org.apache.catalina.core.ContainerBase.setParentClassLoader() sets the parent that
+			// will be used as parent of org.apache.catalina.loader.ParallelWebappClassLoader returned
+			// (by default) from org.apache.catalina.core.ApplicationContext.getClassLoader(), which
+			// internally calls org.apache.catalina.core.StandardContext.getLoader().getClassLoader()
+			// here's everything done manually/explicitly
+			WebappLoader tomcatLoader = new WebappLoader();
+			tomcatLoader.setLoaderInstance(new ParallelWebappClassLoader(highestRankedContext.getClassLoader()));
+			context.setParentClassLoader(highestRankedContext.getClassLoader());
+			context.setLoader(tomcatLoader);
 
 			Collection<SCIWrapper> initializers = new LinkedList<>(this.initializers.get(contextPath).values());
 			// take only these SCIs, which are associated with highest ranked OCM

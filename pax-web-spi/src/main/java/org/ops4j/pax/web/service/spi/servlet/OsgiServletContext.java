@@ -52,7 +52,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +71,8 @@ public class OsgiServletContext implements ServletContext {
 	private ServletContext containerServletContext;
 	private final OsgiContextModel osgiContextModel;
 	private final ServletContextModel servletContextModel;
+
+	private final OsgiServletContextClassLoader classLoader;
 
 	/**
 	 * {@link WebContainerContext} obtained from {@link OsgiContextModel} in the context of the bundle registering
@@ -102,13 +103,14 @@ public class OsgiServletContext implements ServletContext {
 	 * web request invocation - target {@link Servlet} determines the {@link OsgiContextModel} used and the
 	 * {@link org.osgi.framework.Bundle} associated with the target {@link Servlet} is used to resolve actual
 	 * {@link WebContainerContext}.
-	 *
-	 * @param containerServletContext
+	 *  @param containerServletContext
 	 * @param osgiContextModel
 	 * @param servletContextModel
+	 * @param loader
 	 */
 	public OsgiServletContext(ServletContext containerServletContext, OsgiContextModel osgiContextModel,
-			ServletContextModel servletContextModel, SessionCookieConfig defaultSessionCookieConfig) {
+			ServletContextModel servletContextModel, SessionCookieConfig defaultSessionCookieConfig,
+			OsgiServletContextClassLoader loader) {
 		this.containerServletContext = containerServletContext;
 		this.osgiContextModel = osgiContextModel;
 		this.servletContextModel = servletContextModel;
@@ -131,6 +133,8 @@ public class OsgiServletContext implements ServletContext {
 		}
 
 		this.defaultSessionCookieConfig = defaultSessionCookieConfig;
+
+		this.classLoader = loader;
 	}
 
 	/**
@@ -700,13 +704,11 @@ public class OsgiServletContext implements ServletContext {
 	@Override
 	public ClassLoader getClassLoader() {
 		// at Servlet (or Filter) level, this method returns classLoader of a bundle registering given Servlet
-		// (or Filter). Here, it's a bundle registering ServletContextHelper (or HttpContext)
-		// TODO: (very important) this class loader should be "bundle delegating class loaders" - potentially
-		//       backed by more bundles and with mandatory caching.
-		//       Before Pax Web 8, such class loader was created in HttpServiceActive class (bundle-scoped
-		//       implementation of HttpService/WebContainer) and included bundles from "wiring space" of the
-		//       bundle of the HttpService instance
-		return osgiContextModel.getOwnerBundle().adapt(BundleWiring.class).getClassLoader();
+		// (or Filter). Here, it's a bundle registering ServletContextHelper (or HttpContext), but for practical
+		// reasons the returned classloader also contains few other bundles configured specifically
+		// to given server runtime
+//		return osgiContextModel.getOwnerBundle().adapt(BundleWiring.class).getClassLoader();
+		return this.classLoader;
 	}
 
 	@Override

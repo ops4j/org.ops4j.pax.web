@@ -29,7 +29,8 @@ public class WhiteboardIntegrationTest extends AbstractWhiteboardIntegrationTest
 	@Configuration
 	public Option[] configure() {
 		Option[] serverOptions = combine(baseConfigure(), paxWebTomcat());
-		return combine(serverOptions, paxWebExtenderWhiteboard());
+		serverOptions = combine(serverOptions, paxWebExtenderWhiteboard());
+		return combine(serverOptions, paxWebJsp());
 	}
 
 }

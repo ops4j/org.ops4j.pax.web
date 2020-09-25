@@ -59,6 +59,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.model.elements.JspModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.model.events.ElementEvent;
@@ -402,6 +403,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 					}
 					if (!found) {
 						ContainerInitializerModel cim = serverModel.createJSPServletContainerInitializerModel(serviceBundle);
+						cim.setRegisteringBundle(model.getRegisteringBundle());
 						model.getContextModels().forEach(cim::addContextModel);
 						newBatch = new Batch("JSP Configuration and registration of " + model);
 						serverModel.addContainerInitializerModel(cim, newBatch);
@@ -1243,7 +1245,8 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 	public void registerJsps(String[] urlPatterns, Dictionary<String, String> initParams, HttpContext context) {
 		try {
 			ServletModel jspServletModel = serverModel.createJspServletModel(serviceBundle,
-					PaxWebConstants.DEFAULT_JSP_SERVLET_NAME, null, urlPatterns, initParams, configuration.jsp());
+					PaxWebConstants.DEFAULT_JSP_SERVLET_NAME, null, urlPatterns, Utils.toMap(initParams),
+					configuration.jsp());
 			// there can be only one such servlet because of its fixed "jsp" name
 			doRegisterServlet(Collections.singletonList(context), jspServletModel);
 		} catch (NamespaceException | ServletException e) {
@@ -1255,7 +1258,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 	public void registerJspServlet(String jspFile, String[] urlPatterns, Dictionary<String, String> initParams, HttpContext context) {
 		try {
 			ServletModel model = serverModel.createJspServletModel(serviceBundle,
-					jspFile, jspFile, urlPatterns, initParams, configuration.jsp());
+					jspFile, jspFile, urlPatterns, Utils.toMap(initParams), configuration.jsp());
 			// "jsp servlet" is special servlet mapped to anything, but actually implemented using JSP file.
 			// Such servlet actually requires full JSP engine to be configured and ready, but it'll be added
 			// automatically
@@ -1742,6 +1745,31 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				batch.accept(serviceModel);
 				return null;
 			});
+		}
+
+		@Override
+		public void registerJsp(JspModel model) {
+			String file = model.getJspFile();
+			ServletModel jspServletModel = null;
+			if (file != null) {
+				jspServletModel = serverModel.createJspServletModel(serviceBundle,
+						file, file,
+						model.getMappings(), model.getInitParams(), configuration.jsp());
+			} else {
+				jspServletModel = serverModel.createJspServletModel(serviceBundle,
+						PaxWebConstants.DEFAULT_JSP_SERVLET_NAME, null,
+						model.getMappings(), model.getInitParams(), configuration.jsp());
+			}
+			for (OsgiContextModel ocm : model.getContextModels()) {
+				jspServletModel.addContextModel(ocm);
+			}
+			registerServlet(jspServletModel);
+		}
+
+		@Override
+		public void unregisterJsp(JspModel model) {
+			HttpServiceEnabled.this.unregisterServlet(model.getJspFile() == null ?
+					PaxWebConstants.DEFAULT_JSP_SERVLET_NAME : model.getJspFile());
 		}
 	}
 

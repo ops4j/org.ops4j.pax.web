@@ -22,6 +22,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.model.elements.JspModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
@@ -142,5 +143,17 @@ public interface WhiteboardWebContainerView extends PaxWebContainerView {
 	 * @param model
 	 */
 	void unregisterListener(EventListenerModel model);
+
+	/**
+	 * Registration of JSP model
+	 * @param model
+	 */
+	void registerJsp(JspModel model);
+
+	/**
+	 * Unregistration of JSP model
+	 * @param model
+	 */
+	void unregisterJsp(JspModel model);
 
 }

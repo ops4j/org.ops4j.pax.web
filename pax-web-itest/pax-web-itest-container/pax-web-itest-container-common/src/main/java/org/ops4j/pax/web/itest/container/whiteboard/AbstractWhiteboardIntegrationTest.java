@@ -152,8 +152,8 @@ public abstract class AbstractWhiteboardIntegrationTest extends AbstractContaine
 	@Test
 	public void testTldJsp() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'Hello World'",
-						resp -> resp.contains("Hello World"))
+				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/jsp/using-tld.jsp");
 	}
 

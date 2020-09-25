@@ -18,6 +18,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.EventListener;
 import java.util.Hashtable;
 import java.util.List;
 import javax.servlet.Filter;
@@ -25,12 +26,15 @@ import javax.servlet.Servlet;
 
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.FilterTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.HttpContextTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ListenerTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ResourceTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletContextHelperTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ErrorPageMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.FilterMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.HttpContextMappingTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.JspMappingTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ListenerMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ResourceMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletContextHelperMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletMappingTracker;
@@ -40,12 +44,17 @@ import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.context.DefaultServletContextHelper;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.model.elements.JspModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.whiteboard.ErrorPageMapping;
 import org.ops4j.pax.web.service.whiteboard.FilterMapping;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
+import org.ops4j.pax.web.service.whiteboard.JspMapping;
+import org.ops4j.pax.web.service.whiteboard.ListenerMapping;
 import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletMapping;
@@ -204,19 +213,15 @@ public class Activator implements BundleActivator {
 		trackResources();
 		trackWelcomeFiles();
 		trackErrorPages();
+		if (Utils.getPaxWebJspBundle(bundleContext) != null) {
+			trackJspMappings();
+		}
 
-//		if (WebContainerUtils.WEB_CONATAINER_AVAILABLE) {
-//			trackListeners(bundleContext);
-//			trackJspMappings(bundleContext);
-//			if (WebContainerUtils.WEBSOCKETS_AVAILABLE) {
-//				trackWebSockets(bundleContext);
-//			} else {
-//				LOG.info("No javax.websocket.Endpoint class found, WebSocketTracker is disabled");
-//			}
-//		} else {
-//			LOG.warn("Filters tracking has been disabled as the WebContainer (Pax Web) is not available");
-//			LOG.warn("Event Listeners tracking has been disabled as the WebContainer (Pax Web) is not available");
-//			LOG.warn("JSP mappings tracking has been disabled as the WebContainer (Pax Web) is not available");
+		// other
+		trackListeners();
+
+//		if (WebContainerUtils.WEBSOCKETS_AVAILABLE) {
+//			trackWebSockets(bundleContext);
 //		}
 
 		LOG.debug("Pax Web Whiteboard Extender started");
@@ -351,6 +356,32 @@ public class Activator implements BundleActivator {
 	}
 
 	/**
+	 * Track listeners.
+	 */
+	private void trackListeners() {
+		final ServiceTracker<EventListener, EventListenerModel> listenerTracker
+				= ListenerTracker.createTracker(extenderContext, bundleContext);
+		listenerTracker.open();
+		trackers.add(listenerTracker);
+
+		final ServiceTracker<ListenerMapping, EventListenerModel> listenerMappingTracker
+				= ListenerMappingTracker.createTracker(extenderContext, bundleContext);
+		listenerMappingTracker.open();
+		trackers.add(listenerMappingTracker);
+	}
+
+	/**
+	 * Track JSPs.
+	 */
+	private void trackJspMappings() {
+		final ServiceTracker<JspMapping, JspModel> jspMappingTracker
+				= JspMappingTracker.createTracker(extenderContext, bundleContext);
+
+		jspMappingTracker.open();
+		trackers.add(jspMappingTracker);
+	}
+
+	/**
 	 * <p>{@link ServiceFactory} returning default {@link ServletContextHelper} as specified by
 	 * "140.2 The Servlet Context":<blockquote>
 	 *     Some implementations of the ServletContextHelper may be implemented using a Service Factory,
@@ -368,40 +399,6 @@ public class Activator implements BundleActivator {
 		public void ungetService(Bundle bundle, ServiceRegistration<ServletContextHelper> registration, ServletContextHelper service) {
 		}
 	}
-
-	//
-//	/**
-//	 * Track listeners.
-//	 *
-//	 * @param bundleContext the BundleContext associated with this bundle
-//	 */
-//	private void trackListeners(final BundleContext bundleContext) {
-//		final ServiceTracker<EventListener, ListenerWebElement> listenerTracker = ListenerTracker
-//				.createTracker(extenderContext, bundleContext);
-//
-//		listenerTracker.open();
-//		trackers.add(0, listenerTracker);
-//
-//		// FIXME needed?
-//		final ServiceTracker<ListenerMapping, ListenerMappingWebElement> listenerMappingTracker = ListenerMappingTracker
-//				.createTracker(extenderContext, bundleContext);
-//
-//		listenerMappingTracker.open();
-//		trackers.add(0, listenerMappingTracker);
-//	}
-//
-//	/**
-//	 * Track JSPs.
-//	 *
-//	 * @param bundleContext the BundleContext associated with this bundle
-//	 */
-//	private void trackJspMappings(final BundleContext bundleContext) {
-//		final ServiceTracker<JspMapping, JspWebElement> jspMappingTracker = JspMappingTracker
-//				.createTracker(extenderContext, bundleContext);
-//
-//		jspMappingTracker.open();
-//		trackers.add(0, jspMappingTracker);
-//	}
 //
 //	/**
 //	 * Track WebSockets

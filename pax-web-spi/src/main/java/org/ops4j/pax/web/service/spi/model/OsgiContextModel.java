@@ -22,8 +22,10 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.SessionCookieConfig;
 import javax.servlet.descriptor.JspConfigDescriptor;
@@ -70,14 +72,14 @@ import org.slf4j.LoggerFactory;
  * own {@link ServletContext}, to comply with Whiteboard Specification.</p>
  *
  * <p>While many {@link OsgiContextModel OSGi-related contexts} may point to single {@link ServletContextModel} and
- * contribute different web elements (like some bundles provide servlets and other bundle provide login configuration),
+ * contribute different web elements (like some bundles provide servlets and other bundle provides login configuration),
  * some aspects need conflict resolution - for example session timeout setting. Simply highest ranked
  * {@link OsgiContextModel} will be the one providing the configuration for given {@link ServletContextModel}.</p>
  *
  * <p>Some aspects of {@link ServletContext} visible to registered element are however dependent on which particular
  * {@link OsgiContextModel} was used. Resource access will be done through {@link HttpContext} or
  * {@link ServletContextHelper} and context parameters will be stored in this
- * class (remember: there can be different {@link OsgiContextModel} for the same {@link ServletContextModel}, but
+ * class (remember: there can be different {@link OsgiContextModel}s for the same {@link ServletContextModel}, but
  * providing different init parameters ({@code <context-param>} from {@code web.xml}).</p>
  *
  * <p>Another zen-like question: there may be two different {@link ServletContextHelper}
@@ -106,7 +108,22 @@ import org.slf4j.LoggerFactory;
  *     <li>When there are two contexts with different name and same context path, both are used, because there may
  *     be two Whiteboard servlets registered, associated with both OSGi contexts</li>
  *     <li>If one servlet is associated with two {@link OsgiContextModel} pointing to the same context path, only
- *     one should be used - again, according to service ranking</li>
+ *     one should be used (registered into actual server-specific {@link ServletContext} - again, according to service
+ *     ranking</li>
+ *     <li>At actual server runtime level, each servlet is associated (through {@link ServletConfig#getServletContext()})
+ *     with <em>own</em> {@link OsgiContextModel}, but there are things to do before actual request processing - like
+ *     calling {@link javax.servlet.ServletContainerInitializer#onStartup(Set, ServletContext)} methods. Here, the
+ *     {@link OsgiContextModel} passed to such calls is the highest ranked {@link OsgiContextModel} /
+ *     {@link org.ops4j.pax.web.service.spi.servlet.OsgiServletContext} which may be different that the context
+ *     associated with the servlets running in such context.</li>
+ *     <li>When calling {@code registerXXX} methods on {@link org.ops4j.pax.web.service.WebContainer}, by default (or
+ *     explicitly) some bundle-scoped instance of {@link HttpContext} is used (mapped internally again to some
+ *     {@link OsgiContextModel}, but when Whiteboard is enabled, the {@link OsgiContextModel} that is highest-ranked
+ *     for given {@link ServletContext} (and particular context path) is usually the "default" {@link OsgiContextModel}
+ *     created for Whiteboard (shared by default and associated with pax-web-extender-whiteboard bundle, which may
+ *     not be the best source of e.g., resources loaded through {@link ServletContextHelper#getResource(String)}
+ *     until a bundle-scoped instance of {@link ServletContextHelper} is created for a bundle that registers some
+ *     web elements.</li>
  * </ul></p>
  *
  * <p>{@link OsgiContextModel} may represent legacy (Http Service specification) <em>context</em> and standard
@@ -115,7 +132,9 @@ import org.slf4j.LoggerFactory;
  * singleton, then such {@link OsgiContextModel} is equivalent to one created directly through
  * {@link org.osgi.service.http.HttpService} and user may continue to register servlets via
  * {@link org.osgi.service.http.HttpService} to such contexts. That's the way to change the context path of such
- * context.</p>
+ * context. Without any additional steps, the servlets (and filters and resources) registered through
+ * {@link org.ops4j.pax.web.service.WebContainer} will <strong>always</strong> be associated with {@link OsgiContextModel}
+ * that is lower ranked than the "default" {@link OsgiContextModel} coming from Whiteboard.</p>
  *
  * @author Alin Dreghiciu
  * @author Grzegorz Grzybek
@@ -137,7 +156,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 
 		// tricky way to specify that Whiteboard's "context" is easily overrideable, but still much higher ranked
 		// than OsgiContextModels registered for name+bundle pairs from HttpService instance(s)
-		DEFAULT_CONTEXT_MODEL = new OsgiContextModel(bundle, Integer.MIN_VALUE / 2, 0L);
+		DEFAULT_CONTEXT_MODEL = new OsgiContextModel(bundle, Integer.MIN_VALUE / 2, 0L, true);
 		DEFAULT_CONTEXT_MODEL.setName(HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME);
 		DEFAULT_CONTEXT_MODEL.setContextPath(PaxWebConstants.DEFAULT_CONTEXT_PATH);
 
@@ -254,11 +273,15 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	private final List<String> virtualHosts = new ArrayList<>();
 
 	/**
-	 * This is the <em>owner</em> bundle of this <em>context</em>. For {@link org.osgi.service.http.HttpService}
+	 * <p>This is the <em>owner</em> bundle of this <em>context</em>. For {@link org.osgi.service.http.HttpService}
 	 * scenario, that's the bundle of bundle-scoped {@link org.osgi.service.http.HttpService} used to create
 	 * {@link HttpContext}. For Whiteboard scenario, that's the bundle registering
 	 * {@link ServletContextHelper}. For old Pax Web Whiteboard, that can be a
-	 * bundle which registered <em>shared</em> {@link HttpContext}.
+	 * bundle which registered <em>shared</em> {@link HttpContext}.</p>
+	 *
+	 * <p>This is the most important {@link Bundle} that will be used inside "web context class loader" - the
+	 * class loader obtained from {@link ServletContext#getClassLoader()}}, but definitely it won't be the only
+	 * bundle used - we'll need the bundle of actual runtime (like pax-web-tomcat) and for example pax-web-jsp bundle.</p>
 	 */
 	private Bundle ownerBundle;
 
@@ -278,19 +301,27 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	/** Per OSGi context configuration of sessions - standard config from Servlet spec + Server specific config */
 	private final SessionConfigurationModel sessionConfiguration = new SessionConfigurationModel();
 
-	public OsgiContextModel(Bundle ownerBundle, Integer rank, Long serviceId) {
+	/**
+	 * Flag indicating whether this {@link OsgiContextModel} comes from Whiteboard or HttpService.
+	 */
+	private final boolean whiteboard;
+
+	public OsgiContextModel(Bundle ownerBundle, Integer rank, Long serviceId, boolean whiteboard) {
 		this.ownerBundle = ownerBundle;
 		this.serviceRank = rank;
 		this.serviceId = serviceId;
 
 		contextRegistrationProperties.put(Constants.SERVICE_ID, serviceId);
 		contextRegistrationProperties.put(Constants.SERVICE_RANKING, rank);
+		this.whiteboard = whiteboard;
 	}
 
-	public OsgiContextModel(WebContainerContext httpContext, Bundle ownerBundle, String contextPath) {
+	public OsgiContextModel(WebContainerContext httpContext, Bundle ownerBundle, String contextPath,
+			boolean whiteboard) {
 		this.httpContext = httpContext;
 		this.ownerBundle = ownerBundle;
 		this.contextPath = contextPath;
+		this.whiteboard = whiteboard;
 	}
 
 	@Override
@@ -578,7 +609,9 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		} else if (contextReference != null) {
 			source += "ref=" + contextReference;
 		}
-		return "OsgiContextModel{id=" + getId()
+		return "OsgiContextModel{"
+				+ (whiteboard ? "WB" : "HS")
+				+ ",id=" + getId()
 				+ ",name='" + name
 				+ "',path='" + contextPath
 				+ (ownerBundle == null ? "',shared=true" : "',bundle=" + ownerBundle.getSymbolicName())

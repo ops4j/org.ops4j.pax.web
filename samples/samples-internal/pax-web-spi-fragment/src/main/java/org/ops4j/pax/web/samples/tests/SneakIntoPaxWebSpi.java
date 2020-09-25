@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -31,7 +30,6 @@ import java.util.Set;
 import javax.servlet.ServletContainerInitializer;
 
 import org.apache.xbean.osgi.bundle.util.BundleResourceHelper;
-import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
@@ -63,11 +61,6 @@ public class SneakIntoPaxWebSpi {
 		//  5 = {org.apache.felix.framework.BundleImpl@4069} "org.objectweb.asm [22]"
 		//  6 = {org.apache.felix.framework.BundleImpl@4070} "org.objectweb.asm.commons [23]"
 		//  7 = {org.apache.felix.framework.BundleImpl@4071} "org.objectweb.asm.tree [24]"
-
-		ArrayList<Bundle> bundles = new ArrayList<>();
-		bundles.add(bundle);
-		bundles.addAll(wiredBundles);
-		ClassLoader loader = new ResourceDelegatingBundleClassLoader(bundles);
 
 		BundleResourceHelper finder1 = new BundleResourceHelper(bundle, false, true);
 		BundleResourceHelper finder2 = new BundleResourceHelper(bundle, false, false);

@@ -1,21 +1,28 @@
 /*
+ * Copyright 2020 OPS4J.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.
- *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 package org.ops4j.pax.web.itest.container.jsp;
 
+import javax.servlet.Servlet;
+
+import org.junit.Ignore;
+import org.junit.Test;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
+import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
+import org.ops4j.pax.web.service.WebContainer;
+import org.osgi.service.http.HttpContext;
 
 /**
  * The tests contained here will test the usage of the PAX Web Jsp directly with the HttpService, without
@@ -29,73 +36,51 @@ import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
  */
 public abstract class AbstractJspSelfRegistrationIntegrationTest extends AbstractContainerTestBase {
 
-//	@Before
-//	public void setUp() throws Exception {
-//		initServletListener(null);
-//		waitForServletListener();
-////		waitForServer("http://127.0.0.1:8181/");
-//	}
-//
-//	/**
-//	 * Test the class loader parent bug described in PAXWEB-497
-//	 */
-//	@Test
-//	public void testJSPEngineClassLoaderParent() throws Exception {
-//		HttpService httpService = getHttpService(bundleContext);
-//
-//		initServletListener(null);
-//
-//		String urlAlias = "/jsp/jspSelfRegistrationTest.jsp";
-//		JspServletWrapper servlet = new JspServletWrapper(bundleContext.getBundle(), urlAlias);
-//		HttpContext customHttpContext = httpService.createDefaultHttpContext();
-//		httpService.registerServlet(urlAlias, servlet, null, customHttpContext);
-//
-//		waitForServletListener();
-//
-//		HttpTestClientFactory.createDefaultTestClient()
-//				.withResponseAssertion("Response must contain 'TEST OK'",
-//						resp -> resp.contains("TEST OK"))
-//				.doGETandExecuteTest("http://127.0.0.1:8181" + urlAlias);
-//
-//		Assert.assertEquals("Class loader " + servlet.getClassLoader().getParent() + " is not expected class loader parent",
-//				JasperClassLoader.class.getClassLoader(),
-//				servlet.getClassLoader().getParent());
-//
-//		httpService.unregister(urlAlias);
-//	}
-//
-//
-//	/**
-//	 * Tests the custom class loader described in PAXWEB-498
-//	 */
-//	@Test
-//	public void testJSPEngineCustomClassLoader() throws Exception {
-//		HttpService httpService = getHttpService(bundleContext);
-//
-//		initServletListener(null);
-//
-//		String urlAlias = "/jsp/jspSelfRegistrationTest.jsp";
+	/**
+	 * Test the class loader parent bug described in PAXWEB-497
+	 */
+	@Test
+	public void testJSPEngineClassLoaderParent() throws Exception {
+		WebContainer wc = getWebContainer(context);
+
+		String urlAlias = "/jsp/jspSelfRegistrationTest.jsp";
+		configureAndWaitForServletWithMapping("/jsp/jspSelfRegistrationTest.jsp",
+				() -> wc.registerJspServlet(urlAlias, new String[] { urlAlias }, null, null));
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'TEST OK'",
+						resp -> resp.contains("TEST OK"))
+				.doGETandExecuteTest("http://127.0.0.1:8181" + urlAlias);
+
+		wc.unregisterJspServlet(urlAlias, null);
+	}
+
+	/**
+	 * Tests the custom class loader described in PAXWEB-498
+	 */
+	@Test
+	@Ignore("In Pax Web 8 JSPs are handled without ClassLoader tricks")
+	public void testJSPEngineCustomClassLoader() throws Exception {
+		WebContainer httpService = getWebContainer(context);
+
+		String urlAlias = "/jsp/jspSelfRegistrationTest.jsp";
 //		LoggingJasperClassLoader loggingJasperClassLoader = new LoggingJasperClassLoader(bundleContext.getBundle(), JasperClassLoader.class.getClassLoader());
-//		JspServletWrapper servlet = new JspServletWrapper(urlAlias, loggingJasperClassLoader);
-//		HttpContext customHttpContext = httpService.createDefaultHttpContext();
-//		httpService.registerServlet(urlAlias, servlet, null, customHttpContext);
-//
-//		waitForServletListener();
-//
-//		HttpTestClientFactory.createDefaultTestClient()
-//				.withResponseAssertion("Response must contain 'TEST OK'",
-//						resp -> resp.contains("TEST OK"))
-//				.doGETandExecuteTest("http://127.0.0.1:8181" + urlAlias);
-//
-////   		testClient.testWebPath("http://127.0.0.1:8181" + urlAlias, "TEST OK");
-//
+		Servlet servlet = null;//new JspServletWrapper(urlAlias, loggingJasperClassLoader);
+		HttpContext customHttpContext = httpService.createDefaultHttpContext();
+		httpService.registerServlet(urlAlias, servlet, null, customHttpContext);
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'TEST OK'",
+						resp -> resp.contains("TEST OK"))
+				.doGETandExecuteTest("http://127.0.0.1:8181" + urlAlias);
+
 //		String classLoaderLog = loggingJasperClassLoader.getLogBuilder().toString();
 //		System.out.println("classLoaderLog:\n" + classLoaderLog);
-//		Assert.assertTrue("Logging class loader didn't log anything !", classLoaderLog.length() > 0);
-//
-//		httpService.unregister(urlAlias);
-//	}
-//
+//		assertTrue("Logging class loader didn't log anything !", classLoaderLog.length() > 0);
+
+		httpService.unregisterServlet(servlet);
+	}
+
 //	private static class LoggingJasperClassLoader extends JasperClassLoader {
 //
 //		StringBuilder logBuilder = new StringBuilder();

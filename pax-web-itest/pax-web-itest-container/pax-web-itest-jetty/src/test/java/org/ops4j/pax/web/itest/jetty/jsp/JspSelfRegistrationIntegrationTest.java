@@ -13,23 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.jetty.whiteboard;
+package org.ops4j.pax.web.itest.jetty.jsp;
 
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.container.whiteboard.AbstractWhiteboardIntegrationTest;
+import org.ops4j.pax.web.itest.container.jsp.AbstractJspSelfRegistrationIntegrationTest;
 
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 @RunWith(PaxExam.class)
-public class WhiteboardIntegrationTest extends AbstractWhiteboardIntegrationTest {
+public class JspSelfRegistrationIntegrationTest extends AbstractJspSelfRegistrationIntegrationTest {
 
 	@Configuration
 	public Option[] configure() {
 		Option[] serverOptions = combine(baseConfigure(), paxWebJetty());
-		serverOptions = combine(serverOptions, paxWebExtenderWhiteboard());
 		return combine(serverOptions, paxWebJsp());
 	}
 

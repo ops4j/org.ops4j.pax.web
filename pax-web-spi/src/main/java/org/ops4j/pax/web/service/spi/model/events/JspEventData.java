@@ -13,22 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.spi.model;
+package org.ops4j.pax.web.service.spi.model.events;
 
-import org.junit.Test;
+public class JspEventData extends ElementEventData {
 
-import static org.junit.Assert.assertTrue;
+	private final String[] mappings;
+	private final String jspFile;
 
-public class OsgiContextModelTest {
+	public JspEventData(String[] mappings, String jspFile) {
+		this.mappings = mappings;
+		this.jspFile = jspFile;
+	}
 
-	@Test
-	public void sortByRank() {
-		OsgiContextModel ocm1 = new OsgiContextModel(null, 0, 0L, true);
-		ocm1.setContextPath("/testPath");
-		OsgiContextModel ocm2 = new OsgiContextModel(null, 0, 0L, true);
-		ocm2.setContextPath("/testPath");
+	public String[] getMappings() {
+		return mappings;
+	}
 
-		assertTrue("Comparing by static atomic id", ocm1.compareTo(ocm2) < 0);
+	public String getJspFile() {
+		return jspFile;
 	}
 
 }

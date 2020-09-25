@@ -45,6 +45,16 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 	}
 
 	public void stop(BundleContext bc) throws Exception {
+		HttpService service = tracker.getService();
+		if (service != null) {
+			try {
+				service.unregister("/helloworld/hs");
+				service.unregister("/");
+				service.unregister("/images");
+				service.unregister("/alt-images");
+			} catch (Exception ignored) {
+			}
+		}
 		tracker.close();
 	}
 
@@ -93,13 +103,6 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 
 	@Override
 	public void removedService(ServiceReference<HttpService> reference, HttpService service) {
-		try {
-			service.unregister("/helloworld/hs");
-			service.unregister("/");
-			service.unregister("/images");
-			service.unregister("/alt-images");
-		} catch (Exception ignored) {
-		}
 	}
 
 }

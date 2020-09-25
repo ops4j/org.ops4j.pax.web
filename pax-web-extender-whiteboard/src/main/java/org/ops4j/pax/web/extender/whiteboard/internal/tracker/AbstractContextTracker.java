@@ -106,7 +106,7 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 		if (serviceId == null) {
 			serviceId = 0L;
 		}
-		OsgiContextModel model = new OsgiContextModel(serviceReference.getBundle(), rank, serviceId);
+		OsgiContextModel model = new OsgiContextModel(serviceReference.getBundle(), rank, serviceId, true);
 
 		LOG.debug("Configuring OSGi context model from Whiteboard service {} (id={})", serviceReference, serviceId);
 

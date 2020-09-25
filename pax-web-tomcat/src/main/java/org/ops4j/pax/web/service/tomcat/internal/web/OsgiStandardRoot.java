@@ -139,7 +139,8 @@ class OsgiStandardRoot extends StandardRoot {
 								UrlResource potentialDirectory = new UrlResource(OsgiStandardRoot.this, resource, fullPath, maxEntrySize);
 								if (potentialDirectory.exists()) {
 									try (InputStream is = potentialDirectory.getInputStream()) {
-										if (is == null || is.available() == 0) {
+										if ((is == null || is.available() == 0)
+												&& (potentialDirectory.getContent() == null || potentialDirectory.getContent().length == 0)) {
 											URL fixedURL = new URL(resource.toExternalForm() + "/");
 											UrlResource properDirectory = new UrlResource(OsgiStandardRoot.this, fixedURL, fullPath, maxEntrySize);
 											if (properDirectory.exists()) {

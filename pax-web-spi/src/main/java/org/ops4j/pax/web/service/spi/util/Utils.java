@@ -30,6 +30,7 @@ import java.util.function.BiFunction;
 import javax.servlet.ServletConfig;
 
 import org.apache.felix.utils.properties.InterpolationHelper;
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.osgi.framework.Bundle;
@@ -432,7 +433,19 @@ public class Utils {
 
 	public static Bundle getPaxWebJspBundle(BundleContext bundleContext) {
 		for (Bundle b : bundleContext.getBundles()) {
-			if ("org.ops4j.pax.web.pax-web-jsp".equals(b.getSymbolicName())) {
+			if (PaxWebConstants.DEFAULT_PAX_WEB_JSP_SYMBOLIC_NAME.equals(b.getSymbolicName())) {
+				return b;
+			}
+		}
+		return null;
+	}
+
+	public static Bundle getPaxWebJspBundle(Bundle bundle) {
+		if (bundle == null) {
+			return null;
+		}
+		for (Bundle b : bundle.getBundleContext().getBundles()) {
+			if (PaxWebConstants.DEFAULT_PAX_WEB_JSP_SYMBOLIC_NAME.equals(b.getSymbolicName())) {
 				return b;
 			}
 		}

@@ -50,6 +50,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ErrorPageMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.FilterMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.HttpContextMappingTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.JspMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ListenerMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ResourceMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletContextHelperMappingTracker;
@@ -74,11 +75,13 @@ import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.model.elements.JspModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.whiteboard.ErrorPageMapping;
 import org.ops4j.pax.web.service.whiteboard.FilterMapping;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
+import org.ops4j.pax.web.service.whiteboard.JspMapping;
 import org.ops4j.pax.web.service.whiteboard.ListenerMapping;
 import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping;
@@ -148,6 +151,7 @@ public class MultiContainerTestSupport {
 	private ServiceTrackerCustomizer<WelcomeFileMapping, WelcomeFileModel> welcomeFileMappingCustomizer;
 	private ServiceTrackerCustomizer<ErrorPageMapping, ErrorPageModel> errorPageMappingCustomizer;
 	private ServiceTrackerCustomizer<ListenerMapping, EventListenerModel> listenerMappingCustomizer;
+	private ServiceTrackerCustomizer<JspMapping, JspModel> jspMappingCustomizer;
 
 	@Parameterized.Parameters(name = "{0}")
 	public static Collection<Object[]> data() {
@@ -228,6 +232,7 @@ public class MultiContainerTestSupport {
 		welcomeFileMappingCustomizer = getCustomizer(WelcomeFileMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
 		errorPageMappingCustomizer = getCustomizer(ErrorPageMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
 		listenerMappingCustomizer = getCustomizer(ListenerMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
+		jspMappingCustomizer = getCustomizer(JspMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
 	}
 
 	@After
@@ -504,6 +509,10 @@ public class MultiContainerTestSupport {
 
 	public ServiceTrackerCustomizer<ListenerMapping, EventListenerModel> getListenerMappingCustomizer() {
 		return listenerMappingCustomizer;
+	}
+
+	public ServiceTrackerCustomizer<JspMapping, JspModel> getJspMappingCustomizer() {
+		return jspMappingCustomizer;
 	}
 
 	@SuppressWarnings("unchecked")

@@ -50,9 +50,11 @@ public class Activator implements BundleActivator {
 			@Override
 			public void removedService(ServiceReference<HttpService> ref, HttpService service) {
 				super.removedService(ref, service);
-				httpService.unregister("/www");
-				httpService.unregister("/");
-				httpService = null;
+				if (httpService != null) {
+					httpService.unregister("/www");
+					httpService.unregister("/");
+					httpService = null;
+				}
 			}
 		};
 		httpServiceTracker.open();
@@ -60,6 +62,11 @@ public class Activator implements BundleActivator {
 
 	@Override
 	public void stop(BundleContext context) {
+		if (httpService != null) {
+			httpService.unregister("/www");
+			httpService.unregister("/");
+			httpService = null;
+		}
 		httpServiceTracker.close();
 	}
 

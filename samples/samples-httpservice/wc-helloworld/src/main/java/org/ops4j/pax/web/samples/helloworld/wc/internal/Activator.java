@@ -61,6 +61,27 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 	 * Called when the OSGi framework stops our bundle
 	 */
 	public void stop(BundleContext bc) throws Exception {
+		WebContainer webContainer = tracker.getService();
+		if (webContainer != null) {
+			webContainer.unregisterServlet(helloWorldServlet);
+			webContainer.unregisterFilter(helloWorldFilter);
+
+			webContainer.unregisterFilter("HelloWorldFilter");
+			webContainer.unregisterServlet(worldServlet);
+
+			webContainer.unregisterEventListener(helloWorldListener);
+			webContainer.unregisterEventListener(sessionListener);
+
+			webContainer.unregister("/images");
+			webContainer.unregister("/html");
+			webContainer.unregisterServlet(errorServlet);
+			webContainer.unregisterServlet(errorMakerServlet);
+
+			webContainer.unregisterErrorPage("java.lang.Exception", httpContext);
+			webContainer.unregisterErrorPage("404", httpContext);
+
+			webContainer.unregisterWelcomeFiles(new String[] { "index.html" }, httpContext);
+		}
 		tracker.close();
 	}
 
@@ -73,7 +94,7 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 				httpContext = webContainer.createDefaultHttpContext();
 
 				// set a session timeout of 10 minutes
-//				webContainer.setSessionTimeout(10, httpContext);
+				webContainer.setSessionTimeout(10, httpContext);
 
 				// register the hello world servlet for filtering with url pattern
 				// no name is passed, so FQCN will be used as servlet name
@@ -145,24 +166,25 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 
 	@Override
 	public void removedService(ServiceReference<WebContainer> reference, WebContainer webContainer) {
-		webContainer.unregisterServlet(helloWorldServlet);
-		webContainer.unregisterFilter(helloWorldFilter);
-
-		webContainer.unregisterFilter("HelloWorldFilter");
-		webContainer.unregisterServlet(worldServlet);
-
-		webContainer.unregisterEventListener(helloWorldListener);
-		webContainer.unregisterEventListener(sessionListener);
-
-		webContainer.unregister("/images");
-		webContainer.unregister("/html");
-		webContainer.unregisterServlet(errorServlet);
-		webContainer.unregisterServlet(errorMakerServlet);
-
-		//			webContainer.unregisterErrorPage("java.lang.Exception", httpContext);
-		//			webContainer.unregisterErrorPage("404", httpContext);
-
-		webContainer.unregisterWelcomeFiles(new String[] { "index.html" }, httpContext);
+		// we don't have to unregister in removedService(), because it'll be cleaned anyway
+//		webContainer.unregisterServlet(helloWorldServlet);
+//		webContainer.unregisterFilter(helloWorldFilter);
+//
+//		webContainer.unregisterFilter("HelloWorldFilter");
+//		webContainer.unregisterServlet(worldServlet);
+//
+//		webContainer.unregisterEventListener(helloWorldListener);
+//		webContainer.unregisterEventListener(sessionListener);
+//
+//		webContainer.unregister("/images");
+//		webContainer.unregister("/html");
+//		webContainer.unregisterServlet(errorServlet);
+//		webContainer.unregisterServlet(errorMakerServlet);
+//
+//		webContainer.unregisterErrorPage("java.lang.Exception", httpContext);
+//		webContainer.unregisterErrorPage("404", httpContext);
+//
+//		webContainer.unregisterWelcomeFiles(new String[] { "index.html" }, httpContext);
 
 		bundleContext.ungetService(reference);
 	}

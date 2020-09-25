@@ -18,7 +18,6 @@ package org.ops4j.pax.web.service.spi.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Dictionary;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -684,7 +683,7 @@ public class ServerModel implements BatchVisitor {
 	@SuppressWarnings("deprecation")
 	public OsgiContextModel createNewContextModel(WebContainerContext webContext, Bundle serviceBundle,
 			String contextPath) {
-		OsgiContextModel osgiContextModel = new OsgiContextModel(webContext, serviceBundle, contextPath);
+		OsgiContextModel osgiContextModel = new OsgiContextModel(webContext, serviceBundle, contextPath, false);
 		osgiContextModel.setName(webContext.getContextId());
 
 		// this context is not registered using Whiteboard, so we have full right to make it parameterless
@@ -1822,7 +1821,7 @@ public class ServerModel implements BatchVisitor {
 	 */
 	@SuppressWarnings("unchecked")
 	public ServletModel createJspServletModel(Bundle serviceBundle, String name, String jspFile,
-			String[] urlPatterns, Dictionary<String, String> initParams, JspConfiguration config) {
+			String[] urlPatterns, Map<String, String> initParams, JspConfiguration config) {
 		// the bundle associated with this HttpServiceEnabled instance, doesn't need access to
 		// org.apache.jasper.servlet package from pax-web-jsp, we will search the bundle first and report an
 		// error if pax-web-jsp is not available
@@ -1854,7 +1853,7 @@ public class ServerModel implements BatchVisitor {
 				.withLoadOnStartup(1)
 				.withAsyncSupported(true)
 				.withUrlPatterns(urlPatterns)
-				.withInitParams(Utils.toMap(initParams))
+				.withInitParams(initParams)
 				.jspServlet(true)
 				.build();
 	}

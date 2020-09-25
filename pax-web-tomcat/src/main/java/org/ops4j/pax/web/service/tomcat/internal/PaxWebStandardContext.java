@@ -193,7 +193,7 @@ public class PaxWebStandardContext extends StandardContext {
 		this.defaultOsgiContextModel = defaultOsgiContextModel;
 	}
 
-	public ServletContext getDefaultServletContext() {
+	public OsgiServletContext getDefaultServletContext() {
 		return defaultServletContext;
 	}
 

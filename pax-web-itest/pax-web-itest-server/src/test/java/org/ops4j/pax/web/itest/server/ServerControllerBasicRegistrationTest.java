@@ -170,7 +170,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		ServletContextModel scm = new ServletContextModel("/c");
 		batch.addServletContextModel(server, scm);
 
-		OsgiContextModel osgiContext = new OsgiContextModel(wcc, bundle, "/c");
+		OsgiContextModel osgiContext = new OsgiContextModel(wcc, bundle, "/c", false);
 		batch.addOsgiContextModel(osgiContext, scm);
 
 		Map<String, String> initParams = new HashMap<>();
@@ -352,7 +352,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		ServletContextModel scm = new ServletContextModel("/c");
 		batch.addServletContextModel(server, scm);
 
-		OsgiContextModel osgiContext = new OsgiContextModel(new DefaultHttpContext(bundle), bundle, "/c");
+		OsgiContextModel osgiContext = new OsgiContextModel(new DefaultHttpContext(bundle), bundle, "/c", false);
 		batch.addOsgiContextModel(osgiContext, scm);
 
 		batch.addServletModel(server, new ServletModel.Builder()
@@ -500,10 +500,10 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		ServletContextModel contextD = server.getOrCreateServletContextModel("/d", batch);
 		ServletContextModel contextE = server.getOrCreateServletContextModel("/e", batch);
 
-		OsgiContextModel osgiContextC = new OsgiContextModel(wcc1, bundle, "/c");
-		OsgiContextModel osgiContextC2 = new OsgiContextModel(wcc2, bundle, "/c");
-		OsgiContextModel osgiContextD = new OsgiContextModel(wcc1, bundle, "/d");
-		OsgiContextModel osgiContextE = new OsgiContextModel(wcc1, bundle, "/e");
+		OsgiContextModel osgiContextC = new OsgiContextModel(wcc1, bundle, "/c", false);
+		OsgiContextModel osgiContextC2 = new OsgiContextModel(wcc2, bundle, "/c", false);
+		OsgiContextModel osgiContextD = new OsgiContextModel(wcc1, bundle, "/d", false);
+		OsgiContextModel osgiContextE = new OsgiContextModel(wcc1, bundle, "/e", false);
 		batch.addOsgiContextModel(osgiContextC, contextC);
 		batch.addOsgiContextModel(osgiContextC2, contextC);
 		batch.addOsgiContextModel(osgiContextD, contextD);

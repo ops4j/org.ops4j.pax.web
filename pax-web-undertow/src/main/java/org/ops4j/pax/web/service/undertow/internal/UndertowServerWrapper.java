@@ -99,6 +99,7 @@ import org.ops4j.pax.web.service.spi.servlet.DynamicRegistrations;
 import org.ops4j.pax.web.service.spi.servlet.OsgiDynamicServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
+import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
 import org.ops4j.pax.web.service.spi.servlet.RegisteringContainerInitializer;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
@@ -963,8 +964,18 @@ class UndertowServerWrapper implements BatchVisitor {
 			if (osgiServletContexts.containsKey(osgiModel)) {
 				throw new IllegalStateException(osgiModel + " is already registered");
 			}
+
+			// this (and similar Jetty and Tomcat places) should be the only place where
+			// org.ops4j.pax.web.service.spi.servlet.OsgiServletContext is created and we have everything ready
+			// to create proper classloader for this OsgiServletContext
+			// unlike in Jetty or Tomcat, getRealServletContext() may return null for not started context
+			OsgiServletContextClassLoader loader = new OsgiServletContextClassLoader();
+			loader.addBundle(osgiModel.getOwnerBundle());
+			loader.addBundle(paxWebUndertowBundle);
+			loader.addBundle(Utils.getPaxWebJspBundle(paxWebUndertowBundle));
+			loader.makeImmutable();
 			OsgiServletContext osgiContext = new OsgiServletContext(getRealServletContext(contextPath), osgiModel, servletContextModel,
-					defaultSessionCookieConfig);
+					defaultSessionCookieConfig, loader);
 			osgiServletContexts.put(osgiModel, osgiContext);
 			osgiContextModels.get(contextPath).add(osgiModel);
 		}
@@ -1894,7 +1905,7 @@ class UndertowServerWrapper implements BatchVisitor {
 
 		private final String contextPath;
 
-		public ContextLinkingServletExtension(String contextPath) {
+		ContextLinkingServletExtension(String contextPath) {
 			this.contextPath = contextPath;
 		}
 
