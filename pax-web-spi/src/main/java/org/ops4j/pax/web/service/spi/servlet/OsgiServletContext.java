@@ -52,6 +52,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +73,7 @@ public class OsgiServletContext implements ServletContext {
 	private final OsgiContextModel osgiContextModel;
 	private final ServletContextModel servletContextModel;
 
-	private final OsgiServletContextClassLoader classLoader;
+	private final ClassLoader classLoader;
 
 	/**
 	 * {@link WebContainerContext} obtained from {@link OsgiContextModel} in the context of the bundle registering
@@ -134,7 +135,16 @@ public class OsgiServletContext implements ServletContext {
 
 		this.defaultSessionCookieConfig = defaultSessionCookieConfig;
 
-		this.classLoader = loader;
+		if (loader == null) {
+			if (ownerBundle != null && ownerBundle.adapt(BundleWiring.class) != null) {
+				// possibly in testing scenario
+				this.classLoader = ownerBundle.adapt(BundleWiring.class).getClassLoader();
+			} else {
+				this.classLoader = null;
+			}
+		} else {
+			this.classLoader = loader;
+		}
 	}
 
 	/**

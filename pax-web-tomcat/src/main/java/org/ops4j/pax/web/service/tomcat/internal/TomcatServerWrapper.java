@@ -211,14 +211,21 @@ class TomcatServerWrapper implements BatchVisitor {
 		// for now, we have nothing. We can do many things using external jetty-*.xml files, but the creation
 		// of Server itself should be done manually here.
 		LOG.info("Creating Tomcat server instance using configuration properties.");
-		createServer();
+		ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+		try {
+			// TCCL is needed so StringManagers in Tomcat code work
+			Thread.currentThread().setContextClassLoader(TomcatServerWrapper.class.getClassLoader());
+			createServer();
 
-		// No external configuration should replace our "Server" object
-		applyTomcatConfiguration();
+			// No external configuration should replace our "Server" object
+			applyTomcatConfiguration();
 
-		// If external configuration added some connectors, we have to ensure they match declaration from
-		// PID config: org.osgi.service.http.enabled and org.osgi.service.http.secure.enabled
-		verifyConnectorConfiguration();
+			// If external configuration added some connectors, we have to ensure they match declaration from
+			// PID config: org.osgi.service.http.enabled and org.osgi.service.http.secure.enabled
+			verifyConnectorConfiguration();
+		} finally {
+			Thread.currentThread().setContextClassLoader(tccl);
+		}
 
 		// Configure NCSA RequestLogHandler if needed
 		if (configuration.logging().isLogNCSAFormatEnabled()) {
@@ -785,11 +792,15 @@ class TomcatServerWrapper implements BatchVisitor {
 			// this (and similar Jetty and Undertow places) should be the only place where
 			// org.ops4j.pax.web.service.spi.servlet.OsgiServletContext is created and we have everything ready
 			// to create proper classloader for this OsgiServletContext
-			OsgiServletContextClassLoader loader = new OsgiServletContextClassLoader();
-			loader.addBundle(osgiModel.getOwnerBundle());
-			loader.addBundle(paxWebTomcatBundle);
-			loader.addBundle(Utils.getPaxWebJspBundle(paxWebTomcatBundle));
-			loader.makeImmutable();
+			OsgiServletContextClassLoader loader = null;
+			if (paxWebTomcatBundle != null) {
+				// it may not be the case in Test scenario
+				loader = new OsgiServletContextClassLoader();
+				loader.addBundle(osgiModel.getOwnerBundle());
+				loader.addBundle(paxWebTomcatBundle);
+				loader.addBundle(Utils.getPaxWebJspBundle(paxWebTomcatBundle));
+				loader.makeImmutable();
+			}
 			OsgiServletContext osgiContext = new OsgiServletContext(realContext.getServletContext(), osgiModel, servletContextModel,
 					defaultSessionCookieConfig, loader);
 			osgiServletContexts.put(osgiModel, osgiContext);
@@ -1268,7 +1279,12 @@ class TomcatServerWrapper implements BatchVisitor {
 			// internally calls org.apache.catalina.core.StandardContext.getLoader().getClassLoader()
 			// here's everything done manually/explicitly
 			WebappLoader tomcatLoader = new WebappLoader();
-			tomcatLoader.setLoaderInstance(new ParallelWebappClassLoader(highestRankedContext.getClassLoader()));
+			tomcatLoader.setLoaderInstance(new ParallelWebappClassLoader(highestRankedContext.getClassLoader()) {
+				@Override
+				protected void clearReferences() {
+					// skip, because we're managing "deployments" differently
+				}
+			});
 			context.setParentClassLoader(highestRankedContext.getClassLoader());
 			context.setLoader(tomcatLoader);
 

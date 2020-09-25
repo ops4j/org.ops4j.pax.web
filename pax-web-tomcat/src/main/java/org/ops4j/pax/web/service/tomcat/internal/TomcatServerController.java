@@ -158,7 +158,14 @@ class TomcatServerController implements ServerController {
 		}
 		String chroot = baseDirectory == null ? base : null;
 
-		return new TomcatResourceServlet(baseDirectory, chroot, configuration.resources());
+		ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+		try {
+			// TCCL is needed so StringManagers in Tomcat code work
+			Thread.currentThread().setContextClassLoader(TomcatServerWrapper.class.getClassLoader());
+			return new TomcatResourceServlet(baseDirectory, chroot, configuration.resources());
+		} finally {
+			Thread.currentThread().setContextClassLoader(tccl);
+		}
 	}
 
 	@Override

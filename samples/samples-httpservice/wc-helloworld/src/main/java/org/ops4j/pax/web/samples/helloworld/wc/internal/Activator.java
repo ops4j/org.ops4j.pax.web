@@ -185,8 +185,6 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 //		webContainer.unregisterErrorPage("404", httpContext);
 //
 //		webContainer.unregisterWelcomeFiles(new String[] { "index.html" }, httpContext);
-
-		bundleContext.ungetService(reference);
 	}
 
 }

@@ -23,7 +23,6 @@ import org.apache.catalina.Executor;
 import org.apache.catalina.Server;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardThreadExecutor;
-import org.apache.coyote.http11.Http11Nio2Protocol;
 import org.apache.coyote.http2.Http2Protocol;
 import org.apache.tomcat.util.compat.JreCompat;
 import org.ops4j.pax.web.service.spi.config.Configuration;
@@ -142,7 +141,7 @@ public class TomcatFactory {
 			Configuration configuration) {
 		ServerConfiguration sc = configuration.server();
 
-		Connector defaultConnector = new Connector("org.apache.coyote.http11.Http11Nio2Protocol");
+		Connector defaultConnector = new Connector("org.ops4j.pax.web.service.tomcat.internal.PaxWebHttp11Nio2Protocol");
 
 		defaultConnector.setProperty("address", address);
 		defaultConnector.setPort(sc.getHttpPort());
@@ -152,14 +151,16 @@ public class TomcatFactory {
 			defaultConnector.setRedirectPort(sc.getHttpSecurePort());
 		}
 
-		Http11Nio2Protocol protocol = (Http11Nio2Protocol) defaultConnector.getProtocolHandler();
+		PaxWebHttp11Nio2Protocol protocol = (PaxWebHttp11Nio2Protocol) defaultConnector.getProtocolHandler();
 
 		defaultConnector.setXpoweredBy(false);
 		defaultConnector.setAllowTrace(false);
 		protocol.setServer(null);
 		protocol.setServerRemoveAppProvidedValues(true);
 
-		defaultConnector.getProtocolHandler().setExecutor(executor);
+		// don't set an executor here, as we'd get warning:
+		// "The NIO2 connector requires an exclusive executor to operate properly on shutdown"
+//		defaultConnector.getProtocolHandler().setExecutor(executor);
 
 		if (sc.getConnectorIdleTimeout() != null) {
 			defaultConnector.setProperty("connectionTimeout", sc.getConnectorIdleTimeout().toString());
@@ -184,7 +185,7 @@ public class TomcatFactory {
 		// but this object is configured via old/legacy/soon-deprecated setters on
 		// org.apache.coyote.http11.AbstractHttp11Protocol class
 
-		Connector secureConnector = new Connector("org.apache.coyote.http11.Http11Nio2Protocol");
+		Connector secureConnector = new Connector("org.ops4j.pax.web.service.tomcat.internal.PaxWebHttp11Nio2Protocol");
 
 		secureConnector.setProperty("address", address);
 		secureConnector.setPort(sc.getHttpSecurePort());
@@ -192,7 +193,7 @@ public class TomcatFactory {
 		secureConnector.setSecure(true);
 		secureConnector.setProperty("SSLEnabled", "true");
 
-		Http11Nio2Protocol protocol = (Http11Nio2Protocol) secureConnector.getProtocolHandler();
+		PaxWebHttp11Nio2Protocol protocol = (PaxWebHttp11Nio2Protocol) secureConnector.getProtocolHandler();
 
 		protocol.setSslImplementationName("org.apache.tomcat.util.net.jsse.JSSEImplementation");
 
@@ -201,7 +202,9 @@ public class TomcatFactory {
 		protocol.setServer(null);
 		protocol.setServerRemoveAppProvidedValues(true);
 
-		protocol.setExecutor(executor);
+		// don't set an executor here, as we'd get warning:
+		// "The NIO2 connector requires an exclusive executor to operate properly on shutdown"
+//		protocol.setExecutor(executor);
 
 		// --- server keystore for server's own identity
 

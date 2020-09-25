@@ -16,12 +16,11 @@
  */
 package org.apache.tomcat.util.descriptor;
 
+// CHECKSTYLE:OFF
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.servlet.ServletContext;
 
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
@@ -38,20 +37,6 @@ public class DigesterFactory {
 
     private static final StringManager sm =
             StringManager.getManager(Constants.PACKAGE_NAME);
-
-    private static final Class<ServletContext> CLASS_SERVLET_CONTEXT;
-    private static final Class<?> CLASS_JSP_CONTEXT;
-
-    static {
-        CLASS_SERVLET_CONTEXT = ServletContext.class;
-        Class<?> jspContext = null;
-        try {
-            jspContext = Class.forName("javax.servlet.jsp.JspContext");
-        } catch (ClassNotFoundException e) {
-            // Ignore - JSP API is not present.
-        }
-        CLASS_JSP_CONTEXT = jspContext;
-    }
 
 
     /**
@@ -151,10 +136,7 @@ public class DigesterFactory {
     }
 
     private static String locationFor(String name) {
-        URL location = CLASS_SERVLET_CONTEXT.getResource("resources/" + name);
-        if (location == null && CLASS_JSP_CONTEXT != null) {
-            location = CLASS_JSP_CONTEXT.getResource("resources/" + name);
-        }
+        URL location = DigesterFactory.class.getResource("/META-INF/resources/" + name);
         if (location == null) {
             Log log = LogFactory.getLog(DigesterFactory.class);
             log.warn(sm.getString("digesterFactory.missingSchema", name));
@@ -190,3 +172,4 @@ public class DigesterFactory {
         return digester;
     }
 }
+// CHECKSTYLE:ON

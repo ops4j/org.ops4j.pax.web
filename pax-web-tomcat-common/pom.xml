@@ -38,6 +38,80 @@
 	<build>
 		<plugins>
 			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack-tomcat-servlet-api</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.apache.tomcat</groupId>
+									<artifactId>tomcat-servlet-api</artifactId>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>${project.build.directory}/unpack-deps/tomcat-servlet-api</outputDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>unpack-tomcat-jsp-api</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.apache.tomcat</groupId>
+									<artifactId>tomcat-jsp-api</artifactId>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>${project.build.directory}/unpack-deps/tomcat-jsp-api</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<!--
+							copy javax/servlet/resources to be used in javax/servlet/jsp/resources
+							to satisfy org.apache.tomcat.util.descriptor.DigesterFactory which uses class.getResources()
+							for two classes - javax.servlet.ServletContext and javax.servlet.jsp.JspContext,
+							but we repackage only the latter
+						-->
+						<id>copy-selected-resources</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.outputDirectory}/META-INF/resources</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.build.directory}/unpack-deps/tomcat-servlet-api/javax/servlet/resources</directory>
+									<includes>
+										<include>*.xsd</include>
+										<include>*.dtd</include>
+									</includes>
+								</resource>
+								<resource>
+									<directory>${project.build.directory}/unpack-deps/tomcat-jsp-api/javax/servlet/jsp/resources</directory>
+									<includes>
+										<include>*.xsd</include>
+										<include>*.dtd</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
 				<extensions>true</extensions>
@@ -102,7 +176,7 @@
 							org.apache.tomcat.util.threads.res;version="${dependency.tomcat.version}",
 
 							<!-- tomcat-util-scan -->
-							org.apache.tomcat.util.descriptor;version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.descriptor;version="${dependency.tomcat.version}";-split-package:=merge-first,
 							org.apache.tomcat.util.descriptor.tagplugin;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util.descriptor.tld;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util.descriptor.web;version="${dependency.tomcat.version}",
@@ -116,6 +190,10 @@
 							<!-- tomcat-juli (don't export org.apache.tomcat.juli.logging, which comes from pax-logging-api -->
 							org.apache.juli;version="${dependency.tomcat.version}"
 						</Export-Package>
+						<Include-Resource>
+							{maven-resources},
+							META-INF/resources/=${project.build.outputDirectory}/META-INF/resources/
+						</Include-Resource>
 						<_nouses>true</_nouses>
 						<_contract>!*</_contract>
 					</instructions>
@@ -135,6 +213,24 @@
 				runtime scope means: not required for compilation, see as transitive dependency
 				with proper Export-Package, we control what actually is provided at runtime
 			-->
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<!--
+				This dependency is used to take javax.servlet.resources package with XSDs/DTDs into pax-web-tomcat-common
+				to satisfy the DigesterFactory
+			-->
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<!--
+				This dependency is used to take javax.servlet.jsp.resources package with XSDs/DTDs into pax-web-tomcat-common
+				to satisfy the DigesterFactory
+			-->
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-jsp-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 

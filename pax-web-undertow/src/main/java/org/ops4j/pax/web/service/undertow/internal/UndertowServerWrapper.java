@@ -969,11 +969,15 @@ class UndertowServerWrapper implements BatchVisitor {
 			// org.ops4j.pax.web.service.spi.servlet.OsgiServletContext is created and we have everything ready
 			// to create proper classloader for this OsgiServletContext
 			// unlike in Jetty or Tomcat, getRealServletContext() may return null for not started context
-			OsgiServletContextClassLoader loader = new OsgiServletContextClassLoader();
-			loader.addBundle(osgiModel.getOwnerBundle());
-			loader.addBundle(paxWebUndertowBundle);
-			loader.addBundle(Utils.getPaxWebJspBundle(paxWebUndertowBundle));
-			loader.makeImmutable();
+			OsgiServletContextClassLoader loader = null;
+			if (paxWebUndertowBundle != null) {
+				// it may not be the case in Test scenario
+				loader = new OsgiServletContextClassLoader();
+				loader.addBundle(osgiModel.getOwnerBundle());
+				loader.addBundle(paxWebUndertowBundle);
+				loader.addBundle(Utils.getPaxWebJspBundle(paxWebUndertowBundle));
+				loader.makeImmutable();
+			}
 			OsgiServletContext osgiContext = new OsgiServletContext(getRealServletContext(contextPath), osgiModel, servletContextModel,
 					defaultSessionCookieConfig, loader);
 			osgiServletContexts.put(osgiModel, osgiContext);
