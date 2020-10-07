@@ -120,7 +120,7 @@ public abstract class AbstractWebContainerIntegrationTest extends AbstractContai
 	}
 
 	@Test
-	public void testWelcomFiles() throws Exception {
+	public void testWelcomeFiles() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))

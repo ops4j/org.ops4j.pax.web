@@ -15,9 +15,11 @@
  */
 package org.ops4j.pax.web.service.spi.task;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 
@@ -26,12 +28,15 @@ public class ContainerInitializerModelChange extends Change {
 	private final ServerModel serverModel;
 	private final List<ContainerInitializerModel> containerInitializerModels = new LinkedList<>();
 	private ContainerInitializerModel containerInitializerModel;
+	private final List<OsgiContextModel> newModels = new LinkedList<>();
 
-	public ContainerInitializerModelChange(OpCode op, ServerModel serverModel, ContainerInitializerModel containerInitializerModel) {
+	public ContainerInitializerModelChange(OpCode op, ServerModel serverModel, ContainerInitializerModel containerInitializerModel,
+			OsgiContextModel... newModels) {
 		super(op);
 		this.serverModel = serverModel;
 		this.containerInitializerModels.add(containerInitializerModel);
 		this.containerInitializerModel = containerInitializerModel;
+		this.newModels.addAll(Arrays.asList(newModels));
 	}
 
 	public ContainerInitializerModelChange(OpCode op, ServerModel serverModel, List<ContainerInitializerModel> containerInitializerModels) {
@@ -55,6 +60,14 @@ public class ContainerInitializerModelChange extends Change {
 	@Override
 	public void accept(BatchVisitor visitor) {
 		visitor.visit(this);
+	}
+
+	public List<OsgiContextModel> getNewModels() {
+		return newModels;
+	}
+
+	public List<OsgiContextModel> getContextModels() {
+		return newModels.size() > 0 ? newModels : containerInitializerModel.getContextModels();
 	}
 
 	@Override

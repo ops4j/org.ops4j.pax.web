@@ -65,10 +65,6 @@ public class OsgiDynamicServletContext implements ServletContext {
 		return osgiContext.getContainerServletContext();
 	}
 
-	public String[] getWelcomeFiles() {
-		return osgiContext.getWelcomeFiles();
-	}
-
 	// --- methods that throw UnsupportedOperationException (when context is started)
 
 	// these methods allow OSGi-unaware registration of filters, servlets and listeners and according to

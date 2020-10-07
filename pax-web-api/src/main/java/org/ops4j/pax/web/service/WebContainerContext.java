@@ -37,7 +37,8 @@ import org.osgi.service.http.HttpContext;
  *
  * <p>No extension of the original {@link HttpContext} should specify such things as context path, virtual hosts
  * or parameters - these (to match Whiteboard specification) should be specified using service registration
- * paremeters).</p>
+ * paremeters or (legacy Pax Web method) in {@code org.ops4j.pax.web.service.whiteboard.HttpContextMapping} service
+ * or (legacy and not recommended) {@code org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping}.</p>
  *
  * <p>Internally, Pax Web will wrap "new" {@link org.osgi.service.http.context.ServletContextHelper} instances
  * in some implementation of {@link WebContainerContext} interface.</p>

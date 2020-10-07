@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.model.events.WelcomeFileEventData;
 import org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping;
@@ -32,13 +32,13 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class WelcomeFileMappingTracker extends AbstractMappingTracker<WelcomeFileMapping, WelcomeFileMapping, WelcomeFileEventData, WelcomeFileModel> {
 
-	protected WelcomeFileMappingTracker(ExtenderContext extenderContext, BundleContext bundleContext) {
-		super(extenderContext, bundleContext);
+	protected WelcomeFileMappingTracker(WhiteboardContext whiteboardContext, BundleContext bundleContext) {
+		super(whiteboardContext, bundleContext);
 	}
 
-	public static ServiceTracker<WelcomeFileMapping, WelcomeFileModel> createTracker(final ExtenderContext extenderContext,
+	public static ServiceTracker<WelcomeFileMapping, WelcomeFileModel> createTracker(final WhiteboardContext whiteboardContext,
 			final BundleContext bundleContext) {
-		return new WelcomeFileMappingTracker(extenderContext, bundleContext).create(WelcomeFileMapping.class);
+		return new WelcomeFileMappingTracker(whiteboardContext, bundleContext).create(WelcomeFileMapping.class);
 	}
 
 	@Override

@@ -29,6 +29,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
+import org.ops4j.pax.web.service.undertow.internal.web.UndertowResourceServlet;
 import org.osgi.framework.Bundle;
 
 /**
@@ -193,6 +194,11 @@ public class PaxWebServletInfo extends ServletInfo {
 				} else if (model.getElementSupplier() != null) {
 					instance = model.getElementSupplier().get();
 				}
+			}
+
+			if (instance != null && model.isResourceServlet()) {
+				((UndertowResourceServlet) instance).setWelcomeFiles(osgiScopedServletContext.getWelcomeFiles());
+				((UndertowResourceServlet) instance).setWelcomeFilesRedirect(osgiScopedServletContext.isWelcomeFilesRedirect());
 			}
 
 			return new ImmediateInstanceHandle<Servlet>(new OsgiInitializedServlet(instance, this.osgiScopedServletContext));

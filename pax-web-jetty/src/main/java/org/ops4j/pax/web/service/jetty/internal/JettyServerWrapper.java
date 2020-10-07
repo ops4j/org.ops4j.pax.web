@@ -29,6 +29,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Supplier;
 import javax.servlet.Servlet;
@@ -721,7 +722,7 @@ class JettyServerWrapper implements BatchVisitor {
 
 	@Override
 	public void visit(OsgiContextModelChange change) {
-		if (change.getKind() == OpCode.ASSOCIATE) {
+		if (change.getKind() == OpCode.ASSOCIATE || change.getKind() == OpCode.DISASSOCIATE) {
 			return;
 		}
 
@@ -750,17 +751,20 @@ class JettyServerWrapper implements BatchVisitor {
 			// this (and similar Tomcat and Undertow places) should be the only place where
 			// org.ops4j.pax.web.service.spi.servlet.OsgiServletContext is created and we have everything ready
 			// to create proper classloader for this OsgiServletContext
-			OsgiServletContextClassLoader loader = null;
+			ClassLoader classLoader = null;
 			if (paxWebJettyBundle != null) {
 				// it may not be the case in Test scenario
-				loader = new OsgiServletContextClassLoader();
+				OsgiServletContextClassLoader loader = new OsgiServletContextClassLoader();
 				loader.addBundle(osgiModel.getOwnerBundle());
 				loader.addBundle(paxWebJettyBundle);
 				loader.addBundle(Utils.getPaxWebJspBundle(paxWebJettyBundle));
 				loader.makeImmutable();
+				classLoader = loader;
+			} else {
+				classLoader = this.classLoader;
 			}
 			OsgiServletContext osgiContext = new OsgiServletContext(sch.getServletContext(), osgiModel, servletContextModel,
-					defaultSessionCookieConfig, loader);
+					defaultSessionCookieConfig, classLoader);
 			osgiServletContexts.put(osgiModel, osgiContext);
 
 			// a physical context just got a new OSGi context
@@ -788,7 +792,7 @@ class JettyServerWrapper implements BatchVisitor {
 
 			// we have to ensure that non-highest ranked contexts are unregistered
 			osgiServletContexts.forEach((ocm, osc) -> {
-				if (osc != highestRankedContext) {
+				if (ocm.getContextPath().equals(contextPath) && osc != highestRankedContext) {
 					osc.unregister();
 				}
 			});
@@ -841,7 +845,7 @@ class JettyServerWrapper implements BatchVisitor {
 			Set<String> done = new HashSet<>();
 
 			// proper order ensures that (assuming above scenario), for /c1, ocm2 will be chosen and ocm1 skipped
-			model.getContextModels().forEach(osgiContextModel -> {
+			change.getContextModels().forEach(osgiContextModel -> {
 				String contextPath = osgiContextModel.getContextPath();
 
 				if (!done.add(contextPath)) {
@@ -998,11 +1002,12 @@ class JettyServerWrapper implements BatchVisitor {
 		// there's no separate add filter, add filter, remove filter, ... set of operations
 		// everything is passed in single "change"
 
-		Map<String, TreeSet<FilterModel>> contextFilters = change.getContextFilters();
+		Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> contextFilters = change.getContextFilters();
 
-		for (Map.Entry<String, TreeSet<FilterModel>> entry : contextFilters.entrySet()) {
+		for (Map.Entry<String, TreeMap<FilterModel, List<OsgiContextModel>>> entry : contextFilters.entrySet()) {
 			String contextPath = entry.getKey();
-			Set<FilterModel> filters = entry.getValue();
+			Map<FilterModel, List<OsgiContextModel>> filtersMap = entry.getValue();
+			Set<FilterModel> filters = filtersMap.keySet();
 
 			LOG.info("Changing filter configuration for context {}", contextPath);
 
@@ -1042,6 +1047,7 @@ class JettyServerWrapper implements BatchVisitor {
 			// filters are sorted by ranking. for Jetty, this order should be reflected in the array of FilterMappings
 			// order of FilterHolders is irrelevant
 			int pos = 0;
+			boolean noQuick = false;
 			for (FilterModel model : filters) {
 				// <filter> - FilterModel's OsgiContextModels only determine with which servlets such filter may
 				// be associated.
@@ -1066,11 +1072,17 @@ class JettyServerWrapper implements BatchVisitor {
 				// however, if there was some /s1 servlet associated with ocm1 only, filter should be invoked
 				// when targeting /s1 servlet
 
+				// if there's out-of-band list of new filters, there's no way the change will be "quick"
+				noQuick |= filtersMap.get(model) != null;
+
 				// we need highest ranked OsgiContextModel for current context path - chosen not among all
 				// associated OsgiContextModels, but among OsgiContextModels of the FilterModel
 				OsgiContextModel highestRankedModel = null;
-				// remember, this contextModels list is properly sorted
-				for (OsgiContextModel ocm : model.getContextModels()) {
+				// remember, this contextModels list is properly sorted - and it comes either from model or
+				// (if configured) from associated list of models which are being changed in the model
+				List<OsgiContextModel> contextModels = filtersMap.get(model) != null
+						? filtersMap.get(model) : model.getContextModels();
+				for (OsgiContextModel ocm : contextModels) {
 					if (ocm.getContextPath().equals(contextPath)) {
 						highestRankedModel = ocm;
 						break;
@@ -1120,7 +1132,7 @@ class JettyServerWrapper implements BatchVisitor {
 				pos++;
 			}
 
-			if (!quickFilterChange(sch.getServletHandler(), newFilterHolders, newFilterMappings)) {
+			if (noQuick || !quickFilterChange(sch.getServletHandler(), newFilterHolders, newFilterMappings)) {
 				// the hard way - recreate entire array of filters/filter-mappings
 				for (FilterHolder holder : sch.getServletHandler().getFilters()) {
 					try {
@@ -1146,7 +1158,7 @@ class JettyServerWrapper implements BatchVisitor {
 	public void visit(EventListenerModelChange change) {
 		if (change.getKind() == OpCode.ADD) {
 			EventListenerModel eventListenerModel = change.getEventListenerModel();
-			List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
+			List<OsgiContextModel> contextModels = change.getContextModels();
 			Set<String> done = new HashSet<>();
 			contextModels.forEach((context) -> {
 				String contextPath = context.getContextPath();
@@ -1189,10 +1201,11 @@ class JettyServerWrapper implements BatchVisitor {
 	@Override
 	public void visit(WelcomeFileModelChange change) {
 		WelcomeFileModel model = change.getWelcomeFileModel();
-		List<OsgiContextModel> contextModels = model.getContextModels();
 
 		OpCode op = change.getKind();
 		if (op == OpCode.ADD || op == OpCode.DELETE) {
+			List<OsgiContextModel> contextModels = op == OpCode.ADD ? change.getContextModels()
+					: model.getContextModels();
 			// we have to configure all contexts, or rather - all resource servlets in all the contexts.
 			// for Tomcat and Undertow we had to implement welcome file handling in "resource servlets" ourselves,
 			// but we could have them settable.
@@ -1224,13 +1237,14 @@ class JettyServerWrapper implements BatchVisitor {
 				// set welcome files at OsgiServletContext level. NOT at ServletContextHandler level
 				String[] newWelcomeFiles = currentWelcomeFiles.toArray(new String[0]);
 				osgiServletContext.setWelcomeFiles(newWelcomeFiles);
+				osgiServletContext.setWelcomeFilesRedirect(model.isRedirect());
 
-				LOG.info("Reconfiguration of welcome files for all resource servlet in context \"{}\"", context);
+				LOG.info("Reconfiguration of welcome files for all resource servlets in context \"{}\"", context);
 
 				// reconfigure welcome files in resource servlets without reinitialization (Pax Web 8 change)
 				for (ServletHolder sh : servletContextHandler.getServletHandler().getServlets()) {
 					PaxWebServletHolder pwsh = (PaxWebServletHolder) sh;
-					// restart the servlet ONLY if its holder uses given OsgiContextModel
+					// reconfigure the servlet ONLY if its holder uses given OsgiContextModel
 					if (pwsh.getServletModel() != null && pwsh.getServletModel().isResourceServlet()
 							&& context == pwsh.getOsgiContextModel()) {
 						try {
@@ -1258,11 +1272,12 @@ class JettyServerWrapper implements BatchVisitor {
 
 	@Override
 	public void visit(ErrorPageStateChange change) {
-		Map<String, TreeSet<ErrorPageModel>> contextErrorPages = change.getContextErrorPages();
+		Map<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> contextErrorPages = change.getContextErrorPages();
 
-		for (Map.Entry<String, TreeSet<ErrorPageModel>> entry : contextErrorPages.entrySet()) {
+		for (Map.Entry<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> entry : contextErrorPages.entrySet()) {
 			String contextPath = entry.getKey();
-			TreeSet<ErrorPageModel> errorPageModels = entry.getValue();
+			TreeMap<ErrorPageModel, List<OsgiContextModel>> errorPageModelsMap = entry.getValue();
+			Set<ErrorPageModel> errorPageModels = errorPageModelsMap.keySet();
 
 			LOG.info("Changing error page configuration for context {}", contextPath);
 
@@ -1283,7 +1298,7 @@ class JettyServerWrapper implements BatchVisitor {
 	public void visit(ContainerInitializerModelChange change) {
 		if (change.getKind() == OpCode.ADD) {
 			ContainerInitializerModel model = change.getContainerInitializerModel();
-			List<OsgiContextModel> contextModels = model.getContextModels();
+			List<OsgiContextModel> contextModels = change.getContextModels();
 			contextModels.forEach((context) -> {
 				String path = context.getContextPath();
 				ServletContextHandler sch = contextHandlers.get(context.getContextPath());
@@ -1344,25 +1359,26 @@ class JettyServerWrapper implements BatchVisitor {
 		try {
 			String contextPath = sch.getContextPath().equals("") ? "/" : sch.getContextPath();
 			OsgiContextModel highestRanked = ((PaxWebServletHandler) sch.getServletHandler()).getDefaultOsgiContextModel();
+			OsgiServletContext highestRankedContext = ((PaxWebServletHandler) sch.getServletHandler()).getDefaultServletContext();
 
 			LOG.info("Starting Jetty context \"{}\" with default Osgi Context {}", contextPath, highestRanked);
 
 			// first thing - only NOW we can set ServletContext's class loader! It affects many things, including
 			// the TCCL used for example by javax.el.ExpressionFactory.newInstance()
-			Bundle bundle = highestRanked.getOwnerBundle();
-			if (bundle != null) {
-				BundleWiring wiring = bundle.adapt(BundleWiring.class);
-				if (wiring != null && wiring.getClassLoader() != null) {
-					sch.setClassLoader(wiring.getClassLoader());
-				}
-			}
+			sch.setClassLoader(highestRankedContext.getClassLoader());
 
 			// this is when already collected initializers may be added as ordered collection to the servlet context
 			// handler (Pax Web specific) - we need control over them, because we have to pass correct
 			// ServletContext implementation there
 			Collection<SCIWrapper> initializers = new LinkedList<>(this.initializers.get(contextPath).values());
-			// take only these SCIs, which are associated with highest ranked OCM
-			initializers.removeIf(w -> !w.getModel().getContextModels().contains(highestRanked));
+			// Initially I thought we should take only these SCIs, which are associated with highest ranked OCM,
+			// but it turned out that just as we take servlets registered to different OsgiContextModels, but
+			// the same ServletContextModel, we have to do the same with SCIs.
+			// otherwise, by default (with HttpService scenario), SCIs from the OsgiContextModel related to
+			// pax-web-extender-whiteboard would be taken (probably 0), simply because this bundle is usually
+			// the first that grabs an instance of bundle-scoped HttpService
+			// so please do not uncomment and keep for educational purposes!
+//			initializers.removeIf(w -> !w.getModel().getContextModels().contains(highestRanked));
 			if (initializers.size() > 0) {
 				// add a final initializer that will take care of actual registration of potentially collected
 				// dynamic servlets, filters and listeners

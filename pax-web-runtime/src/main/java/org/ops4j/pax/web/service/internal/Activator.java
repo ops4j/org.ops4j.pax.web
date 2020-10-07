@@ -448,11 +448,6 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			LOG.info("Starting server controller {}", serverController.getClass().getName());
 			serverController.start();
 
-			// create default ServletContextModel in ServerModel and propagate it to the controller.
-			// it's important to do it before registering ServiceFactory for HttpService/WebContainer
-			// so bundles getting HttpService/WebContainer instance can operate on at least the default context
-			serverModel.configureActiveServerController(serverController);
-
 			// this is where org.osgi.service.http.HttpService bundle-scoped service is registered in OSGi
 			// this is the most fundamental operation related to Http Service specification
 			Dictionary<String, Object> props = determineServiceProperties(this.configuration, configuration);
@@ -465,6 +460,12 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 					return new HttpServiceProxy(bundle, enabledService);
 				}
 			};
+
+			// this registration is performed inside configuration thread. It may invoke service listeners
+			// awaiting HttpService/WebContainer to start registering web elements, which call configuration
+			// thread again - this time without waiting (same thread)
+			// but this caused a problem in pax-web-extender-whiteboard which has it's own lock.
+			// that's why pax-web-extender-whiteboard should not get the lock after its service listener is called
 			LOG.info("Registering HttpService factory");
 			httpServiceFactoryReg = bundleContext.registerService(HTTPSERVICE_REGISTRATION_NAMES, factory, props);
 

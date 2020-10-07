@@ -79,6 +79,10 @@ public class OsgiScopedServletContext implements ServletContext {
 		return osgiContext.getWelcomeFiles();
 	}
 
+	public boolean isWelcomeFilesRedirect() {
+		return osgiContext.isWelcomeFilesRedirect();
+	}
+
 	// --- methods that throw UnsupportedOperationException
 
 	@Override

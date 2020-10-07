@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.AbstractElementTracker;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
@@ -36,8 +36,8 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 public abstract class AbstractMappingTracker<S extends ContextRelated, R, D extends ElementEventData, T extends ElementModel<R, D>>
 		extends AbstractElementTracker<S, R, D, T> {
 
-	protected AbstractMappingTracker(ExtenderContext extenderContext, BundleContext bundleContext) {
-		super(extenderContext, bundleContext);
+	protected AbstractMappingTracker(WhiteboardContext whiteboardContext, BundleContext bundleContext) {
+		super(whiteboardContext, bundleContext);
 	}
 
 	@Override

@@ -33,7 +33,9 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -887,8 +889,9 @@ class UndertowServerWrapper implements BatchVisitor {
 				deploymentInfo.setServletStackTraces(ServletStackTraces.NONE);
 			}
 
-			// that's only temporary class loader. It'll be changed when OsgiServletContext is created
-			deploymentInfo.setClassLoader(classLoader);
+			// we have no classloader yet to set - it should come from "highest ranked OsgiContextModel" for given
+			// servlet context (context path)
+//			deploymentInfo.setClassLoader(classLoader);
 
 			deploymentInfo.addServlet(new PaxWebServletInfo("default", default404Servlet, true).addMapping("/"));
 
@@ -946,7 +949,7 @@ class UndertowServerWrapper implements BatchVisitor {
 
 	@Override
 	public void visit(OsgiContextModelChange change) {
-		if (change.getKind() == OpCode.ASSOCIATE) {
+		if (change.getKind() == OpCode.ASSOCIATE || change.getKind() == OpCode.DISASSOCIATE) {
 			return;
 		}
 
@@ -969,17 +972,20 @@ class UndertowServerWrapper implements BatchVisitor {
 			// org.ops4j.pax.web.service.spi.servlet.OsgiServletContext is created and we have everything ready
 			// to create proper classloader for this OsgiServletContext
 			// unlike in Jetty or Tomcat, getRealServletContext() may return null for not started context
-			OsgiServletContextClassLoader loader = null;
+			ClassLoader classLoader = null;
 			if (paxWebUndertowBundle != null) {
 				// it may not be the case in Test scenario
-				loader = new OsgiServletContextClassLoader();
+				OsgiServletContextClassLoader loader = new OsgiServletContextClassLoader();
 				loader.addBundle(osgiModel.getOwnerBundle());
 				loader.addBundle(paxWebUndertowBundle);
 				loader.addBundle(Utils.getPaxWebJspBundle(paxWebUndertowBundle));
 				loader.makeImmutable();
+				classLoader = loader;
+			} else {
+				classLoader = this.classLoader;
 			}
 			OsgiServletContext osgiContext = new OsgiServletContext(getRealServletContext(contextPath), osgiModel, servletContextModel,
-					defaultSessionCookieConfig, loader);
+					defaultSessionCookieConfig, classLoader);
 			osgiServletContexts.put(osgiModel, osgiContext);
 			osgiContextModels.get(contextPath).add(osgiModel);
 		}
@@ -1010,7 +1016,7 @@ class UndertowServerWrapper implements BatchVisitor {
 
 			// we have to ensure that non-highest ranked contexts are unregistered
 			osgiServletContexts.forEach((ocm, osc) -> {
-				if (osc != highestRankedContext) {
+				if (ocm.getContextPath().equals(contextPath) && osc != highestRankedContext) {
 					osc.unregister();
 				}
 			});
@@ -1052,7 +1058,7 @@ class UndertowServerWrapper implements BatchVisitor {
 
 			Set<String> done = new HashSet<>();
 
-			model.getContextModels().forEach(osgiContext -> {
+			change.getContextModels().forEach(osgiContext -> {
 				String contextPath = osgiContext.getContextPath();
 				if (!done.add(contextPath)) {
 					return;
@@ -1231,11 +1237,12 @@ class UndertowServerWrapper implements BatchVisitor {
 
 	@Override
 	public void visit(FilterStateChange change) {
-		Map<String, TreeSet<FilterModel>> contextFilters = change.getContextFilters();
+		Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> contextFilters = change.getContextFilters();
 
-		for (Map.Entry<String, TreeSet<FilterModel>> entry : contextFilters.entrySet()) {
+		for (Map.Entry<String, TreeMap<FilterModel, List<OsgiContextModel>>> entry : contextFilters.entrySet()) {
 			String contextPath = entry.getKey();
-			Set<FilterModel> filters = entry.getValue();
+			Map<FilterModel, List<OsgiContextModel>> filtersMap = entry.getValue();
+			Set<FilterModel> filters = filtersMap.keySet();
 
 			ensureServletContextStarted(contextPath);
 
@@ -1247,6 +1254,7 @@ class UndertowServerWrapper implements BatchVisitor {
 			DeploymentInfo deploymentInfo = manager.getDeployment().getDeploymentInfo();
 
 			boolean quick = canQuicklyAddFilter(deploymentInfo, filters);
+			quick &= filtersMap.values().stream().noneMatch(Objects::nonNull);
 
 			if (!quick) {
 				// let's immediately show that given context is no longer mapped
@@ -1280,8 +1288,11 @@ class UndertowServerWrapper implements BatchVisitor {
 				// we need highest ranked OsgiContextModel for current context path - chosen not among all
 				// associated OsgiContextModels, but among OsgiContextModels of the FilterModel
 				OsgiContextModel highestRankedModel = null;
-				// remember, this contextModels list is properly sorted
-				for (OsgiContextModel ocm : model.getContextModels()) {
+				// remember, this contextModels list is properly sorted - and it comes either from model or
+				// (if configured) from associated list of models which are being changed in the model
+				List<OsgiContextModel> contextModels = filtersMap.get(model) != null
+						? filtersMap.get(model) : model.getContextModels();
+				for (OsgiContextModel ocm : contextModels) {
 					if (ocm.getContextPath().equals(contextPath)) {
 						highestRankedModel = ocm;
 						break;
@@ -1369,7 +1380,7 @@ class UndertowServerWrapper implements BatchVisitor {
 	public void visit(EventListenerModelChange change) {
 		if (change.getKind() == OpCode.ADD) {
 			EventListenerModel eventListenerModel = change.getEventListenerModel();
-			List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
+			List<OsgiContextModel> contextModels = change.getContextModels();
 			Set<String> done = new HashSet<>();
 			contextModels.forEach((context) -> {
 				String contextPath = context.getContextPath();
@@ -1447,10 +1458,11 @@ class UndertowServerWrapper implements BatchVisitor {
 	@Override
 	public void visit(WelcomeFileModelChange change) {
 		WelcomeFileModel model = change.getWelcomeFileModel();
-		List<OsgiContextModel> contextModels = model.getContextModels();
 
 		OpCode op = change.getKind();
 		if (op == OpCode.ADD || op == OpCode.DELETE) {
+			List<OsgiContextModel> contextModels = op == OpCode.ADD ? change.getContextModels()
+					: model.getContextModels();
 			contextModels.forEach((context) -> {
 				OsgiServletContext osgiServletContext = osgiServletContexts.get(context);
 
@@ -1474,6 +1486,7 @@ class UndertowServerWrapper implements BatchVisitor {
 				// set welcome files at OsgiServletContext level. NOT at ServletContextHandler level
 				String[] newWelcomeFiles = currentWelcomeFiles.toArray(new String[0]);
 				osgiServletContext.setWelcomeFiles(newWelcomeFiles);
+				osgiServletContext.setWelcomeFilesRedirect(model.isRedirect());
 
 				LOG.info("Reconfiguration of welcome files for all resource servlet in context \"{}\"", context);
 
@@ -1518,11 +1531,12 @@ class UndertowServerWrapper implements BatchVisitor {
 
 	@Override
 	public void visit(ErrorPageStateChange change) {
-		Map<String, TreeSet<ErrorPageModel>> contextErrorPages = change.getContextErrorPages();
+		Map<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> contextErrorPages = change.getContextErrorPages();
 
-		for (Map.Entry<String, TreeSet<ErrorPageModel>> entry : contextErrorPages.entrySet()) {
+		for (Map.Entry<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> entry : contextErrorPages.entrySet()) {
 			String contextPath = entry.getKey();
-			TreeSet<ErrorPageModel> errorPageModels = entry.getValue();
+			TreeMap<ErrorPageModel, List<OsgiContextModel>> errorPageModelsMap = entry.getValue();
+			Set<ErrorPageModel> errorPageModels = errorPageModelsMap.keySet();
 
 			LOG.info("Changing error page configuration for context {}", contextPath);
 
@@ -1581,7 +1595,7 @@ class UndertowServerWrapper implements BatchVisitor {
 	public void visit(ContainerInitializerModelChange change) {
 		if (change.getKind() == OpCode.ADD) {
 			ContainerInitializerModel model = change.getContainerInitializerModel();
-			List<OsgiContextModel> contextModels = model.getContextModels();
+			List<OsgiContextModel> contextModels = change.getContextModels();
 			contextModels.forEach((context) -> {
 				String path = context.getContextPath();
 				DeploymentManager manager = getDeploymentManager(path);
@@ -1637,6 +1651,7 @@ class UndertowServerWrapper implements BatchVisitor {
 		}
 		try {
 			OsgiContextModel highestRanked = securityHandlers.get(contextPath).getDefaultOsgiContextModel();
+			OsgiServletContext highestRankedContext = osgiServletContexts.get(highestRanked);
 
 			LOG.info("Starting Undertow context \"{}\" with default Osgi Context {}",
 					(contextPath.equals("") ? "/" : contextPath), highestRanked);
@@ -1651,12 +1666,8 @@ class UndertowServerWrapper implements BatchVisitor {
 
 			// first thing - only NOW we can set ServletContext's class loader! It affects many things, including
 			// the TCCL used for example by javax.el.ExpressionFactory.newInstance()
-			Bundle bundle = highestRanked.getOwnerBundle();
-			if (bundle != null) {
-				BundleWiring wiring = bundle.adapt(BundleWiring.class);
-				if (wiring != null && wiring.getClassLoader() != null) {
-					deployment.setClassLoader(wiring.getClassLoader());
-				}
+			if (highestRankedContext.getClassLoader() != null) {
+				deployment.setClassLoader(highestRankedContext.getClassLoader());
 			}
 
 			// when starting (or, which is possible only with Pax Web, not Undertow itself - restarting), we'll
@@ -1665,8 +1676,14 @@ class UndertowServerWrapper implements BatchVisitor {
 
 			// add all configured initializers, but as special wrappers
 			Collection<OsgiServletContainerInitializerInfo> initializers = new LinkedList<>(this.initializers.get(contextPath).values());
-			// take only these SCIs, which are associated with highest ranked OCM
-			initializers.removeIf(info -> !info.getModel().getContextModels().contains(highestRanked));
+			// Initially I thought we should take only these SCIs, which are associated with highest ranked OCM,
+			// but it turned out that just as we take servlets registered to different OsgiContextModels, but
+			// the same ServletContextModel, we have to do the same with SCIs.
+			// otherwise, by default (with HttpService scenario), SCIs from the OsgiContextModel related to
+			// pax-web-extender-whiteboard would be taken (probably 0), simply because this bundle is usually
+			// the first that grabs an instance of bundle-scoped HttpService
+			// so please do not uncomment and keep for educational purposes!
+//			initializers.removeIf(info -> !info.getModel().getContextModels().contains(highestRanked));
 
 			for (OsgiServletContainerInitializerInfo info : initializers) {
 				// with no Whiteboard support, we can have only one OsgiContextModel per ContainerInitializerModel

@@ -133,8 +133,8 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 
 				// register a welcome file - should be used for ALL resource servlets - default and non default
 				webContainer.registerWelcomeFiles(new String[] { "index.html" }, true, httpContext);
-				// register static htmls
 
+				// register static htmls
 				webContainer.registerResources("/html", "/html", httpContext);
 
 				errorServlet = new HelloWorldErrorServlet();

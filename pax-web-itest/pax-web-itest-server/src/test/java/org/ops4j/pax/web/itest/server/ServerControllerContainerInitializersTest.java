@@ -35,7 +35,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.wiring.BundleWiring;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -56,16 +55,10 @@ public class ServerControllerContainerInitializersTest extends MultiContainerTes
 		controller.configure();
 		controller.start();
 
-		Bundle bundle = mock(Bundle.class);
-		BundleContext bc = mock(BundleContext.class);
-		when(bundle.toString()).thenReturn("App Bundle");
-		when(bundle.getBundleContext()).thenReturn(bc);
-		BundleWiring wiring = mock(BundleWiring.class);
-		when(bundle.adapt(BundleWiring.class)).thenReturn(wiring);
-		when(wiring.getClassLoader()).thenReturn(this.getClass().getClassLoader());
+		Bundle bundle = mockBundle("App Bundle", false);
+		BundleContext bc = bundle.getBundleContext();
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.configureActiveServerController(controller);
 
 		WebContainer wc = new HttpServiceEnabled(bundle, controller, server, null, controller.getConfiguration());
 		@SuppressWarnings("unchecked")

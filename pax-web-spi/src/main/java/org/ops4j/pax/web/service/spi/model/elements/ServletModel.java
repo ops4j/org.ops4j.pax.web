@@ -651,7 +651,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 				+ (urlPatterns == null ? "" : ",urlPatterns=" + Arrays.toString(urlPatterns))
 				+ (servlet == null ? "" : ",servlet=" + servlet)
 				+ (servletClass == null ? "" : ",servletClass=" + servletClass)
-				+ ",contexts=" + contextModels
+				+ ",contexts=" + getContextModelsInfo()
 				+ "}";
 	}
 

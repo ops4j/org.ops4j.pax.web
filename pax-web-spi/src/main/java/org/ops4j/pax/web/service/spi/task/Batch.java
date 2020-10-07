@@ -18,7 +18,7 @@ package org.ops4j.pax.web.service.spi.task;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
+import java.util.TreeMap;
 
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
@@ -103,12 +103,23 @@ public class Batch {
 	}
 
 	/**
+	 * Mark {@link OsgiContextModel} as (temporarily) disassociated with {@link WebContainerContext}
+	 *
+	 * @param context
+	 * @param osgiContextModel
+	 */
+	public void disassociateOsgiContextModel(WebContainerContext context, OsgiContextModel osgiContextModel) {
+		operations.add(new OsgiContextModelChange(OpCode.DISASSOCIATE, context, osgiContextModel, null));
+	}
+
+	/**
 	 * Add {@link ServletModel} to {@link ServerModel}
 	 * @param serverModel
 	 * @param model
 	 */
-	public void addServletModel(ServerModel serverModel, ServletModel model) {
-		operations.add(new ServletModelChange(OpCode.ADD, serverModel, model));
+	public void addServletModel(ServerModel serverModel, ServletModel model,
+				OsgiContextModel ... newModels) {
+		operations.add(new ServletModelChange(OpCode.ADD, serverModel, model, newModels));
 	}
 
 	/**
@@ -157,8 +168,8 @@ public class Batch {
 	 * @param serverModel
 	 * @param model
 	 */
-	public void addFilterModel(ServerModel serverModel, FilterModel model) {
-		operations.add(new FilterModelChange(OpCode.ADD, serverModel, model));
+	public void addFilterModel(ServerModel serverModel, FilterModel model, OsgiContextModel ... newModels) {
+		operations.add(new FilterModelChange(OpCode.ADD, serverModel, model, newModels));
 	}
 
 	/**
@@ -208,7 +219,7 @@ public class Batch {
 	 * @param dynamic should be set to {@code true} when adding a {@link FilterModel} related to
 	 *        {@link javax.servlet.ServletContext#addFilter}
 	 */
-	public void updateFilters(Map<String, TreeSet<FilterModel>> contextFilters, boolean dynamic) {
+	public void updateFilters(Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> contextFilters, boolean dynamic) {
 		operations.add(new FilterStateChange(contextFilters, dynamic));
 	}
 
@@ -217,8 +228,9 @@ public class Batch {
 	 * @param serverModel
 	 * @param model
 	 */
-	public void addErrorPageModel(ServerModel serverModel, ErrorPageModel model) {
-		operations.add(new ErrorPageModelChange(OpCode.ADD, serverModel, model));
+	public void addErrorPageModel(ServerModel serverModel, ErrorPageModel model,
+				OsgiContextModel ... newModels) {
+		operations.add(new ErrorPageModelChange(OpCode.ADD, serverModel, model, newModels));
 	}
 
 	/**
@@ -266,7 +278,7 @@ public class Batch {
 	 *
 	 * @param contextErrorPageModels
 	 */
-	public void updateErrorPages(Map<String, TreeSet<ErrorPageModel>> contextErrorPageModels) {
+	public void updateErrorPages(Map<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> contextErrorPageModels) {
 		operations.add(new ErrorPageStateChange(contextErrorPageModels));
 	}
 
@@ -275,8 +287,9 @@ public class Batch {
 	 * @param serverModel
 	 * @param model
 	 */
-	public void addEventListenerModel(ServerModel serverModel, EventListenerModel model) {
-		operations.add(new EventListenerModelChange(OpCode.ADD, serverModel, model));
+	public void addEventListenerModel(ServerModel serverModel, EventListenerModel model,
+				OsgiContextModel ... newModels) {
+		operations.add(new EventListenerModelChange(OpCode.ADD, serverModel, model, newModels));
 	}
 
 	/**
@@ -293,8 +306,9 @@ public class Batch {
 	 * @param serverModel
 	 * @param model
 	 */
-	public void addContainerInitializerModel(ServerModel serverModel, ContainerInitializerModel model) {
-		operations.add(new ContainerInitializerModelChange(OpCode.ADD, serverModel, model));
+	public void addContainerInitializerModel(ServerModel serverModel, ContainerInitializerModel model,
+			OsgiContextModel ... newModels) {
+		operations.add(new ContainerInitializerModelChange(OpCode.ADD, serverModel, model, newModels));
 	}
 
 	/**
@@ -311,8 +325,9 @@ public class Batch {
 	 * @param serverModel
 	 * @param model
 	 */
-	public void addWelcomeFileModel(ServerModel serverModel, WelcomeFileModel model) {
-		operations.add(new WelcomeFileModelChange(OpCode.ADD, serverModel, model));
+	public void addWelcomeFileModel(ServerModel serverModel, WelcomeFileModel model,
+				OsgiContextModel ... newModels) {
+		operations.add(new WelcomeFileModelChange(OpCode.ADD, serverModel, model, newModels));
 	}
 
 	/**

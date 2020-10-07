@@ -90,6 +90,8 @@ public class OsgiServletContext implements ServletContext {
 	/** Welcome files are kept at this level - to be accessed by resource servlets, uniquely for each OSGi context */
 	private String[] welcomeFiles;
 
+	private boolean welcomeFilesRedirect = false;
+
 	/** If this context is registered as OSGi service, here's the registration */
 	private ServiceRegistration<ServletContext> registration;
 
@@ -111,7 +113,7 @@ public class OsgiServletContext implements ServletContext {
 	 */
 	public OsgiServletContext(ServletContext containerServletContext, OsgiContextModel osgiContextModel,
 			ServletContextModel servletContextModel, SessionCookieConfig defaultSessionCookieConfig,
-			OsgiServletContextClassLoader loader) {
+			ClassLoader loader) {
 		this.containerServletContext = containerServletContext;
 		this.osgiContextModel = osgiContextModel;
 		this.servletContextModel = servletContextModel;
@@ -238,6 +240,14 @@ public class OsgiServletContext implements ServletContext {
 
 	public void setWelcomeFiles(String[] welcomeFiles) {
 		this.welcomeFiles = welcomeFiles;
+	}
+
+	public boolean isWelcomeFilesRedirect() {
+		return welcomeFilesRedirect;
+	}
+
+	public void setWelcomeFilesRedirect(boolean redirect) {
+		this.welcomeFilesRedirect = redirect;
 	}
 
 	// --- methods that throw UnsupportedOperationException (we can add filters/servlets/listeners, but using

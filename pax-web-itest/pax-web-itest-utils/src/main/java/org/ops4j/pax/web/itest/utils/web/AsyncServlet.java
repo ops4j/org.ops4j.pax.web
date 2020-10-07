@@ -38,7 +38,7 @@ public class AsyncServlet extends HttpServlet {
 	/**
 	 * Regardless of request path/headers/params, this method will slowly return
 	 * 1kB of data.
-	 * 
+	 *
 	 * @param req
 	 * @param resp
 	 * @throws ServletException
@@ -48,14 +48,14 @@ public class AsyncServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
 		switch (req.getDispatcherType()) {
-		case REQUEST:
-			startResponding(req, resp);
-			break;
-		case ASYNC:
-			continueResponding(req, resp);
-			break;
-		default:
-			break;
+			case REQUEST:
+				startResponding(req, resp);
+				break;
+			case ASYNC:
+				continueResponding(req, resp);
+				break;
+			default:
+				break;
 		}
 	}
 

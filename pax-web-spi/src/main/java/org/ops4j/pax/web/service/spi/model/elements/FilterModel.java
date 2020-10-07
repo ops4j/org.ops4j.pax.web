@@ -246,7 +246,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 				+ (regexMapping == null ? "" : ",regexMapping=" + Arrays.toString(regexMapping))
 				+ (filter == null ? "" : ",filter=" + filter)
 				+ (filterClass == null ? "" : ",filterClass=" + filterClass)
-				+ ",contexts=" + contextModels
+				+ ",contexts=" + getContextModelsInfo()
 				+ "}";
 	}
 

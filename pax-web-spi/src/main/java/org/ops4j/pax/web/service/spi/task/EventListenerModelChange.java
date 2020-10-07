@@ -15,9 +15,11 @@
  */
 package org.ops4j.pax.web.service.spi.task;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 
@@ -26,12 +28,15 @@ public class EventListenerModelChange extends Change {
 	private final ServerModel serverModel;
 	private final List<EventListenerModel> eventListenerModels = new LinkedList<>();
 	private EventListenerModel eventListenerModel;
+	private final List<OsgiContextModel> newModels = new LinkedList<>();
 
-	public EventListenerModelChange(OpCode op, ServerModel serverModel, EventListenerModel eventListenerModel) {
+	public EventListenerModelChange(OpCode op, ServerModel serverModel, EventListenerModel eventListenerModel,
+				OsgiContextModel... newModels) {
 		super(op);
 		this.serverModel = serverModel;
 		this.eventListenerModels.add(eventListenerModel);
 		this.eventListenerModel = eventListenerModel;
+		this.newModels.addAll(Arrays.asList(newModels));
 	}
 
 	public EventListenerModelChange(OpCode op, ServerModel serverModel, List<EventListenerModel> eventListenerModels) {
@@ -52,9 +57,17 @@ public class EventListenerModelChange extends Change {
 		return eventListenerModels;
 	}
 
+	public List<OsgiContextModel> getNewModels() {
+		return newModels;
+	}
+
 	@Override
 	public void accept(BatchVisitor visitor) {
 		visitor.visit(this);
+	}
+
+	public List<OsgiContextModel> getContextModels() {
+		return newModels.size() > 0 ? newModels : eventListenerModel.getContextModels();
 	}
 
 	@Override

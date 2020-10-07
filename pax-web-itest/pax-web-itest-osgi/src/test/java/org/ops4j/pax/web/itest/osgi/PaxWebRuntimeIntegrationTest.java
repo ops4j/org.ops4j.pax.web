@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServlet;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -269,19 +270,28 @@ public class PaxWebRuntimeIntegrationTest extends AbstractOsgiTestBase {
 	 * @throws IOException
 	 */
 	public static void prepareBundles() throws IOException {
+		File dir = new File("target/bundles");
+		dir.mkdirs();
+		FileUtils.cleanDirectory(dir);
 		InputStream bundle1 = TinyBundles.bundle()
 				.set("Bundle-ManifestVersion", "2")
 				.set("Bundle-SymbolicName", "b1")
 				.build();
-		new File("target/bundles").mkdirs();
-		IOUtils.copy(bundle1, new FileOutputStream("target/bundles/empty-bundle1.jar"));
+		File f1 = new File(dir, "empty-bundle1.jar");
+		f1.delete();
+		try (FileOutputStream fos = new FileOutputStream(f1)) {
+			IOUtils.copy(bundle1, fos);
+		}
 
 		InputStream bundle2 = TinyBundles.bundle()
 				.set("Bundle-ManifestVersion", "2")
 				.set("Bundle-SymbolicName", "b2")
 				.build();
-		new File("target/bundles").mkdirs();
-		IOUtils.copy(bundle2, new FileOutputStream("target/bundles/empty-bundle2.jar"));
+		File f2 = new File(dir, "empty-bundle2.jar");
+		f2.delete();
+		try (FileOutputStream fos = new FileOutputStream(f2)) {
+			IOUtils.copy(bundle2, fos);
+		}
 	}
 
 }

@@ -143,7 +143,6 @@ public class WhiteboardEventListenersTest extends MultiContainerTestSupport {
 		assertTrue(serviceModelInternals.isEmpty());
 	}
 
-
 	@Test
 	public void servletContextListeners() throws Exception {
 		Bundle sample1 = mockBundle("sample1");

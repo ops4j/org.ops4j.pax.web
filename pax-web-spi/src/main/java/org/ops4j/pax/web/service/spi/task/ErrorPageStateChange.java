@@ -15,22 +15,25 @@
  */
 package org.ops4j.pax.web.service.spi.task;
 
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 
 public class ErrorPageStateChange extends Change {
 
 	/** Explicitly marked as mapping of {@link TreeSet} to highlight the importance of ordering */
-	private final Map<String, TreeSet<ErrorPageModel>> contextErrorPages;
+	private final Map<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> contextErrorPages;
 
-	public ErrorPageStateChange(Map<String, TreeSet<ErrorPageModel>> contextErrorPages) {
+	public ErrorPageStateChange(Map<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> contextErrorPages) {
 		super(OpCode.NONE);
 		this.contextErrorPages = contextErrorPages;
 	}
 
-	public Map<String, TreeSet<ErrorPageModel>> getContextErrorPages() {
+	public Map<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> getContextErrorPages() {
 		return contextErrorPages;
 	}
 

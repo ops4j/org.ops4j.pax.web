@@ -15,8 +15,9 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.AbstractContextTracker;
+import org.ops4j.pax.web.service.spi.context.DefaultServletContextHelper;
 import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping;
@@ -34,13 +35,13 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class ServletContextHelperMappingTracker extends AbstractContextTracker<ServletContextHelperMapping> {
 
-	private ServletContextHelperMappingTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
-		super(extenderContext, bundleContext);
+	private ServletContextHelperMappingTracker(final WhiteboardContext whiteboardContext, final BundleContext bundleContext) {
+		super(whiteboardContext, bundleContext);
 	}
 
-	public static ServiceTracker<ServletContextHelperMapping, OsgiContextModel> createTracker(final ExtenderContext extenderContext,
+	public static ServiceTracker<ServletContextHelperMapping, OsgiContextModel> createTracker(final WhiteboardContext whiteboardContext,
 			final BundleContext bundleContext) {
-		return new ServletContextHelperMappingTracker(extenderContext, bundleContext).create(ServletContextHelperMapping.class);
+		return new ServletContextHelperMappingTracker(whiteboardContext, bundleContext).create(ServletContextHelperMapping.class);
 	}
 
 	@Override
@@ -87,6 +88,9 @@ public class ServletContextHelperMappingTracker extends AbstractContextTracker<S
 					// get the ServletContextHelperMapping again - within proper bundle context, but again - only to
 					// obtain all the information needed. The "factory" method also accepts a Bundle, so we pass it.
 					ServletContextHelper helper = mapping.getServletContextHelper(bundleContext.getBundle());
+					if (helper == null) {
+						helper = new DefaultServletContextHelper(bundleContext.getBundle());
+					}
 					return new WebContainerContextWrapper(bundleContext.getBundle(), helper, model.getName());
 				} finally {
 					// TOCHECK: hmm, won't the ServletContextHelper returned from the mapping go away if we unget

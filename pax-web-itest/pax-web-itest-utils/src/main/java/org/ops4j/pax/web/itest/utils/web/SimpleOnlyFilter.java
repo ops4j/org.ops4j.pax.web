@@ -31,6 +31,7 @@ public class SimpleOnlyFilter implements Filter {
 		System.out.println(config.getServletContext().getContextPath());
 	}
 
+	@Override
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
 			throws IOException, ServletException {
 		servletResponse.setContentType("text/html");

@@ -15,15 +15,17 @@
  */
 package org.ops4j.pax.web.service.spi.task;
 
+import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
+import java.util.TreeMap;
 
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 
 public class FilterStateChange extends Change {
 
-	/** Explicitly marked as mapping of {@link TreeSet} to highlight the importance of ordering */
-	private final Map<String, TreeSet<FilterModel>> contextFilters;
+	/** Explicitly marked as mapping of {@link TreeMap} to highlight the importance of ordering */
+	private final Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> contextFilters;
 
 	/**
 	 * Whether the change is caused by dynamic filter registration. In such case, we should NEVER attempt
@@ -32,7 +34,7 @@ public class FilterStateChange extends Change {
 	 */
 	private boolean dynamic = false;
 
-	public FilterStateChange(Map<String, TreeSet<FilterModel>> contextFilters, boolean dynamic) {
+	public FilterStateChange(Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> contextFilters, boolean dynamic) {
 		super(OpCode.NONE);
 		this.contextFilters = contextFilters;
 		this.dynamic = dynamic;
@@ -42,7 +44,7 @@ public class FilterStateChange extends Change {
 		return dynamic;
 	}
 
-	public Map<String, TreeSet<FilterModel>> getContextFilters() {
+	public Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> getContextFilters() {
 		return contextFilters;
 	}
 

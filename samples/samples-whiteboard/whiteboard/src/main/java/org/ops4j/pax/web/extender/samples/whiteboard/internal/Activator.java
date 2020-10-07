@@ -235,10 +235,6 @@ public class Activator implements BundleActivator {
 			listenerReg.unregister();
 			listenerReg = null;
 		}
-		if (httpContextReg != null) {
-			httpContextReg.unregister();
-			httpContextReg = null;
-		}
 		if (forbiddenServletReg != null) {
 			forbiddenServletReg.unregister();
 			forbiddenServletReg = null;
@@ -246,6 +242,10 @@ public class Activator implements BundleActivator {
 		if (jspMappingRegistration != null) {
 			jspMappingRegistration.unregister();
 			jspMappingRegistration = null;
+		}
+		if (httpContextReg != null) {
+			httpContextReg.unregister();
+			httpContextReg = null;
 		}
 	}
 

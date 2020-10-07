@@ -17,7 +17,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import java.util.List;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
@@ -67,10 +67,10 @@ public abstract class AbstractElementTracker<S, R, D extends ElementEventData, T
 	protected final Logger log = LoggerFactory.getLogger(getClass());
 
 	protected final BundleContext bundleContext;
-	private final ExtenderContext extenderContext;
+	private final WhiteboardContext whiteboardContext;
 
-	protected AbstractElementTracker(ExtenderContext extenderContext, BundleContext bundleContext) {
-		this.extenderContext = extenderContext;
+	protected AbstractElementTracker(WhiteboardContext whiteboardContext, BundleContext bundleContext) {
+		this.whiteboardContext = whiteboardContext;
 		this.bundleContext = bundleContext;
 	}
 
@@ -228,30 +228,29 @@ public abstract class AbstractElementTracker<S, R, D extends ElementEventData, T
 			return null;
 		}
 
+		// remember the selector for given ElementModel - so we can re-register the element if
+		// the filter matches new/changed set of contexts
+		webElement.setContextSelectFilter(contextFilter);
+
 		// 2. get the actual contexts - only after creating actual element. Because failure to resolve target
 		//    contexts should result in specific FailureDTO (e.g., org.osgi.service.http.runtime.dto.FailedServletDTO)
-		List<OsgiContextModel> contexts = extenderContext.resolveContexts(serviceReference.getBundle(), contextFilter);
-
-		if (contexts.size() == 0) {
-			// TODO: should result in DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
-			log.warn("Can't resolve target context(s) for Whiteboard element {}. Filter: {}", serviceReference, selector);
-			return null;
-		}
+		List<OsgiContextModel> contexts = whiteboardContext.resolveContexts(serviceReference.getBundle(), contextFilter);
 
 		// now set the target context models
+		// 2020-10-02: this list may be empty, but we won't prevent "remembering" such web element, because at
+		// any point we may get (Whiteboard-registered) a context that satisfies this web element's selector
 		for (OsgiContextModel contextModel : contexts) {
 			webElement.addContextModel(contextModel);
 		}
 
 		// Web element is created, but validation has to be run separately/explicitly to handle "Failure DTO"
 		if (webElement.isValid()) {
-			extenderContext.addWebElement(serviceReference.getBundle(), webElement);
+			whiteboardContext.addWebElement(serviceReference.getBundle(), webElement);
 
-			//		httpServiceRuntime.addWhiteboardElement(model);
-			extenderContext.configureDTOs(webElement);
+			whiteboardContext.configureDTOs(webElement);
 			return webElement;
 		} else {
-			extenderContext.configureFailedDTOs(webElement);
+			whiteboardContext.configureFailedDTOs(webElement);
 			return null;
 		}
 	}
@@ -279,11 +278,12 @@ public abstract class AbstractElementTracker<S, R, D extends ElementEventData, T
 		log.debug("Whiteboard service removed: {}", serviceReference);
 
 		//		httpServiceRuntime.removeWhiteboardElement(model);
-		extenderContext.removeWebElement(serviceReference.getBundle(), webElement);
+		whiteboardContext.removeWebElement(serviceReference.getBundle(), webElement);
 	}
 
 	/**
-	 * Get a selector for contexts in LDAP-filter syntax.
+	 * Get a selector for contexts in LDAP-filter syntax. Selector is determined using service-registration properties
+	 * and depends on whether the reference is canonical (CMPN Whiteboard) or <em>legacy</em> Pax Web <em>mapping</em>.
 	 *
 	 * @param legacyMapping if {@code true}, then no fallback selector will be created because context id/selector
 	 *        SHOULD be specified using {@link ContextRelated#getContextId()} or

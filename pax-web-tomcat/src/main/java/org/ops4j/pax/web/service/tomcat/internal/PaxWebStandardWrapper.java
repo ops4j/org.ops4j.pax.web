@@ -29,6 +29,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
+import org.ops4j.pax.web.service.tomcat.internal.web.TomcatResourceServlet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
@@ -193,6 +194,11 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 			} else if (servletModel != null && servletModel.getElementSupplier() != null) {
 				instance = servletModel.getElementSupplier().get();
 			}
+		}
+
+		if (instance != null && servletModel != null && servletModel.isResourceServlet()) {
+			((TomcatResourceServlet) instance).setWelcomeFiles(osgiServletContext.getWelcomeFiles());
+			((TomcatResourceServlet) instance).setWelcomeFilesRedirect(osgiServletContext.isWelcomeFilesRedirect());
 		}
 
 		if (instance == null) {

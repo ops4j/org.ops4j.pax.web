@@ -28,8 +28,9 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.IdentityHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
+import java.util.TreeMap;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.Servlet;
@@ -67,7 +68,6 @@ import org.ops4j.pax.web.service.spi.task.Batch;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.HttpContext;
 
 import static org.hamcrest.CoreMatchers.endsWith;
@@ -108,7 +108,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		controller.configure();
 		controller.start();
 
-		Bundle bundle = mock(Bundle.class);
+		Bundle bundle = mockBundle("sample", false);
 
 		WebContainerContext wcc = new DefaultHttpContext(bundle) {
 			@Override
@@ -129,9 +129,8 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		};
 
 		Servlet servlet = new HttpServlet() {
-			private ServletConfig config;
-
 			private final Map<ServletContext, Boolean> contexts = new IdentityHashMap<>();
+			private ServletConfig config;
 
 			@Override
 			public void init(ServletConfig config) throws ServletException {
@@ -163,7 +162,6 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		};
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.configureActiveServerController(controller);
 
 		Batch batch = new Batch("Register Single Servlet");
 
@@ -202,14 +200,9 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		controller.configure();
 		controller.start();
 
-		Bundle bundle = mock(Bundle.class);
-		when(bundle.toString()).thenReturn("App Bundle");
-		BundleWiring wiring = mock(BundleWiring.class);
-		when(bundle.adapt(BundleWiring.class)).thenReturn(wiring);
-		when(wiring.getClassLoader()).thenReturn(this.getClass().getClassLoader());
+		Bundle bundle = mockBundle("App Bundle", false);
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.configureActiveServerController(controller);
 
 		// no batch at all - everything will be done by HttpService itself
 		WebContainer wc = new HttpServiceEnabled(bundle, controller, server, null, controller.getConfiguration());
@@ -238,9 +231,8 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		};
 
 		Servlet servlet = new HttpServlet() {
-			private ServletConfig config;
-
 			private final Map<ServletContext, Boolean> contexts = new IdentityHashMap<>();
+			private ServletConfig config;
 
 			@Override
 			public void init(ServletConfig config) throws ServletException {
@@ -311,7 +303,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		controller.configure();
 		controller.start();
 
-		Bundle bundle = mock(Bundle.class);
+		Bundle bundle = mockBundle("b1", false);
 
 		Servlet servlet = new HttpServlet() {
 			@Override
@@ -345,7 +337,6 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		};
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.configureActiveServerController(controller);
 
 		Batch batch = new Batch("Register Servlet and Event Listener");
 
@@ -390,13 +381,9 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		controller.configure();
 		controller.start();
 
-		Bundle bundle = mock(Bundle.class);
-		BundleWiring wiring = mock(BundleWiring.class);
-		when(bundle.adapt(BundleWiring.class)).thenReturn(wiring);
-		when(wiring.getClassLoader()).thenReturn(this.getClass().getClassLoader());
+		Bundle bundle = mockBundle("sample", false);
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.configureActiveServerController(controller);
 
 		// no batch at all - everything will be done by HttpService itself
 		WebContainer wc = new HttpServiceEnabled(bundle, controller, server, null, controller.getConfiguration());
@@ -463,9 +450,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		controller.configure();
 		controller.start();
 
-		Bundle bundle = mock(Bundle.class);
-		BundleContext context = mock(BundleContext.class);
-		when(bundle.getBundleContext()).thenReturn(context);
+		Bundle bundle = mockBundle("b1", false);
 
 		WebContainerContext wcc1 = new DefaultHttpContext(bundle);
 		WebContainerContext wcc2 = new DefaultHttpContext(bundle, "special");
@@ -476,7 +461,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		// ServletConfig objects (with different - and usually wrong ServletContext)
 		@SuppressWarnings("unchecked")
 		ServiceReference<Servlet> ref = mock(ServiceReference.class);
-		when(context.getService(ref)).thenReturn(new Utils.MyHttpServlet("1"));
+		when(bundle.getBundleContext().getService(ref)).thenReturn(new Utils.MyHttpServlet("1"));
 
 		Filter filter = new HttpFilter() {
 			@Override
@@ -493,7 +478,6 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		};
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.configureActiveServerController(controller);
 
 		Batch batch = new Batch("Register Servlets and Filter");
 		ServletContextModel contextC = server.getOrCreateServletContextModel("/c", batch);
@@ -530,17 +514,17 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 				.withRegisteringBundle(bundle)
 				.build());
 
-		Map<String, TreeSet<FilterModel>> filters = new HashMap<>();
-		TreeSet<FilterModel> set = new TreeSet<>();
+		Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> filters = new HashMap<>();
+		TreeMap<FilterModel, List<OsgiContextModel>> set = new TreeMap<>();
 		// this filter is NOT registered to osgiContextC2, so should NOT be mapped to /c/s2/*
-		set.add(new FilterModel.Builder()
+		set.put(new FilterModel.Builder()
 				.withFilterName("my-filter")
 				.withUrlPatterns(new String[] { "/*" }) // maps to /*/* depending on associated contexts
 				.withFilter(filter)
 				.withOsgiContextModel(osgiContextC) // maps to /c/*
 				.withOsgiContextModel(osgiContextD) // maps to /d/*
 				.withRegisteringBundle(bundle)
-				.build());
+				.build(), null);
 		filters.put("/c", set);
 		filters.put("/d", set);
 		batch.updateFilters(filters, false);
@@ -577,12 +561,9 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		controller.configure();
 		controller.start();
 
-		Bundle bundle = mock(Bundle.class);
-		BundleContext context = mock(BundleContext.class);
-		when(bundle.getBundleContext()).thenReturn(context);
+		Bundle bundle = mockBundle("sample", false);
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.configureActiveServerController(controller);
 
 		Configuration config = controller.getConfiguration();
 		HttpServiceEnabled wc = new HttpServiceEnabled(bundle, controller, server, null, config);
@@ -612,7 +593,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		final int[] id = { 1 };
 		@SuppressWarnings("unchecked")
 		ServiceReference<Servlet> ref = mock(ServiceReference.class);
-		when(context.getService(ref)).thenAnswer(invocation -> new Utils.MyHttpServlet(Integer.toString(id[0]++)));
+		when(bundle.getBundleContext().getService(ref)).thenAnswer(invocation -> new Utils.MyHttpServlet(Integer.toString(id[0]++)));
 
 		Filter filter = new HttpFilter() {
 			@Override
@@ -727,12 +708,10 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		controller.configure();
 		controller.start();
 
-		Bundle bundle = mock(Bundle.class);
-		BundleContext context = mock(BundleContext.class);
-		when(bundle.getBundleContext()).thenReturn(context);
+		Bundle bundle = mockBundle("b1", false);
+		BundleContext context = bundle.getBundleContext();
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.configureActiveServerController(controller);
 
 		Configuration config = controller.getConfiguration();
 		HttpServiceEnabled wc = new HttpServiceEnabled(bundle, controller, server, null, config);

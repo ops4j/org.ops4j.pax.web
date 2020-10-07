@@ -1,0 +1,44 @@
+= A note about SCR
+
+OSGi CMPN Whiteboard Service specification is all about tracking user-registered OSGi services, turning them (_customizing_ them) using trackers/customizers into internal representations of these services and using the customized objects to alter the state of one or more _servlet contexts_ within given server runtime (Jetty, Tomcat, Undertow).
+
+When working with Whiteboard directly, we can easily control the order of the services being registered and it's obviously more _natural_ to register a `ServletContextHelper` before registering a `Servlet` that's associated with such `ServletContextHelper`.
+
+OSGi services (later tracked and customized by Whiteboard implementation) may be provided by other means as well - in Blueprint or Declarative Services (SCR).
+
+In SCR we either control the order using `@Reference` or ... not. (In blueprint, a `<reference>` is not the best way to provide dependencies, as the references are actually proxies that wait on target service).
+
+The problem with SCR in Pax Web is that when e.g., `ServletContextHelper` OSGi service is _published_ using:
+
+[listing,options=nowrap]
+----
+@Component(
+    service = ServletContextHelper.class
+    scope = ServiceScope.BUNDLE,
+    property = {
+        HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH + "=/context",
+        HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=CustomContext"
+})
+public class WhiteboardContext extends ServletContextHelper {
+}
+----
+
+There are at least two `org.osgi.framework.ServiceListener` instances interested in the above service registration:
+
+* a listener with `org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletContextHelperTracker` customizer registered by pax-web-extender-whiteboard
+* listeners with customizers managed by `org.apache.felix.scr.impl.manager.DependencyManager` instances kept in `org.apache.felix.scr.impl.manager.AbstractComponentManager` for SCR components
+
+With Felix that keeps bundle –> List<ListenerInfo> mapping in an unordered `HashMap`, we can't be sure which listener will be called first!
+More precisely, having:
+
+* `org.ops4j.pax.web.samples.whiteboard.ds.extended.PaxWebWhiteboardHttpContextMapping`
+* `org.ops4j.pax.web.samples.whiteboard.ds.extended.PaxWebWhiteboardErrorPageMapping` (which has `@Reference` dependency on the above)
+
+we still _may_ have problems! When `PaxWebWhiteboardHttpContextMapping` (no dependencies) is always activated first, it registers a `org.ops4j.pax.web.service.whiteboard.HttpContextMapping` OSGi service which fires a service event handled in `org.apache.felix.framework.EventDispatcher.fireEventImmediately()` which calls all service listeners.
+
+1. if the listeners of `felix.scr` bundle are first in `org.apache.felix.framework.EventDispatcher.m_svcListeners` map, then `org.apache.felix.scr.impl.manager.DependencyManager.SingleStaticCustomizer.addedService()` is called first on a DM for `PaxWebWhiteboardErrorPageMapping` SCR component
+2. if the listeners of `pax-web-extender-whiteboard` bundle are first, then `org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.HttpContextMappingTracker` is called first and can actually register the context
+
+In case 1, activation of `PaxWebWhiteboardErrorPageMapping` leads to registration of OSGi service and firing another service event, before service event related to registration of `PaxWebWhiteboardHttpContextMapping` is handled by all listeners! So again, new service event is fired, but there's no SCR DependencyManager waiting (no other SCR component depends on the `PaxWebWhiteboardErrorPageMapping`), so `pax-web-extender-whiteboard` is called next and it tries to register the error mapping, but `PaxWebWhiteboardHttpContextMapping` was *not* registered yet leading to missing context!
+
+The only way to solve this problem is to actually review the state of registered Whiteboard services after new contexts are registered...

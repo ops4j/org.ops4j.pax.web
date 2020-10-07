@@ -32,7 +32,7 @@ import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionIdListener;
 import javax.servlet.http.HttpSessionListener;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.events.EventListenerEventData;
 import org.osgi.framework.BundleContext;
@@ -65,11 +65,11 @@ public class ListenerTracker extends AbstractElementTracker<EventListener, Event
 			WriteListener.class
 	};
 
-	private ListenerTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
-		super(extenderContext, bundleContext);
+	private ListenerTracker(final WhiteboardContext whiteboardContext, final BundleContext bundleContext) {
+		super(whiteboardContext, bundleContext);
 	}
 
-	public static ServiceTracker<EventListener, EventListenerModel> createTracker(final ExtenderContext extenderContext,
+	public static ServiceTracker<EventListener, EventListenerModel> createTracker(final WhiteboardContext whiteboardContext,
 			final BundleContext bundleContext) {
 
 		StringBuilder classes = new StringBuilder();
@@ -77,12 +77,13 @@ public class ListenerTracker extends AbstractElementTracker<EventListener, Event
 			classes.append("(objectClass=").append(c.getName()).append(")");
 		}
 		String filter = String.format("(&(|%s)(%s=*))", classes.toString(), HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER);
-		return new ListenerTracker(extenderContext, bundleContext).create(filter);
+		return new ListenerTracker(whiteboardContext, bundleContext).create(filter);
 	}
 
 	@Override
 	protected EventListenerModel createElementModel(ServiceReference<EventListener> serviceReference, Integer rank, Long serviceId) {
 		EventListenerModel model = new EventListenerModel();
+		model.setRegisteringBundle(serviceReference.getBundle());
 		model.setElementReference(serviceReference);
 		model.setServiceRank(rank);
 		model.setServiceId(serviceId);

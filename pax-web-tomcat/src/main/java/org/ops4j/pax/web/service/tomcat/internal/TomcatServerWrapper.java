@@ -32,6 +32,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Supplier;
 import javax.servlet.Servlet;
@@ -765,7 +766,7 @@ class TomcatServerWrapper implements BatchVisitor {
 
 	@Override
 	public void visit(OsgiContextModelChange change) {
-		if (change.getKind() == OpCode.ASSOCIATE) {
+		if (change.getKind() == OpCode.ASSOCIATE || change.getKind() == OpCode.DISASSOCIATE) {
 			return;
 		}
 
@@ -792,17 +793,20 @@ class TomcatServerWrapper implements BatchVisitor {
 			// this (and similar Jetty and Undertow places) should be the only place where
 			// org.ops4j.pax.web.service.spi.servlet.OsgiServletContext is created and we have everything ready
 			// to create proper classloader for this OsgiServletContext
-			OsgiServletContextClassLoader loader = null;
+			ClassLoader classLoader = null;
 			if (paxWebTomcatBundle != null) {
 				// it may not be the case in Test scenario
-				loader = new OsgiServletContextClassLoader();
+				OsgiServletContextClassLoader loader = new OsgiServletContextClassLoader();
 				loader.addBundle(osgiModel.getOwnerBundle());
 				loader.addBundle(paxWebTomcatBundle);
 				loader.addBundle(Utils.getPaxWebJspBundle(paxWebTomcatBundle));
 				loader.makeImmutable();
+				classLoader = loader;
+			} else {
+				classLoader = this.classLoader;
 			}
 			OsgiServletContext osgiContext = new OsgiServletContext(realContext.getServletContext(), osgiModel, servletContextModel,
-					defaultSessionCookieConfig, loader);
+					defaultSessionCookieConfig, classLoader);
 			osgiServletContexts.put(osgiModel, osgiContext);
 			osgiContextModels.get(contextPath).add(osgiModel);
 		}
@@ -828,7 +832,7 @@ class TomcatServerWrapper implements BatchVisitor {
 
 			// we have to ensure that non-highest ranked contexts are unregistered
 			osgiServletContexts.forEach((ocm, osc) -> {
-				if (osc != highestRankedContext) {
+				if (ocm.getContextPath().equals(contextPath) && osc != highestRankedContext) {
 					osc.unregister();
 				}
 			});
@@ -857,7 +861,7 @@ class TomcatServerWrapper implements BatchVisitor {
 
 			Set<String> done = new HashSet<>();
 
-			model.getContextModels().forEach(osgiContext -> {
+			change.getContextModels().forEach(osgiContext -> {
 				String contextPath = osgiContext.getContextPath();
 				if (!done.add(contextPath)) {
 					return;
@@ -984,14 +988,12 @@ class TomcatServerWrapper implements BatchVisitor {
 
 	@Override
 	public void visit(FilterStateChange change) {
-		// there's no separate add filter, add filter, remove filter, ... set of operations
-		// everything is passed in single "change"
+		Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> contextFilters = change.getContextFilters();
 
-		Map<String, TreeSet<FilterModel>> contextFilters = change.getContextFilters();
-
-		for (Map.Entry<String, TreeSet<FilterModel>> entry : contextFilters.entrySet()) {
+		for (Map.Entry<String, TreeMap<FilterModel, List<OsgiContextModel>>> entry : contextFilters.entrySet()) {
 			String contextPath = entry.getKey();
-			Set<FilterModel> filters = entry.getValue();
+			Map<FilterModel, List<OsgiContextModel>> filtersMap = entry.getValue();
+			Set<FilterModel> filters = filtersMap.keySet();
 
 			LOG.info("Changing filter configuration for context {}", contextPath);
 
@@ -1026,7 +1028,9 @@ class TomcatServerWrapper implements BatchVisitor {
 			PaxWebFilterMap[] newFilterMaps = new PaxWebFilterMap[filters.size() + 1];
 
 			for (FilterModel model : filters) {
-				OsgiServletContext osgiContext = getHighestRankedContext(contextPath, model);
+				List<OsgiContextModel> contextModels = filtersMap.get(model) != null
+						? filtersMap.get(model) : model.getContextModels();
+				OsgiServletContext osgiContext = getHighestRankedContext(contextPath, model, contextModels);
 
 				PaxWebFilterDef def = new PaxWebFilterDef(model, false, osgiContext);
 				PaxWebFilterMap map = new PaxWebFilterMap(model, false);
@@ -1044,7 +1048,7 @@ class TomcatServerWrapper implements BatchVisitor {
 	public void visit(EventListenerModelChange change) {
 		if (change.getKind() == OpCode.ADD) {
 			EventListenerModel eventListenerModel = change.getEventListenerModel();
-			List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
+			List<OsgiContextModel> contextModels = change.getContextModels();
 			Set<String> done = new HashSet<>();
 			contextModels.forEach((context) -> {
 				String contextPath = context.getContextPath();
@@ -1107,10 +1111,11 @@ class TomcatServerWrapper implements BatchVisitor {
 	@Override
 	public void visit(WelcomeFileModelChange change) {
 		WelcomeFileModel model = change.getWelcomeFileModel();
-		List<OsgiContextModel> contextModels = model.getContextModels();
 
 		OpCode op = change.getKind();
 		if (op == OpCode.ADD || op == OpCode.DELETE) {
+			List<OsgiContextModel> contextModels = op == OpCode.ADD ? change.getContextModels()
+					: model.getContextModels();
 			contextModels.forEach((context) -> {
 				OsgiServletContext osgiServletContext = osgiServletContexts.get(context);
 				PaxWebStandardContext realContext = contextHandlers.get(context.getContextPath());
@@ -1133,6 +1138,7 @@ class TomcatServerWrapper implements BatchVisitor {
 				// set welcome files at OsgiServletContext level. NOT at ServletContextHandler level
 				String[] newWelcomeFiles = currentWelcomeFiles.toArray(new String[0]);
 				osgiServletContext.setWelcomeFiles(newWelcomeFiles);
+				osgiServletContext.setWelcomeFilesRedirect(model.isRedirect());
 
 				LOG.info("Reconfiguration of welcome files for all resource servlet in context \"{}\"", context);
 
@@ -1164,11 +1170,12 @@ class TomcatServerWrapper implements BatchVisitor {
 
 	@Override
 	public void visit(ErrorPageStateChange change) {
-		Map<String, TreeSet<ErrorPageModel>> contextErrorPages = change.getContextErrorPages();
+		Map<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> contextErrorPages = change.getContextErrorPages();
 
-		for (Map.Entry<String, TreeSet<ErrorPageModel>> entry : contextErrorPages.entrySet()) {
+		for (Map.Entry<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> entry : contextErrorPages.entrySet()) {
 			String contextPath = entry.getKey();
-			TreeSet<ErrorPageModel> errorPageModels = entry.getValue();
+			TreeMap<ErrorPageModel, List<OsgiContextModel>> errorPageModelsMap = entry.getValue();
+			Set<ErrorPageModel> errorPageModels = errorPageModelsMap.keySet();
 
 			LOG.info("Changing error page configuration for context {}", contextPath);
 
@@ -1215,7 +1222,7 @@ class TomcatServerWrapper implements BatchVisitor {
 	public void visit(ContainerInitializerModelChange change) {
 		if (change.getKind() == OpCode.ADD) {
 			ContainerInitializerModel model = change.getContainerInitializerModel();
-			List<OsgiContextModel> contextModels = model.getContextModels();
+			List<OsgiContextModel> contextModels = change.getContextModels();
 			contextModels.forEach((context) -> {
 				String path = context.getContextPath();
 				PaxWebStandardContext ctx = contextHandlers.get(context.getContextPath());
@@ -1289,8 +1296,15 @@ class TomcatServerWrapper implements BatchVisitor {
 			context.setLoader(tomcatLoader);
 
 			Collection<SCIWrapper> initializers = new LinkedList<>(this.initializers.get(contextPath).values());
-			// take only these SCIs, which are associated with highest ranked OCM
-			initializers.removeIf(w -> !w.getModel().getContextModels().contains(highestRanked));
+			// Initially I thought we should take only these SCIs, which are associated with highest ranked OCM,
+			// but it turned out that just as we take servlets registered to different OsgiContextModels, but
+			// the same ServletContextModel, we have to do the same with SCIs.
+			// otherwise, by default (with HttpService scenario), SCIs from the OsgiContextModel related to
+			// pax-web-extender-whiteboard would be taken (probably 0), simply because this bundle is usually
+			// the first that grabs an instance of bundle-scoped HttpService
+			// so please do not uncomment and keep for educational purposes!
+//			initializers.removeIf(w -> !w.getModel().getContextModels().contains(highestRanked));
+
 			if (initializers.size() > 0) {
 				initializers.add(new RegisteringContainerInitializer(this.dynamicRegistrations.get(contextPath)));
 				context.setServletContainerInitializers(initializers);
@@ -1342,10 +1356,15 @@ class TomcatServerWrapper implements BatchVisitor {
 						|| context.getState() == LifecycleState.INITIALIZING;
 	}
 
-	private OsgiServletContext getHighestRankedContext(String contextPath, FilterModel model) {
+	private OsgiServletContext getHighestRankedContext(String contextPath, FilterModel model,
+			List<OsgiContextModel> contextModels) {
 		OsgiContextModel highestRankedModel = null;
-		// remember, this contextModels list is properly sorted
-		for (OsgiContextModel ocm : model.getContextModels()) {
+		// remember, this contextModels list is properly sorted - and it comes either from model or
+		// (if configured) from associated list of models which are being changed in the model
+		if (contextModels == null) {
+			contextModels = model.getContextModels();
+		}
+		for (OsgiContextModel ocm : contextModels) {
 			if (ocm.getContextPath().equals(contextPath)) {
 				highestRankedModel = ocm;
 				break;
@@ -1396,7 +1415,7 @@ class TomcatServerWrapper implements BatchVisitor {
 
 		if (quick) {
 			for (int i = pos; i < newModels.length; i++) {
-				OsgiServletContext osgiContext = getHighestRankedContext(contextPath, newModels[pos]);
+				OsgiServletContext osgiContext = getHighestRankedContext(contextPath, newModels[pos], null);
 
 				context.addFilterDef(new PaxWebFilterDef(newModels[pos], false, osgiContext));
 				context.addFilterMap(new PaxWebFilterMap(newModels[pos], false));

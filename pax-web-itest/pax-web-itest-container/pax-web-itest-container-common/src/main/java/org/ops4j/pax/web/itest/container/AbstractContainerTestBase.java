@@ -18,10 +18,13 @@ package org.ops4j.pax.web.itest.container;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
@@ -94,6 +97,31 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 				@Override
 				protected boolean isFulfilled() throws Exception {
 					return events.stream().anyMatch(e -> expectation.test(e.getType(), e.getData()));
+				}
+			}.waitForCondition();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * "configure and wait" method that allows to check entire stream of {@link ElementEvent}s.
+	 * @param action
+	 * @param expectation
+	 */
+	protected void configureAndWait(Runnable action, final Predicate<List<ElementEvent>> expectation) {
+		final List<ElementEvent> events = new CopyOnWriteArrayList<>();
+		webElementListener = events::add;
+		context.registerService(WebElementListener.class, webElementListener, null);
+
+		action.run();
+
+		try {
+			new WaitCondition("Waiting for " + expectation) {
+				@Override
+				protected boolean isFulfilled() throws Exception {
+					return expectation.test(events);
 				}
 			}.waitForCondition();
 		} catch (InterruptedException e) {
@@ -217,6 +245,18 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 				reg.unregister();
 			}
 		}
+	}
+
+	/**
+	 * Checks whether an event is for {@link org.ops4j.pax.web.service.spi.model.elements.ElementModel} registration
+	 * to all the passed context names.
+	 * @param data
+	 * @param name
+	 * @return
+	 */
+	public static boolean usesContexts(ElementEventData data, String ... names) {
+		Set<String> used = new HashSet<>(data.getContextNames());
+		return used.containsAll(Arrays.asList(names));
 	}
 
 	public static HttpService getHttpService(final BundleContext bundleContext) {

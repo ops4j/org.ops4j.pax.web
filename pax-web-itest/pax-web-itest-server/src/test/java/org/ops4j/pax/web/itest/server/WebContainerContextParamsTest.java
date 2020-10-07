@@ -26,18 +26,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.ops4j.pax.web.itest.server.support.Utils;
-import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.HttpServiceEnabled;
 import org.ops4j.pax.web.service.internal.StoppableHttpService;
-import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpContext;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.web.itest.server.support.Utils.httpGET;
 
@@ -92,7 +87,7 @@ public class WebContainerContextParamsTest extends MultiContainerTestSupport {
 		// no sessions
 		String response = httpGET(port, "/visit");
 		assertTrue(response.endsWith("value"));
-		assertNull(holder[0]);
+		assertThat(holder[0], equalTo("value"));
 
 		((StoppableHttpService) wc).stop();
 
@@ -109,16 +104,16 @@ public class WebContainerContextParamsTest extends MultiContainerTestSupport {
 
 		WebContainer wc = container(sample1);
 
-		// normally, "null" httpContext is mapped to HttpService based OsgiContextModel, but in SCI invocation
-		// the OsgiContextModel passed to SCI.onStartup() is the "default" OsgiContextModel from Whiteboard, so
-		// we have to register higher ranked OsgiContextModel
-		HttpContext httpContext = wc.createDefaultHttpContext();
-		Hashtable<String, Object> properties = new Hashtable<>();
-		properties.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "default");
-		properties.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, "/");
-		ServiceReference<HttpContext> reference = mockReference(sample1,
-				HttpContext.class, properties, () -> httpContext, 0L, 42);
-		OsgiContextModel model = getHttpContextCustomizer().addingService(reference);
+//		// normally, "null" httpContext is mapped to HttpService based OsgiContextModel, but in SCI invocation
+//		// the OsgiContextModel passed to SCI.onStartup() is the "default" OsgiContextModel from Whiteboard, so
+//		// we have to register higher ranked OsgiContextModel
+//		HttpContext httpContext = wc.createDefaultHttpContext();
+//		Hashtable<String, Object> properties = new Hashtable<>();
+//		properties.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "default");
+//		properties.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, "/");
+//		ServiceReference<HttpContext> reference = mockReference(sample1,
+//				HttpContext.class, properties, () -> httpContext, 0L, 42);
+//		OsgiContextModel model = getHttpContextCustomizer().addingService(reference);
 
 		Dictionary<String, Object> params = new Hashtable<>();
 		params.put("test", "value");
@@ -148,6 +143,7 @@ public class WebContainerContextParamsTest extends MultiContainerTestSupport {
 	}
 
 	private static class TestServlet extends Utils.MyIdServlet {
+
 		TestServlet(String id) {
 			super(id);
 		}

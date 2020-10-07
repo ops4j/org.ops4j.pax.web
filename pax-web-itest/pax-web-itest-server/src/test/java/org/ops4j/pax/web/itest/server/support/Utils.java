@@ -107,13 +107,13 @@ public class Utils {
 		}
 	}
 
-	public static String httpGET(int port, String request, String ... headers) throws IOException {
+	public static String httpGET(int port, String request, String... headers) throws IOException {
 		Socket s = new Socket();
 		s.connect(new InetSocketAddress("127.0.0.1", port));
 
 		s.getOutputStream().write((
 				"GET " + request + " HTTP/1.1\r\n" +
-				"Host: 127.0.0.1:" + port + "\r\n").getBytes());
+						"Host: 127.0.0.1:" + port + "\r\n").getBytes());
 		for (String header : headers) {
 			s.getOutputStream().write((header + "\r\n").getBytes());
 		}
@@ -139,7 +139,7 @@ public class Utils {
 	 * @return
 	 * @throws IOException
 	 */
-	public static String httpsGET(int port, String request, String ... headers) throws Exception {
+	public static String httpsGET(int port, String request, String... headers) throws Exception {
 		// Trust standard CA and those trusted by our custom strategy
 		final SSLContext sslcontext = SSLContexts.custom()
 				.loadTrustMaterial((chain, authType) -> {
@@ -246,6 +246,7 @@ public class Utils {
 	}
 
 	public static class SameThreadExecutor implements Executor {
+
 		@Override
 		public void execute(Runnable command) {
 			command.run();

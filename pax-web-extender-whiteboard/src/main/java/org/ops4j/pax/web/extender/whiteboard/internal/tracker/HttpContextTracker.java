@@ -18,7 +18,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
@@ -40,13 +40,13 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class HttpContextTracker extends AbstractContextTracker<HttpContext> {
 
-	private HttpContextTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
-		super(extenderContext, bundleContext);
+	private HttpContextTracker(final WhiteboardContext whiteboardContext, final BundleContext bundleContext) {
+		super(whiteboardContext, bundleContext);
 	}
 
-	public static ServiceTracker<HttpContext, OsgiContextModel> createTracker(final ExtenderContext extenderContext,
+	public static ServiceTracker<HttpContext, OsgiContextModel> createTracker(final WhiteboardContext whiteboardContext,
 			final BundleContext bundleContext) {
-		return new HttpContextTracker(extenderContext, bundleContext).create(HttpContext.class);
+		return new HttpContextTracker(whiteboardContext, bundleContext).create(HttpContext.class);
 	}
 
 	@Override
@@ -130,6 +130,15 @@ public class HttpContextTracker extends AbstractContextTracker<HttpContext> {
 				// registration property is not relevant
 				model.setHttpContext((WebContainerContext) context);
 				model.setShared(((WebContainerContext)context).isShared());
+
+				// name check
+				String actualName = ((WebContainerContext) context).getContextId();
+				if (!name.equals(actualName)) {
+					LOG.warn("The registered context has name \"{}\", but {} service property was \"{}\"."
+									+ " Switching to \"{}\".",
+							actualName, PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, name, actualName);
+					model.setName(actualName);
+				}
 			} else {
 				Boolean shared = Utils.getBooleanProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_SHARED);
 				if (shared != null && shared) {

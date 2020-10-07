@@ -114,7 +114,7 @@ public class PaxWebFilterHolder extends FilterHolder {
 	}
 
 	@Override
-	public void destroyInstance(Object o) throws Exception {
+	public void destroyInstance(Object o) {
 		if (filterModel != null && filterModel.getElementReference() != null) {
 			filterModel.getRegisteringBundle().getBundleContext().ungetService(filterModel.getElementReference());
 		}

@@ -23,9 +23,6 @@ import javax.servlet.http.HttpServletResponse;
 
 public class WhiteboardServlet extends HttpServlet {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 2468029128065282904L;
 	private final String alias;
 

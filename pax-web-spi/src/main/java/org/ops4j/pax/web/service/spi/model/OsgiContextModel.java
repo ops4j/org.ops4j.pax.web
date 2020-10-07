@@ -46,6 +46,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -154,9 +155,11 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		// TOCHECK: what about filter-only pipeline? From which bundle the resources will be loaded?
 		Bundle bundle = FrameworkUtil.getBundle(OsgiContextModel.class);
 
-		// tricky way to specify that Whiteboard's "context" is easily overrideable, but still much higher ranked
-		// than OsgiContextModels registered for name+bundle pairs from HttpService instance(s)
-		DEFAULT_CONTEXT_MODEL = new OsgiContextModel(bundle, Integer.MIN_VALUE / 2, 0L, true);
+		// in Whiteboard, rank of "default" context is 0, so it can be overriden by any service ranked higher than 0
+		// "140.4 Registering Servlets":
+		//     The Servlet Context of the Http Service is treated in the same way as all contexts managed by the
+		//     Whiteboard implementation. The highest ranking is associated with the context of the Http Service.
+		DEFAULT_CONTEXT_MODEL = new OsgiContextModel(bundle, 0, 0L, true);
 		DEFAULT_CONTEXT_MODEL.setName(HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME);
 		DEFAULT_CONTEXT_MODEL.setContextPath(PaxWebConstants.DEFAULT_CONTEXT_PATH);
 
@@ -322,6 +325,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		this.ownerBundle = ownerBundle;
 		this.contextPath = contextPath;
 		this.whiteboard = whiteboard;
+		this.name = HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME;
 	}
 
 	@Override
@@ -396,6 +400,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	 */
 	public WebContainerContext resolveHttpContext(Bundle bundle) {
 		if (httpContext != null) {
+			// immediate singleton context
 			return httpContext;
 		}
 
@@ -406,6 +411,8 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 
 		if (contextSupplier != null) {
 			// HttpContextMapping and ServletContextHelperMapping cases are handled via contextSupplier
+			// where we actually can't be sure that apply() will return the same instance on each call, so
+			// singleton/bundle/prototype scopes are hidden here
 			return contextSupplier.apply(bundleContext, getName());
 		}
 		if (contextReference != null) {
@@ -414,6 +421,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 
 			Object context = bundleContext.getService(contextReference);
 			if (context instanceof WebContainerContext) {
+				// Pax Web specific WebContainerContext
 				return (WebContainerContext) context;
 			}
 			if (context instanceof HttpContext) {
@@ -439,7 +447,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	 * @param context
 	 */
 	public void releaseHttpContext(WebContainerContext context) {
-
+		// TODO: actually release the context!
 	}
 
 	public String getName() {
@@ -599,6 +607,10 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		return sessionConfiguration;
 	}
 
+	public boolean isWhiteboard() {
+		return whiteboard;
+	}
+
 	@Override
 	public String toString() {
 		String source = ",";
@@ -621,20 +633,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 
 	@Override
 	public int compareTo(OsgiContextModel o) {
-		String cp1 = this.getContextPath();
-		String cp2 = o.getContextPath();
-
-		// reverse check - longer path is "first"
-		int pathLength = cp2.length() - cp1.length();
-		if (pathLength != 0) {
-			return pathLength;
-		}
-
-		int pathItself = cp1.compareTo(cp2);
-		if (pathItself != 0) {
-			// no conflict - different contexts
-			return pathItself;
-		}
+		// don't compare paths at all! This comparing method should order the OCMs by ranking ONLY
 
 		// reverse check for ranking - higher rank is "first"
 		long serviceRank = (long)o.getServiceRank() - (long)this.getServiceRank();
@@ -660,6 +659,13 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	public String getTemporaryLocation() {
 		return String.format("%s/OCM%d", "/".equals(contextPath) ? "ROOT" : contextPath + "/", getNumericId());
 	}
+
+
+
+
+
+
+
 
 //	/** Access controller context of the bundle that registered the http context. */
 //	@Review("it's so rarely used - only in one resource access scenario, though there are many such scenarios.")

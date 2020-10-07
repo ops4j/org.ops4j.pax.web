@@ -22,7 +22,7 @@ import javax.servlet.Filter;
 import javax.servlet.GenericFilter;
 import javax.servlet.http.HttpFilter;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.events.FilterEventData;
@@ -43,13 +43,13 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class FilterTracker extends AbstractElementTracker<Filter, Filter, FilterEventData, FilterModel> {
 
-	private FilterTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
-		super(extenderContext, bundleContext);
+	private FilterTracker(final WhiteboardContext whiteboardContext, final BundleContext bundleContext) {
+		super(whiteboardContext, bundleContext);
 	}
 
-	public static ServiceTracker<Filter, FilterModel> createTracker(final ExtenderContext extenderContext,
+	public static ServiceTracker<Filter, FilterModel> createTracker(final WhiteboardContext whiteboardContext,
 			final BundleContext bundleContext) {
-		return new FilterTracker(extenderContext, bundleContext)
+		return new FilterTracker(whiteboardContext, bundleContext)
 				.create(Filter.class, GenericFilter.class, HttpFilter.class);
 	}
 

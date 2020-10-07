@@ -34,6 +34,9 @@ public class ContainerInitializerModel extends ElementModel<ServletContainerInit
 	private final ServletContainerInitializer containerInitializer;
 	private final Set<Class<?>> classes = new LinkedHashSet<>();
 
+	// if SCI was created because ServletModel for JSP was added, we need to remember this
+	private ServletModel relatedModel;
+
 	public ContainerInitializerModel(ServletContainerInitializer containerInitializer, Class<?>[] classes) {
 		this.containerInitializer = containerInitializer;
 		if (classes != null) {
@@ -76,6 +79,14 @@ public class ContainerInitializerModel extends ElementModel<ServletContainerInit
 		}
 
 		return Boolean.TRUE;
+	}
+
+	public void setRelatedModel(ServletModel model) {
+		this.relatedModel = model;
+	}
+
+	public ServletModel getRelatedModel() {
+		return relatedModel;
 	}
 
 }

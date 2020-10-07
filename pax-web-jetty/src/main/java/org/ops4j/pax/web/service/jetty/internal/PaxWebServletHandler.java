@@ -42,6 +42,7 @@ import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiFilterChain;
+import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.osgi.service.http.whiteboard.Preprocessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,7 @@ public class PaxWebServletHandler extends ServletHandler {
 	private final List<Preprocessor> preprocessors = new LinkedList<>();
 
 	/** Default {@link ServletContext} to use for chains without target servlet (e.g., filters only) */
-	private ServletContext defaultServletContext;
+	private OsgiServletContext defaultServletContext;
 	/** Default {@link OsgiContextModel} to use for chains without target servlet (e.g., filters only) */
 	private OsgiContextModel defaultOsgiContextModel;
 	/** Default {@link WebContainerContext} for chains without target {@link Servlet} */
@@ -104,8 +105,12 @@ public class PaxWebServletHandler extends ServletHandler {
 		this.default404Servlet = default404Servlet;
 	}
 
-	public void setDefaultServletContext(ServletContext defaultServletContext) {
+	public void setDefaultServletContext(OsgiServletContext defaultServletContext) {
 		this.defaultServletContext = defaultServletContext;
+	}
+
+	public OsgiServletContext getDefaultServletContext() {
+		return defaultServletContext;
 	}
 
 	public void setDefaultOsgiContextModel(OsgiContextModel defaultOsgiContextModel) {
@@ -166,7 +171,7 @@ public class PaxWebServletHandler extends ServletHandler {
 			PaxWebServletHolder holder = (PaxWebServletHolder) getServlet(model.getName());
 			if (holder == null) {
 				throw new IllegalArgumentException("Can't unregister servlet named \"" + model.getName() + "\" "
-						+ "from Jetty servlet handler of " + getServletContext().getContextPath() + " context");
+						+ "from Jetty servlet handler of " + defaultOsgiContextModel.getContextPath() + " context");
 			}
 
 			ServletMapping mapping = holder.getMapping();

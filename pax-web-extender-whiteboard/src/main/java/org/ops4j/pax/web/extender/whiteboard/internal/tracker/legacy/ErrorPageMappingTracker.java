@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.events.ErrorPageEventData;
 import org.ops4j.pax.web.service.whiteboard.ErrorPageMapping;
@@ -31,13 +31,13 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class ErrorPageMappingTracker extends AbstractMappingTracker<ErrorPageMapping, ErrorPageMapping, ErrorPageEventData, ErrorPageModel> {
 
-	protected ErrorPageMappingTracker(ExtenderContext extenderContext, BundleContext bundleContext) {
-		super(extenderContext, bundleContext);
+	protected ErrorPageMappingTracker(WhiteboardContext whiteboardContext, BundleContext bundleContext) {
+		super(whiteboardContext, bundleContext);
 	}
 
-	public static ServiceTracker<ErrorPageMapping, ErrorPageModel> createTracker(final ExtenderContext extenderContext,
+	public static ServiceTracker<ErrorPageMapping, ErrorPageModel> createTracker(final WhiteboardContext whiteboardContext,
 			final BundleContext bundleContext) {
-		return new ErrorPageMappingTracker(extenderContext, bundleContext).create(ErrorPageMapping.class);
+		return new ErrorPageMappingTracker(whiteboardContext, bundleContext).create(ErrorPageMapping.class);
 	}
 
 	@Override

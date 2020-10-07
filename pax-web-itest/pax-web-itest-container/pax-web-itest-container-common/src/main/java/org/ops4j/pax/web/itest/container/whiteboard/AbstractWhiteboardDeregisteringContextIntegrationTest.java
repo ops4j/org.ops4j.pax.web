@@ -15,7 +15,18 @@
  */
 package org.ops4j.pax.web.itest.container.whiteboard;
 
+import java.util.Hashtable;
+import javax.inject.Inject;
+import javax.servlet.Servlet;
+
+import org.junit.Test;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
+import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
+import org.ops4j.pax.web.service.PaxWebConstants;
+import org.ops4j.pax.web.service.WebContainer;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.http.HttpContext;
 
 /**
  * @author Toni Menzel (tonit)
@@ -23,77 +34,40 @@ import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
  */
 public abstract class AbstractWhiteboardDeregisteringContextIntegrationTest extends AbstractContainerTestBase {
 
-//	@Rule
-//	public CatchAllExceptionsRule catchAllExceptionsRule = new CatchAllExceptionsRule();
-//
-//	private ServiceReference<WebContainer> serviceReference;
-//	private WebContainer webContainerService;
-//
-//	public static Option[] configureWhiteboard() {
-//		return options(
-//				mavenBundle().groupId("org.ops4j.pax.web.samples")
-//						.artifactId("whiteboard").version(VersionUtil.getProjectVersion())
-//						.noStart(),
-//				mavenBundle().groupId("com.cedarsoft.commons").artifactId("test-utils").versionAsInProject(),
-//				mavenBundle().groupId("com.cedarsoft.commons").artifactId("crypt").versionAsInProject(),
-//				mavenBundle().groupId("com.cedarsoft.commons").artifactId("xml-commons").versionAsInProject(),
-//				mavenBundle("commons-codec", "commons-codec").versionAsInProject(),
-//				mavenBundle().groupId("com.fasterxml.jackson.core").artifactId("jackson-core").version("2.9.10"),
-//				mavenBundle().groupId("com.fasterxml.jackson.core").artifactId("jackson-databind").version("2.9.10.2"),
-//				mavenBundle().groupId("com.fasterxml.jackson.core").artifactId("jackson-annotations").version("2.9.10"),
-//				mavenBundle().groupId("com.google.guava").artifactId("guava").version("15.0"),
-//
-//				wrappedBundle(mavenBundle("org.mockito", "mockito-core").version("1.9.5")),
-//				wrappedBundle(mavenBundle("joda-time", "joda-time").version("2.3")),
-//				wrappedBundle(mavenBundle("org.objenesis", "objenesis").version("1.4")),
-//				wrappedBundle(mavenBundle("org.easytesting", "fest-assert").version("1.4")),
-//				wrappedBundle(mavenBundle("org.easytesting", "fest-reflect").version("1.4")),
-//				wrappedBundle(mavenBundle("xmlunit", "xmlunit").version("1.5")),
-//				wrappedBundle(mavenBundle("commons-io", "commons-io").version(asInProject())));
-//	}
-//
-//	@Before
-//	public void setUp() throws BundleException, InterruptedException,
-//			UnavailableException {
-//		serviceReference = bundleContext
-//				.getServiceReference(WebContainer.class);
-//
-//		while (serviceReference == null) {
-//			serviceReference = bundleContext.getServiceReference(WebContainer.class);
-//		}
-//
-//		webContainerService = (WebContainer) bundleContext
-//				.getService(serviceReference);
-//	}
-//
-//	@After
-//	public void tearDown() throws BundleException {
-//		webContainerService = null;
-//		if (bundleContext != null) {
-//			bundleContext.ungetService(serviceReference);
-//		}
-//		serviceReference = null;
-//	}
-//
-//	@Test
-//	public void testDeregisterContext() throws Exception {
-//		Hashtable<String, String> props = new Hashtable<>();
-//		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "myContext");
-//
-//		HttpContext httpContext = webContainerService.createDefaultHttpContext("myContext");
-//
-//		ServiceRegistration<HttpContext> contextService = bundleContext.registerService(HttpContext.class, httpContext, props);
-//
-//		props = new Hashtable<>();
-//		props.put(ExtenderConstants.PROPERTY_ALIAS, "/ungetServletTest");
-//		props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "myContext");
-//
-//		ServiceRegistration<Servlet> servletService = bundleContext.registerService(Servlet.class, new WhiteboardServlet("ungetServletTest"), props);
-//
-//		servletService.unregister();
-//
-//		contextService.unregister();
-//
-//	}
+	@Inject
+	private WebContainer webContainerService;
+
+	@Test
+	public void testDeregisterContext() throws Exception {
+		Hashtable<String, String> props = new Hashtable<>();
+		props.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "myContext");
+
+		HttpContext httpContext = webContainerService.createDefaultHttpContext("myContext");
+
+		ServiceRegistration<HttpContext> contextService = context.registerService(HttpContext.class, httpContext, props);
+
+		props = new Hashtable<>();
+		props.put(PaxWebConstants.SERVICE_PROPERTY_SERVLET_ALIAS, "/ungetServletTest");
+		props.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "myContext");
+
+		// install, but don't start
+		Bundle whiteboard = context.installBundle(sampleURI("whiteboard"));
+		Class<? extends Servlet> c = (Class<? extends Servlet>) whiteboard.loadClass("org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet");
+		Servlet s = c.getConstructor(String.class).newInstance("ungetServletTest");
+
+		ServiceRegistration<Servlet> servletService = context.registerService(Servlet.class, s, props);
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
+						resp -> resp.contains("Hello Whiteboard Extender"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/ungetServletTest");
+
+		servletService.unregister();
+		contextService.unregister();
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(404)
+				.doGETandExecuteTest("http://127.0.0.1:8181/ungetServletTest");
+	}
 
 }

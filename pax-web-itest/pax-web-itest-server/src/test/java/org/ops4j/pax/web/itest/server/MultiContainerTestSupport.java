@@ -20,6 +20,7 @@ import java.net.ServerSocket;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,7 +41,7 @@ import org.junit.Before;
 import org.junit.runners.Parameterized;
 import org.mockito.ArgumentMatchers;
 import org.mockito.stubbing.Answer;
-import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.FilterTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.HttpContextTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ListenerTracker;
@@ -129,7 +130,7 @@ public class MultiContainerTestSupport {
 	protected Map<Bundle, HttpServiceEnabled> containers = new HashMap<>();
 	protected ServiceReference<WebContainer> containerRef;
 
-	protected ExtenderContext whiteboard;
+	protected WhiteboardContext whiteboard;
 
 	private ServiceTrackerCustomizer<ServletContextHelper, OsgiContextModel> servletContextHelperCustomizer;
 	private ServiceTrackerCustomizer<ServletContextHelperMapping, OsgiContextModel> servletContextHelperMappingCustomizer;
@@ -192,7 +193,6 @@ public class MultiContainerTestSupport {
 		config = controller.getConfiguration();
 
 		serverModel = new ServerModel(new Utils.SameThreadExecutor());
-		serverModel.configureActiveServerController(controller);
 
 		whiteboardBundle = mockBundle("org.ops4j.pax.web.pax-web-extender-whiteboard", false);
 		whiteboardBundleContext = whiteboardBundle.getBundleContext();
@@ -213,7 +213,7 @@ public class MultiContainerTestSupport {
 		when(containerRef.getProperty(Constants.SERVICE_ID)).thenReturn(42L);
 		when(whiteboardBundleContext.getService(containerRef)).thenReturn(container);
 
-		whiteboard = new ExtenderContext(null, whiteboardBundleContext);
+		whiteboard = new WhiteboardContext(null, whiteboardBundleContext);
 		whiteboard.webContainerAdded(containerRef);
 
 		servletContextHelperCustomizer = getCustomizer(ServletContextHelperTracker.createTracker(whiteboard, whiteboardBundleContext));
@@ -455,6 +455,56 @@ public class MultiContainerTestSupport {
 		return ref;
 	}
 
+	/**
+	 * Shorthand method to (re)configure mocked {@link ServiceReference} to return additional property
+	 * @param ref
+	 * @param contextNames
+	 */
+	protected void mockContextSelectProperty(ServiceReference<?> ref, String... contextNames) {
+		Hashtable<String, Object> newProperties = new Hashtable<>();
+		Dictionary<String, Object> current = ref.getProperties();
+		if (current != null) {
+			for (Enumeration<String> e = current.keys(); e.hasMoreElements(); ) {
+				String key = e.nextElement();
+				newProperties.put(key, current.get(key));
+			}
+		}
+
+		if (contextNames.length == 1) {
+			newProperties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, String.format("(%s=%s)",
+					HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, contextNames[0]));
+		} else {
+			StringBuilder contexts = new StringBuilder();
+			for (String cn : contextNames) {
+				contexts.append("(").append(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME).append("=");
+				contexts.append(cn).append(")");
+			}
+			newProperties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, String.format("(|%s)",
+					contexts.toString()));
+		}
+
+		newProperties.forEach((k, v) -> when(ref.getProperty(k)).thenReturn(v));
+		when(ref.getPropertyKeys()).thenReturn(newProperties.keySet().toArray(new String[0]));
+		when(ref.getProperties()).thenReturn(newProperties);
+	}
+
+	protected void mockProperty(ServiceReference<?> ref, String name, String value) {
+		Hashtable<String, Object> newProperties = new Hashtable<>();
+		Dictionary<String, Object> current = ref.getProperties();
+		if (current != null) {
+			for (Enumeration<String> e = current.keys(); e.hasMoreElements(); ) {
+				String key = e.nextElement();
+				newProperties.put(key, current.get(key));
+			}
+		}
+
+		newProperties.put(name, value);
+
+		newProperties.forEach((k, v) -> when(ref.getProperty(k)).thenReturn(v));
+		when(ref.getPropertyKeys()).thenReturn(newProperties.keySet().toArray(new String[0]));
+		when(ref.getProperties()).thenReturn(newProperties);
+	}
+
 	public ServiceTrackerCustomizer<ServletContextHelper, OsgiContextModel> getServletContextHelperCustomizer() {
 		return servletContextHelperCustomizer;
 	}
@@ -543,6 +593,7 @@ public class MultiContainerTestSupport {
 	 * Class to verify {@link ServerModel} after performing a test
 	 */
 	public static class ServerModelInternals {
+
 		public final Map<String, ServletContextModel> servletContexts = new HashMap<>();
 		public final Map<ContextKey, TreeSet<OsgiContextModel>> bundleContexts = new HashMap<>();
 		public final Map<String, TreeSet<OsgiContextModel>> sharedContexts = new HashMap<>();
@@ -604,6 +655,7 @@ public class MultiContainerTestSupport {
 	 * Class to verify {@link ServiceModel} after performing a test
 	 */
 	public static class ServiceModelInternals {
+
 		public final Map<String, Map<String, ServletModel>> aliasMapping = new HashMap<>();
 		public final Set<ServletModel> servletModels = new HashSet<>();
 		public final Set<FilterModel> filterModels = new HashSet<>();

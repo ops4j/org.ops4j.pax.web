@@ -45,6 +45,12 @@ public enum OpCode {
 	 * Special association operation between {@link org.ops4j.pax.web.service.WebContainerContext} and
 	 * {@link org.ops4j.pax.web.service.spi.model.OsgiContextModel}
 	 */
-	ASSOCIATE
+	ASSOCIATE,
+
+	/**
+	 * Special deassociation operation between {@link org.ops4j.pax.web.service.WebContainerContext} and
+	 * {@link org.ops4j.pax.web.service.spi.model.OsgiContextModel}
+	 */
+	DISASSOCIATE
 
 }

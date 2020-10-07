@@ -122,8 +122,10 @@ public class TomcatResourceServlet extends DefaultServlet {
 		if (welcomeFiles == null) {
 			if (osgiScopedServletContext instanceof OsgiScopedServletContext) {
 				welcomeFiles = ((OsgiScopedServletContext) osgiScopedServletContext).getWelcomeFiles();
+				redirectWelcome = ((OsgiScopedServletContext) osgiScopedServletContext).isWelcomeFilesRedirect();
 			} else if (osgiScopedServletContext instanceof OsgiServletContext) {
 				welcomeFiles = ((OsgiServletContext) osgiScopedServletContext).getWelcomeFiles();
+				redirectWelcome = ((OsgiServletContext) osgiScopedServletContext).isWelcomeFilesRedirect();
 			}
 		}
 		if (welcomeFiles == null) {

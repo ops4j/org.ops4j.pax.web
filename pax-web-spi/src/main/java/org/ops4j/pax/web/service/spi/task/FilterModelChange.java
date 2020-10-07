@@ -15,9 +15,11 @@
  */
 package org.ops4j.pax.web.service.spi.task;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 
@@ -27,9 +29,11 @@ public class FilterModelChange extends Change {
 	private FilterModel filterModel;
 	private final List<FilterModel> filterModels = new LinkedList<>();
 	private boolean disabled;
+	private final List<OsgiContextModel> newModels = new LinkedList<>();
 
-	public FilterModelChange(OpCode op, ServerModel serverModel, FilterModel filterModel) {
-		this(op, serverModel, filterModel, false);
+	public FilterModelChange(OpCode op, ServerModel serverModel, FilterModel filterModel,
+				OsgiContextModel ... newModels) {
+		this(op, serverModel, filterModel, false, newModels);
 	}
 
 	public FilterModelChange(OpCode op, ServerModel serverModel, List<FilterModel> filterModels) {
@@ -38,12 +42,14 @@ public class FilterModelChange extends Change {
 		this.filterModels.addAll(filterModels);
 	}
 
-	public FilterModelChange(OpCode op, ServerModel serverModel, FilterModel filterModel, boolean disabled) {
+	public FilterModelChange(OpCode op, ServerModel serverModel, FilterModel filterModel, boolean disabled,
+				OsgiContextModel ... newModels) {
 		super(op);
 		this.serverModel = serverModel;
 		this.filterModel = filterModel;
 		this.filterModels.add(filterModel);
 		this.disabled = disabled;
+		this.newModels.addAll(Arrays.asList(newModels));
 	}
 
 	public ServerModel getServerModel() {
@@ -62,9 +68,17 @@ public class FilterModelChange extends Change {
 		return disabled;
 	}
 
+	public List<OsgiContextModel> getNewModels() {
+		return newModels;
+	}
+
 	@Override
 	public void accept(BatchVisitor visitor) {
 		visitor.visit(this);
+	}
+
+	public List<OsgiContextModel> getContextModels() {
+		return newModels.size() > 0 ? newModels : filterModel.getContextModels();
 	}
 
 	@Override

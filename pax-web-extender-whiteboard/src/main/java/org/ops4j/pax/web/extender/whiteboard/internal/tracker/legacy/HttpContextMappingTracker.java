@@ -15,9 +15,10 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.AbstractContextTracker;
 import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.service.spi.context.DefaultHttpContext;
 import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.util.Utils;
@@ -42,13 +43,13 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class HttpContextMappingTracker extends AbstractContextTracker<HttpContextMapping> {
 
-	private HttpContextMappingTracker(final ExtenderContext extenderContext, final BundleContext bundleContext) {
-		super(extenderContext, bundleContext);
+	private HttpContextMappingTracker(final WhiteboardContext whiteboardContext, final BundleContext bundleContext) {
+		super(whiteboardContext, bundleContext);
 	}
 
-	public static ServiceTracker<HttpContextMapping, OsgiContextModel> createTracker(final ExtenderContext extenderContext,
+	public static ServiceTracker<HttpContextMapping, OsgiContextModel> createTracker(final WhiteboardContext whiteboardContext,
 			final BundleContext bundleContext) {
-		return new HttpContextMappingTracker(extenderContext, bundleContext).create(HttpContextMapping.class);
+		return new HttpContextMappingTracker(whiteboardContext, bundleContext).create(HttpContextMapping.class);
 	}
 
 	@Override
@@ -72,7 +73,9 @@ public class HttpContextMappingTracker extends AbstractContextTracker<HttpContex
 
 			// 3. context params
 			model.getContextParams().clear();
-			model.getContextParams().putAll(service.getInitParameters());
+			if (service.getInitParameters() != null) {
+				model.getContextParams().putAll(service.getInitParameters());
+			}
 
 			// 4. don't pass service registration properties...
 			// ... create ones instead (service.id and service.rank are already there)
@@ -147,6 +150,9 @@ public class HttpContextMappingTracker extends AbstractContextTracker<HttpContex
 						// get the HttpContextMapping again - within proper bundle context, but again - only to
 						// obtain all the information needed. The "factory" method also accepts a Bundle, so we pass it.
 						HttpContext context = mapping.getHttpContext(bundleContext.getBundle());
+						if (context == null) {
+							context = new DefaultHttpContext(bundleContext.getBundle(), name);
+						}
 						return new WebContainerContextWrapper(bundleContext.getBundle(), context, model.getName());
 					} finally {
 						if (mapping != null) {

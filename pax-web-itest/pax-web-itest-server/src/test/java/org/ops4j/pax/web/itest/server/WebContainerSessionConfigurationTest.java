@@ -30,16 +30,11 @@ import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
 import org.ops4j.pax.web.itest.server.support.Utils;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.internal.HttpServiceEnabled;
 import org.ops4j.pax.web.service.internal.StoppableHttpService;
-import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
-import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpContext;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -98,19 +93,6 @@ public class WebContainerSessionConfigurationTest extends MultiContainerTestSupp
 
 		WebContainer wc = container(sample1);
 
-		// when passing null as "httpContext" will configure session params for OsgiContextModel which won't
-		// be used as "highest ranked" OCM when actual Servlet Context starts - the default Whiteboard context
-		// will be used instead, so Whiteboard's default OCM will be checked for default session configuration
-		// we can however change it
-		HttpContext httpContext = wc.createDefaultHttpContext();
-		DefaultHttpContextMapping defaultContext = new DefaultHttpContextMapping();
-		defaultContext.setHttpContext(httpContext);
-		defaultContext.setContextId("default");
-		defaultContext.setContextPath("/");
-		ServiceReference<HttpContextMapping> reference = mockReference(sample1,
-				HttpContextMapping.class, null, () -> defaultContext, 0L, 42);
-		OsgiContextModel model = getHttpContextMappingCustomizer().addingService(reference);
-
 		wc.setSessionCookieConfig(null, "SID", false, false, "/visit", 42, null);
 
 		// we need some "active" component to test the configuration
@@ -148,6 +130,7 @@ public class WebContainerSessionConfigurationTest extends MultiContainerTestSupp
 	}
 
 	private static class TestServlet extends Utils.MyIdServlet {
+
 		TestServlet(String id) {
 			super(id);
 		}

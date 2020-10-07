@@ -65,6 +65,7 @@ public class WebContainerJspConfigurationTest extends MultiContainerTestSupport 
 	}
 
 	private static class TestServlet extends Utils.MyIdServlet {
+
 		TestServlet(String id) {
 			super(id);
 		}

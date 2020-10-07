@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -76,6 +77,7 @@ import org.ops4j.pax.web.service.whiteboard.ContextMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
@@ -105,8 +107,6 @@ public class ServerModel implements BatchVisitor {
 
 	/** Unique identified of the Thread from (assumed) single thread pool executor. */
 	private final long registrationThreadId;
-
-	private ServerController serverController;
 
 	// --- Virtual Host model information
 
@@ -225,22 +225,47 @@ public class ServerModel implements BatchVisitor {
 	 * existing models - possibly with other model with the same name, but different context path. This behavior
 	 * is Pax Web specific, because Http Service specification doesn't mention at all about context paths and
 	 * rank-sorting.</p>
+	 *
+	 * <p>The above assumption changed drammatically after I read "140.4 [...] The highest ranking is associated with
+	 * the context of the Http Service" and I had to change the rank of the context associated with HttpService from
+	 * {@link Integer#MIN_VALUE} to {@link Integer#MAX_VALUE}. This prevented a user
+	 * from Whiteboard-registering a {@link org.osgi.service.http.context.ServletContextHelper} singleton service
+	 * (not service factory) that could <em>take over</em> matching (by name) {@link OsgiContextModel}.
+	 * Fortunately I'll still allow this - you just need to register <em>exactly</em> the context that could be
+	 * retrieved from {@link HttpService#createDefaultHttpContext()} (or similar method from {@link WebContainer})
+	 * as OSGi service with:<ul>
+	 *     <li>lower thank {@link Integer#MAX_VALUE} ranking - to allow other registered contexts to <em>take over, or</em></li>
+	 *     <li>changed properties (like context path or init params).</li>
+	 * </ul></p>
 	 */
 	private final Map<ContextKey, TreeSet<OsgiContextModel>> bundleContexts = new HashMap<>();
+
+	/**
+	 * When using Whiteboard methods to override bundleContexts, we have to remember the actual defaults, to restore
+	 * them when last Whiteboard override is gone.
+	 */
+	private final Map<ContextKey, OsgiContextModel> bundleDefaultContexts = new HashMap<>();
 
 	/**
 	 * <p>If an {@link OsgiContextModel} is associated with shared/multi-bundle {@link HttpContext}, such context
 	 * can be retrieved here by name, which should be unique in Http Service namespace.</p>
 	 *
-	 * <p><em>Contexts</em> for Whiteboard Service should <strong>not</strong> be kept here. They're kept in
-	 * {@link #whiteboardContexts}. However it is possible to Whiteboard-register a context that will be treated
-	 * as the <em>context</em> usable by {@link org.osgi.service.http.HttpService}. It's technically possible
+	 * <p><em>Contexts</em> for Whiteboard Service should <strong>not</strong> be kept here. However it also not
+	 * possible to Whiteboard-register a context that will be treated as the <em>context</em> usable by
+	 * {@link org.osgi.service.http.HttpService} because according to 140.4 of Whiteboard specification, "The highest
+	 * ranking is associated with the context of the Http Service". It's technically possible
 	 * to do the opposite, but it's explicitly forbidden by Whiteboard Service specification to allow Whiteboard
 	 * registration of servlets in association with contexts created through {@link org.osgi.service.http.HttpService}.
 	 * Whiteboard specification allows only filters, listeners and error pages to be registered to contexts created
 	 * through {@link org.osgi.service.http.HttpService}, but I think we'll relax it in Pax Web 8.</p>
 	 */
 	private final Map<String, TreeSet<OsgiContextModel>> sharedContexts = new HashMap<>();
+
+	/**
+	 * When using Whiteboard methods to override sharedContexts, we have to remember the actual defaults, to restore
+	 * them when last Whiteboard override is gone.
+	 */
+	private final Map<String, OsgiContextModel> sharedDefaultContexts = new HashMap<>();
 
 	/*
 	 * Whiteboard web elements are also registered into target container through an instance of
@@ -269,9 +294,6 @@ public class ServerModel implements BatchVisitor {
 	 * <p>The map has keys obtained using {@link System#identityHashCode(Object)} to prevent user tricks with
 	 * {@link Object#equals(Object)}. The value is not a {@link Servlet} but it's {@link ServletModel model}
 	 * to better show error messages.</p>
-	 *
-	 * <p>Note: Http Service doesn't say anything about filters, so there's no identity filter map in
-	 * {@link ServerModel}</p>
 	 */
 	private final Map<Servlet, ServletModel> servlets = new IdentityHashMap<>();
 
@@ -320,7 +342,6 @@ public class ServerModel implements BatchVisitor {
 	 */
 	private final Map<ServletContainerInitializer, ContainerInitializerModel> containerInitializers = new IdentityHashMap<>();
 
-
 	/**
 	 * Creates new global model of all web applications with {@link Executor} to be used for configuration and
 	 * registration tasks.
@@ -339,10 +360,6 @@ public class ServerModel implements BatchVisitor {
 	public ServerModel(Executor executor, long threadId) {
 		this.executor = executor;
 		registrationThreadId = threadId;
-
-		// OsgiContextModels are bundle-aware and will be created for ServiceModel and bundle-scoped
-		// HttpServiceEnabled instance. We'll however create one default shared model
-		createDefaultSharedtHttpContext(PaxWebConstants.DEFAULT_SHARED_CONTEXT_NAME);
 	}
 
 	public static long getThreadIdFromSingleThreadPool(Executor executor) {
@@ -367,60 +384,29 @@ public class ServerModel implements BatchVisitor {
 	}
 
 	/**
-	 * After ServerModel is created, we need to create a {@link ServletContextModel} for "/" path and let
-	 * given {@lik ServerController} know about it.
-	 *
-	 * @param serverController
-	 */
-	public void configureActiveServerController(final ServerController serverController) {
-		this.serverController = serverController;
-
-		runSilently(() -> {
-			Batch batch = new Batch("Initialization of default servlet context model");
-
-			getOrCreateServletContextModel(PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
-
-			// only if validation was fine, pass the batch to ServerController, where the batch may fail again
-			serverController.sendBatch(batch);
-
-			// if server runtime has accepted the changes (hoping it'll be in clean state if it didn't), lets
-			// actually apply the changes to global model
-			batch.accept(this);
-
-			return null;
-		});
-	}
-
-	/**
 	 * Creates named {@link OsgiContextModel} as shared {@link OsgiContextModel}.
 	 * @param contextId
 	 * @return
 	 */
-	public OsgiContextModel createDefaultSharedtHttpContext(String contextId) {
+	public OsgiContextModel createDefaultSharedtHttpContext(String contextId, final ServerController controller) {
 		return runSilently(() -> {
-			if (sharedContexts.containsKey(contextId)) {
-				// safe operation, because we should be in single threaded pool's thread
-				OsgiContextModel model = getHighestRankedModel(sharedContexts.get(contextId));
-				if (model != null) {
-					return model;
-				}
-			}
-
 			// we have to create an OsgiContextModel which is backed by direct (not provided by supplier or
 			// service reference) instance of org.ops4j.pax.web.service.MultiBundleWebContainerContext
 			// While we are creating new OsgiContextModel with "contextId" name and without a bundle associated
 			// (shared context), the behavioral aspects of the contexts are the same as ones defined in
 			// OsgiContextModel.DEFAULT_CONTEXT_MODEL. We will use OsgiContextModel.DEFAULT_CONTEXT_MODEL to
 			// call the supplier of the context, so we'll get nice delegate for our MultiBundleWebContainerContext
+			Batch batch = new Batch("Initialization of shared HttpContext \"" + contextId + "\"");
+			ServletContextModel scm = getOrCreateServletContextModel(PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
 
 			// the behavioral aspects from the DEFAULT_CONTEXT_MODEL - wcc will have proper id/name
 			WebContainerContext wcc = OsgiContextModel.DEFAULT_CONTEXT_MODEL.getContextSupplier().apply(null, contextId);
-
 			// the multibundle aspects in new instance, the behavioral - in passed delegate
 			wcc = new DefaultMultiBundleWebContainerContext((WebContainerContextWrapper) wcc);
 
-			OsgiContextModel model = createNewContextModel(wcc, null, PaxWebConstants.DEFAULT_CONTEXT_PATH);
-			associateHttpContext(wcc, model);
+			OsgiContextModel model = getOrCreateOsgiContextModel(wcc, null, PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
+			batch.accept(this);
+			controller.sendBatch(batch);
 
 			return model;
 		});
@@ -562,16 +548,50 @@ public class ServerModel implements BatchVisitor {
 	 * <p>There is really no need to check if the context was already added/associated, because this method
 	 * is only called from {@link org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView} and we
 	 * control it. It doesn't mean there's no way to break it ;)</p>
-	 *
-	 * @param contextModel
+	 *  @param contextModel
+	 * @param serviceModel
 	 * @param batch
 	 */
-	public void registerOsgiContextModelIfNeeded(OsgiContextModel contextModel, Batch batch) {
+	public void registerOsgiContextModelIfNeeded(OsgiContextModel contextModel, ServiceModel serviceModel, Batch batch) {
 		ServletContextModel scm = getOrCreateServletContextModel(contextModel.getContextPath(), batch);
+		// always add
 		batch.addOsgiContextModel(contextModel, scm);
+
 		if (contextModel.hasDirectHttpContextInstance()) {
-			// additionally let it be available to use as the context for HttpService scenarios
+			// let it be available to use as the context for HttpService scenarios - whether or not it should
+			// REPLACE some existing mapping
 			batch.associateOsgiContextModel(contextModel.resolveHttpContext(null), contextModel);
+
+			// this context MAY replace existing, HttpService-related context for given name+bundle, we
+			// can't simply ADD the OsgiContextModel to list of models for given name+bundle - when
+			// the underlying WebContainerContext/HttpContext instance is THE SAME as already used, we should
+			// REMOVE the previous instance (potentially leading to re-registration of existing servlets)
+			// This is the only (Pax Web special) way to alter existing, HttpService-related context
+			ContextKey key = ContextKey.of(contextModel);
+			TreeSet<OsgiContextModel> models = null;
+			if (contextModel.isShared()) {
+				models = sharedContexts.get(key.contextId);
+			} else {
+				models = bundleContexts.get(key);
+			}
+			if (models != null) {
+				for (OsgiContextModel m : models) {
+					if (m.hasDirectHttpContextInstance()) {
+						// equals() works well with UniqueWebContainerContextWrapper
+						if (contextModel.resolveHttpContext(null).equals(m.resolveHttpContext(null))) {
+							// it means that user has registered a HttpContext(Mapping) instance that's using
+							// an instance already managed by HttpService, so we want to _replace_ the model
+							// with new one (backed by the same HttpContext) and potentially re-register existing
+							// web elements just as WhiteboardContext.addWebContext()
+							// re-registers all web elements that are associated with the context being added or
+							// removed
+							// we don't have to remove/disable/disassociate existing context, because it was
+							// already done when matching, incoming OsgiContextModel was associated
+							serviceModel.reRegisterWebElementsIfNeeded(m, contextModel, batch);
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -579,11 +599,40 @@ public class ServerModel implements BatchVisitor {
 	 * Called through {@link org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView} when the
 	 * {@link OsgiContextModel} managed in pax-web-extender-whiteboard should be removed from the target
 	 * {@link ServerController} and unassociated from any bundle.
-	 *
-	 * @param contextModel
+	 *  @param contextModel
+	 * @param serviceModel
 	 * @param batch
 	 */
-	public void unregisterOsgiContextModel(OsgiContextModel contextModel, Batch batch) {
+	public void unregisterOsgiContextModel(OsgiContextModel contextModel, ServiceModel serviceModel, Batch batch) {
+		if (contextModel.hasDirectHttpContextInstance()) {
+			// disassociate the context -> contextModel mapping whether or not we should restore some previous
+			// association (like the one created implicitly for HttpService)
+			batch.disassociateOsgiContextModel(contextModel.resolveHttpContext(null), contextModel);
+
+			ContextKey key = ContextKey.of(contextModel);
+			TreeSet<OsgiContextModel> models = null;
+			if (contextModel.isShared()) {
+				models = sharedContexts.get(key.contextId);
+			} else {
+				models = bundleContexts.get(key);
+			}
+			if (models != null) {
+				for (OsgiContextModel m : models) {
+					if (m == contextModel && m.hasDirectHttpContextInstance()) {
+						// we're unregistering a Whiteboard context that uses the same instance of HttpContext
+						// as one of the models we track here.
+						// this means we should probably go back to different Whiteboard-registered context or
+						// even to the original HttpService-related context and potentially we should
+						// re-register existing web elements
+						if (contextModel.resolveHttpContext(null).equals(m.resolveHttpContext(null))) {
+							// disassociation of some context already restored proper collection of available
+							// contexts for given id/bundle
+							serviceModel.reRegisterWebElementsIfNeeded(m, null, batch);
+						}
+					}
+				}
+			}
+		}
 		batch.removeOsgiContextModel(contextModel);
 	}
 
@@ -640,7 +689,7 @@ public class ServerModel implements BatchVisitor {
 			}
 		}
 
-		if (context.isShared() && contextModel.getOwnerBundle() != null) {
+		if (context.isShared() && !contextModel.isWhiteboard() && contextModel.getOwnerBundle() != null) {
 			throw new IllegalStateException("Existing " + contextModel
 					+ " is owned by " + contextModel.getOwnerBundle() + ", but registration is perfomed using shared "
 					+ context);
@@ -681,10 +730,14 @@ public class ServerModel implements BatchVisitor {
 	 * @return
 	 */
 	@SuppressWarnings("deprecation")
-	public OsgiContextModel createNewContextModel(WebContainerContext webContext, Bundle serviceBundle,
+	public OsgiContextModel  createNewContextModel(WebContainerContext webContext, Bundle serviceBundle,
 			String contextPath) {
 		OsgiContextModel osgiContextModel = new OsgiContextModel(webContext, serviceBundle, contextPath, false);
 		osgiContextModel.setName(webContext.getContextId());
+
+		// In Whiteboard, OsgiContextModel is always shared - even if it always has ownerBundle
+		// here in HttpService case, model with ownerBundle is associated with this bundle and is NOT shared
+		osgiContextModel.setShared(serviceBundle == null);
 
 		// this context is not registered using Whiteboard, so we have full right to make it parameterless
 		osgiContextModel.getContextParams().clear();
@@ -705,9 +758,12 @@ public class ServerModel implements BatchVisitor {
 		registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
 		registration.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, contextPath);
 
-		// in Whiteboard, rank of "default" context is Integer.MIN_VALUE / 2. Here it'll be lowest rank possible
-		registration.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE);
-		osgiContextModel.setServiceRank(Integer.MIN_VALUE);
+		// in Whiteboard, rank of "default" context is 0. Here it'll be highest rank possible, because:
+		// "140.4 Registering Servlets":
+		//     The Servlet Context of the Http Service is treated in the same way as all contexts managed by the
+		//     Whiteboard implementation. The highest ranking is associated with the context of the Http Service.
+		registration.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
+		osgiContextModel.setServiceRank(Integer.MAX_VALUE);
 		// normally there's some service ID. Here it's 0L
 		registration.put(Constants.SERVICE_ID, 0L);
 		osgiContextModel.setServiceId(0L);
@@ -723,12 +779,48 @@ public class ServerModel implements BatchVisitor {
 	 */
 	public void associateHttpContext(final WebContainerContext context, final OsgiContextModel osgiContextModel) {
 		if (context.isShared()) {
-			sharedContexts.computeIfAbsent(context.getContextId(), c -> new TreeSet<>()).add(osgiContextModel);
-			LOG.debug("Configured shared context {} -> {}", context, osgiContextModel);
+			if (sharedContexts.computeIfAbsent(context.getContextId(), c -> new TreeSet<>()).add(osgiContextModel)) {
+				LOG.debug("Configured shared context {} -> {}", context, osgiContextModel);
+
+				if (osgiContextModel.isWhiteboard()) {
+					TreeSet<OsgiContextModel> models = sharedContexts.get(context.getContextId());
+					// we've just added new context, so existing, HttpService-related and created internally context
+					// should now not be taken into account, because of it's Integer.MAX_VALUE priority.
+					// See "140.4 Registering Servlets":
+					//     The highest ranking is associated with the context of the Http Service.
+					//
+					// But in Pax Web we WANT to allow to override HttpService internal context ;)
+					for (Iterator<OsgiContextModel> it = models.iterator(); it.hasNext(); ) {
+						OsgiContextModel model = it.next();
+						if (!model.isWhiteboard()) {
+							if (osgiContextModel.hasDirectHttpContextInstance()
+									&& model.resolveHttpContext(null).equals(osgiContextModel.resolveHttpContext(null))) {
+								sharedDefaultContexts.put(context.getContextId(), model);
+								it.remove();
+							}
+						}
+					}
+				}
+			}
 		} else {
 			ContextKey key = ContextKey.with(context.getContextId(), context.getBundle());
 			if (bundleContexts.computeIfAbsent(key, c -> new TreeSet<>()).add(osgiContextModel)) {
 				LOG.debug("Created association {} -> {}", context, osgiContextModel);
+
+				if (osgiContextModel.isWhiteboard()) {
+					TreeSet<OsgiContextModel> models = bundleContexts.get(key);
+					// same as with shared contexts
+					for (Iterator<OsgiContextModel> it = models.iterator(); it.hasNext(); ) {
+						OsgiContextModel model = it.next();
+						if (!model.isWhiteboard()) {
+							if (osgiContextModel.hasDirectHttpContextInstance()
+									&& model.resolveHttpContext(null).equals(osgiContextModel.resolveHttpContext(null))) {
+								bundleDefaultContexts.put(key, model);
+								it.remove();
+							}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -737,13 +829,18 @@ public class ServerModel implements BatchVisitor {
 	 * <p>Simply unmark {@link WebContainerContext} as the owner/creator/initiator of given {@link OsgiContextModel}
 	 * whether it's shared or bundle-related.</p>
 	 */
-	public void deassociateHttpContext(final WebContainerContext context, final OsgiContextModel osgiContextModel) {
+	public void disassociateHttpContext(final WebContainerContext context, final OsgiContextModel osgiContextModel) {
 		if (context.isShared()) {
 			String key = context.getContextId();
 			TreeSet<OsgiContextModel> models = sharedContexts.get(key);
 			models.remove(osgiContextModel);
 			if (models.isEmpty()) {
-				sharedContexts.remove(key);
+				OsgiContextModel defaultSharedOsgiContextModel = sharedDefaultContexts.remove(key);
+				if (defaultSharedOsgiContextModel != null) {
+					models.add(defaultSharedOsgiContextModel);
+				} else {
+					sharedContexts.remove(key);
+				}
 			}
 			LOG.debug("Removed shared context {} -> {}", context, osgiContextModel);
 		} else {
@@ -751,7 +848,12 @@ public class ServerModel implements BatchVisitor {
 			TreeSet<OsgiContextModel> models = bundleContexts.get(key);
 			models.remove(osgiContextModel);
 			if (models.isEmpty()) {
-				bundleContexts.remove(key);
+				OsgiContextModel defaultBundleOsgiContextModel = bundleDefaultContexts.remove(key);
+				if (defaultBundleOsgiContextModel != null) {
+					models.add(defaultBundleOsgiContextModel);
+				} else {
+					bundleContexts.remove(key);
+				}
 			}
 			LOG.debug("Removed association {} -> {}", context, osgiContextModel);
 		}
@@ -780,12 +882,59 @@ public class ServerModel implements BatchVisitor {
 	}
 
 	/**
+	 * Gets the best bundle {@link OsgiContextModel} for given {@link WebContainerContext} unless it's the one
+	 * to skip
+	 * @param context
+	 * @param skip
+	 * @return
+	 */
+	public OsgiContextModel getBundleContextModel(WebContainerContext context, OsgiContextModel skip) {
+		TreeSet<OsgiContextModel> set = bundleContexts.get(ContextKey.with(context.getContextId(), context.getBundle()));
+		if (set != null) {
+			for (OsgiContextModel model : set) {
+				if (model.equals(skip)) {
+					continue;
+				}
+				return model;
+			}
+		}
+		return null;
+	}
+
+	public OsgiContextModel getBundleDefaultContextModel(ContextKey key) {
+		return bundleDefaultContexts.get(key);
+	}
+
+	/**
 	 * Returns (if exists) bundle-agnostic (shared) {@link OsgiContextModel}
 	 * @param name
 	 * @return
 	 */
 	public OsgiContextModel getSharedContextModel(String name) {
 		return getHighestRankedModel(sharedContexts.get(name));
+	}
+
+	/**
+	 * Gets the best shared {@link OsgiContextModel} for given name unless it's the one to skip
+	 * @param name
+	 * @param skip
+	 * @return
+	 */
+	public OsgiContextModel getSharedContextModel(String name, OsgiContextModel skip) {
+		TreeSet<OsgiContextModel> set = sharedContexts.get(name);
+		if (set != null) {
+			for (OsgiContextModel model : set) {
+				if (model.equals(skip)) {
+					continue;
+				}
+				return model;
+			}
+		}
+		return null;
+	}
+
+	public OsgiContextModel getSharedDefaultContextModel(String name) {
+		return sharedDefaultContexts.get(name);
 	}
 
 	/**
@@ -827,19 +976,24 @@ public class ServerModel implements BatchVisitor {
 	 * from the {@link ServerModel}. Also they should be removed from backend {@link ServerController}.
 	 * @param bundle
 	 */
-	public void deassociateContexts(Bundle bundle) {
+	public void deassociateContexts(final Bundle bundle, final ServerController controller) {
 		// bundle contexts
 		runSilently(() -> {
 			Batch batch = new Batch("Deassociation of contexts for " + bundle);
 
 			bundleContexts.forEach((context, set) -> {
 				if (bundle.equals(context.bundle)) {
-					set.forEach(batch::removeOsgiContextModel);
+					set.forEach(ocm -> {
+						if (!ocm.isWhiteboard()) {
+							batch.disassociateOsgiContextModel(ocm.resolveHttpContext(null), ocm);
+							batch.removeOsgiContextModel(ocm);
+						}
+					});
 				}
 			});
 
 			// no need to do it with Whiteboard contexts - they'll be removed by pax-web-extender-whiteboard tracker
-			ServerModel.this.serverController.sendBatch(batch);
+			controller.sendBatch(batch);
 			batch.accept(this);
 
 			return null;
@@ -933,9 +1087,8 @@ public class ServerModel implements BatchVisitor {
 				throw new NamespaceException(msg);
 			}
 
-			// no alias or name conflicts, add to batch
-			batch.addServletModel(this, model);
-			return;
+			// no alias or name conflicts, but we're not simply adding to batch, because there may be further
+			// conflicts related to URL mappings - after all, "/x alias" == "/x/* mapping"
 		}
 
 		// URL mapping checking: 140.4 "Registering Servlets". Service ranking/id check in case of conflict
@@ -1262,6 +1415,10 @@ public class ServerModel implements BatchVisitor {
 		}
 	}
 
+	public Set<ServletModel> getDisabledServletModels() {
+		return disabledServletModels;
+	}
+
 	/**
 	 * <p>Validates {@link FilterModel} and adds relevant batch operations if validation is successful.</p>
 	 *
@@ -1374,7 +1531,7 @@ public class ServerModel implements BatchVisitor {
 
 		// this map will contain ALL filters registered per context path - including currently enabled, newly
 		// registered and newly enabled. When set is TreeSet, ordering will be correct
-		Map<String, TreeSet<FilterModel>> currentlyEnabledByPath = new HashMap<>();
+		Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> currentlyEnabledByPath = new HashMap<>();
 		Set<FilterModel> currentlyDisabled = new TreeSet<>();
 		prepareFiltersSnapshot(currentlyEnabledByPath, currentlyDisabled, model, newlyDisabled);
 
@@ -1389,28 +1546,28 @@ public class ServerModel implements BatchVisitor {
 		// this is straightforward
 		batch.removeFilterModels(this, models);
 
-		Map<String, TreeSet<FilterModel>> currentlyEnabledByName = new HashMap<>();
+		Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> currentlyEnabledByPath = new HashMap<>();
 		Set<FilterModel> currentlyDisabled = new TreeSet<>();
-		prepareFiltersSnapshot(currentlyEnabledByName, currentlyDisabled, null, new HashSet<>(models));
+		prepareFiltersSnapshot(currentlyEnabledByPath, currentlyDisabled, null, new HashSet<>(models));
 
 		// review all disabled filter models (in ranking order) to verify if they can be enabled again
-		reEnableFilterModels(currentlyDisabled, currentlyEnabledByName, null, batch);
+		reEnableFilterModels(currentlyDisabled, currentlyEnabledByPath, null, batch);
 
 		// finally - full set of filter state changes in all affected servlet contexts
-		batch.updateFilters(currentlyEnabledByName, false);
+		batch.updateFilters(currentlyEnabledByPath, false);
 	}
 
 	/**
 	 * Preparation for {@link #reEnableFilterModels(Set, Map, FilterModel, Batch)} that does
 	 * proper copy of current state of all {@link ServletContextModel}
 	 *
-	 * @param currentlyEnabledByName
+	 * @param currentlyEnabledByPath
 	 * @param currentlyDisabled
 	 * @param newlyAdded prepared snapshot will include newly added model as currentlyDisabled
 	 *        (to enable it potentially)
 	 * @param newlyDisabled prepared snapshot will already have newlyDisabled models removed from snapshot mappings
 	 */
-	private void prepareFiltersSnapshot(Map<String, TreeSet<FilterModel>> currentlyEnabledByName,
+	public void prepareFiltersSnapshot(Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> currentlyEnabledByPath,
 			Set<FilterModel> currentlyDisabled,
 			FilterModel newlyAdded, Set<FilterModel> newlyDisabled) {
 
@@ -1419,8 +1576,12 @@ public class ServerModel implements BatchVisitor {
 		servletContexts.values().forEach(scm -> {
 			String path = scm.getContextPath();
 			// deep copies
-			TreeSet<FilterModel> enabledFilters = new TreeSet<>(scm.getFilterNameMapping().values());
-			currentlyEnabledByName.put(path, enabledFilters);
+			TreeMap<FilterModel, List<OsgiContextModel>> enabledFilters = new TreeMap<>();
+			for (FilterModel fm : scm.getFilterNameMapping().values()) {
+				enabledFilters.put(fm, null);
+			}
+
+			currentlyEnabledByPath.put(path, enabledFilters);
 
 			// newlyDisabled are scheduled for disabling (in batch), so let's remove them from the snapshot
 			if (newlyDisabled != null) {
@@ -1458,7 +1619,7 @@ public class ServerModel implements BatchVisitor {
 	 * @param batch this {@link Batch} will collect avalanche of possible disable/enable operations
 	 */
 	private void reEnableFilterModels(Set<FilterModel> currentlyDisabled,
-			Map<String, TreeSet<FilterModel>> currentlyEnabledByPath, FilterModel modelToEnable, Batch batch) {
+			Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> currentlyEnabledByPath, FilterModel modelToEnable, Batch batch) {
 
 		Set<FilterModel> newlyDisabled = new LinkedHashSet<>();
 		boolean change = false;
@@ -1476,7 +1637,7 @@ public class ServerModel implements BatchVisitor {
 				String cp = sc.getContextPath();
 
 				// name conflict check
-				for (FilterModel enabled : currentlyEnabledByPath.get(cp)) {
+				for (FilterModel enabled : currentlyEnabledByPath.get(cp).keySet()) {
 					boolean nameConflict = haveAnyNameConflict(disabled.getName(), enabled.getName(), disabled, enabled);
 					if (nameConflict) {
 						// name conflict with existing, enabled model. BUT currently disabled model may have
@@ -1512,7 +1673,7 @@ public class ServerModel implements BatchVisitor {
 
 				// update the snapshot - newly enabled model should be visible as the one registered
 				for (ServletContextModel sc : contextsOfDisabledModel) {
-					currentlyEnabledByPath.get(sc.getContextPath()).add(disabled);
+					currentlyEnabledByPath.get(sc.getContextPath()).put(disabled, null);
 				}
 				if (modelToEnable != null && modelToEnable.equals(disabled)) {
 					batch.addFilterModel(this, disabled);
@@ -1635,7 +1796,7 @@ public class ServerModel implements BatchVisitor {
 
 		// this map will contain ALL error page modesl registered per context path - including currently enabled, newly
 		// registered and newly enabled. When set is TreeSet, ordering will be correct
-		Map<String, TreeSet<ErrorPageModel>> currentlyEnabledByPath = new HashMap<>();
+		Map<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> currentlyEnabledByPath = new HashMap<>();
 		Set<ErrorPageModel> currentlyDisabled = new TreeSet<>();
 		Set<ErrorPageModel> newlyDisabled = new HashSet<>();
 		prepareErrorPageSnapshot(currentlyEnabledByPath, currentlyDisabled, model, newlyDisabled);
@@ -1651,7 +1812,7 @@ public class ServerModel implements BatchVisitor {
 		// this is straightforward
 		batch.removeErrorPageModels(this, models);
 
-		Map<String, TreeSet<ErrorPageModel>> currentlyEnabledByPath = new HashMap<>();
+		Map<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> currentlyEnabledByPath = new HashMap<>();
 		Set<ErrorPageModel> currentlyDisabled = new TreeSet<>();
 		prepareErrorPageSnapshot(currentlyEnabledByPath, currentlyDisabled, null, new HashSet<>(models));
 
@@ -1672,7 +1833,7 @@ public class ServerModel implements BatchVisitor {
 	 *        (to enable it potentially)
 	 * @param newlyDisabled prepared snapshot will already have newlyDisabled models removed from snapshot mappings
 	 */
-	private void prepareErrorPageSnapshot(Map<String, TreeSet<ErrorPageModel>> currentlyEnabledByPath,
+	public void prepareErrorPageSnapshot(Map<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> currentlyEnabledByPath,
 			Set<ErrorPageModel> currentlyDisabled,
 			ErrorPageModel newlyAdded, Set<ErrorPageModel> newlyDisabled) {
 
@@ -1681,7 +1842,16 @@ public class ServerModel implements BatchVisitor {
 		servletContexts.values().forEach(scm -> {
 			String path = scm.getContextPath();
 			// deep copies
-			TreeSet<ErrorPageModel> enabledErrorPages = new TreeSet<>(scm.getErrorPageMapping().values());
+			TreeMap<ErrorPageModel, List<OsgiContextModel>> enabledErrorPages = new TreeMap<>();
+			for (ErrorPageModel epm : scm.getErrorPageMapping().values()) {
+				enabledErrorPages.put(epm, null);
+			}
+			for (ServletModel sm : scm.getServletNameMapping().values()) {
+				if (sm.getErrorPageModel() != null) {
+					enabledErrorPages.put(sm.getErrorPageModel(), null);
+				}
+			}
+
 			currentlyEnabledByPath.put(path, enabledErrorPages);
 
 			// newlyDisabled are scheduled for disabling (in batch), so let's remove them from the snapshot
@@ -1716,7 +1886,7 @@ public class ServerModel implements BatchVisitor {
 	 * @param batch this {@link Batch} will collect avalanche of possible disable/enable operations
 	 */
 	private void reEnableErrorPageModels(Set<ErrorPageModel> currentlyDisabled,
-			Map<String, TreeSet<ErrorPageModel>> currentlyEnabledByPath, ErrorPageModel modelToEnable, Batch batch) {
+			Map<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> currentlyEnabledByPath, ErrorPageModel modelToEnable, Batch batch) {
 
 		Set<ErrorPageModel> newlyDisabled = new LinkedHashSet<>();
 		boolean change = false;
@@ -1734,7 +1904,7 @@ public class ServerModel implements BatchVisitor {
 				String cp = sc.getContextPath();
 
 				// conflict check by error page description (code, wildcard, fqcn of exception class)
-				for (ErrorPageModel enabled : currentlyEnabledByPath.get(cp)) {
+				for (ErrorPageModel enabled : currentlyEnabledByPath.get(cp).keySet()) {
 					boolean conflict = false;
 					for (String page1 : disabled.getErrorPages()) {
 						for (String page2 : enabled.getErrorPages()) {
@@ -1779,7 +1949,7 @@ public class ServerModel implements BatchVisitor {
 
 				// update the snapshot - newly enabled model should be visible as the one registered
 				for (ServletContextModel sc : contextsOfDisabledModel) {
-					currentlyEnabledByPath.get(sc.getContextPath()).add(disabled);
+					currentlyEnabledByPath.get(sc.getContextPath()).put(disabled, null);
 				}
 				if (modelToEnable != null && modelToEnable.equals(disabled)) {
 					batch.addErrorPageModel(this, disabled);
@@ -1896,18 +2066,18 @@ public class ServerModel implements BatchVisitor {
 				associateHttpContext(model.resolveHttpContext(null), model);
 				break;
 			}
-			case ADD: {
+			case DISASSOCIATE: {
+				OsgiContextModel model = change.getOsgiContextModel();
+				// it's a whiteboard context that could be used for Http Service scenarios as well, because
+				// it has direct reference to bundleScoped or shared WebContainerContext.
+				// if the model doesn't contain direct HttpContext reference, it can never be passed to associate
+				disassociateHttpContext(model.resolveHttpContext(null), model);
+				break;
+			}
+			case ADD:
+			case DELETE:
 				// actuall it's NOOP at ServerModel level
 				break;
-			}
-			case DELETE: {
-				OsgiContextModel model = change.getOsgiContextModel();
-				if (model.hasDirectHttpContextInstance()) {
-					// removal of HttpService context (bundle-scoped or shared)
-					deassociateHttpContext(model.resolveHttpContext(null), model);
-				}
-				break;
-			}
 			default:
 				break;
 		}
@@ -1931,6 +2101,12 @@ public class ServerModel implements BatchVisitor {
 							sc.getAliasMapping().put(model.getAlias(), model);
 						}
 						Arrays.stream(model.getUrlPatterns()).forEach(p -> sc.getServletUrlPatternMapping().put(p, model));
+						ErrorPageModel epModel = model.getErrorPageModel();
+						if (epModel != null) {
+							for (String page : epModel.getErrorPages()) {
+								sc.getErrorPageMapping().put(page, epModel);
+							}
+						}
 					}
 				});
 
@@ -1959,6 +2135,12 @@ public class ServerModel implements BatchVisitor {
 								sc.getAliasMapping().remove(model.getAlias(), model);
 							}
 							Arrays.stream(model.getUrlPatterns()).forEach(p -> sc.getServletUrlPatternMapping().remove(p, model));
+							ErrorPageModel epModel = model.getErrorPageModel();
+							if (epModel != null) {
+								for (String page : epModel.getErrorPages()) {
+									sc.getErrorPageMapping().remove(page, epModel);
+								}
+							}
 						});
 					}
 				});
@@ -1970,6 +2152,10 @@ public class ServerModel implements BatchVisitor {
 				Set<ServletContextModel> servletContexts = getServletContextModels(model);
 				servletContexts.forEach(sc -> sc.enableServletModel(model));
 				disabledServletModels.remove(model);
+				if (model.getErrorPageModel() != null) {
+					servletContexts.forEach(sc -> sc.enableErrorPageModel(model.getErrorPageModel()));
+					disabledErrorPageModels.remove(model.getErrorPageModel());
+				}
 				break;
 			}
 			case DISABLE: {
@@ -1978,6 +2164,10 @@ public class ServerModel implements BatchVisitor {
 				// disable a servlet in all associated contexts
 				Set<ServletContextModel> servletContexts = getServletContextModels(model);
 				servletContexts.forEach(sc -> sc.disableServletModel(model));
+				if (model.getErrorPageModel() != null) {
+					servletContexts.forEach(sc -> sc.disableErrorPageModel(model.getErrorPageModel()));
+					disabledErrorPageModels.add(model.getErrorPageModel());
+				}
 				break;
 			}
 			case MODIFY:

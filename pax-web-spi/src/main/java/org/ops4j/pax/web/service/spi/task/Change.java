@@ -15,6 +15,11 @@
  */
 package org.ops4j.pax.web.service.spi.task;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+
 /**
  * Single operation to be performed within a {@link Batch}. For now it has two purposes:<ul>
  *     <li>Global model alteration</li>
@@ -39,5 +44,18 @@ public abstract class Change {
 	 * @param visitor
 	 */
 	public abstract void accept(BatchVisitor visitor);
+
+	/**
+	 * <p>Get a list of associated context models.</p>
+	 *
+	 * <p>Usually the list comes from associated model being ADDed and usually doesn't make sense when a change
+	 * concerns more models. Special scenario is to get a list of <em>new</em> context models associated with existing
+	 * element model after it has been removed (from previous list of associated contexts) in the same {@link Batch}.</p>
+	 *
+	 * @return
+	 */
+	public List<OsgiContextModel> getContextModels() {
+		return Collections.emptyList();
+	}
 
 }

@@ -126,10 +126,6 @@ public class PaxWebServletHolder extends ServletHolder {
 
 		// instead of doing it once per request, we can get servlet-scoped WebContainerContext now
 		webContainerContext = osgiContextModel.resolveHttpContext(servletModel.getRegisteringBundle());
-
-		if (servletModel.getServlet() != null && servletModel.isResourceServlet()) {
-			((JettyResourceServlet) servletModel.getServlet()).setWelcomeFiles(osgiServletContext.getWelcomeFiles());
-		}
 	}
 
 	public ServletModel getServletModel() {
@@ -213,6 +209,11 @@ public class PaxWebServletHolder extends ServletHolder {
 			instance = servletModel.getElementSupplier().get();
 		}
 
+		if (instance != null && servletModel != null && servletModel.isResourceServlet()) {
+			((JettyResourceServlet) instance).setWelcomeFiles(osgiServletContext.getWelcomeFiles());
+			((JettyResourceServlet) instance).setWelcomeFilesRedirect(osgiServletContext.isWelcomeFilesRedirect());
+		}
+
 		// if null, newInstance() will be called
 		// In Tomcat configuration is taken from the StandardWrapper, here
 		// org.eclipse.jetty.servlet.ServletHolder._config is private, so we need special OsgiInitializedServlet
@@ -220,7 +221,7 @@ public class PaxWebServletHolder extends ServletHolder {
 	}
 
 	@Override
-	public void destroyInstance(Object o) throws Exception {
+	public void destroyInstance(Object o) {
 		if (servletModel != null && servletModel.getElementReference() != null) {
 			servletModel.getRegisteringBundle().getBundleContext().ungetService(servletModel.getElementReference());
 		}

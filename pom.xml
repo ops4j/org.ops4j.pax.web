@@ -183,16 +183,15 @@
 		<dependency.easymock.version>2.3</dependency.easymock.version>
 
 		<dependency.eclipse.jdt.version>3.23.0</dependency.eclipse.jdt.version>
-		<dependency.eclipse.jetty.version>9.4.31.v20200723</dependency.eclipse.jetty.version>
+		<dependency.eclipse.jetty.version>9.4.32.v20200930</dependency.eclipse.jetty.version>
 		<dependency.eclipse.platform.version>3.12.100</dependency.eclipse.platform.version>
-		<dependency.eclipse.tycho.version>3.10.100.v20150529-1857</dependency.eclipse.tycho.version>
 
-		<dependency.felix.configadmin.version>1.9.16</dependency.felix.configadmin.version>
+		<dependency.felix.configadmin.version>1.9.18</dependency.felix.configadmin.version>
 		<dependency.felix.eventadmin.version>1.5.0</dependency.felix.eventadmin.version>
-		<dependency.felix.fileinstall.version>3.6.4</dependency.felix.fileinstall.version>
+		<dependency.felix.fileinstall.version>3.6.8</dependency.felix.fileinstall.version>
 		<dependency.felix.framework.version>5.6.12</dependency.felix.framework.version>
 		<dependency.felix.metatype.version>1.2.2</dependency.felix.metatype.version>
-		<dependency.felix.scr.version>2.1.16</dependency.felix.scr.version>
+		<dependency.felix.scr.version>2.1.24</dependency.felix.scr.version>
 		<dependency.felix.utils.version>1.11.4</dependency.felix.utils.version>
 <!--		<dependency.felix.webconsole.version>3.1.8</dependency.felix.webconsole.version>-->
 
@@ -265,6 +264,8 @@
 		<dependency.ops4j.swissbox.version>1.8.3</dependency.ops4j.swissbox.version>
 
 		<dependency.osgi.service.jaxrs>1.0.0</dependency.osgi.service.jaxrs>
+		<dependency.org.osgi.util.function>1.1.0</dependency.org.osgi.util.function>
+		<dependency.org.osgi.util.promise>1.1.1</dependency.org.osgi.util.promise>
 		<dependency.osgi.version>7.0.0</dependency.osgi.version>
 
 		<dependency.pax-cdi.version>1.1.3</dependency.pax-cdi.version>
@@ -1201,6 +1202,17 @@
 			</dependency>
 
 			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.util.function</artifactId>
+				<version>${dependency.org.osgi.util.function}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.util.promise</artifactId>
+				<version>${dependency.org.osgi.util.promise}</version>
+			</dependency>
+
+			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.utils</artifactId>
 				<version>${dependency.felix.utils.version}</version>
@@ -1246,11 +1258,6 @@
 				<groupId>org.eclipse.platform</groupId>
 				<artifactId>org.eclipse.osgi</artifactId>
 				<version>${dependency.eclipse.platform.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>org.eclipse.osgi</artifactId>
-				<version>${dependency.eclipse.tycho.version}</version>
 			</dependency>
 
 			<dependency>

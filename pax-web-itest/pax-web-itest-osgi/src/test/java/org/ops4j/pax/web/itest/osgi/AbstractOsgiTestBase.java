@@ -50,10 +50,11 @@ public abstract class AbstractOsgiTestBase extends AbstractControlledTestBase {
 				.add(AbstractControlledTestBase.class)
 				.set("Bundle-SymbolicName", "infra")
 				.build();
-		new File("target/bundles").mkdirs();
-		File bundle = new File("target/bundles/infra-bundle.jar");
+		File dir = new File("target/bundles");
+		dir.mkdirs();
 		String bundleURL = null;
 		try {
+			File bundle = new File(dir, "infra-bundle.jar");
 			IOUtils.copy(helper, new FileOutputStream(bundle));
 			bundleURL = bundle.toURI().toURL().toString();
 		} catch (IOException e) {

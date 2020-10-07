@@ -74,12 +74,10 @@ public class ServerControllerScopesTest extends MultiContainerTestSupport {
 		controller.configure();
 		controller.start();
 
-		Bundle bundle = mock(Bundle.class);
-		BundleContext context = mock(BundleContext.class);
-		when(bundle.getBundleContext()).thenReturn(context);
+		Bundle bundle = mockBundle("b1", false);
+		BundleContext context = bundle.getBundleContext();
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.configureActiveServerController(controller);
 
 		Configuration config = controller.getConfiguration();
 		HttpServiceEnabled wc = new HttpServiceEnabled(bundle, controller, server, null, config);
@@ -152,7 +150,7 @@ public class ServerControllerScopesTest extends MultiContainerTestSupport {
 
 		assertThat(httpGET(port, "/c1/s"), startsWith("HTTP/1.1 404"));
 
-		((StoppableHttpService)wc).stop();
+		((StoppableHttpService) wc).stop();
 		controller.stop();
 
 		ServerModelInternals serverModelInternals = serverModelInternals(server);
@@ -178,7 +176,6 @@ public class ServerControllerScopesTest extends MultiContainerTestSupport {
 		Bundle bundle3 = mockBundle("b3", false);
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.configureActiveServerController(controller);
 
 		Configuration config = controller.getConfiguration();
 		HttpServiceEnabled wc1 = new HttpServiceEnabled(bundle1, controller, server, null, config);
@@ -257,9 +254,9 @@ public class ServerControllerScopesTest extends MultiContainerTestSupport {
 
 		assertThat(httpGET(port, "/c1/s"), startsWith("HTTP/1.1 404"));
 
-		((StoppableHttpService)wc1).stop();
-		((StoppableHttpService)wc2).stop();
-		((StoppableHttpService)wc3).stop();
+		((StoppableHttpService) wc1).stop();
+		((StoppableHttpService) wc2).stop();
+		((StoppableHttpService) wc3).stop();
 		controller.stop();
 
 		ServerModelInternals serverModelInternals = serverModelInternals(server);

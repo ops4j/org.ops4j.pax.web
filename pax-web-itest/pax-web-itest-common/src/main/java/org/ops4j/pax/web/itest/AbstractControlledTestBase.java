@@ -293,6 +293,17 @@ public abstract class AbstractControlledTestBase {
 		};
 	}
 
+	protected Option[] scr() {
+		return new Option[] {
+				mavenBundle("org.apache.felix", "org.apache.felix.scr")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.osgi", "org.osgi.util.promise")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.osgi", "org.osgi.util.function")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
+		};
+	}
+
 	// --- helper methods to be used in all the tests
 
 	/**

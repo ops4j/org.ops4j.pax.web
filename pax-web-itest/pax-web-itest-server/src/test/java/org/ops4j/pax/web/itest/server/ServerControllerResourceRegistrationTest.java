@@ -36,12 +36,10 @@ import org.ops4j.pax.web.service.internal.StoppableHttpService;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.HttpContext;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.ops4j.pax.web.itest.server.support.Utils.extractHeaders;
 import static org.ops4j.pax.web.itest.server.support.Utils.httpGET;
@@ -60,14 +58,9 @@ public class ServerControllerResourceRegistrationTest extends MultiContainerTest
 		controller.configure();
 		controller.start();
 
-		Bundle bundle = mock(Bundle.class);
-		when(bundle.toString()).thenReturn("App Bundle");
-		BundleWiring wiring = mock(BundleWiring.class);
-		when(bundle.adapt(BundleWiring.class)).thenReturn(wiring);
-		when(wiring.getClassLoader()).thenReturn(this.getClass().getClassLoader());
+		Bundle bundle = mockBundle("App Bundle", false);
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.configureActiveServerController(controller);
 
 		// no batch at all - everything will be done by HttpService itself
 		WebContainer wc = new HttpServiceEnabled(bundle, controller, server, null, controller.getConfiguration());
@@ -159,14 +152,9 @@ public class ServerControllerResourceRegistrationTest extends MultiContainerTest
 		controller.configure();
 		controller.start();
 
-		Bundle bundle = mock(Bundle.class);
-		when(bundle.toString()).thenReturn("App Bundle");
-		BundleWiring wiring = mock(BundleWiring.class);
-		when(bundle.adapt(BundleWiring.class)).thenReturn(wiring);
-		when(wiring.getClassLoader()).thenReturn(this.getClass().getClassLoader());
+		Bundle bundle = mockBundle("App Bundle", false);
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.configureActiveServerController(controller);
 
 		// no batch at all - everything will be done by HttpService itself
 		WebContainer wc = new HttpServiceEnabled(bundle, controller, server, null, controller.getConfiguration());
@@ -323,14 +311,9 @@ public class ServerControllerResourceRegistrationTest extends MultiContainerTest
 		controller.configure();
 		controller.start();
 
-		Bundle bundle = mock(Bundle.class);
-		when(bundle.toString()).thenReturn("App Bundle");
-		BundleWiring wiring = mock(BundleWiring.class);
-		when(bundle.adapt(BundleWiring.class)).thenReturn(wiring);
-		when(wiring.getClassLoader()).thenReturn(this.getClass().getClassLoader());
+		Bundle bundle = mockBundle("App Bundle", false);
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.configureActiveServerController(controller);
 
 		// no batch at all - everything will be done by HttpService itself
 		WebContainer wc = new HttpServiceEnabled(bundle, controller, server, null, controller.getConfiguration());

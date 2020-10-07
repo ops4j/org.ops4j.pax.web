@@ -42,7 +42,6 @@ import org.ops4j.pax.web.service.spi.task.Batch;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.wiring.BundleWiring;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.endsWith;
@@ -74,15 +73,10 @@ public class ServerControllerErrorPagesTest extends MultiContainerTestSupport {
 		controller.configure();
 		controller.start();
 
-		Bundle bundle = mock(Bundle.class);
-		BundleContext context = mock(BundleContext.class);
-		BundleWiring bundleWiring = mock(BundleWiring.class);
-		when(bundle.getBundleContext()).thenReturn(context);
-		when(bundle.adapt(BundleWiring.class)).thenReturn(bundleWiring);
-		when(bundleWiring.getClassLoader()).thenReturn(this.getClass().getClassLoader());
+		Bundle bundle = mockBundle("b1", false);
+		BundleContext context = bundle.getBundleContext();
 
 		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-		server.configureActiveServerController(controller);
 
 		Configuration config = controller.getConfiguration();
 		HttpServiceEnabled wc = new HttpServiceEnabled(bundle, controller, server, null, config);

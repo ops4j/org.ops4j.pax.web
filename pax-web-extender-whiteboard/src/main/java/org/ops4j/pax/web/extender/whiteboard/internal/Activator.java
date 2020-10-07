@@ -91,13 +91,15 @@ public class Activator implements BundleActivator {
 	/**
 	 * Extender context.
 	 */
-	private ExtenderContext extenderContext;
+	private WhiteboardContext whiteboardContext;
 
 	/** {@link BundleListener} to cleanup bundle-registered Whiteboard elements when the bundle is gone */
 	private BundleListener bundleListener;
 
 	/** {@link ServiceListener} to track {@link WebContainer} instances to register Whiteboard elements there */
 	private ServiceListener webContainerListener;
+
+	private ServiceRegistration<ServletContextHelper> registration;
 
 	/**
 	 * List of service trackers. All trackers get closed on {@link BundleActivator#stop(BundleContext)}.
@@ -133,7 +135,7 @@ public class Activator implements BundleActivator {
 		//
 		// in other words - "extender context" is the component that bridges between tracked web elements + customized
 		// model elements on one side and "current" WebContainer on the other side
-		extenderContext = new ExtenderContext(httpServiceRuntime, bundleContext);
+		whiteboardContext = new WhiteboardContext(httpServiceRuntime, bundleContext);
 
 		// we immediately register "default" ServletContextHelper as OSGi service
 		// felix.http registers something like this:
@@ -160,13 +162,13 @@ public class Activator implements BundleActivator {
 		properties.put(Constants.SERVICE_RANKING, defaultContextModel.getServiceRank());
 		properties.put(PaxWebConstants.SERVICE_PROPERTY_INTERNAL, true);
 		//		props.put(PaxWebConstants.SERVICE_PROPERTY_VIRTUAL_HOSTS, new String[] { "*" });
-		bundleContext.registerService(ServletContextHelper.class,
+		registration = bundleContext.registerService(ServletContextHelper.class,
 				new DefaultServletContextHelperServiceFactory(), properties);
 
 		// bundle listener to manager per-bundle cache of Whiteboard elements and contexts
 		bundleListener = event -> {
 			if (event.getType() == BundleEvent.STOPPED) {
-				extenderContext.bundleStopped(event.getBundle());
+				whiteboardContext.bundleStopped(event.getBundle());
 			}
 		};
 		bundleContext.addBundleListener(bundleListener);
@@ -174,34 +176,47 @@ public class Activator implements BundleActivator {
 		// track WebContainer service, because we pass Whiteboard services (customized into "element models") to
 		// a _view_ of PaxWeb-specific extension of HttpService
 		webContainerListener = event -> {
-			switch (event.getType()) {
-				case ServiceEvent.REGISTERED: {
-					// new WebContainer was registered
-					extenderContext.webContainerAdded((ServiceReference<WebContainer>) event.getServiceReference());
-					break;
+			// this event should be delivered in Pax Web configuration thread, but we should never attempt
+			// to acquire the whiteboard lock, because current trackers may already get the whiteboard lock
+			// and try to access Pax Web configuration thread...
+			new Thread(() -> {
+				LOG.info("Handling {}", event);
+				switch (event.getType()) {
+					case ServiceEvent.REGISTERED: {
+						// new WebContainer was registered
+						whiteboardContext.webContainerAdded((ServiceReference<WebContainer>) event.getServiceReference());
+						break;
+					}
+					case ServiceEvent.MODIFIED: {
+						// properties have changed - but there's nothing we care about - even if a HttpService/WebContainer
+						// has any ID associated, Whiteboard elements may only target selected Whiteboard implementation,
+						// not the HttpService implementation
+						// "Whiteboard implementation" is represented by registered instance of
+						// org.osgi.service.http.runtime.HttpServiceRuntime, not by HttpService/WebContainer
+						break;
+					}
+					case ServiceEvent.MODIFIED_ENDMATCH: {
+						// no chance for this - we filter by objectClass and it can't change
+						break;
+					}
+					case ServiceEvent.UNREGISTERING: {
+						whiteboardContext.webContainerRemoved((ServiceReference<WebContainer>) event.getServiceReference());
+						break;
+					}
+					default:
+						break;
 				}
-				case ServiceEvent.MODIFIED: {
-					// properties have changed - but there's nothing we care about - even if a HttpService/WebContainer
-					// has any ID associated, Whiteboard elements may only target selected Whiteboard implementation,
-					// not the HttpService implementation
-					// "Whiteboard implementation" is represented by registered instance of
-					// org.osgi.service.http.runtime.HttpServiceRuntime, not by HttpService/WebContainer
-					break;
-				}
-				case ServiceEvent.MODIFIED_ENDMATCH: {
-					// no chance for this - we filter by objectClass and it can't change
-					break;
-				}
-				case ServiceEvent.UNREGISTERING: {
-					extenderContext.webContainerRemoved((ServiceReference<WebContainer>) event.getServiceReference());
-					break;
-				}
-				default:
-					break;
-			}
+			}, "HttpService->Whiteboard").start();
 		};
 		String filter = String.format("(%s=%s)", Constants.OBJECTCLASS, WebContainer.class.getName());
 		bundleContext.addServiceListener(webContainerListener, filter);
+		ServiceReference<WebContainer> ref = bundleContext.getServiceReference(WebContainer.class);
+		if (ref != null) {
+			WebContainer container = bundleContext.getService(ref);
+			if (container != null) {
+				webContainerListener.serviceChanged(new ServiceEvent(ServiceEvent.REGISTERED, ref));
+			}
+		}
 
 		// web contexts
 		trackHttpContexts();
@@ -247,6 +262,13 @@ public class Activator implements BundleActivator {
 			bundleListener = null;
 		}
 
+		if (registration != null) {
+			registration.unregister();
+			registration = null;
+		}
+
+		whiteboardContext.stop();
+
 		LOG.debug("Pax Web Whiteboard Extender stopped");
 	}
 
@@ -255,12 +277,12 @@ public class Activator implements BundleActivator {
 	 */
 	private void trackHttpContexts() {
 		ServiceTracker<HttpContext, OsgiContextModel> httpContextTracker
-				= HttpContextTracker.createTracker(extenderContext, bundleContext);
+				= HttpContextTracker.createTracker(whiteboardContext, bundleContext);
 		httpContextTracker.open();
 		trackers.add(0, httpContextTracker);
 
 		ServiceTracker<HttpContextMapping, OsgiContextModel> httpContextMappingTracker
-				= HttpContextMappingTracker.createTracker(extenderContext, bundleContext);
+				= HttpContextMappingTracker.createTracker(whiteboardContext, bundleContext);
 		httpContextMappingTracker.open();
 		trackers.add(0, httpContextMappingTracker);
 	}
@@ -270,12 +292,12 @@ public class Activator implements BundleActivator {
 	 */
 	private void trackServletContextHelpers() {
 		ServiceTracker<ServletContextHelper, OsgiContextModel> servletContextHelperTracker
-				= ServletContextHelperTracker.createTracker(extenderContext, bundleContext);
+				= ServletContextHelperTracker.createTracker(whiteboardContext, bundleContext);
 		servletContextHelperTracker.open();
 		trackers.add(0, servletContextHelperTracker);
 
 		ServiceTracker<ServletContextHelperMapping, OsgiContextModel> servletContextHelperMappingTracker
-				= ServletContextHelperMappingTracker.createTracker(extenderContext, bundleContext);
+				= ServletContextHelperMappingTracker.createTracker(whiteboardContext, bundleContext);
 		servletContextHelperMappingTracker.open();
 		trackers.add(0, servletContextHelperMappingTracker);
 	}
@@ -288,12 +310,12 @@ public class Activator implements BundleActivator {
 	 */
 	private void trackServlets() {
 		ServiceTracker<Servlet, ServletModel> servletTracker
-				= ServletTracker.createTracker(extenderContext, bundleContext);
+				= ServletTracker.createTracker(whiteboardContext, bundleContext);
 		servletTracker.open();
 		trackers.add(servletTracker);
 
 		ServiceTracker<ServletMapping, ServletModel> servletMappingTracker
-				= ServletMappingTracker.createTracker(extenderContext, bundleContext);
+				= ServletMappingTracker.createTracker(whiteboardContext, bundleContext);
 		servletMappingTracker.open();
 		trackers.add(servletMappingTracker);
 	}
@@ -307,12 +329,12 @@ public class Activator implements BundleActivator {
 	 */
 	private void trackResources() {
 		ServiceTracker<Object, ServletModel> resourceTracker
-				= ResourceTracker.createTracker(extenderContext, bundleContext);
+				= ResourceTracker.createTracker(whiteboardContext, bundleContext);
 		resourceTracker.open();
 		trackers.add(resourceTracker);
 
 		ServiceTracker<ResourceMapping, ServletModel> resourceMappingTracker
-				= ResourceMappingTracker.createTracker(extenderContext, bundleContext);
+				= ResourceMappingTracker.createTracker(whiteboardContext, bundleContext);
 		resourceMappingTracker.open();
 		trackers.add(resourceMappingTracker);
 	}
@@ -325,12 +347,12 @@ public class Activator implements BundleActivator {
 	 */
 	private void trackFilters() {
 		final ServiceTracker<Filter, FilterModel> filterTracker
-				= FilterTracker.createTracker(extenderContext, bundleContext);
+				= FilterTracker.createTracker(whiteboardContext, bundleContext);
 		filterTracker.open();
 		trackers.add(filterTracker);
 
 		final ServiceTracker<FilterMapping, FilterModel> filterMappingTracker
-				= FilterMappingTracker.createTracker(extenderContext, bundleContext);
+				= FilterMappingTracker.createTracker(whiteboardContext, bundleContext);
 		filterMappingTracker.open();
 		trackers.add(filterMappingTracker);
 	}
@@ -340,7 +362,7 @@ public class Activator implements BundleActivator {
 	 */
 	private void trackWelcomeFiles() {
 		final ServiceTracker<WelcomeFileMapping, WelcomeFileModel> welcomeFileTracker
-				= WelcomeFileMappingTracker.createTracker(extenderContext, bundleContext);
+				= WelcomeFileMappingTracker.createTracker(whiteboardContext, bundleContext);
 		welcomeFileTracker.open();
 		trackers.add(welcomeFileTracker);
 	}
@@ -350,9 +372,9 @@ public class Activator implements BundleActivator {
 	 */
 	private void trackErrorPages() {
 		final ServiceTracker<ErrorPageMapping, ErrorPageModel> errorPagesTracker
-				= ErrorPageMappingTracker.createTracker(extenderContext, bundleContext);
+				= ErrorPageMappingTracker.createTracker(whiteboardContext, bundleContext);
 		errorPagesTracker.open();
-		trackers.add(0, errorPagesTracker);
+		trackers.add(errorPagesTracker);
 	}
 
 	/**
@@ -360,12 +382,12 @@ public class Activator implements BundleActivator {
 	 */
 	private void trackListeners() {
 		final ServiceTracker<EventListener, EventListenerModel> listenerTracker
-				= ListenerTracker.createTracker(extenderContext, bundleContext);
+				= ListenerTracker.createTracker(whiteboardContext, bundleContext);
 		listenerTracker.open();
 		trackers.add(listenerTracker);
 
 		final ServiceTracker<ListenerMapping, EventListenerModel> listenerMappingTracker
-				= ListenerMappingTracker.createTracker(extenderContext, bundleContext);
+				= ListenerMappingTracker.createTracker(whiteboardContext, bundleContext);
 		listenerMappingTracker.open();
 		trackers.add(listenerMappingTracker);
 	}
@@ -375,7 +397,7 @@ public class Activator implements BundleActivator {
 	 */
 	private void trackJspMappings() {
 		final ServiceTracker<JspMapping, JspModel> jspMappingTracker
-				= JspMappingTracker.createTracker(extenderContext, bundleContext);
+				= JspMappingTracker.createTracker(whiteboardContext, bundleContext);
 
 		jspMappingTracker.open();
 		trackers.add(jspMappingTracker);
@@ -408,7 +430,7 @@ public class Activator implements BundleActivator {
 //	private void trackWebSockets(final BundleContext bundleContext) {
 //		final ServiceTracker<Object, WebSocketElement> webSocketTracker = WebSocketTracker.createTracker(extenderContext, bundleContext);
 //		webSocketTracker.open();
-//		trackers.add(0, webSocketTracker);
+//		trackers.add(webSocketTracker);
 //	}
 
 }

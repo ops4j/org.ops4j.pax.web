@@ -163,19 +163,16 @@ public abstract class AbstractWhiteboardIntegrationTest extends AbstractContaine
 		DefaultHttpContextMapping httpContextMapping = new DefaultHttpContextMapping();
 		httpContextMapping.setContextId("alternative");
 		httpContextMapping.setContextPath("/alternative");
-		ServiceRegistration<HttpContextMapping> httpContextMappingRegistration = bundleContext
-				.registerService(HttpContextMapping.class,
-						httpContextMapping, null);
+		ServiceRegistration<HttpContextMapping> httpContextMappingRegistration
+				= bundleContext.registerService(HttpContextMapping.class, httpContextMapping, null);
 		try {
 			Servlet servlet = new WhiteboardServlet("/alias");
 			DefaultServletMapping servletMapping = new DefaultServletMapping();
 			servletMapping.setServlet(servlet);
 			servletMapping.setAlias("/alias");
-			String httpContextId = httpContextMapping.getContextId();
-			servletMapping.setContextId(httpContextId);
-			ServiceRegistration<ServletMapping> servletRegistration = bundleContext
-					.registerService(ServletMapping.class,
-							servletMapping, null);
+			servletMapping.setContextId(httpContextMapping.getContextId());
+			ServiceRegistration<ServletMapping> servletRegistration
+					= bundleContext.registerService(ServletMapping.class, servletMapping, null);
 			try {
 				HttpTestClientFactory.createDefaultTestClient()
 						.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",

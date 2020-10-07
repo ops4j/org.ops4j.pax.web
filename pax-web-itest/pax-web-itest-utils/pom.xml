@@ -71,6 +71,9 @@
 							org.osgi.framework.wiring;version="[1.2,2)",
 							org.osgi.util.tracker;version="[1.5,2)",
 
+							<!-- from pax-web-api -->
+							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
+
 							<!-- from pax-logging-api -->
 							org.slf4j;version="[1.7,2)",
 
@@ -102,11 +105,11 @@
 
 		<!-- pax-web own artifacts -->
 
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.web</groupId>-->
-<!--			<artifactId>pax-web-api</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>org.ops4j.pax.web</groupId>-->
 <!--			<artifactId>pax-web-spi</artifactId>-->

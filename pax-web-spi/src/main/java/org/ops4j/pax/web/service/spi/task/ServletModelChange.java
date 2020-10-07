@@ -15,9 +15,13 @@
  */
 package org.ops4j.pax.web.service.spi.task;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 
@@ -27,9 +31,11 @@ public class ServletModelChange extends Change {
 	private ServletModel servletModel;
 	private final Map<ServletModel, Boolean> servletModels = new LinkedHashMap<>();
 	private boolean disabled;
+	private final List<OsgiContextModel> newModels = new LinkedList<>();
 
-	public ServletModelChange(OpCode op, ServerModel serverModel, ServletModel servletModel) {
-		this(op, serverModel, servletModel, false);
+	public ServletModelChange(OpCode op, ServerModel serverModel, ServletModel servletModel,
+				OsgiContextModel ... newModels) {
+		this(op, serverModel, servletModel, false, newModels);
 	}
 
 	public ServletModelChange(OpCode op, ServerModel serverModel, Map<ServletModel, Boolean> servletModels) {
@@ -38,12 +44,14 @@ public class ServletModelChange extends Change {
 		this.servletModels.putAll(servletModels);
 	}
 
-	public ServletModelChange(OpCode op, ServerModel serverModel, ServletModel servletModel, boolean disabled) {
+	public ServletModelChange(OpCode op, ServerModel serverModel, ServletModel servletModel, boolean disabled,
+				OsgiContextModel ... newModels) {
 		super(op);
 		this.serverModel = serverModel;
 		this.servletModel = servletModel;
 		this.servletModels.put(servletModel, !disabled);
 		this.disabled = disabled;
+		this.newModels.addAll(Arrays.asList(newModels));
 	}
 
 	public ServerModel getServerModel() {
@@ -66,9 +74,17 @@ public class ServletModelChange extends Change {
 		return servletModel.isDynamic();
 	}
 
+	public List<OsgiContextModel> getNewModels() {
+		return newModels;
+	}
+
 	@Override
 	public void accept(BatchVisitor visitor) {
 		visitor.visit(this);
+	}
+
+	public List<OsgiContextModel> getContextModels() {
+		return newModels.size() > 0 ? newModels : servletModel.getContextModels();
 	}
 
 	@Override

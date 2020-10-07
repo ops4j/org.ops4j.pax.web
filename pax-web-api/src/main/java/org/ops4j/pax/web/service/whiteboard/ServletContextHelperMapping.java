@@ -20,7 +20,9 @@ import org.osgi.service.http.context.ServletContextHelper;
 
 /**
  * <p><em>ServletContextHelper mapping</em> collects all the information required to register a
- * {@link ServletContextHelperMapping} to allow referencing it later.</p>
+ * {@link ServletContextHelper} to allow referencing it later. This is actually not recommended Whiteboard service,
+ * because OSGi CMPN Whiteboard specification mentions registrations of {@link ServletContextHelper} services
+ * directly, with supporting service registration parameters, which is <em>the OSGi way</em>.</p>
  *
  * <p>Registering a {@link ServletContextHelper} can be done in two ways:<ul>
  *     <li>registering a service with this interface - all the information is included in service itself

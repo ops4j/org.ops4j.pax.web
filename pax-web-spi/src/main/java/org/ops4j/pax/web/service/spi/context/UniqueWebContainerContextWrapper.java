@@ -78,6 +78,11 @@ public class UniqueWebContainerContextWrapper implements WebContainerContext {
 	}
 
 	@Override
+	public String toString() {
+		return delegate.toString();
+	}
+
+	@Override
 	public boolean equals(Object obj) {
 		return delegate.equals(obj);
 	}
@@ -85,6 +90,10 @@ public class UniqueWebContainerContextWrapper implements WebContainerContext {
 	@Override
 	public int hashCode() {
 		return delegate.hashCode();
+	}
+
+	public WebContainerContext getDelegate() {
+		return delegate;
 	}
 
 }

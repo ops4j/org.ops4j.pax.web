@@ -57,7 +57,8 @@ public class WhiteboardContextsTest extends MultiContainerTestSupport {
 	public void justServletWithCustomContext() throws Exception {
 		Bundle sample1 = mockBundle("sample1");
 
-		ServletContextHelper helper = new ServletContextHelper() { };
+		ServletContextHelper helper = new ServletContextHelper() {
+		};
 		getServletContextHelperCustomizer().addingService(mockServletContextHelperReference(sample1, "c1",
 				() -> helper, 0L, 0, "/c"));
 
@@ -253,15 +254,19 @@ public class WhiteboardContextsTest extends MultiContainerTestSupport {
 		// filter 1 is registered to c1 and c3
 		// filter 2 is registered to c2 and c3
 
+		// NOTE 2020-10-02: We've started registering "default" OsgiContextModel with rank 0, so in the test, we had
+		// to change "servletAndFiltersInDifferentContexts(0, 0, 0, ...)" to
+		// "servletAndFiltersInDifferentContexts(1, 1, 1, ...)"
+
 		// all contexts ranked equal, so first one is the best, servlet is registered to c1, so no filter 2 involved
-		servletAndFiltersInDifferentContexts(0, 0, 0, "/s", ">F(1)S(1)<F(1)");
+		servletAndFiltersInDifferentContexts(1, 1, 1, "/s", ">F(1)S(1)<F(1)");
 		// c3 is the best, but from servlet perspective, it's c2, so c2 is used, so no filter 1 involved
 		servletAndFiltersInDifferentContexts(1, 2, 3, "/s", ">F(2)S(1)<F(2)");
 		// c2 is the best, so no filter 1 involved
 		servletAndFiltersInDifferentContexts(1, 3, 2, "/s", ">F(2)S(1)<F(2)");
 
 		// all contexts ranked equal, but no servlet mapped to /t, so c1 is the best, so only filter 1
-		servletAndFiltersInDifferentContexts(0, 0, 0, "/t?terminate=1", ">F(1)<F(1)");
+		servletAndFiltersInDifferentContexts(1, 1, 1, "/t?terminate=1", ">F(1)<F(1)");
 		// c3 is the best, no /t mapping, filter 1 and 2 used
 		servletAndFiltersInDifferentContexts(1, 2, 3, "/t?terminate=2", ">F(1)>F(2)<F(2)<F(1)");
 		// c2 is the best, no /t mapping, filter 2 only
@@ -272,15 +277,18 @@ public class WhiteboardContextsTest extends MultiContainerTestSupport {
 			throws IOException {
 		Bundle b = mockBundle("bundle-for-everything");
 
-		ServletContextHelper helper1 = new ServletContextHelper() { };
+		ServletContextHelper helper1 = new ServletContextHelper() {
+		};
 		ServiceReference<ServletContextHelper> sr1 = mockServletContextHelperReference(b, "c1",
 				() -> helper1, 1L, p1, "/");
 		OsgiContextModel ocm1 = getServletContextHelperCustomizer().addingService(sr1);
-		ServletContextHelper helper2 = new ServletContextHelper() { };
+		ServletContextHelper helper2 = new ServletContextHelper() {
+		};
 		ServiceReference<ServletContextHelper> sr2 = mockServletContextHelperReference(b, "c2",
 				() -> helper2, 2L, p2, "/");
 		OsgiContextModel ocm2 = getServletContextHelperCustomizer().addingService(sr2);
-		ServletContextHelper helper3 = new ServletContextHelper() { };
+		ServletContextHelper helper3 = new ServletContextHelper() {
+		};
 		ServiceReference<ServletContextHelper> sr3 = mockServletContextHelperReference(b, "c3",
 				() -> helper3, 3L, p3, "/");
 		OsgiContextModel ocm3 = getServletContextHelperCustomizer().addingService(sr3);
@@ -319,6 +327,7 @@ public class WhiteboardContextsTest extends MultiContainerTestSupport {
 	}
 
 	private static class TestServlet extends Utils.MyIdServlet {
+
 		TestServlet(String id) {
 			super(id);
 		}

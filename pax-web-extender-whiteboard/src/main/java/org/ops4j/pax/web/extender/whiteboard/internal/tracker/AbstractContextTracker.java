@@ -17,7 +17,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import java.util.Hashtable;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.util.Utils;
@@ -52,10 +52,10 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 	protected static final Logger LOG = LoggerFactory.getLogger(AbstractElementTracker.class);
 
 	protected final BundleContext bundleContext;
-	private final ExtenderContext extenderContext;
+	private final WhiteboardContext whiteboardContext;
 
-	protected AbstractContextTracker(ExtenderContext extenderContext, BundleContext bundleContext) {
-		this.extenderContext = extenderContext;
+	protected AbstractContextTracker(WhiteboardContext whiteboardContext, BundleContext bundleContext) {
+		this.whiteboardContext = whiteboardContext;
 		this.bundleContext = bundleContext;
 	}
 
@@ -112,7 +112,7 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 
 		// the most important thing is - how WebContainerContext will be created within configured OsgiContextModel
 		//
-		// we support 4 service types to be _customized_ as OsgiContextModel:
+		// we support 4 service types to be _customized_ into OsgiContextModel:
 		// 1. org.osgi.service.http.HttpContext - standard interface, but not designed to be whiteboarded.
 		//    Handled through Whiteboard for backward compatibility
 		// 2. org.osgi.service.http.context.ServletContextHelper - the standard from OSGi CMPN R7 Whiteboard spec
@@ -142,27 +142,44 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 
 		// Web context is configured, but validation has to be run separately/explicitly to handle "Failure DTO"
 		if (model.isValid()) {
-			extenderContext.addWebContext(serviceReference.getBundle(), model);
+			whiteboardContext.addWebContext(serviceReference.getBundle(), model);
 
-			//		httpServiceRuntime.addWhiteboardElement(model);
-			extenderContext.configureDTOs(model);
+			whiteboardContext.configureDTOs(model);
 			return model;
 		} else {
-			extenderContext.configureFailedDTOs(model);
+			whiteboardContext.configureFailedDTOs(model);
 			return null;
 		}
 	}
 
 	@Override
-	public void modifiedService(ServiceReference<S> reference, OsgiContextModel service) {
+	public void modifiedService(ServiceReference<S> reference, OsgiContextModel model) {
 		if (skipInternalService(reference)) {
 			return;
 		}
 
 		LOG.debug("Processing Whiteboard context reference change: {}", reference);
 
-		removedService(reference, service);
-		addingService(reference);
+		removedService(reference, model);
+
+		// no service ID change, but some other properties actually MAY change
+		Integer rank = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
+		if (rank == null) {
+			rank = 0;
+		}
+		model.setServiceRank(rank);
+
+		// reconfiguration of EXISTING OsgiContextModel
+		configureContextModel(reference, model);
+
+		// Web context is configured, but validation has to be run separately/explicitly to handle "Failure DTO"
+		if (model.isValid()) {
+			whiteboardContext.addWebContext(reference.getBundle(), model);
+
+			whiteboardContext.configureDTOs(model);
+		} else {
+			whiteboardContext.configureFailedDTOs(model);
+		}
 	}
 
 	@Override
@@ -173,8 +190,7 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 
 		LOG.debug("Whiteboard context removed: {}", serviceReference);
 
-		//		httpServiceRuntime.removeWhiteboardElement(model);
-		extenderContext.removeWebContext(serviceReference.getBundle(), unpublished);
+		whiteboardContext.removeWebContext(serviceReference.getBundle(), unpublished);
 	}
 
 	private boolean skipInternalService(ServiceReference<S> serviceReference) {
@@ -209,15 +225,25 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 	protected void setupArtificialServiceRegistrationProperties(OsgiContextModel model, ContextMapping mapping,
 			boolean whiteboard) {
 		final Hashtable<String, Object> registration = model.getContextRegistrationProperties();
-		if (whiteboard) {
-			registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, mapping.getContextId());
-			registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, mapping.getContextPath());
-		} else {
-			registration.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, mapping.getContextId());
-			registration.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, mapping.getContextPath());
+		String contextId = mapping.getContextId();
+		if (contextId == null) {
+			contextId = HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME;
 		}
-		mapping.getInitParameters().forEach((k, v)
-				-> registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX + k, v));
+		String contextPath = mapping.getContextPath();
+		if (contextPath == null) {
+			contextPath = PaxWebConstants.DEFAULT_CONTEXT_PATH;
+		}
+		if (whiteboard) {
+			registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, contextId);
+			registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
+		} else {
+			registration.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, contextId);
+			registration.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, contextPath);
+		}
+		if (mapping.getInitParameters() != null) {
+			mapping.getInitParameters().forEach((k, v)
+					-> registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX + k, v));
+		}
 	}
 
 	protected String setupName(OsgiContextModel model, ContextMapping mapping) {

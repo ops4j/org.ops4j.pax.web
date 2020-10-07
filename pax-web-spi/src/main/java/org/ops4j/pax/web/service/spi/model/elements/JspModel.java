@@ -31,9 +31,20 @@ public class JspModel extends ElementModel<JspMapping, JspEventData> {
 
 	private Map<String, String> initParams;
 
+	// JspModel is then turned into real servlet - we need to track it
+	private ServletModel servletModel;
+
 	public JspModel(String[] mappings, String jspFile) {
 		this.mappings = mappings;
 		this.jspFile = jspFile;
+	}
+
+	public void setServletModel(ServletModel model) {
+		this.servletModel = model;
+	}
+
+	public ServletModel getServletModel() {
+		return servletModel;
 	}
 
 	@Override
@@ -79,7 +90,6 @@ public class JspModel extends ElementModel<JspMapping, JspEventData> {
 
 	@Override
 	public Boolean performValidation() {
-
 		return Boolean.TRUE;
 	}
 

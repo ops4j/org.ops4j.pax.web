@@ -19,7 +19,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 
 import java.util.EventListener;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.ExtenderContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.events.EventListenerEventData;
 import org.ops4j.pax.web.service.whiteboard.ListenerMapping;
@@ -35,13 +35,13 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class ListenerMappingTracker extends AbstractMappingTracker<ListenerMapping, EventListener, EventListenerEventData, EventListenerModel> {
 
-	protected ListenerMappingTracker(ExtenderContext extenderContext, BundleContext bundleContext) {
-		super(extenderContext, bundleContext);
+	protected ListenerMappingTracker(WhiteboardContext whiteboardContext, BundleContext bundleContext) {
+		super(whiteboardContext, bundleContext);
 	}
 
-	public static ServiceTracker<ListenerMapping, EventListenerModel> createTracker(final ExtenderContext extenderContext,
+	public static ServiceTracker<ListenerMapping, EventListenerModel> createTracker(final WhiteboardContext whiteboardContext,
 			final BundleContext bundleContext) {
-		return new ListenerMappingTracker(extenderContext, bundleContext).create(ListenerMapping.class);
+		return new ListenerMappingTracker(whiteboardContext, bundleContext).create(ListenerMapping.class);
 	}
 
 	@Override

@@ -141,6 +141,9 @@ public class DefaultHttpContext implements WebContainerContext {
 		if (this == o) {
 			return true;
 		}
+		if (o instanceof UniqueWebContainerContextWrapper) {
+			o = ((UniqueWebContainerContextWrapper) o).getDelegate();
+		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}

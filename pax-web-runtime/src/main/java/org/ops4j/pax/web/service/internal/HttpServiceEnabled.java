@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
@@ -164,7 +165,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 		doUnregisterAllWelcomeFiles();
 
-		serverModel.deassociateContexts(serviceBundle);
+		serverModel.deassociateContexts(serviceBundle, serverController);
 	}
 
 	// --- container views
@@ -210,19 +211,12 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 	@Override
 	public WebContainerContext createDefaultHttpContext() {
-		OsgiContextModel context = serverModel.getBundleContextModel(PaxWebConstants.DEFAULT_CONTEXT_NAME, serviceBundle);
-		// no way it can be null. no way it contains indirect reference to HttpContext
-		return new UniqueWebContainerContextWrapper(context.resolveHttpContext(serviceBundle));
+		return createDefaultHttpContext(PaxWebConstants.DEFAULT_CONTEXT_NAME);
 	}
 
 	@Override
 	public WebContainerContext createDefaultHttpContext(String contextId) {
-		OsgiContextModel context = serverModel.getBundleContextModel(contextId, serviceBundle);
-		if (context == null) {
-			// create one in batch through ServiceModel and ensure its stored at ServerModel as well
-			context = serviceModel.createDefaultHttpContext(contextId);
-		}
-		return new UniqueWebContainerContextWrapper(context.resolveHttpContext(serviceBundle));
+		return new UniqueWebContainerContextWrapper(serviceModel.getOrCreateDefaultHttpContext(contextId));
 	}
 
 	@Override
@@ -232,13 +226,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 	@Override
 	public MultiBundleWebContainerContext createDefaultSharedHttpContext(String contextId) {
-		OsgiContextModel context = serverModel.getSharedContextModel(contextId);
-		if (context == null) {
-			// create one in batch through ServerModel, as shared contexts are not associated with any "owner" bundle
-			context = serverModel.createDefaultSharedtHttpContext(contextId);
-		}
-		MultiBundleWebContainerContext sharedContext = (MultiBundleWebContainerContext) context.resolveHttpContext(serviceBundle);
-		return new UniqueMultiBundleWebContainerContextWrapper(sharedContext);
+		return new UniqueMultiBundleWebContainerContextWrapper(serviceModel.getOrCreateDefaultSharedHttpContext(contextId));
 	}
 
 	// --- methods used to register a Servlet - with more options than in original HttpService.registerServlet()
@@ -404,6 +392,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 					if (!found) {
 						ContainerInitializerModel cim = serverModel.createJSPServletContainerInitializerModel(serviceBundle);
 						cim.setRegisteringBundle(model.getRegisteringBundle());
+						cim.setRelatedModel(model);
 						model.getContextModels().forEach(cim::addContextModel);
 						newBatch = new Batch("JSP Configuration and registration of " + model);
 						serverModel.addContainerInitializerModel(cim, newBatch);
@@ -524,7 +513,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 						LOG.info("Unregistering servlet \"{}\"", instance);
 
 						for (ServletModel existing : serviceModel.getServletModels()) {
-							if (existing.getServlet().equals(instance)) {
+							if (existing.getServlet() != null && existing.getServlet().equals(instance)) {
 								toUnregister.add(existing);
 							}
 						}
@@ -564,6 +553,15 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 				final Batch batch = new Batch("Unregistration of servlets: " + toUnregister);
 
+				if (model.isJspServlet()) {
+					// probably we have to unregister SCI for JSP
+					for (ContainerInitializerModel cim : serviceModel.getContainerInitializerModels()) {
+						if (model == cim.getRelatedModel()) {
+							batch.removeContainerInitializerModels(serverModel, Collections.singletonList(cim));
+						}
+					}
+				}
+
 				// removing servlet model may lead to reactivation of some previously disabled models
 				serverModel.removeServletModels(toUnregister, batch);
 
@@ -599,7 +597,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		ServletModel servletModel = new ServletModel.Builder()
 				.withAlias(alias)
 				.withServletName("/".equals(alias) ? "default" : String.format("default-%s", UUID.randomUUID().toString()))
-				.withServlet(resourceServlet.servlet)
+				.withServletSupplier(resourceServlet.supplier)
 				.withLoadOnStartup(1)
 				.withAsyncSupported(true)
 				.resourceServlet(true)
@@ -676,7 +674,8 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			chrootBase = null;
 		}
 
-		return new ResourceServlet(serverController.createResourceServlet(urlBase, chrootBase), urlBase, chrootBase);
+		final String chroot = chrootBase;
+		return new ResourceServlet(() -> serverController.createResourceServlet(urlBase, chroot), urlBase, chrootBase);
 	}
 
 	// --- methods used to register a Filter
@@ -1062,7 +1061,15 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		// "redirect" flag is irrelevant when unregistering and the model may not be the one which is
 		// kept at ServiceModel level - it's used only to carry relevant information
 		// user may simply register 10 pages and then unregister 7 of them
-		WelcomeFileModel model = new WelcomeFileModel(welcomeFiles, false);
+		WelcomeFileModel model = null;
+		for (WelcomeFileModel wfm : serviceModel.getWelcomeFileModels()) {
+			if (Arrays.equals(wfm.getWelcomeFiles(), welcomeFiles)) {
+				model = wfm;
+			}
+		}
+		if (model == null) {
+			model = new WelcomeFileModel(welcomeFiles, false);
+		}
 		doUnregisterWelcomeFiles(Collections.singletonList(httpContext), model);
 	}
 
@@ -1606,6 +1613,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 						PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
 				model.addContextModel(contextModel);
 			});
+			model.getContextModels(); // to make the list immutable
 		}
 		// DON'T register OsgiContextModels carried with Whiteboard-registered WebElement. These should
 		// be registered/configured explicitly by pax-web-extender-whiteboard, before servlet is registered
@@ -1662,7 +1670,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			String name = Arrays.asList(mapping).contains("/")
 					? "default" : String.format("default-%s", UUID.randomUUID().toString());
 			model.setName(name);
-			model.setServlet(resourceServlet.servlet);
+			model.setElementSupplier(resourceServlet.supplier);
 
 			try {
 				doRegisterServlet(Collections.emptyList(), model);
@@ -1729,7 +1737,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		public void addWhiteboardOsgiContextModel(OsgiContextModel model) {
 			serverModel.runSilently(() -> {
 				Batch batch = new Batch("Registration of " + model);
-				serverModel.registerOsgiContextModelIfNeeded(model, batch);
+				serverModel.registerOsgiContextModelIfNeeded(model, serviceModel, batch);
 				serverController.sendBatch(batch);
 				batch.accept(serviceModel);
 				return null;
@@ -1740,7 +1748,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		public void removeWhiteboardOsgiContextModel(OsgiContextModel model) {
 			serverModel.runSilently(() -> {
 				Batch batch = new Batch("Unregistration of " + model);
-				serverModel.unregisterOsgiContextModel(model, batch);
+				serverModel.unregisterOsgiContextModel(model, serviceModel, batch);
 				serverController.sendBatch(batch);
 				batch.accept(serviceModel);
 				return null;
@@ -1763,13 +1771,18 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			for (OsgiContextModel ocm : model.getContextModels()) {
 				jspServletModel.addContextModel(ocm);
 			}
+			model.setServletModel(jspServletModel);
 			registerServlet(jspServletModel);
 		}
 
 		@Override
 		public void unregisterJsp(JspModel model) {
-			HttpServiceEnabled.this.unregisterServlet(model.getJspFile() == null ?
-					PaxWebConstants.DEFAULT_JSP_SERVLET_NAME : model.getJspFile());
+			if (model.getServletModel() != null) {
+				unregisterServlet(model.getServletModel());
+			} else {
+				HttpServiceEnabled.this.unregisterServlet(model.getJspFile() == null ?
+						PaxWebConstants.DEFAULT_JSP_SERVLET_NAME : model.getJspFile());
+			}
 		}
 	}
 
@@ -2293,12 +2306,12 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 	private static class ResourceServlet {
 
-		public final Servlet servlet;
+		public final Supplier<Servlet> supplier;
 		public final URL urlBase;
 		public final String chrootBase;
 
-		ResourceServlet(Servlet servlet, URL urlBase, String chrootBase) {
-			this.servlet = servlet;
+		ResourceServlet(Supplier<Servlet> supplier, URL urlBase, String chrootBase) {
+			this.supplier = supplier;
 			this.urlBase = urlBase;
 			this.chrootBase = chrootBase;
 		}

@@ -218,6 +218,7 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 			public void init() {
 				log.add("s1.init()");
 			}
+
 			@Override
 			public void destroy() {
 				log.add("s1.destroy()");
@@ -228,6 +229,7 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 			public void init() {
 				log.add("f1.init()");
 			}
+
 			@Override
 			public void destroy() {
 				log.add("f1.destroy()");
@@ -238,6 +240,7 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 			public void init() {
 				log.add("f2.init()");
 			}
+
 			@Override
 			public void destroy() {
 				log.add("f2.destroy()");
@@ -336,6 +339,7 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 			public void init() {
 				log.add("s1.init()");
 			}
+
 			@Override
 			public void destroy() {
 				log.add("s1.destroy()");
@@ -346,6 +350,7 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 			public void init() {
 				log.add("f1.init()");
 			}
+
 			@Override
 			public void destroy() {
 				log.add("f1.destroy()");
@@ -356,6 +361,7 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 			public void init() {
 				log.add("f2.init()");
 			}
+
 			@Override
 			public void destroy() {
 				log.add("f2.destroy()");

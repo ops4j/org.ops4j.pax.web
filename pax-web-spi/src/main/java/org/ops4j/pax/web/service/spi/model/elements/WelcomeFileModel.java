@@ -77,10 +77,11 @@ public class WelcomeFileModel extends ElementModel<WelcomeFileMapping, WelcomeFi
 
 	@Override
 	public Boolean performValidation() {
+		// Servlets specification, "10.10 Welcome Files"
 		for (String wf : welcomeFiles) {
-			if (wf == null || "".equals(wf.trim()) || wf.contains("/")) {
+			if (wf == null || "".equals(wf.trim()) || wf.startsWith("/") || wf.endsWith("/")) {
 				throw new IllegalArgumentException("Welcome file \""
-						+ wf + "\" should not be empty and should not contain \"/\" character.");
+						+ wf + "\" should not be empty and should not start/end with \"/\" character.");
 			}
 		}
 

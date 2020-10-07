@@ -19,14 +19,18 @@ package org.ops4j.pax.web.service.spi.model.elements;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.ops4j.pax.web.service.spi.model.Identity;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
+import org.ops4j.pax.web.service.whiteboard.ContextRelated;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -62,6 +66,7 @@ public abstract class ElementModel<T, D extends ElementEventData>
 	 * {@link #getContextModels()}, this list is <em>latched</em>, sorted and can't be modified any further.
 	 */
 	protected List<OsgiContextModel> contextModels = new ArrayList<>();
+	protected String contextModelsInfo;
 
 	protected Boolean isValid;
 
@@ -99,6 +104,11 @@ public abstract class ElementModel<T, D extends ElementEventData>
 	 * {@link org.osgi.service.http.context.ServletContextHelper} if needed.
 	 */
 	private Bundle registeringBundle;
+
+	/**
+	 * {@link Filter} to select associated {@link OsgiContextModel}s.
+	 */
+	private Filter contextFilter;
 
 	/**
 	 * <p>This method should be called from Whiteboard infrastructure to really perform the validation and set
@@ -144,17 +154,43 @@ public abstract class ElementModel<T, D extends ElementEventData>
 			Collections.sort(contextModels);
 			// make immutable
 			contextModels = Collections.unmodifiableList(contextModels);
+			contextModelsInfo = contextModels.stream()
+					.map(ocm -> String.format("{%s,%s,%s,%s}", ocm.isWhiteboard() ? "WB" : "HS", ocm.getId(), ocm.getName(), ocm.getContextPath()))
+					.collect(Collectors.joining(", ", "[", "]"));
 			closed = true;
 		}
 		return contextModels;
 	}
 
+	public String getContextModelsInfo() {
+		return contextModelsInfo;
+	}
+
+	/**
+	 * This method is used to add {@link OsgiContextModel} when an {@link ElementModel} is created for the first
+	 * time (whether it's Whiteboard or HttpService scenario).
+	 * @param model
+	 */
 	public void addContextModel(OsgiContextModel model) {
 		if (closed) {
 			throw new IllegalStateException("Can't add new context models to " + this);
 		} else {
 			contextModels.add(model);
 		}
+	}
+
+	/**
+	 * This method replaces the models for existing {@Link ElementModel} when conditions change (when for example
+	 * new {@link OsgiContextModel} is registered and element should be registered to it after it was already
+	 * registered to other context matching the context selector).
+	 */
+	public void changeContextModels(List<OsgiContextModel> models) {
+		List<OsgiContextModel> newModels = new ArrayList<>(models);
+		Collections.sort(newModels);
+		contextModels = Collections.unmodifiableList(newModels);
+		contextModelsInfo = contextModels.stream()
+				.map(ocm -> String.format("{%s,%s,%s,%s}", ocm.isWhiteboard() ? "WB" : "HS", ocm.getId(), ocm.getName(), ocm.getContextPath()))
+				.collect(Collectors.joining(", ", "[", "]"));
 	}
 
 	/**
@@ -245,6 +281,27 @@ public abstract class ElementModel<T, D extends ElementEventData>
 
 	public void setRegisteringBundle(Bundle registeringBundle) {
 		this.registeringBundle = registeringBundle;
+	}
+
+	/**
+	 * <p>Method corresponding to {@link ContextRelated#getContextSelectFilter()} that sets actual context-selection
+	 * {@link Filter} to be used for this {@link ElementModel} after customizing <em>incoming</em> user-registered
+	 * OSGi service.</p>
+	 *
+	 * <p>This filter can be changed only calling {@link org.osgi.framework.ServiceRegistration#setProperties(Dictionary)}
+	 * on existing registration, but it's rather rare scenario. The point is that this filter is called every time
+	 * new {@link OsgiContextModel} is tracked (or changed or removed) to check whether existing set of contexts
+	 * associated with given {@link ElementModel} has changed - to check whether this {@link ElementModel} should
+	 * be added to new or removed from existing contexts (or both)</p>
+	 *
+	 * @param contextFilter
+	 */
+	public void setContextSelectFilter(Filter contextFilter) {
+		this.contextFilter = contextFilter;
+	}
+
+	public Filter getContextFilter() {
+		return contextFilter;
 	}
 
 	@Override
