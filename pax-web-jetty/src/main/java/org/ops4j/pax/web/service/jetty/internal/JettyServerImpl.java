@@ -316,14 +316,14 @@ class JettyServerImpl implements JettyServer {
 					((org.eclipse.jetty.util.component.LifeCycle) server.getThreadPool()).start();
 				}
 
-				// Fixfor PAXWEB-725
-				ClassLoader classLoader = context.getClassLoader();
-				List<Bundle> bundles = ((ResourceDelegatingBundleClassLoader) classLoader).getBundles();
-				BundleClassLoader parentClassLoader
-						= new BundleClassLoader(bundle);
-				ResourceDelegatingBundleClassLoader containerSpecificClassLoader = new ResourceDelegatingBundleClassLoader(bundles, parentClassLoader);
-				context.setClassLoader(containerSpecificClassLoader);
 				if (!context.isStarted()) {
+					// Fixfor PAXWEB-725
+					ClassLoader classLoader = context.getClassLoader();
+					List<Bundle> bundles = ((ResourceDelegatingBundleClassLoader) classLoader).getBundles();
+					BundleClassLoader parentClassLoader
+							= new BundleClassLoader(bundle);
+					ResourceDelegatingBundleClassLoader containerSpecificClassLoader = new ResourceDelegatingBundleClassLoader(bundles, parentClassLoader);
+					context.setClassLoader(containerSpecificClassLoader);
 					context.start();
 				}
 
