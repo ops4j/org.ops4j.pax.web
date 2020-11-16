@@ -183,7 +183,7 @@
 		<dependency.easymock.version>2.3</dependency.easymock.version>
 
 		<dependency.eclipse.jdt.version>3.23.0</dependency.eclipse.jdt.version>
-		<dependency.eclipse.jetty.version>9.4.32.v20200930</dependency.eclipse.jetty.version>
+		<dependency.eclipse.jetty.version>9.4.34.v20201102</dependency.eclipse.jetty.version>
 		<dependency.eclipse.platform.version>3.12.100</dependency.eclipse.platform.version>
 
 		<dependency.felix.configadmin.version>1.9.18</dependency.felix.configadmin.version>
