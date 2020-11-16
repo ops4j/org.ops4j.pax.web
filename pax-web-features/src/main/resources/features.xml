@@ -99,7 +99,7 @@
     <feature name="pax-http-jetty" version="${project.version}">
         <configfile finalname="${karaf.etc}/jetty.xml">mvn:org.ops4j.pax.web/pax-web-features/${project.version}/xml/jettyconfig</configfile>
         <config name="org.ops4j.pax.web">
-            org.osgi.service.http.port=8181
+            org.osgi.service.http.port=${env:ORG_OPS4J_PAX_WEB_ORG_OSGI_SERVICE_HTTP_PORT:-8181}
             javax.servlet.context.tempdir=${karaf.data}/pax-web-jsp
             org.ops4j.pax.web.config.file=${karaf.etc}/jetty.xml
         </config>
@@ -159,7 +159,7 @@
             org.ops4j.pax.url.war.importPaxLoggingPackages=true
         </config>
         <config name="org.ops4j.pax.web">
-            org.osgi.service.http.port=8181
+            org.osgi.service.http.port=${env:ORG_OPS4J_PAX_WEB_ORG_OSGI_SERVICE_HTTP_PORT:-8181}
             javax.servlet.context.tempdir=${karaf.data}/pax-web-jsp
         </config>
         <feature>scr</feature>
@@ -261,7 +261,7 @@
         <configfile finalname="${karaf.etc}/undertow.properties">mvn:org.ops4j.pax.web/pax-web-features/${project.version}/properties/undertowconfig</configfile>
         <configfile finalname="${karaf.etc}/undertow.xml">mvn:org.ops4j.pax.web/pax-web-features/${project.version}/xml/undertowconfig</configfile>
         <config name="org.ops4j.pax.web">
-            org.osgi.service.http.port=8181
+            org.osgi.service.http.port=${env:ORG_OPS4J_PAX_WEB_ORG_OSGI_SERVICE_HTTP_PORT:-8181}
             javax.servlet.context.tempdir=${karaf.data}/pax-web-jsp
             #org.ops4j.pax.web.config.file=${karaf.etc}/undertow.properties
             org.ops4j.pax.web.config.file=${karaf.etc}/undertow.xml
