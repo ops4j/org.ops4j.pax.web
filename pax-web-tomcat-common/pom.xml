@@ -177,11 +177,11 @@
 
 							<!-- tomcat-util-scan -->
 							org.apache.tomcat.util.descriptor;version="${dependency.tomcat.version}";-split-package:=merge-first,
-							org.apache.tomcat.util.descriptor.tagplugin;version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.descriptor.tagplugin;version="${dependency.tomcat.version}";-split-package:=merge-first,
 							org.apache.tomcat.util.descriptor.tld;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util.descriptor.web;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util.digester;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util.scan;version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.descriptor.web;version="${dependency.tomcat.version}";-split-package:=merge-first,
+							org.apache.tomcat.util.digester;version="${dependency.tomcat.version}";-split-package:=merge-first,
+							org.apache.tomcat.util.scan;version="${dependency.tomcat.version}";-split-package:=merge-first,
 
 							<!-- tomcat-embed-core - unfortunately these packages have to be here -->
 							org.apache.tomcat.util.modeler;version="${dependency.tomcat.version}",
@@ -223,6 +223,21 @@
 			-->
 			<artifactId>tomcat-util-scan</artifactId>
 			<scope>provided</scope>
+			<exclusions>
+				<!-- exclusions to get rid of "Split package, multiple jars provide the same package" warning -->
+				<exclusion>
+					<groupId>org.apache.tomcat</groupId>
+					<artifactId>tomcat-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.tomcat</groupId>
+					<artifactId>tomcat-juli</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.tomcat</groupId>
+					<artifactId>tomcat-util</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<!--
