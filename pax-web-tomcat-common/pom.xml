@@ -216,6 +216,15 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<!--
+				tomcat-embed-core doesn't contain org.apache.tomcat.util.descriptor.tld package, it's moved
+				to tomcat-embed-jasper: https://github.com/apache/tomcat/commit/96e1d96e20defbc0825771c6ce7bee32e54d4c8c
+			-->
+			<artifactId>tomcat-util-scan</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<!--
 				This dependency is used to take javax.servlet.resources package with XSDs/DTDs into pax-web-tomcat-common
 				to satisfy the DigesterFactory

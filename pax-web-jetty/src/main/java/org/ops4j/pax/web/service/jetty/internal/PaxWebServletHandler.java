@@ -79,6 +79,8 @@ public class PaxWebServletHandler extends ServletHandler {
 	 */
 	private final Servlet default404Servlet;
 
+	private final ThreadLocal<PaxWebServletHolder> currentServletHolder = new ThreadLocal<>();
+
 	/**
 	 * Create new {@link ServletHandler} for given {@link org.eclipse.jetty.servlet.ServletContextHandler}
 	 * @param default404Servlet this servlet will be used when there's no mapped servlet
@@ -333,7 +335,17 @@ public class PaxWebServletHandler extends ServletHandler {
 			return chain;
 		}
 
-		chain = super.getFilterChain(baseRequest, pathInContext, servletHolder);
+		// always clear contextlessKey in parent cache, so super.getFilterChain will create new filter chain
+		_chainCache[dispatch].remove(contextlessKey);
+
+		// After an update to Jetty 9.4.34, we have to use different way of rejecting filters from the chain if
+		// they don't match OSGi context... See https://github.com/eclipse/jetty.project/pull/5271
+		currentServletHolder.set(holder);
+		try {
+			chain = super.getFilterChain(baseRequest, pathInContext, servletHolder);
+		} finally {
+			currentServletHolder.remove();
+		}
 
 		// the above chain:
 		// 1) may be null if there are no filters at all
@@ -343,32 +355,30 @@ public class PaxWebServletHandler extends ServletHandler {
 
 		if (chain != null) {
 			_chainCache[dispatch].put(key, chain);
-			_chainLRU[dispatch].add(key);
 		}
 
 		return chain;
 	}
 
 	@Override
-	public CachedChain newCachedChain(List<FilterHolder> filters, ServletHolder servletHolder) {
+	protected FilterChain newFilterChain(FilterHolder filterHolder, FilterChain chain) {
 		// This is where we can narrow the list of filters, which Jetty decided to map to given servlet
 		// we can additionally take OSGi context into account
-		PaxWebServletHolder holder = (PaxWebServletHolder) servletHolder;
+		PaxWebServletHolder holder = currentServletHolder.get();
 
 		OsgiContextModel targetContext = holder.getOsgiContextModel();
 		if (targetContext == null) {
 			targetContext = defaultOsgiContextModel;
 		}
 
-		List<FilterHolder> osgiScopedFilters = new LinkedList<>();
-		for (FilterHolder filter : filters) {
-			PaxWebFilterHolder fHolder = (PaxWebFilterHolder) filter;
-			if (fHolder.matches(targetContext)) {
-				osgiScopedFilters.add(filter);
-			}
+		PaxWebFilterHolder fHolder = (PaxWebFilterHolder) filterHolder;
+		if (fHolder.matches(targetContext)) {
+			// create new chain with filterHolder called first and existing chain called later
+			return super.newFilterChain(filterHolder, chain);
+		} else {
+			// just return existing chain without using this filterHolder
+			return chain;
 		}
-
-		return super.newCachedChain(osgiScopedFilters, servletHolder);
 	}
 
 }

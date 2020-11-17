@@ -46,7 +46,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
-import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
