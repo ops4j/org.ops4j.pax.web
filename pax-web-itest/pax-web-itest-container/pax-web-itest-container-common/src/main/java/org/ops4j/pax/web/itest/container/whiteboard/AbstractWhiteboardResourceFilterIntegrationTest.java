@@ -15,7 +15,24 @@
  */
 package org.ops4j.pax.web.itest.container.whiteboard;
 
+import java.net.URL;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import javax.servlet.Filter;
+import javax.servlet.Servlet;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
+import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
+import org.ops4j.pax.web.itest.utils.web.SimpleFilter;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Toni Menzel (tonit)
@@ -23,42 +40,39 @@ import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
  */
 public abstract class AbstractWhiteboardResourceFilterIntegrationTest extends AbstractContainerTestBase {
 
-//	private ServiceRegistration<Servlet> service;
-//
-//	@Before
-//	public void setUp() throws BundleException, InterruptedException {
-//
-//		Dictionary<String, String> initParams = new Hashtable<>();
-//		initParams.put("alias", "/test-resources");
-//		service = bundleContext.registerService(Servlet.class,
-//				new WhiteboardServlet("/test-resources"), initParams);
-//
-//		initServletListener();
-//		waitForServletListener();
-//	}
-//
-//	@After
-//	public void tearDown() throws BundleException {
-//		service.unregister();
-//	}
-//
-//	@Test
-//	public void testWhiteBoardFiltered() throws Exception {
-//		Dictionary<String, String> props = new Hashtable<>();
-//		props.put("urlPatterns", "*");
-//		SimpleFilter simpleFilter = new SimpleFilter();
-//		ServiceRegistration<Filter> filter = bundleContext.registerService(
-//				Filter.class, simpleFilter, props);
-//
-//		HttpTestClientFactory.createDefaultTestClient()
-//				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
-//						resp -> resp.contains("Hello Whiteboard Extender"))
-//				.doGETandExecuteTest("http://127.0.0.1:8181/test-resources");
-//
-//		URL resource = simpleFilter.getResource();
-//		assertNotNull(resource);
-//
-//		filter.unregister();
-//	}
+	private ServiceRegistration<Servlet> service;
+
+	@Before
+	public void setUp() throws Exception {
+		context.installBundle(sampleURI("whiteboard"));
+		configureAndWaitForServletWithMapping("/test-resources/*", () -> {
+			Dictionary<String, String> props = new Hashtable<>();
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/test-resources/*");
+			service = context.registerService(Servlet.class, new WhiteboardServlet("/test-resources"), props);
+		});
+	}
+
+	@After
+	public void tearDown() throws BundleException {
+		service.unregister();
+	}
+
+	@Test
+	public void testWhiteBoardFiltered() throws Exception {
+		Dictionary<String, String> props = new Hashtable<>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "*");
+		SimpleFilter simpleFilter = new SimpleFilter();
+		ServiceRegistration<Filter> filter = context.registerService(Filter.class, simpleFilter, props);
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
+						resp -> resp.contains("Hello Whiteboard Extender"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/test-resources");
+
+		URL resource = simpleFilter.getResource();
+		assertNotNull(resource);
+
+		filter.unregister();
+	}
 
 }
