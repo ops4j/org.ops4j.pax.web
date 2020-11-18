@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.base.support;
+package org.ops4j.pax.web.itest.utils.web;
 
 import java.io.IOException;
 import java.util.Dictionary;

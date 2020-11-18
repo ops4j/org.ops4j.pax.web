@@ -138,6 +138,11 @@ class JettyServerController implements ServerController {
 		if (listener == null) {
 			throw new IllegalArgumentException("ServerListener is null");
 		}
+		if (state == ServerState.STOPPED) {
+			listener.stateChanged(new ServerEvent(ServerEvent.State.CONFIGURED, jettyServerWrapper.getAddresses(false)));
+		} else if (state == ServerState.STARTED) {
+			listener.stateChanged(new ServerEvent(ServerEvent.State.STARTED, jettyServerWrapper.getAddresses(true)));
+		}
 		listeners.add(listener);
 	}
 

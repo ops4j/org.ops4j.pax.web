@@ -218,14 +218,18 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 	 * Performs an action and waits for {@link org.ops4j.pax.web.service.spi.model.events.ServerEvent} related
 	 * to started container at given port
 	 * @param port
-	 * @param action
+	 * @param actions
 	 */
-	protected void configureAndWaitForListener(int port, Action action) throws Exception {
+	protected void configureAndWaitForListener(int port, Action ... actions) throws Exception {
 		final List<ServerEvent> events = new CopyOnWriteArrayList<>();
 		ServerListener listener = events::add;
 		ServiceRegistration<ServerListener> reg = context.registerService(ServerListener.class, listener, null);
 
-		action.run();
+		if (actions != null) {
+			for (Action a : actions) {
+				a.run();
+			}
+		}
 
 		try {
 			new WaitCondition("Waiting for server listening at " + port) {

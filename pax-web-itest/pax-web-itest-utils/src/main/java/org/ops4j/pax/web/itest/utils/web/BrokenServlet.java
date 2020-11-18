@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.base.support;
+package org.ops4j.pax.web.itest.utils.web;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -48,13 +48,13 @@ public class BrokenServlet extends HttpServlet {
 				} else if (IOException.class.isAssignableFrom(tc)) {
 					throw (IOException) ct.newInstance(exceptionMessage);
 				} else {
-					throw new ServletException((Throwable)ct.newInstance(exceptionMessage));
+					throw new ServletException((Throwable) ct.newInstance(exceptionMessage));
 				}
 			} catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 				throw new RuntimeException("unexpected");
 			}
 		} else if ("return".equals(what)) {
-			Integer code = Integer.parseInt(req.getParameter("code"));
+			int code = Integer.parseInt(req.getParameter("code"));
 			resp.sendError(code);
 		} else {
 			resp.getWriter().println("OK");

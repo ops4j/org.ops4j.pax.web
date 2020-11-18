@@ -134,6 +134,11 @@ class TomcatServerController implements ServerController {
 		if (listener == null) {
 			throw new IllegalArgumentException("ServerListener is null");
 		}
+		if (state == ServerState.STOPPED) {
+			listener.stateChanged(new ServerEvent(ServerEvent.State.CONFIGURED, tomcatServerWrapper.getAddresses(false)));
+		} else if (state == ServerState.STARTED) {
+			listener.stateChanged(new ServerEvent(ServerEvent.State.STARTED, tomcatServerWrapper.getAddresses(true)));
+		}
 		listeners.add(listener);
 	}
 
