@@ -84,7 +84,7 @@ public abstract class AbstractWhiteboardIntegrationTest extends AbstractContaine
 	@Test
 	public void testWhiteboardForbidden() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
-				.withReturnCode(403)
+				.withReturnCode(401)
 				.doGETandExecuteTest("http://127.0.0.1:8181/forbidden");
 	}
 

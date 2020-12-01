@@ -35,6 +35,7 @@ public class WhiteboardContext implements HttpContext {
 			throws IOException {
 		LOG.info("Forbidden access!");
 		response.addHeader("WWW-Authenticate", "Basic realm=\"Test Realm\"");
+		response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 		return false;
 	}
 
