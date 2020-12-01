@@ -36,7 +36,6 @@
 	<description>Integration test base module for Pax Web</description>
 
 	<modules>
-		<module>pax-web-itest-common</module>
 		<module>pax-web-itest-utils</module>
 		<module>pax-web-itest-osgi</module>
 		<module>pax-web-itest-server</module>
