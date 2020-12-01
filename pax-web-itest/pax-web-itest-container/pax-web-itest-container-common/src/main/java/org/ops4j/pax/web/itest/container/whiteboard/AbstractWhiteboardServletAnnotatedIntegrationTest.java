@@ -15,7 +15,17 @@
  */
 package org.ops4j.pax.web.itest.container.whiteboard;
 
+import javax.servlet.Filter;
+import javax.servlet.Servlet;
+
+import org.junit.Test;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
+import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
+import org.ops4j.pax.web.itest.utils.web.AnnotatedTestFilter;
+import org.ops4j.pax.web.itest.utils.web.AnnotatedTestServlet;
+import org.osgi.framework.ServiceRegistration;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Achim Nierbeck (anierbeck)
@@ -23,80 +33,67 @@ import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
  */
 public abstract class AbstractWhiteboardServletAnnotatedIntegrationTest extends AbstractContainerTestBase {
 
-//	@Before
-//	public void setUp() throws Exception {
-//	}
-//
-//	@After
-//	public void tearDown() throws BundleException {
-//	}
-//
-//	@Test
-//	public void testWhiteboardServletRegistration() throws Exception {
-//		initServletListener();
-//		ServiceRegistration<Servlet> servletRegistration = bundleContext
-//				.registerService(Servlet.class, new AnnotatedTestServlet(),
-//						null);
-//		waitForServletListener();
-//
-//		try {
-//			HttpTestClientFactory.createDefaultTestClient()
-//					.withResponseAssertion("Response must contain 'TEST OK'",
-//							resp -> resp.contains("TEST OK"))
-//					.doGETandExecuteTest("http://127.0.0.1:8181/test");
-//		} finally {
-//			servletRegistration.unregister();
-//		}
-//
-//	}
-//
-//	@Test
-//	public void testWhiteboardServletRegistrationDestroyCalled() throws Exception {
-//
-//		AnnotatedTestServlet annotatedTestServlet = new AnnotatedTestServlet();
-//
-//		initServletListener();
-//		ServiceRegistration<Servlet> servletRegistration = bundleContext
-//				.registerService(Servlet.class, annotatedTestServlet,
-//						null);
-//		waitForServletListener();
-//
-//		try {
-//			HttpTestClientFactory.createDefaultTestClient()
-//					.withResponseAssertion("Response must contain 'TEST OK'",
-//							resp -> resp.contains("TEST OK"))
-//					.doGETandExecuteTest("http://127.0.0.1:8181/test");
-//		} finally {
-//			servletRegistration.unregister();
-//		}
-//
-//		assertThat(annotatedTestServlet.isInitCalled(), is(true));
-//		assertThat(annotatedTestServlet.isDestroyCalled(), is(true));
-//	}
-//
-//	@Test
-//	public void testWhiteboardFilterRegistration() throws Exception {
-//
-//		initServletListener();
-//		ServiceRegistration<Servlet> servletRegistration = bundleContext
-//				.registerService(Servlet.class, new AnnotatedTestServlet(),
-//						null);
-//
-//		ServiceRegistration<Filter> filterRegistration = bundleContext
-//				.registerService(Filter.class, new AnnotatedTestFilter(), null);
-//		waitForServletListener();
-//
-//		try {
-//			HttpTestClientFactory.createDefaultTestClient()
-//					.withResponseAssertion("Response must contain 'TEST OK'",
-//							resp -> resp.contains("TEST OK"))
-//					.withResponseAssertion("Response must contain 'FILTER-INIT: true'",
-//							resp -> resp.contains("FILTER-INIT: true"))
-//					.doGETandExecuteTest("http://127.0.0.1:8181/test");
-//		} finally {
-//			servletRegistration.unregister();
-//			filterRegistration.unregister();
-//		}
-//	}
+	@Test
+	public void testWhiteboardServletRegistration() throws Exception {
+		@SuppressWarnings("unchecked")
+		final ServiceRegistration<Servlet>[] servletRegistration = new ServiceRegistration[1];
+		configureAndWaitForServletWithMapping("/test", () -> {
+			servletRegistration[0] = context.registerService(Servlet.class, new AnnotatedTestServlet(), null);
+		});
+
+		try {
+			HttpTestClientFactory.createDefaultTestClient()
+					.withResponseAssertion("Response must contain 'TEST OK'",
+							resp -> resp.contains("TEST OK"))
+					.doGETandExecuteTest("http://127.0.0.1:8181/test");
+		} finally {
+			servletRegistration[0].unregister();
+		}
+	}
+
+	@Test
+	public void testWhiteboardServletRegistrationDestroyCalled() throws Exception {
+		final AnnotatedTestServlet annotatedTestServlet = new AnnotatedTestServlet();
+		@SuppressWarnings("unchecked")
+		final ServiceRegistration<Servlet>[] servletRegistration = new ServiceRegistration[1];
+		configureAndWaitForServletWithMapping("/test", () -> {
+			servletRegistration[0] = context.registerService(Servlet.class, annotatedTestServlet, null);
+		});
+
+		try {
+			HttpTestClientFactory.createDefaultTestClient()
+					.withResponseAssertion("Response must contain 'TEST OK'",
+							resp -> resp.contains("TEST OK"))
+					.doGETandExecuteTest("http://127.0.0.1:8181/test");
+		} finally {
+			servletRegistration[0].unregister();
+		}
+
+		assertTrue(annotatedTestServlet.isInitCalled());
+		assertTrue(annotatedTestServlet.isDestroyCalled());
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testWhiteboardFilterRegistration() throws Exception {
+		final ServiceRegistration<Servlet>[] servletRegistration = new ServiceRegistration[1];
+		final ServiceRegistration<Filter>[] filterRegistration = new ServiceRegistration[1];
+		configureAndWaitForServletWithMapping("/test", () -> {
+			filterRegistration[0] = context.registerService(Filter.class, new AnnotatedTestFilter(), null);
+			servletRegistration[0] = context.registerService(Servlet.class, new AnnotatedTestServlet(), null);
+		});
+
+		try {
+			HttpTestClientFactory.createDefaultTestClient()
+					.withResponseAssertion("Response must contain 'TEST OK'",
+							resp -> resp.contains("TEST OK"))
+					.withResponseAssertion("Response must contain 'FILTER-INIT: true'",
+							resp -> resp.contains("FILTER-INIT: true"))
+					.doGETandExecuteTest("http://127.0.0.1:8181/test");
+		} finally {
+			servletRegistration[0].unregister();
+			filterRegistration[0].unregister();
+		}
+	}
 
 }
