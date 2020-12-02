@@ -18,6 +18,7 @@ package org.ops4j.pax.web.itest.container.whiteboard;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
@@ -32,6 +33,11 @@ import static org.junit.Assert.assertTrue;
  * @since Dec 30, 2012
  */
 public abstract class AbstractWhiteboardServletAnnotatedIntegrationTest extends AbstractContainerTestBase {
+
+	@Before
+	public void waitBeforeTest() throws Exception {
+		configureAndWaitForListener(8181);
+	}
 
 	@Test
 	public void testWhiteboardServletRegistration() throws Exception {

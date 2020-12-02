@@ -865,7 +865,7 @@ public class UnifiedUndertowTest {
 		assertTrue(response.endsWith("'index-z-b1'"));
 
 		// "/" - no "/index.x" or "/index.y" physical resource, but existing mapping for *.y to indexx servlet
-		// forward is performed implicitly by Tomcat's DefaultServlet
+		// forward is performed implicitly by Undertow's DefaultServlet
 		response = send(port, "/c/");
 		assertTrue(response.contains("req.context_path=\"/c\""));
 		assertTrue(response.contains("req.request_uri=\"/c/index.y\""));

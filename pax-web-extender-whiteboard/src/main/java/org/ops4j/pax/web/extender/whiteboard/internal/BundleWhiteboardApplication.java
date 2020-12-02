@@ -20,9 +20,10 @@
 package org.ops4j.pax.web.extender.whiteboard.internal;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Map;
 
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
@@ -57,11 +58,13 @@ public class BundleWhiteboardApplication {
 
 	private final Bundle bundle;
 
+	// contexts and elements should be accessed using WhiteboardContext.lock
+
 	/** List of <em>web elements</em> that are registered by given {@link Bundle}. */
-	private final List<ElementModel<?, ?>> webElements;
+	private final Map<ElementModel<?, ?>, Boolean> webElements = new LinkedHashMap<>();
 
 	/** List of <em>web contexts</em> that are registered by given {@link Bundle}. */
-	private final List<OsgiContextModel> webContexts;
+	private final Map<OsgiContextModel, Boolean> webContexts = new LinkedHashMap<>();
 
 	/**
 	 * <p>pax-web-extender-whiteboard operates on target {@link WebContainer} and special
@@ -84,8 +87,6 @@ public class BundleWhiteboardApplication {
 	 */
 	public BundleWhiteboardApplication(Bundle bundle, ExtendedHttpServiceRuntime httpServiceRuntime) {
 		this.bundle = bundle;
-		this.webElements = new CopyOnWriteArrayList<>();
-		this.webContexts = new CopyOnWriteArrayList<>();
 	}
 
 	public Bundle getBundle() {
@@ -97,7 +98,7 @@ public class BundleWhiteboardApplication {
 	 * @return
 	 */
 	public List<OsgiContextModel> getWebContexts() {
-		return Collections.unmodifiableList(webContexts);
+		return Collections.unmodifiableList(new LinkedList<>(webContexts.keySet()));
 	}
 
 	public List<OsgiContextModel> getWebContainerOsgiContextModels() {
@@ -114,7 +115,7 @@ public class BundleWhiteboardApplication {
 	 * @return
 	 */
 	public List<ElementModel<?, ?>> getWebElements() {
-		return Collections.unmodifiableList(webElements);
+		return Collections.unmodifiableList(new LinkedList<>(webElements.keySet()));
 	}
 
 	/**
@@ -135,8 +136,20 @@ public class BundleWhiteboardApplication {
 		// so we don't have to care about uninstalling the contexts/elements from previous WebContainer
 		WhiteboardWebContainerView view = this.whiteboardContainer;
 		if (view != null) {
-			webContexts.forEach(view::addWhiteboardOsgiContextModel);
-			webElements.forEach(element -> element.register(view));
+			webContexts.keySet().forEach(ctx -> {
+				if (!webContexts.get(ctx)) {
+					view.addWhiteboardOsgiContextModel(ctx);
+					webContexts.put(ctx, true);
+				}
+			});
+			webElements.keySet().forEach(element -> {
+				if (!webElements.get(element)) {
+					if (element.getContextModels().size() > 0) {
+						element.register(view);
+						webElements.put(element, true);
+					}
+				}
+			});
 		}
 	}
 
@@ -148,13 +161,19 @@ public class BundleWhiteboardApplication {
 		// uninstall all current contexts and elements
 		WhiteboardWebContainerView view = this.whiteboardContainer;
 		if (view != null) {
-			webElements.forEach(element -> {
-				if (element.getContextModels().size() > 0) {
+			webElements.keySet().forEach(element -> {
+				if (element.getContextModels().size() > 0 && webElements.get(element)) {
 					// no need to do this otherwise
 					element.unregister(view);
+					webElements.put(element, false);
 				}
 			});
-			webContexts.forEach(view::removeWhiteboardOsgiContextModel);
+			webContexts.keySet().forEach(ctx -> {
+				if (webContexts.get(ctx)) {
+					view.removeWhiteboardOsgiContextModel(ctx);
+					webContexts.put(ctx, false);
+				}
+			});
 		}
 
 		bundle.getBundleContext().ungetService(webContainerServiceRef);
@@ -168,10 +187,11 @@ public class BundleWhiteboardApplication {
 	 * @param webContext
 	 */
 	public void addWebContext(final OsgiContextModel webContext) {
-		webContexts.add(webContext);
+		webContexts.put(webContext, false);
 		WhiteboardWebContainerView view = this.whiteboardContainer;
 		if (view != null) {
 			view.addWhiteboardOsgiContextModel(webContext);
+			webContexts.put(webContext, true);
 		}
 	}
 
@@ -193,7 +213,7 @@ public class BundleWhiteboardApplication {
 	 * @param webElement
 	 */
 	public void addWebElement(final ElementModel<?, ?> webElement) {
-		webElements.add(webElement);
+		webElements.put(webElement, false);
 
 		if (webElement.getContextModels().size() == 0) {
 			// I found this situation to be possible with SCR despite the best attempts of user to register
@@ -216,6 +236,7 @@ public class BundleWhiteboardApplication {
 		// no need to register an element without associated contexts
 		if (webElement.getContextModels().size() > 0) {
 			webElement.register(view);
+			webElements.put(webElement, true);
 		}
 	}
 

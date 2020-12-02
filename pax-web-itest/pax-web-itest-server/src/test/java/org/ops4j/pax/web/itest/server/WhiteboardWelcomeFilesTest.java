@@ -17,6 +17,7 @@ package org.ops4j.pax.web.itest.server;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.util.Hashtable;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -31,6 +32,8 @@ import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
 import org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.context.ServletContextHelper;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.startsWith;
@@ -118,6 +121,176 @@ public class WhiteboardWelcomeFilesTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/x/"), startsWith("HTTP/1.1 404"));
 		assertThat(httpGET(port, "/resources"), startsWith("HTTP/1.1 404"));
 		assertThat(httpGET(port, "/resources/"), startsWith("HTTP/1.1 404"));
+
+		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);
+		ServiceModelInternals serviceModelInternals = serviceModelInternals(sample1);
+
+		assertTrue(serverModelInternals.isClean(whiteboardBundle));
+		assertTrue(serverModelInternals.isClean(sample1));
+		assertTrue(serviceModelInternals.isEmpty());
+	}
+
+	@Test
+	public void onlyOneWayToRegisterWelcomeFilesInCustomContext() throws Exception {
+		File base = new File("target/www");
+		FileUtils.deleteDirectory(base);
+		base.mkdirs();
+		try (FileWriter fw = new FileWriter(new File(base, "file.txt"))) {
+			IOUtils.write("hello1", fw);
+		}
+
+		Bundle sample1 = mockBundle("sample1");
+		when(sample1.getEntry("resources")).thenReturn(base.toURI().toURL());
+		when(sample1.getEntry("resources/")).thenReturn(base.toURI().toURL());
+		when(sample1.getEntry("resources/file.txt")).thenReturn(new File(base, "file.txt").toURI().toURL());
+
+		ServletContextHelper helper = new ServletContextHelper(sample1) {
+		};
+		getServletContextHelperCustomizer().addingService(mockServletContextHelperReference(sample1, "c1",
+				() -> helper, 0L, 0, "/c"));
+
+		// 1. Whiteboard registration as Pax Web specific org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping
+		//    OSGi service
+
+		DefaultResourceMapping rm = new DefaultResourceMapping();
+		rm.setUrlPatterns(new String[] { "/resources/*", "/x/*" });
+		rm.setPath("/resources");
+		Hashtable<String, Object> props = new Hashtable<>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, String.format("(%s=c1)",
+				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
+		ServiceReference<ResourceMapping> resourceMappingRef = mockReference(sample1, ResourceMapping.class,
+				props, () -> rm);
+		ServletModel rmModel = getResourceMappingCustomizer().addingService(resourceMappingRef);
+		assertThat(httpGET(port, "/c/resources/file.txt"), endsWith("hello1"));
+		assertThat(httpGET(port, "/c/x/file.txt"), endsWith("hello1"));
+		assertThat(httpGET(port, "/c/x"), startsWith("HTTP/1.1 302"));
+		assertThat(httpGET(port, "/c/x/"), startsWith("HTTP/1.1 403"));
+		assertThat(httpGET(port, "/c/resources"), startsWith("HTTP/1.1 302"));
+		assertThat(httpGET(port, "/c/resources/"), startsWith("HTTP/1.1 403"));
+
+		DefaultWelcomeFileMapping mapping = new DefaultWelcomeFileMapping();
+		mapping.setWelcomeFiles(new String[] { "file.txt" });
+		mapping.setRedirect(false);
+		ServiceReference<WelcomeFileMapping> mappingRef = mockReference(sample1, WelcomeFileMapping.class,
+				props, () -> mapping);
+		WelcomeFileModel wfmModel = getWelcomeFileMappingCustomizer().addingService(mappingRef);
+		// this is redirect NOT affected by DefaultWelcomeFileMapping.setRedirect()
+		assertThat(httpGET(port, "/c/x"), startsWith("HTTP/1.1 302"));
+		assertThat(httpGET(port, "/c/x/"), endsWith("hello1"));
+		assertThat(httpGET(port, "/c/resources"), startsWith("HTTP/1.1 302"));
+		assertThat(httpGET(port, "/c/resources/"), endsWith("hello1"));
+
+		getWelcomeFileMappingCustomizer().removedService(mappingRef, wfmModel);
+		assertThat(httpGET(port, "/c/x"), startsWith("HTTP/1.1 302"));
+		assertThat(httpGET(port, "/c/x/"), startsWith("HTTP/1.1 403"));
+		assertThat(httpGET(port, "/c/resources"), startsWith("HTTP/1.1 302"));
+		assertThat(httpGET(port, "/c/resources/"), startsWith("HTTP/1.1 403"));
+
+		DefaultWelcomeFileMapping mapping2 = new DefaultWelcomeFileMapping();
+		mapping2.setWelcomeFiles(new String[] { "file.txt" });
+		mapping2.setRedirect(true);
+		ServiceReference<WelcomeFileMapping> mapping2Ref = mockReference(sample1, WelcomeFileMapping.class,
+				props, () -> mapping2);
+		WelcomeFileModel wfmModel2 = getWelcomeFileMappingCustomizer().addingService(mapping2Ref);
+		// this is redirect NOT affected by DefaultWelcomeFileMapping.setRedirect()
+		assertThat(httpGET(port, "/c/x"), startsWith("HTTP/1.1 302"));
+		String response = httpGET(port, "/c/x/");
+		assertThat(response, startsWith("HTTP/1.1 302"));
+		extractHeaders(response).get("Location").endsWith("/c/x/file.txt");
+		assertThat(httpGET(port, "/c/resources"), startsWith("HTTP/1.1 302"));
+		assertThat(httpGET(port, "/c/resources/"), startsWith("HTTP/1.1 302"));
+
+		getWelcomeFileMappingCustomizer().removedService(mapping2Ref, wfmModel2);
+		assertThat(httpGET(port, "/c/x"), startsWith("HTTP/1.1 302"));
+		assertThat(httpGET(port, "/c/x/"), startsWith("HTTP/1.1 403"));
+		assertThat(httpGET(port, "/c/resources"), startsWith("HTTP/1.1 302"));
+		assertThat(httpGET(port, "/c/resources/"), startsWith("HTTP/1.1 403"));
+
+		getResourceMappingCustomizer().removedService(resourceMappingRef, rmModel);
+		assertThat(httpGET(port, "/c/resources/file.txt"), startsWith("HTTP/1.1 404"));
+		assertThat(httpGET(port, "/c/x/file.txt"), startsWith("HTTP/1.1 404"));
+		assertThat(httpGET(port, "/c/x"), startsWith("HTTP/1.1 404"));
+		assertThat(httpGET(port, "/c/x/"), startsWith("HTTP/1.1 404"));
+		assertThat(httpGET(port, "/c/resources"), startsWith("HTTP/1.1 404"));
+		assertThat(httpGET(port, "/c/resources/"), startsWith("HTTP/1.1 404"));
+
+		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);
+		ServiceModelInternals serviceModelInternals = serviceModelInternals(sample1);
+
+		assertTrue(serverModelInternals.isClean(whiteboardBundle));
+		assertTrue(serverModelInternals.isClean(sample1));
+		assertTrue(serviceModelInternals.isEmpty());
+	}
+
+	@Test
+	public void onlyOneWayToRegisterWelcomeFilesInCustomContextAndDefaultWelcomeFiles() throws Exception {
+		File base = new File("target/www");
+		FileUtils.deleteDirectory(base);
+		base.mkdirs();
+		try (FileWriter fw = new FileWriter(new File(base, "file.txt"))) {
+			IOUtils.write("hello1", fw);
+		}
+
+		Bundle sample1 = mockBundle("sample1");
+		when(sample1.getEntry("resources")).thenReturn(base.toURI().toURL());
+		when(sample1.getEntry("resources/")).thenReturn(base.toURI().toURL());
+		when(sample1.getEntry("resources/file.txt")).thenReturn(new File(base, "file.txt").toURI().toURL());
+
+		ServletContextHelper helper = new ServletContextHelper(sample1) {
+		};
+		getServletContextHelperCustomizer().addingService(mockServletContextHelperReference(sample1, "c1",
+				() -> helper, 0L, 0, "/c"));
+
+		// 1. Whiteboard registration as Pax Web specific org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping
+		//    OSGi service
+
+		DefaultResourceMapping rm = new DefaultResourceMapping();
+		rm.setUrlPatterns(new String[] { "/" });
+		rm.setPath("/resources");
+		Hashtable<String, Object> props = new Hashtable<>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, String.format("(%s=c1)",
+				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
+		ServiceReference<ResourceMapping> resourceMappingRef = mockReference(sample1, ResourceMapping.class,
+				props, () -> rm);
+		ServletModel rmModel = getResourceMappingCustomizer().addingService(resourceMappingRef);
+		assertThat(httpGET(port, "/c/file.txt"), endsWith("hello1"));
+		assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
+		assertThat(httpGET(port, "/c/"), startsWith("HTTP/1.1 403"));
+
+		DefaultWelcomeFileMapping mapping = new DefaultWelcomeFileMapping();
+		mapping.setWelcomeFiles(new String[] { "file.txt" });
+		mapping.setRedirect(false);
+		ServiceReference<WelcomeFileMapping> mappingRef = mockReference(sample1, WelcomeFileMapping.class,
+				props, () -> mapping);
+		WelcomeFileModel wfmModel = getWelcomeFileMappingCustomizer().addingService(mappingRef);
+		// this is redirect NOT affected by DefaultWelcomeFileMapping.setRedirect()
+		assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
+		assertThat(httpGET(port, "/c/"), endsWith("hello1"));
+
+		getWelcomeFileMappingCustomizer().removedService(mappingRef, wfmModel);
+		assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
+		assertThat(httpGET(port, "/c/"), startsWith("HTTP/1.1 403"));
+
+		DefaultWelcomeFileMapping mapping2 = new DefaultWelcomeFileMapping();
+		mapping2.setWelcomeFiles(new String[] { "file.txt" });
+		mapping2.setRedirect(true);
+		ServiceReference<WelcomeFileMapping> mapping2Ref = mockReference(sample1, WelcomeFileMapping.class,
+				props, () -> mapping2);
+		WelcomeFileModel wfmModel2 = getWelcomeFileMappingCustomizer().addingService(mapping2Ref);
+		// this is redirect NOT affected by DefaultWelcomeFileMapping.setRedirect()
+		assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
+		String response = httpGET(port, "/c/");
+		assertThat(response, startsWith("HTTP/1.1 302"));
+		extractHeaders(response).get("Location").endsWith("/c/file.txt");
+
+		getWelcomeFileMappingCustomizer().removedService(mapping2Ref, wfmModel2);
+		assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
+		assertThat(httpGET(port, "/c/"), startsWith("HTTP/1.1 403"));
+
+		getResourceMappingCustomizer().removedService(resourceMappingRef, rmModel);
+		assertThat(httpGET(port, "/c/file.txt"), startsWith("HTTP/1.1 404"));
+		assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
+		assertThat(httpGET(port, "/c/"), startsWith("HTTP/1.1 404"));
 
 		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);
 		ServiceModelInternals serviceModelInternals = serviceModelInternals(sample1);

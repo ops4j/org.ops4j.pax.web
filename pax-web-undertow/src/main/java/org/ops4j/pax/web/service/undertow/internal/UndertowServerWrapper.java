@@ -277,7 +277,7 @@ class UndertowServerWrapper implements BatchVisitor {
 	private JAXBContext jaxb = null;
 
 	/** Servlet to use when no servlet is mapped - to ensure that preprocessors and filters are run correctly. */
-	private final Default404Servlet default404Servlet = new Default404Servlet();
+	private final Default404Servlet default404Servlet = new Default404Servlet(true);
 
 	private SessionCookieConfig defaultSessionCookieConfig;
 	private SessionPersistenceManager globalSessionPersistenceManager;

@@ -201,8 +201,11 @@ public class DefaultServlet extends HttpServlet {
                 resp.getWriter().write(output.toString());
             } else {
                 // Pax Web 8: directories without slash are redirected to make behavior consistent with
-                // Jetty and Tomcat
-                if (!path.endsWith("/")) {
+                // Jetty and Tomcat, as Undertow doesn't have similar:
+                //  - org.eclipse.jetty.server.handler.ContextHandler.setAllowNullPathInfo()
+                //  - org.apache.catalina.core.StandardContext.setMapperContextRootRedirectEnabled()
+                boolean isContextRoot = "/".equals(path) && req.getRequestURI().equals(req.getContextPath());
+                if (isContextRoot || !path.endsWith("/")) {
                     if (req.getDispatcherType() == DispatcherType.INCLUDE) {
                         LOG.warn("Can't redirect to welcome page for INCLUDE dispatch");
                         return;

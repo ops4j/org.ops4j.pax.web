@@ -16,15 +16,60 @@
 package org.ops4j.pax.web.service.spi.servlet;
 
 import java.io.IOException;
+import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Default404Servlet extends HttpServlet {
+
+	public static final Logger LOG = LoggerFactory.getLogger(Default404Servlet.class);
+
+	/**
+	 * This flag implements something that's handled in:<ul>
+	 *     <li>Jetty: {@code org.eclipse.jetty.server.handler.ContextHandler#setAllowNullPathInfo(boolean)}</li>
+	 *     <li>Tomcat: {@code org.apache.catalina.core.StandardContext#setMapperContextRootRedirectEnabled(boolean)}</li>
+	 * </ul>
+	 */
+	final boolean undertowRedirectContextRoot;
+
+	public Default404Servlet() {
+		this(false);
+	}
+
+	public Default404Servlet(boolean undertowRedirectContextRoot) {
+		this.undertowRedirectContextRoot = undertowRedirectContextRoot;
+	}
 
 	@Override
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		if (undertowRedirectContextRoot) {
+			if (req.getRequestURI().equals(req.getContextPath())) {
+				if (!resp.isCommitted()) {
+					if (req.getDispatcherType() == DispatcherType.INCLUDE) {
+						LOG.warn("Can't redirect to welcome page for INCLUDE dispatch");
+						return;
+					}
+
+					StringBuilder location = new StringBuilder(req.getRequestURI());
+					location.append('/');
+					if (req.getQueryString() != null) {
+						location.append('?');
+						location.append(req.getQueryString());
+					}
+					// Avoid protocol relative redirects
+					while (location.length() > 1 && location.charAt(1) == '/') {
+						location.deleteCharAt(0);
+					}
+					resp.sendRedirect(resp.encodeRedirectURL(location.toString()));
+					return;
+				}
+			}
+		}
 		if (!resp.isCommitted()) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
 		}
