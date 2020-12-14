@@ -113,7 +113,7 @@
 		<dependency.httpclient.version>4.5.6</dependency.httpclient.version>
 		<dependency.httpcore.version>4.4.10</dependency.httpcore.version>
 		<dependency.felix.framework.version>5.6.12</dependency.felix.framework.version>
-		<dependency.configadmin.version>1.9.16</dependency.configadmin.version>
+		<dependency.configadmin.version>1.9.18</dependency.configadmin.version>
 		<dependency.fileinstall.version>3.6.4</dependency.fileinstall.version>
 		<dependency.gatling.version>2.0.1</dependency.gatling.version>
 		<dependency.logback.version>1.0.6</dependency.logback.version>
