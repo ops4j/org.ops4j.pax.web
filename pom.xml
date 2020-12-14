@@ -129,7 +129,7 @@
 		<dependency.paxurl.version>2.6.3</dependency.paxurl.version>
 		<dependency.pax-logging.version>1.11.6</dependency.pax-logging.version>
 		<dependency.slf4j>1.7.12</dependency.slf4j>
-		<dependency.scr.version>2.1.20</dependency.scr.version>
+		<dependency.scr.version>2.1.24</dependency.scr.version>
 		<dependency.swissbox.version>1.8.3</dependency.swissbox.version>
 		<dependency.tomcat.version>8.5.57</dependency.tomcat.version>
 		<dependency.xbean.version>4.18</dependency.xbean.version>
