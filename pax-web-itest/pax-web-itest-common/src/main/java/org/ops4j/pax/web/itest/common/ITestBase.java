@@ -50,6 +50,8 @@ public abstract class ITestBase extends AbstractControlledTestBase {
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-util").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-util-ajax").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-io").version(asInProject()),
 
 				mavenBundle().groupId("org.ops4j.pax.web")

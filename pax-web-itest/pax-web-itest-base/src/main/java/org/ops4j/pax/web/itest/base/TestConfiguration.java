@@ -139,6 +139,8 @@ public class TestConfiguration {
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-util").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-util-ajax").version(asInProject()),
+				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-io").version(asInProject()),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-http").version(asInProject()),
