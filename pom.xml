@@ -104,7 +104,7 @@
 		<dependency.base.version>1.5.1</dependency.base.version>
 		<dependency.bndlib.version>2.4.0</dependency.bndlib.version>
 		<dependency.commons-beanutils.version>1.9.4</dependency.commons-beanutils.version>
-		<dependency.commons-codec.version>1.14</dependency.commons-codec.version>
+		<dependency.commons-codec.version>1.15</dependency.commons-codec.version>
 		<dependency.commons-collection3.version>3.2.2</dependency.commons-collection3.version>
 		<dependency.commons-collection.version>4.4</dependency.commons-collection.version>
 		<dependency.commons-lang.version>3.10</dependency.commons-lang.version>
