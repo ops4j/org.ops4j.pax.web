@@ -41,7 +41,7 @@ import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.events.ServerListener;
-import org.ops4j.pax.web.service.spi.model.events.WebElementListener;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEventListener;
 import org.ops4j.pax.web.service.spi.util.NamedThreadFactory;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.util.property.DictionaryPropertyResolver;
@@ -68,8 +68,8 @@ import static org.ops4j.pax.web.service.PaxWebConstants.HTTPSERVICE_REGISTRATION
  * <p>Main entry point to Pax-Web.</p>
  * <p>This activator performs these actions:<ul>
  *     <li>servlet event dispatcher</li>
- *     <li>registration of {@link WebElementListener}-{@link EventAdmin} bridge</li>
- *     <li>registration of {@link WebElementListener}-{@link LogService} bridge</li>
+ *     <li>registration of {@link WebElementEventListener}-{@link EventAdmin} bridge</li>
+ *     <li>registration of {@link WebElementEventListener}-{@link LogService} bridge</li>
  *     <li>registration of {@link org.osgi.service.cm.ManagedService} to monitor
  *     {@code org.ops4j.pax.web} PID changes</li>
  * </ul></p>
@@ -95,10 +95,10 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	private ServerController serverController;
 
 	/**
-	 * {@link WebEventDispatcher} bound to lifecycle of this pax-web-runtime bundle, not to configuration
+	 * {@link WebElementEventDispatcher} bound to lifecycle of this pax-web-runtime bundle, not to configuration
 	 * or {@link ServerControllerFactory}.
 	 */
-	private WebEventDispatcher servletEventDispatcher;
+	private WebElementEventDispatcher webElementEventDispatcher;
 
 //	/** Processor for instructions in {@code org.ops4j.pax.web.context} factory PID */
 //	private HttpContextProcessing httpContextProcessing;
@@ -144,7 +144,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 
 	@Override
 	public void start(final BundleContext context) throws Exception {
-		LOG.debug("Starting Pax Web");
+		LOG.debug("Starting Pax Web Runtime");
 
 		runtimeExecutor = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("paxweb-config"));
 		registrationThreadId = ServerModel.getThreadIdFromSingleThreadPool(runtimeExecutor);
@@ -195,18 +195,17 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			updateConfiguration(null);
 		}
 
-		LOG.info("Pax Web started");
+		LOG.info("Pax Web Runtime started");
 	}
 
 	@Override
 	public void stop(final BundleContext context) {
-		LOG.debug("Stopping Pax Web...");
+		LOG.debug("Stopping Pax Web Runtime");
 
 		if (serverListenerTracker != null) {
 			serverListenerTracker.close();
 			serverListenerTracker = null;
 		}
-
 		if (serverControllerFactoryTracker != null) {
 			serverControllerFactoryTracker.close();
 			serverControllerFactoryTracker = null;
@@ -225,9 +224,9 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 //		if (eventServiceTracker != null) {
 //			eventServiceTracker.close();
 //		}
-		if (servletEventDispatcher != null) {
-			servletEventDispatcher.destroy();
-			servletEventDispatcher = null;
+		if (webElementEventDispatcher != null) {
+			webElementEventDispatcher.destroy();
+			webElementEventDispatcher = null;
 		}
 //		if (httpContextProcessing != null) {
 //			httpContextProcessing.destroy();
@@ -243,7 +242,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			// Ignore, we are done anyways...
 		}
 
-		LOG.info("Pax Web stopped");
+		LOG.info("Pax Web Runtime stopped");
 	}
 
 	/**
@@ -429,7 +428,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			// full configuration with all required properties. That's all that is needed down the stream
 			final Configuration configuration = ConfigurationBuilder.getConfiguration(resolver, allProperties);
 
-			servletEventDispatcher = new WebEventDispatcher(bundleContext, configuration);
+			webElementEventDispatcher = new WebElementEventDispatcher(bundleContext, configuration);
 
 			// global, single representation of web server state. It's used
 			//  - in all bundle-scoped instances of HttpServiceEnabled
@@ -455,7 +454,8 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 				@Override
 				StoppableHttpService createService(Bundle bundle) {
 					HttpServiceEnabled enabledService =
-							new HttpServiceEnabled(bundle, serverController, serverModel, servletEventDispatcher, configuration);
+							new HttpServiceEnabled(bundle, serverController, serverModel,
+									webElementEventDispatcher, configuration);
 
 					return new HttpServiceProxy(bundle, enabledService);
 				}
@@ -501,7 +501,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			}
 		}
 
-		// then add/replace configuration properties
+		// TODO: then add/replace configuration properties
 //		setProperty(toPropagate, PROPERTY_HTTP_ENABLED, configuration.isHttpEnabled());
 //		setProperty(toPropagate, PROPERTY_HTTP_PORT, configuration.getHttpPort());
 //		setProperty(toPropagate, PROPERTY_HTTP_CONNECTOR_NAME,

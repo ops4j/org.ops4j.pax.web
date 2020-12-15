@@ -17,7 +17,7 @@ package org.ops4j.pax.web.service.spi.model.events;
 
 import javax.servlet.ServletContainerInitializer;
 
-public class ContainerInitializerEventData extends ElementEventData {
+public class ContainerInitializerEventData extends WebElementEventData {
 
 	private final ServletContainerInitializer initializer;
 

@@ -17,6 +17,30 @@
  */
 package org.ops4j.pax.web.extender.war.internal.parser;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import javax.servlet.DispatcherType;
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.ServletContainerInitializer;
+import javax.servlet.annotation.HandlesTypes;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.annotation.WebListener;
+import javax.servlet.annotation.WebServlet;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.sax.SAXSource;
+
 import org.apache.xbean.finder.BundleAnnotationFinder;
 import org.ops4j.pax.web.descriptor.gen.AuthConstraintType;
 import org.ops4j.pax.web.descriptor.gen.CookieConfigType;
@@ -74,6 +98,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.ops4j.spi.SafeServiceLoader;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
@@ -85,52 +110,32 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.MultipartConfigElement;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.annotation.HandlesTypes;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.annotation.WebListener;
-import javax.servlet.annotation.WebServlet;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.sax.SAXSource;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
 import static java.lang.Boolean.TRUE;
 import static org.ops4j.util.xml.ElementHelper.getChild;
 import static org.ops4j.util.xml.ElementHelper.getChildren;
 
 /**
- * Web xml parser implementation TODO parse and use session-config
+ * <p>{@code web.xml} parser implementation. Everything that's needed to change {@code web.xml} or web fragments
+ * (including annotation configuration) into full object model of single web application (single, distinguished, unique
+ * {@link javax.servlet.ServletContext}.</p>
+ *
+ * <p>In Jetty, the parser is implemented in {@code org.eclipse.jetty.webapp.StandardDescriptorProcessor} and
+ * {@code org.eclipse.jetty.plus.webapp.PlusDescriptorProcessor}.</p>
+ * <p>In Tomcat, the parser is implemented in {@code org.apache.catalina.startup.ContextConfig#webConfig()}.</p>
+ * <p>Undertow doesn't have dedicated {@code web.xml} parser - it's done by Wildfly/EAP.</p>
  *
  * @author Alin Dreghiciu
  * @author Guillaume Nodet
+ * @author Grzegorz Grzybek
  * @since 0.3.0, December 27, 2007
  */
-@SuppressWarnings("deprecation")
 public class WebAppParser {
 
-	/**
-	 * Logger.
-	 */
 	private static final Logger LOG = LoggerFactory.getLogger(WebAppParser.class);
 
 	private ServiceTracker<PackageAdmin, PackageAdmin> packageAdmin;
 
-	public WebAppParser(ServiceTracker<PackageAdmin, PackageAdmin> packageAdmin) {
+	public WebAppParser(BundleContext context) {
 		this.packageAdmin = packageAdmin;
 	}
 
@@ -252,9 +257,9 @@ public class WebAppParser {
 			} else if (value instanceof SecurityRoleType) {
 				SecurityRoleType securityRole = (SecurityRoleType) value;
 				parseSecurityRole(securityRole, webApp);
-			} else if (value instanceof DescriptionType || value instanceof DisplayNameType || value instanceof EmptyType ) {
-                //Descripton Type  or Display Name Type contains no valueable information for pax web, so just ignore it
-                //and make sure there is no warning about it
+			} else if (value instanceof DescriptionType || value instanceof DisplayNameType || value instanceof EmptyType) {
+				//Descripton Type  or Display Name Type contains no valueable information for pax web, so just ignore it
+				//and make sure there is no warning about it
 			} else {
 				LOG.debug("unhandled element [{}] of type [{}]", jaxbElement.getName(), value.getClass().getSimpleName());
 			}
@@ -407,16 +412,16 @@ public class WebAppParser {
 			webAppServletContainerInitializer.setServletContainerInitializer(servletContainerInitializer);
 
 			if (!webApp.getMetaDataComplete() && majorVersion != null && majorVersion >= 3) {
-				 Class<?>[] classes = getHandledTypes(servletContainerInitializer, bundle);
-				 if (classes != null) {
-  					 // add annotated classes to service
-					 webAppServletContainerInitializer.setClasses(classes);
-				 }
+				Class<?>[] classes = getHandledTypes(servletContainerInitializer, bundle);
+				if (classes != null) {
+					// add annotated classes to service
+					webAppServletContainerInitializer.setClasses(classes);
+				}
 			}
 			webApp.addServletContainerInitializer(webAppServletContainerInitializer);
 		}
 	}
-	
+
 	private Class<?>[] getHandledTypes(ServletContainerInitializer servletContainerInitializer, Bundle bundle) {
 		try {
 			@SuppressWarnings("unchecked")
@@ -739,7 +744,7 @@ public class WebAppParser {
 	 * @param webApp      web app for web.xml
 	 */
 	private static void parseListeners(final Element rootElement,
-									   final WebApp webApp) {
+			final WebApp webApp) {
 		final Element[] elements = getChildren(rootElement, "listener");
 		Arrays.stream(elements).forEach(element ->
 				addWebListener(webApp, getTextContent(getChild(element, "listener-class"))));
@@ -772,7 +777,7 @@ public class WebAppParser {
 	 * Parses welcome files out of web.xml.
 	 *
 	 * @param welcomeFileList welcomeFileList element from web.xml
-	 * @param webApp     	  model for web.xml
+	 * @param webApp          model for web.xml
 	 */
 	private static void parseWelcomeFiles(final WelcomeFileListType welcomeFileList, final WebApp webApp) {
 		if (welcomeFileList != null && welcomeFileList.getWelcomeFile() != null
@@ -785,7 +790,7 @@ public class WebAppParser {
 	 * Parses mime mappings out of web.xml.
 	 *
 	 * @param mimeMappingType mimeMappingType element from web.xml
-	 * @param webApp     	  model for web.xml
+	 * @param webApp          model for web.xml
 	 */
 	private static void parseMimeMappings(final MimeMappingType mimeMappingType, final WebApp webApp) {
 		final WebAppMimeMapping mimeMapping = new WebAppMimeMapping();
@@ -961,4 +966,5 @@ public class WebAppParser {
 		}
 		return null;
 	}
+
 }

@@ -58,14 +58,14 @@ class WebAppPublisher {
 	 */
 	private final Map<WebApp, ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder>> webApps;
 
-	private final WebEventDispatcher eventDispatcher;
+	private final WebApplicationEventDispatcher eventDispatcher;
 
 	private final BundleContext bundleContext;
 
 	/**
 	 * Creates a new web app publisher.
 	 */
-	WebAppPublisher(WebEventDispatcher eventDispatcher,
+	WebAppPublisher(WebApplicationEventDispatcher eventDispatcher,
 					BundleContext bundleContext) {
 		webApps = Collections
 				.synchronizedMap(new HashMap<WebApp, ServiceTracker<WebAppDependencyHolder, WebAppDependencyHolder>>());
@@ -135,7 +135,7 @@ class WebAppPublisher {
 		 */
 		private final WebApp webApp;
 
-		private final WebEventDispatcher eventDispatcher;
+		private final WebApplicationEventDispatcher eventDispatcher;
 
 		private BundleContext bundleContext;
 
@@ -153,7 +153,7 @@ class WebAppPublisher {
 		 * @throws NullArgumentException if web app is null
 		 */
 		WebAppDependencyListener(final WebApp webApp,
-								 WebEventDispatcher eventDispatcher, BundleContext bundleContext) {
+								 WebApplicationEventDispatcher eventDispatcher, BundleContext bundleContext) {
 			NullArgumentException.validateNotNull(webApp, "Web app");
 			this.webApp = webApp;
 			this.eventDispatcher = eventDispatcher;

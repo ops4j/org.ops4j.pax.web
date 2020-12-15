@@ -17,7 +17,7 @@ package org.ops4j.pax.web.service.spi.model.events;
 
 import java.util.EventListener;
 
-public class EventListenerEventData extends ElementEventData {
+public class EventListenerEventData extends WebElementEventData {
 
 	private final EventListener listener;
 

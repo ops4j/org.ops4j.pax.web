@@ -183,7 +183,7 @@
 		<dependency.easymock.version>2.3</dependency.easymock.version>
 
 		<dependency.eclipse.jdt.version>3.23.0</dependency.eclipse.jdt.version>
-		<dependency.eclipse.jetty.version>9.4.34.v20201102</dependency.eclipse.jetty.version>
+		<dependency.eclipse.jetty.version>9.4.35.v20201120</dependency.eclipse.jetty.version>
 		<dependency.eclipse.platform.version>3.12.100</dependency.eclipse.platform.version>
 
 		<dependency.felix.configadmin.version>1.9.18</dependency.felix.configadmin.version>
@@ -192,7 +192,7 @@
 		<dependency.felix.framework.version>5.6.12</dependency.felix.framework.version>
 		<dependency.felix.metatype.version>1.2.2</dependency.felix.metatype.version>
 		<dependency.felix.scr.version>2.1.24</dependency.felix.scr.version>
-		<dependency.felix.utils.version>1.11.4</dependency.felix.utils.version>
+		<dependency.felix.utils.version>1.11.6</dependency.felix.utils.version>
 <!--		<dependency.felix.webconsole.version>3.1.8</dependency.felix.webconsole.version>-->
 
 <!--		<dependency.gatling.version>2.0.1</dependency.gatling.version>-->
@@ -1678,6 +1678,12 @@
 				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
+				<!-- required dependency of jetty-servlet since https://github.com/eclipse/jetty.project/issues/5539 -->
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-util-ajax</artifactId>
+				<version>${dependency.eclipse.jetty.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-io</artifactId>
 				<version>${dependency.eclipse.jetty.version}</version>
@@ -1711,6 +1717,11 @@
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-xml</artifactId>
+				<version>${dependency.eclipse.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-plus</artifactId>
 				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
 			<dependency>
@@ -2392,32 +2403,46 @@
 	</pluginRepositories>
 
 	<modules>
+		<!-- API and SPI - the only bundles needed when integrating with Pax Web -->
 		<module>pax-web-api</module>
 		<module>pax-web-spi</module>
 
+		<!-- JSP support -->
 		<module>pax-web-tomcat-common</module>
 		<module>pax-web-jsp</module>
 
+		<!-- 102 CMPN Http Service Specification -->
 		<module>pax-web-runtime</module>
+		<!-- 140 CMPN Whiteboard Service Specification -->
+		<module>pax-web-extender-whiteboard</module>
+		<!-- 128 CMPN Web Applications Specification -->
+<!--		<module>pax-web-extender-war</module>-->
 
 <!--		<module>pax-web-descriptor</module>-->
-<!--		<module>pax-web-extender-war</module>-->
-		<module>pax-web-extender-whiteboard</module>
 <!-- 		<module>pax-web-resources</module> -->
 <!--		<module>pax-web-deployer</module>-->
+
+		<!-- Jetty 9 support -->
 		<module>pax-web-jetty</module>
 		<module>pax-web-jetty-servlet-compatibility</module>
 <!-- 		<module>pax-web-jetty-bundle</module> -->
+
+		<!-- Tomcat 9 support -->
 		<module>pax-web-tomcat</module>
 <!--		<module>pax-web-tomcat-bundle</module>-->
+
+		<!-- Undertow 2 support -->
 		<module>pax-web-undertow</module>
+
 <!--		<module>pax-web-features</module>-->
 <!--		<module>pax-web-archetypes</module>-->
 <!-- 		<module>pax-web-manual</module> -->
 <!--		<module>pax-web-jaas</module>-->
 
+		<!-- All the samples (Http Service, Whiteboard, JSP, WebSockets, WAR) -->
 		<module>samples</module>
 
+		<!-- All the integration tests (OSGi, non-OSGi, Karaf) -->
 		<module>pax-web-itest</module>
 	</modules>
 

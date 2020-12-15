@@ -18,7 +18,7 @@ package org.ops4j.pax.web.service.spi.model.events;
 import java.util.Arrays;
 import javax.servlet.Filter;
 
-public class FilterEventData extends ElementEventData {
+public class FilterEventData extends WebElementEventData {
 
 	private final String filterName;
 	private String[] urlPatterns;

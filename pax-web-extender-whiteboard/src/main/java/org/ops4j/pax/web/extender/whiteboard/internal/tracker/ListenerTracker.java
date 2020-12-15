@@ -32,7 +32,7 @@ import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionIdListener;
 import javax.servlet.http.HttpSessionListener;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.events.EventListenerEventData;
 import org.osgi.framework.BundleContext;
@@ -65,11 +65,11 @@ public class ListenerTracker extends AbstractElementTracker<EventListener, Event
 			WriteListener.class
 	};
 
-	private ListenerTracker(final WhiteboardContext whiteboardContext, final BundleContext bundleContext) {
-		super(whiteboardContext, bundleContext);
+	private ListenerTracker(final WhiteboardExtenderContext whiteboardExtenderContext, final BundleContext bundleContext) {
+		super(whiteboardExtenderContext, bundleContext);
 	}
 
-	public static ServiceTracker<EventListener, EventListenerModel> createTracker(final WhiteboardContext whiteboardContext,
+	public static ServiceTracker<EventListener, EventListenerModel> createTracker(final WhiteboardExtenderContext whiteboardExtenderContext,
 			final BundleContext bundleContext) {
 
 		StringBuilder classes = new StringBuilder();
@@ -77,7 +77,7 @@ public class ListenerTracker extends AbstractElementTracker<EventListener, Event
 			classes.append("(objectClass=").append(c.getName()).append(")");
 		}
 		String filter = String.format("(&(|%s)(%s=*))", classes.toString(), HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER);
-		return new ListenerTracker(whiteboardContext, bundleContext).create(filter);
+		return new ListenerTracker(whiteboardExtenderContext, bundleContext).create(filter);
 	}
 
 	@Override

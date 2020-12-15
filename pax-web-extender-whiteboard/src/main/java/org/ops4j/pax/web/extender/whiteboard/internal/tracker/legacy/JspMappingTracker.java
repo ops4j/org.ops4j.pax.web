@@ -17,7 +17,7 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.service.spi.model.elements.JspModel;
 import org.ops4j.pax.web.service.spi.model.events.JspEventData;
 import org.ops4j.pax.web.service.whiteboard.JspMapping;
@@ -33,13 +33,13 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class JspMappingTracker extends AbstractMappingTracker<JspMapping, JspMapping, JspEventData, JspModel> {
 
-	protected JspMappingTracker(WhiteboardContext whiteboardContext, BundleContext bundleContext) {
-		super(whiteboardContext, bundleContext);
+	protected JspMappingTracker(WhiteboardExtenderContext whiteboardExtenderContext, BundleContext bundleContext) {
+		super(whiteboardExtenderContext, bundleContext);
 	}
 
-	public static ServiceTracker<JspMapping, JspModel> createTracker(final WhiteboardContext whiteboardContext,
+	public static ServiceTracker<JspMapping, JspModel> createTracker(final WhiteboardExtenderContext whiteboardExtenderContext,
 			final BundleContext bundleContext) {
-		return new JspMappingTracker(whiteboardContext, bundleContext).create(JspMapping.class);
+		return new JspMappingTracker(whiteboardExtenderContext, bundleContext).create(JspMapping.class);
 	}
 
 	@Override

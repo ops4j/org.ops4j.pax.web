@@ -17,7 +17,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import javax.servlet.Servlet;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
 import org.ops4j.pax.web.service.spi.util.Utils;
@@ -36,13 +36,13 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class ResourceTracker extends AbstractElementTracker<Object, Servlet, ServletEventData, ServletModel> {
 
-	private ResourceTracker(final WhiteboardContext whiteboardContext, final BundleContext bundleContext) {
-		super(whiteboardContext, bundleContext);
+	private ResourceTracker(final WhiteboardExtenderContext whiteboardExtenderContext, final BundleContext bundleContext) {
+		super(whiteboardExtenderContext, bundleContext);
 	}
 
-	public static ServiceTracker<Object, ServletModel> createTracker(final WhiteboardContext whiteboardContext,
+	public static ServiceTracker<Object, ServletModel> createTracker(final WhiteboardExtenderContext whiteboardExtenderContext,
 			final BundleContext bundleContext) {
-		return new ResourceTracker(whiteboardContext, bundleContext)
+		return new ResourceTracker(whiteboardExtenderContext, bundleContext)
 				.create(String.format("(%s=*)", HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN));
 	}
 

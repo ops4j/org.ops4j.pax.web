@@ -22,16 +22,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
-import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
-import org.ops4j.pax.web.service.spi.util.Utils;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEventData;
+import org.ops4j.pax.web.service.spi.util.WebContainerListener;
+import org.ops4j.pax.web.service.spi.util.WebContainerManager;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -68,9 +67,9 @@ import org.slf4j.LoggerFactory;
  * @author Grzegorz Grzybek (since Pax Web 8)
  * @since 0.4.0, April 01, 2008
  */
-public class WhiteboardContext {
+public class WhiteboardExtenderContext implements WebContainerListener {
 
-	private static final Logger LOG = LoggerFactory.getLogger(WhiteboardContext.class);
+	private static final Logger LOG = LoggerFactory.getLogger(WhiteboardExtenderContext.class);
 
 	private final BundleContext bundleContext;
 
@@ -112,30 +111,17 @@ public class WhiteboardContext {
 	 */
 	private final List<OsgiContextModel> osgiContextsList = new ArrayList<>();
 
-	/**
-	 * <p>pax-web-extender-whiteboard operates on target {@link WebContainer} and special
-	 * {@link org.ops4j.pax.web.service.views.PaxWebContainerView} it provides for Whiteboard purposes.</p>
-	 *
-	 * <p>{@link WebContainer} is (at least by Pax Web) registered as {@link org.osgi.framework.ServiceFactory}, so
-	 * actual service should be obtained using a bundle associated with actual Whiteboard service, but we need
-	 * single registration of {@link OsgiContextModel} through a {@link WebContainer} instance obtained using
-	 * a {@link BundleContext} of pax-web-extender-whiteboard bundle itself - to register
-	 * {@link OsgiContextModel#DEFAULT_CONTEXT_MODEL}.</p>
-	 */
-	private volatile WhiteboardWebContainerView whiteboardContainer;
-
-	/** Guard to check if we're operating on correct service for the {@link WebContainer} */
-	private AtomicLong webContainerServiceId = new AtomicLong(-1L);
-
-	/**
-	 * Current {@link ServiceReference} to compare with other references being added/removed.
-	 */
-	private AtomicReference<ServiceReference<WebContainer>> webContainerServiceRef = new AtomicReference<>();
+	/** This is were the lifecycle of {@link WebContainer} is managed. */
+	private final WebContainerManager webContainerManager;
 
 	/** Implementation of {@link org.osgi.service.http.runtime.HttpServiceRuntime} from Whiteboard Service spec. */
 	private final ExtendedHttpServiceRuntime httpServiceRuntime;
 
-	public WhiteboardContext(ExtendedHttpServiceRuntime httpServiceRuntime, BundleContext bundleContext) {
+	public WhiteboardExtenderContext(ExtendedHttpServiceRuntime httpServiceRuntime, BundleContext bundleContext) {
+		this(httpServiceRuntime, bundleContext, false);
+	}
+
+	public WhiteboardExtenderContext(ExtendedHttpServiceRuntime httpServiceRuntime, BundleContext bundleContext, boolean synchronous) {
 		this.httpServiceRuntime = httpServiceRuntime;
 		this.bundleContext = bundleContext;
 
@@ -143,6 +129,55 @@ public class WhiteboardContext {
 		OsgiContextModel model = OsgiContextModel.DEFAULT_CONTEXT_MODEL;
 		osgiContexts.computeIfAbsent(model.getName(), n -> new TreeSet<>()).add(model);
 		osgiContextsList.add(model);
+
+		webContainerManager = synchronous ? new WebContainerManager(bundleContext, this)
+				: new WebContainerManager(bundleContext, this, "HttpService->Whiteboard");
+		webContainerManager.initialize();
+	}
+
+	/**
+	 * For non-OSGi test purposes
+	 * @return
+	 */
+	public WebContainerManager getWebContainerManager() {
+		return webContainerManager;
+	}
+
+	@Override
+	public void webContainerChanged(ServiceReference<WebContainer> oldReference, ServiceReference<WebContainer> newReference) {
+		if (oldReference != null) {
+			webContainerRemoved(oldReference);
+		}
+		if (newReference != null) {
+			webContainerAdded(newReference);
+		}
+	}
+
+	/**
+	 * Method called from some {@link BundleListener} to clean up the cache of bundle-related Whiteboard services
+	 * @param bundle
+	 */
+	@Override
+	public void bundleStopped(Bundle bundle) {
+		LOG.debug("Clearing Whiteboard cache for {}", bundle);
+
+		lock.lock();
+		BundleWhiteboardApplication application;
+		try {
+			application = bundleApplications.remove(bundle);
+		} finally {
+			lock.unlock();
+		}
+		if (application != null) {
+			application.cleanup();
+		}
+	}
+
+	/**
+	 * Cleans up everything related to pax-web-extender-whiteboard
+	 */
+	public void shutdown() {
+		webContainerManager.shutdown();
 	}
 
 	public ExtendedHttpServiceRuntime getHttpServiceRuntime() {
@@ -235,99 +270,29 @@ public class WhiteboardContext {
 		}
 	}
 
-	/**
-	 * Method called from some {@link BundleListener} to clean up the cache of bundle-related Whiteboard services
-	 * @param bundle
-	 */
-	public void bundleStopped(Bundle bundle) {
-		LOG.debug("Clearing Whiteboard cache for {}", bundle);
-
-		lock.lock();
-		BundleWhiteboardApplication application;
-		try {
-			application = bundleApplications.remove(bundle);
-		} finally {
-			lock.unlock();
-		}
-		if (application != null) {
-			application.cleanup();
-		}
-	}
-
 	// --- Handling registration/unregistration of target WebContainer, where we want to register Whiteboard services
 
 	public void webContainerAdded(ServiceReference<WebContainer> ref) {
-		long serviceId = Utils.getServiceId(ref);
-
-		ServiceReference<WebContainer> currentRef = webContainerServiceRef.get();
-		long currentId = webContainerServiceId.get();
-		if (currentId != -1) {
-			LOG.warn("New WebContainer was registered (service.id={}) and current one (service.id={}) was not"
-							+ " unregistered. Unregistering Whiteboard applications from current WebContainer.",
-					serviceId, currentId);
-
-			// uninstall using old ref
-			uninstallWhiteboardApplications(currentRef);
-		}
-		if (currentId == serviceId) {
-			return;
-		}
-
-		WebContainer webContainer = bundleContext.getService(ref);
-		if (webContainer == null) {
-			LOG.warn("Can't get a WebContainer service from {}", ref);
-		} else {
-			whiteboardContainer = webContainer.adapt(WhiteboardWebContainerView.class);
-		}
-
-		webContainerServiceId.set(serviceId);
-		webContainerServiceRef.set(ref);
-
-		WhiteboardWebContainerView view = whiteboardContainer;
+		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundleContext, ref);
 		if (view != null) {
-			// install global, default OSGi Context Model
+			// install global, default OSGi Context Model using bundle context pf pax-web-extender-whiteboard bundle
 			view.addWhiteboardOsgiContextModel(OsgiContextModel.DEFAULT_CONTEXT_MODEL);
 		}
 
-		// install using new ref
+		// install using new reference which will be dereferenced using a bundle for particular application
 		installWhiteboardApplications(ref);
 	}
 
 	public void webContainerRemoved(ServiceReference<WebContainer> ref) {
-		long serviceId = Utils.getServiceId(ref);
+		// uninstall all managed whiteboard applications from the WebContainer using the reference being removed
+		uninstallWhiteboardApplications(ref);
 
-		ServiceReference<WebContainer> currentRef = webContainerServiceRef.get();
-		long currentId = webContainerServiceId.get();
-		if (currentId != serviceId) {
-			if (currentId != -1) {
-				LOG.warn("Unregistration of unknown WebContainer service with service.id={}, expected {}",
-						serviceId, currentId);
-			} else {
-				LOG.warn("Unregistration of unknown WebContainer service with service.id={}", serviceId);
-			}
-			return;
-		}
-
-		uninstallWhiteboardApplications(currentRef);
-
-		WhiteboardWebContainerView view = whiteboardContainer;
+		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundleContext, ref);
 		if (view != null) {
+			// uninstall global, default OSGi Context Model
 			view.removeWhiteboardOsgiContextModel(OsgiContextModel.DEFAULT_CONTEXT_MODEL);
 		}
-
-		if (currentRef != null) {
-			bundleContext.ungetService(currentRef);
-		}
-		whiteboardContainer = null;
-		webContainerServiceRef.set(null);
-		webContainerServiceId.set(-1);
-	}
-
-	public void stop() {
-		ServiceReference<WebContainer> ref = webContainerServiceRef.get();
-		if (ref != null) {
-			webContainerRemoved(ref);
-		}
+		webContainerManager.releaseContainer(bundleContext, ref);
 	}
 
 	/**
@@ -464,7 +429,7 @@ public class WhiteboardContext {
 		}
 	}
 
-	public <R, D extends ElementEventData, T extends ElementModel<R, D>> void addWebElement(Bundle bundle, T webElement) {
+	public <R, D extends WebElementEventData, T extends ElementModel<R, D>> void addWebElement(Bundle bundle, T webElement) {
 		lock.lock();
 		try {
 			getBundleApplication(bundle).addWebElement(webElement);
@@ -473,7 +438,7 @@ public class WhiteboardContext {
 		}
 	}
 
-	public <R, D extends ElementEventData, T extends ElementModel<R, D>> void removeWebElement(Bundle bundle, T webElement) {
+	public <R, D extends WebElementEventData, T extends ElementModel<R, D>> void removeWebElement(Bundle bundle, T webElement) {
 		lock.lock();
 		try {
 			getBundleApplication(bundle).removeWebElement(webElement);
@@ -496,8 +461,8 @@ public class WhiteboardContext {
 
 		BundleWhiteboardApplication bundleApplication = bundleApplications.get(bundle);
 		if (bundleApplication == null) {
-			bundleApplication = new BundleWhiteboardApplication(bundle, httpServiceRuntime);
-			ServiceReference<WebContainer> ref = webContainerServiceRef.get();
+			bundleApplication = new BundleWhiteboardApplication(bundle, webContainerManager, httpServiceRuntime);
+			ServiceReference<WebContainer> ref = webContainerManager.currentWebContainerReference();
 			if (ref != null) {
 				bundleApplication.webContainerAdded(ref);
 			}

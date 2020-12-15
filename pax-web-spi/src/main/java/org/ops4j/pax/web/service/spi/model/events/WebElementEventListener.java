@@ -21,13 +21,13 @@ package org.ops4j.pax.web.service.spi.model.events;
  *
  * <p>Before Pax Web 8 there was only {@code ServletListener}, but now we have more generic mechanism.</p>
  */
-public interface WebElementListener {
+public interface WebElementEventListener {
 
 	/**
 	 * Notification about registration (failed or successful) and unregistration of any
 	 * {@link org.ops4j.pax.web.service.spi.model.elements.ElementModel}
 	 * @param event
 	 */
-	void registrationEvent(ElementEvent event);
+	void registrationEvent(WebElementEvent event);
 
 }

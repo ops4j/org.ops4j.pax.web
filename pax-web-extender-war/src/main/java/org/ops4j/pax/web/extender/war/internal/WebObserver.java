@@ -66,7 +66,7 @@ public class WebObserver implements WarManager {
 	/**
 	 * Event dispatcher used to notify listeners and send eventAdmin events
 	 */
-	protected final WebEventDispatcher eventDispatcher;
+	protected final WebApplicationEventDispatcher eventDispatcher;
 	/**
 	 * Manage dependencies
 	 */
@@ -93,7 +93,7 @@ public class WebObserver implements WarManager {
     private final String defaultVirtualHost = "default";
         
 	public WebObserver(WebAppParser parser, WebAppPublisher publisher,
-					   WebEventDispatcher eventDispatcher,
+					   WebApplicationEventDispatcher eventDispatcher,
 					   DefaultWebAppDependencyManager dependencyManager,
 					   BundleContext bundleContext) {
 

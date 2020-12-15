@@ -33,13 +33,13 @@ import org.ops4j.pax.web.itest.AbstractControlledTestBase;
 import org.ops4j.pax.web.itest.utils.WaitCondition;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.spi.model.events.ElementEvent;
-import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEventData;
 import org.ops4j.pax.web.service.spi.model.events.FilterEventData;
 import org.ops4j.pax.web.service.spi.model.events.ServerEvent;
 import org.ops4j.pax.web.service.spi.model.events.ServerListener;
 import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
-import org.ops4j.pax.web.service.spi.model.events.WebElementListener;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEventListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
@@ -55,7 +55,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 @ExamReactorStrategy(PerClass.class)
 public abstract class AbstractContainerTestBase extends AbstractControlledTestBase {
 
-	protected WebElementListener webElementListener;
+	protected WebElementEventListener webElementEventListener;
 
 	protected Option[] baseConfigure() {
 		Option[] options = super.baseConfigure();
@@ -79,16 +79,17 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 	// --- helper methods to be used in all the tests
 
 	/**
-	 * Creates a listener for generic {@link ElementEvent} events with
+	 * Creates a listener for generic {@link WebElementEvent} events with
 	 * associated {@link org.ops4j.pax.web.itest.utils.WaitCondition} fulfilled after satisfying passed
-	 * {@link java.util.function.BiPredicate} operating on single {@link ElementEvent}. This method sets up
+	 * {@link java.util.function.BiPredicate} operating on single {@link WebElementEvent}. This method sets up
 	 * the listener, calls the passed {@code action} and waits for the condition that's satisfied according
 	 * to passed {@code expectation}.
 	 */
-	protected void configureAndWait(Runnable action, final BiPredicate<ElementEvent.State, ElementEventData> expectation) {
-		final List<ElementEvent> events = new CopyOnWriteArrayList<>();
-		webElementListener = events::add;
-		context.registerService(WebElementListener.class, webElementListener, null);
+	protected void configureAndWait(Runnable action, final BiPredicate<WebElementEvent.State, WebElementEventData> expectation) {
+		final List<WebElementEvent> events = new CopyOnWriteArrayList<>();
+		webElementEventListener = events::add;
+		ServiceRegistration<WebElementEventListener> reg
+				= context.registerService(WebElementEventListener.class, webElementEventListener, null);
 
 		action.run();
 
@@ -102,18 +103,23 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new RuntimeException(e.getMessage(), e);
+		} finally {
+			if (reg != null) {
+				reg.unregister();
+			}
 		}
 	}
 
 	/**
-	 * "configure and wait" method that allows to check entire stream of {@link ElementEvent}s.
+	 * "configure and wait" method that allows to check entire stream of {@link WebElementEvent}s.
 	 * @param action
 	 * @param expectation
 	 */
-	protected void configureAndWait(Runnable action, final Predicate<List<ElementEvent>> expectation) {
-		final List<ElementEvent> events = new CopyOnWriteArrayList<>();
-		webElementListener = events::add;
-		context.registerService(WebElementListener.class, webElementListener, null);
+	protected void configureAndWait(Runnable action, final Predicate<List<WebElementEvent>> expectation) {
+		final List<WebElementEvent> events = new CopyOnWriteArrayList<>();
+		webElementEventListener = events::add;
+		ServiceRegistration<WebElementEventListener> reg
+				= context.registerService(WebElementEventListener.class, webElementEventListener, null);
 
 		action.run();
 
@@ -127,6 +133,10 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new RuntimeException(e.getMessage(), e);
+		} finally {
+			if (reg != null) {
+				reg.unregister();
+			}
 		}
 	}
 
@@ -136,9 +146,10 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 	 * @param action
 	 */
 	protected void configureAndWaitForNamedServlet(final String servletName, Action action) throws Exception {
-		final List<ElementEvent> events = new CopyOnWriteArrayList<>();
-		webElementListener = events::add;
-		context.registerService(WebElementListener.class, webElementListener, null);
+		final List<WebElementEvent> events = new CopyOnWriteArrayList<>();
+		webElementEventListener = events::add;
+		ServiceRegistration<WebElementEventListener> reg
+				= context.registerService(WebElementEventListener.class, webElementEventListener, null);
 
 		action.run();
 
@@ -147,7 +158,7 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 				@Override
 				protected boolean isFulfilled() throws Exception {
 					return events.stream().anyMatch(e ->
-							e.getType() == ElementEvent.State.DEPLOYED
+							e.getType() == WebElementEvent.State.DEPLOYED
 									&& e.getData() instanceof ServletEventData
 									&& ((ServletEventData) e.getData()).getServletName().equals(servletName));
 				}
@@ -155,6 +166,10 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new RuntimeException(e.getMessage(), e);
+		} finally {
+			if (reg != null) {
+				reg.unregister();
+			}
 		}
 	}
 
@@ -164,9 +179,10 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 	 * @param action
 	 */
 	protected void configureAndWaitForServletWithMapping(final String mapping, Action action) throws Exception {
-		final List<ElementEvent> events = new CopyOnWriteArrayList<>();
-		webElementListener = events::add;
-		context.registerService(WebElementListener.class, webElementListener, null);
+		final List<WebElementEvent> events = new CopyOnWriteArrayList<>();
+		webElementEventListener = events::add;
+		ServiceRegistration<WebElementEventListener> reg
+				= context.registerService(WebElementEventListener.class, webElementEventListener, null);
 
 		action.run();
 
@@ -175,7 +191,7 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 				@Override
 				protected boolean isFulfilled() throws Exception {
 					return events.stream().anyMatch(e ->
-							e.getType() == ElementEvent.State.DEPLOYED
+							e.getType() == WebElementEvent.State.DEPLOYED
 									&& e.getData() instanceof ServletEventData
 									&& Arrays.asList(((ServletEventData) e.getData()).getUrlPatterns()).contains(mapping));
 				}
@@ -183,6 +199,10 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new RuntimeException(e.getMessage(), e);
+		} finally {
+			if (reg != null) {
+				reg.unregister();
+			}
 		}
 	}
 
@@ -192,9 +212,10 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 	 * @param action
 	 */
 	protected void configureAndWaitForFilterWithMapping(final String mapping, Action action) throws Exception {
-		final List<ElementEvent> events = new CopyOnWriteArrayList<>();
-		webElementListener = events::add;
-		context.registerService(WebElementListener.class, webElementListener, null);
+		final List<WebElementEvent> events = new CopyOnWriteArrayList<>();
+		webElementEventListener = events::add;
+		ServiceRegistration<WebElementEventListener> reg
+				= context.registerService(WebElementEventListener.class, webElementEventListener, null);
 
 		action.run();
 
@@ -203,7 +224,7 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 				@Override
 				protected boolean isFulfilled() throws Exception {
 					return events.stream().anyMatch(e ->
-							e.getType() == ElementEvent.State.DEPLOYED
+							e.getType() == WebElementEvent.State.DEPLOYED
 									&& e.getData() instanceof FilterEventData
 									&& Arrays.asList(((FilterEventData) e.getData()).getUrlPatterns()).contains(mapping));
 				}
@@ -211,6 +232,10 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new RuntimeException(e.getMessage(), e);
+		} finally {
+			if (reg != null) {
+				reg.unregister();
+			}
 		}
 	}
 
@@ -258,7 +283,7 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 	 * @param name
 	 * @return
 	 */
-	public static boolean usesContexts(ElementEventData data, String ... names) {
+	public static boolean usesContexts(WebElementEventData data, String ... names) {
 		Set<String> used = new HashSet<>(data.getContextNames());
 		return used.containsAll(Arrays.asList(names));
 	}

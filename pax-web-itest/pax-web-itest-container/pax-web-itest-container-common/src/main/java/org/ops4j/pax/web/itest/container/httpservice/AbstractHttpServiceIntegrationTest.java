@@ -27,9 +27,9 @@ import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.utils.web.SimpleOnlyFilter;
 import org.ops4j.pax.web.itest.utils.web.TestServlet;
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.spi.model.events.ElementEvent;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
 import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
-import org.ops4j.pax.web.service.spi.model.events.WebElementListener;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEventListener;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -112,16 +112,16 @@ public abstract class AbstractHttpServiceIntegrationTest extends AbstractContain
 		final AtomicReference<HttpContext> httpContext1 = new AtomicReference<>();
 		final AtomicReference<HttpContext> httpContext2 = new AtomicReference<>();
 
-		context.registerService(WebElementListener.class, servletEvent -> {
+		context.registerService(WebElementEventListener.class, servletEvent -> {
 			if (!(servletEvent.getData() instanceof ServletEventData)) {
 				return;
 			}
 			ServletEventData data = (ServletEventData) servletEvent.getData();
-			if (servletEvent.getType() == ElementEvent.State.DEPLOYED && "/test1".equals(data.getAlias())) {
+			if (servletEvent.getType() == WebElementEvent.State.DEPLOYED && "/test1".equals(data.getAlias())) {
 				httpContext1.set(data.getHttpContext());
 				latch1.countDown();
 			}
-			if (servletEvent.getType() == ElementEvent.State.DEPLOYED && "/test2".equals(data.getAlias())) {
+			if (servletEvent.getType() == WebElementEvent.State.DEPLOYED && "/test2".equals(data.getAlias())) {
 				httpContext2.set(data.getHttpContext());
 				latch2.countDown();
 			}

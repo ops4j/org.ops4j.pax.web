@@ -18,7 +18,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 import java.util.Arrays;
 import javax.servlet.Filter;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.events.FilterEventData;
 import org.ops4j.pax.web.service.whiteboard.FilterMapping;
@@ -37,13 +37,13 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class FilterMappingTracker extends AbstractMappingTracker<FilterMapping, Filter, FilterEventData, FilterModel> {
 
-	private FilterMappingTracker(final WhiteboardContext whiteboardContext, final BundleContext bundleContext) {
-		super(whiteboardContext, bundleContext);
+	private FilterMappingTracker(final WhiteboardExtenderContext whiteboardExtenderContext, final BundleContext bundleContext) {
+		super(whiteboardExtenderContext, bundleContext);
 	}
 
-	public static ServiceTracker<FilterMapping, FilterModel> createTracker(final WhiteboardContext whiteboardContext,
+	public static ServiceTracker<FilterMapping, FilterModel> createTracker(final WhiteboardExtenderContext whiteboardExtenderContext,
 			final BundleContext bundleContext) {
-		return new FilterMappingTracker(whiteboardContext, bundleContext).create(FilterMapping.class);
+		return new FilterMappingTracker(whiteboardExtenderContext, bundleContext).create(FilterMapping.class);
 	}
 
 	@Override

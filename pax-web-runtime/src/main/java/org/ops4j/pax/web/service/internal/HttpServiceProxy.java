@@ -57,7 +57,7 @@ class HttpServiceProxy implements WebContainer, StoppableHttpService {
 	private final Bundle serviceBundle;
 
 	HttpServiceProxy(Bundle serviceBundle, final WebContainer delegate) {
-		LOG.debug("HttpServiceProxy created for {} and {}", delegate, serviceBundle);
+		LOG.debug("HttpServiceProxy created for {}", delegate);
 
 		this.serviceBundle = serviceBundle;
 		this.delegate = delegate;

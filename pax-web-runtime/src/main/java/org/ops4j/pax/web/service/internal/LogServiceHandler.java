@@ -17,8 +17,8 @@ package org.ops4j.pax.web.service.internal;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.ops4j.pax.web.service.spi.model.events.ElementEvent;
-import org.ops4j.pax.web.service.spi.model.events.WebElementListener;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEventListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * Handles the redirect of ServletEvents to the {@link LogService}
  */
 public class LogServiceHandler implements
-		ServiceTrackerCustomizer<LogService, LogService>, WebElementListener {
+		ServiceTrackerCustomizer<LogService, LogService>, WebElementEventListener {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(LogServiceHandler.class);
@@ -44,7 +44,7 @@ public class LogServiceHandler implements
 	}
 
 	@Override
-	public void registrationEvent(ElementEvent servletEvent) {
+	public void registrationEvent(WebElementEvent servletEvent) {
 //		final String topic;
 //		switch (servletEvent.getType()) {
 //			case WebEvent.DEPLOYING:

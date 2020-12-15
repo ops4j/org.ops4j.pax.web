@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 import org.ops4j.pax.web.service.spi.model.Identity;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
-import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEventData;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.ops4j.pax.web.service.whiteboard.ContextRelated;
 import org.osgi.framework.Bundle;
@@ -57,7 +57,7 @@ import org.osgi.framework.ServiceReference;
  * @param <D> type of the DTO-like object that carries registration information of real service - to be able
  *            to get notified about (un)registration without the way to change actual registration data
  */
-public abstract class ElementModel<T, D extends ElementEventData>
+public abstract class ElementModel<T, D extends WebElementEventData>
 		extends Identity implements Comparable<ElementModel<T, D>> {
 
 	/**
@@ -214,12 +214,12 @@ public abstract class ElementModel<T, D extends ElementEventData>
 	public abstract D asEventData();
 
 	/**
-	 * Set {@link ElementModel} information in {@link ElementEventData} - to be called in specializations
+	 * Set {@link ElementModel} information in {@link WebElementEventData} - to be called in specializations
 	 * of {@link #asEventData()} method.
 	 *
 	 * @param data
 	 */
-	protected void setCommonEventProperties(ElementEventData data) {
+	protected void setCommonEventProperties(WebElementEventData data) {
 		data.setServiceRank(this.serviceRank);
 		data.setServiceId(this.serviceId);
 		data.setElementReference(this.elementReference);

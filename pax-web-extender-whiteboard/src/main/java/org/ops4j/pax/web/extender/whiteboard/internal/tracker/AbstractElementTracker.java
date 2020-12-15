@@ -17,11 +17,11 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import java.util.List;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
-import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEventData;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.whiteboard.ContextRelated;
 import org.osgi.framework.BundleContext;
@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  *        {@link javax.servlet.Servlet} and {@link org.ops4j.pax.web.service.whiteboard.ServletMapping} should be
  *        tracked as {@link org.ops4j.pax.web.service.spi.model.elements.ServletModel}, which is
  *        {@code ElementModel<Servlet>}.
- * @param <D> type of {@link ElementEventData} representing DTO/read-only object carrying information about
+ * @param <D> type of {@link WebElementEventData} representing DTO/read-only object carrying information about
  *        {@link ElementModel} being registered.
  * @param <T> as in {@link ServiceTrackerCustomizer} is the type of the actual tracked object (transformed/customized
  *        service) as required by internal Pax Web mechanisms and it should be (in case of <em>web element</em>) an
@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
  * @author Alin Dreghiciu
  * @since 0.2.0, August 21, 2007
  */
-public abstract class AbstractElementTracker<S, R, D extends ElementEventData, T extends ElementModel<R, D>>
+public abstract class AbstractElementTracker<S, R, D extends WebElementEventData, T extends ElementModel<R, D>>
 		implements ServiceTrackerCustomizer<S, T> {
 
 	private static final String LEGACY_MAPPING_PACKAGE = ContextRelated.class.getPackage().getName();
@@ -67,10 +67,10 @@ public abstract class AbstractElementTracker<S, R, D extends ElementEventData, T
 	protected final Logger log = LoggerFactory.getLogger(getClass());
 
 	protected final BundleContext bundleContext;
-	private final WhiteboardContext whiteboardContext;
+	private final WhiteboardExtenderContext whiteboardExtenderContext;
 
-	protected AbstractElementTracker(WhiteboardContext whiteboardContext, BundleContext bundleContext) {
-		this.whiteboardContext = whiteboardContext;
+	protected AbstractElementTracker(WhiteboardExtenderContext whiteboardExtenderContext, BundleContext bundleContext) {
+		this.whiteboardExtenderContext = whiteboardExtenderContext;
 		this.bundleContext = bundleContext;
 	}
 
@@ -234,7 +234,7 @@ public abstract class AbstractElementTracker<S, R, D extends ElementEventData, T
 
 		// 2. get the actual contexts - only after creating actual element. Because failure to resolve target
 		//    contexts should result in specific FailureDTO (e.g., org.osgi.service.http.runtime.dto.FailedServletDTO)
-		List<OsgiContextModel> contexts = whiteboardContext.resolveContexts(serviceReference.getBundle(), contextFilter);
+		List<OsgiContextModel> contexts = whiteboardExtenderContext.resolveContexts(serviceReference.getBundle(), contextFilter);
 
 		// now set the target context models
 		// 2020-10-02: this list may be empty, but we won't prevent "remembering" such web element, because at
@@ -245,12 +245,12 @@ public abstract class AbstractElementTracker<S, R, D extends ElementEventData, T
 
 		// Web element is created, but validation has to be run separately/explicitly to handle "Failure DTO"
 		if (webElement.isValid()) {
-			whiteboardContext.addWebElement(serviceReference.getBundle(), webElement);
+			whiteboardExtenderContext.addWebElement(serviceReference.getBundle(), webElement);
 
-			whiteboardContext.configureDTOs(webElement);
+			whiteboardExtenderContext.configureDTOs(webElement);
 			return webElement;
 		} else {
-			whiteboardContext.configureFailedDTOs(webElement);
+			whiteboardExtenderContext.configureFailedDTOs(webElement);
 			return null;
 		}
 	}
@@ -278,7 +278,7 @@ public abstract class AbstractElementTracker<S, R, D extends ElementEventData, T
 		log.debug("Whiteboard service removed: {}", serviceReference);
 
 		//		httpServiceRuntime.removeWhiteboardElement(model);
-		whiteboardContext.removeWebElement(serviceReference.getBundle(), webElement);
+		whiteboardExtenderContext.removeWebElement(serviceReference.getBundle(), webElement);
 	}
 
 	/**

@@ -19,7 +19,7 @@ import java.io.File;
 import java.util.List;
 
 import org.ops4j.pax.web.service.PaxWebConfig;
-import org.ops4j.pax.web.service.spi.model.events.ElementEvent;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
 
 public interface ServerConfiguration {
 
@@ -146,7 +146,7 @@ public interface ServerConfiguration {
 
 	/**
 	 * Internal Pax Web configuration option to specify number of threads to dispatch
-	 * {@link ElementEvent} events.
+	 * {@link WebElementEvent} events.
 	 * @return
 	 */
 	Integer getEventDispatcherThreadCount();

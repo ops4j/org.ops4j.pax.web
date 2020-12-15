@@ -601,7 +601,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 				this.externalConfigurations = fileLocations;
 			}
 			Integer eventDispatcherThreadCount = resolveIntegerProperty(PaxWebConfig.PID_CFG_EVENT_DISPATCHER_THREAD_COUNT);
-			this.eventDispatcherThreadCount = eventDispatcherThreadCount == null ? 3 : eventDispatcherThreadCount;
+			this.eventDispatcherThreadCount = eventDispatcherThreadCount == null ? 1 : eventDispatcherThreadCount;
 
 			Boolean stacks = resolveBooleanProperty(PaxWebConfig.PID_CFG_SHOW_STACKS);
 			showStacks = stacks != null && stacks;

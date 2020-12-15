@@ -17,7 +17,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import java.util.Hashtable;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.util.Utils;
@@ -52,10 +52,10 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 	protected static final Logger LOG = LoggerFactory.getLogger(AbstractElementTracker.class);
 
 	protected final BundleContext bundleContext;
-	private final WhiteboardContext whiteboardContext;
+	private final WhiteboardExtenderContext whiteboardExtenderContext;
 
-	protected AbstractContextTracker(WhiteboardContext whiteboardContext, BundleContext bundleContext) {
-		this.whiteboardContext = whiteboardContext;
+	protected AbstractContextTracker(WhiteboardExtenderContext whiteboardExtenderContext, BundleContext bundleContext) {
+		this.whiteboardExtenderContext = whiteboardExtenderContext;
 		this.bundleContext = bundleContext;
 	}
 
@@ -142,12 +142,12 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 
 		// Web context is configured, but validation has to be run separately/explicitly to handle "Failure DTO"
 		if (model.isValid()) {
-			whiteboardContext.addWebContext(serviceReference.getBundle(), model);
+			whiteboardExtenderContext.addWebContext(serviceReference.getBundle(), model);
 
-			whiteboardContext.configureDTOs(model);
+			whiteboardExtenderContext.configureDTOs(model);
 			return model;
 		} else {
-			whiteboardContext.configureFailedDTOs(model);
+			whiteboardExtenderContext.configureFailedDTOs(model);
 			return null;
 		}
 	}
@@ -174,11 +174,11 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 
 		// Web context is configured, but validation has to be run separately/explicitly to handle "Failure DTO"
 		if (model.isValid()) {
-			whiteboardContext.addWebContext(reference.getBundle(), model);
+			whiteboardExtenderContext.addWebContext(reference.getBundle(), model);
 
-			whiteboardContext.configureDTOs(model);
+			whiteboardExtenderContext.configureDTOs(model);
 		} else {
-			whiteboardContext.configureFailedDTOs(model);
+			whiteboardExtenderContext.configureFailedDTOs(model);
 		}
 	}
 
@@ -190,7 +190,7 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 
 		LOG.debug("Whiteboard context removed: {}", serviceReference);
 
-		whiteboardContext.removeWebContext(serviceReference.getBundle(), unpublished);
+		whiteboardExtenderContext.removeWebContext(serviceReference.getBundle(), unpublished);
 	}
 
 	private boolean skipInternalService(ServiceReference<S> serviceReference) {

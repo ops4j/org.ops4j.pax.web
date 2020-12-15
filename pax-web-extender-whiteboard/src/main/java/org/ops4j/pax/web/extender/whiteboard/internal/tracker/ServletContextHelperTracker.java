@@ -18,7 +18,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.util.Utils;
@@ -38,13 +38,13 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class ServletContextHelperTracker extends AbstractContextTracker<ServletContextHelper> {
 
-	private ServletContextHelperTracker(final WhiteboardContext whiteboardContext, final BundleContext bundleContext) {
-		super(whiteboardContext, bundleContext);
+	private ServletContextHelperTracker(final WhiteboardExtenderContext whiteboardExtenderContext, final BundleContext bundleContext) {
+		super(whiteboardExtenderContext, bundleContext);
 	}
 
-	public static ServiceTracker<ServletContextHelper, OsgiContextModel> createTracker(final WhiteboardContext whiteboardContext,
+	public static ServiceTracker<ServletContextHelper, OsgiContextModel> createTracker(final WhiteboardExtenderContext whiteboardExtenderContext,
 			final BundleContext bundleContext) {
-		return new ServletContextHelperTracker(whiteboardContext, bundleContext).create(ServletContextHelper.class);
+		return new ServletContextHelperTracker(whiteboardExtenderContext, bundleContext).create(ServletContextHelper.class);
 	}
 
 	@Override

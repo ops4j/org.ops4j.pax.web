@@ -1,0 +1,162 @@
+= pax-web-extender-war
+
+Entities:
+
+* `WebEvent` - event related to entire Web Application Bundle (WAB). Renamed in Pax Web 8 to `WebApplicationEvent` to distinguish it from `WebElementEvent`
+* `WebAppParser` - `web.xml` parser
+* `WebApp` - parsed `web.xml` + fragments + associated Bundle and HttpContext (from Http Service spec)
+* `WebObserver` - changes `Bundles` into `Extensions` for WAR tracking purposes. Underneath an extension, there's a `WebApp` passed to `DefaultWebAppDependencyManager`
+* `WebAppDependencyHolder` - `HttpService` + 1 (one!) `ServletContainerInitializer`
+* `DefaultWebAppDependencyManager` - `WebApp`->`HttpService` and `WebApp`->`WebAppDependencyHolder` mappings. Registers `WebAppDependencyHolder` OSGi services when `HttpService` service is available
+* `WebElementEventDispatcher` - sends events to `WebApplicationEventListener` callbacks and optionally to `LogService` and `EventAdmin`
+* `WebAppPublisher` - tracks `WebAppDependencyHolder` and when they're available, passes `RegisterWebAppVisitorWC` to `accept` method of a `WebApp`
+
+== Elements to parse
+
+Jetty (`org.eclipse.jetty.webapp.StandardDescriptorProcessor.StandardDescriptorProcessor()` and `org.eclipse.jetty.plus.webapp.PlusDescriptorProcessor.PlusDescriptorProcessor()`):
+
+* `<context-param>`
+* `<deny-uncovered-http-methods>`
+* `<display-name>`
+* `<distributable>`
+* `<env-entry>`
+* `<error-page>`
+* `<filter>`
+* `<filter-mapping>`
+* `<jsp-config>`
+* `<listener>`
+* `<locale-encoding-mapping-list>`
+* `<login-config>`
+* `<message-destination-ref>`
+* `<mime-mapping>`
+* `<post-construct>`
+* `<pre-destroy>`
+* `<resource-env-ref>`
+* `<resource-ref>`
+* `<security-constraint>`
+* `<security-role>`
+* `<servlet>`
+* `<servlet-mapping>`
+* `<session-config>`
+* `<taglib>` (pre Servlet 2.4)
+* `<welcome-file-list>`
+
+Tomcat (`org.apache.tomcat.util.descriptor.web.WebRuleSet.addRuleInstances()`):
+
+* `<absolute-ordering>`
+* `<context-param>`
+* `<deny-uncovered-http-methods>`
+* `<display-name>`
+* `<distributable>`
+* `<ejb-local-ref>`
+* `<ejb-ref>`
+* `<env-entry>`
+* `<error-page>`
+* `<filter>`
+* `<filter-mapping>`
+* `<jsp-config>`
+* `<jsp-config>`
+* `<listener>`
+* `<locale-encoding-mapping-list>`
+* `<login-config>`
+* `<message-destination>`
+* `<message-destination-ref>`
+* `<mime-mapping>`
+* `<name>` (for fragments)
+* `<ordering>` (for fragments)
+* `<post-construct>`
+* `<pre-destroy>`
+* `<request-character-encoding>`
+* `<resource-env-ref>`
+* `<resource-ref>`
+* `<response-character-encoding>`
+* `<security-constraint>`
+* `<security-role>`
+* `<service-ref>`
+* `<servlet>`
+* `<servlet-mapping>`
+* `<session-config>`
+* `<taglib>` (pre Servlet 2.4)
+* `<welcome-file-list>`
+
+web.xml (`http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd`):
+
+* `<absolute-ordering>`
+* `<administered-object>`
+* `<connection-factory>`
+* `<context-param>`
+* `<data-source>`
+* `<default-context-path>`
+* `<deny-uncovered-http-methods>`
+* `<description>`
+* `<display-name>`
+* `<distributable>`
+* `<ejb-local-ref>`
+* `<ejb-ref>`
+* `<env-entry>`
+* `<error-page>`
+* `<filter>`
+* `<filter-mapping>`
+* `<icon>`
+* `<jms-connection-factory>`
+* `<jms-destination>`
+* `<jsp-config>`
+* `<listener>`
+* `<locale-encoding-mapping-list>`
+* `<login-config>`
+* `<mail-session>`
+* `<message-destination>`
+* `<message-destination-ref>`
+* `<mime-mapping>`
+* `<module-name>`
+* `<persistence-context-ref>`
+* `<persistence-unit-ref>`
+* `<post-construct>`
+* `<pre-destroy>`
+* `<request-character-encoding>`
+* `<resource-env-ref>`
+* `<resource-ref>`
+* `<response-character-encoding>`
+* `<security-constraint>`
+* `<security-role>`
+* `<service-ref>`
+* `<servlet>`
+* `<servlet-mapping>`
+* `<session-config>`
+* `<welcome-file-list>`
+
+`web.xml` elements not handled in Tomcat:
+
+* `<administered-object>`
+* `<connection-factory>`
+* `<data-source>`
+* `<default-context-path>`
+* `<description>`
+* `<icon>`
+* `<jms-connection-factory>`
+* `<jms-destination>`
+* `<mail-session>`
+* `<module-name>`
+* `<persistence-context-ref>`
+* `<persistence-unit-ref>`
+
+`web.xml` elements not handled in Jetty:
+
+* `<administered-object>`
+* `<connection-factory>`
+* `<data-source>`
+* `<default-context-path>`
+* `<description>`
+* `<ejb-local-ref>` (but handled in Tomcat)
+* `<ejb-ref>` (but handled in Tomcat)
+* `<icon>`
+* `<jms-connection-factory>`
+* `<jms-destination>`
+* `<mail-session>`
+* `<message-destination>` (but handled in Tomcat)
+* `<module-name>`
+* `<persistence-context-ref>`
+* `<persistence-unit-ref>`
+* `<request-character-encoding>` (but handled in Tomcat, because it's Servlet 4.0)
+* `<response-character-encoding>` (but handled in Tomcat, because it's Servlet 4.0)
+* `<service-ref>` (but handled in Tomcat)

@@ -15,28 +15,24 @@
  */
 package org.ops4j.pax.web.service.internal;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.ops4j.pax.web.annotations.Review;
-import org.ops4j.pax.web.service.spi.WebEvent;
-import org.ops4j.pax.web.service.spi.model.events.ElementEvent;
-import org.ops4j.pax.web.service.spi.model.events.WebElementListener;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEventListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class listens to {@link ElementEvent}s and redirect them to the
+ * This class listens to {@link WebElementEvent}s and redirect them to the
  * {@link EventAdmin} service
  */
 @Review("Check EventAdmin lifecycle")
-public class EventAdminHandler implements WebElementListener,
+public class EventAdminHandler implements WebElementEventListener,
 		ServiceTrackerCustomizer<EventAdmin, EventAdmin> {
 
 	private static final Logger LOG = LoggerFactory
@@ -50,56 +46,56 @@ public class EventAdminHandler implements WebElementListener,
 	}
 
 	@Override
-	public void registrationEvent(ElementEvent servletEvent) {
+	public void registrationEvent(WebElementEvent servletEvent) {
 		EventAdmin eventAdmin = eventAdminReference.get();
-		if (eventAdmin != null) {
-			final String topic;
-			switch (servletEvent.getType()) {
-				case DEPLOYING:
-					topic = WebEvent.WebTopic.DEPLOYING.toString();
-					break;
-				case DEPLOYED:
-					topic = WebEvent.WebTopic.DEPLOYED.toString();
-					break;
-				case UNDEPLOYING:
-					topic = WebEvent.WebTopic.UNDEPLOYING.toString();
-					break;
-				case UNDEPLOYED:
-					topic = WebEvent.WebTopic.UNDEPLOYED.toString();
-					break;
-				case WAITING:
-					// A Waiting Event is not supported by the specification
-					// therefore it is mapped to FAILED, because of collision.
-					//$FALL-THROUGH$
-				case FAILED:
-					//$FALL-THROUGH$
-				default:
-					topic = WebEvent.WebTopic.FAILED.toString();
-			}
-			Dictionary<String, Object> properties = new Hashtable<>();
-//			properties.put(
-//					"servlet.alias",
-//					servletEvent.getAlias() == null ? "" : servletEvent
-//							.getAlias());
-//			properties.put(
-//					"servlet.name",
-//					servletEvent.getServletName() == null ? "" : servletEvent
-//							.getServletName());
-//			properties.put(
-//					"servlet.urlparameter",
-//					servletEvent.getUrlParameter() == null ? "" : servletEvent
-//							.getUrlParameter());
-//			if (servletEvent.getServletClassName() != null) {
-//				properties.put("servlet.servlet", servletEvent.getServletClassName());
+//		if (eventAdmin != null) {
+//			final String topic;
+//			switch (servletEvent.getType()) {
+//				case DEPLOYING:
+//					topic = WebElementEvent.WebTopic.DEPLOYING.toString();
+//					break;
+//				case DEPLOYED:
+//					topic = WebEvent.WebTopic.DEPLOYED.toString();
+//					break;
+//				case UNDEPLOYING:
+//					topic = WebEvent.WebTopic.UNDEPLOYING.toString();
+//					break;
+//				case UNDEPLOYED:
+//					topic = WebEvent.WebTopic.UNDEPLOYED.toString();
+//					break;
+//				case WAITING:
+//					// A Waiting Event is not supported by the specification
+//					// therefore it is mapped to FAILED, because of collision.
+//					//$FALL-THROUGH$
+//				case FAILED:
+//					//$FALL-THROUGH$
+//				default:
+//					topic = WebEvent.WebTopic.FAILED.toString();
 //			}
-//			properties.put("timestamp", servletEvent.getTimestamp());
-//			if (servletEvent.getHttpContext() != null) {
-//				properties.put("servlet.httpcontext",
-//						servletEvent.getHttpContext());
-//			}
-			Event event = new Event(topic, properties);
-			eventAdmin.postEvent(event);
-		}
+//			Dictionary<String, Object> properties = new Hashtable<>();
+////			properties.put(
+////					"servlet.alias",
+////					servletEvent.getAlias() == null ? "" : servletEvent
+////							.getAlias());
+////			properties.put(
+////					"servlet.name",
+////					servletEvent.getServletName() == null ? "" : servletEvent
+////							.getServletName());
+////			properties.put(
+////					"servlet.urlparameter",
+////					servletEvent.getUrlParameter() == null ? "" : servletEvent
+////							.getUrlParameter());
+////			if (servletEvent.getServletClassName() != null) {
+////				properties.put("servlet.servlet", servletEvent.getServletClassName());
+////			}
+////			properties.put("timestamp", servletEvent.getTimestamp());
+////			if (servletEvent.getHttpContext() != null) {
+////				properties.put("servlet.httpcontext",
+////						servletEvent.getHttpContext());
+////			}
+//			Event event = new Event(topic, properties);
+//			eventAdmin.postEvent(event);
+//		}
 	}
 
 	@Override

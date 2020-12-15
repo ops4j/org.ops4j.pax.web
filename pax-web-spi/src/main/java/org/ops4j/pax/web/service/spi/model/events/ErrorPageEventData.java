@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.service.spi.model.events;
 
-public class ErrorPageEventData extends ElementEventData {
+public class ErrorPageEventData extends WebElementEventData {
 
 	private final String[] errorPages;
 	private final String location;

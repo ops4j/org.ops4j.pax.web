@@ -120,7 +120,7 @@ public interface PaxWebConfig {
 
 	/**
 	 * Option to specify number of threads for internal web element/context (un)registration event dispatching.
-	 * Defaults to {@code 3} (as hardcoded before Pax Web 8).
+	 * Defaults to {@code 1} ("3" was hardcoded before Pax Web 8).
 	 */
 	String PID_CFG_EVENT_DISPATCHER_THREAD_COUNT = "org.ops4j.pax.web.server.eventDispatcherThreadCount";
 

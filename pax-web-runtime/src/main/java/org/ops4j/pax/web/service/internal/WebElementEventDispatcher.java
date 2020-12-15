@@ -27,8 +27,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.ops4j.pax.web.service.spi.config.Configuration;
-import org.ops4j.pax.web.service.spi.model.events.ElementEvent;
-import org.ops4j.pax.web.service.spi.model.events.WebElementListener;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEventListener;
 import org.ops4j.pax.web.service.spi.util.NamedThreadFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -40,49 +40,55 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p>Dispatcher of events related to registration/unregistration of <em>web elements</em> (servlets, filters, ...),
- * and <em>web contexts</em> (contexts like {@link org.osgi.service.http.context.ServletContextHelper}).</p>
+ * <p>Dispatcher of events related to registration/unregistration of <em>web elements</em> (servlets, filters, ...).</p>
+ *
+ * <p>It works at lower level than entire <em>web application</em> (or WAR/WAB).</p>
+ *
+ * <p>It's activated using a method from {@link WebElementEventListener} that called to <em>send</em> the event and the
+ * event is passed to other registered {@link WebElementEventListener}s.</p>
  *
  * @author Achim Nierbeck
  */
-public class WebEventDispatcher implements WebElementListener,
-		ServiceTrackerCustomizer<WebElementListener, WebElementListener>, BundleListener {
+public class WebElementEventDispatcher implements WebElementEventListener,
+		ServiceTrackerCustomizer<WebElementEventListener, WebElementEventListener>, BundleListener {
 
-	private static final Logger LOG = LoggerFactory.getLogger(WebEventDispatcher.class);
+	private static final Logger LOG = LoggerFactory.getLogger(WebElementEventDispatcher.class);
 
 	private final BundleContext bundleContext;
 	private final ExecutorService executor;
 
-	/** {@link ServiceTracker} for {@link WebElementListener web listeners} */
-	private final ServiceTracker<WebElementListener, WebElementListener> webElementListenerTracker;
+	/** {@link ServiceTracker} for {@link WebElementEventListener web element listeners} */
+	private final ServiceTracker<WebElementEventListener, WebElementEventListener> webElementListenerTracker;
 
-	/** All tracked {@link WebElementListener web listeners} */
-	private final Set<WebElementListener> listeners = new CopyOnWriteArraySet<>();
+	/** All tracked {@link WebElementEventListener web element listeners} */
+	private final Set<WebElementEventListener> listeners = new CopyOnWriteArraySet<>();
 
 //	private final Map<Long, Map<String, ElementEvent>> states = new ConcurrentHashMap<>();
 
-	public WebEventDispatcher(final BundleContext bundleContext, Configuration configuration) {
+	public WebElementEventDispatcher(final BundleContext bundleContext, Configuration configuration) {
 		this.bundleContext = bundleContext;
 		this.executor = Executors.newFixedThreadPool(configuration.server().getEventDispatcherThreadCount(),
 				new NamedThreadFactory("events"));
 
-		this.webElementListenerTracker = new ServiceTracker<>(bundleContext, WebElementListener.class.getName(), this);
+		this.webElementListenerTracker = new ServiceTracker<>(bundleContext, WebElementEventListener.class.getName(), this);
 		this.webElementListenerTracker.open();
+
 		this.bundleContext.addBundleListener(this);
 	}
 
 	@Override
 	public void bundleChanged(BundleEvent event) {
+		// TODO: clean up listeners for given bundle
 //		if (event.getType() == BundleEvent.STOPPED || event.getType() == BundleEvent.UNINSTALLED) {
 //			states.remove(event.getBundle().getBundleId());
 //		}
 	}
 
 	@Override
-	public WebElementListener addingService(ServiceReference<WebElementListener> reference) {
-		WebElementListener listener = bundleContext.getService(reference);
+	public WebElementEventListener addingService(ServiceReference<WebElementEventListener> reference) {
+		WebElementEventListener listener = bundleContext.getService(reference);
 		if (listener != null) {
-			LOG.debug("New ServletListener added: {}", listener.getClass().getName());
+			LOG.debug("New WebElementEventListener added: {}", listener.getClass().getName());
 			synchronized (listeners) {
 				// TOCHECK: should we really send (and keep!) initial events?
 //				sendInitialEvents(listener);
@@ -93,20 +99,20 @@ public class WebEventDispatcher implements WebElementListener,
 	}
 
 	@Override
-	public void modifiedService(ServiceReference<WebElementListener> reference, WebElementListener service) {
+	public void modifiedService(ServiceReference<WebElementEventListener> reference, WebElementEventListener service) {
 	}
 
 	@Override
-	public void removedService(ServiceReference<WebElementListener> reference, WebElementListener service) {
+	public void removedService(ServiceReference<WebElementEventListener> reference, WebElementEventListener service) {
 		listeners.remove(service);
 		bundleContext.ungetService(reference);
-		LOG.debug("ServletListener is removed: {}", service.getClass().getName());
+		LOG.debug("WebElementEventListener is removed: {}", service.getClass().getName());
 	}
 
 	@Override
-	public void registrationEvent(final ElementEvent event) {
+	public void registrationEvent(final WebElementEvent event) {
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Sending web event " + event + " for bundle " + event.getBundleName());
+			LOG.debug("Sending web element event " + event + " for bundle " + event.getBundleName());
 		}
 		synchronized (listeners) {
 			callListeners(event);
@@ -147,10 +153,10 @@ public class WebEventDispatcher implements WebElementListener,
 //		}
 //	}
 
-	private void callListeners(ElementEvent servletEvent) {
-		for (WebElementListener listener : listeners) {
+	private void callListeners(WebElementEvent event) {
+		for (WebElementEventListener listener : listeners) {
 			try {
-				callListener(listener, servletEvent);
+				callListener(listener, event);
 			} catch (RejectedExecutionException ree) {
 				LOG.warn("Executor shut down", ree);
 				break;
@@ -158,7 +164,7 @@ public class WebEventDispatcher implements WebElementListener,
 		}
 	}
 
-	private void callListener(final WebElementListener listener, final ElementEvent event) {
+	private void callListener(final WebElementEventListener listener, final WebElementEvent event) {
 		try {
 			executor.invokeAny(Collections.<Callable<Void>>singleton(() -> {
 				listener.registrationEvent(event);

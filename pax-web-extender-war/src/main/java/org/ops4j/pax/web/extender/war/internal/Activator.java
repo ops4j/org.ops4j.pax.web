@@ -17,69 +17,94 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
-import java.util.Hashtable;
-
-import org.ops4j.pax.web.extender.war.internal.extender.AbstractExtender;
-import org.ops4j.pax.web.extender.war.internal.extender.Extension;
-import org.ops4j.pax.web.extender.war.internal.parser.WebAppParser;
-import org.ops4j.pax.web.service.spi.WarManager;
+import org.apache.felix.utils.extender.AbstractExtender;
+import org.apache.felix.utils.extender.Extension;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Filter;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("deprecation")
+/**
+ * The {@link org.osgi.framework.BundleActivator} for pax-web-extender-war, which sets all the things up.
+ */
 public class Activator extends AbstractExtender {
 
-	private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
-	private WebObserver webObserver;
-	private WebEventDispatcher webEventDispatcher;
-	private ServiceRegistration<WarManager> registration;
+	public static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+
+	/**
+	 * WAR Extender context - this is where the Bundles are managed as <em>extensions</em> and interaction with
+	 * {@link org.osgi.service.http.HttpService} / {@link org.ops4j.pax.web.service.WebContainer} happens.
+	 */
+	private WarExtenderContext warExtenderContext;
 
 	@Override
 	protected void doStart() throws Exception {
-		logger.debug("Pax Web WAR Extender - Starting");
+		LOG.debug("Starting Pax Web WAR Extender");
 
-		BundleContext bundleContext = getBundleContext();
+		BundleContext context = getBundleContext();
 
-		webEventDispatcher = new WebEventDispatcher(bundleContext);
+		// WarExtenderContext (just like WhiteboardExtenderContext) manages the lifecycle of both the bundles
+		// being extended and the WebContainer OSGi service where the WARs are to be installed
+		warExtenderContext = new WarExtenderContext(getBundleContext());
 
-		Filter filterPackage = bundleContext.createFilter("(objectClass=org.osgi.service.packageadmin.PackageAdmin)");
-		packageAdminTracker = new ServiceTracker<>(bundleContext, filterPackage, null);
-		packageAdminTracker.open();
-
-		DefaultWebAppDependencyManager dependencyManager = new DefaultWebAppDependencyManager();
-
-		webObserver = new WebObserver(new WebAppParser(packageAdminTracker),
-				new WebAppPublisher(webEventDispatcher, bundleContext), webEventDispatcher, dependencyManager,
-				bundleContext);
-
+		// start tracking ths extensions (Bundle -> WebApp)
 		startTracking();
-		registration = getBundleContext().registerService(
-				WarManager.class, webObserver,
-				new Hashtable<>());
 
-		logger.debug("Pax Web WAR Extender - Started");
+		LOG.debug("Pax Web WAR Extender started");
 	}
 
 	@Override
 	protected void doStop() throws Exception {
-		logger.debug("Pax Web WAR Extender - Stopping");
-		if (registration != null) {
-			registration.unregister();
-			registration = null;
-		}
+		LOG.debug("Stopping Pax Web WAR Extender");
+
+		// stop tracking the extensions
 		stopTracking();
-		webEventDispatcher.destroy();
-		packageAdminTracker.close();
-		logger.debug("Pax Web WAR Extender - Stopped");
+
+		warExtenderContext.shutdown();
+
+		LOG.debug("Pax Web WAR Extender stopped");
 	}
 
 	@Override
 	protected Extension doCreateExtension(Bundle bundle) throws Exception {
-		return webObserver.createExtension(bundle);
+		return warExtenderContext.createExtension(bundle);
+	}
+
+	@Override
+	protected void debug(Bundle bundle, String msg) {
+		if (LOG.isDebugEnabled()) {
+			if (bundle == null) {
+				LOG.debug("(no bundle): " + msg);
+			} else {
+				LOG.debug(bundle.getSymbolicName() + "/" + bundle.getVersion() + ": " + msg);
+			}
+		}
+	}
+
+	@Override
+	protected void warn(Bundle bundle, String msg, Throwable t) {
+		if (bundle == null) {
+			if (t != null) {
+				LOG.warn("(no bundle): " + msg, t);
+			} else {
+				LOG.warn("(no bundle): " + msg);
+			}
+		} else {
+			if (t != null) {
+				LOG.warn(bundle.getSymbolicName() + "/" + bundle.getVersion() + ": " + msg, t);
+			} else {
+				LOG.warn(bundle.getSymbolicName() + "/" + bundle.getVersion() + ": " + msg);
+			}
+		}
+	}
+
+	@Override
+	protected void error(String msg, Throwable t) {
+		if (t != null) {
+			LOG.error(msg, t);
+		} else {
+			LOG.error(msg);
+		}
 	}
 
 }

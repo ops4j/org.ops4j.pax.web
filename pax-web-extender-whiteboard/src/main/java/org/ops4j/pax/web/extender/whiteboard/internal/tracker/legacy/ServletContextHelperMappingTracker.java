@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.AbstractContextTracker;
 import org.ops4j.pax.web.service.spi.context.DefaultServletContextHelper;
 import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
@@ -35,13 +35,13 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class ServletContextHelperMappingTracker extends AbstractContextTracker<ServletContextHelperMapping> {
 
-	private ServletContextHelperMappingTracker(final WhiteboardContext whiteboardContext, final BundleContext bundleContext) {
-		super(whiteboardContext, bundleContext);
+	private ServletContextHelperMappingTracker(final WhiteboardExtenderContext whiteboardExtenderContext, final BundleContext bundleContext) {
+		super(whiteboardExtenderContext, bundleContext);
 	}
 
-	public static ServiceTracker<ServletContextHelperMapping, OsgiContextModel> createTracker(final WhiteboardContext whiteboardContext,
+	public static ServiceTracker<ServletContextHelperMapping, OsgiContextModel> createTracker(final WhiteboardExtenderContext whiteboardExtenderContext,
 			final BundleContext bundleContext) {
-		return new ServletContextHelperMappingTracker(whiteboardContext, bundleContext).create(ServletContextHelperMapping.class);
+		return new ServletContextHelperMappingTracker(whiteboardExtenderContext, bundleContext).create(ServletContextHelperMapping.class);
 	}
 
 	@Override

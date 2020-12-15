@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.service.spi.model.events;
 
-public class WelcomeFileEventData extends ElementEventData {
+public class WelcomeFileEventData extends WebElementEventData {
 
 	private final String[] welcomeFiles;
 	private final boolean redirect;

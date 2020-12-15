@@ -63,8 +63,8 @@ import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.JspModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
-import org.ops4j.pax.web.service.spi.model.events.ElementEvent;
-import org.ops4j.pax.web.service.spi.model.events.WebElementListener;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEventListener;
 import org.ops4j.pax.web.service.spi.servlet.DefaultJspPropertyGroupDescriptor;
 import org.ops4j.pax.web.service.spi.servlet.DefaultSessionCookieConfig;
 import org.ops4j.pax.web.service.spi.servlet.DefaultTaglibDescriptor;
@@ -107,7 +107,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 	private final ServerController serverController;
 
-	private final WebElementListener eventDispatcher;
+	private final WebElementEventListener eventDispatcher;
 
 	private final WhiteboardWebContainerView whiteboardContainerView = new WhiteboardWebContainer();
 	private final DirectWebContainerView directContainerView = new DirectWebContainer();
@@ -116,7 +116,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 //	private final Boolean showStacks;
 
 	public HttpServiceEnabled(final Bundle bundle, final ServerController srvController,
-			final ServerModel serverModel, final WebElementListener eventDispatcher, final Configuration configuration) {
+			final ServerModel serverModel, final WebElementEventListener eventDispatcher, final Configuration configuration) {
 		LOG.debug("Creating active Http Service for: {}", bundle);
 
 		this.serverModel = serverModel;
@@ -344,7 +344,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 
 		try {
-			event(ElementEvent.State.DEPLOYING, model);
+			event(WebElementEvent.State.DEPLOYING, model);
 
 			final Batch batch = new Batch("Registration of " + model);
 
@@ -412,12 +412,12 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				return null;
 			});
 
-			event(ElementEvent.State.DEPLOYED, model);
+			event(WebElementEvent.State.DEPLOYED, model);
 		} catch (ServletException | NamespaceException | RuntimeException e) {
-			event(ElementEvent.State.FAILED, model, e);
+			event(WebElementEvent.State.FAILED, model, e);
 			throw e;
 		} catch (Exception e) {
-			event(ElementEvent.State.FAILED, model, e);
+			event(WebElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -465,7 +465,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		Bundle registeringBundle = model.getRegisteringBundle();
 
 		try {
-			event(ElementEvent.State.UNDEPLOYING, model);
+			event(WebElementEvent.State.UNDEPLOYING, model);
 
 			serverModel.run(() -> {
 				List<ServletModel> toUnregister = new LinkedList<>();
@@ -575,9 +575,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				return null;
 			});
 
-			event(ElementEvent.State.UNDEPLOYED, model);
+			event(WebElementEvent.State.UNDEPLOYED, model);
 		} catch (Exception e) {
-			event(ElementEvent.State.FAILED, model, e);
+			event(WebElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -736,7 +736,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 
 		try {
-			event(ElementEvent.State.DEPLOYING, model);
+			event(WebElementEvent.State.DEPLOYING, model);
 
 			model.performValidation();
 
@@ -759,13 +759,13 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				return null;
 			});
 
-			event(ElementEvent.State.DEPLOYED, model);
+			event(WebElementEvent.State.DEPLOYED, model);
 		} catch (NamespaceException cantHappenWheAddingFilters) {
 		} catch (RuntimeException e) {
-			event(ElementEvent.State.FAILED, model, e);
+			event(WebElementEvent.State.FAILED, model, e);
 			throw e;
 		} catch (Exception e) {
-			event(ElementEvent.State.FAILED, model, e);
+			event(WebElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -806,7 +806,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		Bundle registeringBundle = model.getRegisteringBundle();
 
 		try {
-			event(ElementEvent.State.UNDEPLOYING, model);
+			event(WebElementEvent.State.UNDEPLOYING, model);
 
 			serverModel.run(() -> {
 				List<FilterModel> toUnregister = new LinkedList<>();
@@ -887,9 +887,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				return null;
 			});
 
-			event(ElementEvent.State.UNDEPLOYED, model);
+			event(WebElementEvent.State.UNDEPLOYED, model);
 		} catch (Exception e) {
-			event(ElementEvent.State.FAILED, model, e);
+			event(WebElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -911,7 +911,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		final Batch batch = new Batch("Registration of " + model);
 
 		try {
-			event(ElementEvent.State.DEPLOYING, model);
+			event(WebElementEvent.State.DEPLOYING, model);
 
 			model.performValidation();
 
@@ -929,9 +929,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				return null;
 			});
 
-			event(ElementEvent.State.DEPLOYED, model);
+			event(WebElementEvent.State.DEPLOYED, model);
 		} catch (Exception e) {
-			event(ElementEvent.State.FAILED, model, e);
+			event(WebElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -954,7 +954,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		Bundle registeringBundle = model.getRegisteringBundle();
 
 		try {
-			event(ElementEvent.State.UNDEPLOYING, model);
+			event(WebElementEvent.State.UNDEPLOYING, model);
 
 			serverModel.run(() -> {
 				List<EventListenerModel> toUnregister = new LinkedList<>();
@@ -998,10 +998,10 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				return null;
 			});
 
-			event(ElementEvent.State.UNDEPLOYED, model);
+			event(WebElementEvent.State.UNDEPLOYED, model);
 		} catch (ServletException | NamespaceException e) {
 			// if toUnregister is null, IllegalArgumentException is thrown anyway
-			event(ElementEvent.State.FAILED, model, e);
+			event(WebElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -1029,7 +1029,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		final Batch batch = new Batch("Registration of " + model);
 
 		try {
-			event(ElementEvent.State.DEPLOYING, model);
+			event(WebElementEvent.State.DEPLOYING, model);
 
 			model.performValidation();
 
@@ -1047,9 +1047,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				return null;
 			});
 
-			event(ElementEvent.State.DEPLOYED, model);
+			event(WebElementEvent.State.DEPLOYED, model);
 		} catch (Exception e) {
-			event(ElementEvent.State.FAILED, model, e);
+			event(WebElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -1082,7 +1082,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		final Batch batch = new Batch("Unregistration of " + model);
 
 		try {
-			event(ElementEvent.State.UNDEPLOYING, model);
+			event(WebElementEvent.State.UNDEPLOYING, model);
 
 			serverModel.run(() -> {
 				// we have to "translate" contexts again, as unregistration by array doesn't tell us
@@ -1101,9 +1101,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				return null;
 			});
 
-			event(ElementEvent.State.UNDEPLOYED, model);
+			event(WebElementEvent.State.UNDEPLOYED, model);
 		} catch (Exception e) {
-			event(ElementEvent.State.FAILED, model, e);
+			event(WebElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -1136,7 +1136,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 
 		try {
-			event(ElementEvent.State.DEPLOYING, model);
+			event(WebElementEvent.State.DEPLOYING, model);
 
 			model.performValidation();
 
@@ -1158,9 +1158,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				return null;
 			});
 
-			event(ElementEvent.State.DEPLOYED, model);
+			event(WebElementEvent.State.DEPLOYED, model);
 		} catch (Exception e) {
-			event(ElementEvent.State.FAILED, model, e);
+			event(WebElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -1190,7 +1190,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		Bundle registeringBundle = model.getRegisteringBundle();
 
 		try {
-			event(ElementEvent.State.UNDEPLOYING, model);
+			event(WebElementEvent.State.UNDEPLOYING, model);
 
 			// passed "error pages" will help us find actual ErrorPageModel objects registered so far for given
 			// httpService instance - both enabled and disabled (shadowed)
@@ -1239,9 +1239,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				return null;
 			});
 
-			event(ElementEvent.State.UNDEPLOYED, model);
+			event(WebElementEvent.State.UNDEPLOYED, model);
 		} catch (Exception e) {
-			event(ElementEvent.State.FAILED, model, e);
+			event(WebElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -1397,7 +1397,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		final Batch batch = new Batch("Registration of " + model);
 
 		try {
-			event(ElementEvent.State.DEPLOYING, model);
+			event(WebElementEvent.State.DEPLOYING, model);
 
 			model.performValidation();
 
@@ -1415,9 +1415,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				return null;
 			});
 
-			event(ElementEvent.State.DEPLOYED, model);
+			event(WebElementEvent.State.DEPLOYED, model);
 		} catch (Exception e) {
-			event(ElementEvent.State.FAILED, model, e);
+			event(WebElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -1438,7 +1438,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		Bundle registeringBundle = model.getRegisteringBundle();
 
 		try {
-			event(ElementEvent.State.UNDEPLOYING, model);
+			event(WebElementEvent.State.UNDEPLOYING, model);
 
 			serverModel.run(() -> {
 				List<ContainerInitializerModel> toUnregister = new LinkedList<>();
@@ -1477,10 +1477,10 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				return null;
 			});
 
-			event(ElementEvent.State.UNDEPLOYED, model);
+			event(WebElementEvent.State.UNDEPLOYED, model);
 		} catch (ServletException | NamespaceException e) {
 			// if toUnregister is null, IllegalArgumentException is thrown anyway
-			event(ElementEvent.State.FAILED, model, e);
+			event(WebElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -1573,15 +1573,15 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 	// --- private support methods
 
-	private void event(ElementEvent.State type, ElementModel<?, ?> model) {
+	private void event(WebElementEvent.State type, ElementModel<?, ?> model) {
 		if (eventDispatcher != null) {
-			eventDispatcher.registrationEvent(new ElementEvent(type, model.asEventData()));
+			eventDispatcher.registrationEvent(new WebElementEvent(type, model.asEventData()));
 		}
 	}
 
-	private void event(ElementEvent.State type, ElementModel<?, ?> model, Exception exception) {
+	private void event(WebElementEvent.State type, ElementModel<?, ?> model, Exception exception) {
 		if (eventDispatcher != null) {
-			eventDispatcher.registrationEvent(new ElementEvent(type, model.asEventData(), exception));
+			eventDispatcher.registrationEvent(new WebElementEvent(type, model.asEventData(), exception));
 		}
 	}
 

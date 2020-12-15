@@ -24,7 +24,7 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.WaitCondition;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
-import org.ops4j.pax.web.service.spi.model.events.ElementEvent;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
 import org.ops4j.pax.web.service.spi.model.events.ErrorPageEventData;
 import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
 import org.ops4j.pax.web.service.spi.model.events.WelcomeFileEventData;
@@ -80,26 +80,26 @@ public abstract class AbstractWhiteboardDSRestartIntegrationTest extends Abstrac
 			//  - WhiteboardServlet
 			// elements registered to named context(s):
 			//  - PaxWebWhiteboardErrorPageMapping: "CustomHttpContextMapping"
-			match = events.stream().anyMatch(e -> e.getType() == ElementEvent.State.DEPLOYED
+			match = events.stream().anyMatch(e -> e.getType() == WebElementEvent.State.DEPLOYED
 					&& e.getData() instanceof ErrorPageEventData
 					&& usesContexts(e.getData(), "CustomHttpContextMapping"));
 			//  - PaxWebWhiteboardServletMapping: "CustomHttpContext"
-			match &= events.stream().anyMatch(e -> e.getType() == ElementEvent.State.DEPLOYED
+			match &= events.stream().anyMatch(e -> e.getType() == WebElementEvent.State.DEPLOYED
 					&& e.getData() instanceof ServletEventData
 					&& ((ServletEventData)e.getData()).getServletName().equals("org.ops4j.pax.web.samples.whiteboard.ds.extended.PaxWebWhiteboardServletMapping")
 					&& usesContexts(e.getData(), "CustomHttpContext"));
 			//  - PaxWebWhiteboardWelcomeFiles: "CustomHttpContext" and "CustomHttpContextMapping"
-			match &= events.stream().anyMatch(e -> e.getType() == ElementEvent.State.DEPLOYED
+			match &= events.stream().anyMatch(e -> e.getType() == WebElementEvent.State.DEPLOYED
 					&& e.getData() instanceof WelcomeFileEventData
 					&& usesContexts(e.getData(), "CustomHttpContext", "CustomHttpContextMapping"));
 			//  - WhiteboardListener: "CustomContext" - don't care
 			//  - WhiteboardResource: "default", "CustomContext", "CustomHttpContext" and "CustomHttpContextMapping"
-			match &= events.stream().anyMatch(e -> e.getType() == ElementEvent.State.DEPLOYED
+			match &= events.stream().anyMatch(e -> e.getType() == WebElementEvent.State.DEPLOYED
 					&& e.getData() instanceof ServletEventData
 					&& ((ServletEventData)e.getData()).isResourceServlet()
 					&& usesContexts(e.getData(), "default", "CustomContext", "CustomHttpContext", "CustomHttpContextMapping"));
 			//  - WhiteboardServletWithContext: "CustomContext"
-			match &= events.stream().anyMatch(e -> e.getType() == ElementEvent.State.DEPLOYED
+			match &= events.stream().anyMatch(e -> e.getType() == WebElementEvent.State.DEPLOYED
 					&& e.getData() instanceof ServletEventData
 					&& ((ServletEventData)e.getData()).getServletName().equals("ServletWithContext")
 					&& usesContexts(e.getData(), "CustomContext"));
@@ -250,21 +250,21 @@ public abstract class AbstractWhiteboardDSRestartIntegrationTest extends Abstrac
 			}
 		}, events -> {
 			boolean match = true;
-			match = events.stream().anyMatch(e -> e.getType() == ElementEvent.State.DEPLOYED
+			match = events.stream().anyMatch(e -> e.getType() == WebElementEvent.State.DEPLOYED
 					&& e.getData() instanceof ErrorPageEventData
 					&& usesContexts(e.getData(), "CustomHttpContextMapping"));
-			match &= events.stream().anyMatch(e -> e.getType() == ElementEvent.State.DEPLOYED
+			match &= events.stream().anyMatch(e -> e.getType() == WebElementEvent.State.DEPLOYED
 					&& e.getData() instanceof ServletEventData
 					&& ((ServletEventData)e.getData()).getServletName().equals("org.ops4j.pax.web.samples.whiteboard.ds.extended.PaxWebWhiteboardServletMapping")
 					&& usesContexts(e.getData(), "CustomHttpContext"));
-			match &= events.stream().anyMatch(e -> e.getType() == ElementEvent.State.DEPLOYED
+			match &= events.stream().anyMatch(e -> e.getType() == WebElementEvent.State.DEPLOYED
 					&& e.getData() instanceof WelcomeFileEventData
 					&& usesContexts(e.getData(), "CustomHttpContext", "CustomHttpContextMapping"));
-			match &= events.stream().anyMatch(e -> e.getType() == ElementEvent.State.DEPLOYED
+			match &= events.stream().anyMatch(e -> e.getType() == WebElementEvent.State.DEPLOYED
 					&& e.getData() instanceof ServletEventData
 					&& ((ServletEventData)e.getData()).isResourceServlet()
 					&& usesContexts(e.getData(), "default", "CustomContext", "CustomHttpContext", "CustomHttpContextMapping"));
-			match &= events.stream().anyMatch(e -> e.getType() == ElementEvent.State.DEPLOYED
+			match &= events.stream().anyMatch(e -> e.getType() == WebElementEvent.State.DEPLOYED
 					&& e.getData() instanceof ServletEventData
 					&& ((ServletEventData)e.getData()).getServletName().equals("ServletWithContext")
 					&& usesContexts(e.getData(), "CustomContext"));

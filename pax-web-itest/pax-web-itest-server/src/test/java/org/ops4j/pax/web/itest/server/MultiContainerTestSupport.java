@@ -41,7 +41,7 @@ import org.junit.Before;
 import org.junit.runners.Parameterized;
 import org.mockito.ArgumentMatchers;
 import org.mockito.stubbing.Answer;
-import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.FilterTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.HttpContextTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ListenerTracker;
@@ -130,7 +130,7 @@ public class MultiContainerTestSupport {
 	protected Map<Bundle, HttpServiceEnabled> containers = new HashMap<>();
 	protected ServiceReference<WebContainer> containerRef;
 
-	protected WhiteboardContext whiteboard;
+	protected WhiteboardExtenderContext whiteboard;
 
 	private ServiceTrackerCustomizer<ServletContextHelper, OsgiContextModel> servletContextHelperCustomizer;
 	private ServiceTrackerCustomizer<ServletContextHelperMapping, OsgiContextModel> servletContextHelperMappingCustomizer;
@@ -213,8 +213,9 @@ public class MultiContainerTestSupport {
 		when(containerRef.getProperty(Constants.SERVICE_ID)).thenReturn(42L);
 		when(whiteboardBundleContext.getService(containerRef)).thenReturn(container);
 
-		whiteboard = new WhiteboardContext(null, whiteboardBundleContext);
-		whiteboard.webContainerAdded(containerRef);
+		when(whiteboardBundleContext.getServiceReferences(WebContainer.class.getName(), null))
+				.thenReturn(new ServiceReference[] { containerRef });
+		whiteboard = new WhiteboardExtenderContext(null, whiteboardBundleContext, true);
 
 		servletContextHelperCustomizer = getCustomizer(ServletContextHelperTracker.createTracker(whiteboard, whiteboardBundleContext));
 		servletContextHelperMappingCustomizer = getCustomizer(ServletContextHelperMappingTracker.createTracker(whiteboard, whiteboardBundleContext));

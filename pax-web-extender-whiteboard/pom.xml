@@ -96,7 +96,7 @@
 							org.ops4j.pax.web.extender.whiteboard.internal.*
 						</Private-Package>
 						<Export-Package>
-							<!-- pax-web-spi -->
+							<!-- pax-web-extender-whiteboard -->
 							org.ops4j.pax.web.extender.whiteboard;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.extender.whiteboard.runtime;version="${pax-web.osgi.version}"
 						</Export-Package>

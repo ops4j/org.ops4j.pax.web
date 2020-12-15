@@ -92,6 +92,7 @@
 			<artifactId>xbean-finder</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
 		<!-- Logging -->
 
 		<dependency>

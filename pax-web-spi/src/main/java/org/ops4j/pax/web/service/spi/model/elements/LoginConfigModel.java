@@ -19,7 +19,7 @@ import java.util.List;
 
 import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
-import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEventData;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 
 /**
@@ -55,7 +55,7 @@ public class LoginConfigModel extends ElementModel {
 	}
 
 	@Override
-	public ElementEventData asEventData() {
+	public WebElementEventData asEventData() {
 		return null;
 	}
 

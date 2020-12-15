@@ -15,22 +15,18 @@
  */
 package org.ops4j.pax.web.service.spi.model.events;
 
-public class JspEventData extends WebElementEventData {
+/**
+ * <p>128.5 Events - a listener interface to send and receive (by callback) events related to entire web
+ * application.</p>
+ *
+ * <p>For events related to components of web applications (elements and contexts), see {@link WebElementEventListener}.</p>
+ */
+public interface WebApplicationEventListener {
 
-	private final String[] mappings;
-	private final String jspFile;
-
-	public JspEventData(String[] mappings, String jspFile) {
-		this.mappings = mappings;
-		this.jspFile = jspFile;
-	}
-
-	public String[] getMappings() {
-		return mappings;
-	}
-
-	public String getJspFile() {
-		return jspFile;
-	}
+	/**
+	 * Notification about registration (failed or successful) and unregistration of a web application (WAB)
+	 * @param event
+	 */
+	void webEvent(WebApplicationEvent event);
 
 }

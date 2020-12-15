@@ -23,7 +23,7 @@ import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServlet;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
@@ -45,13 +45,13 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, ServletEventData, ServletModel> {
 
-	private ServletTracker(final WhiteboardContext whiteboardContext, final BundleContext bundleContext) {
-		super(whiteboardContext, bundleContext);
+	private ServletTracker(final WhiteboardExtenderContext whiteboardExtenderContext, final BundleContext bundleContext) {
+		super(whiteboardExtenderContext, bundleContext);
 	}
 
-	public static ServiceTracker<Servlet, ServletModel> createTracker(final WhiteboardContext whiteboardContext,
+	public static ServiceTracker<Servlet, ServletModel> createTracker(final WhiteboardExtenderContext whiteboardExtenderContext,
 			final BundleContext bundleContext) {
-		return new ServletTracker(whiteboardContext, bundleContext)
+		return new ServletTracker(whiteboardExtenderContext, bundleContext)
 				.create(Servlet.class, GenericServlet.class, HttpServlet.class);
 	}
 

@@ -59,7 +59,7 @@ import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
-import org.ops4j.pax.web.service.spi.model.events.ElementEventData;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEventData;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
@@ -1708,7 +1708,7 @@ public class ServerModel implements BatchVisitor {
 	 * @param <T>
 	 * @return
 	 */
-	private <T, D extends ElementEventData> boolean haveAnyNameConflict(String name1, String name2,
+	private <T, D extends WebElementEventData> boolean haveAnyNameConflict(String name1, String name2,
 			ElementModel<T, D> model1, ElementModel<T, D> model2) {
 		// if one model has name conflict with other model, check whether the conflict
 		// is in disjoint servlet contexts

@@ -23,7 +23,7 @@ import org.junit.Test;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.WaitCondition;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
-import org.ops4j.pax.web.service.spi.model.events.ElementEvent;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
 import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -106,7 +106,7 @@ public abstract class AbstractWhiteboardRestartIntegrationTest extends AbstractC
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}, events -> {
-			return events.stream().anyMatch(e -> e.getType() == ElementEvent.State.DEPLOYED
+			return events.stream().anyMatch(e -> e.getType() == WebElementEvent.State.DEPLOYED
 					&& e.getData() instanceof ServletEventData
 					&& ((ServletEventData)e.getData()).getServletName().equals("root-servlet"));
 		});

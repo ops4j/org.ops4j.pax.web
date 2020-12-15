@@ -204,8 +204,13 @@
 			<artifactId>jetty-servlet</artifactId>
 		</dependency>
 		<dependency>
-			<artifactId>jetty-xml</artifactId>
 			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-xml</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-plus</artifactId>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>

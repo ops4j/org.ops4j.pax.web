@@ -17,7 +17,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 
 import javax.servlet.Servlet;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext;
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
 import org.ops4j.pax.web.service.whiteboard.ServletMapping;
@@ -38,13 +38,13 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class ServletMappingTracker extends AbstractMappingTracker<ServletMapping, Servlet, ServletEventData, ServletModel> {
 
-	private ServletMappingTracker(final WhiteboardContext whiteboardContext, final BundleContext bundleContext) {
-		super(whiteboardContext, bundleContext);
+	private ServletMappingTracker(final WhiteboardExtenderContext whiteboardExtenderContext, final BundleContext bundleContext) {
+		super(whiteboardExtenderContext, bundleContext);
 	}
 
-	public static ServiceTracker<ServletMapping, ServletModel> createTracker(final WhiteboardContext whiteboardContext,
+	public static ServiceTracker<ServletMapping, ServletModel> createTracker(final WhiteboardExtenderContext whiteboardExtenderContext,
 			final BundleContext bundleContext) {
-		return new ServletMappingTracker(whiteboardContext, bundleContext).create(ServletMapping.class);
+		return new ServletMappingTracker(whiteboardExtenderContext, bundleContext).create(ServletMapping.class);
 	}
 
 	@Override

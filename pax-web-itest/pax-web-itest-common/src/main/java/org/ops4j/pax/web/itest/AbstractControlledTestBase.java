@@ -234,6 +234,9 @@ public abstract class AbstractControlledTestBase {
 
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-util").versionAsInProject(),
+				// required since https://github.com/eclipse/jetty.project/issues/5539
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-util-ajax").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-io").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty")
