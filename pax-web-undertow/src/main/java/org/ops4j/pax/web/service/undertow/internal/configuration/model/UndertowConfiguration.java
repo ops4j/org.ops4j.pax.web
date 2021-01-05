@@ -97,6 +97,9 @@ public class UndertowConfiguration {
 				for (UndertowSubsystem.ResponseHeaderFilter filter : subsystem.getFilters().getResponseHeaders()) {
 					filtersMap.put(filter.getName(), filter);
 				}
+				for (UndertowSubsystem.RequestLimitFilter filter : subsystem.getFilters().getRequestLimits()) {
+                                        filtersMap.put(filter.getName(), filter);
+				}
 				for (UndertowSubsystem.ErrorPageFilter filter : subsystem.getFilters().getErrorPages()) {
 					filtersMap.put(filter.getName(), filter);
 				}

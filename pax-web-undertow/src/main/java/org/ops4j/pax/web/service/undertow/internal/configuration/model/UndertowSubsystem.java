@@ -27,7 +27,7 @@ import io.undertow.predicate.Predicate;
 import io.undertow.predicate.Predicates;
 import io.undertow.server.HandlerWrapper;
 import io.undertow.server.HttpHandler;
-import io.undertow.server.handlers.ResponseCodeHandler;
+import io.undertow.server.handlers.RequestLimitingHandler;
 import io.undertow.server.handlers.SetHeaderHandler;
 import io.undertow.server.handlers.builder.HandlerParser;
 
@@ -185,6 +185,7 @@ public class UndertowSubsystem {
 
 	@XmlType(name = "filterType", namespace = NS_UNDERTOW, propOrder = {
 			"responseHeaders",
+			"requestLimits",
 			"errorPages",
 			"customFilters",
 			"expressionFilters"
@@ -192,6 +193,8 @@ public class UndertowSubsystem {
 	public static class Filters {
 		@XmlElement(name = "response-header")
 		private List<ResponseHeaderFilter> responseHeaders = new ArrayList<>();
+		@XmlElement(name = "request-limit")
+                private List<RequestLimitFilter> requestLimits = new ArrayList<>();
 		@XmlElement(name = "error-page")
 		private List<ErrorPageFilter> errorPages = new ArrayList<>();
 		@XmlElement(name = "filter")
@@ -202,6 +205,10 @@ public class UndertowSubsystem {
 		public List<ResponseHeaderFilter> getResponseHeaders() {
 			return responseHeaders;
 		}
+		
+		public List<RequestLimitFilter> getRequestLimits() {
+                        return requestLimits;
+                }
 
 		public List<ErrorPageFilter> getErrorPages() {
 			return errorPages;
@@ -273,6 +280,44 @@ public class UndertowSubsystem {
 		}
 	}
 
+	@XmlType(name = "request-limitType", namespace = NS_UNDERTOW)
+        public static class RequestLimitFilter extends AbstractFilter {
+                @XmlAttribute(name = "max-concurrent-requests")
+                private int maxConcurrentRequests;
+                @XmlAttribute(name = "queue-size")
+                private int queueSize;
+
+                @Override
+                public HttpHandler configure(HttpHandler handler, String predicate) {
+                        RequestLimitingHandler requestLimitingHandler = 
+                            new RequestLimitingHandler(getMaxConcurrentRequests(), getQueueSize(), handler);
+                        if (predicate == null) {
+                                return requestLimitingHandler;
+                        }
+                        Predicate p = Predicates.parse(predicate, HttpHandler.class.getClassLoader());
+                        // predicate means "apply RequestLimitingHandler if predicate matches, otherwise forward to passed handler"
+                        return Handlers.predicate(p, requestLimitingHandler, handler);
+                }
+
+                public int getMaxConcurrentRequests() {
+                    return maxConcurrentRequests;
+                }
+
+                public void setMaxConcurrentRequests(int maxConcurrentRequests) {
+                    this.maxConcurrentRequests = maxConcurrentRequests;
+                }
+
+                public int getQueueSize() {
+                    return queueSize;
+                }
+
+                public void setQueueSize(int queueSize) {
+                    this.queueSize = queueSize;
+                }
+
+                
+        }
+	
 	@XmlType(name = "errorPageType", namespace = NS_UNDERTOW)
 	public static class ErrorPageFilter extends AbstractFilter {
 		@XmlAttribute
