@@ -17,7 +17,7 @@
  */
 package org.ops4j.pax.web.extender.war.internal.model;
 
-import org.ops4j.lang.NullArgumentException;
+//import org.ops4j.lang.NullArgumentException;
 
 /**
  * Servlet mapping element in web.xml.
@@ -52,7 +52,7 @@ public class WebAppServletMapping {
 	 * @throws NullArgumentException if filter name is null
 	 */
 	public void setServletName(final String servletName) {
-		NullArgumentException.validateNotNull(servletName, "Servlet name");
+//		NullArgumentException.validateNotNull(servletName, "Servlet name");
 		this.servletName = servletName;
 	}
 
@@ -72,7 +72,7 @@ public class WebAppServletMapping {
 	 * @throws NullArgumentException if url pattern is null
 	 */
 	public void setUrlPattern(final String urlPattern) {
-		NullArgumentException.validateNotNull(urlPattern, "Url pattern");
+//		NullArgumentException.validateNotNull(urlPattern, "Url pattern");
 		this.urlPattern = urlPattern;
 	}
 

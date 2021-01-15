@@ -21,7 +21,7 @@ import java.util.EnumSet;
 
 import javax.servlet.DispatcherType;
 
-import org.ops4j.lang.NullArgumentException;
+//import org.ops4j.lang.NullArgumentException;
 
 /**
  * Models filter mapping element in web.xml.
@@ -62,7 +62,7 @@ public class WebAppFilterMapping {
 	 * @throws NullArgumentException if filter name is null
 	 */
 	public void setFilterName(final String filterName) {
-		NullArgumentException.validateNotNull(filterName, "Filter name");
+//		NullArgumentException.validateNotNull(filterName, "Filter name");
 		this.filterName = filterName;
 	}
 

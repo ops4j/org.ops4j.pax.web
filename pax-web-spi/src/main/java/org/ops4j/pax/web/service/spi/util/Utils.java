@@ -23,6 +23,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -40,6 +41,9 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWire;
+import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -432,6 +436,9 @@ public class Utils {
 	}
 
 	public static Bundle getPaxWebJspBundle(BundleContext bundleContext) {
+		if (bundleContext == null) {
+			return null;
+		}
 		for (Bundle b : bundleContext.getBundles()) {
 			if (PaxWebConstants.DEFAULT_PAX_WEB_JSP_SYMBOLIC_NAME.equals(b.getSymbolicName())) {
 				return b;
@@ -441,12 +448,49 @@ public class Utils {
 	}
 
 	public static Bundle getPaxWebJspBundle(Bundle bundle) {
-		if (bundle == null) {
+		BundleContext ctx = bundle == null ? null : bundle.getBundleContext();
+		if (ctx == null) {
 			return null;
 		}
-		for (Bundle b : bundle.getBundleContext().getBundles()) {
+		for (Bundle b : ctx.getBundles()) {
 			if (PaxWebConstants.DEFAULT_PAX_WEB_JSP_SYMBOLIC_NAME.equals(b.getSymbolicName())) {
 				return b;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns a named header from a bundle or from one of its attached fragments
+	 *
+	 * @param bundle
+	 * @param key
+	 * @return
+	 */
+	public static String getManifestHeader(Bundle bundle, String key) {
+		if (bundle == null || bundle.getHeaders() == null) {
+			// strange...
+			return null;
+		}
+		String header = bundle.getHeaders().get(key);
+		if (header != null) {
+			return header;
+		}
+
+		// check fragments
+		BundleWiring wiring = bundle.adapt(BundleWiring.class);
+		if (wiring != null) {
+			List<BundleWire> wires = wiring.getProvidedWires(BundleRevision.HOST_NAMESPACE);
+			if (wires != null) {
+				for (BundleWire wire : wires) {
+					Bundle b = wire.getRequirerWiring().getBundle();
+					if (b != null && b.getHeaders() != null) {
+						header = b.getHeaders().get(key);
+						if (header != null) {
+							return header;
+						}
+					}
+				}
 			}
 		}
 		return null;

@@ -35,7 +35,6 @@ import org.ops4j.pax.web.service.spi.util.NamedThreadFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -77,7 +76,7 @@ public class WebApplicationEventDispatcher implements WebApplicationEventListene
 //	private final ServiceTracker<EventAdmin, EventAdmin> eventAdminTracker;
 //	private final ServiceTracker<LogService, LogService> logServiceTracker;
 
-	public WebApplicationEventDispatcher(final BundleContext bundleContext) throws InvalidSyntaxException {
+	public WebApplicationEventDispatcher(final BundleContext bundleContext) {
 		this.bundleContext = bundleContext;
 		this.executor = Executors.newFixedThreadPool(1, new NamedThreadFactory("wab-events"));
 

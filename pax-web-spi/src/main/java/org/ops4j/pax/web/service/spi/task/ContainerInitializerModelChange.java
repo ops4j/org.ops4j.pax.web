@@ -72,7 +72,15 @@ public class ContainerInitializerModelChange extends Change {
 
 	@Override
 	public String toString() {
-		return getKind() + ": " + containerInitializerModel;
+		ContainerInitializerModel model = containerInitializerModel;
+		if (model == null && containerInitializerModels.size() == 1) {
+			model = containerInitializerModels.get(0);
+		}
+		if (model != null) {
+			return getKind() + ": " + model;
+		} else {
+			return getKind() + ": " + containerInitializerModels.size() + " container initializer models";
+		}
 	}
 
 }

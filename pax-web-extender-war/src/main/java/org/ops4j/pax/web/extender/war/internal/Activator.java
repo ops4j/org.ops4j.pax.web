@@ -17,8 +17,13 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.apache.felix.utils.extender.AbstractExtender;
 import org.apache.felix.utils.extender.Extension;
+import org.ops4j.pax.web.service.PaxWebConstants;
+import org.ops4j.pax.web.service.spi.util.NamedThreadFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -31,11 +36,36 @@ public class Activator extends AbstractExtender {
 
 	public static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
+	private static final int DEFAULT_POOL_SIZE = 3;
+
 	/**
 	 * WAR Extender context - this is where the Bundles are managed as <em>extensions</em> and interaction with
 	 * {@link org.osgi.service.http.HttpService} / {@link org.ops4j.pax.web.service.WebContainer} happens.
 	 */
 	private WarExtenderContext warExtenderContext;
+
+	private int poolSize = DEFAULT_POOL_SIZE;
+
+	@Override
+	protected ExecutorService createExecutor() {
+		return Executors.newScheduledThreadPool(poolSize, new NamedThreadFactory("wab-extender"));
+	}
+
+	@Override
+	public void start(BundleContext context) throws Exception {
+		String poolSizeValue = context.getProperty(PaxWebConstants.BUNDLE_CONTEXT_PROPERTY_WAR_EXTENDER_THREADS);
+		if (poolSizeValue != null && !"".equals(poolSizeValue)) {
+			try {
+				poolSize = Integer.parseInt(poolSizeValue);
+			} catch (NumberFormatException ignored) {
+			}
+		}
+
+		// let's be explicit - even if asynchronous mode is default. Please do not change this.
+		setSynchronous(false);
+
+		super.start(context);
+	}
 
 	@Override
 	protected void doStart() throws Exception {
@@ -45,7 +75,7 @@ public class Activator extends AbstractExtender {
 
 		// WarExtenderContext (just like WhiteboardExtenderContext) manages the lifecycle of both the bundles
 		// being extended and the WebContainer OSGi service where the WARs are to be installed
-		warExtenderContext = new WarExtenderContext(getBundleContext());
+		warExtenderContext = new WarExtenderContext(getBundleContext(), getExecutors());
 
 		// start tracking ths extensions (Bundle -> WebApp)
 		startTracking();

@@ -21,9 +21,7 @@ import java.util.EventListener;
 
 import javax.servlet.Servlet;
 
-import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.swissbox.core.BundleClassLoader;
-import org.ops4j.pax.web.extender.war.internal.model.WebApp;
+import org.ops4j.pax.web.extender.war.internal.model.BundleWebApplication;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
@@ -56,7 +54,7 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 	 */
 	private HttpContext httpContext;
 
-	private BundleClassLoader bundleClassLoader;
+//	private BundleClassLoader bundleClassLoader;
 
 	/**
 	 * Creates a new unregistration visitor.
@@ -65,18 +63,18 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 	 * @throws NullArgumentException if web container is null
 	 */
 	UnregisterWebAppVisitorWC(final WebContainer webContainer) {
-		NullArgumentException.validateNotNull(webContainer, "Web Container");
+//		NullArgumentException.validateNotNull(webContainer, "Web Container");
 		this.webContainer = webContainer;
 	}
 
 	/**
 	 * Unregisters resources related to web app.
 	 *
-	 * @see WebAppVisitor#visit(org.ops4j.pax.web.extender.war.internal.model.WebApp)
+	 * @see WebAppVisitor#visit(BundleWebApplication)
 	 */
-	public void visit(final WebApp webApp) {
-		bundleClassLoader = new BundleClassLoader(webApp.getBundle());
-		httpContext = webApp.getHttpContext();
+	public void visit(final BundleWebApplication webApp) {
+//		bundleClassLoader = new BundleClassLoader(webApp.getBundle());
+//		httpContext = webApp.getHttpContext();
 		// Make sure we stop the context first, so that listeners
 		// can be called correctly before removing ann objects
 		webContainer.begin(httpContext);
@@ -115,17 +113,17 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 	 * @see WebAppVisitor#visit(WebAppServlet)
 	 */
 	public void visit(final WebAppServlet webAppServlet) {
-		NullArgumentException.validateNotNull(webAppServlet, "Web app servlet");
+//		NullArgumentException.validateNotNull(webAppServlet, "Web app servlet");
 		Class<? extends Servlet> servletClass = webAppServlet
 				.getServletClass();
 		if (servletClass == null && webAppServlet.getServletClassName() != null) {
-			try {
-				servletClass = RegisterWebAppVisitorHS.loadClass(Servlet.class, bundleClassLoader,
-						webAppServlet.getServletClassName());
-			} catch (ClassNotFoundException | IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+//			try {
+//				servletClass = RegisterWebAppVisitorHS.loadClass(Servlet.class, bundleClassLoader,
+//						webAppServlet.getServletClassName());
+//			} catch (ClassNotFoundException | IllegalAccessException e) {
+//				 TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 		}
 		if (servletClass != null) {
 			//CHECKSTYLE:OFF
@@ -146,7 +144,7 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 	 * @see WebAppVisitor#visit(WebAppFilter)
 	 */
 	public void visit(final WebAppFilter webAppFilter) {
-		NullArgumentException.validateNotNull(webAppFilter, "Web app filter");
+//		NullArgumentException.validateNotNull(webAppFilter, "Web app filter");
 		String filterName = webAppFilter.getFilterName();
 
 		if (filterName != null) {
@@ -167,8 +165,8 @@ class UnregisterWebAppVisitorWC implements WebAppVisitor {
 	 * @see WebAppVisitor#visit(WebAppListener)
 	 */
 	public void visit(final WebAppListener webAppListener) {
-		NullArgumentException.validateNotNull(webAppListener,
-				"Web app listener");
+//		NullArgumentException.validateNotNull(webAppListener,
+//				"Web app listener");
 		final EventListener listener = webAppListener.getListener();
 		if (listener != null) {
 			//CHECKSTYLE:OFF

@@ -70,7 +70,7 @@ public class BundleWhiteboardApplication {
 	private final WebContainerManager webContainerManager;
 
 	/**
-	 * Current {@link ServiceReference} to use when obtaining a {@like WhiteboardWebContainerView} from
+	 * Current {@link ServiceReference} to use when obtaining a {@link WhiteboardWebContainerView} from
 	 * {@link WebContainerManager}. {@link WebContainerManager} ensures that this reference is consistent - never
 	 * set when there's already a reference set without unsetting it first.
 	 */
@@ -115,7 +115,7 @@ public class BundleWhiteboardApplication {
 	}
 
 	/**
-	 * When (tracked at {@link WhiteboardExtenderContext} level) new {@link WebContainer} {@link ServiceReference}
+	 * When (tracked at {@link WebContainerManager} level) new {@link WebContainer} {@link ServiceReference}
 	 * is added, it is passed to each {@link BundleWhiteboardApplication}, so it can (now and later)
 	 * managed its own bundle-scoped {@link WhiteboardWebContainerView} to install/uninstall web
 	 * elements and contexts
@@ -124,8 +124,9 @@ public class BundleWhiteboardApplication {
 	public void webContainerAdded(ServiceReference<WebContainer> ref) {
 		webContainerServiceRef = ref;
 
-		// install all current contexts and elements. Lifecycle is managed at ExtenderContext level,
+		// install all current contexts and elements. Lifecycle is managed at WhiteboardExtenderContext level,
 		// so we don't have to care about uninstalling the contexts/elements from previous WebContainer
+
 		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle.getBundleContext(), ref);
 		if (view != null) {
 			webContexts.keySet().forEach(ctx -> {
@@ -146,27 +147,27 @@ public class BundleWhiteboardApplication {
 	}
 
 	/**
-	 * {@link WebContainer} reference was untracked at {@link WhiteboardExtenderContext} level.
+	 * {@link WebContainer} reference was untracked at {@link WebContainerManager} level.
 	 * @param ref
 	 */
 	public void webContainerRemoved(ServiceReference<WebContainer> ref) {
 		if (ref != webContainerServiceRef) {
-			throw new IllegalStateException("Removing unknwonw WebContainer reference " + ref + ", expecting " + webContainerServiceRef);
+			throw new IllegalStateException("Removing unknown WebContainer reference " + ref + ", expecting " + webContainerServiceRef);
 		}
 
-		// uninstall all current contexts and elements
+		// no need to uninstall current contexts and elements - they'll get unregistered when bundle-scoped
+		// HttpService/WebContainer is stopped. Here we only mark them as unregistered
 		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle.getBundleContext(), ref);
 		if (view != null) {
 			webElements.keySet().forEach(element -> {
 				if (element.getContextModels().size() > 0 && webElements.get(element)) {
-					// no need to do this otherwise
-					element.unregister(view);
+//					element.unregister(view);
 					webElements.put(element, false);
 				}
 			});
 			webContexts.keySet().forEach(ctx -> {
 				if (webContexts.get(ctx)) {
-					view.removeWhiteboardOsgiContextModel(ctx);
+//					view.removeWhiteboardOsgiContextModel(ctx);
 					webContexts.put(ctx, false);
 				}
 			});

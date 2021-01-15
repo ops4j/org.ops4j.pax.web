@@ -20,36 +20,20 @@ package org.ops4j.pax.web.extender.war.internal;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.EventListener;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
 
-import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.swissbox.core.BundleClassLoader;
-import org.ops4j.pax.web.extender.war.internal.model.WebApp;
+import org.ops4j.pax.web.extender.war.internal.model.BundleWebApplication;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppCookieConfig;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppJspConfig;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppJspPropertyGroup;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppJspServlet;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppLoginConfig;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppSecurityConstraint;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppServletContainerInitializer;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppTagLib;
 import org.ops4j.pax.web.service.PaxWebConstants;
-import org.ops4j.pax.web.service.WebAppDependencyHolder;
-import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.spi.util.ResourceDelegatingBundleClassLoader;
-import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
@@ -74,7 +58,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	/**
 	 * WebContainer to be used for registration.
 	 */
-	private final WebContainer webContainer;
+//	private final WebContainer webContainer;
 	/**
 	 * Created http context (during webapp visit)
 	 */
@@ -84,7 +68,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	 */
 	private ClassLoader bundleClassLoader;
 
-	private WebAppDependencyHolder dependencyHolder;
+//	private WebAppDependencyHolder dependencyHolder;
 
 	/**
 	 * Creates a new registration visitor.
@@ -92,12 +76,12 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	 * @param dependencyHolder dependency holder. Cannot be null.
 	 * @throws NullArgumentException if web container is null
 	 */
-	RegisterWebAppVisitorWC(final WebAppDependencyHolder dependencyHolder) {
-		NullArgumentException
-				.validateNotNull(dependencyHolder, "Web container");
-		this.dependencyHolder = dependencyHolder;
-		this.webContainer = (WebContainer) dependencyHolder.getHttpService();
-	}
+//	RegisterWebAppVisitorWC(final WebAppDependencyHolder dependencyHolder) {
+//		NullArgumentException
+//				.validateNotNull(dependencyHolder, "Web container");
+//		this.dependencyHolder = dependencyHolder;
+//		this.webContainer = (WebContainer) dependencyHolder.getHttpService();
+//	}
 
 	/**
 	 * Creates a default context that will be used for all following
@@ -105,24 +89,24 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	 * of war.
 	 *
 	 * @throws NullArgumentException if web app is null
-	 * @see WebAppVisitor#visit(org.ops4j.pax.web.extender.war.internal.model.WebApp)
+	 * @see WebAppVisitor#visit(BundleWebApplication)
 	 */
-	public void visit(final WebApp webApp) {
+	public void visit(final BundleWebApplication webApp) {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("visiting webapp: {}", webApp);
 		}
-		NullArgumentException.validateNotNull(webApp, "Web app");
-		bundleClassLoader = new BundleClassLoader(webApp.getBundle());
-		Set<Bundle> wiredBundles = ClassPathUtil.getBundlesInClassSpace(
-				webApp.getBundle(), new LinkedHashSet<>());
+//		NullArgumentException.validateNotNull(webApp, "Web app");
+//		bundleClassLoader = new BundleClassLoader(webApp.getBundle());
+//		Set<Bundle> wiredBundles = ClassPathUtil.getBundlesInClassSpace(
+//				webApp.getBundle(), new LinkedHashSet<>());
 		ArrayList<Bundle> bundles = new ArrayList<>();
-		bundles.add(webApp.getBundle());
-		bundles.addAll(wiredBundles);
-		bundleClassLoader = new ResourceDelegatingBundleClassLoader(bundles);
-		httpContext = new WebAppWebContainerContext(
-				webContainer.createDefaultHttpContext(), webApp.getRootPath(),
-				webApp.getBundle(), webApp.getMimeMappings());
-		webApp.setHttpContext(httpContext);
+//		bundles.add(webApp.getBundle());
+//		bundles.addAll(wiredBundles);
+//		bundleClassLoader = new ResourceDelegatingBundleClassLoader(bundles);
+//		httpContext = new WebAppWebContainerContext(
+//				webContainer.createDefaultHttpContext(), webApp.getRootPath(),
+//				webApp.getBundle(), webApp.getMimeMappings());
+//		webApp.setHttpContext(httpContext);
 		//CHECKSTYLE:OFF
 //		try {
 //			webContainer.setContextParam(RegisterWebAppVisitorHS
@@ -132,16 +116,16 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 //		}
 		//CHECKSTYLE:ON
 		// set login Config PAXWEB-210
-		if (webApp.getLoginConfigs() != null) {
-			for (WebAppLoginConfig loginConfig : webApp.getLoginConfigs()) {
-				visit(loginConfig); // TODO: what about more than one login
-				// config? shouldn't it be just one?
-			}
-		}
+//		if (webApp.getLoginConfigs() != null) {
+//			for (WebAppLoginConfig loginConfig : webApp.getLoginConfigs()) {
+//				visit(loginConfig); // TODO: what about more than one login
+//				 config? shouldn't it be just one?
+//			}
+//		}
 
 		//CHECKSTYLE:OFF
 		// set session timeout
-		if (webApp.getSessionTimeout() != null) {
+//		if (webApp.getSessionTimeout() != null) {
 			try {
 //				webContainer.setSessionTimeout(
 //						Integer.parseInt(webApp.getSessionTimeout()),
@@ -149,28 +133,28 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 			} catch (Exception ignore) {
 				LOG.error(REGISTRATION_EXCEPTION_SKIPPING, ignore);
 			}
-		}
+//		}
 		//CHECKSTYLE:ON
 
-		WebAppCookieConfig scc = webApp.getSessionCookieConfig();
-		if (scc != null) {
+//		WebAppCookieConfig scc = webApp.getSessionCookieConfig();
+//		if (scc != null) {
 //			webContainer.setSessionCookieConfig(scc.getDomain(), scc.getName(), scc.getHttpOnly(), scc.getSecure(),
 //					scc.getPath(), scc.getMaxAge(), httpContext);
-		}
+//		}
 
-		for (WebAppServletContainerInitializer servletContainerInitializer : webApp
-				.getServletContainerInitializers()) {
+//		for (WebAppServletContainerInitializer servletContainerInitializer : webApp
+//				.getServletContainerInitializers()) {
 //			webContainer.registerServletContainerInitializer(
 //					servletContainerInitializer
 //							.getServletContainerInitializer(),
 //					servletContainerInitializer.getClasses(), httpContext);
-		}
-		ServletContainerInitializer initializer = dependencyHolder
-				.getServletContainerInitializer();
-		if (initializer != null) {
+//		}
+//		ServletContainerInitializer initializer = dependencyHolder
+//				.getServletContainerInitializer();
+//		if (initializer != null) {
 //			webContainer.registerServletContainerInitializer(initializer, null,
 //					httpContext);
-		}
+//		}
 
 //TODO: VirtualHost and JettyWebXML are missing
 //		webContainer.setConnectorsAndVirtualHosts(webApp.getConnectorList(), webApp.getVirtualHostList(), httpContext);
@@ -180,62 +164,62 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 //					httpContext);
 //		}
 
-		LOG.debug("webcontainer begin!");
-		webContainer.begin(httpContext);
+//		LOG.debug("webcontainer begin!");
+//		webContainer.begin(httpContext);
 
 		//CHECKSTYLE:OFF
-		LOG.debug("registering welcome files");
+//		LOG.debug("registering welcome files");
 		// register welcome files
-		try {
-			final String[] welcomeFiles = webApp.getWelcomeFiles();
-			if (welcomeFiles != null && welcomeFiles.length > 0) {
-//				webContainer.registerWelcomeFiles(welcomeFiles, true, // redirect
-//						httpContext);
-			}
-		} catch (Exception ignore) {
-			LOG.error(REGISTRATION_EXCEPTION_SKIPPING, ignore);
-		}
+//		try {
+//			final String[] welcomeFiles = webApp.getWelcomeFiles();
+//			if (welcomeFiles != null && welcomeFiles.length > 0) {
+////				webContainer.registerWelcomeFiles(welcomeFiles, true, // redirect
+////						httpContext);
+//			}
+//		} catch (Exception ignore) {
+//			LOG.error(REGISTRATION_EXCEPTION_SKIPPING, ignore);
+//		}
 
-		LOG.debug("registering default resources");
+//		LOG.debug("registering default resources");
 		// register resource jspServlet
-		try {
-			webContainer.registerResources("/", "default", httpContext);
-		} catch (Exception ignore) {
-			LOG.error(REGISTRATION_EXCEPTION_SKIPPING, ignore);
-		}
+//		try {
+//			webContainer.registerResources("/", "default", httpContext);
+//		} catch (Exception ignore) {
+//			LOG.error(REGISTRATION_EXCEPTION_SKIPPING, ignore);
+//		}
 
-		LOG.debug("registering jsps");
+//		LOG.debug("registering jsps");
 		// register JSP support
-		try {
+//		try {
 //			webContainer
 //					.registerJsps(
 //							// Fix for PAXWEB-208
 //							new String[]{"*.jsp", "*.jspx", "*.jspf",
 //									"*.xsp", "*.JSP", "*.JSPX", "*.JSPF",
 //									"*.XSP"}, httpContext);
-		} catch (UnsupportedOperationException ignore) {
-			LOG.warn(ignore.getMessage());
-		} catch (Exception ignore) {
-			LOG.error(REGISTRATION_EXCEPTION_SKIPPING, ignore);
-		}
+//		} catch (UnsupportedOperationException ignore) {
+//			LOG.warn(ignore.getMessage());
+//		} catch (Exception ignore) {
+//			LOG.error(REGISTRATION_EXCEPTION_SKIPPING, ignore);
+//		}
 		//CHECKSTYLE:ON
 
-		WebAppJspConfig jspConfigDescriptor = webApp.getJspConfigDescriptor();
-		if (jspConfigDescriptor != null) {
-			for (WebAppTagLib webAppTagLib : jspConfigDescriptor.getTagLibConfigs()) {
-//				webContainer.registerJspConfigTagLibs(webAppTagLib.getTagLibLocation(), webAppTagLib.getTagLibUri(), httpContext);
-			}
-			for (WebAppJspPropertyGroup webAppJspPropertyGroup : jspConfigDescriptor.getJspPropertyGroups()) {
-				Boolean elIgnored = webAppJspPropertyGroup.getElIgnored();
-				List<String> includeCodes = webAppJspPropertyGroup.getIncludeCodes();
-				List<String> includePreludes = webAppJspPropertyGroup.getIncludePreludes();
-				Boolean isXml = webAppJspPropertyGroup.getIsXml();
-				Boolean scriptingInvalid = webAppJspPropertyGroup.getScriptingInvalid();
-				List<String> urlPatterns = webAppJspPropertyGroup.getUrlPatterns();
-
-//				webContainer.registerJspConfigPropertyGroup(includeCodes, includePreludes, urlPatterns, elIgnored, scriptingInvalid, isXml, httpContext);
-			}
-		}
+//		WebAppJspConfig jspConfigDescriptor = webApp.getJspConfigDescriptor();
+//		if (jspConfigDescriptor != null) {
+//			for (WebAppTagLib webAppTagLib : jspConfigDescriptor.getTagLibConfigs()) {
+////				webContainer.registerJspConfigTagLibs(webAppTagLib.getTagLibLocation(), webAppTagLib.getTagLibUri(), httpContext);
+//			}
+//			for (WebAppJspPropertyGroup webAppJspPropertyGroup : jspConfigDescriptor.getJspPropertyGroups()) {
+//				Boolean elIgnored = webAppJspPropertyGroup.getElIgnored();
+//				List<String> includeCodes = webAppJspPropertyGroup.getIncludeCodes();
+//				List<String> includePreludes = webAppJspPropertyGroup.getIncludePreludes();
+//				Boolean isXml = webAppJspPropertyGroup.getIsXml();
+//				Boolean scriptingInvalid = webAppJspPropertyGroup.getScriptingInvalid();
+//				List<String> urlPatterns = webAppJspPropertyGroup.getUrlPatterns();
+//
+////				webContainer.registerJspConfigPropertyGroup(includeCodes, includePreludes, urlPatterns, elIgnored, scriptingInvalid, isXml, httpContext);
+//			}
+//		}
 	}
 
 	/**
@@ -245,7 +229,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	 * @see WebAppVisitor#visit(org.ops4j.pax.web.extender.war.internal.model.WebAppServlet)
 	 */
 	public void visit(final WebAppServlet webAppServlet) {
-		NullArgumentException.validateNotNull(webAppServlet, "Web app servlet");
+//		NullArgumentException.validateNotNull(webAppServlet, "Web app servlet");
 		final String[] urlPatterns = webAppServlet.getAliases();
 		if (urlPatterns == null || urlPatterns.length == 0) {
 			LOG.warn("Servlet [" + webAppServlet
@@ -259,12 +243,12 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 				Class<? extends Servlet> servletClass = RegisterWebAppVisitorHS
 						.loadClass(Servlet.class, bundleClassLoader,
 								webAppServlet.getServletClassName());
-				webContainer.registerServlet(servletClass, urlPatterns,
-						RegisterWebAppVisitorHS.convertInitParams(webAppServlet
-								.getInitParams()), webAppServlet
-								.getLoadOnStartup(), webAppServlet
-								.getAsyncSupported(), webAppServlet.getMultipartConfig()
-						, httpContext);
+//				webContainer.registerServlet(servletClass, urlPatterns,
+//						RegisterWebAppVisitorHS.convertInitParams(webAppServlet
+//								.getInitParams()), webAppServlet
+//								.getLoadOnStartup(), webAppServlet
+//								.getAsyncSupported(), webAppServlet.getMultipartConfig()
+//						, httpContext);
 			}
 			//CHECKSTYLE:OFF
 		} catch (Exception ignore) {
@@ -280,7 +264,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	 * @see WebAppVisitor#visit(org.ops4j.pax.web.extender.war.internal.model.WebAppFilter)
 	 */
 	public void visit(final WebAppFilter webAppFilter) {
-		NullArgumentException.validateNotNull(webAppFilter, "Web app filter");
+//		NullArgumentException.validateNotNull(webAppFilter, "Web app filter");
 		LOG.debug("registering filter: {}", webAppFilter);
 		final String[] urlPatterns = webAppFilter.getUrlPatterns();
 		final String[] servletNames = webAppFilter.getServletNames();
@@ -314,10 +298,10 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 					dispatcherTypeString.append(",");
 				}
 			}
-			initParams.put(PaxWebConstants.FILTER_MAPPING_DISPATCHER, dispatcherTypeString.toString());
+			initParams.put(PaxWebConstants.INIT_PARAM_FILTER_MAPPING_DISPATCHER, dispatcherTypeString.toString());
 //			initParams.put(PaxWebConstants.FILTER_NAME, filterName);
 
-			webContainer.registerFilter(filterClass,  filterName, urlPatterns, servletNames, initParams, (Boolean) asyncSupported, httpContext);
+//			webContainer.registerFilter(filterClass,  filterName, urlPatterns, servletNames, initParams, (Boolean) asyncSupported, httpContext);
 			//CHECKSTYLE:OFF
 		} catch (Exception ignore) {
 			LOG.error(REGISTRATION_EXCEPTION_SKIPPING, ignore);
@@ -332,14 +316,14 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	 * @see WebAppVisitor#visit(org.ops4j.pax.web.extender.war.internal.model.WebAppListener)
 	 */
 	public void visit(final WebAppListener webAppListener) {
-		NullArgumentException.validateNotNull(webAppListener,
-				"Web app listener");
+//		NullArgumentException.validateNotNull(webAppListener,
+//				"Web app listener");
 		try {
 			final EventListener listener = RegisterWebAppVisitorHS.newInstance(
 					EventListener.class, bundleClassLoader,
 					webAppListener.getListenerClass());
 			webAppListener.setListener(listener);
-			webContainer.registerEventListener(listener, httpContext);
+//			webContainer.registerEventListener(listener, httpContext);
 			//CHECKSTYLE:OFF
 		} catch (Exception ignore) {
 			LOG.error(REGISTRATION_EXCEPTION_SKIPPING, ignore);
@@ -354,8 +338,8 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	 * @see WebAppVisitor#visit(org.ops4j.pax.web.extender.war.internal.model.WebAppListener)
 	 */
 	public void visit(final WebAppErrorPage webAppErrorPage) {
-		NullArgumentException.validateNotNull(webAppErrorPage,
-				"Web app error page");
+//		NullArgumentException.validateNotNull(webAppErrorPage,
+//				"Web app error page");
 		try {
 //			webContainer.registerErrorPage(webAppErrorPage.getError(),
 //					webAppErrorPage.getLocation(), httpContext);
@@ -367,8 +351,8 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	}
 
 	public void visit(WebAppLoginConfig loginConfig) {
-		NullArgumentException.validateNotNull(loginConfig,
-				"Web app login config");
+//		NullArgumentException.validateNotNull(loginConfig,
+//				"Web app login config");
 		try {
 //			webContainer.registerLoginConfig(loginConfig.getAuthMethod(),
 //					loginConfig.getRealmName(), loginConfig.getFormLoginPage(),
@@ -381,8 +365,8 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	}
 
 	public void visit(WebAppConstraintMapping constraintMapping) {
-		NullArgumentException.validateNotNull(constraintMapping,
-				"Web app constraint mappings");
+//		NullArgumentException.validateNotNull(constraintMapping,
+//				"Web app constraint mappings");
 		try {
 			WebAppSecurityConstraint securityConstraint = constraintMapping
 					.getSecurityConstraint();
@@ -402,7 +386,7 @@ class RegisterWebAppVisitorWC implements WebAppVisitor {
 	}
 
 	public void end() {
-		webContainer.end(httpContext);
+//		webContainer.end(httpContext);
 	}
 
 }

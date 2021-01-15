@@ -89,7 +89,15 @@ public class ServletModelChange extends Change {
 
 	@Override
 	public String toString() {
-		return getKind() + ": " + servletModel + (disabled ? " (disabled)" : " (enabled)");
+		ServletModel model = servletModel;
+		if (model == null && servletModels.size() == 1) {
+			model = servletModels.keySet().iterator().next();
+		}
+		if (model != null) {
+			return getKind() + ": " + model + (disabled ? " (disabled)" : " (enabled)");
+		} else {
+			return getKind() + ": " + servletModels.size() + " servlet models";
+		}
 	}
 
 }

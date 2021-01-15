@@ -65,10 +65,11 @@ import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEventListener;
+import org.ops4j.pax.web.service.spi.model.views.WebAppWebContainerView;
 import org.ops4j.pax.web.service.spi.servlet.DefaultJspPropertyGroupDescriptor;
 import org.ops4j.pax.web.service.spi.servlet.DefaultSessionCookieConfig;
 import org.ops4j.pax.web.service.spi.servlet.DefaultTaglibDescriptor;
-import org.ops4j.pax.web.service.spi.servlet.DynamicJEEWebContainerView;
+import org.ops4j.pax.web.service.spi.model.views.DynamicJEEWebContainerView;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.Change;
 import org.ops4j.pax.web.service.spi.util.Path;
@@ -111,6 +112,8 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 	private final WhiteboardWebContainerView whiteboardContainerView = new WhiteboardWebContainer();
 	private final DirectWebContainerView directContainerView = new DirectWebContainer();
+	private final WebAppWebContainerView webAppWebContainer = new WebAppWebContainer();
+
 	private final Configuration configuration;
 
 //	private final Boolean showStacks;
@@ -183,8 +186,12 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 		if (type == DynamicJEEWebContainerView.class) {
 			// view used by javax.servlet.ServletContext.addServlet/Filter/Listener dynamic methods
-			// we'll reuse directContainerView, but cast it to different interface
+			// we'll reuse whiteboardContainerView, but cast it to different interface
 			return type.cast(whiteboardContainerView);
+		}
+		if (type == WebAppWebContainerView.class) {
+			// view used when registering WARs (WABs). This is kind of transactional view
+			return type.cast(webAppWebContainer);
 		}
 		return null;
 	}
@@ -1822,6 +1829,25 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 	}
 
+	/**
+	 * Private view class to use the HttpService in kind of transactional way for full web applications.
+	 */
+	private class WebAppWebContainer implements WebAppWebContainerView {
+
+		@Override
+		public void justDoIt(String contextPath) {
+		}
+
+		@Override
+		public boolean allocateContext(Bundle bundle, String contextPath) {
+			return true;
+		}
+
+		@Override
+		public void releaseContext(Bundle bundle, String contextPath) {
+
+		}
+	}
 
 
 

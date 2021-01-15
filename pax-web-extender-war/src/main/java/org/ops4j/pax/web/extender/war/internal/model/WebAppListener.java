@@ -20,7 +20,9 @@ package org.ops4j.pax.web.extender.war.internal.model;
 import java.util.EventListener;
 import java.util.Objects;
 
-import org.ops4j.lang.NullArgumentException;
+import org.ops4j.pax.web.annotations.Review;
+
+//import org.ops4j.lang.NullArgumentException;
 
 /**
  * Models a listener element in web.xml.
@@ -28,6 +30,7 @@ import org.ops4j.lang.NullArgumentException;
  * @author Alin Dreghiciu
  * @since 0.3.0, December 28, 2007
  */
+@Review("To be refactored")
 public class WebAppListener {
 
 	/**
@@ -56,7 +59,7 @@ public class WebAppListener {
 	 * @throws NullArgumentException if listener class is null
 	 */
 	public void setListenerClass(final String listenerClass) {
-		NullArgumentException.validateNotNull(listenerClass, "Listener class");
+//		NullArgumentException.validateNotNull(listenerClass, "Listener class");
 		this.listenerClass = listenerClass;
 	}
 
@@ -80,8 +83,12 @@ public class WebAppListener {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
 		WebAppListener that = (WebAppListener) o;
 		return Objects.equals(listenerClass, that.listenerClass);
 	}

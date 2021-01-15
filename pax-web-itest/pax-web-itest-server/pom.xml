@@ -90,6 +90,11 @@
 			<artifactId>pax-web-extender-whiteboard</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-extender-war</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>

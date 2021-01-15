@@ -32,6 +32,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.views.DynamicJEEWebContainerView;
 import org.ops4j.pax.web.service.spi.servlet.dynamic.DynamicEventListenerRegistration;
 import org.ops4j.pax.web.service.spi.servlet.dynamic.DynamicFilterRegistration;
 import org.ops4j.pax.web.service.spi.servlet.dynamic.DynamicServletRegistration;

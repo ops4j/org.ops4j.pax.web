@@ -27,21 +27,22 @@ import org.osgi.framework.Version;
 public class WebApplicationEvent {
 
 	/**
-	 * A state described in 128.5 Events
+	 * A state described in 128.5 Events + one extra {@code WAITING} state. These are states as seen by observers
+	 * of the deployment process, not as seen by the WAB itself (which may use some more internal states, like
+	 * waiting for {@link org.ops4j.pax.web.service.WebContainer} service reference or waiting for undeployment of
+	 * an application with conflicting context path (possibly including Virtual Hosts config).
 	 */
 	public enum State {
-		DEPLOYING(1, "org/osgi/service/web/DEPLOYING"),
-		DEPLOYED(2, "org/osgi/service/web/DEPLOYED"),
-		UNDEPLOYING(3, "org/osgi/service/web/UNDEPLOYING"),
-		UNDEPLOYED(4, "org/osgi/service/web/UNDEPLOYED"),
-		FAILED(5, "org/osgi/service/web/FAILED"),
-		WAITING(6, "org/osgi/service/web/WAITING"); // not mentioned in the specification
+		DEPLOYING("org/osgi/service/web/DEPLOYING"),
+		DEPLOYED("org/osgi/service/web/DEPLOYED"),
+		UNDEPLOYING("org/osgi/service/web/UNDEPLOYING"),
+		UNDEPLOYED("org/osgi/service/web/UNDEPLOYED"),
+		FAILED("org/osgi/service/web/FAILED"),
+		WAITING("org/osgi/service/web/WAITING"); // not mentioned in the specification
 
-		private final int index;
 		private final String topic;
 
-		State(int index, String topic) {
-			this.index = index;
+		State(String topic) {
 			this.topic = topic;
 		}
 
@@ -59,13 +60,13 @@ public class WebApplicationEvent {
 
 	private final long timestamp;
 
-	private final Exception exception;
+	private final Throwable throwable;
 
 	public WebApplicationEvent(State type, Bundle bundle) {
 		this(type, bundle, null);
 	}
 
-	public WebApplicationEvent(State type, Bundle bundle, Exception exception) {
+	public WebApplicationEvent(State type, Bundle bundle, Throwable throwable) {
 		this.type = type;
 		this.bundle = bundle;
 		this.bundleId = bundle.getBundleId();
@@ -74,13 +75,13 @@ public class WebApplicationEvent {
 
 		this.timestamp = System.currentTimeMillis();
 
-		this.exception = exception;
+		this.throwable = throwable;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("%s (%s/%s): %s", type, bundleName, bundleVersion,
-				exception == null ? "" : " " + exception.getMessage());
+		return String.format("%s (%s/%s)%s", type, bundleName, bundleVersion,
+				throwable == null ? "" : ": " + throwable.getMessage());
 	}
 
 	public State getType() {
@@ -107,8 +108,8 @@ public class WebApplicationEvent {
 		return timestamp;
 	}
 
-	public Exception getException() {
-		return exception;
+	public Throwable getException() {
+		return throwable;
 	}
 
 }

@@ -96,7 +96,6 @@ public abstract class AbstractWhiteboardR6IntegrationTest extends AbstractContai
 
 		registerServlet.unregister();
 		contextHelperService.unregister();
-
 	}
 
 	protected abstract String getErrorMessage(int statusCode);
@@ -419,7 +418,6 @@ public abstract class AbstractWhiteboardR6IntegrationTest extends AbstractContai
 	}
 
 	private static class MyResourceService {
-
 	}
 
 }

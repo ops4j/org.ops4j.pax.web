@@ -17,7 +17,7 @@
  */
 package org.ops4j.pax.web.extender.war.internal.model;
 
-import org.ops4j.lang.NullArgumentException;
+//import org.ops4j.lang.NullArgumentException;
 
 /**
  * Models init param element in web.xml.
@@ -52,7 +52,7 @@ public class WebAppInitParam {
 	 * @throws NullArgumentException if param name is null
 	 */
 	public void setParamName(final String paramName) {
-		NullArgumentException.validateNotNull(paramName, "Param name");
+//		NullArgumentException.validateNotNull(paramName, "Param name");
 		this.paramName = paramName;
 	}
 
@@ -72,7 +72,7 @@ public class WebAppInitParam {
 	 * @throws NullArgumentException if param value is null
 	 */
 	public void setParamValue(final String paramValue) {
-		NullArgumentException.validateNotNull(paramValue, "Param value");
+//		NullArgumentException.validateNotNull(paramValue, "Param value");
 		this.paramValue = paramValue;
 	}
 

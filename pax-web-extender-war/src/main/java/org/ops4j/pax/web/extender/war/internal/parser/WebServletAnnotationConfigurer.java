@@ -15,19 +15,12 @@
  */
 package org.ops4j.pax.web.extender.war.internal.parser;
 
-import java.util.List;
-import java.util.Map.Entry;
-
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
-import javax.servlet.annotation.WebInitParam;
 import javax.servlet.http.HttpServlet;
 
-import org.ops4j.pax.web.extender.war.internal.model.WebApp;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppServlet;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppServletMapping;
-import org.ops4j.pax.web.utils.ServletAnnotationScanner;
+import org.ops4j.pax.web.extender.war.internal.model.BundleWebApplication;
+import org.ops4j.pax.web.service.spi.util.ServletAnnotationScanner;
 import org.osgi.framework.Bundle;
 
 /**
@@ -40,7 +33,7 @@ public class WebServletAnnotationConfigurer extends
 		super(bundle, clazz);
 	}
 
-	public void scan(WebApp webApp) {
+	public void scan(BundleWebApplication webApp) {
 		Class<?> clazz = loadClass();
 
 		if (clazz == null) {
@@ -57,65 +50,65 @@ public class WebServletAnnotationConfigurer extends
 		@SuppressWarnings("unchecked")
         ServletAnnotationScanner annotationParameter = new ServletAnnotationScanner((Class<? extends Servlet>) clazz);
 
-		WebAppServlet webAppServlet = webApp
-				.findServlet(annotationParameter.servletName);
+//		WebAppServlet webAppServlet = webApp
+//				.findServlet(annotationParameter.servletName);
 		log.debug("Registering Servlet {} with url(s) {}",
 				annotationParameter.servletName,
 				annotationParameter.urlPatterns);
 
-		if (webAppServlet == null) {
+//		if (webAppServlet == null) {
 			// Add a new Servlet
 			log.debug("Create a new Servlet");
-			webAppServlet = new WebAppServlet();
-			webAppServlet.setServletName(annotationParameter.servletName);
-			webAppServlet.setServletClassName(className);
-			webApp.addServlet(webAppServlet);
-			webAppServlet.setLoadOnStartup(annotationParameter.loadOnStartup);
-			webAppServlet.setAsyncSupported(annotationParameter.asyncSupported);
+//			webAppServlet = new WebAppServlet();
+//			webAppServlet.setServletName(annotationParameter.servletName);
+//			webAppServlet.setServletClassName(className);
+//			webApp.addServlet(webAppServlet);
+//			webAppServlet.setLoadOnStartup(annotationParameter.loadOnStartup);
+//			webAppServlet.setAsyncSupported(annotationParameter.asyncSupported);
 			// TODO: what about the display Name
-		} else {
+//		} else {
 			//PAXWEB-724
 			// could be that we found the servlet due to the classname not the servletName
 			// this needs to be corrected. 
-			annotationParameter.servletName = webAppServlet.getServletName();
-		}
+//			annotationParameter.servletName = webAppServlet.getServletName();
+//		}
 
-		WebAppInitParam[] initParams = webAppServlet.getInitParams();
+//		WebAppInitParam[] initParams = webAppServlet.getInitParams();
 		// check if the existing servlet has each init-param from the
 		// annotation
 		// if not, add it
-		for (Entry<String, String> entrySet : annotationParameter.webInitParams.entrySet()) {
+//		for (Entry<String, String> entrySet : annotationParameter.webInitParams.entrySet()) {
 			// if (holder.getInitParameter(ip.name()) == null)
-			if (!initParamsContain(initParams, entrySet.getKey())) {
-				WebAppInitParam initParam = new WebAppInitParam();
-				initParam.setParamName(entrySet.getKey());
-				initParam.setParamValue(entrySet.getValue());
-				webAppServlet.addInitParam(initParam);
-			}
-		}
+//			if (!initParamsContain(initParams, entrySet.getKey())) {
+//				WebAppInitParam initParam = new WebAppInitParam();
+//				initParam.setParamName(entrySet.getKey());
+//				initParam.setParamValue(entrySet.getValue());
+//				webAppServlet.addInitParam(initParam);
+//			}
+//		}
 		// check the url-patterns, if there annotation has a new one, add it
-		List<WebAppServletMapping> mappings = webApp
-				.getServletMappings(annotationParameter.servletName);
+//		List<WebAppServletMapping> mappings = webApp
+//				.getServletMappings(annotationParameter.servletName);
 
-		log.debug("Found the following mappings {} for servlet: {}", mappings,
-				annotationParameter.servletName);
+//		log.debug("Found the following mappings {} for servlet: {}", mappings,
+//				annotationParameter.servletName);
 
 		// ServletSpec 3.0 p81 If a servlet already has url mappings from a
 		// descriptor the annotation is ignored
-		if (mappings == null || mappings.isEmpty()) {
-			log.debug("alter/create mappings");
-			for (String urlPattern : annotationParameter.urlPatterns) {
-				log.debug("adding mapping for URL {}", urlPattern);
-				WebAppServletMapping mapping = new WebAppServletMapping();
-				mapping.setServletName(annotationParameter.servletName);
-				mapping.setUrlPattern(urlPattern);
-				webApp.addServletMapping(mapping);
-			}
-		}
+//		if (mappings == null || mappings.isEmpty()) {
+//			log.debug("alter/create mappings");
+//			for (String urlPattern : annotationParameter.urlPatterns) {
+//				log.debug("adding mapping for URL {}", urlPattern);
+//				WebAppServletMapping mapping = new WebAppServletMapping();
+//				mapping.setServletName(annotationParameter.servletName);
+//				mapping.setUrlPattern(urlPattern);
+//				webApp.addServletMapping(mapping);
+//			}
+//		}
 
 		if (null != annotationParameter.multiPartConfigAnnotation) {
 			MultipartConfigElement multipartConfig = new MultipartConfigElement(annotationParameter.multiPartConfigAnnotation);
-			webAppServlet.setMultipartConfig(multipartConfig);
+//			webAppServlet.setMultipartConfig(multipartConfig);
 		}
 
 

@@ -83,7 +83,15 @@ public class FilterModelChange extends Change {
 
 	@Override
 	public String toString() {
-		return getKind() + ": " + filterModel + (disabled ? " (disabled)" : " (enabled)");
+		FilterModel model = filterModel;
+		if (model == null && filterModels.size() == 1) {
+			model = filterModels.get(0);
+		}
+		if (model != null) {
+			return getKind() + ": " + model + (disabled ? " (disabled)" : " (enabled)");
+		} else {
+			return getKind() + ": " + filterModels.size() + " filter models";
+		}
 	}
 
 }

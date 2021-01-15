@@ -72,7 +72,15 @@ public class EventListenerModelChange extends Change {
 
 	@Override
 	public String toString() {
-		return getKind() + ": " + eventListenerModel;
+		EventListenerModel model = eventListenerModel;
+		if (model == null && eventListenerModels.size() == 1) {
+			model = eventListenerModels.get(0);
+		}
+		if (model != null) {
+			return getKind() + ": " + model;
+		} else {
+			return getKind() + ": " + eventListenerModels.size() + " event listener models";
+		}
 	}
 
 }

@@ -19,6 +19,7 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
+import org.ops4j.pax.web.service.spi.model.views.DynamicJEEWebContainerView;
 import org.ops4j.pax.web.service.spi.servlet.dynamic.DynamicEventListenerRegistration;
 import org.ops4j.pax.web.service.spi.servlet.dynamic.DynamicFilterRegistration;
 import org.ops4j.pax.web.service.spi.servlet.dynamic.DynamicServletRegistration;

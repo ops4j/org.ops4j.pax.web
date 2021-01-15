@@ -41,19 +41,21 @@ import org.slf4j.LoggerFactory;
  *     <li>pax-web-extender-whiteboard</li>
  *     <li>pax-web-extender-war</li>
  * </ul>
- * The scenarios are quite similar, because in both cases the information is collected from multiple bundles:<ul>
- *     <li>pax-web-extender-whiteboard - Whiteboard services being registered</li>
- *     <li>pax-web-extender-war - bundles with {@code Web-ContextPath} manifest header being installed</li>
+ * The scenarios are quite similar, because in both cases the information is collected from multiple sources:<ul>
+ *     <li>pax-web-extender-whiteboard - Whiteboard services being registered through different bundles. Many bundles
+ *     may <em>contribute</em> to multiple <em>web applications</em></li>
+ *     <li>pax-web-extender-war - bundles with {@code Web-ContextPath} manifest headers. Here, by design, single
+ *     bundle <em>is equivalent to</em> single <em>web application</em> (possibly with the support of bundle
+ *     fragments or embedded JARs).</li>
  * </ul>
- * While this information may be processed only when proper registration of {@link org.ops4j.pax.web.service.WebContainer}
- * OSGi service is being registered.
- * </p>
+ * However the <em>web applications</em> may be actually registered only when {@link org.ops4j.pax.web.service.WebContainer}
+ * OSGi service is available. Thus this class coordinates the above conditions.</p>
  *
  * <p>This listener manages a (bundle-scoped) reference to <em>current</em> {@link org.ops4j.pax.web.service.WebContainer}
  * and binding to its lifecycle processes the information obtained from multiple <em>client</em> bundles that try
  * to install Web Application related elements/components into the current web container.</p>
  *
- * <p>Before Pax Web 8, for pax-web-extender-war, this was managed by
+ * <p>Before Pax Web 8, this was managed in pax-web-extender-war by
  * {@code org.ops4j.pax.web.extender.war.internal.tracker.ReplaceableService}. In Pax Web 8, for
  * pax-web-extender-whiteboard, initially I used separate {@link org.osgi.framework.ServiceListener}, but I think it's
  * a good idea to unify this functionality inside pax-web-spi bundle.</p>
@@ -138,16 +140,6 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 	}
 
 	/**
-	 * Adapter method that's invoked from {@link ServiceTrackerCustomizer} and calls the listeners in a new thread.
-	 * @param oldReference
-	 * @param newReference
-	 */
-	private void webContainerChanged(ServiceReference<WebContainer> oldReference, ServiceReference<WebContainer> newReference) {
-		currentWebContainerRef.set(newReference);
-		pool.execute(() -> listener.webContainerChanged(oldReference, newReference));
-	}
-
-	/**
 	 * Cleans up internal trackers and thread pools.
 	 */
 	public void shutdown() {
@@ -157,6 +149,23 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 		if (pool instanceof ExecutorService) {
 			((ExecutorService) pool).shutdown();
 		}
+	}
+
+	/**
+	 * Adapter method that's invoked from {@link ServiceTrackerCustomizer} and calls the listeners in a new thread.
+	 * @param oldReference
+	 * @param newReference
+	 */
+	private void webContainerChanged(ServiceReference<WebContainer> oldReference, ServiceReference<WebContainer> newReference) {
+		currentWebContainerRef.set(newReference);
+
+		// we should inform about new reference to WebContainer OSGi service in a separate thread, because this event
+		// is delivered in single pax-web configuration thread (from pax-web-runtime) when WebContainer service
+		// is registered.
+		// In Whiteboard scenario, there may exist threads that already try to register Whiteboard services. Such
+		// threads obtain the Whiteboard lock and try to access pax-web configuration thread and we may end up with
+		// a thread deadlock
+		pool.execute(() -> listener.webContainerChanged(oldReference, newReference));
 	}
 
 	public ServiceReference<WebContainer> currentWebContainerReference() {
@@ -173,23 +182,35 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 	 * @return
 	 */
 	public <T extends PaxWebContainerView> T containerView(BundleContext context, ServiceReference<WebContainer> ref, Class<T> viewClass) {
+		synchronized (containers) {
+			WebContainer webContainer = container(context, ref);
+			if (webContainer != null) {
+				return webContainer.adapt(viewClass);
+			}
+			return null;
+		}
+	}
+
+	public WebContainer container(BundleContext context, ServiceReference<WebContainer> ref) {
 		if (ref == null || context == null) {
 			return null;
 		}
-		Map<BundleContext, WebContainer> bundleContainers = containers.get(ref);
-		if (bundleContainers != null) {
-			WebContainer container = bundleContainers.get(context);
-			if (container != null) {
-				return container.adapt(viewClass);
+		synchronized (containers) {
+			Map<BundleContext, WebContainer> bundleContainers = containers.get(ref);
+			if (bundleContainers != null) {
+				WebContainer container = bundleContainers.get(context);
+				if (container != null) {
+					return container;
+				}
 			}
-		}
-		WebContainer webContainer = context.getService(ref);
-		if (webContainer == null) {
-			LOG.warn("Can't get a WebContainer service from {}", ref);
-			return null;
-		} else {
-			containers.computeIfAbsent(ref, r -> new HashMap<>()).put(context, webContainer);
-			return webContainer.adapt(viewClass);
+			WebContainer webContainer = context.getService(ref);
+			if (webContainer == null) {
+				LOG.warn("Can't get a WebContainer service from {}", ref);
+				return null;
+			} else {
+				containers.computeIfAbsent(ref, r -> new HashMap<>()).put(context, webContainer);
+				return webContainer;
+			}
 		}
 	}
 
@@ -232,14 +253,16 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 		if (ref == null || context == null) {
 			return;
 		}
-		Map<BundleContext, WebContainer> bundleContainers = containers.get(ref);
-		if (bundleContainers != null) {
-			WebContainer container = bundleContainers.remove(context);
-			if (container != null) {
-				context.ungetService(ref);
-			}
-			if (bundleContainers.isEmpty()) {
-				containers.remove(ref);
+		synchronized (containers) {
+			Map<BundleContext, WebContainer> bundleContainers = containers.get(ref);
+			if (bundleContainers != null) {
+				WebContainer container = bundleContainers.remove(context);
+				if (container != null) {
+					context.ungetService(ref);
+				}
+				if (bundleContainers.isEmpty()) {
+					containers.remove(ref);
+				}
 			}
 		}
 	}
@@ -247,12 +270,12 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 	@Override
 	public void bundleChanged(BundleEvent event) {
 		if (event.getType() == BundleEvent.STOPPED) {
-			listener.bundleStopped(event.getBundle());
+			pool.execute(() -> listener.bundleStopped(event.getBundle()));
 		}
 	}
 
 	// --- implementation of ServiceTrackerCustomizer
-	//     We're never calling context.getService(), as this should be performed within a scope of actual
+	//     We're never calling context.getService(), as this should be performed within the scope of actual
 	//     WAR or Whiteboard bundle!
 
 	@Override

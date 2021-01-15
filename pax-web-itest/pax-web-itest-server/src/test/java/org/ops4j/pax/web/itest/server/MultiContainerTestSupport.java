@@ -29,18 +29,23 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 
+import org.apache.felix.utils.extender.Extension;
 import org.apache.jasper.servlet.JspServlet;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runners.Parameterized;
 import org.mockito.ArgumentMatchers;
 import org.mockito.stubbing.Answer;
+import org.ops4j.pax.web.extender.war.internal.WarExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.FilterTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.HttpContextTracker;
@@ -57,6 +62,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ResourceMap
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletContextHelperMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.WelcomeFileMappingTracker;
+import org.ops4j.pax.web.itest.server.controller.ServerControllerScopesTest;
 import org.ops4j.pax.web.itest.server.support.Utils;
 import org.ops4j.pax.web.jsp.JasperInitializer;
 import org.ops4j.pax.web.service.PaxWebConfig;
@@ -79,6 +85,7 @@ import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.JspModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.util.NamedThreadFactory;
 import org.ops4j.pax.web.service.whiteboard.ErrorPageMapping;
 import org.ops4j.pax.web.service.whiteboard.FilterMapping;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
@@ -125,12 +132,18 @@ public class MultiContainerTestSupport {
 
 	protected Bundle whiteboardBundle;
 	protected BundleContext whiteboardBundleContext;
+	protected Bundle warExtenderBundle;
+	protected BundleContext warExtenderBundleContext;
 	protected Bundle jspBundle;
 
 	protected Map<Bundle, HttpServiceEnabled> containers = new HashMap<>();
 	protected ServiceReference<WebContainer> containerRef;
 
-	protected WhiteboardExtenderContext whiteboard;
+	protected WhiteboardExtenderContext whiteboardExtender;
+
+	protected WarExtenderContext warExtender;
+	protected ExecutorService warExtenderPool;
+	protected Map<Bundle, Extension> wabs = new HashMap<>();
 
 	private ServiceTrackerCustomizer<ServletContextHelper, OsgiContextModel> servletContextHelperCustomizer;
 	private ServiceTrackerCustomizer<ServletContextHelperMapping, OsgiContextModel> servletContextHelperMappingCustomizer;
@@ -182,7 +195,7 @@ public class MultiContainerTestSupport {
 		}, port, runtime, getClass().getClassLoader());
 
 		if (enableJSP()) {
-			jspBundle = mockBundle("org.ops4j.pax.web.pax-web-jsp", false);
+			jspBundle = mockBundle("org.ops4j.pax.web.pax-web-jsp", null, false);
 			when(jspBundle.loadClass(PaxWebConstants.DEFAULT_JSP_SERVLET_CLASS)).thenAnswer(inv -> JspServlet.class);
 			when(jspBundle.loadClass(PaxWebConstants.DEFAULT_JSP_SCI_CLASS)).thenAnswer(inv -> JasperInitializer.class);
 		}
@@ -194,51 +207,70 @@ public class MultiContainerTestSupport {
 
 		serverModel = new ServerModel(new Utils.SameThreadExecutor());
 
-		whiteboardBundle = mockBundle("org.ops4j.pax.web.pax-web-extender-whiteboard", false);
-		whiteboardBundleContext = whiteboardBundle.getBundleContext();
-
-		OsgiContextModel.DEFAULT_CONTEXT_MODEL.setOwnerBundle(whiteboardBundle);
-
-		when(whiteboardBundleContext.createFilter(anyString()))
-				.thenAnswer(invocation -> FrameworkUtil.createFilter(invocation.getArgument(0, String.class)));
-
-		when(whiteboardBundleContext.registerService(ArgumentMatchers.eq(ServletContext.class), any(ServletContext.class), any(Dictionary.class)))
-				.thenReturn(mock(ServiceRegistration.class));
-
-		// manually create mock for WebContainer service scoped to a pax-web-extender-whiteboard bundle
-		HttpServiceEnabled container = new HttpServiceEnabled(whiteboardBundle, controller, serverModel, null, config);
-//		containers.put(whiteboardBundle, container);
-
 		containerRef = mock(ServiceReference.class);
 		when(containerRef.getProperty(Constants.SERVICE_ID)).thenReturn(42L);
-		when(whiteboardBundleContext.getService(containerRef)).thenReturn(container);
 
-		when(whiteboardBundleContext.getServiceReferences(WebContainer.class.getName(), null))
-				.thenReturn(new ServiceReference[] { containerRef });
-		whiteboard = new WhiteboardExtenderContext(null, whiteboardBundleContext, true);
+		if (enableWhiteboardExtender()) {
+			whiteboardBundle = mockBundle("org.ops4j.pax.web.pax-web-extender-whiteboard", null, false);
+			whiteboardBundleContext = whiteboardBundle.getBundleContext();
 
-		servletContextHelperCustomizer = getCustomizer(ServletContextHelperTracker.createTracker(whiteboard, whiteboardBundleContext));
-		servletContextHelperMappingCustomizer = getCustomizer(ServletContextHelperMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
-		httpContextCustomizer = getCustomizer(HttpContextTracker.createTracker(whiteboard, whiteboardBundleContext));
-		httpContextMappingCustomizer = getCustomizer(HttpContextMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
+			OsgiContextModel.DEFAULT_CONTEXT_MODEL.setOwnerBundle(whiteboardBundle);
 
-		servletCustomizer = getCustomizer(ServletTracker.createTracker(whiteboard, whiteboardBundleContext));
-		filterCustomizer = getCustomizer(FilterTracker.createTracker(whiteboard, whiteboardBundleContext));
-		resourceCustomizer = getCustomizer(ResourceTracker.createTracker(whiteboard, whiteboardBundleContext));
-		listenerCustomizer = getCustomizer(ListenerTracker.createTracker(whiteboard, whiteboardBundleContext));
+			when(whiteboardBundleContext.createFilter(anyString()))
+					.thenAnswer(invocation -> FrameworkUtil.createFilter(invocation.getArgument(0, String.class)));
 
-		servletMappingCustomizer = getCustomizer(ServletMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
-		filterMappingCustomizer = getCustomizer(FilterMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
-		resourceMappingCustomizer = getCustomizer(ResourceMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
-		welcomeFileMappingCustomizer = getCustomizer(WelcomeFileMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
-		errorPageMappingCustomizer = getCustomizer(ErrorPageMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
-		listenerMappingCustomizer = getCustomizer(ListenerMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
-		jspMappingCustomizer = getCustomizer(JspMappingTracker.createTracker(whiteboard, whiteboardBundleContext));
+			when(whiteboardBundleContext.registerService(ArgumentMatchers.eq(ServletContext.class), any(ServletContext.class), any(Dictionary.class)))
+					.thenReturn(mock(ServiceRegistration.class));
+
+			// manually create mock for WebContainer service scoped to a pax-web-extender-whiteboard bundle
+			HttpServiceEnabled container = new HttpServiceEnabled(whiteboardBundle, controller, serverModel, null, config);
+			//		containers.put(whiteboardBundle, container);
+
+			when(whiteboardBundleContext.getService(containerRef)).thenReturn(container);
+
+			when(whiteboardBundleContext.getServiceReferences(WebContainer.class.getName(), null))
+					.thenReturn(new ServiceReference[] { containerRef });
+			whiteboardExtender = new WhiteboardExtenderContext(null, whiteboardBundleContext, true);
+
+			servletContextHelperCustomizer = getCustomizer(ServletContextHelperTracker.createTracker(whiteboardExtender, whiteboardBundleContext));
+			servletContextHelperMappingCustomizer = getCustomizer(ServletContextHelperMappingTracker.createTracker(whiteboardExtender, whiteboardBundleContext));
+			httpContextCustomizer = getCustomizer(HttpContextTracker.createTracker(whiteboardExtender, whiteboardBundleContext));
+			httpContextMappingCustomizer = getCustomizer(HttpContextMappingTracker.createTracker(whiteboardExtender, whiteboardBundleContext));
+
+			servletCustomizer = getCustomizer(ServletTracker.createTracker(whiteboardExtender, whiteboardBundleContext));
+			filterCustomizer = getCustomizer(FilterTracker.createTracker(whiteboardExtender, whiteboardBundleContext));
+			resourceCustomizer = getCustomizer(ResourceTracker.createTracker(whiteboardExtender, whiteboardBundleContext));
+			listenerCustomizer = getCustomizer(ListenerTracker.createTracker(whiteboardExtender, whiteboardBundleContext));
+
+			servletMappingCustomizer = getCustomizer(ServletMappingTracker.createTracker(whiteboardExtender, whiteboardBundleContext));
+			filterMappingCustomizer = getCustomizer(FilterMappingTracker.createTracker(whiteboardExtender, whiteboardBundleContext));
+			resourceMappingCustomizer = getCustomizer(ResourceMappingTracker.createTracker(whiteboardExtender, whiteboardBundleContext));
+			welcomeFileMappingCustomizer = getCustomizer(WelcomeFileMappingTracker.createTracker(whiteboardExtender, whiteboardBundleContext));
+			errorPageMappingCustomizer = getCustomizer(ErrorPageMappingTracker.createTracker(whiteboardExtender, whiteboardBundleContext));
+			listenerMappingCustomizer = getCustomizer(ListenerMappingTracker.createTracker(whiteboardExtender, whiteboardBundleContext));
+			jspMappingCustomizer = getCustomizer(JspMappingTracker.createTracker(whiteboardExtender, whiteboardBundleContext));
+		}
+
+		if (enableWarExtender()) {
+			warExtenderBundle = mockBundle("org.ops4j.pax.web.pax-web-extender-war", null, false);
+			warExtenderBundleContext = warExtenderBundle.getBundleContext();
+			when(warExtenderBundleContext.getServiceReferences(WebContainer.class.getName(), null))
+					.thenReturn(new ServiceReference[] { containerRef });
+
+			warExtenderPool = Executors.newFixedThreadPool(1, new NamedThreadFactory("wab-extender"));
+			warExtender = new WarExtenderContext(warExtenderBundleContext, warExtenderPool, true);
+			warExtender.webContainerAdded(containerRef);
+		}
 	}
 
 	@After
 	public void cleanup() throws Exception {
-		stopWhiteboardService();
+		if (enableWhiteboardExtender()) {
+			stopWhiteboardService();
+		}
+		if (enableWarExtender()) {
+			warExtender.shutdown();
+		}
 		if (controller != null) {
 			if (controller.getState() == ServerState.STARTED) {
 				controller.stop();
@@ -255,28 +287,45 @@ public class MultiContainerTestSupport {
 		return false;
 	}
 
+	protected boolean enableWarExtender() {
+		return false;
+	}
+
+	protected boolean enableWhiteboardExtender() {
+		return true;
+	}
+
 	protected void stopWhiteboardService() {
-		if (containerRef != null) {
-			whiteboard.webContainerRemoved(containerRef);
-			containerRef = null;
-		}
+		containerRef = null;
 		containers.values().forEach(HttpServiceEnabled::stop);
 		containers.clear();
+		if (whiteboardExtender != null) {
+			whiteboardExtender.shutdown();
+		}
 	}
 
 	protected Bundle mockBundle(String symbolicName) {
-		return mockBundle(symbolicName, true);
+		return mockBundle(symbolicName, null, true);
+	}
+
+	protected Bundle mockBundle(String symbolicName, String contextPath) {
+		return mockBundle(symbolicName, contextPath, true);
+	}
+
+	protected Bundle mockBundle(String symbolicName, boolean obtainWebContainer) {
+		return mockBundle(symbolicName, null, obtainWebContainer);
 	}
 
 	/**
 	 * Helper method to create mock {@link Bundle} with associated mock {@link BundleContext}.
 	 * @param symbolicName
+	 * @param contextPath a value for {@link PaxWebConstants#CONTEXT_PATH_KEY}
 	 * @param obtainWebContainer whether to configure bundle-scoped {@link WebContainer} reference
 	 *                           for this bundle.
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	protected Bundle mockBundle(String symbolicName, boolean obtainWebContainer) {
+	protected Bundle mockBundle(String symbolicName, String contextPath, boolean obtainWebContainer) {
 		Bundle bundle = mock(Bundle.class);
 		BundleContext bundleContext = mock(BundleContext.class);
 		when(bundle.getSymbolicName()).thenReturn(symbolicName);
@@ -285,11 +334,18 @@ public class MultiContainerTestSupport {
 		when(bundle.getBundleContext()).thenReturn(bundleContext);
 		when(bundleContext.getBundle()).thenReturn(bundle);
 
+		if (contextPath != null) {
+			Dictionary<String, String> headers = new Hashtable<>();
+			headers.put(PaxWebConstants.CONTEXT_PATH_KEY, contextPath);
+			when(bundle.getHeaders()).thenReturn(headers);
+		}
+
 		BundleWiring wiring = mock(BundleWiring.class);
 		when(bundle.adapt(BundleWiring.class)).thenReturn(wiring);
 		when(wiring.getClassLoader()).thenReturn(this.getClass().getClassLoader());
 
-		when(bundleContext.registerService(ArgumentMatchers.eq(ServletContext.class), any(ServletContext.class), any(Dictionary.class)))
+		when(bundleContext.registerService(ArgumentMatchers.eq(ServletContext.class), any(ServletContext.class),
+				any(Dictionary.class)))
 				.thenReturn(mock(ServiceRegistration.class));
 
 		if (obtainWebContainer) {
@@ -314,7 +370,9 @@ public class MultiContainerTestSupport {
 	protected void stopContainer(Bundle bundle) {
 		HttpServiceEnabled wc = containers.remove(bundle);
 		((StoppableHttpService) wc).stop();
-		whiteboard.bundleStopped(bundle);
+		if (enableWhiteboardExtender()) {
+			whiteboardExtender.bundleStopped(bundle);
+		}
 	}
 
 	/**
@@ -338,7 +396,9 @@ public class MultiContainerTestSupport {
 		ServiceReference<ServletContextHelper> schRef
 				= mockReference(bundle, ServletContextHelper.class, props, null, serviceId, rank);
 		when(bundle.getBundleContext().getService(schRef)).thenReturn(instance);
-		when(whiteboardBundleContext.getService(schRef)).thenReturn(instance);
+		if (enableWhiteboardExtender()) {
+			when(whiteboardBundleContext.getService(schRef)).thenReturn(instance);
+		}
 
 		return schRef;
 	}
@@ -370,7 +430,9 @@ public class MultiContainerTestSupport {
 						.thenAnswer((Answer<Class<?>>) invocation -> instance.getClass());
 
 				when(bundle.getBundleContext().getService(servletRef)).thenReturn(instance);
-				when(whiteboardBundleContext.getService(servletRef)).thenReturn(instance);
+				if (enableWhiteboardExtender()) {
+					when(whiteboardBundleContext.getService(servletRef)).thenReturn(instance);
+				}
 			}
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException(e.getMessage(), e);
@@ -407,7 +469,9 @@ public class MultiContainerTestSupport {
 
 		ServiceReference<Filter> filterRef = mockReference(bundle, Filter.class, props, null, serviceId, rank);
 		when(bundle.getBundleContext().getService(filterRef)).thenReturn(instance);
-		when(whiteboardBundleContext.getService(filterRef)).thenReturn(instance);
+		if (enableWhiteboardExtender()) {
+			when(whiteboardBundleContext.getService(filterRef)).thenReturn(instance);
+		}
 
 		return filterRef;
 	}
@@ -448,7 +512,9 @@ public class MultiContainerTestSupport {
 				singleton = false;
 			}
 			when(bundle.getBundleContext().getService(ref)).thenReturn(instance);
-			when(whiteboardBundleContext.getService(ref)).thenReturn(instance);
+			if (enableWhiteboardExtender()) {
+				when(whiteboardBundleContext.getService(ref)).thenReturn(instance);
+			}
 		}
 		when(ref.getProperty(Constants.SERVICE_SCOPE))
 				.thenReturn(singleton ? Constants.SCOPE_SINGLETON : Constants.SCOPE_BUNDLE);
@@ -573,6 +639,35 @@ public class MultiContainerTestSupport {
 			Field f = ServiceTracker.class.getDeclaredField("customizer");
 			f.setAccessible(true);
 			return (ServiceTrackerCustomizer<S, T>) f.get(tracker);
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
+	protected void installWab(final Bundle wab) {
+		when(wab.getState()).thenReturn(Bundle.ACTIVE);
+		Extension extension = warExtender.createExtension(wab);
+		wabs.put(wab, extension);
+		final CountDownLatch latch = new CountDownLatch(1);
+		warExtenderPool.submit(() -> {
+			try {
+				extension.start();
+				latch.countDown();
+			} catch (Exception e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
+		});
+		try {
+			latch.await();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
+	protected void uninstallWab(final Bundle wab) {
+		try {
+			wabs.remove(wab).destroy();
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}

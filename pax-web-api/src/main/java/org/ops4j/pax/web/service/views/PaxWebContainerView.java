@@ -19,7 +19,7 @@ import org.ops4j.pax.web.service.WebContainer;
 
 /**
  * Marker interface for <em>views</em> of {@link WebContainer} service, to which
- * the container may be {@link WebContainer#adapt(Class) adopted}.
+ * the container may be {@link WebContainer#adapt(Class) adapted}.
  */
 public interface PaxWebContainerView {
 }

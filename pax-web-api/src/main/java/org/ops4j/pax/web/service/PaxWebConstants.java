@@ -186,7 +186,7 @@ public interface PaxWebConstants {
 	 * values are not case sensitive.
 	 */
 	@Deprecated
-	String FILTER_MAPPING_DISPATCHER = "filter-mapping-dispatcher";
+	String INIT_PARAM_FILTER_MAPPING_DISPATCHER = "filter-mapping-dispatcher";
 
 	/**
 	 * Servlet context attribute containing the bundle context of the bundle registering the http context
@@ -211,6 +211,13 @@ public interface PaxWebConstants {
 	/** Context name of the WAB bundle or bundle registering OSGi servlet context (Pax Web addition) */
 	String SERVICE_PROPERTY_WEB_SERVLETCONTEXT_NAME = "osgi.web.contextname";
 
+	/**
+	 * {@link org.osgi.framework.BundleContext} property (not in PID!) to configure thread count for WAR
+	 * extender. Before Pax Web 8 it was hardcoded to 3 (which is still the default value).
+	 * TODO: think about moving this to PID, but PID configuration is rather related to the web servers, not to the
+	 *       technical aspects like bundle extenders.
+	 */
+	String BUNDLE_CONTEXT_PROPERTY_WAR_EXTENDER_THREADS = "org.ops4j.pax.web.extender.war.threads";
 
 
 
@@ -233,7 +240,7 @@ public interface PaxWebConstants {
 	String PROPERTY_DEFAULT_REALMNAME = "org.ops4j.pax.web.default.realmname";
 
 	/**
-	 * Manifest header key for web application bundles.
+	 * Manifest header key for web application bundles according to 128.3.1 WAB Definition.
 	 */
 	String CONTEXT_PATH_KEY = "Web-ContextPath";
 

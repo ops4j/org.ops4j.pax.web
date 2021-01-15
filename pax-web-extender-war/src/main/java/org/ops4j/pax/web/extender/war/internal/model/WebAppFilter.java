@@ -26,7 +26,7 @@ import java.util.Set;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 
-import org.ops4j.lang.NullArgumentException;
+//import org.ops4j.lang.NullArgumentException;
 
 /**
  * Models filter element in web.xml.
@@ -95,7 +95,7 @@ public class WebAppFilter {
 	 * @throws NullArgumentException if filter name is null
 	 */
 	public void setFilterName(final String filterName) {
-		NullArgumentException.validateNotNull(filterName, "Filter name");
+//		NullArgumentException.validateNotNull(filterName, "Filter name");
 		this.filterName = filterName;
 		// sepcify filter name for Pax Web
 		final WebAppInitParam initParam = new WebAppInitParam();
@@ -120,7 +120,7 @@ public class WebAppFilter {
 	 * @throws NullArgumentException if filter class is null
 	 */
 	public void setFilterClass(final String filterClass) {
-		NullArgumentException.validateNotNull(filterClass, "Filter class");
+//		NullArgumentException.validateNotNull(filterClass, "Filter class");
 		this.filterClassName = filterClass;
 	}
 
@@ -130,7 +130,7 @@ public class WebAppFilter {
 	 * @param filterClass - must extend Filter
 	 */
 	public void setFilterClass(Class<? extends Filter> filterClass) {
-		NullArgumentException.validateNotNull(filterClass, "Filter class");
+//		NullArgumentException.validateNotNull(filterClass, "Filter class");
 		this.filterClass = filterClass;
 	}
 
@@ -169,7 +169,7 @@ public class WebAppFilter {
 	 * @throws NullArgumentException if url pattern is null or empty
 	 */
 	public void addUrlPattern(final String urlPattern) {
-		NullArgumentException.validateNotEmpty(urlPattern, "Url pattern");
+//		NullArgumentException.validateNotEmpty(urlPattern, "Url pattern");
 		urlPatterns.add(urlPattern);
 	}
 
@@ -190,12 +190,12 @@ public class WebAppFilter {
 	 * @throws NullArgumentException if servlet name is null or empty
 	 */
 	public void addServletName(final String servletName) {
-		NullArgumentException.validateNotEmpty(servletName, "Servlet name");
+//		NullArgumentException.validateNotEmpty(servletName, "Servlet name");
 		servletNames.add(servletName);
 	}
 
 	public void addDispatcherType(DispatcherType dispatcherType) {
-		NullArgumentException.validateNotNull(dispatcherType, "DispatcherType");
+//		NullArgumentException.validateNotNull(dispatcherType, "DispatcherType");
 		dispatcherTypes.add(dispatcherType);
 	}
 
@@ -210,11 +210,11 @@ public class WebAppFilter {
 	 * @throws NullArgumentException if param, param name, param value is null
 	 */
 	public void addInitParam(final WebAppInitParam param) {
-		NullArgumentException.validateNotNull(param, "Init param");
-		NullArgumentException.validateNotNull(param.getParamName(),
-				"Init param name");
-		NullArgumentException.validateNotNull(param.getParamValue(),
-				"Init param value");
+//		NullArgumentException.validateNotNull(param, "Init param");
+//		NullArgumentException.validateNotNull(param.getParamName(),
+//				"Init param name");
+//		NullArgumentException.validateNotNull(param.getParamValue(),
+//				"Init param value");
 		initParams.add(param);
 	}
 

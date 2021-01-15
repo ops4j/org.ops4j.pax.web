@@ -17,8 +17,7 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
-import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.web.extender.war.internal.model.WebApp;
+import org.ops4j.pax.web.extender.war.internal.model.BundleWebApplication;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
@@ -52,16 +51,16 @@ class UnregisterWebAppVisitorHS implements WebAppVisitor {
 	 * @throws NullArgumentException if http service is null
 	 */
 	UnregisterWebAppVisitorHS(final HttpService httpService) {
-		NullArgumentException.validateNotNull(httpService, "Http Service");
+//		NullArgumentException.validateNotNull(httpService, "Http Service");
 		this.httpService = httpService;
 	}
 
 	/**
 	 * Unregisters resources related to web app.
 	 *
-	 * @see WebAppVisitor#visit(WebApp)
+	 * @see WebAppVisitor#visit(BundleWebApplication)
 	 */
-	public void visit(final WebApp webApp) {
+	public void visit(final BundleWebApplication webApp) {
 		//CHECKSTYLE:OFF
 		try {
 			httpService.unregister("/");
@@ -79,7 +78,7 @@ class UnregisterWebAppVisitorHS implements WebAppVisitor {
 	 */
 	public void visit(final WebAppServlet webAppServlet) {
 		//CHECKSTYLE:OFF
-		NullArgumentException.validateNotNull(webAppServlet, "Web app servlet");
+//		NullArgumentException.validateNotNull(webAppServlet, "Web app servlet");
 		final String[] aliases = webAppServlet.getAliases();
 		if (aliases != null && aliases.length > 0) {
 			for (String alias : aliases) {

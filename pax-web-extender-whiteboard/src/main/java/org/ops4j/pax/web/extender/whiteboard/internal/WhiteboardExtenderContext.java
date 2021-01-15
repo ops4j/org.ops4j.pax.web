@@ -73,6 +73,9 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 
 	private final BundleContext bundleContext;
 
+	/** This is were the lifecycle of {@link WebContainer} is managed. */
+	private final WebContainerManager webContainerManager;
+
 	/**
 	 * Per-{@link Bundle} cache of lists of Whiteboard services - to clean them up when bundle is gone. This
 	 * map is not concurrent, because it's always accessed within a lock.
@@ -111,9 +114,6 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 	 */
 	private final List<OsgiContextModel> osgiContextsList = new ArrayList<>();
 
-	/** This is were the lifecycle of {@link WebContainer} is managed. */
-	private final WebContainerManager webContainerManager;
-
 	/** Implementation of {@link org.osgi.service.http.runtime.HttpServiceRuntime} from Whiteboard Service spec. */
 	private final ExtendedHttpServiceRuntime httpServiceRuntime;
 
@@ -130,21 +130,17 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 		osgiContexts.computeIfAbsent(model.getName(), n -> new TreeSet<>()).add(model);
 		osgiContextsList.add(model);
 
-		webContainerManager = synchronous ? new WebContainerManager(bundleContext, this)
+		webContainerManager = synchronous
+				? new WebContainerManager(bundleContext, this)
 				: new WebContainerManager(bundleContext, this, "HttpService->Whiteboard");
 		webContainerManager.initialize();
 	}
 
-	/**
-	 * For non-OSGi test purposes
-	 * @return
-	 */
-	public WebContainerManager getWebContainerManager() {
-		return webContainerManager;
-	}
-
 	@Override
 	public void webContainerChanged(ServiceReference<WebContainer> oldReference, ServiceReference<WebContainer> newReference) {
+		// when WebContainer service reference is changed, we should unregister any collected Whiteboard web element
+		// or context from previous WebContainer and register them in new WebContainer
+		// eventually the WebContainer reference will be passed to each BundleWhiteboardApplication
 		if (oldReference != null) {
 			webContainerRemoved(oldReference);
 		}
@@ -161,8 +157,8 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 	public void bundleStopped(Bundle bundle) {
 		LOG.debug("Clearing Whiteboard cache for {}", bundle);
 
-		lock.lock();
 		BundleWhiteboardApplication application;
+		lock.lock();
 		try {
 			application = bundleApplications.remove(bundle);
 		} finally {
@@ -303,6 +299,11 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 	private void installWhiteboardApplications(ServiceReference<WebContainer> ref) {
 		lock.lock();
 		try {
+			// This is were current WebContainer service reference is passed to all known BundleWhiteboardApplications
+			// which may (or may not) have collected (tracked) already some web elements/contexts.
+			// The important (but not difficult) responsibility of BundleWhiteboardApplications is just to remember
+			// whether the web element/context is already registered - that's much easier than in case
+			// of pax-web-extender-war
 			bundleApplications.values().forEach(ba -> ba.webContainerAdded(ref));
 		} finally {
 			lock.unlock();
@@ -373,7 +374,14 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 	private void reRegisterWebElements() {
 		// remember - we're operating within ExtenderContext.lock
 
-		for (BundleWhiteboardApplication app : bundleApplications.values()) {
+		List<BundleWhiteboardApplication> apps;
+		lock.lock();
+		try {
+			apps = new ArrayList<>(bundleApplications.values());
+		} finally {
+			lock.unlock();
+		}
+		for (BundleWhiteboardApplication app : apps) {
 			WhiteboardWebContainerView view = app.getWhiteboardContainer();
 			for (ElementModel<?, ?> webElement : app.getWebElements()) {
 				Filter filter = webElement.getContextFilter();
@@ -459,14 +467,20 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 			return null;
 		}
 
-		BundleWhiteboardApplication bundleApplication = bundleApplications.get(bundle);
-		if (bundleApplication == null) {
-			bundleApplication = new BundleWhiteboardApplication(bundle, webContainerManager, httpServiceRuntime);
-			ServiceReference<WebContainer> ref = webContainerManager.currentWebContainerReference();
-			if (ref != null) {
-				bundleApplication.webContainerAdded(ref);
+		BundleWhiteboardApplication bundleApplication;
+		lock.lock();
+		try {
+			bundleApplication = bundleApplications.get(bundle);
+			if (bundleApplication == null) {
+				bundleApplication = new BundleWhiteboardApplication(bundle, webContainerManager, httpServiceRuntime);
+				ServiceReference<WebContainer> ref = webContainerManager.currentWebContainerReference();
+				if (ref != null) {
+					bundleApplication.webContainerAdded(ref);
+				}
+				bundleApplications.put(bundle, bundleApplication);
 			}
-			bundleApplications.put(bundle, bundleApplication);
+		} finally {
+			lock.unlock();
 		}
 
 		return bundleApplication;

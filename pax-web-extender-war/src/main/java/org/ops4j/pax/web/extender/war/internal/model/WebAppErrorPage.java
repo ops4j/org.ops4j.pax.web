@@ -17,7 +17,7 @@
  */
 package org.ops4j.pax.web.extender.war.internal.model;
 
-import org.ops4j.lang.NullArgumentException;
+//import org.ops4j.lang.NullArgumentException;
 
 /**
  * Models an error page element in web.xml.
@@ -56,7 +56,7 @@ public class WebAppErrorPage {
 	 */
 	public void setErrorCode(String errorCode) {
 		if (errorCode != null) {
-			NullArgumentException.validateNotEmpty(errorCode, "Error code");
+//			NullArgumentException.validateNotEmpty(errorCode, "Error code");
 		}
 		this.errorCode = errorCode;
 	}
@@ -77,7 +77,7 @@ public class WebAppErrorPage {
 	 */
 	public void setExceptionType(String exceptionType) {
 		if (exceptionType != null) {
-			NullArgumentException.validateNotEmpty(exceptionType, "Error code");
+//			NullArgumentException.validateNotEmpty(exceptionType, "Error code");
 		}
 		this.exceptionType = exceptionType;
 	}
@@ -98,7 +98,7 @@ public class WebAppErrorPage {
 	 * @throws org.ops4j.lang.NullArgumentException if location is null or empty
 	 */
 	public void setLocation(String location) {
-		NullArgumentException.validateNotEmpty(location, "Location");
+//		NullArgumentException.validateNotEmpty(location, "Location");
 		this.location = location;
 	}
 

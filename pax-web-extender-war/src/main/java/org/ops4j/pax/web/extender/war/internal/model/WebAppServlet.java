@@ -25,8 +25,6 @@ import java.util.Set;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 
-import org.ops4j.lang.NullArgumentException;
-
 /**
  * Servlet element in web.xml.
  *
@@ -87,7 +85,7 @@ public class WebAppServlet {
 	 * @throws NullArgumentException if servlet name is null
 	 */
 	public void setServletName(final String servletName) {
-		NullArgumentException.validateNotNull(servletName, "Servlet name");
+//		NullArgumentException.validateNotNull(servletName, "Servlet name");
 		this.servletName = servletName;
 		// sepcify filter name for Pax Web
 		final WebAppInitParam initParam = new WebAppInitParam();
@@ -112,8 +110,8 @@ public class WebAppServlet {
 	 * @throws NullArgumentException if servlet class is null
 	 */
 	public void setServletClassName(final String servletClassName) {
-		NullArgumentException.validateNotNull(servletClassName,
-				"Servlet class name");
+//		NullArgumentException.validateNotNull(servletClassName,
+//				"Servlet class name");
 		this.servletClassName = servletClassName;
 	}
 
@@ -153,7 +151,7 @@ public class WebAppServlet {
 	 * @throws NullArgumentException if url pattern is null
 	 */
 	public void addUrlPattern(final String urlPattern) {
-		NullArgumentException.validateNotNull(urlPattern, "Url pattern");
+//		NullArgumentException.validateNotNull(urlPattern, "Url pattern");
 		aliases.add(urlPattern);
 	}
 
@@ -164,17 +162,17 @@ public class WebAppServlet {
 	 * @throws NullArgumentException if param, param name, param value is null
 	 */
 	public void addInitParam(final WebAppInitParam param) {
-		NullArgumentException.validateNotNull(param, "Init param");
-		NullArgumentException.validateNotNull(param.getParamName(),
-				"Init param name");
-		NullArgumentException.validateNotNull(param.getParamValue(),
-				"Init param value");
+//		NullArgumentException.validateNotNull(param, "Init param");
+//		NullArgumentException.validateNotNull(param.getParamName(),
+//				"Init param name");
+//		NullArgumentException.validateNotNull(param.getParamValue(),
+//				"Init param value");
 		initParams.add(param);
 	}
 
 
 	public void setMultipartConfig(MultipartConfigElement multipartConfigElement) {
-		NullArgumentException.validateNotNull(multipartConfigElement, "MultipartConfig");
+//		NullArgumentException.validateNotNull(multipartConfigElement, "MultipartConfig");
 		multipartConfigurations = multipartConfigElement;
 	}
 

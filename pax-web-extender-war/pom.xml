@@ -72,12 +72,26 @@
 <!--							org.ops4j.pax.web.service.spi.model;version="${pax-web.osgi.version}",-->
 <!--							org.ops4j.pax.web.service.spi.model.elements;version="${pax-web.osgi.version}",-->
 <!--							org.ops4j.pax.web.service.spi.model.events;version="${pax-web.osgi.version}",-->
+							org.ops4j.pax.web.service.spi.model.views;version="${pax-web.osgi.version}",
 <!--							org.ops4j.pax.web.service.spi.task;version="${pax-web.osgi.version}",-->
 <!--							org.ops4j.pax.web.service.spi.util;version="${pax-web.osgi.version}",-->
 <!--							org.ops4j.pax.web.service.spi.whiteboard;version="${pax-web.osgi.version}",-->
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[1.7,2)"
+							org.slf4j;version="[1.7,2)",
+
+							<!-- from pax-web-tomcat-common / tomcat-api -->
+							org.apache.tomcat;version="${dependency.tomcat.version}",
+							<!-- from pax-web-tomcat-common / tomcat-util -->
+							org.apache.tomcat.util;version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.buf;version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.compat;version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.res;version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.security;version="${dependency.tomcat.version}",
+							<!-- from pax-web-tomcat-common / tomcat-util-scan -->
+							org.apache.tomcat.util.descriptor;version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.descriptor.web;version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.digester;version="${dependency.tomcat.version}"
 
 							<!-- to check -->
 
@@ -213,6 +227,17 @@
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-slf4j-impl</artifactId>
 			<scope>test</scope>
+		</dependency>
+
+		<!-- Tomcat -->
+
+		<dependency>
+			<!--
+				We need this dependency, but at runtime, the relevant classes/packages will be used from pax-web-tomcat-common
+			-->
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-util-scan</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Testing -->

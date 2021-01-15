@@ -17,7 +17,7 @@
  */
 package org.ops4j.pax.web.extender.war.internal.model;
 
-import org.ops4j.lang.NullArgumentException;
+//import org.ops4j.lang.NullArgumentException;
 
 /**
  * Models mime mapping element in web.xml.
@@ -52,7 +52,7 @@ public class WebAppMimeMapping {
 	 * @throws NullArgumentException if extension is null
 	 */
 	public void setExtension(final String extension) {
-		NullArgumentException.validateNotNull(extension, "Extension");
+//		NullArgumentException.validateNotNull(extension, "Extension");
 		this.extension = extension;
 	}
 
@@ -72,7 +72,7 @@ public class WebAppMimeMapping {
 	 * @throws NullArgumentException if mime type is null
 	 */
 	public void setMimeType(final String mimeType) {
-		NullArgumentException.validateNotNull(mimeType, "Mime type");
+//		NullArgumentException.validateNotNull(mimeType, "Mime type");
 		this.mimeType = mimeType;
 	}
 

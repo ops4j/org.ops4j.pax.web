@@ -19,14 +19,14 @@ package org.ops4j.pax.web.extender.war.internal.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ops4j.lang.NullArgumentException;
+//import org.ops4j.lang.NullArgumentException;
 
 public class WebAppSecurityRole {
 
 	List<String> roleNames = new ArrayList<String>();
 
 	public void addRoleName(String roleName) {
-		NullArgumentException.validateNotNull(roleName, "Role Name");
+//		NullArgumentException.validateNotNull(roleName, "Role Name");
 		roleNames.add(roleName);
 	}
 

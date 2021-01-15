@@ -17,7 +17,7 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
-import org.ops4j.pax.web.extender.war.internal.model.WebApp;
+import org.ops4j.pax.web.extender.war.internal.model.BundleWebApplication;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
@@ -38,7 +38,7 @@ public interface WebAppVisitor {
 	 *
 	 * @param webApp visited web application
 	 */
-	void visit(WebApp webApp);
+	void visit(BundleWebApplication webApp);
 
 	/**
 	 * Called once for each servlet.

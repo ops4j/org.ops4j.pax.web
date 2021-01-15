@@ -993,8 +993,10 @@ public class ServerModel implements BatchVisitor {
 			});
 
 			// no need to do it with Whiteboard contexts - they'll be removed by pax-web-extender-whiteboard tracker
-			controller.sendBatch(batch);
-			batch.accept(this);
+			if (batch.getOperations().size() > 0) {
+				controller.sendBatch(batch);
+				batch.accept(this);
+			}
 
 			return null;
 		});

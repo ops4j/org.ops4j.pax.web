@@ -166,7 +166,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		this.dispatcherTypes = dispatcherTypes;
 		if (this.dispatcherTypes == null || this.dispatcherTypes.length == 0) {
 			// legacy method to get filter dispatcher types
-			String dispatchers = this.initParams.remove(PaxWebConstants.FILTER_MAPPING_DISPATCHER);
+			String dispatchers = this.initParams.remove(PaxWebConstants.INIT_PARAM_FILTER_MAPPING_DISPATCHER);
 			if (dispatchers != null) {
 				String[] types = dispatchers.split("\\s*,\\s*");
 				this.dispatcherTypes = new String[types.length];

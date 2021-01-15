@@ -22,9 +22,7 @@ import java.util.Hashtable;
 
 import javax.servlet.Servlet;
 
-import org.ops4j.lang.NullArgumentException;
-import org.ops4j.pax.swissbox.core.BundleClassLoader;
-import org.ops4j.pax.web.extender.war.internal.model.WebApp;
+import org.ops4j.pax.web.extender.war.internal.model.BundleWebApplication;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppConstraintMapping;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppErrorPage;
 import org.ops4j.pax.web.extender.war.internal.model.WebAppFilter;
@@ -72,7 +70,7 @@ class RegisterWebAppVisitorHS implements WebAppVisitor {
 	 * @throws NullArgumentException if http service is null
 	 */
 	RegisterWebAppVisitorHS(final HttpService httpService) {
-		NullArgumentException.validateNotNull(httpService, "Http Service");
+//		NullArgumentException.validateNotNull(httpService, "Http Service");
 		this.httpService = httpService;
 	}
 
@@ -81,14 +79,14 @@ class RegisterWebAppVisitorHS implements WebAppVisitor {
 	 * registrations and registers a resource for root of war.
 	 *
 	 * @throws NullArgumentException if web app is null
-	 * @see WebAppVisitor#visit(WebApp)
+	 * @see WebAppVisitor#visit(BundleWebApplication)
 	 */
-	public void visit(final WebApp webApp) {
-		NullArgumentException.validateNotNull(webApp, "Web app");
-		bundleClassLoader = new BundleClassLoader(webApp.getBundle());
-		httpContext = new WebAppHttpContext(
-				httpService.createDefaultHttpContext(), webApp.getRootPath(),
-				webApp.getBundle(), webApp.getMimeMappings());
+	public void visit(final BundleWebApplication webApp) {
+//		NullArgumentException.validateNotNull(webApp, "Web app");
+//		bundleClassLoader = new BundleClassLoader(webApp.getBundle());
+//		httpContext = new WebAppHttpContext(
+//				httpService.createDefaultHttpContext(), webApp.getRootPath(),
+//				webApp.getBundle(), webApp.getMimeMappings());
 		try {
 			LOG.info("Pax Web not available. Skipping context params registration");
 			httpService.registerResources("/", "default", httpContext);
@@ -106,7 +104,7 @@ class RegisterWebAppVisitorHS implements WebAppVisitor {
 	 * @see WebAppVisitor#visit(WebAppServlet)
 	 */
 	public void visit(final WebAppServlet webAppServlet) {
-		NullArgumentException.validateNotNull(webAppServlet, "Web app servlet");
+//		NullArgumentException.validateNotNull(webAppServlet, "Web app servlet");
 		final String[] aliases = webAppServlet.getAliases();
 		if (aliases != null && aliases.length > 0) {
 			for (final String alias : aliases) {
@@ -220,9 +218,9 @@ class RegisterWebAppVisitorHS implements WebAppVisitor {
 	public static <T> Class<? extends T> loadClass(final Class<T> clazz,
 												   final ClassLoader classLoader, final String className)
 			throws ClassNotFoundException, IllegalAccessException {
-		NullArgumentException.validateNotNull(clazz, "Class");
-		NullArgumentException.validateNotNull(classLoader, "ClassLoader");
-		NullArgumentException.validateNotNull(className, "Servlet Class");
+//		NullArgumentException.validateNotNull(clazz, "Class");
+//		NullArgumentException.validateNotNull(classLoader, "ClassLoader");
+//		NullArgumentException.validateNotNull(className, "Servlet Class");
 		return (Class<? extends T>) classLoader.loadClass(className);
 	}
 
