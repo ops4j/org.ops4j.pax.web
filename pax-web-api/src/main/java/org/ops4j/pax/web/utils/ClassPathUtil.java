@@ -44,6 +44,7 @@ import java.util.regex.Pattern;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.namespace.BundleNamespace;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleRevision;
@@ -78,7 +79,8 @@ public class ClassPathUtil {
 	 */
 	public static URL[] getClassPathJars(final Bundle bundle, boolean useClassSpace) {
 		final List<URL> urls = new ArrayList<>();
-		final String bundleClasspath = bundle.getHeaders() == null ? null : bundle.getHeaders().get("Bundle-ClassPath");
+		final String bundleClasspath = bundle.getHeaders() == null ? null
+				: bundle.getHeaders().get(Constants.BUNDLE_CLASSPATH);
 		if (bundleClasspath != null) {
 			String[] segments = bundleClasspath.split("\\s*,\\s*");
 			for (String segment : segments) {
@@ -154,18 +156,6 @@ public class ClassPathUtil {
 	}
 
 	/**
-	 * Gets a list of bundles that are imported or required by {@link Bundle}. This method also returns
-	 * attached fragments.
-	 *
-	 * @param bundle the bundle for which to perform the lookup
-	 * @param bundleSet set that's both returned and filled with bundles in the <em>class space</em>.
-	 * @return list of imported and required bundles
-	 */
-	public static Set<Bundle> getBundlesInClassSpace(Bundle bundle, Set<Bundle> bundleSet) {
-		return getBundlesInClassSpace(bundle.getBundleContext(), bundle, bundleSet);
-	}
-
-	/**
 	 * Gets a list of bundles that are imported or required by {@link BundleContext}. This method also returns
 	 * attached fragments.
 	 *
@@ -174,10 +164,10 @@ public class ClassPathUtil {
 	 * @param bundleSet
 	 * @return
 	 */
-	public static Set<Bundle> getBundlesInClassSpace(BundleContext context, Bundle bundle, Set<Bundle> bundleSet) {
+	public static Set<Bundle> getBundlesInClassSpace(Bundle bundle, Set<Bundle> bundleSet) {
 		BundleWiring bundleWiring = bundle == null ? null : bundle.adapt(BundleWiring.class);
 
-		if (bundle == null || context == null || bundleWiring == null) {
+		if (bundle == null || bundleWiring == null) {
 			throw new IllegalArgumentException("Bundle, BundleContext or BundleWiring is null");
 		}
 
@@ -219,12 +209,14 @@ public class ClassPathUtil {
 			bundleSet.addAll(bundles);
 			// collect transitively
 			for (Bundle b : bundles) {
-				getBundlesInClassSpace(context, b, bundleSet);
+				getBundlesInClassSpace(b, bundleSet);
 			}
 		}
 
 		// Sanity checkpoint to remove uninstalled bundles
 		bundleSet.removeIf(b -> b.getState() == Bundle.UNINSTALLED);
+		// And system bundle
+		bundleSet.removeIf(b -> b.getBundleId() == 0L);
 
 		return bundleSet;
 	}

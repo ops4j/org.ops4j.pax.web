@@ -631,7 +631,8 @@ class TomcatServerWrapper implements BatchVisitor {
 			// TODO: think about Tomcat's DigesterFactory and how it loads the dtd/xsd resources
 			WebXmlParser webXmlParser = new WebXmlParser(true, false, true);
 			try {
-				URL internalXml = getClass().getResource("/org/ops4j/pax/web/service/tomcat/internal/web.xml");
+				// default-web.xml is copied from official Tomcat distro and packaged into pax-web-spi
+				URL internalXml = OsgiContextModel.class.getResource("/org/ops4j/pax/web/service/spi/model/default-web.xml");
 				if (internalXml != null) {
 					// resource from pax-web-tomcat bundle added using maven-dependency-plugin - parsed only
 					// to get the MIME mappings

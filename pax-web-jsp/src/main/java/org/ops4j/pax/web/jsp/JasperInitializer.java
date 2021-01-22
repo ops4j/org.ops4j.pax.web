@@ -35,8 +35,9 @@ import org.slf4j.LoggerFactory;
 /**
  * <p>Pax Web extends original initializer, so it is possible to override the {@link TldScanner}.</p>
  *
- * <p>This initializer is <strong>not</strong> declared in {@code /META-INF/services/javax.servlet.ServletContainerInitializer}
- * and if needed, it is used directly by Pax Web to configure the context(s) when JSP support is required.</p>
+ * <p>This initializer is declared in {@code /META-INF/services/javax.servlet.ServletContainerInitializer}
+ * for pax-web-extender-war purpose. For Whiteboard and HttpService purposes, it is used directly to configure the
+ * context(s) when JSP support is required.</p>
  *
  * <p>According to Servlet specification 8.3 "JSP container pluggability", JSP processing/parsing/setup is no longer
  * performed by "Servlet container" itself and instead can be delegated to "JSP container" using

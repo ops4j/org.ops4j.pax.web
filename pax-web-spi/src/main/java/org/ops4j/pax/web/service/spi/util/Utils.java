@@ -496,4 +496,14 @@ public class Utils {
 		return null;
 	}
 
+	/**
+	 * Checkes whether a {@link Bundle} is a fragment bundle.
+	 * @param bundle
+	 * @return
+	 */
+	public static boolean isFragment(Bundle bundle) {
+		return bundle != null && bundle.adapt(BundleRevision.class) != null
+				&& (bundle.adapt(BundleRevision.class).getTypes() & BundleRevision.TYPE_FRAGMENT) != 0;
+	}
+
 }

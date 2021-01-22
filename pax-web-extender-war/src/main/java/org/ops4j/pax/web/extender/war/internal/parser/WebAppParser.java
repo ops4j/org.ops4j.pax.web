@@ -28,9 +28,6 @@ import javax.servlet.ServletContainerInitializer;
 import javax.servlet.annotation.HandlesTypes;
 
 import org.ops4j.pax.web.extender.war.internal.model.BundleWebApplication;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
-import org.ops4j.pax.web.extender.war.internal.model.WebAppListener;
-import org.ops4j.pax.web.extender.war.internal.util.ManifestUtil;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -262,9 +259,9 @@ public class WebAppParser {
 
 			// semicolon-separated facelet libs
 			// TODO merge with any user-defined values
-			WebAppInitParam param = new WebAppInitParam();
-			param.setParamName("javax.faces.FACELETS_LIBRARIES");
-			param.setParamValue(paramValue);
+//			WebAppInitParam param = new WebAppInitParam();
+//			param.setParamName("javax.faces.FACELETS_LIBRARIES");
+//			param.setParamValue(paramValue);
 //			webApp.addContextParam(param);
 		}
 
@@ -279,9 +276,9 @@ public class WebAppParser {
 
 			// comma-separated config files
 			// TODO merge with any user-defined values
-			WebAppInitParam param = new WebAppInitParam();
-			param.setParamName("javax.faces.CONFIG_FILES");
-			param.setParamValue(paramValue);
+//			WebAppInitParam param = new WebAppInitParam();
+//			param.setParamName("javax.faces.CONFIG_FILES");
+//			param.setParamValue(paramValue);
 //			webApp.addContextParam(param);
 		}
 	}
@@ -666,19 +663,6 @@ public class WebAppParser {
 //	}
 
 	/**
-	 * Parses listeners out of web.xml.
-	 *
-	 * @param rootElement web.xml root element
-	 * @param webApp      web app for web.xml
-	 */
-//	private static void parseListeners(final Element rootElement,
-//			final BundleWebApplication webApp) {
-//		final Element[] elements = getChildren(rootElement, "listener");
-//		Arrays.stream(elements).forEach(element ->
-//				addWebListener(webApp, getTextContent(getChild(element, "listener-class"))));
-//	}
-
-	/**
 	 * Parses error pages out of web.xml.
 	 *
 	 * @param errorPageType errorPageType element from web.xml
@@ -779,31 +763,14 @@ public class WebAppParser {
 //		webApp.setJspConfigDescriptor(webAppJspConfig);
 //	}
 
-	/**
-	 * Returns the text content of an element or null if the element is null.
-	 *
-	 * @param element the same element form which the context should be retrieved
-	 * @return text content of element
-	 */
-	private static String getTextContent(final Element element) {
-		if (element != null) {
-			String content = element.getTextContent();
-			if (content != null) {
-				content = content.trim();
-			}
-			return content;
-		}
-		return null;
-	}
-
 	private static void addWebListener(final BundleWebApplication webApp, String clazz) {
-		final WebAppListener listener = new WebAppListener();
-		listener.setListenerClass(clazz);
+//		final WebAppListener listener = new WebAppListener();
+//		listener.setListenerClass(clazz);
 //		webApp.addListener(listener);
 	}
 
 	private static String extractRootPath(final Bundle bundle) {
-		String rootPath = ManifestUtil.getHeader(bundle, "Webapp-Root");
+		String rootPath = "";//ManifestUtil.getHeader(bundle, "Webapp-Root");
 		if (rootPath == null) {
 			rootPath = "";
 		}
@@ -829,7 +796,7 @@ public class WebAppParser {
 
 	private static List<String> extractVirtualHostList(final Bundle bundle) {
 		List<String> virtualHostList = new LinkedList<>();
-		String virtualHostListAsString = ManifestUtil.getHeader(bundle, "Web-VirtualHosts");
+		String virtualHostListAsString = "";//ManifestUtil.getHeader(bundle, "Web-VirtualHosts");
 		if ((virtualHostListAsString != null) && (virtualHostListAsString.length() > 0)) {
 			String[] virtualHostArray = virtualHostListAsString.split(",");
 			for (String virtualHost : virtualHostArray) {
@@ -841,7 +808,7 @@ public class WebAppParser {
 
 	private static List<String> extractConnectorList(final Bundle bundle) {
 		List<String> connectorList = new LinkedList<>();
-		String connectorListAsString = ManifestUtil.getHeader(bundle, "Web-Connectors");
+		String connectorListAsString = "";//ManifestUtil.getHeader(bundle, "Web-Connectors");
 		if ((connectorListAsString != null) && (connectorListAsString.length() > 0)) {
 			String[] virtualHostArray = connectorListAsString.split(",");
 			for (String virtualHost : virtualHostArray) {
@@ -869,30 +836,5 @@ public class WebAppParser {
 		match = path.matches("web-jetty\\.xml");
 		return match;
 	}
-
-//	protected WebAppType parseWebXml(URL url) {
-//		try {
-//			XMLReader reader = XMLReaderFactory.createXMLReader();
-//
-//			// Use filter to override the namespace in the document.
-//			// On JDK 7, JAXB fails to parse the document if the namespace does
-//			// not match
-//			// the one indicated by the generated JAXB model classes.
-//			// For some reason, the JAXB version in JDK 8 is more lenient and
-//			// does
-//			// not require this filter.
-//			NamespaceFilter inFilter = new NamespaceFilter("http://xmlns.jcp.org/xml/ns/javaee");
-//			inFilter.setParent(reader);
-//
-//			JAXBContext context = JAXBContext.newInstance(WebAppType.class);
-//			Unmarshaller unmarshaller = context.createUnmarshaller();
-//			SAXSource source = new SAXSource(inFilter, new InputSource(url.openStream()));
-//
-//			return unmarshaller.unmarshal(source, WebAppType.class).getValue();
-//		} catch (JAXBException | IOException | SAXException exc) {
-//			LOG.error("error parsing web.xml", exc);
-//		}
-//		return null;
-//	}
 
 }

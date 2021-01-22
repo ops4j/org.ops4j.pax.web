@@ -28,36 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class WebObserver implements WarManager {
 
-	/**
-	 * Logger.
-	 */
 	static final Logger LOG = LoggerFactory.getLogger(WebObserver.class);
-	/**
-	 * Web app publisher.
-	 */
-//	protected final WebAppPublisher publisher;
-//
-//	/**
-//	 * Extender bundle context
-//	 */
-//	protected final BundleContext bundleContext;
-//	/**
-//	 * Event dispatcher used to notify listeners and send eventAdmin events
-//	 */
-//	protected final WebApplicationEventDispatcher eventDispatcher;
-//	/**
-//	 * Manage dependencies
-//	 */
-//	protected final DefaultWebAppDependencyManager dependencyManager;
-//	/**
-//	 * Parser to build the WebApp from the bundles
-//	 */
-//	protected final WebAppParser parser;
-
-	/**
-	 * Logger.
-	 */
-	protected final Logger log = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * The queue of published WebApp objects to a context.
@@ -70,22 +41,15 @@ public class WebObserver implements WarManager {
       */
     private final String defaultVirtualHost = "default";
 
-	/**
-	 * Parse the web app and create the extension that will be managed by the
-	 * extender.
-	 */
 //	public Extension createExtension(final Bundle bundle) {
-//		// Start web app creation
 //		try {
 //			eventDispatcher.webEvent(webApp, WebEvent.DEPLOYING);
 //			parser.parse(bundle, webApp);
 //
-//			String requireCapabilityHeader = ManifestUtil.getHeader(bundle,
-//					"Require-Capability");
+//			String requireCapabilityHeader = ManifestUtil.getHeader(bundle, "Require-Capability");
 //			// If the header isn't present Pax-Web is able to take care of it.
 //			// otherwise needs support by Pax-CDI
-//			if (requireCapabilityHeader == null
-//					|| !requireCapabilityHeader.contains("osgi.extender=pax.cdi")) {
+//			if (requireCapabilityHeader == null || !requireCapabilityHeader.contains("osgi.extender=pax.cdi")) {
 //				webApp.setHasDependencies(true);
 //				dependencyManager.addWebApp(webApp);
 //			}
@@ -94,37 +58,12 @@ public class WebObserver implements WarManager {
 //			synchronized (webApps) {
 //				webApps.put(bundle.getBundleId(), webApp);
 //			}
-//
-//			return new SimpleExtension(bundle) {
-//				@Override
-//				public void doStart() {
-//					// Check if the web app has already been destroyed
-//					synchronized (webApps) {
-//						if (!webApps.containsKey(bundle.getBundleId())) {
-//							return;
-//						}
-//					}
-//					deploy(webApp);
-//				}
-//
-//				@Override
-//				public void doDestroy() {
-//					// Flag this web app has destroyed by removing it
-//					// from the list
-//					dependencyManager.removeWebApp(webApp);
-//					undeploy(webApp);
-//					eventDispatcher.removeWebApp(webApp);
-//				}
-//			};
-//			//CHECKSTYLE:OFF
+//			return null;
 //		} catch (Exception e) {
-//			LOG.error(
-//					"Error scanning web bundle " + bundle + ": "
-//							+ e.getMessage(), e);
+//			LOG.error("Error scanning web bundle " + bundle + ": " + e.getMessage(), e);
 //			eventDispatcher.webEvent(webApp, WebEvent.FAILED, e);
 //			return null;
 //		}
-//		//CHECKSTYLE:ON
 //	}
 
 	public void deploy(BundleWebApplication webApp) {
@@ -219,6 +158,7 @@ public class WebObserver implements WarManager {
                 }
 	}
 
+	@Override
 	public int start(long bundleId, String contextName) {
 		BundleWebApplication webApp;
 //		synchronized (webApps) {
@@ -237,6 +177,7 @@ public class WebObserver implements WarManager {
 		return SUCCESS;
 	}
 
+	@Override
 	public int stop(long bundleId) {
 		BundleWebApplication webApp;
 //		synchronized (webApps) {

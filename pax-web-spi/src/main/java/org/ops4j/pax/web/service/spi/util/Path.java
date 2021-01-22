@@ -82,12 +82,12 @@ public class Path {
 
 	/**
 	 * Replaces multiple subsequent slashes with one slash. E.g. ////a//path//
-	 * will becaome /a/path/
+	 * will become /a/path/
 	 *
 	 * @param target target sring to be replaced
 	 * @return a string where the subsequent slashes are replaced with one slash
 	 */
-	static String replaceSlashes(final String target) {
+	public static String replaceSlashes(final String target) {
 		String replaced = target;
 		if (replaced != null) {
 			replaced = replaced.replaceAll("/+", "/");

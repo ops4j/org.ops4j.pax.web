@@ -203,10 +203,6 @@
 							!org.apache.taglibs.standard.tlv.el
 						</Export-Package>
 						<Private-Package>
-							<!-- resources from mvn:org.apache.tomcat/tomcat-servlet-api, not available in jakarta.servlet/jakarta.servlet-api -->
-							javax.servlet.resources;-split-package:=merge-first,
-							<!-- resources from mvn:org.apache.tomcat/tomcat-jsp-api, not available in jakarta.servlet.jsp/jakarta.servlet.jsp-api -->
-							javax.servlet.jsp.resources;-split-package:=merge-first,
 							<!-- resources from mvn:org.apache.tomcat/tomcat-jasper which are not exported (no *.class there) -->
 							org.apache.jasper.resources,
 							<!-- resources from mvn:org.apache.taglibs/taglibs-standard-impl which are not exported (no *.class there) -->

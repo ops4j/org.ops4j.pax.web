@@ -19,18 +19,17 @@ package org.ops4j.pax.web.extender.war.internal;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.ops4j.pax.web.extender.war.internal.model.WebAppMimeMapping;
-import org.ops4j.pax.web.extender.war.internal.util.Path;
+import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
@@ -93,7 +92,7 @@ class WebAppHttpContext extends WebContainerContextWrapper {
 	 * @throws NullArgumentException if http context or bundle is null
 	 */
 	WebAppHttpContext(final HttpContext httpContext, final String rootPath,
-					  final Bundle bundle, final WebAppMimeMapping[] webAppMimeMappings) {
+					  final Bundle bundle/*, final WebAppMimeMapping[] webAppMimeMappings*/) {
         super(bundle, httpContext);
 		if (log.isDebugEnabled()) {
 			log.debug("Creating WebAppHttpContext for {}", httpContext);
@@ -102,10 +101,10 @@ class WebAppHttpContext extends WebContainerContextWrapper {
 		this.rootPath = rootPath;
 		this.bundle = bundle;
 		mimeMappings = new HashMap<>();
-		for (WebAppMimeMapping mimeMapping : webAppMimeMappings) {
-			mimeMappings.put(mimeMapping.getExtension(),
-					mimeMapping.getMimeType());
-		}
+//		for (WebAppMimeMapping mimeMapping : webAppMimeMappings) {
+//			mimeMappings.put(mimeMapping.getExtension(),
+//					mimeMapping.getMimeType());
+//		}
 	}
 
 	/**
@@ -125,8 +124,8 @@ class WebAppHttpContext extends WebContainerContextWrapper {
 	 * @see org.osgi.service.http.HttpContext#getResource(String)
 	 */
 	public URL getResource(final String name) {
-		final String normalizedName = Path.normalizeResourcePath(rootPath
-				+ (name.startsWith("/") ? "" : "/") + name).trim();
+		final String normalizedName = "";//Path.normalizeResourcePath(rootPath
+//				+ (name.startsWith("/") ? "" : "/") + name).trim();
 
 		log.debug("Searching bundle " + bundle
 						+ " for resource [{}], normalized to [{}]", name,
@@ -190,4 +189,38 @@ class WebAppHttpContext extends WebContainerContextWrapper {
 		return "WebAppHttpContext{" + bundle.getSymbolicName() + " - "
 				+ bundle.getBundleId() + '}';
 	}
+
+
+	@Override
+	public String getContextId() {
+		if (httpContext instanceof WebContainerContext) {
+			return ((WebContainerContext) httpContext).getContextId();
+		}
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Set<String> getResourcePaths(final String name) {
+		final String normalizedName = "";//Path.normalizeResourcePath(rootPath
+				//+ (name.startsWith("/") ? "" : "/") + name);
+
+		log.debug("Searching bundle [" + bundle + "] for resource paths of ["
+				+ name + "], normalized to [" + normalizedName + "]");
+		@SuppressWarnings("rawtypes")
+		final Enumeration entryPaths = bundle.getEntryPaths(name);
+		if (entryPaths == null || !entryPaths.hasMoreElements()) {
+			log.debug("No resource paths found");
+			return null;
+		}
+		Set<String> foundPaths = new HashSet<>();
+		while (entryPaths.hasMoreElements()) {
+			foundPaths.add((String) entryPaths.nextElement());
+		}
+		log.debug("Resource paths found: " + foundPaths);
+		return foundPaths;
+	}
+
 }

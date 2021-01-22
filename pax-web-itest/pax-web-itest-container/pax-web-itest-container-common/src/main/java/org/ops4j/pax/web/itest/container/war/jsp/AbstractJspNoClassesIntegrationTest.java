@@ -15,13 +15,7 @@
  */
 package org.ops4j.pax.web.itest.container.war.jsp;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
-import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
 
 /**
  * Regression test for PAXWEB-409.
@@ -30,28 +24,28 @@ import org.osgi.framework.BundleException;
  */
 public abstract class AbstractJspNoClassesIntegrationTest extends AbstractContainerTestBase {
 
-	private Bundle bundle;
-
-	@Before
-	public void setUp() throws Exception {
-		configureAndWaitForServletWithMapping("*.jsp",
-				() -> bundle = installAndStartBundle(sampleURI("helloworld-jsp-noclasses")));
-	}
-
-	@After
-	public void tearDown() throws BundleException {
-		if (bundle != null) {
-			bundle.stop();
-			bundle.uninstall();
-		}
-	}
-
-	@Test
-	public void testSimpleJsp() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'Welcome'",
-						resp -> resp.contains("Welcome"))
-				.doGETandExecuteTest("http://localhost:8181/jspnc/welcome.jsp");
-	}
+//	private Bundle bundle;
+//
+//	@Before
+//	public void setUp() throws Exception {
+//		configureAndWaitForServletWithMapping("*.jsp",
+//				() -> bundle = installAndStartBundle(sampleURI("helloworld-jsp-noclasses")));
+//	}
+//
+//	@After
+//	public void tearDown() throws BundleException {
+//		if (bundle != null) {
+//			bundle.stop();
+//			bundle.uninstall();
+//		}
+//	}
+//
+//	@Test
+//	public void testSimpleJsp() throws Exception {
+//		HttpTestClientFactory.createDefaultTestClient()
+//				.withResponseAssertion("Response must contain 'Welcome'",
+//						resp -> resp.contains("Welcome"))
+//				.doGETandExecuteTest("http://localhost:8181/jspnc/welcome.jsp");
+//	}
 
 }

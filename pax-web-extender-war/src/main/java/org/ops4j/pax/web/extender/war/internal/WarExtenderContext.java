@@ -16,7 +16,6 @@
 package org.ops4j.pax.web.extender.war.internal;
 
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
@@ -25,10 +24,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.felix.utils.extender.AbstractExtender;
 import org.apache.felix.utils.extender.Extension;
 import org.ops4j.pax.web.extender.war.internal.model.BundleWebApplication;
-import org.ops4j.pax.web.extender.war.internal.parser.WebAppParser;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.spi.WarManager;
 import org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.util.WebContainerListener;
@@ -36,7 +33,6 @@ import org.ops4j.pax.web.service.spi.util.WebContainerManager;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,9 +87,9 @@ public class WarExtenderContext implements WebContainerListener {
 
 
 				/** Used to parser {@code web.xml} and fragmnets into a web application model */
-				private final WebAppParser webApplicationParser;
-				private WebObserver webObserver;
-				private final ServiceRegistration<WarManager> registration;
+//				private final WebAppParser webApplicationParser;
+//				private WebObserver webObserver;
+//				private final ServiceRegistration<WarManager> registration;
 
 
 
@@ -125,7 +121,7 @@ public class WarExtenderContext implements WebContainerListener {
 		webApplicationEventDispatcher = new WebApplicationEventDispatcher(bundleContext);
 
 		// web.xml, web-fragment.xml parser
-		webApplicationParser = new WebAppParser(bundleContext);
+//		webApplicationParser = new WebAppParser(bundleContext);
 
 //		webObserver = new WebObserver(
 //				webApplicationParser,
@@ -134,9 +130,9 @@ public class WarExtenderContext implements WebContainerListener {
 //				new DefaultWebAppDependencyManager(),
 //				bundleContext);
 
-		registration = bundleContext.registerService(
-				WarManager.class, webObserver,
-				new Hashtable<>());
+//		registration = bundleContext.registerService(
+//				WarManager.class, webObserver,
+//				new Hashtable<>());
 
 		webContainerManager = synchronous
 				? new WebContainerManager(bundleContext, this)

@@ -32,7 +32,7 @@ import org.osgi.framework.Bundle;
  * <p>In Whiteboard scenario, an {@link OsgiServletContext} should get a {@link ClassLoader} from a bundle that
  * was used to register {@link org.osgi.service.http.context.ServletContextHelper} OSGi service and in case of
  * servlets (and filters), the {@link javax.servlet.ServletContext} obtained from {@link javax.servlet.ServletConfig}
- * should return (in {@link ServletContext#getClassLoader()} the {@link ClassLoader} of a bundle associated with
+ * should return (in {@link ServletContext#getClassLoader()}) the {@link ClassLoader} of a bundle associated with
  * the {@link Bundle} that registered this {@link javax.servlet.Servlet} or {@link javax.servlet.Filter} OSGi service.</p>
  *
  * <p>In practice (and in WAB scenario), the actual {@link ClassLoader} returned from {@link OsgiServletContext} should

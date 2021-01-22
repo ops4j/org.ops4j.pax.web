@@ -15,12 +15,16 @@
  */
 package org.ops4j.pax.web.service.spi;
 
+import org.ops4j.pax.web.annotations.Review;
+
 /**
  * Used to manage deployments of WARs discovered by OPS4J Pax Web - Extender -
  * WAR.
  *
  * @author Hiram Chirino
  */
+@Review("Extend and integrate with org.osgi.service.http.runtime.HttpServiceRuntime for Karaf commands/services"
+		+ " like org.apache.karaf.web.WebContainerService and org.apache.karaf.http.core.ServletService")
 public interface WarManager {
 
 	int SUCCESS = 0;

@@ -16,9 +16,10 @@
  */
 package org.ops4j.pax.web.extender.war.internal.util;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
+import org.ops4j.pax.web.service.spi.util.Path;
+
+import static org.junit.Assert.assertEquals;
 
 public class PathTest {
 

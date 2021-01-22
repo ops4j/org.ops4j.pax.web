@@ -15,9 +15,9 @@
 
 -->
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-    id="jspSimpleTest" version="2.5">
+		xmlns="http://java.sun.com/xml/ns/javaee"
+		xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+		id="jspSimpleTest" version="2.5">
     <display-name>SimpleTestWebXML</display-name>
     <!-- Default page to server -->
     <welcome-file-list>

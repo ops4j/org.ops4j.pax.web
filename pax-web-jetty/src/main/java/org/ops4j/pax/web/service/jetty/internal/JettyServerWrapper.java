@@ -752,6 +752,7 @@ class JettyServerWrapper implements BatchVisitor {
 			// org.ops4j.pax.web.service.spi.servlet.OsgiServletContext is created and we have everything ready
 			// to create proper classloader for this OsgiServletContext
 			ClassLoader classLoader = null;
+			// TODO: handle classloaders already prepared in pax-web-extender-war
 			if (paxWebJettyBundle != null) {
 				// it may not be the case in Test scenario
 				OsgiServletContextClassLoader loader = new OsgiServletContextClassLoader();

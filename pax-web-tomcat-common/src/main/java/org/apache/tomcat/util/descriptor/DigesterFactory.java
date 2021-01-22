@@ -27,6 +27,7 @@ import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.digester.Digester;
 import org.apache.tomcat.util.digester.RuleSet;
 import org.apache.tomcat.util.res.StringManager;
+import org.ops4j.pax.web.service.WebContainer;
 import org.xml.sax.ext.EntityResolver2;
 
 /**
@@ -136,7 +137,8 @@ public class DigesterFactory {
     }
 
     private static String locationFor(String name) {
-        URL location = DigesterFactory.class.getResource("/META-INF/resources/" + name);
+        // Resources are now provided in pax-web-api, as they may be needed from other Pax Web bundles
+        URL location = WebContainer.class.getResource("/META-INF/resources/" + name);
         if (location == null) {
             Log log = LogFactory.getLog(DigesterFactory.class);
             log.warn(sm.getString("digesterFactory.missingSchema", name));

@@ -208,6 +208,15 @@ public abstract class AbstractControlledTestBase {
 				.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1);
 	}
 
+	protected Option[] paxWebExtenderWar() {
+		return new Option[] {
+				mavenBundle("org.ops4j.pax.web", "pax-web-tomcat-common")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ops4j.pax.web", "pax-web-extender-war")
+								.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
+		};
+	}
+
 	protected Option[] paxWebJsp() {
 		return new Option[] {
 				mavenBundle("jakarta.el", "jakarta.el-api")
@@ -317,6 +326,16 @@ public abstract class AbstractControlledTestBase {
 	 */
 	protected String sampleURI(String artifactId) {
 		return "mvn:org.ops4j.pax.web.samples/" + artifactId + "/" + VersionUtils.getProjectVersion();
+	}
+
+	/**
+	 * Returns {@code mvn:} URI for standard Pax Web sample with version set as current version of Pax Web.
+	 *
+	 * @param artifactId
+	 * @return
+	 */
+	protected String sampleWarURI(String artifactId) {
+		return "mvn:org.ops4j.pax.web.samples/" + artifactId + "/" + VersionUtils.getProjectVersion() + "/war";
 	}
 
 	protected Bundle installAndStartBundle(String uri) {

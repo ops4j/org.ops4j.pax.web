@@ -15,7 +15,6 @@
  */
 package org.ops4j.pax.web.extender.war.internal.parser;
 
-import org.ops4j.pax.web.extender.war.internal.model.WebAppInitParam;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,15 +52,15 @@ public class AnnotationConfigurer<T> {
 		return clazz;
 	}
 
-	protected boolean initParamsContain(WebAppInitParam[] initParams,
-										String name) {
-		for (WebAppInitParam webAppInitParam : initParams) {
-			if (webAppInitParam.getParamName().equalsIgnoreCase(name)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
+//	protected boolean initParamsContain(WebAppInitParam[] initParams,
+//										String name) {
+//		for (WebAppInitParam webAppInitParam : initParams) {
+//			if (webAppInitParam.getParamName().equalsIgnoreCase(name)) {
+//				return true;
+//			}
+//		}
+//
+//		return false;
+//	}
 
 }
