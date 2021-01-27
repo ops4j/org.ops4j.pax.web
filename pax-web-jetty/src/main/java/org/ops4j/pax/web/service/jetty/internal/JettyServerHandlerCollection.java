@@ -98,12 +98,15 @@ class JettyServerHandlerCollection extends HandlerCollection {
 		//  - Upon receipt of a client request, the Web container determines the Web application to which to forward it.
 		//  - The Web container next must locate the servlet to process the request using the path mapping procedure [...]
 		//  - The first successful match is used with no further matches attempted
-		for (Handler handler : getHandlers()) {
-			if (matched != null
-					&& (handler instanceof ContextHandler || matchedContextEqualsHandler(matched, handler))) {
-				continue;
+		Handler[] handlers = getHandlers();
+		if (handlers != null) {
+			for (Handler handler : handlers) {
+				if (matched != null
+						&& (handler instanceof ContextHandler || matchedContextEqualsHandler(matched, handler))) {
+					continue;
+				}
+				handler.handle(target, baseRequest, request, response);
 			}
-			handler.handle(target, baseRequest, request, response);
 		}
 	}
 
