@@ -33,7 +33,6 @@ import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.wiring.BundleRevision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -104,14 +103,13 @@ public class PaxWebTldScanner extends TldScanner {
 			// it means that the classloader is org.osgi.framework.BundleReference, so it's loaded in OSGi env
 			// and we can use methods to search the content of the bundle (including fragments, which we should
 			// consider)
-			BundleRevision rev = paxWebJsp.adapt(BundleRevision.class);
-			if ((rev.getTypes() & BundleRevision.TYPE_FRAGMENT) > 0) {
+			if (Utils.isFragment(paxWebJsp)) {
 				// pax-web-jsp should NOT be a fragment, or rather a bundle of this class is fragment. Just sanity
 				// check and API showcase ;)
 				return;
 			}
 			if (bundle.getState() == Bundle.INSTALLED) {
-				// org.osgi.framework.Bundle.findEntries will attempt resolution, but we don't want it
+				// org.osgi.framework.Bundle.findEntries() will attempt resolution, but we don't want it
 				return;
 			}
 			Enumeration<URL> e = paxWebJsp.findEntries("/META-INF", "*.tld", true);
@@ -144,14 +142,10 @@ public class PaxWebTldScanner extends TldScanner {
 	private void scanBundle(Bundle bundle) throws IOException {
 		List<URL> tldURLs = new ArrayList<>(16);
 
-		// TODO: check if /WEB-INF/classes/META-INF/*.tlds are scanned (if WEB-INF/classes is on Bundle-ClasPath it
-		//       won't be returned by org.ops4j.pax.web.utils.ClassPathUtil.getClassPathJars())
-		//       See org.apache.jasper.servlet.TldScanner.TldScannerCallback.scanWebInfClasses()
-
-		// First: JARs from Bundle-ClassPath - we'll scan them separately, because we want to use Bundle.findEntries()
+		// First: entries from Bundle-ClassPath - we'll scan them separately, because we want to use Bundle.findEntries()
 		// methods, which checks the fragments, but doesn't check classpath at all
-		URL[] jars = ClassPathUtil.getClassPathJars(bundle, false);
-		List<URL> jarTLDs = ClassPathUtil.findEntries(jars, "/META-INF", "*.tld", true);
+		URL[] urls = ClassPathUtil.getClassPathURLs(bundle);
+		List<URL> jarTLDs = ClassPathUtil.findEntries(bundle, urls, "META-INF", "*.tld", true);
 		tldURLs.addAll(jarTLDs);
 
 		// 2nd: scan the bundle itself and its fragments using org.osgi.framework.wiring.BundleWiring.findEntries() API.
@@ -165,20 +159,24 @@ public class PaxWebTldScanner extends TldScanner {
 			processedBundles.add(paxWebJsp);
 		}
 
-		// transitive closure of reachable bundles (not fragments)
+		// transitive closure of reachable bundles (not fragments, because these are handled together with associated
+		// bundles)
 		Deque<Bundle> bundles = new LinkedList<>(Collections.singletonList(bundle));
 		while (bundles.size() > 0) {
 			Bundle b = bundles.pop();
+			if (processedBundles.contains(b)) {
+				continue;
+			}
 			Set<Bundle> reachable = new HashSet<>();
 			ClassPathUtil.getBundlesInClassSpace(b, reachable);
 			for (Bundle rb : reachable) {
-				if (!processedBundles.contains(rb) && !Utils.isFragment(rb)) {
+				if (!Utils.isFragment(rb)) {
 					bundles.add(rb);
 				}
 			}
-			processedBundles.add(b);
 			List<URL> bundleTLDs = ClassPathUtil.findEntries(bundles, "META-INF", "*.tld", true, false);
 			tldURLs.addAll(bundleTLDs);
+			processedBundles.add(b);
 		}
 
 		// and finally parse all TLDs - the ones from Bundle-ClassPath are parsed first - just as with JavaEE

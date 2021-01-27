@@ -123,7 +123,7 @@ public class ClassPathUtilIntegrationTest extends AbstractOsgiTestBase {
 
 		// observation related to finding conflicting.properties resource:
 		// - resource is retrieved from bundles wired using Import-Package only if resource's package is on
-		//   Import-Package list. If it is, bundles wired using Require-Bundle and/or own content is NOT checked
+		//   Import-Package list. If it is, bundles wired using Require-Bundle and/or own content are NOT checked
 		// - if imported bundles are not checked, bundle wired using Require-Bundle is checked, but search continues
 		// - local content is checked. local content includes all "roots" from Bundle-ClassPath (like embedded jars)
 		//   AND all attached fragments - these constitue internal content of the host bundle

@@ -35,7 +35,6 @@ import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Element;
 //import static org.ops4j.util.xml.ElementHelper.getChild;
 //import static org.ops4j.util.xml.ElementHelper.getChildren;
 

@@ -106,6 +106,46 @@ public class ClassPathUtil {
 	}
 
 	/**
+	 * <p>Returns a list of urls for all entries that compose the Bundle-ClassPath.</p>
+	 *
+	 * @param bundle
+	 * @return
+	 */
+	public static URL[] getClassPathURLs(final Bundle bundle) {
+		final List<URL> urls = new ArrayList<>();
+		final String bundleClasspath = bundle.getHeaders() == null ? null
+				: bundle.getHeaders().get(Constants.BUNDLE_CLASSPATH);
+		if (bundleClasspath != null) {
+			String[] segments = bundleClasspath.split("\\s*,\\s*");
+			for (String segment : segments) {
+				final URL url = bundle.getEntry(segment);
+				if (url == null) {
+					continue;
+				}
+				String ef = url.toExternalForm();
+				try {
+					if (ef.endsWith("jar")) {
+						// sun.net.www.protocol.jar.Handler.separator = "!/"
+						urls.add(new URL("jar:" + ef + "!/"));
+					} else {
+						// assume it's a subdirectory of a bundle
+						if (!ef.endsWith("/")) {
+							urls.add(new URL(ef + "/"));
+						} else {
+							urls.add(url);
+						}
+					}
+				} catch (MalformedURLException ignore) {
+					LOG.debug(ignore.getMessage());
+				}
+			}
+		LOG.debug("Bundle-ClassPath URLs: " + urls);
+		}
+
+		return urls.toArray(new URL[urls.size()]);
+	}
+
+	/**
 	 * Returns a list of urls to jars that composes the Bundle-ClassPath and also a list of different URLs for bundles
 	 * in <em>class space</em> (which includes bundles for imported packages, fragments, wires of fragments and
 	 * required bundles)
@@ -223,11 +263,15 @@ public class ClassPathUtil {
 
 	/**
 	 * <p>This method uses {@link BundleWiring#listResources} that delegates to classloader. If there are
-	 * more visible resources with the same name, only one is returned.
-	 * Underneath this method uses {@link BundleWiring#listResources}.</p>
+	 * more visible resources with the same name, only one is returned.</p>
+	 *
 	 * <p>This method is not a good choice to discover manifests or e.g., {@code faces-context.xml} files,
 	 * if for single bundle many resources with the same path may be returned (as in case of WAR with Bundle-ClassPath
 	 * or with fragments).</p>
+	 *
+	 * <p>This method is also not good choice to get {@code /META-INF/services/*} files, as these should be accessed
+	 * using classloaders - a {@link Bundle} may have multiple entries on its {@code Bundle-ClassPath}, so
+	 * such service descriptors should be loaded from all the roots.</p>
 	 *
 	 * @param bundles
 	 * @param path
@@ -249,6 +293,41 @@ public class ClassPathUtil {
 				Collection<String> names = wiring.listResources(path, pattern, options);
 				for (String name : names) {
 					resources.add(bundle.getResource(name));
+				}
+			}
+		}
+		return resources;
+	}
+
+	/**
+	 * <p>This method uses {@link Bundle#getResources(String)} that delegates to classloader. If there are more visible
+	 * resources with the same name, <strong>all are returned</strong> (differently than with
+	 * {@link #listResources}).</p>
+	 *
+	 * <p>This method is the only choice to load resources using classloaders (respecting {@code Bundle-ClassPath}),
+	 * and checking attached bundle fragments, but the problem is that it doesn't allow to use patterns.</p>
+	 *
+	 * <p>The important thing to note is that if the bundle is in INSTALLED state, there'll be an attempt to resolve
+	 * it.</p>
+	 *
+	 * @param bundles
+	 * @param path
+	 * @return
+	 */
+	public static List<URL> getResources(Iterable<Bundle> bundles, String path) {
+		List<URL> resources = new ArrayList<>();
+		for (Bundle bundle : bundles) {
+			boolean isFragment = bundle.adapt(BundleRevision.class) != null
+					&& (bundle.adapt(BundleRevision.class).getTypes() & BundleRevision.TYPE_FRAGMENT) != 0;
+			if (!isFragment) {
+				Enumeration<URL> e = null;
+				try {
+					e = bundle.getResources(path);
+					while (e.hasMoreElements()) {
+						resources.add(e.nextElement());
+					}
+				} catch (IOException ioe) {
+					LOG.warn("Problem getting {} resource from {}: {}", path, bundle, ioe.getMessage(), ioe);
 				}
 			}
 		}
@@ -289,8 +368,8 @@ public class ClassPathUtil {
 				resources.addAll(entries);
 
 				if (useBundleClasspath) {
-					URL[] jars = getClassPathJars(bundle, false);
-					resources.addAll(findEntries(jars, normalizeBase(path, true), pattern, recurse));
+					URL[] jars = getClassPathURLs(bundle);
+					resources.addAll(findEntries(bundle, jars, normalizeBase(path, true), pattern, recurse));
 				}
 			}
 		}
@@ -400,7 +479,7 @@ public class ClassPathUtil {
 		}
 
 		List<URL> resources = new LinkedList<>();
-		scanRoots(roots, pattern, recurse, resources);
+		scanRoots(null, roots, pattern, recurse, resources);
 
 		return resources;
 	}
@@ -431,6 +510,8 @@ public class ClassPathUtil {
 	/**
 	 * Third {@code findEntries()} method - this one starts with an array of roots (which are for example
 	 * JARs from {@code Bundle-ClassPath}, but may be other "roots".
+	 * @param bundle the bundle from where the roots come from. It's needed if extracting a <em>directory</em> entry
+	 *        from a bundle
 	 * @param roots URLs that should end with "/" (jar: URLs should end with "!/")
 	 * @param path
 	 * @param pattern
@@ -438,7 +519,7 @@ public class ClassPathUtil {
 	 * @return
 	 * @throws IOException
 	 */
-	public static List<URL> findEntries(URL[] roots, String path, String pattern, boolean recurse)
+	public static List<URL> findEntries(Bundle bundle, URL[] roots, String path, String pattern, boolean recurse)
 			throws IOException {
 		List<URL> resources = new LinkedList<>();
 
@@ -453,11 +534,11 @@ public class ClassPathUtil {
 			newRoots.add(new URL(root, base));
 		}
 
-		scanRoots(newRoots, pattern, recurse, resources);
+		scanRoots(bundle, newRoots, pattern, recurse, resources);
 		return resources;
 	}
 
-	private static void scanRoots(List<URL> roots, String pattern, boolean recurse, List<URL> resources) {
+	private static void scanRoots(Bundle bundle, List<URL> roots, String pattern, boolean recurse, List<URL> resources) {
 		Pattern p = Pattern.compile(pattern.replaceAll("\\?", ".").replaceAll("\\*", ".*"));
 
 		for (URL root : roots) {
@@ -471,6 +552,9 @@ public class ClassPathUtil {
 			} else if ("file".equals(protocol)) {
 				// assume it exists, otherwise it shouldn't be on roots list
 				scanDirectory(new File(URI.create(root.toExternalForm())), p, recurse, resources);
+			} else if (bundle != null
+					&& "bundle".equals(protocol) || "bundleresource".equals(protocol) || "bundleentry".equals(protocol)) {
+				scanBundle(bundle, root, pattern, recurse, resources);
 			}
 		}
 	}
@@ -534,6 +618,21 @@ public class ClassPathUtil {
 			}
 		} catch (IOException e) {
 			LOG.warn(e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * Scan a bundle (using OSGi-runtime-specific protocol handler)
+	 * @param bundle
+	 * @param root
+	 * @param pattern
+	 * @param recurse
+	 * @param result
+	 */
+	private static void scanBundle(Bundle bundle, URL root, String pattern, boolean recurse, Collection<URL> result) {
+		Enumeration<URL> e = bundle.findEntries(root.getPath(), pattern, recurse);
+		while (e.hasMoreElements()) {
+			result.add(e.nextElement());
 		}
 	}
 

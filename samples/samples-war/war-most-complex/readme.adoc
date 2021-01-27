@@ -1,0 +1,189 @@
+= Most complex OSGi Web Application Bundle
+
+This directory contains flat strucure of Maven modules, which (together) show the most complex WAB imaginable (and still handled well by Pax Web 8).
+
+== OSGi and JavaEE perspective
+
+From OSGi perspective, a WAB (which is a normal bundle with `Web-ContextPath` header) should _reach out_ to:
+
+* JARs and generally entries (including directory entry) specified in `Bundle-ClassPath` manifest header
+* bundle fragments attached to the WAB itself
+* bundles reachable from the WAB itself using `Import-Package` (wire from `osgi.wiring.package` namespace) and `Require-Bundle` (`osgi.wiring.bundle` namespace)
+* fragments of the reachable bundles
+
+From JavaEE perspective, a WAR should _reach out_ to:
+
+* JARs from `/WEB-INF/lib` and `/WEB-INF/classes` directory of a WAR (the `/WEB-INF/classes` directory is scanned for TLDs but not for `META-INF/web-fragment.xml` files)
+* JARs from _shared class loader_ (Tomcat specific) which are still treated as application (non-container) libraries
+* JARs from the container (in Tomcat it's a _common class loader_) - these are searched for SCIs, TLDs, but not for `web-fragment.xml` descriptors
+
+== Types of resources to scan
+
+There are 4 different resources to scan in reachable libraries/locations:
+
+* `/META-INF/services/javax.servlet.ServletContainerInitializer` service descriptors - according to Servlet spec 4, "8.2.2 Ordering of web.xml and web-fragment.xml", SCIs from ignored JARs (only if absolute ordering is declared) are also ignored. Non-ignored SCIs with `@HandlesTypes` are not being passed the classes from the ignored JARs. Only absolute ordering may _disable_ some SCIs or related classes declared in `@HandlesTypes` - it is independent from the setting of `metadata-complete`.
+* `*.class` files annotated with `@WebServlet`, `@WebFilter` or `@WebListener` or any class mentioned in `@HandlesTypes` from not ignored SCIs.
+* `web-fragment.xml` descriptors. According to "8.2.1 Modularity of web.xml", "only JAR files bundled in a web application's `WEB-INF/lib` directory, but not those higher up in the class loading delegation chain, need to be scanned for web-fragment.xml"
+* `*.tld` files - this is NOT a responsiblity of pure Servlet container, but if there's a _JSP container_ inside the Servlet container, it is its responsibility. In Tomcat, it happens in `org.apache.jasper.servlet.JasperInitializer.onStartup()` (which is an SCI implementation). These are loaded from:
+** `/WEB-INF/lib/\*.jar!/META-INF/**/*.tld`
+** `/WEB-INF/classes/\**/*.tld` files are not scanned
+** `/WEB-INF/lib/\**/*.tld` files are not scanned
+** `/WEB-INF/tags/\**/*.tld` files are not scanned (with the exception of special `implicit.tld` file)
+** _TLD resource paths_ which are context-relative URIs pointing to `*.tld` file directly (excluding the above) or a JAR with `META-INF/taglib.tld`
+** `web.xml` defined TLDs (`<taglib>`)
+
+There's an interesting question about `/META-INF` directory wrt _service loading_.
+`java.util.ServiceLoader.load(java.lang.Class<S>)` effectively leads to java.lang.ClassLoader.getResources() invocation, so from CL perspective, `/META-INF/services/javax.servlet.ServletContainerInitializer` should be placed (in WAR) in one of:
+
+* `/WEB-INF/classes/META-INF/services/javax.servlet.ServletContainerInitializer`
+* `/WEB-INF/lib/*.jar!/META-INF/services/javax.servlet.ServletContainerInitializer`
+
+But from JAR specification perspective, WAR itself may contain `/META-INF/services/javax.servlet.ServletContainerInitializer` file.
+
+"8.2 Persistence Unit Packaging" chapter of JSR 338 (JPA 2.2) says that in case of WARs, the `persistence.xml` file should be placed inside `WEB-INF/classes/META-INF`, so again it's matching the ClassLoader scenario of `java.util.ServiceLoader`.
+
+So here's a little investigation to check why there are two `/META-INF/services/javax.servlet.ServletContainerInitializer` files in a WAR produced by maven-bundle-plugin even if maven-war-plugin itself includes proper `/WEB-INF/classes/META-INF/services/javax.servlet.ServletContainerInitializer` because there's only `src/main/resources/META-INF/services/javax.servlet.ServletContainerInitializer`.
+
+.First, a preparation of the _classpath_
+
+1. maven-bundle-plugin first prepares a list of `org.apache.felix.bundleplugin.BundlePlugin.ClassPathItem` based on `org.apache.maven.project.MavenProject.getArtifacts()`.
+2. first item is a `.` (_dot_) item pointing to `org.apache.maven.model.Build.getOutputDirectory()` (the `target/classes`)
+3. `org.apache.felix.bundleplugin.BundlePlugin.getSelectedDependencies()` may filter `MavenProject.getArtifacts()` using `excludeDependencies` property of maven-bundle-plugin (comma-separated list of artifact IDs)
+4. `test` scoped artifacts are not used
+5. `org.apache.maven.artifact.handler.ArtifactHandler.isAddedToClasspath()` is consulted and this is affected directly by (declared in `maven-core-3.3.9.jar!/META-INF/plexus/components.xml`) `<component>` elements with `<role>org.apache.maven.artifact.handler.ArtifactHandler</role>`. It's interesting that `war` artifacts have `<addedToClasspath>false</addedToClasspath>`. That's why we get the warning when trying to build a fragment attached to a bundle with `war` packaging.
+6. All non filtered project artifacts are added to the list. Artifact ID becomes the name and file is a `java.io.File` with absolute path to (Maven)resolved artifact.
+
+.Invocation of `org.apache.felix.bundleplugin.BundlePlugin.getOSGiBuilder()`
+
+1. Some default properties are prepare (symbolic name, version, import package set to `*`)
+2. `-removeheaders` is set by default to `Include-Resource,Private-Package`
+3. `-plugin` is set by default to `org.apache.felix.bundleplugin.BlueprintPlugin,aQute.lib.spring.SpringXMLType,org.apache.felix.bundleplugin.JpaPlugin`
+4. `org.apache.felix.bundleplugin.BundlePlugin.transformDirectives()` processes maven-bundle-plugin instructions.
+** `_` prefixed properties are changed to `-` prefixed ones (for bnd)
+** null values are changed to `""`
+** ALL blanks are changed to `""`
+** empty `-wab` instruction is changed to `src/main/webapp/` - so simply putting `<_wab>` to the configuration is usually enough
+5. project's properties with `BNDExtension-` and `BNDPrependExtension-` prefixes are processed
+6. `aQute.bnd.osgi.Builder` is created with previously constructed classpath (array of `ClassPathItem` elements)
+
+.Invocation of `org.apache.felix.bundleplugin.BundlePlugin.addMavenInstructions()`
+
+1. `org.apache.felix.bundleplugin.BundlePlugin.includeMavenResources()`.
+** `org.apache.maven.project.MavenProject.getResources()` and `org.apache.maven.project.MavenProject.getTestResources()` are taken and for each of them, source path (`org.apache.maven.model.FileSet.getDirectory()`) and target path (`org.apache.maven.model.Resource.getTargetPath()`)
+** maven-bundle-plugin, in addition to `src/main/resources` (and test equivalents) adds: `src/main/java` (with `includes: {\*\*/packageinfo}` and `target/generated-sources/annotations` with `includes: {\*\*/packageinfo}`
+** `org.codehaus.plexus.util.DirectoryScanner.scan()` recursively scans source dir (optionally with excludes and includes)
+** each recursive element is changed to `entry=location`, where entry is project-relative value. For example, `META-INF/services/javax.servlet.ServletContainerInitializer=src/main/resources/META-INF/services/javax.servlet.ServletContainerInitializer`. If `org.apache.maven.model.Resource.isFiltering()`, the path is wrapped inside `{...}`.
+2. Only now `Include-Resource` is checked. If it's present, `\{maven-resources}` and `\{maven-test-resources}` are replaced with the above generated lists.
+3. `org.apache.felix.bundleplugin.BundlePlugin.addLocalPackages()`
+** Plexus directory scanner scans `${project.build.outputDirectory}` with `*.class` filter to collect local packages (in order to determine export and private packages).
+** special value of `Private-Package=!*` sets `noprivatePackages` flag
+** all output packages are private by default. `.`, `\*.internal*` and `\*.impl*` packages are never exported. Otherwise the package is exported.
+** `Export-Package` is checked
+** `Private-Package` is checked (with special `\{local-packages}` marker value)
+4. `org.apache.felix.bundleplugin.BundlePlugin.addMavenSourcePath()`
+5. `org.apache.felix.bundleplugin.BundlePlugin.getEmbeddableArtifacts()` + `org.apache.felix.bundleplugin.DependencyEmbedder.processHeaders()` to generate `Bundle-ClassPath` header
+** `Embed-Transitive` chooses between `org.apache.maven.project.MavenProject.getArtifacts()` (when `true`) and `org.apache.maven.project.MavenProject.getDependencyArtifacts()` (when `false`)
+** `Embed-Dependency` + `Embed-Directory` + `Embed-StripGroup` + `Embed-StripVersion` are checked
+
+.Invocation of `aQute.bnd.osgi.Builder.build()`
+
+1. `aQute.bnd.osgi.Builder.doExpand(aQute.bnd.osgi.Jar)`
+2. `aQute.bnd.osgi.Builder.doIncludeResources()`
+** `aQute.bnd.osgi.Builder.copy()` doesn't actually copy any resource, but calls `aQute.bnd.osgi.Jar.putResource(java.lang.String, aQute.bnd.osgi.Resource)`. `lib:` directive on `Include-Resource` may affect `Bundle-ClassPath`.
+** `aQute.bnd.osgi.Jar.directories` and `aQute.bnd.osgi.Jar.resources` are being updated
+3. `aQute.bnd.osgi.Builder.doWab()` is called
+** `WEB-INF/classes` is ALWAYS prepended to `Bundle-ClassPath`.
+** all `aQute.bnd.osgi.Jar.getResources()` which do not start with `META-INF`, `WEB-INF`, `OSGI-INF` and `OSGI-OPT` are prefixed with `WEB-INF/classes`. So:
++
+....
+"WEB-INF/lib/commons-codec-1.13.jar"
+"WEB-INF/lib/commons-io-2.8.0.jar"
+"WEB-INF/lib/the-wab-jar-8.0.0-SNAPSHOT.jar"
+"org/ops4j/pax/web/samples/war/SimplestServlet.class"
+"org/ops4j/pax/web/samples/war/scis/SCIFromTheFragment1.class"
+"org/ops4j/pax/web/samples/war/scis/SCIFromTheFragment2.class"
+"org/ops4j/pax/web/samples/war/scis/SCIFromTheWab1.class"
+"org/ops4j/pax/web/samples/war/scis/SCIFromTheWab2.class"
+....
++
+Are renamed to:
++
+....
+"WEB-INF/classes/org/ops4j/pax/web/samples/war/SimplestServlet.class"
+"WEB-INF/classes/org/ops4j/pax/web/samples/war/scis/SCIFromTheFragment1.class"
+"WEB-INF/classes/org/ops4j/pax/web/samples/war/scis/SCIFromTheFragment2.class"
+"WEB-INF/classes/org/ops4j/pax/web/samples/war/scis/SCIFromTheWab1.class"
+"WEB-INF/classes/org/ops4j/pax/web/samples/war/scis/SCIFromTheWab2.class"
+"WEB-INF/lib/commons-codec-1.13.jar"
+"WEB-INF/lib/commons-io-2.8.0.jar"
+"WEB-INF/lib/the-wab-jar-8.0.0-SNAPSHOT.jar"
+....
+** `aQute.bnd.osgi.Builder.doIncludeResource()` is called by `doWab()` and the `<_wab>` value is passed. If it's a directory (and it usually is), the destination path is set to `""`.
+** after the include from wab `aQute.bnd.osgi.Jar.getResources()` is changed from:
++
+....
+"WEB-INF/classes/org/ops4j/pax/web/samples/war/SimplestServlet.class"
+"WEB-INF/classes/org/ops4j/pax/web/samples/war/scis/SCIFromTheFragment1.class"
+"WEB-INF/classes/org/ops4j/pax/web/samples/war/scis/SCIFromTheFragment2.class"
+"WEB-INF/classes/org/ops4j/pax/web/samples/war/scis/SCIFromTheWab1.class"
+"WEB-INF/classes/org/ops4j/pax/web/samples/war/scis/SCIFromTheWab2.class"
+"WEB-INF/lib/commons-codec-1.13.jar"
+"WEB-INF/lib/commons-io-2.8.0.jar"
+"WEB-INF/lib/the-wab-jar-8.0.0-SNAPSHOT.jar"
+....
++
+to:
++
+....
+"META-INF/<<EMPTY>>"
+"WEB-INF/classes/META-INF/services/javax.servlet.ServletContainerInitializer"
+"WEB-INF/classes/org/ops4j/pax/web/samples/war/SimplestServlet.class"
+"WEB-INF/classes/org/ops4j/pax/web/samples/war/scis/SCIFromTheFragment1.class"
+"WEB-INF/classes/org/ops4j/pax/web/samples/war/scis/SCIFromTheFragment2.class"
+"WEB-INF/classes/org/ops4j/pax/web/samples/war/scis/SCIFromTheWab1.class"
+"WEB-INF/classes/org/ops4j/pax/web/samples/war/scis/SCIFromTheWab2.class"
+"WEB-INF/lib/commons-codec-1.13.jar"
+"WEB-INF/lib/commons-io-2.8.0.jar"
+"WEB-INF/lib/the-wab-jar-8.0.0-SNAPSHOT.jar"
+"WEB-INF/web.xml"
+....
+4. `aQute.bnd.osgi.Builder.addSources()`
+5. `aQute.bnd.osgi.Builder.doPom()`
+
+Finally new artifact is written using `aQute.bnd.osgi.Jar.write(java.io.File)`.
+
+So why the WAB contains both:
+
+* `/META-INF/services/javax.servlet.ServletContainerInitializer`, and
+* `/WEB-INF/classes/META-INF/services/javax.servlet.ServletContainerInitializer`?
+
+The problem is with `<_wab>` instruction.
+By default, maven-bundle-plugin uses `Include-Resource=\{maven-resources}` which contains mappings between project and target resources. This includes:
+....
+META-INF/services/javax.servlet.ServletContainerInitializer -> {aQute.bnd.osgi.FileResource@5715} "/data/sources/github.com/ops4j/org.ops4j.pax.web/samples/samples-war/war-most-complex/the-wab-itself/src/main/resources/META-INF/services/javax.servlet.ServletContainerInitializer"
+....
+This is fine. but `doWab()` filters he resources and prepends all BUT the ones with `META-INF` prefix with `WEB-INF/classes`. So eventually we have:
+....
+META-INF/services/javax.servlet.ServletContainerInitializer=src/main/resources/META-INF/services/javax.servlet.ServletContainerInitializer
+....
+
+Instead of:
+....
+WEB-INF/classes/META-INF/services/javax.servlet.ServletContainerInitializer=src/main/resources/META-INF/services/javax.servlet.ServletContainerInitializer
+....
+
+We still have `WEB-INF/classes/META-INF/services/javax.servlet.ServletContainerInitializer` in the WAB, because I pointed `<_wab>` to expanded WAR from the maven-war-plugin.
+
+== The most complex WAB
+
+So, the most complex WAB will have:
+
+* a required bundle with a bundle fragment
+* a bundle with import-export package wiring and a bundle fragment
+* jars and directories (more than one) on `Bundle-ClassPath`
+
+Each JAR, bundle and bundle fragment will have `/META-INF/services/javax.servlet.ServletContainerInitializer` with `@HandlesTypes`.
+Each JAR, bundle and bundle fragment will have a `/META-INF/web-fragment.xml` - because all reachable JARs should be considered web application libraries.
+Each JAR, bundle and bundle fragment will have annotated servlets.
+
+In Tomcat, all SCI service names are loaded from correct JARs, but the SCI classes themselves are all loaded using single WebApp classloader. In OSGi we have to load the SCI classes from proper bundle (to not enforce `Import-Package` on the WAB).

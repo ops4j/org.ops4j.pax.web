@@ -41,13 +41,22 @@ public class WarBasicIntegrationTest extends AbstractContainerTestBase {
 	@Configuration
 	public Option[] configure() {
 		Option[] serverOptions = combine(baseConfigure(), paxWebJetty());
-		return combine(serverOptions, paxWebExtenderWar());
+		Option[] jspOptions = combine(serverOptions, paxWebJsp());
+		return combine(jspOptions, paxWebExtenderWar());
 	}
 
 	@Before
 	public void setUp() throws Exception {
-		configureAndWaitForServletWithMapping("/servlet",
-				() -> bundle = installAndStartBundle(sampleWarURI("war-simplest-osgi")));
+		configureAndWaitForServletWithMapping("/servlet", () -> {
+			// I'm not refreshing, so fragments have to be installed before their hosts
+			installAndStartBundle(sampleURI("container-bundle-3"));
+			context.installBundle(sampleURI("container-fragment-1"));
+			installAndStartBundle(sampleURI("container-bundle-1"));
+			context.installBundle(sampleURI("container-fragment-2"));
+			installAndStartBundle(sampleURI("container-bundle-2"));
+			context.installBundle(sampleURI("the-wab-fragment"));
+			bundle = installAndStartBundle(sampleWarURI("the-wab-itself"));
+		});
 	}
 
 	@After

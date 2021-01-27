@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+	Copyright 2019 OPS4J.
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+		http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.ops4j.pax.web.samples</groupId>
+		<artifactId>samples-war</artifactId>
+		<version>8.0.0-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+
+	<groupId>org.ops4j.pax.web.samples</groupId>
+	<artifactId>the-wab-itself-jar2</artifactId>
+	<packaging>bundle</packaging>
+
+	<name>OPS4J Pax Web Complex WAR - the WAB (not WAR) 2</name>
+
+	<build>
+		<!--
+			by default:
+			 - <directory> = ${project.basedir}/target
+			 - <outputDirectory> = ${project.build.directory}/classes
+		-->
+		<!-- We can't change <outputDirectory> as it'd force us to use absolute/external target path for src/main/webapp -->
+<!--		<outputDirectory>${project.build.directory}/classes/WEB-INF/classes-not-javaee</outputDirectory>-->
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<!-- using absolute (or external - with ..) paths here will mess up with maven-bundle-plugin -->
+				<targetPath>WEB-INF/classes-not-javaee</targetPath>
+			</resource>
+			<resource>
+				<!-- This path needs to go directly to target path to be included at top-level of the WAB -->
+				<directory>src/main/webapp</directory>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<!-- Changing output of maven-compiler-plugin will change the discovered Private/Export-Package -->
+					<outputDirectory>${project.build.outputDirectory}/WEB-INF/classes-not-javaee</outputDirectory>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<manifestLocation>${project.build.directory}/classes</manifestLocation>
+					<instructions>
+						<Import-Package>
+							org.osgi.framework;version="[1.8,2)",
+							javax.servlet.*;version="[3.1,5)",
+							org.ops4j.pax.web.samples.war.cb1.utils
+						</Import-Package>
+						<!-- We can't use obvious private packages, because they're now prefixed with "WEB-INF.classes-not-javaee." -->
+<!--						<Private-Package>-->
+<!--							org.ops4j.pax.web.samples.war,-->
+<!--							org.ops4j.pax.web.samples.war.scis-->
+<!--						</Private-Package>-->
+						<!--
+							With special value of Private-Package, we won't get the package structure at top level
+							of the bundle. {local-packages} value solves the problem
+						-->
+						<Private-Package>{local-packages}</Private-Package>
+						<!-- No problem with such export -->
+						<Export-Package>org.ops4j.pax.web.samples.war</Export-Package>
+						<!--
+							<_wab> is a handy replacement for Include-Resource, but we explicitly want /WEB-INF/lib-not-javaee
+							as a directory for libraries and we don't want to have additional /WEB-INF/lib. Also
+							we want classes to ba available from a directory different than /WEB-INF/classes (which is always
+							added by default by <_wab>).
+							This also means we need explicit Bundle-ClassPath
+						-->
+<!--						<_wab>${project.build.directory}/${project.build.finalName}</_wab>-->
+						<Web-ContextPath>/wab-complex</Web-ContextPath>
+						<Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
+						<Embed-Directory>WEB-INF/lib-not-javaee</Embed-Directory>
+						<!--
+							Bundle-ClassPath will contain entries (besides the one specified explicitly) calculated
+							using Embed-Directory and Embed-Dependency
+						-->
+						<Bundle-ClassPath>/WEB-INF/classes-not-javaee</Bundle-ClassPath>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+
+		<!-- pax-web own artifacts -->
+
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>the-wab-jar</artifactId>
+		</dependency>
+
+		<!-- JavaEE -->
+
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Other -->
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+	</dependencies>
+
+</project>

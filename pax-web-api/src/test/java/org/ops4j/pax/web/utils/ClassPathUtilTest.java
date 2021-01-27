@@ -91,25 +91,25 @@ public class ClassPathUtilTest {
 			}
 		}
 
-		assertThat(ClassPathUtil.findEntries(roots, "org", "RunWith.class", false).size(), equalTo(0));
-		assertThat(ClassPathUtil.findEntries(roots, "org/junit/runner", "runner/RunWith.class", false).size(), equalTo(0));
-		assertThat(ClassPathUtil.findEntries(roots, "org/junit/runner", "runner/RunWith.class", true).size(), equalTo(0));
+		assertThat(ClassPathUtil.findEntries(null, roots, "org", "RunWith.class", false).size(), equalTo(0));
+		assertThat(ClassPathUtil.findEntries(null, roots, "org/junit/runner", "runner/RunWith.class", false).size(), equalTo(0));
+		assertThat(ClassPathUtil.findEntries(null, roots, "org/junit/runner", "runner/RunWith.class", true).size(), equalTo(0));
 
-		assertCorrectClass(ClassPathUtil.findEntries(roots, "org", "RunWith.class", true));
-		assertCorrectClass(ClassPathUtil.findEntries(roots, "org/", "RunWith.class", true));
-		assertCorrectClass(ClassPathUtil.findEntries(roots, "org", "runner/RunWith.class", true));
-		assertCorrectClass(ClassPathUtil.findEntries(roots, "org", "*/RunWith.class", true));
-		assertCorrectClass(ClassPathUtil.findEntries(roots, "org", "runner/RunW*.class", true));
-		assertCorrectClass(ClassPathUtil.findEntries(roots, "org", "runner/RunWith.*", true));
-		assertCorrectClass(ClassPathUtil.findEntries(roots, "/org", "runner/RunWith.*", true));
-		assertCorrectClass(ClassPathUtil.findEntries(roots, "org/junit", "runner/RunWith.class", true));
-		assertCorrectClass(ClassPathUtil.findEntries(roots, "org/junit", "runner/RunWith.class", false));
-		assertCorrectClass(ClassPathUtil.findEntries(roots, "org/junit/", "runner/RunWith.class", false));
-		assertCorrectClass(ClassPathUtil.findEntries(roots, "org/junit", "/runner/RunWith.class", false));
-		assertCorrectClass(ClassPathUtil.findEntries(roots, "org/junit/", "/runner/RunWith.class", false));
-		assertCorrectClass(ClassPathUtil.findEntries(roots, "/org/junit/", "/runner/RunWith.class", false));
-		assertCorrectClass(ClassPathUtil.findEntries(roots, "/", "RunWith.class", true));
-		assertCorrectClass(ClassPathUtil.findEntries(roots, null, "RunWith.class", true));
+		assertCorrectClass(ClassPathUtil.findEntries(null, roots, "org", "RunWith.class", true));
+		assertCorrectClass(ClassPathUtil.findEntries(null, roots, "org/", "RunWith.class", true));
+		assertCorrectClass(ClassPathUtil.findEntries(null, roots, "org", "runner/RunWith.class", true));
+		assertCorrectClass(ClassPathUtil.findEntries(null, roots, "org", "*/RunWith.class", true));
+		assertCorrectClass(ClassPathUtil.findEntries(null, roots, "org", "runner/RunW*.class", true));
+		assertCorrectClass(ClassPathUtil.findEntries(null, roots, "org", "runner/RunWith.*", true));
+		assertCorrectClass(ClassPathUtil.findEntries(null, roots, "/org", "runner/RunWith.*", true));
+		assertCorrectClass(ClassPathUtil.findEntries(null, roots, "org/junit", "runner/RunWith.class", true));
+		assertCorrectClass(ClassPathUtil.findEntries(null, roots, "org/junit", "runner/RunWith.class", false));
+		assertCorrectClass(ClassPathUtil.findEntries(null, roots, "org/junit/", "runner/RunWith.class", false));
+		assertCorrectClass(ClassPathUtil.findEntries(null, roots, "org/junit", "/runner/RunWith.class", false));
+		assertCorrectClass(ClassPathUtil.findEntries(null, roots, "org/junit/", "/runner/RunWith.class", false));
+		assertCorrectClass(ClassPathUtil.findEntries(null, roots, "/org/junit/", "/runner/RunWith.class", false));
+		assertCorrectClass(ClassPathUtil.findEntries(null, roots, "/", "RunWith.class", true));
+		assertCorrectClass(ClassPathUtil.findEntries(null, roots, null, "RunWith.class", true));
 	}
 
 	private void assertCorrectClass(List<URL> urls) {
