@@ -126,10 +126,10 @@
 		<plugin.maven-antrun-plugin>1.8</plugin.maven-antrun-plugin>
 		<plugin.maven-archetype-plugin>3.0.1</plugin.maven-archetype-plugin>
 		<plugin.maven-assembly-plugin>3.1.0</plugin.maven-assembly-plugin>
-		<plugin.maven-checkstyle-plugin>3.1.1</plugin.maven-checkstyle-plugin>
-		<plugin.dependency.com.puppycrawl.tools.checkstyle>8.33</plugin.dependency.com.puppycrawl.tools.checkstyle>
+		<plugin.maven-checkstyle-plugin>3.1.2</plugin.maven-checkstyle-plugin>
+		<plugin.dependency.com.puppycrawl.tools.checkstyle>8.40</plugin.dependency.com.puppycrawl.tools.checkstyle>
 		<plugin.maven-clean-plugin>3.0.0</plugin.maven-clean-plugin>
-		<plugin.maven-compiler-plugin>3.7.0</plugin.maven-compiler-plugin>
+		<plugin.maven-compiler-plugin>3.8.1</plugin.maven-compiler-plugin>
 		<plugin.maven-dependency-plugin>3.0.1</plugin.maven-dependency-plugin>
 		<plugin.maven-deploy-plugin>2.8.2</plugin.maven-deploy-plugin>
 		<plugin.maven-enforcer-plugin>3.0.0-M1</plugin.maven-enforcer-plugin>
@@ -145,7 +145,7 @@
 		<plugin.dependency.maven-filtering>3.2.0</plugin.dependency.maven-filtering>
 		<plugin.maven-site-plugin>3.6</plugin.maven-site-plugin>
 		<plugin.maven-source-plugin>3.0.1</plugin.maven-source-plugin>
-		<plugin.maven-surefire-plugin>2.22.1</plugin.maven-surefire-plugin>
+		<plugin.maven-surefire-plugin>2.22.2</plugin.maven-surefire-plugin>
 		<plugin.maven-war-plugin>3.3.1</plugin.maven-war-plugin>
 
 		<!-- Other Maven plugins (and their dependencies) -->
@@ -156,7 +156,7 @@
 		<plugin.felix.maven-scr-plugin>1.26.0</plugin.felix.maven-scr-plugin>
 		<plugin.gatling.gatling-maven-plugin>2.0.0</plugin.gatling.gatling-maven-plugin>
 		<plugin.jacoco.jacoco-maven-plugin>0.8.2</plugin.jacoco.jacoco-maven-plugin>
-		<plugin.mojo.build-helper-maven-plugin>3.0.0</plugin.mojo.build-helper-maven-plugin>
+		<plugin.mojo.build-helper-maven-plugin>3.2.0</plugin.mojo.build-helper-maven-plugin>
 		<plugin.mojo.sonar-maven-plugin>4.5.1</plugin.mojo.sonar-maven-plugin>
 		<plugin.mycila.license-maven-plugin>3.0</plugin.mycila.license-maven-plugin>
 		<plugin.servicemix.depends-maven-plugin>1.4.0</plugin.servicemix.depends-maven-plugin>
