@@ -99,7 +99,7 @@
 	</developers>
 
 	<properties>
-		<dependency.asm.version>9.0</dependency.asm.version>
+		<dependency.asm.version>9.1</dependency.asm.version>
 		<dependency.atinject.version>1.2</dependency.atinject.version>
 		<dependency.base.version>1.5.1</dependency.base.version>
 		<dependency.bndlib.version>2.4.0</dependency.bndlib.version>
