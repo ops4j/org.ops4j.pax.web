@@ -134,7 +134,7 @@
 <!--		<dependency.primefaces.version>6.3-SNAPSHOT</dependency.primefaces.version>-->
 		<dependency.slf4j>1.7.12</dependency.slf4j>
 		<dependency.scr.version>2.1.24</dependency.scr.version>
-		<dependency.swissbox.version>1.8.3</dependency.swissbox.version>
+		<dependency.swissbox.version>1.8.4</dependency.swissbox.version>
 		<dependency.tomcat.version>9.0.36</dependency.tomcat.version>
 		<dependency.xbean.version>4.18</dependency.xbean.version>
 		<dependency.xnio-api.version>3.3.8.Final</dependency.xnio-api.version>
