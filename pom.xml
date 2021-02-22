@@ -127,7 +127,7 @@
 		<!-- Karaf 4.2.9 uses broken fileinstall 3.6.6 (FELIX-6103) -->
 		<dependency.karaf.version>4.2.8</dependency.karaf.version>
 		<dependency.osgi.version>6.0.0</dependency.osgi.version>
-		<dependency.paxurl.version>2.6.5</dependency.paxurl.version>
+		<dependency.paxurl.version>2.6.6</dependency.paxurl.version>
 		<dependency.pax-logging.version>1.11.7</dependency.pax-logging.version>
 		<!-- github/primefaces/primefaces#4210: Compatibility with Servlet API 4.0" -->
 		<dependency.primefaces.version>6.2</dependency.primefaces.version>
