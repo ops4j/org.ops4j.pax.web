@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>org.ops4j.pax.web.itest</groupId>
 		<artifactId>pax-web-itest-container</artifactId>
-		<version>7.2.22</version>
+		<version>7.2.23-SNAPSHOT</version>
 	</parent>
 	<groupId>org.ops4j.pax.web.itest.container</groupId>
 	<artifactId>pax-web-itest-container-tomcat</artifactId>
