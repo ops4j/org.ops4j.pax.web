@@ -19,7 +19,7 @@
 	<parent>
 		<groupId>org.ops4j.pax</groupId>
 		<artifactId>web</artifactId>
-		<version>7.4.0</version>
+		<version>7.4.1-SNAPSHOT</version>
 	</parent>
 	<groupId>org.ops4j.pax.web</groupId>
 	<artifactId>pax-web-resources</artifactId>
