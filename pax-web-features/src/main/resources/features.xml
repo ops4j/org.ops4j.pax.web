@@ -123,14 +123,14 @@
 
     <feature name="pax-http" version="${project.version}" description="Implementation of the OSGI HTTP Service">
         <details>Allows to publish servlets using pax web and jetty</details>
-        <feature dependency="true" version="[7.3,7.4)">pax-http-jetty</feature>
+        <feature dependency="true" version="[7.4,7.5)">pax-http-jetty</feature>
         <requirement>
             pax.http.provider
         </requirement>
     </feature>
 
     <feature name="pax-http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}">
-        <feature version="[7.3,7.4)">pax-http</feature>
+        <feature version="[7.4,7.5)">pax-http</feature>
         <bundle dependency="true" start-level="30">mvn:${dependency.jdt.groupId}/${dependency.jdt.artifactId}/${dependency.jdt.version}</bundle>
         <bundle start-level="30" dependency="true">mvn:javax.el/javax.el-api/${dependency.el-api.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${project.version}</bundle>
@@ -147,7 +147,7 @@
         <config name="org.ops4j.pax.url.war">
             org.ops4j.pax.url.war.importPaxLoggingPackages=true
         </config>
-        <feature version="[7.3,7.4)">pax-http-whiteboard</feature>
+        <feature version="[7.4,7.5)">pax-http-whiteboard</feature>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-descriptor/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-war/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${project.version}</bundle>
@@ -166,7 +166,7 @@
             javax.servlet.context.tempdir=${karaf.data}/pax-web-jsp
         </config>
         <feature>scr</feature>
-        <feature version="[7.3,7.4)">pax-http</feature>
+        <feature version="[7.4,7.5)">pax-http</feature>
         <bundle dependency="true" start-level="30">mvn:javax.el/javax.el-api/3.0.0</bundle>
         <bundle dependency="true" start-level="30">mvn:javax.security.auth.message/javax.security.auth.message-api/${dependency.jaspic.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:javax.validation/validation-api/${dependency.validation-api.version}</bundle>
@@ -213,12 +213,12 @@
     </feature>
 
     <feature name="pax-war-tomcat" version="${project.version}">
-        <feature version="[7.3,7.4)">pax-http-tomcat</feature>
-        <feature version="[7.3,7.4)">pax-war</feature>
+        <feature version="[7.4,7.5)">pax-http-tomcat</feature>
+        <feature version="[7.4,7.5)">pax-war</feature>
     </feature>
 
     <feature name="pax-jsf-support" version="${project.version}">
-        <feature version="[7.3,7.4)">pax-war</feature>
+        <feature version="[7.4,7.5)">pax-war</feature>
         <bundle dependency="true">mvn:javax.enterprise/cdi-api/1.2</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_2</bundle>
         <bundle dependency="true">mvn:javax.interceptor/javax.interceptor-api/1.2</bundle>
@@ -238,7 +238,7 @@
     </feature>
 
     <feature name="pax-jsf-resources-support" description="Provide sharing of resources according to Servlet 3.0 for OSGi bundles and JSF" version="${project.version}">
-        <feature version="[7.3,7.4)">pax-jsf-support</feature>
+        <feature version="[7.4,7.5)">pax-jsf-support</feature>
         <bundle dependency="true">mvn:org.ops4j.pax.web/pax-web-resources-extender/${project.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-resources-jsf/${project.version}</bundle>
     </feature>
@@ -287,7 +287,7 @@
         </config>
         <feature>scr</feature>
         <feature version="${dependency.undertow.version}">undertow</feature>
-        <feature version="[7.3,7.4)">pax-http</feature>
+        <feature version="[7.4,7.5)">pax-http</feature>
 
         <feature>pax-web-core</feature>
         <bundle>mvn:org.ops4j.pax.web/pax-web-runtime/${project.version}</bundle>
