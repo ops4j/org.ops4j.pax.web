@@ -1190,6 +1190,7 @@
 				<module>pax-web-tomcat</module>
 				<module>pax-web-tomcat-bundle</module>
 				<module>pax-web-undertow</module>
+				<module>pax-web-undertow-common</module>
 			</modules>
 		</profile>
 		<profile>

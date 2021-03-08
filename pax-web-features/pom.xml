@@ -71,6 +71,10 @@
 			<artifactId>pax-web-undertow</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-undertow-common</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-continuation</artifactId>
 			<version>${dependency.jetty.version}</version>
