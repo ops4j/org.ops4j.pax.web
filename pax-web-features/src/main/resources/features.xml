@@ -221,7 +221,7 @@
         <feature version="[7.4,7.5)">pax-war</feature>
         <bundle dependency="true">mvn:javax.enterprise/cdi-api/1.2</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_2</bundle>
-        <bundle dependency="true">mvn:javax.interceptor/javax.interceptor-api/1.2</bundle>
+        <bundle dependency="true">mvn:javax.interceptor/javax.interceptor-api/1.2.2</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr250-1.0/${servicemix.specs.version}</bundle>
         <bundle dependency="true">mvn:javax.validation/validation-api/${dependency.validation-api.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr303-api-1.0.0/${servicemix.specs.version}</bundle>
