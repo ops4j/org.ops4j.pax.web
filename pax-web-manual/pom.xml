@@ -80,7 +80,7 @@
 								<docVersion>${project.version}</docVersion>
 								<tomcatVersion>${dependency.tomcat.version}</tomcatVersion>
 								<jettyVersion>${dependency.jetty.version}</jettyVersion>
-								<undertowVersion>${dependency.undertow-core.version}</undertowVersion>
+								<undertowVersion>${dependency.undertow.version}</undertowVersion>
 								<latestStableVersion>${baseline.version}</latestStableVersion>
 								<servletVersion>${servlet.spec.version}</servletVersion>
 								<jspVersion>${servlet-jsp.spec.version}</jspVersion>

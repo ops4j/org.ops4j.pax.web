@@ -196,6 +196,7 @@ public abstract class ITestBase extends AbstractControlledTestBase {
 
 				mavenBundle().groupId("org.ops4j.pax.web").artifactId("pax-web-runtime").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web").artifactId("pax-web-undertow").version(asInProject()),
+				mavenBundle().groupId("org.ops4j.pax.web").artifactId("pax-web-undertow-common").version(asInProject()),
 
 				mavenBundle().groupId("org.jboss.xnio").artifactId("xnio-api").version(asInProject()),
 				mavenBundle().groupId("org.jboss.xnio").artifactId("xnio-nio").version(asInProject()),

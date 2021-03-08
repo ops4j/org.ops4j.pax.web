@@ -156,6 +156,7 @@
 								-->
 								<feature>pax-tomcat</feature>
 								<feature>pax-http-tomcat</feature>
+								<feature>undertow</feature>
 								<feature>pax-undertow</feature>
 								<feature>pax-http-undertow</feature>
 							</features>

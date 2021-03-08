@@ -127,6 +127,8 @@
 		<!-- Karaf 4.2.9 uses broken fileinstall 3.6.6 (FELIX-6103) -->
 		<dependency.karaf.version>4.2.8</dependency.karaf.version>
 		<dependency.osgi.version>6.0.0</dependency.osgi.version>
+		<dependency.org.osgi.util.promise>1.1.1</dependency.org.osgi.util.promise>
+		<dependency.org.osgi.util.function>1.1.0</dependency.org.osgi.util.function>
 		<dependency.paxurl.version>2.6.7</dependency.paxurl.version>
 		<dependency.pax-logging.version>1.11.9</dependency.pax-logging.version>
 		<!-- github/primefaces/primefaces#4210: Compatibility with Servlet API 4.0" -->
@@ -137,11 +139,16 @@
 		<dependency.swissbox.version>1.8.4</dependency.swissbox.version>
 		<dependency.tomcat.version>9.0.36</dependency.tomcat.version>
 		<dependency.xbean.version>4.18</dependency.xbean.version>
-		<dependency.xnio-api.version>3.3.8.Final</dependency.xnio-api.version>
-		<dependency.xnio.version>3.3.8.Final</dependency.xnio.version>
-		<dependency.undertow-core.version>2.0.33.Final</dependency.undertow-core.version>
-		<dependency.undertow-servlet.version>2.0.33.Final</dependency.undertow-servlet.version>
-		<dependency.undertow-websockets.version>2.0.33.Final</dependency.undertow-websockets.version>
+		<dependency.undertow.version>2.2.5.Final</dependency.undertow.version>
+		<!--
+			dependencies of Undertow 2.2.x, XNIO is important and should be kept up to date.
+			Wildfly common and client-config are not really used, but needed to satisfy imports (Java and OSGi)
+		-->
+		<dependency.org.jboss.threads.version>3.2.0.Final</dependency.org.jboss.threads.version>
+		<dependency.org.wildfly.common.version>1.5.4.Final</dependency.org.wildfly.common.version>
+		<dependency.org.wildfly.client-config.version>1.0.1.Final</dependency.org.wildfly.client-config.version>
+		<dependency.xnio.version>3.8.4.Final</dependency.xnio.version>
+
 		<dependency.jboss-logging>3.4.1.Final</dependency.jboss-logging>
 	    <dependency.jasypt>1.9.3</dependency.jasypt>
 		<dependency.pax-cdi.version>1.1.3</dependency.pax-cdi.version>
@@ -580,7 +587,7 @@
 			<dependency>
 				<groupId>io.undertow</groupId>
 				<artifactId>undertow-servlet</artifactId>
-				<version>${dependency.undertow-servlet.version}</version>
+				<version>${dependency.undertow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet</groupId>
@@ -661,6 +668,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-undertow-common</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-extender-war</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -697,12 +709,12 @@
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.util.function</artifactId>
-				<version>1.1.0</version>
+				<version>${dependency.org.osgi.util.function}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.util.promise</artifactId>
-				<version>1.1.1</version>
+				<version>${dependency.org.osgi.util.promise}</version>
 			</dependency>
 
 			<dependency>
@@ -1041,22 +1053,37 @@
 			<dependency>
 				<groupId>io.undertow</groupId>
 				<artifactId>undertow-core</artifactId>
-				<version>${dependency.undertow-core.version}</version>
+				<version>${dependency.undertow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.undertow</groupId>
 				<artifactId>undertow-websockets-jsr</artifactId>
-				<version>${dependency.undertow-websockets.version}</version>
+				<version>${dependency.undertow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.xnio</groupId>
 				<artifactId>xnio-api</artifactId>
-				<version>${dependency.xnio-api.version}</version>
+				<version>${dependency.xnio.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.xnio</groupId>
 				<artifactId>xnio-nio</artifactId>
 				<version>${dependency.xnio.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.threads</groupId>
+				<artifactId>jboss-threads</artifactId>
+				<version>${dependency.org.jboss.threads.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.wildfly.common</groupId>
+				<artifactId>wildfly-common</artifactId>
+				<version>${dependency.org.wildfly.common.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.wildfly.client</groupId>
+				<artifactId>wildfly-client-config</artifactId>
+				<version>${dependency.org.wildfly.client-config.version}</version>
 			</dependency>
 			<dependency>
 					<groupId>org.jasypt</groupId>
@@ -1192,6 +1219,7 @@
 			</activation>
 			<modules>
 				<module>pax-web-undertow</module>
+				<module>pax-web-undertow-common</module>
 			</modules>
 		</profile>
 		<profile>
