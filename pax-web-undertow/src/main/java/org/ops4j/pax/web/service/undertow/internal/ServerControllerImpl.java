@@ -824,10 +824,10 @@ public class ServerControllerImpl implements ServerController, ServerControllerE
                         newKeystore.setEntry(keystoreCertAlias, entry, password);
                         keyStore = newKeystore;
                     } else {
-                        throw new IllegalArgumentException("Entry \"keystoreCertAlias\" is not private key entry in keystore " + keystorePath);
+                        throw new IllegalArgumentException("Entry keystoreCertAlias=\"" + keystoreCertAlias + "\" is not private key entry in keystore " + keystorePath);
                     }
                 } else {
-                    throw new IllegalArgumentException("Entry \"keystoreCertAlias\" not found in keystore " + keystorePath);
+                    throw new IllegalArgumentException("Entry keystoreCertAlias=\"" + keystoreCertAlias + "\" not found in keystore " + keystorePath);
                 }
             }
 
@@ -970,6 +970,9 @@ public class ServerControllerImpl implements ServerController, ServerControllerE
     }
 
     private URL loadResource(String resource) throws MalformedURLException {
+        if (resource == null || "".equals(resource.trim())) {
+            return null;
+        }
         URL url;
         try {
             url = new URL(resource);
@@ -991,8 +994,12 @@ public class ServerControllerImpl implements ServerController, ServerControllerE
 
     private KeyStore getKeyStore(URL storePath, String storeType, String storePassword) throws Exception {
         KeyStore keystore = KeyStore.getInstance(storeType);
-        try (InputStream is = storePath.openStream()) {
-            keystore.load(is, storePassword.toCharArray());
+        if (storePath != null) {
+            try (InputStream is = storePath.openStream()) {
+                keystore.load(is, storePassword.toCharArray());
+            }
+        } else {
+            keystore.load(null, storePassword.toCharArray());
         }
         return keystore;
     }

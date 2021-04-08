@@ -26,7 +26,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import javax.servlet.ServletContainerInitializer;
 
 import org.apache.catalina.AccessLog;
@@ -391,8 +390,11 @@ public class EmbeddedTomcat extends Tomcat {
             secureConnector.setScheme("https");
             secureConnector.setProperty("SSLEnabled", "true");
 
-            secureConnector.setProperty("keystoreFile",
-            		configuration.getSslKeystore());
+            if (configuration.getSslKeystore() != null
+                    && !"".equals(configuration.getSslKeystore().trim())) {
+                secureConnector.setProperty("keystoreFile",
+                        configuration.getSslKeystore());
+            }
             secureConnector.setProperty("keystorePass",
             		configuration.getSslKeyPassword());
             secureConnector.setProperty("clientAuth", "false");

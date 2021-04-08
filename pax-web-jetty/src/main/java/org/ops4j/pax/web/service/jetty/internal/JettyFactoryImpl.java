@@ -333,7 +333,9 @@ class JettyFactoryImpl implements JettyFactory {
 
 		// SSL Context Factory for HTTPS and SPDY
 		SslContextFactory sslContextFactory = new SslContextFactory.Server();
-		sslContextFactory.setKeyStorePath(sslKeystore);
+		if (null != sslKeystore && !"".equals(sslKeystore.trim())) {
+			sslContextFactory.setKeyStorePath(sslKeystore);
+		}
 		sslContextFactory.setKeyStorePassword(sslKeystorePassword);
 		sslContextFactory.setKeyManagerPassword(sslKeyPassword);
 		sslContextFactory.setNeedClientAuth(isClientAuthNeeded);
