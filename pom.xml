@@ -165,7 +165,7 @@
 
 		<!-- Plugins -->
 		<gatling-plugin.version>2.0.0</gatling-plugin.version>
-		<bundle-plugin.version>3.3.0</bundle-plugin.version>
+		<bundle-plugin.version>5.1.2</bundle-plugin.version>
 
 		<surefire-plugin.version>2.20.1</surefire-plugin.version>
 		<failsafe-plugin.version>2.20.1</failsafe-plugin.version>
@@ -312,13 +312,6 @@
 					<groupId>org.apache.felix</groupId>
 					<artifactId>maven-bundle-plugin</artifactId>
 					<version>${bundle-plugin.version}</version>
-					<dependencies>
-						<dependency>
-							<groupId>biz.aQute.bnd</groupId>
-							<artifactId>bndlib</artifactId>
-							<version>${dependency.bndlib.version}</version>
-						</dependency>
-					</dependencies>
 					<executions>
 						<execution>
 							<id>bundle</id>
