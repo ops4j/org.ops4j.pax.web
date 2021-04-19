@@ -241,14 +241,22 @@
         <bundle>mvn:org.ops4j.pax.web/pax-web-resources-jsf/${project.version}</bundle>
     </feature>
 
+    <feature name="xnio" version="${depedency.xnio.version}">
+        <bundle>mvn:org.jboss.xnio/xnio-api/${dependency.xnio-api.version}</bundle>
+        <bundle>mvn:org.jboss.xnio/xnio-nio/${dependency.xnio.version}</bundle>
+        <capability>
+            osgi.service;effective:=active;objectClass=org.xnio.XnioProvider
+        </capability>
+    </feature>
+
     <feature name="undertow" version="${dependency.undertow-core.version}">
         <bundle dependency="true" start-level="30">mvn:${servlet.spec.groupId}/${servlet.spec.artifactId}/${servlet.spec.version}</bundle>
         <bundle dependency="true">mvn:javax.annotation/javax.annotation-api/1.3</bundle>
         <bundle dependency="true">mvn:org.jboss.logging/jboss-logging/${dependency.jboss-logging}</bundle>
         <bundle dependency="true">mvn:javax.websocket/javax.websocket-api/${dependency.websocket.version}</bundle>
 
-        <bundle>mvn:org.jboss.xnio/xnio-api/${dependency.xnio-api.version}</bundle>
-        <bundle>mvn:org.jboss.xnio/xnio-nio/${dependency.xnio.version}</bundle>
+        <feature>xnio</feature>
+
         <bundle>mvn:io.undertow/undertow-core/${dependency.undertow-core.version}</bundle>
         <bundle>mvn:io.undertow/undertow-servlet/${dependency.undertow-servlet.version}</bundle>
         <bundle>mvn:io.undertow/undertow-websockets-jsr/${dependency.undertow-websockets.version}</bundle>
