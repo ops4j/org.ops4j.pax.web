@@ -15,17 +15,28 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.servlet.Servlet;
+
 import org.apache.felix.utils.extender.AbstractExtender;
 import org.apache.felix.utils.extender.Extension;
+import org.apache.tomcat.util.descriptor.web.ServletDef;
+import org.apache.tomcat.util.descriptor.web.WebXml;
+import org.apache.tomcat.util.descriptor.web.WebXmlParser;
 import org.ops4j.pax.web.extender.war.internal.model.BundleWebApplication;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.util.WebContainerListener;
@@ -79,15 +90,17 @@ public class WarExtenderContext implements WebContainerListener {
 	/** Used to send events related to entire Web Applications being installed/uninstalled. */
 	private final WebApplicationEventDispatcher webApplicationEventDispatcher;
 
+	/** Used to parser {@code web.xml} and fragmnets into a web application model */
+	private final WebXmlParser webApplicationParser;
+
+	/** Default, common foundation of all WABs - includes default (override'able) servlet and some welcome files */
+	private final WebXml defaultWebXml;
 
 
 
 
 
 
-
-				/** Used to parser {@code web.xml} and fragmnets into a web application model */
-//				private final WebAppParser webApplicationParser;
 //				private WebObserver webObserver;
 //				private final ServiceRegistration<WarManager> registration;
 
@@ -120,8 +133,13 @@ public class WarExtenderContext implements WebContainerListener {
 		// dispatcher of events related to WAB lifecycle (128.5 Events)
 		webApplicationEventDispatcher = new WebApplicationEventDispatcher(bundleContext);
 
-		// web.xml, web-fragment.xml parser
-//		webApplicationParser = new WebAppParser(bundleContext);
+		// TODO: that's a good place to prepare default WebXml instance to be used in all WABs
+
+		// web.xml, web-fragment.xml parser (from tomcat-util-scan)
+		webApplicationParser = new WebXmlParser(false, false, true);
+		webApplicationParser.setClassLoader(WebXmlParser.class.getClassLoader());
+
+		defaultWebXml = findDefaultWebXml();
 
 //		webObserver = new WebObserver(
 //				webApplicationParser,
@@ -175,7 +193,7 @@ public class WarExtenderContext implements WebContainerListener {
 	 * @param bundle
 	 * @return
 	 */
-	public Extension createExtension(Bundle bundle) {
+	public Extension createExtension(Bundle bundle, Runnable cleanup) {
 		if (bundle.getState() != Bundle.ACTIVE) {
 			if (LOG.isTraceEnabled()) {
 				LOG.trace("Ignoring a bundle {} in non-active state", bundle);
@@ -244,7 +262,7 @@ public class WarExtenderContext implements WebContainerListener {
 		// using pax-web-config thread (from pax-web-runtime) anyway - to interact with single ServerModel in
 		// synchronized and consistent way. At least the parsing can be done in parallel
 
-		return new WabExtension(bundle);
+		return new WabExtension(bundle, cleanup);
 	}
 
 	@Override
@@ -297,6 +315,119 @@ public class WarExtenderContext implements WebContainerListener {
 		webContainerManager.releaseContainer(bundleContext, ref);
 	}
 
+	public WebXmlParser getParser() {
+		return webApplicationParser;
+	}
+
+	/**
+	 * Returns default {@link WebXml} which should be prepared when the {@link WarExtenderContext} starts.
+	 * @return
+	 */
+	public WebXml getDefaultWebXml() {
+		return defaultWebXml;
+	}
+
+	/**
+	 * Each {@link BundleWebApplication WAB} needs some default "web xml". Just as in Tomcat, which has some
+	 * default configuration in {@code CATALINA_HOME/conf/web.xml}.
+	 * @return
+	 */
+	public WebXml findDefaultWebXml() {
+		// Global web.xml (in Tomcat it's CATALINA_HOME/conf/web.xml and we package it into pax-web-spi)
+
+		// default-web.xml from Tomcat includes 5 important parts:
+		// - "default" servlet + "/" mapping
+		// - "jsp" servlet + ".jsp" and ".jspx" mappings
+		// - huge list of mime mappings
+		// - session timeout set to 30 (minutes)
+		// - 3 welcome files: index.html, index.htm and index.jsp
+		// MIME mappings are left untouched, but:
+		// - "default" servlet should be replaced by container specific version and we can't use
+		//   org.apache.catalina.servlets.DefaultServlet!
+		// - "jsp" servlet should be replaced by container agnostic org.ops4j.pax.web.jsp.JspServlet and
+		//   we have to be sure that pax-web-jsp bundle is available
+
+		WebXml defaultWebXml = new WebXml();
+		defaultWebXml.setDistributable(true);
+		defaultWebXml.setOverridable(true);
+		defaultWebXml.setAlwaysAddWelcomeFiles(false);
+		defaultWebXml.setReplaceWelcomeFiles(true);
+		try {
+			URL defaultWebXmlURI = OsgiContextModel.class.getResource("/org/ops4j/pax/web/service/spi/model/default-web.xml");
+			webApplicationParser.parseWebXml(defaultWebXmlURI, defaultWebXml, false);
+			defaultWebXml.setURL(defaultWebXmlURI);
+		} catch (IOException e) {
+			LOG.warn("Failure parsing default web.xml: {}", e.getMessage(), e);
+		}
+
+		// review the servlets
+		for (Iterator<Map.Entry<String, ServletDef>> iterator = defaultWebXml.getServlets().entrySet().iterator(); iterator.hasNext(); ) {
+			Map.Entry<String, ServletDef> e = iterator.next();
+			String name = e.getKey();
+			ServletDef servlet = e.getValue();
+			if ("default".equals(name)) {
+				// which means it'll be replaced by container-specific "default" servlet
+				// TODO: maybe there's a better trick
+				servlet.setServletClass(Servlet.class.getName());
+			} else if ("jsp".equals(name)) {
+				if (Utils.getPaxWebJspBundle(bundleContext.getBundle()) != null) {
+					// change org.apache.jasper.servlet.JspServlet to org.ops4j.pax.web.jsp.JspServlet
+					servlet.setServletClass(PaxWebConstants.DEFAULT_JSP_SERVLET_CLASS);
+				} else {
+					// no support for JSP == no JSP servlet at all
+					iterator.remove();
+					// no JSP servlet mapping
+					defaultWebXml.getServletMappings().keySet().remove("jsp");
+					// and no JSP welcome file
+					defaultWebXml.getWelcomeFiles().remove("index.jsp");
+				}
+			}
+		}
+
+		return defaultWebXml;
+	}
+
+	/**
+	 * Each WAB calls this method to prepare its own {@link WebXml}
+	 * @param bundle
+	 * @return
+	 */
+	public WebXml findBundleWebXml(Bundle bundle) {
+		WebXml mainWebXml = null;
+
+		// WAB specific web.xml. 128.3.1 WAB Definition - This web.xml must be found with the Bundle
+		// findEntries() method at the path /WEB-INF/web.xml. The findEntries() method includes fragments,
+		// allowing the web.xml to be provided by a fragment.
+		// ClassPathUtil is not used - we don't want web.xml entries from wired bundles.
+		// I don't expect multiple web.xmls, but in theory it's possible.
+		Enumeration<URL> descriptors = bundle.findEntries("WEB-INF", "web.xml", false);
+		if (descriptors != null) {
+			while (descriptors.hasMoreElements()) {
+				URL next = descriptors.nextElement();
+				LOG.trace("Processing {}", next);
+
+				WebXml webXml = new WebXml();
+				try {
+					webApplicationParser.parseWebXml(next, webXml, false);
+					webXml.setURL(next);
+				} catch (IOException e) {
+					LOG.warn("Failure parsing web.xml for bundle {}: {}", bundle, e.getMessage(), e);
+				}
+				if (mainWebXml == null) {
+					mainWebXml = webXml;
+				} else {
+					mainWebXml.merge(Collections.singleton(webXml));
+				}
+			}
+		}
+		if (mainWebXml == null) {
+			// if it was empty, we still need something to merge scanned fragments into
+			mainWebXml = new WebXml();
+		}
+
+		return mainWebXml;
+	}
+
 	/**
 	 * <p>The {@link Extension} representing a "WAB" (Web Application Bundle) which (according to 128.3 Web Application
 	 * Bundle) is a {@link Bundle} with {@code Web-ContextPath} manifest header.</p>
@@ -312,9 +443,11 @@ public class WarExtenderContext implements WebContainerListener {
 	private class WabExtension implements Extension {
 
 		private final Bundle bundle;
+		private final Runnable cleanup;
 
-		WabExtension(Bundle bundle) {
+		WabExtension(Bundle bundle, Runnable cleanup) {
 			this.bundle = bundle;
+			this.cleanup = cleanup;
 		}
 
 		@Override
@@ -374,6 +507,9 @@ public class WarExtenderContext implements WebContainerListener {
 				// a WebAppDependencyHolder registration. But we're handling the lifecycle in different way now.
 				webApp.stop();
 			} finally {
+				if (cleanup != null) {
+					cleanup.run();
+				}
 				lock.unlock();
 			}
 		}

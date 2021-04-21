@@ -24,6 +24,9 @@ import javax.servlet.http.HttpServletResponse;
 
 public class SimplestServlet extends HttpServlet {
 
+	@Deprecated
+	public Object dummy;
+
 	@Override
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		resp.setContentType("text/plain");

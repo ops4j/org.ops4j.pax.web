@@ -27,4 +27,17 @@
 		</after>
 	</ordering>
 
+	<!--
+		This servlet doesn't have a class, only a JSP file. It'll be converted to use real JSP servlet with jspFile
+		init parameter
+	-->
+	<servlet>
+		<servlet-name>jsp-info</servlet-name>
+		<jsp-file>/jsp-info.jsp</jsp-file>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>jsp-info</servlet-name>
+		<url-pattern>/jspinfo</url-pattern>
+	</servlet-mapping>
+
 </web-fragment>

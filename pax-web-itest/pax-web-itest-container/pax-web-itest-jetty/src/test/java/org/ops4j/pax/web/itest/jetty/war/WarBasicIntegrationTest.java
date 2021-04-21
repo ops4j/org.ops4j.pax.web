@@ -48,7 +48,15 @@ public class WarBasicIntegrationTest extends AbstractContainerTestBase {
 	@Before
 	public void setUp() throws Exception {
 		configureAndWaitForServletWithMapping("/servlet", () -> {
-			// I'm not refreshing, so fragments have to be installed before their hosts
+			context.installBundle(String.format("mvn:org.apache.myfaces.core/myfaces-api/%s", System.getProperty("myfaces.version")));
+			context.installBundle(String.format("mvn:org.apache.myfaces.core/myfaces-impl/%s", System.getProperty("myfaces.version")));
+			context.installBundle(String.format("mvn:commons-beanutils/commons-beanutils/%s", System.getProperty("commons-beanutils.version")));
+			context.installBundle(String.format("mvn:commons-collections/commons-collections/%s", System.getProperty("commons-collections.version")));
+			context.installBundle(String.format("mvn:commons-digester/commons-digester/%s", System.getProperty("commons-digester.version")));
+			context.installBundle("mvn:javax.enterprise/cdi-api/1.2");
+			context.installBundle("mvn:javax.interceptor/javax.interceptor-api/1.2");
+			context.installBundle("mvn:jakarta.websocket/jakarta.websocket-api/1.1.2");
+			// I'm not refreshing, so fragments need to be installed before their hosts
 			installAndStartBundle(sampleURI("container-bundle-3"));
 			context.installBundle(sampleURI("container-fragment-1"));
 			installAndStartBundle(sampleURI("container-bundle-1"));

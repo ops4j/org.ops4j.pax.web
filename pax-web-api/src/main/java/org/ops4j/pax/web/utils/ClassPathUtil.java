@@ -43,7 +43,6 @@ import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.namespace.BundleNamespace;
 import org.osgi.framework.namespace.PackageNamespace;
@@ -95,7 +94,6 @@ public class ClassPathUtil {
 				}
 			}
 		}
-		LOG.debug("Bundle-ClassPath URLs: " + urls);
 
 		if (useClassSpace) {
 			// adds the depending bundles to the "classloader" space
@@ -139,7 +137,42 @@ public class ClassPathUtil {
 					LOG.debug(ignore.getMessage());
 				}
 			}
-		LOG.debug("Bundle-ClassPath URLs: " + urls);
+		}
+
+		return urls.toArray(new URL[urls.size()]);
+	}
+
+	/**
+	 * <p>Returns a list of urls for all non-JAR entries that compose the Bundle-ClassPath.</p>
+	 *
+	 * @param bundle
+	 * @return
+	 */
+	public static URL[] getClassPathNonJars(final Bundle bundle) {
+		final List<URL> urls = new ArrayList<>();
+		final String bundleClasspath = bundle.getHeaders() == null ? null
+				: bundle.getHeaders().get(Constants.BUNDLE_CLASSPATH);
+		if (bundleClasspath != null) {
+			String[] segments = bundleClasspath.split("\\s*,\\s*");
+			for (String segment : segments) {
+				final URL url = bundle.getEntry(segment);
+				if (url == null) {
+					continue;
+				}
+				String ef = url.toExternalForm();
+				try {
+					if (!ef.endsWith("jar")) {
+						// assume it's a subdirectory of a bundle
+						if (!ef.endsWith("/")) {
+							urls.add(new URL(ef + "/"));
+						} else {
+							urls.add(url);
+						}
+					}
+				} catch (MalformedURLException ignore) {
+					LOG.debug(ignore.getMessage());
+				}
+			}
 		}
 
 		return urls.toArray(new URL[urls.size()]);
@@ -196,10 +229,9 @@ public class ClassPathUtil {
 	}
 
 	/**
-	 * Gets a list of bundles that are imported or required by {@link BundleContext}. This method also returns
+	 * Gets a list of bundles that are imported or required by given {@link Bundle}. This method also returns
 	 * attached fragments.
 	 *
-	 * @param context
 	 * @param bundle
 	 * @param bundleSet
 	 * @return
@@ -323,8 +355,10 @@ public class ClassPathUtil {
 				Enumeration<URL> e = null;
 				try {
 					e = bundle.getResources(path);
-					while (e.hasMoreElements()) {
-						resources.add(e.nextElement());
+					if (e != null) {
+						while (e.hasMoreElements()) {
+							resources.add(e.nextElement());
+						}
 					}
 				} catch (IOException ioe) {
 					LOG.warn("Problem getting {} resource from {}: {}", path, bundle, ioe.getMessage(), ioe);
@@ -334,15 +368,31 @@ public class ClassPathUtil {
 		return resources;
 	}
 
+	/**
+	 * This method uses {@link BundleWiring#findEntries} that doesn't involve classloaders so we can get resources
+	 * from fixed path. This way we can find multiple resources with the same path (when for example a bundle has
+	 * attached fragment, which has the same entries). Normally {@link BundleWiring#findEntries} doesn't check JARs
+	 * listed on {@code Bundle-ClassPath} (because it doesn't work at classloader level), however we can explicitly
+	 * tell it to do so.
+	 *
+	 * @param bundle
+	 * @param path
+	 * @param pattern
+	 * @param recurse
+	 * @param useBundleClasspath
+	 * @return
+	 * @throws IOException
+	 */
 	public static List<URL> findEntries(Bundle bundle, String path, String pattern, boolean recurse, boolean useBundleClasspath) throws IOException {
 		return findEntries(Collections.singletonList(bundle), path, pattern, recurse, useBundleClasspath);
 	}
 
 	/**
-	 * This method uses {@link BundleWiring#findEntries} that doesn't involve classloaders. This way we can find
-	 * multiple resources with the same path. Normally {@link BundleWiring#findEntries} doesn't check JARs listed
-	 * on {@code Bundle-ClassPath} (because it doesn't work at classloader level), however we can explicitly tell
-	 * it to do so.
+	 * This method uses {@link BundleWiring#findEntries} that doesn't involve classloaders so we can get resources
+	 * from fixed path. This way we can find multiple resources with the same path (when for example a bundle has
+	 * attached fragment, which has the same entries). Normally {@link BundleWiring#findEntries} doesn't check JARs
+	 * listed on {@code Bundle-ClassPath} (because it doesn't work at classloader level), however we can explicitly
+	 * tell it to do so.
 	 *
 	 * @param bundles
 	 * @param path
@@ -553,7 +603,7 @@ public class ClassPathUtil {
 				// assume it exists, otherwise it shouldn't be on roots list
 				scanDirectory(new File(URI.create(root.toExternalForm())), p, recurse, resources);
 			} else if (bundle != null
-					&& "bundle".equals(protocol) || "bundleresource".equals(protocol) || "bundleentry".equals(protocol)) {
+					&& ("bundle".equals(protocol) || "bundleresource".equals(protocol) || "bundleentry".equals(protocol))) {
 				scanBundle(bundle, root, pattern, recurse, resources);
 			}
 		}

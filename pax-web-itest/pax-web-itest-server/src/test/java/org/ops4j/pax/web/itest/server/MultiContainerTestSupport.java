@@ -15,10 +15,12 @@
  */
 package org.ops4j.pax.web.itest.server;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.EventListener;
@@ -357,7 +359,15 @@ public class MultiContainerTestSupport {
 		}
 
 		if (enableJSP()) {
-			when(bundle.getBundleContext().getBundles()).thenReturn(new Bundle[] { bundle, jspBundle });
+			when(bundleContext.getBundles()).thenReturn(new Bundle[] { bundle, jspBundle });
+		} else {
+			when(bundleContext.getBundles()).thenReturn(new Bundle[] { bundle });
+		}
+
+		try {
+			when(bundle.getResources("META-INF/services/javax.servlet.ServletContainerInitializer"))
+					.thenReturn(Collections.emptyEnumeration());
+		} catch (IOException ignored) {
 		}
 
 		return bundle;
@@ -646,7 +656,7 @@ public class MultiContainerTestSupport {
 
 	protected void installWab(final Bundle wab) {
 		when(wab.getState()).thenReturn(Bundle.ACTIVE);
-		Extension extension = warExtender.createExtension(wab);
+		Extension extension = warExtender.createExtension(wab, null);
 		wabs.put(wab, extension);
 		final CountDownLatch latch = new CountDownLatch(1);
 		warExtenderPool.submit(() -> {

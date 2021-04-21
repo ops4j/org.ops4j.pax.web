@@ -16,7 +16,7 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -174,8 +174,9 @@
 
 		<dependency.commons-beanutils.version>1.9.4</dependency.commons-beanutils.version>
 		<dependency.commons-codec.version>1.13</dependency.commons-codec.version>
-		<dependency.commons-collection.version>4.4</dependency.commons-collection.version>
-		<dependency.commons-collection3.version>3.2.2</dependency.commons-collection3.version>
+		<dependency.commons-collections.version>4.4</dependency.commons-collections.version>
+		<dependency.commons-collections3.version>3.2.2</dependency.commons-collections3.version>
+		<dependency.commons-digester.version>1.8.1</dependency.commons-digester.version>
 		<dependency.commons-io.version>2.8.0</dependency.commons-io.version>
 		<dependency.commons-lang.version>3.9</dependency.commons-lang.version>
 		<dependency.commons-logging.version>1.1.1</dependency.commons-logging.version>
@@ -183,7 +184,7 @@
 		<dependency.easymock.version>2.3</dependency.easymock.version>
 
 		<dependency.eclipse.jdt.version>3.23.0</dependency.eclipse.jdt.version>
-		<dependency.eclipse.jetty.version>9.4.39.v20210325</dependency.eclipse.jetty.version>
+		<dependency.eclipse.jetty.version>9.4.40.v20210413</dependency.eclipse.jetty.version>
 		<dependency.eclipse.platform.version>3.12.100</dependency.eclipse.platform.version>
 
 		<dependency.felix.configadmin.version>1.9.18</dependency.felix.configadmin.version>
@@ -244,20 +245,23 @@
 
 		<dependency.jboss.logging.version>3.3.0.Final</dependency.jboss.logging.version>
 		<dependency.jboss.spec.jstl>1.1.4.Final</dependency.jboss.spec.jstl>
-		<dependency.jboss.undertow.version>2.0.32.Final</dependency.jboss.undertow.version>
+		<dependency.jboss.undertow.version>2.0.34.Final</dependency.jboss.undertow.version>
+<!--		<dependency.jboss.undertow.version>2.2.5.Final-SNAPSHOT</dependency.jboss.undertow.version>-->
 		<dependency.jboss.weld.version>2.4.5.Final</dependency.jboss.weld.version>
 		<dependency.jboss.xnio.version>3.3.8.Final</dependency.jboss.xnio.version>
+<!--		<dependency.jboss.xnio.version>3.8.0.Final</dependency.jboss.xnio.version>-->
 
 		<dependency.jersey.version>1.19</dependency.jersey.version>
 		<dependency.joda-time.version>2.3</dependency.joda-time.version>
-		<dependency.jsf.myfaces.version>2.2.12</dependency.jsf.myfaces.version>
+		<dependency.jsf.myfaces.version>2.3.8</dependency.jsf.myfaces.version>
 		<dependency.jsf.myfaces-facelets-examples20.version>1.0.2.1</dependency.jsf.myfaces-facelets-examples20.version>
 		<dependency.jsf.primefaces.version>8.0</dependency.jsf.primefaces.version>
 		<dependency.junit.version>4.13</dependency.junit.version>
 		<dependency.karaf.version>4.2.1</dependency.karaf.version>
 		<dependency.log4j2.version>2.13.0</dependency.log4j2.version>
 		<dependency.logback.version>1.0.6</dependency.logback.version>
-		<dependency.mockito.version>3.3.3</dependency.mockito.version>
+		<dependency.mockito.version>3.7.7</dependency.mockito.version>
+		<dependency.byte-buddy.version>1.10.20</dependency.byte-buddy.version>
 		<dependency.objenesis.version>3.1</dependency.objenesis.version>
 
 		<dependency.ops4j.base.version>1.5.1</dependency.ops4j.base.version>
@@ -288,7 +292,7 @@
 		<dependency.spring.smx.version>5.3.0_1</dependency.spring.smx.version>
 		<dependency.spring-dm.version>1.2.1</dependency.spring-dm.version>
 		<dependency.taglibs.version>1.2.5</dependency.taglibs.version>
-		<dependency.tomcat.version>9.0.41</dependency.tomcat.version>
+		<dependency.tomcat.version>9.0.45</dependency.tomcat.version>
 		<dependency.xbean.version>4.18</dependency.xbean.version>
 	</properties>
 
@@ -1486,16 +1490,16 @@
 <!--				<version>${dependency.javax.ws.rs2-api.version}</version>-->
 <!--			</dependency>-->
 
-<!--			<dependency>-->
-<!--				<groupId>javax.enterprise</groupId>-->
-<!--				<artifactId>cdi-api</artifactId>-->
-<!--				<version>${dependency.javax.cdi-api.version}</version>-->
-<!--			</dependency>-->
-<!--			<dependency>-->
-<!--				<groupId>javax.interceptor</groupId>-->
-<!--				<artifactId>javax.interceptor-api</artifactId>-->
-<!--				<version>${dependency.javax.interceptor-api.version}</version>-->
-<!--			</dependency>-->
+			<dependency>
+				<groupId>javax.enterprise</groupId>
+				<artifactId>cdi-api</artifactId>
+				<version>${dependency.javax.cdi-api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.interceptor</groupId>
+				<artifactId>javax.interceptor-api</artifactId>
+				<version>${dependency.javax.interceptor-api.version}</version>
+			</dependency>
 
 <!--			<dependency>-->
 <!--				<groupId>javax.json</groupId>-->
@@ -1776,6 +1780,11 @@
 				<artifactId>jetty-webapp</artifactId>
 				<version>${dependency.eclipse.jetty.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-annotations</artifactId>
+				<version>${dependency.eclipse.jetty.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
@@ -1921,6 +1930,11 @@
 				<version>${dependency.tomcat.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.tomcat</groupId>
+				<artifactId>tomcat-coyote</artifactId>
+				<version>${dependency.tomcat.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.tomcat.embed</groupId>
 				<artifactId>tomcat-embed-core</artifactId>
 				<version>${dependency.tomcat.version}</version>
@@ -2008,6 +2022,20 @@
 				<groupId>io.undertow</groupId>
 				<artifactId>undertow-core</artifactId>
 				<version>${dependency.jboss.undertow.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.jboss.threads</groupId>
+						<artifactId>jboss-threads</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.wildfly.client</groupId>
+						<artifactId>wildfly-client-config</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.wildfly.common</groupId>
+						<artifactId>wildfly-common</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>io.undertow</groupId>
@@ -2018,11 +2046,31 @@
 				<groupId>org.jboss.xnio</groupId>
 				<artifactId>xnio-api</artifactId>
 				<version>${dependency.jboss.xnio.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.jboss.threads</groupId>
+						<artifactId>jboss-threads</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.wildfly.client</groupId>
+						<artifactId>wildfly-client-config</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.wildfly.common</groupId>
+						<artifactId>wildfly-common</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.xnio</groupId>
 				<artifactId>xnio-nio</artifactId>
 				<version>${dependency.jboss.xnio.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.jboss.threads</groupId>
+						<artifactId>jboss-threads</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<dependency>
@@ -2112,17 +2160,22 @@
 			<dependency>
 				<groupId>commons-collections</groupId>
 				<artifactId>commons-collections</artifactId>
-				<version>${dependency.commons-collection3.version}</version>
+				<version>${dependency.commons-collections3.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-collections4</artifactId>
-				<version>${dependency.commons-collection.version}</version>
+				<version>${dependency.commons-collections.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-beanutils</groupId>
 				<artifactId>commons-beanutils</artifactId>
 				<version>${dependency.commons-beanutils.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-digester</groupId>
+				<artifactId>commons-digester</artifactId>
+				<version>${dependency.commons-digester.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
@@ -2374,6 +2427,16 @@
 				<artifactId>objenesis</artifactId>
 				<version>${dependency.objenesis.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.bytebuddy</groupId>
+				<artifactId>byte-buddy</artifactId>
+				<version>${dependency.byte-buddy.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.bytebuddy</groupId>
+				<artifactId>byte-buddy-agent</artifactId>
+				<version>${dependency.byte-buddy.version}</version>
+			</dependency>
 <!--			<dependency>-->
 <!--				<groupId>com.cedarsoft.commons</groupId>-->
 <!--				<artifactId>test-utils</artifactId>-->
@@ -2415,7 +2478,7 @@
 		<repository>
 			<id>prime-repo</id>
 			<name>PrimeFaces Maven Repository</name>
-			<url>http://repository.primefaces.org</url>
+			<url>https://repository.primefaces.orgg</url>
 		</repository>
 	</repositories>
 
@@ -2671,77 +2734,77 @@
 			</build>
 		</profile>
 
-		<profile>
-			<id>code-coverage</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.jacoco</groupId>
-						<artifactId>jacoco-maven-plugin</artifactId>
-						<inherited>true</inherited>
-						<executions>
-							<execution>
-								<id>prepare-agent-tests</id>
-								<goals>
-									<goal>prepare-agent</goal>
-								</goals>
-								<phase>process-sources</phase>
-								<configuration>
-									<includes>
-										<include>org.ops4j.pax.web.*</include>
-									</includes>
-									<propertyName>jcoverage.command</propertyName>
-									<excludes>
-										<exclude>org.apache.jasper</exclude>
-										<exclude>org.apache.jasper.compiler</exclude>
-										<exclude>org.apache.jasper.servlet</exclude>
-										<exclude>org.apache.myfaces.test</exclude>
-										<exclude>org.ops4j.pax.web.extender.samples.*</exclude>
-										<exclude>org.ops4j.pax.web.itest.*</exclude>
-										<exclude>org.ops4j.pax.web.samples.*</exclude>
-										<exclude>org.apache.xbean.*</exclude>
-									</excludes>
-									<append>true</append>
-								</configuration>
-							</execution>
-							<execution>
-								<id>prepare-agent-integration</id>
-								<goals>
-									<goal>prepare-agent-integration</goal>
-								</goals>
-								<phase>pre-integration-test</phase>
-								<configuration>
-									<propertyName>jcoverage.command</propertyName>
-									<destFile>${sonar.jacoco.itReportPath}</destFile>
-									<includes>
-										<include>org.ops4j.pax.web.*</include>
-									</includes>
-									<excludes>
-										<exclude>org.apache.jasper</exclude>
-										<exclude>org.apache.jasper.compiler</exclude>
-										<exclude>org.apache.jasper.servlet</exclude>
-										<exclude>org.apache.myfaces.test</exclude>
-										<exclude>org.ops4j.pax.web.utils.ClassPathUtil</exclude>
-										<exclude>org.ops4j.pax.web.extender.samples.*</exclude>
-										<exclude>org.ops4j.pax.web.itest.*</exclude>
-										<exclude>org.ops4j.pax.web.samples.*</exclude>
-										<exclude>org.apache.xbean.*</exclude>
-										<exclude>org.objectweb.asm.*</exclude>
-									</excludes>
-									<append>true</append>
-								</configuration>
-							</execution>
-							<execution>
-								<id>report-test</id>
-								<goals>
-									<goal>report</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
+<!--		<profile>-->
+<!--			<id>code-coverage</id>-->
+<!--			<build>-->
+<!--				<plugins>-->
+<!--					<plugin>-->
+<!--						<groupId>org.jacoco</groupId>-->
+<!--						<artifactId>jacoco-maven-plugin</artifactId>-->
+<!--						<inherited>true</inherited>-->
+<!--						<executions>-->
+<!--							<execution>-->
+<!--								<id>prepare-agent-tests</id>-->
+<!--								<goals>-->
+<!--									<goal>prepare-agent</goal>-->
+<!--								</goals>-->
+<!--								<phase>process-sources</phase>-->
+<!--								<configuration>-->
+<!--									<includes>-->
+<!--										<include>org.ops4j.pax.web.*</include>-->
+<!--									</includes>-->
+<!--									<propertyName>jcoverage.command</propertyName>-->
+<!--									<excludes>-->
+<!--										<exclude>org.apache.jasper</exclude>-->
+<!--										<exclude>org.apache.jasper.compiler</exclude>-->
+<!--										<exclude>org.apache.jasper.servlet</exclude>-->
+<!--										<exclude>org.apache.myfaces.test</exclude>-->
+<!--										<exclude>org.ops4j.pax.web.extender.samples.*</exclude>-->
+<!--										<exclude>org.ops4j.pax.web.itest.*</exclude>-->
+<!--										<exclude>org.ops4j.pax.web.samples.*</exclude>-->
+<!--										<exclude>org.apache.xbean.*</exclude>-->
+<!--									</excludes>-->
+<!--									<append>true</append>-->
+<!--								</configuration>-->
+<!--							</execution>-->
+<!--							<execution>-->
+<!--								<id>prepare-agent-integration</id>-->
+<!--								<goals>-->
+<!--									<goal>prepare-agent-integration</goal>-->
+<!--								</goals>-->
+<!--								<phase>pre-integration-test</phase>-->
+<!--								<configuration>-->
+<!--									<propertyName>jcoverage.command</propertyName>-->
+<!--									<destFile>${sonar.jacoco.itReportPath}</destFile>-->
+<!--									<includes>-->
+<!--										<include>org.ops4j.pax.web.*</include>-->
+<!--									</includes>-->
+<!--									<excludes>-->
+<!--										<exclude>org.apache.jasper</exclude>-->
+<!--										<exclude>org.apache.jasper.compiler</exclude>-->
+<!--										<exclude>org.apache.jasper.servlet</exclude>-->
+<!--										<exclude>org.apache.myfaces.test</exclude>-->
+<!--										<exclude>org.ops4j.pax.web.utils.ClassPathUtil</exclude>-->
+<!--										<exclude>org.ops4j.pax.web.extender.samples.*</exclude>-->
+<!--										<exclude>org.ops4j.pax.web.itest.*</exclude>-->
+<!--										<exclude>org.ops4j.pax.web.samples.*</exclude>-->
+<!--										<exclude>org.apache.xbean.*</exclude>-->
+<!--										<exclude>org.objectweb.asm.*</exclude>-->
+<!--									</excludes>-->
+<!--									<append>true</append>-->
+<!--								</configuration>-->
+<!--							</execution>-->
+<!--							<execution>-->
+<!--								<id>report-test</id>-->
+<!--								<goals>-->
+<!--									<goal>report</goal>-->
+<!--								</goals>-->
+<!--							</execution>-->
+<!--						</executions>-->
+<!--					</plugin>-->
+<!--				</plugins>-->
+<!--			</build>-->
+<!--		</profile>-->
 
 		<!-- License generation: `mvn -Plicense process-sources` -->
 		<profile>

@@ -113,6 +113,8 @@
 							org.apache.tomcat.util.scan;version="${dependency.tomcat.version}";-split-package:=merge-first,
 
 							<!-- tomcat-embed-core - unfortunately these packages have to be here -->
+							org.apache.tomcat.util.bcel;version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.bcel.classfile;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util.modeler;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util.modeler.modules;version="${dependency.tomcat.version}",
 

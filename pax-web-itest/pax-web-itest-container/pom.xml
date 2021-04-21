@@ -68,6 +68,10 @@
 							see: org.ops4j.pax.exam.ConfigurationManager.ConfigurationManager()
 						-->
 						<pax.exam.configuration>file:../../etc/controlled-exam.properties</pax.exam.configuration>
+						<myfaces.version>${dependency.jsf.myfaces.version}</myfaces.version>
+						<commons-beanutils.version>${dependency.commons-beanutils.version}</commons-beanutils.version>
+						<commons-collections.version>${dependency.commons-collections3.version}</commons-collections.version>
+						<commons-digester.version>${dependency.commons-digester.version}</commons-digester.version>
 					</systemPropertyVariables>
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 					<runOrder>alphabetical</runOrder>

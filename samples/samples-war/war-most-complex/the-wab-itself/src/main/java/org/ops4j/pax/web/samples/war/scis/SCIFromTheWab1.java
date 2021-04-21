@@ -19,12 +19,21 @@ import java.util.Set;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
+import javax.servlet.annotation.HandlesTypes;
 
+@HandlesTypes({
+		// see https://bz.apache.org/bugzilla/show_bug.cgi?id=65244
+		Deprecated.class,
+		// we want to get org.ops4j.pax.web.samples.war.Cb1IFace3Impl class from this bundle even if it implements
+		// ServletRegistration through container-bundle-1 and container-bundle-3
+		ServletRegistration.class
+})
 public class SCIFromTheWab1 implements ServletContainerInitializer {
 
 	@Override
 	public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
-
+		System.out.println(c);
 	}
 
 }

@@ -13,21 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.samples.war.scis;
+package org.ops4j.pax.web.samples.war.fragment;
 
-import java.util.EventListener;
-import java.util.Set;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.HandlesTypes;
-
-@HandlesTypes({ EventListener.class })
-public class SCIFromTheWab2 implements ServletContainerInitializer {
-
-	@Override
-	public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
-
-	}
+public interface AnInterfaceFromWabFragment {
 
 }

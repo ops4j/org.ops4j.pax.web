@@ -17,22 +17,12 @@
  */
 package org.ops4j.pax.web.extender.war.internal.model;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Deque;
-import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,30 +32,23 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
+import javax.servlet.annotation.HandlesTypes;
 
 import org.apache.felix.utils.extender.Extension;
 import org.apache.tomcat.util.descriptor.web.ServletDef;
 import org.apache.tomcat.util.descriptor.web.WebXml;
 import org.apache.tomcat.util.descriptor.web.WebXmlParser;
 import org.ops4j.pax.web.extender.war.internal.WarExtenderContext;
-import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent;
 import org.ops4j.pax.web.service.spi.model.views.WebAppWebContainerView;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
-import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.util.WebContainerManager;
-import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.namespace.HostNamespace;
-import org.osgi.framework.wiring.BundleWire;
-import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,25 +75,6 @@ import org.slf4j.LoggerFactory;
 public class BundleWebApplication {
 
 	public static final Logger LOG = LoggerFactory.getLogger(BundleWebApplication.class);
-
-	/**
-	 * Hardcoded equivalent of Tomcat's {@code tomcat.util.scan.StandardJarScanFilter.jarsToSkip} - bundles by
-	 * symbolic name.
-	 */
-	private static final Set<String> IGNORED_BUNDLES;
-
-	static {
-		IGNORED_BUNDLES = new HashSet<>(Arrays.asList(
-				"javax.el-api", // yes - even in mvn:jakarta.el/jakarta.el-api
-				"jakarta.servlet-api",
-				"jakarta.annotation-api",
-				"org.ops4j.pax.logging.pax-logging-api",
-				"org.ops4j.pax.web.pax-web-api",
-				"org.ops4j.pax.web.pax-web-spi",
-				"org.ops4j.pax.web.pax-web-tomcat-common",
-				"org.eclipse.jdt.core.compiler.batch"
-		));
-	}
 
 	/**
 	 * The original WAB (according to 128.3 Web Application Bundle) which is the base of this {@link BundleWebApplication}.
@@ -157,9 +121,6 @@ public class BundleWebApplication {
 	private String contextPath;
 
 	private final ClassLoader classLoader;
-
-	// similar to org.apache.catalina.startup.ContextConfig.ok
-	private boolean fragmentParsingOK = true;
 
 	public BundleWebApplication(Bundle bundle, WebContainerManager webContainerManager,
 			WarExtenderContext extenderContext, ExecutorService pool) {
@@ -391,7 +352,7 @@ public class BundleWebApplication {
 			if (view == null) {
 				LOG.warn("WebContainer reference {} was removed, but {} can't access the WebContainer service"
 						+ " and it can't be undeployed.", ref, this);
-				// but still let's start with new allocation attempt (in new WebContainer)
+				// but still let's start with new allocation attempt (in new WebContainer that'll be set in future)
 				deploymentState.set(State.ALLOCATING_CONTEXT);
 			} else {
 				// as in stop(), we should UNDEPLOY the application, but (unlike as in stop()) to the stage, where
@@ -414,7 +375,7 @@ public class BundleWebApplication {
 						break;
 					case FAILED:
 						// FAILED state of WAB is different that FAILED event (which may mean the context is not free),
-						// but with new WebContainer reference that may soon be set, we'll give this WAS another chance
+						// but with new WebContainer reference that may soon be set, we'll give this WAB another chance
 						break;
 					case ALLOCATING_CONTEXT:
 						try {
@@ -565,12 +526,12 @@ public class BundleWebApplication {
 
 			State state = deploymentState.get();
 			if (state == State.CONFIGURING) {
-				LOG.info("Processing configuration of {}", this);
+				LOG.info("Configuring {}", this);
 				// Post an org/osgi/service/web/DEPLOYING event
 				extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.DEPLOYING, bundle));
 
-				// The Web Runtime processes deployment information by processing the web.xml descriptor ...
-				parseMetadata();
+				// Collect deployment information by processing the web.xml descriptor and other sources of metadata
+				processMetadata();
 
 				// after web.xml/web-fragment.xml/annotations are read, we have to check if the context path
 				// is available
@@ -665,7 +626,7 @@ public class BundleWebApplication {
 	 * <p>Not schedulable equivalent of {@link #deploy()}. It fully undeploys the {@link BundleWebApplication} using
 	 * passed {@link WebAppWebContainerView}.</p>
 	 *
-	 * <p>While {@link #deploy()}, the "starting" side of WAB's lifecycle may be rescheduled few times when
+	 * <p>While {@link #deploy()} method (the "starting" phase of WAB's lifecycle) may be rescheduled few times when
 	 * {@link WebContainer} is not available, here we just have to do everything in one shot.</p>
 	 * @param view
 	 */
@@ -721,9 +682,7 @@ public class BundleWebApplication {
 	 * again (which may happen during refresh), we have to parse everything again, because new model parts may
 	 * become available in OSGi bundle fragments.</p>
 	 */
-	private void parseMetadata() {
-		LOG.debug("Processing web.xml, web fragments and annotations");
-
+	private void processMetadata() {
 		// Servlet spec, 8.1 Annotations and pluggability:
 		//  - "metadata-complete" attribute on web descriptor defines whether this deployment descriptor and any web
 		//    fragments, if any, are complete, or whether the class files available to this module and packaged with
@@ -775,7 +734,7 @@ public class BundleWebApplication {
 		//    should be examined for annotations that specify deployment information.
 		//  - Servlet spec 15.5.1: If metadata-complete is set to " true ", the deployment tool only examines the
 		//    web.xml file and must ignore annotations such as @WebServlet , @WebFilter , and @WebListener present in
-		//    the class files of the application, and must also ignore any web- fragment.xml descriptor packaged in
+		//    the class files of the application, and must also ignore any web-fragment.xml descriptors packaged in
 		//    a jar file in WEB-INF/lib.
 		// So I'm not sure whether to process web-fragment.xml or not...
 
@@ -909,244 +868,144 @@ public class BundleWebApplication {
 		//  - org.apache.catalina.core.StandardContext
 		//  - org.eclipse.jetty.webapp.WebAppContext
 
-		Bundle paxWebJspBundle = Utils.getPaxWebJspBundle(bundle);
+		long start = System.currentTimeMillis();
 
 		ClassLoader tccl = Thread.currentThread().getContextClassLoader();
 		try {
 			// TCCL set only at the time of parsing - not at the time of deployment of the model to a WebContainer
+			// because during deployment, all classes (filters, servlets, listeners, ...) should already be
+			// instantiated.
+			// When target (Jetty/Tomcat/Undertow) ServletContext is started, the TCCL will be set anyway, so
+			// listeners and initializers are invoked correctly (e.g., with access to Tomcat scanner).
 			Thread.currentThread().setContextClassLoader(this.classLoader);
-			WebXmlParser parser = new WebXmlParser(false, false, true);
+
+			// something like Tomcat's CATALINA_HOME/conf/web.xml
+			WebXml defaultWebXml = extenderContext.getDefaultWebXml();
+			// actual WEB-INF/web.xml from a WAB
+
+			LOG.debug("Searching for web.xml descriptor in {}", bundle);
+			WebXml mainWebXml = extenderContext.findBundleWebXml(bundle);
+
+			// at this stage, we don't have javax.servlet.ServletContext available yet. We don't even know
+			// where this WAB is going to be deployed (Tomcat? Jetty? Undertow?). We don't even know whether
+			// the contextPath for this WAB is available.
+
+			// Let's start constructing WAB's "class path" which will eventually be transformed into complete
+			// WAB's ClassLoader accessible through javax.servlet.ServletContext.getClassLoader() - but this will
+			// happen later, after the WAB is really deployed
+			BundleWebApplicationClassSpace wabClassSpace = new BundleWebApplicationClassSpace(bundle, extenderContext);
 
 			try {
-				// Global web.xml (in Tomcat it's CATALINA_HOME/conf/web.xml and we package it into pax-web-spi)
-				// TODO: it should be parsed only once
-				WebXml defaultWebXml = new WebXml();
-				defaultWebXml.setDistributable(true);
-				defaultWebXml.setOverridable(true);
-				defaultWebXml.setAlwaysAddWelcomeFiles(false);
-				defaultWebXml.setReplaceWelcomeFiles(true);
-				URL defaultWebXmlURI = OsgiContextModel.class.getResource("/org/ops4j/pax/web/service/spi/model/default-web.xml");
-				parser.parseWebXml(defaultWebXmlURI, defaultWebXml, false);
-				defaultWebXml.setURL(defaultWebXmlURI);
+				// complex initialization that actually processes entire "class space" and determines the
+				// ordered fragments that will later be used to discover/load SCIs and annotated classes
+				LOG.debug("Searching for web fragments");
+				wabClassSpace.initialize(mainWebXml);
+				boolean ok = wabClassSpace.isFragmentParsingOK();
 
-				// review the servlets
-				for (Iterator<Map.Entry<String, ServletDef>> iterator = defaultWebXml.getServlets().entrySet().iterator(); iterator.hasNext(); ) {
-					Map.Entry<String, ServletDef> e = iterator.next();
-					String name = e.getKey();
-					ServletDef servlet = e.getValue();
-					if ("default".equals(name)) {
-						// which means it'll be replaced by container-specific "default" servlet
-						// TODO: maybe there's a better hack
-						servlet.setServletClass(Servlet.class.getName());
-					} else if ("jsp".equals(name)) {
-						if (paxWebJspBundle != null) {
-							servlet.setServletClass(PaxWebConstants.DEFAULT_JSP_SERVLET_CLASS);
-						} else {
-							// no support for JSP == no JSP servlet at all
-							iterator.remove();
-							// no JSP servlet mapping
-							defaultWebXml.getServletMappings().keySet().remove("jsp");
-							// and no JSP welcome file
-							defaultWebXml.getWelcomeFiles().remove("index.jsp");
-						}
-					}
+				if (!ok) {
+					LOG.warn("There were problems when parsing web-fragment.xml descriptors."
+							+ " Scanning for ServletContainerInitializers and annotated classes won't be performed.");
 				}
 
-				// default-web.xml from Tomcat includes 5 important parts:
-				// - "default" servlet + "/" mapping
-				// - "jsp" servlet + ".jsp" and ".jspx" mappings
-				// - huge list of mime mappings
-				// - session timeout set to 30 (minutes)
-				// - 3 welcome files: index.html, index.htm and index.jsp
-				// MIME mappings are left untouched, but:
-				// - "default" servlet should be replaced by container specific version and we can't use
-				//   org.apache.catalina.servlets.DefaultServlet!
-				// - "jsp" servlet should be replaced by container agnostic org.ops4j.pax.web.jsp.JspServlet and
-				//   we have to be sure that pax-web-jsp bundle is available
-
-				boolean metadataComplete = true;
-				WebXml mainWebXml = null;
-
-				// WAB specific web.xml. 128.3.1 WAB Definition - This web.xml must be found with the Bundle
-				// findEntries() method at the path /WEB-INF/web.xml. The findEntries() method includes fragments,
-				// allowing the web.xml to be provided by a fragment.
-				// I don't expect multiple web.xmls, but it's possible in theory
-				Enumeration<URL> descriptors = bundle.findEntries("WEB-INF", "web.xml", false);
-				if (descriptors != null) {
-					while (descriptors.hasMoreElements()) {
-						URL next = descriptors.nextElement();
-						LOG.debug("Processing {}", next);
-
-						WebXml webXml = new WebXml();
-						parser.parseWebXml(next, webXml, false);
-						webXml.setURL(next);
-						if (mainWebXml == null) {
-							mainWebXml = webXml;
-						} else {
-							mainWebXml.merge(Collections.singleton(webXml));
-						}
-					}
-				} else {
-					metadataComplete = false;
-				}
-				if (mainWebXml == null) {
-					// if it was empty, we still need something to merge scanned fragments into
-					mainWebXml = new WebXml();
-				}
-
-				// at this stage, we don't have javax.servlet.ServletContext available yet. We don't even know
-				// where this WAB is going to be deployed (Tomcat? Jetty? Undertow?). We don't even know whether
-				// the contextPath for this WAB is available.
-
-				// Now find fragments in Bundle-ClassPath and in transitively reachable bundles
-
-				// fragments from Bundle-ClassPath - these may be subject to fragment ordering
-				// these names will map to fragments with WebXml.webappJar = true
-				Map<String, URL> wabClassPath = new LinkedHashMap<>();
-				// fragments from reachable bundles - not subject to fragment ordering and treated as kind of
-				// "container fragments". Also these fragments are being searched for SCIs and never filtered
-				// by the ordering mechanism
-				// these names will map to fragments with WebXml.webappJar = false
-				// that's because while in Tomcat we can have JARs which are in shared loader (and external to the WAR),
-				// in OSGi, all bundles outside of Bundle-ClassPath should be treated as container bundles
-				// and users should:
-				//  - avoid <ordering> such bundles
-				//  - expect that web-fragment.xml and SCIs are always loaded from such bundles
-				//     - web-fragment.xml from such bundles will be "applied" after main web.xml + fragments from
-				//       Bundle-ClassPath. The way merging works means that WABs descriptors have higher priority
-				//     - SCIs from such bundles are applied first, so user's SCIs are invoked later - but again
-				//       this means that WAB's SCIs may override the changed done by container SCIs
-				Map<String, Bundle> reachableBundles = new LinkedHashMap<>();
-
-				Map<String, WebXml> fragments = findFragments(mainWebXml, parser, wabClassPath, reachableBundles);
-
-				// ServletContext, when passed is used to set important "javax.servlet.context.orderedLibs"
-				// attribute, but at this stage, there's no real ServletContext yet. We should provide a mocked one
-				AttributeCollectingServletContext context = new AttributeCollectingServletContext();
-
-				// Tomcat orders the fragments according to 8.2.2 Ordering of web.xml and web-fragment.xml (Servlet spec)
-				// and it orders:
-				//  - container and app fragments according to <absolute-ordering> (if present)
-				//  - at the end, container fragments (webappJar=false) are put at the end of the list (if any)
-				//  - WAR's fragments (from /WEB-INF/lib/*.jar) are placed as first fragments
-				Set<WebXml> orderedFragments = WebXml.orderWebFragments(mainWebXml, fragments, context);
-
-				// if parsing was successful (done if it was required, which may be disabled using empty
+				// if parsing was successful (if it was required, though it may be disabled using empty
 				// <absolute-ordering>), proceed to scanning for ServletContainerInitializers
 				// see org.apache.catalina.startup.ContextConfig.processServletContainerInitializers()
+				if (ok) {
+					LOG.debug("Searching for ServletContainerInitializers (SCIs)");
+				}
+				final List<ServletContainerInitializer> detectedSCIs = ok ? wabClassSpace.loadSCIs()
+						: Collections.emptyList();
 
-				// Tomcat loads:
-				// - all /META-INF/services/javax.servlet.ServletContainerInitializer files from
-				//   the parent of webapp's class loader (the "container provided SCIs")
-				// - SCIs from the webapp and its /WEB-INF/lib/*.jars (each or those mentioned in
-				//   javax.servlet.context.orderedLibs context attribute)
-				// - java.lang.ClassLoader.getResources() method is used
-				// see: org.apache.catalina.startup.WebappServiceLoader.load()
+				// all SCIs are loaded using proper ClassLoaders.
+				// For each SCI we need their @HandlesTypes, so we can detect them later from selected fragments.
+				// Elements of @HandlesTypes may be classes, interfaces or annotations, so when actual scanning
+				// is performed, each scanned class is either compared with @HandlesTypes or checked for
+				// @HandlesTypes annotation
 
-				// so while web-fragment.xml (and even libs without web-fragment.xml when metadata-complete="false")
-				// descriptors are processed in established order for the purpose of manifest building, they are
-				// scanned for ServletContainerInitializers in strict order:
-				// 1. container libs
-				// 2. /WEB-INF/lib/*.jar libs (potentially filtered by the absolute ordering)
-				// Tomcat ensures that a WAR may override an SCI implementation by using single
-				// javax.servlet.ServletContext.getClassLoader() to load SCI implementations whether the
-				// /META-INF/service/javax.servlet.ServletContainerInitializer was loaded from container or webapp lib
-
-				// We can't load the services as entries (without using classloaders), because a bundle may have
-				// custom Bundle-ClassPath (potentially with many entries). So while META-INF/web-fragment.xml has
-				// fixed location in a bundle (or fragment of WAB's JAR),
-				// META-INF/services/javax.servlet.ServletContainerInitializer has to be found using classLoaders, to
-				// pick up for example WEB-INF/classes/META-INF/services/javax.servlet.ServletContainerInitializer if
-				// WEB-INF/classes is on a Bundle-ClassPath
-
-				// a list of URIs of /META-INF/service/javax.servlet.ServletContainerInitializer from reachable bundles
-				Map<Bundle, List<URL>> containerSCIURLs = new LinkedHashMap<>();
-
-				String sciService = "META-INF/services/" + ServletContainerInitializer.class.getName();
-
-				// make list of reachable bundles unique, because there may be multiple web-fragment.xmls from single
-				// bundle and bundle fragments
-				for (Bundle reachableBundle : new LinkedHashSet<>(reachableBundles.values())) {
-					List<URL> urls = ClassPathUtil.getResources(Collections.singletonList(reachableBundle), sciService);
-					containerSCIURLs.put(reachableBundle, urls);
+				// This is direct mapping from values of @javax.servlet.annotation.HandlesTypes to SCIs that
+				// express their interest in these values
+				Map<Class<?>, Set<ServletContainerInitializer>> htToSci = new HashMap<>();
+				// This is the discovered mapping of SCIs to sets of classes that have these types of relations with
+				// types from @HandlesTypes (see "8.2.4 Shared libraries / runtimes pluggability" of the Servlet spec):
+				// - are implementing them
+				// - are extending them
+				// - are annotated with them (class, method and field level) - note that Tomcat only scans
+				//   types annotated at class level (see https://bz.apache.org/bugzilla/show_bug.cgi?id=65244)
+				Map<ServletContainerInitializer, Set<Class<?>>> sciToHt = new LinkedHashMap<>();
+				for (ServletContainerInitializer sci : detectedSCIs) {
+					sciToHt.put(sci, new HashSet<>());
 				}
 
-				// a list of URIs of /META-INF/service/javax.servlet.ServletContainerInitializer WAB's Bundle-ClassPath
-				List<URL> wabSCIURLs = new LinkedList<>();
+				boolean thereAreHTClasses = false;
+				boolean thereAreHTAnnotations = false;
 
-				@SuppressWarnings("unchecked")
-				List<String> orderedLibs = (List<String>) context.getAttribute(ServletContext.ORDERED_LIBS);
-				if (orderedLibs == null) {
-					// all entries from Bundle-ClassPath, so ClassLoader kind of access - we can't impact the order
-					// of Bundle-ClassPath entries, but it doesn't really matter. Tomcat uses
-					// javax.servlet.ServletContext.getClassLoader().getResources()
-					List<URL> urls = ClassPathUtil.getResources(Collections.singletonList(bundle), sciService);
-					wabSCIURLs.addAll(urls);
-				} else {
-					// before checking ORDERED_LIBS, we (and Tomcat) always checks WEB-INF/classes/META-INF/services
-					// Tomcat calls javax.servlet.ServletContext.getResource(), here we have to load the SCI service
-					// from the WAB itself, but ensure (which isn't straightforward) that we skip embedded JARs and
-					// WAB bundle fragments)
-					// - ClassPathUtil.listResources() uses BundleWiring.listResources() which removes duplicates,
-					//   so we can't use it
-					// - bundle.getResources() is ok, but returns also URLs for fragments and other libs on Bundle-ClassPath
-					//   but we want only the URLs for non-jar entries of Bundle-ClassPath (not necessarily only
-					//   /WEB-INF/classes!) and (later) from jar entries listed in ORDERED_LIBS and even fragments
-					//   we (out of spec) list in ORDERED_LIST
-					//   Because we're checking roots from the WAB anyway (later), we can't use bundle.getResources(), as
-					//    - bundle://46.0:5/META-INF/services/javax.servlet.ServletContainerInitializer, and
-					//    - bundle://45.0:0/META-INF/services/javax.servlet.ServletContainerInitializer
-					//   are actually the same resources (first URL is WAB's fragemnt seen through WAB's classloader
-					//   and second is an URL of the fragment itself. Same for:
-					//    - bundle://46.0:2/META-INF/services/javax.servlet.ServletContainerInitializer, and
-					//    - jar:bundle://46.0:0/WEB-INF/lib/the-wab-jar-8.0.0-SNAPSHOT.jar!/META-INF/services/javax.servlet.ServletContainerInitializer
-
-					URL[] urls = ClassPathUtil.getClassPathURLs(bundle);
-					// after getting the roots, we no longer have to use classloader acces and we can get entries
-					// directly with the roots' bases
-					List<URL> nonJarUrls = new ArrayList<>();
-					for (URL url : urls) {
-						if (!"jar".equals(url.getProtocol())) {
-							nonJarUrls.add(url);
-						}
-					}
-					List<URL> wabURLs = ClassPathUtil.findEntries(bundle, nonJarUrls.toArray(new URL[nonJarUrls.size()]),
-							"META-INF/services/", ServletContainerInitializer.class.getName(), false);
-					wabSCIURLs.addAll(wabURLs);
-
-					// selected (also: none) entries from Bundle-ClassPath - only JARs (JavaEE compliant) and
-					// WAB-attached bundle fragments (Pax Web addition - we list them as "<bundle-fragment.id>.bundle"
-					// entries)
-					// ORDERED_LIBS contains jar names, so we have to translate them back
-					// ORDERED_LIBS doesn't contain jar names from the container - only (in JavaEE) from /WEB-INF/lib
-					// and potentially shared classloader
-					List<URL> roots = new ArrayList<>();
-					for (String jarName : orderedLibs) {
-						for (WebXml fragment : orderedFragments) {
-							if (jarName.equals(fragment.getJarName())) {
-								roots.add(wabClassPath.get(fragment.getName()));
+				if (ok) {
+					for (ServletContainerInitializer sci : detectedSCIs) {
+						HandlesTypes ht = sci.getClass().getAnnotation(HandlesTypes.class);
+						if (ht != null && ht.value().length > 0) {
+							for (Class<?> c : ht.value()) {
+								htToSci.computeIfAbsent(c, _c -> new HashSet<>()).add(sci);
+								if (!thereAreHTClasses && !c.isAnnotation()) {
+									thereAreHTClasses = true;
+								}
+								if (!thereAreHTAnnotations && c.isAnnotation()) {
+									thereAreHTAnnotations = true;
+								}
 							}
 						}
 					}
-					wabURLs = ClassPathUtil.findEntries(bundle, roots.toArray(new URL[wabClassPath.size()]),
-							"META-INF/services", ServletContainerInitializer.class.getName(), false);
-					wabSCIURLs.addAll(wabURLs);
 				}
 
-				// a list of instantiated (using correct bundle) SCIs
-				final List<ServletContainerInitializer> detectedSCIs = new LinkedList<>();
+				// now the deep scanning for annotated elements - performed when metadata-complete=false or if
+				// there are any SCIs with @HandlesTypes
+				// see org.apache.catalina.startup.ContextConfig.processClasses()
+				if (ok && (!mainWebXml.isMetadataComplete() || !htToSci.isEmpty())) {
+					LOG.debug("Scanning for annotated classes and/or types declared in @HandlesTypes SCI annotations");
+					wabClassSpace.scanClasses(htToSci, sciToHt, thereAreHTClasses, thereAreHTAnnotations);
+				}
 
-				// container SCIs - loaded from respective bundles
-				containerSCIURLs.forEach((b, urls) -> {
-					for (URL url : urls) {
-						loadSCI(url, b, detectedSCIs);
+				// at this stage we have full mapping of SCIs to sets of classes to pass to their onStartup() method
+				// and also all the WebXml fragments are possibly altered using annotated servlets/filters/listeners
+				// the last thing is the WebXml merging and Pax Web happily reuses
+				// org.apache.tomcat.util.descriptor.web.WebXml functionality to do that
+
+				if (!mainWebXml.isMetadataComplete() && ok) {
+					// only in this case, merge the ordered (web) fragments in
+					ok = mainWebXml.merge(wabClassSpace.getOrderedFragments());
+				}
+
+				// merge in the default web.xml (with default and JSP servlets)
+				mainWebXml.merge(Collections.singleton(defaultWebXml));
+
+				if (ok) {
+					// convert "jsp servlets"
+					ServletDef jsp = mainWebXml.getServlets().get("jsp");
+					Map<String, String> jspInitParams = jsp == null ? Collections.emptyMap() : jsp.getParameterMap();
+					for (Iterator<Map.Entry<String, ServletDef>> it = mainWebXml.getServlets().entrySet().iterator(); it.hasNext(); ) {
+						Map.Entry<String, ServletDef> entry = it.next();
+						String name = entry.getKey();
+						ServletDef def = entry.getValue();
+						if (def.getJspFile() != null) {
+							if (jsp == null) {
+								LOG.warn("A servlet named {} is used with jsp-file, but there's no \"jsp\" servlet configured. Removing.",
+										def.getServletName());
+								it.remove();
+							} else {
+								String jspFile = def.getJspFile();
+								if (!jspFile.startsWith("/")) {
+									jspFile = "/" + jspFile;
+								}
+								def.setServletClass(jsp.getServletClass());
+								jspInitParams.forEach(def::addInitParameter);
+								def.addInitParameter("jspFile", jspFile);
+								// clear this value out
+								def.setJspFile(null);
+							}
+						}
 					}
-				});
+				}
 
-				// WAB SCIs - loaded from WAB itself
-				wabSCIURLs.forEach(url -> {
-					loadSCI(url, bundle, detectedSCIs);
-				});
+				LOG.debug("Finished metadata and fragment processing for {} in {}ms", bundle, System.currentTimeMillis() - start);
 			} catch (IOException e) {
 				throw new RuntimeException(e.getMessage(), e);
 			}
@@ -1166,355 +1025,6 @@ public class BundleWebApplication {
 	}
 
 	// --- utility methods
-
-	/**
-	 * This method is based on Tomcat's {@code org.apache.catalina.startup.ContextConfig#processJarsForWebFragments()}.
-	 * It scans the reachable JARs and bundles to find (and possibly parse) {@code web-fragment.xml} descriptors,
-	 * but the returned <em>fragments</em> determine the bundles/libs to scan for SCIs whether or not the metadata is
-	 * complete.
-	 *
-	 * @param mainWebXml the WAB's {@code web.xml} which tells us whether the metadata is complete
-	 * @param parser
-	 * @param wabClassPath
-	 * @param reachableBundles
-	 * @return
-	 */
-	private Map<String, WebXml> findFragments(WebXml mainWebXml, WebXmlParser parser,
-			Map<String, URL> wabClassPath, Map<String, Bundle> reachableBundles) {
-		// 8.2.2 Ordering of web.xml and web-fragment.xml
-		// this greatly impacts the scanning process for the web fragments and even SCIs
-		// - A web-fragment.xml may have a top level <name> element, which will impact the ordering
-		// - there are two different orderings:
-		//   - absolute ordering specified in "main" web.xml (<absolute-ordering> element)
-		//     - if there's no <others>, then only named fragments are considered and other are ignored
-		//       - Excluded jars are not scanned for annotated servlets, filters or listeners.
-		//       - If a discovered ServletContainerInitializer is loaded from an excluded jar, it will be ignored.
-		//       - Irrespective of the setting of metadata-complete, jars excluded by <absolute-ordering> elements are
-		//         not scanned for classes to be handled by any ServletContainerInitializer.
-		//   - relative ordering (without <absolute-ordering> in "main" web.xml, with <ordering> elements in fragments)
-		//       - order is determined using <before> and <after> elements in web-fragment.xml
-		Set<String> absoluteOrder = mainWebXml.getAbsoluteOrdering();
-		boolean parseRequired = absoluteOrder == null || !absoluteOrder.isEmpty();
-
-		Bundle paxWebJspBundle = Utils.getPaxWebJspBundle(bundle);
-
-		// collect all the JARs that need to be scanned for web-fragments (if metadata-complete="false") or
-		// that may provide SCIs (regardles of metadata-complete)
-		// In JavaEE env it's quite easy:
-		//  - /WEB-INF/*.jar files
-		//  - the JARs from URLClassLoaders of the ClassLoader hierarchy starting from web context's ClassLoader
-		//  - Tomcat doesn't scan WEB-INF/classes/META-INF for fragments
-		// In OSGi/PaxWeb it's different, but respectively:
-		//  - 128.3.6 Dynamic Content: *.jar files from Bundle-ClassPath (not necessarily including
-		//    /WEB-INF/*.jar libs!)
-		//  - Arbitrary decision in Pax Web: all the bundles wired to current bundle via osgi.wiring.bundle
-		//    (Require-Bundle) and osgi.wiring.package namespaces (Import-Package)
-		//
-		// I assume that the WAB bundle itself os not one of the bundles to be searched for web-fragment.xml.
-		// These will be searched only from Bundle-ClassPath and bundle/package wires
-
-		Map<String, WebXml> fragments = new LinkedHashMap<>();
-
-		// see org.apache.catalina.startup.ContextConfig.processJarsForWebFragments()
-
-		// Scan bundle JARs (WEB-INF/lib in JavaEE). Tomcat doesn't scan WEB-INF/classes for web-fragment.xml
-		// these don't have to be transitively checked (though Tomcat has an option to scan JARs from a JAR's
-		// Class-Path manifest header - see org.apache.tomcat.util.scan.StandardJarScanner.processManifest())
-
-		// just take JARs. We don't want web-fragment.xml from /WEB-INF/classes and we don't want such entry to be
-		// represented as WebXml fragment
-		URL[] jars = ClassPathUtil.getClassPathJars(bundle, false);
-		for (URL url : jars) {
-			if (LOG.isTraceEnabled()) {
-				LOG.trace("Scanning WAB ClassPath entry {}", url);
-			}
-			try {
-				// never search for web-fragment.xml in non-jar Bundle-ClassPath entry - Tomcat doesn't
-				// scan WEB-INF/classes for web-fragment.xmls
-				WebXml fragment = process(parser, url, parseRequired);
-				addFragment(fragments, fragment, url.toString());
-				wabClassPath.put(fragment.getName(), url);
-			} catch (Exception e) {
-				LOG.warn("Problem scanning {}: {}", url, e.getMessage(), e);
-			}
-		}
-
-		// The WAB itself may have attached bundle fragments, which should be treated (my decision) as webAppJars
-		// i.e., as /WEB-INF/lib/*.jar libs in JavaEE
-		BundleWiring wiring = bundle.adapt(BundleWiring.class);
-		if (wiring != null) {
-			List<BundleWire> hostWires = wiring.getProvidedWires(HostNamespace.HOST_NAMESPACE);
-			if (hostWires != null) {
-				for (BundleWire wire : hostWires) {
-					Bundle b = wire.getRequirerWiring().getBundle();
-					if (LOG.isTraceEnabled()) {
-						LOG.trace("Scanning WAB fragment {}", b);
-					}
-					try {
-						// take bundle.getEntry("/") as the URL of the fragment
-						URL fragmentRootURL = b.getEntry("/");
-						WebXml fragment = process(parser, fragmentRootURL, parseRequired);
-						// we have to tweak the "jar name" in such way, that we can find the fragment again later
-						fragment.setJarName(String.format("%d.bundle", b.getBundleId()));
-						addFragment(fragments, fragment, fragmentRootURL.toString());
-						wabClassPath.put(fragment.getName(), fragmentRootURL);
-					} catch (Exception e) {
-						LOG.warn("Problem scanning {}: {}", b, e.getMessage(), e);
-					}
-				}
-			}
-		}
-
-		// Scan reachable bundles (ClassPath hierarchy in JavaEE) - without the WAB itself
-
-		Set<Bundle> processedBundles = new HashSet<>();
-		processedBundles.add(bundle);
-		Deque<Bundle> bundles = new LinkedList<>();
-		// added as already processed, but we need it to get reachable bundles
-		bundles.add(bundle);
-		if (paxWebJspBundle != null) {
-			// this will give us access to Jasper SCI even if WAB doesn't have explicit
-			// wires to pax-web-jsp or other JSTL implementations
-			bundles.add(paxWebJspBundle);
-		}
-		while (bundles.size() > 0) {
-			// org.apache.tomcat.util.scan.StandardJarScanner.processURLs() - Tomcat traverses CL hierarchy
-			// and collects non-filtered (see conf/catalina.properties:
-			// "tomcat.util.scan.StandardJarScanFilter.jarsToSkip" property) JARs from all URLClassLoaders
-			Bundle scannedBundle = bundles.pop();
-			if (IGNORED_BUNDLES.contains(scannedBundle.getSymbolicName()) || scannedBundle.getBundleId() == 0L) {
-				continue;
-			}
-
-			Set<Bundle> reachable = new HashSet<>();
-			ClassPathUtil.getBundlesInClassSpace(scannedBundle, reachable);
-			for (Bundle rb : reachable) {
-				if (!processedBundles.contains(rb) && !Utils.isFragment(rb)) {
-					bundles.add(rb);
-				}
-			}
-			if (processedBundles.contains(scannedBundle)) {
-				continue;
-			}
-			if (LOG.isTraceEnabled()) {
-				LOG.trace("Scanning Bundle {}", scannedBundle);
-			}
-
-			try {
-				List<WebXml> fragmentList = process(parser, scannedBundle, parseRequired);
-				for (WebXml fragment : fragmentList) {
-					addFragment(fragments, fragment, null);
-					reachableBundles.put(fragment.getName(), scannedBundle);
-				}
-				processedBundles.add(scannedBundle);
-			} catch (Exception e) {
-				LOG.warn("Problem scanning {}: {}", scannedBundle, e.getMessage(), e);
-			}
-		}
-
-		return fragments;
-	}
-
-	/**
-	 * Process a JAR or other URL from Bundle's {@code Bundle-ClassPath} as a web fragment. This is considered (in
-	 * Tomcat's terms) as "webapp JAR"
-	 *
-	 * @param parser
-	 * @param url
-	 * @param parseRequired
-	 * @return
-	 * @throws IOException
-	 */
-	private WebXml process(WebXmlParser parser, URL url, boolean parseRequired) throws IOException {
-		WebXml fragment = new WebXml();
-		fragment.setWebappJar(true);
-		fragment.setDelegate(false);
-
-		URL fragmentURL = null;
-		if (parseRequired) {
-			List<URL> urls = ClassPathUtil.findEntries(bundle, new URL[] { url }, "META-INF", "web-fragment.xml", false);
-			// there should be at most one, because we pass one URL in the array
-			if (urls.size() > 0) {
-				fragmentURL = urls.get(0);
-				fragment.setURL(fragmentURL);
-			}
-		}
-
-		// see org.apache.tomcat.util.descriptor.web.FragmentJarScannerCallback.scan()
-		boolean found = false;
-		if (fragmentURL == null) {
-			fragment.setDistributable(true);
-		} else {
-			// this may fail, but we won't stop the parsing
-			if (!parser.parseWebXml(fragmentURL, fragment, true)) {
-				fragmentParsingOK = false;
-			} else {
-				found = true;
-			}
-		}
-
-		if (fragment.getName() == null) {
-			fragment.setName(url.toString());
-		}
-		fragment.setJarName(extractJarFileName(url.toString()));
-
-		if (found) {
-			LOG.trace("Found web fragment \"{}\": {}", fragment.getName(), fragmentURL);
-		}
-
-		return fragment;
-	}
-
-	/**
-	 * Process a {@link Bundle} as a web fragment. This is also considered (in Tomcat's terms) as "webapp JAR"
-	 * because it's quite hard to split all the runtime bundles into "platform" and "application" bundles.
-	 *
-	 * @param parser
-	 * @param bundle
-	 * @param parseRequired
-	 * @return
-	 * @throws IOException
-	 */
-	private List<WebXml> process(WebXmlParser parser, Bundle bundle, boolean parseRequired) throws IOException {
-		// Tomcat's org.apache.catalina.startup.ContextConfig.webConfig() says that "web-fragment.xml files are ignored
-		// for _container provided JARs_.". By "container provided JARs" Tomcat means "JARs are treated as application
-		// provided until the common class loader is reached".
-		// And common class loader is the CL which loaded org.apache.tomcat.util.scan.StandardJarScanner class, which
-		// comes from $CATALINA_HOME/lib/tomcat-util-scan.jar
-
-		// https://tomcat.apache.org/tomcat-9.0-doc/class-loader-howto.html#Advanced_configuration allows to
-		// configure (conf/catalina.properties: "shared.loader" property) "shared class loader" for which the
-		// "common class loader" is a parent. So all jars inside "shared class loader" are actually application
-		// libraries
-
-		// Thus in OSGi, we'd have to treat all reachable bundles either as application bundles or container bundles.
-		// For example, user may have installed myfaces-impl.jar as a bundle (it contains META-INF/web-fragment.xml with
-		// org.apache.myfaces.webapp.StartupServletContextListener).
-		// This is out-of-specification decision, because OSGi CMPN 128 Web Application specification says only
-		// about the WAB itself (and its Bundle-ClassPath). It's hard to divide all the bundles into "container bundles"
-		// and "application bundles". I know there's 134 Subsystem Service Specification, but I think it'd be
-		// an overkill
-		// the org.apache.tomcat.util.descriptor.web.WebXml.getWebappJar() determines only whether the JAR providing
-		// the web-fragment.xml is subject to javax.servlet.ServletContext.ORDERED_LIBS
-
-		List<URL> fragmentURLs = new LinkedList<>();
-		if (parseRequired) {
-			List<URL> urls = ClassPathUtil.findEntries(bundle, "META-INF", "web-fragment.xml", false, false);
-			// there may be more than one, because we access bundle fragments as well
-			fragmentURLs.addAll(urls);
-		}
-
-		Map<WebXml, Boolean> fragments = new LinkedHashMap<>();
-		Map<WebXml, URL> fragmentURLMap = new LinkedHashMap<>();
-
-		// see org.apache.tomcat.util.descriptor.web.FragmentJarScannerCallback.scan()
-		if (fragmentURLs.size() == 0) {
-			WebXml fragment = new WebXml();
-			// mark as "container fragment", so it's not affected by the ordering mechanism
-			fragment.setWebappJar(false);
-			fragment.setDelegate(false);
-			fragment.setDistributable(true);
-			String id = String.format("%s/%s", bundle.getSymbolicName(), bundle.getVersion().toString());
-			fragment.setName(id);
-			fragment.setJarName(id);
-			fragments.put(fragment, Boolean.FALSE);
-
-			// return now to not deal with missing name/jarName again
-			return new ArrayList<>(fragments.keySet());
-		} else {
-			for (URL fragmentURL : fragmentURLs) {
-				// this may fail, but we won't stop the parsing
-				WebXml fragment = new WebXml();
-				// mark as "container fragment", so it's not affected by the ordering mechanism
-				fragment.setWebappJar(false);
-				fragment.setDelegate(false);
-				fragment.setURL(fragmentURL);
-				if (!parser.parseWebXml(fragmentURL, fragment, true)) {
-					fragmentParsingOK = false;
-					fragments.put(fragment, Boolean.FALSE);
-				} else {
-					fragments.put(fragment, Boolean.TRUE);
-				}
-				fragmentURLMap.put(fragment, fragmentURL);
-			}
-		}
-
-		// iterate over fragments that were parsed (successfully or not)
-		fragments.forEach((fragment, ok) -> {
-			String url = fragmentURLMap.get(fragment).toString();
-			if (fragment.getName() == null) {
-				fragment.setName(url);
-			}
-			// this is tricky. In JavaEE it's just simple name of a JAR backing up this web fragment. But in OSGi
-			// it may be a "bundle:" URL so we can't extract any good name from it
-//			fragment.setJarName(...);
-
-			if (ok) {
-				LOG.trace("Found web fragment \"{}\": {}", fragment.getName(), url);
-			}
-		});
-
-		return new ArrayList<>(fragments.keySet());
-	}
-
-	/**
-	 * See {@code org.apache.tomcat.util.descriptor.web.FragmentJarScannerCallback.addFragment()}
-	 * @param fragments
-	 * @param fragment
-	 */
-	private void addFragment(Map<String, WebXml> fragments, WebXml fragment, String fallbackId) {
-		if (fragments.containsKey(fragment.getName())) {
-			String duplicateName = fragment.getName();
-			fragments.get(duplicateName).setDuplicated(true);
-			if (fallbackId != null) {
-				// Rename the current fragment so it doesn't clash
-				LOG.warn("There already exists a web fragment named {}. Renaming to {}.", duplicateName, fallbackId);
-				fragment.setName(fallbackId);
-			} else {
-				throw new IllegalArgumentException("Can't add a fragment named \"" + fragment.getName() + "\". It is already added.");
-			}
-		}
-		fragments.put(fragment.getName(), fragment);
-	}
-
-	private String extractJarFileName(String uri) {
-		if (uri.endsWith("!/")) {
-			uri = uri.substring(0, uri.length() - 2);
-		}
-		return uri.substring(uri.lastIndexOf('/') + 1);
-	}
-
-	private void loadSCI(URL url, Bundle bundle, List<ServletContainerInitializer> scis) {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("Loading {} from {}", url, bundle);
-		}
-		try (InputStream is = url.openStream();
-				BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
-			String line = null;
-			while ((line = reader.readLine()) != null) {
-				String name = line.trim();
-				if (name.startsWith("#")) {
-					continue;
-				}
-				int idx = name.indexOf('#');
-				if (idx > 0) {
-					name = name.substring(0, idx).trim();
-				}
-				if (name.length() > 0) {
-					try {
-						Class<?> sciClass = bundle.loadClass(name);
-						ServletContainerInitializer sci = (ServletContainerInitializer) sciClass.newInstance();
-						LOG.debug("SCI {} loaded from {}", sci, bundle);
-						scis.add(sci);
-					} catch (ClassNotFoundException | ClassCastException | InstantiationException | IllegalAccessException e) {
-						LOG.error("Problem loading SCI class from {}: {}", url, e.getMessage(), e);
-					}
-				}
-			}
-		} catch (IOException e) {
-			LOG.error("Problem reading SCI service class from {}: {}", url, e.getMessage(), e);
-		}
-	}
 
 	/**
 	 * An internal state of the {@link BundleWebApplication} - there are more such states than

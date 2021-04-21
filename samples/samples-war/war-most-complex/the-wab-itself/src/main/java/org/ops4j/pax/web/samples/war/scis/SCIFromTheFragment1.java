@@ -16,19 +16,22 @@
 package org.ops4j.pax.web.samples.war.scis;
 
 import java.util.Set;
+import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.HandlesTypes;
 
 /**
  * This SCI is available inside the WAB itself, but declared as /META-INF/service in the fragment. So without a
  * (bundle) fragment, this SCI won't be instantiated.
  */
+@HandlesTypes({ Servlet.class })
 public class SCIFromTheFragment1 implements ServletContainerInitializer {
 
 	@Override
 	public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
-
+		System.out.println(c);
 	}
 
 }

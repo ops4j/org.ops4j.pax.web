@@ -672,6 +672,10 @@ public class UndertowFactory {
 	}
 
 	private URL loadResource(String resource) throws MalformedURLException {
+		// TODO: https://github.com/ops4j/org.ops4j.pax.web/issues/1592 in master-improvements branch for all runtimes
+		if (resource == null || "".equals(resource.trim())) {
+			return null;
+		}
 		URL url;
 		try {
 			url = new URL(resource);
@@ -708,10 +712,14 @@ public class UndertowFactory {
 		} else {
 			keystore = KeyStore.getInstance(storeType, provider);
 		}
-
-		try (InputStream is = storePath.openStream()) {
-			keystore.load(is, storePassword.toCharArray());
+		if (storePath != null) {
+			try (InputStream is = storePath.openStream()) {
+				keystore.load(is, storePassword.toCharArray());
+			}
+		} else {
+			keystore.load(null, storePassword.toCharArray());
 		}
+
 		return keystore;
 	}
 

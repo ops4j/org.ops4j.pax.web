@@ -42,7 +42,9 @@
 				<configuration>
 					<instructions>
 						<Require-Bundle>org.ops4j.pax.web.samples.container-bundle-2</Require-Bundle>
-						<Import-Package />
+						<Import-Package>
+							org.apache.myfaces.application
+						</Import-Package>
 						<Private-Package />
 						<Fragment-Host>org.ops4j.pax.web.samples.the-wab-itself</Fragment-Host>
 					</instructions>
@@ -63,6 +65,13 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>container-bundle-2</artifactId>
+		</dependency>
+
+		<!-- JavaEE / JakartaEE -->
+
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 		</dependency>
 
 	</dependencies>

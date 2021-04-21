@@ -82,7 +82,7 @@ import org.ops4j.pax.web.service.MultiBundleWebContainerContext;
  *     httpService.registerServlet("/alias", servlet, null, context);
  * </pre></p>
  *
- * <p>This trick is based on assumed identity of DefaultHttpContext, which is name+bundleseparates and separates
+ * <p>This trick is based on assumed identity of DefaultHttpContext, which is name+bundle and separates
  * the identity from <em>context behavior</em> ({@link org.osgi.service.http.HttpContext#handleSecurity}), which
  * should not be specified (or emphasized) in every registration.</p>
  */

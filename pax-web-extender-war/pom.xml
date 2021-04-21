@@ -93,6 +93,9 @@
 							org.apache.tomcat.util.descriptor;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util.descriptor.web;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util.digester;version="${dependency.tomcat.version}"
+							<!-- from pax-web-tomcat-common / tomcat-embed-core -->
+							org.apache.tomcat.util.bcel;version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.bcel.classfile;version="${dependency.tomcat.version}",
 
 							<!-- to check -->
 
@@ -128,6 +131,7 @@
 <!--							optional=false; type=!pom; inline=true-->
 <!--						</Embed-Dependency>-->
 <!--						<Embed-Transitive>true</Embed-Transitive>-->
+						<_contract>!*</_contract>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -232,12 +236,18 @@
 
 		<!-- Tomcat -->
 
+		<!--
+			We need these dependencies, but at runtime, the relevant classes/packages will be used
+			from pax-web-tomcat-common
+		-->
 		<dependency>
-			<!--
-				We need this dependency, but at runtime, the relevant classes/packages will be used from pax-web-tomcat-common
-			-->
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-util-scan</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-coyote</artifactId>
 			<scope>provided</scope>
 		</dependency>
 

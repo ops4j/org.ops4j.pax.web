@@ -51,7 +51,7 @@ import org.osgi.framework.Bundle;
  *     <li>{@code io.undertow.servlet.api.DeploymentInfo#setClassLoader(java.lang.ClassLoader)}</li>
  * </ul></p>
  *
- * <p>By default (outside of OSGi), here are the actuall classloader classes used:<ul>
+ * <p>By default (outside of OSGi), here are the actual classloader classes used:<ul>
  *     <li>{@code org.eclipse.jetty.webapp.WebAppClassLoader}</li>
  *     <li>{@code org.apache.catalina.loader.ParallelWebappClassLoader} and {@code org.apache.catalina.loader.WebappLoader}</li>
  *     <li>Nothing particular in plain Undertow, but it's set to {@code org.jboss.as.web.host.WebDeploymentBuilder#getClassLoader()}

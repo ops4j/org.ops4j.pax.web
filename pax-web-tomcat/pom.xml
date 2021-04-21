@@ -92,6 +92,8 @@
 							org.apache.tomcat.util.digester;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util.scan;version="${dependency.tomcat.version}",
 							<!-- pax-web-tomcat-common / tomcat-embed-core -->
+							org.apache.tomcat.util.bcel;version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.bcel.classfile;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util.modeler;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util.modeler.modules;version="${dependency.tomcat.version}",
 							<!-- pax-web-tomcat-common / tomcat-embed-juli -->
@@ -223,8 +225,6 @@
 							org.apache.naming.factory.webservices;version="${dependency.tomcat.version}",
 							org.apache.naming.java;version="${dependency.tomcat.version}",
 							org.apache.tomcat.jni;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util.bcel;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util.bcel.classfile;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util.http;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util.http.fileupload;version="${dependency.tomcat.version}",
 							org.apache.tomcat.util.http.fileupload.disk;version="${dependency.tomcat.version}",

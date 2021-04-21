@@ -17,6 +17,8 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -26,6 +28,7 @@ import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.util.NamedThreadFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +48,8 @@ public class Activator extends AbstractExtender {
 	private WarExtenderContext warExtenderContext;
 
 	private int poolSize = DEFAULT_POOL_SIZE;
+
+	private final Map<Bundle, Extension> extensions = new ConcurrentHashMap<>();
 
 	@Override
 	protected ExecutorService createExecutor() {
@@ -77,7 +82,7 @@ public class Activator extends AbstractExtender {
 		// being extended and the WebContainer OSGi service where the WARs are to be installed
 		warExtenderContext = new WarExtenderContext(getBundleContext(), getExecutors());
 
-		// start tracking ths extensions (Bundle -> WebApp)
+		// start tracking the extensions (Bundle -> WebApp)
 		startTracking();
 
 		LOG.debug("Pax Web WAR Extender started");
@@ -96,8 +101,31 @@ public class Activator extends AbstractExtender {
 	}
 
 	@Override
-	protected Extension doCreateExtension(Bundle bundle) throws Exception {
-		return warExtenderContext.createExtension(bundle);
+	protected Extension doCreateExtension(final Bundle bundle) throws Exception {
+		Extension extension = warExtenderContext.createExtension(bundle, () -> extensions.remove(bundle));
+		if (extension != null) {
+			extensions.put(bundle, extension);
+		}
+		return extension;
+	}
+
+	@Override
+	public void bundleChanged(BundleEvent event) {
+		// prevent confusing "Starting destruction process" for bundles that were never tracked
+		Bundle bundle = event.getBundle();
+		if (bundle.getState() != Bundle.ACTIVE && bundle.getState() != Bundle.STARTING) {
+			if (extensions.containsKey(bundle)) {
+				super.bundleChanged(event);
+			}
+		}
+	}
+
+	@Override
+	public void removedBundle(Bundle bundle, BundleEvent event, Object object) {
+		// Nothing to do
+		if (extensions.containsKey(bundle)) {
+			super.removedBundle(bundle, event, object);
+		}
 	}
 
 	@Override

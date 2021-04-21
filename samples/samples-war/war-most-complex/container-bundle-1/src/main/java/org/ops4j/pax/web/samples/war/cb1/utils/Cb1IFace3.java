@@ -13,21 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.samples.war.scis;
+package org.ops4j.pax.web.samples.war.cb1.utils;
 
-import java.util.EventListener;
-import java.util.Set;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.HandlesTypes;
+import org.ops4j.pax.web.samples.war.cb3.utils.IFace3;
 
-@HandlesTypes({ EventListener.class })
-public class SCIFromTheWab2 implements ServletContainerInitializer {
-
-	@Override
-	public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
-
-	}
+/**
+ * An interface that is visible from {@code the-wab-itself}, but which extends an interface, which should not be
+ * visible.
+ */
+public interface Cb1IFace3 extends IFace3 {
 
 }
