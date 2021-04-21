@@ -62,6 +62,10 @@ public class OsgiServletContextClassLoader extends ClassLoader {
 
 	private List<Bundle> bundles = new ArrayList<>();
 
+	public OsgiServletContextClassLoader() {
+		super(null);
+	}
+
 	/**
 	 * Adds a {@link Bundle} to be reachable from this {@link ClassLoader}
 	 * @param bundle

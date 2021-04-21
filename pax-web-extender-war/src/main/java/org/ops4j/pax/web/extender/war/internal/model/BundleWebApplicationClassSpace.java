@@ -51,6 +51,7 @@ import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.descriptor.web.ServletDef;
 import org.apache.tomcat.util.descriptor.web.WebXml;
 import org.ops4j.pax.web.extender.war.internal.WarExtenderContext;
+import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
@@ -95,6 +96,8 @@ public class BundleWebApplicationClassSpace {
 	private static final Set<ServletContainerInitializer> NO_SCIS = new HashSet<>();
 
 	private final Bundle wabBundle;
+	private OsgiServletContextClassLoader wabClassLoader;
+
 	private final WarExtenderContext extenderContext;
 
 	/**
@@ -284,12 +287,14 @@ public class BundleWebApplicationClassSpace {
 	 * The detected <em>fragments</em> determine the bundles/libs to scan for SCIs whether or not the metadata is
 	 * complete.
 	 *
-	 * @param classSpace
+	 * @param mainWebXml
+	 * @param wabClassLoader
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public void initialize(WebXml mainWebXml) {
+	public void initialize(WebXml mainWebXml, OsgiServletContextClassLoader wabClassLoader) {
 		this.mainWebXml = mainWebXml;
+		this.wabClassLoader = wabClassLoader;
 
 		// 8.2.2 Ordering of web.xml and web-fragment.xml
 		// this greatly impacts the scanning process for the web fragments and even SCIs
@@ -439,6 +444,17 @@ public class BundleWebApplicationClassSpace {
 		}
 
 		orderedLibs = new LinkedHashSet<>((List<String>) context.getAttribute(ServletContext.ORDERED_LIBS));
+
+		// After collecting the bundles associated with ordered web fragments, we can finish the "construction"
+		// of WAB's classloader.
+		// When the WAB is deployed, it'll also get container-specific bundles (like pax-web-undertow) and only
+		// then it'll get "closed" to not accept more bundles.
+		Set<Bundle> delegateBundles = new LinkedHashSet<>();
+		delegateBundles.addAll(applicationFragmentBundles.values());
+		delegateBundles.addAll(containerFragmentBundles.values());
+		delegateBundles.remove(wabBundle);
+
+		delegateBundles.forEach(wabClassLoader::addBundle);
 	}
 
 	/**
@@ -1542,10 +1558,11 @@ public class BundleWebApplicationClassSpace {
 			return;
 		}
 		String resName = className.replace('.', '/') + ".class";
-		// this is where the bundle should be different, as bundle for the-wab-itself can't load
+		// this is where we can't just single bundle associated with web fragment, because for example (samples-war),
+		// the bundle for the-wab-itself can't load
 		// resource org/ops4j/pax/web/samples/war/cb3/utils/IFace3.class, though it can load
 		// resource org/ops4j/pax/web/samples/war/cb1/utils/Cb1IFace3.class (bundle://50.0:1/org/ops4j/pax/web/samples/war/cb1/utils/Cb1IFace3.class)
-		URL url = bundle.getState() != Bundle.UNINSTALLED ? bundle.getResource(resName) : null;
+		URL url = wabClassLoader.getResource(resName);
 		if (url == null) {
 			return;
 		}

@@ -120,7 +120,7 @@ public class BundleWebApplication {
 	 */
 	private String contextPath;
 
-	private final ClassLoader classLoader;
+	private final OsgiServletContextClassLoader classLoader;
 
 	public BundleWebApplication(Bundle bundle, WebContainerManager webContainerManager,
 			WarExtenderContext extenderContext, ExecutorService pool) {
@@ -899,7 +899,7 @@ public class BundleWebApplication {
 				// complex initialization that actually processes entire "class space" and determines the
 				// ordered fragments that will later be used to discover/load SCIs and annotated classes
 				LOG.debug("Searching for web fragments");
-				wabClassSpace.initialize(mainWebXml);
+				wabClassSpace.initialize(mainWebXml, classLoader);
 				boolean ok = wabClassSpace.isFragmentParsingOK();
 
 				if (!ok) {
