@@ -240,6 +240,7 @@
 							Embed-Transitive
 						</_removeheaders>
 						<_nouses>true</_nouses>
+						<_contract>!*</_contract>
 					</instructions>
 				</configuration>
 				<executions>

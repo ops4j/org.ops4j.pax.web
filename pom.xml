@@ -135,7 +135,7 @@
 		<dependency.slf4j>1.7.12</dependency.slf4j>
 		<dependency.scr.version>2.1.26</dependency.scr.version>
 		<dependency.swissbox.version>1.8.4</dependency.swissbox.version>
-		<dependency.tomcat.version>9.0.36</dependency.tomcat.version>
+		<dependency.tomcat.version>9.0.37</dependency.tomcat.version>
 		<dependency.xbean.version>4.19</dependency.xbean.version>
 		<dependency.xnio-api.version>3.3.8.Final</dependency.xnio-api.version>
 		<dependency.xnio.version>3.3.8.Final</dependency.xnio.version>

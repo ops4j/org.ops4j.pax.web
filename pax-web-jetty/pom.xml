@@ -147,6 +147,7 @@
 							Embed-Dependency,
 							Embed-Transitive
 						</_removeheaders>
+						<_contract>!*</_contract>
 					</instructions>
 				</configuration>
 			</plugin>
