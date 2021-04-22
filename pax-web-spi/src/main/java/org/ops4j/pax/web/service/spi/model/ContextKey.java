@@ -17,12 +17,16 @@ package org.ops4j.pax.web.service.spi.model;
 
 import java.util.Objects;
 
+import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.osgi.framework.Bundle;
+import org.osgi.service.http.HttpContext;
 
 public class ContextKey {
 
 	public String contextId;
 	public Bundle bundle;
+	public HttpContext httpContext;
 
 	private ContextKey(String contextId, Bundle bundle) {
 		this.contextId = contextId;
@@ -37,6 +41,16 @@ public class ContextKey {
 		return new ContextKey(context.getName(), context.isShared() ? null : context.getOwnerBundle());
 	}
 
+	public static ContextKey of(WebContainerContext context) {
+		ContextKey key = with(context.getContextId(), context.getBundle());
+		if (context instanceof WebContainerContextWrapper) {
+			// the key should allow matching ALSO by identity hash code of the wrapped context
+			WebContainerContextWrapper wrapper = (WebContainerContextWrapper) context;
+			key.httpContext = wrapper.getHttpContext();
+		}
+		return key;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -46,8 +60,12 @@ public class ContextKey {
 			return false;
 		}
 		ContextKey that = (ContextKey) o;
-		return Objects.equals(contextId, that.contextId) &&
+		boolean idBundleMatch = Objects.equals(contextId, that.contextId) &&
 				Objects.equals(bundle, that.bundle);
+
+		// Comparing httpContexts by identity allows us to have keys with different names which are logically equal.
+		// Remember that when user passes arbitrary httpContext instance, it should NOT be named "default"
+		return idBundleMatch || (httpContext != null && httpContext == ((ContextKey) o).httpContext);
 	}
 
 	@Override

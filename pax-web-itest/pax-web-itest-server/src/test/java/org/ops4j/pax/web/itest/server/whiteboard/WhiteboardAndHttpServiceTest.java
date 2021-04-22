@@ -63,7 +63,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 
 	@Test
 	public void onlyDefaultContexts() throws Exception {
-		// a bundle and bundle-scoped HttpService/WebContainer instance with one "default" OsgiContextModel
+		// create a Bundle and a bundle-scoped HttpService/WebContainer instance with one "default" OsgiContextModel
 		// 2020-10-02: we no longer create OsgiContextModel for given bundle-scoped HttpService when no actual
 		// web element is registered through such HttpService/WebContainer
 		Bundle sample1 = mockBundle("sample1", true);
@@ -99,20 +99,20 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		//
 		// To be honest, it was easier yesterday (2020-09-30) before I swapped the ranks of contexts from:
 		//  - context from HttpService ranked at Integer.MIN_VALUE
-		//  - context from Whiteboard ranked at Integer.MIN-VALUE / 2
+		//  - context from Whiteboard ranked at Integer.MIN_VALUE / 2
 		// to:
 		//  - context from HttpService ranked at Integer.MAX_VALUE
 		//  - context from Whiteboard ranked at 0
 		// but well...
 		//
-		// On drawback before the change was that if I wanted proper/expected context to be passed to SCIs, I had
+		// One drawback before the change was that if I wanted proper/expected context to be passed to SCIs, I had
 		// to register Whiteboard context with ranking > Integer.MIN_VALUE/2 to "take over" the context for HttpService
 		// (bundle-scoped)
 		// on the other hand it WAS possible to register such Whiteboard ServletContextModel that could replace
 		// any (even the one passed as "null") HttpService context. Now it's NOT POSSIBLE - but let's assume
 		// such case was explicitly anticipated by OSGi CMPN designers...
-		// UPDATE: it is possible with special tracking of contexts that are EXACTLY the same contexts which are
-		// already used for bundle-name combination in HttpService/WebContainer. So if we Whiteboard-register
+		// UPDATE: I made it possible with special tracking of contexts that are EXACTLY the same contexts which are
+		// already used for name+bundle combination in HttpService/WebContainer. So if we Whiteboard-register
 		// a context that comes from org.ops4j.pax.web.service.WebContainer.createDefaultHttpContext()
 		// (or org.osgi.service.http.HttpService.createDefaultHttpContext()), whiteboard tracker will detect that
 		// it's the same/existing instance and will updated existing, associated OsgiContextModel, so we:
@@ -124,27 +124,30 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 
 		// we can force creation of an OsgiContextModel matching "(osgi.http.whiteboard.context.httpservice=default)"
 		// selector in three ways:
-		//  - by registering some artificial servlet/filter/listner/error-page/welcome-file/...
-		//    through bundle-scoped HttpService/WebContainer instance,
-		//  - using Pax Web trick with Whiteboard and registration of HttpContext/HttpContextMapping which is a
-		//    singleton (ServletContextHelper/ServletContextHelperMapping can never be configured as the equivalence
-		//    of the context for HttpService) - see subclasses of
-		//    org.ops4j.pax.web.extender.whiteboard.internal.tracker.AbstractContextTracker
-		//  - calling createDefaultHttpContext()
+		//  1. by registering some artificial servlet/filter/listner/error-page/welcome-file/...
+		//     through bundle-scoped HttpService/WebContainer instance,
+		//  2. using Pax Web trick with Whiteboard and registration of HttpContext/HttpContextMapping which is a
+		//     singleton (ServletContextHelper/ServletContextHelperMapping can never be configured as the equivalence
+		//     of the context for HttpService) - see subclasses of
+		//     org.ops4j.pax.web.extender.whiteboard.internal.tracker.AbstractContextTracker
+		//  3. calling createDefaultHttpContext()
 
-		// 1. registering artificial servlet
+		// 1. registering artificial servlet. Underneath, an OsgiContextModel will be created with Integer.MAX_VALUE
+		//    service ranking.
 //		wc.registerResources("/", "/", null);
 
-		// 2. registration of org.osgi.service.http.HttpContext service
+		// 2. registration of org.osgi.service.http.HttpContext service, but ensuring it has higher rank than
+		//    "default" context registered for pax-web-extender-whiteboard bundle
 //		Hashtable<String, Object> properties = new Hashtable<>();
 //		properties.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "default");
 //		properties.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, "/");
 //		getHttpContextCustomizer().addingService(mockReference(sample1,
-//				HttpContext.class, properties, () -> new DefaultHttpContext(sample1), 0L, 0));
+//				HttpContext.class, properties, () -> new DefaultHttpContext(sample1), 0L, 1));
 
 		// 3. Just call org.osgi.service.http.HttpService.createDefaultHttpContext() - the "default" context for "/"
 		//    path and bundle for which the WebContainer instance is scoped will be created and properly sent to
-		//    ServerController and configured in ServerModel
+		//    ServerController and configured in ServerModel. Underneath, an OsgiContextModel will be created
+		//    with Integer.MAX_VALUE service ranking.
 		wc.createDefaultHttpContext();
 
 		final List<OsgiContextModel> models = new LinkedList<>();
@@ -164,12 +167,9 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/s"), startsWith("HTTP/1.1 404"));
 
 		// out of two "contexts", the above servlet should be registered with the HttpService one. Not the Whiteboard
-		// one because of service ranking even if there are 3 contexts in total at this point:
-		//  - OsgiContextModel{HS,id=OCM-5,name='default',path='/',bundle=sample1,context=DefaultHttpContext{bundle=Bundle "sample1",contextId='default'}}
-		//  - OsgiContextModel{HS,id=OCM-3,name='shared',path='/',shared=true,context=DefaultMultiBundleHttpContext{contextId='shared'}}
-		//  - OsgiContextModel{WB,id=OCM-2,name='default',path='/',bundle=org.ops4j.pax.web.pax-web-extender-whiteboard,context=(supplier)}
-		// from the above 3, OCM-2 (the "default" whiteboard context) and OCM-5 (the "default" httpService context) are
-		// considered. OCM-3 is "shared" and is not taken into account
+		// one because of service ranking.
+		//  - (rank 0) OsgiContextModel{WB,id=OCM-2,name='default',path='/',bundle=org.ops4j.pax.web.pax-web-extender-whiteboard,context=(supplier)}
+		//  - (rank MAX_VALUE) OsgiContextModel{HS,id=OCM-4,name='default',path='/',bundle=sample1,context=DefaultHttpContext{bundle=Bundle "sample1",contextId='default'}}
 		Hashtable<String, Object> props = models.get(0).getContextRegistrationProperties();
 		assertThat(props.get(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
 		assertNull(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
@@ -780,9 +780,11 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 	}
 
 	@Test
-	public void httpServiceServletAndFilterWithCustomHttpContext() throws Exception {
+	public void httpServiceServletWithCustomHttpContext() throws Exception {
 		Bundle sample1 = mockBundle("sample1");
 		WebContainer wc = container(sample1);
+
+		// at this point there's only one OsgiContextModel - for "default" context and pax-web-extender-whiteboard bundle
 
 		HttpContext context1 = new HttpContext() {
 			@Override
@@ -804,24 +806,114 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		properties.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "custom");
 		properties.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, "/");
 		ServiceReference<HttpContext> reference1 = mockReference(sample1,
-				HttpContext.class, properties, () -> context1, 0L, 0);
+				HttpContext.class, properties, () -> context1, 0L, 1);
 		OsgiContextModel model1 = getHttpContextCustomizer().addingService(reference1);
+
+		// now we have two OsgiContextModel - 2nd one is "custom" for "sample1" bundle, but there's still no
+		// HttpService context for "default" name, "/" path and "sample1" bundle
 
 		// we've Whiteboard-registered legacy HttpContext, but we can reference it directly with HttpService
 		// registration. We just have to use the same instance which was registered as Whiteboard service.
-		// Actualy name+bundle should match
 		Servlet servlet1 = new Utils.MyIdServlet("1");
+		// this should reference existing, WB-registered context
 		wc.registerServlet(servlet1, "s1", new String[] { "/s/*" }, null, context1);
 		Servlet servlet2 = new Utils.MyIdServlet("2");
+		// this should create 3rd OsgiContextModel - "default" for "sample1" bundle with MAX_VALUE rank
 		wc.registerServlet(servlet2, "s2", new String[] { "/t/*" }, null, null);
 
 		assertThat(httpGET(port, "/s/1"), startsWith("HTTP/1.1 403"));
 		assertThat(httpGET(port, "/s/1?token=1"), endsWith("S(1)"));
 		assertThat(httpGET(port, "/t/1"), endsWith("S(2)"));
 		// when targetting "404 servlet", the chosen context will be the highest ranked one at particular
-		// ServerController level. And because our "custom" context has rank 0 for "/" context, it is higher
-		// than "/" Whiteboard context (Integer.MIN_VALUE/2) and "/" HttpService context (Integer.MIN_VALUE)
-		assertThat(httpGET(port, "/u/1"), startsWith("HTTP/1.1 403"));
+		// ServerController level. Our "custom" context has rank 1 for "/" context, "default" Whiteboard context has
+		// rank 0 and "default" context for sample1 bundle has Integer.MAX_VALUE rank, so there's no need to send
+		// a token to get HTTP 404
+		assertThat(httpGET(port, "/u/1"), startsWith("HTTP/1.1 404"));
+
+		wc.unregisterServlet(servlet1);
+		wc.unregisterServlet(servlet2);
+
+		getHttpContextCustomizer().removedService(reference1, model1);
+	}
+
+	@Test
+	public void httpServiceServletWithReconfiguredDefaultHttpContext() throws Exception {
+		Bundle sample1 = mockBundle("sample1");
+		WebContainer wc = container(sample1);
+
+		// at this point there's only one OsgiContextModel - for "default" context, "/" path and
+		// pax-web-extender-whiteboard bundle
+
+		// let's get the "default" context with "/" path and reconfigure it by Whiteboard registration later
+		HttpContext context1 = wc.createDefaultHttpContext();
+
+		// now we have two OsgiContextModel - 2nd one is "default" for "sample1" bundle and "/" path and it's
+		// HttpService context
+
+		Hashtable<String, Object> properties = new Hashtable<>();
+		// we can't change the ID - we'll get:
+		// WARN  (HttpContextTracker.java:137) - The registered context has name "default", but httpContext.id service property was "custom". Switching to "default".
+		properties.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "custom");
+		// we can change the context path
+		properties.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, "/c");
+		// and ranking
+		ServiceReference<HttpContext> reference1 = mockReference(sample1,
+				HttpContext.class, properties, () -> context1, 0L, 0);
+		OsgiContextModel model1 = getHttpContextCustomizer().addingService(reference1);
+
+		// now we should have three OsgiContextModels, because the OsgiContextModel associated with HttpContext
+		// returned from wc.createDefaultHttpContext() is not visible to pax-web-extender-whiteboard, so it
+		// created new OsgiContextModel wrapping the context
+		// thought the whiteboard registration uses lower ranking thank Integer.MAX_VALUE, there's special
+		// override inside ServerModel that allows reconfiguration of HttpService contexts
+
+		// we've Whiteboard-registered legacy HttpContext, but we can reference it directly with HttpService
+		// registration. We just have to use the same instance which was registered as Whiteboard service.
+		Servlet servlet1 = new Utils.MyIdServlet("1");
+		// this should reference existing, WB-registered context
+		wc.registerServlet(servlet1, "s1", new String[] { "/s/*" }, null, context1);
+		Servlet servlet2 = new Utils.MyIdServlet("2");
+		// this should create 3rd OsgiContextModel - "default" for "sample1" bundle
+		wc.registerServlet(servlet2, "s2", new String[] { "/t/*" }, null, null);
+
+		assertThat(httpGET(port, "/s/1"), startsWith("HTTP/1.1 404"));
+		assertThat(httpGET(port, "/c/s/1"), endsWith("S(1)"));
+		// because 2nd servlet was registered with null, it should still use the reconfigured context
+		assertThat(httpGET(port, "/t/1"), startsWith("HTTP/1.1 404"));
+		assertThat(httpGET(port, "/c/t/1"), endsWith("S(2)"));
+
+		wc.unregisterServlet(servlet1);
+		wc.unregisterServlet(servlet2);
+
+		getHttpContextCustomizer().removedService(reference1, model1);
+	}
+
+	@Test
+	public void httpServiceServletWithReconfiguredCustomHttpContext() throws Exception {
+		Bundle sample1 = mockBundle("sample1");
+		WebContainer wc = container(sample1);
+
+		// let's get the "my-context" context with "/" path and reconfigure it by Whiteboard registration
+		HttpContext context1 = wc.createDefaultHttpContext("my-context");
+
+		Hashtable<String, Object> properties = new Hashtable<>();
+		// we can change the context path
+		properties.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, "/c");
+		// and ranking
+		ServiceReference<HttpContext> reference1 = mockReference(sample1,
+				HttpContext.class, properties, () -> context1, 0L, 0);
+		OsgiContextModel model1 = getHttpContextCustomizer().addingService(reference1);
+
+		Servlet servlet1 = new Utils.MyIdServlet("1");
+		wc.registerServlet(servlet1, "s1", new String[] { "/s/*" }, null, context1);
+		Servlet servlet2 = new Utils.MyIdServlet("2");
+		// this is registered to "default" context which isn't reconfigured
+		wc.registerServlet(servlet2, "s2", new String[] { "/t/*" }, null, null);
+
+		assertThat(httpGET(port, "/s/1"), startsWith("HTTP/1.1 404"));
+		assertThat(httpGET(port, "/c/s/1"), endsWith("S(1)"));
+		assertThat(httpGET(port, "/t/1"), endsWith("S(2)"));
+		assertThat(httpGET(port, "/c/t/1"), startsWith("HTTP/1.1 404"));
 
 		wc.unregisterServlet(servlet1);
 		wc.unregisterServlet(servlet2);

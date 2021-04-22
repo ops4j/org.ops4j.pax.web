@@ -657,11 +657,24 @@ public class ServerModel implements BatchVisitor {
 	 */
 	public OsgiContextModel verifyExistingAssociation(final WebContainerContext context, final Bundle bundle)
 			throws IllegalStateException {
+
 		// quick check in case of references - first among shared contexts, then among bundle-scoped contexts
 		// here we don't care much about the bundle of HttpService used
 		OsgiContextModel contextModel = context.isShared()
 				? getHighestRankedModel(sharedContexts.get(context.getContextId()))
-				: getHighestRankedModel(bundleContexts.get(ContextKey.with(context.getContextId(), context.getBundle())));
+				: getHighestRankedModel(bundleContexts.get(ContextKey.of(context)));
+
+		// special case - passed context may be "unified" with generated ID "context:<identity-hash-code>", but
+		// internally it may be a HttpContext instance used in one of existing bundle contexts
+		if (contextModel == null && !context.isShared()) {
+			HttpContext ctx = context instanceof WebContainerContextWrapper
+					? ((WebContainerContextWrapper) context).getHttpContext() : context;
+			for (ContextKey ck : bundleContexts.keySet()) {
+				if (ck.httpContext == ctx) {
+					contextModel = getHighestRankedModel(bundleContexts.get(ck));
+				}
+			}
+		}
 
 		if (contextModel == null) {
 			if (LOG.isTraceEnabled()) {
@@ -715,13 +728,14 @@ public class ServerModel implements BatchVisitor {
 	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.HttpContextMapping} - Pax Web Whiteboard</li>
 	 * </ul></p>
 	 *
-	 * <p>The above Whiteboard methods allow to specify (service registration parameters, direct
+	 * <p>The above Whiteboard methods allow to specify (service registration parameters or direct
 	 * values in {@link org.ops4j.pax.web.service.whiteboard.ContextMapping}) additional information about
 	 * {@link OsgiContextModel}:<ul>
 	 *     <li>context path</li>
 	 *     <li>context (init) parameters</li>
 	 *     <li>virtual hosts</li>
-	 * </ul>Here, these attributes are not specified and the created {@link OsgiContextModel} is used only
+	 * </ul>
+	 * Here, these attributes are not specified and the created {@link OsgiContextModel} is used only
 	 * for Http Service scenario.</p>
 	 *
 	 * @param webContext
@@ -730,7 +744,7 @@ public class ServerModel implements BatchVisitor {
 	 * @return
 	 */
 	@SuppressWarnings("deprecation")
-	public OsgiContextModel  createNewContextModel(WebContainerContext webContext, Bundle serviceBundle,
+	public OsgiContextModel createNewContextModel(WebContainerContext webContext, Bundle serviceBundle,
 			String contextPath) {
 		OsgiContextModel osgiContextModel = new OsgiContextModel(webContext, serviceBundle, contextPath, false);
 		osgiContextModel.setName(webContext.getContextId());
@@ -803,13 +817,14 @@ public class ServerModel implements BatchVisitor {
 				}
 			}
 		} else {
-			ContextKey key = ContextKey.with(context.getContextId(), context.getBundle());
+			ContextKey key = ContextKey.of(context);
 			if (bundleContexts.computeIfAbsent(key, c -> new TreeSet<>()).add(osgiContextModel)) {
 				LOG.debug("Created association {} -> {}", context, osgiContextModel);
 
 				if (osgiContextModel.isWhiteboard()) {
 					TreeSet<OsgiContextModel> models = bundleContexts.get(key);
-					// same as with shared contexts
+					// same as with shared contexts - it is possible to override the HttpService context with MAX
+					// ranking simply by whiteboard-registering a OsgiContectModel which hasDirectHttpContextInstance()
 					for (Iterator<OsgiContextModel> it = models.iterator(); it.hasNext(); ) {
 						OsgiContextModel model = it.next();
 						if (!model.isWhiteboard()) {
@@ -844,7 +859,7 @@ public class ServerModel implements BatchVisitor {
 			}
 			LOG.debug("Removed shared context {} -> {}", context, osgiContextModel);
 		} else {
-			ContextKey key = ContextKey.with(context.getContextId(), context.getBundle());
+			ContextKey key = ContextKey.of(context);
 			TreeSet<OsgiContextModel> models = bundleContexts.get(key);
 			models.remove(osgiContextModel);
 			if (models.isEmpty()) {
@@ -878,7 +893,7 @@ public class ServerModel implements BatchVisitor {
 	 * @return
 	 */
 	public OsgiContextModel getBundleContextModel(WebContainerContext context) {
-		return getHighestRankedModel(bundleContexts.get(ContextKey.with(context.getContextId(), context.getBundle())));
+		return getHighestRankedModel(bundleContexts.get(ContextKey.of(context)));
 	}
 
 	/**
@@ -889,7 +904,7 @@ public class ServerModel implements BatchVisitor {
 	 * @return
 	 */
 	public OsgiContextModel getBundleContextModel(WebContainerContext context, OsgiContextModel skip) {
-		TreeSet<OsgiContextModel> set = bundleContexts.get(ContextKey.with(context.getContextId(), context.getBundle()));
+		TreeSet<OsgiContextModel> set = bundleContexts.get(ContextKey.of(context));
 		if (set != null) {
 			for (OsgiContextModel model : set) {
 				if (model.equals(skip)) {

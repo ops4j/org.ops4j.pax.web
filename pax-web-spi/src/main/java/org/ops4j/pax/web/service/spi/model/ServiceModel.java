@@ -158,7 +158,6 @@ public class ServiceModel implements BatchVisitor {
 			// Just as ServerModel creates bundle-agnostic ServletContextModel, in ServiceModel we create/acquire
 			// bundle-aware OsgiContextModel - this time in a batch to comply to single-writer principle
 			Batch batch = new Batch("Initialization of HttpContext \"" + contextId + "\" for " + serviceBundle);
-			ServletContextModel scm = serverModel.getOrCreateServletContextModel(PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
 
 			WebContainerContext wcc = new DefaultHttpContext(serviceBundle, contextId);
 

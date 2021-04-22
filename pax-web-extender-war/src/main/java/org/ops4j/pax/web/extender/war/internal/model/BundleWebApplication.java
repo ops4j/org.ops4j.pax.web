@@ -120,7 +120,25 @@ public class BundleWebApplication {
 	 */
 	private String contextPath;
 
+	// dynamic state of the web application - the model passed later using a view of Pax Web's WebWebContainer
+
+	/** Merged {@code web.xml} model from WAB's descriptors and from all reachable "web fragments". */
+	private WebXml mainWebXml = null;
+	/** A "class space" used to collect information from all reachable "web fragments" */
+	private BundleWebApplicationClassSpace classSpace = null;
+	/** An {@link OsgiServletContextClassLoader} which will be used when this WAB is deployed to a container. */
 	private final OsgiServletContextClassLoader classLoader;
+	/**
+	 * This is the discovered mapping of SCIs to sets of classes that are related to types from
+	 * {@link HandlesTypes} using these relations(see "8.2.4 Shared libraries / runtimes pluggability" of the Servlet
+	 * spec):<ul>
+	 *     <li>are implementing them</li>
+	 *     <li>are extending them</li>
+	 *     <li>are annotated with them (class, method and field level) - note that Tomcat only scans types annotated
+	 *     at class level (see https://bz.apache.org/bugzilla/show_bug.cgi?id=65244)</li>
+	 * </ul>
+	 */
+	private final Map<ServletContainerInitializer, Set<Class<?>>> sciToHt = new LinkedHashMap<>();
 
 	public BundleWebApplication(Bundle bundle, WebContainerManager webContainerManager,
 			WarExtenderContext extenderContext, ExecutorService pool) {
@@ -884,7 +902,7 @@ public class BundleWebApplication {
 			// actual WEB-INF/web.xml from a WAB
 
 			LOG.debug("Searching for web.xml descriptor in {}", bundle);
-			WebXml mainWebXml = extenderContext.findBundleWebXml(bundle);
+			mainWebXml = extenderContext.findBundleWebXml(bundle);
 
 			// at this stage, we don't have javax.servlet.ServletContext available yet. We don't even know
 			// where this WAB is going to be deployed (Tomcat? Jetty? Undertow?). We don't even know whether
@@ -893,14 +911,14 @@ public class BundleWebApplication {
 			// Let's start constructing WAB's "class path" which will eventually be transformed into complete
 			// WAB's ClassLoader accessible through javax.servlet.ServletContext.getClassLoader() - but this will
 			// happen later, after the WAB is really deployed
-			BundleWebApplicationClassSpace wabClassSpace = new BundleWebApplicationClassSpace(bundle, extenderContext);
+			classSpace = new BundleWebApplicationClassSpace(bundle, extenderContext);
 
 			try {
 				// complex initialization that actually processes entire "class space" and determines the
 				// ordered fragments that will later be used to discover/load SCIs and annotated classes
 				LOG.debug("Searching for web fragments");
-				wabClassSpace.initialize(mainWebXml, classLoader);
-				boolean ok = wabClassSpace.isFragmentParsingOK();
+				classSpace.initialize(mainWebXml, classLoader);
+				boolean ok = classSpace.isFragmentParsingOK();
 
 				if (!ok) {
 					LOG.warn("There were problems when parsing web-fragment.xml descriptors."
@@ -913,7 +931,7 @@ public class BundleWebApplication {
 				if (ok) {
 					LOG.debug("Searching for ServletContainerInitializers (SCIs)");
 				}
-				final List<ServletContainerInitializer> detectedSCIs = ok ? wabClassSpace.loadSCIs()
+				final List<ServletContainerInitializer> detectedSCIs = ok ? classSpace.loadSCIs()
 						: Collections.emptyList();
 
 				// all SCIs are loaded using proper ClassLoaders.
@@ -925,13 +943,7 @@ public class BundleWebApplication {
 				// This is direct mapping from values of @javax.servlet.annotation.HandlesTypes to SCIs that
 				// express their interest in these values
 				Map<Class<?>, Set<ServletContainerInitializer>> htToSci = new HashMap<>();
-				// This is the discovered mapping of SCIs to sets of classes that have these types of relations with
-				// types from @HandlesTypes (see "8.2.4 Shared libraries / runtimes pluggability" of the Servlet spec):
-				// - are implementing them
-				// - are extending them
-				// - are annotated with them (class, method and field level) - note that Tomcat only scans
-				//   types annotated at class level (see https://bz.apache.org/bugzilla/show_bug.cgi?id=65244)
-				Map<ServletContainerInitializer, Set<Class<?>>> sciToHt = new LinkedHashMap<>();
+
 				for (ServletContainerInitializer sci : detectedSCIs) {
 					sciToHt.put(sci, new HashSet<>());
 				}
@@ -961,7 +973,7 @@ public class BundleWebApplication {
 				// see org.apache.catalina.startup.ContextConfig.processClasses()
 				if (ok && (!mainWebXml.isMetadataComplete() || !htToSci.isEmpty())) {
 					LOG.debug("Scanning for annotated classes and/or types declared in @HandlesTypes SCI annotations");
-					wabClassSpace.scanClasses(htToSci, sciToHt, thereAreHTClasses, thereAreHTAnnotations);
+					classSpace.scanClasses(htToSci, sciToHt, thereAreHTClasses, thereAreHTAnnotations);
 				}
 
 				// at this stage we have full mapping of SCIs to sets of classes to pass to their onStartup() method
@@ -971,7 +983,7 @@ public class BundleWebApplication {
 
 				if (!mainWebXml.isMetadataComplete() && ok) {
 					// only in this case, merge the ordered (web) fragments in
-					ok = mainWebXml.merge(wabClassSpace.getOrderedFragments());
+					ok = mainWebXml.merge(classSpace.getOrderedFragments());
 				}
 
 				// merge in the default web.xml (with default and JSP servlets)

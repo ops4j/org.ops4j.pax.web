@@ -443,7 +443,8 @@ public class BundleWebApplicationClassSpace {
 			orderedFragments.put(fragment.getJarName(), fragment);
 		}
 
-		orderedLibs = new LinkedHashSet<>((List<String>) context.getAttribute(ServletContext.ORDERED_LIBS));
+		List<String> orderedLibsAttribute = (List<String>) context.getAttribute(ServletContext.ORDERED_LIBS);
+		orderedLibs = orderedLibsAttribute == null ? Collections.emptySet() : new LinkedHashSet<>();
 
 		// After collecting the bundles associated with ordered web fragments, we can finish the "construction"
 		// of WAB's classloader.

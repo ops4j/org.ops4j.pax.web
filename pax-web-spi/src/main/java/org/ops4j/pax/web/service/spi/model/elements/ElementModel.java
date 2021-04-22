@@ -288,7 +288,7 @@ public abstract class ElementModel<T, D extends WebElementEventData>
 	 * {@link Filter} to be used for this {@link ElementModel} after customizing <em>incoming</em> user-registered
 	 * OSGi service.</p>
 	 *
-	 * <p>This filter can be changed only calling {@link org.osgi.framework.ServiceRegistration#setProperties(Dictionary)}
+	 * <p>This filter can be changed only by calling {@link org.osgi.framework.ServiceRegistration#setProperties(Dictionary)}
 	 * on existing registration, but it's rather rare scenario. The point is that this filter is called every time
 	 * new {@link OsgiContextModel} is tracked (or changed or removed) to check whether existing set of contexts
 	 * associated with given {@link ElementModel} has changed - to check whether this {@link ElementModel} should

@@ -62,7 +62,7 @@ public class WebContainerContextWrapper extends DefaultHttpContext {
 		this.shared = true;
 	}
 
-	private static String uniqueId(Object context) {
+	public static String uniqueId(Object context) {
 		return String.format("context:%d", System.identityHashCode(context));
 	}
 
@@ -124,6 +124,14 @@ public class WebContainerContextWrapper extends DefaultHttpContext {
 			return servletContextHelper.getRealPath(path);
 		}
 		return super.getRealPath(path);
+	}
+
+	public HttpContext getHttpContext() {
+		return httpContext;
+	}
+
+	public ServletContextHelper getServletContextHelper() {
+		return servletContextHelper;
 	}
 
 	@Override

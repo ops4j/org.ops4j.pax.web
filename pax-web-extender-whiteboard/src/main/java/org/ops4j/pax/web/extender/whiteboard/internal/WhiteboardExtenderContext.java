@@ -271,7 +271,7 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 	public void webContainerAdded(ServiceReference<WebContainer> ref) {
 		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundleContext, ref);
 		if (view != null) {
-			// install global, default OSGi Context Model using bundle context pf pax-web-extender-whiteboard bundle
+			// install global, default OSGi Context Model using bundle context of pax-web-extender-whiteboard bundle
 			view.addWhiteboardOsgiContextModel(OsgiContextModel.DEFAULT_CONTEXT_MODEL);
 		}
 

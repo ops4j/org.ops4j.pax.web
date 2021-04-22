@@ -85,7 +85,7 @@ public class WhiteboardDynamicContextsTest extends MultiContainerTestSupport {
 
 	/**
 	 * This test seems silly when reading line by line, but such situation actually may occur in SCR environment,
-	 * even with propert {@link org.osgi.service.component.annotations.Reference}s to implement kind of ordering
+	 * even with proper {@link org.osgi.service.component.annotations.Reference}s to implement kind of ordering
 	 * between a {@link ServletContextHelper} and a {@link Servlet}.
 	 * @throws Exception
 	 */
@@ -98,6 +98,7 @@ public class WhiteboardDynamicContextsTest extends MultiContainerTestSupport {
 		mockContextSelectProperty(servletRef, "c1");
 		ServletModel model = getServletCustomizer().addingService(servletRef);
 
+		assertThat(httpGET(port, "/s"), startsWith("HTTP/1.1 404"));
 		assertThat(httpGET(port, "/c1/s"), startsWith("HTTP/1.1 404"));
 
 		// only now we're registering ServletContextHelper pointed to by the above servlet. This will actually
@@ -111,9 +112,11 @@ public class WhiteboardDynamicContextsTest extends MultiContainerTestSupport {
 		getServletContextHelperCustomizer()
 				.addingService(mockReference(b, ServletContextHelper.class, properties, () -> ctx, 0L, 0));
 
+		assertThat(httpGET(port, "/s"), startsWith("HTTP/1.1 404"));
 		assertThat(httpGET(port, "/c1/s"), endsWith("S(1)"));
 
 		getServletCustomizer().removedService(servletRef, model);
+		assertThat(httpGET(port, "/s"), startsWith("HTTP/1.1 404"));
 		assertThat(httpGET(port, "/c1/s"), startsWith("HTTP/1.1 404"));
 	}
 
