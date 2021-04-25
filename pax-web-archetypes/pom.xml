@@ -22,7 +22,7 @@
         <relativePath>../pom.xml</relativePath>
         <groupId>org.ops4j.pax</groupId>
         <artifactId>web</artifactId>
-        <version>7.2.25</version>
+        <version>7.2.26-SNAPSHOT</version>
     </parent>
 
     <groupId>org.ops4j.pax.web</groupId>
