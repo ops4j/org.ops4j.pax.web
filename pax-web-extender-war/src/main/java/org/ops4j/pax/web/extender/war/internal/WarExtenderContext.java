@@ -377,7 +377,7 @@ public class WarExtenderContext implements WebContainerListener {
 					// no support for JSP == no JSP servlet at all
 					iterator.remove();
 					// no JSP servlet mapping
-					defaultWebXml.getServletMappings().keySet().remove("jsp");
+					defaultWebXml.getServletMappings().entrySet().removeIf(esm -> esm.getValue().equals("jsp"));
 					// and no JSP welcome file
 					defaultWebXml.getWelcomeFiles().remove("index.jsp");
 				}

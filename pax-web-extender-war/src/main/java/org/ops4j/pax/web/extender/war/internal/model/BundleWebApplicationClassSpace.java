@@ -444,7 +444,7 @@ public class BundleWebApplicationClassSpace {
 		}
 
 		List<String> orderedLibsAttribute = (List<String>) context.getAttribute(ServletContext.ORDERED_LIBS);
-		orderedLibs = orderedLibsAttribute == null ? Collections.emptySet() : new LinkedHashSet<>();
+		orderedLibs = orderedLibsAttribute == null ? Collections.emptySet() : new LinkedHashSet<>(orderedLibsAttribute);
 
 		// After collecting the bundles associated with ordered web fragments, we can finish the "construction"
 		// of WAB's classloader.
@@ -455,7 +455,7 @@ public class BundleWebApplicationClassSpace {
 		delegateBundles.addAll(containerFragmentBundles.values());
 		delegateBundles.remove(wabBundle);
 
-		delegateBundles.forEach(wabClassLoader::addBundle);
+		delegateBundles.forEach(this.wabClassLoader::addBundle);
 	}
 
 	/**
@@ -574,7 +574,9 @@ public class BundleWebApplicationClassSpace {
 				// - bundleentry://48.fwk504807594/META-INF/web-fragment.xml
 				// into:
 				// - bundleentry://48.fwk504807594/
-				fragment.setURL(new URL(fragmentURL, ".."));
+//				fragment.setURL(new URL(fragmentURL, ".."));
+				fragment.setURL(new URL(String.format("%s://%s:%d/",
+						fragmentURL.getProtocol(), fragmentURL.getHost(), fragmentURL.getPort())));
 				fragment.setJarName(extractJarFileName(fragmentURL.toString()));
 				boolean ok = extenderContext.getParser().parseWebXml(fragmentURL, fragment, true);
 				if (fragment.getName() == null) {

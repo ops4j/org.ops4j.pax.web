@@ -120,7 +120,8 @@ public class BundleWebApplication {
 	 */
 	private String contextPath;
 
-	// dynamic state of the web application - the model passed later using a view of Pax Web's WebWebContainer
+	// entire "raw" state of the web application - it is later turned into a model of elements from
+	// org.ops4j.pax.web.service.spi.model package and later passed to a view of Pax Web's WebWebContainer
 
 	/** Merged {@code web.xml} model from WAB's descriptors and from all reachable "web fragments". */
 	private WebXml mainWebXml = null;
@@ -550,6 +551,14 @@ public class BundleWebApplication {
 
 				// Collect deployment information by processing the web.xml descriptor and other sources of metadata
 				processMetadata();
+
+				// We have: 1) mainWebXml (altered by fragments), 2) SCIs, 3) ClassLoader, 4) ClassSpace (support)
+				// so we can build set of ServletModels, FilterModels, ... that'll be sent to WebContainer
+				// implementation as pre-built batch.
+				// This is important advantage of pax-web-extender-war over pax-web-extender-whiteboard. Here
+				// we have complete web application, while in Whiteboard, we build it element by element.
+				// Here we can do it "transactionally" without bothering about conflicts etc.
+				buildModel();
 
 				// after web.xml/web-fragment.xml/annotations are read, we have to check if the context path
 				// is available
@@ -1002,6 +1011,8 @@ public class BundleWebApplication {
 								LOG.warn("A servlet named {} is used with jsp-file, but there's no \"jsp\" servlet configured. Removing.",
 										def.getServletName());
 								it.remove();
+								mainWebXml.getServletMappings().entrySet()
+										.removeIf(e -> e.getValue().equals(def.getServletName()));
 							} else {
 								String jspFile = def.getJspFile();
 								if (!jspFile.startsWith("/")) {
@@ -1017,6 +1028,12 @@ public class BundleWebApplication {
 					}
 				}
 
+				// Tomcat already configures an instance of org.apache.catalina.core.StandardContext here, but
+				// Pax Web will do it later
+
+				// configure /META-INF/resources locations
+				// TODO: /META-INF/resources require 1:N alias:location mapping
+
 				LOG.debug("Finished metadata and fragment processing for {} in {}ms", bundle, System.currentTimeMillis() - start);
 			} catch (IOException e) {
 				throw new RuntimeException(e.getMessage(), e);
@@ -1024,6 +1041,14 @@ public class BundleWebApplication {
 		} finally {
 			Thread.currentThread().setContextClassLoader(tccl);
 		}
+	}
+
+	/**
+	 * This method turns the raw data collected from descriptors and annotations into a model of elements from
+	 * {@code org.ops4j.pax.web.service.spi.model} package.
+	 */
+	private void buildModel() {
+
 	}
 
 	// --- Web Application model access

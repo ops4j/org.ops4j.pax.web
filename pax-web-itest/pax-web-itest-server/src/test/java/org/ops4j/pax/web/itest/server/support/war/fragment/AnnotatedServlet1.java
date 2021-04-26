@@ -13,22 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.samples.war.fragment;
+package org.ops4j.pax.web.itest.server.support.war.fragment;
 
-import java.io.IOException;
-import javax.servlet.GenericServlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
 
-@WebServlet(name = "annotatedServlet2", urlPatterns = { "/as2", "/as2*" })
-// according to "8.1.1 @WebServlet", Classes annotated with @WebServlet class MUST extend the
-// javax.servlet.http.HttpServlet class.
-public class AnnotatedServlet2 extends GenericServlet {
-
-	@Override
-	public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
-	}
+@WebServlet(name = "annotatedServlet1", urlPatterns = { "/as1", "/as1*" }, initParams = {
+		@WebInitParam(name = "param1", value = "value1"),
+		@WebInitParam(name = "param2", value = "value2")
+}, loadOnStartup = 3)
+@MultipartConfig(location = "/dev/null", maxFileSize = 424242L, maxRequestSize = 1024, fileSizeThreshold = 128)
+public class AnnotatedServlet1 extends HttpServlet {
 
 }

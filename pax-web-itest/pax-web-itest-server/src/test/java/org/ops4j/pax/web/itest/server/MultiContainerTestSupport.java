@@ -15,9 +15,15 @@
  */
 package org.ops4j.pax.web.itest.server;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
 import java.net.ServerSocket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,22 +34,29 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.IdentityHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import org.apache.commons.io.IOUtils;
 import org.apache.felix.utils.extender.Extension;
 import org.apache.jasper.servlet.JspServlet;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.runners.Parameterized;
 import org.mockito.ArgumentMatchers;
 import org.mockito.stubbing.Answer;
@@ -104,6 +117,13 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Version;
+import org.osgi.framework.namespace.BundleNamespace;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRequirement;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.context.ServletContextHelper;
@@ -176,6 +196,16 @@ public class MultiContainerTestSupport {
 				{ Runtime.TOMCAT },
 				{ Runtime.UNDERTOW },
 		});
+	}
+
+	@BeforeClass
+	public static void initURLHandlers() {
+		String pkgs = System.getProperty("java.protocol.handler.pkgs");
+		if (pkgs == null) {
+			pkgs = "";
+		}
+		pkgs += "|org.ops4j.pax.web.itest.server.support.protocols";
+		System.setProperty("java.protocol.handler.pkgs", pkgs);
 	}
 
 	public void configurePort() throws Exception {
@@ -346,6 +376,16 @@ public class MultiContainerTestSupport {
 		when(bundle.adapt(BundleWiring.class)).thenReturn(wiring);
 		when(wiring.getClassLoader()).thenReturn(this.getClass().getClassLoader());
 
+		BundleRevision revision = mock(BundleRevision.class);
+		when(bundle.adapt(BundleRevision.class)).thenReturn(revision);
+		when(revision.getWiring()).thenReturn(wiring);
+		when(revision.getBundle()).thenReturn(bundle);
+
+		// prepare real lists to be populated when needed
+		when(wiring.getProvidedWires(HostNamespace.HOST_NAMESPACE)).thenReturn(new LinkedList<>());
+		when(wiring.getRequiredWires(null)).thenReturn(new LinkedList<>());
+		when(wiring.getBundle()).thenReturn(bundle);
+
 		when(bundleContext.registerService(ArgumentMatchers.eq(ServletContext.class), any(ServletContext.class),
 				any(Dictionary.class)))
 				.thenReturn(mock(ServiceRegistration.class));
@@ -500,7 +540,7 @@ public class MultiContainerTestSupport {
 	protected <S> ServiceReference<S> mockReference(Bundle bundle, Class<?>[] classes, Hashtable<String, Object> props,
 			Supplier<S> supplier, Long serviceId, Integer rank) {
 		ServiceReference<S> ref = mock(ServiceReference.class);
-		when(ref.toString()).thenReturn("ref:" + Arrays.asList(classes).toString());
+		when(ref.toString()).thenReturn("ref:" + Arrays.asList(classes));
 
 		String[] names = Arrays.stream(classes).map(Class::getName).toArray(String[]::new);
 		when(ref.getProperty(Constants.OBJECTCLASS)).thenReturn(names);
@@ -556,8 +596,7 @@ public class MultiContainerTestSupport {
 				contexts.append("(").append(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME).append("=");
 				contexts.append(cn).append(")");
 			}
-			newProperties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, String.format("(|%s)",
-					contexts.toString()));
+			newProperties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, String.format("(|%s)", contexts));
 		}
 
 		newProperties.forEach((k, v) -> when(ref.getProperty(k)).thenReturn(v));
@@ -683,6 +722,36 @@ public class MultiContainerTestSupport {
 		}
 	}
 
+	protected void wireByPackage(Bundle b1, Bundle b2, String pkg) {
+		List<BundleWire> wires = b1.adapt(BundleWiring.class).getRequiredWires(null);
+		BundleWire wire = mock(BundleWire.class);
+		wires.add(wire);
+
+		BundleRequirement importPackage = mock(BundleRequirement.class);
+		when(wire.getRequirement()).thenReturn(importPackage);
+		when(importPackage.getNamespace()).thenReturn(PackageNamespace.PACKAGE_NAMESPACE);
+
+		BundleCapability exportPackage = mock(BundleCapability.class);
+		BundleRevision b2Revision = b2.adapt(BundleRevision.class);
+		when(exportPackage.getRevision()).thenReturn(b2Revision);
+		when(wire.getCapability()).thenReturn(exportPackage);
+	}
+
+	protected void wireByBundle(Bundle b1, Bundle b2) {
+		List<BundleWire> wires = b1.adapt(BundleWiring.class).getRequiredWires(null);
+		BundleWire wire = mock(BundleWire.class);
+		wires.add(wire);
+
+		BundleRequirement requireBundle = mock(BundleRequirement.class);
+		when(wire.getRequirement()).thenReturn(requireBundle);
+		when(requireBundle.getNamespace()).thenReturn(BundleNamespace.BUNDLE_NAMESPACE);
+
+		BundleCapability targetBundleCap = mock(BundleCapability.class);
+		BundleRevision b2Revision = b2.adapt(BundleRevision.class);
+		when(targetBundleCap.getRevision()).thenReturn(b2Revision);
+		when(wire.getCapability()).thenReturn(targetBundleCap);
+	}
+
 	protected ServerModelInternals serverModelInternals(ServerModel serverModel) {
 		return new ServerModelInternals(serverModel);
 	}
@@ -693,6 +762,80 @@ public class MultiContainerTestSupport {
 
 	protected ServiceModelInternals serviceModelInternals(WebContainer httpService) {
 		return new ServiceModelInternals(getField(httpService, "serviceModel", ServiceModel.class));
+	}
+
+	/**
+	 * Configures the value returned in {@link Constants#BUNDLE_CLASSPATH} entry. {@code root} base directory
+	 * points to a hierarchy of entries available using {@link Bundle#getEntry(String)}.
+	 * @param bundle
+	 * @param root
+	 * @param configurator
+	 * @throws MalformedURLException
+	 */
+	protected void configureBundleClassPath(Bundle bundle, String root, Consumer<List<String>> configurator) throws IOException {
+		List<String> entries = new ArrayList<>();
+		configurator.accept(entries);
+
+		long id = bundle.getBundleId();
+
+		File jars = new File("target/bundles/bundle" + id);
+		jars.mkdirs();
+
+		for (String entry : entries) {
+
+			File base = new File(root, entry);
+			if (!base.isDirectory()) {
+				continue;
+			}
+			if (base.getName().endsWith(".jar")) {
+				// turn it into a real JAR
+				File jar = pack(jars, base);
+				when(bundle.getEntry(entry)).thenReturn(new URL(String.format("bundle://%d.0:0%s", id, jar.getCanonicalPath())));
+			} else {
+				// it'll be available as normal directory
+				when(bundle.getEntry(entry)).thenReturn(new URL(String.format("bundle://%d.0:0%s", id, base.getCanonicalPath())));
+			}
+		}
+
+		bundle.getHeaders().put(Constants.BUNDLE_CLASSPATH, String.join(", ", entries));
+	}
+
+	private File pack(File target, File base) throws IOException {
+		File targetJar = new File(target, base.getName());
+		try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(targetJar)) {
+			Files.walk(base.toPath()).forEach(p -> {
+				String name = base.toPath().relativize(p).toString();
+				if ("".equals(name)) {
+					return;
+				}
+				try {
+					ArchiveEntry entry = zos.createArchiveEntry(p.toFile(), name);
+					zos.putArchiveEntry(entry);
+					if (p.toFile().isFile()) {
+						try (FileInputStream fis = new FileInputStream(p.toFile())) {
+							IOUtils.copy(fis, zos);
+						}
+					}
+					zos.closeArchiveEntry();
+				} catch (IOException e) {
+					throw new RuntimeException(e.getMessage(), e);
+				}
+			});
+		}
+		return targetJar;
+	}
+
+	protected void attachBundleFragment(Bundle bundle, Bundle itsFragment) {
+		BundleWiring wiring = bundle.adapt(BundleWiring.class);
+		List<BundleWire> hostWires = wiring.getProvidedWires(HostNamespace.HOST_NAMESPACE);
+		BundleWire fragmentWire = mock(BundleWire.class);
+		hostWires.add(fragmentWire);
+		BundleWiring fragmentWiring = itsFragment.adapt(BundleWiring.class);
+		when(fragmentWire.getRequirerWiring()).thenReturn(fragmentWiring);
+
+		BundleRevision fragmentRevision = mock(BundleRevision.class);
+		when(fragmentRevision.getTypes()).thenReturn(BundleRevision.TYPE_FRAGMENT);
+		when(itsFragment.adapt(BundleRevision.class)).thenReturn(fragmentRevision);
 	}
 
 	/**

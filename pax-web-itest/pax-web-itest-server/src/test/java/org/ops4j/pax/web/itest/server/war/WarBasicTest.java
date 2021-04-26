@@ -41,11 +41,7 @@ public class WarBasicTest extends MultiContainerTestSupport {
 		Bundle sample1 = mockBundle("sample1", "/sample");
 		installWab(sample1);
 
-//		assertThat(httpGET(port, "/s"), endsWith("S(1)"));
-
 		uninstallWab(sample1);
-
-//		assertThat(httpGET(port, "/s"), startsWith("HTTP/1.1 404"));
 
 		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);
 		ServiceModelInternals serviceModelInternals = serviceModelInternals(sample1);

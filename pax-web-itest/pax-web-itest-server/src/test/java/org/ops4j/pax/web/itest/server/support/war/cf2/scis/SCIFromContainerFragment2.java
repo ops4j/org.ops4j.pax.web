@@ -13,22 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.samples.war.fragment;
+package org.ops4j.pax.web.itest.server.support.war.cf2.scis;
 
-import java.io.IOException;
-import javax.servlet.GenericServlet;
+import java.util.Set;
+import javax.servlet.ServletContainerInitializer;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebServlet;
 
-@WebServlet(name = "annotatedServlet2", urlPatterns = { "/as2", "/as2*" })
-// according to "8.1.1 @WebServlet", Classes annotated with @WebServlet class MUST extend the
-// javax.servlet.http.HttpServlet class.
-public class AnnotatedServlet2 extends GenericServlet {
+public class SCIFromContainerFragment2 implements ServletContainerInitializer {
 
 	@Override
-	public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+	public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
+
 	}
 
 }

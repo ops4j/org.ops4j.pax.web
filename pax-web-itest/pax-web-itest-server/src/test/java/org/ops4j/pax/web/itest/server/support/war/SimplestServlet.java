@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 OPS4J.
+ * Copyright 2019 OPS4J.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.samples.war.fragment;
+package org.ops4j.pax.web.itest.server.support.war;
 
 import java.io.IOException;
-import javax.servlet.GenericServlet;
+import java.nio.charset.StandardCharsets;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-@WebServlet(name = "annotatedServlet2", urlPatterns = { "/as2", "/as2*" })
-// according to "8.1.1 @WebServlet", Classes annotated with @WebServlet class MUST extend the
-// javax.servlet.http.HttpServlet class.
-public class AnnotatedServlet2 extends GenericServlet {
+public class SimplestServlet extends HttpServlet {
+
+	@Deprecated
+	public Object dummy;
 
 	@Override
-	public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		resp.setContentType("text/plain");
+		resp.setCharacterEncoding(StandardCharsets.UTF_8.toString());
+		resp.getWriter().println("Hello");
+		resp.getWriter().flush();
 	}
 
 }

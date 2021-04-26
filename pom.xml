@@ -165,39 +165,38 @@
 		<!-- versions of Maven dependencies (sorted and groupped in arbotrary way)  -->
 
 		<dependency.alpn.version>8.1.2.v20141202</dependency.alpn.version>
-		<dependency.aries.spifly.version>1.3.2</dependency.aries.spifly.version>
+		<dependency.aries.spifly.version>1.3.3</dependency.aries.spifly.version>
 		<dependency.aries.util.version>1.1.3</dependency.aries.util.version>
-		<dependency.asm.version>9.0</dependency.asm.version>
-		<dependency.bndlib.version>5.1.1</dependency.bndlib.version>
-		<dependency.bouncycastle.version>1.64</dependency.bouncycastle.version>
+		<dependency.asm.version>9.1</dependency.asm.version>
+		<dependency.bndlib.version>5.3.0</dependency.bndlib.version>
+		<dependency.bouncycastle.version>1.68</dependency.bouncycastle.version>
 		<dependency.cedarsoft.test-utils.version>6.0.1</dependency.cedarsoft.test-utils.version>
 
 		<dependency.commons-beanutils.version>1.9.4</dependency.commons-beanutils.version>
-		<dependency.commons-codec.version>1.13</dependency.commons-codec.version>
-		<dependency.commons-collections.version>4.4</dependency.commons-collections.version>
+		<dependency.commons-codec.version>1.15</dependency.commons-codec.version>
 		<dependency.commons-collections3.version>3.2.2</dependency.commons-collections3.version>
+		<dependency.commons-collections4.version>4.4</dependency.commons-collections4.version>
+		<dependency.commons-compress.version>1.20</dependency.commons-compress.version>
 		<dependency.commons-digester.version>1.8.1</dependency.commons-digester.version>
 		<dependency.commons-io.version>2.8.0</dependency.commons-io.version>
-		<dependency.commons-lang.version>3.9</dependency.commons-lang.version>
-		<dependency.commons-logging.version>1.1.1</dependency.commons-logging.version>
+		<dependency.commons-lang3.version>3.12.0</dependency.commons-lang3.version>
 
-		<dependency.easymock.version>2.3</dependency.easymock.version>
-
-		<dependency.eclipse.jdt.version>3.23.0</dependency.eclipse.jdt.version>
+		<dependency.eclipse.jdt.version>3.25.0</dependency.eclipse.jdt.version>
 		<dependency.eclipse.jetty.version>9.4.40.v20210413</dependency.eclipse.jetty.version>
 		<dependency.eclipse.platform.version>3.12.100</dependency.eclipse.platform.version>
 
-		<dependency.felix.configadmin.version>1.9.18</dependency.felix.configadmin.version>
-		<dependency.felix.eventadmin.version>1.5.0</dependency.felix.eventadmin.version>
+		<dependency.felix.configadmin.version>1.9.20</dependency.felix.configadmin.version>
+		<dependency.felix.eventadmin.version>1.6.2</dependency.felix.eventadmin.version>
 		<dependency.felix.fileinstall.version>3.6.8</dependency.felix.fileinstall.version>
-		<dependency.felix.framework.version>5.6.12</dependency.felix.framework.version>
-		<dependency.felix.metatype.version>1.2.2</dependency.felix.metatype.version>
-		<dependency.felix.scr.version>2.1.24</dependency.felix.scr.version>
-		<dependency.felix.utils.version>1.11.6</dependency.felix.utils.version>
+		<dependency.felix.framework5.version>5.6.12</dependency.felix.framework5.version>
+		<dependency.felix.metatype.version>1.2.4</dependency.felix.metatype.version>
+		<dependency.felix.scr.version>2.1.26</dependency.felix.scr.version>
+		<dependency.felix.utils.version>1.11.8</dependency.felix.utils.version>
 <!--		<dependency.felix.webconsole.version>3.1.8</dependency.felix.webconsole.version>-->
 
 <!--		<dependency.gatling.version>2.0.1</dependency.gatling.version>-->
 
+		<!-- TOCHECK -->
 		<dependency.geronimo.bundles.commons-discovery.version>0.4_1</dependency.geronimo.bundles.commons-discovery.version>
 		<dependency.geronimo.specs.activation.version>1.1</dependency.geronimo.specs.activation.version>
 <!--		<dependency.geronimo.specs.annotation.version>1.0.1</dependency.geronimo.specs.annotation.version>-->
@@ -245,7 +244,8 @@
 
 		<dependency.jboss.logging.version>3.3.0.Final</dependency.jboss.logging.version>
 		<dependency.jboss.spec.jstl>1.1.4.Final</dependency.jboss.spec.jstl>
-		<dependency.jboss.undertow.version>2.0.34.Final</dependency.jboss.undertow.version>
+		<!-- TOCHANGE to 2.2.7.Final (with Wildfly wrap dependencies) -->
+		<dependency.jboss.undertow.version>2.0.36.Final</dependency.jboss.undertow.version>
 <!--		<dependency.jboss.undertow.version>2.2.5.Final-SNAPSHOT</dependency.jboss.undertow.version>-->
 		<dependency.jboss.weld.version>2.4.5.Final</dependency.jboss.weld.version>
 		<dependency.jboss.xnio.version>3.3.8.Final</dependency.jboss.xnio.version>
@@ -1267,7 +1267,7 @@
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.framework</artifactId>
-				<version>${dependency.felix.framework.version}</version>
+				<version>${dependency.felix.framework5.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.felix</groupId>
@@ -2165,7 +2165,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-collections4</artifactId>
-				<version>${dependency.commons-collections.version}</version>
+				<version>${dependency.commons-collections4.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-beanutils</groupId>
@@ -2185,12 +2185,17 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
-				<version>${dependency.commons-lang.version}</version>
+				<version>${dependency.commons-lang3.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
 				<version>${dependency.commons-io.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-compress</artifactId>
+				<version>${dependency.commons-compress.version}</version>
 			</dependency>
 
 			<dependency>

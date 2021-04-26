@@ -13,22 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.samples.war.fragment;
+package org.ops4j.pax.web.itest.server.support.protocols.bundle;
 
+import java.io.File;
 import java.io.IOException;
-import javax.servlet.GenericServlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebServlet;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
 
-@WebServlet(name = "annotatedServlet2", urlPatterns = { "/as2", "/as2*" })
-// according to "8.1.1 @WebServlet", Classes annotated with @WebServlet class MUST extend the
-// javax.servlet.http.HttpServlet class.
-public class AnnotatedServlet2 extends GenericServlet {
+public class Handler extends URLStreamHandler {
 
 	@Override
-	public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+	protected URLConnection openConnection(URL u) throws IOException {
+		return new File(u.getPath()).toURI().toURL().openConnection();
 	}
 
 }
