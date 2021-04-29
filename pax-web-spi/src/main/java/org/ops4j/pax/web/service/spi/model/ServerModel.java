@@ -497,7 +497,7 @@ public class ServerModel implements BatchVisitor {
 		}
 
 		ServletContextModel servletContextModel = new ServletContextModel(contextPath);
-		batch.addServletContextModel(this, servletContextModel);
+		batch.addServletContextModel(servletContextModel);
 
 		LOG.info("Created new {}", servletContextModel);
 
@@ -1151,7 +1151,7 @@ public class ServerModel implements BatchVisitor {
 					+ " registration\".", model);
 			// register the model as "awaiting" without touching existing mappings and without additional
 			// check for name conflicts
-			batch.addDisabledServletModel(this, model);
+			batch.addDisabledServletModel(model);
 			return;
 		}
 
@@ -1170,7 +1170,7 @@ public class ServerModel implements BatchVisitor {
 		// available for DTO purposes
 		for (ServletModel existing : newlyDisabled) {
 			// disable it even if it can stay active in some context(s)
-			batch.disableServletModel(this, existing);
+			batch.disableServletModel(existing);
 
 			// disabled servletModel should stop causing name conflicts in given servletContext
 			contextsWithNameConflicts.entrySet().removeIf(e -> {
@@ -1186,14 +1186,14 @@ public class ServerModel implements BatchVisitor {
 		if (!contextsWithNameConflicts.isEmpty()) {
 			LOG.warn("Skipped registration of {} because of existing mappings with name {}."
 					+ " Servlet will be added as \"awaiting registration\".", model, model.getName());
-			batch.addDisabledServletModel(this, model);
+			batch.addDisabledServletModel(model);
 			return;
 		}
 
 		if (newlyDisabled.isEmpty()) {
 			// nothing prevents us from registering new model for all required contexts, because when nothing
 			// was disabled, nothing should be enabled except the new model
-			batch.addServletModel(this, model);
+			batch.addServletModel(model);
 			return;
 		}
 
@@ -1213,7 +1213,7 @@ public class ServerModel implements BatchVisitor {
 		reEnableServletModels(currentlyDisabled, currentlyEnabledByName, currentlyEnabledByPattern, model, batch);
 
 		if (currentlyDisabled.contains(model)) {
-			batch.addDisabledServletModel(this, model);
+			batch.addDisabledServletModel(model);
 		}
 	}
 
@@ -1241,7 +1241,7 @@ public class ServerModel implements BatchVisitor {
 		models.forEach(m -> {
 			modelsAndStates.put(m, !disabledServletModels.contains(m));
 		});
-		batch.removeServletModels(this, modelsAndStates);
+		batch.removeServletModels(modelsAndStates);
 
 		Map<String, Map<String, ServletModel>> currentlyEnabledByName = new HashMap<>();
 		Map<String, Map<String, ServletModel>> currentlyEnabledByPattern = new HashMap<>();
@@ -1391,7 +1391,7 @@ public class ServerModel implements BatchVisitor {
 			if (canBeEnabled) {
 				newlyDisabled.forEach(model -> {
 					// disable the one that has lost
-					batch.disableServletModel(ServerModel.this, model);
+					batch.disableServletModel(model);
 
 					// and forget about it in the snapshot
 					getServletContextModels(model).forEach(scm -> {
@@ -1412,9 +1412,9 @@ public class ServerModel implements BatchVisitor {
 							.forEach(p -> currentlyEnabledByPattern.get(sc.getContextPath()).put(p, disabled));
 				}
 				if (modelToEnable != null && modelToEnable.equals(disabled)) {
-					batch.addServletModel(this, disabled);
+					batch.addServletModel(disabled);
 				} else {
-					batch.enableServletModel(this, disabled);
+					batch.enableServletModel(disabled);
 				}
 				// remove - to check if our new model should later be added as disabled
 				iterator.remove();
@@ -1495,7 +1495,7 @@ public class ServerModel implements BatchVisitor {
 			// register the model as "awaiting" without touching existing mappings and without additional
 			// check for name conflicts. Such batch operation should only be processed by model, not by actual
 			// server runtime
-			batch.addDisabledFilterModel(this, model);
+			batch.addDisabledFilterModel(model);
 			return;
 		}
 
@@ -1536,13 +1536,13 @@ public class ServerModel implements BatchVisitor {
 		// model altering. Actual server will get list of the filters in one operation
 		for (FilterModel existing : newlyDisabled) {
 			// disable it even if it can stay active in some other context(s), not targeted by newly registered filter
-			batch.disableFilterModel(this, existing);
+			batch.disableFilterModel(existing);
 		}
 
 		// and also if we haven't disabled anything, new model will definitely be added as enabled - but it's NOT
 		// the end of processing in case of filters
 		if (newlyDisabled.isEmpty()) {
-			batch.addFilterModel(this, model);
+			batch.addFilterModel(model);
 			// no return here! (unlike in case of servlets)
 		}
 
@@ -1561,7 +1561,7 @@ public class ServerModel implements BatchVisitor {
 	@PaxWebConfiguration
 	public void removeFilterModels(List<FilterModel> models, Batch batch) {
 		// this is straightforward
-		batch.removeFilterModels(this, models);
+		batch.removeFilterModels(models);
 
 		Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> currentlyEnabledByPath = new HashMap<>();
 		Set<FilterModel> currentlyDisabled = new TreeSet<>();
@@ -1678,7 +1678,7 @@ public class ServerModel implements BatchVisitor {
 			if (canBeEnabled) {
 				newlyDisabled.forEach(model -> {
 					// disable the one that has lost
-					batch.disableFilterModel(ServerModel.this, model);
+					batch.disableFilterModel(model);
 
 					// and forget about it in the snapshot
 					getServletContextModels(model).forEach(scm -> {
@@ -1693,9 +1693,9 @@ public class ServerModel implements BatchVisitor {
 					currentlyEnabledByPath.get(sc.getContextPath()).put(disabled, null);
 				}
 				if (modelToEnable != null && modelToEnable.equals(disabled)) {
-					batch.addFilterModel(this, disabled);
+					batch.addFilterModel(disabled);
 				} else {
-					batch.enableFilterModel(this, disabled);
+					batch.enableFilterModel(disabled);
 				}
 				// remove - to check if our new model should later be added as disabled
 				iterator.remove();
@@ -1753,12 +1753,12 @@ public class ServerModel implements BatchVisitor {
 					+ ", it is already registered");
 		}
 
-		batch.addEventListenerModel(this, model);
+		batch.addEventListenerModel(model);
 	}
 
 	@PaxWebConfiguration
 	public void removeEventListenerModels(List<EventListenerModel> models, Batch batch) {
-		batch.removeEventListenerModels(this, models);
+		batch.removeEventListenerModels(models);
 	}
 
 	@PaxWebConfiguration
@@ -1772,12 +1772,12 @@ public class ServerModel implements BatchVisitor {
 					+ ", it is already registered");
 		}
 
-		batch.addContainerInitializerModel(this, model);
+		batch.addContainerInitializerModel(model);
 	}
 
 	@PaxWebConfiguration
 	public void removeContainerInitializerModels(List<ContainerInitializerModel> models, Batch batch) {
-		batch.removeContainerInitializerModels(this, models);
+		batch.removeContainerInitializerModels(models);
 	}
 
 	@PaxWebConfiguration
@@ -1786,12 +1786,12 @@ public class ServerModel implements BatchVisitor {
 			throw new IllegalArgumentException("Can't register " + model + ", it is not associated with any context");
 		}
 
-		batch.addWelcomeFileModel(this, model);
+		batch.addWelcomeFileModel(model);
 	}
 
 	@PaxWebConfiguration
 	public void removeWelcomeFileModel(WelcomeFileModel model, Batch batch) {
-		batch.removeWelcomeFileModel(this, model);
+		batch.removeWelcomeFileModel(model);
 	}
 
 	@PaxWebConfiguration
@@ -1827,7 +1827,7 @@ public class ServerModel implements BatchVisitor {
 	@PaxWebConfiguration
 	public void removeErrorPageModels(List<ErrorPageModel> models, Batch batch) {
 		// this is straightforward
-		batch.removeErrorPageModels(this, models);
+		batch.removeErrorPageModels(models);
 
 		Map<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> currentlyEnabledByPath = new HashMap<>();
 		Set<ErrorPageModel> currentlyDisabled = new TreeSet<>();
@@ -1954,7 +1954,7 @@ public class ServerModel implements BatchVisitor {
 			if (canBeEnabled) {
 				newlyDisabled.forEach(model -> {
 					// disable the one that has lost
-					batch.disableErrorPageModel(ServerModel.this, model);
+					batch.disableErrorPageModel(model);
 
 					// and forget about it in the snapshot
 					getServletContextModels(model).forEach(scm -> {
@@ -1969,9 +1969,9 @@ public class ServerModel implements BatchVisitor {
 					currentlyEnabledByPath.get(sc.getContextPath()).put(disabled, null);
 				}
 				if (modelToEnable != null && modelToEnable.equals(disabled)) {
-					batch.addErrorPageModel(this, disabled);
+					batch.addErrorPageModel(disabled);
 				} else {
-					batch.enableErrorPageModel(this, disabled);
+					batch.enableErrorPageModel(disabled);
 				}
 				// remove - to check if our new model should later be added as disabled
 				iterator.remove();
@@ -1981,7 +1981,7 @@ public class ServerModel implements BatchVisitor {
 			// if model to enable is still in the collection of currently disabled ones, it has to be added
 			// as disabled - just to know it was registered!
 			if (modelToEnable != null && currentlyDisabled.contains(modelToEnable)) {
-				batch.addDisabledErrorPageModel(this, modelToEnable);
+				batch.addDisabledErrorPageModel(modelToEnable);
 			}
 
 			if (change) {

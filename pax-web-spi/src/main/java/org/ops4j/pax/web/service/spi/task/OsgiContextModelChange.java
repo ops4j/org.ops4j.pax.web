@@ -33,6 +33,14 @@ public class OsgiContextModelChange extends Change {
 		this.servletContextModel = servletContextModel;
 	}
 
+	@Override
+	public Change uninstall() {
+		if (this.getKind() == OpCode.ADD) {
+			return new OsgiContextModelChange(OpCode.DELETE, null, osgiContextModel, null);
+		}
+		return null;
+	}
+
 	public WebContainerContext getContext() {
 		return context;
 	}

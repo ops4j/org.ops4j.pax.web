@@ -15,6 +15,8 @@
  */
 package org.ops4j.pax.web.service.spi.task;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -70,8 +72,8 @@ public class Batch {
 	 * @param model
 	 * @param servletContextModel
 	 */
-	public void addServletContextModel(ServerModel model, ServletContextModel servletContextModel) {
-		operations.add(new ServletContextModelChange(OpCode.ADD, model, servletContextModel));
+	public void addServletContextModel(ServletContextModel servletContextModel) {
+		operations.add(new ServletContextModelChange(OpCode.ADD, servletContextModel));
 	}
 
 	/**
@@ -114,21 +116,18 @@ public class Batch {
 
 	/**
 	 * Add {@link ServletModel} to {@link ServerModel}
-	 * @param serverModel
 	 * @param model
 	 */
-	public void addServletModel(ServerModel serverModel, ServletModel model,
-				OsgiContextModel ... newModels) {
-		operations.add(new ServletModelChange(OpCode.ADD, serverModel, model, newModels));
+	public void addServletModel(ServletModel model, OsgiContextModel ... newModels) {
+		operations.add(new ServletModelChange(OpCode.ADD, model, newModels));
 	}
 
 	/**
 	 * Remove {@link ServletModel} from {@link ServerModel}
-	 * @param serverModel
 	 * @param toUnregister
 	 */
-	public void removeServletModels(ServerModel serverModel, Map<ServletModel, Boolean> toUnregister) {
-		operations.add(new ServletModelChange(OpCode.DELETE, serverModel, toUnregister));
+	public void removeServletModels(Map<ServletModel, Boolean> toUnregister) {
+		operations.add(new ServletModelChange(OpCode.DELETE, toUnregister));
 	}
 
 	/**
@@ -136,79 +135,71 @@ public class Batch {
 	 * because other model is registered for the same URL pattern. Disabled models can later be registered of
 	 * existing model with higher ranking is unregistered.
 	 *
-	 * @param serverModel
 	 * @param model
 	 */
-	public void addDisabledServletModel(ServerModel serverModel, ServletModel model) {
-		operations.add(new ServletModelChange(OpCode.ADD, serverModel, model, true));
+	public void addDisabledServletModel(ServletModel model) {
+		operations.add(new ServletModelChange(OpCode.ADD, model, true));
 	}
 
 	/**
 	 * Enable {@link ServletModel}
 	 *
-	 * @param serverModel
 	 * @param model
 	 */
-	public void enableServletModel(ServerModel serverModel, ServletModel model) {
-		operations.add(new ServletModelChange(OpCode.ENABLE, serverModel, model));
+	public void enableServletModel(ServletModel model) {
+		operations.add(new ServletModelChange(OpCode.ENABLE, model));
 	}
 
 	/**
 	 * Disable {@link ServletModel} from {@link ServerModel}
 	 *
-	 * @param serverModel
 	 * @param model
 	 */
-	public void disableServletModel(ServerModel serverModel, ServletModel model) {
-		operations.add(new ServletModelChange(OpCode.DISABLE, serverModel, model));
+	public void disableServletModel(ServletModel model) {
+		operations.add(new ServletModelChange(OpCode.DISABLE, model));
 	}
 
 	/**
 	 * Add {@link FilterModel} to {@link ServerModel}
-	 * @param serverModel
 	 * @param model
 	 */
-	public void addFilterModel(ServerModel serverModel, FilterModel model, OsgiContextModel ... newModels) {
-		operations.add(new FilterModelChange(OpCode.ADD, serverModel, model, newModels));
+	public void addFilterModel(FilterModel model, OsgiContextModel ... newModels) {
+		operations.add(new FilterModelChange(OpCode.ADD, model, newModels));
 	}
 
 	/**
 	 * Remove {@link ServletModel} from {@link ServerModel}
-	 * @param serverModel
 	 * @param toUnregister
 	 */
-	public void removeFilterModels(ServerModel serverModel, List<FilterModel> toUnregister) {
-		operations.add(new FilterModelChange(OpCode.DELETE, serverModel, toUnregister));
+	public void removeFilterModels(List<FilterModel> toUnregister) {
+		operations.add(new FilterModelChange(OpCode.DELETE, toUnregister));
 	}
 
 	/**
 	 * Add {@link FilterModel} to {@link ServerModel} but as <em>disabled</em> model
 	 *
-	 * @param filterModel
 	 * @param model
 	 */
-	public void addDisabledFilterModel(ServerModel serverModel, FilterModel model) {
-		operations.add(new FilterModelChange(OpCode.ADD, serverModel, model, true));
+	public void addDisabledFilterModel(FilterModel model) {
+		operations.add(new FilterModelChange(OpCode.ADD, model, true));
 	}
 
 	/**
 	 * Enable {@link FilterModel}
 	 *
-	 * @param serverModel
 	 * @param model
 	 */
-	public void enableFilterModel(ServerModel serverModel, FilterModel model) {
-		operations.add(new FilterModelChange(OpCode.ENABLE, serverModel, model));
+	public void enableFilterModel(FilterModel model) {
+		operations.add(new FilterModelChange(OpCode.ENABLE, model));
 	}
 
 	/**
 	 * Disable {@link FilterModel} from {@link ServerModel}
 	 *
-	 * @param serverModel
 	 * @param model
 	 */
-	public void disableFilterModel(ServerModel serverModel, FilterModel model) {
-		operations.add(new FilterModelChange(OpCode.DISABLE, serverModel, model));
+	public void disableFilterModel(FilterModel model) {
+		operations.add(new FilterModelChange(OpCode.DISABLE, model));
 	}
 
 	/**
@@ -225,51 +216,45 @@ public class Batch {
 
 	/**
 	 * Add {@link ErrorPageModel} to {@link ServerModel}
-	 * @param serverModel
 	 * @param model
 	 */
-	public void addErrorPageModel(ServerModel serverModel, ErrorPageModel model,
-				OsgiContextModel ... newModels) {
-		operations.add(new ErrorPageModelChange(OpCode.ADD, serverModel, model, newModels));
+	public void addErrorPageModel(ErrorPageModel model, OsgiContextModel ... newModels) {
+		operations.add(new ErrorPageModelChange(OpCode.ADD, model, newModels));
 	}
 
 	/**
 	 * Remove {@link ErrorPageModel} from {@link ServerModel}
-	 * @param serverModel
 	 * @param toUnregister
 	 */
-	public void removeErrorPageModels(ServerModel serverModel, List<ErrorPageModel> toUnregister) {
-		operations.add(new ErrorPageModelChange(OpCode.DELETE, serverModel, toUnregister));
+	public void removeErrorPageModels(List<ErrorPageModel> toUnregister) {
+		operations.add(new ErrorPageModelChange(OpCode.DELETE, toUnregister));
 	}
 
 	/**
 	 * Add {@link ErrorPageModel} to {@link ServerModel} but as <em>disabled</em> model
 	 *
-	 * @param serverModel
 	 * @param model
 	 */
-	public void addDisabledErrorPageModel(ServerModel serverModel, ErrorPageModel model) {
-		operations.add(new ErrorPageModelChange(OpCode.ADD, serverModel, model, true));
+	public void addDisabledErrorPageModel(ErrorPageModel model) {
+		operations.add(new ErrorPageModelChange(OpCode.ADD, model, true));
 	}
 
 	/**
 	 * Enable {@link ErrorPageModel}
 	 *
-	 * @param serverModel
 	 * @param model
 	 */
-	public void enableErrorPageModel(ServerModel serverModel, ErrorPageModel model) {
-		operations.add(new ErrorPageModelChange(OpCode.ENABLE, serverModel, model));
+	public void enableErrorPageModel(ErrorPageModel model) {
+		operations.add(new ErrorPageModelChange(OpCode.ENABLE, model));
 	}
 
 	/**
 	 * Disable {@link ErrorPageModel} in {@link ServerModel}
 	 *
-	 * @param serverModel
 	 * @param model
 	 */
-	public void disableErrorPageModel(ServerModel serverModel, ErrorPageModel model) {
-		operations.add(new ErrorPageModelChange(OpCode.DISABLE, serverModel, model));
+	public void disableErrorPageModel(ErrorPageModel model) {
+		operations.add(new ErrorPageModelChange(OpCode.DISABLE, model));
 	}
 
 	/**
@@ -284,40 +269,36 @@ public class Batch {
 
 	/**
 	 * Add new {@link EventListenerModel}
-	 * @param serverModel
 	 * @param model
 	 */
-	public void addEventListenerModel(ServerModel serverModel, EventListenerModel model,
+	public void addEventListenerModel(EventListenerModel model,
 				OsgiContextModel ... newModels) {
-		operations.add(new EventListenerModelChange(OpCode.ADD, serverModel, model, newModels));
+		operations.add(new EventListenerModelChange(OpCode.ADD, model, newModels));
 	}
 
 	/**
 	 * Remove existing {@link EventListenerModel}
-	 * @param serverModel
 	 * @param models
 	 */
-	public void removeEventListenerModels(ServerModel serverModel, List<EventListenerModel> models) {
-		operations.add(new EventListenerModelChange(OpCode.DELETE, serverModel, models));
+	public void removeEventListenerModels(List<EventListenerModel> models) {
+		operations.add(new EventListenerModelChange(OpCode.DELETE, models));
 	}
 
 	/**
 	 * Add new {@link ContainerInitializerModel}
-	 * @param serverModel
 	 * @param model
 	 */
-	public void addContainerInitializerModel(ServerModel serverModel, ContainerInitializerModel model,
+	public void addContainerInitializerModel(ContainerInitializerModel model,
 			OsgiContextModel ... newModels) {
-		operations.add(new ContainerInitializerModelChange(OpCode.ADD, serverModel, model, newModels));
+		operations.add(new ContainerInitializerModelChange(OpCode.ADD, model, newModels));
 	}
 
 	/**
 	 * Remove existing {@link ContainerInitializerModel}
-	 * @param serverModel
 	 * @param models
 	 */
-	public void removeContainerInitializerModels(ServerModel serverModel, List<ContainerInitializerModel> models) {
-		operations.add(new ContainerInitializerModelChange(OpCode.DELETE, serverModel, models));
+	public void removeContainerInitializerModels(List<ContainerInitializerModel> models) {
+		operations.add(new ContainerInitializerModelChange(OpCode.DELETE, models));
 	}
 
 	/**
@@ -325,9 +306,8 @@ public class Batch {
 	 * @param serverModel
 	 * @param model
 	 */
-	public void addWelcomeFileModel(ServerModel serverModel, WelcomeFileModel model,
-				OsgiContextModel ... newModels) {
-		operations.add(new WelcomeFileModelChange(OpCode.ADD, serverModel, model, newModels));
+	public void addWelcomeFileModel(WelcomeFileModel model, OsgiContextModel ... newModels) {
+		operations.add(new WelcomeFileModelChange(OpCode.ADD, model, newModels));
 	}
 
 	/**
@@ -335,8 +315,8 @@ public class Batch {
 	 * @param serverModel
 	 * @param model
 	 */
-	public void removeWelcomeFileModel(ServerModel serverModel, WelcomeFileModel model) {
-		operations.add(new WelcomeFileModelChange(OpCode.DELETE, serverModel, model));
+	public void removeWelcomeFileModel(WelcomeFileModel model) {
+		operations.add(new WelcomeFileModelChange(OpCode.DELETE, model));
 	}
 
 	/**
@@ -350,6 +330,23 @@ public class Batch {
 		for (Change op : operations) {
 			op.accept(visitor);
 		}
+	}
+
+	/**
+	 * A {@link Batch} can create the <em>uninstallation batch</em> consisting of all the operations reversed.
+	 * TODO: check if we can/should filter some of the operations
+	 * @return
+	 */
+	public Batch uninstall(String description) {
+		Batch b = new Batch(description);
+
+		List<Change> reversed = new ArrayList<>(operations);
+		Collections.reverse(reversed);
+		for (Change c : reversed) {
+			b.operations.add(c.uninstall());
+		}
+
+		return b;
 	}
 
 	@Override

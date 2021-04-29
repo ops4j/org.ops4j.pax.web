@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.spi.model.views;
 
+import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
 import org.osgi.framework.Bundle;
 
@@ -74,6 +75,6 @@ public interface WebAppWebContainerView extends PaxWebContainerView {
 	 */
 	void releaseContext(Bundle bundle, String contextPath);
 
-	void justDoIt(String contextPath);
+	void sendBatch(Batch batch);
 
 }

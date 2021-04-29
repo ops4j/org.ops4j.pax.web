@@ -1107,7 +1107,6 @@ public class BundleWebApplicationClassSpace {
 					sciToHt.computeIfAbsent(sci, s -> new HashSet<>()).add(loadedClass);
 				}
 			}
-			System.out.println();
 		}
 
 		if (thereAreHTAnnotations) {

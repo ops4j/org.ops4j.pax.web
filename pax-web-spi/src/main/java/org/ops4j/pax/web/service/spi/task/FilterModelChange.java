@@ -20,40 +20,30 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
-import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 
 public class FilterModelChange extends Change {
 
-	private final ServerModel serverModel;
 	private FilterModel filterModel;
 	private final List<FilterModel> filterModels = new LinkedList<>();
 	private boolean disabled;
 	private final List<OsgiContextModel> newModels = new LinkedList<>();
 
-	public FilterModelChange(OpCode op, ServerModel serverModel, FilterModel filterModel,
-				OsgiContextModel ... newModels) {
-		this(op, serverModel, filterModel, false, newModels);
+	public FilterModelChange(OpCode op, FilterModel filterModel, OsgiContextModel ... newModels) {
+		this(op, filterModel, false, newModels);
 	}
 
-	public FilterModelChange(OpCode op, ServerModel serverModel, List<FilterModel> filterModels) {
+	public FilterModelChange(OpCode op, List<FilterModel> filterModels) {
 		super(op);
-		this.serverModel = serverModel;
 		this.filterModels.addAll(filterModels);
 	}
 
-	public FilterModelChange(OpCode op, ServerModel serverModel, FilterModel filterModel, boolean disabled,
-				OsgiContextModel ... newModels) {
+	public FilterModelChange(OpCode op, FilterModel filterModel, boolean disabled, OsgiContextModel ... newModels) {
 		super(op);
-		this.serverModel = serverModel;
 		this.filterModel = filterModel;
 		this.filterModels.add(filterModel);
 		this.disabled = disabled;
 		this.newModels.addAll(Arrays.asList(newModels));
-	}
-
-	public ServerModel getServerModel() {
-		return serverModel;
 	}
 
 	public FilterModel getFilterModel() {

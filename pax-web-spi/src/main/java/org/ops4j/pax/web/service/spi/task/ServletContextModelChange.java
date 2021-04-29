@@ -15,7 +15,6 @@
  */
 package org.ops4j.pax.web.service.spi.task;
 
-import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 
 /**
@@ -23,17 +22,23 @@ import org.ops4j.pax.web.service.spi.model.ServletContextModel;
  */
 public class ServletContextModelChange extends Change {
 
-	private final ServerModel serverModel;
 	private final ServletContextModel servletContextModel;
 
-	public ServletContextModelChange(OpCode op, ServerModel model, ServletContextModel servletContextModel) {
+	public ServletContextModelChange(OpCode op, ServletContextModel servletContextModel) {
 		super(op);
-		this.serverModel = model;
 		this.servletContextModel = servletContextModel;
 	}
 
 	public ServletContextModel getServletContextModel() {
 		return servletContextModel;
+	}
+
+	@Override
+	public Change uninstall() {
+		if (this.getKind() == OpCode.ADD) {
+			return new ServletContextModelChange(OpCode.DELETE, servletContextModel);
+		}
+		return null;
 	}
 
 	@Override

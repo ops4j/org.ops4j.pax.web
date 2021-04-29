@@ -163,12 +163,10 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 			}
 		};
 
-		ServerModel server = new ServerModel(new Utils.SameThreadExecutor());
-
 		Batch batch = new Batch("Register Single Servlet");
 
 		ServletContextModel scm = new ServletContextModel("/c");
-		batch.addServletContextModel(server, scm);
+		batch.addServletContextModel(scm);
 
 		OsgiContextModel osgiContext = new OsgiContextModel(wcc, bundle, "/c", false);
 		batch.addOsgiContextModel(osgiContext, scm);
@@ -176,7 +174,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		Map<String, String> initParams = new HashMap<>();
 		initParams.put("p1", "v1");
 
-		batch.addServletModel(server, new ServletModel.Builder()
+		batch.addServletModel(new ServletModel.Builder()
 				.withServletName("my-servlet")
 				.withUrlPatterns(new String[] { "/s/*" })
 				.withServlet(servlet)
@@ -343,12 +341,12 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		Batch batch = new Batch("Register Servlet and Event Listener");
 
 		ServletContextModel scm = new ServletContextModel("/c");
-		batch.addServletContextModel(server, scm);
+		batch.addServletContextModel(scm);
 
 		OsgiContextModel osgiContext = new OsgiContextModel(new DefaultHttpContext(bundle), bundle, "/c", false);
 		batch.addOsgiContextModel(osgiContext, scm);
 
-		batch.addServletModel(server, new ServletModel.Builder()
+		batch.addServletModel(new ServletModel.Builder()
 				.withServletName("my-servlet")
 				.withUrlPatterns(new String[] { "/s/*" })
 				.withServlet(servlet)
@@ -358,7 +356,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 
 		EventListenerModel listenerModel = new EventListenerModel(listener);
 		listenerModel.addContextModel(osgiContext);
-		batch.addEventListenerModel(server, listenerModel);
+		batch.addEventListenerModel(listenerModel);
 
 		controller.sendBatch(batch);
 
@@ -498,7 +496,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 		Map<String, String> initParams = new HashMap<>();
 		initParams.put("p1", "v1");
 
-		batch.addServletModel(server, new ServletModel.Builder()
+		batch.addServletModel(new ServletModel.Builder()
 				.withServletName("my-servlet1")
 				.withUrlPatterns(new String[] { "/s/*" }) // responds to /*/s/* depending on context selector
 				.withServletReference(ref)
@@ -507,7 +505,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 				.withOsgiContextModel(osgiContextE) // responds to /e/s/*
 				.withRegisteringBundle(bundle)
 				.build());
-		batch.addServletModel(server, new ServletModel.Builder()
+		batch.addServletModel(new ServletModel.Builder()
 				.withServletName("my-servlet2")
 				.withUrlPatterns(new String[] { "/s2/*" }) // responds to /*/s2/* depending on context selector
 				.withServletReference(ref)

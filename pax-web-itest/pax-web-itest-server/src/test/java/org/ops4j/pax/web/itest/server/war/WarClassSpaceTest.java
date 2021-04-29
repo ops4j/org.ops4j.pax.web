@@ -19,7 +19,6 @@ import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
-
 import javax.servlet.ServletContainerInitializer;
 
 import org.junit.Test;
@@ -39,8 +38,14 @@ import org.ops4j.pax.web.itest.server.support.war.scis.SCIFromTheWab2;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
 
+import static org.hamcrest.CoreMatchers.endsWith;
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
+import static org.ops4j.pax.web.itest.server.support.Utils.httpGET;
 
 @RunWith(Parameterized.class)
 public class WarClassSpaceTest extends MultiContainerTestSupport {
@@ -70,6 +75,8 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 				new File("src/test/resources/bundles/the-wab-itself/WEB-INF/web.xml").getCanonicalPath());
 		when(wab.findEntries("WEB-INF", "web.xml", false))
 				.thenReturn(Collections.enumeration(Collections.singletonList(new URL(webXmlLocation))));
+		when(wab.loadClass(anyString()))
+				.thenAnswer(i -> WarClassSpaceTest.class.getClassLoader().loadClass(i.getArgument(0, String.class)));
 
 		// 2. the fragment bundle attached to the WAB
 		Bundle wabFragment = mockBundle("the-wab-fragment", false);
@@ -184,27 +191,26 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 						new File(cb3Services, ServletContainerInitializer.class.getName()).toURI().toURL()))
 		);
 
-		// Mockito weirdness...
-		when(wab.loadClass("org.ops4j.pax.web.itest.server.support.war.scis.SCIFromTheWab1"))
-				.thenReturn((Class) SCIFromTheWab1.class);
-		when(wab.loadClass("org.ops4j.pax.web.itest.server.support.war.scis.SCIFromTheWab2"))
-				.thenReturn((Class) SCIFromTheWab2.class);
-		when(wab.loadClass("org.ops4j.pax.web.itest.server.support.war.scis.SCIFromTheFragment1"))
-				.thenReturn((Class) SCIFromTheFragment1.class);
-		when(wab.loadClass("org.ops4j.pax.web.itest.server.support.war.scis.SCIFromTheFragment2"))
-				.thenReturn((Class) SCIFromTheFragment2.class);
-		when(wab.loadClass("org.ops4j.pax.web.itest.server.support.war.jar.scis.SCIFromJar"))
-				.thenReturn((Class) SCIFromJar.class);
-		when(cb1.loadClass("org.ops4j.pax.web.itest.server.support.war.cb1.scis.SCIFromContainerBundle1"))
-				.thenReturn((Class) SCIFromContainerBundle1.class);
-		when(cb1.loadClass("org.ops4j.pax.web.itest.server.support.war.cf1.scis.SCIFromContainerFragment1"))
-				.thenReturn((Class) SCIFromContainerFragment1.class);
-		when(cb2.loadClass("org.ops4j.pax.web.itest.server.support.war.cb2.scis.SCIFromContainerBundle2"))
-				.thenReturn((Class) SCIFromContainerBundle2.class);
-		when(cb2.loadClass("org.ops4j.pax.web.itest.server.support.war.cf2.scis.SCIFromContainerFragment2"))
-				.thenReturn((Class) SCIFromContainerFragment2.class);
-		when(cb3.loadClass("org.ops4j.pax.web.itest.server.support.war.cb3.scis.SCIFromContainerBundle3"))
-				.thenReturn((Class) SCIFromContainerBundle3.class);
+		doReturn(SCIFromTheWab1.class)
+				.when(wab).loadClass("org.ops4j.pax.web.itest.server.support.war.scis.SCIFromTheWab1");
+		doReturn(SCIFromTheWab2.class)
+				.when(wab).loadClass("org.ops4j.pax.web.itest.server.support.war.scis.SCIFromTheWab2");
+		doReturn(SCIFromTheFragment1.class)
+				.when(wab).loadClass("org.ops4j.pax.web.itest.server.support.war.scis.SCIFromTheFragment1");
+		doReturn(SCIFromTheFragment2.class)
+				.when(wab).loadClass("org.ops4j.pax.web.itest.server.support.war.scis.SCIFromTheFragment2");
+		doReturn(SCIFromJar.class)
+				.when(wab).loadClass("org.ops4j.pax.web.itest.server.support.war.jar.scis.SCIFromJar");
+		doReturn(SCIFromContainerBundle1.class)
+				.when(cb1).loadClass("org.ops4j.pax.web.itest.server.support.war.cb1.scis.SCIFromContainerBundle1");
+		doReturn(SCIFromContainerFragment1.class)
+				.when(cb1).loadClass("org.ops4j.pax.web.itest.server.support.war.cf1.scis.SCIFromContainerFragment1");
+		doReturn(SCIFromContainerBundle2.class)
+				.when(cb2).loadClass("org.ops4j.pax.web.itest.server.support.war.cb2.scis.SCIFromContainerBundle2");
+		doReturn(SCIFromContainerFragment2.class)
+				.when(cb2).loadClass("org.ops4j.pax.web.itest.server.support.war.cf2.scis.SCIFromContainerFragment2");
+		doReturn(SCIFromContainerBundle3.class)
+				.when(cb3).loadClass("org.ops4j.pax.web.itest.server.support.war.cb3.scis.SCIFromContainerBundle3");
 
 		// /data/sources/github.com/ops4j/org.ops4j.pax.web/pax-web-itest/pax-web-itest-server/src/test/resources/bundles/the-wab-itself/WEB-INF/classes/
 		File wabClasses = new File("src/test/resources/bundles/the-wab-itself/WEB-INF/classes/");
@@ -237,7 +243,12 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 		);
 
 		installWab(wab);
+
+		assertThat(httpGET(port, "/wab/servlet"), endsWith("Hello"));
+
 		uninstallWab(wab);
+
+		assertThat(httpGET(port, "/wab/servlet"), startsWith("HTTP/1.1 404"));
 
 		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);
 		ServiceModelInternals serviceModelInternals = serviceModelInternals(wab);

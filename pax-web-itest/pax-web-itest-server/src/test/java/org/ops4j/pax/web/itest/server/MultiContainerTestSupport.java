@@ -55,6 +55,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.felix.utils.extender.Extension;
 import org.apache.jasper.servlet.JspServlet;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.runners.Parameterized;
@@ -132,6 +133,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -199,13 +201,22 @@ public class MultiContainerTestSupport {
 	}
 
 	@BeforeClass
-	public static void initURLHandlers() {
+	public static void initURLHandlersAndLogging() {
 		String pkgs = System.getProperty("java.protocol.handler.pkgs");
 		if (pkgs == null) {
-			pkgs = "";
+			pkgs = "org.ops4j.pax.web.itest.server.support.protocols";
+		} else {
+			pkgs += "|org.ops4j.pax.web.itest.server.support.protocols";
 		}
-		pkgs += "|org.ops4j.pax.web.itest.server.support.protocols";
 		System.setProperty("java.protocol.handler.pkgs", pkgs);
+
+		SLF4JBridgeHandler.removeHandlersForRootLogger();
+		SLF4JBridgeHandler.install();
+	}
+
+	@AfterClass
+	public static void cleanupLogging() {
+		SLF4JBridgeHandler.uninstall();
 	}
 
 	public void configurePort() throws Exception {
@@ -716,6 +727,7 @@ public class MultiContainerTestSupport {
 
 	protected void uninstallWab(final Bundle wab) {
 		try {
+			when(wab.getState()).thenReturn(Bundle.STOPPING);
 			wabs.remove(wab).destroy();
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage(), e);

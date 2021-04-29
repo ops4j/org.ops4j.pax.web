@@ -20,7 +20,7 @@ import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 
-@WebServlet(name = "annotatedServlet1", urlPatterns = { "/as1", "/as1*" }, initParams = {
+@WebServlet(name = "annotatedServlet1", urlPatterns = { "/as1", "/as1/*" }, initParams = {
 		@WebInitParam(name = "param1", value = "value1"),
 		@WebInitParam(name = "param2", value = "value2")
 }, loadOnStartup = 3)

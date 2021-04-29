@@ -58,4 +58,12 @@ public abstract class Change {
 		return Collections.emptyList();
 	}
 
+	/**
+	 * A {@link Change} may be reversed, which is handy when rolling back existing {@link Batch}.
+	 * @return
+	 */
+	public Change uninstall() {
+		return null;
+	}
+
 }

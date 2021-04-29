@@ -354,8 +354,8 @@ public class WarExtenderContext implements WebContainerListener {
 		defaultWebXml.setReplaceWelcomeFiles(true);
 		try {
 			URL defaultWebXmlURI = OsgiContextModel.class.getResource("/org/ops4j/pax/web/service/spi/model/default-web.xml");
-			webApplicationParser.parseWebXml(defaultWebXmlURI, defaultWebXml, false);
 			defaultWebXml.setURL(defaultWebXmlURI);
+			webApplicationParser.parseWebXml(defaultWebXmlURI, defaultWebXml, false);
 		} catch (IOException e) {
 			LOG.warn("Failure parsing default web.xml: {}", e.getMessage(), e);
 		}
@@ -407,9 +407,11 @@ public class WarExtenderContext implements WebContainerListener {
 				LOG.trace("Processing {}", next);
 
 				WebXml webXml = new WebXml();
+				webXml.setURL(next);
 				try {
-					webApplicationParser.parseWebXml(next, webXml, false);
-					webXml.setURL(next);
+					if (!webApplicationParser.parseWebXml(next, webXml, false)) {
+						webXml = null;
+					}
 				} catch (IOException e) {
 					LOG.warn("Failure parsing web.xml for bundle {}: {}", bundle, e.getMessage(), e);
 				}

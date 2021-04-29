@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.annotation.HandlesTypes;
@@ -42,9 +44,14 @@ import org.apache.tomcat.util.descriptor.web.WebXml;
 import org.apache.tomcat.util.descriptor.web.WebXmlParser;
 import org.ops4j.pax.web.extender.war.internal.WarExtenderContext;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.spi.context.DefaultHttpContext;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent;
 import org.ops4j.pax.web.service.spi.model.views.WebAppWebContainerView;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
+import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.util.WebContainerManager;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
@@ -140,6 +147,9 @@ public class BundleWebApplication {
 	 * </ul>
 	 */
 	private final Map<ServletContainerInitializer, Set<Class<?>>> sciToHt = new LinkedHashMap<>();
+
+	/** Final batch of the changes/configuration operations related to full web application being deployed */
+	private Batch batch = null;
 
 	public BundleWebApplication(Bundle bundle, WebContainerManager webContainerManager,
 			WarExtenderContext extenderContext, ExecutorService pool) {
@@ -622,7 +632,7 @@ public class BundleWebApplication {
 				}
 
 				// this is were the full WAR/WAB information is passed as a model to WebContainer (through special view)
-				view.justDoIt(contextPath);
+				view.sendBatch(batch);
 
 				if (deploymentState.compareAndSet(state, State.DEPLOYED)) {
 					extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.DEPLOYED, bundle));
@@ -663,7 +673,7 @@ public class BundleWebApplication {
 		}
 		try {
 			// 1. undeploy all the web elements from current WAB
-			view.justDoIt("end of work");
+			view.sendBatch(batch.uninstall("Undeployment of " + this));
 
 			// 2. free the context
 			releaseContext(view, true);
@@ -1048,7 +1058,130 @@ public class BundleWebApplication {
 	 * {@code org.ops4j.pax.web.service.spi.model} package.
 	 */
 	private void buildModel() {
+		final Batch wabBatch = new Batch(this.toString());
 
+		ServletContextModel scm = new ServletContextModel(this.contextPath);
+		wabBatch.addServletContextModel(scm);
+
+		// TOCHECK: WebContainerContext that implements handleSecurity properly or just use login
+		//          configuration / security mapping from the WAB?
+		// TOCHECK: 3rd option for whiteboard/httpservice context model?
+		final OsgiContextModel ocm = new OsgiContextModel(new DefaultHttpContext(this.bundle),
+				this.bundle, this.contextPath, false);
+		wabBatch.addOsgiContextModel(ocm, scm);
+
+		// elements are processed to create a Batch that'll be send to a dedicated view of a WebContainer. Tomcat
+		// configures its context directly in org.apache.catalina.startup.ContextConfig.configureContext()
+
+		// web.xml (`http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd`) defines the below top-level elements.
+		// "J" means "processed by Jetty 9", "T" means "processed by Tomcat 9"
+		//  - [JT] <absolute-ordering>
+		//  - [..] <administered-object>
+		//  - [..] <connection-factory>
+		//  - [JT] <context-param>
+		//  - [..] <data-source>
+		//  - [..] <default-context-path>
+		//  - [JT] <deny-uncovered-http-methods>
+		//  - [..] <description>
+		//  - [JT] <display-name>
+		//  - [JT] <distributable>
+		//  - [.T] <ejb-local-ref>
+		//  - [.T] <ejb-ref>
+		//  - [JT] <env-entry>
+		//  - [JT] <error-page>
+		//  - [JT] <filter>
+		//  - [JT] <filter-mapping>
+		//  - [..] <icon>
+		//  - [..] <jms-connection-factory>
+		//  - [..] <jms-destination>
+		//  - [JT] <jsp-config>
+		//  - [JT] <listener>
+		//  - [JT] <locale-encoding-mapping-list>
+		//  - [JT] <login-config>
+		//  - [..] <mail-session>
+		//  - [.T] <message-destination>
+		//  - [JT] <message-destination-ref>
+		//  - [JT] <mime-mapping>
+		//  - [..] <module-name>
+		//  - [..] <persistence-context-ref>
+		//  - [..] <persistence-unit-ref>
+		//  - [JT] <post-construct>
+		//  - [JT] <pre-destroy>
+		//  - [.T] <request-character-encoding>
+		//  - [JT] <resource-env-ref>
+		//  - [JT] <resource-ref>
+		//  - [.T] <response-character-encoding>
+		//  - [JT] <security-constraint>
+		//  - [JT] <security-role>
+		//  - [.T] <service-ref>
+		//  - [JT] <servlet>
+		//  - [JT] <servlet-mapping>
+		//  - [JT] <session-config>
+		//  - [JT] <welcome-file-list>
+		//
+		// See:
+		// Tomcat:
+		//  - parsing: org.apache.tomcat.util.descriptor.web.WebRuleSet.addRuleInstances()
+		//  - configuration: org.apache.catalina.startup.ContextConfig.configureContext()
+		// Jetty:
+		//  - parsing: org.eclipse.jetty.webapp.StandardDescriptorProcessor + org.eclipse.jetty.plus.webapp.PlusDescriptorProcessor
+		//  - configuration: org.eclipse.jetty.webapp.MetaData.resolve()
+
+		// The detailed context configuration process in Tomcat is:
+		//  - public id
+		//  - effective major/minor version
+		//  - context (init) parameters
+		//  - deny uncovered Http methods
+		//  - error pages
+		//  - filters and their mappings
+		//  - jsp config descriptor
+		//  - listeners
+		//  - locale encoding mapping paramters
+		//  - login config
+		//  - metadata complete (a.k.a. "ignore annotations") - Tomcat calls org.apache.tomcat.InstanceManager.destroyInstance()
+		//    on an instance of filter/servlet after f.destroy()/s.destroy() if annotations are not ignored.
+		//    the annotations are javax.annotation.PostConstruct/javax.annotation.PreDestroy
+		//  - mime mapping
+		//  - request character encoding
+		//  - response character encoding
+		//  - security constraints
+		//  - security roles
+		//  - servlets, their security roles, multipart config and mappings
+		//  - session config and session cookie config
+		//  - welcome files
+		//  - jsp property groups (need to be configured after servlets)
+		//  - postconstruct and predestroy methods
+		//
+		// These web elements are configured in Tomcat context's org.apache.catalina.Context.getNamingResources():
+		//  - ejb local refs
+		//  - ejbs
+		//  - env entries
+		//  - message destination refs
+		//  - resource env refs
+		//  - resource refs
+		//  - service refs
+
+		final Map<String, List<String>> servletMappings = new LinkedHashMap<>();
+		mainWebXml.getServletMappings().forEach((pattern, sn) -> {
+			servletMappings.computeIfAbsent(sn, n -> new LinkedList<>()).add(pattern);
+		});
+		mainWebXml.getServlets().forEach((sn, def) -> {
+			// TODO: resources, which require conversion from javax.servlet.Servlet servlet class
+			Class<Servlet> servletClass = null;
+			try {
+				servletClass = (Class<Servlet>) classLoader.loadClass(def.getServletClass());
+			} catch (ClassNotFoundException e) {
+				LOG.warn("Can't load servlet class {} in the context of {}: {}",
+						def.getServletClass(), this, e.getMessage(), e);
+				return;
+			}
+			String[] mappings = servletMappings.get(sn).toArray(new String[0]);
+			ServletModel servletModel = new ServletModel(mappings, servletClass, null, null, false, null);
+			servletModel.addContextModel(ocm);
+			wabBatch.addServletModel(servletModel, ocm);
+		});
+
+		this.batch = wabBatch;
 	}
 
 	// --- Web Application model access

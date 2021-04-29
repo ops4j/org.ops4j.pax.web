@@ -564,7 +564,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 					// probably we have to unregister SCI for JSP
 					for (ContainerInitializerModel cim : serviceModel.getContainerInitializerModels()) {
 						if (model == cim.getRelatedModel()) {
-							batch.removeContainerInitializerModels(serverModel, Collections.singletonList(cim));
+							batch.removeContainerInitializerModels(Collections.singletonList(cim));
 						}
 					}
 				}
@@ -603,7 +603,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 		ServletModel servletModel = new ServletModel.Builder()
 				.withAlias(alias)
-				.withServletName("/".equals(alias) ? "default" : String.format("default-%s", UUID.randomUUID().toString()))
+				.withServletName("/".equals(alias) ? "default" : String.format("default-%s", UUID.randomUUID()))
 				.withServletSupplier(resourceServlet.supplier)
 				.withLoadOnStartup(1)
 				.withAsyncSupported(true)
@@ -1675,7 +1675,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			// unlike with HttpService.registerResources(), we already have a model here, but the servlet
 			// doesn't yet have a name
 			String name = Arrays.asList(mapping).contains("/")
-					? "default" : String.format("default-%s", UUID.randomUUID().toString());
+					? "default" : String.format("default-%s", UUID.randomUUID());
 			model.setName(name);
 			model.setElementSupplier(resourceServlet.supplier);
 
@@ -1835,7 +1835,12 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 	private class WebAppWebContainer implements WebAppWebContainerView {
 
 		@Override
-		public void justDoIt(String contextPath) {
+		public void sendBatch(final Batch batch) {
+			serverModel.runSilently(() -> {
+				serverController.sendBatch(batch);
+				batch.accept(serverModel);
+				return null;
+			});
 		}
 
 		@Override
@@ -1845,7 +1850,6 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 		@Override
 		public void releaseContext(Bundle bundle, String contextPath) {
-
 		}
 	}
 

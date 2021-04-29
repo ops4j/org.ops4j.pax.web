@@ -16,46 +16,47 @@
 package org.ops4j.pax.web.service.spi.task;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
-import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 
 public class ServletModelChange extends Change {
 
-	private final ServerModel serverModel;
 	private ServletModel servletModel;
 	private final Map<ServletModel, Boolean> servletModels = new LinkedHashMap<>();
 	private boolean disabled;
 	private final List<OsgiContextModel> newModels = new LinkedList<>();
 
-	public ServletModelChange(OpCode op, ServerModel serverModel, ServletModel servletModel,
-				OsgiContextModel ... newModels) {
-		this(op, serverModel, servletModel, false, newModels);
+	public ServletModelChange(OpCode op, ServletModel servletModel, OsgiContextModel ... newModels) {
+		this(op, servletModel, false, newModels);
 	}
 
-	public ServletModelChange(OpCode op, ServerModel serverModel, Map<ServletModel, Boolean> servletModels) {
+	public ServletModelChange(OpCode op, Map<ServletModel, Boolean> servletModels) {
 		super(op);
-		this.serverModel = serverModel;
 		this.servletModels.putAll(servletModels);
 	}
 
-	public ServletModelChange(OpCode op, ServerModel serverModel, ServletModel servletModel, boolean disabled,
-				OsgiContextModel ... newModels) {
+	public ServletModelChange(OpCode op, ServletModel servletModel, boolean disabled, OsgiContextModel ... newModels) {
 		super(op);
-		this.serverModel = serverModel;
 		this.servletModel = servletModel;
 		this.servletModels.put(servletModel, !disabled);
 		this.disabled = disabled;
 		this.newModels.addAll(Arrays.asList(newModels));
 	}
 
-	public ServerModel getServerModel() {
-		return serverModel;
+	@Override
+	public Change uninstall() {
+		if (this.getKind() == OpCode.ADD) {
+			Map<ServletModel, Boolean> models = new HashMap<>();
+			models.put(this.servletModel, true);
+			return new ServletModelChange(OpCode.DELETE, models);
+		}
+		return null;
 	}
 
 	public ServletModel getServletModel() {

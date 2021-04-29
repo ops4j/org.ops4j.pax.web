@@ -20,33 +20,24 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
-import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 
 public class EventListenerModelChange extends Change {
 
-	private final ServerModel serverModel;
 	private final List<EventListenerModel> eventListenerModels = new LinkedList<>();
 	private EventListenerModel eventListenerModel;
 	private final List<OsgiContextModel> newModels = new LinkedList<>();
 
-	public EventListenerModelChange(OpCode op, ServerModel serverModel, EventListenerModel eventListenerModel,
-				OsgiContextModel... newModels) {
+	public EventListenerModelChange(OpCode op, EventListenerModel eventListenerModel, OsgiContextModel... newModels) {
 		super(op);
-		this.serverModel = serverModel;
 		this.eventListenerModels.add(eventListenerModel);
 		this.eventListenerModel = eventListenerModel;
 		this.newModels.addAll(Arrays.asList(newModels));
 	}
 
-	public EventListenerModelChange(OpCode op, ServerModel serverModel, List<EventListenerModel> eventListenerModels) {
+	public EventListenerModelChange(OpCode op, List<EventListenerModel> eventListenerModels) {
 		super(op);
-		this.serverModel = serverModel;
 		this.eventListenerModels.addAll(eventListenerModels);
-	}
-
-	public ServerModel getServerModel() {
-		return serverModel;
 	}
 
 	public EventListenerModel getEventListenerModel() {

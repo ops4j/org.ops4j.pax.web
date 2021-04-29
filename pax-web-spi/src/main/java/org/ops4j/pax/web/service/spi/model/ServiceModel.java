@@ -175,7 +175,7 @@ public class ServiceModel implements BatchVisitor {
 		return serverModel.runSilently(() -> {
 			OsgiContextModel ctx = serverModel.getSharedContextModel(contextId);
 			if (ctx == null) {
-				// create one in batch through ServerModel, as shared contexts are not associated with any "owner" bundle
+				// create one in batch through as shared contexts are not associated with any "owner" bundle
 				ctx = serverModel.createDefaultSharedtHttpContext(contextId, serverController);
 			}
 			return (MultiBundleWebContainerContext) ctx.resolveHttpContext(serviceBundle);
@@ -491,15 +491,15 @@ public class ServiceModel implements BatchVisitor {
 
 		for (ContainerInitializerModel cim : containerInitializerModels) {
 			if (needsReRegistration(cim, oldContext, target, force)) {
-				batch.removeContainerInitializerModels(serverModel, Collections.singletonList(cim));
-				batch.addContainerInitializerModel(serverModel, cim, target);
+				batch.removeContainerInitializerModels(Collections.singletonList(cim));
+				batch.addContainerInitializerModel(cim, target);
 			}
 		}
 
 		for (EventListenerModel elm : eventListenerModels) {
 			if (needsReRegistration(elm, oldContext, target, force)) {
-				batch.removeEventListenerModels(serverModel, Collections.singletonList(elm));
-				batch.addEventListenerModel(serverModel, elm, target);
+				batch.removeEventListenerModels(Collections.singletonList(elm));
+				batch.addEventListenerModel(elm, target);
 			}
 		}
 
@@ -507,23 +507,23 @@ public class ServiceModel implements BatchVisitor {
 			if (needsReRegistration(sm, oldContext, target, force)) {
 				Map<ServletModel, Boolean> modelsAndStates = new LinkedHashMap<>();
 				modelsAndStates.put(sm, !serverModel.getDisabledServletModels().contains(sm));
-				batch.removeServletModels(serverModel, modelsAndStates);
-				batch.addServletModel(serverModel, sm, target);
+				batch.removeServletModels(modelsAndStates);
+				batch.addServletModel(sm, target);
 			}
 		}
 
 		for (WelcomeFileModel wfm : welcomeFileModels) {
 			if (needsReRegistration(wfm, oldContext, target, force)) {
-				batch.removeWelcomeFileModel(serverModel, wfm);
-				batch.addWelcomeFileModel(serverModel, wfm, target);
+				batch.removeWelcomeFileModel(wfm);
+				batch.addWelcomeFileModel(wfm, target);
 			}
 		}
 
 		Set<ErrorPageModel> affectedErrorPageModels = new TreeSet<>();
 		for (ErrorPageModel epm : errorPageModels) {
 			if (needsReRegistration(epm, oldContext, target, force)) {
-				batch.removeErrorPageModels(serverModel, Collections.singletonList(epm));
-				batch.addErrorPageModel(serverModel, epm, target);
+				batch.removeErrorPageModels(Collections.singletonList(epm));
+				batch.addErrorPageModel(epm, target);
 				affectedErrorPageModels.add(epm);
 			}
 		}
@@ -571,8 +571,8 @@ public class ServiceModel implements BatchVisitor {
 		Set<FilterModel> affectedFilterModels = new TreeSet<>();
 		for (FilterModel fm : filterModels) {
 			if (needsReRegistration(fm, oldContext, target, force)) {
-				batch.removeFilterModels(serverModel, Collections.singletonList(fm));
-				batch.addFilterModel(serverModel, fm, target);
+				batch.removeFilterModels(Collections.singletonList(fm));
+				batch.addFilterModel(fm, target);
 				affectedFilterModels.add(fm);
 			}
 		}

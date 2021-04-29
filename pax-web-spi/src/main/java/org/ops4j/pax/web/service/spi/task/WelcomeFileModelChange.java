@@ -20,19 +20,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
-import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 
 public class WelcomeFileModelChange extends Change {
 
-	private final ServerModel serverModel;
 	private final WelcomeFileModel welcomeFileModel;
 	private final List<OsgiContextModel> newModels = new LinkedList<>();
 
-	public WelcomeFileModelChange(OpCode op, ServerModel serverModel, WelcomeFileModel model,
-				OsgiContextModel... newModels) {
+	public WelcomeFileModelChange(OpCode op, WelcomeFileModel model, OsgiContextModel... newModels) {
 		super(op);
-		this.serverModel = serverModel;
 		this.welcomeFileModel = model;
 		this.newModels.addAll(Arrays.asList(newModels));
 	}
@@ -48,10 +44,6 @@ public class WelcomeFileModelChange extends Change {
 
 	public List<OsgiContextModel> getContextModels() {
 		return newModels.size() > 0 ? newModels : welcomeFileModel.getContextModels();
-	}
-
-	public ServerModel getServerModel() {
-		return serverModel;
 	}
 
 	public WelcomeFileModel getWelcomeFileModel() {

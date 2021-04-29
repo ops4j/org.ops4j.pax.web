@@ -606,6 +606,11 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		return sessionConfiguration;
 	}
 
+	/**
+	 * A "whiteboard" context can override implicit "httpservice" context. This allows users to override the
+	 * context (and its path for example) used in {@link org.osgi.service.http.HttpService} scenario.
+	 * @return
+	 */
 	public boolean isWhiteboard() {
 		return whiteboard;
 	}

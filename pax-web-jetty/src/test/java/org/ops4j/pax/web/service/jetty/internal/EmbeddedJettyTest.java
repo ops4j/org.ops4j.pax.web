@@ -651,7 +651,7 @@ public class EmbeddedJettyTest {
 		wac1.setDefaultsDescriptor(null); // to override "org/eclipse/jetty/webapp/webdefault.xml"
 
 		// prepare pure web.xml without any web app structure
-		File webXml = new File("target/web-" + UUID.randomUUID().toString() + ".xml");
+		File webXml = new File("target/web-" + UUID.randomUUID() + ".xml");
 		webXml.delete();
 
 		try (FileWriter writer = new FileWriter(webXml)) {
