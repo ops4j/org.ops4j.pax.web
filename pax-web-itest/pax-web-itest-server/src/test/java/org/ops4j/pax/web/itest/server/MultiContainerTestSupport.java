@@ -404,9 +404,16 @@ public class MultiContainerTestSupport {
 		if (obtainWebContainer) {
 			// this.containerRef is single reference, but it may be passed to getService() for
 			// multiple bundle contexts (mocks)
-			HttpServiceEnabled container = new HttpServiceEnabled(bundle, controller, serverModel, null, config);
+			final HttpServiceEnabled container = new HttpServiceEnabled(bundle, controller, serverModel, null, config);
+			when(bundleContext.getServiceReference(WebContainer.class)).thenReturn(containerRef);
 			when(bundleContext.getService(containerRef)).thenReturn(container);
 			containers.put(bundle, container);
+
+			when(bundleContext.ungetService(containerRef)).thenAnswer(inv -> {
+				// needed to correctly clean up servlets/filters added by SCIs
+				container.stop();
+				return true;
+			});
 		}
 
 		if (enableJSP()) {

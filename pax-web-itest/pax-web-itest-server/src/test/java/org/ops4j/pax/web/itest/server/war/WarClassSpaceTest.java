@@ -244,11 +244,15 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 
 		installWab(wab);
 
+		// servlet from web.xml
 		assertThat(httpGET(port, "/wab/servlet"), endsWith("Hello"));
+		// servlet from a an SCI of container-bundle-3
+		assertThat(httpGET(port, "/wab/dynamic1"), endsWith("Hello World!"));
 
 		uninstallWab(wab);
 
 		assertThat(httpGET(port, "/wab/servlet"), startsWith("HTTP/1.1 404"));
+		assertThat(httpGET(port, "/wab/dynamic1"), startsWith("HTTP/1.1 404"));
 
 		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);
 		ServiceModelInternals serviceModelInternals = serviceModelInternals(wab);

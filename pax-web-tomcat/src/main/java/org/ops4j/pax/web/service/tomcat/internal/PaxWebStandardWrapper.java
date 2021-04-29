@@ -189,7 +189,8 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 				try {
 					instance = servletClass.newInstance();
 				} catch (Exception e) {
-					throw new ServletException(e.getMessage(), e);
+					throw new ServletException("Can't instantiate servlet with class "
+							+ servletClass + ": " + e.getMessage(), e);
 				}
 			} else if (servletModel != null && servletModel.getElementSupplier() != null) {
 				instance = servletModel.getElementSupplier().get();

@@ -41,6 +41,14 @@ public class ContainerInitializerModelChange extends Change {
 		this.containerInitializerModels.addAll(containerInitializerModels);
 	}
 
+	@Override
+	public Change uninstall() {
+		if (this.getKind() == OpCode.ADD) {
+			return new ContainerInitializerModelChange(OpCode.DELETE, this.containerInitializerModel);
+		}
+		return null;
+	}
+
 	public ContainerInitializerModel getContainerInitializerModel() {
 		return containerInitializerModel;
 	}

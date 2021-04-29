@@ -825,12 +825,14 @@ class UndertowServerWrapper implements BatchVisitor {
 
 		servletContainer.listDeployments().forEach(d -> {
 			DeploymentManager deployment = servletContainer.getDeployment(d);
-			String contextPath = deployment.getDeployment().getServletContext().getContextPath();
-			try {
-				deployment.stop();
-				deployment.undeploy();
-			} catch (ServletException e) {
-				LOG.warn("Problem stopping deployment for context " + contextPath + ": " + e.getMessage(), e);
+			if (deployment.getState() != DeploymentManager.State.UNDEPLOYED) {
+				String contextPath = deployment.getDeployment().getServletContext().getContextPath();
+				try {
+					deployment.stop();
+					deployment.undeploy();
+				} catch (ServletException e) {
+					LOG.warn("Problem stopping deployment for context " + contextPath + ": " + e.getMessage(), e);
+				}
 			}
 		});
 		deploymentInfos.clear();
@@ -1071,9 +1073,10 @@ class UndertowServerWrapper implements BatchVisitor {
 				// manager (lifecycle manager of the deployment),
 				DeploymentManager manager = servletContainer.getDeploymentByPath(contextPath);
 				// the managed deployment
-				Deployment deployment = manager.getDeployment();
+				Deployment deployment = manager == null ? null : manager.getDeployment();
 				// and the deployment information
-				DeploymentInfo deploymentInfo = deployment.getDeploymentInfo();
+				DeploymentInfo deploymentInfo = deployment == null ? new DeploymentInfo()
+						: deployment.getDeploymentInfo();
 
 				// <servlet> - always associated with one of ServletModel's OsgiContextModels
 				OsgiServletContext context = osgiServletContexts.get(osgiContext);
@@ -1092,7 +1095,9 @@ class UndertowServerWrapper implements BatchVisitor {
 				// because this is possible (as required by methods like javax.servlet.ServletContext.addServlet())
 				// we can't go the easy way when _removing_ servlets
 				deploymentInfo.addServlet(info);
-				deployment.getServlets().addServlet(info);
+				if (deployment != null) {
+					deployment.getServlets().addServlet(info);
+				}
 
 				// are there any error page declarations in the model?
 				ErrorPageModel epm = model.getErrorPageModel();
@@ -1132,6 +1137,8 @@ class UndertowServerWrapper implements BatchVisitor {
 						((DeploymentImpl) deployment).setErrorPages(currentState);
 					}
 				}
+
+				ensureServletContextStarted(contextPath);
 			});
 			return;
 		}
@@ -1479,7 +1486,9 @@ class UndertowServerWrapper implements BatchVisitor {
 						// special case of "remove all welcome files"
 						currentWelcomeFiles.clear();
 					} else {
-						currentWelcomeFiles.removeAll(Arrays.asList(model.getWelcomeFiles()));
+						for (String s : model.getWelcomeFiles()) {
+							currentWelcomeFiles.remove(s);
+						}
 					}
 				}
 

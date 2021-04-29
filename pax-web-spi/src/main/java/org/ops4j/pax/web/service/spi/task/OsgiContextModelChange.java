@@ -35,9 +35,11 @@ public class OsgiContextModelChange extends Change {
 
 	@Override
 	public Change uninstall() {
-		if (this.getKind() == OpCode.ADD) {
-			return new OsgiContextModelChange(OpCode.DELETE, null, osgiContextModel, null);
-		}
+		// TODO: for now better to not uninstall the context, because it's easier to unregister dynamic servlets
+		//       registered in SCIs...
+//		if (this.getKind() == OpCode.ADD) {
+//			return new OsgiContextModelChange(OpCode.DELETE, null, osgiContextModel, null);
+//		}
 		return null;
 	}
 

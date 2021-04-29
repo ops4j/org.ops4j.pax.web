@@ -47,6 +47,7 @@ import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.context.DefaultHttpContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent;
 import org.ops4j.pax.web.service.spi.model.views.WebAppWebContainerView;
@@ -1065,9 +1066,12 @@ public class BundleWebApplication {
 
 		// TOCHECK: WebContainerContext that implements handleSecurity properly or just use login
 		//          configuration / security mapping from the WAB?
-		// TOCHECK: 3rd option for whiteboard/httpservice context model?
+		// TOCHECK: 3rd option for whiteboard/httpservice context model? it's about disassociation of the context
+		//          during undeployment - but what about whiteboard filters registered to WAB's context?
+//		final OsgiContextModel ocm = new OsgiContextModel(new DefaultHttpContext(this.bundle),
+//				this.bundle, this.contextPath, false);
 		final OsgiContextModel ocm = new OsgiContextModel(new DefaultHttpContext(this.bundle),
-				this.bundle, this.contextPath, false);
+				this.bundle, this.contextPath, true);
 		wabBatch.addOsgiContextModel(ocm, scm);
 
 		// elements are processed to create a Batch that'll be send to a dedicated view of a WebContainer. Tomcat
@@ -1127,7 +1131,7 @@ public class BundleWebApplication {
 		//  - parsing: org.eclipse.jetty.webapp.StandardDescriptorProcessor + org.eclipse.jetty.plus.webapp.PlusDescriptorProcessor
 		//  - configuration: org.eclipse.jetty.webapp.MetaData.resolve()
 
-		// The detailed context configuration process in Tomcat is:
+		// The detailed and ordered context configuration process in Tomcat is:
 		//  - public id
 		//  - effective major/minor version
 		//  - context (init) parameters
@@ -1161,6 +1165,15 @@ public class BundleWebApplication {
 		//  - resource refs
 		//  - service refs
 
+		// TODO: just for now - SCIs should come last because context should NEVER be started implicitly, only at the
+		//       end of the batch
+		this.sciToHt.forEach((sci, classes) -> {
+			Class<?>[] classesArray = classes.isEmpty() ? null : classes.toArray(new Class<?>[0]);
+			ContainerInitializerModel cim = new ContainerInitializerModel(sci, classesArray);
+			cim.addContextModel(ocm);
+			wabBatch.addContainerInitializerModel(cim);
+		});
+
 		final Map<String, List<String>> servletMappings = new LinkedHashMap<>();
 		mainWebXml.getServletMappings().forEach((pattern, sn) -> {
 			servletMappings.computeIfAbsent(sn, n -> new LinkedList<>()).add(pattern);
@@ -1178,8 +1191,21 @@ public class BundleWebApplication {
 			String[] mappings = servletMappings.get(sn).toArray(new String[0]);
 			ServletModel servletModel = new ServletModel(mappings, servletClass, null, null, false, null);
 			servletModel.addContextModel(ocm);
+			// to make the contexts list read-only:
+			servletModel.getContextModels();
 			wabBatch.addServletModel(servletModel, ocm);
 		});
+
+		// After all elements from web.xml descriptors, Tomcat
+		// TODO: I've reserved this task at the end of BundleWebApplication.processMetadata() for now
+
+		// At the end, Tomcat adds SCIs to the context
+//		this.sciToHt.forEach((sci, classes) -> {
+//			Class<?>[] classesArray = classes.isEmpty() ? null : classes.toArray(new Class<?>[0]);
+//			ContainerInitializerModel cim = new ContainerInitializerModel(sci, classesArray);
+//			cim.addContextModel(ocm);
+//			wabBatch.addContainerInitializerModel(cim);
+//		});
 
 		this.batch = wabBatch;
 	}

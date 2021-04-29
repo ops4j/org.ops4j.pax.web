@@ -35,9 +35,11 @@ public class ServletContextModelChange extends Change {
 
 	@Override
 	public Change uninstall() {
-		if (this.getKind() == OpCode.ADD) {
-			return new ServletContextModelChange(OpCode.DELETE, servletContextModel);
-		}
+		// TODO: for now better to not uninstall the context, because it's easier to unregister dynamic servlets
+		//       registered in SCIs...
+//		if (this.getKind() == OpCode.ADD) {
+//			return new ServletContextModelChange(OpCode.DELETE, servletContextModel);
+//		}
 		return null;
 	}
 

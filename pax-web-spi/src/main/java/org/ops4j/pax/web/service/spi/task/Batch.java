@@ -343,7 +343,10 @@ public class Batch {
 		List<Change> reversed = new ArrayList<>(operations);
 		Collections.reverse(reversed);
 		for (Change c : reversed) {
-			b.operations.add(c.uninstall());
+			Change revert = c.uninstall();
+			if (revert != null) {
+				b.operations.add(revert);
+			}
 		}
 
 		return b;
