@@ -70,7 +70,7 @@
 	      <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-api/${dependency.jetty.version}</bundle>
 	      <bundle start-level="30">mvn:org.eclipse.jetty.websocket/javax-websocket-server-impl/${dependency.jetty.version}</bundle>
 	      <bundle start-level="30">mvn:org.eclipse.jetty.websocket/javax-websocket-client-impl/${dependency.jetty.version}</bundle>
-	      <bundle start-level="30">mvn:javax.websocket/javax.websocket-api/${dependency.websocket.version}</bundle>
+	      <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-websocket-api/${dependency.websocket.bundle.version}</bundle>
         <capability>
             osgi.contract;osgi.contract=JavaServlet;version:Version="${servlet.spec.version}";uses:="javax.servlet,javax.servlet.http,javax.servlet.descriptor,javax.servlet.annotation",
             osgi.contract;osgi.contract=JavaWebSockets;version:Version="1";uses:="javax.websocket, javax.websocket.server"
@@ -191,7 +191,7 @@
 
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jaxp-api-1.3/${servicemix.specs.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-annotation_1.1_spec/1.0.1</bundle>
-        <bundle dependency="true" start-level="30">mvn:javax.websocket/javax.websocket-api/${dependency.websocket.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-websocket-api/${dependency.websocket.bundle.version}</bundle>
 
         <feature>pax-web-core</feature>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-runtime/${project.version}</bundle>
@@ -253,7 +253,7 @@
         <bundle dependency="true" start-level="30">mvn:${servlet.spec.groupId}/${servlet.spec.artifactId}/${servlet.spec.version}</bundle>
         <bundle dependency="true">mvn:javax.annotation/javax.annotation-api/1.3</bundle>
         <bundle dependency="true">mvn:org.jboss.logging/jboss-logging/${dependency.jboss-logging}</bundle>
-        <bundle dependency="true">mvn:javax.websocket/javax.websocket-api/${dependency.websocket.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-websocket-api/${dependency.websocket.bundle.version}</bundle>
 
         <feature>xnio</feature>
 
