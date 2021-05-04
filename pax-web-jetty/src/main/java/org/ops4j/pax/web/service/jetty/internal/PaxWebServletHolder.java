@@ -159,7 +159,8 @@ public class PaxWebServletHolder extends ServletHolder {
 			// using ServiceReference<Servlet>. Fortunately this satisfies Jetty.
 			setHeldClass(Servlet.class);
 		} else if (servletModel != null && servletModel.getElementSupplier() != null) {
-			setHeldClass(servletModel.getElementSupplier().get().getClass());
+			// this will set the class as well
+			setInstance(servletModel.getElementSupplier().get());
 		}
 
 		super.doStart();

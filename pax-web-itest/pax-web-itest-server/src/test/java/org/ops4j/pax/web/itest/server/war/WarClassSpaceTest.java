@@ -38,6 +38,7 @@ import org.ops4j.pax.web.itest.server.support.war.scis.SCIFromTheWab2;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -220,9 +221,9 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 						getClass().getClassLoader().getResource("org/ops4j/pax/web/itest/server/support/war/SimplestServlet.class")
 				))
 		);
+		// classes for WAB's fragment - accessible using WAB bundle itself, so it returns the above classes as well
 		when(wab.findEntries("/", "*.class", true)).thenReturn(
 				Collections.enumeration(Arrays.asList(
-						// again the same classes, to check if they're skipped
 						getClass().getClassLoader().getResource("org/ops4j/pax/web/itest/server/support/war/Cb1IFace3Impl.class"),
 						getClass().getClassLoader().getResource("org/ops4j/pax/web/itest/server/support/war/SimplestServlet.class"),
 						getClass().getClassLoader().getResource("org/ops4j/pax/web/itest/server/support/war/fragment/AnnotatedServlet1.class"),
@@ -242,17 +243,40 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 				))
 		);
 
+		// static resources
+		when(wab.getResource("hello.txt")).thenReturn(new File("src/test/resources/bundles/the-wab-itself/hello.txt").toURI().toURL());
+		when(wab.getResource("hello-fragment.txt")).thenReturn(new File("src/test/resources/bundles/the-wab-fragment/hello-fragment.txt").toURI().toURL());
+		// for proper 302 redirect - Undertow doesn't handle such redirect when accessing root of the context.
+		when(wab.getResource("/")).thenReturn(new File("src/test/resources/bundles/the-wab-itself/").toURI().toURL());
+
 		installWab(wab);
+
+		// there should be a /wab context that's (by default) redirecting to /wab/
+		assertThat(httpGET(port, "/wab"), startsWith("HTTP/1.1 302"));
 
 		// servlet from web.xml
 		assertThat(httpGET(port, "/wab/servlet"), endsWith("Hello"));
 		// servlet from a an SCI of container-bundle-3
 		assertThat(httpGET(port, "/wab/dynamic1"), endsWith("Hello World!"));
+		// annotated servlet from WAB fragment
+		assertThat(httpGET(port, "/wab/as1/xyz"), endsWith("Hello /xyz!"));
+		// resource from the WAB
+		assertThat(httpGET(port, "/wab/hello.txt"),
+				containsString("This is just a static resource in the root directory of the WAB."));
+		// resource from the WAB's fragment
+		assertThat(httpGET(port, "/wab/hello-fragment.txt"),
+				containsString("This is just a static resource in the root directory of the WAB's fragment."));
 
 		uninstallWab(wab);
 
 		assertThat(httpGET(port, "/wab/servlet"), startsWith("HTTP/1.1 404"));
 		assertThat(httpGET(port, "/wab/dynamic1"), startsWith("HTTP/1.1 404"));
+		assertThat(httpGET(port, "/wab/as1/xyz"), startsWith("HTTP/1.1 404"));
+		assertThat(httpGET(port, "/wab/hello.txt"), startsWith("HTTP/1.1 404"));
+		assertThat(httpGET(port, "/wab/hello-fragment.txt"), startsWith("HTTP/1.1 404"));
+
+		// there should be no /wab context at all, so no redirect, just 404
+		assertThat(httpGET(port, "/wab"), startsWith("HTTP/1.1 404"));
 
 		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);
 		ServiceModelInternals serviceModelInternals = serviceModelInternals(wab);

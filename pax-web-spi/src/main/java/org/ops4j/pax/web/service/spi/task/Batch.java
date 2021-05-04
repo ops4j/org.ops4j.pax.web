@@ -320,6 +320,27 @@ public class Batch {
 	}
 
 	/**
+	 * Mark a {@link Batch} as <em>transactional</em>, so accepting visitors can be aware that more changes are
+	 * coming. For example, a WAB/WAR configures a set of servlet/filter/... registrations and it's wise to start
+	 * the context only at the end of the batch.
+	 *
+	 * @param contextPath transactions are always (for now?) related to single context path.
+	 */
+	public void beginTransaction(String contextPath) {
+		operations.add(new TransactionStateChange(OpCode.ASSOCIATE, contextPath));
+	}
+
+	/**
+	 * Complete the transaction, so for example a {@link org.ops4j.pax.web.service.spi.ServerController} knows to
+	 * finally start the context.
+	 *
+	 * @param contextPath
+	 */
+	public void commitTransaction(String contextPath) {
+		operations.add(new TransactionStateChange(OpCode.DISASSOCIATE, contextPath));
+	}
+
+	/**
 	 * Assuming everything is ok, this method simply invokes all the collected operations which will:<ul>
 	 *     <li>alter global {@link ServerModel} sequentially.</li>
 	 *     <li>alter actual server runtime</li>
@@ -343,10 +364,7 @@ public class Batch {
 		List<Change> reversed = new ArrayList<>(operations);
 		Collections.reverse(reversed);
 		for (Change c : reversed) {
-			Change revert = c.uninstall();
-			if (revert != null) {
-				b.operations.add(revert);
-			}
+			c.uninstall(b.getOperations());
 		}
 
 		return b;

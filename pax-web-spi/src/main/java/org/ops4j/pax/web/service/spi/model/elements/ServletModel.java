@@ -90,7 +90,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	 * This can only be set when registering Pax Web specific
 	 * {@link org.ops4j.pax.web.service.whiteboard.ServletMapping} "direct Whiteboard" service.
 	 */
-	private final Class<? extends Servlet> servletClass;
+	private Class<? extends Servlet> servletClass;
 
 	/**
 	 * Flag that marks given {@link ServletModel} as "resource servlet" with slightly different processing.
@@ -141,7 +141,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	private ErrorPageModel errorPageModel;
 
 	/**
-	 * Flag used for models registered using {@link javax.servlet.ServletContext#addFilter}
+	 * Flag used for models registered using {@link javax.servlet.ServletContext#addServlet}
 	 */
 	private boolean dynamic = false;
 
@@ -366,7 +366,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	}
 
 	private String generateRandomErrorPage() {
-		return String.format("/error-%s", UUID.randomUUID().toString());
+		return String.format("/error-%s", UUID.randomUUID());
 	}
 
 	/**

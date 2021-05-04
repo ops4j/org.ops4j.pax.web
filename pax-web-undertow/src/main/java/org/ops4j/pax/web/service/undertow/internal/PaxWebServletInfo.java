@@ -140,9 +140,8 @@ public class PaxWebServletInfo extends ServletInfo {
 		} else {
 			info = new PaxWebServletInfo(getName(), servlet, true);
 
-			// these 2 are needed only here, because constructor accepting the model already does it
+			// this is needed only here, because constructor accepting the model already does it
 			info.addMappings(getMappings());
-			getInitParams().forEach(info::addInitParam);
 		}
 		info.setJspFile(getJspFile());
 		info.setLoadOnStartup(getLoadOnStartup());
@@ -157,6 +156,7 @@ public class PaxWebServletInfo extends ServletInfo {
 		if (getServletSecurityInfo() != null) {
 			info.setServletSecurityInfo(getServletSecurityInfo().clone());
 		}
+		getInitParams().forEach(info::addInitParam);
 		return info;
 	}
 

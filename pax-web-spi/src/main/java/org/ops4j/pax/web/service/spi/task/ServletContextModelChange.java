@@ -15,6 +15,8 @@
  */
 package org.ops4j.pax.web.service.spi.task;
 
+import java.util.List;
+
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 
 /**
@@ -34,13 +36,10 @@ public class ServletContextModelChange extends Change {
 	}
 
 	@Override
-	public Change uninstall() {
-		// TODO: for now better to not uninstall the context, because it's easier to unregister dynamic servlets
-		//       registered in SCIs...
-//		if (this.getKind() == OpCode.ADD) {
-//			return new ServletContextModelChange(OpCode.DELETE, servletContextModel);
-//		}
-		return null;
+	public void uninstall(List<Change> operations) {
+		if (this.getKind() == OpCode.ADD) {
+			operations.add(new ServletContextModelChange(OpCode.DELETE, servletContextModel));
+		}
 	}
 
 	@Override

@@ -59,11 +59,13 @@ public abstract class Change {
 	}
 
 	/**
-	 * A {@link Change} may be reversed, which is handy when rolling back existing {@link Batch}.
+	 * A {@link Change} may be reversed, which is handy when rolling back existing {@link Batch}. A single
+	 * change may be a no-op during uninstallation (like for example welcome files), but also may consist of
+	 * more uninstallation changes - like {@link OsgiContextModelChange} which has to follow unregistrations of
+	 * dynamic servlets/filters/listeners.
 	 * @return
 	 */
-	public Change uninstall() {
-		return null;
+	public void uninstall(List<Change> operations) {
 	}
 
 }

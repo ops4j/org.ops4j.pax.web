@@ -72,6 +72,8 @@ import org.ops4j.pax.web.service.spi.servlet.DefaultTaglibDescriptor;
 import org.ops4j.pax.web.service.spi.model.views.DynamicJEEWebContainerView;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.Change;
+import org.ops4j.pax.web.service.spi.task.OpCode;
+import org.ops4j.pax.web.service.spi.task.ServletModelChange;
 import org.ops4j.pax.web.service.spi.util.Path;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
@@ -1837,8 +1839,22 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		@Override
 		public void sendBatch(final Batch batch) {
 			serverModel.runSilently(() -> {
+				// the only thing we have to change is resource servlets, because only now we know the actual
+				// implementation of the resource servlet needed - pax-web-extender-war isn't aware of the target
+				// runtime, where the WAB's elements are being deployed
+				for (Change change : batch.getOperations()) {
+					if (change.getKind() == OpCode.ADD && change instanceof ServletModelChange) {
+						ServletModel model = ((ServletModelChange) change).getServletModel();
+						if (model.isResourceServlet()) {
+							// the resource base is *always* the root of the bundle
+							ResourceServlet rs = createResourceServlet(model.getUrlPatterns(), "");
+							model.setElementSupplier(rs.supplier);
+						}
+					}
+				}
+
 				serverController.sendBatch(batch);
-				batch.accept(serverModel);
+				batch.accept(serviceModel);
 				return null;
 			});
 		}

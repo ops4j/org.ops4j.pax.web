@@ -1,0 +1,43 @@
+////
+    Copyright 2021 OPS4J.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+////
+
+= Pax Web {version}
+:doctype: book
+:reproducible:
+:toc: left
+//:stylesheet: css/paxweb.css
+
+Pax Web {version} is an implementation of these 3 chapters of OSGi CMPN specification:
+
+* https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html[102 Http Service Specification]
+* https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.war.html[128 Web Applications Specification]
+* https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.whiteboard.html[140 Http Whiteboard Specification]
+
+Pax Web doesn't aspire to be the Reference Implementation of these specifications, because the main goal is to leverate existing Servlet container runtimes, namely (in historical order):
+
+* https://www.eclipse.org/jetty/[Eclipse Jetty]
+* https://tomcat.apache.org/[Apache Tomcat]
+* https://undertow.io/[Undertow]
+
+:leveloffset: +1
+
+include::pax-web-components.adoc[]
+
+== link:pax-web-user-guide.html[Users Guide]
+
+== link:pax-web-dev-guide.html[Developers Guide]
+
+:leveloffset: -1

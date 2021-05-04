@@ -36,6 +36,11 @@ import org.ops4j.pax.web.service.spi.model.views.DynamicJEEWebContainerView;
 import org.ops4j.pax.web.service.spi.servlet.dynamic.DynamicEventListenerRegistration;
 import org.ops4j.pax.web.service.spi.servlet.dynamic.DynamicFilterRegistration;
 import org.ops4j.pax.web.service.spi.servlet.dynamic.DynamicServletRegistration;
+import org.ops4j.pax.web.service.spi.task.Change;
+import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
+import org.ops4j.pax.web.service.spi.task.FilterModelChange;
+import org.ops4j.pax.web.service.spi.task.OpCode;
+import org.ops4j.pax.web.service.spi.task.ServletModelChange;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -166,6 +171,10 @@ public class DynamicRegistrations {
 		model.setDynamic(true);
 		configureBundle(context, model, reg.getModel().getActualClass());
 
+		// JavaEE doesn't provide a way to unregister filters registered by
+		// javax.servlet.ServletContext.addFilter(), but Pax Web does!
+		configureUnregistration(context.getOsgiContextModel(), new FilterModelChange(OpCode.DELETE, model));
+
 		dynamicFilterRegistrations.put(reg.getName(), reg);
 
 		// return, so SCI configures it further
@@ -242,6 +251,10 @@ public class DynamicRegistrations {
 		model.setDynamic(true);
 		configureBundle(context, model, reg.getModel().getActualClass());
 
+		// JavaEE doesn't provide a way to unregister servlets registered by
+		// javax.servlet.ServletContext.addServlet(), but Pax Web does!
+		configureUnregistration(context.getOsgiContextModel(), new ServletModelChange(OpCode.DELETE, model));
+
 		dynamicServletRegistrations.put(reg.getName(), reg);
 
 		// return, so SCI configures it further
@@ -295,6 +308,10 @@ public class DynamicRegistrations {
 		model.setServiceRank(Integer.MAX_VALUE);
 		configureBundle(context, model, reg.getModel().getEventListener().getClass());
 
+		// JavaEE doesn't provide a way to unregister listeners registered by
+		// javax.servlet.ServletContext.addListener(), but Pax Web does!
+		configureUnregistration(context.getOsgiContextModel(), new EventListenerModelChange(OpCode.DELETE, model));
+
 		dynamicListenerRegistrations.put(System.identityHashCode(model.getEventListener()), reg);
 	}
 
@@ -306,6 +323,19 @@ public class DynamicRegistrations {
 		// this is important because the registering bundle is used to obtain bundle-scoped WebContainer instance
 		// later - during actual registration of the model
 		model.setRegisteringBundle(bundle);
+	}
+
+	/**
+	 * This methods takes an {@link org.ops4j.pax.web.service.spi.task.Change undeployment change} related
+	 * to dynamic web element registration. Normally such elements are unregistered when bundle-scoped
+	 * {@link WebContainer} service is {@link BundleContext#ungetService unget}, but in case of WABs, it's done
+	 * in a batch, so we need the dynamic unregistrations earlier - before entire contexts is removed.
+	 *
+	 * @param osgiContextModel
+	 * @param unregistration
+	 */
+	private void configureUnregistration(OsgiContextModel osgiContextModel, Change unregistration) {
+		osgiContextModel.addUnregistrationChange(unregistration);
 	}
 
 	/**

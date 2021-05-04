@@ -114,6 +114,7 @@ import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
+import org.ops4j.pax.web.service.spi.task.TransactionStateChange;
 import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.undertow.internal.configuration.ResolvingContentHandler;
@@ -189,6 +190,12 @@ class UndertowServerWrapper implements BatchVisitor {
 	private PathHandler pathHandler;
 
 	private final UndertowFactory undertowFactory;
+
+	/**
+	 * A set of context paths that are being configured within <em>transactions</em> - context is started only at
+	 * the end of the transaction.
+	 */
+	private final Set<String> transactions = new HashSet<>();
 
 	/**
 	 * Single <em>container</em> for all Undertow contexts. It can directly map context path to
@@ -868,6 +875,25 @@ class UndertowServerWrapper implements BatchVisitor {
 	// --- visitor methods for model changes
 
 	@Override
+	public void visit(TransactionStateChange change) {
+		String contextPath = change.getContextPath();
+		if (change.getKind() == OpCode.ASSOCIATE) {
+			if (!transactions.add(contextPath)) {
+				throw new IllegalStateException("Context path " + contextPath
+						+ " is already associated with config transaction");
+			}
+		} else if (change.getKind() == OpCode.DISASSOCIATE) {
+			if (!transactions.remove(contextPath)) {
+				throw new IllegalStateException("Context path " + contextPath
+						+ " is not associated with any config transaction");
+			} else if (deploymentInfos.containsKey(contextPath)) {
+				// end of transaction - start the context
+				ensureServletContextStarted(contextPath);
+			}
+		}
+	}
+
+	@Override
 	public void visit(ServletContextModelChange change) {
 		ServletContextModel model = change.getServletContextModel();
 		String contextPath = model.getContextPath();
@@ -946,6 +972,26 @@ class UndertowServerWrapper implements BatchVisitor {
 			// configure ordered map of initializers
 			initializers.put(model.getContextPath(), new LinkedHashMap<>());
 			dynamicRegistrations.put(model.getContextPath(), new DynamicRegistrations());
+		} else if (change.getKind() == OpCode.DELETE) {
+			dynamicRegistrations.remove(contextPath);
+			initializers.remove(contextPath);
+			osgiContextModels.remove(contextPath);
+			deploymentInfos.remove(contextPath);
+			securityHandlers.remove(contextPath);
+			wrappingHandlers.remove(contextPath);
+
+//			PaxWebStandardContext context = contextHandlers.remove(contextPath);
+//
+//			if (isStarted(context)) {
+//				LOG.info("Stopping Tomcat context \"{}\"", contextPath);
+//				try {
+//					context.stop();
+//				} catch (Exception e) {
+//					LOG.warn("Error stopping Tomcat context \"{}\": {}", contextPath, e.getMessage(), e);
+//				}
+//			}
+//
+//			defaultHost.removeChild(context);
 		}
 	}
 
@@ -1054,7 +1100,11 @@ class UndertowServerWrapper implements BatchVisitor {
 	public void visit(ServletModelChange change) {
 		if ((change.getKind() == OpCode.ADD && !change.isDisabled()) || change.getKind() == OpCode.ENABLE) {
 			ServletModel model = change.getServletModel();
-			LOG.info("Adding servlet {}", model);
+			if (change.getNewModelsInfo() == null) {
+				LOG.info("Adding servlet {}", model);
+			} else {
+				LOG.info("Adding servlet {} to new contexts {}", model, change.getNewModelsInfo());
+			}
 
 			// see implementation requirements in Jetty version of this visit() method
 
@@ -1066,16 +1116,15 @@ class UndertowServerWrapper implements BatchVisitor {
 					return;
 				}
 
-				ensureServletContextStarted(contextPath);
-
 				LOG.debug("Adding servlet {} to {}", model.getName(), contextPath);
 
-				// manager (lifecycle manager of the deployment),
-				DeploymentManager manager = servletContainer.getDeploymentByPath(contextPath);
+				// manager (lifecycle manager of the deployment) - null until
+				// io.undertow.servlet.api.ServletContainer.addDeployment()
+				DeploymentManager manager = getDeploymentManager(contextPath);
 				// the managed deployment
 				Deployment deployment = manager == null ? null : manager.getDeployment();
 				// and the deployment information
-				DeploymentInfo deploymentInfo = deployment == null ? new DeploymentInfo()
+				DeploymentInfo deploymentInfo = deployment == null ? deploymentInfos.get(contextPath)
 						: deployment.getDeploymentInfo();
 
 				// <servlet> - always associated with one of ServletModel's OsgiContextModels
@@ -1085,11 +1134,13 @@ class UndertowServerWrapper implements BatchVisitor {
 				ServletInfo info = new PaxWebServletInfo(model, osgiContext, context);
 
 				boolean isDefaultResourceServlet = model.isResourceServlet();
-				for (String pattern : model.getUrlPatterns()) {
-					isDefaultResourceServlet &= "/".equals(pattern);
+				if (isDefaultResourceServlet) {
+					for (String pattern : model.getUrlPatterns()) {
+						isDefaultResourceServlet &= "/".equals(pattern);
+					}
+					info.addInitParam("pathInfoOnly", Boolean.toString(!isDefaultResourceServlet));
+					info.addInitParam("resolve-against-context-root", Boolean.toString(isDefaultResourceServlet));
 				}
-				info.addInitParam("pathInfoOnly", Boolean.toString(!isDefaultResourceServlet));
-				info.addInitParam("resolve-against-context-root", Boolean.toString(isDefaultResourceServlet));
 
 				// when only adding new servlet, we can simply alter existing deployment
 				// because this is possible (as required by methods like javax.servlet.ServletContext.addServlet())
@@ -1138,6 +1189,8 @@ class UndertowServerWrapper implements BatchVisitor {
 					}
 				}
 
+				deploymentInfos.put(contextPath, deploymentInfo);
+
 				ensureServletContextStarted(contextPath);
 			});
 			return;
@@ -1165,8 +1218,10 @@ class UndertowServerWrapper implements BatchVisitor {
 					LOG.debug("Removing servlet {} from context {}", model.getName(), contextPath);
 
 					// take existing deployment manager and the deployment info from its deployment
-					DeploymentManager manager = servletContainer.getDeploymentByPath(contextPath);
-					DeploymentInfo deploymentInfo = manager.getDeployment().getDeploymentInfo();
+					DeploymentManager manager = getDeploymentManager(contextPath);
+					Deployment deployment = manager == null ? null : manager.getDeployment();
+					DeploymentInfo deploymentInfo = deployment == null ? deploymentInfos.get(contextPath)
+							: deployment.getDeploymentInfo();
 
 					// let's immediately show that given context is no longer mapped
 					pathHandler.removePrefixPath(contextPath);
@@ -1174,8 +1229,10 @@ class UndertowServerWrapper implements BatchVisitor {
 					try {
 						// manager needs to stop the deployment and get rid of it, because we
 						// can't replace a deployment info within deployment manager
-						manager.stop();
-						manager.undeploy();
+						if (manager != null && deployment != null) {
+							manager.stop();
+							manager.undeploy();
+						}
 						// swap the deployment info, which will later be used to start the context
 						deploymentInfos.put(contextPath, deploymentInfo);
 					} catch (ServletException e) {
@@ -1256,9 +1313,10 @@ class UndertowServerWrapper implements BatchVisitor {
 			LOG.info("Changing filter configuration for context {}", contextPath);
 
 			// take existing deployment manager and the deployment info from its deployment
-			DeploymentManager manager = servletContainer.getDeploymentByPath(contextPath);
-			DeploymentManager.State state = manager.getState();
-			DeploymentInfo deploymentInfo = manager.getDeployment().getDeploymentInfo();
+			DeploymentManager manager = getDeploymentManager(contextPath);
+			DeploymentManager.State state = manager == null ? DeploymentManager.State.UNDEPLOYED : manager.getState();
+			DeploymentInfo deploymentInfo = manager == null ? deploymentInfos.get(contextPath)
+					: manager.getDeployment().getDeploymentInfo();
 
 			boolean quick = canQuicklyAddFilter(deploymentInfo, filters);
 			quick &= filtersMap.values().stream().noneMatch(Objects::nonNull);
@@ -1270,10 +1328,12 @@ class UndertowServerWrapper implements BatchVisitor {
 				try {
 					// manager needs to stop the deployment and get rid of it, because we
 					// can't replace a deployment info within deployment manager
-					LOG.trace("Stopping and undelopying the deployment for {}", contextPath);
-					manager.stop();
-					manager.undeploy();
-					state = manager.getState();
+					if (manager != null) {
+						LOG.trace("Stopping and undelopying the deployment for {}", contextPath);
+						manager.stop();
+						manager.undeploy();
+						state = manager.getState();
+					}
 				} catch (ServletException e) {
 					throw new RuntimeException("Problem stopping the deployment of context " + contextPath
 							+ ": " + e.getMessage(), e);
@@ -1421,8 +1481,9 @@ class UndertowServerWrapper implements BatchVisitor {
 				List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
 				contextModels.forEach((context) -> {
 					String contextPath = context.getContextPath();
-					DeploymentManager manager = servletContainer.getDeploymentByPath(contextPath);
-					DeploymentInfo deploymentInfo = manager.getDeployment().getDeploymentInfo();
+					DeploymentManager manager = getDeploymentManager(contextPath);
+					DeploymentInfo deploymentInfo = manager == null ? deploymentInfos.get(contextPath)
+							: manager.getDeployment().getDeploymentInfo();
 
 					EventListener eventListener = eventListenerModel.resolveEventListener();
 					if (eventListener instanceof ServletContextAttributeListener) {
@@ -1655,7 +1716,7 @@ class UndertowServerWrapper implements BatchVisitor {
 	private void ensureServletContextStarted(final String contextPath) {
 		DeploymentManager manager = getDeploymentManager(contextPath);
 
-		if (manager != null) {
+		if (manager != null || pendingTransaction(contextPath)) {
 			return;
 		}
 		try {
@@ -1748,6 +1809,10 @@ class UndertowServerWrapper implements BatchVisitor {
 			throw new IllegalStateException("Can't start Undertow context "
 					+ contextPath + ": " + e.getMessage(), e);
 		}
+	}
+
+	private boolean pendingTransaction(String contextPath) {
+		return transactions.contains(contextPath);
 	}
 
 	/**

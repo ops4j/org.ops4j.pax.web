@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
@@ -31,6 +32,7 @@ public class ServletModelChange extends Change {
 	private final Map<ServletModel, Boolean> servletModels = new LinkedHashMap<>();
 	private boolean disabled;
 	private final List<OsgiContextModel> newModels = new LinkedList<>();
+	private String newModelsInfo;
 
 	public ServletModelChange(OpCode op, ServletModel servletModel, OsgiContextModel ... newModels) {
 		this(op, servletModel, false, newModels);
@@ -47,16 +49,20 @@ public class ServletModelChange extends Change {
 		this.servletModels.put(servletModel, !disabled);
 		this.disabled = disabled;
 		this.newModels.addAll(Arrays.asList(newModels));
+		if (this.newModels.size() > 0) {
+			this.newModelsInfo = this.newModels.stream()
+					.map(ocm -> String.format("{%s,%s,%s,%s}", ocm.isWhiteboard() ? "WB" : "HS", ocm.getId(), ocm.getName(), ocm.getContextPath()))
+					.collect(Collectors.joining(", ", "[", "]"));
+		}
 	}
 
 	@Override
-	public Change uninstall() {
+	public void uninstall(List<Change> operations) {
 		if (this.getKind() == OpCode.ADD) {
 			Map<ServletModel, Boolean> models = new HashMap<>();
 			models.put(this.servletModel, true);
-			return new ServletModelChange(OpCode.DELETE, models);
+			operations.add(new ServletModelChange(OpCode.DELETE, models));
 		}
-		return null;
 	}
 
 	public ServletModel getServletModel() {
@@ -79,6 +85,10 @@ public class ServletModelChange extends Change {
 		return newModels;
 	}
 
+	public String getNewModelsInfo() {
+		return newModelsInfo;
+	}
+
 	@Override
 	public void accept(BatchVisitor visitor) {
 		visitor.visit(this);
@@ -95,7 +105,8 @@ public class ServletModelChange extends Change {
 			model = servletModels.keySet().iterator().next();
 		}
 		if (model != null) {
-			return getKind() + ": " + model + (disabled ? " (disabled)" : " (enabled)");
+			return getKind() + ": " + model + (disabled ? " (disabled)" : " (enabled)")
+					+ (newModelsInfo != null ? " (new contexts: " + newModelsInfo : "");
 		} else {
 			return getKind() + ": " + servletModels.size() + " servlet models";
 		}

@@ -150,8 +150,8 @@
 
 		<!-- Other Maven plugins (and their dependencies) -->
 		<plugin.apache.apache-rat-plugin>0.13</plugin.apache.apache-rat-plugin>
-		<plugin.asciidoctor-maven-plugin>1.5.6</plugin.asciidoctor-maven-plugin>
-		<plugin.dependency.org.asciidoctor>1.5.8</plugin.dependency.org.asciidoctor>
+		<plugin.asciidoctor-maven-plugin>2.1.0</plugin.asciidoctor-maven-plugin>
+		<plugin.dependency.org.asciidoctor.diagram>2.1.2</plugin.dependency.org.asciidoctor.diagram>
 		<plugin.felix.maven-bundle-plugin>5.1.1</plugin.felix.maven-bundle-plugin>
 		<plugin.felix.maven-scr-plugin>1.26.0</plugin.felix.maven-scr-plugin>
 		<plugin.gatling.gatling-maven-plugin>2.0.0</plugin.gatling.gatling-maven-plugin>
@@ -2546,7 +2546,6 @@
 
 <!--		<module>pax-web-features</module>-->
 <!--		<module>pax-web-archetypes</module>-->
-<!-- 		<module>pax-web-manual</module> -->
 <!--		<module>pax-web-jaas</module>-->
 
 		<!-- All the samples (Http Service, Whiteboard, JSP, WebSockets, WAR) -->
@@ -2554,6 +2553,8 @@
 
 		<!-- All the integration tests (OSGi, non-OSGi, Karaf) -->
 		<module>pax-web-itest</module>
+
+		<module>pax-web-manual</module>
 	</modules>
 
 	<profiles>

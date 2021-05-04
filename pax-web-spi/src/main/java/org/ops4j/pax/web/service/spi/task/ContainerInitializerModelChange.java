@@ -42,11 +42,10 @@ public class ContainerInitializerModelChange extends Change {
 	}
 
 	@Override
-	public Change uninstall() {
+	public void uninstall(List<Change> operations) {
 		if (this.getKind() == OpCode.ADD) {
-			return new ContainerInitializerModelChange(OpCode.DELETE, this.containerInitializerModel);
+			operations.add(new ContainerInitializerModelChange(OpCode.DELETE, this.containerInitializerModel));
 		}
-		return null;
 	}
 
 	public ContainerInitializerModel getContainerInitializerModel() {

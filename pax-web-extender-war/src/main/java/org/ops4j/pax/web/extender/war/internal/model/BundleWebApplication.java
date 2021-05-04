@@ -43,6 +43,7 @@ import org.apache.tomcat.util.descriptor.web.ServletDef;
 import org.apache.tomcat.util.descriptor.web.WebXml;
 import org.apache.tomcat.util.descriptor.web.WebXmlParser;
 import org.ops4j.pax.web.extender.war.internal.WarExtenderContext;
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.context.DefaultHttpContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
@@ -151,6 +152,9 @@ public class BundleWebApplication {
 
 	/** Final batch of the changes/configuration operations related to full web application being deployed */
 	private Batch batch = null;
+
+	/** Stored instance of {@link OsgiContextModel} to get access (at undeployment time) to dynamic registrations */
+	private OsgiContextModel osgiContextModel = null;
 
 	public BundleWebApplication(Bundle bundle, WebContainerManager webContainerManager,
 			WarExtenderContext extenderContext, ExecutorService pool) {
@@ -1011,7 +1015,7 @@ public class BundleWebApplication {
 
 				if (ok) {
 					// convert "jsp servlets"
-					ServletDef jsp = mainWebXml.getServlets().get("jsp");
+					ServletDef jsp = mainWebXml.getServlets().get(PaxWebConstants.DEFAULT_JSP_SERVLET_NAME);
 					Map<String, String> jspInitParams = jsp == null ? Collections.emptyMap() : jsp.getParameterMap();
 					for (Iterator<Map.Entry<String, ServletDef>> it = mainWebXml.getServlets().entrySet().iterator(); it.hasNext(); ) {
 						Map.Entry<String, ServletDef> entry = it.next();
@@ -1059,9 +1063,11 @@ public class BundleWebApplication {
 	 * {@code org.ops4j.pax.web.service.spi.model} package.
 	 */
 	private void buildModel() {
-		final Batch wabBatch = new Batch(this.toString());
+		final Batch wabBatch = new Batch("Deployment of " + this);
 
-		ServletContextModel scm = new ServletContextModel(this.contextPath);
+		wabBatch.beginTransaction(contextPath);
+
+		ServletContextModel scm = new ServletContextModel(contextPath);
 		wabBatch.addServletContextModel(scm);
 
 		// TOCHECK: WebContainerContext that implements handleSecurity properly or just use login
@@ -1074,10 +1080,12 @@ public class BundleWebApplication {
 				this.bundle, this.contextPath, true);
 		wabBatch.addOsgiContextModel(ocm, scm);
 
+		this.osgiContextModel = ocm;
+
 		// elements are processed to create a Batch that'll be send to a dedicated view of a WebContainer. Tomcat
 		// configures its context directly in org.apache.catalina.startup.ContextConfig.configureContext()
 
-		// web.xml (`http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd`) defines the below top-level elements.
+		// web.xml (http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd) defines the below top-level elements.
 		// "J" means "processed by Jetty 9", "T" means "processed by Tomcat 9"
 		//  - [JT] <absolute-ordering>
 		//  - [..] <administered-object>
@@ -1165,15 +1173,6 @@ public class BundleWebApplication {
 		//  - resource refs
 		//  - service refs
 
-		// TODO: just for now - SCIs should come last because context should NEVER be started implicitly, only at the
-		//       end of the batch
-		this.sciToHt.forEach((sci, classes) -> {
-			Class<?>[] classesArray = classes.isEmpty() ? null : classes.toArray(new Class<?>[0]);
-			ContainerInitializerModel cim = new ContainerInitializerModel(sci, classesArray);
-			cim.addContextModel(ocm);
-			wabBatch.addContainerInitializerModel(cim);
-		});
-
 		final Map<String, List<String>> servletMappings = new LinkedHashMap<>();
 		mainWebXml.getServletMappings().forEach((pattern, sn) -> {
 			servletMappings.computeIfAbsent(sn, n -> new LinkedList<>()).add(pattern);
@@ -1182,30 +1181,43 @@ public class BundleWebApplication {
 			// TODO: resources, which require conversion from javax.servlet.Servlet servlet class
 			Class<Servlet> servletClass = null;
 			try {
-				servletClass = (Class<Servlet>) classLoader.loadClass(def.getServletClass());
+				if (def.getServletClass() != null) {
+					servletClass = (Class<Servlet>) classLoader.loadClass(def.getServletClass());
+				}
 			} catch (ClassNotFoundException e) {
 				LOG.warn("Can't load servlet class {} in the context of {}: {}",
 						def.getServletClass(), this, e.getMessage(), e);
 				return;
 			}
 			String[] mappings = servletMappings.get(sn).toArray(new String[0]);
-			ServletModel servletModel = new ServletModel(mappings, servletClass, null, null, false, null);
-			servletModel.addContextModel(ocm);
-			// to make the contexts list read-only:
+			ServletModel.Builder builder = new ServletModel.Builder()
+					.withServletName(sn)
+					.withServletClass(servletClass)
+					.withUrlPatterns(mappings)
+					.withAsyncSupported(def.getAsyncSupported())
+					.withLoadOnStartup(def.getLoadOnStartup())
+					.withOsgiContextModel(ocm);
+			if (servletClass == null) {
+				// the actuall class will depend on the target runtime
+				builder.resourceServlet(true);
+			}
+			if (PaxWebConstants.DEFAULT_JSP_SERVLET_NAME.equals(sn)) {
+				builder.jspServlet(true);
+			}
+			ServletModel servletModel = builder.build();
 			servletModel.getContextModels();
-			wabBatch.addServletModel(servletModel, ocm);
+			wabBatch.addServletModel(servletModel);
 		});
 
-		// After all elements from web.xml descriptors, Tomcat
-		// TODO: I've reserved this task at the end of BundleWebApplication.processMetadata() for now
-
 		// At the end, Tomcat adds SCIs to the context
-//		this.sciToHt.forEach((sci, classes) -> {
-//			Class<?>[] classesArray = classes.isEmpty() ? null : classes.toArray(new Class<?>[0]);
-//			ContainerInitializerModel cim = new ContainerInitializerModel(sci, classesArray);
-//			cim.addContextModel(ocm);
-//			wabBatch.addContainerInitializerModel(cim);
-//		});
+		this.sciToHt.forEach((sci, classes) -> {
+			Class<?>[] classesArray = classes.isEmpty() ? null : classes.toArray(new Class<?>[0]);
+			ContainerInitializerModel cim = new ContainerInitializerModel(sci, classesArray);
+			cim.addContextModel(ocm);
+			wabBatch.addContainerInitializerModel(cim);
+		});
+
+		wabBatch.commitTransaction(contextPath);
 
 		this.batch = wabBatch;
 	}

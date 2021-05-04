@@ -27,8 +27,22 @@ package org.ops4j.pax.web.service.spi.task;
  */
 public interface BatchVisitor {
 
+	/**
+	 * Processing the most high-level change - related to
+	 * {@link org.ops4j.pax.web.service.spi.model.ServletContextModel}, which creates (or destroys) entire
+	 * <em>context</em> (1:1 with "context path").
+	 *
+	 * @param change
+	 */
 	void visit(ServletContextModelChange change);
 
+	/**
+	 * Processing a change related to {@link org.ops4j.pax.web.service.spi.model.OsgiContextModel} - a model
+	 * that affects one {@link org.ops4j.pax.web.service.spi.model.ServletContextModel} thought the relation is
+	 * not 1:1, but N:1 - many OsgiContextModels may be associated with single ServletContextModel.
+	 *
+	 * @param change
+	 */
 	void visit(OsgiContextModelChange change);
 
 	/**
@@ -81,5 +95,13 @@ public interface BatchVisitor {
 	 * @param containerInitializerModelChange
 	 */
 	void visit(ContainerInitializerModelChange change);
+
+	/**
+	 * Process a change related to transactions for a context (path). There's no need to implement this method
+	 * in a {@link BatchVisitor}.
+	 * @param transactionStateChange
+	 */
+	default void visit(TransactionStateChange transactionStateChange) {
+	}
 
 }

@@ -99,6 +99,7 @@ import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
+import org.ops4j.pax.web.service.spi.task.TransactionStateChange;
 import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.tomcat.internal.web.TomcatResourceServlet;
@@ -155,6 +156,12 @@ class TomcatServerWrapper implements BatchVisitor {
 	private Executor serverExecutor;
 
 	private final TomcatFactory tomcatFactory;
+
+	/**
+	 * A set of context paths that are being configured within <em>transactions</em> - context is started only at
+	 * the end of the transaction.
+	 */
+	private final Set<String> transactions = new HashSet<>();
 
 	/** Single map of context path to {@link Context} for fast access */
 	private final Map<String, PaxWebStandardContext> contextHandlers = new HashMap<>();
@@ -599,15 +606,36 @@ class TomcatServerWrapper implements BatchVisitor {
 	// --- visitor methods for model changes
 
 	@Override
+	public void visit(TransactionStateChange change) {
+		String contextPath = change.getContextPath();
+		if (change.getKind() == OpCode.ASSOCIATE) {
+			if (!transactions.add(contextPath)) {
+				throw new IllegalStateException("Context path " + contextPath
+						+ " is already associated with config transaction");
+			}
+		} else if (change.getKind() == OpCode.DISASSOCIATE) {
+			if (!transactions.remove(contextPath)) {
+				throw new IllegalStateException("Context path " + contextPath
+						+ " is not associated with any config transaction");
+			} else if (contextHandlers.containsKey(contextPath)) {
+				// end of transaction - start the context
+				ensureServletContextStarted(contextHandlers.get(contextPath));
+			}
+		}
+	}
+
+	@Override
 	public void visit(ServletContextModelChange change) {
 		ServletContextModel model = change.getServletContextModel();
+		String contextPath = model.getContextPath();
+
 		if (change.getKind() == OpCode.ADD) {
 			LOG.info("Creating new Tomcat context for {}", model);
 
 //							Context ctx = new HttpServiceContext(getHost(), accessControllerContext);
 			PaxWebStandardContext context = new PaxWebStandardContext(default404Servlet);
 			context.setName(model.getId());
-			context.setPath("/".equals(model.getContextPath()) ? "" : model.getContextPath());
+			context.setPath("/".equals(contextPath) ? "" : contextPath);
 			// TODO: this should really be context specific
 			context.setWorkDir(configuration.server().getTemporaryDirectory().getAbsolutePath());
 //							ctx.setWebappVersion(name);
@@ -756,12 +784,28 @@ class TomcatServerWrapper implements BatchVisitor {
 			//		// TODO: compare with JettyServerWrapper.addContext
 
 			// explicit no check for existing mapping under given physical context path
-			contextHandlers.put(model.getContextPath(), context);
-			osgiContextModels.put(model.getContextPath(), new TreeSet<>());
+			contextHandlers.put(contextPath, context);
+			osgiContextModels.put(contextPath, new TreeSet<>());
 
 			// configure ordered map of initializers
-			initializers.put(model.getContextPath(), new LinkedHashMap<>());
-			dynamicRegistrations.put(model.getContextPath(), new DynamicRegistrations());
+			initializers.put(contextPath, new LinkedHashMap<>());
+			dynamicRegistrations.put(contextPath, new DynamicRegistrations());
+		} else if (change.getKind() == OpCode.DELETE) {
+			dynamicRegistrations.remove(contextPath);
+			initializers.remove(contextPath);
+			osgiContextModels.remove(contextPath);
+			PaxWebStandardContext context = contextHandlers.remove(contextPath);
+
+			if (isStarted(context)) {
+				LOG.info("Stopping Tomcat context \"{}\"", contextPath);
+				try {
+					context.stop();
+				} catch (Exception e) {
+					LOG.warn("Error stopping Tomcat context \"{}\": {}", contextPath, e.getMessage(), e);
+				}
+			}
+
+			defaultHost.removeChild(context);
 		}
 	}
 
@@ -856,7 +900,11 @@ class TomcatServerWrapper implements BatchVisitor {
 
 		if ((change.getKind() == OpCode.ADD && !change.isDisabled()) || change.getKind() == OpCode.ENABLE) {
 			ServletModel model = change.getServletModel();
-			LOG.info("Adding servlet {}", model);
+			if (change.getNewModelsInfo() == null) {
+				LOG.info("Adding servlet {}", model);
+			} else {
+				LOG.info("Adding servlet {} to new contexts {}", model, change.getNewModelsInfo());
+			}
 
 			// see implementation requirements in Jetty version of this visit() method
 
@@ -881,7 +929,9 @@ class TomcatServerWrapper implements BatchVisitor {
 				for (String pattern : model.getUrlPatterns()) {
 					isDefaultResourceServlet &= "/".equals(pattern);
 				}
-				wrapper.addInitParameter("pathInfoOnly", Boolean.toString(!isDefaultResourceServlet));
+				if (model.isResourceServlet()) {
+					wrapper.addInitParameter("pathInfoOnly", Boolean.toString(!isDefaultResourceServlet));
+				}
 
 				realContext.addChild(wrapper);
 
@@ -1268,11 +1318,11 @@ class TomcatServerWrapper implements BatchVisitor {
 	 * @param sch
 	 */
 	private void ensureServletContextStarted(PaxWebStandardContext context) {
-		if (isStarted(context)) {
+		String contextPath = context.getPath().equals("") ? "/" : context.getPath();
+		if (isStarted(context) || pendingTransaction(contextPath)) {
 			return;
 		}
 		try {
-			String contextPath = context.getPath().equals("") ? "/" : context.getPath();
 			OsgiContextModel highestRanked = context.getDefaultOsgiContextModel();
 			OsgiServletContext highestRankedContext = context.getDefaultServletContext();
 
@@ -1348,6 +1398,10 @@ class TomcatServerWrapper implements BatchVisitor {
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
+	}
+
+	private boolean pendingTransaction(String contextPath) {
+		return transactions.contains(contextPath);
 	}
 
 	public boolean isStarted(PaxWebStandardContext context) {

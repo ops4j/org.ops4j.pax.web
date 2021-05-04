@@ -26,8 +26,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.servlet.Servlet;
-
 import org.apache.felix.utils.extender.AbstractExtender;
 import org.apache.felix.utils.extender.Extension;
 import org.apache.tomcat.util.descriptor.web.ServletDef;
@@ -366,9 +364,9 @@ public class WarExtenderContext implements WebContainerListener {
 			String name = e.getKey();
 			ServletDef servlet = e.getValue();
 			if ("default".equals(name)) {
-				// which means it'll be replaced by container-specific "default" servlet
-				// TODO: maybe there's a better trick
-				servlet.setServletClass(Servlet.class.getName());
+				// which means it'll be replaced by container-specific "default" servlet.
+				// null class will be changed to "resourceServlet" flag in ServletModel
+				servlet.setServletClass(null);
 			} else if ("jsp".equals(name)) {
 				if (Utils.getPaxWebJspBundle(bundleContext.getBundle()) != null) {
 					// change org.apache.jasper.servlet.JspServlet to org.ops4j.pax.web.jsp.JspServlet

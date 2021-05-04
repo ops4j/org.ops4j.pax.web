@@ -38,6 +38,7 @@ import org.ops4j.pax.web.service.spi.context.DefaultServletContextHelper;
 import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.model.elements.JspConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.SessionConfigurationModel;
+import org.ops4j.pax.web.service.spi.task.Change;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -308,6 +309,9 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	 */
 	private final boolean whiteboard;
 
+	/** Tracks {@link Change unregistration changes} for dynamic servlets/filters/listeners */
+	private final List<Change> unregistrations = new ArrayList<>();
+
 	public OsgiContextModel(Bundle ownerBundle, Integer rank, Long serviceId, boolean whiteboard) {
 		this.ownerBundle = ownerBundle;
 		this.serviceRank = rank;
@@ -447,6 +451,23 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	 */
 	public void releaseHttpContext(WebContainerContext context) {
 		// TODO: actually release the context!
+	}
+
+	/**
+	 * <p>At {@link OsgiContextModel} level we track a list of {@link Change changes} that represent implicit
+	 * unregistrations of dynamic servlets/filters/listeners that may have been added for example inside
+	 * {@link javax.servlet.ServletContainerInitializer#onStartup(Set, ServletContext)} method.</p>
+	 *
+	 * <p>JavaEE doesn't bother with unregistration of such elements, but Pax Web does ;)</p>
+	 *
+	 * @param unregistration
+	 */
+	public void addUnregistrationChange(Change unregistration) {
+		this.unregistrations.add(unregistration);
+	}
+
+	public List<Change> getUnregistrations() {
+		return unregistrations;
 	}
 
 	public String getName() {
@@ -663,13 +684,6 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	public String getTemporaryLocation() {
 		return String.format("%s/OCM%d", "/".equals(contextPath) ? "ROOT" : contextPath + "/", getNumericId());
 	}
-
-
-
-
-
-
-
 
 //	/** Access controller context of the bundle that registered the http context. */
 //	@Review("it's so rarely used - only in one resource access scenario, though there are many such scenarios.")

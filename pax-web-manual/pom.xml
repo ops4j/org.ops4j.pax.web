@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
+    Copyright 2020 OPS4J.
 
-      http://www.apache.org/licenses/LICENSE-2.0
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-    KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -36,115 +33,133 @@
 
 	<name>OPS4J Pax Web - Manual</name>
 
-	<properties>
-		<docs.test-sources>${project.build.directory}/test-sources</docs.test-sources>
-	</properties>
+<!--	<properties>-->
+<!--		<docs.test-sources>${project.build.directory}/test-sources</docs.test-sources>-->
+<!--	</properties>-->
 
 	<build>
 		<plugins>
+
+			<!-- Other plugins -->
+
 			<plugin>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>unpack-test-sources</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>unpack-dependencies</goal>
-						</goals>
-						<configuration>
-							<classifier>test-sources</classifier>
-							<includeClassifiers>test-sources</includeClassifiers>
-							<excludeTransitive>true</excludeTransitive>
-							<useSubDirectoryPerArtifact>true</useSubDirectoryPerArtifact>
-							<stripVersion>true</stripVersion>
-							<excludes>META-INF,META-INF/**</excludes>
-							<type>jar</type>
-							<outputDirectory>${docs.test-sources}</outputDirectory>
-							<includeArtifactIds>pax-web-itest-container-jetty</includeArtifactIds>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
+				<!--
+					see migration guide: https://gist.github.com/abelsromero/263ae7703f4bc5efebbfd16d9e407c28
+					manual invocation from src/docs/asciidoc:
+						$ asciidoctor -b html5 -D ../../../target/generated-docs-asciidoctor -a version=8.0.0-SNAPSHOT index.adoc
+				-->
 				<groupId>org.asciidoctor</groupId>
 				<artifactId>asciidoctor-maven-plugin</artifactId>
-				<version>1.5.2</version>
+				<version>${plugin.asciidoctor-maven-plugin}</version>
 				<executions>
 					<execution>
-						<id>output-html</id>
-						<phase>compile</phase>
+						<id>generate-manual</id>
+						<phase>generate-resources</phase>
 						<goals>
 							<goal>process-asciidoc</goal>
 						</goals>
 						<configuration>
-							<sourceHighlighter>coderay</sourceHighlighter>
+							<attributes>
+								<imagesdir>images</imagesdir>
+								<version>${project.version}</version>
+							</attributes>
 							<backend>html5</backend>
 							<doctype>article</doctype>
-							<attributes>
-								<toc>left</toc>
-								<toc-position>left</toc-position>
-								<toclevels>3</toclevels>
-								<icons>font</icons>
-								<docVersion>${project.version}</docVersion>
-								<sectanchors>true</sectanchors>
-								<idprefix />
-								<idseparator>-</idseparator>
-								<docinfo1>true</docinfo1>
-								<linkcss>false</linkcss>
-								<sourcedir>../../../target/test-sources</sourcedir>
-								<docVersion>${project.version}</docVersion>
-								<tomcatVersion>${dependency.tomcat.version}</tomcatVersion>
-								<jettyVersion>${dependency.eclipse.jetty.version}</jettyVersion>
-								<undertowVersion>${dependency.undertow-core.version}</undertowVersion>
-								<latestStableVersion>${baseline.version}</latestStableVersion>
-								<servletVersion>${dependency.javax.servlet-api.version}</servletVersion>
-								<jspVersion>${dependency.javax.servlet.jsp-api.version}</jspVersion>
-								<jsfVersion>${dependency.jsf.myfaces.version}</jsfVersion>
-							</attributes>
+							<embedAssets>true</embedAssets>
+							<sourceDocumentName>index.adoc</sourceDocumentName>
+							<outputDirectory>${project.build.directory}/generated-docs</outputDirectory>
+							<requires>
+								<require>asciidoctor-diagram</require>
+							</requires>
 						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<headerFooter>true</headerFooter>
-				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.asciidoctor</groupId>
+						<artifactId>asciidoctorj-diagram</artifactId>
+						<version>${plugin.dependency.org.asciidoctor.diagram}</version>
+					</dependency>
+				</dependencies>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<configuration>
-					<webResources>
-						<resource>
-							<directory>${project.build.directory}/generated-docs</directory>
-						</resource>
-					</webResources>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<inherited>false</inherited>
-				<executions>
-					<execution>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<skipTests>true</skipTests>
-				</configuration>
-			</plugin>
+
+<!--			<plugin>-->
+<!--				<artifactId>maven-dependency-plugin</artifactId>-->
+<!--				<executions>-->
+<!--					<execution>-->
+<!--						<id>unpack-test-sources</id>-->
+<!--						<phase>generate-sources</phase>-->
+<!--						<goals>-->
+<!--							<goal>unpack-dependencies</goal>-->
+<!--						</goals>-->
+<!--						<configuration>-->
+<!--							<classifier>test-sources</classifier>-->
+<!--							<includeClassifiers>test-sources</includeClassifiers>-->
+<!--							<excludeTransitive>true</excludeTransitive>-->
+<!--							<useSubDirectoryPerArtifact>true</useSubDirectoryPerArtifact>-->
+<!--							<stripVersion>true</stripVersion>-->
+<!--							<excludes>META-INF,META-INF/**</excludes>-->
+<!--							<type>jar</type>-->
+<!--							<outputDirectory>${docs.test-sources}</outputDirectory>-->
+<!--							<includeArtifactIds>pax-web-itest-container-jetty</includeArtifactIds>-->
+<!--						</configuration>-->
+<!--					</execution>-->
+<!--				</executions>-->
+<!--			</plugin>-->
+<!--			<plugin>-->
+<!--				<groupId>org.asciidoctor</groupId>-->
+<!--				<artifactId>asciidoctor-maven-plugin</artifactId>-->
+<!--				<version>1.5.2</version>-->
+<!--				<executions>-->
+<!--					<execution>-->
+<!--						<id>output-html</id>-->
+<!--						<phase>compile</phase>-->
+<!--						<goals>-->
+<!--							<goal>process-asciidoc</goal>-->
+<!--						</goals>-->
+<!--						<configuration>-->
+<!--							<sourceHighlighter>coderay</sourceHighlighter>-->
+<!--							<backend>html5</backend>-->
+<!--							<doctype>article</doctype>-->
+<!--							<attributes>-->
+<!--								<toc>left</toc>-->
+<!--								<toc-position>left</toc-position>-->
+<!--								<toclevels>3</toclevels>-->
+<!--								<icons>font</icons>-->
+<!--								<docVersion>${project.version}</docVersion>-->
+<!--								<sectanchors>true</sectanchors>-->
+<!--								<idprefix />-->
+<!--								<idseparator>-</idseparator>-->
+<!--								<docinfo1>true</docinfo1>-->
+<!--								<linkcss>false</linkcss>-->
+<!--								<sourcedir>../../../target/test-sources</sourcedir>-->
+<!--								<docVersion>${project.version}</docVersion>-->
+<!--								<tomcatVersion>${dependency.tomcat.version}</tomcatVersion>-->
+<!--								<jettyVersion>${dependency.eclipse.jetty.version}</jettyVersion>-->
+<!--								<undertowVersion>${dependency.undertow-core.version}</undertowVersion>-->
+<!--								<latestStableVersion>${baseline.version}</latestStableVersion>-->
+<!--								<servletVersion>${dependency.javax.servlet-api.version}</servletVersion>-->
+<!--								<jspVersion>${dependency.javax.servlet.jsp-api.version}</jspVersion>-->
+<!--								<jsfVersion>${dependency.jsf.myfaces.version}</jsfVersion>-->
+<!--							</attributes>-->
+<!--						</configuration>-->
+<!--					</execution>-->
+<!--				</executions>-->
+<!--				<configuration>-->
+<!--					<headerFooter>true</headerFooter>-->
+<!--				</configuration>-->
+<!--			</plugin>-->
+<!--			<plugin>-->
+<!--				<groupId>org.apache.maven.plugins</groupId>-->
+<!--				<artifactId>maven-war-plugin</artifactId>-->
+<!--				<configuration>-->
+<!--					<webResources>-->
+<!--						<resource>-->
+<!--							<directory>${project.build.directory}/generated-docs</directory>-->
+<!--						</resource>-->
+<!--					</webResources>-->
+<!--				</configuration>-->
+<!--			</plugin>-->
 		</plugins>
 	</build>
 
@@ -152,12 +167,12 @@
 
 		<!-- pax-web own artifacts -->
 
-		<dependency>
-			<groupId>org.ops4j.pax.web.itest.container</groupId>
-			<artifactId>pax-web-itest-container-jetty</artifactId>
-			<classifier>test-sources</classifier>
-			<scope>provided</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web.itest.container</groupId>-->
+<!--			<artifactId>pax-web-itest-container-jetty</artifactId>-->
+<!--			<classifier>test-sources</classifier>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
 
 	</dependencies>
 

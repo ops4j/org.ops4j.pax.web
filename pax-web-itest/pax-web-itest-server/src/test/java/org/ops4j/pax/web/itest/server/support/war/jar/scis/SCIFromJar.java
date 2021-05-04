@@ -24,7 +24,6 @@ public class SCIFromJar implements ServletContainerInitializer {
 
 	@Override
 	public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
-
 	}
 
 }

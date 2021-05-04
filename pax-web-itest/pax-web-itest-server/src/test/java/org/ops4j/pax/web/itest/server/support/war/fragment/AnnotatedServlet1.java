@@ -15,10 +15,14 @@
  */
 package org.ops4j.pax.web.itest.server.support.war.fragment;
 
+import java.io.IOException;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @WebServlet(name = "annotatedServlet1", urlPatterns = { "/as1", "/as1/*" }, initParams = {
 		@WebInitParam(name = "param1", value = "value1"),
@@ -26,5 +30,12 @@ import javax.servlet.http.HttpServlet;
 }, loadOnStartup = 3)
 @MultipartConfig(location = "/dev/null", maxFileSize = 424242L, maxRequestSize = 1024, fileSizeThreshold = 128)
 public class AnnotatedServlet1 extends HttpServlet {
+
+	@Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		String msg = String.format("Hello %s!", req.getPathInfo());
+		resp.setContentLength(msg.length());
+		resp.getWriter().print(msg);
+	}
 
 }
