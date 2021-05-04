@@ -46,7 +46,7 @@
         <javax.mail.version>1.4.7</javax.mail.version>
 		<pax.url.version>${dependency.paxurl.version}</pax.url.version>
         <servicemix.specs.version>2.9.0</servicemix.specs.version>
-        <dependency.websocket.version>1.1</dependency.websocket.version>
+        <dependency.websocket.bundle.version>1.1_1</dependency.websocket.bundle.version>
         <dependency.alpn.version>1.1.2.v20150522</dependency.alpn.version>
 	</properties>
 
