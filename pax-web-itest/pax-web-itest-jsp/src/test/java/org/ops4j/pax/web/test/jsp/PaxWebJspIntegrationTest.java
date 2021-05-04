@@ -32,6 +32,7 @@ import org.junit.Test;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResourceLoader;
@@ -91,7 +92,10 @@ public class PaxWebJspIntegrationTest {
 		// for TLDs
 		Bundle bundle = mock(Bundle.class);
 		BundleContext bc = mock(BundleContext.class);
+		BundleWiring bw = mock(BundleWiring.class);
 		when(bc.getBundle()).thenReturn(bundle);
+		when(bundle.getBundleContext()).thenReturn(bc);
+		when(bundle.adapt(BundleWiring.class)).thenReturn(bw);
 		context.setAttribute(PaxWebConstants.CONTEXT_PARAM_BUNDLE_CONTEXT, bc);
 
 		// can get an error in IDE like "java: cannot access org.apache.jasper.servlet.JasperInitializer"
