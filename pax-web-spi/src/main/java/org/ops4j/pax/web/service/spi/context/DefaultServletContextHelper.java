@@ -31,7 +31,7 @@ import org.osgi.service.http.context.ServletContextHelper;
  */
 public class DefaultServletContextHelper extends ServletContextHelper {
 
-	private final Bundle bundle;
+	protected final Bundle bundle;
 
 	public DefaultServletContextHelper(Bundle runtimeBundle) {
 		super(runtimeBundle);

@@ -259,6 +259,8 @@ class Hc5TestClient implements HttpTestClient {
 				httpClientBuilder.setDefaultCookieStore(httpState.getCookieStore());
 			}
 
+			httpClientBuilder.disableRedirectHandling();
+
 			RequestConfig requestConfig = RequestConfig.custom()
 					.setResponseTimeout(Timeout.ofSeconds(timeoutInSeconds))
 					.setConnectTimeout(Timeout.ofSeconds(timeoutInSeconds))

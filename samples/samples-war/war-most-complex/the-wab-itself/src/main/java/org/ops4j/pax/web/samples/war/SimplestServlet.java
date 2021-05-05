@@ -31,7 +31,8 @@ public class SimplestServlet extends HttpServlet {
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		resp.setContentType("text/plain");
 		resp.setCharacterEncoding(StandardCharsets.UTF_8.toString());
-		resp.getWriter().println("Hello");
+		resp.setContentLength(5);
+		resp.getWriter().print("Hello");
 		resp.getWriter().flush();
 	}
 

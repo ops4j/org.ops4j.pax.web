@@ -13,29 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.container.war;
+package org.ops4j.pax.web.itest.container.war.todo;
 
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
 /**
  * @author Achim Nierbeck
  */
-public abstract class AbstractWarBasicAuthIntegrationTest extends AbstractContainerTestBase {
+public abstract class AbstractWarFormAuthIntegrationTest extends AbstractContainerTestBase {
 
 //	private static final Logger LOG = LoggerFactory
-//			.getLogger(AbstractWarBasicAuthIntegrationTest.class);
+//			.getLogger(AbstractWarFormAuthIntegrationTest.class);
 //
 //	private Bundle installWarBundle;
 //
 //	@Before
 //	public void setUp() throws BundleException, InterruptedException {
 //		LOG.info("Setting up test");
+//
 //		initWebListener();
 //
 //		String bundlePath = WEB_BUNDLE
-//				+ "mvn:org.ops4j.pax.web.samples/war-authentication/"
+//				+ "mvn:org.ops4j.pax.web.samples/war-formauth/"
 //				+ VersionUtil.getProjectVersion() + "/war?" + WEB_CONTEXT_PATH
-//				+ "=/war-authentication";
+//				+ "=/war-formauth";
 //		installWarBundle = bundleContext.installBundle(bundlePath);
 //		installWarBundle.start();
 //
@@ -50,59 +51,42 @@ public abstract class AbstractWarBasicAuthIntegrationTest extends AbstractContai
 //		}
 //	}
 //
-//
 //	@Test
 //	public void testWC() throws Exception {
 //		HttpTestClientFactory.createDefaultTestClient()
 //				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 //						resp -> resp.contains("<h1>Hello World</h1>"))
-//				.doGETandExecuteTest("http://127.0.0.1:8181/war-authentication/wc");
+//				.doGETandExecuteTest("http://127.0.0.1:8181/war-formauth/wc");
 //	}
 //
 //	@Test
-//	public void testWCExample() throws Exception {
+//	public void testWebContainerExample() throws Exception {
 //		HttpTestClientFactory.createDefaultTestClient()
-//				.withReturnCode(401)
-//				.withResponseAssertion("Response must contain 'Unauthorized'",
-//						resp -> resp.contains("Unauthorized"))
-//				.doGETandExecuteTest("http://127.0.0.1:8181/war-authentication/wc/example");
-//
-//		HttpTestClientFactory.createDefaultTestClient()
-//				.authenticate("admin", "admin", "Test Realm")
-//				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
-//						resp -> resp.contains("<h1>Hello World</h1>"))
-//				.doGETandExecuteTest("http://127.0.0.1:8181/war-authentication/wc/example");
-//	}
-//
-//	@Test
-//	public void testWCAdditionalSample() throws Exception {
-//		HttpTestClientFactory.createDefaultTestClient()
-//				.withReturnCode(401)
-//				.withResponseAssertion("Response must contain 'Unauthorized'",
-//						resp -> resp.contains("Unauthorized"))
-//				.doGETandExecuteTest("http://127.0.0.1:8181/war-authentication/wc/additionalsample");
-//
-//		HttpTestClientFactory.createDefaultTestClient()
-//				.authenticate("admin", "admin", "Test Realm")
-//				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
-//						resp -> resp.contains("<h1>Hello World</h1>"))
-//				.doGETandExecuteTest("http://127.0.0.1:8181/war-authentication/wc/additionalsample");
-//	}
-//
-//	@Test
-//	public void testWcSn() throws Exception {
+//				.withResponseAssertion("Response must contain '<title>Login Page for Examples</title>'",
+//						resp -> resp.contains("<title>Login Page for Examples</title>"))
+//				.doGETandExecuteTest("http://127.0.0.1:8181/war-formauth/wc/example");
 //		HttpTestClientFactory.createDefaultTestClient()
 //				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 //						resp -> resp.contains("<h1>Hello World</h1>"))
-//				.doGETandExecuteTest("http://127.0.0.1:8181/war-authentication/wc/sn");
+//				.addParameter("j_username", "admin")
+//				.addParameter("j_password", "admin")
+//				.doPOST("http://127.0.0.1:8181/war-formauth/wc/example?action=j_security_check");
 //	}
 //
 //	@Test
+//	public void testWebContainerSN() throws Exception {
+//		HttpTestClientFactory.createDefaultTestClient()
+//				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
+//						resp -> resp.contains("<h1>Hello World</h1>"))
+//				.doGETandExecuteTest("http://127.0.0.1:8181/war-formauth/wc/sn");
+//	}
+//
+//	@Test
+//	@Ignore("This test assumes redirection/forward to /wc/example which isn't configured")
 //	public void testSlash() throws Exception {
 //		HttpTestClientFactory.createDefaultTestClient()
 //				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 //						resp -> resp.contains("<h1>Hello World</h1>"))
-//				.doGETandExecuteTest("http://127.0.0.1:8181/war-authentication/");
+//				.doGETandExecuteTest("http://127.0.0.1:8181/war-formauth/");
 //	}
-
 }

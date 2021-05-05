@@ -244,10 +244,18 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 		);
 
 		// static resources
-		when(wab.getResource("hello.txt")).thenReturn(new File("src/test/resources/bundles/the-wab-itself/hello.txt").toURI().toURL());
-		when(wab.getResource("hello-fragment.txt")).thenReturn(new File("src/test/resources/bundles/the-wab-fragment/hello-fragment.txt").toURI().toURL());
+		when(wab.findEntries("/", "hello.txt", false)).thenReturn(
+				Collections.enumeration(Collections.singletonList(
+						new File("src/test/resources/bundles/the-wab-itself/hello.txt").toURI().toURL()
+				))
+		);
+		when(wab.findEntries("/", "hello-fragment.txt", false)).thenReturn(
+				Collections.enumeration(Collections.singletonList(
+						new File("src/test/resources/bundles/the-wab-fragment/hello-fragment.txt").toURI().toURL()
+				))
+		);
 		// for proper 302 redirect - Undertow doesn't handle such redirect when accessing root of the context.
-		when(wab.getResource("/")).thenReturn(new File("src/test/resources/bundles/the-wab-itself/").toURI().toURL());
+		when(wab.getEntry("/")).thenReturn(new File("src/test/resources/bundles/the-wab-itself/").toURI().toURL());
 
 		installWab(wab);
 

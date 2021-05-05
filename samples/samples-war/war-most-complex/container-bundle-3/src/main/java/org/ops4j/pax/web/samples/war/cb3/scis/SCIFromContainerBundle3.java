@@ -15,16 +15,26 @@
  */
 package org.ops4j.pax.web.samples.war.cb3.scis;
 
+import java.io.IOException;
 import java.util.Set;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 public class SCIFromContainerBundle3 implements ServletContainerInitializer {
 
 	@Override
 	public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
-
+		ctx.addServlet("dynamic1", new HttpServlet() {
+			@Override
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				resp.setContentLength(12);
+				resp.getWriter().print("Hello World!");
+			}
+		}).addMapping("/dynamic1");
 	}
 
 }

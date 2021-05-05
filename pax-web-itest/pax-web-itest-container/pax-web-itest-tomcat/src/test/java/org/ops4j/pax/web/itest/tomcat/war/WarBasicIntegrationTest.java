@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.jetty.war;
+package org.ops4j.pax.web.itest.tomcat.war;
 
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -28,7 +28,7 @@ public class WarBasicIntegrationTest extends AbstractWarBasicIntegrationTest {
 
 	@Configuration
 	public Option[] configure() {
-		Option[] serverOptions = combine(baseConfigure(), paxWebJetty());
+		Option[] serverOptions = combine(baseConfigure(), paxWebTomcat());
 		Option[] jspOptions = combine(serverOptions, paxWebJsp());
 		return combine(jspOptions, paxWebExtenderWar());
 	}

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.ops4j.pax.web.itest.container.war;
+package org.ops4j.pax.web.itest.container.war.todo;
 
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 

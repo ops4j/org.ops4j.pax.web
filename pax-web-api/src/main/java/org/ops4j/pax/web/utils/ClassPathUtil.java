@@ -681,6 +681,9 @@ public class ClassPathUtil {
 	 */
 	private static void scanBundle(Bundle bundle, URL root, String pattern, boolean recurse, Collection<URL> result) {
 		Enumeration<URL> e = bundle.findEntries(root.getPath(), pattern, recurse);
+		if (e == null) {
+			return;
+		}
 		while (e.hasMoreElements()) {
 			result.add(e.nextElement());
 		}

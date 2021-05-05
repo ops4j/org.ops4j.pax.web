@@ -18,10 +18,13 @@ package org.ops4j.pax.web.itest.container.war;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.container.whiteboard.AbstractWhiteboardIntegrationTest;
+import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
@@ -29,7 +32,8 @@ import org.slf4j.LoggerFactory;
 
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
-public class AbstractWarBasicIntegrationTest extends AbstractContainerTestBase {
+@RunWith(PaxExam.class)
+public abstract class AbstractWarBasicIntegrationTest extends AbstractContainerTestBase {
 
 	public static final Logger LOG = LoggerFactory.getLogger(AbstractWhiteboardIntegrationTest.class);
 
@@ -38,14 +42,30 @@ public class AbstractWarBasicIntegrationTest extends AbstractContainerTestBase {
 	@Configuration
 	public Option[] configure() {
 		Option[] serverOptions = combine(baseConfigure(), paxWebJetty());
-		return combine(serverOptions, paxWebExtenderWar());
+		Option[] jspOptions = combine(serverOptions, paxWebJsp());
+		return combine(jspOptions, paxWebExtenderWar());
 	}
 
 	@Before
 	public void setUp() throws Exception {
-//		configureAndWaitForServletWithMapping("/",
-//				() -> bundle = installAndStartBundle(sampleWarURI("war-simplest-osgi")));
-		bundle = installAndStartBundle(sampleWarURI("war-simplest-osgi"));
+		configureAndWaitForDeployment(() -> {
+			context.installBundle(String.format("mvn:org.apache.myfaces.core/myfaces-api/%s", System.getProperty("myfaces.version")));
+			context.installBundle(String.format("mvn:org.apache.myfaces.core/myfaces-impl/%s", System.getProperty("myfaces.version")));
+			context.installBundle(String.format("mvn:commons-beanutils/commons-beanutils/%s", System.getProperty("commons-beanutils.version")));
+			context.installBundle(String.format("mvn:commons-collections/commons-collections/%s", System.getProperty("commons-collections.version")));
+			context.installBundle(String.format("mvn:commons-digester/commons-digester/%s", System.getProperty("commons-digester.version")));
+			context.installBundle("mvn:javax.enterprise/cdi-api/1.2");
+			context.installBundle("mvn:javax.interceptor/javax.interceptor-api/1.2");
+			context.installBundle("mvn:jakarta.websocket/jakarta.websocket-api/1.1.2");
+			// I'm not refreshing, so fragments need to be installed before their hosts
+			installAndStartBundle(sampleURI("container-bundle-3"));
+			context.installBundle(sampleURI("container-fragment-1"));
+			installAndStartBundle(sampleURI("container-bundle-1"));
+			context.installBundle(sampleURI("container-fragment-2"));
+			installAndStartBundle(sampleURI("container-bundle-2"));
+			context.installBundle(sampleURI("the-wab-fragment"));
+			bundle = installAndStartBundle(sampleWarURI("the-wab-itself"));
+		});
 	}
 
 	@After
@@ -57,8 +77,37 @@ public class AbstractWarBasicIntegrationTest extends AbstractContainerTestBase {
 	}
 
 	@Test
-	public void test() {
-		System.out.println(bundle.getState());
+	public void complexWab() throws Exception {
+		// there should be a /wab-complex context that's (by default) redirecting to /wab-complex/
+		HttpTestClientFactory.createDefaultTestClient()
+				.withReturnCode(302)
+				.doGETandExecuteTest("http://127.0.0.1:8181/wab-complex");
+
+		// servlet from web.xml
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must end with 'Hello'",
+						resp -> resp.endsWith("Hello"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/wab-complex/servlet");
+		// servlet from a an SCI of container-bundle-3
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must end with 'Hello World!'",
+						resp -> resp.endsWith("Hello World!"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/wab-complex/dynamic1");
+		// annotated servlet from WAB fragment
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must end with 'Hello /xyz!'",
+						resp -> resp.endsWith("Hello /xyz!"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/wab-complex/as1/xyz");
+		// resource from the WAB
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'This is just a static resource in the root directory of the WAB.'",
+						resp -> resp.contains("This is just a static resource in the root directory of the WAB."))
+				.doGETandExecuteTest("http://127.0.0.1:8181/wab-complex/hello.txt");
+		// resource from the WAB's fragment
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'This is just a static resource in the root directory of the WAB's fragment.'",
+						resp -> resp.contains("This is just a static resource in the root directory of the WAB's fragment."))
+				.doGETandExecuteTest("http://127.0.0.1:8181/wab-complex/hello-fragment.txt");
 	}
 
 }

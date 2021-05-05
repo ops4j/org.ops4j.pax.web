@@ -23,6 +23,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
@@ -33,6 +34,8 @@ import org.ops4j.pax.web.itest.AbstractControlledTestBase;
 import org.ops4j.pax.web.itest.utils.WaitCondition;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent;
+import org.ops4j.pax.web.service.spi.model.events.WebApplicationEventListener;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEventData;
 import org.ops4j.pax.web.service.spi.model.events.FilterEventData;
@@ -227,6 +230,41 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 							e.getType() == WebElementEvent.State.DEPLOYED
 									&& e.getData() instanceof FilterEventData
 									&& Arrays.asList(((FilterEventData) e.getData()).getUrlPatterns()).contains(mapping));
+				}
+			}.waitForCondition();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException(e.getMessage(), e);
+		} finally {
+			if (reg != null) {
+				reg.unregister();
+			}
+		}
+	}
+
+	/**
+	 * Performs an action and waits for {@link org.ops4j.pax.web.service.spi.model.events.ServerEvent} related
+	 * to started container at given port
+	 * @param port
+	 * @param actions
+	 */
+	protected void configureAndWaitForDeployment(Action action) throws Exception {
+		final CountDownLatch latch = new CountDownLatch(1);
+		WebApplicationEventListener listener = event -> {
+			if (event.getType() == WebApplicationEvent.State.DEPLOYED) {
+				latch.countDown();
+			}
+		};
+		ServiceRegistration<WebApplicationEventListener> reg
+				= context.registerService(WebApplicationEventListener.class, listener, null);
+
+		action.run();
+
+		try {
+			new WaitCondition("Waiting for deployment") {
+				@Override
+				protected boolean isFulfilled() throws Exception {
+					return latch.getCount() == 0L;
 				}
 			}.waitForCondition();
 		} catch (InterruptedException e) {

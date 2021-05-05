@@ -43,9 +43,10 @@ import org.apache.tomcat.util.descriptor.web.ServletDef;
 import org.apache.tomcat.util.descriptor.web.WebXml;
 import org.apache.tomcat.util.descriptor.web.WebXmlParser;
 import org.ops4j.pax.web.extender.war.internal.WarExtenderContext;
+import org.ops4j.pax.web.extender.war.internal.WebApplicationHelper;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.spi.context.DefaultHttpContext;
+import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
@@ -1076,8 +1077,29 @@ public class BundleWebApplication {
 		//          during undeployment - but what about whiteboard filters registered to WAB's context?
 //		final OsgiContextModel ocm = new OsgiContextModel(new DefaultHttpContext(this.bundle),
 //				this.bundle, this.contextPath, false);
-		final OsgiContextModel ocm = new OsgiContextModel(new DefaultHttpContext(this.bundle),
-				this.bundle, this.contextPath, true);
+//		getting: java.lang.RuntimeException: Can't resolve WebContainerContext without Bundle argument
+
+		// The most important part - the OsgiContextModel which bridges web elements from the WAB to actual
+		// servlet context in several aspects - it scopes access to resources and provides proper classloader.
+		// Remember that the same OsgiContextModel is used in THREE areas:
+		//  - HttpService (isWhiteboard() == false, hasDirectHttpContextInstance() == true)
+		//  - Whiteboard (isWhiteboard() == true, hasDirectHttpContextInstance() == false)
+		//  - WAB (isWhiteboard() == false, hasDirectHttpContextInstance() == false)
+		// the hasDirectHttpContextInstance() == false in WAB is important - we can't allow to re-register
+		// web elements from the WAB when new OsgiContextModel is created - there are several checks in
+		// pax-web-extender-whiteboard and pax-web-runtime that determine whether a web element can be re-registered
+		// to new "context". The elements from WAB simply CAN'T do it
+		// TODO: we should only allow other bundles to obtain WebContainer instance within the scope of bundle
+		//       context of the WAB, for example to register additional web elements (usually filters)
+
+		final OsgiContextModel ocm = new OsgiContextModel(null, this.bundle, this.contextPath, false);
+		ocm.setServiceId(0);
+		ocm.setServiceRank(Integer.MAX_VALUE);
+		ocm.setContextSupplier((context, contextName) -> {
+			Bundle b = context == null ? null : context.getBundle();
+			return new WebContainerContextWrapper(b, new WebApplicationHelper(b), contextName);
+		});
+
 		wabBatch.addOsgiContextModel(ocm, scm);
 
 		this.osgiContextModel = ocm;
@@ -1191,6 +1213,7 @@ public class BundleWebApplication {
 			}
 			String[] mappings = servletMappings.get(sn).toArray(new String[0]);
 			ServletModel.Builder builder = new ServletModel.Builder()
+					.withRegisteringBundle(bundle)
 					.withServletName(sn)
 					.withServletClass(servletClass)
 					.withUrlPatterns(mappings)
@@ -1204,15 +1227,14 @@ public class BundleWebApplication {
 			if (PaxWebConstants.DEFAULT_JSP_SERVLET_NAME.equals(sn)) {
 				builder.jspServlet(true);
 			}
-			ServletModel servletModel = builder.build();
-			servletModel.getContextModels();
-			wabBatch.addServletModel(servletModel);
+			wabBatch.addServletModel(builder.build());
 		});
 
 		// At the end, Tomcat adds SCIs to the context
 		this.sciToHt.forEach((sci, classes) -> {
 			Class<?>[] classesArray = classes.isEmpty() ? null : classes.toArray(new Class<?>[0]);
 			ContainerInitializerModel cim = new ContainerInitializerModel(sci, classesArray);
+			cim.setRegisteringBundle(bundle);
 			cim.addContextModel(ocm);
 			wabBatch.addContainerInitializerModel(cim);
 		});

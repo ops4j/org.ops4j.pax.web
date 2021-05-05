@@ -219,11 +219,10 @@ These helper bundles do not use _new_ BundleWiring API:
 `javax.servlet.ServletContext` also contains resource fetching methods:
 
 * `javax.servlet.ServletContext.getResourcePaths` - a directory listing for entries beginning with the passed argument which is a _base_. The _base_ is a directory directly stored in a WAR, but also a path inside _all_ the `/WEB-INF/lib/\*.jar!/META-INF/resources/`. This method returns _names_ and doesn't restrict access to `/WEB-INF` directory!
-* `javax.servlet.ServletContext.getResource` - this method returns a URL. Passed argument _must_ start with `/` and is a base inside a WAR or a base of each of the `/WEB-INF/lib/\*.jar!/META-INF/resources/`. According to JavaDoc, this method doesn't involve classloaders. Also this method doesn't prevent accessing `/WEB-INF/` or `/META-INF`!
-* `javax.servlet.ServletContext.getResourceAsStream`
-* `javax.servlet.ServletContext.getRealPath`
+* `javax.servlet.ServletContext.getResource[AsStream]` - this method returns a URL (a stream from it). Passed argument _must_ start with `/` and is a base inside a WAR or a base of each of the `/WEB-INF/lib/\*.jar!/META-INF/resources/`. According to JavaDoc, this method doesn't involve classloaders. Also this method doesn't prevent accessing `/WEB-INF/` or `/META-INF`!
+* `javax.servlet.ServletContext.getRealPath` - used to translate request URI to a real location of a file mapped by given URI. This is only useful within the context of default (resource) servlet and even Servlet specification says that resource paths from `/META-INF/resources` of embedded JARs should be returned only if the JARs are unpacked - this is even less likely in an OSGi environment (with fragments, bundles, etc.).
 
-Let's try to summarize:
+Let's try to summarize (but only `getResource[asStream]` and `getResourcePaths`):
 
 |===
 |`ServletContext` |CMPN Spec 128 |CMPN Spec 102+140 |Bundle Core API

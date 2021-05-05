@@ -317,7 +317,10 @@ public class DynamicRegistrations {
 
 	private void configureBundle(OsgiServletContext context, ElementModel<?, ?> model, Class<?> aClass) {
 		Bundle bundle = FrameworkUtil.getBundle(aClass);
-		if (bundle == null) {
+		if (bundle == null || bundle.getBundleContext() == null) {
+			// TOCHECK: I was able to install (but not start) myfaces-impl bundle, but I had problems
+			//          obtaining WebContainer instance within the context of this not-started bundle. I think
+			//          it's safe to have the bundle to be the WAB in such case.
 			bundle = context.getOsgiContextModel().getOwnerBundle();
 		}
 		// this is important because the registering bundle is used to obtain bundle-scoped WebContainer instance

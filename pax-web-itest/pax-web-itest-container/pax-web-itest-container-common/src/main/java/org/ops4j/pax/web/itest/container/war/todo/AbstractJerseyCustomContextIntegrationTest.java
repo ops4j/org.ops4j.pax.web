@@ -13,32 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.container.war;
+package org.ops4j.pax.web.itest.container.war.todo;
 
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
 /**
- * @author Sergey Beryozkin
+ * @author Toni Menzel (tonit)
+ * @since Mar 3, 2009
  */
-public abstract class AbstractWabJettyWebIntegrationTest extends AbstractContainerTestBase {
-
-//	private static final Logger LOG = LoggerFactory.getLogger(AbstractWabJettyWebIntegrationTest.class);
-//
+public abstract class AbstractJerseyCustomContextIntegrationTest extends AbstractContainerTestBase {
 //	private Bundle installWarBundle;
 //
 //	@Before
 //	public void setUp() throws BundleException, InterruptedException {
-//		LOG.info("Setting up test");
-//
-//		initWebListener();
-//
-//		String bundlePath = "mvn:org.ops4j.pax.web.samples/wab-jetty-web/"
-//				+ VersionUtil.getProjectVersion() + "/jar";
-//
-//		installWarBundle = bundleContext.installBundle(bundlePath);
-//		installWarBundle.start();
-//
-//		waitForWebListener();
+//		String bundlePath = "mvn:org.ops4j.pax.web.samples/web-jersey/" + VersionUtil.getProjectVersion();
+//		initServletListener();
+//		installWarBundle = installAndStartBundle(bundlePath);
+//		waitForServer("http://127.0.0.1:8181/");
+//		waitForServletListener();
 //	}
 //
 //	@After
@@ -49,14 +41,14 @@ public abstract class AbstractWabJettyWebIntegrationTest extends AbstractContain
 //		}
 //	}
 //
-//
 //	@Test
-//	public void testDispatchJsp() throws Exception {
+//	public void testRoot() throws Exception {
 //		HttpTestClientFactory.createDefaultTestClient()
-//				.withResponseAssertion("Response must contain 'It works'",
-//						resp -> resp.contains("It works"))
-//				.doGETandExecuteTest("http://127.0.0.1:8181/wab-jetty-web/index.html");
+//				.withResponseAssertion("Response must contain 'New session created'", resp -> resp.contains("New session created"))
+//				.doGETandExecuteTest("http://127.0.0.1:8181/");
+//		// test image-serving
+//		HttpTestClientFactory.createDefaultTestClient()
+//				.doGETandExecuteTest("http://127.0.0.1:8181/images/success.png");
 //	}
-
 
 }
