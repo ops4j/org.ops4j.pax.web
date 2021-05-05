@@ -471,8 +471,8 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.websocket</groupId>
-			<artifactId>javax.websocket-api</artifactId>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.javax-websocket-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -699,8 +699,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.websocket</groupId>
-			<artifactId>javax.websocket-api</artifactId>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.javax-websocket-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>commons-collections</groupId>

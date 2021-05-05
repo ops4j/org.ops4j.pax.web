@@ -154,7 +154,7 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle().groupId("org.ops4j.pax.web.itest").artifactId("pax-web-itest-base").versionAsInProject(),
 
 				mavenBundle().groupId("javax.servlet").artifactId("javax.servlet-api").versionAsInProject(),
-				mavenBundle().groupId("javax.websocket").artifactId("javax.websocket-api").version(asInProject()),
+				mavenBundle().groupId("org.apache.servicemix.bundles").artifactId("org.apache.servicemix.bundles.javax-websocket-api").version(asInProject()),
 				paxWebBundles(),
 
 				// httpcomponents HttpClient for testing

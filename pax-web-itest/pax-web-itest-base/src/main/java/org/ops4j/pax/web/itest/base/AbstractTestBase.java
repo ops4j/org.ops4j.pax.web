@@ -107,8 +107,8 @@ public abstract class AbstractTestBase {
 				logbackBundles(),
 
 
-				mavenBundle().groupId("javax.websocket")
-						.artifactId("javax.websocket-api").version(asInProject()),
+				mavenBundle().groupId("org.apache.servicemix.bundles")
+						.artifactId("org.apache.servicemix.bundles.javax-websocket-api").version(asInProject()),
 				mavenBundle().groupId("org.ops4j.pax.web.itest")
 						.artifactId("pax-web-itest-base").versionAsInProject(),
 

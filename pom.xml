@@ -235,7 +235,7 @@
 		<dependency.javax.jaspic.version>1.1</dependency.javax.jaspic.version>
 		<dependency.javax.json-api.version>1.0</dependency.javax.json-api.version>
 		<dependency.javax.mail.version>1.4.7</dependency.javax.mail.version>
-		<dependency.javax.websocket-api.version>1.1</dependency.javax.websocket-api.version>
+		<dependency.javax.websocket-api.version>1.1_1</dependency.javax.websocket-api.version>
 		<dependency.javax.ws.rs1-api.version>1.1.1</dependency.javax.ws.rs1-api.version>
 		<dependency.javax.ws.rs2-api.version>2.0.1</dependency.javax.ws.rs2-api.version>
 		<dependency.javax.validation-api.version>1.1.0.Final</dependency.javax.validation-api.version>
