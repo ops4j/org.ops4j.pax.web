@@ -75,6 +75,10 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 
 		// need to initialize the logger as super doStart is to late already
 		setLogger(Log.getLogger(getDisplayName() == null ? getContextPath() : getDisplayName()));
+
+		// "128.3.5 Static Content" is the only place where protected directories are mentioned. We'll handle them
+		// at request processing level here
+		setProtectedTargets(new String[] { "/WEB-INF", "/META-INF", "/OSGI-INF", "/OSGI-OPT" });
 	}
 
 	public void setServletContainerInitializers(Collection<SCIWrapper> wrappers) {

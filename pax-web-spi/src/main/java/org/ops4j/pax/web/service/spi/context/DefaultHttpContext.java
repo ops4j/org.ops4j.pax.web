@@ -35,10 +35,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Default implementation of {@link HttpContext} that uses the bundle to lookup
- * resources (as specified in 102.10.2 "public interface HttpContext").
+ * <p>Default implementation of {@link HttpContext} that uses the bundle to lookup
+ * resources (as specified in 102.10.2 "public interface HttpContext").</p>
+ *
+ * <p>Note that OSGi CMPN "128.3.5 Static Content" chapter is the only place where "protected directories" are
+ * mentioned, so only the implementation of {@link HttpContext} specific to pax-web-extender-war may contain
+ * such protection. Besides Undertow's default servlet, Tomcat's StandardContextValve and Jetty's ContextHandler
+ * provide such protection so we'll leverage those.</p>
+ *
+ * <p>Actually we should not restrict access to the <em>protected</em> directories, because they usually contain
+ * important configuration files for e.g., JSF.</p>
  *
  * @author Alin Dreghiciu (adreghiciu@gmail.com)
+ * @author Grzegorz Grzybek
  */
 public class DefaultHttpContext implements WebContainerContext {
 
@@ -122,11 +131,6 @@ public class DefaultHttpContext implements WebContainerContext {
 	}
 
 	@Override
-	public String getRealPath(String path) {
-		return null;
-	}
-
-	@Override
 	public String getContextId() {
 		return contextId;
 	}
@@ -158,18 +162,18 @@ public class DefaultHttpContext implements WebContainerContext {
 	}
 
 	/**
-	 * This method supports {@link ServletContext#getResource(String)}
+	 * This method supports {@link ServletContext#getResource(String)} and in default implementation of
+	 * {@link HttpContext} interface, according to "102.10.2 public interface HttpContext", "The behavior of the
+	 * methods on the default HttpContext is defined as follows:[...] This method calls the
+	 * servlet bundle's Bundle.getResource method, and returns the appropriate URL to access the resource"
+	 *
 	 * @param bundle
 	 * @param name
 	 * @return
 	 */
 	protected URL getResource(Bundle bundle, String name) {
-		// "name" is passed from javax.servlet.ServletContext.getResource() which always should start with
-		// leading slash
+		// "name" is passed from javax.servlet.ServletContext.getResource() which always should start with a slash
 		final String normalizedName = Path.normalizeResourcePath(name);
-//		if (isProtected(normalizedName)) {
-//			return null;
-//		}
 		LOG.debug("Searching bundle [" + bundle + "] for resource [" + normalizedName + "]");
 		return bundle.getResource(normalizedName);
 	}
@@ -195,7 +199,10 @@ public class DefaultHttpContext implements WebContainerContext {
 	 *     <li>{@code getEntryPaths}: {@code new EntryFilterEnumeration(revision, no-fragments, path, "*", no-recurse, no-url-values)}</li>
 	 * </ul></p>
 	 *
-	 * <p></p>
+	 * <p>The contradiction is resolved like this: {@link DefaultHttpContext} will implement this method based on
+	 * the Whiteboard behavior because Http Service specification doesn't mention this method at all and
+	 * Web Applications specification doesn't introduce any special support interface to be used <em>under</em>
+	 * {@link ServletContext}.</p>
 	 *
 	 * TODO: Just as {@link ServletContext#getResourcePaths(String)} does, we <strong>have to</strong> include
 	 *       resources available in {@code /WEB-INF/lib/*.jar!/META-INF/resources/} (which I think is good addition from
@@ -209,7 +216,7 @@ public class DefaultHttpContext implements WebContainerContext {
 		final String normalizedName = Path.normalizeResourcePath(name);
 		LOG.debug("Searching bundle [" + bundle + "] for resource paths of [" + normalizedName + "]");
 
-		if ((normalizedName != null) && (bundle != null)) {
+		if (normalizedName != null && bundle != null) {
 			int state = bundle.getState();
 			if (state == Bundle.INSTALLED || state == Bundle.STOPPING || state == Bundle.UNINSTALLED) {
 				// because org.osgi.framework.Bundle.findEntries() for INSTALLED bundle may lead to resolution of
@@ -217,42 +224,17 @@ public class DefaultHttpContext implements WebContainerContext {
 				// thread)
 				return null;
 			}
-			// TOCHECK: urls from findEntries() or names from getEntryPaths()?
 			final Enumeration<URL> e = bundle.findEntries(normalizedName, null, false);
 			if (e != null) {
 				final Set<String> result = new LinkedHashSet<String>();
 				while (e.hasMoreElements()) {
 					String path = e.nextElement().getPath();
-//					if (!isProtected(path)) {
-						result.add(path);
-//					}
+					result.add(path);
 				}
 				return result;
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * According to "128.3.5 Static Content", some paths can't be retrieved by default. This method ensures this
-	 * TODO: check initial slashes or *.jar!/ URLs.
-	 * @param path
-	 * @return
-	 */
-	private boolean isProtected(String path) {
-		if (path == null) {
-			return false;
-		}
-		String p = path.toLowerCase();
-
-		if (p.startsWith("web-inf/")
-				|| p.startsWith("osgi-inf/")
-				|| p.startsWith("meta-inf/")
-				|| p.startsWith("osgi-opt/")) {
-			return true;
-		}
-
-		return false;
 	}
 
 }

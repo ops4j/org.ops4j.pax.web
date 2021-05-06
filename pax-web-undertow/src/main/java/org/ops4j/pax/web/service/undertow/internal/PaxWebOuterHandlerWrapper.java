@@ -23,6 +23,7 @@ import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.handlers.ServletRequestContext;
+import io.undertow.util.StatusCodes;
 import org.ops4j.pax.web.service.spi.servlet.OsgiHttpServletRequestWrapper;
 
 /**
@@ -41,15 +42,25 @@ public class PaxWebOuterHandlerWrapper implements HandlerWrapper {
 			@Override
 			public void handleRequest(HttpServerExchange exchange) throws Exception {
 				ServletRequestContext context = exchange.getAttachment(ServletRequestContext.ATTACHMENT_KEY);
-				ServletInfo servletInfo = context.getCurrentServlet().getManagedServlet().getServletInfo();
+				HttpServletRequest incomingRequest = (HttpServletRequest) context.getServletRequest();
 
-//				if (context.getDeployment().getDeploymentState() != DeploymentManager.State.STARTED) {
-//				}
+				// "128.3.5 Static Content" is the only place where protected directories are mentioned.
+				// We can handle them before proceeding further, even if
+				// io.undertow.servlet.handlers.ServletInitialHandler.handleRequest() checked some of the prefixes
+				// already
+				String path = exchange.getRelativePath();
+				if (path.regionMatches(true, 0, "/meta-inf", 0, "/meta-inf".length())
+						|| path.regionMatches(true, 0, "/web-inf", 0, "/web-inf".length())
+						|| path.regionMatches(true, 0, "/osgi-inf", 0, "/osgi-inf".length())
+						|| path.regionMatches(true, 0, "/osgi-opt", 0, "/osgi-opt".length())) {
+					exchange.setStatusCode(StatusCodes.NOT_FOUND);
+					return;
+				}
+
+				ServletInfo servletInfo = context.getCurrentServlet().getManagedServlet().getServletInfo();
 
 				if (servletInfo instanceof PaxWebServletInfo) {
 					PaxWebServletInfo paxWebServletInfo = (PaxWebServletInfo) servletInfo;
-
-					HttpServletRequest incomingRequest = (HttpServletRequest) context.getServletRequest();
 
 					HttpServletRequest req;
 					if (!paxWebServletInfo.is404()) {

@@ -102,4 +102,32 @@ At Pax Web level, this type of context is represented by `org.ops4j.pax.web.serv
 
 It is important to be aware how it translates to real context managed by target runtime.
 
-=== sss
+== Resources
+
+From the perspective of JavaEE web developer, the proper interface to access web resources is `javax.servlet.ServletContext` and its resource accessing methods:
+
+* `javax.servlet.ServletContext.getResourcePaths` - a directory listing for entries beginning with the passed argument which is a _base_. The _base_ is a directory directly stored in a WAR, but also a path inside _all_ the `/WEB-INF/lib/\*.jar!/META-INF/resources/`. This method returns _names_ and doesn't restrict access to `/WEB-INF` directory!
+* `javax.servlet.ServletContext.getResource[AsStream]` - this method returns a URL (a stream from it). Passed argument _must_ start with `/` and is a base inside a WAR or a base of each of the `/WEB-INF/lib/\*.jar!/META-INF/resources/`. According to JavaDoc, this method doesn't involve classloaders. Also this method doesn't prevent accessing `/WEB-INF/` or `/META-INF`!
+* `javax.servlet.ServletContext.getRealPath` - used to translate request URI to a real location of a file mapped by given URI. This is only useful within the context of default (resource) servlet and even Servlet specification says that resource paths from `/META-INF/resources` of embedded JARs should be returned only if the JARs are unpacked - this is even less likely in an OSGi environment (with fragments, bundles, etc.).
+
+We can skip `getRealPath` method which actually doesn't make any sense in an OSGi environment.
+
+And `getResource[AsStream]` and `getResourcePaths` do not have protection mechanism (to skip `/WEB-INF` or `/META-INF` directories) because many frameworks (like JSF or JSP) need access to these directories.
+
+From the perspective of OSGi web developer, `javax.servlet.ServletContext` is not the only interface that can be used. There are also:
+
+* (from chapter 102, "Http Service specification"): `org.osgi.service.http.HttpContext`
+* (from chapter 140, "Whiteboard specification"): `org.osgi.service.http.context.ServletContextHelper`
+* (from chapter 128, "Web Applications specification", 128.3.5 Static Content and 128.6.3 Resource Lookup): no new interface is introduced, but this is stated:
+[quote]
+The getResource and getResourceAsStream methods of the ServletContext interface are used to access resources in the web application. For a WAB, these resources must be found according to the findEntries method, this method includes fragments. For the getResource and getResourceAsStream method, if multiple resources are found, then the first one must be used.
+
+Only chapter "128.3.5 Static Content" mentions about the protection of `WEB-INF/`, `OSGI-INF/`, `META-INF/` and `OSGI-OPT/` directories. But because we _can't_ filter them out when calling any resource access methods, the only place we can prevent access to these entries is the default servlet (used to serve the resources and usually mapped to `/`).
+
+So no protection is implemented in `javax.servlet.ServletContext` implementations and in any implementation of `org.osgi.service.http.HttpService` or `org.osgi.service.http.context.ServletContextHelper`.
+
+Actual runtimes have their own protection mechanisms:
+
+* Tomcat denies HTTP access to these directories as soon as in `org.apache.catalina.core.StandardContextValve.invoke()`
+* Jetty allows configuration of protected directories in `org.eclipse.jetty.server.handler.ContextHandler._protectedTargets`
+* Undertow does it in just-enough time in `io.undertow.servlet.handlers.DefaultServlet.doGet()`. Some paths are checked in `io.undertow.servlet.handlers.ServletInitialHandler.handleRequest()` (only exact `/META-INF/` and `/WEB-INF` prefixed paths).

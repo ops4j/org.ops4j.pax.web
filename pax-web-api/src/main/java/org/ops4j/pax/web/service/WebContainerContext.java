@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.ops4j.pax.web.service.whiteboard.ContextRelated;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.context.ServletContextHelper;
 
 /**
  * <p>{@link HttpContext} extension that adds:<ul>
@@ -40,7 +41,7 @@ import org.osgi.service.http.HttpContext;
  * paremeters or (legacy Pax Web method) in {@code org.ops4j.pax.web.service.whiteboard.HttpContextMapping} service
  * or (legacy and not recommended) {@code org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping}.</p>
  *
- * <p>Internally, Pax Web will wrap "new" {@link org.osgi.service.http.context.ServletContextHelper} instances
+ * <p>Internally, Pax Web will wrap Whiteboard's {@link org.osgi.service.http.context.ServletContextHelper} instances
  * in some implementation of {@link WebContainerContext} interface.</p>
  *
  * @author Alin Dreghiciu (adreghiciu@gmail.com)
@@ -57,8 +58,11 @@ public interface WebContainerContext extends HttpContext {
 	 * to entries within the web application whose longest sub-path matches the supplied path argument.
 	 * A specified path of "/" indicates the root of the web application.</p>
 	 *
-	 * <p>The methods requires classLoader access, because embedded bundle JARs (listed in {@code Bundle-ClassPath}
-	 * manifest header) should be checked as well.</p>
+	 * <p>Whether this method reaches to embedded JARs, attached fragments or reachable bundles is dependant on
+	 * the implementation and actual Pax Web component used:<ul>
+	 *     <li>In Whiteboard scenario we delegate to {@link ServletContextHelper#getResourcePaths}</li>
+	 *     <li>In HttpService scenario</li>
+	 * </ul></p>
 	 *
 	 * <p>Even if not specified by OSGi CMPN, this method also returns resources relative to all
 	 * {@code /WEB-INF/lib/*.jar!/META-INF/resources/} if the bundle is WAB.</p>
@@ -85,7 +89,9 @@ public interface WebContainerContext extends HttpContext {
 	 * @param path
 	 * @return
 	 */
-	String getRealPath(String path);
+	default String getRealPath(String path) {
+		return null;
+	}
 
 	/**
 	 * Method that backports {@link org.osgi.service.http.context.ServletContextHelper#finishSecurity}

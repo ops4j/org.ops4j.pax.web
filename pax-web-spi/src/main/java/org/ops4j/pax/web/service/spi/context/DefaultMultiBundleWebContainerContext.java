@@ -83,8 +83,9 @@ public final class DefaultMultiBundleWebContainerContext implements MultiBundleW
 	}
 
 	/**
-	 * Search resource paths within the bundle jar as in
-	 * {@link org.osgi.service.http.context.ServletContextHelper#getResourcePaths}. {@inheritDoc}
+	 * <p>Search resource paths within all the bundles sharing this context.</p>
+	 *
+	 * <p>{@inheritDoc}</p>
 	 */
 	@Override
 	public Set<String> getResourcePaths(final String name) {
@@ -94,12 +95,6 @@ public final class DefaultMultiBundleWebContainerContext implements MultiBundleW
 				return paths;
 			}
 		}
-		return null;
-	}
-
-	@Override
-	public String getRealPath(String path) {
-		// when backed by ServletContextHelper, it could be delegated, but here it's only backed by set of bundles
 		return null;
 	}
 

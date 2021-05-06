@@ -17,11 +17,13 @@ package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.IOException;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.valves.ValveBase;
+import org.apache.tomcat.util.buf.MessageBytes;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 
 /**
@@ -49,6 +51,18 @@ public class PaxWebStandardContextValve extends ValveBase {
 
 	@Override
 	public void invoke(Request request, Response response) throws IOException, ServletException {
+		// org.apache.catalina.core.StandardContextValve.invoke() checks for WEB-INF and META-INF paths
+		// we'll check also for OSGI-INF and OSGI-OPT according to "128.3.5 Static Content"
+		MessageBytes requestPathMB = request.getRequestPathMB();
+		if ((requestPathMB.startsWithIgnoreCase("/META-INF/", 0)) || (requestPathMB.equalsIgnoreCase("/META-INF"))
+				|| (requestPathMB.startsWithIgnoreCase("/WEB-INF/", 0)) || (requestPathMB.equalsIgnoreCase("/WEB-INF"))
+				|| (requestPathMB.startsWithIgnoreCase("/OSGI-INF/", 0)) || (requestPathMB.equalsIgnoreCase("/OSGI-INF"))
+				|| (requestPathMB.startsWithIgnoreCase("/OSGI-OPT/", 0)) || (requestPathMB.equalsIgnoreCase("/OSGI-OPT"))
+		) {
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+
 		Wrapper wrapper = request.getWrapper();
 		if (wrapper == null) {
 			// we need SOME wrapper, so preprocessors/security/filters are called correctly
