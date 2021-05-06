@@ -57,6 +57,11 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 	}
 
 	@Override
+	protected boolean enableJSP() {
+		return true;
+	}
+
+	@Override
 	protected boolean enableWhiteboardExtender() {
 		return false;
 	}
@@ -257,6 +262,21 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 		// for proper 302 redirect - Undertow doesn't handle such redirect when accessing root of the context.
 		when(wab.getEntry("/")).thenReturn(new File("src/test/resources/bundles/the-wab-itself/").toURI().toURL());
 
+		// TLD
+		when(wab.findEntries("/", "META-INF/my.tld", false)).thenAnswer((i) ->
+				Collections.enumeration(Collections.singletonList(new File("src/test/resources/tlds/test.tld").toURI().toURL()
+		)));
+		// JSP
+		when(wab.findEntries("/", "hello.jsp", false)).thenAnswer((i) ->
+				Collections.enumeration(Collections.singletonList(new File("src/test/resources/jsp/hellotldandc.jsp").toURI().toURL()
+		)));
+		when(wab.findEntries("/", "coda.jsp", false)).thenAnswer((i) ->
+				Collections.enumeration(Collections.singletonList(new File("src/test/resources/jsp/coda.jsp").toURI().toURL()
+		)));
+		when(wab.findEntries("/", "error.jsp", false)).thenAnswer((i) ->
+				Collections.enumeration(Collections.singletonList(new File("src/test/resources/jsp/error.jsp").toURI().toURL()
+		)));
+
 		installWab(wab);
 
 		// there should be a /wab context that's (by default) redirecting to /wab/
@@ -268,12 +288,32 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/wab/dynamic1"), endsWith("Hello World!"));
 		// annotated servlet from WAB fragment
 		assertThat(httpGET(port, "/wab/as1/xyz"), endsWith("Hello /xyz!"));
+		// annotated servlet from WAB fragment - filtered
+		assertThat(httpGET(port, "/wab/as1/should-be-filtered/xyz"), endsWith("Hello /should-be-filtered/xyz! (filtered)"));
 		// resource from the WAB
 		assertThat(httpGET(port, "/wab/hello.txt"),
 				containsString("This is just a static resource in the root directory of the WAB."));
 		// resource from the WAB's fragment
 		assertThat(httpGET(port, "/wab/hello-fragment.txt"),
 				containsString("This is just a static resource in the root directory of the WAB's fragment."));
+		// real JSP with EL and custom and standard tags
+		String jspResult = httpGET(port, "/wab/hello.jsp?p1=v1&p2=v2");
+		assertThat(jspResult, containsString("<span>Hello Custom Tags!</span>"));
+		assertThat(jspResult, containsString("<h1>v1</h1>"));
+		assertThat(jspResult, containsString("<h2>v2</h2>"));
+		assertThat(jspResult, containsString("<!-- Added because Pax Web can do it -->"));
+		// access through welcome file
+		jspResult = httpGET(port, "/wab/?p1=v3&p2=v4");
+		assertThat(jspResult, containsString("<span>Hello Custom Tags!</span>"));
+		assertThat(jspResult, containsString("<h1>v3</h1>"));
+		assertThat(jspResult, containsString("<h2>v4</h2>"));
+		assertThat(jspResult, containsString("<!-- Added because Pax Web can do it -->"));
+
+		// error pages
+		assertThat(httpGET(port, "/wab/crash?ex=java.io.IOException&msg=crash"),
+				containsString("<div id=\"exception\">java.io.IOException</div>"));
+		assertThat(httpGET(port, "/wab/crash?result=442"),
+				containsString("<div id=\"code\">442</div>"));
 
 		uninstallWab(wab);
 

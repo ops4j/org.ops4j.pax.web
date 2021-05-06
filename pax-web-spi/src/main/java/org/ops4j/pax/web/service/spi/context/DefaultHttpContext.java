@@ -174,7 +174,7 @@ public class DefaultHttpContext implements WebContainerContext {
 	protected URL getResource(Bundle bundle, String name) {
 		// "name" is passed from javax.servlet.ServletContext.getResource() which always should start with a slash
 		final String normalizedName = Path.normalizeResourcePath(name);
-		LOG.debug("Searching bundle [" + bundle + "] for resource [" + normalizedName + "]");
+		LOG.trace("Searching bundle [" + bundle + "] for resource [" + normalizedName + "]");
 		return bundle.getResource(normalizedName);
 	}
 
@@ -214,7 +214,7 @@ public class DefaultHttpContext implements WebContainerContext {
 	 */
 	protected Set<String> getResourcePaths(Bundle bundle, String name) {
 		final String normalizedName = Path.normalizeResourcePath(name);
-		LOG.debug("Searching bundle [" + bundle + "] for resource paths of [" + normalizedName + "]");
+		LOG.trace("Searching bundle [" + bundle + "] for resource paths of [" + normalizedName + "]");
 
 		if (normalizedName != null && bundle != null) {
 			int state = bundle.getState();

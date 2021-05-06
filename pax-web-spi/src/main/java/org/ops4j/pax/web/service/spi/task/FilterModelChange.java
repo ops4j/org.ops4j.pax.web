@@ -16,6 +16,7 @@
 package org.ops4j.pax.web.service.spi.task;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -60,6 +61,13 @@ public class FilterModelChange extends Change {
 
 	public List<OsgiContextModel> getNewModels() {
 		return newModels;
+	}
+
+	@Override
+	public void uninstall(List<Change> operations) {
+		if (getKind() == OpCode.ADD) {
+			operations.add(new FilterModelChange(OpCode.DELETE, Collections.singletonList(filterModel)));
+		}
 	}
 
 	@Override

@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.spi.task;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -35,6 +36,18 @@ public class ErrorPageStateChange extends Change {
 
 	public Map<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> getContextErrorPages() {
 		return contextErrorPages;
+	}
+
+	@Override
+	public void uninstall(List<Change> operations) {
+		if (getKind() == OpCode.NONE) {
+			Map<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> newMap = new HashMap<>();
+			for (String context : contextErrorPages.keySet()) {
+				newMap.put(context, new TreeMap<>());
+			}
+
+			operations.add(new ErrorPageStateChange(newMap));
+		}
 	}
 
 	@Override

@@ -18,6 +18,7 @@
 package org.ops4j.pax.web.extender.war.internal.model;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,19 +28,26 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
+import javax.servlet.SessionCookieConfig;
 import javax.servlet.annotation.HandlesTypes;
+import javax.servlet.descriptor.JspConfigDescriptor;
+import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 
 import org.apache.felix.utils.extender.Extension;
+import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.descriptor.web.ServletDef;
+import org.apache.tomcat.util.descriptor.web.SessionConfig;
 import org.apache.tomcat.util.descriptor.web.WebXml;
 import org.apache.tomcat.util.descriptor.web.WebXmlParser;
 import org.ops4j.pax.web.extender.war.internal.WarExtenderContext;
@@ -47,12 +55,17 @@ import org.ops4j.pax.web.extender.war.internal.WebApplicationHelper;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
+import org.ops4j.pax.web.service.spi.model.ContextMetadataModel;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent;
 import org.ops4j.pax.web.service.spi.model.views.WebAppWebContainerView;
+import org.ops4j.pax.web.service.spi.servlet.DefaultSessionCookieConfig;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.util.WebContainerManager;
@@ -1061,8 +1074,9 @@ public class BundleWebApplication {
 
 	/**
 	 * This method turns the raw data collected from descriptors and annotations into a model of elements from
-	 * {@code org.ops4j.pax.web.service.spi.model} package.
+	 * {@code org.ops4j.pax.web.service.spi.model} package configured in a transactional {@link Batch}.
 	 */
+	@SuppressWarnings("unchecked")
 	private void buildModel() {
 		final Batch wabBatch = new Batch("Deployment of " + this);
 
@@ -1071,15 +1085,10 @@ public class BundleWebApplication {
 		ServletContextModel scm = new ServletContextModel(contextPath);
 		wabBatch.addServletContextModel(scm);
 
-		// TOCHECK: WebContainerContext that implements handleSecurity properly or just use login
-		//          configuration / security mapping from the WAB?
 		// TOCHECK: 3rd option for whiteboard/httpservice context model? it's about disassociation of the context
 		//          during undeployment - but what about whiteboard filters registered to WAB's context?
-//		final OsgiContextModel ocm = new OsgiContextModel(new DefaultHttpContext(this.bundle),
-//				this.bundle, this.contextPath, false);
-//		getting: java.lang.RuntimeException: Can't resolve WebContainerContext without Bundle argument
 
-		// The most important part - the OsgiContextModel which bridges web elements from the WAB to actual
+		// 1. The most important part - the OsgiContextModel which bridges web elements from the WAB to actual
 		// servlet context in several aspects - it scopes access to resources and provides proper classloader.
 		// Remember that the same OsgiContextModel is used in THREE areas:
 		//  - HttpService (isWhiteboard() == false, hasDirectHttpContextInstance() == true)
@@ -1090,7 +1099,8 @@ public class BundleWebApplication {
 		// pax-web-extender-whiteboard and pax-web-runtime that determine whether a web element can be re-registered
 		// to new "context". The elements from WAB simply CAN'T do it
 		// TODO: we should only allow other bundles to obtain WebContainer instance within the scope of bundle
-		//       context of the WAB, for example to register additional web elements (usually filters)
+		//       context of the WAB, for example to register additional web elements (usually filters) altering
+		//       the web application of the WAB
 
 		final OsgiContextModel ocm = new OsgiContextModel(null, this.bundle, this.contextPath, false);
 		ocm.setServiceId(0);
@@ -1100,58 +1110,106 @@ public class BundleWebApplication {
 			return new WebContainerContextWrapper(b, new WebApplicationHelper(b), contextName);
 		});
 
-		wabBatch.addOsgiContextModel(ocm, scm);
+		// 1.1. Session configuration is passed directly in OsgiContextModel
+		SessionConfig webXmlSessionConfig = mainWebXml.getSessionConfig();
+		if (webXmlSessionConfig != null) {
+			if (webXmlSessionConfig.getSessionTimeout() != null) {
+				ocm.setSessionTimeout(webXmlSessionConfig.getSessionTimeout());
+			}
 
+			SessionCookieConfig scc = new DefaultSessionCookieConfig();
+			ocm.setSessionCookieConfig(scc);
+			if (webXmlSessionConfig.getCookieName() != null) {
+				scc.setName(webXmlSessionConfig.getCookieName());
+			}
+			if (webXmlSessionConfig.getCookieDomain() != null) {
+				scc.setDomain(webXmlSessionConfig.getCookieDomain());
+			}
+			if (webXmlSessionConfig.getCookiePath() != null) {
+				scc.setPath(webXmlSessionConfig.getCookiePath());
+			}
+			if (webXmlSessionConfig.getCookieMaxAge() != null) {
+				scc.setMaxAge(webXmlSessionConfig.getCookieMaxAge());
+			}
+			if (webXmlSessionConfig.getCookieHttpOnly() != null) {
+				scc.setHttpOnly(webXmlSessionConfig.getCookieHttpOnly());
+			}
+			if (webXmlSessionConfig.getCookieSecure() != null) {
+				scc.setSecure(webXmlSessionConfig.getCookieSecure());
+			}
+			if (webXmlSessionConfig.getCookieComment() != null) {
+				scc.setComment(webXmlSessionConfig.getCookieComment());
+			}
+
+			if (webXmlSessionConfig.getSessionTrackingModes() != null) {
+				ocm.getSessionConfiguration().getTrackingModes().addAll(webXmlSessionConfig.getSessionTrackingModes());
+			}
+		}
+
+		// 1.2. JSP configuration is also part of OsgiContextModel - the highest ranked one for given
+		//      ServletContextModelwill be taken. Used in org.apache.jasper.servlet.TldScanner.scanJspConfig()
+		ocm.getJspConfigDescriptor().getTaglibs().clear();
+		ocm.getJspConfigDescriptor().getJspPropertyGroups().clear();
+		JspConfigDescriptor jspConfig = mainWebXml.getJspConfigDescriptor();
+		if (jspConfig != null) {
+			ocm.addTagLibs(jspConfig.getTaglibs());
+			for (JspPropertyGroupDescriptor group : jspConfig.getJspPropertyGroups()) {
+				ocm.addJspPropertyGroupDescriptor(group);
+			}
+		}
+
+		wabBatch.addOsgiContextModel(ocm, scm);
 		this.osgiContextModel = ocm;
 
-		// elements are processed to create a Batch that'll be send to a dedicated view of a WebContainer. Tomcat
-		// configures its context directly in org.apache.catalina.startup.ContextConfig.configureContext()
+		// elements from web.xml are processed to create a Batch that'll be send to a dedicated view of a WebContainer.
+		// Tomcat configures its context directly in org.apache.catalina.startup.ContextConfig.configureContext()
 
 		// web.xml (http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd) defines the below top-level elements.
-		// "J" means "processed by Jetty 9", "T" means "processed by Tomcat 9"
-		//  - [JT] <absolute-ordering>
-		//  - [..] <administered-object>
-		//  - [..] <connection-factory>
+		// "J" means "processed by Jetty 9", "T" means "processed by Tomcat 9", "+" means already handled by Pax Web,
+		// "-" means not yet handled, "x" means there's no need to handle it
+		//  + [JT] <absolute-ordering> (used only when parsing metadata)
+		//  x [..] <administered-object>
+		//  x [..] <connection-factory>
 		//  - [JT] <context-param>
-		//  - [..] <data-source>
-		//  - [..] <default-context-path>
-		//  - [JT] <deny-uncovered-http-methods>
-		//  - [..] <description>
-		//  - [JT] <display-name>
-		//  - [JT] <distributable>
-		//  - [.T] <ejb-local-ref>
-		//  - [.T] <ejb-ref>
+		//  x [..] <data-source>
+		//  x [..] <default-context-path>
+		//  + [JT] <deny-uncovered-http-methods>
+		//  x [..] <description>
+		//  + [JT] <display-name>
+		//  + [JT] <distributable>
+		//  x [.T] <ejb-local-ref>
+		//  x [.T] <ejb-ref>
 		//  - [JT] <env-entry>
-		//  - [JT] <error-page>
-		//  - [JT] <filter>
-		//  - [JT] <filter-mapping>
-		//  - [..] <icon>
-		//  - [..] <jms-connection-factory>
-		//  - [..] <jms-destination>
-		//  - [JT] <jsp-config>
+		//  + [JT] <error-page>
+		//  + [JT] <filter>
+		//  + [JT] <filter-mapping>
+		//  x [..] <icon>
+		//  x [..] <jms-connection-factory>
+		//  x [..] <jms-destination>
+		//  + [JT] <jsp-config>
 		//  - [JT] <listener>
-		//  - [JT] <locale-encoding-mapping-list>
+		//  + [JT] <locale-encoding-mapping-list>
 		//  - [JT] <login-config>
-		//  - [..] <mail-session>
-		//  - [.T] <message-destination>
-		//  - [JT] <message-destination-ref>
-		//  - [JT] <mime-mapping>
-		//  - [..] <module-name>
-		//  - [..] <persistence-context-ref>
-		//  - [..] <persistence-unit-ref>
+		//  x [..] <mail-session>
+		//  x [.T] <message-destination>
+		//  x [JT] <message-destination-ref>
+		//  + [JT] <mime-mapping>
+		//  x [..] <module-name>
+		//  x [..] <persistence-context-ref>
+		//  x [..] <persistence-unit-ref>
 		//  - [JT] <post-construct>
 		//  - [JT] <pre-destroy>
-		//  - [.T] <request-character-encoding>
+		//  + [.T] <request-character-encoding> (Servlet 4)
 		//  - [JT] <resource-env-ref>
 		//  - [JT] <resource-ref>
-		//  - [.T] <response-character-encoding>
+		//  + [.T] <response-character-encoding> (Servlet 4)
 		//  - [JT] <security-constraint>
 		//  - [JT] <security-role>
-		//  - [.T] <service-ref>
-		//  - [JT] <servlet>
-		//  - [JT] <servlet-mapping>
-		//  - [JT] <session-config>
-		//  - [JT] <welcome-file-list>
+		//  x [.T] <service-ref>
+		//  + [JT] <servlet>
+		//  + [JT] <servlet-mapping>
+		//  + [JT] <session-config>
+		//  + [JT] <welcome-file-list>
 		//
 		// See:
 		// Tomcat:
@@ -1161,29 +1219,34 @@ public class BundleWebApplication {
 		//  - parsing: org.eclipse.jetty.webapp.StandardDescriptorProcessor + org.eclipse.jetty.plus.webapp.PlusDescriptorProcessor
 		//  - configuration: org.eclipse.jetty.webapp.MetaData.resolve()
 
-		// The detailed and ordered context configuration process in Tomcat is:
-		//  - public id
-		//  - effective major/minor version
-		//  - context (init) parameters
-		//  - deny uncovered Http methods
-		//  - error pages
-		//  - filters and their mappings
-		//  - jsp config descriptor
-		//  - listeners
-		//  - locale encoding mapping paramters
+		// The detailed and ordered context configuration process in Tomcat is alphabetical:
+		//  + public id
+		//  + effective major/minor version
+		//  		- context (init) parameters
+		//  + deny uncovered HTTP methods
+		//  + display name
+		//  + distributable flag
+		//  + error pages
+		//  + filters and their mappings
+		//  + jsp config descriptor
+		//  		- listeners
+		//  + locale encoding mapping paramters
 		//  - login config
-		//  - metadata complete (a.k.a. "ignore annotations") - Tomcat calls org.apache.tomcat.InstanceManager.destroyInstance()
+		//  + metadata complete (a.k.a. "ignore annotations") - Tomcat calls org.apache.tomcat.InstanceManager.destroyInstance()
 		//    on an instance of filter/servlet after f.destroy()/s.destroy() if annotations are not ignored.
 		//    the annotations are javax.annotation.PostConstruct/javax.annotation.PreDestroy
-		//  - mime mapping
-		//  - request character encoding
-		//  - response character encoding
+		//  + mime mapping
+		//  + request character encoding
+		//  + response character encoding
 		//  - security constraints
 		//  - security roles
-		//  - servlets, their security roles, multipart config and mappings
-		//  - session config and session cookie config
-		//  - welcome files
-		//  - jsp property groups (need to be configured after servlets)
+		//  + servlets
+		//  - servlets' security roles
+		//  		- servlets' multipart config
+		//  + servlets' mappings
+		//  + session config and session cookie config
+		//  + welcome files
+		//  + jsp property groups
 		//  - postconstruct and predestroy methods
 		//
 		// These web elements are configured in Tomcat context's org.apache.catalina.Context.getNamingResources():
@@ -1195,12 +1258,35 @@ public class BundleWebApplication {
 		//  - resource refs
 		//  - service refs
 
+		// but we'll do it in a more organized way
+
+		// 2. some metadata related with context, but kept at OsgiContextModel level - not everything has to
+		//    be propagated to Server/Service model
+
+		// 2.1. public id, major, minor version, display name, distributable flag, metadata complete flag,
+		//      req/res character encoding (Servlet API 4), ...
+		ContextMetadataModel meta = new ContextMetadataModel();
+		meta.setPublicId(mainWebXml.getPublicId());
+		meta.setMajorVersion(mainWebXml.getMajorVersion());
+		meta.setMinorVersion(mainWebXml.getMinorVersion());
+		meta.setMetadataComplete(mainWebXml.isMetadataComplete());
+		meta.setDistributable(mainWebXml.isDistributable());
+		meta.setDisplayName(mainWebXml.getDisplayName());
+		meta.setRequestCharacterEncoding(mainWebXml.getRequestCharacterEncoding());
+		meta.setResponseCharacterEncoding(mainWebXml.getResponseCharacterEncoding());
+		meta.setDenyUncoveredHttpMethods(mainWebXml.getDenyUncoveredHttpMethods());
+		wabBatch.configureMetadata(meta, ocm);
+
+		// 2.2. MIME mapping - come from Tomcat's default web.xml packaged inside pax-web-spi. This web.xml
+		//      contains huge list of <mime-mapping>s. Also Locale-Encoding mapping
+		wabBatch.configureMimeAndEncodingMappings(mainWebXml.getMimeMappings(), mainWebXml.getLocaleEncodingMappings(), ocm);
+
+		// 3. servlets, their mapping and multipart config
 		final Map<String, List<String>> servletMappings = new LinkedHashMap<>();
 		mainWebXml.getServletMappings().forEach((pattern, sn) -> {
 			servletMappings.computeIfAbsent(sn, n -> new LinkedList<>()).add(pattern);
 		});
 		mainWebXml.getServlets().forEach((sn, def) -> {
-			// TODO: resources, which require conversion from javax.servlet.Servlet servlet class
 			Class<Servlet> servletClass = null;
 			try {
 				if (def.getServletClass() != null) {
@@ -1219,6 +1305,7 @@ public class BundleWebApplication {
 					.withUrlPatterns(mappings)
 					.withAsyncSupported(def.getAsyncSupported())
 					.withLoadOnStartup(def.getLoadOnStartup())
+					.withInitParams(def.getParameterMap())
 					.withOsgiContextModel(ocm);
 			if (servletClass == null) {
 				// the actuall class will depend on the target runtime
@@ -1230,7 +1317,72 @@ public class BundleWebApplication {
 			wabBatch.addServletModel(builder.build());
 		});
 
-		// At the end, Tomcat adds SCIs to the context
+		// 4. filters and their mappings
+		Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> allFilterModels = new HashMap<>();
+		TreeMap<FilterModel, List<OsgiContextModel>> filterModels = new TreeMap<>();
+		allFilterModels.put(contextPath, filterModels);
+		Map<String, FilterMap> filterMappings = new HashMap<>();
+		mainWebXml.getFilterMappings().forEach(fn -> filterMappings.put(fn.getFilterName(), fn));
+		mainWebXml.getFilters().forEach((fn, def) -> {
+			Class<Filter> filterClass = null;
+			try {
+				if (def.getFilterClass() != null) {
+					filterClass = (Class<Filter>) classLoader.loadClass(def.getFilterClass());
+				}
+			} catch (ClassNotFoundException e) {
+				LOG.warn("Can't load filter class {} in the context of {}: {}",
+						def.getFilterClass(), this, e.getMessage(), e);
+				return;
+			}
+			String[] mappings = filterMappings.get(fn).getURLPatterns();
+			String[] servletNames = filterMappings.get(fn).getServletNames();
+			String[] dispatcherTypes = filterMappings.get(fn).getDispatcherNames();
+			FilterModel.Builder builder = new FilterModel.Builder()
+					.withRegisteringBundle(bundle)
+					.withFilterName(fn)
+					.withFilterClass(filterClass)
+					.withUrlPatterns(mappings)
+					.withServletNames(servletNames)
+					.withDispatcherTypes(dispatcherTypes)
+					.withAsyncSupported("true".equals(def.getAsyncSupported()))
+					.withInitParams(def.getParameterMap())
+					.withOsgiContextModel(ocm);
+			FilterModel fm = builder.build();
+			filterModels.put(fm, null);
+			// this is for Server/Service model
+			wabBatch.addFilterModel(fm);
+		});
+		// this is for ServerController
+		wabBatch.updateFilters(allFilterModels, false);
+
+		// 5. welcome files - without a way to configure redirect flag
+		WelcomeFileModel wfm = new WelcomeFileModel(mainWebXml.getWelcomeFiles().toArray(new String[0]), false);
+		wfm.setRegisteringBundle(bundle);
+		wfm.addContextModel(ocm);
+		wabBatch.addWelcomeFileModel(wfm);
+
+		// 6. error pages
+		Map<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> allEpModels = new HashMap<>();
+		TreeMap<ErrorPageModel, List<OsgiContextModel>> epModels = new TreeMap<>();
+		allEpModels.put(contextPath, epModels);
+		Map<String, List<String>> locationToPage = new LinkedHashMap<>();
+		mainWebXml.getErrorPages().values().forEach(ep -> {
+			// "name" == error code or exception name
+			locationToPage.computeIfAbsent(ep.getLocation(), l -> new ArrayList<>()).add(ep.getName());
+		});
+		locationToPage.forEach((l, pages) -> {
+			ErrorPageModel epm = new ErrorPageModel(pages.toArray(new String[0]), l);
+			epm.setRegisteringBundle(bundle);
+			epm.addContextModel(ocm);
+			epm.performValidation();
+			epModels.put(epm, null);
+			// this is for Server/Service model
+			wabBatch.addErrorPageModel(epm);
+		});
+		// this is for ServerController
+		wabBatch.updateErrorPages(allEpModels);
+
+		// 7. At the end, Tomcat adds SCIs to the context
 		this.sciToHt.forEach((sci, classes) -> {
 			Class<?>[] classesArray = classes.isEmpty() ? null : classes.toArray(new Class<?>[0]);
 			ContainerInitializerModel cim = new ContainerInitializerModel(sci, classesArray);
@@ -1324,28 +1476,9 @@ public class BundleWebApplication {
 //	 */
 //	private String contextName;
 //	/**
-//	 * Root path.
-//	 */
-//	private String rootPath;
-//	/**
 //	 * Session timeout.
 //	 */
 //	private String sessionTimeout;
-//
-//	/**
-//	 * The http context used during registration of error page. Is not set by
-//	 * the parser but by the registration visitor during registration.
-//	 */
-//	private HttpContext httpContext;
-//
-//	/**
-//	 * Servlets.
-//	 */
-//	private final Map<String, WebAppServlet> servlets;
-//	/**
-//	 * Mapping between servlet name and servlet mapping.
-//	 */
-//	private final Map<String, Set<WebAppServletMapping>> servletMappings;
 //	/**
 //	 * Filters.
 //	 */
@@ -1400,13 +1533,7 @@ public class BundleWebApplication {
 //
 //	private boolean metaDataComplete;
 //
-//	private final List<WebAppServletContainerInitializer> servletContainerInitializers;
-//
 //	private URL jettyWebXmlURL;
-//
-//	private List<URL> webFragments;
-//
-//	private boolean hasDependencies;
 //
 //	private List<String> sessionTrackingModes;
 //
@@ -1459,16 +1586,6 @@ public class BundleWebApplication {
 //		return contextName;
 //	}
 //
-//	public void setRootPath(final String rootPath) {
-//		NullArgumentException.validateNotNull(rootPath, "Root Path");
-//		this.rootPath = rootPath;
-//
-//	}
-//
-//	public String getRootPath() {
-//		return rootPath;
-//	}
-//
 //	/**
 //	 * Setter.
 //	 *
@@ -1485,94 +1602,6 @@ public class BundleWebApplication {
 //	 */
 //	public String getSessionTimeout() {
 //		return sessionTimeout;
-//	}
-//
-//	/**
-//	 * Getter.
-//	 *
-//	 * @return bundle
-//	 */
-//	public Bundle getBundle() {
-//		return bundle;
-//	}
-//
-//	/**
-//	 * Setter.
-//	 *
-//	 * @param bundle value to set
-//	 */
-//	public void setBundle(Bundle bundle) {
-//		this.bundle = bundle;
-//	}
-//
-//	/**
-//	 * Add a servlet.
-//	 *
-//	 * @param servlet to add
-//	 * @throws NullArgumentException if servlet, servlet name or servlet class is null
-//	 */
-//	public void addServlet(final WebAppServlet servlet) {
-//		NullArgumentException.validateNotNull(servlet, "Servlet");
-//		NullArgumentException.validateNotNull(servlet.getServletName(),
-//				"Servlet name");
-//		if (servlet instanceof WebAppJspServlet) {
-//			NullArgumentException.validateNotNull(
-//					((WebAppJspServlet) servlet).getJspPath(), "JSP-path");
-//		} else {
-//			NullArgumentException.validateNotNull(
-//					servlet.getServletClassName(), "Servlet class");
-//		}
-//		servlets.put(servlet.getServletName(), servlet);
-//		// add aliases for servlet mappings added before servlet
-//		for (WebAppServletMapping mapping : getServletMappings(servlet
-//				.getServletName())) {
-//			servlet.addUrlPattern(mapping.getUrlPattern());
-//		}
-//	}
-//
-//	/**
-//	 * Add a servlet mapping.
-//	 *
-//	 * @param servletMapping to add
-//	 * @throws NullArgumentException if servlet mapping, servlet name or url pattern is null
-//	 */
-//	public void addServletMapping(final WebAppServletMapping servletMapping) {
-//		NullArgumentException
-//				.validateNotNull(servletMapping, "Servlet mapping");
-//		NullArgumentException.validateNotNull(servletMapping.getServletName(),
-//				"Servlet name");
-//		NullArgumentException.validateNotNull(servletMapping.getUrlPattern(),
-//				"Url pattern");
-//		Set<WebAppServletMapping> webAppServletMappings = servletMappings
-//				.get(servletMapping.getServletName());
-//		if (webAppServletMappings == null) {
-//			webAppServletMappings = new HashSet<>();
-//			servletMappings.put(servletMapping.getServletName(),
-//					webAppServletMappings);
-//		}
-//		webAppServletMappings.add(servletMapping);
-//		final WebAppServlet servlet = servlets.get(servletMapping
-//				.getServletName());
-//		// can be that the servlet is not yet added
-//		if (servlet != null) {
-//			servlet.addUrlPattern(servletMapping.getUrlPattern());
-//		}
-//	}
-//
-//	/**
-//	 * Returns a servlet mapping by servlet name.
-//	 *
-//	 * @param servletName servlet name
-//	 * @return array of servlet mappings for requested servlet name
-//	 */
-//	public List<WebAppServletMapping> getServletMappings(
-//			final String servletName) {
-//		final Set<WebAppServletMapping> webAppServletMappings = servletMappings
-//				.get(servletName);
-//		if (webAppServletMappings == null) {
-//			return new ArrayList<>();
-//		}
-//		return new ArrayList<>(webAppServletMappings);
 //	}
 //
 //	/**
@@ -1823,24 +1852,6 @@ public class BundleWebApplication {
 //	}
 //
 //	/**
-//	 * Getter.
-//	 *
-//	 * @return http context
-//	 */
-//	public HttpContext getHttpContext() {
-//		return httpContext;
-//	}
-//
-//	/**
-//	 * Setter.
-//	 *
-//	 * @param httpContext value to set
-//	 */
-//	public void setHttpContext(HttpContext httpContext) {
-//		this.httpContext = httpContext;
-//	}
-//
-//	/**
 //	 * Accepts a visitor for inner elements.
 //	 *
 //	 * @param visitor visitor
@@ -1886,14 +1897,6 @@ public class BundleWebApplication {
 //		visitor.end();
 //	}
 //
-//	private Collection<WebAppServlet> getSortedWebAppServlet() {
-//		List<WebAppServlet> webAppServlets = new ArrayList<>(
-//				servlets.values());
-//		Collections.sort(webAppServlets, WEB_APP_SERVLET_COMPARATOR);
-//
-//		return webAppServlets;
-//	}
-//
 //	public URL getWebXmlURL() {
 //		return webXmlURL;
 //	}
@@ -1908,14 +1911,6 @@ public class BundleWebApplication {
 //
 //	public URL getJettyWebXmlURL() {
 //		return jettyWebXmlURL;
-//	}
-//
-//	public boolean getHasDependencies() {
-//		return hasDependencies;
-//	}
-//
-//	public void setHasDependencies(boolean hasDependencies) {
-//		this.hasDependencies = hasDependencies;
 //	}
 //
 //	public void setVirtualHostList(List<String> virtualHostList) {
@@ -1942,55 +1937,6 @@ public class BundleWebApplication {
 //
 //	public boolean getMetaDataComplete() {
 //		return metaDataComplete;
-//	}
-//
-//	public WebAppServlet findServlet(String servletName) {
-//		if (this.servlets.containsKey(servletName)) {
-//			return this.servlets.get(servletName);
-//		} else {
-//			//PAXWEB-724 special handling
-//			Collection<WebAppServlet> values = this.servlets.values();
-//			for (WebAppServlet webAppServlet : values) {
-//				String servletClassName = webAppServlet.getServletClassName();
-//				if (servletName.equals(servletClassName)) {
-//					return webAppServlet;
-//				}
-//			}
-//			return null;
-//		}
-//	}
-//
-//	public WebAppFilter findFilter(String filterName) {
-//		if (this.filters.containsKey(filterName)) {
-//			return this.filters.get(filterName);
-//		} else {
-//			return null;
-//		}
-//	}
-//
-//	public void addServletContainerInitializer(
-//			WebAppServletContainerInitializer servletContainerInitializer) {
-//		NullArgumentException.validateNotNull(servletContainerInitializer,
-//				"ServletContainerInitializer");
-//		this.servletContainerInitializers.add(servletContainerInitializer);
-//	}
-//
-//	public List<WebAppServletContainerInitializer> getServletContainerInitializers() {
-//		return servletContainerInitializers;
-//	}
-//
-//	/**
-//	 * @return the webFragments
-//	 */
-//	public List<URL> getWebFragments() {
-//		return webFragments;
-//	}
-//
-//	/**
-//	 * @param webFragments the webFragments to set
-//	 */
-//	public void setWebFragments(List<URL> webFragments) {
-//		this.webFragments = webFragments;
 //	}
 //
 //	public void addSessionTrackingMode(String sessionTrackingMode) {

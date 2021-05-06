@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.ops4j.pax.web.service.WebContainerContext;
+import org.ops4j.pax.web.service.spi.model.ContextMetadataModel;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
@@ -338,6 +339,25 @@ public class Batch {
 	 */
 	public void commitTransaction(String contextPath) {
 		operations.add(new TransactionStateChange(OpCode.DISASSOCIATE, contextPath));
+	}
+
+	/**
+	 * Configure some meta information related to a context.
+	 * @param meta
+	 * @param ocm
+	 */
+	public void configureMetadata(ContextMetadataModel meta, OsgiContextModel ocm) {
+		operations.add(new ContextMetadataModelChange(OpCode.ADD, meta, ocm));
+	}
+
+	/**
+	 * Configure extension - MIME mapping.
+	 * @param mimeMapping
+	 * @param localeEncodingMapping
+	 * @param ocm
+	 */
+	public void configureMimeAndEncodingMappings(Map<String, String> mimeMapping, Map<String, String> localeEncodingMapping, OsgiContextModel ocm) {
+		operations.add(new MimeAndLocaleMappingChange(OpCode.ADD, mimeMapping, localeEncodingMapping, ocm));
 	}
 
 	/**

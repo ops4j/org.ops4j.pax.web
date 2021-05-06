@@ -95,6 +95,7 @@ public class WebContainerSessionConfigurationTest extends MultiContainerTestSupp
 		WebContainer wc = container(sample1);
 
 		wc.setSessionCookieConfig(null, "SID", false, false, "/visit", 42, null);
+		wc.setSessionTimeout(42, null);
 
 		// we need some "active" component to test the configuration
 		wc.registerServlet("/visit", new TestServlet("1"), null, null);

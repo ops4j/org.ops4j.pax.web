@@ -70,6 +70,7 @@ import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.ErrorPage;
 import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.ListenerInfo;
+import io.undertow.servlet.api.MimeMapping;
 import io.undertow.servlet.api.ServletContainer;
 import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.api.ServletSessionConfig;
@@ -87,6 +88,7 @@ import io.undertow.servlet.util.InMemorySessionPersistence;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
 import org.ops4j.pax.web.service.spi.config.SessionConfiguration;
+import org.ops4j.pax.web.service.spi.model.ContextMetadataModel;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
@@ -105,11 +107,13 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
 import org.ops4j.pax.web.service.spi.servlet.RegisteringContainerInitializer;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
+import org.ops4j.pax.web.service.spi.task.ContextMetadataModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterStateChange;
+import org.ops4j.pax.web.service.spi.task.MimeAndLocaleMappingChange;
 import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
@@ -1097,6 +1101,55 @@ class UndertowServerWrapper implements BatchVisitor {
 	}
 
 	@Override
+	public void visit(ContextMetadataModelChange change) {
+		if (change.getKind() == OpCode.ADD) {
+			OsgiContextModel ocm = change.getOsgiContextModel();
+			ContextMetadataModel meta = change.getMetadata();
+
+			String contextPath = ocm.getContextPath();
+
+			OsgiContextModel highestRankedModel = Utils.getHighestRankedModel(osgiContextModels.get(contextPath));
+			if (ocm == highestRankedModel) {
+				LOG.info("Configuring metadata of {}", ocm);
+
+				// only in this case we'll configure the metadata
+				DeploymentInfo info = deploymentInfos.get(contextPath);
+				// don't bother with already deployed infos - we'll ensure this method is called quite early
+				info.setMajorVersion(meta.getMajorVersion());
+				info.setMinorVersion(meta.getMinorVersion());
+				info.setDisplayName(meta.getDisplayName());
+				// no place to set these
+//				meta.getDistributable();
+//				meta.isMetadataComplete();
+//				meta.getPublicId();
+
+				info.setDefaultRequestEncoding(meta.getRequestCharacterEncoding());
+				info.setDefaultResponseEncoding(meta.getResponseCharacterEncoding());
+
+				info.setDenyUncoveredHttpMethods(meta.isDenyUncoveredHttpMethods());
+			}
+		}
+	}
+
+	@Override
+	public void visit(MimeAndLocaleMappingChange change) {
+		if (change.getKind() == OpCode.ADD) {
+			OsgiContextModel ocm = change.getOsgiContextModel();
+
+			String contextPath = ocm.getContextPath();
+
+			OsgiContextModel highestRankedModel = Utils.getHighestRankedModel(osgiContextModels.get(contextPath));
+			if (ocm == highestRankedModel) {
+				LOG.info("Configuring MIME and Locale Encoding mapping of {}", ocm);
+
+				DeploymentInfo info = deploymentInfos.get(contextPath);
+				change.getMimeMapping().forEach((ext, mime) -> info.addMimeMapping(new MimeMapping(ext, mime)));
+				change.getLocaleEncodingMapping().forEach(info::addLocaleCharsetMapping);
+			}
+		}
+	}
+
+	@Override
 	public void visit(ServletModelChange change) {
 		if ((change.getKind() == OpCode.ADD && !change.isDisabled()) || change.getKind() == OpCode.ENABLE) {
 			ServletModel model = change.getServletModel();
@@ -1792,6 +1845,10 @@ class UndertowServerWrapper implements BatchVisitor {
 					ssc.setHttpOnly(scc.isHttpOnly());
 					ssc.setSecure(scc.isSecure());
 					ssc.setComment(scc.getComment());
+
+					if (sc.getTrackingModes().size() > 0) {
+						ssc.setSessionTrackingModes(sc.getTrackingModes());
+					}
 				}
 			}
 

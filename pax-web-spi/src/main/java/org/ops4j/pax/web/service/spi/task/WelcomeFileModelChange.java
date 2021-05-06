@@ -38,6 +38,13 @@ public class WelcomeFileModelChange extends Change {
 	}
 
 	@Override
+	public void uninstall(List<Change> operations) {
+		if (getKind() == OpCode.ADD) {
+			operations.add(new WelcomeFileModelChange(OpCode.DELETE, welcomeFileModel));
+		}
+	}
+
+	@Override
 	public void accept(BatchVisitor visitor) {
 		visitor.visit(this);
 	}

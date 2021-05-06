@@ -15,13 +15,14 @@
  */
 package org.ops4j.pax.web.service.spi.model.elements;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import javax.servlet.SessionCookieConfig;
 import javax.servlet.SessionTrackingMode;
 
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.servlet.DefaultSessionCookieConfig;
 
 /**
  * <p>Set of parameters configuring HTTP Sessions, referenced from {@link OsgiContextModel}.</p>
@@ -36,10 +37,10 @@ public class SessionConfigurationModel {
 	private Integer sessionTimeout = PaxWebConstants.DEFAULT_SESSION_TIMEOUT;
 
 	/** {@code <session-config>/<cookie-config>} */
-	private SessionCookieConfig sessionCookieConfig = null;
+	private SessionCookieConfig sessionCookieConfig = new DefaultSessionCookieConfig();
 
 	/** {@code <session-config>/<tracking-mode>} */
-	private final List<SessionTrackingMode> trackingModes = new ArrayList<>(3);
+	private final Set<SessionTrackingMode> trackingModes = new HashSet<>();
 
 	// The configuration of sessions outside web.xml is server specific and covers:
 	// Jetty (org.eclipse.jetty.server.session.SessionHandler):
@@ -79,7 +80,7 @@ public class SessionConfigurationModel {
 		this.sessionCookieConfig = sessionCookieConfig;
 	}
 
-	public List<SessionTrackingMode> getTrackingModes() {
+	public Set<SessionTrackingMode> getTrackingModes() {
 		return trackingModes;
 	}
 

@@ -543,7 +543,7 @@ public class OsgiServletContext implements ServletContext {
 	@Override
 	public JspConfigDescriptor getJspConfigDescriptor() {
 		// according to 140.2.6 "Behavior of the Servlet Context", this method should return null
-		// but I don't agree
+		// but I don't agree - I hope TCK won't mind
 		return osgiContextModel.getJspConfigDescriptor();
 	}
 

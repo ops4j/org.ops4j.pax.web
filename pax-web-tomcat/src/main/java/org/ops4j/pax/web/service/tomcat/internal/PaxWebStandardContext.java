@@ -156,6 +156,7 @@ public class PaxWebStandardContext extends StandardContext {
 	}
 
 	public void setServletContainerInitializers(Collection<SCIWrapper> wrappers) {
+		this.servletContainerInitializers.clear();
 		this.servletContainerInitializers.addAll(wrappers);
 	}
 

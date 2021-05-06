@@ -1511,7 +1511,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			// we're in configuration thread, so no harm can be done
 			contextModel.setSessionTimeout(minutes);
 
-			// if there's a need to actually create the context
+			// if there's a need to actually create the context (batch may be empty if contextModel existed)
 			serverController.sendBatch(batch);
 
 			// no need to visit() the batch at service/serverModel level
@@ -1849,6 +1849,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 							// the resource base is *always* the root of the bundle
 							ResourceServlet rs = createResourceServlet(model.getUrlPatterns(), "");
 							model.setElementSupplier(rs.supplier);
+						}
+						if (model.isJspServlet()) {
+							model.configureJspServlet(configuration.jsp());
 						}
 					}
 				}

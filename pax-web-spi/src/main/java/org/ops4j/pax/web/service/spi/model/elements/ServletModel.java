@@ -632,7 +632,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			 */
 			if (initParams.get("scratchdir") == null) {
 				// I know that there (in theory) may be more, but let's take the first one, as I don't expect
-				// more context when working with JSPs - JSP servlet can easily be registered with HttpService. With
+				// more contexts when working with JSPs - JSP servlet can easily be registered with HttpService. With
 				// Whiteboard we still can register such servlet but with much hassle
 				OsgiContextModel ocm = getContextModels().get(0);
 				initParams.put("scratchdir", config.getJspScratchDir(ocm));

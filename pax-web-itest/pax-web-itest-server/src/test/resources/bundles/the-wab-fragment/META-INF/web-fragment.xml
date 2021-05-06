@@ -21,4 +21,17 @@
 
 	<name>TheWabFragmentFragment</name>
 
+	<filter>
+		<filter-name>filter-from-fragment</filter-name>
+		<filter-class>org.ops4j.pax.web.itest.server.support.war.fragment.DeclaredFilter</filter-class>
+		<init-param>
+			<param-name>sign</param-name>
+			<param-value>filtered</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>filter-from-fragment</filter-name>
+		<url-pattern>/as1/should-be-filtered/*</url-pattern>
+	</filter-mapping>
+
 </web-fragment>

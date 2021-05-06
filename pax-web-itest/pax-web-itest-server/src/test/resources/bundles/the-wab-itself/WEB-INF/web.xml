@@ -20,14 +20,58 @@
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
     version="4.0">
 
+	<display-name>Simple web.xml, but the application contains many fragments</display-name>
+
+	<deny-uncovered-http-methods />
+
+	<locale-encoding-mapping-list>
+		<locale-encoding-mapping>
+			<locale>pl_PL</locale>
+			<encoding>UTF-8</encoding>
+		</locale-encoding-mapping>
+	</locale-encoding-mapping-list>
+
 	<servlet>
 		<servlet-name>simplest-servlet</servlet-name>
 		<servlet-class>org.ops4j.pax.web.itest.server.support.war.SimplestServlet</servlet-class>
 	</servlet>
-
 	<servlet-mapping>
 		<servlet-name>simplest-servlet</servlet-name>
 		<url-pattern>/servlet</url-pattern>
 	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>crash-servlet</servlet-name>
+		<servlet-class>org.ops4j.pax.web.itest.server.support.ProblemServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>crash-servlet</servlet-name>
+		<url-pattern>/crash</url-pattern>
+	</servlet-mapping>
+
+	<jsp-config>
+		<taglib>
+			<taglib-uri>urn:x</taglib-uri>
+			<taglib-location>/META-INF/my.tld</taglib-location>
+		</taglib>
+		<jsp-property-group>
+			<url-pattern>*.jsp</url-pattern>
+			<include-coda>/coda.jsp</include-coda>
+		</jsp-property-group>
+	</jsp-config>
+
+	<error-page>
+		<exception-type>java.io.IOException</exception-type>
+		<location>/error.jsp</location>
+	</error-page>
+
+	<error-page>
+		<error-code>442</error-code>
+		<location>/error.jsp</location>
+	</error-page>
+
+	<welcome-file-list>
+		<welcome-file>hello.jsp</welcome-file>
+	</welcome-file-list>
 
 </web-app>

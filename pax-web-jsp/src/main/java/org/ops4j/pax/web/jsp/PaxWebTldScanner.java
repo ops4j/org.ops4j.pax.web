@@ -85,8 +85,8 @@ public class PaxWebTldScanner extends TldScanner {
 		//    we should scan:
 		//     - this bundle
 		//     - this bundle's fragments
-		//     - (optionally?) this bundle's required bundles
-		//     - (optionally?) this bundle's wires
+		//     - this bundle's required bundles
+		//     - this bundle's wires
 		LOG.info("Searching for TlDs in bundle {}", bundle);
 		scanBundle(bundle);
 	}
@@ -161,7 +161,8 @@ public class PaxWebTldScanner extends TldScanner {
 
 		// transitive closure of reachable bundles (not fragments, because these are handled together with associated
 		// bundles)
-		Deque<Bundle> bundles = new LinkedList<>(Collections.singletonList(bundle));
+		Deque<Bundle> bundles = new LinkedList<>();
+		bundles.add(bundle);
 		while (bundles.size() > 0) {
 			Bundle b = bundles.pop();
 			if (processedBundles.contains(b)) {
@@ -174,7 +175,7 @@ public class PaxWebTldScanner extends TldScanner {
 					bundles.add(rb);
 				}
 			}
-			List<URL> bundleTLDs = ClassPathUtil.findEntries(bundles, "META-INF", "*.tld", true, false);
+			List<URL> bundleTLDs = ClassPathUtil.findEntries(Collections.singletonList(b), "META-INF", "*.tld", true, false);
 			tldURLs.addAll(bundleTLDs);
 			processedBundles.add(b);
 		}

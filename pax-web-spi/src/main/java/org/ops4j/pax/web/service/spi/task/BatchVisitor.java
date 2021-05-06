@@ -104,4 +104,18 @@ public interface BatchVisitor {
 	default void visit(TransactionStateChange transactionStateChange) {
 	}
 
+	/**
+	 * Process a change related to metadata of the <em>context</em>. No need to "uninstall" such change.
+	 * @param contextMetadataModelChange
+	 */
+	default void visit(ContextMetadataModelChange contextMetadataModelChange) {
+	}
+
+	/**
+	 * Process a change related to full MIME mapping for the context. No add/remove/modify operations - just full set.
+	 * @param mimeAndLocaleMappingChange
+	 */
+	default void visit(MimeAndLocaleMappingChange mimeAndLocaleMappingChange) {
+	}
+
 }

@@ -37,7 +37,9 @@ import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.SessionCookieConfig;
 
+import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.jmx.MBeanContainer;
+import org.eclipse.jetty.security.ConstraintAware;
 import org.eclipse.jetty.server.ConnectionFactory;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.CustomRequestLog;
@@ -70,6 +72,7 @@ import org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
 import org.ops4j.pax.web.service.spi.config.SessionConfiguration;
+import org.ops4j.pax.web.service.spi.model.ContextMetadataModel;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
@@ -90,11 +93,13 @@ import org.ops4j.pax.web.service.spi.servlet.RegisteringContainerInitializer;
 import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
+import org.ops4j.pax.web.service.spi.task.ContextMetadataModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterStateChange;
+import org.ops4j.pax.web.service.spi.task.MimeAndLocaleMappingChange;
 import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
@@ -714,10 +719,6 @@ class JettyServerWrapper implements BatchVisitor {
 			sch.setInitParameter(DefaultServlet.CONTEXT_INIT + "maxCachedFiles",
 					maxEntries != null ? Integer.toString(maxEntries) : "2048");
 
-			// many OsgiContextModels may refer to single ServletContextModel and servlets, when calling
-			// ServletContext.getServletContextName() will be getting OsgiContextModel specific name
-//			sch.setDisplayName(model.getContextPath());
-
 			mainHandler.addHandler(sch);
 			mainHandler.mapContexts();
 
@@ -863,6 +864,67 @@ class JettyServerWrapper implements BatchVisitor {
 			// TOCHECK: there should be no more web elements in the context, no OSGi mechanisms, just 404 all the time
 			((PaxWebServletHandler) sch.getServletHandler()).setDefaultOsgiContextModel(null);
 			((PaxWebServletHandler) sch.getServletHandler()).setDefaultServletContext(null);
+		}
+	}
+
+	@Override
+	public void visit(ContextMetadataModelChange change) {
+		if (change.getKind() == OpCode.ADD) {
+			OsgiContextModel ocm = change.getOsgiContextModel();
+			ContextMetadataModel meta = change.getMetadata();
+
+			String contextPath = ocm.getContextPath();
+			ServletContextHandler sch = contextHandlers.get(contextPath);
+
+			if (sch == null) {
+				throw new IllegalStateException(ocm + " refers to unknown ServletContext for path " + contextPath);
+			}
+
+			OsgiContextModel highestRankedModel = Utils.getHighestRankedModel(osgiContextModels.get(contextPath));
+			if (ocm == highestRankedModel) {
+				LOG.info("Configuring metadata of {}", ocm);
+
+				// only in this case we'll configure the metadata
+				sch.getServletContext().setEffectiveMajorVersion(meta.getMajorVersion());
+				sch.getServletContext().setEffectiveMinorVersion(meta.getMinorVersion());
+				sch.setDisplayName(meta.getDisplayName());
+				// org.eclipse.jetty.webapp.WebDescriptor._distributable - doesn't do anything useful (?)
+//				meta.getDistributable();
+				// nowhere to set these too
+//				meta.isMetadataComplete();
+//				meta.getPublicId();
+//				meta.getRequestCharacterEncoding();
+//				meta.getResponseCharacterEncoding();
+
+				if (sch.getSecurityHandler() instanceof ConstraintAware) {
+					((ConstraintAware) sch.getSecurityHandler()).setDenyUncoveredHttpMethods(meta.isDenyUncoveredHttpMethods());
+				}
+			}
+		}
+	}
+
+	@Override
+	public void visit(MimeAndLocaleMappingChange change) {
+		if (change.getKind() == OpCode.ADD) {
+			OsgiContextModel ocm = change.getOsgiContextModel();
+
+			String contextPath = ocm.getContextPath();
+			ServletContextHandler sch = contextHandlers.get(contextPath);
+
+			if (sch == null) {
+				throw new IllegalStateException(ocm + " refers to unknown ServletContext for path " + contextPath);
+			}
+
+			OsgiContextModel highestRankedModel = Utils.getHighestRankedModel(osgiContextModels.get(contextPath));
+			if (ocm == highestRankedModel) {
+				LOG.info("Configuring MIME and Locale Encoding mapping of {}", ocm);
+
+				MimeTypes mimeTypes = new MimeTypes();
+				mimeTypes.setMimeMap(change.getMimeMapping());
+				sch.setMimeTypes(mimeTypes);
+
+				change.getLocaleEncodingMapping().forEach(sch::addLocaleEncoding);
+			}
 		}
 	}
 
@@ -1466,6 +1528,10 @@ class JettyServerWrapper implements BatchVisitor {
 					sh.getSessionCookieConfig().setHttpOnly(scc.isHttpOnly());
 					sh.getSessionCookieConfig().setSecure(scc.isSecure());
 					sh.getSessionCookieConfig().setComment(scc.getComment());
+
+					if (sc.getTrackingModes().size() > 0) {
+						sh.setSessionTrackingModes(sc.getTrackingModes());
+					}
 				}
 			}
 

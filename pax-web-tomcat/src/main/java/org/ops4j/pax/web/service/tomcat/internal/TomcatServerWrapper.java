@@ -71,6 +71,7 @@ import org.apache.tomcat.util.descriptor.web.WebXmlParser;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
 import org.ops4j.pax.web.service.spi.config.SessionConfiguration;
+import org.ops4j.pax.web.service.spi.model.ContextMetadataModel;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
@@ -90,11 +91,13 @@ import org.ops4j.pax.web.service.spi.servlet.RegisteringContainerInitializer;
 import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
+import org.ops4j.pax.web.service.spi.task.ContextMetadataModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterStateChange;
+import org.ops4j.pax.web.service.spi.task.MimeAndLocaleMappingChange;
 import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
@@ -638,8 +641,6 @@ class TomcatServerWrapper implements BatchVisitor {
 			context.setPath("/".equals(contextPath) ? "" : contextPath);
 			// TODO: this should really be context specific
 			context.setWorkDir(configuration.server().getTemporaryDirectory().getAbsolutePath());
-//							ctx.setWebappVersion(name);
-//							ctx.setDocBase(basedir);
 
 			// in this new context, we need "initial OSGi filter" which will:
 			// - call preprocessors
@@ -655,8 +656,8 @@ class TomcatServerWrapper implements BatchVisitor {
 			context.addLifecycleListener(new Tomcat.FixContextListener());
 
 			// mime mappings from Tomcat's web.xml
+			// TODO: I think we should parse it only in pax-web-extender-war and have a default mapping here only
 			WebXml webXml = new WebXml();
-			// TODO: think about Tomcat's DigesterFactory and how it loads the dtd/xsd resources
 			WebXmlParser webXmlParser = new WebXmlParser(true, false, true);
 			try {
 				// default-web.xml is copied from official Tomcat distro and packaged into pax-web-spi
@@ -888,6 +889,61 @@ class TomcatServerWrapper implements BatchVisitor {
 			// TOCHECK: there should be no more web elements in the context, no OSGi mechanisms, just 404 all the time
 			realContext.setDefaultOsgiContextModel(null);
 			realContext.setDefaultServletContext(null);
+		}
+	}
+
+	@Override
+	public void visit(ContextMetadataModelChange change) {
+		if (change.getKind() == OpCode.ADD) {
+			OsgiContextModel ocm = change.getOsgiContextModel();
+			ContextMetadataModel meta = change.getMetadata();
+
+			String contextPath = ocm.getContextPath();
+			PaxWebStandardContext context = contextHandlers.get(contextPath);
+
+			if (context == null) {
+				throw new IllegalStateException(ocm + " refers to unknown ServletContext for path " + contextPath);
+			}
+
+			OsgiContextModel highestRankedModel = Utils.getHighestRankedModel(osgiContextModels.get(contextPath));
+			if (ocm == highestRankedModel) {
+				LOG.info("Configuring metadata of {}", ocm);
+
+				// only in this case we'll configure the metadata
+				context.setEffectiveMajorVersion(meta.getMajorVersion());
+				context.setEffectiveMinorVersion(meta.getMinorVersion());
+				context.setDisplayName(meta.getDisplayName());
+				context.setDistributable(meta.getDistributable());
+				context.setIgnoreAnnotations(meta.isMetadataComplete());
+				context.setPublicId(meta.getPublicId());
+
+				context.setRequestCharacterEncoding(meta.getRequestCharacterEncoding());
+				context.setResponseCharacterEncoding(meta.getResponseCharacterEncoding());
+
+				context.setDenyUncoveredHttpMethods(meta.isDenyUncoveredHttpMethods());
+			}
+		}
+	}
+
+	@Override
+	public void visit(MimeAndLocaleMappingChange change) {
+		if (change.getKind() == OpCode.ADD) {
+			OsgiContextModel ocm = change.getOsgiContextModel();
+
+			String contextPath = ocm.getContextPath();
+			PaxWebStandardContext context = contextHandlers.get(contextPath);
+
+			if (context == null) {
+				throw new IllegalStateException(ocm + " refers to unknown ServletContext for path " + contextPath);
+			}
+
+			OsgiContextModel highestRankedModel = Utils.getHighestRankedModel(osgiContextModels.get(contextPath));
+			if (ocm == highestRankedModel) {
+				LOG.info("Configuring MIME and Locale Encoding mapping of {}", ocm);
+
+				change.getMimeMapping().forEach(context::addMimeMapping);
+				change.getLocaleEncodingMapping().forEach(context::addLocaleEncodingMappingParameter);
+			}
 		}
 	}
 
@@ -1389,6 +1445,10 @@ class TomcatServerWrapper implements BatchVisitor {
 							config.setSecure(scc.isSecure());
 							config.setMaxAge(scc.getMaxAge());
 							config.setComment(scc.getComment());
+
+							if (sc.getTrackingModes().size() > 0) {
+								context.getServletContext().setSessionTrackingModes(sc.getTrackingModes());
+							}
 						}
 					}
 				}

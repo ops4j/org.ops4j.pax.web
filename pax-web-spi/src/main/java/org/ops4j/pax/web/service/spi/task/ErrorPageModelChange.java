@@ -54,6 +54,13 @@ public class ErrorPageModelChange extends Change {
 	}
 
 	@Override
+	public void uninstall(List<Change> operations) {
+		if (getKind() == OpCode.ADD) {
+			operations.add(new ErrorPageModelChange(OpCode.DELETE, errorPageModels));
+		}
+	}
+
+	@Override
 	public void accept(BatchVisitor visitor) {
 		visitor.visit(this);
 	}

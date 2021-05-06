@@ -16,3 +16,6 @@
 
 org.ops4j.pax.web.itest.server.support.war.scis.SCIFromTheWab1
 org.ops4j.pax.web.itest.server.support.war.scis.SCIFromTheWab2
+
+# to have JSP support in a test were bundles are mocked
+org.ops4j.pax.web.jsp.JasperInitializer

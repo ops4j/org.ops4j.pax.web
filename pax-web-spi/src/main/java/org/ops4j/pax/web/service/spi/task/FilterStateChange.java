@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.spi.task;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -46,6 +47,18 @@ public class FilterStateChange extends Change {
 
 	public Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> getContextFilters() {
 		return contextFilters;
+	}
+
+	@Override
+	public void uninstall(List<Change> operations) {
+		if (getKind() == OpCode.NONE) {
+			Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> newMap = new HashMap<>();
+			for (String context : contextFilters.keySet()) {
+				newMap.put(context, new TreeMap<>());
+			}
+
+			operations.add(new FilterStateChange(newMap, dynamic));
+		}
 	}
 
 	@Override

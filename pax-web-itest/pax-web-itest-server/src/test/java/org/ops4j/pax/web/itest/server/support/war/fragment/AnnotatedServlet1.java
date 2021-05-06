@@ -34,7 +34,7 @@ public class AnnotatedServlet1 extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String msg = String.format("Hello %s!", req.getPathInfo());
-		resp.setContentLength(msg.length());
+		req.setAttribute("cl", msg.length());
 		resp.getWriter().print(msg);
 	}
 
