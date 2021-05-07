@@ -216,7 +216,6 @@ public class DynamicRegistrations {
 	public ServletRegistration.Dynamic addServlet(OsgiServletContext context, String servletName, Class<? extends Servlet> servletClass) {
 		OsgiContextModel osgiContextModel = context.getOsgiContextModel();
 
-
 		ServletModel.Builder builder = new ServletModel.Builder()
 				.withServletName(servletName)
 				.withServletClass(servletClass)

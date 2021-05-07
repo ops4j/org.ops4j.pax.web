@@ -807,16 +807,21 @@ class JettyServerWrapper implements BatchVisitor {
 			// org.ops4j.pax.web.service.spi.servlet.OsgiServletContext is created and we have everything ready
 			// to create proper classloader for this OsgiServletContext
 			ClassLoader classLoader = null;
-			// TODO: handle classloaders already prepared in pax-web-extender-war
+			if (osgiModel.getClassLoader() != null) {
+				// WAB scenario - the classloader was already prepared earlier when the WAB was processed..
+				// The classloader already includes several reachable bundles
+				classLoader = osgiModel.getClassLoader();
+			}
 			if (paxWebJettyBundle != null) {
 				// it may not be the case in Test scenario
-				OsgiServletContextClassLoader loader = new OsgiServletContextClassLoader();
+				OsgiServletContextClassLoader loader = classLoader != null
+						? (OsgiServletContextClassLoader) classLoader : new OsgiServletContextClassLoader();
 				loader.addBundle(osgiModel.getOwnerBundle());
 				loader.addBundle(paxWebJettyBundle);
 				loader.addBundle(Utils.getPaxWebJspBundle(paxWebJettyBundle));
 				loader.makeImmutable();
 				classLoader = loader;
-			} else {
+			} else if (classLoader == null) {
 				classLoader = this.classLoader;
 			}
 			OsgiServletContext osgiContext = new OsgiServletContext(sch.getServletContext(), osgiModel, servletContextModel,
@@ -1350,7 +1355,9 @@ class JettyServerWrapper implements BatchVisitor {
 						// special case of "remove all welcome files"
 						currentWelcomeFiles.clear();
 					} else {
-						currentWelcomeFiles.removeAll(Arrays.asList(model.getWelcomeFiles()));
+						for (String s : model.getWelcomeFiles()) {
+							currentWelcomeFiles.remove(s);
+						}
 					}
 				}
 
@@ -1486,6 +1493,7 @@ class JettyServerWrapper implements BatchVisitor {
 			// first thing - only NOW we can set ServletContext's class loader! It affects many things, including
 			// the TCCL used for example by javax.el.ExpressionFactory.newInstance()
 			sch.setClassLoader(highestRankedContext.getClassLoader());
+			sch.setOsgiServletContext(highestRankedContext);
 
 			// this is when already collected initializers may be added as ordered collection to the servlet context
 			// handler (Pax Web specific) - we need control over them, because we have to pass correct

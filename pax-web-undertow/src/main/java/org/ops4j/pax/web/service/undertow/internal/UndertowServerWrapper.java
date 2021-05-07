@@ -19,6 +19,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -44,6 +47,8 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeListener;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.SessionCookieConfig;
 import javax.xml.bind.JAXBContext;
@@ -69,6 +74,7 @@ import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.ErrorPage;
 import io.undertow.servlet.api.FilterInfo;
+import io.undertow.servlet.api.InstanceHandle;
 import io.undertow.servlet.api.ListenerInfo;
 import io.undertow.servlet.api.MimeMapping;
 import io.undertow.servlet.api.ServletContainer;
@@ -1025,15 +1031,21 @@ class UndertowServerWrapper implements BatchVisitor {
 			// to create proper classloader for this OsgiServletContext
 			// unlike in Jetty or Tomcat, getRealServletContext() may return null for not started context
 			ClassLoader classLoader = null;
+			if (osgiModel.getClassLoader() != null) {
+				// WAB scenario - the classloader was already prepared earlier when the WAB was processed..
+				// The classloader already includes several reachable bundles
+				classLoader = osgiModel.getClassLoader();
+			}
 			if (paxWebUndertowBundle != null) {
 				// it may not be the case in Test scenario
-				OsgiServletContextClassLoader loader = new OsgiServletContextClassLoader();
+				OsgiServletContextClassLoader loader = classLoader != null
+						? (OsgiServletContextClassLoader) classLoader : new OsgiServletContextClassLoader();
 				loader.addBundle(osgiModel.getOwnerBundle());
 				loader.addBundle(paxWebUndertowBundle);
 				loader.addBundle(Utils.getPaxWebJspBundle(paxWebUndertowBundle));
 				loader.makeImmutable();
 				classLoader = loader;
-			} else {
+			} else if (classLoader == null) {
 				classLoader = this.classLoader;
 			}
 			OsgiServletContext osgiContext = new OsgiServletContext(getRealServletContext(contextPath), osgiModel, servletContextModel,
@@ -1519,8 +1531,21 @@ class UndertowServerWrapper implements BatchVisitor {
 				}
 
 				// add the listener to real context - even ServletContextAttributeListener (but only once - even
-				// if there are many OsgiServletContexts per ServletContext)
-				ListenerInfo info = new ListenerInfo(eventListener.getClass(), new ImmediateInstanceFactory<>(eventListener));
+				// if there are many OsgiServletContexts per ServlApplicationListenersetContext)
+				// we have to wrap the listener, so proper OsgiServletContext is passed there
+				EventListener wrapper = eventListener;
+				if (eventListener instanceof ServletContextListener) {
+					ContextLinkingInvocationHandler handler = new ContextLinkingInvocationHandler((ServletContextListener)eventListener);
+					wrapper = (EventListener) Proxy.newProxyInstance(context.getClassLoader(),
+							eventListener.getClass().getInterfaces(), handler);
+					// it may be a case that this listener is dynamic
+					OsgiContextModel highestRanked = securityHandlers.get(contextPath).getDefaultOsgiContextModel();
+					if (highestRanked != null) {
+						OsgiServletContext highestRankedContext = osgiServletContexts.get(highestRanked);
+						handler.setOsgiContext(highestRankedContext);
+					}
+				}
+				ListenerInfo info = new ListenerInfo(eventListener.getClass(), new ImmediateInstanceFactory<>(wrapper));
 
 				deploymentInfo.addListener(info);
 				if (manager != null) {
@@ -1551,8 +1576,10 @@ class UndertowServerWrapper implements BatchVisitor {
 					pathHandler.removePrefixPath(contextPath);
 
 					try {
-						manager.stop();
-						manager.undeploy();
+						if (manager != null) {
+							manager.stop();
+							manager.undeploy();
+						}
 						// swap the deployment info, which will later be used to start the context
 						deploymentInfos.put(contextPath, deploymentInfo);
 					} catch (ServletException e) {
@@ -1785,7 +1812,7 @@ class UndertowServerWrapper implements BatchVisitor {
 			// SCIs require working ServletContext inside OsgiServletContext, but Undertow's ServletContext
 			// is created only later
 			deployment.getServletExtensions().removeIf(e -> e instanceof ContextLinkingServletExtension);
-			deployment.addServletExtension(new ContextLinkingServletExtension(contextPath));
+			deployment.addServletExtension(new ContextLinkingServletExtension(contextPath, highestRankedContext));
 
 			// first thing - only NOW we can set ServletContext's class loader! It affects many things, including
 			// the TCCL used for example by javax.el.ExpressionFactory.newInstance()
@@ -1859,8 +1886,7 @@ class UndertowServerWrapper implements BatchVisitor {
 
 			HttpHandler handler = manager.start();
 
-			// actual registration of "context" in Undertow's path handler. There are no servlets,
-			// filters and anything yet
+			// actual registration of "context" in Undertow's path handler.
 			pathHandler.addPrefixPath(contextPath, handler);
 		} catch (ServletException e) {
 			throw new IllegalStateException("Can't start Undertow context "
@@ -2049,25 +2075,68 @@ class UndertowServerWrapper implements BatchVisitor {
 		}
 	}
 
+	private static class ContextLinkingInvocationHandler implements InvocationHandler {
+
+		private final EventListener eventListener;
+		private OsgiServletContext osgiContext;
+
+		ContextLinkingInvocationHandler(EventListener eventListener) {
+			this.eventListener = eventListener;
+		}
+
+		@Override
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			if (osgiContext != null) {
+				if (method.getName().equals("contextInitialized")) {
+					return method.invoke(eventListener, new ServletContextEvent(osgiContext));
+				} else if (method.getName().equals("contextDestroyed")) {
+					return method.invoke(eventListener, new ServletContextEvent(osgiContext));
+				}
+			}
+			return method.invoke(eventListener, args);
+		}
+
+		public void setOsgiContext(OsgiServletContext osgiContext) {
+			this.osgiContext = osgiContext;
+		}
+	}
+
 	/**
 	 * An internal {@link ServletExtension} that propagates "container servlet context" to all related
-	 * {@link OsgiServletContext}s.
+	 * {@link OsgiServletContext}s and that configures {@link ContextLinkingInvocationHandler}s.
 	 */
 	private class ContextLinkingServletExtension implements ServletExtension {
 
 		private final String contextPath;
+		private final OsgiServletContext osgiContext;
 
-		ContextLinkingServletExtension(String contextPath) {
+		ContextLinkingServletExtension(String contextPath, OsgiServletContext osgiContext) {
 			this.contextPath = contextPath;
+			this.osgiContext = osgiContext;
 		}
 
 		@Override
 		public void handleDeployment(DeploymentInfo deploymentInfo, ServletContext servletContext) {
+			for (ListenerInfo lInfo : deploymentInfo.getListeners()) {
+				try {
+					InstanceHandle<? extends EventListener> handle = lInfo.getInstanceFactory().createInstance();
+					EventListener el = handle.getInstance();
+					if (Proxy.isProxyClass(el.getClass())) {
+						InvocationHandler ih = Proxy.getInvocationHandler(el);
+						if (ih instanceof ContextLinkingInvocationHandler) {
+							((ContextLinkingInvocationHandler) ih).setOsgiContext(osgiContext);
+						}
+					}
+				} catch (InstantiationException ignored) {
+				}
+			}
+
 			osgiServletContexts.forEach((ocm, osc) -> {
 				if (ocm.getContextPath().equals(contextPath)) {
 					osc.setContainerServletContext(servletContext);
 				}
 			});
+
 		}
 	}
 

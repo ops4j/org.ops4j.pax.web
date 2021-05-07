@@ -20,6 +20,8 @@ import java.security.AccessControlContext;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 
 import org.eclipse.jetty.server.HandlerContainer;
@@ -28,6 +30,7 @@ import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +55,8 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 				private URL jettyWebXmlURL;
 
 				private List<String> virtualHosts;
+
+	private OsgiServletContext osgiServletContext;
 
 	/**
 	 * Create a slightly extended version of Jetty's {@link ServletContextHandler}. It is still not as complex as
@@ -83,6 +88,25 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 
 	public void setServletContainerInitializers(Collection<SCIWrapper> wrappers) {
 		this.servletContainerInitializers.addAll(wrappers);
+	}
+
+	/**
+	 * We have to ensure that this {@link org.eclipse.jetty.server.handler.ContextHandler} will always return
+	 * proper instance of {@link javax.servlet.ServletContext} - especially in the events passed to listeners
+	 * @param osgiServletContext
+	 */
+	public void setOsgiServletContext(OsgiServletContext osgiServletContext) {
+		this.osgiServletContext = osgiServletContext;
+	}
+
+	@Override
+	public void callContextInitialized(ServletContextListener l, ServletContextEvent e) {
+		super.callContextInitialized(l, new ServletContextEvent(osgiServletContext));
+	}
+
+	@Override
+	public void callContextDestroyed(ServletContextListener l, ServletContextEvent e) {
+		super.callContextDestroyed(l, new ServletContextEvent(osgiServletContext));
 	}
 
 	@Override

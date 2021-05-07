@@ -17,6 +17,8 @@ package org.ops4j.pax.web.samples.war;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -24,12 +26,23 @@ import javax.servlet.http.HttpServletResponse;
 
 public class SimplestServlet extends HttpServlet {
 
+	@Deprecated
+	public Object dummy;
+
 	@Override
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		resp.setContentType("text/plain");
 		resp.setCharacterEncoding(StandardCharsets.UTF_8.toString());
-		resp.getWriter().println("Hello");
+		resp.setContentLength(5);
+		resp.getWriter().print("Hello");
 		resp.getWriter().flush();
+
+		try {
+			InitialContext ic = new InitialContext();
+			System.out.println(ic.lookup("/"));
+		} catch (NamingException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

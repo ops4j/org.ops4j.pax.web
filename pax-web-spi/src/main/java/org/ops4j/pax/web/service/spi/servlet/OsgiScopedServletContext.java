@@ -396,9 +396,16 @@ public class OsgiScopedServletContext implements ServletContext {
 
 	@Override
 	public ClassLoader getClassLoader() {
-		// TODO: this should really be a classloader of a bundle that registered e.g., a servlet, but probably
-		//       it should be "bundle delegating classloader" with bundles constituting a "web application",
-		//       which is very important from e.g., point of view of JSF tag descriptor discovery
+		// according to Whiteboard specification - this should be strictly a classloader of a bundle registering
+		// the servlet/filter, but in case of WAB, we'll return the WAB's classloader (delegating to
+		// all reachable bundles)
+
+		if (getOsgiContextModel().getClassLoader() != null) {
+			// WAB case
+			return osgiContext.getClassLoader();
+		}
+
+		// Whiteboard/HttpService case
 		return bundle.adapt(BundleWiring.class).getClassLoader();
 	}
 

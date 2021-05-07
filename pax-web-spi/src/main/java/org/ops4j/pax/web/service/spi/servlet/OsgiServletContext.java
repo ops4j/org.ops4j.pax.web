@@ -634,9 +634,6 @@ public class OsgiServletContext implements ServletContext {
 	}
 
 	public InputStream getResourceAsStream(WebContainerContext context, String path) {
-		// TODO: according to 128.3.5 Static Content, we can't return any restricted paths, even if
-		//       org.ops4j.pax.web.service.WebContainerContext.getResourcePaths and
-		//       org.osgi.service.http.context.ServletContextHelper.getResourcePaths allow that
 		URL resource = context.getResource(path);
 		if (resource != null) {
 			try {
@@ -726,11 +723,22 @@ public class OsgiServletContext implements ServletContext {
 
 	@Override
 	public ClassLoader getClassLoader() {
-		// at Servlet (or Filter) level, this method returns classLoader of a bundle registering given Servlet
-		// (or Filter). Here, it's a bundle registering ServletContextHelper (or HttpContext), but for practical
-		// reasons the returned classloader also contains few other bundles configured specifically
-		// to given server runtime
-//		return osgiContextModel.getOwnerBundle().adapt(BundleWiring.class).getClassLoader();
+		// According to Whiteboard specification, this method should return:
+		//  - a classloader of the bundle registering ServletContextHelper service (generally)
+		//  - a classloader of the bundle registering a Servlet/Filter service (when accesing from Servlet/Filter)
+		// According to Web Applications specification (chapter 128 of the OSGi CMPN specification) there's ...
+		// nothing important about classloaders, so we'll return Pax Web specific OsgiServletContextClassLoader
+		// that delegates to a set of "reachable" bundles
+
+		// The current state (to indicate differences between Pax Web and the specifications) is:
+		// Whiteboard/HttpService specs:
+		//  - OsgiScopedServletContext.getClassLoader() will return a classloader for a bundle registering
+		//    the servlet/filter - fully conforming to Whiteboard specification
+		//  - OsgiServletContext.getClassLoader() will return a OsgiServletContextClassLoader collecting few
+		//    additional bundles (like pax-web-jsp or pax-web-jetty|tomcat|undertow)
+		// WAB spec
+		//  - both contexts will return the same OsgiServletContextClassLoader with bundles "reachable" from WAB
+
 		return this.classLoader;
 	}
 

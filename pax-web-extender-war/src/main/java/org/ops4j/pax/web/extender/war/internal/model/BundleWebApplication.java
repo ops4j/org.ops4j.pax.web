@@ -1113,6 +1113,9 @@ public class BundleWebApplication {
 			Bundle b = context == null ? null : context.getBundle();
 			return new WebContainerContextWrapper(b, new WebApplicationHelper(b), contextName);
 		});
+		// very important step - we pass a classloader, which contains reachable bundles - bundles discovered when
+		// WAB's metadata was parsed/processed
+		ocm.setClassLoader(this.classLoader);
 
 		// 1.1. Session configuration is passed directly in OsgiContextModel
 		SessionConfig webXmlSessionConfig = mainWebXml.getSessionConfig();

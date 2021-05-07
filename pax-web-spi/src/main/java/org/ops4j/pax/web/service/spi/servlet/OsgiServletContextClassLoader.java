@@ -71,9 +71,13 @@ public class OsgiServletContextClassLoader extends ClassLoader {
 	 * @param bundle
 	 */
 	public void addBundle(Bundle bundle) {
-		if (bundle != null) {
+		if (bundle != null && !bundles.contains(bundle)) {
 			bundles.add(bundle);
 		}
+	}
+
+	public List<Bundle> getBundles() {
+		return bundles;
 	}
 
 	/**

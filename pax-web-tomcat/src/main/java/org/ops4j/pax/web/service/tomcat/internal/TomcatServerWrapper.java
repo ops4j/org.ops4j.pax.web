@@ -840,15 +840,21 @@ class TomcatServerWrapper implements BatchVisitor {
 			// org.ops4j.pax.web.service.spi.servlet.OsgiServletContext is created and we have everything ready
 			// to create proper classloader for this OsgiServletContext
 			ClassLoader classLoader = null;
+			if (osgiModel.getClassLoader() != null) {
+				// WAB scenario - the classloader was already prepared earlier when the WAB was processed..
+				// The classloader already includes several reachable bundles
+				classLoader = osgiModel.getClassLoader();
+			}
 			if (paxWebTomcatBundle != null) {
 				// it may not be the case in Test scenario
-				OsgiServletContextClassLoader loader = new OsgiServletContextClassLoader();
+				OsgiServletContextClassLoader loader = classLoader != null
+						? (OsgiServletContextClassLoader) classLoader : new OsgiServletContextClassLoader();
 				loader.addBundle(osgiModel.getOwnerBundle());
 				loader.addBundle(paxWebTomcatBundle);
 				loader.addBundle(Utils.getPaxWebJspBundle(paxWebTomcatBundle));
 				loader.makeImmutable();
 				classLoader = loader;
-			} else {
+			} else if (classLoader == null) {
 				classLoader = this.classLoader;
 			}
 			OsgiServletContext osgiContext = new OsgiServletContext(realContext.getServletContext(), osgiModel, servletContextModel,
@@ -1240,7 +1246,9 @@ class TomcatServerWrapper implements BatchVisitor {
 						// special case of "remove all welcome files"
 						currentWelcomeFiles.clear();
 					} else {
-						currentWelcomeFiles.removeAll(Arrays.asList(model.getWelcomeFiles()));
+						for (String s : model.getWelcomeFiles()) {
+							currentWelcomeFiles.remove(s);
+						}
 					}
 				}
 
@@ -1403,6 +1411,7 @@ class TomcatServerWrapper implements BatchVisitor {
 			});
 			context.setParentClassLoader(highestRankedContext.getClassLoader());
 			context.setLoader(tomcatLoader);
+			context.setOsgiServletContext(highestRankedContext);
 
 			Collection<SCIWrapper> initializers = new LinkedList<>(this.initializers.get(contextPath).values());
 			// Initially I thought we should take only these SCIs, which are associated with highest ranked OCM,

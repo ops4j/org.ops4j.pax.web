@@ -41,7 +41,19 @@ public class WebApplicationHelper extends DefaultServletContextHelper {
 		if ("/".equals(name)) {
 			return super.getResource(name);
 		} else {
-			Enumeration<URL> e = bundle.findEntries("/", Path.normalizeResourcePath(name), false);
+			Enumeration<URL> e = null;
+			String normalizedPath = Path.normalizeResourcePath(name);
+			// 128.6.3 Resource Lookup: Since the getResource and getResourceAsStream methods do not support wildcards
+			// while the findEntries method does it is necessary to escape the wildcard asterisk ('*' \u002A) with
+			// prefixing it with a reverse solidus ('\' \u005C). This implies that a reverse solidus must be escaped
+			// with an extra reverse solidus. For example, the path foo\bar* must be escaped to foo\\bar\*.
+			normalizedPath = normalizedPath.replace("\\", "\\\\").replace("*", "\\*");
+			if (!normalizedPath.contains("/")) {
+				e = bundle.findEntries("/", normalizedPath, false);
+			} else {
+				int lastSlash = normalizedPath.lastIndexOf('/');
+				e = bundle.findEntries(normalizedPath.substring(0, lastSlash), normalizedPath.substring(lastSlash + 1), false);
+			}
 			if (e != null) {
 				return e.nextElement();
 			}

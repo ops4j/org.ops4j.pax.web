@@ -38,6 +38,7 @@ import org.ops4j.pax.web.service.spi.context.DefaultServletContextHelper;
 import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.model.elements.JspConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.SessionConfigurationModel;
+import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
 import org.ops4j.pax.web.service.spi.task.Change;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -319,6 +320,8 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	/** Tracks {@link Change unregistration changes} for dynamic servlets/filters/listeners */
 	private final List<Change> unregistrations = new ArrayList<>();
 
+	private OsgiServletContextClassLoader classLoader = null;
+
 	public OsgiContextModel(Bundle ownerBundle, Integer rank, Long serviceId, boolean whiteboard) {
 		this.ownerBundle = ownerBundle;
 		this.serviceRank = rank;
@@ -551,6 +554,20 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 
 	public void setHttpContext(WebContainerContext httpContext) {
 		this.httpContext = httpContext;
+	}
+
+	public OsgiServletContextClassLoader getClassLoader() {
+		return classLoader;
+	}
+
+	/**
+	 * In Whiteboard and HttpService scenarios, {@link OsgiServletContextClassLoader} is created in an the wrapper
+	 * for actual server runtime (to include the bundle specific to given runtime). But in WAB case, we already
+	 * have some set of bundles collected as reachable bundles.
+	 * @param classLoader
+	 */
+	public void setClassLoader(OsgiServletContextClassLoader classLoader) {
+		this.classLoader = classLoader;
 	}
 
 	/**

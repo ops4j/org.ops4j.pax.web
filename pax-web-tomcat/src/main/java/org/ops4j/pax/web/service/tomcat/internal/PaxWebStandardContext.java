@@ -70,6 +70,9 @@ public class PaxWebStandardContext extends StandardContext {
 	private PaxWebFilterMap osgiInitFilterMap;
 	private PaxWebFilterDef osgiInitFilterDef;
 
+	/** Highest ranked {@link OsgiServletContext} set when Tomcat's context starts */
+	private OsgiServletContext osgiServletContext;
+
 	/**
 	 * {@link Preprocessor} are registered as filters, but without particular target
 	 * {@link org.ops4j.pax.web.service.spi.servlet.OsgiServletContext}, so they're effectively registered in
@@ -150,6 +153,15 @@ public class PaxWebStandardContext extends StandardContext {
 		}
 	}
 
+	/**
+	 * We have to ensure that this {@link StandardContext} will always return
+	 * proper instance of {@link javax.servlet.ServletContext} - especially in the events passed to listeners
+	 * @param osgiServletContext
+	 */
+	public void setOsgiServletContext(OsgiServletContext osgiServletContext) {
+		this.osgiServletContext = osgiServletContext;
+	}
+
 	@Override
 	public void addServletContainerInitializer(ServletContainerInitializer sci, Set<Class<?>> classes) {
 		// we don't want initializers in Tomcat's context, because we manage them ourselves
@@ -158,6 +170,14 @@ public class PaxWebStandardContext extends StandardContext {
 	public void setServletContainerInitializers(Collection<SCIWrapper> wrappers) {
 		this.servletContainerInitializers.clear();
 		this.servletContainerInitializers.addAll(wrappers);
+	}
+
+	@Override
+	public ServletContext getServletContext() {
+		if (osgiServletContext != null) {
+			return osgiServletContext;
+		}
+		return super.getServletContext();
 	}
 
 	@Override
