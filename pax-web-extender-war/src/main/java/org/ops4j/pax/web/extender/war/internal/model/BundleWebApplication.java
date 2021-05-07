@@ -20,6 +20,7 @@ package org.ops4j.pax.web.extender.war.internal.model;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -36,6 +37,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.Filter;
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
@@ -46,6 +48,7 @@ import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 
 import org.apache.felix.utils.extender.Extension;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
+import org.apache.tomcat.util.descriptor.web.MultipartDef;
 import org.apache.tomcat.util.descriptor.web.ServletDef;
 import org.apache.tomcat.util.descriptor.web.SessionConfig;
 import org.apache.tomcat.util.descriptor.web.WebXml;
@@ -60,6 +63,7 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
@@ -1158,6 +1162,16 @@ public class BundleWebApplication {
 			}
 		}
 
+		// 1.3. Some initial attributes. "osgi-bundlecontext" and
+		//      "org.springframework.osgi.web.org.osgi.framework.BundleContext" will be set in the constructor
+		//      of OsgiServletContext, because these are needed also in Whiteboard and HttpService scenarios.
+		if (classSpace.getOrderedLibs() != null) {
+			ocm.getInitialContextAttributes().put(ServletContext.ORDERED_LIBS, classSpace.getOrderedLibs());
+		}
+
+		// 1.4. Context initial parameters
+		ocm.getContextParams().putAll(mainWebXml.getContextParams());
+
 		wabBatch.addOsgiContextModel(ocm, scm);
 		this.osgiContextModel = ocm;
 
@@ -1168,35 +1182,19 @@ public class BundleWebApplication {
 		// "J" means "processed by Jetty 9", "T" means "processed by Tomcat 9", "+" means already handled by Pax Web,
 		// "-" means not yet handled, "x" means there's no need to handle it
 		//  + [JT] <absolute-ordering> (used only when parsing metadata)
-		//  x [..] <administered-object>
-		//  x [..] <connection-factory>
-		//  - [JT] <context-param>
-		//  x [..] <data-source>
-		//  x [..] <default-context-path>
+		//  + [JT] <context-param>
 		//  + [JT] <deny-uncovered-http-methods>
-		//  x [..] <description>
 		//  + [JT] <display-name>
 		//  + [JT] <distributable>
-		//  x [.T] <ejb-local-ref>
-		//  x [.T] <ejb-ref>
 		//  - [JT] <env-entry>
 		//  + [JT] <error-page>
 		//  + [JT] <filter>
 		//  + [JT] <filter-mapping>
-		//  x [..] <icon>
-		//  x [..] <jms-connection-factory>
-		//  x [..] <jms-destination>
 		//  + [JT] <jsp-config>
-		//  - [JT] <listener>
+		//  + [JT] <listener>
 		//  + [JT] <locale-encoding-mapping-list>
 		//  - [JT] <login-config>
-		//  x [..] <mail-session>
-		//  x [.T] <message-destination>
-		//  x [JT] <message-destination-ref>
 		//  + [JT] <mime-mapping>
-		//  x [..] <module-name>
-		//  x [..] <persistence-context-ref>
-		//  x [..] <persistence-unit-ref>
 		//  - [JT] <post-construct>
 		//  - [JT] <pre-destroy>
 		//  + [.T] <request-character-encoding> (Servlet 4)
@@ -1205,11 +1203,29 @@ public class BundleWebApplication {
 		//  + [.T] <response-character-encoding> (Servlet 4)
 		//  - [JT] <security-constraint>
 		//  - [JT] <security-role>
-		//  x [.T] <service-ref>
 		//  + [JT] <servlet>
 		//  + [JT] <servlet-mapping>
 		//  + [JT] <session-config>
 		//  + [JT] <welcome-file-list>
+		//
+		// These won't be handled:
+		//  x [..] <administered-object>
+		//  x [..] <connection-factory>
+		//  x [..] <data-source>
+		//  x [..] <default-context-path>
+		//  x [..] <description>
+		//  x [.T] <ejb-local-ref>
+		//  x [.T] <ejb-ref>
+		//  x [..] <icon>
+		//  x [..] <jms-connection-factory>
+		//  x [..] <jms-destination>
+		//  x [..] <mail-session>
+		//  x [.T] <message-destination>
+		//  x [JT] <message-destination-ref>
+		//  x [..] <module-name>
+		//  x [..] <persistence-context-ref>
+		//  x [..] <persistence-unit-ref>
+		//  x [.T] <service-ref>
 		//
 		// See:
 		// Tomcat:
@@ -1222,14 +1238,14 @@ public class BundleWebApplication {
 		// The detailed and ordered context configuration process in Tomcat is alphabetical:
 		//  + public id
 		//  + effective major/minor version
-		//  		- context (init) parameters
+		//  + context (init) parameters
 		//  + deny uncovered HTTP methods
 		//  + display name
 		//  + distributable flag
 		//  + error pages
 		//  + filters and their mappings
 		//  + jsp config descriptor
-		//  		- listeners
+		//  + listeners
 		//  + locale encoding mapping paramters
 		//  - login config
 		//  + metadata complete (a.k.a. "ignore annotations") - Tomcat calls org.apache.tomcat.InstanceManager.destroyInstance()
@@ -1242,7 +1258,7 @@ public class BundleWebApplication {
 		//  - security roles
 		//  + servlets
 		//  - servlets' security roles
-		//  		- servlets' multipart config
+		//  + servlets' multipart config
 		//  + servlets' mappings
 		//  + session config and session cookie config
 		//  + welcome files
@@ -1307,6 +1323,15 @@ public class BundleWebApplication {
 					.withLoadOnStartup(def.getLoadOnStartup())
 					.withInitParams(def.getParameterMap())
 					.withOsgiContextModel(ocm);
+
+			MultipartDef md = def.getMultipartDef();
+			if (md != null) {
+				long maxFileSize = md.getMaxFileSize() == null ? -1L : Long.parseLong(md.getMaxFileSize());
+				long maxRequestSize = md.getMaxRequestSize() == null ? -1L : Long.parseLong(md.getMaxRequestSize());
+				int fileSizeThreshold = md.getFileSizeThreshold() == null ? 0 : Integer.parseInt(md.getFileSizeThreshold());
+				MultipartConfigElement mpConfig = new MultipartConfigElement(md.getLocation(), maxFileSize, maxRequestSize, fileSizeThreshold);
+				builder.withMultipartConfigElement(mpConfig);
+			}
 			if (servletClass == null) {
 				// the actuall class will depend on the target runtime
 				builder.resourceServlet(true);
@@ -1355,13 +1380,30 @@ public class BundleWebApplication {
 		// this is for ServerController
 		wabBatch.updateFilters(allFilterModels, false);
 
-		// 5. welcome files - without a way to configure redirect flag
+		// 5. listeners
+		for (String listener : mainWebXml.getListeners()) {
+			Class<EventListener> listenerClass = null;
+			try {
+				listenerClass = (Class<EventListener>) classLoader.loadClass(listener);
+				EventListener eventListener = listenerClass.newInstance();
+				EventListenerModel elm = new EventListenerModel(eventListener);
+				elm.setRegisteringBundle(bundle);
+				elm.addContextModel(ocm);
+				wabBatch.addEventListenerModel(elm);
+			} catch (ClassNotFoundException e) {
+				LOG.warn("Can't load listener class {} in the context of {}: {}", listener, this, e.getMessage(), e);
+			} catch (InstantiationException | IllegalAccessException e) {
+				LOG.warn("Can't instantiate listener class {} in the context of {}: {}", listener, this, e.getMessage(), e);
+			}
+		}
+
+		// 6. welcome files - without a way to configure redirect flag
 		WelcomeFileModel wfm = new WelcomeFileModel(mainWebXml.getWelcomeFiles().toArray(new String[0]), false);
 		wfm.setRegisteringBundle(bundle);
 		wfm.addContextModel(ocm);
 		wabBatch.addWelcomeFileModel(wfm);
 
-		// 6. error pages
+		// 7. error pages
 		Map<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> allEpModels = new HashMap<>();
 		TreeMap<ErrorPageModel, List<OsgiContextModel>> epModels = new TreeMap<>();
 		allEpModels.put(contextPath, epModels);
@@ -1382,7 +1424,7 @@ public class BundleWebApplication {
 		// this is for ServerController
 		wabBatch.updateErrorPages(allEpModels);
 
-		// 7. At the end, Tomcat adds SCIs to the context
+		// 8. At the end, Tomcat adds SCIs to the context
 		this.sciToHt.forEach((sci, classes) -> {
 			Class<?>[] classesArray = classes.isEmpty() ? null : classes.toArray(new Class<?>[0]);
 			ContainerInitializerModel cim = new ContainerInitializerModel(sci, classesArray);
@@ -1466,53 +1508,14 @@ public class BundleWebApplication {
 //	 * The URL to the web.xml for the web app.
 //	 */
 //	private URL webXmlURL;
-//
-//	/**
-//	 * Application display name.
-//	 */
-//	private String displayName;
-//	/**
-//	 * Context name.
-//	 */
-//	private String contextName;
-//	/**
-//	 * Session timeout.
-//	 */
-//	private String sessionTimeout;
-//	/**
-//	 * Filters.
-//	 */
-//	private final Map<String, WebAppFilter> filters;
-//	/**
-//	 * Mapping between filter name and filter mapping.
-//	 */
-//	private final Map<String, Set<WebAppFilterMapping>> filterMappings;
-//	/**
-//	 * Filters order. List in the order the filters should be applied. When read
-//	 * from an web xml it should respect SRV.6.2.4 section in servlet specs
-//	 * which is the order defined in filter mappings.
-//	 */
-//	private final List<String> orderedFilters;
 //	/**
 //	 * Context parameters.
 //	 */
 //	private final Set<WebAppInitParam> contextParams;
 //	/**
-//	 * Mime mappings.
-//	 */
-//	private final Set<WebAppMimeMapping> mimeMappings;
-//	/**
 //	 * Listeners.
 //	 */
 //	private final List<WebAppListener> listeners;
-//	/**
-//	 * Error pages.
-//	 */
-//	private final List<WebAppErrorPage> errorPages;
-//	/**
-//	 * Welcome files.
-//	 */
-//	private final List<String> welcomeFiles;
 //	/**
 //	 * Virtual Host List.
 //	 */
@@ -1531,24 +1534,7 @@ public class BundleWebApplication {
 //
 //	private final List<WebAppLoginConfig> loginConfig;
 //
-//	private boolean metaDataComplete;
-//
 //	private URL jettyWebXmlURL;
-//
-//	private List<String> sessionTrackingModes;
-//
-//	private WebAppCookieConfig sessionCookieConfig;
-//
-//	private WebAppJspConfig jspConfigDescriptor;
-//
-//	/**
-//	 * Setter.
-//	 *
-//	 * @param displayName value to set
-//	 */
-//	public void setDisplayName(final String displayName) {
-//		this.displayName = displayName;
-//	}
 //
 //	private WebAppInitParam getWebAppInitParam(String name) {
 //		for (WebAppInitParam p : contextParams) {
@@ -1582,113 +1568,6 @@ public class BundleWebApplication {
 //		contextParams.add(initParam);
 //	}
 //
-//	public String getContextName() {
-//		return contextName;
-//	}
-//
-//	/**
-//	 * Setter.
-//	 *
-//	 * @param minutes session timeout
-//	 */
-//	public void setSessionTimeout(final String minutes) {
-//		sessionTimeout = minutes;
-//	}
-//
-//	/**
-//	 * Getter.
-//	 *
-//	 * @return session timeout in minutes
-//	 */
-//	public String getSessionTimeout() {
-//		return sessionTimeout;
-//	}
-//
-//	/**
-//	 * Add a filter.
-//	 *
-//	 * @param filter to add
-//	 * @throws NullArgumentException if filter, filter name or filter class is null
-//	 */
-//	public void addFilter(final WebAppFilter filter) {
-//		NullArgumentException.validateNotNull(filter, "Filter");
-//		NullArgumentException.validateNotNull(filter.getFilterName(),
-//				"Filter name");
-//		NullArgumentException.validateNotNull(filter.getFilterClass(),
-//				"Filter class");
-//		filters.put(filter.getFilterName(), filter);
-//		// add url patterns and servlet names for filter mappings added before
-//		// filter
-//		for (WebAppFilterMapping mapping : getFilterMappings(filter
-//				.getFilterName())) {
-//			if (mapping.getUrlPattern() != null
-//					&& mapping.getUrlPattern().trim().length() > 0) {
-//				filter.addUrlPattern(mapping.getUrlPattern());
-//			}
-//			if (mapping.getServletName() != null
-//					&& mapping.getServletName().trim().length() > 0) {
-//				filter.addServletName(mapping.getServletName());
-//			}
-//		}
-//	}
-//
-//	/**
-//	 * Add a filter mapping.
-//	 *
-//	 * @param filterMapping to add
-//	 * @throws NullArgumentException if filter mapping or filter name is null
-//	 */
-//	public void addFilterMapping(final WebAppFilterMapping filterMapping) {
-//		NullArgumentException.validateNotNull(filterMapping, "Filter mapping");
-//		NullArgumentException.validateNotNull(filterMapping.getFilterName(),
-//				"Filter name");
-//
-//		final String filterName = filterMapping.getFilterName();
-//		if (!orderedFilters.contains(filterName)) {
-//			orderedFilters.add(filterName);
-//		}
-//		Set<WebAppFilterMapping> webAppFilterMappings = filterMappings
-//				.get(filterName);
-//		if (webAppFilterMappings == null) {
-//			webAppFilterMappings = new HashSet<>();
-//			filterMappings.put(filterName, webAppFilterMappings);
-//		}
-//		webAppFilterMappings.add(filterMapping);
-//		final WebAppFilter filter = filters.get(filterName);
-//		// can be that the filter is not yet added
-//		if (filter != null) {
-//			if (filterMapping.getUrlPattern() != null
-//					&& filterMapping.getUrlPattern().trim().length() > 0) {
-//				filter.addUrlPattern(filterMapping.getUrlPattern());
-//			}
-//			if (filterMapping.getServletName() != null
-//					&& filterMapping.getServletName().trim().length() > 0) {
-//				filter.addServletName(filterMapping.getServletName());
-//			}
-//			if (filterMapping.getDispatcherTypes() != null
-//					&& !filterMapping.getDispatcherTypes().isEmpty()) {
-//				for (DispatcherType dispatcherType : filterMapping.getDispatcherTypes()) {
-//					filter.addDispatcherType(dispatcherType);
-//				}
-//			}
-//		}
-//	}
-//
-//	/**
-//	 * Returns filter mappings by filter name.
-//	 *
-//	 * @param filterName filter name
-//	 * @return array of filter mappings for requested filter name
-//	 */
-//	public List<WebAppFilterMapping> getFilterMappings(final String filterName) {
-//		final Set<WebAppFilterMapping> webAppFilterMappings = filterMappings
-//				.get(filterName);
-//		if (webAppFilterMappings == null) {
-//			return new ArrayList<>();
-//		}
-//		return new ArrayList<>(webAppFilterMappings);
-//	}
-//
 //	/**
 //	 * Add a listener.
 //	 *
@@ -1702,43 +1581,6 @@ public class BundleWebApplication {
 //		if (!listeners.contains(listener)) {
 //			listeners.add(listener);
 //		}
-//	}
-//
-//	/**
-//	 * Add an error page.
-//	 *
-//	 * @param errorPage to add
-//	 * @throws NullArgumentException if error page is null or both error type and exception code
-//	 *                               is null
-//	 */
-//	public void addErrorPage(final WebAppErrorPage errorPage) {
-//		NullArgumentException.validateNotNull(errorPage, "Error page");
-//		if (errorPage.getErrorCode() == null
-//				&& errorPage.getExceptionType() == null) {
-//			throw new NullPointerException(
-//					"At least one of error type or exception code must be set");
-//		}
-//		errorPages.add(errorPage);
-//	}
-//
-//	/**
-//	 * Add a welcome file.
-//	 *
-//	 * @param welcomeFile to add
-//	 * @throws NullArgumentException if welcome file is null or empty
-//	 */
-//	public void addWelcomeFile(final String welcomeFile) {
-//		NullArgumentException.validateNotEmpty(welcomeFile, "Welcome file");
-//		welcomeFiles.add(welcomeFile);
-//	}
-//
-//	/**
-//	 * Return all welcome files.
-//	 *
-//	 * @return an array of all welcome files
-//	 */
-//	public String[] getWelcomeFiles() {
-//		return welcomeFiles.toArray(new String[welcomeFiles.size()]);
 //	}
 //
 //	/**
@@ -1763,21 +1605,6 @@ public class BundleWebApplication {
 //	 */
 //	public WebAppInitParam[] getContextParams() {
 //		return contextParams.toArray(new WebAppInitParam[contextParams.size()]);
-//	}
-//
-//	/**
-//	 * Add a mime mapping.
-//	 *
-//	 * @param mimeMapping to add
-//	 * @throws NullArgumentException if mime mapping, extension or mime type is null
-//	 */
-//	public void addMimeMapping(final WebAppMimeMapping mimeMapping) {
-//		NullArgumentException.validateNotNull(mimeMapping, "Mime mapping");
-//		NullArgumentException.validateNotNull(mimeMapping.getExtension(),
-//				"Mime mapping extension");
-//		NullArgumentException.validateNotNull(mimeMapping.getMimeType(),
-//				"Mime mapping type");
-//		mimeMappings.add(mimeMapping);
 //	}
 //
 //	/**
@@ -1843,45 +1670,13 @@ public class BundleWebApplication {
 //	}
 //
 //	/**
-//	 * Return all mime mappings.
-//	 *
-//	 * @return an array of all mime mappings
-//	 */
-//	public WebAppMimeMapping[] getMimeMappings() {
-//		return mimeMappings.toArray(new WebAppMimeMapping[mimeMappings.size()]);
-//	}
-//
-//	/**
 //	 * Accepts a visitor for inner elements.
 //	 *
 //	 * @param visitor visitor
 //	 */
 //	public void accept(final WebAppVisitor visitor) {
-//		visitor.visit(this); // First do everything else
-//
 //		for (WebAppListener listener : listeners) {
 //			visitor.visit(listener);
-//		}
-//		if (!filters.isEmpty()) {
-//			// first visit the filters with a filter mapping in mapping order
-//			final List<WebAppFilter> remainingFilters = new ArrayList<>(
-//					filters.values());
-//			for (String filterName : orderedFilters) {
-//				final WebAppFilter filter = filters.get(filterName);
-//				visitor.visit(filter);
-//				remainingFilters.remove(filter);
-//			}
-//			// then visit filters without a mapping order in the order they were
-//			// added
-//			for (WebAppFilter filter : remainingFilters) {
-//				visitor.visit(filter);
-//			}
-//		}
-//		if (!servlets.isEmpty()) {
-//			for (WebAppServlet servlet : getSortedWebAppServlet()) {
-//				// Fix for PAXWEB-205
-//				visitor.visit(servlet);
-//			}
 //		}
 //		if (!constraintsMapping.isEmpty()) {
 //			for (WebAppConstraintMapping constraintMapping : constraintsMapping) {
@@ -1889,12 +1684,6 @@ public class BundleWebApplication {
 //			}
 //
 //		}
-//
-//		for (WebAppErrorPage errorPage : errorPages) {
-//			visitor.visit(errorPage);
-//		}
-//
-//		visitor.end();
 //	}
 //
 //	public URL getWebXmlURL() {
@@ -1929,40 +1718,6 @@ public class BundleWebApplication {
 //
 //	public List<String> getConnectorList() {
 //		return connectorList;
-//	}
-//
-//	public void setMetaDataComplete(boolean metaDataComplete) {
-//		this.metaDataComplete = metaDataComplete;
-//	}
-//
-//	public boolean getMetaDataComplete() {
-//		return metaDataComplete;
-//	}
-//
-//	public void addSessionTrackingMode(String sessionTrackingMode) {
-//		NullArgumentException.validateNotNull(sessionTrackingMode,
-//				"session tracking mode");
-//		sessionTrackingModes.add(sessionTrackingMode);
-//	}
-//
-//	public List<String> getSessionTrackingModes() {
-//		return sessionTrackingModes;
-//	}
-//
-//	public void setSessionCookieConfig(WebAppCookieConfig sessionCookieConfig) {
-//		this.sessionCookieConfig = sessionCookieConfig;
-//	}
-//
-//	public void setJspConfigDescriptor(WebAppJspConfig webAppJspConfig) {
-//		jspConfigDescriptor = webAppJspConfig;
-//	}
-//
-//	public WebAppJspConfig getJspConfigDescriptor() {
-//		return jspConfigDescriptor;
-//	}
-//
-//	public WebAppCookieConfig getSessionCookieConfig() {
-//		return sessionCookieConfig;
 //	}
 
 }

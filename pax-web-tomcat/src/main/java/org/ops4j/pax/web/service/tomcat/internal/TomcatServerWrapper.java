@@ -1146,7 +1146,9 @@ class TomcatServerWrapper implements BatchVisitor {
 				context.addFilterMap(map);
 			}
 
-			context.filterStart();
+			if (isStarted(context) && !pendingTransaction(contextPath)) {
+				context.filterStart();
+			}
 //			}
 		}
 	}

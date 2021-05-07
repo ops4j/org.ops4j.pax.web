@@ -27,6 +27,11 @@
 		</after>
 	</ordering>
 
+	<context-param>
+		<param-name>param-from-fragment</param-name>
+		<param-value>value-from-fragment</param-value>
+	</context-param>
+
 	<!--
 		This servlet doesn't have a class, only a JSP file. It'll be converted to use real JSP servlet with jspFile
 		init parameter

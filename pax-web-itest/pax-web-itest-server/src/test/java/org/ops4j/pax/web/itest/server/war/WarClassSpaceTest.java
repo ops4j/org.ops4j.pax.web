@@ -276,6 +276,9 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 		when(wab.findEntries("/", "error.jsp", false)).thenAnswer((i) ->
 				Collections.enumeration(Collections.singletonList(new File("src/test/resources/jsp/error.jsp").toURI().toURL()
 		)));
+		when(wab.findEntries("/", "jsp-info.jsp", false)).thenAnswer((i) ->
+				Collections.enumeration(Collections.singletonList(new File("src/test/resources/jsp/jsp-info.jsp").toURI().toURL()
+		)));
 
 		installWab(wab);
 
@@ -308,12 +311,21 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 		assertThat(jspResult, containsString("<h1>v3</h1>"));
 		assertThat(jspResult, containsString("<h2>v4</h2>"));
 		assertThat(jspResult, containsString("<!-- Added because Pax Web can do it -->"));
+		// access through JSP servlet
+		jspResult = httpGET(port, "/wab/jspinfo?j1=Hello");
+		assertThat(jspResult, containsString("<h2>value-from-fragment</h2>"));
+		assertThat(jspResult, containsString("<h3>Hello</h3>"));
+		assertThat(jspResult, containsString("<h4>Mock for BundleContext"));
+		assertThat(jspResult, containsString("<h5>Mock for BundleContext"));
+		// number of ORDERED_LIBS
+		assertThat(jspResult, containsString("<h6>9</h6>"));
+		// attribute set by ServletContextListener
+		assertThat(jspResult, containsString("<h2>generated-value</h2>"));
 
 		// error pages
 		assertThat(httpGET(port, "/wab/crash?ex=java.io.IOException&msg=crash"),
 				containsString("<div id=\"exception\">java.io.IOException</div>"));
-		assertThat(httpGET(port, "/wab/crash?result=442"),
-				containsString("<div id=\"code\">442</div>"));
+		assertThat(httpGET(port, "/wab/crash?result=442"), containsString("<div id=\"code\">442</div>"));
 
 		uninstallWab(wab);
 

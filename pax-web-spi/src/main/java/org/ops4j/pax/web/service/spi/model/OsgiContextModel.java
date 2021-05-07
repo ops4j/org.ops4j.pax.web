@@ -267,6 +267,13 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	private final Map<String, String> contextParams = new HashMap<>();
 
 	/**
+	 * When {@link org.ops4j.pax.web.service.spi.servlet.OsgiServletContext} is created with this
+	 * {@link OsgiContextModel}, it should get some initial "attributes" (in addition to "init params") including
+	 * (but not limited to) {@link ServletContext#ORDERED_LIBS}.
+	 */
+	private final Map<String, Object> initialContextAttributes = new HashMap<>();
+
+	/**
 	 * <p>Virtual Host List as specified when {@link ServletContextHelper},
 	 * {@link HttpContext} or {@link org.ops4j.pax.web.service.whiteboard.ContextMapping} was registered.</p>
 	 *
@@ -480,6 +487,10 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 
 	public Map<String, String> getContextParams() {
 		return contextParams;
+	}
+
+	public Map<String, Object> getInitialContextAttributes() {
+		return initialContextAttributes;
 	}
 
 	public Hashtable<String, Object> getContextRegistrationProperties() {

@@ -53,6 +53,13 @@ public class EventListenerModelChange extends Change {
 	}
 
 	@Override
+	public void uninstall(List<Change> operations) {
+		if (getKind() == OpCode.ADD) {
+			operations.add(new EventListenerModelChange(OpCode.DELETE, eventListenerModel));
+		}
+	}
+
+	@Override
 	public void accept(BatchVisitor visitor) {
 		visitor.visit(this);
 	}

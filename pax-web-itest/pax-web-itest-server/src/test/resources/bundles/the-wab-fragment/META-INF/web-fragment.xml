@@ -21,6 +21,10 @@
 
 	<name>TheWabFragmentFragment</name>
 
+	<listener>
+		<listener-class>org.ops4j.pax.web.itest.server.support.war.fragment.JustListener</listener-class>
+	</listener>
+
 	<filter>
 		<filter-name>filter-from-fragment</filter-name>
 		<filter-class>org.ops4j.pax.web.itest.server.support.war.fragment.DeclaredFilter</filter-class>

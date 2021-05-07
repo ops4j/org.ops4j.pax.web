@@ -135,6 +135,9 @@ public class OsgiServletContext implements ServletContext {
 			this.attributes.put(PaxWebConstants.CONTEXT_PARAM_SPRING_BUNDLE_CONTEXT, ownerBundle.getBundleContext());
 		}
 
+		// additional attributes set when OsgiContextModel was created
+		this.attributes.putAll(osgiContextModel.getInitialContextAttributes());
+
 		this.defaultSessionCookieConfig = defaultSessionCookieConfig;
 
 		if (loader == null) {

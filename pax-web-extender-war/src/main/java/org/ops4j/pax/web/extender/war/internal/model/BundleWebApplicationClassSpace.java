@@ -281,6 +281,10 @@ public class BundleWebApplicationClassSpace {
 		return new LinkedHashSet<>(orderedFragments.values());
 	}
 
+	public Set<String> getOrderedLibs() {
+		return orderedLibs;
+	}
+
 	/**
 	 * This method is based on Tomcat's {@code org.apache.catalina.startup.ContextConfig#processJarsForWebFragments()}.
 	 * It scans the reachable JARs and bundles to find (and possibly parse) {@code web-fragment.xml} descriptors.
