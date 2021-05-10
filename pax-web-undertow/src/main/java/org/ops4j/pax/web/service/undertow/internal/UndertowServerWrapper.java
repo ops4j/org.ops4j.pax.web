@@ -257,8 +257,6 @@ class UndertowServerWrapper implements BatchVisitor {
 	 */
 	private final Map<String, DeploymentInfo> deploymentInfos = new HashMap<>();
 
-	// TODO: the three below fields are the same in Jetty, Tomcat and Undertow
-
 	/**
 	 * 1:1 mapping between {@link OsgiContextModel} and {@link org.osgi.service.http.context.ServletContextHelper}'s
 	 * specific {@link javax.servlet.ServletContext}.
@@ -927,10 +925,6 @@ class UndertowServerWrapper implements BatchVisitor {
 				deploymentInfo.setServletStackTraces(ServletStackTraces.NONE);
 			}
 
-			// we have no classloader yet to set - it should come from "highest ranked OsgiContextModel" for given
-			// servlet context (context path)
-//			deploymentInfo.setClassLoader(classLoader);
-
 			deploymentInfo.addServlet(new PaxWebServletInfo("default", default404Servlet, true).addMapping("/"));
 
 			// In Jetty and Tomcat we can operate on FilterChains, here we have to split the OsgiFilterChain's
@@ -989,19 +983,6 @@ class UndertowServerWrapper implements BatchVisitor {
 			deploymentInfos.remove(contextPath);
 			securityHandlers.remove(contextPath);
 			wrappingHandlers.remove(contextPath);
-
-//			PaxWebStandardContext context = contextHandlers.remove(contextPath);
-//
-//			if (isStarted(context)) {
-//				LOG.info("Stopping Tomcat context \"{}\"", contextPath);
-//				try {
-//					context.stop();
-//				} catch (Exception e) {
-//					LOG.warn("Error stopping Tomcat context \"{}\": {}", contextPath, e.getMessage(), e);
-//				}
-//			}
-//
-//			defaultHost.removeChild(context);
 		}
 	}
 
@@ -1096,20 +1077,6 @@ class UndertowServerWrapper implements BatchVisitor {
 				securityHandlers.get(contextPath).setDefaultOsgiContextModel(null);
 			}
 		}
-
-//			// manager (lifecycle manager of the deployment),
-//			DeploymentManager manager = servletContainer.getDeploymentByPath(contextPath);
-//			// the managed deployment
-//			Deployment deployment = manager.getDeployment();
-//			// and the deployment information
-//			DeploymentInfo deploymentInfo = deployment.getDeploymentInfo();
-//
-//			// to make the code consistent, we could set DeploymentInfo's class loader here, but in fact, it's
-//			// used only in situations we override anyway (like adding servlets to existing ServletContext)
-////			ClassLoader classLoader = highestRankedModel.getOwnerBundle().adapt(BundleWiring.class).getClassLoader();
-////			servletContainer.getDeploymentByPath(contextPath).undeploy();
-////			deploymentInfo.setClassLoader(classLoader);
-////			servletContainer.getDeploymentByPath(contextPath).deploy();
 	}
 
 	@Override
@@ -2050,17 +2017,6 @@ class UndertowServerWrapper implements BatchVisitor {
 //			throw new RuntimeException("Unable to add welcome files", e);
 //		}
 //	}
-//
-//	@Override
-//	public void addContainerInitializerModel(ContainerInitializerModel model) {
-//		assertNotState(State.Unconfigured);
-//		try {
-//			final Context context = findOrCreateContext(model.getContextModel());
-//			context.addContainerInitializerModel(model);
-//		} catch (ServletException e) {
-//			throw new RuntimeException("Unable to add welcome files", e);
-//		}
-//	}
 
 	// see org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService#getConfidentialPortManager
 	private class SimpleConfidentialPortManager implements ConfidentialPortManager {
@@ -2119,6 +2075,7 @@ class UndertowServerWrapper implements BatchVisitor {
 		public void handleDeployment(DeploymentInfo deploymentInfo, ServletContext servletContext) {
 			for (ListenerInfo lInfo : deploymentInfo.getListeners()) {
 				try {
+					// it's an immediate instance factory, so we can call createInstance() many times
 					InstanceHandle<? extends EventListener> handle = lInfo.getInstanceFactory().createInstance();
 					EventListener el = handle.getInstance();
 					if (Proxy.isProxyClass(el.getClass())) {
@@ -2136,7 +2093,6 @@ class UndertowServerWrapper implements BatchVisitor {
 					osc.setContainerServletContext(servletContext);
 				}
 			});
-
 		}
 	}
 

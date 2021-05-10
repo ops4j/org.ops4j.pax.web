@@ -27,12 +27,12 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import javax.net.ssl.SSLContext;
 
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
@@ -86,6 +86,8 @@ class Hc5TestClient implements HttpTestClient {
 	private String keystorePassword = "passw0rd";
 
 	private String keyManagerPassword = "passw0rd";
+
+	private Map<String, byte[]> attachments;
 
 	Hc5TestClient() {
 	}
@@ -216,6 +218,14 @@ class Hc5TestClient implements HttpTestClient {
 	}
 
 	@Override
+	public HttpTestClient doPOST(String url, Map<String, byte[]> attachments) {
+		this.doPOST = true;
+		pathToTest = url;
+		this.attachments = attachments;
+		return this;
+	}
+
+	@Override
 	public HttpTestClient addParameter(String name, String value) {
 		if (name == null || value == null) {
 			throw new IllegalArgumentException("Parameters must be set!");
@@ -280,6 +290,12 @@ class Hc5TestClient implements HttpTestClient {
 
 			requestParameters.forEach(requestBuilder::addParameter);
 			httpHeaders.forEach(requestBuilder::addHeader);
+
+			if (attachments != null) {
+				final MultipartEntityBuilder b = MultipartEntityBuilder.create();
+				attachments.forEach(b::addBinaryBody);
+				requestBuilder.setEntity(b.build());
+			}
 
 			request = requestBuilder.build();
 			httpClientBuilder.setDefaultRequestConfig(requestConfig);

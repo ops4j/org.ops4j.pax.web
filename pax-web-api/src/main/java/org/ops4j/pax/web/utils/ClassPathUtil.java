@@ -152,7 +152,10 @@ public class ClassPathUtil {
 		final List<URL> urls = new ArrayList<>();
 		final String bundleClasspath = bundle.getHeaders() == null ? null
 				: bundle.getHeaders().get(Constants.BUNDLE_CLASSPATH);
-		if (bundleClasspath != null) {
+		if (bundleClasspath == null) {
+			// fallback to just root directory of the bundle
+			return new URL[] { bundle.getEntry("/") };
+		} else {
 			String[] segments = bundleClasspath.split("\\s*,\\s*");
 			for (String segment : segments) {
 				final URL url = bundle.getEntry(segment);

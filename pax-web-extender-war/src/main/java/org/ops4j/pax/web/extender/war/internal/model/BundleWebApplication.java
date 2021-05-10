@@ -1504,21 +1504,10 @@ public class BundleWebApplication {
 		FAILED
 	}
 
-//	static final Comparator<WebAppServlet> WEB_APP_SERVLET_COMPARATOR =
-//			(servlet1, servlet2) -> servlet1.getLoadOnStartup() - servlet2.getLoadOnStartup();
-//
 //	/**
 //	 * The URL to the web.xml for the web app.
 //	 */
 //	private URL webXmlURL;
-//	/**
-//	 * Context parameters.
-//	 */
-//	private final Set<WebAppInitParam> contextParams;
-//	/**
-//	 * Listeners.
-//	 */
-//	private final List<WebAppListener> listeners;
 //	/**
 //	 * Virtual Host List.
 //	 */
@@ -1527,7 +1516,6 @@ public class BundleWebApplication {
 //	 * Connectors List
 //	 */
 //	private final List<String> connectorList;
-//
 //	/**
 //	 * SecurityConstraints
 //	 */
@@ -1538,77 +1526,6 @@ public class BundleWebApplication {
 //	private final List<WebAppLoginConfig> loginConfig;
 //
 //	private URL jettyWebXmlURL;
-//
-//	private WebAppInitParam getWebAppInitParam(String name) {
-//		for (WebAppInitParam p : contextParams) {
-//			if (name.equals(p.getParamName())) {
-//				return p;
-//			}
-//		}
-//		return null;
-//	}
-//
-//	/**
-//	 * Setter.
-//	 *
-//	 * @param contextName value to set. Cannot be null.
-//	 * @throws NullArgumentException if context name is null
-//	 */
-//	public void setContextName(final String contextName) {
-//		NullArgumentException.validateNotNull(contextName, "Context name");
-//		this.contextName = contextName;
-//
-//		// remove the previous setting.
-//		WebAppInitParam prev = getWebAppInitParam("webapp.context");
-//		if (prev != null) {
-//			contextParams.remove(prev);
-//		}
-//
-//		// set the context name into the context params
-//		final WebAppInitParam initParam = new WebAppInitParam();
-//		initParam.setParamName("webapp.context");
-//		initParam.setParamValue(contextName);
-//		contextParams.add(initParam);
-//	}
-//
-//	/**
-//	 * Add a listener.
-//	 *
-//	 * @param listener to add
-//	 * @throws NullArgumentException if listener or listener class is null
-//	 */
-//	public void addListener(final WebAppListener listener) {
-//		NullArgumentException.validateNotNull(listener, "Listener");
-//		NullArgumentException.validateNotNull(listener.getListenerClass(),
-//				"Listener class");
-//		if (!listeners.contains(listener)) {
-//			listeners.add(listener);
-//		}
-//	}
-//
-//	/**
-//	 * Add a context param.
-//	 *
-//	 * @param contextParam to add
-//	 * @throws NullArgumentException if context param, param name or param value is null
-//	 */
-//	public void addContextParam(final WebAppInitParam contextParam) {
-//		NullArgumentException.validateNotNull(contextParam, "Context param");
-//		NullArgumentException.validateNotNull(contextParam.getParamName(),
-//				"Context param name");
-//		NullArgumentException.validateNotNull(contextParam.getParamValue(),
-//				"Context param value");
-//		contextParams.add(contextParam);
-//	}
-//
-//	/**
-//	 * Return all context params.
-//	 *
-//	 * @return an array of all context params
-//	 */
-//	public WebAppInitParam[] getContextParams() {
-//		return contextParams.toArray(new WebAppInitParam[contextParams.size()]);
-//	}
 //
 //	/**
 //	 * Add a security constraint
@@ -1678,9 +1595,6 @@ public class BundleWebApplication {
 //	 * @param visitor visitor
 //	 */
 //	public void accept(final WebAppVisitor visitor) {
-//		for (WebAppListener listener : listeners) {
-//			visitor.visit(listener);
-//		}
 //		if (!constraintsMapping.isEmpty()) {
 //			for (WebAppConstraintMapping constraintMapping : constraintsMapping) {
 //				visitor.visit(constraintMapping);

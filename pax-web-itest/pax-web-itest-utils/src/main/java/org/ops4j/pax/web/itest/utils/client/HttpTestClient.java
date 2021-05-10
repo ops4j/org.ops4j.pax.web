@@ -160,6 +160,14 @@ public interface HttpTestClient {
 	HttpTestClient doPOST(String url);
 
 	/**
+	 * Prepares the client to execute a POST-request against the given URL with attachments.
+	 *
+	 * @param url Destination-url that should be tested
+	 * @return the HttpPostConfiguration-instance
+	 */
+	HttpTestClient doPOST(String url, Map<String, byte[]> attachments);
+
+	/**
 	 * Depending on {@link #doGET(String)} or {@link #doPOST(String)}
 	 * the parameters are later added to the GET-URL or the POST-content.
 	 *

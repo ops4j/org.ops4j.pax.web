@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
+import javax.servlet.annotation.MultipartConfig;
 
 import org.apache.tomcat.util.bcel.classfile.AnnotationElementValue;
 import org.apache.tomcat.util.bcel.classfile.AnnotationEntry;
@@ -48,6 +49,7 @@ import org.apache.tomcat.util.bcel.classfile.JavaClass;
 import org.apache.tomcat.util.bcel.classfile.SimpleElementValue;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
+import org.apache.tomcat.util.descriptor.web.MultipartDef;
 import org.apache.tomcat.util.descriptor.web.ServletDef;
 import org.apache.tomcat.util.descriptor.web.WebXml;
 import org.ops4j.pax.web.extender.war.internal.WarExtenderContext;
@@ -151,7 +153,7 @@ public class BundleWebApplicationClassSpace {
 	 * <p>In Tomcat, this subset doesn't include all <em>container fragments</em> (with or without
 	 * {@code web-fragment.xml}).</p>
 	 */
-	private Set<String> orderedLibs = null;
+	private List<String> orderedLibs = null;
 
 	// similar to org.apache.catalina.startup.ContextConfig.ok
 	private boolean fragmentParsingOK = true;
@@ -281,7 +283,7 @@ public class BundleWebApplicationClassSpace {
 		return new LinkedHashSet<>(orderedFragments.values());
 	}
 
-	public Set<String> getOrderedLibs() {
+	public List<String> getOrderedLibs() {
 		return orderedLibs;
 	}
 
@@ -448,7 +450,7 @@ public class BundleWebApplicationClassSpace {
 		}
 
 		List<String> orderedLibsAttribute = (List<String>) context.getAttribute(ServletContext.ORDERED_LIBS);
-		orderedLibs = orderedLibsAttribute == null ? Collections.emptySet() : new LinkedHashSet<>(orderedLibsAttribute);
+		orderedLibs = orderedLibsAttribute == null ? Collections.emptyList() : orderedLibsAttribute;
 
 		// After collecting the bundles associated with ordered web fragments, we can finish the "construction"
 		// of WAB's classloader.
@@ -1219,12 +1221,6 @@ public class BundleWebApplicationClassSpace {
 					servletName = annValue.stringifyValue();
 					break;
 				case "value":
-					if (urlPatterns != null) {
-						LOG.warn("{} has both value and urlPatterns in @WebServlet annotation", className);
-						break;
-					}
-					urlPatterns = new String[] { annValue.stringifyValue() };
-					break;
 				case "urlPatterns":
 					if (urlPatterns != null) {
 						LOG.warn("{} has both value and urlPatterns in @WebServlet annotation", className);
@@ -1292,6 +1288,41 @@ public class BundleWebApplicationClassSpace {
 			}
 		}
 
+		// get remaining annotation entries to find @javax.servlet.annotation.MultipartConfig
+		AnnotationEntry[] ae = clazz.getAnnotationEntries();
+		for (AnnotationEntry e : ae) {
+			if (MultipartConfig.class.getName().equals(className(e.getAnnotationType()))) {
+				MultipartDef multipartDef = new MultipartDef();
+				servlet.setMultipartDef(multipartDef);
+				multipartDef.setFileSizeThreshold("0");
+				multipartDef.setMaxFileSize("-1");
+				multipartDef.setMaxRequestSize("-1");
+
+				for (ElementValuePair evp : e.getElementValuePairs()) {
+					String annKey = evp.getNameString();
+					ElementValue annValue = evp.getValue();
+					switch (annKey) {
+						case "location":
+							multipartDef.setLocation(annValue.stringifyValue());
+							break;
+						case "fileSizeThreshold":
+							multipartDef.setFileSizeThreshold(annValue.stringifyValue());
+							break;
+						case "maxFileSize":
+							multipartDef.setMaxFileSize(annValue.stringifyValue());
+							break;
+						case "maxRequestSize":
+							multipartDef.setMaxRequestSize(annValue.stringifyValue());
+							break;
+						default:
+							break;
+					}
+				}
+
+				break;
+			}
+		}
+
 		if (!override) {
 			fragment.addServlet(servlet);
 		}
@@ -1338,12 +1369,6 @@ public class BundleWebApplicationClassSpace {
 					filterName = annValue.stringifyValue();
 					break;
 				case "value":
-					if (urlPatterns != null) {
-						LOG.warn("{} has both value and urlPatterns in @WebFilter annotation", className);
-						break;
-					}
-					urlPatterns = new String[] { annValue.stringifyValue() };
-					break;
 				case "urlPatterns":
 					if (urlPatterns != null) {
 						LOG.warn("{} has both value and urlPatterns in @WebFilter annotation", className);
