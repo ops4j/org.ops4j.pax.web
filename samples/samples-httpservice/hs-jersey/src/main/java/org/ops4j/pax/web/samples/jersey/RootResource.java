@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 @Path("/")
 public class RootResource {
 
-	private Logger logger = Logger.getLogger(getClass().getName());
+	private final Logger logger = Logger.getLogger(getClass().getName());
 
 	@Context
 	private HttpServletRequest request;
@@ -55,4 +55,5 @@ public class RootResource {
 				+ "If this <a href=\"/images/success.png\">link</a> leads to an image the test is successful"
 				+ "</body></html>";
 	}
+
 }

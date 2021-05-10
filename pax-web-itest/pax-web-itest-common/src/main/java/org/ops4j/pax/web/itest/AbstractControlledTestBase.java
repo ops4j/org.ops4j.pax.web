@@ -316,6 +316,61 @@ public abstract class AbstractControlledTestBase {
 		};
 	}
 
+	protected Option[] jersey() {
+		// mvn:com.sun.activation/javax.activation/1.2.0
+		// mvn:jakarta.annotation/jakarta.annotation-api/1.3.5
+		// mvn:jakarta.ws.rs/jakarta.ws.rs-api/2.1.6
+		// mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/1.0_6
+		// mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_3
+		// mvn:org.glassfish.hk2/hk2-api/2.6.1
+		// mvn:org.glassfish.hk2/hk2-locator/2.6.1
+		// mvn:org.glassfish.hk2/hk2-utils/2.6.1
+		// mvn:org.glassfish.hk2/osgi-resource-locator/1.0.3
+		// mvn:org.glassfish.jersey.containers/jersey-container-servlet/2.34
+		// mvn:org.glassfish.jersey.containers/jersey-container-servlet-core/2.34
+		// mvn:org.glassfish.jersey.core/jersey-client/2.34
+		// mvn:org.glassfish.jersey.core/jersey-common/2.34
+		// mvn:org.glassfish.jersey.core/jersey-server/2.34
+		// mvn:org.glassfish.jersey.inject/jersey-hk2/2.34
+		// mvn:org.javassist/javassist/3.28.0-GA
+		return new Option[] {
+				mavenBundle("jakarta.validation", "jakarta.validation-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("jakarta.annotation", "jakarta.annotation-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("com.sun.activation", "javax.activation")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.aopalliance")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("jakarta.xml.bind", "jakarta.xml.bind-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("jakarta.ws.rs", "jakarta.ws.rs-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.glassfish.hk2", "hk2-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.glassfish.hk2", "hk2-locator")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.glassfish.hk2", "hk2-utils")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.glassfish.hk2", "osgi-resource-locator")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.glassfish.jersey.core", "jersey-common")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.glassfish.jersey.core", "jersey-server")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.glassfish.jersey.core", "jersey-client")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.glassfish.jersey.containers", "jersey-container-servlet-core")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.glassfish.jersey.containers", "jersey-container-servlet")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.glassfish.jersey.inject", "jersey-hk2")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.javassist", "javassist")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
+		};
+	}
+
 	// --- helper methods to be used in all the tests
 
 	/**

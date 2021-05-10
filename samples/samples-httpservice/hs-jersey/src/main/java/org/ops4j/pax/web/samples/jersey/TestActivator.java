@@ -18,6 +18,8 @@ package org.ops4j.pax.web.samples.jersey;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.servlet.ServletContainer;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -25,13 +27,9 @@ import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sun.jersey.api.core.DefaultResourceConfig;
-import com.sun.jersey.api.core.ResourceConfig;
-import com.sun.jersey.spi.container.servlet.ServletContainer;
-
 public class TestActivator implements BundleActivator {
 
-	private Logger logger = Logger.getLogger(getClass().getName());
+	private final Logger logger = Logger.getLogger(getClass().getName());
 
 	private HttpService httpService;
 	private ServiceTracker<HttpService, HttpService> httpServiceTracker;
@@ -40,7 +38,6 @@ public class TestActivator implements BundleActivator {
 	public void start(BundleContext context) {
 		logger.info("starting Jersey TestActivator");
 		httpServiceTracker = new ServiceTracker<HttpService, HttpService>(context, HttpService.class, null) {
-
 			@Override
 			public HttpService addingService(ServiceReference<HttpService> serviceRef) {
 				logger.info("registering Jersey servlet");
@@ -69,7 +66,7 @@ public class TestActivator implements BundleActivator {
 
 	private void registerResources(HttpContext httpContext) {
 		try {
-			httpService.registerResources("/images/", "/", null);
+			httpService.registerResources("/images", "/", null);
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, "Registering resources failed", e);
 		}
@@ -77,11 +74,11 @@ public class TestActivator implements BundleActivator {
 
 	private void registerJerseyServlet(HttpContext httpContext) {
 		try {
-			ResourceConfig app = new DefaultResourceConfig();
-			app.getSingletons().add(new RootResource());
+			ResourceConfig app = new ResourceConfig().register(new RootResource());
 			httpService.registerServlet("/", new ServletContainer(app), null, null);
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, "Registering Jersey servlet failed", e);
 		}
 	}
+
 }

@@ -15,23 +15,22 @@
  */
 package org.ops4j.pax.web.samples.jersey;
 
-import org.osgi.framework.Bundle;
-import org.osgi.service.http.HttpContext;
-
+import java.io.IOException;
+import java.net.URL;
+import java.util.logging.Logger;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.logging.Logger;
+import org.osgi.framework.Bundle;
+import org.osgi.service.http.HttpContext;
 
 class CustomHttpContext implements HttpContext {
 
-	private Logger logger = Logger.getLogger(getClass().getName());
+	private final Logger logger = Logger.getLogger(getClass().getName());
 
-	private Bundle bundle;
+	private final Bundle bundle;
 
 	CustomHttpContext(Bundle bundle) {
 		this.bundle = bundle;
@@ -67,4 +66,5 @@ class CustomHttpContext implements HttpContext {
 
 		return success || request.getCookies() == null;
 	}
+
 }

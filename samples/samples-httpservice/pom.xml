@@ -39,6 +39,7 @@
 		<module>wc-helloworld</module>
 		<module>authentication</module>
 		<module>http-custom-context</module>
+		<module>hs-jersey</module>
 	</modules>
 
 </project>
