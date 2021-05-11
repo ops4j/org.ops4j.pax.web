@@ -294,7 +294,7 @@
 		<dependency.servicemix.specs.version>2.9.0</dependency.servicemix.specs.version>
 
 		<dependency.slf4j.version>1.7.30</dependency.slf4j.version>
-		<dependency.spring.version>5.3.1</dependency.spring.version>
+		<dependency.spring.version>5.3.6</dependency.spring.version>
 		<dependency.spring.smx.version>5.3.0_1</dependency.spring.smx.version>
 		<dependency.spring-dm.version>1.2.1</dependency.spring-dm.version>
 		<dependency.taglibs.version>1.2.5</dependency.taglibs.version>

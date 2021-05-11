@@ -38,6 +38,7 @@
 		<module>war-simplest-osgi</module>
 		<module>war-servlet-jsp-file</module>
 		<module>war-most-complex</module>
+		<module>war-spring</module>
 	</modules>
 
 </project>

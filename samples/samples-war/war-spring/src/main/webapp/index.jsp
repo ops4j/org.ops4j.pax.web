@@ -16,15 +16,15 @@
 
 --%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Error JSP</title>
-	<meta charset="UTF-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>Spring Pax Web Sample</title>
 </head>
 <body>
-	<div id="code">${requestScope["javax.servlet.error.status_code"]}</div>
-	<div id="exception">${requestScope["javax.servlet.error.exception_type"].name}</div>
+	<h2>Spring MVC - Hello World</h2>
+
+	Let's call the <a href="helloWorld.do">HelloWorldController</a>.
 </body>
 </html>

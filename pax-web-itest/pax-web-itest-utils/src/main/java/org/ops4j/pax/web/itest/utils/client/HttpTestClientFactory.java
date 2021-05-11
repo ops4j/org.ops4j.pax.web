@@ -33,7 +33,23 @@ public class HttpTestClientFactory {
 	 * @return Jetty-based HttpTestClient
 	 */
 	public static HttpTestClient createDefaultTestClient() {
-		return new Hc5TestClient()
+		return createDefaultTestClient(true);
+	}
+
+	/**
+	 * creates a default HttpTestClient based on Jetty HttpClient with
+	 * some default configuration.
+	 * <ul>
+	 * <li>Return-Code: 200 OK</li>
+	 * <li>Keystore: src/main/resources-binary/keystore</li>
+	 * <li>Request-Header: Accept-Language=en</li>
+	 * <li>Request-Timeout: 10 seconds</li>
+	 * </ul>
+	 *
+	 * @return Jetty-based HttpTestClient
+	 */
+	public static HttpTestClient createDefaultTestClient(boolean followRedirects) {
+		return new Hc5TestClient(followRedirects)
 				.timeoutInSeconds(10)
 				.withBundleKeystore("org.ops4j.pax.web.itest.pax-web-itest-utils", "server.jks")
 				.addRequestHeader("Accept-Language", "en")
@@ -53,7 +69,7 @@ public class HttpTestClientFactory {
 	 * @return Jetty-based HttpTestClient
 	 */
 	public static HttpTestClient createDefaultTestClientWithCRL() {
-		return new Hc5TestClient()
+		return new Hc5TestClient(true)
 				.timeoutInSeconds(10)
 				.withBundleKeystore("org.ops4j.pax.web.itest.pax-web-itest-utils", "server.jks")
 				.addRequestHeader("Accept-Language", "en")

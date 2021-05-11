@@ -928,6 +928,11 @@ public class BundleWebApplicationClassSpace {
 			List<URL> classes = ClassPathUtil.findEntries(wabBundle, new URL[] { url }, "/", "*.class", true);
 			for (URL u : classes) {
 				processedRoots.add(u.toExternalForm());
+				if (!u.getPath().endsWith(".class")) {
+					// skip entries like
+					// "jar:bundle://40.0:0/WEB-INF/lib/spring-core-5.3.6.jar!/org/springframework/core/type/classreading/"
+					continue;
+				}
 				LOG.trace("    Scanning {}", u);
 				processClass(u, mainWebXml, wabBundle, htOnly, htToSci, sciToHt, javaClassCache,
 						thereAreHTClasses, thereAreHTAnnotations);
@@ -989,6 +994,11 @@ public class BundleWebApplicationClassSpace {
 						LOG.trace("    Skipping {}", u);
 						continue;
 					}
+				}
+				if (!u.getPath().endsWith(".class")) {
+					// skip entries like
+					// "jar:bundle://40.0:0/WEB-INF/lib/spring-core-5.3.6.jar!/org/springframework/core/type/classreading/"
+					continue;
 				}
 				LOG.trace("    Scanning {}", u);
 				processClass(u, fragment, fragmentBundle, fragmentHtOnly, htToSci, sciToHt, javaClassCache,

@@ -110,19 +110,6 @@
 			<artifactId>pax-web-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.web</groupId>-->
-<!--			<artifactId>pax-web-spi</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
-
-		<!-- OPS4J dependencies -->
-
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.logging</groupId>-->
-<!--			<artifactId>pax-logging-api</artifactId>-->
-<!--			<scope>runtime</scope>-->
-<!--		</dependency>-->
 
 		<!-- OSGi -->
 
@@ -180,17 +167,6 @@
 			<artifactId>httpcore5-h2</artifactId>
 			<scope>provided</scope>
 		</dependency>
-
-<!--		<dependency>-->
-<!--			<groupId>org.apache.httpcomponents</groupId>-->
-<!--			<artifactId>httpclient-osgi</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.apache.httpcomponents</groupId>-->
-<!--			<artifactId>httpasyncclient</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
 
 	</dependencies>
 

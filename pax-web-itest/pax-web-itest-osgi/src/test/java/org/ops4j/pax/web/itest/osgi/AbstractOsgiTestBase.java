@@ -25,8 +25,6 @@ import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.ProbeBuilder;
 import org.ops4j.pax.exam.TestProbeBuilder;
-import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.ops4j.pax.tinybundles.core.TinyBundles;
 import org.ops4j.pax.web.itest.AbstractControlledTestBase;
 import org.osgi.framework.Constants;
@@ -37,7 +35,6 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 /**
  * <p>Base class for all OSGi Pax Exam tests not related to any special container (Jetty, Tomcat or Undertow).</p>
  */
-@ExamReactorStrategy(PerClass.class)
 public abstract class AbstractOsgiTestBase extends AbstractControlledTestBase {
 
 	protected Option[] baseConfigure() {

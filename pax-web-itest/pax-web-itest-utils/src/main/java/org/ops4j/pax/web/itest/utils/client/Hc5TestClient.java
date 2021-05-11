@@ -83,13 +83,16 @@ class Hc5TestClient implements HttpTestClient {
 	private int timeoutInSeconds = 100;
 	private CookieState httpState = null;
 
+	private final boolean followRedirects;
+
 	private String keystorePassword = "passw0rd";
 
 	private String keyManagerPassword = "passw0rd";
 
 	private Map<String, byte[]> attachments;
 
-	Hc5TestClient() {
+	Hc5TestClient(boolean followRedirects) {
+		this.followRedirects = followRedirects;
 	}
 
 	@Override
@@ -269,7 +272,9 @@ class Hc5TestClient implements HttpTestClient {
 				httpClientBuilder.setDefaultCookieStore(httpState.getCookieStore());
 			}
 
-			httpClientBuilder.disableRedirectHandling();
+			if (!followRedirects) {
+				httpClientBuilder.disableRedirectHandling();
+			}
 
 			RequestConfig requestConfig = RequestConfig.custom()
 					.setResponseTimeout(Timeout.ofSeconds(timeoutInSeconds))

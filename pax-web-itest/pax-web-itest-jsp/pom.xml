@@ -106,11 +106,6 @@
 			<artifactId>pax-web-jsp</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web.itest</groupId>
-			<artifactId>pax-web-itest-common</artifactId>
-			<scope>test</scope>
-		</dependency>
 
 		<!-- OPS4J dependencies -->
 

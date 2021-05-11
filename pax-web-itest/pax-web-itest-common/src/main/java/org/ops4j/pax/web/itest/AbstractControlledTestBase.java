@@ -419,4 +419,13 @@ public abstract class AbstractControlledTestBase {
 				.filter(b -> symbolicName.equals(b.getSymbolicName())).findFirst().orElse(null);
 	}
 
+	/**
+	 * Get a sample Bundle by its artifactId.
+	 * @param symbolicName
+	 * @return
+	 */
+	protected Bundle sampleBundle(String sample) {
+		return bundle("org.ops4j.pax.web.samples." + sample);
+	}
+
 }

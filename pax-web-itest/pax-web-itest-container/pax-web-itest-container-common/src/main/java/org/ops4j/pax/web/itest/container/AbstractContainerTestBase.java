@@ -28,21 +28,20 @@ import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.ops4j.pax.web.itest.AbstractControlledTestBase;
 import org.ops4j.pax.web.itest.utils.WaitCondition;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent;
-import org.ops4j.pax.web.service.spi.model.events.WebApplicationEventListener;
-import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
-import org.ops4j.pax.web.service.spi.model.events.WebElementEventData;
 import org.ops4j.pax.web.service.spi.model.events.FilterEventData;
 import org.ops4j.pax.web.service.spi.model.events.ServerEvent;
 import org.ops4j.pax.web.service.spi.model.events.ServerListener;
 import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
+import org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent;
+import org.ops4j.pax.web.service.spi.model.events.WebApplicationEventListener;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEventData;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEventListener;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
@@ -55,7 +54,6 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 /**
  * <p>Single base class for all container-related tests.</p>
  */
-@ExamReactorStrategy(PerClass.class)
 public abstract class AbstractContainerTestBase extends AbstractControlledTestBase {
 
 	protected WebElementEventListener webElementEventListener;
@@ -243,8 +241,8 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 	}
 
 	/**
-	 * Performs an action and waits for {@link org.ops4j.pax.web.service.spi.model.events.ServerEvent} related
-	 * to started container at given port
+	 * Performs an action and waits for {@link org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent} related
+	 * to started WAB
 	 * @param port
 	 * @param actions
 	 */
@@ -275,6 +273,21 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 				reg.unregister();
 			}
 		}
+	}
+
+	/**
+	 * Performs an action and waits for {@link org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent} related
+	 * to started WAB, but only if the provided sample bundle is not ACTIVE.
+	 * @param port
+	 * @param actions
+	 */
+	protected void configureAndWaitForDeploymentUnlessInstalled(String sample, Action action) throws Exception {
+		Bundle b = sampleBundle(sample);
+		if (b != null && b.getState() == Bundle.ACTIVE) {
+			return;
+		}
+
+		configureAndWaitForDeployment(action);
 	}
 
 	/**

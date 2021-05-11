@@ -33,7 +33,7 @@
 
 	<name>OPS4J Pax Web - Integration Tests - Common</name>
 
-	<description>Abstract Pax Web integration tests for all containers</description>
+	<description>Abstract Pax Exam base class for many integration tests</description>
 
 	<build>
 		<resources>

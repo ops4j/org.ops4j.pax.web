@@ -15,60 +15,46 @@
  */
 package org.ops4j.pax.web.itest.container.war;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
-
+import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Achim Nierbeck
  */
 public abstract class AbstractWarSpringIntegrationTest extends AbstractContainerTestBase {
 
-//	private static final Logger LOG = LoggerFactory.getLogger(AbstractWarSpringIntegrationTest.class);
-//
-//	private Bundle installWarBundle;
-//
-//	@Before
-//	public void setUp() throws BundleException, InterruptedException {
-//		LOG.info("Setting up test");
-//
-//		initWebListener();
-//
-//		String bundlePath = "mvn:org.ops4j.pax.web.samples/war-spring/"
-//				+ VersionUtil.getProjectVersion() + "/war";
-//		installWarBundle = bundleContext.installBundle(bundlePath);
-//		installWarBundle.start();
-//
-//		waitForWebListener();
-//	}
-//
-//	@After
-//	public void tearDown() throws BundleException {
-//		if (installWarBundle != null) {
-//			installWarBundle.stop();
-//			installWarBundle.uninstall();
-//		}
-//	}
-//
-//
-//	@Test
-//	public void testWC() throws Exception {
-//		HttpTestClientFactory.createDefaultTestClient()
-//				.withResponseAssertion("Response must contain '<h2>Spring MVC - Hello World</h2>'",
-//						resp -> resp.contains("<h2>Spring MVC - Hello World</h2>"))
-//				.doGETandExecuteTest("http://127.0.0.1:8181/war-spring");
-//
-//	}
-//
-//	@Test
-//	public void testCallController() throws Exception {
-//		HttpTestClientFactory.createDefaultTestClient()
-//				.withResponseAssertion("Response must contain '<h2>Spring MVC - Hello World</h2>'",
-//						resp -> resp.contains("<h2>Spring MVC - Hello World</h2>"))
-//				.doGETandExecuteTest("http://127.0.0.1:8181/war-spring");
-//
-//		HttpTestClientFactory.createDefaultTestClient()
-//				.withResponseAssertion("Response must contain 'Done! Spring MVC works like a charm!'",
-//						resp -> resp.contains("Done! Spring MVC works like a charm!"))
-//				.doGETandExecuteTest("http://127.0.0.1:8181/war-spring/helloWorld.do");
-//	}
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractWarSpringIntegrationTest.class);
+
+	@Before
+	public void setUp() throws Exception {
+		configureAndWaitForDeploymentUnlessInstalled("war-spring", () -> {
+			installAndStartBundle(sampleWarURI("war-spring"));
+		});
+	}
+
+	@Test
+	public void testWC() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h2>Spring MVC - Hello World</h2>'",
+						resp -> resp.contains("<h2>Spring MVC - Hello World</h2>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-spring");
+	}
+
+	@Test
+	public void testCallController() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<h2>Spring MVC - Hello World</h2>'",
+						resp -> resp.contains("<h2>Spring MVC - Hello World</h2>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-spring");
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Done! Spring MVC works like a charm!'",
+						resp -> resp.contains("Done! Spring MVC works like a charm!"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-spring/helloWorld.do");
+	}
+
 }
