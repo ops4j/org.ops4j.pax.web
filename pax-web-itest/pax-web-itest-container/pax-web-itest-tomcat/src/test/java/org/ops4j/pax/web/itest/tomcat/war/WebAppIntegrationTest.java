@@ -13,23 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.tomcat.war;
 
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.common.AbstractWebAppIntegrationTest;
+import org.ops4j.pax.web.itest.container.war.AbstractWebAppIntegrationTest;
+
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
- * @author Grzegorz Grzybek
+ * @author Achim Nierbeck (anierbeck)
+ * @since Dec 30, 2012
  */
 @RunWith(PaxExam.class)
 public class WebAppIntegrationTest extends AbstractWebAppIntegrationTest {
 
 	@Configuration
-	public static Option[] configure() {
-		return configureJetty();
+	public Option[] configure() {
+		Option[] serverOptions = combine(baseConfigure(), paxWebTomcat());
+		Option[] jspOptions = combine(serverOptions, paxWebJsp());
+		return combine(jspOptions, paxWebExtenderWar());
 	}
+
 }

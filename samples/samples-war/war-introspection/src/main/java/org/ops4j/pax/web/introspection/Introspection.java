@@ -23,6 +23,9 @@ public class Introspection {
 
 	private static List<String> events = new LinkedList<>();
 
+	private Introspection() {
+	}
+
 	public static void event(String event) {
 		events.add(event);
 	}

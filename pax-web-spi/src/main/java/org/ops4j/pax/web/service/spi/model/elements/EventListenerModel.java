@@ -87,6 +87,10 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 		}
 	}
 
+	public EventListener getResolvedListener() {
+		return resolvedListener;
+	}
+
 	/**
 	 * When a listener is removed from native servlet container, it should be <em>unget</em> here - this
 	 * is esiecially important with service references.

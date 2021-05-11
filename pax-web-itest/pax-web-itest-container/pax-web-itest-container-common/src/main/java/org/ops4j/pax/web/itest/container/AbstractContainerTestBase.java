@@ -281,13 +281,15 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 	 * @param port
 	 * @param actions
 	 */
-	protected void configureAndWaitForDeploymentUnlessInstalled(String sample, Action action) throws Exception {
+	protected Bundle configureAndWaitForDeploymentUnlessInstalled(String sample, Action action) throws Exception {
 		Bundle b = sampleBundle(sample);
 		if (b != null && b.getState() == Bundle.ACTIVE) {
-			return;
+			return b;
 		}
 
 		configureAndWaitForDeployment(action);
+
+		return sampleBundle(sample);
 	}
 
 	/**
