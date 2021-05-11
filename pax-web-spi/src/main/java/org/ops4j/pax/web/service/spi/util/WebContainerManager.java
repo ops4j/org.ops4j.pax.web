@@ -165,7 +165,21 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 		// In Whiteboard scenario, there may exist threads that already try to register Whiteboard services. Such
 		// threads obtain the Whiteboard lock and try to access pax-web configuration thread and we may end up with
 		// a thread deadlock
-		pool.execute(() -> listener.webContainerChanged(oldReference, newReference));
+		pool.execute(() -> {
+			String name = Thread.currentThread().getName();
+			try {
+				if (oldReference == null) {
+					Thread.currentThread().setName(name + " (add HttpService)");
+				} else if (newReference == null) {
+					Thread.currentThread().setName(name + " (remove HttpService)");
+				} else {
+					Thread.currentThread().setName(name + " (change HttpService)");
+				}
+				listener.webContainerChanged(oldReference, newReference);
+			} finally {
+				Thread.currentThread().setName(name);
+			}
+		});
 	}
 
 	public ServiceReference<WebContainer> currentWebContainerReference() {
@@ -270,7 +284,15 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 	@Override
 	public void bundleChanged(BundleEvent event) {
 		if (event.getType() == BundleEvent.STOPPED) {
-			pool.execute(() -> listener.bundleStopped(event.getBundle()));
+			pool.execute(() -> {
+				String name = Thread.currentThread().getName();
+				try {
+					Thread.currentThread().setName(name + " (stop " + event.getBundle().getSymbolicName() + ")");
+					listener.bundleStopped(event.getBundle());
+				} finally {
+					Thread.currentThread().setName(name);
+				}
+			});
 		}
 	}
 

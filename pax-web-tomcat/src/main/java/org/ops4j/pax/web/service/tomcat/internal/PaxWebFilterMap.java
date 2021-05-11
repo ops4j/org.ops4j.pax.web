@@ -47,6 +47,36 @@ public class PaxWebFilterMap extends FilterMap {
 				addURLPatternDecoded(urlPattern);
 			}
 		}
+		if (filterModel.isDynamic()) {
+			filterModel.getDynamicServletNames().forEach(dm -> {
+				if (!dm.isAfter()) {
+					for (String sn : dm.getServletNames()) {
+						addServletName(sn);
+					}
+				}
+			});
+			filterModel.getDynamicUrlPatterns().forEach(dm -> {
+				if (!dm.isAfter()) {
+					for (String pattern : dm.getUrlPatterns()) {
+						addURLPatternDecoded(pattern);
+					}
+				}
+			});
+			filterModel.getDynamicServletNames().forEach(dm -> {
+				if (dm.isAfter()) {
+					for (String sn : dm.getServletNames()) {
+						addServletName(sn);
+					}
+				}
+			});
+			filterModel.getDynamicUrlPatterns().forEach(dm -> {
+				if (dm.isAfter()) {
+					for (String pattern : dm.getUrlPatterns()) {
+						addURLPatternDecoded(pattern);
+					}
+				}
+			});
+		}
 		if (filterModel.getDispatcherTypes() != null) {
 			for (String dispatcherType : filterModel.getDispatcherTypes()) {
 				setDispatcher(dispatcherType);

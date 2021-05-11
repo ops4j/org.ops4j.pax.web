@@ -118,6 +118,8 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 	private final Configuration configuration;
 
+	private volatile boolean stopped = false;
+
 //	private final Boolean showStacks;
 
 	public HttpServiceEnabled(final Bundle bundle, final ServerController srvController,
@@ -149,6 +151,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		LOG.debug("Stopping http service for: " + serviceBundle);
 
 		// TODO: make it transactional, so removal of two servlets won't restart the servlet context twice
+		//       though it's not that easy - we can't quickly detect if the stop() is called because HttpService
+		//       (factory) is unregistered or the bundle called unget() on the reference because underneath it's
+		//       all about calling unget()
 
 		// strange while loops, because "unregistration" may not necessarily end with removal of single web
 		// element. For example, when many servlets were registered by class name
@@ -171,6 +176,8 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		doUnregisterAllWelcomeFiles();
 
 		serverModel.deassociateContexts(serviceBundle, serverController);
+
+		stopped = true;
 	}
 
 	// --- container views
@@ -1839,26 +1846,38 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		@Override
 		public void sendBatch(final Batch batch) {
 			serverModel.runSilently(() -> {
-				// the only thing we have to change is resource servlets, because only now we know the actual
-				// implementation of the resource servlet needed - pax-web-extender-war isn't aware of the target
-				// runtime, where the WAB's elements are being deployed
-				for (Change change : batch.getOperations()) {
-					if (change.getKind() == OpCode.ADD && change instanceof ServletModelChange) {
-						ServletModel model = ((ServletModelChange) change).getServletModel();
-						if (model.isResourceServlet()) {
-							// the resource base is *always* the root of the bundle
-							ResourceServlet rs = createResourceServlet(model.getUrlPatterns(), "");
-							model.setElementSupplier(rs.supplier);
-						}
-						if (model.isJspServlet()) {
-							model.configureJspServlet(configuration.jsp());
+				String name = Thread.currentThread().getName();
+				try {
+					Thread.currentThread().setName(name + " (" + batch.getShortDescription() + ")");
+
+					if (stopped) {
+						LOG.info("WebContainer is already stopped.");
+						return null;
+					}
+
+					// the only thing we have to change is resource servlets, because only now we know the actual
+					// implementation of the resource servlet needed - pax-web-extender-war isn't aware of the target
+					// runtime, where the WAB's elements are being deployed
+					for (Change change : batch.getOperations()) {
+						if (change.getKind() == OpCode.ADD && change instanceof ServletModelChange) {
+							ServletModel model = ((ServletModelChange) change).getServletModel();
+							if (model.isResourceServlet()) {
+								// the resource base is *always* the root of the bundle
+								ResourceServlet rs = createResourceServlet(model.getUrlPatterns(), "");
+								model.setElementSupplier(rs.supplier);
+							}
+							if (model.isJspServlet()) {
+								model.configureJspServlet(configuration.jsp());
+							}
 						}
 					}
-				}
 
-				serverController.sendBatch(batch);
-				batch.accept(serviceModel);
-				return null;
+					serverController.sendBatch(batch);
+					batch.accept(serviceModel);
+					return null;
+				} finally {
+					Thread.currentThread().setName(name);
+				}
 			});
 		}
 
@@ -2339,7 +2358,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 	@Override
 	public String toString() {
-		return super.toString() + " for bundle " + serviceBundle;
+		return "HttpService (enabled) for bundle " + serviceBundle;
 	}
 
 //    @Override

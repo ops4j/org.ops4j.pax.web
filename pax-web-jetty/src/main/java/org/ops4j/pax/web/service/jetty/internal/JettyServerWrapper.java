@@ -1119,7 +1119,41 @@ class JettyServerWrapper implements BatchVisitor {
 
 	@Override
 	public void visit(FilterModelChange change) {
-		// no op here - will be handled with FilterStateChange
+		// only handle dynamic filter registration here - filter added only as last filter
+		FilterModel model = change.getFilterModel();
+		Set<String> done = new HashSet<>();
+		if (change.getKind() == OpCode.ADD && model.isDynamic()) {
+			for (OsgiContextModel ocm : change.getContextModels()) {
+				String contextPath = ocm.getContextPath();
+
+				if (!done.add(contextPath)) {
+					continue;
+				}
+
+				LOG.info("Adding dynamic filter to context {}", contextPath);
+
+				OsgiContextModel highestRankedModel = null;
+				for (OsgiContextModel cm : model.getContextModels()) {
+					if (cm.getContextPath().equals(contextPath)) {
+						highestRankedModel = cm;
+						break;
+					}
+				}
+				if (highestRankedModel == null) {
+					highestRankedModel = ocm;
+				}
+
+				PaxWebServletContextHandler sch = contextHandlers.get(contextPath);
+				OsgiServletContext context = osgiServletContexts.get(highestRankedModel);
+
+				ServletHandler servletHandler = sch.getServletHandler();
+				List<PaxWebFilterMapping> mapping = configureFilterMappings(model);
+				PaxWebFilterHolder holder = new PaxWebFilterHolder(model, context);
+				for (PaxWebFilterMapping m : mapping) {
+					servletHandler.addFilter(holder, m);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -1225,35 +1259,7 @@ class JettyServerWrapper implements BatchVisitor {
 				PaxWebFilterMapping mapping = new PaxWebFilterMapping(model);
 
 				newFilterHolders[pos] = holder;
-				final LinkedList<PaxWebFilterMapping> paxWebFilterMappings = new LinkedList<>();
-				newFilterMappings[pos] = paxWebFilterMappings;
-				if (model.getDynamicServletNames().size() > 0 || model.getDynamicUrlPatterns().size() > 0) {
-					// this FilterModel was created in SCI using ServletContext.addFilter(), so it has ONLY
-					// dynamic mappings (potentially more than one)
-					model.getDynamicServletNames().forEach(dm -> {
-						if (!dm.isAfter()) {
-							paxWebFilterMappings.add(new PaxWebFilterMapping(model, dm));
-						}
-					});
-					model.getDynamicUrlPatterns().forEach(dm -> {
-						if (!dm.isAfter()) {
-							paxWebFilterMappings.add(new PaxWebFilterMapping(model, dm));
-						}
-					});
-					model.getDynamicServletNames().forEach(dm -> {
-						if (dm.isAfter()) {
-							paxWebFilterMappings.add(new PaxWebFilterMapping(model, dm));
-						}
-					});
-					model.getDynamicUrlPatterns().forEach(dm -> {
-						if (dm.isAfter()) {
-							paxWebFilterMappings.add(new PaxWebFilterMapping(model, dm));
-						}
-					});
-				} else {
-					// normal OSGi mapping
-					paxWebFilterMappings.add(new PaxWebFilterMapping(model));
-				}
+				newFilterMappings[pos] = configureFilterMappings(model);
 				pos++;
 			}
 
@@ -1277,6 +1283,40 @@ class JettyServerWrapper implements BatchVisitor {
 				ensureServletContextStarted(sch);
 			}
 		}
+	}
+
+	private List<PaxWebFilterMapping> configureFilterMappings(FilterModel model) {
+		List<PaxWebFilterMapping> mappings = new LinkedList<>();
+
+		if (model.getDynamicServletNames().size() > 0 || model.getDynamicUrlPatterns().size() > 0) {
+			// this FilterModel was created in SCI using ServletContext.addFilter(), so it has ONLY
+			// dynamic mappings (potentially more than one)
+			model.getDynamicServletNames().forEach(dm -> {
+				if (!dm.isAfter()) {
+					mappings.add(new PaxWebFilterMapping(model, dm));
+				}
+			});
+			model.getDynamicUrlPatterns().forEach(dm -> {
+				if (!dm.isAfter()) {
+					mappings.add(new PaxWebFilterMapping(model, dm));
+				}
+			});
+			model.getDynamicServletNames().forEach(dm -> {
+				if (dm.isAfter()) {
+					mappings.add(new PaxWebFilterMapping(model, dm));
+				}
+			});
+			model.getDynamicUrlPatterns().forEach(dm -> {
+				if (dm.isAfter()) {
+					mappings.add(new PaxWebFilterMapping(model, dm));
+				}
+			});
+		} else {
+			// normal OSGi mapping
+			mappings.add(new PaxWebFilterMapping(model));
+		}
+
+		return mappings;
 	}
 
 	@Override

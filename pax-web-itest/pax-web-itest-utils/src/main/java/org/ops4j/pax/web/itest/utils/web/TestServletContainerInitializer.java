@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.base.support;
+package org.ops4j.pax.web.itest.utils.web;
 
 import java.util.Set;
-
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -25,10 +24,10 @@ import javax.servlet.ServletException;
  * Registers an additional Filter.
  */
 public class TestServletContainerInitializer implements ServletContainerInitializer {
-    @Override
-    public void onStartup(Set<Class<?>> c, ServletContext servletContext) throws ServletException {
-        servletContext.addFilter("initializerFilter", SimpleFilter.class).addMappingForUrlPatterns(null, false, "/*");
-    }
 
+	@Override
+	public void onStartup(Set<Class<?>> c, ServletContext servletContext) throws ServletException {
+		servletContext.addFilter("initializerFilter", SimpleFilter.class).addMappingForUrlPatterns(null, false, "/*");
+	}
 
 }

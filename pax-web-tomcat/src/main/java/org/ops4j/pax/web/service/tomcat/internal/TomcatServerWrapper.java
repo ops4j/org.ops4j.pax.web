@@ -1060,7 +1060,40 @@ class TomcatServerWrapper implements BatchVisitor {
 
 	@Override
 	public void visit(FilterModelChange change) {
-		// no op here - will be handled with FilterStateChange
+		// only handle dynamic filter registration here - filter added only as last filter
+		FilterModel model = change.getFilterModel();
+		Set<String> done = new HashSet<>();
+		if (change.getKind() == OpCode.ADD && model.isDynamic()) {
+			for (OsgiContextModel ocm : change.getContextModels()) {
+				String contextPath = ocm.getContextPath();
+
+				if (!done.add(contextPath)) {
+					continue;
+				}
+
+				LOG.info("Adding dynamic filter to context {}", contextPath);
+
+				OsgiContextModel highestRankedModel = null;
+				for (OsgiContextModel cm : model.getContextModels()) {
+					if (cm.getContextPath().equals(contextPath)) {
+						highestRankedModel = cm;
+						break;
+					}
+				}
+				if (highestRankedModel == null) {
+					highestRankedModel = ocm;
+				}
+
+				PaxWebStandardContext context = contextHandlers.get(contextPath);
+				OsgiServletContext osgiContext = osgiServletContexts.get(highestRankedModel);
+
+				PaxWebFilterDef def = new PaxWebFilterDef(model, false, osgiContext);
+				PaxWebFilterMap map = new PaxWebFilterMap(model, false);
+
+				context.addFilterDef(def);
+				context.addFilterMap(map);
+			}
+		}
 	}
 
 	@Override

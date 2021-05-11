@@ -20,7 +20,7 @@
 
     <servlet>
         <servlet-name>simple</servlet-name>
-        <servlet-class>org.ops4j.pax.web.itest.base.support.TestServlet</servlet-class>
+        <servlet-class>org.ops4j.pax.web.itest.utils.web.TestServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
 

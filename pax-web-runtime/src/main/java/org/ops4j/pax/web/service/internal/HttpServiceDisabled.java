@@ -451,7 +451,7 @@ class HttpServiceDisabled implements WebContainer {
 
 	@Override
 	public String toString() {
-		return super.toString() + " for bundle " + serviceBundle;
+		return "HttpService (disabled) for bundle " + serviceBundle;
 	}
 
 //    @Override

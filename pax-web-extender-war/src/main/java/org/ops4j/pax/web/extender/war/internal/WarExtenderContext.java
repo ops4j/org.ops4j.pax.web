@@ -455,26 +455,34 @@ public class WarExtenderContext implements WebContainerListener {
 			// start() method is called within a thread of the war extender pool (that's explicit configuration
 			// in pax-web-extender-war)
 
-			BundleWebApplication webApp;
-			lock.lock();
-			try {
-				webApp = webApplications.get(bundle);
-				if (webApp == null) {
-					return;
-				}
-				// Pax Web before version 8 checked non-standard "Webapp-Deploy" manifest header. I don't think it's
-				// necessary now
-			} finally {
-				lock.unlock();
-			}
+			String name = Thread.currentThread().getName();
 
-			// Aries Blueprint container may be processed by several reschedules of "this" into a configured
-			// thread pool. Rescheduling happens at some stages of Blueprint container lifecycle, when it has to
-			// wait (for namespace handlers or mandatory services). But ideally, when everything is available and
-			// there's no need to wait, we should try doing everything in single thread.
-			// starting a webapp immediately (in current thread) will process with parsing and deployment. Only
-			// if the WebContainer reference is not available, we'll reschedule the lifecycle processing
-			webApp.start();
+			try {
+				BundleWebApplication webApp;
+				lock.lock();
+				try {
+					webApp = webApplications.get(bundle);
+					if (webApp == null) {
+						return;
+					}
+					// Pax Web before version 8 checked non-standard "Webapp-Deploy" manifest header. I don't think it's
+					// necessary now
+				} finally {
+					lock.unlock();
+				}
+
+				Thread.currentThread().setName(name + " (" + webApp.getContextPath() + ")");
+
+				// Aries Blueprint container may be processed by several reschedules of "this" into a configured
+				// thread pool. Rescheduling happens at some stages of Blueprint container lifecycle, when it has to
+				// wait (for namespace handlers or mandatory services). But ideally, when everything is available and
+				// there's no need to wait, we should try doing everything in single thread.
+				// starting a webapp immediately (in current thread) will process with parsing and deployment. Only
+				// if the WebContainer reference is not available, we'll reschedule the lifecycle processing
+				webApp.start();
+			} finally {
+				Thread.currentThread().setName(name);
+			}
 		}
 
 		@Override

@@ -402,8 +402,7 @@ public class BundleWebApplication {
 					webContainerServiceRef, WebAppWebContainerView.class);
 
 			if (view == null) {
-				LOG.warn("WebContainer reference {} was removed, but {} can't access the WebContainer service"
-						+ " and it can't be undeployed.", ref, this);
+				LOG.info("WebContainer reference {} was removed, {} should already be undeployed.", ref, this);
 				// but still let's start with new allocation attempt (in new WebContainer that'll be set in future)
 				deploymentState.set(State.ALLOCATING_CONTEXT);
 			} else {
@@ -696,7 +695,9 @@ public class BundleWebApplication {
 		}
 		try {
 			// 1. undeploy all the web elements from current WAB
-			view.sendBatch(batch.uninstall("Undeployment of " + this));
+			Batch uninstall = batch.uninstall("Undeployment of " + this);
+			uninstall.setShortDescription("undeploy " + this.contextPath);
+			view.sendBatch(uninstall);
 
 			// 2. free the context
 			releaseContext(view, true);
@@ -1083,6 +1084,7 @@ public class BundleWebApplication {
 	@SuppressWarnings("unchecked")
 	private void buildModel() {
 		final Batch wabBatch = new Batch("Deployment of " + this);
+		wabBatch.setShortDescription("deploy " + this.contextPath);
 
 		wabBatch.beginTransaction(contextPath);
 
@@ -1380,8 +1382,10 @@ public class BundleWebApplication {
 			// this is for Server/Service model
 			wabBatch.addFilterModel(fm);
 		});
-		// this is for ServerController
-		wabBatch.updateFilters(allFilterModels, false);
+		if (filterModels.size() > 0) {
+			// this is for ServerController
+			wabBatch.updateFilters(allFilterModels, false);
+		}
 
 		// 5. listeners
 		for (String listener : mainWebXml.getListeners()) {
@@ -1424,8 +1428,10 @@ public class BundleWebApplication {
 			// this is for Server/Service model
 			wabBatch.addErrorPageModel(epm);
 		});
-		// this is for ServerController
-		wabBatch.updateErrorPages(allEpModels);
+		if (epModels.size() > 0) {
+			// this is for ServerController
+			wabBatch.updateErrorPages(allEpModels);
+		}
 
 		// 8. At the end, Tomcat adds SCIs to the context
 		this.sciToHt.forEach((sci, classes) -> {

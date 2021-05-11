@@ -263,7 +263,7 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 		when(wab.getEntry("/")).thenReturn(new File("src/test/resources/bundles/the-wab-itself/").toURI().toURL());
 
 		// TLD
-		when(wab.findEntries("/", "META-INF/my.tld", false)).thenAnswer((i) ->
+		when(wab.findEntries("META-INF", "my.tld", false)).thenAnswer((i) ->
 				Collections.enumeration(Collections.singletonList(new File("src/test/resources/tlds/test.tld").toURI().toURL()
 		)));
 		// JSP

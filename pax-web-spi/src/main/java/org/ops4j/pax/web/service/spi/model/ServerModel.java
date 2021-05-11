@@ -68,6 +68,7 @@ import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterStateChange;
+import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
@@ -1007,7 +1008,7 @@ public class ServerModel implements BatchVisitor {
 				}
 			});
 
-			// no need to do it with Whiteboard contexts - they'll be removed by pax-web-extender-whiteboard tracker
+			// no don't need to do it with Whiteboard contexts - they'll be removed by pax-web-extender-whiteboard tracker
 			if (batch.getOperations().size() > 0) {
 				controller.sendBatch(batch);
 				batch.accept(this);
@@ -1539,12 +1540,7 @@ public class ServerModel implements BatchVisitor {
 			batch.disableFilterModel(existing);
 		}
 
-		// and also if we haven't disabled anything, new model will definitely be added as enabled - but it's NOT
-		// the end of processing in case of filters
-		if (newlyDisabled.isEmpty()) {
-			batch.addFilterModel(model);
-			// no return here! (unlike in case of servlets)
-		}
+		// don't add the filter to the batch now - it'll be added in reEnableFilterModels()
 
 		// this map will contain ALL filters registered per context path - including currently enabled, newly
 		// registered and newly enabled. When set is TreeSet, ordering will be correct
@@ -2068,8 +2064,13 @@ public class ServerModel implements BatchVisitor {
 
 	@Override
 	public void visit(ServletContextModelChange change) {
-		ServletContextModel model = change.getServletContextModel();
-		this.servletContexts.put(model.getContextPath(), model);
+		if (change.getKind() == OpCode.ADD) {
+			ServletContextModel model = change.getServletContextModel();
+			this.servletContexts.put(model.getContextPath(), model);
+		} else if (change.getKind() == OpCode.DELETE) {
+			ServletContextModel model = change.getServletContextModel();
+			this.servletContexts.remove(model.getContextPath(), model);
+		}
 	}
 
 	@Override

@@ -1326,9 +1326,85 @@ class UndertowServerWrapper implements BatchVisitor {
 		}
 	}
 
+
 	@Override
 	public void visit(FilterModelChange change) {
-		// no op here - will be handled with FilterStateChange
+		// only handle dynamic filter registration here - filter added only as last filter
+		FilterModel model = change.getFilterModel();
+		Set<String> done = new HashSet<>();
+		if (change.getKind() == OpCode.ADD && model.isDynamic()) {
+			for (OsgiContextModel ocm : change.getContextModels()) {
+				String contextPath = ocm.getContextPath();
+
+				if (!done.add(contextPath)) {
+					continue;
+				}
+
+				LOG.info("Adding dynamic filter to context {}", contextPath);
+
+				OsgiContextModel highestRankedModel = null;
+				for (OsgiContextModel cm : model.getContextModels()) {
+					if (cm.getContextPath().equals(contextPath)) {
+						highestRankedModel = cm;
+						break;
+					}
+				}
+				if (highestRankedModel == null) {
+					highestRankedModel = ocm;
+				}
+
+				OsgiServletContext osgiContext = osgiServletContexts.get(highestRankedModel);
+				DeploymentManager manager = getDeploymentManager(contextPath);
+				DeploymentManager.State state = manager == null ? DeploymentManager.State.UNDEPLOYED : manager.getState();
+				DeploymentInfo deploymentInfo = manager == null ? deploymentInfos.get(contextPath)
+						: manager.getDeployment().getDeploymentInfo();
+				Deployment deployment = manager == null ? null : manager.getDeployment();
+
+				// filter definition
+				FilterInfo info = new PaxWebFilterInfo(model, osgiContext);
+
+				deploymentInfo.addFilter(info);
+				if (deployment != null) {
+					deployment.getFilters().addFilter(info);
+				}
+
+				String filterName = model.getName();
+
+				// filter mapping
+				for (String type : model.getDispatcherTypes()) {
+					DispatcherType dt = DispatcherType.valueOf(type);
+
+					model.getDynamicServletNames().forEach(dm -> {
+						if (!dm.isAfter()) {
+							for (String sn : dm.getServletNames()) {
+								deploymentInfo.addFilterServletNameMapping(filterName, sn, dt);
+							}
+						}
+					});
+					model.getDynamicUrlPatterns().forEach(dm -> {
+						if (!dm.isAfter()) {
+							for (String pattern : dm.getUrlPatterns()) {
+								deploymentInfo.addFilterUrlMapping(filterName, pattern, dt);
+							}
+						}
+					});
+					model.getDynamicServletNames().forEach(dm -> {
+						if (dm.isAfter()) {
+							for (String sn : dm.getServletNames()) {
+								deploymentInfo.addFilterServletNameMapping(filterName, sn, dt);
+							}
+						}
+					});
+					model.getDynamicUrlPatterns().forEach(dm -> {
+						if (dm.isAfter()) {
+							for (String pattern : dm.getUrlPatterns()) {
+								deploymentInfo.addFilterUrlMapping(filterName, pattern, dt);
+							}
+						}
+					});
+				}
+			}
+		}
 	}
 
 	@Override

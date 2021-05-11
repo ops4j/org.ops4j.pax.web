@@ -290,7 +290,15 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	public void updateConfiguration(final Dictionary<String, ?> configuration) {
 		LOG.info("Scheduling Pax Web reconfiguration because configuration has changed");
 		// change configuration using new properties (possibly from configadmin) and current ServerControllerFactory
-		runtimeExecutor.submit(() -> updateController(configuration, serverControllerFactory));
+		runtimeExecutor.submit(() -> {
+			String name = Thread.currentThread().getName();
+			try {
+				Thread.currentThread().setName(name + " (change config)");
+				updateController(configuration, serverControllerFactory);
+			} finally {
+				Thread.currentThread().setName(name);
+			}
+		});
 	}
 
 	/**
@@ -310,7 +318,15 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 		}
 
 		// change configuration using new (or null when not available) ServerControllerFactory and current configuration
-		Future<?> future = runtimeExecutor.submit(() -> updateController(configuration, controllerFactory));
+		Future<?> future = runtimeExecutor.submit(() -> {
+			String name = Thread.currentThread().getName();
+			try {
+				Thread.currentThread().setName(name + " (change controller)");
+				updateController(configuration, controllerFactory);
+			} finally {
+				Thread.currentThread().setName(name);
+			}
+		});
 
 		// Make sure that when destroying the configuration (factory == null), we do things synchronously
 		if (controllerFactory == null) {

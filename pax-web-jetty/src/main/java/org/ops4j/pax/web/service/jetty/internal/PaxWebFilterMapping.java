@@ -67,8 +67,10 @@ public class PaxWebFilterMapping extends FilterMapping {
 		// again when configuration changes.
 		this.timestamp = filterModel.getTimestamp();
 
-		List<DispatcherType> types = Arrays.asList(dynamicMapping.getDispatcherTypes());
-		this.setDispatcherTypes(EnumSet.copyOf(types));
+		if (dynamicMapping.getDispatcherTypes() != null) {
+			List<DispatcherType> types = Arrays.asList(dynamicMapping.getDispatcherTypes());
+			this.setDispatcherTypes(EnumSet.copyOf(types));
+		}
 
 		this.setFilterName(filterModel.getName());
 		this.setPathSpecs(dynamicMapping.getUrlPatterns());

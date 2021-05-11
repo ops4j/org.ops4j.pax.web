@@ -58,6 +58,7 @@ public class Batch {
 
 	private final List<Change> operations = new LinkedList<>();
 	private final String description;
+	private String shortDescription;
 
 	public Batch(String description) {
 		this.description = description;
@@ -65,6 +66,14 @@ public class Batch {
 
 	public List<Change> getOperations() {
 		return operations;
+	}
+
+	public String getShortDescription() {
+		return shortDescription;
+	}
+
+	public void setShortDescription(String shortDescription) {
+		this.shortDescription = shortDescription;
 	}
 
 	/**

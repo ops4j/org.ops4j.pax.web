@@ -201,9 +201,19 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		sources += (this.urlPatterns != null && this.urlPatterns.length > 0 ? 1 : 0);
 		sources += (this.regexMapping != null && this.regexMapping.length > 0 ? 1 : 0);
 
-		if (sources == 0) {
+		if (!dynamic && sources == 0) {
 			throw new IllegalArgumentException("Please specify one of: servlet name mapping, url pattern mapping"
 					+ " or regex mapping");
+		}
+
+		if (dynamic) {
+			sources = 0;
+			sources += (this.dynamicUrlPatterns != null && this.dynamicUrlPatterns.size() > 0 ? 1 : 0);
+			sources += (this.dynamicServletNames != null && this.dynamicServletNames.size() > 0 ? 1 : 0);
+			if (sources == 0) {
+				throw new IllegalArgumentException("For dynamic filter registration, please specify one of:"
+						+ " servlet name mapping or url pattern mapping");
+			}
 		}
 
 		return Boolean.TRUE;
@@ -480,7 +490,9 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		public static DynamicMapping forServletNames(EnumSet<DispatcherType> dispatcherTypes, String[] servletNames, boolean isMatchAfter) {
 			DynamicMapping mapping = new DynamicMapping();
 			mapping.after = isMatchAfter;
-			mapping.dispatcherTypes = dispatcherTypes.toArray(new DispatcherType[dispatcherTypes.size()]);
+			if (dispatcherTypes != null) {
+				mapping.dispatcherTypes = dispatcherTypes.toArray(new DispatcherType[dispatcherTypes.size()]);
+			}
 			mapping.servletNames = servletNames;
 			return mapping;
 		}
@@ -488,7 +500,9 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		public static DynamicMapping forUrlPatterns(EnumSet<DispatcherType> dispatcherTypes, String[] urlPatterns, boolean isMatchAfter) {
 			DynamicMapping mapping = new DynamicMapping();
 			mapping.after = isMatchAfter;
-			mapping.dispatcherTypes = dispatcherTypes.toArray(new DispatcherType[dispatcherTypes.size()]);
+			if (dispatcherTypes != null) {
+				mapping.dispatcherTypes = dispatcherTypes.toArray(new DispatcherType[dispatcherTypes.size()]);
+			}
 			mapping.urlPatterns = urlPatterns;
 			return mapping;
 		}
