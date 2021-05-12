@@ -17,4 +17,4 @@
 /**
  * Tests related to Java Server Faces technology
  */
-package org.ops4j.pax.web.itest.container.jsf;
+package org.ops4j.pax.web.itest.container.war.todo.jsf;

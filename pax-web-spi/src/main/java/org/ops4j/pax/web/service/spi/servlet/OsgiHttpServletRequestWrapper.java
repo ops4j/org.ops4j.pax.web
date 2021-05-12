@@ -85,10 +85,14 @@ public class OsgiHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
 	@Override
 	public HttpSession getSession(boolean create) {
-		if (create) {
-			if (session == null) {
-				synchronized (this) {
-					session = new OsgiHttpSession(super.getSession(true), context);
+		if (session == null) {
+			synchronized (this) {
+				if (session == null) {
+					HttpSession original = super.getSession(create);
+					if (original == null) {
+						return null;
+					}
+					this.session = new OsgiHttpSession(original, context);
 				}
 			}
 		}

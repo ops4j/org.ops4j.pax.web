@@ -628,6 +628,10 @@ class UndertowServerWrapper implements BatchVisitor {
 	private XnioWorker getWorker(String workerName) {
 		if (workerName != null) {
 			if (!workers.containsKey(workerName)) {
+				if ("default".equals(workerName)) {
+					workers.put("default", undertowFactory.getDefaultWorker(configuration));
+					return workers.get(workerName);
+				}
 				throw new IllegalArgumentException("No worker named \"" + workerName + "\" is configured");
 			}
 			return workers.get(workerName);
@@ -639,6 +643,10 @@ class UndertowServerWrapper implements BatchVisitor {
 	private ByteBufferPool getBufferPool(String bufferPoolName) {
 		if (bufferPoolName != null) {
 			if (!bufferPools.containsKey(bufferPoolName)) {
+				if ("default".equals(bufferPoolName)) {
+					bufferPools.put("default", undertowFactory.getDefaultBufferPool());
+					return bufferPools.get(bufferPoolName);
+				}
 				throw new IllegalArgumentException("No buffer pool named \"" + bufferPoolName + "\" is configured");
 			}
 			return bufferPools.get(bufferPoolName);
