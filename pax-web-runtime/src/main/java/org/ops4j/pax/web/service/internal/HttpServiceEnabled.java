@@ -1866,7 +1866,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 								ResourceServlet rs = createResourceServlet(model.getUrlPatterns(), "");
 								model.setElementSupplier(rs.supplier);
 							}
-							if (model.isJspServlet()) {
+							if (model.isJspServlet()
+									|| (model.getServletClass() != null
+									&& PaxWebConstants.DEFAULT_JSP_SERVLET_CLASS.equals(model.getServletClass().getName()))) {
 								model.configureJspServlet(configuration.jsp());
 							}
 						}

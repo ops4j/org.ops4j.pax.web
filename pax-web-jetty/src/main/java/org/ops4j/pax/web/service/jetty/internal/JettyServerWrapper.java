@@ -1353,10 +1353,16 @@ class JettyServerWrapper implements BatchVisitor {
 					if (eventListener instanceof ServletContextAttributeListener) {
 						// remove it from per-OsgiContext list
 						OsgiServletContext c = osgiServletContexts.get(context);
-						c.removeServletContextAttributeListener((ServletContextAttributeListener)eventListener);
+						if (c != null) {
+							c.removeServletContextAttributeListener((ServletContextAttributeListener)eventListener);
+						}
 					}
-					// remove the listener from real context - even ServletContextAttributeListener
-					servletContextHandler.removeEventListener(eventListener);
+					if (servletContextHandler != null) {
+						// remove the listener from real context - even ServletContextAttributeListener
+						// this may be null in case of WAB where we keep event listeners so they get contextDestroyed
+						// event properly
+						servletContextHandler.removeEventListener(eventListener);
+					}
 					eventListenerModel.ungetEventListener(eventListener);
 				});
 			}

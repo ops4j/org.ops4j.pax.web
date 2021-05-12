@@ -1195,25 +1195,31 @@ class TomcatServerWrapper implements BatchVisitor {
 					if (eventListener instanceof ServletContextAttributeListener) {
 						// remove it from per-OsgiContext list
 						OsgiServletContext c = osgiServletContexts.get(context);
-						c.removeServletContextAttributeListener((ServletContextAttributeListener)eventListener);
+						if (c != null) {
+							c.removeServletContextAttributeListener((ServletContextAttributeListener)eventListener);
+						}
 					}
 					// remove the listener from real context - even ServletContextAttributeListener
-					Object[] elisteners = standardContext.getApplicationEventListeners();
-					Object[] llisteners = standardContext.getApplicationLifecycleListeners();
-					List<Object> newEListeners = new ArrayList<>();
-					List<Object> newLListeners = new ArrayList<>();
-					for (Object l : elisteners) {
-						if (l != eventListener) {
-							newEListeners.add(l);
+					if (standardContext != null) {
+						// this may be null in case of WAB where we keep event listeners so they get contextDestroyed
+						// event properly
+						Object[] elisteners = standardContext.getApplicationEventListeners();
+						Object[] llisteners = standardContext.getApplicationLifecycleListeners();
+						List<Object> newEListeners = new ArrayList<>();
+						List<Object> newLListeners = new ArrayList<>();
+						for (Object l : elisteners) {
+							if (l != eventListener) {
+								newEListeners.add(l);
+							}
 						}
-					}
-					for (Object l : llisteners) {
-						if (l != eventListener) {
-							newLListeners.add(l);
+						for (Object l : llisteners) {
+							if (l != eventListener) {
+								newLListeners.add(l);
+							}
 						}
+						standardContext.setApplicationEventListeners(newEListeners.toArray(new Object[newEListeners.size()]));
+						standardContext.setApplicationLifecycleListeners(newLListeners.toArray(new Object[newLListeners.size()]));
 					}
-					standardContext.setApplicationEventListeners(newEListeners.toArray(new Object[newEListeners.size()]));
-					standardContext.setApplicationLifecycleListeners(newLListeners.toArray(new Object[newLListeners.size()]));
 					eventListenerModel.ungetEventListener(eventListener);
 				});
 			}

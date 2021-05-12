@@ -163,7 +163,7 @@ public class OsgiServletContext implements ServletContext {
 	public void register() {
 		if (registration == null && containerServletContext != null) {
 			try {
-				LOG.info("Registering {} as OSGi service for \"{}\" context path", this, getContextPath());
+				LOG.info("Registering {} as OSGi service for \"{}\" context path", this, osgiContextModel.getContextPath());
 
 				// osgiContextModel has an "owner bundle":
 				//  - when backed by ServletContextHelper from Whiteboard - always, even if such context is always
@@ -185,7 +185,7 @@ public class OsgiServletContext implements ServletContext {
 					Dictionary<String, Object> properties = new Hashtable<>();
 					properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SYMBOLIC_NAME, bundle.getSymbolicName());
 					properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_VERSION, bundle.getVersion());
-					properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_PATH, getContextPath());
+					properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_PATH, osgiContextModel.getContextPath());
 					properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_NAME, osgiContextModel.getName());
 					registration = bc.registerService(ServletContext.class, this, properties);
 				}
@@ -429,7 +429,12 @@ public class OsgiServletContext implements ServletContext {
 	@Override
 	public String getContextPath() {
 		// Return the web context path of the Servlet Context.
-		return osgiContextModel.getContextPath();
+		// to comply to Servlets specification, we have to return "" instead of "/"
+		String contextPath = osgiContextModel.getContextPath();
+		if ("/".equals(contextPath)) {
+			return "";
+		}
+		return contextPath;
 	}
 
 	@Override

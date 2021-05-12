@@ -192,9 +192,11 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	}
 
 	/**
-	 * 1:1 mapping to <em>server specific</em> {@link ServletContextModel}. Though we don't need entire model,
+	 * <p>1:1 mapping to <em>server specific</em> {@link ServletContextModel}. Though we don't need entire model,
 	 * especially when we don't have all the data required for {@link ServletContextModel}, so we keep only
-	 * the context path - a <em>key</em> to {@link ServletContextModel}.
+	 * the context path - a <em>key</em> to {@link ServletContextModel}.</p>
+	 *
+	 * <p>The context path for ROOT context is {@code "/"}, not {@code ""}.</p>
 	 */
 	private String contextPath;
 

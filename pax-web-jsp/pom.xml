@@ -102,9 +102,6 @@
 							org.eclipse.jdt.internal.compiler.env,
 							org.eclipse.jdt.internal.compiler.impl,
 							org.eclipse.jdt.internal.compiler.problem,
-							<!--							org.eclipse.*;resolution:=optional,-->
-							<!--							org.eclipse.jdt.internal.compiler.parser;resolution:=optional-->
-							<!--							org.eclipse.jdt.internal.compiler.problem-->
 
 							<!-- other standard packages -->
 							javax.annotation,
@@ -256,26 +253,6 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- OPS4J dependencies -->
-
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.base</groupId>-->
-<!--			<artifactId>ops4j-base-util-xml</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.swissbox</groupId>-->
-<!--			<artifactId>pax-swissbox-core</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--			<optional>true</optional>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.swissbox</groupId>-->
-<!--			<artifactId>pax-swissbox-optional-jcl</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--			<optional>true</optional>-->
-<!--		</dependency>-->
-
 		<!-- OSGi -->
 
 		<dependency>
@@ -288,11 +265,6 @@
 			<artifactId>osgi.cmpn</artifactId>
 			<scope>provided</scope>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>org.osgi</groupId>-->
-<!--			<artifactId>osgi.annotation</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
 
 		<!-- JavaEE -->
 

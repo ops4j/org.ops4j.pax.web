@@ -1579,8 +1579,12 @@ class UndertowServerWrapper implements BatchVisitor {
 				EventListener wrapper = eventListener;
 				if (eventListener instanceof ServletContextListener) {
 					ContextLinkingInvocationHandler handler = new ContextLinkingInvocationHandler((ServletContextListener)eventListener);
-					wrapper = (EventListener) Proxy.newProxyInstance(context.getClassLoader(),
-							eventListener.getClass().getInterfaces(), handler);
+					ClassLoader cl = context.getClassLoader();
+					if (cl == null) {
+						// for test scenario
+						cl = eventListener.getClass().getClassLoader();
+					}
+					wrapper = (EventListener) Proxy.newProxyInstance(cl, eventListener.getClass().getInterfaces(), handler);
 					// it may be a case that this listener is dynamic
 					OsgiContextModel highestRanked = securityHandlers.get(contextPath).getDefaultOsgiContextModel();
 					if (highestRanked != null) {
@@ -1624,20 +1628,26 @@ class UndertowServerWrapper implements BatchVisitor {
 							manager.undeploy();
 						}
 						// swap the deployment info, which will later be used to start the context
-						deploymentInfos.put(contextPath, deploymentInfo);
+						if (deploymentInfo != null) {
+							deploymentInfos.put(contextPath, deploymentInfo);
+						}
 					} catch (ServletException e) {
 						throw new RuntimeException("Problem stopping the deployment of context " + contextPath
 								+ ": " + e.getMessage(), e);
 					}
 
-					deploymentInfo.getListeners().removeIf(li -> {
-						try {
-							return li.getInstanceFactory() instanceof ImmediateInstanceFactory
-									&& ((ImmediateInstanceFactory<?>) li.getInstanceFactory()).createInstance().getInstance() == eventListener;
-						} catch (InstantiationException ignored) {
-							return false;
-						}
-					});
+					if (deploymentInfo != null) {
+						// this may be null in case of WAB where we keep event listeners so they get contextDestroyed
+						// event properly
+						deploymentInfo.getListeners().removeIf(li -> {
+							try {
+								return li.getInstanceFactory() instanceof ImmediateInstanceFactory
+										&& ((ImmediateInstanceFactory<?>) li.getInstanceFactory()).createInstance().getInstance() == eventListener;
+							} catch (InstantiationException ignored) {
+								return false;
+							}
+						});
+					}
 					eventListenerModel.ungetEventListener(eventListener);
 
 					ensureServletContextStarted(contextPath);
@@ -1839,7 +1849,7 @@ class UndertowServerWrapper implements BatchVisitor {
 	private void ensureServletContextStarted(final String contextPath) {
 		DeploymentManager manager = getDeploymentManager(contextPath);
 
-		if (manager != null || pendingTransaction(contextPath)) {
+		if (manager != null || pendingTransaction(contextPath) || !deploymentInfos.containsKey(contextPath)) {
 			return;
 		}
 		try {

@@ -15,14 +15,10 @@
  */
 package org.ops4j.pax.web.itest.container.jsp;
 
-import javax.servlet.Servlet;
-
-import org.junit.Ignore;
 import org.junit.Test;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.ops4j.pax.web.service.WebContainer;
-import org.osgi.service.http.HttpContext;
 
 /**
  * The tests contained here will test the usage of the PAX Web Jsp directly with the HttpService, without
@@ -54,62 +50,5 @@ public abstract class AbstractJspSelfRegistrationIntegrationTest extends Abstrac
 
 		wc.unregisterJspServlet(urlAlias, null);
 	}
-
-	/**
-	 * Tests the custom class loader described in PAXWEB-498
-	 */
-	@Test
-	@Ignore("In Pax Web 8 JSPs are handled without ClassLoader tricks")
-	public void testJSPEngineCustomClassLoader() throws Exception {
-		WebContainer httpService = getWebContainer(context);
-
-		String urlAlias = "/jsp/jspSelfRegistrationTest.jsp";
-//		LoggingJasperClassLoader loggingJasperClassLoader = new LoggingJasperClassLoader(bundleContext.getBundle(), JasperClassLoader.class.getClassLoader());
-		Servlet servlet = null;//new JspServletWrapper(urlAlias, loggingJasperClassLoader);
-		HttpContext customHttpContext = httpService.createDefaultHttpContext();
-		httpService.registerServlet(urlAlias, servlet, null, customHttpContext);
-
-		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'TEST OK'",
-						resp -> resp.contains("TEST OK"))
-				.doGETandExecuteTest("http://127.0.0.1:8181" + urlAlias);
-
-//		String classLoaderLog = loggingJasperClassLoader.getLogBuilder().toString();
-//		System.out.println("classLoaderLog:\n" + classLoaderLog);
-//		assertTrue("Logging class loader didn't log anything !", classLoaderLog.length() > 0);
-
-		httpService.unregisterServlet(servlet);
-	}
-
-//	private static class LoggingJasperClassLoader extends JasperClassLoader {
-//
-//		StringBuilder logBuilder = new StringBuilder();
-//
-//		LoggingJasperClassLoader(Bundle bundle, ClassLoader parent) {
-//			super(bundle, parent);
-//		}
-//
-//		@Override
-//		public URL getResource(String name) {
-//			logBuilder.append("getResource(").append(name).append(")\n");
-//			return super.getResource(name);
-//		}
-//
-//		@Override
-//		public Enumeration<URL> getResources(String name) throws IOException {
-//			logBuilder.append("getResources(").append(name).append(")\n");
-//			return super.getResources(name);
-//		}
-//
-//		@Override
-//		public Class<?> loadClass(String name) throws ClassNotFoundException {
-//			logBuilder.append("loadClass(").append(name).append(")\n");
-//			return super.loadClass(name);
-//		}
-//
-//		StringBuilder getLogBuilder() {
-//			return logBuilder;
-//		}
-//	}
 
 }
