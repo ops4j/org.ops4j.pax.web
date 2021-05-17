@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.spi.model.elements;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,6 +24,7 @@ import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -45,13 +47,21 @@ import org.osgi.framework.ServiceReference;
 public class FilterModel extends ElementModel<Filter, FilterEventData> {
 
 	/**
-	 * <p>URL patterns as specified by:<ul>
+	 * <p>URL patterns and servlet names (per dispatcher type) as specified by:<ul>
 	 *     <li>Pax Web specific extensions to {@link org.osgi.service.http.HttpService}</li>
 	 *     <li>Whiteboard Service specification</li>
 	 *     <li>Servlet API specification</li>
 	 * </ul></p>
+	 *
+	 * <p>Additionally we store regex mappings here</p>
 	 */
-	private String[] urlPatterns;
+	private final List<Mapping> mappingsPerDispatcherTypes = new LinkedList<>();
+
+	/* These 3 fields contain flat collections of mappings */
+
+	private String[] flatUrlPatterns;
+	private String[] flatServletNames;
+	private String[] flatRegexPatterns;
 
 	/**
 	 * When using {@link javax.servlet.ServletContext#addFilter(String, Filter)} and
@@ -60,16 +70,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 	 */
 	private final List<DynamicMapping> dynamicUrlPatterns = new LinkedList<>();
 
-	/** Servlet names for filter mapping. {@code <filter-mapping>/<servlet-name>} */
-	private String[] servletNames;
-
 	private final List<DynamicMapping> dynamicServletNames = new LinkedList<>();
-
-	/** Regex mapping from OSGi Whiteboard Service specification. Not available in Servet specification. */
-	private String[] regexMapping;
-
-	/** {@link DispatcherType Dispatcher types} for filter mapping. {@code <filter-mapping>/<dispatcher>} */
-	private String[] dispatcherTypes;
 
 	/** Filter name that defaults to FQCN of the {@link Filter}. {@code <filter>/<filter-name>} */
 	private final String name;
@@ -115,27 +116,54 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		this.setElementReference(reference);
 	}
 
-	public FilterModel(String filterName, String[] urlPatterns, String[] servletNames, String[] regexMapping,
+	public FilterModel(String filterName, String[] urlPatterns, String[] servletNames, String[] regexPatterns,
 			Filter filter, Dictionary<String, String> initParams, Boolean asyncSupported) {
-		this(urlPatterns, servletNames, regexMapping, null,
+		this(urlPatterns, servletNames, regexPatterns, null,
 				filterName, Utils.toMap(initParams), asyncSupported, filter, null, null, null, null);
 	}
 
-	public FilterModel(String filterName, String[] urlPatterns, String[] servletNames, String[] regexMapping,
+	public FilterModel(String filterName, String[] urlPatterns, String[] servletNames, String[] regexPatterns,
 			Class<? extends Filter> filterClass, Dictionary<String, String> initParams, Boolean asyncSupported) {
-		this(urlPatterns, servletNames, regexMapping, null,
+		this(urlPatterns, servletNames, regexPatterns, null,
 				filterName, Utils.toMap(initParams), asyncSupported, null, filterClass, null, null, null);
 	}
 
 	@SuppressWarnings("deprecation")
-	private FilterModel(String[] urlPatterns, String[] servletNames, String[] regexMapping, String[] dispatcherTypes,
+	private FilterModel(String[] urlPatterns, String[] servletNames, String[] regexPatterns, String[] dispatcherTypes,
 			String name, Map<String, String> initParams, Boolean asyncSupported, Filter filter,
 			Class<? extends Filter> filterClass, ServiceReference<? extends Filter> reference,
 			Supplier<? extends Filter> supplier, Bundle registeringBundle) {
 
-		this.urlPatterns = Path.normalizePatterns(urlPatterns);
-		this.servletNames = servletNames != null ? Arrays.copyOf(servletNames, servletNames.length) : null;
-		this.regexMapping = regexMapping != null ? Arrays.copyOf(regexMapping, regexMapping.length) : null;
+		DispatcherType[] dts = new DispatcherType[dispatcherTypes == null ? 0 : dispatcherTypes.length];
+		if (dts.length > 0) {
+			for (int i = 0; i < dispatcherTypes.length; i++) {
+				dts[i] = DispatcherType.valueOf(dispatcherTypes[i].toUpperCase(Locale.ROOT));
+			}
+		}
+		if (dts.length == 0 && initParams != null) {
+			// legacy method to get filter dispatcher types
+			String dispatchers = initParams.remove(PaxWebConstants.INIT_PARAM_FILTER_MAPPING_DISPATCHER);
+			if (dispatchers != null) {
+				String[] types = dispatchers.split("\\s*,\\s*");
+				dts = new DispatcherType[types.length];
+				int i = 0;
+				for (String t : types) {
+					dts[i++] = DispatcherType.valueOf(t.toUpperCase());
+				}
+			} else {
+				dts = new DispatcherType[] { DispatcherType.REQUEST };
+			}
+		}
+
+		// this constructor allows only single <set of dispatcher types> -> <mapping>
+		Mapping map = new Mapping();
+		map.dispatcherTypes = dts;
+		map.urlPatterns = urlPatterns != null ? Path.normalizePatterns(urlPatterns) : null;
+		map.servletNames = servletNames != null ? Arrays.copyOf(servletNames, servletNames.length) : null;
+		map.regexPatterns = regexPatterns != null ? Arrays.copyOf(regexPatterns, regexPatterns.length) : null;
+		if (!(map.urlPatterns == null && map.servletNames == null && map.regexPatterns == null)) {
+			this.mappingsPerDispatcherTypes.add(map);
+		}
 
 		this.initParams = initParams == null ? Collections.emptyMap() : new LinkedHashMap<>(initParams);
 		this.asyncSupported = asyncSupported;
@@ -162,22 +190,6 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 			name = UUID.randomUUID().toString();
 		}
 		this.name = name;
-
-		this.dispatcherTypes = dispatcherTypes;
-		if (this.dispatcherTypes == null || this.dispatcherTypes.length == 0) {
-			// legacy method to get filter dispatcher types
-			String dispatchers = this.initParams.remove(PaxWebConstants.INIT_PARAM_FILTER_MAPPING_DISPATCHER);
-			if (dispatchers != null) {
-				String[] types = dispatchers.split("\\s*,\\s*");
-				this.dispatcherTypes = new String[types.length];
-				int i = 0;
-				for (String t : types) {
-					this.dispatcherTypes[i++] = DispatcherType.valueOf(t.toUpperCase()).name();
-				}
-			} else {
-				this.dispatcherTypes = new String[] { DispatcherType.REQUEST.name() };
-			}
-		}
 	}
 
 	@Override
@@ -196,14 +208,18 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 					+ " or service reference");
 		}
 
-		sources = 0;
-		sources += (this.servletNames != null && this.servletNames.length > 0 ? 1 : 0);
-		sources += (this.urlPatterns != null && this.urlPatterns.length > 0 ? 1 : 0);
-		sources += (this.regexMapping != null && this.regexMapping.length > 0 ? 1 : 0);
+		if (!dynamic) {
+			for (Mapping map : mappingsPerDispatcherTypes) {
+				sources = 0;
+				sources += (map.servletNames != null && map.servletNames.length > 0 ? 1 : 0);
+				sources += (map.urlPatterns != null && map.urlPatterns.length > 0 ? 1 : 0);
+				sources += (map.regexPatterns != null && map.regexPatterns.length > 0 ? 1 : 0);
 
-		if (!dynamic && sources == 0) {
-			throw new IllegalArgumentException("Please specify one of: servlet name mapping, url pattern mapping"
-					+ " or regex mapping");
+				if (sources == 0) {
+					throw new IllegalArgumentException("Please specify one of: servlet name mapping, url pattern mapping"
+							+ " or regex mapping");
+				}
+			}
 		}
 
 		if (dynamic) {
@@ -214,6 +230,32 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 				throw new IllegalArgumentException("For dynamic filter registration, please specify one of:"
 						+ " servlet name mapping or url pattern mapping");
 			}
+		}
+
+		// no more mapping changes expected, so we can flatten url mappings, servlet names
+		// and regexp mappings for toString() purposes
+		List<String> up = new ArrayList<>();
+		List<String> sn = new ArrayList<>();
+		List<String> rp = new ArrayList<>();
+		for (Mapping map : mappingsPerDispatcherTypes) {
+			if (map.urlPatterns != null) {
+				up.addAll(Arrays.asList(map.urlPatterns));
+			}
+			if (map.servletNames != null) {
+				sn.addAll(Arrays.asList(map.servletNames));
+			}
+			if (map.regexPatterns != null) {
+				rp.addAll(Arrays.asList(map.regexPatterns));
+			}
+		}
+		if (!up.isEmpty()) {
+			this.flatUrlPatterns = up.toArray(new String[up.size()]);
+		}
+		if (!sn.isEmpty()) {
+			this.flatServletNames = sn.toArray(new String[sn.size()]);
+		}
+		if (!rp.isEmpty()) {
+			this.flatRegexPatterns = rp.toArray(new String[rp.size()]);
 		}
 
 		return Boolean.TRUE;
@@ -231,8 +273,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 
 	@Override
 	public FilterEventData asEventData() {
-		FilterEventData data = new FilterEventData(name, urlPatterns,  servletNames, regexMapping, dispatcherTypes,
-				filter, filterClass);
+		FilterEventData data = new FilterEventData(name, mappingsPerDispatcherTypes, filter, filterClass);
 		setCommonEventProperties(data);
 		return data;
 	}
@@ -251,37 +292,13 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 	public String toString() {
 		return "FilterModel{id=" + getId()
 				+ ",name='" + name + "'"
-				+ (urlPatterns == null ? "" : ",urlPatterns=" + Arrays.toString(urlPatterns))
-				+ (servletNames == null ? "" : ",servletNames=" + Arrays.toString(servletNames))
-				+ (regexMapping == null ? "" : ",regexMapping=" + Arrays.toString(regexMapping))
+				+ (flatUrlPatterns == null ? "" : ",urlPatterns=" + Arrays.toString(flatUrlPatterns))
+				+ (flatServletNames == null ? "" : ",servletNames=" + Arrays.toString(flatServletNames))
+				+ (flatRegexPatterns == null ? "" : ",regexPatterns=" + Arrays.toString(flatRegexPatterns))
 				+ (filter == null ? "" : ",filter=" + filter)
 				+ (filterClass == null ? "" : ",filterClass=" + filterClass)
 				+ ",contexts=" + getContextModelsInfo()
 				+ "}";
-	}
-
-	public String[] getUrlPatterns() {
-		return urlPatterns;
-	}
-
-	public String[] getServletNames() {
-		return servletNames;
-	}
-
-	public void setServletNames(String[] servletNames) {
-		this.servletNames = servletNames;
-	}
-
-	public String[] getRegexMapping() {
-		return regexMapping;
-	}
-
-	public void setDispatcherTypes(String[] dispatcherTypes) {
-		this.dispatcherTypes = dispatcherTypes;
-	}
-
-	public String[] getDispatcherTypes() {
-		return dispatcherTypes;
 	}
 
 	public String getName() {
@@ -339,6 +356,10 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		return null; // even if it can't happen
 	}
 
+	public List<Mapping> getMappingsPerDispatcherTypes() {
+		return mappingsPerDispatcherTypes;
+	}
+
 	public List<DynamicMapping> getDynamicUrlPatterns() {
 		return dynamicUrlPatterns;
 	}
@@ -367,7 +388,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 
 		private String[] urlPatterns;
 		private String[] servletNames;
-		private String[] regexMapping;
+		private String[] regexPatterns;
 		private String[] dispatcherTypes;
 		private String filterName;
 		private Map<String, String> initParams;
@@ -398,8 +419,8 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 			return this;
 		}
 
-		public FilterModel.Builder withRegexMapping(String[] regexMapping) {
-			this.regexMapping = regexMapping;
+		public FilterModel.Builder withRegexMapping(String[] regexPatterns) {
+			this.regexPatterns = regexPatterns;
 			return this;
 		}
 
@@ -471,7 +492,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		}
 
 		public FilterModel build() {
-			FilterModel model = new FilterModel(urlPatterns, servletNames, regexMapping, dispatcherTypes,
+			FilterModel model = new FilterModel(urlPatterns, servletNames, regexPatterns, dispatcherTypes,
 					filterName, initParams, asyncSupported, filter, filterClass, reference, supplier,
 					bundle);
 			list.forEach(model::addContextModel);
@@ -481,17 +502,63 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		}
 	}
 
-	public static class DynamicMapping {
-		private boolean after;
-		private DispatcherType[] dispatcherTypes;
-		private String[] servletNames;
-		private String[] urlPatterns;
+	public static class Mapping {
+		protected DispatcherType[] dispatcherTypes;
+		protected String[] servletNames;
+		protected String[] urlPatterns;
+		protected String[] regexPatterns;
+
+		public Mapping() {
+		}
+
+		public Mapping(String[] urlPatterns, String[] servletNames) {
+			this.urlPatterns = urlPatterns;
+			this.servletNames = servletNames;
+		}
+
+		public DispatcherType[] getDispatcherTypes() {
+			return dispatcherTypes;
+		}
+
+		public void setDispatcherTypes(DispatcherType[] dispatcherTypes) {
+			this.dispatcherTypes = dispatcherTypes;
+		}
+
+		public String[] getServletNames() {
+			return servletNames;
+		}
+
+		public void setServletNames(String[] servletNames) {
+			this.servletNames = servletNames;
+		}
+
+		public String[] getUrlPatterns() {
+			return urlPatterns;
+		}
+
+		public void setUrlPatterns(String[] urlPatterns) {
+			this.urlPatterns = urlPatterns;
+		}
+
+		public String[] getRegexPatterns() {
+			return regexPatterns;
+		}
+
+		public void setRegexPatterns(String[] regexPatterns) {
+			this.regexPatterns = regexPatterns;
+		}
+	}
+
+	public static class DynamicMapping extends Mapping {
+		protected boolean after;
 
 		public static DynamicMapping forServletNames(EnumSet<DispatcherType> dispatcherTypes, String[] servletNames, boolean isMatchAfter) {
 			DynamicMapping mapping = new DynamicMapping();
 			mapping.after = isMatchAfter;
 			if (dispatcherTypes != null) {
 				mapping.dispatcherTypes = dispatcherTypes.toArray(new DispatcherType[dispatcherTypes.size()]);
+			} else {
+				mapping.dispatcherTypes = new DispatcherType[] { DispatcherType.REQUEST };
 			}
 			mapping.servletNames = servletNames;
 			return mapping;
@@ -502,6 +569,8 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 			mapping.after = isMatchAfter;
 			if (dispatcherTypes != null) {
 				mapping.dispatcherTypes = dispatcherTypes.toArray(new DispatcherType[dispatcherTypes.size()]);
+			} else {
+				mapping.dispatcherTypes = new DispatcherType[] { DispatcherType.REQUEST };
 			}
 			mapping.urlPatterns = urlPatterns;
 			return mapping;
@@ -509,18 +578,6 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 
 		public boolean isAfter() {
 			return after;
-		}
-
-		public DispatcherType[] getDispatcherTypes() {
-			return dispatcherTypes;
-		}
-
-		public String[] getServletNames() {
-			return servletNames;
-		}
-
-		public String[] getUrlPatterns() {
-			return urlPatterns;
 		}
 	}
 

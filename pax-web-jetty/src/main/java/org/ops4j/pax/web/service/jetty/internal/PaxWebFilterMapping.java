@@ -17,6 +17,7 @@ package org.ops4j.pax.web.service.jetty.internal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import javax.servlet.DispatcherType;
@@ -33,24 +34,28 @@ public class PaxWebFilterMapping extends FilterMapping {
 	private final FilterModel filterModel;
 	private final long timestamp;
 
-	public PaxWebFilterMapping(FilterModel filterModel) {
+	/**
+	 * {@link FilterMapping} with selected {@link FilterModel.Mapping}
+	 * @param filterModel
+	 * @param mapping
+	 */
+	public PaxWebFilterMapping(FilterModel filterModel, FilterModel.Mapping mapping) {
 		this.filterModel = filterModel;
 		// remember when given mapping was created to detect if associated filter should be destroyed and initialized
 		// again when configuration changes.
 		this.timestamp = filterModel.getTimestamp();
 
 		List<DispatcherType> types = new ArrayList<>();
-		for (String type : filterModel.getDispatcherTypes()) {
-			types.add(DispatcherType.valueOf(type));
-		}
+		Collections.addAll(types, mapping.getDispatcherTypes());
 		this.setDispatcherTypes(EnumSet.copyOf(types));
 
 		this.setFilterName(filterModel.getName());
-		this.setPathSpecs(filterModel.getUrlPatterns());
-		this.setServletNames(filterModel.getServletNames());
+		this.setPathSpecs(mapping.getUrlPatterns());
+		this.setServletNames(mapping.getServletNames());
 
 		// special mapping kind from Whiteboard Service spec
-		String[] regexMapping = filterModel.getRegexMapping();
+		String[] regexMapping = mapping.getRegexPatterns();
+		// TODO: special mapping kind from Whiteboard Service spec
 		if (regexMapping != null && regexMapping.length > 0) {
 			this.setPathSpecs(new String[] { "/*" });
 		}
@@ -75,12 +80,6 @@ public class PaxWebFilterMapping extends FilterMapping {
 		this.setFilterName(filterModel.getName());
 		this.setPathSpecs(dynamicMapping.getUrlPatterns());
 		this.setServletNames(dynamicMapping.getServletNames());
-
-		// special mapping kind from Whiteboard Service spec
-		String[] regexMapping = filterModel.getRegexMapping();
-		if (regexMapping != null && regexMapping.length > 0) {
-			this.setPathSpecs(new String[] { "/*" });
-		}
 	}
 
 	public FilterModel getFilterModel() {

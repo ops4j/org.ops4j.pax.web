@@ -1378,39 +1378,7 @@ class UndertowServerWrapper implements BatchVisitor {
 
 				String filterName = model.getName();
 
-				// filter mapping
-				for (String type : model.getDispatcherTypes()) {
-					DispatcherType dt = DispatcherType.valueOf(type);
-
-					model.getDynamicServletNames().forEach(dm -> {
-						if (!dm.isAfter()) {
-							for (String sn : dm.getServletNames()) {
-								deploymentInfo.addFilterServletNameMapping(filterName, sn, dt);
-							}
-						}
-					});
-					model.getDynamicUrlPatterns().forEach(dm -> {
-						if (!dm.isAfter()) {
-							for (String pattern : dm.getUrlPatterns()) {
-								deploymentInfo.addFilterUrlMapping(filterName, pattern, dt);
-							}
-						}
-					});
-					model.getDynamicServletNames().forEach(dm -> {
-						if (dm.isAfter()) {
-							for (String sn : dm.getServletNames()) {
-								deploymentInfo.addFilterServletNameMapping(filterName, sn, dt);
-							}
-						}
-					});
-					model.getDynamicUrlPatterns().forEach(dm -> {
-						if (dm.isAfter()) {
-							for (String pattern : dm.getUrlPatterns()) {
-								deploymentInfo.addFilterUrlMapping(filterName, pattern, dt);
-							}
-						}
-					});
-				}
+				configureFilterMappings(model, deploymentInfo);
 			}
 		}
 	}
@@ -1517,24 +1485,7 @@ class UndertowServerWrapper implements BatchVisitor {
 
 					String filterName = model.getName();
 
-					// filter mapping
-					for (String type : model.getDispatcherTypes()) {
-						DispatcherType dt = DispatcherType.valueOf(type);
-
-						if (model.getRegexMapping() != null && model.getRegexMapping().length > 0) {
-							// TODO: handle regexp filter mapping
-							deploymentInfo.addFilterUrlMapping(filterName, "/*", dt);
-						} else if (model.getUrlPatterns() != null) {
-							for (String pattern : model.getUrlPatterns()) {
-								deploymentInfo.addFilterUrlMapping(filterName, pattern, dt);
-							}
-						}
-						if (model.getServletNames() != null) {
-							for (String name : model.getServletNames()) {
-								deploymentInfo.addFilterServletNameMapping(filterName, name, dt);
-							}
-						}
-					}
+					configureFilterMappings(model, deploymentInfo);
 				}
 			}
 
@@ -2032,6 +1983,68 @@ class UndertowServerWrapper implements BatchVisitor {
 		}
 
 		return quick;
+	}
+
+	private void configureFilterMappings(FilterModel model, DeploymentInfo deploymentInfo) {
+		String filterName = model.getName();
+
+		if (model.isDynamic()) {
+			model.getDynamicServletNames().forEach(dm -> {
+				if (!dm.isAfter()) {
+					for (DispatcherType dt : dm.getDispatcherTypes()) {
+						for (String sn : dm.getServletNames()) {
+							deploymentInfo.addFilterServletNameMapping(filterName, sn, dt);
+						}
+					}
+				}
+			});
+			model.getDynamicUrlPatterns().forEach(dm -> {
+				if (!dm.isAfter()) {
+					for (DispatcherType dt : dm.getDispatcherTypes()) {
+						for (String pattern : dm.getUrlPatterns()) {
+							deploymentInfo.addFilterUrlMapping(filterName, pattern, dt);
+						}
+					}
+				}
+			});
+			model.getDynamicServletNames().forEach(dm -> {
+				if (dm.isAfter()) {
+					for (DispatcherType dt : dm.getDispatcherTypes()) {
+						for (String sn : dm.getServletNames()) {
+							deploymentInfo.addFilterServletNameMapping(filterName, sn, dt);
+						}
+					}
+				}
+			});
+			model.getDynamicUrlPatterns().forEach(dm -> {
+				if (dm.isAfter()) {
+					for (DispatcherType dt : dm.getDispatcherTypes()) {
+						for (String pattern : dm.getUrlPatterns()) {
+							deploymentInfo.addFilterUrlMapping(filterName, pattern, dt);
+						}
+					}
+				}
+			});
+		} else {
+			// non-dynamic mapping
+			for (FilterModel.Mapping mapping : model.getMappingsPerDispatcherTypes()) {
+				for (DispatcherType dt : mapping.getDispatcherTypes()) {
+					if (mapping.getRegexPatterns() != null && mapping.getRegexPatterns().length > 0) {
+						// TODO: handle regexp filter mapping
+						deploymentInfo.addFilterUrlMapping(filterName, "/*", dt);
+					} else if (mapping.getUrlPatterns() != null) {
+						for (String pattern : mapping.getUrlPatterns()) {
+							deploymentInfo.addFilterUrlMapping(filterName, pattern, dt);
+						}
+					}
+					if (mapping.getServletNames() != null) {
+						for (String name : mapping.getServletNames()) {
+							deploymentInfo.addFilterServletNameMapping(filterName, name, dt);
+						}
+					}
+				}
+			}
+		}
 	}
 
 //	/**

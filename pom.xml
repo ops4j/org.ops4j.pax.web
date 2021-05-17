@@ -898,7 +898,7 @@
 
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
-				<artifactId>helloworld-wc</artifactId>
+				<artifactId>wc-helloworld</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

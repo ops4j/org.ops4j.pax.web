@@ -315,9 +315,14 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	private final SessionConfigurationModel sessionConfiguration = new SessionConfigurationModel();
 
 	/**
-	 * Flag indicating whether this {@link OsgiContextModel} comes from Whiteboard or HttpService.
+	 * Flag indicating whether this {@link OsgiContextModel} comes from Whiteboard.
 	 */
 	private final boolean whiteboard;
+
+	/**
+	 * Flag indicating whether this {@link OsgiContextModel} comes from a WAB.
+	 */
+	private boolean wab;
 
 	/** Tracks {@link Change unregistration changes} for dynamic servlets/filters/listeners */
 	private final List<Change> unregistrations = new ArrayList<>();
@@ -664,6 +669,21 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	 */
 	public boolean isWhiteboard() {
 		return whiteboard;
+	}
+
+	/**
+	 * A "WAB" context is always created by pax-web-extender-war when a WAB is installed and provides dedicated,
+	 * direct (no service reference and no supplier) to {@link HttpContext}.
+	 *
+	 * TODO: check what happens if BundleActivator of the WAB interacts with HttpService or with Whiteboard
+	 * @return
+	 */
+	public boolean isWab() {
+		return wab;
+	}
+
+	public void setWab(boolean wab) {
+		this.wab = wab;
 	}
 
 	@Override

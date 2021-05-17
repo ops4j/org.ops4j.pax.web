@@ -17,6 +17,7 @@ package org.ops4j.pax.web.service.spi.model.events;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
+import org.osgi.service.http.HttpContext;
 
 /**
  * Event related to registration of a web application (WAB), described in OSGi CMPN 128 Web Applications Specification.
@@ -62,11 +63,13 @@ public class WebApplicationEvent {
 
 	private final Throwable throwable;
 
-	public WebApplicationEvent(State type, Bundle bundle) {
-		this(type, bundle, null);
+	private HttpContext context;
+
+	public WebApplicationEvent(State type, Bundle bundle, HttpContext context) {
+		this(type, bundle, context, null);
 	}
 
-	public WebApplicationEvent(State type, Bundle bundle, Throwable throwable) {
+	public WebApplicationEvent(State type, Bundle bundle, HttpContext context, Throwable throwable) {
 		this.type = type;
 		this.bundle = bundle;
 		this.bundleId = bundle.getBundleId();
@@ -76,6 +79,8 @@ public class WebApplicationEvent {
 		this.timestamp = System.currentTimeMillis();
 
 		this.throwable = throwable;
+
+		this.context = context;
 	}
 
 	@Override
@@ -110,6 +115,10 @@ public class WebApplicationEvent {
 
 	public Throwable getException() {
 		return throwable;
+	}
+
+	public HttpContext getContext() {
+		return context;
 	}
 
 }

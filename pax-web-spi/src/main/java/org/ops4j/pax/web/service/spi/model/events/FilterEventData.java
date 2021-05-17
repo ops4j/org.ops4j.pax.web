@@ -15,8 +15,12 @@
  */
 package org.ops4j.pax.web.service.spi.model.events;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import javax.servlet.Filter;
+
+import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 
 public class FilterEventData extends WebElementEventData {
 
@@ -28,21 +32,27 @@ public class FilterEventData extends WebElementEventData {
 	private final Filter filter;
 	private final Class<? extends Filter> filterClass;
 
-	public FilterEventData(String filterName, String[] urlPatterns, String[] servletNames,
-			String[] regexMapping, String[] dispatcherTypes, Filter filter, Class<? extends Filter> filterClass) {
+	public FilterEventData(String filterName, List<FilterModel.Mapping> mapping, Filter filter, Class<? extends Filter> filterClass) {
 		this.filterName = filterName;
-		if (urlPatterns != null) {
-			this.urlPatterns = Arrays.copyOf(urlPatterns, urlPatterns.length);
+		List<String> urlPatterns = new ArrayList<>();
+		List<String> servletNames = new ArrayList<>();
+		List<String> regexMapping = new ArrayList<>();
+		// I explicitly drop the DispatcherType -> mapping relation flattening all mapping information
+		for (FilterModel.Mapping m : mapping) {
+			String[] up = m.getUrlPatterns();
+			if (up != null) {
+				this.urlPatterns = Arrays.copyOf(up, up.length);
+			}
+			String[] sn = m.getServletNames();
+			if (sn != null) {
+				this.servletNames = Arrays.copyOf(sn, sn.length);
+			}
+			String[] rm = m.getRegexPatterns();
+			if (rm != null) {
+				this.regexMapping = Arrays.copyOf(rm, rm.length);
+			}
 		}
-		if (servletNames != null) {
-			this.servletNames = Arrays.copyOf(servletNames, servletNames.length);
-		}
-		if (regexMapping != null) {
-			this.regexMapping = Arrays.copyOf(regexMapping, regexMapping.length);
-		}
-		if (dispatcherTypes != null) {
-			this.dispatcherTypes = Arrays.copyOf(dispatcherTypes, dispatcherTypes.length);
-		}
+
 		this.filter = filter;
 		this.filterClass = filterClass;
 	}
@@ -61,10 +71,6 @@ public class FilterEventData extends WebElementEventData {
 
 	public String[] getRegexMapping() {
 		return regexMapping;
-	}
-
-	public String[] getDispatcherTypes() {
-		return dispatcherTypes;
 	}
 
 	public Filter getFilter() {

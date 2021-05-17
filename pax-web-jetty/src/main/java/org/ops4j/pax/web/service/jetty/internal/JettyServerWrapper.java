@@ -1256,7 +1256,6 @@ class JettyServerWrapper implements BatchVisitor {
 				OsgiServletContext context = osgiServletContexts.get(highestRankedModel);
 
 				PaxWebFilterHolder holder = new PaxWebFilterHolder(model, context);
-				PaxWebFilterMapping mapping = new PaxWebFilterMapping(model);
 
 				newFilterHolders[pos] = holder;
 				newFilterMappings[pos] = configureFilterMappings(model);
@@ -1313,7 +1312,9 @@ class JettyServerWrapper implements BatchVisitor {
 			});
 		} else {
 			// normal OSGi mapping
-			mappings.add(new PaxWebFilterMapping(model));
+			for (FilterModel.Mapping map : model.getMappingsPerDispatcherTypes()) {
+				mappings.add(new PaxWebFilterMapping(model, map));
+			}
 		}
 
 		return mappings;

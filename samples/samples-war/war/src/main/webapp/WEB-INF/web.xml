@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	    http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+
+-->
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+	<display-name>Pax Web Extender WAR Sample</display-name>
+
+	<servlet>
+		<servlet-name>example.servlet</servlet-name>
+		<servlet-class>org.ops4j.pax.web.extender.samples.war.internal.ExampleServlet</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>helloworld.servlet.wc</servlet-name>
+		<servlet-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldServlet</servlet-class>
+		<init-param>
+			<param-name>from</param-name>
+			<param-value>WebContainer</param-value>
+		</init-param>
+	</servlet>
+
+	<servlet>
+		<servlet-name>helloworld.servlet.wc.sn</servlet-name>
+		<servlet-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldServlet</servlet-class>
+		<init-param>
+			<param-name>from</param-name>
+			<param-value>WebContainer</param-value>
+		</init-param>
+	</servlet>
+
+	<servlet>
+		<servlet-name>test-jsp</servlet-name>
+		<jsp-file>/subjsp/test.jsp</jsp-file>
+	</servlet>
+
+	<servlet>
+		<servlet-name>test-silent-startup-load</servlet-name>
+		<servlet-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldStartupSilentServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet>
+		<servlet-name>test-talkative-startup-load</servlet-name>
+		<servlet-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldStartupTalkativeServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>test-jsp</servlet-name>
+		<url-pattern>/wc/subjsp</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>example.servlet</servlet-name>
+		<url-pattern>/wc/example</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>helloworld.servlet.wc</servlet-name>
+		<url-pattern>/wc</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>helloworld.servlet.wc.sn</servlet-name>
+		<url-pattern>/wc/sn</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>example.servlet</servlet-name>
+		<url-pattern>/wc/alias</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>test-talkative-startup-load</servlet-name>
+		<url-pattern>/wc/talkative</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>test-silent-startup-load</servlet-name>
+		<url-pattern>/wc/silent</url-pattern>
+	</servlet-mapping>
+
+	<filter>
+		<filter-name>helloworld.filter.wc</filter-name>
+		<filter-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldFilter</filter-class>
+		<init-param>
+			<param-name>title</param-name>
+			<param-value>Hello World (url pattern)</param-value>
+		</init-param>
+	</filter>
+
+	<filter>
+		<filter-name>helloworld.filter.wc.sn</filter-name>
+		<filter-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldFilter</filter-class>
+		<init-param>
+			<param-name>title</param-name>
+			<param-value>Hello World (servlet name)</param-value>
+		</init-param>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>helloworld.filter.wc.sn</filter-name>
+		<servlet-name>helloworld.servlet.wc.sn</servlet-name>
+	</filter-mapping>
+
+	<filter-mapping>
+		<filter-name>helloworld.filter.wc</filter-name>
+		<url-pattern>/wc</url-pattern>
+	</filter-mapping>
+
+	<filter-mapping>
+		<filter-name>helloworld.filter.wc</filter-name>
+		<url-pattern>/wc/example</url-pattern>
+	</filter-mapping>
+
+	<listener>
+		<listener-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldListener</listener-class>
+	</listener>
+
+	<listener>
+		<listener-class>org.ops4j.pax.web.extender.samples.war.internal.ExampleServletContextListener</listener-class>
+	</listener>
+
+	<error-page>
+		<error-code>404</error-code>
+		<location>/error.jsp</location>
+	</error-page>
+	<error-page>
+		<error-code>403</error-code>
+		<location>/error-403.jsp</location>
+	</error-page>
+
+	<error-page>
+		<exception-type>java.lang.Exception</exception-type>
+		<location>/exception.jsp</location>
+	</error-page>
+
+	<!--
+		Because this WAR includes helloworld-wc lib, which has now ROOT/index.html,
+		we need artificial welcome-file
+	-->
+	<welcome-file-list>
+		<welcome-file>default.txt</welcome-file>
+	</welcome-file-list>
+
+</web-app>

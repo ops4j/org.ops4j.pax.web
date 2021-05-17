@@ -15,6 +15,8 @@
  */
 package org.ops4j.pax.web.service.tomcat.internal;
 
+import javax.servlet.DispatcherType;
+
 import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 
@@ -28,58 +30,78 @@ public class PaxWebFilterMap extends FilterMap {
 	/** Flag to mark the filter as "initial" - that handles preprocessors and security in difficult Tomcat env. */
 	private final boolean initialFilter;
 
+	/**
+	 * Creates a {@link FilterMap} that has to be configured later (dynamic or static mappings
+	 * per dispatcher type)
+	 * @param filterModel
+	 */
+	public PaxWebFilterMap(FilterModel filterModel, FilterModel.Mapping mapping) {
+		this.filterModel = filterModel;
+		this.initialFilter = false;
+
+		setFilterName(filterModel.getName());
+		addMaping(mapping);
+	}
+
+	public PaxWebFilterMap(FilterModel filterModel, FilterModel.DynamicMapping mapping) {
+		this.filterModel = filterModel;
+		this.initialFilter = false;
+
+		setFilterName(filterModel.getName());
+		addDynamicMaping(mapping);
+	}
+
+	/**
+	 * Create a {@link FilterMap} with just one mapping
+	 * @param filterModel
+	 * @param initialFilter
+	 */
 	public PaxWebFilterMap(FilterModel filterModel, boolean initialFilter) {
 		this.filterModel = filterModel;
 		this.initialFilter = initialFilter;
 
 		setFilterName(filterModel.getName());
 
-		if (filterModel.getServletNames() != null) {
-			for (String servletName : filterModel.getServletNames()) {
+		if (filterModel.getMappingsPerDispatcherTypes().size() != 1) {
+			throw new IllegalArgumentException("Filter Mapping should have one set of mappings specified");
+		}
+
+		addMaping(filterModel.getMappingsPerDispatcherTypes().get(0));
+	}
+
+	public void addMaping(FilterModel.Mapping mapping) {
+		if (mapping.getDispatcherTypes() != null) {
+			for (DispatcherType dispatcherType : mapping.getDispatcherTypes()) {
+				setDispatcher(dispatcherType.name());
+			}
+		}
+		if (mapping.getRegexPatterns() != null && mapping.getRegexPatterns().length > 0) {
+			// special mapping kind from Whiteboard Service spec
+			addURLPatternDecoded("*");
+		} else if (mapping.getUrlPatterns() != null && mapping.getUrlPatterns().length > 0) {
+			for (String urlPattern : mapping.getUrlPatterns()) {
+				addURLPatternDecoded(urlPattern);
+			}
+		} else if (mapping.getServletNames() != null && mapping.getServletNames().length > 0) {
+			for (String servletName : mapping.getServletNames()) {
 				addServletName(servletName);
 			}
 		}
-		if (filterModel.getRegexMapping() != null && filterModel.getRegexMapping().length > 0) {
-			// special mapping kind from Whiteboard Service spec
-			addURLPatternDecoded("*");
-		} else if (filterModel.getUrlPatterns() != null) {
-			for (String urlPattern : filterModel.getUrlPatterns()) {
-				addURLPatternDecoded(urlPattern);
+	}
+
+	public void addDynamicMaping(FilterModel.DynamicMapping mapping) {
+		if (mapping.getDispatcherTypes() != null) {
+			for (DispatcherType dispatcherType : mapping.getDispatcherTypes()) {
+				setDispatcher(dispatcherType.name());
 			}
 		}
-		if (filterModel.isDynamic()) {
-			filterModel.getDynamicServletNames().forEach(dm -> {
-				if (!dm.isAfter()) {
-					for (String sn : dm.getServletNames()) {
-						addServletName(sn);
-					}
-				}
-			});
-			filterModel.getDynamicUrlPatterns().forEach(dm -> {
-				if (!dm.isAfter()) {
-					for (String pattern : dm.getUrlPatterns()) {
-						addURLPatternDecoded(pattern);
-					}
-				}
-			});
-			filterModel.getDynamicServletNames().forEach(dm -> {
-				if (dm.isAfter()) {
-					for (String sn : dm.getServletNames()) {
-						addServletName(sn);
-					}
-				}
-			});
-			filterModel.getDynamicUrlPatterns().forEach(dm -> {
-				if (dm.isAfter()) {
-					for (String pattern : dm.getUrlPatterns()) {
-						addURLPatternDecoded(pattern);
-					}
-				}
-			});
-		}
-		if (filterModel.getDispatcherTypes() != null) {
-			for (String dispatcherType : filterModel.getDispatcherTypes()) {
-				setDispatcher(dispatcherType);
+		if (mapping.getUrlPatterns() != null && mapping.getUrlPatterns().length > 0) {
+			for (String urlPattern : mapping.getUrlPatterns()) {
+				addURLPatternDecoded(urlPattern);
+			}
+		} else if (mapping.getServletNames() != null && mapping.getServletNames().length > 0) {
+			for (String servletName : mapping.getServletNames()) {
+				addServletName(servletName);
 			}
 		}
 	}

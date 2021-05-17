@@ -126,15 +126,15 @@ public class PaxWebStandardContext extends StandardContext {
 
 		FilterModel filterModel = new FilterModel("__osgi@" + System.identityHashCode(osgiInitFilter),
 				new String[] { "*" }, null, null, osgiInitFilter, null, true);
-		filterModel.setDispatcherTypes(new String[] {
-				DispatcherType.ERROR.name(),
-				DispatcherType.FORWARD.name(),
-				DispatcherType.INCLUDE.name(),
-				DispatcherType.REQUEST.name(),
-				DispatcherType.ASYNC.name()
+		filterModel.getMappingsPerDispatcherTypes().get(0).setDispatcherTypes(new DispatcherType[] {
+				DispatcherType.ERROR,
+				DispatcherType.FORWARD,
+				DispatcherType.INCLUDE,
+				DispatcherType.REQUEST,
+				DispatcherType.ASYNC
 		});
-		osgiInitFilterMap = new PaxWebFilterMap(filterModel, true);
 		osgiInitFilterDef = new PaxWebFilterDef(filterModel, true, null);
+		osgiInitFilterMap = new PaxWebFilterMap(filterModel, true);
 
 		addFilterDef(osgiInitFilterDef);
 		addFilterMapBefore(osgiInitFilterMap);

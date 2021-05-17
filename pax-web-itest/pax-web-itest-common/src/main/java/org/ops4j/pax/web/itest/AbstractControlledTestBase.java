@@ -30,9 +30,11 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.ops4j.pax.logging.PaxLoggingConstants;
 import org.ops4j.pax.web.itest.utils.VersionUtils;
 import org.ops4j.pax.web.itest.utils.WaitCondition;
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -213,6 +215,13 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle("org.ops4j.pax.web", "pax-web-tomcat-common")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.ops4j.pax.web", "pax-web-extender-war")
+								.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				// pax-url-war requires osgi promise+function
+				mavenBundle("org.osgi", "org.osgi.util.promise")
+								.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.osgi", "org.osgi.util.function")
+								.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ops4j.pax.url", "pax-url-war").classifier("uber")
 								.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
 		};
 	}
@@ -407,6 +416,20 @@ public abstract class AbstractControlledTestBase {
 		} catch (InterruptedException | BundleException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	/**
+	 * Installs a bundle using {@code webbundle:} protocol
+	 * @param artifactId
+	 * @param contextPath
+	 * @return
+	 */
+	protected Bundle installAndStartWebBundle(String artifactId, String contextPath) {
+		String uri = String.format("webbundle:%s?%s=%s&%s=org.ops4j.pax.web.samples.%s",
+				sampleWarURI(artifactId),
+				PaxWebConstants.CONTEXT_PATH_KEY, contextPath,
+				Constants.BUNDLE_SYMBOLICNAME, artifactId);
+		return installAndStartBundle(uri);
 	}
 
 	/**

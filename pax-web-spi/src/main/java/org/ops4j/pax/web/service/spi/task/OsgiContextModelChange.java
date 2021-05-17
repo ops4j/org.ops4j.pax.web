@@ -40,6 +40,8 @@ public class OsgiContextModelChange extends Change {
 		if (this.getKind() == OpCode.ADD) {
 			operations.addAll(osgiContextModel.getUnregistrations());
 			operations.add(new OsgiContextModelChange(OpCode.DELETE, null, osgiContextModel, null));
+		} else if (this.getKind() == OpCode.ASSOCIATE) {
+			operations.add(new OsgiContextModelChange(OpCode.DISASSOCIATE, context, osgiContextModel, null));
 		}
 	}
 

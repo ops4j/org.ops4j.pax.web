@@ -57,12 +57,15 @@ public class WebApplicationHelper extends DefaultServletContextHelper {
 			if (e != null) {
 				return e.nextElement();
 			}
+
+			// in Pax Web 7 the WebAppHttpContext for WABs falled back to org.osgi.framework.Bundle.getResource() call
+			// which is the default implementation for HttpService scenario, here we are explicitly NOT doing the same.
 		}
+
+		// TODO: this helper should contain the bundles from OsgiServletContextClassLoader that should be checked
+		//       for resources (also in META-INF/resources)
 
 		return null;
 	}
-
-	// TODO: this helper should contain the bundles from OsgiServletContextClassLoader that should be checked
-	//       for resources (also in META-INF/resources)
 
 }

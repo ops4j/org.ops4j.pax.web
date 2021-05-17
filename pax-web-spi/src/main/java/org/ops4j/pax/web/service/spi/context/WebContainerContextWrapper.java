@@ -56,10 +56,15 @@ public class WebContainerContextWrapper extends DefaultHttpContext {
 	}
 
 	public WebContainerContextWrapper(final Bundle bundle, final ServletContextHelper helper, final String name) {
+		this(bundle, helper, name, true);
+	}
+
+	public WebContainerContextWrapper(final Bundle bundle, final ServletContextHelper helper, final String name,
+			boolean shared) {
 		super(bundle, name == null ? uniqueId(helper) : name);
 		this.httpContext = null;
 		this.servletContextHelper = helper;
-		this.shared = true;
+		this.shared = shared;
 	}
 
 	public static String uniqueId(Object context) {

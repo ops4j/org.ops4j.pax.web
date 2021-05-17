@@ -19,6 +19,7 @@ package org.ops4j.pax.web.extender.war.internal.model;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EventListener;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
@@ -57,6 +60,7 @@ import org.ops4j.pax.web.extender.war.internal.WarExtenderContext;
 import org.ops4j.pax.web.extender.war.internal.WebApplicationHelper;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.model.ContextMetadataModel;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
@@ -174,6 +178,13 @@ public class BundleWebApplication {
 	/** Stored instance of {@link OsgiContextModel} to get access (at undeployment time) to dynamic registrations */
 	private OsgiContextModel osgiContextModel = null;
 
+	/**
+	 * Stored instance of {@link org.osgi.service.http.HttpContext} that wraps
+	 * {@link org.osgi.service.http.context.ServletContextHelper}, so we're able to reference this context
+	 * both in Whiteboard and HttpService scenarios.
+ 	 */
+	private WebContainerContext httpContext = null;
+
 	public BundleWebApplication(Bundle bundle, WebContainerManager webContainerManager,
 			WarExtenderContext extenderContext, ExecutorService pool) {
 		this.bundle = bundle;
@@ -234,7 +245,7 @@ public class BundleWebApplication {
 		// related to WAB's bundle
 
 		State state = deploymentState.getAndSet(State.UNDEPLOYING);
-		extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYING, bundle));
+		extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYING, bundle, httpContext));
 
 		// get a WebContainer for the last time - it doesn't have to be available (no need to lock here)
 		ServiceReference<WebContainer> ref = webContainerServiceRef;
@@ -316,7 +327,7 @@ public class BundleWebApplication {
 
 		// whether the undeployment failed, succeeded or wasn't needed, we broadcast an event and set final stage.
 		deploymentState.set(State.UNDEPLOYED);
-		extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYED, bundle));
+		extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYED, bundle, null));
 
 		webContainerManager.releaseContainer(bundle.getBundleContext(), ref);
 	}
@@ -413,7 +424,7 @@ public class BundleWebApplication {
 				// parsed web.xml + fragments + annotations
 
 				State state = deploymentState.getAndSet(State.UNDEPLOYING);
-				extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYING, bundle));
+				extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYING, bundle, httpContext));
 
 				// similar state check as with stop(), but with slightly different handling
 				switch (state) {
@@ -473,7 +484,7 @@ public class BundleWebApplication {
 				// means that if the WebContainer is available again, the WAB will be scheduled to ALLOCATING_CONTEXT
 				// state
 				deploymentState.set(State.WAITING_FOR_WEB_CONTAINER);
-				extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYED, bundle));
+				extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYED, bundle, null));
 			}
 
 			webContainerManager.releaseContainer(bundle.getBundleContext(), ref);
@@ -500,7 +511,7 @@ public class BundleWebApplication {
 					LOG.debug("WebContainer service reference is not available. {} enters Grace Period state.", this);
 					// note: there may be duplicate WAITING events if web container is not available before
 					// context path reservation and before actual registration of webapp's web elements.
-					extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.WAITING, bundle));
+					extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.WAITING, bundle, null));
 				}
 			}
 			return view;
@@ -579,7 +590,7 @@ public class BundleWebApplication {
 			if (state == State.CONFIGURING) {
 				LOG.info("Configuring {}", this);
 				// Post an org/osgi/service/web/DEPLOYING event
-				extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.DEPLOYING, bundle));
+				extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.DEPLOYING, bundle, null));
 
 				// Collect deployment information by processing the web.xml descriptor and other sources of metadata
 				processMetadata();
@@ -625,7 +636,7 @@ public class BundleWebApplication {
 					// deployment fails. [...] If the prior Web Application with the same Context Path is undeployed
 					// later, this Web Application should be considered as a candidate.
 					if (deploymentState.compareAndSet(state, State.WAITING_FOR_CONTEXT)) {
-						extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.FAILED, bundle));
+						extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.FAILED, bundle, null));
 					}
 					return;
 				}
@@ -657,7 +668,7 @@ public class BundleWebApplication {
 				view.sendBatch(batch);
 
 				if (deploymentState.compareAndSet(state, State.DEPLOYED)) {
-					extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.DEPLOYED, bundle));
+					extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.DEPLOYED, bundle, httpContext));
 				}
 			}
 		} catch (Throwable t) {
@@ -667,7 +678,7 @@ public class BundleWebApplication {
 			// because we use SLF4J logger directly (backed by pax-logging)
 			LOG.error("Problem processing {}: {}", this, t.getMessage(), t);
 
-			extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.FAILED, bundle, t));
+			extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.FAILED, bundle, null, t));
 		} finally {
 			// context allocation or deployment may end up with missing WebContainer reference, an exception or
 			// success. In all the cases we have to trigger corresponding latches, so potential parallel stop()
@@ -1091,15 +1102,12 @@ public class BundleWebApplication {
 		ServletContextModel scm = new ServletContextModel(contextPath);
 		wabBatch.addServletContextModel(scm);
 
-		// TOCHECK: 3rd option for whiteboard/httpservice context model? it's about disassociation of the context
-		//          during undeployment - but what about whiteboard filters registered to WAB's context?
-
 		// 1. The most important part - the OsgiContextModel which bridges web elements from the WAB to actual
 		// servlet context in several aspects - it scopes access to resources and provides proper classloader.
 		// Remember that the same OsgiContextModel is used in THREE areas:
-		//  - HttpService (isWhiteboard() == false, hasDirectHttpContextInstance() == true)
+		//  - HttpService (isWhiteboard() == false, isWab() == false, hasDirectHttpContextInstance() == true)
 		//  - Whiteboard (isWhiteboard() == true, hasDirectHttpContextInstance() == false)
-		//  - WAB (isWhiteboard() == false, hasDirectHttpContextInstance() == false)
+		//  - WAB (isWab() == true, hasDirectHttpContextInstance() == true)
 		// the hasDirectHttpContextInstance() == false in WAB is important - we can't allow to re-register
 		// web elements from the WAB when new OsgiContextModel is created - there are several checks in
 		// pax-web-extender-whiteboard and pax-web-runtime that determine whether a web element can be re-registered
@@ -1109,15 +1117,23 @@ public class BundleWebApplication {
 		//       the web application of the WAB
 
 		final OsgiContextModel ocm = new OsgiContextModel(null, this.bundle, this.contextPath, false);
+		ocm.setWab(true);
 		ocm.setServiceId(0);
 		ocm.setServiceRank(Integer.MAX_VALUE);
-		ocm.setContextSupplier((context, contextName) -> {
-			Bundle b = context == null ? null : context.getBundle();
-			return new WebContainerContextWrapper(b, new WebApplicationHelper(b), contextName);
-		});
 		// very important step - we pass a classloader, which contains reachable bundles - bundles discovered when
 		// WAB's metadata was parsed/processed
 		ocm.setClassLoader(this.classLoader);
+
+		// this is the best place to think about how to reference the underlying "context"
+		// in HttpService and Whiteboard scenarios.
+		//  - For HttpService, the OsgiContextModel needs a direct reference to HttpContext object and
+		//    we'll create it here - can be later caught through WebApplicationEventListener
+		//    in order to combine Whiteboard and HttpService scenarios, we'll wrap it in WebContainerContextWrapper
+		//  - For Whiteboard, we need a name to reference using osgi.http.whiteboard.context.select property
+		//    and we'll use contextPath as the name
+		WebApplicationHelper contextHelper = new WebApplicationHelper(bundle);
+		httpContext = new WebContainerContextWrapper(bundle, contextHelper, contextPath, false);
+		ocm.setHttpContext(httpContext);
 
 		// 1.1. Session configuration is passed directly in OsgiContextModel
 		SessionConfig webXmlSessionConfig = mainWebXml.getSessionConfig();
@@ -1178,6 +1194,8 @@ public class BundleWebApplication {
 		ocm.getContextParams().putAll(mainWebXml.getContextParams());
 
 		wabBatch.addOsgiContextModel(ocm, scm);
+		wabBatch.associateOsgiContextModel(httpContext, ocm);
+
 		this.osgiContextModel = ocm;
 
 		// elements from web.xml are processed to create a Batch that'll be send to a dedicated view of a WebContainer.
@@ -1351,8 +1369,10 @@ public class BundleWebApplication {
 		Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> allFilterModels = new HashMap<>();
 		TreeMap<FilterModel, List<OsgiContextModel>> filterModels = new TreeMap<>();
 		allFilterModels.put(contextPath, filterModels);
-		Map<String, FilterMap> filterMappings = new HashMap<>();
-		mainWebXml.getFilterMappings().forEach(fn -> filterMappings.put(fn.getFilterName(), fn));
+		final Map<String, List<FilterMap>> filterMappings = new HashMap<>();
+		mainWebXml.getFilterMappings().forEach(fm -> {
+			filterMappings.computeIfAbsent(fm.getFilterName(), n -> new LinkedList<>()).add(fm);
+		});
 		mainWebXml.getFilters().forEach((fn, def) -> {
 			Class<Filter> filterClass = null;
 			try {
@@ -1364,20 +1384,30 @@ public class BundleWebApplication {
 						def.getFilterClass(), this, e.getMessage(), e);
 				return;
 			}
-			String[] mappings = filterMappings.get(fn).getURLPatterns();
-			String[] servletNames = filterMappings.get(fn).getServletNames();
-			String[] dispatcherTypes = filterMappings.get(fn).getDispatcherNames();
 			FilterModel.Builder builder = new FilterModel.Builder()
 					.withRegisteringBundle(bundle)
 					.withFilterName(fn)
 					.withFilterClass(filterClass)
-					.withUrlPatterns(mappings)
-					.withServletNames(servletNames)
-					.withDispatcherTypes(dispatcherTypes)
 					.withAsyncSupported("true".equals(def.getAsyncSupported()))
 					.withInitParams(def.getParameterMap())
 					.withOsgiContextModel(ocm);
 			FilterModel fm = builder.build();
+
+			for (FilterMap map : filterMappings.get(fn)) {
+				FilterModel.Mapping m = new FilterModel.Mapping();
+				String[] dtn = map.getDispatcherNames();
+				if (dtn == null || dtn.length == 0) {
+					m.setDispatcherTypes(new DispatcherType[] { DispatcherType.REQUEST });
+				} else {
+					m.setDispatcherTypes(Arrays.stream(dtn)
+							.map(name -> DispatcherType.valueOf(name.toUpperCase(Locale.ROOT)))
+							.toArray(DispatcherType[]::new));
+				}
+				m.setServletNames(map.getServletNames());
+				m.setUrlPatterns(map.getURLPatterns());
+				fm.getMappingsPerDispatcherTypes().add(m);
+			}
+
 			filterModels.put(fm, null);
 			// this is for Server/Service model
 			wabBatch.addFilterModel(fm);

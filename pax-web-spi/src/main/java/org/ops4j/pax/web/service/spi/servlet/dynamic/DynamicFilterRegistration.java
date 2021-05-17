@@ -17,11 +17,11 @@ package org.ops4j.pax.web.service.spi.servlet.dynamic;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 
@@ -58,7 +58,10 @@ public class DynamicFilterRegistration implements FilterRegistration.Dynamic {
 
 	@Override
 	public Collection<String> getServletNameMappings() {
-		return Collections.unmodifiableList(Arrays.asList(model.getServletNames()));
+		return model.getDynamicServletNames().stream()
+				.map(FilterModel.Mapping::getServletNames)
+				.flatMap(Arrays::stream)
+				.collect(Collectors.toSet());
 	}
 
 	@Override
@@ -68,7 +71,10 @@ public class DynamicFilterRegistration implements FilterRegistration.Dynamic {
 
 	@Override
 	public Collection<String> getUrlPatternMappings() {
-		return Collections.unmodifiableList(Arrays.asList(model.getUrlPatterns()));
+		return model.getDynamicUrlPatterns().stream()
+				.map(FilterModel.Mapping::getUrlPatterns)
+				.flatMap(Arrays::stream)
+				.collect(Collectors.toSet());
 	}
 
 	@Override

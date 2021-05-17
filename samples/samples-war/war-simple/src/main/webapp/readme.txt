@@ -1,0 +1,1 @@
+registerResources test (ROOT) - entry

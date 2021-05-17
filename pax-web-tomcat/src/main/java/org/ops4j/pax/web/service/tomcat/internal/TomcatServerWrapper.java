@@ -1087,11 +1087,8 @@ class TomcatServerWrapper implements BatchVisitor {
 				PaxWebStandardContext context = contextHandlers.get(contextPath);
 				OsgiServletContext osgiContext = osgiServletContexts.get(highestRankedModel);
 
-				PaxWebFilterDef def = new PaxWebFilterDef(model, false, osgiContext);
-				PaxWebFilterMap map = new PaxWebFilterMap(model, false);
-
-				context.addFilterDef(def);
-				context.addFilterMap(map);
+				context.addFilterDef(new PaxWebFilterDef(model, false, osgiContext));
+				configureFilterMappings(model, context);
 			}
 		}
 	}
@@ -1142,11 +1139,8 @@ class TomcatServerWrapper implements BatchVisitor {
 						? filtersMap.get(model) : model.getContextModels();
 				OsgiServletContext osgiContext = getHighestRankedContext(contextPath, model, contextModels);
 
-				PaxWebFilterDef def = new PaxWebFilterDef(model, false, osgiContext);
-				PaxWebFilterMap map = new PaxWebFilterMap(model, false);
-
-				context.addFilterDef(def);
-				context.addFilterMap(map);
+				context.addFilterDef(new PaxWebFilterDef(model, false, osgiContext));
+				configureFilterMappings(model, context);
 			}
 
 			if (isStarted(context) && !pendingTransaction(contextPath)) {
@@ -1547,13 +1541,43 @@ class TomcatServerWrapper implements BatchVisitor {
 				OsgiServletContext osgiContext = getHighestRankedContext(contextPath, newModels[pos], null);
 
 				context.addFilterDef(new PaxWebFilterDef(newModels[pos], false, osgiContext));
-				context.addFilterMap(new PaxWebFilterMap(newModels[pos], false));
+				configureFilterMappings(newModels[pos], context);
 			}
 			context.filterStart();
 			return true;
 		}
 
 		return false;
+	}
+
+	private void configureFilterMappings(FilterModel model, PaxWebStandardContext context) {
+		if (model.getDynamicServletNames().size() > 0 || model.getDynamicUrlPatterns().size() > 0) {
+			model.getDynamicServletNames().forEach(dm -> {
+				if (!dm.isAfter()) {
+					context.addFilterMap(new PaxWebFilterMap(model, dm));
+				}
+			});
+			model.getDynamicUrlPatterns().forEach(dm -> {
+				if (!dm.isAfter()) {
+					context.addFilterMap(new PaxWebFilterMap(model, dm));
+				}
+			});
+			model.getDynamicServletNames().forEach(dm -> {
+				if (dm.isAfter()) {
+					context.addFilterMap(new PaxWebFilterMap(model, dm));
+				}
+			});
+			model.getDynamicUrlPatterns().forEach(dm -> {
+				if (dm.isAfter()) {
+					context.addFilterMap(new PaxWebFilterMap(model, dm));
+				}
+			});
+		} else {
+			// normal OSGi mapping
+			for (FilterModel.Mapping map : model.getMappingsPerDispatcherTypes()) {
+				context.addFilterMap(new PaxWebFilterMap(model, map));
+			}
+		}
 	}
 
 //	@Override

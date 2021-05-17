@@ -352,8 +352,12 @@ public class WarExtenderContext implements WebContainerListener {
 		defaultWebXml.setReplaceWelcomeFiles(true);
 		try {
 			URL defaultWebXmlURI = OsgiContextModel.class.getResource("/org/ops4j/pax/web/service/spi/model/default-web.xml");
-			defaultWebXml.setURL(defaultWebXmlURI);
-			webApplicationParser.parseWebXml(defaultWebXmlURI, defaultWebXml, false);
+			if (defaultWebXmlURI != null) {
+				// it can be null when invoked from IDE without proper `mvn package`, which
+				// repackages Tomcat's resources into pax-web-spi
+				defaultWebXml.setURL(defaultWebXmlURI);
+				webApplicationParser.parseWebXml(defaultWebXmlURI, defaultWebXml, false);
+			}
 		} catch (IOException e) {
 			LOG.warn("Failure parsing default web.xml: {}", e.getMessage(), e);
 		}

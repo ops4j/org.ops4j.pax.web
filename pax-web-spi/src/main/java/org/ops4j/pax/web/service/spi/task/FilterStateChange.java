@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.servlet.DispatcherType;
+
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 
@@ -39,6 +41,22 @@ public class FilterStateChange extends Change {
 		super(OpCode.NONE);
 		this.contextFilters = contextFilters;
 		this.dynamic = dynamic;
+
+		// fix dispatcher types
+		for (TreeMap<FilterModel, List<OsgiContextModel>> map : contextFilters.values()) {
+			for (FilterModel fm : map.keySet()) {
+				if (!fm.isDynamic()) {
+					for (FilterModel.Mapping mapping : fm.getMappingsPerDispatcherTypes()) {
+						if (mapping.getDispatcherTypes() == null || mapping.getDispatcherTypes().length == 0) {
+							// Servlet 4 Spec: 6.2.5 Filters and the RequestDispatcher
+							mapping.setDispatcherTypes(new DispatcherType[] {
+									DispatcherType.REQUEST
+							});
+						}
+					}
+				}
+			}
+		}
 	}
 
 	public boolean isDynamic() {

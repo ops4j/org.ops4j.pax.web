@@ -622,10 +622,10 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		// "name" is very misleading term here as it's the "base path" or "resource prefix". Also Pax Web allows it
 		// to be a file: URL to make it easier to expose a directory as the resource directory (web root directory)
 		if (resourceServlet.urlBase != null) {
-			LOG.info("Configuring resource servlet to serve resources from {}", resourceServlet.urlBase);
+			LOG.debug("Configuring resource servlet to serve resources from {}", resourceServlet.urlBase);
 			servletModel.setBaseFileUrl(resourceServlet.urlBase);
 		} else {
-			LOG.info("Configuring resource servlet to serve resources from WebContainerContext");
+			LOG.debug("Configuring resource servlet to serve resources from WebContainerContext");
 			servletModel.setBasePath(resourceServlet.chrootBase);
 		}
 

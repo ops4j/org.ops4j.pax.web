@@ -207,6 +207,12 @@
 			<artifactId>ops4j-base-io</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.ops4j.pax.url</groupId>
+			<artifactId>pax-url-war</artifactId>
+			<classifier>uber</classifier>
+		</dependency>
+
 		<!-- OSGi -->
 
 		<dependency>

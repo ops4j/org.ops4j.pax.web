@@ -558,9 +558,10 @@ public class ServerModel implements BatchVisitor {
 		// always add
 		batch.addOsgiContextModel(contextModel, scm);
 
-		if (contextModel.hasDirectHttpContextInstance()) {
+		if (contextModel.hasDirectHttpContextInstance() && !contextModel.isWab()) {
 			// let it be available to use as the context for HttpService scenarios - whether or not it should
 			// REPLACE some existing mapping
+			// we explicitly disallow reregistration out of WAB context model
 			batch.associateOsgiContextModel(contextModel.resolveHttpContext(null), contextModel);
 
 			// this context MAY replace existing, HttpService-related context for given name+bundle, we
