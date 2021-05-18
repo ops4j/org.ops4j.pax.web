@@ -35,7 +35,7 @@
 
 	<dependencies>
 
-		<!-- pax-web own artifacts -->
+		<!-- pax-web httpservice/webcontainer samples -->
 
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>

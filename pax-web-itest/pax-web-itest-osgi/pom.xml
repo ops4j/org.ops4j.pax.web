@@ -154,11 +154,8 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.ops4j.pax.web.samples</groupId>
-			<artifactId>pax-web-spi-fragment</artifactId>
-			<scope>runtime</scope>
-		</dependency>
+		<!-- pax-web internal samples -->
+
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>initializers</artifactId>
@@ -174,6 +171,13 @@
 			<artifactId>initializers-fragment2</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>pax-web-spi-fragment</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- pax-web war samples -->
 
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>

@@ -156,37 +156,16 @@
 			<artifactId>pax-web-itest-utils</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.ops4j.pax.web.samples</groupId>
-			<artifactId>hs-helloworld</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web.samples</groupId>
-			<artifactId>authentication</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web.samples</groupId>
-			<artifactId>hs-jersey</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web.samples</groupId>
-			<artifactId>http-custom-context</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web.samples</groupId>
-			<artifactId>wc-helloworld</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web.samples</groupId>
-			<artifactId>whiteboard</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web.samples</groupId>
-			<artifactId>whiteboard-ds</artifactId>
-		</dependency>
+		<!-- pax-web war samples -->
+
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>war</artifactId>
+			<type>war</type>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>helloworld-servlet3</artifactId>
 			<type>war</type>
 		</dependency>
 		<dependency>
@@ -213,6 +192,74 @@
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>war-spring</artifactId>
 			<type>war</type>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>container-bundle-1</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>container-bundle-2</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>container-bundle-3</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>container-fragment-1</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>container-fragment-2</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>the-wab-fragment</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>the-wab-jar</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>the-wab-itself</artifactId>
+			<type>war</type>
+		</dependency>
+
+		<!-- pax-web httpservice/webcontainer samples -->
+
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>hs-helloworld</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>authentication</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>hs-jersey</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>http-custom-context</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>wc-helloworld</artifactId>
+		</dependency>
+
+		<!-- pax-web whiteboard samples -->
+
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>whiteboard</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>whiteboard-ds</artifactId>
 		</dependency>
 
 		<!-- OPS4J dependencies -->

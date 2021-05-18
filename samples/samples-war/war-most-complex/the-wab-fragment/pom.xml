@@ -55,7 +55,7 @@
 
 	<dependencies>
 
-		<!-- pax-web own artifacts -->
+		<!-- pax-web war samples -->
 
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
