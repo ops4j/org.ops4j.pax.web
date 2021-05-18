@@ -18,16 +18,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>hello jsp</title>
-	<!-- the variable, message, is declared and initialized -->
-	<%!
-		String message = "Hello, World, from JSP";
-	%>
+	<title>Shows how to use taglibs via an automatic include</title>
 </head>
 <body>
-
-	<!-- the value of the variable, message, is inserted between h2 tags -->
-	<h2><span style="color: #AA0000"><%= message %></span></h2>
-
+<c:set var="works" value="core taglib works implicitly" />
+<span><c:out value="${works}" /></span>
 </body>
 </html>

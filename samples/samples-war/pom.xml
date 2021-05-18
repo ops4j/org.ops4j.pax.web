@@ -45,6 +45,7 @@
 		<module>war-introspection-bundle</module>
 		<module>helloworld-servlet3</module>
 		<module>war-dispatch-jsp</module>
+		<module>jsp-filter</module>
 	</modules>
 
 </project>

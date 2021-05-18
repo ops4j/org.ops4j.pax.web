@@ -827,6 +827,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>jsp-filter</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
 				<artifactId>war-introspection</artifactId>
 				<version>${project.version}</version>
 				<type>war</type>

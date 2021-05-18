@@ -21,13 +21,17 @@
 	<title>hello jsp</title>
 	<!-- the variable, message, is declared and initialized -->
 	<%!
-		String message = "Hello, World, from JSP";
+		String message = "Hello, World, from JSP2";
 	%>
 </head>
 <body>
 
 	<!-- the value of the variable, message, is inserted between h2 tags -->
-	<h2><span style="color: #AA0000"><%= message %></span></h2>
+	<h2><%=message%></h2>
+
+	<h3>
+		<jsp:include page="includes/test.jsp" />
+	</h3>
 
 </body>
 </html>

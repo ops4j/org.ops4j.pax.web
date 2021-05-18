@@ -15,19 +15,7 @@
     limitations under the License.
 
 --%>
-<!DOCTYPE html>
-<html>
-<head>
-	<title>hello jsp</title>
-	<!-- the variable, message, is declared and initialized -->
-	<%!
-		String message = "Hello, World, from JSP";
-	%>
-</head>
-<body>
-
-	<!-- the value of the variable, message, is inserted between h2 tags -->
-	<h2><span style="color: #AA0000"><%= message %></span></h2>
-
-</body>
-</html>
+<%!
+	String myMessage = "My JSP Test";
+%>
+<%=myMessage%>

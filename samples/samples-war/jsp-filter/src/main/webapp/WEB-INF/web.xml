@@ -18,17 +18,29 @@
 		xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
 		version="4.0">
 
-	<display-name>Pax Web Extender WAR Dispatch JSP Sample</display-name>
+	<display-name>JSPFilterTest</display-name>
 
-	<servlet>
-		<servlet-name>example.servlet</servlet-name>
-		<servlet-class>org.ops4j.pax.web.extender.samples.war.dispatch.jsp.ExampleServlet</servlet-class>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
+	<filter>
+		<display-name>TestFilter</display-name>
+		<filter-name>TestFilter</filter-name>
+		<filter-class>org.ops4j.pax.web.jsp.filter.test.TestFilter</filter-class>
+	</filter>
 
-	<servlet-mapping>
-		<servlet-name>example.servlet</servlet-name>
-		<url-pattern>/wc/dispatch/jsp</url-pattern>
-	</servlet-mapping>
+	<filter-mapping>
+		<filter-name>TestFilter</filter-name>
+		<url-pattern>/includes/*</url-pattern>
+		<dispatcher>INCLUDE</dispatcher>
+	</filter-mapping>
+
+	<jsp-config>
+		<jsp-property-group>
+			<url-pattern>/test-taglib-inc.jsp</url-pattern>
+			<include-prelude>/WEB-INF/jspf/headertags.jspf</include-prelude>
+		</jsp-property-group>
+	</jsp-config>
+
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
 
 </web-app>
