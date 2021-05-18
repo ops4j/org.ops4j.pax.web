@@ -262,7 +262,7 @@
 		<dependency.jsf.myfaces-facelets-examples20.version>1.0.2.1</dependency.jsf.myfaces-facelets-examples20.version>
 		<dependency.jsf.primefaces.version>8.0</dependency.jsf.primefaces.version>
 		<dependency.junit.version>4.13.2</dependency.junit.version>
-		<dependency.karaf.version>4.2.1</dependency.karaf.version>
+		<dependency.karaf.version>4.2.11</dependency.karaf.version>
 		<dependency.log4j2.version>2.14.1</dependency.log4j2.version>
 		<dependency.logback.version>1.0.6</dependency.logback.version>
 		<dependency.mockito.version>3.7.7</dependency.mockito.version>
