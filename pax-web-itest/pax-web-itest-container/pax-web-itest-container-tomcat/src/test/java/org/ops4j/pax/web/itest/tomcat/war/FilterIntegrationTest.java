@@ -19,17 +19,19 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.common.AbstractRootAliasIntegrationTest;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerMethod;
+import org.ops4j.pax.web.itest.common.AbstractFilterIntegrationTest;
 
 /**
- * @author Toni Menzel (tonit)
- * @since Mar 3, 2009
+ * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
-public class RootAliasIntegrationTest extends AbstractRootAliasIntegrationTest {
+@ExamReactorStrategy(PerMethod.class)
+public class FilterIntegrationTest extends AbstractFilterIntegrationTest {
 
 	@Configuration
-	public static Option[] configure() {
+	public Option[] configure() {
 		return configureTomcat();
 	}
 }
