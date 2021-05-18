@@ -52,7 +52,19 @@ public class WebApplicationHelper extends DefaultServletContextHelper {
 				e = bundle.findEntries("/", normalizedPath, false);
 			} else {
 				int lastSlash = normalizedPath.lastIndexOf('/');
-				e = bundle.findEntries(normalizedPath.substring(0, lastSlash), normalizedPath.substring(lastSlash + 1), false);
+				if (lastSlash == normalizedPath.length() - 1) {
+					// case when asking for e.g., "static/" - we should rather look for "static" in "" and not ""
+					// in "static
+					normalizedPath = normalizedPath.substring(0, normalizedPath.length() - 1);
+					if (!normalizedPath.contains("/")) {
+						e = bundle.findEntries("/", normalizedPath, false);
+					} else {
+						lastSlash = normalizedPath.lastIndexOf('/');
+						e = bundle.findEntries(normalizedPath.substring(0, lastSlash), normalizedPath.substring(lastSlash + 1), false);
+					}
+				} else {
+					e = bundle.findEntries(normalizedPath.substring(0, lastSlash), normalizedPath.substring(lastSlash + 1), false);
+				}
 			}
 			if (e != null) {
 				return e.nextElement();
