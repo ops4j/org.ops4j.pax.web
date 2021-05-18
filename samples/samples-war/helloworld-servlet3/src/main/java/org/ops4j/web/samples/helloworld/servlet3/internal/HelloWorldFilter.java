@@ -18,7 +18,6 @@ package org.ops4j.web.samples.helloworld.servlet3.internal;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -34,33 +33,29 @@ import javax.servlet.annotation.WebInitParam;
  * @author Alin Dreghiciu
  * @since 0.3.0, January 02, 2008
  */
-@WebFilter(urlPatterns = {"/hello/*"}, initParams = {@WebInitParam(name = "title", value = "Hello World (url pattern)")})
+@WebFilter(
+		urlPatterns = { "/hello/*" },
+		initParams = { @WebInitParam(name = "title", value = "Hello World (url pattern)") }
+)
 public class HelloWorldFilter implements Filter {
 
-	/**
-	 * Filter config.
-	 */
 	private FilterConfig filterConfig;
 
 	private boolean haveBundleContext;
 
 	public void init(final FilterConfig filterConfig) throws ServletException {
 		this.filterConfig = filterConfig;
-		haveBundleContext = filterConfig.getServletContext().getAttribute(
-				"osgi-bundlecontext") != null;
+		haveBundleContext = filterConfig.getServletContext().getAttribute("osgi-bundlecontext") != null;
 	}
 
-	public void doFilter(final ServletRequest request,
-						 final ServletResponse response, final FilterChain chain)
+	public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
 			throws IOException, ServletException {
 		response.setContentType("text/html");
 
 		final PrintWriter writer = response.getWriter();
 		writer.println("<html>");
-		writer.println("<head><title>"
-				+ filterConfig.getInitParameter("title") + "</title></head>");
-		writer.println("<!-- Have bundle context in filter: "
-				+ haveBundleContext + " -->");
+		writer.println("<head><title>" + filterConfig.getInitParameter("title") + "</title></head>");
+		writer.println("<!-- Have bundle context in filter: " + haveBundleContext + " -->");
 
 		chain.doFilter(request, response);
 
@@ -70,4 +65,5 @@ public class HelloWorldFilter implements Filter {
 	public void destroy() {
 		// do nothing
 	}
+
 }

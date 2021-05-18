@@ -39,15 +39,11 @@ public class DuplicateDefinitionServlet extends HttpServlet {
 			throws ServletException, IOException {
 		final PrintWriter writer = response.getWriter();
 		writer.println("<head>");
-		writer.println("<link rel=\"stylesheet\" href=\""
-				+ request.getServletContext().getContextPath()
-				+ "/css/content.css\">");
+		writer.println("<link rel=\"stylesheet\" href=\"" + request.getServletContext().getContextPath() + "/css/content.css\">");
 		writer.println("</head>");
 		writer.println("<body align='center'>");
 		writer.println("<h1>Duplicate Servlet</h1>");
-		writer.println("<img src='"
-				+ request.getServletContext().getContextPath()
-				+ "/images/logo.png' border='0'/>");
+		writer.println("<img src='" + request.getServletContext().getContextPath() + "/images/logo.png' border='0'/>");
 		writer.println("<h1>from WEB-INF/classes</h1>");
 		writer.println("</body>");
 	}

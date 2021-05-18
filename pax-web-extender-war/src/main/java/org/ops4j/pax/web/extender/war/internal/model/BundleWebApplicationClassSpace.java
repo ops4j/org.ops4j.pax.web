@@ -1473,6 +1473,7 @@ public class BundleWebApplicationClassSpace {
 					filterMap.setDispatcher(dt);
 				}
 			}
+			fragment.addFilterMapping(filterMap);
 		} else {
 			// override only when not present on existing mapping
 			FilterMap existingMapping = null;

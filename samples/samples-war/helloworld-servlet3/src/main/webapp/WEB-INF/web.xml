@@ -21,16 +21,16 @@
 
 	<display-name>Pax Web Extender WAR Sample</display-name>
 
-	<servlet>
-		<servlet-name>duplicate</servlet-name>
-		<servlet-class>org.ops4j.web.samples.helloworld.servlet3.internal.DuplicateDefinitionServlet</servlet-class>
-	</servlet>
+	<!-- In Pax Web 8 we simply do not allow this - DuplicateDefinitionServlet has @WebServlet annotation -->
+<!--	<servlet>-->
+<!--		<servlet-name>duplicate</servlet-name>-->
+<!--		<servlet-class>org.ops4j.web.samples.helloworld.servlet3.internal.DuplicateDefinitionServlet</servlet-class>-->
+<!--	</servlet>-->
+<!--	<servlet-mapping>-->
+<!--		<servlet-name>duplicate</servlet-name>-->
+<!--		<url-pattern>/duplicate</url-pattern>-->
+<!--	</servlet-mapping>-->
 
-	<servlet-mapping>
-		<servlet-name>duplicate</servlet-name>
-		<url-pattern>/duplicate</url-pattern>
-	</servlet-mapping>
-	
 	<error-page>
 		<error-code>404</error-code>
 		<location>/error.jsp</location>

@@ -27,25 +27,17 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet(name = "helloWorld", urlPatterns = {"/hello", "/hello/filter"})
 public class HelloWorld extends HttpServlet {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		final PrintWriter writer = response.getWriter();
 		writer.println("<head>");
-		writer.println("<link rel=\"stylesheet\" href=\""
-				+ request.getServletContext().getContextPath()
-				+ "/css/content.css\">");
+		writer.println("<link rel=\"stylesheet\" href=\"" + request.getServletContext().getContextPath() + "/css/content.css\">");
 		writer.println("</head>");
 		writer.println("<body align='center'>");
 		writer.println("<h1>Hello World</h1>");
-		writer.println("<img src='"
-				+ request.getServletContext().getContextPath()
-				+ "/images/logo.png' border='0'/>");
+		writer.println("<img src='" + request.getServletContext().getContextPath() + "/images/logo.png' border='0'/>");
 		writer.println("<h1>from WEB-INF/classes</h1>");
 		writer.println("</body>");
 	}
