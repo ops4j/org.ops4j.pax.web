@@ -238,6 +238,17 @@
 			<type>war</type>
 		</dependency>
 
+		<!-- pax-web jsp samples -->
+
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>helloworld-jsp</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>helloworld-jsp-noclasses</artifactId>
+		</dependency>
+
 		<!-- pax-web httpservice/webcontainer samples -->
 
 		<dependency>
