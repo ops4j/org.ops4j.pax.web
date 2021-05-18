@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-	Copyright 2019 OPS4J.
+	Copyright 2021 OPS4J.
 
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -21,30 +21,28 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.ops4j.pax.web</groupId>
-		<artifactId>samples</artifactId>
+		<groupId>org.ops4j.pax.web.samples</groupId>
+		<artifactId>samples-war</artifactId>
 		<version>8.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.ops4j.pax.web.samples</groupId>
-	<artifactId>samples-war</artifactId>
-	<packaging>pom</packaging>
+	<artifactId>war-dispatch-jsp</artifactId>
+	<packaging>war</packaging>
 
-	<name>OPS4J Pax Web WAR Samples</name>
+	<name>OPS4J Pax Web WAR Samples - WAR Dispatch JSP</name>
 
-	<modules>
-		<module>war</module>
-		<module>war-simple</module>
-		<module>war-simplest-javaee</module>
-		<module>war-simplest-osgi</module>
-		<module>war-servlet-jsp-file</module>
-		<module>war-most-complex</module>
-		<module>war-spring</module>
-		<module>war-introspection</module>
-		<module>war-introspection-bundle</module>
-		<module>helloworld-servlet3</module>
-		<module>war-dispatch-jsp</module>
-	</modules>
+	<dependencies>
+
+		<!-- JavaEE -->
+
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+	</dependencies>
 
 </project>

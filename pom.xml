@@ -951,6 +951,17 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>hs-jersey</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>http-custom-context</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
 				<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
 				<artifactId>fragment</artifactId>
 				<version>${project.version}</version>
@@ -983,7 +994,31 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>war-dispatch-jsp</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>war-introspection-bundle</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>war-servlet-jsp-file</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
 				<artifactId>war-simple</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>war-spring</artifactId>
 				<version>${project.version}</version>
 				<type>war</type>
 			</dependency>
