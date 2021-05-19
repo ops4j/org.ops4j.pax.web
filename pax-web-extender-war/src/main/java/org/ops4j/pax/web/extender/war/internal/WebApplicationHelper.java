@@ -15,12 +15,18 @@
  */
 package org.ops4j.pax.web.extender.war.internal;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
 
 import org.ops4j.pax.web.service.spi.context.DefaultServletContextHelper;
 import org.ops4j.pax.web.service.spi.util.Path;
+import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>This class adjusts {@link org.osgi.service.http.context.ServletContextHelper} from the Whiteboard specification
@@ -32,9 +38,17 @@ import org.osgi.framework.Bundle;
  */
 public class WebApplicationHelper extends DefaultServletContextHelper {
 
-	public WebApplicationHelper(Bundle runtimeBundle) {
+	public static final Logger LOG = LoggerFactory.getLogger(WebApplicationHelper.class);
+
+	/** Additional roots of the {@code META-INF/resources} locations within WAB's reachable bundles/embedded JARs */
+	private final Map<Bundle, URL> metainfResourceRoots;
+
+	public WebApplicationHelper(Bundle runtimeBundle, Map<Bundle, URL> metainfResourceRoots) {
 		super(runtimeBundle);
+		this.metainfResourceRoots = metainfResourceRoots;
 	}
+
+	// TODO: even if resources may be cached at Jetty/Tomcat/UndertowResourceServlet, we should cache URLs here
 
 	@Override
 	public URL getResource(String name) {
@@ -48,34 +62,56 @@ public class WebApplicationHelper extends DefaultServletContextHelper {
 			// prefixing it with a reverse solidus ('\' \u005C). This implies that a reverse solidus must be escaped
 			// with an extra reverse solidus. For example, the path foo\bar* must be escaped to foo\\bar\*.
 			normalizedPath = normalizedPath.replace("\\", "\\\\").replace("*", "\\*");
+			String root = null;
+			String path = null;
 			if (!normalizedPath.contains("/")) {
-				e = bundle.findEntries("/", normalizedPath, false);
+				root = "/";
+				path = normalizedPath;
 			} else {
 				int lastSlash = normalizedPath.lastIndexOf('/');
 				if (lastSlash == normalizedPath.length() - 1) {
 					// case when asking for e.g., "static/" - we should rather look for "static" in "" and not ""
-					// in "static
+					// in "static"
 					normalizedPath = normalizedPath.substring(0, normalizedPath.length() - 1);
 					if (!normalizedPath.contains("/")) {
-						e = bundle.findEntries("/", normalizedPath, false);
+						root = "/";
+						path = normalizedPath;
 					} else {
 						lastSlash = normalizedPath.lastIndexOf('/');
-						e = bundle.findEntries(normalizedPath.substring(0, lastSlash), normalizedPath.substring(lastSlash + 1), false);
+						root = normalizedPath.substring(0, lastSlash);
+						path = normalizedPath.substring(lastSlash + 1);
 					}
 				} else {
-					e = bundle.findEntries(normalizedPath.substring(0, lastSlash), normalizedPath.substring(lastSlash + 1), false);
+					root = normalizedPath.substring(0, lastSlash);
+					path = normalizedPath.substring(lastSlash + 1);
 				}
 			}
+
+			e = bundle.findEntries(root, path, false);
 			if (e != null) {
 				return e.nextElement();
 			}
 
 			// in Pax Web 7 the WebAppHttpContext for WABs falled back to org.osgi.framework.Bundle.getResource() call
-			// which is the default implementation for HttpService scenario, here we are explicitly NOT doing the same.
-		}
+			// which is the default implementation for HttpService scenario, here we are explicitly NOT doing this,
+			// because we don't want to return resources fom the Bundle-ClassPath.
+			// It's still possible if user knows the Bundle-ClassPath, but still, roots mentioned in
+			// "128.3.5 Static Content" are always forbidden at very early stage of request processing.
+			// So only if user puts classes to root of the WAB or to some other directory different than WEB-INF,
+			// META-INF, OSGI-INF or OSGI-OPT we are returning them when accessing using known root.
 
-		// TODO: this helper should contain the bundles from OsgiServletContextClassLoader that should be checked
-		//       for resources (also in META-INF/resources)
+			try {
+				for (Map.Entry<Bundle, URL> entry : metainfResourceRoots.entrySet()) {
+					List<URL> entries = ClassPathUtil.findEntries(entry.getKey(), new URL[] { entry.getValue() },
+							root, path, false);
+					if (entries.size() > 0) {
+						return entries.get(0);
+					}
+				}
+			} catch (IOException ex) {
+				LOG.warn("Error accessing {}/{} from META-INF/resources: {}", root, path, ex.getMessage(), ex);
+			}
+		}
 
 		return null;
 	}

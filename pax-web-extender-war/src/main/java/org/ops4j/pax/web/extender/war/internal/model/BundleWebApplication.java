@@ -18,6 +18,8 @@
 package org.ops4j.pax.web.extender.war.internal.model;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -76,6 +78,7 @@ import org.ops4j.pax.web.service.spi.model.views.WebAppWebContainerView;
 import org.ops4j.pax.web.service.spi.servlet.DefaultSessionCookieConfig;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
 import org.ops4j.pax.web.service.spi.task.Batch;
+import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.util.WebContainerManager;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
@@ -156,10 +159,19 @@ public class BundleWebApplication {
 
 	/** Merged {@code web.xml} model from WAB's descriptors and from all reachable "web fragments". */
 	private WebXml mainWebXml = null;
+
 	/** A "class space" used to collect information from all reachable "web fragments" */
 	private BundleWebApplicationClassSpace classSpace = null;
+
 	/** An {@link OsgiServletContextClassLoader} which will be used when this WAB is deployed to a container. */
 	private final OsgiServletContextClassLoader classLoader;
+
+	/**
+	 * Map of URLs to {@code META-INF/resources} of reachable bundles and WAB's embedded JARs keyed by the
+	 * bundles used to access those roots.
+	 */
+	private final Map<Bundle, URL> metainfResourceRoots = new LinkedHashMap<>();
+
 	/**
 	 * This is the discovered mapping of SCIs to sets of classes that are related to types from
 	 * {@link HandlesTypes} using these relations(see "8.2.4 Shared libraries / runtimes pluggability" of the Servlet
@@ -1076,8 +1088,26 @@ public class BundleWebApplication {
 				// Tomcat already configures an instance of org.apache.catalina.core.StandardContext here, but
 				// Pax Web will do it later
 
-				// configure /META-INF/resources locations
-				// TODO: /META-INF/resources require 1:N alias:location mapping
+				// configure /META-INF/resources locations -
+				// according to "4.6 Resources" of the Servlet API 4 specification (OSGi CMPN 128 doesn't say anything about it)
+				// we'll check all the JARs from Bundle-ClassPath and those reachable (via Import-Package or Require-Bundle)
+				// bundles that have META-INF/web-fragment.xml - all locations that contain META-INF/resources will be added
+				// to org.ops4j.pax.web.extender.war.internal.WebApplicationHelper, so they're searched for web resources
+				try {
+					for (URL url : classSpace.getWabClassPath()) {
+						URL metainfResource = new URL(url, "META-INF/resources/");
+						if (Utils.isDirectory(metainfResource)) {
+							metainfResourceRoots.put(bundle, metainfResource);
+						}
+					}
+					for (Map.Entry<Bundle, URL> e : classSpace.getApplicationFragmentBundles().entrySet()) {
+						URL metainfResource = new URL(e.getValue(), "META-INF/resources/");
+						if (Utils.isDirectory(metainfResource)) {
+							metainfResourceRoots.put(e.getKey(), metainfResource);
+						}
+					}
+				} catch (MalformedURLException ignored) {
+				}
 
 				LOG.debug("Finished metadata and fragment processing for {} in {}ms", bundle, System.currentTimeMillis() - start);
 			} catch (IOException e) {
@@ -1131,7 +1161,8 @@ public class BundleWebApplication {
 		//    in order to combine Whiteboard and HttpService scenarios, we'll wrap it in WebContainerContextWrapper
 		//  - For Whiteboard, we need a name to reference using osgi.http.whiteboard.context.select property
 		//    and we'll use contextPath as the name
-		WebApplicationHelper contextHelper = new WebApplicationHelper(bundle);
+
+		WebApplicationHelper contextHelper = new WebApplicationHelper(bundle, metainfResourceRoots);
 		httpContext = new WebContainerContextWrapper(bundle, contextHelper, contextPath, false);
 		ocm.setHttpContext(httpContext);
 

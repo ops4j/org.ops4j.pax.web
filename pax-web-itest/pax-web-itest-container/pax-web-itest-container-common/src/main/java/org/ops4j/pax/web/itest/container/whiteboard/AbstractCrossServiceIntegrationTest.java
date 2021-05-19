@@ -38,6 +38,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 public abstract class AbstractCrossServiceIntegrationTest extends AbstractContainerTestBase {
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testMultipleServiceCombination() throws Exception {
 		WebContainer httpService = getWebContainer(context);
 

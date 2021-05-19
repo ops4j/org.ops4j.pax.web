@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-	Copyright 2019 OPS4J.
+	Copyright 2021 OPS4J.
 
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -21,33 +21,26 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.ops4j.pax.web</groupId>
-		<artifactId>samples</artifactId>
+		<groupId>org.ops4j.pax.web.samples</groupId>
+		<artifactId>samples-war</artifactId>
 		<version>8.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.ops4j.pax.web.samples</groupId>
-	<artifactId>samples-war</artifactId>
-	<packaging>pom</packaging>
+	<artifactId>war-required</artifactId>
+	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web WAR Samples</name>
+	<name>OPS4J Pax Web WAR Samples - WAR required bundle</name>
 
-	<modules>
-		<module>war</module>
-		<module>war-simple</module>
-		<module>war-simplest-javaee</module>
-		<module>war-simplest-osgi</module>
-		<module>war-servlet-jsp-file</module>
-		<module>war-most-complex</module>
-		<module>war-spring</module>
-		<module>war-introspection</module>
-		<module>war-introspection-bundle</module>
-		<module>helloworld-servlet3</module>
-		<module>war-dispatch-jsp</module>
-		<module>jsp-filter</module>
-		<module>war-requiring</module>
-		<module>war-required</module>
-	</modules>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>

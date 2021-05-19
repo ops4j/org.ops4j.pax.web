@@ -107,6 +107,9 @@ public class BundleWebApplicationClassSpace {
 	 * These will represent web fragments with {@link org.apache.tomcat.util.descriptor.web.WebXml#webappJar}
 	 * = {@code true} whether or not they contain {@code META-INF/web-fragment.xml}.</p>
 	 *
+	 * <p>"WAB ClassPath" also includes OSGi fragments attached to WAB host. It doesn't contain reachable bundles
+	 * (through Import-Package or Require-Bundle).</p>
+	 *
 	 * <p>The keys are fragment jar names.</p>
 	 */
 	private final Map<String, URL> wabClassPath = new LinkedHashMap<>();
@@ -285,6 +288,29 @@ public class BundleWebApplicationClassSpace {
 
 	public List<String> getOrderedLibs() {
 		return orderedLibs;
+	}
+
+	/**
+	 * Returns root URLs of the JARs included in WAB's {@code Bundle-ClassPath} and root URLs of the OSGi fragments
+	 * of the WAB.
+	 * @return
+	 */
+	public Collection<URL> getWabClassPath() {
+		return wabClassPath.values();
+	}
+
+	/**
+	 * Returns root URLs of the bundles reachable through {@code Import-Package} and {@code Require-Bundle}
+	 * that contain {@code META-INF/web-fragment.xml}
+	 * @return
+	 */
+	public Map<Bundle, URL> getApplicationFragmentBundles() {
+		Map<Bundle, URL> result = new LinkedHashMap<>(applicationFragmentBundles.size());
+		for (Bundle b : applicationFragmentBundles.values()) {
+			result.put(b, b.getEntry("/"));
+		}
+
+		return result;
 	}
 
 	/**

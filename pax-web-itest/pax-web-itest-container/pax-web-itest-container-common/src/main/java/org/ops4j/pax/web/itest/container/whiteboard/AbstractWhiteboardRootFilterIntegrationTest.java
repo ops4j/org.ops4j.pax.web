@@ -40,6 +40,7 @@ public abstract class AbstractWhiteboardRootFilterIntegrationTest extends Abstra
 	private ServiceRegistration<Servlet> service;
 
 	@Before
+	@SuppressWarnings("deprecation")
 	public void setUp() throws Exception {
 		context.installBundle(sampleURI("whiteboard"));
 		configureAndWaitForServletWithMapping("/*", () -> {

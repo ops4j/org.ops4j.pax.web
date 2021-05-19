@@ -52,6 +52,7 @@ public abstract class AbstractWhiteboardRankedFilterIntegrationTest extends Abst
 	}
 
 	@Before
+	@SuppressWarnings("deprecation")
 	public void setUp() throws Exception {
 		context.installBundle(sampleURI("whiteboard"));
 		configureAndWaitForServletWithMapping("/ranked/*", () -> {

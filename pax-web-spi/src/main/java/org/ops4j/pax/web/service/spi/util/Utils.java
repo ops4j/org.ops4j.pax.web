@@ -15,6 +15,9 @@
  */
 package org.ops4j.pax.web.service.spi.util;
 
+import java.io.File;
+import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
@@ -504,6 +507,29 @@ public class Utils {
 	public static boolean isFragment(Bundle bundle) {
 		return bundle != null && bundle.adapt(BundleRevision.class) != null
 				&& (bundle.adapt(BundleRevision.class).getTypes() & BundleRevision.TYPE_FRAGMENT) != 0;
+	}
+
+	/**
+	 * Checks if given location is a directory
+	 * @param location
+	 * @return
+	 */
+	public static boolean isDirectory(URL location) {
+		if ("file".equals(location.getProtocol())) {
+			try {
+				return new File(location.toURI()).isDirectory();
+			} catch (URISyntaxException e) {
+				return false;
+			}
+		}
+		try (InputStream is = location.openStream()) {
+			if (is != null && is.available() == 0) {
+				return true;
+			}
+		} catch (Exception ignored) {
+			return false;
+		}
+		return false;
 	}
 
 }

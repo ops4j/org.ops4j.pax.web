@@ -38,6 +38,7 @@ public abstract class AbstractWhiteboardDeregisteringContextIntegrationTest exte
 	private WebContainer webContainerService;
 
 	@Test
+	@SuppressWarnings({ "deprecation", "unchecked" })
 	public void testDeregisterContext() throws Exception {
 		Hashtable<String, String> props = new Hashtable<>();
 		props.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "myContext");

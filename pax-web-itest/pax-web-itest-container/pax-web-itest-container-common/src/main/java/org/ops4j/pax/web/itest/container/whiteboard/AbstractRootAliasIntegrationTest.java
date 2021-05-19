@@ -67,6 +67,7 @@ public abstract class AbstractRootAliasIntegrationTest extends AbstractContainer
 		unregisterServlet("/secondRoot/third");
 	}
 
+	@SuppressWarnings("deprecation")
 	private ServiceRegistration<Servlet> registerServletWhiteBoard(final String path) throws ServletException {
 		Dictionary<String, String> initParams = new Hashtable<>();
 		initParams.put(PaxWebConstants.INIT_PARAM_SERVLET_NAME, path);
@@ -82,6 +83,7 @@ public abstract class AbstractRootAliasIntegrationTest extends AbstractContainer
 				initParams);
 	}
 
+	@SuppressWarnings("deprecation")
 	private void registerServlet(final String path) throws ServletException, NamespaceException {
 		Dictionary<String, String> initParams = new Hashtable<>();
 		initParams.put(PaxWebConstants.INIT_PARAM_SERVLET_NAME, path);
