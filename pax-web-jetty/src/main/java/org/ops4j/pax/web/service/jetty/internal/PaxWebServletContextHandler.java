@@ -82,7 +82,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 		setLogger(Log.getLogger(getDisplayName() == null ? getContextPath() : getDisplayName()));
 
 		// "128.3.5 Static Content" is the only place where protected directories are mentioned. We'll handle them
-		// at request processing level here
+		// at request processing stage and configure here
 		setProtectedTargets(new String[] { "/WEB-INF", "/META-INF", "/OSGI-INF", "/OSGI-OPT" });
 	}
 
@@ -187,59 +187,5 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 		// 7. Do super work
 		super.doStart();
 	}
-
-//					@Override
-//					public void callContextInitialized(final ServletContextListener l,
-//							final ServletContextEvent e) {
-//						try {
-//							// toggle state of the dynamic API so that the listener cannot use
-//							// it
-//							if (isProgrammaticListener(l)) {
-//								this.getServletContext().setEnabled(false);
-//							}
-//
-//							if (LOG.isDebugEnabled()) {
-//								LOG.debug("contextInitialized: {}->{}", e, l);
-//							}
-//
-//							try {
-//								ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
-//										new Callable<Void>() {
-//
-//											@Override
-//											public Void call() {
-//												l.contextInitialized(e);
-//												return null;
-//											}
-//
-//										});
-//								// CHECKSTYLE:OFF
-//							} catch (Exception ex) {
-//								if (ex instanceof RuntimeException) {
-//									throw (RuntimeException) ex;
-//								}
-//								LOG.error("Ignored exception during listener registration", e);
-//							}
-//
-//						} finally {
-//							// untoggle the state of the dynamic API
-//							this.getServletContext().setEnabled(true);
-//						}
-//					}
-
-//					@Override
-//					public boolean isProtectedTarget(String target) {
-//						// Fixes PAXWEB-196 and PAXWEB-211
-//						//CHECKSTYLE:OFF
-//						while (target.startsWith("//")) {
-//							target = URIUtil.compactPath(target);
-//						}
-//						//CHECKSTYLE:ON
-//
-//						return StringUtil.startsWithIgnoreCase(target, "/web-inf")
-//								|| StringUtil.startsWithIgnoreCase(target, "/meta-inf")
-//								|| StringUtil.startsWithIgnoreCase(target, "/osgi-inf")
-//								|| StringUtil.startsWithIgnoreCase(target, "/osgi-opt");
-//					}
 
 }

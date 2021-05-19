@@ -48,6 +48,7 @@
 		<module>jsp-filter</module>
 		<module>war-requiring</module>
 		<module>war-required</module>
+		<module>simple-filter</module>
 	</modules>
 
 </project>

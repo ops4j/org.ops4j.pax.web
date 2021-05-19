@@ -211,6 +211,11 @@
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>war-requiring</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>simple-filter</artifactId>
+			<type>war</type>
+		</dependency>
 
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
