@@ -219,6 +219,12 @@
 
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>war-jsf23-embedded</artifactId>
+			<type>war</type>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>container-bundle-1</artifactId>
 		</dependency>
 		<dependency>
@@ -414,6 +420,10 @@
 		<dependency>
 			<groupId>jakarta.validation</groupId>
 			<artifactId>jakarta.validation-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.websocket</groupId>
+			<artifactId>jakarta.websocket-api</artifactId>
 		</dependency>
 
 		<dependency>

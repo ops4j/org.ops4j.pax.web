@@ -1,1 +1,0 @@
-Special directory with name equal to name of WAR context.

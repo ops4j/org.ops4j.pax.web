@@ -985,6 +985,13 @@
 				<version>${project.version}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>war-jsf23-embedded</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
+
 			<!-- pax-web httpservice/webcontainer samples -->
 
 			<dependency>
@@ -2282,11 +2289,23 @@
 				<groupId>commons-beanutils</groupId>
 				<artifactId>commons-beanutils</artifactId>
 				<version>${dependency.commons-beanutils.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>commons-digester</groupId>
 				<artifactId>commons-digester</artifactId>
 				<version>${dependency.commons-digester.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>

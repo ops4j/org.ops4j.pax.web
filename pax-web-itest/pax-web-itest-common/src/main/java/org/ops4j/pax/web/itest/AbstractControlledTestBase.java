@@ -326,22 +326,6 @@ public abstract class AbstractControlledTestBase {
 	}
 
 	protected Option[] jersey() {
-		// mvn:com.sun.activation/javax.activation/1.2.0
-		// mvn:jakarta.annotation/jakarta.annotation-api/1.3.5
-		// mvn:jakarta.ws.rs/jakarta.ws.rs-api/2.1.6
-		// mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/1.0_6
-		// mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_3
-		// mvn:org.glassfish.hk2/hk2-api/2.6.1
-		// mvn:org.glassfish.hk2/hk2-locator/2.6.1
-		// mvn:org.glassfish.hk2/hk2-utils/2.6.1
-		// mvn:org.glassfish.hk2/osgi-resource-locator/1.0.3
-		// mvn:org.glassfish.jersey.containers/jersey-container-servlet/2.34
-		// mvn:org.glassfish.jersey.containers/jersey-container-servlet-core/2.34
-		// mvn:org.glassfish.jersey.core/jersey-client/2.34
-		// mvn:org.glassfish.jersey.core/jersey-common/2.34
-		// mvn:org.glassfish.jersey.core/jersey-server/2.34
-		// mvn:org.glassfish.jersey.inject/jersey-hk2/2.34
-		// mvn:org.javassist/javassist/3.28.0-GA
 		return new Option[] {
 				mavenBundle("jakarta.validation", "jakarta.validation-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
@@ -377,6 +361,44 @@ public abstract class AbstractControlledTestBase {
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.javassist", "javassist")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
+		};
+	}
+
+	protected Option[] myfacesDependencies() {
+		return new Option[] {
+				mavenBundle("jakarta.websocket", "jakarta.websocket-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("jakarta.el", "jakarta.el-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("javax.interceptor", "javax.interceptor-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				// it has to be CDI 1.2 for Myfaces 2.3.x
+				mavenBundle("javax.enterprise", "cdi-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
+		};
+	}
+
+	protected Option[] myfaces() {
+		return new Option[] {
+				mavenBundle("jakarta.websocket", "jakarta.websocket-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("jakarta.el", "jakarta.el-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("javax.interceptor", "javax.interceptor-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				// it has to be CDI 1.2 for Myfaces 2.3.x
+				mavenBundle("javax.enterprise", "cdi-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("commons-collections", "commons-collections")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("commons-beanutils", "commons-beanutils")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("commons-digester", "commons-digester")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.apache.myfaces.core", "myfaces-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.apache.myfaces.core", "myfaces-impl")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 		};
 	}
 
