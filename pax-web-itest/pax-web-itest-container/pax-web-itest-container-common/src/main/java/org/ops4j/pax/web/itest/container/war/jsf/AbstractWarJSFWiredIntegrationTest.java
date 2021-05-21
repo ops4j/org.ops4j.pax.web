@@ -30,23 +30,23 @@ import static org.junit.Assert.fail;
 /**
  * @author Achim Nierbeck
  */
-public abstract class AbstractWarJSFEmbeddedIntegrationTest extends AbstractContainerTestBase {
+public abstract class AbstractWarJSFWiredIntegrationTest extends AbstractContainerTestBase {
 
 	private Bundle wab;
 
 	@Before
 	public void setUp() throws Exception {
-		wab = configureAndWaitForDeploymentUnlessInstalled("war-jsf23-embedded", () -> {
-			installAndStartBundle(sampleWarURI("war-jsf23-embedded"));
+		wab = configureAndWaitForDeploymentUnlessInstalled("war-jsf23-wired", () -> {
+			installAndStartBundle(sampleWarURI("war-jsf23-wired"));
 		});
 	}
 
 	@Test
 	public void testSlash() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'Hello from JSF 2.3 example running on Pax Web 8'",
-						resp -> resp.contains("Hello from JSF 2.3 example running on Pax Web 8"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf23-embedded/");
+				.withResponseAssertion("Response must contain 'Please enter your name'",
+						resp -> resp.contains("Please enter your name"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf23-wired/");
 	}
 
 	@Test
@@ -56,8 +56,8 @@ public abstract class AbstractWarJSFEmbeddedIntegrationTest extends AbstractCont
 		LOG.debug("Testing JSF workflow!");
 		String response = HttpTestClientFactory.createDefaultTestClient()
 				.useCookieState(cookieState)
-				.withResponseAssertion("Response must contain 'Hello from JSF 2.3 example running on Pax Web 8'",
-						resp -> resp.contains("Hello from JSF 2.3 example running on Pax Web 8"))
+				.withResponseAssertion("Response must contain 'Please enter your name'",
+						resp -> resp.contains("Please enter your name"))
 				.withResponseAssertion("Response must contain JSF-ViewState-ID",
 						resp -> {
 							LOG.debug("Found JSF starting page: {}", resp);
@@ -91,7 +91,7 @@ public abstract class AbstractWarJSFEmbeddedIntegrationTest extends AbstractCont
 
 							return true;
 						})
-				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf23-embedded");
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf23-wired");
 
 		Pattern patternViewState = Pattern.compile("id=\"j_id_.*:javax.faces.ViewState:\\w\"");
 		Matcher viewStateMatcher = patternViewState.matcher(response);
@@ -115,12 +115,12 @@ public abstract class AbstractWarJSFEmbeddedIntegrationTest extends AbstractCont
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.useCookieState(cookieState)
-				.withResponseAssertion("Response from POST must contain 'Hello world!'",
-						resp -> resp.contains("Hello world!"))
-				.doPOST("http://127.0.0.1:8181/war-jsf23-embedded/start.xhtml")
-				.addParameter("mainForm:what", "world")
+				.withResponseAssertion("Response from POST must contain 'Hello Dummy-User. We hope you enjoy Apache MyFaces'",
+						resp -> resp.contains("Hello Dummy-User. We hope you enjoy Apache MyFaces"))
+				.doPOST("http://127.0.0.1:8181/war-jsf23-wired/faces/helloWorld.jsp")
+				.addParameter("mainForm:name", "Dummy-User")
 				.addParameter(viewStateID, viewStateValue)
-				.addParameter(inputID, "say")
+				.addParameter(inputID, "Press me")
 				.addParameter("javax.faces.ViewState", viewStateValue)
 				.addParameter("mainForm_SUBMIT", "1")
 				.executeTest();

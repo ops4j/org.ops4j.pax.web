@@ -31,7 +31,9 @@ public class JspServlet extends org.apache.jasper.servlet.JspServlet {
 	public void init(ServletConfig config) throws ServletException {
 		ClassLoader tccl = Thread.currentThread().getContextClassLoader();
 		try {
-			Thread.currentThread().setContextClassLoader(JspServlet.class.getClassLoader());
+			if (tccl == null) {
+				Thread.currentThread().setContextClassLoader(JspServlet.class.getClassLoader());
+			}
 			super.init(config);
 		} finally {
 			Thread.currentThread().setContextClassLoader(tccl);
@@ -42,7 +44,9 @@ public class JspServlet extends org.apache.jasper.servlet.JspServlet {
 	public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
 		ClassLoader tccl = Thread.currentThread().getContextClassLoader();
 		try {
-			Thread.currentThread().setContextClassLoader(JspServlet.class.getClassLoader());
+			if (tccl == null) {
+				Thread.currentThread().setContextClassLoader(JspServlet.class.getClassLoader());
+			}
 			super.service(req, res);
 		} finally {
 			Thread.currentThread().setContextClassLoader(tccl);

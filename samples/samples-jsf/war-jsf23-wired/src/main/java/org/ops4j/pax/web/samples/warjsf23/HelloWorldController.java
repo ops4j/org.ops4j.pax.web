@@ -16,23 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.myfaces.test;
+package org.ops4j.pax.web.samples.warjsf23;
 
 /**
  * A typical simple backing bean, that is backed to <code>helloworld.jsp</code>
  */
 public class HelloWorldController {
 
-	// properties
 	private String name;
 
-	/**
-	 * default empty constructor
-	 */
-	public HelloWorldController() {
-	}
-
-	// -------------------getter & setter
 	public String getName() {
 		return name;
 	}
@@ -49,4 +41,5 @@ public class HelloWorldController {
 		// system of JSF
 		return "success";
 	}
+
 }
