@@ -75,6 +75,10 @@ public class OsgiScopedServletContext implements ServletContext {
 		return osgiContext.getContainerServletContext();
 	}
 
+	public ClassLoader getOsgiContextClassLoader() {
+		return osgiContext.getClassLoader();
+	}
+
 	public String[] getWelcomeFiles() {
 		return osgiContext.getWelcomeFiles();
 	}
@@ -402,7 +406,7 @@ public class OsgiScopedServletContext implements ServletContext {
 
 		if (getOsgiContextModel().getClassLoader() != null) {
 			// WAB case
-			return osgiContext.getClassLoader();
+			return getOsgiContextModel().getClassLoader();
 		}
 
 		// Whiteboard/HttpService case

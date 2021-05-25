@@ -21,19 +21,29 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
+
 /**
  * Pax Web extension of the original {@link org.apache.jasper.servlet.JspServlet} to set proper TCCL, so Jasper
  * can correctly create {@link javax.el.ExpressionFactory}.
  */
 public class JspServlet extends org.apache.jasper.servlet.JspServlet {
 
+	private ClassLoader cl;
+
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+		if (config.getServletContext() instanceof OsgiScopedServletContext) {
+			cl = ((OsgiScopedServletContext)config.getServletContext()).getOsgiContextClassLoader();
+		} else {
+			cl = config.getServletContext().getClassLoader();
+		}
+		if (cl == null) {
+			cl = JspServlet.class.getClassLoader();
+		}
 		try {
-			if (tccl == null) {
-				Thread.currentThread().setContextClassLoader(JspServlet.class.getClassLoader());
-			}
+			Thread.currentThread().setContextClassLoader(cl);
 			super.init(config);
 		} finally {
 			Thread.currentThread().setContextClassLoader(tccl);
@@ -44,9 +54,7 @@ public class JspServlet extends org.apache.jasper.servlet.JspServlet {
 	public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
 		ClassLoader tccl = Thread.currentThread().getContextClassLoader();
 		try {
-			if (tccl == null) {
-				Thread.currentThread().setContextClassLoader(JspServlet.class.getClassLoader());
-			}
+			Thread.currentThread().setContextClassLoader(cl);
 			super.service(req, res);
 		} finally {
 			Thread.currentThread().setContextClassLoader(tccl);
