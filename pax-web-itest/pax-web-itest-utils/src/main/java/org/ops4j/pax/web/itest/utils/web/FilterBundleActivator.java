@@ -29,6 +29,7 @@ public class FilterBundleActivator implements BundleActivator {
 	private ServiceRegistration<Filter> filterReg;
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void start(BundleContext context) throws Exception {
 		// register a filter
 		Hashtable<String, String> props = new Hashtable<>();

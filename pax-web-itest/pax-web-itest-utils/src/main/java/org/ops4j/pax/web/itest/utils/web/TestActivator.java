@@ -40,6 +40,7 @@ public class TestActivator implements BundleActivator {
 	private ServiceRegistration<Filter> filterReg;
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void start(BundleContext context) throws Exception {
 		Dictionary<String, String> props;
 		// register a filter

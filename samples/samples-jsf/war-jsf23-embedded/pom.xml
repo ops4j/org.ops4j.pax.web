@@ -31,7 +31,7 @@
 	<artifactId>war-jsf23-embedded</artifactId>
 	<packaging>war</packaging>
 
-	<name>OPS4J Pax Web JSF Samples - WAR with embedded JSF</name>
+	<name>OPS4J Pax Web JSF Samples - embedded JSF</name>
 
 	<description>This WAR contains MyFaces libs and their dependencies in WEB-INF/lib</description>
 

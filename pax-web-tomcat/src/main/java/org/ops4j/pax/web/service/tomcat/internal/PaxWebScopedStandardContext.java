@@ -98,6 +98,11 @@ public class PaxWebScopedStandardContext extends StandardContext {
 		return delegate.getPath();
 	}
 
+	@Override
+	public String getEncodedPath() {
+		return delegate.getEncodedPath();
+	}
+
 	// equals/hashCode have to be delegated to make Tomcat's mapper work in INCLUDE dispatcher
 
 	@Override

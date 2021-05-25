@@ -28,12 +28,12 @@
 	</parent>
 
 	<groupId>org.ops4j.pax.web.samples</groupId>
-	<artifactId>war-jsf23-wired</artifactId>
+	<artifactId>war-primefaces-embedded</artifactId>
 	<packaging>war</packaging>
 
-	<name>OPS4J Pax Web JSF Samples - wired JSF</name>
+	<name>OPS4J Pax Web JSF Samples - embedded Primefaces</name>
 
-	<description>This WAR depends on MyFaces and their dependencies through Import-Package</description>
+	<description>This WAR contains MyFaces libs and their dependencies in WEB-INF/lib</description>
 
 	<build>
 		<resources>
@@ -55,15 +55,45 @@
 					</supportedProjectTypes>
 					<instructions>
 						<Import-Package>
-							<!-- This is the only required import - to ensure that this WAB is "wired" to MyFaces -->
-							javax.faces.webapp
+							javax.el,
+							javax.websocket.*,
+							javax.servlet.jsp.jstl.*;version="1.2",
+							javax.servlet.jsp.*;version="2.3",
+							javax.servlet.*;version="[3.1,5)",
+							javax.naming,
+
+							<!-- for InstanceManager needed by MyFaces' Tomcat7AnnotationInjectionProvider -->
+							org.apache.tomcat,
+
+							<!-- These are required by embedded MyFaces to generate tokens for viewstate -->
+							javax.crypto,
+							javax.crypto.spec,
+
+							<!-- This is required at runtime (TODO: check JDK11) -->
+							javax.xml.bind,
+
+							<!-- These are required by embedded MyFaces to parse various descriptors -->
+							javax.xml.parsers,
+							javax.xml.transform,
+							javax.xml.xpath,
+							org.xml.sax,
+							org.xml.sax.ext,
+							org.xml.sax.helpers,
+							org.w3c.dom,
+
+							<!-- These will come from pax-logging-api -->
+							org.apache.commons.logging,
+							org.slf4j
 						</Import-Package>
 						<Private-Package>
-							org.ops4j.pax.web.samples.warjsf23
+							org.ops4j.pax.web.samples.primefaces
 						</Private-Package>
 						<_wab>${project.build.directory}/${project.build.finalName}</_wab>
-						<Web-ContextPath>/war-jsf23-wired</Web-ContextPath>
+						<Web-ContextPath>/war-primefaces-embedded</Web-ContextPath>
 						<Export-Package />
+						<Embed-Directory>WEB-INF/lib</Embed-Directory>
+						<Embed-Dependency>*;scope=compile;artifactId=!commons-logging</Embed-Dependency>
+						<Embed-Transitive>false</Embed-Transitive>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -93,12 +123,28 @@
 		<dependency>
 			<groupId>org.apache.myfaces.core</groupId>
 			<artifactId>myfaces-api</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.myfaces.core</groupId>
 			<artifactId>myfaces-impl</artifactId>
-			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.primefaces</groupId>
+			<artifactId>primefaces</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-digester</groupId>
+			<artifactId>commons-digester</artifactId>
 		</dependency>
 
 	</dependencies>

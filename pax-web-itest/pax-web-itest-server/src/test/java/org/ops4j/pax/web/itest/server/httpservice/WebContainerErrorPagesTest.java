@@ -40,6 +40,7 @@ import static org.ops4j.pax.web.itest.server.support.Utils.httpGET;
 public class WebContainerErrorPagesTest extends MultiContainerTestSupport {
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void errorPagesAndContextSwitching() throws Exception {
 		Bundle sample1 = mockBundle("sample1");
 		WebContainer wc = container(sample1);

@@ -35,6 +35,7 @@ public class Bundle1Activator implements BundleActivator {
 	private ServiceRegistration<Filter> filterReg;
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void start(BundleContext context) throws Exception {
 		ServiceReference<WebContainer> serviceReference = context.getServiceReference(WebContainer.class);
 

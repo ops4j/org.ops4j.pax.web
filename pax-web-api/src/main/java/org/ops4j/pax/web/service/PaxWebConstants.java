@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.service;
 
+import java.net.JarURLConnection;
 import javax.servlet.ServletContext;
 
 import org.ops4j.pax.web.service.whiteboard.ContextMapping;
@@ -196,6 +197,19 @@ public interface PaxWebConstants {
 
 	/** For legacy Spring-DM support, {@link org.osgi.framework.BundleContext} should be available under this param */
 	String CONTEXT_PARAM_SPRING_BUNDLE_CONTEXT = "org.springframework.osgi.web.org.osgi.framework.BundleContext";
+
+	/**
+	 * <p>According to "11.1.3 Application Configuration Parameters" of JSF 2.3 specification,
+	 * {@code javax.faces.FACELETS_LIBRARIES} is a list of resource names relative to context root. This is not
+	 * supposed to find resources in embedded JARs, but there's no other easy way to let MyFaces find such taglib
+	 * resources in Pax Web.</p>
+	 *
+	 * <p>Normally, {@code org.apache.myfaces.view.facelets.util.Classpath#_searchResource()} assumes that the
+	 * URL is {@link JarURLConnection} when doing recursive search and does a special GAE check. Nothing that could
+	 * help us provide nice OSGi-aware discovery mechanism. That's why this context parameter will provide special
+	 * {@link java.util.Map} that can be used when searching for FACELET resources.</p>
+	 */
+	String CONTEXT_PARAM_PAX_WEB_FACELETS_LIBRARIES = "org.ops4j.pax.web.javax.faces.FACELETS_LIBRARIES";
 
 	// --- 3 properties defined in 128.3.4 "Publishing the Servlet Context" (and one Pax Web specific)
 

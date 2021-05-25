@@ -16,25 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.myfaces.test;
+package org.ops4j.pax.web.samples.primefaces;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
+
+// According to "5.4 Managed Bean Annotations" of JSF 2.3 specification,javax.faces.bean package
+// is deprecated and the recommended annotations should be taken from CDI 1.2
 
 @ManagedBean(name = "helloWorld")
 @SessionScoped
 public class HelloWorldController {
 
-	// properties
 	private String name;
 
-	/**
-	 * default empty constructor
-	 */
 	public HelloWorldController() {
 	}
 
-	// -------------------getter & setter
 	public String getName() {
 		return name;
 	}
@@ -49,4 +47,5 @@ public class HelloWorldController {
 	public String send() {
 		return "success?faces-redirect=true";
 	}
+
 }

@@ -36,6 +36,7 @@ public class PaxWebWhiteboardWelcomeFiles implements WelcomeFileMapping {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public String getContextSelectFilter() {
 		// only 3 out of 4 contexts
 		return String.format("(|(%s=%s)(%s=%s)(%s=%s))",

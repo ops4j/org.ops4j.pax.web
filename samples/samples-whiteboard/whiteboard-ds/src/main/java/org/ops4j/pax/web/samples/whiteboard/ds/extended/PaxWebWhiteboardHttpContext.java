@@ -31,6 +31,7 @@ import org.osgi.service.http.HttpContext;
 		PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID + "=" + PaxWebWhiteboardHttpContext.CONTEXT_ID,
 		PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH + "=/custom-http-context"
 })
+@SuppressWarnings("deprecation")
 public class PaxWebWhiteboardHttpContext implements HttpContext {
 
 	public static final String CONTEXT_ID = "CustomHttpContext";

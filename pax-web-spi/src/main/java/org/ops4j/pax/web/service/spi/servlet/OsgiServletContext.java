@@ -620,9 +620,6 @@ public class OsgiServletContext implements ServletContext {
 	}
 
 	public URL getResource(WebContainerContext context, String path) throws MalformedURLException {
-		// TODO: according to 128.3.5 Static Content, we can't return any restricted paths, even if
-		//       org.ops4j.pax.web.service.WebContainerContext.getResourcePaths and
-		//       org.osgi.service.http.context.ServletContextHelper.getResourcePaths allow that
 		// According to 128.6.3 Resource Lookup, in case of WAB, it is explicitly mentioned that
 		// Bundle.findEntries() method must be used.
 		// In Whiteboard/HttpService case, this delegates to ServletContextHelper/HttpContext, so it is clear that
@@ -630,6 +627,15 @@ public class OsgiServletContext implements ServletContext {
 		// ServletContextHelper that acts accordingly to 128.6.3, but because default implementation of
 		// ServletContextHelper is roughly compatible, we'll leave it as is - but still we need to support a case
 		// when a WAB is installed, but then, higher-ranked ServletContextHelper is registered for WABs context path.
+
+		// special javax.faces.FACELETS_LIBRARIES handling
+		@SuppressWarnings("unchecked")
+		Map<String, URL> mapping = (Map<String, URL>) osgiContextModel.getInitialContextAttributes()
+				.get(PaxWebConstants.CONTEXT_PARAM_PAX_WEB_FACELETS_LIBRARIES);
+		if (mapping != null && mapping.containsKey(path)) {
+			return mapping.get(path);
+		}
+
 		return context.getResource(path);
 	}
 

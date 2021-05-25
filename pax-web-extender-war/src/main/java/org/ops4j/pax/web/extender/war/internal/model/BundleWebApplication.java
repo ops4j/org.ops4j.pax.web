@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -40,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
@@ -80,6 +82,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.util.WebContainerManager;
+import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
@@ -171,6 +174,8 @@ public class BundleWebApplication {
 	 * bundles used to access those roots.
 	 */
 	private final Map<Bundle, URL> metainfResourceRoots = new LinkedHashMap<>();
+
+	private final Set<URL> faceletTagLibDescriptors = new LinkedHashSet<>();
 
 	/**
 	 * This is the discovered mapping of SCIs to sets of classes that are related to types from
@@ -1088,23 +1093,36 @@ public class BundleWebApplication {
 				// Tomcat already configures an instance of org.apache.catalina.core.StandardContext here, but
 				// Pax Web will do it later
 
-				// configure /META-INF/resources locations -
-				// according to "4.6 Resources" of the Servlet API 4 specification (OSGi CMPN 128 doesn't say anything about it)
-				// we'll check all the JARs from Bundle-ClassPath and those reachable (via Import-Package or Require-Bundle)
-				// bundles that have META-INF/web-fragment.xml - all locations that contain META-INF/resources will be added
-				// to org.ops4j.pax.web.extender.war.internal.WebApplicationHelper, so they're searched for web resources
+				// Now, search for additional resources:
+				// 1) configure /META-INF/resources locations -
+				//    according to "4.6 Resources" of the Servlet API 4 specification (OSGi CMPN 128 doesn't say anything about it)
+				//    we'll check all the JARs from Bundle-ClassPath and those reachable (via Import-Package or Require-Bundle)
+				//    bundles that have META-INF/web-fragment.xml - all locations that contain META-INF/resources will be added
+				//    to org.ops4j.pax.web.extender.war.internal.WebApplicationHelper, so they're searched for web resources
+				// 2) /META-INF/**/*.taglib.xml to set up javax.faces.FACELETS_LIBRARIES context parameter
+				//    First, I wanted to provide /META-INF/services/org.apache.myfaces.spi.FaceletConfigResourceProvider
+				//    in pax-web-jsp (or pax-web-extender-war), but it wouldn't really work for WABs embedding
+				//    myfaces + primefaces. Pax Web bundle would need optional import of org.apache.myfaces.spi package
+				//    or we'd have to for WAB creators to import our package with the class implementing this service...
+				//    That's why a better approach is to prepopulate javax.faces.FACELETS_LIBRARIES context init parameter
+
 				try {
 					for (URL url : classSpace.getWabClassPath()) {
 						URL metainfResource = new URL(url, "META-INF/resources/");
 						if (Utils.isDirectory(metainfResource)) {
 							metainfResourceRoots.put(bundle, metainfResource);
 						}
+						// e.g., jar:bundle://46.0:0/WEB-INF/lib/primefaces-10.0.0.jar!/META-INF/primefaces-p.taglib.xml
+						faceletTagLibDescriptors.addAll(ClassPathUtil.findEntries(bundle, new URL[] { url },
+								"META-INF", "*.taglib.xml", true));
 					}
 					for (Map.Entry<Bundle, URL> e : classSpace.getApplicationFragmentBundles().entrySet()) {
 						URL metainfResource = new URL(e.getValue(), "META-INF/resources/");
 						if (Utils.isDirectory(metainfResource)) {
 							metainfResourceRoots.put(e.getKey(), metainfResource);
 						}
+						faceletTagLibDescriptors.addAll(ClassPathUtil.findEntries(e.getKey(), new URL[] { e.getValue() },
+								"META-INF", "*.taglib.xml", true));
 					}
 				} catch (MalformedURLException ignored) {
 				}
@@ -1219,6 +1237,19 @@ public class BundleWebApplication {
 		//      of OsgiServletContext, because these are needed also in Whiteboard and HttpService scenarios.
 		if (classSpace.getOrderedLibs() != null) {
 			ocm.getInitialContextAttributes().put(ServletContext.ORDERED_LIBS, classSpace.getOrderedLibs());
+		}
+		if (!faceletTagLibDescriptors.isEmpty()) {
+			final Map<String, URL> faceletsUrlMapping = new HashMap<>();
+			String faceletsLibraries = faceletTagLibDescriptors.stream()
+					.map(u -> {
+						String ef = u.toExternalForm();
+						String path = ef.contains("!/") ? ef.substring(ef.indexOf("!/") + 2) : u.getPath();
+						faceletsUrlMapping.putIfAbsent(path, u);
+						return path;
+					})
+					.collect(Collectors.joining(";"));
+			ocm.getContextParams().put("javax.faces.FACELETS_LIBRARIES", faceletsLibraries);
+			ocm.getInitialContextAttributes().put(PaxWebConstants.CONTEXT_PARAM_PAX_WEB_FACELETS_LIBRARIES, faceletsUrlMapping);
 		}
 
 		// 1.4. Context initial parameters

@@ -42,6 +42,7 @@
 		<module>jsf-primefaces-embedded-fragment</module>
 		<module>war-jsf23-embedded</module>
 		<module>war-jsf23-wired</module>
+		<module>war-primefaces-embedded</module>
 	</modules>
 
 </project>

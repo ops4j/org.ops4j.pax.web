@@ -47,6 +47,7 @@ public class WebContainerJspTest extends MultiContainerTestSupport {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void simpleJspTest() throws Exception {
 		Bundle sample1 = mockBundle("sample1");
 		when(sample1.getResource("hello.jsp")).thenReturn(new File("src/test/resources/jsp/hello.jsp").toURI().toURL());
@@ -79,6 +80,7 @@ public class WebContainerJspTest extends MultiContainerTestSupport {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void jsppWithCustomTaglibsTest() throws Exception {
 		Bundle sample1 = mockBundle("sample1");
 		when(sample1.getResource("hellotld.jspage")).thenReturn(new File("src/test/resources/jsp/hellotld.jsp").toURI().toURL());

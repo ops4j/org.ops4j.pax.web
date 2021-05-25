@@ -80,7 +80,6 @@ import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletMapp
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.WelcomeFileMappingTracker;
 import org.ops4j.pax.web.itest.server.controller.ServerControllerScopesTest;
 import org.ops4j.pax.web.itest.server.support.Utils;
-import org.ops4j.pax.web.jsp.JasperInitializer;
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
@@ -239,8 +238,17 @@ public class MultiContainerTestSupport {
 
 		if (enableJSP()) {
 			jspBundle = mockBundle("org.ops4j.pax.web.pax-web-jsp", null, false);
-			when(jspBundle.loadClass(PaxWebConstants.DEFAULT_JSP_SERVLET_CLASS)).thenAnswer(inv -> JspServlet.class);
-			when(jspBundle.loadClass(PaxWebConstants.DEFAULT_JSP_SCI_CLASS)).thenAnswer(inv -> JasperInitializer.class);
+			when(jspBundle.getBundleId()).thenReturn(101L);
+			when(jspBundle.getState()).thenReturn(Bundle.ACTIVE);
+			when(jspBundle.getEntry("/")).thenReturn(new URL("bundle://101.0:0/"));
+			when(jspBundle.getResources("META-INF/services/javax.el.ExpressionFactory"))
+					.thenReturn(Collections.enumeration(Collections.singletonList(
+							org.ops4j.pax.web.jsp.JspServlet.class.getResource("META-INF/services/javax.el.ExpressionFactory")))
+					);
+			when(jspBundle.loadClass(anyString()))
+					.thenAnswer(i -> JspServlet.class.getClassLoader().loadClass(i.getArgument(0, String.class)));
+			when(jspBundle.getResource(anyString()))
+					.thenAnswer(i -> JspServlet.class.getClassLoader().getResource(i.getArgument(0, String.class)));
 		}
 
 		controller.configure();

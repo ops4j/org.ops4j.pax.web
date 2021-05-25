@@ -32,6 +32,7 @@ public class ServletBundleActivator implements BundleActivator {
 	private ServiceRegistration<HttpContext> httpContextReg;
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void start(BundleContext context) throws Exception {
 		ServiceReference<WebContainer> serviceReference = context.getServiceReference(WebContainer.class);
 

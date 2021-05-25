@@ -33,6 +33,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 						+ ")"
 		}
 )
+@SuppressWarnings("deprecation")
 public class WhiteboardResource {
 
 }
