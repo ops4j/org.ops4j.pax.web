@@ -18,6 +18,7 @@ package org.ops4j.pax.web.itest;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.function.Function;
 import javax.inject.Inject;
 
 import org.junit.After;
@@ -476,6 +477,24 @@ public abstract class AbstractControlledTestBase {
 				PaxWebConstants.CONTEXT_PATH_KEY, contextPath,
 				Constants.BUNDLE_SYMBOLICNAME, artifactId);
 		return installAndStartBundle(uri);
+	}
+
+	/**
+	 * Installs a bundle using {@code webbundle:} protocol
+	 * @param groupId
+	 * @param artifactId
+	 * @param version
+	 * @param symbolicName
+	 * @param contextPath
+	 * @return
+	 */
+	protected Bundle installAndStartWebBundle(String groupId, String artifactId, String version,
+			String symbolicName, String contextPath, Function<String, String> convertURI) {
+		String uri = String.format("webbundle:mvn:%s/%s/%s/war?%s=%s&%s=%s",
+				groupId, artifactId, version,
+				PaxWebConstants.CONTEXT_PATH_KEY, contextPath,
+				Constants.BUNDLE_SYMBOLICNAME, symbolicName);
+		return installAndStartBundle(convertURI == null ? uri : convertURI.apply(uri));
 	}
 
 	/**

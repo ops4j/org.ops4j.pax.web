@@ -259,6 +259,7 @@
 		<dependency.jersey.version>2.34</dependency.jersey.version>
 		<dependency.joda-time.version>2.3</dependency.joda-time.version>
 		<dependency.jsf.myfaces.version>2.3.9</dependency.jsf.myfaces.version>
+		<dependency.jsf.trinidad.version>2.2.1</dependency.jsf.trinidad.version>
 		<dependency.jsf.myfaces-facelets-examples20.version>1.0.2.1</dependency.jsf.myfaces-facelets-examples20.version>
 		<dependency.jsf.primefaces.version>10.0.0</dependency.jsf.primefaces.version>
 		<dependency.junit.version>4.13.2</dependency.junit.version>
@@ -2398,6 +2399,17 @@
 				<groupId>org.apache.myfaces.core</groupId>
 				<artifactId>myfaces-impl</artifactId>
 				<version>${dependency.jsf.myfaces.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.myfaces.trinidad</groupId>
+				<artifactId>trinidad-impl</artifactId>
+				<version>${dependency.jsf.trinidad.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.myfaces.trinidad</groupId>
+				<artifactId>trinidad-demo</artifactId>
+				<version>${dependency.jsf.trinidad.version}</version>
+				<type>war</type>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.myfaces.commons</groupId>

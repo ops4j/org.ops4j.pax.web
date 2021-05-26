@@ -17,6 +17,7 @@
  */
 package org.ops4j.pax.web.extender.war.internal.model;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -1254,6 +1255,8 @@ public class BundleWebApplication {
 
 		// 1.4. Context initial parameters
 		ocm.getContextParams().putAll(mainWebXml.getContextParams());
+		ocm.getInitialContextAttributes().put(ServletContext.TEMPDIR,
+				new File(System.getProperty("java.io.tmpdir"), ocm.getTemporaryLocation()));
 
 		wabBatch.addOsgiContextModel(ocm, scm);
 		wabBatch.associateOsgiContextModel(httpContext, ocm);
