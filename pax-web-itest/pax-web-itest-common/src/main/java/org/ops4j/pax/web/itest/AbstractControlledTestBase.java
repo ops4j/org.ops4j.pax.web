@@ -50,6 +50,7 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemTimeout;
 import static org.ops4j.pax.exam.CoreOptions.url;
 import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
  * <p>Single base class for all Pax Exam integration tests. Subclasses may add specific helper methods.</p>
@@ -400,6 +401,29 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle("org.apache.myfaces.core", "myfaces-impl")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 		};
+	}
+
+	protected Option[] primefaces() {
+		return combine(myfaces(),
+				mavenBundle("jakarta.xml.bind", "jakarta.xml.bind-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("com.sun.activation", "javax.activation")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.apache.aries.spifly", "org.apache.aries.spifly.dynamic.bundle")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ow2.asm", "asm")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ow2.asm", "asm-commons")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ow2.asm", "asm-util")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ow2.asm", "asm-tree")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ow2.asm", "asm-analysis")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.primefaces", "primefaces")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
+		);
 	}
 
 	// --- helper methods to be used in all the tests

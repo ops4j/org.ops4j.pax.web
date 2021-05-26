@@ -24,15 +24,20 @@ import org.ops4j.pax.web.itest.container.war.jsf.AbstractWarJSFPrimefacesIntegra
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 @RunWith(PaxExam.class)
-public class WarJSFPrimefacesEmbeddedIntegrationTest extends AbstractWarJSFPrimefacesIntegrationTest {
+public class WarJSFPrimefacesWiredIntegrationTest extends AbstractWarJSFPrimefacesIntegrationTest {
 
 	@Configuration
 	public Option[] configure() {
 		Option[] serverOptions = combine(baseConfigure(), paxWebUndertow());
 		Option[] jspOptions = combine(serverOptions, paxWebJsp());
-		// only the dependencies, because myfaces jars and commons-* jars are packaged within the WAB
-		Option[] jsfOptions = combine(jspOptions, myfacesDependencies());
+		// MyFaces and dependencies are installed as bundles
+		Option[] jsfOptions = combine(jspOptions, primefaces());
 		return combine(jsfOptions, paxWebExtenderWar());
+	}
+
+	@Override
+	protected String getVariant() {
+		return "war-primefaces-wired";
 	}
 
 }

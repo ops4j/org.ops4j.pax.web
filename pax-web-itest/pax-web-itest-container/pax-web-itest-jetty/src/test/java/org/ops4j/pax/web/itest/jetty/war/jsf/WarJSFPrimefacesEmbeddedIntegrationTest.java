@@ -19,12 +19,12 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.container.war.jsf.AbstractWarJSFPrimefacesEmbeddedIntegrationTest;
+import org.ops4j.pax.web.itest.container.war.jsf.AbstractWarJSFPrimefacesIntegrationTest;
 
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 @RunWith(PaxExam.class)
-public class WarJSFPrimefacesEmbeddedIntegrationTest extends AbstractWarJSFPrimefacesEmbeddedIntegrationTest {
+public class WarJSFPrimefacesEmbeddedIntegrationTest extends AbstractWarJSFPrimefacesIntegrationTest {
 
 	@Configuration
 	public Option[] configure() {

@@ -27,16 +27,20 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Achim Nierbeck
  */
-public abstract class AbstractWarJSFPrimefacesEmbeddedIntegrationTest extends AbstractContainerTestBase {
+public abstract class AbstractWarJSFPrimefacesIntegrationTest extends AbstractContainerTestBase {
 
-	private static final Logger LOG = LoggerFactory.getLogger(AbstractWarJSFPrimefacesEmbeddedIntegrationTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractWarJSFPrimefacesIntegrationTest.class);
 
 	private Bundle wab;
 
+	protected String getVariant() {
+		return "war-primefaces-embedded";
+	}
+
 	@Before
 	public void setUp() throws Exception {
-		wab = configureAndWaitForDeploymentUnlessInstalled("war-primefaces-embedded", () -> {
-			installAndStartBundle(sampleWarURI("war-primefaces-embedded"));
+		wab = configureAndWaitForDeploymentUnlessInstalled(getVariant(), () -> {
+			installAndStartBundle(sampleWarURI(getVariant()));
 		});
 	}
 
@@ -45,7 +49,7 @@ public abstract class AbstractWarJSFPrimefacesEmbeddedIntegrationTest extends Ab
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Please enter your name'",
 						resp -> resp.contains("Please enter your name"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/war-primefaces-embedded/");
+				.doGETandExecuteTest("http://127.0.0.1:8181/" + getVariant() + "/");
 	}
 
 	@Test
@@ -57,7 +61,7 @@ public abstract class AbstractWarJSFPrimefacesEmbeddedIntegrationTest extends Ab
 				.useCookieState(cookieState)
 				.withResponseAssertion("Response must contain 'Please enter your name'",
 						resp -> resp.contains("Please enter your name"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/war-primefaces-embedded/");
+				.doGETandExecuteTest("http://127.0.0.1:8181/" + getVariant() + "/");
 
 		String viewState = extractJsfViewState(response);
 
@@ -65,7 +69,7 @@ public abstract class AbstractWarJSFPrimefacesEmbeddedIntegrationTest extends Ab
 				.useCookieState(cookieState)
 				.withResponseAssertion("Response must contain 'Hello Dummy-User. We hope you enjoy Apache MyFaces'",
 						resp -> resp.contains("Hello Dummy-User. We hope you enjoy Apache MyFaces"))
-				.doPOST("http://127.0.0.1:8181/war-primefaces-embedded/helloWorld.xhtml")
+				.doPOST("http://127.0.0.1:8181/" + getVariant() + "/helloWorld.xhtml")
 				.addParameter("mainForm:name", "Dummy-User")
 				.addParameter("mainForm:j_id_b", "Press me")
 				.addParameter("javax.faces.ViewState", viewState)
@@ -80,7 +84,7 @@ public abstract class AbstractWarJSFPrimefacesEmbeddedIntegrationTest extends Ab
 						resp -> resp.contains("Please enter your name"))
 				.withResponseAssertion("The Primefaces-tag <p:panelGrid> was not rendered correctly.",
 						resp -> !resp.matches("(?s).*<p:panelGrid.*>.*</p:panelGrid>.*"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/war-primefaces-embedded/");
+				.doGETandExecuteTest("http://127.0.0.1:8181/" + getVariant() + "/");
 	}
 
 	/**
