@@ -446,24 +446,24 @@ class JettyFactoryImpl implements JettyFactory {
 				Comparator<String> cipherComparator = (Comparator<String>) FieldUtils.readDeclaredStaticField(comparatorClass, "COMPARATOR");
 				sslContextFactory.setCipherComparator(cipherComparator);
 
-				sslFactory = new SslConnectionFactory(sslContextFactory, "h2");
+				sslFactory = new SslConnectionFactory(sslContextFactory, "alpn");
 				connectionFactories.add(sslFactory);
 
 
 				//org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory
 				Class<?> loadClass = bundle.loadClass("org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory");
-//				
-//				//ALPNServerConnectionFactory alpn = new ALPNServerConnectionFactory("spdy/3", "http/1.1");
-//				alpnFactory = (NegotiatingServerConnectionFactory) ConstructorUtils.invokeConstructor(loadClass, (Object) new String[] {"ssl", "http/2", "http/1.1"});
-//				alpnFactory.setDefaultProtocol("http/1.1");
-//				connectionFactories.add(alpnFactory);
+				http2Factory = (AbstractConnectionFactory) ConstructorUtils.invokeConstructor(loadClass, httpsConfig);
+				connectionFactories.add(http2Factory);
+
+				loadClass = bundle.loadClass("org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory");
+				alpnFactory = (NegotiatingServerConnectionFactory) ConstructorUtils.invokeConstructor(loadClass, (Object) new String[] {"ssl", "http/1.1", "h2"});
+				alpnFactory.setDefaultProtocol("http/1.1");
+				connectionFactories.add(alpnFactory);
 
 				//HTTPSPDYServerConnectionFactory spdy = new HTTPSPDYServerConnectionFactory(SPDY.V3, httpConfig);
 //				loadClass = bundle.loadClass("org.eclipse.jetty.spdy.server.http.HTTPSPDYServerConnectionFactory");
 //				loadClass = bundle.loadClass("org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory");
 
-				http2Factory = (AbstractConnectionFactory) ConstructorUtils.invokeConstructor(loadClass, httpsConfig);
-				connectionFactories.add(http2Factory);
 
 			} catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalArgumentException | IllegalAccessException | InstantiationException e) {
 				// TODO Auto-generated catch block
@@ -524,7 +524,6 @@ class JettyFactoryImpl implements JettyFactory {
 
 		} catch (ClassNotFoundException e) {
 			log.info("No ALPN class available");
-			return false;
 		}
 
 		try {
