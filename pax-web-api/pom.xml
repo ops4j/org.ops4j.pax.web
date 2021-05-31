@@ -62,9 +62,9 @@
 							${bundle.namespace};version="${pax-web.osgi.version}",
 							${bundle.namespace}.whiteboard;version="${pax-web.osgi.version}",
 							org.osgi.service.http;version="1.2.1",
-							org.osgi.service.http.context;version="1.0",
-							org.osgi.service.http.runtime;version="1.0",
-							org.osgi.service.http.runtime.dto;version="1.0",
+							org.osgi.service.http.context;version="1.1.0",
+							org.osgi.service.http.runtime;version="1.1.0",
+							org.osgi.service.http.runtime.dto;version="1.1.0",
 							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}"
 						</Export-Package>
 						<_removeheaders>
