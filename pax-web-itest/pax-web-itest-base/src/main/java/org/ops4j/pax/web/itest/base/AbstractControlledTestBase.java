@@ -162,6 +162,8 @@ public abstract class AbstractControlledTestBase {
 
 //				addCodeCoverageOption(),
 
+				mavenBundle().groupId("javax.annotation").artifactId("javax.annotation-api").version("1.3"),
+
 				mavenBundle().groupId("org.ops4j.pax.web.itest").artifactId("pax-web-itest-base").versionAsInProject(),
 
 				mavenBundle().groupId("javax.servlet").artifactId("javax.servlet-api").versionAsInProject(),
