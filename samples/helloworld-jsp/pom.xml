@@ -64,27 +64,106 @@
 						<Export-Package>!*</Export-Package>
 						<Private-Package>
 							org.apache.jsp,
-							org.ops4j.pax.web.samples.helloworld.jsp.internal
+							${bundle.namespace}.internal.*
 						</Private-Package>
+						<Embed-Dependency>*; scope=runtime; type=!pom</Embed-Dependency>
+						<Include-Resource> {maven-resources}, {maven-dependencies},
+							org/apache/jsp/helloworld/jsp/simple_jsp.class=target/jsp-source/org/apache/jsp/helloworld/jsp/simple_jsp.class,
+							org/apache/jsp/helloworld/jsp/using_002dtld_jsp.class=target/jsp-source/org/apache/jsp/helloworld/jsp/using_002dtld_jsp.class
+						</Include-Resource>
+						<_removeheaders>
+							Private-Package,
+							Include-Resource,
+							Embed-Dependency,
+							Embed-Transitive
+						</_removeheaders>
 					</instructions>
 				</configuration>
 			</plugin>
 			<plugin>
 				<!-- This plugin used due to issues running on MacOS X and JDK7 -->
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-jspc-maven-plugin</artifactId>
-				<version>9.4.39.v20210325</version>
+				<groupId>org.jasig.mojo.jspc</groupId>
+				<artifactId>jspc-maven-plugin</artifactId>
+				<version>2.0.2</version>
 				<executions>
 					<execution>
 						<id>jspc</id>
 						<goals>
-							<goal>jspc</goal>
+							<goal>compile</goal>
 						</goals>
-						<configuration>
-							<webAppSourceDirectory>${project.basedir}/src/main/resources/helloworld/jsp</webAppSourceDirectory>
-						</configuration>
 					</execution>
 				</executions>
+				<configuration>
+					<packageName>org.apache.jsp</packageName>
+					<defaultSourcesDirectory>${project.basedir}/src/main/resources</defaultSourcesDirectory>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.jasig.mojo.jspc</groupId>
+						<artifactId>jspc-compiler-tomcat8</artifactId>
+						<version>2.0.2</version>
+						<exclusions>
+							<exclusion>
+								<groupId>org.apache.tomcat</groupId>
+								<artifactId>jasper</artifactId>
+							</exclusion>
+							<exclusion>
+								<groupId>org.apache.tomcat</groupId>
+								<artifactId>jasper-el</artifactId>
+							</exclusion>
+							<exclusion>
+								<groupId>org.apache.tomcat</groupId>
+								<artifactId>jasper-jdt</artifactId>
+							</exclusion>
+							<exclusion>
+								<groupId>org.apache.tomcat</groupId>
+								<artifactId>servlet-api</artifactId>
+							</exclusion>
+							<exclusion>
+								<groupId>org.apache.tomcat</groupId>
+								<artifactId>jsp-api</artifactId>
+							</exclusion>
+							<exclusion>
+								<groupId>org.apache.tomcat</groupId>
+								<artifactId>el-api</artifactId>
+							</exclusion>
+							<exclusion>
+								<groupId>org.apache.tomcat</groupId>
+								<artifactId>annotations-api</artifactId>
+							</exclusion>
+						</exclusions>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.tomcat.embed</groupId>
+						<artifactId>tomcat-embed-jasper</artifactId>
+						<version>9.0.36</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.tomcat.embed</groupId>
+						<artifactId>tomcat-embed-el</artifactId>
+						<version>9.0.36</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.tomcat.embed</groupId>
+						<artifactId>tomcat-embed-core</artifactId>
+						<version>9.0.36</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.tomcat.embed</groupId>
+						<artifactId>tomcat-embed-core</artifactId>
+						<version>9.0.36</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.geronimo.bundles</groupId>
+						<artifactId>jstl</artifactId>
+						<version>1.2_1</version>
+					</dependency>
+					<dependency>
+						<groupId>${dependency.jdt.groupId}</groupId>
+						<artifactId>${dependency.jdt.artifactId}</artifactId>
+						<version>${dependency.jdt.version}</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 	</build>
