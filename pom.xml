@@ -128,7 +128,7 @@
 		<dependency.karaf.version>4.2.8</dependency.karaf.version>
 		<dependency.osgi.version>6.0.0</dependency.osgi.version>
 		<dependency.paxurl.version>2.6.7</dependency.paxurl.version>
-		<dependency.pax-logging.version>1.11.9</dependency.pax-logging.version>
+		<dependency.pax-logging.version>1.11.6</dependency.pax-logging.version>
 		<!-- github/primefaces/primefaces#4210: Compatibility with Servlet API 4.0" -->
 		<dependency.primefaces.version>6.2</dependency.primefaces.version>
 <!--		<dependency.primefaces.version>6.3-SNAPSHOT</dependency.primefaces.version>-->
