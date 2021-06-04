@@ -250,7 +250,7 @@
 
         <bundle>mvn:org.jboss.xnio/xnio-api/${dependency.xnio-api.version}</bundle>
         <bundle>mvn:org.jboss.xnio/xnio-nio/${dependency.xnio.version}</bundle>
-        
+
         <bundle>mvn:io.undertow/undertow-core/${dependency.undertow-core.version}</bundle>
         <bundle>mvn:io.undertow/undertow-servlet/${dependency.undertow-servlet.version}</bundle>
         <bundle>mvn:io.undertow/undertow-websockets-jsr/${dependency.undertow-websockets.version}</bundle>
