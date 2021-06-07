@@ -61,8 +61,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Export-Package>org.ops4j.pax.web.descriptor.gen;
-							version="${pax-web.osgi.version}"</Export-Package>
+						<Export-Package>org.ops4j.pax.web.descriptor.gen;version="${pax-web.osgi.version}";-noimport:=true</Export-Package>
 					</instructions>
 				</configuration>
 				<executions>
