@@ -132,6 +132,7 @@
 									org.ops4j.pax.cdi.extension; filter:="(extension=pax-cdi-extension)",
 									org.ops4j.pax.cdi.faces
 								</Require-Capability>
+								<_contract>!*</_contract>
 							</instructions>
 						</configuration>
 					</execution>

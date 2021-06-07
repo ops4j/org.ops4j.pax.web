@@ -75,15 +75,15 @@
 							!javax.security.auth.x500,
 						</Import-Package>
 						<Export-Package>
-							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}"; -split-package:=merge-first,
-							org.ops4j.pax.web.service;version="${pax-web.osgi.version}";-split-package:=merge-first,
-							org.ops4j.pax.web.service.spi;version="${pax-web.osgi.version}"; -split-package:=merge-first,
-							org.ops4j.pax.web.service.spi.model;version="${pax-web.osgi.version}"; -split-package:=merge-first,
-							org.ops4j.pax.web.service.spi.util;version="${pax-web.osgi.version}";-split-package:=merge-first,
-							org.apache.catalina.*;version="${dependency.tomcat.version}";-split-package:=merge-first,
-							org.apache.coyote.*;version="${dependency.tomcat.version}";-split-package:=merge-first,
-							org.apache.naming.*;version="${dependency.tomcat.version}";-split-package:=merge-first,
-							org.apache.tomcat.*;version="${dependency.tomcat.version}";-split-package:=merge-first
+							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}";-split-package:=merge-first;-noimport:=true,
+							org.ops4j.pax.web.service;version="${pax-web.osgi.version}";-split-package:=merge-first;-noimport:=true,
+							org.ops4j.pax.web.service.spi;version="${pax-web.osgi.version}";-split-package:=merge-first;-noimport:=true,
+							org.ops4j.pax.web.service.spi.model;version="${pax-web.osgi.version}";-split-package:=merge-first;-noimport:=true,
+							org.ops4j.pax.web.service.spi.util;version="${pax-web.osgi.version}";-split-package:=merge-first;-noimport:=true,
+							org.apache.catalina.*;version="${dependency.tomcat.version}";-split-package:=merge-first;-noimport:=true,
+							org.apache.coyote.*;version="${dependency.tomcat.version}";-split-package:=merge-first;-noimport:=true,
+							org.apache.naming.*;version="${dependency.tomcat.version}";-split-package:=merge-first;-noimport:=true,
+							org.apache.tomcat.*;version="${dependency.tomcat.version}";-split-package:=merge-first;-noimport:=true
 						</Export-Package>
 						<Embed-Dependency>*; scope=compile; type=!pom;
 							inline=**/*.class|**/*.ico|**/*.dtd|**/*.xml|**/*.properties|**/*.map|**/*.default|**/*.providers</Embed-Dependency>
@@ -94,6 +94,7 @@
 							Embed-Dependency,
 							Embed-Transitive
 						</_removeheaders>
+						<_contract>!*</_contract>
 					</instructions>
 				</configuration>
 				<executions>
