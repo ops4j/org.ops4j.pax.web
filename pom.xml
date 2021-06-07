@@ -244,12 +244,13 @@
 
 		<dependency.jackson.version>2.3.0</dependency.jackson.version>
 
+		<dependency.jboss.classfilewriter.version>1.2.5.Final</dependency.jboss.classfilewriter.version>
 		<dependency.jboss.logging.version>3.3.0.Final</dependency.jboss.logging.version>
 		<dependency.jboss.spec.jstl>1.1.4.Final</dependency.jboss.spec.jstl>
 		<!-- TOCHANGE to 2.2.7.Final (with Wildfly wrap dependencies) -->
 		<dependency.jboss.undertow.version>2.0.36.Final</dependency.jboss.undertow.version>
 <!--		<dependency.jboss.undertow.version>2.2.5.Final-SNAPSHOT</dependency.jboss.undertow.version>-->
-		<dependency.jboss.weld.version>2.4.5.Final</dependency.jboss.weld.version>
+		<dependency.jboss.weld.version>2.4.8.Final</dependency.jboss.weld.version>
 		<dependency.jboss.xnio.version>3.3.8.Final</dependency.jboss.xnio.version>
 <!--		<dependency.jboss.xnio.version>3.8.0.Final</dependency.jboss.xnio.version>-->
 
@@ -278,7 +279,7 @@
 		<dependency.org.osgi.util.promise>1.1.1</dependency.org.osgi.util.promise>
 		<dependency.osgi.version>7.0.0</dependency.osgi.version>
 
-		<dependency.pax-cdi.version>1.1.3</dependency.pax-cdi.version>
+		<dependency.pax-cdi.version>1.1.4</dependency.pax-cdi.version>
 		<dependency.pax-exam.version>4.13.4</dependency.pax-exam.version>
 		<dependency.pax-logging.version>2.0.9</dependency.pax-logging.version>
 		<dependency.pax-url.version>2.6.7</dependency.pax-url.version>
@@ -2354,7 +2355,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.xbean</groupId>
-				<artifactId>xbean-asm7-shaded</artifactId>
+				<artifactId>xbean-asm9-shaded</artifactId>
+				<version>${dependency.xbean.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.xbean</groupId>
+				<artifactId>xbean-finder-shaded</artifactId>
 				<version>${dependency.xbean.version}</version>
 			</dependency>
 
@@ -2467,6 +2473,17 @@
 				<groupId>org.jboss.weld</groupId>
 				<artifactId>weld-core-jsf</artifactId>
 				<version>${dependency.jboss.weld.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.weld</groupId>
+				<artifactId>weld-osgi-bundle</artifactId>
+				<version>${dependency.jboss.weld.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.classfilewriter</groupId>
+				<artifactId>jboss-classfilewriter</artifactId>
+				<version>${dependency.jboss.classfilewriter.version}</version>
 			</dependency>
 
 			<dependency>

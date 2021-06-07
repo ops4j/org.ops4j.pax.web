@@ -350,6 +350,35 @@
 			<classifier>uber</classifier>
 		</dependency>
 
+		<dependency>
+			<groupId>org.ops4j.pax.cdi</groupId>
+			<artifactId>pax-cdi-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.cdi</groupId>
+			<artifactId>pax-cdi-extender</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.cdi</groupId>
+			<artifactId>pax-cdi-extension</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.cdi</groupId>
+			<artifactId>pax-cdi-spi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.cdi</groupId>
+			<artifactId>pax-cdi-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.cdi</groupId>
+			<artifactId>pax-cdi-weld</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.cdi</groupId>
+			<artifactId>pax-cdi-jetty-weld</artifactId>
+		</dependency>
+
 		<!-- OSGi -->
 
 		<dependency>
@@ -381,6 +410,19 @@
 		<dependency>
 			<groupId>org.apache.aries.spifly</groupId>
 			<artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.xbean</groupId>
+			<artifactId>xbean-bundleutils</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.xbean</groupId>
+			<artifactId>xbean-asm9-shaded</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.xbean</groupId>
+			<artifactId>xbean-finder-shaded</artifactId>
 		</dependency>
 
 		<!-- JavaEE -->
@@ -496,6 +538,10 @@
 			<groupId>commons-digester</groupId>
 			<artifactId>commons-digester</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.glassfish.hk2</groupId>
@@ -541,6 +587,15 @@
 		<dependency>
 			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.classfilewriter</groupId>
+			<artifactId>jboss-classfilewriter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.weld</groupId>
+			<artifactId>weld-osgi-bundle</artifactId>
 		</dependency>
 
 		<dependency>

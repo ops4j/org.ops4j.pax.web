@@ -1255,6 +1255,7 @@ public class BundleWebApplication {
 
 		// 1.4. Context initial parameters
 		ocm.getContextParams().putAll(mainWebXml.getContextParams());
+		// TODO: do it consistently using runtime configuration of temp directory
 		ocm.getInitialContextAttributes().put(ServletContext.TEMPDIR,
 				new File(System.getProperty("java.io.tmpdir"), ocm.getTemporaryLocation()));
 

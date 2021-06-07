@@ -61,20 +61,20 @@ public class PaxWebTldScanner extends TldScanner {
 		// 1. If the container is Java EE platform compliant, the Map Entries for the tag libraries that are part
 		//    of the Java EE platform.
 		//    In Pax Web the "platform" will be pax-web-jsp bundle and we'll just get standard tag library TLDs
-		LOG.info("Searching for TlDs in pax-web-jsp bundle");
+		LOG.info("Searching for TLDs in pax-web-jsp bundle");
 		scanPlatform();
 
 		// 2. Taglib Map in web.xml - these are the ones registered using:
 		//     - org.ops4j.pax.web.service.WebContainer.registerJspConfigTagLibs()
 		//     - org.ops4j.pax.web.service.WebContainer.registerJspConfigPropertyGroup()
 		//    these match /web-app/jsp-config/taglib/taglib-location elements in web.xml
-		LOG.info("Searching for TlDs in context configuration (web.xml)");
+		LOG.info("Searching for TLDs in context configuration (web.xml)");
 		scanJspConfig();
 
 		// 3. TLDs found as resources of ServletContext - that's done entirely by Tomcat, no OSGi here except
 		//    the fact that ServletContext.getResourcePaths() and ServletContext.getResource() methods are backed
 		//    by WebContainerContext/ServletContextHelper
-		LOG.info("Searching for TlDs in /WEB-INF/");
+		LOG.info("Searching for TLDs in /WEB-INF/");
 		scanResourcePaths("/WEB-INF/");
 
 		// 4. Tomcat calls javax.servlet.ServletContext.getResourcePaths("/WEB-INF/lib/") and processes
@@ -87,7 +87,7 @@ public class PaxWebTldScanner extends TldScanner {
 		//     - this bundle's fragments
 		//     - this bundle's required bundles
 		//     - this bundle's wires
-		LOG.info("Searching for TlDs in bundle {}", bundle);
+		LOG.info("Searching for TLDs in bundle {}", bundle);
 		scanBundle(bundle);
 	}
 

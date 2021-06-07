@@ -285,6 +285,10 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 		// there should be a /wab context that's (by default) redirecting to /wab/
 		assertThat(httpGET(port, "/wab"), startsWith("HTTP/1.1 302"));
 
+		// remember - if the JSP or default servlet tests fail, it means pax-web-spi doesn't have its
+		// pax-web-spi/target/classes/org/ops4j/pax/web/service/spi/model/default-web.xml unpacked
+		// correctly - you have to `mvn package` on pax-web-spi first.
+
 		// servlet from web.xml
 		assertThat(httpGET(port, "/wab/servlet"), endsWith("Hello"));
 		// servlet from a an SCI of container-bundle-3

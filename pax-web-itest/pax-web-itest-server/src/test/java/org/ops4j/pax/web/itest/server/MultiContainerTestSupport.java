@@ -243,7 +243,11 @@ public class MultiContainerTestSupport {
 			when(jspBundle.getEntry("/")).thenReturn(new URL("bundle://101.0:0/"));
 			when(jspBundle.getResources("META-INF/services/javax.el.ExpressionFactory"))
 					.thenReturn(Collections.enumeration(Collections.singletonList(
-							org.ops4j.pax.web.jsp.JspServlet.class.getResource("META-INF/services/javax.el.ExpressionFactory")))
+							org.ops4j.pax.web.jsp.JspServlet.class.getResource("/META-INF/services/javax.el.ExpressionFactory")))
+					);
+			when(jspBundle.getResources("META-INF/services/javax.servlet.ServletContainerInitializer"))
+					.thenReturn(Collections.enumeration(Collections.singletonList(
+							org.ops4j.pax.web.jsp.JspServlet.class.getResource("/META-INF/services/javax.servlet.ServletContainerInitializer")))
 					);
 			when(jspBundle.loadClass(anyString()))
 					.thenAnswer(i -> JspServlet.class.getClassLoader().loadClass(i.getArgument(0, String.class)));

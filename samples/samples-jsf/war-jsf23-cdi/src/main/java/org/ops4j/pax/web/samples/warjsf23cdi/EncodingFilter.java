@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.ops4j.pax.web.samples.warjsf22cdi;
+package org.ops4j.pax.web.samples.warjsf23cdi;
 
 import java.io.IOException;
 import javax.servlet.Filter;
@@ -28,20 +28,18 @@ import javax.servlet.ServletResponse;
 
 public class EncodingFilter implements Filter {
 
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+	@Override
+	public void init(FilterConfig filterConfig) throws ServletException {
+	}
 
-    }
+	@Override
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+		request.setCharacterEncoding("UTF-8");
+		chain.doFilter(request, response);
+	}
 
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        request.setCharacterEncoding("UTF-8");
-        chain.doFilter(request, response);
-    }
-
-    @Override
-    public void destroy() {
-
-    }
+	@Override
+	public void destroy() {
+	}
 
 }

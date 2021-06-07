@@ -19,14 +19,14 @@
 	under the License.
 
 -->
-<web-app version="3.1" metadata-complete="true"
+<web-app version="3.1" metadata-complete="false"
 		xmlns="http://xmlns.jcp.org/xml/ns/javaee"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
 
 	<filter>
 		<filter-name>charset-encoding</filter-name>
-		<filter-class>org.ops4j.pax.web.samples.warjsf22cdi.EncodingFilter</filter-class>
+		<filter-class>org.ops4j.pax.web.samples.warjsf23cdi.EncodingFilter</filter-class>
 	</filter>
 
 	<servlet>

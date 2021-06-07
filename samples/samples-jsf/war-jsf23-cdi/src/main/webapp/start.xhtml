@@ -21,17 +21,17 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html">
 <h:head>
 	<title>Hello from CDI-Managed SessionBean</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 </h:head>
 <h:body>
-	<h:form>
-		<h:outputLabel for="what" value="Hello:"/>
-		<h:inputText id="what" value="#{hello.what}"/>
-		<br/>
-		<h:commandButton value="say" action="#{hello.say}"/>
+	<h:form id="mainForm">
+		<h:outputLabel for="what" value="Hello:" />
+		<h:inputText id="what" value="#{hello.what}" />
+		<br />
+		<h:commandButton value="say" action="#{hello.say}" />
 	</h:form>
-	<br/>
-	<h:outputText value="#{hello.result}" rendered="#{not empty(hello.what)}"/>
+	<br />
+	<h:outputText value="#{hello.result}" rendered="#{not empty(hello.what)}" />
 	<br />
 	<h:outputText value="#{hello.test}" />
 </h:body>
