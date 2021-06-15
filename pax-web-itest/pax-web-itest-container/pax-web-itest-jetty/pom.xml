@@ -59,7 +59,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-jetty-servlet-compatibility</artifactId>
+			<artifactId>pax-web-compatibility-servlet31</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -75,11 +75,27 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- OSGi -->
+
+		<dependency>
+			<!-- Can't be added to maven-failsafe-plugin classpath -->
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.cdi</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<!-- Can't be added to maven-failsafe-plugin classpath -->
+			<groupId>org.apache.aries.cdi</groupId>
+			<artifactId>org.apache.aries.cdi.extender</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
 		<!-- JavaEE -->
 
 		<dependency>
 			<!--
-				can't be transtive dependency from pax-web-itest-container-common, because it has to be "runtime"
+				Can't be transtive dependency from pax-web-itest-container-common, because it has to be "runtime"
 				scoped, so it's not added to maven-failsafe-plugin classpath (duplicate SLF4J binding)
 			-->
 			<groupId>jakarta.el</groupId>

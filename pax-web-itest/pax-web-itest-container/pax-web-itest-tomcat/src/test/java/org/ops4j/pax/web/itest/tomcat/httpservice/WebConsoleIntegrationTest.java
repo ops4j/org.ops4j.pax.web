@@ -33,7 +33,7 @@ public class WebConsoleIntegrationTest extends AbstractWebConsoleIntegrationTest
 		return combine(baseConfigure(),
 				combine(paxWebTomcat(),
 						// felix.webconsole needs servlet-api 3
-						mavenBundle("org.ops4j.pax.web", "pax-web-jetty-servlet-compatibility")
+						mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-servlet31")
 								.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart()
 				)
 		);

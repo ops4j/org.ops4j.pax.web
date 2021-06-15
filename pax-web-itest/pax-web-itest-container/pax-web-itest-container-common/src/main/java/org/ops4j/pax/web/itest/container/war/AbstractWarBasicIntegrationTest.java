@@ -55,7 +55,7 @@ public abstract class AbstractWarBasicIntegrationTest extends AbstractContainerT
 			context.installBundle(String.format("mvn:commons-collections/commons-collections/%s", System.getProperty("commons-collections.version")));
 			context.installBundle(String.format("mvn:commons-digester/commons-digester/%s", System.getProperty("commons-digester.version")));
 			context.installBundle("mvn:javax.enterprise/cdi-api/1.2");
-			context.installBundle("mvn:javax.interceptor/javax.interceptor-api/1.2");
+			context.installBundle("mvn:jakarta.interceptor/jakarta.interceptor-api/1.2.5");
 			context.installBundle("mvn:jakarta.websocket/jakarta.websocket-api/1.1.2");
 			// I'm not refreshing, so fragments need to be installed before their hosts
 			installAndStartBundle(sampleURI("container-bundle-3"));

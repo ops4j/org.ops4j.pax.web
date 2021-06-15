@@ -22,7 +22,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.container.war.AbstractWarJsfCdiIntegrationTest;
+import org.ops4j.pax.web.itest.container.war.jsf.AbstractWarJsfCdiIntegrationTest;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 
@@ -38,7 +38,7 @@ public class WarJsfCdiIntegrationTest extends AbstractWarJsfCdiIntegrationTest {
 		Option[] serverOptions = combine(baseConfigure(), paxWebJetty());
 		Option[] osgiOptions = combine(serverOptions, configAdmin());
 		Option[] jspOptions = combine(osgiOptions, paxWebJsp());
-		Option[] cdiOptions = combine(jspOptions, cdiAndMyfaces(containerSpecificCdiBundle()));
+		Option[] cdiOptions = combine(jspOptions, ariesCdiAndMyfaces(containerSpecificCdiBundle()));
 		return combine(cdiOptions, paxWebExtenderWar());
 	}
 
@@ -50,7 +50,6 @@ public class WarJsfCdiIntegrationTest extends AbstractWarJsfCdiIntegrationTest {
 	}
 
 	@Test
-	@Ignore("Pax CDI integrates with Pax web using something I want to remove (org.ops4j.pax.web.service.WebAppDependencyHolder)")
 	public void testCdi() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain '" + containerSpecificCdiBundle() + "'",

@@ -18,7 +18,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.ops4j.pax.web.itest.container.war;
+package org.ops4j.pax.web.itest.container.war.jsf;
 
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 

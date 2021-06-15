@@ -65,7 +65,7 @@
 		<dependency>
 			<!-- for felix.webconsole purpose -->
 			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-jetty-servlet-compatibility</artifactId>
+			<artifactId>pax-web-compatibility-servlet31</artifactId>
 			<scope>test</scope>
 		</dependency>
 

@@ -51,7 +51,8 @@
 							javax.servlet.*;version="[3.1,5)",
 							javax.faces.bean,
 							javax.faces.webapp,
-							org.osgi.service.url
+							org.osgi.service.url,
+							org.osgi.service.cdi.annotations
 						</Import-Package>
 						<Private-Package>
 							org.ops4j.pax.web.samples.warjsf23cdi
@@ -62,20 +63,22 @@
 							org.apache.myfaces.*,
 							org.jboss.weld.*,
 							org.ops4j.pax.web.*,
-							org.ops4j.pax.cdi.*
+							org.apache.myfaces.cdi,
+							org.apache.myfaces.cdi.*,
+							org.apache.myfaces.flow.cdi,
+							org.apache.myfaces.flow.cdi.*
 						</DynamicImport-Package>
 						<Export-Package />
-						<!--
-							we need org.ops4j.pax.cdi.faces cap, to detect /META-INF/faces-config.xml
-							fragment from given weld/openwebbeans pax-cdi bundle
-						-->
-						<Require-Capability>
-							osgi.extender; filter:="(osgi.extender=pax.cdi)",
-							org.ops4j.pax.cdi.extension; filter:="(extension=pax-cdi-extension)",
-							org.ops4j.pax.cdi.faces
-						</Require-Capability>
+						<Require-Capability><![CDATA[
+							osgi.extender;filter:="(&(osgi.extender=osgi.cdi)(version>=1.0.0)(!(version>=2.0.0)))";
+								beans:List<String>="
+									org.ops4j.pax.web.samples.warjsf23cdi.Hello,
+									org.apache.myfaces.flow.cdi.FlowBuilderFactoryBean",
+							osgi.cdi.extension;filter:="(osgi.cdi.extension=aries.cdi.http)"
+						]]></Require-Capability>
 						<Embed-Directory>WEB-INF/lib</Embed-Directory>
 						<Embed-Dependency>*;scope=compile</Embed-Dependency>
+						<_cdiannotations>*;discover=none</_cdiannotations>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -92,19 +95,16 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- OPS4J dependencies -->
-
-		<dependency>
-			<groupId>org.ops4j.pax.cdi</groupId>
-			<artifactId>pax-cdi-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
 		<!-- OSGi -->
 
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.cdi</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -116,8 +116,8 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.enterprise</groupId>
-			<artifactId>cdi-api</artifactId>
+			<groupId>jakarta.enterprise</groupId>
+			<artifactId>jakarta.enterprise.cdi-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 

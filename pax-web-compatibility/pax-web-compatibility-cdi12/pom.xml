@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2020 OPS4J.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.ops4j.pax.web</groupId>
+		<artifactId>pax-web-compatibility</artifactId>
+		<version>8.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<groupId>org.ops4j.pax.web</groupId>
+	<artifactId>pax-web-compatibility-cdi12</artifactId>
+	<packaging>bundle</packaging>
+
+	<name>OPS4J Pax Web - CDI 1.2 compatibility</name>
+
+	<description>
+		This fragment bundle can be used together with _canonical_ (IMO) jakarta.enterprise.cdi-api instead of
+		more OSGi aware geronimo-jcdi_2.0_spec (that declares additional caps/reqs)
+	</description>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Fragment-Host>jakarta.enterprise.cdi-api</Fragment-Host>
+						<Export-Package>
+							javax.decorator;version="1.2";uses:="javax.enterprise.inject",
+							javax.enterprise.context;version="1.2";uses:="javax.enterprise.util,javax.inject",
+							javax.enterprise.context.spi;version="1.2",
+							javax.enterprise.event;version="1.2";uses:="javax.enterprise.util",
+							javax.enterprise.inject;version="1.2";uses:="javax.enterprise.context,javax.enterprise.util,javax.inject",
+							javax.enterprise.inject.spi;version="1.2";uses:="javax.el,javax.enterprise.context.spi,javax.enterprise.event,javax.enterprise.inject,javax.enterprise.inject.spi.configurator,javax.interceptor",
+							javax.enterprise.util;version="1.2"
+						</Export-Package>
+						<Provide-Capability><![CDATA[
+							osgi.contract;osgi.contract=JavaCDI;uses:="javax.decorator,javax.enterprise.context,javax.enterprise.context.spi,javax.enterprise.context.control,javax.enterprise.util,javax.enterprise.inject,javax.enterprise.inject.se,javax.enterprise.inject.literal,javax.enterprise.inject.spi,javax.enterprise.inject.spi.configurator,javax.enterprise.event";
+								version:List<Version>="2.0,1.2,1.1,1.0"
+						]]></Provide-Capability>
+						<Require-Capability><![CDATA[
+							osgi.serviceloader;filter:="(osgi.serviceloader=javax.enterprise.inject.se.SeContainerInitializer)";cardinality:=multiple,
+							osgi.serviceloader;filter:="(osgi.serviceloader=javax.enterprise.inject.spi.CDIProvider)";cardinality:=multiple,
+							osgi.extender;filter:="(osgi.extender=osgi.serviceloader.processor)",
+							osgi.contract;osgi.contract=JavaEL;filter:="(&(osgi.contract=JavaEL)(version=2.2.0))",
+							osgi.contract;osgi.contract=JavaInterceptor;filter:="(&(osgi.contract=JavaInterceptor)(version=1.2.0))",
+							osgi.contract;osgi.contract=JavaInject;filter:="(&(osgi.contract=JavaInject)(version=1.0.0))"
+						]]></Require-Capability>
+<!--						<Require-Capability><![CDATA[-->
+<!--							osgi.serviceloader;filter:="(osgi.serviceloader=javax.enterprise.inject.se.SeContainerInitializer)";cardinality:=multiple,-->
+<!--							osgi.serviceloader;filter:="(osgi.serviceloader=javax.enterprise.inject.spi.CDIProvider)";cardinality:=multiple,-->
+<!--							osgi.extender;filter:="(osgi.extender=osgi.serviceloader.processor)",-->
+<!--							osgi.contract;osgi.contract=JavaEL;filter:="(&(osgi.contract=JavaEL)(version=2.2.0))",-->
+<!--							osgi.contract;osgi.contract=JavaInterceptor;filter:="(&(osgi.contract=JavaInterceptor)(version=1.2.0))",-->
+<!--							osgi.contract;osgi.contract=JavaInject;filter:="(&(osgi.contract=JavaInject)(version=1.0.0))",-->
+<!--						]]></Require-Capability>-->
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+
+		<!-- JavaEE -->
+
+		<dependency>
+			<groupId>jakarta.enterprise</groupId>
+			<artifactId>jakarta.enterprise.cdi-api</artifactId>
+		</dependency>
+
+	</dependencies>
+
+</project>

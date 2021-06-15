@@ -104,7 +104,7 @@ public class BundleWebApplicationClassSpace {
 
 	/**
 	 * <p>"JAR Fragments" from {@code Bundle-ClassPath} - these may be subject to fragment ordering.
-	 * These will represent web fragments with {@link org.apache.tomcat.util.descriptor.web.WebXml#webappJar}
+	 * These will represent web fragments with {@link WebXml#getWebappJar()}
 	 * = {@code true} whether or not they contain {@code META-INF/web-fragment.xml}.</p>
 	 *
 	 * <p>"WAB ClassPath" also includes OSGi fragments attached to WAB host. It doesn't contain reachable bundles

@@ -24,6 +24,7 @@ import java.util.List;
 import javax.servlet.ServletContext;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleReference;
 
 /**
  * <p>A {@link ClassLoader} added in Pax Web to replace all pax-swissbox/xbean <em>bundle classloaders</em> and to be used
@@ -57,13 +58,20 @@ import org.osgi.framework.Bundle;
  *     <li>Nothing particular in plain Undertow, but it's set to {@code org.jboss.as.web.host.WebDeploymentBuilder#getClassLoader()}
  *         in Wildfly/EAP.</li>
  * </ul></p>
+ *
+ * <p>This {@link ClassLoader} implements {@link BundleReference}</p>
  */
-public class OsgiServletContextClassLoader extends ClassLoader {
+public class OsgiServletContextClassLoader extends ClassLoader implements BundleReference {
 
 	private List<Bundle> bundles = new ArrayList<>();
 
 	public OsgiServletContextClassLoader() {
 		super(null);
+	}
+
+	@Override
+	public Bundle getBundle() {
+		return bundles.size() == 0 ? null : bundles.get(0);
 	}
 
 	/**

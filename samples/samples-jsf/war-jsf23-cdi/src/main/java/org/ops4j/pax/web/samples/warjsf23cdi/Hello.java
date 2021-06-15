@@ -18,35 +18,30 @@
  */
 package org.ops4j.pax.web.samples.warjsf23cdi;
 
+import org.ops4j.pax.web.service.spi.ServerControllerFactory;
+import org.osgi.service.cdi.annotations.Bean;
+import org.osgi.service.cdi.annotations.Reference;
+import org.osgi.service.cdi.annotations.SingleComponent;
+import org.osgi.service.url.URLStreamHandlerService;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.ops4j.pax.cdi.api.Component;
-import org.ops4j.pax.cdi.api.Dynamic;
-import org.ops4j.pax.cdi.api.Filter;
-import org.ops4j.pax.cdi.api.Immediate;
-import org.ops4j.pax.cdi.api.Service;
-import org.ops4j.pax.web.service.spi.ServerControllerFactory;
-import org.osgi.service.url.URLStreamHandlerService;
-
+@Bean
+@SingleComponent
 @Named("hello")
-@Immediate
-@Component
 public class Hello {
 
 	private String what;
 	private String result;
-	private final String test = "hello from working JSF 2.2/CDI 1.2 example";
+	private final String test = "hello from working JSF 2.3/CDI 2.0 example";
 
 	@Inject
-	@Dynamic
-	@Service
-	@Filter("(!(url.handler.protocol=mvn))")
+	@Reference(target = "(!(url.handler.protocol=mvn))")
 	private URLStreamHandlerService handler;
 
 	@Inject
-	@Dynamic
-	@Service
+	@Reference
 	private ServerControllerFactory serverControllerFactory;
 
 	public void setWhat(String what) {

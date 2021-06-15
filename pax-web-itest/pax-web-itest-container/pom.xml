@@ -62,6 +62,9 @@
 					<includes>
 						<include>**/*IntegrationTest.java</include>
 					</includes>
+					<excludes>
+						<exclude>**/WarJsfCdiIntegrationTest.java</exclude>
+					</excludes>
 					<systemPropertyVariables>
 						<!--
 							to configure pax-exam with pax.exam.system=default which gives us more control over installed bundles
@@ -128,6 +131,29 @@
 	</build>
 
 	<profiles>
+		<profile>
+			<id>felix6</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-failsafe-plugin</artifactId>
+						<configuration>
+							<excludes>
+								<exclude>**/*</exclude>
+							</excludes>
+							<includes>
+								<include>**/WarJsfCdiIntegrationTest.java</include>
+							</includes>
+							<classpathDependencyExcludes>
+								<!-- This includes osgi.core R6 -->
+								<exclude>biz.aQute.bnd:biz.aQute.bndlib</exclude>
+							</classpathDependencyExcludes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 		<profile>
 			<id>jetty</id>
 			<activation>

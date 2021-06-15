@@ -49,6 +49,7 @@ import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.namespace.extender.ExtenderNamespace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -232,8 +233,12 @@ public class ClassPathUtil {
 	}
 
 	/**
-	 * Gets a list of bundles that are imported or required by given {@link Bundle}. This method also returns
-	 * attached fragments.
+	 * <p>Gets a list of bundles that are:<ul>
+	 *     <li>imported by given bundle</li>
+	 *     <li>required by given bundle</li>
+	 *     <li>attached as fragments to given bundle</li>
+	 *     <li>extended by given bundle</li>
+	 * </ul></p>
 	 *
 	 * @param bundle
 	 * @param bundleSet
@@ -272,6 +277,15 @@ public class ClassPathUtil {
 			for (BundleWire wire : providedWires) {
 				Bundle b = wire.getRequirerWiring().getBundle();
 				bundles.add(b);
+			}
+		}
+
+		// additionally check extender bundles
+		List<BundleWire> extenderWires = bundleWiring.getRequiredWires(ExtenderNamespace.EXTENDER_NAMESPACE);
+		if (extenderWires != null) {
+			for (BundleWire wire : extenderWires) {
+				Bundle extenderBundle = wire.getCapability().getRevision().getBundle();
+				bundles.add(extenderBundle);
 			}
 		}
 

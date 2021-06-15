@@ -108,6 +108,7 @@
 							org.ops4j.pax.web.itest,
 							org.ops4j.pax.web.itest.container.*
 						</Export-Package>
+						<_contract>!*</_contract>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -154,6 +155,27 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web.itest</groupId>
 			<artifactId>pax-web-itest-utils</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-compatibility-servlet31</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-compatibility-cdi12</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-compatibility-el2</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-compatibility-interceptor12</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-compatibility-annotation13</artifactId>
 		</dependency>
 
 		<!-- pax-web war samples -->
@@ -350,40 +372,15 @@
 			<classifier>uber</classifier>
 		</dependency>
 
-		<dependency>
-			<groupId>org.ops4j.pax.cdi</groupId>
-			<artifactId>pax-cdi-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.cdi</groupId>
-			<artifactId>pax-cdi-extender</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.cdi</groupId>
-			<artifactId>pax-cdi-extension</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.cdi</groupId>
-			<artifactId>pax-cdi-spi</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.cdi</groupId>
-			<artifactId>pax-cdi-web</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.cdi</groupId>
-			<artifactId>pax-cdi-weld</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.cdi</groupId>
-			<artifactId>pax-cdi-jetty-weld</artifactId>
-		</dependency>
-
 		<!-- OSGi -->
 
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.cdi</artifactId>
 		</dependency>
 
 		<dependency>
@@ -399,12 +396,45 @@
 			<artifactId>org.apache.felix.scr</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.converter</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.util.function</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.util.promise</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.aries.cdi</groupId>
+			<artifactId>org.apache.aries.cdi.spi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.aries.cdi</groupId>
+			<artifactId>org.apache.aries.cdi.extension.spi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.aries.cdi</groupId>
+			<artifactId>org.apache.aries.cdi.extender</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.aries.cdi</groupId>
+			<artifactId>org.apache.aries.cdi.weld</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.aries.cdi</groupId>
+			<artifactId>org.apache.aries.cdi.extension.servlet.common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.aries.cdi</groupId>
+			<artifactId>org.apache.aries.cdi.extension.servlet.weld</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.aries.cdi</groupId>
+			<artifactId>org.apache.aries.cdi.extra</artifactId>
 		</dependency>
 
 		<dependency>
@@ -457,12 +487,12 @@
 			<artifactId>jakarta.el-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax.enterprise</groupId>
-			<artifactId>cdi-api</artifactId>
+			<groupId>jakarta.enterprise</groupId>
+			<artifactId>jakarta.enterprise.cdi-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax.interceptor</groupId>
-			<artifactId>javax.interceptor-api</artifactId>
+			<groupId>jakarta.interceptor</groupId>
+			<artifactId>jakarta.interceptor-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.validation</groupId>
