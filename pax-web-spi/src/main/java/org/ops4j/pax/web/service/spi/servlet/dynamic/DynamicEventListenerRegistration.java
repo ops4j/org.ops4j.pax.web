@@ -28,6 +28,8 @@ public class DynamicEventListenerRegistration {
 
 	public DynamicEventListenerRegistration(EventListenerModel model, OsgiContextModel osgiContextModel) {
 		this.model = model;
+		// "close" the context list
+		this.model.getContextModels();
 		this.osgiContextModel = osgiContextModel;
 	}
 

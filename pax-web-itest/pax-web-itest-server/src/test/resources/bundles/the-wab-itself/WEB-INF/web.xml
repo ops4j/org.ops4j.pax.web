@@ -33,7 +33,7 @@
 
 	<servlet>
 		<servlet-name>simplest-servlet</servlet-name>
-		<servlet-class>org.ops4j.pax.web.itest.server.support.war.SimplestServlet</servlet-class>
+		<servlet-class>org.ops4j.pax.web.itest.server.support.war.servlets.SimplestServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>simplest-servlet</servlet-name>

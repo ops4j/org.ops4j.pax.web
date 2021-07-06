@@ -13,27 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.server.support.war;
+package org.ops4j.pax.web.itest.server.support.war.servlets;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import javax.servlet.ServletException;
+import org.ops4j.pax.web.itest.server.support.war.StaticList;
+
 import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
-public class SimplestServlet extends HttpServlet {
-
-	@Deprecated
-	public Object dummy;
+public class ServletAddedInWebXml extends HttpServlet {
 
 	@Override
-	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		resp.setContentType("text/plain");
-		resp.setCharacterEncoding(StandardCharsets.UTF_8.toString());
-		resp.setContentLength(5);
-		resp.getWriter().print("Hello");
-		resp.getWriter().flush();
+	public void init() {
+		StaticList.EVENTS.add("Servlet-from-web.xml initialized");
+	}
+
+	@Override
+	public void destroy() {
+		StaticList.EVENTS.add("Servlet-from-web.xml destroyed");
 	}
 
 }

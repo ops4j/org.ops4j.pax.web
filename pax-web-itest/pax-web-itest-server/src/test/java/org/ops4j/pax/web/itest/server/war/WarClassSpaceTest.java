@@ -223,14 +223,14 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 		when(wab.findEntries(wabClasses.getCanonicalPath() + "/", "*.class", true)).thenReturn(
 				Collections.enumeration(Arrays.asList(
 						getClass().getClassLoader().getResource("org/ops4j/pax/web/itest/server/support/war/Cb1IFace3Impl.class"),
-						getClass().getClassLoader().getResource("org/ops4j/pax/web/itest/server/support/war/SimplestServlet.class")
+						getClass().getClassLoader().getResource("org/ops4j/pax/web/itest/server/support/war/servlets/SimplestServlet.class")
 				))
 		);
 		// classes for WAB's fragment - accessible using WAB bundle itself, so it returns the above classes as well
 		when(wab.findEntries("/", "*.class", true)).thenReturn(
 				Collections.enumeration(Arrays.asList(
 						getClass().getClassLoader().getResource("org/ops4j/pax/web/itest/server/support/war/Cb1IFace3Impl.class"),
-						getClass().getClassLoader().getResource("org/ops4j/pax/web/itest/server/support/war/SimplestServlet.class"),
+						getClass().getClassLoader().getResource("org/ops4j/pax/web/itest/server/support/war/servlets/SimplestServlet.class"),
 						getClass().getClassLoader().getResource("org/ops4j/pax/web/itest/server/support/war/fragment/AnnotatedServlet1.class"),
 						getClass().getClassLoader().getResource("org/ops4j/pax/web/itest/server/support/war/fragment/AnnotatedServlet2.class"),
 						getClass().getClassLoader().getResource("org/ops4j/pax/web/itest/server/support/war/fragment/AnnotatedServlet3.class")

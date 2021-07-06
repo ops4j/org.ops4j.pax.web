@@ -53,6 +53,12 @@
 
 							javax.naming,
 							javax.xml.parsers,
+							javax.xml.stream,
+							javax.xml.transform,
+							javax.xml.transform.dom,
+							javax.xml.transform.sax,
+							javax.xml.transform.stax,
+							javax.xml.transform.stream,
 							org.w3c.dom,
 							org.xml.sax
 						</Import-Package>

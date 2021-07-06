@@ -22,7 +22,7 @@
 
 	<parent>
 		<groupId>org.ops4j.pax.web</groupId>
-		<artifactId>pax-web-compatibility</artifactId>
+		<artifactId>pax-web-fragments</artifactId>
 		<version>8.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
@@ -61,12 +61,12 @@
 								version:List<Version>="2.0,1.2,1.1,1.0"
 						]]></Provide-Capability>
 						<Require-Capability><![CDATA[
-							osgi.serviceloader;filter:="(osgi.serviceloader=javax.enterprise.inject.se.SeContainerInitializer)";cardinality:=multiple,
-							osgi.serviceloader;filter:="(osgi.serviceloader=javax.enterprise.inject.spi.CDIProvider)";cardinality:=multiple,
-							osgi.extender;filter:="(osgi.extender=osgi.serviceloader.processor)",
-							osgi.contract;osgi.contract=JavaEL;filter:="(&(osgi.contract=JavaEL)(version=2.2.0))",
-							osgi.contract;osgi.contract=JavaInterceptor;filter:="(&(osgi.contract=JavaInterceptor)(version=1.2.0))",
-							osgi.contract;osgi.contract=JavaInject;filter:="(&(osgi.contract=JavaInject)(version=1.0.0))"
+							osgi.serviceloader;filter:="(osgi.serviceloader=javax.enterprise.inject.se.SeContainerInitializer)";cardinality:=multiple;resolution:=optional,
+							osgi.serviceloader;filter:="(osgi.serviceloader=javax.enterprise.inject.spi.CDIProvider)";cardinality:=multiple;resolution:=optional,
+							osgi.extender;filter:="(osgi.extender=osgi.serviceloader.processor)";resolution:=optional,
+							osgi.contract;osgi.contract=JavaEL;filter:="(&(osgi.contract=JavaEL)(version=2.2.0))";resolution:=optional,
+							osgi.contract;osgi.contract=JavaInterceptor;filter:="(&(osgi.contract=JavaInterceptor)(version=1.2.0))";resolution:=optional,
+							osgi.contract;osgi.contract=JavaInject;filter:="(&(osgi.contract=JavaInject)(version=1.0.0))";resolution:=optional
 						]]></Require-Capability>
 <!--						<Require-Capability><![CDATA[-->
 <!--							osgi.serviceloader;filter:="(osgi.serviceloader=javax.enterprise.inject.se.SeContainerInitializer)";cardinality:=multiple,-->

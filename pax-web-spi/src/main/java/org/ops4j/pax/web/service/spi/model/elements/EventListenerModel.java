@@ -16,10 +16,10 @@
  */
 package org.ops4j.pax.web.service.spi.model.elements;
 
-import java.util.EventListener;
-
 import org.ops4j.pax.web.service.spi.model.events.EventListenerEventData;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
+
+import java.util.EventListener;
 
 public class EventListenerModel extends ElementModel<EventListener, EventListenerEventData> {
 
@@ -93,7 +93,7 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 
 	/**
 	 * When a listener is removed from native servlet container, it should be <em>unget</em> here - this
-	 * is esiecially important with service references.
+	 * is especially important with service references.
 	 * @param listener
 	 */
 	public void ungetEventListener(EventListener listener) {
@@ -119,6 +119,16 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 					+ " supplier or service reference");
 		}
 		return Boolean.TRUE;
+	}
+
+	@Override
+	public String toString() {
+		return "EventListenerModel{id=" + getId()
+				+ (eventListener != null ? ",listener='" + eventListener + "'" : "")
+				+ (getElementSupplier() != null ? ",supplier='" + getElementSupplier() + "'" : "")
+				+ (getElementReference() != null ? ",reference='" + getElementReference() + "'" : "")
+				+ ",contexts=" + getContextModelsInfo()
+				+ "}";
 	}
 
 }

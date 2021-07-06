@@ -305,7 +305,7 @@
 		<dependency.servicemix.specs.version>2.9.0</dependency.servicemix.specs.version>
 
 		<dependency.slf4j.version>1.7.30</dependency.slf4j.version>
-		<dependency.spring.version>5.3.7</dependency.spring.version>
+		<dependency.spring.version>4.3.25.RELEASE</dependency.spring.version>
 		<dependency.spring.smx.version>5.3.6_1</dependency.spring.smx.version>
 		<dependency.spring-dm.version>1.2.1</dependency.spring-dm.version>
 		<dependency.taglibs.version>1.2.5</dependency.taglibs.version>
@@ -813,6 +813,11 @@
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-compatibility-annotation13</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-fragment-myfaces-spifly</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -1607,6 +1612,29 @@
 				<groupId>org.apache.aries.cdi</groupId>
 				<artifactId>org.apache.aries.cdi.extra</artifactId>
 				<version>${dependency.aries.cdi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.aries.cdi</groupId>
+				<artifactId>org.apache.aries.cdi.extension.el.jsp</artifactId>
+				<version>${dependency.aries.cdi.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.geronimo.specs</groupId>
+						<artifactId>geronimo-annotation_1.3_spec</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.geronimo.specs</groupId>
+						<artifactId>geronimo-el_2.2_spec</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.geronimo.specs</groupId>
+						<artifactId>geronimo-interceptor_1.2_spec</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.geronimo.specs</groupId>
+						<artifactId>geronimo-jcdi_2.0_spec</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<dependency>
@@ -2876,13 +2904,14 @@
 		<!-- 128 CMPN Web Applications Specification -->
 		<module>pax-web-extender-war</module>
 
-<!--		<module>pax-web-descriptor</module>-->
+		<module>pax-web-fragments</module>
+
+		<!--		<module>pax-web-descriptor</module>-->
 <!-- 		<module>pax-web-resources</module> -->
 <!--		<module>pax-web-deployer</module>-->
 
 		<!-- Jetty 9 support -->
 		<module>pax-web-jetty</module>
-		<module>pax-web-compatibility</module>
 <!-- 		<module>pax-web-jetty-bundle</module> -->
 
 		<!-- Tomcat 9 support -->

@@ -434,8 +434,6 @@ public class ServiceModel implements BatchVisitor {
 	 * <p>This method is an equivalent of
 	 * {@code org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardContext#reRegisterWebElements()}.</p>
 	 *
-	 * <p>We don't have to </p>
-	 *
 	 * @param oldContext
 	 * @param newContext may be null - in such case we have to determine new context
 	 * @param batch

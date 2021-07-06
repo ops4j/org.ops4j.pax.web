@@ -42,6 +42,8 @@ public class DynamicServletRegistration implements ServletRegistration.Dynamic {
 	public DynamicServletRegistration(ServletModel model, OsgiContextModel osgiContextModel,
 			ServletContextModel servletContextModel, DynamicRegistrations regs) {
 		this.model = model;
+		// "close" the context list
+		this.model.getContextModels();
 		this.osgiContextModel = osgiContextModel;
 		this.servletContextModel = servletContextModel;
 		this.registrations = regs;
@@ -90,6 +92,7 @@ public class DynamicServletRegistration implements ServletRegistration.Dynamic {
 		// from existing registrations (except current registration)
 		registrations.getDynamicServletRegistrations().values().forEach(r -> {
 			if (r != DynamicServletRegistration.this) {
+				// tomcat additionally checks "if (wrapper.isOverridable())", so it's possible to alter "/" mapping
 				existing.addAll(r.getMappings());
 			}
 		});
@@ -119,7 +122,8 @@ public class DynamicServletRegistration implements ServletRegistration.Dynamic {
 
 	@Override
 	public Collection<String> getMappings() {
-		return Collections.unmodifiableList(Arrays.asList(model.getUrlPatterns()));
+		return model.getUrlPatterns() == null ? Collections.emptyList()
+				: Collections.unmodifiableList(Arrays.asList(model.getUrlPatterns()));
 	}
 
 	@Override

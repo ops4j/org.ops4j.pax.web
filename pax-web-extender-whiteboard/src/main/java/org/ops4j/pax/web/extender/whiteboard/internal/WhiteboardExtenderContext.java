@@ -238,7 +238,8 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 			// to work, we're explicitly skipping "shared" contexts - user will still be able to use such shared
 			// HttpService contexts (specific to Pax Web), but with more effort.
 			for (OsgiContextModel model : getBundleApplication(bundle).getWebContainerOsgiContextModels()) {
-				if (!model.isShared() && selector.matchCase(model.getContextRegistrationProperties())) {
+				if ((!model.isShared() || model.isWab())
+						&& selector.matchCase(model.getContextRegistrationProperties())) {
 					targetContexts.add(model);
 				}
 			}
@@ -396,6 +397,7 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 				// 1. unregistration because of no matching contexts
 				// TODO: DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
 				if (newMatching.size() == 0) {
+					LOG.debug("Unregistering {} because its context selection filter doesn't match any context", webElement);
 					if (view != null) {
 						webElement.unregister(view);
 					}
@@ -407,6 +409,7 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 				// TODO: get rid of existing DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
 				if (oldMatching.size() == 0) {
 					webElement.changeContextModels(newMatching);
+					LOG.debug("Registering {} because its context selection filter started matching existing contexts", webElement);
 					if (view != null) {
 						webElement.register(view);
 					}
@@ -427,10 +430,12 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 				// so it's really easier - FULLY unregister the element from all current contexts and then
 				// register to all the new contexts
 				if (view != null) {
+					LOG.debug("Unregistering {} because its context selection filter matched new set of contexts", webElement);
 					webElement.unregister(view);
 				}
 				webElement.changeContextModels(newMatching);
 				if (view != null) {
+					LOG.debug("Registering {} again after its context selection filter matched new set of contexts", webElement);
 					webElement.register(view);
 				}
 			}
@@ -490,7 +495,7 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 
 	/**
 	 * This method is invoked after checking that element model {@link ElementModel#isValid() is valid}.
-	 * @param httpServiceRuntime
+	 * @param webElement
 	 */
 	public void configureDTOs(ElementModel<?, ?> webElement) {
 		// TODO: could result in DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
@@ -499,21 +504,21 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 
 	/**
 	 * This method is invoked after checking that element model {@link ElementModel#isValid() is not valid}.
-	 * @param httpServiceRuntime
+	 * @param webElement
 	 */
 	public void configureFailedDTOs(ElementModel<?, ?> webElement) {
 	}
 
 	/**
 	 * This method is invoked after checking that context model {@link OsgiContextModel#isValid() is valid}.
-	 * @param httpServiceRuntime
+	 * @param webContext
 	 */
 	public void configureDTOs(OsgiContextModel webContext) {
 	}
 
 	/**
 	 * This method is invoked after checking that context model {@link OsgiContextModel#isValid() is not valid}.
-	 * @param httpServiceRuntime
+	 * @param webContext
 	 */
 	public void configureFailedDTOs(OsgiContextModel webContext) {
 	}

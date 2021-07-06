@@ -37,7 +37,7 @@ public class WarBasicTest extends MultiContainerTestSupport {
 	}
 
 	@Test
-	public void simplestWabWithoutWebXml() throws Exception {
+	public void simplestWabWithoutWebXml() {
 		Bundle sample1 = mockBundle("sample1", "/sample");
 		installWab(sample1);
 

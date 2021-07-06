@@ -215,6 +215,10 @@
 						</Embed-Dependency>
 						<_nouses>true</_nouses>
 						<_contract>!*</_contract>
+						<Provide-Capability><![CDATA[
+							osgi.contract;osgi.contract=JavaJSP;uses:="javax.servlet.jsp,javax.servlet.jsp.el,javax.servlet.jsp.tagext";
+								version:List<Version>="2.3,2.2,2.1,2"
+						]]></Provide-Capability>
 					</instructions>
 				</configuration>
 			</plugin>

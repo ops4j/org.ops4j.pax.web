@@ -70,15 +70,19 @@
 						</DynamicImport-Package>
 						<Export-Package />
 						<Require-Capability><![CDATA[
-							osgi.extender;filter:="(&(osgi.extender=osgi.cdi)(version>=1.0.0)(!(version>=2.0.0)))";
-								beans:List<String>="
-									org.ops4j.pax.web.samples.warjsf23cdi.Hello,
-									org.apache.myfaces.flow.cdi.FlowBuilderFactoryBean",
-							osgi.cdi.extension;filter:="(osgi.cdi.extension=aries.cdi.http)"
+							osgi.cdi.extension;filter:="(osgi.cdi.extension=aries.cdi.http)",
+							osgi.cdi.extension;filter:="(osgi.cdi.extension=aries.cdi.el.jsp)"
 						]]></Require-Capability>
+						<!-- with -cdiannotations instruction, we don't have to list the beans manually -->
+<!--						<Require-Capability><![CDATA[-->
+<!--							osgi.extender;filter:="(&(osgi.extender=osgi.cdi)(version>=1.0.0)(!(version>=2.0.0)))";-->
+<!--								beans:List<String>="-->
+<!--									org.ops4j.pax.web.samples.warjsf23cdi.Hello",-->
+<!--							osgi.cdi.extension;filter:="(osgi.cdi.extension=aries.cdi.http)"-->
+<!--						]]></Require-Capability>-->
 						<Embed-Directory>WEB-INF/lib</Embed-Directory>
 						<Embed-Dependency>*;scope=compile</Embed-Dependency>
-						<_cdiannotations>*;discover=none</_cdiannotations>
+						<_cdiannotations>*;discover=annotated</_cdiannotations>
 					</instructions>
 				</configuration>
 			</plugin>

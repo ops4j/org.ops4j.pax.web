@@ -404,8 +404,7 @@ public class OsgiScopedServletContext implements ServletContext {
 		// the servlet/filter, but in case of WAB, we'll return the WAB's classloader (delegating to
 		// all reachable bundles)
 
-		if (getOsgiContextModel().getClassLoader() != null) {
-			// WAB case
+		if (getOsgiContextModel().isWab()) {
 			return getOsgiContextModel().getClassLoader();
 		}
 

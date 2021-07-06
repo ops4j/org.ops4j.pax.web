@@ -16,7 +16,6 @@
 package org.ops4j.pax.web.itest.jetty.war.jsf;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -29,7 +28,7 @@ import org.osgi.framework.Bundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 @RunWith(PaxExam.class)
-public class WarJsfCdiIntegrationTest extends AbstractWarJsfCdiIntegrationTest {
+public class WarJSFCdiIntegrationTest extends AbstractWarJsfCdiIntegrationTest {
 
 	private Bundle wab;
 
@@ -37,7 +36,8 @@ public class WarJsfCdiIntegrationTest extends AbstractWarJsfCdiIntegrationTest {
 	public Option[] configure() {
 		Option[] serverOptions = combine(baseConfigure(), paxWebJetty());
 		Option[] osgiOptions = combine(serverOptions, configAdmin());
-		Option[] jspOptions = combine(osgiOptions, paxWebJsp());
+		Option[] whiteboardOptions = combine(osgiOptions, paxWebExtenderWhiteboard());
+		Option[] jspOptions = combine(whiteboardOptions, paxWebJsp());
 		Option[] cdiOptions = combine(jspOptions, ariesCdiAndMyfaces(containerSpecificCdiBundle()));
 		return combine(cdiOptions, paxWebExtenderWar());
 	}

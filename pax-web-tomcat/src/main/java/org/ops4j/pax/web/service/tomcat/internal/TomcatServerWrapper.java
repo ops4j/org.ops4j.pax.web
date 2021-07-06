@@ -761,6 +761,10 @@ class TomcatServerWrapper implements BatchVisitor {
 			osgiContextModels.remove(contextPath);
 			PaxWebStandardContext context = contextHandlers.remove(contextPath);
 
+			// Note: for WAB deployments, this is the last operation of the undeployment batch and all web element
+			// removals are delayed until this step.
+			// This is important to ensure proper order of destruction ended with contextDestroyed() calls
+
 			if (isStarted(context)) {
 				LOG.info("Stopping Tomcat context \"{}\"", contextPath);
 				try {
@@ -1012,7 +1016,6 @@ class TomcatServerWrapper implements BatchVisitor {
 				if (!entry.getValue()) {
 					continue;
 				}
-				LOG.info("Removing servlet {}", model);
 
 				Set<String> done = new HashSet<>();
 
@@ -1023,6 +1026,12 @@ class TomcatServerWrapper implements BatchVisitor {
 						return;
 					}
 
+					if (pendingTransaction(contextPath)) {
+						LOG.debug("Delaying removal of servlet {}", model);
+						return;
+					}
+
+					LOG.info("Removing servlet {}", model);
 					LOG.debug("Removing servlet {} from context {}", model.getName(), contextPath);
 
 					// there should already be a ServletContextHandler
@@ -1039,7 +1048,6 @@ class TomcatServerWrapper implements BatchVisitor {
 					// are there any error page declarations in the model?
 					ErrorPageModel epm = model.getErrorPageModel();
 					if (epm != null) {
-						String location = model.getErrorPageModel().getLocation();
 						for (ErrorPage ep : realContext.findErrorPages()) {
 							if (ep.getExceptionType() != null && epm.getExceptionClassNames().contains(ep.getExceptionType())) {
 								realContext.removeErrorPage(ep);
@@ -1066,7 +1074,6 @@ class TomcatServerWrapper implements BatchVisitor {
 		if (change.getKind() == OpCode.ADD && model.isDynamic()) {
 			for (OsgiContextModel ocm : change.getContextModels()) {
 				String contextPath = ocm.getContextPath();
-
 				if (!done.add(contextPath)) {
 					continue;
 				}
@@ -1131,9 +1138,6 @@ class TomcatServerWrapper implements BatchVisitor {
 				}
 			}
 
-			PaxWebFilterDef[] newFilterDefs = new PaxWebFilterDef[filters.size() + 1];
-			PaxWebFilterMap[] newFilterMaps = new PaxWebFilterMap[filters.size() + 1];
-
 			for (FilterModel model : filters) {
 				List<OsgiContextModel> contextModels = filtersMap.get(model) != null
 						? filtersMap.get(model) : model.getContextModels();
@@ -1158,15 +1162,16 @@ class TomcatServerWrapper implements BatchVisitor {
 			Set<String> done = new HashSet<>();
 			contextModels.forEach((context) -> {
 				String contextPath = context.getContextPath();
+				if (!done.add(contextPath)) {
+					return;
+				}
+
 				PaxWebStandardContext standardContext = contextHandlers.get(contextPath);
 				EventListener eventListener = eventListenerModel.resolveEventListener();
 				if (eventListener instanceof ServletContextAttributeListener) {
 					// add it to accessible list to fire per-OsgiContext attribute changes
 					OsgiServletContext c = osgiServletContexts.get(context);
 					c.addServletContextAttributeListener((ServletContextAttributeListener)eventListener);
-				}
-				if (!done.add(contextPath)) {
-					return;
 				}
 
 				// add the listener to real context - even ServletContextAttributeListener (but only once - even
@@ -1179,6 +1184,7 @@ class TomcatServerWrapper implements BatchVisitor {
 				}
 			});
 		}
+
 		if (change.getKind() == OpCode.DELETE) {
 			List<EventListenerModel> eventListenerModels = change.getEventListenerModels();
 			for (EventListenerModel eventListenerModel : eventListenerModels) {
@@ -1193,6 +1199,12 @@ class TomcatServerWrapper implements BatchVisitor {
 							c.removeServletContextAttributeListener((ServletContextAttributeListener)eventListener);
 						}
 					}
+
+					if (pendingTransaction(context.getContextPath())) {
+						LOG.debug("Delaying removal of event listener {}", eventListenerModel);
+						return;
+					}
+
 					// remove the listener from real context - even ServletContextAttributeListener
 					if (standardContext != null) {
 						// this may be null in case of WAB where we keep event listeners so they get contextDestroyed
@@ -1211,10 +1223,10 @@ class TomcatServerWrapper implements BatchVisitor {
 								newLListeners.add(l);
 							}
 						}
-						standardContext.setApplicationEventListeners(newEListeners.toArray(new Object[newEListeners.size()]));
-						standardContext.setApplicationLifecycleListeners(newLListeners.toArray(new Object[newLListeners.size()]));
+						standardContext.setApplicationEventListeners(newEListeners.toArray(new Object[0]));
+						standardContext.setApplicationLifecycleListeners(newLListeners.toArray(new Object[0]));
 					}
-					eventListenerModel.ungetEventListener(eventListener);
+//					eventListenerModel.ungetEventListener(eventListener);
 				});
 			}
 		}
@@ -1347,14 +1359,14 @@ class TomcatServerWrapper implements BatchVisitor {
 					// even if there's org.apache.catalina.core.StandardContext.addServletContainerInitializer(),
 					// there's no "remove" equivalent and also we want to be able to pass correct implementation
 					// of ServletContext there
-					ServletContainerInitializer initializer = model.getContainerInitializer();
 					DynamicRegistrations registrations = this.dynamicRegistrations.get(path);
 					OsgiDynamicServletContext dynamicContext = new OsgiDynamicServletContext(osgiServletContexts.get(context), registrations);
 					SCIWrapper wrapper = new SCIWrapper(dynamicContext, model);
-					initializers.get(path).put(System.identityHashCode(initializer), wrapper);
+					initializers.get(path).put(System.identityHashCode(model.getContainerInitializer()), wrapper);
 				}
 			});
 		}
+
 		if (change.getKind() == OpCode.DELETE) {
 			List<ContainerInitializerModel> models = change.getContainerInitializerModels();
 			for (ContainerInitializerModel model : models) {
@@ -1378,7 +1390,7 @@ class TomcatServerWrapper implements BatchVisitor {
 	 * <p>This method is always (should be) called withing the "configuration thread" of Pax Web Runtime, because
 	 * it's called in visit() methods for servlets (including resources) and filters, so we can safely access
 	 * {@link org.ops4j.pax.web.service.spi.model.ServerModel}.</p>
-	 * @param sch
+	 * @param context
 	 */
 	private void ensureServletContextStarted(PaxWebStandardContext context) {
 		String contextPath = context.getPath().equals("") ? "/" : context.getPath();

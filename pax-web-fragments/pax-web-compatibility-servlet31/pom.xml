@@ -22,21 +22,16 @@
 
 	<parent>
 		<groupId>org.ops4j.pax.web</groupId>
-		<artifactId>pax-web-compatibility</artifactId>
+		<artifactId>pax-web-fragments</artifactId>
 		<version>8.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.ops4j.pax.web</groupId>
-	<artifactId>pax-web-compatibility-annotation13</artifactId>
+	<artifactId>pax-web-compatibility-servlet31</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web - Annotation 1.3 compatibility</name>
-
-	<description>
-		This fragment bundle can be used together with _canonical_ (IMO) jakarta.annotation-api instead of
-		more OSGi aware geronimo-annotation_1.3_spec (that declares additional caps/reqs)
-	</description>
+	<name>OPS4J Pax Web - Servlet API 3.1 compatibility</name>
 
 	<build>
 		<plugins>
@@ -46,10 +41,20 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Fragment-Host>jakarta.annotation-api</Fragment-Host>
+						<Fragment-Host>jakarta.servlet-api</Fragment-Host>
+						<Export-Package>
+							javax.servlet;version="3.1.0";uses:="javax.servlet.annotation,javax.servlet.descriptor",
+							javax.servlet;version="2.6";uses:="javax.servlet.annotation,javax.servlet.descriptor",
+							javax.servlet.annotation;version="3.1.0";uses:="javax.servlet",
+							javax.servlet.annotation;version="2.6";uses:="javax.servlet",
+							javax.servlet.http;version="3.1.0";uses:="javax.servlet",
+							javax.servlet.http;version="2.6";uses:="javax.servlet",
+							javax.servlet.descriptor;version="3.1.0",
+							javax.servlet.descriptor;version="2.6",
+						</Export-Package>
 						<Provide-Capability><![CDATA[
-							osgi.contract;osgi.contract=JavaAnnotation;uses:="javax.annotation,javax.annotation.sql,javax.annotation.security";
-								version:List<Version>="1.3,1.2,1.1,1.0"
+							osgi.contract;osgi.contract=JavaServlet;uses:="javax.servlet,javax.servlet.http,javax.servlet.descriptor,javax.servlet.annotation";
+								version:List<Version>="4.0,3.1,3.0,2.6"
 						]]></Provide-Capability>
 					</instructions>
 				</configuration>
@@ -62,8 +67,8 @@
 		<!-- JavaEE -->
 
 		<dependency>
-			<groupId>jakarta.annotation</groupId>
-			<artifactId>jakarta.annotation-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 		</dependency>
 
 	</dependencies>

@@ -35,6 +35,8 @@ import javax.servlet.SessionTrackingMode;
 import javax.servlet.descriptor.JspConfigDescriptor;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>This class wraps {@link OsgiServletContext} and is used to perform "dynamic registration operations" of
@@ -48,6 +50,8 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
  * web elements registered by multiple SCIs and actually register them later after all SCIs are invoked.</p>
  */
 public class OsgiDynamicServletContext implements ServletContext {
+
+	public static final Logger LOG = LoggerFactory.getLogger(OsgiDynamicServletContext.class);
 
 	private final OsgiServletContext osgiContext;
 	private final DynamicRegistrations registration;
@@ -118,17 +122,29 @@ public class OsgiDynamicServletContext implements ServletContext {
 
 	@Override
 	public <T extends Filter> T createFilter(Class<T> clazz) throws ServletException {
-		throw new UnsupportedOperationException("createFilter() is not supported.");
+		try {
+			return clazz.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new ServletException(e.getMessage(), e);
+		}
 	}
 
 	@Override
 	public <T extends EventListener> T createListener(Class<T> clazz) throws ServletException {
-		throw new UnsupportedOperationException("createListener() is not supported.");
+		try {
+			return clazz.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new ServletException(e.getMessage(), e);
+		}
 	}
 
 	@Override
 	public <T extends Servlet> T createServlet(Class<T> clazz) throws ServletException {
-		throw new UnsupportedOperationException("createServlet() is not supported.");
+		try {
+			return clazz.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new ServletException(e.getMessage(), e);
+		}
 	}
 
 	@Override
@@ -138,7 +154,9 @@ public class OsgiDynamicServletContext implements ServletContext {
 
 	@Override
 	public boolean setInitParameter(String name, String value) {
-		throw new UnsupportedOperationException("setInitParameter() is not supported.");
+		// called for example by
+		// org.springframework.boot.autoconfigure.jersey.JerseyAutoConfiguration$JerseyWebApplicationInitializer.onStartup()
+		return osgiContext.getOsgiContextModel().getContextParams().putIfAbsent(name, value) == null;
 	}
 
 	@Override

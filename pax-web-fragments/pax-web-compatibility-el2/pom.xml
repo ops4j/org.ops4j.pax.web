@@ -22,16 +22,21 @@
 
 	<parent>
 		<groupId>org.ops4j.pax.web</groupId>
-		<artifactId>pax-web-compatibility</artifactId>
+		<artifactId>pax-web-fragments</artifactId>
 		<version>8.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.ops4j.pax.web</groupId>
-	<artifactId>pax-web-compatibility-servlet31</artifactId>
+	<artifactId>pax-web-compatibility-el2</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web - Servlet API 3.1 compatibility</name>
+	<name>OPS4J Pax Web - EL 2.2 compatibility</name>
+
+	<description>
+		This fragment bundle can be used together with _canonical_ (IMO) jakarta.el-api instead of
+		more OSGi aware geronimo-el_2.2_spec (that declares additional caps/reqs)
+	</description>
 
 	<build>
 		<plugins>
@@ -41,21 +46,17 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Fragment-Host>jakarta.servlet-api</Fragment-Host>
+						<Fragment-Host>javax.el-api</Fragment-Host>
 						<Export-Package>
-							javax.servlet;version="3.1.0";uses:="javax.servlet.annotation,javax.servlet.descriptor",
-							javax.servlet;version="2.6";uses:="javax.servlet.annotation,javax.servlet.descriptor",
-							javax.servlet.annotation;version="3.1.0";uses:="javax.servlet",
-							javax.servlet.annotation;version="2.6";uses:="javax.servlet",
-							javax.servlet.http;version="3.1.0";uses:="javax.servlet",
-							javax.servlet.http;version="2.6";uses:="javax.servlet",
-							javax.servlet.descriptor;version="3.1.0",
-							javax.servlet.descriptor;version="2.6",
+							javax.el;version="2.2"
 						</Export-Package>
 						<Provide-Capability><![CDATA[
-							osgi.contract;osgi.contract=JavaServlet;uses:="javax.servlet,javax.servlet.http,javax.servlet.descriptor,javax.servlet.annotation";
-								version:List<Version>="4.0,3.1,3.0,2.6"
+							osgi.contract;osgi.contract=JavaEL;uses:="javax.el";version:List<Version>="3.0,2.2,2.1,2.0,1.0"
 						]]></Provide-Capability>
+<!--						<Require-Capability><![CDATA[-->
+<!--							osgi.serviceloader;filter:="(osgi.serviceloader=javax.el.ExpressionFactory)";cardinality:=multiple;resolution:=optional,-->
+<!--							osgi.extender;filter:="(osgi.extender=osgi.serviceloader.processor)",-->
+<!--						]]></Require-Capability>-->
 					</instructions>
 				</configuration>
 			</plugin>
@@ -67,8 +68,8 @@
 		<!-- JavaEE -->
 
 		<dependency>
-			<groupId>jakarta.servlet</groupId>
-			<artifactId>jakarta.servlet-api</artifactId>
+			<groupId>jakarta.el</groupId>
+			<artifactId>jakarta.el-api</artifactId>
 		</dependency>
 
 	</dependencies>

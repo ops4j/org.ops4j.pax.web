@@ -41,6 +41,8 @@ public class DynamicFilterRegistration implements FilterRegistration.Dynamic {
 
 	public DynamicFilterRegistration(FilterModel model, OsgiContextModel osgiContextModel, DynamicRegistrations regs) {
 		this.model = model;
+		// "close" the context list
+		this.model.getContextModels();
 		this.osgiContextModel = osgiContextModel;
 		this.registrations = regs;
 	}

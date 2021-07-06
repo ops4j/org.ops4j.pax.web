@@ -761,6 +761,11 @@ class JettyServerWrapper implements BatchVisitor {
 			osgiContextModels.remove(contextPath);
 			PaxWebServletContextHandler sch = contextHandlers.remove(contextPath);
 
+			// Note: for WAB deployments, this is the last operation of the undeployment batch and all web element
+			// removals are delayed until this step.
+			// This is important to ensure proper order of destruction ended with contextDestroyed() calls
+			// No need to clean anything, as the PaxWebServletContextHandler is not reused
+
 			if (sch.isStarted()) {
 				LOG.info("Stopping Jetty context \"{}\"", contextPath);
 				try {
@@ -835,7 +840,6 @@ class JettyServerWrapper implements BatchVisitor {
 		if (change.getKind() == OpCode.DELETE) {
 			LOG.info("Removing {} from {}", osgiModel, sch);
 
-			// TOCHECK: are there web elements associated with removed mapping for OsgiServletContext?
 			OsgiServletContext removedOsgiServletContext = osgiServletContexts.remove(osgiModel);
 			osgiContextModels.get(contextPath).remove(osgiModel);
 
@@ -860,11 +864,6 @@ class JettyServerWrapper implements BatchVisitor {
 
 			// and the highest ranked context should be registered as OSGi service (if it wasn't registered)
 			highestRankedContext.register();
-
-			// TODO: very important question - here the classloader of entire context should be changed to the one
-			//       built around a bundle registering the highest ranked OsgiContextModel. But this class loader's
-			//       "space" should also include (somehow) all the reachable bundles (for example the bundles
-			//       that have registered any web elements into this context)...
 		} else {
 			// TOCHECK: there should be no more web elements in the context, no OSGi mechanisms, just 404 all the time
 			((PaxWebServletHandler) sch.getServletHandler()).setDefaultOsgiContextModel(null);
@@ -973,7 +972,6 @@ class JettyServerWrapper implements BatchVisitor {
 			// proper order ensures that (assuming above scenario), for /c1, ocm2 will be chosen and ocm1 skipped
 			change.getContextModels().forEach(osgiContextModel -> {
 				String contextPath = osgiContextModel.getContextPath();
-
 				if (!done.add(contextPath)) {
 					// servlet was already added to given ServletContextHandler
 					// in association with the highest ranked OsgiContextModel (and its supporting
@@ -1057,7 +1055,6 @@ class JettyServerWrapper implements BatchVisitor {
 				if (!entry.getValue()) {
 					continue;
 				}
-				LOG.info("Removing servlet {}", model);
 
 				Set<String> done = new HashSet<>();
 
@@ -1068,6 +1065,12 @@ class JettyServerWrapper implements BatchVisitor {
 						return;
 					}
 
+					if (pendingTransaction(contextPath)) {
+						LOG.debug("Delaying removal of servlet {}", model);
+						return;
+					}
+
+					LOG.info("Removing servlet {}", model);
 					LOG.debug("Removing servlet {} from context {}", model.getName(), contextPath);
 
 					// there should already be a ServletContextHandler
@@ -1125,7 +1128,6 @@ class JettyServerWrapper implements BatchVisitor {
 		if (change.getKind() == OpCode.ADD && model.isDynamic()) {
 			for (OsgiContextModel ocm : change.getContextModels()) {
 				String contextPath = ocm.getContextPath();
-
 				if (!done.add(contextPath)) {
 					continue;
 				}
@@ -1195,9 +1197,6 @@ class JettyServerWrapper implements BatchVisitor {
 			//
 			// For Pax Web purposes, we'll try to handle such scenario and all the filters in a chain without servlet
 			// will use OsgiServletContext which is "best" (wrt service ranking) for given physical context path
-
-			FilterHolder[] filterHolders = sch.getServletHandler().getFilters();
-			FilterMapping[] filterMappings = sch.getServletHandler().getFilterMappings();
 
 			PaxWebFilterHolder[] newFilterHolders = new PaxWebFilterHolder[filters.size()];
 			@SuppressWarnings("unchecked")
@@ -1284,42 +1283,6 @@ class JettyServerWrapper implements BatchVisitor {
 		}
 	}
 
-	private List<PaxWebFilterMapping> configureFilterMappings(FilterModel model) {
-		List<PaxWebFilterMapping> mappings = new LinkedList<>();
-
-		if (model.getDynamicServletNames().size() > 0 || model.getDynamicUrlPatterns().size() > 0) {
-			// this FilterModel was created in SCI using ServletContext.addFilter(), so it has ONLY
-			// dynamic mappings (potentially more than one)
-			model.getDynamicServletNames().forEach(dm -> {
-				if (!dm.isAfter()) {
-					mappings.add(new PaxWebFilterMapping(model, dm));
-				}
-			});
-			model.getDynamicUrlPatterns().forEach(dm -> {
-				if (!dm.isAfter()) {
-					mappings.add(new PaxWebFilterMapping(model, dm));
-				}
-			});
-			model.getDynamicServletNames().forEach(dm -> {
-				if (dm.isAfter()) {
-					mappings.add(new PaxWebFilterMapping(model, dm));
-				}
-			});
-			model.getDynamicUrlPatterns().forEach(dm -> {
-				if (dm.isAfter()) {
-					mappings.add(new PaxWebFilterMapping(model, dm));
-				}
-			});
-		} else {
-			// normal OSGi mapping
-			for (FilterModel.Mapping map : model.getMappingsPerDispatcherTypes()) {
-				mappings.add(new PaxWebFilterMapping(model, map));
-			}
-		}
-
-		return mappings;
-	}
-
 	@Override
 	public void visit(EventListenerModelChange change) {
 		if (change.getKind() == OpCode.ADD) {
@@ -1328,22 +1291,36 @@ class JettyServerWrapper implements BatchVisitor {
 			Set<String> done = new HashSet<>();
 			contextModels.forEach((context) -> {
 				String contextPath = context.getContextPath();
-				ServletContextHandler servletContextHandler = contextHandlers.get(contextPath);
+				if (!done.add(contextPath)) {
+					return;
+				}
+
+				PaxWebServletContextHandler servletContextHandler = contextHandlers.get(contextPath);
 				EventListener eventListener = eventListenerModel.resolveEventListener();
 				if (eventListener instanceof ServletContextAttributeListener) {
 					// add it to accessible list to fire per-OsgiContext attribute changes
 					OsgiServletContext c = osgiServletContexts.get(context);
 					c.addServletContextAttributeListener((ServletContextAttributeListener)eventListener);
 				}
-				if (!done.add(contextPath)) {
-					return;
-				}
 
 				// add the listener to real context - even ServletContextAttributeListener (but only once - even
 				// if there are many OsgiServletContexts per ServletContext)
+//				boolean restartNeeded = false;
+//				if (servletContextHandler.isStarted()) {
+//					try {
+//						servletContextHandler.stop();
+//						restartNeeded = true;
+//					} catch (Exception e) {
+//						LOG.error(e.getMessage(), e);
+//					}
+//				}
 				servletContextHandler.addEventListener(eventListener);
+//				if (restartNeeded) {
+//					ensureServletContextStarted(servletContextHandler);
+//				}
 			});
 		}
+
 		if (change.getKind() == OpCode.DELETE) {
 			List<EventListenerModel> eventListenerModels = change.getEventListenerModels();
 			for (EventListenerModel eventListenerModel : eventListenerModels) {
@@ -1358,13 +1335,19 @@ class JettyServerWrapper implements BatchVisitor {
 							c.removeServletContextAttributeListener((ServletContextAttributeListener)eventListener);
 						}
 					}
+
+					if (pendingTransaction(context.getContextPath())) {
+						LOG.debug("Delaying removal of event listener {}", eventListenerModel);
+						return;
+					}
+
 					if (servletContextHandler != null) {
 						// remove the listener from real context - even ServletContextAttributeListener
 						// this may be null in case of WAB where we keep event listeners so they get contextDestroyed
 						// event properly
 						servletContextHandler.removeEventListener(eventListener);
 					}
-					eventListenerModel.ungetEventListener(eventListener);
+//					eventListenerModel.ungetEventListener(eventListener);
 				});
 			}
 		}
@@ -1479,6 +1462,8 @@ class JettyServerWrapper implements BatchVisitor {
 				if (sch.isStarted()) {
 					// Jetty, Tomcat and Undertow all disable "addServlet()" method (and filter and listener
 					// equivalents) after the context has started, so we'll just print an error here
+					// Also, SCis can be added only through pax-web-extender-war, so no way to start the context
+					// before adding any SCI
 					LOG.warn("ServletContainerInitializer {} can't be added, as the context {} is already started",
 							model.getContainerInitializer(), sch);
 				} else {
@@ -1486,7 +1471,6 @@ class JettyServerWrapper implements BatchVisitor {
 					// ContainerInitializerModel, because (for now) there's no Whiteboard support, thus there can
 					// be only one OsgiContextModel
 
-					ServletContainerInitializer initializer = model.getContainerInitializer();
 					// Jetty doesn't handle ServletContainerInitializers directly... There's something in
 					// org.eclipse.jetty.annotations.AnnotationConfiguration and
 					// org.eclipse.jetty.servlet.listener.ContainerInitializer which turns initializer into a
@@ -1497,10 +1481,11 @@ class JettyServerWrapper implements BatchVisitor {
 					DynamicRegistrations registrations = this.dynamicRegistrations.get(path);
 					OsgiDynamicServletContext dynamicContext = new OsgiDynamicServletContext(osgiServletContexts.get(context), registrations);
 					SCIWrapper wrapper = new SCIWrapper(dynamicContext, model);
-					initializers.get(path).put(System.identityHashCode(initializer), wrapper);
+					initializers.get(path).put(System.identityHashCode(model.getContainerInitializer()), wrapper);
 				}
 			});
 		}
+
 		if (change.getKind() == OpCode.DELETE) {
 			List<ContainerInitializerModel> models = change.getContainerInitializerModels();
 			for (ContainerInitializerModel model : models) {
@@ -1590,6 +1575,26 @@ class JettyServerWrapper implements BatchVisitor {
 				}
 			}
 
+			// There's a deadlock, when starting the context in single paxweb-config thread:
+			// 1. org.apache.aries.cdi.weld.WeldCDIContainerInitializer.initialize() is called in Aries CCR thread
+			// 2. locking <0x1e70> (a org.jboss.weld.Container) in Aries CCR thread
+			// 3. org.apache.aries.cdi.extension.servlet.weld.WeldServletExtension.afterDeploymentValidation() is called in Aries CCR thread
+			// 4. org.jboss.weld.module.web.servlet.WeldInitialListener is whiteboard-registered in Aries CCR thread
+			// 5. Pax Web's listener tracker passes the registration to single paxweb-config thread
+			// 6. Pax Web's JettyServerWrapper registers the listener in already started context (so it restarts it) in
+			//    paxweb-config thread
+			// 7. WeldInitialListener.contextInitialized() is called in paxweb-config thread
+			// 8. org.jboss.weld.module.web.servlet.HttpContextLifecycle#fireEventForApplicationScope() has
+			//    synchronized block on the org.jboss.weld.Container instance - deadlock
+
+			// TODO: do it better
+//			new Thread(() -> {
+//				try {
+//					sch.start();
+//				} catch (Exception e) {
+//					LOG.error(e.getMessage(), e);
+//				}
+//			}).start();
 			sch.start();
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
@@ -1620,7 +1625,7 @@ class JettyServerWrapper implements BatchVisitor {
 	 * of current list of filters. This is quite special case, but not that uncommon - when new filters are
 	 * lower-ranked than all existing ones and there are no filters to be removed.</p>
 	 *
-	 * <p>TODO: with {@link ServletHandler#insertFilterMapping(FilterMapping, int, boolean)} we could
+	 * <p>TODO: with {@code ServletHandler#insertFilterMapping(FilterMapping, int, boolean)} we could
 	 *          optimize even more</p>
 	 *
 	 * @param servletHandler
@@ -1629,7 +1634,7 @@ class JettyServerWrapper implements BatchVisitor {
 	 * @return
 	 */
 	private boolean quickFilterChange(ServletHandler servletHandler, PaxWebFilterHolder[] newFilterHolders, List<PaxWebFilterMapping>[] newFilterMappings) {
-		PaxWebFilterHolder[] existingFilterHolders = (PaxWebFilterHolder[]) servletHandler.getFilters();
+		FilterHolder[] existingFilterHolders = servletHandler.getFilters();
 
 		int pos = 0;
 		boolean quick = newFilterHolders.length >= existingFilterHolders.length;
@@ -1639,7 +1644,7 @@ class JettyServerWrapper implements BatchVisitor {
 			if (pos >= existingFilterHolders.length) {
 				break;
 			}
-			if (!existingFilterHolders[pos].getFilterModel().equals(newFilterHolders[pos].getFilterModel())) {
+			if (!((PaxWebFilterHolder)existingFilterHolders[pos]).getFilterModel().equals(newFilterHolders[pos].getFilterModel())) {
 				quick = false;
 				break;
 			}
@@ -1657,6 +1662,42 @@ class JettyServerWrapper implements BatchVisitor {
 		}
 
 		return false;
+	}
+
+	private List<PaxWebFilterMapping> configureFilterMappings(FilterModel model) {
+		List<PaxWebFilterMapping> mappings = new LinkedList<>();
+
+		if (model.getDynamicServletNames().size() > 0 || model.getDynamicUrlPatterns().size() > 0) {
+			// this FilterModel was created in SCI using ServletContext.addFilter(), so it has ONLY
+			// dynamic mappings (potentially more than one)
+			model.getDynamicServletNames().forEach(dm -> {
+				if (!dm.isAfter()) {
+					mappings.add(new PaxWebFilterMapping(model, dm));
+				}
+			});
+			model.getDynamicUrlPatterns().forEach(dm -> {
+				if (!dm.isAfter()) {
+					mappings.add(new PaxWebFilterMapping(model, dm));
+				}
+			});
+			model.getDynamicServletNames().forEach(dm -> {
+				if (dm.isAfter()) {
+					mappings.add(new PaxWebFilterMapping(model, dm));
+				}
+			});
+			model.getDynamicUrlPatterns().forEach(dm -> {
+				if (dm.isAfter()) {
+					mappings.add(new PaxWebFilterMapping(model, dm));
+				}
+			});
+		} else {
+			// normal OSGi mapping
+			for (FilterModel.Mapping map : model.getMappingsPerDispatcherTypes()) {
+				mappings.add(new PaxWebFilterMapping(model, map));
+			}
+		}
+
+		return mappings;
 	}
 
 	// PAXWEB-210: create security constraints

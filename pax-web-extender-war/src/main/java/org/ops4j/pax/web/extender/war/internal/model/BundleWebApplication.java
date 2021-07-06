@@ -87,6 +87,7 @@ import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -226,7 +227,7 @@ public class BundleWebApplication {
 	/**
 	 * <p>A {@link BundleWebApplication} can be started only once. Even if "Figure 128.2 State diagram Web Application"
 	 * shows that WAB 	 * can go from UNDEPLOYED to DEPLOYING state, we're using
-	 * {@link org.apache.felix.utils.extender.AbstractExtender#destroyExtension}, so what will be started after
+	 * {@code org.apache.felix.utils.extender.AbstractExtender#destroyExtension}, so what will be started after
 	 * undeployment is a new instance of {@link BundleWebApplication}. Again it's important to distinguish
 	 * {@link BundleWebApplication.State} and {@link WebApplicationEvent.State}.</p>
 	 *
@@ -1172,6 +1173,8 @@ public class BundleWebApplication {
 		// very important step - we pass a classloader, which contains reachable bundles - bundles discovered when
 		// WAB's metadata was parsed/processed
 		ocm.setClassLoader(this.classLoader);
+		// this is important - we should be able to reference the context by path (not by name)
+		ocm.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, this.contextPath);
 
 		// this is the best place to think about how to reference the underlying "context"
 		// in HttpService and Whiteboard scenarios.
@@ -1256,8 +1259,11 @@ public class BundleWebApplication {
 		// 1.4. Context initial parameters
 		ocm.getContextParams().putAll(mainWebXml.getContextParams());
 		// TODO: do it consistently using runtime configuration of temp directory
-		ocm.getInitialContextAttributes().put(ServletContext.TEMPDIR,
-				new File(System.getProperty("java.io.tmpdir"), ocm.getTemporaryLocation()));
+		File tmpLocation = new File(System.getProperty("java.io.tmpdir"), ocm.getTemporaryLocation());
+		if (!tmpLocation.mkdirs()) {
+			LOG.warn("Can't create temporary directory for {}: {}", ocm, tmpLocation.getAbsolutePath());
+		}
+		ocm.getInitialContextAttributes().put(ServletContext.TEMPDIR, tmpLocation);
 
 		wabBatch.addOsgiContextModel(ocm, scm);
 		wabBatch.associateOsgiContextModel(httpContext, ocm);

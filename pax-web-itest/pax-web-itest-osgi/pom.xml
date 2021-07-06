@@ -159,6 +159,11 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-compatibility-annotation13</artifactId>
+		</dependency>
+
 		<!-- pax-web internal samples -->
 
 		<dependency>

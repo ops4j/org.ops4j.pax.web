@@ -51,7 +51,7 @@ import org.osgi.framework.ServiceReference;
  * being registered by {@link javax.servlet.ServletContainerInitializer}s.</p>
  *
  * <p>Just as dynamic registration methods of {@link javax.servlet.ServletContext}, we don't bother with
- * unregistration of the elements. We will eventually clean things up, but only after give context is somehow
+ * unregistration of the elements. We will eventually clean things up, but only after given context is somehow
  * destroyed/closed. Registration declarations stored in this class are cleared after invocation of
  * context's {@link javax.servlet.ServletContainerInitializer} ends.</p>
  */

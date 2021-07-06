@@ -404,9 +404,10 @@ public abstract class AbstractControlledTestBase {
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-interceptor12")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
-				// it has to be CDI 1.2 for Myfaces 2.3.x
-				mavenBundle("javax.enterprise", "cdi-api")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("jakarta.enterprise", "jakarta.enterprise.cdi-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart(),
+				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-cdi12")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
 				mavenBundle("commons-collections", "commons-collections")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("commons-beanutils", "commons-beanutils")
@@ -491,6 +492,8 @@ public abstract class AbstractControlledTestBase {
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.apache.myfaces.core", "myfaces-impl")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ops4j.pax.web", "pax-web-fragment-myfaces-spifly")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
 
 				// These 4 would be required because of osgi.contract capabilities. But Pax Web provides proper
 				// compatibility bundles that fix _canonical_ jakarta API bundles
@@ -528,6 +531,8 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle("org.apache.aries.cdi", "org.apache.aries.cdi.extension.servlet.common")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.apache.aries.cdi", "org.apache.aries.cdi.extension.servlet.weld")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.apache.aries.cdi", "org.apache.aries.cdi.extension.el.jsp")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.apache.aries.cdi", "org.apache.aries.cdi.extra")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
