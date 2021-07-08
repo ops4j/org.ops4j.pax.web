@@ -24,8 +24,6 @@ import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 
 public abstract class AbstractWarJsfCdiIntegrationTest extends AbstractContainerTestBase {
 
-	protected abstract String containerSpecificCdiBundle();
-
 	// only Jetty implementation for now, I need to prepare Pax CDI 1.2.x to integrate with new Pax Web...
 
 }

@@ -21,16 +21,17 @@ package org.ops4j.pax.web.samples.warjsf23cdi;
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.osgi.service.cdi.annotations.Bean;
 import org.osgi.service.cdi.annotations.Reference;
-import org.osgi.service.cdi.annotations.SingleComponent;
 import org.osgi.service.url.URLStreamHandlerService;
 
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.Serializable;
 
 @Bean
-@SingleComponent
 @Named("hello")
-public class Hello {
+@RequestScoped
+public class Hello implements Serializable {
 
 	private String what;
 	private String result;
@@ -43,6 +44,10 @@ public class Hello {
 	@Inject
 	@Reference
 	private ServerControllerFactory serverControllerFactory;
+
+	public Hello() {
+		System.out.println("<ctor>");
+	}
 
 	public void setWhat(String what) {
 		this.what = what;
@@ -57,11 +62,13 @@ public class Hello {
 	}
 
 	public String getTest() {
-		return String.format("test, %s, %s", handler, serverControllerFactory);
+		return String.format("%s, %s, %s", test,
+				handler.getClass().getName(), serverControllerFactory.getClass().getName());
 	}
 
 	public void say() {
-		result = String.format("Hello %s! (mvn handler: %s, current web runtime: %s)", what, handler, serverControllerFactory);
+		result = String.format("Hello %s! (mvn handler: %s, current web runtime: %s)", what,
+				handler.getClass().getName(), serverControllerFactory.getClass().getName());
 	}
 
 }

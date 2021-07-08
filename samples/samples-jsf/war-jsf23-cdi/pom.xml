@@ -47,32 +47,53 @@
 					</supportedProjectTypes>
 					<instructions>
 						<Import-Package>
+							javax.enterprise.context,
 							javax.inject,
 							javax.servlet.*;version="[3.1,5)",
+							javax.faces.annotation,
 							javax.faces.bean,
+							javax.faces.view,
 							javax.faces.webapp,
 							org.osgi.service.url,
-							org.osgi.service.cdi.annotations
+							org.osgi.service.cdi.annotations,
+							org.ops4j.pax.web.service.spi
 						</Import-Package>
 						<Private-Package>
 							org.ops4j.pax.web.samples.warjsf23cdi
 						</Private-Package>
 						<_wab>${project.build.directory}/${project.build.finalName}</_wab>
 						<Web-ContextPath>/war-jsf23-cdi</Web-ContextPath>
-						<DynamicImport-Package>
-							org.apache.myfaces.*,
-							org.jboss.weld.*,
-							org.ops4j.pax.web.*,
-							org.apache.myfaces.cdi,
-							org.apache.myfaces.cdi.*,
-							org.apache.myfaces.flow.cdi,
-							org.apache.myfaces.flow.cdi.*
-						</DynamicImport-Package>
+<!--						<DynamicImport-Package>-->
+<!--							org.apache.myfaces.*,-->
+<!--							org.jboss.weld.*,-->
+<!--							org.ops4j.pax.web.*,-->
+<!--							org.apache.myfaces.cdi,-->
+<!--							org.apache.myfaces.cdi.*,-->
+<!--							org.apache.myfaces.flow.cdi,-->
+<!--							org.apache.myfaces.flow.cdi.*-->
+<!--						</DynamicImport-Package>-->
 						<Export-Package />
-						<Require-Capability><![CDATA[
+						<Require-Capability>
+							<!--
+								When using Weld (desirably through aries-cdi), we have to ensure the requirements
+								from https://docs.jboss.org/weld/reference/latest-3.1/en-US/html_single/#_servlet
+								are met.
+							-->
+							<!--
+								org.apache.aries.cdi.extension.servlet.weld.WeldServletExtension CDI extension
+								which registers (wrapped)
+								org.jboss.weld.module.web.servlet.WeldInitialListener ServletContextListener
+							-->
 							osgi.cdi.extension;filter:="(osgi.cdi.extension=aries.cdi.http)",
+							<!--
+								org.apache.aries.cdi.extension.el.jsp.ELJSPExtension CDI extension
+								which registers anonymous ServletContextListener
+								which calls:
+								 - javax.servlet.jsp.JspApplicationContext.addELResolver(javax.enterprise.inject.spi.BeanManager.getELResolver())
+								 - javax.servlet.jsp.JspApplicationContext.addELContextListener(new org.jboss.weld.module.web.el.WeldELContextListener())
+							-->
 							osgi.cdi.extension;filter:="(osgi.cdi.extension=aries.cdi.el.jsp)"
-						]]></Require-Capability>
+						</Require-Capability>
 						<!-- with -cdiannotations instruction, we don't have to list the beans manually -->
 <!--						<Require-Capability><![CDATA[-->
 <!--							osgi.extender;filter:="(&(osgi.extender=osgi.cdi)(version>=1.0.0)(!(version>=2.0.0)))";-->
@@ -122,6 +143,12 @@
 		<dependency>
 			<groupId>jakarta.enterprise</groupId>
 			<artifactId>jakarta.enterprise.cdi-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.myfaces.core</groupId>
+			<artifactId>myfaces-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 

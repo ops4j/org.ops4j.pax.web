@@ -32,6 +32,7 @@ public class SCIThatAddsServletContextListener implements ServletContainerInitia
 
     @Override
     public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
+        // this is exactly how JasperInitializer (JSP SCI) adds context listeners found in TLDs
         ctx.addListener(new ServletContextListener() {
             @Override
             public void contextInitialized(ServletContextEvent sce) {

@@ -21,31 +21,45 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.ops4j.pax</groupId>
-		<artifactId>web</artifactId>
+		<groupId>org.ops4j.pax.web</groupId>
+		<artifactId>pax-web-fragments</artifactId>
 		<version>8.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.ops4j.pax.web</groupId>
-	<artifactId>pax-web-fragments</artifactId>
-	<packaging>pom</packaging>
+	<artifactId>pax-web-fragment-myfaces-inject</artifactId>
+	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web - support bundles</name>
+	<name>OPS4J Pax Web - myfaces-api tweak </name>
 
-	<modules>
-		<!--
-			These are fragments that either export older versions of some packages or add osgi.contracts to
-			JakartaEE _canonical_ API jars
-		-->
-		<module>pax-web-compatibility-cdi12</module>
-		<module>pax-web-compatibility-servlet31</module>
-		<module>pax-web-compatibility-el2</module>
-		<module>pax-web-compatibility-interceptor12</module>
-		<module>pax-web-compatibility-annotation13</module>
-		<!-- These are other support fragments -->
-		<module>pax-web-fragment-myfaces-inject</module>
-		<module>pax-web-fragment-myfaces-spifly</module>
-	</modules>
+	<description>
+		This fragment bundle adds javax.inject import to myfaces-api
+	</description>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Fragment-Host>org.apache.myfaces.core.api</Fragment-Host>
+						<Import-Package>javax.inject</Import-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>org.apache.myfaces.core</groupId>
+			<artifactId>myfaces-impl</artifactId>
+		</dependency>
+
+	</dependencies>
 
 </project>

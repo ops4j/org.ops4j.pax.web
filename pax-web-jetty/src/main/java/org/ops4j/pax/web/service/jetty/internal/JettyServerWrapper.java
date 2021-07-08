@@ -1305,18 +1305,16 @@ class JettyServerWrapper implements BatchVisitor {
 
 				// add the listener to real context - even ServletContextAttributeListener (but only once - even
 				// if there are many OsgiServletContexts per ServletContext)
-//				boolean restartNeeded = false;
-//				if (servletContextHandler.isStarted()) {
-//					try {
-//						servletContextHandler.stop();
-//						restartNeeded = true;
-//					} catch (Exception e) {
-//						LOG.error(e.getMessage(), e);
-//					}
-//				}
 				servletContextHandler.addEventListener(eventListener);
-//				if (restartNeeded) {
-//					ensureServletContextStarted(servletContextHandler);
+
+				// calling javax.servlet.ServletContextListener.contextInitialized() when server (context) is
+				// already started and doing it in separate thread is a tweak to make Aries-CDI + extensions
+				// work with CDI/JSF sample. I definitely have to solve it differently.
+				// The probelms are summarized in https://github.com/ops4j/org.ops4j.pax.web/issues/1622
+//				if (servletContextHandler.isStarted() && ServletContextListener.class.isAssignableFrom(eventListener.getClass())) {
+//					new Thread(() -> {
+//						((ServletContextListener) eventListener).contextInitialized(new ServletContextEvent(osgiServletContexts.get(context)));
+//					}).start();
 //				}
 			});
 		}

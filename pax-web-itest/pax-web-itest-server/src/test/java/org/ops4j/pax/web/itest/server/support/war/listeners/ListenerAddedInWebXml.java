@@ -24,7 +24,13 @@ public class ListenerAddedInWebXml implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        StaticList.EVENTS.add("Listener-from-web.xml initialized");
+        try {
+            sce.getServletContext().addListener(new ServletContextListener() {
+            });
+        } catch (UnsupportedOperationException ignored) {
+            // it should not be possible to add a listener from a listener
+            StaticList.EVENTS.add("Listener-from-web.xml initialized");
+        }
     }
 
     @Override

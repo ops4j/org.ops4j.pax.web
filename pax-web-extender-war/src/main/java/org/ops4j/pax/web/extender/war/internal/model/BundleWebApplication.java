@@ -673,6 +673,12 @@ public class BundleWebApplication {
 				}
 			}
 
+			// TODO: special situation for aries-cdi, which is also an extender. its two CDI extensions:
+			//  - org.apache.aries.cdi.extension.servlet.weld.WeldServletExtension
+			//  - org.apache.aries.cdi.extension.el.jsp.ELJSPExtension
+			//  register two servlet context listeners via whiteboard
+			// We have to (somehow) wait for this extender before we actually register the web application...
+
 			state = deploymentState.get();
 			if (state == State.DEPLOYING) {
 				LOG.debug("Registering {} in WebContainer", contextPath);
@@ -1260,7 +1266,7 @@ public class BundleWebApplication {
 		ocm.getContextParams().putAll(mainWebXml.getContextParams());
 		// TODO: do it consistently using runtime configuration of temp directory
 		File tmpLocation = new File(System.getProperty("java.io.tmpdir"), ocm.getTemporaryLocation());
-		if (!tmpLocation.mkdirs()) {
+		if (!tmpLocation.exists() && !tmpLocation.mkdirs()) {
 			LOG.warn("Can't create temporary directory for {}: {}", ocm, tmpLocation.getAbsolutePath());
 		}
 		ocm.getInitialContextAttributes().put(ServletContext.TEMPDIR, tmpLocation);

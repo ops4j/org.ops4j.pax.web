@@ -475,7 +475,7 @@ public abstract class AbstractControlledTestBase {
 		);
 	}
 
-	protected Option[] ariesCdiAndMyfaces(String containerCdiArtifact) {
+	protected Option[] ariesCdiAndMyfaces() {
 		return new Option[]{
 				mavenBundle("jakarta.websocket", "jakarta.websocket-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
@@ -492,6 +492,8 @@ public abstract class AbstractControlledTestBase {
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.apache.myfaces.core", "myfaces-impl")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ops4j.pax.web", "pax-web-fragment-myfaces-inject")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
 				mavenBundle("org.ops4j.pax.web", "pax-web-fragment-myfaces-spifly")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
 
