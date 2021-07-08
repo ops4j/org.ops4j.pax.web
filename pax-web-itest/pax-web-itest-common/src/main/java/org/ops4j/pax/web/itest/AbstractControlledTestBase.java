@@ -444,37 +444,6 @@ public abstract class AbstractControlledTestBase {
 		);
 	}
 
-	protected Option[] paxCdiAndMyfaces(String containerCdiArtifact) {
-		return combine(myfaces(),
-				mavenBundle("jakarta.validation", "jakarta.validation-api")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.jboss.classfilewriter", "jboss-classfilewriter")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.jboss.weld", "weld-osgi-bundle")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.apache.xbean", "xbean-bundleutils")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.apache.xbean", "xbean-asm9-shaded")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.apache.xbean", "xbean-finder-shaded")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-api")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-spi")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-extender")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-extension")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-web")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle().groupId("org.ops4j.pax.cdi").artifactId(containerCdiArtifact)
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-weld")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
-		);
-	}
-
 	protected Option[] ariesCdiAndMyfaces() {
 		return new Option[]{
 				mavenBundle("jakarta.websocket", "jakarta.websocket-api")

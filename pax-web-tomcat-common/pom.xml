@@ -89,37 +89,37 @@
 							-->
 
 							<!-- tomcat-api -->
-							org.apache.tomcat;version="${dependency.tomcat.version}",
+							org.apache.tomcat;version="${dependency.org.apache.tomcat}",
 
 							<!-- tomcat-util -->
-							org.apache.tomcat.util;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util.buf;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util.codec.binary;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util.collections;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util.compat;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util.file;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util.json;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util.res;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util.security;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util.threads;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util.threads.res;version="${dependency.tomcat.version}",
+							org.apache.tomcat.util;version="${dependency.org.apache.tomcat}",
+							org.apache.tomcat.util.buf;version="${dependency.org.apache.tomcat}",
+							org.apache.tomcat.util.codec.binary;version="${dependency.org.apache.tomcat}",
+							org.apache.tomcat.util.collections;version="${dependency.org.apache.tomcat}",
+							org.apache.tomcat.util.compat;version="${dependency.org.apache.tomcat}",
+							org.apache.tomcat.util.file;version="${dependency.org.apache.tomcat}",
+							org.apache.tomcat.util.json;version="${dependency.org.apache.tomcat}",
+							org.apache.tomcat.util.res;version="${dependency.org.apache.tomcat}",
+							org.apache.tomcat.util.security;version="${dependency.org.apache.tomcat}",
+							org.apache.tomcat.util.threads;version="${dependency.org.apache.tomcat}",
+							org.apache.tomcat.util.threads.res;version="${dependency.org.apache.tomcat}",
 
 							<!-- tomcat-util-scan -->
-							org.apache.tomcat.util.descriptor;version="${dependency.tomcat.version}";-split-package:=merge-first,
-							org.apache.tomcat.util.descriptor.tagplugin;version="${dependency.tomcat.version}";-split-package:=merge-first,
-							org.apache.tomcat.util.descriptor.tld;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util.descriptor.web;version="${dependency.tomcat.version}";-split-package:=merge-first,
-							org.apache.tomcat.util.digester;version="${dependency.tomcat.version}";-split-package:=merge-first,
-							org.apache.tomcat.util.scan;version="${dependency.tomcat.version}";-split-package:=merge-first,
+							org.apache.tomcat.util.descriptor;version="${dependency.org.apache.tomcat}";-split-package:=merge-first,
+							org.apache.tomcat.util.descriptor.tagplugin;version="${dependency.org.apache.tomcat}";-split-package:=merge-first,
+							org.apache.tomcat.util.descriptor.tld;version="${dependency.org.apache.tomcat}",
+							org.apache.tomcat.util.descriptor.web;version="${dependency.org.apache.tomcat}";-split-package:=merge-first,
+							org.apache.tomcat.util.digester;version="${dependency.org.apache.tomcat}";-split-package:=merge-first,
+							org.apache.tomcat.util.scan;version="${dependency.org.apache.tomcat}";-split-package:=merge-first,
 
 							<!-- tomcat-embed-core - unfortunately these packages have to be here -->
-							org.apache.tomcat.util.bcel;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util.bcel.classfile;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util.modeler;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util.modeler.modules;version="${dependency.tomcat.version}",
+							org.apache.tomcat.util.bcel;version="${dependency.org.apache.tomcat}",
+							org.apache.tomcat.util.bcel.classfile;version="${dependency.org.apache.tomcat}",
+							org.apache.tomcat.util.modeler;version="${dependency.org.apache.tomcat}",
+							org.apache.tomcat.util.modeler.modules;version="${dependency.org.apache.tomcat}",
 
 							<!-- tomcat-juli (don't export org.apache.tomcat.juli.logging, which comes from pax-logging-api -->
-							org.apache.juli;version="${dependency.tomcat.version}"
+							org.apache.juli;version="${dependency.org.apache.tomcat}"
 						</Export-Package>
 						<_nouses>true</_nouses>
 						<_contract>!*</_contract>

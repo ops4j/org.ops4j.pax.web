@@ -56,10 +56,10 @@
 							javax.servlet.jsp.tagext;version="2.3",
 
 							<!-- JSTL API (also exported from pax-web-jsp - this bundle) -->
-							javax.servlet.jsp.jstl.core;version="${dependency.jakarta.servlet.jsp.jstl-api.version}",
-							javax.servlet.jsp.jstl.fmt;version="${dependency.jakarta.servlet.jsp.jstl-api.version}",
-							javax.servlet.jsp.jstl.sql;version="${dependency.jakarta.servlet.jsp.jstl-api.version}",
-							javax.servlet.jsp.jstl.tlv;version="${dependency.jakarta.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.core;version="${dependency.jakarta.servlet.jsp.jstl-api}",
+							javax.servlet.jsp.jstl.fmt;version="${dependency.jakarta.servlet.jsp.jstl-api}",
+							javax.servlet.jsp.jstl.sql;version="${dependency.jakarta.servlet.jsp.jstl-api}",
+							javax.servlet.jsp.jstl.tlv;version="${dependency.jakarta.servlet.jsp.jstl-api}",
 
 							<!-- EL API (only imported - from jakarta.el:jakarta.el-api) -->
 							javax.el;version="[3.0,4)",
@@ -83,17 +83,17 @@
 							org.apache.juli.logging,
 
 							<!-- packages required by Jasper/EL implementation and exported from pax-web-tomcat-common -->
-							org.apache.tomcat;version="${dependency.tomcat.version}",
-							org.apache.tomcat.util;version=${dependency.tomcat.version},
-							org.apache.tomcat.util.digester;version=${dependency.tomcat.version},
-							org.apache.tomcat.util.descriptor;version=${dependency.tomcat.version},
-							org.apache.tomcat.util.descriptor.tagplugin;version=${dependency.tomcat.version},
-							org.apache.tomcat.util.descriptor.tld;version=${dependency.tomcat.version},
-							org.apache.tomcat.util.descriptor.web;version=${dependency.tomcat.version},
-							org.apache.tomcat.util.file;version=${dependency.tomcat.version},
-							org.apache.tomcat.util.res;version=${dependency.tomcat.version},
-							org.apache.tomcat.util.scan;version=${dependency.tomcat.version},
-							org.apache.tomcat.util.security;version=${dependency.tomcat.version},
+							org.apache.tomcat;version="${dependency.org.apache.tomcat}",
+							org.apache.tomcat.util;version=${dependency.org.apache.tomcat},
+							org.apache.tomcat.util.digester;version=${dependency.org.apache.tomcat},
+							org.apache.tomcat.util.descriptor;version=${dependency.org.apache.tomcat},
+							org.apache.tomcat.util.descriptor.tagplugin;version=${dependency.org.apache.tomcat},
+							org.apache.tomcat.util.descriptor.tld;version=${dependency.org.apache.tomcat},
+							org.apache.tomcat.util.descriptor.web;version=${dependency.org.apache.tomcat},
+							org.apache.tomcat.util.file;version=${dependency.org.apache.tomcat},
+							org.apache.tomcat.util.res;version=${dependency.org.apache.tomcat},
+							org.apache.tomcat.util.scan;version=${dependency.org.apache.tomcat},
+							org.apache.tomcat.util.security;version=${dependency.org.apache.tomcat},
 
 							<!-- Eclipse ECJ compiler -->
 							org.eclipse.jdt.core.compiler,
@@ -134,10 +134,10 @@
 							javax.servlet.jsp.tagext;version="2.3",
 
 							<!-- re-export JSTL API from mvn:jakarta.servlet.jsp.jstl/jakarta.servlet.jsp.jstl-api -->
-							javax.servlet.jsp.jstl.core;version="${dependency.jakarta.servlet.jsp.jstl-api.version}",
-							javax.servlet.jsp.jstl.fmt;version="${dependency.jakarta.servlet.jsp.jstl-api.version}",
-							javax.servlet.jsp.jstl.sql;version="${dependency.jakarta.servlet.jsp.jstl-api.version}",
-							javax.servlet.jsp.jstl.tlv;version="${dependency.jakarta.servlet.jsp.jstl-api.version}",
+							javax.servlet.jsp.jstl.core;version="${dependency.jakarta.servlet.jsp.jstl-api}",
+							javax.servlet.jsp.jstl.fmt;version="${dependency.jakarta.servlet.jsp.jstl-api}",
+							javax.servlet.jsp.jstl.sql;version="${dependency.jakarta.servlet.jsp.jstl-api}",
+							javax.servlet.jsp.jstl.tlv;version="${dependency.jakarta.servlet.jsp.jstl-api}",
 
 							<!--
 								re-export EL Impl - from mvn:org.apache.tomcat/tomcat-jasper-el
@@ -154,23 +154,23 @@
 								   at version 3.0.0
 								version of implementation should be not the same as the version of specification
 							-->
-							org.apache.el;version="${dependency.tomcat.version}",
-							org.apache.el.lang;version="${dependency.tomcat.version}",
-							org.apache.el.parser;version="${dependency.tomcat.version}",
-							org.apache.el.stream;version="${dependency.tomcat.version}",
-							org.apache.el.util;version="${dependency.tomcat.version}",
+							org.apache.el;version="${dependency.org.apache.tomcat}",
+							org.apache.el.lang;version="${dependency.org.apache.tomcat}",
+							org.apache.el.parser;version="${dependency.org.apache.tomcat}",
+							org.apache.el.stream;version="${dependency.org.apache.tomcat}",
+							org.apache.el.util;version="${dependency.org.apache.tomcat}",
 
 							<!-- re-export JSP Impl - from mvn:org.apache.tomcat/tomcat-jasper -->
-							org.apache.jasper;version="${dependency.tomcat.version}";-split-package:=merge-first,
-							org.apache.jasper.compiler;version="${dependency.tomcat.version}",
-							org.apache.jasper.compiler.tagplugin;version="${dependency.tomcat.version}",
-							org.apache.jasper.el;version="${dependency.tomcat.version}",
-							org.apache.jasper.runtime;version="${dependency.tomcat.version}",
-							org.apache.jasper.security;version="${dependency.tomcat.version}",
-							org.apache.jasper.servlet;version="${dependency.tomcat.version}",
-							org.apache.jasper.tagplugins.jstl;version="${dependency.tomcat.version}",
-							org.apache.jasper.tagplugins.jstl.core;version="${dependency.tomcat.version}",
-							org.apache.jasper.util;version="${dependency.tomcat.version}",
+							org.apache.jasper;version="${dependency.org.apache.tomcat}";-split-package:=merge-first,
+							org.apache.jasper.compiler;version="${dependency.org.apache.tomcat}",
+							org.apache.jasper.compiler.tagplugin;version="${dependency.org.apache.tomcat}",
+							org.apache.jasper.el;version="${dependency.org.apache.tomcat}",
+							org.apache.jasper.runtime;version="${dependency.org.apache.tomcat}",
+							org.apache.jasper.security;version="${dependency.org.apache.tomcat}",
+							org.apache.jasper.servlet;version="${dependency.org.apache.tomcat}",
+							org.apache.jasper.tagplugins.jstl;version="${dependency.org.apache.tomcat}",
+							org.apache.jasper.tagplugins.jstl.core;version="${dependency.org.apache.tomcat}",
+							org.apache.jasper.util;version="${dependency.org.apache.tomcat}",
 
 							<!--
 								re-export JSTL Impl from mvn:org.apache.taglibs/taglibs-standard-impl

@@ -18,4 +18,4 @@
 # because we have test-scoped dependency to pax-url-aether
 # when running with org.ops4j.pax.exam.karaf.container.internal.KarafTestContainer, pax-url-aether
 # would need to be installed separately
-mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/${dependency.servicemix.bundles.javax-inject.version}
+mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/${dependency.org.apache.servicemix.bundles.javax-inject}

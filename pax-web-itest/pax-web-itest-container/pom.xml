@@ -71,11 +71,20 @@
 							see: org.ops4j.pax.exam.ConfigurationManager.ConfigurationManager()
 						-->
 						<pax.exam.configuration>file:../../etc/controlled-exam.properties</pax.exam.configuration>
-						<karaf.version>${dependency.karaf.version}</karaf.version>
-						<myfaces.version>${dependency.jsf.myfaces.version}</myfaces.version>
-						<commons-beanutils.version>${dependency.commons-beanutils.version}</commons-beanutils.version>
-						<commons-collections.version>${dependency.commons-collections3.version}</commons-collections.version>
-						<commons-digester.version>${dependency.commons-digester.version}</commons-digester.version>
+
+						<commons-beanutils.version>${dependency.commons-beanutils}</commons-beanutils.version>
+						<commons-collections.version>${dependency.commons-collections3}</commons-collections.version>
+						<commons-digester.version>${dependency.commons-digester}</commons-digester.version>
+						<commons-fileupload.version>${dependency.commons-fileupload}</commons-fileupload.version>
+						<commons-io.version>${dependency.commons-io}</commons-io.version>
+						<felix-webconsole.version>${dependency.org.apache.felix.webconsole}</felix-webconsole.version>
+						<jakarta-el-api.version>${dependency.jakarta.el-api}</jakarta-el-api.version>
+						<jakarta-enterprise-cdi-api.version>${dependency.jakarta.enterprise.cdi-api}</jakarta-enterprise-cdi-api.version>
+						<jakarta-interceptor-api.version>${dependency.jakarta.interceptor-api}</jakarta-interceptor-api.version>
+						<jakarta-websocket-api.version>${dependency.jakarta.websocket-api}</jakarta-websocket-api.version>
+						<karaf.version>${dependency.org.apache.karaf}</karaf.version>
+						<myfaces.version>${dependency.org.apache.myfaces}</myfaces.version>
+						<pax-web.version>${project.version}</pax-web.version>
 					</systemPropertyVariables>
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 					<runOrder>alphabetical</runOrder>

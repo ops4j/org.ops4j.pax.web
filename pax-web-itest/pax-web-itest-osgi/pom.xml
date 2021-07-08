@@ -65,8 +65,8 @@
 							org.ops4j.pax.exam.CoreOptions.mavenBundle(), but for which we don't want to add
 							maven dependencies (otherwise required if using MavenArtifactProvisionOption.versionAsInProject())
 						-->
-						<version.asm>${dependency.asm.version}</version.asm>
-						<version.xbean>${dependency.xbean.version}</version.xbean>
+						<version.asm>${dependency.org.ow2.asm}</version.asm>
+						<version.xbean>${dependency.org.apache.xbean}</version.xbean>
 					</systemPropertyVariables>
 					<redirectTestOutputToFile>false</redirectTestOutputToFile>
 					<runOrder>alphabetical</runOrder>

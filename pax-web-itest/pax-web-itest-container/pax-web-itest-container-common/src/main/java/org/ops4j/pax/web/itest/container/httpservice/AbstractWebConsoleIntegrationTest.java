@@ -30,9 +30,9 @@ public abstract class AbstractWebConsoleIntegrationTest extends AbstractContaine
 	@Before
 	public void setUp() throws Exception {
 		configureAndWaitForServletWithMapping("/system/console/res/*", () -> {
-			context.installBundle("mvn:commons-fileupload/commons-fileupload/1.4");
-			context.installBundle("mvn:commons-io/commons-io/2.8.0");
-			Bundle b = context.installBundle("mvn:org.apache.felix/org.apache.felix.webconsole/4.5.4");
+			context.installBundle(String.format("mvn:commons-fileupload/commons-fileupload/%s", System.getProperty("commons-fileupload.version")));
+			context.installBundle(String.format("mvn:commons-io/commons-io/%s", System.getProperty("commons-io.version")));
+			Bundle b = context.installBundle(String.format("mvn:org.apache.felix/org.apache.felix.webconsole/%s", System.getProperty("felix-webconsole.version")));
 			b.start();
 		});
 	}
