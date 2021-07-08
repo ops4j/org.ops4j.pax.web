@@ -15,7 +15,6 @@
  */
 package org.ops4j.pax.web.itest.tomcat.war;
 
-import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -25,7 +24,6 @@ import org.ops4j.pax.web.itest.container.war.AbstractWarVaadin08IntegrationTest;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 @RunWith(PaxExam.class)
-@Ignore("Tomcat enforces section 4.4 of the Servlet 3.0 specification. Atmosphere calls getServletRegistrations() from ServletContextListener...")
 public class WarVaadin08IntegrationTest extends AbstractWarVaadin08IntegrationTest {
 
 	@Configuration

@@ -1176,8 +1176,7 @@ class TomcatServerWrapper implements BatchVisitor {
 
 				// add the listener to real context - even ServletContextAttributeListener (but only once - even
 				// if there are many OsgiServletContexts per ServletContext)
-				if (eventListener instanceof HttpSessionListener
-						|| eventListener instanceof ServletContextListener) {
+				if (eventListener instanceof HttpSessionListener || eventListener instanceof ServletContextListener) {
 					standardContext.addApplicationLifecycleListener(eventListener);
 				} else {
 					standardContext.addApplicationEventListener(eventListener);

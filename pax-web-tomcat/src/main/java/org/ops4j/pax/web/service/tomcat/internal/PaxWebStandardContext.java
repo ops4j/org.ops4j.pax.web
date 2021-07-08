@@ -81,6 +81,7 @@ public class PaxWebStandardContext extends StandardContext {
 	private final List<Preprocessor> preprocessors = new LinkedList<>();
 
 	private final Collection<SCIWrapper> servletContainerInitializers = new LinkedList<>();
+	private final List<Object> applicationLifecycleListener = new LinkedList<>();
 
 	public PaxWebStandardContext(Default404Servlet defaultServlet) {
 		super();
@@ -208,6 +209,26 @@ public class PaxWebStandardContext extends StandardContext {
 		}
 
 		return false;
+	}
+
+	@Override
+	public void addApplicationLifecycleListener(Object listener) {
+		// override, so Tomcat doesn't know about "application lifecycle listeners", a.k.a. "no pluggability listeners"
+		// because we enforce Section 4.4 of the Servlet 3.0 specification
+		this.applicationLifecycleListener.add(listener);
+	}
+
+	@Override
+	public void setApplicationLifecycleListeners(Object[] listeners) {
+		Object[] newListeners = new Object[listeners.length + applicationLifecycleListener.size()];
+		System.arraycopy(listeners, 0, newListeners, 0, listeners.length);
+		int pos = listeners.length;
+		for (Object l : applicationLifecycleListener) {
+			newListeners[pos++] = l;
+		}
+
+		// Add all listeners as "pluggability listeners"
+		super.setApplicationLifecycleListeners(newListeners);
 	}
 
 	public void setDefaultOsgiContextModel(OsgiContextModel defaultOsgiContextModel) {
