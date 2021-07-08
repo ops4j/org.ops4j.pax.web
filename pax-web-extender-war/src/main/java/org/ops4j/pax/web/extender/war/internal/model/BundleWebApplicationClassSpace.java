@@ -1070,7 +1070,7 @@ public class BundleWebApplicationClassSpace {
 
 			if (!fragmentHtOnly) {
 				// do not check if the class should be scanned for annotations like @WebServlet, @WebFilter, ...
-				checkClass(fragment, bundle, clazz);
+				checkClass(fragment, bundle, htToSci, clazz, javaClassCache);
 			}
 		} catch (IOException e) {
 			LOG.warn("Can't read {}: {}", url, e.getMessage(), e);
@@ -1202,20 +1202,24 @@ public class BundleWebApplicationClassSpace {
 	 *
 	 * @param fragment
 	 * @param bundle
+	 * @param htToSci
 	 * @param clazz
+	 * @param javaClassCache
 	 */
-	private void checkClass(WebXml fragment, Bundle bundle, JavaClass clazz) {
+	private void checkClass(WebXml fragment, Bundle bundle, Map<Class<?>, Set<ServletContainerInitializer>> htToSci, JavaClass clazz, Map<String, ClassCacheEntry> javaClassCache) {
 		AnnotationEntry[] ae = clazz.getAnnotationEntries();
 		if (ae == null) {
 			return;
 		}
 
 		String webElementClassName = clazz.getClassName();
+		addSuperClassesAndInterfacesToTheCache(clazz, webElementClassName, bundle, htToSci, javaClassCache);
+
 		for (AnnotationEntry ann : ae) {
 			switch (className(ann.getAnnotationType())) {
 				case "javax.servlet.annotation.WebServlet":
 					LOG.trace("      Processing annotated servlet {}", webElementClassName);
-					processAnnotatedServletClass(webElementClassName, fragment, bundle, ann, clazz);
+					processAnnotatedServletClass(webElementClassName, fragment, bundle, ann, clazz, javaClassCache);
 					return;
 				case "javax.servlet.annotation.WebFilter":
 					LOG.trace("      Processing annotated filter {}", webElementClassName);
@@ -1230,9 +1234,21 @@ public class BundleWebApplicationClassSpace {
 		}
 	}
 
-	private void processAnnotatedServletClass(String className, WebXml fragment, Bundle bundle, AnnotationEntry ann, JavaClass clazz) {
+	private void processAnnotatedServletClass(String className, WebXml fragment, Bundle bundle, AnnotationEntry ann, JavaClass clazz, Map<String, ClassCacheEntry> javaClassCache) {
 		// no idea whether to process annotations on superclasses/interfaces...
-		if (!"javax.servlet.http.HttpServlet".equals(clazz.getSuperclassName())) {
+		boolean extendsHttpServlet = false;
+		String sc = clazz.getSuperclassName();
+		while (true) {
+			if ("java.lang.Object".equals(sc)) {
+				break;
+			}
+			if ("javax.servlet.http.HttpServlet".equals(sc)) {
+				extendsHttpServlet = true;
+				break;
+			}
+			sc = javaClassCache.get(sc).superClassName;
+		}
+		if (!extendsHttpServlet) {
 			LOG.warn("{} annotated with @WebServlet doesn't extend javax.servlet.http.HttpServlet."
 					+ " See chapter 8.1.1 of the Servlet specification.", className);
 			return;

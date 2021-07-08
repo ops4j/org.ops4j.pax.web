@@ -275,10 +275,17 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-servlet").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-security").versionAsInProject()
-//				mavenBundle().groupId("org.eclipse.jetty")
-//						.artifactId("jetty-continuation")
-//						.version(asInProject()),
+						.artifactId("jetty-security").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-continuation").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty.websocket")
+						.artifactId("websocket-api").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty.websocket")
+						.artifactId("websocket-common").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty.websocket")
+						.artifactId("websocket-server").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty.websocket")
+						.artifactId("websocket-servlet").versionAsInProject()
 		};
 	}
 
