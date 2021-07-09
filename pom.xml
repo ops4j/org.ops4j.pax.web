@@ -2824,6 +2824,7 @@
 								<exclude>**/*.req</exclude>
 								<exclude>**/*.cer</exclude>
 								<exclude>**/*.srl</exclude>
+								<exclude>**/VAADIN/themes/**/*</exclude>
 							</excludes>
 						</configuration>
 					</plugin>
