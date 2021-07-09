@@ -1207,13 +1207,12 @@ class UndertowServerWrapper implements BatchVisitor {
 					ServletInfo pwsi = e.getValue();
 					boolean override = false;
 					if (pwsi instanceof PaxWebServletInfo) {
-						if (((PaxWebServletInfo) pwsi).getServletModel() == null || !((PaxWebServletInfo) pwsi).getServletModel().isOverridable()) {
-							continue;
-						}
-						for (String mapping : pwsi.getMappings()) {
-							if (info.getMappings().contains(mapping)) {
-								override = true;
-								break;
+						if (((PaxWebServletInfo) pwsi).getServletModel() == null || ((PaxWebServletInfo) pwsi).getServletModel().isOverridable()) {
+							for (String mapping : pwsi.getMappings()) {
+								if (info.getMappings().contains(mapping)) {
+									override = true;
+									break;
+								}
 							}
 						}
 					}
@@ -1336,7 +1335,7 @@ class UndertowServerWrapper implements BatchVisitor {
 					// but we can reuse the deployment info - this is the only object from which we can remove
 					// servlets
 					deploymentInfo.getServlets().remove(model.getName());
-					if (model.isResourceServlet() && Arrays.asList(model.getUrlPatterns()).contains("/")) {
+					if (Arrays.asList(model.getUrlPatterns()).contains("/")) {
 						// we need to replace "/" servlet
 						PaxWebServletInfo defaultServletInfo = new PaxWebServletInfo("default", default404Servlet, true);
 						deploymentInfo.addServlet(defaultServletInfo.addMapping("/"));

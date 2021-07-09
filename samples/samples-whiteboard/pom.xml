@@ -37,6 +37,7 @@
 	<modules>
 		<module>whiteboard</module>
 		<module>whiteboard-ds</module>
+		<module>whiteboard-ds-1603</module>
 	</modules>
 
 </project>
