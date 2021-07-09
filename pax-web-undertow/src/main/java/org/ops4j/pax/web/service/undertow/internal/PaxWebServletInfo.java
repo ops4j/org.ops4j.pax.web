@@ -32,6 +32,9 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.undertow.internal.web.UndertowResourceServlet;
 import org.osgi.framework.Bundle;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Special {@link ServletInfo} that can be configured from {@link ServletModel}.
  */
@@ -61,6 +64,12 @@ public class PaxWebServletInfo extends ServletInfo {
 	 * security methods and we have to tweak filter config to return proper {@link ServletContext}.
 	 */
 	private boolean is404 = false;
+
+	/**
+	 * We have to manage the mapping ourselves to implement override'able servlets... We can't
+	 * remove servlets from existing DeploymentImpl object, so we have to ... clear the mapping.
+	 */
+	private final List<String> mappings = new ArrayList<>();
 
 	/**
 	 * Constructor to use when wrapping internal {@link Servlet servlets} which won't use OSGi machinery.
@@ -132,6 +141,23 @@ public class PaxWebServletInfo extends ServletInfo {
 	}
 
 	@Override
+	public List<String> getMappings() {
+		// override to get modifiable list
+		return mappings;
+	}
+
+	public ServletInfo addMapping(final String mapping) {
+		// just a copy of super.addMapping()
+		if (!mapping.startsWith("/") && !mapping.startsWith("*") && !mapping.isEmpty()) {
+			//if the user adds a mapping like 'index.html' we transparently translate it to '/index.html'
+			mappings.add("/" + mapping);
+		} else {
+			mappings.add(mapping);
+		}
+		return this;
+	}
+
+	@Override
 	@SuppressWarnings("MethodDoesntCallSuperMethod")
 	public ServletInfo clone() {
 		final ServletInfo info;
@@ -158,6 +184,15 @@ public class PaxWebServletInfo extends ServletInfo {
 		}
 		getInitParams().forEach(info::addInitParam);
 		return info;
+	}
+
+	@Override
+	public String toString() {
+		return "PaxWebServletInfo{" +
+				"mappings=" + mappings +
+				", servletClass=" + servletClass +
+				", name='" + getName() + '\'' +
+				'}';
 	}
 
 	/**

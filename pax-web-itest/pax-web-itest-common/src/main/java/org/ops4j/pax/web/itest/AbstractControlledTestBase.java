@@ -277,7 +277,14 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-security").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-continuation").versionAsInProject(),
+						.artifactId("jetty-continuation").versionAsInProject()
+		};
+	}
+
+	protected Option[] jettyWebSockets() {
+		return new Option[] {
+				mavenBundle("jakarta.websocket", "jakarta.websocket-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle().groupId("org.eclipse.jetty.websocket")
 						.artifactId("websocket-api").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.websocket")
@@ -304,6 +311,13 @@ public abstract class AbstractControlledTestBase {
 		};
 	}
 
+	protected Option[] tomcatWebSockets() {
+		return new Option[] {
+				mavenBundle("jakarta.websocket", "jakarta.websocket-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
+		};
+	}
+
 	/**
 	 * Installation of all the bundles required by {@code pax-web-undertow}
 	 * @return
@@ -319,6 +333,13 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle("io.undertow", "undertow-servlet")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.ops4j.pax.web", "pax-web-undertow")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
+		};
+	}
+
+	protected Option[] undertowWebSockets() {
+		return new Option[] {
+				mavenBundle("jakarta.websocket", "jakarta.websocket-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
 		};
 	}

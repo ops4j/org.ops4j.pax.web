@@ -50,6 +50,7 @@
 		<module>war-required</module>
 		<module>simple-filter</module>
 		<module>war-vaadin08</module>
+		<module>war-vaadin08-spring</module>
 	</modules>
 
 </project>

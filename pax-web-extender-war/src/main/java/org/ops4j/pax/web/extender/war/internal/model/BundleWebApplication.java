@@ -1440,6 +1440,7 @@ public class BundleWebApplication {
 			if (PaxWebConstants.DEFAULT_JSP_SERVLET_NAME.equals(sn)) {
 				builder.jspServlet(true);
 			}
+			builder.setOverridable(def.isOverridable());
 			wabBatch.addServletModel(builder.build());
 		});
 

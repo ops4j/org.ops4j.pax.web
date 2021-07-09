@@ -1016,6 +1016,7 @@ class JettyServerWrapper implements BatchVisitor {
 				ServletMapping mapping = new ServletMapping();
 				mapping.setServletName(model.getName());
 				mapping.setPathSpecs(model.getUrlPatterns());
+				mapping.setDefault(model.isOverridable());
 
 				boolean isDefaultResourceServlet = model.isResourceServlet();
 				for (String pattern : model.getUrlPatterns()) {

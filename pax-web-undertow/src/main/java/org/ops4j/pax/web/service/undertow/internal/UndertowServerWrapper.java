@@ -1200,6 +1200,36 @@ class UndertowServerWrapper implements BatchVisitor {
 					info.addInitParam("resolve-against-context-root", Boolean.toString(isDefaultResourceServlet));
 				}
 
+				// Jetty and Tomcat have notion of "default"/"overrideable" servlets
+				// but we have to do it ourselves in Undertow...
+				for (Iterator<Map.Entry<String, ServletInfo>> it = deploymentInfo.getServlets().entrySet().iterator(); it.hasNext(); ) {
+					Map.Entry<String, ServletInfo> e = it.next();
+					ServletInfo pwsi = e.getValue();
+					boolean override = false;
+					if (pwsi instanceof PaxWebServletInfo) {
+						if (((PaxWebServletInfo) pwsi).getServletModel() == null || !((PaxWebServletInfo) pwsi).getServletModel().isOverridable()) {
+							continue;
+						}
+						for (String mapping : pwsi.getMappings()) {
+							if (info.getMappings().contains(mapping)) {
+								override = true;
+								break;
+							}
+						}
+					}
+					if (override) {
+						it.remove();
+						if (deployment != null) {
+							// unfortunately we can't remove existing servlet, so we have to clear
+							// its mapping
+							ManagedServlet ms = deployment.getServlets().getManagedServlet(e.getKey());
+							if (ms.getServletInfo() instanceof PaxWebServletInfo) {
+								// it's unmodifiable map in ServletInfo, but we override it...
+								ms.getServletInfo().getMappings().clear();
+							}
+						}
+					}
+				}
 				// when only adding new servlet, we can simply alter existing deployment
 				// because this is possible (as required by methods like javax.servlet.ServletContext.addServlet())
 				// we can't go the easy way when _removing_ servlets
@@ -1560,7 +1590,13 @@ class UndertowServerWrapper implements BatchVisitor {
 						// for test scenario
 						cl = eventListener.getClass().getClassLoader();
 					}
-					wrapper = (EventListener) Proxy.newProxyInstance(cl, eventListener.getClass().getInterfaces(), handler);
+					Set<Class<?>> interfaces = new LinkedHashSet<>();
+					Class<?> c = eventListener.getClass();
+					while (c != Object.class) {
+						interfaces.addAll(Arrays.asList(c.getInterfaces()));
+						c = c.getSuperclass();
+					}
+					wrapper = (EventListener) Proxy.newProxyInstance(cl, interfaces.toArray(new Class[0]), handler);
 					// it may be a case that this listener is dynamic
 					OsgiContextModel highestRanked = securityHandlers.get(contextPath).getDefaultOsgiContextModel();
 					if (highestRanked != null) {

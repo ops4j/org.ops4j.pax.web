@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2021 OPS4J.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.ops4j.pax.web.samples</groupId>
+		<artifactId>samples-war</artifactId>
+		<version>8.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<groupId>org.ops4j.pax.web.samples</groupId>
+	<artifactId>war-vaadin08-spring</artifactId>
+	<packaging>war</packaging>
+
+	<name>OPS4J Pax Web WAR Samples - Vaadin 8 and Spring (old)</name>
+
+	<description><![CDATA[
+		https://vaadin.com/docs/v8/framework/advanced/advanced-spring
+		https://github.com/vaadin/framework-spring-tutorial
+		https://vaadin.github.io/framework-spring-tutorial
+		Project created using https://start.spring.io/#!type=maven-project&language=java&platformVersion=2.5.2.RELEASE&packaging=war&jvmVersion=1.8&groupId=com.example&artifactId=demo&name=demo&description=Demo%20project%20for%20Spring%20Boot&packageName=com.example.demo&dependencies=vaadin
+		but changed from Vaadin 14 to Vaadin 8.
+	]]></description>
+
+	<properties>
+		<dependency.com.vaadin>8.13.2</dependency.com.vaadin>
+		<dependency.org.springframework>4.3.25.RELEASE</dependency.org.springframework>
+		<dependency.org.springframework.boot>1.5.22.RELEASE</dependency.org.springframework.boot>
+	</properties>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>com.vaadin</groupId>
+					<artifactId>vaadin-maven-plugin</artifactId>
+					<version>${dependency.com.vaadin}</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<supportedProjectTypes>
+						<supportedProjectType>jar</supportedProjectType>
+						<supportedProjectType>war</supportedProjectType>
+						<supportedProjectType>bundle</supportedProjectType>
+					</supportedProjectTypes>
+					<instructions>
+						<Import-Package>
+							javax.servlet.jsp.jstl.*;version="1.2",
+							javax.servlet.jsp.*;version="2.3",
+							javax.servlet.*;version="[3.1,5)",
+
+							javax.websocket,
+							javax.websocket.server,
+
+							javax.management,
+							javax.management.modelmbean,
+							javax.naming,
+							javax.xml.parsers,
+							javax.xml.stream,
+							javax.xml.transform,
+							javax.xml.transform.dom,
+							javax.xml.transform.sax,
+							javax.xml.transform.stax,
+							javax.xml.transform.stream,
+							org.w3c.dom,
+							org.xml.sax,
+
+							org.apache.commons.logging,
+							org.slf4j,
+							org.jboss.logging
+						</Import-Package>
+						<Export-Package />
+						<Private-Package>
+							org.ops4j.pax.web.samples.vaadin08.*
+						</Private-Package>
+						<_wab>${project.build.directory}/${project.build.finalName}</_wab>
+						<Web-ContextPath>/war-vaadin08-spring</Web-ContextPath>
+						<Embed-Dependency>*;scope=compile</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
+						<Embed-Directory>WEB-INF/lib</Embed-Directory>
+						<!--
+							bndlib detects:
+							 - com.vaadin.osgi.resources.impl.VaadinResourceServiceImpl
+							   which registers com.vaadin.osgi.resources.impl.VaadinServletContextFactory ServletContextHelper (factory)
+							 - com.vaadin.osgi.resources.impl.VaadinResourceTrackerComponent
+							 - com.vaadin.osgi.themes.ValoThemeContribution
+							 - com.vaadin.osgi.widgetset.DefaultWidgetsetContribution
+							 - com.vaadin.server.osgi.BootstrapContribution
+							so I'm disabling the SCR component detection. There's another sample for that
+						-->
+						<_dsannotations />
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.vaadin</groupId>
+				<artifactId>vaadin-maven-plugin</artifactId>
+				<executions>
+					<!-- adjusted after https://github.com/enver-haase/Playground/tree/master/connect4 -->
+					<execution>
+						<goals>
+							<goal>clean</goal>
+							<goal>resources</goal>
+							<goal>update-theme</goal>
+							<goal>update-widgetset</goal>
+							<goal>compile-theme</goal>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.vaadin</groupId>
+				<artifactId>vaadin-bom</artifactId>
+				<version>${dependency.com.vaadin}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-framework-bom</artifactId>
+				<version>${dependency.org.springframework}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${dependency.org.springframework.boot}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+
+		<!-- JavaEE -->
+
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Vaadin -->
+
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>vaadin-spring-boot-starter</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.jboss.logging</groupId>
+					<artifactId>jboss-logging</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>jcl-over-slf4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>jul-to-slf4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>log4j-over-slf4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-classic</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-tomcat</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+	</dependencies>
+
+</project>

@@ -712,6 +712,10 @@ public class OsgiServletContext implements ServletContext {
 
 	@Override
 	public RequestDispatcher getNamedDispatcher(String name) {
+		if (osgiContextModel.isWab()) {
+			return containerServletContext.getNamedDispatcher(name);
+		}
+
 		ServletModel servletModel = servletContextModel.getServletNameMapping().get(name);
 		if (servletModel == null) {
 			return null;

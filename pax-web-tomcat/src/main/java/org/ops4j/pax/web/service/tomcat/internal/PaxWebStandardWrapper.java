@@ -129,6 +129,8 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 		// instead of doing it once per request, we can get servlet-scoped WebContainerContext now
 		webContainerContext = osgiContextModel.resolveHttpContext(servletModel.getRegisteringBundle());
 
+		setOverridable(servletModel.isOverridable());
+
 		// setup proper pipeline - that will invoke the servlet with proper filter chain and with proper req/res
 		// wrappers
 		// "basic" valve is org.apache.catalina.core.StandardWrapperValve

@@ -146,6 +146,12 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	private boolean dynamic = false;
 
 	/**
+	 * Flag indicating that a servlet may be overriden. It's set to {@code true} for example for
+	 * {@code default} servlet from <em>default</em> {@code web.xml}.
+	 */
+	private boolean overridable = false;
+
+	/**
 	 * Constructor used for servlet unregistration
 	 * @param alias
 	 * @param servletName
@@ -540,6 +546,14 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		this.jspFile = jspFile;
 	}
 
+	private void setOverridable(boolean overridable) {
+		this.overridable = overridable;
+	}
+
+	public boolean isOverridable() {
+		return overridable;
+	}
+
 	public String getBasePath() {
 		return basePath;
 	}
@@ -678,6 +692,8 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		private String jspFile;
 		// only for resource servlet
 		private String resourcePath;
+		// it means the definition may be overriden later (e.g., in SCI through ServletContext.addServlet())
+		private boolean overridable;
 
 		public Builder() {
 		}
@@ -794,6 +810,11 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			return this;
 		}
 
+		public Builder setOverridable(boolean overridable) {
+			this.overridable = overridable;
+			return this;
+		}
+
 		public ServletModel build() {
 			ServletModel model = new ServletModel(alias, urlPatterns, servletName, initParams,
 					loadOnStartup, asyncSupported, multipartConfigElement, servlet, servletClass, reference,
@@ -805,6 +826,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			model.setErrorDeclarations(errorDeclarations);
 			model.setJspServlet(jspServlet);
 			model.setJspFile(jspFile);
+			model.setOverridable(overridable);
 			return model;
 		}
 	}

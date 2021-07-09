@@ -220,9 +220,12 @@ public class PaxWebStandardContext extends StandardContext {
 
 	@Override
 	public void setApplicationLifecycleListeners(Object[] listeners) {
-		Object[] newListeners = new Object[listeners.length + applicationLifecycleListener.size()];
-		System.arraycopy(listeners, 0, newListeners, 0, listeners.length);
-		int pos = listeners.length;
+		Object[] newListeners = new Object[listeners == null ? applicationLifecycleListener.size()
+				: listeners.length + applicationLifecycleListener.size()];
+		if (listeners != null) {
+			System.arraycopy(listeners, 0, newListeners, 0, listeners.length);
+		}
+		int pos = listeners == null ? 0 : listeners.length;
 		for (Object l : applicationLifecycleListener) {
 			newListeners[pos++] = l;
 		}
