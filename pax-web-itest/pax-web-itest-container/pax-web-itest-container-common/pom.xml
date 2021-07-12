@@ -102,7 +102,8 @@
 								of the bundles that export these packages
 							-->
 							org.ops4j.pax.web.extender.whiteboard.runtime,
-							org.ops4j.pax.web.extender.samples.whiteboard.internal
+							org.ops4j.pax.web.extender.samples.whiteboard.internal,
+							org.ops4j.pax.web.samples.whiteboard.ds
 						</DynamicImport-Package>
 						<Export-Package>
 							org.ops4j.pax.web.itest,
@@ -336,6 +337,14 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>whiteboard-ds</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>whiteboard-ds-1603</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>whiteboard-ds-dynamic</artifactId>
 		</dependency>
 
 		<!-- OPS4J dependencies -->

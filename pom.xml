@@ -1044,6 +1044,16 @@
 				<artifactId>whiteboard-ds</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>whiteboard-ds-1603</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>whiteboard-ds-dynamic</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 <!--			<dependency>-->
 <!--				<groupId>org.ops4j.pax.web.samples</groupId>-->
