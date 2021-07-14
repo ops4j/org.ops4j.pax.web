@@ -228,30 +228,22 @@ public interface SecurityConfiguration {
 	 */
 	Integer getMaxCertPathLength();
 
-
-
-
-
-
+	/**
+	 * Returns max nonce age for DIGEST authentication (in ms), defaults to 60s (60000ms)
+	 * @return
+	 */
+	Long getDigestAuthMaxNonceAge();
 
 	/**
-	 * The default implementation will be removed on next major release - 8.0.0
-	 * No default auth method with be used if implementation is not provided.
-	 *
-	 * @return the default auth method, null if not implemented
+	 * Returns max nonce count for DIGEST authentication, defaults to 1024
+	 * @return
 	 */
-	default String getDefaultAuthMethod() {
-		return null;
-	}
+	Integer getDigestAuthMaxNonceCount();
 
 	/**
-	 * The default implementation will be removed on next major release - 8.0.0
-	 * No default realm name with be used if implementation is not provided.
-	 *
-	 * @return the default realm name, null if not implemented
+	 * Returns whether to redirect (by default) or forward to error page during FORM authentication
+	 * @return
 	 */
-	default String getDefaultRealmName() {
-		return null;
-	}
+	Boolean getFormAuthRedirect();
 
 }

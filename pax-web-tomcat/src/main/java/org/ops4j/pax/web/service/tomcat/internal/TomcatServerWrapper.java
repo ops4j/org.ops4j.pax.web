@@ -17,8 +17,10 @@ package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,11 +50,13 @@ import org.apache.catalina.Context;
 import org.apache.catalina.Engine;
 import org.apache.catalina.Executor;
 import org.apache.catalina.Host;
+import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.LifecycleState;
 import org.apache.catalina.Service;
 import org.apache.catalina.Valve;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.AccessLogAdapter;
+import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.core.StandardEngine;
 import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.core.StandardServer;
@@ -60,7 +64,6 @@ import org.apache.catalina.core.StandardService;
 import org.apache.catalina.loader.ParallelWebappClassLoader;
 import org.apache.catalina.loader.WebappLoader;
 import org.apache.catalina.session.StandardManager;
-import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.valves.AccessLogValve;
 import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
 import org.apache.tomcat.util.descriptor.web.ErrorPage;
@@ -68,6 +71,7 @@ import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.descriptor.web.WebXml;
 import org.apache.tomcat.util.descriptor.web.WebXmlParser;
+import org.apache.tomcat.util.digester.Digester;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
 import org.ops4j.pax.web.service.spi.config.SessionConfiguration;
@@ -79,7 +83,6 @@ import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
-import org.ops4j.pax.web.service.spi.model.elements.SessionConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 import org.ops4j.pax.web.service.spi.servlet.DynamicRegistrations;
@@ -109,6 +112,7 @@ import org.ops4j.pax.web.service.tomcat.internal.web.TomcatResourceServlet;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 /**
  * <p>A <em>wrapper</em> or <em>holder</em> of actual Tomcat server. This class perform two kinds of tasks:<ul>
@@ -176,6 +180,13 @@ class TomcatServerWrapper implements BatchVisitor {
 	private final Map<OsgiContextModel, OsgiServletContext> osgiServletContexts = new HashMap<>();
 
 	/**
+	 * When {@link PaxWebStandardContext} is started, it has to be configured according to current, highest-ranked
+	 * {@link OsgiContextModel} using specific session and security configuration. These listeners are added
+	 * when {@link OsgiContextModel} is visited.
+	 */
+	private final Map<OsgiContextModel, LifecycleListener> configurationListeners = new HashMap<>();
+
+	/**
 	 * 1:N mapping between context path and sorted (by ranking rules) set of {@link OsgiContextModel}. This helps
 	 * finding proper {@link org.osgi.service.http.context.ServletContextHelper} (1:1 with {@link OsgiContextModel})
 	 * to use for filters, when the invocation chain doesn't contain target servlet (which otherwise would
@@ -226,9 +237,10 @@ class TomcatServerWrapper implements BatchVisitor {
 		try {
 			// TCCL is needed so StringManagers in Tomcat code work
 			Thread.currentThread().setContextClassLoader(TomcatServerWrapper.class.getClassLoader());
-			createServer();
 
-			// No external configuration should replace our "Server" object
+			// unlike as in Jetty, we can't configure the "template" server to be altered using external XML
+			// configuration (at least not without overwriting digester rules like ObjectCreateRule), so we'll first
+			// check if there's an XML configuration available and fallback to fully-programmatic server otherwise
 			applyTomcatConfiguration();
 
 			// If external configuration added some connectors, we have to ensure they match declaration from
@@ -253,7 +265,7 @@ class TomcatServerWrapper implements BatchVisitor {
 	 *
 	 * @return
 	 */
-	private void createServer() throws Exception {
+	private void createServer() {
 		serverExecutor = tomcatFactory.createThreadPool(configuration);
 
 		// actual org.apache.catalina.core.StandardServer
@@ -292,105 +304,156 @@ class TomcatServerWrapper implements BatchVisitor {
 
 	/**
 	 * It was very easy and clean in Jetty, Tomcat also has a method, where the embedded Tomcat server can be
-	 * configured using external XML files conforming to Tomcat digester configuration.
+	 * configured using external XML files conforming to Tomcat digester configuration but less flexible than Jetty.
 	 */
 	private void applyTomcatConfiguration() {
 		File[] locations = configuration.server().getConfigurationFiles();
+		URL tomcatResource = getClass().getResource("/tomcat-server.xml");
 		if (locations.length == 0) {
-			LOG.info("No external Tomcat configuration file specified. Default/PID configuration will be used.");
-			return;
+			if (tomcatResource == null) {
+				LOG.info("No external Tomcat configuration files specified. Default/PID configuration will be used.");
+			} else {
+				LOG.info("Found \"tomcat-server.xml\" resource on the classpath: {}.", tomcatResource);
+			}
 		} else if (locations.length > 1) {
-			LOG.warn("Can't specify Tomcat configuration using more than one XML file. Skipping XML configuration.");
-			return;
+			LOG.warn("Can't specify Tomcat configuration using more than one XML file. Only {} will be used.", locations[0]);
 		} else {
-			LOG.info("Processing Tomcat configuration using file: {}", locations[0]);
+			if (tomcatResource != null) {
+				LOG.info("Found additional \"tomcat-server.xml\" resource on the classpath: {}, but {} will be used instead.",
+						tomcatResource, locations[0]);
+			}
+			LOG.info("Processing Tomcat configuration from file: {}", locations[0]);
 		}
 
-		File xmlConfig = locations[0];
-
-		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		URL config = null;
 		try {
-//			// PAXWEB-1112 - classloader leak prevention:
-//			// first find XmlConfiguration class' CL to set it as TCCL when performing static
-//			// initialization of XmlConfiguration in order to not leak
-//			// org.eclipse.jetty.xml.XmlConfiguration.__factoryLoader.loader
-//			ClassLoader jettyXmlCl = null;
-//			if (paxWebJettyBundle != null) {
-//				for (Bundle b : paxWebJettyBundle.getBundleContext().getBundles()) {
-//					if ("org.eclipse.jetty.xml".equals(b.getSymbolicName())) {
-//						jettyXmlCl = b.adapt(BundleWiring.class).getClassLoader();
-//						break;
-//					}
-//				}
-//			}
-//
-//			// TCCL to perform static initialization of XmlConfiguration with proper TCCL
-//			Thread.currentThread().setContextClassLoader(jettyXmlCl);
-//			XmlConfiguration configuration
-//					= new XmlConfiguration(Resource.newResource(getClass().getResource("/jetty-empty.xml")));
-//
-//			// When parsing, TCCL will be set to CL of pax-web-jetty bundle
-//			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-//
-//			XmlConfiguration previous = null;
-//			Map<String, Object> objects = new LinkedHashMap<>();
-//
-//			// the only existing objects. Names as found in JETTY_HOME/etc/jetty*.xml files
-//			objects.put("Server", server);
-//			objects.put("threadPool", server.getThreadPool());
-//
-//			for (File location : locations) {
-//				LOG.debug("Parsing {}", location);
-//				configuration = new XmlConfiguration(Resource.newResource(location));
-//
-//				// add objects created in previous file, so they're available when parsing next one
-//				configuration.getIdMap().putAll(previous == null ? objects : previous.getIdMap());
-//				// configuration will be available for Jetty when using <Property />
-//				configuration.getProperties().putAll(this.configuration.all());
-//
-//				configuration.configure();
-//
-//				// collect all created objects
-//				objects.putAll(configuration.getIdMap());
-//
-//				// collect all created HttpConfigurations
-//				configuration.getIdMap().forEach((id, v) -> {
-//					if (HttpConfiguration.class.isAssignableFrom(v.getClass())) {
-//						httpConfigs.put(id, (HttpConfiguration) v);
-//					}
-//				});
-//
-//				previous = configuration;
-//			}
-//
-//			if (locations.length > 0) {
-//				// the "Server" object should not be redefined
-//				objects.values().forEach(bean -> {
-//					if (Server.class.isAssignableFrom(bean.getClass())) {
-//						if (bean != server) {
-//							String msg = "Can't create instance of Jetty server in external configuration files.";
-//							throw new IllegalArgumentException(msg);
-//						}
-//					}
-//				});
-//
-//				// summary about found connectors
-//				Connector[] connectors = server.getConnectors();
-//				if (connectors != null && connectors.length > 0) {
-//					for (Connector connector : connectors) {
-//						String host = ((ServerConnector) connector).getHost();
-//						if (host == null) {
-//							host = "0.0.0.0";
-//						}
-//						int port = ((ServerConnector) connector).getPort();
-//						LOG.info("Found configured connector \"{}\": {}:{}", connector.getName(), host, port);
-//					}
-//				} else {
-//					LOG.debug("No connectors configured in external Jetty configuration files.");
-//				}
-//			}
-		} finally {
-			Thread.currentThread().setContextClassLoader(loader);
+			config = locations.length == 0 ? tomcatResource : locations[0].toURI().toURL();
+		} catch (MalformedURLException e) {
+			LOG.warn(e.getMessage(), e);
+		}
+
+		TomcatFactory.ServerHolder holder = new TomcatFactory.ServerHolder();
+		if (config != null) {
+			Digester digester = tomcatFactory.createServerDigester();
+			digester.push(holder);
+
+			LOG.debug("Parsing {}", config);
+
+			try (InputStream is = config.openStream()) {
+				digester.parse(is);
+			} catch (IOException | SAXException e) {
+				LOG.warn("Problem parsing {}: {}", config, e.getMessage(), e);
+			}
+		}
+
+		if (holder.getServer() == null) {
+			// we have to create the server using non-XML configuration only
+			createServer();
+		} else {
+			// we have to review the Server created by parsing the XML - as it doesn't have to be "complete"
+			// Here's full hierarchy of objects/elements of Tomcat-compliant XML (compacting some irrelevant elements):
+			// <Server> (one global server)
+			//    <GlobalNamingResources>
+			//        ...
+			//    <Listener>
+			//    <Service> (multiple per server)
+			//        <Listener>
+			//        <Executor> (multiple per service)
+			//        <Connector> (multiple per service, reference executor by id)
+			//            <SSLHostConfig>
+			//                ...
+			//            <Listener>
+			//            <UpgradeProtocol>
+			//        <Engine> (one per service)
+			//            <Cluster>
+			//            <Listener>
+			//            <Realm>
+			//                ...
+			//            <Valve>
+			//            <Host>
+			//                <Alias>
+			//                <Cluster>
+			//                <Listener>
+			//                <Realm>
+			//                <Valve>
+			//                <Context>
+			//                    ...
+			//
+			// To understand a model a bit (https://tomcat.apache.org/tomcat-9.0-doc/config/index.html):
+			//  - there's one global <Server>
+			//  - <Service> represents a group of <Connector>s that is associated with an <Engine>
+			//  - <Connector> is one of the interfaces _receiving_ incoming requests for particular <Service>
+			//  - a Container is a component that actually _processes_ an incoming request for a <Service>
+			//  - there are 4 different "containers":
+			//     - <Engine> handles *all* requests for a <Service> through its <Connector>s
+			//     - <Host> handles requests within an <Engine> for particular virtual host
+			//     - <Context> handles reuqests within a <Host> for particular web application
+			//     - Wrapper (no XML element for it) handles requests within a <Context> for particular servlet
+			//
+			// The above model, in the context of Pax Web and OSGi means that we need only one <Service>. Period.
+			// We'll still handle more connectors and virtual hosts, but in a way that's consistent between
+			// Jetty, Tomcat and Undertow.
+
+			// <Server>
+			server = (StandardServer) holder.getServer();
+
+			// <Server>/<Service>
+			if (server.findServices().length == 0) {
+				LOG.info("No Service configured in Tomcat XML configuration. Creating default \"Catalina\" Service.");
+				service = new StandardService();
+				server.addService(service);
+			} else {
+				service = (StandardService) this.server.findServices()[0];
+				if (server.findServices().length > 1) {
+					LOG.warn("More than one Service configured in Tomcat XML configuration." +
+							" Using \"{}\" and removing the other ones.", service.getName());
+					Service[] findServices = server.findServices();
+					for (int i = 1; i < findServices.length; i++) {
+						server.removeService(findServices[i]);
+					}
+				}
+			}
+			service.setName(TOMCAT_CATALINA_NAME);
+
+			// <Server>/<Service>/<Executor>
+			if (service.findExecutors().length == 0) {
+				LOG.info("No Executor configured in Tomcat XML configuration. Creating default Executor from configuration.");
+				serverExecutor = tomcatFactory.createThreadPool(configuration);
+				service.addExecutor(serverExecutor);
+			} else {
+				serverExecutor = service.findExecutors()[0];
+				if (service.findExecutors().length > 1) {
+					// don't remove other executors, as they may be referenced from custom connectors.
+					// programmatically created connectors however will reference the first executor.
+					LOG.warn("More than one Executor configured in Tomcat XML configuration." +
+							" Using \"{}\" as the default and keeping the other ones.", serverExecutor.getName());
+				}
+			}
+
+			// <Server>/<Service>/<Engine>
+			engine = (StandardEngine) this.service.getContainer();
+			if (engine == null) {
+				LOG.info("No Engine configured in Tomcat XML configuration. Creating default \"Catalina\" Engine.");
+				engine = new StandardEngine();
+				service.setContainer(engine);
+			}
+			engine.setName(TOMCAT_CATALINA_NAME);
+			// this default host will *never* change
+			engine.setDefaultHost("localhost");
+
+			// <Server>/<Service>/<Engine>/<Host>
+			if (engine.findChildren().length == 0 || engine.findChild("localhost") == null) {
+				LOG.info("No \"localhost\" Host configured in Tomcat XML configuration. Creating one.");
+				Host host = new StandardHost();
+				host.setName("localhost");
+				host.setAppBase(".");
+				engine.addChild(host);
+			}
+			for (Container child : engine.findChildren()) {
+				((ContainerBase) child).setStartChildren(false);
+			}
+
+			defaultHost = (Host) engine.findChild("localhost");
 		}
 	}
 
@@ -498,7 +561,7 @@ class TomcatServerWrapper implements BatchVisitor {
 	}
 
 	/**
-	 * Configure request logging (AKA <em>NCSA logging</em>) for Jetty, using configuration properties.
+	 * Configure request logging (AKA <em>NCSA logging</em>) for Tomcat, using configuration properties.
 	 */
 	public void configureRequestLog() {
 		LogConfiguration lc = configuration.logging();
@@ -652,8 +715,6 @@ class TomcatServerWrapper implements BatchVisitor {
 			// same as Jetty's org.eclipse.jetty.server.handler.ContextHandler.setAllowNullPathInfo(false)
 			// to enable redirect from /context-path to /context-path/
 			context.setMapperContextRootRedirectEnabled(true);
-
-			context.addLifecycleListener(new Tomcat.FixContextListener());
 
 			// mime mappings from Tomcat's web.xml
 			// TODO: I think we should parse it only in pax-web-extender-war and have a default mapping here only
@@ -829,6 +890,8 @@ class TomcatServerWrapper implements BatchVisitor {
 					defaultSessionCookieConfig, classLoader);
 			osgiServletContexts.put(osgiModel, osgiContext);
 			osgiContextModels.get(contextPath).add(osgiModel);
+
+			configurationListeners.put(osgiModel, new OsgiContextConfiguration(osgiModel, configuration));
 		}
 
 		if (change.getKind() == OpCode.DELETE) {
@@ -839,6 +902,8 @@ class TomcatServerWrapper implements BatchVisitor {
 			osgiContextModels.get(contextPath).remove(osgiModel);
 
 			removedOsgiServletContext.unregister();
+
+			configurationListeners.remove(osgiModel);
 		}
 
 		// there may be a change in what's the "best" (highest ranked) OsgiContextModel for given
@@ -1436,42 +1501,25 @@ class TomcatServerWrapper implements BatchVisitor {
 				context.setServletContainerInitializers(initializers);
 			}
 
-			context.addLifecycleListener(event -> {
-				if (event.getLifecycle().getState() == LifecycleState.STARTING_PREP) {
-					// alter session configuration
-					SessionConfigurationModel sc = highestRanked.getSessionConfiguration();
-					if (sc != null) {
-						if (sc.getSessionTimeout() != null) {
-							context.setSessionTimeout(sc.getSessionTimeout());
-						}
-						SessionCookieConfig scc = sc.getSessionCookieConfig();
-						SessionCookieConfig config = context.getServletContext().getSessionCookieConfig();
-						if (scc != null && config != null) {
-							if (scc.getName() != null) {
-								context.setSessionCookieName(scc.getName());
-								config.setName(scc.getName());
-							}
-							if (scc.getDomain() != null) {
-								context.setSessionCookieDomain(scc.getDomain());
-								config.setDomain(scc.getDomain());
-							}
-							if (scc.getPath() != null) {
-								context.setSessionCookiePath(scc.getPath());
-								config.setPath(scc.getPath());
-							}
-							context.setUseHttpOnly(scc.isHttpOnly());
-							config.setHttpOnly(scc.isHttpOnly());
-							config.setSecure(scc.isSecure());
-							config.setMaxAge(scc.getMaxAge());
-							config.setComment(scc.getComment());
+			// org.apache.catalina.startup.Tomcat.FixContextListener() sets context as configured and is
+			// required for embedded usage. But it does a bit more than it should, so we'll do everything more
+			// cleverly
 
-							if (sc.getTrackingModes().size() > 0) {
-								context.getServletContext().setSessionTrackingModes(sc.getTrackingModes());
-							}
-						}
+			// remove existing OsgiContextConfiguration listeners
+			for (LifecycleListener listener : context.findLifecycleListeners()) {
+				if (listener instanceof OsgiContextConfiguration) {
+					context.removeLifecycleListener(listener);
+					Valve authenticationValve = ((OsgiContextConfiguration) listener).getAuthenticationValve();
+					if (authenticationValve != null) {
+						// remove the auth valve, because next time, an auth valve for different
+						// OsgiContextModel may have to be used
+						context.getPipeline().removeValve(authenticationValve);
 					}
 				}
-			});
+			}
+
+			// and add the one related to highest-ranked OsgiContextModel
+			context.addLifecycleListener(this.configurationListeners.get(highestRanked));
 
 			context.start();
 		} catch (Exception e) {
@@ -1591,48 +1639,6 @@ class TomcatServerWrapper implements BatchVisitor {
 		}
 	}
 
-//	@Override
-//	public void removeContext(final HttpContext httpContext) {
-//		LOG.debug("remove context [{}]", httpContext);
-//
-//		try {
-//			if (servletContextService != null) {
-//				servletContextService.unregister();
-//			}
-//		} catch (final IllegalStateException e) {
-//			LOG.info("ServletContext service already removed");
-//		}
-//
-//		final Context context = contextMap.remove(httpContext);
-//		if (context == null) {
-//			throw new RemoveContextException(
-//					"cannot remove the context because it does not exist: "
-//							+ httpContext);
-//		}
-//		try {
-//			final LifecycleState state = context.getState();
-//			if (LifecycleState.STOPPING != state
-//					&& LifecycleState.STOPPED != state
-//					&& LifecycleState.STOPPING_PREP != state) {
-//				context.stop();
-//			}
-//		} catch (LifecycleException e) {
-//			throw new RemoveContextException("cannot stop the context: "
-//					+ httpContext, e);
-//		}
-//		this.server.getHost().removeChild(context);
-//		try {
-//			final LifecycleState state = context.getState();
-//			if (LifecycleState.DESTROYED != state
-//					&& LifecycleState.DESTROYING != state) {
-//				context.destroy();
-//			}
-//		} catch (final LifecycleException e) {
-//			throw new RemoveContextException("cannot destroy the context: "
-//					+ httpContext, e);
-//		}
-//	}
-//
 //	@Override
 //	public void addSecurityConstraintMapping(final SecurityConstraintMappingModel secMapModel) {
 //		LOG.debug("add security contstraint mapping [{}]", secMapModel);

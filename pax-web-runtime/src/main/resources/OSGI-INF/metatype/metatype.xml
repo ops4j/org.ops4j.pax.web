@@ -104,7 +104,7 @@
 		<AD id="org.ops4j.pax.web.ssl.clientauth.needed" type="Boolean" default="false"
 				name="Client Authentication Needed"/>
 
-		<AD id="org.ops4j.pax.web.ssl.protocol" type="String" default="TLSv1.2"
+		<AD id="org.ops4j.pax.web.ssl.protocol" type="String" default="TLSv1.3"
 				name="Default protocol for used SSLContext" />
 
 		<AD id="org.ops4j.pax.web.ssl.secureRandom.algorithm" type="String" default=""
@@ -148,6 +148,13 @@
 				name="OCSP Responder URL" />
 		<AD id="org.ops4j.pax.web.maxCertPathLength" type="Integer" default=""
 				name="Max certificate path length" />
+
+		<AD id="org.ops4j.pax.web.digestAuth.maxNonceAge" type="Long" default="60000"
+				name="Max nonce age for DIGEST authentication (in ms)" />
+		<AD id="org.ops4j.pax.web.digestAuth.maxNonceCount" type="Integer" default="1024"
+				name="Max nonce count for DIGEST authentication" />
+		<AD id="org.ops4j.pax.web.formAuth.errorRedirect" type="Boolean" default="true"
+				name="Use redirect to error page for FORM authentication" />
 
 		<!-- Properties related to JSP -->
 
@@ -221,9 +228,6 @@
 <!--		<AD name="Algorithm for Encrypted password" id="org.ops4j.pax.web.enc.algorithm" type="String" default="PBEWithMD5AndDES" />-->
 <!--		<AD name="Prefix for Encrypted password" id="org.ops4j.pax.web.enc.prefix" type="String" default="ENC(" />-->
 <!--		<AD name="Suffix for Encrypted password" id="org.ops4j.pax.web.enc.suffix" type="String" default=")" />-->
-
-<!--		<AD name="Default Auth" id="org.ops4j.pax.web.default.authmethod" required="false" type="String" default="" />-->
-<!--		<AD name="Default Realm" id="org.ops4j.pax.web.default.realmname" required="false" type="String" default="" />-->
 
 	</OCD>
 

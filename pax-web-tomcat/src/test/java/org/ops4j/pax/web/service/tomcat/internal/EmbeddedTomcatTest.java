@@ -547,7 +547,7 @@ public class EmbeddedTomcatTest {
 			}
 		}).createStartDigester();
 
-		ServerHolder holder = new ServerHolder();
+		TomcatFactory.ServerHolder holder = new TomcatFactory.ServerHolder();
 		digester.push(holder);
 
 		// properties that are fortunately used from within tomcat-*.xml
@@ -610,7 +610,7 @@ public class EmbeddedTomcatTest {
 			}
 		}).createStartDigester();
 
-		ServerHolder holder = new ServerHolder();
+		TomcatFactory.ServerHolder holder = new TomcatFactory.ServerHolder();
 		digester.push(holder);
 
 		// properties that are fortunately used from within tomcat-*.xml
@@ -651,7 +651,7 @@ public class EmbeddedTomcatTest {
 			}
 		}).createStartDigester();
 
-		ServerHolder holder = new ServerHolder();
+		TomcatFactory.ServerHolder holder = new TomcatFactory.ServerHolder();
 		digester.push(holder);
 
 		// properties that are fortunately used from within tomcat-*.xml
@@ -789,7 +789,7 @@ public class EmbeddedTomcatTest {
 			}
 		}).createStartDigester();
 
-		ServerHolder holder = new ServerHolder();
+		TomcatFactory.ServerHolder holder = new TomcatFactory.ServerHolder();
 		digester.push(holder);
 
 		// properties that are fortunately used from within tomcat-*.xml
@@ -884,21 +884,6 @@ public class EmbeddedTomcatTest {
 			}
 		}
 		return headers;
-	}
-
-	/**
-	 * A class on which Tomcat digester can call {@link #setServer(Server)}
-	 */
-	public static class ServerHolder {
-		private Server server;
-
-		public Server getServer() {
-			return server;
-		}
-
-		public void setServer(Server server) {
-			this.server = server;
-		}
 	}
 
 	public static class TestServlet extends HttpServlet {

@@ -23,8 +23,10 @@ import org.apache.catalina.Executor;
 import org.apache.catalina.Server;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardThreadExecutor;
+import org.apache.catalina.startup.Catalina;
 import org.apache.coyote.http2.Http2Protocol;
 import org.apache.tomcat.util.compat.JreCompat;
+import org.apache.tomcat.util.digester.Digester;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.SecurityConfiguration;
 import org.ops4j.pax.web.service.spi.config.ServerConfiguration;
@@ -351,6 +353,42 @@ public class TomcatFactory {
 		LOG.info("Secure Tomcat connector created: {}", secureConnector);
 
 		return secureConnector;
+	}
+
+
+	/**
+	 * Returns a Tomcat-specific XML processor to parse {@code tomcat-server.xml}.
+	 * @return
+	 */
+	public Digester createServerDigester() {
+		return new PaxWebCatalina().createStartDigester();
+	}
+
+	private static class PaxWebCatalina extends Catalina {
+		PaxWebCatalina() {
+		}
+
+		@Override
+		public Digester createStartDigester() {
+			Digester digester = super.createStartDigester();
+			digester.setClassLoader(PaxWebCatalina.class.getClassLoader());
+			return digester;
+		}
+	}
+
+	/**
+	 * A class on which Tomcat digester can call {@link #setServer(Server)}
+	 */
+	public static class ServerHolder {
+		private Server server;
+
+		public Server getServer() {
+			return server;
+		}
+
+		public void setServer(Server server) {
+			this.server = server;
+		}
 	}
 
 }

@@ -496,6 +496,19 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		return super.get(property);
 	}
 
+	private Long resolveLongProperty(String property) {
+		if (!contains(property)) {
+			ensurePropertyResolver(property);
+			try {
+				String resolvedProperty = propertyResolver.get(property);
+				return set(property, resolvedProperty == null ? null : Long.valueOf(propertyResolver.get(property)));
+			} catch (Exception e) {
+				LOG.debug("Reading configuration property " + property + " has failed: {}", e.getMessage());
+			}
+		}
+		return super.get(property);
+	}
+
 	private Boolean eagerBooleanProperty(String property) {
 		return super.get(property);
 	}
@@ -913,6 +926,21 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		@Override
 		public Integer getMaxCertPathLength() {
 			return resolveIntegerProperty(PaxWebConfig.PID_CFG_MAX_CERT_PATH_LENGTH);
+		}
+
+		@Override
+		public Long getDigestAuthMaxNonceAge() {
+			return resolveLongProperty(PaxWebConfig.PID_CFG_DIGESTAUTH_MAX_NONCE_AGE);
+		}
+
+		@Override
+		public Integer getDigestAuthMaxNonceCount() {
+			return resolveIntegerProperty(PaxWebConfig.PID_CFG_DIGESTAUTH_MAX_NONCE_COUNT);
+		}
+
+		@Override
+		public Boolean getFormAuthRedirect() {
+			return resolveBooleanProperty(PaxWebConfig.PID_CFG_FORMAUTH_REDIRECT);
 		}
 	}
 

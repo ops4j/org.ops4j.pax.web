@@ -47,7 +47,6 @@ public class JettyResourceServlet extends DefaultServlet {
 
 	// super._welcomes can be cleared after super.init()...
 	private String[] welcomeFiles;
-	private boolean welcomeFilesRedirect;
 
 	public JettyResourceServlet(PathResource baseUrlResource, String chroot) {
 		this.baseUrlResource = baseUrlResource;
@@ -93,7 +92,6 @@ public class JettyResourceServlet extends DefaultServlet {
 	}
 
 	public void setWelcomeFilesRedirect(boolean welcomeFilesRedirect) {
-		this.welcomeFilesRedirect = welcomeFilesRedirect;
 		_resourceService.setRedirectWelcome(welcomeFilesRedirect);
 	}
 

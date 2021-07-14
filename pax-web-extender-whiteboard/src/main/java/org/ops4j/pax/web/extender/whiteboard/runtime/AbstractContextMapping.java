@@ -20,7 +20,7 @@ import java.util.Map;
 
 import org.ops4j.pax.web.service.whiteboard.ContextMapping;
 
-public class AbstractContextMapping implements ContextMapping {
+public abstract class AbstractContextMapping implements ContextMapping {
 
 	private String contextId;
 	private String contextPath;

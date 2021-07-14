@@ -217,6 +217,7 @@
 		</jsp-property-group>
 	</jsp-config>
 
+	<!-- org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintModel -->
 	<security-constraint>
 		<!--Zero or more repetitions:-->
 		<display-name>token</display-name>
@@ -248,10 +249,7 @@
 		</user-data-constraint>
 	</security-constraint>
 
-	<!--
-		org.ops4j.pax.web.service.spi.model.OsgiContextModel.loginConfiguration
-		org.ops4j.pax.web.service.spi.model.elements.LoginConfigurationModel
-	-->
+	<!-- org.ops4j.pax.web.service.spi.model.elements.LoginConfigModel -->
 	<login-config>
 		<!--Optional:-->
 		<auth-method>token</auth-method>
@@ -264,6 +262,7 @@
 		</form-login-config>
 	</login-config>
 
+	<!-- org.ops4j.pax.web.service.spi.model.elements.SecurityConfigurationModel.securityRoles -->
 	<security-role>
 		<!--Zero or more repetitions:-->
 		<description>string</description>

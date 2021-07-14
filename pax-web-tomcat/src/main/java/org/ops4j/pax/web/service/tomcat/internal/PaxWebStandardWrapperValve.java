@@ -26,26 +26,11 @@ import static org.ops4j.pax.web.service.tomcat.internal.PaxWebStandardContext.PA
 
 public class PaxWebStandardWrapperValve extends ValveBase {
 
-	/**
-	 * {@link org.apache.catalina.core.StandardWrapper} of the servlet for which this valve is used to handle
-	 * a request.
-	 */
-	private final PaxWebStandardWrapper wrapper;
-
-	/**
-	 * <em>Real</em> Tomcat's context that's used to obtain default {@link javax.servlet.ServletContext} and
-	 * {@link org.ops4j.pax.web.service.spi.model.OsgiContextModel} for filter chain creation.
-	 */
-	private final PaxWebStandardContext realContext;
-
-	public PaxWebStandardWrapperValve(ValveBase next, PaxWebStandardWrapper wrapper, PaxWebStandardContext realContext) {
+	public PaxWebStandardWrapperValve(ValveBase next, PaxWebStandardWrapper wrapper) {
 		setNext(next);
 		setAsyncSupported(wrapper.isAsyncSupported());
 		setContainer(wrapper);
 		setDomain(wrapper.getDomain());
-
-		this.wrapper = wrapper;
-		this.realContext = realContext;
 	}
 
 	/**

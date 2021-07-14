@@ -232,6 +232,13 @@ public interface PaxWebConfig {
 	/** Return max length of cert path to use during certificate validation */
 	String PID_CFG_MAX_CERT_PATH_LENGTH = "org.ops4j.pax.web.maxCertPathLength";
 
+	/** Return max nonce age for DIGEST authentication (in ms), defaults to 60s (60000ms) */
+	String PID_CFG_DIGESTAUTH_MAX_NONCE_AGE = "org.ops4j.pax.web.digestAuth.maxNonceAge";
+	/** Return max nonce count for DIGEST authentication, defaults to 1024 */
+	String PID_CFG_DIGESTAUTH_MAX_NONCE_COUNT = "org.ops4j.pax.web.digestAuth.maxNonceCount";
+	/** Returns whether to redirect (true, default) to form-login error page or use forward (false) */
+	String PID_CFG_FORMAUTH_REDIRECT = "org.ops4j.pax.web.formAuth.redirect";
+
 	// --- logging configuration properties
 
 	/** Should we enable "NCSA Logger"? */

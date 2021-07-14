@@ -205,18 +205,6 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		return null;
 	}
 
-	// --- TODO: transactional access to web container
-
-	@Override
-	public void begin(HttpContext context) {
-		// marks given context as participating in a transaction
-	}
-
-	@Override
-	public void end(HttpContext context) {
-		// ends a transaction and deassociates given context from a pending transaction
-	}
-
 	// --- different methods used to retrieve HttpContext
 	//     "102.10.3.1 public HttpContext createDefaultHttpContext()" says that "a new HttpContext object is created
 	//     each time this method is called", but we actually don't want "default" context to mean something

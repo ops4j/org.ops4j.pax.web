@@ -16,10 +16,8 @@
 package org.ops4j.pax.web.service.undertow.internal;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.Set;
 import java.util.function.Consumer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -29,14 +27,10 @@ import io.undertow.server.HttpHandler;
 import io.undertow.servlet.ServletExtension;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
-import io.undertow.servlet.api.SecurityConstraint;
 import io.undertow.servlet.api.SessionPersistenceManager;
-import io.undertow.servlet.api.TransportGuaranteeType;
-import io.undertow.servlet.api.WebResourceCollection;
 import org.ops4j.pax.web.service.AuthenticatorService;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
-import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
@@ -53,7 +47,7 @@ public class Context /*implements org.ops4j.pax.web.service.spi.LifeCycle, HttpH
 	private IdentityManager identityManager;
 	private ContextAwarePathHandler path;
 	private OsgiContextModel contextModel;
-	private final Set<SecurityConstraintMappingModel> securityConstraintMappings = new LinkedHashSet<>();
+//	private final Set<SecurityConstraintMappingModel> securityConstraintMappings = new LinkedHashSet<>();
 	private final List<ServiceRegistration<ServletContext>> registeredServletContexts = new ArrayList<>();
 	private /*final */ClassLoader classLoader;
 	private volatile HttpHandler handler;
@@ -91,30 +85,30 @@ public class Context /*implements org.ops4j.pax.web.service.spi.LifeCycle, HttpH
 //			));
 //		}
 
-		for (SecurityConstraintMappingModel securityConstraintMapping : securityConstraintMappings) {
-			SecurityConstraint info = new SecurityConstraint();
-//            if (securityConstraintMapping.isAuthentication()) {
-//                info.setEmptyRoleSemantic(SecurityInfo.EmptyRoleSemantic.AUTHENTICATE);
-//            }
-			info.addRolesAllowed(securityConstraintMapping.getRoles());
-			String dataConstraint = securityConstraintMapping.getDataConstraint();
-			if (dataConstraint == null || "NONE".equals(dataConstraint)) {
-				info.setTransportGuaranteeType(TransportGuaranteeType.NONE);
-			} else if ("INTEGRAL".equals(dataConstraint)) {
-				info.setTransportGuaranteeType(TransportGuaranteeType.INTEGRAL);
-			} else {
-				info.setTransportGuaranteeType(TransportGuaranteeType.CONFIDENTIAL);
-			}
-			WebResourceCollection wr = new WebResourceCollection();
-			if (securityConstraintMapping.getMapping() != null) {
-				wr.addHttpMethod(securityConstraintMapping.getMapping());
-			}
-			if (securityConstraintMapping.getUrl() != null) {
-				wr.addUrlPattern(securityConstraintMapping.getUrl());
-			}
-			info.addWebResourceCollection(wr);
-			deployment.addSecurityConstraint(info);
-		}
+//		for (SecurityConstraintMappingModel securityConstraintMapping : securityConstraintMappings) {
+//			SecurityConstraint info = new SecurityConstraint();
+////            if (securityConstraintMapping.isAuthentication()) {
+////                info.setEmptyRoleSemantic(SecurityInfo.EmptyRoleSemantic.AUTHENTICATE);
+////            }
+//			info.addRolesAllowed(securityConstraintMapping.getRoles());
+//			String dataConstraint = securityConstraintMapping.getDataConstraint();
+//			if (dataConstraint == null || "NONE".equals(dataConstraint)) {
+//				info.setTransportGuaranteeType(TransportGuaranteeType.NONE);
+//			} else if ("INTEGRAL".equals(dataConstraint)) {
+//				info.setTransportGuaranteeType(TransportGuaranteeType.INTEGRAL);
+//			} else {
+//				info.setTransportGuaranteeType(TransportGuaranteeType.CONFIDENTIAL);
+//			}
+//			WebResourceCollection wr = new WebResourceCollection();
+//			if (securityConstraintMapping.getMapping() != null) {
+//				wr.addHttpMethod(securityConstraintMapping.getMapping());
+//			}
+//			if (securityConstraintMapping.getUrl() != null) {
+//				wr.addUrlPattern(securityConstraintMapping.getUrl());
+//			}
+//			info.addWebResourceCollection(wr);
+//			deployment.addSecurityConstraint(info);
+//		}
 
 //		if (isJspAvailable()) { // use JasperClassloader
 //			try {

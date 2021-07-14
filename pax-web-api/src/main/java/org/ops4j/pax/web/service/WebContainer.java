@@ -108,65 +108,6 @@ public interface WebContainer extends HttpService {
 		return null;
 	}
 
-	// --- transactional access to web container
-
-	/**
-	 * <p>
-	 * Begins a <em>transaction</em> to group multiple registration calls for
-	 * given {@link HttpContext}.
-	 * </p>
-	 *
-	 * <p>
-	 * No operation related to given <em>transaction</em> will be effective
-	 * until {@link #end(HttpContext)} is called. The important thing is that
-	 * even if some initial operations are added to transaction (like
-	 * registration of servlet with alias "/alias"), the validation will be
-	 * performed only at the end of <em>transaction</em>, so another
-	 * registration of servlet for "/alias" may succeed and this transaction
-	 * will eventually fail even if the "/alias" registration in given
-	 * transaction was performed earlier.
-	 * </p>
-	 *
-	 * <p>
-	 * After this call, nothing will be passed to actual server implementation
-	 * until {@link #end(HttpContext)} is called. There's no thread affinity for
-	 * such <em>transaction</em>, so given {@link HttpContext} can be passed
-	 * around between threads without problems. However, there's no timeout, so
-	 * not finished transactions will hang until the bundle is stopped.
-	 * </p>
-	 *
-	 * <p>
-	 * Technically, given {@link HttpContext} is marked as participating in
-	 * transaction and all registrations are done in single model of a context.
-	 * {@link #end(HttpContext)} passes all registered elements and context
-	 * parameters (like session configuration) to actual server, ending the
-	 * transaction. The benefit of such approach is that we don't have to take
-	 * care about the order of operations because when transaction is
-	 * {@link #end(HttpContext) ended}, some ordering may be performed.
-	 * </p>
-	 *
-	 * <p>
-	 * Even using {@code null} as {@link HttpContext} will work, because the
-	 * default (scoped to given bundle) context will be marked as participating
-	 * in a <em>transaction</em>.
-	 * </p>
-	 *
-	 * @param context
-	 * @return
-	 */
-	void begin(HttpContext context);
-
-	/**
-	 * <p>
-	 * Ends a <em>transaction</em> related to given {@link HttpContext} (or
-	 * default context if {@code null} is used). This method triggers invocation
-	 * of all delayed operations.
-	 * </p>
-	 *
-	 * @param context
-	 */
-	void end(HttpContext context);
-
 	// --- different methods used to retrieve HttpContext
 
 	/**
@@ -939,7 +880,6 @@ public interface WebContainer extends HttpService {
 
 
 
-//
 //    /**
 //     * Registers login configuration, with authorization method and realm name.
 //     *

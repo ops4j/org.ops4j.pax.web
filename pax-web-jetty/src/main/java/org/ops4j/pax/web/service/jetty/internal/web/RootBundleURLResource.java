@@ -83,12 +83,12 @@ public class RootBundleURLResource extends Resource {
 	}
 
 	@Override
-	public InputStream getInputStream() throws IOException {
+	public InputStream getInputStream() {
 		return null;
 	}
 
 	@Override
-	public ReadableByteChannel getReadableByteChannel() throws IOException {
+	public ReadableByteChannel getReadableByteChannel() {
 		return null;
 	}
 
@@ -108,7 +108,7 @@ public class RootBundleURLResource extends Resource {
 	}
 
 	@Override
-	public Resource addPath(String path) throws IOException, MalformedURLException {
+	public Resource addPath(String path) throws IOException {
 		return delegate.addPath(path);
 	}
 

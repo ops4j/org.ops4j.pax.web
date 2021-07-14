@@ -41,6 +41,10 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		this.bundleContext = context;
 
+		// TODO: we should think more about it. "true"/empty means there'll be org.apache.catalina.core.NamingContextListener
+		//       added to StandardService
+		System.setProperty("catalina.useNaming", "false");
+
 		Bundle paxWebTomcatBundle = bundleContext.getBundle();
 		ClassLoader loader = paxWebTomcatBundle.adapt(BundleWiring.class).getClassLoader();
 

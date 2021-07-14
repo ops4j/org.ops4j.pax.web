@@ -51,12 +51,16 @@ import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.SessionCookieConfig;
 import javax.servlet.annotation.HandlesTypes;
+import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 
 import org.apache.felix.utils.extender.Extension;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
+import org.apache.tomcat.util.descriptor.web.LoginConfig;
 import org.apache.tomcat.util.descriptor.web.MultipartDef;
+import org.apache.tomcat.util.descriptor.web.SecurityCollection;
+import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.apache.tomcat.util.descriptor.web.ServletDef;
 import org.apache.tomcat.util.descriptor.web.SessionConfig;
 import org.apache.tomcat.util.descriptor.web.WebXml;
@@ -74,6 +78,9 @@ import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.model.elements.LoginConfigModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConfigurationModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent;
@@ -1271,6 +1278,49 @@ public class BundleWebApplication {
 		}
 		ocm.getInitialContextAttributes().put(ServletContext.TEMPDIR, tmpLocation);
 
+		// 1.5. Security - also part of OsgiContextModel
+		// <login-config>
+		LoginConfig loginConfig = mainWebXml.getLoginConfig();
+		SecurityConfigurationModel securityConfiguration = ocm.getSecurityConfiguration();
+		if (loginConfig != null) {
+			LoginConfigModel lcm = new LoginConfigModel();
+			lcm.setAuthMethod(loginConfig.getAuthMethod());
+			lcm.setRealmName(loginConfig.getRealmName());
+			lcm.setFormLoginPage(loginConfig.getLoginPage());
+			lcm.setFormErrorPage(loginConfig.getErrorPage());
+			securityConfiguration.setLoginConfig(lcm);
+		}
+		// <security-role>
+		securityConfiguration.getSecurityRoles().addAll(mainWebXml.getSecurityRoles());
+		// <security-constraint>
+		for (SecurityConstraint sc : mainWebXml.getSecurityConstraints()) {
+			SecurityConstraintModel constraint = new SecurityConstraintModel();
+			// <display-name> (no <name> at this level)
+			constraint.setName(sc.getDisplayName());
+			// <web-resource-collection> elements
+			for (SecurityCollection wrc : sc.findCollections()) {
+				SecurityConstraintModel.WebResourceCollection collection = new SecurityConstraintModel.WebResourceCollection();
+				collection.setName(wrc.getName());
+				collection.getMethods().addAll(Arrays.asList(wrc.findMethods()));
+				collection.getOmittedMethods().addAll(Arrays.asList(wrc.findOmittedMethods()));
+				collection.getPatterns().addAll(Arrays.asList(wrc.findPatterns()));
+				constraint.getWebResourceCollections().add(collection);
+			}
+			// <auth-constraint> elements
+			constraint.setAuthRolesSet(sc.getAuthConstraint());
+			constraint.getAuthRoles().addAll(Arrays.asList(sc.findAuthRoles()));
+			// <user-data-constraint>
+			if (sc.getUserConstraint() != null && !"".equals(sc.getUserConstraint().trim())) {
+				if (ServletSecurity.TransportGuarantee.NONE.toString().equals(sc.getUserConstraint())) {
+					constraint.setTransportGuarantee(ServletSecurity.TransportGuarantee.NONE);
+				} else {
+					constraint.setTransportGuarantee(ServletSecurity.TransportGuarantee.CONFIDENTIAL);
+				}
+			}
+
+			securityConfiguration.getSecurityConstraints().add(constraint);
+		}
+
 		wabBatch.addOsgiContextModel(ocm, scm);
 		wabBatch.associateOsgiContextModel(httpContext, ocm);
 
@@ -1294,7 +1344,7 @@ public class BundleWebApplication {
 		//  + [JT] <jsp-config>
 		//  + [JT] <listener>
 		//  + [JT] <locale-encoding-mapping-list>
-		//  - [JT] <login-config>
+		//  + [JT] <login-config>
 		//  + [JT] <mime-mapping>
 		//  - [JT] <post-construct>
 		//  - [JT] <pre-destroy>
@@ -1302,8 +1352,8 @@ public class BundleWebApplication {
 		//  - [JT] <resource-env-ref>
 		//  - [JT] <resource-ref>
 		//  + [.T] <response-character-encoding> (Servlet 4)
-		//  - [JT] <security-constraint>
-		//  - [JT] <security-role>
+		//  + [JT] <security-constraint>
+		//  + [JT] <security-role>
 		//  + [JT] <servlet>
 		//  + [JT] <servlet-mapping>
 		//  + [JT] <session-config>
@@ -1348,15 +1398,15 @@ public class BundleWebApplication {
 		//  + jsp config descriptor
 		//  + listeners
 		//  + locale encoding mapping paramters
-		//  - login config
+		//  + login config
 		//  + metadata complete (a.k.a. "ignore annotations") - Tomcat calls org.apache.tomcat.InstanceManager.destroyInstance()
 		//    on an instance of filter/servlet after f.destroy()/s.destroy() if annotations are not ignored.
 		//    the annotations are javax.annotation.PostConstruct/javax.annotation.PreDestroy
 		//  + mime mapping
 		//  + request character encoding
 		//  + response character encoding
-		//  - security constraints
-		//  - security roles
+		//  + security constraints
+		//  + security roles
 		//  + servlets
 		//  - servlets' security roles
 		//  + servlets' multipart config
@@ -1412,6 +1462,11 @@ public class BundleWebApplication {
 			} catch (ClassNotFoundException e) {
 				LOG.warn("Can't load servlet class {} in the context of {}: {}",
 						def.getServletClass(), this, e.getMessage(), e);
+				return;
+			}
+			if (servletMappings.get(sn) == null) {
+				// the servlet may have been overriden by other servlet with the same mapping (for example
+				// if you have "/" mapped servlet not named "default")
 				return;
 			}
 			String[] mappings = servletMappings.get(sn).toArray(new String[0]);

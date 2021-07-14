@@ -90,26 +90,6 @@ public interface ServerController {
 	 */
 	void removeListener(ServerListener listener);
 
-//	LifeCycle getContext(OsgiContextModel model);
-//
-//	void removeContext(HttpContext httpContext);
-//
-//	void addEventListener(EventListenerModel eventListenerModel);
-//
-//	void removeEventListener(EventListenerModel eventListenerModel);
-//
-//	void addErrorPage(ErrorPageModel model);
-//
-//	void removeErrorPage(ErrorPageModel model);
-//
-//	void addWelcomFiles(WelcomeFileModel model);
-//
-//	void removeWelcomeFiles(WelcomeFileModel model);
-//
-//	void addSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
-//
-//	void removeSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel);
-
 	/**
 	 * Each {@link ServerController} can be instructed to perform {@link Batch} of atomic operations.
 	 * @param batch

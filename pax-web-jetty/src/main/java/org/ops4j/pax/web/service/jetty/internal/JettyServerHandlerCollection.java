@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * @author Alin Dreghiciu
  * @since 0.2.3, December 22, 2007
  */
-@Review("There should be better collection - that could look forward next context handlers and handle welcome files")
+@Review("There should be a better collection - that could look forward next context handlers")
 class JettyServerHandlerCollection extends HandlerCollection {
 
 	private static final Logger LOG = LoggerFactory

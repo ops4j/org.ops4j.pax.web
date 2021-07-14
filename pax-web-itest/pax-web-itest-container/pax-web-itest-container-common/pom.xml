@@ -187,6 +187,17 @@
 			<artifactId>pax-web-fragment-myfaces-spifly</artifactId>
 		</dependency>
 
+		<!-- pax-web config samples -->
+
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>auth-config-fragment-jetty</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>auth-config-fragment-tomcat</artifactId>
+		</dependency>
+
 		<!-- pax-web war samples -->
 
 		<dependency>

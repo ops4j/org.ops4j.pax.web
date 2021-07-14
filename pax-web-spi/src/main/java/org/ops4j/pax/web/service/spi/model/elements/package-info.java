@@ -30,5 +30,10 @@
  *
  * <p>Welcome files may be confusing, but these (themselves) do NOT serve any content - these are used by resources
  * (resource servlets) to adjust their behavior.</p>
+ *
+ * <p>And finally, some passive web elements are used to configure {@link org.ops4j.pax.web.service.spi.model.OsgiContextModel}
+ * and they don't extend {@link org.ops4j.pax.web.service.spi.model.elements.ElementModel} - which means they are
+ * not called to <em>register</em> themselves. Instead they just configure certain fields of the OSGi context model.
+ * These include session and login configuration.</p>
  */
 package org.ops4j.pax.web.service.spi.model.elements;

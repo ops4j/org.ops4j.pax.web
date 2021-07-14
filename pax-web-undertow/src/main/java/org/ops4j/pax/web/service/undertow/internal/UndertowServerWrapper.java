@@ -2136,28 +2136,6 @@ class UndertowServerWrapper implements BatchVisitor {
 //		}
 //	}
 //
-//	private Context findOrCreateContext(final OsgiContextModel contextModel) {
-//		NullArgumentException.validateNotNull(contextModel, "contextModel");
-//		synchronized (contextMap) {
-//			if (contextMap.containsKey(contextModel.getHttpContext())) {
-//				return contextMap.get(contextModel.getHttpContext());
-//			}
-//			Context newCtx = new Context(this, path, contextModel);
-//			newCtx.setConfiguration(configuration);
-//			newCtx.setDefaultSessionTimeoutInMinutes(defaultSessionTimeoutInMinutes);
-//			newCtx.setSessionPersistenceManager(sessionPersistenceManager);
-//			contextMap.put(contextModel.getHttpContext(), newCtx);
-//			final Servlet servlet = createResourceServlet(contextModel, "/", "default");
-//			final ResourceModel model = new ResourceModel(contextModel, servlet, "/", "default");
-//			try {
-//				newCtx.addServlet(model);
-//			} catch (ServletException e) {
-//				LOG.warn(e.getMessage(), e);
-//			}
-//			return newCtx;
-//		}
-//	}
-//
 //	@Override
 //	public void addSecurityConstraintMapping(SecurityConstraintMappingModel model) {
 //		assertNotState(State.Unconfigured);

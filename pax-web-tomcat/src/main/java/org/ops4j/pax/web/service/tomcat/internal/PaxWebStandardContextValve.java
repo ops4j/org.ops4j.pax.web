@@ -33,7 +33,7 @@ import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
  * want to do it in Pax Web, because resource serving should not be "default" action - it has to be
  * configured explicitly.</p>
  *
- * <p>This valve is invoked before original {@link org.apache.catalina.core.StandardContextValve}.</p>
+ * <p>This valve is invoked before original {@code org.apache.catalina.core.StandardContextValve}.</p>
  */
 public class PaxWebStandardContextValve extends ValveBase {
 

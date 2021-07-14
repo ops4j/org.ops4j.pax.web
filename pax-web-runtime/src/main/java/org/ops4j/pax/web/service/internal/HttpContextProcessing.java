@@ -253,7 +253,7 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 //			}
 
 			// altering the context required stopping it - let's (knowing the details) start it again
-			wc.end(httpContext);
+//			wc.end(httpContext);
 		}
 
 		/**
@@ -284,7 +284,7 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 //			}
 
 			// cleaning the context required stopping it - let's (knowing the details) start it again
-			wc.end(httpContext);
+//			wc.end(httpContext);
 
 			httpContext = null;
 		}

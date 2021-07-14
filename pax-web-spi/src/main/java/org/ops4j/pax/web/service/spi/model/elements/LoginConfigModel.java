@@ -15,20 +15,13 @@
  */
 package org.ops4j.pax.web.service.spi.model.elements;
 
-import java.util.List;
-
-import org.ops4j.pax.web.annotations.Review;
-import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
-import org.ops4j.pax.web.service.spi.model.events.WebElementEventData;
-import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
-
 /**
- * <p>Set of parameters for login configuration parameters, referenced from {@link OsgiContextModel}.</p>
+ * <p>Set of parameters for login configuration parameters, referenced from
+ * {@link org.ops4j.pax.web.service.spi.model.OsgiContextModel}.</p>
  *
  * <p>This model reflects {@code <login-config>} element from {@code web.xml}.</p>
  */
-@Review("Not refactored yet")
-public class LoginConfigModel extends ElementModel {
+public class LoginConfigModel {
 
 	/** {@code <login-config>/<auth-method>} */
 	private String authMethod;
@@ -41,23 +34,6 @@ public class LoginConfigModel extends ElementModel {
 
 	/** {@code <login-config>/<form-login-config>/<form-error-page>} */
 	private String formErrorPage;
-
-	LoginConfigModel(List<OsgiContextModel> contextModels) {
-//		super(contextModels);
-	}
-
-	@Override
-	public void register(WhiteboardWebContainerView view) {
-	}
-
-	@Override
-	public void unregister(WhiteboardWebContainerView view) {
-	}
-
-	@Override
-	public WebElementEventData asEventData() {
-		return null;
-	}
 
 	public String getAuthMethod() {
 		return authMethod;
@@ -89,10 +65,6 @@ public class LoginConfigModel extends ElementModel {
 
 	public void setFormErrorPage(String formErrorPage) {
 		this.formErrorPage = formErrorPage;
-	}
-	@Override
-	public Boolean performValidation() {
-		return Boolean.TRUE;
 	}
 
 }

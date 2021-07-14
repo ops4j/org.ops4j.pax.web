@@ -65,13 +65,10 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 	 *
 	 * @param parent
 	 * @param contextPath
-	 * @param sessions
-	 * @param security
 	 * @param configuration
 	 */
-	public PaxWebServletContextHandler(HandlerContainer parent, String contextPath, boolean sessions, boolean security,
-			Configuration configuration) {
-		super(parent, contextPath, sessions, security);
+	public PaxWebServletContextHandler(HandlerContainer parent, String contextPath, Configuration configuration) {
+		super(parent, contextPath, true, true);
 
 		// TCCL of sessionManager timer threads will be set to thread of pax-web-jetty bundle, not to current TCCL
 		ScheduledExecutorScheduler executorScheduler = new ScheduledExecutorScheduler(getSessionHandler().toString() + "Timer", true,

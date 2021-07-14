@@ -15,31 +15,16 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import java.io.File;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.EventListener;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.function.Supplier;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContextAttributeListener;
-import javax.servlet.SessionCookieConfig;
-
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.security.ConstraintAware;
+import org.eclipse.jetty.security.ConstraintMapping;
+import org.eclipse.jetty.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.security.authentication.BasicAuthenticator;
+import org.eclipse.jetty.security.authentication.ClientCertAuthenticator;
+import org.eclipse.jetty.security.authentication.ConfigurableSpnegoAuthenticator;
+import org.eclipse.jetty.security.authentication.DigestAuthenticator;
+import org.eclipse.jetty.security.authentication.FormAuthenticator;
 import org.eclipse.jetty.server.ConnectionFactory;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.CustomRequestLog;
@@ -65,6 +50,7 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
 import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.xml.XmlConfiguration;
 import org.ops4j.pax.web.annotations.Review;
@@ -79,7 +65,9 @@ import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
-import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintMappingModel;
+import org.ops4j.pax.web.service.spi.model.elements.LoginConfigModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConfigurationModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.SessionConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
@@ -111,6 +99,30 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
+import javax.servlet.ServletContextAttributeListener;
+import javax.servlet.SessionCookieConfig;
+import javax.servlet.annotation.ServletSecurity;
+import java.io.File;
+import java.net.InetSocketAddress;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.EventListener;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.function.Supplier;
 
 /**
  * <p>A <em>wrapper</em> or <em>holder</em> of actual Jetty server. This class perform two kinds of tasks:<ul>
@@ -285,11 +297,18 @@ class JettyServerWrapper implements BatchVisitor {
 	 */
 	private void applyJettyConfiguration() throws Exception {
 		File[] locations = configuration.server().getConfigurationFiles();
+		URL jettyResource = getClass().getResource("/jetty.xml");
 		if (locations.length == 0) {
-			LOG.info("No external Jetty configuration files specified. Default/PID configuration will be used.");
-			// no return, we'll handle the below mentioned TCCL leaks
+			if (jettyResource == null) {
+				LOG.info("No external Jetty configuration files specified. Default/PID configuration will be used.");
+			} else {
+				LOG.info("Found \"jetty.xml\" resource on the classpath: {}.", jettyResource);
+			}
 		} else {
 			LOG.info("Processing Jetty configuration from files: {}", Arrays.asList(locations));
+			if (jettyResource != null) {
+				LOG.info("Found additional \"jetty.xml\" resource on the classpath: {}.", jettyResource);
+			}
 		}
 
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -308,10 +327,13 @@ class JettyServerWrapper implements BatchVisitor {
 				}
 			}
 
-			// TCCL to perform static initialization of XmlConfiguration with proper TCCL
+			// PAXWEB-1112: TCCL to perform static initialization of XmlConfiguration with proper TCCL
+			// needed for org.eclipse.jetty.xml.XmlConfiguration.__factoryLoader
 			Thread.currentThread().setContextClassLoader(jettyXmlCl);
-			XmlConfiguration configuration
-					= new XmlConfiguration(Resource.newResource(getClass().getResource("/jetty-empty.xml")));
+			URL emptyConfig = getClass().getResource("/jetty-empty.xml");
+			if (emptyConfig != null) {
+				new XmlConfiguration(Resource.newResource(emptyConfig));
+			}
 
 			// When parsing, TCCL will be set to CL of pax-web-jetty bundle
 			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
@@ -323,36 +345,47 @@ class JettyServerWrapper implements BatchVisitor {
 			objects.put("Server", server);
 			objects.put("threadPool", server.getThreadPool());
 
+			List<XmlConfiguration> configs = new ArrayList<>();
 			for (File location : locations) {
-				LOG.debug("Parsing {}", location);
-				configuration = new XmlConfiguration(Resource.newResource(location));
+				configs.add(new XmlConfiguration(Resource.newResource(location)));
+			}
+			if (jettyResource != null) {
+				configs.add(new XmlConfiguration(Resource.newResource(jettyResource)));
+			}
+
+			for (XmlConfiguration cfg : configs) {
+				LOG.debug("Parsing {}", cfg);
 
 				// add objects created in previous file, so they're available when parsing next one
-				configuration.getIdMap().putAll(previous == null ? objects : previous.getIdMap());
+				cfg.getIdMap().putAll(previous == null ? objects : previous.getIdMap());
 				// configuration will be available for Jetty when using <Property />
-				configuration.getProperties().putAll(this.configuration.all());
+				cfg.getProperties().putAll(this.configuration.all());
 
-				configuration.configure();
+				try {
+					cfg.configure();
+				} catch (Exception e) {
+					LOG.warn("Problem parsing {}: {}", cfg, e.getMessage(), e);
+				}
 
 				// collect all created objects
-				objects.putAll(configuration.getIdMap());
+				objects.putAll(cfg.getIdMap());
 
 				// collect all created HttpConfigurations
-				configuration.getIdMap().forEach((id, v) -> {
+				cfg.getIdMap().forEach((id, v) -> {
 					if (HttpConfiguration.class.isAssignableFrom(v.getClass())) {
 						httpConfigs.put(id, (HttpConfiguration) v);
 					}
 				});
 
-				previous = configuration;
+				previous = cfg;
 			}
 
-			if (locations.length > 0) {
+			if (locations.length > 0 || jettyResource != null) {
 				// the "Server" object should not be redefined
 				objects.values().forEach(bean -> {
 					if (Server.class.isAssignableFrom(bean.getClass())) {
 						if (bean != server) {
-							String msg = "Can't create instance of Jetty server in external configuration files.";
+							String msg = "Can't create new instance of Jetty server in external configuration files.";
 							throw new IllegalArgumentException(msg);
 						}
 					}
@@ -685,7 +718,7 @@ class JettyServerWrapper implements BatchVisitor {
 		if (change.getKind() == OpCode.ADD) {
 			LOG.info("Creating new Jetty context for {}", model);
 
-			PaxWebServletContextHandler sch = new PaxWebServletContextHandler(null, contextPath, true, true, configuration);
+			PaxWebServletContextHandler sch = new PaxWebServletContextHandler(null, contextPath, configuration);
 			// special, OSGi-aware org.eclipse.jetty.servlet.ServletHandler
 			sch.setServletHandler(new PaxWebServletHandler(default404Servlet));
 			// setting "false" here will trigger 302 redirect when browsing to context without trailing "/"
@@ -723,20 +756,20 @@ class JettyServerWrapper implements BatchVisitor {
 			mainHandler.mapContexts();
 
 			// session configuration - based on defaultSessionConfiguration, but may be later overriden in OsgiContext
-			SessionHandler sh = sch.getSessionHandler();
-			if (sh != null) {
+			SessionHandler sessions = sch.getSessionHandler();
+			if (sessions != null) {
 				SessionConfiguration sc = configuration.session();
-				sh.setMaxInactiveInterval(sc.getSessionTimeout() * 60);
-				sh.setSessionCookie(defaultSessionCookieConfig.getName());
-				sh.getSessionCookieConfig().setDomain(defaultSessionCookieConfig.getDomain());
+				sessions.setMaxInactiveInterval(sc.getSessionTimeout() * 60);
+				sessions.setSessionCookie(defaultSessionCookieConfig.getName());
+				sessions.getSessionCookieConfig().setDomain(defaultSessionCookieConfig.getDomain());
 				// will default to context path if null
-				sh.getSessionCookieConfig().setPath(defaultSessionCookieConfig.getPath());
-				sh.getSessionCookieConfig().setMaxAge(defaultSessionCookieConfig.getMaxAge());
-				sh.getSessionCookieConfig().setHttpOnly(defaultSessionCookieConfig.isHttpOnly());
-				sh.getSessionCookieConfig().setSecure(defaultSessionCookieConfig.isSecure());
-				sh.getSessionCookieConfig().setComment(defaultSessionCookieConfig.getComment());
+				sessions.getSessionCookieConfig().setPath(defaultSessionCookieConfig.getPath());
+				sessions.getSessionCookieConfig().setMaxAge(defaultSessionCookieConfig.getMaxAge());
+				sessions.getSessionCookieConfig().setHttpOnly(defaultSessionCookieConfig.isHttpOnly());
+				sessions.getSessionCookieConfig().setSecure(defaultSessionCookieConfig.isSecure());
+				sessions.getSessionCookieConfig().setComment(defaultSessionCookieConfig.getComment());
 				if (sc.getSessionUrlPathParameter() != null) {
-					sh.setSessionIdPathParameterName(sc.getSessionUrlPathParameter());
+					sessions.setSessionIdPathParameterName(sc.getSessionUrlPathParameter());
 				}
 				if (sc.getSessionWorkerName() != null) {
 					SessionIdManager sidManager = server.getSessionIdManager();
@@ -745,6 +778,9 @@ class JettyServerWrapper implements BatchVisitor {
 					}
 				}
 			}
+
+			// security configuration will be configured when context is started and will be based (if needed)
+			// on highest ranked OsgiContextModel
 
 			// explicit no check for existing mapping under given physical context path
 			contextHandlers.put(contextPath, sch);
@@ -1546,30 +1582,127 @@ class JettyServerWrapper implements BatchVisitor {
 			}
 
 			// alter session configuration
-			SessionHandler sh = sch.getSessionHandler();
-			SessionConfigurationModel sc = highestRanked.getSessionConfiguration();
-			if (sc != null) {
-				if (sc.getSessionTimeout() != null) {
-					sh.setMaxInactiveInterval(sc.getSessionTimeout() * 60);
+			SessionHandler sessionHandler = sch.getSessionHandler();
+			SessionConfigurationModel sessionConfig = highestRanked.getSessionConfiguration();
+			if (sessionConfig != null) {
+				if (sessionConfig.getSessionTimeout() != null) {
+					sessionHandler.setMaxInactiveInterval(sessionConfig.getSessionTimeout() * 60);
 				}
-				SessionCookieConfig scc = sc.getSessionCookieConfig();
+				SessionCookieConfig scc = sessionConfig.getSessionCookieConfig();
 				if (scc != null) {
 					if (scc.getName() != null) {
-						sh.setSessionCookie(scc.getName());
+						sessionHandler.setSessionCookie(scc.getName());
 					}
 					if (scc.getDomain() != null) {
-						sh.getSessionCookieConfig().setDomain(scc.getDomain());
+						sessionHandler.getSessionCookieConfig().setDomain(scc.getDomain());
 					}
 					if (scc.getPath() != null) {
-						sh.getSessionCookieConfig().setPath(scc.getPath());
+						sessionHandler.getSessionCookieConfig().setPath(scc.getPath());
 					}
-					sh.getSessionCookieConfig().setMaxAge(scc.getMaxAge());
-					sh.getSessionCookieConfig().setHttpOnly(scc.isHttpOnly());
-					sh.getSessionCookieConfig().setSecure(scc.isSecure());
-					sh.getSessionCookieConfig().setComment(scc.getComment());
+					sessionHandler.getSessionCookieConfig().setMaxAge(scc.getMaxAge());
+					sessionHandler.getSessionCookieConfig().setHttpOnly(scc.isHttpOnly());
+					sessionHandler.getSessionCookieConfig().setSecure(scc.isSecure());
+					sessionHandler.getSessionCookieConfig().setComment(scc.getComment());
 
-					if (sc.getTrackingModes().size() > 0) {
-						sh.setSessionTrackingModes(sc.getTrackingModes());
+					if (sessionConfig.getTrackingModes().size() > 0) {
+						sessionHandler.setSessionTrackingModes(sessionConfig.getTrackingModes());
+					}
+				}
+			}
+
+			// security configuration - as with sessions, it's taken from OsgiContextModel
+			SecurityConfigurationModel securityConfig = highestRanked.getSecurityConfiguration();
+			LoginConfigModel loginConfig = securityConfig.getLoginConfig();
+			if (loginConfig != null) {
+				// only in this case there's a need to configure anything
+				ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
+				sch.setSecurityHandler(securityHandler);
+
+				securityHandler.setRealmName(loginConfig.getRealmName());
+
+				switch (loginConfig.getAuthMethod().toUpperCase()) {
+					case Constraint.__BASIC_AUTH:
+						securityHandler.setAuthenticator(new BasicAuthenticator());
+						break;
+					case Constraint.__DIGEST_AUTH:
+						DigestAuthenticator digestAuthenticator = new DigestAuthenticator();
+						digestAuthenticator.setMaxNonceAge(configuration.security().getDigestAuthMaxNonceAge());
+						digestAuthenticator.setMaxNonceCount(configuration.security().getDigestAuthMaxNonceCount());
+						securityHandler.setAuthenticator(digestAuthenticator);
+						break;
+					case Constraint.__CERT_AUTH:
+					case Constraint.__CERT_AUTH2:
+						securityHandler.setAuthenticator(new ClientCertAuthenticator());
+						break;
+					case Constraint.__FORM_AUTH:
+						FormAuthenticator formAuthenticator = new FormAuthenticator(loginConfig.getFormLoginPage(),
+								loginConfig.getFormErrorPage(), configuration.security().getFormAuthRedirect());
+						securityHandler.setInitParameter(FormAuthenticator.__FORM_LOGIN_PAGE, loginConfig.getFormLoginPage());
+						securityHandler.setInitParameter(FormAuthenticator.__FORM_ERROR_PAGE, loginConfig.getFormErrorPage());
+						securityHandler.setAuthenticator(formAuthenticator);
+						break;
+					case Constraint.__NEGOTIATE_AUTH:
+						// TODO: create configuration options
+						securityHandler.setAuthenticator(new ConfigurableSpnegoAuthenticator());
+						break;
+					default:
+						// TODO: discover (OSGi, ServiceLoader) an authenticator, e.g., Keycloak
+				}
+
+				for (String role : securityConfig.getSecurityRoles()) {
+					securityHandler.addRole(role);
+				}
+
+				// see org.eclipse.jetty.webapp.StandardDescriptorProcessor.visitSecurityConstraint()
+				for (SecurityConstraintModel constraint : securityConfig.getSecurityConstraints()) {
+					Constraint base = new Constraint();
+					if (constraint.isAuthRolesSet()) {
+						base.setAuthenticate(true);
+						base.setRoles(constraint.getAuthRoles().toArray(new String[0]));
+					}
+					if (constraint.getTransportGuarantee() == ServletSecurity.TransportGuarantee.NONE) {
+						base.setDataConstraint(Constraint.DC_NONE);
+					} else {
+						// DC_CONFIDENTIAL and DC_INTEGRAL are handled equally and effectively mean "use TLS"
+						base.setDataConstraint(Constraint.DC_CONFIDENTIAL);
+					}
+
+					for (SecurityConstraintModel.WebResourceCollection wrc : constraint.getWebResourceCollections()) {
+						Constraint sc = (Constraint) base.clone();
+						sc.setName(wrc.getName());
+
+						if (wrc.getMethods().size() > 0 && wrc.getOmittedMethods().size() > 0) {
+							LOG.warn("Both methods and method omissions specified in the descriptor. Using methods only");
+							wrc.getOmittedMethods().clear();
+						}
+						for (String url : wrc.getPatterns()) {
+							boolean hit = false;
+							for (String method : wrc.getMethods()) {
+								ConstraintMapping mapping = new ConstraintMapping();
+								mapping.setMethod(method);
+								mapping.setPathSpec(url);
+								mapping.setConstraint(sc);
+								securityHandler.addConstraintMapping(mapping);
+								hit = true;
+							}
+							for (String method : wrc.getOmittedMethods()) {
+								ConstraintMapping mapping = new ConstraintMapping();
+								// yes - one-element array as in
+								// org.eclipse.jetty.webapp.StandardDescriptorProcessor.visitSecurityConstraint()
+								mapping.setMethodOmissions(new String[] { method });
+								mapping.setPathSpec(url);
+								mapping.setConstraint(sc);
+								securityHandler.addConstraintMapping(mapping);
+								hit = true;
+							}
+							if (!hit) {
+								// all-method constraint
+								ConstraintMapping mapping = new ConstraintMapping();
+								mapping.setPathSpec(url);
+								mapping.setConstraint(sc);
+								securityHandler.addConstraintMapping(mapping);
+							}
+						}
 					}
 				}
 			}
@@ -1697,76 +1830,6 @@ class JettyServerWrapper implements BatchVisitor {
 		}
 
 		return mappings;
-	}
-
-	// PAXWEB-210: create security constraints
-//	@Override
-	public void addSecurityConstraintMappings(
-			final SecurityConstraintMappingModel model) {
-//					final ServletContextHandler context = server.getOrCreateContext(model);
-//					final SecurityHandler securityHandler = context.getSecurityHandler();
-//					if (securityHandler == null) {
-//						throw new IllegalStateException(
-//								"Internal error: Cannot find the security handler. Please report.");
-//					}
-//					String mappingMethod = model.getMapping();
-//					String constraintName = model.getConstraintName();
-//					String url = model.getUrl();
-//					String dataConstraint = model.getDataConstraint();
-//					List<String> roles = model.getRoles();
-//					boolean authentication = model.isAuthentication();
-//
-//					ConstraintMapping newConstraintMapping = new ConstraintMapping();
-//					newConstraintMapping.setMethod(mappingMethod);
-//					newConstraintMapping.setPathSpec(url);
-//					Constraint constraint = new Constraint();
-//					constraint.setAuthenticate(authentication);
-//					constraint.setName(constraintName);
-//					constraint.setRoles(roles.toArray(new String[roles.size()]));
-//
-//					if (dataConstraint == null || "NONE".equals(dataConstraint)) {
-//						constraint.setDataConstraint(Constraint.DC_NONE);
-//					} else if ("INTEGRAL".equals(dataConstraint)) {
-//						constraint.setDataConstraint(Constraint.DC_INTEGRAL);
-//					} else if ("CONFIDENTIAL".equals(dataConstraint)) {
-//						constraint.setDataConstraint(Constraint.DC_CONFIDENTIAL);
-//					} else {
-//						LOG.warn("Unknown user-data-constraint:" + dataConstraint);
-//						constraint.setDataConstraint(Constraint.DC_CONFIDENTIAL);
-//					}
-//
-//					newConstraintMapping.setConstraint(constraint);
-//
-//					((ConstraintSecurityHandler) securityHandler)
-//							.addConstraintMapping(newConstraintMapping);
-	}
-
-	//	@Override
-	public void removeSecurityConstraintMappings(
-			final SecurityConstraintMappingModel model) {
-//		final ServletContextHandler context = server.getContext(model
-//				.getContextModel().getHttpContext());
-//		if (context == null) {
-//			return; // context already gone
-//		}
-//		final SecurityHandler securityHandler = context.getSecurityHandler();
-//		if (securityHandler == null) {
-//			throw new IllegalStateException(
-//					"Internal error: Cannot find the security handler. Please report.");
-//		}
-//
-//		List<ConstraintMapping> constraintMappings = ((ConstraintSecurityHandler) securityHandler)
-//				.getConstraintMappings();
-//		for (ConstraintMapping constraintMapping : constraintMappings) {
-//			boolean urlMatch = constraintMapping.getPathSpec()
-//					.equalsIgnoreCase(model.getUrl());
-//			boolean methodMatch = (constraintMapping.getMethod() == null && model.getMapping() == null)
-//					|| (constraintMapping.getMethod().equalsIgnoreCase(model.getMapping()));
-//			if (urlMatch && methodMatch) {
-//				constraintMappings.remove(constraintMapping);
-//			}
-//		}
-//		removeContext(model.getContextModel().getHttpContext());
 	}
 
 }

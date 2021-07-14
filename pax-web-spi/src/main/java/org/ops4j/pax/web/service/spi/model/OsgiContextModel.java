@@ -37,6 +37,7 @@ import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.context.DefaultServletContextHelper;
 import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.model.elements.JspConfigurationModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.SessionConfigurationModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
 import org.ops4j.pax.web.service.spi.task.Change;
@@ -314,6 +315,9 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	/** Per OSGi context configuration of sessions - standard config from Servlet spec + Server specific config */
 	private final SessionConfigurationModel sessionConfiguration = new SessionConfigurationModel();
 
+	/** Per OSGi context configuration of security - login config, security constraints and security roles */
+	private final SecurityConfigurationModel securityConfiguration = new SecurityConfigurationModel();
+
 	/**
 	 * Flag indicating whether this {@link OsgiContextModel} comes from Whiteboard.
 	 */
@@ -327,6 +331,10 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	/** Tracks {@link Change unregistration changes} for dynamic servlets/filters/listeners */
 	private final List<Change> unregistrations = new ArrayList<>();
 
+	/**
+	 * {@link ClassLoader} may be configured for given {@link OsgiContextModel} in some cases (WAB), but externally
+	 * configured {@link ClassLoader} may be created in other scenarios (whiteboard, {@link org.osgi.service.http.HttpService}.
+	 */
 	private OsgiServletContextClassLoader classLoader = null;
 
 	public OsgiContextModel(Bundle ownerBundle, Integer rank, Long serviceId, boolean whiteboard) {
@@ -415,7 +423,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	 * instance of the context on each call (but the {@code getHttpContext()}/{@code getServletContextHelper()} doesn't
 	 * accept {@link BundleContext}).</p>
 	 *
-	 * @param bundleContext
+	 * @param bundle
 	 * @return
 	 */
 	public WebContainerContext resolveHttpContext(Bundle bundle) {
@@ -568,7 +576,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	}
 
 	/**
-	 * In Whiteboard and HttpService scenarios, {@link OsgiServletContextClassLoader} is created in an the wrapper
+	 * In Whiteboard and HttpService scenarios, {@link OsgiServletContextClassLoader} is created in the wrapper
 	 * for actual server runtime (to include the bundle specific to given runtime). But in WAB case, we already
 	 * have some set of bundles collected as reachable bundles.
 	 * @param classLoader
@@ -660,6 +668,10 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 
 	public SessionConfigurationModel getSessionConfiguration() {
 		return sessionConfiguration;
+	}
+
+	public SecurityConfigurationModel getSecurityConfiguration() {
+		return securityConfiguration;
 	}
 
 	/**

@@ -85,7 +85,7 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 		setServlet(servlet);
 		setParent(container);
 
-		getPipeline().addValve(new PaxWebStandardWrapperValve((ValveBase) getPipeline().getBasic(), this, realContext));
+		getPipeline().addValve(new PaxWebStandardWrapperValve((ValveBase) getPipeline().getBasic(), this));
 	}
 
 	/**
@@ -134,7 +134,7 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 		// setup proper pipeline - that will invoke the servlet with proper filter chain and with proper req/res
 		// wrappers
 		// "basic" valve is org.apache.catalina.core.StandardWrapperValve
-		getPipeline().addValve(new PaxWebStandardWrapperValve((ValveBase) getPipeline().getBasic(), this, realContext));
+		getPipeline().addValve(new PaxWebStandardWrapperValve((ValveBase) getPipeline().getBasic(), this));
 	}
 
 	public ServletModel getServletModel() {

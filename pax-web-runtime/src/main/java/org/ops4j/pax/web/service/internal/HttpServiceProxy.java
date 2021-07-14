@@ -90,18 +90,6 @@ class HttpServiceProxy implements WebContainer, StoppableHttpService {
 		return delegate.adapt(type);
 	}
 
-	// --- transactional access to web container
-
-	@Override
-	public void begin(HttpContext context) {
-		delegate.begin(context);
-	}
-
-	@Override
-	public void end(HttpContext context) {
-		delegate.end(context);
-	}
-
 	// --- different methods used to retrieve HttpContext
 
 	@Override

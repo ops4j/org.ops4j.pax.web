@@ -59,16 +59,6 @@ class HttpServiceDisabled implements WebContainer {
 		return null;
 	}
 
-	// --- transactional access to web container
-
-	@Override
-	public void begin(HttpContext httpContext) {
-	}
-
-	@Override
-	public void end(HttpContext httpContext) {
-	}
-
 	// --- different methods used to retrieve HttpContext
 
 	@Override

@@ -183,16 +183,6 @@ public class PaxWebServletHandler extends ServletHandler {
 			// if servlet is still started stop the servlet holder (=servlet.destroy()) as Jetty will not do that
 			LOG.debug("Stopping servlet holder {}", holder);
 			try {
-//				ContextClassLoaderUtils.doWithClassLoader(
-//						context.getClassLoader(), new Callable<Void>() {
-//
-//							@Override
-//							public Void call() throws Exception {
-//								holder.stop();
-//								return null;
-//							}
-//
-//						});
 				holder.stop();
 			} catch (Exception e) {
 				throw new RuntimeException(e.getMessage(), e);
