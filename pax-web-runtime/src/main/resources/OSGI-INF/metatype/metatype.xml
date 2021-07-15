@@ -153,8 +153,8 @@
 				name="Max nonce age for DIGEST authentication (in ms)" />
 		<AD id="org.ops4j.pax.web.digestAuth.maxNonceCount" type="Integer" default="1024"
 				name="Max nonce count for DIGEST authentication" />
-		<AD id="org.ops4j.pax.web.formAuth.errorRedirect" type="Boolean" default="true"
-				name="Use redirect to error page for FORM authentication" />
+		<AD id="org.ops4j.pax.web.formAuth.errorRedirect" type="Boolean" default="false"
+				name="Use redirect to error page for FORM authentication (Only for Jetty. Tomcat never redirects, Undertow always redirects)" />
 
 		<!-- Properties related to JSP -->
 

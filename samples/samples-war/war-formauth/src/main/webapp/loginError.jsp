@@ -1,10 +1,12 @@
 <!--
 
+	Copyright 2021 OPS4J.
+
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
 	You may obtain a copy of the License at
 
-	    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 	Unless required by applicable law or agreed to in writing, software
 	distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,13 +15,13 @@
 	limitations under the License.
 
 -->
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
 <html>
 <head>
-<title>Error Page For Examples</title>
+	<title>Error Page For Examples</title>
 </head>
-<body bgcolor="white">
-Invalid username and/or password, please try
-<a href='<%=response.encodeURL("login.jsp")%>'>again</a>
-.
+<body>
+Invalid username and/or password, please try <a href='<%=request.getContextPath() + "/wc/example" %>'> again</a>.
 </body>
 </html>

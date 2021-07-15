@@ -967,6 +967,19 @@
 				<version>${project.version}</version>
 				<type>war</type>
 			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>war-vaadin08-spring</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>war-formauth</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
 
 			<!-- pax-web jsp samples -->
 

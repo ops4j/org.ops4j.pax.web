@@ -21,8 +21,8 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.ops4j.pax.web</groupId>
-		<artifactId>samples</artifactId>
+		<groupId>org.ops4j.pax.web.samples</groupId>
+		<artifactId>samples-war</artifactId>
 		<version>8.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
@@ -31,47 +31,22 @@
 	<artifactId>war-formauth</artifactId>
 	<packaging>war</packaging>
 
-	<name>OPS4J Pax Web - Samples - WAR Extender - Formbased Authentication</name>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+	<name>OPS4J Pax Web WAR Samples - FORM authentication</name>
 
 	<dependencies>
 
-		<!-- pax-web own artifacts -->
+		<!-- pax-web httpservice/webcontainer samples -->
 
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
-			<artifactId>helloworld-wc</artifactId>
-		</dependency>
-
-		<!-- OPS4J dependencies -->
-
-		<dependency>
-			<groupId>org.ops4j.pax.swissbox</groupId>
-			<artifactId>pax-swissbox-optional-jcl</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- OSGi -->
-
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>osgi.core</artifactId>
-			<scope>provided</scope>
+			<artifactId>wc-helloworld</artifactId>
 		</dependency>
 
 		<!-- JavaEE -->
 
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 

@@ -236,8 +236,8 @@ public interface PaxWebConfig {
 	String PID_CFG_DIGESTAUTH_MAX_NONCE_AGE = "org.ops4j.pax.web.digestAuth.maxNonceAge";
 	/** Return max nonce count for DIGEST authentication, defaults to 1024 */
 	String PID_CFG_DIGESTAUTH_MAX_NONCE_COUNT = "org.ops4j.pax.web.digestAuth.maxNonceCount";
-	/** Returns whether to redirect (true, default) to form-login error page or use forward (false) */
-	String PID_CFG_FORMAUTH_REDIRECT = "org.ops4j.pax.web.formAuth.redirect";
+	/** Returns whether to forward (false, default) to form-login error page or use redirect (true) */
+	String PID_CFG_FORMAUTH_REDIRECT = "org.ops4j.pax.web.formAuth.errorRedirect";
 
 	// --- logging configuration properties
 

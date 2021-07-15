@@ -16,16 +16,22 @@
     limitations under the License.
 
 -->
-<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+		version="4.0">
 
-	<display-name>Pax Web Extender WAR Sample</display-name>
+	<listener>
+		<listener-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldListener</listener-class>
+	</listener>
 
 	<servlet>
 		<servlet-name>example.servlet</servlet-name>
 		<servlet-class>org.ops4j.pax.web.extender.samples.war.formauth.ExampleServlet</servlet-class>
 	</servlet>
+	<servlet-mapping>
+		<servlet-name>example.servlet</servlet-name>
+		<url-pattern>/wc/example</url-pattern>
+	</servlet-mapping>
 
 	<servlet>
 		<servlet-name>helloworld.servlet.wc</servlet-name>
@@ -35,6 +41,10 @@
 			<param-value>WebContainer</param-value>
 		</init-param>
 	</servlet>
+	<servlet-mapping>
+		<servlet-name>helloworld.servlet.wc</servlet-name>
+		<url-pattern>/wc</url-pattern>
+	</servlet-mapping>
 
 	<servlet>
 		<servlet-name>helloworld.servlet.wc.sn</servlet-name>
@@ -44,17 +54,6 @@
 			<param-value>WebContainer</param-value>
 		</init-param>
 	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>example.servlet</servlet-name>
-		<url-pattern>/wc/example</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>helloworld.servlet.wc</servlet-name>
-		<url-pattern>/wc</url-pattern>
-	</servlet-mapping>
-
 	<servlet-mapping>
 		<servlet-name>helloworld.servlet.wc.sn</servlet-name>
 		<url-pattern>/wc/sn</url-pattern>
@@ -68,6 +67,14 @@
 			<param-value>Hello World (url pattern)</param-value>
 		</init-param>
 	</filter>
+	<filter-mapping>
+		<filter-name>helloworld.filter.wc</filter-name>
+		<url-pattern>/wc</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>helloworld.filter.wc</filter-name>
+		<url-pattern>/wc/example</url-pattern>
+	</filter-mapping>
 
 	<filter>
 		<filter-name>helloworld.filter.wc.sn</filter-name>
@@ -77,25 +84,18 @@
 			<param-value>Hello World (servlet name)</param-value>
 		</init-param>
 	</filter>
-
 	<filter-mapping>
 		<filter-name>helloworld.filter.wc.sn</filter-name>
 		<servlet-name>helloworld.servlet.wc.sn</servlet-name>
 	</filter-mapping>
 
-	<filter-mapping>
-		<filter-name>helloworld.filter.wc</filter-name>
-		<url-pattern>/wc</url-pattern>
-	</filter-mapping>
-
-	<filter-mapping>
-		<filter-name>helloworld.filter.wc</filter-name>
-		<url-pattern>/wc/example</url-pattern>
-	</filter-mapping>
-
-	<listener>
-		<listener-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldListener</listener-class>
-	</listener>
+	<login-config>
+		<auth-method>FORM</auth-method>
+		<form-login-config>
+			<form-login-page>/login.jsp</form-login-page>
+			<form-error-page>/loginError.jsp</form-error-page>
+		</form-login-config>
+	</login-config>
 
 	<security-constraint>
 		<web-resource-collection>
@@ -108,16 +108,14 @@
 			<role-name>admin</role-name>
 		</auth-constraint>
 	</security-constraint>
-	<login-config>
-		<auth-method>FORM</auth-method>
-		<form-login-config>
-			<form-login-page>/login.jsp</form-login-page>
-			<form-error-page>/loginError.jsp</form-error-page>
-		</form-login-config>
-	</login-config>
+
 	<security-role>
 		<description>Test Role</description>
 		<role-name>admin</role-name>
 	</security-role>
+
+	<welcome-file-list>
+		<welcome-file>/wc</welcome-file>
+	</welcome-file-list>
 
 </web-app>

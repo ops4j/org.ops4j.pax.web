@@ -1618,7 +1618,7 @@ class JettyServerWrapper implements BatchVisitor {
 				ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
 				sch.setSecurityHandler(securityHandler);
 
-				securityHandler.setRealmName(loginConfig.getRealmName());
+				securityHandler.setRealmName(loginConfig.getRealmName() == null ? "default" : loginConfig.getRealmName());
 
 				switch (loginConfig.getAuthMethod().toUpperCase()) {
 					case Constraint.__BASIC_AUTH:
@@ -1636,7 +1636,7 @@ class JettyServerWrapper implements BatchVisitor {
 						break;
 					case Constraint.__FORM_AUTH:
 						FormAuthenticator formAuthenticator = new FormAuthenticator(loginConfig.getFormLoginPage(),
-								loginConfig.getFormErrorPage(), configuration.security().getFormAuthRedirect());
+								loginConfig.getFormErrorPage(), !configuration.security().getFormAuthRedirect());
 						securityHandler.setInitParameter(FormAuthenticator.__FORM_LOGIN_PAGE, loginConfig.getFormLoginPage());
 						securityHandler.setInitParameter(FormAuthenticator.__FORM_ERROR_PAGE, loginConfig.getFormErrorPage());
 						securityHandler.setAuthenticator(formAuthenticator);
