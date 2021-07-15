@@ -15,10 +15,14 @@
  */
 package org.ops4j.pax.web.service.undertow.internal.security;
 
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,13 +30,37 @@ import io.undertow.security.idm.Account;
 import io.undertow.security.idm.Credential;
 import io.undertow.security.idm.IdentityManager;
 import io.undertow.security.idm.PasswordCredential;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * Implementation of {@link IdentityManager} for {@code <w:properties>} and {@code <w:users>} authentication
+ * from {@code undertow.xml}.
+ */
 public class PropertiesIdentityManager implements IdentityManager {
 
-	private final Map<String, String> config;
+	public static final Logger LOG = LoggerFactory.getLogger(PropertiesIdentityManager.class);
+
+	private final Map<String, String> users = new HashMap<>();
+	private final Map<String, Set<String>> roles = new HashMap<>();
 
 	public PropertiesIdentityManager(Map<String, String> config) {
-		this.config = config;
+		config.forEach((user, credentials) -> {
+			String[] creds = credentials != null ? credentials.split("\\s*,\\s*") : new String[0];
+			if (creds.length == 0) {
+				return;
+			}
+			this.users.put(user, creds[0].trim());
+			if (creds.length > 1) {
+				Set<String> roles = new HashSet<>();
+				for (int i = 1; i < creds.length; i++) {
+					roles.add(creds[i].trim());
+				}
+				this.roles.put(user, roles);
+			} else {
+				this.roles.put(user, Collections.emptySet());
+			}
+		});
 	}
 
 	@Override
@@ -49,21 +77,35 @@ public class PropertiesIdentityManager implements IdentityManager {
 	public Account verify(String id, Credential credential) {
 		if (credential instanceof PasswordCredential) {
 			char[] password = ((PasswordCredential) credential).getPassword();
-			String userData = config.get(id);
-			if (userData != null) {
-				List<String> pieces = Arrays.asList(userData.split(","));
-				if (pieces.get(0).equals(new String(password))) {
-					Principal principal = new SimplePrincipal(id);
-					Set<String> roles = new HashSet<>(pieces.subList(1, pieces.size()));
-					return new AccountImpl(principal, roles);
+			String pwd = users.get(id);
+			if (pwd != null) {
+				if (compare(pwd, new String(password))) {
+					return new AccountImpl(new SimplePrincipal(id), roles.get(id));
 				}
 			}
 		}
 		return null;
 	}
 
-	static class SimplePrincipal implements Principal {
+	private boolean compare(String stored, String provided) {
+		if (stored.contains(":")) {
+			String alg = stored.substring(0, stored.indexOf(':'));
+			stored = stored.substring(stored.indexOf(':') + 1).toUpperCase();
+			try {
+				MessageDigest md = MessageDigest.getInstance(alg);
+				byte[] hash = md.digest(provided.getBytes(StandardCharsets.UTF_8));
+				String encoded = encode(hash);
+				return stored.equals(encoded);
+			} catch (NoSuchAlgorithmException e) {
+				LOG.warn("Can't verify credentials: {}", e.getMessage(), e);
+				return false;
+			}
+		} else {
+			return stored.equals(provided);
+		}
+	}
 
+	static class SimplePrincipal implements Principal {
 		private final String name;
 
 		SimplePrincipal(String name) {
@@ -77,7 +119,6 @@ public class PropertiesIdentityManager implements IdentityManager {
 	}
 
 	static class AccountImpl implements Account {
-
 		private final Principal principal;
 		private final Set<String> roles;
 
@@ -95,6 +136,15 @@ public class PropertiesIdentityManager implements IdentityManager {
 		public Set<String> getRoles() {
 			return roles;
 		}
+	}
+
+	public static String encode(byte[] bytes) {
+		StringWriter sw = new StringWriter();
+		for (byte b : bytes) {
+			sw.append(String.format("%02x", b));
+		}
+
+		return sw.toString().toUpperCase();
 	}
 
 }

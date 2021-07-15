@@ -1,1 +1,0 @@
-registerResources test (ROOT)

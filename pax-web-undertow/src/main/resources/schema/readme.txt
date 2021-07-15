@@ -14,4 +14,4 @@
 # limitations under the License.
 #
 
-admin: MD5:21232f297a57a5a743894a0e4a801fc3,server-administrator,content-administrator,admin
+Wildfly/Undertow schemas are copied from $WILDFLY_HOME/docs/schema

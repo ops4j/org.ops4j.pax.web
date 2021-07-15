@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+   implied.
+
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+		targetNamespace="urn:org.ops4j.pax.web:undertow:1.1"
+		xmlns="urn:org.ops4j.pax.web:undertow:1.1"
+		xmlns:tns="urn:org.ops4j.pax.web:undertow:1.1"
+		xmlns:io="urn:jboss:domain:io:3.0"
+		xmlns:wildfly="urn:jboss:domain:17.0"
+		xmlns:undertow="urn:jboss:domain:undertow:12.0"
+		elementFormDefault="qualified" attributeFormDefault="unqualified"
+		version="1.0">
+
+	<xs:annotation>
+		<xs:documentation>
+			Configuration schema for pax-web-undertow reusing schemas from wildfly-24.x/undertow-2.2.x subsystem
+		</xs:documentation>
+	</xs:annotation>
+
+	<xs:import namespace="urn:jboss:domain:io:3.0" />
+	<xs:import namespace="urn:jboss:domain:undertow:12.0" />
+	<xs:import namespace="urn:jboss:domain:17.0" />
+
+	<xs:element name="undertow" type="tns:UndertowType" />
+
+	<xs:complexType name="UndertowType">
+		<xs:sequence>
+			<xs:element ref="io:subsystem" minOccurs="0" />
+			<!-- This element is optional to allow Undertow configuration "fragments" with only security realms configured -->
+			<xs:element ref="undertow:subsystem" minOccurs="0" />
+			<!--
+				since urn:jboss:domain:undertow:4.0 this element is "legacy" and "ssl-context" attribute from
+				https-listener should be used to reference "new" elytron-based SSLContext definition from
+				urn:wildfly:elytron:9.0 XSD. But here in Pax Web 8 we'll stick to a little extended
+				wildfly:security-realmType
+			-->
+			<xs:element name="security-realm" type="tns:security-realmType" minOccurs="0" maxOccurs="unbounded" />
+			<xs:element name="interface" type="wildfly:named-interfaceType" minOccurs="0" maxOccurs="unbounded" />
+			<xs:element name="socket-binding" type="wildfly:socket-bindingType" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="security-realmType">
+		<xs:complexContent>
+			<xs:extension base="wildfly:security-realmType">
+				<xs:sequence>
+					<xs:element name="user-principal-class-name" type="xs:string" minOccurs="0" />
+					<xs:element name="role-principal-class-name" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+</xs:schema>

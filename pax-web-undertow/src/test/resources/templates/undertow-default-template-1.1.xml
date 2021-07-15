@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2021 OPS4J.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<undertow xmlns="urn:org.ops4j.pax.web:undertow:1.1"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:w="urn:jboss:domain:17.0"
+		xmlns:io="urn:jboss:domain:io:3.0"
+		xsi:schemaLocation="
+			urn:org.ops4j.pax.web:undertow:1.1 file://../../../main/resources/schema/pax-web-undertow_1_1.xsd
+			urn:jboss:domain:io:3.0 file://../../../main/resources/schema/wildfly-io_3_0.xsd
+			urn:jboss:domain:undertow:12.0 file://../../../main/resources/schema/wildfly-undertow_12_0.xsd
+			urn:jboss:domain:17.0 file://../../../main/resources/schema/wildfly-config_17_0.xsd">
+
+	<!--
+		IO subsystem may be used to configure "default" buffer pool and "default" worker which will be used
+		if no "worker" or "buffer-pool" attributes are specified.
+		When no "default" worker and buffer pool are defined, Pax Web will create default workers internally.
+		buffer-pool may be referenced from the listener and websocket
+		 - buffer-size defaults to:
+			- when < 64MB of Xmx: 512
+			- when < 128MB of Xmx: 1024
+			- when >= 128MB of Xmx: 16K - 20
+		 - direct-buffers defaults to:
+			- when < 64MB of Xmx: false
+			- when >= 64MB of Xmx: true
+		 - buffers-per-slice doesn't seem to be used...
+			- when < 128MB of Xmx: 10
+			- when >= 128MB of Xmx: 20
+
+		worker may be referenced from the listener, access-log and websocket
+		 - io-threads defaults to Math.max(Runtime.getRuntime().availableProcessors(), 2);
+		 - task-core-threads and task-max-threads default to io-threads * 8
+	-->
+	<subsystem xmlns="urn:jboss:domain:io:3.0">
+		<buffer-pool name="default" buffer-size="16364" direct-buffers="true" />
+		<buffer-pool name="bp2" buffer-size="16364" direct-buffers="true" />
+		<worker name="default" io-threads="8" task-core-threads="64" task-max-threads="64"
+				stack-size="0"
+				task-keepalive="60000" />
+		<worker name="w2" io-threads="8" task-core-threads="64" task-max-threads="64"
+				stack-size="0"
+				task-keepalive="60000" />
+	</subsystem>
+
+	<!-- https://docs.jboss.org/author/display/WFLY/Undertow+subsystem+configuration -->
+	<subsystem xmlns="urn:jboss:domain:undertow:12.0">
+		<!-- org.wildfly.extension.undertow.ByteBufferPoolDefinition -->
+		<!-- used to construct org.wildfly.extension.undertow.ByteBufferPoolDefinition.ByteBufferPoolService - not needed -->
+		<byte-buffer-pool name="" buffer-size="" direct="" max-pool-size="" />
+		<!-- org.wildfly.extension.undertow.BufferCacheDefinition -->
+		<buffer-cache name="default" buffer-size="1024" buffers-per-region="1024" max-regions="10" />
+		<!-- org.wildfly.extension.undertow.ServerDefinition -->
+		<server name="default-server" default-host="localhost" servlet-container="default">
+			<!-- org.wildfly.extension.undertow.HttpListenerResourceDefinition -->
+			<http-listener
+					receive-buffer="65536"
+					send-buffer="65536"
+					tcp-backlog="128"
+					tcp-keep-alive="false"
+					read-timeout="${http.read.timeout}"
+					write-timeout="${http.write.timeout}"
+					max-connections="5"
+
+					name="http"
+					socket-binding="http"
+					worker="default"
+					buffer-pool="default"
+					enabled="true"
+					resolve-peer-address="false"
+					disallowed-methods="TRACE OPTIONS"
+					secure="false"
+
+					max-post-size="10485760"
+					buffer-pipelined-data="false"
+					max-header-size="1048576"
+					max-parameters="1000"
+					max-headers="200"
+					max-cookies="200"
+					allow-encoded-slash="false"
+					decode-url="true"
+					url-charset="UTF-8"
+					always-set-keep-alive="true"
+					max-buffered-request-size="16384"
+					record-request-start-time="true"
+					allow-equals-in-cookie-value="false"
+					no-request-timeout="60000"
+					request-parse-timeout="60000"
+					rfc6265-cookie-validation="false"
+					allow-unescaped-characters-in-url="false"
+
+					certificate-forwarding="false"
+					redirect-socket="https"
+					proxy-address-forwarding="false"
+
+					enable-http2="false"
+					http2-enable-push="false"
+					http2-header-table-size="4096"
+					http2-initial-window-size="65535"
+					http2-max-concurrent-streams="-1"
+					http2-max-frame-size="16384"
+					http2-max-header-list-size="-1"
+
+					require-host-http11="false"
+					proxy-protocol="false"
+			/>
+
+			<!-- org.wildfly.extension.undertow.HttpsListenerResourceDefinition -->
+			<!-- verify-client: org.xnio.SslClientAuthMode.NOT_REQUESTED, org.xnio.SslClientAuthMode.REQUESTED, org.xnio.SslClientAuthMode.REQUIRED -->
+			<https-listener
+					receive-buffer="65536"
+					send-buffer="65536"
+					tcp-backlog="128"
+					tcp-keep-alive="false"
+					read-timeout="${http.read.timeout}"
+					write-timeout="${http.write.timeout}"
+					max-connections="5"
+
+					name="http"
+					socket-binding="https"
+					worker="default"
+					buffer-pool="default"
+					enabled="true"
+					resolve-peer-address="false"
+					disallowed-methods="TRACE OPTIONS"
+					secure="true"
+
+					max-post-size="10485760"
+					buffer-pipelined-data="false"
+					max-header-size="1048576"
+					max-parameters="1000"
+					max-headers="200"
+					max-cookies="200"
+					allow-encoded-slash="false"
+					decode-url="true"
+					url-charset="UTF-8"
+					always-set-keep-alive="true"
+					max-buffered-request-size="16384"
+					record-request-start-time="true"
+					allow-equals-in-cookie-value="false"
+					no-request-timeout="60000"
+					request-parse-timeout="60000"
+					rfc6265-cookie-validation="false"
+					allow-unescaped-characters-in-url="false"
+
+					ssl-context="use-security-realm-instead!"
+					certificate-forwarding="false"
+					proxy-address-forwarding="false"
+
+					security-realm="https"
+					verify-client="NOT_REQUESTED"
+					enabled-cipher-suites="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384 TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"
+					enabled-protocols="TLSv1.1 TLSv1.2"
+					ssl-session-cache-size="0"
+					ssl-session-timeout="0"
+
+					enable-http2="false"
+					enable-spdy="false"
+					http2-enable-push="false"
+					http2-header-table-size="4096"
+					http2-initial-window-size="65535"
+					http2-max-concurrent-streams="-1"
+					http2-max-frame-size="16384"
+					http2-max-header-list-size="-1"
+
+					require-host-http11="false"
+					proxy-protocol="false"
+			/>
+
+			<!-- org.wildfly.extension.undertow.HostDefinition -->
+			<host name="default-host" alias="localhost">
+				<location name="/" handler="welcome-content" />
+				<location name="/docs" handler="docs-content">
+					<filter-ref name="x-docs" />
+				</location>
+				<!-- pattern: common, combined, "" // io.undertow.server.handlers.accesslog.AccessLogHandler.handleCommonNames() -->
+				<access-log directory="${karaf.data}/log" pattern="common" prefix="access_log." suffix="log" rotate="true" />
+				<filter-ref name="server-header" />
+				<filter-ref name="x-powered-by-header" />
+				<filter-ref name="ex-filter-1" predicate="method(POST)" />
+			</host>
+		</server>
+		<!-- org.wildfly.extension.undertow.ServletContainerDefinition -->
+		<servlet-container name="default" default-session-timeout="31">
+			<!-- Not used - configured per container-agnostic web context -->
+			<jsp-config />
+			<persistent-sessions path="${karaf.data}/web-sessions" />
+			<websockets />
+			<welcome-files>
+				<welcome-file name="index.html" />
+				<welcome-file name="index.txt" />
+			</welcome-files>
+			<session-cookie name="JSESSIONID" domain="domain" http-only="true" max-age="130" secure="true" comment="Session Cookie" />
+		</servlet-container>
+		<!-- org.wildfly.extension.undertow.handlers.HandlerDefinitions -->
+		<handlers>
+			<!-- org.wildfly.extension.undertow.handlers.FileHandler#createHandler -->
+			<file name="welcome-content" path="/tmp" cache-buffer-size="1024" cache-buffers="1024"
+					case-sensitive="false" directory-listing="false" follow-symlink="false" safe-symlink-paths="/tmp /data/tmp" />
+			<!-- org.wildfly.extension.undertow.handlers.ReverseProxyHandler#createHandler - not handled by Pax Web -->
+			<reverse-proxy name="rp1" />
+		</handlers>
+		<!-- org.wildfly.extension.undertow.filters.FilterDefinitions -->
+		<filters>
+			<!-- filters for reference from /host/filter-ref and /host/location/filter-ref -->
+			<response-header name="server-header" header-name="Server" header-value="pax-undertow" />
+			<response-header name="x-powered-by-header" header-name="X-Powered-By" header-value="Pax-Undertow/1" />
+			<response-header name="x-docs" header-name="X-Docs" header-value="Pax-Undertow-Docs/1" />
+			<!-- not handled by Pax Web - error pages are configured per context -->
+			<error-page name="custom-error-page-1" code="404" path="/error" />
+			<!-- not yet handled by Pax Web -->
+			<filter name="custom-filter-1" class-name="fully.qualified.filter.class.Name" module="irrelevant JBoss Module" />
+			<!-- undertow-core-2.0.26.Final.jar!/META-INF/services/io.undertow.server.handlers.builder.HandlerBuilder -->
+			<expression-filter name="ex-filter-1" expression="redirect(http://localhost)" />
+			<gzip name="gzip-1" />
+			<!-- org.wildfly.extension.undertow.filters.RequestLimitHandler -->
+			<request-limit name="rl-1" max-concurrent-requests="100" queue-size="128" />
+			<!-- org.wildfly.extension.undertow.filters.RewriteFilterDefinition#createHttpHandler -->
+			<rewrite name="r-1" target="/c1" redirect="true" />
+			<rewrite name="r-2" target="/c2" redirect="false" />
+		</filters>
+		<!-- Not handled in Pax Web -->
+		<application-security-domains />
+	</subsystem>
+
+	<!-- https://docs.jboss.org/author/display/WFLY/Security+Realms -->
+	<!--
+		we'll use "default" security realm by default to configure jaas/properties authentication
+		(io.undertow.security.idm.IdentityManager):
+		 - w:jaas - org.ops4j.pax.web.service.undertow.internal.security.JaasIdentityManager
+		 - w:properties - org.ops4j.pax.web.service.undertow.internal.security.PropertiesIdentityManager
+	-->
+	<security-realm name="default">
+		<w:authentication>
+			<!-- Choose one from jaas/properties/users -->
+			<!-- JaasIdentityManager for given realm -->
+			<w:jaas name="karaf" />
+			<!--
+				OR PropertiesIdentityManager for users from properties file in the format:
+					user1 = password, role1, role2, ...
+					user2 = password, role1, role2, ...
+				where password may have a prefix describing MessageDigest to use (as in <w:users>)
+			-->
+			<w:properties path="users.properties" />
+			<!-- OR PropertiesIdentityManager configured directly in XML (no roles can be configured) -->
+			<w:users>
+				<!--
+					Passwords handle the following java.security.MessageDigest prefixes (also in properties file):
+					- MD5 : sun.security.provider.MD5
+					- SHA, SHA-1, SHA1 : sun.security.provider.SHA
+					- SHA-224 : sun.security.provider.SHA2$SHA224
+					- SHA-256 : sun.security.provider.SHA2$SHA256
+					- SHA-384 : sun.security.provider.SHA5$SHA384
+					- SHA-512 : sun.security.provider.SHA5$SHA512
+					- SHA-512/224 : sun.security.provider.SHA5$SHA512_224
+					- SHA-512/256 : sun.security.provider.SHA5$SHA512_256
+					if there's a prefix, the part following ':' is HEX encoded digest of the password
+				-->
+				<w:user username="admin">
+					<w:password>MD5:21232f297a57a5a743894a0e4a801fc3</w:password>
+				</w:user>
+				<w:user username="user">
+					<w:password>plain-password</w:password>
+				</w:user>
+			</w:users>
+			<!-- kerberos, ldap, local and plug-in are not handled by Pax Web. Please use <w:jaas> and proper login module(s) -->
+<!--			<w:kerberos />-->
+<!--			<w:ldap connection="ldap://localhost:389" base-dn="dc=undertow" />-->
+<!--			<w:local />-->
+<!--			<w:plug-in name="p1" />-->
+			<!-- truststore is used not for user authentication, but to configure server truststore for TLS -->
+<!--			<w:truststore />-->
+		</w:authentication>
+		<!-- Not handled by Pax Web -->
+		<w:authorization />
+		<user-principal-class-name>org.apache.karaf.jaas.boot.principal.UserPrincipal</user-principal-class-name>
+		<role-principal-class-name>org.apache.karaf.jaas.boot.principal.RolePrincipal</role-principal-class-name>
+		<!--<role-principal-class-name>...</role-principal-class-name>-->
+	</security-realm>
+	<!--
+		Any security realm may be referenced by https-listener to define trust/keystore, protocols and cipher suites
+	-->
+	<security-realm name="https">
+		<w:server-identities>
+			<w:ssl>
+				<!-- sun.security.ssl.ProtocolVersion -->
+				<!-- sun.security.ssl.CipherSuite -->
+				<!-- openssl ciphers 'ALL:eNULL' | sed -e 's/:/\n/g' | sort -->
+				<w:engine
+						enabled-cipher-suites="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384 TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"
+						enabled-protocols="TLSv1 TLSv1.1 TLSv1.2" />
+				<w:keystore path="${karaf.etc}/certs/server.keystore" provider="JKS" alias="server"
+						keystore-password="secret" key-password="secret"
+						generate-self-signed-certificate-host="localhost" />
+			</w:ssl>
+			<!-- Not handled by Pax Web -->
+			<w:kerberos />
+			<!-- Not handled by Pax Web -->
+			<w:secret value="" />
+		</w:server-identities>
+		<w:authentication>
+			<w:truststore path="${karaf.etc}/certs/server.truststore" provider="JKS" keystore-password="secret" />
+		</w:authentication>
+	</security-realm>
+
+	<!-- Interface lists IP addresses to bind to -->
+	<interface name="default">
+		<w:inet-address value="0.0.0.0" />
+		<w:inet-address value="127.0.0.1" />
+	</interface>
+	<interface name="secure">
+		<w:inet-address value="127.0.0.1" />
+	</interface>
+
+	<!-- Socket Binding adds port for each IP from referenced Interface -->
+	<socket-binding name="http" interface="default" port="${org.osgi.service.http.port}" />
+	<socket-binding name="https" interface="secure" port="${org.osgi.service.http.port.secure}" />
+
+</undertow>

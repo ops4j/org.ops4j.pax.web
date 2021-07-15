@@ -22,7 +22,7 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 public class ResourceServletTest {
 
 	private ResourceManager resourceManager;
-	private Context context;
+//	private Context context;
 	private OsgiContextModel contextModel;
 
 //	public void setUp() {

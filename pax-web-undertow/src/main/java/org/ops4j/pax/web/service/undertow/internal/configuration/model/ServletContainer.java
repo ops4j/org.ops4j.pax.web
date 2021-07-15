@@ -28,7 +28,8 @@ import static org.ops4j.pax.web.service.undertow.internal.configuration.model.Ob
 		"jspConfig",
 		"persistentSessions",
 		"websockets",
-		"welcomeFiles"
+		"welcomeFiles",
+		"sessionCookie"
 })
 public class ServletContainer {
 
@@ -49,7 +50,10 @@ public class ServletContainer {
 
 	@XmlElementWrapper(name = "welcome-files")
 	@XmlElement(name = "welcome-file")
-	private List<WelcomeFile> welcomeFiles = new ArrayList<>();
+	private final List<WelcomeFile> welcomeFiles = new ArrayList<>();
+
+	@XmlElement(name = "session-cookie")
+	private SessionCookie sessionCookie;
 
 	public String getName() {
 		return name;
@@ -93,6 +97,14 @@ public class ServletContainer {
 
 	public List<WelcomeFile> getWelcomeFiles() {
 		return welcomeFiles;
+	}
+
+	public SessionCookie getSessionCookie() {
+		return sessionCookie;
+	}
+
+	public void setSessionCookie(SessionCookie sessionCookie) {
+		this.sessionCookie = sessionCookie;
 	}
 
 	@Override
@@ -170,6 +182,83 @@ public class ServletContainer {
 		public String toString() {
 			final StringBuilder sb = new StringBuilder("{ ");
 			sb.append("name: ").append(name);
+			sb.append(" }");
+			return sb.toString();
+		}
+	}
+
+	@XmlType(name = "session-cookieType", namespace = NS_UNDERTOW)
+	public static class SessionCookie {
+		@XmlAttribute
+		private String name;
+		@XmlAttribute
+		private String domain;
+		@XmlAttribute
+		private String comment;
+		@XmlAttribute(name = "http-only")
+		private boolean httpOnly;
+		@XmlAttribute
+		private boolean secure;
+		@XmlAttribute(name = "max-age")
+		private Integer maxAge;
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getDomain() {
+			return domain;
+		}
+
+		public void setDomain(String domain) {
+			this.domain = domain;
+		}
+
+		public String getComment() {
+			return comment;
+		}
+
+		public void setComment(String comment) {
+			this.comment = comment;
+		}
+
+		public boolean isHttpOnly() {
+			return httpOnly;
+		}
+
+		public void setHttpOnly(boolean httpOnly) {
+			this.httpOnly = httpOnly;
+		}
+
+		public boolean isSecure() {
+			return secure;
+		}
+
+		public void setSecure(boolean secure) {
+			this.secure = secure;
+		}
+
+		public Integer getMaxAge() {
+			return maxAge;
+		}
+
+		public void setMaxAge(Integer maxAge) {
+			this.maxAge = maxAge;
+		}
+
+		@Override
+		public String toString() {
+			final StringBuilder sb = new StringBuilder("{ ");
+			sb.append("name: ").append(name);
+			sb.append(", domain: ").append(domain);
+			sb.append(", comment: ").append(comment);
+			sb.append(", http only: ").append(httpOnly);
+			sb.append(", secure: ").append(secure);
+			sb.append(", max age: ").append(maxAge);
 			sb.append(" }");
 			return sb.toString();
 		}

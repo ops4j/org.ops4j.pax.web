@@ -469,7 +469,7 @@ class TomcatServerWrapper implements BatchVisitor {
 
 		String[] addresses = configuration.server().getListeningAddresses();
 
-		// review connectors possibly configured from external files and check if they match configadmin configuration
+		// review connectors possibly configured from external tomcat-server.xml and check if they match configadmin configuration
 		for (String address : addresses) {
 			verifyConnector(address, httpPort, httpEnabled, false,
 					() -> tomcatFactory.createDefaultConnector(server, address, serverExecutor, configuration));
@@ -789,25 +789,6 @@ class TomcatServerWrapper implements BatchVisitor {
 			//				processContextConfig(context, digester, configFile);
 			//			}
 			//		}
-			//
-			//		String authMethod = contextModel.getAuthMethod();
-			//		if (authMethod == null) {
-			//			authMethod = "NONE";
-			//		}
-			//		String realmName = contextModel.getRealmName();
-			//		String loginPage = contextModel.getFormLoginPage();
-			//		String errorPage = contextModel.getFormErrorPage();
-			//		LoginConfig loginConfig = new LoginConfig(authMethod, realmName, loginPage, errorPage);
-			//		context.setLoginConfig(loginConfig);
-			//		LOG.debug("loginConfig: method={} realm={}", authMethod, realmName);
-			//		// Custom Service Valve for checking authentication stuff ...
-			//		context.getPipeline().addValve(new ServiceValve(httpContext));
-			//		if (context.getAuthenticator() == null) {
-			//			// Authentication Valve according to configured authentication method
-			//			context.getPipeline().addValve(getAuthenticatorValve(authMethod));
-			//		}
-			//
-			//		// TODO: compare with JettyServerWrapper.addContext
 
 			// explicit no check for existing mapping under given physical context path
 			contextHandlers.put(contextPath, context);
@@ -1639,108 +1620,6 @@ class TomcatServerWrapper implements BatchVisitor {
 		}
 	}
 
-//	@Override
-//	public void addSecurityConstraintMapping(final SecurityConstraintMappingModel secMapModel) {
-//		LOG.debug("add security contstraint mapping [{}]", secMapModel);
-//		final Context context = findOrCreateContext(secMapModel
-//				.getContextModel());
-//
-//		String mappingMethod = secMapModel.getMapping();
-//		String constraintName = secMapModel.getConstraintName();
-//		String url = secMapModel.getUrl();
-//		String dataConstraint = secMapModel.getDataConstraint();
-//		List<String> roles = secMapModel.getRoles();
-//		boolean authentication = secMapModel.isAuthentication();
-//
-//		SecurityConstraint[] constraints = context.findConstraints();
-//		SecurityConstraint secConstraint = new SecurityConstraint();
-//		boolean foundExisting = false;
-//
-//		for (SecurityConstraint securityConstraint : constraints) {
-//			if (securityConstraint.getDisplayName().equalsIgnoreCase(
-//					constraintName)) {
-//				secConstraint = securityConstraint;
-//				foundExisting = true;
-//				continue;
-//			}
-//		}
-//
-//		if (!foundExisting) {
-//			secConstraint.setDisplayName(secMapModel.getConstraintName());
-//			secConstraint.setAuthConstraint(authentication);
-//			for (String authRole : roles) {
-//				secConstraint.addAuthRole(authRole);
-//			}
-//			secConstraint.setUserConstraint(dataConstraint);
-//			context.addConstraint(secConstraint);
-//		}
-//
-//		SecurityCollection collection = new SecurityCollection();
-//		collection.addMethod(mappingMethod);
-//		collection.addPattern(url);
-//
-//		secConstraint.addCollection(collection);
-//
-//	}
-//
-//	@Override
-//	public void removeSecurityConstraintMapping(SecurityConstraintMappingModel secMapModel) {
-//		if (secMapModel == null) {
-//			return;
-//		}
-//
-//		LOG.debug("remove security contstraint mapping [{}]", secMapModel);
-//		final Context context = findOrCreateContext(secMapModel.getContextModel());
-//
-//		SecurityConstraint toRemove = null;
-//		for (SecurityConstraint sc: context.findConstraints()) {
-//			if (sc.getDisplayName().equalsIgnoreCase(secMapModel.getConstraintName())) {
-//				toRemove = sc;
-//				break;
-//			}
-//		}
-//
-//		if (toRemove != null) {
-//			context.removeConstraint(toRemove);
-//		}
-//	}
-//
-//	private Valve getAuthenticatorValve(String authMethod) {
-//		String authUpper = authMethod.toUpperCase(Locale.ROOT);
-//		// this is the content of org/apache/catalina/startup/Authenticators.properties
-//		switch (authUpper) {
-//		case "BASIC":
-//			return new BasicAuthenticator();
-//		case "CLIENT-CERT":
-//			return new SSLAuthenticator();
-//		case "DIGEST":
-//			return new DigestAuthenticator();
-//		case "FORM":
-//			return new FormAuthenticator();
-//		case "SPNEGO":
-//			return new SpnegoAuthenticator();
-//		case "NONE":
-//			return new NonLoginAuthenticator();
-//		default:
-//			return getAuthenticator(authUpper);
-//		}
-//	}
-//
-//	private Valve getAuthenticator(String method) {
-//		ServiceLoader<AuthenticatorService> sl = ServiceLoader.load(AuthenticatorService.class, getClass().getClassLoader());
-//		for (AuthenticatorService svc : sl) {
-//			try {
-//				Valve auth = svc.getAuthenticatorService(method, Valve.class);
-//				if (auth != null) {
-//					return auth;
-//				}
-//			} catch (Throwable t) {
-//				LOG.debug("Unable to load AuthenticatorService for: " + method, t);
-//			}
-//		}
-//		return null;
-//	}
-//
 //	private URL getDefaultContextXml() {
 //		// get the resource URL from the config fragment
 //		URL defaultContextUrl = getClass().getResource("/context.xml");

@@ -23,12 +23,19 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlType;
 
 import io.undertow.Handlers;
+import io.undertow.attribute.ExchangeAttributes;
 import io.undertow.predicate.Predicate;
 import io.undertow.predicate.Predicates;
-import io.undertow.server.HandlerWrapper;
 import io.undertow.server.HttpHandler;
+import io.undertow.server.handlers.RedirectHandler;
+import io.undertow.server.handlers.RequestLimitingHandler;
+import io.undertow.server.handlers.SetAttributeHandler;
 import io.undertow.server.handlers.SetHeaderHandler;
-import io.undertow.server.handlers.builder.HandlerParser;
+import io.undertow.server.handlers.builder.PredicatedHandler;
+import io.undertow.server.handlers.builder.PredicatedHandlersParser;
+import io.undertow.server.handlers.encoding.ContentEncodingRepository;
+import io.undertow.server.handlers.encoding.EncodingHandler;
+import io.undertow.server.handlers.encoding.GzipEncodingProvider;
 
 import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_UNDERTOW;
 
@@ -52,7 +59,7 @@ public class UndertowSubsystem {
 
 	@XmlElementWrapper(name = "handlers")
 	@XmlElement(name = "file")
-	private List<FileHandler> fileHandlers = new ArrayList<>();
+	private final List<FileHandler> fileHandlers = new ArrayList<>();
 
 	@XmlElement
 	private Filters filters;
@@ -95,12 +102,10 @@ public class UndertowSubsystem {
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder("{");
-		sb.append("\n\t\tbuffer cache: " + bufferCache);
-		sb.append("\n\t\tserver: " + server);
-		sb.append("\n\t\tservlet container: " + servletContainer);
-		sb.append("\n\t}");
-		return sb.toString();
+		return "{\n\t\tbuffer cache: " + bufferCache +
+				"\n\t\tserver: " + server +
+				"\n\t\tservlet container: " + servletContainer +
+				"\n\t}";
 	}
 
 	@XmlType(name = "buffer-cacheType", namespace = NS_UNDERTOW)
@@ -148,13 +153,11 @@ public class UndertowSubsystem {
 
 		@Override
 		public String toString() {
-			final StringBuilder sb = new StringBuilder("{ ");
-			sb.append("name: ").append(name);
-			sb.append(", buffer size: ").append(bufferSize);
-			sb.append(", buffers per region: ").append(buffersPerRegion);
-			sb.append(", max regions: ").append(maxRegions);
-			sb.append(" }");
-			return sb.toString();
+			return "{ name: " + name +
+					", buffer size: " + bufferSize +
+					", buffers per region: " + buffersPerRegion +
+					", max regions: " + maxRegions +
+					" }";
 		}
 	}
 
@@ -164,6 +167,18 @@ public class UndertowSubsystem {
 		private String name;
 		@XmlAttribute
 		private String path;
+		@XmlAttribute(name = "cache-buffer-size")
+		private Integer cacheBufferSize = 1024;
+		@XmlAttribute(name = "cache-buffers")
+		private Integer cacheBuffers = 1024;
+		@XmlAttribute(name = "directory-listing")
+		private Boolean directoryListing = false;
+		@XmlAttribute(name = "follow-symlink")
+		private Boolean followSymlink = false;
+		@XmlAttribute(name = "case-sensitive")
+		private Boolean caseSensitive = true;
+		@XmlAttribute(name = "safe-symlink-paths")
+		private final List<String> safeSymlinkPaths = new ArrayList<>();
 
 		public String getName() {
 			return name;
@@ -180,23 +195,76 @@ public class UndertowSubsystem {
 		public void setPath(String path) {
 			this.path = path;
 		}
+
+		public Integer getCacheBufferSize() {
+			return cacheBufferSize;
+		}
+
+		public void setCacheBufferSize(Integer cacheBufferSize) {
+			this.cacheBufferSize = cacheBufferSize;
+		}
+
+		public Integer getCacheBuffers() {
+			return cacheBuffers;
+		}
+
+		public void setCacheBuffers(Integer cacheBuffers) {
+			this.cacheBuffers = cacheBuffers;
+		}
+
+		public Boolean getDirectoryListing() {
+			return directoryListing;
+		}
+
+		public void setDirectoryListing(Boolean directoryListing) {
+			this.directoryListing = directoryListing;
+		}
+
+		public Boolean getFollowSymlink() {
+			return followSymlink;
+		}
+
+		public void setFollowSymlink(Boolean followSymlink) {
+			this.followSymlink = followSymlink;
+		}
+
+		public Boolean getCaseSensitive() {
+			return caseSensitive;
+		}
+
+		public void setCaseSensitive(Boolean caseSensitive) {
+			this.caseSensitive = caseSensitive;
+		}
+
+		public List<String> getSafeSymlinkPaths() {
+			return safeSymlinkPaths;
+		}
 	}
 
 	@XmlType(name = "filterType", namespace = NS_UNDERTOW, propOrder = {
 			"responseHeaders",
 			"errorPages",
 			"customFilters",
-			"expressionFilters"
+			"expressionFilters",
+			"gzipFilters",
+			"requestLimitFilters",
+			"rewriteFilters"
 	})
 	public static class Filters {
 		@XmlElement(name = "response-header")
-		private List<ResponseHeaderFilter> responseHeaders = new ArrayList<>();
+		private final List<ResponseHeaderFilter> responseHeaders = new ArrayList<>();
 		@XmlElement(name = "error-page")
-		private List<ErrorPageFilter> errorPages = new ArrayList<>();
+		private final List<ErrorPageFilter> errorPages = new ArrayList<>();
 		@XmlElement(name = "filter")
-		private List<CustomFilter> customFilters = new ArrayList<>();
+		private final List<CustomFilter> customFilters = new ArrayList<>();
 		@XmlElement(name = "expression-filter")
-		private List<ExpressionFilter> expressionFilters = new ArrayList<>();
+		private final List<ExpressionFilter> expressionFilters = new ArrayList<>();
+		@XmlElement(name = "gzip")
+		private final List<GzipFilter> gzipFilters = new ArrayList<>();
+		@XmlElement(name = "request-limit")
+		private final List<RequestLimitFilter> requestLimitFilters = new ArrayList<>();
+		@XmlElement(name = "rewrite")
+		private final List<RewriteFilter> rewriteFilters = new ArrayList<>();
 
 		public List<ResponseHeaderFilter> getResponseHeaders() {
 			return responseHeaders;
@@ -212,6 +280,18 @@ public class UndertowSubsystem {
 
 		public List<ExpressionFilter> getExpressionFilters() {
 			return expressionFilters;
+		}
+
+		public List<GzipFilter> getGzipFilters() {
+			return gzipFilters;
+		}
+
+		public List<RequestLimitFilter> getRequestLimitFilters() {
+			return requestLimitFilters;
+		}
+
+		public List<RewriteFilter> getRewriteFilters() {
+			return rewriteFilters;
 		}
 	}
 
@@ -234,7 +314,7 @@ public class UndertowSubsystem {
 		 * @param predicate
 		 * @return
 		 */
-		public abstract HttpHandler configure(HttpHandler handler, String predicate);
+		public abstract HttpHandler configure(HttpHandler handler, Predicate predicate);
 	}
 
 	@XmlType(name = "response-headerType", namespace = NS_UNDERTOW)
@@ -245,14 +325,12 @@ public class UndertowSubsystem {
 		private String value;
 
 		@Override
-		public HttpHandler configure(HttpHandler handler, String predicate) {
+		public HttpHandler configure(HttpHandler handler, Predicate predicate) {
 			SetHeaderHandler setHeaderHandler = new SetHeaderHandler(handler, header, value);
 			if (predicate == null) {
 				return setHeaderHandler;
 			}
-			Predicate p = Predicates.parse(predicate, HttpHandler.class.getClassLoader());
-			// predicate means "apply SetHeaderHandler if predicate matches, otherwise forward to passed handler"
-			return Handlers.predicate(p, setHeaderHandler, handler);
+			return Handlers.predicate(predicate, setHeaderHandler, handler);
 		}
 
 		public String getHeader() {
@@ -280,8 +358,8 @@ public class UndertowSubsystem {
 		private String path;
 
 		@Override
-		public HttpHandler configure(HttpHandler handler, String predicate) {
-			// TODO: not sure what to do here
+		public HttpHandler configure(HttpHandler handler, Predicate predicate) {
+			// not handled by Pax Web - error pages are configured using OSGi means (Whiteboard, WAB)
 			return handler;
 		}
 
@@ -310,7 +388,7 @@ public class UndertowSubsystem {
 		private String module;
 
 		@Override
-		public HttpHandler configure(HttpHandler handler, String predicate) {
+		public HttpHandler configure(HttpHandler handler, Predicate predicate) {
 			// TODO: use javax.servlet filters or just generic io.undertow.server.HttpHandler?
 			return handler;
 		}
@@ -340,14 +418,13 @@ public class UndertowSubsystem {
 		private String module;
 
 		@Override
-		public HttpHandler configure(HttpHandler handler, String predicate) {
-			HandlerWrapper wrapper = HandlerParser.parse(expression, HttpHandler.class.getClassLoader());
-			if (predicate == null) {
-				return wrapper.wrap(handler);
-			}
-			Predicate p = Predicates.parse(predicate, HttpHandler.class.getClassLoader());
+		public HttpHandler configure(HttpHandler handler, Predicate predicate) {
+			List<PredicatedHandler> handlers = PredicatedHandlersParser.parse(expression, HttpHandler.class.getClassLoader());
 			// predicate means "apply expression if predicate matches, otherwise forward to passed handler withour processing"
-			return Handlers.predicate(p, wrapper.wrap(handler), handler);
+			if (predicate == null) {
+				return Handlers.predicates(handlers, handler);
+			}
+			return Handlers.predicate(predicate, Handlers.predicates(handlers, handler), handler);
 		}
 
 		public String getExpression() {
@@ -364,6 +441,90 @@ public class UndertowSubsystem {
 
 		public void setModule(String module) {
 			this.module = module;
+		}
+	}
+
+	@XmlType(name = "gzipType", namespace = NS_UNDERTOW)
+	public static class GzipFilter extends AbstractFilter {
+		@Override
+		public HttpHandler configure(HttpHandler handler, Predicate predicate) {
+			if (predicate == null) {
+				predicate = Predicates.truePredicate();
+			}
+			return new EncodingHandler(handler, new ContentEncodingRepository()
+					.addEncodingHandler("gzip", new GzipEncodingProvider(), 50, predicate));
+		}
+	}
+
+	@XmlType(name = "request-limitType", namespace = NS_UNDERTOW)
+	public static class RequestLimitFilter extends AbstractFilter {
+		@XmlAttribute(name = "max-concurrent-requests")
+		private Integer maxConcurrentRequests = 100;
+		@XmlAttribute(name = "queue-size")
+		private Integer queueSize = 0;
+
+		public Integer getMaxConcurrentRequests() {
+			return maxConcurrentRequests;
+		}
+
+		public void setMaxConcurrentRequests(Integer maxConcurrentRequests) {
+			this.maxConcurrentRequests = maxConcurrentRequests;
+		}
+
+		public Integer getQueueSize() {
+			return queueSize;
+		}
+
+		public void setQueueSize(Integer queueSize) {
+			this.queueSize = queueSize;
+		}
+
+		@Override
+		public HttpHandler configure(HttpHandler handler, Predicate predicate) {
+			HttpHandler requestLimitingHandler = new RequestLimitingHandler(maxConcurrentRequests, queueSize, handler);
+			if (predicate == null) {
+				return requestLimitingHandler;
+			}
+			return Handlers.predicate(predicate, requestLimitingHandler, handler);
+		}
+	}
+
+	@XmlType(name = "rewriteFilterType", namespace = NS_UNDERTOW)
+	public static class RewriteFilter extends AbstractFilter {
+		@XmlAttribute
+		private String target;
+		@XmlAttribute
+		private String redirect;
+
+		public String getTarget() {
+			return target;
+		}
+
+		public void setTarget(String target) {
+			this.target = target;
+		}
+
+		public String getRedirect() {
+			return redirect;
+		}
+
+		public void setRedirect(String redirect) {
+			this.redirect = redirect;
+		}
+
+		@Override
+		public HttpHandler configure(HttpHandler handler, Predicate predicate) {
+			HttpHandler redirectHandler;
+			if ("true".equalsIgnoreCase(redirect)) {
+				redirectHandler = new RedirectHandler(target);
+			} else {
+				redirectHandler = new SetAttributeHandler(handler, ExchangeAttributes.relativePath(),
+						ExchangeAttributes.parser(HttpHandler.class.getClassLoader()).parse(target));
+			}
+			if (predicate == null) {
+				return redirectHandler;
+			}
+			return Handlers.predicate(predicate, redirectHandler, handler);
 		}
 	}
 

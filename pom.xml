@@ -264,7 +264,7 @@
 		<dependency.org.ow2.asm>9.2</dependency.org.ow2.asm>
 		<dependency.org.primefaces>10.0.0</dependency.org.primefaces>
 		<dependency.org.slf4j>1.7.31</dependency.org.slf4j>
-		<dependency.org.springframework>5.3.8</dependency.org.springframework>
+		<dependency.org.springframework>5.3.9</dependency.org.springframework>
 	</properties>
 
 	<build>
@@ -797,6 +797,11 @@
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
 				<artifactId>auth-config-fragment-tomcat</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>auth-config-fragment-undertow</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

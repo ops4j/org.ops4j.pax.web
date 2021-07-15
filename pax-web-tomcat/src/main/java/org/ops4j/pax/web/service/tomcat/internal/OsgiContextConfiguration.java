@@ -212,4 +212,19 @@ public class OsgiContextConfiguration implements LifecycleListener {
 		}
 	}
 
+//	private Valve getAuthenticator(String method) {
+//		ServiceLoader<AuthenticatorService> sl = ServiceLoader.load(AuthenticatorService.class, getClass().getClassLoader());
+//		for (AuthenticatorService svc : sl) {
+//			try {
+//				Valve auth = svc.getAuthenticatorService(method, Valve.class);
+//				if (auth != null) {
+//					return auth;
+//				}
+//			} catch (Throwable t) {
+//				LOG.debug("Unable to load AuthenticatorService for: " + method, t);
+//			}
+//		}
+//		return null;
+//	}
+
 }

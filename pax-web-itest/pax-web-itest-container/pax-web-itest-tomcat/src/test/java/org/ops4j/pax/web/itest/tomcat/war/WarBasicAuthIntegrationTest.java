@@ -32,8 +32,8 @@ public class WarBasicAuthIntegrationTest extends AbstractWarBasicAuthIntegration
 	@Configuration
 	public Option[] configure() {
 		Option[] serverOptions = combine(baseConfigure(), paxWebTomcat());
-		// this will install a fragment attached to pax-web-jetty bundle, so it can find "jetty.xml" resource
-		// used to alter the Jetty server
+		// this will install a fragment attached to pax-web-tomcat bundle, so it can find "tomcat-server.xml" resource
+		// used to configure the Tomcat server
 		MavenArtifactProvisionOption auth = mavenBundle("org.ops4j.pax.web.samples", "auth-config-fragment-tomcat")
 				.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart();
 		Option[] authOptions = combine(serverOptions, auth);

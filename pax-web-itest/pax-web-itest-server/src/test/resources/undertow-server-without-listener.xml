@@ -16,12 +16,9 @@
     limitations under the License.
 
 -->
-<undertow xmlns="urn:org.ops4j.pax.web:undertow:1.0"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="
-			urn:jboss:domain:undertow:4.0 http://www.jboss.org/schema/jbossas/wildfly-undertow_4_0.xsd">
+<undertow xmlns="urn:org.ops4j.pax.web:undertow:1.1">
 
-	<subsystem xmlns="urn:jboss:domain:undertow:4.0">
+	<subsystem xmlns="urn:jboss:domain:undertow:12.0">
 		<server name="default-server" default-host="localhost">
 			<host name="default-host" alias="localhost" />
 		</server>

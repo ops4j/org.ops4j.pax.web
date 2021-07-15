@@ -16,9 +16,9 @@
 
 /**
  * <p>Undertow itself doesn't define means to parse {@code undertow.xml} file. This is done by Wildfly using class
- * like {@code org.wildfly.extension.undertow.UndertowSubsystemParser_10_0}.</p>
+ * like {@code org.wildfly.extension.undertow.UndertowSubsystemParser_12_0}.</p>
  */
-@XmlSchema(namespace = "urn:org.ops4j.pax.web:undertow:1.0",
+@XmlSchema(namespace = ObjectFactory.NS_PAXWEB_UNDERTOW,
 		elementFormDefault = XmlNsForm.QUALIFIED, attributeFormDefault = XmlNsForm.UNQUALIFIED,
 		xmlns = {
 			@XmlNs(prefix = "", namespaceURI = ObjectFactory.NS_PAXWEB_UNDERTOW),

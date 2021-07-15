@@ -45,8 +45,6 @@ public class UndertowServerControllerFactory implements ServerControllerFactory 
 	/** Utility class to construct different Undertow supporting objects */
 	private final UndertowFactory undertowFactory;
 
-	private final XnioProvider xnioProvider;
-
 	/**
 	 * Constructs global instance (no more needed) of {@link ServerControllerFactory} for Undertow.
 	 *
@@ -58,9 +56,8 @@ public class UndertowServerControllerFactory implements ServerControllerFactory 
 			XnioProvider provider) {
 		this.paxWebUndertowBundle = paxWebUndertowBundle;
 		this.classLoader = classLoader;
-		this.xnioProvider = provider;
 
-		undertowFactory = new UndertowFactory(paxWebUndertowBundle, classLoader, xnioProvider);
+		undertowFactory = new UndertowFactory(classLoader, provider);
 	}
 
 	@Override

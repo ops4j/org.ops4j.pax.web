@@ -28,10 +28,10 @@
 	</parent>
 
 	<groupId>org.ops4j.pax.web.samples</groupId>
-	<artifactId>undertow-auth-config-fragment</artifactId>
+	<artifactId>auth-config-fragment-undertow</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web - Samples - Undertow authentication config fragment</name>
+	<name>OPS4J Pax Web Config Samples - Undertow auth</name>
 
 	<build>
 		<plugins>
@@ -42,7 +42,6 @@
 				<configuration>
 					<instructions>
 						<Fragment-Host>org.ops4j.pax.web.pax-web-undertow</Fragment-Host>
-						<Import-Packages>*</Import-Packages>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -51,11 +50,11 @@
 
 	<dependencies>
 
-		<!-- Undertow -->
+		<!-- pax-web own artifacts -->
 
 		<dependency>
-			<groupId>io.undertow</groupId>
-			<artifactId>undertow-servlet</artifactId>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-undertow</artifactId>
 		</dependency>
 
 	</dependencies>

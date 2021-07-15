@@ -31,6 +31,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.PKIXBuilderParameters;
 import java.security.cert.X509CertSelector;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -68,7 +69,6 @@ import org.ops4j.pax.web.service.spi.config.SecurityConfiguration;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.IoSubsystem;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.SecurityRealm;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.Server;
-import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xnio.ChannelListener;
@@ -87,10 +87,8 @@ public class UndertowFactory {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UndertowFactory.class);
 
-	private final Bundle paxWebUndertowBundle;
 	private final ClassLoader classLoader;
 
-	private final XnioProvider xnioProvider;
 	private final Xnio xnio;
 
 	private boolean alpnAvailable;
@@ -103,10 +101,8 @@ public class UndertowFactory {
 	private XnioWorker defaultWorker;
 	private ByteBufferPool defaultBufferPool;
 
-	UndertowFactory(Bundle paxWebUndertowBundle, ClassLoader classLoader, XnioProvider xnioProvider) {
-		this.paxWebUndertowBundle = paxWebUndertowBundle;
+	UndertowFactory(ClassLoader classLoader, XnioProvider xnioProvider) {
 		this.classLoader = classLoader;
-		this.xnioProvider = xnioProvider;
 		this.xnio = xnioProvider.getInstance();
 
 		discovery();
@@ -295,7 +291,7 @@ public class UndertowFactory {
 	 */
 	private AcceptingChannelWithAddress createListener(String address, HttpHandler rootHandler,
 			Configuration configuration, Server.Listener def, InetSocketAddress listenerAddress) {
-		AcceptingChannel<? extends StreamConnection> listener = null;
+		AcceptingChannel<? extends StreamConnection> listener;
 		try {
 			listener = createListener(configuration, def, rootHandler, null, getDefaultWorker(configuration),
 					defaultBufferPool, listenerAddress);
@@ -317,8 +313,8 @@ public class UndertowFactory {
 	 * @param listenerAddress
 	 * @return
 	 */
-	public AcceptingChannel<? extends StreamConnection> createListener(Configuration config, Server.Listener definition, HttpHandler rootHandler,
-			SecurityRealm realm,
+	public AcceptingChannel<? extends StreamConnection> createListener(Configuration config, Server.Listener definition,
+			HttpHandler rootHandler, SecurityRealm realm,
 			XnioWorker workerForListener, ByteBufferPool bufferPoolForListener, InetSocketAddress listenerAddress)
 			throws IOException {
 
@@ -351,9 +347,8 @@ public class UndertowFactory {
 
 		// the "server"
 		if (definition instanceof Server.HttpListener) {
-			// useProxyProtocol can't be specified via XML. Undertow.Builder allows it via
-			// io.undertow.Undertow.ListenerConfig.useProxyProtocol
-			if (/*listener.useProxyProtocol*/ false) {
+			Server.HttpListener http = (Server.HttpListener) definition;
+			if (http.isProxyProtocol()) {
 				finalListener = new ProxyProtocolOpenListener(openListener, null, bufferPoolForListener, OptionMap.EMPTY);
 			}
 			ChannelListener<AcceptingChannel<StreamConnection>> acceptListener = ChannelListeners.openListenerAdapter(finalListener);
@@ -374,17 +369,48 @@ public class UndertowFactory {
 			}
 			if (https.getSslSessionCacheSize() > 0) {
 				sslParametersBuilder.set(Options.SSL_ENABLE_SESSION_CREATION, true);
+				sslParametersBuilder.set(Options.SSL_CLIENT_SESSION_CACHE_SIZE, https.getSslSessionCacheSize());
+				sslParametersBuilder.set(Options.SSL_SERVER_SESSION_CACHE_SIZE, https.getSslSessionCacheSize());
 			}
-			if (https.getEnabledCipherSuites().size() > 0) {
-				sslParametersBuilder.set(Options.SSL_ENABLED_CIPHER_SUITES, Sequence.of(https.getEnabledCipherSuites()));
-			} else if (config.security().getCiphersuiteIncluded().length > 0) {
-				sslParametersBuilder.set(Options.SSL_ENABLED_CIPHER_SUITES, Sequence.of(config.security().getCiphersuiteIncluded()));
+			sslParametersBuilder.set(Options.SSL_CLIENT_SESSION_TIMEOUT, https.getSslSessionTimeout());
+			sslParametersBuilder.set(Options.SSL_SERVER_SESSION_TIMEOUT, https.getSslSessionTimeout());
+
+			SecurityRealm.Engine engine = null;
+			if (realm != null && realm.getIdentities() != null && realm.getIdentities().getSsl() != null
+					&& realm.getIdentities().getSsl().getEngine() != null) {
+				engine = realm.getIdentities().getSsl().getEngine();
 			}
-			if (https.getEnabledProtocols().size() > 0) {
-				sslParametersBuilder.set(Options.SSL_ENABLED_PROTOCOLS, Sequence.of(https.getEnabledProtocols()));
-			} else if (config.security().getProtocolsIncluded().length > 0) {
-				sslParametersBuilder.set(Options.SSL_ENABLED_PROTOCOLS, Sequence.of(config.security().getProtocolsIncluded()));
+
+			List<String> enabledCipherSuites = https.getEnabledCipherSuites();
+			if (enabledCipherSuites.size() > 0 && engine != null && engine.getEnabledCipherSuites().size() > 0) {
+				LOG.warn("Enabled cipher suites specified both for https-listener and ssl/engine." +
+						" Cipher suites from the https-listener will be used.");
 			}
+			if (enabledCipherSuites.size() == 0 && engine != null) {
+				enabledCipherSuites = engine.getEnabledCipherSuites();
+			}
+			if (enabledCipherSuites.size() == 0 && config.security().getCiphersuiteIncluded().length > 0) {
+				enabledCipherSuites = Arrays.asList(config.security().getCiphersuiteIncluded());
+			}
+			if (enabledCipherSuites.size() > 0) {
+				sslParametersBuilder.set(Options.SSL_ENABLED_CIPHER_SUITES, Sequence.of(enabledCipherSuites));
+			}
+
+			List<String> enabledProtocols = https.getEnabledProtocols();
+			if (enabledProtocols.size() > 0 && engine != null && engine.getEnabledProtocols().size() > 0) {
+				LOG.warn("Enabled protocols specified both for https-listener and ssl/engine." +
+						" Protocols from the https-listener will be used.");
+			}
+			if (enabledProtocols.size() == 0 && engine != null) {
+				enabledProtocols = engine.getEnabledProtocols();
+			}
+			if (enabledProtocols.size() == 0 && config.security().getProtocolsIncluded().length > 0) {
+				enabledProtocols = Arrays.asList(config.security().getProtocolsIncluded());
+			}
+			if (enabledProtocols.size() > 0) {
+				sslParametersBuilder.set(Options.SSL_ENABLED_PROTOCOLS, Sequence.of(enabledProtocols));
+			}
+
 			// javax.net.ssl.SSLParameters.setUseCipherSuitesOrder()
 			sslParametersBuilder.set(UndertowOptions.SSL_USER_CIPHER_SUITES_ORDER, true);
 			OptionMap sslParameters = sslParametersBuilder.getMap();
@@ -392,7 +418,7 @@ public class UndertowFactory {
 			SSLContext sslContext = buildSSLContext(config, https, realm);
 			UndertowXnioSsl xnioSsl = new UndertowXnioSsl(xnio, sslParameters, bufferPoolForListener, sslContext);
 
-			if (/*listener.useProxyProtocol*/ false) {
+			if (https.isProxyProtocol()) {
 				finalListener = new ProxyProtocolOpenListener(openListener, xnioSsl, bufferPoolForListener, sslParameters);
 			}
 			ChannelListener<AcceptingChannel<SslConnection>> acceptListener = ChannelListeners.openListenerAdapter(finalListener);
@@ -444,7 +470,7 @@ public class UndertowFactory {
 		undertowOptions.set(UndertowOptions.DECODE_URL, listener.isDecodeUrl());
 		undertowOptions.set(UndertowOptions.ALLOW_ENCODED_SLASH, listener.isAllowEncodedSlash());
 		undertowOptions.set(UndertowOptions.ALLOW_EQUALS_IN_COOKIE_VALUE, listener.isAllowEqualsInCookieValue());
-//					undertowOptions.set(UndertowOptions.ALLOW_UNESCAPED_CHARACTERS_IN_URL, ...);
+		undertowOptions.set(UndertowOptions.ALLOW_UNESCAPED_CHARACTERS_IN_URL, listener.isAllowUnescapedCharactersInUrl());
 		undertowOptions.set(UndertowOptions.URL_CHARSET, listener.getUrlCharset());
 
 		undertowOptions.set(UndertowOptions.ALWAYS_SET_KEEP_ALIVE, listener.isAlwaysSetKeepAlive());
@@ -521,8 +547,8 @@ public class UndertowFactory {
 	private SSLContext buildSSLContext(Configuration config, Server.HttpsListener definition, SecurityRealm realm) {
 		SecurityConfiguration sec = config.security();
 
-		SecurityRealm.Keystore keystore = null;
-		SecurityRealm.Truststore truststore = null;
+		SecurityRealm.Keystore keystore;
+		SecurityRealm.Truststore truststore;
 
 		if (realm == null || realm.getAuthentication() == null || realm.getAuthentication().getTruststore() == null) {
 			// fallback configuration from PID
@@ -664,6 +690,10 @@ public class UndertowFactory {
 			}
 
 			context.init(keyManagers, trustManagers, random);
+			context.getClientSessionContext().setSessionCacheSize(definition.getSslSessionCacheSize());
+			context.getClientSessionContext().setSessionTimeout(definition.getSslSessionTimeout());
+			context.getServerSessionContext().setSessionCacheSize(definition.getSslSessionCacheSize());
+			context.getServerSessionContext().setSessionTimeout(definition.getSslSessionTimeout());
 
 			return context;
 		} catch (Exception e) {
@@ -862,11 +892,9 @@ public class UndertowFactory {
 
 		@Override
 		public String toString() {
-			final StringBuilder sb = new StringBuilder("AcceptingChannelWithAddress{");
-			sb.append("acceptingChannel=").append(acceptingChannel);
-			sb.append(", address=").append(address);
-			sb.append('}');
-			return sb.toString();
+			return "AcceptingChannelWithAddress{acceptingChannel=" + acceptingChannel +
+					", address=" + address +
+					"}";
 		}
 	}
 

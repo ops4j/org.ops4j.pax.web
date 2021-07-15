@@ -31,7 +31,7 @@
 	<artifactId>auth-config-fragment-tomcat</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web Config Samples - Tomcat authentication</name>
+	<name>OPS4J Pax Web Config Samples - Tomcat auth</name>
 
 	<build>
 		<plugins>

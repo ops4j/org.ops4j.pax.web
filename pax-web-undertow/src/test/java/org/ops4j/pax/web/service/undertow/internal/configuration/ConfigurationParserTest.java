@@ -48,7 +48,7 @@ public class ConfigurationParserTest {
 
 	@Test
 	public void jaxbModel() throws Exception {
-		LOG.info("Unmarshall undertow-default-template.xml");
+		LOG.info("Unmarshall undertow-default-template-1.1.xml");
 //		StreamSource source = new StreamSource(getClass().getResourceAsStream("/templates/undertow-default-template.xml"));
 		Unmarshaller unmarshaller = context.createUnmarshaller();
 
@@ -65,7 +65,7 @@ public class ConfigurationParserTest {
 		XMLReader xmlReader = spf.newSAXParser().getXMLReader();
 		UnmarshallerHandler unmarshallerHandler = unmarshaller.getUnmarshallerHandler();
 		xmlReader.setContentHandler(new ResolvingContentHandler(pid, unmarshallerHandler));
-		xmlReader.parse(new InputSource(getClass().getResourceAsStream("/templates/undertow-default-template.xml")));
+		xmlReader.parse(new InputSource(getClass().getResourceAsStream("/templates/undertow-default-template-1.1.xml")));
 
 		//Configuration cfg = (Configuration) unmarshaller.unmarshal(source);
 		UndertowConfiguration cfg = (UndertowConfiguration) unmarshallerHandler.getResult();

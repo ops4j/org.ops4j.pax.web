@@ -23,6 +23,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.InetSocketAddress;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,6 +38,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -51,6 +53,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.SessionCookieConfig;
+import javax.servlet.annotation.ServletSecurity;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.UnmarshallerHandler;
@@ -59,6 +62,9 @@ import javax.xml.parsers.SAXParserFactory;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.connector.ByteBufferPool;
+import io.undertow.predicate.Predicate;
+import io.undertow.predicate.Predicates;
+import io.undertow.security.idm.IdentityManager;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.OpenListener;
@@ -66,6 +72,8 @@ import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.accesslog.AccessLogHandler;
 import io.undertow.server.handlers.accesslog.AccessLogReceiver;
 import io.undertow.server.handlers.accesslog.DefaultAccessLogReceiver;
+import io.undertow.server.handlers.resource.PathResourceManager;
+import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.servlet.ServletExtension;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.ConfidentialPortManager;
@@ -76,12 +84,17 @@ import io.undertow.servlet.api.ErrorPage;
 import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.InstanceHandle;
 import io.undertow.servlet.api.ListenerInfo;
+import io.undertow.servlet.api.LoginConfig;
 import io.undertow.servlet.api.MimeMapping;
+import io.undertow.servlet.api.SecurityConstraint;
+import io.undertow.servlet.api.SecurityInfo;
 import io.undertow.servlet.api.ServletContainer;
 import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.api.ServletSessionConfig;
 import io.undertow.servlet.api.ServletStackTraces;
 import io.undertow.servlet.api.SessionPersistenceManager;
+import io.undertow.servlet.api.TransportGuaranteeType;
+import io.undertow.servlet.api.WebResourceCollection;
 import io.undertow.servlet.core.ContextClassLoaderSetupAction;
 import io.undertow.servlet.core.DeploymentImpl;
 import io.undertow.servlet.core.ManagedFilter;
@@ -101,10 +114,14 @@ import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.model.elements.LoginConfigModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConfigurationModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.SessionConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
+import org.ops4j.pax.web.service.spi.servlet.DefaultSessionCookieConfig;
 import org.ops4j.pax.web.service.spi.servlet.DynamicRegistrations;
 import org.ops4j.pax.web.service.spi.servlet.OsgiDynamicServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
@@ -128,11 +145,15 @@ import org.ops4j.pax.web.service.spi.task.TransactionStateChange;
 import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.undertow.internal.configuration.ResolvingContentHandler;
+import org.ops4j.pax.web.service.undertow.internal.configuration.model.Interface;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.IoSubsystem;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.SecurityRealm;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.Server;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.SocketBinding;
 import org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowConfiguration;
+import org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowSubsystem;
+import org.ops4j.pax.web.service.undertow.internal.security.JaasIdentityManager;
+import org.ops4j.pax.web.service.undertow.internal.security.PropertiesIdentityManager;
 import org.ops4j.pax.web.service.undertow.internal.web.FlexibleErrorPages;
 import org.ops4j.pax.web.service.undertow.internal.web.OsgiServletContainerInitializerInfo;
 import org.ops4j.pax.web.service.undertow.internal.web.UndertowResourceServlet;
@@ -201,6 +222,8 @@ class UndertowServerWrapper implements BatchVisitor {
 
 	private final UndertowFactory undertowFactory;
 
+	private IdentityManager identityManager;
+
 	/**
 	 * A set of context paths that are being configured within <em>transactions</em> - context is started only at
 	 * the end of the transaction.
@@ -226,7 +249,7 @@ class UndertowServerWrapper implements BatchVisitor {
 	//  - io.undertow.servlet.api.Deployment is something that's managed by "deployment manager" and it's created after
 	//    telling "deployment manager" to "deploy()" itself
 	//
-	// Now the problem is that while "deployment" (io.undertow.servlet.api.Deployment) can be used to
+	// Now the problem is that while "deployment" (io.undertow.servlet.api.Deployment) can be used to call
 	// io.undertow.servlet.api.Deployment.getServlets() to get io.undertow.servlet.core.ManagedServlets instance
 	// to which we can add new servlets, this ManagedServlets class CAN'T be used to remove existing servlets...
 	//
@@ -288,13 +311,11 @@ class UndertowServerWrapper implements BatchVisitor {
 	 */
 	private final Configuration configuration;
 
-	/** JAXB context used to unmarshall Undertow XML configuration */
-	private JAXBContext jaxb = null;
-
 	/** Servlet to use when no servlet is mapped - to ensure that preprocessors and filters are run correctly. */
 	private final Default404Servlet default404Servlet = new Default404Servlet(true);
 
-	private SessionCookieConfig defaultSessionCookieConfig;
+	private SessionCookieConfig defaultSessionCookieConfig = null;
+	private Integer defaultSessionTimeout = null;
 	private SessionPersistenceManager globalSessionPersistenceManager;
 
 	// configuration read from undertow.xml
@@ -329,7 +350,7 @@ class UndertowServerWrapper implements BatchVisitor {
 
 		// apply single (if exists) external undertow.xml file by reading it according to Wildfly XSDs,
 		// but using Pax Web specific handlers
-		// before Pax Web 8 thre was also etc/undertow.properties with identity manager properties,
+		// before Pax Web 8 there was also etc/undertow.properties with identity manager properties,
 		// but it's no longer supported
 		try {
 			applyUndertowConfiguration();
@@ -347,22 +368,20 @@ class UndertowServerWrapper implements BatchVisitor {
 		verifyListenerConfiguration();
 
 		// default session configuration is prepared, but not set in the server instance. It can be set
-		// only after first context is created
-		this.defaultSessionCookieConfig = configuration.session().getDefaultSessionCookieConfig();
+		// only after first context is created. Configuration from undertow.xml has higher priority than PID.
+		if (defaultSessionCookieConfig == null) {
+			this.defaultSessionCookieConfig = configuration.session().getDefaultSessionCookieConfig();
+		}
+		if (defaultSessionTimeout == null) {
+			defaultSessionTimeout = configuration.session().getSessionTimeout();
+		}
 
-		File dir = configuration.session().getSessionStoreDirectory();
-		if (dir != null) {
-			// configure or override session persistence manager that could've been configured in undertow.xml
-			if (globalSessionPersistenceManager != null) {
-				LOG.warn("Overriding session persistence manager {} configured in external XML file with new"
-								+ "manager configured using PID and location {}",
-						globalSessionPersistenceManager, configuration.session().getSessionStoreDirectory());
-			}
-
-			LOG.info("Using file session persistence. Location: " + dir.getCanonicalPath());
-			globalSessionPersistenceManager = new FileSessionPersistence(dir);
-		} else {
-			if (globalSessionPersistenceManager == null) {
+		if (globalSessionPersistenceManager == null) {
+			File dir = configuration.session().getSessionStoreDirectory();
+			if (dir != null) {
+				LOG.info("Using file session persistence. Location: " + dir.getCanonicalPath());
+				globalSessionPersistenceManager = new FileSessionPersistence(dir);
+			} else {
 				LOG.info("Using in-memory session persistence");
 				globalSessionPersistenceManager = new InMemorySessionPersistence();
 			}
@@ -375,51 +394,80 @@ class UndertowServerWrapper implements BatchVisitor {
 	 */
 	private void applyUndertowConfiguration() throws Exception {
 		File[] locations = configuration.server().getConfigurationFiles();
+		URL undertowResource = getClass().getResource("/undertow.xml");
 		if (locations.length == 0) {
-			LOG.info("No external Undertow configuration file specified. Default/PID configuration will be used.");
-			return;
+			if (undertowResource == null) {
+				LOG.info("No external Undertow configuration files specified. Default/PID configuration will be used.");
+			} else {
+				LOG.info("Found \"undertow.xml\" resource on the classpath: {}.", undertowResource);
+			}
 		} else if (locations.length > 1) {
-			LOG.warn("Can't specify Undertow configuration using more than one XML file. Skipping XML configuration.");
-			return;
+			LOG.warn("Can't specify Undertow configuration using more than one XML file. Only {} will be used.", locations[0]);
 		} else {
-			LOG.info("Processing Undertow configuration using file: {}", locations[0]);
+			if (undertowResource != null) {
+				LOG.info("Found additional \"undertow.xml\" resource on the classpath: {}, but {} will be used instead.",
+						undertowResource, locations[0]);
+			}
+			LOG.info("Processing Undertow configuration from file: {}", locations[0]);
 		}
 
-		File xmlConfig = locations[0];
+		File xmlConfig = locations.length > 0 ? locations[0] : null;
 
-//			case PROPERTIES:
-//				LOG.info("Using \"" + undertowResource + "\" to read additional configuration for Undertow");
-//				configureIdentityManager(undertowResource);
-//				// do not break - go to standard PID configuration
-//			case PID:
-//				LOG.info("Using \"org.ops4j.pax.url.web\" PID to configure Undertow");
-//				rootHandler = configureUndertow(configuration, builder, rootHandler);
-//				break;
-//		}
+		if (xmlConfig != null || undertowResource != null) {
+			JAXBContext jaxb = JAXBContext.newInstance("org.ops4j.pax.web.service.undertow.internal.configuration.model", classLoader);
+			Unmarshaller unmarshaller = jaxb.createUnmarshaller();
+			UnmarshallerHandler unmarshallerHandler = unmarshaller.getUnmarshallerHandler();
 
-		jaxb = JAXBContext.newInstance("org.ops4j.pax.web.service.undertow.internal.configuration.model", classLoader);
-		Unmarshaller unmarshaller = jaxb.createUnmarshaller();
-		UnmarshallerHandler unmarshallerHandler = unmarshaller.getUnmarshallerHandler();
+			// indirect unmarshalling with property resolution *inside XML attribute values*
+			SAXParserFactory spf = SAXParserFactory.newInstance();
+			spf.setNamespaceAware(true);
+			XMLReader xmlReader = spf.newSAXParser().getXMLReader();
 
-		// indirect unmarshalling with property resolution *inside XML attribute values*
-		SAXParserFactory spf = SAXParserFactory.newInstance();
-		spf.setNamespaceAware(true);
-		XMLReader xmlReader = spf.newSAXParser().getXMLReader();
+			xmlReader.setContentHandler(new ResolvingContentHandler(configuration.all(), unmarshallerHandler));
+			if (xmlConfig != null) {
+				LOG.debug("Parsing {}", xmlConfig);
+				try (InputStream stream = new FileInputStream(xmlConfig)) {
+					xmlReader.parse(new InputSource(stream));
+				}
+			} else {
+				LOG.debug("Parsing {}", undertowResource);
+				try (InputStream stream = undertowResource.openStream()) {
+					xmlReader.parse(new InputSource(stream));
+				}
+			}
 
-		xmlReader.setContentHandler(new ResolvingContentHandler(configuration.all(), unmarshallerHandler));
-		try (InputStream stream = new FileInputStream(xmlConfig)) {
-			xmlReader.parse(new InputSource(stream));
+			this.undertowConfiguration = (UndertowConfiguration) unmarshallerHandler.getResult();
 		}
 
-		this.undertowConfiguration = (UndertowConfiguration) unmarshallerHandler.getResult();
-//		if (cfg == null
-//				|| cfg.getSocketBindings().size() == 0
-//				|| cfg.getInterfaces().size() == 0
-//				|| cfg.getSubsystem() == null
-//				|| cfg.getSubsystem().getServer() == null) {
-//			throw new IllegalArgumentException("Problem configuring Undertow server using \"" + xmlConfig
-//					+ "\": incomplete XML configuration");
-//		}
+		// the external XML could be very simple - I assume that the most trivial XML can specify ... nothing,
+		// besides top level {urn:org.ops4j.pax.web:undertow:1.1}undertow element
+		if (undertowConfiguration == null) {
+			undertowConfiguration = new UndertowConfiguration();
+		}
+		// add default interfaces - they'll be verified later if they match PID configuration
+		if (undertowConfiguration.getInterfaces().size() == 0) {
+			Interface iface = new Interface();
+			iface.setName("default");
+			Interface.InetAddress address = new Interface.InetAddress();
+			address.setIp("0.0.0.0");
+			iface.getAddresses().add(address);
+			undertowConfiguration.getInterfaces().add(iface);
+		}
+		if (undertowConfiguration.getSocketBindings().size() == 0 && configuration.server().isHttpEnabled()) {
+			SocketBinding binding = new SocketBinding();
+			binding.setName("http");
+			binding.setInterfaceRef("default");
+			binding.setPort(configuration.server().getHttpPort());
+			undertowConfiguration.getSocketBindings().add(binding);
+		}
+
+		if (undertowConfiguration.getSubsystem() == null) {
+			undertowConfiguration.setSubsystem(new UndertowSubsystem());
+		}
+		if (undertowConfiguration.getSubsystem().getServer() == null) {
+			undertowConfiguration.getSubsystem().setServer(new Server());
+		}
+
 		undertowConfiguration.init();
 
 		if (LOG.isDebugEnabled()) {
@@ -432,197 +480,216 @@ class UndertowServerWrapper implements BatchVisitor {
 			for (IoSubsystem.Worker worker : io.getWorkers()) {
 				workers.put(worker.getName(), undertowFactory.createWorker(worker));
 			}
-			for (IoSubsystem.BufferPool pool : io.getBuferPools()) {
+			for (IoSubsystem.BufferPool pool : io.getBufferPools()) {
 				bufferPools.put(pool.getName(), undertowFactory.createBufferPool(pool));
 			}
 		}
 
 		// listeners will be checked by verifyConnectorConfiguration() later
-		List<Server.HttpListener> httpListeners = null;
-		List<Server.HttpsListener> httpsListeners = null;
-		if (undertowConfiguration.getSubsystem() != null && undertowConfiguration.getSubsystem().getServer() != null) {
-			httpListeners = undertowConfiguration.getSubsystem().getServer().getHttpListeners();
-			httpsListeners = undertowConfiguration.getSubsystem().getServer().getHttpsListeners();
-		}
+		List<Server.HttpListener> httpListeners = undertowConfiguration.getSubsystem().getServer().getHttpListeners();
+		List<Server.HttpsListener> httpsListeners = undertowConfiguration.getSubsystem().getServer().getHttpsListeners();
 
 		// http listener(s)
-		if (httpListeners != null) {
-			for (Server.HttpListener http : httpListeners) {
-				String listenerName = http.getName();
-				if (!http.isEnabled()) {
-					LOG.debug("Skipping disabled Undertow http listener \"{}\"", listenerName);
-					continue;
-				}
-				UndertowConfiguration.BindingInfo binding = undertowConfiguration.bindingInfo(http.getSocketBindingName());
-				for (String address : binding.getAddresses()) {
-					LOG.info("Configuring Undertow http listener for address " + address + ":" + binding.getPort());
+		for (Server.HttpListener http : httpListeners) {
+			String listenerName = http.getName();
+			if (!http.isEnabled()) {
+				LOG.debug("Skipping disabled Undertow http listener \"{}\"", listenerName);
+				continue;
+			}
+			UndertowConfiguration.BindingInfo binding = undertowConfiguration.bindingInfo(http.getSocketBindingName());
+			for (String address : binding.getAddresses()) {
+				LOG.info("Configuring Undertow http listener for address " + address + ":" + binding.getPort());
 
-					XnioWorker workerForListener = getWorker(http.getWorkerName());
-					ByteBufferPool bufferPoolForListener = getBufferPool(http.getBufferPoolName());
+				XnioWorker workerForListener = getWorker(http.getWorkerName());
+				ByteBufferPool bufferPoolForListener = getBufferPool(http.getBufferPoolName());
 
-					// this is specific to non-secure listener
-					// see org.wildfly.extension.undertow.Server#lookupSecurePort
-					if (http.getRedirectSocket() != null) {
-						SocketBinding secureSocketBinding = undertowConfiguration.socketBinding(http.getRedirectSocket());
-						if (secureSocketBinding != null) {
-							this.securePortMapping.put(binding.getPort(), secureSocketBinding.getPort());
-						}
+				// this is specific to non-secure listener
+				// see org.wildfly.extension.undertow.Server#lookupSecurePort
+				if (http.getRedirectSocket() != null) {
+					SocketBinding secureSocketBinding = undertowConfiguration.socketBinding(http.getRedirectSocket());
+					if (secureSocketBinding != null) {
+						this.securePortMapping.put(binding.getPort(), secureSocketBinding.getPort());
 					}
-
-					InetSocketAddress inetAddress = new InetSocketAddress(address, binding.getPort());
-					AcceptingChannel<? extends StreamConnection> listener = undertowFactory.createListener(
-							configuration, http, rootHandler, null,
-							workerForListener, bufferPoolForListener,
-							inetAddress
-					);
-					listeners.put(http.getName(), new UndertowFactory.AcceptingChannelWithAddress(listener, inetAddress));
 				}
+
+				InetSocketAddress inetAddress = new InetSocketAddress(address, binding.getPort());
+				AcceptingChannel<? extends StreamConnection> listener = undertowFactory.createListener(
+						configuration, http, rootHandler, null,
+						workerForListener, bufferPoolForListener,
+						inetAddress
+				);
+				listeners.put(http.getName(), new UndertowFactory.AcceptingChannelWithAddress(listener, inetAddress));
 			}
 		}
 
 		// https listener(s)
-		if (httpsListeners != null) {
-			for (Server.HttpsListener https : httpsListeners) {
-				String listenerName = https.getName();
-				if (!https.isEnabled()) {
-					LOG.debug("Skipping disabled Undertow https listener \"{}\"", listenerName);
-					continue;
+		for (Server.HttpsListener https : httpsListeners) {
+			String listenerName = https.getName();
+			if (!https.isEnabled()) {
+				LOG.debug("Skipping disabled Undertow https listener \"{}\"", listenerName);
+				continue;
+			}
+			UndertowConfiguration.BindingInfo binding = undertowConfiguration.bindingInfo(https.getSocketBindingName());
+			for (String address : binding.getAddresses()) {
+				LOG.info("Configuring Undertow https listener for address " + address + ":" + binding.getPort());
+
+				XnioWorker workerForListener = getWorker(https.getWorkerName());
+				ByteBufferPool bufferPoolForListener = getBufferPool(https.getBufferPoolName());
+
+				if (https.getSslContext() != null) {
+					LOG.warn("ssl-context reference attribute from https-listener listener is not supported"
+							+ " in Pax Web. Please use security-realm reference attribute instead.");
 				}
-				UndertowConfiguration.BindingInfo binding = undertowConfiguration.bindingInfo(https.getSocketBindingName());
-				for (String address : binding.getAddresses()) {
-					LOG.info("Configuring Undertow https listener for address " + address + ":" + binding.getPort());
+				SecurityRealm realm = undertowConfiguration.securityRealm(https.getSecurityRealm());
+				if (realm == null) {
+					throw new IllegalArgumentException("No security realm with name \"" + https.getSecurityRealm()
+							+ "\" available for \"" + https.getName() + "\" https listener.");
+				}
 
-					XnioWorker workerForListener = getWorker(https.getWorkerName());
-					ByteBufferPool bufferPoolForListener = getBufferPool(https.getBufferPoolName());
+				InetSocketAddress inetAddress = new InetSocketAddress(address, binding.getPort());
+				AcceptingChannel<? extends StreamConnection> listener = undertowFactory.createListener(
+						configuration, https, rootHandler, realm,
+						workerForListener, bufferPoolForListener,
+						inetAddress
+				);
+				listeners.put(https.getName(), new UndertowFactory.AcceptingChannelWithAddress(listener, inetAddress));
+			}
+		}
 
-					if (https.getSslContext() != null) {
-						LOG.warn("ssl-context reference attribute from https-listener listener is not supported"
-								+ " in Pax Web. Please use security-realm reference attribute instead.");
+		// identity manager - looked up in "default" security realm
+		SecurityRealm defaultRealm = undertowConfiguration.securityRealm("default");
+		if (defaultRealm != null) {
+			SecurityRealm.JaasAuth jaasAuth = defaultRealm.getAuthentication().getJaas();
+			SecurityRealm.PropertiesAuth propertiesAuth = defaultRealm.getAuthentication().getProperties();
+			SecurityRealm.UsersAuth usersAuth = defaultRealm.getAuthentication().getUsers();
+			if (jaasAuth != null) {
+				LOG.info("Creating JAAS Identity Manager");
+				String userPrincipalClassName = defaultRealm.getUserPrincipalClassName();
+				if (userPrincipalClassName == null || "".equals(userPrincipalClassName.trim())) {
+					userPrincipalClassName = "java.security.Principal";
+				}
+				Set<String> rolePrincipalClassNames = new LinkedHashSet<>(defaultRealm.getRolePrincipalClassNames());
+
+				identityManager = new JaasIdentityManager(jaasAuth.getName(), userPrincipalClassName, rolePrincipalClassNames);
+			} else if (propertiesAuth != null || usersAuth != null) {
+				Map<String, String> users = new HashMap<>();
+
+				if (propertiesAuth != null) {
+					Properties userProperties = new Properties();
+					LOG.info("Creating Properties Identity Manager using {}", propertiesAuth.getPath());
+					File userBase = new File(propertiesAuth.getPath());
+					if (!userBase.isFile()) {
+						throw new IllegalArgumentException(userBase.getCanonicalPath() + " is not accessible. Can't load users/groups information.");
 					}
-					SecurityRealm realm = undertowConfiguration.securityRealm(https.getSecurityRealm());
-					if (realm == null) {
-						throw new IllegalArgumentException("No security realm with name \"" + https.getSecurityRealm()
-								+ "\" available for \"" + https.getName() + "\" https listener.");
+					try (FileInputStream stream = new FileInputStream(userBase)) {
+						userProperties.load(stream);
+						for (String user : userProperties.stringPropertyNames()) {
+							users.put(user, userProperties.getProperty(user));
+						}
 					}
+				} else {
+					LOG.info("Creating Properties Identity Manager using XML configuration");
+					for (SecurityRealm.User user : usersAuth.getUsers()) {
+						users.put(user.getUsername(), user.getPassword());
+					}
+				}
 
-					InetSocketAddress inetAddress = new InetSocketAddress(address, binding.getPort());
-					AcceptingChannel<? extends StreamConnection> listener = undertowFactory.createListener(
-							configuration, https, rootHandler, realm,
-							workerForListener, bufferPoolForListener,
-							inetAddress
-					);
-					listeners.put(https.getName(), new UndertowFactory.AcceptingChannelWithAddress(listener, inetAddress));
+				identityManager = new PropertiesIdentityManager(users);
+			}
+		}
+
+		// /undertow/subsystem/server/host/location - file handlers for static context paths.
+		if (undertowConfiguration.getSubsystem().getServer().getHost() != null) {
+			for (Server.Host.Location location : undertowConfiguration.getSubsystem().getServer().getHost().getLocation()) {
+				String context = location.getName();
+				String handlerRef = location.getHandler();
+				UndertowSubsystem.FileHandler fileHandler = undertowConfiguration.handler(handlerRef);
+				if (fileHandler == null) {
+					throw new IllegalArgumentException("No handler with name \"" + location.getHandler() + "\" available for " + location.getName() + " location.");
+				}
+				File base = new File(fileHandler.getPath());
+				if (!base.isDirectory()) {
+					throw new IllegalArgumentException(base.getCanonicalPath() + " is not accessible. Can't configure handler for " + location.getName() + " location.");
+				}
+				// fileHandler.path is simply filesystem directory
+				PathResourceManager resourceManager = new PathResourceManager(base.toPath(), fileHandler.getCacheBufferSize() * fileHandler.getCacheBuffers(),
+						fileHandler.getCaseSensitive(), fileHandler.getFollowSymlink(), fileHandler.getSafeSymlinkPaths().toArray(new String[0]));
+				ResourceHandler rh = new ResourceHandler(resourceManager);
+				if (undertowConfiguration.getSubsystem().getServletContainer() != null) {
+					rh.setWelcomeFiles();
+					for (org.ops4j.pax.web.service.undertow.internal.configuration.model.ServletContainer.WelcomeFile wf : undertowConfiguration.getSubsystem().getServletContainer().getWelcomeFiles()) {
+						rh.addWelcomeFiles(wf.getName());
+					}
+				}
+				if (rootHandler instanceof PathHandler) {
+					if (LOG.isDebugEnabled()) {
+						LOG.debug("Adding resource handler for location \"" + context + "\" and base path \"" + base.getCanonicalPath() + "\".");
+					}
+					((PathHandler) rootHandler).addPrefixPath(context, rh);
 				}
 			}
 		}
 
-//		builder.setServerOption(UndertowOptions.RECORD_REQUEST_START_TIME, recordRequestStartTime);
-//		if (configuration.server().getConnectorIdleTimeout() != null) {
-//			builder.setServerOption(UndertowOptions.IDLE_TIMEOUT, configuration.server().getConnectorIdleTimeout());
-//		}
-//
-//		// identity manager - looked up in "default" security realm
-//		SecurityRealm defaultRealm = cfg.securityRealm("default");
-//		if (defaultRealm != null) {
-//			SecurityRealm.JaasAuth jaasAuth = defaultRealm.getAuthentication().getJaas();
-//			SecurityRealm.PropertiesAuth propertiesAuth = defaultRealm.getAuthentication().getProperties();
-//			if (jaasAuth != null) {
-//				String userPrincipalClassName = defaultRealm.getUserPrincipalClassName();
-//				if (userPrincipalClassName == null || "".equals(userPrincipalClassName.trim())) {
-//					userPrincipalClassName = "java.security.Principal";
-//				}
-//				Set<String> rolePrincipalClassNames = new LinkedHashSet<>(defaultRealm.getRolePrincipalClassNames());
-//				identityManager = new JaasIdentityManager(jaasAuth.getName(),
-//						userPrincipalClassName, rolePrincipalClassNames);
-//			} else if (propertiesAuth != null) {
-//				File userBase = new File(propertiesAuth.getPath());
-//				if (!userBase.isFile()) {
-//					throw new IllegalArgumentException(userBase.getCanonicalPath() + " is not accessible. Can't load users/groups information.");
-//				}
-//				Properties userProperties = new Properties();
-//				Map<String, String> map = new HashMap<>();
-//				try (FileInputStream stream = new FileInputStream(userBase)) {
-//					userProperties.load(stream);
-//					for (String user : userProperties.stringPropertyNames()) {
-//						map.put(user, userProperties.getProperty(user));
-//					}
-//				}
-//				identityManager = new PropertiesIdentityManager(map);
-//			}
-//		}
-//
-//		// /undertow/subsystem/server/host/location - file handlers for static context paths.
-//		if (cfg.getSubsystem().getServer().getHost() != null) {
-//			for (Server.Host.Location location : cfg.getSubsystem().getServer().getHost().getLocation()) {
-//				String context = location.getName();
-//				String handlerRef = location.getHandler();
-//				UndertowSubsystem.FileHandler fileHandler = cfg.handler(handlerRef);
-//				if (fileHandler == null) {
-//					throw new IllegalArgumentException("No handler with name \"" + location.getHandler() + "\" available for " + location.getName() + " location.");
-//				}
-//				File base = new File(fileHandler.getPath());
-//				if (!base.isDirectory()) {
-//					throw new IllegalArgumentException(base.getCanonicalPath() + " is not accessible. Can't configure handler for " + location.getName() + " location.");
-//				}
-//				// fileHandler.path is simply filesystem directory
-//				ResourceHandler rh = new ResourceHandler(new FileResourceManager(base, 4096));
-//				if (cfg.getSubsystem().getServletContainer() != null) {
-//					rh.setWelcomeFiles();
-//					for (org.ops4j.pax.web.service.undertow.internal.configuration.model.ServletContainer.WelcomeFile wf : cfg.getSubsystem().getServletContainer().getWelcomeFiles()) {
-//						rh.addWelcomeFiles(wf.getName());
-//					}
-//				}
-//				if (rootHandler instanceof PathHandler) {
-//					if (LOG.isDebugEnabled()) {
-//						LOG.debug("Adding resource handler for location \"" + context + "\" and base path \"" + base.getCanonicalPath() + "\".");
-//					}
-//					((PathHandler) rootHandler).addPrefixPath(context, rh);
-//				}
-//			}
-//		}
-//
-//		// global filters (subsystem/filters/response-header and subsystem/filters/filter)
-//		if (cfg.getSubsystem().getServer().getHost() != null) {
-//			for (Server.Host.FilterRef fr : cfg.getSubsystem().getServer().getHost().getFilterRef()) {
-//				UndertowSubsystem.AbstractFilter filter = cfg.filter(fr.getName());
-//				if (filter == null) {
-//					throw new IllegalArgumentException("No filter with name \"" + fr.getName() + "\" available.");
-//				}
-//				rootHandler = filter.configure(rootHandler, fr.getPredicate());
-//			}
-//		}
-//
-//		// session configuration and persistence
-//		this.defaultSessionTimeoutInMinutes = 30;
-//		try {
-//			if (cfg.getSubsystem().getServletContainer() != null) {
-//				String defaultSessionTimeout = cfg.getSubsystem().getServletContainer().getDefaultSessionTimeout();
-//				if (defaultSessionTimeout != null && !"".equals(defaultSessionTimeout)) {
-//					this.defaultSessionTimeoutInMinutes = Integer.parseInt(defaultSessionTimeout);
-//				}
-//			}
-//		} catch (NumberFormatException ignored) {
-//		}
-//
-//		org.ops4j.pax.web.service.undertow.internal.configuration.model.ServletContainer.PersistentSessionsConfig persistentSessions = cfg.getSubsystem().getServletContainer() == null ? null
-//				: cfg.getSubsystem().getServletContainer().getPersistentSessions();
-//		if (persistentSessions == null) {
-//			// no sessions, but let's use InMemorySessionPersistence
-//			LOG.info("Using in-memory session persistence");
-//			sessionPersistenceManager = new InMemorySessionPersistence();
-//		} else {
-//			if (persistentSessions.getPath() != null && !"".equals(persistentSessions.getPath().trim())) {
-//				// file persistence manager
-//				File sessionsDir = new File(persistentSessions.getPath());
-//				sessionsDir.mkdirs();
-//				LOG.info("Using file session persistence. Location: " + sessionsDir.getCanonicalPath());
-//				sessionPersistenceManager = new FileSessionPersistence(sessionsDir);
-//			} else {
-//				// in memory persistence manager
-//				LOG.info("No path configured for persistent-sessions. Using in-memory session persistence.");
-//				sessionPersistenceManager = new InMemorySessionPersistence();
-//			}
-//		}
+		// global filters (subsystem/filters/response-header and subsystem/filters/filter)
+		if (undertowConfiguration.getSubsystem().getServer().getHost() != null) {
+			for (Server.Host.FilterRef fr : undertowConfiguration.getSubsystem().getServer().getHost().getFilterRef()) {
+				UndertowSubsystem.AbstractFilter filter = undertowConfiguration.filter(fr.getName());
+				if (filter == null) {
+					throw new IllegalArgumentException("No filter with name \"" + fr.getName() + "\" available.");
+				}
+		 		// predicate means "apply SetHeaderHandler if predicate matches, otherwise forward to passed handler"
+
+				Predicate p = fr.getPredicate() == null ? null : Predicates.parse(fr.getPredicate(), HttpHandler.class.getClassLoader());
+				rootHandler = filter.configure(rootHandler, p);
+			}
+		}
+
+		// session configuration
+		// <session-cookie name="JSESSIONID" domain="domain" http-only="true" max-age="130" secure="true" comment="Session Cookie" />
+		if (undertowConfiguration.getSubsystem().getServletContainer() != null) {
+			String dst = undertowConfiguration.getSubsystem().getServletContainer().getDefaultSessionTimeout();
+			if (dst != null && !"".equals(dst)) {
+				try {
+					this.defaultSessionTimeout = Integer.parseInt(dst);
+				} catch (NumberFormatException e) {
+					LOG.warn("Invalid default session timeout \"" + dst + "\". Using 30 (minutes).");
+				}
+			}
+			org.ops4j.pax.web.service.undertow.internal.configuration.model.ServletContainer.SessionCookie cookieConfig
+					= undertowConfiguration.getSubsystem().getServletContainer().getSessionCookie();
+			if (cookieConfig != null) {
+				defaultSessionCookieConfig = new DefaultSessionCookieConfig();
+				defaultSessionCookieConfig.setName(cookieConfig.getName());
+				defaultSessionCookieConfig.setComment(cookieConfig.getComment());
+				defaultSessionCookieConfig.setDomain(cookieConfig.getDomain());
+//				defaultSessionCookieConfig.setPath(?);
+				defaultSessionCookieConfig.setSecure(cookieConfig.isSecure());
+				defaultSessionCookieConfig.setHttpOnly(cookieConfig.isHttpOnly());
+				defaultSessionCookieConfig.setMaxAge(cookieConfig.getMaxAge());
+			}
+		}
+
+		// session persistence
+		// <persistent-sessions path="${karaf.data}/web-sessions" />
+		org.ops4j.pax.web.service.undertow.internal.configuration.model.ServletContainer.PersistentSessionsConfig persistentSessions
+				= undertowConfiguration.getSubsystem().getServletContainer() == null ? null : undertowConfiguration.getSubsystem().getServletContainer().getPersistentSessions();
+		if (persistentSessions != null) {
+			// otherwise, PID configuration will be used
+			if (persistentSessions.getPath() != null && !"".equals(persistentSessions.getPath().trim())) {
+				// file persistence manager
+				File sessionsDir = new File(persistentSessions.getPath());
+				if (!sessionsDir.isDirectory() || !sessionsDir.mkdirs()) {
+					LOG.warn("Can't access or create {} for file session persistence.", sessionsDir);
+				} else {
+					LOG.info("Using file session persistence. Location: " + sessionsDir.getCanonicalPath());
+					globalSessionPersistenceManager = new FileSessionPersistence(sessionsDir);
+				}
+			} else {
+				// in memory persistence manager
+				LOG.info("No path configured for persistent-sessions. Using in-memory session persistence.");
+				globalSessionPersistenceManager = new InMemorySessionPersistence();
+			}
+		}
 	}
 
 	private XnioWorker getWorker(String workerName) {
@@ -667,7 +734,7 @@ class UndertowServerWrapper implements BatchVisitor {
 
 		String[] addresses = configuration.server().getListeningAddresses();
 
-		// review connectors possibly configured from jetty.xml and check if they match configadmin configuration
+		// review connectors possibly configured from undertow.xml and check if they match configadmin configuration
 		for (String address : addresses) {
 			verifyListener(address, httpPort, httpEnabled, false,
 					() -> undertowFactory.createDefaultListener(address, rootHandler, configuration));
@@ -935,6 +1002,12 @@ class UndertowServerWrapper implements BatchVisitor {
 
 			deploymentInfo.addServlet(new PaxWebServletInfo("default", default404Servlet, true).addMapping("/"));
 
+			deploymentInfo.setConfidentialPortManager(new SimpleConfidentialPortManager());
+
+			// one IDM for all the contexts - it's only an authentication repository, login configs and authorization
+			// checks will be handled depending on OsgiContextModel
+			deploymentInfo.setIdentityManager(identityManager);
+
 			// In Jetty and Tomcat we can operate on FilterChains, here we have to split the OsgiFilterChain's
 			// functionality into different HandlerWrappers:
 			//  - to wrap request, so proper ServletContext is returned
@@ -953,10 +1026,6 @@ class UndertowServerWrapper implements BatchVisitor {
 			PaxWebSecurityHandler securityWrapper = new PaxWebSecurityHandler();
 			this.securityHandlers.put(contextPath, securityWrapper);
 			deploymentInfo.addSecurityWrapper(securityWrapper);
-
-//							deployment.setConfidentialPortManager(getConfidentialPortManager());
-//							deployment.setResourceManager(this);
-//							deployment.setIdentityManager(identityManager);
 
 			// session configuration - based on defaultSessionConfiguration, but may be later overriden in OsgiContext
 			SessionConfiguration sc = configuration.session();
@@ -1386,7 +1455,6 @@ class UndertowServerWrapper implements BatchVisitor {
 		}
 	}
 
-
 	@Override
 	public void visit(FilterModelChange change) {
 		// only handle dynamic filter registration here - filter added only as last filter
@@ -1667,7 +1735,7 @@ class UndertowServerWrapper implements BatchVisitor {
 							}
 						});
 					}
-//					eventListenerModel.ungetEventListener(eventListener);
+//					TODO: eventListenerModel.ungetEventListener(eventListener);
 
 					ensureServletContextStarted(contextPath);
 				});
@@ -1914,12 +1982,12 @@ class UndertowServerWrapper implements BatchVisitor {
 			}
 
 			// alter session configuration
-			SessionConfigurationModel sc = highestRanked.getSessionConfiguration();
-			if (sc != null) {
-				if (sc.getSessionTimeout() != null) {
-					deployment.setDefaultSessionTimeout(sc.getSessionTimeout() * 60);
+			SessionConfigurationModel session = highestRanked.getSessionConfiguration();
+			if (session != null) {
+				if (session.getSessionTimeout() != null) {
+					deployment.setDefaultSessionTimeout(session.getSessionTimeout() * 60);
 				}
-				SessionCookieConfig scc = sc.getSessionCookieConfig();
+				SessionCookieConfig scc = session.getSessionCookieConfig();
 				ServletSessionConfig ssc = deployment.getServletSessionConfig();
 				if (scc != null) {
 					if (ssc == null) {
@@ -1940,10 +2008,56 @@ class UndertowServerWrapper implements BatchVisitor {
 					ssc.setSecure(scc.isSecure());
 					ssc.setComment(scc.getComment());
 
-					if (sc.getTrackingModes().size() > 0) {
-						ssc.setSessionTrackingModes(sc.getTrackingModes());
+					if (session.getTrackingModes().size() > 0) {
+						ssc.setSessionTrackingModes(session.getTrackingModes());
 					}
 				}
+			}
+
+			// alter security configuration
+			SecurityConfigurationModel security = highestRanked.getSecurityConfiguration();
+			LoginConfigModel lc = security.getLoginConfig();
+			if (lc != null) {
+				deployment.setLoginConfig(new LoginConfig(lc.getAuthMethod(), lc.getRealmName(),
+						lc.getFormLoginPage(), lc.getFormErrorPage()));
+
+				deployment.addSecurityRoles(security.getSecurityRoles());
+
+				for (SecurityConstraintModel constraintModel : security.getSecurityConstraints()) {
+					SecurityConstraint constraint = new SecurityConstraint();
+		            if (constraintModel.isAuthRolesSet()) {
+		                constraint.setEmptyRoleSemantic(SecurityInfo.EmptyRoleSemantic.AUTHENTICATE);
+		            }
+					constraint.addRolesAllowed(constraintModel.getAuthRoles());
+					if (constraintModel.getTransportGuarantee() == ServletSecurity.TransportGuarantee.NONE) {
+						constraint.setTransportGuaranteeType(TransportGuaranteeType.NONE);
+					} else if (constraintModel.getTransportGuarantee() == ServletSecurity.TransportGuarantee.CONFIDENTIAL) {
+						constraint.setTransportGuaranteeType(TransportGuaranteeType.CONFIDENTIAL);
+					}
+					for (SecurityConstraintModel.WebResourceCollection col : constraintModel.getWebResourceCollections()) {
+						WebResourceCollection wrc = new WebResourceCollection();
+						boolean methodSet = false;
+						wrc.addHttpMethods(col.getMethods());
+						if (col.getMethods().size() == 0) {
+							wrc.addHttpMethodOmissions(col.getOmittedMethods());
+						}
+						wrc.addUrlPatterns(col.getPatterns());
+						constraint.addWebResourceCollection(wrc);
+					}
+					deployment.addSecurityConstraint(constraint);
+				}
+
+//				if (isWebSocketAvailable()) {
+//					wsXnioWorker = UndertowUtil.createWorker(contextModel.getClassLoader());
+//					if (wsXnioWorker != null) {
+//						deployment.addServletContextAttribute(
+//								io.undertow.websockets.jsr.WebSocketDeploymentInfo.ATTRIBUTE_NAME,
+//								new io.undertow.websockets.jsr.WebSocketDeploymentInfo()
+//										.setWorker(wsXnioWorker)
+//										.setBuffers(new DefaultByteBufferPool(true, 100))
+//						);
+//					}
+//				}
 			}
 
 			manager = servletContainer.addDeployment(deployment);
@@ -2102,65 +2216,8 @@ class UndertowServerWrapper implements BatchVisitor {
 		}
 	}
 
-//	/**
-//	 * Loads additional properties and configure {@link UndertowServerController#identityManager}
-//	 * @param undertowResource
-//	 */
-//	private void configureIdentityManager(URL undertowResource) {
-//		try {
-//			Properties props = new Properties();
-//			try (InputStream is = undertowResource.openStream()) {
-//				props.load(is);
-//			}
-//			Map<String, String> config = new LinkedHashMap<>();
-//			for (Map.Entry<Object, Object> entry : props.entrySet()) {
-//				config.put(entry.getKey().toString(), entry.getValue().toString());
-//			}
-//			identityManager = (IdentityManager)createConfigurationObject(config, "identityManager");
-//
-////			String listeners = config.get("listeners");
-////			if (listeners != null) {
-////				String[] names = listeners.split("(, )+");
-////				for (String name : names) {
-////					String type = config.get("listeners." + name + ".type");
-////					String address = config.get("listeners." + name + ".address");
-////					String port = config.get("listeners." + name + ".port");
-////					if ("http".equals(type)) {
-////						builder.addHttpListener(Integer.parseInt(port), address);
-////					}
-////				}
-////			}
-//		} catch (Exception e) {
-//			LOG.error("Exception while starting Undertow", e);
-//			throw new RuntimeException("Exception while starting Undertow", e);
-//		}
-//	}
-//
-//	@Override
-//	public void addSecurityConstraintMapping(SecurityConstraintMappingModel model) {
-//		assertNotState(State.Unconfigured);
-//		try {
-//			final Context context = findOrCreateContext(model.getContextModel());
-//			context.addSecurityConstraintMapping(model);
-//		} catch (ServletException e) {
-//			throw new RuntimeException("Unable to add welcome files", e);
-//		}
-//	}
-//
-//	@Override
-//	public void removeSecurityConstraintMapping(SecurityConstraintMappingModel model) {
-//		assertNotState(State.Unconfigured);
-//		try {
-//			final Context context = findOrCreateContext(model.getContextModel());
-//			context.removeSecurityConstraintMapping(model);
-//		} catch (ServletException e) {
-//			throw new RuntimeException("Unable to add welcome files", e);
-//		}
-//	}
-
 	// see org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService#getConfidentialPortManager
 	private class SimpleConfidentialPortManager implements ConfidentialPortManager {
-
 		@Override
 		public int getConfidentialPort(HttpServerExchange exchange) {
 			int port = exchange.getConnection().getLocalAddress(InetSocketAddress.class).getPort();
@@ -2172,7 +2229,6 @@ class UndertowServerWrapper implements BatchVisitor {
 	}
 
 	private static class ContextLinkingInvocationHandler implements InvocationHandler {
-
 		private final EventListener eventListener;
 		private OsgiServletContext osgiContext;
 
@@ -2202,7 +2258,6 @@ class UndertowServerWrapper implements BatchVisitor {
 	 * {@link OsgiServletContext}s and that configures {@link ContextLinkingInvocationHandler}s.
 	 */
 	private class ContextLinkingServletExtension implements ServletExtension {
-
 		private final String contextPath;
 		private final OsgiServletContext osgiContext;
 
@@ -2235,5 +2290,20 @@ class UndertowServerWrapper implements BatchVisitor {
 			});
 		}
 	}
+
+//	private ServletExtension getAuthenticator(String method) {
+//		ServiceLoader<AuthenticatorService> sl = ServiceLoader.load(AuthenticatorService.class, getClass().getClassLoader());
+//		for (AuthenticatorService svc : sl) {
+//			try {
+//				ServletExtension auth = svc.getAuthenticatorService(method, ServletExtension.class);
+//				if (auth != null) {
+//					return auth;
+//				}
+//			} catch (Throwable t) {
+//				LOG.debug("Unable to load AuthenticatorService for: " + method, t);
+//			}
+//		}
+//		return null;
+//	}
 
 }

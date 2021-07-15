@@ -1,0 +1,54 @@
+= attributes for <http-listener> and <https-listener>
+
+allow-encoded-slash (http, https) - `io.undertow.UndertowOptions.ALLOW_ENCODED_SLASH`
+allow-equals-in-cookie-value (http, https) - `io.undertow.UndertowOptions.ALLOW_EQUALS_IN_COOKIE_VALUE`
+allow-unescaped-characters-in-url (http, https) - `io.undertow.UndertowOptions.ALLOW_UNESCAPED_CHARACTERS_IN_URL`
+always-set-keep-alive (http, https) - `io.undertow.UndertowOptions.ALWAYS_SET_KEEP_ALIVE`
+buffer-pipelined-data (http, https) - `io.undertow.UndertowOptions.BUFFER_PIPELINED_DATA`
+buffer-pool (http, https) - `io.undertow.server.protocol.http.HttpOpenListener.bufferPool`
+certificate-forwarding (http, https) - `io.undertow.server.handlers.SSLHeaderHandler`
+decode-url (http, https) - `io.undertow.UndertowOptions.DECODE_URL`
+disallowed-methods (http, https) - `io.undertow.server.handlers.DisallowedMethodsHandler`
+enabled-cipher-suites (https) - `org.xnio.Options.SSL_ENABLED_CIPHER_SUITES`
+enabled-protocols (https) - `org.xnio.Options.SSL_ENABLED_PROTOCOLS`
+enabled (http, https) - handled by skipping or not skipping the configuration
+enable-http2 (http, https) - `io.undertow.UndertowOptions.ENABLE_HTTP2`
+enable-spdy (https) - not handled
+http2-enable-push (http, https) - `io.undertow.UndertowOptions.HTTP2_SETTINGS_ENABLE_PUSH`
+http2-header-table-size (http, https) - `io.undertow.UndertowOptions.HTTP2_SETTINGS_HEADER_TABLE_SIZE`
+http2-initial-window-size (http, https) - `io.undertow.UndertowOptions.HTTP2_SETTINGS_INITIAL_WINDOW_SIZE`
+http2-max-concurrent-streams (http, https) - `io.undertow.UndertowOptions.HTTP2_SETTINGS_MAX_CONCURRENT_STREAMS`
+http2-max-frame-size (http, https) - `io.undertow.UndertowOptions.HTTP2_SETTINGS_MAX_FRAME_SIZE`
+http2-max-header-list-size (http, https) - `io.undertow.UndertowOptions.HTTP2_SETTINGS_MAX_HEADER_LIST_SIZE`
+max-buffered-request-size (http, https) - `io.undertow.UndertowOptions.MAX_BUFFERED_REQUEST_SIZE`
+max-connections (http, https) - `org.xnio.Options.CONNECTION_HIGH_WATER`/`org.xnio.Options.CONNECTION_LOW_WATER`
+max-cookies (http, https) - `io.undertow.UndertowOptions.MAX_COOKIES`
+max-headers (http, https) - `io.undertow.UndertowOptions.MAX_HEADERS`
+max-header-size (http, https) - `io.undertow.UndertowOptions.MAX_HEADER_SIZE`
+max-parameters (http, https) - `io.undertow.UndertowOptions.MAX_PARAMETERS`
+max-post-size (http, https) - `io.undertow.UndertowOptions.MAX_ENTITY_SIZE`
+name (http, https) - handled as identifier
+no-request-timeout (http, https) - `io.undertow.UndertowOptions.NO_REQUEST_TIMEOUT`
+proxy-address-forwarding (http, https) - `io.undertow.server.handlers.ProxyPeerAddressHandler`
+proxy-protocol (http, https) - `io.undertow.server.protocol.proxy.ProxyProtocolOpenListener`
+read-timeout (http, https) - `org.xnio.Options.READ_TIMEOUT`
+receive-buffer (http , https) - `org.xnio.Options.RECEIVE_BUFFER`
+record-request-start-time (http, https) - `io.undertow.UndertowOptions.RECORD_REQUEST_START_TIME`
+redirect-socket (http) - `org.ops4j.pax.web.service.undertow.internal.UndertowServerWrapper.securePortMapping`, `org.ops4j.pax.web.service.undertow.internal.UndertowServerWrapper.SimpleConfidentialPortManager.getConfidentialPort()`, `io.undertow.servlet.api.ConfidentialPortManager`, `io.undertow.servlet.api.DeploymentInfo.setConfidentialPortManager()`
+request-parse-timeout (http, https) - `io.undertow.UndertowOptions.REQUEST_PARSE_TIMEOUT`
+require-host-http11 (http, https) - `io.undertow.UndertowOptions.REQUIRE_HOST_HTTP11`
+resolve-peer-address (http, https) - `io.undertow.server.handlers.PeerNameResolvingHandler`
+rfc6265-cookie-validation (http, https) - `io.undertow.UndertowOptions.ENABLE_RFC6265_COOKIE_VALIDATION`
+secure (http, https) - `org.xnio.Options.SECURE`
+security-realm (https) - `org.ops4j.pax.web.service.undertow.internal.UndertowFactory.buildSSLContext()`
+send-buffer (http, https) - `org.xnio.Options.SEND_BUFFER`
+socket-binding (http, https) - `org.xnio.XnioWorker.createStreamConnectionServer()`
+ssl-context (https) - please use `security-realm` instead
+ssl-session-cache-size (https) - `javax.net.ssl.SSLSessionContext.setSessionCacheSize()`, `org.xnio.Options.SSL_CLIENT_SESSION_CACHE_SIZE`, `org.xnio.Options.SSL_SERVER_SESSION_CACHE_SIZE`
+ssl-session-timeout (https) - `javax.net.ssl.SSLSessionContext.setSessionTimeout()`
+tcp-backlog (http, https) - `org.xnio.Options.BACKLOG`
+tcp-keep-alive (http, https) - `org.xnio.Options.KEEP_ALIVE`
+url-charset (http, https) - `io.undertow.UndertowOptions.URL_CHARSET`
+verify-client (https) - `org.xnio.Options.SSL_CLIENT_AUTH_MODE`
+worker (http, https) - `org.xnio.XnioWorker.createStreamConnectionServer()`
+write-timeout (http, https) - `org.xnio.Options.WRITE_TIMEOUT`

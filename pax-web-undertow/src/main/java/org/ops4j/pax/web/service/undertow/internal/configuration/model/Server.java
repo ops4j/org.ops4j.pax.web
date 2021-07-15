@@ -366,6 +366,12 @@ public class Server {
 		@XmlAttribute(name = "rfc6265-cookie-validation")
 		protected boolean rfc6265CookieValidation = false;
 
+		/**
+		 * Undertow: io.undertow.UndertowOptions#ALLOW_UNESCAPED_CHARACTERS_IN_URL
+		 */
+		@XmlAttribute(name = "allow-unescaped-characters-in-url")
+		protected boolean allowUnescapedCharactersInUrl = false;
+
 		public String getName() {
 			return name;
 		}
@@ -558,6 +564,14 @@ public class Server {
 			this.rfc6265CookieValidation = rfc6265CookieValidation;
 		}
 
+		public boolean isAllowUnescapedCharactersInUrl() {
+			return allowUnescapedCharactersInUrl;
+		}
+
+		public void setAllowUnescapedCharactersInUrl(boolean allowUnescapedCharactersInUrl) {
+			this.allowUnescapedCharactersInUrl = allowUnescapedCharactersInUrl;
+		}
+
 		public abstract boolean isProxyAddressForwarding();
 
 		public abstract boolean isCertificateForwarding();
@@ -674,6 +688,9 @@ public class Server {
 		@XmlAttribute(name = "require-host-http11")
 		private boolean requireHostHttp11 = false;
 
+		@XmlAttribute(name = "proxy-protocol")
+		private boolean proxyProtocol = false;
+
 		@Override
 		public boolean isCertificateForwarding() {
 			return certificateForwarding;
@@ -765,6 +782,14 @@ public class Server {
 			this.requireHostHttp11 = requireHostHttp11;
 		}
 
+		public boolean isProxyProtocol() {
+			return proxyProtocol;
+		}
+
+		public void setProxyProtocol(boolean proxyProtocol) {
+			this.proxyProtocol = proxyProtocol;
+		}
+
 		@Override
 		public String toString() {
 			final StringBuilder sb = new StringBuilder("{ ");
@@ -788,6 +813,7 @@ public class Server {
 			sb.append(", http2 max frame size: ").append(http2MaxFrameSize);
 			sb.append(", http2 max header list size: ").append(http2MaxHeaderListSize);
 			sb.append(", require host http11: ").append(requireHostHttp11);
+			sb.append(", proxy protocol: ").append(proxyProtocol);
 			return sb.toString();
 		}
 	}
@@ -805,6 +831,8 @@ public class Server {
 		private boolean proxyAddressForwarding = false;
 
 		// legacy in urn:jboss:domain:undertow:4.0 - but still used in pax-web
+		// but "ssl-context" used in Wildfly integrates harder with the Wildfly itself, so "security-realm" is
+		// the mechanism to configure security
 		@XmlAttribute(name = "security-realm")
 		private String securityRealm;
 
@@ -895,6 +923,9 @@ public class Server {
 		 */
 		@XmlAttribute(name = "require-host-http11")
 		private boolean requireHostHttp11 = false;
+
+		@XmlAttribute(name = "proxy-protocol")
+		private boolean proxyProtocol = false;
 
 		public String getSslContext() {
 			return sslContext;
@@ -1043,6 +1074,14 @@ public class Server {
 			this.requireHostHttp11 = requireHostHttp11;
 		}
 
+		public boolean isProxyProtocol() {
+			return proxyProtocol;
+		}
+
+		public void setProxyProtocol(boolean proxyProtocol) {
+			this.proxyProtocol = proxyProtocol;
+		}
+
 		@Override
 		public boolean isSecure() {
 			return true;
@@ -1078,6 +1117,7 @@ public class Server {
 			sb.append(", http2 max frame size: ").append(http2MaxFrameSize);
 			sb.append(", http2 max header list size: ").append(http2MaxHeaderListSize);
 			sb.append(", require host http11: ").append(requireHostHttp11);
+			sb.append(", proxy protocol: ").append(proxyProtocol);
 			return sb.toString();
 		}
 	}
@@ -1099,6 +1139,7 @@ public class Server {
 		private AccessLog accessLog;
 		@XmlElement(name = "filter-ref")
 		private final List<FilterRef> filterRef = new ArrayList<>();
+		// <xs:element name="console-access-log" type="consoleAccessLogType" minOccurs="0"/>
 
 		public String getName() {
 			return name;

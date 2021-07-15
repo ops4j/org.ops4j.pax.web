@@ -114,7 +114,7 @@ public class UndertowConfiguration {
 			for (IoSubsystem.Worker worker : ioSubsystem.getWorkers()) {
 				workers.put(worker.getName(), worker);
 			}
-			for (IoSubsystem.BufferPool pool : ioSubsystem.getBuferPools()) {
+			for (IoSubsystem.BufferPool pool : ioSubsystem.getBufferPools()) {
 				bufferPools.put(pool.getName(), pool);
 			}
 		}
@@ -238,26 +238,26 @@ public class UndertowConfiguration {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("{\n\tsubsystem: " + subsystem + "\n");
+		sb.append("{\n\tsubsystem: ").append(subsystem).append("\n");
 		sb.append("\tsecurity realms: {");
 		for (SecurityRealm sr : securityRealms) {
-			sb.append("\n\t\t" + sr);
+			sb.append("\n\t\t").append(sr);
 		}
 		sb.append("\n\t}\n\tinterfaces: {");
 		for (Interface i : interfaces) {
-			sb.append("\n\t\t" + i);
+			sb.append("\n\t\t").append(i);
 		}
 		sb.append("\n\t}\n\tsocket bindings: {");
 		for (SocketBinding b : socketBindings) {
-			sb.append("\n\t\t" + b);
+			sb.append("\n\t\t").append(b);
 		}
 		sb.append("\n\t}\n\tworkers: {");
 		for (IoSubsystem.Worker w : workers.values()) {
-			sb.append("\n\t\t" + w);
+			sb.append("\n\t\t").append(w);
 		}
 		sb.append("\n\t}\n\tbuffer pools: {");
 		for (IoSubsystem.BufferPool bp : bufferPools.values()) {
-			sb.append("\n\t\t" + bp);
+			sb.append("\n\t\t").append(bp);
 		}
 		sb.append("\n\t}\n}\n");
 		return sb.toString();

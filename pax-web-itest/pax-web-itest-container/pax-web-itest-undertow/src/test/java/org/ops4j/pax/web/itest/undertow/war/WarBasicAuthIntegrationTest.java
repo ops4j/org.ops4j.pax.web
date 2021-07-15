@@ -31,9 +31,9 @@ public class WarBasicAuthIntegrationTest extends AbstractWarBasicAuthIntegration
 
 	@Configuration
 	public Option[] configure() {
-		Option[] serverOptions = combine(baseConfigure(), paxWebJetty());
-		// this will install a fragment attached to pax-web-jetty bundle, so it can find "jetty.xml" resource
-		// used to alter the Jetty server
+		Option[] serverOptions = combine(baseConfigure(), paxWebUndertow());
+		// this will install a fragment attached to pax-web-undertow bundle, so it can find "undertow.xml" resource
+		// used to alter the Undertow server
 		MavenArtifactProvisionOption auth = mavenBundle("org.ops4j.pax.web.samples", "auth-config-fragment-undertow")
 				.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart();
 		Option[] authOptions = combine(serverOptions, auth);

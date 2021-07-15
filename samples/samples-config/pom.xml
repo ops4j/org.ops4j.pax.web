@@ -36,7 +36,7 @@
 	<modules>
 		<module>auth-config-fragment-jetty</module>
 		<module>auth-config-fragment-tomcat</module>
-<!--		<module>auth-config-fragment-undertow</module>-->
+		<module>auth-config-fragment-undertow</module>
 	</modules>
 
 </project>

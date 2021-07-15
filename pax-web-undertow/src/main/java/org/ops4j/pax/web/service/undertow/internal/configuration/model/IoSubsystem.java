@@ -30,26 +30,24 @@ import static org.ops4j.pax.web.service.undertow.internal.configuration.model.Ob
 public class IoSubsystem {
 
 	@XmlElement(name = "worker")
-	private List<Worker> workers = new ArrayList<>();
+	private final List<Worker> workers = new ArrayList<>();
 
 	@XmlElement(name = "buffer-pool")
-	private List<BufferPool> bufferPools = new ArrayList<>();
+	private final List<BufferPool> bufferPools = new ArrayList<>();
 
 	public List<Worker> getWorkers() {
 		return workers;
 	}
 
-	public List<BufferPool> getBuferPools() {
+	public List<BufferPool> getBufferPools() {
 		return bufferPools;
 	}
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder("{");
-		sb.append("\n\t\tworkers: " + workers);
-		sb.append("\n\t\tbuffer pools: " + bufferPools);
-		sb.append("\n\t}");
-		return sb.toString();
+		return "{\n\t\tworkers: " + workers +
+				"\n\t\tbuffer pools: " + bufferPools +
+				"\n\t}";
 	}
 
 	@XmlType(name = "workerType", namespace = NS_IO)
@@ -118,15 +116,13 @@ public class IoSubsystem {
 
 		@Override
 		public String toString() {
-			final StringBuilder sb = new StringBuilder("{ ");
-			sb.append("name: ").append(name);
-			sb.append(", io threads: ").append(ioThreads);
-			sb.append(", task max threads: ").append(taskMaxThreads);
-			sb.append(", task core threads: ").append(taskCoreThreads);
-			sb.append(", task keep alive: ").append(taskKeepalive);
-			sb.append(", stack size: ").append(stackSize);
-			sb.append(" }");
-			return sb.toString();
+			return "{ name: " + name +
+					", io threads: " + ioThreads +
+					", task max threads: " + taskMaxThreads +
+					", task core threads: " + taskCoreThreads +
+					", task keep alive: " + taskKeepalive +
+					", stack size: " + stackSize +
+					" }";
 		}
 	}
 
@@ -166,12 +162,10 @@ public class IoSubsystem {
 
 		@Override
 		public String toString() {
-			final StringBuilder sb = new StringBuilder("{ ");
-			sb.append("name: ").append(name);
-			sb.append(", buffer size: ").append(bufferSize);
-			sb.append(", use direct buffers: ").append(directBuffers);
-			sb.append(" }");
-			return sb.toString();
+			return "{ name: " + name +
+					", buffer size: " + bufferSize +
+					", use direct buffers: " + directBuffers +
+					" }";
 		}
 	}
 

@@ -45,7 +45,7 @@ public class SecurityRealm {
 	private String userPrincipalClassName;
 
 	@XmlElement(name = "role-principal-class-name")
-	private List<String> rolePrincipalClassNames = new ArrayList<>();
+	private final List<String> rolePrincipalClassNames = new ArrayList<>();
 
 	public ServerIdentities getIdentities() {
 		return identities;
@@ -86,13 +86,13 @@ public class SecurityRealm {
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder("{\n");
-		sb.append("\t\t\tname: " + name);
+		sb.append("\t\t\tname: ").append(name);
 		if (identities != null) {
-			sb.append("\n\t\t\tssl: " + identities.getSsl());
+			sb.append("\n\t\t\tssl: ").append(identities.getSsl());
 		}
-		sb.append("\n\t\t\tauthentication: " + authentication);
-		sb.append("\n\t\t\tuser principal class name: " + userPrincipalClassName);
-		sb.append("\n\t\t\trole principal class names: " + rolePrincipalClassNames);
+		sb.append("\n\t\t\tauthentication: ").append(authentication);
+		sb.append("\n\t\t\tuser principal class name: ").append(userPrincipalClassName);
+		sb.append("\n\t\t\trole principal class names: ").append(rolePrincipalClassNames);
 		sb.append("\n\t\t}");
 		return sb.toString();
 	}
@@ -142,18 +142,17 @@ public class SecurityRealm {
 
 		@Override
 		public String toString() {
-			final StringBuilder sb = new StringBuilder("{\n");
-			sb.append("\t\t\t\tengine: ").append(engine);
-			sb.append("\n\t\t\t\tkeystore: ").append(keystore);
-			sb.append("\n\t\t\t}");
-			return sb.toString();
+			return "{\n\t\t\t\tengine: " + engine +
+					"\n\t\t\t\tkeystore: " + keystore +
+					"\n\t\t\t}";
 		}
 	}
 
 	@XmlType(name = "authenticationType", namespace = NS_WILDFLY, propOrder = {
 			"truststore",
 			"jaas",
-			"properties"
+			"properties",
+			"users"
 	})
 	public static class Authentication {
 		@XmlElement
@@ -162,6 +161,8 @@ public class SecurityRealm {
 		private JaasAuth jaas;
 		@XmlElement
 		private PropertiesAuth properties;
+		@XmlElement
+		private UsersAuth users;
 
 		public Truststore getTruststore() {
 			return truststore;
@@ -187,23 +188,30 @@ public class SecurityRealm {
 			this.properties = properties;
 		}
 
+		public UsersAuth getUsers() {
+			return users;
+		}
+
+		public void setUsers(UsersAuth users) {
+			this.users = users;
+		}
+
 		@Override
 		public String toString() {
-			final StringBuilder sb = new StringBuilder("{ ");
-			sb.append("truststore: ").append(truststore);
-			sb.append(", jaas: ").append(jaas);
-			sb.append(", properties: ").append(properties);
-			sb.append(" }");
-			return sb.toString();
+			return "{ truststore: " + truststore +
+					", jaas: " + jaas +
+					", properties: " + properties +
+					", users: " + users +
+					" }";
 		}
 	}
 
 	@XmlType(name = "engineType", namespace = NS_WILDFLY)
 	public static class Engine {
 		@XmlAttribute(name = "enabled-cipher-suites")
-		private List<String> enabledCipherSuites = new ArrayList<>();
+		private final List<String> enabledCipherSuites = new ArrayList<>();
 		@XmlAttribute(name = "enabled-protocols")
-		private List<String> enabledProtocols = new ArrayList<>();
+		private final List<String> enabledProtocols = new ArrayList<>();
 
 		public List<String> getEnabledCipherSuites() {
 			return enabledCipherSuites;
@@ -215,11 +223,9 @@ public class SecurityRealm {
 
 		@Override
 		public String toString() {
-			final StringBuilder sb = new StringBuilder("{ ");
-			sb.append("enabled ciphers: ").append(enabledCipherSuites);
-			sb.append(", enabled protocols: ").append(enabledProtocols);
-			sb.append(" }");
-			return sb.toString();
+			return "{ enabled ciphers: " + enabledCipherSuites +
+					", enabled protocols: " + enabledProtocols +
+					" }";
 		}
 	}
 
@@ -259,11 +265,9 @@ public class SecurityRealm {
 
 		@Override
 		public String toString() {
-			final StringBuilder sb = new StringBuilder("{ ");
-			sb.append("provider: ").append(type);
-			sb.append(", path: ").append(path);
-			sb.append(" }");
-			return sb.toString();
+			return "{ provider: " + type +
+					", path: " + path +
+					" }";
 		}
 	}
 
@@ -302,12 +306,10 @@ public class SecurityRealm {
 
 		@Override
 		public String toString() {
-			final StringBuilder sb = new StringBuilder("{ ");
-			sb.append("provider: ").append(getType());
-			sb.append(", path: ").append(getPath());
-			sb.append(", alias: ").append(alias);
-			sb.append(" }");
-			return sb.toString();
+			return "{ provider: " + getType() +
+					", path: " + getPath() +
+					", alias: " + alias +
+					" }";
 		}
 	}
 
@@ -326,10 +328,7 @@ public class SecurityRealm {
 
 		@Override
 		public String toString() {
-			final StringBuilder sb = new StringBuilder("{ ");
-			sb.append("name: ").append(name);
-			sb.append(" }");
-			return sb.toString();
+			return "{ name: " + name + " }";
 		}
 	}
 
@@ -348,10 +347,51 @@ public class SecurityRealm {
 
 		@Override
 		public String toString() {
-			final StringBuilder sb = new StringBuilder("{ ");
-			sb.append("path: ").append(path);
-			sb.append(" }");
-			return sb.toString();
+			return "{ path: " + path + " }";
+		}
+	}
+
+	@XmlType(name = "usersAuthenticationType", namespace = NS_WILDFLY)
+	public static class UsersAuth {
+		@XmlElement(name = "user")
+		private final List<User> users = new ArrayList<>();
+
+		public List<User> getUsers() {
+			return users;
+		}
+
+		@Override
+		public String toString() {
+			return "{ users: " + users + " }";
+		}
+	}
+
+	@XmlType(name = "userType", namespace = NS_WILDFLY)
+	public static class User {
+		@XmlAttribute
+		private String username;
+		@XmlElement
+		private String password;
+
+		public String getUsername() {
+			return username;
+		}
+
+		public void setUsername(String username) {
+			this.username = username;
+		}
+
+		public String getPassword() {
+			return password;
+		}
+
+		public void setPassword(String password) {
+			this.password = password;
+		}
+
+		@Override
+		public String toString() {
+			return username + "/***";
 		}
 	}
 

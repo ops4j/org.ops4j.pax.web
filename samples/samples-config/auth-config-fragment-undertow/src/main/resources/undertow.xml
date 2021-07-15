@@ -16,22 +16,17 @@
     limitations under the License.
 
 -->
+<!-- Minimal Undertow XML configuration, where all the defaults will be configured by Pax Web -->
 <undertow xmlns="urn:org.ops4j.pax.web:undertow:1.1" xmlns:w="urn:jboss:domain:17.0">
-
-	<subsystem xmlns="urn:jboss:domain:undertow:12.0">
-		<server name="default-server">
-			<http-listener name="http" socket-binding="http" />
-			<host name="default-host" alias="localhost" />
-		</server>
-		<servlet-container name="default">
-			<persistent-sessions path="target/web-sessions-undertow" />
-		</servlet-container>
-	</subsystem>
-
-	<interface name="default">
-		<w:inet-address value="0.0.0.0" />
-	</interface>
-
-	<socket-binding name="http" interface="default" port="8181" />
-
+	<security-realm name="default">
+		<w:authentication>
+			<!-- File will be loaded relatively to pax-web-itest-undertow module -->
+			<w:properties path="target/test-classes/users.properties" />
+<!--			<w:users>-->
+<!--				<w:user username="admin">-->
+<!--					<w:password>SHA-512:c7ad44cbad762a5da0a452f9e854fdc1e0e7a52a38015f23f3eab1d80b931dd472634dfac71cd34ebc35d16ab7fb8a90c81f975113d6c7538dc69dd8de9077ec</w:password>-->
+<!--				</w:user>-->
+<!--			</w:users>-->
+		</w:authentication>
+	</security-realm>
 </undertow>
