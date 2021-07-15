@@ -1,9 +1,0 @@
-mvn:org.ops4j.pax.logging/pax-logging-api
-mvn:org.ops4j.pax.logging/pax-logging-service
-mvn:org.ops4j.pax.web/pax-web-jetty-bundle
-mvn:org.ops4j.pax.wicket/service
-mvn:org.ops4j.pax.wicket.samples.departmentstore/model
-mvn:org.ops4j.pax.wicket.samples.departmentstore.view/application
-mvn:org.ops4j.pax.wicket.samples.departmentstore.view/floor
-mvn:org.ops4j.pax.wicket.samples.departmentstore.view/about
-mvn:org.ops4j.pax.wicket.samples.departmentstore.view/franchisee

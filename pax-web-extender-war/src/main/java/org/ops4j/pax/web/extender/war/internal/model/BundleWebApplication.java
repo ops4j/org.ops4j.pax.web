@@ -631,13 +631,18 @@ public class BundleWebApplication {
 
 				// after web.xml/web-fragment.xml/annotations are read, we have to check if the context path
 				// is available
-				if (deploymentState.compareAndSet(State.CONFIGURING, State.ALLOCATING_CONTEXT)) {
-					if (allocatingLatch != null && allocatingLatch.getCount() > 0) {
-						// for now let's keep this brute check
-						throw new IllegalStateException("[dev error] Previous context allocation attempt didn't finish"
-								+ " properly. Existing latch found.");
+				State st = deploymentState.get();
+				if (st == State.CONFIGURING || st == State.ALLOCATING_CONTEXT) {
+					// webContainerRemoved() could already switched the state to ALLOCATING_CONTEXT, but we need to
+					// create the allocating latch
+					if (deploymentState.compareAndSet(st, State.ALLOCATING_CONTEXT)) {
+						if (allocatingLatch != null && allocatingLatch.getCount() > 0) {
+							// for now let's keep this brute check
+							throw new IllegalStateException("[dev error] Previous context allocation attempt didn't finish"
+									+ " properly. Existing latch found.");
+						}
+						allocatingLatch = new CountDownLatch(1);
 					}
-					allocatingLatch = new CountDownLatch(1);
 				}
 			}
 

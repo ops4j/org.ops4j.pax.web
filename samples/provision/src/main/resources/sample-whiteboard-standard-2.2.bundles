@@ -1,8 +1,0 @@
-mvn:org.ops4j.pax.logging/pax-logging-api
-mvn:org.ops4j.pax.logging/pax-logging-service
-mvn:org.ungoverned.osgi.bundle/http
-wrap:mvn:javax.servlet/servlet-api/2.2,file:./javax.servlet-2.2.bnd
-mvn:org.ops4j.pax.web/pax-web-extender-whiteboard@update
-mvn:org.ops4j.pax.web.samples/whiteboard@update
-
--Dorg.osgi.service.http.port=8080

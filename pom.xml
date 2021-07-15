@@ -171,7 +171,7 @@
 		<dependency.commons-collections3>3.2.2</dependency.commons-collections3>
 		<dependency.commons-digester>1.8.1</dependency.commons-digester>
 		<dependency.commons-fileupload>1.4</dependency.commons-fileupload>
-		<dependency.commons-io>2.8.0</dependency.commons-io>
+		<dependency.commons-io>2.11.0</dependency.commons-io>
 		<dependency.com.sun.activation>1.2.0</dependency.com.sun.activation>
 
 		<!--		<dependency.io.gatling.highcharts>3.6.1</dependency.io.gatling.highcharts>-->
