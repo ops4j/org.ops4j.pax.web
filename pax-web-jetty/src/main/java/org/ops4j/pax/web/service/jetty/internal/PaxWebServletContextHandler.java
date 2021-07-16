@@ -46,14 +46,8 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 
 	private final Collection<SCIWrapper> servletContainerInitializers = new LinkedList<>();
 
-				/**
-				 * Access controller context of the bundle that registred the http context.
-				 */
 				private AccessControlContext accessControllerContext;
-
-
 				private URL jettyWebXmlURL;
-
 				private List<String> virtualHosts;
 
 	private OsgiServletContext osgiServletContext;
@@ -111,31 +105,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 		// 1. Pax Web 7 was explicitly adding org.ops4j.pax.web.jsp.JasperInitializer here, but we're no longer doing it
 		//    WebAppContext in Jetty uses org.eclipse.jetty.webapp.JspConfiguration for this purpose
 
-		// 2. TODO: Sort initializers as it was done in Pax Web 7?
-//		final List<ServletContainerInitializer> cdi = new LinkedList<>();
-//		final List<ServletContainerInitializer> jsp = new LinkedList<>();
-//		final List<ServletContainerInitializer> jettyWebSocket = new LinkedList<>();
-//		final List<ServletContainerInitializer> remaining = new LinkedList<>();
-//
-//		servletContainerInitializers.forEach(scim -> {
-//			ServletContainerInitializer sci = scim.getContainerInitializer();
-//			String className = sci.getClass().getName();
-//			if ("org.ops4j.pax.cdi.web.impl.CdiServletContainerInitializer".equals(className)) {
-//				cdi.add(sci);
-//			} else if (className.startsWith("org.eclipse.jetty.websocket")) {
-//				jettyWebSocket.add(sci);
-//			} else if ("org.ops4j.pax.web.jsp.JasperInitializer".equals(className)) {
-//				jsp.add(sci);
-//			} else {
-//				remaining.add(sci);
-//			}
-//		});
-//
-//		List<ServletContainerInitializer> list = new LinkedList<>();
-//		list.addAll(cdi);
-//		list.addAll(jettyWebSocket);
-//		list.addAll(jsp);
-//		list.addAll(remaining);
+		// 2. Pax Web 7 was sorting the initializers - we don't have to do it in Pax Web 8
 
 		// 3. Call the initializers
 		servletContainerInitializers.forEach(wrapper -> {

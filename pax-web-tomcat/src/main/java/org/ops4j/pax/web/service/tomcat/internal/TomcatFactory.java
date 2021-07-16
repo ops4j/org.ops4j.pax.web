@@ -24,6 +24,7 @@ import org.apache.catalina.Server;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardThreadExecutor;
 import org.apache.catalina.startup.Catalina;
+import org.apache.catalina.startup.ContextConfig;
 import org.apache.coyote.http2.Http2Protocol;
 import org.apache.tomcat.util.compat.JreCompat;
 import org.apache.tomcat.util.digester.Digester;
@@ -364,6 +365,10 @@ public class TomcatFactory {
 		return new PaxWebCatalina().createStartDigester();
 	}
 
+	public Digester createContextDigester() {
+		return new PaxWebCatalinaContextConfig().createContextDigester();
+	}
+
 	private static class PaxWebCatalina extends Catalina {
 		PaxWebCatalina() {
 		}
@@ -373,6 +378,16 @@ public class TomcatFactory {
 			Digester digester = super.createStartDigester();
 			digester.setClassLoader(PaxWebCatalina.class.getClassLoader());
 			return digester;
+		}
+	}
+
+	private static class PaxWebCatalinaContextConfig extends ContextConfig {
+		PaxWebCatalinaContextConfig() {
+		}
+
+		@Override
+		public Digester createContextDigester() {
+			return super.createContextDigester();
 		}
 	}
 

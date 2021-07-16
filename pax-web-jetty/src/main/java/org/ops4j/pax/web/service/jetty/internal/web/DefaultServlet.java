@@ -322,10 +322,13 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
         _resourceService.setGzipEquivalentFileExtensions(gzipEquivalentFileExtensions);
 
         _servletHandler = _contextHandler.getChildHandlerByClass(ServletHandler.class);
-        for (ServletHolder h : _servletHandler.getServlets())
-        {
-            if (h.getServletInstance() == this)
-                _defaultHolder = h;
+        if (_servletHandler != null) {
+            // could be null when the WAB ships own jetty-web.xml
+            for (ServletHolder h : _servletHandler.getServlets())
+            {
+                if (h.getServletInstance() == this)
+                    _defaultHolder = h;
+            }
         }
 
         if (LOG.isDebugEnabled())

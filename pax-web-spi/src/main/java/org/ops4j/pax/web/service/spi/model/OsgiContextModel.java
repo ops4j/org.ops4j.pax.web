@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -317,6 +318,9 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 
 	/** Per OSGi context configuration of security - login config, security constraints and security roles */
 	private final SecurityConfigurationModel securityConfiguration = new SecurityConfigurationModel();
+
+	/** Context-specific list of URLs for XML descriptors (only Jetty and Tomcat handle them) */
+	private final List<URL> serverSpecificDescriptors = new ArrayList<>();
 
 	/**
 	 * Flag indicating whether this {@link OsgiContextModel} comes from Whiteboard.
@@ -672,6 +676,10 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 
 	public SecurityConfigurationModel getSecurityConfiguration() {
 		return securityConfiguration;
+	}
+
+	public List<URL> getServerSpecificDescriptors() {
+		return serverSpecificDescriptors;
 	}
 
 	/**

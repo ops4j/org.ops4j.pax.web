@@ -981,6 +981,12 @@
 				<type>war</type>
 			</dependency>
 
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>wab-container-context-config</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
 			<!-- pax-web jsp samples -->
 
 			<dependency>
@@ -2636,7 +2642,7 @@
 		<repository>
 			<id>prime-repo</id>
 			<name>PrimeFaces Maven Repository</name>
-			<url>https://repository.primefaces.orgg</url>
+			<url>https://repository.primefaces.org</url>
 		</repository>
 	</repositories>
 
@@ -2808,6 +2814,7 @@
 								<exclude>**/.settings/**</exclude>
 								<exclude>**/bin/**</exclude>
 								<!-- resources file -->
+								<exclude>**/index.txt</exclude>
 								<exclude>**/goal.txt</exclude>
 								<exclude>**/grep.txt</exclude>
 								<exclude>**/edit.txt</exclude>

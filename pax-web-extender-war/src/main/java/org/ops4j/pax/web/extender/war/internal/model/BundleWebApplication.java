@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -186,6 +187,8 @@ public class BundleWebApplication {
 
 	private final Set<URL> faceletTagLibDescriptors = new LinkedHashSet<>();
 
+	private final List<URL> serverSpecificDescriptors = new ArrayList<>();
+
 	/**
 	 * This is the discovered mapping of SCIs to sets of classes that are related to types from
 	 * {@link HandlesTypes} using these relations(see "8.2.4 Shared libraries / runtimes pluggability" of the Servlet
@@ -200,9 +203,6 @@ public class BundleWebApplication {
 
 	/** Final batch of the changes/configuration operations related to full web application being deployed */
 	private Batch batch = null;
-
-	/** Stored instance of {@link OsgiContextModel} to get access (at undeployment time) to dynamic registrations */
-	private OsgiContextModel osgiContextModel = null;
 
 	/**
 	 * Stored instance of {@link org.osgi.service.http.HttpContext} that wraps
@@ -1147,6 +1147,50 @@ public class BundleWebApplication {
 				} catch (MalformedURLException ignored) {
 				}
 
+				// kind of extension point - both Jetty and Tomcat allow container-specific (web-)context
+				// configuration.
+				//
+				// Jetty uses org.eclipse.jetty.webapp.JettyWebXmlConfiguration and searches for jetty8-web.xml,
+				// jetty-web.xml and web-jetty.xml (in this order) - all searched for in WEB-INF of the WAR
+				// see https://www.eclipse.org/jetty/documentation/jetty-9/index.html#jetty-web-xml-config
+				//
+				// Tomcat uses org.apache.catalina.startup.ContextConfig.processContextConfig() +
+				// ContextConfig.createContextDigester() and processes META-INF/context.xml packaged in the WAR
+				// note that WEB-INF/tomcat-web.xml is an alternative web.xml descriptor, not a digester-parsed
+				// XML file.
+				// see https://tomcat.apache.org/tomcat-9.0-doc/config/context.html#Defining_a_context
+				//
+				// Undertow doesn't have such "extension point"
+
+				// Jetty - search in WEB-INF - also in attached OSGi fragments
+				Enumeration<URL> descriptors = bundle.findEntries("WEB-INF", "jetty-web.xml", false);
+				if (descriptors == null) {
+					descriptors = bundle.findEntries("WEB-INF", "web-jetty.xml", false);
+				}
+				if (descriptors != null) {
+					while (descriptors.hasMoreElements()) {
+						URL url = descriptors.nextElement();
+						LOG.debug("Found Jetty-specific descriptor: {}", url);
+						serverSpecificDescriptors.add(url);
+					}
+				}
+
+				// Tomcat - search in META-INF - both in top-level of the WAR and in WEB-INF/classes/META-INF
+				// (or generally - in non-jar entries on WAB's Bundle-ClassPath)
+				descriptors = bundle.findEntries("META-INF", "context.xml", false);
+				if (descriptors != null) {
+					while (descriptors.hasMoreElements()) {
+						URL url = descriptors.nextElement();
+						LOG.debug("Found Tomcat-specific descriptor: {}", url);
+						serverSpecificDescriptors.add(url);
+					}
+				}
+				List<URL> urls = ClassPathUtil.findEntries(bundle, ClassPathUtil.getClassPathNonJars(bundle), "META-INF", "context.xml", false);
+				for (URL url : urls) {
+					LOG.debug("Found Tomcat-specific descriptor: {}", url);
+					serverSpecificDescriptors.add(url);
+				}
+
 				LOG.debug("Finished metadata and fragment processing for {} in {}ms", bundle, System.currentTimeMillis() - start);
 			} catch (IOException e) {
 				throw new RuntimeException(e.getMessage(), e);
@@ -1326,10 +1370,11 @@ public class BundleWebApplication {
 			securityConfiguration.getSecurityConstraints().add(constraint);
 		}
 
+		// 1.6 context specific configuration URLs
+		ocm.getServerSpecificDescriptors().addAll(serverSpecificDescriptors);
+
 		wabBatch.addOsgiContextModel(ocm, scm);
 		wabBatch.associateOsgiContextModel(httpContext, ocm);
-
-		this.osgiContextModel = ocm;
 
 		// elements from web.xml are processed to create a Batch that'll be send to a dedicated view of a WebContainer.
 		// Tomcat configures its context directly in org.apache.catalina.startup.ContextConfig.configureContext()
@@ -1558,7 +1603,7 @@ public class BundleWebApplication {
 
 		// 5. listeners
 		for (String listener : mainWebXml.getListeners()) {
-			Class<EventListener> listenerClass = null;
+			Class<EventListener> listenerClass;
 			try {
 				listenerClass = (Class<EventListener>) classLoader.loadClass(listener);
 				EventListener eventListener = listenerClass.newInstance();

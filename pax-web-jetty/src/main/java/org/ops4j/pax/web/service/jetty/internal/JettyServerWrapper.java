@@ -1618,17 +1618,23 @@ class JettyServerWrapper implements BatchVisitor {
 				ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
 				sch.setSecurityHandler(securityHandler);
 
-				securityHandler.setRealmName(loginConfig.getRealmName() == null ? "default" : loginConfig.getRealmName());
+				securityHandler.setRealmName(loginConfig.getRealmName());
 
 				switch (loginConfig.getAuthMethod().toUpperCase()) {
 					case Constraint.__BASIC_AUTH:
 						securityHandler.setAuthenticator(new BasicAuthenticator());
+						if (securityHandler.getRealmName() == null) {
+							securityHandler.setRealmName("default");
+						}
 						break;
 					case Constraint.__DIGEST_AUTH:
 						DigestAuthenticator digestAuthenticator = new DigestAuthenticator();
 						digestAuthenticator.setMaxNonceAge(configuration.security().getDigestAuthMaxNonceAge());
 						digestAuthenticator.setMaxNonceCount(configuration.security().getDigestAuthMaxNonceCount());
 						securityHandler.setAuthenticator(digestAuthenticator);
+						if (securityHandler.getRealmName() == null) {
+							securityHandler.setRealmName("default");
+						}
 						break;
 					case Constraint.__CERT_AUTH:
 					case Constraint.__CERT_AUTH2:
@@ -1639,6 +1645,7 @@ class JettyServerWrapper implements BatchVisitor {
 								loginConfig.getFormErrorPage(), !configuration.security().getFormAuthRedirect());
 						securityHandler.setInitParameter(FormAuthenticator.__FORM_LOGIN_PAGE, loginConfig.getFormLoginPage());
 						securityHandler.setInitParameter(FormAuthenticator.__FORM_ERROR_PAGE, loginConfig.getFormErrorPage());
+						securityHandler.setInitParameter(FormAuthenticator.__FORM_DISPATCH, Boolean.toString(!configuration.security().getFormAuthRedirect()));
 						securityHandler.setAuthenticator(formAuthenticator);
 						break;
 					case Constraint.__NEGOTIATE_AUTH:
@@ -1705,6 +1712,47 @@ class JettyServerWrapper implements BatchVisitor {
 						}
 					}
 				}
+			}
+
+			// and finally - XML context configuration which should be treated as highest priority (overriding
+			// the above setup)
+			XmlConfiguration previous = null;
+			Map<String, Object> objects = new LinkedHashMap<>();
+			objects.put("Context", sch);
+
+			ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+			Thread.currentThread().setContextClassLoader(sch.getClassLoader());
+			try {
+				for (URL url : highestRanked.getServerSpecificDescriptors()) {
+					String path = url.getPath();
+					if (path.startsWith("/WEB-INF/") && path.endsWith(".xml") && path.contains("jetty")) {
+						XmlConfiguration cfg = new XmlConfiguration(Resource.newResource(url));
+						LOG.info("Processing context specific {} for {}", url, contextPath);
+
+						cfg.getIdMap().putAll(previous == null ? objects : previous.getIdMap());
+						cfg.getProperties().putAll(this.configuration.all());
+
+						try {
+							cfg.configure();
+						} catch (Exception e) {
+							LOG.warn("Problem parsing {}: {}", cfg, e.getMessage(), e);
+						}
+
+						// collect all created objects
+						objects.putAll(cfg.getIdMap());
+
+						// collect all created HttpConfigurations
+						cfg.getIdMap().forEach((id, v) -> {
+							if (HttpConfiguration.class.isAssignableFrom(v.getClass())) {
+								httpConfigs.put(id, (HttpConfiguration) v);
+							}
+						});
+
+						previous = cfg;
+					}
+				}
+			} finally {
+				Thread.currentThread().setContextClassLoader(tccl);
 			}
 
 			// There's a deadlock, when starting the context in single paxweb-config thread:

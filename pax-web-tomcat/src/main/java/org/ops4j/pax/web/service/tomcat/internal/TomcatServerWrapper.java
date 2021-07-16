@@ -872,7 +872,7 @@ class TomcatServerWrapper implements BatchVisitor {
 			osgiServletContexts.put(osgiModel, osgiContext);
 			osgiContextModels.get(contextPath).add(osgiModel);
 
-			configurationListeners.put(osgiModel, new OsgiContextConfiguration(osgiModel, configuration));
+			configurationListeners.put(osgiModel, new OsgiContextConfiguration(osgiModel, configuration, tomcatFactory));
 		}
 
 		if (change.getKind() == OpCode.DELETE) {

@@ -2018,7 +2018,14 @@ class UndertowServerWrapper implements BatchVisitor {
 			SecurityConfigurationModel security = highestRanked.getSecurityConfiguration();
 			LoginConfigModel lc = security.getLoginConfig();
 			if (lc != null) {
-				deployment.setLoginConfig(new LoginConfig(lc.getAuthMethod(), lc.getRealmName(),
+				String authMethod = lc.getAuthMethod();
+				String realmName = lc.getRealmName();
+				if ("BASIC".equals(authMethod) || "DIGEST".equals(authMethod)) {
+					if (realmName == null) {
+						realmName = "default";
+					}
+				}
+				deployment.setLoginConfig(new LoginConfig(authMethod, realmName,
 						lc.getFormLoginPage(), lc.getFormErrorPage()));
 
 				deployment.addSecurityRoles(security.getSecurityRoles());

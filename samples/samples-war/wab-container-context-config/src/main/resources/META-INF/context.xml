@@ -16,8 +16,13 @@
     limitations under the License.
 
 -->
-<Context privileged="true">
-    <Resources allowLinking="true">
-         <PreResources className="org.apache.catalina.webresources.DirResourceSet" base="target" internalPath="/logs" webAppMount="/static-content"/>
-    </Resources>
+<Context>
+	<Valve className="org.ops4j.pax.web.tomcat.valves.TestValve" />
+	<!--
+		we can't set <Resources> here, because Pax Web 8 does a special configuration of the default servlet
+		to be compatible with both Whiteboard and WAB specifications
+	-->
+<!--	<Resources>-->
+<!--		<PreResources className="org.apache.catalina.webresources.DirResourceSet" base="target" internalPath="/test-classes" webAppMount="/static-content" />-->
+<!--	</Resources>-->
 </Context>

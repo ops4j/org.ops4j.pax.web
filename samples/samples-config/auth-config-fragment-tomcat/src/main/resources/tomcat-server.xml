@@ -21,7 +21,8 @@
 	<Service>
 		<Engine>
 			<!-- File will be loaded relatively to pax-web-itest-tomcat module -->
-			<Realm className="org.apache.catalina.realm.MemoryRealm" pathname="target/test-classes/tomcat-users.xml"/>
+			<!-- Realm at Engine level will be used for all the contexts -->
+			<Realm className="org.apache.catalina.realm.MemoryRealm" pathname="target/test-classes/tomcat-users.xml" />
 		</Engine>
 	</Service>
 </Server>

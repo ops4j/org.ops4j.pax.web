@@ -320,6 +320,11 @@
             <type>war</type>
         </dependency>
 
+        <dependency>
+            <groupId>org.ops4j.pax.web.samples</groupId>
+            <artifactId>wab-container-context-config</artifactId>
+        </dependency>
+
 		<!-- pax-web jsp samples -->
 
 		<dependency>

@@ -15,6 +15,10 @@
  */
 package org.ops4j.pax.web.service.tomcat.internal;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+
 import org.apache.catalina.Authenticator;
 import org.apache.catalina.Lifecycle;
 import org.apache.catalina.LifecycleEvent;
@@ -29,12 +33,16 @@ import org.apache.catalina.authenticator.SpnegoAuthenticator;
 import org.apache.tomcat.util.descriptor.web.LoginConfig;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
+import org.apache.tomcat.util.digester.Digester;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.LoginConfigModel;
 import org.ops4j.pax.web.service.spi.model.elements.SecurityConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintModel;
 import org.ops4j.pax.web.service.spi.model.elements.SessionConfigurationModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 import javax.servlet.SessionCookieConfig;
 
@@ -44,7 +52,10 @@ import javax.servlet.SessionCookieConfig;
  */
 public class OsgiContextConfiguration implements LifecycleListener {
 
+	public static final Logger LOG = LoggerFactory.getLogger(OsgiContextConfiguration.class);
+
 	private final OsgiContextModel osgiContextModel;
+	private final TomcatFactory tomcatFactory;
 
 	/** This is an {@link org.apache.catalina.Authenticator} configured for the context */
 	private final Valve authenticationValve;
@@ -52,8 +63,9 @@ public class OsgiContextConfiguration implements LifecycleListener {
 	private final LoginConfig loginConfig;
 	private final boolean noAuth;
 
-	public OsgiContextConfiguration(OsgiContextModel osgiContextModel, Configuration configuration) {
+	public OsgiContextConfiguration(OsgiContextModel osgiContextModel, Configuration configuration, TomcatFactory tomcatFactory) {
 		this.osgiContextModel = osgiContextModel;
+		this.tomcatFactory = tomcatFactory;
 
 		if (osgiContextModel.getSecurityConfiguration().getLoginConfig() == null) {
 			authenticationValve = null;
@@ -77,11 +89,17 @@ public class OsgiContextConfiguration implements LifecycleListener {
 		switch (loginConfig.getAuthMethod().toUpperCase()) {
 			case "BASIC":
 				authenticator = new BasicAuthenticator();
+				if (this.loginConfig.getRealmName() == null) {
+					this.loginConfig.setRealmName("default");
+				}
 				break;
 			case "DIGEST":
 				DigestAuthenticator digestAuthenticator = new DigestAuthenticator();
 				digestAuthenticator.setNonceValidity(configuration.security().getDigestAuthMaxNonceAge());
 				authenticator = digestAuthenticator;
+				if (this.loginConfig.getRealmName() == null) {
+					this.loginConfig.setRealmName("default");
+				}
 				break;
 			case "CLIENT-CERT":
 			case "CLIENT_CERT":
@@ -206,6 +224,31 @@ public class OsgiContextConfiguration implements LifecycleListener {
 				}
 
 				context.getPipeline().addValve(authenticationValve);
+			}
+
+			// Tomcat-specific context configuration
+			ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+			Thread.currentThread().setContextClassLoader(osgiContextModel.getClassLoader());
+			try {
+				for (URL url : osgiContextModel.getServerSpecificDescriptors()) {
+					String path = url.getPath();
+					if (path.equals("/META-INF/context.xml")) {
+						LOG.info("Processing context specific {} for {}", url, osgiContextModel.getContextPath());
+
+						Digester digester = tomcatFactory.createContextDigester();
+						digester.setClassLoader(osgiContextModel.getClassLoader());
+						digester.push(context.getParent());
+						digester.push(context);
+
+						try (InputStream is = url.openStream()) {
+							digester.parse(is);
+						} catch (IOException | SAXException e) {
+							LOG.warn("Problem parsing {}: {}", url, e.getMessage(), e);
+						}
+					}
+				}
+			} finally {
+				Thread.currentThread().setContextClassLoader(tccl);
 			}
 
 			context.setConfigured(true);

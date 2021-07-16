@@ -16,9 +16,7 @@
     limitations under the License.
 
 -->
-<!--<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "https://www.eclipse.org/jetty/configure_9_3.dtd">-->
-<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "configure_9_3.dtd">
-
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_3.dtd">
 <Configure id="Server">
 	<Set name="connectors">
 		<Array type="org.eclipse.jetty.server.Connector">
