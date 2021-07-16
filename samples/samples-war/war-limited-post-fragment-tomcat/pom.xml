@@ -21,24 +21,53 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.ops4j.pax.web</groupId>
-		<artifactId>samples</artifactId>
+		<groupId>org.ops4j.pax.web.samples</groupId>
+		<artifactId>samples-war</artifactId>
 		<version>8.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.ops4j.pax.web.samples</groupId>
-	<artifactId>samples-config</artifactId>
-	<packaging>pom</packaging>
+	<artifactId>war-limited-post-fragment-tomcat</artifactId>
+	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web Config Samples/Fragments</name>
+	<name>OPS4J Pax Web WAR Samples - POST size (Tomcat)</name>
 
-	<modules>
-		<module>auth-config-fragment-jetty</module>
-		<module>auth-config-fragment-tomcat</module>
-		<module>auth-config-fragment-undertow</module>
-		<module>limit-post-config-fragment-tomcat</module>
-		<module>limit-post-config-fragment-undertow</module>
-	</modules>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Fragment-Host>org.ops4j.pax.web.samples.war-limited-post</Fragment-Host>
+						<Import-Package>
+							org.apache.catalina.filters
+						</Import-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+
+		<!-- pax-web war samples -->
+
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>war-limited-post</artifactId>
+			<type>war</type>
+		</dependency>
+
+		<!-- Tomcat -->
+
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-core</artifactId>
+		</dependency>
+
+	</dependencies>
 
 </project>

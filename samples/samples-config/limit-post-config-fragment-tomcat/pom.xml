@@ -24,39 +24,39 @@
 		<groupId>org.ops4j.pax.web</groupId>
 		<artifactId>samples</artifactId>
 		<version>8.0.0-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
+		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.ops4j.pax.web.samples</groupId>
-	<artifactId>samples-war</artifactId>
-	<packaging>pom</packaging>
+	<artifactId>limit-post-config-fragment-tomcat</artifactId>
+	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web WAR Samples</name>
+	<name>OPS4J Pax Web Config Samples - Tomcat POST config</name>
 
-	<modules>
-		<module>war</module>
-		<module>war-simple</module>
-		<module>war-simplest-javaee</module>
-		<module>war-simplest-osgi</module>
-		<module>war-servlet-jsp-file</module>
-		<module>war-most-complex</module>
-		<module>war-spring</module>
-		<module>war-introspection</module>
-		<module>war-introspection-bundle</module>
-		<module>helloworld-servlet3</module>
-		<module>war-dispatch-jsp</module>
-		<module>jsp-filter</module>
-		<module>war-requiring</module>
-		<module>war-required</module>
-		<module>simple-filter</module>
-		<module>war-authentication</module>
-		<module>war-vaadin08</module>
-		<module>war-vaadin08-spring</module>
-		<module>war-formauth</module>
-		<module>wab-container-context-config</module>
-		<module>war-limited-post</module>
-		<module>war-limited-post-fragment-tomcat</module>
-		<module>war-limited-post-fragment-undertow</module>
-	</modules>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Fragment-Host>org.ops4j.pax.web.pax-web-tomcat</Fragment-Host>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+
+		<!-- pax-web own artifacts -->
+
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-tomcat</artifactId>
+		</dependency>
+
+	</dependencies>
 
 </project>

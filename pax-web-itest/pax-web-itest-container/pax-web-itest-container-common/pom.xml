@@ -16,7 +16,8 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -202,6 +203,15 @@
 			<artifactId>auth-config-fragment-undertow</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>limit-post-config-fragment-tomcat</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>limit-post-config-fragment-undertow</artifactId>
+		</dependency>
+
 		<!-- pax-web war samples -->
 
 		<dependency>
@@ -303,27 +313,41 @@
 			<type>war</type>
 		</dependency>
 
-        <dependency>
-            <groupId>org.ops4j.pax.web.samples</groupId>
-            <artifactId>war-vaadin08</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.web.samples</groupId>
-            <artifactId>war-vaadin08-spring</artifactId>
-            <type>war</type>
-        </dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>war-vaadin08</artifactId>
+			<type>war</type>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>war-vaadin08-spring</artifactId>
+			<type>war</type>
+		</dependency>
 
-        <dependency>
-            <groupId>org.ops4j.pax.web.samples</groupId>
-            <artifactId>war-formauth</artifactId>
-            <type>war</type>
-        </dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>war-formauth</artifactId>
+			<type>war</type>
+		</dependency>
 
-        <dependency>
-            <groupId>org.ops4j.pax.web.samples</groupId>
-            <artifactId>wab-container-context-config</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>wab-container-context-config</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>war-limited-post</artifactId>
+			<type>war</type>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>war-limited-post-fragment-tomcat</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>war-limited-post-fragment-undertow</artifactId>
+		</dependency>
 
 		<!-- pax-web jsp samples -->
 

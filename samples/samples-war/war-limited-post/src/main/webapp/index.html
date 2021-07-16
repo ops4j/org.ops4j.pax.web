@@ -14,32 +14,32 @@
 
 -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Post size test</title>
+	<title>Post size test</title>
 </head>
 <body>
 
-	<p>Click on button Test below to test max post size</p>
-	<script>
-    	function createBigData(length) {
-    		var data = "";
-			for(i=0; i<length; i++) {
-				data += "A"
-			}
-			return data; 
-    	}
-    
-		function run(length) {
-			document.querySelector("textarea").value = createBigData(length);
-			document.querySelector("form").submit();
-		}
-	</script>
+<p>Click on button Test below to test max post size</p>
+<script>
+    function createBigData(length) {
+        var data = "";
+        for (i = 0; i < length; i++) {
+            data += "A"
+        }
+        return data;
+    }
 
-	<form action="upload-check" method="POST">
-		<textarea name="data"></textarea>
-		<button onclick="run(3000000)">Test 300k!</button>
-	</form>
+    function run(length) {
+        document.querySelector("textarea").value = createBigData(length);
+        document.querySelector("form").submit();
+    }
+</script>
+
+<form action="upload-check" method="POST">
+	<textarea name="data"></textarea>
+	<button onclick="run(128)">Test 128!</button>
+</form>
 
 </body>
 </html>

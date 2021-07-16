@@ -26,12 +26,16 @@ import org.ops4j.pax.web.service.spi.model.events.ErrorPageEventData;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.ops4j.pax.web.service.whiteboard.ErrorPageMapping;
 import org.osgi.framework.wiring.BundleWiring;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Alin Dreghiciu
  * @since 0.3.0, January 12, 2008
  */
 public class ErrorPageModel extends ElementModel<ErrorPageMapping, ErrorPageEventData> {
+
+	public static final Logger LOG = LoggerFactory.getLogger(ErrorPageModel.class);
 
 	private static final Pattern ERROR_CODE = Pattern.compile("^\\d{3}$");
 
@@ -136,7 +140,9 @@ public class ErrorPageModel extends ElementModel<ErrorPageMapping, ErrorPageEven
 				}
 				exceptionClassNames.add(exClass.getName());
 			} catch (ClassNotFoundException e) {
-				throw new IllegalArgumentException("Can't load \"" + page + "\" class using " + loader);
+				LOG.warn("Can't load \"" + page + "\" class using " + loader + "." +
+						"This exception class will still be used for this error page, but may result in classloading problems later.");
+				exceptionClassNames.add(page);
 			}
 		}
 

@@ -805,6 +805,17 @@
 				<version>${project.version}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>limit-post-config-fragment-tomcat</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>limit-post-config-fragment-undertow</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
 			<!-- pax-web internal samples -->
 
 			<dependency>
@@ -984,6 +995,23 @@
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
 				<artifactId>wab-container-context-config</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>war-limited-post</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>war-limited-post-fragment-tomcat</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>war-limited-post-fragment-undertow</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

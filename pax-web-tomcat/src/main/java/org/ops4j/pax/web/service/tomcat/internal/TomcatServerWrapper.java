@@ -504,7 +504,8 @@ class TomcatServerWrapper implements BatchVisitor {
 		}
 
 		for (Connector connector : currentConnectors) {
-			if ("org.apache.coyote.http11.Http11Nio2Protocol".equals(connector.getProtocolHandlerClassName())) {
+			if ("org.apache.coyote.http11.Http11Nio2Protocol".equals(connector.getProtocolHandlerClassName())
+					|| "org.ops4j.pax.web.service.tomcat.internal.PaxWebHttp11Nio2Protocol".equals(connector.getProtocolHandlerClassName())) {
 				if (match(address, port, connector)) {
 					if (connector.getSecure() == secure) {
 						expectedConnector = connector;

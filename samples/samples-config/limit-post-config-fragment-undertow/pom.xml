@@ -24,16 +24,14 @@
 		<groupId>org.ops4j.pax.web</groupId>
 		<artifactId>samples</artifactId>
 		<version>8.0.0-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
+		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.ops4j.pax.web.samples</groupId>
-	<artifactId>war-extended-post</artifactId>
-	<packaging>war</packaging>
+	<artifactId>limit-post-config-fragment-undertow</artifactId>
+	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web - Samples - WAR Extender - extended post</name>
-
-	<description>Sample to use jetty-web.xml to increase post size</description>
+	<name>OPS4J Pax Web Config Samples - Undertow POST config</name>
 
 	<build>
 		<plugins>
@@ -42,24 +40,8 @@
 				<artifactId>maven-bundle-plugin</artifactId>
 				<extensions>true</extensions>
 				<configuration>
-					<supportedProjectTypes>
-						<supportedProjectType>war</supportedProjectType>
-					</supportedProjectTypes>
-					<manifestLocation>${project.build.directory}/META-INF</manifestLocation>
 					<instructions>
-						<_wab>src/main/webapp</_wab>
-						<Bundle-ClassPath>WEB-INF/classes</Bundle-ClassPath>
-						<Export-Package>
-							org.ops4j.pax.web.jettyconftest.*
-						</Export-Package>
-						<Import-Package>
-							javax.servlet.*;version="[3.1,5)",
-							*
-						</Import-Package>
-						<Embed-Dependency>*;scope=compile|runtime;</Embed-Dependency>
-						<Embed-Directory>WEB-INF/lib</Embed-Directory>
-						<Embed-Transitive>true</Embed-Transitive>
-						<Web-ContextPath>/posttest</Web-ContextPath>
+						<Fragment-Host>org.ops4j.pax.web.pax-web-undertow</Fragment-Host>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -68,13 +50,13 @@
 
 	<dependencies>
 
-		<!-- JavaEE -->
+		<!-- pax-web own artifacts -->
 
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<scope>provided</scope>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-undertow</artifactId>
 		</dependency>
+
 	</dependencies>
 
 </project>

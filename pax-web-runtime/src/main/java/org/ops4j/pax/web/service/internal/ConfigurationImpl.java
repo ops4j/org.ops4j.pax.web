@@ -88,6 +88,16 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	 */
 	ConfigurationImpl(final PropertyResolver propertyResolver, Map<String, String> sourceProperties) {
 		this.propertyResolver = propertyResolver;
+
+		// review existing properties and override them with ones from the resolver (if they exist)
+		for (String key : sourceProperties.keySet()) {
+			String v = propertyResolver.get(key);
+			if (v != null && !"".equals(v)) {
+				// override, so for example a framework property overrides a value from metatype.xml
+				sourceProperties.put(key, v);
+			}
+		}
+
 		this.sourceProperties = Collections.unmodifiableMap(sourceProperties);
 
 		id = UUID.randomUUID().toString();
