@@ -766,7 +766,7 @@ class UndertowServerWrapper implements BatchVisitor {
 			UndertowFactory.AcceptingChannelWithAddress listener = iterator.next();
 			String className = listener.getAcceptingChannel().getClass().getName();
 			boolean secureMatch = secure && className.equals("io.undertow.protocols.ssl.UndertowAcceptingSslChannel");
-			boolean nonSecureMatch = !secure && className.equals("org.xnio.nio.QueuedNioTcpServer");
+			boolean nonSecureMatch = !secure && className.equals("org.xnio.nio.QueuedNioTcpServer2");
 			if (secureMatch || nonSecureMatch) {
 				if (match(address, port, listener.getAddress())) {
 					listenerFound = true;

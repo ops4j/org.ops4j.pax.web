@@ -56,7 +56,7 @@ public class WarPostIntegrationTest extends AbstractWarPostIntegrationTest {
 
 	@Override
 	protected int getPostSizeExceededHttpResponseCode() {
-		// TODO: issue an UNDERTOW jira issue. io.undertow.server.RequestTooBigException should be checked
+		// TODO: create an UNDERTOW jira issue. io.undertow.server.RequestTooBigException should be checked
 		//       as the cause of IllegalStateException and better error code should be used (413)
 		return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 	}

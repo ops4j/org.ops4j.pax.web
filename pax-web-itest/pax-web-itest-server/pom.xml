@@ -198,6 +198,21 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- Undertow -->
+
+		<dependency>
+			<groupId>org.jboss.threads</groupId>
+			<artifactId>jboss-threads</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<!-- the classes from this dependency are normally provided by pax-web-undertow, but it doesn't work in "test" phase yet -->
+			<groupId>org.wildfly.common</groupId>
+			<artifactId>wildfly-common</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- Logging -->
 
 		<dependency>

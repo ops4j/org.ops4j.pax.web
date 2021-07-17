@@ -84,21 +84,12 @@
 							org.xml.sax
 
 							<!-- to check -->
-<!--							org.apache.jasper.servlet; resolution:=optional,-->
 <!--							javax.security.auth,-->
 <!--							javax.security.auth.callback,-->
 <!--							javax.security.auth.login,-->
 <!--							javax.security.cert; resolution:=optional,-->
-<!--							javax.xml.parsers,-->
 <!--							javax.websocket.*; resolution:=optional,-->
-<!--							org.eclipse.jetty.*;version="[7.1.0,10.0.0)",-->
-<!--							org.apache.xbean.finder.*,-->
 <!--							javax.el;version="[2.1.0,4.0.0)";resolution:=optional,-->
-<!--							org.apache.el;version="2.2"; resolution:=optional,-->
-<!--							org.apache.el.lang;version="2.2"; resolution:=optional,-->
-<!--							org.apache.el.parser;version="2.2"; resolution:=optional,-->
-<!--							org.apache.el.stream;version="2.2"; resolution:=optional,-->
-<!--							org.apache.el.util;version="2.2"; resolution:=optional,-->
 						</Import-Package>
 						<Provide-Capability>
 							osgi.service;effective:=active;objectClass:List&lt;String&gt;="org.ops4j.pax.web.service.spi.ServerControllerFactory"
@@ -271,17 +262,6 @@
 		</dependency>
 
 		<!-- Other -->
-
-<!--		<dependency>-->
-<!--			<groupId>org.apache.xbean</groupId>-->
-<!--			<artifactId>xbean-finder</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ow2.asm</groupId>-->
-<!--			<artifactId>asm</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
 
 		<dependency>
 			<groupId>commons-io</groupId>

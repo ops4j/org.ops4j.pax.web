@@ -19,6 +19,10 @@
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-fragment_4_0.xsd"
     version="4.0">
 
+	<!--
+		TODO: create an UNDERTOW jira issue. io.undertow.server.RequestTooBigException should be checked
+		      as the cause of IllegalStateException and better error code should be used (413)
+	-->
 	<error-page>
 		<exception-type>java.lang.IllegalStateException</exception-type>
 		<location>/too-big.html</location>

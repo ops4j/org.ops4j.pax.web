@@ -63,38 +63,37 @@
 							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
 							<!-- from pax-web-spi -->
 							org.ops4j.pax.web.service.spi.*;version="${pax-web.osgi.version}",
-							<!-- from pax-web-jsp -->
-<!--							org.ops4j.pax.web.jsp;version="${pax-web.osgi.version}";resolution:=optional,-->
 
 							<!-- from pax-logging-api -->
 							org.slf4j;version="[1.7,2)",
+							org.jboss.logging,
 
 							<!-- undertow and xnio packages -->
-							org.xnio;version="[3.3,4)",
-							org.xnio.channels;version="[3.3,4)",
-							io.undertow;version="[2.0,3)",
-							io.undertow.connector;version="[2.0,3)",
-							io.undertow.io;version="[2.0,3)",
-							io.undertow.predicate;version="[2.0,3)",
-							io.undertow.protocols.ssl;version="[2.0,3)",
-							io.undertow.security.api;version="[2.0,3)",
-							io.undertow.security.idm;version="[2.0,3)",
-							io.undertow.server;version="[2.0,3)",
-							io.undertow.server.handlers;version="[2.0,3)",
-							io.undertow.server.handlers.accesslog;version="[2.0,3)",
-							io.undertow.server.handlers.builder;version="[2.0,3)",
-							io.undertow.server.handlers.cache;version="[2.0,3)",
-							io.undertow.server.handlers.resource;version="[2.0,3)",
-							io.undertow.server.protocol.http;version="[2.0,3)",
-							io.undertow.server.protocol.http2;version="[2.0,3)",
-							io.undertow.server.session;version="[2.0,3)",
-							io.undertow.servlet;version="[2.0,3)",
-							io.undertow.servlet.api;version="[2.0,3)",
-							io.undertow.servlet.core;version="[2.0,3)",
-							io.undertow.servlet.handlers;version="[2.0,3)",
-							io.undertow.servlet.spec;version="[2.0,3)",
-							io.undertow.servlet.util;version="[2.0,3)",
-							io.undertow.util;version="[2.0,3)",
+							org.xnio;version="[3.8,4)",
+							org.xnio.channels;version="[3.8,4)",
+							io.undertow;version="[2.2,3)",
+							io.undertow.connector;version="[2.2,3)",
+							io.undertow.io;version="[2.2,3)",
+							io.undertow.predicate;version="[2.2,3)",
+							io.undertow.protocols.ssl;version="[2.2,3)",
+							io.undertow.security.api;version="[2.2,3)",
+							io.undertow.security.idm;version="[2.2,3)",
+							io.undertow.server;version="[2.2,3)",
+							io.undertow.server.handlers;version="[2.2,3)",
+							io.undertow.server.handlers.accesslog;version="[2.2,3)",
+							io.undertow.server.handlers.builder;version="[2.2,3)",
+							io.undertow.server.handlers.cache;version="[2.2,3)",
+							io.undertow.server.handlers.resource;version="[2.2,3)",
+							io.undertow.server.protocol.http;version="[2.2,3)",
+							io.undertow.server.protocol.http2;version="[2.2,3)",
+							io.undertow.server.session;version="[2.2,3)",
+							io.undertow.servlet;version="[2.2,3)",
+							io.undertow.servlet.api;version="[2.2,3)",
+							io.undertow.servlet.core;version="[2.2,3)",
+							io.undertow.servlet.handlers;version="[2.2,3)",
+							io.undertow.servlet.spec;version="[2.2,3)",
+							io.undertow.servlet.util;version="[2.2,3)",
+							io.undertow.util;version="[2.2,3)",
 
 							<!-- other -->
 							javax.annotation;version="[1.2,2)";resolution:=optional,
@@ -109,20 +108,26 @@
 							org.xml.sax.helpers
 
 							<!-- to check -->
-<!--							org.apache.jasper.servlet; resolution:=optional,-->
 <!--							javax.management.*; resolution:=optional,-->
 <!--							javax.websocket.*; resolution:=optional,-->
 <!--							javax.el; version="[2.1.0,4.0.0)";resolution:=optional,-->
-<!--							org.apache.el; version="2.2"; resolution:=optional,-->
-<!--							org.apache.el.lang; version="2.2"; resolution:=optional,-->
-<!--							org.apache.el.parser; version="2.2"; resolution:=optional,-->
-<!--							org.apache.el.stream; version="2.2"; resolution:=optional,-->
-<!--							org.apache.el.util; version="2.2"; resolution:=optional,-->
 <!--							*-->
 						</Import-Package>
 						<Provide-Capability>
 							osgi.service;effective:=active;objectClass:List&lt;String&gt;="org.ops4j.pax.web.service.spi.ServerControllerFactory"
 						</Provide-Capability>
+						<Export-Package>
+							<!-- these packages are required for Undertow 2.2.x and XNIO 3.8.x -->
+							org.jboss.threads,
+							org.jboss.threads.management,
+							org.wildfly.client.config,
+							org.wildfly.common,
+							org.wildfly.common.context,
+							org.wildfly.common.cpu,
+							org.wildfly.common.function,
+							org.wildfly.common.net,
+							org.wildfly.common.ref
+						</Export-Package>
 						<Private-Package>
 							org.ops4j.pax.web.service.undertow.internal.*,
 						</Private-Package>
@@ -146,53 +151,11 @@
 			<artifactId>pax-web-spi</artifactId>
 			<scope>provided</scope>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.web</groupId>-->
-<!--			<artifactId>pax-web-jsp</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--			<optional>true</optional>-->
-<!--		</dependency>-->
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-runtime</artifactId>
 			<scope>provided</scope>
 		</dependency>
-
-		<!-- OPS4J dependencies -->
-
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.base</groupId>-->
-<!--			<artifactId>ops4j-base-lang</artifactId>-->
-<!--			<optional>true</optional>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.base</groupId>-->
-<!--			<artifactId>ops4j-base-util-xml</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.swissbox</groupId>-->
-<!--			<artifactId>pax-swissbox-core</artifactId>-->
-<!--			<optional>true</optional>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.swissbox</groupId>-->
-<!--			<artifactId>pax-swissbox-optional-jcl</artifactId>-->
-<!--			<optional>true</optional>-->
-<!--		</dependency>-->
-
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.swissbox</groupId>-->
-<!--			<artifactId>pax-swissbox-tracker</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.swissbox</groupId>-->
-<!--			<artifactId>pax-swissbox-property</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>javax.websocket</groupId>-->
-<!--			<artifactId>javax.websocket-api</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
 
 		<!-- OSGi -->
 
@@ -234,6 +197,29 @@
 <!--			<artifactId>undertow-websockets-jsr</artifactId>-->
 <!--		</dependency>-->
 
+		<dependency>
+			<groupId>org.jboss.xnio</groupId>
+			<artifactId>xnio-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.xnio</groupId>
+			<artifactId>xnio-nio</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.threads</groupId>
+			<artifactId>jboss-threads</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.wildfly.common</groupId>
+			<artifactId>wildfly-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.wildfly.client</groupId>
+			<artifactId>wildfly-client-config</artifactId>
+		</dependency>
+
 		<!-- Logging -->
 
 		<dependency>
@@ -253,21 +239,6 @@
 		</dependency>
 
 		<!-- Other -->
-
-<!--		<dependency>-->
-<!--			<groupId>org.apache.commons</groupId>-->
-<!--    		<artifactId>commons-lang3</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.apache.commons</groupId>-->
-<!--			<artifactId>commons-collections4</artifactId>-->
-<!--			<scope>test</scope>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.apache.xbean</groupId>-->
-<!--			<artifactId>xbean-finder</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
 
 		<dependency>
 			<groupId>commons-io</groupId>
