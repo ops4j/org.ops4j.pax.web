@@ -330,9 +330,15 @@ public class SSLUtils {
 		server1Builder.addExtension(Extension.authorityKeyIdentifier, false, new AuthorityKeyIdentifier(caKeyId));
 		server1Builder.addExtension(Extension.subjectKeyIdentifier, false, new SubjectKeyIdentifier(server1KeyId));
 		// https://tools.ietf.org/html/rfc5280#section-4.2.1.12
-		server1Builder.addExtension(Extension.extendedKeyUsage, false, new ExtendedKeyUsage(KeyPurposeId.id_kp_serverAuth));
+		server1Builder.addExtension(Extension.extendedKeyUsage, false, new ExtendedKeyUsage(new KeyPurposeId[] {
+				KeyPurposeId.id_kp_serverAuth, KeyPurposeId.id_kp_clientAuth
+		}));
+
 		// https://tools.ietf.org/html/rfc5280#section-4.2.1.6
-		server1Builder.addExtension(Extension.subjectAlternativeName, false, new GeneralNames(new GeneralName(GeneralName.iPAddress, "127.0.0.1")));
+		server1Builder.addExtension(Extension.subjectAlternativeName, false, new GeneralNames(new GeneralName[] {
+				new GeneralName(GeneralName.iPAddress, "127.0.0.1"),
+				new GeneralName(GeneralName.dNSName, "localhost")
+		}));
 
 		client1Builder.addExtension(Extension.basicConstraints, false, new BasicConstraints(false));
 		client1Builder.addExtension(Extension.keyUsage, false, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.nonRepudiation | KeyUsage.keyEncipherment));
@@ -343,8 +349,13 @@ public class SSLUtils {
 		server2Builder.addExtension(Extension.keyUsage, false, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.nonRepudiation | KeyUsage.keyEncipherment));
 		server2Builder.addExtension(Extension.authorityKeyIdentifier, false, new AuthorityKeyIdentifier(server2KeyId));
 		server2Builder.addExtension(Extension.subjectKeyIdentifier, false, new SubjectKeyIdentifier(server2KeyId));
-		server2Builder.addExtension(Extension.extendedKeyUsage, false, new ExtendedKeyUsage(KeyPurposeId.id_kp_serverAuth));
-		server2Builder.addExtension(Extension.subjectAlternativeName, false, new GeneralNames(new GeneralName(GeneralName.iPAddress, "127.0.0.1")));
+		server2Builder.addExtension(Extension.extendedKeyUsage, false, new ExtendedKeyUsage(new KeyPurposeId[] {
+				KeyPurposeId.id_kp_serverAuth, KeyPurposeId.id_kp_clientAuth
+		}));
+		server2Builder.addExtension(Extension.subjectAlternativeName, false, new GeneralNames(new GeneralName[] {
+				new GeneralName(GeneralName.iPAddress, "127.0.0.1"),
+				new GeneralName(GeneralName.dNSName, "localhost")
+		}));
 
 		client2Builder.addExtension(Extension.basicConstraints, false, new BasicConstraints(false));
 		client2Builder.addExtension(Extension.keyUsage, false, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.nonRepudiation | KeyUsage.keyEncipherment));

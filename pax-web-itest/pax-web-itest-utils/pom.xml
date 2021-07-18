@@ -79,7 +79,8 @@
 
 							<!-- other -->
 							javax.net,
-							javax.net.ssl
+							javax.net.ssl,
+							javax.security.auth.x500
 						</Import-Package>
 						<Dynamic-ImportPackage>
 							javax.websocket,

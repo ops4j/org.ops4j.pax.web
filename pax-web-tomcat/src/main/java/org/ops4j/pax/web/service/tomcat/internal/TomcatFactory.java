@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.tomcat.internal;
 
+import java.io.File;
 import java.security.NoSuchAlgorithmException;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
@@ -22,18 +23,20 @@ import javax.net.ssl.SSLParameters;
 import org.apache.catalina.Executor;
 import org.apache.catalina.Server;
 import org.apache.catalina.connector.Connector;
+import org.apache.catalina.core.StandardServer;
 import org.apache.catalina.core.StandardThreadExecutor;
 import org.apache.catalina.startup.Catalina;
 import org.apache.catalina.startup.ContextConfig;
 import org.apache.coyote.http2.Http2Protocol;
 import org.apache.tomcat.util.compat.JreCompat;
 import org.apache.tomcat.util.digester.Digester;
+import org.apache.tomcat.util.digester.Rule;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.SecurityConfiguration;
 import org.ops4j.pax.web.service.spi.config.ServerConfiguration;
-import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.Attributes;
 
 /**
  * <p>Helper class that's used to create various parts of embedded Tomcat similar to Jetty equivalent.</p>
@@ -46,14 +49,12 @@ public class TomcatFactory {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TomcatFactory.class);
 
-	private final Bundle paxWebTomcatBundle;
 	private final ClassLoader classLoader;
 
 	private boolean alpnAvailable;
 	private boolean http2Available;
 
-	TomcatFactory(Bundle paxWebTomcatBundle, ClassLoader classLoader) {
-		this.paxWebTomcatBundle = paxWebTomcatBundle;
+	TomcatFactory(ClassLoader classLoader) {
 		this.classLoader = classLoader;
 
 		discovery();
@@ -362,7 +363,10 @@ public class TomcatFactory {
 	 * @return
 	 */
 	public Digester createServerDigester() {
-		return new PaxWebCatalina().createStartDigester();
+		Digester digester = new PaxWebCatalina().createStartDigester();
+		// special rule for catalinaHome / catalinaBase attributes
+		digester.getRules().match("", "Server").add(new BaseDirsRule(digester));
+		return digester;
 	}
 
 	public Digester createContextDigester() {
@@ -403,6 +407,63 @@ public class TomcatFactory {
 
 		public void setServer(Server server) {
 			this.server = server;
+		}
+	}
+
+	/**
+	 * Original {@link Digester} for Tomcat's {@code server.xml} can't set {@code catalinaHome}
+	 * and {@code catalinaBase} properties, because there's no String->File converter. We'll fix this
+	 * by adding new special {@link Rule}.
+	 */
+	private static class BaseDirsRule extends Rule {
+		BaseDirsRule(Digester digester) {
+			this.digester = digester;
+		}
+
+		@Override
+		public void begin(String namespace, String name, Attributes attributes) throws Exception {
+			Object top = digester.peek();
+			if (top instanceof StandardServer) {
+				String home = attributes.getValue("catalinaHome");
+				if (home != null && !"".equals(home)) {
+					boolean ok = false;
+					File catalinaHome = new File(home);
+					if (catalinaHome.isFile()) {
+						LOG.warn("Can't set catalina home to {}. It is an existing file.", home);
+					} else if (!catalinaHome.isDirectory()) {
+						if (!catalinaHome.mkdirs()) {
+							LOG.warn("Can't set catalina home to {}. Can't create directory.", home);
+						} else {
+							ok = true;
+						}
+					} else {
+						ok = true;
+					}
+					if (ok) {
+						((StandardServer) top).setCatalinaHome(new File(home));
+					}
+				}
+				String base = attributes.getValue("catalinaBase");
+				if (base != null && !"".equals(base)) {
+					boolean ok = false;
+					File catalinaBase = new File(base);
+					if (catalinaBase.isFile()) {
+						LOG.warn("Can't set catalina base to {}. It is an existing file.", base);
+					} else if (!catalinaBase.isDirectory()) {
+						if (!catalinaBase.mkdirs()) {
+							LOG.warn("Can't set catalina base to {}. Can't create directory.", base);
+						} else {
+							ok = true;
+						}
+					} else {
+						ok = true;
+					}
+					if (ok) {
+						((StandardServer) top).setCatalinaBase(new File(base));
+					}
+				}
+			}
+			super.begin(namespace, name, attributes);
 		}
 	}
 

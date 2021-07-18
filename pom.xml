@@ -104,8 +104,6 @@
 
 		<!-- project properties -->
 
-<!--		<session.executionRootDirectory />-->
-
 		<!-- properties to be overriden when declaring OSGi manifest -->
 		<bundle.symbolic.name>${project.groupId}.${project.artifactId}</bundle.symbolic.name>
 
@@ -791,6 +789,12 @@
 			</dependency>
 
 			<!-- pax-web config samples -->
+
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>config-fragment-tomcat</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>

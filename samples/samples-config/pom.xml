@@ -39,6 +39,7 @@
 		<module>auth-config-fragment-undertow</module>
 		<module>limit-post-config-fragment-tomcat</module>
 		<module>limit-post-config-fragment-undertow</module>
+		<module>config-fragment-tomcat</module>
 	</modules>
 
 </project>

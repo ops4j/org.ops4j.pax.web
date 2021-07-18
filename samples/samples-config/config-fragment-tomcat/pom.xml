@@ -21,43 +21,40 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.ops4j.pax.web</groupId>
-		<artifactId>samples</artifactId>
+		<groupId>org.ops4j.pax.web.samples</groupId>
+		<artifactId>samples-config</artifactId>
 		<version>8.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.ops4j.pax.web.samples</groupId>
-	<artifactId>war-tomcat-resource</artifactId>
-	<packaging>war</packaging>
+	<artifactId>config-fragment-tomcat</artifactId>
+	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web - Samples - WAR Extender - Tomcat Resource</name>
+	<name>OPS4J Pax Web Config Samples - Tomcat config</name>
 
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Fragment-Host>org.ops4j.pax.web.pax-web-tomcat</Fragment-Host>
+					</instructions>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
 
 	<dependencies>
 
-		<!-- OSGi -->
+		<!-- pax-web own artifacts -->
 
 		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>osgi.core</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- JavaEE -->
-
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<scope>provided</scope>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-tomcat</artifactId>
 		</dependency>
 
 	</dependencies>

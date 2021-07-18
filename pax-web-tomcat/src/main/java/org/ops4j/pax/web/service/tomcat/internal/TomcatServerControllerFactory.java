@@ -55,7 +55,7 @@ public class TomcatServerControllerFactory implements ServerControllerFactory {
 		this.paxWebTomcatBundle = paxWebTomcatBundle;
 		this.classLoader = classLoader;
 
-		tomcatFactory = new TomcatFactory(paxWebTomcatBundle, classLoader);
+		tomcatFactory = new TomcatFactory(classLoader);
 	}
 
 	@Override

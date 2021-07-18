@@ -148,9 +148,7 @@ class TomcatServerWrapper implements BatchVisitor {
 	/** Tomcat's {@link Engine} */
 	private StandardEngine engine;
 
-	/**
-	 * Tomcat's default {@link Host}
-	 */
+	/** Tomcat's default {@link Host} */
 	private Host defaultHost;
 
 	/**
@@ -194,14 +192,10 @@ class TomcatServerWrapper implements BatchVisitor {
 	 */
 	private final Map<String, TreeSet<OsgiContextModel>> osgiContextModels = new HashMap<>();
 
-	/**
-	 * Even if Tomcat manages SCIs, we'll manage them here instead - to be able to remove them when needed.
-	 */
+	/** Even if Tomcat manages SCIs, we'll manage them here instead - to be able to remove them when needed. */
 	private final Map<String, LinkedHashMap<Integer, SCIWrapper>> initializers = new HashMap<>();
 
-	/**
-	 * Keep dynamic configuration and use it during startup only.
-	 */
+	/** Keep dynamic configuration and use it during startup only. */
 	private final Map<String, DynamicRegistrations> dynamicRegistrations = new HashMap<>();
 
 	/**
@@ -258,6 +252,8 @@ class TomcatServerWrapper implements BatchVisitor {
 		// default session configuration is prepared, but not set in the server instance. It can be set
 		// only after first context is created
 		this.defaultSessionCookieConfig = configuration.session().getDefaultSessionCookieConfig();
+
+		// TODO: take session/cookie config from tomcat-server.xml as well
 	}
 
 	/**
@@ -505,6 +501,7 @@ class TomcatServerWrapper implements BatchVisitor {
 
 		for (Connector connector : currentConnectors) {
 			if ("org.apache.coyote.http11.Http11Nio2Protocol".equals(connector.getProtocolHandlerClassName())
+					|| "org.apache.coyote.http11.Http11NioProtocol".equals(connector.getProtocolHandlerClassName())
 					|| "org.ops4j.pax.web.service.tomcat.internal.PaxWebHttp11Nio2Protocol".equals(connector.getProtocolHandlerClassName())) {
 				if (match(address, port, connector)) {
 					if (connector.getSecure() == secure) {
@@ -775,21 +772,6 @@ class TomcatServerWrapper implements BatchVisitor {
 			//				contextModel.getJettyWebXmlURL(),
 			//				contextModel.getVirtualHosts(), null /*contextModel.getConnectors() */,
 			//				server.getBasedir());
-			//
-			//		// support default context.xml in configurationDir or config fragment
-			//		URL defaultContextUrl = getDefaultContextXml();
-			//		// support MTA-INF/context.xml in war
-			//		URL configFile = bundle.getEntry(org.apache.catalina.startup.Constants.ApplicationContextXml);
-			//		if (defaultContextUrl != null || configFile != null) {
-			//			Digester digester = createContextDigester();
-			//			if (defaultContextUrl != null) {
-			//				processContextConfig(context, digester, defaultContextUrl);
-			//			}
-			//			if (configFile != null) {
-			//				context.setConfigFile(configFile);
-			//				processContextConfig(context, digester, configFile);
-			//			}
-			//		}
 
 			// explicit no check for existing mapping under given physical context path
 			contextHandlers.put(contextPath, context);
