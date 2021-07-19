@@ -97,7 +97,7 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 		try {
 			new WaitCondition("Waiting for " + expectation) {
 				@Override
-				protected boolean isFulfilled() throws Exception {
+				protected boolean isFulfilled() {
 					return events.stream().anyMatch(e -> expectation.test(e.getType(), e.getData()));
 				}
 			}.waitForCondition();
@@ -127,7 +127,7 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 		try {
 			new WaitCondition("Waiting for " + expectation) {
 				@Override
-				protected boolean isFulfilled() throws Exception {
+				protected boolean isFulfilled() {
 					return expectation.test(events);
 				}
 			}.waitForCondition();
@@ -157,7 +157,7 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 		try {
 			new WaitCondition("Waiting for " + servletName + " servlet") {
 				@Override
-				protected boolean isFulfilled() throws Exception {
+				protected boolean isFulfilled() {
 					return events.stream().anyMatch(e ->
 							e.getType() == WebElementEvent.State.DEPLOYED
 									&& e.getData() instanceof ServletEventData
@@ -190,7 +190,7 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 		try {
 			new WaitCondition("Waiting for servlet mapped to " + mapping) {
 				@Override
-				protected boolean isFulfilled() throws Exception {
+				protected boolean isFulfilled() {
 					return events.stream().anyMatch(e ->
 							e.getType() == WebElementEvent.State.DEPLOYED
 									&& e.getData() instanceof ServletEventData
@@ -223,7 +223,7 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 		try {
 			new WaitCondition("Waiting for filter mapped to " + mapping) {
 				@Override
-				protected boolean isFulfilled() throws Exception {
+				protected boolean isFulfilled() {
 					return events.stream().anyMatch(e ->
 							e.getType() == WebElementEvent.State.DEPLOYED
 									&& e.getData() instanceof FilterEventData
@@ -243,8 +243,7 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 	/**
 	 * Performs an action and waits for {@link org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent} related
 	 * to started WAB
-	 * @param port
-	 * @param actions
+	 * @param action
 	 */
 	protected void configureAndWaitForDeployment(Action action) throws Exception {
 		final CountDownLatch latch = new CountDownLatch(1);
@@ -261,7 +260,7 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 		try {
 			new WaitCondition("Waiting for deployment") {
 				@Override
-				protected boolean isFulfilled() throws Exception {
+				protected boolean isFulfilled() {
 					return latch.getCount() == 0L;
 				}
 			}.waitForCondition();
@@ -278,8 +277,8 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 	/**
 	 * Performs an action and waits for {@link org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent} related
 	 * to started WAB, but only if the provided sample bundle is not ACTIVE.
-	 * @param port
-	 * @param actions
+	 * @param sample
+	 * @param action
 	 */
 	protected Bundle configureAndWaitForDeploymentUnlessInstalled(String sample, Action action) throws Exception {
 		Bundle b = sampleBundle(sample);
@@ -312,7 +311,7 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 		try {
 			new WaitCondition("Waiting for server listening at " + port) {
 				@Override
-				protected boolean isFulfilled() throws Exception {
+				protected boolean isFulfilled() {
 					return events.stream().anyMatch(e ->
 							e.getState() == ServerEvent.State.STARTED
 									&& Arrays.stream(e.getAddresses()).map(InetSocketAddress::getPort)
@@ -333,7 +332,7 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 	 * Checks whether an event is for {@link org.ops4j.pax.web.service.spi.model.elements.ElementModel} registration
 	 * to all the passed context names.
 	 * @param data
-	 * @param name
+	 * @param names
 	 * @return
 	 */
 	public static boolean usesContexts(WebElementEventData data, String ... names) {
