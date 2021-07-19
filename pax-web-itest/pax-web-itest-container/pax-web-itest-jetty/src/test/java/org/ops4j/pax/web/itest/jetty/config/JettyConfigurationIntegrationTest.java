@@ -13,66 +13,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty.config;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.base.VersionUtil;
-import org.ops4j.pax.web.itest.base.client.HttpTestClient;
-import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
+import org.ops4j.pax.exam.options.MavenArtifactProvisionOption;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
+import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 
+import static org.ops4j.pax.exam.Constants.START_LEVEL_TEST_BUNDLE;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
-import static org.ops4j.pax.web.itest.common.ITestBase.configureJetty;
 
 /**
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
-public class JettyConfigurationIntegrationTest extends ITestBase {
-
-	private Bundle installWarBundle;
+public class JettyConfigurationIntegrationTest extends AbstractContainerTestBase {
 
 	@Configuration
-	public static Option[] configure() {
-		return combine(
-				configureJetty(),
-				mavenBundle().groupId("org.ops4j.pax.web.samples")
-						.artifactId("jetty-config-fragment")
-						.version(VersionUtil.getProjectVersion()).noStart());
-
+	public Option[] configure() {
+		Option[] serverOptions = combine(baseConfigure(), paxWebJetty());
+		// this will install a fragment attached to pax-web-jetty bundle, so it can find "jetty.xml" resource
+		// used to alter the Jetty server
+		MavenArtifactProvisionOption config = mavenBundle("org.ops4j.pax.web.samples", "config-fragment-jetty")
+				.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart();
+		Option[] authOptions = combine(serverOptions, config);
+		return combine(authOptions, paxWebExtenderWar());
 	}
 
 	@Before
-	public void setUp() throws BundleException, InterruptedException {
-		logger.info("Setting up test");
-
-		initWebListener();
-
-		final String bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web.samples/war/" + VersionUtil.getProjectVersion()
-				+ "/war?" + WEB_CONTEXT_PATH + "=/test";
-		installWarBundle = bundleContext.installBundle(bundlePath);
-		installWarBundle.start();
-
-		waitForWebListener();
+	public void setUp() throws Exception {
+		configureAndWaitForDeploymentUnlessInstalled("war", () -> {
+			installAndStartWebBundle("war", "/test");
+		});
 	}
-
-	@After
-	public void tearDown() throws BundleException {
-		if (installWarBundle != null) {
-			installWarBundle.stop();
-			installWarBundle.uninstall();
-		}
-	}
-
 
 	@Test
 	public void testWeb() throws Exception {
@@ -85,8 +64,8 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 	@Test
 	public void testServerVersion() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseHeaderAssertion( "Response must not contain a jetty version", header ->
-					header.map(entry -> entry.getKey()).allMatch(s -> !s.equalsIgnoreCase("Server"))
+				.withResponseHeaderAssertion("Response must not contain a jetty version", header ->
+						header.map(entry -> entry.getKey()).allMatch(s -> !s.equalsIgnoreCase("Server"))
 				)
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
@@ -124,4 +103,5 @@ public class JettyConfigurationIntegrationTest extends ITestBase {
 						resp -> resp.contains("<a href=\"/static-content/"))
 				.doGETandExecuteTest("http://localhost:8181/static-content/");
 	}
+
 }

@@ -13,25 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty.config;
 
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.base.VersionUtil;
-import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.ops4j.pax.exam.options.MavenArtifactProvisionOption;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
+import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 
+import static org.ops4j.pax.exam.Constants.START_LEVEL_TEST_BUNDLE;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
-import static org.ops4j.pax.web.itest.common.ITestBase.configureJetty;
 
 /**
  * Tests Web-Connectors and Web-VirtualHosts MANIFEST headers. Based on
@@ -40,46 +37,28 @@ import static org.ops4j.pax.web.itest.common.ITestBase.configureJetty;
  * @author Gareth Collins
  */
 @RunWith(PaxExam.class)
-public class JettyConfigurationExtendedIntegrationTest extends ITestBase {
-
-	private static final Logger LOG = LoggerFactory
-			.getLogger(JettyConfigurationExtendedIntegrationTest.class);
-
-	private Bundle installWarBundle;
+@Ignore("Waiting for virtual host/connector handling")
+public class JettyConfigurationExtendedIntegrationTest extends AbstractContainerTestBase {
 
 	@Configuration
-	public static Option[] configure() {
-		return combine(
-				configureJetty(),
-				mavenBundle().groupId("org.ops4j.pax.web.samples")
-						.artifactId("jetty-config-fragment")
-						.version(VersionUtil.getProjectVersion()).noStart());
+	public Option[] configure() {
+		Option[] serverOptions = combine(baseConfigure(), paxWebJetty());
+		// this will install a fragment attached to pax-web-jetty bundle, so it can find "jetty.xml" resource
+		// used to alter the Jetty server
+		MavenArtifactProvisionOption config = mavenBundle("org.ops4j.pax.web.samples", "config-fragment-jetty")
+				.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart();
+		Option[] authOptions = combine(serverOptions, config);
+		return combine(authOptions, paxWebExtenderWar());
 	}
 
 	@Before
-	public void setUp() throws BundleException, InterruptedException {
-		LOG.info("Setting up test");
-
-		initWebListener();
-
-		final String bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web.samples/war/" + VersionUtil.getProjectVersion()
-				+ "/war?" + WEB_CONTEXT_PATH + "=/test&" + WEB_VIRTUAL_HOSTS
-				+ "=localhost";
-		installWarBundle = bundleContext.installBundle(bundlePath);
-		installWarBundle.start();
-
-		waitForWebListener();
+	public void setUp() throws Exception {
+		configureAndWaitForDeploymentUnlessInstalled("war", () -> {
+			installAndStartWebBundle("org.ops4j.pax.web.samples", "war", System.getProperty("pax-web.version"),
+					"war", "/test",
+					uri -> uri + "&Web-VirtualHosts=localhost");
+		});
 	}
-
-	@After
-	public void tearDown() throws BundleException {
-		if (installWarBundle != null) {
-			installWarBundle.stop();
-			installWarBundle.uninstall();
-		}
-	}
-
 
 	// it should work for virtual host == localhost
 	@Test
@@ -90,6 +69,7 @@ public class JettyConfigurationExtendedIntegrationTest extends ITestBase {
 				.doGETandExecuteTest("http://localhost:8181/test/wc/example");
 	}
 
+	// it should not work for virtual host == 127.0.0.1
 	@Test
 	public void testWebIP() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
@@ -111,4 +91,5 @@ public class JettyConfigurationExtendedIntegrationTest extends ITestBase {
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("http://localhost:8282/test/wc/example");
 	}
+
 }

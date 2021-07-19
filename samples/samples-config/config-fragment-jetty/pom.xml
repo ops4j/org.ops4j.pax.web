@@ -21,36 +21,40 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.ops4j.pax.web</groupId>
-		<artifactId>samples</artifactId>
+		<groupId>org.ops4j.pax.web.samples</groupId>
+		<artifactId>samples-config</artifactId>
 		<version>8.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.ops4j.pax.web.samples</groupId>
-	<artifactId>war-jetty-web</artifactId>
-	<packaging>war</packaging>
+	<artifactId>config-fragment-jetty</artifactId>
+	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web - Samples - WAR Extender - jetty-web</name>
-	<description>Sample to use jetty-web.xml</description>
+	<name>OPS4J Pax Web Config Samples - Jetty config</name>
 
 	<build>
-		<finalName>war-jetty-web</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Fragment-Host>org.ops4j.pax.web.pax-web-jetty</Fragment-Host>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 
 	<dependencies>
 
-		<!-- Testing -->
+		<!-- pax-web own artifacts -->
 
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.easymock</groupId>
-			<artifactId>easymock</artifactId>
-			<scope>test</scope>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-jetty</artifactId>
 		</dependency>
 
 	</dependencies>

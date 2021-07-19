@@ -17,17 +17,10 @@
 
 -->
 <!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_3.dtd">
-<!--
-This is the jetty specific web application configuration file.  When starting
-a Web Application, the WEB-INF/web-jetty.xml file is looked for and if found, treated
-as a org.eclipse.jetty.server.server.xml.XmlConfiguration file and is applied to the
-org.eclipse.jetty.servlet.WebApplicationContext objet
--->
-
-<Configure class="org.eclipse.jetty.webapp.WebAppContext">
-  <Set name="virtualHosts">
-    <Array type="java.lang.String">
-      <Item>localhost:8282</Item>
-    </Array>
-  </Set>
+<Configure id="Context">
+	<Set name="virtualHosts">
+		<Array type="java.lang.String">
+			<Item>localhost</Item>
+		</Array>
+	</Set>
 </Configure>

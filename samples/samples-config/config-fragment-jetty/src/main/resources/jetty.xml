@@ -17,7 +17,7 @@
 
 -->
 <!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_3.dtd">
-<Configure id="Server" class="org.eclipse.jetty.server.Server">
+<Configure id="Server">
 
 	<New id="httpConfig" class="org.eclipse.jetty.server.HttpConfiguration">
 		<Set name="secureScheme">https</Set>
@@ -70,11 +70,11 @@
 				<New class="org.eclipse.jetty.server.handler.ContextHandler">
 					<Set name="contextPath">/static-content</Set>
 					<Set name="handler">
-	    				<New class="org.eclipse.jetty.server.handler.ResourceHandler">
+						<New class="org.eclipse.jetty.server.handler.ResourceHandler">
 							<Set name="resourceBase">target/logs</Set>
 							<Set name="directoriesListed">true</Set>
-	    				</New>
-    				</Set>
+						</New>
+					</Set>
 				</New>
 			</Arg>
 		</Call>

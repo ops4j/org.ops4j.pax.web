@@ -24,7 +24,6 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.container.war.jsf.AbstractWarJsfCdiIntegrationTest;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
-import org.osgi.framework.Bundle;
 
 import static org.ops4j.pax.exam.CoreOptions.bootDelegationPackage;
 import static org.ops4j.pax.exam.CoreOptions.systemPackage;
@@ -32,8 +31,6 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 
 @RunWith(PaxExam.class)
 public class WarJSFCdiIntegrationTest extends AbstractWarJsfCdiIntegrationTest {
-
-	private Bundle wab;
 
 	@Configuration
 	public Option[] configure() {
@@ -52,7 +49,7 @@ public class WarJSFCdiIntegrationTest extends AbstractWarJsfCdiIntegrationTest {
 
 	@Before
 	public void setUp() throws Exception {
-		wab = configureAndWaitForDeploymentUnlessInstalled("war-jsf23-cdi", () -> {
+		configureAndWaitForDeploymentUnlessInstalled("war-jsf23-cdi", () -> {
 			installAndStartBundle(sampleWarURI("war-jsf23-cdi"));
 		});
 	}

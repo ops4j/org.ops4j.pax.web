@@ -795,6 +795,11 @@
 				<artifactId>config-fragment-tomcat</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>config-fragment-jetty</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
@@ -1020,6 +1025,13 @@
 				<groupId>org.ops4j.pax.web.samples</groupId>
 				<artifactId>war-limited-post-fragment-undertow</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>war-jetty-web</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
 			</dependency>
 
 			<!-- pax-web jsp samples -->

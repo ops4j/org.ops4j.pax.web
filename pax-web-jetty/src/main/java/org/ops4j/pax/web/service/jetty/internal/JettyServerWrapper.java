@@ -223,6 +223,18 @@ class JettyServerWrapper implements BatchVisitor {
 		LOG.info("Creating Jetty server instance using configuration properties.");
 		createServer();
 
+		// most important part - a handler - even before applying external configuration, as it may contain
+		// <Get name="handler">/<Call name="addHandler">
+		// TODO: my initial idea was to have this hierarchy:
+		//  server:
+		//   - handler collection
+		//      - handler collection to store custom handlers with @Priority > 0
+		//      - context handler collection to store context handlers
+		//      - handler collection to store custom handlers with @Priority < 0
+		//  but for now, let's have it like before Pax Web 8
+		this.mainHandler = new ContextHandlerCollection();
+		server.setHandler(this.mainHandler);
+
 		// No external configuration should replace our "Server" object
 		applyJettyConfiguration();
 
@@ -260,17 +272,6 @@ class JettyServerWrapper implements BatchVisitor {
 		}
 
 		mbeanContainer = jettyFactory.enableJmxIfPossible(server);
-
-		// most important part - a handler.
-		// TODO: my initial idea was to have this hierarchy:
-		//  server:
-		//   - handler collection
-		//      - handler collection to store custom handlers with @Priority > 0
-		//      - context handler collection to store context handlers
-		//      - handler collection to store custom handlers with @Priority < 0
-		//  but for now, let's have it like before Pax Web 8
-		this.mainHandler = new ContextHandlerCollection();
-		server.setHandler(this.mainHandler);
 	}
 
 	/**
