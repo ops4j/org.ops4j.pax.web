@@ -21,12 +21,11 @@ import org.ops4j.pax.web.resources.api.query.ResourceQueryResult;
 
 public class JsfResourceQueryResult implements ResourceQueryResult {
 
-	private boolean matchedLocalePrefix;
-	private boolean matchedLibraryName;
-	private String libraryVersion;
-	private String resourceVersion;
+	private final boolean matchedLocalePrefix;
+	private final boolean matchedLibraryName;
+	private final String libraryVersion;
+	private final String resourceVersion;
 	private ResourceInfo resourceInformation;
-
 
 	public JsfResourceQueryResult(boolean matchedLocalePrefix, boolean matchedLibraryName, String libraryVersion, String resourceVersion) {
 		this.matchedLocalePrefix = matchedLocalePrefix;
@@ -35,12 +34,10 @@ public class JsfResourceQueryResult implements ResourceQueryResult {
 		this.resourceVersion = resourceVersion;
 	}
 
-
 	@Override
 	public void addMatchedResourceInfo(ResourceInfo resourceInfo) {
 		this.resourceInformation = resourceInfo;
 	}
-
 
 	public boolean isMatchedLocalePrefix() {
 		return matchedLocalePrefix;
@@ -50,16 +47,13 @@ public class JsfResourceQueryResult implements ResourceQueryResult {
 		return matchedLibraryName;
 	}
 
-
 	public String getLibraryVersion() {
 		return libraryVersion;
 	}
 
-
 	public String getResourceVersion() {
 		return resourceVersion;
 	}
-
 
 	public ResourceInfo getResourceInformation() {
 		return resourceInformation;

@@ -180,6 +180,17 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 	}
 
 	@Override
+	public String getServletClass() {
+		if (super.getServletClass() != null) {
+			return super.getServletClass();
+		}
+		if (servletModel.getServletClass() != null) {
+			return servletModel.getServletClass().getName();
+		}
+		return null;
+	}
+
+	@Override
 	public synchronized Servlet loadServlet() throws ServletException {
 		Servlet instance = super.getServlet();
 		if (instance == null) {

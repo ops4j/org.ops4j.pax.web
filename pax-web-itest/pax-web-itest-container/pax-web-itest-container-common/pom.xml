@@ -104,7 +104,11 @@
 							-->
 							org.ops4j.pax.web.extender.whiteboard.runtime,
 							org.ops4j.pax.web.extender.samples.whiteboard.internal,
-							org.ops4j.pax.web.samples.whiteboard.ds
+							org.ops4j.pax.web.samples.whiteboard.ds,
+
+							org.ops4j.pax.web.resources.api,
+							org.ops4j.pax.web.resources.jsf,
+							javax.faces.application
 						</DynamicImport-Package>
 						<Export-Package>
 							org.ops4j.pax.web.itest,
@@ -186,6 +190,19 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-fragment-myfaces-spifly</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-resources-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-resources-extender</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-resources-jsf</artifactId>
 		</dependency>
 
 		<!-- pax-web config samples -->
@@ -284,8 +301,26 @@
 
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>war-jsf23-wired</artifactId>
+			<type>war</type>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>war-jsf23-embedded</artifactId>
 			<type>war</type>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>jsf-resourcehandler-myfaces</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>jsf-resourcehandler-resourcebundle</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>jsf-resourcehandler-resourcebundle-override</artifactId>
 		</dependency>
 
 		<dependency>
@@ -668,6 +703,10 @@
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
 		</dependency>
 
 		<dependency>

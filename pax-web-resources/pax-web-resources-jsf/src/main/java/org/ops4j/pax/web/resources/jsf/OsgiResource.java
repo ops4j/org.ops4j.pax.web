@@ -16,16 +16,6 @@
  */
 package org.ops4j.pax.web.resources.jsf;
 
-import org.apache.commons.lang3.StringUtils;
-import org.ops4j.pax.web.resources.jsf.internal.FacesServletMapping;
-import org.ops4j.pax.web.resources.jsf.internal.ResourceHandlerUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.faces.application.ProjectStage;
-import javax.faces.application.Resource;
-import javax.faces.application.ResourceHandler;
-import javax.faces.context.FacesContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -37,14 +27,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import javax.faces.application.ProjectStage;
+import javax.faces.application.Resource;
+import javax.faces.application.ResourceHandler;
+import javax.faces.context.FacesContext;
+
+import org.apache.commons.lang3.StringUtils;
+import org.ops4j.pax.web.resources.jsf.internal.FacesServletMapping;
+import org.ops4j.pax.web.resources.jsf.internal.ResourceHandlerUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Custom resource-implementation because other implementations are tied to
  * either Mojarra or Myfaces.
  */
 public class OsgiResource extends Resource {
-
 
 	public static final String REQUEST_PARAM_TYPE = "type";
 	public static final String REQUEST_PARAM_LIBRARY = "ln";
@@ -54,7 +52,7 @@ public class OsgiResource extends Resource {
 	private static final String PATTERN_RFC_1036 = "EEE, dd-MMM-yy HH:mm:ss zzz";
 	private static final String PATTERN_ASCITIME = "EEE MMM d HH:mm:ss yyyy";
 
-	private transient Logger logger;
+	private final transient Logger logger;
 	private final URL bundleResourceUrl;
 	private final LocalDateTime lastModified;
 	private String resourceVersion;
@@ -100,7 +98,6 @@ public class OsgiResource extends Resource {
 			pathBuilder = new StringBuilder(servletMapping.getMapping()).append(path);
 		}
 
-
 		List<String> parameters = new ArrayList<>(5);
 		// mark OsgiResources with request-parameter
 		parameters.add(REQUEST_PARAM_TYPE + "=osgi");
@@ -123,7 +120,7 @@ public class OsgiResource extends Resource {
 		}
 
 		// concat optional parameter with & and add as request-parameters
-		String parameterString = parameters.stream().collect(Collectors.joining("&"));
+		String parameterString = String.join("&", parameters);
 		if (StringUtils.isNotBlank(parameterString)) {
 			pathBuilder.append("?").append(parameterString);
 		}

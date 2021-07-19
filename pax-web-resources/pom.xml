@@ -31,7 +31,7 @@
 	<artifactId>pax-web-resources</artifactId>
 	<packaging>pom</packaging>
 
-	<name>OPS4J Pax Web - Resources Reactor</name>
+	<name>OPS4J Pax Web - Resources</name>
 
 	<modules>
 		<module>pax-web-resources-api</module>

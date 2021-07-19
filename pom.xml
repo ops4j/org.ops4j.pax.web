@@ -788,6 +788,23 @@
 				<version>${project.version}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-resources-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-resources-extender</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-resources-jsf</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
 			<!-- pax-web config samples -->
 
 			<dependency>
@@ -1083,9 +1100,31 @@
 
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>war-jsf23-wired</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
 				<artifactId>war-jsf23-embedded</artifactId>
 				<version>${project.version}</version>
 				<type>war</type>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>jsf-resourcehandler-myfaces</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>jsf-resourcehandler-resourcebundle</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>jsf-resourcehandler-resourcebundle-override</artifactId>
+				<version>${project.version}</version>
 			</dependency>
 
 			<!-- pax-web httpservice/webcontainer samples -->
@@ -2763,8 +2802,6 @@
 
 		<module>pax-web-fragments</module>
 
-		<!--		<module>pax-web-descriptor</module>-->
-<!-- 		<module>pax-web-resources</module> -->
 <!--		<module>pax-web-deployer</module>-->
 
 		<!-- Jetty 9 support -->
@@ -2781,6 +2818,8 @@
 <!--		<module>pax-web-features</module>-->
 <!--		<module>pax-web-archetypes</module>-->
 <!--		<module>pax-web-jaas</module>-->
+
+		<module>pax-web-resources</module>
 
 		<!-- All the samples (Http Service, Whiteboard, JSP, WebSockets, WAR) -->
 		<module>samples</module>

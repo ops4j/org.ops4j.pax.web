@@ -16,16 +16,17 @@
  */
 package org.ops4j.pax.web.resources.jsf;
 
-import static org.junit.Assert.*;
-
 import java.util.Optional;
 
 import org.junit.Test;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 public class JsfResourceQueryTests {
 
 	@Test
-	public void testLocaleAndLibrary() throws Exception {
+	public void testLocaleAndLibrary() {
 		JsfResourceQuery query = new JsfResourceQuery("iceland", "library", "resource.png", null);
 
 		Optional<JsfResourceQueryResult> result = query.matches("/META-INF/resources/iceland/library/resource.png");
@@ -34,7 +35,7 @@ public class JsfResourceQueryTests {
 	}
 
 	@Test
-	public void testLocaleAndLibrary_WithoutLocalePath() throws Exception {
+	public void testLocaleAndLibraryWithoutLocalePath() {
 		JsfResourceQuery query = new JsfResourceQuery("iceland", "library", "resource.png", null);
 
 		Optional<JsfResourceQueryResult> result = query.matches("/META-INF/resources/library/resource.png");
@@ -43,7 +44,7 @@ public class JsfResourceQueryTests {
 	}
 
 	@Test
-	public void testLocaleAndLibraryWithVersion() throws Exception {
+	public void testLocaleAndLibraryWithVersion() {
 		JsfResourceQuery query = new JsfResourceQuery("iceland", "library", "resource.png", null);
 
 		Optional<JsfResourceQueryResult> result = query.matches("/META-INF/resources/iceland/library/1_1/resource.png");
@@ -52,7 +53,7 @@ public class JsfResourceQueryTests {
 	}
 
 	@Test
-	public void testLocaleAndResourceWithVersion() throws Exception {
+	public void testLocaleAndResourceWithVersion() {
 		JsfResourceQuery query = new JsfResourceQuery("iceland", "library", "resource.png", null);
 
 		Optional<JsfResourceQueryResult> result = query.matches("/META-INF/resources/iceland/resource.png/2_1.png");
@@ -61,7 +62,7 @@ public class JsfResourceQueryTests {
 	}
 
 	@Test
-	public void testLocaleAndLibraryWithVersionAndResourceVersion() throws Exception {
+	public void testLocaleAndLibraryWithVersionAndResourceVersion() {
 		JsfResourceQuery query = new JsfResourceQuery("iceland", "library", "resource.png", null);
 
 		Optional<JsfResourceQueryResult> result = query.matches("/META-INF/resources/iceland/library/1_1/resource.png/2_1.png");
@@ -70,7 +71,7 @@ public class JsfResourceQueryTests {
 	}
 
 	@Test
-	public void testLocaleAndLibraryWithVersionAndResourceWithSubfolderAndVersion() throws Exception {
+	public void testLocaleAndLibraryWithVersionAndResourceWithSubfolderAndVersion() {
 		JsfResourceQuery query = new JsfResourceQuery("iceland", "library", "img/resource.png", null);
 
 		Optional<JsfResourceQueryResult> result = query.matches("/META-INF/resources/iceland/library/1_1/img/resource.png/2_1.png");
@@ -79,11 +80,12 @@ public class JsfResourceQueryTests {
 	}
 
 	@Test
-	public void testLocaleAndLibraryWithVersionAndResourceWithSubfolderAndVersion_False() throws Exception {
+	public void testLocaleAndLibraryWithVersionAndResourceWithSubfolderAndVersionFalse() {
 		JsfResourceQuery query = new JsfResourceQuery("iceland", "library", "img/resource.png", null);
 
 		Optional<JsfResourceQueryResult> result = query.matches("/META-INF/resources/iceland/library/1_1/img/not_matching_resourcename.png/2_1.png");
 
 		assertFalse(result.isPresent());
 	}
+
 }

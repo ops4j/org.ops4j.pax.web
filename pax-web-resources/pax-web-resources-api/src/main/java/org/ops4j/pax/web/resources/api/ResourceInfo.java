@@ -19,10 +19,14 @@ package org.ops4j.pax.web.resources.api;
 import java.net.URL;
 import java.time.LocalDateTime;
 
+/**
+ * Resource representation with an {@link URL} (usually with {@code bundle:} scheme or similar).
+ */
 public class ResourceInfo {
-	private URL url;
-	private LocalDateTime lastModified;
-	private long bundleId;
+
+	private final URL url;
+	private final LocalDateTime lastModified;
+	private final long bundleId;
 
 	public ResourceInfo(URL url, LocalDateTime lastModified, long bundleId) {
 		this.url = url;
@@ -41,4 +45,5 @@ public class ResourceInfo {
 	public long getBundleId() {
 		return bundleId;
 	}
+
 }

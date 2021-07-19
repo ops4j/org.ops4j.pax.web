@@ -43,47 +43,6 @@
 		<module>samples-jsp</module>
 		<module>samples-jsf</module>
 		<module>samples-whiteboard</module>
-
-<!--		<module>jsp/war-introspection</module>-->
-<!--		<module>helloworld-jsp</module>-->
-<!--		<module>helloworld-jsp-noclasses</module>-->
-<!--		<module>war</module>-->
-<!--		<module>war-dispatch-jsp</module>-->
-<!--		<module>whiteboard</module>-->
-<!--		<module>whiteboard-extended</module>-->
-<!--		<module>whiteboard-blueprint</module>-->
-<!--		<module>whiteboard-ds</module>-->
-<!--		<module>whiteboard-ds-jaxrs</module>-->
-<!--		<module>provision</module>-->
-<!--		<module>features</module>-->
-<!--		<module>jetty-config-fragment</module>-->
-<!--		<module>war-authentication</module>-->
-<!--		<module>jetty-auth-config-fragment</module>-->
-<!--		<module>tomcat-config-fragment</module>-->
-<!--		<module>tomcat-auth-config-fragment</module>-->
-<!--		<module>undertow-auth-config-fragment</module>-->
-<!--		<module>war-formauth</module>-->
-<!--		<module>war-introspection</module>-->
-<!--		<module>war-introspection-bundle</module>-->
-<!--		<module>war-jsf</module>-->
-<!--		<module>war-jsf22</module>-->
-<!--		<module>war-jsf22-cdi</module>-->
-<!--		<module>war-jsf-cdi</module>-->
-<!--		<module>war-jsf-primefaces</module>-->
-<!--		<module>helloworld-servlet3</module>-->
-<!--		<module>jsp-filter</module>-->
-<!--		<module>simple-filter</module>-->
-<!--		<module>war-jetty-web</module>-->
-<!--		<module>war-tomcat-resource</module>-->
-<!--		<module>war-simple</module>-->
-<!--		<module>war-spring</module>-->
-<!--		<module>war-spring-osgi</module>-->
-<!--		<module>web-fragment</module>-->
-<!--		<module>wab-jetty-web</module>-->
-<!--		<module>websocket-jsr356</module>-->
-<!--		<module>war-extended-post</module>-->
-<!--		<module>web-jersey</module>-->
-<!--		<module>jsf-resourcehandler</module>-->
 	</modules>
 
 </project>

@@ -16,11 +16,6 @@
  */
 package org.ops4j.pax.web.jsf.resourcehandler.internal;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.ops4j.pax.web.jsf.resourcehandler.internal.OsgiResourceMatcher.isBundleResource;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -35,6 +30,11 @@ import org.ops4j.pax.web.resources.extender.internal.IndexedOsgiResourceLocator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.ops4j.pax.web.jsf.resourcehandler.internal.OsgiResourceMatcher.isBundleResource;
+
 public class IndexedOsgiResourceLocaterTests {
 
 	private IndexedOsgiResourceLocator sut;
@@ -43,7 +43,7 @@ public class IndexedOsgiResourceLocaterTests {
 	private Bundle resourceBundleTwo;
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		context = mock(BundleContext.class);
 		resourceBundleOne = new BundleBuilder().withBundleId(100).withSymbolicName("resourcebundle-one")
 				.buildWithResources("template.html", "base.css");
@@ -62,7 +62,7 @@ public class IndexedOsgiResourceLocaterTests {
 	}
 
 	@Test
-	public void resourcesAvailable() throws Exception {
+	public void resourcesAvailable() {
 
 		assertThat("Resource doesn't match!", sut.locateResource("template.html"), isBundleResource(resourceBundleOne, "template.html"));
 		assertThat("Resource doesn't match!", sut.locateResource("base.css"), isBundleResource(resourceBundleOne, "base.css"));
@@ -72,7 +72,7 @@ public class IndexedOsgiResourceLocaterTests {
 
 
 	@Test
-	public void resourceOverride() throws Exception {
+	public void resourceOverride() {
 		Bundle overridingBundle = new BundleBuilder().withSymbolicName("resourcebundle-override")
 				.buildWithResources("another.html", "template.html");
 		when(context.getBundle(resourceBundleOne.getBundleId())).thenReturn(resourceBundleOne);
@@ -87,7 +87,7 @@ public class IndexedOsgiResourceLocaterTests {
 	}
 
 	@Test
-	public void resourceOverrideUninstalled() throws Exception {
+	public void resourceOverrideUninstalled() {
 		Bundle overridingBundle = new BundleBuilder().withSymbolicName("resourcebundle-override")
 				.buildWithResources("another.html", "template.html");
 		when(context.getBundle(resourceBundleOne.getBundleId())).thenReturn(resourceBundleOne);
@@ -124,11 +124,11 @@ public class IndexedOsgiResourceLocaterTests {
 		}
 
 		private Long generateBundleId() {
-			long LOWER_RANGE = 0; // assign lower range value
-			long UPPER_RANGE = 1000000; // assign upper range value
+			long lowerRange = 0; // assign lower range value
+			long upperRange = 1000000; // assign upper range value
 			Random random = new Random();
 
-			return LOWER_RANGE + (long) (random.nextDouble() * (UPPER_RANGE - LOWER_RANGE));
+			return lowerRange + (long) (random.nextDouble() * (upperRange - lowerRange));
 		}
 
 		private Collection<URL> addResourceTestdataToMock(String... paths) {
@@ -142,5 +142,7 @@ public class IndexedOsgiResourceLocaterTests {
 			}
 			return urls;
 		}
+
 	}
+
 }

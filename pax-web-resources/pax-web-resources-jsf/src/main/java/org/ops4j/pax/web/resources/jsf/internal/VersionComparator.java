@@ -48,27 +48,27 @@ public final class VersionComparator implements Comparator<String> {
 			if (i1 < 0) {
 				if (o1.length() > 0) {
 					p1 = false;
-					n1 = Integer.valueOf(o1);
+					n1 = Integer.parseInt(o1);
 					o1 = "";
 				} else {
 					p1 = false;
 					n1 = 0;
 				}
 			} else {
-				n1 = Integer.valueOf(o1.substring(0, i1));
+				n1 = Integer.parseInt(o1.substring(0, i1));
 				o1 = o1.substring(i1 + 1);
 			}
 			if (i2 < 0) {
 				if (o2.length() > 0) {
 					p2 = false;
-					n2 = Integer.valueOf(o2);
+					n2 = Integer.parseInt(o2);
 					o2 = "";
 				} else {
 					p2 = false;
 					n2 = 0;
 				}
 			} else {
-				n2 = Integer.valueOf(o2.substring(0, i2));
+				n2 = Integer.parseInt(o2.substring(0, i2));
 				o2 = o2.substring(i2 + 1);
 			}
 		}
@@ -78,4 +78,5 @@ public final class VersionComparator implements Comparator<String> {
 		}
 		return n1 - n2;
 	}
+
 }

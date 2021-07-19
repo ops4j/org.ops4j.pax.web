@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 /**
  * This package contains mostly utility code taken from MyFaces in order to handle Resources without additional
  * dependencies to pax-web

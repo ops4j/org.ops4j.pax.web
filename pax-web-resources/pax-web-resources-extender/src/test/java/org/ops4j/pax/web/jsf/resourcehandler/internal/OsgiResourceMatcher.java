@@ -23,8 +23,8 @@ import org.osgi.framework.Bundle;
 
 class OsgiResourceMatcher extends TypeSafeMatcher<ResourceInfo> {
 
-	private long bundleId;
-	private String resourcepath;
+	private final long bundleId;
+	private final String resourcepath;
 
 	private OsgiResourceMatcher(Bundle bundle, String resourcepath) {
 		if (bundle == null || resourcepath == null) {
@@ -62,5 +62,3 @@ class OsgiResourceMatcher extends TypeSafeMatcher<ResourceInfo> {
 	}
 
 }
-
-

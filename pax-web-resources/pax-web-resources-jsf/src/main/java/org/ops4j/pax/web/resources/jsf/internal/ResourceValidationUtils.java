@@ -186,4 +186,5 @@ public final class ResourceValidationUtils {
 		}
 		return true;
 	}
+
 }

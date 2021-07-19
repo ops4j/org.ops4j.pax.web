@@ -28,8 +28,9 @@
 	</parent>
 
 	<artifactId>pax-web-resources-api</artifactId>
+	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web - Resources-API</name>
+	<name>OPS4J Pax Web - Resources - API</name>
 
 	<build>
 		<plugins>
@@ -39,9 +40,14 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<_sources>true</_sources>
+						<Import-Package>
+							<!-- ranges indicate we can work with OSGi Core R6+ -->
+							org.osgi.framework;version="[1.8,2)",
+							org.osgi.framework.wiring;version="[1.2,2)",
+							org.osgi.util.tracker;version="[1.5,2)"
+						</Import-Package>
 						<Export-Package>
-							org.ops4j.pax.web.resources.api,\
+							org.ops4j.pax.web.resources.api,
 							org.ops4j.pax.web.resources.api.query
 						</Export-Package>
 					</instructions>

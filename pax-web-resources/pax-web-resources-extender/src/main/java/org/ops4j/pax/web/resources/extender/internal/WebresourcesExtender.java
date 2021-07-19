@@ -48,9 +48,9 @@ public class WebresourcesExtender implements BundleActivator, BundleListener {
 	 */
 	private static final String CAPABILITY_EXTENDER = "osgi.extender";
 
-	private transient Logger logger;
+	private final transient Logger logger;
 	private BundleContext bundleContext;
-	private List<OsgiResourceLocator> osgiResourceLocatorServices = new CopyOnWriteArrayList<>();
+	private final List<OsgiResourceLocator> osgiResourceLocatorServices = new CopyOnWriteArrayList<>();
 
 	private ServiceTracker<OsgiResourceLocator, OsgiResourceLocator> trackerResourceLocator;
 
@@ -59,7 +59,7 @@ public class WebresourcesExtender implements BundleActivator, BundleListener {
 	}
 
 	@Override
-	public void start(BundleContext context) throws Exception {
+	public void start(BundleContext context) {
 		this.bundleContext = context;
 
 		IndexedOsgiResourceLocator indexedRegistryService = new IndexedOsgiResourceLocator(context);
@@ -91,6 +91,7 @@ public class WebresourcesExtender implements BundleActivator, BundleListener {
 				context.ungetService(reference);
 			}
 		});
+
 		trackerResourceLocator.open();
 		// register service
 		Dictionary<String, Object> props = new Hashtable<>(1);
@@ -153,4 +154,5 @@ public class WebresourcesExtender implements BundleActivator, BundleListener {
 				.filter(bundle -> isJsfBundleForExtenderStartingOrActive(bundle, this::checkBundleWiringForExtender))
 				.forEach(service::register);
 	}
+
 }

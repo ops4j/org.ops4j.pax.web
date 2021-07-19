@@ -28,8 +28,9 @@
 	</parent>
 
 	<artifactId>pax-web-resources-jsf</artifactId>
+	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web - Resources-JSF</name>
+	<name>OPS4J Pax Web - Resources - JSF</name>
 
 	<description>Provides a OSGi-aware Resourcehandler-implementation for JSF 2.</description>
 
@@ -41,16 +42,21 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<_sources>true</_sources>
 						<Import-Package>
-							org.apache.commons.lang3;version='[3.0,4)',\
+							org.apache.commons.lang3;version='[3.0,4)',
+
+							<!-- ranges indicate we can work with OSGi Core R6+ -->
+							org.osgi.framework;version="[1.8,2)",
+							org.osgi.framework.wiring;version="[1.2,2)",
+							org.osgi.util.tracker;version="[1.5,2)",
+
 							*
 						</Import-Package>
 						<Export-Package>
 							org.ops4j.pax.web.resources.jsf
 						</Export-Package>
 						<Private-Package>
-							org.ops4j.pax.web.jsf.resourcehandler.internal
+							org.ops4j.pax.web.resources.jsf.internal
 						</Private-Package>
 					</instructions>
 				</configuration>
@@ -94,8 +100,8 @@
 		<!-- JavaEE -->
 
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -121,7 +127,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
+			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 

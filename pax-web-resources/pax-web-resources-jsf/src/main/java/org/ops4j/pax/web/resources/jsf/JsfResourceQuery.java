@@ -57,7 +57,6 @@ public class JsfResourceQuery implements ResourceQueryMatcher {
 	private final String resourceName;
 	private final String contentType;
 
-
 	public JsfResourceQuery(String localePrefix, String libraryName, String resourceName, String contentType) {
 		if (resourceName == null) {
 			throw new IllegalArgumentException("resourceName must be set!");
@@ -111,7 +110,6 @@ public class JsfResourceQuery implements ResourceQueryMatcher {
 		}
 	}
 
-
 	private String matchLibraryName(final String path, final MatchingResult result) {
 		if (libraryName != null && path.startsWith(PATH_SEPARATOR + libraryName)) {
 			result.matchedLibraryName = true;
@@ -159,7 +157,6 @@ public class JsfResourceQuery implements ResourceQueryMatcher {
 		}
 	}
 
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public <R extends ResourceQueryResult> Optional<R> matches(final String resourcePath) {
@@ -187,7 +184,6 @@ public class JsfResourceQuery implements ResourceQueryMatcher {
 		return (Optional<R>) result.createFinalResult();
 	}
 
-
 	private static final class MatchingResult {
 		private boolean matchedLocalePrefix;
 		private boolean matchedLibraryName;
@@ -203,4 +199,5 @@ public class JsfResourceQuery implements ResourceQueryMatcher {
 			}
 		}
 	}
+
 }

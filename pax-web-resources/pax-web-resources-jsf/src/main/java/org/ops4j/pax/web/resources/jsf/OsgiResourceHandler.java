@@ -90,7 +90,7 @@ public class OsgiResourceHandler extends ResourceHandlerWrapper {
 	private static final String INIT_PARAM_RESOURCE_BUFFER_SIZE = "org.ops4j.pax.web.resources.jsf.RESOURCE_BUFFER_SIZE";
 	private static final char PATH_SEPARATOR = '/';
 
-	private transient Logger logger = LoggerFactory.getLogger(getClass());
+	private final transient Logger logger = LoggerFactory.getLogger(getClass());
 	private final ResourceHandler wrapped;
 	private final String[] excludedResourceExtensions;
 	private final int resourceBufferSize;
@@ -147,7 +147,6 @@ public class OsgiResourceHandler extends ResourceHandlerWrapper {
 //        // the localePrefix and facesContext must be used to get the available contracts.
 //		final FacesContext facesContext = FacesContext.getCurrentInstance();
 //		
-//		
 //		Resource resource = null;
 //
 //        if (resourceName == null)
@@ -186,7 +185,6 @@ public class OsgiResourceHandler extends ResourceHandlerWrapper {
 //				resourceInfo.getLastModified());
 		return createResource(resourceName, null, null);
 	}
-
 
 	@Override
 	public Resource createResource(String resourceName) {
@@ -244,7 +242,6 @@ public class OsgiResourceHandler extends ResourceHandlerWrapper {
 			return null;
 		}
 
-
 		// inspect final resource for contentType
 		// FIXME deal with content-type
 //		if (contentType == null)
@@ -255,9 +252,7 @@ public class OsgiResourceHandler extends ResourceHandlerWrapper {
 //				logger.error("Could not determine contentType from url-resource!", e);
 //			}
 //		}
-
 	}
-
 
 	private Optional<JsfResourceQueryResult> matchResources(OsgiResourceLocator service, JsfResourceQuery query) {
 		Collection<JsfResourceQueryResult> matchedResults = service.findResources(query);
@@ -282,7 +277,6 @@ public class OsgiResourceHandler extends ResourceHandlerWrapper {
 		});
 	}
 
-
 	@Override
 	public void handleResourceRequest(FacesContext facesContext) throws IOException {
 		final Map<String, String> requestParameterMap = facesContext.getExternalContext().getRequestParameterMap();
@@ -306,7 +300,6 @@ public class OsgiResourceHandler extends ResourceHandlerWrapper {
 			//resource base name
 			return;
 		}
-
 
 		// We neet to get an instance of HttpServletResponse, but sometimes
 		// the response object is wrapped by several instances of
@@ -340,12 +333,10 @@ public class OsgiResourceHandler extends ResourceHandlerWrapper {
 			return;
 		}
 
-
 		if (libraryName != null && !ResourceValidationUtils.isValidLibraryName(libraryName)) {
 			httpServletResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
-
 
 		String resourceIdentifier = createResourceIdentifier(localePrefix, resourceName, resourceVersion, libraryName, libraryVersion);
 
@@ -361,13 +352,11 @@ public class OsgiResourceHandler extends ResourceHandlerWrapper {
 				localePrefix, resourceName, resourceVersion, libraryName, libraryVersion,
 				resourceInfo.getLastModified());
 
-
 		// Resource has not changed, return 304
 		if (!resource.userAgentNeedsUpdate(facesContext)) {
 			httpServletResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 			return;
 		}
-
 
 		// serve
 
@@ -384,13 +373,10 @@ public class OsgiResourceHandler extends ResourceHandlerWrapper {
 
 		//serve up the bytes (taken from trinidad ResourceServlet)
 		try {
-
 			//byte[] buffer = new byte[_BUFFER_SIZE];
 			byte[] buffer = new byte[this.resourceBufferSize];
 
-			try (
-					InputStream in = resource.getInputStream();
-					OutputStream out = httpServletResponse.getOutputStream()) {
+			try (InputStream in = resource.getInputStream(); OutputStream out = httpServletResponse.getOutputStream()) {
 				int count = ResourceHandlerUtils.pipeBytes(in, out, buffer);
 				//set the content length
 				if (!httpServletResponse.isCommitted()) {
@@ -400,12 +386,11 @@ public class OsgiResourceHandler extends ResourceHandlerWrapper {
 		} catch (IOException e) {
 			if (logger.isErrorEnabled()) {
 				logger.error("Error trying to load resource '{}' with library '{}' : {}",
-						new Object[]{resourceName, libraryName, e.getMessage(), e});
+						resourceName, libraryName, e.getMessage(), e);
 			}
 			// return 404
 			httpServletResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
 		}
-
 	}
 
 	/**
@@ -437,7 +422,6 @@ public class OsgiResourceHandler extends ResourceHandlerWrapper {
 		return sb.toString();
 	}
 
-
 	/**
 	 * Gets a {@link OsgiResourceLocator}-service, applies the given function,
 	 * and ungets the service.
@@ -461,4 +445,5 @@ public class OsgiResourceHandler extends ResourceHandlerWrapper {
 		}
 		return resourceQueryResult;
 	}
+
 }
