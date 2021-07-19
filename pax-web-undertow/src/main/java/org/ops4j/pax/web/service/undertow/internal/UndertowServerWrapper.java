@@ -485,77 +485,6 @@ class UndertowServerWrapper implements BatchVisitor {
 			}
 		}
 
-		// listeners will be checked by verifyConnectorConfiguration() later
-		List<Server.HttpListener> httpListeners = undertowConfiguration.getSubsystem().getServer().getHttpListeners();
-		List<Server.HttpsListener> httpsListeners = undertowConfiguration.getSubsystem().getServer().getHttpsListeners();
-
-		// http listener(s)
-		for (Server.HttpListener http : httpListeners) {
-			String listenerName = http.getName();
-			if (!http.isEnabled()) {
-				LOG.debug("Skipping disabled Undertow http listener \"{}\"", listenerName);
-				continue;
-			}
-			UndertowConfiguration.BindingInfo binding = undertowConfiguration.bindingInfo(http.getSocketBindingName());
-			for (String address : binding.getAddresses()) {
-				LOG.info("Configuring Undertow http listener for address " + address + ":" + binding.getPort());
-
-				XnioWorker workerForListener = getWorker(http.getWorkerName());
-				ByteBufferPool bufferPoolForListener = getBufferPool(http.getBufferPoolName());
-
-				// this is specific to non-secure listener
-				// see org.wildfly.extension.undertow.Server#lookupSecurePort
-				if (http.getRedirectSocket() != null) {
-					SocketBinding secureSocketBinding = undertowConfiguration.socketBinding(http.getRedirectSocket());
-					if (secureSocketBinding != null) {
-						this.securePortMapping.put(binding.getPort(), secureSocketBinding.getPort());
-					}
-				}
-
-				InetSocketAddress inetAddress = new InetSocketAddress(address, binding.getPort());
-				AcceptingChannel<? extends StreamConnection> listener = undertowFactory.createListener(
-						configuration, http, rootHandler, null,
-						workerForListener, bufferPoolForListener,
-						inetAddress
-				);
-				listeners.put(http.getName(), new UndertowFactory.AcceptingChannelWithAddress(listener, inetAddress));
-			}
-		}
-
-		// https listener(s)
-		for (Server.HttpsListener https : httpsListeners) {
-			String listenerName = https.getName();
-			if (!https.isEnabled()) {
-				LOG.debug("Skipping disabled Undertow https listener \"{}\"", listenerName);
-				continue;
-			}
-			UndertowConfiguration.BindingInfo binding = undertowConfiguration.bindingInfo(https.getSocketBindingName());
-			for (String address : binding.getAddresses()) {
-				LOG.info("Configuring Undertow https listener for address " + address + ":" + binding.getPort());
-
-				XnioWorker workerForListener = getWorker(https.getWorkerName());
-				ByteBufferPool bufferPoolForListener = getBufferPool(https.getBufferPoolName());
-
-				if (https.getSslContext() != null) {
-					LOG.warn("ssl-context reference attribute from https-listener listener is not supported"
-							+ " in Pax Web. Please use security-realm reference attribute instead.");
-				}
-				SecurityRealm realm = undertowConfiguration.securityRealm(https.getSecurityRealm());
-				if (realm == null) {
-					throw new IllegalArgumentException("No security realm with name \"" + https.getSecurityRealm()
-							+ "\" available for \"" + https.getName() + "\" https listener.");
-				}
-
-				InetSocketAddress inetAddress = new InetSocketAddress(address, binding.getPort());
-				AcceptingChannel<? extends StreamConnection> listener = undertowFactory.createListener(
-						configuration, https, rootHandler, realm,
-						workerForListener, bufferPoolForListener,
-						inetAddress
-				);
-				listeners.put(https.getName(), new UndertowFactory.AcceptingChannelWithAddress(listener, inetAddress));
-			}
-		}
-
 		// identity manager - looked up in "default" security realm
 		SecurityRealm defaultRealm = undertowConfiguration.securityRealm("default");
 		if (defaultRealm != null) {
@@ -641,6 +570,79 @@ class UndertowServerWrapper implements BatchVisitor {
 
 				Predicate p = fr.getPredicate() == null ? null : Predicates.parse(fr.getPredicate(), HttpHandler.class.getClassLoader());
 				rootHandler = filter.configure(rootHandler, p);
+			}
+		}
+
+		// only now create listeners, because rootHandler may have been wrapped
+
+		// listeners will be checked by verifyConnectorConfiguration() later
+		List<Server.HttpListener> httpListeners = undertowConfiguration.getSubsystem().getServer().getHttpListeners();
+		List<Server.HttpsListener> httpsListeners = undertowConfiguration.getSubsystem().getServer().getHttpsListeners();
+
+		// http listener(s)
+		for (Server.HttpListener http : httpListeners) {
+			String listenerName = http.getName();
+			if (!http.isEnabled()) {
+				LOG.debug("Skipping disabled Undertow http listener \"{}\"", listenerName);
+				continue;
+			}
+			UndertowConfiguration.BindingInfo binding = undertowConfiguration.bindingInfo(http.getSocketBindingName());
+			for (String address : binding.getAddresses()) {
+				LOG.info("Configuring Undertow http listener for address " + address + ":" + binding.getPort());
+
+				XnioWorker workerForListener = getWorker(http.getWorkerName());
+				ByteBufferPool bufferPoolForListener = getBufferPool(http.getBufferPoolName());
+
+				// this is specific to non-secure listener
+				// see org.wildfly.extension.undertow.Server#lookupSecurePort
+				if (http.getRedirectSocket() != null) {
+					SocketBinding secureSocketBinding = undertowConfiguration.socketBinding(http.getRedirectSocket());
+					if (secureSocketBinding != null) {
+						this.securePortMapping.put(binding.getPort(), secureSocketBinding.getPort());
+					}
+				}
+
+				InetSocketAddress inetAddress = new InetSocketAddress(address, binding.getPort());
+				AcceptingChannel<? extends StreamConnection> listener = undertowFactory.createListener(
+						configuration, http, rootHandler, null,
+						workerForListener, bufferPoolForListener,
+						inetAddress
+				);
+				listeners.put(http.getName(), new UndertowFactory.AcceptingChannelWithAddress(listener, inetAddress));
+			}
+		}
+
+		// https listener(s)
+		for (Server.HttpsListener https : httpsListeners) {
+			String listenerName = https.getName();
+			if (!https.isEnabled()) {
+				LOG.debug("Skipping disabled Undertow https listener \"{}\"", listenerName);
+				continue;
+			}
+			UndertowConfiguration.BindingInfo binding = undertowConfiguration.bindingInfo(https.getSocketBindingName());
+			for (String address : binding.getAddresses()) {
+				LOG.info("Configuring Undertow https listener for address " + address + ":" + binding.getPort());
+
+				XnioWorker workerForListener = getWorker(https.getWorkerName());
+				ByteBufferPool bufferPoolForListener = getBufferPool(https.getBufferPoolName());
+
+				if (https.getSslContext() != null) {
+					LOG.warn("ssl-context reference attribute from https-listener listener is not supported"
+							+ " in Pax Web. Please use security-realm reference attribute instead.");
+				}
+				SecurityRealm realm = undertowConfiguration.securityRealm(https.getSecurityRealm());
+				if (realm == null) {
+					throw new IllegalArgumentException("No security realm with name \"" + https.getSecurityRealm()
+							+ "\" available for \"" + https.getName() + "\" https listener.");
+				}
+
+				InetSocketAddress inetAddress = new InetSocketAddress(address, binding.getPort());
+				AcceptingChannel<? extends StreamConnection> listener = undertowFactory.createListener(
+						configuration, https, rootHandler, realm,
+						workerForListener, bufferPoolForListener,
+						inetAddress
+				);
+				listeners.put(https.getName(), new UndertowFactory.AcceptingChannelWithAddress(listener, inetAddress));
 			}
 		}
 
