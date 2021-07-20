@@ -384,7 +384,6 @@ public class Batch {
 
 	/**
 	 * A {@link Batch} can create the <em>uninstallation batch</em> consisting of all the operations reversed.
-	 * TODO: check if we can/should filter some of the operations
 	 * @return
 	 */
 	public Batch uninstall(String description) {

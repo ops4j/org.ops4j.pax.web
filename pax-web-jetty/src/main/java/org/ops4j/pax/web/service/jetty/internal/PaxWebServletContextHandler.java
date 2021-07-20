@@ -123,30 +123,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 		// 4. TODO: virtual host handling - at this level (like Pax Web 7)?
 //		this.setVirtualHosts(virtualHosts.toArray(EMPTY_STRING_ARRAY));
 
-		// 5. TODO: specific Jetty XML? (rather not - it should be handled at the wrapper level, unless the context.xml
-		//          is about the context itself (like jetty-web.xml)
-//		if (jettyWebXmlURL != null) {
-//			try {
-//				ContextClassLoaderUtils.doWithClassLoader(getClassLoader(),
-//						new Callable<Void>() {
-//
-//							@Override
-//							public Void call() throws IOException {
-//								//do parsing and altering of webApp here
-//								DOMJettyWebXmlParser jettyWebXmlParser = new DOMJettyWebXmlParser();
-//								jettyWebXmlParser.parse(PaxWebServletContextHandler.this, jettyWebXmlURL.openStream());
-//
-//								return null;
-//							}
-//
-//						});
-//			} catch (Exception e) {
-//				if (e instanceof RuntimeException) {
-//					throw (RuntimeException) e;
-//				}
-//				LOG.error("Ignored exception during listener registration", e);
-//			}
-//		}
+		// 5. jetty-web.xml are already handled
 
 		// 6. Pax Web 7 was setting the attributes in real ServletContext, but we already do it according to
 		//    Whiteboard specification at OsgiServletContext level

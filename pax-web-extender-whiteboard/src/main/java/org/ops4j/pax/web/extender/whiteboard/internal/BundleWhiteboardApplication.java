@@ -396,7 +396,6 @@ public class BundleWhiteboardApplication {
 	//			httpContext = new WebContainerContext() {
 	//				@Override
 	//				public Set<String> getResourcePaths(String name) {
-	//					// FIXME check if this is valid for plain HttpContext-registrations
 	//					return null;
 	//				}
 	//

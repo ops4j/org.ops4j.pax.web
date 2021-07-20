@@ -21,8 +21,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 /**
- * TODO Add JavaDoc.
- *
  * @author Achim Nierbeck
  * @since 4.0.0, Aug 31, 2013
  */

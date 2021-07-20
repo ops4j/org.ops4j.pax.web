@@ -937,8 +937,6 @@ public class BundleWebApplicationClassSpace {
 		root.interfaceNames = new String[0];
 		javaClassCache.put(root.superClassName, root);
 
-		// TODO: optimize by unpacking the JAR, to access it through files (memory mapped files?) if it's faster
-
 		// 1. scan classes in non-JAR entries from WAB's Bundle-ClassPath
 		//     - always for types from @HandlesTypes
 		//     - possibly for other annotated types if metadata-complete="false" on this.mainWebXml

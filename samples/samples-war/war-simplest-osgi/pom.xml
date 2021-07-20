@@ -49,6 +49,7 @@
 						<Import-Package>
 							org.osgi.framework;version="[1.8,2)",
 							javax.servlet.*;version="[3.1,5)",
+							sun.nio.ch;resolution:=optional,
 							*
 						</Import-Package>
 						<Private-Package>

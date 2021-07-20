@@ -63,7 +63,6 @@ public class EventListenerModelChange extends Change {
 				if (ServletContextListener.class.isAssignableFrom(listener.getClass())) {
 					// special case - we don't want such listeners to be removed, so they really get the
 					// notification about context being destroyed
-					// TODO: check the same for Session Listeners
 					return;
 				}
 			}

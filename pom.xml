@@ -2095,13 +2095,29 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
-				<artifactId>javax-websocket-server-impl</artifactId>
+				<artifactId>javax-websocket-client-impl</artifactId>
 				<version>${dependency.org.eclipse.jetty}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>javax.websocket</groupId>
+						<artifactId>javax.websocket-client-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.websocket</groupId>
+						<artifactId>javax.websocket-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
-				<artifactId>javax-websocket-client-impl</artifactId>
+				<artifactId>javax-websocket-server-impl</artifactId>
 				<version>${dependency.org.eclipse.jetty}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>javax.websocket</groupId>
+						<artifactId>javax.websocket-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<!-- Tomcat -->
@@ -2153,6 +2169,17 @@
 				<version>${dependency.org.apache.tomcat}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.tomcat</groupId>
+				<artifactId>tomcat-websocket</artifactId>
+				<version>${dependency.org.apache.tomcat}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.tomcat</groupId>
+						<artifactId>tomcat-websocket-api</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.tomcat.embed</groupId>
 				<artifactId>tomcat-embed-core</artifactId>
 				<version>${dependency.org.apache.tomcat}</version>
@@ -2165,12 +2192,18 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.tomcat.embed</groupId>
-				<artifactId>tomcat-embed-logging-juli</artifactId>
+				<artifactId>tomcat-embed-websocket</artifactId>
 				<version>${dependency.org.apache.tomcat}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>*</groupId>
+						<artifactId>*</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.tomcat.embed</groupId>
-				<artifactId>tomcat-embed-websocket</artifactId>
+				<artifactId>tomcat-embed-logging-juli</artifactId>
 				<version>${dependency.org.apache.tomcat}</version>
 			</dependency>
 			<dependency>
@@ -2263,6 +2296,12 @@
 				<groupId>io.undertow</groupId>
 				<artifactId>undertow-websockets-jsr</artifactId>
 				<version>${dependency.io.undertow}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.jboss.spec.javax.websocket</groupId>
+						<artifactId>jboss-websocket-api_1.1_spec</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.xnio</groupId>
@@ -2936,6 +2975,7 @@
 								<exclude>**/start.txt</exclude>
 								<exclude>**/hello*.txt</exclude>
 								<exclude>**/start.txt</exclude>
+								<exclude>**/todo.txt</exclude>
 								<exclude>**/foo</exclude>
 								<exclude>**/maven-metadata-local.xml</exclude>
 								<exclude>**/*.xsd</exclude>

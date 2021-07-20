@@ -91,9 +91,6 @@ public final class ServletContextModel extends Identity {
 	 * <p>Normally this is checked at server level, but for the sake of compliance, we have to do it before hitting
 	 * the server. And we have to take into account virtual hosts (not available in specification) and
 	 * context paths (mentioned only in Whiteboard Service specification).</p>
-	 *
-	 * <p>TODO: This map also includes those URL patterns from {@link #servletUrlPatternMapping} which are defined
-	 *     as <em>exact</em> mappings in Servlet API specification.</p>
 	 */
 	private final Map<String, ServletModel> aliasMapping = new HashMap<>();
 

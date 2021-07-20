@@ -877,49 +877,11 @@ public interface WebContainer extends HttpService {
 	 */
 	void setContextParams(Dictionary<String, Object> params, HttpContext httpContext);
 
+	// methods used to register annotated web socket endpoints
 
 
 
-//    /**
-//     * Registers login configuration, with authorization method and realm name.
-//     *
-//     * @param authMethod
-//     * @param realmName
-//     * @param formLoginPage
-//     * @param formErrorPage
-//     * @param httpContext
-//     */
-//    void registerLoginConfig(String authMethod, String realmName, String formLoginPage, String formErrorPage,
-//            HttpContext httpContext);
-//
-//    /**
-//     * Unregisters login configuration ....
-//     *
-//     * @param httpContext
-//     */
-//    void unregisterLoginConfig(HttpContext httpContext);
-//
-//    /**
-//     * Registers constraint mappings....
-//     *
-//     * @param constraintName
-//     * @param mapping
-//     * @param url
-//     * @param dataConstraint
-//     * @param authentication
-//     * @param roles
-//     * @param httpContext
-//     */
-//    void registerConstraintMapping(String constraintName, String mapping, String url, String dataConstraint,
-//            boolean authentication, List<String> roles, HttpContext httpContext);
-//
-//    /**
-//     * Unregisters constraint mappings....
-//     *
-//     * @param httpContext
-//     */
-//    void unregisterConstraintMapping(HttpContext httpContext);
-//
+
 //    void registerWebSocket(Object webSocket, HttpContext httpContext);
 //
 //    void unregisterWebSocket(Object webSocket, HttpContext httpContext);

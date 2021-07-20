@@ -204,10 +204,6 @@ public class DefaultHttpContext implements WebContainerContext {
 	 * Web Applications specification doesn't introduce any special support interface to be used <em>under</em>
 	 * {@link ServletContext}.</p>
 	 *
-	 * TODO: Just as {@link ServletContext#getResourcePaths(String)} does, we <strong>have to</strong> include
-	 *       resources available in {@code /WEB-INF/lib/*.jar!/META-INF/resources/} (which I think is good addition from
-	 *       Servlet API to Whiteboard API).
-	 *
 	 * @param bundle
 	 * @param name
 	 * @return

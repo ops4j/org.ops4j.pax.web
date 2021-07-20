@@ -42,9 +42,9 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-							org.apache.catalina,
-							org.apache.catalina.connector,
-							org.apache.catalina.valves,
+							org.apache.catalina;resolution:=optional,
+							org.apache.catalina.connector;resolution:=optional,
+							org.apache.catalina.valves;resolution:=optional,
 							javax.servlet.http
 						</Import-Package>
 						<Web-ContextPath>/wab-container-context-config</Web-ContextPath>

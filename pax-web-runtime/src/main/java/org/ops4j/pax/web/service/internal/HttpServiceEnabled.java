@@ -2311,7 +2311,6 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 //
 //	@Override
 //	public void unregisterWebSocket(Object webSocket, HttpContext httpContext) {
-//		// TODO Auto-generated method stub
 //	}
 
 //	@Override

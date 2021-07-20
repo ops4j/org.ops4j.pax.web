@@ -662,9 +662,6 @@ public class OsgiServletContext implements ServletContext {
 	}
 
 	public Set<String> getResourcePaths(WebContainerContext context, String path) {
-		// TODO: according to 128.3.5 Static Content, we can't return any restricted paths, even if
-		//       org.ops4j.pax.web.service.WebContainerContext.getResourcePaths and
-		//       org.osgi.service.http.context.ServletContextHelper.getResourcePaths allow that
 		return context.getResourcePaths(path);
 	}
 

@@ -15,14 +15,12 @@
  */
 package org.ops4j.pax.web.itest.container.jsp;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.container.httpservice.AbstractHttpServiceIntegrationTest;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,10 +32,6 @@ public abstract class AbstractJspIntegrationTest extends AbstractContainerTestBa
 	public static final Logger LOG = LoggerFactory.getLogger(AbstractHttpServiceIntegrationTest.class);
 
 	private Bundle hsBundle;
-
-	// TODO: we DON'T stop the bundle in @After, because for now we don't stop the underlying ServletContext
-	//       when last servlet from this context is removed. And we can't for now register SCIs (one of them
-	//       is needed for JSPs) to a started context.
 
 	@Before
 	public void setup() throws Exception {
@@ -52,14 +46,6 @@ public abstract class AbstractJspIntegrationTest extends AbstractContainerTestBa
 		}
 		configureAndWaitForServletWithMapping("/images/*",
 				() -> hsBundle = installAndStartBundle(sampleURI("helloworld-jsp")));
-	}
-
-	@After
-	public void cleanup() throws BundleException {
-//		if (hsBundle != null) {
-//			hsBundle.stop();
-//			hsBundle.uninstall();
-//		}
 	}
 
 	@Test

@@ -181,6 +181,11 @@
 			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>jakarta.websocket</groupId>
+			<artifactId>jakarta.websocket-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- Undertow -->
 
@@ -192,10 +197,10 @@
 			<groupId>io.undertow</groupId>
 			<artifactId>undertow-servlet</artifactId>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>io.undertow</groupId>-->
-<!--			<artifactId>undertow-websockets-jsr</artifactId>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>io.undertow</groupId>
+			<artifactId>undertow-websockets-jsr</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.jboss.xnio</groupId>

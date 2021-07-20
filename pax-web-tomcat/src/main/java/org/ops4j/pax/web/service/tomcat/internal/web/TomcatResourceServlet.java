@@ -37,10 +37,6 @@ import org.slf4j.LoggerFactory;
 /**
  * <p>Extension of Tomcat's <em>default servlet</em> to satisfy the resource contract from Http Service and Whiteboard
  * Service specifications.</p>
- *
- * <p>TODO: handle {@code META-INF/resources} from WAB's JARs and handle {@code addWebinfClassesResources} flag
- *          which enables additional {@code  WEB-INF/classes/META-INF/resources} resource root from the WAB itself
- * See http://tomcat.apache.org/tomcat-9.0-doc/config/context.html#Standard_Implementation</p>
  */
 public class TomcatResourceServlet extends DefaultServlet {
 

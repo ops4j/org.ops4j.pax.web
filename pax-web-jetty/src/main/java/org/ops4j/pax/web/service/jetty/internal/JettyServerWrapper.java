@@ -1620,22 +1620,21 @@ class JettyServerWrapper implements BatchVisitor {
 				sch.setSecurityHandler(securityHandler);
 
 				securityHandler.setRealmName(loginConfig.getRealmName());
+				// realm name is needed even for FORM based authentication if there are more than 1 login services
+				// defined for a server
+				if (securityHandler.getRealmName() == null) {
+					securityHandler.setRealmName("default");
+				}
 
 				switch (loginConfig.getAuthMethod().toUpperCase()) {
 					case Constraint.__BASIC_AUTH:
 						securityHandler.setAuthenticator(new BasicAuthenticator());
-						if (securityHandler.getRealmName() == null) {
-							securityHandler.setRealmName("default");
-						}
 						break;
 					case Constraint.__DIGEST_AUTH:
 						DigestAuthenticator digestAuthenticator = new DigestAuthenticator();
 						digestAuthenticator.setMaxNonceAge(configuration.security().getDigestAuthMaxNonceAge());
 						digestAuthenticator.setMaxNonceCount(configuration.security().getDigestAuthMaxNonceCount());
 						securityHandler.setAuthenticator(digestAuthenticator);
-						if (securityHandler.getRealmName() == null) {
-							securityHandler.setRealmName("default");
-						}
 						break;
 					case Constraint.__CERT_AUTH:
 					case Constraint.__CERT_AUTH2:

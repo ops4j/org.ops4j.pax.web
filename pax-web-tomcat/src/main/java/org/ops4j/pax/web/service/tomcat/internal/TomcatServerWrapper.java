@@ -760,7 +760,6 @@ class TomcatServerWrapper implements BatchVisitor {
 			//		// TODO: what about the AccessControlContext?
 			//		// TODO: the virtual host section below
 			//		// TODO: what about the VirtualHosts?
-			//		// TODO: what about the tomcat-web.xml config?
 			//		// TODO: connectors are needed for virtual host?
 			//
 			//		final Context context = server.addContext(
@@ -1529,8 +1528,6 @@ class TomcatServerWrapper implements BatchVisitor {
 	 * <p>As with Jetty, there's some chance that there's only one new filter to be added to existing set of filters
 	 * <em>at the end of the list</em>. If it's not possible, filters have to be recreated (destroy + init)
 	 * entirely.</p>
-	 *
-	 * <p>TODO: Not possible to initialize only the added filter...</p>
 	 *
 	 * <p>Here we have to test for the <em>initial filter</em>.</p>
 	 *

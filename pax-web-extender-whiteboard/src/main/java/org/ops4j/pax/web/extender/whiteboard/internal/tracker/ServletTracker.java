@@ -103,11 +103,6 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 				}
 			}
 		}
-		if (initParams.isEmpty()) {
-			// TODO: this message should probably be removed at some point
-			log.info("Whiteboard servlet has no init parameters specified. In Pax Web 8, service registration "
-					+ "properties are no longer copied as init parameters.");
-		}
 
 		// 5. async-supported
 		Boolean asyncSupported = Utils.getPaxWebProperty(serviceReference,

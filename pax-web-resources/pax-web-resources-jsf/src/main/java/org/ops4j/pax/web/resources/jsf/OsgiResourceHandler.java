@@ -179,7 +179,6 @@ public class OsgiResourceHandler extends ResourceHandlerWrapper {
 //        ResourceInfo resourceInfo = null;
 //        
 //        
-//        // TODO check
 //        return new OsgiResource(resourceInfo.getUrl(),
 //				"TODOloc", resourceName, "TODOresVer", null, null,
 //				resourceInfo.getLastModified());
