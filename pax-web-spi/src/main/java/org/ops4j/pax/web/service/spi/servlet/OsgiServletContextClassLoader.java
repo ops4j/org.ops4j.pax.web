@@ -84,6 +84,20 @@ public class OsgiServletContextClassLoader extends ClassLoader implements Bundle
 		}
 	}
 
+	/**
+	 * Adds {@link Bundle bundles} to be reachable from this {@link ClassLoader}
+	 * @param bundle
+	 */
+	public void addBundles(Bundle ... bundle) {
+		if (bundles != null) {
+			for (Bundle b : bundle) {
+				if (b != null && !bundles.contains(b)) {
+					bundles.add(b);
+				}
+			}
+		}
+	}
+
 	public List<Bundle> getBundles() {
 		return bundles;
 	}

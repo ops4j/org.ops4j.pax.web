@@ -170,6 +170,7 @@
 		<dependency.commons-digester>1.8.1</dependency.commons-digester>
 		<dependency.commons-fileupload>1.4</dependency.commons-fileupload>
 		<dependency.commons-io>2.11.0</dependency.commons-io>
+		<dependency.com.fasterxml.jackson.core>2.12.4</dependency.com.fasterxml.jackson.core>
 		<dependency.com.sun.activation>1.2.0</dependency.com.sun.activation>
 
 		<!--		<dependency.io.gatling.highcharts>3.6.1</dependency.io.gatling.highcharts>-->
@@ -691,6 +692,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-tomcat-websocket</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-undertow</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -1047,6 +1053,13 @@
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
 				<artifactId>war-jetty-web</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>war-websocket-jsr356</artifactId>
 				<version>${project.version}</version>
 				<type>war</type>
 			</dependency>
@@ -2746,6 +2759,22 @@
 				<version>${dependency.org.apache.httpcomponents.core5}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+				<version>${dependency.com.fasterxml.jackson.core}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+				<version>${dependency.com.fasterxml.jackson.core}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${dependency.com.fasterxml.jackson.core}</version>
+			</dependency>
+
 			<!-- Testing -->
 
 			<dependency>
@@ -2849,6 +2878,7 @@
 
 		<!-- Tomcat 9 support -->
 		<module>pax-web-tomcat</module>
+		<module>pax-web-tomcat-websocket</module>
 <!--		<module>pax-web-tomcat-bundle</module>-->
 
 		<!-- Undertow 2 support -->

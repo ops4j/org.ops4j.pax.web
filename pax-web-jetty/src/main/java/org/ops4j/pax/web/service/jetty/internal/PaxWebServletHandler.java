@@ -17,8 +17,10 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
+import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
@@ -158,6 +160,26 @@ public class PaxWebServletHandler extends ServletHandler {
 		holder.setMapping(mapping);
 		addServlet(holder);
 		addServletMapping(mapping);
+	}
+
+	/**
+	 * Override the method from {@link org.eclipse.jetty.servlet.ServletContextHandler} just because
+	 * {@code org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer} adds
+	 * {@link FilterHolder} directly, while we use {@link PaxWebFilterHolder} array.
+	 * @param holder
+	 * @param pathSpec
+	 * @param dispatches
+	 */
+	@Override
+	public void addFilterWithMapping(FilterHolder holder, String pathSpec, EnumSet<DispatcherType> dispatches) {
+		if (holder instanceof PaxWebFilterHolder) {
+			super.addFilterWithMapping(holder, pathSpec, dispatches);
+			return;
+		}
+
+		PaxWebFilterHolder paxWebFilterHolder = new PaxWebFilterHolder(holder, defaultServletContext);
+
+		super.addFilterWithMapping(paxWebFilterHolder, pathSpec, dispatches);
 	}
 
 	/**

@@ -464,6 +464,48 @@ public class Utils {
 	}
 
 	/**
+	 * Specialized method that's used to add Jetty WebSocket bundles that we know to contain required
+	 * {@link javax.servlet.ServletContainerInitializer} services
+	 * @param bundle
+	 * @return
+	 */
+	public static Bundle[] getJettyWebSocketBundles(Bundle bundle) {
+		BundleContext ctx = bundle == null ? null : bundle.getBundleContext();
+		if (ctx == null) {
+			return null;
+		}
+		Bundle[] bundles = new Bundle[] { null, null };
+		for (Bundle b : ctx.getBundles()) {
+			if ("org.eclipse.jetty.websocket.server".equals(b.getSymbolicName())) {
+				bundles[0] = b;
+			}
+			if ("org.eclipse.jetty.websocket.javax.websocket.server".equals(b.getSymbolicName())) {
+				bundles[1] = b;
+			}
+		}
+		return bundles;
+	}
+
+	/**
+	 * Specialized method that's used to add Tomcat WebSocket bundle that we know to contain required
+	 * {@link javax.servlet.ServletContainerInitializer} services
+	 * @param bundle
+	 * @return
+	 */
+	public static Bundle getTomcatWebSocketBundle(Bundle bundle) {
+		BundleContext ctx = bundle == null ? null : bundle.getBundleContext();
+		if (ctx == null) {
+			return null;
+		}
+		for (Bundle b : ctx.getBundles()) {
+			if ("org.ops4j.pax.web.pax-web-tomcat-websocket".equals(b.getSymbolicName())) {
+				return b;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Returns a named header from a bundle or from one of its attached fragments
 	 *
 	 * @param bundle

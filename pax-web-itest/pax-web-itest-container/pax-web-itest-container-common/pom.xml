@@ -399,6 +399,12 @@
 			<type>war</type>
 		</dependency>
 
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>war-websocket-jsr356</artifactId>
+			<type>war</type>
+		</dependency>
+
 		<!-- pax-web jsp samples -->
 
 		<dependency>

@@ -101,13 +101,10 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 	}
 
 	@Override
-	protected void doStart() throws Exception {
-		// 1. Pax Web 7 was explicitly adding org.ops4j.pax.web.jsp.JasperInitializer here, but we're no longer doing it
-		//    WebAppContext in Jetty uses org.eclipse.jetty.webapp.JspConfiguration for this purpose
+	protected void startContext() throws Exception {
+		// there are no org.eclipse.jetty.servlet.ServletContextHandler.ServletContainerInitializerCaller beans
+		// because we manage SCIs ourselves
 
-		// 2. Pax Web 7 was sorting the initializers - we don't have to do it in Pax Web 8
-
-		// 3. Call the initializers
 		servletContainerInitializers.forEach(wrapper -> {
 			ClassLoader tccl = Thread.currentThread().getContextClassLoader();
 			try {
@@ -119,6 +116,18 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 				Thread.currentThread().setContextClassLoader(tccl);
 			}
 		});
+
+		super.startContext();
+	}
+
+	@Override
+	protected void doStart() throws Exception {
+		// 1. Pax Web 7 was explicitly adding org.ops4j.pax.web.jsp.JasperInitializer here, but we're no longer doing it
+		//    WebAppContext in Jetty uses org.eclipse.jetty.webapp.JspConfiguration for this purpose
+
+		// 2. Pax Web 7 was sorting the initializers - we don't have to do it in Pax Web 8
+
+		// 3. Call the initializers - in startContext()
 
 		// 4. TODO: virtual host handling - at this level (like Pax Web 7)?
 //		this.setVirtualHosts(virtualHosts.toArray(EMPTY_STRING_ARRAY));

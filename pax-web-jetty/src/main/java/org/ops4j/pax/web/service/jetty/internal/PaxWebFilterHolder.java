@@ -15,9 +15,12 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 
+import org.eclipse.jetty.servlet.BaseHolder;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
@@ -53,21 +56,52 @@ public class PaxWebFilterHolder extends FilterHolder {
 		this.filterModel = filterModel;
 		this.osgiServletContext = osgiServletContext;
 
-		// name that binds a servlet with its mapping
-		setName(filterModel.getName());
-		if (filterModel.getFilterClass() != null) {
-			setHeldClass(filterModel.getFilterClass());
-		} else if (filterModel.getFilter() != null) {
-			setFilter(filterModel.getFilter());
-		} else {
-			this.filterReference = filterModel.getElementReference();
+		if (filterModel != null) {
+			// name that binds a servlet with its mapping
+			setName(filterModel.getName());
+
+			if (filterModel.getFilterClass() != null) {
+				setHeldClass(filterModel.getFilterClass());
+			} else if (filterModel.getFilter() != null) {
+				setFilter(filterModel.getFilter());
+			} else {
+				this.filterReference = filterModel.getElementReference();
+			}
+
+			setInitParameters(filterModel.getInitParams());
+
+			setAsyncSupported(filterModel.getAsyncSupported() != null && filterModel.getAsyncSupported());
 		}
 
-		setInitParameters(filterModel.getInitParams());
-		setAsyncSupported(filterModel.getAsyncSupported() != null && filterModel.getAsyncSupported());
-
 		// setup proper delegation for ServletContext
-		servletContext = new OsgiScopedServletContext(this.osgiServletContext, filterModel.getRegisteringBundle());
+		if (filterModel != null) {
+			servletContext = new OsgiScopedServletContext(this.osgiServletContext, filterModel.getRegisteringBundle());
+		} else {
+			servletContext = null;
+		}
+	}
+
+	public PaxWebFilterHolder(FilterHolder holder, OsgiServletContext defaultServletContext) {
+		this.filterModel = null;
+		this.osgiServletContext = defaultServletContext;
+		this.servletContext = null;
+
+		setName(holder.getName());
+		setAsyncSupported(holder.isAsyncSupported());
+		setInitParameters(holder.getInitParameters());
+		try {
+			// unfortunately, if I want to keep an array of PaxWebFilterHolders, I have to do the reflection here...
+			Method getInstance = BaseHolder.class.getDeclaredMethod("getInstance");
+			getInstance.setAccessible(true);
+			setFilter((Filter) getInstance.invoke(holder));
+		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+			e.printStackTrace();
+		}
+		setClassName(holder.getClassName());
+		setDisplayName(holder.getDisplayName());
+		setHeldClass(holder.getHeldClass());
+		setServletHandler(holder.getServletHandler());
+		setStopTimeout(holder.getStopTimeout());
 	}
 
 	@Override
@@ -89,7 +123,7 @@ public class PaxWebFilterHolder extends FilterHolder {
 	@Override
 	protected synchronized Filter getInstance() {
 		Filter instance = super.getInstance();
-		if (instance == null) {
+		if (instance == null && filterModel != null) {
 			// obtain Filter using reference
 			ServiceReference<? extends Filter> ref = filterModel.getElementReference();
 			if (ref != null) {
@@ -97,7 +131,7 @@ public class PaxWebFilterHolder extends FilterHolder {
 			}
 		}
 
-		if (instance == null && filterModel.getFilterClass() != null) {
+		if (instance == null && filterModel != null && filterModel.getFilterClass() != null) {
 			Class<? extends Filter> filterClass = filterModel.getFilterClass();
 			try {
 				instance = filterClass.newInstance();
@@ -106,11 +140,21 @@ public class PaxWebFilterHolder extends FilterHolder {
 			}
 		}
 
-		if (instance == null && filterModel.getElementSupplier() != null) {
+		if (instance == null && filterModel != null && filterModel.getElementSupplier() != null) {
 			instance = filterModel.getElementSupplier().get();
 		}
 
-		return instance == null ? null : new OsgiInitializedFilter(instance, servletContext);
+		if (instance == null && getHeldClass() != null) {
+			// case of org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter added by Jetty's SCI
+			try {
+				instance = getHeldClass().newInstance();
+			} catch (Exception e) {
+				throw new IllegalStateException("Can't instantiate Filter with class " + getHeldClass(), e);
+			}
+		}
+
+		return instance == null ? null
+				: new OsgiInitializedFilter(instance, servletContext == null ? osgiServletContext : servletContext);
 	}
 
 	@Override
@@ -129,7 +173,7 @@ public class PaxWebFilterHolder extends FilterHolder {
 	 * @return
 	 */
 	public boolean matches(OsgiContextModel targetContext) {
-		return filterModel.getContextModels().contains(targetContext);
+		return filterModel == null || filterModel.getContextModels().contains(targetContext);
 	}
 
 	public FilterModel getFilterModel() {

@@ -424,6 +424,21 @@ public class BundleWebApplicationClassSpace {
 			// wires to pax-web-jsp bundle or to other JSTL implementations
 			bundles.add(paxWebJspBundle);
 		}
+		Bundle[] jettyWebSocketBundles = Utils.getJettyWebSocketBundles(wabBundle);
+		if (jettyWebSocketBundles != null) {
+			for (Bundle b : jettyWebSocketBundles) {
+				// this will give us access to Jetty WebSocket SCIs even if WAB doesn't have explicit wires
+				if (b != null) {
+					bundles.add(b);
+				}
+			}
+		}
+		Bundle tomcatWebSocketBundle = Utils.getTomcatWebSocketBundle(wabBundle);
+		if (tomcatWebSocketBundle != null) {
+			// this will give us access to Tomcat WebSocket SCIs even if WAB doesn't have explicit wires
+			bundles.add(tomcatWebSocketBundle);
+		}
+
 		while (bundles.size() > 0) {
 			// org.apache.tomcat.util.scan.StandardJarScanner.processURLs() - Tomcat traverses CL hierarchy
 			// and collects non-filtered (see conf/catalina.properties:
