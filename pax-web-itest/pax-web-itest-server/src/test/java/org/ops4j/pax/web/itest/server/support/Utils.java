@@ -149,10 +149,11 @@ public class Utils {
 				.loadKeyMaterial(new File("target/client.jks"), "passw0rd".toCharArray(), "passw0rd".toCharArray(), (aliases, sslParameters) -> "client")
 				.build();
 
-		// Allow TLSv1.1 and TLSv1.2 protocol only
+		// Allow TLSv1.1, TLSv1.2 and TLSv1.3 protocol only
 		final SSLConnectionSocketFactory sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
 				.setSslContext(sslcontext)
-				.setTlsVersions(TLS.V_1_1, TLS.V_1_2)
+				.setCiphers("TLS_AES_256_GCM_SHA384")
+				.setTlsVersions(TLS.V_1_3)
 				.build();
 		final HttpClientConnectionManager cm = PoolingHttpClientConnectionManagerBuilder.create()
 				.setSSLSocketFactory(sslSocketFactory)

@@ -225,7 +225,7 @@
 		<dependency.org.apache.tomcat>9.0.50</dependency.org.apache.tomcat>
 		<dependency.org.apache.xbean>4.20</dependency.org.apache.xbean>
 
-		<dependency.org.bouncycastle>1.68</dependency.org.bouncycastle>
+		<dependency.org.bouncycastle>1.69</dependency.org.bouncycastle>
 
 		<dependency.org.eclipse.jdt.ecj>3.26.0</dependency.org.eclipse.jdt.ecj>
 		<dependency.org.eclipse.jetty>9.4.43.v20210629</dependency.org.eclipse.jetty>
@@ -261,7 +261,7 @@
 
 		<dependency.org.ow2.asm>9.2</dependency.org.ow2.asm>
 		<dependency.org.primefaces>10.0.0</dependency.org.primefaces>
-		<dependency.org.slf4j>1.7.31</dependency.org.slf4j>
+		<dependency.org.slf4j>1.7.32</dependency.org.slf4j>
 		<dependency.org.springframework>5.3.9</dependency.org.springframework>
 
 		<dependency.org.wildfly.client>1.0.1.Final</dependency.org.wildfly.client>

@@ -70,6 +70,8 @@ public class ServerControllerBasicConfigurationTest extends MultiContainerTestSu
 	public void sslConfiguration() throws Exception {
 		SSLUtils.generateKeyStores();
 
+		System.setProperty("javax.net.debug", "ssl");
+
 		ServerController controller = Utils.createServerController(properties -> {
 			new File("target/ncsa").mkdirs();
 			properties.put(PaxWebConfig.PID_CFG_LOG_NCSA_ENABLED, "true");
@@ -78,9 +80,12 @@ public class ServerControllerBasicConfigurationTest extends MultiContainerTestSu
 				properties.put(PaxWebConfig.PID_CFG_LOG_NCSA_LOGFILE, "request");
 			} else if (runtime == Runtime.UNDERTOW) {
 				// tweak ciphers/protocols to check proper configuration
-				properties.put(PaxWebConfig.PID_CFG_PROTOCOLS_INCLUDED, "TLSv1.1");
-				properties.put(PaxWebConfig.PID_CFG_CIPHERSUITES_INCLUDED, "TLS_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_256_GCM_SHA384");
+				// see https://datatracker.ietf.org/doc/html/rfc6460
+				// see sun.security.ssl.CipherSuite
 			}
+			properties.put(PaxWebConfig.PID_CFG_SSL_PROTOCOL, "TLSv1.3");
+			properties.put(PaxWebConfig.PID_CFG_PROTOCOLS_INCLUDED, "TLSv1.3");
+			properties.put(PaxWebConfig.PID_CFG_CIPHERSUITES_INCLUDED, "TLS_AES_256_GCM_SHA384");
 
 			properties.put(PaxWebConfig.PID_CFG_HTTP_ENABLED, "false");
 			properties.remove(PaxWebConfig.PID_CFG_HTTP_PORT);
@@ -109,7 +114,6 @@ public class ServerControllerBasicConfigurationTest extends MultiContainerTestSu
 			// remaining SSL parameters
 			properties.put(PaxWebConfig.PID_CFG_SSL_CLIENT_AUTH_WANTED, "false");
 			properties.put(PaxWebConfig.PID_CFG_SSL_CLIENT_AUTH_NEEDED, "true");
-			properties.put(PaxWebConfig.PID_CFG_SSL_PROTOCOL, "TLSv1.2");
 			properties.put(PaxWebConfig.PID_CFG_SSL_SECURE_RANDOM_ALGORITHM, "NativePRNGNonBlocking");
 			properties.put(PaxWebConfig.PID_CFG_SSL_RENEGOTIATION_ALLOWED, "true");
 //			properties.put(PaxWebConfig.PID_CFG_SSL_RENEGOTIATION_LIMIT, "");
@@ -124,10 +128,9 @@ public class ServerControllerBasicConfigurationTest extends MultiContainerTestSu
 		/*
 		 * With the above configuration (client auth required), we'll be able to access the server using curl:
 		 *
-		 * $ curl --cacert ca.cer.pem --cert-type DER --cert client1.cer --key-type DER --key client1-private.key -v https://127.0.0.1:42203/
-		 * *   Trying 127.0.0.1:42203...
-		 * * TCP_NODELAY set
-		 * * Connected to 127.0.0.1 (127.0.0.1) port 42203 (#0)
+		 * $ curl --cacert ca.cer.pem --cert-type DER --cert client1.cer --key-type DER --key client1-private.key -v https://127.0.0.1:33003
+		 * *   Trying 127.0.0.1:33003...
+		 * * Connected to 127.0.0.1 (127.0.0.1) port 33003 (#0)
 		 * * ALPN, offering h2
 		 * * ALPN, offering http/1.1
 		 * * successfully set certificate verify locations:
@@ -135,17 +138,18 @@ public class ServerControllerBasicConfigurationTest extends MultiContainerTestSu
 		 *   CApath: none
 		 * * TLSv1.3 (OUT), TLS handshake, Client hello (1):
 		 * * TLSv1.3 (IN), TLS handshake, Server hello (2):
-		 * * TLSv1.2 (IN), TLS handshake, Certificate (11):
-		 * * TLSv1.2 (IN), TLS handshake, Server key exchange (12):
-		 * * TLSv1.2 (IN), TLS handshake, Request CERT (13):
-		 * * TLSv1.2 (IN), TLS handshake, Server finished (14):
-		 * * TLSv1.2 (OUT), TLS handshake, Certificate (11):
-		 * * TLSv1.2 (OUT), TLS handshake, Client key exchange (16):
-		 * * TLSv1.2 (OUT), TLS handshake, CERT verify (15):
-		 * * TLSv1.2 (OUT), TLS change cipher, Change cipher spec (1):
-		 * * TLSv1.2 (OUT), TLS handshake, Finished (20):
-		 * * TLSv1.2 (IN), TLS handshake, Finished (20):
-		 * * SSL connection using TLSv1.2 / ECDHE-RSA-AES256-GCM-SHA384
+		 * * TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+		 * * TLSv1.3 (OUT), TLS handshake, Client hello (1):
+		 * * TLSv1.3 (IN), TLS handshake, Server hello (2):
+		 * * TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+		 * * TLSv1.3 (IN), TLS handshake, Request CERT (13):
+		 * * TLSv1.3 (IN), TLS handshake, Certificate (11):
+		 * * TLSv1.3 (IN), TLS handshake, CERT verify (15):
+		 * * TLSv1.3 (IN), TLS handshake, Finished (20):
+		 * * TLSv1.3 (OUT), TLS handshake, Certificate (11):
+		 * * TLSv1.3 (OUT), TLS handshake, CERT verify (15):
+		 * * TLSv1.3 (OUT), TLS handshake, Finished (20):
+		 * * SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384
 		 * * ALPN, server did not agree to a protocol
 		 * * Server certificate:
 		 * *  subject: CN=server1
@@ -155,18 +159,36 @@ public class ServerControllerBasicConfigurationTest extends MultiContainerTestSu
 		 * *  issuer: CN=CA
 		 * *  SSL certificate verify ok.
 		 * > GET / HTTP/1.1
-		 * > Host: 127.0.0.1:42203
-		 * > User-Agent: curl/7.66.0
-		 * > Accept: * /*
+		 * > Host: 127.0.0.1:33003
+		 * > User-Agent: curl/7.71.1
+		 * > Accept: * slash *
 		 * >
+		 * * TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
 		 * * Mark bundle as not supporting multiuse
 		 * < HTTP/1.1 404 Not Found
 		 * < Cache-Control: must-revalidate,no-cache,no-store
 		 * < Content-Type: text/html;charset=iso-8859-1
 		 * < Content-Length: 352
+		 * <
+		 * <html>
+		 * <head>
+		 * <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+		 * <title>Error 404 Not Found</title>
+		 * </head>
+		 * <body><h2>HTTP ERROR 404 Not Found</h2>
+		 * <table>
+		 * <tr><th>URI:</th><td>/</td></tr>
+		 * <tr><th>STATUS:</th><td>404</td></tr>
+		 * <tr><th>MESSAGE:</th><td>Not Found</td></tr>
+		 * <tr><th>SERVLET:</th><td>-</td></tr>
+		 * </table>
+		 *
+		 * </body>
+		 * </html>
+		 * * Connection #0 to host 127.0.0.1 left intact
 		 *
 		 * Or openssl:
-		 * $ openssl s_client -connect 127.0.0.1:42203 -CAfile ca.cer.pem -keyform der -key client1-private.key -certform der -cert client1.cer
+		 * $ openssl s_client -connect 127.0.0.1:38615 -tls1_3 -CAfile ca.cer.pem -cert client1.cer -certform der -key client1-private.key -keyform der
 		 * CONNECTED(00000003)
 		 * Can't use SSL_get_servername
 		 * depth=1 CN = CA
@@ -180,23 +202,24 @@ public class ServerControllerBasicConfigurationTest extends MultiContainerTestSu
 		 * ---
 		 * Server certificate
 		 * -----BEGIN CERTIFICATE-----
-		 * MIIDGzCCAgOgAwIBAgIBATANBgkqhkiG9w0BAQUFADANMQswCQYDVQQDDAJDQTAe
+		 * MIIDMTCCAhmgAwIBAgIBATANBgkqhkiG9w0BAQUFADANMQswCQYDVQQDDAJDQTAe
 		 * Fw0xODEyMzEyMzAwMDBaFw0zODEyMzEyMzAwMDBaMBIxEDAOBgNVBAMMB3NlcnZl
-		 * cjEwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCT8n+ZzGpvPZGb0jl2
-		 * iInvKbeVDnDl5r887KAsQFwLm87/m3ooovyjRd+d2YfEgtIPvCdmiZobQb5YbMAo
-		 * +NhBLUJzXUGFvpoCKuNyLZ/g4XPlhiuw/nqgBRWDOEzc5OxuxcCJ21blhfPpAo4l
-		 * PMzOmkSuaLr14qvnS1Y1pjOMYrjiBxADqWAB3M5slTNkd2wmoOqMHE3AS/Fd5kWt
-		 * gSF8In9UHdr7dO1/d1OGgx409uaNAKU6y4eunRxgQDYuscxZ0NhQrZ7fOVU7lzt2
-		 * tGExb6YOcNrmciWwtHXOLqADXex0xRXm2Xkz4ltHha6N9hmKUnlZzEZws00aYRk1
-		 * Ry7/AgMBAAGjgYAwfjAJBgNVHRMEAjAAMAsGA1UdDwQEAwIF4DAfBgNVHSMEGDAW
-		 * gBSDj+8/EcYxjP7zN2CYnr4WCLZWdzAdBgNVHQ4EFgQUzoPWz4/KDg7nJgoY0AbZ
-		 * 4koQTdcwEwYDVR0lBAwwCgYIKwYBBQUHAwEwDwYDVR0RBAgwBocEfwAAATANBgkq
-		 * hkiG9w0BAQUFAAOCAQEAh92LnzsnKMMI39Xs8j13/H+oVCJh4bUhKR6D3oVqJ+8o
-		 * 7aG8FchYhwqDUtVnzKKvuL5uIUHf0Bs8X8jmhEoZeP6GtNGoA570aXsdWG/pI61Z
-		 * l5Cul6XObuFWrwQXjCDlXKcGqVDiAEnfv0cO/ymWmo3o8Cr/R5h5Ztcyp/47W16w
-		 * QUouyI1vqgbI9wf/Ombzt9Ju5jKsQunPzS5UWVIJYgbHt7H9spM1tAmsbBjufkIc
-		 * PTmjR5ZkOrgwzN/V04cBOeiZKjYxBrR2m0xv5YPNxEAJXL0Qji2vwcN8nipXe2ix
-		 * +4okmXBoHoMe9XNd3GNNRVbSw28CW+IiTvKNTEPvqQ==
+		 * cjEwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCXlw/uSyg7KO41ok10
+		 * tellidbaZq58GiDyP2JjmQS8IeAZ8OpFfQLcKhrEQbcCalwaNbl1qpFTmhsNtrGw
+		 * Fv7G3AoEHfYvySHw0hnQA/6aciQz7rIWnR1e/kT4Pr6F1ZqEJ70Vc0XdrP7wOhiN
+		 * PCmeS4NdAoJc1WoMe3Am1s/Fh/KZa6BYxf5TDfEiFgqcIMjZf78MwWt4PMg0Q4ok
+		 * bI4gOLudq00jmu6Jch03sLkY0mxg3HJriD6VHGx0C8w1qeiFd23xYrVk/iy9Wday
+		 * u2WmuWgTXUvRHKIrvQkugHCJEeBmMcShq+7nflmM5IcLhIxEkI4ivpgRefOaxu8N
+		 * nw6DAgMBAAGjgZYwgZMwCQYDVR0TBAIwADALBgNVHQ8EBAMCBeAwHwYDVR0jBBgw
+		 * FoAUuZRaF3E7rCYUHn26YkQYKmkeD9kwHQYDVR0OBBYEFF6e2ws8JmTOxgohstFd
+		 * K9NtTFO/MB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAaBgNVHREEEzAR
+		 * hwR/AAABgglsb2NhbGhvc3QwDQYJKoZIhvcNAQEFBQADggEBAF8UQFWyftbhOTkQ
+		 * N/WEA2w4U+fi0IEMLvT6ixsvxY3JeSPRTpthB/fwR4T0KjXJ9NSy/QFWeoiKFMNu
+		 * IM7zAqgX6HWQ1tJNivUqeYTGDfS+hjYAiTB0/nUXf2wAg2z+R33tVg2e8HGeiF6Q
+		 * ihIQR+Bwp3jI3x+alu3vvfQwzUWIPdlDWWO34qyI5TEg03fzUqiugjQxuAn8osyE
+		 * qgye0cI9Q2ZHzwU81xZn3pnFUpSuFVvyltnbDVwfnlnaLp9CSVirw2QGnfAJfSGy
+		 * KTbKYPZQCgMRqKT8EZeDZGRojf1pZ8BB8iH9efleByONMAESRO0Z90n/XTVLSGX2
+		 * +LEnIUA=
 		 * -----END CERTIFICATE-----
 		 * subject=CN = server1
 		 *
@@ -204,39 +227,50 @@ public class ServerControllerBasicConfigurationTest extends MultiContainerTestSu
 		 *
 		 * ---
 		 * Acceptable client certificate CA names
-		 * CN = server2
 		 * CN = server1
+		 * CN = server2
 		 * CN = CA
-		 * Client Certificate Types: RSA sign, DSA sign, ECDSA sign
-		 * Requested Signature Algorithms: ECDSA+SHA512:RSA+SHA512:ECDSA+SHA384:RSA+SHA384:ECDSA+SHA256:RSA+SHA256:DSA+SHA256:ECDSA+SHA224:RSA+SHA224:DSA+SHA224:ECDSA+SHA1:RSA+SHA1:DSA+SHA1
-		 * Shared Requested Signature Algorithms: ECDSA+SHA512:RSA+SHA512:ECDSA+SHA384:RSA+SHA384:ECDSA+SHA256:RSA+SHA256:DSA+SHA256:ECDSA+SHA224:RSA+SHA224:DSA+SHA224:ECDSA+SHA1:RSA+SHA1:DSA+SHA1
+		 * Requested Signature Algorithms: ECDSA+SHA256:ECDSA+SHA384:ECDSA+SHA512:RSA-PSS+SHA256:RSA-PSS+SHA384:RSA-PSS+SHA512:RSA-PSS+SHA256:RSA-PSS+SHA384:RSA-PSS+SHA512:RSA+SHA256:RSA+SHA384:RSA+SHA512:ECDSA+SHA1:RSA+SHA1
+		 * Shared Requested Signature Algorithms: ECDSA+SHA256:ECDSA+SHA384:ECDSA+SHA512:RSA-PSS+SHA256:RSA-PSS+SHA384:RSA-PSS+SHA512:RSA-PSS+SHA256:RSA-PSS+SHA384:RSA-PSS+SHA512:RSA+SHA256:RSA+SHA384:RSA+SHA512
 		 * Peer signing digest: SHA256
-		 * Peer signature type: RSA
+		 * Peer signature type: RSA-PSS
 		 * Server Temp Key: ECDH, P-256, 256 bits
 		 * ---
-		 * SSL handshake has read 1386 bytes and written 2225 bytes
+		 * SSL handshake has read 1722 bytes and written 2485 bytes
 		 * Verification: OK
 		 * ---
-		 * New, TLSv1.2, Cipher is ECDHE-RSA-AES256-GCM-SHA384
+		 * New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384
 		 * Server public key is 2048 bit
-		 * Secure Renegotiation IS supported
+		 * Secure Renegotiation IS NOT supported
 		 * Compression: NONE
 		 * Expansion: NONE
 		 * No ALPN negotiated
+		 * Early data was not sent
+		 * Verify return code: 0 (ok)
+		 * ---
+		 * ---
+		 * Post-Handshake New Session Ticket arrived:
 		 * SSL-Session:
-		 *     Protocol  : TLSv1.2
-		 *     Cipher    : ECDHE-RSA-AES256-GCM-SHA384
-		 *     Session-ID: 5E831344113312A768A0B9F6ACA412F285718A28DECC66BB286023054CD49569
+		 *     Protocol  : TLSv1.3
+		 *     Cipher    : TLS_AES_256_GCM_SHA384
+		 *     Session-ID: 535C3D0B6565AA2B797AFAFDDDF42B87253E0452F9F566EBC50D2DFBFE0F31CE
 		 *     Session-ID-ctx:
-		 *     Master-Key: 722813FE30E27C1068C80E123F395B943015EB9036652C40130CBAE73636EBFBF41D5311446D227DB40AB9CDE2D7EC4A
+		 *     Resumption PSK: 6DBB4873A5BA4EA18AC71FF39D164163840D073CFF5BA34E7011FDB1654D92187A5BCAC76BEC5C2E83371DD7C22900A5
 		 *     PSK identity: None
 		 *     PSK identity hint: None
 		 *     SRP username: None
-		 *     Start Time: 1585648452
+		 *     TLS session ticket lifetime hint: 86400 (seconds)
+		 *     TLS session ticket:
+		 *     0000 - b9 e4 ed 5c 10 a9 b0 e0-4f eb 53 13 35 68 fd 41   ...\....O.S.5h.A
+		 *     0010 - c8 33 c1 63 b3 e8 fc 7d-08 df 16 03 54 c4 8d 34   .3.c...}....T..4
+		 *
+		 *     Start Time: 1626857245
 		 *     Timeout   : 7200 (sec)
 		 *     Verify return code: 0 (ok)
-		 *     Extended master secret: yes
+		 *     Extended master secret: no
+		 *     Max Early Data: 0
 		 * ---
+		 * read R BLOCK
 		 * GET / HTTP/1.1
 		 * Host: 127.0.0.1
 		 * Connection: close
@@ -246,6 +280,23 @@ public class ServerControllerBasicConfigurationTest extends MultiContainerTestSu
 		 * Cache-Control: must-revalidate,no-cache,no-store
 		 * Content-Type: text/html;charset=iso-8859-1
 		 * Content-Length: 352
+		 *
+		 * <html>
+		 * <head>
+		 * <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+		 * <title>Error 404 Not Found</title>
+		 * </head>
+		 * <body><h2>HTTP ERROR 404 Not Found</h2>
+		 * <table>
+		 * <tr><th>URI:</th><td>/</td></tr>
+		 * <tr><th>STATUS:</th><td>404</td></tr>
+		 * <tr><th>MESSAGE:</th><td>Not Found</td></tr>
+		 * <tr><th>SERVLET:</th><td>-</td></tr>
+		 * </table>
+		 *
+		 * </body>
+		 * </html>
+		 * closed
 		 */
 
 		assertThat(httpsGET(port, "/"), containsString("HTTP/1.1 404"));
