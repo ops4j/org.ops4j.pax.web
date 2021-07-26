@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.undertow.internal.configuration.model;
+package org.ops4j.pax.web.service.undertow.configuration.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +21,8 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
-import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_PAXWEB_UNDERTOW;
-import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_WILDFLY;
+import static org.ops4j.pax.web.service.undertow.configuration.model.ObjectFactory.NS_PAXWEB_UNDERTOW;
+import static org.ops4j.pax.web.service.undertow.configuration.model.ObjectFactory.NS_WILDFLY;
 
 @XmlType(name = "security-realmType", namespace = NS_PAXWEB_UNDERTOW, propOrder = {
 		"identities",

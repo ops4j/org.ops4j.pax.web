@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.undertow.internal.configuration.model;
+package org.ops4j.pax.web.service.undertow.configuration.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +37,7 @@ import io.undertow.server.handlers.encoding.ContentEncodingRepository;
 import io.undertow.server.handlers.encoding.EncodingHandler;
 import io.undertow.server.handlers.encoding.GzipEncodingProvider;
 
-import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_UNDERTOW;
+import static org.ops4j.pax.web.service.undertow.configuration.model.ObjectFactory.NS_UNDERTOW;
 
 @XmlType(name = "undertow-subsystemType", namespace = NS_UNDERTOW, propOrder = {
 		"bufferCache",

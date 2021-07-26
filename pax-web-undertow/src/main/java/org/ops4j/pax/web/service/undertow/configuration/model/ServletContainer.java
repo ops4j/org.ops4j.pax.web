@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.undertow.internal.configuration.model;
+package org.ops4j.pax.web.service.undertow.configuration.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlType;
 
-import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_UNDERTOW;
+import static org.ops4j.pax.web.service.undertow.configuration.model.ObjectFactory.NS_UNDERTOW;
 
 @XmlType(name = "servletContainerType", namespace = NS_UNDERTOW, propOrder = {
 		"jspConfig",
@@ -109,23 +109,19 @@ public class ServletContainer {
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder("{ ");
-		sb.append("name: ").append(name);
-		sb.append(", default session timeout: ").append(defaultSessionTimeout);
-		sb.append(", jsp config: ").append(jspConfig);
-		sb.append(", websockets: ").append(websockets);
-		sb.append(", welcome files: ").append(welcomeFiles);
-		sb.append(" }");
-		return sb.toString();
+		return "{ name: " + name +
+				", default session timeout: " + defaultSessionTimeout +
+				", jsp config: " + jspConfig +
+				", websockets: " + websockets +
+				", welcome files: " + welcomeFiles +
+				" }";
 	}
 
 	@XmlType(name = "jsp-configurationType", namespace = NS_UNDERTOW)
 	public static class JspConfig {
 		@Override
 		public String toString() {
-			final StringBuilder sb = new StringBuilder("{ ");
-			sb.append("}");
-			return sb.toString();
+			return "{ }";
 		}
 	}
 
@@ -148,20 +144,71 @@ public class ServletContainer {
 
 		@Override
 		public String toString() {
-			final StringBuilder sb = new StringBuilder("{ ");
-			sb.append("path: ").append(path);
-			sb.append("}");
-			return sb.toString();
+			return "{ path: " + path + "}";
 		}
 	}
 
 	@XmlType(name = "websocketsType", namespace = NS_UNDERTOW)
 	public static class Websockets {
+		@XmlAttribute(name = "worker")
+		protected String workerName = "default";
+		@XmlAttribute(name = "buffer-pool")
+		protected String bufferPoolName = "default";
+		@XmlAttribute(name = "dispatch-to-worker")
+		protected boolean dispatchToWorker = true;
+		@XmlAttribute(name = "per-message-deflate")
+		protected boolean perMessageDeflate = false;
+		@XmlAttribute(name = "deflater-level")
+		protected int deflaterLevel = 1; // java.util.zip.Deflater.BEST_SPEED
+
+		public String getWorkerName() {
+			return workerName;
+		}
+
+		public void setWorkerName(String workerName) {
+			this.workerName = workerName;
+		}
+
+		public String getBufferPoolName() {
+			return bufferPoolName;
+		}
+
+		public void setBufferPoolName(String bufferPoolName) {
+			this.bufferPoolName = bufferPoolName;
+		}
+
+		public boolean isDispatchToWorker() {
+			return dispatchToWorker;
+		}
+
+		public void setDispatchToWorker(boolean dispatchToWorker) {
+			this.dispatchToWorker = dispatchToWorker;
+		}
+
+		public boolean isPerMessageDeflate() {
+			return perMessageDeflate;
+		}
+
+		public void setPerMessageDeflate(boolean perMessageDeflate) {
+			this.perMessageDeflate = perMessageDeflate;
+		}
+
+		public int getDeflaterLevel() {
+			return deflaterLevel;
+		}
+
+		public void setDeflaterLevel(int deflaterLevel) {
+			this.deflaterLevel = deflaterLevel;
+		}
+
 		@Override
 		public String toString() {
-			final StringBuilder sb = new StringBuilder("{ ");
-			sb.append("}");
-			return sb.toString();
+			return "{ worker name: " + workerName +
+					", buffer pool name: " + bufferPoolName +
+					", dispatch: " + dispatchToWorker +
+					", per message deflate: " + perMessageDeflate +
+					", deflater level: " + deflaterLevel +
+					" }";
 		}
 	}
 
@@ -180,10 +227,7 @@ public class ServletContainer {
 
 		@Override
 		public String toString() {
-			final StringBuilder sb = new StringBuilder("{ ");
-			sb.append("name: ").append(name);
-			sb.append(" }");
-			return sb.toString();
+			return "{ name: " + name + " }";
 		}
 	}
 
@@ -252,15 +296,13 @@ public class ServletContainer {
 
 		@Override
 		public String toString() {
-			final StringBuilder sb = new StringBuilder("{ ");
-			sb.append("name: ").append(name);
-			sb.append(", domain: ").append(domain);
-			sb.append(", comment: ").append(comment);
-			sb.append(", http only: ").append(httpOnly);
-			sb.append(", secure: ").append(secure);
-			sb.append(", max age: ").append(maxAge);
-			sb.append(" }");
-			return sb.toString();
+			return "{ name: " + name +
+					", domain: " + domain +
+					", comment: " + comment +
+					", http only: " + httpOnly +
+					", secure: " + secure +
+					", max age: " + maxAge +
+					" }";
 		}
 	}
 

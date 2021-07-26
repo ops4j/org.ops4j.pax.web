@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.undertow.internal.configuration;
+package org.ops4j.pax.web.service.undertow.configuration.model;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +27,7 @@ import javax.xml.parsers.SAXParserFactory;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.ops4j.pax.web.service.PaxWebConfig;
-import org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowConfiguration;
+import org.ops4j.pax.web.service.undertow.internal.configuration.ResolvingContentHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
@@ -43,7 +43,7 @@ public class ConfigurationParserTest {
 
 	@BeforeClass
 	public static void jaxbContext() throws JAXBException {
-		context = JAXBContext.newInstance("org.ops4j.pax.web.service.undertow.internal.configuration.model");
+		context = JAXBContext.newInstance("org.ops4j.pax.web.service.undertow.configuration.model");
 	}
 
 	@Test

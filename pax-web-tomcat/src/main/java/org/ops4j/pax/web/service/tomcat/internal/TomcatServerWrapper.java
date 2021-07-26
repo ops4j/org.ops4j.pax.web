@@ -844,6 +844,7 @@ class TomcatServerWrapper implements BatchVisitor {
 				loader.addBundle(osgiModel.getOwnerBundle());
 				loader.addBundle(paxWebTomcatBundle);
 				loader.addBundle(Utils.getPaxWebJspBundle(paxWebTomcatBundle));
+				loader.addBundle(Utils.getTomcatWebSocketBundle(paxWebTomcatBundle));
 				loader.makeImmutable();
 				classLoader = loader;
 			} else if (classLoader == null) {

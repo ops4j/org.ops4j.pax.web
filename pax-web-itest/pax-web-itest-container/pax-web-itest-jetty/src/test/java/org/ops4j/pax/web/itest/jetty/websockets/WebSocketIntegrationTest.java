@@ -61,6 +61,20 @@ public class WebSocketIntegrationTest extends AbstractContainerTestBase {
 
 	@Before
 	public void setUp() throws Exception {
+		// Jetty uses org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer SCI that handles:
+		//  - classes implementing javax.websocket.server.ServerApplicationConfig
+		//  - classes implementing javax.websocket.Endpoint
+		//  - classes annotated with @javax.websocket.server.ServerEndpoint
+		// Tomcat uses org.apache.tomcat.websocket.server.WsSci SCI that handles:
+		//  - classes implementing javax.websocket.server.ServerApplicationConfig
+		//  - classes implementing javax.websocket.Endpoint
+		//  - classes annotated with @javax.websocket.server.ServerEndpoint
+		// Undertow doesn't provide any special SCI. When web sockets are configured, Wildfly calls
+		// io.undertow.servlet.api.DeploymentInfo.addServletContextAttribute() with
+		// "io.undertow.websockets.jsr.WebSocketDeploymentInfo" as attribute name and an instance of
+		// io.undertow.websockets.jsr.WebSocketDeploymentInfo as the value. All necessary information
+		// is prepared using org.wildfly.extension.undertow.deployment.UndertowJSRWebSocketDeploymentProcessor#deploy()
+
 		configureAndWaitForDeploymentUnlessInstalled("war-websocket-jsr356", () -> {
 			installAndStartBundle(sampleWarURI("war-websocket-jsr356"));
 		});

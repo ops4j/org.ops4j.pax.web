@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.undertow.internal;
+package org.ops4j.pax.web.service.undertow.websocket.internal;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

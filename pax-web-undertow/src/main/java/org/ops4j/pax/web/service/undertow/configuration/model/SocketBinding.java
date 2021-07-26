@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.undertow.internal.configuration.model;
+package org.ops4j.pax.web.service.undertow.configuration.model;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
-import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_WILDFLY;
+import static org.ops4j.pax.web.service.undertow.configuration.model.ObjectFactory.NS_WILDFLY;
 
 @XmlType(name = "socket-bindingType", namespace = NS_WILDFLY)
 public class SocketBinding {
@@ -56,12 +56,10 @@ public class SocketBinding {
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder("{ ");
-		sb.append("name: " + name);
-		sb.append(", interface: " + interfaceRef);
-		sb.append(", port: " + port);
-		sb.append(" }");
-		return sb.toString();
+		return "{ name: " + name +
+				", interface: " + interfaceRef +
+				", port: " + port +
+				" }";
 	}
 
 }

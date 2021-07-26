@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.undertow.internal.configuration.model;
+package org.ops4j.pax.web.service.undertow.configuration.model;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlType;
 import io.undertow.protocols.http2.Http2Channel;
 import org.xnio.SslClientAuthMode;
 
-import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_UNDERTOW;
+import static org.ops4j.pax.web.service.undertow.configuration.model.ObjectFactory.NS_UNDERTOW;
 
 @XmlType(name = "serverType", namespace = NS_UNDERTOW, propOrder = {
 		"httpListeners",
@@ -74,13 +74,11 @@ public class Server {
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder("{\n");
-		sb.append("\t\t\tname: ").append(name);
-		sb.append("\n\t\t\thttp listeners: ").append(httpListeners);
-		sb.append("\n\t\t\thttps listeners: ").append(httpsListeners);
-		sb.append("\n\t\t\thost: ").append(host);
-		sb.append("\n\t\t}");
-		return sb.toString();
+		return "{\n\t\t\tname: " + name +
+				"\n\t\t\thttp listeners: " + httpListeners +
+				"\n\t\t\thttps listeners: " + httpsListeners +
+				"\n\t\t\thost: " + host +
+				"\n\t\t}";
 	}
 
 	// In Wildfly, org.wildfly.extension.undertow.ListenerResourceDefinition (and derived
@@ -205,22 +203,17 @@ public class Server {
 
 		@Override
 		public String toString() {
-			final StringBuilder sb = new StringBuilder("{ ");
-			sb.append(toStringParameters());
-			sb.append(" }");
-			return sb.toString();
+			return "{ " + toStringParameters() + " }";
 		}
 
 		protected String toStringParameters() {
-			final StringBuilder sb = new StringBuilder();
-			sb.append("receive buffer: ").append(receiveBuffer);
-			sb.append(", send buffer: ").append(sendBuffer);
-			sb.append(", tcp backlog: ").append(tcpBacklog);
-			sb.append(", tcp KeepAlive: ").append(tcpKeepAlive);
-			sb.append(", read timeoout: ").append(readTimeout);
-			sb.append(", write timeoout: ").append(writeTimeout);
-			sb.append(", max connections: ").append(maxConnections);
-			return sb.toString();
+			return "receive buffer: " + receiveBuffer +
+					", send buffer: " + sendBuffer +
+					", tcp backlog: " + tcpBacklog +
+					", tcp KeepAlive: " + tcpKeepAlive +
+					", read timeoout: " + readTimeout +
+					", write timeoout: " + writeTimeout +
+					", max connections: " + maxConnections;
 		}
 	}
 

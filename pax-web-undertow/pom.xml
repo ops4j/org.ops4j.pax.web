@@ -109,7 +109,6 @@
 
 							<!-- to check -->
 <!--							javax.management.*; resolution:=optional,-->
-<!--							javax.websocket.*; resolution:=optional,-->
 <!--							javax.el; version="[2.1.0,4.0.0)";resolution:=optional,-->
 <!--							*-->
 						</Import-Package>
@@ -117,6 +116,9 @@
 							osgi.service;effective:=active;objectClass:List&lt;String&gt;="org.ops4j.pax.web.service.spi.ServerControllerFactory"
 						</Provide-Capability>
 						<Export-Package>
+							org.ops4j.pax.web.service.undertow,
+							org.ops4j.pax.web.service.undertow.configuration.model,
+
 							<!-- these packages are required for Undertow 2.2.x and XNIO 3.8.x -->
 							org.jboss.threads,
 							org.jboss.threads.management,
@@ -181,11 +183,6 @@
 			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>jakarta.websocket</groupId>
-			<artifactId>jakarta.websocket-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
 
 		<!-- Undertow -->
 
@@ -196,10 +193,6 @@
 		<dependency>
 			<groupId>io.undertow</groupId>
 			<artifactId>undertow-servlet</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.undertow</groupId>
-			<artifactId>undertow-websockets-jsr</artifactId>
 		</dependency>
 
 		<dependency>

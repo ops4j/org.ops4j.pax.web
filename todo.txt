@@ -4,9 +4,9 @@
  -  4. DTOs
  -  5. "listener=true" for Whiteboard listeners
  -  6. Listener ordering according to ranking
- -  7. WebSockets
+ -  7. Whiteboard WebSockets
  -  8. HTTP context processing (potentially with external web-fragment.xml)
- -  9. JAX-RS example
+ -  9. JAX-RS example with aries-jaxrs
  - 10. CLRs
  - 11. Jetty org.eclipse.jetty.server.Handler and org.eclipse.jetty.server.Connector tracking
  - 12. HTTP/2
@@ -14,8 +14,7 @@
  - 14. Session per OsgiContextModel / OsgiServletContext
  - 15. Keycloak integration
  - 16. Mixing (in different order) WAB and Whiteboard contexts
- - 17. JAX-RS example with aries-jaxrs
- - 18. JSP servlet configuration through Pax Web PID
- - 19. Jasypt encryption in PID
- - 20. Allocating contexts for WABs, where WAB's OsgiContextModel is of highest priority (can't have other OsgiContextModel overring the WAB's one)
- - 21. Switch away from JAXB to SAX/StAX parsing for undertow.xml
+ - 17. JSP servlet configuration through Pax Web PID
+ - 18. Jasypt encryption in PID
+ - 19. Allocating contexts for WABs, where WAB's OsgiContextModel is of highest priority (can't have other OsgiContextModel overring the WAB's one)
+ - 20. Switch away from JAXB to SAX/StAX parsing for undertow.xml

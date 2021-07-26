@@ -27,7 +27,7 @@
 		}
 )
 @XmlAccessorType(XmlAccessType.FIELD)
-package org.ops4j.pax.web.service.undertow.internal.configuration.model;
+package org.ops4j.pax.web.service.undertow.configuration.model;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

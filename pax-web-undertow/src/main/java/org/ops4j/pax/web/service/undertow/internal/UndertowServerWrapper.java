@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -144,14 +145,16 @@ import org.ops4j.pax.web.service.spi.task.ServletModelChange;
 import org.ops4j.pax.web.service.spi.task.TransactionStateChange;
 import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.ops4j.pax.web.service.spi.util.Utils;
+import org.ops4j.pax.web.service.undertow.PaxWebUndertowExtension;
+import org.ops4j.pax.web.service.undertow.UndertowSupport;
 import org.ops4j.pax.web.service.undertow.internal.configuration.ResolvingContentHandler;
-import org.ops4j.pax.web.service.undertow.internal.configuration.model.Interface;
-import org.ops4j.pax.web.service.undertow.internal.configuration.model.IoSubsystem;
-import org.ops4j.pax.web.service.undertow.internal.configuration.model.SecurityRealm;
-import org.ops4j.pax.web.service.undertow.internal.configuration.model.Server;
-import org.ops4j.pax.web.service.undertow.internal.configuration.model.SocketBinding;
-import org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowConfiguration;
-import org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowSubsystem;
+import org.ops4j.pax.web.service.undertow.configuration.model.Interface;
+import org.ops4j.pax.web.service.undertow.configuration.model.IoSubsystem;
+import org.ops4j.pax.web.service.undertow.configuration.model.SecurityRealm;
+import org.ops4j.pax.web.service.undertow.configuration.model.Server;
+import org.ops4j.pax.web.service.undertow.configuration.model.SocketBinding;
+import org.ops4j.pax.web.service.undertow.configuration.model.UndertowConfiguration;
+import org.ops4j.pax.web.service.undertow.configuration.model.UndertowSubsystem;
 import org.ops4j.pax.web.service.undertow.internal.security.JaasIdentityManager;
 import org.ops4j.pax.web.service.undertow.internal.security.PropertiesIdentityManager;
 import org.ops4j.pax.web.service.undertow.internal.web.FlexibleErrorPages;
@@ -173,7 +176,7 @@ import org.xnio.channels.AcceptingChannel;
  * Wrapper of actual {@link Undertow} server that can translate generic model changes into Undertow configuration
  * and deployments.
  */
-class UndertowServerWrapper implements BatchVisitor {
+class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UndertowServerWrapper.class);
 
@@ -414,7 +417,7 @@ class UndertowServerWrapper implements BatchVisitor {
 		File xmlConfig = locations.length > 0 ? locations[0] : null;
 
 		if (xmlConfig != null || undertowResource != null) {
-			JAXBContext jaxb = JAXBContext.newInstance("org.ops4j.pax.web.service.undertow.internal.configuration.model", classLoader);
+			JAXBContext jaxb = JAXBContext.newInstance("org.ops4j.pax.web.service.undertow.configuration.model", classLoader);
 			Unmarshaller unmarshaller = jaxb.createUnmarshaller();
 			UnmarshallerHandler unmarshallerHandler = unmarshaller.getUnmarshallerHandler();
 
@@ -546,7 +549,7 @@ class UndertowServerWrapper implements BatchVisitor {
 				ResourceHandler rh = new ResourceHandler(resourceManager);
 				if (undertowConfiguration.getSubsystem().getServletContainer() != null) {
 					rh.setWelcomeFiles();
-					for (org.ops4j.pax.web.service.undertow.internal.configuration.model.ServletContainer.WelcomeFile wf : undertowConfiguration.getSubsystem().getServletContainer().getWelcomeFiles()) {
+					for (org.ops4j.pax.web.service.undertow.configuration.model.ServletContainer.WelcomeFile wf : undertowConfiguration.getSubsystem().getServletContainer().getWelcomeFiles()) {
 						rh.addWelcomeFiles(wf.getName());
 					}
 				}
@@ -657,7 +660,7 @@ class UndertowServerWrapper implements BatchVisitor {
 					LOG.warn("Invalid default session timeout \"" + dst + "\". Using 30 (minutes).");
 				}
 			}
-			org.ops4j.pax.web.service.undertow.internal.configuration.model.ServletContainer.SessionCookie cookieConfig
+			org.ops4j.pax.web.service.undertow.configuration.model.ServletContainer.SessionCookie cookieConfig
 					= undertowConfiguration.getSubsystem().getServletContainer().getSessionCookie();
 			if (cookieConfig != null) {
 				defaultSessionCookieConfig = new DefaultSessionCookieConfig();
@@ -673,7 +676,7 @@ class UndertowServerWrapper implements BatchVisitor {
 
 		// session persistence
 		// <persistent-sessions path="${karaf.data}/web-sessions" />
-		org.ops4j.pax.web.service.undertow.internal.configuration.model.ServletContainer.PersistentSessionsConfig persistentSessions
+		org.ops4j.pax.web.service.undertow.configuration.model.ServletContainer.PersistentSessionsConfig persistentSessions
 				= undertowConfiguration.getSubsystem().getServletContainer() == null ? null : undertowConfiguration.getSubsystem().getServletContainer().getPersistentSessions();
 		if (persistentSessions != null) {
 			// otherwise, PID configuration will be used
@@ -694,11 +697,16 @@ class UndertowServerWrapper implements BatchVisitor {
 		}
 	}
 
-	private XnioWorker getWorker(String workerName) {
+	@Override
+	public XnioWorker getWorker(String workerName) {
 		if (workerName != null) {
 			if (!workers.containsKey(workerName)) {
 				if ("default".equals(workerName)) {
-					workers.put("default", undertowFactory.getDefaultWorker(configuration));
+					synchronized (workers) {
+						if (!workers.containsKey(workerName)) {
+							workers.put("default", undertowFactory.getDefaultWorker(configuration));
+						}
+					}
 					return workers.get(workerName);
 				}
 				throw new IllegalArgumentException("No worker named \"" + workerName + "\" is configured");
@@ -709,11 +717,16 @@ class UndertowServerWrapper implements BatchVisitor {
 		}
 	}
 
-	private ByteBufferPool getBufferPool(String bufferPoolName) {
+	@Override
+	public ByteBufferPool getBufferPool(String bufferPoolName) {
 		if (bufferPoolName != null) {
 			if (!bufferPools.containsKey(bufferPoolName)) {
 				if ("default".equals(bufferPoolName)) {
-					bufferPools.put("default", undertowFactory.getDefaultBufferPool());
+					synchronized (bufferPools) {
+						if (!bufferPools.containsKey(bufferPoolName)) {
+							bufferPools.put("default", undertowFactory.getDefaultBufferPool());
+						}
+					}
 					return bufferPools.get(bufferPoolName);
 				}
 				throw new IllegalArgumentException("No buffer pool named \"" + bufferPoolName + "\" is configured");
@@ -1121,6 +1134,7 @@ class UndertowServerWrapper implements BatchVisitor {
 				loader.addBundle(osgiModel.getOwnerBundle());
 				loader.addBundle(paxWebUndertowBundle);
 				loader.addBundle(Utils.getPaxWebJspBundle(paxWebUndertowBundle));
+				loader.addBundle(Utils.getUndertowWebSocketBundle(paxWebUndertowBundle));
 				loader.makeImmutable();
 				classLoader = loader;
 			} else if (classLoader == null) {
@@ -1957,6 +1971,12 @@ class UndertowServerWrapper implements BatchVisitor {
 				deployment.setClassLoader(highestRankedContext.getClassLoader());
 			}
 
+			// handle Pax Web specific extensions:
+			ServiceLoader<PaxWebUndertowExtension> extensions = ServiceLoader.load(PaxWebUndertowExtension.class, highestRankedContext.getClassLoader());
+			for (PaxWebUndertowExtension extension : extensions) {
+				extension.handleDeployment(deployment, undertowConfiguration, this);
+			}
+
 			// when starting (or, which is possible only with Pax Web, not Undertow itself - restarting), we'll
 			// clear all the SCIs in the deploymentInfo and add new ones (because some of them may have been removed)
 			deployment.getServletContainerInitializers().clear();
@@ -2027,11 +2047,14 @@ class UndertowServerWrapper implements BatchVisitor {
 						realmName = "default";
 					}
 				}
+
 				deployment.setLoginConfig(new LoginConfig(authMethod, realmName,
 						lc.getFormLoginPage(), lc.getFormErrorPage()));
 
+				deployment.getSecurityRoles().clear();
 				deployment.addSecurityRoles(security.getSecurityRoles());
 
+				deployment.getSecurityConstraints().clear();
 				for (SecurityConstraintModel constraintModel : security.getSecurityConstraints()) {
 					SecurityConstraint constraint = new SecurityConstraint();
 		            if (constraintModel.isAuthRolesSet()) {
@@ -2055,18 +2078,6 @@ class UndertowServerWrapper implements BatchVisitor {
 					}
 					deployment.addSecurityConstraint(constraint);
 				}
-
-//				if (isWebSocketAvailable()) {
-//					wsXnioWorker = UndertowUtil.createWorker(contextModel.getClassLoader());
-//					if (wsXnioWorker != null) {
-//						deployment.addServletContextAttribute(
-//								io.undertow.websockets.jsr.WebSocketDeploymentInfo.ATTRIBUTE_NAME,
-//								new io.undertow.websockets.jsr.WebSocketDeploymentInfo()
-//										.setWorker(wsXnioWorker)
-//										.setBuffers(new DefaultByteBufferPool(true, 100))
-//						);
-//					}
-//				}
 			}
 
 			manager = servletContainer.addDeployment(deployment);

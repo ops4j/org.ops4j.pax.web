@@ -419,24 +419,29 @@ public class BundleWebApplicationClassSpace {
 		bundles.add(wabBundle);
 		processedBundles.add(wabBundle);
 
+		// JSP support is independent on targer runtime, so it's either/or situation
 		if (paxWebJspBundle != null) {
 			// this will give us access to Jasper SCI even if WAB doesn't have explicit
 			// wires to pax-web-jsp bundle or to other JSTL implementations
 			bundles.add(paxWebJspBundle);
 		}
-		Bundle[] jettyWebSocketBundles = Utils.getJettyWebSocketBundles(wabBundle);
-		if (jettyWebSocketBundles != null) {
-			for (Bundle b : jettyWebSocketBundles) {
-				// this will give us access to Jetty WebSocket SCIs even if WAB doesn't have explicit wires
-				if (b != null) {
-					bundles.add(b);
-				}
-			}
+
+		// WebSockets are a bit tricky - every container has special SCIs for that (and Undertow also has
+		// special extension), but we need the SCIs to be available now - so the WAB already knows which SCIs
+		// to load and which classes to pass to their onStartup() method
+		// There may be a situation where we'll find SCIs for more containers - we will filter them out
+		// in given ServerController implementation.
+		Bundle jettyWebSocketBundle = Utils.getJettyWebSocketBundle(wabBundle);
+		if (jettyWebSocketBundle != null) {
+			bundles.add(jettyWebSocketBundle);
 		}
 		Bundle tomcatWebSocketBundle = Utils.getTomcatWebSocketBundle(wabBundle);
 		if (tomcatWebSocketBundle != null) {
-			// this will give us access to Tomcat WebSocket SCIs even if WAB doesn't have explicit wires
 			bundles.add(tomcatWebSocketBundle);
+		}
+		Bundle undertowWebSocketBundle = Utils.getUndertowWebSocketBundle(wabBundle);
+		if (undertowWebSocketBundle != null) {
+			bundles.add(undertowWebSocketBundle);
 		}
 
 		while (bundles.size() > 0) {

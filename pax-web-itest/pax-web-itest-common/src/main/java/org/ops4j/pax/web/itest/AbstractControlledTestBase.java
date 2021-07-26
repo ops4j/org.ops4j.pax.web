@@ -152,7 +152,7 @@ public abstract class AbstractControlledTestBase {
 	 * @return
 	 */
 	protected Option[] defaultLoggingConfig() {
-		String fileName = null;
+		String fileName;
 		try {
 			fileName = new File(LOG_DIR, getClass().getSimpleName() + ".log").getCanonicalPath();
 		} catch (IOException e) {
@@ -352,6 +352,8 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle("jakarta.websocket", "jakarta.websocket-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("io.undertow", "undertow-websockets-jsr")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ops4j.pax.web", "pax-web-undertow-websocket")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
 		};
 	}

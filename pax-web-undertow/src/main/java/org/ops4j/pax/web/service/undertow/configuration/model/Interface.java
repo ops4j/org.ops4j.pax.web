@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.undertow.internal.configuration.model;
+package org.ops4j.pax.web.service.undertow.configuration.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
-import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_WILDFLY;
+import static org.ops4j.pax.web.service.undertow.configuration.model.ObjectFactory.NS_WILDFLY;
 
 @XmlType(name = "named-interfaceType", namespace = NS_WILDFLY, propOrder = {
 		"addresses"
@@ -32,7 +32,7 @@ public class Interface {
 	private String name;
 
 	@XmlElement(name = "inet-address")
-	private List<InetAddress> addresses = new ArrayList<>();
+	private final List<InetAddress> addresses = new ArrayList<>();
 
 	public String getName() {
 		return name;
@@ -48,11 +48,9 @@ public class Interface {
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder("{ ");
-		sb.append("name: " + name);
-		sb.append(", address: " + addresses);
-		sb.append(" }");
-		return sb.toString();
+		return "{ name: " + name +
+				", address: " + addresses +
+				" }";
 	}
 
 	@XmlType(name = "inet-addressType", namespace = NS_WILDFLY)
@@ -70,10 +68,7 @@ public class Interface {
 
 		@Override
 		public String toString() {
-			final StringBuilder sb = new StringBuilder("{ ");
-			sb.append("ip: ").append(ip).append('\'');
-			sb.append(" }");
-			return sb.toString();
+			return "{ ip: " + ip + " }";
 		}
 	}
 

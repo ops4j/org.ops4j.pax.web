@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.undertow.internal.configuration.model;
+package org.ops4j.pax.web.service.undertow.configuration.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,9 +26,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
-import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_IO;
-import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_PAXWEB_UNDERTOW;
-import static org.ops4j.pax.web.service.undertow.internal.configuration.model.ObjectFactory.NS_UNDERTOW;
+import static org.ops4j.pax.web.service.undertow.configuration.model.ObjectFactory.NS_IO;
+import static org.ops4j.pax.web.service.undertow.configuration.model.ObjectFactory.NS_PAXWEB_UNDERTOW;
+import static org.ops4j.pax.web.service.undertow.configuration.model.ObjectFactory.NS_UNDERTOW;
 
 @XmlRootElement(name = "undertow")
 @XmlType(name = "UndertowType", propOrder = {
@@ -121,7 +121,7 @@ public class UndertowConfiguration {
 	}
 
 	/**
-	 * Returns {@link org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowSubsystem.FileHandler}
+	 * Returns {@link org.ops4j.pax.web.service.undertow.configuration.model.UndertowSubsystem.FileHandler}
 	 * by name
 	 * @param name
 	 * @return
@@ -131,7 +131,7 @@ public class UndertowConfiguration {
 	}
 
 	/**
-	 * Returns {@link org.ops4j.pax.web.service.undertow.internal.configuration.model.UndertowSubsystem.AbstractFilter}
+	 * Returns {@link org.ops4j.pax.web.service.undertow.configuration.model.UndertowSubsystem.AbstractFilter}
 	 * by name
 	 * @param name
 	 * @return

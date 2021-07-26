@@ -199,7 +199,9 @@
 			<!-- Not used - configured per container-agnostic web context -->
 			<jsp-config />
 			<persistent-sessions path="${karaf.data}/web-sessions" />
-			<websockets />
+			<!-- deflater-level: 0-9. See java.util.zip.Deflater.setLevel(). Used only of per-message-deflate is true -->
+			<websockets buffer-pool="default" worker="default"
+					deflater-level="" dispatch-to-worker="true" per-message-deflate="true" />
 			<welcome-files>
 				<welcome-file name="index.html" />
 				<welcome-file name="index.txt" />

@@ -464,26 +464,25 @@ public class Utils {
 	}
 
 	/**
-	 * Specialized method that's used to add Jetty WebSocket bundles that we know to contain required
-	 * {@link javax.servlet.ServletContainerInitializer} services
+	 * Specialized method that's used to add Jetty WebSocket bundle that we know to contain required
+	 * {@link javax.servlet.ServletContainerInitializer} services.
+	 * Actually Jetty has two bundles with SCIs (websocket-server and javax-websocket-server-impl), but the JSR356 one
+	 * is wired to the native one
 	 * @param bundle
 	 * @return
 	 */
-	public static Bundle[] getJettyWebSocketBundles(Bundle bundle) {
+	public static Bundle getJettyWebSocketBundle(Bundle bundle) {
 		BundleContext ctx = bundle == null ? null : bundle.getBundleContext();
 		if (ctx == null) {
 			return null;
 		}
 		Bundle[] bundles = new Bundle[] { null, null };
 		for (Bundle b : ctx.getBundles()) {
-			if ("org.eclipse.jetty.websocket.server".equals(b.getSymbolicName())) {
-				bundles[0] = b;
-			}
 			if ("org.eclipse.jetty.websocket.javax.websocket.server".equals(b.getSymbolicName())) {
-				bundles[1] = b;
+				return b;
 			}
 		}
-		return bundles;
+		return null;
 	}
 
 	/**
@@ -499,6 +498,27 @@ public class Utils {
 		}
 		for (Bundle b : ctx.getBundles()) {
 			if ("org.ops4j.pax.web.pax-web-tomcat-websocket".equals(b.getSymbolicName())) {
+				return b;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Specialized method that's used to add Undertow WebSocket bundle that we know to contain required
+	 * {@link javax.servlet.ServletContainerInitializer} services
+	 * @param bundle
+	 * @return
+	 */
+	public static Bundle getUndertowWebSocketBundle(Bundle bundle) {
+		BundleContext ctx = bundle == null ? null : bundle.getBundleContext();
+		if (ctx == null) {
+			return null;
+		}
+		for (Bundle b : ctx.getBundles()) {
+			// undertow-websockets-jsr doesn't include javax.servlet.ServletContainerInitializer service, so
+			// we have to provide our own.
+			if ("org.ops4j.pax.web.pax-web-undertow-websocket".equals(b.getSymbolicName())) {
 				return b;
 			}
 		}

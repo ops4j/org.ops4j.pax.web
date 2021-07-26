@@ -861,7 +861,7 @@ class JettyServerWrapper implements BatchVisitor {
 				loader.addBundle(osgiModel.getOwnerBundle());
 				loader.addBundle(paxWebJettyBundle);
 				loader.addBundle(Utils.getPaxWebJspBundle(paxWebJettyBundle));
-				loader.addBundles(Utils.getJettyWebSocketBundles(paxWebJettyBundle));
+				loader.addBundles(Utils.getJettyWebSocketBundle(paxWebJettyBundle));
 				loader.makeImmutable();
 				classLoader = loader;
 			} else if (classLoader == null) {
