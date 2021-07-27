@@ -1,20 +1,24 @@
- -  1. Whiteboard preprocessors
- -  2. Jetty/Tomcat/Undertow bundles
- -  3. org.osgi.framework.ServiceObjects and proper service management (unget, prototype, singleton, bundle scopes)
- -  4. DTOs
- -  5. "listener=true" for Whiteboard listeners
- -  6. Listener ordering according to ranking
- -  7. Whiteboard WebSockets
- -  8. HTTP context processing (potentially with external web-fragment.xml)
- -  9. JAX-RS example with aries-jaxrs
- - 10. CLRs
- - 11. Jetty org.eclipse.jetty.server.Handler and org.eclipse.jetty.server.Connector tracking
- - 12. HTTP/2
- - 13. Web-VirtualHosts / Web-Connectors
- - 14. Session per OsgiContextModel / OsgiServletContext
- - 15. Keycloak integration
- - 16. Mixing (in different order) WAB and Whiteboard contexts
- - 17. JSP servlet configuration through Pax Web PID
- - 18. Jasypt encryption in PID
- - 19. Allocating contexts for WABs, where WAB's OsgiContextModel is of highest priority (can't have other OsgiContextModel overring the WAB's one)
- - 20. Switch away from JAXB to SAX/StAX parsing for undertow.xml
+Must have for 8.0.0.GA:
+ - Whiteboard preprocessors
+ - org.osgi.framework.ServiceObjects and proper service management (unget, prototype, singleton, bundle scopes)
+ - DTOs
+ + "listener=true" for Whiteboard listeners
+ - Listener ordering according to ranking
+ - Whiteboard WebSockets
+ - JAX-RS example with aries-jaxrs
+ - CRLs
+ - Session per OsgiContextModel / OsgiServletContext
+ - Mixing (in different order) WAB and Whiteboard contexts
+ - JSP servlet configuration through Pax Web PID
+ - Allocating contexts for WABs, where WAB's OsgiContextModel is of highest priority (can't have other OsgiContextModel overring the WAB's one)
+ - Karaf integration tests
+Moved to after 8.0.0.GA (8.0.x):
+ - Jetty/Tomcat/Undertow bundles
+ - HTTP context processing (potentially with external web-fragment.xml)
+ - HTTP/2 (mostly tests)
+ - Keycloak integration
+ - Jasypt encryption in PID
+Move to 8.1.x:
+ - Jetty org.eclipse.jetty.server.Handler and org.eclipse.jetty.server.Connector tracking
+ - Web-VirtualHosts / Web-Connectors
+ - Switch away from JAXB to SAX/StAX parsing for undertow.xml

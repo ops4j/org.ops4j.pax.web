@@ -75,9 +75,8 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 	 *
 	 * @param serviceReference
 	 * @param model
-	 * @return
 	 */
-	protected abstract OsgiContextModel configureContextModel(ServiceReference<S> serviceReference,
+	protected abstract void configureContextModel(ServiceReference<S> serviceReference,
 			OsgiContextModel model);
 
 	// --- implementation of org.osgi.util.tracker.ServiceTrackerCustomizer

@@ -53,7 +53,7 @@ public class HttpContextMappingTracker extends AbstractContextTracker<HttpContex
 	}
 
 	@Override
-	protected OsgiContextModel configureContextModel(ServiceReference<HttpContextMapping> serviceReference,
+	protected void configureContextModel(ServiceReference<HttpContextMapping> serviceReference,
 			final OsgiContextModel model) {
 
 		HttpContextMapping service = null;
@@ -178,8 +178,6 @@ public class HttpContextMappingTracker extends AbstractContextTracker<HttpContex
 				bundleContext.ungetService(serviceReference);
 			}
 		}
-
-		return model;
 	}
 
 }

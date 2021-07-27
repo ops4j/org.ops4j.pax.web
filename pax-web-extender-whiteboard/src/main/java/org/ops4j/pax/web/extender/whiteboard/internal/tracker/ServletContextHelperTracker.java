@@ -49,7 +49,7 @@ public class ServletContextHelperTracker extends AbstractContextTracker<ServletC
 
 	@Override
 	@SuppressWarnings("deprecation")
-	protected OsgiContextModel configureContextModel(ServiceReference<ServletContextHelper> serviceReference,
+	protected void configureContextModel(ServiceReference<ServletContextHelper> serviceReference,
 			OsgiContextModel model) {
 
 		// always shared
@@ -101,8 +101,6 @@ public class ServletContextHelperTracker extends AbstractContextTracker<ServletC
 		// ServletContextHelper will be obtained from service reference on each call using correct bundle - always
 		// this is the standard Whiteboard Service specification scenario
 		model.setContextReference(serviceReference);
-
-		return model;
 	}
 
 }

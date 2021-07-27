@@ -45,7 +45,7 @@ public class ServletContextHelperMappingTracker extends AbstractContextTracker<S
 	}
 
 	@Override
-	protected OsgiContextModel configureContextModel(ServiceReference<ServletContextHelperMapping> serviceReference,
+	protected void configureContextModel(ServiceReference<ServletContextHelperMapping> serviceReference,
 			final OsgiContextModel model) {
 
 		ServletContextHelperMapping service = null;
@@ -106,8 +106,6 @@ public class ServletContextHelperMappingTracker extends AbstractContextTracker<S
 				bundleContext.ungetService(serviceReference);
 			}
 		}
-
-		return model;
 	}
 
 }

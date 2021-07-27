@@ -35,10 +35,13 @@ import javax.servlet.http.HttpSessionListener;
 import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.events.EventListenerEventData;
+import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tracks {@link EventListener}s.
@@ -47,6 +50,8 @@ import org.osgi.util.tracker.ServiceTracker;
  * @since 0.4.0, April 05, 2008
  */
 public class ListenerTracker extends AbstractElementTracker<EventListener, EventListener, EventListenerEventData, EventListenerModel> {
+
+	public static final Logger LOG = LoggerFactory.getLogger(ListenerTracker.class);
 
 	private static final Class<?>[] SUPPORTED_LISTENER_CLASSES = new Class[] {
 			// OSGi CMPN R7 Whiteboard Service
@@ -82,6 +87,16 @@ public class ListenerTracker extends AbstractElementTracker<EventListener, Event
 
 	@Override
 	protected EventListenerModel createElementModel(ServiceReference<EventListener> serviceReference, Integer rank, Long serviceId) {
+		Boolean isListener = Utils.getBooleanProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER);
+		if (isListener == null || !isListener) {
+			// 140.7 Registering Listeners:
+			// Events are sent to listeners registered in the Service Registry with the osgi.http.whiteboard.listener
+			// service property set to true, independent of case.
+			LOG.debug("Listener service reference doesn't have a property {}=true",
+					HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER);
+			return null;
+		}
+
 		EventListenerModel model = new EventListenerModel();
 		model.setRegisteringBundle(serviceReference.getBundle());
 		model.setElementReference(serviceReference);

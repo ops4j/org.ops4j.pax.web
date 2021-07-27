@@ -183,7 +183,7 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 		T webElement = createElementModel(serviceReference, rank, serviceId);
 
 		if (webElement == null) {
-			log.warn("No element model was created from reference {}", serviceReference);
+			log.debug("No element model was created from reference {}", serviceReference);
 			return null;
 		}
 

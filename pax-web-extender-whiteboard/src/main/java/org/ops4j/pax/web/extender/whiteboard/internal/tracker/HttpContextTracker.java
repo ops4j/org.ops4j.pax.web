@@ -51,7 +51,7 @@ public class HttpContextTracker extends AbstractContextTracker<HttpContext> {
 
 	@Override
 	@SuppressWarnings("deprecation")
-	protected OsgiContextModel configureContextModel(ServiceReference<HttpContext> serviceReference,
+	protected void configureContextModel(ServiceReference<HttpContext> serviceReference,
 			OsgiContextModel model) {
 
 		// false by default, unless there's special registration (checked later)
@@ -183,8 +183,6 @@ public class HttpContextTracker extends AbstractContextTracker<HttpContext> {
 				model.setShared(shared);
 			}
 		}
-
-		return model;
 	}
 
 }
