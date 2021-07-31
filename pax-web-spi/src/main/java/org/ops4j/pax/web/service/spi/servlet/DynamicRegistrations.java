@@ -18,11 +18,13 @@ package org.ops4j.pax.web.service.spi.servlet;
 import java.util.Collection;
 import java.util.EventListener;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletContextListener;
 import javax.servlet.ServletRegistration;
 
 import org.ops4j.pax.web.service.WebContainer;
@@ -64,6 +66,10 @@ public class DynamicRegistrations {
 	private final Map<String, DynamicFilterRegistration> dynamicFilterRegistrations = new HashMap<>();
 	private final Map<Integer, DynamicEventListenerRegistration> dynamicListenerRegistrations = new HashMap<>();
 
+	// this map allows us to remember the dynamic model used to register a listener, so if there's a need,
+	// we can remove such listener from runtime-specific context
+	private final Map<EventListener, EventListenerModel> dynamicListenerModels = new IdentityHashMap<>();
+
 	public Map<String, DynamicServletRegistration> getDynamicServletRegistrations() {
 		return dynamicServletRegistrations;
 	}
@@ -76,7 +82,11 @@ public class DynamicRegistrations {
 		return dynamicListenerRegistrations.values();
 	}
 
-	// In order to transition from Servlet API to OSGi HttpService/Whiteboard APIs, we need a bundle-scoped
+	public Map<EventListener, EventListenerModel> getDynamicListenerModels() {
+		return dynamicListenerModels;
+	}
+
+// In order to transition from Servlet API to OSGi HttpService/Whiteboard APIs, we need a bundle-scoped
 	// instance of WebContainer even if the ServletContainerInitializer that calls these methods is completely
 	// unaware of OSGi
 	//
@@ -301,10 +311,20 @@ public class DynamicRegistrations {
 	 * @param reg
 	 */
 	private void register(OsgiServletContext context, DynamicEventListenerRegistration reg) {
-		// TOCHECK: we can assume that given listener (by instance) is not registered in any other way
-
 		EventListenerModel model = reg.getModel();
+
+		// we should never allow installation of ServletContextListeners this way
+		if (!context.acceptsServletContextListeners()) {
+			if (model.getEventListener() instanceof ServletContextListener) {
+				String message = "Section 4.4.3 of the Servlets specification allows ServletContextListeners" +
+						" to be added only by ServletContainerInitializers, declared in web.xml or web-fragment.xml or" +
+						" by discovery of @WebListener annotated classes";
+				throw new UnsupportedOperationException(message);
+			}
+		}
+
 		model.setServiceRank(Integer.MAX_VALUE);
+		model.setDynamic(true);
 		configureBundle(context, model, reg.getModel().getEventListener().getClass());
 
 		// JavaEE doesn't provide a way to unregister listeners registered by
@@ -312,6 +332,9 @@ public class DynamicRegistrations {
 		configureUnregistration(context.getOsgiContextModel(), new EventListenerModelChange(OpCode.DELETE, model));
 
 		dynamicListenerRegistrations.put(System.identityHashCode(model.getEventListener()), reg);
+
+		// remember the model, so we can unregister it later when we have to restart the context
+		dynamicListenerModels.put(model.getEventListener(), model);
 	}
 
 	private void configureBundle(OsgiServletContext context, ElementModel<?, ?> model, Class<?> aClass) {
@@ -360,15 +383,15 @@ public class DynamicRegistrations {
 	}
 
 	public DynamicJEEWebContainerView getContainer(Bundle bundle) {
-		BundleContext bc = bundle.getBundleContext();
-		if (bc == null) {
-			throw new IllegalStateException("Can't obtain WebContainer instance for dynamic registration. Bundle "
-					+ bundle + " has no bundle context. Is this bundle ACTIVE?");
+		if (bundle == null || bundle.getBundleContext() == null) {
+			return null;
 		}
 
+		BundleContext bc = bundle.getBundleContext();
 		ServiceReference<WebContainer> ref = bc.getServiceReference(WebContainer.class);
 		if (ref == null) {
-			throw new IllegalStateException("Can't obtain WebContainer service reference. Dynamic registration not possible.");
+			// can be null in low level, non-OSGi tests
+			return null;
 		}
 
 		WebContainer container = bc.getService(ref);

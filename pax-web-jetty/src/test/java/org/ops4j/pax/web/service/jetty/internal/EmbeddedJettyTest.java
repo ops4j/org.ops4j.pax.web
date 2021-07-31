@@ -27,11 +27,16 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.ServletContainerInitializer;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -432,6 +437,114 @@ public class EmbeddedJettyTest {
 		s2.close();
 
 		assertTrue(sw.toString().endsWith("\r\n\r\nOK2\n"));
+
+		server.stop();
+		server.join();
+	}
+
+	@Test
+	public void embeddedServerWithServletContextHandlerAndDynamicInitializers() throws Exception {
+		Server server = new Server();
+		ServerConnector connector = new ServerConnector(server, 1, 1, new HttpConnectionFactory());
+		connector.setPort(0);
+		server.setConnectors(new Connector[] { connector });
+
+		ContextHandlerCollection chc = new ContextHandlerCollection();
+
+		ServletContextHandler handler1 = new ServletContextHandler(null, "/c1", ServletContextHandler.NO_SESSIONS);
+		handler1.setAllowNullPathInfo(true);
+
+		// Jetty uses org.eclipse.jetty.server.handler.ContextHandler.Context.setExtendedListenerTypes flag
+		// that may alter the specification-defined behavior of adding listeners
+		// org.eclipse.jetty.server.handler.ContextHandler.Context._enabled turns on/off dynamic registration to
+		// the context, but still a type of listener is verified - ServletContextListener type can be added
+		// only if setExtendedListenerTypes(true) was called
+		// org.eclipse.jetty.server.handler.ContextHandler.Context._enabled is set to false when first programmatic
+		// ServletContextListener is called
+		// a "programmatic listener" is any listener added using sc.addListener()
+		//
+		// Jetty calls context.getServletContext().setExtendedListenerTypes(true) when starting SCIs (which are wrapped
+		// in ServletContextListeners...) ONLY
+		// If a ServletContextListener wants to add another ServletContextListener (like
+		// org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer.configure())
+
+		// SCI that adds a ServletContextListener which tries to add ServletContextListener
+		handler1.addBean(new ServletContextHandler.Initializer(handler1, new ServletContainerInitializer() {
+			@Override
+			public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
+				// ServletContextListener added from SCI - this is real "programmatic listener"
+				ctx.addListener(new ServletContextListener() {
+					@Override
+					public void contextInitialized(ServletContextEvent sce) {
+						// ServletContextListener added from a "programmatic listener"
+						// throws (according to the spec) java.lang.UnsupportedOperationException
+//						sce.getServletContext().addListener(new ServletContextListener() {
+//							@Override
+//							public void contextInitialized(ServletContextEvent sce) {
+//								ServletContextListener.super.contextInitialized(sce);
+//							}
+//						});
+					}
+				});
+			}
+		}));
+
+		// ServletContextListener added "from web.xml"
+		handler1.addEventListener(new ServletContextListener() {
+			@Override
+			public void contextInitialized(ServletContextEvent sce) {
+				// ServletContextListener added from a listener - not possible:
+				//     java.lang.IllegalArgumentException: Inappropriate listener class org.ops4j.pax.web.service.jetty.internal.EmbeddedJettyTest$7$1
+				// however we can set org.eclipse.jetty.server.handler.ContextHandler.Context._extendedListenerTypes to true
+				// just as org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer.configure()
+				// do it
+//				sce.getServletContext().addListener(new ServletContextListener() {
+//					@Override
+//					public void contextInitialized(ServletContextEvent sce) {
+//						ServletContextListener.super.contextInitialized(sce);
+//					}
+//				});
+			}
+		});
+
+		handler1.addServlet(new ServletHolder("default-servlet", new HttpServlet() {
+			@Override
+			protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				resp.setContentType("text/plain");
+				resp.setCharacterEncoding("UTF-8");
+				resp.getWriter().write("OK1\n");
+				resp.getWriter().close();
+
+				// can't add new servlet - org.eclipse.jetty.servlet.ServletContextHandler.Context.checkDynamic()
+				// prevents it
+//				req.getServletContext().addServlet("new-servlet", new HttpServlet() {
+//					@Override
+//					protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+//						resp.setContentType("text/plain");
+//						resp.setCharacterEncoding("UTF-8");
+//						resp.getWriter().write("OK2\n");
+//						resp.getWriter().close();
+//					}
+//				}).addMapping("/s2");
+			}
+		}), "/s1");
+
+		chc.addHandler(handler1);
+
+		server.setHandler(chc);
+		server.start();
+
+		int port = connector.getLocalPort();
+
+		String response;
+
+		response = send(connector.getLocalPort(), "/c1/s2");
+		assertTrue(response.startsWith("HTTP/1.1 404"));
+		response = send(connector.getLocalPort(), "/c1/s1");
+		assertTrue(response.endsWith("\r\n\r\nOK1\n"));
+//		// call servlet added dynamically from the servlet
+//		response = send(connector.getLocalPort(), "/c1/s2");
+//		assertTrue(response.endsWith("\r\n\r\nOK2\n"));
 
 		server.stop();
 		server.join();

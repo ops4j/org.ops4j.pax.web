@@ -18,40 +18,34 @@ package org.ops4j.pax.web.extender.whiteboard.runtime;
 
 import org.ops4j.pax.web.service.whiteboard.WebSocketMapping;
 
-public class DefaultWebSocketMapping implements WebSocketMapping {
+public class DefaultWebSocketMapping extends AbstractContextRelated implements WebSocketMapping {
 
-	private String httpContextId;
-	private Boolean extractSharedHttpContext;
-	private Object webSocket;
+	private Object webSocketAnnotatedEndpoint;
+	private Class<?> webSocketClass;
 
 	@Override
-	public String getHttpContextId() {
-		return httpContextId;
+	public Object getWebSocketAnnotatedEndpoint() {
+		return webSocketAnnotatedEndpoint;
+	}
+
+	public void setWebSocketAnnotatedEndpoint(Object webSocketAnnotatedEndpoint) {
+		this.webSocketAnnotatedEndpoint = webSocketAnnotatedEndpoint;
 	}
 
 	@Override
-	public void setHttpContextId(String httpContextId) {
-		this.httpContextId = httpContextId;
+	public Class<?> getWebSocketClass() {
+		return webSocketClass;
+	}
+
+	public void setWebSocketClass(Class<?> webSocketClass) {
+		this.webSocketClass = webSocketClass;
 	}
 
 	@Override
-	public Boolean getSharedContext() {
-		return extractSharedHttpContext;
-	}
-
-	@Override
-	public void setSharedContext(Boolean sharedHttpContext) {
-		this.extractSharedHttpContext = sharedHttpContext;
-	}
-
-	@Override
-	public Object getWebSocket() {
-		return webSocket;
-	}
-
-	@Override
-	public void setWebSocket(Object published) {
-		this.webSocket = published;
+	public String toString() {
+		return "DefaultWebSocketMapping{"
+				+ "webSocketAnnotatedEndpoint=" + webSocketAnnotatedEndpoint
+				+ ", webSocketClass=" + webSocketClass + '}';
 	}
 
 }

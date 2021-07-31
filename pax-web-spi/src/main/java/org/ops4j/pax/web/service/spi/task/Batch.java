@@ -32,8 +32,8 @@ import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
-import org.osgi.service.http.HttpContext;
 
 /**
  * <p>List of tasks to perform on model. Collects primitive operations which can be reverted if something
@@ -45,8 +45,6 @@ import org.osgi.service.http.HttpContext;
  *     <li>actually apply the operations to global model</li>
  *     <li>pass the operations (e.g., create servlet context, create osgi context, register servlet) to
  *     {@link org.ops4j.pax.web.service.spi.ServerController}</li>
- *     <li>schedule for later invocation when using <em>transactions</em> with
- *     {@link org.ops4j.pax.web.service.WebContainer#begin(HttpContext)}</li>
  * </ul></p>
  *
  * <p>This class is implemented using the Visitor pattern, where the registration operations (servlet registration,
@@ -79,7 +77,6 @@ public class Batch {
 	/**
 	 * Add new {@link ServletContextModel}
 	 *
-	 * @param model
 	 * @param servletContextModel
 	 */
 	public void addServletContextModel(ServletContextModel servletContextModel) {
@@ -303,6 +300,10 @@ public class Batch {
 		operations.add(new ContainerInitializerModelChange(OpCode.ADD, model, newModels));
 	}
 
+	public void changeContainerInitializerModel(ContainerInitializerModel model) {
+		operations.add(new ContainerInitializerModelChange(OpCode.MODIFY, model));
+	}
+
 	/**
 	 * Remove existing {@link ContainerInitializerModel}
 	 * @param models
@@ -313,8 +314,8 @@ public class Batch {
 
 	/**
 	 * Add new {@link WelcomeFileModel}
-	 * @param serverModel
 	 * @param model
+	 * @param newModels
 	 */
 	public void addWelcomeFileModel(WelcomeFileModel model, OsgiContextModel ... newModels) {
 		operations.add(new WelcomeFileModelChange(OpCode.ADD, model, newModels));
@@ -322,11 +323,50 @@ public class Batch {
 
 	/**
 	 * Remove {@link WelcomeFileModel}
-	 * @param serverModel
 	 * @param model
 	 */
 	public void removeWelcomeFileModel(WelcomeFileModel model) {
 		operations.add(new WelcomeFileModelChange(OpCode.DELETE, model));
+	}
+
+	/**
+	 * Add new {@link WebSocketModel}
+	 * @param model
+	 */
+	public void addWebSocketModel(WebSocketModel model) {
+		operations.add(new WebSocketModelChange(OpCode.ADD, model));
+	}
+
+	/**
+	 * Add new {@link WebSocketModel} marked as disabled
+	 * @param model
+	 */
+	public void addDisabledWebSocketModel(WebSocketModel model) {
+		operations.add(new WebSocketModelChange(OpCode.ADD, model, true));
+	}
+
+	/**
+	 * Disable existing {@link WebSocketModel}
+	 * @param model
+	 */
+	public void disableWebSocketModel(WebSocketModel model) {
+		operations.add(new WebSocketModelChange(OpCode.DISABLE, model));
+	}
+
+	/**
+	 * Remove existing {@link WebSocketModel}
+	 * @param models
+	 */
+	public void removeWebSocketModels(Map<WebSocketModel, Boolean> models) {
+		operations.add(new WebSocketModelChange(OpCode.DELETE, models));
+	}
+
+	/**
+	 * Enable existing {@link WebSocketModel}
+	 * @param model
+	 */
+	public void enableWebSocketModel(WebSocketModel model) {
+		operations.add(new WebSocketModelChange(OpCode.ENABLE, model));
 	}
 
 	/**
@@ -370,6 +410,15 @@ public class Batch {
 	}
 
 	/**
+	 * Operation that clears all dynamic registrations from the model and target context. Dynamic registrations
+	 * are the ones created by e.g., {@link javax.servlet.ServletContext#addServlet}.
+	 * @param contextModels
+	 */
+	public void clearDynamicRegistrations(List<OsgiContextModel> contextModels) {
+		operations.add(new ClearDynamicRegistrationsChange(OpCode.MODIFY, contextModels));
+	}
+
+	/**
 	 * Assuming everything is ok, this method simply invokes all the collected operations which will:<ul>
 	 *     <li>alter global {@link ServerModel} sequentially.</li>
 	 *     <li>alter actual server runtime</li>
@@ -400,7 +449,7 @@ public class Batch {
 
 	@Override
 	public String toString() {
-		return "Batch{\"" + description + "\"}";
+		return "Batch{\"" + description + "\", size=" + operations.size() + "}";
 	}
 
 }

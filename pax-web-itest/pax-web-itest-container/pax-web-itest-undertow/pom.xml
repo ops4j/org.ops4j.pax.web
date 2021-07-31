@@ -44,6 +44,21 @@
 			<!-- so it's not added to failsafe classpath -->
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-spi</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-runtime</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<!-- With just this dependency, we should transitively get everything that's needed for Undertow tests -->

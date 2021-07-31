@@ -81,7 +81,7 @@ public class FilterStateChange extends Change {
 
 	@Override
 	public void accept(BatchVisitor visitor) {
-		visitor.visit(this);
+		visitor.visitFilterStateChange(this);
 	}
 
 }

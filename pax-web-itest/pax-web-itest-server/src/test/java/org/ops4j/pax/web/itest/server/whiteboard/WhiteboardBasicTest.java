@@ -151,8 +151,8 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 
 		assertThat(httpGET(port, "/s"), endsWith(">F(1)S(1)<F(1)"));
 
-		assertThat("Filter.init() and Servlet.init() should get different context",
-				contexts1.size(), equalTo(2));
+		assertTrue("Filter.init() and Servlet.init() should get different context + one extra from WebSockets for Undertow",
+				contexts1.size() >= 2);
 		assertThat("When processing request, there should be only one, Servlet-specific ServletContext",
 				contexts2.size(), equalTo(1));
 
@@ -276,9 +276,15 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 
 		System.out.println(log);
 
+		// undertow is messed up because of WebSockets filter
+
 		assertThat(log.pop(), equalTo("reg(s1)"));
 		assertThat(log.pop(), equalTo("s1.init()"));
 		assertThat(log.pop(), equalTo("reg(f1)"));
+		if (runtime == Runtime.UNDERTOW) {
+			assertThat(log.pop(), equalTo("s1.destroy()"));
+		}
+
 		assertThat(log.pop(), equalTo("f1.init()"));
 		assertThat(log.pop(), equalTo("reg(f2)"));
 		if (runtime == Runtime.TOMCAT) {
@@ -286,7 +292,14 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 			assertThat(log.pop(), equalTo("f1.destroy()"));
 			assertThat(log.pop(), equalTo("f1.init()"));
 		}
+		if (runtime == Runtime.UNDERTOW) {
+			assertThat(log.pop(), equalTo("f1.destroy()"));
+			assertThat(log.pop(), equalTo("f1.init()"));
+		}
 		assertThat(log.pop(), equalTo("f2.init()"));
+		if (runtime == Runtime.UNDERTOW) {
+			assertThat(log.pop(), equalTo("s1.init()"));
+		}
 		assertThat(log.pop(), equalTo("unreg(f2)"));
 		if (runtime == Runtime.UNDERTOW) {
 			// For Undertow, when filter is unregistered, we have to redeploy entire context

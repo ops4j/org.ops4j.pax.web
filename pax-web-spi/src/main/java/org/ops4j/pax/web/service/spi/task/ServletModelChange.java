@@ -34,13 +34,20 @@ public class ServletModelChange extends Change {
 	private final List<OsgiContextModel> newModels = new LinkedList<>();
 	private String newModelsInfo;
 
+	private boolean dynamic = false;
+
 	public ServletModelChange(OpCode op, ServletModel servletModel, OsgiContextModel ... newModels) {
 		this(op, servletModel, false, newModels);
 	}
 
 	public ServletModelChange(OpCode op, Map<ServletModel, Boolean> servletModels) {
+		this(op, servletModels, false);
+	}
+
+	public ServletModelChange(OpCode op, Map<ServletModel, Boolean> servletModels, boolean dynamic) {
 		super(op);
 		this.servletModels.putAll(servletModels);
+		this.dynamic = dynamic;
 	}
 
 	public ServletModelChange(OpCode op, ServletModel servletModel, boolean disabled, OsgiContextModel ... newModels) {
@@ -78,7 +85,7 @@ public class ServletModelChange extends Change {
 	}
 
 	public boolean isDynamic() {
-		return servletModel.isDynamic();
+		return dynamic || (servletModel != null && servletModel.isDynamic());
 	}
 
 	public List<OsgiContextModel> getNewModels() {
@@ -91,7 +98,7 @@ public class ServletModelChange extends Change {
 
 	@Override
 	public void accept(BatchVisitor visitor) {
-		visitor.visit(this);
+		visitor.visitServletModelChange(this);
 	}
 
 	public List<OsgiContextModel> getContextModels() {

@@ -17,6 +17,7 @@ package org.ops4j.pax.web.service.jetty.internal;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 
@@ -43,6 +44,9 @@ public class PaxWebFilterHolder extends FilterHolder {
 	private final OsgiServletContext osgiServletContext;
 	/** This {@link ServletContext} is scoped to particular Whiteboard filter */
 	private final OsgiScopedServletContext servletContext;
+
+	// mappings remembered for the holder
+	private List<PaxWebFilterMapping> mapping;
 
 	/**
 	 * Initialize {@link PaxWebFilterHolder} with {@link FilterModel}. All its
@@ -178,6 +182,14 @@ public class PaxWebFilterHolder extends FilterHolder {
 
 	public FilterModel getFilterModel() {
 		return filterModel;
+	}
+
+	public void setMapping(List<PaxWebFilterMapping> mapping) {
+		this.mapping = mapping;
+	}
+
+	public List<PaxWebFilterMapping> getMapping() {
+		return mapping;
 	}
 
 }

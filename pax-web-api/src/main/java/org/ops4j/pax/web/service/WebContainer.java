@@ -879,19 +879,26 @@ public interface WebContainer extends HttpService {
 
 	// methods used to register annotated web socket endpoints
 
+	/**
+	 * Registers a WebSocket endpoint annotated with {@code @javax.websocket.server.ServerEndpoint}. The actual
+	 * object passed may be both an actual instance or a {@link Class} object which will be instantiated when needed.
+	 * @param webSocket
+	 * @param httpContext
+	 */
+	void registerWebSocket(Object webSocket, HttpContext httpContext);
 
+	// methods used to unregister annotated web socket endpoints
 
+	/**
+	 * Unregisters a previously registered WebSocket endpoint annotated with
+	 * {@code @javax.websocket.server.ServerEndpoint}
+	 * @param webSocket
+	 * @param httpContext
+	 */
+	void unregisterWebSocket(Object webSocket, HttpContext httpContext);
 
-//    void registerWebSocket(Object webSocket, HttpContext httpContext);
-//
-//    void unregisterWebSocket(Object webSocket, HttpContext httpContext);
-//
-//    // RequestInfoDTO calculateRequestInfoDTO(String path,
-//    // Iterator<WhiteboardElement> iterator);
-//    //
-//    // RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement>
-//    // iterator);
-//
-//    // WebContainerDTO getWebcontainerDTO();
+//	RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator);
+//	RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator);
+//	WebContainerDTO getWebcontainerDTO();
 
 }

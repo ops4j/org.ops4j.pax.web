@@ -27,6 +27,7 @@ import java.net.Socket;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 import javax.servlet.DispatcherType;
@@ -35,6 +36,10 @@ import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.GenericFilter;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -59,6 +64,8 @@ import org.apache.catalina.core.StandardServer;
 import org.apache.catalina.core.StandardService;
 import org.apache.catalina.core.StandardThreadExecutor;
 import org.apache.catalina.core.StandardWrapper;
+import org.apache.catalina.loader.ParallelWebappClassLoader;
+import org.apache.catalina.loader.WebappLoader;
 import org.apache.catalina.servlets.DefaultServlet;
 import org.apache.catalina.startup.Catalina;
 import org.apache.catalina.startup.Constants;
@@ -69,6 +76,7 @@ import org.apache.catalina.webresources.DirResourceSet;
 import org.apache.catalina.webresources.StandardRoot;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.tomcat.SimpleInstanceManager;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.digester.Digester;
@@ -181,6 +189,151 @@ public class EmbeddedTomcatTest {
 
 		String response = send(connector.getLocalPort(), "/");
 		assertTrue(response.endsWith("\r\n\r\nOK\n"));
+
+		server.stop();
+		server.destroy();
+	}
+
+	@Test
+	public void dynamicListeners() throws Exception {
+		Server server = new StandardServer();
+		server.setCatalinaBase(new File("target"));
+
+		Service service = new StandardService();
+		service.setName("Catalina");
+		server.addService(service);
+
+		Executor executor = new StandardThreadExecutor();
+		service.addExecutor(executor);
+
+		Connector connector = new Connector("HTTP/1.1");
+		connector.setPort(0);
+		connector.setProperty("address", "127.0.0.1");
+		service.addConnector(connector);
+
+		Engine engine = new StandardEngine();
+		engine.setName("Catalina");
+		engine.setDefaultHost("localhost");
+		service.setContainer(engine);
+
+		Host host = new StandardHost();
+		host.setName("localhost");
+		host.setAppBase(".");
+		engine.addChild(host);
+
+		// org.apache.catalina.util.ContextName.ContextName(java.lang.String, boolean) explicitly
+		// changes "ROOT" name into
+		// org.apache.catalinah.util.ContextName.path == org.apache.catalina.util.ContextName.name == ""
+		StandardContext context = new StandardContext();
+		context.setName("");
+		context.setPath("");
+		WebappLoader tomcatLoader = new WebappLoader();
+		tomcatLoader.setLoaderInstance(new ParallelWebappClassLoader(getClass().getClassLoader()) {
+			@Override
+			protected void clearReferences() {
+				// skip, because we're managing "deployments" differently
+			}
+
+			@Override
+			public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+				return EmbeddedTomcatTest.class.getClassLoader().loadClass(name);
+			}
+		});
+		context.setParentClassLoader(getClass().getClassLoader());
+		context.setLoader(tomcatLoader);
+
+		// Fix startup sequence - required if you don't use web.xml. The start() method in context will set
+		// 'configured' to false - and expects a listener to set it back to true.
+//		context.addLifecycleListener(new Tomcat.FixContextListener());
+		context.addLifecycleListener((event) -> {
+			if (event.getType().equals(Lifecycle.CONFIGURE_START_EVENT)) {
+				// this is normally done by complex org.apache.catalina.startup.ContextConfig.configureStart()
+				context.setConfigured(true);
+			}
+		});
+		host.addChild(context);
+
+		Servlet servlet = new HttpServlet() {
+			@Override
+			protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				LOG.info("Handling request: {}", req.toString());
+				resp.setContentType("text/plain");
+				resp.setCharacterEncoding("UTF-8");
+				resp.getWriter().write("OK1\n");
+				resp.getWriter().close();
+
+				// java.lang.IllegalStateException: Servlets cannot be added to context [] as the context has been initialised
+				// Tomcat checks !context.getState().equals(LifecycleState.STARTING_PREP)
+//				req.getServletContext().addServlet("new-servlet", new HttpServlet() {
+//					@Override
+//					protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+//						resp.setContentType("text/plain");
+//						resp.setCharacterEncoding("UTF-8");
+//						resp.getWriter().write("OK2\n");
+//						resp.getWriter().close();
+//					}
+//				}).addMapping("/s2");
+			}
+		};
+
+		Wrapper wrapper = new StandardWrapper();
+		wrapper.setServlet(servlet);
+		wrapper.setName("s1");
+		context.addChild(wrapper);
+		context.addServletMappingDecoded("/s1", wrapper.getName(), false);
+		context.setInstanceManager(new SimpleInstanceManager());
+
+		// SCI that adds a ServletContextListener which tries to add ServletContextListener
+		context.addServletContainerInitializer(new ServletContainerInitializer() {
+			@Override
+			public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
+				// ServletContextListener added from SCI - this is real "programmatic listener"
+				ctx.addListener(new ServletContextListener() {
+					@Override
+					public void contextInitialized(ServletContextEvent sce) {
+						// ServletContextListener added from a "programmatic listener"
+						// throws (according to the spec)
+						// java.lang.UnsupportedOperationException: "Section 4.4 of the Servlet 3.0 specification does
+						// not permit this method to be called from a ServletContextListener that was not defined in
+						// web.xml, a web-fragment.xml file nor annotated with @WebListener"
+//						sce.getServletContext().addListener(new ServletContextListener() {
+//							@Override
+//							public void contextInitialized(ServletContextEvent sce) {
+//								ServletContextListener.super.contextInitialized(sce);
+//							}
+//						});
+					}
+				});
+			}
+		}, null);
+
+		// this method is called from org.apache.catalina.startup.ContextConfig.configureContext() and ALL
+		// listener class names from web.xml, web-fragment.xml and @WebListener are added to the context using this
+		// method.
+		context.addApplicationListener("org.ops4j.pax.web.service.tomcat.internal.ServletContextListenerAddedFromWebXml");
+		// this method is called from dynamic sc.addListener() IF the listener implements javax.servlet.http.HttpSessionListener
+		// or javax.servlet.ServletContextListener (the latter ONLY when org.apache.catalina.core.ApplicationContext.newServletContextListenerAllowed==true)
+		// when ApplicationContext.newServletContextListenerAllowed==false, ServletContextListener is treated
+		// as programmatic, so Tomcat throws
+		// IllegalArgumentException("Once the first ServletContextListener has been called, no more ServletContextListeners may be added.")
+		// org.apache.catalina.core.ApplicationContext.newServletContextListenerAllowed is set to false
+		// in org.apache.catalina.core.StandardContext.listenerStart() AFTER all SCIs have been called. This means
+		// that any new ServletContextListener can't be added anymore
+//		context.addApplicationLifecycleListener();
+
+		server.start();
+
+		LOG.info("Local port after start: {}", connector.getLocalPort());
+
+		String response;
+
+		response = send(connector.getLocalPort(), "/s2");
+		assertTrue(response.startsWith("HTTP/1.1 404"));
+		response = send(connector.getLocalPort(), "/s1");
+		assertTrue(response.endsWith("\r\n\r\nOK1\n"));
+//		// call servlet added dynamically from the servlet
+//		response = send(connector.getLocalPort(), "/s2");
+//		assertTrue(response.endsWith("\r\n\r\nOK2\n"));
 
 		server.stop();
 		server.destroy();
@@ -565,7 +718,7 @@ public class EmbeddedTomcatTest {
 		StandardServer server = (StandardServer) holder.getServer();
 		Service catalina = server.findService("Catalina");
 		Connector connector = catalina.findConnectors()[0];
-		assertThat(((StandardThreadExecutor)catalina.getExecutor("default")).getNamePrefix(), equalTo("tomcat-pool-"));
+		assertThat(((StandardThreadExecutor) catalina.getExecutor("default")).getNamePrefix(), equalTo("tomcat-pool-"));
 
 		server.start();
 
@@ -628,7 +781,7 @@ public class EmbeddedTomcatTest {
 		StandardServer server = (StandardServer) holder.getServer();
 		Service catalina = server.findService("Catalina");
 		Connector connector = catalina.findConnectors()[0];
-		assertThat(((StandardThreadExecutor)catalina.getExecutor("default")).getNamePrefix(), equalTo("tomcat-pool-"));
+		assertThat(((StandardThreadExecutor) catalina.getExecutor("default")).getNamePrefix(), equalTo("tomcat-pool-"));
 
 		server.start();
 
@@ -845,13 +998,13 @@ public class EmbeddedTomcatTest {
 		server.destroy();
 	}
 
-	private String send(int port, String request, String ... headers) throws IOException {
+	private String send(int port, String request, String... headers) throws IOException {
 		Socket s = new Socket();
 		s.connect(new InetSocketAddress("127.0.0.1", port));
 
 		s.getOutputStream().write((
 				"GET " + request + " HTTP/1.1\r\n" +
-				"Host: 127.0.0.1:" + port + "\r\n").getBytes());
+						"Host: 127.0.0.1:" + port + "\r\n").getBytes());
 		for (String header : headers) {
 			s.getOutputStream().write((header + "\r\n").getBytes());
 		}

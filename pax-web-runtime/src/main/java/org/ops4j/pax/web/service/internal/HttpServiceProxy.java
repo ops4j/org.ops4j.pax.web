@@ -394,17 +394,20 @@ class HttpServiceProxy implements WebContainer, StoppableHttpService {
 		delegate.setContextParams(params, httpContext);
 	}
 
-//	/**
-//	 * @see WebContainer#setContextParam(Dictionary, HttpContext)
-//	 */
-//	@Override
-//	public void setContextParam(final Dictionary<String, ?> params,
-//			final HttpContext httpContext) {
-//		LOG.debug("Setting context paramters [" + params
-//				+ "] for http context [" + httpContext + "]");
-//		delegate.setContextParam(params, httpContext);
-//	}
-//
+	// methods used to register annotated web socket endpoints
+
+	@Override
+	public void registerWebSocket(Object webSocket, HttpContext httpContext) {
+		delegate.registerWebSocket(webSocket, httpContext);
+	}
+
+	// methods used to unregister annotated web socket endpoints
+
+	@Override
+	public void unregisterWebSocket(Object webSocket, HttpContext httpContext) {
+		delegate.unregisterWebSocket(webSocket, httpContext);
+	}
+
 //	@Override
 //	public void registerLoginConfig(String authMethod, String realmName,
 //			String formLoginPage, String formErrorPage, HttpContext httpContext) {
@@ -450,16 +453,6 @@ class HttpServiceProxy implements WebContainer, StoppableHttpService {
 ////	public void setConnectorsAndVirtualHosts(List<String> connectors, List<String> virtualHosts, HttpContext httpContext) {
 ////		delegate.setConnectorsAndVirtualHosts(connectors, virtualHosts, httpContext);
 ////	}
-//
-//	@Override
-//	public void registerWebSocket(Object webSocket, HttpContext httpContext) {
-//		delegate.registerWebSocket(webSocket, httpContext);
-//	}
-//
-//	@Override
-//	public void unregisterWebSocket(Object webSocket, HttpContext httpContext) {
-//		delegate.unregisterWebSocket(webSocket, httpContext);
-//	}
 
 //	@Override
 //	public RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator) {

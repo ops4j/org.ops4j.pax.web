@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -39,9 +40,11 @@ import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
+import org.ops4j.pax.web.service.spi.task.ClearDynamicRegistrationsChange;
 import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
@@ -52,6 +55,7 @@ import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
+import org.ops4j.pax.web.service.spi.task.WebSocketModelChange;
 import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
@@ -89,7 +93,7 @@ public class ServiceModel implements BatchVisitor {
 	/**
 	 * <p>Servlets registered under alias in given context path (exact URL pattern) by given bundle-scoped
 	 * {@link org.osgi.service.http.HttpService}. Group of disjoint slices of
-	 * {@link org.ops4j.pax.web.service.spi.model.ServletContextModel#aliasMapping} for all context mappings.</p>
+	 * {@code org.ops4j.pax.web.service.spi.model.ServletContextModel#aliasMapping} for all context mappings.</p>
 	 *
 	 * <p>Kept to fulfill the contract of {@link org.osgi.service.http.HttpService#unregister(String)}, which
 	 * doesn't distinguish servlets registered under the same alias into different <em>contexts</em>.</p>
@@ -127,8 +131,8 @@ public class ServiceModel implements BatchVisitor {
 	/** Error page models are kept as collection and processed for conflicts at {@link ServerModel} level */
 	private final Set<ErrorPageModel> errorPageModels = new HashSet<>();
 
-//	private final Map<String, SecurityConstraintMappingModel> securityConstraintMappingModels;
-//	private final Map<Object, WebSocketModel> webSockets;
+	/** Web Sockets registered by given bundle */
+	private final Set<WebSocketModel> webSocketModels = new HashSet<>();
 
 	public ServiceModel(ServerModel serverModel, ServerController serverController, Bundle serviceBundle) {
 		this.serverModel = serverModel;
@@ -210,13 +214,17 @@ public class ServiceModel implements BatchVisitor {
 		return containerInitializerModels;
 	}
 
-	@Override
-	public void visit(ServletContextModelChange change) {
-		serverModel.visit(change);
+	public Set<WebSocketModel> getWebSocketModels() {
+		return webSocketModels;
 	}
 
 	@Override
-	public void visit(OsgiContextModelChange change) {
+	public void visitServletContextModelChange(ServletContextModelChange change) {
+		serverModel.visitServletContextModelChange(change);
+	}
+
+	@Override
+	public void visitOsgiContextModelChange(OsgiContextModelChange change) {
 		switch (change.getKind()) {
 			case ASSOCIATE:
 				serverModel.associateHttpContext(change.getContext(), change.getOsgiContextModel());
@@ -226,7 +234,7 @@ public class ServiceModel implements BatchVisitor {
 				break;
 			case ADD:
 			case DELETE:
-				serverModel.visit(change);
+				serverModel.visitOsgiContextModelChange(change);
 				break;
 			default:
 				break;
@@ -234,7 +242,16 @@ public class ServiceModel implements BatchVisitor {
 	}
 
 	@Override
-	public void visit(ServletModelChange change) {
+	public void visitServletModelChange(ServletModelChange change) {
+		if (change.isDynamic()) {
+			// don't process dynamic changes at this level. We'll be clearing dynamic web elements (servlets,
+			// filters and listeners when target runtime's context is stopped)
+
+			// of course I'm aware of the situation where dynamic servlet is insstalled by SCI and then a Whiteboard
+			// registration of a servlet happens which doesn't detect the conflict (e.g., by name) with the dynamic
+			// servlet. But for now I'm consciously not handling such scenario
+			return;
+		}
 		if (change.getKind() == OpCode.ADD) {
 			ServletModel model = change.getServletModel();
 			if (change.getNewModels().size() > 0) {
@@ -259,7 +276,7 @@ public class ServiceModel implements BatchVisitor {
 			}
 
 			// and the change should be processed at serverModel level
-			serverModel.visit(change);
+			serverModel.visitServletModelChange(change);
 			return;
 		}
 
@@ -279,18 +296,21 @@ public class ServiceModel implements BatchVisitor {
 			}
 
 			// the change should be processed at serverModel level as well
-			serverModel.visit(change);
+			serverModel.visitServletModelChange(change);
 			return;
 		}
 
 		if (change.getKind() == OpCode.ENABLE || change.getKind() == OpCode.DISABLE) {
 			// only alter server model - enabled or disabled model stays "registered" at serviceModel level
-			serverModel.visit(change);
+			serverModel.visitServletModelChange(change);
 		}
 	}
 
 	@Override
-	public void visit(FilterModelChange change) {
+	public void visitFilterModelChange(FilterModelChange change) {
+		if (change.isDynamic()) {
+			return;
+		}
 		if (change.getKind() == OpCode.ADD) {
 			FilterModel model = change.getFilterModel();
 			if (change.getNewModels().size() > 0) {
@@ -301,7 +321,7 @@ public class ServiceModel implements BatchVisitor {
 			// apply the change at ServiceModel level - whether it's disabled or not
 			filterModels.add(model);
 			// the change should also be processed at serverModel level
-			serverModel.visit(change);
+			serverModel.visitFilterModelChange(change);
 			return;
 		}
 
@@ -313,22 +333,25 @@ public class ServiceModel implements BatchVisitor {
 				this.filterModels.remove(model);
 			}
 			// the change should be processed at serverModel level as well
-			serverModel.visit(change);
+			serverModel.visitFilterModelChange(change);
 			return;
 		}
 
 		if (change.getKind() == OpCode.ENABLE || change.getKind() == OpCode.DISABLE) {
-			serverModel.visit(change);
+			serverModel.visitFilterModelChange(change);
 		}
 	}
 
 	@Override
-	public void visit(FilterStateChange change) {
+	public void visitFilterStateChange(FilterStateChange change) {
 		// no op here. At model level (unlike in server controller level), filters are added/removed individually
 	}
 
 	@Override
-	public void visit(EventListenerModelChange change) {
+	public void visitEventListenerModelChange(EventListenerModelChange change) {
+		if (change.isDynamic()) {
+			return;
+		}
 		if (change.getKind() == OpCode.ADD) {
 			EventListenerModel model = change.getEventListenerModel();
 			if (change.getNewModels().size() > 0) {
@@ -342,11 +365,11 @@ public class ServiceModel implements BatchVisitor {
 		}
 
 		// the change should be processed at serverModel level as well
-		serverModel.visit(change);
+		serverModel.visitEventListenerModelChange(change);
 	}
 
 	@Override
-	public void visit(ContainerInitializerModelChange change) {
+	public void visitContainerInitializerModelChange(ContainerInitializerModelChange change) {
 		if (change.getKind() == OpCode.ADD) {
 			ContainerInitializerModel model = change.getContainerInitializerModel();
 			if (change.getNewModels().size() > 0) {
@@ -360,11 +383,11 @@ public class ServiceModel implements BatchVisitor {
 		}
 
 		// the change should be processed at serverModel level as well
-		serverModel.visit(change);
+		serverModel.visitContainerInitializerModelChange(change);
 	}
 
 	@Override
-	public void visit(WelcomeFileModelChange change) {
+	public void visitWelcomeFileModelChange(WelcomeFileModelChange change) {
 		WelcomeFileModel model = change.getWelcomeFileModel();
 		if (change.getKind() == OpCode.ADD) {
 			if (change.getNewModels().size() > 0) {
@@ -389,18 +412,18 @@ public class ServiceModel implements BatchVisitor {
 			if (change.getKind() == OpCode.ADD) {
 				welcomes.addAll(Arrays.asList(model.getWelcomeFiles()));
 			} else if (change.getKind() == OpCode.DELETE) {
-				welcomes.removeAll(Arrays.asList(model.getWelcomeFiles()));
+				Arrays.asList(model.getWelcomeFiles()).forEach(welcomes::remove);
 				if (welcomes.isEmpty()) {
 					welcomeFiles.remove(key);
 				}
 			}
 		}
 
-		serverModel.visit(change);
+		serverModel.visitWelcomeFileModelChange(change);
 	}
 
 	@Override
-	public void visit(ErrorPageModelChange change) {
+	public void visitErrorPageModelChange(ErrorPageModelChange change) {
 		if (change.getKind() == OpCode.ADD) {
 			ErrorPageModel model = change.getErrorPageModel();
 			if (change.getNewModels().size() > 0) {
@@ -417,12 +440,77 @@ public class ServiceModel implements BatchVisitor {
 			}
 		}
 
-		serverModel.visit(change);
+		serverModel.visitErrorPageModelChange(change);
 	}
 
 	@Override
-	public void visit(ErrorPageStateChange change) {
+	public void visitErrorPageStateChange(ErrorPageStateChange change) {
 		// no op here. At model level (unlike in server controller level), filters are added/removed individually
+	}
+
+	@Override
+	public void visitWebSocketModelChange(WebSocketModelChange change) {
+		if (change.getKind() == OpCode.ADD) {
+			WebSocketModel model = change.getWebSocketModel();
+			if (change.getNewModels().size() > 0) {
+				// it means we need to set them in the model now
+				model.changeContextModels(change.getNewModels());
+			}
+
+			webSocketModels.add(model);
+			// the change should also be processed at serverModel level
+			serverModel.visitWebSocketModelChange(change);
+			return;
+		}
+
+		if (change.getKind() == OpCode.DELETE) {
+			Collection<WebSocketModel> modelsToRemove = change.getWebSocketModels().keySet();
+
+			// apply the change at ServiceModel level - whether it's disabled or not
+			for (WebSocketModel model : modelsToRemove) {
+				this.webSocketModels.remove(model);
+			}
+			// the change should be processed at serverModel level as well
+			serverModel.visitWebSocketModelChange(change);
+			return;
+		}
+
+		if (change.getKind() == OpCode.ENABLE || change.getKind() == OpCode.DISABLE) {
+			serverModel.visitWebSocketModelChange(change);
+		}
+	}
+
+	@Override
+	public void visitClearDynamicRegistrationsChange(ClearDynamicRegistrationsChange change) {
+		// servlets
+		for (Iterator<ServletModel> iterator = servletModels.iterator(); iterator.hasNext(); ) {
+			ServletModel model = iterator.next();
+			if (model.isDynamic()) {
+				if (model.getAlias() != null) {
+					if (aliasMapping.containsKey(model.getAlias())) {
+						for (OsgiContextModel ocm : model.getContextModels()) {
+							aliasMapping.get(model.getAlias()).remove(ocm.getContextPath(), model);
+						}
+						if (aliasMapping.get(model.getAlias()).isEmpty()) {
+							aliasMapping.remove(model.getAlias());
+						}
+					}
+				}
+				if (model.getErrorPageModel() != null) {
+					errorPageModels.remove(model.getErrorPageModel());
+				}
+				iterator.remove();
+			}
+		}
+
+		// filters
+		filterModels.removeIf(FilterModel::isDynamic);
+
+		// listeners
+		eventListenerModels.removeIf(EventListenerModel::isDynamic);
+
+		// and the change should be processed at serverModel level
+		serverModel.visitClearDynamicRegistrationsChange(change);
 	}
 
 	/**
@@ -534,6 +622,7 @@ public class ServiceModel implements BatchVisitor {
 			Map<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> currentlyEnabledByPath = new HashMap<>();
 			serverModel.prepareErrorPageSnapshot(currentlyEnabledByPath, new TreeSet<>(), null, new HashSet<>());
 
+			// no need to do anything if paths are the same, because error page model is only a declaration/configuration
 			if (!path1.equals(path2)) {
 				// change in old context (and catch the error page models that should be moved to different context)
 				TreeMap<ErrorPageModel, List<OsgiContextModel>> p1 = new TreeMap<>();
@@ -560,8 +649,6 @@ public class ServiceModel implements BatchVisitor {
 					p2.putAll(epModels2);
 				}
 				state.put(path2, p2);
-			} else {
-				// no need to do anything, because error page model is only a declaration/configuration
 			}
 			batch.updateErrorPages(state);
 		}

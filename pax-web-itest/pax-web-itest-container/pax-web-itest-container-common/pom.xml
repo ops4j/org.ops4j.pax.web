@@ -59,6 +59,8 @@
 							javax.servlet;version="[3.1,5)",
 							javax.servlet.annotation;version="[3.1,5)",
 							javax.servlet.http;version="[3.1,5)",
+							javax.websocket;resolution:=optional,
+							javax.websocket.server;resolution:=optional,
 
 							<!-- ranges indicate we can work with OSGi Core R6+ -->
 							org.osgi.framework;version="[1.8,2)",

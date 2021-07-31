@@ -15,8 +15,10 @@
  */
 package org.ops4j.pax.web.service.spi.model.elements;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import javax.servlet.ServletContainerInitializer;
 
@@ -34,8 +36,20 @@ public class ContainerInitializerModel extends ElementModel<ServletContainerInit
 	private final ServletContainerInitializer containerInitializer;
 	private final Set<Class<?>> classes = new LinkedHashSet<>();
 
-	// if SCI was created because ServletModel for JSP was added, we need to remember this
-	private ServletModel relatedModel;
+	// if SCI was created because ServletModel for JSP was added, we need to remember this. When last ServletModel
+	// is gone, we can unregister the ContainerInitializerModel
+	private final List<ServletModel> relatedServletModels = new ArrayList<>();
+
+	// if SCI was created because WebSocketModel was added, we need to remember this. We have to remember all the
+	// models because WebSocket related SCIs need to know the endpoints to register - whether they're specified
+	// as classes (the easy way) or existing instances (the hard way)
+	// when last WebSocketModel is gone, we can unregister the ContainerInitializerModel
+	private final List<WebSocketModel> relatedWebSocketModels = new ArrayList<>();
+
+	private boolean forJetty = false;
+	private boolean forTomcat = false;
+	private boolean forUndertow = false;
+	private boolean forAnyRuntime = true;
 
 	public ContainerInitializerModel(ServletContainerInitializer containerInitializer, Class<?>[] classes) {
 		this.containerInitializer = containerInitializer;
@@ -43,11 +57,15 @@ public class ContainerInitializerModel extends ElementModel<ServletContainerInit
 			this.classes.addAll(Arrays.asList(classes));
 		}
 	}
+	@Override
+	protected String getIdPrefix() {
+		return "CIM";
+	}
 
 	@Override
 	public void register(WhiteboardWebContainerView view) {
 		// for now it's NOOP, because there's no Whiteboard support for SCI
-		// but we may rething this method (and unregister) in pax-web-extender-war
+		// but we may rething this method (and unregister one) in pax-web-extender-war
 	}
 
 	@Override
@@ -81,12 +99,64 @@ public class ContainerInitializerModel extends ElementModel<ServletContainerInit
 		return Boolean.TRUE;
 	}
 
-	public void setRelatedModel(ServletModel model) {
-		this.relatedModel = model;
+	public List<WebSocketModel> getRelatedWebSocketModels() {
+		return relatedWebSocketModels;
 	}
 
-	public ServletModel getRelatedModel() {
-		return relatedModel;
+	public List<ServletModel> getRelatedServletModels() {
+		return relatedServletModels;
+	}
+
+	public boolean isForJetty() {
+		return forJetty;
+	}
+
+	public void setForJetty(boolean forJetty) {
+		this.forJetty = forJetty;
+		if (forJetty) {
+			this.forAnyRuntime = false;
+		}
+	}
+
+	public boolean isForTomcat() {
+		return forTomcat;
+	}
+
+	public void setForTomcat(boolean forTomcat) {
+		this.forTomcat = forTomcat;
+		if (forTomcat) {
+			this.forAnyRuntime = false;
+		}
+	}
+
+	public boolean isForUndertow() {
+		return forUndertow;
+	}
+
+	public void setForUndertow(boolean forUndertow) {
+		this.forUndertow = forUndertow;
+		if (forUndertow) {
+			this.forAnyRuntime = false;
+		}
+	}
+
+	public boolean isForAnyRuntime() {
+		return forAnyRuntime;
+	}
+
+	public void setForAnyRuntime(boolean forAnyRuntime) {
+		this.forAnyRuntime = forAnyRuntime;
+	}
+
+	@Override
+	public String toString() {
+		return "ContainerInitializerModel{id=" + getId()
+				+ (containerInitializer == null ? "" : ",SCI=" + containerInitializer)
+				+ (!forJetty ? "" : ",Jetty only")
+				+ (!forTomcat ? "" : ",Tomcat only")
+				+ (!forUndertow ? "" : ",Undertow only")
+				+ ",contexts=" + getContextModelsInfo()
+				+ "}";
 	}
 
 }

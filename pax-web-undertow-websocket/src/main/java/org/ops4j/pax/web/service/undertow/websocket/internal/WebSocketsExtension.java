@@ -18,9 +18,11 @@ package org.ops4j.pax.web.service.undertow.websocket.internal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.EventListener;
 import java.util.List;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.websocket.Extension;
@@ -30,7 +32,7 @@ import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.ThreadSetupHandler;
 import io.undertow.servlet.core.ContextClassLoaderSetupAction;
-import io.undertow.servlet.spec.ServletContextImpl;
+import io.undertow.servlet.util.ImmediateInstanceFactory;
 import io.undertow.websockets.WebSocketExtension;
 import io.undertow.websockets.extensions.ExtensionHandshake;
 import io.undertow.websockets.extensions.PerMessageDeflateHandshake;
@@ -39,6 +41,7 @@ import io.undertow.websockets.jsr.ExtensionImpl;
 import io.undertow.websockets.jsr.JsrWebSocketFilter;
 import io.undertow.websockets.jsr.ServerWebSocketContainer;
 import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.undertow.PaxWebUndertowExtension;
 import org.ops4j.pax.web.service.undertow.UndertowSupport;
 import org.ops4j.pax.web.service.undertow.configuration.model.ServletContainer;
@@ -52,7 +55,7 @@ public class WebSocketsExtension implements PaxWebUndertowExtension {
 
 	@Override
 	public void handleDeployment(DeploymentInfo deploymentInfo, UndertowConfiguration configuration,
-			UndertowSupport support) {
+			UndertowSupport support, OsgiContextModel osgiContextModel) {
 		ServletContainer.Websockets wsConfig = null;
 		if (configuration != null && configuration.getSubsystem() != null
 				&& configuration.getSubsystem().getServletContainer() != null) {
@@ -97,17 +100,19 @@ public class WebSocketsExtension implements PaxWebUndertowExtension {
 //		deploymentInfo.addServletContextAttribute(WebSocketDeploymentInfo.ATTRIBUTE_NAME, wsInfo);
 		deploymentInfo.addServletContextAttribute(WebSocketDeploymentInfo.ATTRIBUTE_NAME + ".paxweb", wsInfo);
 
-		deploymentInfo.addListener(Servlets.listener(WebSocketListener.class));
-		deploymentInfo.addDeploymentCompleteListener(new ServletContextListener() {
-			@Override
-			public void contextInitialized(ServletContextEvent sce) {
-				container.validateDeployment();
-			}
+		EventListener proxy = support.proxiedServletContextListener(new WebSocketListener(), osgiContextModel);
+		// adding the listener to deployment info will let it register additional listeners/filters/servlets
+		// to the context
+		deploymentInfo.addListener(Servlets.listener(WebSocketListener.class, new ImmediateInstanceFactory<>(proxy)));
+		deploymentInfo.addDeploymentCompleteListener(new WsCleanUpServletContextListener(container));
+	}
 
-			@Override
-			public void contextDestroyed(ServletContextEvent sce) {
-			}
-		});
+	@Override
+	public void cleanDeployment(DeploymentInfo deploymentInfo) {
+		deploymentInfo.getServletContextAttributes().remove(ServerContainer.class.getName());
+		deploymentInfo.getServletContextAttributes().remove(WebSocketDeploymentInfo.ATTRIBUTE_NAME + ".paxweb");
+		deploymentInfo.getListeners().removeIf(li -> li.getListenerClass() == WebSocketListener.class);
+		deploymentInfo.getDeploymentCompleteListeners().removeIf(dcl -> dcl.getClass() == WsCleanUpServletContextListener.class);
 	}
 
 	private static final class WebSocketListener implements ServletContextListener {
@@ -117,24 +122,39 @@ public class WebSocketsExtension implements PaxWebUndertowExtension {
 		@Override
 		public void contextInitialized(ServletContextEvent sce) {
 			// how to trick Undertow...
-			Object wsInfo = sce.getServletContext().getAttribute(WebSocketDeploymentInfo.ATTRIBUTE_NAME + ".paxweb");
-			sce.getServletContext().setAttribute(WebSocketDeploymentInfo.ATTRIBUTE_NAME, wsInfo);
+			ServletContext servletContext = sce.getServletContext();
+
+			Object wsInfo = servletContext.getAttribute(WebSocketDeploymentInfo.ATTRIBUTE_NAME + ".paxweb");
+			servletContext.setAttribute(WebSocketDeploymentInfo.ATTRIBUTE_NAME, wsInfo);
 
 			// the remaining part as in io.undertow.websockets.jsr.Bootstrap
-			container = (ServerWebSocketContainer) sce.getServletContext().getAttribute(ServerContainer.class.getName());
-			FilterRegistration.Dynamic filter = sce.getServletContext().addFilter(Bootstrap.FILTER_NAME, JsrWebSocketFilter.class);
-			sce.getServletContext().addListener(JsrWebSocketFilter.LogoutListener.class);
+			container = (ServerWebSocketContainer) servletContext.getAttribute(ServerContainer.class.getName());
+			FilterRegistration.Dynamic filter = servletContext.addFilter(Bootstrap.FILTER_NAME, JsrWebSocketFilter.class);
+			servletContext.addListener(JsrWebSocketFilter.LogoutListener.class);
 			filter.setAsyncSupported(true);
-			if (!container.getConfiguredServerEndpoints().isEmpty()) {
-				filter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/*");
-			} else {
-				container.setContextToAddFilter((ServletContextImpl) sce.getServletContext());
-			}
+			filter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/*");
 		}
 
 		@Override
 		public void contextDestroyed(ServletContextEvent sce) {
 			container.close();
+		}
+	}
+
+	private static class WsCleanUpServletContextListener implements ServletContextListener {
+		private final ServerWebSocketContainer container;
+
+		WsCleanUpServletContextListener(ServerWebSocketContainer container) {
+			this.container = container;
+		}
+
+		@Override
+		public void contextInitialized(ServletContextEvent sce) {
+			container.validateDeployment();
+		}
+
+		@Override
+		public void contextDestroyed(ServletContextEvent sce) {
 		}
 	}
 

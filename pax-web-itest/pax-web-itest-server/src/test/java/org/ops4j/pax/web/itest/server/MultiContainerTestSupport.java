@@ -54,6 +54,8 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.utils.extender.Extension;
 import org.apache.jasper.servlet.JspServlet;
+import org.apache.tomcat.websocket.server.WsSci;
+import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -99,8 +101,10 @@ import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.JspModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.util.NamedThreadFactory;
+import org.ops4j.pax.web.service.undertow.PaxWebUndertowExtension;
 import org.ops4j.pax.web.service.whiteboard.ErrorPageMapping;
 import org.ops4j.pax.web.service.whiteboard.FilterMapping;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
@@ -110,6 +114,7 @@ import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletMapping;
 import org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping;
+import org.ops4j.pax.web.websocket.internal.PaxWebWebSocketsServletContainerInitializer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -158,6 +163,11 @@ public class MultiContainerTestSupport {
 	protected Bundle warExtenderBundle;
 	protected BundleContext warExtenderBundleContext;
 	protected Bundle jspBundle;
+
+	protected Bundle wsGenericBundle;
+	protected Bundle wsJettyBundle;
+	protected Bundle wsTomcatBundle;
+	protected Bundle wsUndertowBundle;
 
 	protected Map<Bundle, HttpServiceEnabled> containers = new HashMap<>();
 	protected ServiceReference<WebContainer> containerRef;
@@ -234,6 +244,7 @@ public class MultiContainerTestSupport {
 			if (location != null) {
 				props.put(PaxWebConfig.PID_CFG_SESSION_STORE_DIRECTORY, location);
 			}
+			props.put(PaxWebConfig.PID_CFG_SHOW_STACKS, "true");
 		}, port, runtime, getClass().getClassLoader());
 
 		if (enableJSP()) {
@@ -266,7 +277,7 @@ public class MultiContainerTestSupport {
 		when(containerRef.getProperty(Constants.SERVICE_ID)).thenReturn(42L);
 
 		if (enableWhiteboardExtender()) {
-			whiteboardBundle = mockBundle("org.ops4j.pax.web.pax-web-extender-whiteboard", null, false);
+			whiteboardBundle = mockBundle("org.ops4j.pax.web.pax-web-extender-whiteboard", null, true);
 			whiteboardBundleContext = whiteboardBundle.getBundleContext();
 
 			OsgiContextModel.DEFAULT_CONTEXT_MODEL.setOwnerBundle(whiteboardBundle);
@@ -316,6 +327,31 @@ public class MultiContainerTestSupport {
 			warExtender = new WarExtenderContext(warExtenderBundleContext, warExtenderPool, true);
 			warExtender.webContainerAdded(containerRef);
 		}
+
+		if (enableWebSockets()) {
+			wsGenericBundle = mockBundle("org.ops4j.pax.web.pax-web-websocket", null, false);
+			wsJettyBundle = mockBundle("org.eclipse.jetty.websocket.javax.websocket.server", null, false);
+			wsTomcatBundle = mockBundle("org.ops4j.pax.web.pax-web-tomcat-websocket", null, false);
+			wsUndertowBundle = mockBundle("org.ops4j.pax.web.pax-web-undertow-websocket", null, false);
+
+			when(wsGenericBundle.getBundleId()).thenReturn(201L);
+			when(wsJettyBundle.getBundleId()).thenReturn(202L);
+			when(wsTomcatBundle.getBundleId()).thenReturn(203L);
+			when(wsUndertowBundle.getBundleId()).thenReturn(204L);
+			when(wsGenericBundle.getState()).thenReturn(Bundle.ACTIVE);
+			when(wsJettyBundle.getState()).thenReturn(Bundle.ACTIVE);
+			when(wsTomcatBundle.getState()).thenReturn(Bundle.ACTIVE);
+			when(wsUndertowBundle.getState()).thenReturn(Bundle.ACTIVE);
+
+			when(wsGenericBundle.loadClass(anyString()))
+					.thenAnswer(i -> PaxWebWebSocketsServletContainerInitializer.class.getClassLoader().loadClass(i.getArgument(0, String.class)));
+			when(wsJettyBundle.loadClass(anyString()))
+					.thenAnswer(i -> WebSocketServerContainerInitializer.class.getClassLoader().loadClass(i.getArgument(0, String.class)));
+			when(wsTomcatBundle.loadClass(anyString()))
+					.thenAnswer(i -> WsSci.class.getClassLoader().loadClass(i.getArgument(0, String.class)));
+			when(wsUndertowBundle.loadClass(anyString()))
+					.thenAnswer(i -> PaxWebUndertowExtension.class.getClassLoader().loadClass(i.getArgument(0, String.class)));
+		}
 	}
 
 	@After
@@ -350,6 +386,10 @@ public class MultiContainerTestSupport {
 		return true;
 	}
 
+	protected boolean enableWebSockets() {
+		return false;
+	}
+
 	protected void stopWhiteboardService() {
 		containerRef = null;
 		containers.values().forEach(HttpServiceEnabled::stop);
@@ -374,7 +414,7 @@ public class MultiContainerTestSupport {
 	/**
 	 * Helper method to create mock {@link Bundle} with associated mock {@link BundleContext}.
 	 * @param symbolicName
-	 * @param contextPath a value for {@link PaxWebConstants#CONTEXT_PATH_KEY}
+	 * @param contextPath a value for {@link PaxWebConstants#CONTEXT_PATH_HEADER}
 	 * @param obtainWebContainer whether to configure bundle-scoped {@link WebContainer} reference
 	 *                           for this bundle.
 	 * @return
@@ -391,7 +431,7 @@ public class MultiContainerTestSupport {
 
 		if (contextPath != null) {
 			Dictionary<String, String> headers = new Hashtable<>();
-			headers.put(PaxWebConstants.CONTEXT_PATH_KEY, contextPath);
+			headers.put(PaxWebConstants.CONTEXT_PATH_HEADER, contextPath);
 			when(bundle.getHeaders()).thenReturn(headers);
 		}
 
@@ -883,8 +923,10 @@ public class MultiContainerTestSupport {
 		public final Map<Filter, FilterModel> filters = new IdentityHashMap<>();
 		public final Set<FilterModel> disabledFilterModels = new TreeSet<>();
 		public final Set<ErrorPageModel> disabledErrorPageModels = new TreeSet<>();
-		private final Map<EventListener, EventListenerModel> eventListeners = new IdentityHashMap<>();
-		private final Map<ServletContainerInitializer, ContainerInitializerModel> containerInitializers = new IdentityHashMap<>();
+		public final Map<EventListener, EventListenerModel> eventListeners = new IdentityHashMap<>();
+		public final Map<ServletContainerInitializer, ContainerInitializerModel> containerInitializers = new IdentityHashMap<>();
+		public final Map<Object, WebSocketModel> webSockets = new IdentityHashMap<>();
+		public final Set<WebSocketModel> disabledWebSocketModels = new TreeSet<>();
 
 		private final ServerModel model;
 //		private final Map<String, VirtualHostModel> virtualHosts = new HashMap<>();
@@ -904,6 +946,8 @@ public class MultiContainerTestSupport {
 			disabledErrorPageModels.addAll(getField(model, "disabledErrorPageModels", Set.class));
 			eventListeners.putAll(getField(model, "eventListeners", Map.class));
 			containerInitializers.putAll(getField(model, "containerInitializers", Map.class));
+			webSockets.putAll(getField(model, "webSockets", Map.class));
+			disabledWebSocketModels.addAll(getField(model, "disabledWebSocketModels", Set.class));
 		}
 
 		/**
@@ -927,6 +971,8 @@ public class MultiContainerTestSupport {
 			clean &= disabledErrorPageModels.stream().noneMatch(depm -> depm.getRegisteringBundle().equals(bundle));
 			clean &= eventListeners.values().stream().noneMatch(elm -> elm.getRegisteringBundle().equals(bundle));
 			clean &= containerInitializers.values().stream().noneMatch(cim -> cim.getRegisteringBundle().equals(bundle));
+			clean &= webSockets.values().stream().noneMatch(wsm -> wsm.getRegisteringBundle().equals(bundle));
+			clean &= disabledWebSocketModels.stream().noneMatch(wsm -> wsm.getRegisteringBundle().equals(bundle));
 			return clean;
 		}
 	}
@@ -944,6 +990,7 @@ public class MultiContainerTestSupport {
 		private final Set<WelcomeFileModel> welcomeFileModels = new HashSet<>();
 		private final Set<ErrorPageModel> errorPageModels = new HashSet<>();
 		private final Set<ContainerInitializerModel> containerInitializerModels = new HashSet<>();
+		private final Set<WebSocketModel> webSocketModels = new HashSet<>();
 
 		private final ServiceModel model;
 
@@ -958,6 +1005,7 @@ public class MultiContainerTestSupport {
 			welcomeFileModels.addAll(getField(model, "welcomeFileModels", Set.class));
 			errorPageModels.addAll(getField(model, "errorPageModels", Set.class));
 			containerInitializerModels.addAll(getField(model, "containerInitializerModels", Set.class));
+			webSocketModels.addAll(getField(model, "webSocketModels", Set.class));
 		}
 
 		public boolean isEmpty() {
@@ -968,6 +1016,7 @@ public class MultiContainerTestSupport {
 					&& welcomeFiles.isEmpty()
 					&& welcomeFileModels.isEmpty()
 					&& errorPageModels.isEmpty()
+					&& webSocketModels.isEmpty()
 					&& containerInitializerModels.isEmpty();
 		}
 	}

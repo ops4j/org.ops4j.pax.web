@@ -37,6 +37,7 @@ import org.apache.felix.utils.properties.InterpolationHelper;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -102,8 +103,8 @@ public class Utils {
 				Object k = enumeration.nextElement();
 				Object v = dictionary.get(k);
 
-				String key = null;
-				String value = null;
+				String key;
+				String value;
 
 				if (k instanceof String) {
 					key = (String) k;
@@ -178,7 +179,7 @@ public class Utils {
 			throw new IllegalArgumentException("No class specified to create objectClass-based filter.");
 		}
 
-		String filter = null;
+		String filter;
 
 		if (trackedClass.length == 1) {
 			filter = "(" + Constants.OBJECTCLASS + "=" + trackedClass[0].getName() + ")";
@@ -391,7 +392,7 @@ public class Utils {
 	public static <T> T getPaxWebProperty(ServiceReference<?> serviceReference, String legacyName, String whiteboardName,
 			BiFunction<String, Object, T> propertyProvider) {
 		T value = null;
-		Object propertyValue = null;
+		Object propertyValue;
 		if (legacyName != null) {
 			propertyValue = serviceReference.getProperty(legacyName);
 			if (propertyValue != null) {
@@ -526,6 +527,24 @@ public class Utils {
 	}
 
 	/**
+	 * Find Pax Web bundle for generic (Whiteboard and HttpService) support for WebSockets
+	 * @param bundle
+	 * @return
+	 */
+	public static Bundle getPaxWebWebSocketsBundle(Bundle bundle) {
+		BundleContext ctx = bundle == null ? null : bundle.getBundleContext();
+		if (ctx == null) {
+			return null;
+		}
+		for (Bundle b : ctx.getBundles()) {
+			if ("org.ops4j.pax.web.pax-web-websocket".equals(b.getSymbolicName())) {
+				return b;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Returns a named header from a bundle or from one of its attached fragments
 	 *
 	 * @param bundle
@@ -593,5 +612,24 @@ public class Utils {
 		}
 		return false;
 	}
+
+	/**
+	 * Returns {@code true} if two elements models use at least one {@link OsgiContextModel} referring to the same
+	 * cotext path.
+	 * @param model1
+	 * @param model2
+	 * @return
+	 */
+    public static boolean useSameContextPath(ElementModel<?, ?> model1, ElementModel<?, ?> model2) {
+		for (OsgiContextModel cm1 : model1.getContextModels()) {
+			for (OsgiContextModel cm2 : model2.getContextModels()) {
+				if (cm1.getContextPath().equals(cm2.getContextPath())) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+    }
 
 }

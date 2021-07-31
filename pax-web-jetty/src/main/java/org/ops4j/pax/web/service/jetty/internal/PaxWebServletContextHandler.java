@@ -17,9 +17,14 @@ package org.ops4j.pax.web.service.jetty.internal;
 
 import java.net.URL;
 import java.security.AccessControlContext;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.EventListener;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
@@ -30,7 +35,6 @@ import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
-import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,13 +48,27 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PaxWebServletContextHandler.class);
 
-	private final Collection<SCIWrapper> servletContainerInitializers = new LinkedList<>();
+	// This collection will be ordered by rank/serviceId of the ContainerInitializerModels
+	private final Collection<SCIWrapper> servletContainerInitializers = new TreeSet<>();
 
 				private AccessControlContext accessControllerContext;
 				private URL jettyWebXmlURL;
 				private List<String> virtualHosts;
 
-	private OsgiServletContext osgiServletContext;
+	private ServletContext osgiServletContext;
+
+	/**
+	 * A {@link ThreadLocal} value that helps us collect these attributes that are set by these SCIs that operate
+	 * on Jetty's {@link org.eclipse.jetty.server.handler.ContextHandler} directly. These attributes
+	 * have to be cleared when SCIs change or even when the context is restarted.
+	 */
+	private final ThreadLocal<Boolean> isCallingSCI = ThreadLocal.withInitial(() -> Boolean.FALSE);
+
+	/**
+	 * The collected names of the attributes set directly to Jetty's {@link org.eclipse.jetty.server.handler.ContextHandler}
+	 * which have to be cleared when the container is restarted
+	 */
+	private final Set<String> attributesToClearBeforeRestart = new HashSet<>();
 
 	/**
 	 * Create a slightly extended version of Jetty's {@link ServletContextHandler}. It is still not as complex as
@@ -78,6 +96,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 	}
 
 	public void setServletContainerInitializers(Collection<SCIWrapper> wrappers) {
+		this.servletContainerInitializers.clear();
 		this.servletContainerInitializers.addAll(wrappers);
 	}
 
@@ -86,7 +105,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 	 * proper instance of {@link javax.servlet.ServletContext} - especially in the events passed to listeners
 	 * @param osgiServletContext
 	 */
-	public void setOsgiServletContext(OsgiServletContext osgiServletContext) {
+	public void setOsgiServletContext(ServletContext osgiServletContext) {
 		this.osgiServletContext = osgiServletContext;
 	}
 
@@ -105,19 +124,36 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 		// there are no org.eclipse.jetty.servlet.ServletContextHandler.ServletContainerInitializerCaller beans
 		// because we manage SCIs ourselves
 
+		for (String name : attributesToClearBeforeRestart) {
+			removeAttribute(name);
+		}
+		attributesToClearBeforeRestart.clear();
+
 		servletContainerInitializers.forEach(wrapper -> {
 			ClassLoader tccl = Thread.currentThread().getContextClassLoader();
 			try {
+				getServletContext().setExtendedListenerTypes(true);
 				Thread.currentThread().setContextClassLoader(getClassLoader());
+				isCallingSCI.set(true);
 				wrapper.onStartup();
 			} catch (ServletException e) {
 				LOG.error(e.getMessage(), e);
 			} finally {
+				isCallingSCI.remove();
 				Thread.currentThread().setContextClassLoader(tccl);
+				getServletContext().setExtendedListenerTypes(false);
 			}
 		});
 
 		super.startContext();
+	}
+
+	@Override
+	public void setAttribute(String name, Object value) {
+		if (isCallingSCI.get()) {
+			attributesToClearBeforeRestart.add(name);
+		}
+		super.setAttribute(name, value);
 	}
 
 	@Override
@@ -139,6 +175,30 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 
 		// 7. Do super work
 		super.doStart();
+	}
+
+	@Override
+	protected void doStop() throws Exception {
+		// setEventListeners() method is called during doStop(), existing, durable listeners are added again, but
+		// then durable listeners are cleared, so the "preserved" listener will be lost next time
+		// we have to fix this
+		// TODO: file a Github issue for eclipse/jetty-project
+
+		// here we remember the "durable" listeners
+		List<EventListener> toKeep = new ArrayList<>();
+		for (EventListener el : getEventListeners()) {
+			if (isDurableListener(el)) {
+				toKeep.add(el);
+			}
+		}
+		super.doStop();
+
+		// here we'll remove them and add again, so they're again marked as "durable", because
+		// org.eclipse.jetty.server.handler.ContextHandler._durableListeners was cleared in super.doStop().
+		for (EventListener el : toKeep) {
+			removeEventListener(el);
+			addEventListener(el);
+		}
 	}
 
 }

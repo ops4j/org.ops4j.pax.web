@@ -62,7 +62,7 @@ public class ErrorPageModelChange extends Change {
 
 	@Override
 	public void accept(BatchVisitor visitor) {
-		visitor.visit(this);
+		visitor.visitErrorPageModelChange(this);
 	}
 
 	public List<OsgiContextModel> getContextModels() {

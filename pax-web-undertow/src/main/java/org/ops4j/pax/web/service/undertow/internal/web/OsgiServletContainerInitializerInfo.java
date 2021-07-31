@@ -29,7 +29,8 @@ import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
 /**
  * This {@link ServletContainerInitializerInfo} allows to clear underlying {@link ContainerInitializerModel}.
  */
-public class OsgiServletContainerInitializerInfo extends ServletContainerInitializerInfo {
+public class OsgiServletContainerInitializerInfo extends ServletContainerInitializerInfo
+		implements Comparable<OsgiServletContainerInitializerInfo> {
 
 	private final ContainerInitializerModel model;
 
@@ -59,7 +60,7 @@ public class OsgiServletContainerInitializerInfo extends ServletContainerInitial
 		}
 
 		@Override
-		public InstanceHandle<ServletContainerInitializer> createInstance() throws InstantiationException {
+		public InstanceHandle<ServletContainerInitializer> createInstance() {
 			return new InstanceHandle<ServletContainerInitializer>() {
 				@Override
 				public ServletContainerInitializer getInstance() {
@@ -74,10 +75,14 @@ public class OsgiServletContainerInitializerInfo extends ServletContainerInitial
 
 				@Override
 				public void release() {
-					SCIInstanceFactory.this.model = null;
 				}
 			};
 		}
+	}
+
+	@Override
+	public int compareTo(OsgiServletContainerInitializerInfo o) {
+		return model.compareTo(o.model);
 	}
 
 }

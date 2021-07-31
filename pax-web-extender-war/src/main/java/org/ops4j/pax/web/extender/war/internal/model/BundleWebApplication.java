@@ -1653,6 +1653,9 @@ public class BundleWebApplication {
 			ContainerInitializerModel cim = new ContainerInitializerModel(sci, classesArray);
 			cim.setRegisteringBundle(bundle);
 			cim.addContextModel(ocm);
+			// we add this SCI even if it _may_ be targetted at different runtime. For example Undertow's websockets
+			// bundle may be available, but the target runtime is Tomcat or Jetty. We will fitler out such SCI
+			// in the ServerController itself later.
 			wabBatch.addContainerInitializerModel(cim);
 		});
 

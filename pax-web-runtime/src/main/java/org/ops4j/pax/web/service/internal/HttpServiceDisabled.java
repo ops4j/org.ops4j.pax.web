@@ -361,11 +361,24 @@ class HttpServiceDisabled implements WebContainer {
 		LOG.warn("Http service has already been stopped");
 	}
 
+	// methods used to register annotated web socket endpoints
 
+	@Override
+	public void registerWebSocket(Object webSocket, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
 
+	// methods used to unregister annotated web socket endpoints
 
+	@Override
+	public void unregisterWebSocket(Object webSocket, HttpContext httpContext) {
+		LOG.warn("Http service has already been stopped");
+	}
 
-
+	@Override
+	public String toString() {
+		return "HttpService (disabled) for bundle " + serviceBundle;
+	}
 
 //	/**
 //	 * @see WebContainer#registerLoginConfig(String, String, String, String, HttpContext)
@@ -403,11 +416,6 @@ class HttpServiceDisabled implements WebContainer {
 //	public void unregisterConstraintMapping(HttpContext httpContext) {
 //		LOG.warn("Http service has already been stopped");
 //	}
-//
-//	@Override
-//	public void registerJettyWebXml(URL jettyWebXmlURL, HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
 
 //	@Override
 //	public void setConnectorsAndVirtualHosts(List<String> connectors, List<String> virtualHosts,
@@ -416,33 +424,16 @@ class HttpServiceDisabled implements WebContainer {
 //	}
 //
 //	@Override
-//	public void registerWebSocket(Object webSocket, HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	@Override
-//	public void unregisterWebSocket(Object webSocket, HttpContext httpContext) {
-//		LOG.warn("Http service has already been stoped");
-//	}
-//
-//	@Override
 //	public RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator) {
 //		LOG.warn("Http service has already been stoped");
-//		// FIXME check if null valid
 //		return null;
 //	}
 //
 //	@Override
 //	public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator) {
 //		LOG.warn("Http service has already been stoped");
-//		// FIXME check if null valid
 //		return null;
 //	}
-
-	@Override
-	public String toString() {
-		return "HttpService (disabled) for bundle " + serviceBundle;
-	}
 
 //    @Override
 //    public WebContainerDTO getWebcontainerDTO() {

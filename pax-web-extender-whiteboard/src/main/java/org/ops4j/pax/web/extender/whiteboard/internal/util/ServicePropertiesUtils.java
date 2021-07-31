@@ -61,7 +61,7 @@ public class ServicePropertiesUtils {
 	 * Returns a property as Integer.
 	 *
 	 * @param serviceReference service reference; cannot be null
-	 * @param key              property key; cannot be null
+	 * @param key property key; cannot be null
 	 * @return property value; null if property is not set or property value is
 	 * not an Integer
 	 * @throws NullArgumentException - If service reference is null - If key is null

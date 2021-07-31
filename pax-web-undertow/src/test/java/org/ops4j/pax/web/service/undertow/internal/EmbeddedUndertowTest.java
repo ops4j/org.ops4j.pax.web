@@ -28,10 +28,15 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContainerInitializer;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpFilter;
 import javax.servlet.http.HttpServlet;
@@ -51,11 +56,13 @@ import io.undertow.server.handlers.resource.CachingResourceManager;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.server.handlers.resource.ResourceManager;
 import io.undertow.server.protocol.http.HttpOpenListener;
+import io.undertow.servlet.ServletExtension;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.ServletContainer;
+import io.undertow.servlet.api.ServletContainerInitializerInfo;
 import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.handlers.DefaultServlet;
 import io.undertow.servlet.handlers.ServletChain;
@@ -210,6 +217,129 @@ public class EmbeddedUndertowTest {
 				"If-Modified-Since: " + headers.get("Date"));
 		assertTrue(response.contains("HTTP/1.1 304"));
 		assertFalse(response.contains("rootLogger.appenderRef.stdout.ref = stdout"));
+
+		server.stop();
+	}
+
+	@Test
+	public void dynamicListeners() throws Exception {
+		PathHandler path = Handlers.path();
+		Undertow server = Undertow.builder()
+				.addHttpListener(0, "0.0.0.0")
+				.setHandler(path)
+				.build();
+
+		HttpServlet servletInstance = new HttpServlet() {
+			@Override
+			protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+				LOG.info("Handling request: {}", req.toString());
+				resp.setContentType("text/plain");
+				resp.setCharacterEncoding("UTF-8");
+				resp.getWriter().write("OK1\n");
+				resp.getWriter().close();
+
+				// java.lang.IllegalStateException: UT010041: The servlet context has already been initialized, you can only call this method from a ServletContainerInitializer or a ServletContextListener
+//				req.getServletContext().addServlet("new-servlet", new HttpServlet() {
+//					@Override
+//					protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+//						resp.setContentType("text/plain");
+//						resp.setCharacterEncoding("UTF-8");
+//						resp.getWriter().write("OK2\n");
+//						resp.getWriter().close();
+//					}
+//				}).addMapping("/s2");
+			}
+		};
+
+		ServletInfo servlet = Servlets.servlet("default", servletInstance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servletInstance));
+		servlet.addMapping("/s1");
+
+		DeploymentInfo deploymentInfo = Servlets.deployment()
+				.setClassLoader(this.getClass().getClassLoader())
+				.setContextPath("/c")
+				.setDisplayName("Default Application")
+				.setDeploymentName("")
+				.addServletExtension(new ServletExtension() {
+					@Override
+					public void handleDeployment(DeploymentInfo deploymentInfo, ServletContext servletContext) {
+						// ServletContextListener added by ServletExtension
+						deploymentInfo.addListener(Servlets.listener(ServletContextListener.class, new ImmediateInstanceFactory<>(new ServletContextListener() {
+							@Override
+							public void contextInitialized(ServletContextEvent sce) {
+								// ServletContextListener added from a listener added from extension
+								// throws java.lang.RuntimeException: java.lang.IllegalArgumentException: \
+								//     UT010043: Cannot add servlet context listener from a programatically added listener
+//								sce.getServletContext().addListener(new ServletContextListener() {
+//									@Override
+//									public void contextInitialized(ServletContextEvent sce) {
+//										ServletContextListener.super.contextInitialized(sce);
+//									}
+//								});
+							}
+						})));
+					}
+				})
+				.addServletContainerInitializer(new ServletContainerInitializerInfo(ServletContainerInitializer.class,
+						new ImmediateInstanceFactory<ServletContainerInitializer>(new ServletContainerInitializer() {
+							@Override
+							public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
+								// ServletContextListener added from SCI - this is real "programmatic listener"
+								ctx.addListener(new ServletContextListener() {
+									@Override
+									public void contextInitialized(ServletContextEvent sce) {
+										// ServletContextListener added from a "programmatic listener"
+										// throws (according to the spec)
+										// java.lang.RuntimeException: java.lang.UnsupportedOperationException: \
+										//     UT010042: This method cannot be called from a servlet context listener that has been added programatically
+//										sce.getServletContext().addListener(new ServletContextListener() {
+//											@Override
+//											public void contextInitialized(ServletContextEvent sce) {
+//												ServletContextListener.super.contextInitialized(sce);
+//											}
+//										});
+									}
+								});
+							}
+						}), null))
+				// listener added from web.xml/web-fragment.xml/@WebListener
+				.addListener(Servlets.listener(ServletContextListener.class, new ImmediateInstanceFactory<>(new ServletContextListener() {
+					@Override
+					public void contextInitialized(ServletContextEvent sce) {
+						// ServletContextListener added from a listener added from web.xml
+						// throws java.lang.RuntimeException: java.lang.IllegalArgumentException: \
+						//     UT010043: Cannot add servlet context listener from a programatically added listener
+//						sce.getServletContext().addListener(new ServletContextListener() {
+//							@Override
+//							public void contextInitialized(ServletContextEvent sce) {
+//								ServletContextListener.super.contextInitialized(sce);
+//							}
+//						});
+					}
+				})))
+				.addServlet(servlet)
+				.addServlet(Servlets.servlet(DefaultServlet.class).addMapping("/"))
+				.setUrlEncoding("UTF-8");
+
+		ServletContainer container = Servlets.newContainer();
+		DeploymentManager dm = container.addDeployment(deploymentInfo);
+		dm.deploy();
+		HttpHandler handler = dm.start();
+
+		path.addPrefixPath("/c", handler);
+
+		server.start();
+
+		int port = ((InetSocketAddress) server.getListenerInfo().get(0).getAddress()).getPort();
+
+		String response;
+
+		response = send(port, "/c/s2");
+		assertTrue(response.startsWith("HTTP/1.1 404"));
+		response = send(port, "/c/s1");
+		assertTrue(response.endsWith("\r\n\r\nOK1\n"));
+//		// call servlet added dynamically from the servlet
+//		response = send(port, "/c/s2");
+//		assertTrue(response.endsWith("\r\n\r\nOK2\n"));
 
 		server.stop();
 	}

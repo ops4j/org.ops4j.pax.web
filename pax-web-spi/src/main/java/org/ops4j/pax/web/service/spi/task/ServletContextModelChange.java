@@ -44,7 +44,7 @@ public class ServletContextModelChange extends Change {
 
 	@Override
 	public void accept(BatchVisitor visitor) {
-		visitor.visit(this);
+		visitor.visitServletContextModelChange(this);
 	}
 
 	@Override

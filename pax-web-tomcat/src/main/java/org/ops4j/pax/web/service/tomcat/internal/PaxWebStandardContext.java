@@ -15,7 +15,9 @@
  */
 package org.ops4j.pax.web.service.tomcat.internal;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -28,14 +30,20 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.catalina.Container;
+import org.apache.catalina.LifecycleException;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.valves.ValveBase;
+import org.apache.tomcat.util.descriptor.web.ErrorPage;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiFilterChain;
+import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
+import org.ops4j.pax.web.service.spi.servlet.RegisteringContextListener;
 import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
 import org.osgi.service.http.whiteboard.Preprocessor;
 import org.slf4j.Logger;
@@ -71,7 +79,7 @@ public class PaxWebStandardContext extends StandardContext {
 	private PaxWebFilterDef osgiInitFilterDef;
 
 	/** Highest ranked {@link OsgiServletContext} set when Tomcat's context starts */
-	private OsgiServletContext osgiServletContext;
+	private ServletContext osgiServletContext;
 
 	/**
 	 * {@link Preprocessor} are registered as filters, but without particular target
@@ -81,7 +89,7 @@ public class PaxWebStandardContext extends StandardContext {
 	private final List<Preprocessor> preprocessors = new LinkedList<>();
 
 	private final Collection<SCIWrapper> servletContainerInitializers = new LinkedList<>();
-	private final List<Object> applicationLifecycleListener = new LinkedList<>();
+	private final List<Object> applicationLifecycleListeners = new LinkedList<>();
 
 	public PaxWebStandardContext(Default404Servlet defaultServlet) {
 		super();
@@ -159,7 +167,7 @@ public class PaxWebStandardContext extends StandardContext {
 	 * proper instance of {@link javax.servlet.ServletContext} - especially in the events passed to listeners
 	 * @param osgiServletContext
 	 */
-	public void setOsgiServletContext(OsgiServletContext osgiServletContext) {
+	public void setOsgiServletContext(ServletContext osgiServletContext) {
 		this.osgiServletContext = osgiServletContext;
 	}
 
@@ -175,10 +183,12 @@ public class PaxWebStandardContext extends StandardContext {
 
 	@Override
 	public ServletContext getServletContext() {
+		// we have to initialize it if it's not done already
+		ServletContext superContext = super.getServletContext();
 		if (osgiServletContext != null) {
 			return osgiServletContext;
 		}
-		return super.getServletContext();
+		return superContext;
 	}
 
 	@Override
@@ -205,6 +215,12 @@ public class PaxWebStandardContext extends StandardContext {
 		}
 
 		if (ok) {
+			// first, Tomcat doesn't have to be aware of ANY application lifecycle listeners (call this method
+			// through super pointer!)
+			// only when it finds sets us the instances (we override this method) we can start returning
+			// them - that's the only way to prevent Tomcat passing org.apache.catalina.core.StandardContext.NoPluggabilityServletContext
+			// to our listeners
+			super.setApplicationLifecycleListeners(new Object[0]);
 			return super.listenerStart();
 		}
 
@@ -212,26 +228,118 @@ public class PaxWebStandardContext extends StandardContext {
 	}
 
 	@Override
+	protected synchronized void stopInternal() throws LifecycleException {
+		// org.apache.catalina.core.StandardContext.resetContext() will be call so we have to preserve some
+		// items from the context
+		Container[] children = findChildren();
+		Object[] applicationEventListeners = getApplicationEventListeners();
+		Object[] applicationLifecycleListeners = getApplicationLifecycleListeners();
+
+		super.stopInternal();
+
+		for (Object el : applicationEventListeners) {
+			addApplicationEventListener(el);
+		}
+		for (Object el : applicationLifecycleListeners) {
+			// restore in super fields
+			super.addApplicationLifecycleListener(el);
+		}
+		for (Container child : children) {
+			if (child instanceof PaxWebStandardWrapper) {
+				PaxWebStandardWrapper pwsw = ((PaxWebStandardWrapper) child);
+				ServletModel model = pwsw.getServletModel();
+				OsgiScopedServletContext osgiServletContext = (OsgiScopedServletContext) pwsw.getServletContext();
+				PaxWebStandardWrapper wrapper = new PaxWebStandardWrapper(model,
+						pwsw.getOsgiContextModel(), osgiServletContext.getOsgiContext(), this);
+
+				boolean isDefaultResourceServlet = model.isResourceServlet();
+				for (String pattern : model.getUrlPatterns()) {
+					isDefaultResourceServlet &= "/".equals(pattern);
+				}
+				if (model.isResourceServlet()) {
+					wrapper.addInitParameter("pathInfoOnly", Boolean.toString(!isDefaultResourceServlet));
+				}
+				addChild(wrapper);
+
+				// <servlet-mapping>
+				String name = model.getName();
+				for (String pattern : model.getUrlPatterns()) {
+					addServletMappingDecoded(pattern, name, false);
+				}
+
+				// are there any error page declarations in the model?
+				ErrorPageModel epm = model.getErrorPageModel();
+				if (epm != null) {
+					String location = epm.getLocation();
+					for (String ex : epm.getExceptionClassNames()) {
+						ErrorPage errorPage = new ErrorPage();
+						errorPage.setExceptionType(ex);
+						errorPage.setLocation(location);
+						addErrorPage(errorPage);
+					}
+					for (int code : epm.getErrorCodes()) {
+						ErrorPage errorPage = new ErrorPage();
+						errorPage.setErrorCode(code);
+						errorPage.setLocation(location);
+						addErrorPage(errorPage);
+					}
+					if (epm.isXx4()) {
+						for (int c = 400; c < 500; c++) {
+							ErrorPage errorPage = new ErrorPage();
+							errorPage.setErrorCode(c);
+							errorPage.setLocation(location);
+							addErrorPage(errorPage);
+						}
+					}
+					if (epm.isXx5()) {
+						for (int c = 500; c < 600; c++) {
+							ErrorPage errorPage = new ErrorPage();
+							errorPage.setErrorCode(c);
+							errorPage.setLocation(location);
+							addErrorPage(errorPage);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	@Override
 	public void addApplicationLifecycleListener(Object listener) {
 		// override, so Tomcat doesn't know about "application lifecycle listeners", a.k.a. "no pluggability listeners"
-		// because we enforce Section 4.4 of the Servlet 3.0 specification
-		this.applicationLifecycleListener.add(listener);
+		// because we enforce Section 4.4 of the Servlet 3.0 specificationin different way
+		this.applicationLifecycleListeners.add(listener);
+	}
+
+	/**
+	 * When removing listeners, we have to remove them from this "hijack list" too
+	 * @param listener
+	 */
+	public void removeApplicationLifecycleListener(Object listener) {
+		applicationLifecycleListeners.remove(listener);
 	}
 
 	@Override
 	public void setApplicationLifecycleListeners(Object[] listeners) {
-		Object[] newListeners = new Object[listeners == null ? applicationLifecycleListener.size()
-				: listeners.length + applicationLifecycleListener.size()];
+		// we have to prevent adding the same listeners multiple times - this may happen when Tomcat
+		// context is restarted and we have a mixture of Whiteboards listeners, listeners added by SCIs and
+		// listeners from other listener
+		List<Object> newListeners = new ArrayList<>();
 		if (listeners != null) {
-			System.arraycopy(listeners, 0, newListeners, 0, listeners.length);
+			Collections.addAll(newListeners, listeners);
 		}
-		int pos = listeners == null ? 0 : listeners.length;
-		for (Object l : applicationLifecycleListener) {
-			newListeners[pos++] = l;
+		for (Object l : applicationLifecycleListeners) {
+			if (!newListeners.contains(l)) {
+				newListeners.add(l);
+			}
 		}
 
 		// Add all listeners as "pluggability listeners"
-		super.setApplicationLifecycleListeners(newListeners);
+		super.setApplicationLifecycleListeners(newListeners.toArray());
+	}
+
+	public void clearApplicationLifecycleListeners() {
+		applicationLifecycleListeners.removeIf(l -> l instanceof RegisteringContextListener);
 	}
 
 	public void setDefaultOsgiContextModel(OsgiContextModel defaultOsgiContextModel) {

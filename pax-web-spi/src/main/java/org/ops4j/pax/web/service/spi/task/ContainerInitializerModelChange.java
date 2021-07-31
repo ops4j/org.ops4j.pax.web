@@ -58,7 +58,7 @@ public class ContainerInitializerModelChange extends Change {
 
 	@Override
 	public void accept(BatchVisitor visitor) {
-		visitor.visit(this);
+		visitor.visitContainerInitializerModelChange(this);
 	}
 
 	public List<OsgiContextModel> getNewModels() {

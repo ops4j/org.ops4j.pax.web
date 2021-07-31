@@ -16,6 +16,7 @@
 package org.ops4j.pax.web.service.undertow;
 
 import io.undertow.servlet.api.DeploymentInfo;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.undertow.configuration.model.UndertowConfiguration;
 
 /**
@@ -32,7 +33,15 @@ public interface PaxWebUndertowExtension {
 	 * @param deploymentInfo
 	 * @param configuration
 	 * @param support
+	 * @param osgiContextModel
 	 */
-	void handleDeployment(DeploymentInfo deploymentInfo, UndertowConfiguration configuration, UndertowSupport support);
+	void handleDeployment(DeploymentInfo deploymentInfo, UndertowConfiguration configuration,
+			UndertowSupport support, OsgiContextModel osgiContextModel);
+
+	/**
+	 * Extensions may alter the {@link DeploymentInfo}, so they have to clean up after themselves
+	 * @param deploymentInfo
+	 */
+	void cleanDeployment(DeploymentInfo deploymentInfo);
 
 }

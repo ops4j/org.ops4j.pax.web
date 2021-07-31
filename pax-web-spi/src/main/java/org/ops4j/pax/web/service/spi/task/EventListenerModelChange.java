@@ -51,6 +51,10 @@ public class EventListenerModelChange extends Change {
 		return eventListenerModels;
 	}
 
+	public boolean isDynamic() {
+		return eventListenerModel != null && eventListenerModel.isDynamic();
+	}
+
 	public List<OsgiContextModel> getNewModels() {
 		return newModels;
 	}
@@ -72,7 +76,7 @@ public class EventListenerModelChange extends Change {
 
 	@Override
 	public void accept(BatchVisitor visitor) {
-		visitor.visit(this);
+		visitor.visitEventListenerModelChange(this);
 	}
 
 	public List<OsgiContextModel> getContextModels() {

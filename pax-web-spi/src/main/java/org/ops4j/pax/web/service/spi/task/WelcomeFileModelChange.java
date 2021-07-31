@@ -46,7 +46,7 @@ public class WelcomeFileModelChange extends Change {
 
 	@Override
 	public void accept(BatchVisitor visitor) {
-		visitor.visit(this);
+		visitor.visitWelcomeFileModelChange(this);
 	}
 
 	public List<OsgiContextModel> getContextModels() {

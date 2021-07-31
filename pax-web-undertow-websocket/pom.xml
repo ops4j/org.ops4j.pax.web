@@ -51,6 +51,8 @@
 							<!-- from pax-logging-api -->
 							org.slf4j;version="[1.7,2)",
 
+							org.ops4j.pax.web.service.spi.model,
+							org.ops4j.pax.web.service.spi.servlet,
 							org.ops4j.pax.web.service.undertow,
 							org.ops4j.pax.web.service.undertow.configuration.model,
 
@@ -72,6 +74,10 @@
 
 		<!-- pax-web own artifacts -->
 
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-spi</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-undertow</artifactId>

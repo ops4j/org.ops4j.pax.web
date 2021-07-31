@@ -136,6 +136,9 @@ public abstract class ElementModel<T, D extends WebElementEventData>
 	 * exceptions thrown for all validation problems. In Whiteboard scenario, the exception is caught, logged and
 	 * it's the tracker that prevents further registration.</p>
 	 *
+	 * <p>This method <em>may</em> alter the state of the model when (which is possible during validation) some
+	 * extra information is obtained/compiled/processed.</p>
+	 *
 	 * @return
 	 */
 	public abstract Boolean performValidation() throws Exception;
@@ -318,19 +321,19 @@ public abstract class ElementModel<T, D extends WebElementEventData>
 	 */
 	@Override
 	public int compareTo(ElementModel<T, D> o) {
-		int c1 = this.serviceRank - o.serviceRank;
+		int c1 = Integer.compare(this.serviceRank, o.serviceRank);
 		if (c1 != 0) {
 			// higher rank - "lesser" service in terms of order
 			return -c1;
 		}
 		// higher service id - "greater" service in terms of order
-		int c2 = (int)(this.serviceId - o.serviceId);
+		int c2 = Long.compare(this.serviceId, o.serviceId);
 		if (c2 != 0) {
 			return c2;
 		}
 
 		// we need some fallback here - prefer model created earlier
-		return this.getNumericId() - o.getNumericId();
+		return Integer.compare(this.getNumericId(), o.getNumericId());
 	}
 
 	// ---+ equals() and hashCode() become final in ElementModel because this class requires strong identity

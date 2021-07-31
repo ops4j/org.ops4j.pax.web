@@ -15,7 +15,6 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EventListener;
@@ -58,10 +57,12 @@ import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEventData;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
+import org.ops4j.pax.web.service.spi.task.ClearDynamicRegistrationsChange;
 import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
@@ -72,6 +73,7 @@ import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
+import org.ops4j.pax.web.service.spi.task.WebSocketModelChange;
 import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.whiteboard.ContextMapping;
@@ -344,6 +346,16 @@ public class ServerModel implements BatchVisitor {
 	private final Map<ServletContainerInitializer, ContainerInitializerModel> containerInitializers = new IdentityHashMap<>();
 
 	/**
+	 * Keeps WebSockets to check for conflicts - both by instance and by {@link Class}
+	 */
+	private final Map<Object, WebSocketModel> webSockets = new IdentityHashMap<>();
+
+	/**
+	 * Currently disabled Web Socket models
+	 */
+	private final Set<WebSocketModel> disabledWebSocketModels = new TreeSet<>();
+
+	/**
 	 * Creates new global model of all web applications with {@link Executor} to be used for configuration and
 	 * registration tasks.
 	 * @param executor
@@ -570,7 +582,7 @@ public class ServerModel implements BatchVisitor {
 			// REMOVE the previous instance (potentially leading to re-registration of existing servlets)
 			// This is the only (Pax Web special) way to alter existing, HttpService-related context
 			ContextKey key = ContextKey.of(contextModel);
-			TreeSet<OsgiContextModel> models = null;
+			TreeSet<OsgiContextModel> models;
 			if (contextModel.isShared()) {
 				models = sharedContexts.get(key.contextId);
 			} else {
@@ -612,7 +624,7 @@ public class ServerModel implements BatchVisitor {
 			batch.disassociateOsgiContextModel(contextModel.resolveHttpContext(null), contextModel);
 
 			ContextKey key = ContextKey.of(contextModel);
-			TreeSet<OsgiContextModel> models = null;
+			TreeSet<OsgiContextModel> models;
 			if (contextModel.isShared()) {
 				models = sharedContexts.get(key.contextId);
 			} else {
@@ -983,6 +995,22 @@ public class ServerModel implements BatchVisitor {
 
 		// shared contexts
 		contexts.addAll(sharedContexts.values().stream().map(Utils::getHighestRankedModel).collect(Collectors.toSet()));
+
+		return contexts;
+	}
+
+	public List<OsgiContextModel> getAllBundleOsgiContextModels(Bundle bundle) {
+		final List<OsgiContextModel> contexts = new LinkedList<>();
+
+		// bundle contexts
+		runSilently(() -> {
+			bundleContexts.forEach((context, set) -> {
+				if (bundle.equals(context.bundle)) {
+					contexts.addAll(set);
+				}
+			});
+			return null;
+		});
 
 		return contexts;
 	}
@@ -1438,6 +1466,14 @@ public class ServerModel implements BatchVisitor {
 		return disabledServletModels;
 	}
 
+	public Collection<ContainerInitializerModel> getContainerInitializerModels() {
+		return containerInitializers.values();
+	}
+
+	public Set<WebSocketModel> getDisabledWebSocketModels() {
+		return disabledWebSocketModels;
+	}
+
 	/**
 	 * <p>Validates {@link FilterModel} and adds relevant batch operations if validation is successful.</p>
 	 *
@@ -1773,11 +1809,6 @@ public class ServerModel implements BatchVisitor {
 	}
 
 	@PaxWebConfiguration
-	public void removeContainerInitializerModels(List<ContainerInitializerModel> models, Batch batch) {
-		batch.removeContainerInitializerModels(models);
-	}
-
-	@PaxWebConfiguration
 	public void addWelcomeFileModel(WelcomeFileModel model, Batch batch) {
 		if (model.getContextModels().isEmpty()) {
 			throw new IllegalArgumentException("Can't register " + model + ", it is not associated with any context");
@@ -2015,7 +2046,7 @@ public class ServerModel implements BatchVisitor {
 			throw new IllegalStateException("pax-web-jsp bundle is not installed. Can't register JSP servlet.");
 		}
 
-		Class<? extends Servlet> jspServletClass = null;
+		Class<? extends Servlet> jspServletClass;
 		try {
 			jspServletClass = (Class<? extends Servlet>) paxWebJsp.loadClass(PaxWebConstants.DEFAULT_JSP_SERVLET_CLASS);
 		} catch (ClassNotFoundException e) {
@@ -2048,8 +2079,8 @@ public class ServerModel implements BatchVisitor {
 		if (paxWebJsp == null) {
 			throw new IllegalStateException("pax-web-jsp bundle is not installed. Can't register JSP servlet.");
 		}
-		Class<? extends ServletContainerInitializer> jspSCIClass = null;
-		ServletContainerInitializer sci = null;
+		Class<? extends ServletContainerInitializer> jspSCIClass;
+		ServletContainerInitializer sci;
 		try {
 			jspSCIClass = (Class<? extends ServletContainerInitializer>) paxWebJsp.loadClass(PaxWebConstants.DEFAULT_JSP_SCI_CLASS);
 			sci = jspSCIClass.newInstance();
@@ -2061,10 +2092,235 @@ public class ServerModel implements BatchVisitor {
 		return new ContainerInitializerModel(sci, null);
 	}
 
+	@PaxWebConfiguration
+	public void addWebSocketModel(WebSocketModel model, Batch batch) {
+		if (model.getContextModels().isEmpty()) {
+			throw new IllegalArgumentException("Can't register " + model + ", it is not associated with any context");
+		}
+
+		Object wsInstance = model.getWebSocketEndpoint();
+		if (wsInstance != null && webSockets.containsKey(wsInstance)) {
+			throw new IllegalArgumentException("Can't register web socket " + wsInstance + ", it has"
+					+ " already been registered using " + webSockets.get(wsInstance));
+		}
+
+		Class<?> wsClass = model.getWebSocketEndpointClass();
+		if (wsClass != null && webSockets.containsKey(wsClass)) {
+			throw new IllegalArgumentException("Can't register web socket by class " + wsClass + ", it has"
+					+ " already been registered using " + webSockets.get(wsClass));
+		}
+
+		Set<ServletContextModel> targetServletContexts = getServletContextModels(model);
+
+		// URL mapping checking - much easier than with servlets/filters, as WebSocket can be mapped only under
+		// a single path
+
+		boolean register = true;
+		Set<WebSocketModel> newlyDisabled = new HashSet<>();
+
+		for (ServletContextModel sc : targetServletContexts) {
+			WebSocketModel existing = sc.getWebSocketUrlPathMapping().get(model.getMappedPath());
+			if (existing != null) {
+				// service.ranking/service.id checking
+				if (model.compareTo(existing) < 0) {
+					// we won
+					newlyDisabled.add(existing);
+				} else {
+					LOG.warn("{} can't be registered now in context {} under \"{}\" mapping. Conflict with {}.",
+							model, sc.getContextPath(), model.getMappedPath(), existing);
+					register = false;
+					break;
+				}
+			}
+		}
+
+		if (!register) {
+			LOG.warn("Skipped registration of {} because of existing mappings. WebSocket will be added as \"awaiting"
+					+ " registration\".", model);
+			// register the model as "awaiting" without touching existing mappings
+			batch.addDisabledWebSocketModel(model);
+			return;
+		}
+
+		for (WebSocketModel existing : newlyDisabled) {
+			// disable it even if it can stay active in some context(s)
+			batch.disableWebSocketModel(existing);
+		}
+
+		if (newlyDisabled.isEmpty()) {
+			// just add the model. In other case we sill have to do more checks, because newly disabled models
+			// may lead to re-enablement of currently disabled models which are higher ranked than our new model
+			batch.addWebSocketModel(model);
+			return;
+		}
+
+		// it's quite problematic part. we're in the method that only prepares the batch, but doesn't
+		// yet change the model itself. Before the model is affected, we'll send this batch to
+		// target runtime, so we already need to perform more complex calculation here, using temporary collections
+
+		// each disabled servletModel may be a reason to enable other models. Currently disabled
+		// ServerModels (+ our new model) may be enabled ONLY if they can be enabled in ALL associated contexts
+
+		Map<String, Map<String, WebSocketModel>> currentlyEnabledByPath = new HashMap<>();
+		Set<WebSocketModel> currentlyDisabled = new TreeSet<>();
+		prepareWebSocketsSnapshot(currentlyEnabledByPath, currentlyDisabled, model, newlyDisabled);
+
+		reEnableWebSocketModels(currentlyDisabled, currentlyEnabledByPath, model, batch);
+
+		if (currentlyDisabled.contains(model)) {
+			batch.addDisabledWebSocketModel(model);
+		}
+	}
+
+	@PaxWebConfiguration
+	public void removeWebSocketModels(List<WebSocketModel> models, Batch batch) {
+		Map<WebSocketModel, Boolean> modelsAndStates = new LinkedHashMap<>();
+		models.forEach(m -> {
+			modelsAndStates.put(m, !disabledWebSocketModels.contains(m));
+		});
+		batch.removeWebSocketModels(modelsAndStates);
+
+		Map<String, Map<String, WebSocketModel>> currentlyEnabledByPath = new HashMap<>();
+		Set<WebSocketModel> currentlyDisabled = new TreeSet<>();
+		prepareWebSocketsSnapshot(currentlyEnabledByPath, currentlyDisabled, null, new HashSet<>(models));
+
+		// review all disabled web socket models (in ranking order) to verify if they can be enabled again
+		reEnableWebSocketModels(currentlyDisabled, currentlyEnabledByPath, null, batch);
+	}
+
+	/**
+	 * Preparation for {@link #reEnableWebSocketModels(Set, Map, WebSocketModel, Batch)} that does
+	 * proper copy of current state of all {@link ServletContextModel}
+	 *
+	 * @param currentlyEnabledByPath
+	 * @param currentlyDisabled
+	 * @param newlyAdded prepared snapshot will include newly added model as currentlyDisabled
+	 *        (to enable it potentially)
+	 * @param newlyDisabled prepared snapshot will already have newlyDisabled models removed from snapshot mappings
+	 */
+	public void prepareWebSocketsSnapshot(Map<String, Map<String, WebSocketModel>> currentlyEnabledByPath,
+			Set<WebSocketModel> currentlyDisabled,
+			WebSocketModel newlyAdded, Set<WebSocketModel> newlyDisabled) {
+
+		currentlyDisabled.addAll(disabledWebSocketModels);
+
+		servletContexts.values().forEach(scm -> {
+			String path = scm.getContextPath();
+			// deep copies
+			Map<String, WebSocketModel> enabledByPath = new HashMap<>(scm.getWebSocketUrlPathMapping());
+			currentlyEnabledByPath.put(path, enabledByPath);
+
+			// newlyDisabled are scheduled for disabling (in batch), so let's remove them from the snapshot
+			if (newlyDisabled != null) {
+				newlyDisabled.forEach(wsm -> {
+					getServletContextModels(wsm).forEach(scm2 -> {
+						if (scm.equals(scm2)) {
+							enabledByPath.remove(wsm.getMappedPath(), wsm);
+						}
+					});
+				});
+			}
+		});
+
+		// newlyAdded is for now only "offered" to be registered as active, because if new model causes
+		// disabling of existing model, other (disabled) model may be better than the newly registered one
+		if (newlyAdded != null) {
+			currentlyDisabled.add(newlyAdded);
+		}
+	}
+
+	/**
+	 * <p>Fragile method used both during web socket registration and unregistration. Similar to (and simpler than)
+	 * equivalent method for servlets.</p>
+	 *
+	 * <p>This method has to be provided with current snapshot of all disabled and registered web sockets and will
+	 * be called recursively because every "woken up" model may lead to disabling of other models, which again
+	 * may enable other models and so on...</p>
+	 *
+	 * @param currentlyDisabled currently disabled models - this collection may be shrunk in this method. Every
+	 *        model removed from this collection will be batched for enabling
+	 * @param currentlyEnabledByPath temporary state of web sockets per context - may be altered during invocation
+	 * @param modelToEnable newly added model (could be {@code null}) - needed because when adding new filter, it
+	 *        is initialy treated as disabled. We have to decide then whether to enable existing model or add
+	 *        this new one
+	 * @param batch this {@link Batch} will collect avalanche of possible disable/enable operations
+	 */
+	private void reEnableWebSocketModels(Set<WebSocketModel> currentlyDisabled,
+			Map<String, Map<String, WebSocketModel>> currentlyEnabledByPath, WebSocketModel modelToEnable, Batch batch) {
+
+		Set<WebSocketModel> newlyDisabled = new LinkedHashSet<>();
+		boolean change = false;
+
+		// reviewed using TreeSet, i.e., by proper ranking
+		for (Iterator<WebSocketModel> iterator = currentlyDisabled.iterator(); iterator.hasNext(); ) {
+			// this is the highest ranked, currently disabled web socket model
+			WebSocketModel disabled = iterator.next();
+			boolean canBeEnabled = true;
+			newlyDisabled.clear();
+
+			Set<ServletContextModel> contextsOfDisabledModel = getServletContextModels(disabled);
+
+			for (ServletContextModel sc : contextsOfDisabledModel) {
+				String cp = sc.getContextPath();
+
+				// URL mapping check
+				WebSocketModel existingMapping = currentlyEnabledByPath.get(cp).get(disabled.getMappedPath());
+				if (existingMapping != null) {
+					// URL conflict with existing, enabled model. BUT currently disabled model may have
+					// higher ranking...
+					if (disabled.compareTo(existingMapping) < 0) {
+						// still can be enabled (but we have to check everything) and currently disabled
+						// may potentially get disabled
+						newlyDisabled.add(existingMapping);
+					} else {
+						canBeEnabled = false;
+						break;
+					}
+				}
+			}
+
+			// disabled model can be enabled again - in all its contexts
+			if (canBeEnabled) {
+				newlyDisabled.forEach(model -> {
+					// disable the one that has lost
+					batch.disableWebSocketModel(model);
+
+					// and forget about it in the snapshot
+					getServletContextModels(model).forEach(scm -> {
+						currentlyEnabledByPath.get(scm.getContextPath()).remove(model.getMappedPath());
+					});
+
+					// do NOT add newlyDisabled to "currentlyDisabled" - we don't want to check if they can be enabled!
+				});
+
+				// update the snapshot - newly enabled model should be visible as the one registered
+				for (ServletContextModel sc : contextsOfDisabledModel) {
+					currentlyEnabledByPath.get(sc.getContextPath()).put(disabled.getMappedPath(), null);
+				}
+				if (modelToEnable != null && modelToEnable.equals(disabled)) {
+					batch.addWebSocketModel(disabled);
+				} else {
+					batch.enableWebSocketModel(disabled);
+				}
+				// remove - to check if our new model should later be added as disabled
+				iterator.remove();
+				change = true;
+			}
+			if (change) {
+				// exit the loop (leaving some currently disabled models not checked) and get ready for recursion
+				break;
+			}
+		} // end of "for" loop that checks all currently disabled models that can potentially be enabled
+
+		if (change) {
+			reEnableWebSocketModels(currentlyDisabled, currentlyEnabledByPath, modelToEnable, batch);
+		}
+	}
+
 	// --- batch operation visit() methods performed without validation, because it was done earlier
 
 	@Override
-	public void visit(ServletContextModelChange change) {
+	public void visitServletContextModelChange(ServletContextModelChange change) {
 		if (change.getKind() == OpCode.ADD) {
 			ServletContextModel model = change.getServletContextModel();
 			this.servletContexts.put(model.getContextPath(), model);
@@ -2075,7 +2331,7 @@ public class ServerModel implements BatchVisitor {
 	}
 
 	@Override
-	public void visit(OsgiContextModelChange change) {
+	public void visitOsgiContextModelChange(OsgiContextModelChange change) {
 		switch (change.getKind()) {
 			case ASSOCIATE: {
 				OsgiContextModel model = change.getOsgiContextModel();
@@ -2103,7 +2359,7 @@ public class ServerModel implements BatchVisitor {
 	}
 
 	@Override
-	public void visit(ServletModelChange change) {
+	public void visitServletModelChange(ServletModelChange change) {
 		switch (change.getKind()) {
 			case ADD: {
 				ServletModel model = change.getServletModel();
@@ -2196,7 +2452,7 @@ public class ServerModel implements BatchVisitor {
 	}
 
 	@Override
-	public void visit(FilterModelChange change) {
+	public void visitFilterModelChange(FilterModelChange change) {
 		switch (change.getKind()) {
 			case ADD: {
 				FilterModel model = change.getFilterModel();
@@ -2262,12 +2518,12 @@ public class ServerModel implements BatchVisitor {
 	}
 
 	@Override
-	public void visit(FilterStateChange change) {
+	public void visitFilterStateChange(FilterStateChange change) {
 		// no op here - handled at ServerController level only
 	}
 
 	@Override
-	public void visit(EventListenerModelChange change) {
+	public void visitEventListenerModelChange(EventListenerModelChange change) {
 		switch (change.getKind()) {
 			case ADD: {
 				EventListenerModel model = change.getEventListenerModel();
@@ -2293,12 +2549,12 @@ public class ServerModel implements BatchVisitor {
 	}
 
 	@Override
-	public void visit(WelcomeFileModelChange change) {
+	public void visitWelcomeFileModelChange(WelcomeFileModelChange change) {
 		// no need to store welcome files at ServerModel level, because we don't have to check for any conflicts
 	}
 
 	@Override
-	public void visit(ErrorPageModelChange change) {
+	public void visitErrorPageModelChange(ErrorPageModelChange change) {
 		switch (change.getKind()) {
 			case ADD: {
 				ErrorPageModel model = change.getErrorPageModel();
@@ -2362,12 +2618,12 @@ public class ServerModel implements BatchVisitor {
 	}
 
 	@Override
-	public void visit(ErrorPageStateChange change) {
+	public void visitErrorPageStateChange(ErrorPageStateChange change) {
 		// no op here - handled at ServerController level only
 	}
 
 	@Override
-	public void visit(ContainerInitializerModelChange change) {
+	public void visitContainerInitializerModelChange(ContainerInitializerModelChange change) {
 		switch (change.getKind()) {
 			case ADD: {
 				ContainerInitializerModel model = change.getContainerInitializerModel();
@@ -2392,24 +2648,138 @@ public class ServerModel implements BatchVisitor {
 		}
 	}
 
+	@Override
+	public void visitWebSocketModelChange(WebSocketModelChange change) {
+		switch (change.getKind()) {
+			case ADD: {
+				WebSocketModel model = change.getWebSocketModel();
 
+				// add new WebSocketModel to all target contexts
+				Set<ServletContextModel> servletContexts = getServletContextModels(model);
+				servletContexts.forEach(sc -> {
+					if (change.isDisabled()) {
+						// registered initially as disabled
+						disabledWebSocketModels.add(model);
+					} else {
+						sc.getWebSocketUrlPathMapping().put(model.getMappedPath(), model);
+					}
+				});
 
+				if (model.getWebSocketEndpoint() != null) {
+					webSockets.put(model.getWebSocketEndpoint(), model);
+				}
+				if (model.getWebSocketEndpointClass() != null) {
+					webSockets.put(model.getWebSocketEndpointClass(), model);
+				}
+				break;
+			}
+			case MODIFY:
+				break;
+			case DELETE: {
+				Collection<WebSocketModel> models = change.getWebSocketModels().keySet();
 
+				models.forEach(model -> {
+					if (model.getWebSocketEndpoint() != null) {
+						webSockets.remove(model.getWebSocketEndpoint(), model);
+					}
+					if (model.getWebSocketEndpointClass() != null) {
+						webSockets.remove(model.getWebSocketEndpointClass(), model);
+					}
+					// could be among disabled ones
+					boolean wasDisabled = disabledWebSocketModels.remove(model);
 
+					if (!wasDisabled) {
+						// remove WebSocketModel from all target contexts. disabled model was not available there
+						Set<ServletContextModel> servletContexts = getServletContextModels(model);
+						servletContexts.forEach(sc -> {
+							// use special, 2-arg version of map.remove()
+							sc.getWebSocketUrlPathMapping().remove(model.getMappedPath(), model);
+						});
+					}
+				});
+				break;
+			}
+			case ENABLE: {
+				WebSocketModel model = change.getWebSocketModel();
+				// enable a web socket in all associated contexts
+				Set<ServletContextModel> servletContexts = getServletContextModels(model);
+				servletContexts.forEach(sc -> sc.enableWebSocketModel(model));
+				disabledWebSocketModels.remove(model);
+				break;
+			}
+			case DISABLE: {
+				WebSocketModel model = change.getWebSocketModel();
+				disabledWebSocketModels.add(model);
+				// disable a web socket in all associated contexts
+				Set<ServletContextModel> servletContexts = getServletContextModels(model);
+				servletContexts.forEach(sc -> sc.disableWebSocketModel(model));
+				break;
+			}
+			default:
+				break;
+		}
+	}
 
+	@Override
+	public void visitClearDynamicRegistrationsChange(ClearDynamicRegistrationsChange change) {
+		// no need to check any conflicts here, as everything is checked when the dynamic servlets/filters/listeners
+		// are registered in the first place
 
+		// servlets
+		for (Iterator<Map.Entry<Servlet, ServletModel>> iterator = servlets.entrySet().iterator(); iterator.hasNext(); ) {
+			Map.Entry<Servlet, ServletModel> e = iterator.next();
+			Servlet servlet = e.getKey();
+			ServletModel model = e.getValue();
+			if (model.isDynamic()) {
+				// let's be predictive here..
+				disabledServletModels.remove(model);
+				getServletContextModels(model).forEach(sc -> {
+					sc.getServletNameMapping().remove(model.getName(), model);
+					if (model.getAlias() != null) {
+						// should not happen
+						sc.getAliasMapping().remove(model.getAlias(), model);
+					}
+					Arrays.stream(model.getUrlPatterns())
+							.forEach(p -> sc.getServletUrlPatternMapping().remove(p, model));
+					ErrorPageModel epModel = model.getErrorPageModel();
+					if (epModel != null) {
+						disabledErrorPageModels.remove(epModel);
+						for (String page : epModel.getErrorPages()) {
+							sc.getErrorPageMapping().remove(page, epModel);
+						}
+					}
+				});
+				iterator.remove();
+			}
+		}
 
+		// filters
+		for (Iterator<Map.Entry<Filter, FilterModel>> iterator = filters.entrySet().iterator(); iterator.hasNext(); ) {
+			Map.Entry<Filter, FilterModel> e = iterator.next();
+			Filter filter = e.getKey();
+			FilterModel model = e.getValue();
+			if (model.isDynamic()) {
+				// add new FilterModel to all target contexts
+				getServletContextModels(model).forEach(sc -> {
+					sc.getFilterNameMapping().remove(model.getName(), model);
+				});
+				iterator.remove();
+			}
+		}
 
+		// listeners
+		eventListeners.entrySet().removeIf(e -> e.getValue().isDynamic());
+	}
 
-	private List<String> resolveVirtualHosts(ElementModel elementModel) {
-		return null;
+//	private List<String> resolveVirtualHosts(ElementModel elementModel) {
+//		return null;
 //		List<String> virtualHosts = elementModel.getContextModel().getVirtualHosts();
 //		if (virtualHosts == null || virtualHosts.isEmpty()) {
 //			virtualHosts = new ArrayList<>();
 //			virtualHosts.add(DEFAULT_VIRTUAL_HOST);
 //		}
 //		return virtualHosts;
-	}
+//	}
 
 	private String resolveVirtualHost(String hostName) {
 //		if (bundlesByVirtualHost.containsKey(hostName)) {
@@ -2419,59 +2789,59 @@ public class ServerModel implements BatchVisitor {
 //		}
 	}
 
-	private List<String> resolveVirtualHosts(Bundle bundle) {
-		List<String> virtualHosts = new ArrayList<>();
-//		for (Map.Entry<String, List<Bundle>> entry : bundlesByVirtualHost.entrySet()) {
-//			if (entry.getValue().contains(bundle)) {
-//				virtualHosts.add(entry.getKey());
-//			}
+//	private List<String> resolveVirtualHosts(Bundle bundle) {
+//		List<String> virtualHosts = new ArrayList<>();
+////		for (Map.Entry<String, List<Bundle>> entry : bundlesByVirtualHost.entrySet()) {
+////			if (entry.getValue().contains(bundle)) {
+////				virtualHosts.add(entry.getKey());
+////			}
+////		}
+//		if (virtualHosts.isEmpty()) {
+//			virtualHosts.add(DEFAULT_VIRTUAL_HOST);
 //		}
-		if (virtualHosts.isEmpty()) {
-			virtualHosts.add(DEFAULT_VIRTUAL_HOST);
-		}
-		return virtualHosts;
-	}
+//		return virtualHosts;
+//	}
 
-	private void associateBundle(List<String> virtualHosts, Bundle bundle) {
-		for (String virtualHost : virtualHosts) {
-//			List<Bundle> bundles = bundlesByVirtualHost.get(virtualHost);
-//			if (bundles == null) {
-//				bundles = new ArrayList<>();
-//				bundlesByVirtualHost.put(virtualHost, bundles);
-//			}
-//			bundles.add(bundle);
-		}
-	}
+//	private void associateBundle(List<String> virtualHosts, Bundle bundle) {
+//		for (String virtualHost : virtualHosts) {
+////			List<Bundle> bundles = bundlesByVirtualHost.get(virtualHost);
+////			if (bundles == null) {
+////				bundles = new ArrayList<>();
+////				bundlesByVirtualHost.put(virtualHost, bundles);
+////			}
+////			bundles.add(bundle);
+//		}
+//	}
 
-	private void deassociateBundle(List<String> virtualHosts, Bundle bundle) {
-		for (String virtualHost : virtualHosts) {
-//			List<Bundle> bundles = bundlesByVirtualHost.get(virtualHost);
-//			bundles.remove(bundle);
-//			if (bundles.isEmpty()) {
-//				bundlesByVirtualHost.remove(virtualHost);
-//			}
-		}
-	}
+//	private void deassociateBundle(List<String> virtualHosts, Bundle bundle) {
+//		for (String virtualHost : virtualHosts) {
+////			List<Bundle> bundles = bundlesByVirtualHost.get(virtualHost);
+////			bundles.remove(bundle);
+////			if (bundles.isEmpty()) {
+////				bundlesByVirtualHost.remove(virtualHost);
+////			}
+//		}
+//	}
 
-	public OsgiContextModel matchPathToContext(final String path) {
-		return matchPathToContext("", path);
-	}
+//	public OsgiContextModel matchPathToContext(final String path) {
+//		return matchPathToContext("", path);
+//	}
 
-	public OsgiContextModel matchPathToContext(final String hostName, final String path) {
-		final boolean debug = LOG.isDebugEnabled();
-		if (debug) {
-			LOG.debug("Matching [" + path + "]...");
-		}
-		String virtualHost = resolveVirtualHost(hostName);
-		UrlPattern urlPattern = null;
+//	public OsgiContextModel matchPathToContext(final String hostName, final String path) {
+//		final boolean debug = LOG.isDebugEnabled();
+//		if (debug) {
+//			LOG.debug("Matching [" + path + "]...");
+//		}
+//		String virtualHost = resolveVirtualHost(hostName);
+//		UrlPattern urlPattern = null;
 		// first match servlets
-		try {
+//		try {
 //			Optional<Map<String, UrlPattern>> optionalServletUrlPatterns = Optional.ofNullable(servletUrlPatterns.get(virtualHost));
 //			if (optionalServletUrlPatterns.isPresent()) {
 //				urlPattern = matchPathToContext(optionalServletUrlPatterns.get(), path);
 //			}
-		} finally {
-		}
+//		} finally {
+//		}
 		// then if there is no matched servlet look for filters
 //		if (urlPattern == null) {
 //			Optional<ConcurrentMap<String, Set<UrlPattern>>> optionalFilterUrlPattern = Optional.ofNullable(filterUrlPatterns.get(virtualHost));
@@ -2479,19 +2849,19 @@ public class ServerModel implements BatchVisitor {
 ////				urlPattern = matchFilterPathToContext(filterUrlPatterns.get(virtualHost), path);
 ////			}
 //		}
-		OsgiContextModel matched = null;
+//		OsgiContextModel matched = null;
 //		if (urlPattern != null) {
 //			matched = urlPattern.getElementModel().getContextModel();
 //		}
-		if (debug) {
-			if (matched != null) {
-				LOG.debug("Path [" + path + "] matched to " + urlPattern);
-			} else {
-				LOG.debug("Path [" + path + "] does not match any context");
-			}
-		}
-		return matched;
-	}
+//		if (debug) {
+//			if (matched != null) {
+//				LOG.debug("Path [" + path + "] matched to " + urlPattern);
+//			} else {
+//				LOG.debug("Path [" + path + "] does not match any context");
+//			}
+//		}
+//		return matched;
+//	}
 
 	private static UrlPattern matchFilterPathToContext(final Map<String, Set<UrlPattern>> urlPatternsMap, final String path) {
 		Set<String> keySet = urlPatternsMap.keySet();

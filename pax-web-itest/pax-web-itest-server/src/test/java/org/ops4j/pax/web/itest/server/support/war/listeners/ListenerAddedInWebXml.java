@@ -25,6 +25,9 @@ public class ListenerAddedInWebXml implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         try {
+            // It should be possible to add a listener OTHER than javax.servlet.ServletContextListener
+            // from a listener added in web.xml/web-fragment.xml/@WebListener. But only Jetty allow adding new
+            // ServletContextListeners IF ContextHandler.Context._extendedListenerTypes == true
             sce.getServletContext().addListener(new ServletContextListener() {
             });
         } catch (UnsupportedOperationException ignored) {

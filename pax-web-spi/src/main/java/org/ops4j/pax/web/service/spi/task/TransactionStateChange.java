@@ -32,7 +32,7 @@ public class TransactionStateChange extends Change {
 
 	@Override
 	public void accept(BatchVisitor visitor) {
-		visitor.visit(this);
+		visitor.visitTransactionStateChange(this);
 	}
 
 	@Override

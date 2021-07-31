@@ -44,10 +44,8 @@ public interface PaxWebConfig {
 	String PID_CFG_TEMP_DIR = ServletContext.TEMPDIR;
 
 	/**
-	 * Backward compatible option to specify single external configuration file.
-	 * @deprecated specify {@link #PID_CFG_SERVER_CONFIGURATION_FILES} instead
+	 * Option to specify single external configuration file.
 	 */
-	@Deprecated
 	String PID_CFG_SERVER_CONFIGURATION_FILE = "org.ops4j.pax.web.config.file";
 
 	/**

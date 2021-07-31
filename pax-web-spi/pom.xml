@@ -93,6 +93,9 @@
 							javax.servlet.descriptor;version="[3.1,5)",
 							javax.servlet.http;version="[3.1,5)",
 
+							javax.websocket;version="[1.1,2)";resolution:=optional,
+							javax.websocket.server;version="[1.1,2)";resolution:=optional,
+
 							<!-- ranges indicate we can work with OSGi Core R6+ -->
 							org.osgi.framework;version="[1.8,2)",
 							org.osgi.framework.wiring;version="[1.2,2)",
@@ -178,6 +181,12 @@
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.websocket</groupId>
+			<artifactId>jakarta.websocket-api</artifactId>
+			<scope>provided</scope>
+			<optional>true</optional>
 		</dependency>
 
 		<!-- Logging -->

@@ -61,11 +61,14 @@ import io.undertow.server.protocol.http2.Http2OpenListener;
 import io.undertow.server.protocol.http2.Http2UpgradeHandler;
 import io.undertow.server.protocol.proxy.ProxyProtocolOpenListener;
 import io.undertow.servlet.api.DeploymentInfo;
+import io.undertow.servlet.api.FilterInfo;
+import io.undertow.servlet.api.FilterMappingInfo;
 import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.handlers.MarkSecureHandler;
 import io.undertow.util.HttpString;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.SecurityConfiguration;
+import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.undertow.configuration.model.IoSubsystem;
 import org.ops4j.pax.web.service.undertow.configuration.model.SecurityRealm;
 import org.ops4j.pax.web.service.undertow.configuration.model.Server;
@@ -772,9 +775,12 @@ public class UndertowFactory {
 	 * <p>This is almost a copy of original {@link DeploymentInfo#clone()}</p>
 	 *
 	 * @param existing
+	 * @param clearDynamicFilters
+	 * @param clearNonDynamicFilters
 	 * @return
 	 */
-	public DeploymentInfo clearFilters(DeploymentInfo existing) {
+	public DeploymentInfo clearFilters(DeploymentInfo existing, boolean clearDynamicFilters,
+			boolean clearNonDynamicFilters) {
 		final DeploymentInfo info = new DeploymentInfo()
 				.setClassLoader(existing.getClassLoader())
 				.setContextPath(existing.getContextPath())
@@ -787,11 +793,28 @@ public class UndertowFactory {
 		for (Map.Entry<String, ServletInfo> e : existing.getServlets().entrySet()) {
 			info.addServlet(e.getValue().clone());
 		}
-		// do NOT copy filters
-//		for (Map.Entry<String, FilterInfo> e : existing.getFilters().entrySet()) {
-//			info.addFilter(e.getValue().clone());
-//		}
-		// do NOT populate filter mappings
+		// copy needed filters and mappings
+		Set<String> names = new HashSet<>();
+		for (Map.Entry<String, FilterInfo> e : existing.getFilters().entrySet()) {
+			FilterInfo fi = e.getValue();
+			if (fi instanceof PaxWebFilterInfo) {
+				FilterModel fm = ((PaxWebFilterInfo) fi).getFilterModel();
+				if (fm == null || (!clearDynamicFilters && fm.isDynamic()) || (!clearNonDynamicFilters && !fm.isDynamic())) {
+					info.addFilter(fi);
+					names.add(fi.getName());
+				}
+			}
+		}
+		for (FilterMappingInfo fm : existing.getFilterMappings()) {
+			if (names.contains(fm.getFilterName())) {
+				if (fm.getMappingType() == FilterMappingInfo.MappingType.SERVLET) {
+					info.addFilterServletNameMapping(fm.getFilterName(), fm.getMapping(), fm.getDispatcher());
+				}
+				if (fm.getMappingType() == FilterMappingInfo.MappingType.URL) {
+					info.addFilterUrlMapping(fm.getFilterName(), fm.getMapping(), fm.getDispatcher());
+				}
+			}
+		}
 
 		info.setDisplayName(existing.getDisplayName());
 		info.getListeners().addAll(existing.getListeners());

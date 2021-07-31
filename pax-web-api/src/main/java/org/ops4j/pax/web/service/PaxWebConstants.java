@@ -67,6 +67,27 @@ public interface PaxWebConstants {
 	/** The only supported {@link javax.servlet.ServletContainerInitializer} class that configures JSP engine */
 	String DEFAULT_JSP_SCI_CLASS = "org.ops4j.pax.web.jsp.JasperInitializer";
 
+	/**
+	 * The only supported {@link javax.servlet.ServletContainerInitializer} class that configures WebSocket
+	 * container for Jetty
+	 */
+	String DEFAULT_WEBSOCKET_JETTY_SCI_CLASS = "org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer";
+	/**
+	 * The only supported {@link javax.servlet.ServletContainerInitializer} class that configures WebSocket
+	 * container for Tomcat
+	 */
+	String DEFAULT_WEBSOCKET_TOMCAT_SCI_CLASS = "org.apache.tomcat.websocket.server.WsSci";
+	/**
+	 * The only supported {@link javax.servlet.ServletContainerInitializer} class that configures WebSocket
+	 * container for Undertow
+	 */
+	String DEFAULT_WEBSOCKET_UNDERTOW_SCI_CLASS = "org.ops4j.pax.web.service.undertow.websocket.internal.WebSocketsInitializer";
+	/**
+	 * The only supported {@link javax.servlet.ServletContainerInitializer} for generic configuration of
+	 * WebSocket container
+ 	 */
+	String DEFAULT_WEBSOCKET_SCI_CLASS = "org.ops4j.pax.web.websocket.internal.PaxWebWebSocketsServletContainerInitializer";
+
 	/** Default {@link ServletContext#getContextPath() context path} */
 	String DEFAULT_CONTEXT_PATH = "/";
 
@@ -75,6 +96,9 @@ public interface PaxWebConstants {
 
 	/** Symbolic Name of pax-web-jsp bundle */
 	String DEFAULT_PAX_WEB_JSP_SYMBOLIC_NAME = "org.ops4j.pax.web.pax-web-jsp";
+
+	/** Manifest header key for web application bundles according to 128.3.1 WAB Definition. */
+	String CONTEXT_PATH_HEADER = "Web-ContextPath";
 
 	/**
 	 * Service registration property to mark services as <em>internal</em>, so they're not processed by Pax Web
@@ -241,11 +265,6 @@ public interface PaxWebConstants {
 
 
 
-	/**
-	 * Init param name for specifying a context name.
-	 */
-	String CONTEXT_NAME = "webapp.context";
-
 	String PROPERTY_HTTP_USE_NIO = "org.osgi.service.http.useNIO";
 
 	String PROPERTY_VIRTUAL_HOST_LIST = "org.ops4j.pax.web.default.virtualhosts";
@@ -253,22 +272,10 @@ public interface PaxWebConstants {
 	String PROPERTY_DEFAULT_AUTHMETHOD = "org.ops4j.pax.web.default.authmethod";
 	String PROPERTY_DEFAULT_REALMNAME = "org.ops4j.pax.web.default.realmname";
 
-	/**
-	 * Manifest header key for web application bundles according to 128.3.1 WAB Definition.
-	 */
-	String CONTEXT_PATH_KEY = "Web-ContextPath";
-
-
-
-
 	String PROPERTY_ENC_MASTERPASSWORD = PID + ".enc.masterpassword";
-
 	String PROPERTY_ENC_ALGORITHM = PID + ".enc.algorithm";
-
 	String PROPERTY_ENC_ENABLED = PID + ".enc.enabled";
-
 	String PROPERTY_ENC_PREFIX = PID + ".enc.prefix";
-
 	String PROPERTY_ENC_SUFFIX = PID + ".enc.suffix";
 
 }

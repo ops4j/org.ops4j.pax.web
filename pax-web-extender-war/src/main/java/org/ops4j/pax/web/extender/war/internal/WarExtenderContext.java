@@ -199,14 +199,14 @@ public class WarExtenderContext implements WebContainerListener {
 			return null;
 		}
 
-		String context = Utils.getManifestHeader(bundle, PaxWebConstants.CONTEXT_PATH_KEY);
+		String context = Utils.getManifestHeader(bundle, PaxWebConstants.CONTEXT_PATH_HEADER);
 		if (context == null) {
 			return null;
 		}
 
 		if (!context.startsWith("/") || (!"/".equals(context) && context.endsWith("/"))) {
 			LOG.warn("{} manifest header of {} specifies invalid context path: {}. This bundle will not be processed.",
-					PaxWebConstants.CONTEXT_PATH_KEY, bundle, context);
+					PaxWebConstants.CONTEXT_PATH_HEADER, bundle, context);
 			return null;
 		}
 

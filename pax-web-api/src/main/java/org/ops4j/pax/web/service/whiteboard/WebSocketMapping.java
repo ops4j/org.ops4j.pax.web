@@ -15,26 +15,33 @@
  */
 package org.ops4j.pax.web.service.whiteboard;
 
-import org.ops4j.pax.web.annotations.Review;
-
-@Review("Not yet refactored")
-public interface WebSocketMapping {
+/**
+ * <p><em>WebSocket mapping</em> contains all the information required to register a WebSocket. Because the
+ * WebSockets (JSR-356) don't have to implement any specific interface or extend any specific class, we have much
+ * more flexibility and responsibility here.</p>
+ *
+ * <p>On purpose, we don't allow registration of other objects that usually can be passed (by means of
+ * {@link javax.servlet.annotation.HandlesTypes} annotation on a {@link javax.servlet.ServletContainerInitializer}
+ * related to WebSockets) by users. Only annontated classes or actual instances are handled and we don't support:<ul>
+ *     <li>{@code javax.websocket.server.ServerApplicationConfig}</li>
+ *     <li>{@code javax.websocket.Endpoint}</li>
+ * </ul></p>
+ */
+public interface WebSocketMapping extends ContextRelated {
 
 	/**
-	 * Getter.
-	 *
-	 * @return id of the http context this filter belongs to
+	 * Returns a {@link Class} of the WebSocket endpoint that should be annotated with
+	 * {@code @javax.websocket.server.ServerEndpoint} annotation. If both the
+	 * object ({@link #getWebSocketAnnotatedEndpoint()}) and the class is specified, the class takes precedence.
+	 * @return
 	 */
-	String getHttpContextId();
+	Class<?> getWebSocketClass();
 
-	void setHttpContextId(String httpContextId);
-
-	Boolean getSharedContext();
-
-	void setSharedContext(Boolean extractSharedHttpContext);
-
-	Object getWebSocket();
-
-	void setWebSocket(Object published);
+	/**
+	 * Returns an instance of a class annotated with {@code @javax.websocket.server.ServerEndpoint}. If both the
+	 * object and the class ({@link #getWebSocketClass()}) is specified, the class takes precedence.
+	 * @return
+	 */
+	Object getWebSocketAnnotatedEndpoint();
 
 }

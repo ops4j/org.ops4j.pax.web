@@ -34,7 +34,7 @@ public interface BatchVisitor {
 	 *
 	 * @param change
 	 */
-	void visit(ServletContextModelChange change);
+	void visitServletContextModelChange(ServletContextModelChange change);
 
 	/**
 	 * Processing a change related to {@link org.ops4j.pax.web.service.spi.model.OsgiContextModel} - a model
@@ -43,79 +43,91 @@ public interface BatchVisitor {
 	 *
 	 * @param change
 	 */
-	void visit(OsgiContextModelChange change);
+	void visitOsgiContextModelChange(OsgiContextModelChange change);
 
 	/**
 	 * Processing a change related to {@link org.ops4j.pax.web.service.spi.model.elements.ServletModel}. Related
 	 * to registration or unregistration of servlets.
 	 * @param change
 	 */
-	void visit(ServletModelChange change);
+	void visitServletModelChange(ServletModelChange change);
 
 	/**
 	 * Processing a change related to {@link org.ops4j.pax.web.service.spi.model.elements.FilterModel}. Related
 	 * to registration or unregistration of filter.
 	 * @param change
 	 */
-	void visit(FilterModelChange change);
+	void visitFilterModelChange(FilterModelChange change);
 
 	/**
 	 * Processing full change of registered filters for all the affected contexts. It's necessary for filters,
 	 * because registration of single filter may require reorganization (ordering) of currently registered filters.
 	 * @param change
 	 */
-	void visit(FilterStateChange change);
+	void visitFilterStateChange(FilterStateChange change);
 
 	/**
 	 * Processing a change related to {@link org.ops4j.pax.web.service.spi.model.elements.EventListenerModel}
 	 * @param change
 	 */
-	void visit(EventListenerModelChange change);
+	void visitEventListenerModelChange(EventListenerModelChange change);
 
 	/**
 	 * Process a change related to <em>welcome files</em>.
 	 * @param change
 	 */
-	void visit(WelcomeFileModelChange change);
+	void visitWelcomeFileModelChange(WelcomeFileModelChange change);
 
 	/**
 	 * Process a change related to error pages
 	 * @param change
 	 */
-	void visit(ErrorPageModelChange change);
+	void visitErrorPageModelChange(ErrorPageModelChange change);
 
 	/**
 	 * Process full change of the state of error pages per context
 	 * @param change
 	 */
-	void visit(ErrorPageStateChange change);
+	void visitErrorPageStateChange(ErrorPageStateChange change);
 
 	/**
 	 * Process a change related to {@link org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel}
-	 * @param containerInitializerModelChange
+	 * @param change
 	 */
-	void visit(ContainerInitializerModelChange change);
+	void visitContainerInitializerModelChange(ContainerInitializerModelChange change);
+
+	/**
+	 * Process a change related to {@link org.ops4j.pax.web.service.spi.model.elements.WebSocketModel}
+	 * @param change
+	 */
+	void visitWebSocketModelChange(WebSocketModelChange change);
 
 	/**
 	 * Process a change related to transactions for a context (path). There's no need to implement this method
 	 * in a {@link BatchVisitor}.
-	 * @param transactionStateChange
+	 * @param change
 	 */
-	default void visit(TransactionStateChange transactionStateChange) {
+	default void visitTransactionStateChange(TransactionStateChange change) {
 	}
 
 	/**
 	 * Process a change related to metadata of the <em>context</em>. No need to "uninstall" such change.
-	 * @param contextMetadataModelChange
+	 * @param change
 	 */
-	default void visit(ContextMetadataModelChange contextMetadataModelChange) {
+	default void visitContextMetadataModelChange(ContextMetadataModelChange change) {
 	}
 
 	/**
 	 * Process a change related to full MIME mapping for the context. No add/remove/modify operations - just full set.
-	 * @param mimeAndLocaleMappingChange
+	 * @param change
 	 */
-	default void visit(MimeAndLocaleMappingChange mimeAndLocaleMappingChange) {
+	default void visitMimeAndLocaleMappingChange(MimeAndLocaleMappingChange change) {
 	}
+
+	/**
+	 * Process a change related to reset of dynamic registrations (like {@link javax.servlet.ServletContext#addServlet}
+	 * @param change
+	 */
+	void visitClearDynamicRegistrationsChange(ClearDynamicRegistrationsChange change);
 
 }

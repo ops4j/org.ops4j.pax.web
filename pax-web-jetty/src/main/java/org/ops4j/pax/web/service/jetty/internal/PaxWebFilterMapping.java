@@ -33,6 +33,7 @@ public class PaxWebFilterMapping extends FilterMapping {
 
 	private final FilterModel filterModel;
 	private final long timestamp;
+	private final boolean after;
 
 	/**
 	 * {@link FilterMapping} with selected {@link FilterModel.Mapping}
@@ -59,6 +60,8 @@ public class PaxWebFilterMapping extends FilterMapping {
 		if (regexMapping != null && regexMapping.length > 0) {
 			this.setPathSpecs(new String[] { "/*" });
 		}
+
+		this.after = true;
 	}
 
 	/**
@@ -80,10 +83,16 @@ public class PaxWebFilterMapping extends FilterMapping {
 		this.setFilterName(filterModel.getName());
 		this.setPathSpecs(dynamicMapping.getUrlPatterns());
 		this.setServletNames(dynamicMapping.getServletNames());
+
+		this.after = dynamicMapping.isAfter();
 	}
 
 	public FilterModel getFilterModel() {
 		return filterModel;
+	}
+
+	public boolean isAfter() {
+		return after;
 	}
 
 }

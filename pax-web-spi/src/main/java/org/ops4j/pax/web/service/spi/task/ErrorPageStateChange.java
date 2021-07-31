@@ -52,7 +52,7 @@ public class ErrorPageStateChange extends Change {
 
 	@Override
 	public void accept(BatchVisitor visitor) {
-		visitor.visit(this);
+		visitor.visitErrorPageStateChange(this);
 	}
 
 }

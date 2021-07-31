@@ -25,7 +25,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 /**
  * A {@link ServletContainerInitializer} that calls actual SCI with different {@link ServletContext}
  */
-public class SCIWrapper implements ServletContainerInitializer {
+public class SCIWrapper implements ServletContainerInitializer, Comparable<SCIWrapper> {
 
 	private final OsgiDynamicServletContext context;
 	private final ContainerInitializerModel model;
@@ -41,6 +41,7 @@ public class SCIWrapper implements ServletContainerInitializer {
 	 */
 	public void onStartup() throws ServletException {
 		model.getContainerInitializer().onStartup(model.getClasses(), context);
+		context.rememberAttributesFromSCIs();
 	}
 
 	@Override
@@ -52,6 +53,11 @@ public class SCIWrapper implements ServletContainerInitializer {
 
 	public ContainerInitializerModel getModel() {
 		return model;
+	}
+
+	@Override
+	public int compareTo(SCIWrapper o) {
+		return model.compareTo(o.model);
 	}
 
 }

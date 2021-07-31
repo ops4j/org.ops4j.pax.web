@@ -106,6 +106,8 @@ public class WebContainerSessionPersistenceTest extends MultiContainerTestSuppor
 		assertTrue(serviceModelInternals.isEmpty());
 
 		if (runtime == Runtime.UNDERTOW) {
+			controller.stop();
+			controller = null;
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream("target/sessions/ROOT"));
 			Object sessions = ois.readObject();
 			assertNotNull(sessions);

@@ -15,7 +15,10 @@
  */
 package org.ops4j.pax.web.service.undertow;
 
+import java.util.EventListener;
+
 import io.undertow.connector.ByteBufferPool;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.xnio.XnioWorker;
 
 /**
@@ -26,5 +29,7 @@ public interface UndertowSupport {
 	XnioWorker getWorker(String workerName);
 
 	ByteBufferPool getBufferPool(String bufferPoolName);
+
+	EventListener proxiedServletContextListener(EventListener listener, OsgiContextModel osgiContextModel);
 
 }

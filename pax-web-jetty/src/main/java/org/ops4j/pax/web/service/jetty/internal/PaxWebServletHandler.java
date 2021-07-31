@@ -17,6 +17,7 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -138,6 +139,30 @@ public class PaxWebServletHandler extends ServletHandler {
 		}
 
 		super.doStart();
+	}
+
+	@Override
+	protected synchronized void doStop() throws Exception {
+		// before stopping, we have to remove dynamic filters (servlets are removed in clear() visitor of
+		// JettyServerWrapper) exactly here, because otherwise there'll be wrong index of
+		// org.eclipse.jetty.servlet.ServletHandler._matchAfterIndex
+
+		List<PaxWebFilterHolder> newFilters = new ArrayList<>();
+		List<PaxWebFilterMapping> newFilterMappings = new ArrayList<>();
+		for (FilterHolder fh : getFilters()) {
+			if (fh instanceof PaxWebFilterHolder) {
+				PaxWebFilterHolder pwfh = (PaxWebFilterHolder) fh;
+				if (pwfh.getFilterModel() == null || pwfh.getFilterModel().isDynamic()) {
+					continue;
+				}
+				newFilters.add(pwfh);
+				newFilterMappings.addAll(pwfh.getMapping());
+			}
+		}
+		setFilters(newFilters.toArray(new PaxWebFilterHolder[0]));
+		setFilterMappings(newFilterMappings.toArray(new PaxWebFilterMapping[0]));
+
+		super.doStop();
 	}
 
 	@Override

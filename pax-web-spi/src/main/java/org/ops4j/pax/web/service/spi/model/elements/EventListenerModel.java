@@ -26,6 +26,11 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 	private EventListener eventListener;
 	private EventListener resolvedListener;
 
+	/**
+	 * Flag used for models registered using {@link javax.servlet.ServletContext#addListener}
+	 */
+	private boolean dynamic = false;
+
 	public EventListenerModel() {
 	}
 
@@ -56,6 +61,14 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 
 	public void setEventListener(EventListener eventListener) {
 		this.eventListener = eventListener;
+	}
+
+	public void setDynamic(boolean dynamic) {
+		this.dynamic = dynamic;
+	}
+
+	public boolean isDynamic() {
+		return dynamic;
 	}
 
 	/**

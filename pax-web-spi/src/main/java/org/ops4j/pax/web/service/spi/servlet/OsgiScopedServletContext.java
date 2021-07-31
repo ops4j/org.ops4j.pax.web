@@ -67,6 +67,10 @@ public class OsgiScopedServletContext implements ServletContext {
 		this.webContainerContext = osgiContext.getOsgiContextModel().resolveHttpContext(bundle);
 	}
 
+	public OsgiServletContext getOsgiContext() {
+		return osgiContext;
+	}
+
 	public OsgiContextModel getOsgiContextModel() {
 		return osgiContext.getOsgiContextModel();
 	}

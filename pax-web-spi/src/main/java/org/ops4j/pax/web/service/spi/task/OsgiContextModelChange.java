@@ -59,7 +59,7 @@ public class OsgiContextModelChange extends Change {
 
 	@Override
 	public void accept(BatchVisitor visitor) {
-		visitor.visit(this);
+		visitor.visitOsgiContextModelChange(this);
 	}
 
 	@Override

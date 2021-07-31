@@ -24,6 +24,7 @@ import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.JspModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
 import org.osgi.framework.Bundle;
@@ -91,7 +92,7 @@ public interface WhiteboardWebContainerView extends PaxWebContainerView {
 
 	/**
 	 * Registers error pages into {@link ElementModel#getContextModels() associated contexts}
-	 * @param rrorPageModel
+	 * @param model
 	 */
 	void registerErrorPages(ErrorPageModel model);
 
@@ -134,7 +135,7 @@ public interface WhiteboardWebContainerView extends PaxWebContainerView {
 
 	/**
 	 * Registers a {@link EventListenerModel}.
-	 * @param servletModel
+	 * @param model
 	 */
 	void registerListener(EventListenerModel model);
 
@@ -155,5 +156,17 @@ public interface WhiteboardWebContainerView extends PaxWebContainerView {
 	 * @param model
 	 */
 	void unregisterJsp(JspModel model);
+
+	/**
+	 * Registration of {@link WebSocketModel}
+	 * @param model
+	 */
+    void registerWebSocket(WebSocketModel model);
+
+	/**
+	 * Unregistration of {@link WebSocketModel}
+	 * @param model
+	 */
+	void unregisterWebSocket(WebSocketModel model);
 
 }

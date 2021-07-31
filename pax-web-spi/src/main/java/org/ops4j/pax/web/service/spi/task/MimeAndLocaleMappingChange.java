@@ -46,7 +46,7 @@ public class MimeAndLocaleMappingChange extends Change {
 
 	@Override
 	public void accept(BatchVisitor visitor) {
-		visitor.visit(this);
+		visitor.visitMimeAndLocaleMappingChange(this);
 	}
 
 }

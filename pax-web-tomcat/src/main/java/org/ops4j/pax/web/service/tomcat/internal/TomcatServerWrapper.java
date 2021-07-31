@@ -28,9 +28,7 @@ import java.util.Collection;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +36,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Supplier;
 import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextListener;
 import javax.servlet.SessionCookieConfig;
@@ -83,6 +81,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 import org.ops4j.pax.web.service.spi.servlet.DynamicRegistrations;
@@ -93,6 +92,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
 import org.ops4j.pax.web.service.spi.servlet.RegisteringContainerInitializer;
 import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
+import org.ops4j.pax.web.service.spi.task.ClearDynamicRegistrationsChange;
 import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
 import org.ops4j.pax.web.service.spi.task.ContextMetadataModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
@@ -106,6 +106,7 @@ import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
 import org.ops4j.pax.web.service.spi.task.TransactionStateChange;
+import org.ops4j.pax.web.service.spi.task.WebSocketModelChange;
 import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.tomcat.internal.web.TomcatResourceServlet;
@@ -193,7 +194,7 @@ class TomcatServerWrapper implements BatchVisitor {
 	private final Map<String, TreeSet<OsgiContextModel>> osgiContextModels = new HashMap<>();
 
 	/** Even if Tomcat manages SCIs, we'll manage them here instead - to be able to remove them when needed. */
-	private final Map<String, LinkedHashMap<Integer, SCIWrapper>> initializers = new HashMap<>();
+	private final Map<String, TreeSet<SCIWrapper>> initializers = new HashMap<>();
 
 	/** Keep dynamic configuration and use it during startup only. */
 	private final Map<String, DynamicRegistrations> dynamicRegistrations = new HashMap<>();
@@ -670,7 +671,7 @@ class TomcatServerWrapper implements BatchVisitor {
 	// --- visitor methods for model changes
 
 	@Override
-	public void visit(TransactionStateChange change) {
+	public void visitTransactionStateChange(TransactionStateChange change) {
 		String contextPath = change.getContextPath();
 		if (change.getKind() == OpCode.ASSOCIATE) {
 			if (!transactions.add(contextPath)) {
@@ -689,7 +690,7 @@ class TomcatServerWrapper implements BatchVisitor {
 	}
 
 	@Override
-	public void visit(ServletContextModelChange change) {
+	public void visitServletContextModelChange(ServletContextModelChange change) {
 		ServletContextModel model = change.getServletContextModel();
 		String contextPath = model.getContextPath();
 
@@ -777,7 +778,7 @@ class TomcatServerWrapper implements BatchVisitor {
 			osgiContextModels.put(contextPath, new TreeSet<>());
 
 			// configure ordered map of initializers
-			initializers.put(contextPath, new LinkedHashMap<>());
+			initializers.put(contextPath, new TreeSet<>());
 			dynamicRegistrations.put(contextPath, new DynamicRegistrations());
 		} else if (change.getKind() == OpCode.DELETE) {
 			dynamicRegistrations.remove(contextPath);
@@ -789,10 +790,11 @@ class TomcatServerWrapper implements BatchVisitor {
 			// removals are delayed until this step.
 			// This is important to ensure proper order of destruction ended with contextDestroyed() calls
 
-			if (isStarted(context)) {
+			if (context != null && isStarted(context)) {
 				LOG.info("Stopping Tomcat context \"{}\"", contextPath);
 				try {
 					context.stop();
+					context.setOsgiServletContext(null);
 				} catch (Exception e) {
 					LOG.warn("Error stopping Tomcat context \"{}\": {}", contextPath, e.getMessage(), e);
 				}
@@ -803,7 +805,7 @@ class TomcatServerWrapper implements BatchVisitor {
 	}
 
 	@Override
-	public void visit(OsgiContextModelChange change) {
+	public void visitOsgiContextModelChange(OsgiContextModelChange change) {
 		if (change.getKind() == OpCode.ASSOCIATE || change.getKind() == OpCode.DISASSOCIATE) {
 			return;
 		}
@@ -815,7 +817,8 @@ class TomcatServerWrapper implements BatchVisitor {
 		PaxWebStandardContext realContext = contextHandlers.get(contextPath);
 
 		if (realContext == null) {
-			throw new IllegalStateException(osgiModel + " refers to unknown ServletContext for path " + contextPath);
+			visitServletContextModelChange(new ServletContextModelChange(OpCode.ADD, new ServletContextModel(contextPath)));
+			realContext = contextHandlers.get(contextPath);
 		}
 
 		if (change.getKind() == OpCode.ADD) {
@@ -889,14 +892,19 @@ class TomcatServerWrapper implements BatchVisitor {
 			// and the highest ranked context should be registered as OSGi service (if it wasn't registered)
 			highestRankedContext.register();
 		} else {
-			// TOCHECK: there should be no more web elements in the context, no OSGi mechanisms, just 404 all the time
 			realContext.setDefaultOsgiContextModel(null);
 			realContext.setDefaultServletContext(null);
+
+			// removing LAST OsgiContextModel for given servlet context (by context path) is almost like if the
+			// servlet context was entirely removed. Let's assume that the bundle that lead to creation of given
+			// context stopped and it's HttpService instance was removed, which means that given OsgiContextModel
+			// was removed
+			visitServletContextModelChange(new ServletContextModelChange(OpCode.DELETE, new ServletContextModel(contextPath)));
 		}
 	}
 
 	@Override
-	public void visit(ContextMetadataModelChange change) {
+	public void visitContextMetadataModelChange(ContextMetadataModelChange change) {
 		if (change.getKind() == OpCode.ADD) {
 			OsgiContextModel ocm = change.getOsgiContextModel();
 			ContextMetadataModel meta = change.getMetadata();
@@ -929,7 +937,7 @@ class TomcatServerWrapper implements BatchVisitor {
 	}
 
 	@Override
-	public void visit(MimeAndLocaleMappingChange change) {
+	public void visitMimeAndLocaleMappingChange(MimeAndLocaleMappingChange change) {
 		if (change.getKind() == OpCode.ADD) {
 			OsgiContextModel ocm = change.getOsgiContextModel();
 
@@ -951,11 +959,13 @@ class TomcatServerWrapper implements BatchVisitor {
 	}
 
 	@Override
-	public void visit(ServletModelChange change) {
+	public void visitServletModelChange(ServletModelChange change) {
 		// org.apache.catalina.core.StandardContext.addChild() accepts only instances of org.apache.catalina.Wrapper
 		// - org.apache.catalina.core.ContainerBase.addChildInternal() fires org.apache.catalina.Container.ADD_CHILD_EVENT
 		// - org.apache.catalina.mapper.Mapper.addWrappers() is called for mapper
 		// - mapper is kept in org.apache.catalina.core.StandardService.mapper
+
+		Set<String> done = new HashSet<>();
 
 		if ((change.getKind() == OpCode.ADD && !change.isDisabled()) || change.getKind() == OpCode.ENABLE) {
 			ServletModel model = change.getServletModel();
@@ -966,8 +976,6 @@ class TomcatServerWrapper implements BatchVisitor {
 			}
 
 			// see implementation requirements in Jetty version of this visit() method
-
-			Set<String> done = new HashSet<>();
 
 			change.getContextModels().forEach(osgiContext -> {
 				String contextPath = osgiContext.getContextPath();
@@ -1046,8 +1054,6 @@ class TomcatServerWrapper implements BatchVisitor {
 					continue;
 				}
 
-				Set<String> done = new HashSet<>();
-
 				// proper order ensures that (assuming above scenario), for /c1, ocm2 will be chosen and ocm1 skipped
 				model.getContextModels().forEach(osgiContextModel -> {
 					String contextPath = osgiContextModel.getContextPath();
@@ -1068,10 +1074,10 @@ class TomcatServerWrapper implements BatchVisitor {
 
 					Container child = realContext.findChild(model.getName());
 					if (child != null) {
-						realContext.removeChild(child);
 						for (String pattern : model.getUrlPatterns()) {
 							realContext.removeServletMapping(pattern);
 						}
+						realContext.removeChild(child);
 					}
 
 					// are there any error page declarations in the model?
@@ -1096,7 +1102,7 @@ class TomcatServerWrapper implements BatchVisitor {
 	}
 
 	@Override
-	public void visit(FilterModelChange change) {
+	public void visitFilterModelChange(FilterModelChange change) {
 		// only handle dynamic filter registration here - filter added only as last filter
 		FilterModel model = change.getFilterModel();
 		Set<String> done = new HashSet<>();
@@ -1107,7 +1113,7 @@ class TomcatServerWrapper implements BatchVisitor {
 					continue;
 				}
 
-				LOG.info("Adding dynamic filter to context {}", contextPath);
+				LOG.info("Adding dynamic filter {} to context {}", model, contextPath);
 
 				OsgiContextModel highestRankedModel = null;
 				for (OsgiContextModel cm : model.getContextModels()) {
@@ -1130,7 +1136,16 @@ class TomcatServerWrapper implements BatchVisitor {
 	}
 
 	@Override
-	public void visit(FilterStateChange change) {
+	public void visitFilterStateChange(FilterStateChange change) {
+		if (change.isDynamic()) {
+			// dynamic filter may be added when:
+			// 1) normal filter is added
+			// 2) context is started
+			// 3) SCIs are called that register a filter
+			// so we can't rely on full "state change"
+			return;
+		}
+
 		Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> contextFilters = change.getContextFilters();
 
 		for (Map.Entry<String, TreeMap<FilterModel, List<OsgiContextModel>>> entry : contextFilters.entrySet()) {
@@ -1141,6 +1156,10 @@ class TomcatServerWrapper implements BatchVisitor {
 			LOG.info("Changing filter configuration for context {}", contextPath);
 
 			PaxWebStandardContext context = contextHandlers.get(contextPath);
+			if (context == null) {
+				// it can happen when unregistering last filters (or rather setting the state with empty set of filters)
+				continue;
+			}
 
 			ensureServletContextStarted(context);
 
@@ -1151,20 +1170,27 @@ class TomcatServerWrapper implements BatchVisitor {
 			FilterMap[] filterMaps = context.findFilterMaps();
 
 			// 2020-06-02: it's not possible to simply add a filter to Tomcat and init() it without init()ing
-			// existing filters
-//			if (true || !quickFilterChange(context, filterDefs, filters, contextPath)) {
-			// the hard way - recreate entire array of filters/filter-mappings
+			// existing filters, so no way to do quick change
 			context.filterStop();
-			// remove all but "initial OSGi filter"
+
+			// remove all but "initial OSGi filter" and dynamically added filters
 			for (FilterDef def : filterDefs) {
-				if (!(def instanceof PaxWebFilterDef && ((PaxWebFilterDef) def).isInitial())) {
-					context.removeFilterDef(def);
+				if (def instanceof PaxWebFilterDef) {
+					if (((PaxWebFilterDef) def).isInitial()
+							|| (((PaxWebFilterDef) def).getFilterModel() != null && ((PaxWebFilterDef) def).getFilterModel().isDynamic())) {
+						continue;
+					}
 				}
+				context.removeFilterDef(def);
 			}
 			for (FilterMap map : filterMaps) {
-				if (!(map instanceof PaxWebFilterMap && ((PaxWebFilterMap) map).isInitial())) {
-					context.removeFilterMap(map);
+				if (map instanceof PaxWebFilterMap) {
+					if (((PaxWebFilterMap) map).isInitial()
+							|| (((PaxWebFilterMap) map).getFilterModel() != null && ((PaxWebFilterMap) map).getFilterModel().isDynamic())) {
+						continue;
+					}
 				}
+				context.removeFilterMap(map);
 			}
 
 			for (FilterModel model : filters) {
@@ -1179,16 +1205,16 @@ class TomcatServerWrapper implements BatchVisitor {
 			if (isStarted(context) && !pendingTransaction(contextPath)) {
 				context.filterStart();
 			}
-//			}
 		}
 	}
 
 	@Override
-	public void visit(EventListenerModelChange change) {
+	public void visitEventListenerModelChange(EventListenerModelChange change) {
+		Set<String> done = new HashSet<>();
+
 		if (change.getKind() == OpCode.ADD) {
 			EventListenerModel eventListenerModel = change.getEventListenerModel();
 			List<OsgiContextModel> contextModels = change.getContextModels();
-			Set<String> done = new HashSet<>();
 			contextModels.forEach((context) -> {
 				String contextPath = context.getContextPath();
 				if (!done.add(contextPath)) {
@@ -1206,8 +1232,13 @@ class TomcatServerWrapper implements BatchVisitor {
 				// add the listener to real context - even ServletContextAttributeListener (but only once - even
 				// if there are many OsgiServletContexts per ServletContext)
 				if (eventListener instanceof HttpSessionListener || eventListener instanceof ServletContextListener) {
+					// we're adding these listeners to overriden method, so Tomcat doesn't know about
+					// "no pluggability listeners"
 					standardContext.addApplicationLifecycleListener(eventListener);
 				} else {
+					// this method is called from org.apache.catalina.startup.ContextConfig.configureContext() and ALL
+					// listener class names from web.xml, web-fragment.xml and @WebListener are added to the context using this
+					// method.
 					standardContext.addApplicationEventListener(eventListener);
 				}
 			});
@@ -1218,7 +1249,12 @@ class TomcatServerWrapper implements BatchVisitor {
 			for (EventListenerModel eventListenerModel : eventListenerModels) {
 				List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
 				contextModels.forEach((context) -> {
-					PaxWebStandardContext standardContext = contextHandlers.get(context.getContextPath());
+					String contextPath = context.getContextPath();
+					if (!done.add(contextPath)) {
+						return;
+					}
+
+					PaxWebStandardContext standardContext = contextHandlers.get(contextPath);
 					EventListener eventListener = eventListenerModel.resolveEventListener();
 					if (eventListener instanceof ServletContextAttributeListener) {
 						// remove it from per-OsgiContext list
@@ -1228,7 +1264,7 @@ class TomcatServerWrapper implements BatchVisitor {
 						}
 					}
 
-					if (pendingTransaction(context.getContextPath())) {
+					if (pendingTransaction(contextPath)) {
 						LOG.debug("Delaying removal of event listener {}", eventListenerModel);
 						return;
 					}
@@ -1251,6 +1287,7 @@ class TomcatServerWrapper implements BatchVisitor {
 								newLListeners.add(l);
 							}
 						}
+						standardContext.removeApplicationLifecycleListener(eventListener);
 						standardContext.setApplicationEventListeners(newEListeners.toArray(new Object[0]));
 						standardContext.setApplicationLifecycleListeners(newLListeners.toArray(new Object[0]));
 					}
@@ -1261,7 +1298,7 @@ class TomcatServerWrapper implements BatchVisitor {
 	}
 
 	@Override
-	public void visit(WelcomeFileModelChange change) {
+	public void visitWelcomeFileModelChange(WelcomeFileModelChange change) {
 		WelcomeFileModel model = change.getWelcomeFileModel();
 
 		OpCode op = change.getKind();
@@ -1318,12 +1355,12 @@ class TomcatServerWrapper implements BatchVisitor {
 	}
 
 	@Override
-	public void visit(ErrorPageModelChange change) {
+	public void visitErrorPageModelChange(ErrorPageModelChange change) {
 		// no op here
 	}
 
 	@Override
-	public void visit(ErrorPageStateChange change) {
+	public void visitErrorPageStateChange(ErrorPageStateChange change) {
 		Map<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> contextErrorPages = change.getContextErrorPages();
 
 		for (Map.Entry<String, TreeMap<ErrorPageModel, List<OsgiContextModel>>> entry : contextErrorPages.entrySet()) {
@@ -1373,41 +1410,229 @@ class TomcatServerWrapper implements BatchVisitor {
 	}
 
 	@Override
-	public void visit(ContainerInitializerModelChange change) {
+	public void visitContainerInitializerModelChange(ContainerInitializerModelChange change) {
 		if (change.getKind() == OpCode.ADD) {
 			ContainerInitializerModel model = change.getContainerInitializerModel();
+			if (!model.isForAnyRuntime() && !model.isForTomcat()) {
+				return;
+			}
 			List<OsgiContextModel> contextModels = change.getContextModels();
 			contextModels.forEach((context) -> {
 				String path = context.getContextPath();
 				PaxWebStandardContext ctx = contextHandlers.get(context.getContextPath());
 				if (isStarted(ctx)) {
-					LOG.warn("ServletContainerInitializer {} can't be added, as the context {} is already started",
-							model.getContainerInitializer(), ctx);
-				} else {
-					// even if there's org.apache.catalina.core.StandardContext.addServletContainerInitializer(),
-					// there's no "remove" equivalent and also we want to be able to pass correct implementation
-					// of ServletContext there
-					DynamicRegistrations registrations = this.dynamicRegistrations.get(path);
-					OsgiDynamicServletContext dynamicContext = new OsgiDynamicServletContext(osgiServletContexts.get(context), registrations);
-					SCIWrapper wrapper = new SCIWrapper(dynamicContext, model);
-					initializers.get(path).put(System.identityHashCode(model.getContainerInitializer()), wrapper);
+					// we have to stop it. This operation should follow ClearDynamicRegistrationsChange that
+					// clears possible dynamic registrations
+					// also this operation is always followed by active web element registration (servlet or websocket)
+					// because there's no need to just start the container with only one SCI
+					LOG.info("Stopping Tomcat context \"{}\" before registering a ServletContextInitializer", path);
+					try {
+						ctx.stop();
+						ctx.setOsgiServletContext(null);
+					} catch (Exception e) {
+						LOG.warn("Error stopping Tomcat context \"{}\": {}", path, e.getMessage(), e);
+					}
 				}
+
+				// even if there's org.apache.catalina.core.StandardContext.addServletContainerInitializer(),
+				// there's no "remove" equivalent and also we want to be able to pass correct implementation
+				// of ServletContext there
+				DynamicRegistrations registrations = this.dynamicRegistrations.get(path);
+				OsgiDynamicServletContext dynamicContext = new OsgiDynamicServletContext(osgiServletContexts.get(context), registrations);
+				SCIWrapper wrapper = new SCIWrapper(dynamicContext, model);
+				initializers.get(path).add(wrapper);
 			});
 		}
 
 		if (change.getKind() == OpCode.DELETE) {
 			List<ContainerInitializerModel> models = change.getContainerInitializerModels();
 			for (ContainerInitializerModel model : models) {
+				if (!model.isForAnyRuntime() && !model.isForTomcat()) {
+					continue;
+				}
 				List<OsgiContextModel> contextModels = model.getContextModels();
 				contextModels.forEach((context) -> {
 					String path = context.getContextPath();
-					ServletContainerInitializer initializer = model.getContainerInitializer();
-					LinkedHashMap<Integer, SCIWrapper> wrappers = this.initializers.get(path);
+					TreeSet<SCIWrapper> wrappers = this.initializers.get(path);
 					if (wrappers != null) {
-						wrappers.remove(System.identityHashCode(initializer));
+						wrappers.removeIf(w -> w.getModel() == model);
 					}
 				});
 			}
+		}
+	}
+
+	@Override
+	public void visitWebSocketModelChange(WebSocketModelChange change) {
+		if ((change.getKind() == OpCode.ADD && !change.isDisabled()) || change.getKind() == OpCode.ENABLE) {
+			WebSocketModel model = change.getWebSocketModel();
+
+			Set<String> done = new HashSet<>();
+
+			change.getContextModels().forEach(osgiContextModel -> {
+				String contextPath = osgiContextModel.getContextPath();
+				if (!done.add(contextPath)) {
+					return;
+				}
+
+				LOG.info("Adding web socket {} to {}", model, contextPath);
+
+				// actually the web socket is already part of (known to) relevant SCI that'll register it when context
+				// is started.
+				// - when WebSocket is added to fresh (not started) context, the context will be started here
+				// - when WebSocket is added to already started context, restart will be handled in
+				//   visit(ContainerInitializerModelChange) method
+				// so in both cases we simply have to start the server if it's not yet started
+
+				ensureServletContextStarted(contextHandlers.get(contextPath));
+			});
+			return;
+		}
+
+		if (change.getKind() == OpCode.DISABLE || change.getKind() == OpCode.DELETE) {
+			for (Map.Entry<WebSocketModel, Boolean> entry : change.getWebSocketModels().entrySet()) {
+				WebSocketModel model = entry.getKey();
+				if (!entry.getValue()) {
+					continue;
+				}
+
+				Set<String> done = new HashSet<>();
+
+				model.getContextModels().forEach(osgiContextModel -> {
+					String contextPath = osgiContextModel.getContextPath();
+					if (!done.add(contextPath)) {
+						return;
+					}
+
+					if (pendingTransaction(contextPath)) {
+						LOG.debug("Delaying removal of web socket {}", model);
+						return;
+					}
+
+					LOG.info("Removing web socket {} from context {}", model, contextPath);
+
+					// just as when adding WebSockets, we only have to ensure that context is started if it was
+					// stopped. Restart is handled in visit(ContainerInitializerModelChange) method
+
+					ensureServletContextStarted(contextHandlers.get(contextPath));
+				});
+			}
+		}
+	}
+
+	@Override
+	public void visitClearDynamicRegistrationsChange(ClearDynamicRegistrationsChange change) {
+		Set<String> done = new HashSet<>();
+
+		// the contexts related to the change will be (re)started in following batch operations. We have to clear
+		// existing dynamic elements first
+		change.getContextModels().forEach(context -> {
+			String contextPath = context.getContextPath();
+			if (!done.add(contextPath)) {
+				return;
+			}
+
+			clearDynamicRegistrations(contextPath, context);
+		});
+	}
+
+	private void clearDynamicRegistrations(String contextPath, OsgiContextModel context) {
+		LOG.info("Removing dynamically registered servlets/filters/listeners from context {}", contextPath);
+
+		// there should already be a ServletContextHandler
+		PaxWebStandardContext ctx = contextHandlers.get(contextPath);
+
+		// we can safely stop the context
+		if (isStarted(ctx)) {
+			LOG.info("Stopping Tomcat context \"{}\"", contextPath);
+			try {
+				ctx.stop();
+				ctx.clearApplicationLifecycleListeners();
+				ctx.setOsgiServletContext(null);
+			} catch (Exception e) {
+				LOG.warn("Error stopping Tomcat context \"{}\": {}", contextPath, e.getMessage(), e);
+			}
+		}
+
+		// servlets
+		Map<ServletModel, Boolean> toRemove = new HashMap<>();
+		for (Container child : ctx.findChildren()) {
+			if (child instanceof PaxWebStandardWrapper) {
+				ServletModel model = ((PaxWebStandardWrapper) child).getServletModel();
+				if (model != null && model.isDynamic()) {
+					toRemove.put(model, Boolean.TRUE);
+				}
+			}
+		}
+		if (!toRemove.isEmpty()) {
+			// it's safe, because dynamic servlets can target only one osgi/servlet context
+			visitServletModelChange(new ServletModelChange(OpCode.DELETE, toRemove));
+		}
+
+		// filters - clear all dynamic ones
+		FilterDef[] filterDefs = ctx.findFilterDefs();
+		FilterMap[] filterMaps = ctx.findFilterMaps();
+		for (FilterDef def : filterDefs) {
+			if (def instanceof PaxWebFilterDef) {
+				if (((PaxWebFilterDef) def).isInitial()
+						|| (((PaxWebFilterDef) def).getFilterModel() != null && !((PaxWebFilterDef) def).getFilterModel().isDynamic())) {
+					continue;
+				}
+			}
+			ctx.removeFilterDef(def);
+		}
+		for (FilterMap map : filterMaps) {
+			if (map instanceof PaxWebFilterMap) {
+				if (((PaxWebFilterMap) map).isInitial()
+						|| (((PaxWebFilterMap) map).getFilterModel() != null && !((PaxWebFilterMap) map).getFilterModel().isDynamic())) {
+					continue;
+				}
+			}
+			ctx.removeFilterMap(map);
+		}
+
+		// listeners - it's easier, because we remember them in dynamic registrations
+		DynamicRegistrations contextRegistrations = this.dynamicRegistrations.get(contextPath);
+		if (contextRegistrations != null) {
+			contextRegistrations.getDynamicListenerModels().forEach((listenerToRemove, model) -> {
+				if (model.isDynamic()) {
+					if (listenerToRemove instanceof ServletContextAttributeListener) {
+						// remove it from per-OsgiContext list
+						OsgiServletContext c = osgiServletContexts.get(context);
+						if (c != null) {
+							c.removeServletContextAttributeListener((ServletContextAttributeListener) listenerToRemove);
+						}
+					}
+
+					// a bit harder (than in Jetty) way to remove the listeners
+					Object[] elisteners = ctx.getApplicationEventListeners();
+					Object[] llisteners = ctx.getApplicationLifecycleListeners();
+					List<Object> newEListeners = new ArrayList<>();
+					List<Object> newLListeners = new ArrayList<>();
+					for (Object existing : elisteners) {
+						if (existing != listenerToRemove) {
+							newEListeners.add(existing);
+						}
+					}
+					for (Object existing : llisteners) {
+						if (existing != listenerToRemove) {
+							newLListeners.add(existing);
+						}
+					}
+					ctx.removeApplicationLifecycleListener(listenerToRemove);
+					ctx.setApplicationEventListeners(newEListeners.toArray(new Object[0]));
+					ctx.setApplicationLifecycleListeners(newLListeners.toArray(new Object[0]));
+				}
+			});
+			// remove application listeners added to Tomcat
+//			ctx.clearApplicationLifecycleListeners();
+			// it'll be prepared for new dynamic registrations when SCIs are started again
+			contextRegistrations.getDynamicListenerModels().clear();
+
+			// additionally clear pending registrations
+			contextRegistrations.getDynamicServletRegistrations().clear();
+			contextRegistrations.getDynamicFilterRegistrations().clear();
+			contextRegistrations.getDynamicListenerRegistrations().clear();
 		}
 	}
 
@@ -1421,13 +1646,14 @@ class TomcatServerWrapper implements BatchVisitor {
 	 * @param context
 	 */
 	private void ensureServletContextStarted(PaxWebStandardContext context) {
-		String contextPath = context.getPath().equals("") ? "/" : context.getPath();
-		if (isStarted(context) || pendingTransaction(contextPath)) {
+		String contextPath = context == null || context.getPath().equals("") ? "/" : context.getPath();
+		if (context == null || isStarted(context) || pendingTransaction(contextPath)) {
 			return;
 		}
 		try {
 			OsgiContextModel highestRanked = context.getDefaultOsgiContextModel();
 			OsgiServletContext highestRankedContext = context.getDefaultServletContext();
+			highestRankedContext.allowServletContextListeners();
 
 			LOG.info("Starting Tomcat context \"{}\" with default Osgi Context {}", context, highestRanked);
 
@@ -1448,9 +1674,18 @@ class TomcatServerWrapper implements BatchVisitor {
 			});
 			context.setParentClassLoader(highestRankedContext.getClassLoader());
 			context.setLoader(tomcatLoader);
-			context.setOsgiServletContext(highestRankedContext);
 
-			Collection<SCIWrapper> initializers = new LinkedList<>(this.initializers.get(contextPath).values());
+			context.setOsgiServletContext(null);
+			ServletContext realContext = context.getServletContext();
+
+			highestRankedContext.clearAttributesFromPreviousCycle();
+			clearDynamicRegistrations(contextPath, highestRanked);
+
+			DynamicRegistrations registrations = this.dynamicRegistrations.get(contextPath);
+			// allow dynamic registration, which will be restricted by RegisteringContainerInitializer
+			context.setOsgiServletContext(new OsgiDynamicServletContext(highestRankedContext, registrations));
+
+			Collection<SCIWrapper> initializers = new TreeSet<>(this.initializers.get(contextPath));
 			// Initially I thought we should take only these SCIs, which are associated with highest ranked OCM,
 			// but it turned out that just as we take servlets registered to different OsgiContextModels, but
 			// the same ServletContextModel, we have to do the same with SCIs.
@@ -1460,10 +1695,10 @@ class TomcatServerWrapper implements BatchVisitor {
 			// so please do not uncomment and keep for educational purposes!
 //			initializers.removeIf(w -> !w.getModel().getContextModels().contains(highestRanked));
 
-			if (initializers.size() > 0) {
-				initializers.add(new RegisteringContainerInitializer(this.dynamicRegistrations.get(contextPath)));
-				context.setServletContainerInitializers(initializers);
-			}
+			// and finally add the registering initializer which will also mark the OsgiServletContext as no longer
+			// accepting registration of additional ServletContextListeners
+			initializers.add(new RegisteringContainerInitializer(highestRankedContext, registrations));
+			context.setServletContainerInitializers(initializers);
 
 			// org.apache.catalina.startup.Tomcat.FixContextListener() sets context as configured and is
 			// required for embedded usage. But it does a bit more than it should, so we'll do everything more
@@ -1485,7 +1720,14 @@ class TomcatServerWrapper implements BatchVisitor {
 			// and add the one related to highest-ranked OsgiContextModel
 			context.addLifecycleListener(this.configurationListeners.get(highestRanked));
 
+			osgiServletContexts.forEach((ocm, osc) -> {
+				if (ocm.getContextPath().equals(contextPath)) {
+					osc.setContainerServletContext(realContext);
+				}
+			});
+
 			context.start();
+
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
@@ -1525,62 +1767,16 @@ class TomcatServerWrapper implements BatchVisitor {
 		return osgiServletContexts.get(highestRankedModel);
 	}
 
-	/**
-	 * <p>As with Jetty, there's some chance that there's only one new filter to be added to existing set of filters
-	 * <em>at the end of the list</em>. If it's not possible, filters have to be recreated (destroy + init)
-	 * entirely.</p>
-	 *
-	 * <p>Here we have to test for the <em>initial filter</em>.</p>
-	 *
-	 * @param context
-	 * @param existingFilterDefs
-	 * @param filters
-	 * @param contextPath
-	 * @return
-	 */
-	private boolean quickFilterChange(PaxWebStandardContext context, FilterDef[] existingFilterDefs,
-			Set<FilterModel> filters, String contextPath) {
-		int pos = 0;
-		FilterModel[] newModels = filters.toArray(new FilterModel[0]);
-		boolean quick = newModels.length >= existingFilterDefs.length - 1;
-
-		// by "quick" we mean - there are no removed filters and new filters come last
-		while (quick) {
-			if (pos >= existingFilterDefs.length - 1) {
-				break;
-			}
-			if (!(existingFilterDefs[pos + 1] instanceof PaxWebFilterDef
-					&& ((PaxWebFilterDef) existingFilterDefs[pos + 1]).getFilterModel().equals(newModels[pos]))) {
-				quick = false;
-				break;
-			}
-			pos++;
-		}
-
-		if (quick) {
-			for (int i = pos; i < newModels.length; i++) {
-				OsgiServletContext osgiContext = getHighestRankedContext(contextPath, newModels[pos], null);
-
-				context.addFilterDef(new PaxWebFilterDef(newModels[pos], false, osgiContext));
-				configureFilterMappings(newModels[pos], context);
-			}
-			context.filterStart();
-			return true;
-		}
-
-		return false;
-	}
-
 	private void configureFilterMappings(FilterModel model, PaxWebStandardContext context) {
 		if (model.getDynamicServletNames().size() > 0 || model.getDynamicUrlPatterns().size() > 0) {
 			model.getDynamicServletNames().forEach(dm -> {
 				if (!dm.isAfter()) {
-					context.addFilterMap(new PaxWebFilterMap(model, dm));
+					context.addFilterMapBefore(new PaxWebFilterMap(model, dm));
 				}
 			});
 			model.getDynamicUrlPatterns().forEach(dm -> {
 				if (!dm.isAfter()) {
-					context.addFilterMap(new PaxWebFilterMap(model, dm));
+					context.addFilterMapBefore(new PaxWebFilterMap(model, dm));
 				}
 			});
 			model.getDynamicServletNames().forEach(dm -> {
@@ -1600,84 +1796,5 @@ class TomcatServerWrapper implements BatchVisitor {
 			}
 		}
 	}
-
-//	private URL getDefaultContextXml() {
-//		// get the resource URL from the config fragment
-//		URL defaultContextUrl = getClass().getResource("/context.xml");
-//		// overwrite with context xml from configuration directory if it exists
-//		File configurationFile = new File(server.getConfigurationDir(), "context.xml");
-//		if (configurationFile.exists()) {
-//			try {
-//				defaultContextUrl = configurationFile.toURI().toURL();
-//			} catch (MalformedURLException e) {
-//				LOG.error("cannot access default context file", e);
-//			}
-//		}
-//		return defaultContextUrl;
-//	}
-//
-//    private void processContextConfig(Context context, Digester digester, URL contextXml) {
-//
-//        if (LOG.isDebugEnabled()) {
-//        	LOG.debug("Processing context [" + context.getName()
-//                    + "] configuration file [" + contextXml + "]");
-//        }
-//
-//        InputSource source = null;
-//        InputStream stream = null;
-//
-//        try {
-//            source = new InputSource(contextXml.toString());
-//            URLConnection xmlConn = contextXml.openConnection();
-//            xmlConn.setUseCaches(false);
-//            stream = xmlConn.getInputStream();
-//        } catch (Exception e) {
-//            LOG.error("Cannot read context file" , e);
-//        }
-//
-//        if (source == null) {
-//            return;
-//        }
-//
-//        try {
-//            source.setByteStream(stream);
-//            digester.setClassLoader(this.getClass().getClassLoader());
-//            digester.setUseContextClassLoader(false);
-//            digester.push(context.getParent());
-//            digester.push(context);
-//            XmlErrorHandler errorHandler = new XmlErrorHandler();
-//            digester.setErrorHandler(errorHandler);
-//            digester.parse(source);
-//            if (errorHandler.getWarnings().size() > 0 ||
-//                    errorHandler.getErrors().size() > 0) {
-//                for (SAXParseException e : errorHandler.getWarnings()) {
-//                    LOG.warn("Warning in XML processing", e.getMessage(), source);
-//                }
-//                for (SAXParseException e : errorHandler.getErrors()) {
-//                    LOG.warn("Error in XML processing", e.getMessage(), source);
-//                }
-//            }
-//            if (LOG.isDebugEnabled()) {
-//                LOG.debug("Successfully processed context [" + context.getName()
-//                        + "] configuration file [" + contextXml + "]");
-//            }
-//        } catch (SAXParseException e) {
-//            LOG.error("Cannot parse config file {}", context.getName(), e);
-//            LOG.error("at {} {}",
-//                             "" + e.getLineNumber(),
-//                             "" + e.getColumnNumber());
-//        } catch (Exception e) {
-//        	LOG.error("Cannot parse context {}",
-//                    context.getName(), e);
-//        } finally {
-//            try {
-//                if (stream != null) {
-//                    stream.close();
-//                }
-//            } catch (IOException e) {
-//                LOG.error("Cannot close context configuration", e);
-//            }
-//        }
-//    }
 
 }

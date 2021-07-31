@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.Filter;
@@ -48,6 +49,31 @@ import org.slf4j.LoggerFactory;
  * {@link javax.servlet.ServletContainerInitializer}s may be used to register dynamic servlets/filters/listeners
  * through many {@link OsgiServletContext}s into single {@link ServletContext}. We need to keep track of the dynamic
  * web elements registered by multiple SCIs and actually register them later after all SCIs are invoked.</p>
+ *
+ * <p>2021-07-29 update: when implementing WebSockets (having problems in Undertow), I realized it's not that easy...
+ * <ul>
+ *     <li>registration of servlets and filters should always be allowed (chapter 4.4.3.5 of Servlets 4 spec),
+ *         but for example Jetty calls {@code org.eclipse.jetty.servlet.ServletContextHandler.Context#checkDynamic()},
+ *         Tomcat checks {@code !context.getState().equals(LifecycleState.STARTING_PREP)} and Undertow calls
+ *         {@code io.undertow.servlet.spec.ServletContextImpl#ensureNotInitialized()}</li>
+ *     <li>The basic, most "initial" way of adding listeners is through web.xml, web-fragment.xml or
+ *         {@link javax.servlet.annotation.WebListener} and such listeners should always be able to add more
+ *         listeners. Each container has it's own way to mark the point when new listeners can't be added:<ul>
+ *             <li>Jetty calls {@code ContextHandler.Context#setEnabled(false)} when invoking first programmatic
+ *                 listener, but new {@link javax.servlet.ServletContextListener} can't be added if
+ *                 {@code org.eclipse.jetty.server.handler.ContextHandler.Context#_extendedListenerTypes} is
+ *                 false</li>
+ *             <li>Tomcat calls SCIs which can add {@link javax.servlet.ServletContextListener}, but then inside
+ *                 {@code org.apache.catalina.core.StandardContext#listenerStart()}, {@code newServletContextListenerAllowed}
+ *                 is set to {@code false}. Additionally all programmatic ServletContextListeners are marked as
+ *                 "no pluggability listeners", so they can't add ANY new listener. ServletContextListeners added
+ *                 in SCIs can add other listeners only.</li>
+ *             <li>Undertow allows listeners to call {@link ServletContext#addListener} only if the adding
+ *                 listener is NOT programmatic. But new {@link javax.servlet.ServletContextListener} can
+ *                 never be added anyway</li>
+ *         </ul></li>
+ * </ul>
+ * </p>
  */
 public class OsgiDynamicServletContext implements ServletContext {
 
@@ -56,9 +82,21 @@ public class OsgiDynamicServletContext implements ServletContext {
 	private final OsgiServletContext osgiContext;
 	private final DynamicRegistrations registration;
 
+	/** The collected names of the attributes which have to be cleared when the container is restarted */
+	private final Set<String> attributesToClearBeforeRestart = new HashSet<>();
+
 	public OsgiDynamicServletContext(OsgiServletContext osgiContext, DynamicRegistrations registration) {
 		this.osgiContext = osgiContext;
 		this.registration = registration;
+	}
+
+	/**
+	 * This method has to be called after {@link SCIWrapper} calls wrapped
+	 * {@link javax.servlet.ServletContainerInitializer}, so attributes potentially added by the SCI are removed
+	 * when the context is restarted.
+	 */
+	public void rememberAttributesFromSCIs() {
+		osgiContext.getAttributesToClearBeforeRestart().addAll(attributesToClearBeforeRestart);
 	}
 
 	public OsgiContextModel getOsgiContextModel() {
@@ -181,6 +219,8 @@ public class OsgiDynamicServletContext implements ServletContext {
 
 	@Override
 	public void setAttribute(String name, Object object) {
+		// remember the attribute added by SCI - it has to be removed when the context is restarted
+		attributesToClearBeforeRestart.add(name);
 		osgiContext.setAttribute(name, object);
 	}
 

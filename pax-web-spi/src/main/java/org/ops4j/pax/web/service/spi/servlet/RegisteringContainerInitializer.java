@@ -15,14 +15,15 @@
  */
 package org.ops4j.pax.web.service.spi.servlet;
 
+import java.util.Iterator;
 import java.util.Set;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 
+import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.views.DynamicJEEWebContainerView;
 import org.ops4j.pax.web.service.spi.servlet.dynamic.DynamicEventListenerRegistration;
-import org.ops4j.pax.web.service.spi.servlet.dynamic.DynamicFilterRegistration;
-import org.ops4j.pax.web.service.spi.servlet.dynamic.DynamicServletRegistration;
 import org.osgi.framework.Bundle;
 
 /**
@@ -42,39 +43,42 @@ import org.osgi.framework.Bundle;
 public class RegisteringContainerInitializer extends SCIWrapper {
 
 	private final DynamicRegistrations registrations;
+	private final OsgiServletContext osgiServletContext;
 
-	public RegisteringContainerInitializer(DynamicRegistrations registrations) {
-		super(null, null);
+	public RegisteringContainerInitializer(OsgiServletContext osgiServletContext, DynamicRegistrations registrations) {
+		super(null, new ContainerInitializerModel(null, null));
 		this.registrations = registrations;
+
+		// This has to always be the last one - lowest rank
+		this.getModel().setServiceRank(Integer.MIN_VALUE);
+		this.getModel().setServiceId(Long.MAX_VALUE);
+
+		this.osgiServletContext = osgiServletContext;
 	}
 
 	@Override
 	public void onStartup() throws ServletException {
-		// register listeners
-		for (DynamicEventListenerRegistration reg : registrations.getDynamicListenerRegistrations()) {
-			Bundle bundle = reg.getModel().getRegisteringBundle();
-			DynamicJEEWebContainerView container = registrations.getContainer(bundle);
-			container.registerListener(reg.getModel());
+		// we are the last SCI in the chain, so here's the last place where ServletContextListeners can be registered
+
+		// first we will register all ServletContextListeners added by SCIs and then register
+		// a ServletContextListeners that will register servlets/filters/listeners added both by SCIs AND
+		// other ServletContextListeners...
+
+		for (Iterator<DynamicEventListenerRegistration> iterator = registrations.getDynamicListenerRegistrations().iterator(); iterator.hasNext(); ) {
+			DynamicEventListenerRegistration reg = iterator.next();
+			if (reg.getModel().getEventListener() instanceof ServletContextListener) {
+				Bundle bundle = reg.getModel().getRegisteringBundle();
+				DynamicJEEWebContainerView container = registrations.getContainer(bundle);
+				if (container != null) {
+					container.registerListener(reg.getModel());
+				}
+				iterator.remove();
+			}
 		}
 
-		// register servlets
-		for (DynamicServletRegistration reg : registrations.getDynamicServletRegistrations().values()) {
-			Bundle bundle = reg.getModel().getRegisteringBundle();
-			DynamicJEEWebContainerView container = registrations.getContainer(bundle);
-			container.registerServlet(reg.getModel());
-		}
+		osgiServletContext.getContainerServletContext().addListener(new RegisteringContextListener(registrations));
 
-		// register filters
-		for (DynamicFilterRegistration reg : registrations.getDynamicFilterRegistrations()) {
-			Bundle bundle = reg.getModel().getRegisteringBundle();
-			DynamicJEEWebContainerView container = registrations.getContainer(bundle);
-			container.registerFilter(reg.getModel());
-		}
-
-		// clean the registrations
-		registrations.getDynamicServletRegistrations().clear();
-		registrations.getDynamicFilterRegistrations().clear();
-		registrations.getDynamicListenerRegistrations().clear();
+		osgiServletContext.noMoreServletContextListeners();
 	}
 
 	@Override

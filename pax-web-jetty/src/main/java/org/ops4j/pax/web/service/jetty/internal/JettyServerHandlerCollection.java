@@ -23,10 +23,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.ops4j.pax.web.annotations.Review;
-import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,8 +61,8 @@ class JettyServerHandlerCollection extends HandlerCollection {
 			return;
 		}
 
-		final OsgiContextModel matched = serverModel.matchPathToContext(request.getServerName(),target);
-		if (matched != null) {
+//		final OsgiContextModel matched = serverModel.matchPathToContext(request.getServerName(),target);
+//		if (matched != null) {
 			// check for nulls and start complaining
 //			NullArgumentException.validateNotNull(matched.getHttpContext(),
 //					"The http Context of " + matched.getContextName()
@@ -90,7 +88,7 @@ class JettyServerHandlerCollection extends HandlerCollection {
 //			}
 			//CHECKSTYLE:ON
 
-		}
+//		}
 		// now handle all other handlers
 		// PAXWEB-981 - let's ensure that only one org.eclipse.jetty.server.handler.ContextHandler can handle a request
 		// Servlets 3.1, 12.1 "Use of URL Paths":
@@ -98,10 +96,10 @@ class JettyServerHandlerCollection extends HandlerCollection {
 		//  - The Web container next must locate the servlet to process the request using the path mapping procedure [...]
 		//  - The first successful match is used with no further matches attempted
 		for (Handler handler : getHandlers()) {
-			if (matched != null
-					&& (handler instanceof ContextHandler/* || matchedContextEqualsHandler(matched, handler)*/)) {
-				continue;
-			}
+//			if (matched != null
+//					&& (handler instanceof ContextHandler/* || matchedContextEqualsHandler(matched, handler)*/)) {
+//				continue;
+//			}
 			handler.handle(target, baseRequest, request, response);
 		}
 	}

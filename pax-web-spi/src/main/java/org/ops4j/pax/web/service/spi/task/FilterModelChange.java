@@ -59,6 +59,10 @@ public class FilterModelChange extends Change {
 		return disabled;
 	}
 
+	public boolean isDynamic() {
+		return filterModel != null && filterModel.isDynamic();
+	}
+
 	public List<OsgiContextModel> getNewModels() {
 		return newModels;
 	}
@@ -72,7 +76,7 @@ public class FilterModelChange extends Change {
 
 	@Override
 	public void accept(BatchVisitor visitor) {
-		visitor.visit(this);
+		visitor.visitFilterModelChange(this);
 	}
 
 	public List<OsgiContextModel> getContextModels() {

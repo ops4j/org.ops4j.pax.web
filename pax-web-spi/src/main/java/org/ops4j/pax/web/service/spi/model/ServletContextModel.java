@@ -15,10 +15,8 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import javax.servlet.ServletContext;
@@ -26,9 +24,9 @@ import javax.servlet.ServletContext;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.JspConfigurationModel;
-import org.ops4j.pax.web.service.spi.model.elements.LoginConfigModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.SessionConfigurationModel;
+import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 
 /**
  * <p>This class is 1:1 representation of server-specific {@link ServletContext} and is unaware of
@@ -77,8 +75,8 @@ public final class ServletContextModel extends Identity {
 	/** JSP configuration as defined in {@link ServletContext#getJspConfigDescriptor()} */
 	private JspConfigurationModel jspConfiguration;
 
-	/** Login configurations as specified by {@code <login-config>} element from {@code web.xml}. */
-	private final List<LoginConfigModel> loginConfigurations = new ArrayList<>();
+//	/** Login configurations as specified by {@code <login-config>} element from {@code web.xml}. */
+//	private final List<LoginConfigModel> loginConfigurations = new ArrayList<>();
 
 	/** Servlet name mapping enforces servlet name uniqueness within a context. */
 	private final Map<String, ServletModel> servletNameMapping = new HashMap<>();
@@ -105,6 +103,9 @@ public final class ServletContextModel extends Identity {
 
 	/** Filter name mapping enforces filter name uniqueness within a context. */
 	private final Map<String, FilterModel> filterNameMapping = new HashMap<>();
+
+	/** Mapping of WebSocket paths to WebSocket models */
+	private final Map<String, WebSocketModel> webSocketUrlPathMapping = new HashMap<>();
 
 	/**
 	 * Mapping between error code / wildcard / exception class name and actual (enabled) {@link ErrorPageModel}
@@ -185,6 +186,24 @@ public final class ServletContextModel extends Identity {
 		}
 	}
 
+	/**
+	 * <p>Marks given {@link WebSocketModel} as enabled.</p>
+	 *
+	 * @param model
+	 */
+	public void enableWebSocketModel(WebSocketModel model) {
+		webSocketUrlPathMapping.put(model.getMappedPath(), model);
+	}
+
+	/**
+	 * <p>Marks given {@link WebSocketModel} as disabled.</p>
+	 *
+	 * @param model
+	 */
+	public void disableWebSocketModel(WebSocketModel model) {
+		webSocketUrlPathMapping.remove(model.getMappedPath());
+	}
+
 	public String getContextPath() {
 		return contextPath;
 	}
@@ -223,6 +242,10 @@ public final class ServletContextModel extends Identity {
 
 	public Map<String, ErrorPageModel> getErrorPageMapping() {
 		return errorPageMapping;
+	}
+
+	public Map<String, WebSocketModel> getWebSocketUrlPathMapping() {
+		return webSocketUrlPathMapping;
 	}
 
 	@Override

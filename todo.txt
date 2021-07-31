@@ -1,5 +1,6 @@
 Must have for 8.0.0.GA:
  - Whiteboard preprocessors
+ - RegEx filter mapping
  - org.osgi.framework.ServiceObjects and proper service management (unget, prototype, singleton, bundle scopes)
  - DTOs
  + "listener=true" for Whiteboard listeners
@@ -12,12 +13,15 @@ Must have for 8.0.0.GA:
  - JSP servlet configuration through Pax Web PID
  - Allocating contexts for WABs, where WAB's OsgiContextModel is of highest priority (can't have other OsgiContextModel overring the WAB's one)
  - Karaf integration tests
+
 Moved to after 8.0.0.GA (8.0.x):
  - Jetty/Tomcat/Undertow bundles
  - HTTP context processing (potentially with external web-fragment.xml)
  - HTTP/2 (mostly tests)
  - Keycloak integration
  - Jasypt encryption in PID
+ - @ServletSecurity, @RunAs, @DeclareRoles annotations on servlets
+
 Move to 8.1.x:
  - Jetty org.eclipse.jetty.server.Handler and org.eclipse.jetty.server.Connector tracking
  - Web-VirtualHosts / Web-Connectors

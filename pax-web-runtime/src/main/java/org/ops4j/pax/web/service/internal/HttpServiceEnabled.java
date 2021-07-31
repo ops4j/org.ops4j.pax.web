@@ -18,11 +18,13 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EventListener;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -56,12 +58,14 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
+import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModelAware;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.JspModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEventListener;
@@ -74,6 +78,7 @@ import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.Change;
 import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
+import org.ops4j.pax.web.service.spi.task.TransactionStateChange;
 import org.ops4j.pax.web.service.spi.util.Path;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
@@ -150,32 +155,104 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 	public void stop() {
 		LOG.debug("Stopping http service for: " + serviceBundle);
 
-		// TODO: make it transactional, so removal of two servlets won't restart the servlet context twice
-		//       though it's not that easy - we can't quickly detect if the stop() is called because HttpService
-		//       (factory) is unregistered or the bundle called unget() on the reference because underneath it's
-		//       all about calling unget()
+		Batch b = new Batch("Stopping " + this);
 
-		// strange while loops, because "unregistration" may not necessarily end with removal of single web
-		// element. For example, when many servlets were registered by class name
-		while (!serviceModel.getFilterModels().isEmpty()) {
-			doUnregisterFilter(serviceModel.getFilterModels().iterator().next());
+		Set<String> contexts = new HashSet<>();
+		// filters
+		for (FilterModel fm : serviceModel.getFilterModels()) {
+			for (OsgiContextModel ocm : fm.getContextModels()) {
+				contexts.add(ocm.getContextPath());
+			}
 		}
-		while (!serviceModel.getServletModels().isEmpty()) {
-			doUnregisterServlet(serviceModel.getServletModels().iterator().next());
+		b.removeFilterModels(new ArrayList<>(serviceModel.getFilterModels()));
+		// servlets
+		Map<ServletModel, Boolean> servlets = new HashMap<>();
+		for (ServletModel sm : serviceModel.getServletModels()) {
+			servlets.put(sm, !serverModel.getDisabledServletModels().contains(sm));
+			for (OsgiContextModel ocm : sm.getContextModels()) {
+				contexts.add(ocm.getContextPath());
+			}
 		}
-		while (!serviceModel.getEventListenerModels().isEmpty()) {
-			doUnregisterEventListener(serviceModel.getEventListenerModels().iterator().next());
+		b.removeServletModels(servlets);
+		// event listeners
+		for (EventListenerModel elm : serviceModel.getEventListenerModels()) {
+			for (OsgiContextModel ocm : elm.getContextModels()) {
+				contexts.add(ocm.getContextPath());
+			}
 		}
-		while (!serviceModel.getErrorPageModels().isEmpty()) {
-			doUnregisterErrorPages(serviceModel.getErrorPageModels().iterator().next());
+		b.removeEventListenerModels(new ArrayList<>(serviceModel.getEventListenerModels()));
+		// error pages
+		for (ErrorPageModel epm : serviceModel.getErrorPageModels()) {
+			for (OsgiContextModel ocm : epm.getContextModels()) {
+				contexts.add(ocm.getContextPath());
+			}
 		}
-		while (!serviceModel.getContainerInitializerModels().isEmpty()) {
-			doUnregisterServletContainerInitializer(serviceModel.getContainerInitializerModels().iterator().next());
+		b.removeErrorPageModels(new ArrayList<>(serviceModel.getErrorPageModels()));
+		// SCIs
+		for (ContainerInitializerModel cim : serviceModel.getContainerInitializerModels()) {
+			for (OsgiContextModel ocm : cim.getContextModels()) {
+				contexts.add(ocm.getContextPath());
+			}
+		}
+		b.removeContainerInitializerModels(new ArrayList<>(serviceModel.getContainerInitializerModels()));
+		// web sockets
+		Map<WebSocketModel, Boolean> webSockets = new HashMap<>();
+		for (WebSocketModel wsm : serviceModel.getWebSocketModels()) {
+			webSockets.put(wsm, !serverModel.getDisabledWebSocketModels().contains(wsm));
+			for (OsgiContextModel ocm : wsm.getContextModels()) {
+				contexts.add(ocm.getContextPath());
+			}
+		}
+		b.removeWebSocketModels(webSockets);
+		// welcome pages
+		for (WelcomeFileModel wfm : serviceModel.getWelcomeFileModels()) {
+			for (OsgiContextModel ocm : wfm.getContextModels()) {
+				contexts.add(ocm.getContextPath());
+			}
+			b.removeWelcomeFileModel(wfm);
 		}
 
-		doUnregisterAllWelcomeFiles();
+		for (OsgiContextModel ocm : serverModel.getAllBundleOsgiContextModels(serviceBundle)) {
+			if (!ocm.isWhiteboard()) {
+				b.disassociateOsgiContextModel(ocm.resolveHttpContext(null), ocm);
+				b.removeOsgiContextModel(ocm);
+			}
+		}
 
-		serverModel.deassociateContexts(serviceBundle, serverController);
+		for (String ctx : contexts) {
+			b.getOperations().add(0, new TransactionStateChange(OpCode.ASSOCIATE, ctx));
+			b.getOperations().add(new TransactionStateChange(OpCode.DISASSOCIATE, ctx));
+		}
+
+		serverController.sendBatch(b);
+		b.accept(serviceModel);
+
+//		// strange while loops, because "unregistration" may not necessarily end with removal of single web
+//		// element. For example, when many servlets were registered by class name
+//		while (!serviceModel.getFilterModels().isEmpty()) {
+//			doUnregisterFilter(serviceModel.getFilterModels().iterator().next());
+//		}
+//		while (!serviceModel.getServletModels().isEmpty()) {
+//			doUnregisterServlet(serviceModel.getServletModels().iterator().next());
+//		}
+//		while (!serviceModel.getEventListenerModels().isEmpty()) {
+//			doUnregisterEventListener(serviceModel.getEventListenerModels().iterator().next());
+//		}
+//		while (!serviceModel.getErrorPageModels().isEmpty()) {
+//			doUnregisterErrorPages(serviceModel.getErrorPageModels().iterator().next());
+//		}
+//		while (!serviceModel.getContainerInitializerModels().isEmpty()) {
+//			doUnregisterServletContainerInitializer(serviceModel.getContainerInitializerModels().iterator().next());
+//		}
+//		while (!serviceModel.getWebSocketModels().isEmpty()) {
+//			doUnregisterWebSocket(serviceModel.getWebSocketModels().iterator().next());
+//		}
+//		for (WelcomeFileModel model : serviceModel.getWelcomeFileModels()) {
+//			// context(s) will be picked from the model
+//			doUnregisterWelcomeFiles(Collections.emptyList(), model);
+//		}
+
+//		serverModel.deassociateContexts(serviceBundle, serverController);
 
 		stopped = true;
 	}
@@ -376,33 +453,42 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				// no exception, so we can alter the batch if needed (for JSPs)
 				Batch newBatch = batch;
 				if (model.isJspServlet()) {
-					// we need JSP SCI if it's not already there
-					boolean found = false;
-					for (ContainerInitializerModel cim : serviceModel.getContainerInitializerModels()) {
+					// we need JSP SCI if it's not already there - but because SCIs are added to actual
+					// context regardless of the OsgiContextModel, we'll check server-global SCI models
+					// instead of service-local (bundle-scoped) ones
+					ContainerInitializerModel jspSCIModel = null;
+					for (ContainerInitializerModel cim : serverModel.getContainerInitializerModels()) {
 						if (PaxWebConstants.DEFAULT_JSP_SCI_CLASS.equals(cim.getContainerInitializer().getClass().getName())) {
 							// fine, but is it for correct context?
-							found = true;
-							for (OsgiContextModel cm : cim.getContextModels()) {
-								if (!model.getContextModels().contains(cm)) {
-									found = false;
-									break;
-								}
-							}
-							if (found) {
+							if (Utils.useSameContextPath(cim, model)) {
+								jspSCIModel = cim;
 								break;
 							}
 						}
 					}
-					if (!found) {
-						ContainerInitializerModel cim = serverModel.createJSPServletContainerInitializerModel(serviceBundle);
-						cim.setRegisteringBundle(model.getRegisteringBundle());
-						cim.setRelatedModel(model);
-						model.getContextModels().forEach(cim::addContextModel);
+					if (jspSCIModel == null) {
+						// we have to create a model for JSP SCI
+						jspSCIModel = serverModel.createJSPServletContainerInitializerModel(serviceBundle);
+						jspSCIModel.setRegisteringBundle(model.getRegisteringBundle());
+						jspSCIModel.getRelatedServletModels().add(model);
+						model.getContextModels().forEach(jspSCIModel::addContextModel);
 						newBatch = new Batch("JSP Configuration and registration of " + model);
-						serverModel.addContainerInitializerModel(cim, newBatch);
+
+						// whether or not the target context is started, we're adding an SCI that'll have to be run.
+						// so potentially other SCis have to be run as well. This means we can't
+						// let them to register dynamic elements (servlets, filters and listeners) more than once.
+						// So we always tell the batch processors (visitors) to clear the dynamic objects
+						newBatch.clearDynamicRegistrations(model.getContextModels());
+
+						serverModel.addContainerInitializerModel(jspSCIModel, newBatch);
 						for (Change operation : batch.getOperations()) {
 							newBatch.getOperations().add(operation);
 						}
+					} else {
+						// we have to tell existing model for JSP SCI that there's another ServerModel with JSP
+						// that requires such SCI. There's NO need to restart the context and to alter SCIs for the
+						// context, because JSP initialization has to be done only once
+						jspSCIModel.getRelatedServletModels().add(model);
 					}
 				}
 
@@ -559,9 +645,17 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 				if (model.isJspServlet()) {
 					// probably we have to unregister SCI for JSP
-					for (ContainerInitializerModel cim : serviceModel.getContainerInitializerModels()) {
-						if (model == cim.getRelatedModel()) {
-							batch.removeContainerInitializerModels(Collections.singletonList(cim));
+					for (ContainerInitializerModel cim : serverModel.getContainerInitializerModels()) {
+						if (cim.getRelatedServletModels().remove(model)) {
+							// if there are no more ServletModels using the JSP SCI, we can unregister the JSP SCI
+							// even if it was registered within the scope of another bundle
+							if (cim.getRelatedServletModels().isEmpty()) {
+								// removal of SCI will never require a context restart. If the context is not started,
+								// it's fine, but if the context is started, this SCI being removed played it's role
+								// already. There are some arguments for the restart, but I believe it's fine not
+								// to do it
+								batch.removeContainerInitializerModels(Collections.singletonList(cim));
+							}
 						}
 					}
 				}
@@ -764,7 +858,8 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			});
 
 			event(WebElementEvent.State.DEPLOYED, model);
-		} catch (NamespaceException cantHappenWheAddingFilters) {
+		} catch (NamespaceException ignored) {
+			// can't happen when adding filters
 		} catch (RuntimeException e) {
 			event(WebElementEvent.State.FAILED, model, e);
 			throw e;
@@ -1112,13 +1207,6 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 	}
 
-	private void doUnregisterAllWelcomeFiles() {
-		for (WelcomeFileModel model : serviceModel.getWelcomeFileModels()) {
-			// context(s) will be picked from the model
-			doUnregisterWelcomeFiles(Collections.emptyList(), model);
-		}
-	}
-
 	// --- methods used to register error pages
 
 	@Override
@@ -1410,6 +1498,10 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 				LOG.info("Registering {}", model);
 
+				// whether or not the target context is started, we're adding an SCI that'll have to be run.
+				// so potentially other SCis have to be run as well. This means we have to clear all dynamic objects
+				batch.clearDynamicRegistrations(model.getContextModels());
+
 				serverModel.addContainerInitializerModel(model, batch);
 
 				serverController.sendBatch(batch);
@@ -1472,7 +1564,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 				final Batch batch = new Batch("Unregistration of ServletContainerInitializer: " + toUnregister);
 
-				serverModel.removeContainerInitializerModels(toUnregister, batch);
+				batch.removeContainerInitializerModels(toUnregister);
 
 				serverController.sendBatch(batch);
 
@@ -1575,6 +1667,324 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		});
 	}
 
+	// methods used to register annotated web socket endpoints
+
+	@Override
+	public void registerWebSocket(Object webSocket, HttpContext httpContext) {
+		if (Class.class == webSocket.getClass()) {
+			doRegisterWebSocket(Collections.singletonList(httpContext), new WebSocketModel(null, (Class<?>) webSocket));
+		} else {
+			doRegisterWebSocket(Collections.singletonList(httpContext), new WebSocketModel(webSocket, null));
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void doRegisterWebSocket(List<HttpContext> httpContexts, WebSocketModel model) {
+		LOG.debug("Passing registration of {} to configuration thread", model);
+
+		if (model.getRegisteringBundle() == null) {
+			model.setRegisteringBundle(this.serviceBundle);
+		}
+
+		try {
+			event(WebElementEvent.State.DEPLOYING, model);
+
+			final Batch batch = new Batch("Registration of " + model);
+
+			serverModel.run(() -> {
+				translateContexts(httpContexts, model, batch);
+
+				try {
+					model.performValidation();
+				} catch (Exception e) {
+					throw new RuntimeException(e.getMessage(), e);
+				}
+
+				LOG.info("Registering {}", model);
+
+				// whether or not the target context is started, SCIs will ALWAY be invoked. This means we can't
+				// let them to register dynamic elements (servlets, filters and listeners) more than once. So we
+				// always tell the batch processors (visitors) to clear the dynamic objects
+				batch.clearDynamicRegistrations(model.getContextModels());
+
+				// we need *two* WebSocket SCIs:
+				//  - one is runtime specific that configures concrete implementation of
+				//    javax.websocket.server.ServerContainer inside servlet context. This SCI should *not* be passed
+				//    any classes to onStartup() method
+				//  - the other one is runtime agnostic and should be invoked AFTER the runtime-specific one and its
+				//    task should be actual registration of the WebSocket endpoint(s)
+
+				Bundle paxWebWS = Utils.getPaxWebWebSocketsBundle(serviceBundle);
+				if (paxWebWS == null) {
+					throw new IllegalStateException("pax-web-websocket bundle is not installed. Can't register WebSocket endpoint.");
+				}
+
+				Bundle jettyWebSocketBundle = Utils.getJettyWebSocketBundle(serviceBundle);
+				Bundle tomcatWebSocketBundle = Utils.getTomcatWebSocketBundle(serviceBundle);
+				Bundle undertowWebSocketBundle = Utils.getUndertowWebSocketBundle(serviceBundle);
+
+				ContainerInitializerModel cimForGenericWSSupport = null;
+				ContainerInitializerModel cimForJettyWSSupport = null;
+				ContainerInitializerModel cimForTomcatWSSupport = null;
+				ContainerInitializerModel cimForUndertowWSSupport = null;
+
+				// we'll search all the SCI models for entire server model to find out if we have to
+				// register needed SCI(s)
+				for (ContainerInitializerModel cim : serverModel.getContainerInitializerModels()) {
+					if (!Utils.useSameContextPath(cim, model)) {
+						continue;
+					}
+
+					// this server-wide ContainerInitializerModel uses OsgiContextModel that matches
+					// the context path of one of the OsgiContextModel's context path of the WebSocket
+					// model being registered
+
+					switch (cim.getContainerInitializer().getClass().getName()) {
+						case PaxWebConstants.DEFAULT_WEBSOCKET_SCI_CLASS:
+							cimForGenericWSSupport = cim;
+							break;
+						case PaxWebConstants.DEFAULT_WEBSOCKET_JETTY_SCI_CLASS:
+							cimForJettyWSSupport = cim;
+							break;
+						case PaxWebConstants.DEFAULT_WEBSOCKET_TOMCAT_SCI_CLASS:
+							cimForTomcatWSSupport = cim;
+							break;
+						case PaxWebConstants.DEFAULT_WEBSOCKET_UNDERTOW_SCI_CLASS:
+							cimForUndertowWSSupport = cim;
+							break;
+						default:
+							break;
+					}
+				}
+
+				if (jettyWebSocketBundle != null) {
+					// we may need Jetty-specific SCI for WebSockets
+					if (cimForJettyWSSupport == null) {
+						cimForJettyWSSupport = createContainerSpecificWsSCIModel(jettyWebSocketBundle, model,
+								PaxWebConstants.DEFAULT_WEBSOCKET_JETTY_SCI_CLASS, "Jetty");
+						cimForJettyWSSupport.setForJetty(true);
+						batch.addContainerInitializerModel(cimForJettyWSSupport);
+					}
+					cimForJettyWSSupport.getRelatedWebSocketModels().add(model);
+				}
+				if (tomcatWebSocketBundle != null) {
+					// we may need Tomcat-specific SCI for WebSockets
+					if (cimForTomcatWSSupport == null) {
+						cimForTomcatWSSupport = createContainerSpecificWsSCIModel(tomcatWebSocketBundle, model,
+								PaxWebConstants.DEFAULT_WEBSOCKET_TOMCAT_SCI_CLASS, "Tomcat");
+						cimForTomcatWSSupport.setForTomcat(true);
+						batch.addContainerInitializerModel(cimForTomcatWSSupport);
+					}
+					cimForTomcatWSSupport.getRelatedWebSocketModels().add(model);
+				}
+				if (undertowWebSocketBundle != null) {
+					// we may need Undertow-specific SCI for WebSockets
+					if (cimForUndertowWSSupport == null) {
+						cimForUndertowWSSupport = createContainerSpecificWsSCIModel(undertowWebSocketBundle, model,
+								PaxWebConstants.DEFAULT_WEBSOCKET_UNDERTOW_SCI_CLASS, "Undertow");
+						cimForUndertowWSSupport.setForUndertow(true);
+						batch.addContainerInitializerModel(cimForUndertowWSSupport);
+					}
+					cimForUndertowWSSupport.getRelatedWebSocketModels().add(model);
+				}
+
+				if (cimForGenericWSSupport == null) {
+					// create an SCI that'll register our endpoints in clever, Pax-Web specific way
+					Class<? extends ServletContainerInitializer> wsSCIClass;
+
+					ServletContainerInitializer sci;
+					try {
+						wsSCIClass = (Class<? extends ServletContainerInitializer>) paxWebWS.loadClass(PaxWebConstants.DEFAULT_WEBSOCKET_SCI_CLASS);
+						sci = wsSCIClass.newInstance();
+					} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+						throw new IllegalStateException("Can't create WebSocket SCI " + PaxWebConstants.DEFAULT_WEBSOCKET_SCI_CLASS
+								+ " using bundle " + paxWebWS);
+					}
+
+					cimForGenericWSSupport = new ContainerInitializerModel(sci, null);
+					cimForGenericWSSupport.setServiceId(0);
+					cimForGenericWSSupport.setServiceRank(0);
+
+					model.getContextModels().forEach(cimForGenericWSSupport::addContextModel);
+					cimForGenericWSSupport.setRegisteringBundle(model.getRegisteringBundle());
+
+					// now the important part - according to JSR-356 (WebSockets), user is registering endpoints
+					// by passing an annotated class to javax.websocket.server.ServerContainer.addEndpoint(java.lang.Class<?>)
+					// method. However here we're getting actual instance of the endpoint (but also we can get a class).
+					// So our SCI SHOULD be able to register already instantiated endpoints
+					if (sci instanceof ContainerInitializerModelAware) {
+						((ContainerInitializerModelAware) sci).setContainerInitializerModel(cimForGenericWSSupport);
+					}
+
+					batch.addContainerInitializerModel(cimForGenericWSSupport);
+				} else {
+					// probably we're registering another WebSocket, so we'll just add the model to existing SCI
+					// and ContainerInitializerModel (also when adding the SCI for the first time), but also we'll
+					// tell the batch to update the SCI model - this should lead to full container restart later
+					batch.changeContainerInitializerModel(cimForGenericWSSupport);
+				}
+				cimForGenericWSSupport.getRelatedWebSocketModels().add(model);
+
+				serverModel.addWebSocketModel(model, batch);
+
+				serverController.sendBatch(batch);
+				batch.accept(serviceModel);
+
+				return null;
+			});
+
+			event(WebElementEvent.State.DEPLOYED, model);
+		} catch (Exception e) {
+			event(WebElementEvent.State.FAILED, model, e);
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * Create container specific {@link ContainerInitializerModel} needed when registering {@link WebSocketModel}.
+	 * @param bundle
+	 * @param model
+	 * @param className
+	 * @param containerName
+	 * @return
+	 */
+	private ContainerInitializerModel createContainerSpecificWsSCIModel(Bundle bundle, WebSocketModel model, String className, String containerName) {
+		ServletContainerInitializer sci;
+		try {
+			@SuppressWarnings("unchecked")
+			Class<? extends ServletContainerInitializer> sciClass
+					= (Class<? extends ServletContainerInitializer>) bundle.loadClass(className);
+			sci = sciClass.newInstance();
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			throw new IllegalStateException("Can't create " + containerName + " WebSocket SCI " + className
+					+ " using bundle " + bundle);
+		}
+
+		ContainerInitializerModel cim = new ContainerInitializerModel(sci, null);
+		cim.setServiceId(0);
+		cim.setServiceRank(Integer.MAX_VALUE);
+
+		model.getContextModels().forEach(cim::addContextModel);
+		cim.setRegisteringBundle(model.getRegisteringBundle());
+
+		return cim;
+	}
+
+	// methods used to unregister annotated web socket endpoints
+
+	@Override
+	public void unregisterWebSocket(Object webSocket, HttpContext httpContext) {
+		if (Class.class == webSocket.getClass()) {
+			doUnregisterWebSocket(new WebSocketModel(null, (Class<?>) webSocket));
+		} else {
+			doUnregisterWebSocket(new WebSocketModel(webSocket, null));
+		}
+	}
+
+	private void doUnregisterWebSocket(WebSocketModel model) {
+		final Object instance = model.getWebSocketEndpoint();
+		final Class<?> endpointClass = model.getWebSocketEndpointClass();
+		ServiceReference<?> reference = model.getElementReference();
+
+		if (model.getRegisteringBundle() == null) {
+			model.setRegisteringBundle(serviceBundle);
+		}
+		Bundle registeringBundle = model.getRegisteringBundle();
+
+		try {
+			event(WebElementEvent.State.UNDEPLOYING, model);
+
+			serverModel.run(() -> {
+				List<WebSocketModel> toUnregister = new LinkedList<>();
+
+				// This loop checks Whiteboard unregistration - reference identity
+				for (WebSocketModel existing : serviceModel.getWebSocketModels()) {
+					if (existing == model) {
+						// Whiteboard scenario, where actual "customized" object is unregistered
+						LOG.info("Unregistering web socket model \"{}\"", model);
+						toUnregister.add(existing);
+						break;
+					}
+				}
+				if (toUnregister.isEmpty()) {
+					// search by criteria
+					if (endpointClass != null) {
+						LOG.info("Unregistering web socket by class \"{}\"", endpointClass);
+
+						for (WebSocketModel existing : serviceModel.getWebSocketModels()) {
+							if (existing.getWebSocketEndpointClass().equals(endpointClass)) {
+								toUnregister.add(existing);
+							}
+						}
+						if (toUnregister.size() == 0) {
+							throw new IllegalArgumentException("Web Socket of \"" + endpointClass.getName() + "\" class "
+									+ "was never registered by " + registeringBundle);
+						}
+					} else if (reference != null) {
+						LOG.info("Unregistering webs ocket by refernce \"{}\"", reference);
+
+						for (WebSocketModel existing : serviceModel.getWebSocketModels()) {
+							if (existing.getElementReference().equals(reference)) {
+								toUnregister.add(existing);
+							}
+						}
+						if (toUnregister.size() == 0) {
+							throw new IllegalArgumentException("Web Socket with reference \"" + reference + "\" "
+									+ "was never registered by " + registeringBundle);
+						}
+					} else if (instance != null) {
+						LOG.info("Unregistering web socket \"{}\"", instance);
+
+						for (WebSocketModel existing : serviceModel.getWebSocketModels()) {
+							if (existing.getWebSocketEndpoint().equals(instance)) {
+								toUnregister.add(existing);
+							}
+						}
+						if (toUnregister.size() == 0) {
+							throw new IllegalArgumentException("Web Socket \"" + instance + "\" "
+									+ "was never registered by " + registeringBundle);
+						}
+					}
+				}
+				if (toUnregister.isEmpty()) {
+					throw new IllegalArgumentException("Can't find a web socket to unregister using criteria from " + model);
+				}
+
+				final Batch batch = new Batch("Unregistration of web sockets: " + toUnregister);
+
+				List<OsgiContextModel> models = new ArrayList<>();
+				for (WebSocketModel wsm : toUnregister) {
+					models.addAll(wsm.getContextModels());
+				}
+				batch.clearDynamicRegistrations(models);
+
+				// potentially we have to unregister SCI for Web Sockets
+				for (WebSocketModel wsm : toUnregister) {
+					for (ContainerInitializerModel cim : serverModel.getContainerInitializerModels()) {
+						if (cim.getRelatedWebSocketModels().remove(wsm)) {
+							if (cim.getRelatedWebSocketModels().isEmpty()) {
+								batch.removeContainerInitializerModels(Collections.singletonList(cim));
+							}
+						}
+					}
+				}
+
+				serverModel.removeWebSocketModels(toUnregister, batch);
+
+				serverController.sendBatch(batch);
+
+				batch.accept(serviceModel);
+
+				return null;
+			});
+
+			event(WebElementEvent.State.UNDEPLOYED, model);
+		} catch (Exception e) {
+			event(WebElementEvent.State.FAILED, model, e);
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
 	// --- private support methods
 
 	private void event(WebElementEvent.State type, ElementModel<?, ?> model) {
@@ -1642,6 +2052,11 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 
 		return context;
+	}
+
+	@Override
+	public String toString() {
+		return "HttpService (enabled) for bundle " + serviceBundle;
 	}
 
 	/**
@@ -1762,7 +2177,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		@Override
 		public void registerJsp(JspModel model) {
 			String file = model.getJspFile();
-			ServletModel jspServletModel = null;
+			ServletModel jspServletModel;
 			if (file != null) {
 				jspServletModel = serverModel.createJspServletModel(serviceBundle,
 						file, file,
@@ -1787,6 +2202,16 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				HttpServiceEnabled.this.unregisterServlet(model.getJspFile() == null ?
 						PaxWebConstants.DEFAULT_JSP_SERVLET_NAME : model.getJspFile());
 			}
+		}
+
+		@Override
+		public void registerWebSocket(WebSocketModel model) {
+			doRegisterWebSocket(Collections.emptyList(), model);
+		}
+
+		@Override
+		public void unregisterWebSocket(WebSocketModel model) {
+			doUnregisterWebSocket(model);
 		}
 	}
 
@@ -1881,6 +2306,17 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 	}
 
+	private static class ResourceServlet {
+		public final Supplier<Servlet> supplier;
+		public final URL urlBase;
+		public final String chrootBase;
+
+		ResourceServlet(Supplier<Servlet> supplier, URL urlBase, String chrootBase) {
+			this.supplier = supplier;
+			this.urlBase = urlBase;
+			this.chrootBase = chrootBase;
+		}
+	}
 
 
 
@@ -1892,32 +2328,6 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 
 
-//	@Override
-//	public void registerJspServlet(final String[] urlPatterns,
-//								   Dictionary<String, ?> initParams, final HttpContext httpContext,
-//								   final String jspFile) {
-//		if (!SupportUtils.isJSPAvailable()) {
-//			throw new UnsupportedOperationException(
-//					"Jsp support is not enabled. Is org.ops4j.pax.web.jsp bundle installed?");
-//		}
-//		final Servlet jspServlet = new JspServletWrapper(serviceBundle, jspFile);
-//		final ContextModel contextModel = getOrCreateContext(httpContext);
-//		//CHECKSTYLE:OFF
-//		initParams = createInitParams(contextModel, initParams == null ? new Hashtable<>() : initParams);
-//		//CHECKSTYLE:ON
-//		serviceModel.addContextModel(contextModel);
-//		try {
-//			registerServlet(jspServlet, getJspServletName(jspFile),
-//					urlPatterns == null ? new String[]{"*.jsp"}
-//							: urlPatterns, initParams, httpContext);
-//		} catch (ServletException ignore) {
-//			// this should never happen
-//			LOG.error("Internal error. Please report.", ignore);
-//		}
-//		Map<Servlet, String[]> jspServlets = contextModel.getJspServlets();
-//		jspServlets.put(jspServlet, urlPatterns);
-//
-//	}
 
 //	@SuppressWarnings("unchecked")
 //	private Dictionary<String, ?> createInitParams(ContextModel contextModel,
@@ -1987,67 +2397,6 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 //		}
 //		LOG.debug("JSP scratchdir: " + initParams.get("scratchdir"));
 //		return initParams;
-//	}
-//
-//	/**
-//	 * @see WebContainer#unregisterJsps(HttpContext)
-//	 */
-//	@Override
-//	public void unregisterJsps(final HttpContext httpContext) {
-//		if (!SupportUtils.isJSPAvailable()) {
-//			throw new UnsupportedOperationException(
-//					"Jsp support is not enabled. Is org.ops4j.pax.web.jsp bundle installed?");
-//		}
-//		NullArgumentException.validateNotNull(httpContext, "Http context");
-//		final OsgiContextModel contextModel = serviceModel
-//				.getContextModel(httpContext);
-//		if (contextModel == null) {
-//			throw new IllegalArgumentException(
-//					"Jsp support is not enabled for http context ["
-//							+ httpContext + "]");
-//		}
-//		for (Iterator<Servlet> jspServlets = contextModel.getJspServlets()
-//				.keySet().iterator(); jspServlets.hasNext(); ) {
-//			Servlet jspServlet = jspServlets.next();
-//			try {
-//				unregisterServlet(jspServlet);
-//			} finally {
-//				jspServlets.remove();
-//			}
-//		}
-//	}
-//
-//	/**
-//	 * @see WebContainer#unregisterJsps(HttpContext)
-//	 */
-//	@Override
-//	public void unregisterJsps(final String[] urlPatterns,
-//							   final HttpContext httpContext) {
-//		if (!SupportUtils.isJSPAvailable()) {
-//			throw new UnsupportedOperationException(
-//					"Jsp support is not enabled. Is org.ops4j.pax.web.jsp bundle installed?");
-//		}
-//		NullArgumentException.validateNotNull(httpContext, "Http context");
-//		final ContextModel contextModel = serviceModel
-//				.getContextModel(httpContext);
-//		if (contextModel == null) {
-//			throw new IllegalArgumentException(
-//					"Jsp support is not enabled for http context ["
-//							+ httpContext + "]");
-//		}
-//		for (Iterator<Map.Entry<Servlet, String[]>> jspServlets = contextModel
-//				.getJspServlets().entrySet().iterator(); jspServlets.hasNext(); ) {
-//			Map.Entry<Servlet, String[]> entry = jspServlets.next();
-//			String[] candidateUrlPatterns = entry.getValue();
-//			if (Arrays.equals(urlPatterns, candidateUrlPatterns)) {
-//				Servlet jspServlet = entry.getKey();
-//				try {
-//					unregisterServlet(jspServlet);
-//				} finally {
-//					jspServlets.remove();
-//				}
-//			}
-//		}
 //	}
 //
 //	@Override
@@ -2137,55 +2486,6 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 //			}
 //		}
 //	}
-//
-//	@Override
-//	public void registerJettyWebXml(URL jettyWebXmlURL, HttpContext httpContext) {
-//		NullArgumentException.validateNotNull(httpContext, "Http context");
-//		final ContextModel contextModel = getOrCreateContext(httpContext);
-//		LOG.debug("Using context [" + contextModel + "]");
-//		URL contextModelJettyWebXmlURL = contextModel.getJettyWebXmlURL();
-//		if (!(contextModelJettyWebXmlURL == jettyWebXmlURL || contextModelJettyWebXmlURL != null
-//				&& contextModelJettyWebXmlURL.equals(jettyWebXmlURL))) {
-//			if (!serviceModel.canBeConfigured(httpContext)) {
-//				throw new IllegalStateException(
-//						"Http context already used. jetty-web.xml URL can be set/changed only before first usage");
-//			}
-//			contextModel.setJettyWebXmlUrl(jettyWebXmlURL);
-//		}
-//		serviceModel.addContextModel(contextModel);
-//
-//	}
-//
-//	@Override
-//	public void begin(HttpContext httpContext) {
-//		final ContextModel contextModel = getOrCreateContext(httpContext);
-//		LOG.debug("Beginning and ssing context [" + contextModel + "]");
-//		try {
-//			serverController.getContext(contextModel);
-//			contextModel.setWebBundle(true);
-//			//CHECKSTYLE:OFF
-//		} catch (RuntimeException e) {
-//			LOG.error("Exception starting HttpContext registration", e);
-//			throw e;
-//		}
-//		//CHECKSTYLE:ON
-//	}
-//
-//	@Override
-//	public void end(HttpContext httpContext) {
-//		final ContextModel contextModel = getOrCreateContext(httpContext);
-//		LOG.debug("Using context [" + contextModel + "]");
-//		try {
-//			serverController.getContext(contextModel).start();
-//			//CHECKSTYLE:OFF
-//		} catch (Exception e) {
-//			if (e instanceof RuntimeException) {
-//				throw (RuntimeException) e;
-//			}
-//			LOG.error("Exception finalizing HttpContext registration", e);
-//		}
-//		//CHECKSTYLE:ON
-//	}
 
 //	@Override
 //	public void setConnectorsAndVirtualHosts(List<String> connectors, List<String> virtualHosts,
@@ -2218,99 +2518,6 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 //		}
 //		contextModel.setVirtualHosts(realVirtualHosts);
 //		serviceModel.addContextModel(contextModel);
-//	}
-//
-//	@Override
-//	public void registerWebSocket(final Object webSocket, final HttpContext httpContext) {
-//		NullArgumentException.validateNotNull(httpContext, "Http Context");
-//		NullArgumentException.validateNotNull(webSocket, "WebSocket");
-//
-//		ContextModel contextModel = getOrCreateContext(httpContext);
-//
-//		WebSocketModel model = new WebSocketModel(contextModel, webSocket);
-//
-//		boolean controllerSuccess = false;
-//		boolean serviceSuccess = false;
-//		try {
-//			contextModel.addContainerInitializer(new ServletContainerInitializer() {
-//
-//				private Integer maxTry = 20;
-//
-//				@Override
-//				public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
-//					Callable<Boolean> task = () -> registerWebSocket(ctx, 1);
-//
-//					ExecutorService executor = Executors.newSingleThreadExecutor();
-//					Future<Boolean> future = executor.submit(task);
-//
-//					try {
-//						Boolean success = future.get(maxTry * 500 + 2000, TimeUnit.MILLISECONDS);
-//						if (success) {
-//							LOG.info("registered WebSocket");
-//						} else {
-//							LOG.error("Failed to create WebSocket, obviosly the endpoint couldn't be registered");
-//						}
-//					} catch (InterruptedException | ExecutionException | TimeoutException e) {
-//						LOG.error("Failed to wait for registering of WebSocket", e);
-//					}
-//
-//				}
-//
-//				private boolean registerWebSocket(ServletContext ctx, int registerTry) {
-//					if (registerTry == maxTry) {
-//						LOG.error("Tried to Register Websocket for {} times, will stop now", registerTry);
-//						return false;
-//					}
-//					javax.websocket.server.ServerContainer serverContainer = (javax.websocket.server.ServerContainer) ctx.getAttribute(javax.websocket.server.ServerContainer.class.getName());
-//					if (serverContainer != null) {
-//						try {
-//							serverContainer.addEndpoint(webSocket.getClass());
-//							return true;
-//						} catch (DeploymentException e) {
-//							LOG.error("Failed to register WebSocket", e);
-//							return false;
-//						}
-//					} else {
-//						try {
-//							LOG.debug("couldn't find ServerContainer, will try again in 500ms");
-//							LOG.debug("this is the {} try", registerTry);
-//							Thread.sleep(500);
-//							return registerWebSocket(ctx, registerTry + 1);
-//						} catch (InterruptedException e) {
-//							LOG.error("Failed to register WebSocket due to: ", e);
-//							return false;
-//						}
-//					}
-//				}
-//			}, null);
-//			controllerSuccess = true;
-//
-//			serviceModel.addWebSocketModel(model);
-//			serviceSuccess = true;
-//		} finally {
-//			// as this compensatory actions to work the remove methods should
-//			// not throw exceptions.
-//			if (!controllerSuccess) {
-//				if (serviceSuccess) {
-//					serviceModel.removeWebSocketModel(webSocket);
-//				}
-//			}
-//		}
-//
-//		if (!isWebAppWebContainerContext(contextModel)) {
-//			try {
-//				serverController.getContext(contextModel).start();
-//				// CHECKSTYLE:OFF
-//			} catch (Exception e) {
-//				LOG.error("Could not start the servlet context for context path ["
-//						+ contextModel.getContextName() + "]", e);
-//			} //CHECKSTYLE:ON
-//		}
-//
-//	}
-//
-//	@Override
-//	public void unregisterWebSocket(Object webSocket, HttpContext httpContext) {
 //	}
 
 //	@Override
@@ -2345,11 +2552,6 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 //		throw new IllegalStateException(String.format("Service '%s' could not be retrieved!", WhiteboardDtoService.class.getName()));
 //	}
 
-	@Override
-	public String toString() {
-		return "HttpService (enabled) for bundle " + serviceBundle;
-	}
-
 //    @Override
 //    public WebContainerDTO getWebcontainerDTO() {
 //        WebContainerDTO dto = new WebContainerDTO();
@@ -2360,18 +2562,5 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 //
 //        return dto;
 //    }
-
-	private static class ResourceServlet {
-
-		public final Supplier<Servlet> supplier;
-		public final URL urlBase;
-		public final String chrootBase;
-
-		ResourceServlet(Supplier<Servlet> supplier, URL urlBase, String chrootBase) {
-			this.supplier = supplier;
-			this.urlBase = urlBase;
-			this.chrootBase = chrootBase;
-		}
-	}
 
 }

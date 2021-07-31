@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.EventListener;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -85,7 +86,7 @@ public class OsgiServletContext implements ServletContext {
 	 */
 	private final WebContainerContext defaultWebContainerContext;
 
-	private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>();
+	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
 	/** Welcome files are kept at this level - to be accessed by resource servlets, uniquely for each OSGi context */
 	private String[] welcomeFiles;
@@ -98,6 +99,11 @@ public class OsgiServletContext implements ServletContext {
 	private final List<ServletContextAttributeListener> attributeListeners = new CopyOnWriteArrayList<>();
 
 	private final SessionCookieConfig defaultSessionCookieConfig;
+
+	/** The collected names of the attributes which have to be cleared when the container is restarted */
+	private final Set<String> attributesToClearBeforeRestart = new HashSet<>();
+
+	private boolean acceptsServletContextListeners = true;
 
 	/**
 	 * Constructor called when {@link OsgiContextModel} is passed to given
@@ -161,7 +167,7 @@ public class OsgiServletContext implements ServletContext {
 	 * (including HttpService and Whiteboard).</p>
 	 */
 	public void register() {
-		if (registration == null && containerServletContext != null) {
+		if (registration == null) {
 			try {
 				LOG.info("Registering {} as OSGi service for \"{}\" context path", this, osgiContextModel.getContextPath());
 
@@ -202,7 +208,7 @@ public class OsgiServletContext implements ServletContext {
 	public void unregister() {
 		if (registration != null) {
 			try {
-				LOG.info("Unegistering {} as OSGi service for \"{}\" context path", this, getContextPath());
+				LOG.info("Unegistering {} as OSGi service for \"{}\" context path", this, osgiContextModel.getContextPath());
 
 				registration.unregister();
 			} catch (Exception e) {
@@ -213,6 +219,31 @@ public class OsgiServletContext implements ServletContext {
 				registration = null;
 			}
 		}
+	}
+
+	public Set<String> getAttributesToClearBeforeRestart() {
+		return attributesToClearBeforeRestart;
+	}
+
+	/**
+	 * This method removes the attributes set by {@link javax.servlet.ServletContainerInitializer SCIs} in previous
+	 * restart of the context.
+	 */
+	public void clearAttributesFromPreviousCycle() {
+		for (String name : attributesToClearBeforeRestart) {
+			removeAttribute(name);
+		}
+		attributesToClearBeforeRestart.clear();
+
+		attributes.clear();
+		Bundle ownerBundle = osgiContextModel.getOwnerBundle();
+		if (ownerBundle != null && ownerBundle.getBundleContext() != null) {
+			this.attributes.put(PaxWebConstants.CONTEXT_PARAM_BUNDLE_CONTEXT, ownerBundle.getBundleContext());
+			this.attributes.put(PaxWebConstants.CONTEXT_PARAM_SPRING_BUNDLE_CONTEXT, ownerBundle.getBundleContext());
+		}
+
+		// additional attributes set when OsgiContextModel was created
+		this.attributes.putAll(osgiContextModel.getInitialContextAttributes());
 	}
 
 	public OsgiContextModel getOsgiContextModel() {
@@ -227,6 +258,7 @@ public class OsgiServletContext implements ServletContext {
 	 * We have to be able to replace server-specific {@link ServletContext}, because we can't freely
 	 * replace web elements in Undertow. In Undertow we have to recreate entire context, thus getting new
 	 * {@link ServletContext}.
+	 * Also Tomcat replaces a context (facade) inside StandardContext
 	 * @param containerServletContext
 	 */
 	public void setContainerServletContext(ServletContext containerServletContext) {
@@ -251,6 +283,30 @@ public class OsgiServletContext implements ServletContext {
 
 	public void setWelcomeFilesRedirect(boolean redirect) {
 		this.welcomeFilesRedirect = redirect;
+	}
+
+	/**
+	 * This will mark the {@link OsgiServletContext} as a context that still alows for dynamic registration, but
+	 * not if the listener implements {@link javax.servlet.ServletContextListener}
+	 */
+	public void noMoreServletContextListeners() {
+		this.acceptsServletContextListeners = false;
+	}
+
+	/**
+	 * Can {@link javax.servlet.ServletContextListener} be registered?
+	 * @return
+	 */
+	public boolean acceptsServletContextListeners() {
+		return acceptsServletContextListeners;
+	}
+
+	/**
+	 * This method should be called with the associated context starts, so SCIs can register
+	 * {@link javax.servlet.ServletContextListener} listeners
+	 */
+	public void allowServletContextListeners() {
+		this.acceptsServletContextListeners = true;
 	}
 
 	// --- methods that throw UnsupportedOperationException (we can add filters/servlets/listeners, but using
