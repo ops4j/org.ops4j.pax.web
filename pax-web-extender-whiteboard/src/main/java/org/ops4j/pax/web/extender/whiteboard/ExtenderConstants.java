@@ -36,9 +36,4 @@ public interface ExtenderConstants {
 	 */
 	String PROPERTY_HTTP_CONNECTORS = "httpContext.connectors";
 
-	/**
-	 * A registration property for enabling filtering for WebSockets via Whitebox Tracking.
-	 */
-	String WEBSOCKET = "websocket";
-
 }

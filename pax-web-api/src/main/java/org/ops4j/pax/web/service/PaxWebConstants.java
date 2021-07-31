@@ -107,6 +107,15 @@ public interface PaxWebConstants {
 	String SERVICE_PROPERTY_INTERNAL = "org.ops4j.pax.web.internal";
 
 	/**
+	 * Service registration property indication WebSocket registration. Named after
+	 * {@link HttpWhiteboardConstants#HTTP_WHITEBOARD_LISTENER}
+	 */
+	String SERVICE_PROPERTY_WEBSOCKET = "org.ops4j.pax.web.http.whiteboard.websocket";
+	/** Legacy service registration property indication WebSocket registration. */
+	@Deprecated
+	String SERVICE_PROPERTY_WEBSOCKET_LEGACY = "websocket";
+
+	/**
 	 * <p>Pax Web specific service property used when registering:<ul>
 	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping}</li>
 	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.HttpContextMapping}</li>

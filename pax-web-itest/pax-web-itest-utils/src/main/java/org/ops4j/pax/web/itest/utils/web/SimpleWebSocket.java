@@ -17,7 +17,6 @@ package org.ops4j.pax.web.itest.utils.web;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.websocket.ClientEndpoint;
 import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -26,9 +25,13 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
-@ClientEndpoint
-@ServerEndpoint(value = "/simple/")
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@ServerEndpoint(value = "/simple")
 public class SimpleWebSocket {
+
+	public static final Logger LOG = LoggerFactory.getLogger(SimpleWebSocket.class);
 
 	List<String> messages = new ArrayList<>();
 
@@ -38,8 +41,10 @@ public class SimpleWebSocket {
 	}
 
 	@OnMessage
-	public void onWebSocketText(String message) {
+	public String onWebSocketText(String message) {
 		System.out.println("Received TEXT message: " + message);
+		messages.add(message);
+		return "I got \"" + message + "\"";
 	}
 
 	@OnClose

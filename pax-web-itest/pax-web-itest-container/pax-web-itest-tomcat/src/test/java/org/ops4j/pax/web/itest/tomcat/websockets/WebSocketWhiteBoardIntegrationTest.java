@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.tomcat;
+package org.ops4j.pax.web.itest.tomcat.websockets;
 
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.common.AbstractWebSocketWhiteBoardIntegrationTest;
+import org.ops4j.pax.web.itest.container.websockets.AbstractWebSocketWhiteBoardIntegrationTest;
 
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
  * @author Achim Nierbeck
@@ -29,7 +30,15 @@ import org.ops4j.pax.web.itest.common.AbstractWebSocketWhiteBoardIntegrationTest
 public class WebSocketWhiteBoardIntegrationTest extends AbstractWebSocketWhiteBoardIntegrationTest {
 
 	@Configuration
-	public static Option[] configure() {
-		return configureTomcat();
+	public Option[] configure() {
+		Option[] serverOptions = combine(baseConfigure(), paxWebTomcat());
+		Option[] websocketOptions = combine(serverOptions, tomcatWebSockets());
+		return combine(websocketOptions, paxWebExtenderWhiteboard());
 	}
+
+	@Override
+	protected String getContainerSpecificWebSocketsBundleSN() {
+		return "org.ops4j.pax.web.pax-web-tomcat-websocket";
+	}
+
 }

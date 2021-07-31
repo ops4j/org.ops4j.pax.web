@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty.websockets;
 
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.common.AbstractWebSocketWhiteBoardIntegrationTest;
+import org.ops4j.pax.web.itest.container.websockets.AbstractWebSocketWhiteBoardIntegrationTest;
 
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
  * @author Achim Nierbeck
@@ -29,8 +30,15 @@ import org.ops4j.pax.web.itest.common.AbstractWebSocketWhiteBoardIntegrationTest
 public class WebSocketWhiteBoardIntegrationTest extends AbstractWebSocketWhiteBoardIntegrationTest {
 
 	@Configuration
-	public static Option[] configure() {
-		return configureWebSocketJetty();
+	public Option[] configure() {
+		Option[] serverOptions = combine(baseConfigure(), paxWebJetty());
+		Option[] websocketOptions = combine(serverOptions, jettyWebSockets());
+		return combine(websocketOptions, paxWebExtenderWhiteboard());
 	}
-}
 
+	@Override
+	protected String getContainerSpecificWebSocketsBundleSN() {
+		return "org.eclipse.jetty.websocket.javax.websocket";
+	}
+
+}

@@ -30,6 +30,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ListenerTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ResourceTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletContextHelperTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.ServletTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.WebSocketTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ErrorPageMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.FilterMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.HttpContextMappingTracker;
@@ -47,6 +48,7 @@ import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.JspModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.whiteboard.ErrorPageMapping;
@@ -171,10 +173,7 @@ public class Activator implements BundleActivator {
 
 		// other
 		trackListeners();
-
-//		if (WebContainerUtils.WEBSOCKETS_AVAILABLE) {
-//			trackWebSockets();
-//		}
+		trackWebSockets();
 
 		LOG.debug("Pax Web Whiteboard Extender started");
 	}
@@ -333,16 +332,15 @@ public class Activator implements BundleActivator {
 		trackers.add(jspMappingTracker);
 	}
 
-//	/**
-//	 * Track WebSockets
-//	 *
-//	 * @param bundleContext the BundleContext associated with this bundle
-//	 */
-//	private void trackWebSockets(final BundleContext bundleContext) {
-//		final ServiceTracker<Object, WebSocketElement> webSocketTracker = WebSocketTracker.createTracker(extenderContext, bundleContext);
-//		webSocketTracker.open();
-//		trackers.add(webSocketTracker);
-//	}
+	/**
+	 * Track WebSockets
+	 */
+	private void trackWebSockets() {
+		final ServiceTracker<Object, WebSocketModel> webSocketTracker
+				= WebSocketTracker.createTracker(whiteboardExtenderContext, context);
+		webSocketTracker.open();
+		trackers.add(webSocketTracker);
+	}
 
 	/**
 	 * <p>{@link ServiceFactory} returning default {@link ServletContextHelper} as specified by

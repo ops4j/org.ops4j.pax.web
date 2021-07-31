@@ -15,58 +15,37 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
+import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
+import org.ops4j.pax.web.service.PaxWebConstants;
+import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
+import org.ops4j.pax.web.service.spi.model.events.WebSocketEventData;
 import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 
-public class WebSocketTracker /*extends AbstractElementTracker<Object, WebSocketElement>*/ {
-    private static final Logger LOG = LoggerFactory.getLogger(WebSocketTracker.class);
+public class WebSocketTracker extends AbstractElementTracker<Object, Object, WebSocketEventData, WebSocketModel> {
 
-	private BundleContext bundleContext;
+	private WebSocketTracker(final WhiteboardExtenderContext whiteboardExtenderContext, final BundleContext bundleContext) {
+		super(whiteboardExtenderContext, bundleContext);
+	}
 
-//	WebSocketTracker(ExtenderContext extenderContext, BundleContext bundleContext) {
-//		super(extenderContext, bundleContext);
-//		this.bundleContext = bundleContext;
-//	}
-//
-//	public static ServiceTracker<Object, WebSocketElement> createTracker(final ExtenderContext extenderContext,
-//			final BundleContext bundleContext) {
-//		return new WebSocketTracker(extenderContext, bundleContext).create("(&(objectClass=" + Object.class.getName() + ")(" + ExtenderConstants.WEBSOCKET + "=true))");
-//	}
-//
-//	@Override
-//	WebSocketElement createWebElement(ServiceReference<Object> serviceReference, Object published) {
-//
-//		// FIXME Validation for WebSockets done here rather than in WebElement
-//		// because we're tracking Object
-//
-//		if (Endpoint.class.isAssignableFrom(published.getClass())) {
-//			LOG.warn(
-//					"WebSockets created as instances of Endpoint isn't supported, because it requires also to register ServerApplicationConfig");
-//			return null;
-//		}
-//
-//		ServerEndpoint serverEndpoint = published.getClass().getAnnotation(ServerEndpoint.class);
-//		if (serverEndpoint == null) {
-//			return null;
-//		}
-//
-//		LOG.info("found websocket endpoint!!");
-//
-//		WebSocketMapping mapping = new DefaultWebSocketMapping();
-//		mapping.setHttpContextId(ServicePropertiesUtils.extractHttpContextId(serviceReference));
-//		mapping.setWebSocket(published);
-//		return new WebSocketElement(serviceReference, mapping);
-//	}
+	public static ServiceTracker<Object, WebSocketModel> createTracker(final WhiteboardExtenderContext whiteboardExtenderContext,
+			final BundleContext bundleContext) {
 
-//	@Override
-//	public void register(WebContainer webContainer, HttpContext httpContext) throws Exception {
-////		webContainer.registerWebSocket(mapping.getWebSocket(), httpContext);
-//	}
-//
-//	@Override
-//	public void unregister(WebContainer webContainer, HttpContext httpContext) {
-////		webContainer.unregisterWebSocket(mapping.getWebSocket(), httpContext);
-//	}
+		String filter = "(|(" + PaxWebConstants.SERVICE_PROPERTY_WEBSOCKET + "=true)(" +
+				PaxWebConstants.SERVICE_PROPERTY_WEBSOCKET_LEGACY + "=true))";
+
+		return new WebSocketTracker(whiteboardExtenderContext, bundleContext).create(filter);
+	}
+
+	@Override
+	protected WebSocketModel createElementModel(ServiceReference<Object> serviceReference, Integer rank, Long serviceId) {
+		WebSocketModel model = new WebSocketModel();
+		model.setRegisteringBundle(serviceReference.getBundle());
+		model.setElementReference(serviceReference);
+		model.setServiceRank(rank);
+		model.setServiceId(serviceId);
+		return model;
+	}
 
 }

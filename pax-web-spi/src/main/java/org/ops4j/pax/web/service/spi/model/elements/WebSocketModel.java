@@ -34,6 +34,8 @@ public class WebSocketModel extends ElementModel<Object, WebSocketEventData> {
     private final Object webSocketEndpoint;
     private Class<?> webSocketEndpointClass;
 
+    private Class<?> webSocketEndpointClassResolved;
+
     // see javax.websocket.server.ServerEndpoint.value
     private String mappedPath;
 
@@ -43,6 +45,11 @@ public class WebSocketModel extends ElementModel<Object, WebSocketEventData> {
     private Class<? extends Encoder>[] encoderClasses = new Class[0];
 
     private String[] subprotocols = new String[0];
+
+    public WebSocketModel() {
+        this.webSocketEndpoint = null;
+        this.webSocketEndpointClass = null;
+    }
 
     public WebSocketModel(Object webSocketEndpoint, Class<?> webSocketEndpointClass) {
         this.webSocketEndpoint = webSocketEndpoint;
@@ -55,6 +62,10 @@ public class WebSocketModel extends ElementModel<Object, WebSocketEventData> {
 
     public Class<?> getWebSocketEndpointClass() {
         return webSocketEndpointClass;
+    }
+
+    public Class<?> getWebSocketEndpointClassResolved() {
+        return webSocketEndpointClassResolved;
     }
 
     public String getMappedPath() {
@@ -85,7 +96,7 @@ public class WebSocketModel extends ElementModel<Object, WebSocketEventData> {
 
     @Override
     public WebSocketEventData asEventData() {
-        WebSocketEventData data = new WebSocketEventData(webSocketEndpoint, webSocketEndpointClass);
+        WebSocketEventData data = new WebSocketEventData(webSocketEndpoint, webSocketEndpointClassResolved);
         setCommonEventProperties(data);
         return data;
     }
@@ -136,7 +147,7 @@ public class WebSocketModel extends ElementModel<Object, WebSocketEventData> {
             if (endpoint.value() != null) {
                 mappedPath = endpoint.value().trim();
                 // set the class - we will need it during actual registration
-                webSocketEndpointClass = c;
+                webSocketEndpointClassResolved = c;
                 return Boolean.TRUE;
             }
             decoderClasses = endpoint.decoders();
@@ -153,7 +164,7 @@ public class WebSocketModel extends ElementModel<Object, WebSocketEventData> {
     public String toString() {
         return "WebSocketModel{id=" + getId()
                 + (webSocketEndpoint == null ? "" : ",endpoint=" + webSocketEndpoint)
-                + (webSocketEndpointClass == null ? "" : ",endpoint class=" + webSocketEndpointClass)
+                + (webSocketEndpointClassResolved == null ? "" : ",endpoint class=" + webSocketEndpointClassResolved)
                 + ",contexts=" + getContextModelsInfo()
                 + "}";
     }

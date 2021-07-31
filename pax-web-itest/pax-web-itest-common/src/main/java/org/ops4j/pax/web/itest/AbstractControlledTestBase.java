@@ -300,7 +300,9 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle().groupId("org.eclipse.jetty.websocket")
 						.artifactId("websocket-server").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("websocket-servlet").versionAsInProject()
+						.artifactId("websocket-servlet").versionAsInProject(),
+				mavenBundle("org.ops4j.pax.web", "pax-web-websocket")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
 		};
 	}
 
@@ -324,6 +326,8 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle("jakarta.websocket", "jakarta.websocket-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.ops4j.pax.web", "pax-web-tomcat-websocket")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ops4j.pax.web", "pax-web-websocket")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
 		};
 	}
@@ -354,6 +358,8 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle("io.undertow", "undertow-websockets-jsr")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.ops4j.pax.web", "pax-web-undertow-websocket")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ops4j.pax.web", "pax-web-websocket")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
 		};
 	}

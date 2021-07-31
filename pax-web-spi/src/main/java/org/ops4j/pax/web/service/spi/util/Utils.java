@@ -527,6 +527,27 @@ public class Utils {
 	}
 
 	/**
+	 * Specialized method that's used to add Undertow WebSocket bundle that we know to contain required
+	 * {@link javax.servlet.ServletContainerInitializer} services
+	 * @param bundle
+	 * @return
+	 */
+	public static Bundle getPaxWebUndertowWebSocketBundle(Bundle bundle) {
+		BundleContext ctx = bundle == null ? null : bundle.getBundleContext();
+		if (ctx == null) {
+			return null;
+		}
+		for (Bundle b : ctx.getBundles()) {
+			// undertow-websockets-jsr provides necessary
+			// /META-INF/services/javax.websocket.server.ServerEndpointConfig$Configurator
+			if ("io.undertow.websockets-jsr".equals(b.getSymbolicName())) {
+				return b;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Find Pax Web bundle for generic (Whiteboard and HttpService) support for WebSockets
 	 * @param bundle
 	 * @return

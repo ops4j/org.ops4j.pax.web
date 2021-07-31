@@ -17,6 +17,8 @@ package org.ops4j.pax.web.itest.container.websockets;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javax.websocket.ClientEndpoint;
@@ -31,76 +33,57 @@ import javax.websocket.WebSocketContainer;
 import org.junit.Before;
 import org.junit.Test;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
-import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
+import org.ops4j.pax.web.itest.utils.web.SimpleWebSocket;
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 
 /**
  * @author Achim Nierbeck
  */
-public abstract class AbstractWebSocketIntegrationTest extends AbstractContainerTestBase {
+public abstract class AbstractWebSocketWhiteBoardIntegrationTest extends AbstractContainerTestBase {
 
-	public static final Logger LOG = LoggerFactory.getLogger(AbstractWebSocketIntegrationTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractWebSocketWhiteBoardIntegrationTest.class);
 
 	@Before
 	public void setUp() throws Exception {
-		// Jetty uses org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer SCI that handles:
-		//  - classes implementing javax.websocket.server.ServerApplicationConfig
-		//  - classes implementing javax.websocket.Endpoint
-		//  - classes annotated with @javax.websocket.server.ServerEndpoint
-		// Tomcat uses org.apache.tomcat.websocket.server.WsSci SCI that handles:
-		//  - classes implementing javax.websocket.server.ServerApplicationConfig
-		//  - classes implementing javax.websocket.Endpoint
-		//  - classes annotated with @javax.websocket.server.ServerEndpoint
-		// Undertow doesn't provide any special SCI. When web sockets are configured, Wildfly calls
-		// io.undertow.servlet.api.DeploymentInfo.addServletContextAttribute() with
-		// "io.undertow.websockets.jsr.WebSocketDeploymentInfo" as attribute name and an instance of
-		// io.undertow.websockets.jsr.WebSocketDeploymentInfo as the value. All necessary information
-		// is prepared using org.wildfly.extension.undertow.deployment.UndertowJSRWebSocketDeploymentProcessor#deploy()
-
-		configureAndWaitForDeploymentUnlessInstalled("war-websocket-jsr356", () -> {
-			installAndStartBundle(sampleWarURI("war-websocket-jsr356"));
-		});
+		configureAndWaitForListener(8181);
 	}
-
-	@Test
-	public void testWebsocketWebapp() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'Chatroom'",
-						resp -> resp.contains("Chatroom"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/websocket/index.html");
-
-		HttpTestClientFactory.createDefaultTestClient()
-				.doGETandExecuteTest("http://127.0.0.1:8181/websocket/resource/js/jquery-1.10.2.min.js");
-	}
-
-	protected abstract String getContainerSpecificWebSocketsBundleSN();
 
 	@Test
 	public void testWebsocket() throws Exception {
+		SimpleWebSocket simpleWebSocket = new SimpleWebSocket();
+
+		Dictionary<String, Object> filter = new Hashtable<>();
+		filter.put(PaxWebConstants.SERVICE_PROPERTY_WEBSOCKET, "true");
+		context.registerService(Object.class.getName(), simpleWebSocket, filter);
+
 		WebSocketContainer cc = getWebSocketContainer();
-		URI uri = new URI("ws://127.0.0.1:8181/websocket/chat/scala");
-		SimpleChatSocket socket = new SimpleChatSocket();
+		URI uri = new URI("ws://127.0.0.1:8181/simple");
+		WebSocketClient client = new WebSocketClient();
 		ClassLoader tccl = Thread.currentThread().getContextClassLoader();
 		try {
 			Bundle webSocketClientBundle = bundle(getContainerSpecificWebSocketsBundleSN());
 			Thread.currentThread().setContextClassLoader(webSocketClientBundle.adapt(BundleWiring.class).getClassLoader());
-			Session session = cc.connectToServer(socket, uri);
+			Session session = cc.connectToServer(client, uri);
 
-			socket.awaitClose(5, TimeUnit.SECONDS);
+			client.awaitClose(5, TimeUnit.SECONDS);
 			session.close();
 		} finally {
 			Thread.currentThread().setContextClassLoader(tccl);
 		}
 
-		String anwer = socket.getAnswer();
+		String anwer = client.getAnswer();
 
-		assertTrue(anwer.contains("test"));
-		assertTrue(anwer.contains("me"));
+		assertThat(anwer, equalTo("I got \"Hello\""));
+		assertThat(simpleWebSocket.getMessages().size(), equalTo(1));
+		assertThat(simpleWebSocket.getMessages().get(0), equalTo("Hello"));
 	}
 
 	protected WebSocketContainer getWebSocketContainer() {
@@ -114,8 +97,11 @@ public abstract class AbstractWebSocketIntegrationTest extends AbstractContainer
 		}
 	}
 
+	protected abstract String getContainerSpecificWebSocketsBundleSN();
+
+
 	@ClientEndpoint
-	public static class SimpleChatSocket {
+	public static class WebSocketClient {
 
 		private final CountDownLatch closeLatch = new CountDownLatch(1);
 		private String answer;
@@ -124,7 +110,7 @@ public abstract class AbstractWebSocketIntegrationTest extends AbstractContainer
 		@OnOpen
 		public void onConnect(Session session) throws Exception {
 			LOG.info("Got connect: {}", session);
-			session.getBasicRemote().sendText("{\"message\":\"test\", \"sender\":\"me\"}");
+			session.getBasicRemote().sendText("Hello");
 			this.session = session;
 		}
 

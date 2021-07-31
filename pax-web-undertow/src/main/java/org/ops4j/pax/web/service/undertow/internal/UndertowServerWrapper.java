@@ -1159,6 +1159,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				loader.addBundle(osgiModel.getOwnerBundle());
 				loader.addBundle(paxWebUndertowBundle);
 				loader.addBundle(Utils.getPaxWebJspBundle(paxWebUndertowBundle));
+				loader.addBundle(Utils.getPaxWebUndertowWebSocketBundle(paxWebUndertowBundle));
 				loader.addBundle(Utils.getUndertowWebSocketBundle(paxWebUndertowBundle));
 				loader.makeImmutable();
 				classLoader = loader;

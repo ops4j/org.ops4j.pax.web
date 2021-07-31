@@ -5,7 +5,7 @@ Must have for 8.0.0.GA:
  - DTOs
  + "listener=true" for Whiteboard listeners
  - Listener ordering according to ranking
- - Whiteboard WebSockets
+ + Whiteboard WebSockets
  - JAX-RS example with aries-jaxrs
  - CRLs
  - Session per OsgiContextModel / OsgiServletContext

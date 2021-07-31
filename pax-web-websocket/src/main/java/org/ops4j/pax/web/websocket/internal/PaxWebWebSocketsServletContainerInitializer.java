@@ -143,7 +143,7 @@ public class PaxWebWebSocketsServletContainerInitializer implements ServletConta
 
 		@Override
 		public Class<?> getEndpointClass() {
-			return wsm.getWebSocketEndpointClass();
+			return wsm.getWebSocketEndpointClassResolved();
 		}
 
 		@Override
