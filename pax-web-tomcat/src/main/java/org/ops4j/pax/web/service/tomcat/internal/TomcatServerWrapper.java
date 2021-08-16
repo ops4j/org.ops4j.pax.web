@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -89,6 +90,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiDynamicServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
+import org.ops4j.pax.web.service.spi.servlet.PreprocessorFilterConfig;
 import org.ops4j.pax.web.service.spi.servlet.RegisteringContainerInitializer;
 import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
@@ -111,6 +113,7 @@ import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.tomcat.internal.web.TomcatResourceServlet;
 import org.osgi.framework.Bundle;
+import org.osgi.service.http.whiteboard.Preprocessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -1151,9 +1154,12 @@ class TomcatServerWrapper implements BatchVisitor {
 		for (Map.Entry<String, TreeMap<FilterModel, List<OsgiContextModel>>> entry : contextFilters.entrySet()) {
 			String contextPath = entry.getKey();
 			Map<FilterModel, List<OsgiContextModel>> filtersMap = entry.getValue();
-			Set<FilterModel> filters = filtersMap.keySet();
+			Set<FilterModel> filters = new TreeSet<>(filtersMap.keySet());
 
 			LOG.info("Changing filter configuration for context {}", contextPath);
+
+			OsgiContextModel defaultHighestRankedModel = osgiContextModels.containsKey(contextPath)
+					? osgiContextModels.get(contextPath).iterator().next() : null;
 
 			PaxWebStandardContext context = contextHandlers.get(contextPath);
 			if (context == null) {
@@ -1191,6 +1197,19 @@ class TomcatServerWrapper implements BatchVisitor {
 					}
 				}
 				context.removeFilterMap(map);
+			}
+
+			// clear to keep the order of all available preprocessors
+			context.getPreprocessors().clear();
+
+			for (Iterator<FilterModel> iterator = filters.iterator(); iterator.hasNext(); ) {
+				FilterModel model = iterator.next();
+				if (model.isPreprocessor()) {
+					Preprocessor preprocessor = (Preprocessor) model.getInstance();
+					context.getPreprocessors()
+							.put(preprocessor, new PreprocessorFilterConfig(model, osgiServletContexts.get(defaultHighestRankedModel)));
+					iterator.remove();
+				}
 			}
 
 			for (FilterModel model : filters) {

@@ -128,24 +128,7 @@ public class PaxWebFilterHolder extends FilterHolder {
 	protected synchronized Filter getInstance() {
 		Filter instance = super.getInstance();
 		if (instance == null && filterModel != null) {
-			// obtain Filter using reference
-			ServiceReference<? extends Filter> ref = filterModel.getElementReference();
-			if (ref != null) {
-				instance =  filterModel.getRegisteringBundle().getBundleContext().getService(ref);
-			}
-		}
-
-		if (instance == null && filterModel != null && filterModel.getFilterClass() != null) {
-			Class<? extends Filter> filterClass = filterModel.getFilterClass();
-			try {
-				instance = filterClass.newInstance();
-			} catch (Exception e) {
-				throw new IllegalStateException("Can't instantiate Filter with class " + filterClass, e);
-			}
-		}
-
-		if (instance == null && filterModel != null && filterModel.getElementSupplier() != null) {
-			instance = filterModel.getElementSupplier().get();
+			instance = filterModel.getInstance();
 		}
 
 		if (instance == null && getHeldClass() != null) {

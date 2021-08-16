@@ -127,6 +127,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiDynamicServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
+import org.ops4j.pax.web.service.spi.servlet.PreprocessorFilterConfig;
 import org.ops4j.pax.web.service.spi.servlet.RegisteringContainerInitializer;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.ClearDynamicRegistrationsChange;
@@ -164,6 +165,7 @@ import org.ops4j.pax.web.service.undertow.internal.web.UndertowResourceServlet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.service.http.whiteboard.Preprocessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
@@ -269,6 +271,11 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 	 * be done in cleaner way in Jetty and Tomcat.
 	 */
 	private final Map<String, PaxWebOuterHandlerWrapper> wrappingHandlers = new HashMap<>();
+
+	/**
+	 * <em>Outer handlers</em> for all the contexts - these are used to call {@link Preprocessor preprocessors}.
+	 */
+	private final Map<String, PaxWebPreprocessorsHandler> preprocessorsHandlers = new HashMap<>();
 
 	/**
 	 * Handlers that call {@link org.osgi.service.http.HttpContext#handleSecurity} and/or
@@ -959,6 +966,14 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			if (deployment.getState() != DeploymentManager.State.UNDEPLOYED) {
 				String contextPath = deployment.getDeployment().getServletContext().getContextPath();
 				try {
+					if (preprocessorsHandlers.containsKey(contextPath)) {
+						for (Map.Entry<Preprocessor, PreprocessorFilterConfig> p : preprocessorsHandlers.get(contextPath).getPreprocessors().entrySet()) {
+							if (p.getValue().isInitCalled()) {
+								p.getKey().destroy();
+							}
+						}
+					}
+
 					deployment.stop();
 					deployment.undeploy();
 				} catch (ServletException e) {
@@ -971,6 +986,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 		// - they'll be cleared individually through HttpServiceEnabled
 //		osgiServletContexts.clear();
 //		osgiContextModels.clear();
+		preprocessorsHandlers.clear();
 		securityHandlers.clear();
 		wrappingHandlers.clear();
 		errorPages.clear();
@@ -1054,15 +1070,17 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			//  - to wrap request, so proper ServletContext is returned
 			//  - to call preprocessors
 			//  - to call handleSecurity()/finishSecurity()
+			//
+			// io.undertow.servlet.core.DeploymentManagerImpl.wrapHandlers() turns the last wrapper
+			// into the "outermost" one
+
+			PaxWebPreprocessorsHandler preprocessorWrapper = new PaxWebPreprocessorsHandler();
+			this.preprocessorsHandlers.put(contextPath, preprocessorWrapper);
+			deploymentInfo.addOuterHandlerChainWrapper(preprocessorWrapper);
 
 			PaxWebOuterHandlerWrapper outerWrapper = new PaxWebOuterHandlerWrapper();
 			this.wrappingHandlers.put(contextPath, outerWrapper);
 			deploymentInfo.addOuterHandlerChainWrapper(outerWrapper);
-
-			// TODO: ensure preprocessors work
-//			PaxWebPreprocessorsHandler preprocessorWrapper = new PaxWebPreprocessorsHandler();
-//			this.preprocessorsHandlers.put(contextPath, preprocessorWrapper);
-//			deployment.addOuterHandlerChainWrapper(preprocessorWrapper);
 
 			PaxWebSecurityHandler securityWrapper = new PaxWebSecurityHandler();
 			this.securityHandlers.put(contextPath, securityWrapper);
@@ -1109,7 +1127,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			DeploymentManager manager = getDeploymentManager(contextPath);
 			if (manager != null) {
 				DeploymentInfo deploymentInfoToRemove = manager.getDeployment().getDeploymentInfo();
-				stopUndertowContext(contextPath, manager, manager.getDeployment(), null);
+				stopUndertowContext(contextPath, manager, manager.getDeployment(), null, false);
 				servletContainer.removeDeployment(deploymentInfoToRemove);
 			}
 		}
@@ -1433,7 +1451,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 							: deployment.getDeploymentInfo();
 
 					if (!change.isDynamic()) {
-						stopUndertowContext(contextPath, manager, deployment, deploymentInfo);
+						stopUndertowContext(contextPath, manager, deployment, deploymentInfo, false);
 					}
 
 					// but we can reuse the deployment info - this is the only object from which we can remove
@@ -1549,12 +1567,82 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 		Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> contextFilters = change.getContextFilters();
 
+		// first preprocessors only
 		for (Map.Entry<String, TreeMap<FilterModel, List<OsgiContextModel>>> entry : contextFilters.entrySet()) {
 			String contextPath = entry.getKey();
 			Map<FilterModel, List<OsgiContextModel>> filtersMap = entry.getValue();
-			Set<FilterModel> filters = filtersMap.keySet();
+			Set<FilterModel> filters = new TreeSet<>(filtersMap.keySet());
+
+			LOG.info("Changing preprocessor configuration for context {}", contextPath);
+
+			OsgiContextModel defaultHighestRankedModel = osgiContextModels.containsKey(contextPath)
+					? osgiContextModels.get(contextPath).iterator().next() : null;
+
+			// take existing deployment manager and the deployment info from its deployment
+			DeploymentManager manager = getDeploymentManager(contextPath);
+			DeploymentManager.State state = manager == null ? DeploymentManager.State.UNDEPLOYED : manager.getState();
+			DeploymentInfo deploymentInfo = manager == null ? deploymentInfos.get(contextPath)
+					: manager.getDeployment().getDeploymentInfo();
+
+			if (deploymentInfo == null) {
+				// it can happen when unregistering last filters (or rather setting the state with empty set of filters)
+				continue;
+			}
+
+			// potentially, all existing preprocessors will be removed
+			PaxWebPreprocessorsHandler preprocessorsHandler = preprocessorsHandlers.get(contextPath);
+			Set<Preprocessor> toDestroy = new HashSet<>(preprocessorsHandler.getPreprocessors().keySet());
+			// some new preprocessors may be added - we have to init() them ourselves, because they're not held
+			// in PaxWebFilterHolders
+			Map<Preprocessor, PreprocessorFilterConfig> toInit = new HashMap<>();
+
+			// clear to keep the order of all available preprocessors
+			preprocessorsHandler.getPreprocessors().clear();
+
+			for (Iterator<FilterModel> iterator = filters.iterator(); iterator.hasNext(); ) {
+				FilterModel model = iterator.next();
+				if (model.isPreprocessor()) {
+					Preprocessor preprocessor = (Preprocessor) model.getInstance();
+					PreprocessorFilterConfig fc = new PreprocessorFilterConfig(model, osgiServletContexts.get(defaultHighestRankedModel));
+					if (!toDestroy.contains(preprocessor)) {
+						// new preprocessor - we have to init() it
+						toInit.put(preprocessor, fc);
+					} else {
+						// it was already there - we don't have to destroy() it
+						toDestroy.remove(preprocessor);
+					}
+					preprocessorsHandler.getPreprocessors()
+							.put(preprocessor, fc);
+					iterator.remove();
+				}
+			}
+
+			if (manager != null && manager.getState() == DeploymentManager.State.STARTED) {
+				for (Map.Entry<Preprocessor, PreprocessorFilterConfig> e : toInit.entrySet()) {
+					try {
+						PreprocessorFilterConfig fc = e.getValue();
+						e.getKey().init(fc);
+						fc.setInitCalled(true);
+					} catch (ServletException ex) {
+						LOG.warn("Problem during preprocessor initialization: {}", ex.getMessage(), ex);
+					}
+				}
+				for (Preprocessor p : toDestroy) {
+					p.destroy();
+				}
+			}
+		}
+
+		// now - only non-preprocessors
+		for (Map.Entry<String, TreeMap<FilterModel, List<OsgiContextModel>>> entry : contextFilters.entrySet()) {
+			String contextPath = entry.getKey();
+			Map<FilterModel, List<OsgiContextModel>> filtersMap = entry.getValue();
+			Set<FilterModel> filters = new TreeSet<>(filtersMap.keySet());
 
 			LOG.info("Changing filter configuration for context {}", contextPath);
+
+			OsgiContextModel defaultHighestRankedModel = osgiContextModels.containsKey(contextPath)
+					? osgiContextModels.get(contextPath).iterator().next() : null;
 
 			// take existing deployment manager and the deployment info from its deployment
 			DeploymentManager manager = getDeploymentManager(contextPath);
@@ -1572,7 +1660,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 			if (!quick) {
 				Deployment deployment = manager == null ? null : manager.getDeployment();
-				stopUndertowContext(contextPath, manager, deployment, null);
+				stopUndertowContext(contextPath, manager, deployment, null, true);
 				if (manager != null) {
 					state = manager.getState();
 				}
@@ -1589,6 +1677,9 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			List<FilterInfo> added = new LinkedList<>();
 
 			for (FilterModel model : filters) {
+				if (model.isPreprocessor()) {
+					continue;
+				}
 				// we need highest ranked OsgiContextModel for current context path - chosen not among all
 				// associated OsgiContextModels, but among OsgiContextModels of the FilterModel
 				OsgiContextModel highestRankedModel = null;
@@ -1605,7 +1696,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				if (highestRankedModel == null) {
 					LOG.warn("(dev) Can't find proper OsgiContextModel for the filter. Falling back to "
 							+ "highest ranked OsgiContextModel for given ServletContextModel");
-					highestRankedModel = osgiContextModels.get(contextPath).iterator().next();
+					highestRankedModel = defaultHighestRankedModel;
 				}
 				OsgiServletContext context = osgiServletContexts.get(highestRankedModel);
 
@@ -1733,7 +1824,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 					// unfortunately, one does not simply remove EventListener from existing context in Undertow
 
 					Deployment deployment = manager == null ? null : manager.getDeployment();
-					stopUndertowContext(contextPath, manager, deployment, deploymentInfo);
+					stopUndertowContext(contextPath, manager, deployment, deploymentInfo, false);
 
 					if (deploymentInfo != null) {
 						// this may be null in case of WAB where we keep event listeners so they get contextDestroyed
@@ -1905,7 +1996,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				String path = context.getContextPath();
 				DeploymentManager manager = getDeploymentManager(path);
 				if (manager != null) {
-					stopUndertowContext(path, manager, manager.getDeployment(), null);
+					stopUndertowContext(path, manager, manager.getDeployment(), null, false);
 				}
 
 				// because of the quirks related to Undertow's deploymentInfo vs. deployment (and their
@@ -2018,7 +2109,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 		DeploymentManager manager = getDeploymentManager(contextPath);
 		Deployment deployment = manager == null ? null : manager.getDeployment();
 
-		stopUndertowContext(contextPath, manager, deployment, null);
+		stopUndertowContext(contextPath, manager, deployment, null, false);
 		DeploymentInfo deploymentInfo = deploymentInfos.get(contextPath);
 
 		// servlets
@@ -2242,6 +2333,16 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 			HttpHandler handler = manager.start();
 
+			// the above start() ends with filter initialization and just after that, the state is changed
+			// to State.STARTED. So we can start preprocessors here
+			for (Map.Entry<Preprocessor, PreprocessorFilterConfig> e : preprocessorsHandlers.get(contextPath).getPreprocessors().entrySet()) {
+				PreprocessorFilterConfig fc = e.getValue();
+				if (!e.getValue().isInitCalled()) {
+					e.getKey().init(fc);
+					fc.setInitCalled(true);
+				}
+			}
+
 			// actual registration of "context" in Undertow's path handler.
 			pathHandler.addPrefixPath(contextPath, handler);
 		} catch (ServletException e) {
@@ -2398,8 +2499,10 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 	 * @param manager
 	 * @param deployment
 	 * @param deploymentInfo new {@link DeploymentInfo} that could be used if the context should be started again
+	 * @param skipPreprocessors
 	 */
-	private void stopUndertowContext(String contextPath, DeploymentManager manager, Deployment deployment, DeploymentInfo deploymentInfo) {
+	private void stopUndertowContext(String contextPath, DeploymentManager manager, Deployment deployment,
+			DeploymentInfo deploymentInfo, boolean skipPreprocessors) {
 		// let's immediately show that given context is no longer mapped
 		pathHandler.removePrefixPath(contextPath);
 
@@ -2408,6 +2511,15 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			// can't replace a deployment info within deployment manager
 			if (manager != null/* && deployment != null*/) {
 				LOG.info("Stopping Undertow context \"{}\"", contextPath);
+
+				if (!skipPreprocessors) {
+					for (Map.Entry<Preprocessor, PreprocessorFilterConfig> p : preprocessorsHandlers.get(contextPath).getPreprocessors().entrySet()) {
+						if (p.getValue().isInitCalled()) {
+							p.getKey().destroy();
+							p.getValue().setInitCalled(false);
+						}
+					}
+				}
 
 				manager.stop();
 				manager.undeploy();

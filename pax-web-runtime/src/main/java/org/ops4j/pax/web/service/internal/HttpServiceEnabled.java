@@ -1912,7 +1912,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 						LOG.info("Unregistering web socket by class \"{}\"", endpointClass);
 
 						for (WebSocketModel existing : serviceModel.getWebSocketModels()) {
-							if (existing.getWebSocketEndpointClass().equals(endpointClass)) {
+							if (endpointClass.equals(existing.getWebSocketEndpointClass())) {
 								toUnregister.add(existing);
 							}
 						}

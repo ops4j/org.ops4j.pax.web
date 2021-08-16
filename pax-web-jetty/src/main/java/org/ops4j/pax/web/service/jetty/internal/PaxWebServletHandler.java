@@ -19,10 +19,12 @@ package org.ops4j.pax.web.service.jetty.internal;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -67,7 +69,7 @@ public class PaxWebServletHandler extends ServletHandler {
 	 * {@link Preprocessor} instances are always registered to all contexts and are always mapped to all servlet
 	 * chains, so handling them is easy.
 	 */
-	private final List<Preprocessor> preprocessors = new LinkedList<>();
+	private final Map<Preprocessor, FilterConfig> preprocessors = new LinkedHashMap<>();
 
 	/** Default {@link ServletContext} to use for chains without target servlet (e.g., filters only) */
 	private OsgiServletContext defaultServletContext;
@@ -142,6 +144,16 @@ public class PaxWebServletHandler extends ServletHandler {
 	}
 
 	@Override
+	public void initialize() throws Exception {
+		// initialize preprocessors
+		for (Map.Entry<Preprocessor, FilterConfig> p : preprocessors.entrySet()) {
+			p.getKey().init(p.getValue());
+		}
+
+		super.initialize();
+	}
+
+	@Override
 	protected synchronized void doStop() throws Exception {
 		// before stopping, we have to remove dynamic filters (servlets are removed in clear() visitor of
 		// JettyServerWrapper) exactly here, because otherwise there'll be wrong index of
@@ -161,6 +173,11 @@ public class PaxWebServletHandler extends ServletHandler {
 		}
 		setFilters(newFilters.toArray(new PaxWebFilterHolder[0]));
 		setFilterMappings(newFilterMappings.toArray(new PaxWebFilterMapping[0]));
+
+		// destroy the preprocessors
+		for (Preprocessor p : preprocessors.keySet()) {
+			p.destroy();
+		}
 
 		super.doStop();
 	}
@@ -338,10 +355,10 @@ public class PaxWebServletHandler extends ServletHandler {
 			chain = (request, response) -> holder.handle(baseRequest, request, response);
 		}
 		if (!holder.is404()) {
-			return new OsgiFilterChain(preprocessors, holder.getServletContext(),
+			return new OsgiFilterChain(new ArrayList<>(preprocessors.keySet()), holder.getServletContext(),
 					holder.getWebContainerContext(), chain);
 		} else {
-			return new OsgiFilterChain(preprocessors, defaultServletContext, defaultWebContainerContext, chain);
+			return new OsgiFilterChain(new ArrayList<>(preprocessors.keySet()), defaultServletContext, defaultWebContainerContext, chain);
 		}
 	}
 
@@ -416,6 +433,10 @@ public class PaxWebServletHandler extends ServletHandler {
 			// just return existing chain without using this filterHolder
 			return chain;
 		}
+	}
+
+	public Map<Preprocessor, FilterConfig> getPreprocessors() {
+		return preprocessors;
 	}
 
 }

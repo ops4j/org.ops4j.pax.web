@@ -133,6 +133,7 @@ import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.http.whiteboard.Preprocessor;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -594,6 +595,29 @@ public class MultiContainerTestSupport {
 		}
 
 		return filterRef;
+	}
+
+	protected ServiceReference<Preprocessor> mockPreprocessorReference(Bundle bundle, String name,
+			Supplier<Preprocessor> supplier, Long serviceId, Integer rank) {
+		Hashtable<String, Object> props = new Hashtable<>();
+
+		Preprocessor instance = supplier.get();
+		try {
+			when(bundle.loadClass(instance.getClass().getName()))
+					.thenAnswer((Answer<Class<?>>) invocation -> instance.getClass());
+			when(bundle.loadClass(Preprocessor.class.getName()))
+					.thenAnswer((Answer<Class<?>>) invocation -> Preprocessor.class);
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
+
+		ServiceReference<Preprocessor> ref = mockReference(bundle, Preprocessor.class, props, null, serviceId, rank);
+		when(bundle.getBundleContext().getService(ref)).thenReturn(instance);
+		if (enableWhiteboardExtender()) {
+			when(whiteboardBundleContext.getService(ref)).thenReturn(instance);
+		}
+
+		return ref;
 	}
 
 	protected <S> ServiceReference<S> mockReference(Bundle bundle, Class<S> clazz, Hashtable<String, Object> props,

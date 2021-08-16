@@ -31,6 +31,7 @@ import org.ops4j.pax.web.service.spi.util.FilterAnnotationScanner;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.http.whiteboard.Preprocessor;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -50,13 +51,20 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 	public static ServiceTracker<Filter, FilterModel> createTracker(final WhiteboardExtenderContext whiteboardExtenderContext,
 			final BundleContext bundleContext) {
 		return new FilterTracker(whiteboardExtenderContext, bundleContext)
-				.create(Filter.class, GenericFilter.class, HttpFilter.class);
+				.create(Filter.class, GenericFilter.class, HttpFilter.class, Preprocessor.class);
 	}
 
 	@Override
 	@SuppressWarnings("deprecation")
 	protected FilterModel createElementModel(ServiceReference<Filter> serviceReference, Integer rank, Long serviceId) {
-		log.debug("Creating fiiter model from R7 whiteboard service {} (id={})", serviceReference, serviceId);
+		String[] classes = Utils.getObjectClasses(serviceReference);
+		boolean preprocessor = Arrays.stream(classes).anyMatch(s -> Preprocessor.class.getName().equals(s));
+
+		if (!preprocessor) {
+			log.debug("Creating fiiter model from R7 whiteboard service {} (id={})", serviceReference, serviceId);
+		} else {
+			log.debug("Creating preprocessor model from R7 whiteboard service {} (id={})", serviceReference, serviceId);
+		}
 
 		// 1. filter name
 		String name = Utils.getPaxWebProperty(serviceReference,
@@ -64,42 +72,56 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 				Utils::asString);
 
 		// 2a. URL patterns
-		String[] urlPatterns = Utils.getPaxWebProperty(serviceReference,
+		String[] urlPatterns = preprocessor ? new String[] { "/*" } : Utils.getPaxWebProperty(serviceReference,
 				PaxWebConstants.SERVICE_PROPERTY_URL_PATTERNS, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN,
 				Utils::asStringArray);
 
 		// 2b. Regex patterns
-		Object propertyValue = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX);
+		Object propertyValue = preprocessor ? new String[0] : serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX);
 		String[] regexUrlPatterns = Utils.asStringArray(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX, propertyValue);
 
 		// 2c. Servlet names
-		String[] servletNames = Utils.getPaxWebProperty(serviceReference,
+		String[] servletNames = preprocessor ? new String[0] : Utils.getPaxWebProperty(serviceReference,
 				PaxWebConstants.SERVICE_PROPERTY_SERVLET_NAMES, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_SERVLET,
 				Utils::asStringArray);
 
 		// 3. init params
 		Map<String, String> initParams = new LinkedHashMap<>();
-		String legacyInitPrefix = Utils.getStringProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_INIT_PREFIX);
-		if (legacyInitPrefix != null) {
-			log.warn("Legacy {} property found, filter init parameters should be prefixed with {} instead",
-					PaxWebConstants.SERVICE_PROPERTY_INIT_PREFIX,
-					HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX);
-		}
-		// are there any service properties prefixed with legacy "init." prefix (or one specified by "init-prefix"?
-		final String[] prefix = new String[] { legacyInitPrefix == null ? PaxWebConstants.DEFAULT_INIT_PREFIX_PROP : legacyInitPrefix };
-		boolean hasLegacyInitProperty = Arrays.stream(serviceReference.getPropertyKeys())
-				.anyMatch(p -> p.startsWith(prefix[0]));
-		if (hasLegacyInitProperty) {
-			log.warn("Legacy filter init parameters found (with prefix: {}), init parameters should be prefixed with"
-					+ " {} instead", prefix[0], HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX);
+		if (!preprocessor) {
+			// normal filter
+			String legacyInitPrefix = Utils.getStringProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_INIT_PREFIX);
+			if (legacyInitPrefix != null) {
+				log.warn("Legacy {} property found, filter init parameters should be prefixed with {} instead",
+						PaxWebConstants.SERVICE_PROPERTY_INIT_PREFIX,
+						HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX);
+			}
+			// are there any service properties prefixed with legacy "init." prefix (or one specified by "init-prefix"?
+			final String[] prefix = new String[] { legacyInitPrefix == null ? PaxWebConstants.DEFAULT_INIT_PREFIX_PROP : legacyInitPrefix };
+			boolean hasLegacyInitProperty = Arrays.stream(serviceReference.getPropertyKeys())
+					.anyMatch(p -> p.startsWith(prefix[0]));
+			if (hasLegacyInitProperty) {
+				log.warn("Legacy filter init parameters found (with prefix: {}), init parameters should be prefixed with"
+						+ " {} instead", prefix[0], HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX);
+			} else {
+				prefix[0] = HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX;
+			}
+			for (String key : serviceReference.getPropertyKeys()) {
+				if (key.startsWith(prefix[0])) {
+					String value = Utils.getStringProperty(serviceReference, key);
+					if (value != null) {
+						initParams.put(key.substring(prefix[0].length()), value);
+					}
+				}
+			}
 		} else {
-			prefix[0] = HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX;
-		}
-		for (String key : serviceReference.getPropertyKeys()) {
-			if (key.startsWith(prefix[0])) {
-				String value = Utils.getStringProperty(serviceReference, key);
-				if (value != null) {
-					initParams.put(key.substring(prefix[0].length()), value);
+			// preprocessor - different init params
+			String prefix = HttpWhiteboardConstants.HTTP_WHITEBOARD_PREPROCESSOR_INIT_PARAM_PREFIX;
+			for (String key : serviceReference.getPropertyKeys()) {
+				if (key.startsWith(prefix)) {
+					String value = Utils.getStringProperty(serviceReference, key);
+					if (value != null) {
+						initParams.put(key.substring(prefix.length()), value);
+					}
 				}
 			}
 		}
@@ -108,12 +130,13 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 		Boolean asyncSupported = Utils.getPaxWebProperty(serviceReference,
 				PaxWebConstants.SERVICE_PROPERTY_ASYNC_SUPPORTED, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_ASYNC_SUPPORTED,
 				Utils::asBoolean);
+		if (preprocessor) {
+			asyncSupported = Boolean.TRUE;
+		}
 
 		// 5. dispatcher types
 		propertyValue = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER);
 		String[] dispatcherTypeNames = Utils.asStringArray(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, propertyValue);
-
-			//		initParams.put(PaxWebConstants.FILTER_MAPPING_DISPATCHER, dispatcherInitString);
 
 		// 6. Check the filter annotations - we need a class of actual filter
 		Filter service = null;
@@ -162,11 +185,9 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 					}
 					// 5. async-supported
 					if (scanner.asyncSupported != null) {
-						if (asyncSupported != null && asyncSupported != scanner.asyncSupported) {
+						if (asyncSupported != scanner.asyncSupported) {
 							log.warn("Filter async flag specified using both service property ({}) and annotation ({})."
 									+ " Choosing {}.", asyncSupported, scanner.asyncSupported, asyncSupported);
-						} else {
-							asyncSupported = scanner.asyncSupported;
 						}
 					}
 				}
@@ -187,9 +208,21 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 				.withFilterName(name)
 				.withInitParams(initParams)
 				.withAsyncSupported(asyncSupported)
+				.isPreprocessor(preprocessor)
 				.withDispatcherTypes(dispatcherTypeNames);
 
 		return builder.build();
+	}
+
+	@Override
+	protected String determineSelector(boolean legacyMapping, String legacyId, String selector, ServiceReference<Filter> serviceReference) {
+		boolean preprocessor = Arrays.stream(Utils.getObjectClasses(serviceReference))
+				.anyMatch(s -> Preprocessor.class.getName().equals(s));
+		if (!preprocessor) {
+			return super.determineSelector(legacyMapping, legacyId, selector, serviceReference);
+		} else {
+			return "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)";
+		}
 	}
 
 }

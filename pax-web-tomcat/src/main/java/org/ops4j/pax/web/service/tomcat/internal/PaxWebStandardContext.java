@@ -18,11 +18,14 @@ package org.ops4j.pax.web.service.tomcat.internal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
+import javax.servlet.FilterConfig;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
@@ -86,7 +89,7 @@ public class PaxWebStandardContext extends StandardContext {
 	 * {@link org.ops4j.pax.web.service.spi.servlet.OsgiServletContext}, so they're effectively registered in
 	 * all available physical servlet contexts.
 	 */
-	private final List<Preprocessor> preprocessors = new LinkedList<>();
+	private final Map<Preprocessor, FilterConfig> preprocessors = new LinkedHashMap<>();
 
 	private final Collection<SCIWrapper> servletContainerInitializers = new LinkedList<>();
 	private final List<Object> applicationLifecycleListeners = new LinkedList<>();
@@ -121,10 +124,10 @@ public class PaxWebStandardContext extends StandardContext {
 
 			final OsgiFilterChain osgiChain;
 			if (wrapper != null && !wrapper.is404()) {
-				osgiChain = new OsgiFilterChain(delegate.getPreprocessors(),
+				osgiChain = new OsgiFilterChain(new ArrayList<>(delegate.getPreprocessors().keySet()),
 						wrapper.getServletContext(), wrapper.getWebContainerContext(), null);
 			} else {
-				osgiChain = new OsgiFilterChain(delegate.getPreprocessors(),
+				osgiChain = new OsgiFilterChain(new ArrayList<>(delegate.getPreprocessors().keySet()),
 						delegate.getDefaultServletContext(), delegate.getDefaultWebContainerContext(), null);
 			}
 
@@ -189,6 +192,31 @@ public class PaxWebStandardContext extends StandardContext {
 			return osgiServletContext;
 		}
 		return superContext;
+	}
+
+	@Override
+	public boolean filterStart() {
+		for (Map.Entry<Preprocessor, FilterConfig> p : preprocessors.entrySet()) {
+			try {
+				p.getKey().init(p.getValue());
+			} catch (ServletException e) {
+				LOG.warn("Problem during preprocessor initialization: {}", e.getMessage(), e);
+			}
+		}
+
+		return super.filterStart();
+	}
+
+	@Override
+	public boolean filterStop() {
+		boolean result = super.filterStop();
+
+		// destroy the preprocessors
+		for (Preprocessor p : preprocessors.keySet()) {
+			p.destroy();
+		}
+
+		return result;
 	}
 
 	@Override
@@ -358,8 +386,8 @@ public class PaxWebStandardContext extends StandardContext {
 		return defaultWebContainerContext;
 	}
 
-	public List<Preprocessor> getPreprocessors() {
-		return this.preprocessors;
+	public Map<Preprocessor, FilterConfig> getPreprocessors() {
+		return preprocessors;
 	}
 
 }

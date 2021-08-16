@@ -79,7 +79,7 @@ public class OsgiFilterChain implements FilterChain {
 		HttpServletResponse res = (HttpServletResponse) response;
 
 		// Here's the best place to wrap a request - but only when called for the first time!
-		if (index == 0) {
+		if (index == 0 && servletContext != null) {
 			req = new OsgiHttpServletRequestWrapper(req, servletContext);
 		}
 

@@ -101,6 +101,9 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 	 */
 	private boolean dynamic = false;
 
+	/** Flag to mark a {@link FilterModel} for {@link org.osgi.service.http.whiteboard.Preprocessor} */
+	private boolean preprocessor = false;
+
 	/**
 	 * Constructor used for filter unregistration
 	 * @param filterName
@@ -208,6 +211,23 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 					+ " or service reference");
 		}
 
+		if (preprocessor) {
+			// tweak the mapping
+			dynamicServletNames.clear();
+			dynamicUrlPatterns.clear();
+			this.mappingsPerDispatcherTypes.clear();
+			Mapping mapping = new Mapping();
+			mapping.setDispatcherTypes(new DispatcherType[] {
+					DispatcherType.ERROR,
+					DispatcherType.FORWARD,
+					DispatcherType.INCLUDE,
+					DispatcherType.REQUEST,
+					DispatcherType.ASYNC
+			});
+			mapping.setUrlPatterns(new String[] { "/*" });
+			this.mappingsPerDispatcherTypes.add(mapping);
+		}
+
 		if (!dynamic) {
 			for (Mapping map : mappingsPerDispatcherTypes) {
 				sources = 0;
@@ -249,13 +269,13 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 			}
 		}
 		if (!up.isEmpty()) {
-			this.flatUrlPatterns = up.toArray(new String[up.size()]);
+			this.flatUrlPatterns = up.toArray(new String[0]);
 		}
 		if (!sn.isEmpty()) {
-			this.flatServletNames = sn.toArray(new String[sn.size()]);
+			this.flatServletNames = sn.toArray(new String[0]);
 		}
 		if (!rp.isEmpty()) {
-			this.flatRegexPatterns = rp.toArray(new String[rp.size()]);
+			this.flatRegexPatterns = rp.toArray(new String[0]);
 		}
 
 		return Boolean.TRUE;
@@ -292,6 +312,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 	public String toString() {
 		return "FilterModel{id=" + getId()
 				+ ",name='" + name + "'"
+				+ (preprocessor ? ",preprocessor" : "")
 				+ (flatUrlPatterns == null ? "" : ",urlPatterns=" + Arrays.toString(flatUrlPatterns))
 				+ (flatServletNames == null ? "" : ",servletNames=" + Arrays.toString(flatServletNames))
 				+ (flatRegexPatterns == null ? "" : ",regexPatterns=" + Arrays.toString(flatRegexPatterns))
@@ -315,6 +336,14 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 
 	public void setAsyncSupported(Boolean asyncSupported) {
 		this.asyncSupported = asyncSupported;
+	}
+
+	public boolean isPreprocessor() {
+		return preprocessor;
+	}
+
+	public void setPreprocessor(boolean preprocessor) {
+		this.preprocessor = preprocessor;
 	}
 
 	public Filter getFilter() {
@@ -384,6 +413,32 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		return dynamic;
 	}
 
+	/**
+	 * This method should be used by actual runtime to obtain an instance of the {@link Filter}.
+	 * TODO: do proper service unget if needed!
+	 * @return
+	 */
+	public Filter getInstance() {
+		Filter instance = null;
+		// obtain Filter using reference
+		ServiceReference<? extends Filter> ref = getElementReference();
+		if (ref != null) {
+			instance =  getRegisteringBundle().getBundleContext().getService(ref);
+		}
+		if (instance == null && filterClass != null) {
+			try {
+				instance = filterClass.newInstance();
+			} catch (Exception e) {
+				throw new IllegalStateException("Can't instantiate Filter with class " + filterClass, e);
+			}
+		}
+		if (instance == null && getElementSupplier() != null) {
+			instance = getElementSupplier().get();
+		}
+
+		return instance;
+	}
+
 	public static class Builder {
 
 		private String[] urlPatterns;
@@ -401,6 +456,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		private Bundle bundle;
 		private int rank;
 		private long serviceId;
+		private boolean preprocessor = false;
 
 		public Builder() {
 		}
@@ -491,6 +547,11 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 			return this;
 		}
 
+		public Builder isPreprocessor(boolean preprocessor) {
+			this.preprocessor = preprocessor;
+			return this;
+		}
+
 		public FilterModel build() {
 			FilterModel model = new FilterModel(urlPatterns, servletNames, regexPatterns, dispatcherTypes,
 					filterName, initParams, asyncSupported, filter, filterClass, reference, supplier,
@@ -498,6 +559,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 			list.forEach(model::addContextModel);
 			model.setServiceRank(this.rank);
 			model.setServiceId(this.serviceId);
+			model.setPreprocessor(preprocessor);
 			return model;
 		}
 	}
@@ -556,7 +618,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 			DynamicMapping mapping = new DynamicMapping();
 			mapping.after = isMatchAfter;
 			if (dispatcherTypes != null) {
-				mapping.dispatcherTypes = dispatcherTypes.toArray(new DispatcherType[dispatcherTypes.size()]);
+				mapping.dispatcherTypes = dispatcherTypes.toArray(new DispatcherType[0]);
 			} else {
 				mapping.dispatcherTypes = new DispatcherType[] { DispatcherType.REQUEST };
 			}
@@ -568,7 +630,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 			DynamicMapping mapping = new DynamicMapping();
 			mapping.after = isMatchAfter;
 			if (dispatcherTypes != null) {
-				mapping.dispatcherTypes = dispatcherTypes.toArray(new DispatcherType[dispatcherTypes.size()]);
+				mapping.dispatcherTypes = dispatcherTypes.toArray(new DispatcherType[0]);
 			} else {
 				mapping.dispatcherTypes = new DispatcherType[] { DispatcherType.REQUEST };
 			}

@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -37,6 +38,7 @@ import java.util.function.Supplier;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContextAttributeListener;
+import javax.servlet.ServletException;
 import javax.servlet.SessionCookieConfig;
 import javax.servlet.annotation.ServletSecurity;
 
@@ -103,6 +105,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiDynamicServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
+import org.ops4j.pax.web.service.spi.servlet.PreprocessorFilterConfig;
 import org.ops4j.pax.web.service.spi.servlet.RegisteringContainerInitializer;
 import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
@@ -125,6 +128,7 @@ import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.service.http.whiteboard.Preprocessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1223,7 +1227,7 @@ class JettyServerWrapper implements BatchVisitor {
 		for (Map.Entry<String, TreeMap<FilterModel, List<OsgiContextModel>>> entry : contextFilters.entrySet()) {
 			String contextPath = entry.getKey();
 			Map<FilterModel, List<OsgiContextModel>> filtersMap = entry.getValue();
-			Set<FilterModel> filters = filtersMap.keySet();
+			Set<FilterModel> filters = new TreeSet<>(filtersMap.keySet());
 
 			PaxWebServletContextHandler sch = contextHandlers.get(contextPath);
 			if (sch == null) {
@@ -1232,6 +1236,47 @@ class JettyServerWrapper implements BatchVisitor {
 			}
 
 			LOG.info("Changing filter configuration for context {}", contextPath);
+
+			OsgiContextModel defaultHighestRankedModel = osgiContextModels.get(contextPath).iterator().next();
+
+			// potentially, all existing preprocessors will be removed
+			Set<Preprocessor> toDestroy = new HashSet<>(((PaxWebServletHandler) sch.getServletHandler()).getPreprocessors().keySet());
+			// some new preprocessors may be added - we have to init() them ourselves, because they're not held
+			// in PaxWebFilterHolders
+			Map<Preprocessor, FilterModel> toInit = new HashMap<>();
+
+			// clear to keep the order of all available preprocessors
+			((PaxWebServletHandler) sch.getServletHandler()).getPreprocessors().clear();
+
+			for (Iterator<FilterModel> iterator = filters.iterator(); iterator.hasNext(); ) {
+				FilterModel model = iterator.next();
+				if (model.isPreprocessor()) {
+					Preprocessor preprocessor = (Preprocessor) model.getInstance();
+					if (!toDestroy.contains(preprocessor)) {
+						// new preprocessor - we have to init() it
+						toInit.put(preprocessor, model);
+					} else {
+						// it was already there - we don't have to destroy() it
+						toDestroy.remove(preprocessor);
+					}
+					((PaxWebServletHandler) sch.getServletHandler()).getPreprocessors()
+							.put(preprocessor, new PreprocessorFilterConfig(model, osgiServletContexts.get(defaultHighestRankedModel)));
+					iterator.remove();
+				}
+			}
+
+			if (sch.isStarted()) {
+				for (Map.Entry<Preprocessor, FilterModel> e : toInit.entrySet()) {
+					try {
+						e.getKey().init(new PreprocessorFilterConfig(e.getValue(), osgiServletContexts.get(defaultHighestRankedModel)));
+					} catch (ServletException ex) {
+						LOG.warn("Problem during preprocessor initialization: {}", ex.getMessage(), ex);
+					}
+				}
+				for (Preprocessor p : toDestroy) {
+					p.destroy();
+				}
+			}
 
 			// all the filters should be added to org.ops4j.pax.web.service.jetty.internal.PaxWebServletHandler
 			// of ServletContextHandler - regardles of the "OSGi context" with which the filter was registered.
@@ -1256,6 +1301,7 @@ class JettyServerWrapper implements BatchVisitor {
 			// For Pax Web purposes, we'll try to handle such scenario and all the filters in a chain without servlet
 			// will use OsgiServletContext which is "best" (wrt service ranking) for given physical context path
 
+			// holders won't include preprocessors
 			PaxWebFilterHolder[] newFilterHolders = new PaxWebFilterHolder[filters.size()];
 
 			// filters are sorted by ranking. for Jetty, this order should be reflected in the array of FilterMappings
@@ -1305,7 +1351,7 @@ class JettyServerWrapper implements BatchVisitor {
 				if (highestRankedModel == null) {
 					LOG.warn("(dev) Can't find proper OsgiContextModel for the filter. Falling back to "
 							+ "highest ranked OsgiContextModel for given ServletContextModel");
-					highestRankedModel = osgiContextModels.get(contextPath).iterator().next();
+					highestRankedModel = defaultHighestRankedModel;
 				}
 
 				OsgiServletContext context = osgiServletContexts.get(highestRankedModel);
