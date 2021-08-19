@@ -162,16 +162,6 @@
 				name="Global JSP scratchdir. It's preferred to leave this option empty and rely on context-dependent scratch dir." />
 		<AD id="org.ops4j.pax.web.jsp.development" required="false" type="String" default="false"
 				name="JSP development" />
-<!--		<AD name="JSP checkInterval" id="org.ops4j.pax.web.jsp.check.interval" type="String" default="300" />-->
-<!--		<AD name="JSP classdebuginfo" id="org.ops4j.pax.web.jsp.debug.info" type="String" default="true" />-->
-<!--		<AD name="JSP enablePooling" id="org.ops4j.pax.web.jsp.enable.pooling" type="String" default="true" />-->
-<!--		<AD name="JSP ieClassId" id="org.ops4j.pax.web.jsp.ie.classid" type="String" default="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" />-->
-<!--		<AD name="JSP javaEncoding" id="org.ops4j.pax.web.jsp.java.encoding" type="String" default="UTF-8" />-->
-<!--		<AD name="JSP keepgenerated" id="org.ops4j.pax.web.jsp.keep.generated" type="String" default="true" />-->
-<!--		<AD name="JSP logVerbosityLevel" id="org.ops4j.pax.web.jsp.log.verbosity.level" type="String" default="WARNING" />-->
-<!--		<AD name="JSP mappedfile" id="org.ops4j.pax.web.jsp.mapped.file" type="String" default="false" />-->
-<!--		<AD name="JSP tagpoolMaxSize" id="org.ops4j.pax.web.jsp.tagpool.max.size" type="String" default="5" />-->
-<!--		<AD name="JSP usePrecompiled" id="org.ops4j.pax.web.jsp.precompilation" type="String" default="false" />-->
 
 		<!-- Properties related to Sessions -->
 
@@ -217,8 +207,6 @@
 				name="NCSA Log Extended" />
 		<AD id="org.ops4j.pax.web.log.ncsa.logtimezone" type="String" default="GMT"
 				name="NCSA Log Time Zone" />
-
-<!--		<AD name="Configuration File for Jetty" id="org.ops4j.pax.web.config.file" type="String" default="" />-->
 
 <!--		<AD name="Default Virtual Hosts" id="org.ops4j.pax.web.default.virtualhosts" required="false" type="String" default="" />-->
 <!--		<AD name="Default Connectors" id="org.ops4j.pax.web.default.connectors" required="false" type="String" default="" />-->

@@ -390,26 +390,4 @@ public interface PaxWebConfig {
 	/** Global Scratch directory for JSPs - by default it is relative to global tmp dir and depends on the context */
 	String PID_CFG_JSP_SCRATCH_DIR = "org.ops4j.pax.web.jsp.scratch.dir";
 
-//	String PROPERTY_JSP_CHECK_INTERVAL = "org.ops4j.pax.web.jsp.check.interval";
-//
-//	String PROPERTY_JSP_DEBUG_INFO = "org.ops4j.pax.web.jsp.debug.info";
-//
-//	String PROPERTY_JSP_DEVELOPMENT = "org.ops4j.pax.web.jsp.development";
-//
-//	String PROPERTY_JSP_ENABLE_POOLING = "org.ops4j.pax.web.jsp.enable.pooling";
-//
-//	String PROPERTY_JSP_IE_CLASS_ID = "org.ops4j.pax.web.jsp.ie.classid";
-//
-//	String PROPERTY_JSP_JAVA_ENCODING = "org.ops4j.pax.web.jsp.java.encoding";
-//
-//	String PROPERTY_JSP_KEEP_GENERATED = "org.ops4j.pax.web.jsp.keep.generated";
-//
-//	String PROPERTY_JSP_LOG_VERBOSITY_LEVEL = "org.ops4j.pax.web.jsp.log.verbosity.level";
-//
-//	String PROPERTY_JSP_MAPPED_FILE = "org.ops4j.pax.web.jsp.mapped.file";
-//
-//	String PROPERTY_JSP_TAGPOOL_MAX_SIZE = "org.ops4j.pax.web.jsp.tagpool.max.size";
-//
-//	String PROPERTY_JSP_PRECOMPILATION = "org.ops4j.pax.web.jsp.precompilation";
-
 }

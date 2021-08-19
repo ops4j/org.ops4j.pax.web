@@ -26,7 +26,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.felix.utils.extender.AbstractExtender;
 import org.apache.felix.utils.extender.Extension;
 import org.apache.tomcat.util.descriptor.web.ServletDef;
 import org.apache.tomcat.util.descriptor.web.WebXml;
@@ -185,7 +184,7 @@ public class WarExtenderContext implements WebContainerListener {
 	}
 
 	/**
-	 * A method supporting {@link AbstractExtender#doCreateExtension(org.osgi.framework.Bundle)} for WAR
+	 * A method supporting {@code AbstractExtender#doCreateExtension(org.osgi.framework.Bundle)} for WAR
 	 * publishing purposes.
 	 *
 	 * @param bundle

@@ -3,12 +3,12 @@ Must have for 8.0.0.GA:
  + "listener=true" for Whiteboard listeners
  + Whiteboard WebSockets
  + RegEx filter mapping
+ + JSP servlet configuration through Pax Web PID
  - Listener ordering according to ranking
  - org.osgi.framework.ServiceObjects and proper service management (unget, prototype, singleton, bundle scopes)
  - DTOs
  - Mixing (in different order) WAB and Whiteboard contexts, allocating contexts for WABs, where WAB's OsgiContextModel is of highest priority (can't have other OsgiContextModel overring the WAB's one)
  - Session per OsgiContextModel / OsgiServletContext
- - JSP servlet configuration through Pax Web PID
  - CRLs
  - Karaf integration tests
 
