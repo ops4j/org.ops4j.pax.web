@@ -115,7 +115,7 @@ public class PaxWebFilterInfo extends FilterInfo {
 				}
 			}
 
-			Filter osgiInitializedFilter = new OsgiInitializedFilter(instance, this.osgiScopedServletContext);
+			Filter osgiInitializedFilter = new OsgiInitializedFilter(instance, model, this.osgiScopedServletContext);
 			Filter scopedFilter = new ScopedFilter(osgiInitializedFilter, model);
 
 			return new ImmediateInstanceHandle<Filter>(scopedFilter);

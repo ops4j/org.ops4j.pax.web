@@ -56,7 +56,6 @@ public class PaxWebFilterMapping extends FilterMapping {
 
 		// special mapping kind from Whiteboard Service spec
 		String[] regexMapping = mapping.getRegexPatterns();
-		// TODO: special mapping kind from Whiteboard Service spec
 		if (regexMapping != null && regexMapping.length > 0) {
 			this.setPathSpecs(new String[] { "/*" });
 		}

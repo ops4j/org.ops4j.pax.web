@@ -141,7 +141,7 @@ public class PaxWebFilterHolder extends FilterHolder {
 		}
 
 		return instance == null ? null
-				: new OsgiInitializedFilter(instance, servletContext == null ? osgiServletContext : servletContext);
+				: new OsgiInitializedFilter(instance, filterModel, servletContext == null ? osgiServletContext : servletContext);
 	}
 
 	@Override

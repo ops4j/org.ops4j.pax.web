@@ -2475,7 +2475,6 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			for (FilterModel.Mapping mapping : model.getMappingsPerDispatcherTypes()) {
 				for (DispatcherType dt : mapping.getDispatcherTypes()) {
 					if (mapping.getRegexPatterns() != null && mapping.getRegexPatterns().length > 0) {
-						// TODO: handle regexp filter mapping
 						deploymentInfo.addFilterUrlMapping(filterName, "/*", dt);
 					} else if (mapping.getUrlPatterns() != null) {
 						for (String pattern : mapping.getUrlPatterns()) {

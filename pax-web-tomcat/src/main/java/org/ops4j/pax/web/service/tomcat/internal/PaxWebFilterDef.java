@@ -96,7 +96,7 @@ public class PaxWebFilterDef extends FilterDef {
 		if (isInitial()) {
 			super.setFilter(filter);
 		} else {
-			Filter delegate = filter == null ? null : new ScopedFilter(new OsgiInitializedFilter(filter, servletContext), filterModel);
+			Filter delegate = filter == null ? null : new ScopedFilter(new OsgiInitializedFilter(filter, filterModel, servletContext), filterModel);
 			super.setFilter(delegate);
 		}
 	}

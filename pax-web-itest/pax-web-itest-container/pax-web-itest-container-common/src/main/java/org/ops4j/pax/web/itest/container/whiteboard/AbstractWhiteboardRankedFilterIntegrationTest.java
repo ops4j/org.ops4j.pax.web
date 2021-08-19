@@ -84,10 +84,8 @@ public abstract class AbstractWhiteboardRankedFilterIntegrationTest extends Abst
 		ServiceRegistration<Filter> filter2 = context.registerService(Filter.class, new RankFilter(), props);
 
 		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'Filter Rank: 1'",
-						resp -> resp.contains("Filter Rank: 1"))
-				.withResponseAssertion("Response must contain 'Filter Rank: 2'",
-						resp -> resp.contains("Filter Rank: 2"))
+				.withResponseAssertion("Response must contain 'Filter Rank: 2Filter Rank: 1'",
+						resp -> resp.contains("Filter Rank: 2Filter Rank: 1"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/ranked");
 
 		filter1.unregister();
@@ -111,10 +109,8 @@ public abstract class AbstractWhiteboardRankedFilterIntegrationTest extends Abst
 		ServiceRegistration<Filter> filter2 = context.registerService(Filter.class, new RankFilter(), props);
 
 		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'Filter Rank: 1'",
-						resp -> resp.contains("Filter Rank: 1"))
-				.withResponseAssertion("Response must contain 'Filter Rank: 2'",
-						resp -> resp.contains("Filter Rank: 2"))
+				.withResponseAssertion("Response must contain 'Filter Rank: 2Filter Rank: 1'",
+						resp -> resp.contains("Filter Rank: 2Filter Rank: 1"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/ranked");
 
 		filter1.unregister();
@@ -145,12 +141,8 @@ public abstract class AbstractWhiteboardRankedFilterIntegrationTest extends Abst
 		ServiceRegistration<Filter> filter2 = context.registerService(Filter.class, new RankFilter(), props);
 
 		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'Filter Rank: 1'",
-						resp -> resp.contains("Filter Rank: 1"))
-				.withResponseAssertion("Response must contain 'Filter Rank: 2'",
-						resp -> resp.contains("Filter Rank: 2"))
-				.withResponseAssertion("Response must contain 'Filter Rank: 3'",
-						resp -> resp.contains("Filter Rank: 3"))
+				.withResponseAssertion("Response must contain 'Filter Rank: 3Filter Rank: 2Filter Rank: 1'",
+						resp -> resp.contains("Filter Rank: 3Filter Rank: 2Filter Rank: 1"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/ranked");
 
 		filter1.unregister();
@@ -169,7 +161,7 @@ public abstract class AbstractWhiteboardRankedFilterIntegrationTest extends Abst
 		@Override
 		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 				throws IOException, ServletException {
-			response.getWriter().println("Filter Rank: " + rank);
+			response.getWriter().print("Filter Rank: " + rank);
 			chain.doFilter(request, response);
 		}
 
