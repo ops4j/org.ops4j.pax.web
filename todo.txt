@@ -6,7 +6,6 @@ Must have for 8.0.0.GA:
  + "listener=true" for Whiteboard listeners
  - Listener ordering according to ranking
  + Whiteboard WebSockets
- - JAX-RS example with aries-jaxrs
  - CRLs
  - Session per OsgiContextModel / OsgiServletContext
  - Mixing (in different order) WAB and Whiteboard contexts
@@ -15,12 +14,14 @@ Must have for 8.0.0.GA:
  - Karaf integration tests
 
 Moved to after 8.0.0.GA (8.0.x):
+ - JAX-RS example with aries-jaxrs
  - Jetty/Tomcat/Undertow bundles
  - HTTP context processing (potentially with external web-fragment.xml)
  - HTTP/2 (mostly tests)
  - Keycloak integration
  - Jasypt encryption in PID
  - @ServletSecurity, @RunAs, @DeclareRoles annotations on servlets
+ - skipping configured web fragments (no scanning, as in Tomcat's tomcat.util.scan.StandardJarScanFilter.jarsToSkip)
 
 Move to 8.1.x:
  - Jetty org.eclipse.jetty.server.Handler and org.eclipse.jetty.server.Connector tracking

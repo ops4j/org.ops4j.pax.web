@@ -1,0 +1,50 @@
+.sidemenu-header {
+  align-items: center;
+  box-shadow: var(--lumo-box-shadow-s);
+  display: flex;
+  height: var(--lumo-size-xl);
+  width: 100%;
+}
+
+.sidemenu-header h1 {
+  font-size: var(--lumo-font-size-l);
+  margin: 0;
+}
+
+.sidemenu-menu #logo {
+  align-items: center;
+  box-sizing: border-box;
+  display: flex;
+  padding: var(--lumo-space-s) var(--lumo-space-m);
+}
+
+.sidemenu-menu #logo img {
+  height: calc(var(--lumo-size-l) * 1.5);
+}
+
+.sidemenu-menu #logo span {
+  font-size: var(--lumo-font-size-xl);
+  font-weight: 600;
+  margin: 0 var(--lumo-space-s);
+}
+
+.sidemenu-menu vaadin-tab {
+  font-size: var(--lumo-font-size-s);
+  height: var(--lumo-size-l);
+  font-weight: 600;
+  color: var(--lumo-body-text-color);
+}
+
+.sidemenu-menu vaadin-tab:hover {
+  background-color: var(--lumo-contrast-5pct);
+  text-decoration: none;
+}
+
+.sidemenu-menu vaadin-tab[selected] {
+  background-color: var(--lumo-primary-color-10pct);
+  color: var(--lumo-primary-text-color);
+}
+
+hr {
+  margin: 0;
+}

@@ -52,6 +52,7 @@
 		<module>war-authentication</module>
 		<module>war-vaadin08</module>
 		<module>war-vaadin08-spring</module>
+		<module>war-vaadin20-spring</module>
 		<module>war-formauth</module>
 		<module>wab-container-context-config</module>
 		<module>war-limited-post</module>
