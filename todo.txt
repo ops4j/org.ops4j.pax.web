@@ -9,7 +9,6 @@ Must have for 8.0.0.GA:
  - DTOs
  - Mixing (in different order) WAB and Whiteboard contexts, allocating contexts for WABs, where WAB's OsgiContextModel is of highest priority (can't have other OsgiContextModel overring the WAB's one)
  - Session per OsgiContextModel / OsgiServletContext
- - CRLs
  - Karaf integration tests
 
 Moved to after 8.0.0.GA (8.0.x):
