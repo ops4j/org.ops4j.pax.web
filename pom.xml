@@ -170,6 +170,7 @@
 		<dependency.commons-digester>1.8.1</dependency.commons-digester>
 		<dependency.commons-fileupload>1.4</dependency.commons-fileupload>
 		<dependency.commons-io>2.11.0</dependency.commons-io>
+		<dependency.com.fasterxml.classmate>1.5.1</dependency.com.fasterxml.classmate>
 		<dependency.com.fasterxml.jackson.core>2.12.4</dependency.com.fasterxml.jackson.core>
 		<dependency.com.sun.activation>1.2.0</dependency.com.sun.activation>
 
@@ -208,6 +209,7 @@
 		<dependency.org.apache.felix.framework6>6.0.4</dependency.org.apache.felix.framework6>
 		<dependency.org.apache.felix.metatype>1.2.4</dependency.org.apache.felix.metatype>
 		<dependency.org.apache.felix.scr>2.1.26</dependency.org.apache.felix.scr>
+		<dependency.org.codehaus.mojo.animal-sniffer-annotations>1.20</dependency.org.codehaus.mojo.animal-sniffer-annotations>
 		<dependency.org.apache.felix.utils>1.11.8</dependency.org.apache.felix.utils>
 		<dependency.org.apache.felix.webconsole>4.6.2</dependency.org.apache.felix.webconsole>
 
@@ -223,7 +225,7 @@
 		<dependency.org.apache.servicemix.bundles.aopalliance>1.0_6</dependency.org.apache.servicemix.bundles.aopalliance>
 		<dependency.org.apache.servicemix.bundles.javax-inject>1_3</dependency.org.apache.servicemix.bundles.javax-inject>
 		<dependency.org.apache.taglibs>1.2.5</dependency.org.apache.taglibs>
-		<dependency.org.apache.tomcat>9.0.50</dependency.org.apache.tomcat>
+		<dependency.org.apache.tomcat>9.0.52</dependency.org.apache.tomcat>
 		<dependency.org.apache.xbean>4.20</dependency.org.apache.xbean>
 
 		<dependency.org.bouncycastle>1.69</dependency.org.bouncycastle>
@@ -244,6 +246,7 @@
 		<dependency.org.jboss.weld>3.1.6.Final</dependency.org.jboss.weld>
 		<dependency.org.jboss.xnio>3.8.4.Final</dependency.org.jboss.xnio>
 
+		<dependency.org.jsoup>1.12.1</dependency.org.jsoup>
 		<dependency.org.mockito>3.11.2</dependency.org.mockito>
 		<dependency.org.mortbay.jetty.alpn>8.1.2.v20141202</dependency.org.mortbay.jetty.alpn>
 
@@ -268,6 +271,8 @@
 
 		<dependency.org.wildfly.client>1.0.1.Final</dependency.org.wildfly.client>
 		<dependency.org.wildfly.common>1.5.4.Final</dependency.org.wildfly.common>
+
+		<dependency.org.yaml.snakeyaml>1.29</dependency.org.yaml.snakeyaml>
 	</properties>
 
 	<build>
@@ -1493,6 +1498,11 @@
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.scr</artifactId>
 				<version>${dependency.org.apache.felix.scr}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>animal-sniffer-annotations</artifactId>
+				<version>${dependency.org.codehaus.mojo.animal-sniffer-annotations}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.felix</groupId>
@@ -2756,6 +2766,12 @@
 			</dependency>
 
 			<dependency>
+				<groupId>com.fasterxml</groupId>
+				<artifactId>classmate</artifactId>
+				<version>${dependency.com.fasterxml.classmate}</version>
+			</dependency>
+
+			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-core</artifactId>
 				<version>${dependency.com.fasterxml.jackson.core}</version>
@@ -2769,6 +2785,17 @@
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
 				<version>${dependency.com.fasterxml.jackson.core}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jsoup</groupId>
+				<artifactId>jsoup</artifactId>
+				<version>${dependency.org.jsoup}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.yaml</groupId>
+				<artifactId>snakeyaml</artifactId>
+				<version>${dependency.org.yaml.snakeyaml}</version>
 			</dependency>
 
 			<!-- Testing -->
