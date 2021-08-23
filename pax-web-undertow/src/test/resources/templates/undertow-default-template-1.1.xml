@@ -201,7 +201,7 @@
 			<persistent-sessions path="${karaf.data}/web-sessions" />
 			<!-- deflater-level: 0-9. See java.util.zip.Deflater.setLevel(). Used only of per-message-deflate is true -->
 			<websockets buffer-pool="default" worker="default"
-					deflater-level="" dispatch-to-worker="true" per-message-deflate="true" />
+					deflater-level="0" dispatch-to-worker="true" per-message-deflate="true" />
 			<welcome-files>
 				<welcome-file name="index.html" />
 				<welcome-file name="index.txt" />
@@ -220,7 +220,7 @@
 		<filters>
 			<!-- filters for reference from /host/filter-ref and /host/location/filter-ref -->
 			<response-header name="server-header" header-name="Server" header-value="pax-undertow" />
-			<response-header name="x-powered-by-header" header-name="X-Powered-By" header-value="Pax-Undertow/1" />
+			<response-header name="x-powered-by-header" header-name="X-Powered-By" header-value="Pax-Web-Undertow/1" />
 			<response-header name="x-docs" header-name="X-Docs" header-value="Pax-Undertow-Docs/1" />
 			<!-- not handled by Pax Web - error pages are configured per context -->
 			<error-page name="custom-error-page-1" code="404" path="/error" />
@@ -304,7 +304,7 @@
 				<!-- openssl ciphers 'ALL:eNULL' | sed -e 's/:/\n/g' | sort -->
 				<w:engine
 						enabled-cipher-suites="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384 TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"
-						enabled-protocols="TLSv1 TLSv1.1 TLSv1.2" />
+						enabled-protocols="TLSv1.1 TLSv1.2 TLSv1.3" />
 				<w:keystore path="${karaf.etc}/certs/server.keystore" provider="JKS" alias="server"
 						keystore-password="secret" key-password="secret"
 						generate-self-signed-certificate-host="localhost" />

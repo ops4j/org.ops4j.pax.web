@@ -16,71 +16,204 @@
     limitations under the License.
 
 -->
-<undertow xmlns="urn:org.ops4j.pax.web:undertow:1.0"
+<undertow xmlns="urn:org.ops4j.pax.web:undertow:1.1"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:w="urn:jboss:domain:5.0"
+		xmlns:w="urn:jboss:domain:17.0"
 		xmlns:io="urn:jboss:domain:io:3.0"
 		xsi:schemaLocation="
-			urn:jboss:domain:io:3.0 http://www.jboss.org/schema/jbossas/wildfly-io_3_0.xsd
-			urn:jboss:domain:undertow:4.0 http://www.jboss.org/schema/jbossas/wildfly-undertow_4_0.xsd
-			urn:jboss:domain:5.0 http://www.jboss.org/schema/jbossas/wildfly-config_5_0.xsd">
+			urn:org.ops4j.pax.web:undertow:1.1 https://raw.githubusercontent.com/ops4j/org.ops4j.pax.web/main/pax-web-undertow/src/main/resources/schema/pax-web-undertow_1_1.xsd
+			urn:jboss:domain:io:3.0 https://raw.githubusercontent.com/wildfly/wildfly-core/16.0.1.Final/io/subsystem/src/main/resources/schema/wildfly-io_3_0.xsd
+			urn:jboss:domain:undertow:12.0 https://raw.githubusercontent.com/wildfly/wildfly/24.0.1.Final/undertow/src/main/resources/schema/wildfly-undertow_12_0.xsd
+			urn:jboss:domain:17.0 https://raw.githubusercontent.com/wildfly/wildfly-core/16.0.1.Final/server/src/main/resources/schema/wildfly-config_17_0.xsd">
 
 	<!--
-	 Only "default" worker and buffer-pool are supported and can be used to override the default values
-	 used by all listeners
+		IO subsystem may be used to configure "default" buffer pool and "default" worker which will be used
+		if no "worker" or "buffer-pool" attributes are specified.
+		When no "default" worker and buffer pool are defined, Pax Web will create default workers internally.
+		buffer-pool may be referenced from the listener and websocket
+		 - buffer-size defaults to:
+			- when < 64MB of Xmx: 512
+			- when < 128MB of Xmx: 1024
+			- when >= 128MB of Xmx: 16K - 20
+		 - direct-buffers defaults to:
+			- when < 64MB of Xmx: false
+			- when >= 64MB of Xmx: true
+		 - buffers-per-slice doesn't seem to be used...
+			- when < 128MB of Xmx: 10
+			- when >= 128MB of Xmx: 20
 
-	buffer-pool may be referenced from the listener and websocket
-	 - buffer-size defaults to:
-		- when < 64MB of Xmx: 512
-		- when < 128MB of Xmx: 1024
-		- when >= 128MB of Xmx: 16K - 20
-	 - direct-buffers defaults to:
-		- when < 64MB of Xmx: false
-		- when >= 64MB of Xmx: true
-
-	worker may be referenced from the listener, access-log and websocket
-	 - io-threads defaults to Math.max(Runtime.getRuntime().availableProcessors(), 2);
-	 - task-core-threads and task-max-threads default to io-threads * 8
+		worker may be referenced from the listener, access-log and websocket
+		 - io-threads defaults to Math.max(Runtime.getRuntime().availableProcessors(), 2);
+		 - task-core-threads and task-max-threads default to io-threads * 8
 	-->
 	<subsystem xmlns="urn:jboss:domain:io:3.0">
 		<buffer-pool name="default" buffer-size="16364" direct-buffers="true" />
-		<worker name="default" io-threads="8" task-core-threads="64" task-max-threads="64" />
+		<worker name="default" io-threads="8" task-core-threads="64" task-max-threads="64"
+				stack-size="0"
+				task-keepalive="60000" />
 	</subsystem>
 
 	<!-- https://docs.jboss.org/author/display/WFLY/Undertow+subsystem+configuration -->
-	<subsystem xmlns="urn:jboss:domain:undertow:4.0">
+	<subsystem xmlns="urn:jboss:domain:undertow:12.0">
 		<!-- org.wildfly.extension.undertow.BufferCacheDefinition -->
 		<buffer-cache name="default" buffer-size="1024" buffers-per-region="1024" max-regions="10" />
-		<server name="default-server">
-			<!-- HTTP(S) Listener references Socket Binding (and indirectly - Interfaces) -->
-			<http-listener name="http" socket-binding="http" />
+		<server name="default-server" default-host="localhost" servlet-container="default">
+			<!-- HTTP(S) Listeners reference Socket Bindings (and indirectly - Interfaces) -->
+			<http-listener name="http" socket-binding="http"
+					worker="default"
+					buffer-pool="default"
+					enabled="true"
+
+					receive-buffer="65536"
+					send-buffer="65536"
+					tcp-backlog="128"
+					tcp-keep-alive="false"
+					read-timeout="-1"
+					write-timeout="-1"
+					max-connections="1000000"
+
+					resolve-peer-address="false"
+					disallowed-methods="TRACE OPTIONS"
+					secure="false"
+
+					max-post-size="10485760"
+					buffer-pipelined-data="false"
+					max-header-size="1048576"
+					max-parameters="1000"
+					max-headers="200"
+					max-cookies="200"
+					allow-encoded-slash="false"
+					decode-url="true"
+					url-charset="UTF-8"
+					always-set-keep-alive="true"
+					max-buffered-request-size="16384"
+					record-request-start-time="true"
+					allow-equals-in-cookie-value="false"
+					no-request-timeout="60000"
+					request-parse-timeout="60000"
+					rfc6265-cookie-validation="false"
+					allow-unescaped-characters-in-url="false"
+
+					certificate-forwarding="false"
+					redirect-socket="https"
+					proxy-address-forwarding="false"
+
+					enable-http2="false"
+					http2-enable-push="false"
+					http2-header-table-size="4096"
+					http2-initial-window-size="65535"
+					http2-max-concurrent-streams="-1"
+					http2-max-frame-size="16384"
+					http2-max-header-list-size="-1"
+
+					require-host-http11="false"
+					proxy-protocol="false"
+			/>
+
 			<!-- verify-client: org.xnio.SslClientAuthMode.NOT_REQUESTED, org.xnio.SslClientAuthMode.REQUESTED, org.xnio.SslClientAuthMode.REQUIRED -->
-			<!--<https-listener name="https" socket-binding="https"-->
-			<!--security-realm="https" verify-client="NOT_REQUESTED" />-->
+			<!-- for algorithm/protocol assignment, see sun.security.ssl.CipherSuite -->
+			<https-listener name="https" socket-binding="https"
+					worker="default"
+					buffer-pool="default"
+					enabled="false"
+
+					receive-buffer="65536"
+					send-buffer="65536"
+					tcp-backlog="128"
+					tcp-keep-alive="false"
+					read-timeout="-1"
+					write-timeout="-1"
+					max-connections="1000000"
+
+					resolve-peer-address="false"
+					disallowed-methods="TRACE OPTIONS"
+					secure="true"
+
+					max-post-size="10485760"
+					buffer-pipelined-data="false"
+					max-header-size="1048576"
+					max-parameters="1000"
+					max-headers="200"
+					max-cookies="200"
+					allow-encoded-slash="false"
+					decode-url="true"
+					url-charset="UTF-8"
+					always-set-keep-alive="true"
+					max-buffered-request-size="16384"
+					record-request-start-time="true"
+					allow-equals-in-cookie-value="false"
+					no-request-timeout="60000"
+					request-parse-timeout="60000"
+					rfc6265-cookie-validation="false"
+					allow-unescaped-characters-in-url="false"
+
+					certificate-forwarding="false"
+					proxy-address-forwarding="false"
+
+					enable-http2="false"
+					http2-enable-push="false"
+					http2-header-table-size="4096"
+					http2-initial-window-size="65535"
+					http2-max-concurrent-streams="-1"
+					http2-max-frame-size="16384"
+					http2-max-header-list-size="-1"
+
+					require-host-http11="false"
+					proxy-protocol="false"
+
+					security-realm="https"
+					verify-client="NOT_REQUESTED"
+					enabled-cipher-suites="TLS_AES_256_GCM_SHA384"
+					enabled-protocols="TLSv1.3"
+					ssl-session-cache-size="0"
+					ssl-session-timeout="0"
+			/>
+
+			<!-- org.wildfly.extension.undertow.HostDefinition -->
 			<host name="default-host" alias="localhost">
-				<!--<location name="/" handler="welcome-content" />-->
-				<!--<location name="/docs" handler="docs-content" />-->
+<!--				<location name="/" handler="welcome-content" />-->
+<!--				<location name="/docs" handler="docs-content" />-->
+				<!-- pattern: common, combined, "" // io.undertow.server.handlers.accesslog.AccessLogHandler.handleCommonNames() -->
 				<access-log directory="${karaf.data}/log" pattern="common" prefix="access_log." suffix="log" rotate="true" />
 				<filter-ref name="server-header" />
 				<filter-ref name="x-powered-by-header" />
+<!--				<filter-ref name="expression-filter-1" predicate="method(GET)" />-->
+<!--				<filter-ref name="gzip-filter" />-->
 			</host>
 		</server>
-		<servlet-container name="default">
+		<!-- org.wildfly.extension.undertow.ServletContainerDefinition -->
+		<servlet-container name="default" default-session-timeout="30">
+			<!-- Not used - configured per container-agnostic web context -->
 			<jsp-config />
-			<websockets />
+			<session-cookie name="JSESSIONID" domain="domain" http-only="true" max-age="130" secure="true" comment="Session Cookie" />
+			<persistent-sessions path="${karaf.data}/web-sessions" />
+			<!-- deflater-level: 0-9. See java.util.zip.Deflater.setLevel(). Used only of per-message-deflate is true -->
+			<websockets buffer-pool="default" worker="default"
+					deflater-level="0" dispatch-to-worker="true" per-message-deflate="true" />
 			<welcome-files>
 				<welcome-file name="index.html" />
 				<welcome-file name="index.txt" />
 			</welcome-files>
 		</servlet-container>
+		<!-- org.wildfly.extension.undertow.handlers.HandlerDefinitions -->
 		<handlers>
-			<file name="welcome-content" path="${karaf.home}/welcome" />
-			<!--<file name="docs-content" path="${karaf.home}/docs" />-->
+			<!-- org.wildfly.extension.undertow.handlers.FileHandler#createHandler -->
+			<file name="welcome-content" path="${karaf.home}/welcome" cache-buffer-size="1024" cache-buffers="1024"
+					case-sensitive="false" directory-listing="true" follow-symlink="false" safe-symlink-paths="/dev/null" />
+			<file name="docs-content" path="${karaf.home}/docs" />
 		</handlers>
+		<!-- org.wildfly.extension.undertow.filters.FilterDefinitions -->
 		<filters>
 			<!-- filters for reference from /host/filter-ref and /host/location/filter-ref -->
-			<response-header name="server-header" header-name="Server" header-value="Pax-HTTP-Undertow" />
-			<response-header name="x-powered-by-header" header-name="X-Powered-By" header-value="Pax-HTTP-Undertow/${project.version}" />
+			<response-header name="server-header" header-name="Server" header-value="pax-undertow" />
+			<response-header name="x-powered-by-header" header-name="X-Powered-By" header-value="Pax-Web-Undertow/${project.version}" />
+<!--			<expression-filter name="expression-filter-1" expression="redirect(http://localhost)" />-->
+<!--			<gzip name="gzip-filter" />-->
+			<!-- org.wildfly.extension.undertow.filters.RequestLimitHandler -->
+<!--			<request-limit name="rl-1" max-concurrent-requests="100" queue-size="128" />-->
+			<!-- org.wildfly.extension.undertow.filters.RewriteFilterDefinition#createHttpHandler -->
+<!--			<rewrite name="r-1" target="/c1" redirect="true" />-->
+<!--			<rewrite name="r-2" target="/c2" redirect="false" />-->
 		</filters>
 	</subsystem>
 
@@ -93,15 +226,31 @@
 	-->
 	<security-realm name="default">
 		<w:authentication>
+			<!-- Choose one from jaas/properties/users -->
 			<!-- JaasIdentityManager for given realm -->
 			<w:jaas name="karaf" />
-			<!-- OR PropertiesIdentityManager (mutually exclusive with <w:jaas>) -->
-			<!--<w:properties path="users.properties" />-->
+			<!--
+				OR PropertiesIdentityManager for users from properties file in the format:
+					user1 = password, role1, role2, ...
+					user2 = password, role1, role2, ...
+				where password may have a prefix describing MessageDigest to use (as in <w:users>)
+			-->
+<!--			<w:properties path="${karaf.etc}/undertow-users.properties" />-->
+			<!-- OR PropertiesIdentityManager configured directly in XML (no roles can be configured) -->
+<!--			<w:users>-->
+<!--				<w:user username="admin">-->
+<!--					<w:password>MD5:21232f297a57a5a743894a0e4a801fc3</w:password>-->
+<!--				</w:user>-->
+<!--				<w:user username="user">-->
+<!--					<w:password>plain-text-password</w:password>-->
+<!--				</w:user>-->
+<!--			</w:users>-->
 		</w:authentication>
 		<user-principal-class-name>org.apache.karaf.jaas.boot.principal.UserPrincipal</user-principal-class-name>
 		<role-principal-class-name>org.apache.karaf.jaas.boot.principal.RolePrincipal</role-principal-class-name>
 		<!--<role-principal-class-name>...</role-principal-class-name>-->
 	</security-realm>
+
 	<!--
 		Any security realm may be referenced by https-listener to define trust/keystore, protocols and cipher suites
 	-->
@@ -112,8 +261,8 @@
 				<!-- sun.security.ssl.CipherSuite -->
 				<!-- openssl ciphers 'ALL:eNULL' | sed -e 's/:/\n/g' | sort -->
 				<w:engine
-						enabled-cipher-suites="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384 TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"
-						enabled-protocols="TLSv1.1 TLSv1.2" />
+						enabled-cipher-suites="TLS_AES_128_GCM_SHA256 TLS_AES_256_GCM_SHA384"
+						enabled-protocols="TLSv1.3" />
 				<w:keystore path="${karaf.etc}/certs/server.keystore" provider="JKS" alias="server"
 						keystore-password="secret" key-password="secret"
 						generate-self-signed-certificate-host="localhost" />

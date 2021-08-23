@@ -30,7 +30,7 @@ import org.osgi.framework.BundleException;
  * @author Grzegorz Grzybek
  */
 @RunWith(PaxExam.class)
-public class HttpServiceIntegrationKarafTest extends KarafBaseTest {
+public abstract class HttpServiceBaseKarafTest extends AbstractKarafTestBase {
 
 	private Bundle bundle;
 
@@ -40,24 +40,16 @@ public class HttpServiceIntegrationKarafTest extends KarafBaseTest {
 	}
 
 	@Before
-	public void setUp() throws Exception {
-		initWebListener();
+	public void setup() throws Exception {
+		configureAndWaitForServletWithMapping("/alt-images/*",
+				() -> bundle = installAndStartBundle(sampleURI("hs-helloworld")));
+	}
 
-		String warUrl = "mvn:org.ops4j.pax.web.samples/helloworld-hs/"
-				+ getProjectVersion();
-		bundle = bundleContext.installBundle(warUrl);
-		bundle.start();
-
-		waitForWebListener();
-
-		int failCount = 0;
-		while (bundle.getState() != Bundle.ACTIVE) {
-			Thread.sleep(500);
-			if (failCount > 500) {
-				throw new RuntimeException(
-						"Required helloworld-hs is never active");
-			}
-			failCount++;
+	@After
+	public void tearDown() throws BundleException {
+		if (bundle != null) {
+			bundle.stop();
+			bundle.uninstall();
 		}
 	}
 
@@ -83,14 +75,6 @@ public class HttpServiceIntegrationKarafTest extends KarafBaseTest {
 						headers -> headers.anyMatch(header -> header.getKey().equals("Content-Type")
 								&& header.getValue().startsWith("text/html")))
 				.doGETandExecuteTest("http://127.0.0.1:8181/alt2-images/logo.png");
-	}
-
-	@After
-	public void tearDown() throws BundleException {
-		if (bundle != null) {
-			bundle.stop();
-			bundle.uninstall();
-		}
 	}
 
 }

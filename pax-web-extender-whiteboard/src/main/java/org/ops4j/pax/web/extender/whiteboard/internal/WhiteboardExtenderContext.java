@@ -155,8 +155,6 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 	 */
 	@Override
 	public void bundleStopped(Bundle bundle) {
-		LOG.debug("Clearing Whiteboard cache for {}", bundle);
-
 		BundleWhiteboardApplication application;
 		lock.lock();
 		try {
@@ -165,6 +163,7 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 			lock.unlock();
 		}
 		if (application != null) {
+			LOG.debug("Clearing Whiteboard cache for {}", bundle);
 			application.cleanup();
 		}
 	}

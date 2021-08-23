@@ -29,7 +29,7 @@
 
 	<groupId>org.ops4j.pax.web.itest</groupId>
 	<artifactId>pax-web-itest-common</artifactId>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 
 	<name>OPS4J Pax Web - Integration Tests - Common</name>
 
@@ -42,6 +42,71 @@
 				<filtering>true</filtering>
 			</resource>
 		</resources>
+
+		<plugins>
+
+			<!-- Felix plugins -->
+
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Import-Package>
+							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
+							javax.servlet;version="[3.1,5)",
+							javax.servlet.annotation;version="[3.1,5)",
+							javax.servlet.http;version="[3.1,5)",
+							javax.websocket;resolution:=optional,
+							javax.websocket.server;resolution:=optional,
+
+							<!-- ranges indicate we can work with OSGi Core R6+ -->
+							org.osgi.framework;version="[1.8,2)",
+							org.osgi.framework.wiring;version="[1.2,2)",
+							org.osgi.util.tracker;version="[1.5,2)",
+
+							<!-- OSGi cmpn -->
+							org.osgi.service.cm;resolution:=optional,
+							org.osgi.service.http;version="[1.2,2)",
+							org.osgi.service.http.context;version="[1.1,2)",
+							org.osgi.service.http.runtime.dto;version="[1.1,2)",
+							org.osgi.service.http.runtime;version="[1.1,2)",
+
+							<!-- from pax-web-api -->
+							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
+
+							<!-- from pax-web-spi -->
+							org.ops4j.pax.web.service.spi.model.events;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.servlet;version="${pax-web.osgi.version}",
+
+							<!-- from pax-web-itest-utils -->
+							org.ops4j.pax.web.itest.utils,
+							org.ops4j.pax.web.itest.utils.assertion,
+							org.ops4j.pax.web.itest.utils.client,
+							org.ops4j.pax.web.itest.utils.web,
+
+							<!-- from pax-logging-api -->
+							org.slf4j;version="[1.7,2)",
+							org.ops4j.pax.logging,
+
+							<!-- test dependencies -->
+							javax.inject
+						</Import-Package>
+						<DynamicImport-Package>
+							org.junit,
+							org.junit.*,
+							org.ops4j.pax.exam,
+							org.ops4j.pax.exam.*
+						</DynamicImport-Package>
+						<Export-Package>
+							org.ops4j.pax.web.itest
+						</Export-Package>
+						<_contract>!*</_contract>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 
 	<dependencies>
@@ -76,6 +141,10 @@
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam-junit4</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 		</dependency>
 
 		<!-- ServiceMIX -->

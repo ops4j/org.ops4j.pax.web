@@ -108,6 +108,15 @@ public class UndertowConfiguration {
 				for (UndertowSubsystem.ExpressionFilter filter : subsystem.getFilters().getExpressionFilters()) {
 					filtersMap.put(filter.getName(), filter);
 				}
+				for (UndertowSubsystem.GzipFilter filter : subsystem.getFilters().getGzipFilters()) {
+					filtersMap.put(filter.getName(), filter);
+				}
+				for (UndertowSubsystem.RequestLimitFilter filter : subsystem.getFilters().getRequestLimitFilters()) {
+					filtersMap.put(filter.getName(), filter);
+				}
+				for (UndertowSubsystem.RewriteFilter filter : subsystem.getFilters().getRewriteFilters()) {
+					filtersMap.put(filter.getName(), filter);
+				}
 			}
 		}
 		if (ioSubsystem != null) {

@@ -28,19 +28,19 @@ import static org.junit.Assert.assertNotNull;
 /**
  * @author achim
  */
-public class FeaturesUndertowKarafTest extends FeaturesBaseKarafTest {
+public class FeaturesTomcatKarafTest extends FeaturesBaseKarafTest {
 
 	@Configuration
 	public Option[] config() {
-		return undertowConfig();
+		return tomcatConfig();
 	}
 
 	@Test
 	public void testJmx() throws Exception {
 		try (JMXConnector connector = this.getJMXConnector()) {
 			MBeanServerConnection connection = connector.getMBeanServerConnection();
-			ObjectName name = new ObjectName("org.xnio:type=Xnio,provider=\"nio\",worker=\"XNIO-default\"");
-			Object handlers = connection.getAttribute(name, "CoreWorkerPoolSize");
+			ObjectName name = new ObjectName("Catalina:type=Server");
+			Object handlers = connection.getAttribute(name, "serverInfo");
 			assertNotNull(handlers);
 		}
 	}

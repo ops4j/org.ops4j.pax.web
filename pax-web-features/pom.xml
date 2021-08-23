@@ -36,7 +36,7 @@
 	<description>
 		Pax Web module creating a features xml file to deploy Pax Web components as features in Apache Karaf.
 		To use this feature enter the following in your Karaf shell -
-		features:install mvn:org.ops4j.pax.web/features/${project.version}/xml/features
+		feature:install mvn:org.ops4j.pax.web/features/${project.version}/xml/features
 	</description>
 
 	<build>
@@ -65,22 +65,6 @@
 				</executions>
 			</plugin>
 
-			<!-- Tools -->
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>copy</id>
-						<phase>generate-resources</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
 			<!-- Karaf plugins -->
 
 			<plugin>
@@ -90,15 +74,12 @@
 					<execution>
 						<id>verify</id>
 						<phase>process-resources</phase>
-						<!--						<goals>-->
-						<!--							<goal>verify</goal>-->
-						<!--						</goals>-->
+						<goals>
+							<goal>verify</goal>
+						</goals>
 						<configuration>
 							<descriptors>
-								<descriptor>mvn:org.apache.karaf.features/framework/${dependency.karaf.version}/xml/features</descriptor>
-								<descriptor>mvn:org.apache.karaf.features/standard/${dependency.karaf.version}/xml/features</descriptor>
-								<descriptor>mvn:org.apache.karaf.features/enterprise/${dependency.karaf.version}/xml/features</descriptor>
-								<descriptor>mvn:org.ops4j.pax.keycloak/pax-keycloak-features/${dependency.pax-keycloak.version}/xml/features</descriptor>
+<!--								<descriptor>mvn:org.apache.karaf.features/standard/${dependency.org.apache.karaf}/xml/features</descriptor>-->
 								<descriptor>file:${project.build.directory}/classes/features.xml</descriptor>
 							</descriptors>
 							<blacklistedDescriptors>
@@ -112,22 +93,7 @@
 								<feature>framework</feature>
 							</framework>
 							<features>
-								<!-- We can't use pax-* as we need to disable pax-jsf-support
-								<feature>pax-*</feature>
-								-->
-								<feature>pax-http</feature>
-								<feature>pax-http-whiteboard</feature>
-								<feature>pax-war</feature>
-								<feature>pax-jetty</feature>
-								<!-- 								<feature>pax-jetty-spdy</feature> -->
-								<feature>pax-http-jetty</feature>
-								<!-- pax-cdi does not validate correctly
-								<feature>pax-jsf-support</feature>
-								-->
-								<feature>pax-tomcat</feature>
-								<feature>pax-http-tomcat</feature>
-								<feature>pax-undertow</feature>
-								<feature>pax-http-undertow</feature>
+								<feature>pax-web-*</feature>
 							</features>
 							<verifyTransitive>false</verifyTransitive>
 							<ignoreMissingConditions>true</ignoreMissingConditions>
@@ -158,17 +124,17 @@
 								<artifact>
 									<file>${project.build.outputDirectory}/jetty.xml</file>
 									<type>xml</type>
-									<classifier>jettyconfig</classifier>
+									<classifier>config-jetty</classifier>
 								</artifact>
 								<artifact>
-									<file>${project.build.outputDirectory}/undertow.properties</file>
-									<type>properties</type>
-									<classifier>undertowconfig</classifier>
+									<file>${project.build.outputDirectory}/tomcat-server.xml</file>
+									<type>xml</type>
+									<classifier>config-tomcat</classifier>
 								</artifact>
 								<artifact>
 									<file>${project.build.outputDirectory}/undertow.xml</file>
 									<type>xml</type>
-									<classifier>undertowconfig</classifier>
+									<classifier>config-undertow</classifier>
 								</artifact>
 							</artifacts>
 						</configuration>
@@ -185,23 +151,67 @@
 
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-compatibility-annotation13</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-compatibility-el2</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-compatibility-servlet31</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-extender-war</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-extender-whiteboard</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-jetty</artifactId>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.web</groupId>-->
-<!--			<artifactId>pax-web-tomcat</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.web</groupId>-->
-<!--			<artifactId>pax-web-undertow</artifactId>-->
-<!--		</dependency>-->
-
-		<!-- Jetty -->
-
 		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-continuation</artifactId>
-			<scope>provided</scope>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-jsp</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-runtime</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-spi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-tomcat</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-tomcat-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-tomcat-websocket</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-undertow</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-undertow-websocket</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-websocket</artifactId>
 		</dependency>
 
 		<dependency>

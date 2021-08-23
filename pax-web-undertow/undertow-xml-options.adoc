@@ -31,7 +31,7 @@ name (http, https) - handled as identifier
 no-request-timeout (http, https) - `io.undertow.UndertowOptions.NO_REQUEST_TIMEOUT`
 proxy-address-forwarding (http, https) - `io.undertow.server.handlers.ProxyPeerAddressHandler`
 proxy-protocol (http, https) - `io.undertow.server.protocol.proxy.ProxyProtocolOpenListener`
-read-timeout (http, https) - `org.xnio.Options.READ_TIMEOUT`
+read-timeout (http, https) - `org.xnio.Options.READ_TIMEOUT` (ms)
 receive-buffer (http , https) - `org.xnio.Options.RECEIVE_BUFFER`
 record-request-start-time (http, https) - `io.undertow.UndertowOptions.RECORD_REQUEST_START_TIME`
 redirect-socket (http) - `org.ops4j.pax.web.service.undertow.internal.UndertowServerWrapper.securePortMapping`, `org.ops4j.pax.web.service.undertow.internal.UndertowServerWrapper.SimpleConfidentialPortManager.getConfidentialPort()`, `io.undertow.servlet.api.ConfidentialPortManager`, `io.undertow.servlet.api.DeploymentInfo.setConfidentialPortManager()`
@@ -51,4 +51,4 @@ tcp-keep-alive (http, https) - `org.xnio.Options.KEEP_ALIVE`
 url-charset (http, https) - `io.undertow.UndertowOptions.URL_CHARSET`
 verify-client (https) - `org.xnio.Options.SSL_CLIENT_AUTH_MODE`
 worker (http, https) - `org.xnio.XnioWorker.createStreamConnectionServer()`
-write-timeout (http, https) - `org.xnio.Options.WRITE_TIMEOUT`
+write-timeout (http, https) - `org.xnio.Options.WRITE_TIMEOUT` (ms)

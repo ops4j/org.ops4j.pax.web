@@ -101,12 +101,12 @@ class Hc5TestClient implements HttpTestClient {
 			throw new IllegalArgumentException("keystoreLocation must not be null!");
 		}
 		String keystoreFilename;
-		if (keystoreLocation.startsWith("${")) {
-			int indexOfPlaceHolder = keystoreLocation.indexOf("}");
-			String placeHolder = keystoreLocation.substring(0, indexOfPlaceHolder);
-			placeHolder = placeHolder.substring(2);
+		if (keystoreLocation.contains("${")) {
+			int from = keystoreLocation.indexOf("${");
+			int to = keystoreLocation.indexOf("}");
+			String placeHolder = keystoreLocation.substring(from + 2, to);
 			String property = System.getProperty(placeHolder);
-			keystoreFilename = property + keystoreLocation.substring(indexOfPlaceHolder + 1);
+			keystoreFilename = keystoreLocation.substring(0, from) + property + keystoreLocation.substring(to + 1);
 		} else {
 			keystoreFilename = keystoreLocation;
 		}

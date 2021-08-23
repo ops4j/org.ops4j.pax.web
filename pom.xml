@@ -217,7 +217,7 @@
 
 		<dependency.org.apache.httpcomponents.client5>5.1</dependency.org.apache.httpcomponents.client5>
 		<dependency.org.apache.httpcomponents.core5>5.1.1</dependency.org.apache.httpcomponents.core5>
-		<dependency.org.apache.karaf>4.2.11</dependency.org.apache.karaf>
+		<dependency.org.apache.karaf>4.3.2</dependency.org.apache.karaf>
 		<dependency.org.apache.logging.log4j>2.14.1</dependency.org.apache.logging.log4j>
 		<dependency.org.apache.myfaces>2.3.9</dependency.org.apache.myfaces>
 		<dependency.org.apache.myfaces.commons.facelets-examples20>1.0.2.1</dependency.org.apache.myfaces.commons.facelets-examples20>
@@ -1544,6 +1544,16 @@
 				<artifactId>framework</artifactId>
 				<version>${dependency.org.apache.karaf}</version>
 				<type>kar</type>
+				<exclusions>
+					<exclusion>
+						<groupId>com.sun.activation</groupId>
+						<artifactId>javax.activation</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.annotation</groupId>
+						<artifactId>javax.annotation-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.karaf</groupId>
@@ -1560,6 +1570,12 @@
 				<groupId>org.apache.karaf.features</groupId>
 				<artifactId>org.apache.karaf.features.core</artifactId>
 				<version>${dependency.org.apache.karaf}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>javax.activation</groupId>
+						<artifactId>activation</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.karaf.management</groupId>
@@ -1609,6 +1625,14 @@
 					<exclusion>
 						<groupId>org.apache.karaf</groupId>
 						<artifactId>org.apache.karaf.client</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.annotation</groupId>
+						<artifactId>javax.annotation-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.hibernate</groupId>
+						<artifactId>hibernate-osgi</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
@@ -1793,6 +1817,8 @@
 				<artifactId>jakarta.el-api</artifactId>
 				<version>${dependency.jakarta.el-api}</version>
 			</dependency>
+
+			<!-- JavaEE / JakartaEE -->
 
 			<dependency>
 				<groupId>jakarta.servlet</groupId>
@@ -2911,7 +2937,8 @@
 		<module>pax-web-undertow</module>
 		<module>pax-web-undertow-websocket</module>
 
-<!--		<module>pax-web-features</module>-->
+		<module>pax-web-features</module>
+
 <!--		<module>pax-web-archetypes</module>-->
 <!--		<module>pax-web-jaas</module>-->
 

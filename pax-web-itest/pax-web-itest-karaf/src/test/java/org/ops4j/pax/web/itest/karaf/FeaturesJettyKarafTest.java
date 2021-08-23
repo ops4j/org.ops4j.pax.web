@@ -28,19 +28,19 @@ import static org.junit.Assert.assertNotNull;
 /**
  * @author achim
  */
-public class FeaturesUndertowKarafTest extends FeaturesBaseKarafTest {
+public class FeaturesJettyKarafTest extends FeaturesBaseKarafTest {
 
 	@Configuration
 	public Option[] config() {
-		return undertowConfig();
+		return jettyConfig();
 	}
 
 	@Test
 	public void testJmx() throws Exception {
 		try (JMXConnector connector = this.getJMXConnector()) {
 			MBeanServerConnection connection = connector.getMBeanServerConnection();
-			ObjectName name = new ObjectName("org.xnio:type=Xnio,provider=\"nio\",worker=\"XNIO-default\"");
-			Object handlers = connection.getAttribute(name, "CoreWorkerPoolSize");
+			ObjectName name = new ObjectName("org.eclipse.jetty.server.handler:type=contexthandlercollection,id=0");
+			Object handlers = connection.getAttribute(name, "handlers");
 			assertNotNull(handlers);
 		}
 	}

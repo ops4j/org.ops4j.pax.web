@@ -83,6 +83,7 @@
 							io.undertow.server.handlers.accesslog;version="[2.2,3)",
 							io.undertow.server.handlers.builder;version="[2.2,3)",
 							io.undertow.server.handlers.cache;version="[2.2,3)",
+							io.undertow.server.handlers.encoding;version="[2.2,3)",
 							io.undertow.server.handlers.resource;version="[2.2,3)",
 							io.undertow.server.protocol.http;version="[2.2,3)",
 							io.undertow.server.protocol.http2;version="[2.2,3)",
