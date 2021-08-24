@@ -19,8 +19,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Configuration;
-import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -33,11 +31,6 @@ import org.osgi.framework.BundleException;
 public abstract class HttpServiceBaseKarafTest extends AbstractKarafTestBase {
 
 	private Bundle bundle;
-
-	@Configuration
-	public Option[] configuration() {
-		return jettyConfig();
-	}
 
 	@Before
 	public void setup() throws Exception {

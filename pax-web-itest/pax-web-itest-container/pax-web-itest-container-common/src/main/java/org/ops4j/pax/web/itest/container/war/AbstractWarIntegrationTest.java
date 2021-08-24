@@ -137,7 +137,7 @@ public abstract class AbstractWarIntegrationTest extends AbstractContainerTestBa
 	public void testSlash() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(404)
-				.withResponseAssertion("Response must contain '<h1>Error 403 Page</h1>'",
+				.withResponseAssertion("Response must contain '<h1>Error Page</h1>'",
 						resp -> resp.contains("<h1>Error Page</h1>"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war/");
 	}

@@ -49,14 +49,14 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceCo
 
 public class AbstractKarafTestBase extends AbstractControlledTestBase {
 
+	protected MavenArtifactUrlReference paxWebFeatures;
+
 	@Inject
 	protected FeaturesService featuresService;
 
 	/** To make sure the tests run only when the boot features are fully installed */
 	@Inject
 	private BootFinished bootFinished;
-
-	private MavenArtifactUrlReference paxWebFeatures;
 
 	/**
 	 * Karaf integration tests have completely different <em>base configuration</em>, so no call to
@@ -168,6 +168,10 @@ public class AbstractKarafTestBase extends AbstractControlledTestBase {
 		String frameworkProperty = System.getProperty("pax.exam.framework");
 		LOG.info("pax.exam.framework: {}", frameworkProperty);
 		return "felix".equals(frameworkProperty);
+	}
+
+	public Option jspConfig() {
+		return features(paxWebFeatures, "pax-web-jsp");
 	}
 
 	public Option[] jettyConfig() {

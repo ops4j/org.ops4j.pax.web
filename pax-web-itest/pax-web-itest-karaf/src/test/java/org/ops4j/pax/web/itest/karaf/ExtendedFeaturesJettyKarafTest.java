@@ -15,18 +15,14 @@
  */
 package org.ops4j.pax.web.itest.karaf;
 
-import org.ops4j.pax.exam.Configuration;
-import org.ops4j.pax.exam.Option;
-
 /**
- * PAXWEB-1099
- * @author Grzegorz Grzybek
+ * @author achim
  */
-public class HttpServiceJettyKarafTest extends HttpServiceBaseKarafTest {
+public class ExtendedFeaturesJettyKarafTest extends ExtendedFeaturesBaseKarafTest {
 
-	@Configuration
-	public Option[] configuration() {
-		return jettyConfig();
+	@Override
+	protected String containerSpecificRuntimeFeature() {
+		return "pax-web-http-jetty";
 	}
 
 }

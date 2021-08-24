@@ -15,14 +15,16 @@
  */
 package org.ops4j.pax.web.itest.karaf;
 
+import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.PaxExam;
 
 /**
- * PAXWEB-1099
- * @author Grzegorz Grzybek
+ * @author achim
  */
-public class HttpServiceJettyKarafTest extends HttpServiceBaseKarafTest {
+@RunWith(PaxExam.class)
+public class KarafManualJettyKarafTest extends KarafManualBaseKarafTest {
 
 	@Configuration
 	public Option[] configuration() {
