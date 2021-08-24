@@ -50,7 +50,7 @@ public class OsgiInitializedFilter implements Filter {
 		this.filter = filter;
 		this.servletContext = servletSpecificContext;
 
-		if (model.getMappingsPerDispatcherTypes().size() == 1) {
+		if (model != null && model.getMappingsPerDispatcherTypes().size() == 1) {
 			String[] regexPatterns = model.getMappingsPerDispatcherTypes().get(0).getRegexPatterns();
 			if (regexPatterns != null && regexPatterns.length > 0) {
 				// we have Whiteboard-special RegEx filter
