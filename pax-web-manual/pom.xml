@@ -142,31 +142,18 @@
 <!--					<headerFooter>true</headerFooter>-->
 <!--				</configuration>-->
 <!--			</plugin>-->
-<!--			<plugin>-->
-<!--				<groupId>org.apache.maven.plugins</groupId>-->
-<!--				<artifactId>maven-war-plugin</artifactId>-->
-<!--				<configuration>-->
-<!--					<webResources>-->
-<!--						<resource>-->
-<!--							<directory>${project.build.directory}/generated-docs</directory>-->
-<!--						</resource>-->
-<!--					</webResources>-->
-<!--				</configuration>-->
-<!--			</plugin>-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<webResources>
+						<resource>
+							<directory>${project.build.directory}/generated-docs</directory>
+						</resource>
+					</webResources>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
-
-	<dependencies>
-
-		<!-- pax-web own artifacts -->
-
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.web.itest.container</groupId>-->
-<!--			<artifactId>pax-web-itest-container-jetty</artifactId>-->
-<!--			<classifier>test-sources</classifier>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
-
-	</dependencies>
 
 </project>

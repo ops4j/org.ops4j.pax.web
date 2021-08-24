@@ -151,6 +151,15 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>limit-post-config-fragment-tomcat</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>limit-post-config-fragment-undertow</artifactId>
+		</dependency>
+
 		<!-- pax-web whiteboard samples -->
 
 		<dependency>
