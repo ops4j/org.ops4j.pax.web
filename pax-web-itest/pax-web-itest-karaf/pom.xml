@@ -153,6 +153,19 @@
 
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>auth-config-fragment-jetty</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>auth-config-fragment-tomcat</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>auth-config-fragment-undertow</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>limit-post-config-fragment-tomcat</artifactId>
 		</dependency>
 		<dependency>
