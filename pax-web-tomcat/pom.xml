@@ -106,6 +106,9 @@
 							javax.naming,
 							javax.naming.spi,
 							javax.net.ssl,
+							javax.security.auth,
+							javax.security.auth.callback,
+							javax.security.auth.login,
 							javax.security.auth.message,
 							javax.security.auth.message.callback,
 							javax.security.auth.message.config,
@@ -146,9 +149,6 @@
 <!--							javax.net.ssl-->
 <!--							javax.persistence-->
 <!--							javax.rmi.ssl-->
-<!--							javax.security.auth-->
-<!--							javax.security.auth.callback-->
-<!--							javax.security.auth.login-->
 <!--							javax.security.auth.spi-->
 <!--							javax.security.auth.x500-->
 <!--							javax.security.cert-->

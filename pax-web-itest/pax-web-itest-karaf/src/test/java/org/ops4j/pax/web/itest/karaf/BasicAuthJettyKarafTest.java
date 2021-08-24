@@ -26,7 +26,7 @@ import static org.ops4j.pax.exam.Constants.START_LEVEL_TEST_BUNDLE;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
-public class BasicAuthJettyKarafTest extends BasicAuthBaseKarafTest {
+public class BasicAuthJettyKarafTest extends AuthBaseKarafTest {
 
 	@Configuration
 	public Option[] configuration() {

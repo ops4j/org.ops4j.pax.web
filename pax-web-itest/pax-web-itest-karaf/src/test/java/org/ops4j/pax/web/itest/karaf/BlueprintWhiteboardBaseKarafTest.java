@@ -41,6 +41,10 @@ public abstract class BlueprintWhiteboardBaseKarafTest extends AbstractKarafTest
 	public void setUp() throws Exception {
 		configureAndWaitForServletWithMapping("/",
 				() -> bundle = installAndStartBundle(sampleURI("whiteboard-blueprint")));
+		// with org.ops4j.pax.web.itest.container.whiteboard.AbstractWhiteboardDSRestartIntegrationTest.setUp()
+		// we could create complex "wait expression" because we weren't sure which DS service is registered last
+		// here let's stick with plain old thread.sleep ("pots")
+		Thread.sleep(500);
 	}
 
 	@After

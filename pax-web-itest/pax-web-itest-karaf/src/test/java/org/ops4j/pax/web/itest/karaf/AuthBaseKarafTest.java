@@ -24,7 +24,7 @@ import org.ops4j.pax.exam.junit.PaxExam;
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
-public abstract class BasicAuthBaseKarafTest extends AbstractKarafTestBase {
+public abstract class AuthBaseKarafTest extends AbstractKarafTestBase {
 
 	@Before
 	public void setUp() throws Exception {

@@ -70,6 +70,7 @@
 
 							<!-- from Jetty bundles -->
 							org.eclipse.jetty.*,
+							org.eclipse.jetty.jaas,
 <!--							org.eclipse.jetty.alpn.*; resolution:=optional,-->
 <!--							org.eclipse.jetty.jaas.*; resolution:=optional,-->
 <!--							org.eclipse.jetty.jmx.*; resolution:=optional,-->
@@ -177,10 +178,14 @@
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-http</artifactId>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>org.eclipse.jetty</groupId>-->
-<!--			<artifactId>jetty-security</artifactId>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-jaas</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
