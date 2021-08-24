@@ -18,14 +18,13 @@ package org.ops4j.pax.web.itest.karaf;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 
-/**
- * @author achim
- */
-public class KarafManualJettyKarafTest extends KarafManualBaseKarafTest {
+import static org.ops4j.pax.exam.OptionUtils.combine;
+
+public class BlueprintWhiteboardTomcatKarafTest extends BlueprintWhiteboardBaseKarafTest {
 
 	@Configuration
 	public Option[] configuration() {
-		return jettyConfig();
+		return combine(tomcatConfig(), paxWebJsp());
 	}
 
 }

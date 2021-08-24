@@ -39,6 +39,7 @@
 		<module>whiteboard-ds</module>
 		<module>whiteboard-ds-1603</module>
 		<module>whiteboard-ds-dynamic</module>
+		<module>whiteboard-blueprint</module>
 	</modules>
 
 </project>

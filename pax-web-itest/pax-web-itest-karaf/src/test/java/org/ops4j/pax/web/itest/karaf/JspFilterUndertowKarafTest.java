@@ -18,14 +18,16 @@ package org.ops4j.pax.web.itest.karaf;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 
+import static org.ops4j.pax.exam.OptionUtils.combine;
+
 /**
  * @author achim
  */
-public class KarafManualJettyKarafTest extends KarafManualBaseKarafTest {
+public class JspFilterUndertowKarafTest extends JspFilterBaseKarafTest {
 
 	@Configuration
 	public Option[] configuration() {
-		return jettyConfig();
+		return combine(undertowConfig(), jspConfig());
 	}
 
 }

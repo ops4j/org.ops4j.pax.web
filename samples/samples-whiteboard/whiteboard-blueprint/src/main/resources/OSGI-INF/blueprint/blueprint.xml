@@ -1,0 +1,158 @@
+<!--
+
+    Copyright 2021 OPS4J.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+	<!-- just as org.ops4j.pax.web.extender.samples.whiteboard.internal.Activator.start() in "whiteboard" sample, but with Blueprint -->
+
+	<!-- Registering the Forbidden Servlet first -->
+	<bean id="forbiddenContext" class="org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardContext" />
+	<service id="forbiddenCtxtService" ref="forbiddenContext" interface="org.osgi.service.http.HttpContext">
+		<service-properties>
+			<entry key="httpContext.id" value="forbidden" />
+			<entry key="service.ranking" value="-2147483648" />
+		</service-properties>
+	</service>
+
+	<!-- JSP handling -->
+	<service id="jspMapping" interface="org.ops4j.pax.web.service.whiteboard.JspMapping">
+		<bean class="org.ops4j.pax.web.extender.whiteboard.runtime.DefaultJspMapping">
+			<property name="urlPatterns">
+				<array>
+					<value>/jsp/*</value>
+				</array>
+			</property>
+		</bean>
+	</service>
+
+	<bean id="forbiddenServlet" class="org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet">
+		<argument type="java.lang.String" value="/forbidden" />
+	</bean>
+	<service id="forbiddenServletService" ref="forbiddenServlet" interface="javax.servlet.Servlet">
+		<service-properties>
+			<entry key="alias" value="/forbidden" />
+			<entry key="httpContext.id" value="forbidden" />
+			<entry key="servlet-name" value="forbidden-servlet" />
+		</service-properties>
+	</service>
+
+	<!-- Welcome Files -->
+	<bean id="welcomeFile" class="org.ops4j.pax.web.extender.whiteboard.runtime.DefaultWelcomeFileMapping">
+		<property name="redirect" value="true" />
+		<property name="welcomeFiles">
+			<array>
+				<value>index.html</value>
+				<value>welcome.html</value>
+			</array>
+		</property>
+	</bean>
+	<service id="welcomeFileService" ref="welcomeFile" interface="org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping" />
+
+	<!-- 404 mapping -->
+	<service id="errorPageMapping" interface="org.ops4j.pax.web.service.whiteboard.ErrorPageMapping">
+		<bean class="org.ops4j.pax.web.extender.whiteboard.runtime.DefaultErrorPageMapping">
+			<property name="errors">
+				<array>
+					<value>404</value>
+				</array>
+			</property>
+			<property name="location" value="/404.html" />
+		</bean>
+	</service>
+
+	<service interface="org.ops4j.pax.web.service.whiteboard.ErrorPageMapping">
+		<bean class="org.ops4j.pax.web.extender.whiteboard.runtime.DefaultErrorPageMapping">
+			<property name="errors">
+				<array>
+					<value>java.lang.Exception</value>
+				</array>
+			</property>
+			<property name="location" value="/uncaughtException.html" />
+		</bean>
+	</service>
+
+	<!-- Registering the WhiteBoardServlet -->
+	<bean id="whiteBoardServlet" class="org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet">
+		<argument type="java.lang.String" value="/whiteboard" />
+	</bean>
+	<service id="whiteBoardServletService" ref="whiteBoardServlet" interface="javax.servlet.Servlet">
+		<service-properties>
+			<entry key="alias" value="/whiteboard" />
+			<entry key="osgi.http.whiteboard.servlet.name" value="whiteboard-servlet" />
+		</service-properties>
+	</service>
+
+	<!-- Registering the RootServlet -->
+	<bean id="rootServlet" class="org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet">
+		<argument type="java.lang.String" value="/root" />
+	</bean>
+	<service id="rootServletService" ref="rootServlet" interface="javax.servlet.Servlet">
+		<service-properties>
+			<entry key="alias" value="/root" />
+			<entry key="osgi.http.whiteboard.servlet.name" value="root-servlet" />
+		</service-properties>
+	</service>
+
+	<!-- Registering resources! -->
+	<bean id="resourceMapping" class="org.ops4j.pax.web.extender.whiteboard.runtime.DefaultResourceMapping">
+		<property name="alias" value="/whiteboardresources" />
+		<property name="path" value="/images" />
+	</bean>
+	<service id="resources" ref="resourceMapping" interface="org.ops4j.pax.web.service.whiteboard.ResourceMapping" />
+
+	<bean id="filteredServlet" class="org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet">
+		<argument type="java.lang.String" value="/filtered" />
+	</bean>
+	<service id="filteredServletService" ref="filteredServlet" interface="javax.servlet.Servlet">
+		<service-properties>
+			<entry key="alias" value="/filtered" />
+			<entry key="osgi.http.whiteboard.servlet.name" value="filtered-servlet" />
+		</service-properties>
+	</service>
+
+	<service id="servletFilterService" interface="javax.servlet.Filter">
+		<service-properties>
+			<entry key="urlPatterns" value="/filtered/*" />
+			<entry key="osgi.http.whiteboard.filter.name" value="filter1" />
+		</service-properties>
+		<bean class="org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardFilter" />
+	</service>
+
+	<!-- ServletRequest Listener -->
+	<service interface="java.util.EventListener">
+		<bean class="org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardListener" />
+	</service>
+
+	<!-- Exceptions / Error-Page -->
+	<service interface="javax.servlet.http.HttpServlet">
+		<service-properties>
+			<entry key="alias" value="/exception" />
+		</service-properties>
+		<bean class="org.ops4j.pax.web.extender.samples.whiteboard.internal.ExceptionServlet" />
+	</service>
+
+	<!-- Default Resource Mapping -->
+	<service id="defaultResourceService" interface="org.ops4j.pax.web.service.whiteboard.ResourceMapping">
+		<bean class="org.ops4j.pax.web.extender.whiteboard.runtime.DefaultResourceMapping">
+			<property name="alias" value="/" />
+			<property name="path" value="" />
+		</bean>
+	</service>
+
+</blueprint>

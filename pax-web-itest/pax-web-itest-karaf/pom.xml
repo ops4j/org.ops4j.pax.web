@@ -57,6 +57,9 @@
 						<karaf.version>${dependency.org.apache.karaf}</karaf.version>
 						<myfaces.version>${dependency.org.apache.myfaces}</myfaces.version>
 						<pax-web.version>${project.version}</pax-web.version>
+						<commons-fileupload.version>${dependency.commons-fileupload}</commons-fileupload.version>
+						<commons-io.version>${dependency.commons-io}</commons-io.version>
+						<felix-webconsole.version>${dependency.org.apache.felix.webconsole}</felix-webconsole.version>
 					</systemPropertyVariables>
 					<forkCount>1</forkCount>
 					<reuseForks>false</reuseForks>
@@ -148,11 +151,13 @@
 			<scope>test</scope>
 		</dependency>
 
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.web.samples</groupId>-->
-<!--			<artifactId>whiteboard-blueprint</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
+		<!-- pax-web whiteboard samples -->
+
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>whiteboard-blueprint</artifactId>
+		</dependency>
+
 <!--		<dependency>-->
 <!--			<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>-->
 <!--			<artifactId>fragment</artifactId>-->
@@ -342,6 +347,11 @@
 		<dependency>
 			<groupId>commons-digester</groupId>
 			<artifactId>commons-digester</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.jdt</groupId>
+			<artifactId>ecj</artifactId>
 		</dependency>
 
 <!--		<dependency>-->

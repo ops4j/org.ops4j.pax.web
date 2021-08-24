@@ -15,15 +15,12 @@
  */
 package org.ops4j.pax.web.itest.karaf;
 
-import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.PaxExam;
 
 /**
  * @author achim
  */
-@RunWith(PaxExam.class)
 public class KarafManualUndertowKarafTest extends KarafManualBaseKarafTest {
 
 	@Configuration

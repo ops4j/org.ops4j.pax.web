@@ -13,15 +13,11 @@
 	limitations under the License.
 
 -->
-<!DOCTYPE html
-        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-    <title>Welcome page </title>
-</head>
-<body>
+<html>
+<body align='center'>
+	<h1><%= "Hello World"%></h1>
+	<img src='/whiteboardresources/ops4j.png' border='0' />
 
-    <h2>Welcome to the Welcome page</h2>
+	<h1>from jsp</h1>
 </body>
 </html>

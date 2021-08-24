@@ -146,7 +146,7 @@ public class Activator implements BundleActivator {
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "filter1");
 		filter1Reg = bundleContext.registerService(Filter.class, new WhiteboardFilter(), props);
 
-		//registering servlet and two filters on one URL
+		// registering servlet and two filters on one URL
 		props = new Hashtable<>();
 		props.put(PaxWebConstants.SERVICE_PROPERTY_SERVLET_ALIAS, "/second");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "second-servlet");
