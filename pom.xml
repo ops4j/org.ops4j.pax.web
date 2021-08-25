@@ -3121,6 +3121,9 @@
 								<exclude>**/*.cer</exclude>
 								<exclude>**/*.srl</exclude>
 								<exclude>**/VAADIN/themes/**/*</exclude>
+								<exclude>**/node_modules/**/*</exclude>
+								<exclude>**/frontend/generated/**/*</exclude>
+								<exclude>**/*.yaml</exclude>
 							</excludes>
 						</configuration>
 					</plugin>

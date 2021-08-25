@@ -17,10 +17,10 @@ Moved to after 8.0.0.GA (8.0.x):
  - Jetty/Tomcat/Undertow bundles
  - HTTP context processing (potentially with external web-fragment.xml)
  - HTTP/2 (mostly tests)
- - Keycloak integration
  - Jasypt encryption in PID
  - @ServletSecurity, @RunAs, @DeclareRoles annotations on servlets
  - skipping configured web fragments (no scanning, as in Tomcat's tomcat.util.scan.StandardJarScanFilter.jarsToSkip)
+ - Keycloak integration
 
 Move to 8.1.x:
  - Jetty org.eclipse.jetty.server.Handler and org.eclipse.jetty.server.Connector tracking (as in Pax Web 7), but also

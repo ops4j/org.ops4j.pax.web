@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.karaf.todo;
+package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;

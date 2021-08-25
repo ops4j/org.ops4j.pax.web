@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.undertow.war;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
@@ -26,61 +26,45 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.base.VersionUtil;
-import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
+import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.wiring.BundleWiring;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
+ * This is Undertow-only test for PAXWEB-1092 (https://github.com/ops4j/org.ops4j.pax.web/issues/1384)
+ *
  * @author Grzegorz Grzybek
  */
 @RunWith(PaxExam.class)
-public class WarExtendedIntegrationTest extends ITestBase {
-
-	private static final Logger LOG = LoggerFactory.getLogger(WarExtendedIntegrationTest.class);
+public class WarExtendedIntegrationTest extends AbstractContainerTestBase {
 
 	private Bundle installWar1Bundle;
 	private Bundle installWar2Bundle;
 
 	@Configuration
-	public static Option[] configure() {
-		return configureUndertow();
+	public Option[] configure() {
+		Option[] serverOptions = combine(baseConfigure(), paxWebUndertow());
+		Option[] jspOptions = combine(serverOptions, paxWebJsp());
+		return combine(jspOptions, paxWebExtenderWar());
 	}
 
 	@Before
-	public void setUp() throws BundleException, InterruptedException {
-		LOG.info("Setting up test");
-
-		initWebListener();
-
-		String bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web.samples/war-introspection/"
-				+ VersionUtil.getProjectVersion() + "/war?"
-				+ WEB_CONTEXT_PATH + "=/war1&"
-				+ "Bundle-SymbolicName=war1";
-		installWar1Bundle = bundleContext.installBundle(bundlePath);
-		installWar1Bundle.start();
-
-		waitForWebListener();
-
-		initWebListener();
-
-		bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web.samples/war-introspection/"
-				+ VersionUtil.getProjectVersion() + "/war?"
-				+ WEB_CONTEXT_PATH + "=/war2&"
-				+ "Bundle-SymbolicName=war2";
-		installWar2Bundle = bundleContext.installBundle(bundlePath);
-		installWar2Bundle.start();
-
-		waitForWebListener();
+	public void setUp() throws Exception {
+		configureAndWaitForDeployment(() -> {
+			installWar1Bundle = installAndStartWebBundle("org.ops4j.pax.web.samples", "war-introspection",
+					System.getProperty("pax-web.version"), "war1", "/war1", null);
+		});
+		configureAndWaitForDeployment(() -> {
+			installWar2Bundle = installAndStartWebBundle("org.ops4j.pax.web.samples", "war-introspection",
+					System.getProperty("pax-web.version"), "war2", "/war2", null);
+		});
 	}
 
 	@After
@@ -121,14 +105,32 @@ public class WarExtendedIntegrationTest extends ITestBase {
 
 		installWar1Bundle.stop();
 
+		// Pax Web 7 was initializing all the servlets. We're initializing only the ones with load-on-startup
+		// or the ones being invoked
+
+		// events1 = {java.util.LinkedList@6386}  size = 7
+		// 0 = {@6394} "contextInitialized: /war1"
+		// 1 = {@6395} "paramFound: my.value"
+		// 2 = {@6396} "init: introspection-default-filter"
+		// 3 = {@6397} "init: introspection-default-servlet /war1"
+		// 4 = {@6398} "destroy: introspection-default-servlet /war1"
+		// 5 = {@6399} "destroy: introspection-default-filter"
+		// 6 = {@6400} "contextDestroyed: /war1"
+		//
+		// events2 = {java.util.LinkedList@6387}  size = 4
+		// 0 = {@6402} "contextInitialized: /war2"
+		// 1 = {@6403} "paramFound: my.value"
+		// 2 = {@6404} "init: introspection-default-filter"
+		// 3 = {@6405} "init: introspection-default-servlet /war2"
+
 		assertThat("There should be single ServletContext disposal",
 				events1.stream().filter(s -> s.equals("contextDestroyed: /war1")).count(), equalTo(1L));
-		assertThat("war1 should have 6 registration, 6 unregistration, and 1 parameter found events recorded",
-				events1.size(), equalTo(13));
+		assertThat("war1 should have 2 registration, 2 unregistration, and 1 parameter found events recorded",
+				events1.size(), equalTo(7));
 		assertTrue("There should be no ServletContext disposal",
 				events2.stream().noneMatch(s -> s.equals("contextDestroyed: /war2")));
-		assertThat("war2 should have only 6 registration and 1 parameter found events recorded",
-				events2.size(), equalTo(7));
+		assertThat("war2 should have only 2 registration and 1 parameter found events recorded",
+				events2.size(), equalTo(4));
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(HttpServletResponse.SC_NOT_FOUND)

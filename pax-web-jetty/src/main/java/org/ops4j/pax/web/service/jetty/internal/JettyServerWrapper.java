@@ -1377,11 +1377,13 @@ class JettyServerWrapper implements BatchVisitor {
 							// filter added normally
 							newFiltersList.add(pwfh);
 							// mappings added depending on the flag
-							for (PaxWebFilterMapping pwfm : pwfh.getMapping()) {
-								if (pwfm.isAfter()) {
-									newFilterMappingsListAfter.add(pwfm);
-								} else {
-									newFilterMappingsListBefore.add(pwfm);
+							if (pwfh.getMapping() != null) {
+								for (PaxWebFilterMapping pwfm : pwfh.getMapping()) {
+									if (pwfm.isAfter()) {
+										newFilterMappingsListAfter.add(pwfm);
+									} else {
+										newFilterMappingsListBefore.add(pwfm);
+									}
 								}
 							}
 						}
@@ -1406,12 +1408,17 @@ class JettyServerWrapper implements BatchVisitor {
 				sch.getServletHandler().setFilterMappings(new FilterMapping[0]);
 
 				for (PaxWebFilterHolder fh : newFilterHolders) {
+					if ("Jetty_WebSocketUpgradeFilter".equals(fh.getName())) {
+						sch.getServletContext().removeAttribute("org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter");
+					}
 					sch.getServletHandler().addFilter(fh);
-					for (PaxWebFilterMapping fm : fh.getMapping()) {
-						if (fm.isAfter()) {
-							newFilterMappingsListAfter.add(fm);
-						} else {
-							newFilterMappingsListBefore.add(fm);
+					if (fh.getMapping() != null) {
+						for (PaxWebFilterMapping fm : fh.getMapping()) {
+							if (fm.isAfter()) {
+								newFilterMappingsListAfter.add(fm);
+							} else {
+								newFilterMappingsListBefore.add(fm);
+							}
 						}
 					}
 				}

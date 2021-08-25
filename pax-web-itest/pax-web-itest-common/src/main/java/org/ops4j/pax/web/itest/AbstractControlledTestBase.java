@@ -302,7 +302,9 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-security").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-continuation").versionAsInProject()
+						.artifactId("jetty-continuation").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-jaas").versionAsInProject()
 		};
 	}
 
