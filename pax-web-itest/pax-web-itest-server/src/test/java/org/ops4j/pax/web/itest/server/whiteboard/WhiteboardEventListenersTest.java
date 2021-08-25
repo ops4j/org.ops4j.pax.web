@@ -145,7 +145,7 @@ public class WhiteboardEventListenersTest extends MultiContainerTestSupport {
 	}
 
 	@Test
-	public void servletContextListeners() throws Exception {
+	public void servletContextListeners() {
 		Bundle sample1 = mockBundle("sample1");
 
 		// here we check that IF javax.servlet.ServletContextListener is registered before first "active"
@@ -174,6 +174,59 @@ public class WhiteboardEventListenersTest extends MultiContainerTestSupport {
 
 		getServletCustomizer().removedService(servletRef, model);
 		getListenerCustomizer().removedService(elRef, elModel);
+
+		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);
+		ServiceModelInternals serviceModelInternals = serviceModelInternals(sample1);
+
+		assertTrue(serverModelInternals.isClean(whiteboardBundle));
+		assertTrue(serverModelInternals.isClean(sample1));
+		assertTrue(serviceModelInternals.isEmpty());
+	}
+
+	@Test
+	public void servletContextListenersOrdering() {
+		Bundle sample1 = mockBundle("sample1");
+
+		List<String> events = new LinkedList<>();
+
+		Hashtable<String, Object> properties = new Hashtable<>();
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
+		ServiceReference<EventListener> el1Ref = mockReference(sample1, new Class<?>[] { ServletContextListener.class }, properties,
+				() -> new NamedContextListener("l1", events), 0L, 0);
+		EventListenerModel el1Model = getListenerCustomizer().addingService(el1Ref);
+
+		assertThat(events.size(), equalTo(0));
+
+		// now register a servlet - this will start and initialize the context
+
+		Servlet servlet = new Utils.MyIdServlet("1");
+		ServiceReference<Servlet> servletRef = mockServletReference(sample1, "servlet1",
+				() -> servlet, 0L, 0, "/s");
+		ServletModel model = getServletCustomizer().addingService(servletRef);
+
+		// without any actual request the context should start&initialize
+		assertThat(events.size(), equalTo(1));
+		assertThat(events.get(0), equalTo("l1 initialized in \"\""));
+
+		// now register a higher ranked ServletContextListener - this SHOULD restart the context and listeners
+		// should be called in proper order
+
+		properties = new Hashtable<>();
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
+		ServiceReference<EventListener> el2Ref = mockReference(sample1, new Class<?>[] { ServletContextListener.class }, properties,
+				() -> new NamedContextListener("l2", events), 0L, 1);
+		EventListenerModel el2Model = getListenerCustomizer().addingService(el2Ref);
+
+		// because the context was started, there's no need to register or call the servlet.
+
+		assertThat(events.size(), equalTo(4));
+		assertThat(events.get(1), equalTo("l1 destroyed in \"\""));
+		assertThat(events.get(2), equalTo("l2 initialized in \"\""));
+		assertThat(events.get(3), equalTo("l1 initialized in \"\""));
+
+		getServletCustomizer().removedService(servletRef, model);
+		getListenerCustomizer().removedService(el1Ref, el1Model);
+		getListenerCustomizer().removedService(el2Ref, el2Model);
 
 		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);
 		ServiceModelInternals serviceModelInternals = serviceModelInternals(sample1);
@@ -254,6 +307,27 @@ public class WhiteboardEventListenersTest extends MultiContainerTestSupport {
 		@Override
 		public void contextDestroyed(ServletContextEvent sce) {
 			events.add(sce);
+		}
+	}
+
+	private static class NamedContextListener implements ServletContextListener {
+
+		private final List<String> events;
+		private final String name;
+
+		NamedContextListener(String name, List<String> events) {
+			this.name = name;
+			this.events = events;
+		}
+
+		@Override
+		public void contextInitialized(ServletContextEvent sce) {
+			events.add(String.format("%s initialized in \"%s\"", name, sce.getServletContext().getContextPath()));
+		}
+
+		@Override
+		public void contextDestroyed(ServletContextEvent sce) {
+			events.add(String.format("%s destroyed in \"%s\"", name, sce.getServletContext().getContextPath()));
 		}
 	}
 

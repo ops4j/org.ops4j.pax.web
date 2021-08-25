@@ -16,7 +16,7 @@ org.apache.el.ExpressionFactoryImpl
 # limitations under the License.
 #
 
-# The service-imp-first in this file is because it's required by jakarta.el:jakarta.el-api:3.0.3 and we treat
+# The service-impl-first in this file is because it's required by jakarta.el:jakarta.el-api:3.0.3 and we treat
 # it as _canonical_ EL API Jar
 # Its javax.el.FactoryFinder class reads only the first line of this file...
 # org.apache.tomcat:tomcat-el skips the comments correctly because it's using generic java.util.ServiceLoader API

@@ -38,6 +38,7 @@ import java.util.function.Supplier;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContextAttributeListener;
+import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.SessionCookieConfig;
 import javax.servlet.annotation.ServletSecurity;
@@ -1454,14 +1455,32 @@ class JettyServerWrapper implements BatchVisitor {
 					c.addServletContextAttributeListener((ServletContextAttributeListener)eventListener);
 				}
 
+				boolean stopped = false;
+				if (servletContextHandler.isStarted() && ServletContextListener.class.isAssignableFrom(eventListener.getClass())) {
+					// we have to stop the context, so existing ServletContextListeners are called
+					// with contextDestroyed() and new listener is added according to ranking rules of
+					// the EventListenerModel
+					try {
+						servletContextHandler.stop();
+						stopped = true;
+					} catch (Exception e) {
+						LOG.warn("Problem stopping {}: {}", servletContextHandler, e.getMessage());
+					}
+				}
+
 				// add the listener to real context - even ServletContextAttributeListener (but only once - even
 				// if there are many OsgiServletContexts per ServletContext)
-				servletContextHandler.addEventListener(eventListener);
+				servletContextHandler.addEventListener(eventListenerModel, eventListener);
+
+				if (stopped) {
+					// we have to start it again
+					ensureServletContextStarted(servletContextHandler);
+				}
 
 				// calling javax.servlet.ServletContextListener.contextInitialized() when server (context) is
 				// already started and doing it in separate thread is a tweak to make Aries-CDI + extensions
 				// work with CDI/JSF sample. I definitely have to solve it differently.
-				// The probelms are summarized in https://github.com/ops4j/org.ops4j.pax.web/issues/1622
+				// The problems are summarized in https://github.com/ops4j/org.ops4j.pax.web/issues/1622
 //				if (servletContextHandler.isStarted() && ServletContextListener.class.isAssignableFrom(eventListener.getClass())) {
 //					new Thread(() -> {
 //						((ServletContextListener) eventListener).contextInitialized(new ServletContextEvent(osgiServletContexts.get(context)));
@@ -1480,7 +1499,7 @@ class JettyServerWrapper implements BatchVisitor {
 						return;
 					}
 
-					ServletContextHandler servletContextHandler = contextHandlers.get(contextPath);
+					PaxWebServletContextHandler servletContextHandler = contextHandlers.get(contextPath);
 					EventListener eventListener = eventListenerModel.resolveEventListener();
 					if (eventListener instanceof ServletContextAttributeListener) {
 						// remove it from per-OsgiContext list
@@ -1499,7 +1518,7 @@ class JettyServerWrapper implements BatchVisitor {
 						// remove the listener from real context - even ServletContextAttributeListener
 						// this may be null in case of WAB where we keep event listeners so they get contextDestroyed
 						// event properly
-						servletContextHandler.removeEventListener(eventListener);
+						servletContextHandler.removeEventListener(eventListenerModel, eventListener);
 					}
 //					eventListenerModel.ungetEventListener(eventListener);
 				});

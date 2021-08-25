@@ -15,14 +15,15 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import java.net.URL;
 import java.security.AccessControlContext;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EventListener;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -35,6 +36,8 @@ import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerKey;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,10 +55,19 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 	private final Collection<SCIWrapper> servletContainerInitializers = new TreeSet<>();
 
 				private AccessControlContext accessControllerContext;
-				private URL jettyWebXmlURL;
 				private List<String> virtualHosts;
 
 	private ServletContext osgiServletContext;
+
+	/**
+	 * This maps keeps all the listeners in order, as expected by OSGi CMPN R7 Whiteboard specification.
+	 */
+	private final Map<EventListenerKey, EventListener> rankedListeners = new TreeMap<>();
+
+	/**
+	 * Here we'll keep the listeners without associated {@link EventListenerModel}
+	 */
+	private final List<EventListener> orderedListeners = new ArrayList<>();
 
 	/**
 	 * A {@link ThreadLocal} value that helps us collect these attributes that are set by these SCIs that operate
@@ -120,6 +132,65 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 	}
 
 	@Override
+	public void addEventListener(EventListener listener) {
+		// called for example by
+		// org.eclipse.jetty.websocket.server.NativeWebSocketServletContainerInitializer.configure()
+		// so we should treat it as a listener added with rank=0
+		addEventListener(null, listener);
+	}
+
+	/**
+	 * Special {@code addEventListener()} that should be called instead of {@link #addEventListener(EventListener)},
+	 * because we want to sort the listeners according to Whiteboard/ranking rules.
+	 * @param model
+	 * @param listener
+	 */
+	public void addEventListener(EventListenerModel model, EventListener listener) {
+		// we are not adding the listener to org.eclipse.jetty.server.handler.ContextHandler._eventListeners
+		// now - we'll add them just before the context is started, so we're sure that the order is correct.
+		// this is especially important for ServletContextListeners
+
+		if (model == null || model.isDynamic()) {
+			orderedListeners.add(listener);
+		} else {
+			rankedListeners.put(EventListenerKey.ofModel(model), listener);
+		}
+
+		if (!ServletContextListener.class.isAssignableFrom(listener.getClass())) {
+			// otherwise it'll be added anyway when context is started, because such listener can
+			// be added only for stopped context
+			if (isStarted()) {
+				// we have to add it, because there'll be no restart
+				super.addEventListener(listener);
+			}
+		}
+	}
+
+	@Override
+	protected void addProgrammaticListener(EventListener listener) {
+		// we have to hijack this method and add the listener later in correct order
+		orderedListeners.add(listener);
+	}
+
+	@Override
+	public void removeEventListener(EventListener listener) {
+		removeEventListener(null, listener);
+	}
+
+	/**
+	 * Special {@code removeEventListener()} that manages the ordering of the listeners.
+	 * @param model
+	 * @param listener
+	 */
+	public void removeEventListener(EventListenerModel model, EventListener listener) {
+		if (model == null) {
+			orderedListeners.remove(listener);
+		} else {
+			rankedListeners.remove(EventListenerKey.ofModel(model));
+		}
+	}
+
+	@Override
 	protected void startContext() throws Exception {
 		// there are no org.eclipse.jetty.servlet.ServletContextHandler.ServletContainerInitializerCaller beans
 		// because we manage SCIs ourselves
@@ -145,6 +216,18 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 			}
 		});
 
+		// SCIs may have added some listeners which we've hijacked, to order them according
+		// to Whiteboard/ranking rules. Now it's perfect time to add them in correct order
+		for (int pos = 0; pos < orderedListeners.size(); pos++) {
+			EventListener el = orderedListeners.get(pos);
+			rankedListeners.put(EventListenerKey.ofPosition(pos), el);
+		}
+
+		for (EventListener el : rankedListeners.values()) {
+			super.addEventListener(el);
+		}
+
+		// this method will start the just added listeners in the order we wanted
 		super.startContext();
 	}
 
@@ -161,7 +244,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 		// 1. Pax Web 7 was explicitly adding org.ops4j.pax.web.jsp.JasperInitializer here, but we're no longer doing it
 		//    WebAppContext in Jetty uses org.eclipse.jetty.webapp.JspConfiguration for this purpose
 
-		// 2. Pax Web 7 was sorting the initializers - we don't have to do it in Pax Web 8
+		// 2. Pax Web 7 was sorting the initializers according to arbitrary rules - we don't have to do it in Pax Web 8
 
 		// 3. Call the initializers - in startContext()
 
@@ -181,24 +264,18 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 	protected void doStop() throws Exception {
 		// setEventListeners() method is called during doStop(), existing, durable listeners are added again, but
 		// then durable listeners are cleared, so the "preserved" listener will be lost next time
-		// we have to fix this
 		// TODO: file a Github issue for eclipse/jetty-project
 
-		// here we remember the "durable" listeners
-		List<EventListener> toKeep = new ArrayList<>();
-		for (EventListener el : getEventListeners()) {
-			if (isDurableListener(el)) {
-				toKeep.add(el);
-			}
-		}
+		// doStop() will do a lot of work, but among others, it'll clear durable listeners.
 		super.doStop();
 
-		// here we'll remove them and add again, so they're again marked as "durable", because
-		// org.eclipse.jetty.server.handler.ContextHandler._durableListeners was cleared in super.doStop().
-		for (EventListener el : toKeep) {
-			removeEventListener(el);
-			addEventListener(el);
-		}
+		// 2021-08-25: because we started keeping listeners ordered, we just need to clean all
+		// the listeners, which will be added back when the context is started
+		setEventListeners(new EventListener[0]);
+		getSessionHandler().clearEventListeners();
+
+		// remove the listeners without associated EventListenerModel from rankedListeners map
+		rankedListeners.entrySet().removeIf(e -> e.getKey().getRanklessPosition() >= 0);
 	}
 
 }

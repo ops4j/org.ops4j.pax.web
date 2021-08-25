@@ -5,7 +5,7 @@ Must have for 8.0.0.GA:
  + RegEx filter mapping
  + JSP servlet configuration through Pax Web PID
  + Karaf integration tests
- - Listener ordering according to ranking
+ ~ Listener ordering according to ranking
  - org.osgi.framework.ServiceObjects and proper service management (unget, prototype, singleton, bundle scopes)
  - DTOs
  - Mixing (in different order) WAB and Whiteboard contexts, allocating contexts for WABs, where WAB's OsgiContextModel
@@ -21,6 +21,8 @@ Moved to after 8.0.0.GA (8.0.x):
  - @ServletSecurity, @RunAs, @DeclareRoles annotations on servlets
  - skipping configured web fragments (no scanning, as in Tomcat's tomcat.util.scan.StandardJarScanFilter.jarsToSkip)
  - Keycloak integration
+ - pax-web-deployer
+ - Maven archetypes
 
 Move to 8.1.x:
  - Jetty org.eclipse.jetty.server.Handler and org.eclipse.jetty.server.Connector tracking (as in Pax Web 7), but also

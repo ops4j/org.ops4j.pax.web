@@ -323,7 +323,7 @@ public class DynamicRegistrations {
 			}
 		}
 
-		model.setServiceRank(Integer.MAX_VALUE);
+		model.setServiceRank(0);
 		model.setDynamic(true);
 		configureBundle(context, model, reg.getModel().getEventListener().getClass());
 
