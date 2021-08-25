@@ -1564,6 +1564,14 @@
 						<groupId>javax.annotation</groupId>
 						<artifactId>javax.annotation-api</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>com.sun.istack</groupId>
+						<artifactId>istack-commons-runtime</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.sun.activation</groupId>
+						<artifactId>jakarta.activation</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>
@@ -1585,6 +1593,10 @@
 					<exclusion>
 						<groupId>javax.activation</groupId>
 						<artifactId>activation</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.sun.activation</groupId>
+						<artifactId>jakarta.activation</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
@@ -1644,6 +1656,10 @@
 					<exclusion>
 						<groupId>org.hibernate</groupId>
 						<artifactId>hibernate-osgi</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.sun.istack</groupId>
+						<artifactId>istack-commons-runtime</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
