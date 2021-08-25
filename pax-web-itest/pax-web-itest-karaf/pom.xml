@@ -173,6 +173,19 @@
 			<artifactId>limit-post-config-fragment-undertow</artifactId>
 		</dependency>
 
+		<!-- pax-web war samples -->
+
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>war-spring</artifactId>
+			<type>war</type>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>war-spring-wired</artifactId>
+			<type>war</type>
+		</dependency>
+
 		<!-- pax-web whiteboard samples -->
 
 		<dependency>
