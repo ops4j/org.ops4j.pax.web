@@ -38,7 +38,6 @@ import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerKey;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
-import org.ops4j.pax.web.service.spi.servlet.RegisteringContextListener;
 import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -184,7 +183,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 	 * @param listener
 	 */
 	public void removeEventListener(EventListenerModel model, EventListener listener) {
-		if (model == null) {
+		if (model == null || model.isDynamic()) {
 			orderedListeners.remove(listener);
 		} else {
 			rankedListeners.remove(EventListenerKey.ofModel(model));

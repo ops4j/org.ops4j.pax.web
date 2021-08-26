@@ -5,12 +5,12 @@ Must have for 8.0.0.GA:
  + RegEx filter mapping
  + JSP servlet configuration through Pax Web PID
  + Karaf integration tests
- ~ Listener ordering according to ranking
+ + Listener ordering according to ranking
+ - Session per OsgiContextModel / OsgiServletContext
  - org.osgi.framework.ServiceObjects and proper service management (unget, prototype, singleton, bundle scopes)
  - DTOs
  - Mixing (in different order) WAB and Whiteboard contexts, allocating contexts for WABs, where WAB's OsgiContextModel
    is of highest priority (can't have other OsgiContextModel overring the WAB's one)
- - Session per OsgiContextModel / OsgiServletContext
 
 Moved to after 8.0.0.GA (8.0.x):
  - JAX-RS example with aries-jaxrs

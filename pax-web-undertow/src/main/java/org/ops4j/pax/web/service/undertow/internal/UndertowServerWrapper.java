@@ -111,6 +111,7 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerKey;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.LoginConfigModel;
@@ -315,6 +316,20 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 	 * Keep dynamic configuration and use it during startup only.
 	 */
 	private final Map<String, DynamicRegistrations> dynamicRegistrations = new HashMap<>();
+
+	// Jetty and Tomcat keeps the ranked/ordered listeners inside an object of class derived from Jetty/Tomcat
+	// "context" class (PaxWebServletContextHandler and PaxWebStandardContext respectively). In Undertow we
+	// have only DeploymentInfo and I decided not to specialize this class. So we have to keep the listeners here
+
+	/**
+	 * This maps keeps all the listeners in order, as expected by OSGi CMPN R7 Whiteboard specification.
+	 */
+	private final Map<String, TreeMap<EventListenerKey, PaxWebListenerInfo>> rankedListeners = new HashMap<>();
+
+	/**
+	 * Here we'll keep the listeners without associated {@link EventListenerModel}
+	 */
+	private final Map<String, List<PaxWebListenerInfo>> orderedListeners = new HashMap<>();
 
 	/**
 	 * Global {@link Configuration} passed from pax-web-runtime through
@@ -1110,9 +1125,15 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			osgiContextModels.put(contextPath, new TreeSet<>());
 
 			// configure ordered map of initializers
-			initializers.put(model.getContextPath(), new TreeSet<>());
-			dynamicRegistrations.put(model.getContextPath(), new DynamicRegistrations());
+			initializers.put(contextPath, new TreeSet<>());
+			dynamicRegistrations.put(contextPath, new DynamicRegistrations());
+
+			rankedListeners.put(contextPath, new TreeMap<>());
+			orderedListeners.put(contextPath, new ArrayList<>());
 		} else if (change.getKind() == OpCode.DELETE) {
+			orderedListeners.remove(contextPath);
+			rankedListeners.remove(contextPath);
+
 			dynamicRegistrations.remove(contextPath);
 			initializers.remove(contextPath);
 			osgiContextModels.remove(contextPath);
@@ -1778,6 +1799,16 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 					c.addServletContextAttributeListener((ServletContextAttributeListener) eventListener);
 				}
 
+				boolean stopped = false;
+				if (manager != null && manager.getState() != DeploymentManager.State.UNDEPLOYED
+						&& ServletContextListener.class.isAssignableFrom(eventListener.getClass())) {
+					// we have to stop the context, so existing ServletContextListeners are called
+					// with contextDestroyed() and new listener is added according to ranking rules of
+					// the EventListenerModel
+					stopUndertowContext(contextPath, manager, manager.getDeployment(), null, false);
+					stopped = true;
+				}
+
 				// add the listener to real context - even ServletContextAttributeListener (but only once - even
 				// if there are many OsgiServletContexts per ServlApplicationListenersetContext)
 				// we have to wrap the listener, so proper OsgiServletContext is passed there
@@ -1785,11 +1816,38 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				if (eventListener instanceof ServletContextListener) {
 					wrapper = proxiedServletContextListener(eventListener, context);
 				}
-				ListenerInfo info = new ListenerInfo(eventListener.getClass(), new ImmediateInstanceFactory<>(wrapper));
+				PaxWebListenerInfo info = new PaxWebListenerInfo(eventListener.getClass(), new ImmediateInstanceFactory<>(wrapper));
+				info.setModel(eventListenerModel);
 
-				deploymentInfo.addListener(info);
-				if (manager != null) {
-					manager.getDeployment().getApplicationListeners().addListener(new ManagedListener(info, eventListenerModel.isDynamic()));
+				// don't add the listener to DeploymentInfo yet - all the listeners will be added after sorting,
+				// when the context is started (DeploymentInfo is deployed)
+				if (eventListenerModel.isDynamic()) {
+					orderedListeners.get(contextPath).add(info);
+					if (manager != null && manager.getState() == DeploymentManager.State.UNDEPLOYED) {
+						// it may be the case, when RegisteringContainerInitializer.onStartup() is adding the listener
+						// but (unlike in Jetty and Tomcat) we have no way to squeeze a listener processing
+						// after SCI invocation. So we have to add the listener to existing deployment
+						deploymentInfo.addListener(info);
+						manager.getDeployment().getApplicationListeners().addListener(new ManagedListener(info, eventListenerModel.isDynamic()));
+					}
+				} else {
+					rankedListeners.get(contextPath).put(EventListenerKey.ofModel(eventListenerModel), info);
+				}
+
+				// check the class of non-wrapped listener
+				if (!ServletContextListener.class.isAssignableFrom(eventListener.getClass())) {
+					// otherwise it'll be added anyway when context is started, because such listener can
+					// be added only for stopped context
+					if (manager != null) {
+						// we have to add it, because there'll be no restart
+						deploymentInfo.addListener(info);
+						manager.getDeployment().getApplicationListeners().addListener(new ManagedListener(info, eventListenerModel.isDynamic()));
+					}
+				}
+
+				if (stopped) {
+					// we have to start it again
+					ensureServletContextStarted(contextPath);
 				}
 			});
 		}
@@ -1813,6 +1871,16 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 						// remove it from per-OsgiContext list
 						OsgiServletContext c = osgiServletContexts.get(context);
 						c.removeServletContextAttributeListener((ServletContextAttributeListener) eventListener);
+					}
+
+					if (eventListenerModel.isDynamic()) {
+						if (orderedListeners.containsKey(contextPath)) {
+							orderedListeners.get(contextPath).removeIf(li -> li.getModel() == eventListenerModel);
+						}
+					} else {
+						if (rankedListeners.containsKey(contextPath)) {
+							rankedListeners.get(contextPath).remove(EventListenerKey.ofModel(eventListenerModel));
+						}
 					}
 
 					if (pendingTransaction(contextPath)) {
@@ -2326,6 +2394,19 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				}
 			}
 
+			// only now add the listeners in correct order
+
+			// SCIs may have added some listeners which we've hijacked, to order them according
+			// to Whiteboard/ranking rules. Now it's perfect time to add them in correct order
+			for (int pos = 0; pos < orderedListeners.get(contextPath).size(); pos++) {
+				PaxWebListenerInfo li = orderedListeners.get(contextPath).get(pos);
+				rankedListeners.get(contextPath).put(EventListenerKey.ofPosition(pos), li);
+			}
+
+			for (ListenerInfo li : rankedListeners.get(contextPath).values()) {
+				deployment.addListener(li);
+			}
+
 			manager = servletContainer.addDeployment(deployment);
 
 			// here's where Undertow-specific instance of javax.servlet.ServletContext is created
@@ -2529,6 +2610,17 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			}
 		} catch (ServletException e) {
 			LOG.warn("Error stopping Undertow context \"{}\": {}", contextPath, e.getMessage(), e);
+		}
+
+		// finally clear dynamic listeners - they'll be added again when the context is started
+
+		if (deploymentInfos.containsKey(contextPath)) {
+			// remove the listeners without associated EventListenerModel from rankedListeners map
+			rankedListeners.get(contextPath).entrySet().removeIf(e -> e.getKey().getRanklessPosition() >= 0);
+			// ALL listeners added without a model (listeners added by SCIs and other listeners) will be cleared
+			orderedListeners.get(contextPath).clear();
+			// and clear the listeners in deployment info (fortunately Undertow allows us to do it)
+			deploymentInfos.get(contextPath).getListeners().clear();
 		}
 	}
 

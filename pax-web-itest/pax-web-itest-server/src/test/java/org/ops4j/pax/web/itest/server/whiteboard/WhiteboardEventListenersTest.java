@@ -217,7 +217,7 @@ public class WhiteboardEventListenersTest extends MultiContainerTestSupport {
 				() -> new NamedContextListener("l2", events), 0L, 1);
 		EventListenerModel el2Model = getListenerCustomizer().addingService(el2Ref);
 
-		// because the context was started, there's no need to register or call the servlet.
+		// because the context was already started, there's no need to register or call the servlet.
 
 		assertThat(events.size(), equalTo(4));
 		assertThat(events.get(1), equalTo("l1 destroyed in \"\""));

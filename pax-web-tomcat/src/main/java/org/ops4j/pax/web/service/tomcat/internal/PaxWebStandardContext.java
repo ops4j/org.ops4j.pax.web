@@ -419,7 +419,7 @@ public class PaxWebStandardContext extends StandardContext {
 	 * @param listener
 	 */
 	public void removeListener(EventListenerModel model, Object listener) {
-		if (model == null) {
+		if (model == null || model.isDynamic()) {
 			orderedListeners.remove(listener);
 		} else {
 			rankedListeners.remove(EventListenerKey.ofModel(model));
