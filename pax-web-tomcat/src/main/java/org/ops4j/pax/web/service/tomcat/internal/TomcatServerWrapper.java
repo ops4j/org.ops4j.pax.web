@@ -793,11 +793,10 @@ class TomcatServerWrapper implements BatchVisitor {
 			// removals are delayed until this step.
 			// This is important to ensure proper order of destruction ended with contextDestroyed() calls
 
-			if (context != null && isStarted(context)) {
+			if (context != null && context.isStarted()) {
 				LOG.info("Stopping Tomcat context \"{}\"", contextPath);
 				try {
 					context.stop();
-					context.setOsgiServletContext(null);
 				} catch (Exception e) {
 					LOG.warn("Error stopping Tomcat context \"{}\": {}", contextPath, e.getMessage(), e);
 				}
@@ -1221,7 +1220,7 @@ class TomcatServerWrapper implements BatchVisitor {
 				configureFilterMappings(model, context);
 			}
 
-			if (isStarted(context) && !pendingTransaction(contextPath)) {
+			if (context.isStarted() && !pendingTransaction(contextPath)) {
 				context.filterStart();
 			}
 		}
@@ -1248,17 +1247,38 @@ class TomcatServerWrapper implements BatchVisitor {
 					c.addServletContextAttributeListener((ServletContextAttributeListener)eventListener);
 				}
 
+				boolean stopped = false;
+				if (standardContext.isStarted() && standardContext.getState() != LifecycleState.STARTING_PREP
+						&& ServletContextListener.class.isAssignableFrom(eventListener.getClass())) {
+					// we have to stop the context, so existing ServletContextListeners are called
+					// with contextDestroyed() and new listener is added according to ranking rules of
+					// the EventListenerModel
+					LOG.info("Stopping Tomcat context \"{}\" before registering a ServletContextListener", contextPath);
+					try {
+						standardContext.stop();
+						stopped = true;
+					} catch (Exception e) {
+						LOG.warn("Problem stopping {}: {}", standardContext, e.getMessage());
+					}
+				}
+
 				// add the listener to real context - even ServletContextAttributeListener (but only once - even
 				// if there are many OsgiServletContexts per ServletContext)
 				if (eventListener instanceof HttpSessionListener || eventListener instanceof ServletContextListener) {
 					// we're adding these listeners to overriden method, so Tomcat doesn't know about
 					// "no pluggability listeners"
-					standardContext.addApplicationLifecycleListener(eventListener);
+					standardContext.addApplicationLifecycleListener(eventListenerModel, eventListener);
 				} else {
-					// this method is called from org.apache.catalina.startup.ContextConfig.configureContext() and ALL
-					// listener class names from web.xml, web-fragment.xml and @WebListener are added to the context using this
-					// method.
-					standardContext.addApplicationEventListener(eventListener);
+					// org.apache.catalina.core.StandardContext.addApplicationEventListener() is called from
+					// org.apache.catalina.startup.ContextConfig.configureContext() and ALL listener class names
+					// from web.xml, web-fragment.xml and @WebListener are added to the context using this method.
+					// here we're calling specialized method that adds a listener with associated model
+					standardContext.addApplicationEventListener(eventListenerModel, eventListener);
+				}
+
+				if (stopped) {
+					// we have to start it again
+					ensureServletContextStarted(standardContext);
 				}
 			});
 		}
@@ -1292,23 +1312,23 @@ class TomcatServerWrapper implements BatchVisitor {
 					if (standardContext != null) {
 						// this may be null in case of WAB where we keep event listeners so they get contextDestroyed
 						// event properly
-						Object[] elisteners = standardContext.getApplicationEventListeners();
-						Object[] llisteners = standardContext.getApplicationLifecycleListeners();
-						List<Object> newEListeners = new ArrayList<>();
-						List<Object> newLListeners = new ArrayList<>();
-						for (Object l : elisteners) {
+						Object[] evListeners = standardContext.getApplicationEventListeners();
+						Object[] lcListeners = standardContext.getApplicationLifecycleListeners();
+						List<Object> newEvListeners = new ArrayList<>();
+						List<Object> newLcListeners = new ArrayList<>();
+						for (Object l : evListeners) {
 							if (l != eventListener) {
-								newEListeners.add(l);
+								newEvListeners.add(l);
 							}
 						}
-						for (Object l : llisteners) {
+						for (Object l : lcListeners) {
 							if (l != eventListener) {
-								newLListeners.add(l);
+								newLcListeners.add(l);
 							}
 						}
-						standardContext.removeApplicationLifecycleListener(eventListener);
-						standardContext.setApplicationEventListeners(newEListeners.toArray(new Object[0]));
-						standardContext.setApplicationLifecycleListeners(newLListeners.toArray(new Object[0]));
+						standardContext.removeListener(eventListenerModel, eventListener);
+						standardContext.setApplicationEventListeners(newEvListeners.toArray(new Object[0]));
+						standardContext.setApplicationLifecycleListeners(newLcListeners.toArray(new Object[0]));
 					}
 //					eventListenerModel.ungetEventListener(eventListener);
 				});
@@ -1439,7 +1459,7 @@ class TomcatServerWrapper implements BatchVisitor {
 			contextModels.forEach((context) -> {
 				String path = context.getContextPath();
 				PaxWebStandardContext ctx = contextHandlers.get(context.getContextPath());
-				if (isStarted(ctx)) {
+				if (ctx.isStarted()) {
 					// we have to stop it. This operation should follow ClearDynamicRegistrationsChange that
 					// clears possible dynamic registrations
 					// also this operation is always followed by active web element registration (servlet or websocket)
@@ -1447,7 +1467,6 @@ class TomcatServerWrapper implements BatchVisitor {
 					LOG.info("Stopping Tomcat context \"{}\" before registering a ServletContextInitializer", path);
 					try {
 						ctx.stop();
-						ctx.setOsgiServletContext(null);
 					} catch (Exception e) {
 						LOG.warn("Error stopping Tomcat context \"{}\": {}", path, e.getMessage(), e);
 					}
@@ -1556,18 +1575,16 @@ class TomcatServerWrapper implements BatchVisitor {
 	}
 
 	private void clearDynamicRegistrations(String contextPath, OsgiContextModel context) {
-		LOG.info("Removing dynamically registered servlets/filters/listeners from context {}", contextPath);
+		LOG.debug("Removing dynamically registered servlets/filters/listeners from context {}", contextPath);
 
 		// there should already be a ServletContextHandler
 		PaxWebStandardContext ctx = contextHandlers.get(contextPath);
 
 		// we can safely stop the context
-		if (isStarted(ctx)) {
+		if (ctx.isStarted()) {
 			LOG.info("Stopping Tomcat context \"{}\"", contextPath);
 			try {
 				ctx.stop();
-				ctx.clearApplicationLifecycleListeners();
-				ctx.setOsgiServletContext(null);
 			} catch (Exception e) {
 				LOG.warn("Error stopping Tomcat context \"{}\": {}", contextPath, e.getMessage(), e);
 			}
@@ -1638,7 +1655,7 @@ class TomcatServerWrapper implements BatchVisitor {
 							newLListeners.add(existing);
 						}
 					}
-					ctx.removeApplicationLifecycleListener(listenerToRemove);
+					ctx.removeListener(model, listenerToRemove);
 					ctx.setApplicationEventListeners(newEListeners.toArray(new Object[0]));
 					ctx.setApplicationLifecycleListeners(newLListeners.toArray(new Object[0]));
 				}
@@ -1666,7 +1683,7 @@ class TomcatServerWrapper implements BatchVisitor {
 	 */
 	private void ensureServletContextStarted(PaxWebStandardContext context) {
 		String contextPath = context == null || context.getPath().equals("") ? "/" : context.getPath();
-		if (context == null || isStarted(context) || pendingTransaction(contextPath)) {
+		if (context == null || context.isStarted() || pendingTransaction(contextPath)) {
 			return;
 		}
 		try {
@@ -1754,13 +1771,6 @@ class TomcatServerWrapper implements BatchVisitor {
 
 	private boolean pendingTransaction(String contextPath) {
 		return transactions.contains(contextPath);
-	}
-
-	public boolean isStarted(PaxWebStandardContext context) {
-		return context.getState() == LifecycleState.STARTED
-						|| context.getState() == LifecycleState.STARTING
-						|| context.getState() == LifecycleState.STARTING_PREP
-						|| context.getState() == LifecycleState.INITIALIZING;
 	}
 
 	private OsgiServletContext getHighestRankedContext(String contextPath, FilterModel model,

@@ -15,6 +15,8 @@
  */
 package org.ops4j.pax.web.service.spi.model.elements;
 
+import java.util.Objects;
+
 public class EventListenerKey implements Comparable<EventListenerKey> {
 
 	// fields matching org.ops4j.pax.web.service.spi.model.elements.ElementModel
@@ -22,11 +24,13 @@ public class EventListenerKey implements Comparable<EventListenerKey> {
 	private final long serviceId;
 	// for listeners added without model, we consider only the position
 	private final int ranklessPosition;
+	private final int hashCode;
 
-	private EventListenerKey(int serviceRank, long serviceId, int ranklessPosition) {
+	private EventListenerKey(int serviceRank, long serviceId, int ranklessPosition, int hashCode) {
 		this.serviceRank = serviceRank;
 		this.serviceId = serviceId;
 		this.ranklessPosition = ranklessPosition;
+		this.hashCode = hashCode;
 	}
 
 	/**
@@ -36,7 +40,7 @@ public class EventListenerKey implements Comparable<EventListenerKey> {
 	 * @return
 	 */
 	public static EventListenerKey ofModel(EventListenerModel model) {
-		return new EventListenerKey(model.getServiceRank(), model.getServiceId(), -1);
+		return new EventListenerKey(model.getServiceRank(), model.getServiceId(), -1, System.identityHashCode(model));
 	}
 
 	/**
@@ -46,7 +50,7 @@ public class EventListenerKey implements Comparable<EventListenerKey> {
 	 * @return
 	 */
 	public static EventListenerKey ofPosition(int position) {
-		return new EventListenerKey(0, 0L, position);
+		return new EventListenerKey(0, 0L, position, 0);
 	}
 
 	public int getServiceRank() {
@@ -74,8 +78,34 @@ public class EventListenerKey implements Comparable<EventListenerKey> {
 			return c2;
 		}
 
-		// we need some fallback here - prefer model created earlier
-		return Integer.compare(this.ranklessPosition, o.ranklessPosition);
+		if (ranklessPosition >= 0 && o.ranklessPosition >= 0) {
+			// simple compare by position - earlier = first
+			return Integer.compare(this.ranklessPosition, o.ranklessPosition);
+		}
+		if (ranklessPosition >= 0) {
+			// we are rankless, so should be called/used later
+			return 1;
+		}
+		if (o.ranklessPosition >= 0) {
+			return -1;
+		}
+		return Integer.compare(this.hashCode, o.hashCode);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		EventListenerKey that = (EventListenerKey) o;
+		if (ranklessPosition > 0) {
+			return ranklessPosition == that.ranklessPosition;
+		}
+		return hashCode == that.hashCode;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(ranklessPosition, hashCode);
 	}
 
 }

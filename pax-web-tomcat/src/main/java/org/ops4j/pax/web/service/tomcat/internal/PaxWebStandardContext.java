@@ -17,36 +17,39 @@ package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.LifecycleException;
+import org.apache.catalina.LifecycleState;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.valves.ValveBase;
 import org.apache.tomcat.util.descriptor.web.ErrorPage;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerKey;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiFilterChain;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
-import org.ops4j.pax.web.service.spi.servlet.RegisteringContextListener;
 import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
 import org.osgi.service.http.whiteboard.Preprocessor;
 import org.slf4j.Logger;
@@ -62,16 +65,26 @@ public class PaxWebStandardContext extends StandardContext {
 
 	public static final Logger LOG = LoggerFactory.getLogger(PaxWebStandardContext.class);
 
-	/** Name of an attribute that indicates a {@link PaxWebStandardContext} for given request processing */
+	/**
+	 * Name of an attribute that indicates a {@link PaxWebStandardContext} for given request processing
+	 */
 	public static final String PAXWEB_STANDARD_CONTEXT = ".paxweb.standard.context";
-	/** Name of an attribute that indicates a {@link PaxWebStandardWrapper} for given request processing */
+	/**
+	 * Name of an attribute that indicates a {@link PaxWebStandardWrapper} for given request processing
+	 */
 	public static final String PAXWEB_STANDARD_WRAPPER = ".paxweb.standard.wrapper";
 
-	/** Default {@link ServletContext} to use for chains without target servlet (e.g., filters only) */
+	/**
+	 * Default {@link ServletContext} to use for chains without target servlet (e.g., filters only)
+	 */
 	private OsgiServletContext defaultServletContext;
-	/** Default {@link OsgiContextModel} to use for chains without target servlet (e.g., filters only) */
+	/**
+	 * Default {@link OsgiContextModel} to use for chains without target servlet (e.g., filters only)
+	 */
 	private OsgiContextModel defaultOsgiContextModel;
-	/** Default {@link WebContainerContext} for chains without target {@link Servlet} */
+	/**
+	 * Default {@link WebContainerContext} for chains without target {@link Servlet}
+	 */
 	private WebContainerContext defaultWebContainerContext;
 
 	private String osgiInitFilterName;
@@ -81,7 +94,9 @@ public class PaxWebStandardContext extends StandardContext {
 	private PaxWebFilterMap osgiInitFilterMap;
 	private PaxWebFilterDef osgiInitFilterDef;
 
-	/** Highest ranked {@link OsgiServletContext} set when Tomcat's context starts */
+	/**
+	 * Highest ranked {@link OsgiServletContext} set when Tomcat's context starts
+	 */
 	private ServletContext osgiServletContext;
 
 	/**
@@ -92,7 +107,16 @@ public class PaxWebStandardContext extends StandardContext {
 	private final Map<Preprocessor, FilterConfig> preprocessors = new LinkedHashMap<>();
 
 	private final Collection<SCIWrapper> servletContainerInitializers = new LinkedList<>();
-	private final List<Object> applicationLifecycleListeners = new LinkedList<>();
+
+	/**
+	 * This maps keeps all the listeners in order, as expected by OSGi CMPN R7 Whiteboard specification.
+	 */
+	private final Map<EventListenerKey, Object> rankedListeners = new TreeMap<>();
+
+	/**
+	 * Here we'll keep the listeners without associated {@link EventListenerModel}
+	 */
+	private final List<Object> orderedListeners = new ArrayList<>();
 
 	public PaxWebStandardContext(Default404Servlet defaultServlet) {
 		super();
@@ -155,6 +179,7 @@ public class PaxWebStandardContext extends StandardContext {
 	/**
 	 * This method may be called long after initial filter was created. In Jetty and Undertow there's no
 	 * <em>initial</em> filter, because we can do it better, but with Tomcat we have to do it like this.
+	 *
 	 * @param defaultServletContext
 	 */
 	public void setDefaultServletContext(OsgiServletContext defaultServletContext) {
@@ -168,6 +193,7 @@ public class PaxWebStandardContext extends StandardContext {
 	/**
 	 * We have to ensure that this {@link StandardContext} will always return
 	 * proper instance of {@link javax.servlet.ServletContext} - especially in the events passed to listeners
+	 *
 	 * @param osgiServletContext
 	 */
 	public void setOsgiServletContext(ServletContext osgiServletContext) {
@@ -219,9 +245,21 @@ public class PaxWebStandardContext extends StandardContext {
 		return result;
 	}
 
+	/**
+	 * Handy method to check if the context is started for OSGi purposes
+	 *
+	 * @return
+	 */
+	public boolean isStarted() {
+		return getState() == LifecycleState.STARTED
+				|| getState() == LifecycleState.STARTING
+				|| getState() == LifecycleState.STARTING_PREP
+				|| getState() == LifecycleState.INITIALIZING;
+	}
+
 	@Override
 	public boolean listenerStart() {
-		// This is a method overriden JUST because it is invoked just after original
+		// This is a method overriden JUST because it is invoked right after original
 		// org.apache.catalina.core.StandardContext.startInternal() invokes ServletContainerInitializers.
 		// We have to call SCIs ourselves to pass better OsgiServletContext there.
 
@@ -245,7 +283,7 @@ public class PaxWebStandardContext extends StandardContext {
 		if (ok) {
 			// first, Tomcat doesn't have to be aware of ANY application lifecycle listeners (call this method
 			// through super pointer!)
-			// only when it finds sets us the instances (we override this method) we can start returning
+			// only when it sets us the instances of listeners (we override this method) we can start returning
 			// them - that's the only way to prevent Tomcat passing org.apache.catalina.core.StandardContext.NoPluggabilityServletContext
 			// to our listeners
 			super.setApplicationLifecycleListeners(new Object[0]);
@@ -260,18 +298,10 @@ public class PaxWebStandardContext extends StandardContext {
 		// org.apache.catalina.core.StandardContext.resetContext() will be call so we have to preserve some
 		// items from the context
 		Container[] children = findChildren();
-		Object[] applicationEventListeners = getApplicationEventListeners();
-		Object[] applicationLifecycleListeners = getApplicationLifecycleListeners();
 
+		// this will clear the listeners, but we'll add them again when (re)starting the context
 		super.stopInternal();
 
-		for (Object el : applicationEventListeners) {
-			addApplicationEventListener(el);
-		}
-		for (Object el : applicationLifecycleListeners) {
-			// restore in super fields
-			super.addApplicationLifecycleListener(el);
-		}
 		for (Container child : children) {
 			if (child instanceof PaxWebStandardWrapper) {
 				PaxWebStandardWrapper pwsw = ((PaxWebStandardWrapper) child);
@@ -330,44 +360,106 @@ public class PaxWebStandardContext extends StandardContext {
 				}
 			}
 		}
+
+		// clear the OSGi context - new one will be set when the context is started again
+		setOsgiServletContext(null);
+
+		// remove the listeners without associated EventListenerModel from rankedListeners map
+		rankedListeners.entrySet().removeIf(e -> e.getKey().getRanklessPosition() >= 0);
+		// ALL listeners added without a model (listeners added by SCIs and other listeners) will be cleared
+		orderedListeners.clear();
+	}
+
+	@Override
+	public void addApplicationEventListener(Object listener) {
+		addApplicationEventListener(null, listener);
+	}
+
+	/**
+	 * Special {@code addApplicationEventListener()} that should be called instead of
+	 * {@link #addApplicationEventListener(Object)}, because we want to sort the listeners according to
+	 * Whiteboard/ranking rules.
+	 *
+	 * @param model
+	 * @param listener
+	 */
+	public void addApplicationEventListener(EventListenerModel model, Object listener) {
+		// we're not adding the listener to StandardContext - we'll add all listeners when the context is started
+
+		if (model == null || model.isDynamic()) {
+			orderedListeners.add(listener);
+		} else {
+			rankedListeners.put(EventListenerKey.ofModel(model), listener);
+		}
+
+		if (!ServletContextListener.class.isAssignableFrom(listener.getClass())) {
+			// otherwise it'll be added anyway when context is started, because such listener can
+			// be added only for stopped context
+			if (isStarted()) {
+				// we have to add it, because there'll be no restart
+				super.addApplicationEventListener(listener);
+			}
+		}
 	}
 
 	@Override
 	public void addApplicationLifecycleListener(Object listener) {
-		// override, so Tomcat doesn't know about "application lifecycle listeners", a.k.a. "no pluggability listeners"
-		// because we enforce Section 4.4 of the Servlet 3.0 specificationin different way
-		this.applicationLifecycleListeners.add(listener);
+		addApplicationLifecycleListener(null, listener);
+	}
+
+	public void addApplicationLifecycleListener(EventListenerModel model, Object listener) {
+		// for now, we mix lifecycle and event listeners
+		addApplicationEventListener(model, listener);
 	}
 
 	/**
-	 * When removing listeners, we have to remove them from this "hijack list" too
+	 * When removing listeners, we have to remove them from managed ordered lists - whether it's lifecycle or
+	 * event listener.
+	 *
 	 * @param listener
 	 */
-	public void removeApplicationLifecycleListener(Object listener) {
-		applicationLifecycleListeners.remove(listener);
+	public void removeListener(EventListenerModel model, Object listener) {
+		if (model == null) {
+			orderedListeners.remove(listener);
+		} else {
+			rankedListeners.remove(EventListenerKey.ofModel(model));
+		}
 	}
 
 	@Override
 	public void setApplicationLifecycleListeners(Object[] listeners) {
+		if (getState() == LifecycleState.STOPPING) {
+			// it's null anyway
+			super.setApplicationLifecycleListeners(listeners);
+			return;
+		}
+
+		// when Tomcat sets here the listener instances, we'll alter the array with the instances we've collected
+
 		// we have to prevent adding the same listeners multiple times - this may happen when Tomcat
 		// context is restarted and we have a mixture of Whiteboards listeners, listeners added by SCIs and
 		// listeners from other listener
-		List<Object> newListeners = new ArrayList<>();
-		if (listeners != null) {
-			Collections.addAll(newListeners, listeners);
-		}
-		for (Object l : applicationLifecycleListeners) {
-			if (!newListeners.contains(l)) {
-				newListeners.add(l);
-			}
+
+		// SCIs may have added some listeners which we've hijacked, to order them according
+		// to Whiteboard/ranking rules. Now it's perfect time to add them in correct order
+		for (int pos = 0; pos < orderedListeners.size(); pos++) {
+			Object el = orderedListeners.get(pos);
+			rankedListeners.put(EventListenerKey.ofPosition(pos), el);
 		}
 
 		// Add all listeners as "pluggability listeners"
-		super.setApplicationLifecycleListeners(newListeners.toArray());
-	}
+		List<Object> lifecycleListeners = new ArrayList<>();
+		List<Object> eventListeners = new ArrayList<>();
+		for (Object listener : rankedListeners.values()) {
+			if (listener instanceof ServletContextListener) {
+				lifecycleListeners.add(listener);
+			}
+			// because ServletContextListener's implementation may implement other listener interfaces too
+			eventListeners.add(listener);
+		}
 
-	public void clearApplicationLifecycleListeners() {
-		applicationLifecycleListeners.removeIf(l -> l instanceof RegisteringContextListener);
+		super.setApplicationLifecycleListeners(lifecycleListeners.toArray());
+		super.setApplicationEventListeners(eventListeners.toArray());
 	}
 
 	public void setDefaultOsgiContextModel(OsgiContextModel defaultOsgiContextModel) {

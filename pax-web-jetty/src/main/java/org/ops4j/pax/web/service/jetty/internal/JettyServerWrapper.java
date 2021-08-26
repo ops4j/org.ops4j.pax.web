@@ -1461,6 +1461,7 @@ class JettyServerWrapper implements BatchVisitor {
 					// with contextDestroyed() and new listener is added according to ranking rules of
 					// the EventListenerModel
 					try {
+						LOG.info("Stopping Jetty context \"{}\" before registering a ServletContextListener", contextPath);
 						servletContextHandler.stop();
 						stopped = true;
 					} catch (Exception e) {
@@ -1760,7 +1761,7 @@ class JettyServerWrapper implements BatchVisitor {
 	}
 
 	private void clearDynamicRegistrations(String contextPath, OsgiContextModel context) {
-		LOG.info("Removing dynamically registered servlets/filters/listeners from context {}", contextPath);
+		LOG.debug("Removing dynamically registered servlets/filters/listeners from context {}", contextPath);
 
 		// there should already be a ServletContextHandler
 		PaxWebServletContextHandler sch = contextHandlers.get(contextPath);

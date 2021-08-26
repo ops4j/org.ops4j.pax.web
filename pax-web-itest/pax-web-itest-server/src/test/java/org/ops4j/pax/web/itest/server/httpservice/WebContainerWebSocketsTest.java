@@ -88,7 +88,7 @@ public class WebContainerWebSocketsTest extends MultiContainerTestSupport {
 		// register an SCI that registers a filter that should be available between registrations
 		wc.registerServletContainerInitializer(new ServletContainerInitializer() {
 			@Override
-			public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
+			public void onStartup(Set<Class<?>> c, ServletContext ctx) {
 				ctx.addFilter("fd", new Filter() {
 					@Override
 					public void init(FilterConfig filterConfig) throws ServletException {
@@ -96,7 +96,7 @@ public class WebContainerWebSocketsTest extends MultiContainerTestSupport {
 					}
 
 					@Override
-					public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+					public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException {
 						response.setContentType("text/plain");
 						response.getWriter().println("dynamic filter OK");
 						response.getWriter().close();
@@ -105,12 +105,25 @@ public class WebContainerWebSocketsTest extends MultiContainerTestSupport {
 			}
 		}, null, null);
 
+		// register a servlet first to check if web sockets can be added later (after the context has started)
+		// and this servlet stays registered
+		wc.registerServlet("/s", new HttpServlet() {
+			@Override
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+				resp.setContentType("text/plain");
+				resp.setStatus(HttpServletResponse.SC_OK);
+				resp.getWriter().println("static OK");
+				resp.getWriter().close();
+			}
+		}, null, null);
+
 		// register a listener that'll register another servlet to check whether the runtime registers dynamic
 		// elements after SCIs are called.
 		// Why in WebSockets test? because Undertow registers a filter not in an SCI but in
 		// org.ops4j.pax.web.service.undertow.websocket.internal.WebSocketsExtension.WebSocketListener.contextInitialized()
-		// TODO: register it after servlet to ensure it's called in general listener-related refactoring
 		wc.registerEventListener(new ServletContextListener() {
+			private final String name = "ServletContextListener that adds /d servlet";
+
 			@Override
 			public void contextInitialized(ServletContextEvent sce) {
 				// but the attributes set by listeners should be cleared when the context is restarted
@@ -119,7 +132,7 @@ public class WebContainerWebSocketsTest extends MultiContainerTestSupport {
 
 				sce.getServletContext().addServlet("dynamic", new HttpServlet() {
 					@Override
-					protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+					protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 						resp.setContentType("text/plain");
 						resp.setStatus(HttpServletResponse.SC_OK);
 						resp.getWriter().println("dynamic OK");
@@ -128,18 +141,6 @@ public class WebContainerWebSocketsTest extends MultiContainerTestSupport {
 				}).addMapping("/d");
 			}
 		}, null);
-
-		// register a servlet first to check if web sockets can be added later (after the context has started)
-		// and this servlet stays registered
-		wc.registerServlet("/s", new HttpServlet() {
-			@Override
-			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-				resp.setContentType("text/plain");
-				resp.setStatus(HttpServletResponse.SC_OK);
-				resp.getWriter().println("static OK");
-				resp.getWriter().close();
-			}
-		}, null, null);
 
 		String response = httpGET(port, "/s");
 		assertTrue(response.contains("static OK"));
@@ -238,7 +239,7 @@ public class WebContainerWebSocketsTest extends MultiContainerTestSupport {
 		// register an SCI that registers a filter that should be available between registrations
 		wc.registerServletContainerInitializer(new ServletContainerInitializer() {
 			@Override
-			public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
+			public void onStartup(Set<Class<?>> c, ServletContext ctx) {
 				ctx.addFilter("fd", new Filter() {
 					@Override
 					public void init(FilterConfig filterConfig) throws ServletException {
@@ -246,7 +247,7 @@ public class WebContainerWebSocketsTest extends MultiContainerTestSupport {
 					}
 
 					@Override
-					public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+					public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException {
 						response.setContentType("text/plain");
 						response.getWriter().println("dynamic filter OK");
 						response.getWriter().close();
@@ -255,12 +256,25 @@ public class WebContainerWebSocketsTest extends MultiContainerTestSupport {
 			}
 		}, null, null);
 
+		// register a servlet first to check if web sockets can be added later (after the context has started)
+		// and this servlet stays registered
+		wc.registerServlet("/s", new HttpServlet() {
+			@Override
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+				resp.setContentType("text/plain");
+				resp.setStatus(HttpServletResponse.SC_OK);
+				resp.getWriter().println("static OK");
+				resp.getWriter().close();
+			}
+		}, null, null);
+
 		// register a listener that'll register another servlet to check whether the runtime registers dynamic
 		// elements after SCIs are called.
 		// Why in WebSockets test? because Undertow registers a filter not in an SCI but in
 		// org.ops4j.pax.web.service.undertow.websocket.internal.WebSocketsExtension.WebSocketListener.contextInitialized()
-		// TODO: register it after servlet to ensure it's called in general listener-related refactoring
 		wc.registerEventListener(new ServletContextListener() {
+			private final String name = "ServletContextListener that adds /d servlet";
+
 			@Override
 			public void contextInitialized(ServletContextEvent sce) {
 				// but the attributes set by listeners should be cleared when the context is restarted
@@ -269,7 +283,7 @@ public class WebContainerWebSocketsTest extends MultiContainerTestSupport {
 
 				sce.getServletContext().addServlet("dynamic", new HttpServlet() {
 					@Override
-					protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+					protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 						resp.setContentType("text/plain");
 						resp.setStatus(HttpServletResponse.SC_OK);
 						resp.getWriter().println("dynamic OK");
@@ -278,18 +292,6 @@ public class WebContainerWebSocketsTest extends MultiContainerTestSupport {
 				}).addMapping("/d");
 			}
 		}, null);
-
-		// register a servlet first to check if web sockets can be added later (after the context has started)
-		// and this servlet stays registered
-		wc.registerServlet("/s", new HttpServlet() {
-			@Override
-			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-				resp.setContentType("text/plain");
-				resp.setStatus(HttpServletResponse.SC_OK);
-				resp.getWriter().println("static OK");
-				resp.getWriter().close();
-			}
-		}, null, null);
 
 		// registering a filter doesn't necessarily restart the container/context, because filters may be
 		// added in quick way without restarting the context.
@@ -300,7 +302,7 @@ public class WebContainerWebSocketsTest extends MultiContainerTestSupport {
 			}
 
 			@Override
-			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException {
 				response.setContentType("text/plain");
 				response.getWriter().println("static filter OK");
 				response.getWriter().close();
