@@ -748,16 +748,11 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 
 	/**
 	 * Each {@link OsgiContextModel} should have separate "working directory" and this method returns such relative
-	 * path depending on {@link #contextPath} and {@link #getNumericId()}
+	 * path depending on {@link #contextPath} and {@link #getName()}
 	 * @return
 	 */
 	public String getTemporaryLocation() {
-		// TODO: should rather swap numeric id into name (for WABs, it should always be "default")
-		if (isWab()) {
-			// When restarting, a WAB gets new OsgiContextModel, so we have to keep the path unique for the WAB
-			return "/".equals(contextPath) ? "ROOT" : contextPath;
-		}
-		return String.format("%s/OCM%d", "/".equals(contextPath) ? "ROOT" : contextPath + "/", getNumericId());
+		return String.format("%s/%s", "/".equals(contextPath) ? "ROOT" : contextPath.substring(1), getName());
 	}
 
 //	/** Access controller context of the bundle that registered the http context. */

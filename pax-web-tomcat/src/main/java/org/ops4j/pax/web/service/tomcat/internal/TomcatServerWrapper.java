@@ -860,6 +860,15 @@ class TomcatServerWrapper implements BatchVisitor {
 			}
 			OsgiServletContext osgiContext = new OsgiServletContext(realContext.getServletContext(), osgiModel, servletContextModel,
 					defaultSessionCookieConfig, classLoader);
+
+			// that's ideal place to set ServletContext.TEMPDIR attribute - it'll work for HttpService, Whiteboard and WAB
+			File tmpLocation = new File(configuration.server().getTemporaryDirectory(), osgiModel.getTemporaryLocation());
+			if (!tmpLocation.exists() && !tmpLocation.mkdirs()) {
+				LOG.warn("Can't create temporary directory for {}: {}", osgiModel, tmpLocation.getAbsolutePath());
+			}
+			osgiModel.getInitialContextAttributes().put(ServletContext.TEMPDIR, tmpLocation);
+			osgiContext.setAttribute(ServletContext.TEMPDIR, tmpLocation);
+
 			osgiServletContexts.put(osgiModel, osgiContext);
 			osgiContextModels.get(contextPath).add(osgiModel);
 

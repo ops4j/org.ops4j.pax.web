@@ -17,7 +17,6 @@
  */
 package org.ops4j.pax.web.extender.war.internal.model;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -1320,12 +1319,6 @@ public class BundleWebApplication {
 
 		// 1.4. Context initial parameters
 		ocm.getContextParams().putAll(mainWebXml.getContextParams());
-		// TODO: do it consistently using runtime configuration of temp directory
-		File tmpLocation = new File(System.getProperty("java.io.tmpdir"), ocm.getTemporaryLocation());
-		if (!tmpLocation.exists() && !tmpLocation.mkdirs()) {
-			LOG.warn("Can't create temporary directory for {}: {}", ocm, tmpLocation.getAbsolutePath());
-		}
-		ocm.getInitialContextAttributes().put(ServletContext.TEMPDIR, tmpLocation);
 
 		// 1.5. Security - also part of OsgiContextModel
 		// <login-config>
