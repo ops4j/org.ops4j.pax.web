@@ -6,9 +6,9 @@ Must have for 8.0.0.GA:
  + JSP servlet configuration through Pax Web PID
  + Karaf integration tests
  + Listener ordering according to ranking
- - Session per OsgiContextModel / OsgiServletContext
+ + Session per OsgiContextModel / OsgiServletContext (including proper javax.servlet.context.tempdir handling)
  - org.osgi.framework.ServiceObjects and proper service management (unget, prototype, singleton, bundle scopes)
- - DTOs
+ - Whiteboard DTOs
  - Mixing (in different order) WAB and Whiteboard contexts, allocating contexts for WABs, where WAB's OsgiContextModel
    is of highest priority (can't have other OsgiContextModel overring the WAB's one)
 

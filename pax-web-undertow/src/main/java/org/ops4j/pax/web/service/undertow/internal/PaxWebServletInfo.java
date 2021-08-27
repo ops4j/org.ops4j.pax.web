@@ -132,6 +132,10 @@ public class PaxWebServletInfo extends ServletInfo {
 		return servletContext;
 	}
 
+	public OsgiServletContext getOsgiServletContext() {
+		return osgiServletContext;
+	}
+
 	public OsgiContextModel getOsgiContextModel() {
 		return osgiContextModel;
 	}

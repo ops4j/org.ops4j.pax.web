@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.itest.karaf;
 
+import java.rmi.NoSuchObjectException;
 import java.util.Hashtable;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -43,7 +44,18 @@ public abstract class FeaturesBaseKarafTest extends AbstractKarafTestBase {
 		Hashtable<String, Object> env = new Hashtable<>();
 		String[] credentials = new String[] { "karaf", "karaf" };
 		env.put(JMXConnector.CREDENTIALS, credentials);
-		return JMXConnectorFactory.connect(url, env);
+		int count = 5;
+		Exception last = null;
+		while (count > 0) {
+			try {
+				return JMXConnectorFactory.connect(url, env);
+			} catch (NoSuchObjectException e) {
+				count--;
+				last = e;
+				Thread.sleep(400);
+			}
+		}
+		throw last;
 	}
 
 }

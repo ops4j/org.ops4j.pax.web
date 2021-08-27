@@ -67,7 +67,7 @@ public class PaxWebPreprocessorsHandler implements HandlerWrapper {
 							ex[0] = e;
 						}
 					}
-				});
+				}, null);
 
 				chain.doFilter(incomingRequest, outgoingRequest);
 				if (ex[0] != null) {

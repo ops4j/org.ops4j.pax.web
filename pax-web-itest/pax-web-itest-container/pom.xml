@@ -63,6 +63,10 @@
 						<include>**/*IntegrationTest.java</include>
 					</includes>
 					<excludes>
+						<!--
+							This test isn't working as I want it to work. Also it requires Felix 6, so I'll probably
+							move it to pax-web-itest-karaf (4.3.x based)
+						-->
 						<exclude>**/WarJSFCdiIntegrationTest.java</exclude>
 					</excludes>
 					<systemPropertyVariables>

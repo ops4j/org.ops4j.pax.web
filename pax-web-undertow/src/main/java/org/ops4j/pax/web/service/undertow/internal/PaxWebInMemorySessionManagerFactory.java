@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 OPS4J.
+ * Copyright 2021 OPS4J.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.spi.config;
+package org.ops4j.pax.web.service.undertow.internal;
 
-import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import io.undertow.server.session.SessionManager;
+import io.undertow.servlet.api.Deployment;
+import io.undertow.servlet.core.InMemorySessionManagerFactory;
 
-public interface JspConfiguration {
+public class PaxWebInMemorySessionManagerFactory extends InMemorySessionManagerFactory {
 
-	/**
-	 * What scratch directory should we use when compiling JSP pages? Default is the work directory for
-	 * the current web application.
-	 * @param model scratch dir should depend on the {@link OsgiContextModel} where the JSP servlet is installed
-	 * @return
-	 */
-	String getJspScratchDir(OsgiContextModel model);
+	@Override
+	public SessionManager createSessionManager(Deployment deployment) {
+		return new PaxWebSessionManager(super.createSessionManager(deployment));
+	}
 
 }

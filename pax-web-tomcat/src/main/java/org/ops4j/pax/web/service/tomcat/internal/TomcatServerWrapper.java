@@ -41,6 +41,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextListener;
 import javax.servlet.SessionCookieConfig;
+import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionListener;
 
 import org.apache.catalina.AccessLog;
@@ -90,6 +91,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiDynamicServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
+import org.ops4j.pax.web.service.spi.servlet.OsgiSessionAttributeListener;
 import org.ops4j.pax.web.service.spi.servlet.PreprocessorFilterConfig;
 import org.ops4j.pax.web.service.spi.servlet.RegisteringContainerInitializer;
 import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
@@ -212,6 +214,12 @@ class TomcatServerWrapper implements BatchVisitor {
 	private final Default404Servlet default404Servlet = new Default404Servlet();
 
 	private SessionCookieConfig defaultSessionCookieConfig;
+
+	/**
+	 * All {@link EventListenerModel} instances for {@link HttpSessionAttributeListener} listeners. They'll be
+	 * reviewed in order to propagate session attribute events per {@link OsgiContextModel}.
+	 */
+	private final List<EventListenerModel> sessionListenerModels = new ArrayList<>();
 
 	TomcatServerWrapper(Configuration config, TomcatFactory tomcatFactory,
 			Bundle paxWebTomcatBundle, ClassLoader classLoader) {
@@ -701,7 +709,7 @@ class TomcatServerWrapper implements BatchVisitor {
 			LOG.info("Creating new Tomcat context for {}", model);
 
 //							Context ctx = new HttpServiceContext(getHost(), accessControllerContext);
-			PaxWebStandardContext context = new PaxWebStandardContext(default404Servlet);
+			PaxWebStandardContext context = new PaxWebStandardContext(default404Servlet, new OsgiSessionAttributeListener(sessionListenerModels));
 			context.setName(model.getId());
 			context.setPath("/".equals(contextPath) ? "" : contextPath);
 			// TODO: this should really be context specific
@@ -767,14 +775,9 @@ class TomcatServerWrapper implements BatchVisitor {
 			//		// TODO: connectors are needed for virtual host?
 			//
 			//		final Context context = server.addContext(
-			//				contextModel.getContextParams(),
-			//				getContextAttributes(bundleContext),
-			//				contextModel.getContextName(), contextModel.getHttpContext(),
 			//				contextModel.getAccessControllerContext(),
 			//				contextModel.getContainerInitializers(),
-			//				contextModel.getJettyWebXmlURL(),
 			//				contextModel.getVirtualHosts(), null /*contextModel.getConnectors() */,
-			//				server.getBasedir());
 
 			// explicit no check for existing mapping under given physical context path
 			contextHandlers.put(contextPath, context);
@@ -1246,6 +1249,10 @@ class TomcatServerWrapper implements BatchVisitor {
 					OsgiServletContext c = osgiServletContexts.get(context);
 					c.addServletContextAttributeListener((ServletContextAttributeListener)eventListener);
 				}
+				if (eventListener instanceof HttpSessionAttributeListener) {
+					// we have to store it separately to propagate OsgiHttpSession specific events
+					sessionListenerModels.add(eventListenerModel);
+				}
 
 				boolean stopped = false;
 				if (standardContext.isStarted() && standardContext.getState() != LifecycleState.STARTING_PREP
@@ -1301,6 +1308,9 @@ class TomcatServerWrapper implements BatchVisitor {
 						if (c != null) {
 							c.removeServletContextAttributeListener((ServletContextAttributeListener)eventListener);
 						}
+					}
+					if (eventListener instanceof HttpSessionAttributeListener) {
+						sessionListenerModels.remove(eventListenerModel);
 					}
 
 					if (pendingTransaction(contextPath)) {
@@ -1410,6 +1420,12 @@ class TomcatServerWrapper implements BatchVisitor {
 			LOG.info("Changing error page configuration for context {}", contextPath);
 
 			PaxWebStandardContext context = contextHandlers.get(contextPath);
+
+			if (context == null) {
+				// may happen when cleaning things out
+				return;
+			}
+
 			for (ErrorPage ep : context.findErrorPages()) {
 				context.removeErrorPage(ep);
 			}
@@ -1763,7 +1779,8 @@ class TomcatServerWrapper implements BatchVisitor {
 			});
 
 			context.start();
-
+			// swap dynamic to normal context
+			context.setOsgiServletContext(highestRankedContext);
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}

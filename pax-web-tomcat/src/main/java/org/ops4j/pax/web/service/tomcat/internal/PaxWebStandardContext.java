@@ -15,9 +15,14 @@
  */
 package org.ops4j.pax.web.service.tomcat.internal;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +37,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSessionAttributeListener;
+import javax.servlet.http.HttpSessionBindingEvent;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.LifecycleException;
@@ -50,6 +57,7 @@ import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiFilterChain;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
+import org.ops4j.pax.web.service.spi.servlet.OsgiSessionAttributeListener;
 import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
 import org.osgi.service.http.whiteboard.Preprocessor;
 import org.slf4j.Logger;
@@ -118,9 +126,12 @@ public class PaxWebStandardContext extends StandardContext {
 	 */
 	private final List<Object> orderedListeners = new ArrayList<>();
 
-	public PaxWebStandardContext(Default404Servlet defaultServlet) {
+	private final OsgiSessionAttributeListener osgiSessionsBridge;
+
+	public PaxWebStandardContext(Default404Servlet defaultServlet, OsgiSessionAttributeListener osgiSessionsBridge) {
 		super();
 		getPipeline().addValve(new PaxWebStandardContextValve((ValveBase) getPipeline().getBasic(), defaultServlet));
+		this.osgiSessionsBridge = osgiSessionsBridge;
 	}
 
 	/**
@@ -149,10 +160,10 @@ public class PaxWebStandardContext extends StandardContext {
 			final OsgiFilterChain osgiChain;
 			if (wrapper != null && !wrapper.is404()) {
 				osgiChain = new OsgiFilterChain(new ArrayList<>(delegate.getPreprocessors().keySet()),
-						wrapper.getServletContext(), wrapper.getWebContainerContext(), null);
+						wrapper.getServletContext(), wrapper.getWebContainerContext(), null, osgiSessionsBridge);
 			} else {
 				osgiChain = new OsgiFilterChain(new ArrayList<>(delegate.getPreprocessors().keySet()),
-						delegate.getDefaultServletContext(), delegate.getDefaultWebContainerContext(), null);
+						delegate.getDefaultServletContext(), delegate.getDefaultWebContainerContext(), null, osgiSessionsBridge);
 			}
 
 			// this chain will be called (or not)
@@ -386,6 +397,11 @@ public class PaxWebStandardContext extends StandardContext {
 	public void addApplicationEventListener(EventListenerModel model, Object listener) {
 		// we're not adding the listener to StandardContext - we'll add all listeners when the context is started
 
+		if (listener instanceof HttpSessionAttributeListener) {
+			// we should not pass information about meta OSGi-scoped session
+			listener = proxiedHttpSessionAttributeListener(listener);
+		}
+
 		if (model == null || model.isDynamic()) {
 			orderedListeners.add(listener);
 		} else {
@@ -462,6 +478,22 @@ public class PaxWebStandardContext extends StandardContext {
 		super.setApplicationEventListeners(eventListeners.toArray());
 	}
 
+	public Object proxiedHttpSessionAttributeListener(Object eventListener) {
+		SessionFilteringInvocationHandler handler = new SessionFilteringInvocationHandler(eventListener);
+		ClassLoader cl = getParentClassLoader();
+		if (cl == null) {
+			// for test scenario
+			cl = eventListener.getClass().getClassLoader();
+		}
+		Set<Class<?>> interfaces = new LinkedHashSet<>();
+		Class<?> c = eventListener.getClass();
+		while (c != Object.class) {
+			interfaces.addAll(Arrays.asList(c.getInterfaces()));
+			c = c.getSuperclass();
+		}
+		return Proxy.newProxyInstance(cl, interfaces.toArray(new Class[0]), handler);
+	}
+
 	public void setDefaultOsgiContextModel(OsgiContextModel defaultOsgiContextModel) {
 		this.defaultOsgiContextModel = defaultOsgiContextModel;
 	}
@@ -480,6 +512,29 @@ public class PaxWebStandardContext extends StandardContext {
 
 	public Map<Preprocessor, FilterConfig> getPreprocessors() {
 		return preprocessors;
+	}
+
+	private static class SessionFilteringInvocationHandler implements InvocationHandler {
+		private final Object eventListener;
+
+		SessionFilteringInvocationHandler(Object eventListener) {
+			this.eventListener = eventListener;
+		}
+
+		@Override
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			boolean proceed = method.getName().equals("attributeAdded")
+					|| method.getName().equals("attributeRemoved")
+					|| method.getName().equals("attributeReplaced");
+			if (proceed && method.getDeclaringClass() == HttpSessionAttributeListener.class) {
+				HttpSessionBindingEvent event = (HttpSessionBindingEvent) args[0];
+				if (event.getName().startsWith("__osgi@session@")) {
+					return null;
+				}
+				return method.invoke(eventListener, args);
+			}
+			return method.invoke(eventListener, args);
+		}
 	}
 
 }

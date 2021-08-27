@@ -752,6 +752,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	 * @return
 	 */
 	public String getTemporaryLocation() {
+		// TODO: should rather swap numeric id into name (for WABs, it should always be "default")
 		if (isWab()) {
 			// When restarting, a WAB gets new OsgiContextModel, so we have to keep the path unique for the WAB
 			return "/".equals(contextPath) ? "ROOT" : contextPath;

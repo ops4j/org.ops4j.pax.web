@@ -102,7 +102,7 @@ public class AbstractKarafTestBase extends AbstractControlledTestBase {
 						.useDeployFolder(false),
 				new DoNotModifyLogOption(),
 
-				org.ops4j.pax.exam.karaf.options.KarafDistributionOption.debugConfiguration("5005", false),
+//				org.ops4j.pax.exam.karaf.options.KarafDistributionOption.debugConfiguration("5005", false),
 
 				configureConsole().ignoreLocalConsole(),
 

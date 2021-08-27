@@ -53,6 +53,7 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.SessionCookieConfig;
 import javax.servlet.annotation.ServletSecurity;
+import javax.servlet.http.HttpSessionAttributeListener;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.UnmarshallerHandler;
@@ -128,6 +129,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiDynamicServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
+import org.ops4j.pax.web.service.spi.servlet.OsgiSessionAttributeListener;
 import org.ops4j.pax.web.service.spi.servlet.PreprocessorFilterConfig;
 import org.ops4j.pax.web.service.spi.servlet.RegisteringContainerInitializer;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
@@ -352,6 +354,12 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 	 * to remove some of them.
 	 */
 	private final Map<String, FlexibleErrorPages> errorPages = new HashMap<>();
+
+	/**
+	 * All {@link EventListenerModel} instances for {@link HttpSessionAttributeListener} listeners. They'll be
+	 * reviewed in order to propagate session attribute events per {@link OsgiContextModel}.
+	 */
+	private final List<EventListenerModel> sessionListenerModels = new ArrayList<>();
 
 	UndertowServerWrapper(Configuration config, UndertowFactory undertowFactory,
 			Bundle paxWebUndertowBundle, ClassLoader classLoader) {
@@ -1093,7 +1101,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			this.preprocessorsHandlers.put(contextPath, preprocessorWrapper);
 			deploymentInfo.addOuterHandlerChainWrapper(preprocessorWrapper);
 
-			PaxWebOuterHandlerWrapper outerWrapper = new PaxWebOuterHandlerWrapper();
+			PaxWebOuterHandlerWrapper outerWrapper = new PaxWebOuterHandlerWrapper(new OsgiSessionAttributeListener(sessionListenerModels));
 			this.wrappingHandlers.put(contextPath, outerWrapper);
 			deploymentInfo.addOuterHandlerChainWrapper(outerWrapper);
 
@@ -1798,6 +1806,10 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 					OsgiServletContext c = osgiServletContexts.get(context);
 					c.addServletContextAttributeListener((ServletContextAttributeListener) eventListener);
 				}
+				if (eventListener instanceof HttpSessionAttributeListener) {
+					// we have to store it separately to propagate OsgiHttpSession specific events
+					sessionListenerModels.add(eventListenerModel);
+				}
 
 				boolean stopped = false;
 				if (manager != null && manager.getState() != DeploymentManager.State.UNDEPLOYED
@@ -1871,6 +1883,9 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 						// remove it from per-OsgiContext list
 						OsgiServletContext c = osgiServletContexts.get(context);
 						c.removeServletContextAttributeListener((ServletContextAttributeListener) eventListener);
+					}
+					if (eventListener instanceof HttpSessionAttributeListener) {
+						sessionListenerModels.remove(eventListenerModel);
 					}
 
 					if (eventListenerModel.isDynamic()) {
@@ -2005,6 +2020,11 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			Deployment deployment = getDeployment(contextPath);
 			DeploymentInfo deploymentInfo = deployment == null ? deploymentInfos.get(contextPath)
 					: deployment.getDeploymentInfo();
+
+			if (deploymentInfo == null) {
+				// may happen when cleaning things out
+				return;
+			}
 
 			deploymentInfo.getErrorPages().clear();
 
@@ -2317,6 +2337,8 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			RegisteringContainerInitializer registeringSCI = new RegisteringContainerInitializer(highestRankedContext, registrations);
 			deployment.addServletContainerInitializers(new OsgiServletContainerInitializerInfo(registeringSCI));
 
+			deployment.setSessionManagerFactory(new PaxWebInMemorySessionManagerFactory());
+
 			// alter session configuration
 			SessionConfigurationModel session = highestRanked.getSessionConfiguration();
 			if (session != null) {
@@ -2371,9 +2393,9 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				deployment.getSecurityConstraints().clear();
 				for (SecurityConstraintModel constraintModel : security.getSecurityConstraints()) {
 					SecurityConstraint constraint = new SecurityConstraint();
-		            if (constraintModel.isAuthRolesSet()) {
-		                constraint.setEmptyRoleSemantic(SecurityInfo.EmptyRoleSemantic.AUTHENTICATE);
-		            }
+					if (constraintModel.isAuthRolesSet()) {
+						constraint.setEmptyRoleSemantic(SecurityInfo.EmptyRoleSemantic.AUTHENTICATE);
+					}
 					constraint.addRolesAllowed(constraintModel.getAuthRoles());
 					if (constraintModel.getTransportGuarantee() == ServletSecurity.TransportGuarantee.NONE) {
 						constraint.setTransportGuaranteeType(TransportGuaranteeType.NONE);

@@ -31,6 +31,8 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 
 import org.eclipse.jetty.server.HandlerContainer;
+import org.eclipse.jetty.server.session.Session;
+import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
@@ -278,6 +280,18 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 		rankedListeners.entrySet().removeIf(e -> e.getKey().getRanklessPosition() >= 0);
 		// ALL listeners added without a model (listeners added by SCIs and other listeners) will be cleared
 		orderedListeners.clear();
+	}
+
+	@Override
+	protected SessionHandler newSessionHandler() {
+		return new SessionHandler() {
+			@Override
+			public void doSessionAttributeListeners(Session session, String name, Object old, Object value) {
+				if (!name.startsWith("__osgi@session@")) {
+					super.doSessionAttributeListeners(session, name, old, value);
+				}
+			}
+		};
 	}
 
 }

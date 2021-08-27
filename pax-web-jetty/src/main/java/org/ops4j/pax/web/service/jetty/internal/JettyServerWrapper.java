@@ -42,6 +42,7 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.SessionCookieConfig;
 import javax.servlet.annotation.ServletSecurity;
+import javax.servlet.http.HttpSessionAttributeListener;
 
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.jmx.MBeanContainer;
@@ -106,6 +107,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiDynamicServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
+import org.ops4j.pax.web.service.spi.servlet.OsgiSessionAttributeListener;
 import org.ops4j.pax.web.service.spi.servlet.PreprocessorFilterConfig;
 import org.ops4j.pax.web.service.spi.servlet.RegisteringContainerInitializer;
 import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
@@ -212,6 +214,12 @@ class JettyServerWrapper implements BatchVisitor {
 	private final Default404Servlet default404Servlet = new Default404Servlet();
 
 	private SessionCookieConfig defaultSessionCookieConfig;
+
+	/**
+	 * All {@link EventListenerModel} instances for {@link HttpSessionAttributeListener} listeners. They'll be
+	 * reviewed in order to propagate session attribute events per {@link OsgiContextModel}.
+	 */
+	private final List<EventListenerModel> sessionListenerModels = new ArrayList<>();
 
 	JettyServerWrapper(Configuration config, JettyFactory jettyFactory,
 			Bundle paxWebJettyBundle, ClassLoader classLoader) {
@@ -711,7 +719,7 @@ class JettyServerWrapper implements BatchVisitor {
 
 			PaxWebServletContextHandler sch = new PaxWebServletContextHandler(null, contextPath, configuration);
 			// special, OSGi-aware org.eclipse.jetty.servlet.ServletHandler
-			sch.setServletHandler(new PaxWebServletHandler(default404Servlet));
+			sch.setServletHandler(new PaxWebServletHandler(default404Servlet, new OsgiSessionAttributeListener(sessionListenerModels)));
 			// setting "false" here will trigger 302 redirect when browsing to context without trailing "/"
 			sch.setAllowNullPathInfo(false);
 			// welcome files will be handled at default/resource servlet level and OsgiServletContext
@@ -750,7 +758,7 @@ class JettyServerWrapper implements BatchVisitor {
 			SessionHandler sessions = sch.getSessionHandler();
 			if (sessions != null) {
 				SessionConfiguration sc = configuration.session();
-				sessions.setMaxInactiveInterval(sc.getSessionTimeout() * 60);
+				sessions.setMaxInactiveInterval(sc.getSessionTimeout());
 				sessions.setSessionCookie(defaultSessionCookieConfig.getName());
 				sessions.getSessionCookieConfig().setDomain(defaultSessionCookieConfig.getDomain());
 				// will default to context path if null
@@ -1454,6 +1462,10 @@ class JettyServerWrapper implements BatchVisitor {
 					OsgiServletContext c = osgiServletContexts.get(context);
 					c.addServletContextAttributeListener((ServletContextAttributeListener)eventListener);
 				}
+				if (eventListener instanceof HttpSessionAttributeListener) {
+					// we have to store it separately to propagate OsgiHttpSession specific events
+					sessionListenerModels.add(eventListenerModel);
+				}
 
 				boolean stopped = false;
 				if (servletContextHandler.isStarted() && ServletContextListener.class.isAssignableFrom(eventListener.getClass())) {
@@ -1508,6 +1520,9 @@ class JettyServerWrapper implements BatchVisitor {
 						if (c != null) {
 							c.removeServletContextAttributeListener((ServletContextAttributeListener)eventListener);
 						}
+					}
+					if (eventListener instanceof HttpSessionAttributeListener) {
+						sessionListenerModels.remove(eventListenerModel);
 					}
 
 					if (pendingTransaction(contextPath)) {
@@ -1614,6 +1629,11 @@ class JettyServerWrapper implements BatchVisitor {
 
 			// there should already be a ServletContextHandler
 			ServletContextHandler sch = contextHandlers.get(contextPath);
+
+			if (sch == null) {
+				// may happen when cleaning things out
+				return;
+			}
 
 			ErrorPageErrorHandler eph = (ErrorPageErrorHandler) sch.getErrorHandler();
 			eph.getErrorPages().clear();

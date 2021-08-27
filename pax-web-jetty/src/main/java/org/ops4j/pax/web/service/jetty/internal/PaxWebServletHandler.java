@@ -42,12 +42,12 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
 import org.eclipse.jetty.util.ArrayUtil;
-import org.ops4j.pax.web.annotations.Review;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiFilterChain;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
+import org.ops4j.pax.web.service.spi.servlet.OsgiSessionAttributeListener;
 import org.osgi.service.http.whiteboard.Preprocessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +78,8 @@ public class PaxWebServletHandler extends ServletHandler {
 	/** Default {@link WebContainerContext} for chains without target {@link Servlet} */
 	private WebContainerContext defaultWebContainerContext;
 
+	private final OsgiSessionAttributeListener osgiSessionsBridge;
+
 	/**
 	 * Default servlet to be used when there's nothing mapped under "/" - this is to ensure that filter-only
 	 * chains will work without problems.
@@ -90,8 +92,7 @@ public class PaxWebServletHandler extends ServletHandler {
 	 * Create new {@link ServletHandler} for given {@link org.eclipse.jetty.servlet.ServletContextHandler}
 	 * @param default404Servlet this servlet will be used when there's no mapped servlet
 	 */
-	@Review("Move this comment to server-agnostic code")
-	PaxWebServletHandler(Servlet default404Servlet) {
+	PaxWebServletHandler(Servlet default404Servlet, OsgiSessionAttributeListener osgiSessionsBridge) {
 		// we need default servlet for these reasons:
 		// 1. there HAS TO be something that'll send 404 if nothing is found within given ServletContextHandler
 		// 2. without mapped servlet, even 404 one, no filter chain will be created, so we won't be able
@@ -110,6 +111,7 @@ public class PaxWebServletHandler extends ServletHandler {
 		setFilters(new PaxWebFilterHolder[0]);
 
 		this.default404Servlet = default404Servlet;
+		this.osgiSessionsBridge = osgiSessionsBridge;
 	}
 
 	public void setDefaultServletContext(OsgiServletContext defaultServletContext) {
@@ -356,9 +358,10 @@ public class PaxWebServletHandler extends ServletHandler {
 		}
 		if (!holder.is404()) {
 			return new OsgiFilterChain(new ArrayList<>(preprocessors.keySet()), holder.getServletContext(),
-					holder.getWebContainerContext(), chain);
+					holder.getWebContainerContext(), chain, osgiSessionsBridge);
 		} else {
-			return new OsgiFilterChain(new ArrayList<>(preprocessors.keySet()), defaultServletContext, defaultWebContainerContext, chain);
+			return new OsgiFilterChain(new ArrayList<>(preprocessors.keySet()), defaultServletContext,
+					defaultWebContainerContext, chain, osgiSessionsBridge);
 		}
 	}
 

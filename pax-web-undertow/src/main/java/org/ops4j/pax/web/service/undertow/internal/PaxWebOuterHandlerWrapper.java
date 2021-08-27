@@ -25,6 +25,8 @@ import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.handlers.ServletRequestContext;
 import io.undertow.util.StatusCodes;
 import org.ops4j.pax.web.service.spi.servlet.OsgiHttpServletRequestWrapper;
+import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
+import org.ops4j.pax.web.service.spi.servlet.OsgiSessionAttributeListener;
 
 /**
  * This {@link HandlerWrapper} ensures that {@link org.osgi.service.http.whiteboard.Preprocessor preprocessors},
@@ -33,7 +35,13 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiHttpServletRequestWrapper;
 public class PaxWebOuterHandlerWrapper implements HandlerWrapper {
 
 	/** Default {@link ServletContext} to use for chains without target servlet (e.g., filters only) */
-	private ServletContext defaultServletContext;
+	private OsgiServletContext defaultServletContext;
+
+	private final OsgiSessionAttributeListener osgiSessionsBridge;
+
+	public PaxWebOuterHandlerWrapper(OsgiSessionAttributeListener osgiSessionsBridge) {
+		this.osgiSessionsBridge = osgiSessionsBridge;
+	}
 
 	@Override
 	@SuppressWarnings("Convert2Lambda")
@@ -66,11 +74,11 @@ public class PaxWebOuterHandlerWrapper implements HandlerWrapper {
 					if (!paxWebServletInfo.is404()) {
 						// wrap request, so it returns servlet's servlet context
 						req = new OsgiHttpServletRequestWrapper(incomingRequest,
-								paxWebServletInfo.getServletContext());
+								paxWebServletInfo.getServletContext(), osgiSessionsBridge);
 					} else {
 						// wrap request, so it returns default context's servlet context
 						req = new OsgiHttpServletRequestWrapper(incomingRequest,
-								defaultServletContext);
+								defaultServletContext, osgiSessionsBridge);
 					}
 					context.setServletRequest(req);
 				}
@@ -85,7 +93,7 @@ public class PaxWebOuterHandlerWrapper implements HandlerWrapper {
 		return defaultServletContext;
 	}
 
-	public void setDefaultServletContext(ServletContext defaultServletContext) {
+	public void setDefaultServletContext(OsgiServletContext defaultServletContext) {
 		this.defaultServletContext = defaultServletContext;
 	}
 

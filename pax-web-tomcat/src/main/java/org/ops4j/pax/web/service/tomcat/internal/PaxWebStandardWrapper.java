@@ -171,6 +171,10 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 		return servletContext;
 	}
 
+	public OsgiServletContext getOsgiServletContext() {
+		return osgiServletContext;
+	}
+
 	public WebContainerContext getWebContainerContext() {
 		return webContainerContext;
 	}

@@ -48,6 +48,8 @@ public class OsgiFilterChain implements FilterChain {
 	private final ServletContext servletContext;
 	private final WebContainerContext webContext;
 
+	private final OsgiSessionAttributeListener osgiSessionsBridge;
+
 	private FilterChain chain;
 
 	private int index = 0;
@@ -62,11 +64,13 @@ public class OsgiFilterChain implements FilterChain {
 	 * @param originalChain
 	 */
 	public OsgiFilterChain(List<Preprocessor> preprocessors, ServletContext servletContext,
-			WebContainerContext context, FilterChain originalChain) {
+			WebContainerContext context, FilterChain originalChain,
+			OsgiSessionAttributeListener osgiSessionsBridge) {
 		this.preprocessors.addAll(preprocessors);
 		this.webContext = context;
 		this.servletContext = servletContext;
 		this.chain = originalChain;
+		this.osgiSessionsBridge = osgiSessionsBridge;
 	}
 
 	public void setChain(FilterChain chain) {
@@ -80,7 +84,7 @@ public class OsgiFilterChain implements FilterChain {
 
 		// Here's the best place to wrap a request - but only when called for the first time!
 		if (index == 0 && servletContext != null) {
-			req = new OsgiHttpServletRequestWrapper(req, servletContext);
+			req = new OsgiHttpServletRequestWrapper(req, servletContext, osgiSessionsBridge);
 		}
 
 		if (index < preprocessors.size()) {

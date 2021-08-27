@@ -124,7 +124,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 			}
 
 			@Override
-			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) {
 				LOG.info("handleSecurity(" + request + ")");
 				return request.getHeader("Let-Me-In") != null;
 			}
@@ -144,7 +144,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 			}
 
 			@Override
-			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 				resp.setContentType("text/plain");
 
 				contexts.put(getServletContext(), true);
@@ -219,7 +219,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 			}
 
 			@Override
-			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) {
 				LOG.info("handleSecurity(" + request + ")");
 				return request.getHeader("Let-Me-In") != null;
 			}
@@ -244,7 +244,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 			}
 
 			@Override
-			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 				resp.setContentType("text/plain");
 
 				contexts.put(getServletContext(), true);
@@ -307,8 +307,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 
 		Servlet servlet = new HttpServlet() {
 			@Override
-			protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-					throws ServletException, IOException {
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 				req.setAttribute("a", "a1");
 				req.setAttribute("a", "a2");
 				req.removeAttribute("a");
@@ -390,8 +389,7 @@ public class ServerControllerBasicRegistrationTest extends MultiContainerTestSup
 
 		Servlet servlet = new HttpServlet() {
 			@Override
-			protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-					throws ServletException, IOException {
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 				req.setAttribute("a", "a1");
 				req.setAttribute("a", "a2");
 				req.removeAttribute("a");
