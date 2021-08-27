@@ -81,6 +81,7 @@ public class PaxWebWebSocketsServletContainerInitializer implements ServletConta
 			} else if (wsm.getElementSupplier() != null) {
 				annotatedEndpointInstances.put(wsm, wsm.getElementSupplier().get());
 			} else if (wsm.getElementReference() != null) {
+				// TOUNGET:
 				Object endpoint = wsm.getRegisteringBundle().getBundleContext().getService(wsm.getElementReference());
 				annotatedEndpointInstances.put(wsm, endpoint);
 			} else {

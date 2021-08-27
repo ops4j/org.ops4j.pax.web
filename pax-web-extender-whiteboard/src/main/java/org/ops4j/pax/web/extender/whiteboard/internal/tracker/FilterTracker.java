@@ -141,6 +141,7 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 		// 6. Check the filter annotations - we need a class of actual filter
 		Filter service = null;
 		try {
+			// TOUNGET:
 			service = bundleContext.getService(serviceReference);
 			if (service != null) {
 				FilterAnnotationScanner scanner = new FilterAnnotationScanner(service.getClass());
@@ -194,6 +195,7 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 			}
 		} finally {
 			if (service != null) {
+				// TOUNGET:
 				bundleContext.ungetService(serviceReference);
 			}
 		}

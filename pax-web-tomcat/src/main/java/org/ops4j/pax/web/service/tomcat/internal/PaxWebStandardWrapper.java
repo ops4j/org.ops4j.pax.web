@@ -200,7 +200,7 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 		if (instance == null) {
 			if (serviceReference != null) {
 				// obtain Servlet using reference
-				// TODO: use org.osgi.framework.ServiceObjects
+				// TOUNGET: use org.osgi.framework.ServiceObjects
 				instance = servletModel.getRegisteringBundle().getBundleContext().getService(serviceReference);
 			} else if (servletClass != null) {
 				try {
@@ -232,6 +232,7 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 	public synchronized void unload() throws ServletException {
 		super.unload();
 		if (servletModel != null && servletModel.getElementReference() != null) {
+			// TOUNGET:
 			servletModel.getRegisteringBundle().getBundleContext().ungetService(servletModel.getElementReference());
 		}
 	}

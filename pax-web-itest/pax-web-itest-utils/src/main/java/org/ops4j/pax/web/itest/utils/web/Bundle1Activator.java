@@ -44,7 +44,7 @@ public class Bundle1Activator implements BundleActivator {
 			Thread.sleep(100);
 		}
 
-		WebContainer service = (WebContainer) context.getService(serviceReference);
+		WebContainer service = context.getService(serviceReference);
 		HttpContext httpContext = service.createDefaultSharedHttpContext();
 
 		Dictionary<String, String> props;

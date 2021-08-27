@@ -1231,7 +1231,6 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 		if (change.getKind() == OpCode.DELETE) {
 			LOG.info("Removing {} from {}", osgiModel, contextPath);
 
-			// TOCHECK: are there web elements associated with removed mapping for OsgiServletContext?
 			OsgiServletContext removedOsgiServletContext = osgiServletContexts.remove(osgiModel);
 			osgiContextModels.get(contextPath).remove(osgiModel);
 
@@ -1262,7 +1261,6 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			// and the highest ranked context should be registered as OSGi service (if it wasn't registered)
 			highestRankedContext.register();
 		} else {
-			// TOCHECK: there should be no more web elements in the context, no OSGi mechanisms, just 404 all the time
 			if (wrappingHandlers.containsKey(contextPath)) {
 				wrappingHandlers.get(contextPath).setDefaultServletContext(null);
 			}
@@ -1930,7 +1928,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 							}
 						});
 					}
-//					TODO: eventListenerModel.ungetEventListener(eventListener);
+//					TOUNGET: eventListenerModel.ungetEventListener(eventListener);
 
 					ensureServletContextStarted(contextPath);
 				});

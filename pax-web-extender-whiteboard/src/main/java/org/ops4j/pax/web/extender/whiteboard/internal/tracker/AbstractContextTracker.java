@@ -202,6 +202,7 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 	 * @return
 	 */
 	protected <C> C dereference(ServiceReference<C> reference) {
+		// TOUNGET:
 		C service = bundleContext.getService(reference);
 		if (service == null) {
 			throw new IllegalArgumentException("Can't create Whiteboard context, can't dereference " + reference);

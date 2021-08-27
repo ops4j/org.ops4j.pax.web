@@ -38,8 +38,6 @@ import org.osgi.service.http.whiteboard.Preprocessor;
  *     {@link org.osgi.service.http.context.ServletContextHelper#handleSecurity} +
  *     {@link org.osgi.service.http.context.ServletContextHelper#finishSecurity}</li>
  * </ul>
- *
- * TODO: ensure proper behavior in REQUEST, INCLUDE, FORWARD dispatches
  */
 public class OsgiFilterChain implements FilterChain {
 

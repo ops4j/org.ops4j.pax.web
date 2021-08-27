@@ -60,6 +60,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Xnio
 
 	@Override
 	public XnioProvider addingService(ServiceReference<XnioProvider> reference) {
+		// TOUNGET:
 		XnioProvider provider = bundleContext.getService(reference);
 		Bundle bundle = bundleContext.getBundle();
 		UndertowServerControllerFactory factory = new UndertowServerControllerFactory(bundle,

@@ -570,7 +570,7 @@ public class ServiceModel implements BatchVisitor {
 
 		LOG.info("Re-registering web elements from {} to {}", oldContext, target);
 
-		// TODO: I can still imagine a scenario, where a web element should not simply be re-registered into
+		// TODO_WAB: I can still imagine a scenario, where a web element should not simply be re-registered into
 		//       new context, because this new context may already contain higher-ranked web elements.
 		//       But for now, let's NOT treat it as generic scenario, but only as a way to alter HttpService
 		//       related contexts using Whiteboard services

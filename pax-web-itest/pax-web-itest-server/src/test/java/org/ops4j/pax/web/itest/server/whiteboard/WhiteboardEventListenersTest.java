@@ -70,7 +70,6 @@ public class WhiteboardEventListenersTest extends MultiContainerTestSupport {
 				super.doGet(req, resp);
 				// even if we wrap request object, attributes are passed to wrapped request
 				req.setAttribute("a", "1");
-				// TODO: this will be tricky when we implment session per Osgi Context
 				req.getSession().setAttribute("b", "2");
 				// this is tricky because we store attributes by OsgiServletContext, which is
 				// in 1:1 relation with OsgiContextModel

@@ -88,6 +88,7 @@ public class WebresourcesExtender implements BundleActivator, BundleListener {
 				logger.info("OsgiResourceLocator from bundle '{}' removed.",
 						reference.getBundle().getSymbolicName());
 				osgiResourceLocatorServices.remove(service);
+				// TOUNGET:
 				context.ungetService(reference);
 			}
 		});

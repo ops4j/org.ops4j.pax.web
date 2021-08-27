@@ -95,6 +95,7 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 			}
 			if (getElementReference() != null) {
 				// last, but official check
+				// TOUNGET:
 				resolvedListener = getRegisteringBundle().getBundleContext().getService(getElementReference());
 			}
 			return resolvedListener;
@@ -115,6 +116,7 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 			return;
 		}
 		if (getElementReference() != null) {
+			// TOUNGET:
 			getRegisteringBundle().getBundleContext().ungetService(getElementReference());
 		}
 	}

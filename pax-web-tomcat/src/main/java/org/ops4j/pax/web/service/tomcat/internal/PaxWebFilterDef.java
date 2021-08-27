@@ -67,7 +67,7 @@ public class PaxWebFilterDef extends FilterDef {
 			this.filterReference = filterModel.getElementReference();
 
 			if (filterReference != null) {
-				// TODO: ensure it's ungotten later
+				// TOUNGET: ensure it's ungotten later
 				instance = filterModel.getRegisteringBundle().getBundleContext().getService(filterReference);
 			}
 		}

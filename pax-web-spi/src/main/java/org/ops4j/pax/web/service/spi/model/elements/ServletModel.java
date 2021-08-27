@@ -510,15 +510,16 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		} else if (this.servlet != null) {
 			return this.servlet.getClass();
 		} else if (this.getElementSupplier() != null) {
-			// TOCHECK: what if user decides to control lifecycle of this element?
 			Servlet s = getElementSupplier().get();
 			return s.getClass();
 		} else if (getElementReference() != null) {
+			// TOUNGET:
 			Servlet s = getRegisteringBundle().getBundleContext().getService(getElementReference());
 			if (s != null) {
 				try {
 					return s.getClass();
 				} finally {
+					// TOUNGET:
 					getRegisteringBundle().getBundleContext().ungetService(getElementReference());
 				}
 			} else {

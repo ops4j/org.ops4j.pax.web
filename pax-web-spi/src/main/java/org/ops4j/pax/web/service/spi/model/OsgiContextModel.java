@@ -155,7 +155,6 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		// bundle that "registered" the default ServletContextHelper according to "140.2 The Servlet Context"
 		// it's not relevant, because the actual ServletContextHelper will be bound to the bundle for which
 		// actual servlet was registered.
-		// TOCHECK: what about filter-only pipeline? From which bundle the resources will be loaded?
 		Bundle bundle = FrameworkUtil.getBundle(OsgiContextModel.class);
 
 		// in Whiteboard, rank of "default" context is 0, so it can be overriden by any service ranked higher than 0
@@ -368,7 +367,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	/**
 	 * <p>This method should be called from Whiteboard infrastructure to really perform the validation and set
 	 * <em>isValid</em> flag, which is then used for "Failure DTO" purposes.</li>
-	 * TODO: different exceptions or calbacks for DTO purposes
+	 * TODO_DTO: different exceptions or calbacks for DTO purposes
 	 */
 	public boolean isValid() {
 		if (isValid == null) {
@@ -448,9 +447,9 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 			return contextSupplier.apply(bundleContext, getName());
 		}
 		if (contextReference != null) {
-			// TODO: the hardest part. All returned services SHOULD be unget when no longer used
 			LOG.debug("Dereferencing {} for {}", contextReference, bundleContext);
 
+			// TOUNGET: the hardest part. All returned services SHOULD be unget when no longer used
 			Object context = bundleContext.getService(contextReference);
 			if (context instanceof WebContainerContext) {
 				// Pax Web specific WebContainerContext
@@ -479,7 +478,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	 * @param context
 	 */
 	public void releaseHttpContext(WebContainerContext context) {
-		// TODO: actually release the context!
+		// TOUNGET: actually release the context!
 	}
 
 	/**
@@ -695,7 +694,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	 * A "WAB" context is always created by pax-web-extender-war when a WAB is installed and provides dedicated,
 	 * direct (no service reference and no supplier) to {@link HttpContext}.
 	 *
-	 * TODO: check what happens if BundleActivator of the WAB interacts with HttpService or with Whiteboard
+	 * TODO_WAB: check what happens if BundleActivator of the WAB interacts with HttpService or with Whiteboard
 	 * @return
 	 */
 	public boolean isWab() {

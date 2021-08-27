@@ -95,7 +95,8 @@ public class JasperInitializer extends org.apache.jasper.servlet.JasperInitializ
 			return;
 		}
 
-		// TOCHECK: override the instance manager required by org.apache.jasper.servlet.JspServletWrapper.getServlet()
+		// TODO: Maybe override the instance manager required by org.apache.jasper.servlet.JspServletWrapper.getServlet()
+		//       with one that can handle @PostContruct/@PreDestroy?
 		context.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
 
 		// set configured JarScanner into the context

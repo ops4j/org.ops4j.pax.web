@@ -97,6 +97,7 @@ public class HttpContextMappingTracker extends AbstractContextTracker<HttpContex
 			String scope = Utils.getStringProperty(serviceReference, Constants.SERVICE_SCOPE);
 			if (Constants.SCOPE_SINGLETON.equals(scope)) {
 				// for singletons, we don't care about unget()
+				// TOUNGET:
 				HttpContextMapping contextMapping = bundleContext.getService(serviceReference);
 
 				// HttpContextMapping is singleton, but it may return different context on each call of getHttpContext
@@ -156,6 +157,7 @@ public class HttpContextMappingTracker extends AbstractContextTracker<HttpContex
 						return new WebContainerContextWrapper(bundleContext.getBundle(), context, model.getName());
 					} finally {
 						if (mapping != null) {
+							// TOUNGET:
 							bundleContext.ungetService(serviceReference);
 						}
 					}

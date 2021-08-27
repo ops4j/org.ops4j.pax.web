@@ -98,7 +98,7 @@ public class WebApplicationEventDispatcher implements WebApplicationEventListene
 
 	@Override
 	public void bundleChanged(BundleEvent event) {
-		// TODO: clean up listeners for given bundle
+		// TODO_WAB: clean up listeners for given bundle
 //		if (event.getType() == BundleEvent.STOPPED || event.getType() == BundleEvent.UNINSTALLED) {
 //			states.remove(event.getBundle().getBundleId());
 //		}
@@ -106,11 +106,12 @@ public class WebApplicationEventDispatcher implements WebApplicationEventListene
 
 	@Override
 	public WebApplicationEventListener addingService(ServiceReference<WebApplicationEventListener> reference) {
+		// TOUNGET:
 		WebApplicationEventListener listener = bundleContext.getService(reference);
 		if (listener != null) {
 			LOG.debug("New WebApplicationEventListener added: {}", listener.getClass().getName());
 			synchronized (listeners) {
-				// TOCHECK: should we really send (and keep!) initial events?
+				// TOCHECK: should we really send (and keep!) initial events? (it's only for Karaf command actually)
 //				sendInitialEvents(listener);
 				listeners.add(listener);
 			}
@@ -125,6 +126,7 @@ public class WebApplicationEventDispatcher implements WebApplicationEventListene
 	@Override
 	public void removedService(ServiceReference<WebApplicationEventListener> reference, WebApplicationEventListener service) {
 		listeners.remove(service);
+		// TOUNGET:
 		bundleContext.ungetService(reference);
 		LOG.debug("WebApplicationEventListener is removed: {}", service.getClass().getName());
 	}

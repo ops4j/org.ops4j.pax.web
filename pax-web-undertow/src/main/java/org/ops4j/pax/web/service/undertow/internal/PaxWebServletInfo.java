@@ -218,6 +218,7 @@ public class PaxWebServletInfo extends ServletInfo {
 			if (instance == null) {
 				if (model.getElementReference() != null) {
 					// obtain Servlet using reference
+					// TOUNGET:
 					instance = model.getRegisteringBundle().getBundleContext().getService(model.getElementReference());
 					if (instance == null) {
 						throw new RuntimeException("Can't get a Servlet service from the reference " + model.getElementReference());

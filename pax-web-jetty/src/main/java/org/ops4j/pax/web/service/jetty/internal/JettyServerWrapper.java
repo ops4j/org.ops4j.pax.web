@@ -1101,9 +1101,9 @@ class JettyServerWrapper implements BatchVisitor {
 					String location = epm.getLocation();
 
 					ErrorPageErrorHandler eph = (ErrorPageErrorHandler) sch.getErrorHandler();
-					// TODO: If there are many servlets (mapped to non conflicting URIs), they still may define
-					//       conflicting error pages, and these conflicts are NOT resolved at ServletModel
-					//       resolution time. For now, we simply override existing error pages
+					// If there are many servlets (mapped to non conflicting URIs), they still may define
+					// conflicting error pages, and these conflicts are NOT resolved at ServletModel
+					// resolution time. For now, we simply override existing error pages
 					configureErrorPages(location, eph, epm);
 				}
 
@@ -1150,9 +1150,9 @@ class JettyServerWrapper implements BatchVisitor {
 						String location = epm.getLocation();
 
 						ErrorPageErrorHandler eph = (ErrorPageErrorHandler) sch.getErrorHandler();
-						// TODO: If there are many servlets (mapped to non conflicting URIs), they still may define
-						//       conflicting error pages, and these conflicts are NOT resolved at ServletModel
-						//       resolution time. For now, we simply remove existing error pages
+						// If there are many servlets (mapped to non conflicting URIs), they still may define
+						// conflicting error pages, and these conflicts are NOT resolved at ServletModel
+						// resolution time. For now, we simply remove existing error pages
 						Map<String, String> existing = eph.getErrorPages();
 						for (String ex : epm.getExceptionClassNames()) {
 							existing.entrySet().removeIf(e -> e.getKey().equals(ex) && e.getValue().equals(location));
@@ -2135,9 +2135,6 @@ class JettyServerWrapper implements BatchVisitor {
 	 * <p>This method tries to check if it's ok to just add new filters from {@code newFilterHolders} <em>at the end</em>
 	 * of current list of filters. This is quite special case, but not that uncommon - when new filters are
 	 * lower-ranked than all existing ones and there are no filters to be removed.</p>
-	 *
-	 * <p>TODO: with {@code ServletHandler#insertFilterMapping(FilterMapping, int, boolean)} we could
-	 *          optimize even more</p>
 	 *
 	 * @param servletHandler
 	 * @param newFilterHolders

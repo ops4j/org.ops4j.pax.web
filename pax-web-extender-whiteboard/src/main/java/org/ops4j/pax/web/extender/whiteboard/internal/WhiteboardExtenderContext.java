@@ -394,7 +394,7 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 				}
 
 				// 1. unregistration because of no matching contexts
-				// TODO: DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
+				// TODO_DTO: DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
 				if (newMatching.size() == 0) {
 					LOG.debug("Unregistering {} because its context selection filter doesn't match any context", webElement);
 					if (view != null) {
@@ -405,7 +405,7 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 				}
 
 				// 2. easy registration after some models matched
-				// TODO: get rid of existing DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
+				// TODO_DTO: get rid of existing DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
 				if (oldMatching.size() == 0) {
 					webElement.changeContextModels(newMatching);
 					LOG.debug("Registering {} because its context selection filter started matching existing contexts", webElement);
@@ -490,14 +490,14 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 		return bundleApplication;
 	}
 
-	// TODO: handling successful/failed DTO for elements/contexts
+	// TODO_DTO: handling successful/failed DTO for elements/contexts
 
 	/**
 	 * This method is invoked after checking that element model {@link ElementModel#isValid() is valid}.
 	 * @param webElement
 	 */
 	public void configureDTOs(ElementModel<?, ?> webElement) {
-		// TODO: could result in DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
+		// TODO_DTO: could result in DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
 		//       even if all other configuration params (url mappings, name, ...) are fine
 	}
 

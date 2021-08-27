@@ -147,6 +147,7 @@ public class PaxWebFilterHolder extends FilterHolder {
 	@Override
 	public void destroyInstance(Object o) {
 		if (filterModel != null && filterModel.getElementReference() != null) {
+			// TOUNGET:
 			filterModel.getRegisteringBundle().getBundleContext().ungetService(filterModel.getElementReference());
 		}
 		super.destroyInstance(o);

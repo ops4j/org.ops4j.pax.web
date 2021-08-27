@@ -114,7 +114,7 @@ public abstract class ElementModel<T, D extends WebElementEventData>
 	 * <p>This method should be called from Whiteboard infrastructure to really perform the validation and set
 	 * <em>isValid</em> flag, which is then used for "Failure DTO" purposes.</p>
 	 *
-	 * TODO: maybe we should accept some callback for DTO purposes.
+	 * TODO_DTO: maybe we should accept some callback for DTO purposes.
 	 */
 	public boolean isValid() {
 		if (isValid == null) {

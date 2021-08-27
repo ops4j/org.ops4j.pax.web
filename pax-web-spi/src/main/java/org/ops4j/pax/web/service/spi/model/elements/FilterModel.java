@@ -364,16 +364,17 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		} else if (this.filter != null) {
 			return this.filter.getClass();
 		} else if (this.getElementSupplier() != null) {
-			// TOCHECK: what if user decides to control lifecycle of this element?
 			Filter s = getElementSupplier().get();
 			return s.getClass();
 		}
 		if (getElementReference() != null) {
+			// TOUNGET:
 			Filter f = getRegisteringBundle().getBundleContext().getService(getElementReference());
 			if (f != null) {
 				try {
 					return f.getClass();
 				} finally {
+					// TOUNGET:
 					getRegisteringBundle().getBundleContext().ungetService(getElementReference());
 				}
 			} else {
@@ -415,7 +416,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 
 	/**
 	 * This method should be used by actual runtime to obtain an instance of the {@link Filter}.
-	 * TODO: do proper service unget if needed!
+	 * TOUNGET: do proper service unget if needed!
 	 * @return
 	 */
 	public Filter getInstance() {
@@ -423,6 +424,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		// obtain Filter using reference
 		ServiceReference<? extends Filter> ref = getElementReference();
 		if (ref != null) {
+			// TOUNGET:
 			instance =  getRegisteringBundle().getBundleContext().getService(ref);
 		}
 		if (instance == null && filterClass != null) {

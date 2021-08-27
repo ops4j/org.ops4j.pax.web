@@ -39,7 +39,7 @@ public class Bundle2Activator implements BundleActivator {
 			Thread.sleep(100);
 		}
 
-		WebContainer service = (WebContainer) context.getService(serviceReference);
+		WebContainer service = context.getService(serviceReference);
 
 		Collection<ServiceReference<HttpContext>> serviceReferences = context.getServiceReferences(HttpContext.class, "(httpContext.id=shared)");
 

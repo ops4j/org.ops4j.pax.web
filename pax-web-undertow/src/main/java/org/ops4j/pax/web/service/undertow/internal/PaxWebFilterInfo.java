@@ -98,6 +98,7 @@ public class PaxWebFilterInfo extends FilterInfo {
 			if (instance == null) {
 				if (model.getElementReference() != null) {
 					// obtain Filter using reference
+					// TOUNGET:
 					instance = model.getRegisteringBundle().getBundleContext().getService(model.getElementReference());
 					if (instance == null) {
 						throw new RuntimeException("Can't get a Filter service from the reference " + model.getElementReference());

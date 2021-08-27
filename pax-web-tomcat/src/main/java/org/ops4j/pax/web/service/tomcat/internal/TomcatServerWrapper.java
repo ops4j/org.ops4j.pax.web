@@ -264,8 +264,6 @@ class TomcatServerWrapper implements BatchVisitor {
 		// default session configuration is prepared, but not set in the server instance. It can be set
 		// only after first context is created
 		this.defaultSessionCookieConfig = configuration.session().getDefaultSessionCookieConfig();
-
-		// TODO: take session/cookie config from tomcat-server.xml as well
 	}
 
 	/**
@@ -712,8 +710,6 @@ class TomcatServerWrapper implements BatchVisitor {
 			PaxWebStandardContext context = new PaxWebStandardContext(default404Servlet, new OsgiSessionAttributeListener(sessionListenerModels));
 			context.setName(model.getId());
 			context.setPath("/".equals(contextPath) ? "" : contextPath);
-			// TODO: this should really be context specific
-			context.setWorkDir(configuration.server().getTemporaryDirectory().getAbsolutePath());
 
 			// in this new context, we need "initial OSGi filter" which will:
 			// - call preprocessors
@@ -878,7 +874,6 @@ class TomcatServerWrapper implements BatchVisitor {
 		if (change.getKind() == OpCode.DELETE) {
 			LOG.info("Removing {} from {}", osgiModel, realContext);
 
-			// TOCHECK: are there web elements associated with removed mapping for OsgiServletContext?
 			OsgiServletContext removedOsgiServletContext = osgiServletContexts.remove(osgiModel);
 			osgiContextModels.get(contextPath).remove(osgiModel);
 
@@ -1735,6 +1730,11 @@ class TomcatServerWrapper implements BatchVisitor {
 			});
 			context.setParentClassLoader(highestRankedContext.getClassLoader());
 			context.setLoader(tomcatLoader);
+			File workDir = (File) highestRankedContext.getAttribute(ServletContext.TEMPDIR);
+			if (workDir == null) {
+				workDir = configuration.server().getTemporaryDirectory();
+			}
+			context.setWorkDir(workDir.getAbsolutePath());
 
 			context.setOsgiServletContext(null);
 			ServletContext realContext = context.getServletContext();

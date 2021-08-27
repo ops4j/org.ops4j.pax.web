@@ -74,7 +74,7 @@ public abstract class AbstractMappingTracker<S extends ContextRelated, R, D exte
 				}
 			} finally {
 				if (service != null) {
-					// the service was obtained only to extract contextId/selector out of it, so we have to unget()
+					// TOUNGET: the service was obtained only to extract contextId/selector out of it, so we have to unget()
 					bundleContext.ungetService(serviceReference);
 				}
 			}
@@ -99,7 +99,7 @@ public abstract class AbstractMappingTracker<S extends ContextRelated, R, D exte
 			return doCreateElementModel(serviceReference.getBundle(), service, rank, serviceId);
 		} finally {
 			if (service != null) {
-				// the service was obtained only to extract the data out of it, so we have to unget()
+				// TOUNGET: the service was obtained only to extract the data out of it, so we have to unget()
 				bundleContext.ungetService(serviceReference);
 			}
 		}

@@ -130,6 +130,7 @@ public class WebSocketModel extends ElementModel<Object, WebSocketEventData> {
                 throw new IllegalArgumentException("Can't determine the Web Socket endpoint path. Element supplier returned null.");
             }
         } else if (getElementReference() != null) {
+            // TOUNGET:
             Object ws = getRegisteringBundle().getBundleContext().getService(getElementReference());
             if (ws != null) {
                 c = ws.getClass();
@@ -144,15 +145,16 @@ public class WebSocketModel extends ElementModel<Object, WebSocketEventData> {
 
         if (c.isAnnotationPresent(ServerEndpoint.class)) {
             ServerEndpoint endpoint = c.getAnnotation(ServerEndpoint.class);
+            decoderClasses = endpoint.decoders();
+            encoderClasses = endpoint.encoders();
+            subprotocols = endpoint.subprotocols();
+
             if (endpoint.value() != null) {
                 mappedPath = endpoint.value().trim();
                 // set the class - we will need it during actual registration
                 webSocketEndpointClassResolved = c;
                 return Boolean.TRUE;
             }
-            decoderClasses = endpoint.decoders();
-            encoderClasses = endpoint.encoders();
-            subprotocols = endpoint.subprotocols();
         }
 
         LOG.warn("Can't determine the Web Socket endpoint path - is @ServerEndpoint annotation present?");

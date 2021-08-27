@@ -399,6 +399,7 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 					LOG.warn("Can't obtain service reference for WebContainer for bundle {}", symbolicName);
 					return null;
 				}
+				// TOUNGET:
 				WebContainer wc = context.getService(sr);
 				if (wc == null) {
 					LOG.warn("Can't obtain WebContainer service for bundle {}", symbolicName);

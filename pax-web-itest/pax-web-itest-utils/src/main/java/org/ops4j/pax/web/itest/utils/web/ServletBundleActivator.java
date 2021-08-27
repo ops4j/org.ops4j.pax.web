@@ -31,17 +31,20 @@ public class ServletBundleActivator implements BundleActivator {
 	private ServiceRegistration<Servlet> servletReg;
 	private ServiceRegistration<HttpContext> httpContextReg;
 
+	private ServiceReference<WebContainer> serviceReference;
+	private WebContainer service;
+
 	@Override
 	@SuppressWarnings("deprecation")
 	public void start(BundleContext context) throws Exception {
-		ServiceReference<WebContainer> serviceReference = context.getServiceReference(WebContainer.class);
+		serviceReference = context.getServiceReference(WebContainer.class);
 
 		while (serviceReference == null) {
 			serviceReference = context.getServiceReference(WebContainer.class);
 			Thread.sleep(100);
 		}
 
-		WebContainer service = (WebContainer) context.getService(serviceReference);
+		service = context.getService(serviceReference);
 		HttpContext httpContext = service.createDefaultSharedHttpContext();
 
 		// register a custom http context
@@ -64,6 +67,9 @@ public class ServletBundleActivator implements BundleActivator {
 		}
 		if (httpContextReg != null) {
 			httpContextReg.unregister();
+		}
+		if (service != null) {
+			context.ungetService(serviceReference);
 		}
 	}
 

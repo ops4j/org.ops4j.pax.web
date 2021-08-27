@@ -141,6 +141,7 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 		// 9. Check the servlet annotations - we need a class of actual servlet
 		Servlet service = null;
 		try {
+			// TOUNGET:
 			service = bundleContext.getService(serviceReference);
 			if (service != null) {
 				ServletAnnotationScanner scanner = new ServletAnnotationScanner(service.getClass());
@@ -204,6 +205,7 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 			}
 		} finally {
 			if (service != null) {
+				// TOUNGET:
 				bundleContext.ungetService(serviceReference);
 			}
 		}

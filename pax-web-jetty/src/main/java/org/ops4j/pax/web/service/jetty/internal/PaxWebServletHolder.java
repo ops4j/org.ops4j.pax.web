@@ -203,7 +203,7 @@ public class PaxWebServletHolder extends ServletHolder {
 	protected synchronized Servlet getInstance() {
 		Servlet instance = super.getInstance();
 		if (instance == null && servletReference != null) {
-			// obtain Servlet using reference
+			// TOUNGET: obtain Servlet using reference
 			instance = servletModel.getRegisteringBundle().getBundleContext().getService(servletReference);
 		}
 		if (instance == null && servletModel.getElementSupplier() != null) {
@@ -224,6 +224,7 @@ public class PaxWebServletHolder extends ServletHolder {
 	@Override
 	public void destroyInstance(Object o) {
 		if (servletModel != null && servletModel.getElementReference() != null) {
+			// TOUNGET:
 			servletModel.getRegisteringBundle().getBundleContext().ungetService(servletModel.getElementReference());
 		}
 		super.destroyInstance(o);

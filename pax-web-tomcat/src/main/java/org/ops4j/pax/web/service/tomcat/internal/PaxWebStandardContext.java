@@ -194,7 +194,7 @@ public class PaxWebStandardContext extends StandardContext {
 	 * @param defaultServletContext
 	 */
 	public void setDefaultServletContext(OsgiServletContext defaultServletContext) {
-		// TODO: release previous WebContainerContext
+		// TOUNGET: release previous WebContainerContext
 		this.defaultServletContext = defaultServletContext;
 		if (defaultServletContext != null) {
 			this.defaultWebContainerContext = defaultOsgiContextModel.resolveHttpContext(defaultOsgiContextModel.getOwnerBundle());

@@ -347,6 +347,7 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 	 * @return
 	 */
 	protected S dereference(ServiceReference<S> reference) {
+		// TOUNGET:
 		S service = bundleContext.getService(reference);
 		if (service == null) {
 			throw new IllegalArgumentException("Can't create Whiteboard service, can't dereference " + reference);

@@ -79,8 +79,8 @@ public class LogServiceHandler implements
 
 	@Override
 	public LogService addingService(ServiceReference<LogService> reference) {
-		if (reference.isAssignableTo(bundleContext.getBundle(),
-				"org.osgi.service.log.LogService")) {
+		if (reference.isAssignableTo(bundleContext.getBundle(), "org.osgi.service.log.LogService")) {
+			// TOUNGET:
 			LogService logService = bundleContext.getService(reference);
 			try {
 				if (logService instanceof LogService) {
@@ -96,8 +96,7 @@ public class LogServiceHandler implements
 			} catch (NoClassDefFoundError e) {
 				LOG.warn("A LogService service was found, but the coresponding class can't be loaded, make sure to have a compatible org.osgi.service.log package package exported with version range [1.3,2.0)");
 			}
-			// If we came along here, we have no use of this service, so unget
-			// it!
+			// TOUNGET: If we came along here, we have no use of this service, so unget it!
 			bundleContext.ungetService(reference);
 		} else {
 			LOG.warn("A LogService service was found, but it is not assignable to this bundle, make sure to have a compatible org.osgi.service.log package package exported with version range [1.3,2.0)");
@@ -114,7 +113,7 @@ public class LogServiceHandler implements
 	@Override
 	public void removedService(ServiceReference<LogService> reference,
 							   LogService service) {
-		// What ever happens: We unget the service first
+		// TOUNGET: Whatever happens: We unget the service first
 		bundleContext.ungetService(reference);
 		try {
 			if (service instanceof LogService) {

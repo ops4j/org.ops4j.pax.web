@@ -39,7 +39,7 @@ import org.osgi.framework.Bundle;
  *         keep validation simple - web elements have to be valid only within a scope of single context.</li>
  *     <li>After the deployment finishes, it should be treated as normal Whiteboard/HttpService context, so we can
  *         <em>alter</em> the context by registering (for example) a Whiteboard filter into WAR/WAB context</li>
- *     <li>TODO: As of 2021-01-05, the open question is: what to do with Whiteboard elements registered into a context
+ *     <li>TODO_WAB: As of 2021-01-05, the open question is: what to do with Whiteboard elements registered into a context
  *               created for a WAR/WAB after the bundle associated with this WAR/WAB is uninstalled/stopped?</li>
  *     <li>If a WAR/WAB's deployment is attempted and associated context (path) is not free, we have to put such
  *         WAR/WAB into a kind of <em>pending</em> state, because the conflicting context (path) may at some point
@@ -68,7 +68,7 @@ public interface WebAppWebContainerView extends PaxWebContainerView {
 	 * <p>After a WAB is undeployed, the context path used by this bundle is again free for registration by Whiteboard
 	 * or HttpService.</p>
 	 *
-	 * <p>TODO: However the question remains open about what to do with Whiteboard/HttpService web elements registered
+	 * <p>TODO_WAB: However the question remains open about what to do with Whiteboard/HttpService web elements registered
 	 *          after the WAB was DEPLOYED.</p>
 	 * @param bundle
 	 * @param contextPath

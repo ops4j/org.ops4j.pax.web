@@ -2370,7 +2370,6 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 //			Integer jspTagpoolMaxSize = configuration.jsp().getJspTagpoolMaxSize();
 //			Boolean jspPrecompilation = configuration.jsp().getJspPrecompilation();
 //
-//			// TODO: fix this with PAXWEB-226
 //			Map<String, Object> params = new HashMap<>(12);
 //			params.put("checkInterval", jspCheckInterval);
 //			params.put("classdebuginfo", jspClassDebugInfo);

@@ -84,6 +84,7 @@ public class ServletContextHelperMappingTracker extends AbstractContextTracker<S
 			model.setContextSupplier((bundleContext, ignoredName) -> {
 				ServletContextHelperMapping mapping = null;
 				try {
+					// TOUNGET:
 					mapping = bundleContext.getService(serviceReference);
 					// get the ServletContextHelperMapping again - within proper bundle context, but again - only to
 					// obtain all the information needed. The "factory" method also accepts a Bundle, so we pass it.
@@ -93,7 +94,7 @@ public class ServletContextHelperMappingTracker extends AbstractContextTracker<S
 					}
 					return new WebContainerContextWrapper(bundleContext.getBundle(), helper, model.getName());
 				} finally {
-					// TOCHECK: hmm, won't the ServletContextHelper returned from the mapping go away if we unget
+					// TOUNGET: hmm, won't the ServletContextHelper returned from the mapping go away if we unget
 					//          the mapping?
 					if (mapping != null) {
 						bundleContext.ungetService(serviceReference);

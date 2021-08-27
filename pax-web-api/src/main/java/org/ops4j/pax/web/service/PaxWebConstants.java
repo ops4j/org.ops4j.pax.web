@@ -261,8 +261,6 @@ public interface PaxWebConstants {
 	/**
 	 * {@link org.osgi.framework.BundleContext} property (not in PID!) to configure thread count for WAR
 	 * extender. Before Pax Web 8 it was hardcoded to 3 (which is still the default value).
-	 * TODO: think about moving this to PID, but PID configuration is rather related to the web servers, not to the
-	 *       technical aspects like bundle extenders.
 	 */
 	String BUNDLE_CONTEXT_PROPERTY_WAR_EXTENDER_THREADS = "org.ops4j.pax.web.extender.war.threads";
 

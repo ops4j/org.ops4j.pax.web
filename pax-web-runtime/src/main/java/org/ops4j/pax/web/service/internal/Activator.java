@@ -489,8 +489,14 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			// we need registered WebContainer for this MSF to work
 //			createManagedServiceFactory(bundleContext);
 		} catch (Throwable t) {
-			// TODO: ignore those exceptions if the bundle is being stopped
-			LOG.error("Unable to start Pax Web server: {}", t.getMessage(), t);
+			try {
+				Bundle bundle = bundleContext.getBundle();
+				if (bundle.getState() == Bundle.STOPPING || bundle.getState() == Bundle.UNINSTALLED) {
+					return;
+				}
+				LOG.error("Unable to start Pax Web server: {}", t.getMessage(), t);
+			} catch (IllegalStateException ignored) {
+			}
 		}
 	}
 
@@ -499,8 +505,6 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	 *
 	 * @param managedConfig
 	 * @param configuration
-	 * @param httpPort
-	 * @param httpSecurePort
 	 * @return
 	 *
 	 * @since 0.6.0, PAXWEB-127
@@ -517,7 +521,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			}
 		}
 
-		// TODO: then add/replace configuration properties
+		// TODO_DTO: then add/replace configuration properties (when implementing DTOs and HttpServiceRuntime)
 //		setProperty(toPropagate, PROPERTY_HTTP_ENABLED, configuration.isHttpEnabled());
 //		setProperty(toPropagate, PROPERTY_HTTP_PORT, configuration.getHttpPort());
 //		setProperty(toPropagate, PROPERTY_HTTP_CONNECTOR_NAME,
@@ -688,6 +692,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 
 		@Override
 		public ServerControllerFactory addingService(ServiceReference<ServerControllerFactory> reference) {
+			// TOUNGET:
 			final ServerControllerFactory controllerFactory = bundleContext.getService(reference);
 			updateServerControllerFactory(controllerFactory);
 			return controllerFactory;
@@ -701,6 +706,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 		@Override
 		public void removedService(ServiceReference<ServerControllerFactory> reference, ServerControllerFactory service) {
 			if (bundleContext != null) {
+				// TOUNGET:
 				bundleContext.ungetService(reference);
 			}
 			updateServerControllerFactory(null);
@@ -711,6 +717,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 
 		@Override
 		public ServerListener addingService(ServiceReference<ServerListener> reference) {
+			// TOUNGET:
 			ServerListener service = bundleContext.getService(reference);
 			ServerController sc = serverController;
 			if (sc != null) {
@@ -732,6 +739,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 				serverListeners.remove(service);
 			}
 			if (bundleContext != null) {
+				// TOUNGET:
 				bundleContext.ungetService(reference);
 			}
 		}

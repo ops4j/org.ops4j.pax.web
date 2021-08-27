@@ -1223,7 +1223,7 @@ public class BundleWebApplication {
 		// web elements from the WAB when new OsgiContextModel is created - there are several checks in
 		// pax-web-extender-whiteboard and pax-web-runtime that determine whether a web element can be re-registered
 		// to new "context". The elements from WAB simply CAN'T do it
-		// TODO: we should only allow other bundles to obtain WebContainer instance within the scope of bundle
+		// TODO_WAB: we should only allow other bundles to obtain WebContainer instance within the scope of bundle
 		//       context of the WAB, for example to register additional web elements (usually filters) altering
 		//       the web application of the WAB
 

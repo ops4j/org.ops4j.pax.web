@@ -176,7 +176,7 @@ public abstract class AbstractWhiteboardR6DtoIntegrationTest extends AbstractCon
 //					defaultContext.get().errorPageDTOs[0],
 //					errorPageDTO -> errorPageDTO.serviceId == errorPageServiceId
 //							&& Objects.equals(errorPageDTO.exceptions[0], "java.io.IOException")
-////							&& errorPageDTO.errorCodes[0] == 404 FIXME errorCodes currently not mapped
+////							&& errorPageDTO.errorCodes[0] == 404 TODO_DTO errorCodes currently not mapped
 //							&& errorPageDTO.servletContextId == defaultServletContextServiceId);
 //		}
 //		// Test all under Custom-ServletContext

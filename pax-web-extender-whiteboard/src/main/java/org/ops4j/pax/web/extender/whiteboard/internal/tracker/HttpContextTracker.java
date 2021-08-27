@@ -122,6 +122,7 @@ public class HttpContextTracker extends AbstractContextTracker<HttpContext> {
 		String scope = Utils.getStringProperty(serviceReference, Constants.SERVICE_SCOPE);
 		if (Constants.SCOPE_SINGLETON.equals(scope)) {
 			LOG.debug("Dereferencing singleton service {}", serviceReference);
+			// TOUNGET:
 			HttpContext context = bundleContext.getService(serviceReference);
 
 			if (context instanceof WebContainerContext) {

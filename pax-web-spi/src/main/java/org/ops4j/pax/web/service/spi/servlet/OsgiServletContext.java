@@ -391,8 +391,6 @@ public class OsgiServletContext implements ServletContext {
 
 	@Override
 	public ServletRegistration.Dynamic addJspFile(String servletName, String jspFile) {
-		// TOCHECK: this could be treated as dynamic addServlet, allowed when context is not started, but
-		//          who uses "JSP files based servlets" nowadays?
 		throw new UnsupportedOperationException("addJspFile() is not supported.");
 	}
 
@@ -749,8 +747,8 @@ public class OsgiServletContext implements ServletContext {
 
 	@Override
 	public RequestDispatcher getRequestDispatcher(String path) {
-		// TOCHECK: this should be narrowed to servlets registered only to the same ServletContextHelper
-		//          but we cede the path resolution to the container, so we can't actually tell...
+		// this should be narrowed to servlets registered only to the same ServletContextHelper
+		// but we cede the path resolution to the container, so we can't actually tell...
 		//
 		// for example, if there are two servlets registered using two ServletContextHelpers that use the same
 		// context path:

@@ -154,7 +154,7 @@ public class WarExtenderContext implements WebContainerListener {
 				: new WebContainerManager(bundleContext, this, "HttpService->WarExtender");
 		webContainerManager.initialize();
 
-		// TODO: setup a listener to get notified about all the contexts being installed (Whiteboard and HttpService)
+		// TODO_WAB: setup a listener to get notified about all the contexts being installed (Whiteboard and HttpService)
 		//       so we can retry deployment of FAILED (due to context conflict) WABs
 	}
 
