@@ -132,7 +132,6 @@ import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.service.http.whiteboard.Preprocessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1259,10 +1258,10 @@ class JettyServerWrapper implements BatchVisitor {
 			OsgiContextModel defaultHighestRankedModel = osgiContextModels.get(contextPath).iterator().next();
 
 			// potentially, all existing preprocessors will be removed
-			Set<Preprocessor> toDestroy = new HashSet<>(((PaxWebServletHandler) sch.getServletHandler()).getPreprocessors().keySet());
+			Set<PreprocessorFilterConfig> toDestroy = new HashSet<>(((PaxWebServletHandler) sch.getServletHandler()).getPreprocessors());
 			// some new preprocessors may be added - we have to init() them ourselves, because they're not held
 			// in PaxWebFilterHolders
-			Map<Preprocessor, FilterModel> toInit = new HashMap<>();
+			List<PreprocessorFilterConfig> toInit = new LinkedList<>();
 
 			// clear to keep the order of all available preprocessors
 			((PaxWebServletHandler) sch.getServletHandler()).getPreprocessors().clear();
@@ -1270,30 +1269,37 @@ class JettyServerWrapper implements BatchVisitor {
 			for (Iterator<FilterModel> iterator = filters.iterator(); iterator.hasNext(); ) {
 				FilterModel model = iterator.next();
 				if (model.isPreprocessor()) {
-					Preprocessor preprocessor = (Preprocessor) model.getInstance();
-					if (!toDestroy.contains(preprocessor)) {
+					PreprocessorFilterConfig filterConfig = new PreprocessorFilterConfig(model, osgiServletContexts.get(defaultHighestRankedModel));
+					if (toDestroy.stream().noneMatch(pfc -> pfc.getModel().equals(model))) {
 						// new preprocessor - we have to init() it
-						toInit.put(preprocessor, model);
+						toInit.add(filterConfig);
 					} else {
 						// it was already there - we don't have to destroy() it
-						toDestroy.remove(preprocessor);
+						toDestroy.removeIf(pfc -> {
+							boolean match = pfc.getModel().equals(model);
+							if (match) {
+								// there's existing PreprocessorFilterConfig, so copy the instance and
+								// potentially the ServiceObjects
+								filterConfig.copyFrom(pfc);
+							}
+							return match;
+						});
 					}
-					((PaxWebServletHandler) sch.getServletHandler()).getPreprocessors()
-							.put(preprocessor, new PreprocessorFilterConfig(model, osgiServletContexts.get(defaultHighestRankedModel)));
+					((PaxWebServletHandler) sch.getServletHandler()).getPreprocessors().add(filterConfig);
 					iterator.remove();
 				}
 			}
 
 			if (sch.isStarted()) {
-				for (Map.Entry<Preprocessor, FilterModel> e : toInit.entrySet()) {
+				for (PreprocessorFilterConfig fc : toInit) {
 					try {
-						e.getKey().init(new PreprocessorFilterConfig(e.getValue(), osgiServletContexts.get(defaultHighestRankedModel)));
+						fc.getInstance().init(fc);
 					} catch (ServletException ex) {
 						LOG.warn("Problem during preprocessor initialization: {}", ex.getMessage(), ex);
 					}
 				}
-				for (Preprocessor p : toDestroy) {
-					p.destroy();
+				for (PreprocessorFilterConfig fc : toDestroy) {
+					fc.destroy();
 				}
 			}
 
@@ -1546,7 +1552,6 @@ class JettyServerWrapper implements BatchVisitor {
 						// event properly
 						servletContextHandler.removeEventListener(eventListenerModel, eventListener);
 					}
-//					eventListenerModel.ungetEventListener(eventListener);
 				});
 			}
 		}
@@ -1572,6 +1577,11 @@ class JettyServerWrapper implements BatchVisitor {
 				// that's where "resource servlets" take the welcome files from
 				OsgiServletContext osgiServletContext = osgiServletContexts.get(context);
 				ServletContextHandler servletContextHandler = contextHandlers.get(context.getContextPath());
+
+				if (osgiServletContext == null) {
+					// may happen when cleaning things out
+					return;
+				}
 
 				Set<String> currentWelcomeFiles = osgiServletContext.getWelcomeFiles() == null
 						? new LinkedHashSet<>()

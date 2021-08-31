@@ -34,6 +34,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -51,12 +52,14 @@ public class PaxWebServletHolder extends ServletHolder {
 
 	private ServletMapping mapping;
 
-	private ServiceReference<? extends Servlet> servletReference;
+	private ServiceReference<Servlet> servletReference;
 
 	/** This {@link ServletContext} is scoped to single {@link org.osgi.service.http.context.ServletContextHelper} */
 	private final OsgiServletContext osgiServletContext;
 	/** This {@link ServletContext} is scoped to particular Whiteboard servlet */
 	private final OsgiScopedServletContext servletContext;
+
+	private ServiceObjects<Servlet> serviceObjects;
 
 	/**
 	 * Each servlet will be associated with {@link WebContainerContext} scoped to the bundle which registered
@@ -203,8 +206,12 @@ public class PaxWebServletHolder extends ServletHolder {
 	protected synchronized Servlet getInstance() {
 		Servlet instance = super.getInstance();
 		if (instance == null && servletReference != null) {
-			// TOUNGET: obtain Servlet using reference
-			instance = servletModel.getRegisteringBundle().getBundleContext().getService(servletReference);
+			if (!servletModel.isPrototype()) {
+				instance = servletModel.getRegisteringBundle().getBundleContext().getService(servletReference);
+			} else {
+				serviceObjects = servletModel.getRegisteringBundle().getBundleContext().getServiceObjects(servletReference);
+				instance = serviceObjects.getService();
+			}
 		}
 		if (instance == null && servletModel.getElementSupplier() != null) {
 			instance = servletModel.getElementSupplier().get();
@@ -223,11 +230,21 @@ public class PaxWebServletHolder extends ServletHolder {
 
 	@Override
 	public void destroyInstance(Object o) {
-		if (servletModel != null && servletModel.getElementReference() != null) {
-			// TOUNGET:
-			servletModel.getRegisteringBundle().getBundleContext().ungetService(servletModel.getElementReference());
-		}
 		super.destroyInstance(o);
+		if (servletModel != null && servletReference != null) {
+			if (!servletModel.isPrototype()) {
+				servletModel.getRegisteringBundle().getBundleContext().ungetService(servletReference);
+			} else {
+				Servlet realServlet = (Servlet) o;
+				if (realServlet instanceof Wrapper) {
+					realServlet = ((Wrapper) realServlet).getWrapped();
+				}
+				if (realServlet instanceof OsgiInitializedServlet) {
+					realServlet = ((OsgiInitializedServlet) realServlet).getDelegate();
+				}
+				serviceObjects.ungetService(realServlet);
+			}
+		}
 	}
 
 	/**

@@ -73,10 +73,9 @@ public class ServletMappingTracker extends AbstractMappingTracker<ServletMapping
 		if (servletMapping.getServletClass() != null) {
 			builder.withServletClass(servletMapping.getServletClass());
 		} else {
-			// assume the source is getServlet() method. BUT because this method MAY return a new Servlet instance
-			// on each call (poor man's PrototypeServiceFactory), we won't call this method directly, but pass
-			// it via supplier instead
-			builder.withServletSupplier(servletMapping::getServlet);
+			// Just get the servlet and don't care if getServlet() returns a singleton or not.
+			// This will allow us to unget the mapping
+			builder.withServlet(servletMapping.getServlet());
 		}
 
 		return builder.build();

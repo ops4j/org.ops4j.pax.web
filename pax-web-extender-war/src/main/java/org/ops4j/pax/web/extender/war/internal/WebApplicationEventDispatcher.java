@@ -106,7 +106,6 @@ public class WebApplicationEventDispatcher implements WebApplicationEventListene
 
 	@Override
 	public WebApplicationEventListener addingService(ServiceReference<WebApplicationEventListener> reference) {
-		// TOUNGET:
 		WebApplicationEventListener listener = bundleContext.getService(reference);
 		if (listener != null) {
 			LOG.debug("New WebApplicationEventListener added: {}", listener.getClass().getName());
@@ -126,7 +125,6 @@ public class WebApplicationEventDispatcher implements WebApplicationEventListene
 	@Override
 	public void removedService(ServiceReference<WebApplicationEventListener> reference, WebApplicationEventListener service) {
 		listeners.remove(service);
-		// TOUNGET:
 		bundleContext.ungetService(reference);
 		LOG.debug("WebApplicationEventListener is removed: {}", service.getClass().getName());
 	}

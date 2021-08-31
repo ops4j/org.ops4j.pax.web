@@ -147,7 +147,9 @@ public class ServiceModel implements BatchVisitor {
 				// create one in batch through ServiceModel and ensure its stored at ServerModel as well
 				ctx = createDefaultHttpContext(contextId);
 			}
-			return ctx.resolveHttpContext(serviceBundle);
+			// we don't have to "resolve" here, as the OsgiContextModel has direct reference and is already
+			// scoped to proper serviceBundle
+			return ctx.getDirectHttpContextInstance();
 		});
 	}
 
@@ -182,7 +184,8 @@ public class ServiceModel implements BatchVisitor {
 				// create one in batch through as shared contexts are not associated with any "owner" bundle
 				ctx = serverModel.createDefaultSharedtHttpContext(contextId, serverController);
 			}
-			return (MultiBundleWebContainerContext) ctx.resolveHttpContext(serviceBundle);
+			// we don't have to "resolve" here, as the OsgiContextModel has direct reference
+			return (MultiBundleWebContainerContext) ctx.getDirectHttpContextInstance();
 		});
 	}
 
@@ -537,7 +540,7 @@ public class ServiceModel implements BatchVisitor {
 					target = serverModel.getSharedDefaultContextModel(oldContext.getName());
 				}
 			} else {
-				target = serverModel.getBundleContextModel(oldContext.resolveHttpContext(null), oldContext);
+				target = serverModel.getBundleContextModel(oldContext.getDirectHttpContextInstance(), oldContext);
 				if (target == null) {
 					target = serverModel.getBundleDefaultContextModel(ContextKey.of(oldContext));
 				}

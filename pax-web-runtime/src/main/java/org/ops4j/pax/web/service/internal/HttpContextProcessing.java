@@ -127,7 +127,7 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 	}
 
 	/**
-	 * <p>A class that operates on {@link HttpService}/{@link WebContainer} scoped
+	 * <p>A class that operates on {@link org.osgi.service.http.HttpService}/{@link WebContainer} scoped
 	 * for given, configured {@link Bundle}.</p>
 	 * <p>We don't have to operate on wirings/revisions - that's not required for
 	 * {@link org.osgi.framework.Constants#SCOPE_BUNDLE}.</p>
@@ -399,7 +399,7 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 					LOG.warn("Can't obtain service reference for WebContainer for bundle {}", symbolicName);
 					return null;
 				}
-				// TOUNGET:
+				// We know it's bundle-scoped, so no need for careful instance counting (via ServiceObjects)
 				WebContainer wc = context.getService(sr);
 				if (wc == null) {
 					LOG.warn("Can't obtain WebContainer service for bundle {}", symbolicName);

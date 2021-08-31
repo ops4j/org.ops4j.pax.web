@@ -19,12 +19,11 @@ package org.ops4j.pax.web.service.jetty.internal;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -48,6 +47,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiFilterChain;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiSessionAttributeListener;
+import org.ops4j.pax.web.service.spi.servlet.PreprocessorFilterConfig;
 import org.osgi.service.http.whiteboard.Preprocessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,9 +67,10 @@ public class PaxWebServletHandler extends ServletHandler {
 
 	/**
 	 * {@link Preprocessor} instances are always registered to all contexts and are always mapped to all servlet
-	 * chains, so handling them is easy.
+	 * chains, so handling them is easy. We keep only the configs, because we have to manage the lifecycle
+	 * of OSGi services for {@link Preprocessor} instances.
 	 */
-	private final Map<Preprocessor, FilterConfig> preprocessors = new LinkedHashMap<>();
+	private final List<PreprocessorFilterConfig> preprocessors = new LinkedList<>();
 
 	/** Default {@link ServletContext} to use for chains without target servlet (e.g., filters only) */
 	private OsgiServletContext defaultServletContext;
@@ -123,7 +124,6 @@ public class PaxWebServletHandler extends ServletHandler {
 	}
 
 	public void setDefaultOsgiContextModel(OsgiContextModel defaultOsgiContextModel) {
-		// TOUNGET: release previous WebContainerContext
 		this.defaultOsgiContextModel = defaultOsgiContextModel;
 		if (defaultOsgiContextModel != null) {
 			this.defaultWebContainerContext = defaultOsgiContextModel.resolveHttpContext(defaultOsgiContextModel.getOwnerBundle());
@@ -148,8 +148,8 @@ public class PaxWebServletHandler extends ServletHandler {
 	@Override
 	public void initialize() throws Exception {
 		// initialize preprocessors
-		for (Map.Entry<Preprocessor, FilterConfig> p : preprocessors.entrySet()) {
-			p.getKey().init(p.getValue());
+		for (PreprocessorFilterConfig fc : preprocessors) {
+			fc.getInstance().init(fc);
 		}
 
 		super.initialize();
@@ -177,8 +177,8 @@ public class PaxWebServletHandler extends ServletHandler {
 		setFilterMappings(newFilterMappings.toArray(new PaxWebFilterMapping[0]));
 
 		// destroy the preprocessors
-		for (Preprocessor p : preprocessors.keySet()) {
-			p.destroy();
+		for (PreprocessorFilterConfig fc : preprocessors) {
+			fc.destroy();
 		}
 
 		super.doStop();
@@ -356,11 +356,12 @@ public class PaxWebServletHandler extends ServletHandler {
 			// 3b. if the holder is for known 404 servlet, we still need a chain that calls 404 servlet
 			chain = (request, response) -> holder.handle(baseRequest, request, response);
 		}
+		List<Preprocessor> preprocessorInstances = preprocessors.stream().map(PreprocessorFilterConfig::getInstance).collect(Collectors.toList());
 		if (!holder.is404()) {
-			return new OsgiFilterChain(new ArrayList<>(preprocessors.keySet()), holder.getServletContext(),
+			return new OsgiFilterChain(new ArrayList<>(preprocessorInstances), holder.getServletContext(),
 					holder.getWebContainerContext(), chain, osgiSessionsBridge);
 		} else {
-			return new OsgiFilterChain(new ArrayList<>(preprocessors.keySet()), defaultServletContext,
+			return new OsgiFilterChain(new ArrayList<>(preprocessorInstances), defaultServletContext,
 					defaultWebContainerContext, chain, osgiSessionsBridge);
 		}
 	}
@@ -438,7 +439,7 @@ public class PaxWebServletHandler extends ServletHandler {
 		}
 	}
 
-	public Map<Preprocessor, FilterConfig> getPreprocessors() {
+	public List<PreprocessorFilterConfig> getPreprocessors() {
 		return preprocessors;
 	}
 

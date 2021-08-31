@@ -121,9 +121,10 @@ public class HttpContextTracker extends AbstractContextTracker<HttpContext> {
 		// to register bundle-scoped (or shared) WebContainerContext->OsgiContextModel mapping
 		String scope = Utils.getStringProperty(serviceReference, Constants.SERVICE_SCOPE);
 		if (Constants.SCOPE_SINGLETON.equals(scope)) {
-			LOG.debug("Dereferencing singleton service {}", serviceReference);
-			// TOUNGET:
-			HttpContext context = bundleContext.getService(serviceReference);
+			LOG.debug("Dereferencing singleton service {} to obtain HttpContext instance", serviceReference);
+
+			// even here, obtain the instance using the registering bundle context
+			HttpContext context = model.getOwnerBundle().getBundleContext().getService(serviceReference);
 
 			if (context instanceof WebContainerContext) {
 				// assume that if user wants this context to be "shared", it's actually an instance
@@ -183,6 +184,16 @@ public class HttpContextTracker extends AbstractContextTracker<HttpContext> {
 			if (shared != null) {
 				model.setShared(shared);
 			}
+		}
+	}
+
+	@Override
+	protected void cleanupContextModel(ServiceReference<HttpContext> serviceReference, OsgiContextModel unpublished) {
+		String scope = Utils.getStringProperty(serviceReference, Constants.SERVICE_SCOPE);
+		if (Constants.SCOPE_SINGLETON.equals(scope)) {
+			// that was the only case when we called getService(), so we have to unget - even if it's only
+			// for reference counting
+			unpublished.getOwnerBundle().getBundleContext().ungetService(serviceReference);
 		}
 	}
 

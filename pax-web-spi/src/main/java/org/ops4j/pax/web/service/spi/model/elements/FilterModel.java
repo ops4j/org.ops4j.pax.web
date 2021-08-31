@@ -112,7 +112,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 	 * @param reference
 	 */
 	public FilterModel(String filterName, Filter filter,
-			Class<? extends Filter> filterClass, ServiceReference<? extends Filter> reference) {
+			Class<? extends Filter> filterClass, ServiceReference<Filter> reference) {
 		this.name = filterName;
 		this.filter = filter;
 		this.filterClass = filterClass;
@@ -134,8 +134,8 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 	@SuppressWarnings("deprecation")
 	private FilterModel(String[] urlPatterns, String[] servletNames, String[] regexPatterns, String[] dispatcherTypes,
 			String name, Map<String, String> initParams, Boolean asyncSupported, Filter filter,
-			Class<? extends Filter> filterClass, ServiceReference<? extends Filter> reference,
-			Supplier<? extends Filter> supplier, Bundle registeringBundle) {
+			Class<? extends Filter> filterClass, ServiceReference<Filter> reference,
+			Supplier<Filter> supplier, Bundle registeringBundle) {
 
 		DispatcherType[] dts = new DispatcherType[dispatcherTypes == null ? 0 : dispatcherTypes.length];
 		if (dts.length > 0) {
@@ -368,19 +368,9 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 			return s.getClass();
 		}
 		if (getElementReference() != null) {
-			// TOUNGET:
-			Filter f = getRegisteringBundle().getBundleContext().getService(getElementReference());
-			if (f != null) {
-				try {
-					return f.getClass();
-				} finally {
-					// TOUNGET:
-					getRegisteringBundle().getBundleContext().ungetService(getElementReference());
-				}
-			} else {
-				// sane default, accepted by Undertow - especially if it has instance factory
-				return Filter.class;
-			}
+			// I don't want to dereference here - especially if the reference was "prototype" scoped
+			// sane default, accepted by Undertow - especially if it has instance factory
+			return Filter.class;
 		}
 
 		return null; // even if it can't happen
@@ -414,33 +404,6 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		return dynamic;
 	}
 
-	/**
-	 * This method should be used by actual runtime to obtain an instance of the {@link Filter}.
-	 * TOUNGET: do proper service unget if needed!
-	 * @return
-	 */
-	public Filter getInstance() {
-		Filter instance = null;
-		// obtain Filter using reference
-		ServiceReference<? extends Filter> ref = getElementReference();
-		if (ref != null) {
-			// TOUNGET:
-			instance =  getRegisteringBundle().getBundleContext().getService(ref);
-		}
-		if (instance == null && filterClass != null) {
-			try {
-				instance = filterClass.newInstance();
-			} catch (Exception e) {
-				throw new IllegalStateException("Can't instantiate Filter with class " + filterClass, e);
-			}
-		}
-		if (instance == null && getElementSupplier() != null) {
-			instance = getElementSupplier().get();
-		}
-
-		return instance;
-	}
-
 	public static class Builder {
 
 		private String[] urlPatterns;
@@ -452,8 +415,8 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		private Boolean asyncSupported;
 		private Filter filter;
 		private Class<? extends Filter> filterClass;
-		private ServiceReference<? extends Filter> reference;
-		private Supplier<? extends Filter> supplier;
+		private ServiceReference<Filter> reference;
+		private Supplier<Filter> supplier;
 		private final List<OsgiContextModel> list = new LinkedList<>();
 		private Bundle bundle;
 		private int rank;
@@ -512,18 +475,18 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 			return this;
 		}
 
-		public FilterModel.Builder withFilterReference(ServiceReference<? extends Filter> reference) {
+		public FilterModel.Builder withFilterReference(ServiceReference<Filter> reference) {
 			this.reference = reference;
 			return this;
 		}
 
-		public FilterModel.Builder withFilterReference(Bundle bundle, ServiceReference<? extends Filter> reference) {
+		public FilterModel.Builder withFilterReference(Bundle bundle, ServiceReference<Filter> reference) {
 			this.bundle = bundle;
 			this.reference = reference;
 			return this;
 		}
 
-		public FilterModel.Builder withFilterSupplier(Supplier<? extends Filter> supplier) {
+		public FilterModel.Builder withFilterSupplier(Supplier<Filter> supplier) {
 			this.supplier = supplier;
 			return this;
 		}

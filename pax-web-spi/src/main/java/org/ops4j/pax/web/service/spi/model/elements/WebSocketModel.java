@@ -130,12 +130,18 @@ public class WebSocketModel extends ElementModel<Object, WebSocketEventData> {
                 throw new IllegalArgumentException("Can't determine the Web Socket endpoint path. Element supplier returned null.");
             }
         } else if (getElementReference() != null) {
-            // TOUNGET:
-            Object ws = getRegisteringBundle().getBundleContext().getService(getElementReference());
-            if (ws != null) {
-                c = ws.getClass();
-            } else {
-                throw new IllegalArgumentException("Can't determine the Web Socket endpoint path. Service reference returned null.");
+            Object ws = null;
+            try {
+                ws = getRegisteringBundle().getBundleContext().getService(getElementReference());
+                if (ws != null) {
+                    c = ws.getClass();
+                } else {
+                    throw new IllegalArgumentException("Can't determine the Web Socket endpoint path. Service reference returned null.");
+                }
+            } finally {
+                if (ws != null) {
+                    getRegisteringBundle().getBundleContext().ungetService(getElementReference());
+                }
             }
         }
 

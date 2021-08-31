@@ -28,6 +28,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedFilter;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.ScopedFilter;
+import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -39,8 +40,6 @@ public class PaxWebFilterInfo extends FilterInfo {
 
 	/** This {@link ServletContext} is scoped to single {@link org.osgi.service.http.context.ServletContextHelper} */
 	private final OsgiServletContext osgiServletContext;
-	/** This {@link ServletContext} is scoped to particular Whiteboard filter - but only at init() time. */
-	private final OsgiScopedServletContext servletContext;
 
 	private ServiceReference<? extends Filter> serviceReference;
 
@@ -59,10 +58,7 @@ public class PaxWebFilterInfo extends FilterInfo {
 		setAsyncSupported(filterModel.getAsyncSupported() != null && filterModel.getAsyncSupported());
 
 		filterModel.getInitParams().forEach(this::addInitParam);
-
-		this.servletContext = ((FilterModelFactory)super.getInstanceFactory()).getServletContext();
 	}
-
 
 	@Override
 	@SuppressWarnings("MethodDoesntCallSuperMethod")
@@ -86,6 +82,7 @@ public class PaxWebFilterInfo extends FilterInfo {
 
 		private final FilterModel model;
 		private final OsgiScopedServletContext osgiScopedServletContext;
+		private ServiceObjects<Filter> serviceObjects;
 
 		FilterModelFactory(FilterModel model, OsgiScopedServletContext osgiScopedServletContext) {
 			this.model = model;
@@ -98,8 +95,12 @@ public class PaxWebFilterInfo extends FilterInfo {
 			if (instance == null) {
 				if (model.getElementReference() != null) {
 					// obtain Filter using reference
-					// TOUNGET:
-					instance = model.getRegisteringBundle().getBundleContext().getService(model.getElementReference());
+					if (!model.isPrototype()) {
+						instance = model.getRegisteringBundle().getBundleContext().getService(model.getElementReference());
+					} else {
+						serviceObjects = model.getRegisteringBundle().getBundleContext().getServiceObjects(model.getElementReference());
+						instance = serviceObjects.getService();
+					}
 					if (instance == null) {
 						throw new RuntimeException("Can't get a Filter service from the reference " + model.getElementReference());
 					}
@@ -119,7 +120,18 @@ public class PaxWebFilterInfo extends FilterInfo {
 			Filter osgiInitializedFilter = new OsgiInitializedFilter(instance, model, this.osgiScopedServletContext);
 			Filter scopedFilter = new ScopedFilter(osgiInitializedFilter, model);
 
-			return new ImmediateInstanceHandle<Filter>(scopedFilter);
+			return new ImmediateInstanceHandle<Filter>(scopedFilter) {
+				@Override
+				public void release() {
+					if (model.getElementReference() != null) {
+						if (!model.isPrototype()) {
+							model.getRegisteringBundle().getBundleContext().ungetService(model.getElementReference());
+						} else {
+							serviceObjects.ungetService(getInstance());
+						}
+					}
+				}
+			};
 		}
 
 		public OsgiScopedServletContext getServletContext() {

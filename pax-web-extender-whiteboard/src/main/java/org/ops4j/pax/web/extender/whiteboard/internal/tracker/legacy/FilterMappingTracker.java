@@ -68,7 +68,7 @@ public class FilterMappingTracker extends AbstractMappingTracker<FilterMapping, 
 		if (filterMapping.getFilterClass() != null) {
 			builder.withFilterClass(filterMapping.getFilterClass());
 		} else {
-			builder.withFilterSupplier(filterMapping::getFilter);
+			builder.withFilter(filterMapping.getFilter());
 		}
 
 		return builder.build();

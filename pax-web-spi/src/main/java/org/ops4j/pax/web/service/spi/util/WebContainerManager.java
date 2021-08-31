@@ -217,7 +217,6 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 					return container;
 				}
 			}
-			// TOUNGET:
 			WebContainer webContainer = context.getService(ref);
 			if (webContainer == null) {
 				LOG.warn("Can't get a WebContainer service from {}", ref);
@@ -273,7 +272,6 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 			if (bundleContainers != null) {
 				WebContainer container = bundleContainers.remove(context);
 				if (container != null) {
-					// TOUNGET:
 					context.ungetService(ref);
 				}
 				if (bundleContainers.isEmpty()) {

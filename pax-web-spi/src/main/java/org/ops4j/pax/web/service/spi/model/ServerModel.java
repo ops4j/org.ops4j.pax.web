@@ -574,7 +574,7 @@ public class ServerModel implements BatchVisitor {
 			// let it be available to use as the context for HttpService scenarios - whether or not it should
 			// REPLACE some existing mapping
 			// we explicitly disallow reregistration out of WAB context model
-			batch.associateOsgiContextModel(contextModel.resolveHttpContext(null), contextModel);
+			batch.associateOsgiContextModel(contextModel.getDirectHttpContextInstance(), contextModel);
 
 			// this context MAY replace existing, HttpService-related context for given name+bundle, we
 			// can't simply ADD the OsgiContextModel to list of models for given name+bundle - when
@@ -592,7 +592,7 @@ public class ServerModel implements BatchVisitor {
 				for (OsgiContextModel m : models) {
 					if (m.hasDirectHttpContextInstance()) {
 						// equals() works well with UniqueWebContainerContextWrapper
-						if (contextModel.resolveHttpContext(null).equals(m.resolveHttpContext(null))) {
+						if (contextModel.getDirectHttpContextInstance().equals(m.getDirectHttpContextInstance())) {
 							// it means that user has registered a HttpContext(Mapping) instance that's using
 							// an instance already managed by HttpService, so we want to _replace_ the model
 							// with new one (backed by the same HttpContext) and potentially re-register existing
@@ -621,7 +621,7 @@ public class ServerModel implements BatchVisitor {
 		if (contextModel.hasDirectHttpContextInstance()) {
 			// disassociate the context -> contextModel mapping whether or not we should restore some previous
 			// association (like the one created implicitly for HttpService)
-			batch.disassociateOsgiContextModel(contextModel.resolveHttpContext(null), contextModel);
+			batch.disassociateOsgiContextModel(contextModel.getDirectHttpContextInstance(), contextModel);
 
 			ContextKey key = ContextKey.of(contextModel);
 			TreeSet<OsgiContextModel> models;
@@ -638,7 +638,7 @@ public class ServerModel implements BatchVisitor {
 						// this means we should probably go back to different Whiteboard-registered context or
 						// even to the original HttpService-related context and potentially we should
 						// re-register existing web elements
-						if (contextModel.resolveHttpContext(null).equals(m.resolveHttpContext(null))) {
+						if (contextModel.getDirectHttpContextInstance().equals(m.getDirectHttpContextInstance())) {
 							// disassociation of some context already restored proper collection of available
 							// contexts for given id/bundle
 							serviceModel.reRegisterWebElementsIfNeeded(m, null, batch);
@@ -821,8 +821,8 @@ public class ServerModel implements BatchVisitor {
 					for (Iterator<OsgiContextModel> it = models.iterator(); it.hasNext(); ) {
 						OsgiContextModel model = it.next();
 						if (!model.isWhiteboard()) {
-							if (osgiContextModel.hasDirectHttpContextInstance()
-									&& model.resolveHttpContext(null).equals(osgiContextModel.resolveHttpContext(null))) {
+							if (osgiContextModel.hasDirectHttpContextInstance() && model.hasDirectHttpContextInstance()
+									&& model.getDirectHttpContextInstance().equals(osgiContextModel.getDirectHttpContextInstance())) {
 								sharedDefaultContexts.put(context.getContextId(), model);
 								it.remove();
 							}
@@ -842,8 +842,8 @@ public class ServerModel implements BatchVisitor {
 					for (Iterator<OsgiContextModel> it = models.iterator(); it.hasNext(); ) {
 						OsgiContextModel model = it.next();
 						if (!model.isWhiteboard()) {
-							if (osgiContextModel.hasDirectHttpContextInstance()
-									&& model.resolveHttpContext(null).equals(osgiContextModel.resolveHttpContext(null))) {
+							if (osgiContextModel.hasDirectHttpContextInstance() && model.hasDirectHttpContextInstance()
+									&& model.getDirectHttpContextInstance().equals(osgiContextModel.getDirectHttpContextInstance())) {
 								bundleDefaultContexts.put(key, model);
 								it.remove();
 							}
@@ -1030,7 +1030,7 @@ public class ServerModel implements BatchVisitor {
 				if (bundle.equals(context.bundle)) {
 					set.forEach(ocm -> {
 						if (!ocm.isWhiteboard()) {
-							batch.disassociateOsgiContextModel(ocm.resolveHttpContext(null), ocm);
+							batch.disassociateOsgiContextModel(ocm.getDirectHttpContextInstance(), ocm);
 							batch.removeOsgiContextModel(ocm);
 						}
 					});
@@ -2338,7 +2338,7 @@ public class ServerModel implements BatchVisitor {
 				// it's a whiteboard context that could be used for Http Service scenarios as well, because
 				// it has direct reference to bundleScoped or shared WebContainerContext.
 				// if the model doesn't contain direct HttpContext reference, it can never be passed to associate
-				associateHttpContext(model.resolveHttpContext(null), model);
+				associateHttpContext(model.getDirectHttpContextInstance(), model);
 				break;
 			}
 			case DISASSOCIATE: {
@@ -2346,7 +2346,7 @@ public class ServerModel implements BatchVisitor {
 				// it's a whiteboard context that could be used for Http Service scenarios as well, because
 				// it has direct reference to bundleScoped or shared WebContainerContext.
 				// if the model doesn't contain direct HttpContext reference, it can never be passed to associate
-				disassociateHttpContext(model.resolveHttpContext(null), model);
+				disassociateHttpContext(model.getDirectHttpContextInstance(), model);
 				break;
 			}
 			case ADD:

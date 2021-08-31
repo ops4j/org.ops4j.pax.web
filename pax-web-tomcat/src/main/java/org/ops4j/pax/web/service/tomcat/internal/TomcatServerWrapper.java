@@ -115,7 +115,6 @@ import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.tomcat.internal.web.TomcatResourceServlet;
 import org.osgi.framework.Bundle;
-import org.osgi.service.http.whiteboard.Preprocessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -1211,9 +1210,8 @@ class TomcatServerWrapper implements BatchVisitor {
 			for (Iterator<FilterModel> iterator = filters.iterator(); iterator.hasNext(); ) {
 				FilterModel model = iterator.next();
 				if (model.isPreprocessor()) {
-					Preprocessor preprocessor = (Preprocessor) model.getInstance();
 					context.getPreprocessors()
-							.put(preprocessor, new PreprocessorFilterConfig(model, osgiServletContexts.get(defaultHighestRankedModel)));
+							.add(new PreprocessorFilterConfig(model, osgiServletContexts.get(defaultHighestRankedModel)));
 					iterator.remove();
 				}
 			}
@@ -1344,7 +1342,6 @@ class TomcatServerWrapper implements BatchVisitor {
 						standardContext.setApplicationEventListeners(newEvListeners.toArray(new Object[0]));
 						standardContext.setApplicationLifecycleListeners(newLcListeners.toArray(new Object[0]));
 					}
-//					eventListenerModel.ungetEventListener(eventListener);
 				});
 			}
 		}
@@ -1361,6 +1358,11 @@ class TomcatServerWrapper implements BatchVisitor {
 			contextModels.forEach((context) -> {
 				OsgiServletContext osgiServletContext = osgiServletContexts.get(context);
 				PaxWebStandardContext realContext = contextHandlers.get(context.getContextPath());
+
+				if (osgiServletContext == null) {
+					// may happen when cleaning things out
+					return;
+				}
 
 				Set<String> currentWelcomeFiles = osgiServletContext.getWelcomeFiles() == null
 						? new LinkedHashSet<>()

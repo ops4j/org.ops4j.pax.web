@@ -17,10 +17,14 @@ package org.ops4j.pax.web.service.spi.servlet;
 
 import java.util.Collections;
 import java.util.Enumeration;
+import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.osgi.framework.ServiceObjects;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.whiteboard.Preprocessor;
 
 public class PreprocessorFilterConfig implements FilterConfig {
 
@@ -28,9 +32,65 @@ public class PreprocessorFilterConfig implements FilterConfig {
 	private final OsgiServletContext context;
 	private boolean initCalled = false;
 
+	private Preprocessor instance;
+	private ServiceObjects<Filter> serviceObjects;
+
 	public PreprocessorFilterConfig(FilterModel model, OsgiServletContext context) {
 		this.model = model;
 		this.context = context;
+	}
+
+	/**
+	 * {@link FilterConfig} for particular {@link Preprocessor} is responsible for creation and destruction
+	 * of the instance. It is especially important when {@link Preprocessor} is registered as prorotype OSGi service.
+	 * @return
+	 */
+	public Preprocessor getInstance() {
+		if (instance != null) {
+			return instance;
+		}
+
+		// obtain Filter using reference
+		ServiceReference<Filter> ref = model.getElementReference();
+		if (ref != null) {
+			if (!model.isPrototype()) {
+				instance = (Preprocessor) model.getRegisteringBundle().getBundleContext().getService(ref);
+			} else {
+				serviceObjects = model.getRegisteringBundle().getBundleContext().getServiceObjects(ref);
+				instance = (Preprocessor) serviceObjects.getService();
+			}
+		}
+		if (instance == null && model.getFilterClass() != null) {
+			try {
+				instance = (Preprocessor) model.getFilterClass().newInstance();
+			} catch (Exception e) {
+				throw new IllegalStateException("Can't instantiate Preprocessor with class " + model.getFilterClass(), e);
+			}
+		}
+		if (instance == null && model.getElementSupplier() != null) {
+			instance = (Preprocessor) model.getElementSupplier().get();
+		}
+
+		return instance;
+	}
+
+	public void destroy() {
+		if (instance != null) {
+			instance.destroy();
+			instance = null;
+			if (model.getElementReference() != null) {
+				if (!model.isPrototype()) {
+					model.getRegisteringBundle().getBundleContext().ungetService(model.getElementReference());
+				} else {
+					serviceObjects.ungetService(getInstance());
+					serviceObjects = null;
+				}
+			}
+		}
+	}
+
+	public FilterModel getModel() {
+		return model;
 	}
 
 	@Override
@@ -59,6 +119,11 @@ public class PreprocessorFilterConfig implements FilterConfig {
 
 	public boolean isInitCalled() {
 		return initCalled;
+	}
+
+	public void copyFrom(PreprocessorFilterConfig pfc) {
+		instance = pfc.instance;
+		serviceObjects = pfc.serviceObjects;
 	}
 
 }

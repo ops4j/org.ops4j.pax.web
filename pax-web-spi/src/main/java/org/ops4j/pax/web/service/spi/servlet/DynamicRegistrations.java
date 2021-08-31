@@ -103,8 +103,6 @@ public class DynamicRegistrations {
 	//         org.apache.felix.framework.ServiceRegistry.ungetServices()
 	//           org.apache.felix.framework.Felix.stopBundle()
 	//
-	// TOUNGET: we will also not care about ungetService
-	//
 	// According to javadocs, addXXX methods may return null if a filter/servlet with given name is already
 	// registered. On the other hand, org.apache.myfaces.ee6.MyFacesContainerInitializer.onStartup() doesn't
 	// check for null, but checks existence of the servlet using javax.servlet.ServletContext.getServletRegistrations()
@@ -195,11 +193,11 @@ public class DynamicRegistrations {
 		OsgiContextModel osgiContextModel = context.getOsgiContextModel();
 		try {
 			@SuppressWarnings("unchecked")
-			Class<? extends Servlet> filterClass = (Class<? extends Servlet>) osgiContextModel.getOwnerBundle().loadClass(className);
+			Class<? extends Servlet> servletClass = (Class<? extends Servlet>) osgiContextModel.getOwnerBundle().loadClass(className);
 
 			ServletModel.Builder builder = new ServletModel.Builder()
 					.withServletName(servletName)
-					.withServletClass(filterClass)
+					.withServletClass(servletClass)
 					// osgiContextModel from the model of this OsgiServletContext
 					.withOsgiContextModel(osgiContextModel);
 
@@ -394,7 +392,8 @@ public class DynamicRegistrations {
 			return null;
 		}
 
-		// TOUNGET:
+		// org.ops4j.pax.web.service.WebContainer is bundle-scoped and it'll be unget() when given bundle is stopped,
+		// so we don't have to remember to unget()
 		WebContainer container = bc.getService(ref);
 		if (container == null) {
 			throw new IllegalStateException("Can't obtain WebContainer instance from " + ref + " reference. Dynamic registration not possible.");

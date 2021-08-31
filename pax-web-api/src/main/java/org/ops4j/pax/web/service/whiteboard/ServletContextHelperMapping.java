@@ -33,6 +33,9 @@ import org.osgi.service.http.context.ServletContextHelper;
  * </ul></p>
  *
  * <p>This interface doesn't extend {@link ContextRelated}, because it represents the <em>context</em> itself.</p>
+ *
+ * <p>Even if {@link #getServletContextHelper()} may return a singleton or a new instance on each call, this method
+ * will be called once and the result will be treated as singleton.</p>
  */
 public interface ServletContextHelperMapping extends ContextMapping {
 

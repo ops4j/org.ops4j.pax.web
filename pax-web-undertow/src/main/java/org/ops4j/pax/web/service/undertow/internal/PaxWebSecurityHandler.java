@@ -49,7 +49,7 @@ public class PaxWebSecurityHandler implements HandlerWrapper {
 					HttpServletRequest req = (HttpServletRequest) context.getServletRequest();
 					HttpServletResponse res = (HttpServletResponse) context.getServletResponse();
 
-					WebContainerContext webContext = null;
+					WebContainerContext webContext;
 					if (!paxWebServletInfo.is404()) {
 						webContext = paxWebServletInfo.getWebContainerContext();
 					} else {
@@ -86,7 +86,6 @@ public class PaxWebSecurityHandler implements HandlerWrapper {
 	}
 
 	public void setDefaultOsgiContextModel(OsgiContextModel defaultOsgiContextModel) {
-		// TOUNGET: release previous WebContainerContext
 		this.defaultOsgiContextModel = defaultOsgiContextModel;
 		if (defaultOsgiContextModel != null) {
 			this.defaultWebContainerContext = defaultOsgiContextModel.resolveHttpContext(defaultOsgiContextModel.getOwnerBundle());

@@ -30,6 +30,7 @@ import org.ops4j.pax.web.service.spi.model.events.WebElementEventData;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.ops4j.pax.web.service.whiteboard.ContextRelated;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 
@@ -83,7 +84,12 @@ public abstract class ElementModel<T, D extends WebElementEventData>
 	 * use {@link ServiceReference#getBundle() a bundle} and its context to obtain a reference to
 	 * {@link org.osgi.service.http.context.ServletContextHelper} associated with the element.
 	 */
-	private ServiceReference<? extends T> elementReference;
+	private ServiceReference<T> elementReference;
+
+	/**
+	 * Flag indicating whether a model that uses {@link ServiceReference} has {@code prototype} scope.
+	 */
+	private boolean prototype = false;
 
 	/**
 	 * Because user may specify Whiteboard service (e.g., {@link javax.servlet.Servlet}) using <em>legacy</em> service
@@ -109,6 +115,12 @@ public abstract class ElementModel<T, D extends WebElementEventData>
 	 * {@link Filter} to select associated {@link OsgiContextModel}s.
 	 */
 	private Filter contextFilter;
+
+	/**
+	 * We can set the context selector LDAP expression, so it doesn't have to be resolved from e.g.,
+	 * service registration properties.
+	 */
+	private String contextSelector;
 
 	/**
 	 * <p>This method should be called from Whiteboard infrastructure to really perform the validation and set
@@ -230,7 +242,7 @@ public abstract class ElementModel<T, D extends WebElementEventData>
 		this.contextModels.forEach(cm -> data.getContextNames().add(cm.getName()));
 		if (this.contextModels.size() == 1 && this.contextModels.get(0).hasDirectHttpContextInstance()) {
 			// special case of "old" HttpContext associated with the model
-			data.setHttpContext(this.contextModels.get(0).resolveHttpContext(null));
+			data.setHttpContext(this.contextModels.get(0).getDirectHttpContextInstance());
 		}
 	}
 
@@ -262,12 +274,23 @@ public abstract class ElementModel<T, D extends WebElementEventData>
 		this.timestamp = timestamp;
 	}
 
-	public ServiceReference<? extends T> getElementReference() {
+	public ServiceReference<T> getElementReference() {
 		return elementReference;
 	}
 
-	public void setElementReference(ServiceReference<? extends T> elementReference) {
+	public void setElementReference(ServiceReference<T> elementReference) {
 		this.elementReference = elementReference;
+		if (elementReference != null) {
+			this.prototype = Constants.SCOPE_PROTOTYPE.equals(elementReference.getProperty(Constants.SERVICE_SCOPE));
+		}
+	}
+
+	/**
+	 * Should be used only when {@link #getElementReference()} returns non-null value.
+	 * @return
+	 */
+	public boolean isPrototype() {
+		return prototype;
 	}
 
 	public Supplier<? extends T> getElementSupplier() {
@@ -284,6 +307,21 @@ public abstract class ElementModel<T, D extends WebElementEventData>
 
 	public void setRegisteringBundle(Bundle registeringBundle) {
 		this.registeringBundle = registeringBundle;
+	}
+
+	/**
+	 * Some Whiteboard services specify context selector using
+	 * {@link org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_CONTEXT_SELECT} service
+	 * registration property and some (legacy) using {@link ContextRelated#getContextId()}/{@link ContextRelated#getContextSelectFilter()}.
+	 * After setting the selector, we no longer have to resolve one.
+	 * @param mappingSelector
+	 */
+	public void setContextSelector(String mappingSelector) {
+		this.contextSelector = mappingSelector;
+	}
+
+	public String getContextSelector() {
+		return contextSelector;
 	}
 
 	/**

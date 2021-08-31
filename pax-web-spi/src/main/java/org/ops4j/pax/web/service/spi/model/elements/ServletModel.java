@@ -90,7 +90,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	 * This can only be set when registering Pax Web specific
 	 * {@link org.ops4j.pax.web.service.whiteboard.ServletMapping} "direct Whiteboard" service.
 	 */
-	private Class<? extends Servlet> servletClass;
+	private final Class<? extends Servlet> servletClass;
 
 	/**
 	 * Flag that marks given {@link ServletModel} as "resource servlet" with slightly different processing.
@@ -160,7 +160,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	 * @param reference
 	 */
 	public ServletModel(String alias, String servletName, Servlet servlet,
-			Class<? extends Servlet> servletClass, ServiceReference<? extends Servlet> reference) {
+			Class<? extends Servlet> servletClass, ServiceReference<Servlet> reference) {
 		this.alias = alias;
 		this.name = servletName;
 		this.servlet = servlet;
@@ -191,7 +191,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	@SuppressWarnings("deprecation")
 	private ServletModel(String alias, String[] urlPatterns, String name, Map<String, String> initParams,
 			Integer loadOnStartup, Boolean asyncSupported, MultipartConfigElement multipartConfigElement,
-			Servlet servlet, Class<? extends Servlet> servletClass, ServiceReference<? extends Servlet> reference,
+			Servlet servlet, Class<? extends Servlet> servletClass, ServiceReference<Servlet> reference,
 			Supplier<? extends Servlet> supplier, boolean resourceServlet,
 			Bundle registeringBundle) {
 		this.alias = alias;
@@ -513,19 +513,9 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			Servlet s = getElementSupplier().get();
 			return s.getClass();
 		} else if (getElementReference() != null) {
-			// TOUNGET:
-			Servlet s = getRegisteringBundle().getBundleContext().getService(getElementReference());
-			if (s != null) {
-				try {
-					return s.getClass();
-				} finally {
-					// TOUNGET:
-					getRegisteringBundle().getBundleContext().ungetService(getElementReference());
-				}
-			} else {
-				// sane default, accepted by Undertow - especially if it has instance factory
-				return Servlet.class;
-			}
+			// I don't want to dereference here - especially if the reference was "prototype" scoped
+			// sane default, accepted by Undertow - especially if it has instance factory
+			return Servlet.class;
 		}
 
 		return null; // even if it can't happen
@@ -682,7 +672,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		private String[] errorDeclarations;
 		private Servlet servlet;
 		private Class<? extends Servlet> servletClass;
-		private ServiceReference<? extends Servlet> reference;
+		private ServiceReference<Servlet> reference;
 		private Supplier<? extends Servlet> supplier;
 		private final List<OsgiContextModel> list = new LinkedList<>();
 		private Bundle bundle;
@@ -748,12 +738,12 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			return this;
 		}
 
-		public Builder withServletReference(ServiceReference<? extends Servlet> reference) {
+		public Builder withServletReference(ServiceReference<Servlet> reference) {
 			this.reference = reference;
 			return this;
 		}
 
-		public Builder withServletReference(Bundle bundle, ServiceReference<? extends Servlet> reference) {
+		public Builder withServletReference(Bundle bundle, ServiceReference<Servlet> reference) {
 			this.bundle = bundle;
 			this.reference = reference;
 			return this;

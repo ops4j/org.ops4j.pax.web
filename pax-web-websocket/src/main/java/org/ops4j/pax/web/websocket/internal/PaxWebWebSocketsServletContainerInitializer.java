@@ -81,7 +81,10 @@ public class PaxWebWebSocketsServletContainerInitializer implements ServletConta
 			} else if (wsm.getElementSupplier() != null) {
 				annotatedEndpointInstances.put(wsm, wsm.getElementSupplier().get());
 			} else if (wsm.getElementReference() != null) {
-				// TOUNGET:
+				// Not using ServiceObjects even if this service may be prototype-scoped. 1) Whiteboard
+				// specification doesn't say anything about WebSockets, 2) WebSockets are managed via SCIs, which
+				// (without special tricks/proxies) have only onStartup() methods.
+				// So we rely on implicit ungetService() called when the bundle is stopped
 				Object endpoint = wsm.getRegisteringBundle().getBundleContext().getService(wsm.getElementReference());
 				annotatedEndpointInstances.put(wsm, endpoint);
 			} else {

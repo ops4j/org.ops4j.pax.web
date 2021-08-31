@@ -31,6 +31,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.undertow.internal.web.UndertowResourceServlet;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceObjects;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -206,6 +207,7 @@ public class PaxWebServletInfo extends ServletInfo {
 
 		private final ServletModel model;
 		private final OsgiScopedServletContext osgiScopedServletContext;
+		private ServiceObjects<Servlet> serviceObjects;
 
 		ServletModelFactory(ServletModel model, OsgiScopedServletContext osgiScopedServletContext) {
 			this.model = model;
@@ -217,9 +219,13 @@ public class PaxWebServletInfo extends ServletInfo {
 			Servlet instance = model.getServlet();
 			if (instance == null) {
 				if (model.getElementReference() != null) {
-					// obtain Servlet using reference
-					// TOUNGET:
-					instance = model.getRegisteringBundle().getBundleContext().getService(model.getElementReference());
+					// obtain Servlet using service reference
+					if (!model.isPrototype()) {
+						instance = model.getRegisteringBundle().getBundleContext().getService(model.getElementReference());
+					} else {
+						serviceObjects = model.getRegisteringBundle().getBundleContext().getServiceObjects(model.getElementReference());
+						instance = serviceObjects.getService();
+					}
 					if (instance == null) {
 						throw new RuntimeException("Can't get a Servlet service from the reference " + model.getElementReference());
 					}
@@ -241,7 +247,18 @@ public class PaxWebServletInfo extends ServletInfo {
 				((UndertowResourceServlet) instance).setWelcomeFilesRedirect(osgiScopedServletContext.isWelcomeFilesRedirect());
 			}
 
-			return new ImmediateInstanceHandle<Servlet>(new OsgiInitializedServlet(instance, this.osgiScopedServletContext));
+			return new ImmediateInstanceHandle<Servlet>(new OsgiInitializedServlet(instance, this.osgiScopedServletContext)) {
+				@Override
+				public void release() {
+					if (model.getElementReference() != null) {
+						if (!model.isPrototype()) {
+							model.getRegisteringBundle().getBundleContext().ungetService(model.getElementReference());
+						} else {
+							serviceObjects.ungetService(getInstance());
+						}
+					}
+				}
+			};
 		}
 
 		public OsgiScopedServletContext getServletContext() {

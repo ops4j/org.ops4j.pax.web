@@ -100,6 +100,7 @@ public class ServletContextHelperTracker extends AbstractContextTracker<ServletC
 		// 6. source of the context
 		// ServletContextHelper will be obtained from service reference on each call using correct bundle - always
 		// this is the standard Whiteboard Service specification scenario
+		// even if the scope is "singleton", remember the reference
 		model.setContextReference(serviceReference);
 	}
 

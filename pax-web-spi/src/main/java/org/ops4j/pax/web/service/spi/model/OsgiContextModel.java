@@ -221,6 +221,12 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	private WebContainerContext httpContext;
 
 	/**
+	 * If the reference to {@link HttpContext}/{@link ServletContextHelper} is not specified directly, it has
+	 * to be resolved for some bundle first
+	 */
+	private WebContainerContext resolvedHttpContext;
+
+	/**
 	 * <p>When a <em>context</em> is registered as Whiteboard service, we have to keep the reference here, because
 	 * actual service may be a {@link org.osgi.framework.ServiceFactory}, so it has to be dereferenced within
 	 * the context (...) of actual web element (like Servlet).</p>
@@ -449,7 +455,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		if (contextReference != null) {
 			LOG.debug("Dereferencing {} for {}", contextReference, bundleContext);
 
-			// TOUNGET: the hardest part. All returned services SHOULD be unget when no longer used
+			// not handling (via ServiceObjects) prototype-scope, so no need to unget()
 			Object context = bundleContext.getService(contextReference);
 			if (context instanceof WebContainerContext) {
 				// Pax Web specific WebContainerContext
@@ -469,16 +475,6 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		}
 
 		throw new IllegalStateException("No HttpContext/ServletContextHelper configured for " + this);
-	}
-
-	/**
-	 * If {@link WebContainerContext} was obtained via {@link ServiceReference}, it <strong>has to</strong> be
-	 * unget later.
-	 *
-	 * @param context
-	 */
-	public void releaseHttpContext(WebContainerContext context) {
-		// TOUNGET: actually release the context!
 	}
 
 	/**
@@ -597,6 +593,16 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	 */
 	public boolean hasDirectHttpContextInstance() {
 		return httpContext != null;
+	}
+
+	/**
+	 * If caller knows there's a direct reference to {@link WebContainerContext} (wrapping an instance
+	 * of {@link HttpContext} or {@link ServletContextHelper}), then we can get this context without "resulution"
+	 * process.
+	 * @return
+	 */
+	public WebContainerContext getDirectHttpContextInstance() {
+		return httpContext;
 	}
 
 	/**

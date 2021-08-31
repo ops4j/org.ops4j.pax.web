@@ -25,6 +25,17 @@ import java.util.EventListener;
 public class EventListenerModel extends ElementModel<EventListener, EventListenerEventData> {
 
 	private EventListener eventListener;
+
+	// According to 140.7 Registering Listeners, there's no requirement to handle prototype-scoped listeners
+	// It'd be quite hard to do, because in case of servlets and filters, all the runtimes have specific, extensible
+	// (to different degree) "holder" classes with getInstance()/destroy() methods, where we can keep the instance
+	// of org.osgi.framework.ServiceObjects.
+	// There's usually no "holder" for listeners and also we (in Tomcat and Undertow) create proxied instances
+	// of listeners for specific purposes (passing correct servlet context for example), so we explicitly do NOT
+	// handle prototype-scope.
+	// That's why we can keep single resolved instance of the listener (singleton or registering bundle-scoped)
+	// Also, we don't have to unget(), because we cache the instance and it'll be unget() anyway when the bundle
+	// is stopped
 	private EventListener resolvedListener;
 
 	/**
@@ -94,8 +105,6 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 				resolvedListener = getElementSupplier().get();
 			}
 			if (getElementReference() != null) {
-				// last, but official check
-				// TOUNGET:
 				resolvedListener = getRegisteringBundle().getBundleContext().getService(getElementReference());
 			}
 			return resolvedListener;
@@ -104,21 +113,6 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 
 	public EventListener getResolvedListener() {
 		return resolvedListener;
-	}
-
-	/**
-	 * When a listener is removed from native servlet container, it should be <em>unget</em> here - this
-	 * is especially important with service references.
-	 * @param listener
-	 */
-	public void ungetEventListener(EventListener listener) {
-		if (listener == null || listener != resolvedListener) {
-			return;
-		}
-		if (getElementReference() != null) {
-			// TOUNGET:
-			getRegisteringBundle().getBundleContext().ungetService(getElementReference());
-		}
 	}
 
 	@Override

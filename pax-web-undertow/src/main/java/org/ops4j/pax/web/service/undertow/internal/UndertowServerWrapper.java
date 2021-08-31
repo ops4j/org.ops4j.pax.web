@@ -575,7 +575,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 					throw new IllegalArgumentException(base.getCanonicalPath() + " is not accessible. Can't configure handler for " + location.getName() + " location.");
 				}
 				// fileHandler.path is simply filesystem directory
-				PathResourceManager resourceManager = new PathResourceManager(base.toPath(), fileHandler.getCacheBufferSize() * fileHandler.getCacheBuffers(),
+				PathResourceManager resourceManager = new PathResourceManager(base.toPath(), (long) fileHandler.getCacheBufferSize() * fileHandler.getCacheBuffers(),
 						fileHandler.getCaseSensitive(), fileHandler.getFollowSymlink(), fileHandler.getSafeSymlinkPaths().toArray(new String[0]));
 				ResourceHandler rh = new ResourceHandler(resourceManager);
 				if (undertowConfiguration.getSubsystem().getServletContainer() != null) {
@@ -990,9 +990,10 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				String contextPath = deployment.getDeployment().getServletContext().getContextPath();
 				try {
 					if (preprocessorsHandlers.containsKey(contextPath)) {
-						for (Map.Entry<Preprocessor, PreprocessorFilterConfig> p : preprocessorsHandlers.get(contextPath).getPreprocessors().entrySet()) {
-							if (p.getValue().isInitCalled()) {
-								p.getKey().destroy();
+						for (PreprocessorFilterConfig fc : preprocessorsHandlers.get(contextPath).getPreprocessors()) {
+							if (fc.isInitCalled()) {
+								fc.destroy();
+								fc.setInitCalled(false);
 							}
 						}
 					}
@@ -1627,10 +1628,10 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 			// potentially, all existing preprocessors will be removed
 			PaxWebPreprocessorsHandler preprocessorsHandler = preprocessorsHandlers.get(contextPath);
-			Set<Preprocessor> toDestroy = new HashSet<>(preprocessorsHandler.getPreprocessors().keySet());
+			Set<PreprocessorFilterConfig> toDestroy = new HashSet<>(preprocessorsHandler.getPreprocessors());
 			// some new preprocessors may be added - we have to init() them ourselves, because they're not held
 			// in PaxWebFilterHolders
-			Map<Preprocessor, PreprocessorFilterConfig> toInit = new HashMap<>();
+			List<PreprocessorFilterConfig> toInit = new LinkedList<>();
 
 			// clear to keep the order of all available preprocessors
 			preprocessorsHandler.getPreprocessors().clear();
@@ -1638,33 +1639,39 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			for (Iterator<FilterModel> iterator = filters.iterator(); iterator.hasNext(); ) {
 				FilterModel model = iterator.next();
 				if (model.isPreprocessor()) {
-					Preprocessor preprocessor = (Preprocessor) model.getInstance();
-					PreprocessorFilterConfig fc = new PreprocessorFilterConfig(model, osgiServletContexts.get(defaultHighestRankedModel));
-					if (!toDestroy.contains(preprocessor)) {
+					PreprocessorFilterConfig filterConfig = new PreprocessorFilterConfig(model, osgiServletContexts.get(defaultHighestRankedModel));
+					if (toDestroy.stream().noneMatch(pfc -> pfc.getModel().equals(model))) {
 						// new preprocessor - we have to init() it
-						toInit.put(preprocessor, fc);
+						toInit.add(filterConfig);
 					} else {
 						// it was already there - we don't have to destroy() it
-						toDestroy.remove(preprocessor);
+						toDestroy.removeIf(pfc -> {
+							boolean match = pfc.getModel().equals(model);
+							if (match) {
+								// there's existing PreprocessorFilterConfig, so copy the instance and
+								// potentially the ServiceObjects
+								filterConfig.copyFrom(pfc);
+							}
+							return match;
+						});
 					}
-					preprocessorsHandler.getPreprocessors()
-							.put(preprocessor, fc);
+					preprocessorsHandler.getPreprocessors().add(filterConfig);
 					iterator.remove();
 				}
 			}
 
 			if (manager != null && manager.getState() == DeploymentManager.State.STARTED) {
-				for (Map.Entry<Preprocessor, PreprocessorFilterConfig> e : toInit.entrySet()) {
+				for (PreprocessorFilterConfig fc : toInit) {
 					try {
-						PreprocessorFilterConfig fc = e.getValue();
-						e.getKey().init(fc);
+						fc.getInstance().init(fc);
 						fc.setInitCalled(true);
 					} catch (ServletException ex) {
 						LOG.warn("Problem during preprocessor initialization: {}", ex.getMessage(), ex);
 					}
 				}
-				for (Preprocessor p : toDestroy) {
-					p.destroy();
+				for (PreprocessorFilterConfig fc : toDestroy) {
+					fc.destroy();
+					fc.setInitCalled(false);
 				}
 			}
 		}
@@ -1928,7 +1935,6 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 							}
 						});
 					}
-//					TOUNGET: eventListenerModel.ungetEventListener(eventListener);
 
 					ensureServletContextStarted(contextPath);
 				});
@@ -1947,7 +1953,12 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			contextModels.forEach((context) -> {
 				OsgiServletContext osgiServletContext = osgiServletContexts.get(context);
 
-				Deployment deployment = getDeployment(osgiServletContext.getContextPath());
+				if (osgiServletContext == null) {
+					// may happen when cleaning things out
+					return;
+				}
+
+				Deployment deployment = getDeployment(context.getContextPath());
 
 				Set<String> currentWelcomeFiles = osgiServletContext.getWelcomeFiles() == null
 						? new LinkedHashSet<>()
@@ -2445,10 +2456,9 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 			// the above start() ends with filter initialization and just after that, the state is changed
 			// to State.STARTED. So we can start preprocessors here
-			for (Map.Entry<Preprocessor, PreprocessorFilterConfig> e : preprocessorsHandlers.get(contextPath).getPreprocessors().entrySet()) {
-				PreprocessorFilterConfig fc = e.getValue();
-				if (!e.getValue().isInitCalled()) {
-					e.getKey().init(fc);
+			for (PreprocessorFilterConfig fc : preprocessorsHandlers.get(contextPath).getPreprocessors()) {
+				if (!fc.isInitCalled()) {
+					fc.getInstance().init(fc);
 					fc.setInitCalled(true);
 				}
 			}
@@ -2622,10 +2632,10 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				LOG.info("Stopping Undertow context \"{}\"", contextPath);
 
 				if (!skipPreprocessors) {
-					for (Map.Entry<Preprocessor, PreprocessorFilterConfig> p : preprocessorsHandlers.get(contextPath).getPreprocessors().entrySet()) {
-						if (p.getValue().isInitCalled()) {
-							p.getKey().destroy();
-							p.getValue().setInitCalled(false);
+					for (PreprocessorFilterConfig fc : preprocessorsHandlers.get(contextPath).getPreprocessors()) {
+						if (fc.isInitCalled()) {
+							fc.destroy();
+							fc.setInitCalled(false);
 						}
 					}
 				}

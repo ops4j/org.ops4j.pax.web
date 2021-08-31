@@ -28,7 +28,10 @@ import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedFilter;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
+import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Special {@link FilterHolder} to handle OSGi specific lifecycle related to
@@ -36,9 +39,11 @@ import org.osgi.framework.ServiceReference;
  */
 public class PaxWebFilterHolder extends FilterHolder {
 
+	public static final Logger LOG = LoggerFactory.getLogger(PaxWebFilterHolder.class);
+
 	private final FilterModel filterModel;
 
-	private ServiceReference<? extends Filter> filterReference;
+	private ServiceReference<Filter> filterReference;
 
 	/** This {@link ServletContext} is scoped to single {@link org.osgi.service.http.context.ServletContextHelper} */
 	private final OsgiServletContext osgiServletContext;
@@ -47,6 +52,8 @@ public class PaxWebFilterHolder extends FilterHolder {
 
 	// mappings remembered for the holder
 	private List<PaxWebFilterMapping> mapping;
+
+	private ServiceObjects<Filter> serviceObjects;
 
 	/**
 	 * Initialize {@link PaxWebFilterHolder} with {@link FilterModel}. All its
@@ -99,7 +106,7 @@ public class PaxWebFilterHolder extends FilterHolder {
 			getInstance.setAccessible(true);
 			setFilter((Filter) getInstance.invoke(holder));
 		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-			e.printStackTrace();
+			LOG.error("Can't manage dynamic filter: {}", e.getMessage(), e);
 		}
 		setClassName(holder.getClassName());
 		setDisplayName(holder.getDisplayName());
@@ -127,8 +134,16 @@ public class PaxWebFilterHolder extends FilterHolder {
 	@Override
 	protected synchronized Filter getInstance() {
 		Filter instance = super.getInstance();
-		if (instance == null && filterModel != null) {
-			instance = filterModel.getInstance();
+		if (instance == null && filterReference != null) {
+			if (!filterModel.isPrototype()) {
+				instance = filterModel.getRegisteringBundle().getBundleContext().getService(filterReference);
+			} else {
+				serviceObjects = filterModel.getRegisteringBundle().getBundleContext().getServiceObjects(filterReference);
+				instance = serviceObjects.getService();
+			}
+		}
+		if (instance == null && filterModel.getElementSupplier() != null) {
+			instance = filterModel.getElementSupplier().get();
 		}
 
 		if (instance == null && getHeldClass() != null) {
@@ -146,11 +161,21 @@ public class PaxWebFilterHolder extends FilterHolder {
 
 	@Override
 	public void destroyInstance(Object o) {
-		if (filterModel != null && filterModel.getElementReference() != null) {
-			// TOUNGET:
-			filterModel.getRegisteringBundle().getBundleContext().ungetService(filterModel.getElementReference());
-		}
 		super.destroyInstance(o);
+		if (filterModel != null && filterReference != null) {
+			if (!filterModel.isPrototype()) {
+				filterModel.getRegisteringBundle().getBundleContext().ungetService(filterReference);
+			} else {
+				Filter realFilter = (Filter) o;
+				if (realFilter instanceof FilterHolder.Wrapper) {
+					realFilter = ((FilterHolder.Wrapper) realFilter).getWrapped();
+				}
+				if (realFilter instanceof OsgiInitializedFilter) {
+					realFilter = ((OsgiInitializedFilter) realFilter).getDelegate();
+				}
+				serviceObjects.ungetService(realFilter);
+			}
+		}
 	}
 
 	/**

@@ -111,11 +111,6 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 
 		// 6. load-on-startup
 		Integer loadOnStartup = Utils.getIntegerProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_LOAD_ON_STARTUP);
-		if (loadOnStartup != null) {
-			log.warn("Legacy {} property specified, load-on-startup should be specified using"
-							+ " @javax.servlet.annotation.WebServlet annotation",
-					PaxWebConstants.SERVICE_PROPERTY_LOAD_ON_STARTUP);
-		}
 
 		// 7. multipart configuration - not supported in Pax Web legacy
 		MultipartConfigElement multiPartConfig = null;
@@ -141,8 +136,9 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 		// 9. Check the servlet annotations - we need a class of actual servlet
 		Servlet service = null;
 		try {
-			// TOUNGET:
-			service = bundleContext.getService(serviceReference);
+			// if the service is prototype-scoped, new instance will be created, but never used (e.g., never
+			// get its init() called)
+			service = serviceReference.getBundle().getBundleContext().getService(serviceReference);
 			if (service != null) {
 				ServletAnnotationScanner scanner = new ServletAnnotationScanner(service.getClass());
 				if (scanner.scanned) {
@@ -205,8 +201,7 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 			}
 		} finally {
 			if (service != null) {
-				// TOUNGET:
-				bundleContext.ungetService(serviceReference);
+				serviceReference.getBundle().getBundleContext().ungetService(serviceReference);
 			}
 		}
 

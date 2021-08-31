@@ -76,8 +76,15 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 	 * @param serviceReference
 	 * @param model
 	 */
-	protected abstract void configureContextModel(ServiceReference<S> serviceReference,
-			OsgiContextModel model);
+	protected abstract void configureContextModel(ServiceReference<S> serviceReference, OsgiContextModel model);
+
+	/**
+	 * When the service is unregistered, there may be cases, where particular context tracker has to do some cleanup
+	 * @param serviceReference
+	 * @param unpublished
+	 */
+	protected void cleanupContextModel(ServiceReference<S> serviceReference, OsgiContextModel unpublished) {
+	}
 
 	// --- implementation of org.osgi.util.tracker.ServiceTrackerCustomizer
 
@@ -190,25 +197,12 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 		LOG.debug("Whiteboard context removed: {}", serviceReference);
 
 		whiteboardExtenderContext.removeWebContext(serviceReference.getBundle(), unpublished);
+
+		cleanupContextModel(serviceReference, unpublished);
 	}
 
 	private boolean skipInternalService(ServiceReference<S> serviceReference) {
 		return Utils.getBooleanProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_INTERNAL);
-	}
-
-	/**
-	 * Helper method to get a service from a {@link ServiceReference} with tiny validation.
-	 * @param reference
-	 * @return
-	 */
-	protected <C> C dereference(ServiceReference<C> reference) {
-		// TOUNGET:
-		C service = bundleContext.getService(reference);
-		if (service == null) {
-			throw new IllegalArgumentException("Can't create Whiteboard context, can't dereference " + reference);
-		}
-
-		return service;
 	}
 
 	/**

@@ -217,7 +217,10 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 			}
 		}
 
-		String selector = determineSelector(legacyMapping, legacyId, (String) selectorProperty, serviceReference);
+		String selector = webElement.getContextSelector();
+		if (selector == null) {
+			selector = determineSelector(legacyMapping, legacyId, (String) selectorProperty, serviceReference);
+		}
 
 		Filter contextFilter;
 		try {
@@ -339,21 +342,6 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 		}
 
 		return selector;
-	}
-
-	/**
-	 * Helper method to get a service from a {@link ServiceReference} with tiny validation.
-	 * @param reference
-	 * @return
-	 */
-	protected S dereference(ServiceReference<S> reference) {
-		// TOUNGET:
-		S service = bundleContext.getService(reference);
-		if (service == null) {
-			throw new IllegalArgumentException("Can't create Whiteboard service, can't dereference " + reference);
-		}
-
-		return service;
 	}
 
 }

@@ -15,8 +15,15 @@
  */
 package org.ops4j.pax.web.service.tomcat.internal;
 
+import java.io.IOException;
 import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.GenericFilter;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
@@ -25,6 +32,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedFilter;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.ScopedFilter;
+import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -39,7 +47,7 @@ public class PaxWebFilterDef extends FilterDef {
 	/** Flag to mark the filter as "initial" - that handles preprocessors and security in difficult Tomcat env. */
 	private final boolean initialFilter;
 
-	private ServiceReference<? extends Filter> filterReference;
+	private ServiceReference<Filter> filterReference;
 
 	/** This {@link ServletContext} the highest ranked {@link OsgiServletContext} for given physical context */
 	private final OsgiServletContext osgiServletContext;
@@ -63,17 +71,10 @@ public class PaxWebFilterDef extends FilterDef {
 			}
 		} else if (filterModel.getFilter() != null) {
 			instance = filterModel.getFilter();
+		} else if (filterModel.getElementSupplier() != null) {
+			instance = filterModel.getElementSupplier().get();
 		} else {
 			this.filterReference = filterModel.getElementReference();
-
-			if (filterReference != null) {
-				// TOUNGET: ensure it's ungotten later
-				instance = filterModel.getRegisteringBundle().getBundleContext().getService(filterReference);
-			}
-		}
-
-		if (instance == null && filterModel.getElementSupplier() != null) {
-			instance = filterModel.getElementSupplier().get();
 		}
 
 		filterModel.getInitParams().forEach(this::addInitParameter);
@@ -96,7 +97,8 @@ public class PaxWebFilterDef extends FilterDef {
 		if (isInitial()) {
 			super.setFilter(filter);
 		} else {
-			Filter delegate = filter == null ? null : new ScopedFilter(new OsgiInitializedFilter(filter, filterModel, servletContext), filterModel);
+			Filter delegate = filter == null ? new LifecycleFilter(filterModel)
+					: new ScopedFilter(new OsgiInitializedFilter(filter, filterModel, servletContext), filterModel);
 			super.setFilter(delegate);
 		}
 	}
@@ -118,6 +120,65 @@ public class PaxWebFilterDef extends FilterDef {
 
 	public FilterModel getFilterModel() {
 		return filterModel;
+	}
+
+	/**
+	 * This filter can instantiate the target filter. Only needed for Tomcat, where the "holder" is not that
+	 * extensible.
+	 */
+	private class LifecycleFilter implements Filter {
+
+		private final FilterModel model;
+		private Filter filter;
+		private ServiceObjects<Filter> serviceObjects;
+
+		LifecycleFilter(FilterModel model) {
+			this.model = model;
+		}
+
+		@Override
+		public void init(FilterConfig filterConfig) throws ServletException {
+			if (model.getElementReference() != null) {
+				// it SHOULD be a reference
+				Filter instance;
+				if (!filterModel.isPrototype()) {
+					instance = filterModel.getRegisteringBundle().getBundleContext().getService(filterReference);
+				} else {
+					serviceObjects = filterModel.getRegisteringBundle().getBundleContext().getServiceObjects(filterReference);
+					instance = serviceObjects.getService();
+				}
+
+				filter = new ScopedFilter(new OsgiInitializedFilter(instance, filterModel, servletContext), filterModel);
+			} else {
+				// strange...
+				filter = new GenericFilter() {
+					@Override
+					public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException, IOException {
+						chain.doFilter(request, response);
+					}
+				};
+			}
+			filter.init(filterConfig);
+		}
+
+		@Override
+		public void destroy() {
+			filter.destroy();
+			if (filterReference != null) {
+				if (!filterModel.isPrototype()) {
+					filterModel.getRegisteringBundle().getBundleContext().ungetService(filterReference);
+				} else {
+					serviceObjects.ungetService(filter);
+				}
+			}
+		}
+
+		@Override
+		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+			// proceed with the filter
+			filter.doFilter(request, response, chain);
+		}
+
 	}
 
 }

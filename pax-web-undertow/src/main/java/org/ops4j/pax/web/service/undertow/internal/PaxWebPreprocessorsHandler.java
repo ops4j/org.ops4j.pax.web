@@ -16,8 +16,9 @@
 package org.ops4j.pax.web.service.undertow.internal;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
@@ -44,7 +45,7 @@ public class PaxWebPreprocessorsHandler implements HandlerWrapper {
 	 * {@link org.ops4j.pax.web.service.spi.servlet.OsgiServletContext}, so they're effectively registered in
 	 * all available physical servlet contexts.
 	 */
-	private final Map<Preprocessor, PreprocessorFilterConfig> preprocessors = new LinkedHashMap<>();
+	private final List<PreprocessorFilterConfig> preprocessors = new LinkedList<>();
 
 	@Override
 	@SuppressWarnings("Convert2Lambda")
@@ -56,8 +57,10 @@ public class PaxWebPreprocessorsHandler implements HandlerWrapper {
 				HttpServletRequest incomingRequest = (HttpServletRequest) context.getServletRequest();
 				HttpServletResponse outgoingRequest = (HttpServletResponse) context.getServletResponse();
 
+				List<Preprocessor> preprocessorInstances = preprocessors.stream().map(PreprocessorFilterConfig::getInstance).collect(Collectors.toList());
+
 				final Exception[] ex = new Exception[] { null };
-				FilterChain chain = new OsgiFilterChain(new ArrayList<>(preprocessors.keySet()), null, null, new FilterChain() {
+				FilterChain chain = new OsgiFilterChain(new ArrayList<>(preprocessorInstances), null, null, new FilterChain() {
 					@Override
 					public void doFilter(ServletRequest request, ServletResponse response) {
 						// just proceed
@@ -77,7 +80,7 @@ public class PaxWebPreprocessorsHandler implements HandlerWrapper {
 		};
 	}
 
-	public Map<Preprocessor, PreprocessorFilterConfig> getPreprocessors() {
+	public List<PreprocessorFilterConfig> getPreprocessors() {
 		return preprocessors;
 	}
 

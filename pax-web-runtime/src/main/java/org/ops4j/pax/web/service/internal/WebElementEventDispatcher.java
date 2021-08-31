@@ -86,7 +86,6 @@ public class WebElementEventDispatcher implements WebElementEventListener,
 
 	@Override
 	public WebElementEventListener addingService(ServiceReference<WebElementEventListener> reference) {
-		// TOUNGET:
 		WebElementEventListener listener = bundleContext.getService(reference);
 		if (listener != null) {
 			LOG.debug("New WebElementEventListener added: {}", listener.getClass().getName());
@@ -106,7 +105,6 @@ public class WebElementEventDispatcher implements WebElementEventListener,
 	@Override
 	public void removedService(ServiceReference<WebElementEventListener> reference, WebElementEventListener service) {
 		listeners.remove(service);
-		// TOUNGET:
 		bundleContext.ungetService(reference);
 		LOG.debug("WebElementEventListener is removed: {}", service.getClass().getName());
 	}

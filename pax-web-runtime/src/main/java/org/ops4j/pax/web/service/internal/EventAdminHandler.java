@@ -38,7 +38,7 @@ public class EventAdminHandler implements WebElementEventListener,
 	private static final Logger LOG = LoggerFactory
 			.getLogger(EventAdminHandler.class);
 
-	private AtomicReference<EventAdmin> eventAdminReference = new AtomicReference<>();
+	private final AtomicReference<EventAdmin> eventAdminReference = new AtomicReference<>();
 	private final BundleContext bundleContext;
 
 	public EventAdminHandler(BundleContext bundleContext) {
@@ -101,25 +101,15 @@ public class EventAdminHandler implements WebElementEventListener,
 	@Override
 	public EventAdmin addingService(ServiceReference<EventAdmin> reference) {
 		if (reference.isAssignableTo(bundleContext.getBundle(), "org.osgi.service.event.EventAdmin")) {
-			// TOUNGET:
 			EventAdmin eventService = bundleContext.getService(reference);
-			try {
-				if (eventService instanceof EventAdmin) {
-					EventAdmin old = eventAdminReference
-							.getAndSet(eventService);
-					if (old != null) {
-						LOG.debug(
-								"replace old EventAdmin instance {} by an instance of {}",
-								old.getClass().getName(), eventService
-										.getClass().getName());
-					}
-					return eventService;
+			if (eventService != null) {
+				EventAdmin old = eventAdminReference.getAndSet(eventService);
+				if (old != null) {
+					LOG.debug("replace old EventAdmin instance {} by an instance of {}",
+							old.getClass().getName(), eventService.getClass().getName());
 				}
-			} catch (NoClassDefFoundError e) {
-				LOG.warn("An EventAdmin service was found, but the corresponding class can't be loaded, make sure to have a compatible org.osgi.service.event package exported with version range [1.3,2.0)");
+				return eventService;
 			}
-			// TOUNGET: If we came along here, we have no use of this service, so unget it!
-			bundleContext.ungetService(reference);
 		} else {
 			LOG.warn("An EventAdmin service was found, but it is not assignable to this bundle, make sure to have a compatible org.osgi.service.event package exported with version range [1.3,2.0)");
 		}
@@ -127,25 +117,16 @@ public class EventAdminHandler implements WebElementEventListener,
 	}
 
 	@Override
-	public void modifiedService(ServiceReference<EventAdmin> reference,
-								EventAdmin service) {
+	public void modifiedService(ServiceReference<EventAdmin> reference, EventAdmin service) {
 		// we don't care about properties
 	}
 
 	@Override
-	public void removedService(ServiceReference<EventAdmin> reference,
-							   EventAdmin service) {
-		// TOUNGET: Whatever happens: We unget the service first
+	public void removedService(ServiceReference<EventAdmin> reference, EventAdmin service) {
 		bundleContext.ungetService(reference);
-		try {
-			if (service instanceof EventAdmin) {
-				// We only want to remove it if it is the current reference,
-				// otherwhise it could be release and we keep the old one
-				eventAdminReference.compareAndSet(service, null);
-			}
-		} catch (NoClassDefFoundError e) {
-			// we should never go here, but if this happens silently ignore it
-		}
+		// We only want to remove it if it is the current reference,
+		// otherwhise it could be release and we keep the old one
+		eventAdminReference.compareAndSet(service, null);
 	}
 
 }

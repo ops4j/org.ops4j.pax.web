@@ -31,6 +31,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.tomcat.internal.web.TomcatResourceServlet;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -44,12 +45,14 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 	private final PaxWebStandardContext realContext;
 
 	private Class<? extends Servlet> servletClass;
-	private ServiceReference<? extends Servlet> serviceReference;
+	private ServiceReference<Servlet> serviceReference;
 
 	/** This {@link ServletContext} is scoped to single {@link org.osgi.service.http.context.ServletContextHelper} */
 	private final OsgiServletContext osgiServletContext;
 	/** This {@link ServletContext} is scoped to particular Whiteboard servlet */
 	private final OsgiScopedServletContext servletContext;
+
+	private ServiceObjects<Servlet> serviceObjects;
 
 	/**
 	 * Each servlet will be associated with {@link WebContainerContext} scoped to the bundle which registered
@@ -200,8 +203,12 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 		if (instance == null) {
 			if (serviceReference != null) {
 				// obtain Servlet using reference
-				// TOUNGET: use org.osgi.framework.ServiceObjects
-				instance = servletModel.getRegisteringBundle().getBundleContext().getService(serviceReference);
+				if (!servletModel.isPrototype()) {
+					instance = servletModel.getRegisteringBundle().getBundleContext().getService(serviceReference);
+				} else {
+					serviceObjects = servletModel.getRegisteringBundle().getBundleContext().getServiceObjects(serviceReference);
+					instance = serviceObjects.getService();
+				}
 			} else if (servletClass != null) {
 				try {
 					instance = servletClass.newInstance();
@@ -232,8 +239,11 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 	public synchronized void unload() throws ServletException {
 		super.unload();
 		if (servletModel != null && servletModel.getElementReference() != null) {
-			// TOUNGET:
-			servletModel.getRegisteringBundle().getBundleContext().ungetService(servletModel.getElementReference());
+			if (!servletModel.isPrototype()) {
+				servletModel.getRegisteringBundle().getBundleContext().ungetService(servletModel.getElementReference());
+			} else {
+				serviceObjects.ungetService(getServlet());
+			}
 		}
 	}
 

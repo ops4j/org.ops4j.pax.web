@@ -157,8 +157,11 @@ public class WhiteboardWelcomeFilesTest extends MultiContainerTestSupport {
 		rm.setUrlPatterns(new String[] { "/resources/*", "/x/*" });
 		rm.setPath("/resources");
 		Hashtable<String, Object> props = new Hashtable<>();
+		// mind that we can't specify the selector using Whiteboard properties, while registering the legacy "mapping"
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, String.format("(%s=c1)",
 				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
+		// we have to do it in the mapping itself
+		rm.setContextSelectFilter(String.format("(%s=c1)", HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
 		ServiceReference<ResourceMapping> resourceMappingRef = mockReference(sample1, ResourceMapping.class,
 				props, () -> rm);
 		ServletModel rmModel = getResourceMappingCustomizer().addingService(resourceMappingRef);
@@ -172,6 +175,7 @@ public class WhiteboardWelcomeFilesTest extends MultiContainerTestSupport {
 		DefaultWelcomeFileMapping mapping = new DefaultWelcomeFileMapping();
 		mapping.setWelcomeFiles(new String[] { "file.txt" });
 		mapping.setRedirect(false);
+		mapping.setContextSelectFilter(String.format("(%s=c1)", HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
 		ServiceReference<WelcomeFileMapping> mappingRef = mockReference(sample1, WelcomeFileMapping.class,
 				props, () -> mapping);
 		WelcomeFileModel wfmModel = getWelcomeFileMappingCustomizer().addingService(mappingRef);
@@ -190,6 +194,7 @@ public class WhiteboardWelcomeFilesTest extends MultiContainerTestSupport {
 		DefaultWelcomeFileMapping mapping2 = new DefaultWelcomeFileMapping();
 		mapping2.setWelcomeFiles(new String[] { "file.txt" });
 		mapping2.setRedirect(true);
+		mapping2.setContextSelectFilter(String.format("(%s=c1)", HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
 		ServiceReference<WelcomeFileMapping> mapping2Ref = mockReference(sample1, WelcomeFileMapping.class,
 				props, () -> mapping2);
 		WelcomeFileModel wfmModel2 = getWelcomeFileMappingCustomizer().addingService(mapping2Ref);
@@ -249,8 +254,11 @@ public class WhiteboardWelcomeFilesTest extends MultiContainerTestSupport {
 		rm.setUrlPatterns(new String[] { "/" });
 		rm.setPath("/resources");
 		Hashtable<String, Object> props = new Hashtable<>();
+		// mind that we can't specify the selector using Whiteboard properties, while registering the legacy "mapping"
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, String.format("(%s=c1)",
 				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
+		// we have to do it in the mapping itself
+		rm.setContextSelectFilter(String.format("(%s=c1)", HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
 		ServiceReference<ResourceMapping> resourceMappingRef = mockReference(sample1, ResourceMapping.class,
 				props, () -> rm);
 		ServletModel rmModel = getResourceMappingCustomizer().addingService(resourceMappingRef);
@@ -261,6 +269,7 @@ public class WhiteboardWelcomeFilesTest extends MultiContainerTestSupport {
 		DefaultWelcomeFileMapping mapping = new DefaultWelcomeFileMapping();
 		mapping.setWelcomeFiles(new String[] { "file.txt" });
 		mapping.setRedirect(false);
+		mapping.setContextSelectFilter(String.format("(%s=c1)", HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
 		ServiceReference<WelcomeFileMapping> mappingRef = mockReference(sample1, WelcomeFileMapping.class,
 				props, () -> mapping);
 		WelcomeFileModel wfmModel = getWelcomeFileMappingCustomizer().addingService(mappingRef);
@@ -275,6 +284,7 @@ public class WhiteboardWelcomeFilesTest extends MultiContainerTestSupport {
 		DefaultWelcomeFileMapping mapping2 = new DefaultWelcomeFileMapping();
 		mapping2.setWelcomeFiles(new String[] { "file.txt" });
 		mapping2.setRedirect(true);
+		mapping2.setContextSelectFilter(String.format("(%s=c1)", HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
 		ServiceReference<WelcomeFileMapping> mapping2Ref = mockReference(sample1, WelcomeFileMapping.class,
 				props, () -> mapping2);
 		WelcomeFileModel wfmModel2 = getWelcomeFileMappingCustomizer().addingService(mapping2Ref);

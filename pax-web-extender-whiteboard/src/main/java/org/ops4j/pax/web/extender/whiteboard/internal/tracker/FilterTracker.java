@@ -26,8 +26,8 @@ import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.events.FilterEventData;
-import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.util.FilterAnnotationScanner;
+import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
@@ -141,8 +141,9 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 		// 6. Check the filter annotations - we need a class of actual filter
 		Filter service = null;
 		try {
-			// TOUNGET:
-			service = bundleContext.getService(serviceReference);
+			// if the service is prototype-scoped, new instance will be created, but never used (e.g., never
+			// get its init() called)
+			service = serviceReference.getBundle().getBundleContext().getService(serviceReference);
 			if (service != null) {
 				FilterAnnotationScanner scanner = new FilterAnnotationScanner(service.getClass());
 				if (scanner.scanned) {
@@ -195,8 +196,8 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 			}
 		} finally {
 			if (service != null) {
-				// TOUNGET:
-				bundleContext.ungetService(serviceReference);
+				// unget without ever calling init() - thus the instance (if prototype-scoped) is rejected
+				serviceReference.getBundle().getBundleContext().ungetService(serviceReference);
 			}
 		}
 

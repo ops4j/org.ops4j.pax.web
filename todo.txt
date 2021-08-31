@@ -7,10 +7,10 @@ Must have for 8.0.0.GA:
  + Karaf integration tests
  + Listener ordering according to ranking
  + Session per OsgiContextModel / OsgiServletContext (including proper javax.servlet.context.tempdir handling)
- ~ org.osgi.framework.ServiceObjects and proper service management (unget, prototype, singleton, bundle scopes)
- - Whiteboard DTOs
- - Mixing (in different order) WAB and Whiteboard contexts, allocating contexts for WABs, where WAB's OsgiContextModel
+ + org.osgi.framework.ServiceObjects and proper service management (unget, prototype, singleton, bundle scopes)
+ ~ Mixing (in different order) WAB and Whiteboard contexts, allocating contexts for WABs, where WAB's OsgiContextModel
    is of highest priority (can't have other OsgiContextModel overring the WAB's one)
+ - Whiteboard DTOs
 
 Moved to after 8.0.0.GA (8.0.x):
  - JAX-RS example with aries-jaxrs
@@ -26,8 +26,9 @@ Moved to after 8.0.0.GA (8.0.x):
  - EventAdmin notifications (128.5 Events)
 
 Move to 8.1.x:
- - Jetty org.eclipse.jetty.server.Handler and org.eclipse.jetty.server.Connector tracking (as in Pax Web 7), but also
-   maybe org.apache.catalina.Valve/org.apache.catalina.connector.Connector tracking for Tomcat and
+ - Jetty org.eclipse.jetty.server.Handler, org.eclipse.jetty.server.Connector and
+   org.eclipse.jetty.server.HttpConfiguration.Customizer tracking (as in Pax Web 7), but also maybe
+   org.apache.catalina.Valve/org.apache.catalina.connector.Connector tracking for Tomcat and
    io.undertow.servlet.ServletExtension/io.undertow.server.HttpHandler/org.xnio.channels.AcceptingChannel for Undertow
  - Web-VirtualHosts / Web-Connectors
  - Switch away from JAXB to SAX/StAX parsing for undertow.xml

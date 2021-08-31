@@ -20,8 +20,10 @@ import org.ops4j.pax.web.extender.whiteboard.internal.tracker.AbstractContextTra
 import org.ops4j.pax.web.service.spi.context.DefaultServletContextHelper;
 import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.util.tracker.ServiceTracker;
@@ -52,7 +54,7 @@ public class ServletContextHelperMappingTracker extends AbstractContextTracker<S
 		try {
 			// dereference here to get some information, but unget later.
 			// this reference will be dereferenced again in the (Bundle)Context of actual Whiteboard service
-			service = dereference(serviceReference);
+			service = model.getOwnerBundle().getBundleContext().getService(serviceReference);
 
 			model.setShared(true);
 
@@ -65,7 +67,9 @@ public class ServletContextHelperMappingTracker extends AbstractContextTracker<S
 
 			// 3. context params
 			model.getContextParams().clear();
-			model.getContextParams().putAll(service.getInitParameters());
+			if (service.getInitParameters() != null) {
+				model.getContextParams().putAll(service.getInitParameters());
+			}
 
 			// 4. don't pass service registration properties...
 			// ... create ones instead (service.id and service.rank are already there)
@@ -75,32 +79,27 @@ public class ServletContextHelperMappingTracker extends AbstractContextTracker<S
 //			service.getVirtualHosts();
 
 			// 6. source of the context
-			// ServletContexxtHelperMapping is legacy (Pax Web specific) method for registration of
+			// ServletContextHelperMapping is legacy (Pax Web specific) method for registration of
 			// standard ServletContextMapping with the details specified directly and not as service registration
 			// properties
 			// even if the service registered is singleton and getServletContextHelper() returns the same instance
 			// all the time, we still configure a supplier, because ServletContexteHelper should never be
 			// treated as a context passed to httpService.registerServlet(..., context)
-			model.setContextSupplier((bundleContext, ignoredName) -> {
-				ServletContextHelperMapping mapping = null;
-				try {
-					// TOUNGET:
-					mapping = bundleContext.getService(serviceReference);
-					// get the ServletContextHelperMapping again - within proper bundle context, but again - only to
-					// obtain all the information needed. The "factory" method also accepts a Bundle, so we pass it.
-					ServletContextHelper helper = mapping.getServletContextHelper(bundleContext.getBundle());
-					if (helper == null) {
-						helper = new DefaultServletContextHelper(bundleContext.getBundle());
-					}
-					return new WebContainerContextWrapper(bundleContext.getBundle(), helper, model.getName());
-				} finally {
-					// TOUNGET: hmm, won't the ServletContextHelper returned from the mapping go away if we unget
-					//          the mapping?
-					if (mapping != null) {
-						bundleContext.ungetService(serviceReference);
-					}
-				}
-			});
+			String scope = Utils.getStringProperty(serviceReference, Constants.SERVICE_SCOPE);
+			if (!Constants.SCOPE_SINGLETON.equals(scope)) {
+				LOG.warn("ServletContextHelperMapping service was not registered as \"singleton\". However it's only used" +
+						" to obtain a ServletContextHelper instance. Consider registering non-singleton ServletContextHelper service instead");
+			}
+
+			ServletContextHelper helper = service.getServletContextHelper(serviceReference.getBundle());
+			if (helper == null) {
+				helper = new DefaultServletContextHelper(serviceReference.getBundle());
+			}
+
+			// not set as direct reference, but as a supplier, so it won't be treated as HttpService-related "context"
+			final ServletContextHelper finalHelper = helper;
+			model.setContextSupplier((bundleContext, ignoredName) ->
+					new WebContainerContextWrapper(bundleContext.getBundle(), finalHelper, model.getName()));
 		} finally {
 			if (service != null) {
 				// the service was obtained only to extract the data out of it, so we have to unget()

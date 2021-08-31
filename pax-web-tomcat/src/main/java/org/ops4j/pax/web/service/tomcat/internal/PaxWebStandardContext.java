@@ -21,16 +21,15 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
-import javax.servlet.FilterConfig;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
@@ -58,6 +57,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiFilterChain;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiSessionAttributeListener;
+import org.ops4j.pax.web.service.spi.servlet.PreprocessorFilterConfig;
 import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
 import org.osgi.service.http.whiteboard.Preprocessor;
 import org.slf4j.Logger;
@@ -112,7 +112,7 @@ public class PaxWebStandardContext extends StandardContext {
 	 * {@link org.ops4j.pax.web.service.spi.servlet.OsgiServletContext}, so they're effectively registered in
 	 * all available physical servlet contexts.
 	 */
-	private final Map<Preprocessor, FilterConfig> preprocessors = new LinkedHashMap<>();
+	private final List<PreprocessorFilterConfig> preprocessors = new LinkedList<>();
 
 	private final Collection<SCIWrapper> servletContainerInitializers = new LinkedList<>();
 
@@ -158,11 +158,12 @@ public class PaxWebStandardContext extends StandardContext {
 			}
 
 			final OsgiFilterChain osgiChain;
+			List<Preprocessor> preprocessorInstances = preprocessors.stream().map(PreprocessorFilterConfig::getInstance).collect(Collectors.toList());
 			if (wrapper != null && !wrapper.is404()) {
-				osgiChain = new OsgiFilterChain(new ArrayList<>(delegate.getPreprocessors().keySet()),
+				osgiChain = new OsgiFilterChain(new ArrayList<>(preprocessorInstances),
 						wrapper.getServletContext(), wrapper.getWebContainerContext(), null, osgiSessionsBridge);
 			} else {
-				osgiChain = new OsgiFilterChain(new ArrayList<>(delegate.getPreprocessors().keySet()),
+				osgiChain = new OsgiFilterChain(new ArrayList<>(preprocessorInstances),
 						delegate.getDefaultServletContext(), delegate.getDefaultWebContainerContext(), null, osgiSessionsBridge);
 			}
 
@@ -194,7 +195,6 @@ public class PaxWebStandardContext extends StandardContext {
 	 * @param defaultServletContext
 	 */
 	public void setDefaultServletContext(OsgiServletContext defaultServletContext) {
-		// TOUNGET: release previous WebContainerContext
 		this.defaultServletContext = defaultServletContext;
 		if (defaultServletContext != null) {
 			this.defaultWebContainerContext = defaultOsgiContextModel.resolveHttpContext(defaultOsgiContextModel.getOwnerBundle());
@@ -233,9 +233,9 @@ public class PaxWebStandardContext extends StandardContext {
 
 	@Override
 	public boolean filterStart() {
-		for (Map.Entry<Preprocessor, FilterConfig> p : preprocessors.entrySet()) {
+		for (PreprocessorFilterConfig fc : preprocessors) {
 			try {
-				p.getKey().init(p.getValue());
+				fc.getInstance().init(fc);
 			} catch (ServletException e) {
 				LOG.warn("Problem during preprocessor initialization: {}", e.getMessage(), e);
 			}
@@ -249,8 +249,8 @@ public class PaxWebStandardContext extends StandardContext {
 		boolean result = super.filterStop();
 
 		// destroy the preprocessors
-		for (Preprocessor p : preprocessors.keySet()) {
-			p.destroy();
+		for (PreprocessorFilterConfig fc : preprocessors) {
+			fc.destroy();
 		}
 
 		return result;
@@ -510,7 +510,7 @@ public class PaxWebStandardContext extends StandardContext {
 		return defaultWebContainerContext;
 	}
 
-	public Map<Preprocessor, FilterConfig> getPreprocessors() {
+	public List<PreprocessorFilterConfig> getPreprocessors() {
 		return preprocessors;
 	}
 

@@ -122,7 +122,6 @@ public class Activator implements BundleActivator {
 
 		@Override
 		public Handler addingService(ServiceReference<Handler> reference) {
-			// TOUNGET:
 			Handler handler = bundleContext.getService(reference);
 			Integer ranking = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
 
@@ -148,7 +147,6 @@ public class Activator implements BundleActivator {
 
 		@Override
 		public void removedService(ServiceReference<Handler> reference, Handler handler) {
-			// TOUNGET: What ever happens: We un-get the service first
 			bundleContext.ungetService(reference);
 //			try {
 //				serverControllerFactory.removeHandler(handler);
@@ -163,7 +161,6 @@ public class Activator implements BundleActivator {
 
 		@Override
 		public Connector addingService(ServiceReference<Connector> reference) {
-			// TOUNGET:
 			Connector connector = bundleContext.getService(reference);
 
 			//add handler to factory and restart. 
@@ -189,7 +186,6 @@ public class Activator implements BundleActivator {
 
 		@Override
 		public void removedService(ServiceReference<Connector> reference, Connector connector) {
-			// TOUNGET: What ever happens: We un-get the service first
 			bundleContext.ungetService(reference);
 			try {
 				// remove handler from factory and restart it. 
@@ -215,7 +211,6 @@ public class Activator implements BundleActivator {
 
 		@Override
 		public Customizer addingService(ServiceReference<Customizer> reference) {
-			// TOUNGET:
 			Customizer customizer = bundleContext.getService(reference);
 			Integer ranking = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
 //			serverControllerFactory.addCustomizer(customizer, ranking == null ? 0 : ranking);
@@ -230,7 +225,6 @@ public class Activator implements BundleActivator {
 
 		@Override
 		public void removedService(ServiceReference<Customizer> reference, Customizer customizer) {
-			// TOUNGET: What ever happens: We un-get the service first
 			bundleContext.ungetService(reference);
 //			try {
 //

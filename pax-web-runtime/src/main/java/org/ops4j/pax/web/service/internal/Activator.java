@@ -692,7 +692,6 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 
 		@Override
 		public ServerControllerFactory addingService(ServiceReference<ServerControllerFactory> reference) {
-			// TOUNGET:
 			final ServerControllerFactory controllerFactory = bundleContext.getService(reference);
 			updateServerControllerFactory(controllerFactory);
 			return controllerFactory;
@@ -706,7 +705,6 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 		@Override
 		public void removedService(ServiceReference<ServerControllerFactory> reference, ServerControllerFactory service) {
 			if (bundleContext != null) {
-				// TOUNGET:
 				bundleContext.ungetService(reference);
 			}
 			updateServerControllerFactory(null);
@@ -717,12 +715,11 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 
 		@Override
 		public ServerListener addingService(ServiceReference<ServerListener> reference) {
-			// TOUNGET:
 			ServerListener service = bundleContext.getService(reference);
 			ServerController sc = serverController;
 			if (sc != null) {
-				sc.addListener(service);
 				serverListeners.add(service);
+				sc.addListener(service);
 			}
 			return service;
 		}
@@ -739,7 +736,6 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 				serverListeners.remove(service);
 			}
 			if (bundleContext != null) {
-				// TOUNGET:
 				bundleContext.ungetService(reference);
 			}
 		}

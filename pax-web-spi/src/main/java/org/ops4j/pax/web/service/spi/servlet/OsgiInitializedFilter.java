@@ -133,4 +133,8 @@ public class OsgiInitializedFilter implements Filter {
 		filter.destroy();
 	}
 
+	public Filter getDelegate() {
+		return filter;
+	}
+
 }

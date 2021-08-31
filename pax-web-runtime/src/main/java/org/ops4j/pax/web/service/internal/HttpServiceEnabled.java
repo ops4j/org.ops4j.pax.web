@@ -213,8 +213,8 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 
 		for (OsgiContextModel ocm : serverModel.getAllBundleOsgiContextModels(serviceBundle)) {
-			if (!ocm.isWhiteboard()) {
-				b.disassociateOsgiContextModel(ocm.resolveHttpContext(null), ocm);
+			if (ocm.hasDirectHttpContextInstance()) {
+				b.disassociateOsgiContextModel(ocm.getDirectHttpContextInstance(), ocm);
 				b.removeOsgiContextModel(ocm);
 			}
 		}
@@ -516,7 +516,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 	@Override
 	public void unregister(final String alias) {
-		ServletModel model = new ServletModel(alias, null, null, null, (ServiceReference<? extends Servlet>) null);
+		ServletModel model = new ServletModel(alias, null, null, null, (ServiceReference<Servlet>) null);
 		doUnregisterServlet(model);
 	}
 

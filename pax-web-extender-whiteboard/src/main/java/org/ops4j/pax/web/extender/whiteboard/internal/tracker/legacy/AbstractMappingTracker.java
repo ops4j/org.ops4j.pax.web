@@ -40,43 +40,33 @@ public abstract class AbstractMappingTracker<S extends ContextRelated, R, D exte
 		super(whiteboardExtenderContext, bundleContext);
 	}
 
-	@Override
-	protected String determineSelector(boolean legacyMapping, String legacyId, String selector, ServiceReference<S> serviceReference) {
+	protected String determineSelector(boolean legacyMapping, String legacyId, String selector, ServiceReference<S> serviceReference,
+			ContextRelated webElement) {
 		selector = super.determineSelector(legacyMapping, legacyId, selector, serviceReference);
 
-		if (selector == null) {
+		if (selector == null && webElement != null) {
 			// we have to take contextId/selector from the ContextRelated service itself - that's available
 			// only for "legacy mapping registration"
 
-			S service = null;
-			try {
-				service = dereference(serviceReference);
+			selector = webElement.getContextSelectFilter();
+			legacyId = webElement.getContextId();
 
-				selector = service.getContextSelectFilter();
-				legacyId = service.getContextId();
+			// repeated validation, but for id/selector from the mapping itself.
+			if (selector != null && legacyId != null) {
+				log.warn("Both context id={} and context selector={} are specified. Using {}.",
+						legacyId, selector, selector);
+				legacyId = null;
+			}
 
-				// repeated validation, but for id/selector from the mapping itself.
-				if (selector != null && legacyId != null) {
-					log.warn("Both context id={} and context selector={} are specified. Using {}.",
-							legacyId, selector, selector);
-					legacyId = null;
-				}
+			if (selector == null && legacyId != null) {
+				// 140.10 Integration with Http Service Contexts
+				selector = String.format("(%s=%s)", HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY, legacyId);
+			}
 
-				if (selector == null && legacyId != null) {
-					// 140.10 Integration with Http Service Contexts
-					selector = String.format("(%s=%s)", HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY, legacyId);
-				}
-
-				if (selector == null) {
-					// just "default"
-					selector = String.format("(%s=%s)", HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME,
-							HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME);
-				}
-			} finally {
-				if (service != null) {
-					// TOUNGET: the service was obtained only to extract contextId/selector out of it, so we have to unget()
-					bundleContext.ungetService(serviceReference);
-				}
+			if (selector == null) {
+				// just "default"
+				selector = String.format("(%s=%s)", HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME,
+						HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME);
 			}
 		}
 
@@ -85,21 +75,28 @@ public abstract class AbstractMappingTracker<S extends ContextRelated, R, D exte
 
 	@Override
 	protected final T createElementModel(ServiceReference<S> serviceReference, Integer rank, Long serviceId) {
-
 		// for services extending org.ops4j.pax.web.service.whiteboard.ContextRelated, we ALWAYS
 		// get the service, unlike with new Whiteboard CMPN specification, where service is obtained
 		// just before registration - possibly to register it inside more than one ServletContext
 
 		S service = null;
 		try {
-			service = dereference(serviceReference);
+			// dereference only to get the mapping and actual web element from the mapping. It can be safely unget()
+			// later
+			service = serviceReference.getBundle().getBundleContext().getService(serviceReference);
 			log.debug("Creating web element model from legacy whiteboard service {} (id={}): {}",
 					serviceReference, serviceId, service);
 
-			return doCreateElementModel(serviceReference.getBundle(), service, rank, serviceId);
+			T t = doCreateElementModel(serviceReference.getBundle(), service, rank, serviceId);
+
+			// all the services implementing ContextRelated should specify the context (selector) directly
+			String mappingSelector = determineSelector(true, null, null, serviceReference, service);
+			t.setContextSelector(mappingSelector);
+
+			return t;
 		} finally {
 			if (service != null) {
-				// TOUNGET: the service was obtained only to extract the data out of it, so we have to unget()
+				// The service was obtained only to extract the data out of it, so we can unget()
 				bundleContext.ungetService(serviceReference);
 			}
 		}

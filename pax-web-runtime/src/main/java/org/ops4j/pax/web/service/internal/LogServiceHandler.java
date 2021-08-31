@@ -35,7 +35,7 @@ public class LogServiceHandler implements
 	private static final Logger LOG = LoggerFactory
 			.getLogger(LogServiceHandler.class);
 
-	private AtomicReference<LogService> logServiceReference = new AtomicReference<>();
+	private final AtomicReference<LogService> logServiceReference = new AtomicReference<>();
 
 	private final BundleContext bundleContext;
 
@@ -80,24 +80,15 @@ public class LogServiceHandler implements
 	@Override
 	public LogService addingService(ServiceReference<LogService> reference) {
 		if (reference.isAssignableTo(bundleContext.getBundle(), "org.osgi.service.log.LogService")) {
-			// TOUNGET:
 			LogService logService = bundleContext.getService(reference);
-			try {
-				if (logService instanceof LogService) {
-					LogService old = logServiceReference.getAndSet(logService);
-					if (old != null) {
-						LOG.debug(
-								"replace old LogService instance {} by an instance of {}",
-								old.getClass().getName(), logService.getClass()
-										.getName());
-					}
-					return logService;
+			if (logService != null) {
+				LogService old = logServiceReference.getAndSet(logService);
+				if (old != null) {
+					LOG.debug("replace old LogService instance {} by an instance of {}",
+							old.getClass().getName(), logService.getClass().getName());
 				}
-			} catch (NoClassDefFoundError e) {
-				LOG.warn("A LogService service was found, but the coresponding class can't be loaded, make sure to have a compatible org.osgi.service.log package package exported with version range [1.3,2.0)");
+				return logService;
 			}
-			// TOUNGET: If we came along here, we have no use of this service, so unget it!
-			bundleContext.ungetService(reference);
 		} else {
 			LOG.warn("A LogService service was found, but it is not assignable to this bundle, make sure to have a compatible org.osgi.service.log package package exported with version range [1.3,2.0)");
 		}
@@ -105,26 +96,16 @@ public class LogServiceHandler implements
 	}
 
 	@Override
-	public void modifiedService(ServiceReference<LogService> reference,
-								LogService service) {
+	public void modifiedService(ServiceReference<LogService> reference, LogService service) {
 		// we don't care about properties
 	}
 
 	@Override
-	public void removedService(ServiceReference<LogService> reference,
-							   LogService service) {
-		// TOUNGET: Whatever happens: We unget the service first
+	public void removedService(ServiceReference<LogService> reference, LogService service) {
 		bundleContext.ungetService(reference);
-		try {
-			if (service instanceof LogService) {
-				// We only want to remove it if it is the current reference,
-				// otherwhise it could be release and we keep the old one
-				logServiceReference.compareAndSet(service, null);
-			}
-		} catch (NoClassDefFoundError e) {
-			// we should never go here, but if this happens silently ignore it
-		}
-
+		// We only want to remove it if it is the current reference,
+		// otherwhise it could be release and we keep the old one
+		logServiceReference.compareAndSet(service, null);
 	}
 
 }
