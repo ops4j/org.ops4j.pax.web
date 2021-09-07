@@ -73,10 +73,8 @@ public class Activator extends AbstractExtender {
 	}
 
 	@Override
-	protected void doStart() throws Exception {
+	protected void doStart() {
 		LOG.debug("Starting Pax Web WAR Extender");
-
-		BundleContext context = getBundleContext();
 
 		// WarExtenderContext (just like WhiteboardExtenderContext) manages the lifecycle of both the bundles
 		// being extended and the WebContainer OSGi service where the WARs are to be installed
@@ -89,7 +87,7 @@ public class Activator extends AbstractExtender {
 	}
 
 	@Override
-	protected void doStop() throws Exception {
+	protected void doStop() {
 		LOG.debug("Stopping Pax Web WAR Extender");
 
 		// stop tracking the extensions
@@ -101,7 +99,7 @@ public class Activator extends AbstractExtender {
 	}
 
 	@Override
-	protected Extension doCreateExtension(final Bundle bundle) throws Exception {
+	protected Extension doCreateExtension(final Bundle bundle) {
 		Extension extension = warExtenderContext.createExtension(bundle, () -> extensions.remove(bundle));
 		if (extension != null) {
 			extensions.put(bundle, extension);

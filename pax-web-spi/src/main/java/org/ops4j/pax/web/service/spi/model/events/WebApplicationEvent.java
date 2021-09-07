@@ -59,19 +59,24 @@ public class WebApplicationEvent {
 	private final String bundleName;
 	private final String bundleVersion;
 
+	private final String contextPath;
+
 	private final long timestamp;
 
 	private final Throwable throwable;
 
-	private HttpContext context;
+	private final HttpContext context;
 
-	public WebApplicationEvent(State type, Bundle bundle, HttpContext context) {
-		this(type, bundle, context, null);
+	private boolean awaitingAllocation = false;
+
+	public WebApplicationEvent(State type, Bundle bundle, String contextPath, HttpContext context) {
+		this(type, bundle, contextPath, context, null);
 	}
 
-	public WebApplicationEvent(State type, Bundle bundle, HttpContext context, Throwable throwable) {
+	public WebApplicationEvent(State type, Bundle bundle, String contextPath, HttpContext context, Throwable throwable) {
 		this.type = type;
 		this.bundle = bundle;
+		this.contextPath = contextPath;
 		this.bundleId = bundle.getBundleId();
 		this.bundleName = bundle.getSymbolicName();
 		this.bundleVersion = bundle.getVersion() == null ? Version.emptyVersion.toString() : bundle.getVersion().toString();
@@ -119,6 +124,18 @@ public class WebApplicationEvent {
 
 	public HttpContext getContext() {
 		return context;
+	}
+
+	public String getContextPath() {
+		return contextPath;
+	}
+
+	public boolean isAwaitingAllocation() {
+		return awaitingAllocation;
+	}
+
+	public void setAwaitingAllocation(boolean awaitingAllocation) {
+		this.awaitingAllocation = awaitingAllocation;
 	}
 
 }

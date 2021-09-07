@@ -327,14 +327,10 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	/** Context-specific list of URLs for XML descriptors (only Jetty and Tomcat handle them) */
 	private final List<URL> serverSpecificDescriptors = new ArrayList<>();
 
-	/**
-	 * Flag indicating whether this {@link OsgiContextModel} comes from Whiteboard.
-	 */
+	/** Flag indicating whether this {@link OsgiContextModel} comes from Whiteboard. */
 	private final boolean whiteboard;
 
-	/**
-	 * Flag indicating whether this {@link OsgiContextModel} comes from a WAB.
-	 */
+	/** Flag indicating whether this {@link OsgiContextModel} comes from a WAB. */
 	private boolean wab;
 
 	/** Tracks {@link Change unregistration changes} for dynamic servlets/filters/listeners */
@@ -699,8 +695,6 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	/**
 	 * A "WAB" context is always created by pax-web-extender-war when a WAB is installed and provides dedicated,
 	 * direct (no service reference and no supplier) to {@link HttpContext}.
-	 *
-	 * TODO_WAB: check what happens if BundleActivator of the WAB interacts with HttpService or with Whiteboard
 	 * @return
 	 */
 	public boolean isWab() {

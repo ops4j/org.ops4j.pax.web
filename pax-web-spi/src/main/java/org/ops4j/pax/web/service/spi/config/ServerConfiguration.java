@@ -169,10 +169,6 @@ public interface ServerConfiguration {
 
 	List<String> getVirtualHosts();
 
-
-
-
-
 	Boolean isEncEnabled();
 
 	String getEncMasterPassword();

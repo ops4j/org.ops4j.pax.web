@@ -73,7 +73,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		// (HttpContext -> OsgiContextModel) for any bundle-scoped HttpServiceEnabled instance created until there's
 		// a need to actually register a web element!
 		// I had to do it, because I was getting "highest ranked OsgiContextModel" for given context path (mostly "/")
-		// related to pax-web-extender-whiteboard bundle which was usually the first obtaining the bundle-scoped
+		// related to pax-web-extender-whiteboard bundle which was usually the first bundle obtaining the bundle-scoped
 		// HttpService instance.
 		// probably that's why "140.10 Integration with Http Service Contexts" says:
 		//     A Http Whiteboard service which should be registered with a Http Context from the Http Service can
@@ -86,8 +86,9 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		// servlets being registered through HttpService and then the request pipelines being affected by Whiteboard
 		// filters/listeners/error pages?
 		//
-		// in Whiteboard, rank of "default" (built-in) context is 0. In HttpService the rank of the context
-		// used/created as an argument to httpService.register(..., context) is "highest"
+		// in Whiteboard, rank of "default" (built-in) context is 0 (see static block in OsgiContextModel class).
+		// In HttpService the rank of the context used/created as an argument to httpService.register(..., context) is
+		// "highest" (see ServerModel.createNewContextModel())
 		// "140.4 Registering Servlets":
 		//     The Servlet Context of the Http Service is treated in the same way as all contexts managed by the
 		//     Whiteboard implementation. The highest ranking is associated with the context of the Http Service.
@@ -96,14 +97,6 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		//  - it's impossible to specify context path with CMPN HttpService
 		//  - OSGi CMPN HttpService spec assumed that if you httpService.register(..., context), you expect exactly
 		//    this context to be used and not some Whiteboard context for "/" path
-		//
-		// To be honest, it was easier yesterday (2020-09-30) before I swapped the ranks of contexts from:
-		//  - context from HttpService ranked at Integer.MIN_VALUE
-		//  - context from Whiteboard ranked at Integer.MIN_VALUE / 2
-		// to:
-		//  - context from HttpService ranked at Integer.MAX_VALUE
-		//  - context from Whiteboard ranked at 0
-		// but well...
 		//
 		// One drawback before the change was that if I wanted proper/expected context to be passed to SCIs, I had
 		// to register Whiteboard context with ranking > Integer.MIN_VALUE/2 to "take over" the context for HttpService
@@ -166,14 +159,17 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		getServletCustomizer().removedService(servletRef, model);
 		assertThat(httpGET(port, "/s"), startsWith("HTTP/1.1 404"));
 
-		// out of two "contexts", the above servlet should be registered with the HttpService one. Not the Whiteboard
-		// one because of service ranking.
+		// out of the two above "contexts", TestServlet should be registered with the HttpService one, not the
+		// Whiteboard one because of service ranking.
 		//  - (rank 0) OsgiContextModel{WB,id=OCM-2,name='default',path='/',bundle=org.ops4j.pax.web.pax-web-extender-whiteboard,context=(supplier)}
 		//  - (rank MAX_VALUE) OsgiContextModel{HS,id=OCM-4,name='default',path='/',bundle=sample1,context=DefaultHttpContext{bundle=Bundle "sample1",contextId='default'}}
 		Hashtable<String, Object> props = models.get(0).getContextRegistrationProperties();
-		assertThat(props.get(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
-		assertNull(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
-		assertThat(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH), equalTo("/"));
+		assertThat("It should be HttpService context",
+				props.get(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
+		assertNull("It should not be the Whiteboard context",
+				props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
+		assertThat("It should be the \"/\" context specified using Whiteboard property",
+				props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH), equalTo("/"));
 
 		models.clear();
 
@@ -190,9 +186,12 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 
 		// now, we've explicitly said to register Whiteboard servlet to Whiteboard "default" context
 		props = models.get(0).getContextRegistrationProperties();
-		assertNull(props.get(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY));
-		assertThat(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME), equalTo("default"));
-		assertThat(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH), equalTo("/"));
+		assertNull("It should not be HttpService context",
+				props.get(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY));
+		assertThat("It should be the Whiteboard context",
+				props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME), equalTo("default"));
+		assertThat("It should be the \"/\" context specified using Whiteboard property",
+				props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH), equalTo("/"));
 	}
 
 	@Test
@@ -202,7 +201,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		// override "default" HttpService context
 		HttpContext context1 = new HttpContext() {
 			@Override
-			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) {
 				return "1".equals(request.getParameter("token"));
 			}
 
@@ -220,7 +219,8 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		properties.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "default");
 		properties.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, "/");
 
-		// register HttpService context with very high ranking - to use it for normal Whiteboard servlets
+		// register HttpService context (using Whiteboard method) with very high ranking - to use it for normal
+		// Whiteboard servlets
 		ServiceReference<HttpContext> reference1 = mockReference(sample1,
 				HttpContext.class, properties, () -> context1, 0L, 1042);
 		OsgiContextModel model1 = getHttpContextCustomizer().addingService(reference1);
@@ -228,7 +228,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		// override "default" Whiteboard context
 		ServletContextHelper context2 = new ServletContextHelper() {
 			@Override
-			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) {
 				return "2".equals(request.getParameter("token"));
 			}
 		};
@@ -295,7 +295,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		// override a context used with HttpService - even without specifying anything in httpService.registerServlet()
 		HttpContext context1 = new HttpContext() {
 			@Override
-			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) {
 				return "1".equals(request.getParameter("token"));
 			}
 
@@ -322,7 +322,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		// override "default" Whiteboard context
 		ServletContextHelper context2 = new ServletContextHelper() {
 			@Override
-			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) {
 				return "2".equals(request.getParameter("token"));
 			}
 		};
@@ -345,6 +345,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		// 2020-10-02: Note that because we didn't register anything yet, there was no OsgiContextModel
 		// created with Integer.MAX_VALUE ranking according to 140.4 "The highest ranking is associated with the
 		// context of the Http Service."!
+		// if there was such OsgiContextModel, the TestServlet wouldn't use the one we've registered with rank=42
 		wc.registerServlet(servlet, new String[] { "/s/*" }, null, null);
 		assertThat(httpGET(port, "/s"), startsWith("HTTP/1.1 403"));
 		assertThat(httpGET(port, "/s?token=1"), endsWith("S(1)"));
@@ -381,7 +382,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		// TRY TO override "default" HttpService context with special context and handleSecurity()
 		HttpContext context1 = new HttpContext() {
 			@Override
-			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) {
 				return "1".equals(request.getParameter("token"));
 			}
 
@@ -441,7 +442,8 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 
 		// register HttpContext with ANY rank, but using the same INSTANCE we've got from
 		// org.osgi.service.http.HttpService.createDefaultHttpContext() - this should replace the default "default"
-		// context
+		// context - so we have a method to configure context path of the default context for example
+		// also, existing, HttpService-registered servlet should immediately switch to new context path!
 		Hashtable<String, Object> properties = new Hashtable<>();
 		properties.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "default");
 		properties.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, "/new-path");
@@ -629,7 +631,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 
 		HttpContext context1 = new HttpContext() {
 			@Override
-			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) {
 				return "1".equals(request.getParameter("token"));
 			}
 
@@ -652,7 +654,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 
 		HttpContext context2 = new HttpContext() {
 			@Override
-			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) {
 				return "2".equals(request.getParameter("token"));
 			}
 
@@ -719,7 +721,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		// override "default" HttpService context, to specify its context path (and security of course)
 		HttpContext context1 = new HttpContext() {
 			@Override
-			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) {
 				return "1".equals(request.getParameter("token"));
 			}
 
@@ -788,7 +790,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 
 		HttpContext context1 = new HttpContext() {
 			@Override
-			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) {
 				return "1".equals(request.getParameter("token"));
 			}
 

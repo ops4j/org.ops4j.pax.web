@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.samples.war;
+package org.ops4j.pax.web.samples.war.javaee;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -28,7 +28,7 @@ public class SimplestServlet extends HttpServlet {
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		resp.setContentType("text/plain");
 		resp.setCharacterEncoding(StandardCharsets.UTF_8.toString());
-		resp.getWriter().println("Hello");
+		resp.getWriter().println("Hello (WAR)");
 		resp.getWriter().flush();
 	}
 

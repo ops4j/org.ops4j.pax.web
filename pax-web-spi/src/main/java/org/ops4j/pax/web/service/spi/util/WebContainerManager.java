@@ -272,7 +272,11 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 			if (bundleContainers != null) {
 				WebContainer container = bundleContainers.remove(context);
 				if (container != null) {
-					context.ungetService(ref);
+					try {
+						context.ungetService(ref);
+					} catch (IllegalStateException ignored) {
+						// java.lang.IllegalStateException: Invalid BundleContext.
+					}
 				}
 				if (bundleContainers.isEmpty()) {
 					containers.remove(ref);
@@ -280,6 +284,8 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 			}
 		}
 	}
+
+	// --- implementation of org.osgi.framework.BundleListener
 
 	@Override
 	public void bundleChanged(BundleEvent event) {
@@ -296,7 +302,7 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 		}
 	}
 
-	// --- implementation of ServiceTrackerCustomizer
+	// --- implementation of org.osgi.util.tracker.ServiceTrackerCustomizer
 	//     We're never calling context.getService(), as this should be performed within the scope of actual
 	//     WAR or Whiteboard bundle!
 

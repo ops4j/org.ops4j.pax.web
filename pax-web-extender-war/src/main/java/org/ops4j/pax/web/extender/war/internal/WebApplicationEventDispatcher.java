@@ -98,7 +98,6 @@ public class WebApplicationEventDispatcher implements WebApplicationEventListene
 
 	@Override
 	public void bundleChanged(BundleEvent event) {
-		// TODO_WAB: clean up listeners for given bundle
 //		if (event.getType() == BundleEvent.STOPPED || event.getType() == BundleEvent.UNINSTALLED) {
 //			states.remove(event.getBundle().getBundleId());
 //		}
@@ -292,6 +291,14 @@ public class WebApplicationEventDispatcher implements WebApplicationEventListene
 //				webApp.getBundle(), bundle, httpService,
 //				webApp.getHttpContext()));
 //	}
+
+	/**
+	 * Package-private method to register the main listener for WAB conflict management.
+	 * @return
+	 */
+	Set<WebApplicationEventListener> getListeners() {
+		return listeners;
+	}
 
 	private void callListeners(WebApplicationEvent event) {
 		for (WebApplicationEventListener listener : listeners) {

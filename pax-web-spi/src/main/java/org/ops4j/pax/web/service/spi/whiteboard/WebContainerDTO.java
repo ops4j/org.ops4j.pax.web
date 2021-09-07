@@ -16,6 +16,9 @@
  */
 package org.ops4j.pax.web.service.spi.whiteboard;
 
+import org.ops4j.pax.web.annotations.Review;
+
+@Review
 public class WebContainerDTO {
     
     public Integer port;

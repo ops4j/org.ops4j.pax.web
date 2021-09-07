@@ -29,7 +29,6 @@ import javax.servlet.SessionCookieConfig;
 
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.spi.config.Configuration;
-import org.ops4j.pax.web.service.spi.config.JettyConfiguration;
 import org.ops4j.pax.web.service.spi.config.JspConfiguration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
 import org.ops4j.pax.web.service.spi.config.ResourceConfiguration;
@@ -143,11 +142,6 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	@Override
 	public LogConfiguration logging() {
 		return logConfiguration;
-	}
-
-	@Override
-	public JettyConfiguration jetty() {
-		return null;
 	}
 
 	@Override

@@ -57,6 +57,7 @@ import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
+import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModelAware;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
@@ -227,33 +228,6 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		serverController.sendBatch(b);
 		b.accept(serviceModel);
 
-//		// strange while loops, because "unregistration" may not necessarily end with removal of single web
-//		// element. For example, when many servlets were registered by class name
-//		while (!serviceModel.getFilterModels().isEmpty()) {
-//			doUnregisterFilter(serviceModel.getFilterModels().iterator().next());
-//		}
-//		while (!serviceModel.getServletModels().isEmpty()) {
-//			doUnregisterServlet(serviceModel.getServletModels().iterator().next());
-//		}
-//		while (!serviceModel.getEventListenerModels().isEmpty()) {
-//			doUnregisterEventListener(serviceModel.getEventListenerModels().iterator().next());
-//		}
-//		while (!serviceModel.getErrorPageModels().isEmpty()) {
-//			doUnregisterErrorPages(serviceModel.getErrorPageModels().iterator().next());
-//		}
-//		while (!serviceModel.getContainerInitializerModels().isEmpty()) {
-//			doUnregisterServletContainerInitializer(serviceModel.getContainerInitializerModels().iterator().next());
-//		}
-//		while (!serviceModel.getWebSocketModels().isEmpty()) {
-//			doUnregisterWebSocket(serviceModel.getWebSocketModels().iterator().next());
-//		}
-//		for (WelcomeFileModel model : serviceModel.getWelcomeFileModels()) {
-//			// context(s) will be picked from the model
-//			doUnregisterWelcomeFiles(Collections.emptyList(), model);
-//		}
-
-//		serverModel.deassociateContexts(serviceBundle, serverController);
-
 		stopped = true;
 	}
 
@@ -276,7 +250,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			return type.cast(whiteboardContainerView);
 		}
 		if (type == WebAppWebContainerView.class) {
-			// view used when registering WARs (WABs). This is kind of transactional view
+			// view used when registering WARs (WABs). This is kind of transactional view to register everything
+			// from web.xml/fragments/annotations in one batch - without starting the target context after each
+			// servlet (for example)
 			return type.cast(webAppWebContainer);
 		}
 		return null;
@@ -710,9 +686,6 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			LOG.debug("Configuring resource servlet to serve resources from WebContainerContext");
 			servletModel.setBasePath(resourceServlet.chrootBase);
 		}
-
-		// TODO: think about resource cache sharing between resource servlets. Now all resource servlets
-		//       configure their own resource cache
 
 		try {
 			doRegisterServlet(Collections.singletonList(context), servletModel);
@@ -2297,12 +2270,40 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 
 		@Override
-		public boolean allocateContext(Bundle bundle, String contextPath) {
-			return true;
+		public boolean allocateContext(Bundle wab, String contextPath) {
+			return serverModel.runSilently(() -> {
+				if (stopped) {
+					LOG.info("WebContainer is already stopped.");
+					return false;
+				}
+
+				OsgiContextModel ocm = serverModel.getWabContext(contextPath, wab, true);
+				return ocm != null;
+			});
 		}
 
 		@Override
-		public void releaseContext(Bundle bundle, String contextPath) {
+		public ServletContextModel getServletContext(Bundle wab, String contextPath) {
+			OsgiContextModel ocm = serverModel.getWabContext(contextPath, wab, false);
+			return ocm == null ? null : serverModel.getServletContextModel(ocm.getContextPath());
+		}
+
+		@Override
+		public OsgiContextModel getOsgiContext(Bundle wab, String contextPath) {
+			return serverModel.getWabContext(contextPath, wab, false);
+		}
+
+		@Override
+		public void releaseContext(Bundle wab, String contextPath) {
+			serverModel.runSilently(() -> {
+				if (stopped) {
+					LOG.info("WebContainer is already stopped.");
+					return null;
+				}
+
+				serverModel.releaseWabContext(contextPath, wab);
+				return null;
+			});
 		}
 	}
 

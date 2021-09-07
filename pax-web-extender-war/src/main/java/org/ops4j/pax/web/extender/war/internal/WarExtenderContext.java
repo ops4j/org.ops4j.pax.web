@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
@@ -35,6 +37,7 @@ import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent;
+import org.ops4j.pax.web.service.spi.model.events.WebApplicationEventListener;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.util.WebContainerListener;
 import org.ops4j.pax.web.service.spi.util.WebContainerManager;
@@ -73,8 +76,14 @@ public class WarExtenderContext implements WebContainerListener {
 	private final Map<Bundle, BundleWebApplication> webApplications = new HashMap<>();
 
 	/**
-	 * This lock prevents concurrent access to a list of {@link #webApplications}. This is similar to how
-	 * whiteboard extender context manages a list of <em>bundle applications</em>.
+	 * ContextPath mapped lists of bundles awaiting allocation of their
+	 * {@link PaxWebConstants#CONTEXT_PATH_HEADER context path}
+	 */
+	private final Map<String, List<Bundle>> webApplicationQueue = new HashMap<>();
+
+	/**
+	 * This lock prevents concurrent access to a list of {@link #webApplications} and {@link #webApplicationQueue}.
+	 * This is similar to how whiteboard extender context manages a list of <em>bundle applications</em>.
 	 */
 	private final Lock lock = new ReentrantLock();
 
@@ -87,25 +96,12 @@ public class WarExtenderContext implements WebContainerListener {
 	/** Used to send events related to entire Web Applications being installed/uninstalled. */
 	private final WebApplicationEventDispatcher webApplicationEventDispatcher;
 
-	/** Used to parser {@code web.xml} and fragmnets into a web application model */
-	private final WebXmlParser webApplicationParser;
-
 	/** Default, common foundation of all WABs - includes default (override'able) servlet and some welcome files */
 	private final WebXml defaultWebXml;
 
+	private final WabConflictListener wabConflictListener;
 
-
-
-
-
-//				private WebObserver webObserver;
 //				private final ServiceRegistration<WarManager> registration;
-
-
-
-
-
-
 
 	/**
 	 * Construct a {@link WarExtenderContext} with asynchronous (production) {@link WebContainerManager}
@@ -130,12 +126,6 @@ public class WarExtenderContext implements WebContainerListener {
 		// dispatcher of events related to WAB lifecycle (128.5 Events)
 		webApplicationEventDispatcher = new WebApplicationEventDispatcher(bundleContext);
 
-		// TODO: that's a good place to prepare default WebXml instance to be used in all WABs
-
-		// web.xml, web-fragment.xml parser (from tomcat-util-scan)
-		webApplicationParser = new WebXmlParser(false, false, true);
-		webApplicationParser.setClassLoader(WebXmlParser.class.getClassLoader());
-
 		defaultWebXml = findDefaultWebXml();
 
 //		webObserver = new WebObserver(
@@ -154,8 +144,8 @@ public class WarExtenderContext implements WebContainerListener {
 				: new WebContainerManager(bundleContext, this, "HttpService->WarExtender");
 		webContainerManager.initialize();
 
-		// TODO_WAB: setup a listener to get notified about all the contexts being installed (Whiteboard and HttpService)
-		//       so we can retry deployment of FAILED (due to context conflict) WABs
+		wabConflictListener = new WabConflictListener();
+		webApplicationEventDispatcher.getListeners().add(wabConflictListener);
 	}
 
 	/**
@@ -173,13 +163,14 @@ public class WarExtenderContext implements WebContainerListener {
 //		}
 
 		webContainerManager.shutdown();
+		webApplicationEventDispatcher.getListeners().remove(wabConflictListener);
 	}
 
 	/**
 	 * Send a {@link BundleWebApplication} related event.
 	 * @param event
 	 */
-	public void webEvent(WebApplicationEvent event) {
+	public void sendWebEvent(WebApplicationEvent event) {
 		webApplicationEventDispatcher.webEvent(event);
 	}
 
@@ -312,8 +303,14 @@ public class WarExtenderContext implements WebContainerListener {
 		webContainerManager.releaseContainer(bundleContext, ref);
 	}
 
+	/**
+	 * Returns a new {@link WebXmlParser} on each call (SAX Parser safety).
+	 * @return
+	 */
 	public WebXmlParser getParser() {
-		return webApplicationParser;
+		WebXmlParser parser = new WebXmlParser(false, false, true);
+		parser.setClassLoader(WebXmlParser.class.getClassLoader());
+		return parser;
 	}
 
 	/**
@@ -355,7 +352,7 @@ public class WarExtenderContext implements WebContainerListener {
 				// it can be null when invoked from IDE without proper `mvn package`, which
 				// repackages Tomcat's resources into pax-web-spi
 				defaultWebXml.setURL(defaultWebXmlURI);
-				webApplicationParser.parseWebXml(defaultWebXmlURI, defaultWebXml, false);
+				getParser().parseWebXml(defaultWebXmlURI, defaultWebXml, false);
 			}
 		} catch (IOException e) {
 			LOG.warn("Failure parsing default web.xml: {}", e.getMessage(), e);
@@ -410,7 +407,7 @@ public class WarExtenderContext implements WebContainerListener {
 				WebXml webXml = new WebXml();
 				webXml.setURL(next);
 				try {
-					if (!webApplicationParser.parseWebXml(next, webXml, false)) {
+					if (!getParser().parseWebXml(next, webXml, false)) {
 						webXml = null;
 					}
 				} catch (IOException e) {
@@ -474,7 +471,8 @@ public class WarExtenderContext implements WebContainerListener {
 					lock.unlock();
 				}
 
-				Thread.currentThread().setName(name + " (" + webApp.getContextPath() + ")");
+				long id = bundle.getBundleId();
+				Thread.currentThread().setName(name + " (" + webApp.getContextPath() + " [" + id + "])");
 
 				// Aries Blueprint container may be processed by several reschedules of "this" into a configured
 				// thread pool. Rescheduling happens at some stages of Blueprint container lifecycle, when it has to
@@ -522,6 +520,69 @@ public class WarExtenderContext implements WebContainerListener {
 					cleanup.run();
 				}
 				lock.unlock();
+			}
+		}
+	}
+
+	/**
+	 * A listener that can re-schedule WAB deployments when other WABs' state changes.
+	 */
+	private class WabConflictListener implements WebApplicationEventListener {
+		@Override
+		public void webEvent(WebApplicationEvent event) {
+			// according to extension JavaDoc (org.apache.felix.utils.extender.Extension.destroy), this method
+			// is called for example in the thread that stops the bundle. We have to schedule the handler to another
+			// thread
+			pool.submit(new DeployTask(event));
+		}
+	}
+
+	private class DeployTask implements Runnable {
+		private final WebApplicationEvent event;
+
+		private DeployTask(WebApplicationEvent event) {
+			this.event = event;
+		}
+
+		/**
+		 * Method called when {@link WebApplicationEvent} is received. We're interested in
+		 * {@link WebApplicationEvent.State#UNDEPLOYED} events, because some WABs may have to be rescheduled.
+		 */
+		@Override
+		public void run() {
+			Bundle wab = event.getBundle();
+			String contextPath = event.getContextPath();
+
+			if (event.getType() == WebApplicationEvent.State.FAILED && event.isAwaitingAllocation()) {
+				// some WAB has failed because it wasn't able to allocate the context - another WAB has
+				// "taken" it earlier.
+				LOG.info("Added {} to await-queue for {}", webApplications.get(wab), contextPath);
+				webApplicationQueue.computeIfAbsent(contextPath, cp -> new LinkedList<>()).add(wab);
+			}
+
+			if (event.getType() == WebApplicationEvent.State.UNDEPLOYED) {
+				if (webApplicationQueue.containsKey(contextPath)) {
+					// in case it was awaiting the allocation
+					webApplicationQueue.get(contextPath).remove(wab);
+				}
+
+				lock.lock();
+				try {
+					for (Iterator<Bundle> it = webApplicationQueue.get(contextPath).iterator(); it.hasNext(); ) {
+						Bundle awaitingWab = it.next();
+						if (awaitingWab != wab) {
+							// a WAB for some contextPath was UNDEPLOYED, so next awaiting WAB can be deployed
+							// (at least attempted to be deployed)
+							BundleWebApplication app = webApplications.get(awaitingWab);
+							LOG.info("Redeploying {}, because {} is now available", app, contextPath);
+							app.deploy();
+							it.remove();
+							break;
+						}
+					}
+				} finally {
+					lock.unlock();
+				}
 			}
 		}
 	}

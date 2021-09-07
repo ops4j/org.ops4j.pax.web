@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
@@ -210,6 +211,17 @@ public class BundleWebApplication {
  	 */
 	private WebContainerContext httpContext = null;
 
+	/**
+	 * If our WAB manages to <em>take</em> given context path, we'll have {@link OsgiContextModel} available
+	 * for us to configure (using {@code web.xml}, fragments, ...).
+	 */
+	private OsgiContextModel allocatedOsgiContextModel = null;
+
+	/**
+	 * Allocated {@link ServletContextModel}
+	 */
+	private ServletContextModel allocatedServletContextModel = null;
+
 	public BundleWebApplication(Bundle bundle, WebContainerManager webContainerManager,
 			WarExtenderContext extenderContext, ExecutorService pool) {
 		this.bundle = bundle;
@@ -270,7 +282,7 @@ public class BundleWebApplication {
 		// related to WAB's bundle
 
 		State state = deploymentState.getAndSet(State.UNDEPLOYING);
-		extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYING, bundle, httpContext));
+		extenderContext.sendWebEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYING, bundle, contextPath, httpContext));
 
 		// get a WebContainer for the last time - it doesn't have to be available (no need to lock here)
 		ServiceReference<WebContainer> ref = webContainerServiceRef;
@@ -352,7 +364,7 @@ public class BundleWebApplication {
 
 		// whether the undeployment failed, succeeded or wasn't needed, we broadcast an event and set final stage.
 		deploymentState.set(State.UNDEPLOYED);
-		extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYED, bundle, null));
+		extenderContext.sendWebEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYED, bundle, contextPath, null));
 
 		webContainerManager.releaseContainer(bundle.getBundleContext(), ref);
 	}
@@ -449,7 +461,7 @@ public class BundleWebApplication {
 				// parsed web.xml + fragments + annotations
 
 				State state = deploymentState.getAndSet(State.UNDEPLOYING);
-				extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYING, bundle, httpContext));
+				extenderContext.sendWebEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYING, bundle, contextPath, httpContext));
 
 				// similar state check as with stop(), but with slightly different handling
 				switch (state) {
@@ -509,7 +521,7 @@ public class BundleWebApplication {
 				// means that if the WebContainer is available again, the WAB will be scheduled to ALLOCATING_CONTEXT
 				// state
 				deploymentState.set(State.WAITING_FOR_WEB_CONTAINER);
-				extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYED, bundle, null));
+				extenderContext.sendWebEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYED, bundle, contextPath, null));
 			}
 
 			webContainerManager.releaseContainer(bundle.getBundleContext(), ref);
@@ -536,7 +548,7 @@ public class BundleWebApplication {
 					LOG.debug("WebContainer service reference is not available. {} enters Grace Period state.", this);
 					// note: there may be duplicate WAITING events if web container is not available before
 					// context path reservation and before actual registration of webapp's web elements.
-					extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.WAITING, bundle, null));
+					extenderContext.sendWebEvent(new WebApplicationEvent(WebApplicationEvent.State.WAITING, bundle, contextPath, null));
 				}
 			}
 			return view;
@@ -555,7 +567,7 @@ public class BundleWebApplication {
 	 * (mandatory, optional), while here, it's only single, mandatory {@link org.ops4j.pax.web.service.WebContainer}
 	 * service.</p>
 	 */
-	private void deploy() {
+	public void deploy() {
 		try {
 			// progress through states in a loop - when everything is available, we can simply transition to
 			// final state in single thread/task run. If we need to wait for anything, we'll break the loop
@@ -615,18 +627,10 @@ public class BundleWebApplication {
 			if (state == State.CONFIGURING) {
 				LOG.info("Configuring {}", this);
 				// Post an org/osgi/service/web/DEPLOYING event
-				extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.DEPLOYING, bundle, null));
+				extenderContext.sendWebEvent(new WebApplicationEvent(WebApplicationEvent.State.DEPLOYING, bundle, contextPath, null));
 
 				// Collect deployment information by processing the web.xml descriptor and other sources of metadata
 				processMetadata();
-
-				// We have: 1) mainWebXml (altered by fragments), 2) SCIs, 3) ClassLoader, 4) ClassSpace (support)
-				// so we can build set of ServletModels, FilterModels, ... that'll be sent to WebContainer
-				// implementation as pre-built batch.
-				// This is important advantage of pax-web-extender-war over pax-web-extender-whiteboard. Here
-				// we have complete web application, while in Whiteboard, we build it element by element.
-				// Here we can do it "transactionally" without bothering about conflicts etc.
-				buildModel();
 
 				// after web.xml/web-fragment.xml/annotations are read, we have to check if the context path
 				// is available
@@ -650,7 +654,7 @@ public class BundleWebApplication {
 			// but most common scenario is that we continue the WAB deployment
 
 			state = deploymentState.get();
-			if (state == State.ALLOCATING_CONTEXT) {
+			if (state == State.ALLOCATING_CONTEXT || state == State.WAITING_FOR_CONTEXT) {
 				LOG.debug("Checking if {} context path is available", contextPath);
 
 				// but need a WebContainer to allocate the context
@@ -658,6 +662,7 @@ public class BundleWebApplication {
 				if (view == null) {
 					return;
 				}
+
 				if (!view.allocateContext(bundle, contextPath)) {
 					LOG.debug("Context path {} is already used. {} will wait for this context to be available.",
 							contextPath, this);
@@ -666,10 +671,27 @@ public class BundleWebApplication {
 					// deployment fails. [...] If the prior Web Application with the same Context Path is undeployed
 					// later, this Web Application should be considered as a candidate.
 					if (deploymentState.compareAndSet(state, State.WAITING_FOR_CONTEXT)) {
-						extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.FAILED, bundle, null));
+						WebApplicationEvent event = new WebApplicationEvent(WebApplicationEvent.State.FAILED, bundle, contextPath, null);
+						event.setAwaitingAllocation(true);
+						extenderContext.sendWebEvent(event);
 					}
 					return;
 				}
+
+				allocatedServletContextModel = view.getServletContext(bundle, contextPath);
+				allocatedOsgiContextModel = view.getOsgiContext(bundle, contextPath);
+
+				LOG.info("Allocated context for {}: {}", contextPath, allocatedOsgiContextModel);
+
+				// We have: 1) mainWebXml (altered by fragments), 2) SCIs, 3) ClassLoader, 4) ClassSpace (support)
+				// so we can build set of ServletModels, FilterModels, ... that'll be sent to WebContainer
+				// implementation as pre-built batch.
+				// The OsgiContextModel was obtained when allocating the context
+				// This is important advantage of pax-web-extender-war over pax-web-extender-whiteboard. Here
+				// we have complete web application, while in Whiteboard, we build it element by element.
+				// Here we can do it "transactionally" without bothering about conflicts etc.
+				buildModel();
+
 				// from now on, this.contextPath is "ours" and we can do anything with it
 				if (deploymentState.compareAndSet(state, State.DEPLOYING)) {
 					// count down this latch, so it's free even before the deployment attempt
@@ -704,7 +726,7 @@ public class BundleWebApplication {
 				view.sendBatch(batch);
 
 				if (deploymentState.compareAndSet(state, State.DEPLOYED)) {
-					extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.DEPLOYED, bundle, httpContext));
+					extenderContext.sendWebEvent(new WebApplicationEvent(WebApplicationEvent.State.DEPLOYED, bundle, contextPath, httpContext));
 				}
 			}
 		} catch (Throwable t) {
@@ -714,7 +736,7 @@ public class BundleWebApplication {
 			// because we use SLF4J logger directly (backed by pax-logging)
 			LOG.error("Problem processing {}: {}", this, t.getMessage(), t);
 
-			extenderContext.webEvent(new WebApplicationEvent(WebApplicationEvent.State.FAILED, bundle, null, t));
+			extenderContext.sendWebEvent(new WebApplicationEvent(WebApplicationEvent.State.FAILED, bundle, contextPath, null, t));
 		} finally {
 			// context allocation or deployment may end up with missing WebContainer reference, an exception or
 			// success. In all the cases we have to trigger corresponding latches, so potential parallel stop()
@@ -769,11 +791,16 @@ public class BundleWebApplication {
 		try {
 			view.releaseContext(bundle, contextPath);
 		} catch (Exception e) {
+			if (e.getCause() != null && e.getCause() instanceof RejectedExecutionException) {
+				LOG.debug("{} was not undeployed, config executor stopped.", this);
+			}
 			if (propagateException) {
 				throw new RuntimeException(e);
 			} else {
 				LOG.warn("Problem releasing context for {}: {}", this, e.getMessage(), e);
 			}
+		} finally {
+			allocatedOsgiContextModel = null;
 		}
 	}
 
@@ -782,7 +809,7 @@ public class BundleWebApplication {
 	/**
 	 * <p>Parse all the possible descriptors to create final web application model. The rules specified in Servlet
 	 * specification should be applied. We're following the order from
-	 * {@code org.apache.catalina.startup.ContextConfig#webConfig()}. And we're even using Tomcat's {@code }web.xml}
+	 * {@code org.apache.catalina.startup.ContextConfig#webConfig()}. And we're even using Tomcat's {@code web.xml}
 	 * parser.</p>
 	 *
 	 * <p>After the descriptors/annotations are parsed, the model stays in current {@link BundleWebApplication}
@@ -1210,7 +1237,9 @@ public class BundleWebApplication {
 
 		wabBatch.beginTransaction(contextPath);
 
-		ServletContextModel scm = new ServletContextModel(contextPath);
+		// we simply take the allocated (and associated with our bundle and our bundle's Web-ContextPath) context
+		ServletContextModel scm = allocatedServletContextModel;
+		// but we still add it to the batch - ServerModel has special handling for allocated Servlet/OsgiContextModels
 		wabBatch.addServletContextModel(scm);
 
 		// 1. The most important part - the OsgiContextModel which bridges web elements from the WAB to actual
@@ -1223,11 +1252,10 @@ public class BundleWebApplication {
 		// web elements from the WAB when new OsgiContextModel is created - there are several checks in
 		// pax-web-extender-whiteboard and pax-web-runtime that determine whether a web element can be re-registered
 		// to new "context". The elements from WAB simply CAN'T do it
-		// TODO_WAB: we should only allow other bundles to obtain WebContainer instance within the scope of bundle
-		//       context of the WAB, for example to register additional web elements (usually filters) altering
-		//       the web application of the WAB
 
-		final OsgiContextModel ocm = new OsgiContextModel(null, this.bundle, this.contextPath, false);
+		// we simply take the allocated (and associated with our bundle and our bundle's Web-ContextPath) context
+		final OsgiContextModel ocm = allocatedOsgiContextModel;
+
 		ocm.setWab(true);
 		ocm.setServiceId(0);
 		ocm.setServiceRank(Integer.MAX_VALUE);

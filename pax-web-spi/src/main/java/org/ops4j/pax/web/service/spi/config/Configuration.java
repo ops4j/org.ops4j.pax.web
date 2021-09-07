@@ -78,12 +78,6 @@ public interface Configuration {
 	LogConfiguration logging();
 
 	/**
-	 * Accesses Jetty-specific configuration
-	 * @return
-	 */
-	JettyConfiguration jetty();
-
-	/**
 	 * Accesses single typed property by name.
 	 * @param property
 	 * @return

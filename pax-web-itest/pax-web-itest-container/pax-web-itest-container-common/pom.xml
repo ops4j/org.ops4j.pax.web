@@ -305,6 +305,16 @@
 			<artifactId>simple-filter</artifactId>
 			<type>war</type>
 		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>war-simplest-osgi</artifactId>
+			<type>war</type>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>war-simplest-javaee</artifactId>
+			<type>war</type>
+		</dependency>
 
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>

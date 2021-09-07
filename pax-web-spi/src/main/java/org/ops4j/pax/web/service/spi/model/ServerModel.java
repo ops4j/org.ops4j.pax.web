@@ -76,7 +76,6 @@ import org.ops4j.pax.web.service.spi.task.ServletModelChange;
 import org.ops4j.pax.web.service.spi.task.WebSocketModelChange;
 import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.ops4j.pax.web.service.spi.util.Utils;
-import org.ops4j.pax.web.service.whiteboard.ContextMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.service.http.HttpContext;
@@ -110,27 +109,6 @@ public class ServerModel implements BatchVisitor {
 
 	/** Unique identified of the Thread from (assumed) single thread pool executor. */
 	private final long registrationThreadId;
-
-	// --- Virtual Host model information
-
-	/**
-	 * <p>Map of all available virtual hosts. Each key is virtual host main name (no alias, no wildcard).</p>
-	 *
-	 * <p>Web application (in other words, full {@link javax.servlet.ServletContext servlet contexts}) or registered
-	 * whiteboard services (always connected with some <em>context</em>) are associated with particular virtual host
-	 * <strong>always</strong> indirectly - through associated <em>context</em>.</p>
-	 *
-	 * <p>WAR bundle can do it using bundle manifest header {@code Web-VirtualHosts}, while a <em>context</em> may
-	 * refer to virtual host using methods described in {@link ContextMapping#getVirtualHosts()}.</p>
-	 */
-	private final Map<String, VirtualHostModel> virtualHosts = new HashMap<>();
-
-	/**
-	 * Default host used to <strong>register</strong> web elements, if no particular host is specified. It should
-	 * rather be named <em>fallback host</em>, because it should handle requests that don't specify a host or that
-	 * specify unknown host. See {@code org.apache.catalina.core.StandardEngine#defaultHost()}.
-	 */
-	private final VirtualHostModel defaultHost = new VirtualHostModel();
 
 	// --- Global context information - not related to any particular bundle
 
@@ -248,6 +226,16 @@ public class ServerModel implements BatchVisitor {
 	 * them when last Whiteboard override is gone.
 	 */
 	private final Map<ContextKey, OsgiContextModel> bundleDefaultContexts = new HashMap<>();
+
+	/**
+	 * <p>When using WABs, we can't allow two WABs to fight for a context - only one WAB is allowed to <em>allocate</em>
+	 * a context. Such context will then be used as the highest-ranked {@link OsgiContextModel} for both
+	 * HttpService and Whiteboard scenarios, but only after deployment of such WAB (and all its web elements).
+	 * Special map remembers which context is allocated by which WAB (even before the deployment).</p>
+	 *
+	 * <p>The key is the context path.</p>
+	 */
+	private final Map<String, OsgiContextModel> bundleWabAllocatedContexts = new HashMap<>();
 
 	/**
 	 * <p>If an {@link OsgiContextModel} is associated with shared/multi-bundle {@link HttpContext}, such context
@@ -492,8 +480,7 @@ public class ServerModel implements BatchVisitor {
 	/**
 	 * <p>Returns {@link ServletContextModel} uniquely identified by <em>context path</em> (as defined by
 	 * {@link ServletContext#getContextPath()}. There's single instance of {@link ServletContextModel} even if
-	 * it's available in multiple {@link VirtualHostModel virtual hosts} and referenced by many
-	 * {@link OsgiContextModel}.</p>
+	 * it may be referenced by many {@link OsgiContextModel}s.</p>
 	 *
 	 * <p>This method doesn't alter the global model, only adds relevant operation to the {@link Batch}.</p>
 	 *
@@ -570,10 +557,9 @@ public class ServerModel implements BatchVisitor {
 		// always add
 		batch.addOsgiContextModel(contextModel, scm);
 
-		if (contextModel.hasDirectHttpContextInstance() && !contextModel.isWab()) {
+		if (contextModel.hasDirectHttpContextInstance()) {
 			// let it be available to use as the context for HttpService scenarios - whether or not it should
 			// REPLACE some existing mapping
-			// we explicitly disallow reregistration out of WAB context model
 			batch.associateOsgiContextModel(contextModel.getDirectHttpContextInstance(), contextModel);
 
 			// this context MAY replace existing, HttpService-related context for given name+bundle, we
@@ -593,13 +579,12 @@ public class ServerModel implements BatchVisitor {
 					if (m.hasDirectHttpContextInstance()) {
 						// equals() works well with UniqueWebContainerContextWrapper
 						if (contextModel.getDirectHttpContextInstance().equals(m.getDirectHttpContextInstance())) {
-							// it means that user has registered a HttpContext(Mapping) instance that's using
-							// an instance already managed by HttpService, so we want to _replace_ the model
-							// with new one (backed by the same HttpContext) and potentially re-register existing
-							// web elements just as WhiteboardContext.addWebContext()
+							// It means that user has registered a HttpContext(Mapping) already managed by HttpService,
+							// so we want to _replace_ the model with new one (backed by the same HttpContext) and
+							// potentially re-register existing web elements just as WhiteboardContext.addWebContext()
 							// re-registers all web elements that are associated with the context being added or
-							// removed
-							// we don't have to remove/disable/disassociate existing context, because it was
+							// removed.
+							// We don't have to remove/disable/disassociate existing context, because it was
 							// already done when matching, incoming OsgiContextModel was associated
 							serviceModel.reRegisterWebElementsIfNeeded(m, contextModel, batch);
 						}
@@ -638,11 +623,10 @@ public class ServerModel implements BatchVisitor {
 						// this means we should probably go back to different Whiteboard-registered context or
 						// even to the original HttpService-related context and potentially we should
 						// re-register existing web elements
-						if (contextModel.getDirectHttpContextInstance().equals(m.getDirectHttpContextInstance())) {
-							// disassociation of some context already restored proper collection of available
-							// contexts for given id/bundle
-							serviceModel.reRegisterWebElementsIfNeeded(m, null, batch);
-						}
+
+						// disassociation of some context already restored proper collection of available
+						// contexts for given id/bundle
+						serviceModel.reRegisterWebElementsIfNeeded(m, null, batch);
 					}
 				}
 			}
@@ -737,7 +721,7 @@ public class ServerModel implements BatchVisitor {
 	 * The only other way to create {@link OsgiContextModel} is the Whiteboard approach, when user registers one
 	 * of these OSGi services:<ul>
 	 *     <li>{@link org.osgi.service.http.context.ServletContextHelper} with service registration parameters</li>
-	 *     <li>{@link HttpContext} with service registration parameters - not recommended</li>
+	 *     <li>{@link org.osgi.service.http.HttpContext} with service registration parameters - not recommended</li>
 	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping} - Pax Web Whiteboard</li>
 	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.HttpContextMapping} - Pax Web Whiteboard</li>
 	 * </ul></p>
@@ -823,7 +807,9 @@ public class ServerModel implements BatchVisitor {
 						if (!model.isWhiteboard()) {
 							if (osgiContextModel.hasDirectHttpContextInstance() && model.hasDirectHttpContextInstance()
 									&& model.getDirectHttpContextInstance().equals(osgiContextModel.getDirectHttpContextInstance())) {
+								// store the shared model being replaced in special map
 								sharedDefaultContexts.put(context.getContextId(), model);
+								// remove the model being replaced from available shared models
 								it.remove();
 							}
 						}
@@ -844,7 +830,9 @@ public class ServerModel implements BatchVisitor {
 						if (!model.isWhiteboard()) {
 							if (osgiContextModel.hasDirectHttpContextInstance() && model.hasDirectHttpContextInstance()
 									&& model.getDirectHttpContextInstance().equals(osgiContextModel.getDirectHttpContextInstance())) {
+								// store the model being replaced in special map
 								bundleDefaultContexts.put(key, model);
+								// remove the model being replaced from available bundle models
 								it.remove();
 							}
 						}
@@ -864,8 +852,11 @@ public class ServerModel implements BatchVisitor {
 			TreeSet<OsgiContextModel> models = sharedContexts.get(key);
 			models.remove(osgiContextModel);
 			if (models.isEmpty()) {
+				// no more shared models available
+				// was there some stored shared model, overriden by Whiteboard shared context?
 				OsgiContextModel defaultSharedOsgiContextModel = sharedDefaultContexts.remove(key);
 				if (defaultSharedOsgiContextModel != null) {
+					// restore previously overriden shared model
 					models.add(defaultSharedOsgiContextModel);
 				} else {
 					sharedContexts.remove(key);
@@ -877,8 +868,11 @@ public class ServerModel implements BatchVisitor {
 			TreeSet<OsgiContextModel> models = bundleContexts.get(key);
 			models.remove(osgiContextModel);
 			if (models.isEmpty()) {
+				// no more bundle models available
+				// was there some stored bundle model, overriden by Whiteboard context?
 				OsgiContextModel defaultBundleOsgiContextModel = bundleDefaultContexts.remove(key);
 				if (defaultBundleOsgiContextModel != null) {
+					// restore previously overriden bundle model
 					models.add(defaultBundleOsgiContextModel);
 				} else {
 					bundleContexts.remove(key);
@@ -1061,6 +1055,62 @@ public class ServerModel implements BatchVisitor {
 				.map(ocm -> servletContexts.get(ocm.getContextPath()))
 				.filter(Objects::nonNull)
 				.collect(Collectors.toSet());
+	}
+
+	/**
+	 * When dealing with WABs, before WAB's {@link OsgiContextModel} is available for other registrations
+	 * (HttpService and Whiteboard) it has to be allocated - so no two WABs conflict about an {@link OsgiContextModel}.
+	 * Allocated {@link OsgiContextModel} can later be handled in {@link #visitOsgiContextModelChange} and when
+	 * it's deallocated, awaiting WABs are informed that they can proceed with registration.
+	 *
+	 * @param contextPath
+	 * @param wab
+	 * @param create
+	 * @return
+	 */
+	@PaxWebConfiguration
+	public OsgiContextModel getWabContext(String contextPath, Bundle wab, boolean create) {
+		if (!create) {
+			return bundleWabAllocatedContexts.get(contextPath);
+		}
+
+		// create if not available
+		OsgiContextModel ocm = bundleWabAllocatedContexts.get(contextPath);
+		if (ocm != null) {
+			// return only if allocated by proper WAB
+			return ocm.getOwnerBundle().equals(wab) ? ocm : null;
+		}
+
+		// simply create new OsgiContextModel dedicated for WAB. WebContainerContext will be configured later
+		// (in BundleWebApplication.buildModel())
+		ocm = new OsgiContextModel(null, wab, contextPath, false);
+		bundleWabAllocatedContexts.put(contextPath, ocm);
+
+		if (!servletContexts.containsKey(contextPath)) {
+			servletContexts.put(contextPath, new ServletContextModel(contextPath));
+		}
+
+		return ocm;
+	}
+
+	/**
+	 * Free the {@link OsgiContextModel} allocated previously by a WAB.
+	 * @param contextPath
+	 * @param wab
+	 */
+	@PaxWebConfiguration
+	public void releaseWabContext(String contextPath, Bundle wab) {
+		bundleWabAllocatedContexts.entrySet()
+				.removeIf(e -> contextPath.equals(e.getKey()) && e.getValue().getOwnerBundle().equals(wab));
+	}
+
+	/**
+	 * Simply returns a {@link ServletContextModel} for given {@code contextPath}
+	 * @param contextPath
+	 * @return
+	 */
+	public ServletContextModel getServletContextModel(String contextPath) {
+		return servletContexts.get(contextPath);
 	}
 
 	// --- methods that operate on "web elements"
@@ -2321,6 +2371,7 @@ public class ServerModel implements BatchVisitor {
 
 	@Override
 	public void visitServletContextModelChange(ServletContextModelChange change) {
+		// TODO_WAB: for WABs, it should be there after allocation and should not be removed before releasing
 		if (change.getKind() == OpCode.ADD) {
 			ServletContextModel model = change.getServletContextModel();
 			this.servletContexts.put(model.getContextPath(), model);

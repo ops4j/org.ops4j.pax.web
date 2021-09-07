@@ -22,7 +22,7 @@
 
 	<servlet>
 		<servlet-name>simplest-servlet</servlet-name>
-		<servlet-class>org.ops4j.pax.web.samples.war.SimplestServlet</servlet-class>
+		<servlet-class>org.ops4j.pax.web.samples.war.osgi.SimplestServlet</servlet-class>
 	</servlet>
 
 	<servlet-mapping>

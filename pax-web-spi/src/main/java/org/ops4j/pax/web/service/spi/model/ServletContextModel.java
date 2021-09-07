@@ -23,9 +23,7 @@ import javax.servlet.ServletContext;
 
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
-import org.ops4j.pax.web.service.spi.model.elements.JspConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
-import org.ops4j.pax.web.service.spi.model.elements.SessionConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 
 /**
@@ -65,18 +63,6 @@ public final class ServletContextModel extends Identity {
 
 	/** <em>Context path</em> as defined by {@link ServletContext#getContextPath()}. */
 	private final String contextPath;
-
-	/**
-	 * Session configuration as defined by {@link ServletContext#getSessionTimeout()},
-	 * {@link ServletContext#getSessionCookieConfig()} and {@link ServletContext#getEffectiveSessionTrackingModes()}.
-	 */
-	private SessionConfigurationModel sessionConfiguration;
-
-	/** JSP configuration as defined in {@link ServletContext#getJspConfigDescriptor()} */
-	private JspConfigurationModel jspConfiguration;
-
-//	/** Login configurations as specified by {@code <login-config>} element from {@code web.xml}. */
-//	private final List<LoginConfigModel> loginConfigurations = new ArrayList<>();
 
 	/** Servlet name mapping enforces servlet name uniqueness within a context. */
 	private final Map<String, ServletModel> servletNameMapping = new HashMap<>();
@@ -206,22 +192,6 @@ public final class ServletContextModel extends Identity {
 
 	public String getContextPath() {
 		return contextPath;
-	}
-
-	public SessionConfigurationModel getSessionConfiguration() {
-		return sessionConfiguration;
-	}
-
-	public void setSessionConfiguration(SessionConfigurationModel sessionConfiguration) {
-		this.sessionConfiguration = sessionConfiguration;
-	}
-
-	public JspConfigurationModel getJspConfiguration() {
-		return jspConfiguration;
-	}
-
-	public void setJspConfiguration(JspConfigurationModel jspConfiguration) {
-		this.jspConfiguration = jspConfiguration;
 	}
 
 	public Map<String, ServletModel> getServletNameMapping() {

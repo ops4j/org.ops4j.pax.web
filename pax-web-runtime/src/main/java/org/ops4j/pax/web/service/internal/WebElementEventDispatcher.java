@@ -78,7 +78,6 @@ public class WebElementEventDispatcher implements WebElementEventListener,
 
 	@Override
 	public void bundleChanged(BundleEvent event) {
-		// TODO_WAB: clean up listeners for given bundle
 //		if (event.getType() == BundleEvent.STOPPED || event.getType() == BundleEvent.UNINSTALLED) {
 //			states.remove(event.getBundle().getBundleId());
 //		}
