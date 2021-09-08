@@ -38,6 +38,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
@@ -136,6 +137,7 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 
 		// remember ONLY "default" (mapped to "/") context model
 		OsgiContextModel model = OsgiContextModel.DEFAULT_CONTEXT_MODEL;
+		model.setOwnerBundle(FrameworkUtil.getBundle(this.getClass()));
 		osgiContexts.computeIfAbsent(model.getName(), n -> new TreeSet<>()).add(model);
 		osgiContextsList.add(model);
 
@@ -435,8 +437,10 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 				if (newMatching.size() == 0) {
 					LOG.debug("Unregistering {} because its context selection filter doesn't match any context", webElement);
 					if (view != null) {
+						// first unregister
 						webElement.unregister(view);
 					}
+					// then change
 					webElement.changeContextModels(newMatching);
 					continue;
 				}
@@ -444,9 +448,11 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 				// 2. easy registration after some models matched
 				// TODO_DTO: get rid of existing DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
 				if (oldMatching.size() == 0) {
+					// first change
 					webElement.changeContextModels(newMatching);
 					LOG.debug("Registering {} because its context selection filter started matching existing contexts", webElement);
 					if (view != null) {
+						// then register
 						webElement.register(view);
 					}
 					continue;

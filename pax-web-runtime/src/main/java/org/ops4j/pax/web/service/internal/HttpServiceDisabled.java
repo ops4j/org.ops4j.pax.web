@@ -52,6 +52,10 @@ class HttpServiceDisabled implements WebContainer {
 		LOG.debug("Changing HttpService state to " + this);
 	}
 
+	private void warn() {
+		LOG.warn("Http service has already been stopped");
+	}
+
 	// --- container views
 
 	@Override
@@ -63,13 +67,13 @@ class HttpServiceDisabled implements WebContainer {
 
 	@Override
 	public HttpContext createDefaultHttpContext() {
-		LOG.warn("Http service has already been stopped");
+		warn();
 		return null;
 	}
 
 	@Override
 	public HttpContext createDefaultHttpContext(String contextID) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 		return null;
 	}
 
@@ -88,95 +92,95 @@ class HttpServiceDisabled implements WebContainer {
 	@Override
 	public void registerServlet(String alias, Servlet servlet, Dictionary<?, ?> initParams, HttpContext httpContext)
 			throws ServletException, NamespaceException {
-		LOG.warn("");
+		warn();
 	}
 
 	@Override
 	public void registerServlet(String alias, Servlet servlet, Dictionary<?, ?> initParams,
 			Integer loadOnStartup, Boolean asyncSupported, HttpContext httpContext)
 			throws ServletException, NamespaceException {
-		LOG.warn("");
+		warn();
 	}
 
 	@Override
 	public void registerServlet(Servlet servlet, String[] urlPatterns, Dictionary<String, String> initParams,
 			HttpContext httpContext) throws ServletException {
-		LOG.warn("");
+		warn();
 	}
 
 	@Override
 	public void registerServlet(Servlet servlet, String[] urlPatterns, Dictionary<String, String> initParams,
 			Integer loadOnStartup, Boolean asyncSupported, HttpContext httpContext) throws ServletException {
-		LOG.warn("");
+		warn();
 	}
 
 	@Override
 	public void registerServlet(Servlet servlet, String servletName, String[] urlPatterns,
 			Dictionary<String, String> initParams, HttpContext httpContext) throws ServletException {
-		LOG.warn("");
+		warn();
 	}
 
 	@Override
 	public void registerServlet(Servlet servlet, String servletName, String[] urlPatterns,
 			Dictionary<String, String> initParams, Integer loadOnStartup, Boolean asyncSupported,
 			HttpContext httpContext) throws ServletException {
-		LOG.warn("");
+		warn();
 	}
 
 	@Override
 	public void registerServlet(Servlet servlet, String servletName, String[] urlPatterns,
 			Dictionary<String, String> initParams, Integer loadOnStartup, Boolean asyncSupported,
 			MultipartConfigElement multiPartConfig, HttpContext httpContext) throws ServletException {
-		LOG.warn("");
+		warn();
 	}
 
 	@Override
 	public void registerServlet(Class<? extends Servlet> servletClass, String[] urlPatterns,
 			Dictionary<String, String> initParams, HttpContext httpContext) throws ServletException {
-		LOG.warn("");
+		warn();
 	}
 
 	@Override
 	public void registerServlet(Class<? extends Servlet> servletClass, String[] urlPatterns,
 			Dictionary<String, String> initParams, Integer loadOnStartup, Boolean asyncSupported,
 			HttpContext httpContext) throws ServletException {
-		LOG.warn("");
+		warn();
 	}
 
 	@Override
 	public void registerServlet(Class<? extends Servlet> servletClass, String[] urlPatterns,
 			Dictionary<String, String> initParams, Integer loadOnStartup, Boolean asyncSupported,
 			MultipartConfigElement multiPartConfig, HttpContext httpContext) throws ServletException {
-		LOG.warn("");
+		warn();
 	}
 
 	// --- methods used to unregister a Servlet
 
 	@Override
 	public void unregister(final String alias) {
-		LOG.warn("");
+		warn();
 	}
 
 	@Override
 	public void unregisterServlet(final Servlet servlet) {
-		LOG.warn("");
+		warn();
 	}
 
 	@Override
 	public void unregisterServlet(String servletName) {
-		LOG.warn("");
+		warn();
 	}
 
 	@Override
 	public void unregisterServlets(Class<? extends Servlet> servletClass) {
-		LOG.warn("");
+		warn();
 	}
 
 	// --- methods used to register resources
 
 	@Override
 	public void registerResources(String alias, String name, HttpContext context) throws NamespaceException {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	// --- methods used to register a Filter
@@ -184,195 +188,195 @@ class HttpServiceDisabled implements WebContainer {
 	@Override
 	public void registerFilter(Filter filter, String[] urlPatterns, String[] servletNames,
 			Dictionary<String, String> initParams, HttpContext httpContext) throws ServletException {
-		LOG.warn("");
+		warn();
 	}
 
 	@Override
 	public void registerFilter(Filter filter, String filterName, String[] urlPatterns, String[] servletNames,
 			Dictionary<String, String> initParams, Boolean asyncSupported,
 			HttpContext httpContext) throws ServletException {
-		LOG.warn("");
+		warn();
 	}
 
 	@Override
 	public void registerFilter(Class<? extends Filter> filterClass, String[] urlPatterns, String[] servletNames,
 			Dictionary<String, String> initParams, HttpContext httpContext) throws ServletException {
-		LOG.warn("");
+		warn();
 	}
 
 	@Override
 	public void registerFilter(Class<? extends Filter> filterClass, String filterName, String[] urlPatterns,
 			String[] servletNames, Dictionary<String, String> initParams, Boolean asyncSupported,
 			HttpContext httpContext) throws ServletException {
-		LOG.warn("");
+		warn();
 	}
 
 	// --- methods used to unregister a Filter
 
 	@Override
 	public void unregisterFilter(Filter filter) {
-		LOG.warn("");
+		warn();
 	}
 
 	@Override
 	public void unregisterFilter(String filterName) {
-		LOG.warn("");
+		warn();
 	}
 
 	@Override
 	public void unregisterFilters(Class<? extends Filter> filterClass) {
-		LOG.warn("");
+		warn();
 	}
 
 	// --- methods used to register an EventListener
 
 	@Override
 	public void registerEventListener(final EventListener listener, final HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	// --- methods used to unregister an EventListener
 
 	@Override
 	public void unregisterEventListener(final EventListener listener) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	// --- methods used to register welcome pages
 
 	@Override
 	public void registerWelcomeFiles(String[] welcomeFiles, boolean redirect, HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	// --- methods used to unregister welcome pages
 
 	@Override
 	public void unregisterWelcomeFiles(String[] welcomeFiles, HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	// --- methods used to register error pages
 
 	@Override
 	public void registerErrorPage(String error, String location, HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	@Override
 	public void registerErrorPages(String[] errors, String location, HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	// --- methods used to unregister error pages
 
 	@Override
 	public void unregisterErrorPage(String error, HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	@Override
 	public void unregisterErrorPages(String[] errors, HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	// methods used to register / configure JSPs
 
 	@Override
 	public void registerJsps(String[] urlPatterns, Dictionary<String, String> initParams, HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	@Override
 	public void registerJspServlet(String jspFile, String[] urlPatterns, Dictionary<String, String> initParams, HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	@Override
 	public void registerJspConfigTagLibs(String tagLibLocation, String tagLibUri, HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	@Override
 	public void registerJspConfigTagLibs(Collection<TaglibDescriptor> tagLibs, HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	@Override
 	public void registerJspConfigPropertyGroup(List<String> includeCodas, List<String> includePreludes,
 			List<String> urlPatterns, Boolean elIgnored, Boolean scriptingInvalid, Boolean isXml,
 			HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	@Override
 	public void registerJspConfigPropertyGroup(JspPropertyGroupDescriptor descriptor, HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	// methods used to unregister / unconfigure JSPs
 
 	@Override
 	public void unregisterJsps(HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	@Override
 	public void unregisterJspServlet(String jspFile, HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	// methods used to register ServletContainerInitializers
 
 	@Override
 	public void registerServletContainerInitializer(ServletContainerInitializer initializer, Class<?>[] classes, HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	// methods used to unregister ServletContainerInitializers
 
 	@Override
 	public void unregisterServletContainerInitializer(ServletContainerInitializer initializer, HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	// methods used to configure session
 
 	@Override
 	public void setSessionTimeout(Integer minutes, HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	@Override
 	public void setSessionCookieConfig(String domain, String name, Boolean httpOnly, Boolean secure, String path,
 			Integer maxAge, HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	@Override
 	public void setSessionCookieConfig(SessionCookieConfig config, HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	// methods used to alter context init parameters
 
 	@Override
 	public void setContextParams(Dictionary<String, Object> params, HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	// methods used to register annotated web socket endpoints
 
 	@Override
 	public void registerWebSocket(Object webSocket, HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	// methods used to unregister annotated web socket endpoints
 
 	@Override
 	public void unregisterWebSocket(Object webSocket, HttpContext httpContext) {
-		LOG.warn("Http service has already been stopped");
+		warn();
 	}
 
 	@Override

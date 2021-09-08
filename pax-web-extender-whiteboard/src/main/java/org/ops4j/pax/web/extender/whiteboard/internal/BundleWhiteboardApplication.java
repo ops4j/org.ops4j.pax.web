@@ -76,9 +76,6 @@ public class BundleWhiteboardApplication {
 	 */
 	private volatile ServiceReference<WebContainer> webContainerServiceRef;
 
-	/**
-	 * Constructor.
-	 */
 	public BundleWhiteboardApplication(Bundle bundle, WebContainerManager webContainerManager,
 			ExtendedHttpServiceRuntime httpServiceRuntime) {
 		this.bundle = bundle;
@@ -161,13 +158,11 @@ public class BundleWhiteboardApplication {
 		if (view != null) {
 			webElements.keySet().forEach(element -> {
 				if (element.getContextModels().size() > 0 && webElements.get(element)) {
-//					element.unregister(view);
 					webElements.put(element, false);
 				}
 			});
 			webContexts.keySet().forEach(ctx -> {
 				if (webContexts.get(ctx)) {
-//					view.removeWhiteboardOsgiContextModel(ctx);
 					webContexts.put(ctx, false);
 				}
 			});
@@ -277,223 +272,5 @@ public class BundleWhiteboardApplication {
 	public WhiteboardWebContainerView getWhiteboardContainer() {
 		return webContainerManager.whiteboardView(bundle.getBundleContext(), webContainerServiceRef);
 	}
-
-//	@Override
-	//	public void serviceChanged(HttpService oldService, HttpService newService, Map<String, Object> serviceProperties) {
-	//		if (newService != null && !WebContainerUtils.isWebContainer(newService)) {
-	//			throw new IllegalStateException("HttpService must be implementing Pax-Web WebContainer!");
-	//		}
-	//		httpServiceLock.writeLock().lock();
-	//		try {
-	//			unregisterWebElements();
-	//			webContainer = (WebContainer)newService;
-	//			httpContext = null;
-	//			registerHttpContext();
-	//		} finally {
-	//			httpServiceLock.writeLock().unlock();
-	//		}
-	//	}
-	//
-	//	public boolean hasHttpContextMapping() {
-	//		return httpContextMapping != null;
-	//	}
-	//
-	//	public void setHttpContextMapping(
-	//			final HttpContextMapping httpContextMapping) {
-	//		httpServiceLock.writeLock().lock();
-	//		try {
-	//			if (hasHttpContextMapping()) {
-	//				unregisterHttpContext();
-	//			}
-	//			this.httpContextMapping = httpContextMapping;
-	//			registerHttpContext();
-	//		} finally {
-	//			httpServiceLock.writeLock().unlock();
-	//		}
-	//	}
-	//
-	//	private void unregisterHttpContext() {
-	//		if (httpContext != null) {
-	//			unregisterWebElements();
-	//			httpServiceRuntime.stop();
-	//			httpContext = null;
-	//		}
-	//	}
-	//
-	//	private void registerHttpContext() {
-	//		if (httpContextMapping != null && webContainer != null) {
-	//			getHttpContext();
-	//			if (WebContainerUtils.isWebContainer(webContainer)) {
-	//				final Map<String, String> contextparams = new HashMap<>();
-	//				if (httpContextMapping.getContextPath() != null) {
-	//					contextparams.put(PaxWebConstants.CONTEXT_NAME,
-	//							httpContextMapping.getContextPath());
-	//				}
-	//				if (httpContextMapping.getInitParameters() != null) {
-	//					contextparams.putAll(httpContextMapping.getInitParameters());
-	//					String virtualHosts = contextparams.remove(ExtenderConstants.PROPERTY_HTTP_VIRTUAL_HOSTS);
-	//					List<String> virtualHostsList = convertToList(virtualHosts);
-	//					String connectors = contextparams.remove(ExtenderConstants.PROPERTY_HTTP_CONNECTORS);
-	//					List<String> connectorsList = convertToList(connectors);
-	////					webContainer.setConnectorsAndVirtualHosts(connectorsList, virtualHostsList, httpContext);
-	//				}
-	////				webContainer.setContextParam(
-	////						DictionaryUtils.adapt(contextparams), httpContext);
-	//			}
-	//			registerWebElements();
-	//		}
-	//	}
-	//
-	//	private void getHttpContext() {
-	//		httpContext = httpContextMapping.getHttpContext();
-	//		if (httpContext == null) {
-	//			if (servletContextHelper != null) {
-	//				httpContext = new WebContainerContext() {
-	//					@Override
-	//					public Set<String> getResourcePaths(String name) {
-	//						return null;
-	//					}
-	//
-	//					@Override
-	//					public String getContextId() {
-	//						return httpContextId;
-	//					}
-	//
-	//					@Override
-	//					public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
-	//						return servletContextHelper.handleSecurity(request, response);
-	//					}
-	//
-	//					@Override
-	//					public URL getResource(String name) {
-	//						return servletContextHelper.getResource(name);
-	//					}
-	//
-	//					@Override
-	//					public String getMimeType(String name) {
-	//						return servletContextHelper.getMimeType(name);
-	//					}
-	//				};
-	//			} else {
-	//				String sharedContext = null;
-	//				if (httpContextMapping != null && httpContextMapping.getInitParameters() != null) {
-	//					sharedContext = httpContextMapping.getInitParameters().get(ExtenderConstants.PROPERTY_HTTP_CONTEXT_SHARED);
-	//				}
-	//
-	//				if (Boolean.parseBoolean(sharedContext) && WebContainerUtils.isWebContainer(webContainer)) {
-	//					//PAXWEB-660
-	//					httpContext = webContainer.createDefaultSharedHttpContext();
-	//				} else if (httpContextId != null && WebContainerUtils.isWebContainer(webContainer)) {
-	//					httpContext = webContainer.createDefaultHttpContext(httpContextId);
-	//				} else {
-	//					//default
-	//					httpContext = webContainer.createDefaultHttpContext();
-	//				}
-	//			}
-	//		} else if (!(httpContext instanceof WebContainerContext)) {
-	//			// wrap registered HttpContext in pax-web specific context
-	//			final HttpContext localHttpContext = httpContext;
-	//			httpContext = new WebContainerContext() {
-	//				@Override
-	//				public Set<String> getResourcePaths(String name) {
-	//					return null;
-	//				}
-	//
-	//				@Override
-	//				public String getContextId() {
-	//					return httpContextId;
-	//				}
-	//
-	//				@Override
-	//				public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
-	//					return localHttpContext.handleSecurity(request, response);
-	//				}
-	//
-	//				@Override
-	//				public URL getResource(String name) {
-	//					return localHttpContext.getResource(name);
-	//				}
-	//
-	//				@Override
-	//				public String getMimeType(String name) {
-	//					return localHttpContext.getMimeType(name);
-	//				}
-	//			};
-	//		}
-	//	}
-	//
-	//	private void registerWebElements() {
-	//		httpServiceLock.readLock().lock();
-	//		try {
-	//			if (webContainer != null && httpContext != null) {
-	//				for (WebElement registerer : webElements) {
-	//					registerWebElement(registerer);
-	//				}
-	//			}
-	//		} finally {
-	//			httpServiceLock.readLock().unlock();
-	//		}
-	//	}
-	//
-	//	private List<String> convertToList(String elementListAsString) {
-	//		List<String> elementList = new LinkedList<>();
-	//		if (elementListAsString != null) {
-	//			String[] elementArray = elementListAsString.split(",");
-	//			elementList = Arrays.stream(elementArray).map(String::trim).collect(Collectors.toList());
-	//		}
-	//		return elementList;
-	//	}
-	//
-	//	private void registerWebElement(final WebElement registerer) {
-	//		//CHECKSTYLE:OFF
-	//		try {
-	//			if (webContainer != null && httpContext != null && registerer.isValid()) {
-	//				registerer.register(webContainer, httpContext);
-	//			}
-	//		} catch (Exception ignore) {
-	//			LOG.error("Registration skipped for [" + registerer
-	//					+ "] due to error during registration", ignore);
-	//		} finally {
-	//			httpServiceRuntime.addWhiteboardElement(registerer);
-	//		}
-	//		//CHECKSTYLE:ON
-	//	}
-	//
-	//	private void unregisterWebElements() {
-	//		httpServiceLock.readLock().lock();
-	//		try {
-	//			if (webContainer != null && httpContext != null) {
-	//				webElements.forEach(this::unregisterWebElement);
-	//			}
-	//		} finally {
-	//			webElements.forEach(httpServiceRuntime::removeWhiteboardElement);
-	//			httpServiceLock.readLock().unlock();
-	//		}
-	//	}
-	//
-	//	private void unregisterWebElement(final WebElement registerer) {
-	//		if (webContainer != null && httpContext != null && registerer.isValid()) {
-	//			registerer.unregister(webContainer, httpContext);
-	//		}
-	//	}
-	//
-	//	public void setServletContextHelper(final ServletContextHelper servletContextHelper, final HttpContextMapping httpContextMapping) {
-	//		httpServiceLock.writeLock().lock();
-	//		try {
-	//			if (hasHttpContextMapping()) {
-	//				unregisterHttpContext();
-	//			}
-	//			this.servletContextHelper = servletContextHelper;
-	//			this.httpContextMapping = httpContextMapping;
-	//			registerHttpContext();
-	//		} finally {
-	//			httpServiceLock.writeLock().unlock();
-	//		}
-	//	}
-	//
-	//	@Override
-	//	public String toString() {
-	//		return this.getClass().getSimpleName() + "{mapping=" + httpContextMapping + "}";
-	//	}
 
 }

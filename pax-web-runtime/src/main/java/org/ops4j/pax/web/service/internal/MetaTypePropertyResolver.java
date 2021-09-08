@@ -76,35 +76,6 @@ public class MetaTypePropertyResolver extends DictionaryPropertyResolver {
 			return properties;
 		}
 
-//		// create a temporary directory
-//		if (properties.get(PROPERTY_TEMP_DIR) != null) {
-//			// check if the provided temp directory exists
-//			File temporaryDirectory = new File(
-//					properties.get(PROPERTY_TEMP_DIR));
-//			if (!temporaryDirectory.exists()) {
-//				temporaryDirectory.mkdirs(); // since this is a provided temp
-//				// directory it is not cleared
-//				// after shutdown.
-//			}
-//		} else {
-//			// temp directory doesn't exist create it.
-//			try {
-//				File temporaryDirectory = File.createTempFile(".paxweb", "");
-//				temporaryDirectory.delete();
-//				temporaryDirectory = new File(
-//						temporaryDirectory.getAbsolutePath());
-//				temporaryDirectory.mkdirs();
-//				temporaryDirectory.deleteOnExit();
-//				properties.put(PROPERTY_TEMP_DIR,
-//						temporaryDirectory.getCanonicalPath());
-//				//CHECKSTYLE:OFF
-//			} catch (Exception e) {
-//				LOG.warn("Could not create temporary directory. Reason: "
-//						+ e.getMessage());
-//			}
-//			//CHECKSTYLE:ON
-//		}
-
 		return properties;
 	}
 

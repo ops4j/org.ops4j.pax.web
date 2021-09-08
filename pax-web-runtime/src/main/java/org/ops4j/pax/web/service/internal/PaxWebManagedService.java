@@ -43,8 +43,9 @@ public class PaxWebManagedService implements ManagedService {
 	public interface ConfigurationUpdater {
 
 		/**
-		 * Decoupling from {@link ConfigurationAdmin}, so pax-web-runtime can use CM or work without it. This method
-		 * is used to inform configuration mechanisms that properties in {@code org.ops4j.pax.web} PID has changed.
+		 * Decoupling from {@link org.osgi.service.cm.ConfigurationAdmin}, so pax-web-runtime can use CM or work
+		 * without it. This method is used to inform configuration mechanisms that properties in
+		 * {@code org.ops4j.pax.web} PID has changed.
 		 * @param properties
 		 */
 		void updateConfiguration(Dictionary<String, ?> properties);

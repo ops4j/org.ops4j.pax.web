@@ -27,4 +27,10 @@ public interface JspConfiguration {
 	 */
 	String getJspScratchDir(OsgiContextModel model);
 
+	/**
+	 * Returns root directory for scratch directories for all the web applications.
+	 * @return
+	 */
+	String getGloablJspScratchDir();
+
 }

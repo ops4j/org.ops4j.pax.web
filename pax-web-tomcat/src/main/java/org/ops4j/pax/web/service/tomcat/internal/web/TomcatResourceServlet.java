@@ -100,7 +100,7 @@ public class TomcatResourceServlet extends DefaultServlet {
 		final ServletContext osgiScopedServletContext = getServletContext();
 
 		int maxEntrySize = resourceConfig == null || resourceConfig.maxCacheEntrySize() == null
-						? (int) resources.getCacheMaxSize() / 20 : resourceConfig.maxCacheEntrySize();
+				? (int) resources.getCacheMaxSize() / 20 : resourceConfig.maxCacheEntrySize();
 
 		// and tweak org.apache.catalina.servlets.DefaultServlet.resources
 		resources = new OsgiStandardRoot(this.resources, baseDirectory, chroot, osgiScopedServletContext, maxEntrySize * 1024);

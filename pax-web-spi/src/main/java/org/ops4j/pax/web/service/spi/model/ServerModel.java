@@ -82,6 +82,9 @@ import org.osgi.framework.Constants;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import org.osgi.service.http.runtime.HttpServiceRuntime;
+import org.osgi.service.http.runtime.dto.RequestInfoDTO;
+import org.osgi.service.http.runtime.dto.RuntimeDTO;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,7 +102,7 @@ import static org.ops4j.pax.web.service.spi.util.Utils.getHighestRankedModel;
  * @author Alin Dreghiciu
  * @author Grzegorz Grzybek
  */
-public class ServerModel implements BatchVisitor {
+public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ServerModel.class);
 
@@ -2916,6 +2919,18 @@ public class ServerModel implements BatchVisitor {
 ////			}
 //		}
 //	}
+
+	// --- implementation of org.osgi.service.http.runtime.HttpServiceRuntime
+
+	@Override
+	public RuntimeDTO getRuntimeDTO() {
+		return null;
+	}
+
+	@Override
+	public RequestInfoDTO calculateRequestInfoDTO(String path) {
+		return null;
+	}
 
 //	public OsgiContextModel matchPathToContext(final String path) {
 //		return matchPathToContext("", path);

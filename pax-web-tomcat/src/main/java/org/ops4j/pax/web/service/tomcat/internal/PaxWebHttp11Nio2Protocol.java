@@ -42,7 +42,7 @@ public class PaxWebHttp11Nio2Protocol extends AbstractHttp11JsseProtocol<Nio2Cha
 				ThreadPoolExecutor executor = new ThreadPoolExecutor(getMinSpareThreads(), getMaxThreads(), 60, TimeUnit.SECONDS, taskqueue, tf);
 				setExecutor(executor);
 				internalExecutor = true;
-				taskqueue.setParent((ThreadPoolExecutor) executor);
+				taskqueue.setParent(executor);
 			}
 		});
 	}

@@ -440,16 +440,6 @@ class HttpServiceProxy implements WebContainer, StoppableHttpService {
 //	}
 //
 ////	@Override
-////	public SharedWebContainerContext getDefaultSharedHttpContext() {
-////		return delegate.getDefaultSharedHttpContext();
-////	}
-//
-////	@Override
-////	public void registerJettyWebXml(URL jettyWebXmlURL, HttpContext httpContext) {
-////		delegate.registerJettyWebXml(jettyWebXmlURL, httpContext);
-////	}
-//
-////	@Override
 ////	public void setConnectorsAndVirtualHosts(List<String> connectors, List<String> virtualHosts, HttpContext httpContext) {
 ////		delegate.setConnectorsAndVirtualHosts(connectors, virtualHosts, httpContext);
 ////	}
