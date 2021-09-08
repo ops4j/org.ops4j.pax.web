@@ -716,7 +716,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 			source += "ref=" + contextReference;
 		}
 		return "OsgiContextModel{"
-				+ (whiteboard ? "WB" : "HS")
+				+ (whiteboard ? "WB" : (wab ? "WAB" : "HS"))
 				+ ",id=" + getId()
 				+ ",name='" + name
 				+ "',path='" + contextPath

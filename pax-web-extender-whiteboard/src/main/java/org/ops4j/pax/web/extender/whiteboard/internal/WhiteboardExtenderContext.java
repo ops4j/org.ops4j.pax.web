@@ -22,12 +22,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
+import org.ops4j.pax.web.service.spi.model.events.WebContextEventListener;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEventData;
 import org.ops4j.pax.web.service.spi.util.WebContainerListener;
 import org.ops4j.pax.web.service.spi.util.WebContainerManager;
@@ -67,9 +69,16 @@ import org.slf4j.LoggerFactory;
  * @author Grzegorz Grzybek (since Pax Web 8)
  * @since 0.4.0, April 01, 2008
  */
-public class WhiteboardExtenderContext implements WebContainerListener {
+public class WhiteboardExtenderContext implements WebContainerListener, WebContextEventListener {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WhiteboardExtenderContext.class);
+
+	/**
+	 * Deadlock preventing flag. When {@link WebContainer} is unregistered we'll be getting information about
+	 * {@link OsgiContextModel} being removed, but there's no point altering the Whiteboard registrations, because
+	 * web elements are uninstalled anyway (awaiting new registration of {@link WebContainer}).
+	 */
+	final AtomicBoolean acceptWabContexts = new AtomicBoolean(false);
 
 	private final BundleContext bundleContext;
 
@@ -165,6 +174,32 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 		if (application != null) {
 			LOG.debug("Clearing Whiteboard cache for {}", bundle);
 			application.cleanup();
+		}
+	}
+
+	@Override
+	public void wabContextRegistered(OsgiContextModel model) {
+		if (!acceptWabContexts.get()) {
+			return;
+		}
+		lock.lock();
+		try {
+			reRegisterWebElements();
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void wabContextUnregistered(OsgiContextModel model) {
+		if (!acceptWabContexts.get()) {
+			return;
+		}
+		lock.lock();
+		try {
+			reRegisterWebElements();
+		} finally {
+			lock.unlock();
 		}
 	}
 
@@ -273,13 +308,21 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 		if (view != null) {
 			// install global, default OSGi Context Model using bundle context of pax-web-extender-whiteboard bundle
 			view.addWhiteboardOsgiContextModel(OsgiContextModel.DEFAULT_CONTEXT_MODEL);
+			// register a listener, so when WABs are installed/uninstalled, their OsgiContextModels are used as
+			// the context with highest priority - hiding both the context managed by pax-web-runtime and the contexts
+			// registered by pax-web-extender-whiteboard
+			view.registerWabOsgiContextListener(this);
 		}
 
 		// install using new reference which will be dereferenced using a bundle for particular application
 		installWhiteboardApplications(ref);
+
+		acceptWabContexts.set(true);
 	}
 
 	public void webContainerRemoved(ServiceReference<WebContainer> ref) {
+		acceptWabContexts.set(false);
+
 		// uninstall all managed whiteboard applications from the WebContainer using the reference being removed
 		uninstallWhiteboardApplications(ref);
 
@@ -374,13 +417,7 @@ public class WhiteboardExtenderContext implements WebContainerListener {
 	private void reRegisterWebElements() {
 		// remember - we're operating within ExtenderContext.lock
 
-		List<BundleWhiteboardApplication> apps;
-		lock.lock();
-		try {
-			apps = new ArrayList<>(bundleApplications.values());
-		} finally {
-			lock.unlock();
-		}
+		List<BundleWhiteboardApplication> apps = new ArrayList<>(bundleApplications.values());
 		for (BundleWhiteboardApplication app : apps) {
 			WhiteboardWebContainerView view = app.getWhiteboardContainer();
 			for (ElementModel<?, ?> webElement : app.getWebElements()) {

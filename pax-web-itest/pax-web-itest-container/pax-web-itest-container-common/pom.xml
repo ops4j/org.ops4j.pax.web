@@ -79,6 +79,7 @@
 							org.ops4j.pax.web.service.whiteboard;version="${pax-web.osgi.version}",
 
 							<!-- from pax-web-spi -->
+							org.ops4j.pax.web.service.spi.context,
 							org.ops4j.pax.web.service.spi.model.events,
 							org.ops4j.pax.web.service.spi.servlet,
 

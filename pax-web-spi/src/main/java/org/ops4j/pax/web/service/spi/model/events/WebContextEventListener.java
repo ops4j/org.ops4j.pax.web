@@ -15,17 +15,27 @@
  */
 package org.ops4j.pax.web.service.spi.model.events;
 
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+
 /**
- * <p>Listener interface to observe events related to {@link org.ops4j.pax.web.service.spi.model.OsgiContextModel}
- * registration.</p>
+ * <p>Listener interface for one particular task - passing information from pax-web-runtime to
+ * pax-web-extender-whiteboard about {@link OsgiContextModel} instances
+ * created in pax-web-extender-war (I know it's ugly, but it's almost the last thing before Pax Web 8!).</p>
+ *
+ * @author Grzegorz Grzybek
  */
 public interface WebContextEventListener {
 
 	/**
-	 * Notification about registration (failed or successful) and unregistration of any
-	 * {@link org.ops4j.pax.web.service.spi.model.OsgiContextModel}
-	 * @param event
+	 * Notification about registration of WAB's {@link OsgiContextModel}
+	 * @param model
 	 */
-	void registrationEvent(WebContextEvent event);
+	void wabContextRegistered(OsgiContextModel model);
+
+	/**
+	 * Notification about unregistration of WAB's {@link OsgiContextModel}
+	 * @param model
+	 */
+	void wabContextUnregistered(OsgiContextModel model);
 
 }

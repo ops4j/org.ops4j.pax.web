@@ -182,6 +182,8 @@ public class Activator implements BundleActivator {
 	public void stop(final BundleContext bundleContext) throws Exception {
 		LOG.debug("Stopping Pax Web Whiteboard Extender");
 
+		whiteboardExtenderContext.acceptWabContexts.set(false);
+
 		List<ServiceTracker<?, ?>> serviceTrackers = new ArrayList<>(this.trackers);
 		Collections.reverse(serviceTrackers);
 		for (ServiceTracker<?, ?> tracker : serviceTrackers) {

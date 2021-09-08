@@ -59,6 +59,7 @@ import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.model.events.WebContextEventListener;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEventData;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
@@ -344,6 +345,13 @@ public class ServerModel implements BatchVisitor {
 	private final Set<WebSocketModel> disabledWebSocketModels = new TreeSet<>();
 
 	/**
+	 * Listener to be informed about WAB {@link OsgiContextModel} being registered. There's no need to unregister
+	 * (now), because pax-web-extender-whiteboard does it every time the {@link WebContainer} reference changes, which
+	 * leads to recreation of the {@link ServerModel}.
+	 */
+	private WebContextEventListener wabOsgiContextListener;
+
+	/**
 	 * Creates new global model of all web applications with {@link Executor} to be used for configuration and
 	 * registration tasks.
 	 * @param executor
@@ -548,7 +556,8 @@ public class ServerModel implements BatchVisitor {
 	 * <p>There is really no need to check if the context was already added/associated, because this method
 	 * is only called from {@link org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView} and we
 	 * control it. It doesn't mean there's no way to break it ;)</p>
-	 *  @param contextModel
+	 *
+	 * @param contextModel
 	 * @param serviceModel
 	 * @param batch
 	 */
@@ -794,7 +803,7 @@ public class ServerModel implements BatchVisitor {
 			if (sharedContexts.computeIfAbsent(context.getContextId(), c -> new TreeSet<>()).add(osgiContextModel)) {
 				LOG.debug("Configured shared context {} -> {}", context, osgiContextModel);
 
-				if (osgiContextModel.isWhiteboard()) {
+				if (osgiContextModel.isWhiteboard() || osgiContextModel.isWab()) {
 					TreeSet<OsgiContextModel> models = sharedContexts.get(context.getContextId());
 					// we've just added new context, so existing, HttpService-related and created internally context
 					// should now not be taken into account, because of it's Integer.MAX_VALUE priority.
@@ -804,7 +813,7 @@ public class ServerModel implements BatchVisitor {
 					// But in Pax Web we WANT to allow to override HttpService internal context ;)
 					for (Iterator<OsgiContextModel> it = models.iterator(); it.hasNext(); ) {
 						OsgiContextModel model = it.next();
-						if (!model.isWhiteboard()) {
+						if (!model.isWhiteboard() && !model.isWab()) {
 							if (osgiContextModel.hasDirectHttpContextInstance() && model.hasDirectHttpContextInstance()
 									&& model.getDirectHttpContextInstance().equals(osgiContextModel.getDirectHttpContextInstance())) {
 								// store the shared model being replaced in special map
@@ -821,13 +830,13 @@ public class ServerModel implements BatchVisitor {
 			if (bundleContexts.computeIfAbsent(key, c -> new TreeSet<>()).add(osgiContextModel)) {
 				LOG.debug("Created association {} -> {}", context, osgiContextModel);
 
-				if (osgiContextModel.isWhiteboard()) {
+				if (osgiContextModel.isWhiteboard() || osgiContextModel.isWab()) {
 					TreeSet<OsgiContextModel> models = bundleContexts.get(key);
 					// same as with shared contexts - it is possible to override the HttpService context with MAX
 					// ranking simply by whiteboard-registering a OsgiContectModel which hasDirectHttpContextInstance()
 					for (Iterator<OsgiContextModel> it = models.iterator(); it.hasNext(); ) {
 						OsgiContextModel model = it.next();
-						if (!model.isWhiteboard()) {
+						if (!model.isWhiteboard() && !model.isWab()) {
 							if (osgiContextModel.hasDirectHttpContextInstance() && model.hasDirectHttpContextInstance()
 									&& model.getDirectHttpContextInstance().equals(osgiContextModel.getDirectHttpContextInstance())) {
 								// store the model being replaced in special map
@@ -837,6 +846,11 @@ public class ServerModel implements BatchVisitor {
 							}
 						}
 					}
+				}
+
+				if (wabOsgiContextListener != null && osgiContextModel.isWab()) {
+					// let pax-web-extender-whiteboard know about new WAB OsgiContextModel
+					wabOsgiContextListener.wabContextRegistered(osgiContextModel);
 				}
 			}
 		}
@@ -878,6 +892,12 @@ public class ServerModel implements BatchVisitor {
 					bundleContexts.remove(key);
 				}
 			}
+
+			if (wabOsgiContextListener != null && osgiContextModel.isWab()) {
+				// let pax-web-extender-whiteboard know about WAB OsgiContextModel being removed
+				wabOsgiContextListener.wabContextUnregistered(osgiContextModel);
+			}
+
 			LOG.debug("Removed association {} -> {}", context, osgiContextModel);
 		}
 	}
@@ -990,6 +1010,9 @@ public class ServerModel implements BatchVisitor {
 		// shared contexts
 		contexts.addAll(sharedContexts.values().stream().map(Utils::getHighestRankedModel).collect(Collectors.toSet()));
 
+		// WAB contexts
+		contexts.addAll(bundleWabAllocatedContexts.values());
+
 		return contexts;
 	}
 
@@ -1084,6 +1107,10 @@ public class ServerModel implements BatchVisitor {
 		// simply create new OsgiContextModel dedicated for WAB. WebContainerContext will be configured later
 		// (in BundleWebApplication.buildModel())
 		ocm = new OsgiContextModel(null, wab, contextPath, false);
+		ocm.setWab(true);
+		// do NOT use "default" as the name of the context, so it's NOT patched by
+		// osgi.http.whiteboard.context.select=(osgi.http.whiteboard.context.name=default)
+		ocm.setName(contextPath);
 		bundleWabAllocatedContexts.put(contextPath, ocm);
 
 		if (!servletContexts.containsKey(contextPath)) {
@@ -1111,6 +1138,23 @@ public class ServerModel implements BatchVisitor {
 	 */
 	public ServletContextModel getServletContextModel(String contextPath) {
 		return servletContexts.get(contextPath);
+	}
+
+	/**
+	 * <p>When WABs send their {@link OsgiContextModel} to {@link ServerModel}, this should be the only, always-winning
+	 * {@link OsgiContextModel} used both by the Whiteboard and HttpService web elements. This method allows
+	 * pax-web-extender-whiteboard to register a callback that can be informed about new {@link OsgiContextModel}
+	 * being registered for a WAB - pax-web-extender-whiteboard can then decide to re-register relevant Whiteboard
+	 * elements to new context.</p>
+	 *
+	 * <p>For HttpService scenario, when {@link HttpService#registerServlet} is called first and then WAB is installed,
+	 * the existing servlet is <string>not</string> switched immediately to new context. This should work only
+	 * for new servlets registered using HttpService.</p>
+	 *
+	 * @param listener
+	 */
+	public void registerWabOsgiContextListener(WebContextEventListener listener) {
+		wabOsgiContextListener = listener;
 	}
 
 	// --- methods that operate on "web elements"
@@ -2371,7 +2415,6 @@ public class ServerModel implements BatchVisitor {
 
 	@Override
 	public void visitServletContextModelChange(ServletContextModelChange change) {
-		// TODO_WAB: for WABs, it should be there after allocation and should not be removed before releasing
 		if (change.getKind() == OpCode.ADD) {
 			ServletContextModel model = change.getServletContextModel();
 			this.servletContexts.put(model.getContextPath(), model);

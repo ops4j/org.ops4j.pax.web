@@ -100,7 +100,6 @@ public abstract class AbstractWabConflictIntegrationTest extends AbstractContain
 				return;
 			}
 			if (event.getType() == WebApplicationEvent.State.DEPLOYED) {
-				// one of them succeeded
 				if (event.getBundle().getSymbolicName().equals(nextToSucceed[0])) {
 					latch2.countDown();
 				}

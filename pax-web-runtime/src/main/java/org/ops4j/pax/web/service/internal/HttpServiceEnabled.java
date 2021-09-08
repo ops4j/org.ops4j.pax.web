@@ -68,6 +68,7 @@ import org.ops4j.pax.web.service.spi.model.elements.JspModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.model.events.WebContextEventListener;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEventListener;
 import org.ops4j.pax.web.service.spi.model.views.WebAppWebContainerView;
@@ -2123,6 +2124,11 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		@Override
 		public void unregisterListener(EventListenerModel model) {
 			doUnregisterEventListener(model);
+		}
+
+		@Override
+		public void registerWabOsgiContextListener(WebContextEventListener whiteboardExtenderContext) {
+			serverModel.registerWabOsgiContextListener(whiteboardExtenderContext);
 		}
 
 		@Override

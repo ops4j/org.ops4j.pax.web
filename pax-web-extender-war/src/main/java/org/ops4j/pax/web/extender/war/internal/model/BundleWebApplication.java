@@ -1262,8 +1262,13 @@ public class BundleWebApplication {
 		// very important step - we pass a classloader, which contains reachable bundles - bundles discovered when
 		// WAB's metadata was parsed/processed
 		ocm.setClassLoader(this.classLoader);
-		// this is important - we should be able to reference the context by path (not by name)
+		// this is important - we should be able to reference the context by path
 		ocm.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, this.contextPath);
+		// we should NOT set osgi.http.whiteboard.context.name=default, otherwise, Whiteboard elements without
+		// context selector would surprisingly be registered to WAB context with non "/" context path
+		// so if Whiteboard element is targetting a WAB, it should ONLY use osgi.http.whiteboard.context.path in
+		// osgi.http.whiteboard.context.select selector
+//		ocm.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, PaxWebConstants.DEFAULT_CONTEXT_NAME);
 
 		// this is the best place to think about how to reference the underlying "context"
 		// in HttpService and Whiteboard scenarios.
@@ -1274,6 +1279,8 @@ public class BundleWebApplication {
 		//    and we'll use contextPath as the name
 
 		WebApplicationHelper contextHelper = new WebApplicationHelper(bundle, metainfResourceRoots);
+		// do NOT use "default" as the name of the context, so it's NOT patched by
+		// osgi.http.whiteboard.context.select=(osgi.http.whiteboard.context.name=default)
 		httpContext = new WebContainerContextWrapper(bundle, contextHelper, contextPath, false);
 		ocm.setHttpContext(httpContext);
 

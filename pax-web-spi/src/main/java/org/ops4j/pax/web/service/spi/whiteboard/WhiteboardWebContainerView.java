@@ -26,6 +26,7 @@ import org.ops4j.pax.web.service.spi.model.elements.JspModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.model.events.WebContextEventListener;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
 import org.osgi.framework.Bundle;
 
@@ -41,6 +42,14 @@ import org.osgi.framework.Bundle;
  * these have to be translated from {@link org.osgi.service.http.HttpContext}.</p>
  */
 public interface WhiteboardWebContainerView extends PaxWebContainerView {
+
+	/**
+	 * Register a listener/hook, that'll be called when there's {@link OsgiContextModel} created for the WAB.
+	 * Such {@link OsgiContextModel} should be always used for given context path, hiding all other context models.
+	 *
+	 * @param whiteboardExtenderContext
+	 */
+	void registerWabOsgiContextListener(WebContextEventListener whiteboardExtenderContext);
 
 	/**
 	 * Returns all the contexts (customized to unified {@link OsgiContextModel} internal representation) managed
