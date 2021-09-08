@@ -102,6 +102,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.SessionConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.model.events.ServerEvent;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 import org.ops4j.pax.web.service.spi.servlet.DynamicRegistrations;
 import org.ops4j.pax.web.service.spi.servlet.OsgiDynamicServletContext;
@@ -618,24 +619,25 @@ class JettyServerWrapper implements BatchVisitor {
 	 * @param useLocalPort
 	 * @return
 	 */
-	public InetSocketAddress[] getAddresses(boolean useLocalPort) {
+	public ServerEvent.Address[] getAddresses(boolean useLocalPort) {
 		if (server == null || server.getConnectors() == null || server.getConnectors().length == 0) {
 			return null;
 		}
-		final List<InetSocketAddress> result = new ArrayList<>(server.getConnectors().length);
+		final List<ServerEvent.Address> result = new ArrayList<>(server.getConnectors().length);
 		for (Connector connector : server.getConnectors()) {
 			if (connector instanceof ServerConnector) {
 				ServerConnector sc = (ServerConnector)connector;
 				int port = useLocalPort ? sc.getLocalPort() : sc.getPort();
+				SslConnectionFactory cf = sc.getConnectionFactory(SslConnectionFactory.class);
 				if (sc.getHost() == null) {
-					result.add(new InetSocketAddress(port));
+					result.add(new ServerEvent.Address(new InetSocketAddress(port), cf != null));
 				} else {
-					result.add(new InetSocketAddress(sc.getHost(), port));
+					result.add(new ServerEvent.Address(new InetSocketAddress(sc.getHost(), port), cf != null));
 				}
 			}
 		}
 
-		return result.toArray(new InetSocketAddress[0]);
+		return result.toArray(new ServerEvent.Address[0]);
 	}
 
 	// --- connector/handler/customizer methods

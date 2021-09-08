@@ -277,8 +277,10 @@ public class UndertowFactory {
 	 */
 	public UndertowFactory.AcceptingChannelWithAddress createSecureListener(String address, HttpHandler rootHandler,
 			Configuration configuration) {
-		return createListener(address, rootHandler, configuration, new Server.HttpsListener(),
-			new InetSocketAddress(address, configuration.server().getHttpSecurePort()));
+		AcceptingChannelWithAddress listener = createListener(address, rootHandler, configuration, new Server.HttpsListener(),
+				new InetSocketAddress(address, configuration.server().getHttpSecurePort()));
+		listener.setSecure(true);
+		return listener;
 	}
 
 	/**
@@ -899,6 +901,7 @@ public class UndertowFactory {
 	public static class AcceptingChannelWithAddress {
 		private final AcceptingChannel<? extends StreamConnection> acceptingChannel;
 		private final InetSocketAddress address;
+		private boolean secure;
 
 		public AcceptingChannelWithAddress(AcceptingChannel<? extends StreamConnection> acceptingChannel, InetSocketAddress address) {
 			this.acceptingChannel = acceptingChannel;
@@ -913,10 +916,19 @@ public class UndertowFactory {
 			return address;
 		}
 
+		public boolean isSecure() {
+			return secure;
+		}
+
+		public void setSecure(boolean secure) {
+			this.secure = secure;
+		}
+
 		@Override
 		public String toString() {
 			return "AcceptingChannelWithAddress{acceptingChannel=" + acceptingChannel +
 					", address=" + address +
+					", secure=" + secure +
 					"}";
 		}
 	}

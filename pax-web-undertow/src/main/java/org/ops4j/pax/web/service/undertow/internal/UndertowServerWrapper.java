@@ -122,6 +122,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.SessionConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.model.events.ServerEvent;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 import org.ops4j.pax.web.service.spi.servlet.DefaultSessionCookieConfig;
 import org.ops4j.pax.web.service.spi.servlet.DynamicRegistrations;
@@ -1027,13 +1028,13 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 	 * @param useLocalPort
 	 * @return
 	 */
-	public InetSocketAddress[] getAddresses(boolean useLocalPort) {
+	public ServerEvent.Address[] getAddresses(boolean useLocalPort) {
 		if (listeners.size() == 0) {
 			return null;
 		}
-		final List<InetSocketAddress> result = new ArrayList<>(listeners.size());
-		listeners.values().forEach(ac -> result.add(ac.getAddress()));
-		return result.toArray(new InetSocketAddress[0]);
+		final List<ServerEvent.Address> result = new ArrayList<>(listeners.size());
+		listeners.values().forEach(ac -> result.add(new ServerEvent.Address(ac.getAddress(), ac.isSecure())));
+		return result.toArray(new ServerEvent.Address[0]);
 	}
 
 	// --- visitor methods for model changes

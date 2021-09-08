@@ -85,6 +85,7 @@ import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.model.events.ServerEvent;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 import org.ops4j.pax.web.service.spi.servlet.DynamicRegistrations;
 import org.ops4j.pax.web.service.spi.servlet.OsgiDynamicServletContext;
@@ -653,7 +654,7 @@ class TomcatServerWrapper implements BatchVisitor {
 	 * @param useLocalPort
 	 * @return
 	 */
-	public InetSocketAddress[] getAddresses(boolean useLocalPort) {
+	public ServerEvent.Address[] getAddresses(boolean useLocalPort) {
 		Service service = server.findService(TOMCAT_CATALINA_NAME);
 		if (service == null) {
 			return null;
@@ -662,18 +663,18 @@ class TomcatServerWrapper implements BatchVisitor {
 		if (currentConnectors == null) {
 			currentConnectors = new Connector[0];
 		}
-		final List<InetSocketAddress> result = new ArrayList<>(currentConnectors.length);
+		final List<ServerEvent.Address> result = new ArrayList<>(currentConnectors.length);
 		for (Connector connector : currentConnectors) {
 			InetAddress address = (InetAddress) connector.getProperty("address");
 			int port = useLocalPort ? connector.getLocalPort() : connector.getPort();
 			if (address == null) {
-				result.add(new InetSocketAddress(port));
+				result.add(new ServerEvent.Address(new InetSocketAddress(port), connector.getSecure()));
 			} else {
-				result.add(new InetSocketAddress(address, port));
+				result.add(new ServerEvent.Address(new InetSocketAddress(address, port), connector.getSecure()));
 			}
 		}
 
-		return result.toArray(new InetSocketAddress[0]);
+		return result.toArray(new ServerEvent.Address[0]);
 	}
 
 	// --- visitor methods for model changes

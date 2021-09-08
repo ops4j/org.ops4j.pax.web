@@ -18,6 +18,8 @@
 package org.ops4j.pax.web.service.internal;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -46,6 +48,7 @@ import org.ops4j.pax.web.service.spi.config.SecurityConfiguration;
 import org.ops4j.pax.web.service.spi.config.ServerConfiguration;
 import org.ops4j.pax.web.service.spi.config.SessionConfiguration;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
+import org.ops4j.pax.web.service.spi.model.events.ServerEvent;
 import org.ops4j.pax.web.service.spi.model.events.ServerListener;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEventListener;
 import org.ops4j.pax.web.service.spi.util.NamedThreadFactory;
@@ -63,6 +66,7 @@ import org.osgi.service.event.EventAdmin;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.HttpServiceRuntime;
+import org.osgi.service.http.runtime.HttpServiceRuntimeConstants;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -483,7 +487,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 
 			// this is where org.osgi.service.http.HttpService bundle-scoped service is registered in OSGi
 			// this is the most fundamental operation related to Http Service specification
-			Dictionary<String, Object> props = determineServiceProperties(this.configuration, configuration);
+			Dictionary<String, Object> props = determineServiceProperties(configuration);
 			ServiceFactory<StoppableHttpService> factory = new StoppableHttpServiceFactory() {
 				@Override
 				StoppableHttpService createService(Bundle bundle) {
@@ -504,7 +508,17 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			httpServiceFactoryReg = bundleContext.registerService(HTTPSERVICE_REGISTRATION_NAMES, factory, props);
 
 			LOG.info("Registering HttpServiceRuntime");
-			httpServiceRuntimeReg = bundleContext.registerService(HttpServiceRuntime.class, serverModel, null);
+			// see Table 140.9 Service properties for the HttpServiceRuntime service
+			props = new Hashtable<>();
+			// we'll set this propery later through ServerListener
+			props.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT, "/");
+			Long httpServiceId = (Long) httpServiceFactoryReg.getReference().getProperty(Constants.SERVICE_ID);
+			props.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ID, Collections.singletonList(httpServiceId));
+			props.put(Constants.SERVICE_CHANGECOUNT, 0L);
+			httpServiceRuntimeReg = bundleContext.registerService(HttpServiceRuntime.class, serverModel, props);
+
+			// added listener is immediately called with the current state
+			serverController.addListener(new AddressConfiguration());
 
 			// ManagedServiceFactory for org.ops4j.pax.web.context factory PID
 			// we need registered WebContainer for this MSF to work
@@ -524,64 +538,62 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	/**
 	 * Pass properties used to configure {@link HttpService} to service registration.
 	 *
-	 * @param managedConfig
 	 * @param configuration
 	 * @return
 	 *
 	 * @since 0.6.0, PAXWEB-127
 	 */
-	private Dictionary<String, Object> determineServiceProperties(final Dictionary<String, ?> managedConfig, final Configuration configuration) {
-
-		final Hashtable<String, Object> toPropagate = new Hashtable<>();
+	private Dictionary<String, Object> determineServiceProperties(final Configuration configuration) {
+		final Hashtable<String, Object> properties = new Hashtable<>();
 
 		// configuration already collects the properties from env/system/context properties and also from
 		// metatype config and configadmin
 
 		ServerConfiguration sc = configuration.server();
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_HTTP_ENABLED, sc.isHttpEnabled());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_HTTP_PORT, sc.getHttpPort());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_HTTP_SECURE_ENABLED, sc.isHttpSecureEnabled());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_HTTP_PORT_SECURE, sc.getHttpSecurePort());
+		setProperty(properties, PaxWebConfig.PID_CFG_HTTP_ENABLED, sc.isHttpEnabled());
+		setProperty(properties, PaxWebConfig.PID_CFG_HTTP_PORT, sc.getHttpPort());
+		setProperty(properties, PaxWebConfig.PID_CFG_HTTP_SECURE_ENABLED, sc.isHttpSecureEnabled());
+		setProperty(properties, PaxWebConfig.PID_CFG_HTTP_PORT_SECURE, sc.getHttpSecurePort());
 		// only relevant for Jetty
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_HTTP_CONNECTOR_NAME, sc.getHttpConnectorName());
+		setProperty(properties, PaxWebConfig.PID_CFG_HTTP_CONNECTOR_NAME, sc.getHttpConnectorName());
 		// only relevant for Jetty
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_HTTP_SECURE_CONNECTOR_NAME, sc.getHttpSecureConnectorName());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_LISTENING_ADDRESSES, sc.getListeningAddresses());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_CONNECTOR_IDLE_TIMEOUT, sc.getConnectorIdleTimeout());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SERVER_IDLE_TIMEOUT, sc.getServerIdleTimeout());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SERVER_MAX_THREADS, sc.getServerMaxThreads());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SERVER_MIN_THREADS, sc.getServerMinThreads());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SERVER_THREAD_NAME_PREFIX, sc.getServerThreadNamePrefix());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SHOW_STACKS, sc.isShowStacks());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_EVENT_DISPATCHER_THREAD_COUNT, sc.getEventDispatcherThreadCount());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_HTTP_CHECK_FORWARDED_HEADERS, sc.checkForwardedHeaders());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_TEMP_DIR, sc.getTemporaryDirectory());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_HTTP_CHECK_FORWARDED_HEADERS, sc.checkForwardedHeaders());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SERVER_CONFIGURATION_FILES, sc.getConfigurationFiles());
+		setProperty(properties, PaxWebConfig.PID_CFG_HTTP_SECURE_CONNECTOR_NAME, sc.getHttpSecureConnectorName());
+		setProperty(properties, PaxWebConfig.PID_CFG_LISTENING_ADDRESSES, sc.getListeningAddresses());
+		setProperty(properties, PaxWebConfig.PID_CFG_CONNECTOR_IDLE_TIMEOUT, sc.getConnectorIdleTimeout());
+		setProperty(properties, PaxWebConfig.PID_CFG_SERVER_IDLE_TIMEOUT, sc.getServerIdleTimeout());
+		setProperty(properties, PaxWebConfig.PID_CFG_SERVER_MAX_THREADS, sc.getServerMaxThreads());
+		setProperty(properties, PaxWebConfig.PID_CFG_SERVER_MIN_THREADS, sc.getServerMinThreads());
+		setProperty(properties, PaxWebConfig.PID_CFG_SERVER_THREAD_NAME_PREFIX, sc.getServerThreadNamePrefix());
+		setProperty(properties, PaxWebConfig.PID_CFG_SHOW_STACKS, sc.isShowStacks());
+		setProperty(properties, PaxWebConfig.PID_CFG_EVENT_DISPATCHER_THREAD_COUNT, sc.getEventDispatcherThreadCount());
+		setProperty(properties, PaxWebConfig.PID_CFG_HTTP_CHECK_FORWARDED_HEADERS, sc.checkForwardedHeaders());
+		setProperty(properties, PaxWebConfig.PID_CFG_TEMP_DIR, sc.getTemporaryDirectory());
+		setProperty(properties, PaxWebConfig.PID_CFG_HTTP_CHECK_FORWARDED_HEADERS, sc.checkForwardedHeaders());
+		setProperty(properties, PaxWebConfig.PID_CFG_SERVER_CONFIGURATION_FILES, sc.getConfigurationFiles());
 
 		LogConfiguration lc = configuration.logging();
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_LOG_NCSA_ENABLED, lc.isLogNCSAFormatEnabled());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_LOG_NCSA_LOGDIR, lc.getLogNCSADirectory());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_LOG_NCSA_LOGFILE, lc.getLogNCSAFile());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_LOG_NCSA_APPEND, lc.isLogNCSAAppend());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_LOG_NCSA_LOGFILE_DATE_FORMAT, lc.getLogNCSAFilenameDateFormat());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_LOG_NCSA_RETAINDAYS, lc.getLogNCSARetainDays());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_LOG_NCSA_EXTENDED, lc.isLogNCSAExtended());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_LOG_NCSA_LOGTIMEZONE, lc.getLogNCSATimeZone());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_LOG_NCSA_BUFFERED, lc.getLogNCSABuffered());
+		setProperty(properties, PaxWebConfig.PID_CFG_LOG_NCSA_ENABLED, lc.isLogNCSAFormatEnabled());
+		setProperty(properties, PaxWebConfig.PID_CFG_LOG_NCSA_LOGDIR, lc.getLogNCSADirectory());
+		setProperty(properties, PaxWebConfig.PID_CFG_LOG_NCSA_LOGFILE, lc.getLogNCSAFile());
+		setProperty(properties, PaxWebConfig.PID_CFG_LOG_NCSA_APPEND, lc.isLogNCSAAppend());
+		setProperty(properties, PaxWebConfig.PID_CFG_LOG_NCSA_LOGFILE_DATE_FORMAT, lc.getLogNCSAFilenameDateFormat());
+		setProperty(properties, PaxWebConfig.PID_CFG_LOG_NCSA_RETAINDAYS, lc.getLogNCSARetainDays());
+		setProperty(properties, PaxWebConfig.PID_CFG_LOG_NCSA_EXTENDED, lc.isLogNCSAExtended());
+		setProperty(properties, PaxWebConfig.PID_CFG_LOG_NCSA_LOGTIMEZONE, lc.getLogNCSATimeZone());
+		setProperty(properties, PaxWebConfig.PID_CFG_LOG_NCSA_BUFFERED, lc.getLogNCSABuffered());
 
 		SessionConfiguration sess = configuration.session();
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SESSION_TIMEOUT, sess.getSessionTimeout());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SESSION_COOKIE_NAME, sess.getSessionCookieName());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SESSION_COOKIE_DOMAIN, sess.getSessionCookieDomain());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SESSION_COOKIE_PATH, sess.getSessionCookiePath());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SESSION_COOKIE_COMMENT, sess.getSessionCookieComment());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SESSION_COOKIE_HTTP_ONLY, sess.getSessionCookieHttpOnly());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SESSION_COOKIE_SECURE, sess.getSessionCookieSecure());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SESSION_COOKIE_MAX_AGE, sess.getSessionCookieMaxAge());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SESSION_URL, sess.getSessionUrlPathParameter());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SESSION_WORKER_NAME, sess.getSessionWorkerName());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SESSION_STORE_DIRECTORY, sess.getSessionStoreDirectoryLocation());
+		setProperty(properties, PaxWebConfig.PID_CFG_SESSION_TIMEOUT, sess.getSessionTimeout());
+		setProperty(properties, PaxWebConfig.PID_CFG_SESSION_COOKIE_NAME, sess.getSessionCookieName());
+		setProperty(properties, PaxWebConfig.PID_CFG_SESSION_COOKIE_DOMAIN, sess.getSessionCookieDomain());
+		setProperty(properties, PaxWebConfig.PID_CFG_SESSION_COOKIE_PATH, sess.getSessionCookiePath());
+		setProperty(properties, PaxWebConfig.PID_CFG_SESSION_COOKIE_COMMENT, sess.getSessionCookieComment());
+		setProperty(properties, PaxWebConfig.PID_CFG_SESSION_COOKIE_HTTP_ONLY, sess.getSessionCookieHttpOnly());
+		setProperty(properties, PaxWebConfig.PID_CFG_SESSION_COOKIE_SECURE, sess.getSessionCookieSecure());
+		setProperty(properties, PaxWebConfig.PID_CFG_SESSION_COOKIE_MAX_AGE, sess.getSessionCookieMaxAge());
+		setProperty(properties, PaxWebConfig.PID_CFG_SESSION_URL, sess.getSessionUrlPathParameter());
+		setProperty(properties, PaxWebConfig.PID_CFG_SESSION_WORKER_NAME, sess.getSessionWorkerName());
+		setProperty(properties, PaxWebConfig.PID_CFG_SESSION_STORE_DIRECTORY, sess.getSessionStoreDirectoryLocation());
 
 		ResourceConfiguration res = configuration.resources();
 //		setProperty(toPropagate, PaxWebConfig.PID_CFG_DEFAULT_SERVLET_ACCEPT_RANGES, res.acceptRanges());
@@ -593,45 +605,45 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 //		setProperty(toPropagate, PaxWebConfig.PID_CFG_DEFAULT_SERVLET_CACHE_TTL, res.maxCacheTTL());
 
 		JspConfiguration jsp = configuration.jsp();
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_JSP_SCRATCH_DIR, jsp.getGloablJspScratchDir());
+		setProperty(properties, PaxWebConfig.PID_CFG_JSP_SCRATCH_DIR, jsp.getGloablJspScratchDir());
 
 		SecurityConfiguration sec = configuration.security();
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_PROVIDER, sec.getSslProvider());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_KEYSTORE, sec.getSslKeystore());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_KEYSTORE_PASSWORD, "********"/*sec.getSslKeystorePassword()*/);
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_KEY_PASSWORD, "********"/*sec.getSslKeyPassword()*/);
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_KEYSTORE_TYPE, sec.getSslKeystoreType());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_KEYSTORE_PROVIDER, sec.getSslKeystoreProvider());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_KEY_MANAGER_FACTORY_ALGORITHM, sec.getSslKeyManagerFactoryAlgorithm());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_KEY_ALIAS, sec.getSslKeyAlias());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_TRUSTSTORE, sec.getTruststore());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_TRUSTSTORE_PASSWORD, "********"/*sec.getTruststorePassword()*/);
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_TRUSTSTORE_TYPE, sec.getTruststoreType());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_TRUSTSTORE_PROVIDER, sec.getTruststoreProvider());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_TRUST_MANAGER_FACTORY_ALGORITHM, sec.getTrustManagerFactoryAlgorithm());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_CLIENT_AUTH_WANTED, sec.isClientAuthWanted());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_CLIENT_AUTH_NEEDED, sec.isClientAuthNeeded());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_PROTOCOL, sec.getSslProtocol());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_SECURE_RANDOM_ALGORITHM, sec.getSecureRandomAlgorithm());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_PROTOCOLS_INCLUDED, sec.getProtocolsIncluded());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_PROTOCOLS_EXCLUDED, sec.getProtocolsExcluded());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_CIPHERSUITES_INCLUDED, sec.getCiphersuiteIncluded());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_CIPHERSUITES_EXCLUDED, sec.getCiphersuiteExcluded());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_RENEGOTIATION_ALLOWED, sec.isSslRenegotiationAllowed());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_RENEGOTIATION_LIMIT, sec.getSslRenegotiationLimit());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_SESSION_ENABLED, sec.getSslSessionsEnabled());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_SESSION_CACHE_SIZE, sec.getSslSessionCacheSize());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_SSL_SESSION_TIMEOUT, sec.getSslSessionTimeout());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_VALIDATE_CERTS, sec.isValidateCerts());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_VALIDATE_PEER_CERTS, sec.isValidatePeerCerts());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_ENABLE_OCSP, sec.isEnableOCSP());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_ENABLE_CRLDP, sec.isEnableCRLDP());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_CRL_PATH, sec.getCrlPath());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_OCSP_RESPONDER_URL, sec.getOcspResponderURL());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_MAX_CERT_PATH_LENGTH, sec.getMaxCertPathLength());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_DIGESTAUTH_MAX_NONCE_AGE, sec.getDigestAuthMaxNonceAge());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_DIGESTAUTH_MAX_NONCE_COUNT, sec.getDigestAuthMaxNonceCount());
-		setProperty(toPropagate, PaxWebConfig.PID_CFG_FORMAUTH_REDIRECT, sec.getFormAuthRedirect());
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_PROVIDER, sec.getSslProvider());
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_KEYSTORE, sec.getSslKeystore());
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_KEYSTORE_PASSWORD, "********"/*sec.getSslKeystorePassword()*/);
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_KEY_PASSWORD, "********"/*sec.getSslKeyPassword()*/);
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_KEYSTORE_TYPE, sec.getSslKeystoreType());
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_KEYSTORE_PROVIDER, sec.getSslKeystoreProvider());
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_KEY_MANAGER_FACTORY_ALGORITHM, sec.getSslKeyManagerFactoryAlgorithm());
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_KEY_ALIAS, sec.getSslKeyAlias());
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_TRUSTSTORE, sec.getTruststore());
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_TRUSTSTORE_PASSWORD, "********"/*sec.getTruststorePassword()*/);
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_TRUSTSTORE_TYPE, sec.getTruststoreType());
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_TRUSTSTORE_PROVIDER, sec.getTruststoreProvider());
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_TRUST_MANAGER_FACTORY_ALGORITHM, sec.getTrustManagerFactoryAlgorithm());
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_CLIENT_AUTH_WANTED, sec.isClientAuthWanted());
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_CLIENT_AUTH_NEEDED, sec.isClientAuthNeeded());
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_PROTOCOL, sec.getSslProtocol());
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_SECURE_RANDOM_ALGORITHM, sec.getSecureRandomAlgorithm());
+		setProperty(properties, PaxWebConfig.PID_CFG_PROTOCOLS_INCLUDED, sec.getProtocolsIncluded());
+		setProperty(properties, PaxWebConfig.PID_CFG_PROTOCOLS_EXCLUDED, sec.getProtocolsExcluded());
+		setProperty(properties, PaxWebConfig.PID_CFG_CIPHERSUITES_INCLUDED, sec.getCiphersuiteIncluded());
+		setProperty(properties, PaxWebConfig.PID_CFG_CIPHERSUITES_EXCLUDED, sec.getCiphersuiteExcluded());
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_RENEGOTIATION_ALLOWED, sec.isSslRenegotiationAllowed());
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_RENEGOTIATION_LIMIT, sec.getSslRenegotiationLimit());
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_SESSION_ENABLED, sec.getSslSessionsEnabled());
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_SESSION_CACHE_SIZE, sec.getSslSessionCacheSize());
+		setProperty(properties, PaxWebConfig.PID_CFG_SSL_SESSION_TIMEOUT, sec.getSslSessionTimeout());
+		setProperty(properties, PaxWebConfig.PID_CFG_VALIDATE_CERTS, sec.isValidateCerts());
+		setProperty(properties, PaxWebConfig.PID_CFG_VALIDATE_PEER_CERTS, sec.isValidatePeerCerts());
+		setProperty(properties, PaxWebConfig.PID_CFG_ENABLE_OCSP, sec.isEnableOCSP());
+		setProperty(properties, PaxWebConfig.PID_CFG_ENABLE_CRLDP, sec.isEnableCRLDP());
+		setProperty(properties, PaxWebConfig.PID_CFG_CRL_PATH, sec.getCrlPath());
+		setProperty(properties, PaxWebConfig.PID_CFG_OCSP_RESPONDER_URL, sec.getOcspResponderURL());
+		setProperty(properties, PaxWebConfig.PID_CFG_MAX_CERT_PATH_LENGTH, sec.getMaxCertPathLength());
+		setProperty(properties, PaxWebConfig.PID_CFG_DIGESTAUTH_MAX_NONCE_AGE, sec.getDigestAuthMaxNonceAge());
+		setProperty(properties, PaxWebConfig.PID_CFG_DIGESTAUTH_MAX_NONCE_COUNT, sec.getDigestAuthMaxNonceCount());
+		setProperty(properties, PaxWebConfig.PID_CFG_FORMAUTH_REDIRECT, sec.getFormAuthRedirect());
 
 //		setProperty(toPropagate, PROPERTY_HTTP_USE_NIO, configuration.useNIO());
 //		setProperty(toPropagate, PROPERTY_DEFAULT_AUTHMETHOD, configuration.getDefaultAuthMethod());
@@ -642,7 +654,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 //		setProperty(toPropagate, PROPERTY_ENC_PREFIX, configuration.getEncPrefix());
 //		setProperty(toPropagate, PROPERTY_ENC_SUFFIX, configuration.getEncSuffix());
 
-		return toPropagate;
+		return properties;
 	}
 
 	private void setProperty(final Hashtable<String, Object> properties, final String name, final Object value) {
@@ -738,6 +750,33 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			if (bundleContext != null) {
 				bundleContext.ungetService(reference);
 			}
+		}
+	}
+
+	/**
+	 * This listener alters the registration of {@link HttpServiceRuntime} properties
+	 */
+	private class AddressConfiguration implements ServerListener {
+		@Override
+		public void stateChanged(ServerEvent event) {
+			if (httpServiceRuntimeReg == null || httpServiceRuntimeReg.getReference() == null) {
+				return;
+			}
+			String[] props = httpServiceRuntimeReg.getReference().getPropertyKeys();
+			Dictionary<String, Object> newProps = new Hashtable<>();
+			for (String key : props) {
+				newProps.put(key, httpServiceRuntimeReg.getReference().getProperty(key));
+			}
+			if (event.getState() == ServerEvent.State.STARTED) {
+				String[] addresses = Arrays.stream(event.getAddresses())
+						.map(ia -> String.format("%s://%s:%d/", ia.isSecure() ? "https" : "http",
+								ia.getAddress().getAddress().getHostAddress(), ia.getAddress().getPort())).toArray(String[]::new);
+				newProps.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT, addresses);
+			} else {
+				newProps.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT, "/");
+			}
+			// update the registration properties
+			httpServiceRuntimeReg.setProperties(newProps);
 		}
 	}
 

@@ -27,10 +27,10 @@ public class ServerEvent {
 		STARTED, STOPPED, CONFIGURED
 	}
 
-	private final InetSocketAddress[] addresses;
+	private final Address[] addresses;
 	private final State state;
 
-	public ServerEvent(State state, InetSocketAddress[] addresses) {
+	public ServerEvent(State state, Address[] addresses) {
 		this.state = state;
 		this.addresses = addresses;
 	}
@@ -39,8 +39,26 @@ public class ServerEvent {
 		return state;
 	}
 
-	public InetSocketAddress[] getAddresses() {
+	public Address[] getAddresses() {
 		return addresses;
+	}
+
+	public static class Address {
+		private final InetSocketAddress address;
+		private final boolean secure;
+
+		public Address(InetSocketAddress address, boolean secure) {
+			this.address = address;
+			this.secure = secure;
+		}
+
+		public InetSocketAddress getAddress() {
+			return address;
+		}
+
+		public boolean isSecure() {
+			return secure;
+		}
 	}
 
 }
