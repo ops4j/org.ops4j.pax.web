@@ -71,6 +71,9 @@ public abstract class ElementModel<T, D extends WebElementEventData>
 
 	protected Boolean isValid;
 
+	/** If there's any failure during the lifetime of the context, we can provide a failure DTO information here. */
+	protected int dtoFailureCode = -1;
+
 	private volatile boolean closed = false;
 
 	private int serviceRank = 0;
@@ -125,8 +128,6 @@ public abstract class ElementModel<T, D extends WebElementEventData>
 	/**
 	 * <p>This method should be called from Whiteboard infrastructure to really perform the validation and set
 	 * <em>isValid</em> flag, which is then used for "Failure DTO" purposes.</p>
-	 *
-	 * TODO_DTO: maybe we should accept some callback for DTO purposes.
 	 */
 	public boolean isValid() {
 		if (isValid == null) {
@@ -343,6 +344,14 @@ public abstract class ElementModel<T, D extends WebElementEventData>
 
 	public Filter getContextFilter() {
 		return contextFilter;
+	}
+
+	public int getDtoFailureCode() {
+		return dtoFailureCode;
+	}
+
+	public void setDtoFailureCode(int dtoFailureCode) {
+		this.dtoFailureCode = dtoFailureCode;
 	}
 
 	@Override

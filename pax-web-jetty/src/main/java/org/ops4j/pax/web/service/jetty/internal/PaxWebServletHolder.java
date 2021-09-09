@@ -36,6 +36,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.runtime.dto.DTOConstants;
 
 /**
  * <p>Jetty {@link ServletHolder} that can perform tasks described in Http Service and Whiteboard Service
@@ -220,6 +221,10 @@ public class PaxWebServletHolder extends ServletHolder {
 		if (instance != null && servletModel != null && servletModel.isResourceServlet()) {
 			((JettyResourceServlet) instance).setWelcomeFiles(osgiServletContext.getWelcomeFiles());
 			((JettyResourceServlet) instance).setWelcomeFilesRedirect(osgiServletContext.isWelcomeFilesRedirect());
+		}
+
+		if (instance == null) {
+			servletModel.setDtoFailureCode(DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE);
 		}
 
 		// if null, newInstance() will be called

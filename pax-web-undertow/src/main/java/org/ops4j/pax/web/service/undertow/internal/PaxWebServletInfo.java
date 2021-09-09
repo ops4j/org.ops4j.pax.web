@@ -32,6 +32,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.undertow.internal.web.UndertowResourceServlet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceObjects;
+import org.osgi.service.http.runtime.dto.DTOConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -227,6 +228,7 @@ public class PaxWebServletInfo extends ServletInfo {
 						instance = serviceObjects.getService();
 					}
 					if (instance == null) {
+						model.setDtoFailureCode(DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE);
 						throw new RuntimeException("Can't get a Servlet service from the reference " + model.getElementReference());
 					}
 				} else if (model.getServletClass() != null) {
@@ -251,10 +253,18 @@ public class PaxWebServletInfo extends ServletInfo {
 				@Override
 				public void release() {
 					if (model.getElementReference() != null) {
-						if (!model.isPrototype()) {
-							model.getRegisteringBundle().getBundleContext().ungetService(model.getElementReference());
-						} else {
-							serviceObjects.ungetService(getInstance());
+						try {
+							if (!model.isPrototype()) {
+								model.getRegisteringBundle().getBundleContext().ungetService(model.getElementReference());
+							} else if (getInstance() != null) {
+								Servlet realServlet = getInstance();
+								if (realServlet instanceof OsgiInitializedServlet) {
+									realServlet = ((OsgiInitializedServlet) realServlet).getDelegate();
+								}
+								serviceObjects.ungetService(realServlet);
+							}
+						} catch (IllegalStateException e) {
+							// bundle context has already been invalidated ?
 						}
 					}
 				}

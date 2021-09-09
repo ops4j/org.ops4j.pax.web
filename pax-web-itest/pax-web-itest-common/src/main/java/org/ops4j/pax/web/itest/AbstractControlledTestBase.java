@@ -17,7 +17,6 @@ package org.ops4j.pax.web.itest;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashSet;
@@ -935,7 +934,7 @@ public abstract class AbstractControlledTestBase {
 				protected boolean isFulfilled() {
 					return events.stream().anyMatch(e ->
 							e.getState() == ServerEvent.State.STARTED
-									&& Arrays.stream(e.getAddresses()).map(InetSocketAddress::getPort)
+									&& Arrays.stream(e.getAddresses()).map(a -> a.getAddress().getPort())
 									.anyMatch(p -> p == port));
 				}
 			}.waitForCondition();

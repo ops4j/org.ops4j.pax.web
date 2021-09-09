@@ -247,12 +247,17 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 		}
 
 		// Web element is created, but validation has to be run separately/explicitly to handle "Failure DTO"
+		// org.ops4j.pax.web.service.spi.model.elements.ElementModel.performValidation() sets proper "last failure",
+		// which may then be set to different value (for example when dereferencing ServiceReference)
 		if (webElement.isValid()) {
+			// the succesful DTO information will be propagated to HttpServiceRuntime (which is the ServerModel)
+			// during registration of the web element
 			whiteboardExtenderContext.addWebElement(serviceReference.getBundle(), webElement);
-
-			whiteboardExtenderContext.configureDTOs(webElement);
 			return webElement;
 		} else {
+			// the failed DTO information have to be passed directly, because we're not registering the web element
+			// model. Such failure DTO is never updated, instead its removed and added again, when for example
+			// the service registration properties change
 			whiteboardExtenderContext.configureFailedDTOs(webElement);
 			return null;
 		}
@@ -280,7 +285,6 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 	public void removedService(final ServiceReference<S> serviceReference, final T webElement) {
 		log.debug("Whiteboard service removed: {}", serviceReference);
 
-		//		httpServiceRuntime.removeWhiteboardElement(model);
 		whiteboardExtenderContext.removeWebElement(serviceReference.getBundle(), webElement);
 	}
 

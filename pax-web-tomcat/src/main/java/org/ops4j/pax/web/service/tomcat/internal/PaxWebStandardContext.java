@@ -338,7 +338,7 @@ public class PaxWebStandardContext extends StandardContext {
 
 				// are there any error page declarations in the model?
 				ErrorPageModel epm = model.getErrorPageModel();
-				if (epm != null) {
+				if (epm != null && epm.isValid()) {
 					String location = epm.getLocation();
 					for (String ex : epm.getExceptionClassNames()) {
 						ErrorPage errorPage = new ErrorPage();

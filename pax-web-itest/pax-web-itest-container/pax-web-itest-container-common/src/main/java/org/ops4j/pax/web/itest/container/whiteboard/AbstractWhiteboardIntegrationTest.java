@@ -20,7 +20,6 @@ import javax.servlet.Servlet;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
@@ -39,7 +38,8 @@ import org.osgi.service.http.runtime.dto.RuntimeDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * @author Toni Menzel (tonit)
@@ -187,44 +187,41 @@ public abstract class AbstractWhiteboardIntegrationTest extends AbstractContaine
 	}
 
 	@Test
-	@Ignore("DTOs do not work yet in Pax Web 8")
 	public void testMultipleContextMappingsWithDTOsCheck() throws Exception {
 		BundleContext bundleContext = bundle.getBundleContext();
 		DefaultHttpContextMapping httpContextMapping = new DefaultHttpContextMapping();
 		httpContextMapping.setContextId("dtoCheck");
-		httpContextMapping.setContextPath("dtocheck");
-		ServiceRegistration<HttpContextMapping> httpContextMappingRegistration = bundleContext
-				.registerService(HttpContextMapping.class,
-						httpContextMapping, null);
+		httpContextMapping.setContextPath("/dtocheck");
+		ServiceRegistration<HttpContextMapping> httpContextMappingRegistration
+				= bundleContext.registerService(HttpContextMapping.class, httpContextMapping, null);
 		try {
 			Servlet servlet = new WhiteboardServlet("/dtocheck");
 			DefaultServletMapping servletMapping = new DefaultServletMapping();
 			servletMapping.setServlet(servlet);
 			servletMapping.setAlias("/dtocheck");
-			String httpContextId = httpContextMapping.getContextId();
-			servletMapping.setContextId(httpContextId);
-			ServiceRegistration<ServletMapping> servletRegistration = bundleContext
-					.registerService(ServletMapping.class,
-							servletMapping, null);
+			servletMapping.setContextId(httpContextMapping.getContextId());
+			ServiceRegistration<ServletMapping> servletRegistration
+					= bundleContext.registerService(ServletMapping.class, servletMapping, null);
 
-			ServiceReference<HttpServiceRuntime> serviceReference = bundleContext.getServiceReference(HttpServiceRuntime.class);
+			ServiceReference<HttpServiceRuntime> serviceReference
+					= bundleContext.getServiceReference(HttpServiceRuntime.class);
 			try {
 				HttpTestClientFactory.createDefaultTestClient()
 						.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
 								resp -> resp.contains("Hello Whiteboard Extender"))
 						.doGETandExecuteTest("http://127.0.0.1:8181/dtocheck/dtocheck");
 
+				// interact with org.osgi.service.http.runtime.HttpServiceRuntime
 				HttpServiceRuntime httpServiceRuntime = bundleContext.getService(serviceReference);
-
 				RuntimeDTO runtimeDTO = httpServiceRuntime.getRuntimeDTO();
 
-				assertEquals(0, runtimeDTO.failedServletContextDTOs.length);
+				assertThat(runtimeDTO.failedServletContextDTOs.length, equalTo(0));
+				assertThat(runtimeDTO.servletContextDTOs.length, equalTo(3));
 
-				assertEquals(2, runtimeDTO.servletContextDTOs.length);
+				long count = Arrays.stream(runtimeDTO.servletContextDTOs)
+						.filter(servletContext -> servletContext.name.equalsIgnoreCase("dtoCheck")).count();
 
-				long count = Arrays.stream(runtimeDTO.servletContextDTOs).filter(servletContext -> servletContext.name.equalsIgnoreCase("dtoCheck")).count();
-
-				assertEquals(1, count);
+				assertThat(count, equalTo(1L));
 			} finally {
 				bundleContext.ungetService(serviceReference);
 				servletRegistration.unregister();

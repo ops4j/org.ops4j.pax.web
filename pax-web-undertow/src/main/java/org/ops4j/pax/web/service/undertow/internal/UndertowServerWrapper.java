@@ -1412,7 +1412,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 				// are there any error page declarations in the model?
 				ErrorPageModel epm = model.getErrorPageModel();
-				if (epm != null) {
+				if (epm != null && epm.isValid()) {
 					String location = epm.getLocation();
 					FlexibleErrorPages currentState = errorPages.computeIfAbsent(contextPath, cp -> new FlexibleErrorPages());
 					for (String ex : epm.getExceptionClassNames()) {

@@ -148,11 +148,14 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 
 		// Web context is configured, but validation has to be run separately/explicitly to handle "Failure DTO"
 		if (model.isValid()) {
+			// the succesful DTO information will be propagated to HttpServiceRuntime (which is the ServerModel)
+			// during registration of the web context
 			whiteboardExtenderContext.addWebContext(serviceReference.getBundle(), model);
-
-			whiteboardExtenderContext.configureDTOs(model);
 			return model;
 		} else {
+			// the failed DTO information have to be passed directly, because we're not registering the web context
+			// model. Such failure DTO is never updated, instead its removed and added again, when for example
+			// the service registration properties change
 			whiteboardExtenderContext.configureFailedDTOs(model);
 			return null;
 		}
@@ -181,8 +184,6 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 		// Web context is configured, but validation has to be run separately/explicitly to handle "Failure DTO"
 		if (model.isValid()) {
 			whiteboardExtenderContext.addWebContext(reference.getBundle(), model);
-
-			whiteboardExtenderContext.configureDTOs(model);
 		} else {
 			whiteboardExtenderContext.configureFailedDTOs(model);
 		}

@@ -100,17 +100,11 @@ public class Activator implements BundleActivator {
 	 */
 	private final List<ServiceTracker<?, ?>> trackers = new ArrayList<>();
 
-    private ExtendedHttpServiceRuntime httpServiceRuntime;
-
 	@Override
 	public void start(final BundleContext bundleContext) throws Exception {
 		LOG.info("Starting Pax Web Whiteboard Extender");
 
 		this.context = bundleContext;
-
-		// this is implementation of Whiteboard Service's org.osgi.service.http.runtime.HttpServiceRuntime
-		httpServiceRuntime = new ExtendedHttpServiceRuntime(bundleContext);
-		httpServiceRuntime.start();
 
 		// this is where "trackers" register/unregister their customized objects.
 		// a short summary:
@@ -128,7 +122,7 @@ public class Activator implements BundleActivator {
 		//
 		// in other words - "extender context" is the component that bridges between tracked web elements + customized
 		// model elements on one side and "current" WebContainer obtained using proper bundle(context) on the other side
-		whiteboardExtenderContext = new WhiteboardExtenderContext(httpServiceRuntime, bundleContext);
+		whiteboardExtenderContext = new WhiteboardExtenderContext(bundleContext);
 
 		// we immediately register "default" ServletContextHelper as OSGi service
 		// felix.http registers something like this:
@@ -190,8 +184,6 @@ public class Activator implements BundleActivator {
 			tracker.close();
 		}
 		this.trackers.clear();
-
-		httpServiceRuntime.stop();
 
 		if (registration != null) {
 			registration.unregister();

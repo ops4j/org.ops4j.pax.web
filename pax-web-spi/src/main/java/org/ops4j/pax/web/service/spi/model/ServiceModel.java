@@ -274,7 +274,7 @@ public class ServiceModel implements BatchVisitor {
 			}
 			servletModels.add(model);
 
-			if (model.getErrorPageModel() != null) {
+			if (model.getErrorPageModel() != null && model.getErrorPageModel().isValid()) {
 				errorPageModels.add(model.getErrorPageModel());
 			}
 
@@ -499,7 +499,7 @@ public class ServiceModel implements BatchVisitor {
 						}
 					}
 				}
-				if (model.getErrorPageModel() != null) {
+				if (model.getErrorPageModel() != null && model.getErrorPageModel().isValid()) {
 					errorPageModels.remove(model.getErrorPageModel());
 				}
 				iterator.remove();

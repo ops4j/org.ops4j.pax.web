@@ -34,6 +34,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.ScopedFilter;
 import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.runtime.dto.DTOConstants;
 
 /**
  * Extension of Tomcat's {@link FilterDef} which can tell if it's suitable for a chain with given target
@@ -148,6 +149,10 @@ public class PaxWebFilterDef extends FilterDef {
 					instance = serviceObjects.getService();
 				}
 
+				if (instance == null) {
+					filterModel.setDtoFailureCode(DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE);
+				}
+
 				filter = new ScopedFilter(new OsgiInitializedFilter(instance, filterModel, servletContext), filterModel);
 			} else {
 				// strange...
@@ -168,7 +173,14 @@ public class PaxWebFilterDef extends FilterDef {
 				if (!filterModel.isPrototype()) {
 					filterModel.getRegisteringBundle().getBundleContext().ungetService(filterReference);
 				} else {
-					serviceObjects.ungetService(filter);
+					Filter realFilter = filter;
+					if (realFilter instanceof ScopedFilter) {
+						realFilter = ((ScopedFilter) realFilter).getDelegate();
+					}
+					if (realFilter instanceof OsgiInitializedFilter) {
+						realFilter = ((OsgiInitializedFilter) realFilter).getDelegate();
+					}
+					serviceObjects.ungetService(realFilter);
 				}
 			}
 		}

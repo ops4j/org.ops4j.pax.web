@@ -33,6 +33,7 @@ import org.ops4j.pax.web.service.tomcat.internal.web.TomcatResourceServlet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.runtime.dto.DTOConstants;
 
 /**
  * Tomcat's version of Jetty's {@code org.ops4j.pax.web.service.jetty.internal.PaxWebServletHolder} which
@@ -226,7 +227,8 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 			((TomcatResourceServlet) instance).setWelcomeFilesRedirect(osgiServletContext.isWelcomeFilesRedirect());
 		}
 
-		if (instance == null) {
+		if (instance == null && servletModel != null) {
+			servletModel.setDtoFailureCode(DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE);
 			throw new IllegalStateException("Can't load servlet for " + servletModel);
 		}
 
@@ -241,7 +243,7 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 		if (servletModel != null && servletModel.getElementReference() != null) {
 			if (!servletModel.isPrototype()) {
 				servletModel.getRegisteringBundle().getBundleContext().ungetService(servletModel.getElementReference());
-			} else {
+			} else if (serviceObjects != null) {
 				serviceObjects.ungetService(getServlet());
 			}
 		}

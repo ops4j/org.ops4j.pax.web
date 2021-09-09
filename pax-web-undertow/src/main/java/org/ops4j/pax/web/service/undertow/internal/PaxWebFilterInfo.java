@@ -30,6 +30,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.ScopedFilter;
 import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.runtime.dto.DTOConstants;
 
 /**
  * Special {@link FilterInfo} that can be configured from {@link FilterModel}.
@@ -102,6 +103,7 @@ public class PaxWebFilterInfo extends FilterInfo {
 						instance = serviceObjects.getService();
 					}
 					if (instance == null) {
+						model.setDtoFailureCode(DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE);
 						throw new RuntimeException("Can't get a Filter service from the reference " + model.getElementReference());
 					}
 				} else if (model.getFilterClass() != null) {
@@ -124,10 +126,21 @@ public class PaxWebFilterInfo extends FilterInfo {
 				@Override
 				public void release() {
 					if (model.getElementReference() != null) {
-						if (!model.isPrototype()) {
-							model.getRegisteringBundle().getBundleContext().ungetService(model.getElementReference());
-						} else {
-							serviceObjects.ungetService(getInstance());
+						try {
+							if (!model.isPrototype()) {
+								model.getRegisteringBundle().getBundleContext().ungetService(model.getElementReference());
+							} else if (getInstance() != null) {
+								Filter realFilter = getInstance();
+								if (realFilter instanceof ScopedFilter) {
+									realFilter = ((ScopedFilter) realFilter).getDelegate();
+								}
+								if (realFilter instanceof OsgiInitializedFilter) {
+									realFilter = ((OsgiInitializedFilter) realFilter).getDelegate();
+								}
+								serviceObjects.ungetService(realFilter);
+							}
+						} catch (IllegalStateException e) {
+							// bundle context has already been invalidated ?
 						}
 					}
 				}

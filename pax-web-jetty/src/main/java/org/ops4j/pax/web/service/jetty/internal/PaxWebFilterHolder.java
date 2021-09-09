@@ -30,6 +30,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.runtime.dto.DTOConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -153,6 +154,10 @@ public class PaxWebFilterHolder extends FilterHolder {
 			} catch (Exception e) {
 				throw new IllegalStateException("Can't instantiate Filter with class " + getHeldClass(), e);
 			}
+		}
+
+		if (instance == null) {
+			filterModel.setDtoFailureCode(DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE);
 		}
 
 		return instance == null ? null

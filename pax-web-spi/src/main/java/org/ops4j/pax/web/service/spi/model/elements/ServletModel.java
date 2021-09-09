@@ -16,12 +16,14 @@
 package org.ops4j.pax.web.service.spi.model.elements;
 
 import java.io.File;
+import java.io.FilePermission;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,6 +43,11 @@ import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.runtime.dto.DTOConstants;
+import org.osgi.service.http.runtime.dto.FailedResourceDTO;
+import org.osgi.service.http.runtime.dto.FailedServletDTO;
+import org.osgi.service.http.runtime.dto.ResourceDTO;
+import org.osgi.service.http.runtime.dto.ServletDTO;
 
 /**
  * Set of parameters describing everything that's required to register a {@link Servlet}.
@@ -258,31 +265,38 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			sources += (getElementReference() != null ? 1 : 0);
 			sources += (getElementSupplier() != null ? 1 : 0);
 			if (sources == 0) {
+				dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 				throw new IllegalArgumentException("Servlet Model must specify one of: servlet instance, servlet class,"
 						+ " servlet supplier or service reference");
 			}
 			if (sources != 1) {
+				dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 				throw new IllegalArgumentException("Servlet Model should specify a servlet uniquely as instance, class,"
 						+ " supplier or service reference");
 			}
 		}
 
 		if (this.alias == null && (this.urlPatterns == null || this.urlPatterns.length == 0)) {
+			dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 			throw new IllegalArgumentException("Neither alias nor URL patterns array is specified");
 		}
 		if (this.alias != null && this.urlPatterns != null && this.urlPatterns.length > 0 && !aliasCopiedToPatterns) {
+			dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 			throw new IllegalArgumentException("Can't specify both alias and URL patterns array");
 		}
 
 		if (this.alias != null) {
 			if (!this.alias.startsWith("/")) {
+				dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 				throw new IllegalArgumentException("Alias does not start with slash (/)");
 			}
 			// "/" must be allowed
 			if (alias.length() > 1 && alias.endsWith("/")) {
+				dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 				throw new IllegalArgumentException("Alias should not end with slash (/)");
 			}
 			if ("".equals(alias.trim())) {
+				dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 				throw new IllegalArgumentException("Alias should not be empty");
 			}
 		}
@@ -294,11 +308,13 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 				}
 				if (url.endsWith("/*")) {
 					if (url.substring(0, url.length() - 2).contains("*") || !url.startsWith("/")) {
+						dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 						throw new IllegalArgumentException("URL Pattern \"" + url + "\" is not a valid path pattern");
 					}
 				}
 				if (url.startsWith("*.")) {
 					if (url.substring(2).contains("/") || url.substring(2).contains("*")) {
+						dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 						throw new IllegalArgumentException("URL Pattern \"" + url + "\" is not a valid extension pattern");
 					}
 				}
@@ -307,6 +323,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 
 		if (resourceServlet) {
 			if (rawPath == null && basePath == null && baseFileUrl == null) {
+				dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 				throw new IllegalArgumentException("Base path or base directory is required for resource servlets");
 			}
 			sources = 0;
@@ -314,6 +331,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			sources += (basePath != null ? 1 : 0);
 			sources += (baseFileUrl != null ? 1 : 0);
 			if (sources != 1) {
+				dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 				throw new IllegalArgumentException("Only one base (resource base or base directory) is allowed for resource servlets");
 			}
 		}
@@ -351,9 +369,10 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			} else if (errorPageExtension != null) {
 				epm.setLocation(errorPageExtension);
 			}
-			if (epm.performValidation()) {
-				errorPageModel = epm;
-			}
+
+			// do not throw validation error and always keep the error page model - for DTO purposes
+			epm.isValid();
+			errorPageModel = epm;
 		}
 
 		if (jspFile != null) {
@@ -368,6 +387,14 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			initParams.put("jspFile", jspFile);
 		}
 
+		if (multipartConfigElement != null && multipartConfigElement.getLocation() != null) {
+			if (System.getSecurityManager() != null && !getRegisteringBundle().hasPermission(new FilePermission(multipartConfigElement.getLocation(), "read,write,delete"))) {
+				dtoFailureCode = DTOConstants.FAILURE_REASON_SERVLET_WRITE_TO_LOCATION_DENIED;
+				throw new IllegalArgumentException("No Write permission to " + multipartConfigElement.getLocation());
+			}
+		}
+
+		dtoFailureCode = -1;
 		return Boolean.TRUE;
 	}
 
@@ -646,6 +673,90 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			initParams.putIfAbsent("suppressSmap", "true");
 			initParams.putIfAbsent("classdebuginfo", "false");
 		}
+	}
+
+	public ResourceDTO toResourceDTO() {
+		ResourceDTO dto = new ResourceDTO();
+		// will be set later
+		dto.servletContextId = 0L;
+		dto.patterns = urlPatterns == null ? new String[0] : new String[urlPatterns.length];
+		if (urlPatterns != null) {
+			System.arraycopy(urlPatterns, 0, dto.patterns, 0, urlPatterns.length);
+		}
+		if (rawPath != null) {
+			dto.prefix = rawPath;
+		} else if (basePath != null) {
+			dto.prefix = basePath;
+		} else if (baseFileUrl != null) {
+			dto.prefix = this.baseFileUrl.toExternalForm();
+		}
+		dto.serviceId = getServiceId();
+		return dto;
+	}
+
+	public FailedResourceDTO toFailedResourceDTO(int dtoFailureCode) {
+		FailedResourceDTO dto = new FailedResourceDTO();
+		dto.servletContextId = 0L;
+		dto.patterns = urlPatterns == null ? new String[0] : new String[urlPatterns.length];
+		if (urlPatterns != null) {
+			System.arraycopy(urlPatterns, 0, dto.patterns, 0, urlPatterns.length);
+		}
+		if (rawPath != null) {
+			dto.prefix = rawPath;
+		} else if (basePath != null) {
+			dto.prefix = basePath;
+		} else if (baseFileUrl != null) {
+			dto.prefix = this.baseFileUrl.toExternalForm();
+		}
+		dto.serviceId = getServiceId();
+		dto.failureReason = dtoFailureCode;
+		return dto;
+	}
+
+	public ServletDTO toServletDTO() {
+		ServletDTO dto = new ServletDTO();
+		dto.name = name;
+		dto.asyncSupported = asyncSupported != null && asyncSupported;
+		dto.initParams = new HashMap<>(initParams);
+		// will be set later
+		dto.servletContextId = 0L;
+		dto.patterns = urlPatterns == null ? new String[0] : new String[urlPatterns.length];
+		if (urlPatterns != null) {
+			System.arraycopy(urlPatterns, 0, dto.patterns, 0, urlPatterns.length);
+		}
+		dto.multipartEnabled = multipartConfigElement != null;
+		if (dto.multipartEnabled) {
+			dto.multipartFileSizeThreshold = multipartConfigElement.getFileSizeThreshold();
+			dto.multipartLocation = multipartConfigElement.getLocation();
+			dto.multipartMaxFileSize = multipartConfigElement.getMaxFileSize();
+			dto.multipartMaxRequestSize = multipartConfigElement.getMaxRequestSize();
+		}
+		dto.serviceId = getServiceId();
+		dto.servletInfo = null;
+		return dto;
+	}
+
+	public FailedServletDTO toFailedServletDTO(int dtoFailureCode) {
+		FailedServletDTO dto = new FailedServletDTO();
+		dto.name = name;
+		dto.asyncSupported = asyncSupported != null && asyncSupported;
+		dto.initParams = new HashMap<>(initParams);
+		dto.servletContextId = 0L;
+		dto.patterns = urlPatterns == null ? new String[0] : new String[urlPatterns.length];
+		if (urlPatterns != null) {
+			System.arraycopy(urlPatterns, 0, dto.patterns, 0, urlPatterns.length);
+		}
+		dto.multipartEnabled = multipartConfigElement != null;
+		if (dto.multipartEnabled) {
+			dto.multipartFileSizeThreshold = multipartConfigElement.getFileSizeThreshold();
+			dto.multipartLocation = multipartConfigElement.getLocation();
+			dto.multipartMaxFileSize = multipartConfigElement.getMaxFileSize();
+			dto.multipartMaxRequestSize = multipartConfigElement.getMaxRequestSize();
+		}
+		dto.serviceId = getServiceId();
+		dto.servletInfo = null;
+		dto.failureReason = dtoFailureCode;
+		return dto;
 	}
 
 	@Override

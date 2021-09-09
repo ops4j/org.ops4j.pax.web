@@ -15,8 +15,10 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Dictionary;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,6 +37,7 @@ import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.servlet.Filter;
@@ -77,14 +80,37 @@ import org.ops4j.pax.web.service.spi.task.ServletModelChange;
 import org.ops4j.pax.web.service.spi.task.WebSocketModelChange;
 import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.ops4j.pax.web.service.spi.util.Utils;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
+import org.ops4j.pax.web.service.whiteboard.ContextMapping;
+import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
+import org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.dto.ServiceReferenceDTO;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.HttpServiceRuntime;
+import org.osgi.service.http.runtime.dto.DTOConstants;
+import org.osgi.service.http.runtime.dto.ErrorPageDTO;
+import org.osgi.service.http.runtime.dto.FailedErrorPageDTO;
+import org.osgi.service.http.runtime.dto.FailedFilterDTO;
+import org.osgi.service.http.runtime.dto.FailedListenerDTO;
+import org.osgi.service.http.runtime.dto.FailedPreprocessorDTO;
+import org.osgi.service.http.runtime.dto.FailedResourceDTO;
+import org.osgi.service.http.runtime.dto.FailedServletContextDTO;
+import org.osgi.service.http.runtime.dto.FailedServletDTO;
+import org.osgi.service.http.runtime.dto.FilterDTO;
+import org.osgi.service.http.runtime.dto.ListenerDTO;
+import org.osgi.service.http.runtime.dto.PreprocessorDTO;
 import org.osgi.service.http.runtime.dto.RequestInfoDTO;
+import org.osgi.service.http.runtime.dto.ResourceDTO;
 import org.osgi.service.http.runtime.dto.RuntimeDTO;
+import org.osgi.service.http.runtime.dto.ServletContextDTO;
+import org.osgi.service.http.runtime.dto.ServletDTO;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,8 +169,8 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 	 * Http Service specification and internal information about OSGi-specific <em>context</em>. In Whiteboard Service
 	 * scenario, the relation is reversed - from user point of view, name of <em>context</em> is used, this name
 	 * represents some {@link OsgiContextModel} and from this {@link OsgiContextModel} Pax Web obtains an instance
-	 * of {@link WebContainerContext} - because {@link org.osgi.service.http.context.ServletContextHelper}
-	 * may be registered as {@link org.osgi.framework.ServiceFactory}.</p>
+	 * of {@link WebContainerContext} - because {@link ServletContextHelper}
+	 * may be registered as {@link ServiceFactory}.</p>
 	 *
 	 * <p>Technically, in Http Service scenario, {@link HttpContext} is the entry point and the mapped
 	 * {@link OsgiContextModel} contains it (or rather its extension - {@link WebContainerContext}) directly.</p>
@@ -157,15 +183,15 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 	 *     different {@link OsgiContextModel OSGi contexts}, further pointing to single {@link ServletContextModel}.</li>
 	 *     <li>Pax Web introduces <em>shared</em> {@link HttpContext} where e.g., "default" <em>context</em>
 	 *     can be used by many bundles and can allow {@link HttpContext} to load resources from different bundles.</li>
-	 *     <li>"new" {@link org.osgi.service.http.context.ServletContextHelper} is by default shared by multiple
+	 *     <li>"new" {@link ServletContextHelper} is by default shared by multiple
 	 *     bundles, and its name <strong>is</strong> the only distinguishing element, however web elements may
-	 *     refer (using an LDAP filter) to more than one {@link org.osgi.service.http.context.ServletContextHelper}
+	 *     refer (using an LDAP filter) to more than one {@link ServletContextHelper}
 	 *     (using wildcard filter or when filtering by other service registration properties).</li>
 	 *     <li>"old" Http Service specification doesn't mention at all the concept of sharing {@link HttpContext}
 	 *     through service registry. That's Pax Web improvement and additional configuration method (like specifying
 	 *     <em>context path</em>).</li>
 	 *     <li>Registered <em>contexts</em> (and Whiteboard Service spec states this explicitly) may be instances
-	 *     of {@link org.osgi.framework.ServiceFactory} which add bundle identity aspect to the context. This means
+	 *     of {@link ServiceFactory} which add bundle identity aspect to the context. This means
 	 *     that even if two bundles register servlets with the same <em>context</em>, the {@code getResource()}
 	 *     method loads resources from relevant bundle - different for different servlets.</li>
 	 * </ul></p>
@@ -192,10 +218,10 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 	 *     the same id and bundle</em></li>
 	 *     <li>Pax Web shared/multi-bundle variant of {@link HttpContext} - <em>the same</em> will be defined as
 	 *     <em>having the same id</em></li>
-	 *     <li>standard {@link org.osgi.service.http.context.ServletContextHelper} from Whiteboard Service spec -
+	 *     <li>standard {@link ServletContextHelper} from Whiteboard Service spec -
 	 *     <em>the same</em> will be defined as <em>having the same name</em>, but also service ranking is taken into
 	 *     account (when needed). {@link OsgiContextModel}s that use
-	 *     {@link org.osgi.service.http.context.ServletContextHelper} are not tracked here.</li>
+	 *     {@link ServletContextHelper} are not tracked here.</li>
 	 * </ul></p>
 	 *
 	 * <p>For now (2020-05-20) the decision is that if user registers a servlet with {@code null} {@link HttpContext},
@@ -206,7 +232,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 	 * <p>This map's values are {@link TreeSet} collections, so we can also have rank-sorting here. Normally user
 	 * can't have more {@link OsgiContextModel} instances for single {@link WebContainerContext} when using
 	 * {@link WebContainer} directly, but when Whiteboard-registering legacy {@link HttpContext} or
-	 * {@link org.ops4j.pax.web.service.whiteboard.HttpContextMapping} services it's possible to override (shadow)
+	 * {@link HttpContextMapping} services it's possible to override (shadow)
 	 * existing models - possibly with other model with the same name, but different context path. This behavior
 	 * is Pax Web specific, because Http Service specification doesn't mention at all about context paths and
 	 * rank-sorting.</p>
@@ -214,7 +240,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 	 * <p>The above assumption changed drammatically after I read "140.4 [...] The highest ranking is associated with
 	 * the context of the Http Service" and I had to change the rank of the context associated with HttpService from
 	 * {@link Integer#MIN_VALUE} to {@link Integer#MAX_VALUE}. This prevented a user
-	 * from Whiteboard-registering a {@link org.osgi.service.http.context.ServletContextHelper} singleton service
+	 * from Whiteboard-registering a {@link ServletContextHelper} singleton service
 	 * (not service factory) that could <em>take over</em> matching (by name) {@link OsgiContextModel}.
 	 * Fortunately I'll still allow this - you just need to register <em>exactly</em> the context that could be
 	 * retrieved from {@link HttpService#createDefaultHttpContext()} (or similar method from {@link WebContainer})
@@ -247,12 +273,12 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 	 *
 	 * <p><em>Contexts</em> for Whiteboard Service should <strong>not</strong> be kept here. However it also not
 	 * possible to Whiteboard-register a context that will be treated as the <em>context</em> usable by
-	 * {@link org.osgi.service.http.HttpService} because according to 140.4 of Whiteboard specification, "The highest
+	 * {@link HttpService} because according to 140.4 of Whiteboard specification, "The highest
 	 * ranking is associated with the context of the Http Service". It's technically possible
 	 * to do the opposite, but it's explicitly forbidden by Whiteboard Service specification to allow Whiteboard
-	 * registration of servlets in association with contexts created through {@link org.osgi.service.http.HttpService}.
+	 * registration of servlets in association with contexts created through {@link HttpService}.
 	 * Whiteboard specification allows only filters, listeners and error pages to be registered to contexts created
-	 * through {@link org.osgi.service.http.HttpService}, but I think we'll relax it in Pax Web 8.</p>
+	 * through {@link HttpService}, but I think we'll relax it in Pax Web 8.</p>
 	 */
 	private final Map<String, TreeSet<OsgiContextModel>> sharedContexts = new HashMap<>();
 
@@ -261,6 +287,13 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 	 * them when last Whiteboard override is gone.
 	 */
 	private final Map<String, OsgiContextModel> sharedDefaultContexts = new HashMap<>();
+
+	/**
+	 * This set contains all the {@link OsgiContextModel} instances coming from Whiteboard, which are NOT used
+	 * to override HttpService-related contexts. The only reason to keep them is to have a full picture for
+	 * {@link RuntimeDTO} needs.
+	 */
+	private final Set<OsgiContextModel> whiteboardContexts = new HashSet<>();
 
 	/*
 	 * Whiteboard web elements are also registered into target container through an instance of
@@ -284,13 +317,15 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 	 *
 	 * <p>Though according to Whiteboard Service spec, a servlet may be registered into many <em>contexts</em> and
 	 * in Pax Web - also to many <em>virtual hosts</em>, it's happening internally - user still can't register
-	 * a servlet multiple times (whether using {@link org.osgi.service.http.HttpService} or Whiteboard registration.</p>
+	 * a servlet multiple times (whether using {@link HttpService} or Whiteboard registration.</p>
 	 *
 	 * <p>The map has keys obtained using {@link System#identityHashCode(Object)} to prevent user tricks with
 	 * {@link Object#equals(Object)}. The value is not a {@link Servlet} but it's {@link ServletModel model}
 	 * to better show error messages.</p>
 	 */
 	private final Map<Servlet, ServletModel> servlets = new IdentityHashMap<>();
+
+	private final Set<ServletModel> servletsForDTO = new HashSet<>();
 
 	/**
 	 * <p>When new servlet is registered using Whiteboard approach and there's already a servlet registered for
@@ -313,6 +348,8 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 	 */
 	private final Map<Filter, FilterModel> filters = new IdentityHashMap<>();
 
+	private final Set<FilterModel> filtersForDTO = new HashSet<>();
+
 	/**
 	 * <p>When new filter is registered with the same name it may either be registered as <em>disabled</em> or
 	 * may lead to disabling other existing filters..</p>
@@ -332,6 +369,8 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 	 */
 	private final Map<EventListener, EventListenerModel> eventListeners = new IdentityHashMap<>();
 
+	private final Set<EventListenerModel> eventListenersForDTO = new HashSet<>();
+
 	/**
 	 * Keep container initializers to check for conflicts.
 	 */
@@ -347,12 +386,31 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 	 */
 	private final Set<WebSocketModel> disabledWebSocketModels = new TreeSet<>();
 
+	private final Set<ElementModel<?, ?>> failedWhiteboardElements = new HashSet<>();
+
 	/**
 	 * Listener to be informed about WAB {@link OsgiContextModel} being registered. There's no need to unregister
 	 * (now), because pax-web-extender-whiteboard does it every time the {@link WebContainer} reference changes, which
 	 * leads to recreation of the {@link ServerModel}.
 	 */
 	private WebContextEventListener wabOsgiContextListener;
+
+	/**
+	 * {@link ServiceReferenceDTO} for the associated {@link HttpServiceRuntime}. It's properties will be changed
+	 * on different occassions.
+	 */
+	private ServiceReferenceDTO httpServiceRuntimeDTO;
+
+	/**
+	 * Actual {@link ServiceRegistration} of {@link HttpServiceRuntime}. We need it on every {@link #getRuntimeDTO()}
+	 * invocation.
+	 */
+	private ServiceRegistration<HttpServiceRuntime> httpServiceRuntimeReg;
+
+	/**
+	 * {@code service.changecount} for {@link HttpServiceRuntime} {@link ServiceRegistration}.
+	 */
+	private final AtomicLong changeCount = new AtomicLong(0L);
 
 	/**
 	 * Creates new global model of all web applications with {@link Executor} to be used for configuration and
@@ -429,7 +487,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 	 * tasks. Such tasks can freely manipulate all internal Pax Web Runtime models without a need for
 	 * synchronization.</p>
 	 *
-	 * <p>The task is executed by {@link java.util.concurrent.Executor} associated with this {@link ServerModel}.</p>
+	 * <p>The task is executed by {@link Executor} associated with this {@link ServerModel}.</p>
 	 *
 	 * @param task
 	 * @param <T>
@@ -438,6 +496,10 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 	 * @throws NamespaceException
 	 */
 	public <T> T run(ModelRegistrationTask<T> task) throws ServletException, NamespaceException {
+		// in theory, a task doesn't have to change the model, but we accept false positives
+		// that's the only required place to increment the change count thanks to single-thread config pool ;)
+		incrementChangeCounter();
+
 		if (Thread.currentThread().getId() == registrationThreadId) {
 			// we can run immediately
 			return task.run();
@@ -476,6 +538,30 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 
 		// ??
 		return null;
+	}
+
+	/**
+	 * Increment internal change counter and propagate this information to {@link ServiceRegistration} for
+	 * {@link HttpServiceRuntime} and {@link ServiceReferenceDTO}
+	 */
+	private void incrementChangeCounter() {
+		changeCount.incrementAndGet();
+		try {
+			if (httpServiceRuntimeReg == null || httpServiceRuntimeReg.getReference() == null) {
+				// usually during tests
+				return;
+			}
+			String[] props = httpServiceRuntimeReg.getReference().getPropertyKeys();
+			Dictionary<String, Object> newProps = new Hashtable<>();
+			for (String key : props) {
+				newProps.put(key, httpServiceRuntimeReg.getReference().getProperty(key));
+			}
+			newProps.put("service.changecount", changeCount.get());
+			// update the registration properties
+			httpServiceRuntimeReg.setProperties(newProps);
+		} catch (Exception e) {
+			LOG.warn("Problem incrementing the change counter: {}", e.getMessage());
+		}
 	}
 
 	public <T> T runSilently(ModelRegistrationTask<T> task) {
@@ -523,7 +609,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 	 *
 	 * <p>As mentioned in {@link #bundleContexts} doc, the identity is checked for {@link WebContainerContext}
 	 * and for "default" contexts (returned from {@code create} methods of
-	 * {@link org.ops4j.pax.web.service.WebContainer}) this identity is name+bundle (or only name for <em>shared</em>
+	 * {@link WebContainer}) this identity is name+bundle (or only name for <em>shared</em>
 	 * contexts), but for user-provided contexts it can be anything.</p>
 	 *
 	 * <p>This method doesn't alter the global model, only adds relevant operation to the {@link Batch}.</p>
@@ -557,7 +643,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 	 * {@link ServerController}.</p>
 	 *
 	 * <p>There is really no need to check if the context was already added/associated, because this method
-	 * is only called from {@link org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView} and we
+	 * is only called from {@link WhiteboardWebContainerView} and we
 	 * control it. It doesn't mean there's no way to break it ;)</p>
 	 *
 	 * @param contextModel
@@ -603,11 +689,14 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 					}
 				}
 			}
+		} else {
+			// treat it as normal Whiteboard context, which we only need to remember for DTO purposes
+			whiteboardContexts.add(contextModel);
 		}
 	}
 
 	/**
-	 * Called through {@link org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView} when the
+	 * Called through {@link WhiteboardWebContainerView} when the
 	 * {@link OsgiContextModel} managed in pax-web-extender-whiteboard should be removed from the target
 	 * {@link ServerController} and unassociated from any bundle.
 	 *  @param contextModel
@@ -642,7 +731,12 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 					}
 				}
 			}
+		} else {
+			// treat it as normal Whiteboard context, which we only need to remember for DTO purposes
+			whiteboardContexts.remove(contextModel);
 		}
+
+		// always remove
 		batch.removeOsgiContextModel(contextModel);
 	}
 
@@ -650,17 +744,17 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 	 * <p>This method ensures that <strong>if</strong> given {@link WebContainerContext} is already mapped to some
 	 * {@link OsgiContextModel}, it is permitted to reference it within a scope of a given bundle.</p>
 	 *
-	 * <p>There are several scenarios, including one where {@link org.osgi.service.http.HttpService}, scoped to
+	 * <p>There are several scenarios, including one where {@link HttpService}, scoped to
 	 * one bundle is used to register a servlet, while passed {@link HttpContext} is scoped to another bundle.</p>
 	 *
 	 * <p>With whiteboard approach, user can't trick the runtime with two different bundles (one from the passed
-	 * {@link HttpContext} and other - from the bundle scoped {@link org.osgi.service.http.HttpService} because
+	 * {@link HttpContext} and other - from the bundle scoped {@link HttpService} because
 	 * it's designed much better.</p>
 	 *
 	 * @param context existing extension of {@link HttpContext}, probably created from bundle-scoped
-	 *        {@link org.osgi.service.http.HttpService}
+	 *        {@link HttpService}
 	 * @param bundle actual bundle on behalf of each we try to perform a registration of web element - comes from
-	 *        the scope of {@link org.osgi.service.http.HttpService} through which the registration is made.
+	 *        the scope of {@link HttpService} through which the registration is made.
 	 * @return if the association exists and is valid, related {@link OsgiContextModel} is returned. {@code null}
 	 *         is returned if the association is possible
 	 * @throws IllegalStateException if there exists incompatible association
@@ -732,14 +826,14 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 	 * <p>Dedicated method for this purpose emphasizes the importance and fragility of {@link OsgiContextModel}.
 	 * The only other way to create {@link OsgiContextModel} is the Whiteboard approach, when user registers one
 	 * of these OSGi services:<ul>
-	 *     <li>{@link org.osgi.service.http.context.ServletContextHelper} with service registration parameters</li>
-	 *     <li>{@link org.osgi.service.http.HttpContext} with service registration parameters - not recommended</li>
-	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping} - Pax Web Whiteboard</li>
-	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.HttpContextMapping} - Pax Web Whiteboard</li>
+	 *     <li>{@link ServletContextHelper} with service registration parameters</li>
+	 *     <li>{@link HttpContext} with service registration parameters - not recommended</li>
+	 *     <li>{@link ServletContextHelperMapping} - Pax Web Whiteboard</li>
+	 *     <li>{@link HttpContextMapping} - Pax Web Whiteboard</li>
 	 * </ul></p>
 	 *
 	 * <p>The above Whiteboard methods allow to specify (service registration parameters or direct
-	 * values in {@link org.ops4j.pax.web.service.whiteboard.ContextMapping}) additional information about
+	 * values in {@link ContextMapping}) additional information about
 	 * {@link OsgiContextModel}:<ul>
 	 *     <li>context path</li>
 	 *     <li>context (init) parameters</li>
@@ -1989,7 +2083,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 				enabledErrorPages.put(epm, null);
 			}
 			for (ServletModel sm : scm.getServletNameMapping().values()) {
-				if (sm.getErrorPageModel() != null) {
+				if (sm.getErrorPageModel() != null && sm.getErrorPageModel().isValid()) {
 					enabledErrorPages.put(sm.getErrorPageModel(), null);
 				}
 			}
@@ -2474,7 +2568,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 						}
 						Arrays.stream(model.getUrlPatterns()).forEach(p -> sc.getServletUrlPatternMapping().put(p, model));
 						ErrorPageModel epModel = model.getErrorPageModel();
-						if (epModel != null) {
+						if (epModel != null && epModel.isValid()) {
 							for (String page : epModel.getErrorPages()) {
 								sc.getErrorPageMapping().put(page, epModel);
 							}
@@ -2485,12 +2579,14 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 				if (model.getServlet() != null) {
 					servlets.put(model.getServlet(), model);
 				}
+				servletsForDTO.add(model);
 				break;
 			}
 			case DELETE: {
 				Collection<ServletModel> models = change.getServletModels().keySet();
 
 				models.forEach(model -> {
+					servletsForDTO.remove(model);
 					if (model.getServlet() != null) {
 						servlets.remove(model.getServlet(), model);
 					}
@@ -2568,6 +2664,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 				if (model.getFilter() != null) {
 					filters.put(model.getFilter(), model);
 				}
+				filtersForDTO.add(model);
 				break;
 			}
 			case MODIFY:
@@ -2576,6 +2673,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 				List<FilterModel> models = change.getFilterModels();
 
 				models.forEach(model -> {
+					filtersForDTO.remove(model);
 					if (model.getFilter() != null) {
 						filters.remove(model.getFilter(), model);
 					}
@@ -2628,12 +2726,14 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 				if (model.getEventListener() != null) {
 					eventListeners.put(model.getEventListener(), model);
 				}
+				eventListenersForDTO.add(model);
 				break;
 			}
 			case DELETE: {
 				Collection<EventListenerModel> models = change.getEventListenerModels();
 
 				models.forEach(model -> {
+					eventListenersForDTO.remove(model);
 					if (model.getEventListener() != null) {
 						eventListeners.remove(model.getEventListener(), model);
 					}
@@ -2839,7 +2939,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 					Arrays.stream(model.getUrlPatterns())
 							.forEach(p -> sc.getServletUrlPatternMapping().remove(p, model));
 					ErrorPageModel epModel = model.getErrorPageModel();
-					if (epModel != null) {
+					if (epModel != null && epModel.isValid()) {
 						disabledErrorPageModels.remove(epModel);
 						for (String page : epModel.getErrorPages()) {
 							sc.getErrorPageMapping().remove(page, epModel);
@@ -2924,12 +3024,260 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 
 	@Override
 	public RuntimeDTO getRuntimeDTO() {
-		return null;
+		return runSilently(() -> {
+			RuntimeDTO dto = new RuntimeDTO();
+
+			// --- service information
+
+			dto.serviceDTO = new ServiceReferenceDTO();
+			dto.serviceDTO.id = httpServiceRuntimeDTO.id;
+			dto.serviceDTO.bundle = httpServiceRuntimeDTO.bundle;
+			dto.serviceDTO.usingBundles = Arrays.stream(httpServiceRuntimeReg.getReference().getUsingBundles())
+					.mapToLong(Bundle::getBundleId).toArray();
+			dto.serviceDTO.properties = new HashMap<>(httpServiceRuntimeDTO.properties);
+			dto.serviceDTO.properties.put("service.changecount", changeCount.get());
+			// osgi.http.endpoint will be updated by org.ops4j.pax.web.service.internal.Activator.AddressConfiguration
+
+			// --- context information
+
+			Map<OsgiContextModel, ServletContextDTO> scDTOs = new LinkedHashMap<>();
+			List<FailedServletContextDTO> failedScDTOs = new ArrayList<>();
+
+			// OsgiContextModels from WABs - we don't care about contexts "awaiting allocation"
+			bundleWabAllocatedContexts.values().forEach(ocm -> {
+				scDTOs.put(ocm, ocm.toDTO());
+			});
+			// OsgiContextModels from HttpService/WebContainer (including Whiteboard ones with direct context instance)
+			// including non-failed ones and failed (usually shaded - set elements from 2nd to the end)
+			bundleContexts.values().forEach(ocms -> {
+				boolean first = true;
+				for (OsgiContextModel ocm : ocms) {
+					if (first) {
+						scDTOs.put(ocm, ocm.toDTO());
+					} else {
+						failedScDTOs.add(ocm.toFailedDTO(DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE));
+					}
+					first = false;
+				}
+			});
+			// HttpService/WebContainer which are shaded by Whiteboard-registered contexts with direct instance
+			bundleDefaultContexts.values().forEach(ocm -> {
+				failedScDTOs.add(ocm.toFailedDTO(DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE));
+			});
+			// OsgiContextModels from Whiteboard (excluding ones with direct context instance) - failed and non-failed
+			// they're not kept at ServerModel level at all
+			whiteboardContexts.forEach(ocm -> {
+				if (ocm.getDtoFailureCode() >= 0) {
+					failedScDTOs.add(ocm.toFailedDTO(ocm.getDtoFailureCode()));
+				} else {
+					scDTOs.put(ocm, ocm.toDTO());
+				}
+			});
+			// we don't care about shared HttpService/WebContainer contexts as these are Pax Web specific
+
+			dto.servletContextDTOs = scDTOs.values().toArray(new ServletContextDTO[0]);
+			dto.failedServletContextDTOs = failedScDTOs.toArray(new FailedServletContextDTO[0]);
+
+			// --- element information
+			//     successful DTOs are attached to one of the ServletContextDTO
+			//     failed DTOs are attached directly to the RuntimeDTO
+
+			Map<ServletContextDTO, List<ErrorPageDTO>> scErrorPages = new IdentityHashMap<>();
+			Map<ServletContextDTO, List<FilterDTO>> scFilters = new IdentityHashMap<>();
+			Map<ServletContextDTO, List<ListenerDTO>> scListeners = new IdentityHashMap<>();
+			List<PreprocessorDTO> preprocessorDTOs = new ArrayList<>();
+			Map<ServletContextDTO, List<ResourceDTO>> scResources = new IdentityHashMap<>();
+			Map<ServletContextDTO, List<ServletDTO>> scServlets = new IdentityHashMap<>();
+
+			for (ServletContextDTO scDTO : dto.servletContextDTOs) {
+				scErrorPages.put(scDTO, new ArrayList<>());
+				scFilters.put(scDTO, new ArrayList<>());
+				scListeners.put(scDTO, new ArrayList<>());
+				scResources.put(scDTO, new ArrayList<>());
+				scServlets.put(scDTO, new ArrayList<>());
+			}
+
+			List<FailedErrorPageDTO> failedErrorPageDTOs = new ArrayList<>();
+			List<FailedFilterDTO> failedFilterDTOs = new ArrayList<>();
+			List<FailedListenerDTO> failedListenerDTOs = new ArrayList<>();
+			List<FailedPreprocessorDTO> failedPreprocessorDTOs = new ArrayList<>();
+			List<FailedResourceDTO> failedResourceDTOs = new ArrayList<>();
+			List<FailedServletDTO> failedServletDTOs = new ArrayList<>();
+
+			// ------ servlets, resources and error pages
+			this.servletsForDTO.forEach(sm -> {
+				if (sm.isResourceServlet()) {
+					if (!sm.isValid()) {
+						failedResourceDTOs.add(sm.toFailedResourceDTO(sm.getDtoFailureCode()));
+						return;
+					}
+				} else if (sm.getErrorPageModel() != null) {
+					if (!sm.getErrorPageModel().isValid()) {
+						failedErrorPageDTOs.add(sm.getErrorPageModel().toFailedDTO(sm, sm.getErrorPageModel().getDtoFailureCode()));
+						return;
+					}
+				} else if (!sm.isValid()) {
+					failedServletDTOs.add(sm.toFailedServletDTO(sm.getDtoFailureCode()));
+					return;
+				}
+
+				// case of valid models
+				sm.getContextModels().forEach(ocm -> {
+					if (sm.isResourceServlet()) {
+						scResources.get(scDTOs.get(ocm)).add(sm.toResourceDTO());
+					} else if (sm.getErrorPageModel() != null) {
+						scErrorPages.get(scDTOs.get(ocm)).add(sm.getErrorPageModel().toDTO(sm));
+					} else {
+						scServlets.get(scDTOs.get(ocm)).add(sm.toServletDTO());
+					}
+				});
+			});
+			this.disabledServletModels.forEach(sm -> {
+				if (sm.isResourceServlet()) {
+					failedResourceDTOs.add(sm.toFailedResourceDTO(DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE));
+				} else if (sm.getErrorPageModel() != null) {
+					failedErrorPageDTOs.add(sm.getErrorPageModel().toFailedDTO(sm, DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE));
+				} else {
+					failedServletDTOs.add(sm.toFailedServletDTO(DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE));
+				}
+			});
+			this.disabledErrorPageModels.forEach(epm -> {
+				failedErrorPageDTOs.add(epm.toFailedDTO(null, DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE));
+			});
+			// ------ filters and preprocessors
+			this.filtersForDTO.forEach(fm -> {
+				if (!fm.isValid()) {
+					if (fm.isPreprocessor()) {
+						failedPreprocessorDTOs.add(fm.toFailedPreprocessorDTO(fm.getDtoFailureCode()));
+					} else {
+						failedFilterDTOs.add(fm.toFailedFilterDTO(fm.getDtoFailureCode()));
+					}
+				} else {
+					fm.getContextModels().forEach(ocm -> {
+						if (fm.isPreprocessor()) {
+							// diagram Figure 140.3 Runtime DTO Overview Diagram is wrong, because
+							// PreprocessorDTOs are kept at RuntimeDTO level
+							preprocessorDTOs.add(fm.toPreprocessorDTO());
+						} else {
+							// only preprocessors are associated (according to Whiteboard DTO chapter) with
+							// any context - even if in Pax Web they're associated with ALL the contexts
+							scFilters.get(scDTOs.get(ocm)).add(fm.toFilterDTO());
+						}
+					});
+				}
+			});
+			this.disabledFilterModels.forEach(fm -> {
+				if (fm.isPreprocessor()) {
+					failedPreprocessorDTOs.add(fm.toFailedPreprocessorDTO(DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE));
+				} else {
+					failedFilterDTOs.add(fm.toFailedFilterDTO(DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE));
+				}
+			});
+			// ------ listeners
+			this.eventListenersForDTO.forEach(lm -> {
+				if (!lm.isValid()) {
+					failedListenerDTOs.add(lm.toFailedDTO(lm.getDtoFailureCode()));
+				} else {
+					lm.getContextModels().forEach(ocm -> {
+						scListeners.get(scDTOs.get(ocm)).add(lm.toDTO());
+					});
+				}
+			});
+			// ------ failed Whiteboard elements
+			this.failedWhiteboardElements.forEach(em -> {
+				if (em instanceof ErrorPageModel) {
+					failedErrorPageDTOs.add(((ErrorPageModel) em).toFailedDTO(null, em.getDtoFailureCode()));
+				} else if (em instanceof FilterModel) {
+					if (((FilterModel) em).isPreprocessor()) {
+						failedPreprocessorDTOs.add(((FilterModel) em).toFailedPreprocessorDTO(em.getDtoFailureCode()));
+					} else {
+						failedFilterDTOs.add(((FilterModel) em).toFailedFilterDTO(em.getDtoFailureCode()));
+					}
+				} else if (em instanceof EventListenerModel) {
+					failedListenerDTOs.add(((EventListenerModel) em).toFailedDTO(em.getDtoFailureCode()));
+				} else if (em instanceof ServletModel) {
+					if (((ServletModel) em).isResourceServlet()) {
+						failedResourceDTOs.add(((ServletModel) em).toFailedResourceDTO(em.getDtoFailureCode()));
+					} else if (((ServletModel) em).getErrorPageModel() != null) {
+						failedErrorPageDTOs.add(((ServletModel) em).getErrorPageModel().toFailedDTO((ServletModel) em,
+								((ServletModel) em).getErrorPageModel().getDtoFailureCode()));
+					} else {
+						failedServletDTOs.add(((ServletModel) em).toFailedServletDTO(em.getDtoFailureCode()));
+					}
+				}
+			});
+
+			for (ServletContextDTO scDTO : dto.servletContextDTOs) {
+				scDTO.errorPageDTOs = scErrorPages.get(scDTO).toArray(new ErrorPageDTO[0]);
+				for (ErrorPageDTO d : scDTO.errorPageDTOs) {
+					d.servletContextId = scDTO.serviceId;
+				}
+				scDTO.filterDTOs = scFilters.get(scDTO).toArray(new FilterDTO[0]);
+				for (FilterDTO d : scDTO.filterDTOs) {
+					d.servletContextId = scDTO.serviceId;
+				}
+				// this should work according to Figure 140.3 Runtime DTO Overview Diagram...
+//				scDTO.preprocessorDTOs = scPreprocessors.get(scDTO).toArray(new PreprocessorDTO[0]);
+				scDTO.listenerDTOs = scListeners.get(scDTO).toArray(new ListenerDTO[0]);
+				for (ListenerDTO d : scDTO.listenerDTOs) {
+					d.servletContextId = scDTO.serviceId;
+				}
+				scDTO.servletDTOs = scServlets.get(scDTO).toArray(new ServletDTO[0]);
+				for (ServletDTO d : scDTO.servletDTOs) {
+					d.servletContextId = scDTO.serviceId;
+				}
+				scDTO.resourceDTOs = scResources.get(scDTO).toArray(new ResourceDTO[0]);
+				for (ResourceDTO d : scDTO.resourceDTOs) {
+					d.servletContextId = scDTO.serviceId;
+				}
+			}
+
+			dto.failedErrorPageDTOs = failedErrorPageDTOs.toArray(new FailedErrorPageDTO[0]);
+			dto.failedFilterDTOs = failedFilterDTOs.toArray(new FailedFilterDTO[0]);
+			dto.preprocessorDTOs = preprocessorDTOs.toArray(new PreprocessorDTO[0]);
+			dto.failedPreprocessorDTOs = failedPreprocessorDTOs.toArray(new FailedPreprocessorDTO[0]);
+			dto.failedListenerDTOs = failedListenerDTOs.toArray(new FailedListenerDTO[0]);
+			dto.failedResourceDTOs = failedResourceDTOs.toArray(new FailedResourceDTO[0]);
+			dto.failedServletDTOs = failedServletDTOs.toArray(new FailedServletDTO[0]);
+
+			return dto;
+		});
 	}
 
 	@Override
 	public RequestInfoDTO calculateRequestInfoDTO(String path) {
-		return null;
+		return runSilently(() -> {
+			RequestInfoDTO dto = new RequestInfoDTO();
+			dto.path = path;
+			return dto;
+		});
+	}
+
+	/**
+	 * Set the "template" {@link ServiceReferenceDTO} for the associated {@link HttpServiceRuntime} registration.
+	 * It should be set initially after {@link ServerModel} is created and {@link HttpServiceRuntime} is registered.
+	 * @param httpServiceRuntimeReg
+	 * @param httpServiceRuntimeDTO
+	 */
+	public void setHttpServiceRuntimeInformation(ServiceRegistration<HttpServiceRuntime> httpServiceRuntimeReg, ServiceReferenceDTO httpServiceRuntimeDTO) {
+		this.httpServiceRuntimeReg = httpServiceRuntimeReg;
+		this.httpServiceRuntimeDTO = httpServiceRuntimeDTO;
+	}
+
+	public ServiceRegistration<HttpServiceRuntime> getHttpServiceRuntimeReg() {
+		return httpServiceRuntimeReg;
+	}
+
+	public ServiceReferenceDTO getHttpServiceRuntimeDTO() {
+		return httpServiceRuntimeDTO;
+	}
+
+	public Set<OsgiContextModel> getWhiteboardContexts() {
+		return whiteboardContexts;
+	}
+
+	public Set<ElementModel<?, ?>> getFailedWhiteboardElements() {
+		return failedWhiteboardElements;
 	}
 
 //	public OsgiContextModel matchPathToContext(final String path) {

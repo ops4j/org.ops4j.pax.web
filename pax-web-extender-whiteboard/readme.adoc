@@ -165,7 +165,7 @@ Servlet containers themselves also have "default"/"resource" servlets to serve s
 
 ALl these servlets do several things like handling _index_ for directory access (or not), preventing access to `/WEB-INF/`, etc. For actual resource serving, another interface is used:
 
-* `org.eclipse.jetty.server.ResourceService.doGet()` → `org.eclipse.jetty.http.HttpContent.ContentFactory.getContent()` → `org.eclipse.jetty.util.resource.ResourceFactory.getResource()` → `org.eclipse.jetty.servlet.DefaultServlet.getResource()`
+* `org.eclipse.jetty.server.ResourceService.doGet()` → `org.eclipse.jetty.http.HttpContent.ContentFactory.getContent()` → `org.eclipse.jetty.util.resource.ResourceFactory.getResource()` → `org.eclipse.jetty.servlet.DefaultServlet.getResource()`
 ** if `org.eclipse.jetty.servlet.DefaultServlet._resourceBase` is not `null`: org.eclipse.jetty.util.resource.Resource.addPath()`
 ** `org.eclipse.jetty.server.handler.ContextHandler.getResource()` → `org.eclipse.jetty.util.resource.Resource.addPath()`
 ** `javax.servlet.ServletContext.getResource()`
@@ -286,3 +286,149 @@ _Error pages_ are (from `web.xml` point of view) mappings from error codes or FQ
 * `org.eclipse.jetty.servlet.ErrorPageErrorHandler._errorPages`
 * `org.apache.catalina.util.ErrorPageSupport.exceptionPages` and `org.apache.catalina.util.ErrorPageSupport.statusPages`
 * `io.undertow.servlet.api.DeploymentInfo.errorPages` and `io.undertow.servlet.core.DeploymentImpl.errorPages` (no specific Undertow `web.xml` parser. It's parsed in Wildfly by `org.jboss.metadata.parser.servlet.WebCommonMetaDataParser#parse()`)
+
+== DTOs
+
+Whiteboard DTOs (chapter `140.9 The Http Service Runtime Service`) is the last task I planned before Pax Web 8.0.0.GA.
+Whiteboard specification assumes huge control over everything registered to the Whiteboard, but Pax Web moves the emphasis to native (Jetty/Tomcat/Undertow) mechanisms of the servlet container, so not everything is as easy as it'd be when implemented using single `DispatcherServlet`.
+
+=== Where Pax Web 8 implements `org.osgi.service.http.runtime.HttpServiceRuntime`?
+
+I decided to register this service not from pax-web-extender-whiteboard bundle, which is responsible for tracking Whiteboard services. In Pax Web 8, this service is published from pax-web-runtime and the _source_ of DTO information is `org.ops4j.pax.web.service.spi.model.ServerModel`, which keeps all the web elements - from Whiteboard, HttpService/WebContainer and from the WABs.
+
+=== DTO for successful services
+
+This part is easier - because every validated Whiteboard service is registered into `ServerModel`, we can easily associated the DTO information.
+
+=== DTO for failed services
+
+This is a bit trickier, at least for the Whiteboard part, because failed registrations are _not_ passed to pax-web-runtime. But I'll think about something.
+
+=== DTO failure reasons
+
+Checking the specification, these are the failure codes:
+
+* `FAILURE_REASON_UNKNOWN` = 0 Failure reason is unknown.
+* `FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING` = 1 No matching ServletContextHelper.
+* `FAILURE_REASON_SERVLET_CONTEXT_FAILURE` = 2 Matching ServletContextHelper, but the context is not used due to a problem with the context.
+* `FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE` = 3 Service is shadowed by another service.  For example, a service with the same service properties but a higher service ranking.
+* `FAILURE_REASON_EXCEPTION_ON_INIT` = 4 An exception occurred during initializing of the service.  This reason can only happen for servlets and servlet filters.
+* `FAILURE_REASON_SERVICE_NOT_GETTABLE` = 5 The service is registered in the service registry but getting the service fails as it returns null.
+* `FAILURE_REASON_VALIDATION_FAILED` = 6 The service is registered in the service registry but the service properties are invalid.
+* `FAILURE_REASON_SERVICE_IN_USE` = 7 The service is not registered as a prototype scoped service and is already in use with a servlet context and therefore can't be used with another servlet context.
+* `FAILURE_REASON_SERVLET_WRITE_TO_LOCATION_DENIED` = 8 The servlet is not registered as it is configured to have multipart enabled, but the bundle containing the servlet has no write permission to the provided location for the uploaded files.  Since: 1.1
+* `FAILURE_REASON_WHITEBOARD_WRITE_TO_DEFAULT_DENIED` = 9 The servlet is not registered as it is configured to have multipart enabled, but the whiteboard implementation has no write permission to the default location for the uploaded files.  Since: 1.1
+* `FAILURE_REASON_SERVLET_READ_FROM_DEFAULT_DENIED` = 10 The servlet is not registered as it is configured to have multipart enabled, but the bundle containing the servlet has no read permission to the default location for the uploaded files.  Since: 1.1
+* `FAILURE_REASON_WHITEBOARD_WRITE_TO_LOCATION_DENIED` = 11 The servlet is not registered as it is configured to have multipart enabled, but the whiteboard implementation has no write permission to the provided location for the uploaded files.  Since: 1.1
+
+Here are the failure codes associated with particular web element FailedDTOs:
+
+* `FailedErrorPageDTO`:
+** DTOConstants.FAILURE_REASON_UNKNOWN
+** DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT
+** DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
+** DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE
+** DTOConstants.FAILURE_REASON_SERVLET_CONTEXT_FAILURE
+** DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE
+* `FailedFilterDTO`:
+** DTOConstants.FAILURE_REASON_UNKNOWN
+** DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT
+** DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
+** DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE
+** DTOConstants.FAILURE_REASON_SERVLET_CONTEXT_FAILURE
+** DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE
+* `FailedListenerDTO`:
+** DTOConstants.FAILURE_REASON_UNKNOWN
+** DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT
+** DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
+** DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE
+** DTOConstants.FAILURE_REASON_SERVLET_CONTEXT_FAILURE
+** DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE
+* `FailedPreprocessorDTO`:
+** DTOConstants.FAILURE_REASON_UNKNOWN
+** DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT
+** DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE
+* `FailedResourceDTO`:
+** DTOConstants.FAILURE_REASON_UNKNOWN
+** DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT
+** DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
+** DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE
+** DTOConstants.FAILURE_REASON_SERVLET_CONTEXT_FAILURE
+** DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE
+* `FailedServletContextDTO`:
+** DTOConstants.FAILURE_REASON_UNKNOWN
+** DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT
+** DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
+** DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE
+** DTOConstants.FAILURE_REASON_SERVLET_CONTEXT_FAILURE
+** DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE
+* `FailedServletDTO`:
+** DTOConstants.FAILURE_REASON_UNKNOWN
+** DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT
+** DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
+** DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE
+** DTOConstants.FAILURE_REASON_SERVLET_CONTEXT_FAILURE
+** DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE
+** DTOConstants.FAILURE_REASON_SERVLET_WRITE_TO_LOCATION_DENIED
+** DTOConstants.FAILURE_REASON_WHITEBOARD_WRITE_TO_DEFAULT_DENIED
+** DTOConstants.FAILURE_REASON_SERVLET_READ_FROM_DEFAULT_DENIED
+
+And here's the revers mapping (FailedDTOs associated with failure codes):
+
+* (0) `FAILURE_REASON_UNKNOWN`:
+** `FailedErrorPageDTO`
+** `FailedFilterDTO`
+** `FailedListenerDTO`
+** `FailedPreprocessorDTO`
+** `FailedResourceDTO`
+** `FailedServletContextDTO`
+** `FailedServletDTO`
+* (1) `FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING`:
+** `FailedErrorPageDTO`
+** `FailedFilterDTO`
+** `FailedListenerDTO`
+** `FailedResourceDTO`
+** `FailedServletContextDTO` (why?)
+** `FailedServletDTO`
+* (2) `FAILURE_REASON_SERVLET_CONTEXT_FAILURE`:
+** `FailedErrorPageDTO`
+** `FailedFilterDTO`
+** `FailedListenerDTO`
+** `FailedResourceDTO`
+** `FailedServletContextDTO`
+** `FailedServletDTO`
+* (3) `FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE`:
+** `FailedErrorPageDTO`
+** `FailedFilterDTO`
+** `FailedListenerDTO` (why?)
+** `FailedResourceDTO`
+** `FailedServletContextDTO`
+** `FailedServletDTO`
+* (4) `FAILURE_REASON_EXCEPTION_ON_INIT`:
+** `FailedErrorPageDTO` (why?)
+** `FailedFilterDTO`
+** `FailedListenerDTO` (why? especially for fine-graned listeners, like request attribute listeners)
+** `FailedPreprocessorDTO`
+** `FailedResourceDTO` (why? even if I know there's DefaultServlet underneath)
+** `FailedServletContextDTO` (why? ServletContextHelpers are not initialized)
+** `FailedServletDTO`
+* (5) `FAILURE_REASON_SERVICE_NOT_GETTABLE`:
+** `FailedErrorPageDTO`
+** `FailedFilterDTO`
+** `FailedListenerDTO`
+** `FailedPreprocessorDTO`
+** `FailedResourceDTO`
+** `FailedServletContextDTO`
+** `FailedServletDTO`
+* (6) `FAILURE_REASON_VALIDATION_FAILED`:
+** no particular failure DTO mentioned in the specification
+* (7) `FAILURE_REASON_SERVICE_IN_USE`:
+** no particular failure DTO mentioned in the specification
+* (8) `FAILURE_REASON_SERVLET_WRITE_TO_LOCATION_DENIED`:
+** `FailedServletDTO`
+* (9) `FAILURE_REASON_WHITEBOARD_WRITE_TO_DEFAULT_DENIED`:
+** `FailedServletDTO`
+* (10) `FAILURE_REASON_SERVLET_READ_FROM_DEFAULT_DENIED`:
+** `FailedServletDTO`
+* (11) `FAILURE_REASON_WHITEBOARD_WRITE_TO_LOCATION_DENIED`:
+** no particular failure DTO mentioned in the specification

@@ -2192,6 +2192,38 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		public void unregisterWebSocket(WebSocketModel model) {
 			doUnregisterWebSocket(model);
 		}
+
+		@Override
+		public void failedDTOInformation(ElementModel<?, ?> webElement) {
+			serverModel.runSilently(() -> {
+				serverModel.getFailedWhiteboardElements().add(webElement);
+				return null;
+			});
+		}
+
+		@Override
+		public void failedDTOInformation(OsgiContextModel webContext) {
+			serverModel.runSilently(() -> {
+				serverModel.getWhiteboardContexts().add(webContext);
+				return null;
+			});
+		}
+
+		@Override
+		public void clearFailedDTOInformation(ElementModel<?, ?> webElement) {
+			serverModel.runSilently(() -> {
+				serverModel.getFailedWhiteboardElements().remove(webElement);
+				return null;
+			});
+		}
+
+		@Override
+		public void clearFailedDTOInformation(OsgiContextModel webContext) {
+			serverModel.runSilently(() -> {
+				serverModel.getWhiteboardContexts().remove(webContext);
+				return null;
+			});
+		}
 	}
 
 	/**

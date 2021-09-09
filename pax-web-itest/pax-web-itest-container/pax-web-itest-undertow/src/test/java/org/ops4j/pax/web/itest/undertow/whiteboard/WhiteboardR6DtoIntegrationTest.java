@@ -13,26 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.jetty;
-
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.exam.OptionUtils.combine;
+package org.ops4j.pax.web.itest.undertow.whiteboard;
 
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.common.AbstractWhiteboardR6DtoIntegrationTest;
+import org.ops4j.pax.web.itest.container.whiteboard.AbstractWhiteboardR6DtoIntegrationTest;
+
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 @RunWith(PaxExam.class)
 public class WhiteboardR6DtoIntegrationTest extends AbstractWhiteboardR6DtoIntegrationTest {
 
 	@Configuration
-	public static Option[] configure() {
-		return combine(
-				configureJetty(),
-				mavenBundle().groupId("org.ops4j.pax.web.samples").artifactId("whiteboard-ds").versionAsInProject(),
-				systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("INFO"));
+	public Option[] configure() {
+		Option[] serverOptions = combine(baseConfigure(), paxWebUndertow());
+		serverOptions = combine(serverOptions, paxWebExtenderWhiteboard());
+		serverOptions = combine(serverOptions, combine(configAdmin(), scr()));
+		return combine(serverOptions, paxWebJsp());
 	}
+
 }

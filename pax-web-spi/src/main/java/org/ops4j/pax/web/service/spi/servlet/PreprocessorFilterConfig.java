@@ -24,6 +24,7 @@ import javax.servlet.ServletContext;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.runtime.dto.DTOConstants;
 import org.osgi.service.http.whiteboard.Preprocessor;
 
 public class PreprocessorFilterConfig implements FilterConfig {
@@ -69,6 +70,10 @@ public class PreprocessorFilterConfig implements FilterConfig {
 		}
 		if (instance == null && model.getElementSupplier() != null) {
 			instance = (Preprocessor) model.getElementSupplier().get();
+		}
+
+		if (instance == null) {
+			model.setDtoFailureCode(DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE);
 		}
 
 		return instance;

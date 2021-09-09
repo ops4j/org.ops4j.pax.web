@@ -41,6 +41,7 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.context.ServletContextHelper;
+import org.osgi.service.http.runtime.dto.DTOConstants;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +87,8 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 	/** This is were the lifecycle of {@link WebContainer} is managed. */
 	private final WebContainerManager webContainerManager;
 
+	private ServiceReference<WebContainer> currentWebContainerReference;
+
 	/**
 	 * Per-{@link Bundle} cache of lists of Whiteboard services - to clean them up when bundle is gone. This
 	 * map is not concurrent, because it's always accessed within a lock.
@@ -124,20 +127,19 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 	 */
 	private final List<OsgiContextModel> osgiContextsList = new ArrayList<>();
 
-	/** Implementation of {@link org.osgi.service.http.runtime.HttpServiceRuntime} from Whiteboard Service spec. */
-	private final ExtendedHttpServiceRuntime httpServiceRuntime;
-
-	public WhiteboardExtenderContext(ExtendedHttpServiceRuntime httpServiceRuntime, BundleContext bundleContext) {
-		this(httpServiceRuntime, bundleContext, false);
+	public WhiteboardExtenderContext(BundleContext bundleContext) {
+		this(bundleContext, false);
 	}
 
-	public WhiteboardExtenderContext(ExtendedHttpServiceRuntime httpServiceRuntime, BundleContext bundleContext, boolean synchronous) {
-		this.httpServiceRuntime = httpServiceRuntime;
+	public WhiteboardExtenderContext(BundleContext bundleContext, boolean synchronous) {
 		this.bundleContext = bundleContext;
 
 		// remember ONLY "default" (mapped to "/") context model
 		OsgiContextModel model = OsgiContextModel.DEFAULT_CONTEXT_MODEL;
-		model.setOwnerBundle(FrameworkUtil.getBundle(this.getClass()));
+		Bundle owner = FrameworkUtil.getBundle(this.getClass());
+		if (owner != null) {
+			model.setOwnerBundle(FrameworkUtil.getBundle(this.getClass()));
+		}
 		osgiContexts.computeIfAbsent(model.getName(), n -> new TreeSet<>()).add(model);
 		osgiContextsList.add(model);
 
@@ -210,10 +212,7 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 	 */
 	public void shutdown() {
 		webContainerManager.shutdown();
-	}
-
-	public ExtendedHttpServiceRuntime getHttpServiceRuntime() {
-		return httpServiceRuntime;
+		currentWebContainerReference = null;
 	}
 
 	/**
@@ -316,6 +315,8 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 			view.registerWabOsgiContextListener(this);
 		}
 
+		currentWebContainerReference = ref;
+
 		// install using new reference which will be dereferenced using a bundle for particular application
 		installWhiteboardApplications(ref);
 
@@ -324,6 +325,8 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 
 	public void webContainerRemoved(ServiceReference<WebContainer> ref) {
 		acceptWabContexts.set(false);
+
+		currentWebContainerReference = null;
 
 		// uninstall all managed whiteboard applications from the WebContainer using the reference being removed
 		uninstallWhiteboardApplications(ref);
@@ -398,6 +401,12 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 			reRegisterWebElements();
 
 			getBundleApplication(bundle).removeWebContext(model);
+
+			WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundleContext, currentWebContainerReference);
+			if (view != null) {
+				view.clearFailedDTOInformation(model);
+			}
+			webContainerManager.releaseContainer(bundleContext, currentWebContainerReference);
 		} finally {
 			lock.unlock();
 		}
@@ -433,7 +442,6 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 				}
 
 				// 1. unregistration because of no matching contexts
-				// TODO_DTO: DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
 				if (newMatching.size() == 0) {
 					LOG.debug("Unregistering {} because its context selection filter doesn't match any context", webElement);
 					if (view != null) {
@@ -442,17 +450,18 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 					}
 					// then change
 					webElement.changeContextModels(newMatching);
+					webElement.setDtoFailureCode(DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING);
 					continue;
 				}
 
 				// 2. easy registration after some models matched
-				// TODO_DTO: get rid of existing DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
 				if (oldMatching.size() == 0) {
 					// first change
 					webElement.changeContextModels(newMatching);
 					LOG.debug("Registering {} because its context selection filter started matching existing contexts", webElement);
 					if (view != null) {
 						// then register
+						webElement.setDtoFailureCode(-1);
 						webElement.register(view);
 					}
 					continue;
@@ -497,6 +506,12 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 		lock.lock();
 		try {
 			getBundleApplication(bundle).removeWebElement(webElement);
+
+			WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundleContext, currentWebContainerReference);
+			if (view != null) {
+				view.clearFailedDTOInformation(webElement);
+			}
+			webContainerManager.releaseContainer(bundleContext, currentWebContainerReference);
 		} finally {
 			lock.unlock();
 		}
@@ -519,7 +534,7 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 		try {
 			bundleApplication = bundleApplications.get(bundle);
 			if (bundleApplication == null) {
-				bundleApplication = new BundleWhiteboardApplication(bundle, webContainerManager, httpServiceRuntime);
+				bundleApplication = new BundleWhiteboardApplication(bundle, webContainerManager);
 				ServiceReference<WebContainer> ref = webContainerManager.currentWebContainerReference();
 				if (ref != null) {
 					bundleApplication.webContainerAdded(ref);
@@ -533,36 +548,31 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 		return bundleApplication;
 	}
 
-	// TODO_DTO: handling successful/failed DTO for elements/contexts
-
-	/**
-	 * This method is invoked after checking that element model {@link ElementModel#isValid() is valid}.
-	 * @param webElement
-	 */
-	public void configureDTOs(ElementModel<?, ?> webElement) {
-		// TODO_DTO: could result in DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
-		//       even if all other configuration params (url mappings, name, ...) are fine
-	}
-
 	/**
 	 * This method is invoked after checking that element model {@link ElementModel#isValid() is not valid}.
+	 * This is the way to pass failed DTO information, because successful DTO information is passed automatically
 	 * @param webElement
 	 */
 	public void configureFailedDTOs(ElementModel<?, ?> webElement) {
-	}
-
-	/**
-	 * This method is invoked after checking that context model {@link OsgiContextModel#isValid() is valid}.
-	 * @param webContext
-	 */
-	public void configureDTOs(OsgiContextModel webContext) {
+		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundleContext, currentWebContainerReference);
+		if (view != null) {
+			view.failedDTOInformation(webElement);
+		}
+		webContainerManager.releaseContainer(bundleContext, currentWebContainerReference);
 	}
 
 	/**
 	 * This method is invoked after checking that context model {@link OsgiContextModel#isValid() is not valid}.
+	 * This is the way to pass failed DTO information, because successful DTO information is passed automatically
+	 * when web elements using the {@link OsgiContextModel} are registered to the runtime.
 	 * @param webContext
 	 */
 	public void configureFailedDTOs(OsgiContextModel webContext) {
+		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundleContext, currentWebContainerReference);
+		if (view != null) {
+			view.failedDTOInformation(webContext);
+		}
+		webContainerManager.releaseContainer(bundleContext, currentWebContainerReference);
 	}
 
 }

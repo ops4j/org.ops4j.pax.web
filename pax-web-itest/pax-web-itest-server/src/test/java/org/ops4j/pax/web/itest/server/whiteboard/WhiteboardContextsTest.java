@@ -17,6 +17,7 @@ package org.ops4j.pax.web.itest.server.whiteboard;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Hashtable;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
@@ -41,13 +42,17 @@ import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.dto.ServiceReferenceDTO;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.context.ServletContextHelper;
+import org.osgi.service.http.runtime.HttpServiceRuntime;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.ops4j.pax.web.itest.server.support.Utils.httpGET;
 
@@ -124,9 +129,19 @@ public class WhiteboardContextsTest extends MultiContainerTestSupport {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings({ "deprecation", "unchecked" })
 	public void fourWaysToRegisterWhiteboardContext() throws Exception {
 		Bundle sample1 = mockBundle("sample1");
+
+		ServiceRegistration<HttpServiceRuntime> sreg = mock(ServiceRegistration.class);
+		ServiceReference<HttpServiceRuntime> sref = mock(ServiceReference.class);
+		when(sreg.getReference()).thenReturn(sref);
+		when(sref.getUsingBundles()).thenReturn(new Bundle[0]);
+		ServiceReferenceDTO srDTO = new ServiceReferenceDTO();
+		srDTO.id = 42L;
+		srDTO.bundle = whiteboardBundle.getBundleId();
+		srDTO.properties = new HashMap<>();
+		serverModel.setHttpServiceRuntimeInformation(sreg, srDTO);
 
 		// 1. Official Whiteboard method
 		ServletContextHelper context1 = new ServletContextHelper() {
@@ -244,6 +259,8 @@ public class WhiteboardContextsTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/c2/s?token=2&get_a=true"), endsWith("}c2{"));
 		assertThat(httpGET(port, "/c3/s?token=3&get_a=true"), endsWith("}c3{"));
 		assertThat(httpGET(port, "/c4/s?token=4&get_a=true"), endsWith("}c4{"));
+
+		serverModel.getRuntimeDTO();
 
 		getServletCustomizer().removedService(servletRef, model);
 	}

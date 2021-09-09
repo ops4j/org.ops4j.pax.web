@@ -19,6 +19,7 @@ package org.ops4j.pax.web.service.spi.model.elements;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -26,6 +27,9 @@ import org.ops4j.pax.web.service.spi.model.events.ErrorPageEventData;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.ops4j.pax.web.service.whiteboard.ErrorPageMapping;
 import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.service.http.runtime.dto.DTOConstants;
+import org.osgi.service.http.runtime.dto.ErrorPageDTO;
+import org.osgi.service.http.runtime.dto.FailedErrorPageDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,6 +101,48 @@ public class ErrorPageModel extends ElementModel<ErrorPageMapping, ErrorPageEven
 		this.location = location;
 	}
 
+	public FailedErrorPageDTO toFailedDTO(ServletModel sm, int dtoFailureCode) {
+		FailedErrorPageDTO dto = new FailedErrorPageDTO();
+		if (sm != null) {
+			dto.name = sm.getName();
+			dto.asyncSupported = sm.getAsyncSupported() != null && sm.getAsyncSupported();
+			dto.initParams = new HashMap<>(sm.getInitParams());
+			dto.serviceId = sm.getServiceId();
+		} else {
+			dto.name = getId();
+			dto.asyncSupported = false;
+			dto.initParams = new HashMap<>();
+			dto.serviceId = getServiceId();
+		}
+		dto.servletContextId = 0L;
+		dto.servletInfo = null;
+		dto.errorCodes = errorCodes.stream().mapToLong(Integer::longValue).toArray();
+		dto.exceptions = exceptionClassNames.toArray(new String[0]);
+		dto.failureReason = dtoFailureCode;
+		return dto;
+	}
+
+	public ErrorPageDTO toDTO(ServletModel sm) {
+		ErrorPageDTO dto = new ErrorPageDTO();
+		if (sm != null) {
+			dto.name = sm.getName();
+			dto.asyncSupported = sm.getAsyncSupported() != null && sm.getAsyncSupported();
+			dto.initParams = new HashMap<>(sm.getInitParams());
+			dto.serviceId = sm.getServiceId();
+		} else {
+			dto.name = getId();
+			dto.asyncSupported = false;
+			dto.initParams = new HashMap<>();
+			dto.serviceId = getServiceId();
+		}
+		// will be set later
+		dto.servletContextId = 0L;
+		dto.servletInfo = null;
+		dto.errorCodes = errorCodes.stream().mapToLong(Integer::longValue).toArray();
+		dto.exceptions = exceptionClassNames.toArray(new String[0]);
+		return dto;
+	}
+
 	@Override
 	public String toString() {
 		return "ErrorPageModel{id=" + getId()
@@ -119,6 +165,7 @@ public class ErrorPageModel extends ElementModel<ErrorPageMapping, ErrorPageEven
 			if (ERROR_CODE.matcher(page).matches()) {
 				int code = Integer.parseInt(page);
 				if (code < 400 || code > 599) {
+					dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 					throw new IllegalArgumentException("HTTP error code should be between 400 and 599");
 				}
 				errorCodes.add(code);
@@ -130,11 +177,13 @@ public class ErrorPageModel extends ElementModel<ErrorPageMapping, ErrorPageEven
 				loader = getRegisteringBundle() == null
 						? null : getRegisteringBundle().adapt(BundleWiring.class).getClassLoader();
 				if (loader == null) {
+					dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 					throw new IllegalArgumentException("Can't verify class name of error page \""
 							+ page + "\" - no bundle associated with error pages");
 				}
 				Class<?> exClass = loader.loadClass(page);
 				if (!Throwable.class.isAssignableFrom(exClass)) {
+					dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 					throw new IllegalArgumentException("Can't use \"" + page + "\" as error page - this class"
 							+ " doesn't inherit from java.lang.Throwable");
 				}
@@ -146,6 +195,7 @@ public class ErrorPageModel extends ElementModel<ErrorPageMapping, ErrorPageEven
 			}
 		}
 
+		dtoFailureCode = -1;
 		return Boolean.TRUE;
 	}
 

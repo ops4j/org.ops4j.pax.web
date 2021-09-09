@@ -76,8 +76,7 @@ public class BundleWhiteboardApplication {
 	 */
 	private volatile ServiceReference<WebContainer> webContainerServiceRef;
 
-	public BundleWhiteboardApplication(Bundle bundle, WebContainerManager webContainerManager,
-			ExtendedHttpServiceRuntime httpServiceRuntime) {
+	public BundleWhiteboardApplication(Bundle bundle, WebContainerManager webContainerManager) {
 		this.bundle = bundle;
 		this.webContainerManager = webContainerManager;
 	}

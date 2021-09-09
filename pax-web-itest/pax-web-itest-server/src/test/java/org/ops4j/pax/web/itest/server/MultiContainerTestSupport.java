@@ -297,7 +297,7 @@ public class MultiContainerTestSupport {
 
 			when(whiteboardBundleContext.getServiceReferences(WebContainer.class.getName(), null))
 					.thenReturn(new ServiceReference[] { containerRef });
-			whiteboardExtender = new WhiteboardExtenderContext(null, whiteboardBundleContext, true);
+			whiteboardExtender = new WhiteboardExtenderContext(whiteboardBundleContext, true);
 
 			servletContextHelperCustomizer = getCustomizer(ServletContextHelperTracker.createTracker(whiteboardExtender, whiteboardBundleContext));
 			servletContextHelperMappingCustomizer = getCustomizer(ServletContextHelperMappingTracker.createTracker(whiteboardExtender, whiteboardBundleContext));

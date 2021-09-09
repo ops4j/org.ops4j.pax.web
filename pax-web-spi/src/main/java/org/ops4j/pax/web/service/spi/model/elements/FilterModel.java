@@ -21,13 +21,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
@@ -40,6 +44,11 @@ import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.runtime.dto.DTOConstants;
+import org.osgi.service.http.runtime.dto.FailedFilterDTO;
+import org.osgi.service.http.runtime.dto.FailedPreprocessorDTO;
+import org.osgi.service.http.runtime.dto.FilterDTO;
+import org.osgi.service.http.runtime.dto.PreprocessorDTO;
 
 /**
  * Set of parameters describing everything that's required to register a {@link Filter}.
@@ -62,6 +71,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 	private String[] flatUrlPatterns;
 	private String[] flatServletNames;
 	private String[] flatRegexPatterns;
+	private String[] flatDispatcherTypes;
 
 	/**
 	 * When using {@link javax.servlet.ServletContext#addFilter(String, Filter)} and
@@ -203,10 +213,12 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		sources += (getElementReference() != null ? 1 : 0);
 		sources += (getElementSupplier() != null ? 1 : 0);
 		if (sources == 0) {
+			dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 			throw new IllegalArgumentException("Filter Model must specify one of: filter instance, filter class"
 					+ " or service reference");
 		}
 		if (sources != 1) {
+			dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 			throw new IllegalArgumentException("Filter Model should specify a filter uniquely as instance, class"
 					+ " or service reference");
 		}
@@ -236,6 +248,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 				sources += (map.regexPatterns != null && map.regexPatterns.length > 0 ? 1 : 0);
 
 				if (sources == 0) {
+					dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 					throw new IllegalArgumentException("Please specify one of: servlet name mapping, url pattern mapping"
 							+ " or regex mapping");
 				}
@@ -247,6 +260,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 			sources += (this.dynamicUrlPatterns != null && this.dynamicUrlPatterns.size() > 0 ? 1 : 0);
 			sources += (this.dynamicServletNames != null && this.dynamicServletNames.size() > 0 ? 1 : 0);
 			if (sources == 0) {
+				dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 				throw new IllegalArgumentException("For dynamic filter registration, please specify one of:"
 						+ " servlet name mapping or url pattern mapping");
 			}
@@ -277,7 +291,13 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		if (!rp.isEmpty()) {
 			this.flatRegexPatterns = rp.toArray(new String[0]);
 		}
+		Set<String> dispatcherTypes = new HashSet<>();
+		for (Mapping map : mappingsPerDispatcherTypes) {
+			dispatcherTypes.addAll(Arrays.stream(map.getDispatcherTypes()).map(Enum::name).collect(Collectors.toSet()));
+		}
+		this.flatDispatcherTypes = dispatcherTypes.toArray(new String[0]);
 
+		dtoFailureCode = -1;
 		return Boolean.TRUE;
 	}
 
@@ -306,6 +326,75 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 			return this.name.compareTo(((FilterModel)o).name);
 		}
 		return superCompare;
+	}
+
+	public FilterDTO toFilterDTO() {
+		FilterDTO dto = new FilterDTO();
+		dto.name = name;
+		dto.asyncSupported = asyncSupported != null && asyncSupported;
+		dto.initParams = new HashMap<>(initParams);
+		// will be set later
+		dto.servletContextId = 0L;
+		dto.patterns = flatUrlPatterns == null ? new String[0] : new String[flatUrlPatterns.length];
+		if (flatUrlPatterns != null) {
+			System.arraycopy(flatUrlPatterns, 0, dto.patterns, 0, flatUrlPatterns.length);
+		}
+		dto.dispatcher = flatDispatcherTypes == null ? new String[0] : new String[flatDispatcherTypes.length];
+		if (flatDispatcherTypes != null) {
+			System.arraycopy(flatDispatcherTypes, 0, dto.dispatcher, 0, flatDispatcherTypes.length);
+		}
+		dto.regexs = flatRegexPatterns == null ? new String[0] : new String[flatRegexPatterns.length];
+		if (flatRegexPatterns != null) {
+			System.arraycopy(flatRegexPatterns, 0, dto.regexs, 0, flatRegexPatterns.length);
+		}
+		dto.servletNames = flatServletNames == null ? new String[0] : new String[flatServletNames.length];
+		if (flatServletNames != null) {
+			System.arraycopy(flatServletNames, 0, dto.servletNames, 0, flatServletNames.length);
+		}
+		dto.serviceId = getServiceId();
+		return dto;
+	}
+
+	public FailedFilterDTO toFailedFilterDTO(int dtoFailureCode) {
+		FailedFilterDTO dto = new FailedFilterDTO();
+		dto.name = name;
+		dto.asyncSupported = asyncSupported != null && asyncSupported;
+		dto.initParams = new HashMap<>(initParams);
+		dto.servletContextId = 0L;
+		dto.patterns = flatUrlPatterns == null ? new String[0] : new String[flatUrlPatterns.length];
+		if (flatUrlPatterns != null) {
+			System.arraycopy(flatUrlPatterns, 0, dto.patterns, 0, flatUrlPatterns.length);
+		}
+		dto.dispatcher = flatDispatcherTypes == null ? new String[0] : new String[flatDispatcherTypes.length];
+		if (flatDispatcherTypes != null) {
+			System.arraycopy(flatDispatcherTypes, 0, dto.dispatcher, 0, flatDispatcherTypes.length);
+		}
+		dto.regexs = flatRegexPatterns == null ? new String[0] : new String[flatRegexPatterns.length];
+		if (flatRegexPatterns != null) {
+			System.arraycopy(flatRegexPatterns, 0, dto.regexs, 0, flatRegexPatterns.length);
+		}
+		dto.servletNames = flatServletNames == null ? new String[0] : new String[flatServletNames.length];
+		if (flatServletNames != null) {
+			System.arraycopy(flatServletNames, 0, dto.servletNames, 0, flatServletNames.length);
+		}
+		dto.serviceId = getServiceId();
+		dto.failureReason = dtoFailureCode;
+		return dto;
+	}
+
+	public PreprocessorDTO toPreprocessorDTO() {
+		PreprocessorDTO dto = new PreprocessorDTO();
+		dto.initParams = new HashMap<>(initParams);
+		dto.serviceId = getServiceId();
+		return dto;
+	}
+
+	public FailedPreprocessorDTO toFailedPreprocessorDTO(int dtoFailureCode) {
+		FailedPreprocessorDTO dto = new FailedPreprocessorDTO();
+		dto.initParams = new HashMap<>(initParams);
+		dto.serviceId = getServiceId();
+		dto.failureReason = dtoFailureCode;
+		return dto;
 	}
 
 	@Override

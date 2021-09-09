@@ -60,6 +60,10 @@ public class ScopedFilter implements Filter {
 		filter.destroy();
 	}
 
+	public Filter getDelegate() {
+		return filter;
+	}
+
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		ServletContext context = request.getServletContext();

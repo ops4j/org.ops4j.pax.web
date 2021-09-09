@@ -178,4 +178,33 @@ public interface WhiteboardWebContainerView extends PaxWebContainerView {
 	 */
 	void unregisterWebSocket(WebSocketModel model);
 
+	/**
+	 * Send information about failure DTO related to given {@link ElementModel}. Successful DTO is sent/calculated
+	 * together with the registration - Whiteboard service tracking failures are normally not sent as element
+	 * registrations to pax-web-runtime.
+	 * @param webElement
+	 */
+	void failedDTOInformation(ElementModel<?, ?> webElement);
+
+	/**
+	 * Send information about failure DTO related to given {@link OsgiContextModel}. Successful DTO is sent/calculated
+	 * togehter with the registration.
+	 * @param webContext
+	 */
+	void failedDTOInformation(OsgiContextModel webContext);
+
+	/**
+	 * Sned information that given {@link ElementModel} is no longer Whiteboard-tracked, so possible failure DTOs
+	 * have to be cleared
+	 * @param webElement
+	 */
+	void clearFailedDTOInformation(ElementModel<?, ?> webElement);
+
+	/**
+	 * Sned information that given {@link OsgiContextModel} is no longer Whiteboard-tracked, so possible failure DTOs
+	 * have to be cleared
+	 * @param webContext
+	 */
+	void clearFailedDTOInformation(OsgiContextModel webContext);
+
 }

@@ -75,6 +75,9 @@ public class OsgiInitializedFilter implements Filter {
 
 	@Override
 	public void init(final FilterConfig config) throws ServletException {
+		if (filter == null) {
+			return;
+		}
 		filter.init(new FilterConfig() {
 			@Override
 			public String getFilterName() {
@@ -124,7 +127,11 @@ public class OsgiInitializedFilter implements Filter {
 				chain.doFilter(request, response);
 			}
 		} else {
-			filter.doFilter(request, response, chain);
+			if (filter == null) {
+				chain.doFilter(request, response);
+			} else {
+				filter.doFilter(request, response, chain);
+			}
 		}
 	}
 

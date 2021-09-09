@@ -49,6 +49,9 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.context.ServletContextHelper;
+import org.osgi.service.http.runtime.dto.DTOConstants;
+import org.osgi.service.http.runtime.dto.FailedServletContextDTO;
+import org.osgi.service.http.runtime.dto.ServletContextDTO;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -312,6 +315,9 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 
 	private Boolean isValid;
 
+	/** If there's any failure during the lifetime of the context, we can provide a failure DTO information here. */
+	private int dtoFailureCode = -1;
+
 	/** Such model is shared, if underlying {@link WebContainerContext} is shared */
 	private Boolean shared = true;
 
@@ -369,7 +375,6 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	/**
 	 * <p>This method should be called from Whiteboard infrastructure to really perform the validation and set
 	 * <em>isValid</em> flag, which is then used for "Failure DTO" purposes.</li>
-	 * TODO_DTO: different exceptions or calbacks for DTO purposes
 	 */
 	public boolean isValid() {
 		if (isValid == null) {
@@ -397,6 +402,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 			} else if (httpContext != null) {
 				LOG.warn("Missing name property for context {}", httpContext);
 			}
+			dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 			return Boolean.FALSE;
 		}
 
@@ -408,9 +414,11 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 				LOG.warn("Illegal context path (\"{}\") for context {}. Should start with \"/\".",
 						contextPath, httpContext);
 			}
+			dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 			return Boolean.FALSE;
 		}
 
+		dtoFailureCode = -1;
 		return Boolean.TRUE;
 	}
 
@@ -466,10 +474,12 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 				return new WebContainerContextWrapper(bundleContext.getBundle(), (ServletContextHelper) context, name);
 			}
 
+			dtoFailureCode = DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE;
 			throw new IllegalStateException("Unsupported Whiteboard service for HttpContext/ServletContextHelper"
 					+ " specified");
 		}
 
+		dtoFailureCode = DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE;
 		throw new IllegalStateException("No HttpContext/ServletContextHelper configured for " + this);
 	}
 
@@ -615,7 +625,11 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		this.shared = shared;
 	}
 
-	// --- methods that are used directly from web.xml (or fragment) parsing and from WebContainer methods
+	public int getDtoFailureCode() {
+		return dtoFailureCode;
+	}
+
+// --- methods that are used directly from web.xml (or fragment) parsing and from WebContainer methods
 	//     related to JSP configuration
 
 	public void addTagLibs(Collection<TaglibDescriptor> tagLibs) {
@@ -752,6 +766,46 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	 */
 	public String getTemporaryLocation() {
 		return String.format("%s/%s", "/".equals(contextPath) ? "ROOT" : contextPath.substring(1), getName());
+	}
+
+	/**
+	 * Called on demand when someone wants to create {@link ServletContextDTO successful DTO} from this
+	 * {@link OsgiContextModel}
+	 * @return
+	 */
+	public ServletContextDTO toDTO() {
+		ServletContextDTO scDTO = new ServletContextDTO();
+		scDTO.name = getName();
+		scDTO.contextPath = getContextPath();
+		scDTO.serviceId = getServiceId();
+		// they're kept at OsgiServletContext, not OsgiContextModel level
+		scDTO.attributes = new HashMap<>();
+		// but I can include the initial attributes
+		scDTO.attributes.putAll(getInitialContextAttributes());
+		scDTO.initParams = new HashMap<>();
+		scDTO.initParams.putAll(getContextParams());
+		return scDTO;
+	}
+
+	/**
+	 * Called on demand when someone wants to create {@link FailedServletContextDTO failed DTO} from this
+	 * {@link OsgiContextModel}, specifying a reason of failure.
+	 * @param failureReason
+	 * @return
+	 */
+	public FailedServletContextDTO toFailedDTO(int failureReason) {
+		FailedServletContextDTO scDTO = new FailedServletContextDTO();
+		scDTO.name = getName();
+		scDTO.contextPath = getContextPath();
+		scDTO.serviceId = getServiceId();
+		// they're kept at OsgiServletContext, not OsgiContextModel level
+		scDTO.attributes = new HashMap<>();
+		// but I can include the initial attributes
+		scDTO.attributes.putAll(getInitialContextAttributes());
+		scDTO.initParams = new HashMap<>();
+		scDTO.initParams.putAll(getContextParams());
+		scDTO.failureReason = failureReason;
+		return scDTO;
 	}
 
 //	/** Access controller context of the bundle that registered the http context. */

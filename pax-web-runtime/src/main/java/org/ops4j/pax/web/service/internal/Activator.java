@@ -62,6 +62,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.dto.ServiceReferenceDTO;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.context.ServletContextHelper;
@@ -156,6 +157,12 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	private final List<ServerListener> serverListeners = new CopyOnWriteArrayList<>();
 
 	private final AtomicBoolean initialConfigSet = new AtomicBoolean(false);
+
+	/**
+	 * Global, single instance of {@link ServerModel} recreated together with each (re)registration of
+	 * {@link HttpService}.
+	 */
+	private ServerModel serverModel = null;
 
 	/**
 	 * Single thread pool to process all configuration changes, {@link ServerControllerFactory} (re)registrations
@@ -471,7 +478,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			// global, single representation of web server state. It's used
 			//  - in all bundle-scoped instances of HttpServiceEnabled
 			//  - also to reflect Whiteboard registrations (through pax-web-extender-whiteboard)
-			final ServerModel serverModel = new ServerModel(runtimeExecutor, registrationThreadId);
+			serverModel = new ServerModel(runtimeExecutor, registrationThreadId);
 
 			// create a controller object to operate on any supported web server
 			serverController = serverControllerFactory.createServerController(configuration);
@@ -514,8 +521,26 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			props.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT, "/");
 			Long httpServiceId = (Long) httpServiceFactoryReg.getReference().getProperty(Constants.SERVICE_ID);
 			props.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ID, Collections.singletonList(httpServiceId));
-			props.put(Constants.SERVICE_CHANGECOUNT, 0L);
+			// SERVICE_CHANGECOUNT is 1.9 OSGi Core addition, so use literal please
+//			props.put(Constants.SERVICE_CHANGECOUNT, 0L);
+			props.put("service.changecount", 0L);
 			httpServiceRuntimeReg = bundleContext.registerService(HttpServiceRuntime.class, serverModel, props);
+
+			// "template" ServiceReferenceDTO for HttpServiceRuntime, however it has to be updated:
+			// - when "service.changecount" increases
+			// - when target runtime is started/stopped to update "osgi.http.endpoint"
+			// However Figure 140.3 Runtime DTO Overview Diagram doesn mention this field in RuntimeDTO at all...
+			ServiceReferenceDTO httpServiceRuntimeDTO = new ServiceReferenceDTO();
+			httpServiceRuntimeDTO.id = (long) httpServiceRuntimeReg.getReference().getProperty(Constants.SERVICE_ID);
+			httpServiceRuntimeDTO.bundle = bundleContext.getBundle().getBundleId();
+			httpServiceRuntimeDTO.properties = new HashMap<>();
+			httpServiceRuntimeDTO.properties.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT, "/");
+			httpServiceRuntimeDTO.properties.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ID, Collections.singletonList(httpServiceId));
+			httpServiceRuntimeDTO.properties.put("service.changecount", 0L);
+			// initially "usingBundles" is empty and we'll be setting it on every
+			httpServiceRuntimeDTO.usingBundles = new long[0];
+			// we'll set the template into ServerModel, so it's available from there, when creating full RuntimeDTO
+			serverModel.setHttpServiceRuntimeInformation(httpServiceRuntimeReg, httpServiceRuntimeDTO);
 
 			// added listener is immediately called with the current state
 			serverController.addListener(new AddressConfiguration());
@@ -772,8 +797,10 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 						.map(ia -> String.format("%s://%s:%d/", ia.isSecure() ? "https" : "http",
 								ia.getAddress().getAddress().getHostAddress(), ia.getAddress().getPort())).toArray(String[]::new);
 				newProps.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT, addresses);
+				serverModel.getHttpServiceRuntimeDTO().properties.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT, addresses);
 			} else {
 				newProps.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT, "/");
+				serverModel.getHttpServiceRuntimeDTO().properties.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT, "/");
 			}
 			// update the registration properties
 			httpServiceRuntimeReg.setProperties(newProps);

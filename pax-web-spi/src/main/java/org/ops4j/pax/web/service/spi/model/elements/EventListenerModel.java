@@ -18,9 +18,16 @@
 package org.ops4j.pax.web.service.spi.model.elements;
 
 import org.ops4j.pax.web.service.spi.model.events.EventListenerEventData;
+import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
+import org.osgi.service.http.runtime.dto.DTOConstants;
+import org.osgi.service.http.runtime.dto.FailedListenerDTO;
+import org.osgi.service.http.runtime.dto.ListenerDTO;
 
+import java.util.Arrays;
 import java.util.EventListener;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class EventListenerModel extends ElementModel<EventListener, EventListenerEventData> {
 
@@ -107,6 +114,11 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 			if (getElementReference() != null) {
 				resolvedListener = getRegisteringBundle().getBundleContext().getService(getElementReference());
 			}
+			if (resolvedListener == null) {
+				dtoFailureCode = DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE;
+			} else {
+				dtoFailureCode = -1;
+			}
 			return resolvedListener;
 		}
 	}
@@ -121,14 +133,66 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 		sources += (getElementReference() != null ? 1 : 0);
 		sources += (getElementSupplier() != null ? 1 : 0);
 		if (sources == 0) {
+			dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 			throw new IllegalArgumentException("Event Listener Model must specify one of: listener instance,"
 					+ " listener supplier or listener reference");
 		}
 		if (sources != 1) {
+			dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 			throw new IllegalArgumentException("Event Listener Model should specify a listener uniquely as instance,"
 					+ " supplier or service reference");
 		}
+
+		dtoFailureCode = -1;
 		return Boolean.TRUE;
+	}
+
+	public ListenerDTO toDTO() {
+		ListenerDTO dto = new ListenerDTO();
+		// will be set later
+		dto.servletContextId = 0L;
+		dto.serviceId = getServiceId();
+		Class<?> c = null;
+		if (eventListener != null) {
+			c = eventListener.getClass();
+		} else if (getElementSupplier() != null) {
+			c = getElementSupplier().get().getClass();
+		} else if (getElementReference() != null) {
+			dto.types = Utils.getObjectClasses(getElementReference());
+		}
+		if (c != null) {
+			Set<Class<?>> interfaces = new LinkedHashSet<>();
+			while (c != Object.class) {
+				interfaces.addAll(Arrays.asList(c.getInterfaces()));
+				c = c.getSuperclass();
+			}
+			dto.types = interfaces.stream().map(Class::getName).distinct().toArray(String[]::new);
+		}
+		return dto;
+	}
+
+	public FailedListenerDTO toFailedDTO(int dtoFailureCode) {
+		FailedListenerDTO dto = new FailedListenerDTO();
+		dto.servletContextId = 0L;
+		dto.serviceId = getServiceId();
+		Class<?> c = null;
+		if (eventListener != null) {
+			c = eventListener.getClass();
+		} else if (getElementSupplier() != null) {
+			c = getElementSupplier().get().getClass();
+		} else if (getElementReference() != null) {
+			dto.types = Utils.getObjectClasses(getElementReference());
+		}
+		if (c != null) {
+			Set<Class<?>> interfaces = new LinkedHashSet<>();
+			while (c != Object.class) {
+				interfaces.addAll(Arrays.asList(c.getInterfaces()));
+				c = c.getSuperclass();
+			}
+			dto.types = interfaces.stream().map(Class::getName).distinct().toArray(String[]::new);
+		}
+		dto.failureReason = dtoFailureCode;
+		return dto;
 	}
 
 	@Override
@@ -140,5 +204,4 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 				+ ",contexts=" + getContextModelsInfo()
 				+ "}";
 	}
-
 }
