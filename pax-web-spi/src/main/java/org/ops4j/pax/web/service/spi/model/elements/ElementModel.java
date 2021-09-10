@@ -210,6 +210,14 @@ public abstract class ElementModel<T, D extends WebElementEventData>
 	}
 
 	/**
+	 * Method used when Whiteboard service changes its registration properties
+	 */
+	public void resetContextModels() {
+		closed = false;
+		contextModels = new ArrayList<>();
+	}
+
+	/**
 	 * Each {@link ElementModel} can register itself as Whiteboard element.
 	 * @param view
 	 */

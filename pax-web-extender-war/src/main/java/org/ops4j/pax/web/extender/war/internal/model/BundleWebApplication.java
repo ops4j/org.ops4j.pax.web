@@ -793,6 +793,7 @@ public class BundleWebApplication {
 		} catch (Exception e) {
 			if (e.getCause() != null && e.getCause() instanceof RejectedExecutionException) {
 				LOG.debug("{} was not undeployed, config executor stopped.", this);
+				return;
 			}
 			if (propagateException) {
 				throw new RuntimeException(e);

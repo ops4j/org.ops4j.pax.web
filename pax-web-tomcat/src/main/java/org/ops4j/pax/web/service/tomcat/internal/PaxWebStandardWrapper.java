@@ -195,6 +195,12 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 		if (servletModel.getServletClass() != null) {
 			return servletModel.getServletClass().getName();
 		}
+		if (servletModel.getServlet() != null) {
+			return servletModel.getServlet().getClass().getName();
+		}
+		if (servletModel.getElementSupplier() != null) {
+			return servletModel.getElementSupplier().get().getClass().getName();
+		}
 		return null;
 	}
 
@@ -243,7 +249,7 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 		if (servletModel != null && servletModel.getElementReference() != null) {
 			if (!servletModel.isPrototype()) {
 				servletModel.getRegisteringBundle().getBundleContext().ungetService(servletModel.getElementReference());
-			} else if (serviceObjects != null) {
+			} else if (serviceObjects != null && getServlet() != null) {
 				serviceObjects.ungetService(getServlet());
 			}
 		}

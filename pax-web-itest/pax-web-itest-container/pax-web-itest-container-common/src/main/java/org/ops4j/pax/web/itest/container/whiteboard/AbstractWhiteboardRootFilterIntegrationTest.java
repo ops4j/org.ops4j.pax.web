@@ -80,12 +80,6 @@ public abstract class AbstractWhiteboardRootFilterIntegrationTest extends Abstra
 
 	@Test
 	public void testWhiteBoardNotFiltered() throws Exception {
-		Dictionary<String, String> initParams = new Hashtable<>();
-		initParams.put("alias", "/whiteboard");
-		ServiceRegistration<Servlet> whiteboard = context.registerService(
-				Servlet.class, new WhiteboardServlet("/whiteboard"),
-				initParams);
-
 		Dictionary<String, String> props = new Hashtable<>();
 		props.put("urlPatterns", "/*");
 		ServiceRegistration<Filter> filter = context.registerService(
@@ -102,7 +96,6 @@ public abstract class AbstractWhiteboardRootFilterIntegrationTest extends Abstra
 				.doGETandExecuteTest("http://127.0.0.1:8181/whiteboard");
 
 		filter.unregister();
-		whiteboard.unregister();
 	}
 
 }

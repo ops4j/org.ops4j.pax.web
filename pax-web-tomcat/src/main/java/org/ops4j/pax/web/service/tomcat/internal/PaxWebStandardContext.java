@@ -333,6 +333,7 @@ public class PaxWebStandardContext extends StandardContext {
 				// <servlet-mapping>
 				String name = model.getName();
 				for (String pattern : model.getUrlPatterns()) {
+					removeServletMapping(pattern);
 					addServletMappingDecoded(pattern, name, false);
 				}
 

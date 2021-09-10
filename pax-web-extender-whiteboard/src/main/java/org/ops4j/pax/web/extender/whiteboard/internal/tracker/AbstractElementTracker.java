@@ -128,7 +128,6 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 	// --- implementation of org.osgi.util.tracker.ServiceTrackerCustomizer
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public T addingService(final ServiceReference<S> serviceReference) {
 		log.debug("Processing new Whiteboard service reference: {}", serviceReference);
 
@@ -182,6 +181,16 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 		// and contains almost _everything_ needed to process it later (for example after WebContainer becomes available)
 		T webElement = createElementModel(serviceReference, rank, serviceId);
 
+		return addingService(serviceReference, webElement);
+	}
+
+	/**
+	 * Method used both for new services and for modified services
+	 * @param serviceReference
+	 * @param webElement
+	 */
+	@SuppressWarnings("deprecation")
+	private T addingService(ServiceReference<S> serviceReference, T webElement) {
 		if (webElement == null) {
 			log.debug("No element model was created from reference {}", serviceReference);
 			return null;
@@ -227,7 +236,7 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 			contextFilter = bundleContext.createFilter(selector);
 		} catch (InvalidSyntaxException e) {
 			log.error("Can't register web element from reference {}, skipping registration."
-							+ " Bad context selector: {}", serviceReference, selector, e);
+					+ " Bad context selector: {}", serviceReference, selector, e);
 			return null;
 		}
 
@@ -278,7 +287,20 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 		// servlet simply has to be unregistered from e.g.m /context1 context and registered into e.g., /context2
 
 		removedService(reference, service);
-		addingService(reference);
+
+		// we have to be sure that we'll use the same instance!
+
+		// the ranking may have changed
+		Integer rank = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
+		if (rank == null) {
+			rank = 0;
+		}
+		service.setServiceRank(rank);
+
+		// we have to clear the contexts
+		service.resetContextModels();
+
+		addingService(reference, service);
 	}
 
 	@Override

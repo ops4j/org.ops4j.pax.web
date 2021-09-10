@@ -58,7 +58,9 @@ public class PreprocessorFilterConfig implements FilterConfig {
 				instance = (Preprocessor) model.getRegisteringBundle().getBundleContext().getService(ref);
 			} else {
 				serviceObjects = model.getRegisteringBundle().getBundleContext().getServiceObjects(ref);
-				instance = (Preprocessor) serviceObjects.getService();
+				if (serviceObjects != null) {
+					instance = (Preprocessor) serviceObjects.getService();
+				}
 			}
 		}
 		if (instance == null && model.getFilterClass() != null) {
@@ -86,7 +88,7 @@ public class PreprocessorFilterConfig implements FilterConfig {
 			if (model.getElementReference() != null) {
 				if (!model.isPrototype()) {
 					model.getRegisteringBundle().getBundleContext().ungetService(model.getElementReference());
-				} else {
+				} else if (serviceObjects != null && getInstance() != null) {
 					serviceObjects.ungetService(getInstance());
 					serviceObjects = null;
 				}
