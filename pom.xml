@@ -1850,8 +1850,6 @@
 				<version>${dependency.jakarta.el-api}</version>
 			</dependency>
 
-			<!-- JavaEE / JakartaEE -->
-
 			<dependency>
 				<groupId>jakarta.servlet</groupId>
 				<artifactId>jakarta.servlet-api</artifactId>

@@ -460,4 +460,23 @@
 
 	</dependencies>
 
+	<profiles>
+		<profile>
+			<id>jdk11</id>
+			<activation>
+				<jdk>[9,)</jdk>
+			</activation>
+			<dependencies>
+
+				<!-- JavaEE / JakartaEE -->
+
+				<dependency>
+					<groupId>jakarta.annotation</groupId>
+					<artifactId>jakarta.annotation-api</artifactId>
+				</dependency>
+
+			</dependencies>
+		</profile>
+	</profiles>
+
 </project>
