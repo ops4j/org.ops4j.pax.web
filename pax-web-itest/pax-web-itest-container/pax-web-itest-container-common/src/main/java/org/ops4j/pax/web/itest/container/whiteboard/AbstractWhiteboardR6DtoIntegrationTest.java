@@ -26,13 +26,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletRequestListener;
 import javax.servlet.http.HttpServlet;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
@@ -42,7 +40,6 @@ import org.ops4j.pax.web.samples.whiteboard.ds.WhiteboardListener;
 import org.ops4j.pax.web.samples.whiteboard.ds.WhiteboardResource;
 import org.ops4j.pax.web.samples.whiteboard.ds.WhiteboardServlet;
 import org.ops4j.pax.web.samples.whiteboard.ds.WhiteboardServletWithContext;
-import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.events.ErrorPageEventData;
 import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
@@ -66,6 +63,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.web.itest.utils.assertion.Assert.assertThat;
@@ -343,15 +341,18 @@ public abstract class AbstractWhiteboardR6DtoIntegrationTest extends AbstractCon
 	}
 
 	@Test
-	@Ignore
 	public void testRequestInfoDto() throws Exception {
-		final long defaultServletContextServiceId = (long) getServiceReference(context, ServletContext.class, "(" + PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_NAME + "=default)").getProperty(Constants.SERVICE_ID);
+		RuntimeDTO runtimeDTO = withService(HttpServiceRuntime::getRuntimeDTO);
+		Optional<ServletContextDTO> defaultContext = Arrays.stream(runtimeDTO.servletContextDTOs)
+				.filter(servletContextDTO -> Objects.equals(servletContextDTO.name, "default"))
+				.findFirst();
+		final long defaultContextServiceId = defaultContext.map(contextDTO -> contextDTO.serviceId).orElse(-1L);
 
 		RequestInfoDTO requestInfoDTO = withService(
 				httpServiceRuntime -> httpServiceRuntime.calculateRequestInfoDTO("/simple-servlet"));
 
 		assertEquals("Path doesn't match", "/simple-servlet", requestInfoDTO.path);
-		assertEquals("ServletContext-ServiceID doesn't match", requestInfoDTO.servletContextId, defaultServletContextServiceId);
+		assertEquals("ServletContext-ServiceID doesn't match", requestInfoDTO.servletContextId, defaultContextServiceId);
 		assertThat("ServletDTO doesn't match",
 				requestInfoDTO.servletDTO, servletDTO ->
 						Objects.equals(servletDTO.patterns[0], "/simple-servlet")
@@ -360,21 +361,22 @@ public abstract class AbstractWhiteboardR6DtoIntegrationTest extends AbstractCon
 				requestInfoDTO.filterDTOs[0], filterDTO ->
 						Objects.equals(filterDTO.patterns[0], "/simple-servlet")
 								&& Objects.equals(filterDTO.name, "SimpleFilter"));
-		assertThat("ResourceDTO doesn't match",
-				requestInfoDTO.resourceDTO, resourceDTO ->
-						Objects.equals(resourceDTO.patterns[0], "/resources"));
+		assertNull("ResourceDTO should be null, because servlet matches the request", requestInfoDTO.resourceDTO);
 	}
 
 	@Test
-	@Ignore
 	public void testRequestInfoDtoCustomContext() throws Exception {
-		final long customServletContextServiceId = (long) context.getServiceReferences(ServletContext.class, "(" + PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_NAME + "=CustomContext)").stream().findFirst().orElseThrow(() -> new AssertionError("CustomContext ServletContext not found")).getProperty(Constants.SERVICE_ID);
+		RuntimeDTO runtimeDTO = withService(HttpServiceRuntime::getRuntimeDTO);
+		Optional<ServletContextDTO> customContext = Arrays.stream(runtimeDTO.servletContextDTOs)
+				.filter(servletContextDTO -> Objects.equals(servletContextDTO.name, "CustomContext"))
+				.findFirst();
+		final long customContextServiceId = customContext.map(contextDTO -> contextDTO.serviceId).orElse(-1L);
 
 		RequestInfoDTO requestInfoDTO = withService(
 				httpServiceRuntime -> httpServiceRuntime.calculateRequestInfoDTO("/context/servlet"));
 
 		assertEquals("Path doesn't match", "/context/servlet", requestInfoDTO.path);
-		assertEquals("ServletContext-ServiceID doesn't match", requestInfoDTO.servletContextId, customServletContextServiceId);
+		assertEquals("ServletContext-ServiceID doesn't match", requestInfoDTO.servletContextId, customContextServiceId);
 		assertThat("ServletDTO doesn't match",
 				requestInfoDTO.servletDTO,
 				servletDTO -> Objects.equals(servletDTO.patterns[0], "/servlet"));

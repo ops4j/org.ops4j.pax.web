@@ -18,6 +18,8 @@ package org.ops4j.pax.web.service.spi.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.EventListener;
 import java.util.HashMap;
@@ -84,6 +86,7 @@ import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.ops4j.pax.web.service.whiteboard.ContextMapping;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping;
+import org.osgi.dto.DTO;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceFactory;
@@ -3249,6 +3252,142 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 		return runSilently(() -> {
 			RequestInfoDTO dto = new RequestInfoDTO();
 			dto.path = path;
+
+			// let's ... simply get the information from RuntimeDTO
+			RuntimeDTO runtimeDTO = getRuntimeDTO();
+
+			Set<ServletContextDTO> orderedServletContexts = new TreeSet<>(new ContextComparator());
+			Collections.addAll(orderedServletContexts, runtimeDTO.servletContextDTOs);
+
+			for (ServletContextDTO scdto : orderedServletContexts) {
+				if (path.startsWith(scdto.contextPath)) {
+					dto.servletContextId = scdto.serviceId;
+
+					String remaining = path.substring(scdto.contextPath.length());
+					if (remaining.contains("?")) {
+						// remove query string
+						remaining = remaining.substring(0, remaining.indexOf("?"));
+					}
+					if (!remaining.startsWith("/")) {
+						remaining = "/" + remaining;
+					}
+
+					// checking servlets/resources
+
+					// we can assume valid patterns: "/", "/xxx/*", "/xxx", "*.x".
+					// "/" has to be saved as fallback pattern (default servlet)
+					Map<String, DTO> orderedMappings = new TreeMap<>(new PatternComparator());
+					for (ServletDTO sdto : scdto.servletDTOs) {
+						for (String p : sdto.patterns) {
+							orderedMappings.put(p, sdto);
+						}
+					}
+					for (ResourceDTO rdto : scdto.resourceDTOs) {
+						for (String p : rdto.patterns) {
+							orderedMappings.put(p, rdto);
+						}
+					}
+					for (Map.Entry<String, DTO> e : orderedMappings.entrySet()) {
+						String mapping = e.getKey();
+						DTO target = e.getValue();
+
+						boolean match = false;
+						if (!"/".equals(mapping)) {
+							if (!mapping.contains("*") && mapping.equals(remaining)) {
+								// found exact match
+								match = true;
+							} else if (mapping.contains("*")) {
+								if (mapping.endsWith("/*") && remaining.startsWith(mapping.substring(0, mapping.length() - 2))) {
+									// found prefix match
+									match = true;
+								} else if (mapping.startsWith("*.") && remaining.endsWith(mapping.substring(1))) {
+									// found extension match
+									match = true;
+								}
+							}
+						} else {
+							// checked always last
+							match = true;
+						}
+						if (match) {
+							if (target instanceof ResourceDTO) {
+								dto.resourceDTO = (ResourceDTO) target;
+							} else {
+								dto.servletDTO = (ServletDTO) target;
+							}
+							// end of searching through servlet/resource mappings
+							break;
+						}
+						// continue with the next pattern
+					}
+
+					// checking filters
+					String targetName = null;
+					if (dto.servletDTO != null) {
+						targetName = dto.servletDTO.name;
+					} else if (dto.resourceDTO != null) {
+						targetName = "default";
+					}
+
+					List<FilterDTO> matchingFilters = new ArrayList<>();
+					for (FilterDTO fdto : scdto.filterDTOs) {
+						if (fdto.servletNames != null) {
+							boolean match = false;
+							for (String sn : fdto.servletNames) {
+								if (sn != null && sn.equals(targetName)) {
+									matchingFilters.add(fdto);
+									match = true;
+									break;
+								}
+							}
+							if (match) {
+								// no need to check the URL mappings
+								continue;
+							}
+						}
+						if (fdto.patterns != null) {
+							boolean match = false;
+							for (String p : fdto.patterns) {
+								if (!p.contains("*") && p.equals(remaining)) {
+									// found exact match
+									match = true;
+								} else if (p.contains("*")) {
+									if (p.endsWith("/*") && remaining.startsWith(p.substring(0, p.length() - 2))) {
+										// found prefix match
+										match = true;
+									} else if (p.startsWith("*.") && remaining.endsWith(p.substring(1))) {
+										// found extension match
+										match = true;
+									}
+								}
+								if (match) {
+									matchingFilters.add(fdto);
+									break;
+								}
+							}
+							if (match) {
+								// no need to check the regex mapping
+								continue;
+							}
+						}
+						if (fdto.regexs != null) {
+							boolean match = false;
+							for (String p : fdto.regexs) {
+								Pattern re = Pattern.compile(p);
+								if (re.matcher(remaining).matches()) {
+									matchingFilters.add(fdto);
+									break;
+								}
+							}
+						}
+					}
+					dto.filterDTOs = matchingFilters.toArray(new FilterDTO[0]);
+
+					// end of searching through context paths
+					break;
+				}
+			}
+
 			return dto;
 		});
 	}
@@ -3280,187 +3419,69 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 		return failedWhiteboardElements;
 	}
 
-//	public OsgiContextModel matchPathToContext(final String path) {
-//		return matchPathToContext("", path);
-//	}
-
-//	public OsgiContextModel matchPathToContext(final String hostName, final String path) {
-//		final boolean debug = LOG.isDebugEnabled();
-//		if (debug) {
-//			LOG.debug("Matching [" + path + "]...");
-//		}
-//		String virtualHost = resolveVirtualHost(hostName);
-//		UrlPattern urlPattern = null;
-		// first match servlets
-//		try {
-//			Optional<Map<String, UrlPattern>> optionalServletUrlPatterns = Optional.ofNullable(servletUrlPatterns.get(virtualHost));
-//			if (optionalServletUrlPatterns.isPresent()) {
-//				urlPattern = matchPathToContext(optionalServletUrlPatterns.get(), path);
-//			}
-//		} finally {
-//		}
-		// then if there is no matched servlet look for filters
-//		if (urlPattern == null) {
-//			Optional<ConcurrentMap<String, Set<UrlPattern>>> optionalFilterUrlPattern = Optional.ofNullable(filterUrlPatterns.get(virtualHost));
-////			if (optionalFilterUrlPattern.isPresent()) {
-////				urlPattern = matchFilterPathToContext(filterUrlPatterns.get(virtualHost), path);
-////			}
-//		}
-//		OsgiContextModel matched = null;
-//		if (urlPattern != null) {
-//			matched = urlPattern.getElementModel().getContextModel();
-//		}
-//		if (debug) {
-//			if (matched != null) {
-//				LOG.debug("Path [" + path + "] matched to " + urlPattern);
-//			} else {
-//				LOG.debug("Path [" + path + "] does not match any context");
-//			}
-//		}
-//		return matched;
-//	}
-
-	private static UrlPattern matchFilterPathToContext(final Map<String, Set<UrlPattern>> urlPatternsMap, final String path) {
-		Set<String> keySet = urlPatternsMap.keySet();
-		for (String key : keySet) {
-			Set<UrlPattern> patternsMap = urlPatternsMap.get(key);
-
-			for (UrlPattern urlPattern : patternsMap) {
-				Map<String, UrlPattern> tempMap = new HashMap<>();
-				tempMap.put(key, urlPattern);
-				UrlPattern pattern = matchPathToContext(tempMap, path);
-				if (pattern != null) {
-					return pattern;
-				}
-			}
-		}
-		return null;
-	}
-
-	private static UrlPattern matchPathToContext(final Map<String, UrlPattern> urlPatternsMap, final String path) {
-		UrlPattern matched = null;
-		String servletPath = path;
-
-		while ((matched == null) && (!"".equals(servletPath))) {
-			// Match the asterisks first that comes just after the current
-			// servlet path, so that it satisfies the longest path req
-			if (servletPath.endsWith("/")) {
-				matched = urlPatternsMap.get(servletPath + "*");
-			} else {
-				matched = urlPatternsMap.get(servletPath + "/*");
-			}
-
-			// try to match the exact resource if the above fails
-			if (matched == null) {
-				matched = urlPatternsMap.get(servletPath);
-			}
-
-			// now try to match the url backwards one directory at a time
-			if (matched == null) {
-				String lastPathSegment = servletPath.substring(servletPath.lastIndexOf("/") + 1);
-				servletPath = servletPath.substring(0, servletPath.lastIndexOf("/"));
-				// case 1: the servlet path is /
-				if (("".equals(servletPath)) && ("".equals(lastPathSegment))) {
-					break;
-				} else if ("".equals(lastPathSegment)) {
-					// case 2 the servlet path ends with /
-					matched = urlPatternsMap.get(servletPath + "/*");
-					continue;
-				} else if (lastPathSegment.contains(".")) {
-					// case 3 the last path segment has a extension that needs
-					// to be
-					// matched
-					String extension = lastPathSegment.substring(lastPathSegment.lastIndexOf("."));
-					if (extension.length() > 1) {
-						// case 3.5 refer to second bulleted point of heading
-						// Specification of Mappings
-						// in servlet specification
-						// PATCH - do not go global too early. Next 3 lines
-						// modified.
-						// matched = urlPatternsMap.get("*" + extension);
-						if (matched == null) {
-							matched = urlPatternsMap.get(("".equals(servletPath) ? "*" : servletPath + "/*")
-									+ extension);
-						}
-					}
-				} else {
-					// case 4 search for the wild cards at the end of servlet
-					// path
-					// of the next iteration
-					if (servletPath.endsWith("/")) {
-						matched = urlPatternsMap.get(servletPath + "*");
-					} else {
-						matched = urlPatternsMap.get(servletPath + "/*");
-					}
-				}
-
-				// case 5 if all the above fails look for the actual mapping
-				if (matched == null) {
-					matched = urlPatternsMap.get(servletPath);
-				}
-
-				// case 6 the servlet path has / followed by context name, this
-				// case is
-				// selected at the end of the directory, when none of the them
-				// matches.
-				// So we try to match to root.
-				if ((matched == null) && ("".equals(servletPath)) && (!"".equals(lastPathSegment))) {
-					matched = urlPatternsMap.get("/");
-				}
-			}
-		}
-		return matched;
-	}
-
 	/**
-	 * Returns the full path (including the context name if set)
-	 *
-	 * @param model a context model
-	 * @param path  path to be prepended
-	 * @return full path
+	 * {@link Comparator} that sorts {@link ServletContextDTO} by the longest context path.
 	 */
-	private static String getFullPath(final OsgiContextModel model, final String path) {
-		String fullPath = path.trim();
-//		if (model.getContextName().length() > 0) {
-//			fullPath = "/" + model.getContextName();
-//			if (!"/".equals(path.trim())) {
-//				if ((!(fullPath.endsWith("/"))) && (!(path.startsWith("/")))) {
-//					fullPath += "/";
-//				}
-//				fullPath = fullPath + path;
-//			}
-//		}
-		return fullPath;
-	}
-
-	/**
-	 * Touple of full url pattern and registered model (servlet/filter) for the
-	 * model.
-	 */
-	private static class UrlPattern {
-
-		private final Pattern pattern;
-		private final ElementModel elementModel;
-
-		UrlPattern(final String pattern, final ElementModel elementModel) {
-			this.elementModel = elementModel;
-			String patternToUse = pattern;
-			if (!patternToUse.contains("*")) {
-				patternToUse = patternToUse + (pattern.endsWith("/") ? "*" : "/*");
-			}
-			patternToUse = patternToUse.replace(".", "\\.");
-			patternToUse = patternToUse.replace("*", ".*");
-			this.pattern = Pattern.compile(patternToUse);
-		}
-
-		ElementModel getElementModel() {
-			return elementModel;
-		}
-
+	private static class ContextComparator implements Comparator<ServletContextDTO> {
 		@Override
-		public String toString() {
-			return new StringBuilder().append("{").append("pattern=").append(pattern.pattern()).append(",model=")
-					.append(elementModel).append("}").toString();
+		public int compare(ServletContextDTO o1, ServletContextDTO o2) {
+			String cp1 = o1.contextPath;
+			String cp2 = o2.contextPath;
+			long slashes1 = cp1.codePoints().mapToObj(cp -> (char) cp).filter(c -> c == '/').count();
+			long slashes2 = cp2.codePoints().mapToObj(cp -> (char) cp).filter(c -> c == '/').count();
+			if (slashes1 != slashes2) {
+				// more slashes - "earlier" (lower) context
+				return Long.compare(slashes2, slashes1);
+			}
+			if (cp1.length() != cp2.length()) {
+				// order by length, so "/" is at the end
+				return Integer.compare(cp2.length(), cp1.length());
+			}
+			// alphabetlically
+			return cp1.compareTo(cp2);
+		}
+	}
+
+	/**
+	 * {@link Comparator} that sorts pattern mappings of {@link ServletDTO} and {@link ResourceDTO} objects
+	 */
+	private static class PatternComparator implements Comparator<String> {
+		@Override
+		public int compare(String p1, String p2) {
+			long slashes1 = p1.codePoints().mapToObj(cp -> (char) cp).filter(c -> c == '/').count();
+			long slashes2 = p2.codePoints().mapToObj(cp -> (char) cp).filter(c -> c == '/').count();
+			// "/" always at the end
+			if ("/".equals(p1)) {
+				return 1;
+			}
+			if ("/".equals(p2)) {
+				return -1;
+			}
+			if (slashes1 != slashes2) {
+				// more slashes - "earlier" (lower) context. "*.xxx" has no slashes, so will have lowest priority
+				return Long.compare(slashes2, slashes1);
+			}
+			// 12.1 Use of URL Paths rules - exact matching is before pattern matching
+			if (p1.contains("*") && p2.contains("*")) {
+				if (p1.length() != p2.length()) {
+					// order by length, so "/" is at the end
+					return Integer.compare(p2.length(), p1.length());
+				}
+				// alphabetlically
+				return p1.compareTo(p2);
+			}
+			if (p1.contains("*")) {
+				return 1;
+			}
+			if (p2.contains("*")) {
+				return 1;
+			}
+			if (p1.length() != p2.length()) {
+				// order by length, so "/" is at the end
+				return Integer.compare(p2.length(), p1.length());
+			}
+			// alphabetlically
+			return p1.compareTo(p2);
 		}
 	}
 

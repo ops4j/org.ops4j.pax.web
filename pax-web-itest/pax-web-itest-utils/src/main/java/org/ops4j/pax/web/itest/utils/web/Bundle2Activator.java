@@ -36,7 +36,6 @@ public class Bundle2Activator implements BundleActivator {
 
 		while (serviceReference == null) {
 			serviceReference = context.getServiceReference(WebContainer.class);
-			Thread.sleep(100);
 		}
 
 		WebContainer service = context.getService(serviceReference);
