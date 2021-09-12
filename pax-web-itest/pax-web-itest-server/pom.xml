@@ -302,5 +302,28 @@
 		</dependency>
 
 	</dependencies>
+	<profiles>
+		<profile>
+			<id>jdk11</id>
+			<activation>
+				<jdk>[9,)</jdk>
+			</activation>
+			<dependencies>
+
+				<!-- JavaEE / JakartaEE -->
+
+				<dependency>
+					<groupId>jakarta.xml.bind</groupId>
+					<artifactId>jakarta.xml.bind-api</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>com.sun.xml.bind</groupId>
+					<artifactId>jaxb-impl</artifactId>
+					<scope>test</scope>
+				</dependency>
+
+			</dependencies>
+		</profile>
+	</profiles>
 
 </project>

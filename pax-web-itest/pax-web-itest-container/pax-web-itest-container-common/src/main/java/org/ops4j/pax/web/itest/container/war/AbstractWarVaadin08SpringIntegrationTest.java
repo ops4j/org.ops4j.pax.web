@@ -33,10 +33,14 @@ public abstract class AbstractWarVaadin08SpringIntegrationTest extends AbstractC
 
 	@Test
 	public void testSlash() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'vaadin.initApplication(\"warvaadin08spring'",
-						resp -> resp.contains("vaadin.initApplication(\"warvaadin08spring"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/war-vaadin08-spring");
+		if (javaMajorVersion() <= 8) {
+			HttpTestClientFactory.createDefaultTestClient()
+					.withResponseAssertion("Response must contain 'vaadin.initApplication(\"warvaadin08spring'",
+							resp -> resp.contains("vaadin.initApplication(\"warvaadin08spring"))
+					.doGETandExecuteTest("http://127.0.0.1:8181/war-vaadin08-spring");
+		} else {
+			LOG.warn("Vaadin 8 WAR with Spring 4.3 has problems (CGLIB proxies) on JDK9+");
+		}
 	}
 
 }

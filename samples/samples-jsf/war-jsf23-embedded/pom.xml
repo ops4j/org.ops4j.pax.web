@@ -69,7 +69,7 @@
 							javax.crypto,
 							javax.crypto.spec,
 
-							<!-- This is required at runtime (TODO: check JDK11) -->
+							<!-- This is required at runtime -->
 							javax.xml.bind,
 
 							<!-- These are required by embedded MyFaces to parse various descriptors -->

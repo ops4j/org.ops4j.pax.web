@@ -61,6 +61,9 @@ public abstract class AbstractWarBasicIntegrationTest extends AbstractContainerT
 			context.installBundle(String.format("mvn:jakarta.interceptor/jakarta.interceptor-api/%s", System.getProperty("jakarta-interceptor-api.version")));
 			context.installBundle(String.format("mvn:jakarta.el/jakarta.el-api/%s", System.getProperty("jakarta-el-api.version")));
 			context.installBundle(String.format("mvn:jakarta.websocket/jakarta.websocket-api/%s", System.getProperty("jakarta-websocket-api.version")));
+			context.installBundle(String.format("mvn:jakarta.xml.bind/jakarta.xml.bind-api/%s", System.getProperty("jakarta-xml-bind-api.version")));
+			context.installBundle(String.format("mvn:com.sun.activation/javax.activation/%s", System.getProperty("activation.version")));
+
 			// I'm not refreshing, so fragments need to be installed before their hosts
 			installAndStartBundle(sampleURI("container-bundle-3"));
 			context.installBundle(sampleURI("container-fragment-1"));

@@ -18,7 +18,6 @@ package org.ops4j.pax.web.utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -76,7 +75,7 @@ public class ClassPathUtilTest {
 	public void findResourcesInJARs() throws IOException {
 		URL[] roots = new URL[] { null };
 
-		URL[] urls = ((URLClassLoader) cl).getURLs();
+		URL[] urls = ClassPathUtil.getURLs(cl);
 		if (urls.length == 1) {
 			urls = ClassPathUtil.jarToItsClassPath(urls[0]);
 		}

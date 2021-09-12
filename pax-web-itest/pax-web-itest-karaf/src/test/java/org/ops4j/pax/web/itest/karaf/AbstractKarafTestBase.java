@@ -205,13 +205,4 @@ public class AbstractKarafTestBase extends AbstractControlledTestBase {
 		return HttpTestClientFactory.createDefaultTestClient().withExternalKeystore("${karaf.base}/etc/keystore");
 	}
 
-	private int javaMajorVersion() {
-		String v = System.getProperty("java.specification.version");
-		if (v.contains(".")) {
-			// before Java 9
-			v = v.split("\\.")[1];
-		}
-		return Integer.parseInt(v);
-	}
-
 }

@@ -104,6 +104,7 @@
 							javax.security.auth.login,
 							javax.xml.bind,
 							javax.xml.bind.annotation,
+							com.sun.xml.bind.v2;resolution:=optional,
 							javax.xml.parsers,
 							org.xml.sax,
 							org.xml.sax.helpers
@@ -273,6 +274,11 @@
 				<dependency>
 					<groupId>jakarta.xml.bind</groupId>
 					<artifactId>jakarta.xml.bind-api</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>com.sun.xml.bind</groupId>
+					<artifactId>jaxb-impl</artifactId>
+					<scope>test</scope>
 				</dependency>
 
 			</dependencies>

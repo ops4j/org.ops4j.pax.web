@@ -71,6 +71,7 @@ import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.linkBundle;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemPackage;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemTimeout;
 import static org.ops4j.pax.exam.CoreOptions.url;
 import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
@@ -363,7 +364,7 @@ public abstract class AbstractControlledTestBase {
 	 * @return
 	 */
 	protected Option[] paxWebUndertow() {
-		return new Option[] {
+		Option[] options = new Option[] {
 				mavenBundle("org.jboss.xnio", "xnio-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.jboss.xnio", "xnio-nio")
@@ -375,6 +376,15 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle("org.ops4j.pax.web", "pax-web-undertow")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
 		};
+		if (javaMajorVersion() >= 9) {
+			return combine(options,
+					mavenBundle("jakarta.xml.bind", "jakarta.xml.bind-api").versionAsInProject(),
+					mavenBundle("com.sun.xml.bind", "jaxb-impl").versionAsInProject(),
+					mavenBundle("com.sun.activation", "javax.activation").versionAsInProject(),
+					systemProperty("javax.xml.bind.JAXBContextFactory").value("com.sun.xml.bind.v2.JAXBContextFactory")
+			);
+		}
+		return options;
 	}
 
 	protected Option[] undertowWebSockets() {
@@ -446,7 +456,7 @@ public abstract class AbstractControlledTestBase {
 	}
 
 	protected Option[] myfacesDependencies() {
-		return new Option[] {
+		Option[] options = new Option[] {
 				mavenBundle("jakarta.websocket", "jakarta.websocket-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("jakarta.el", "jakarta.el-api")
@@ -463,11 +473,19 @@ public abstract class AbstractControlledTestBase {
 				// but it's ok to have compatibility bundle
 				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-cdi12")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
+
 		};
+		if (javaMajorVersion() >= 9) {
+			return combine(options,
+					mavenBundle("jakarta.xml.bind", "jakarta.xml.bind-api").versionAsInProject(),
+					mavenBundle("com.sun.activation", "javax.activation").versionAsInProject()
+			);
+		}
+		return options;
 	}
 
 	protected Option[] myfaces() {
-		return new Option[] {
+		Option[] options = new Option[] {
 				mavenBundle("jakarta.websocket", "jakarta.websocket-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("jakarta.el", "jakarta.el-api")
@@ -493,6 +511,13 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle("org.apache.myfaces.core", "myfaces-impl")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 		};
+		if (javaMajorVersion() >= 9) {
+			return combine(options,
+					mavenBundle("jakarta.xml.bind", "jakarta.xml.bind-api").versionAsInProject(),
+					mavenBundle("com.sun.activation", "javax.activation").versionAsInProject()
+			);
+		}
+		return options;
 	}
 
 	protected Option[] primefaces() {
@@ -994,6 +1019,15 @@ public abstract class AbstractControlledTestBase {
 		Dictionary<String, Object> initParams = new Hashtable<>();
 		initParams.put(PaxWebConstants.INIT_PARAM_SERVLET_NAME, servletName);
 		return initParams;
+	}
+
+	protected int javaMajorVersion() {
+		String v = System.getProperty("java.specification.version");
+		if (v.contains(".")) {
+			// before Java 9
+			v = v.split("\\.")[1];
+		}
+		return Integer.parseInt(v);
 	}
 
 	@FunctionalInterface

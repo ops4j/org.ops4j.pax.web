@@ -110,30 +110,41 @@ public class ClassSpaceTest {
 		// 1st enumeration comes from the parent (the famous parent-first Java delegation model)
 
 		// ext classloader. meta-index ($JAVA_HOME/jre/lib/meta-index) file prevents returning META-INF/MANIFEST.MF
-		for (Enumeration<URL> e = ((URLClassLoader)getClass().getClassLoader().getParent()).findResources("META-INF/MANIFEST.MF"); e.hasMoreElements(); ) {
-			LOG.info("URL 1a: {}", e.nextElement());
+		if (getClass().getClassLoader().getParent() instanceof URLClassLoader) {
+			for (Enumeration<URL> e = ((URLClassLoader)getClass().getClassLoader().getParent()).findResources("META-INF/MANIFEST.MF"); e.hasMoreElements(); ) {
+				LOG.info("URL 1a: {}", e.nextElement());
+			}
 		}
 		// but META-INF/services/java.nio.file.spi.FileSystemProvider is allowed ($JAVA_HOME/jre/lib/ext/meta-index)
-		for (Enumeration<URL> e = ((URLClassLoader)getClass().getClassLoader().getParent()).findResources("META-INF/services/java.nio.file.spi.FileSystemProvider"); e.hasMoreElements(); ) {
-			LOG.info("URL 1b: {}", e.nextElement());
+		if (getClass().getClassLoader().getParent() instanceof URLClassLoader) {
+			for (Enumeration<URL> e = ((URLClassLoader) getClass().getClassLoader().getParent()).findResources("META-INF/services/java.nio.file.spi.FileSystemProvider"); e.hasMoreElements(); ) {
+				LOG.info("URL 1b: {}", e.nextElement());
+			}
 		}
 
 		// app classloader
-		for (Enumeration<URL> e = ((URLClassLoader)getClass().getClassLoader()).findResources("META-INF/MANIFEST.MF"); e.hasMoreElements(); ) {
-			LOG.info("URL 2a: {}", e.nextElement());
+		if (getClass().getClassLoader() instanceof URLClassLoader) {
+			for (Enumeration<URL> e = ((URLClassLoader) getClass().getClassLoader()).findResources("META-INF/MANIFEST.MF"); e.hasMoreElements(); ) {
+				LOG.info("URL 2a: {}", e.nextElement());
+			}
 		}
 		// findResources("") gives us less than expected.
 		// to this end, org.springframework.core.io.support.PathMatchingResourcePatternResolver.doFindAllClassPathResources()
 		// explicitly calls org.springframework.core.io.support.PathMatchingResourcePatternResolver.addAllClassLoaderJarRoots()
 		// to add missing entries by checking entire classpath
-		for (Enumeration<URL> e = ((URLClassLoader)getClass().getClassLoader()).findResources(""); e.hasMoreElements(); ) {
-			LOG.info("URL 2b: {}", e.nextElement());
+		if (getClass().getClassLoader() instanceof URLClassLoader) {
+			for (Enumeration<URL> e = ((URLClassLoader) getClass().getClassLoader()).findResources(""); e.hasMoreElements(); ) {
+				LOG.info("URL 2b: {}", e.nextElement());
+			}
 		}
 		// system classloader - usually same as app classloader. Taken from:
 		// 1) sun.misc.Launcher.getClassLoader() == sun.misc.Launcher.AppClassLoader.getAppClassLoader()
 		// 2) -Djava.system.class.loader
-		for (Enumeration<URL> e = ((URLClassLoader) ClassLoader.getSystemClassLoader()).findResources("META-INF/MANIFEST.MF"); e.hasMoreElements(); ) {
-			LOG.info("URL 3: {}", e.nextElement());
+
+		if (ClassLoader.getSystemClassLoader() instanceof URLClassLoader) {
+			for (Enumeration<URL> e = ((URLClassLoader) ClassLoader.getSystemClassLoader()).findResources("META-INF/MANIFEST.MF"); e.hasMoreElements(); ) {
+				LOG.info("URL 3: {}", e.nextElement());
+			}
 		}
 
 		LOG.info("System classloader: {}", System.getProperty("java.system.class.loader"));

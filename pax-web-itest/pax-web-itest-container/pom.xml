@@ -86,6 +86,8 @@
 						<jakarta-enterprise-cdi-api.version>${dependency.jakarta.enterprise.cdi-api}</jakarta-enterprise-cdi-api.version>
 						<jakarta-interceptor-api.version>${dependency.jakarta.interceptor-api}</jakarta-interceptor-api.version>
 						<jakarta-websocket-api.version>${dependency.jakarta.websocket-api}</jakarta-websocket-api.version>
+						<jakarta-xml-bind-api.version>${dependency.jakarta.xml.bind-api}</jakarta-xml-bind-api.version>
+						<activation.version>${dependency.com.sun.activation}</activation.version>
 						<karaf.version>${dependency.org.apache.karaf}</karaf.version>
 						<myfaces.version>${dependency.org.apache.myfaces}</myfaces.version>
 						<pax-web.version>${project.version}</pax-web.version>

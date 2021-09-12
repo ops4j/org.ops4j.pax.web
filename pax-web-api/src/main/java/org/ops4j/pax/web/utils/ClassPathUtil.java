@@ -19,6 +19,9 @@ package org.ops4j.pax.web.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -462,6 +465,28 @@ public class ClassPathUtil {
 	}
 
 	/**
+	 * Helper method to get {@link ClassLoader}s URLs (if possible)
+	 * @param loader
+	 * @return
+	 */
+	public static URL[] getURLs(ClassLoader loader) {
+		URL[] urls = new URL[0];
+		if (loader instanceof URLClassLoader) {
+			urls = ((URLClassLoader) loader).getURLs();
+		} else {
+			try {
+				Field ucpField = loader.getClass().getDeclaredField("ucp");
+				ucpField.setAccessible(true);
+				Object ucp = ucpField.get(loader);
+				Method getURLsMethod = ucp.getClass().getDeclaredMethod("getURLs");
+				urls = (URL[]) getURLsMethod.invoke(ucp);
+			} catch (NoSuchFieldException | IllegalAccessException | NoSuchMethodException | InvocationTargetException ignored) {
+			}
+		}
+		return urls;
+	}
+
+	/**
 	 * <p>This method matches {@link Bundle#findEntries(String, String, boolean)} but should be used when we don't
 	 * have access to any {@link Bundle}. It is used as a fallback in some resource-finding methods when
 	 * {@link org.osgi.framework.FrameworkUtil#getBundle(Class)} doesn't return anything (which may be a case in
@@ -512,27 +537,25 @@ public class ClassPathUtil {
 			// - sun.misc.URLClassPath.JarLoader
 			// and simply in JarLoader, java.util.jar.JarFile.getJarEntry("") doesn't return anything, while
 			// in FileLoader we get sun.misc.URLClassPath.Loader.getBaseURL() as the URL for "".
-			if (loader instanceof URLClassLoader) {
-				URL[] urls = ((URLClassLoader) loader).getURLs();
-				if (urls.length == 1) {
-					// let's handle surefire here
-					if (urls[0].toExternalForm().endsWith("jar")) {
-						urls = jarToItsClassPath(urls[0]);
-					}
+			URL[] urls = getURLs(loader);
+			if (urls.length == 1) {
+				// let's handle surefire here
+				if (urls[0].toExternalForm().endsWith("jar")) {
+					urls = jarToItsClassPath(urls[0]);
 				}
-				for (URL entry : urls) {
-					if ("jar".equals(entry.getProtocol())) {
-						roots.add(entry);
-					} else {
-						if (entry.getPath().endsWith(".jar")) {
-							// don't bother with ZIPs, WARs, ...
-							roots.add(new URL("jar:" + entry.toExternalForm() + "!/"));
-						} else if ("file".equals(entry.getProtocol())) {
-							// this may be file:/path/to/maven/project/test-classes/ for example
-							File dir = new File(URI.create(entry.toExternalForm()));
-							if (dir.isDirectory()) {
-								roots.add(dir.toURI().toURL());
-							}
+			}
+			for (URL entry : urls) {
+				if ("jar".equals(entry.getProtocol())) {
+					roots.add(entry);
+				} else {
+					if (entry.getPath().endsWith(".jar")) {
+						// don't bother with ZIPs, WARs, ...
+						roots.add(new URL("jar:" + entry.toExternalForm() + "!/"));
+					} else if ("file".equals(entry.getProtocol())) {
+						// this may be file:/path/to/maven/project/test-classes/ for example
+						File dir = new File(URI.create(entry.toExternalForm()));
+						if (dir.isDirectory()) {
+							roots.add(dir.toURI().toURL());
 						}
 					}
 				}
