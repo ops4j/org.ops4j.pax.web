@@ -11,6 +11,7 @@ Must have for 8.0.0.GA:
  + Mixing (in different order) WAB and Whiteboard contexts, allocating contexts for WABs
  + Whiteboard DTOs
  + JDK 11 checks
+ + JDK 17 checks
 
 Moved to after 8.0.0.GA (8.0.x):
  - @ServletSecurity, @RunAs, @DeclareRoles annotations on servlets

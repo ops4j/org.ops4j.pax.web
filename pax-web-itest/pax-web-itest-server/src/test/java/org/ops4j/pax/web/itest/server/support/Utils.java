@@ -174,8 +174,10 @@ public class Utils {
 				if (sslSession != null) {
 					LOG.info("SSL protocol " + sslSession.getProtocol());
 					LOG.info("SSL cipher suite " + sslSession.getCipherSuite());
-					for (javax.security.cert.X509Certificate cert : sslSession.getPeerCertificateChain()) {
-						LOG.info("Server cert: " + cert.getSubjectDN() + " (issuer: " + cert.getIssuerDN() + ")");
+					for (java.security.cert.Certificate c : sslSession.getPeerCertificates()) {
+						X509Certificate cert = (X509Certificate) c;
+						LOG.info("Server cert: " + cert.getSubjectX500Principal().getName()
+								+ " (issuer: " + cert.getIssuerX500Principal().getName() + ")");
 					}
 				}
 

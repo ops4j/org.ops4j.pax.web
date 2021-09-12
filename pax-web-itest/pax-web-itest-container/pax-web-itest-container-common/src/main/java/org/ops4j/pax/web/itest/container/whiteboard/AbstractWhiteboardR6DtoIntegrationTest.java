@@ -491,6 +491,18 @@ public abstract class AbstractWhiteboardR6DtoIntegrationTest extends AbstractCon
 		public int compareTo(Object reference) {
 			return 0;
 		}
+
+		// since 1.9, so no @Override, to make it work with 1.8
+//		@Override
+		public Dictionary<String, Object> getProperties() {
+			return null;
+		}
+
+		// since 1.10, so no @Override, to make it work with 1.8
+//		@Override
+		public <A> A adapt(Class<A> aClass) {
+			return null;
+		}
 	}
 
 }

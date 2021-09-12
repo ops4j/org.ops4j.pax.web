@@ -82,7 +82,7 @@ public class SSLUtils {
 		}
 
 		// sun.security.rsa.RSAKeyPairGenerator
-		KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA", "SunJSSE");
+		KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA", "SunRsaSign");
 //		assertThat(getField(kpg, "spi").getClass().getName()).isEqualTo("sun.security.rsa.RSAKeyPairGenerator");
 
 		// 5 key pairs: 1 for CA, 2 for server keystore and 2 for client keystore
@@ -140,7 +140,7 @@ public class SSLUtils {
 //		assertThat(((RSAPrivateKey) caPrivateKey).getModulus()).isEqualTo(((RSAPublicKey) caPublicKey).getModulus());
 
 		// key (actual key) to specification (information allowing to recreate the key)
-		KeyFactory kf = KeyFactory.getInstance("RSA", "SunJSSE");
+		KeyFactory kf = KeyFactory.getInstance("RSA", "SunRsaSign");
 //		assertThat(getField(kf, "spi").getClass().getName()).isEqualTo("sun.security.rsa.RSAKeyFactory");
 		// sun.security.rsa.RSAKeyFactory knows which interfaces/classes it can handle and directly takes what's
 		// needed, e.g., java.security.interfaces.RSAPrivateCrtKey.getPrimeExponentP() in translateKey()
@@ -385,7 +385,7 @@ public class SSLUtils {
 		Certificate server2Cer = cf.generateCertificate(new FileInputStream("target/server2.cer"));
 		Certificate client2Cer = cf.generateCertificate(new FileInputStream("target/client2.cer"));
 
-		kf = KeyFactory.getInstance("RSA", "SunJSSE");
+		kf = KeyFactory.getInstance("RSA", "SunRsaSign");
 
 		// java.security.spec.InvalidKeySpecException: Only RSAPrivate(Crt)KeySpec and PKCS8EncodedKeySpec supported for RSA private keys
 //        PrivateKey serverKey = kf.generatePrivate(new X509EncodedKeySpec(Files.readAllBytes(new File("target/server-private.key").toPath())));

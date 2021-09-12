@@ -50,6 +50,7 @@
 			<id>felix</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
+				<jdk>[8,9)</jdk>
 			</activation>
 			<dependencies>
 				<dependency>
@@ -81,6 +82,33 @@
 				<dependency>
 					<groupId>org.eclipse.platform</groupId>
 					<artifactId>org.eclipse.osgi</artifactId>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>jdk11</id>
+			<activation>
+				<jdk>[9,)</jdk>
+			</activation>
+			<dependencyManagement>
+				<dependencies>
+					<dependency>
+						<groupId>org.osgi</groupId>
+						<artifactId>osgi.core</artifactId>
+						<version>${dependency.org.osgi.core8}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.felix</groupId>
+						<artifactId>org.apache.felix.framework</artifactId>
+						<version>${dependency.org.apache.felix.framework7}</version>
+					</dependency>
+				</dependencies>
+			</dependencyManagement>
+			<dependencies>
+				<dependency>
+					<groupId>org.apache.felix</groupId>
+					<artifactId>org.apache.felix.framework</artifactId>
 					<scope>test</scope>
 				</dependency>
 			</dependencies>

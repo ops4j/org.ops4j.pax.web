@@ -35,6 +35,7 @@ import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.systemPackage;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemTimeout;
 import static org.ops4j.pax.exam.CoreOptions.when;
@@ -92,7 +93,19 @@ public class AbstractKarafTestBase extends AbstractControlledTestBase {
 		if (javaMajorVersion() >= 9) {
 			jdkSpecificOptions = new Option[] {
 					new VMOption("-classpath"),
-					new VMOption("lib/jdk9plus/*" + File.pathSeparator + "lib/boot/*")
+					new VMOption("lib/jdk9plus/*" + File.pathSeparator + "lib/boot/*"),
+					new VMOption("--add-exports=java.base/org.apache.karaf.specs.locator=java.xml,ALL-UNNAMED"),
+					new VMOption("--add-opens=java.base/java.net=ALL-UNNAMED"),
+					new VMOption("--add-opens=java.base/jdk.internal.loader=ALL-UNNAMED"),
+					new VMOption("--add-opens=java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED"),
+					new VMOption("--add-opens=java.rmi/sun.rmi.registry=ALL-UNNAMED"),
+					new VMOption("--add-reads=java.xml=java.logging"),
+					new VMOption("--patch-module=java.base=lib/endorsed/org.apache.karaf.specs.locator-" + getKarafVersion() + ".jar"),
+					new VMOption("--patch-module=java.xml=lib/endorsed/org.apache.karaf.specs.java.xml-" + getKarafVersion() + ".jar")
+			};
+		} else {
+			jdkSpecificOptions = new Option[] {
+					systemPackage("javax.annotation;version=\"1.3\"")
 			};
 		}
 

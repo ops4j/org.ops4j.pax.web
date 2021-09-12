@@ -475,7 +475,12 @@ public class ClassPathUtil {
 			urls = ((URLClassLoader) loader).getURLs();
 		} else {
 			try {
-				Field ucpField = loader.getClass().getDeclaredField("ucp");
+				Field ucpField = null;
+				try {
+					ucpField = loader.getClass().getDeclaredField("ucp");
+				} catch (NoSuchFieldException e) {
+					ucpField = loader.getClass().getSuperclass().getDeclaredField("ucp");
+				}
 				ucpField.setAccessible(true);
 				Object ucp = ucpField.get(loader);
 				Method getURLsMethod = ucp.getClass().getDeclaredMethod("getURLs");
