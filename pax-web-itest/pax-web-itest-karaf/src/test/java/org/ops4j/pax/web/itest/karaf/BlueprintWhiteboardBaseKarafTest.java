@@ -25,6 +25,9 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultHttpContextMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultServletMapping;
+import org.ops4j.pax.web.service.spi.model.events.FilterEventData;
+import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletMapping;
 import org.osgi.framework.Bundle;
@@ -39,12 +42,34 @@ public abstract class BlueprintWhiteboardBaseKarafTest extends AbstractKarafTest
 
 	@Before
 	public void setUp() throws Exception {
-		configureAndWaitForServletWithMapping("/",
-				() -> bundle = installAndStartBundle(sampleURI("whiteboard-blueprint")));
-		// with org.ops4j.pax.web.itest.container.whiteboard.AbstractWhiteboardDSRestartIntegrationTest.setUp()
-		// we could create complex "wait expression" because we weren't sure which DS service is registered last
-		// here let's stick with plain old thread.sleep ("pots")
-		Thread.sleep(500);
+		configureAndWait(() -> bundle = installAndStartBundle(sampleURI("whiteboard-blueprint")), events -> {
+			boolean match = events.stream().anyMatch(e -> e.getType() == WebElementEvent.State.DEPLOYED
+					&& e.getData() instanceof ServletEventData
+					&& ((ServletEventData)e.getData()).isResourceServlet()
+					&& usesContexts(e.getData(), "default"));
+			match &= events.stream().anyMatch(e -> e.getType() == WebElementEvent.State.DEPLOYED
+					&& e.getData() instanceof ServletEventData
+					&& ((ServletEventData)e.getData()).getServletName().equals("forbidden-servlet")
+					&& usesContexts(e.getData(), "forbidden"));
+			match &= events.stream().anyMatch(e -> e.getType() == WebElementEvent.State.DEPLOYED
+					&& e.getData() instanceof ServletEventData
+					&& ((ServletEventData)e.getData()).getServletName().equals("whiteboard-servlet")
+					&& usesContexts(e.getData(), "default"));
+			match &= events.stream().anyMatch(e -> e.getType() == WebElementEvent.State.DEPLOYED
+					&& e.getData() instanceof ServletEventData
+					&& ((ServletEventData)e.getData()).getServletName().equals("root-servlet")
+					&& usesContexts(e.getData(), "default"));
+			match &= events.stream().anyMatch(e -> e.getType() == WebElementEvent.State.DEPLOYED
+					&& e.getData() instanceof ServletEventData
+					&& ((ServletEventData)e.getData()).getServletName().equals("filtered-servlet")
+					&& usesContexts(e.getData(), "default"));
+			match &= events.stream().anyMatch(e -> e.getType() == WebElementEvent.State.DEPLOYED
+					&& e.getData() instanceof FilterEventData
+					&& ((FilterEventData)e.getData()).getFilterName().equals("filter1")
+					&& usesContexts(e.getData(), "default"));
+
+			return match;
+		});
 	}
 
 	@After
