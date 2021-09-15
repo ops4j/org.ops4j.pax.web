@@ -80,7 +80,7 @@ public class WhiteboardErrorPagesTest extends MultiContainerTestSupport {
 			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<th>URI:</th><td>/xikes</td>"));
 		} else if (runtime == Runtime.TOMCAT) {
 			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<p><b>Message</b> x462</p><p>"));
-			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<h1>HTTP Status 404 – Not Found</h1>"));
+			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<h1>HTTP Status 404"));
 		} else if (runtime == Runtime.UNDERTOW) {
 			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<body>x462</body>"));
 			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<body>Not Found</body>"));
@@ -97,7 +97,7 @@ public class WhiteboardErrorPagesTest extends MultiContainerTestSupport {
 			assertThat(httpGET(port, "/yikes?result=461&msg=x461"), containsString("<p><b>Message</b> x461</p><p>"));
 			assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), containsString("<p><b>Message</b> x</p><p>"));
 			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<p><b>Message</b> x462</p><p>"));
-			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<h1>HTTP Status 404 – Not Found</h1>"));
+			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<h1>HTTP Status 404"));
 		} else if (runtime == Runtime.UNDERTOW) {
 			assertThat(httpGET(port, "/yikes?result=461&msg=x461"), containsString("<body>x461</body>"));
 			assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), containsString("<div class=\"value\">ex=java.io.FileNotFoundException"));
@@ -122,7 +122,7 @@ public class WhiteboardErrorPagesTest extends MultiContainerTestSupport {
 			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<th>URI:</th><td>/xikes</td>"));
 		} else if (runtime == Runtime.TOMCAT) {
 			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<p><b>Message</b> x462</p><p>"));
-			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<h1>HTTP Status 404 – Not Found</h1>"));
+			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<h1>HTTP Status 404"));
 		} else if (runtime == Runtime.UNDERTOW) {
 			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<body>x462</body>"));
 			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<body>Not Found</body>"));
@@ -139,7 +139,7 @@ public class WhiteboardErrorPagesTest extends MultiContainerTestSupport {
 			assertThat(httpGET(port, "/yikes?result=461&msg=x461"), containsString("<p><b>Message</b> x461</p><p>"));
 			assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), containsString("<p><b>Message</b> x</p><p>"));
 			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<p><b>Message</b> x462</p><p>"));
-			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<h1>HTTP Status 404 – Not Found</h1>"));
+			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<h1>HTTP Status 404"));
 		} else if (runtime == Runtime.UNDERTOW) {
 			assertThat(httpGET(port, "/yikes?result=461&msg=x461"), containsString("<body>x461</body>"));
 			assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), containsString("<div class=\"value\">ex=java.io.FileNotFoundException"));
@@ -170,7 +170,7 @@ public class WhiteboardErrorPagesTest extends MultiContainerTestSupport {
 			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<th>URI:</th><td>/xikes</td>"));
 		} else if (runtime == Runtime.TOMCAT) {
 			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<p><b>Message</b> x462</p><p>"));
-			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<h1>HTTP Status 404 – Not Found</h1>"));
+			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<h1>HTTP Status 404"));
 		} else if (runtime == Runtime.UNDERTOW) {
 			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<body>x462</body>"));
 			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<body>Not Found</body>"));
@@ -188,7 +188,7 @@ public class WhiteboardErrorPagesTest extends MultiContainerTestSupport {
 			assertThat(httpGET(port, "/yikes?result=461&msg=x461"), containsString("<p><b>Message</b> x461</p><p>"));
 			assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), containsString("<p><b>Message</b> x</p><p>"));
 			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<p><b>Message</b> x462</p><p>"));
-			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<h1>HTTP Status 404 – Not Found</h1>"));
+			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<h1>HTTP Status 404"));
 		} else if (runtime == Runtime.UNDERTOW) {
 			assertThat(httpGET(port, "/yikes?result=461&msg=x461"), containsString("<body>x461</body>"));
 			assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), containsString("<div class=\"value\">ex=java.io.FileNotFoundException"));
@@ -213,7 +213,7 @@ public class WhiteboardErrorPagesTest extends MultiContainerTestSupport {
 			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<th>URI:</th><td>/xikes</td>"));
 		} else if (runtime == Runtime.TOMCAT) {
 			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<p><b>Message</b> x462</p><p>"));
-			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<h1>HTTP Status 404 – Not Found</h1>"));
+			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<h1>HTTP Status 404"));
 		} else if (runtime == Runtime.UNDERTOW) {
 			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<body>x462</body>"));
 			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<body>Not Found</body>"));
@@ -230,7 +230,7 @@ public class WhiteboardErrorPagesTest extends MultiContainerTestSupport {
 			assertThat(httpGET(port, "/yikes?result=461&msg=x461"), containsString("<p><b>Message</b> x461</p><p>"));
 			assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), containsString("<p><b>Message</b> x</p><p>"));
 			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<p><b>Message</b> x462</p><p>"));
-			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<h1>HTTP Status 404 – Not Found</h1>"));
+			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<h1>HTTP Status 404"));
 		} else if (runtime == Runtime.UNDERTOW) {
 			assertThat(httpGET(port, "/yikes?result=461&msg=x461"), containsString("<body>x461</body>"));
 			assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), containsString("<div class=\"value\">ex=java.io.FileNotFoundException"));

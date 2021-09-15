@@ -885,10 +885,10 @@ public class MultiContainerTestSupport {
 			if (base.getName().endsWith(".jar")) {
 				// turn it into a real JAR
 				File jar = pack(jars, base);
-				when(bundle.getEntry(entry)).thenReturn(new URL(String.format("bundle://%d.0:0%s", id, jar.getCanonicalPath())));
+				when(bundle.getEntry(entry)).thenReturn(new URL(String.format("bundle://%d.0:0%s", id, jar.toURI().getPath())));
 			} else {
 				// it'll be available as normal directory
-				when(bundle.getEntry(entry)).thenReturn(new URL(String.format("bundle://%d.0:0%s", id, base.getCanonicalPath())));
+				when(bundle.getEntry(entry)).thenReturn(new URL(String.format("bundle://%d.0:0%s", id, base.toURI().getPath())));
 			}
 		}
 

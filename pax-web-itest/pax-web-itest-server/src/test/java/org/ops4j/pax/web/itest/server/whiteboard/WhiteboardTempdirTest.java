@@ -85,10 +85,10 @@ public class WhiteboardTempdirTest extends MultiContainerTestSupport {
 		httpGET(port, "/d/s");
 		httpGET(port, "/d/t");
 
-		assertThat(events.get(0), equalTo("tmp/c/c1"));
-		assertThat(events.get(1), equalTo("tmp/c/c1"));
-		assertThat(events.get(2), equalTo("tmp/d/d1"));
-		assertThat(events.get(3), equalTo("tmp/d/d2"));
+		assertThat(events.get(0), equalTo("tmp" + File.separatorChar + "c" + File.separatorChar + "c1"));
+		assertThat(events.get(1), equalTo("tmp" + File.separatorChar + "c" + File.separatorChar + "c1"));
+		assertThat(events.get(2), equalTo("tmp" + File.separatorChar + "d" + File.separatorChar + "d1"));
+		assertThat(events.get(3), equalTo("tmp" + File.separatorChar + "d" + File.separatorChar + "d2"));
 
 		getServletCustomizer().removedService(servlet1Ref, model1);
 		getServletCustomizer().removedService(servlet2Ref, model2);

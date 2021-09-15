@@ -80,7 +80,7 @@ public abstract class AbstractWebContainerSecuredIntegrationTest extends Abstrac
 		properties.put(PaxWebConfig.PID_CFG_SSL_CLIENT_AUTH_WANTED, "false");
 		properties.put(PaxWebConfig.PID_CFG_SSL_CLIENT_AUTH_NEEDED, "true");
 		properties.put(PaxWebConfig.PID_CFG_SSL_PROTOCOL, "TLSv1.2");
-		properties.put(PaxWebConfig.PID_CFG_SSL_SECURE_RANDOM_ALGORITHM, "NativePRNGNonBlocking");
+		properties.put(PaxWebConfig.PID_CFG_SSL_SECURE_RANDOM_ALGORITHM, "SHA1PRNG");
 		properties.put(PaxWebConfig.PID_CFG_SSL_RENEGOTIATION_ALLOWED, "true");
 		properties.put(PaxWebConfig.PID_CFG_SSL_SESSION_ENABLED, "true");
 

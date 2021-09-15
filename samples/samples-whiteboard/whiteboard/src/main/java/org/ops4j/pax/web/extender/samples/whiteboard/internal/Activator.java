@@ -161,6 +161,7 @@ public class Activator implements BundleActivator {
 		// register second filter
 		props = new Hashtable<>();
 		props.put(PaxWebConstants.SERVICE_PROPERTY_URL_PATTERNS, "/second/*");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "filter3");
 		filter3Reg = bundleContext.registerService(Filter.class, new SecondWhiteboardFilter(), props);
 
 		// register a servlet request listener
@@ -169,6 +170,7 @@ public class Activator implements BundleActivator {
 		// servlet to test exceptions and error pages
 		props = new Hashtable<>();
 		props.put(PaxWebConstants.SERVICE_PROPERTY_SERVLET_ALIAS, "/exception");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "exception-servlet");
 		exceptionServletRegistration = bundleContext.registerService(HttpServlet.class, new ExceptionServlet(), props);
 
 		// register resource at root of bundle

@@ -44,15 +44,15 @@ public class WhiteboardJspTest extends MultiContainerTestSupport {
 	public void oneWayToRegisterJsps() throws Exception {
 		Bundle sample1 = mockBundle("sample1");
 		// getResource for HttpContext, getEntry for ServletContextHelper...
-		when(sample1.getEntry("hello.JSP")).thenReturn(new File("src/test/resources/jsp/hello.jsp").toURI().toURL());
+		when(sample1.getEntry("hello.jsp42")).thenReturn(new File("src/test/resources/jsp/hello.jsp").toURI().toURL());
 
 		DefaultJspMapping mapping = new DefaultJspMapping();
-		mapping.setUrlPatterns(new String[] { "*.JSP" });
+		mapping.setUrlPatterns(new String[] { "*.jsp42" });
 
 		ServiceReference<JspMapping> ref = mockReference(sample1, JspMapping.class, null, () -> mapping, 0L, 0);
 		JspModel model = getJspMappingCustomizer().addingService(ref);
 
-		String response = httpGET(port, "/hello.JSP?p1=v1&p2=v2");
+		String response = httpGET(port, "/hello.jsp42?p1=v1&p2=v2");
 		assertTrue(response.contains("<h1>v1</h1>")); // <h1><c:out value="${param['p1']}" /></h1>
 		assertTrue(response.contains("<h2>v2</h2>")); // <h2>${param['p2']}</h2>
 

@@ -60,7 +60,7 @@ public class WebContainerSessionPersistenceTest extends MultiContainerTestSuppor
 		location.mkdirs();
 		try {
 			FileUtils.cleanDirectory(location);
-			return location.getCanonicalPath();
+			return location.toURI().getPath();
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
@@ -113,12 +113,14 @@ public class WebContainerSessionPersistenceTest extends MultiContainerTestSuppor
 			assertNotNull(sessions);
 			assertTrue(sessions instanceof LinkedHashMap);
 			assertThat(((Map<?, ?>) sessions).size(), equalTo(3));
+			ois.close();
 		} else if (runtime == Runtime.TOMCAT) {
 			controller.stop();
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream("target/sessions/SESSIONS.ser"));
 			Object count = ois.readObject();
 			assertNotNull(count);
 			assertThat((Integer) count, equalTo(3));
+			ois.close();
 		} else if (runtime == Runtime.JETTY) {
 			String[] names = new File("target/sessions").list();
 			assertNotNull(names);

@@ -1983,7 +1983,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				osgiServletContext.setWelcomeFiles(newWelcomeFiles);
 				osgiServletContext.setWelcomeFilesRedirect(model.isRedirect());
 
-				LOG.info("Reconfiguration of welcome files for all resource servlet in context \"{}\"", context);
+				LOG.info("Reconfiguration of welcome files for all resource servlets in context \"{}\"", context);
 
 				// reconfigure welcome files in resource servlets
 				if (deployment != null) {

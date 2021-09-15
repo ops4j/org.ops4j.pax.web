@@ -45,7 +45,9 @@ public abstract class AbstractSimultaneousWhiteboardIntegrationTest extends Abst
 	protected Option[] baseConfigure() {
 		File dir = new File("target/bundles");
 		try {
-			FileUtils.cleanDirectory(dir);
+			if (dir.isDirectory()) {
+				FileUtils.cleanDirectory(dir);
+			}
 			dir.mkdirs();
 			InputStream b1 = TinyBundles.bundle().add(TestActivator.class)
 					.add(WhiteboardFilter.class)

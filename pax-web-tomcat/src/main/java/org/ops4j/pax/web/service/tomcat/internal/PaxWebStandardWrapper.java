@@ -247,7 +247,7 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 	public synchronized void unload() throws ServletException {
 		super.unload();
 		if (servletModel != null && servletModel.getElementReference() != null) {
-			if (!servletModel.isPrototype()) {
+			if (!servletModel.isPrototype() && servletModel.getRegisteringBundle().getBundleContext() != null) {
 				servletModel.getRegisteringBundle().getBundleContext().ungetService(servletModel.getElementReference());
 			} else if (serviceObjects != null && getServlet() != null) {
 				serviceObjects.ungetService(getServlet());

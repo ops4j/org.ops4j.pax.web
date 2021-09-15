@@ -52,7 +52,7 @@ public class WarListenersTest extends MultiContainerTestSupport {
 			entries.add("WEB-INF/classes");
 		});
 		String webXmlLocation = String.format("bundle://42.0:0%s",
-				new File("src/test/resources/bundles/wab-listeners/WEB-INF/web.xml").getCanonicalPath());
+				new File("src/test/resources/bundles/wab-listeners/WEB-INF/web.xml").toURI().getPath());
 		when(wab.findEntries("WEB-INF", "web.xml", false))
 				.thenReturn(Collections.enumeration(Collections.singletonList(new URL(webXmlLocation))));
 		when(wab.loadClass(anyString()))

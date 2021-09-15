@@ -78,7 +78,7 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 			entries.add("WEB-INF/lib/commons-codec-1.13.jar");
 		});
 		String webXmlLocation = String.format("bundle://42.0:0%s",
-				new File("src/test/resources/bundles/the-wab-itself/WEB-INF/web.xml").getCanonicalPath());
+				new File("src/test/resources/bundles/the-wab-itself/WEB-INF/web.xml").toURI().getPath());
 		when(wab.findEntries("WEB-INF", "web.xml", false))
 				.thenReturn(Collections.enumeration(Collections.singletonList(new URL(webXmlLocation))));
 		when(wab.loadClass(anyString()))
@@ -92,7 +92,7 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 		when(wabFragment.getEntry("/")).thenReturn(new URL("bundle://43.0:0/"));
 		// fragment is scanning "through" the host bundle
 		String wabFragmentWebFragmentXmlLocation = String.format("bundle://42.0:0%s",
-				new File("src/test/resources/bundles/the-wab-fragment/META-INF/web-fragment.xml").getCanonicalPath());
+				new File("src/test/resources/bundles/the-wab-fragment/META-INF/web-fragment.xml").toURI().getPath());
 		when(wab.findEntries("/META-INF/", "web-fragment.xml", false))
 				.thenReturn(Collections.enumeration(Collections.singletonList(new URL(wabFragmentWebFragmentXmlLocation))));
 
@@ -133,25 +133,25 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 				.thenReturn(Arrays.asList(
 						new URL(String.format("bundle://44.0:0%s",
 								new File("src/test/resources/bundles/container-bundle-1/META-INF/web-fragment.xml")
-										.getCanonicalPath())),
+										.toURI().getPath())),
 						new URL(String.format("bundle://45.0:0%s",
 								new File("src/test/resources/bundles/container-fragment-1/META-INF/web-fragment.xml")
-										.getCanonicalPath()))
+										.toURI().getPath()))
 				));
 		when(cb2.adapt(BundleWiring.class).findEntries("META-INF", "web-fragment.xml", 0))
 				.thenReturn(Arrays.asList(
 						new URL(String.format("bundle://46.0:0%s",
 								new File("src/test/resources/bundles/container-bundle-2/META-INF/web-fragment.xml")
-										.getCanonicalPath())),
+										.toURI().getPath())),
 						new URL(String.format("bundle://47.0:0%s",
 								new File("src/test/resources/bundles/container-fragment-2/META-INF/web-fragment.xml")
-										.getCanonicalPath()))
+										.toURI().getPath()))
 				));
 		when(cb3.adapt(BundleWiring.class).findEntries("META-INF", "web-fragment.xml", 0))
 				.thenReturn(Collections.singletonList(
 						new URL(String.format("bundle://48.0:0%s",
 								new File("src/test/resources/bundles/container-bundle-3/META-INF/web-fragment.xml")
-										.getCanonicalPath()))
+										.toURI().getPath()))
 				));
 
 		when(wab.getBundleContext().getBundle(44L)).thenReturn(cb1);
@@ -162,7 +162,7 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 
 		File wabServices = new File("src/test/resources/bundles/the-wab-itself/WEB-INF/classes/META-INF/services/");
 		File wabFragmentServices = new File("src/test/resources/bundles/the-wab-fragment/META-INF/services/");
-		when(wab.findEntries(wabServices.getCanonicalPath() + "/",
+		when(wab.findEntries(wabServices.toURI().getPath() + "/",
 				ServletContainerInitializer.class.getName(), false)).thenReturn(
 				Collections.enumeration(Collections.singletonList(
 						new File(wabServices, ServletContainerInitializer.class.getName()).toURI().toURL()))
@@ -220,7 +220,7 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 
 		// /data/sources/github.com/ops4j/org.ops4j.pax.web/pax-web-itest/pax-web-itest-server/src/test/resources/bundles/the-wab-itself/WEB-INF/classes/
 		File wabClasses = new File("src/test/resources/bundles/the-wab-itself/WEB-INF/classes/");
-		when(wab.findEntries(wabClasses.getCanonicalPath() + "/", "*.class", true)).thenReturn(
+		when(wab.findEntries(wabClasses.toURI().getPath() + "/", "*.class", true)).thenReturn(
 				Collections.enumeration(Arrays.asList(
 						getClass().getClassLoader().getResource("org/ops4j/pax/web/itest/server/support/war/Cb1IFace3Impl.class"),
 						getClass().getClassLoader().getResource("org/ops4j/pax/web/itest/server/support/war/servlets/SimplestServlet.class")
