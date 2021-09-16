@@ -8,33 +8,33 @@ OPS4j Pax Web
 What is Pax Web
 ===============
 
-OSGi R6 Http Service and Web Applications (OSGi Enterprise Release chapter 128) implementation using Jetty 9 and Tomcat 8.   
-Pax Web extends OSGi Http Service with better servlet support, filters, listeners, error pages and JSPs and some others in order to meet the latest versions of Servlet specs.    
+* OSGi R7 Http Service Specification implementation ([OSGi CMPN R7, chapter 102](https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html))
+* OSGi R7 Web Applications Specification implementation ([OSGi CMPN R7, chapter 128](https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.war.html))
+* OSGi R7 Http Whiteboard Specification implementation ([OSGi CMPN R7, chapter 140](https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.whiteboard.html))
+
+Pax Web extends OSGi Http Service with better servlet support, filters, listeners, error pages and JSPs and some others in order to meet the latest versions of Servlet specs.
 Pax Web facilitates an easy installation of WAR bundles as well as discovery of web elements published as OSGi services. All of this beside the, standard, programmatic registration as detailed in the HTTP Service specs.
 
-Currently it supports the following:    
-* Servlet 3.0   
-* JSP 1.1.2   
-* JSF 2.1   
-* Jetty 9.x   
-* Tomcat 8.x  
-* support of CDI (through [Pax CDI](https://github.com/ops4j/org.ops4j.pax.cdi))  
-* support of only Servlet 3.0 annotated Servlets in JAR   
+There are 3 equivalent (in terms of functionality) implementations in Pax Web:
+
+* pax-web-jetty bundle uses [Jetty](https://www.eclipse.org/jetty/) 9.4.x
+* pax-web-tomcat bundle uses [Tomcat](https://tomcat.apache.org/) 9.0.x
+* pax-web-undertow bundle uses [Undertow](https://undertow.io/) 2.2.x
 
 ## Documentation
 
-* <https://ops4j1.jira.com/wiki/display/paxweb/Pax+Web>
-or alternative
+* <https://ops4j1.jira.com/wiki/spaces/paxweb/overview>
+or alternative (work in progress)
 * <http://ops4j.github.io/pax/web/index.html>
 
 ## Contributing
 
 In OPS4J, everyone is invited to contribute. We don't require any paperwork or community reputation.
-All we ask you is to move carefully and to clean up after yourself: 
+All we ask you is to move carefully and to clean up after yourself:
 
 * Describe your problem or enhancement request before submitting a solution.
-* Submit a [JIRA](https://ops4j1.jira.com/browse/PAXWEB) issue before creating a pull request. This is required for the release notes.
-* For discussions, the [mailing list](https://groups.google.com/forum/#!forum/ops4j) is more suitable than JIRA.
+* Submit a [GitHub issue](https://github.com/ops4j/org.ops4j.pax.web/issues) before creating a pull request. This is required for the release notes.
+* For discussions, the [mailing list](https://groups.google.com/forum/#!forum/ops4j) is more suitable than GH issues.
 * Any bugfix or new feature must be covered by regression tests.
 
 
@@ -58,4 +58,4 @@ Go to oss.sonatype.org and push pax-web to central.
 
 If you want more information about releasing, please take a look on:
 
-http://team.ops4j.org/wiki/display/ops4j/Releasing
+https://ops4j1.jira.com/wiki/spaces/ops4j/pages/12060688/Releasing
