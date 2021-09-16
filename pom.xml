@@ -3042,11 +3042,11 @@
 									<goal>jar</goal>
 									<goal>test-javadoc</goal>
 								</goals>
-								<configuration>
-									<doclint>none</doclint>
-								</configuration>
 							</execution>
 						</executions>
+						<configuration>
+							<doclint>none</doclint>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>
