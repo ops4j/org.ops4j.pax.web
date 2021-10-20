@@ -68,6 +68,7 @@ public abstract class AbstractWarPostIntegrationTest extends ITestBase {
 						resp -> resp.contains("POST data size is: 3000000"))
 				.doPOST("http://127.0.0.1:8181/posttest/upload-check")
 				.addParameter("data", createData())
+				.timeoutInSeconds(30)
 				.executeTest();
 	}
 

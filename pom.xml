@@ -124,7 +124,8 @@
 		<dependency.jsr303.version>1.8.0</dependency.jsr303.version>
 		<dependency.jsr305.version>1.3.9_1</dependency.jsr305.version>
 		<dependency.jstl.version>1.2</dependency.jstl.version>
-		<dependency.karaf.version>4.2.11</dependency.karaf.version>
+		<!-- Karaf 4.2.9 uses broken fileinstall 3.6.6 (FELIX-6103) -->
+		<dependency.karaf.version>4.2.8</dependency.karaf.version>
 		<dependency.osgi.version>6.0.0</dependency.osgi.version>
 		<dependency.org.osgi.util.promise>1.1.1</dependency.org.osgi.util.promise>
 		<dependency.org.osgi.util.function>1.1.0</dependency.org.osgi.util.function>

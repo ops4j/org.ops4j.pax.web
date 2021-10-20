@@ -110,7 +110,7 @@ public abstract class AbstractControlledTestBase {
 				systemTimeout(60 * 60 * 1000),
 
 				// path relative to pax-web-itest-container-<containerName>
-				systemProperty("org.ops4j.pax.logging.property.file").value("src/test/resources/pax-logging.properties"),
+				systemProperty("org.ops4j.pax.logging.property.file").value("../../pax-web-itest-base/src/main/resources/log4j2.properties"),
 				frameworkProperty("felix.bootdelegation.implicit").value("false"),
 				// set to "4" to see Felix wiring information
 				frameworkProperty("felix.log.level").value("1"),
