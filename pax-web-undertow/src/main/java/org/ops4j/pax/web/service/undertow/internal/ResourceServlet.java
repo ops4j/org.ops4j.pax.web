@@ -16,8 +16,10 @@
 package org.ops4j.pax.web.service.undertow.internal;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
@@ -31,6 +33,9 @@ import io.undertow.server.handlers.resource.ResourceManager;
 import io.undertow.servlet.handlers.DefaultServlet;
 import io.undertow.servlet.handlers.ServletRequestContext;
 import io.undertow.servlet.spec.HttpServletRequestImpl;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.wiring.BundleRevision;
 
 /**
  * TODO: Undertow resource handling is done not by {@link DefaultServlet} but by {@link ResourceHandler}.
@@ -68,10 +73,27 @@ public class ResourceServlet extends HttpServlet implements ResourceManager {
 
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
-		if (!(request instanceof HttpServletRequestImpl)) {
-			throw new IllegalStateException("Request is not an instance of " + HttpServletRequestImpl.class.getName());
+		ServletRequest realRequest = request;
+		// unwrap the request
+		while (realRequest instanceof HttpServletRequestWrapper) {
+			if (((HttpServletRequestWrapper) realRequest).getRequest() != null) {
+				realRequest = ((HttpServletRequestWrapper) realRequest).getRequest();
+			} else {
+				throw new IllegalStateException("Wrapped request " + realRequest.getClass().getName() + " doesn't wrap any actual servlet");
+			}
 		}
-		HttpServerExchange exchange = ((HttpServletRequestImpl) request).getExchange();
+		if (!(realRequest instanceof HttpServletRequestImpl)) {
+			String msg = realRequest == null ? ", it is null" : ", it is an instance of " + realRequest.getClass().getName()
+					+ ", loaded from " + FrameworkUtil.getBundle(realRequest.getClass());
+			if (realRequest != null) {
+				Bundle bundle = FrameworkUtil.getBundle(realRequest.getClass());
+				if (bundle != null) {
+					msg += ", revision: " + bundle.adapt(BundleRevision.class);
+				}
+			}
+			throw new IllegalStateException("Request is not an instance of " + HttpServletRequestImpl.class.getName() + msg);
+		}
+		HttpServerExchange exchange = ((HttpServletRequestImpl) realRequest).getExchange();
 		try {
 			handler.handleRequest(exchange);
 		} catch (IOException | ServletException e) {
