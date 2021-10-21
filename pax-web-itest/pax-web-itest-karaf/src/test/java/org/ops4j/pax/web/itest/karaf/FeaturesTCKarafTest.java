@@ -43,6 +43,10 @@ public class FeaturesTCKarafTest extends KarafBaseTest {
 		return tomcatConfig();
 	}
 
+	protected String overridesFile() {
+		return "org.apache.karaf.features-servlet4.xml";
+	}
+
 	@Test
 	public void test() throws Exception {
 

@@ -40,6 +40,10 @@ public class WarTCKarafTest extends KarafBaseTest {
 
 	private Bundle warBundle;
 
+	protected String overridesFile() {
+		return "org.apache.karaf.features-servlet4.xml";
+	}
+
 	@Configuration
 	public Option[] config() {
 

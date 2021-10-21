@@ -34,6 +34,10 @@ public class FeaturesUndertowKarafTest extends KarafBaseTest {
 		return undertowConfig();
 	}
 
+	protected String overridesFile() {
+		return "org.apache.karaf.features-servlet4.xml";
+	}
+
 	@Test
 	public void test() throws Exception {
 

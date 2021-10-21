@@ -74,6 +74,10 @@ public class KarafBaseTest extends AbstractControlledTestBase {
 
 	private org.ops4j.pax.web.itest.base.ServletListenerImpl servletListener;
 
+	protected String overridesFile() {
+		return "org.apache.karaf.features.xml";
+	}
+
 	public Option[] baseConfig() {
 
 		MavenUrlReference karafStandardFeature = maven()
@@ -82,7 +86,7 @@ public class KarafBaseTest extends AbstractControlledTestBase {
 
 		String featureProcessing = null;
 		try {
-			featureProcessing = new File("target/test-classes/org.apache.karaf.features.xml").toURI().toURL().toString();
+			featureProcessing = new File("target/test-classes/" + overridesFile()).toURI().toURL().toString();
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
