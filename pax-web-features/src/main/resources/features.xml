@@ -249,8 +249,8 @@
         <bundle dependency="true">mvn:org.jboss.logging/jboss-logging/${dependency.jboss-logging}</bundle>
         <bundle dependency="true">mvn:javax.websocket/javax.websocket-api/${dependency.websocket.version}</bundle>
 
-        <bundle>mvn:org.jboss.xnio/xnio-api/${dependency.xnio.version}</bundle>
-        <bundle>mvn:org.jboss.xnio/xnio-nio/${dependency.xnio.version}</bundle>
+        <bundle start-level="25">mvn:org.jboss.xnio/xnio-api/${dependency.xnio.version}</bundle>
+        <bundle start-level="25">mvn:org.jboss.xnio/xnio-nio/${dependency.xnio.version}</bundle>
         <bundle>mvn:io.undertow/undertow-core/${dependency.undertow.version}</bundle>
         <bundle>mvn:io.undertow/undertow-servlet/${dependency.undertow.version}</bundle>
         <bundle>mvn:io.undertow/undertow-websockets-jsr/${dependency.undertow.version}</bundle>
@@ -291,7 +291,7 @@
 
         <feature>pax-web-core</feature>
         <bundle>mvn:org.ops4j.pax.web/pax-web-runtime/${project.version}</bundle>
-        <bundle>mvn:org.ops4j.pax.web/pax-web-undertow/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-undertow/${project.version}</bundle>
 
         <capability>
             pax.http.provider;provider:=undertow
