@@ -18,13 +18,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.ops4j.pax.web.itest.undertow.war.jsf;
+package org.ops4j.pax.web.itest.tomcat.war.jsf;
 
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.container.war.jsf.AbstractWarJsfResourcehandlerIntegrationTest;
+import org.ops4j.pax.web.itest.container.war.jsf.AbstractWarJSFResourcehandlerIntegrationTest;
 
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
@@ -33,11 +33,11 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
  * @author Marc Schlegel
  */
 @RunWith(PaxExam.class)
-public class WarJsfResourcehandlerIntegrationTest extends AbstractWarJsfResourcehandlerIntegrationTest {
+public class WarJSFResourcehandlerIntegrationTest extends AbstractWarJSFResourcehandlerIntegrationTest {
 
 	@Configuration
 	public Option[] configure() {
-		Option[] serverOptions = combine(baseConfigure(), paxWebUndertow());
+		Option[] serverOptions = combine(baseConfigure(), paxWebTomcat());
 		Option[] jspOptions = combine(serverOptions, paxWebJsp());
 		// MyFaces and dependencies are installed as bundles
 		Option[] jsfOptions = combine(jspOptions, myfaces());

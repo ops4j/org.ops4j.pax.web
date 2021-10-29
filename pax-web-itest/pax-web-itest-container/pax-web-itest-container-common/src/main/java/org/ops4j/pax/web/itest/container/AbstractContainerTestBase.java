@@ -28,6 +28,13 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 public abstract class AbstractContainerTestBase extends AbstractControlledTestBase {
 
 	protected Option[] baseConfigure() {
+		Option[] options = baseConfigureWithoutRuntime();
+		options = combine(options, paxWebRuntime());
+
+		return options;
+	}
+
+	protected Option[] baseConfigureWithoutRuntime() {
 		Option[] options = super.baseConfigure();
 		Option[] containerOptions = new Option[] {
 				frameworkProperty("org.osgi.service.http.port").value("8181")
@@ -40,7 +47,6 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 				.value("../../etc/log4j2-osgi.properties"));
 
 		options = combine(options, paxWebCore());
-		options = combine(options, paxWebRuntime());
 		options = combine(options, paxWebTestSupport());
 
 		return options;

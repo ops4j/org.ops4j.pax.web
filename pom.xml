@@ -234,6 +234,7 @@
 
 		<dependency.org.eclipse.jdt.ecj>3.26.0</dependency.org.eclipse.jdt.ecj>
 		<dependency.org.eclipse.jetty>9.4.44.v20210927</dependency.org.eclipse.jetty>
+		<dependency.org.eclipse.jetty.osgi>9.4.44</dependency.org.eclipse.jetty.osgi>
 		<dependency.org.eclipse.platform.osgi>3.12.100</dependency.org.eclipse.platform.osgi>
 
 		<dependency.org.glassfish.hk2>2.6.1</dependency.org.glassfish.hk2>
@@ -700,11 +701,11 @@
 				<artifactId>pax-web-jetty</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-<!--			<dependency>-->
-<!--				<groupId>org.ops4j.pax.web</groupId>-->
-<!--				<artifactId>pax-web-jetty-bundle</artifactId>-->
-<!--				<version>${project.version}</version>-->
-<!--			</dependency>-->
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-jetty-bundle</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-tomcat-common</artifactId>
@@ -2010,12 +2011,28 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-jaspi</artifactId>
+				<version>${dependency.org.eclipse.jetty}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.eclipse.jetty.orbit</groupId>
+						<artifactId>javax.security.auth.message</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-client</artifactId>
 				<version>${dependency.org.eclipse.jetty}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-continuation</artifactId>
+				<version>${dependency.org.eclipse.jetty}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-deploy</artifactId>
 				<version>${dependency.org.eclipse.jetty}</version>
 			</dependency>
 			<dependency>
@@ -2068,6 +2085,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-servlets</artifactId>
+				<version>${dependency.org.eclipse.jetty}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-xml</artifactId>
 				<version>${dependency.org.eclipse.jetty}</version>
 			</dependency>
@@ -2078,7 +2100,23 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-rewrite</artifactId>
+				<version>${dependency.org.eclipse.jetty}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>javax.servlet</groupId>
+						<artifactId>javax.servlet-api</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-jmx</artifactId>
+				<version>${dependency.org.eclipse.jetty}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-jndi</artifactId>
 				<version>${dependency.org.eclipse.jetty}</version>
 			</dependency>
 			<dependency>
@@ -2981,7 +3019,7 @@
 
 		<!-- Jetty 9 support -->
 		<module>pax-web-jetty</module>
-<!-- 		<module>pax-web-jetty-bundle</module> -->
+ 		<module>pax-web-jetty-bundle</module>
 
 		<!-- Tomcat 9 support -->
 		<module>pax-web-tomcat</module>

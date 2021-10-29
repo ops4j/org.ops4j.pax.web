@@ -17,7 +17,7 @@ Moved to after 8.0.0.GA (8.0.x):
  - @ServletSecurity, @RunAs, @DeclareRoles annotations on servlets
  - EventAdmin notifications (128.5 Events)
  - skipping configured web fragments (no scanning, as in Tomcat's tomcat.util.scan.StandardJarScanFilter.jarsToSkip)
- - Jetty/Tomcat/Undertow bundles
+ - [#1637] Jetty/Tomcat/Undertow bundles
  - JAX-RS example with aries-jaxrs
  - CDI example with aries-cdi
  - HTTP context processing (potentially with external web-fragment.xml)

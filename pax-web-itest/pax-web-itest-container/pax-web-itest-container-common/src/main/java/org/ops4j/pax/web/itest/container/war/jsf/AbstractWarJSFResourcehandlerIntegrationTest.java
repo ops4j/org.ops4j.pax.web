@@ -54,7 +54,7 @@ import static org.ops4j.pax.web.itest.utils.assertion.Assert.assertThat;
 /**
  * @author Marc Schlegel
  */
-public class AbstractWarJsfResourcehandlerIntegrationTest extends AbstractContainerTestBase {
+public class AbstractWarJSFResourcehandlerIntegrationTest extends AbstractContainerTestBase {
 
 	/**
 	 * The default implementation {@code org.ops4j.pax.web.resources.extender.internal.IndexedOsgiResourceLocator} is

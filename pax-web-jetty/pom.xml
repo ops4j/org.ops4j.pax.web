@@ -62,8 +62,6 @@
 							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
 							<!-- from pax-web-spi -->
 							org.ops4j.pax.web.service.spi.*;version="${pax-web.osgi.version}",
-							<!-- from pax-web-jsp -->
-<!--							org.ops4j.pax.web.jsp;version="${pax-web.osgi.version}"; resolution:=optional,-->
 
 							<!-- from pax-logging-api -->
 							org.slf4j;version="[1.7,2)",
@@ -71,10 +69,6 @@
 							<!-- from Jetty bundles -->
 							org.eclipse.jetty.*,
 							org.eclipse.jetty.jaas,
-<!--							org.eclipse.jetty.alpn.*; resolution:=optional,-->
-<!--							org.eclipse.jetty.jaas.*; resolution:=optional,-->
-<!--							org.eclipse.jetty.jmx.*; resolution:=optional,-->
-<!--							org.eclipse.jetty.websocket.*; resolution:=optional,-->
 
 							<!-- other -->
 							javax.annotation;version="[1.2,2)"; resolution:=optional,
@@ -83,14 +77,6 @@
 							javax.xml.parsers,
 							org.w3c.dom,
 							org.xml.sax
-
-							<!-- to check -->
-<!--							javax.security.auth,-->
-<!--							javax.security.auth.callback,-->
-<!--							javax.security.auth.login,-->
-<!--							javax.security.cert; resolution:=optional,-->
-<!--							javax.websocket.*; resolution:=optional,-->
-<!--							javax.el;version="[2.1.0,4.0.0)";resolution:=optional,-->
 						</Import-Package>
 						<Provide-Capability>
 							osgi.service;effective:=active;objectClass:List&lt;String&gt;="org.ops4j.pax.web.service.spi.ServerControllerFactory"

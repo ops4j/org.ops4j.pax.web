@@ -91,15 +91,7 @@
 							org.w3c.dom,
 							org.xml.sax
 
-							<!-- to check after restoring previous functionality (jasypt, jsp, websockets) -->
-<!--							javax.websocket.*;resolution:=optional,-->
-<!--							org.apache.jasper.servlet;resolution:=optional,-->
-<!--							org.w3c.dom,-->
-<!--							org.xml.sax,-->
-<!--							com.sun.el;version="2.1.0";resolution:=optional,-->
-<!--							com.sun.el.lang;version="2.1.0";resolution:=optional,-->
-<!--							com.sun.el.parser;version="2.1.0";resolution:=optional,-->
-<!--							com.sun.el.util;version="2.1.0";resolution:=optional,-->
+							<!-- to check after restoring previous functionality (jasypt) -->
 <!--							org.jasypt.encryption.pbe;resolution:=optional,-->
 <!--							javax.crypto.spec;resolution:=optional,-->
 <!--							javax.crypto;resolution:=optional-->

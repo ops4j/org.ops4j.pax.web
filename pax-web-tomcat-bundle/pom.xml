@@ -105,8 +105,7 @@
 							org.apache.tomcat.*;version="${dependency.tomcat.version}";
 							-split-package:=merge-first
 						</Export-Package>
-						<Embed-Dependency>*; scope=compile; type=!pom;
-							inline=**/*.class|**/*.ico|**/*.dtd|**/*.xml|**/*.properties|**/*.map|**/*.default|**/*.providers</Embed-Dependency>
+						<Embed-Dependency>*; scope=compile; type=!pom</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 					</instructions>
 				</configuration>

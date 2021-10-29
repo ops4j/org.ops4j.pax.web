@@ -24,7 +24,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.container.war.jsf.AbstractWarJsfResourcehandlerIntegrationTest;
+import org.ops4j.pax.web.itest.container.war.jsf.AbstractWarJSFResourcehandlerIntegrationTest;
 
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
@@ -33,7 +33,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
  * @author Marc Schlegel
  */
 @RunWith(PaxExam.class)
-public class WarJsfResourcehandlerIntegrationTest extends AbstractWarJsfResourcehandlerIntegrationTest {
+public class WarJSFResourcehandlerIntegrationTest extends AbstractWarJSFResourcehandlerIntegrationTest {
 
 	@Configuration
 	public Option[] configure() {
