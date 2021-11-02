@@ -76,6 +76,8 @@ import static org.ops4j.pax.exam.CoreOptions.systemTimeout;
 import static org.ops4j.pax.exam.CoreOptions.url;
 import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
 import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.web.itest.utils.WaitCondition.RETRY_DURATION_MILLIS;
+import static org.ops4j.pax.web.itest.utils.WaitCondition.SLEEP_DURATION_MILLIS;
 
 /**
  * <p>Single base class for all Pax Exam integration tests. Subclasses may add specific helper methods.</p>
@@ -891,6 +893,16 @@ public abstract class AbstractControlledTestBase {
 	 * @param action
 	 */
 	protected void configureAndWaitForDeployment(Action action) throws Exception {
+		configureAndWaitForDeployment(action, RETRY_DURATION_MILLIS);
+	}
+
+	/**
+	 * Performs an action and waits for {@link org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent} related
+	 * to started WAB
+	 * @param action
+	 * @param timeoutInMs
+	 */
+	protected void configureAndWaitForDeployment(Action action, long timeoutInMs) throws Exception {
 		final CountDownLatch latch = new CountDownLatch(1);
 		WebApplicationEventListener listener = event -> {
 			if (event.getType() == WebApplicationEvent.State.DEPLOYED) {
@@ -908,7 +920,7 @@ public abstract class AbstractControlledTestBase {
 				protected boolean isFulfilled() {
 					return latch.getCount() == 0L;
 				}
-			}.waitForCondition();
+			}.waitForCondition(timeoutInMs, SLEEP_DURATION_MILLIS);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new RuntimeException(e.getMessage(), e);

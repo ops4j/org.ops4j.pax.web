@@ -28,7 +28,7 @@ public abstract class AbstractWarVaadin20SpringIntegrationTest extends AbstractC
 
 	@Before
 	public void setUp() throws Exception {
-		configureAndWaitForDeployment(() -> installAndStartBundle(sampleWarURI("war-vaadin20-spring")));
+		configureAndWaitForDeployment(() -> installAndStartBundle(sampleWarURI("war-vaadin20-spring")), 20000);
 	}
 
 	@Test

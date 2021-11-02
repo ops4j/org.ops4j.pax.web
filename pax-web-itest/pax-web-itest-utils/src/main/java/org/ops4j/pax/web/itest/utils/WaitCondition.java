@@ -23,8 +23,8 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class WaitCondition {
 
-	private static final long RETRY_DURATION_MILLIS = 10000;
-	private static final long SLEEP_DURATION_MILLIS = 200;
+	public static final long RETRY_DURATION_MILLIS = 10000;
+	public static final long SLEEP_DURATION_MILLIS = 200;
 	private static final Logger LOG = LoggerFactory.getLogger(WaitCondition.class);
 
 	private final String description;

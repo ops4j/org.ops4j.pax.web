@@ -28,13 +28,13 @@
 	</parent>
 
 	<groupId>org.ops4j.pax.web</groupId>
-	<artifactId>pax-web-tomcat-bundle</artifactId>
+	<artifactId>pax-web-undertow-bundle</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web - Tomcat Bundle</name>
+	<name>OPS4J Pax Web - Undertow Bundle</name>
 
 	<description>
-		This module combines pax-web-runtime, pax-web-tomcat and Tomcat artifacts in single bundle. It still requires Servlet API, WebSocket API
+		This module combines pax-web-runtime, pax-web-undertow and Undertow/Wildfly artifacts in single bundle. It still requires Servlet API, WebSocket API
 		and other dependencies.
 	</description>
 
@@ -46,7 +46,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Bundle-Activator>org.ops4j.pax.web.service.tomcat.bundle.internal.CompositeActivator</Bundle-Activator>
+						<Bundle-Activator>org.ops4j.pax.web.service.undertow.bundle.internal.CompositeActivator</Bundle-Activator>
 						<Import-Package>
 							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
 							javax.servlet;version="[3.1,5)",
@@ -78,9 +78,6 @@
 							org.ops4j.pax.web.service.whiteboard;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
 
-							<!-- from pax-web-jsp -->
-							javax.servlet.jsp.tagext;version="2.3";resolution:=optional,
-
 							<!-- from pax-web-spi -->
 							org.ops4j.pax.web.service.spi;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.config;version="${pax-web.osgi.version}",
@@ -99,82 +96,54 @@
 							org.slf4j.helpers;version="[1.7,2)";resolution:=optional,
 							org.slf4j.spi;version="[1.7,2)";resolution:=optional,
 							org.osgi.service.log;version="[1.3,2)";resolution:=optional,
-							org.apache.juli.logging,
+							org.jboss.logging,
 
 							<!-- other -->
 							javax.annotation;version="[1.2,2)";resolution:=optional,
 							javax.annotation.security;version="[1.2,2)";resolution:=optional,
-							javax.imageio;resolution:=optional,
-							javax.mail;resolution:=optional,
-							javax.mail.internet;resolution:=optional,
+							javax.crypto,
 							javax.management;resolution:=optional,
-							javax.management.loading;resolution:=optional,
-							javax.management.modelmbean;resolution:=optional,
-							javax.management.openmbean;resolution:=optional,
-							javax.management.remote;resolution:=optional,
-							javax.management.remote.rmi;resolution:=optional,
 							javax.naming;resolution:=optional,
-							javax.naming.directory;resolution:=optional,
-							javax.naming.ldap;resolution:=optional,
-							javax.naming.spi;resolution:=optional,
-							javax.net;resolution:=optional,
-							javax.net.ssl;resolution:=optional,
+							javax.net.ssl,
 
 							javax.security.auth;resolution:=optional,
 							javax.security.auth.callback;resolution:=optional,
+							javax.security.auth.kerberos;resolution:=optional,
 							javax.security.auth.login;resolution:=optional,
-							javax.security.auth.message;resolution:=optional,
-							javax.security.auth.message.callback;resolution:=optional,
-							javax.security.auth.message.config;resolution:=optional,
-							javax.security.auth.message.module;resolution:=optional,
-							javax.security.auth.spi;resolution:=optional,
-							javax.security.auth.x500;resolution:=optional,
+							javax.security.cert;resolution:=optional,
+							javax.security.sasl;resolution:=optional,
 
 							javax.sql;resolution:=optional,
-							javax.rmi.ssl;resolution:=optional,
-							javax.xml.parsers,
-							javax.xml.transform;resolution:=optional,
-							javax.xml.transform.dom;resolution:=optional,
-							javax.xml.transform.stream;resolution:=optional,
-
-							javax.crypto;resolution:=optional,
-							javax.crypto.spec;resolution:=optional,
-							javax.ejb;resolution:=optional,
-							javax.persistence;resolution:=optional,
-							javax.security.cert;resolution:=optional,
-							javax.wsdl;resolution:=optional,
-							javax.wsdl.extensions;resolution:=optional,
-							javax.wsdl.extensions.soap;resolution:=optional,
-							javax.wsdl.factory;resolution:=optional,
-							javax.wsdl.xml;resolution:=optional,
 							javax.xml.namespace;resolution:=optional,
-							javax.xml.rpc;resolution:=optional,
-							javax.xml.rpc.handler;resolution:=optional,
-							javax.xml.ws;resolution:=optional,
+							javax.xml.parsers,
+							javax.xml.stream,
+							javax.xml.bind,
+							javax.xml.bind.annotation,
+							com.sun.xml.bind.v2;resolution:=optional,
 
 							org.ietf.jgss;resolution:=optional,
-							com.sun.jndi.ldap;resolution:=optional,
-							com.sun.security.auth.login;resolution:=optional,
-							org.graalvm.nativeimage;resolution:=optional,
 							org.w3c.dom,
-							org.w3c.dom.ls;resolution:=optional,
 							org.xml.sax,
-							org.xml.sax.ext;resolution:=optional,
 							org.xml.sax.helpers,
 							sun.misc;resolution:=optional,
-							sun.rmi.registry;resolution:=optional,
-							sun.rmi.transport;resolution:=optional
+							com.oracle.svm.core.annotate;resolution:=optional,
+							org.eclipse.jetty.alpn;resolution:=optional,
+							org.graalvm.nativeimage;resolution:=optional,
+							org.graalvm.nativeimage.c;resolution:=optional,
+							org.graalvm.nativeimage.c.function;resolution:=optional,
+							org.graalvm.nativeimage.c.type;resolution:=optional,
+							org.graalvm.word;resolution:=optional
 						</Import-Package>
-						<Private-Package>
-							org.ops4j.pax.web.service.tomcat.bundle.internal.*,
-							org.ops4j.pax.web.service.tomcat.internal.*
-						</Private-Package>
 						<Export-Package>
-							org.apache.catalina.*;version="${dependency.org.apache.tomcat}",
-							org.apache.coyote.*;version="${dependency.org.apache.tomcat}",
-							org.apache.juli;version="${dependency.org.apache.tomcat}",
-							org.apache.naming.*;version="${dependency.org.apache.tomcat}",
-							org.apache.tomcat.*;version="${dependency.org.apache.tomcat}"
+							io.undertow.*;version="${dependency.io.undertow}",
+							org.xnio.*;version="${dependency.org.jboss.xnio}",
+
+							org.ops4j.pax.web.service.undertow,
+							org.ops4j.pax.web.service.undertow.configuration.model,
+
+							org.wildfly.common.context;-split-package:=merge-first,
+							org.wildfly.common.function;-split-package:=merge-first,
+							org.wildfly.common.net;-split-package:=merge-first
 						</Export-Package>
 						<Embed-Dependency>*;scope=compile;type=!pom;inline=true</Embed-Dependency>
 						<Embed-Transitive>false</Embed-Transitive>
@@ -198,15 +167,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-tomcat</artifactId>
+			<artifactId>pax-web-undertow</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-tomcat-common</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-tomcat-websocket</artifactId>
+			<artifactId>pax-web-undertow-websocket</artifactId>
 		</dependency>
 
 		<!-- OSGi -->
@@ -215,6 +180,49 @@
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.core</artifactId>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.cmpn</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Undertow -->
+
+		<dependency>
+			<groupId>io.undertow</groupId>
+			<artifactId>undertow-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.undertow</groupId>
+			<artifactId>undertow-servlet</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.undertow</groupId>
+			<artifactId>undertow-websockets-jsr</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.xnio</groupId>
+			<artifactId>xnio-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.xnio</groupId>
+			<artifactId>xnio-nio</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.threads</groupId>
+			<artifactId>jboss-threads</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.wildfly.common</groupId>
+			<artifactId>wildfly-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.wildfly.client</groupId>
+			<artifactId>wildfly-client-config</artifactId>
 		</dependency>
 
 	</dependencies>

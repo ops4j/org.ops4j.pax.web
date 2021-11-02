@@ -738,6 +738,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-undertow-bundle</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-extender-whiteboard</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -3034,6 +3039,7 @@
 		<!-- Undertow 2 support -->
 		<module>pax-web-undertow</module>
 		<module>pax-web-undertow-websocket</module>
+		<module>pax-web-undertow-bundle</module>
 
 		<module>pax-web-features</module>
 
