@@ -164,15 +164,6 @@
 <!--							javax.xml.transform.dom-->
 <!--							javax.xml.transform.stream-->
 <!--							javax.xml.ws-->
-
-							<!-- to check -->
-<!--							javax.security.auth,-->
-<!--							javax.security.auth.callback,-->
-<!--							javax.security.auth.login,-->
-<!--							javax.servlet.jsp.*;version="[2.2,2.3)",-->
-<!--							javax.websocket,-->
-<!--							javax.websocket.server,-->
-<!--							javax.el; version="[2.1.0,3.1.0)";resolution:=optional,-->
 						</Import-Package>
 						<Export-Package>
 							<!-- Re-export everything from Tomcat, which after Pax Web 8 is not imported from TIPI -->
@@ -307,6 +298,7 @@
 		<dependency>
 			<groupId>org.apache.tomcat.embed</groupId>
 			<artifactId>tomcat-embed-core</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>

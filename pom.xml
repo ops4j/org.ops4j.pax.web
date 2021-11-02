@@ -718,6 +718,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-tomcat-bundle</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-tomcat-websocket</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -3024,7 +3029,7 @@
 		<!-- Tomcat 9 support -->
 		<module>pax-web-tomcat</module>
 		<module>pax-web-tomcat-websocket</module>
-<!--		<module>pax-web-tomcat-bundle</module>-->
+		<module>pax-web-tomcat-bundle</module>
 
 		<!-- Undertow 2 support -->
 		<module>pax-web-undertow</module>

@@ -23,7 +23,7 @@
 	<parent>
 		<groupId>org.ops4j.pax</groupId>
 		<artifactId>web</artifactId>
-		<version>8.0.0-SNAPSHOT</version>
+		<version>8.0.1-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -33,10 +33,10 @@
 
 	<name>OPS4J Pax Web - Tomcat Bundle</name>
 
-	<properties>
-		<bundle.namespace>org.ops4j.pax.web.service.tomcat</bundle.namespace>
-		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
-	</properties>
+	<description>
+		This module combines pax-web-runtime, pax-web-tomcat and Tomcat artifacts in single bundle. It still requires Servlet API, WebSocket API
+		and other dependencies.
+	</description>
 
 	<build>
 		<plugins>
@@ -47,79 +47,140 @@
 				<configuration>
 					<excludeDependencies>META-INF/ECLIPSEF.RSA</excludeDependencies>
 					<instructions>
-						<Bundle-Activator>org.ops4j.pax.web.service.tomcat.internal.CompositeActivator</Bundle-Activator>
+						<Bundle-Activator>org.ops4j.pax.web.service.tomcat.bundle.internal.CompositeActivator</Bundle-Activator>
 						<Import-Package>
-							javax.net.ssl; resolution:=optional,
-							javax.servlet.*; version="[3.1,5)",
-							javax.transaction;
-							resolution:=optional,
-							javax.security.auth,
-							javax.security.auth.callback,
-							javax.security.auth.login,
-							javax.security.cert;resolution:=optional;version="[2.3.0,3.1.0)",
-							javax.xml.parsers,
-							org.osgi.framework;version="[1.0.0,2.0.0)",
-							org.osgi.service.http;version="[1.0.0,2.0.0)",
-							org.slf4j;version="[1.5,2)",
-							javax.el;version="[2.1.0,3.1.0)";resolution:=optional,
+							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
+							javax.servlet;version="[3.1,5)",
+							javax.servlet.annotation;version="[3.1,5)",
+							javax.servlet.descriptor;version="[3.1,5)",
+							javax.servlet.http;version="[3.1,5)",
+
+							javax.websocket;version="[1.1,2)";resolution:=optional,
+							javax.websocket.server;version="[1.1,2)";resolution:=optional,
+
+							<!-- ranges indicate we can work with OSGi Core R6+ -->
+							org.osgi.framework;version="[1.8,2)",
+							org.osgi.framework.dto;version="[1.0,2)",
+							org.osgi.framework.wiring;version="[1.2,2)",
+							org.osgi.util.tracker;version="[1.5,2)",
+
+							<!-- OSGi cmpn -->
+							org.osgi.service.cm;version="[1.0,2.0)";resolution:=optional,
+							org.osgi.service.event;resolution:=optional,
+							org.osgi.service.http;version="[1.2,2)",
+							org.osgi.service.http.context;version="[1.1,2)",
+							org.osgi.service.http.runtime;version="[1.1,2)",
+							org.osgi.service.http.runtime.dto;version="[1.1,2)",
+							org.osgi.service.http.whiteboard;version="[1.1,2)",
+
+							<!-- from pax-web-api -->
+							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.views;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.whiteboard;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
+
+							<!-- from pax-web-jsp -->
+							javax.servlet.jsp.tagext;version="2.3";resolution:=optional,
+
+							<!-- from pax-web-spi -->
+							org.ops4j.pax.web.service.spi;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.config;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.context;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.model;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.model.elements;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.model.events;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.model.views;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.util;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.servlet;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.task;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.whiteboard;version="${pax-web.osgi.version}",
+
+							<!-- from pax-logging-api -->
+							org.slf4j;version="[1.7,2)",
+							org.slf4j.helpers;version="[1.7,2)";resolution:=optional,
+							org.slf4j.spi;version="[1.7,2)";resolution:=optional,
+							org.osgi.service.log;version="[1.3,2)";resolution:=optional,
 							org.apache.juli.logging,
-							org.apache.el.*;version="2.2",
-							org.apache.catalina.*,
-							org.apache.coyote.*,
-							org.apache.naming.*,
-							org.apache.tomcat.*,
-							*,
-							!javax.microedition.io,
-							!javax.security.auth.x500,
+
+							<!-- other -->
+							javax.annotation;version="[1.2,2)";resolution:=optional,
+							javax.annotation.security;version="[1.2,2)";resolution:=optional,
+							javax.imageio;resolution:=optional,
+							javax.mail;resolution:=optional,
+							javax.mail.internet;resolution:=optional,
+							javax.management;resolution:=optional,
+							javax.management.loading;resolution:=optional,
+							javax.management.modelmbean;resolution:=optional,
+							javax.management.openmbean;resolution:=optional,
+							javax.management.remote;resolution:=optional,
+							javax.management.remote.rmi;resolution:=optional,
+							javax.naming;resolution:=optional,
+							javax.naming.directory;resolution:=optional,
+							javax.naming.ldap;resolution:=optional,
+							javax.naming.spi;resolution:=optional,
+							javax.net;resolution:=optional,
+							javax.net.ssl;resolution:=optional,
+
+							javax.security.auth;resolution:=optional,
+							javax.security.auth.callback;resolution:=optional,
+							javax.security.auth.login;resolution:=optional,
+							javax.security.auth.message;resolution:=optional,
+							javax.security.auth.message.callback;resolution:=optional,
+							javax.security.auth.message.config;resolution:=optional,
+							javax.security.auth.message.module;resolution:=optional,
+							javax.security.auth.spi;resolution:=optional,
+							javax.security.auth.x500;resolution:=optional,
+
+							javax.sql;resolution:=optional,
+							javax.rmi.ssl;resolution:=optional,
+							javax.xml.parsers,
+
+							javax.crypto;resolution:=optional,
+							javax.crypto.spec;resolution:=optional,
+							javax.ejb;resolution:=optional,
+							javax.persistence;resolution:=optional,
+							javax.security.cert;resolution:=optional,
+							javax.wsdl;resolution:=optional,
+							javax.wsdl.extensions;resolution:=optional,
+							javax.wsdl.extensions.soap;resolution:=optional,
+							javax.wsdl.factory;resolution:=optional,
+							javax.wsdl.xml;resolution:=optional,
+							javax.xml.namespace;resolution:=optional,
+							javax.xml.rpc;resolution:=optional,
+							javax.xml.rpc.handler;resolution:=optional,
+							javax.xml.transform;resolution:=optional,
+							javax.xml.transform.dom;resolution:=optional,
+							javax.xml.transform.stream;resolution:=optional,
+							javax.xml.ws;resolution:=optional,
+
+							org.ietf.jgss;resolution:=optional,
+							com.sun.jndi.ldap;resolution:=optional,
+							com.sun.security.auth.login;resolution:=optional,
+							org.graalvm.nativeimage;resolution:=optional,
+							org.w3c.dom,
+							org.w3c.dom.ls;resolution:=optional,
+							org.xml.sax,
+							org.xml.sax.ext;resolution:=optional,
+							org.xml.sax.helpers,
+							sun.misc;resolution:=optional,
+							sun.rmi.registry;resolution:=optional,
+							sun.rmi.transport;resolution:=optional
 						</Import-Package>
+						<Private-Package>
+							org.ops4j.pax.web.service.tomcat.bundle.internal.*,
+							org.ops4j.pax.web.service.tomcat.internal.*
+						</Private-Package>
 						<Export-Package>
-							javax.servlet;version="2.6.0",
-							javax.servlet.annotation;version="2.6.0",
-							javax.servlet.descriptor;version="2.6.0",
-							javax.servlet.http;version="2.6.0",
-							javax.servlet.resources;version="2.6.0",
-							javax.servlet;version="3.1.0",
-							javax.servlet.annotation;version="3.1.0",
-							javax.servlet.descriptor;version="3.1.0",
-							javax.servlet.http;version="3.1.0",
-							javax.servlet.resources;version="3.1.0",
-							org.ops4j.pax.web.utils;
-							version="${pax-web.osgi.version}"; -split-package:=merge-first,
-							org.ops4j.pax.web.service;
-							version="${pax-web.osgi.version}";
-							-split-package:=merge-first,
-							org.ops4j.pax.web.service.spi;
-							version="${pax-web.osgi.version}"; -split-package:=merge-first,
-							org.ops4j.pax.web.service.spi.model;
-							version="${pax-web.osgi.version}"; -split-package:=merge-first,
-							org.ops4j.pax.web.service.spi.util;
-							version="${pax-web.osgi.version}";
-							-split-package:=merge-first,
-							org.osgi.service.http;version="1.2.0",
-							org.apache.catalina.*;version="${dependency.tomcat.version}";
-							-split-package:=merge-first,
-							org.apache.coyote.*;version="${dependency.tomcat.version}";
-							-split-package:=merge-first,
-							org.apache.naming.*;version="${dependency.tomcat.version}";
-							-split-package:=merge-first,
-							org.apache.tomcat.*;version="${dependency.tomcat.version}";
-							-split-package:=merge-first
+							org.apache.catalina.*;version="${dependency.org.apache.tomcat}",
+							org.apache.coyote.*;version="${dependency.org.apache.tomcat}",
+							org.apache.juli;version="${dependency.org.apache.tomcat}",
+							org.apache.naming.*;version="${dependency.org.apache.tomcat}",
+							org.apache.tomcat.*;version="${dependency.org.apache.tomcat}"
 						</Export-Package>
-						<Embed-Dependency>*; scope=compile; type=!pom</Embed-Dependency>
-						<Embed-Transitive>true</Embed-Transitive>
+						<Embed-Dependency>*;scope=compile;type=!pom;inline=true</Embed-Dependency>
+						<Embed-Transitive>false</Embed-Transitive>
 					</instructions>
 				</configuration>
-				<executions>
-					<execution>
-						<id>baseline</id>
-						<goals>
-							<goal>baseline</goal>
-						</goals>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -131,11 +192,18 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-runtime</artifactId>
-			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-websocket</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-tomcat</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-tomcat-common</artifactId>
 		</dependency>
 
 		<!-- OSGi -->
@@ -144,17 +212,6 @@
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.core</artifactId>
 			<scope>provided</scope>
-		</dependency>
-
-		<!-- Tomcat -->
-
-		<dependency>
-			<groupId>org.ops4j.pax.tipi</groupId>
-			<artifactId>org.ops4j.pax.tipi.tomcat-embed-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.tipi</groupId>
-			<artifactId>org.ops4j.pax.tipi.tomcat-embed-websocket</artifactId>
 		</dependency>
 
 	</dependencies>

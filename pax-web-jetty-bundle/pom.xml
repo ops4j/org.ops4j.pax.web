@@ -139,7 +139,6 @@
 							org.eclipse.jetty.*;version="${dependency.org.eclipse.jetty.osgi}"
 						</Export-Package>
 						<Embed-Dependency>*;scope=compile;type=!pom;inline=true</Embed-Dependency>
-						<Embed-Directory>libs</Embed-Directory>
 						<Embed-Transitive>true</Embed-Transitive>
 					</instructions>
 				</configuration>
@@ -154,6 +153,10 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-runtime</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-websocket</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
