@@ -205,7 +205,7 @@
 		<dependency.org.apache.felix.configadmin>1.9.20</dependency.org.apache.felix.configadmin>
 		<dependency.org.apache.felix.converter>1.0.18</dependency.org.apache.felix.converter>
 		<dependency.org.apache.felix.eventadmin>1.6.2</dependency.org.apache.felix.eventadmin>
-		<dependency.org.apache.felix.fileinstall>3.6.8</dependency.org.apache.felix.fileinstall>
+		<dependency.org.apache.felix.fileinstall>3.7.2</dependency.org.apache.felix.fileinstall>
 		<dependency.org.apache.felix.framework5>5.6.12</dependency.org.apache.felix.framework5>
 		<dependency.org.apache.felix.framework6>6.0.4</dependency.org.apache.felix.framework6>
 		<dependency.org.apache.felix.framework7>7.0.1</dependency.org.apache.felix.framework7>
