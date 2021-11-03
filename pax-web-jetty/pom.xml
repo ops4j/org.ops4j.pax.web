@@ -320,6 +320,12 @@
 			<version>1.0.6</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.geronimo.components</groupId>
+			<artifactId>geronimo-jaspi</artifactId>
+			<version>${dependency.jaspi.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 </project>
