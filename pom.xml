@@ -227,7 +227,7 @@
 		<dependency.org.apache.servicemix.bundles.aopalliance>1.0_6</dependency.org.apache.servicemix.bundles.aopalliance>
 		<dependency.org.apache.servicemix.bundles.javax-inject>1_3</dependency.org.apache.servicemix.bundles.javax-inject>
 		<dependency.org.apache.taglibs>1.2.5</dependency.org.apache.taglibs>
-		<dependency.org.apache.tomcat>9.0.52</dependency.org.apache.tomcat>
+		<dependency.org.apache.tomcat>9.0.54</dependency.org.apache.tomcat>
 		<dependency.org.apache.xbean>4.20</dependency.org.apache.xbean>
 
 		<dependency.org.bouncycastle>1.69</dependency.org.bouncycastle>
