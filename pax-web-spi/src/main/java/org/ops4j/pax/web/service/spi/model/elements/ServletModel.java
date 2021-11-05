@@ -33,6 +33,7 @@ import java.util.function.Supplier;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.config.JspConfiguration;
@@ -41,8 +42,11 @@ import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
 import org.ops4j.pax.web.service.spi.util.Path;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
+import org.ops4j.pax.web.service.whiteboard.ServletMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.dto.DTOConstants;
 import org.osgi.service.http.runtime.dto.FailedResourceDTO;
 import org.osgi.service.http.runtime.dto.FailedServletDTO;
@@ -54,13 +58,13 @@ import org.osgi.service.http.runtime.dto.ServletDTO;
  */
 public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 
-	/** Alias as defined by old {@link org.osgi.service.http.HttpService} registration methods */
+	/** Alias as defined by old {@link HttpService} registration methods */
 	private final String alias;
 	private boolean aliasCopiedToPatterns = false;
 
 	/**
 	 * <p>URL patterns as specified by:<ul>
-	 *     <li>Pax Web specific extensions to {@link org.osgi.service.http.HttpService}</li>
+	 *     <li>Pax Web specific extensions to {@link HttpService}</li>
 	 *     <li>Whiteboard Service specification</li>
 	 *     <li>Servlet API specification</li>
 	 * </ul></p>
@@ -95,7 +99,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	/**
 	 * Actual class of the servlet, to be instantiated by servlet container itself. {@code <servlet>/<servlet-class>}.
 	 * This can only be set when registering Pax Web specific
-	 * {@link org.ops4j.pax.web.service.whiteboard.ServletMapping} "direct Whiteboard" service.
+	 * {@link ServletMapping} "direct Whiteboard" service.
 	 */
 	private final Class<? extends Servlet> servletClass;
 
@@ -109,13 +113,13 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 
 	/**
 	 * If a servlet is based on JSP file, this is the location passed by Jasper servlet to
-	 * {@link javax.servlet.ServletContext#getResource(String)}
+	 * {@link ServletContext#getResource(String)}
 	 */
 	private String jspFile;
 
 	/**
 	 * For resource servlets, we have to specify <em>base path</em> which should be the "prefix" to prepend when
-	 * accessing resources through {@link org.osgi.service.http.context.ServletContextHelper} (in Whiteboard). But
+	 * accessing resources through {@link ServletContextHelper} (in Whiteboard). But
 	 * Pax Web will happily allow to serve properties (without custom context) when basePath is absolute URI.
 	 */
 	private String basePath = null;
@@ -148,7 +152,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	private ErrorPageModel errorPageModel;
 
 	/**
-	 * Flag used for models registered using {@link javax.servlet.ServletContext#addServlet}
+	 * Flag used for models registered using {@link ServletContext#addServlet}
 	 */
 	private boolean dynamic = false;
 
@@ -157,6 +161,16 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	 * {@code default} servlet from <em>default</em> {@code web.xml}.
 	 */
 	private boolean overridable = false;
+
+	private String runAs;
+
+	private final Map<String, String> roleLinks = new HashMap<>();
+
+	/**
+	 * If this flag is present, and if the servlet is dynamic, we have to recreate security constraints
+	 * in the target context.
+	 */
+	private boolean servletSecurityPresent = false;
 
 	/**
 	 * Constructor used for servlet unregistration
@@ -616,6 +630,26 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		return dynamic;
 	}
 
+	public String getRunAs() {
+		return this.runAs;
+	}
+
+	public void setRunAs(String runAs) {
+		this.runAs = runAs;
+	}
+
+	public Map<String, String> getRoleLinks() {
+		return roleLinks;
+	}
+
+	public void setServletSecurityPresent(boolean servletSecurityPresent) {
+		this.servletSecurityPresent = servletSecurityPresent;
+	}
+
+	public boolean isServletSecurityPresent() {
+		return servletSecurityPresent;
+	}
+
 	/**
 	 * Special configuration just before registration of the {@link ServletModel} if it's a JSP servlet
 	 * @param config
@@ -796,6 +830,8 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		private String resourcePath;
 		// it means the definition may be overriden later (e.g., in SCI through ServletContext.addServlet())
 		private boolean overridable;
+		private String runAs;
+		private final Map<String, String> roleLinks = new HashMap<>();
 
 		public Builder() {
 		}
@@ -917,6 +953,16 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			return this;
 		}
 
+		public Builder setRunAs(String role) {
+			this.runAs = role;
+			return this;
+		}
+
+		public Builder addRoleLink(String name, String link) {
+			this.roleLinks.put(name, link);
+			return this;
+		}
+
 		public ServletModel build() {
 			ServletModel model = new ServletModel(alias, urlPatterns, servletName, initParams,
 					loadOnStartup, asyncSupported, multipartConfigElement, servlet, servletClass, reference,
@@ -929,6 +975,8 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			model.setJspServlet(jspServlet);
 			model.setJspFile(jspFile);
 			model.setOverridable(overridable);
+			model.setRunAs(runAs);
+			model.getRoleLinks().putAll(roleLinks);
 			return model;
 		}
 	}

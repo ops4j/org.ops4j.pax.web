@@ -140,6 +140,14 @@ public interface HttpTestClient {
 	HttpTestClient doGET(String url);
 
 	/**
+	 * Prepares the client to execute a HED-request against the given URL.
+	 *
+	 * @param url Destination-url that should be tested
+	 * @return the HttpGetConfiguration-instance
+	 */
+	HttpTestClient doHEAD(String url);
+
+	/**
 	 * Convenience-method for executing the test without further configuration
 	 * Note: this method is a terminal-call and ends the fluent-method-chaining.
 	 *

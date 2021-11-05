@@ -21,35 +21,33 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.ops4j.pax</groupId>
-		<artifactId>web</artifactId>
+		<groupId>org.ops4j.pax.web.samples</groupId>
+		<artifactId>samples-war</artifactId>
 		<version>8.0.1-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<groupId>org.ops4j.pax.web.archetypes</groupId>
-	<artifactId>war-archetype</artifactId>
-	<packaging>maven-archetype</packaging>
+	<groupId>org.ops4j.pax.web.samples</groupId>
+	<artifactId>war-security</artifactId>
+	<packaging>war</packaging>
 
-	<name>OPS4J Pax Web - WAR Archetype</name>
+	<name>OPS4J Pax Web WAR Samples - Declarative Security</name>
 
-	<build>
-		<extensions>
-			<extension>
-				<groupId>org.apache.maven.archetype</groupId>
-				<artifactId>archetype-packaging</artifactId>
-				<version>2.2</version>
-			</extension>
-		</extensions>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+	<dependencies>
+
+		<!-- JavaEE -->
+
+		<dependency>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+	</dependencies>
 
 </project>

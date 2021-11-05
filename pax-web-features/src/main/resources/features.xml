@@ -311,6 +311,8 @@ javax.servlet.context.tempdir = ${karaf.data}/tmp
 		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-tomcat-common/${project.version}</bundle>
 		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-war/${project.version}</bundle>
 
+		<bundle start-level="30" dependency="true">mvn:jakarta.annotation/jakarta.annotation-api/${dependency.jakarta.annotation-api}</bundle>
+
 <!--		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-deployer/${project.version}</bundle>-->
 
 		<!-- pax-url-war requires osgi promise+function -->

@@ -1091,6 +1091,12 @@ class JettyServerWrapper implements BatchVisitor {
 						sh.setServletMappings(ArrayUtil.removeFromArray(sh.getServletMappings(), defaultMapping));
 					}
 				}
+
+				// role mapping per-servlet
+				model.getRoleLinks().forEach(holder::setUserRoleLink);
+
+				holder.setRunAsRole(model.getRunAs());
+
 				((PaxWebServletHandler) sh).addServletWithMapping(holder, mapping);
 
 				// are there any error page declarations in the model?
@@ -1110,6 +1116,18 @@ class JettyServerWrapper implements BatchVisitor {
 
 				if (!change.isDynamic()) {
 					ensureServletContextStarted(sch);
+				} else if (model.isServletSecurityPresent() && sch.getSecurityHandler() != null) {
+					// let's check the dynamic servlet security constraints - not necessarily from the highest
+					// ranked OsgiContextModel, but from OsgiContextModel of the servlet
+					List<SecurityConstraintModel> dynamicModels = new ArrayList<>();
+					model.getContextModels().forEach(ocm -> {
+						for (SecurityConstraintModel sc : ocm.getSecurityConfiguration().getSecurityConstraints()) {
+							if (sc.getServletModel() == model) {
+								dynamicModels.add(sc);
+							}
+						}
+					});
+					ensureSecurityConstraintsConfigured((ConstraintSecurityHandler) sch.getSecurityHandler(), dynamicModels);
 				}
 			});
 			return;
@@ -2020,58 +2038,7 @@ class JettyServerWrapper implements BatchVisitor {
 					securityHandler.addRole(role);
 				}
 
-				// see org.eclipse.jetty.webapp.StandardDescriptorProcessor.visitSecurityConstraint()
-				for (SecurityConstraintModel constraint : securityConfig.getSecurityConstraints()) {
-					Constraint base = new Constraint();
-					if (constraint.isAuthRolesSet()) {
-						base.setAuthenticate(true);
-						base.setRoles(constraint.getAuthRoles().toArray(new String[0]));
-					}
-					if (constraint.getTransportGuarantee() == ServletSecurity.TransportGuarantee.NONE) {
-						base.setDataConstraint(Constraint.DC_NONE);
-					} else {
-						// DC_CONFIDENTIAL and DC_INTEGRAL are handled equally and effectively mean "use TLS"
-						base.setDataConstraint(Constraint.DC_CONFIDENTIAL);
-					}
-
-					for (SecurityConstraintModel.WebResourceCollection wrc : constraint.getWebResourceCollections()) {
-						Constraint sc = (Constraint) base.clone();
-						sc.setName(wrc.getName());
-
-						if (wrc.getMethods().size() > 0 && wrc.getOmittedMethods().size() > 0) {
-							LOG.warn("Both methods and method omissions specified in the descriptor. Using methods only");
-							wrc.getOmittedMethods().clear();
-						}
-						for (String url : wrc.getPatterns()) {
-							boolean hit = false;
-							for (String method : wrc.getMethods()) {
-								ConstraintMapping mapping = new ConstraintMapping();
-								mapping.setMethod(method);
-								mapping.setPathSpec(url);
-								mapping.setConstraint(sc);
-								securityHandler.addConstraintMapping(mapping);
-								hit = true;
-							}
-							for (String method : wrc.getOmittedMethods()) {
-								ConstraintMapping mapping = new ConstraintMapping();
-								// yes - one-element array as in
-								// org.eclipse.jetty.webapp.StandardDescriptorProcessor.visitSecurityConstraint()
-								mapping.setMethodOmissions(new String[] { method });
-								mapping.setPathSpec(url);
-								mapping.setConstraint(sc);
-								securityHandler.addConstraintMapping(mapping);
-								hit = true;
-							}
-							if (!hit) {
-								// all-method constraint
-								ConstraintMapping mapping = new ConstraintMapping();
-								mapping.setPathSpec(url);
-								mapping.setConstraint(sc);
-								securityHandler.addConstraintMapping(mapping);
-							}
-						}
-					}
-				}
+				ensureSecurityConstraintsConfigured(securityHandler, securityConfig.getSecurityConstraints());
 			}
 
 			// and finally - XML context configuration which should be treated as highest priority (overriding
@@ -2121,6 +2088,70 @@ class JettyServerWrapper implements BatchVisitor {
 			sch.start();
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
+		}
+	}
+
+	private void ensureSecurityConstraintsConfigured(ConstraintSecurityHandler securityHandler, List<SecurityConstraintModel> models) {
+		// see org.eclipse.jetty.webapp.StandardDescriptorProcessor.visitSecurityConstraint()
+		for (SecurityConstraintModel constraint : models) {
+			Constraint base = new Constraint();
+			if (constraint.isAuthRolesSet()) {
+				base.setAuthenticate(true);
+				base.setRoles(constraint.getAuthRoles().toArray(new String[0]));
+				for (String role : constraint.getAuthRoles()) {
+					// in case it wasn't declared in <security-role>
+					securityHandler.addRole(role);
+				}
+			}
+			if (constraint.getTransportGuarantee() == ServletSecurity.TransportGuarantee.NONE) {
+				base.setDataConstraint(Constraint.DC_NONE);
+			} else {
+				// DC_CONFIDENTIAL and DC_INTEGRAL are handled equally and effectively mean "use TLS"
+				base.setDataConstraint(Constraint.DC_CONFIDENTIAL);
+			}
+
+			for (SecurityConstraintModel.WebResourceCollection wrc : constraint.getWebResourceCollections()) {
+				Constraint sc = null;
+				try {
+					sc = (Constraint) base.clone();
+					sc.setName(wrc.getName());
+				} catch (CloneNotSupportedException e) {
+					LOG.warn(e.getMessage(), e);
+				}
+
+				if (wrc.getMethods().size() > 0 && wrc.getOmittedMethods().size() > 0) {
+					LOG.warn("Both methods and method omissions specified in the descriptor. Using methods only");
+					wrc.getOmittedMethods().clear();
+				}
+				for (String url : wrc.getPatterns()) {
+					boolean hit = false;
+					for (String method : wrc.getMethods()) {
+						ConstraintMapping mapping = new ConstraintMapping();
+						mapping.setMethod(method);
+						mapping.setPathSpec(url);
+						mapping.setConstraint(sc);
+						securityHandler.addConstraintMapping(mapping);
+						hit = true;
+					}
+					for (String method : wrc.getOmittedMethods()) {
+						ConstraintMapping mapping = new ConstraintMapping();
+						// yes - one-element array as in
+						// org.eclipse.jetty.webapp.StandardDescriptorProcessor.visitSecurityConstraint()
+						mapping.setMethodOmissions(new String[] { method });
+						mapping.setPathSpec(url);
+						mapping.setConstraint(sc);
+						securityHandler.addConstraintMapping(mapping);
+						hit = true;
+					}
+					if (!hit) {
+						// all-method constraint
+						ConstraintMapping mapping = new ConstraintMapping();
+						mapping.setPathSpec(url);
+						mapping.setConstraint(sc);
+						securityHandler.addConstraintMapping(mapping);
+					}
+				}
+			}
 		}
 	}
 

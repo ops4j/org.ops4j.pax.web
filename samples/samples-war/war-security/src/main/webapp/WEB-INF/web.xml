@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2021 OPS4J.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+		 version="4.0">
+
+	<listener>
+		<listener-class>org.ops4j.pax.web.samples.war.security.RegisteringListener</listener-class>
+	</listener>
+
+	<servlet>
+		<servlet-name>s4</servlet-name>
+		<servlet-class>org.ops4j.pax.web.samples.war.security.DeclaredServlet</servlet-class>
+		<!--
+			13.2 Declarative Security
+				The Deployer maps the application’s logical security requirements to a
+				representation of the security policy that is specific to the runtime environment.
+		-->
+		<security-role-ref>
+			<!-- the application embedded role reference linked to application security role -->
+			<role-name>admin</role-name>
+			<!-- the name of the application security role -->
+			<role-link>role-admin</role-link>
+		</security-role-ref>
+		<!--
+			If no matching security-role-ref exists for a role reference used in a call to
+			isUserInRole, the container must default to testing the user for membership in the
+			security-role with role-name equal to the role reference used in the call.
+		-->
+<!--		<security-role-ref>-->
+<!--			<role-name>manager</role-name>-->
+<!--			<role-link>role-manager</role-link>-->
+<!--		</security-role-ref>-->
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>s4</servlet-name>
+		<url-pattern>/s4/*</url-pattern>
+	</servlet-mapping>
+
+	<login-config>
+		<auth-method>BASIC</auth-method>
+		<realm-name>Test Realm</realm-name>
+	</login-config>
+
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Secure Area</web-resource-name>
+			<url-pattern>/s4/secure/*</url-pattern>
+			<http-method>GET</http-method>
+		</web-resource-collection>
+		<auth-constraint>
+			<!-- we can use both "admin" (thanks to security-role-ref) and "role-admin" here -->
+			<role-name>role-admin</role-name>
+		</auth-constraint>
+	</security-constraint>
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Very Secure Area</web-resource-name>
+			<url-pattern>/s4/secure/very/*</url-pattern>
+			<http-method>GET</http-method>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>role-manager</role-name>
+		</auth-constraint>
+	</security-constraint>
+
+	<security-role>
+		<role-name>role-admin</role-name>
+	</security-role>
+	<!--
+		Declared using @javax.annotation.security.DeclareRoles
+		on org.ops4j.pax.web.samples.war.security.FullyAnnotatedServlet
+	-->
+	<!--
+		But for example Tomcat will add roles used in <auth-constraint> anyway
+		in org.apache.catalina.startup.ContextConfig.validateSecurityRoles()
+	-->
+<!--	<security-role>-->
+<!--		<role-name>role-manager</role-name>-->
+<!--	</security-role>-->
+
+</web-app>

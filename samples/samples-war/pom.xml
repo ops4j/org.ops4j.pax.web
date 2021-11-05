@@ -61,6 +61,7 @@
 		<module>war-limited-post-fragment-undertow</module>
 		<module>war-jetty-web</module>
 		<module>war-websocket-jsr356</module>
+		<module>war-security</module>
 	</modules>
 
 </project>

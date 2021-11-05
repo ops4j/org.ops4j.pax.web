@@ -90,6 +90,7 @@ import io.undertow.servlet.api.SecurityConstraint;
 import io.undertow.servlet.api.SecurityInfo;
 import io.undertow.servlet.api.ServletContainer;
 import io.undertow.servlet.api.ServletInfo;
+import io.undertow.servlet.api.ServletSecurityInfo;
 import io.undertow.servlet.api.ServletSessionConfig;
 import io.undertow.servlet.api.ServletStackTraces;
 import io.undertow.servlet.api.SessionPersistenceManager;
@@ -1402,6 +1403,12 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 						}
 					}
 				}
+
+				// role mapping per-servlet
+				model.getRoleLinks().forEach(info::addSecurityRoleRef);
+
+				info.setRunAs(model.getRunAs());
+
 				// when only adding new servlet, we can simply alter existing deployment
 				// because this is possible (as required by methods like javax.servlet.ServletContext.addServlet())
 				// we can't go the easy way when _removing_ servlets
@@ -1453,6 +1460,41 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 				if (!change.isDynamic()) {
 					ensureServletContextStarted(contextPath);
+				} else if (model.isServletSecurityPresent()) {
+					List<SecurityConstraintModel> dynamicModels = new ArrayList<>();
+					model.getContextModels().forEach(ocm -> {
+						for (SecurityConstraintModel sc : ocm.getSecurityConfiguration().getSecurityConstraints()) {
+							if (sc.getServletModel() == model) {
+								dynamicModels.add(sc);
+							}
+						}
+					});
+					// io.undertow.servlet.api.ServletInfo.setServletSecurityInfo() is copied to the DeploymentInfo
+					// anyway
+					ServletSecurityInfo ssi = new ServletSecurityInfo();
+					for (SecurityConstraintModel constraintModel : dynamicModels) {
+						SecurityConstraint constraint = new SecurityConstraint();
+						if (constraintModel.isAuthRolesSet()) {
+							constraint.setEmptyRoleSemantic(SecurityInfo.EmptyRoleSemantic.AUTHENTICATE);
+						}
+						constraint.addRolesAllowed(constraintModel.getAuthRoles());
+						if (constraintModel.getTransportGuarantee() == ServletSecurity.TransportGuarantee.NONE) {
+							constraint.setTransportGuaranteeType(TransportGuaranteeType.NONE);
+						} else if (constraintModel.getTransportGuarantee() == ServletSecurity.TransportGuarantee.CONFIDENTIAL) {
+							constraint.setTransportGuaranteeType(TransportGuaranteeType.CONFIDENTIAL);
+						}
+						for (SecurityConstraintModel.WebResourceCollection col : constraintModel.getWebResourceCollections()) {
+							WebResourceCollection wrc = new WebResourceCollection();
+							boolean methodSet = false;
+							wrc.addHttpMethods(col.getMethods());
+							if (col.getMethods().size() == 0) {
+								wrc.addHttpMethodOmissions(col.getOmittedMethods());
+							}
+							wrc.addUrlPatterns(col.getPatterns());
+							constraint.addWebResourceCollection(wrc);
+						}
+						deploymentInfo.addSecurityConstraint(constraint);
+					}
 				}
 			});
 			return;

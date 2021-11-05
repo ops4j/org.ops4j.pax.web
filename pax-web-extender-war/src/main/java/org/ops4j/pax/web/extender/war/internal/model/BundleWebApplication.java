@@ -44,6 +44,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
+import javax.annotation.security.DeclareRoles;
+import javax.annotation.security.RunAs;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
@@ -52,6 +54,8 @@ import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.SessionCookieConfig;
 import javax.servlet.annotation.HandlesTypes;
+import javax.servlet.annotation.HttpConstraint;
+import javax.servlet.annotation.HttpMethodConstraint;
 import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
@@ -1387,6 +1391,8 @@ public class BundleWebApplication {
 			// <auth-constraint> elements
 			constraint.setAuthRolesSet(sc.getAuthConstraint());
 			constraint.getAuthRoles().addAll(Arrays.asList(sc.findAuthRoles()));
+			// in case the roles were missing and used in <auth-constraint>, we have to add them here
+			securityConfiguration.getSecurityRoles().addAll(constraint.getAuthRoles());
 			// <user-data-constraint>
 			if (sc.getUserConstraint() != null && !"".equals(sc.getUserConstraint().trim())) {
 				if (ServletSecurity.TransportGuarantee.NONE.toString().equals(sc.getUserConstraint())) {
@@ -1487,7 +1493,7 @@ public class BundleWebApplication {
 		//  + security constraints
 		//  + security roles
 		//  + servlets
-		//  - servlets' security roles
+		//  + servlets' security roles
 		//  + servlets' multipart config
 		//  + servlets' mappings
 		//  + session config and session cookie config
@@ -1505,6 +1511,31 @@ public class BundleWebApplication {
 		//  - service refs
 
 		// but we'll do it in a more organized way
+
+		// Tomcat, after calling org.apache.catalina.startup.ContextConfig.webConfig(),
+		// calls org.apache.catalina.startup.ContextConfig.applicationAnnotationsConfig() which processes
+		// additional annotations on servlets/filters/listeners
+		// for all elements:
+		//  - class level:
+		//     - @javax.annotation.Resource -> org.apache.catalina.deploy.NamingResourcesImpl.addEnvironment()
+		//       or org.apache.catalina.deploy.NamingResourcesImpl.addService()
+		//       or org.apache.catalina.deploy.NamingResourcesImpl.addResource()
+		//       or org.apache.catalina.deploy.NamingResourcesImpl.addMessageDestinationRef()
+		//       or org.apache.catalina.deploy.NamingResourcesImpl.addResourceEnvRef()
+		//     - @javax.annotation.Resources
+		//     - @EJB (commented out in Tomcat code)
+		//     - @WebServiceRef (commented out in Tomcat code)
+		//     - @javax.annotation.security.DeclareRoles -> org.apache.catalina.Context.addSecurityRole()
+		//  - field level:
+		//     - @javax.annotation.Resource
+		//  - method level:
+		//     - @javax.annotation.Resource
+		// additionally for servlets:
+		//  - class level:
+		//     - @javax.annotation.security.RunAs -> org.apache.catalina.Wrapper.setRunAs() (only for EJB I guess)
+		//     - @javax.servlet.annotation.ServletSecurity -> org.apache.catalina.Context.addServletSecurity()
+		//
+		// we will add relevant information below
 
 		// 2. some metadata related with context, but kept at OsgiContextModel level - not everything has to
 		//    be propagated to Server/Service model
@@ -1575,6 +1606,95 @@ public class BundleWebApplication {
 				builder.jspServlet(true);
 			}
 			builder.setOverridable(def.isOverridable());
+
+			if (servletClass != null) {
+				// scan for annotations
+				// @javax.annotation.security.DeclareRoles
+				collectDeclaredRoles(servletClass, securityConfiguration);
+
+				// @javax.annotation.security.RunAs
+				RunAs runAs = servletClass.getAnnotation(RunAs.class);
+				if (runAs != null) {
+					builder.setRunAs(runAs.value());
+				}
+
+				// @javax.servlet.annotation.ServletSecurity
+				ServletSecurity servletSecurity = servletClass.getAnnotation(ServletSecurity.class);
+				if (servletSecurity != null) {
+					// similar to <security-constraint>, but with the URLs taken from servlet mapping
+					// we have to additionally check for conflicts with generic constraints from web.xml (and fragments)
+
+					// see org.apache.catalina.core.StandardContext.addServletSecurity()
+					for (String urlPattern : mappings) {
+						boolean foundConflict = false;
+
+						for (SecurityConstraintModel seccm : securityConfiguration.getSecurityConstraints()) {
+							for (SecurityConstraintModel.WebResourceCollection col : seccm.getWebResourceCollections()) {
+								if (col.getPatterns().contains(urlPattern)) {
+									// servlet with @ServletSecurity uses mapping which has already an
+									// associated <security-constraint>
+									foundConflict = true;
+									break;
+								}
+							}
+							if (foundConflict) {
+								break;
+							}
+						}
+
+						if (foundConflict) {
+							LOG.warn("Servlet {} annotated with @ServletSecurity has conflict with existing <security-constraints> from the descriptor(s)" +
+									" for the pattern \"{}\"", servletClass, urlPattern);
+						} else {
+							// add the per method constraints
+							HttpMethodConstraint[] withMethods = servletSecurity.httpMethodConstraints();
+							List<String> omittedMethods = new ArrayList<>();
+							for (HttpMethodConstraint c : withMethods) {
+								SecurityConstraintModel constraint = new SecurityConstraintModel();
+								SecurityConstraintModel.WebResourceCollection col = new SecurityConstraintModel.WebResourceCollection();
+								constraint.getWebResourceCollections().add(col);
+								constraint.setTransportGuarantee(c.transportGuarantee());
+								constraint.getAuthRoles().addAll(Arrays.asList(c.rolesAllowed()));
+								if (constraint.getAuthRoles().isEmpty()) {
+									// I think it'll do what I want - no roles means DENY all
+									constraint.setAuthRolesSet(c.emptyRoleSemantic() == ServletSecurity.EmptyRoleSemantic.DENY);
+								} else {
+									constraint.setAuthRolesSet(true);
+								}
+								col.getPatterns().add(urlPattern);
+								col.getMethods().add(c.value());
+								omittedMethods.add(c.value());
+
+								securityConfiguration.getSecurityConstraints().add(constraint);
+							}
+
+							HttpConstraint c = servletSecurity.value();
+							// Add the constraint for all the other methods
+							if (c != null) {
+								SecurityConstraintModel constraint = new SecurityConstraintModel();
+								SecurityConstraintModel.WebResourceCollection col = new SecurityConstraintModel.WebResourceCollection();
+								constraint.getWebResourceCollections().add(col);
+								constraint.setTransportGuarantee(c.transportGuarantee());
+								constraint.getAuthRoles().addAll(Arrays.asList(c.rolesAllowed()));
+								if (constraint.getAuthRoles().isEmpty()) {
+									// I think it'll do what I want - no roles means DENY all
+									constraint.setAuthRolesSet(c.value() == ServletSecurity.EmptyRoleSemantic.DENY);
+								} else {
+									constraint.setAuthRolesSet(true);
+								}
+								col.getPatterns().add(urlPattern);
+								col.getOmittedMethods().addAll(omittedMethods);
+
+								securityConfiguration.getSecurityConstraints().add(constraint);
+							}
+						}
+					}
+				}
+			}
+			if (def.getSecurityRoleRefs() != null) {
+				def.getSecurityRoleRefs().forEach(srr -> builder.addRoleLink(srr.getName(), srr.getLink()));
+			}
+
 			wabBatch.addServletModel(builder.build());
 		});
 
@@ -1621,6 +1741,11 @@ public class BundleWebApplication {
 				fm.getMappingsPerDispatcherTypes().add(m);
 			}
 
+			if (filterClass != null) {
+				// scan for annotations
+				collectDeclaredRoles(filterClass, securityConfiguration);
+			}
+
 			filterModels.put(fm, null);
 			// this is for Server/Service model
 			wabBatch.addFilterModel(fm);
@@ -1639,6 +1764,10 @@ public class BundleWebApplication {
 				EventListenerModel elm = new EventListenerModel(eventListener);
 				elm.setRegisteringBundle(bundle);
 				elm.addContextModel(ocm);
+
+				// scan for annotations
+				collectDeclaredRoles(listenerClass, securityConfiguration);
+
 				wabBatch.addEventListenerModel(elm);
 			} catch (ClassNotFoundException e) {
 				LOG.warn("Can't load listener class {} in the context of {}: {}", listener, this, e.getMessage(), e);
@@ -1691,6 +1820,15 @@ public class BundleWebApplication {
 		wabBatch.commitTransaction(contextPath);
 
 		this.batch = wabBatch;
+	}
+
+	private void collectDeclaredRoles(Class<?> clazz, SecurityConfigurationModel securityConfiguration) {
+		DeclareRoles dr = clazz.getAnnotation(DeclareRoles.class);
+		if (dr != null && dr.value() != null) {
+			for (String role : dr.value()) {
+				securityConfiguration.getSecurityRoles().add(role);
+			}
+		}
 	}
 
 	// --- Web Application model access

@@ -69,6 +69,8 @@ import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
 import org.apache.tomcat.util.descriptor.web.ErrorPage;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
+import org.apache.tomcat.util.descriptor.web.SecurityCollection;
+import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.apache.tomcat.util.descriptor.web.WebXml;
 import org.apache.tomcat.util.descriptor.web.WebXmlParser;
 import org.apache.tomcat.util.digester.Digester;
@@ -82,6 +84,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
@@ -1009,6 +1012,11 @@ class TomcatServerWrapper implements BatchVisitor {
 					wrapper.addInitParameter("pathInfoOnly", Boolean.toString(!isDefaultResourceServlet));
 				}
 
+				// role mapping per-servlet
+				model.getRoleLinks().forEach(wrapper::addSecurityReference);
+
+				wrapper.setRunAs(model.getRunAs());
+
 				realContext.addChild(wrapper);
 
 				// <servlet-mapping>
@@ -1051,7 +1059,66 @@ class TomcatServerWrapper implements BatchVisitor {
 					}
 				}
 
-				ensureServletContextStarted(realContext);
+				if (!change.isDynamic()) {
+					ensureServletContextStarted(realContext);
+				} else if (model.isServletSecurityPresent()) {
+					// let's check the dynamic servlet security constraints - not necessarily from the highest
+					// ranked OsgiContextModel, but from OsgiContextModel of the servlet
+					List<SecurityConstraintModel> dynamicModels = new ArrayList<>();
+					model.getContextModels().forEach(ocm -> {
+						for (SecurityConstraintModel sc : ocm.getSecurityConfiguration().getSecurityConstraints()) {
+							if (sc.getServletModel() == model) {
+								dynamicModels.add(sc);
+							}
+						}
+					});
+
+					// add the dynamic security constraints here (while static ones are added in OsgiContextConfiguration
+					// listener
+					Set<String> potentiallyNewRoles = new HashSet<>();
+
+					for (SecurityConstraintModel scm : dynamicModels) {
+						SecurityConstraint constraint = new SecurityConstraint();
+						constraint.setDisplayName(scm.getName());
+						constraint.setUserConstraint(scm.getTransportGuarantee().name());
+
+						constraint.setAuthConstraint(scm.isAuthRolesSet());
+						for (String role : scm.getAuthRoles()) {
+							constraint.addAuthRole(role);
+							potentiallyNewRoles.add(role);
+						}
+
+						// <web-resource-collection> elements
+						for (SecurityConstraintModel.WebResourceCollection col : scm.getWebResourceCollections()) {
+							SecurityCollection wrc = new SecurityCollection();
+							wrc.setName(col.getName());
+							boolean methodSet = false;
+							for (String method : col.getMethods()) {
+								wrc.addMethod(method);
+								methodSet = true;
+							}
+							if (!methodSet) {
+								for (String method : col.getOmittedMethods()) {
+									wrc.addOmittedMethod(method);
+								}
+							}
+							for (String pattern : col.getPatterns()) {
+								wrc.addPattern(pattern);
+							}
+							constraint.addCollection(wrc);
+						}
+						realContext.addConstraint(constraint);
+					}
+
+					// add missing roles
+					Set<String> currentRoles = new HashSet<>(Arrays.asList(realContext.findSecurityRoles()));
+
+					for (String role : potentiallyNewRoles) {
+						if (!currentRoles.contains(role)) {
+							realContext.addSecurityRole(role);
+						}
+					}
+				}
 			});
 			return;
 		}

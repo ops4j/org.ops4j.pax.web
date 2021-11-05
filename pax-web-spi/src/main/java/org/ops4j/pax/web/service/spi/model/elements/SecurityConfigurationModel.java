@@ -16,7 +16,9 @@
 package org.ops4j.pax.web.service.spi.model.elements;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p>Single configuration class for 3 top-level elements of {@code web.xml}:<ul>
@@ -44,7 +46,7 @@ public class SecurityConfigurationModel {
 
 	private LoginConfigModel loginConfig = null;
 	private final List<SecurityConstraintModel> securityConstraints = new ArrayList<>();
-	private final List<String> securityRoles = new ArrayList<>();
+	private final Set<String> securityRoles = new LinkedHashSet<>();
 
 	/**
 	 * Returns a single, context-wide login configuration matching {@code <login-config>} element
@@ -71,7 +73,7 @@ public class SecurityConfigurationModel {
 	 * Returns a list of roles matching the {@code <security-role>/<role-name>} elements from {@code web.xml}.
 	 * @return
 	 */
-	public List<String> getSecurityRoles() {
+	public Set<String> getSecurityRoles() {
 		return securityRoles;
 	}
 

@@ -79,6 +79,7 @@ class Hc5TestClient implements HttpTestClient {
 	private String pathToTest;
 	private boolean doGET;
 	private boolean doPOST;
+	private boolean doHEAD;
 	private final Map<String, String> requestParameters = new HashMap<>();
 	private int timeoutInSeconds = 100;
 	private CookieState httpState = null;
@@ -208,6 +209,13 @@ class Hc5TestClient implements HttpTestClient {
 	}
 
 	@Override
+	public HttpTestClient doHEAD(String url) {
+		this.doHEAD = true;
+		pathToTest = url;
+		return this;
+	}
+
+	@Override
 	public String doGETandExecuteTest(String url) throws Exception {
 		doGET(url);
 		return executeTest();
@@ -289,6 +297,8 @@ class Hc5TestClient implements HttpTestClient {
 				requestBuilder = ClassicRequestBuilder.get(pathToTest);
 			} else if (doPOST && !doGET) {
 				requestBuilder = ClassicRequestBuilder.post(pathToTest);
+			} else if (doHEAD) {
+				requestBuilder = ClassicRequestBuilder.head(pathToTest);
 			} else {
 				throw new IllegalStateException("Test must be configured either with GET or POST!");
 			}

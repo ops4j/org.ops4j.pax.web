@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.spi.model.elements;
 
+import javax.servlet.ServletSecurityElement;
 import javax.servlet.annotation.ServletSecurity;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,14 @@ public class SecurityConstraintModel {
 
 	/** {@code <transport-guarantee><user-data-constraint>}. INTEGRAL and CONFIDENTIAL are in practice equivalent */
 	private ServletSecurity.TransportGuarantee transportGuarantee = ServletSecurity.TransportGuarantee.NONE;
+
+	/**
+	 * If the security constraint model was created from Servlet-specific configuration like:<ul>
+	 *     <li>{@link javax.servlet.ServletRegistration.Dynamic#setServletSecurity(ServletSecurityElement)}, or</li>
+	 *     <li>{@link ServletSecurity} annotation</li>
+	 * </ul>we remember the associated {@link ServletModel}, so dynamic security constraints are properly applied.
+	 */
+	private ServletModel servletModel;
 
 	public String getName() {
 		return name;
@@ -71,6 +80,14 @@ public class SecurityConstraintModel {
 
 	public void setTransportGuarantee(ServletSecurity.TransportGuarantee transportGuarantee) {
 		this.transportGuarantee = transportGuarantee;
+	}
+
+	public void setServletModel(ServletModel servletModel) {
+		this.servletModel = servletModel;
+	}
+
+	public ServletModel getServletModel() {
+		return servletModel;
 	}
 
 	/**
