@@ -21,9 +21,12 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
 /**
- * Event related to registration of single {@link org.ops4j.pax.web.service.spi.model.elements.ElementModel} which
+ * <p>Event related to registration of single {@link org.ops4j.pax.web.service.spi.model.elements.ElementModel} which
  * may represent any <em>web element</em> like {@link Servlet} or {@link javax.servlet.Filter}.
- * In Pax Web 7 there was only a {@code ServletEvent}.
+ * In Pax Web 7 there was only a {@code ServletEvent}.</p>
+ *
+ * <p>While the names may be similar, these events are <strong>not</strong> the events mentioned in chapter 128.5,
+ * which defines WAB events. Thus these events are not required to be passed to Event Admin Service.</p>
  *
  * @author Achim Nierbeck
  */

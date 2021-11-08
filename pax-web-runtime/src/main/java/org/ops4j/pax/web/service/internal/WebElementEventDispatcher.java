@@ -63,8 +63,6 @@ public class WebElementEventDispatcher implements WebElementEventListener,
 	/** All tracked {@link WebElementEventListener web element listeners} */
 	private final Set<WebElementEventListener> listeners = new CopyOnWriteArraySet<>();
 
-//	private final Map<Long, Map<String, ElementEvent>> states = new ConcurrentHashMap<>();
-
 	public WebElementEventDispatcher(final BundleContext bundleContext, Configuration configuration) {
 		this.bundleContext = bundleContext;
 		this.executor = Executors.newFixedThreadPool(configuration.server().getEventDispatcherThreadCount(),
@@ -78,9 +76,6 @@ public class WebElementEventDispatcher implements WebElementEventListener,
 
 	@Override
 	public void bundleChanged(BundleEvent event) {
-//		if (event.getType() == BundleEvent.STOPPED || event.getType() == BundleEvent.UNINSTALLED) {
-//			states.remove(event.getBundle().getBundleId());
-//		}
 	}
 
 	@Override
@@ -89,8 +84,6 @@ public class WebElementEventDispatcher implements WebElementEventListener,
 		if (listener != null) {
 			LOG.debug("New WebElementEventListener added: {}", listener.getClass().getName());
 			synchronized (listeners) {
-				// TOCHECK: should we really send (and keep!) initial events? (it's only for Karaf command actually)
-//				sendInitialEvents(listener);
 				listeners.add(listener);
 			}
 		}
@@ -115,9 +108,6 @@ public class WebElementEventDispatcher implements WebElementEventListener,
 		}
 		synchronized (listeners) {
 			callListeners(event);
-//			Map<String, ElementEvent> events
-//					= states.computeIfAbsent(event.getBundleId(), k -> new LinkedHashMap<>());
-//			events.put(event.getAlias(), event);
 		}
 	}
 
@@ -131,26 +121,6 @@ public class WebElementEventDispatcher implements WebElementEventListener,
 		} catch (InterruptedException ignored) {
 		}
 	}
-
-//	/**
-//	 * When a {@link WebElementListener} is added after some web elements/contexts were already added, we'll
-//	 * send those initial events to newly registered {@link WebElementListener}.
-//	 * @param listener
-//	 */
-//	private void sendInitialEvents(WebElementListener listener) {
-//		for (Map.Entry<Long, Map<String, ElementEvent>> entry : states.entrySet()) {
-//			try {
-//				if (entry.getValue() != null && !entry.getValue().isEmpty()) {
-//					for (ElementEvent event : entry.getValue().values()) {
-//						callListener(listener, new ElementEvent(event, true));
-//					}
-//				}
-//			} catch (RejectedExecutionException ree) {
-//				LOG.warn("Executor shut down", ree);
-//				break;
-//			}
-//		}
-//	}
 
 	private void callListeners(WebElementEvent event) {
 		for (WebElementEventListener listener : listeners) {

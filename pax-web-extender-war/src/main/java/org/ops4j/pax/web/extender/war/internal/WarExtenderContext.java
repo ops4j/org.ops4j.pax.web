@@ -17,9 +17,11 @@ package org.ops4j.pax.web.extender.war.internal;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -127,13 +129,6 @@ public class WarExtenderContext implements WebContainerListener {
 		webApplicationEventDispatcher = new WebApplicationEventDispatcher(bundleContext);
 
 		defaultWebXml = findDefaultWebXml();
-
-//		webObserver = new WebObserver(
-//				webApplicationParser,
-//				new WebAppPublisher(webApplicationEventDispatcher, bundleContext),
-//				webApplicationEventDispatcher,
-//				new DefaultWebAppDependencyManager(),
-//				bundleContext);
 
 //		registration = bundleContext.registerService(
 //				WarManager.class, webObserver,
@@ -426,6 +421,38 @@ public class WarExtenderContext implements WebContainerListener {
 		}
 
 		return mainWebXml;
+	}
+
+	/**
+	 * This method returns a collection of bundle (WAB) ids which all use the same context path. The returned
+	 * collection returns all awaiting WABs' IDs, the passed WAB's ID and the ID of the WAB that successfully
+	 * <em>allocated</em> the context path.
+	 *
+	 * @param contextPath
+	 * @param wab
+	 * @return
+	 */
+	public Collection<Long> calculateCollisionIds(String contextPath, Bundle wab) {
+		Collection<Long> ids = new HashSet<>();
+
+		ids.add(wab.getBundleId());
+
+		lock.lock();
+		try {
+			List<Bundle> awaiting = webApplicationQueue.get(contextPath);
+			if (awaiting != null) {
+				awaiting.forEach(w -> ids.add(w.getBundleId()));
+			}
+			this.webApplications.forEach((w, bwa) -> {
+				if (contextPath.equals(bwa.getContextPath())) {
+					ids.add(w.getBundleId());
+				}
+			});
+		} finally {
+			lock.unlock();
+		}
+
+		return ids;
 	}
 
 	/**

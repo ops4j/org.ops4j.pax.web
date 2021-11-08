@@ -409,6 +409,13 @@ public abstract class AbstractControlledTestBase {
 		};
 	}
 
+	protected Option[] eventAdmin() {
+		return new Option[] {
+				mavenBundle("org.apache.felix", "org.apache.felix.eventadmin")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
+		};
+	}
+
 	protected Option[] scr() {
 		return new Option[] {
 				mavenBundle("org.apache.felix", "org.apache.felix.scr")

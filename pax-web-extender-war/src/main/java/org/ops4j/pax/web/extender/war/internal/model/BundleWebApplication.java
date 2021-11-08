@@ -298,7 +298,6 @@ public class BundleWebApplication {
 			case UNCONFIGURED:
 			case CONFIGURING:
 			case UNDEPLOYED:
-			case UNDEPLOYING:
 			case WAITING_FOR_WEB_CONTAINER:
 				// web container is not available, but there's nothing to clean up
 			case WAITING_FOR_CONTEXT:
@@ -677,6 +676,7 @@ public class BundleWebApplication {
 					if (deploymentState.compareAndSet(state, State.WAITING_FOR_CONTEXT)) {
 						WebApplicationEvent event = new WebApplicationEvent(WebApplicationEvent.State.FAILED, bundle, contextPath, null);
 						event.setAwaitingAllocation(true);
+						event.setCollisionIds(extenderContext.calculateCollisionIds(contextPath, bundle));
 						extenderContext.sendWebEvent(event);
 					}
 					return;

@@ -97,11 +97,6 @@ public class PaxWebStandardContext extends StandardContext {
 
 	private String osgiInitFilterName;
 
-	// TODO: these are kept, so we can replace the active context and preprocessors
-
-	private PaxWebFilterMap osgiInitFilterMap;
-	private PaxWebFilterDef osgiInitFilterDef;
-
 	/**
 	 * Highest ranked {@link OsgiServletContext} set when Tomcat's context starts
 	 */
@@ -181,8 +176,8 @@ public class PaxWebStandardContext extends StandardContext {
 				DispatcherType.REQUEST,
 				DispatcherType.ASYNC
 		});
-		osgiInitFilterDef = new PaxWebFilterDef(filterModel, true, null);
-		osgiInitFilterMap = new PaxWebFilterMap(filterModel, true);
+		PaxWebFilterDef osgiInitFilterDef = new PaxWebFilterDef(filterModel, true, null);
+		PaxWebFilterMap osgiInitFilterMap = new PaxWebFilterMap(filterModel, true);
 
 		addFilterDef(osgiInitFilterDef);
 		addFilterMapBefore(osgiInitFilterMap);

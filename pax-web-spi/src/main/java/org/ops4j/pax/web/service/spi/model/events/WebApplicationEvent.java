@@ -15,13 +15,17 @@
  */
 package org.ops4j.pax.web.service.spi.model.events;
 
+import java.util.Collection;
+
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.service.http.HttpContext;
 
 /**
- * Event related to registration of a web application (WAB), described in OSGi CMPN 128 Web Applications Specification.
- * Before Pax Web 8 it was called {@code org.ops4j.pax.web.service.spi.WebEvent}.
+ * <p>Event related to registration of a web application (WAB), described in OSGi CMPN 128 Web Applications Specification.
+ * Before Pax Web 8 it was called {@code org.ops4j.pax.web.service.spi.WebEvent}.</p>
+ *
+ * <p>These events have to be passed to Event Admin Service.</p>
  *
  * @author Achim Nierbeck
  */
@@ -52,12 +56,17 @@ public class WebApplicationEvent {
 		}
 	}
 
+	private static Bundle extenderBundle;
+	private static long extenderBundleId;
+	private static String extenderBundleName;
+	private static Version extenderBundleVersion;
+
 	private final WebApplicationEvent.State type;
 
 	private final Bundle bundle;
 	private final long bundleId;
 	private final String bundleName;
-	private final String bundleVersion;
+	private final Version bundleVersion;
 
 	private final String contextPath;
 
@@ -69,6 +78,8 @@ public class WebApplicationEvent {
 
 	private boolean awaitingAllocation = false;
 
+	private Collection<Long> collisionIds;
+
 	public WebApplicationEvent(State type, Bundle bundle, String contextPath, HttpContext context) {
 		this(type, bundle, contextPath, context, null);
 	}
@@ -79,13 +90,20 @@ public class WebApplicationEvent {
 		this.contextPath = contextPath;
 		this.bundleId = bundle.getBundleId();
 		this.bundleName = bundle.getSymbolicName();
-		this.bundleVersion = bundle.getVersion() == null ? Version.emptyVersion.toString() : bundle.getVersion().toString();
+		this.bundleVersion = bundle.getVersion() == null ? Version.emptyVersion : bundle.getVersion();
 
 		this.timestamp = System.currentTimeMillis();
 
 		this.throwable = throwable;
 
 		this.context = context;
+	}
+
+	public static void setExtenderBundle(Bundle bundle) {
+		extenderBundle = bundle;
+		extenderBundleId = bundle.getBundleId();
+		extenderBundleName = bundle.getSymbolicName();
+		extenderBundleVersion = bundle.getVersion();
 	}
 
 	@Override
@@ -110,8 +128,24 @@ public class WebApplicationEvent {
 		return bundleName;
 	}
 
-	public String getBundleVersion() {
+	public Version getBundleVersion() {
 		return bundleVersion;
+	}
+
+	public Bundle getExtenderBundle() {
+		return extenderBundle;
+	}
+
+	public long getExtenderBundleId() {
+		return extenderBundleId;
+	}
+
+	public String getExtenderBundleName() {
+		return extenderBundleName;
+	}
+
+	public Version getExtenderBundleVersion() {
+		return extenderBundleVersion;
 	}
 
 	public long getTimestamp() {
@@ -136,6 +170,14 @@ public class WebApplicationEvent {
 
 	public void setAwaitingAllocation(boolean awaitingAllocation) {
 		this.awaitingAllocation = awaitingAllocation;
+	}
+
+	public Collection<Long> getCollisionIds() {
+		return collisionIds;
+	}
+
+	public void setCollisionIds(Collection<Long> collisionIds) {
+		this.collisionIds = collisionIds;
 	}
 
 }

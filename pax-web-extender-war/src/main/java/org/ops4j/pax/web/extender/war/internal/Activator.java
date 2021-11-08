@@ -25,6 +25,7 @@ import java.util.concurrent.Executors;
 import org.apache.felix.utils.extender.AbstractExtender;
 import org.apache.felix.utils.extender.Extension;
 import org.ops4j.pax.web.service.PaxWebConstants;
+import org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent;
 import org.ops4j.pax.web.service.spi.util.NamedThreadFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -68,6 +69,9 @@ public class Activator extends AbstractExtender {
 
 		// let's be explicit - even if asynchronous mode is default. Please do not change this.
 		setSynchronous(false);
+
+		// static information which we don't have to obtain for each new WebApplicationEvent.
+		WebApplicationEvent.setExtenderBundle(context.getBundle());
 
 		super.start(context);
 	}

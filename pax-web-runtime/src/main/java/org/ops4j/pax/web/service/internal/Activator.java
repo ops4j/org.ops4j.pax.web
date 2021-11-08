@@ -50,6 +50,7 @@ import org.ops4j.pax.web.service.spi.config.SessionConfiguration;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.events.ServerEvent;
 import org.ops4j.pax.web.service.spi.model.events.ServerListener;
+import org.ops4j.pax.web.service.spi.model.events.WebApplicationEventListener;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEventListener;
 import org.ops4j.pax.web.service.spi.util.NamedThreadFactory;
 import org.ops4j.pax.web.service.spi.util.Utils;
@@ -59,6 +60,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -180,34 +182,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 
 		bundleContext = context;
 
-//		if (SupportUtils.isEventAdminAvailable()) {
-//			// Do use the filters this way the eventadmin packages can be resolved optional!
-//			Filter filterEvent = context.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
-//			EventAdminHandler adminHandler = new EventAdminHandler(context);
-//			eventServiceTracker = new ServiceTracker<>(context, filterEvent, adminHandler);
-//			eventServiceTracker.open();
-//
-//			context.registerService(ServletListener.class, adminHandler, null);
-//			LOG.info("EventAdmin support enabled, servlet events will be postet to topics.");
-//		} else {
-//			LOG.info("EventAdmin support is not available, no servlet events will be posted!");
-//		}
-
-//		if (SupportUtils.isLogServiceAvailable()) {
-//			// Do use the filters this way the logservice packages can be resolved optional!
-//			Filter filterLog = context.createFilter("(objectClass=org.osgi.service.log.LogService)");
-//			LogServiceHandler logServiceHandler = new LogServiceHandler(context);
-//			logServiceTracker = new ServiceTracker<>(context, filterLog, logServiceHandler);
-//			logServiceTracker.open();
-//
-//			context.registerService(ServletListener.class, logServiceHandler, null);
-//			LOG.info("LogService support enabled, log events will be created.");
-//		} else {
-//			LOG.info("LogService support is not available, no log events will be created!");
-//		}
-
-		serverListenerTracker = new ServiceTracker<ServerListener, ServerListener>(bundleContext,
-				ServerListener.class, new ServerListenerCustomizer());
+		serverListenerTracker = new ServiceTracker<>(bundleContext, ServerListener.class, new ServerListenerCustomizer());
 		serverListenerTracker.open();
 
 		if (SupportUtils.isConfigurationAdminAvailable()) {
@@ -217,6 +192,19 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 		} else {
 			// no org.osgi.service.cm.ConfigurationAdmin available at all, so we can configure immediately
 			updateConfiguration(null);
+		}
+
+		if (SupportUtils.isEventAdminAvailable()) {
+			// Do use the filters this way the eventadmin packages can be resolved optional!
+			Filter filterEvent = context.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
+			EventAdminHandler adminHandler = new EventAdminHandler(context);
+			eventServiceTracker = new ServiceTracker<>(context, filterEvent, adminHandler);
+			eventServiceTracker.open();
+
+			context.registerService(WebApplicationEventListener.class, adminHandler, null);
+			LOG.info("EventAdmin support enabled, WAB events will be posted to EventAdmin topics.");
+		} else {
+			LOG.info("EventAdmin support is not available, no WAB events will be sent.");
 		}
 
 		LOG.info("Pax Web Runtime started");
@@ -238,16 +226,13 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			servletContextHelperReg.unregister();
 			servletContextHelperReg = null;
 		}
-//		if (logServiceTracker != null) {
-//			logServiceTracker.close();
-//		}
 		if (managedServiceReg != null) {
 			managedServiceReg.unregister();
 			managedServiceReg = null;
 		}
-//		if (eventServiceTracker != null) {
-//			eventServiceTracker.close();
-//		}
+		if (eventServiceTracker != null) {
+			eventServiceTracker.close();
+		}
 		if (webElementEventDispatcher != null) {
 			webElementEventDispatcher.destroy();
 			webElementEventDispatcher = null;
@@ -255,11 +240,15 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 //		if (httpContextProcessing != null) {
 //			httpContextProcessing.destroy();
 //		}
+
 		// Wait up to 20 seconds, otherwhise
 		try {
 			runtimeExecutor.shutdown();
 			LOG.debug("...entering 20 seconds grace period...");
-			runtimeExecutor.awaitTermination(20, TimeUnit.SECONDS);
+			boolean ok = runtimeExecutor.awaitTermination(20, TimeUnit.SECONDS);
+			if (!ok) {
+				LOG.warn("Timeout awaiting termination, shutting down the executor.");
+			}
 			runtimeExecutor.shutdownNow();
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();

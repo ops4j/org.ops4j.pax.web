@@ -15,28 +15,31 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.ops4j.pax.web.annotations.Review;
-import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
-import org.ops4j.pax.web.service.spi.model.events.WebElementEventListener;
+import org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent;
+import org.ops4j.pax.web.service.spi.model.events.WebApplicationEventListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class listens to {@link WebElementEvent}s and redirect them to the
- * {@link EventAdmin} service
+ * <p>This class listens to {@link WebApplicationEvent}s and redirect them to the
+ * {@link EventAdmin} service according to chapter "128.5 Events" of OSGi CMPN R7 Specification.</p>
+ *
+ * <p>This handler is part of pax-web-runtime, but processes events related to WABs. No events related
+ * to Whiteboard/HttpService element registration are passed to Event Admin (for now?) because
+ * Whiteboard Specification (and HttpService Specification) doesn't mention anything about Event Admin.</p>
  */
-@Review("Check EventAdmin lifecycle")
-public class EventAdminHandler implements WebElementEventListener,
-		ServiceTrackerCustomizer<EventAdmin, EventAdmin> {
+public class EventAdminHandler implements WebApplicationEventListener, ServiceTrackerCustomizer<EventAdmin, EventAdmin> {
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(EventAdminHandler.class);
+	private static final Logger LOG = LoggerFactory.getLogger(EventAdminHandler.class);
 
 	private final AtomicReference<EventAdmin> eventAdminReference = new AtomicReference<>();
 	private final BundleContext bundleContext;
@@ -46,56 +49,35 @@ public class EventAdminHandler implements WebElementEventListener,
 	}
 
 	@Override
-	public void registrationEvent(WebElementEvent servletEvent) {
+	public void webEvent(WebApplicationEvent event) {
 		EventAdmin eventAdmin = eventAdminReference.get();
-//		if (eventAdmin != null) {
-//			final String topic;
-//			switch (servletEvent.getType()) {
-//				case DEPLOYING:
-//					topic = WebElementEvent.WebTopic.DEPLOYING.toString();
-//					break;
-//				case DEPLOYED:
-//					topic = WebEvent.WebTopic.DEPLOYED.toString();
-//					break;
-//				case UNDEPLOYING:
-//					topic = WebEvent.WebTopic.UNDEPLOYING.toString();
-//					break;
-//				case UNDEPLOYED:
-//					topic = WebEvent.WebTopic.UNDEPLOYED.toString();
-//					break;
-//				case WAITING:
-//					// A Waiting Event is not supported by the specification
-//					// therefore it is mapped to FAILED, because of collision.
-//					//$FALL-THROUGH$
-//				case FAILED:
-//					//$FALL-THROUGH$
-//				default:
-//					topic = WebEvent.WebTopic.FAILED.toString();
-//			}
-//			Dictionary<String, Object> properties = new Hashtable<>();
-////			properties.put(
-////					"servlet.alias",
-////					servletEvent.getAlias() == null ? "" : servletEvent
-////							.getAlias());
-////			properties.put(
-////					"servlet.name",
-////					servletEvent.getServletName() == null ? "" : servletEvent
-////							.getServletName());
-////			properties.put(
-////					"servlet.urlparameter",
-////					servletEvent.getUrlParameter() == null ? "" : servletEvent
-////							.getUrlParameter());
-////			if (servletEvent.getServletClassName() != null) {
-////				properties.put("servlet.servlet", servletEvent.getServletClassName());
-////			}
-////			properties.put("timestamp", servletEvent.getTimestamp());
-////			if (servletEvent.getHttpContext() != null) {
-////				properties.put("servlet.httpcontext",
-////						servletEvent.getHttpContext());
-////			}
-//			Event event = new Event(topic, properties);
-//			eventAdmin.postEvent(event);
-//		}
+		if (eventAdmin != null) {
+			final String topic = event.getType().getTopic();
+			Dictionary<String, Object> properties = new Hashtable<>();
+
+			// 128.5 Events
+			properties.put("bundle", event.getBundle());
+			properties.put("bundle.symbolicName", event.getBundleName());
+			properties.put("bundle.id", event.getBundleId());
+			properties.put("bundle.version", event.getBundleVersion());
+			properties.put("context.path", event.getContextPath());
+			properties.put("timestamp", event.getTimestamp());
+			properties.put("extender.bundle", event.getExtenderBundle());
+			properties.put("extender.bundle.id", event.getExtenderBundleId());
+			properties.put("extender.bundle.symbolicName", event.getExtenderBundleName());
+			properties.put("extender.bundle.version", event.getExtenderBundleVersion());
+
+			if (event.getException() != null) {
+				properties.put("exception", event.getException());
+			}
+			if (event.getCollisionIds() != null) {
+				properties.put("collision", event.getContextPath());
+				properties.put("collision.bundles", event.getCollisionIds());
+			}
+
+			Event ev = new Event(topic, properties);
+			eventAdmin.postEvent(ev);
+		}
 	}
 
 	@Override
@@ -111,7 +93,7 @@ public class EventAdminHandler implements WebElementEventListener,
 				return eventService;
 			}
 		} else {
-			LOG.warn("An EventAdmin service was found, but it is not assignable to this bundle, make sure to have a compatible org.osgi.service.event package exported with version range [1.3,2.0)");
+			LOG.warn("An EventAdmin service was found, but it is not assignable to this bundle, make sure to have a compatible org.osgi.service.event package exported.");
 		}
 		return null;
 	}
