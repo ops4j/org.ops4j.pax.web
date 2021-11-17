@@ -21,7 +21,7 @@
 		<relativePath>../pom.xml</relativePath>
 		<groupId>org.ops4j.pax.web.samples</groupId>
 		<artifactId>web-fragment</artifactId>
-		<version>7.3.22</version>
+		<version>7.3.23-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
