@@ -84,7 +84,7 @@ public class DefaultWebAppDependencyManager {
 						oldReg.unregister();
 					} catch (IllegalStateException e) {
 						//ignore, service is already gone.
-						LOG.info("Unregistering an alredy unregistered Service: {} ", oldReg.getClass());
+						LOG.info("Unregistering an already unregistered Service: {} ", oldReg.getClass());
 					}
 				}
 			}
@@ -101,7 +101,7 @@ public class DefaultWebAppDependencyManager {
 				serviceRegistration.unregister();
 			} catch (IllegalStateException e) {
 				// ignore, service is already gone.
-				LOG.info("Unregistering an alredy unregistered Service: {} ", serviceRegistration.getClass());
+				LOG.info("Unregistering an already unregistered Service: {} ", serviceRegistration.getClass());
 			}
 		}
 		ReplaceableService<HttpService> tracker = trackers.remove(webApp);
