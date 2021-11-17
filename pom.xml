@@ -126,7 +126,7 @@
 		<dependency.jstl.version>1.2</dependency.jstl.version>
 		<dependency.karaf.version>4.2.11</dependency.karaf.version>
 		<dependency.osgi.version>6.0.0</dependency.osgi.version>
-		<dependency.paxurl.version>2.6.7</dependency.paxurl.version>
+		<dependency.paxurl.version>2.6.8</dependency.paxurl.version>
 		<dependency.pax-logging.version>1.11.6</dependency.pax-logging.version>
 		<dependency.slf4j>1.7.12</dependency.slf4j>
 		<dependency.scr.version>2.1.26</dependency.scr.version>
