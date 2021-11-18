@@ -30,8 +30,11 @@ import org.junit.Test;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.VersionUtils;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
+import org.ops4j.pax.web.service.spi.model.events.FilterEventData;
 import org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent;
 import org.ops4j.pax.web.service.spi.model.events.WebApplicationEventListener;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEventListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
@@ -81,7 +84,7 @@ public abstract class AbstractWabWhiteboardConflictIntegrationTest extends Abstr
 				VersionUtils.getProjectVersion());
 		Bundle wab = context.installBundle(wabUri);
 
-		final CountDownLatch latch = new CountDownLatch(1);
+		final CountDownLatch latch = new CountDownLatch(2);
 
 		WebApplicationEventListener listener = event -> {
 			if (!event.getContextPath().equals("/war-bundle")) {
@@ -91,15 +94,30 @@ public abstract class AbstractWabWhiteboardConflictIntegrationTest extends Abstr
 				latch.countDown();
 			}
 		};
-		ServiceRegistration<WebApplicationEventListener> reg
+		WebElementEventListener elListener = event -> {
+			if (event.getType() == WebElementEvent.State.DEPLOYED) {
+				if (event.getData() instanceof FilterEventData) {
+					if (event.getData().getContextNames().contains("/war-bundle")) {
+						latch.countDown();
+					}
+				}
+			}
+		};
+
+		ServiceRegistration<WebApplicationEventListener> reg1
 				= context.registerService(WebApplicationEventListener.class, listener, null);
+		ServiceRegistration<WebElementEventListener> reg2
+				= context.registerService(WebElementEventListener.class, elListener, null);
 
 		try {
 			wab.start();
 			assertTrue(latch.await(5000, TimeUnit.MILLISECONDS));
 		} finally {
-			if (reg != null) {
-				reg.unregister();
+			if (reg1 != null) {
+				reg1.unregister();
+			}
+			if (reg2 != null) {
+				reg2.unregister();
 			}
 		}
 

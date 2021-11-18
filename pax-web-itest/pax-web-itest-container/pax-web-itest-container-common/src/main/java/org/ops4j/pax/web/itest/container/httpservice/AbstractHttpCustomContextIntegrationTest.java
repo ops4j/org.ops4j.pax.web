@@ -20,10 +20,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
-import org.ops4j.pax.web.service.spi.model.events.ErrorPageEventData;
 import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
-import org.ops4j.pax.web.service.spi.model.events.WelcomeFileEventData;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 

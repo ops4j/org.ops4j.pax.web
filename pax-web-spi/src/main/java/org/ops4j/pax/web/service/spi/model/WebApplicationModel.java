@@ -18,7 +18,6 @@ package org.ops4j.pax.web.service.spi.model;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeSet;
 
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpService;

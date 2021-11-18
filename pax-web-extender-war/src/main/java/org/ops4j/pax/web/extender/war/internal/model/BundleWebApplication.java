@@ -263,7 +263,7 @@ public class BundleWebApplication {
 			throw new IllegalStateException("Can't start " + this + ": it's already in " + state + " state");
 		}
 
-		scheduleIfPossible(null, State.CONFIGURING, true);
+		scheduleIfPossible(State.UNCONFIGURED, State.CONFIGURING, true);
 	}
 
 	/**
@@ -286,13 +286,12 @@ public class BundleWebApplication {
 		// Otherwise, the undeployment might've been happening after Felix/Equinox already cleaned up everything
 		// related to WAB's bundle
 
-		State state = deploymentState.getAndSet(State.UNDEPLOYING);
-		extenderContext.sendWebEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYING, bundle, contextPath, httpContext));
-
 		// get a WebContainer for the last time - it doesn't have to be available (no need to lock here)
 		ServiceReference<WebContainer> ref = webContainerServiceRef;
 		WebAppWebContainerView view = webContainerManager.containerView(bundle.getBundleContext(),
 				ref, WebAppWebContainerView.class);
+
+		State state = deploymentState.get();
 
 		// depending on current state, we may have to clean up more resources or just finish quickly
 		switch (state) {
@@ -366,9 +365,8 @@ public class BundleWebApplication {
 				break;
 		}
 
-		// whether the undeployment failed, succeeded or wasn't needed, we broadcast an event and set final stage.
+		// whether the undeployment failed, succeeded or wasn't needed, we set the final state
 		deploymentState.set(State.UNDEPLOYED);
-		extenderContext.sendWebEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYED, bundle, contextPath, null));
 
 		webContainerManager.releaseContainer(bundle.getBundleContext(), ref);
 	}
@@ -453,19 +451,27 @@ public class BundleWebApplication {
 			WebAppWebContainerView view = webContainerManager.containerView(bundle.getBundleContext(),
 					webContainerServiceRef, WebAppWebContainerView.class);
 
+			State state = deploymentState.get();
+
 			if (view == null) {
 				LOG.info("WebContainer reference {} was removed, {} should already be undeployed.", ref, this);
 				// but still let's start with new allocation attempt (in new WebContainer that'll be set in future)
-				deploymentState.set(State.ALLOCATING_CONTEXT);
+				switch (state) {
+					case WAITING_FOR_CONTEXT:
+					case ALLOCATING_CONTEXT:
+					case DEPLOYING:
+					case DEPLOYED:
+						deploymentState.set(State.WAITING_FOR_CONTEXT);
+						break;
+					default:
+						// leave as is (earlier stages of deployment)
+				}
 			} else {
 				// as in stop(), we should UNDEPLOY the application, but (unlike as in stop()) to the stage, where
 				// it could potentially be DEPLOYED again. re-registration of WebContainer service won't change the
 				// information content of current WAB (when WAB is restarted/refreshed, it may get new bundle
 				// fragments attached, thus new web fragments may become available), so it's safe to reuse already
 				// parsed web.xml + fragments + annotations
-
-				State state = deploymentState.getAndSet(State.UNDEPLOYING);
-				extenderContext.sendWebEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYING, bundle, contextPath, httpContext));
 
 				// similar state check as with stop(), but with slightly different handling
 				switch (state) {
@@ -474,11 +480,12 @@ public class BundleWebApplication {
 					case UNDEPLOYED:
 					case UNDEPLOYING:
 					case WAITING_FOR_WEB_CONTAINER:
-					case WAITING_FOR_CONTEXT:
-						break;
 					case FAILED:
-						// FAILED state of WAB is different that FAILED event (which may mean the context is not free),
-						// but with new WebContainer reference that may soon be set, we'll give this WAB another chance
+						// do not change the state at all - keep as is
+						break;
+					case WAITING_FOR_CONTEXT:
+						// switch back to waiting for WebContainer
+						deploymentState.set(State.WAITING_FOR_WEB_CONTAINER);
 						break;
 					case ALLOCATING_CONTEXT:
 						try {
@@ -494,6 +501,7 @@ public class BundleWebApplication {
 									+ " Can't free the context, leaving it in inconsistent state.", this);
 							Thread.currentThread().interrupt();
 						}
+						deploymentState.set(State.WAITING_FOR_WEB_CONTAINER);
 						break;
 					case DEPLOYING:
 						try {
@@ -505,6 +513,7 @@ public class BundleWebApplication {
 								LOG.info("Undeploying {} from previous WebContainer after waiting for its full"
 										+ " deployment", this);
 								undeploy(view);
+								deploymentState.set(State.UNDEPLOYED);
 							}
 						} catch (InterruptedException e) {
 							LOG.warn("Thread interrupted while waiting for end of deployment of {}."
@@ -515,17 +524,11 @@ public class BundleWebApplication {
 					case DEPLOYED:
 						LOG.info("Undeploying fully deployed {}", this);
 						undeploy(view);
+						deploymentState.set(State.UNDEPLOYED);
 						break;
 					default:
 						break;
 				}
-
-				// with the removal of WebContainer reference, we broadcast UNDEPLOYED event, but the state is as
-				// if the WAB was waiting for the context to be allocated. WAITING_FOR_WEB_CONTAINER state
-				// means that if the WebContainer is available again, the WAB will be scheduled to ALLOCATING_CONTEXT
-				// state
-				deploymentState.set(State.WAITING_FOR_WEB_CONTAINER);
-				extenderContext.sendWebEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYED, bundle, contextPath, null));
 			}
 
 			webContainerManager.releaseContainer(bundle.getBundleContext(), ref);
@@ -768,6 +771,8 @@ public class BundleWebApplication {
 			throw new IllegalArgumentException("Can't undeploy " + this + " without valid WebContainer");
 		}
 		try {
+			deploymentState.set(State.UNDEPLOYING);
+			extenderContext.sendWebEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYING, bundle, contextPath, null));
 			// 1. undeploy all the web elements from current WAB
 			Batch uninstall = batch.uninstall("Undeployment of " + this);
 			uninstall.setShortDescription("undeploy " + this.contextPath);
@@ -775,11 +780,13 @@ public class BundleWebApplication {
 
 			// 2. free the context
 			releaseContext(view, true);
+			extenderContext.sendWebEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYED, bundle, contextPath, null));
 		} catch (Exception e) {
 			// 128.3.8 Stopping the Web Application Bundle: Any failure during undeploying should be logged but must
 			// not stop the cleaning up of resources and notification of (other) listeners as well as handling any
 			// collisions.
 			LOG.warn("Problem undeploying {}: {}", this, e.getMessage(), e);
+			extenderContext.sendWebEvent(new WebApplicationEvent(WebApplicationEvent.State.FAILED, bundle, contextPath, null, e));
 		}
 	}
 
