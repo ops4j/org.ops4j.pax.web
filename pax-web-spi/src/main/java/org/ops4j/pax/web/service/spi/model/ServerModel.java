@@ -327,6 +327,10 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 	 * <p>The map has keys obtained using {@link System#identityHashCode(Object)} to prevent user tricks with
 	 * {@link Object#equals(Object)}. The value is not a {@link Servlet} but it's {@link ServletModel model}
 	 * to better show error messages.</p>
+	 *
+	 * <p>Mind that this map doesn't contain all registered servlets - only the ones registered as singletons.
+	 * Servlets for which {@link ServletModel} uses {@link org.osgi.framework.ServiceReference} or
+	 * {@link java.util.function.Supplier} are not kept here.</p>
 	 */
 	private final Map<Servlet, ServletModel> servlets = new IdentityHashMap<>();
 

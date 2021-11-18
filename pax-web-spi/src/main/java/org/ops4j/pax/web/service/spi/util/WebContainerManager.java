@@ -217,7 +217,13 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 					return container;
 				}
 			}
-			WebContainer webContainer = context.getService(ref);
+			WebContainer webContainer;
+			try {
+				webContainer = context.getService(ref);
+			} catch (IllegalStateException e) {
+				// could be java.lang.IllegalStateException: Invalid BundleContext.
+				return null;
+			}
 			if (webContainer == null) {
 				LOG.warn("Can't get a WebContainer service from {}", ref);
 				return null;
