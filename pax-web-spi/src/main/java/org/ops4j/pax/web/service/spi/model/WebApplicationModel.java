@@ -45,9 +45,6 @@ public class WebApplicationModel {
 	private final List<Bundle> containerFragmentBundles = new ArrayList<>();
 	private final List<Bundle> applicationFragmentBundles = new ArrayList<>();
 
-//	/** {@link OsgiContextModel} collection sorted by service rank */
-//	private final TreeSet<OsgiContextModel> osgiContextModels = new TreeSet<>();
-
 	public Bundle getBundle() {
 		return bundle;
 	}

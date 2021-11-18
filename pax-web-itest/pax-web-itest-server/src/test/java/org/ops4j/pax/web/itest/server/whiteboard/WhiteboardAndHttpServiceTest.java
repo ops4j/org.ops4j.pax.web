@@ -866,7 +866,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		// now we should have three OsgiContextModels, because the OsgiContextModel associated with HttpContext
 		// returned from wc.createDefaultHttpContext() is not visible to pax-web-extender-whiteboard, so it
 		// created new OsgiContextModel wrapping the context
-		// thought the whiteboard registration uses lower ranking thank Integer.MAX_VALUE, there's special
+		// though the whiteboard registration uses lower ranking thank Integer.MAX_VALUE, there's special
 		// override inside ServerModel that allows reconfiguration of HttpService contexts
 
 		// we've Whiteboard-registered legacy HttpContext, but we can reference it directly with HttpService
@@ -875,7 +875,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		// this should reference existing, WB-registered context
 		wc.registerServlet(servlet1, "s1", new String[] { "/s/*" }, null, context1);
 		Servlet servlet2 = new Utils.MyIdServlet("2");
-		// this should create 3rd OsgiContextModel - "default" for "sample1" bundle
+		// this should use the 2nd OsgiContextModel - "default" for "sample1" bundle created earlier
 		wc.registerServlet(servlet2, "s2", new String[] { "/t/*" }, null, null);
 
 		assertThat(httpGET(port, "/s/1"), startsWith("HTTP/1.1 404"));

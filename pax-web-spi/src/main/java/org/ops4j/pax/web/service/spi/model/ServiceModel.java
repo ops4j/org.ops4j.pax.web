@@ -42,6 +42,8 @@ import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEventListener;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.ClearDynamicRegistrationsChange;
@@ -134,10 +136,14 @@ public class ServiceModel implements BatchVisitor {
 	/** Web Sockets registered by given bundle */
 	private final Set<WebSocketModel> webSocketModels = new HashSet<>();
 
-	public ServiceModel(ServerModel serverModel, ServerController serverController, Bundle serviceBundle) {
+	private final WebElementEventListener eventDispatcher;
+
+	public ServiceModel(ServerModel serverModel, ServerController serverController, Bundle serviceBundle,
+			WebElementEventListener eventDispatcher) {
 		this.serverModel = serverModel;
 		this.serviceBundle = serviceBundle;
 		this.serverController = serverController;
+		this.eventDispatcher = eventDispatcher;
 	}
 
 	public WebContainerContext getOrCreateDefaultHttpContext(String contextId) {
@@ -575,6 +581,7 @@ public class ServiceModel implements BatchVisitor {
 
 		for (ContainerInitializerModel cim : containerInitializerModels) {
 			if (needsReRegistration(cim, oldContext, target, force)) {
+				event(WebElementEvent.State.UNDEPLOYING, cim);
 				batch.removeContainerInitializerModels(Collections.singletonList(cim));
 				batch.addContainerInitializerModel(cim, target);
 			}
@@ -582,6 +589,7 @@ public class ServiceModel implements BatchVisitor {
 
 		for (EventListenerModel elm : eventListenerModels) {
 			if (needsReRegistration(elm, oldContext, target, force)) {
+				event(WebElementEvent.State.UNDEPLOYING, elm);
 				batch.removeEventListenerModels(Collections.singletonList(elm));
 				batch.addEventListenerModel(elm, target);
 			}
@@ -591,6 +599,7 @@ public class ServiceModel implements BatchVisitor {
 			if (needsReRegistration(sm, oldContext, target, force)) {
 				Map<ServletModel, Boolean> modelsAndStates = new LinkedHashMap<>();
 				modelsAndStates.put(sm, !serverModel.getDisabledServletModels().contains(sm));
+				event(WebElementEvent.State.UNDEPLOYING, sm);
 				batch.removeServletModels(modelsAndStates);
 				batch.addServletModel(sm, target);
 			}
@@ -598,6 +607,7 @@ public class ServiceModel implements BatchVisitor {
 
 		for (WelcomeFileModel wfm : welcomeFileModels) {
 			if (needsReRegistration(wfm, oldContext, target, force)) {
+				event(WebElementEvent.State.UNDEPLOYING, wfm);
 				batch.removeWelcomeFileModel(wfm);
 				batch.addWelcomeFileModel(wfm, target);
 			}
@@ -606,6 +616,7 @@ public class ServiceModel implements BatchVisitor {
 		Set<ErrorPageModel> affectedErrorPageModels = new TreeSet<>();
 		for (ErrorPageModel epm : errorPageModels) {
 			if (needsReRegistration(epm, oldContext, target, force)) {
+				event(WebElementEvent.State.UNDEPLOYING, epm);
 				batch.removeErrorPageModels(Collections.singletonList(epm));
 				batch.addErrorPageModel(epm, target);
 				affectedErrorPageModels.add(epm);
@@ -654,6 +665,7 @@ public class ServiceModel implements BatchVisitor {
 		Set<FilterModel> affectedFilterModels = new TreeSet<>();
 		for (FilterModel fm : filterModels) {
 			if (needsReRegistration(fm, oldContext, target, force)) {
+				event(WebElementEvent.State.UNDEPLOYING, fm);
 				batch.removeFilterModels(Collections.singletonList(fm));
 				batch.addFilterModel(fm, target);
 				affectedFilterModels.add(fm);
@@ -746,6 +758,12 @@ public class ServiceModel implements BatchVisitor {
 		OsgiContextModel currentContext = model.getContextModels().get(0);
 		return currentContext == oldContext
 				&& (force || !oldContext.isWhiteboard() || newContext.compareTo(oldContext) < 0);
+	}
+
+	private void event(WebElementEvent.State type, ElementModel<?, ?> model) {
+		if (eventDispatcher != null) {
+			eventDispatcher.registrationEvent(new WebElementEvent(type, model.asEventData()));
+		}
 	}
 
 }

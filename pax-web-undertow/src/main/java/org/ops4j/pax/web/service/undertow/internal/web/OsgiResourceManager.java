@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.undertow.internal.web;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -58,9 +59,13 @@ public class OsgiResourceManager implements ResourceManager {
 		this.chroot = chroot;
 		this.osgiScopedServletContext = osgiScopedServletContext;
 		this.fileETagFunction = new FileETagFunction();
+		File location = (File) osgiScopedServletContext.getAttribute(ServletContext.TEMPDIR);
+		if (location == null) {
+			location = new File(System.getProperty("java.io.tmpdir"));
+		}
 		this.pathResourceManager = (PathResourceManager) PathResourceManager.builder()
 				// base won't be used
-				.setBase(Paths.get(ServletContext.TEMPDIR))
+				.setBase(location.toPath())
 				.build();
 	}
 

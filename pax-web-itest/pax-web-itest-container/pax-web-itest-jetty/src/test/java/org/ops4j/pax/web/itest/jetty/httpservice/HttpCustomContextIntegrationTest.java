@@ -28,7 +28,7 @@ public class HttpCustomContextIntegrationTest extends AbstractHttpCustomContextI
 
 	@Configuration
 	public Option[] configure() {
-		return combine(baseConfigure(), paxWebJetty());
+		return combine(combine(baseConfigure(), paxWebExtenderWhiteboard()), paxWebJetty());
 	}
 
 }

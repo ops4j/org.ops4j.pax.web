@@ -81,9 +81,14 @@ import org.ops4j.pax.web.service.spi.servlet.DefaultTaglibDescriptor;
 import org.ops4j.pax.web.service.spi.model.views.DynamicJEEWebContainerView;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.Change;
+import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
+import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
+import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
+import org.ops4j.pax.web.service.spi.task.FilterModelChange;
 import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
 import org.ops4j.pax.web.service.spi.task.TransactionStateChange;
+import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.ops4j.pax.web.service.spi.util.Path;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
@@ -138,7 +143,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		LOG.debug("Creating active Http Service for: {}", bundle);
 
 		this.serverModel = serverModel;
-		this.serviceModel = new ServiceModel(serverModel, srvController, bundle);
+		this.serviceModel = new ServiceModel(serverModel, srvController, bundle, eventDispatcher);
 
 		this.serviceBundle = bundle;
 
@@ -2145,8 +2150,17 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			serverModel.runSilently(() -> {
 				Batch batch = new Batch("Registration of " + model);
 				serverModel.registerOsgiContextModelIfNeeded(model, serviceModel, batch);
-				serverController.sendBatch(batch);
-				batch.accept(serviceModel);
+
+				try {
+					serverController.sendBatch(batch);
+					batch.accept(serviceModel);
+
+					// strange, but we have to send DEPLOYED events if everything's fine at this stage - in kind of batch
+					handleReRegistrationEvents(WebElementEvent.State.DEPLOYED, batch, null);
+				} catch (Exception e) {
+					// batch FAILED event - although we don't know which batch ADDs actually failed...
+					handleReRegistrationEvents(WebElementEvent.State.FAILED, batch, e);
+				}
 				return null;
 			});
 		}
@@ -2156,8 +2170,15 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			serverModel.runSilently(() -> {
 				Batch batch = new Batch("Unregistration of " + model);
 				serverModel.unregisterOsgiContextModel(model, serviceModel, batch);
-				serverController.sendBatch(batch);
-				batch.accept(serviceModel);
+
+				try {
+					serverController.sendBatch(batch);
+					batch.accept(serviceModel);
+					handleReRegistrationEvents(WebElementEvent.State.DEPLOYED, batch, null);
+				} catch (Exception e) {
+					handleReRegistrationEvents(WebElementEvent.State.FAILED, batch, e);
+				}
+
 				return null;
 			});
 		}
@@ -2232,6 +2253,46 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				serverModel.getWhiteboardContexts().remove(webContext);
 				return null;
 			});
+		}
+
+		private void handleReRegistrationEvents(WebElementEvent.State state, Batch batch, Exception e) {
+			if (e == null) {
+				for (Change change : batch.getOperations()) {
+					if (change.getKind() == OpCode.ADD) {
+						if (change instanceof ContainerInitializerModelChange) {
+							event(state, ((ContainerInitializerModelChange) change).getContainerInitializerModel());
+						} else if (change instanceof EventListenerModelChange) {
+							event(state, ((EventListenerModelChange) change).getEventListenerModel());
+						} else if (change instanceof ServletModelChange) {
+							event(state, ((ServletModelChange) change).getServletModel());
+						} else if (change instanceof WelcomeFileModelChange) {
+							event(state, ((WelcomeFileModelChange) change).getWelcomeFileModel());
+						} else if (change instanceof ErrorPageModelChange) {
+							event(state, ((ErrorPageModelChange) change).getErrorPageModel());
+						} else if (change instanceof FilterModelChange) {
+							event(state, ((FilterModelChange) change).getFilterModel());
+						}
+					}
+				}
+			} else {
+				for (Change change : batch.getOperations()) {
+					if (change.getKind() == OpCode.ADD) {
+						if (change instanceof ContainerInitializerModelChange) {
+							event(state, ((ContainerInitializerModelChange) change).getContainerInitializerModel(), e);
+						} else if (change instanceof EventListenerModelChange) {
+							event(state, ((EventListenerModelChange) change).getEventListenerModel(), e);
+						} else if (change instanceof ServletModelChange) {
+							event(state, ((ServletModelChange) change).getServletModel(), e);
+						} else if (change instanceof WelcomeFileModelChange) {
+							event(state, ((WelcomeFileModelChange) change).getWelcomeFileModel(), e);
+						} else if (change instanceof ErrorPageModelChange) {
+							event(state, ((ErrorPageModelChange) change).getErrorPageModel(), e);
+						} else if (change instanceof FilterModelChange) {
+							event(state, ((FilterModelChange) change).getFilterModel(), e);
+						}
+					}
+				}
+			}
 		}
 	}
 

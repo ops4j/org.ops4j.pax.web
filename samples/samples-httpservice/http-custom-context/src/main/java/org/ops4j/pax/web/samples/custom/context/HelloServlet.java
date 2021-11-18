@@ -52,12 +52,8 @@ public class HelloServlet extends HttpServlet {
 		final PrintWriter writer = response.getWriter();
 		writer.println("<body align='center'>");
 		writer.println("<h1>Hello World</h1>");
-		writer.println("<img src='" + request.getContextPath()
-				+ "/images/logo.png' border='0'/>");
-		writer.println("<h1>" + getServletConfig().getInitParameter("from")
-				+ "</h1>");
-//		writer.print(getServletContext().getAttribute("requestCounter")
-//				.toString() + " requests");
+		writer.println("<img src='" + request.getContextPath() + "/www/logo.png' border='0'/>");
+		writer.println("<h1>" + getServletConfig().getInitParameter("from") + "</h1>");
 		writer.println("<h1>Current User Name: " + userName + "</h1>");
 		writer.println("<h1>Session:</h1>");
 		writer.println(session.getId());
@@ -67,8 +63,7 @@ public class HelloServlet extends HttpServlet {
 	private static String getSessionData() {
 		final StringBuilder s = new StringBuilder();
 
-		final List<Object> userNames = HelloSessionListener
-				.getAttributes("userName");
+		final List<Object> userNames = HelloSessionListener.getAttributes("userName");
 		s.append(userNames.size()).append("<br>");
 
 		for (final Object userName : userNames) {

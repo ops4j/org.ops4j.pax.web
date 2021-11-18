@@ -683,6 +683,25 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 			} else {
 				models = bundleContexts.get(key);
 			}
+			if (models == null && !contextModel.isShared()) {
+				// we didn't find existing HttpService-related context by key, but we should try harder
+				OsgiContextModel model = null;
+				for (Map.Entry<ContextKey, TreeSet<OsgiContextModel>> entry : bundleContexts.entrySet()) {
+					ContextKey ck = entry.getKey();
+					TreeSet<OsgiContextModel> ocms = entry.getValue();
+					if (ck.bundle == contextModel.getOwnerBundle()) {
+						for (OsgiContextModel ocm : ocms) {
+							if (ocm.hasDirectHttpContextInstance() && ocm.getDirectHttpContextInstance().equals(contextModel.getDirectHttpContextInstance())) {
+								model = ocm;
+								break;
+							}
+						}
+					}
+				}
+				if (model != null) {
+					models = new TreeSet<>(Collections.singletonList(model));
+				}
+			}
 			if (models != null) {
 				for (OsgiContextModel m : models) {
 					if (m.hasDirectHttpContextInstance()) {
@@ -913,8 +932,8 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 
 				if (osgiContextModel.isWhiteboard() || osgiContextModel.isWab()) {
 					TreeSet<OsgiContextModel> models = sharedContexts.get(context.getContextId());
-					// we've just added new context, so existing, HttpService-related and created internally context
-					// should now not be taken into account, because of it's Integer.MAX_VALUE priority.
+					// we've just added new context, but existing, HttpService-related and created internally context
+					// will be taken into account anyway, because of it's Integer.MAX_VALUE priority.
 					// See "140.4 Registering Servlets":
 					//     The highest ranking is associated with the context of the Http Service.
 					//
@@ -3437,7 +3456,8 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		// never contain references to any "real" model that is used in actual registration. This is to prevent
 		// unwanted changes to internal, fragile model.
 
-		// we're not adding WebApplicationModels related to WABs - these will be added by pax-web-extender-war's plugin
+		// here we're preparing models for all known contexts - plugins will fill out the details or add more
+		// web applications
 
 		// plugins may add new models or alter existing ones.
 		// for example, pax-web-extender-war adds models related to failed WABs

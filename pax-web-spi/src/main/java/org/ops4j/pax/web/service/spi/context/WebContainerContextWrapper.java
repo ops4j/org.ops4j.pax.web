@@ -179,22 +179,23 @@ public class WebContainerContextWrapper extends DefaultHttpContext {
 		} else if (!bundle.equals(other.bundle)) {
 			return false;
 		}
-		if (contextId == null) {
-			if (other.contextId != null) {
-				return false;
-			}
-		} else if (!contextId.equals(other.contextId)) {
-			return false;
-		}
 
 		// only one of these can be set
 		if (httpContext == null) {
+			if (contextId == null) {
+				if (other.contextId != null) {
+					return false;
+				}
+			} else if (!contextId.equals(other.contextId)) {
+				return false;
+			}
 			if (servletContextHelper == null) {
 				return other.servletContextHelper == null;
 			} else {
 				return servletContextHelper.equals(other.servletContextHelper);
 			}
 		} else {
+			// ignore IDs, because they may be generated - direct instances are checked
 			return httpContext.equals(other.httpContext);
 		}
 	}
