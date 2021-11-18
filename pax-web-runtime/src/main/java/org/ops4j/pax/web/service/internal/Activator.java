@@ -232,6 +232,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 		}
 		if (eventServiceTracker != null) {
 			eventServiceTracker.close();
+			eventServiceTracker = null;
 		}
 		if (webElementEventDispatcher != null) {
 			webElementEventDispatcher.destroy();

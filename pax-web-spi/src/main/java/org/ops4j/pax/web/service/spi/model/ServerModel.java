@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
@@ -66,6 +67,7 @@ import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.model.events.WebContextEventListener;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEventData;
+import org.ops4j.pax.web.service.spi.model.views.ReportViewPlugin;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.ClearDynamicRegistrationsChange;
@@ -131,7 +133,7 @@ import static org.ops4j.pax.web.service.spi.util.Utils.getHighestRankedModel;
  * @author Alin Dreghiciu
  * @author Grzegorz Grzybek
  */
-public class ServerModel implements BatchVisitor, HttpServiceRuntime {
+public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportViewPlugin {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ServerModel.class);
 
@@ -415,6 +417,8 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 	 */
 	private final AtomicLong changeCount = new AtomicLong(0L);
 
+	private final List<ReportViewPlugin> plugins = new CopyOnWriteArrayList<>();
+
 	/**
 	 * Creates new global model of all web applications with {@link Executor} to be used for configuration and
 	 * registration tasks.
@@ -500,7 +504,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 	 */
 	public <T> T run(ModelRegistrationTask<T> task) throws ServletException, NamespaceException {
 		// in theory, a task doesn't have to change the model, but we accept false positives
-		// that's the only required place to increment the change count thanks to single-thread config pool ;)
+		// that's the only required place to increment the change count thanks to single-threaded config pool ;)
 		incrementChangeCounter();
 
 		if (Thread.currentThread().getId() == registrationThreadId) {
@@ -3390,6 +3394,79 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime {
 
 			return dto;
 		});
+	}
+
+	@Override
+	public void collectWebApplications(List<WebApplicationModel> webapps) {
+		// This is the main method used by org.ops4j.pax.web.service.spi.model.views.ReportWebContainerView to
+		// get information about installed "web applications".
+		// There are 3 "origins" of applications:
+		//  - pax-web-extender-war deploys "full" web applications based on web.xml (and fragments + annotations)
+		//  - pax-web-extender-whiteboard tracks Whiteboard services (servlets, filters, listeners, ...) and installs
+		//    the web elements together with matching "context"
+		//  - pax-web-runtime implements org.osgi.service.http.HttpService/org.ops4j.pax.web.service.WebContainer
+		//    and allows direct registration of web elements
+		//
+		// Whatever's the origin, every "web application" is about web elements registered into single implementation
+		// of javax.servlet.ServletContext (target runtime specific) which is uniquely identified by its context path.
+		// However in OSGi (all 3 origins), web elements are not directly registered there - there's an intermediate
+		// implementation of javax.servlet.ServletContext, common for all runtimes -
+		// org.ops4j.pax.web.service.spi.servlet.OsgiServletContext. And from configuration perspective, there's
+		// 1:1 mapping with even more important object - org.ops4j.pax.web.service.spi.model.OsgiContextModel
+		//
+		// When any of the "deployers" (WAB, Whiteboard, HttpService) creates a "web application", it chooses
+		// the target ServletContext using different means:
+		//  - WAB - one OsgiContextModel is created for the WAB and its context path - it's always the "best"
+		//    OsgiContextModel for ServletContext with given context path
+		//  - Whiteboard - first, one OsgiContextModel is created for each Whiteboard-registered service of
+		//    org.osgi.service.http.context.ServletContextHelper and web elements choose such helper using
+		//    "osgi.http.whiteboard.context.select" service registration property (with specification-defined default)
+		//  - HttpService - when registering web elements, a custom (or default, if null) instance of
+		//    org.osgi.service.http.HttpContext is passed along the registration. For each such HttpContext,
+		//    a HttpService-specific (tied to the registering bundle) OsgiContextModel is created
+		//
+		// org.ops4j.pax.web.service.spi.model.WebApplicationModel class is not used internally for actual
+		// registration. This model is created only for reporting purposes (kind of like DTOs, but more flexible) and
+		// never contain references to any "real" model that is used in actual registration. This is to prevent
+		// unwanted changes to internal, fragile model.
+
+		// we're not adding WebApplicationModels related to WABs - these will be added by pax-web-extender-war's plugin
+
+		// plugins may add new models or alter existing ones.
+		// for example, pax-web-extender-war adds models related to failed WABs
+		plugins.forEach(plugin -> plugin.collectWebApplications(webapps));
+	}
+
+	@Override
+	public WebApplicationModel getWebApplication(String contextPath) {
+		for (ReportViewPlugin plugin : plugins) {
+			WebApplicationModel app = plugin.getWebApplication(contextPath);
+			if (app != null) {
+				return app;
+			}
+		}
+
+		return null;
+	}
+
+	@Override
+	public WebApplicationModel getWebApplication(long bundleId) {
+		for (ReportViewPlugin plugin : plugins) {
+			WebApplicationModel app = plugin.getWebApplication(bundleId);
+			if (app != null) {
+				return app;
+			}
+		}
+
+		return null;
+	}
+
+	public void registerReportViewPlugin(ReportViewPlugin plugin) {
+		plugins.add(plugin);
+	}
+
+	public void unregisterReportViewPlugin(ReportViewPlugin plugin) {
+		plugins.remove(plugin);
 	}
 
 	/**

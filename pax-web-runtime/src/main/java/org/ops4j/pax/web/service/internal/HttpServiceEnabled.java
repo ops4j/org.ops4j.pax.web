@@ -58,6 +58,7 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.WebApplicationModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModelAware;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
@@ -71,6 +72,8 @@ import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.model.events.WebContextEventListener;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEventListener;
+import org.ops4j.pax.web.service.spi.model.views.ReportViewPlugin;
+import org.ops4j.pax.web.service.spi.model.views.ReportWebContainerView;
 import org.ops4j.pax.web.service.spi.model.views.WebAppWebContainerView;
 import org.ops4j.pax.web.service.spi.servlet.DefaultJspPropertyGroupDescriptor;
 import org.ops4j.pax.web.service.spi.servlet.DefaultSessionCookieConfig;
@@ -122,6 +125,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 	private final WhiteboardWebContainerView whiteboardContainerView = new WhiteboardWebContainer();
 	private final DirectWebContainerView directContainerView = new DirectWebContainer();
 	private final WebAppWebContainerView webAppWebContainer = new WebAppWebContainer();
+	private final ReportWebContainer reportWebContainer = new ReportWebContainer();
 
 	private final Configuration configuration;
 
@@ -255,6 +259,11 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			// from web.xml/fragments/annotations in one batch - without starting the target context after each
 			// servlet (for example)
 			return type.cast(webAppWebContainer);
+		}
+		if (type == ReportWebContainerView.class) {
+			// view used to get information about installed "web applications" - whatever is their origin
+			// (WAB, Whiteboard or HttpService/WebContainer)
+			return type.cast(reportWebContainer);
 		}
 		return null;
 	}
@@ -2343,6 +2352,42 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				return null;
 			});
 		}
+
+		@Override
+		public void registerReportViewPlugin(ReportViewPlugin plugin) {
+			serverModel.registerReportViewPlugin(plugin);
+		}
+
+		@Override
+		public void unregisterReportViewPlugin(ReportViewPlugin plugin) {
+			serverModel.unregisterReportViewPlugin(plugin);
+		}
+	}
+
+	/**
+	 * Private view class to get all desired information to be used in Karaf commands or other reports.
+	 * This view can't be used to alter the state of pax-web-runtime in any way.
+	 */
+	private class ReportWebContainer implements ReportWebContainerView {
+
+		@Override
+		public List<WebApplicationModel> listWebApplications() {
+			List<WebApplicationModel> webapps = new LinkedList<>();
+
+			serverModel.collectWebApplications(webapps);
+
+			return webapps;
+		}
+
+		@Override
+		public WebApplicationModel getWebApplication(String contextPath) {
+			return serverModel.getWebApplication(contextPath);
+		}
+
+		@Override
+		public WebApplicationModel getWebApplication(long bundleId) {
+			return serverModel.getWebApplication(bundleId);
+		}
 	}
 
 	private static class ResourceServlet {
@@ -2557,48 +2602,5 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 //		contextModel.setVirtualHosts(realVirtualHosts);
 //		serviceModel.addContextModel(contextModel);
 //	}
-
-//	@Override
-//	public RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator) {
-//		return withWhiteboardDtoService(service -> service.calculateRequestInfoDTO(path, iterator, serverModel, serviceModel));
-//	}
-//
-//	@Override
-//	public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator) {
-//		return withWhiteboardDtoService(service -> service.createWhiteboardRuntimeDTO(iterator, serverModel, serviceModel));
-//	}
-
-//	/**
-//	 * WhiteboardDtoService is registered as DS component. Should be removed if this class gets full DS support
-//	 * @param function a function which is applied against WhiteboardDtoService
-//	 * @param <T> Type of the functions return value
-//	 * @return value provided by given function
-//	 */
-//	private <T> T withWhiteboardDtoService(Function<WhiteboardDtoService, T> function) {
-//		final BundleContext bundleContext = serviceBundle.getBundleContext();
-//		ServiceReference<WhiteboardDtoService> ref = bundleContext.getServiceReference(WhiteboardDtoService.class);
-//		if (ref != null) {
-//			WhiteboardDtoService service = bundleContext.getService(ref);
-//			if (service != null) {
-//				try {
-//					return function.apply(service);
-//				} finally {
-//					bundleContext.ungetService(ref);
-//				}
-//			}
-//		}
-//		throw new IllegalStateException(String.format("Service '%s' could not be retrieved!", WhiteboardDtoService.class.getName()));
-//	}
-
-//    @Override
-//    public WebContainerDTO getWebcontainerDTO() {
-//        WebContainerDTO dto = new WebContainerDTO();
-//
-//        dto.port = serverController.getHttpPort();
-//        dto.securePort = serverController.getHttpSecurePort();
-//        dto.listeningAddresses = serverController.getConfiguration().server().getListeningAddresses();
-//
-//        return dto;
-//    }
 
 }

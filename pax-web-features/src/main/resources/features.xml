@@ -321,7 +321,23 @@ javax.servlet.context.tempdir = ${karaf.data}/tmp
 		<bundle start-level="30">mvn:org.ops4j.pax.url/pax-url-war/${dependency.org.ops4j.pax.url}/jar/uber</bundle>
 	</feature>
 
-<!--	<feature name="pax-jetty-http2" version="${project.version}" description="Optional additional feature to run Jetty with SPDY">-->
+	<!-- Karaf integration -->
+
+
+	<feature name="pax-web-karaf" description="Pax Web Karaf integration" version="${project.version}">
+		<feature>pax-web-core</feature>
+		<!-- TODO: we don't want (for now) include standard Karaf features, as they contain several pax-web-* "transitive" features -->
+<!--		<feature version="[4.4,5)">shell</feature>-->
+
+		<bundle dependency="true">mvn:org.apache.karaf.shell/org.apache.karaf.shell.core/${dependency.org.apache.karaf}</bundle>
+		<bundle dependency="true">mvn:org.jline/jline-terminal/${dependency.org.jline}</bundle>
+		<bundle dependency="true">mvn:org.jline/jline-reader/${dependency.org.jline}</bundle>
+		<bundle dependency="true">mvn:org.jline/jline-builtins/${dependency.org.jline}</bundle>
+
+		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-karaf/${project.version}</bundle>
+	</feature>
+
+	<!--	<feature name="pax-jetty-http2" version="${project.version}" description="Optional additional feature to run Jetty with SPDY">-->
 <!--		<details>-->
 <!--			Please beware, for this feature to run properly you'll need to add the alpn-boot.jar to the-->
 <!--			lib/ext folder of Karaf in some cases of your JVM.-->

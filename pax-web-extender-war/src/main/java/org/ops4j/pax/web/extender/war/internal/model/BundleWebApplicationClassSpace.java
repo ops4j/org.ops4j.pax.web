@@ -313,6 +313,10 @@ public class BundleWebApplicationClassSpace {
 		return result;
 	}
 
+	public Collection<Bundle> getContainerFragmentBundles() {
+		return containerFragmentBundles.values();
+	}
+
 	/**
 	 * This method is based on Tomcat's {@code org.apache.catalina.startup.ContextConfig#processJarsForWebFragments()}.
 	 * It scans the reachable JARs and bundles to find (and possibly parse) {@code web-fragment.xml} descriptors.

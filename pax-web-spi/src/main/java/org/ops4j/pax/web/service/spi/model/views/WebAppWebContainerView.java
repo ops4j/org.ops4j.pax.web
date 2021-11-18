@@ -108,4 +108,16 @@ public interface WebAppWebContainerView extends PaxWebContainerView {
 	 */
 	void sendBatch(Batch batch);
 
+	/**
+	 * Register additional {@link ReportViewPlugin}
+	 * @param plugin
+	 */
+	void registerReportViewPlugin(ReportViewPlugin plugin);
+
+	/**
+	 * Unregister previously registered {@link ReportViewPlugin}
+	 * @param plugin
+	 */
+	void unregisterReportViewPlugin(ReportViewPlugin plugin);
+
 }

@@ -38,8 +38,11 @@ import org.ops4j.pax.web.extender.war.internal.model.BundleWebApplication;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.WebApplicationModel;
 import org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent;
 import org.ops4j.pax.web.service.spi.model.events.WebApplicationEventListener;
+import org.ops4j.pax.web.service.spi.model.views.ReportViewPlugin;
+import org.ops4j.pax.web.service.spi.model.views.WebAppWebContainerView;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.util.WebContainerListener;
 import org.ops4j.pax.web.service.spi.util.WebContainerManager;
@@ -63,7 +66,7 @@ import org.slf4j.LoggerFactory;
  * pool from Felix extender is used to process lifecycle stages of {@link BundleWebApplication} in a similar way
  * as Aries BlueprintContainers.</p>
  */
-public class WarExtenderContext implements WebContainerListener {
+public class WarExtenderContext implements WebContainerListener, ReportViewPlugin {
 
 	// even the structure of the fields attempts to match the structure of WhiteboardExtenderContext
 
@@ -266,11 +269,60 @@ public class WarExtenderContext implements WebContainerListener {
 		// extension.destroy()
 	}
 
+	@Override
+	public void collectWebApplications(final List<WebApplicationModel> webapps) {
+		lock.lock();
+		try {
+			this.webApplications.values().forEach(wab -> {
+				webapps.add(wab.asWebApplicationModel());
+			});
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public WebApplicationModel getWebApplication(String contextPath) {
+		for (Map.Entry<Bundle, BundleWebApplication> e : webApplications.entrySet()) {
+			if (contextPath.equals(e.getValue().getContextPath())
+					&& e.getValue().getDeploymentState() == BundleWebApplication.State.DEPLOYED) {
+				return getWebApplication(e.getKey());
+			}
+		}
+
+		return null;
+	}
+
+	@Override
+	public WebApplicationModel getWebApplication(long bundleId) {
+		for (Map.Entry<Bundle, BundleWebApplication> e : webApplications.entrySet()) {
+			if (e.getKey().getBundleId() == bundleId) {
+				return getWebApplication(e.getKey());
+			}
+		}
+		return null;
+	}
+
+	private WebApplicationModel getWebApplication(Bundle bundle) {
+		BundleWebApplication app = webApplications.get(bundle);
+		return app == null ? null : app.asWebApplicationModel();
+	}
+
 	// --- Handling registration/unregistration of target WebContainer, where we want to register WAB applications
 
 	public void webContainerAdded(ServiceReference<WebContainer> ref) {
 		lock.lock();
 		try {
+			// let the ReportWebContainerView get more information about WABs - not only the generic information
+			// kept at OsgiContextModel, but also about failed WABs.
+			WebAppWebContainerView view = webContainerManager.containerView(bundleContext, ref, WebAppWebContainerView.class);
+			if (view == null) {
+				LOG.warn("Can't obtain WebAppWebContainerView from {}. No additional " +
+						"information will be available for web applications installed by WAR extender.", view);
+			} else {
+				view.registerReportViewPlugin(this);
+			}
+
 			// We're setting a "current" reference to a WebContainer service for each WAB
 			// The only thing we can guarantee is that we're not setting a reference when it's already set - every
 			// time a reference changes, we first have to unset previous reference (if exists), so the lifecycle
@@ -291,6 +343,12 @@ public class WarExtenderContext implements WebContainerListener {
 			// as with webContainerAdded, we can't remove a reference when it's not set, but it's still true that
 			// the WAB may be at any stage of its lifecycle
 			webApplications.values().forEach(wab -> wab.webContainerRemoved(ref));
+
+			WebAppWebContainerView view = webContainerManager.containerView(bundleContext, ref, WebAppWebContainerView.class);
+			if (view != null) {
+				view.unregisterReportViewPlugin(this);
+				webContainerManager.releaseContainer(bundleContext, ref);
+			}
 		} finally {
 			lock.unlock();
 		}

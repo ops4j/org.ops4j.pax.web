@@ -79,6 +79,7 @@ import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.model.ContextMetadataModel;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.WebApplicationModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
@@ -1841,6 +1842,38 @@ public class BundleWebApplication {
 		this.contextPath = contextPath;
 	}
 
+	public State getDeploymentState() {
+		return deploymentState.get();
+	}
+
+	/**
+	 * Reporting method for the purpose of {@link org.ops4j.pax.web.service.spi.model.views.ReportWebContainerView}.
+	 * We never want to return any object that's actually used for deployment and request processing, so simply
+	 * each {@link BundleWebApplication} can return a report about itself.
+	 * @return
+	 */
+	public WebApplicationModel asWebApplicationModel() {
+		WebApplicationModel model = new WebApplicationModel();
+		model.setBundle(bundle);
+		model.setWab(true);
+		model.setDeploymentState(deploymentState.get().getStateName());
+		model.setContextPath(contextPath);
+		model.getServletContainerInitializers().addAll(sciToHt.keySet().stream()
+				.map(sci -> sci.getClass().getName()).collect(Collectors.toList()));
+		model.getMetaInfResources().addAll(metainfResourceRoots.values());
+		model.getDescriptors().addAll(serverSpecificDescriptors);
+		// non-JAR entries of the Bundle-ClassPath
+		URL[] urls = ClassPathUtil.getClassPathNonJars(bundle);
+		for (URL url : urls) {
+			model.getWabClassPath().add(url);
+		}
+		model.getWabClassPath().addAll(classSpace.getWabClassPath());
+		model.getContainerFragmentBundles().addAll(classSpace.getContainerFragmentBundles());
+		model.getApplicationFragmentBundles().addAll(classSpace.getApplicationFragmentBundles().keySet());
+
+		return model;
+	}
+
 	// --- utility methods
 
 	/**
@@ -1848,27 +1881,27 @@ public class BundleWebApplication {
 	 * {@link WebApplicationEvent.State events} related to {@link BundleWebApplication} lifecycle. These states
 	 * are not directly communicated to observers, but are used to control the lifecycle of the web application.
 	 */
-	enum State {
+	public enum State {
 		/** Initial state after BundleWebApplication has just been created */
-		UNCONFIGURED,
+		UNCONFIGURED("Not configured"),
 
 		/** State, where parsing of web.xml, fragments and annotations are processed */
-		CONFIGURING,
+		CONFIGURING("Configuring"),
 
 		/** State after web configuration is ready, but we have to check if the target context (path) is free */
-		ALLOCATING_CONTEXT,
+		ALLOCATING_CONTEXT("Allocating"),
 
 		/**
 		 * State in which we're actually registering web elements from web.xml/web-fragment.xml/annotations into
 		 * allocated context {@link ServletContext context}.
 		 */
-		DEPLOYING,
+		DEPLOYING("Deploying"),
 
 		/** Final state - completely and successfully deployed application */
-		DEPLOYED,
+		DEPLOYED("Deployed"),
 
 		/** State where {@link WebContainer} reference is needed, but it's not available */
-		WAITING_FOR_WEB_CONTAINER,
+		WAITING_FOR_WEB_CONTAINER("Awaiting registration"),
 
 		/**
 		 * <p>State after web configuration is ready, but simply the target context path is used by another WAB
@@ -1878,26 +1911,32 @@ public class BundleWebApplication {
 		 * used the same context path (and virtual hosts). Now we have more specialized state and "WAITING" is no
 		 * longer used</p>
 		 */
-		WAITING_FOR_CONTEXT,
+		WAITING_FOR_CONTEXT("Awaiting context"),
 
 		/** The WAB is in the process of undeployment */
-		UNDEPLOYING,
+		UNDEPLOYING("Undeploying"),
 
 		/** The WAB is fully undeployed */
-		UNDEPLOYED,
+		UNDEPLOYED("Undeployed"),
 
 		/**
 		 * Failed beyond any repair. This state is used after parsing errors or other validation errors. FAILED
 		 * {@link BundleWebApplication} will never be attempted to be deployed again. For a case where WAB is
 		 * waiting for a context path to be <em>free</em>, see {@link State#WAITING_FOR_CONTEXT}.
 		 */
-		FAILED
+		FAILED("Failed");
+
+		private final String stateName;
+
+		State(String stateName) {
+			this.stateName = stateName;
+		}
+
+		public String getStateName() {
+			return stateName;
+		}
 	}
 
-//	/**
-//	 * The URL to the web.xml for the web app.
-//	 */
-//	private URL webXmlURL;
 //	/**
 //	 * Virtual Host List.
 //	 */
@@ -1906,108 +1945,6 @@ public class BundleWebApplication {
 //	 * Connectors List
 //	 */
 //	private final List<String> connectorList;
-//	/**
-//	 * SecurityConstraints
-//	 */
-//	private final List<WebAppConstraintMapping> constraintsMapping;
-//
-//	private final List<WebAppSecurityRole> securityRoles;
-//
-//	private final List<WebAppLoginConfig> loginConfig;
-//
-//	private URL jettyWebXmlURL;
-//
-//	/**
-//	 * Add a security constraint
-//	 *
-//	 * @param constraintMapping
-//	 * @throws NullArgumentException if security constraint is null
-//	 */
-//	public void addConstraintMapping(
-//			final WebAppConstraintMapping constraintMapping) {
-//		NullArgumentException.validateNotNull(constraintMapping,
-//				"constraint mapping");
-//		constraintsMapping.add(constraintMapping);
-//	}
-//
-//	/**
-//	 * @return list of {@link WebAppConstraintMapping}
-//	 */
-//	public WebAppConstraintMapping[] getConstraintMappings() {
-//		return constraintsMapping
-//				.toArray(new WebAppConstraintMapping[constraintsMapping.size()]);
-//	}
-//
-//	/**
-//	 * Adds a security role
-//	 *
-//	 * @param securityRole
-//	 */
-//	public void addSecurityRole(final WebAppSecurityRole securityRole) {
-//		NullArgumentException.validateNotNull(securityRole, "Security Role");
-//		securityRoles.add(securityRole);
-//	}
-//
-//	/**
-//	 * @return list of {@link WebAppSecurityRole}
-//	 */
-//	public WebAppSecurityRole[] getSecurityRoles() {
-//		return securityRoles.toArray(new WebAppSecurityRole[securityRoles
-//				.size()]);
-//	}
-//
-//	/**
-//	 * Adds a login config
-//	 *
-//	 * @param webApploginConfig
-//	 */
-//	public void addLoginConfig(final WebAppLoginConfig webApploginConfig) {
-//		NullArgumentException
-//				.validateNotNull(webApploginConfig, "Login Config");
-//		NullArgumentException.validateNotNull(
-//				webApploginConfig.getAuthMethod(),
-//				"Login Config Authorization Method");
-//		// NullArgumentException.validateNotNull(loginConfig.getRealmName(),
-//		// "Login Config Realm Name");
-//		loginConfig.add(webApploginConfig);
-//	}
-//
-//	/**
-//	 * @return list of {@link WebAppLoginConfig}
-//	 */
-//	public WebAppLoginConfig[] getLoginConfigs() {
-//		return loginConfig.toArray(new WebAppLoginConfig[loginConfig.size()]);
-//	}
-//
-//	/**
-//	 * Accepts a visitor for inner elements.
-//	 *
-//	 * @param visitor visitor
-//	 */
-//	public void accept(final WebAppVisitor visitor) {
-//		if (!constraintsMapping.isEmpty()) {
-//			for (WebAppConstraintMapping constraintMapping : constraintsMapping) {
-//				visitor.visit(constraintMapping);
-//			}
-//
-//		}
-//	}
-//
-//	public URL getWebXmlURL() {
-//		return webXmlURL;
-//	}
-//
-//	public void setWebXmlURL(URL webXmlURL) {
-//		this.webXmlURL = webXmlURL;
-//	}
-//
-//	public void setJettyWebXmlURL(URL jettyWebXmlURL) {
-//		this.jettyWebXmlURL = jettyWebXmlURL;
-//	}
-//
-//	public URL getJettyWebXmlURL() {
-//		return jettyWebXmlURL;
-//	}
 //
 //	public void setVirtualHostList(List<String> virtualHostList) {
 //		this.virtualHostList.clear();
