@@ -957,8 +957,11 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 				}
 
 				if (wabOsgiContextListener != null && osgiContextModel.isWab()) {
-					// let pax-web-extender-whiteboard know about new WAB OsgiContextModel
-					wabOsgiContextListener.wabContextRegistered(osgiContextModel);
+					// let pax-web-extender-whiteboard know about new WAB OsgiContextModel - but let's release
+					// current thread (see https://github.com/ops4j/org.ops4j.pax.web/issues/1648)
+					executor.execute(() -> {
+						wabOsgiContextListener.wabContextRegistered(osgiContextModel);
+					});
 				}
 			}
 		}
