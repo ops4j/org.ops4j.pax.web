@@ -2194,7 +2194,21 @@ class JettyServerWrapper implements BatchVisitor {
 			if (pos >= existingFilterHolders.length) {
 				break;
 			}
-			if (!((PaxWebFilterHolder)existingFilterHolders[pos]).getFilterModel().equals(newFilterHolders[pos].getFilterModel())) {
+			if ((((PaxWebFilterHolder) existingFilterHolders[pos]).getFilterModel() == null
+					|| newFilterHolders[pos].getFilterModel() == null)) {
+				if (existingFilterHolders[pos].getName() != null) {
+					if (!existingFilterHolders[pos].getName().equals(newFilterHolders[pos].getName())) {
+						quick = false;
+						break;
+					}
+				}
+				if (existingFilterHolders[pos].getHeldClass() != null) {
+					if (!existingFilterHolders[pos].getHeldClass().equals(newFilterHolders[pos].getHeldClass())) {
+						quick = false;
+						break;
+					}
+				}
+			} else if (!((PaxWebFilterHolder)existingFilterHolders[pos]).getFilterModel().equals(newFilterHolders[pos].getFilterModel())) {
 				quick = false;
 				break;
 			}

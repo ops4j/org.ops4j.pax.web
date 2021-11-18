@@ -2582,8 +2582,12 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			if (pos >= existingFilters.length) {
 				break;
 			}
-			if (!(existingFilters[pos] instanceof PaxWebFilterInfo
-					&& ((PaxWebFilterInfo) existingFilters[pos]).getFilterModel().equals(newFilters[pos]))) {
+			if (!(existingFilters[pos] instanceof PaxWebFilterInfo)) {
+				quick = false;
+				break;
+			}
+			PaxWebFilterInfo fi = (PaxWebFilterInfo) existingFilters[pos];
+			if (!(fi.getFilterModel() != null && fi.getFilterModel().equals(newFilters[pos]))) {
 				quick = false;
 				break;
 			}
