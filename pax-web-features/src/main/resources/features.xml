@@ -35,8 +35,6 @@
 
     <feature name="pax-jetty" description="Provide Jetty engine support" version="${dependency.jetty.version}">
         <feature>pax-web-core</feature>
-        <bundle start-level="29">mvn:org.eclipse.jetty.orbit/javax.security.auth.message/1.0.0.v201108011116</bundle>
-        <bundle start-level="29">mvn:org.apache.geronimo.components/geronimo-jaspi/${dependency.jaspi.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/${servicemix.specs.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:${servlet.spec.groupId}/${servlet.spec.artifactId}/${servlet.spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:javax.mail/mail/${javax.mail.version}</bundle>
