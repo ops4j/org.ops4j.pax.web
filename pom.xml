@@ -168,7 +168,6 @@
 		<dependency.el-api.version>3.0.0</dependency.el-api.version>
 		<dependency.validation-api.version>1.1.0.Final</dependency.validation-api.version>
 		<dependency.jaspic.version>1.1</dependency.jaspic.version>
-		<dependency.jaspi.version>2.0.0</dependency.jaspi.version>
 
 		<!-- Tells Sonar to use JaCoCo as the code coverage tool -->
 		<sonar.skippedModules>pax-web-itest-load</sonar.skippedModules>
