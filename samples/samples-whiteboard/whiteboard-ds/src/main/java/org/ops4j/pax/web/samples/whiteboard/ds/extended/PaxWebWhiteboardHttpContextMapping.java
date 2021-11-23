@@ -21,9 +21,10 @@ import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ServiceScope;
 import org.osgi.service.http.HttpContext;
 
-@Component(property = PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID + "=CustomHttpContextMapping")
+@Component(property = PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID + "=CustomHttpContextMapping", scope = ServiceScope.SINGLETON)
 public class PaxWebWhiteboardHttpContextMapping implements HttpContextMapping {
 
 	public static final String HTTP_CONTEXT_ID = "CustomHttpContextMapping";

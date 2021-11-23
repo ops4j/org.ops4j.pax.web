@@ -159,6 +159,10 @@ public class OsgiServletContext implements ServletContext {
 		}
 	}
 
+	public WebContainerContext getResolvedWebContainerContext() {
+		return defaultWebContainerContext;
+	}
+
 	/**
 	 * <p>A server wrapper that finds this {@link OsgiServletContext} to be highest ranked for given
 	 * physical {@link ServletContext} should register it as OSGi service for given context path.</p>

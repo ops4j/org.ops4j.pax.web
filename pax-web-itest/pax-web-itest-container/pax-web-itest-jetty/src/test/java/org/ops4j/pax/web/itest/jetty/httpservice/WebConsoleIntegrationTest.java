@@ -28,7 +28,7 @@ public class WebConsoleIntegrationTest extends AbstractWebConsoleIntegrationTest
 
 	@Configuration
 	public Option[] configure() {
-		return combine(baseConfigure(), paxWebJetty());
+		return combine(baseConfigure(), combine(paxWebJetty(), configAdmin()));
 	}
 
 }

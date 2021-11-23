@@ -208,7 +208,7 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 
 	public WebContainer container(Bundle bundle, ServiceReference<WebContainer> ref) {
 		BundleContext bundleContext = bundle != null ? bundle.getBundleContext() : null;
-		if (ref == null || bundle == null || bundleContext == null) {
+		if (ref == null || bundle == null) {
 			return null;
 		}
 		synchronized (containers) {
@@ -218,6 +218,9 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 				if (container != null) {
 					return container;
 				}
+			}
+			if (bundleContext == null) {
+				return null;
 			}
 			WebContainer webContainer;
 			try {

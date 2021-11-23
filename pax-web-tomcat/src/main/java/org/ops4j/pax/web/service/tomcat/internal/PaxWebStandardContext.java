@@ -487,16 +487,9 @@ public class PaxWebStandardContext extends StandardContext {
 		return Proxy.newProxyInstance(cl, interfaces.toArray(new Class[0]), handler);
 	}
 
-	public void setDefaultOsgiContextModel(OsgiContextModel defaultOsgiContextModel) {
-		if (this.defaultOsgiContextModel != null) {
-			// release previous WebContainerContext
-			this.defaultOsgiContextModel.releaseHttpContext(this.defaultOsgiContextModel.getOwnerBundle());
-			this.defaultWebContainerContext = null;
-		}
+	public void setDefaultOsgiContextModel(OsgiContextModel defaultOsgiContextModel, WebContainerContext resolvedWebContainerContext) {
 		this.defaultOsgiContextModel = defaultOsgiContextModel;
-		if (defaultOsgiContextModel != null) {
-			this.defaultWebContainerContext = defaultOsgiContextModel.resolveHttpContext(defaultOsgiContextModel.getOwnerBundle());
-		}
+		this.defaultWebContainerContext = resolvedWebContainerContext;
 	}
 
 	public OsgiServletContext getDefaultServletContext() {

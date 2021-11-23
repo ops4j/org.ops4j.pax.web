@@ -933,8 +933,8 @@ class JettyServerWrapper implements BatchVisitor {
 				try {
 					sch.stop();
 					// clear the OSGi context + model - it'll be calculated to next higher ranked ones few lines later
+					((PaxWebServletHandler) sch.getServletHandler()).setDefaultOsgiContextModel(null, null);
 					((PaxWebServletHandler) sch.getServletHandler()).setDefaultServletContext(null);
-					((PaxWebServletHandler) sch.getServletHandler()).setDefaultOsgiContextModel(null);
 				} catch (Exception e) {
 					LOG.warn("Error stopping Jetty context \"{}\": {}", contextPath, e.getMessage(), e);
 				}
@@ -949,7 +949,7 @@ class JettyServerWrapper implements BatchVisitor {
 			if (highestRankedModel != ((PaxWebServletHandler) sch.getServletHandler()).getDefaultOsgiContextModel()) {
 				LOG.info("Changing default OSGi context model for " + sch);
 				OsgiServletContext highestRankedContext = osgiServletContexts.get(highestRankedModel);
-				((PaxWebServletHandler) sch.getServletHandler()).setDefaultOsgiContextModel(highestRankedModel);
+				((PaxWebServletHandler) sch.getServletHandler()).setDefaultOsgiContextModel(highestRankedModel, highestRankedContext.getResolvedWebContainerContext());
 				((PaxWebServletHandler) sch.getServletHandler()).setDefaultServletContext(highestRankedContext);
 
 				// we have to ensure that non-highest ranked contexts are unregistered
@@ -963,7 +963,7 @@ class JettyServerWrapper implements BatchVisitor {
 				highestRankedContext.register();
 			}
 		} else {
-			((PaxWebServletHandler) sch.getServletHandler()).setDefaultOsgiContextModel(null);
+			((PaxWebServletHandler) sch.getServletHandler()).setDefaultOsgiContextModel(null, null);
 			((PaxWebServletHandler) sch.getServletHandler()).setDefaultServletContext(null);
 
 			// removing LAST OsgiContextModel for given servlet context (by context path) is almost like if the

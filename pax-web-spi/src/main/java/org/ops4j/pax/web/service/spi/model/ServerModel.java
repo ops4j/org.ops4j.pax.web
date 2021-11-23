@@ -570,6 +570,8 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 			newProps.put("service.changecount", changeCount.get());
 			// update the registration properties
 			httpServiceRuntimeReg.setProperties(newProps);
+		} catch (IllegalStateException e) {
+			LOG.debug("Problem incrementing the change counter: {}", e.getMessage());
 		} catch (Exception e) {
 			LOG.warn("Problem incrementing the change counter: {}", e.getMessage());
 		}

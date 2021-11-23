@@ -1284,7 +1284,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 						wrappingHandlers.get(contextPath).setDefaultServletContext(null);
 					}
 					if (securityHandlers.containsKey(contextPath)) {
-						securityHandlers.get(contextPath).setDefaultOsgiContextModel(null);
+						securityHandlers.get(contextPath).setDefaultOsgiContextModel(null, null);
 					}
 				}
 			}
@@ -1303,7 +1303,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				if (wrappingHandlers.containsKey(contextPath)) {
 					wrappingHandlers.get(contextPath).setDefaultServletContext(highestRankedContext);
 				}
-				securityHandler.setDefaultOsgiContextModel(highestRankedModel);
+				securityHandler.setDefaultOsgiContextModel(highestRankedModel, highestRankedContext.getResolvedWebContainerContext());
 
 				// we have to ensure that non-highest ranked contexts are unregistered
 				osgiServletContexts.forEach((ocm, osc) -> {
@@ -1320,7 +1320,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				wrappingHandlers.get(contextPath).setDefaultServletContext(null);
 			}
 			if (securityHandlers.containsKey(contextPath)) {
-				securityHandlers.get(contextPath).setDefaultOsgiContextModel(null);
+				securityHandlers.get(contextPath).setDefaultOsgiContextModel(null, null);
 			}
 
 			// removing LAST OsgiContextModel for given servlet context (by context path) is almost like if the

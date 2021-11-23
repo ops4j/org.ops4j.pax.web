@@ -42,6 +42,7 @@ import org.ops4j.pax.web.service.spi.model.elements.SecurityConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.SessionConfigurationModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
 import org.ops4j.pax.web.service.spi.task.Change;
+import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -222,12 +223,6 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	 * bundle.</p>
 	 */
 	private WebContainerContext httpContext;
-
-	/**
-	 * If the reference to {@link HttpContext}/{@link ServletContextHelper} is not specified directly, it has
-	 * to be resolved for some bundle first
-	 */
-	private WebContainerContext resolvedHttpContext;
 
 	/**
 	 * <p>When a <em>context</em> is registered as Whiteboard service, we have to keep the reference here, because
@@ -457,7 +452,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 			return contextSupplier.apply(bundleContext, getName());
 		}
 		if (contextReference != null) {
-			LOG.debug("Dereferencing {} for {}", contextReference, bundleContext.getBundle());
+			LOG.debug("Dereferencing {} for {}", toString(contextReference), bundleContext.getBundle());
 
 			// not handling (via ServiceObjects) prototype-scope, so no need to unget()
 			Object context = bundleContext.getService(contextReference);
@@ -483,6 +478,11 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		throw new IllegalStateException("No HttpContext/ServletContextHelper configured for " + this);
 	}
 
+	private String toString(ServiceReference<?> ref) {
+		Long id = (Long) ref.getProperty(Constants.SERVICE_ID);
+		return String.format("ServiceReference (id=%d, objectClass=%s)", id, String.join(", ", Utils.getObjectClasses(ref)));
+	}
+
 	/**
 	 * Call {@link BundleContext#ungetService(ServiceReference)} for given bundle if needed, to release the
 	 * {@link WebContainerContext} reference.
@@ -494,7 +494,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		}
 		BundleContext context = bundle != null ? bundle.getBundleContext() : null;
 		if (context != null) {
-			LOG.debug("Ungetting {} for {}", contextReference, context.getBundle());
+			LOG.debug("Ungetting {} for {}", toString(contextReference), context.getBundle());
 
 			context.ungetService(contextReference);
 		}

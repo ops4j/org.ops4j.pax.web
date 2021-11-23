@@ -921,7 +921,7 @@ class TomcatServerWrapper implements BatchVisitor {
 				try {
 					realContext.stop();
 					// clear the OSGi context + model - it'll be calculated to next higher ranked ones few lines later
-					realContext.setDefaultOsgiContextModel(null);
+					realContext.setDefaultOsgiContextModel(null, null);
 					realContext.setDefaultServletContext(null);
 				} catch (Exception e) {
 					LOG.warn("Error stopping Tomcat context \"{}\": {}", contextPath, e.getMessage(), e);
@@ -939,7 +939,7 @@ class TomcatServerWrapper implements BatchVisitor {
 			if (highestRankedModel != realContext.getDefaultOsgiContextModel()) {
 				LOG.info("Changing default OSGi context model for " + realContext);
 				OsgiServletContext highestRankedContext = osgiServletContexts.get(highestRankedModel);
-				realContext.setDefaultOsgiContextModel(highestRankedModel);
+				realContext.setDefaultOsgiContextModel(highestRankedModel, highestRankedContext.getResolvedWebContainerContext());
 				realContext.setDefaultServletContext(highestRankedContext);
 
 				// we have to ensure that non-highest ranked contexts are unregistered
@@ -953,7 +953,7 @@ class TomcatServerWrapper implements BatchVisitor {
 				highestRankedContext.register();
 			}
 		} else {
-			realContext.setDefaultOsgiContextModel(null);
+			realContext.setDefaultOsgiContextModel(null, null);
 			realContext.setDefaultServletContext(null);
 
 			// removing LAST OsgiContextModel for given servlet context (by context path) is almost like if the
