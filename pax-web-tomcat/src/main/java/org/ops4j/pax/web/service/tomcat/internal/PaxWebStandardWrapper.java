@@ -57,7 +57,7 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 
 	/**
 	 * Each servlet will be associated with {@link WebContainerContext} scoped to the bundle which registered
-	 * given {@link Servlet}.
+	 * given {@link Servlet}. This has to be <em>unget</em> at the end of servlet's lifecycle.
 	 */
 	private final WebContainerContext webContainerContext;
 
@@ -131,7 +131,7 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 		servletContext = new OsgiScopedServletContext(this.osgiServletContext, servletModel.getRegisteringBundle());
 
 		// instead of doing it once per request, we can get servlet-scoped WebContainerContext now
-		webContainerContext = osgiContextModel.resolveHttpContext(servletModel.getRegisteringBundle());
+		webContainerContext = servletContext.getResolvedWebContainerContext();
 
 		setOverridable(servletModel.isOverridable());
 
@@ -252,6 +252,9 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 			} else if (serviceObjects != null && getServlet() != null) {
 				serviceObjects.ungetService(getServlet());
 			}
+		}
+		if (servletModel != null && servletModel.getRegisteringBundle() != null) {
+			servletContext.releaseWebContainerContext(servletModel.getRegisteringBundle());
 		}
 	}
 

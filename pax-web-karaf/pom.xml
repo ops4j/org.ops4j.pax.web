@@ -54,7 +54,6 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-<!--						<Bundle-Activator>org.ops4j.pax.web.service.internal.Activator</Bundle-Activator>-->
 						<Import-Package>
 							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
 							javax.servlet;version="[3.1,5)",
@@ -141,6 +140,7 @@
 		<dependency>
 			<groupId>org.apache.karaf.shell</groupId>
 			<artifactId>org.apache.karaf.shell.core</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- JavaEE -->

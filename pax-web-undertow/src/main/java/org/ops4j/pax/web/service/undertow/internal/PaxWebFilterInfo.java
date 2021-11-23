@@ -143,6 +143,9 @@ public class PaxWebFilterInfo extends FilterInfo {
 							// bundle context has already been invalidated ?
 						}
 					}
+					if (model.getRegisteringBundle() != null) {
+						osgiScopedServletContext.releaseWebContainerContext(model.getRegisteringBundle());
+					}
 				}
 			};
 		}

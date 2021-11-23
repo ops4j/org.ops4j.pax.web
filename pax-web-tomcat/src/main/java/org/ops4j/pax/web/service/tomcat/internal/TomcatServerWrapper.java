@@ -81,6 +81,7 @@ import org.ops4j.pax.web.service.spi.model.ContextMetadataModel;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
+import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
@@ -176,6 +177,15 @@ class TomcatServerWrapper implements BatchVisitor {
 	 * the end of the transaction.
 	 */
 	private final Set<String> transactions = new HashSet<>();
+
+	/**
+	 * When delaying removal of servlets and listeners (not filters, error pages, ...), we have to ensure that
+	 * they are really removed. It is automatic for WABs, where entire context is destroyed, but not necessarily
+	 * for HttpService/WebContainer and Whiteboard scenarios. I observed this when working on sample Karaf
+	 * commands that allowed me to register/unregister servlets on demand, controlling when the HttpService
+	 * instance is <em>unget</em>.
+	 */
+	private final Map<String, List<ElementModel<?, ?>>> delayedRemovals = new HashMap<>();
 
 	/** Single map of context path to {@link Context} for fast access */
 	private final Map<String, PaxWebStandardContext> contextHandlers = new HashMap<>();
@@ -690,13 +700,34 @@ class TomcatServerWrapper implements BatchVisitor {
 				throw new IllegalStateException("Context path " + contextPath
 						+ " is already associated with config transaction");
 			}
+			delayedRemovals.computeIfAbsent(contextPath, cp -> new ArrayList<>());
 		} else if (change.getKind() == OpCode.DISASSOCIATE) {
 			if (!transactions.remove(contextPath)) {
 				throw new IllegalStateException("Context path " + contextPath
 						+ " is not associated with any config transaction");
-			} else if (contextHandlers.containsKey(contextPath)) {
-				// end of transaction - start the context
-				ensureServletContextStarted(contextHandlers.get(contextPath));
+			} else {
+				// check pending removals
+				List<ElementModel<?, ?>> toRemove = delayedRemovals.get(contextPath);
+				if (toRemove != null && contextHandlers.containsKey(contextPath)) {
+					for (Iterator<ElementModel<?, ?>> iterator = toRemove.iterator(); iterator.hasNext(); ) {
+						ElementModel<?, ?> model = iterator.next();
+						if (model instanceof ServletModel) {
+							removeServletModel(contextPath, ((ServletModel) model));
+						} else if (model instanceof EventListenerModel) {
+							removeEventListenerModel(contextHandlers.get(contextPath), ((EventListenerModel) model),
+									((EventListenerModel) model).getResolvedListener());
+						}
+						iterator.remove();
+					}
+				}
+				delayedRemovals.remove(contextPath);
+				if (contextHandlers.containsKey(contextPath)) {
+					// end of transaction - start the context
+					PaxWebStandardContext context = contextHandlers.get(contextPath);
+					if (server.getState() == LifecycleState.STARTED) {
+						ensureServletContextStarted(context);
+					}
+				}
 			}
 		}
 	}
@@ -881,6 +912,21 @@ class TomcatServerWrapper implements BatchVisitor {
 			osgiContextModels.get(contextPath).remove(osgiModel);
 
 			removedOsgiServletContext.unregister();
+			removedOsgiServletContext.releaseWebContainerContext();
+
+			OsgiServletContext currentHighestRankedContext = realContext.getDefaultServletContext();
+			if (currentHighestRankedContext == removedOsgiServletContext) {
+				// we have to stop the context - it'll be started later
+				LOG.info("Stopping Tomcat context \"{}\"", contextPath);
+				try {
+					realContext.stop();
+					// clear the OSGi context + model - it'll be calculated to next higher ranked ones few lines later
+					realContext.setDefaultOsgiContextModel(null);
+					realContext.setDefaultServletContext(null);
+				} catch (Exception e) {
+					LOG.warn("Error stopping Tomcat context \"{}\": {}", contextPath, e.getMessage(), e);
+				}
+			}
 
 			configurationListeners.remove(osgiModel);
 		}
@@ -890,19 +936,22 @@ class TomcatServerWrapper implements BatchVisitor {
 		// target servlet (with filters only)
 		OsgiContextModel highestRankedModel = Utils.getHighestRankedModel(osgiContextModels.get(contextPath));
 		if (highestRankedModel != null) {
-			OsgiServletContext highestRankedContext = osgiServletContexts.get(highestRankedModel);
-			realContext.setDefaultOsgiContextModel(highestRankedModel);
-			realContext.setDefaultServletContext(highestRankedContext);
+			if (highestRankedModel != realContext.getDefaultOsgiContextModel()) {
+				LOG.info("Changing default OSGi context model for " + realContext);
+				OsgiServletContext highestRankedContext = osgiServletContexts.get(highestRankedModel);
+				realContext.setDefaultOsgiContextModel(highestRankedModel);
+				realContext.setDefaultServletContext(highestRankedContext);
 
-			// we have to ensure that non-highest ranked contexts are unregistered
-			osgiServletContexts.forEach((ocm, osc) -> {
-				if (ocm.getContextPath().equals(contextPath) && osc != highestRankedContext) {
-					osc.unregister();
-				}
-			});
+				// we have to ensure that non-highest ranked contexts are unregistered
+				osgiServletContexts.forEach((ocm, osc) -> {
+					if (ocm.getContextPath().equals(contextPath) && osc != highestRankedContext) {
+						osc.unregister();
+					}
+				});
 
-			// and the highest ranked context should be registered as OSGi service (if it wasn't registered)
-			highestRankedContext.register();
+				// and the highest ranked context should be registered as OSGi service (if it wasn't registered)
+				highestRankedContext.register();
+			}
 		} else {
 			realContext.setDefaultOsgiContextModel(null);
 			realContext.setDefaultServletContext(null);
@@ -1139,40 +1188,45 @@ class TomcatServerWrapper implements BatchVisitor {
 
 					if (pendingTransaction(contextPath)) {
 						LOG.debug("Delaying removal of servlet {}", model);
+						delayedRemovals.get(contextPath).add(model);
 						return;
 					}
 
-					LOG.info("Removing servlet {}", model);
-					LOG.debug("Removing servlet {} from context {}", model.getName(), contextPath);
-
-					// there should already be a ServletContextHandler
-					Context realContext = contextHandlers.get(contextPath);
-
-					Container child = realContext.findChild(model.getName());
-					if (child != null) {
-						for (String pattern : model.getUrlPatterns()) {
-							realContext.removeServletMapping(pattern);
-						}
-						realContext.removeChild(child);
-					}
-
-					// are there any error page declarations in the model?
-					ErrorPageModel epm = model.getErrorPageModel();
-					if (epm != null) {
-						for (ErrorPage ep : realContext.findErrorPages()) {
-							if (ep.getExceptionType() != null && epm.getExceptionClassNames().contains(ep.getExceptionType())) {
-								realContext.removeErrorPage(ep);
-							}
-							if (ep.getErrorCode() > 0) {
-								if (epm.getErrorCodes().contains(ep.getErrorCode())
-										|| (epm.isXx4() && ep.getErrorCode() >= 400 && ep.getErrorCode() < 500)
-										|| (epm.isXx5() && ep.getErrorCode() >= 500 && ep.getErrorCode() < 600)) {
-									realContext.removeErrorPage(ep);
-								}
-							}
-						}
-					}
+					removeServletModel(contextPath, model);
 				});
+			}
+		}
+	}
+
+	private void removeServletModel(String contextPath, ServletModel model) {
+		LOG.info("Removing servlet {}", model);
+		LOG.debug("Removing servlet {} from context {}", model.getName(), contextPath);
+
+		// there should already be a ServletContextHandler
+		Context realContext = contextHandlers.get(contextPath);
+
+		Container child = realContext.findChild(model.getName());
+		if (child != null) {
+			for (String pattern : model.getUrlPatterns()) {
+				realContext.removeServletMapping(pattern);
+			}
+			realContext.removeChild(child);
+		}
+
+		// are there any error page declarations in the model?
+		ErrorPageModel epm = model.getErrorPageModel();
+		if (epm != null) {
+			for (ErrorPage ep : realContext.findErrorPages()) {
+				if (ep.getExceptionType() != null && epm.getExceptionClassNames().contains(ep.getExceptionType())) {
+					realContext.removeErrorPage(ep);
+				}
+				if (ep.getErrorCode() > 0) {
+					if (epm.getErrorCodes().contains(ep.getErrorCode())
+							|| (epm.isXx4() && ep.getErrorCode() >= 400 && ep.getErrorCode() < 500)
+							|| (epm.isXx5() && ep.getErrorCode() >= 500 && ep.getErrorCode() < 600)) {
+						realContext.removeErrorPage(ep);
+					}
+				}
 			}
 		}
 	}
@@ -1388,31 +1442,38 @@ class TomcatServerWrapper implements BatchVisitor {
 						return;
 					}
 
-					// remove the listener from real context - even ServletContextAttributeListener
-					if (standardContext != null) {
-						// this may be null in case of WAB where we keep event listeners so they get contextDestroyed
-						// event properly
-						Object[] evListeners = standardContext.getApplicationEventListeners();
-						Object[] lcListeners = standardContext.getApplicationLifecycleListeners();
-						List<Object> newEvListeners = new ArrayList<>();
-						List<Object> newLcListeners = new ArrayList<>();
-						for (Object l : evListeners) {
-							if (l != eventListener) {
-								newEvListeners.add(l);
-							}
-						}
-						for (Object l : lcListeners) {
-							if (l != eventListener) {
-								newLcListeners.add(l);
-							}
-						}
-						standardContext.removeListener(eventListenerModel, eventListener);
-						standardContext.setApplicationEventListeners(newEvListeners.toArray(new Object[0]));
-						standardContext.setApplicationLifecycleListeners(newLcListeners.toArray(new Object[0]));
-					}
+					removeEventListenerModel(standardContext, eventListenerModel, eventListener);
 				});
 			}
 		}
+	}
+
+	private void removeEventListenerModel(PaxWebStandardContext standardContext, EventListenerModel eventListenerModel, EventListener eventListener) {
+		// remove the listener from real context - even ServletContextAttributeListener
+		if (standardContext != null) {
+			// this may be null in case of WAB where we keep event listeners so they get contextDestroyed
+			// event properly
+			Object[] evListeners = standardContext.getApplicationEventListeners();
+			Object[] lcListeners = standardContext.getApplicationLifecycleListeners();
+			List<Object> newEvListeners = new ArrayList<>();
+			List<Object> newLcListeners = new ArrayList<>();
+			for (Object l : evListeners) {
+				if (l != eventListener) {
+					newEvListeners.add(l);
+				}
+			}
+			for (Object l : lcListeners) {
+				if (l != eventListener) {
+					newLcListeners.add(l);
+				}
+			}
+			if (eventListener != null) {
+				standardContext.removeListener(eventListenerModel, eventListener);
+			}
+			standardContext.setApplicationEventListeners(newEvListeners.toArray(new Object[0]));
+			standardContext.setApplicationLifecycleListeners(newLcListeners.toArray(new Object[0]));
+		}
+		eventListenerModel.releaseEventListener();
 	}
 
 	@Override
@@ -1632,11 +1693,6 @@ class TomcatServerWrapper implements BatchVisitor {
 						return;
 					}
 
-					if (pendingTransaction(contextPath)) {
-						LOG.debug("Delaying removal of web socket {}", model);
-						return;
-					}
-
 					LOG.info("Removing web socket {} from context {}", model, contextPath);
 
 					// just as when adding WebSockets, we only have to ensure that context is started if it was
@@ -1665,7 +1721,6 @@ class TomcatServerWrapper implements BatchVisitor {
 	}
 
 	private void clearDynamicRegistrations(String contextPath, OsgiContextModel context) {
-		LOG.debug("Removing dynamically registered servlets/filters/listeners from context {}", contextPath);
 
 		// there should already be a ServletContextHandler
 		PaxWebStandardContext ctx = contextHandlers.get(contextPath);
@@ -1680,6 +1735,8 @@ class TomcatServerWrapper implements BatchVisitor {
 			}
 		}
 
+		final int[] removed = { 0 };
+
 		// servlets
 		Map<ServletModel, Boolean> toRemove = new HashMap<>();
 		for (Container child : ctx.findChildren()) {
@@ -1687,6 +1744,7 @@ class TomcatServerWrapper implements BatchVisitor {
 				ServletModel model = ((PaxWebStandardWrapper) child).getServletModel();
 				if (model != null && model.isDynamic()) {
 					toRemove.put(model, Boolean.TRUE);
+					removed[0]++;
 				}
 			}
 		}
@@ -1706,6 +1764,7 @@ class TomcatServerWrapper implements BatchVisitor {
 				}
 			}
 			ctx.removeFilterDef(def);
+			removed[0]++;
 		}
 		for (FilterMap map : filterMaps) {
 			if (map instanceof PaxWebFilterMap) {
@@ -1722,6 +1781,7 @@ class TomcatServerWrapper implements BatchVisitor {
 		if (contextRegistrations != null) {
 			contextRegistrations.getDynamicListenerModels().forEach((listenerToRemove, model) -> {
 				if (model.isDynamic()) {
+					removed[0]++;
 					if (listenerToRemove instanceof ServletContextAttributeListener) {
 						// remove it from per-OsgiContext list
 						OsgiServletContext c = osgiServletContexts.get(context);
@@ -1759,6 +1819,10 @@ class TomcatServerWrapper implements BatchVisitor {
 			contextRegistrations.getDynamicServletRegistrations().clear();
 			contextRegistrations.getDynamicFilterRegistrations().clear();
 			contextRegistrations.getDynamicListenerRegistrations().clear();
+		}
+
+		if (removed[0] > 0) {
+			LOG.debug("Removed {} dynamically registered servlets/filters/listeners from context {}", removed[0], contextPath);
 		}
 	}
 

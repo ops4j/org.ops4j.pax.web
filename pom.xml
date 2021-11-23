@@ -1621,6 +1621,10 @@
 						<groupId>com.sun.activation</groupId>
 						<artifactId>jakarta.activation</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>org.apache.felix</groupId>
+						<artifactId>org.apache.felix.framework</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>

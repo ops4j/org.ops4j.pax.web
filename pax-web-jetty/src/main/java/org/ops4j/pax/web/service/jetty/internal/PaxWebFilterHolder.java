@@ -181,6 +181,9 @@ public class PaxWebFilterHolder extends FilterHolder {
 				serviceObjects.ungetService(realFilter);
 			}
 		}
+		if (filterModel != null && filterModel.getRegisteringBundle() != null) {
+			servletContext.releaseWebContainerContext(filterModel.getRegisteringBundle());
+		}
 	}
 
 	/**

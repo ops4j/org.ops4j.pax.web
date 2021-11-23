@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
@@ -80,7 +81,7 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 
 	private final Executor pool;
 
-	private final Map<ServiceReference<WebContainer>, Map<BundleContext, WebContainer>> containers = new HashMap<>();
+	private final Map<ServiceReference<WebContainer>, Map<Bundle, WebContainer>> containers = new HashMap<>();
 
 	/**
 	 * Creates a manager that delivers service events synchronously (for test purposes).
@@ -190,14 +191,14 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 	 * Helper method that makes it easier to obtain a {@link PaxWebContainerView} using passed
 	 * {@link BundleContext} and {@link ServiceReference} to a {@link WebContainer}
 	 *
-	 * @param context
+	 * @param bundle
 	 * @param ref
 	 * @param viewClass
 	 * @return
 	 */
-	public <T extends PaxWebContainerView> T containerView(BundleContext context, ServiceReference<WebContainer> ref, Class<T> viewClass) {
+	public <T extends PaxWebContainerView> T containerView(Bundle bundle, ServiceReference<WebContainer> ref, Class<T> viewClass) {
 		synchronized (containers) {
-			WebContainer webContainer = container(context, ref);
+			WebContainer webContainer = container(bundle, ref);
 			if (webContainer != null) {
 				return webContainer.adapt(viewClass);
 			}
@@ -205,21 +206,22 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 		}
 	}
 
-	public WebContainer container(BundleContext context, ServiceReference<WebContainer> ref) {
-		if (ref == null || context == null) {
+	public WebContainer container(Bundle bundle, ServiceReference<WebContainer> ref) {
+		BundleContext bundleContext = bundle != null ? bundle.getBundleContext() : null;
+		if (ref == null || bundle == null || bundleContext == null) {
 			return null;
 		}
 		synchronized (containers) {
-			Map<BundleContext, WebContainer> bundleContainers = containers.get(ref);
+			Map<Bundle, WebContainer> bundleContainers = containers.get(ref);
 			if (bundleContainers != null) {
-				WebContainer container = bundleContainers.get(context);
+				WebContainer container = bundleContainers.get(bundle);
 				if (container != null) {
 					return container;
 				}
 			}
 			WebContainer webContainer;
 			try {
-				webContainer = context.getService(ref);
+				webContainer = bundleContext.getService(ref);
 			} catch (IllegalStateException e) {
 				// could be java.lang.IllegalStateException: Invalid BundleContext.
 				return null;
@@ -228,7 +230,7 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 				LOG.warn("Can't get a WebContainer service from {}", ref);
 				return null;
 			} else {
-				containers.computeIfAbsent(ref, r -> new HashMap<>()).put(context, webContainer);
+				containers.computeIfAbsent(ref, r -> new HashMap<>()).put(bundle, webContainer);
 				return webContainer;
 			}
 		}
@@ -237,49 +239,52 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 	/**
 	 * Returns a {@link WhiteboardWebContainerView} for the passed {@link BundleContext} and <em>current</em>
 	 * reference to {@link WebContainer} service.
-	 * @param context
+	 * @param bundle
 	 * @return
 	 */
-	public WhiteboardWebContainerView whiteboardView(BundleContext context) {
-		return containerView(context, currentWebContainerRef.get(), WhiteboardWebContainerView.class);
+	public WhiteboardWebContainerView whiteboardView(Bundle bundle) {
+		return containerView(bundle, currentWebContainerRef.get(), WhiteboardWebContainerView.class);
 	}
 
 	/**
 	 * Returns a {@link WhiteboardWebContainerView} for the passed {@link BundleContext} and the passed
 	 * reference to {@link WebContainer} service.
-	 * @param context
+	 * @param bundle
 	 * @param ref
 	 * @return
 	 */
-	public WhiteboardWebContainerView whiteboardView(BundleContext context, ServiceReference<WebContainer> ref) {
-		return containerView(context, ref, WhiteboardWebContainerView.class);
+	public WhiteboardWebContainerView whiteboardView(Bundle bundle, ServiceReference<WebContainer> ref) {
+		return containerView(bundle, ref, WhiteboardWebContainerView.class);
 	}
 
 	/**
 	 * Helper method to release cached {@link PaxWebContainerView} for the passed {@link BundleContext} and
 	 * <em>current</em> reference to a {@link WebContainer} service.
-	 * @param context
+	 * @param bundle
 	 */
-	public void releaseContainer(BundleContext context) {
-		releaseContainer(context, currentWebContainerRef.get());
+	public void releaseContainer(Bundle bundle) {
+		releaseContainer(bundle, currentWebContainerRef.get());
 	}
 
 	/**
 	 * Helper method to release cached {@link PaxWebContainerView}
-	 * @param context
+	 * @param bundle
 	 * @param ref
 	 */
-	public void releaseContainer(BundleContext context, ServiceReference<WebContainer> ref) {
-		if (ref == null || context == null) {
+	public void releaseContainer(Bundle bundle, ServiceReference<WebContainer> ref) {
+		if (ref == null || bundle == null) {
 			return;
 		}
 		synchronized (containers) {
-			Map<BundleContext, WebContainer> bundleContainers = containers.get(ref);
+			Map<Bundle, WebContainer> bundleContainers = containers.get(ref);
 			if (bundleContainers != null) {
-				WebContainer container = bundleContainers.remove(context);
+				WebContainer container = bundleContainers.remove(bundle);
 				if (container != null) {
 					try {
-						context.ungetService(ref);
+						BundleContext bundleContext = bundle.getBundleContext();
+						if (bundleContext != null) {
+							bundleContext.ungetService(ref);
+						}
 					} catch (IllegalStateException ignored) {
 						// java.lang.IllegalStateException: Invalid BundleContext.
 					}

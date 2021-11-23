@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.service.spi.model.views;
 
-import java.util.List;
+import java.util.Set;
 
 import org.ops4j.pax.web.service.spi.model.WebApplicationModel;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
@@ -32,13 +32,13 @@ public interface ReportWebContainerView extends PaxWebContainerView {
 	/**
 	 * <p>List all {@link WebApplicationModel web applications} installed (or failed) into pax-web-runtime.</p>
 	 *
-	 * <p>The list contains mostly Web Application Bundles (WABs), but it'll probably contain all
+	 * <p>User expects mostly the Web Application Bundles (WABs), but the list will contain all
 	 * <em>web applications</em> - the ones created using Whiteboard registration or direct installation using
-	 * {@link org.osgi.service.http.HttpService}.</p>
+	 * {@link org.osgi.service.http.HttpService} as well.</p>
 	 *
 	 * @return
 	 */
-	List<WebApplicationModel> listWebApplications();
+	Set<WebApplicationModel> listWebApplications();
 
 	/**
 	 * <p>Returns {@link WebApplicationModel} by context path - only real, deployed WABs are considered.

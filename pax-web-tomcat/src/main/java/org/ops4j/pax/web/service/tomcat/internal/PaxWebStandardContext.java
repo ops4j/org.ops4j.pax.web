@@ -191,9 +191,6 @@ public class PaxWebStandardContext extends StandardContext {
 	 */
 	public void setDefaultServletContext(OsgiServletContext defaultServletContext) {
 		this.defaultServletContext = defaultServletContext;
-		if (defaultServletContext != null) {
-			this.defaultWebContainerContext = defaultOsgiContextModel.resolveHttpContext(defaultOsgiContextModel.getOwnerBundle());
-		}
 	}
 
 	/**
@@ -491,7 +488,15 @@ public class PaxWebStandardContext extends StandardContext {
 	}
 
 	public void setDefaultOsgiContextModel(OsgiContextModel defaultOsgiContextModel) {
+		if (this.defaultOsgiContextModel != null) {
+			// release previous WebContainerContext
+			this.defaultOsgiContextModel.releaseHttpContext(this.defaultOsgiContextModel.getOwnerBundle());
+			this.defaultWebContainerContext = null;
+		}
 		this.defaultOsgiContextModel = defaultOsgiContextModel;
+		if (defaultOsgiContextModel != null) {
+			this.defaultWebContainerContext = defaultOsgiContextModel.resolveHttpContext(defaultOsgiContextModel.getOwnerBundle());
+		}
 	}
 
 	public OsgiServletContext getDefaultServletContext() {

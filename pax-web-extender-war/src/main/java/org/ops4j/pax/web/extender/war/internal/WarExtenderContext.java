@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -73,6 +74,7 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 	private static final Logger LOG = LoggerFactory.getLogger(WarExtenderContext.class);
 
 	private final BundleContext bundleContext;
+	private final Bundle bundle;
 
 	/** This is were the lifecycle of {@link WebContainer} is managed. */
 	private final WebContainerManager webContainerManager;
@@ -126,6 +128,7 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 	 */
 	public WarExtenderContext(BundleContext bundleContext, ExecutorService pool, boolean synchronous) {
 		this.bundleContext = bundleContext;
+		this.bundle = bundleContext.getBundle();
 		this.pool = pool;
 
 		// dispatcher of events related to WAB lifecycle (128.5 Events)
@@ -270,7 +273,7 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 	}
 
 	@Override
-	public void collectWebApplications(final List<WebApplicationModel> webapps) {
+	public void collectWebApplications(final Set<WebApplicationModel> webapps) {
 		lock.lock();
 		try {
 			this.webApplications.values().forEach(wab -> {
@@ -315,7 +318,7 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 		try {
 			// let the ReportWebContainerView get more information about WABs - not only the generic information
 			// kept at OsgiContextModel, but also about failed WABs.
-			WebAppWebContainerView view = webContainerManager.containerView(bundleContext, ref, WebAppWebContainerView.class);
+			WebAppWebContainerView view = webContainerManager.containerView(bundle, ref, WebAppWebContainerView.class);
 			if (view == null) {
 				LOG.warn("Can't obtain WebAppWebContainerView from {}. No additional " +
 						"information will be available for web applications installed by WAR extender.", view);
@@ -344,16 +347,16 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 			// the WAB may be at any stage of its lifecycle
 			webApplications.values().forEach(wab -> wab.webContainerRemoved(ref));
 
-			WebAppWebContainerView view = webContainerManager.containerView(bundleContext, ref, WebAppWebContainerView.class);
+			WebAppWebContainerView view = webContainerManager.containerView(bundle, ref, WebAppWebContainerView.class);
 			if (view != null) {
 				view.unregisterReportViewPlugin(this);
-				webContainerManager.releaseContainer(bundleContext, ref);
+				webContainerManager.releaseContainer(bundle, ref);
 			}
 		} finally {
 			lock.unlock();
 		}
 
-		webContainerManager.releaseContainer(bundleContext, ref);
+		webContainerManager.releaseContainer(bundle, ref);
 	}
 
 	/**

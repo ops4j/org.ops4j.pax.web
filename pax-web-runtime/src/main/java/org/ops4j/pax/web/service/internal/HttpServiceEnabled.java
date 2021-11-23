@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -2432,8 +2433,8 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 	private class ReportWebContainer implements ReportWebContainerView {
 
 		@Override
-		public List<WebApplicationModel> listWebApplications() {
-			List<WebApplicationModel> webapps = new LinkedList<>();
+		public Set<WebApplicationModel> listWebApplications() {
+			Set<WebApplicationModel> webapps = new TreeSet<>();
 
 			serverModel.collectWebApplications(webapps);
 

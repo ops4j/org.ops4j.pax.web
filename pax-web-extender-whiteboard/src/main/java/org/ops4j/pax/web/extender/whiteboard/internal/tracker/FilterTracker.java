@@ -187,7 +187,7 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 					}
 					// 5. async-supported
 					if (scanner.asyncSupported != null) {
-						if (asyncSupported != scanner.asyncSupported) {
+						if (asyncSupported != null && asyncSupported != scanner.asyncSupported) {
 							log.warn("Filter async flag specified using both service property ({}) and annotation ({})."
 									+ " Choosing {}.", asyncSupported, scanner.asyncSupported, asyncSupported);
 						}

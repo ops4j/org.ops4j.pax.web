@@ -408,55 +408,9 @@ class HttpServiceProxy implements WebContainer, StoppableHttpService {
 		delegate.unregisterWebSocket(webSocket, httpContext);
 	}
 
-//	@Override
-//	public void registerLoginConfig(String authMethod, String realmName,
-//			String formLoginPage, String formErrorPage, HttpContext httpContext) {
-//		LOG.debug("Registering LoginConfig for realm [ " + realmName + " ]");
-//		delegate.registerLoginConfig(authMethod, realmName, formLoginPage,
-//				formErrorPage, httpContext);
-//	}
-//
-//	@Override
-//	public void unregisterLoginConfig(final HttpContext httpContext) {
-//		LOG.debug("Unregistering LoginConfig");
-//		delegate.unregisterLoginConfig(httpContext);
-//	}
-//
-//	@Override
-//	public void registerConstraintMapping(String constraintName, String mapping,
-//			String url, String dataConstraint, boolean authentication,
-//			List<String> roles, HttpContext httpContext) {
-//		LOG.debug("Registering constraint mapping for [ " + constraintName
-//				+ " ] ");
-//		delegate.registerConstraintMapping(constraintName, mapping, url,
-//				dataConstraint, authentication, roles, httpContext);
-//
-//	}
-//
-//	@Override
-//	public void unregisterConstraintMapping(final HttpContext httpContext) {
-//		LOG.debug("Unregister constraint mapping");
-//		delegate.unregisterConstraintMapping(httpContext);
-//	}
-//
-////	@Override
-////	public void setConnectorsAndVirtualHosts(List<String> connectors, List<String> virtualHosts, HttpContext httpContext) {
-////		delegate.setConnectorsAndVirtualHosts(connectors, virtualHosts, httpContext);
-////	}
-
-//	@Override
-//	public RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator) {
-//		return delegate.calculateRequestInfoDTO(path, iterator);
-//	}
-//
-//	@Override
-//	public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator) {
-//		return delegate.createWhiteboardRuntimeDTO(iterator);
-//	}
-//
-//	@Override
-//	public WebContainerDTO getWebcontainerDTO() {
-//		return delegate.getWebcontainerDTO();
-//	}
+	@Override
+	public String toString() {
+		return "Proxy for " + delegate.toString();
+	}
 
 }

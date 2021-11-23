@@ -124,6 +124,11 @@ public class PaxWebServletHandler extends ServletHandler {
 	}
 
 	public void setDefaultOsgiContextModel(OsgiContextModel defaultOsgiContextModel) {
+		if (this.defaultOsgiContextModel != null) {
+			// release previous WebContainerContext
+			this.defaultOsgiContextModel.releaseHttpContext(this.defaultOsgiContextModel.getOwnerBundle());
+			this.defaultWebContainerContext = null;
+		}
 		this.defaultOsgiContextModel = defaultOsgiContextModel;
 		if (defaultOsgiContextModel != null) {
 			this.defaultWebContainerContext = defaultOsgiContextModel.resolveHttpContext(defaultOsgiContextModel.getOwnerBundle());

@@ -3423,7 +3423,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 	}
 
 	@Override
-	public void collectWebApplications(List<WebApplicationModel> webapps) {
+	public void collectWebApplications(Set<WebApplicationModel> webapps) {
 		// This is the main method used by org.ops4j.pax.web.service.spi.model.views.ReportWebContainerView to
 		// get information about installed "web applications".
 		// There are 3 "origins" of applications:

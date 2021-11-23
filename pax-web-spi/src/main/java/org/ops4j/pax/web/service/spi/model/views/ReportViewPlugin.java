@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.service.spi.model.views;
 
-import java.util.List;
+import java.util.Set;
 
 import org.ops4j.pax.web.service.spi.model.WebApplicationModel;
 
@@ -29,15 +29,17 @@ public interface ReportViewPlugin {
 
 	/**
 	 * This method is called to fill a list of {@link WebApplicationModel web application models} for reporting
-	 * purpose.
+	 * purpose. It is the responsibility of the implementation to check (by some kind of key) if the
+	 * {@link WebApplicationModel} is already in the passed set - in this case, the existing model can be updated
+	 * instead.
 	 *
 	 * @param webapps
 	 */
-	void collectWebApplications(List<WebApplicationModel> webapps);
+	void collectWebApplications(Set<WebApplicationModel> webapps);
 
 	/**
-	 * Returns information about single WAB (by its context path) - only successully deployed WABs are returned.
-	 * For information about failed WABs, use the method with bundle ID.
+	 * Returns information about single WAB (by its context path) - only successully deployed WABs should be returned,
+	 * because there may be more failed contexts too. For information about failed WABs, use the method with bundle ID.
 	 *
 	 * @param contextPath
 	 * @return

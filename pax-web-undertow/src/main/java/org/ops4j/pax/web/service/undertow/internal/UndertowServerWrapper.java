@@ -112,6 +112,7 @@ import org.ops4j.pax.web.service.spi.model.ContextMetadataModel;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
+import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerKey;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
@@ -240,6 +241,15 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 	 * the end of the transaction.
 	 */
 	private final Set<String> transactions = new HashSet<>();
+
+	/**
+	 * When delaying removal of servlets and listeners (not filters, error pages, ...), we have to ensure that
+	 * they are really removed. It is automatic for WABs, where entire context is destroyed, but not necessarily
+	 * for HttpService/WebContainer and Whiteboard scenarios. I observed this when working on sample Karaf
+	 * commands that allowed me to register/unregister servlets on demand, controlling when the HttpService
+	 * instance is <em>unget</em>.
+	 */
+	private final Map<String, List<ElementModel<?, ?>>> delayedRemovals = new HashMap<>();
 
 	/**
 	 * Single <em>container</em> for all Undertow contexts. It can directly map context path to
@@ -1048,13 +1058,36 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				throw new IllegalStateException("Context path " + contextPath
 						+ " is already associated with config transaction");
 			}
+			delayedRemovals.computeIfAbsent(contextPath, cp -> new ArrayList<>());
 		} else if (change.getKind() == OpCode.DISASSOCIATE) {
 			if (!transactions.remove(contextPath)) {
 				throw new IllegalStateException("Context path " + contextPath
 						+ " is not associated with any config transaction");
-			} else if (deploymentInfos.containsKey(contextPath)) {
-				// end of transaction - start the context
-				ensureServletContextStarted(contextPath);
+			} else {
+				// check pending removals
+				List<ElementModel<?, ?>> toRemove = delayedRemovals.get(contextPath);
+				DeploymentManager manager = getDeploymentManager(contextPath);
+				if (toRemove != null && manager != null) {
+					for (Iterator<ElementModel<?, ?>> iterator = toRemove.iterator(); iterator.hasNext(); ) {
+						ElementModel<?, ?> model = iterator.next();
+						if (model instanceof ServletModel) {
+							removeServletModel(contextPath, ((ServletModel) model), null);
+						} else if (model instanceof EventListenerModel) {
+							DeploymentInfo deploymentInfo = manager.getDeployment().getDeploymentInfo();
+							Deployment deployment = manager.getDeployment();
+							stopUndertowContext(contextPath, manager, deploymentInfo, false);
+
+							removeEventListenerModel(deploymentInfo, (EventListenerModel) model,
+									((EventListenerModel) model).getResolvedListener());
+						}
+						iterator.remove();
+					}
+				}
+				delayedRemovals.remove(contextPath);
+				if (deploymentInfos.containsKey(contextPath)) {
+					// end of transaction - start the context
+					ensureServletContextStarted(contextPath);
+				}
 			}
 		}
 	}
@@ -1159,7 +1192,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			DeploymentManager manager = getDeploymentManager(contextPath);
 			if (manager != null) {
 				DeploymentInfo deploymentInfoToRemove = manager.getDeployment().getDeploymentInfo();
-				stopUndertowContext(contextPath, manager, manager.getDeployment(), null, false);
+				stopUndertowContext(contextPath, manager, null, false);
 				servletContainer.removeDeployment(deploymentInfoToRemove);
 			}
 		}
@@ -1238,6 +1271,23 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			osgiContextModels.get(contextPath).remove(osgiModel);
 
 			removedOsgiServletContext.unregister();
+			removedOsgiServletContext.releaseWebContainerContext();
+
+			PaxWebOuterHandlerWrapper wrapper = wrappingHandlers.get(contextPath);
+			if (wrapper != null) {
+				OsgiServletContext currentHighestRankedContext = wrapper.getDefaultServletContext();
+				if (currentHighestRankedContext == removedOsgiServletContext) {
+					// we have to stop the context - it'll be started later
+					DeploymentManager manager = getDeploymentManager(contextPath);
+					stopUndertowContext(contextPath, manager, null, false);
+					if (wrappingHandlers.containsKey(contextPath)) {
+						wrappingHandlers.get(contextPath).setDefaultServletContext(null);
+					}
+					if (securityHandlers.containsKey(contextPath)) {
+						securityHandlers.get(contextPath).setDefaultOsgiContextModel(null);
+					}
+				}
+			}
 		}
 
 		// there may be a change in what's the "best" (highest ranked) OsgiContextModel for given
@@ -1245,24 +1295,26 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 		// target servlet (with filters only)
 		OsgiContextModel highestRankedModel = Utils.getHighestRankedModel(osgiContextModels.get(contextPath));
 		if (highestRankedModel != null) {
-			OsgiServletContext highestRankedContext = osgiServletContexts.get(highestRankedModel);
-			// default "contexts" to handle security and class/resource loading
-			if (wrappingHandlers.containsKey(contextPath)) {
-				wrappingHandlers.get(contextPath).setDefaultServletContext(highestRankedContext);
-			}
-			if (securityHandlers.containsKey(contextPath)) {
-				securityHandlers.get(contextPath).setDefaultOsgiContextModel(highestRankedModel);
-			}
-
-			// we have to ensure that non-highest ranked contexts are unregistered
-			osgiServletContexts.forEach((ocm, osc) -> {
-				if (ocm.getContextPath().equals(contextPath) && osc != highestRankedContext) {
-					osc.unregister();
+			PaxWebSecurityHandler securityHandler = securityHandlers.get(contextPath);
+			if (securityHandler != null && highestRankedModel != securityHandler.getDefaultOsgiContextModel()) {
+				LOG.info("Changing default OSGi context model for context \"" + contextPath + "\"");
+				OsgiServletContext highestRankedContext = osgiServletContexts.get(highestRankedModel);
+				// default "contexts" to handle security and class/resource loading
+				if (wrappingHandlers.containsKey(contextPath)) {
+					wrappingHandlers.get(contextPath).setDefaultServletContext(highestRankedContext);
 				}
-			});
+				securityHandler.setDefaultOsgiContextModel(highestRankedModel);
 
-			// and the highest ranked context should be registered as OSGi service (if it wasn't registered)
-			highestRankedContext.register();
+				// we have to ensure that non-highest ranked contexts are unregistered
+				osgiServletContexts.forEach((ocm, osc) -> {
+					if (ocm.getContextPath().equals(contextPath) && osc != highestRankedContext) {
+						osc.unregister();
+					}
+				});
+
+				// and the highest ranked context should be registered as OSGi service (if it wasn't registered)
+				highestRankedContext.register();
+			}
 		} else {
 			if (wrappingHandlers.containsKey(contextPath)) {
 				wrappingHandlers.get(contextPath).setDefaultServletContext(null);
@@ -1516,77 +1568,82 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 					if (pendingTransaction(contextPath)) {
 						LOG.debug("Delaying removal of servlet {}", model);
+						delayedRemovals.get(contextPath).add(model);
 						return;
 					}
 
-					// this time we just assume that the servlet context is started
-
-					LOG.info("Removing servlet {}", model);
-					LOG.debug("Removing servlet {} from context {}", model.getName(), contextPath);
-
-					// take existing deployment manager and the deployment info from its deployment
-					DeploymentManager manager = getDeploymentManager(contextPath);
-					Deployment deployment = manager == null ? null : manager.getDeployment();
-					DeploymentInfo deploymentInfo = deployment == null ? deploymentInfos.get(contextPath)
-							: deployment.getDeploymentInfo();
-
-					if (!change.isDynamic()) {
-						stopUndertowContext(contextPath, manager, deployment, deploymentInfo, false);
-					}
-
-					// but we can reuse the deployment info - this is the only object from which we can remove
-					// servlets
-					deploymentInfo.getServlets().remove(model.getName());
-					if (Arrays.asList(model.getUrlPatterns()).contains("/")) {
-						// we need to replace "/" servlet
-						PaxWebServletInfo defaultServletInfo = new PaxWebServletInfo("default", default404Servlet, true);
-						deploymentInfo.addServlet(defaultServletInfo.addMapping("/"));
-					}
-
-					// are there any error page declarations in the model?
-					// we'll be redeploying the deployment info, so we don't have to change error pages
-					// in existing (the one being undeployed) deployment
-					ErrorPageModel epm = model.getErrorPageModel();
-					if (epm != null) {
-						String location = epm.getLocation();
-						FlexibleErrorPages currentState = errorPages.computeIfAbsent(contextPath, cp -> new FlexibleErrorPages());
-						for (String ex : epm.getExceptionClassNames()) {
-							try {
-								ClassLoader cl = model.getRegisteringBundle().adapt(BundleWiring.class).getClassLoader();
-								@SuppressWarnings("unchecked")
-								Class<Throwable> t = (Class<Throwable>) cl.loadClass(ex);
-								currentState.getExceptionMappings().remove(t, location);
-							} catch (ClassNotFoundException e) {
-								LOG.warn("Can't load exception class {}: {}", ex, e.getMessage(), e);
-							}
-						}
-						for (int code : epm.getErrorCodes()) {
-							currentState.getErrorCodeLocations().remove(code, location);
-						}
-						if (epm.isXx4()) {
-							for (int c = 400; c < 500; c++) {
-								currentState.getErrorCodeLocations().remove(c, location);
-							}
-						}
-						if (epm.isXx5()) {
-							for (int c = 500; c < 600; c++) {
-								currentState.getErrorCodeLocations().remove(c, location);
-							}
-						}
-
-						// keep only remaining, not removed pages
-						deploymentInfo.getErrorPages().clear();
-						currentState.getErrorCodeLocations()
-								.forEach((c, l) -> deploymentInfo.addErrorPage(new ErrorPage(location, c)));
-						currentState.getExceptionMappings()
-								.forEach((e, l) -> deploymentInfo.addErrorPage(new ErrorPage(location, e)));
-					}
-
-					if (!change.isDynamic()) {
-						ensureServletContextStarted(contextPath);
-					}
+					removeServletModel(contextPath, model, change);
 				});
 			}
+		}
+	}
+
+	private void removeServletModel(String contextPath, ServletModel model, ServletModelChange change) {
+		// this time we just assume that the servlet context is started
+
+		LOG.info("Removing servlet {}", model);
+		LOG.debug("Removing servlet {} from context {}", model.getName(), contextPath);
+
+		// take existing deployment manager and the deployment info from its deployment
+		DeploymentManager manager = getDeploymentManager(contextPath);
+		Deployment deployment = manager == null ? null : manager.getDeployment();
+		DeploymentInfo deploymentInfo = deployment == null ? deploymentInfos.get(contextPath)
+				: deployment.getDeploymentInfo();
+
+		if (change != null && !change.isDynamic()) {
+			stopUndertowContext(contextPath, manager, deploymentInfo, false);
+		}
+
+		// but we can reuse the deployment info - this is the only object from which we can remove
+		// servlets
+		deploymentInfo.getServlets().remove(model.getName());
+		if (Arrays.asList(model.getUrlPatterns()).contains("/")) {
+			// we need to replace "/" servlet
+			PaxWebServletInfo defaultServletInfo = new PaxWebServletInfo("default", default404Servlet, true);
+			deploymentInfo.addServlet(defaultServletInfo.addMapping("/"));
+		}
+
+		// are there any error page declarations in the model?
+		// we'll be redeploying the deployment info, so we don't have to change error pages
+		// in existing (the one being undeployed) deployment
+		ErrorPageModel epm = model.getErrorPageModel();
+		if (epm != null) {
+			String location = epm.getLocation();
+			FlexibleErrorPages currentState = errorPages.computeIfAbsent(contextPath, cp -> new FlexibleErrorPages());
+			for (String ex : epm.getExceptionClassNames()) {
+				try {
+					ClassLoader cl = model.getRegisteringBundle().adapt(BundleWiring.class).getClassLoader();
+					@SuppressWarnings("unchecked")
+					Class<Throwable> t = (Class<Throwable>) cl.loadClass(ex);
+					currentState.getExceptionMappings().remove(t, location);
+				} catch (ClassNotFoundException e) {
+					LOG.warn("Can't load exception class {}: {}", ex, e.getMessage(), e);
+				}
+			}
+			for (int code : epm.getErrorCodes()) {
+				currentState.getErrorCodeLocations().remove(code, location);
+			}
+			if (epm.isXx4()) {
+				for (int c = 400; c < 500; c++) {
+					currentState.getErrorCodeLocations().remove(c, location);
+				}
+			}
+			if (epm.isXx5()) {
+				for (int c = 500; c < 600; c++) {
+					currentState.getErrorCodeLocations().remove(c, location);
+				}
+			}
+
+			// keep only remaining, not removed pages
+			deploymentInfo.getErrorPages().clear();
+			currentState.getErrorCodeLocations()
+					.forEach((c, l) -> deploymentInfo.addErrorPage(new ErrorPage(location, c)));
+			currentState.getExceptionMappings()
+					.forEach((e, l) -> deploymentInfo.addErrorPage(new ErrorPage(location, e)));
+		}
+
+		if (change != null && !change.isDynamic()) {
+			ensureServletContextStarted(contextPath);
 		}
 	}
 
@@ -1745,8 +1802,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			quick &= filtersMap.values().stream().noneMatch(Objects::nonNull);
 
 			if (!quick) {
-				Deployment deployment = manager == null ? null : manager.getDeployment();
-				stopUndertowContext(contextPath, manager, deployment, null, true);
+				stopUndertowContext(contextPath, manager, null, true);
 				if (manager != null) {
 					state = manager.getState();
 				}
@@ -1874,7 +1930,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 					// we have to stop the context, so existing ServletContextListeners are called
 					// with contextDestroyed() and new listener is added according to ranking rules of
 					// the EventListenerModel
-					stopUndertowContext(contextPath, manager, manager.getDeployment(), null, false);
+					stopUndertowContext(contextPath, manager, null, false);
 					stopped = true;
 				}
 
@@ -1960,29 +2016,34 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 						return;
 					}
 
-					// remove the listener from real context - even ServletContextAttributeListener
-					// unfortunately, one does not simply remove EventListener from existing context in Undertow
-
 					Deployment deployment = manager == null ? null : manager.getDeployment();
-					stopUndertowContext(contextPath, manager, deployment, deploymentInfo, false);
+					stopUndertowContext(contextPath, manager, deploymentInfo, false);
 
-					if (deploymentInfo != null) {
-						// this may be null in case of WAB where we keep event listeners so they get contextDestroyed
-						// event properly
-						deploymentInfo.getListeners().removeIf(li -> {
-							try {
-								return li.getInstanceFactory() instanceof ImmediateInstanceFactory
-										&& ((ImmediateInstanceFactory<?>) li.getInstanceFactory()).createInstance().getInstance() == eventListener;
-							} catch (InstantiationException ignored) {
-								return false;
-							}
-						});
-					}
+					removeEventListenerModel(deploymentInfo, eventListenerModel, eventListener);
 
 					ensureServletContextStarted(contextPath);
 				});
 			}
 		}
+	}
+
+	private void removeEventListenerModel(DeploymentInfo deploymentInfo, EventListenerModel eventListenerModel, EventListener eventListener) {
+		// remove the listener from real context - even ServletContextAttributeListener
+		// unfortunately, one does not simply remove EventListener from existing context in Undertow
+
+		if (deploymentInfo != null) {
+			// this may be null in case of WAB where we keep event listeners so they get contextDestroyed
+			// event properly
+			deploymentInfo.getListeners().removeIf(li -> {
+				try {
+					return li.getInstanceFactory() instanceof ImmediateInstanceFactory
+							&& ((ImmediateInstanceFactory<?>) li.getInstanceFactory()).createInstance().getInstance() == eventListener;
+				} catch (InstantiationException ignored) {
+					return false;
+				}
+			});
+		}
+		eventListenerModel.releaseEventListener();
 	}
 
 	@Override
@@ -2145,7 +2206,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				String path = context.getContextPath();
 				DeploymentManager manager = getDeploymentManager(path);
 				if (manager != null) {
-					stopUndertowContext(path, manager, manager.getDeployment(), null, false);
+					stopUndertowContext(path, manager, null, false);
 				}
 
 				// because of the quirks related to Undertow's deploymentInfo vs. deployment (and their
@@ -2220,11 +2281,6 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 						return;
 					}
 
-					if (pendingTransaction(contextPath)) {
-						LOG.debug("Delaying removal of web socket {}", model);
-						return;
-					}
-
 					LOG.info("Removing web socket {} from context {}", model, contextPath);
 
 					// just as when adding WebSockets, we only have to ensure that context is started if it was
@@ -2256,10 +2312,11 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 		LOG.debug("Removing dynamically registered servlets/filters/listeners from context {}", contextPath);
 
 		DeploymentManager manager = getDeploymentManager(contextPath);
-		Deployment deployment = manager == null ? null : manager.getDeployment();
 
-		stopUndertowContext(contextPath, manager, deployment, null, false);
+		stopUndertowContext(contextPath, manager, null, false);
 		DeploymentInfo deploymentInfo = deploymentInfos.get(contextPath);
+
+		final int[] removed = { 0 };
 
 		// servlets
 		Map<ServletModel, Boolean> toRemove = new HashMap<>();
@@ -2268,6 +2325,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				ServletModel model = ((PaxWebServletInfo) info).getServletModel();
 				if (model != null && model.isDynamic()) {
 					toRemove.put(model, Boolean.TRUE);
+					removed[0]++;
 				}
 			}
 		}
@@ -2286,6 +2344,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			DeploymentInfo finalDeploymentInfo = deploymentInfo;
 			contextRegistrations.getDynamicListenerModels().forEach((listenerToRemove, model) -> {
 				if (model.isDynamic()) {
+					removed[0]++;
 					if (listenerToRemove instanceof ServletContextAttributeListener) {
 						// remove it from per-OsgiContext list
 						OsgiServletContext c = osgiServletContexts.get(context);
@@ -2320,6 +2379,10 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			contextRegistrations.getDynamicServletRegistrations().clear();
 			contextRegistrations.getDynamicFilterRegistrations().clear();
 			contextRegistrations.getDynamicListenerRegistrations().clear();
+		}
+
+		if (removed[0] > 0) {
+			LOG.debug("Removed {} dynamically registered servlets/filters/listeners from context {}", removed[0], contextPath);
 		}
 	}
 
@@ -2663,11 +2726,10 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 	 *
 	 * @param contextPath
 	 * @param manager
-	 * @param deployment
 	 * @param deploymentInfo new {@link DeploymentInfo} that could be used if the context should be started again
 	 * @param skipPreprocessors
 	 */
-	private void stopUndertowContext(String contextPath, DeploymentManager manager, Deployment deployment,
+	private void stopUndertowContext(String contextPath, DeploymentManager manager,
 			DeploymentInfo deploymentInfo, boolean skipPreprocessors) {
 		// let's immediately show that given context is no longer mapped
 		pathHandler.removePrefixPath(contextPath);

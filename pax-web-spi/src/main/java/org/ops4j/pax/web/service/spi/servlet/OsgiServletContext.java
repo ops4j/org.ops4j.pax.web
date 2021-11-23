@@ -52,6 +52,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
@@ -219,6 +220,15 @@ public class OsgiServletContext implements ServletContext {
 				registration = null;
 			}
 		}
+	}
+
+	/**
+	 * Everywhere the {@link OsgiServletContext} is created, we have to call
+	 * {@link org.osgi.framework.BundleContext#ungetService(ServiceReference)} on the {@link WebContainerContext}
+	 * reference when needed.
+	 */
+	public void releaseWebContainerContext() {
+		osgiContextModel.releaseHttpContext(osgiContextModel.getOwnerBundle());
 	}
 
 	public Set<String> getAttributesToClearBeforeRestart() {

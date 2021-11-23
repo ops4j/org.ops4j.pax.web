@@ -92,6 +92,7 @@ import org.ops4j.pax.web.service.spi.model.ContextMetadataModel;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
+import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
@@ -175,6 +176,15 @@ class JettyServerWrapper implements BatchVisitor {
 	 * the end of the transaction.
 	 */
 	private final Set<String> transactions = new HashSet<>();
+
+	/**
+	 * When delaying removal of servlets and listeners (not filters, error pages, ...), we have to ensure that
+	 * they are really removed. It is automatic for WABs, where entire context is destroyed, but not necessarily
+	 * for HttpService/WebContainer and Whiteboard scenarios. I observed this when working on sample Karaf
+	 * commands that allowed me to register/unregister servlets on demand, controlling when the HttpService
+	 * instance is <em>unget</em>.
+	 */
+	private final Map<String, List<ElementModel<?, ?>>> delayedRemovals = new HashMap<>();
 
 	/** Single map of context path to {@link ServletContextHandler} for fast access */
 	private final Map<String, PaxWebServletContextHandler> contextHandlers = new HashMap<>();
@@ -690,13 +700,33 @@ class JettyServerWrapper implements BatchVisitor {
 				throw new IllegalStateException("Context path " + contextPath
 						+ " is already associated with config transaction");
 			}
+			delayedRemovals.computeIfAbsent(contextPath, cp -> new ArrayList<>());
 		} else if (change.getKind() == OpCode.DISASSOCIATE) {
 			if (!transactions.remove(contextPath)) {
 				throw new IllegalStateException("Context path " + contextPath
 						+ " is not associated with any config transaction");
-			} else if (contextHandlers.containsKey(contextPath)) {
-				// end of transaction - start the context
-				ensureServletContextStarted(contextHandlers.get(contextPath));
+			} else {
+				// check pending removals
+				List<ElementModel<?, ?>> toRemove = delayedRemovals.get(contextPath);
+				if (toRemove != null) {
+					for (Iterator<ElementModel<?, ?>> iterator = toRemove.iterator(); iterator.hasNext(); ) {
+						ElementModel<?, ?> model = iterator.next();
+						if (model instanceof ServletModel) {
+							removeServletModel(contextPath, ((ServletModel) model));
+						} else if (model instanceof EventListenerModel) {
+							removeEventListenerModel(contextHandlers.get(contextPath), ((EventListenerModel) model));
+						}
+						iterator.remove();
+					}
+					delayedRemovals.remove(contextPath);
+				}
+				if (contextHandlers.containsKey(contextPath)) {
+					// end of transaction - start the context
+					PaxWebServletContextHandler sch = contextHandlers.get(contextPath);
+					if (sch.getServer().isStarted()) {
+						ensureServletContextStarted(sch);
+					}
+				}
 			}
 		}
 	}
@@ -894,6 +924,21 @@ class JettyServerWrapper implements BatchVisitor {
 			osgiContextModels.get(contextPath).remove(osgiModel);
 
 			removedOsgiServletContext.unregister();
+			removedOsgiServletContext.releaseWebContainerContext();
+
+			OsgiServletContext currentHighestRankedContext = ((PaxWebServletHandler) sch.getServletHandler()).getDefaultServletContext();
+			if (currentHighestRankedContext == removedOsgiServletContext) {
+				// we have to stop the context - it'll be started later
+				LOG.info("Stopping Jetty context \"{}\"", contextPath);
+				try {
+					sch.stop();
+					// clear the OSGi context + model - it'll be calculated to next higher ranked ones few lines later
+					((PaxWebServletHandler) sch.getServletHandler()).setDefaultServletContext(null);
+					((PaxWebServletHandler) sch.getServletHandler()).setDefaultOsgiContextModel(null);
+				} catch (Exception e) {
+					LOG.warn("Error stopping Jetty context \"{}\": {}", contextPath, e.getMessage(), e);
+				}
+			}
 		}
 
 		// there may be a change in what's the "best" (highest ranked) OsgiContextModel for given
@@ -901,19 +946,22 @@ class JettyServerWrapper implements BatchVisitor {
 		// target servlet (with filters only)
 		OsgiContextModel highestRankedModel = Utils.getHighestRankedModel(osgiContextModels.get(contextPath));
 		if (highestRankedModel != null) {
-			OsgiServletContext highestRankedContext = osgiServletContexts.get(highestRankedModel);
-			((PaxWebServletHandler) sch.getServletHandler()).setDefaultOsgiContextModel(highestRankedModel);
-			((PaxWebServletHandler) sch.getServletHandler()).setDefaultServletContext(highestRankedContext);
+			if (highestRankedModel != ((PaxWebServletHandler) sch.getServletHandler()).getDefaultOsgiContextModel()) {
+				LOG.info("Changing default OSGi context model for " + sch);
+				OsgiServletContext highestRankedContext = osgiServletContexts.get(highestRankedModel);
+				((PaxWebServletHandler) sch.getServletHandler()).setDefaultOsgiContextModel(highestRankedModel);
+				((PaxWebServletHandler) sch.getServletHandler()).setDefaultServletContext(highestRankedContext);
 
-			// we have to ensure that non-highest ranked contexts are unregistered
-			osgiServletContexts.forEach((ocm, osc) -> {
-				if (ocm.getContextPath().equals(contextPath) && osc != highestRankedContext) {
-					osc.unregister();
-				}
-			});
+				// we have to ensure that non-highest ranked contexts are unregistered
+				osgiServletContexts.forEach((ocm, osc) -> {
+					if (ocm.getContextPath().equals(contextPath) && osc != highestRankedContext) {
+						osc.unregister();
+					}
+				});
 
-			// and the highest ranked context should be registered as OSGi service (if it wasn't registered)
-			highestRankedContext.register();
+				// and the highest ranked context should be registered as OSGi service (if it wasn't registered)
+				highestRankedContext.register();
+			}
 		} else {
 			((PaxWebServletHandler) sch.getServletHandler()).setDefaultOsgiContextModel(null);
 			((PaxWebServletHandler) sch.getServletHandler()).setDefaultServletContext(null);
@@ -1149,55 +1197,63 @@ class JettyServerWrapper implements BatchVisitor {
 
 					if (pendingTransaction(contextPath)) {
 						LOG.debug("Delaying removal of servlet {}", model);
+						delayedRemovals.get(contextPath).add(model);
 						return;
 					}
 
-					LOG.info("Removing servlet {}", model);
-					LOG.debug("Removing servlet {} from context {}", model.getName(), contextPath);
-
-					// there should already be a ServletContextHandler
-					ServletContextHandler sch = contextHandlers.get(contextPath);
-
-					((PaxWebServletHandler) sch.getServletHandler()).removeServletWithMapping(model);
-
-					// are there any error page declarations in the model?
-					ErrorPageModel epm = model.getErrorPageModel();
-					if (epm != null) {
-						// location will be the first URL mapping (even if there may be more)
-						// in pure OSGi CMPN Whiteboard case, initially there could be no mapping at all, but in such
-						// case a default would be generated for us to use
-						String location = epm.getLocation();
-
-						ErrorPageErrorHandler eph = (ErrorPageErrorHandler) sch.getErrorHandler();
-						// If there are many servlets (mapped to non conflicting URIs), they still may define
-						// conflicting error pages, and these conflicts are NOT resolved at ServletModel
-						// resolution time. For now, we simply remove existing error pages
-						Map<String, String> existing = eph.getErrorPages();
-						for (String ex : epm.getExceptionClassNames()) {
-							existing.entrySet().removeIf(e -> e.getKey().equals(ex) && e.getValue().equals(location));
-						}
-						for (int code : epm.getErrorCodes()) {
-							existing.entrySet().removeIf(e -> e.getKey().equals(Integer.toString(code)) && e.getValue().equals(location));
-						}
-						if (epm.isXx4() || epm.isXx5()) {
-							// hmm, can't change existing ErrorPageErrorHandler
-							eph = new ErrorPageErrorHandler();
-							sch.setErrorHandler(eph);
-							if (epm.isXx4()) {
-								existing.entrySet().removeIf(e -> e.getKey().startsWith("4") && e.getKey().length() == 3
-								&& e.getValue().equals(location));
-							}
-							if (epm.isXx5()) {
-								existing.entrySet().removeIf(e -> e.getKey().startsWith("5") && e.getKey().length() == 3
-								&& e.getValue().equals(location));
-							}
-						}
-						// leave remaining (not removed) mappings
-						for (Map.Entry<String, String> e : existing.entrySet()) {
-							eph.addErrorPage(e.getKey(), e.getValue());
-						}
-					}
+					removeServletModel(contextPath, model);
 				});
+			}
+		}
+	}
+
+	private void removeServletModel(String contextPath, ServletModel model) {
+		ServletContextHandler sch = contextHandlers.get(contextPath);
+
+		if (sch == null) {
+			return;
+		}
+
+		((PaxWebServletHandler) sch.getServletHandler()).removeServletWithMapping(model);
+
+		LOG.info("Removing servlet {}", model);
+		LOG.debug("Removing servlet {} from context {}", model.getName(), contextPath);
+
+		// are there any error page declarations in the model?
+		ErrorPageModel epm = model.getErrorPageModel();
+		if (epm != null) {
+			// location will be the first URL mapping (even if there may be more)
+			// in pure OSGi CMPN Whiteboard case, initially there could be no mapping at all, but in such
+			// case a default would be generated for us to use
+			String location = epm.getLocation();
+
+			ErrorPageErrorHandler eph = (ErrorPageErrorHandler) sch.getErrorHandler();
+			// If there are many servlets (mapped to non conflicting URIs), they still may define
+			// conflicting error pages, and these conflicts are NOT resolved at ServletModel
+			// resolution time. For now, we simply remove existing error pages
+			Map<String, String> existing = eph.getErrorPages();
+			for (String ex : epm.getExceptionClassNames()) {
+				existing.entrySet().removeIf(e -> e.getKey().equals(ex) && e.getValue().equals(location));
+			}
+			for (int code : epm.getErrorCodes()) {
+				existing.entrySet().removeIf(e -> e.getKey().equals(Integer.toString(code)) && e.getValue().equals(location));
+			}
+			if (epm.isXx4() || epm.isXx5()) {
+				// hmm, can't change existing ErrorPageErrorHandler
+				eph = new ErrorPageErrorHandler();
+				sch.setErrorHandler(eph);
+				if (epm.isXx4()) {
+					existing.entrySet().removeIf(e -> e.getKey().startsWith("4") && e.getKey().length() == 3
+							&& e.getValue().equals(location));
+				}
+				if (epm.isXx5()) {
+					existing.entrySet().removeIf(e -> e.getKey().startsWith("5") && e.getKey().length() == 3
+							&& e.getValue().equals(location));
+				}
+			}
+			// leave remaining (not removed) mappings
+			for (Map.Entry<String, String> e : existing.entrySet()) {
+				eph.addErrorPage(e.getKey(), e.getValue());
 			}
 		}
 	}
@@ -1566,14 +1622,21 @@ class JettyServerWrapper implements BatchVisitor {
 						return;
 					}
 
-					if (servletContextHandler != null) {
-						// remove the listener from real context - even ServletContextAttributeListener
-						// this may be null in case of WAB where we keep event listeners so they get contextDestroyed
-						// event properly
-						servletContextHandler.removeEventListener(eventListenerModel, eventListener);
-					}
+					removeEventListenerModel(servletContextHandler, eventListenerModel);
 				});
 			}
+		}
+	}
+
+	private void removeEventListenerModel(PaxWebServletContextHandler servletContextHandler, EventListenerModel eventListenerModel) {
+		if (servletContextHandler != null) {
+			LOG.info("Removing event listener {}", eventListenerModel);
+
+			// remove the listener from real context - even ServletContextAttributeListener
+			// this may be null in case of WAB where we keep event listeners so they get contextDestroyed
+			// event properly
+			servletContextHandler.removeEventListener(eventListenerModel, eventListenerModel.resolveEventListener());
+			eventListenerModel.releaseEventListener();
 		}
 	}
 
@@ -1788,11 +1851,6 @@ class JettyServerWrapper implements BatchVisitor {
 						return;
 					}
 
-					if (pendingTransaction(contextPath)) {
-						LOG.debug("Delaying removal of web socket {}", model);
-						return;
-					}
-
 					LOG.info("Removing web socket {} from context {}", model, contextPath);
 
 					// just as when adding WebSockets, we only have to ensure that context is started if it was
@@ -1821,8 +1879,6 @@ class JettyServerWrapper implements BatchVisitor {
 	}
 
 	private void clearDynamicRegistrations(String contextPath, OsgiContextModel context) {
-		LOG.debug("Removing dynamically registered servlets/filters/listeners from context {}", contextPath);
-
 		// there should already be a ServletContextHandler
 		PaxWebServletContextHandler sch = contextHandlers.get(contextPath);
 
@@ -1836,6 +1892,8 @@ class JettyServerWrapper implements BatchVisitor {
 			}
 		}
 
+		final int[] removed = { 0 };
+
 		// servlets
 		ServletHolder[] allServlets = sch.getServletHandler().getServlets();
 		Map<ServletModel, Boolean> toRemove = new HashMap<>();
@@ -1844,6 +1902,7 @@ class JettyServerWrapper implements BatchVisitor {
 				ServletModel model = ((PaxWebServletHolder) sh).getServletModel();
 				if (model != null && model.isDynamic()) {
 					toRemove.put(model, Boolean.TRUE);
+					removed[0]++;
 				}
 			}
 		}
@@ -1864,6 +1923,7 @@ class JettyServerWrapper implements BatchVisitor {
 				// we'll treat such registration as dynamic that has to be removed
 				if (model == null || model.isDynamic()) {
 					filtersToRemove.add(fh);
+					removed[0]++;
 				}
 			}
 		}
@@ -1887,6 +1947,7 @@ class JettyServerWrapper implements BatchVisitor {
 			contextRegistrations.getDynamicListenerModels().forEach((l, model) -> {
 				if (model.isDynamic()) {
 					// yes it always should be
+					removed[0]++;
 
 					if (l instanceof ServletContextAttributeListener) {
 						// remove it from per-OsgiContext list
@@ -1906,6 +1967,10 @@ class JettyServerWrapper implements BatchVisitor {
 			contextRegistrations.getDynamicServletRegistrations().clear();
 			contextRegistrations.getDynamicFilterRegistrations().clear();
 			contextRegistrations.getDynamicListenerRegistrations().clear();
+		}
+
+		if (removed[0] > 0) {
+			LOG.debug("Removed {} dynamically registered servlets/filters/listeners from context {}", removed[0], contextPath);
 		}
 	}
 

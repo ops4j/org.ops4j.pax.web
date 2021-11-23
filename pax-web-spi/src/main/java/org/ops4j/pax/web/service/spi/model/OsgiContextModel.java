@@ -457,7 +457,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 			return contextSupplier.apply(bundleContext, getName());
 		}
 		if (contextReference != null) {
-			LOG.debug("Dereferencing {} for {}", contextReference, bundleContext);
+			LOG.debug("Dereferencing {} for {}", contextReference, bundleContext.getBundle());
 
 			// not handling (via ServiceObjects) prototype-scope, so no need to unget()
 			Object context = bundleContext.getService(contextReference);
@@ -481,6 +481,23 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 
 		dtoFailureCode = DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE;
 		throw new IllegalStateException("No HttpContext/ServletContextHelper configured for " + this);
+	}
+
+	/**
+	 * Call {@link BundleContext#ungetService(ServiceReference)} for given bundle if needed, to release the
+	 * {@link WebContainerContext} reference.
+	 * @param bundle
+	 */
+	public void releaseHttpContext(Bundle bundle) {
+		if (contextReference == null) {
+			return;
+		}
+		BundleContext context = bundle != null ? bundle.getBundleContext() : null;
+		if (context != null) {
+			LOG.debug("Ungetting {} for {}", contextReference, context.getBundle());
+
+			context.ungetService(contextReference);
+		}
 	}
 
 	/**

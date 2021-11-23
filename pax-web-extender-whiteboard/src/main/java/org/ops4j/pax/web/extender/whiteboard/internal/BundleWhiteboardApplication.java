@@ -95,7 +95,7 @@ public class BundleWhiteboardApplication {
 
 	public List<OsgiContextModel> getWebContainerOsgiContextModels() {
 		List<OsgiContextModel> models = new LinkedList<>();
-		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle.getBundleContext(), webContainerServiceRef);
+		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle, webContainerServiceRef);
 		if (view != null) {
 			models.addAll(view.getOsgiContextModels(bundle));
 		}
@@ -123,7 +123,7 @@ public class BundleWhiteboardApplication {
 		// install all current contexts and elements. Lifecycle is managed at WhiteboardExtenderContext level,
 		// so we don't have to care about uninstalling the contexts/elements from previous WebContainer
 
-		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle.getBundleContext(), ref);
+		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle, ref);
 		if (view != null) {
 			webContexts.keySet().forEach(ctx -> {
 				if (!webContexts.get(ctx)) {
@@ -153,7 +153,7 @@ public class BundleWhiteboardApplication {
 
 		// no need to uninstall current contexts and elements - they'll get unregistered when bundle-scoped
 		// HttpService/WebContainer is stopped. Here we only mark them as unregistered
-		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle.getBundleContext(), ref);
+		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle, ref);
 		if (view != null) {
 			webElements.keySet().forEach(element -> {
 				if (element.getContextModels().size() > 0 && webElements.get(element)) {
@@ -167,7 +167,7 @@ public class BundleWhiteboardApplication {
 			});
 		}
 
-		webContainerManager.releaseContainer(bundle.getBundleContext(), ref);
+		webContainerManager.releaseContainer(bundle, ref);
 		webContainerServiceRef = null;
 	}
 
@@ -178,7 +178,7 @@ public class BundleWhiteboardApplication {
 	 */
 	public void addWebContext(final OsgiContextModel webContext) {
 		webContexts.put(webContext, false);
-		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle.getBundleContext(), webContainerServiceRef);
+		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle, webContainerServiceRef);
 		if (view != null) {
 			view.addWhiteboardOsgiContextModel(webContext);
 			webContexts.put(webContext, true);
@@ -193,7 +193,7 @@ public class BundleWhiteboardApplication {
 	public void removeWebContext(final OsgiContextModel webContext) {
 		webContexts.remove(webContext);
 
-		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle.getBundleContext(), webContainerServiceRef);
+		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle, webContainerServiceRef);
 		if (view == null) {
 			LOG.debug("{} will be unregistered when WebContainer/HttpService is available", webContext);
 			return;
@@ -221,7 +221,7 @@ public class BundleWhiteboardApplication {
 					webElement, webElement.getContextFilter());
 		}
 
-		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle.getBundleContext(), webContainerServiceRef);
+		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle, webContainerServiceRef);
 		if (view == null) {
 			LOG.debug("{} will be registered when WebContainer/HttpService is available", webElement);
 			return;
@@ -241,7 +241,7 @@ public class BundleWhiteboardApplication {
 	public void removeWebElement(final ElementModel<?, ?> webElement) {
 		webElements.remove(webElement);
 
-		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle.getBundleContext(), webContainerServiceRef);
+		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle, webContainerServiceRef);
 		if (view == null) {
 			LOG.debug("{} will be unregistered when WebContainer/HttpService is available", webElement);
 			return;
@@ -265,11 +265,11 @@ public class BundleWhiteboardApplication {
 	public void cleanup() {
 		this.webContexts.clear();
 		this.webElements.clear();
-		webContainerManager.releaseContainer(bundle.getBundleContext());
+		webContainerManager.releaseContainer(bundle);
 	}
 
 	public WhiteboardWebContainerView getWhiteboardContainer() {
-		return webContainerManager.whiteboardView(bundle.getBundleContext(), webContainerServiceRef);
+		return webContainerManager.whiteboardView(bundle, webContainerServiceRef);
 	}
 
 }

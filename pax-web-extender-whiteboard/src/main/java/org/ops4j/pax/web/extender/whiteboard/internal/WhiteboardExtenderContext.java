@@ -82,7 +82,7 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 	 */
 	final AtomicBoolean acceptWabContexts = new AtomicBoolean(false);
 
-	private final BundleContext bundleContext;
+	private final Bundle bundle;
 
 	/** This is were the lifecycle of {@link WebContainer} is managed. */
 	private final WebContainerManager webContainerManager;
@@ -132,7 +132,7 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 	}
 
 	public WhiteboardExtenderContext(BundleContext bundleContext, boolean synchronous) {
-		this.bundleContext = bundleContext;
+		this.bundle = bundleContext.getBundle();
 
 		// remember ONLY "default" (mapped to "/") context model
 		OsgiContextModel model = OsgiContextModel.DEFAULT_CONTEXT_MODEL;
@@ -305,7 +305,7 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 	// --- Handling registration/unregistration of target WebContainer, where we want to register Whiteboard services
 
 	public void webContainerAdded(ServiceReference<WebContainer> ref) {
-		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundleContext, ref);
+		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle, ref);
 		if (view != null) {
 			// install global, default OSGi Context Model using bundle context of pax-web-extender-whiteboard bundle
 			view.addWhiteboardOsgiContextModel(OsgiContextModel.DEFAULT_CONTEXT_MODEL);
@@ -331,12 +331,13 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 		// uninstall all managed whiteboard applications from the WebContainer using the reference being removed
 		uninstallWhiteboardApplications(ref);
 
-		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundleContext, ref);
+		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle, ref);
 		if (view != null) {
 			// uninstall global, default OSGi Context Model
 			view.removeWhiteboardOsgiContextModel(OsgiContextModel.DEFAULT_CONTEXT_MODEL);
 		}
-		webContainerManager.releaseContainer(bundleContext, ref);
+		// finally now we can actually release the service
+		webContainerManager.releaseContainer(bundle, ref);
 	}
 
 	/**
@@ -402,11 +403,10 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 
 			getBundleApplication(bundle).removeWebContext(model);
 
-			WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundleContext, currentWebContainerReference);
+			WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle, currentWebContainerReference);
 			if (view != null) {
 				view.clearFailedDTOInformation(model);
 			}
-			webContainerManager.releaseContainer(bundleContext, currentWebContainerReference);
 		} finally {
 			lock.unlock();
 		}
@@ -507,11 +507,10 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 		try {
 			getBundleApplication(bundle).removeWebElement(webElement);
 
-			WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundleContext, currentWebContainerReference);
+			WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle, currentWebContainerReference);
 			if (view != null) {
 				view.clearFailedDTOInformation(webElement);
 			}
-			webContainerManager.releaseContainer(bundleContext, currentWebContainerReference);
 		} finally {
 			lock.unlock();
 		}
@@ -554,11 +553,10 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 	 * @param webElement
 	 */
 	public void configureFailedDTOs(ElementModel<?, ?> webElement) {
-		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundleContext, currentWebContainerReference);
+		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle, currentWebContainerReference);
 		if (view != null) {
 			view.failedDTOInformation(webElement);
 		}
-		webContainerManager.releaseContainer(bundleContext, currentWebContainerReference);
 	}
 
 	/**
@@ -568,11 +566,10 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 	 * @param webContext
 	 */
 	public void configureFailedDTOs(OsgiContextModel webContext) {
-		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundleContext, currentWebContainerReference);
+		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle, currentWebContainerReference);
 		if (view != null) {
 			view.failedDTOInformation(webContext);
 		}
-		webContainerManager.releaseContainer(bundleContext, currentWebContainerReference);
 	}
 
 }

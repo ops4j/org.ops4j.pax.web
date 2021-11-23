@@ -123,6 +123,13 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 		}
 	}
 
+	public void releaseEventListener() {
+		if (getElementReference() != null) {
+			getRegisteringBundle().getBundleContext().ungetService(getElementReference());
+		}
+		resolvedListener = null;
+	}
+
 	public EventListener getResolvedListener() {
 		return resolvedListener;
 	}

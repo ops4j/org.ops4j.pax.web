@@ -288,8 +288,7 @@ public class BundleWebApplication {
 
 		// get a WebContainer for the last time - it doesn't have to be available (no need to lock here)
 		ServiceReference<WebContainer> ref = webContainerServiceRef;
-		WebAppWebContainerView view = webContainerManager.containerView(bundle.getBundleContext(),
-				ref, WebAppWebContainerView.class);
+		WebAppWebContainerView view = webContainerManager.containerView(bundle, ref, WebAppWebContainerView.class);
 
 		State state = deploymentState.get();
 
@@ -368,7 +367,7 @@ public class BundleWebApplication {
 		// whether the undeployment failed, succeeded or wasn't needed, we set the final state
 		deploymentState.set(State.UNDEPLOYED);
 
-		webContainerManager.releaseContainer(bundle.getBundleContext(), ref);
+		webContainerManager.releaseContainer(bundle, ref);
 	}
 
 	/**
@@ -448,8 +447,8 @@ public class BundleWebApplication {
 
 		refLock.lock();
 		try {
-			WebAppWebContainerView view = webContainerManager.containerView(bundle.getBundleContext(),
-					webContainerServiceRef, WebAppWebContainerView.class);
+			WebAppWebContainerView view = webContainerManager.containerView(bundle, webContainerServiceRef,
+					WebAppWebContainerView.class);
 
 			State state = deploymentState.get();
 
@@ -531,7 +530,7 @@ public class BundleWebApplication {
 				}
 			}
 
-			webContainerManager.releaseContainer(bundle.getBundleContext(), ref);
+			webContainerManager.releaseContainer(bundle, ref);
 			webContainerServiceRef = null;
 		} finally {
 			refLock.unlock();
@@ -548,8 +547,8 @@ public class BundleWebApplication {
 	private WebAppWebContainerView currentWebContainer(State currentState) {
 		refLock.lock();
 		try {
-			WebAppWebContainerView view = webContainerManager.containerView(bundle.getBundleContext(),
-					webContainerServiceRef, WebAppWebContainerView.class);
+			WebAppWebContainerView view = webContainerManager.containerView(bundle, webContainerServiceRef,
+					WebAppWebContainerView.class);
 			if (view == null) {
 				if (deploymentState.compareAndSet(currentState, State.WAITING_FOR_WEB_CONTAINER)) {
 					LOG.debug("WebContainer service reference is not available. {} enters Grace Period state.", this);

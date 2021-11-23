@@ -36,6 +36,7 @@ import javax.servlet.descriptor.JspConfigDescriptor;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.wiring.BundleWiring;
 
 /**
@@ -60,11 +61,33 @@ public class OsgiScopedServletContext implements ServletContext {
 
 	private final WebContainerContext webContainerContext;
 
+	/**
+	 * This constructor uses passed {@link OsgiServletContext} to get {@link OsgiContextModel} and call
+	 * {@link OsgiContextModel#resolveHttpContext(Bundle)}. Servlets/Filters using this scoped OSGi servlet context
+	 * have to reuse this instance.
+	 *
+	 * @param osgiContext
+	 * @param bundle
+	 */
 	public OsgiScopedServletContext(OsgiServletContext osgiContext, Bundle bundle) {
 		this.osgiContext = osgiContext;
 		this.bundle = bundle;
 
 		this.webContainerContext = osgiContext.getOsgiContextModel().resolveHttpContext(bundle);
+	}
+
+	public WebContainerContext getResolvedWebContainerContext() {
+		return webContainerContext;
+	}
+
+	/**
+	 * Everywhere the {@link OsgiScopedServletContext} is created, we have to call
+	 * {@link org.osgi.framework.BundleContext#ungetService(ServiceReference)} on the {@link WebContainerContext}
+	 * reference
+	 * @param bundle
+	 */
+	public void releaseWebContainerContext(Bundle bundle) {
+		osgiContext.getOsgiContextModel().releaseHttpContext(bundle);
 	}
 
 	public OsgiServletContext getOsgiContext() {

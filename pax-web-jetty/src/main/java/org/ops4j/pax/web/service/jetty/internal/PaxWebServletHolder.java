@@ -34,6 +34,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.runtime.dto.DTOConstants;
@@ -64,7 +65,7 @@ public class PaxWebServletHolder extends ServletHolder {
 
 	/**
 	 * Each servlet will be associated with {@link WebContainerContext} scoped to the bundle which registered
-	 * given {@link Servlet}.
+	 * given {@link Servlet}. This has to be <em>unget</em> at the end of servlet's lifecycle.
 	 */
 	private final WebContainerContext webContainerContext;
 
@@ -129,7 +130,7 @@ public class PaxWebServletHolder extends ServletHolder {
 		servletContext = new OsgiScopedServletContext(this.osgiServletContext, servletModel.getRegisteringBundle());
 
 		// instead of doing it once per request, we can get servlet-scoped WebContainerContext now
-		webContainerContext = osgiContextModel.resolveHttpContext(servletModel.getRegisteringBundle());
+		webContainerContext = servletContext.getResolvedWebContainerContext();
 	}
 
 	public ServletModel getServletModel() {
@@ -238,7 +239,10 @@ public class PaxWebServletHolder extends ServletHolder {
 		super.destroyInstance(o);
 		if (servletModel != null && servletReference != null) {
 			if (!servletModel.isPrototype()) {
-				servletModel.getRegisteringBundle().getBundleContext().ungetService(servletReference);
+				BundleContext context = servletModel.getRegisteringBundle().getBundleContext();
+				if (context != null) {
+					context.ungetService(servletReference);
+				}
 			} else {
 				Servlet realServlet = (Servlet) o;
 				if (realServlet instanceof Wrapper) {
@@ -249,6 +253,9 @@ public class PaxWebServletHolder extends ServletHolder {
 				}
 				serviceObjects.ungetService(realServlet);
 			}
+		}
+		if (servletModel != null && servletModel.getRegisteringBundle() != null) {
+			servletContext.releaseWebContainerContext(servletModel.getRegisteringBundle());
 		}
 	}
 

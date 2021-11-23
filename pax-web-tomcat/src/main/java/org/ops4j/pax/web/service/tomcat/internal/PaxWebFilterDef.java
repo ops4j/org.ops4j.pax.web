@@ -50,15 +50,12 @@ public class PaxWebFilterDef extends FilterDef {
 
 	private ServiceReference<Filter> filterReference;
 
-	/** This {@link ServletContext} the highest ranked {@link OsgiServletContext} for given physical context */
-	private final OsgiServletContext osgiServletContext;
 	/** This {@link ServletContext} is scoped to particular Whiteboard filter */
 	private OsgiScopedServletContext servletContext = null;
 
 	public PaxWebFilterDef(FilterModel filterModel, boolean initialFilter, OsgiServletContext osgiContext) {
 		this.filterModel = filterModel;
 		this.initialFilter = initialFilter;
-		this.osgiServletContext = osgiContext;
 
 		// name that binds a servlet with its mapping
 		setFilterName(filterModel.getName());
@@ -82,8 +79,8 @@ public class PaxWebFilterDef extends FilterDef {
 		setAsyncSupported(filterModel.getAsyncSupported() != null && filterModel.getAsyncSupported() ? "true" : "false");
 
 		// setup proper delegation for ServletContext
-		if (this.osgiServletContext != null) {
-			servletContext = new OsgiScopedServletContext(this.osgiServletContext, filterModel.getRegisteringBundle());
+		if (osgiContext != null) {
+			servletContext = new OsgiScopedServletContext(osgiContext, filterModel.getRegisteringBundle());
 		}
 
 		if (isInitial()) {
@@ -98,7 +95,7 @@ public class PaxWebFilterDef extends FilterDef {
 		if (isInitial()) {
 			super.setFilter(filter);
 		} else {
-			Filter delegate = filter == null ? new LifecycleFilter(filterModel)
+			Filter delegate = filter == null ? new LifecycleFilter()
 					: new ScopedFilter(new OsgiInitializedFilter(filter, filterModel, servletContext), filterModel);
 			super.setFilter(delegate);
 		}
@@ -129,17 +126,15 @@ public class PaxWebFilterDef extends FilterDef {
 	 */
 	private class LifecycleFilter implements Filter {
 
-		private final FilterModel model;
 		private Filter filter;
 		private ServiceObjects<Filter> serviceObjects;
 
-		LifecycleFilter(FilterModel model) {
-			this.model = model;
+		LifecycleFilter() {
 		}
 
 		@Override
 		public void init(FilterConfig filterConfig) throws ServletException {
-			if (model.getElementReference() != null) {
+			if (filterReference != null) {
 				// it SHOULD be a reference
 				Filter instance;
 				if (!filterModel.isPrototype()) {
@@ -182,6 +177,9 @@ public class PaxWebFilterDef extends FilterDef {
 					}
 					serviceObjects.ungetService(realFilter);
 				}
+			}
+			if (servletContext != null && filterModel.getRegisteringBundle() != null) {
+				servletContext.releaseWebContainerContext(filterModel.getRegisteringBundle());
 			}
 		}
 

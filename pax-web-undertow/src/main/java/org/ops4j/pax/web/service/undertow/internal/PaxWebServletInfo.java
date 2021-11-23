@@ -57,7 +57,7 @@ public class PaxWebServletInfo extends ServletInfo {
 	private final OsgiScopedServletContext servletContext;
 	/**
 	 * Each servlet will be associated with {@link WebContainerContext} scoped to the bundle which registered
-	 * given {@link Servlet}.
+	 * given {@link Servlet}. This has to be <em>unget</em> at the end of servlet's lifecycle.
 	 */
 	private final WebContainerContext webContainerContext;
 
@@ -115,7 +115,7 @@ public class PaxWebServletInfo extends ServletInfo {
 		setMultipartConfig(servletModel.getMultipartConfigElement());
 
 		this.servletContext = ((ServletModelFactory)super.getInstanceFactory()).getServletContext();
-		this.webContainerContext = osgiContextModel.resolveHttpContext(servletModel.getRegisteringBundle());
+		this.webContainerContext = servletContext.getResolvedWebContainerContext();
 	}
 
 	public ServletModel getServletModel() {
@@ -164,7 +164,6 @@ public class PaxWebServletInfo extends ServletInfo {
 	}
 
 	@Override
-	@SuppressWarnings("MethodDoesntCallSuperMethod")
 	public ServletInfo clone() {
 		final ServletInfo info;
 		if (!is404) {
@@ -263,6 +262,13 @@ public class PaxWebServletInfo extends ServletInfo {
 								}
 								serviceObjects.ungetService(realServlet);
 							}
+						} catch (IllegalStateException e) {
+							// bundle context has already been invalidated ?
+						}
+					}
+					if (model.getRegisteringBundle() != null) {
+						try {
+							osgiScopedServletContext.releaseWebContainerContext(model.getRegisteringBundle());
 						} catch (IllegalStateException e) {
 							// bundle context has already been invalidated ?
 						}

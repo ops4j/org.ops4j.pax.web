@@ -89,7 +89,7 @@ public class PaxWebOuterHandlerWrapper implements HandlerWrapper {
 		};
 	}
 
-	public ServletContext getDefaultServletContext() {
+	public OsgiServletContext getDefaultServletContext() {
 		return defaultServletContext;
 	}
 

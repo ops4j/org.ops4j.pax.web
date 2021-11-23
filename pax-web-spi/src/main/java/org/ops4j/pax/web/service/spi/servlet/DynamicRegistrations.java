@@ -86,7 +86,7 @@ public class DynamicRegistrations {
 		return dynamicListenerModels;
 	}
 
-// In order to transition from Servlet API to OSGi HttpService/Whiteboard APIs, we need a bundle-scoped
+	// In order to transition from Servlet API to OSGi HttpService/Whiteboard APIs, we need a bundle-scoped
 	// instance of WebContainer even if the ServletContainerInitializer that calls these methods is completely
 	// unaware of OSGi
 	//

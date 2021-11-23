@@ -66,7 +66,7 @@ public abstract class AbstractServletAnnotatedIntegrationTest extends AbstractCo
 
 	@Test
 	public void testMultipart() throws Exception {
-		Map<String, byte[]> attachments = new HashMap<String, byte[]>();
+		Map<String, byte[]> attachments = new HashMap<>();
 		attachments.put("exampleFile", "file.part".getBytes(StandardCharsets.UTF_8));
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Part of file: exampleFile'",
