@@ -330,9 +330,7 @@ javax.servlet.context.tempdir = ${karaf.data}/tmp
 <!--		<feature version="[4.4,5)">shell</feature>-->
 
 		<bundle dependency="true">mvn:org.apache.karaf.shell/org.apache.karaf.shell.core/${dependency.org.apache.karaf}</bundle>
-		<bundle dependency="true">mvn:org.jline/jline-terminal/${dependency.org.jline}</bundle>
-		<bundle dependency="true">mvn:org.jline/jline-reader/${dependency.org.jline}</bundle>
-		<bundle dependency="true">mvn:org.jline/jline-builtins/${dependency.org.jline}</bundle>
+		<bundle dependency="true">mvn:org.jline/jline/${dependency.org.jline}</bundle>
 
 		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-karaf/${project.version}</bundle>
 	</feature>
