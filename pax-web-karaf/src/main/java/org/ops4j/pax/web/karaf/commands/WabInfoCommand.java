@@ -18,39 +18,32 @@ package org.ops4j.pax.web.karaf.commands;
 import java.net.URL;
 import java.util.List;
 
-import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
-import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.ShellUtil;
-import org.apache.karaf.shell.support.table.Col;
-import org.apache.karaf.shell.support.table.ShellTable;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.WebApplicationModel;
 import org.ops4j.pax.web.service.spi.model.views.ReportWebContainerView;
 import org.osgi.framework.Bundle;
 
-@Command(scope = "web", name = "wab-show", description = "Show information about Web Application Bundle.")
+@Command(scope = "web", name = "wab-info", description = "Shows information about Web Application Bundle.")
 @Service
-public class WabShowCommand implements Action {
+public class WabInfoCommand extends WebCommand {
 
 	@Argument(name = "wab", description = "WAB specified by context path or bundle ID")
 	private Object wab;
 
-	@Reference
-	private WebContainer webContainer;
-
 	@Override
-	public Object execute() {
+	public void doExecute(WebContainer webContainer) {
 		ReportWebContainerView view = webContainer.adapt(ReportWebContainerView.class);
 		if (view == null) {
 			System.err.println("Can't obtain a reference to WebContainer/HttpService.");
-			return null;
+			return;
 		}
 		if (wab == null) {
 			System.err.println("Please specify the WAB using context path or bundle ID");
-			return null;
+			return;
 		}
 
 		long bundleId = -1L;
@@ -63,7 +56,7 @@ public class WabShowCommand implements Action {
 				app = view.getWebApplication(bundleId);
 			} catch (NumberFormatException e) {
 				System.err.println("Can't parse \"" + wab.toString() + "\" as bundle ID.");
-				return null;
+				return;
 			}
 		}
 
@@ -73,7 +66,7 @@ public class WabShowCommand implements Action {
 			} else {
 				System.err.println("Can't find Web Application Bundle with context path = \"" + wab + "\".");
 			}
-			return null;
+			return;
 		}
 
 		String title = ShellUtil.getBundleName(app.getBundle());
@@ -117,8 +110,6 @@ public class WabShowCommand implements Action {
 				System.out.println(" - (" + b.getBundleId() + ") " + b.getSymbolicName() + "/" + b.getVersion());
 			});
 		}
-
-		return null;
 	}
 
 }

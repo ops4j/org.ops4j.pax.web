@@ -1440,7 +1440,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		// only after disabling lower ranked models we can check the name conflicts, because servlet
 		// with conflicting name inside a context may have just been disabled.
 		if (!contextsWithNameConflicts.isEmpty()) {
-			LOG.warn("Skipped registration of {} because of existing mappings with name {}."
+			LOG.warn("Skipped registration of {} because of existing servlets with name {}."
 					+ " Servlet will be added as \"awaiting registration\".", model, model.getName());
 			batch.addDisabledServletModel(model);
 			return;
@@ -3460,6 +3460,32 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 
 		// here we're preparing models for all known contexts - plugins will fill out the details or add more
 		// web applications
+		// 1a. bundle-scoped HttpService contexts which are shadowed by WAB/Whiteboard contexts
+		bundleDefaultContexts.values().forEach(ocm -> {
+			webapps.add(new WebApplicationModel(ocm, true));
+		});
+		// 1b. bundle-scoped HttpService contexts
+		bundleContexts.values().forEach(ocms -> {
+			ocms.forEach(ocm -> {
+				if (!ocm.isWab()) {
+					webapps.add(new WebApplicationModel(ocm));
+				}
+			});
+		});
+		// 2a. shared HttpService contexts which are shadowed by WAB/Whiteboard contexts
+		sharedDefaultContexts.values().forEach(ocm -> {
+			webapps.add(new WebApplicationModel(ocm, true));
+		});
+		// 2b. shared HttpService contexts
+		sharedContexts.values().forEach(ocms -> {
+			ocms.forEach(ocm -> {
+				webapps.add(new WebApplicationModel(ocm));
+			});
+		});
+		// 3. Whiteboard contexts
+		whiteboardContexts.forEach(ocm -> {
+			webapps.add(new WebApplicationModel(ocm));
+		});
 
 		// plugins may add new models or alter existing ones.
 		// for example, pax-web-extender-war adds models related to failed WABs

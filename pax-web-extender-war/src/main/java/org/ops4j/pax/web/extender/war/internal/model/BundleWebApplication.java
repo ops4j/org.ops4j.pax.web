@@ -1848,6 +1848,10 @@ public class BundleWebApplication {
 		this.contextPath = contextPath;
 	}
 
+	public Bundle getBundle() {
+		return bundle;
+	}
+
 	public State getDeploymentState() {
 		return deploymentState.get();
 	}

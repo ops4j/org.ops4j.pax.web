@@ -41,6 +41,7 @@
 		<module>limit-post-config-fragment-undertow</module>
 		<module>config-fragment-tomcat</module>
 		<module>config-fragment-jetty</module>
+		<module>showcase</module>
 	</modules>
 
 </project>

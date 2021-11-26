@@ -15,61 +15,70 @@
  */
 package org.ops4j.pax.web.karaf.commands;
 
-import java.net.URL;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
-import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
-import org.apache.karaf.shell.api.action.Option;
-import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.Col;
+import org.apache.karaf.shell.support.table.Row;
 import org.apache.karaf.shell.support.table.ShellTable;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.WebApplicationModel;
 import org.ops4j.pax.web.service.spi.model.views.ReportWebContainerView;
-import org.osgi.framework.Bundle;
+import org.osgi.service.http.runtime.HttpServiceRuntimeConstants;
 
-@Command(scope = "web", name = "wab-list", description = "Lists all available Web Application Bundles.")
+@Command(scope = "web", name = "wab-list", description = "Lists all available, deployed Web Application Bundles.")
 @Service
-public class WabListCommand implements Action {
-
-	@Reference
-	private WebContainer webContainer;
+public class WabListCommand extends WebCommand {
 
 	@Override
-	public Object execute() {
+	public void doExecute(WebContainer webContainer) {
 		ReportWebContainerView view = webContainer.adapt(ReportWebContainerView.class);
 		if (view == null) {
 			System.err.println("Can't obtain a reference to WebContainer/HttpService.");
-			return null;
+			return;
 		}
 
-		List<WebApplicationModel> webapps = view.listWebApplications();
+		Set<WebApplicationModel> webapps = view.listWebApplications();
+
+		String url = null;
+		if (runtime != null) {
+			String base = ((String[])runtime.getRuntimeDTO().serviceDTO.properties.get(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT))[0];
+			base = base.substring(0, base.length() - 1);
+			base = base.replace("0.0.0.0", "127.0.0.1");
+			url = base;
+			if (url.endsWith("/")) {
+				url = url.substring(0, url.length() - 1);
+			}
+		}
 
 		final ShellTable table = new ShellTable();
+		table.column(new Col("Context Path"));
 		table.column(new Col("Bundle ID"));
 		table.column(new Col("Symbolic Name"));
-		table.column(new Col("Context Path"));
 		table.column(new Col("State"));
+		if (url != null) {
+			table.column(new Col("Base URL"));
+		}
 
+		String finalUrl = url;
 		webapps.forEach(app -> {
+			if (!app.isWab()) {
+				return;
+			}
 			long bundleId = app.getBundle().getBundleId();
 			String symbolicName = app.getBundle().getSymbolicName();
 			String contextPath = app.getContextPath();
 			String state = app.getDeploymentState();
-//			String applicationFragments = app.getApplicationFragmentBundles().stream()
-//					.map(Bundle::getSymbolicName).collect(Collectors.joining("\n"));
-//			String containerFragments = app.getContainerFragmentBundles().stream()
-//					.map(Bundle::getSymbolicName).collect(Collectors.joining("\n"));
-//			String classPath = app.getWabClassPath().stream().map(URL::getPath).collect(Collectors.joining("\n"));
 
-			table.addRow().addContent(bundleId, symbolicName, contextPath, state);
+			Row row = table.addRow();
+			row.addContent(contextPath, bundleId, symbolicName, state);
+			if (finalUrl != null) {
+				row.addContent(finalUrl + contextPath);
+			}
 		});
 
 		table.print(System.out, true);
-		return null;
 	}
 
 }
