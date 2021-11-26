@@ -141,7 +141,7 @@ org.osgi.service.http.secure.enabled = false
 #org.ops4j.pax.web.config.file = ${karaf.etc}/jetty.xml
 
 # this is a root directory for all the context-specific directories managed by Pax Web
-javax.servlet.context.tempdir = ${karaf.data}/tmp
+javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		</config>
 		<configfile finalname="${karaf.etc}/jetty.xml">
 			mvn:org.ops4j.pax.web/pax-web-features/${project.version}/xml/config-jetty
@@ -205,7 +205,7 @@ org.osgi.service.http.secure.enabled = false
 #org.ops4j.pax.web.config.file = ${karaf.etc}/tomcat-server.xml
 
 # this is a root directory for all the context-specific directories managed by Pax Web
-javax.servlet.context.tempdir = ${karaf.data}/tmp
+javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		</config>
 		<configfile finalname="${karaf.etc}/tomcat-server.xml">
 			mvn:org.ops4j.pax.web/pax-web-features/${project.version}/xml/config-tomcat
@@ -274,7 +274,7 @@ org.osgi.service.http.secure.enabled = false
 #org.ops4j.pax.web.config.file = ${karaf.etc}/undertow.xml
 
 # this is a root directory for all the context-specific directories managed by Pax Web
-javax.servlet.context.tempdir = ${karaf.data}/tmp
+javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		</config>
 		<configfile finalname="${karaf.etc}/undertow.xml">
 			mvn:org.ops4j.pax.web/pax-web-features/${project.version}/xml/config-undertow
