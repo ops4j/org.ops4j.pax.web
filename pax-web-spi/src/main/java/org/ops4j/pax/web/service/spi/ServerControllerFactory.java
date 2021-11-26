@@ -39,4 +39,13 @@ public interface ServerControllerFactory {
 	 */
 	ServerController createServerController(Configuration configuration);
 
+	/**
+	 * Cleanup method, because we don't want controllers to live forever.
+	 *
+	 * @param controller
+	 * @param configuration
+	 */
+	default void releaseServerController(ServerController controller, Configuration configuration) {
+	}
+
 }

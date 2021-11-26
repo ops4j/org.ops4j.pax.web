@@ -45,7 +45,7 @@ public class JettyServerControllerFactory implements ServerControllerFactory {
 	private final ClassLoader classLoader;
 
 	/** One {@link org.ops4j.pax.web.service.spi.ServerController} per unique configuration ID. */
-	private final Map<String, JettyServerController> serverControllers = new HashMap<>();
+	private final Map<String, ServerController> serverControllers = new HashMap<>();
 
 	/** Utility class to construct different Jetty supporting objects */
 	private final JettyFactory jettyFactory;
@@ -69,9 +69,9 @@ public class JettyServerControllerFactory implements ServerControllerFactory {
 
 		Comparator<PriorityValue<?>> c = Comparator.comparingInt(o -> o.priority);
 
-		handlers = new TreeSet<PriorityValue<Handler>>(c);
-		connectors = new TreeSet<PriorityValue<Connector>>(c);
-		customizers = new TreeSet<PriorityValue<Customizer>>(c);
+		handlers = new TreeSet<>(c);
+		connectors = new TreeSet<>(c);
+		customizers = new TreeSet<>(c);
 
 		jettyFactory = new JettyFactory(paxWebJettyBundle, classLoader);
 	}
@@ -125,6 +125,11 @@ public class JettyServerControllerFactory implements ServerControllerFactory {
 //				}
 //			}
 //		};
+	}
+
+	@Override
+	public void releaseServerController(ServerController controller, Configuration configuration) {
+		serverControllers.remove(configuration.id(), controller);
 	}
 
 //	public void addHandler(Handler handler, int ranking) {

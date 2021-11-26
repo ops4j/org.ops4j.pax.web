@@ -39,7 +39,7 @@ public class TomcatServerControllerFactory implements ServerControllerFactory {
 	private final ClassLoader classLoader;
 
 	/** One {@link org.ops4j.pax.web.service.spi.ServerController} per unique configuration ID. */
-	private final Map<String, TomcatServerController> serverControllers = new HashMap<>();
+	private final Map<String, ServerController> serverControllers = new HashMap<>();
 
 	/** Utility class to construct different Tomcat supporting objects */
 	private final TomcatFactory tomcatFactory;
@@ -69,6 +69,11 @@ public class TomcatServerControllerFactory implements ServerControllerFactory {
 		serverControllers.put(configuration.id(), controller);
 
 		return controller;
+	}
+
+	@Override
+	public void releaseServerController(ServerController controller, Configuration configuration) {
+		serverControllers.remove(configuration.id(), controller);
 	}
 
 }

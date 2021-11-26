@@ -214,6 +214,10 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	public void stop(final BundleContext context) {
 		LOG.debug("Stopping Pax Web Runtime");
 
+		if (serverControllerFactory != null && serverController != null) {
+			serverControllerFactory.releaseServerController(serverController, serverController.getConfiguration());
+		}
+
 		if (serverListenerTracker != null) {
 			serverListenerTracker.close();
 			serverListenerTracker = null;

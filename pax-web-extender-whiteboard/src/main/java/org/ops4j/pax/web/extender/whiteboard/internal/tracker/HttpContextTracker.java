@@ -193,7 +193,10 @@ public class HttpContextTracker extends AbstractContextTracker<HttpContext> {
 		if (Constants.SCOPE_SINGLETON.equals(scope)) {
 			// that was the only case when we called getService(), so we have to unget - even if it's only
 			// for reference counting
-			unpublished.getOwnerBundle().getBundleContext().ungetService(serviceReference);
+			BundleContext context = unpublished.getOwnerBundle() == null ? null : unpublished.getOwnerBundle().getBundleContext();
+			if (context != null) {
+				context.ungetService(serviceReference);
+			}
 		}
 	}
 

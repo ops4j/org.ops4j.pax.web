@@ -40,7 +40,7 @@ public class UndertowServerControllerFactory implements ServerControllerFactory 
 	private final ClassLoader classLoader;
 
 	/** One {@link org.ops4j.pax.web.service.spi.ServerController} per unique configuration ID. */
-	private final Map<String, UndertowServerController> serverControllers = new HashMap<>();
+	private final Map<String, ServerController> serverControllers = new HashMap<>();
 
 	/** Utility class to construct different Undertow supporting objects */
 	private final UndertowFactory undertowFactory;
@@ -71,6 +71,11 @@ public class UndertowServerControllerFactory implements ServerControllerFactory 
 		serverControllers.put(configuration.id(), controller);
 
 		return controller;
+	}
+
+	@Override
+	public void releaseServerController(ServerController controller, Configuration configuration) {
+		serverControllers.remove(configuration.id(), controller);
 	}
 
 }
