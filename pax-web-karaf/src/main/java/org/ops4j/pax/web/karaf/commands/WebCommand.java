@@ -24,10 +24,10 @@ import org.osgi.service.http.runtime.HttpServiceRuntime;
 
 public abstract class WebCommand implements Action {
 
+	protected HttpServiceRuntime runtime;
+
 	@Reference
 	private BundleContext context;
-
-	protected HttpServiceRuntime runtime;
 
 	@Override
 	public final Object execute() {
