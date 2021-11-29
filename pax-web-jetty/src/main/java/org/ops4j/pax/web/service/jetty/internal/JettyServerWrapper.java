@@ -2283,7 +2283,7 @@ class JettyServerWrapper implements BatchVisitor {
 		if (quick) {
 			for (int i = pos; i < newFilterHolders.length; i++) {
 				// each holder may have many mappings
-				PaxWebFilterHolder fh = newFilterHolders[pos];
+				PaxWebFilterHolder fh = newFilterHolders[i];
 				servletHandler.addFilter(fh);
 				for (PaxWebFilterMapping paxWebFilterMapping : fh.getMapping()) {
 					if (paxWebFilterMapping.isAfter()) {
