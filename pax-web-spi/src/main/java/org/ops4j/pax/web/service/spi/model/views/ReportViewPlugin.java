@@ -59,6 +59,6 @@ public interface ReportViewPlugin {
 	 *
 	 * @param servlets
 	 */
-	default void collectServlets(Set<ServletInfo> servlets) {}
+	default void collectServlets(Set<ServletInfo> servlets) { }
 
 }
