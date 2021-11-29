@@ -23,7 +23,7 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.ShellUtil;
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.spi.model.WebApplicationModel;
+import org.ops4j.pax.web.service.spi.model.info.WebApplicationInfo;
 import org.ops4j.pax.web.service.spi.model.views.ReportWebContainerView;
 import org.osgi.framework.Bundle;
 
@@ -47,7 +47,7 @@ public class WabInfoCommand extends WebCommand {
 		}
 
 		long bundleId = -1L;
-		WebApplicationModel app;
+		WebApplicationInfo app;
 		if (wab.toString().startsWith("/")) {
 			app = view.getWebApplication(wab.toString());
 		} else {

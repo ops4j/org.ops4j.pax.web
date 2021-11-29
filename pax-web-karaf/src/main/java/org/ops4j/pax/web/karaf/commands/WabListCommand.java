@@ -23,7 +23,7 @@ import org.apache.karaf.shell.support.table.Col;
 import org.apache.karaf.shell.support.table.Row;
 import org.apache.karaf.shell.support.table.ShellTable;
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.spi.model.WebApplicationModel;
+import org.ops4j.pax.web.service.spi.model.info.WebApplicationInfo;
 import org.ops4j.pax.web.service.spi.model.views.ReportWebContainerView;
 import org.osgi.service.http.runtime.HttpServiceRuntimeConstants;
 
@@ -39,7 +39,7 @@ public class WabListCommand extends WebCommand {
 			return;
 		}
 
-		Set<WebApplicationModel> webapps = view.listWebApplications();
+		Set<WebApplicationInfo> webapps = view.listWebApplications();
 
 		String url = null;
 		if (runtime != null) {

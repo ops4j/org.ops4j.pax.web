@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.spi.model;
+package org.ops4j.pax.web.service.spi.model.info;
+
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 
 /**
  * A read-only (or at least "not affecting real model") class to present information about
  * {@link OsgiContextModel}.
  */
-public class WebContextModel {
+public class WebContextInfo {
 
 	private final OsgiContextModel model;
 
-	public WebContextModel(OsgiContextModel model) {
+	public WebContextInfo(OsgiContextModel model) {
 		this.model = model;
 	}
 

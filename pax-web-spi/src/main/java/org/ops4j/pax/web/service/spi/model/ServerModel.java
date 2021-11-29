@@ -67,6 +67,8 @@ import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.model.events.WebContextEventListener;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEventData;
+import org.ops4j.pax.web.service.spi.model.info.ServletInfo;
+import org.ops4j.pax.web.service.spi.model.info.WebApplicationInfo;
 import org.ops4j.pax.web.service.spi.model.views.ReportViewPlugin;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
@@ -3425,7 +3427,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 	}
 
 	@Override
-	public void collectWebApplications(Set<WebApplicationModel> webapps) {
+	public void collectWebApplications(Set<WebApplicationInfo> webapps) {
 		// This is the main method used by org.ops4j.pax.web.service.spi.model.views.ReportWebContainerView to
 		// get information about installed "web applications".
 		// There are 3 "origins" of applications:
@@ -3462,29 +3464,29 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		// web applications
 		// 1a. bundle-scoped HttpService contexts which are shadowed by WAB/Whiteboard contexts
 		bundleDefaultContexts.values().forEach(ocm -> {
-			webapps.add(new WebApplicationModel(ocm, true));
+			webapps.add(new WebApplicationInfo(ocm, true));
 		});
 		// 1b. bundle-scoped HttpService contexts
 		bundleContexts.values().forEach(ocms -> {
 			ocms.forEach(ocm -> {
 				if (!ocm.isWab()) {
-					webapps.add(new WebApplicationModel(ocm));
+					webapps.add(new WebApplicationInfo(ocm));
 				}
 			});
 		});
 		// 2a. shared HttpService contexts which are shadowed by WAB/Whiteboard contexts
 		sharedDefaultContexts.values().forEach(ocm -> {
-			webapps.add(new WebApplicationModel(ocm, true));
+			webapps.add(new WebApplicationInfo(ocm, true));
 		});
 		// 2b. shared HttpService contexts
 		sharedContexts.values().forEach(ocms -> {
 			ocms.forEach(ocm -> {
-				webapps.add(new WebApplicationModel(ocm));
+				webapps.add(new WebApplicationInfo(ocm));
 			});
 		});
 		// 3. Whiteboard contexts
 		whiteboardContexts.forEach(ocm -> {
-			webapps.add(new WebApplicationModel(ocm));
+			webapps.add(new WebApplicationInfo(ocm));
 		});
 
 		// plugins may add new models or alter existing ones.
@@ -3493,9 +3495,9 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 	}
 
 	@Override
-	public WebApplicationModel getWebApplication(String contextPath) {
+	public WebApplicationInfo getWebApplication(String contextPath) {
 		for (ReportViewPlugin plugin : plugins) {
-			WebApplicationModel app = plugin.getWebApplication(contextPath);
+			WebApplicationInfo app = plugin.getWebApplication(contextPath);
 			if (app != null) {
 				return app;
 			}
@@ -3505,15 +3507,22 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 	}
 
 	@Override
-	public WebApplicationModel getWebApplication(long bundleId) {
+	public WebApplicationInfo getWebApplication(long bundleId) {
 		for (ReportViewPlugin plugin : plugins) {
-			WebApplicationModel app = plugin.getWebApplication(bundleId);
+			WebApplicationInfo app = plugin.getWebApplication(bundleId);
 			if (app != null) {
 				return app;
 			}
 		}
 
 		return null;
+	}
+
+	@Override
+	public void collectServlets(Set<ServletInfo> servlets) {
+		for (ServletModel s : servletsForDTO) {
+			servlets.add(new ServletInfo(s));
+		}
 	}
 
 	public void registerReportViewPlugin(ReportViewPlugin plugin) {

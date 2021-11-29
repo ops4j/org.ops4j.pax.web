@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.service.spi.model;
+package org.ops4j.pax.web.service.spi.model.info;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.ops4j.pax.web.service.PaxWebConstants;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.service.http.HttpService;
@@ -37,7 +38,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
  *
  * <p>This model collects <em>all</em> information regardless of the web application deployment mechanism.</p>
  */
-public class WebApplicationModel implements Comparable<WebApplicationModel> {
+public class WebApplicationInfo implements Comparable<WebApplicationInfo> {
 
 	private String contextPath;
 	private Bundle bundle;
@@ -53,21 +54,23 @@ public class WebApplicationModel implements Comparable<WebApplicationModel> {
 	private final List<Bundle> applicationFragmentBundles = new ArrayList<>();
 	private boolean replaced;
 
-	private WebContextModel contextModel;
+	private WebContextInfo contextModel;
 
-	public WebApplicationModel() {
+	public WebApplicationInfo() {
 	}
 
-	public WebApplicationModel(OsgiContextModel ocm) {
-		contextModel = new WebContextModel(ocm);
-		contextPath = ocm.getContextPath();
-		bundle = ocm.getOwnerBundle();
-		wab = ocm.isWab();
-		whiteboard = ocm.isWhiteboard();
-		httpService = !(wab || whiteboard);
+	public WebApplicationInfo(OsgiContextModel ocm) {
+		if (ocm != null) {
+			contextModel = new WebContextInfo(ocm);
+			contextPath = ocm.getContextPath();
+			bundle = ocm.getOwnerBundle();
+			wab = ocm.isWab();
+			whiteboard = ocm.isWhiteboard();
+			httpService = !(wab || whiteboard);
+		}
 	}
 
-	public WebApplicationModel(OsgiContextModel ocm, boolean replaced) {
+	public WebApplicationInfo(OsgiContextModel ocm, boolean replaced) {
 		this(ocm);
 		if (replaced) {
 			// this context is 1) bundle-scoped created in HttpService, 2) shadowed by Whiteboard-registered
@@ -140,7 +143,7 @@ public class WebApplicationModel implements Comparable<WebApplicationModel> {
 		return applicationFragmentBundles;
 	}
 
-	public void setContextModel(WebContextModel contextModel) {
+	public void setContextModel(WebContextInfo contextModel) {
 		this.contextModel = contextModel;
 	}
 
@@ -189,7 +192,7 @@ public class WebApplicationModel implements Comparable<WebApplicationModel> {
 	}
 
 	@Override
-	public int compareTo(WebApplicationModel other) {
+	public int compareTo(WebApplicationInfo other) {
 		// first - by context path
 		if (!contextPath.equals(other.contextPath)) {
 			int s1 = contextPath.split("/").length;

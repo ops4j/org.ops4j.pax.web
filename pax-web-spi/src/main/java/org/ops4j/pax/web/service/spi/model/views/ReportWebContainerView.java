@@ -17,7 +17,8 @@ package org.ops4j.pax.web.service.spi.model.views;
 
 import java.util.Set;
 
-import org.ops4j.pax.web.service.spi.model.WebApplicationModel;
+import org.ops4j.pax.web.service.spi.model.info.ServletInfo;
+import org.ops4j.pax.web.service.spi.model.info.WebApplicationInfo;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
 
 /**
@@ -30,7 +31,7 @@ import org.ops4j.pax.web.service.views.PaxWebContainerView;
 public interface ReportWebContainerView extends PaxWebContainerView {
 
 	/**
-	 * <p>List all {@link WebApplicationModel web applications} installed (or failed) into pax-web-runtime.</p>
+	 * <p>List all {@link WebApplicationInfo web applications} installed (or failed) into pax-web-runtime.</p>
 	 *
 	 * <p>User expects mostly the Web Application Bundles (WABs), but the list will contain all
 	 * <em>web applications</em> - the ones created using Whiteboard registration or direct installation using
@@ -38,24 +39,31 @@ public interface ReportWebContainerView extends PaxWebContainerView {
 	 *
 	 * @return
 	 */
-	Set<WebApplicationModel> listWebApplications();
+	Set<WebApplicationInfo> listWebApplications();
 
 	/**
-	 * <p>Returns {@link WebApplicationModel} by context path - only real, deployed WABs are considered.
+	 * <p>Returns {@link WebApplicationInfo} by context path - only real, deployed WABs are considered.
 	 * <em>Web applications</em> created using Whiteboard or HttpService methods are not returned.</p>
 	 *
 	 * @param contextPath
 	 * @return
 	 */
-	WebApplicationModel getWebApplication(String contextPath);
+	WebApplicationInfo getWebApplication(String contextPath);
 
 	/**
-	 * <p>Returns {@link WebApplicationModel} by bundle Id - only real WABs are considered. <em>Web applications</em>
+	 * <p>Returns {@link WebApplicationInfo} by bundle Id - only real WABs are considered. <em>Web applications</em>
 	 * created using Whiteboard or HttpService methods are not returned.</p>
 	 *
 	 * @param bundleId
 	 * @return
 	 */
-	WebApplicationModel getWebApplication(long bundleId);
+	WebApplicationInfo getWebApplication(long bundleId);
+
+	/**
+	 * <p>Returns all available servlets registered using different means.</p>
+	 *
+	 * @return
+	 */
+	Set<ServletInfo> listServlets();
 
 }

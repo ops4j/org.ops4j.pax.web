@@ -79,7 +79,7 @@ import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.model.ContextMetadataModel;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
-import org.ops4j.pax.web.service.spi.model.WebApplicationModel;
+import org.ops4j.pax.web.service.spi.model.info.WebApplicationInfo;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
@@ -1862,8 +1862,8 @@ public class BundleWebApplication {
 	 * each {@link BundleWebApplication} can return a report about itself.
 	 * @return
 	 */
-	public WebApplicationModel asWebApplicationModel() {
-		WebApplicationModel model = new WebApplicationModel();
+	public WebApplicationInfo asWebApplicationModel() {
+		WebApplicationInfo model = new WebApplicationInfo(allocatedOsgiContextModel);
 		model.setBundle(bundle);
 		model.setWab(true);
 		model.setDeploymentState(deploymentState.get().getStateName());

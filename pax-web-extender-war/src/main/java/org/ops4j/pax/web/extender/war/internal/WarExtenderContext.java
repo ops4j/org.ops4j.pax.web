@@ -39,7 +39,7 @@ import org.ops4j.pax.web.extender.war.internal.model.BundleWebApplication;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
-import org.ops4j.pax.web.service.spi.model.WebApplicationModel;
+import org.ops4j.pax.web.service.spi.model.info.WebApplicationInfo;
 import org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent;
 import org.ops4j.pax.web.service.spi.model.events.WebApplicationEventListener;
 import org.ops4j.pax.web.service.spi.model.views.ReportViewPlugin;
@@ -273,7 +273,7 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 	}
 
 	@Override
-	public void collectWebApplications(final Set<WebApplicationModel> webapps) {
+	public void collectWebApplications(final Set<WebApplicationInfo> webapps) {
 		lock.lock();
 		try {
 			this.webApplications.values().forEach(wab -> {
@@ -285,7 +285,7 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 	}
 
 	@Override
-	public WebApplicationModel getWebApplication(String contextPath) {
+	public WebApplicationInfo getWebApplication(String contextPath) {
 		for (Map.Entry<Bundle, BundleWebApplication> e : webApplications.entrySet()) {
 			if (contextPath.equals(e.getValue().getContextPath())
 					&& e.getValue().getDeploymentState() == BundleWebApplication.State.DEPLOYED) {
@@ -297,7 +297,7 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 	}
 
 	@Override
-	public WebApplicationModel getWebApplication(long bundleId) {
+	public WebApplicationInfo getWebApplication(long bundleId) {
 		for (Map.Entry<Bundle, BundleWebApplication> e : webApplications.entrySet()) {
 			if (e.getKey().getBundleId() == bundleId) {
 				return getWebApplication(e.getKey());
@@ -306,7 +306,7 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 		return null;
 	}
 
-	private WebApplicationModel getWebApplication(Bundle bundle) {
+	private WebApplicationInfo getWebApplication(Bundle bundle) {
 		BundleWebApplication app = webApplications.get(bundle);
 		return app == null ? null : app.asWebApplicationModel();
 	}

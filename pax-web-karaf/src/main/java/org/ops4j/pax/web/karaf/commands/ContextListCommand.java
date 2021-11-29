@@ -23,7 +23,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.Col;
 import org.apache.karaf.shell.support.table.ShellTable;
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.spi.model.WebApplicationModel;
+import org.ops4j.pax.web.service.spi.model.info.WebApplicationInfo;
 import org.ops4j.pax.web.service.spi.model.views.ReportWebContainerView;
 
 @Command(scope = "web", name = "context-list", description = "Lists all available web contexts. These may originate from HttpService, Whiteboard or WAB Extender.")
@@ -38,7 +38,7 @@ public class ContextListCommand extends WebCommand {
 			return;
 		}
 
-		Set<WebApplicationModel> webapps = view.listWebApplications();
+		Set<WebApplicationInfo> webapps = view.listWebApplications();
 
 		final ShellTable table = new ShellTable();
 		table.column(new Col("Bundle ID"));

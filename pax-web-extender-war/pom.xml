@@ -70,6 +70,7 @@
 							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
 <!--							org.ops4j.pax.web.service.whiteboard;version="${pax-web.osgi.version}",-->
 							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
+
 							<!-- from pax-web-spi -->
 							org.ops4j.pax.web.service.spi;version="${pax-web.osgi.version}",
 <!--							org.ops4j.pax.web.service.spi.config;version="${pax-web.osgi.version}",-->
@@ -77,6 +78,7 @@
 							org.ops4j.pax.web.service.spi.model;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.model.elements;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.model.events;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.model.info;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.model.views;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.servlet;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.task;version="${pax-web.osgi.version}",

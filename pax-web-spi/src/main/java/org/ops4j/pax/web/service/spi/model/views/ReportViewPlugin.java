@@ -17,7 +17,8 @@ package org.ops4j.pax.web.service.spi.model.views;
 
 import java.util.Set;
 
-import org.ops4j.pax.web.service.spi.model.WebApplicationModel;
+import org.ops4j.pax.web.service.spi.model.info.ServletInfo;
+import org.ops4j.pax.web.service.spi.model.info.WebApplicationInfo;
 
 /**
  * <p>An interfaces that should be implemented by bundles that want to create/alter/enhance the information returned by
@@ -28,14 +29,14 @@ import org.ops4j.pax.web.service.spi.model.WebApplicationModel;
 public interface ReportViewPlugin {
 
 	/**
-	 * This method is called to fill a list of {@link WebApplicationModel web application models} for reporting
+	 * This method is called to fill a list of {@link WebApplicationInfo web application models} for reporting
 	 * purpose. It is the responsibility of the implementation to check (by some kind of key) if the
-	 * {@link WebApplicationModel} is already in the passed set - in this case, the existing model can be updated
+	 * {@link WebApplicationInfo} is already in the passed set - in this case, the existing model can be updated
 	 * instead.
 	 *
 	 * @param webapps
 	 */
-	void collectWebApplications(Set<WebApplicationModel> webapps);
+	void collectWebApplications(Set<WebApplicationInfo> webapps);
 
 	/**
 	 * Returns information about single WAB (by its context path) - only successully deployed WABs should be returned,
@@ -44,13 +45,20 @@ public interface ReportViewPlugin {
 	 * @param contextPath
 	 * @return
 	 */
-	WebApplicationModel getWebApplication(String contextPath);
+	WebApplicationInfo getWebApplication(String contextPath);
 
 	/**
 	 * Returns information about single WAB (by its bundle id).
 	 * @param bundleId
 	 * @return
 	 */
-	WebApplicationModel getWebApplication(long bundleId);
+	WebApplicationInfo getWebApplication(long bundleId);
+
+	/**
+	 * Fill information about available servlets
+	 *
+	 * @param servlets
+	 */
+	default void collectServlets(Set<ServletInfo> servlets) {}
 
 }

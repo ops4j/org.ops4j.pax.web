@@ -59,7 +59,8 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
-import org.ops4j.pax.web.service.spi.model.WebApplicationModel;
+import org.ops4j.pax.web.service.spi.model.info.ServletInfo;
+import org.ops4j.pax.web.service.spi.model.info.WebApplicationInfo;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModelAware;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
@@ -2433,8 +2434,8 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 	private class ReportWebContainer implements ReportWebContainerView {
 
 		@Override
-		public Set<WebApplicationModel> listWebApplications() {
-			Set<WebApplicationModel> webapps = new TreeSet<>();
+		public Set<WebApplicationInfo> listWebApplications() {
+			Set<WebApplicationInfo> webapps = new TreeSet<>();
 
 			serverModel.collectWebApplications(webapps);
 
@@ -2442,13 +2443,22 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 
 		@Override
-		public WebApplicationModel getWebApplication(String contextPath) {
+		public WebApplicationInfo getWebApplication(String contextPath) {
 			return serverModel.getWebApplication(contextPath);
 		}
 
 		@Override
-		public WebApplicationModel getWebApplication(long bundleId) {
+		public WebApplicationInfo getWebApplication(long bundleId) {
 			return serverModel.getWebApplication(bundleId);
+		}
+
+		@Override
+		public Set<ServletInfo> listServlets() {
+			Set<ServletInfo> servlets = new TreeSet<>();
+
+			serverModel.collectServlets(servlets);
+
+			return servlets;
 		}
 	}
 
