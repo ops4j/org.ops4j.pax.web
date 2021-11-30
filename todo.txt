@@ -28,7 +28,7 @@ Moved to after 8.0.0.GA (8.0.x):
  - Maven archetypes
  - Updated manual
  - Blog post
- ~ [#1643] Karaf commands within Pax Web itself (not in Karaf)
+ + [#1643] Karaf commands within Pax Web itself (not in Karaf)
 
 Move to 8.1.x:
  - Switch away from JAXB to SAX/StAX parsing for undertow.xml
