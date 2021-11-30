@@ -171,7 +171,7 @@ public abstract class ElementModel<T, D extends WebElementEventData>
 			// make immutable
 			contextModels = Collections.unmodifiableList(contextModels);
 			contextModelsInfo = contextModels.stream()
-					.map(ocm -> String.format("{%s,%s,%s,%s}", ocm.isWhiteboard() ? "WB" : "HS", ocm.getId(), ocm.getName(), ocm.getContextPath()))
+					.map(ocm -> String.format("{%s,%s,%s,%s}", ocm.isWhiteboard() ? "WB" : (ocm.isWab() ? "WAB" : "HS"), ocm.getId(), ocm.getName(), ocm.getContextPath()))
 					.collect(Collectors.joining(", ", "[", "]"));
 			closed = true;
 		}
@@ -205,7 +205,7 @@ public abstract class ElementModel<T, D extends WebElementEventData>
 		Collections.sort(newModels);
 		contextModels = Collections.unmodifiableList(newModels);
 		contextModelsInfo = contextModels.stream()
-				.map(ocm -> String.format("{%s,%s,%s,%s}", ocm.isWhiteboard() ? "WB" : "HS", ocm.getId(), ocm.getName(), ocm.getContextPath()))
+				.map(ocm -> String.format("{%s,%s,%s,%s}", ocm.isWhiteboard() ? "WB" : (ocm.isWab() ? "WAB" : "HS"), ocm.getId(), ocm.getName(), ocm.getContextPath()))
 				.collect(Collectors.joining(", ", "[", "]"));
 	}
 

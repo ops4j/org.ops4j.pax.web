@@ -33,7 +33,7 @@ public abstract class WebCommand implements Action {
 	public final Object execute() {
 		ServiceReference<WebContainer> ref = context.getServiceReference(WebContainer.class);
 		if (ref == null) {
-			System.err.println("Can't get a reference to org.osgi.service.http.HttpService.");
+			System.err.println(">> Can't get a reference to org.osgi.service.http.HttpService.");
 			return null;
 		}
 		WebContainer service = context.getService(ref);

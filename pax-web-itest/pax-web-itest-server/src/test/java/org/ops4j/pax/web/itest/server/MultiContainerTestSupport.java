@@ -319,10 +319,11 @@ public class MultiContainerTestSupport {
 		}
 
 		if (enableWarExtender()) {
-			warExtenderBundle = mockBundle("org.ops4j.pax.web.pax-web-extender-war", null, false);
+			warExtenderBundle = mockBundle("org.ops4j.pax.web.pax-web-extender-war", null, true);
 			warExtenderBundleContext = warExtenderBundle.getBundleContext();
 			when(warExtenderBundleContext.getServiceReferences(WebContainer.class.getName(), null))
 					.thenReturn(new ServiceReference[] { containerRef });
+			when(warExtenderBundleContext.getService(containerRef)).thenReturn(container(warExtenderBundle));
 
 			warExtenderPool = Executors.newFixedThreadPool(1, new NamedThreadFactory("wab-extender"));
 			warExtender = new WarExtenderContext(warExtenderBundleContext, warExtenderPool, true);

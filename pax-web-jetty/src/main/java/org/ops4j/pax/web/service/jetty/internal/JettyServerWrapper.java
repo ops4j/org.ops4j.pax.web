@@ -622,6 +622,15 @@ class JettyServerWrapper implements BatchVisitor {
 
 		LOG.info("Destroying Jetty server {}", server);
 		server.destroy();
+
+		dynamicRegistrations.clear();
+		initializers.clear();
+		osgiContextModels.clear();
+		contextHandlers.forEach((path, sch) -> {
+			mainHandler.removeHandler(sch);
+		});
+		contextHandlers.clear();
+		mainHandler.mapContexts();
 	}
 
 	/**
@@ -833,12 +842,14 @@ class JettyServerWrapper implements BatchVisitor {
 			// This is important to ensure proper order of destruction ended with contextDestroyed() calls
 			// No need to clean anything, as the PaxWebServletContextHandler is not reused
 
-			if (sch != null && sch.isStarted()) {
-				LOG.info("Stopping Jetty context \"{}\"", contextPath);
-				try {
-					sch.stop();
-				} catch (Exception e) {
-					LOG.warn("Error stopping Jetty context \"{}\": {}", contextPath, e.getMessage(), e);
+			if (sch != null) {
+				if (sch.isStarted()) {
+					LOG.info("Stopping Jetty context \"{}\"", contextPath);
+					try {
+						sch.stop();
+					} catch (Exception e) {
+						LOG.warn("Error stopping Jetty context \"{}\": {}", contextPath, e.getMessage(), e);
+					}
 				}
 				mainHandler.removeHandler(sch);
 				mainHandler.mapContexts();

@@ -101,14 +101,12 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 	private final ExecutorService pool;
 
 	/** Used to send events related to entire Web Applications being installed/uninstalled. */
-	private final WebApplicationEventDispatcher webApplicationEventDispatcher;
+	private WebApplicationEventDispatcher webApplicationEventDispatcher;
 
 	/** Default, common foundation of all WABs - includes default (override'able) servlet and some welcome files */
 	private final WebXml defaultWebXml;
 
 	private final WabConflictListener wabConflictListener;
-
-//				private final ServiceRegistration<WarManager> registration;
 
 	/**
 	 * Construct a {@link WarExtenderContext} with asynchronous (production) {@link WebContainerManager}
@@ -136,10 +134,6 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 
 		defaultWebXml = findDefaultWebXml();
 
-//		registration = bundleContext.registerService(
-//				WarManager.class, webObserver,
-//				new Hashtable<>());
-
 		webContainerManager = synchronous
 				? new WebContainerManager(bundleContext, this)
 				: new WebContainerManager(bundleContext, this, "HttpService->WarExtender");
@@ -153,18 +147,23 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 	 * Cleans up everything related to pax-web-extender-war
 	 */
 	public void shutdown() {
-//		if (webApplicationEventDispatcher != null) {
-//			webApplicationEventDispatcher.destroy();
+		if (webApplicationEventDispatcher != null) {
+			webApplicationEventDispatcher.getListeners().remove(wabConflictListener);
+			webApplicationEventDispatcher.destroy();
 //			webApplicationEventDispatcher = null;
-//		}
-//
-//		if (registration != null) {
-//			registration.unregister();
-//			registration = null;
-//		}
+		}
+
+		// before shutting down webContainerManager, we have to unregister ourselves as ReportPlugin, because
+		// it'll be too late in org.ops4j.pax.web.extender.war.internal.WarExtenderContext.webContainerRemoved()
+		// when pax-web-extender-war bundle stops
+		ServiceReference<WebContainer> ref = webContainerManager.currentWebContainerReference();
+		WebAppWebContainerView view = webContainerManager.containerView(bundle, ref, WebAppWebContainerView.class);
+		if (view != null) {
+			view.unregisterReportViewPlugin(this);
+			webContainerManager.releaseContainer(bundle, ref);
+		}
 
 		webContainerManager.shutdown();
-		webApplicationEventDispatcher.getListeners().remove(wabConflictListener);
 	}
 
 	/**

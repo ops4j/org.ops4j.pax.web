@@ -40,6 +40,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -425,6 +426,8 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 
 	private final List<ReportViewPlugin> plugins = new CopyOnWriteArrayList<>();
 
+	private final AtomicBoolean stopping = new AtomicBoolean(false);
+
 	/**
 	 * Creates new global model of all web applications with {@link Executor} to be used for configuration and
 	 * registration tasks.
@@ -553,11 +556,19 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		return null;
 	}
 
+	public void setStopping() {
+		this.stopping.set(true);
+	}
+
 	/**
 	 * Increment internal change counter and propagate this information to {@link ServiceRegistration} for
 	 * {@link HttpServiceRuntime} and {@link ServiceReferenceDTO}
 	 */
 	private void incrementChangeCounter() {
+		if (stopping.get()) {
+			return;
+		}
+
 		changeCount.incrementAndGet();
 		try {
 			if (httpServiceRuntimeReg == null || httpServiceRuntimeReg.getReference() == null) {

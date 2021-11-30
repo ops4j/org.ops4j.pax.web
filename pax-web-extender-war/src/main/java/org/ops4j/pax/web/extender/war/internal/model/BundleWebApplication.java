@@ -182,7 +182,7 @@ public class BundleWebApplication {
 	private BundleWebApplicationClassSpace classSpace = null;
 
 	/** An {@link OsgiServletContextClassLoader} which will be used when this WAB is deployed to a container. */
-	private final OsgiServletContextClassLoader classLoader;
+	private OsgiServletContextClassLoader classLoader;
 
 	/**
 	 * Map of URLs to {@code META-INF/resources} of reachable bundles and WAB's embedded JARs keyed by the
@@ -233,12 +233,6 @@ public class BundleWebApplication {
 		this.webContainerManager = webContainerManager;
 		this.extenderContext = extenderContext;
 		this.pool = pool;
-
-		OsgiServletContextClassLoader loader = new OsgiServletContextClassLoader();
-		loader.addBundle(bundle);
-		// pax-web-tomcat-common used to parse the descriptors
-		loader.addBundle(FrameworkUtil.getBundle(WebXmlParser.class));
-		this.classLoader = loader;
 	}
 
 	@Override
@@ -260,7 +254,7 @@ public class BundleWebApplication {
 	public void start() {
 		State state = deploymentState.get();
 		if (state != State.UNCONFIGURED) {
-			throw new IllegalStateException("Can't start " + this + ": it's already in " + state + " state");
+			return;
 		}
 
 		scheduleIfPossible(State.UNCONFIGURED, State.CONFIGURING, true);
@@ -424,9 +418,14 @@ public class BundleWebApplication {
 
 			// No need to schedule if WAB is not waiting for the container.
 			// Also, even if the WAB was already in state AFTER "allocating context" and prepared to register WAB's web
-			// elements, after new WebContainer reference is set, we have to get back to ALLOCATING_CONTEXT, as the new
+			// elements, after new WebContainer reference is set, we have to get back to UNCONFIGURED, as the new
 			// reference may be for a WebContainer with completely different setup
-			scheduleIfPossible(State.WAITING_FOR_WEB_CONTAINER, State.ALLOCATING_CONTEXT, false);
+			State state = deploymentState.get();
+			if (state == State.UNCONFIGURED) {
+				scheduleIfPossible(State.UNCONFIGURED, State.CONFIGURING, false);
+			} else if (state == State.WAITING_FOR_WEB_CONTAINER) {
+				scheduleIfPossible(State.WAITING_FOR_WEB_CONTAINER, State.ALLOCATING_CONTEXT, false);
+			}
 		} finally {
 			refLock.unlock();
 		}
@@ -438,12 +437,20 @@ public class BundleWebApplication {
 					+ ", expecting " + webContainerServiceRef);
 		}
 
+		LOG.info("WebContainer reference is gone. Cleaning up the state of " + this);
+
 		// previously set WebContainer ref was removed. But we may be in the pending process of WAB registration,
 		// web.xml parsing or waiting for the reference.
 		// while stop() is definitely an end of this BundleWebApplication (because stopped WAB may start with
-		// new bundle fragments attached, with potentially new web fragments), disappearance of WebContainer reference
-		// for DEPLOYED web application should bring it back to ALLOCATION_CONTEXT state, so we preserve the parsed
-		// state of web elements
+		// new bundle fragments attached, with potentially new web fragments), <removed>disappearance of WebContainer
+		// reference for DEPLOYED web application should bring it back to ALLOCATION_CONTEXT state, so we preserve the
+		// parsed state of web elements</removed>
+		// EDIT (2021-11-30): When playing with restarts/refreshes, I found that actually, disappearance of
+		// WebContainer service have to get us back to CONFIGURING state. The problem is that the built model
+		// may contain SCIs and classloaders from e.g., pax-web-jetty. pax-web-jetty's restart leads to re-registration
+		// of ServerController, which leads to re-registration of WebContainer itself. a WAB has to "start over"
+		// to create new instance of class loader and discover the fragments again (including classpath scanning)
+		// the same happens with Tomcat and Undertow.
 
 		refLock.lock();
 		try {
@@ -454,23 +461,14 @@ public class BundleWebApplication {
 
 			if (view == null) {
 				LOG.info("WebContainer reference {} was removed, {} should already be undeployed.", ref, this);
-				// but still let's start with new allocation attempt (in new WebContainer that'll be set in future)
-				switch (state) {
-					case WAITING_FOR_CONTEXT:
-					case ALLOCATING_CONTEXT:
-					case DEPLOYING:
-					case DEPLOYED:
-						deploymentState.set(State.WAITING_FOR_CONTEXT);
-						break;
-					default:
-						// leave as is (earlier stages of deployment)
-				}
+				deploymentState.set(State.UNCONFIGURED);
 			} else {
-				// as in stop(), we should UNDEPLOY the application, but (unlike as in stop()) to the stage, where
-				// it could potentially be DEPLOYED again. re-registration of WebContainer service won't change the
-				// information content of current WAB (when WAB is restarted/refreshed, it may get new bundle
+				// as in stop(), we should UNDEPLOY the application, <removed>but (unlike as in stop()) to the stage,
+				// where it could potentially be DEPLOYED again. re-registration of WebContainer service won't change
+				// the information content of current WAB (when WAB is restarted/refreshed, it may get new bundle
 				// fragments attached, thus new web fragments may become available), so it's safe to reuse already
-				// parsed web.xml + fragments + annotations
+				// parsed web.xml + fragments + annotations</removed>
+				// EDIT (2021-11-30): we have to get back to UNCONFIGURED state
 
 				// similar state check as with stop(), but with slightly different handling
 				switch (state) {
@@ -479,12 +477,9 @@ public class BundleWebApplication {
 					case UNDEPLOYED:
 					case UNDEPLOYING:
 					case WAITING_FOR_WEB_CONTAINER:
-					case FAILED:
-						// do not change the state at all - keep as is
-						break;
 					case WAITING_FOR_CONTEXT:
-						// switch back to waiting for WebContainer
-						deploymentState.set(State.WAITING_FOR_WEB_CONTAINER);
+					case FAILED:
+						deploymentState.set(State.UNCONFIGURED);
 						break;
 					case ALLOCATING_CONTEXT:
 						try {
@@ -500,7 +495,7 @@ public class BundleWebApplication {
 									+ " Can't free the context, leaving it in inconsistent state.", this);
 							Thread.currentThread().interrupt();
 						}
-						deploymentState.set(State.WAITING_FOR_WEB_CONTAINER);
+						deploymentState.set(State.UNCONFIGURED);
 						break;
 					case DEPLOYING:
 						try {
@@ -512,7 +507,7 @@ public class BundleWebApplication {
 								LOG.info("Undeploying {} from previous WebContainer after waiting for its full"
 										+ " deployment", this);
 								undeploy(view);
-								deploymentState.set(State.UNDEPLOYED);
+								deploymentState.set(State.UNCONFIGURED);
 							}
 						} catch (InterruptedException e) {
 							LOG.warn("Thread interrupted while waiting for end of deployment of {}."
@@ -523,7 +518,7 @@ public class BundleWebApplication {
 					case DEPLOYED:
 						LOG.info("Undeploying fully deployed {}", this);
 						undeploy(view);
-						deploymentState.set(State.UNDEPLOYED);
+						deploymentState.set(State.UNCONFIGURED);
 						break;
 					default:
 						break;
@@ -534,6 +529,20 @@ public class BundleWebApplication {
 			webContainerServiceRef = null;
 		} finally {
 			refLock.unlock();
+
+			// we have to clean up the state here, but in case normal deployment happens, we'll do it in synchronized{}
+			synchronized (this) {
+				this.batch = null;
+				this.classSpace = null;
+				this.sciToHt.clear();
+				this.httpContext = null;
+				this.allocatedOsgiContextModel = null;
+				this.allocatedServletContextModel = null;
+				this.classLoader = null;
+				this.mainWebXml = null;
+				this.faceletTagLibDescriptors.clear();
+				this.serverSpecificDescriptors.clear();
+			}
 		}
 	}
 
@@ -573,7 +582,7 @@ public class BundleWebApplication {
 	 * (mandatory, optional), while here, it's only single, mandatory {@link org.ops4j.pax.web.service.WebContainer}
 	 * service.</p>
 	 */
-	public void deploy() {
+	public synchronized void deploy() {
 		try {
 			// progress through states in a loop - when everything is available, we can simply transition to
 			// final state in single thread/task run. If we need to wait for anything, we'll break the loop
@@ -635,6 +644,13 @@ public class BundleWebApplication {
 				// Post an org/osgi/service/web/DEPLOYING event
 				extenderContext.sendWebEvent(new WebApplicationEvent(WebApplicationEvent.State.DEPLOYING, bundle, contextPath, null));
 
+				// always create the classloader from scratch
+				OsgiServletContextClassLoader loader = new OsgiServletContextClassLoader();
+				loader.addBundle(bundle);
+				// pax-web-tomcat-common used to parse the descriptors
+				loader.addBundle(FrameworkUtil.getBundle(WebXmlParser.class));
+				this.classLoader = loader;
+
 				// Collect deployment information by processing the web.xml descriptor and other sources of metadata
 				processMetadata();
 
@@ -642,7 +658,7 @@ public class BundleWebApplication {
 				// is available
 				State st = deploymentState.get();
 				if (st == State.CONFIGURING || st == State.ALLOCATING_CONTEXT) {
-					// webContainerRemoved() could already switched the state to ALLOCATING_CONTEXT, but we need to
+					// webContainerRemoved() could already switched the state to UNCONFIGURED, but we need to
 					// create the allocating latch
 					if (deploymentState.compareAndSet(st, State.ALLOCATING_CONTEXT)) {
 						if (allocatingLatch != null && allocatingLatch.getCount() > 0) {
@@ -786,6 +802,10 @@ public class BundleWebApplication {
 			// collisions.
 			LOG.warn("Problem undeploying {}: {}", this, e.getMessage(), e);
 			extenderContext.sendWebEvent(new WebApplicationEvent(WebApplicationEvent.State.FAILED, bundle, contextPath, null, e));
+		} finally {
+			// clear possible batch (to free model references)
+			batch = null;
+			classSpace = null;
 		}
 	}
 
