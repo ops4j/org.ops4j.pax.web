@@ -163,7 +163,7 @@ public class MetaCommand implements Action {
 							table.addRow().addContent(b.getBundleId(), b.getSymbolicName(),
 									sr.getProperty(Constants.SERVICE_ID), sr.getProperty(Constants.SERVICE_SCOPE),
 									"[" + String.join(", ", Arrays.asList((String[]) sr.getProperty(Constants.OBJECTCLASS))) + "]",
-									count == null ? "-" : count.get());
+									count == null ? "-" : (count.get() < 0 ? "-" : count.get()));
 						}
 					}
 				}

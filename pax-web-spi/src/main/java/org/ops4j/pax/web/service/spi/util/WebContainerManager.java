@@ -285,7 +285,9 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 				if (container != null) {
 					try {
 						BundleContext bundleContext = bundle.getBundleContext();
-						if (bundleContext != null) {
+						if (bundleContext != null && bundle.getState() == Bundle.ACTIVE) {
+							// no need to unget if we're stopping
+							// (I don't want to show negative usage count in web:meta command)
 							bundleContext.ungetService(ref);
 						}
 					} catch (IllegalStateException ignored) {
