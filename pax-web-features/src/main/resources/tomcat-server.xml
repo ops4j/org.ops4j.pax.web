@@ -20,26 +20,30 @@
 	Pax Web 8 handles top-level catalinaHome and catalinaBase attributes and converts them to File
 	values for org.apache.catalina.core.StandardServer
 -->
-<Server port="8005" shutdown="SHUTDOWN" portOffset="42" catalinaBase="target/tomcat">
+<Server port="8005" shutdown="SHUTDOWN">
 	<Service name="Catalina">
 		<Connector port="8181" protocol="HTTP/1.1" redirectPort="8443" />
 
 		<!-- see https://tomcat.apache.org/tomcat-9.0-doc/config/http.html#SSL_Support_-_SSLHostConfig -->
-<!--		<Connector port="8443" protocol="HTTP/1.1" SSLEnabled="true" secure="true">-->
-<!--			<SSLHostConfig protocols="+TLSv1.2" honorCipherOrder="true"-->
-<!--					truststoreFile="../../etc/security/server.jks"-->
-<!--					truststorePassword="passw0rd"-->
-<!--					certificateVerification="optional">-->
-<!--				<Certificate-->
-<!--						certificateKeystoreFile="../../etc/security/server.jks"-->
-<!--						certificateKeystorePassword="passw0rd"-->
-<!--						certificateKeyAlias="server"-->
-<!--				/>-->
-<!--			</SSLHostConfig>-->
-<!--		</Connector>-->
+		<!--
+		<Connector port="8443" protocol="HTTP/1.1" SSLEnabled="true" secure="true">
+			<SSLHostConfig protocols="+TLSv1.2" honorCipherOrder="true"
+					truststoreFile="../../etc/security/server.jks"
+					truststorePassword="passw0rd"
+					certificateVerification="optional">
+				<Certificate
+						certificateKeystoreFile="../../etc/security/server.jks"
+						certificateKeystorePassword="passw0rd"
+						certificateKeyAlias="server"
+				/>
+			</SSLHostConfig>
+		</Connector>
+		-->
 
 		<Engine name="Catalina" defaultHost="localhost">
-<!--			<Realm className="org.apache.catalina.realm.MemoryRealm" pathname="target/test-classes/tomcat-users.xml" />-->
+			<!--
+			<Realm className="org.apache.catalina.realm.MemoryRealm" pathname="target/test-classes/tomcat-users.xml" />
+			-->
 		</Engine>
 	</Service>
 </Server>
