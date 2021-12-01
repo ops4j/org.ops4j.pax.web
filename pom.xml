@@ -3101,6 +3101,22 @@
 		</profile>
 
 		<profile>
+			<id>felix7</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<dependencyManagement>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.felix</groupId>
+						<artifactId>org.apache.felix.framework</artifactId>
+						<version>${dependency.org.apache.felix.framework7}</version>
+					</dependency>
+				</dependencies>
+			</dependencyManagement>
+		</profile>
+
+		<profile>
 			<id>release</id>
 			<build>
 				<plugins>
