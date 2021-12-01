@@ -71,7 +71,7 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 
 	/**
 	 * Constructor to use when wrapping internal {@link Servlet servlets} which won't use OSGi machinery.
-	 *  @param name
+	 * @param name
 	 * @param container
 	 * @param servlet
 	 */
@@ -86,6 +86,7 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 		webContainerContext = null;
 		this.is404 = is404;
 
+		setName(name);
 		setServlet(servlet);
 		setParent(container);
 

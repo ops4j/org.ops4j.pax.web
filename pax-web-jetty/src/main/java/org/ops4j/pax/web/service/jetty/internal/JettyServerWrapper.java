@@ -631,6 +631,10 @@ class JettyServerWrapper implements BatchVisitor {
 		});
 		contextHandlers.clear();
 		mainHandler.mapContexts();
+
+		// I found this necessary, when pax-web-jetty is restarted/refreshed without affecting
+		// pax-web-extender-whiteboard
+		osgiServletContexts.values().forEach(OsgiServletContext::unregister);
 	}
 
 	/**
@@ -2015,7 +2019,8 @@ class JettyServerWrapper implements BatchVisitor {
 
 			DynamicRegistrations registrations = this.dynamicRegistrations.get(contextPath);
 			// allow dynamic registration, which will be restricted by RegisteringContainerInitializer
-			sch.setOsgiServletContext(new OsgiDynamicServletContext(highestRankedContext, registrations));
+			OsgiDynamicServletContext dynamicContext = new OsgiDynamicServletContext(highestRankedContext, registrations);
+			sch.setOsgiServletContext(dynamicContext);
 
 			// this is when already collected initializers may be added as ordered collection to the servlet context
 			// handler (Pax Web specific) - we need control over them, because we have to pass correct
@@ -2162,6 +2167,8 @@ class JettyServerWrapper implements BatchVisitor {
 //				}
 //			}).start();
 			sch.start();
+
+			dynamicContext.rememberAttributesFromSCIs();
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}

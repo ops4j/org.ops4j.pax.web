@@ -47,6 +47,8 @@ public class PaxWebScopedStandardContext extends StandardContext {
 	public PaxWebScopedStandardContext(PaxWebStandardWrapper paxWebStandardWrapper, PaxWebStandardContext delegate) {
 		this.wrapper = paxWebStandardWrapper;
 		this.delegate = delegate;
+		setName(delegate.getName());
+		setPath(delegate.getPath());
 	}
 
 	@Override

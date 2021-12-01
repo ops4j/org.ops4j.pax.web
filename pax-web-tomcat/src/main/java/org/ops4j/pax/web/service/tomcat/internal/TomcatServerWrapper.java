@@ -657,6 +657,10 @@ class TomcatServerWrapper implements BatchVisitor {
 
 			LOG.info("Destroying Tomcat server {}", server);
 			server.destroy();
+
+			// I found this necessary, when pax-web-tomcat is restarted/refreshed without affecting
+			// pax-web-extender-whiteboard
+			osgiServletContexts.values().forEach(OsgiServletContext::unregister);
 		} catch (final Throwable e) {
 			LOG.error("Problem stopping Tomcat server {}", e.getMessage(), e);
 		}
@@ -742,8 +746,9 @@ class TomcatServerWrapper implements BatchVisitor {
 
 //							Context ctx = new HttpServiceContext(getHost(), accessControllerContext);
 			PaxWebStandardContext context = new PaxWebStandardContext(default404Servlet, new OsgiSessionAttributeListener(sessionListenerModels));
-			context.setName(model.getId());
 			context.setPath("/".equals(contextPath) ? "" : contextPath);
+			// name is used in final toString(), so better to have it clearer
+			context.setName(contextPath);
 
 			// in this new context, we need "initial OSGi filter" which will:
 			// - call preprocessors
@@ -919,7 +924,9 @@ class TomcatServerWrapper implements BatchVisitor {
 				// we have to stop the context - it'll be started later
 				LOG.info("Stopping Tomcat context \"{}\"", contextPath);
 				try {
-					realContext.stop();
+					if (realContext.isStarted()) {
+						realContext.stop();
+					}
 					// clear the OSGi context + model - it'll be calculated to next higher ranked ones few lines later
 					realContext.setDefaultOsgiContextModel(null, null);
 					realContext.setDefaultServletContext(null);
@@ -1878,7 +1885,8 @@ class TomcatServerWrapper implements BatchVisitor {
 
 			DynamicRegistrations registrations = this.dynamicRegistrations.get(contextPath);
 			// allow dynamic registration, which will be restricted by RegisteringContainerInitializer
-			context.setOsgiServletContext(new OsgiDynamicServletContext(highestRankedContext, registrations));
+			OsgiDynamicServletContext dynamicContext = new OsgiDynamicServletContext(highestRankedContext, registrations);
+			context.setOsgiServletContext(dynamicContext);
 
 			Collection<SCIWrapper> initializers = new TreeSet<>(this.initializers.get(contextPath));
 			// Initially I thought we should take only these SCIs, which are associated with highest ranked OCM,
@@ -1923,6 +1931,7 @@ class TomcatServerWrapper implements BatchVisitor {
 
 			context.start();
 			// swap dynamic to normal context
+			dynamicContext.rememberAttributesFromSCIs();
 			context.setOsgiServletContext(highestRankedContext);
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);

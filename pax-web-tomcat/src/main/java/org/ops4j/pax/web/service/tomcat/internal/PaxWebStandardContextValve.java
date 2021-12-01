@@ -45,7 +45,7 @@ public class PaxWebStandardContextValve extends ValveBase {
 		setContainer(next.getContainer());
 		setDomain(next.getDomain());
 
-		wrapperFor404Servlet = new PaxWebStandardWrapper(null, (PaxWebStandardContext) getContainer(),
+		wrapperFor404Servlet = new PaxWebStandardWrapper("404", (PaxWebStandardContext) getContainer(),
 				defaultServlet, true);
 	}
 

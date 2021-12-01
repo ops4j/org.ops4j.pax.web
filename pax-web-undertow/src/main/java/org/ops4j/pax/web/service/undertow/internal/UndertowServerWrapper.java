@@ -1032,6 +1032,10 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 		this.bufferPools.values().forEach(ByteBufferPool::close);
 		this.bufferPools.clear();
 		undertowFactory.closeDefaultPoolAndBuffer();
+
+		// I found this necessary, when pax-web-undertow is restarted/refreshed without affecting
+		// pax-web-extender-whiteboard
+		osgiServletContexts.values().forEach(OsgiServletContext::unregister);
 	}
 
 	/**
@@ -2568,6 +2572,8 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 					fc.setInitCalled(true);
 				}
 			}
+
+			highestRankedDynamicContext.rememberAttributesFromSCIs();
 
 			// actual registration of "context" in Undertow's path handler.
 			pathHandler.addPrefixPath(contextPath, handler);
