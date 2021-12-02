@@ -18,7 +18,7 @@ Moved to after 8.0.0.GA (8.0.x):
  + [#1641] EventAdmin notifications (128.5 Events)
  + [#1637] Jetty/Tomcat/Undertow bundles
  + [#1643] Karaf commands within Pax Web itself (not in Karaf)
- ~ [#1653] skipping configured web fragments (no scanning, as in Tomcat's tomcat.util.scan.StandardJarScanFilter.jarsToSkip)
+ + [#1653] skipping configured web fragments (no scanning, as in Tomcat's tomcat.util.scan.StandardJarScanFilter.jarsToSkip)
  - Jasypt encryption in PID
  - Keycloak integration
  - HTTP context processing (potentially with external web-fragment.xml)

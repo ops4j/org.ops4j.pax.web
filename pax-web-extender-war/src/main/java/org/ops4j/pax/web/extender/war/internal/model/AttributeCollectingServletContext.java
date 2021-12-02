@@ -103,7 +103,7 @@ public class AttributeCollectingServletContext implements ServletContext {
 	}
 
 	@Override
-	public Servlet getServlet(String name) throws ServletException {
+	public Servlet getServlet(String name) {
 		return null;
 	}
 
@@ -237,7 +237,7 @@ public class AttributeCollectingServletContext implements ServletContext {
 	}
 
 	@Override
-	public <T extends Filter> T createFilter(Class<T> clazz) throws ServletException {
+	public <T extends Filter> T createFilter(Class<T> clazz) {
 		return null;
 	}
 
@@ -287,7 +287,7 @@ public class AttributeCollectingServletContext implements ServletContext {
 	}
 
 	@Override
-	public <T extends EventListener> T createListener(Class<T> clazz) throws ServletException {
+	public <T extends EventListener> T createListener(Class<T> clazz) {
 		return null;
 	}
 

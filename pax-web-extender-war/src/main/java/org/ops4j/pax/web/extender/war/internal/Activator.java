@@ -24,12 +24,13 @@ import java.util.concurrent.Executors;
 
 import org.apache.felix.utils.extender.AbstractExtender;
 import org.apache.felix.utils.extender.Extension;
-import org.ops4j.pax.web.service.PaxWebConstants;
+import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.spi.model.events.WebApplicationEvent;
 import org.ops4j.pax.web.service.spi.util.NamedThreadFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
+import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,20 +53,29 @@ public class Activator extends AbstractExtender {
 
 	private final Map<Bundle, Extension> extensions = new ConcurrentHashMap<>();
 
+	/** Registration of {@link org.osgi.service.cm.ManagedService} for {@code org.ops4j.pax.web} PID. */
+	private ServiceRegistration<?> managedServiceReg;
+
+	private ExecutorService executors;
+
 	@Override
 	protected ExecutorService createExecutor() {
-		return Executors.newScheduledThreadPool(poolSize, new NamedThreadFactory("wab-extender"));
+		// return null, because we want to be able to replace the executorService, which is private in parent class
+		return null;
 	}
 
 	@Override
 	public void start(BundleContext context) throws Exception {
-		String poolSizeValue = context.getProperty(PaxWebConstants.BUNDLE_CONTEXT_PROPERTY_WAR_EXTENDER_THREADS);
+		String poolSizeValue = context.getProperty(PaxWebConfig.BUNDLE_CONTEXT_PROPERTY_WAR_EXTENDER_THREADS);
 		if (poolSizeValue != null && !"".equals(poolSizeValue)) {
 			try {
 				poolSize = Integer.parseInt(poolSizeValue);
 			} catch (NumberFormatException ignored) {
 			}
 		}
+
+		LOG.info("Configuring WAR extender thread pool. Pool size = {}", poolSize);
+		executors = Executors.newScheduledThreadPool(poolSize, new NamedThreadFactory("wab-extender"));
 
 		// let's be explicit - even if asynchronous mode is default. Please do not change this.
 		setSynchronous(false);
@@ -91,15 +101,34 @@ public class Activator extends AbstractExtender {
 	}
 
 	@Override
+	public synchronized void stop(BundleContext context) throws Exception {
+		super.stop(context);
+	}
+
+	@Override
 	protected void doStop() {
 		LOG.debug("Stopping Pax Web WAR Extender");
 
-		// stop tracking the extensions
-		stopTracking();
+		if (managedServiceReg != null) {
+			managedServiceReg.unregister();
+			managedServiceReg = null;
+		}
 
-		warExtenderContext.shutdown();
+		if (warExtenderContext != null) {
+			// it means we were started in the first place
+
+			// stop tracking the extensions
+			stopTracking();
+
+			warExtenderContext.shutdown();
+		}
 
 		LOG.debug("Pax Web WAR Extender stopped");
+	}
+
+	@Override
+	public synchronized ExecutorService getExecutors() {
+		return executors;
 	}
 
 	@Override

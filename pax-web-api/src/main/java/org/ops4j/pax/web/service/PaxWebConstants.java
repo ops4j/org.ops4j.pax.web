@@ -258,11 +258,6 @@ public interface PaxWebConstants {
 	/** Context name of the WAB bundle or bundle registering OSGi servlet context (Pax Web addition) */
 	String SERVICE_PROPERTY_WEB_SERVLETCONTEXT_NAME = "osgi.web.contextname";
 
-	/**
-	 * {@link org.osgi.framework.BundleContext} property (not in PID!) to configure thread count for WAR
-	 * extender. Before Pax Web 8 it was hardcoded to 3 (which is still the default value).
-	 */
-	String BUNDLE_CONTEXT_PROPERTY_WAR_EXTENDER_THREADS = "org.ops4j.pax.web.extender.war.threads";
 
 
 
@@ -270,14 +265,9 @@ public interface PaxWebConstants {
 
 
 
-
-
-	String PROPERTY_HTTP_USE_NIO = "org.osgi.service.http.useNIO";
 
 	String PROPERTY_VIRTUAL_HOST_LIST = "org.ops4j.pax.web.default.virtualhosts";
 	String PROPERTY_CONNECTOR_LIST = "org.ops4j.pax.web.default.connectors";
-	String PROPERTY_DEFAULT_AUTHMETHOD = "org.ops4j.pax.web.default.authmethod";
-	String PROPERTY_DEFAULT_REALMNAME = "org.ops4j.pax.web.default.realmname";
 
 	String PROPERTY_ENC_MASTERPASSWORD = PID + ".enc.masterpassword";
 	String PROPERTY_ENC_ALGORITHM = PID + ".enc.algorithm";

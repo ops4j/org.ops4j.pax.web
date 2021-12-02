@@ -653,4 +653,28 @@ public class Utils {
 		return false;
     }
 
+	public static boolean isConfigurationAdminAvailable(Class<?> cls) {
+		try {
+			cls.getClassLoader().loadClass("org.osgi.service.cm.ConfigurationAdmin");
+			return true;
+		} catch (ClassNotFoundException e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Check if {@code org.osgi.service.event.EventAdmin} is available
+	 *
+	 * @return <code>true</code> if EventAdmin class can be loaded,
+	 * <code>false</code> otherwhise
+	 */
+	public static boolean isEventAdminAvailable(Class<?> cls) {
+		try {
+			cls.getClassLoader().loadClass("org.osgi.service.event.EventAdmin");
+			return true;
+		} catch (ClassNotFoundException ignore) {
+			return false;
+		}
+	}
+
 }

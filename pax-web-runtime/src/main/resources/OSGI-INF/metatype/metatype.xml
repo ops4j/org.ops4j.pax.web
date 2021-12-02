@@ -217,6 +217,13 @@
 <!--		<AD name="Prefix for Encrypted password" id="org.ops4j.pax.web.enc.prefix" type="String" default="ENC(" />-->
 <!--		<AD name="Suffix for Encrypted password" id="org.ops4j.pax.web.enc.suffix" type="String" default=")" />-->
 
+		<!-- Properties related to WAR extender -->
+
+		<AD id="org.ops4j.pax.web.extender.war.jarsToSkip" type="String" default="default"
+				name="List of libraries' patterns (by symbolic name or jar name) to skip" />
+		<AD id="org.ops4j.pax.web.extender.war.jarsToScan" type="String" default=""
+				name="List of libraries' patterns scan. Empty values means scanning all non skipped." />
+
 	</OCD>
 
 </metatype:MetaData>

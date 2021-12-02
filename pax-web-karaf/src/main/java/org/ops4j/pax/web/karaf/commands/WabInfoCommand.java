@@ -17,6 +17,7 @@ package org.ops4j.pax.web.karaf.commands;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -76,10 +77,15 @@ public class WabInfoCommand extends WebCommand {
 		System.out.println("Context Path: " + app.getContextPath());
 		System.out.println("Deployment State: " + app.getDeploymentState());
 		List<URL> wabClassPath = app.getWabClassPath();
+		Set<URL> wabClassPathSkipped = app.getWabClassPathSkipped();
 		if (!wabClassPath.isEmpty()) {
 			System.out.println("WAB ClassPath:");
 			wabClassPath.forEach(url -> {
-				System.out.println(" - " + url);
+				System.out.print(" - " + url);
+				if (wabClassPathSkipped != null && wabClassPathSkipped.contains(url)) {
+					System.out.print(" (scanning skipped)");
+				}
+				System.out.println();
 			});
 		}
 		List<String> scis = app.getServletContainerInitializers();

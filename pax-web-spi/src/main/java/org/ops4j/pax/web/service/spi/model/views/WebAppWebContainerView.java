@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.spi.model.views;
 
+import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.task.Batch;
@@ -119,5 +120,11 @@ public interface WebAppWebContainerView extends PaxWebContainerView {
 	 * @param plugin
 	 */
 	void unregisterReportViewPlugin(ReportViewPlugin plugin);
+
+	/**
+	 * Returns {@link Configuration} object related to current container
+	 * @return
+	 */
+	Configuration getConfiguration();
 
 }

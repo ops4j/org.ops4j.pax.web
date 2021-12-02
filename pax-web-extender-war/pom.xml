@@ -94,6 +94,7 @@
 							org.apache.tomcat.util;version="${dependency.org.apache.tomcat}",
 							org.apache.tomcat.util.buf;version="${dependency.org.apache.tomcat}",
 							org.apache.tomcat.util.compat;version="${dependency.org.apache.tomcat}",
+							org.apache.tomcat.util.file;version="${dependency.org.apache.tomcat}",
 							org.apache.tomcat.util.res;version="${dependency.org.apache.tomcat}",
 							org.apache.tomcat.util.security;version="${dependency.org.apache.tomcat}",
 							<!-- from pax-web-tomcat-common / tomcat-util-scan -->

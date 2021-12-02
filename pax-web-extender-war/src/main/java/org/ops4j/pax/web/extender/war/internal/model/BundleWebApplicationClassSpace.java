@@ -22,7 +22,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
@@ -57,6 +56,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
@@ -89,12 +89,6 @@ public class BundleWebApplicationClassSpace {
 
 	public static final Logger LOG = LoggerFactory.getLogger(BundleWebApplicationClassSpace.class);
 
-	/**
-	 * Hardcoded equivalent of Tomcat's {@code tomcat.util.scan.StandardJarScanFilter.jarsToSkip} - bundles by
-	 * symbolic name.
-	 */
-	private static final Set<String> IGNORED_BUNDLES;
-
 	private static final Set<ServletContainerInitializer> NO_SCIS = new HashSet<>();
 
 	private final Bundle wabBundle;
@@ -113,6 +107,7 @@ public class BundleWebApplicationClassSpace {
 	 * <p>The keys are fragment jar names.</p>
 	 */
 	private final Map<String, URL> wabClassPath = new LinkedHashMap<>();
+	private final Map<String, Boolean> wabClassPathSkipped = new HashMap<>();
 
 	/**
 	 * <p>"JAR Fragments" from reachable bundles that do not contain {@code META-INF/web-fragment.xml} descriptors,
@@ -163,104 +158,6 @@ public class BundleWebApplicationClassSpace {
 
 	private WebXml mainWebXml;
 
-	static {
-		IGNORED_BUNDLES = new HashSet<>(Arrays.asList(
-				"javax.el-api", // yes - even in mvn:jakarta.el/jakarta.el-api
-				"jakarta.servlet-api",
-				"jakarta.annotation-api",
-				"org.ops4j.pax.logging.pax-logging-api",
-				"org.ops4j.pax.web.pax-web-api",
-				"org.ops4j.pax.web.pax-web-spi",
-				"org.ops4j.pax.web.pax-web-tomcat-common",
-				"org.eclipse.jdt.core.compiler.batch"
-		));
-
-		// Tomcat has also predefined list of skipped JARs, which contains:
-		// - annotations-api.jar
-		// - ant-junit*.jar
-		// - ant-launcher.jar
-		// - ant.jar
-		// - asm-*.jar
-		// - aspectj*.jar
-		// - bootstrap.jar
-		// - catalina-ant.jar
-		// - catalina-ha.jar
-		// - catalina-ssi.jar
-		// - catalina-storeconfig.jar
-		// - catalina-tribes.jar
-		// - catalina.jar
-		// - cglib-*.jar
-		// - cobertura-*.jar
-		// - commons-beanutils*.jar
-		// - commons-codec*.jar
-		// - commons-collections*.jar
-		// - commons-daemon.jar
-		// - commons-dbcp*.jar
-		// - commons-digester*.jar
-		// - commons-fileupload*.jar
-		// - commons-httpclient*.jar
-		// - commons-io*.jar
-		// - commons-lang*.jar
-		// - commons-logging*.jar
-		// - commons-math*.jar
-		// - commons-pool*.jar
-		// - dom4j-*.jar
-		// - easymock-*.jar
-		// - ecj-*.jar
-		// - el-api.jar
-		// - geronimo-spec-jaxrpc*.jar
-		// - h2*.jar
-		// - hamcrest-*.jar
-		// - hibernate*.jar
-		// - httpclient*.jar
-		// - icu4j-*.jar
-		// - jasper-el.jar
-		// - jasper.jar
-		// - jaspic-api.jar
-		// - jaxb-*.jar
-		// - jaxen-*.jar
-		// - jdom-*.jar
-		// - jetty-*.jar
-		// - jmx-tools.jar
-		// - jmx.jar
-		// - jsp-api.jar
-		// - jstl.jar
-		// - jta*.jar
-		// - junit-*.jar
-		// - junit.jar
-		// - log4j*.jar
-		// - mail*.jar
-		// - objenesis-*.jar
-		// - oraclepki.jar
-		// - oro-*.jar
-		// - servlet-api-*.jar
-		// - servlet-api.jar
-		// - slf4j*.jar
-		// - taglibs-standard-spec-*.jar
-		// - tagsoup-*.jar
-		// - tomcat-api.jar
-		// - tomcat-coyote.jar
-		// - tomcat-dbcp.jar
-		// - tomcat-i18n-*.jar
-		// - tomcat-jdbc.jar
-		// - tomcat-jni.jar
-		// - tomcat-juli-adapters.jar
-		// - tomcat-juli.jar
-		// - tomcat-util-scan.jar
-		// - tomcat-util.jar
-		// - tomcat-websocket.jar
-		// - tools.jar
-		// - websocket-api.jar
-		// - wsdl4j*.jar
-		// - xercesImpl.jar
-		// - xml-apis.jar
-		// - xmlParserAPIs-*.jar
-		// - xmlParserAPIs.jar
-		// - xom-*.jar
-
-		// TODO: we should parameterize these two skip lists
-	}
-
 	/**
 	 * Creates a classpace for a {@link Bundle} with "main" web descriptor already parsed. In OSGi, there may be
 	 * more {@code web.xml} descriptors found, when WAB itself is a host for some OSGi bundle fragments.
@@ -297,6 +194,18 @@ public class BundleWebApplicationClassSpace {
 	 */
 	public Collection<URL> getWabClassPath() {
 		return wabClassPath.values();
+	}
+
+	public Set<URL> getWabClassPathNotScanned() {
+		// just for reporting purpose
+		final Set<URL> skipped = new HashSet<>();
+		wabClassPath.forEach((name, url) -> {
+			Boolean b = wabClassPathSkipped.get(name);
+			if (b != null && b) {
+				skipped.add(url);
+			}
+		});
+		return skipped;
 	}
 
 	/**
@@ -375,14 +284,18 @@ public class BundleWebApplicationClassSpace {
 		LOG.trace("Searching for web fragments in WAB Bundle-ClassPath jars");
 		URL[] jars = ClassPathUtil.getClassPathJars(wabBundle, false);
 		for (URL url : jars) {
-			LOG.trace("  Scanning embedded jar {}", url);
+			LOG.trace("  Checking embedded jar {}", url);
+
 			try {
-				WebXml fragment = process(url, parseRequired, extractJarFileName(url.toString()));
+				String jarName = extractJarFileName(url.toString());
+				boolean skipScanning = extenderContext.skipJarScanning(jarName);
+				WebXml fragment = process(url, parseRequired && !skipScanning, skipScanning, jarName);
 				// URL of the JAR, not of its /META-INF/web-fragment.xml, because there may be no such file
 				fragment.setWebappJar(true);
 
 				addFragment(fragment);
 				wabClassPath.put(fragment.getJarName(), url);
+				wabClassPathSkipped.put(fragment.getJarName(), skipScanning);
 			} catch (Exception e) {
 				LOG.warn("  Problem scanning embedded jar {}: {}", url, e.getMessage(), e);
 			}
@@ -398,15 +311,18 @@ public class BundleWebApplicationClassSpace {
 			if (hostWires != null) {
 				for (BundleWire wire : hostWires) {
 					Bundle b = wire.getRequirerWiring().getBundle();
-					LOG.trace("  Scanning bundle fragment {}", b);
+					LOG.trace("  Checking bundle fragment {}", b);
 					try {
 						// take bundle.getEntry("/") as the URL of the web fragment
 						URL fragmentRootURL = b.getEntry("/");
-						WebXml fragment = process(fragmentRootURL, parseRequired, extractJarFileName(b));
+						boolean skipScanning = extenderContext.skipBundleScanning(b);
+						WebXml fragment = process(fragmentRootURL, parseRequired && !skipScanning,
+								skipScanning, extractJarFileName(b));
 						fragment.setWebappJar(true);
 
 						addFragment(fragment);
 						wabClassPath.put(fragment.getJarName(), fragmentRootURL);
+						wabClassPathSkipped.put(fragment.getJarName(), skipScanning);
 					} catch (Exception e) {
 						LOG.warn("  Problem scanning bundle fragment {}: {}", b, e.getMessage(), e);
 					}
@@ -453,7 +369,10 @@ public class BundleWebApplicationClassSpace {
 			// and collects non-filtered (see conf/catalina.properties:
 			// "tomcat.util.scan.StandardJarScanFilter.jarsToSkip" property) JARs from all URLClassLoaders
 			Bundle scannedBundle = bundles.pop();
-			if (IGNORED_BUNDLES.contains(scannedBundle.getSymbolicName()) || scannedBundle.getBundleId() == 0L) {
+			if (extenderContext.skipBundleScanning(scannedBundle) || scannedBundle.getBundleId() == 0L) {
+				if (processedBundles.add(scannedBundle)) {
+					LOG.trace("  Skipped checking of wired bundle {}", scannedBundle);
+				}
 				continue;
 			}
 
@@ -468,8 +387,9 @@ public class BundleWebApplicationClassSpace {
 				continue;
 			}
 
-			LOG.trace("  Scanning wired bundle {}", scannedBundle);
+			LOG.trace("  Checking wired bundle {}", scannedBundle);
 			try {
+				extenderContext.skipBundleScanning(scannedBundle);
 				List<WebXml> fragmentList = process(scannedBundle, parseRequired);
 				for (WebXml fragment : fragmentList) {
 					addFragment(fragment);
@@ -520,11 +440,12 @@ public class BundleWebApplicationClassSpace {
 	 *
 	 * @param url
 	 * @param parseRequired is {@code false} only if main {@code web.xml} has explicit, empty {@code <absolute-ordering>}.
+	 * @param skip
 	 * @param jarName
 	 * @return
 	 * @throws IOException
 	 */
-	private WebXml process(URL url, boolean parseRequired, String jarName) throws IOException {
+	private WebXml process(URL url, boolean parseRequired, boolean skip, String jarName) throws IOException {
 		WebXml fragment = new WebXml();
 		fragment.setName(jarName);
 		fragment.setURL(url);
@@ -551,7 +472,11 @@ public class BundleWebApplicationClassSpace {
 						fragment.getName(), url, jarName);
 			}
 		} else {
-			LOG.trace("    Found web fragment without descriptor, url: {}, jarName: {}", url, jarName);
+			if (!skip) {
+				LOG.trace("    Found web fragment without descriptor, url: {}, jarName: {}", url, jarName);
+			} else {
+				LOG.trace("    Skipped web fragment, url: {}, jarName: {}", url, jarName);
+			}
 		}
 
 		return fragment;
@@ -590,7 +515,7 @@ public class BundleWebApplicationClassSpace {
 		//    web-fragment.xml is parsed
 		//  - if a reachable bundle (or its bundle fragments) doesn't contain META-INF/web-fragment.xml, it is
 		//    treated as container web fragment (webappJar = false), is NOT subject to web fragment ordering, but can
-		//    still be a source of SCIs and annotated classes
+		//    still be a source of SCIs and annotated classes (unless it's skipped)
 		// Tomcat doesn't load META-INF/web-fragment.xml files from libraries in common classloader - even
 		// if it exists.
 
@@ -602,7 +527,7 @@ public class BundleWebApplicationClassSpace {
 		}
 
 		// see org.apache.tomcat.util.descriptor.web.FragmentJarScannerCallback.scan()
-		if (fragmentURLs.size() == 0) {
+		if (fragmentURLs.isEmpty()) {
 			WebXml fragment = new WebXml();
 			// mark as "container fragment", so it's not affected by the ordering mechanism
 			fragment.setWebappJar(false);
@@ -656,8 +581,17 @@ public class BundleWebApplicationClassSpace {
 			// Felix: bundle://42.0:0/META-INF/web-fragment.xml
 			//        org.apache.felix.framework.BundleRevisionImpl.createURL()
 			//        m_id = bundle ID (id + '.' + revision), port = content index
+			// Felix 7: bundle://0d0df6e5-14e6-493d-a2a1-21cc8071e986_80.0:0/META-INF/web-fragment.xml
+			//          org.apache.felix.framework.BundleRevisionImpl.createURL()
+			//          m_id = bundle ID (id + '.' + revision), port = content index
+			//          but additionaly it's prepended with m_bundle.getFramework()._getProperty(Constants.FRAMEWORK_UUID) + "_"
+			//          m_bundle.getFramework()._getProperty(Constants.FRAMEWORK_UUID) + "_" + m_id + ":" + port + path
 			try {
 				String id = uri.substring(9, uri.indexOf('.'));
+				String uuid = wabBundle.getBundleContext().getProperty(Constants.FRAMEWORK_UUID);
+				if (uuid != null && id.startsWith(uuid)) {
+					id = id.substring(uuid.length() + 1);
+				}
 				Bundle b = wabBundle.getBundleContext().getBundle(Long.parseLong(id));
 				return extractJarFileName(b);
 			} catch (Exception e) {
@@ -842,6 +776,10 @@ public class BundleWebApplicationClassSpace {
 			Map<Bundle, String> processed = new HashMap<>();
 			for (String jarName : orderedLibs) {
 				if (wabClassPath.containsKey(jarName)) {
+					if (extenderContext.skipJarScanning(jarName)) {
+						LOG.trace("  Skipped scanning of embedded JAR {}", jarName);
+						continue;
+					}
 					LOG.trace("  Scanning embedded JAR {}", jarName);
 					List<URL> urls = ClassPathUtil.findEntries(wabBundle, new URL[] { orderedFragments.get(jarName).getURL() },
 							"META-INF/services", ServletContainerInitializer.class.getName(), false);
@@ -1012,6 +950,11 @@ public class BundleWebApplicationClassSpace {
 				// because if it endsWith(".jar") it has different fragment.getURL() pointing to embedded jar
 				LOG.trace("  Skipping ordered fragment {} (already scanned through {} from fragment {})",
 						jarName, fragmentBundle, processed.get(fragmentBundle));
+				continue;
+			}
+			Boolean skipJar = wabClassPathSkipped.get(jarName);
+			if (skipJar != null && skipJar) {
+				LOG.trace("  Skipping ordered fragment {} (by configuration)", jarName);
 				continue;
 			}
 			if (bundleFragment) {

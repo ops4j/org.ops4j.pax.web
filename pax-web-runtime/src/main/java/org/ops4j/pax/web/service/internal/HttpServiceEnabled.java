@@ -2425,6 +2425,11 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		public void unregisterReportViewPlugin(ReportViewPlugin plugin) {
 			serverModel.unregisterReportViewPlugin(plugin);
 		}
+
+		@Override
+		public Configuration getConfiguration() {
+			return configuration;
+		}
 	}
 
 	/**

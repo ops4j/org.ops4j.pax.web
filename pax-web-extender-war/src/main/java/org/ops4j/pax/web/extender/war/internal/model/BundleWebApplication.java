@@ -152,11 +152,6 @@ public class BundleWebApplication {
 
 	private final Lock refLock = new ReentrantLock();
 
-	/**
-	 * The {@link ExecutorService} where this bundle web application is scheduled to progresss through its lifecycle
-	 */
-	private final ExecutorService pool;
-
 	/** The current state of the web application */
 	private final AtomicReference<State> deploymentState = new AtomicReference<>(State.UNCONFIGURED);
 
@@ -227,12 +222,10 @@ public class BundleWebApplication {
 	 */
 	private ServletContextModel allocatedServletContextModel = null;
 
-	public BundleWebApplication(Bundle bundle, WebContainerManager webContainerManager,
-			WarExtenderContext extenderContext, ExecutorService pool) {
+	public BundleWebApplication(Bundle bundle, WebContainerManager webContainerManager, WarExtenderContext extenderContext) {
 		this.bundle = bundle;
 		this.webContainerManager = webContainerManager;
 		this.extenderContext = extenderContext;
-		this.pool = pool;
 	}
 
 	@Override
@@ -379,7 +372,7 @@ public class BundleWebApplication {
 		if (expectedState != null) {
 			if (deploymentState.compareAndSet(expectedState, newState)) {
 				if (!synchronous) {
-					pool.submit(this::deploy);
+					extenderContext.getPool().submit(this::deploy);
 				} else {
 					deploy();
 				}
@@ -389,7 +382,7 @@ public class BundleWebApplication {
 		} else {
 			deploymentState.set(newState);
 			if (!synchronous) {
-				pool.submit(this::deploy);
+				extenderContext.getPool().submit(this::deploy);
 			} else {
 				deploy();
 			}
@@ -1898,6 +1891,7 @@ public class BundleWebApplication {
 			model.getWabClassPath().add(url);
 		}
 		model.getWabClassPath().addAll(classSpace.getWabClassPath());
+		model.getWabClassPathSkipped().addAll(classSpace.getWabClassPathNotScanned());
 		model.getContainerFragmentBundles().addAll(classSpace.getContainerFragmentBundles());
 		model.getApplicationFragmentBundles().addAll(classSpace.getApplicationFragmentBundles().keySet());
 

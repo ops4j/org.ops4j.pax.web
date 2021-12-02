@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service.spi.model.info;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -50,6 +51,7 @@ public class WebApplicationInfo implements Comparable<WebApplicationInfo> {
 	private final List<URL> metaInfResources = new ArrayList<>();
 	private final List<URL> descriptors = new ArrayList<>();
 	private final List<URL> wabClassPath = new ArrayList<>();
+	private final Set<URL> wabClassPathSkipped = new HashSet<>();
 	private final List<Bundle> containerFragmentBundles = new ArrayList<>();
 	private final List<Bundle> applicationFragmentBundles = new ArrayList<>();
 	private boolean replaced;
@@ -133,6 +135,10 @@ public class WebApplicationInfo implements Comparable<WebApplicationInfo> {
 
 	public List<URL> getWabClassPath() {
 		return wabClassPath;
+	}
+
+	public Set<URL> getWabClassPathSkipped() {
+		return wabClassPathSkipped;
 	}
 
 	public List<Bundle> getContainerFragmentBundles() {

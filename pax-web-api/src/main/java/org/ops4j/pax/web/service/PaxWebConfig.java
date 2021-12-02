@@ -122,6 +122,29 @@ public interface PaxWebConfig {
 	 */
 	String PID_CFG_EVENT_DISPATCHER_THREAD_COUNT = "org.ops4j.pax.web.server.eventDispatcherThreadCount";
 
+	/**
+	 * {@link org.osgi.framework.BundleContext} property to configure thread count for WAR
+	 * extender. Before Pax Web 8 it was hardcoded to 3 (which is still the default value).
+	 */
+	String BUNDLE_CONTEXT_PROPERTY_WAR_EXTENDER_THREADS = "org.ops4j.pax.web.extender.war.threads";
+
+	/**
+	 * Context property listing symbolic names of the bundles or jar names (in {@code /WEB-INF/lib}) patterns to skip
+	 * when searching for TLDs, web fragments and annotated classes. This property can have special value of
+	 * {@code "default"} (no quotes) which roughly matches Tomcat's {@code tomcat.util.scan.StandardJarScanFilter.jarsToSkip}
+	 * property
+	 */
+	String BUNDLE_CONTEXT_PROPERTY_WAR_EXTENDER_JARS_TO_SKIP = "org.ops4j.pax.web.extender.war.jarsToSkip";
+
+	/**
+	 * Context property listing symbolic names of the bundles or jar names (in {@code /WEB-INF/lib}) patterns to skan
+	 * when searching for TLDs, web fragments and annotated classes. Normally all the reachable jars are scanned, but
+	 * if something is matched by {@link #BUNDLE_CONTEXT_PROPERTY_WAR_EXTENDER_JARS_TO_SKIP}, we can skan it by adding the pattern
+	 * to this property (by default this property has empty value, which means that all non-skipped libraries are
+	 * scanned).
+	 */
+	String BUNDLE_CONTEXT_PROPERTY_WAR_EXTENDER_JARS_TO_SCAN = "org.ops4j.pax.web.extender.war.jarsToScan";
+
 	// --- security configuration properties
 
 	/**

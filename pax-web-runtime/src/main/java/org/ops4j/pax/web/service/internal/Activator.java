@@ -37,7 +37,6 @@ import org.ops4j.pax.web.annotations.PaxWebConfiguration;
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.internal.util.SupportUtils;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.ops4j.pax.web.service.spi.config.Configuration;
@@ -185,7 +184,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 		serverListenerTracker = new ServiceTracker<>(bundleContext, ServerListener.class, new ServerListenerCustomizer());
 		serverListenerTracker.open();
 
-		if (SupportUtils.isConfigurationAdminAvailable()) {
+		if (Utils.isConfigurationAdminAvailable(this.getClass())) {
 			// ManagedService for org.ops4j.pax.web PID monitoring, so configuration won't happen yet
 			// (for example in FelixStartLevel thread), but only after Configuration Admin notifies us
 			registerManagedService(context);
@@ -194,7 +193,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			updateConfiguration(null);
 		}
 
-		if (SupportUtils.isEventAdminAvailable()) {
+		if (Utils.isEventAdminAvailable(this.getClass())) {
 			// Do use the filters this way the eventadmin packages can be resolved optional!
 			Filter filterEvent = context.createFilter("(objectClass=org.osgi.service.event.EventAdmin)");
 			EventAdminHandler adminHandler = new EventAdminHandler(context);

@@ -17,6 +17,8 @@ package org.ops4j.pax.web.extender.war.internal;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -27,7 +29,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -35,7 +39,9 @@ import org.apache.felix.utils.extender.Extension;
 import org.apache.tomcat.util.descriptor.web.ServletDef;
 import org.apache.tomcat.util.descriptor.web.WebXml;
 import org.apache.tomcat.util.descriptor.web.WebXmlParser;
+import org.apache.tomcat.util.file.Matcher;
 import org.ops4j.pax.web.extender.war.internal.model.BundleWebApplication;
+import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
@@ -71,6 +77,13 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 
 	// even the structure of the fields attempts to match the structure of WhiteboardExtenderContext
 
+	/**
+	 * Hardcoded equivalent of Tomcat's {@code tomcat.util.scan.StandardJarScanFilter.jarsToSkip} - bundles by
+	 * symbolic name or jars by file name (with glob support). JARs should have {@code .jar} suffix in the pattern,
+	 * otherwise the skipped library is treated as symbolic name pattern.
+	 */
+	static final List<String> DEFAULT_IGNORED_LIBRARIES;
+
 	private static final Logger LOG = LoggerFactory.getLogger(WarExtenderContext.class);
 
 	private final BundleContext bundleContext;
@@ -98,15 +111,99 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 	 * The same pool which is used for entire pax-web-extender-war, to progress through the lifecycle of the
 	 * {@link BundleWebApplication}.
 	 */
-	private final ExecutorService pool;
+	private final AtomicReference<ExecutorService> pool = new AtomicReference<>();
 
 	/** Used to send events related to entire Web Applications being installed/uninstalled. */
-	private WebApplicationEventDispatcher webApplicationEventDispatcher;
+	private final WebApplicationEventDispatcher webApplicationEventDispatcher;
 
 	/** Default, common foundation of all WABs - includes default (override'able) servlet and some welcome files */
 	private final WebXml defaultWebXml;
 
 	private final WabConflictListener wabConflictListener;
+
+	private final List<String> jarsToSkip = new CopyOnWriteArrayList<>();
+	private final List<String> jarsToScan = new CopyOnWriteArrayList<>();
+
+	static {
+		// this list is used by default or if "org.ops4j.pax.web.extender.war.jarsToSkip" PID property
+		// is equal to "default" (no quotes). "default" can be used in custom configuration as well
+		DEFAULT_IGNORED_LIBRARIES = Arrays.asList(
+				"javax.*",
+				"jakarta.*",
+				"org.apache.aries.*", // as bundle
+				"org.apache.aries.*.jar", // as embedded jar (in hawtio for example)
+				"org.apache.felix.*",
+				"org.apache.karaf.*",
+				"org.osgi.util.*",
+				"org.ops4j.pax.logging.*",
+				"org.ops4j.pax.web.pax-web-api",
+				"org.ops4j.pax.web.pax-web-spi",
+				"org.ops4j.pax.web.pax-web-runtime",
+				"org.ops4j.pax.web.pax-web-extender-*",
+				"org.ops4j.pax.web.pax-web-karaf",
+				"org.ops4j.pax.web.pax-web-jetty*",
+				"org.ops4j.pax.web.pax-web-tomcat",
+				"org.ops4j.pax.web.pax-web-undertow",
+				"org.eclipse.jdt.core.compiler.batch",
+				// see Tomcat's tomcat.util.scan.StandardJarScanFilter.jarsToSkip property in
+				// TOMCAT_HOME/conf/catalina.properties
+				"annotations-api.jar",
+				"ant*.jar",
+				"asm*.jar",
+				"aspectj*.jar",
+				"cglib*.jar",
+				"cobertura*.jar",
+				"org.apache.commons.*", // as bundle
+				"commons-*.jar", // as embedded jar
+				"dom4j-*.jar",
+				"easymock-*.jar",
+				"ecj-*.jar",
+				"el-api.jar",
+				"geronimo-spec-*.jar",
+				"guava-*.jar",
+				"h2*.jar",
+				"hamcrest*.jar",
+				"hibernate*.jar",
+				"httpcore*.jar",
+				"httpclient*.jar",
+				"icu4j-*.jar",
+				"jackson-*.jar",
+				"jasper-el.jar",
+				"jasper.jar",
+				"jaspic-api.jar",
+				"jaxb-*.jar",
+				"jaxen-*.jar",
+				"jdom-*.jar",
+				"jetty-*.jar",
+				"jmx-tools.jar",
+				"jmx.jar",
+				"jolokia-*.jar",
+				"jsp-api.jar",
+				"jstl.jar",
+				"jta*.jar",
+				"junit-*.jar",
+				"junit.jar",
+				"log4j*.jar",
+				"mail*.jar",
+				"objenesis-*.jar",
+				"oraclepki.jar",
+				"oro-*.jar",
+				"servlet-api-*.jar",
+				"servlet-api.jar",
+				"slf4j*.jar",
+				"swagger-*.jar",
+				"taglibs-standard-spec-*.jar",
+				"tagsoup-*.jar",
+				"tools.jar",
+				"websocket-api.jar",
+				"wsdl4j*.jar",
+				"xercesImpl.jar",
+				"xml-apis.jar",
+				"xmlParserAPIs-*.jar",
+				"xmlParserAPIs.jar",
+				"xom-*.jar"
+		);
+	}
 
 	/**
 	 * Construct a {@link WarExtenderContext} with asynchronous (production) {@link WebContainerManager}
@@ -127,7 +224,31 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 	public WarExtenderContext(BundleContext bundleContext, ExecutorService pool, boolean synchronous) {
 		this.bundleContext = bundleContext;
 		this.bundle = bundleContext.getBundle();
-		this.pool = pool;
+		this.pool.set(pool);
+
+		String skippedJars = bundleContext.getProperty(PaxWebConfig.BUNDLE_CONTEXT_PROPERTY_WAR_EXTENDER_JARS_TO_SKIP);
+		List<String> skippedJarsList;
+		if (skippedJars != null) {
+			skippedJarsList = new ArrayList<>();
+			for (String pattern : skippedJars.split("\\s*,\\s")) {
+				if ("default".equals(pattern)) {
+					skippedJarsList.addAll(WarExtenderContext.DEFAULT_IGNORED_LIBRARIES);
+				} else {
+					skippedJarsList.add(pattern);
+				}
+			}
+		} else {
+			skippedJarsList = new ArrayList<>(WarExtenderContext.DEFAULT_IGNORED_LIBRARIES);
+		}
+
+		String scannedJars = bundleContext.getProperty(PaxWebConfig.BUNDLE_CONTEXT_PROPERTY_WAR_EXTENDER_JARS_TO_SCAN);
+		List<String> scannedJarsList;
+		if (scannedJars != null) {
+			scannedJarsList = new ArrayList<>();
+			Collections.addAll(scannedJarsList, scannedJars.split("\\s*,\\s"));
+		} else {
+			scannedJarsList = Collections.emptyList();
+		}
 
 		// dispatcher of events related to WAB lifecycle (128.5 Events)
 		webApplicationEventDispatcher = new WebApplicationEventDispatcher(bundleContext);
@@ -138,6 +259,10 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 				? new WebContainerManager(bundleContext, this)
 				: new WebContainerManager(bundleContext, this, "HttpService->WarExtender");
 		webContainerManager.initialize();
+
+		// default values, which may be reconfigured using context properties (no PID here!)
+		jarsToSkip.addAll(skippedJarsList);
+		jarsToScan.addAll(scannedJarsList);
 
 		wabConflictListener = new WabConflictListener();
 		webApplicationEventDispatcher.getListeners().add(wabConflictListener);
@@ -164,6 +289,22 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 		}
 
 		webContainerManager.shutdown();
+	}
+
+	public ExecutorService getPool() {
+		return pool.get();
+	}
+
+	public void setPool(ExecutorService pool) {
+		this.pool.set(pool);
+	}
+
+	public List<String> getJarsToSkip() {
+		return jarsToSkip;
+	}
+
+	public List<String> getJarsToScan() {
+		return jarsToScan;
 	}
 
 	/**
@@ -204,7 +345,7 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 		// that's too harsh requirement, because a WAR can be used to serve static content only, without
 		// registration of any servlet (at least explicitly - as the "default" server should be added for free)
 
-		BundleWebApplication webApplication = new BundleWebApplication(bundle, webContainerManager, this, pool);
+		BundleWebApplication webApplication = new BundleWebApplication(bundle, webContainerManager, this);
 		webApplication.setContextPath(context);
 		ServiceReference<WebContainer> ref = webContainerManager.currentWebContainerReference();
 		if (ref != null) {
@@ -516,6 +657,51 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 	}
 
 	/**
+	 * Checks whether given {@link Bundle} should be scanned for annotated classes and web fragments
+	 * @param scannedBundle
+	 * @return
+	 */
+	public boolean skipBundleScanning(Bundle scannedBundle) {
+		if (scannedBundle.getBundleId() == 0L) {
+			return true;
+		}
+		String symbolicName = scannedBundle.getSymbolicName();
+		boolean skip = false;
+		for (String name : getJarsToSkip()) {
+			if (Matcher.match(name, symbolicName, true)) {
+				skip = true;
+				break;
+			}
+		}
+		for (String name : getJarsToScan()) {
+			if (Matcher.match(name, symbolicName, true)) {
+				skip = false;
+				break;
+			}
+		}
+
+		return skip;
+	}
+
+	public boolean skipJarScanning(String jarName) {
+		boolean skip = false;
+		for (String name : getJarsToSkip()) {
+			if (name.endsWith(".jar") && Matcher.match(name, jarName, true)) {
+				skip = true;
+				break;
+			}
+		}
+		for (String name : getJarsToScan()) {
+			if (name.endsWith(".jar") && Matcher.match(name, jarName, true)) {
+				skip = false;
+				break;
+			}
+		}
+
+		return skip;
+	}
+
+	/**
 	 * <p>The {@link Extension} representing a "WAB" (Web Application Bundle) which (according to 128.3 Web Application
 	 * Bundle) is a {@link Bundle} with {@code Web-ContextPath} manifest header.</p>
 	 *
@@ -620,7 +806,7 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 			// according to extension JavaDoc (org.apache.felix.utils.extender.Extension.destroy), this method
 			// is called for example in the thread that stops the bundle. We have to schedule the handler to another
 			// thread
-			pool.submit(new DeployTask(event));
+			getPool().submit(new DeployTask(event));
 		}
 	}
 
