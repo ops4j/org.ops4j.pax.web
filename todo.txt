@@ -20,12 +20,13 @@ Moved to after 8.0.0.GA (8.0.x):
  + [#1643] Karaf commands within Pax Web itself (not in Karaf)
  + [#1653] skipping configured web fragments (no scanning, as in Tomcat's tomcat.util.scan.StandardJarScanFilter.jarsToSkip)
  + [#1654] Switch away from JAXB to SAX/StAX parsing for undertow.xml
- - Jasypt encryption in PID
- - Keycloak integration
- - HTTP context processing (potentially with external web-fragment.xml)
- - HTTP/2 (mostly tests)
- - JAX-RS example with aries-jaxrs
- - CDI example with aries-cdi
+ ~ [#1655] Jasypt encryption in PID
+ - [#1657] Keycloak integration
+ - [#1656] HTTP context processing (potentially with external web-fragment.xml)
+ - [#1420, #1370] HTTP/2 (mostly tests)
+ - [#1406] JAX-RS example with aries-jaxrs
+ - [#1622] CDI example with aries-cdi
+ - [#1640] JASPIC/JSR-196
 
 Move to 8.1.x:
  - Web-VirtualHosts / Web-Connectors
