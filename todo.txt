@@ -19,6 +19,7 @@ Moved to after 8.0.0.GA (8.0.x):
  + [#1637] Jetty/Tomcat/Undertow bundles
  + [#1643] Karaf commands within Pax Web itself (not in Karaf)
  + [#1653] skipping configured web fragments (no scanning, as in Tomcat's tomcat.util.scan.StandardJarScanFilter.jarsToSkip)
+ + [#1654] Switch away from JAXB to SAX/StAX parsing for undertow.xml
  - Jasypt encryption in PID
  - Keycloak integration
  - HTTP context processing (potentially with external web-fragment.xml)
@@ -27,7 +28,6 @@ Moved to after 8.0.0.GA (8.0.x):
  - CDI example with aries-cdi
 
 Move to 8.1.x:
- - Switch away from JAXB to SAX/StAX parsing for undertow.xml
  - Web-VirtualHosts / Web-Connectors
  - Jetty org.eclipse.jetty.server.Handler, org.eclipse.jetty.server.Connector and
    org.eclipse.jetty.server.HttpConfiguration.Customizer tracking (as in Pax Web 7), but also maybe

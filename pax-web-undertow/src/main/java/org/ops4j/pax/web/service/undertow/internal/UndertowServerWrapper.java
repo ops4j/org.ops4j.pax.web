@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
@@ -54,9 +55,7 @@ import javax.servlet.ServletException;
 import javax.servlet.SessionCookieConfig;
 import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.http.HttpSessionAttributeListener;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.UnmarshallerHandler;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.SAXParserFactory;
 
 import io.undertow.Handlers;
@@ -163,6 +162,7 @@ import org.ops4j.pax.web.service.undertow.configuration.model.SocketBinding;
 import org.ops4j.pax.web.service.undertow.configuration.model.UndertowConfiguration;
 import org.ops4j.pax.web.service.undertow.configuration.model.UndertowSubsystem;
 import org.ops4j.pax.web.service.undertow.internal.configuration.ResolvingContentHandler;
+import org.ops4j.pax.web.service.undertow.internal.configuration.UnmarshallingContentHandler;
 import org.ops4j.pax.web.service.undertow.internal.security.JaasIdentityManager;
 import org.ops4j.pax.web.service.undertow.internal.security.PropertiesIdentityManager;
 import org.ops4j.pax.web.service.undertow.internal.web.FlexibleErrorPages;
@@ -460,13 +460,14 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 		File xmlConfig = locations.length > 0 ? locations[0] : null;
 
 		if (xmlConfig != null || undertowResource != null) {
-			JAXBContext jaxb = JAXBContext.newInstance("org.ops4j.pax.web.service.undertow.configuration.model", classLoader);
-			Unmarshaller unmarshaller = jaxb.createUnmarshaller();
-			UnmarshallerHandler unmarshallerHandler = unmarshaller.getUnmarshallerHandler();
+			UnmarshallingContentHandler unmarshallerHandler = new UnmarshallingContentHandler();
 
 			// indirect unmarshalling with property resolution *inside XML attribute values*
 			SAXParserFactory spf = SAXParserFactory.newInstance();
 			spf.setNamespaceAware(true);
+			spf.setValidating(false);
+			spf.setXIncludeAware(false);
+			spf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 			XMLReader xmlReader = spf.newSAXParser().getXMLReader();
 
 			xmlReader.setContentHandler(new ResolvingContentHandler(configuration.all(), unmarshallerHandler));
@@ -482,7 +483,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				}
 			}
 
-			this.undertowConfiguration = (UndertowConfiguration) unmarshallerHandler.getResult();
+			this.undertowConfiguration = unmarshallerHandler.getConfiguration();
 		}
 
 		// the external XML could be very simple - I assume that the most trivial XML can specify ... nothing,
@@ -575,7 +576,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 		// /undertow/subsystem/server/host/location - file handlers for static context paths.
 		if (undertowConfiguration.getSubsystem().getServer().getHost() != null) {
-			for (Server.Host.Location location : undertowConfiguration.getSubsystem().getServer().getHost().getLocation()) {
+			for (Server.Host.Location location : undertowConfiguration.getSubsystem().getServer().getHost().getLocations()) {
 				String context = location.getName();
 				String handlerRef = location.getHandler();
 				UndertowSubsystem.FileHandler fileHandler = undertowConfiguration.handler(handlerRef);
@@ -589,13 +590,28 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				// fileHandler.path is simply filesystem directory
 				PathResourceManager resourceManager = new PathResourceManager(base.toPath(), (long) fileHandler.getCacheBufferSize() * fileHandler.getCacheBuffers(),
 						fileHandler.getCaseSensitive(), fileHandler.getFollowSymlink(), fileHandler.getSafeSymlinkPaths().toArray(new String[0]));
-				ResourceHandler rh = new ResourceHandler(resourceManager);
+				HttpHandler rh = new ResourceHandler(resourceManager);
 				if (undertowConfiguration.getSubsystem().getServletContainer() != null) {
-					rh.setWelcomeFiles();
+					// clear welcome files first
+					((ResourceHandler) rh).setWelcomeFiles();
 					for (org.ops4j.pax.web.service.undertow.configuration.model.ServletContainer.WelcomeFile wf : undertowConfiguration.getSubsystem().getServletContainer().getWelcomeFiles()) {
-						rh.addWelcomeFiles(wf.getName());
+						((ResourceHandler) rh).addWelcomeFiles(wf.getName());
 					}
 				}
+				// filter-refs - in reverse order
+				ListIterator<Server.Host.FilterRef> it = location.getFilterRefs().listIterator(location.getFilterRefs().size());
+				while (it.hasPrevious()) {
+					Server.Host.FilterRef fr = it.previous();
+					UndertowSubsystem.AbstractFilter filter = undertowConfiguration.filter(fr.getName());
+					if (filter == null) {
+						throw new IllegalArgumentException("No filter with name \"" + fr.getName() + "\" available.");
+					}
+					// predicate means "apply SetHeaderHandler if predicate matches, otherwise forward to passed handler"
+
+					Predicate p = fr.getPredicate() == null ? null : Predicates.parse(fr.getPredicate(), HttpHandler.class.getClassLoader());
+					rh = filter.configure(rh, p);
+				}
+
 				if (rootHandler instanceof PathHandler) {
 					if (LOG.isDebugEnabled()) {
 						LOG.debug("Adding resource handler for location \"" + context + "\" and base path \"" + base.getCanonicalPath() + "\".");
@@ -607,12 +623,15 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 		// global filters (subsystem/filters/response-header and subsystem/filters/filter)
 		if (undertowConfiguration.getSubsystem().getServer().getHost() != null) {
-			for (Server.Host.FilterRef fr : undertowConfiguration.getSubsystem().getServer().getHost().getFilterRef()) {
+			List<Server.Host.FilterRef> filterRefs = undertowConfiguration.getSubsystem().getServer().getHost().getFilterRefs();
+			ListIterator<Server.Host.FilterRef> iterator = filterRefs.listIterator(filterRefs.size());
+			while (iterator.hasPrevious()) {
+				Server.Host.FilterRef fr = iterator.previous();
 				UndertowSubsystem.AbstractFilter filter = undertowConfiguration.filter(fr.getName());
 				if (filter == null) {
 					throw new IllegalArgumentException("No filter with name \"" + fr.getName() + "\" available.");
 				}
-		 		// predicate means "apply SetHeaderHandler if predicate matches, otherwise forward to passed handler"
+				// predicate means "apply SetHeaderHandler if predicate matches, otherwise forward to passed handler"
 
 				Predicate p = fr.getPredicate() == null ? null : Predicates.parse(fr.getPredicate(), HttpHandler.class.getClassLoader());
 				rootHandler = filter.configure(rootHandler, p);

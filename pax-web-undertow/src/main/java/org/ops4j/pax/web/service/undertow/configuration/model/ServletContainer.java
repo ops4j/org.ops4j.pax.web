@@ -17,43 +17,39 @@ package org.ops4j.pax.web.service.undertow.configuration.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlType;
+import java.util.Map;
+import javax.xml.namespace.QName;
 
-import static org.ops4j.pax.web.service.undertow.configuration.model.ObjectFactory.NS_UNDERTOW;
+import org.ops4j.pax.web.service.undertow.internal.configuration.ParserUtils;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXParseException;
 
-@XmlType(name = "servletContainerType", namespace = NS_UNDERTOW, propOrder = {
-		"jspConfig",
-		"persistentSessions",
-		"websockets",
-		"welcomeFiles",
-		"sessionCookie"
-})
 public class ServletContainer {
 
-	@XmlAttribute
+	protected static final QName ATT_NAME = new QName("name");
+	protected static final QName ATT_DEFAULT_SESSION_TIMEOUT = new QName("default-session-timeout");
+
 	private String name;
 
-	@XmlAttribute(name = "default-session-timeout")
 	private String defaultSessionTimeout = "30";
 
-	@XmlElement(name = "jsp-config")
 	private JspConfig jspConfig;
 
-	@XmlElement(name = "persistent-sessions")
 	private PersistentSessionsConfig persistentSessions;
 
-	@XmlElement
 	private Websockets websockets;
 
-	@XmlElementWrapper(name = "welcome-files")
-	@XmlElement(name = "welcome-file")
 	private final List<WelcomeFile> welcomeFiles = new ArrayList<>();
 
-	@XmlElement(name = "session-cookie")
 	private SessionCookie sessionCookie;
+
+	public static ServletContainer create(Map<QName, String> attributes, Locator locator) {
+		ServletContainer container = new ServletContainer();
+		container.name = attributes.get(ATT_NAME);
+		container.defaultSessionTimeout = attributes.get(ATT_DEFAULT_SESSION_TIMEOUT);
+
+		return container;
+	}
 
 	public String getName() {
 		return name;
@@ -112,12 +108,12 @@ public class ServletContainer {
 		return "{ name: " + name +
 				", default session timeout: " + defaultSessionTimeout +
 				", jsp config: " + jspConfig +
+				", session cookie config: " + sessionCookie +
 				", websockets: " + websockets +
 				", welcome files: " + welcomeFiles +
 				" }";
 	}
 
-	@XmlType(name = "jsp-configurationType", namespace = NS_UNDERTOW)
 	public static class JspConfig {
 		@Override
 		public String toString() {
@@ -125,13 +121,21 @@ public class ServletContainer {
 		}
 	}
 
-	@XmlType(name = "persistent-sessionsType", namespace = NS_UNDERTOW)
 	public static class PersistentSessionsConfig {
-		@XmlAttribute
+		private static final QName ATT_PATH = new QName("path");
+
 		private String path;
+
+		public static PersistentSessionsConfig create(Map<QName, String> attributes, Locator locator) {
+			PersistentSessionsConfig config = new PersistentSessionsConfig();
+			config.path = attributes.get(ATT_PATH);
+
+			return config;
+		}
 
 		/**
 		 * The path to store the session data. If not specified the data will just be stored in memory only.
+		 *
 		 * @return
 		 */
 		public String getPath() {
@@ -148,18 +152,29 @@ public class ServletContainer {
 		}
 	}
 
-	@XmlType(name = "websocketsType", namespace = NS_UNDERTOW)
 	public static class Websockets {
-		@XmlAttribute(name = "worker")
+		protected static final QName ATT_WORKER = new QName("worker");
+		protected static final QName ATT_BUFFER_POOL = new QName("buffer-pool");
+		protected static final QName ATT_DISPATCH_TO_WORKER = new QName("dispatch-to-worker");
+		protected static final QName ATT_PER_MESSAGE_DEFLATE = new QName("per-message-deflate");
+		protected static final QName ATT_DEFLATER_LEVEL = new QName("deflater-level");
+
 		protected String workerName = "default";
-		@XmlAttribute(name = "buffer-pool")
 		protected String bufferPoolName = "default";
-		@XmlAttribute(name = "dispatch-to-worker")
 		protected boolean dispatchToWorker = true;
-		@XmlAttribute(name = "per-message-deflate")
 		protected boolean perMessageDeflate = false;
-		@XmlAttribute(name = "deflater-level")
 		protected int deflaterLevel = 1; // java.util.zip.Deflater.BEST_SPEED
+
+		public static Websockets create(Map<QName, String> attributes, Locator locator) throws SAXParseException {
+			Websockets ws = new Websockets();
+			ws.workerName = ParserUtils.toStringValue(attributes.get(ATT_WORKER), locator, "default");
+			ws.bufferPoolName = ParserUtils.toStringValue(attributes.get(ATT_BUFFER_POOL), locator, "default");
+			ws.dispatchToWorker = ParserUtils.toBoolean(attributes.get(ATT_DISPATCH_TO_WORKER), locator, true);
+			ws.perMessageDeflate = ParserUtils.toBoolean(attributes.get(ATT_PER_MESSAGE_DEFLATE), locator, false);
+			ws.deflaterLevel = ParserUtils.toInteger(attributes.get(ATT_DEFLATER_LEVEL), locator, 1);
+
+			return ws;
+		}
 
 		public String getWorkerName() {
 			return workerName;
@@ -212,10 +227,17 @@ public class ServletContainer {
 		}
 	}
 
-	@XmlType(name = "welcome-fileType", namespace = NS_UNDERTOW)
 	public static class WelcomeFile {
-		@XmlAttribute
+		protected static final QName ATT_NAME = new QName("name");
+
 		private String name;
+
+		public static WelcomeFile create(Map<QName, String> attributes, Locator locator) {
+			WelcomeFile wf = new WelcomeFile();
+			wf.name = attributes.get(ATT_NAME);
+
+			return wf;
+		}
 
 		public String getName() {
 			return name;
@@ -231,20 +253,32 @@ public class ServletContainer {
 		}
 	}
 
-	@XmlType(name = "session-cookieType", namespace = NS_UNDERTOW)
 	public static class SessionCookie {
-		@XmlAttribute
+		protected static final QName ATT_NAME = new QName("name");
+		protected static final QName ATT_DOMAIN = new QName("domain");
+		protected static final QName ATT_COMMENT = new QName("comment");
+		protected static final QName ATT_HTTP_ONLY = new QName("http-only");
+		protected static final QName ATT_SECURE = new QName("secure");
+		protected static final QName ATT_MAX_AGE = new QName("max-age");
+
 		private String name;
-		@XmlAttribute
 		private String domain;
-		@XmlAttribute
 		private String comment;
-		@XmlAttribute(name = "http-only")
-		private boolean httpOnly;
-		@XmlAttribute
-		private boolean secure;
-		@XmlAttribute(name = "max-age")
+		private boolean httpOnly = true;
+		private boolean secure = true;
 		private Integer maxAge;
+
+		public static SessionCookie create(Map<QName, String> attributes, Locator locator) throws SAXParseException {
+			SessionCookie config = new SessionCookie();
+			config.name = attributes.get(ATT_NAME);
+			config.domain = attributes.get(ATT_DOMAIN);
+			config.comment = attributes.get(ATT_COMMENT);
+			config.httpOnly = ParserUtils.toBoolean(attributes.get(ATT_HTTP_ONLY), locator, true);
+			config.secure = ParserUtils.toBoolean(attributes.get(ATT_SECURE), locator, true);
+			config.maxAge = ParserUtils.toInteger(attributes.get(ATT_MAX_AGE), locator, null);
+
+			return config;
+		}
 
 		public String getName() {
 			return name;

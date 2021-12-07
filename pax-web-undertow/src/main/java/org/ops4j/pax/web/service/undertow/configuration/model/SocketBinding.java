@@ -15,20 +15,31 @@
  */
 package org.ops4j.pax.web.service.undertow.configuration.model;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlType;
+import java.util.Map;
+import javax.xml.namespace.QName;
 
-import static org.ops4j.pax.web.service.undertow.configuration.model.ObjectFactory.NS_WILDFLY;
+import org.ops4j.pax.web.service.undertow.internal.configuration.ParserUtils;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXParseException;
 
-@XmlType(name = "socket-bindingType", namespace = NS_WILDFLY)
 public class SocketBinding {
 
-	@XmlAttribute
+	private static final QName ATT_NAME = new QName("name");
+	private static final QName ATT_INTERFACE = new QName("interface");
+	private static final QName ATT_PORT = new QName("port");
+
 	private String name;
-	@XmlAttribute(name = "interface")
 	private String interfaceRef;
-	@XmlAttribute
 	private Integer port;
+
+	public static SocketBinding create(Map<QName, String> attributes, Locator locator) throws SAXParseException {
+		SocketBinding binding = new SocketBinding();
+		binding.name = attributes.get(ATT_NAME);
+		binding.interfaceRef = attributes.get(ATT_INTERFACE);
+		binding.port = ParserUtils.toInteger(attributes.get(ATT_PORT), locator, null);
+
+		return binding;
+	}
 
 	public String getName() {
 		return name;

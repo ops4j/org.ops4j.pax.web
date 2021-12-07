@@ -378,14 +378,7 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle("org.ops4j.pax.web", "pax-web-undertow")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
 		};
-		if (javaMajorVersion() >= 9) {
-			return combine(options,
-					mavenBundle("jakarta.xml.bind", "jakarta.xml.bind-api").versionAsInProject(),
-					mavenBundle("com.sun.xml.bind", "jaxb-impl").versionAsInProject(),
-					mavenBundle("com.sun.activation", "javax.activation").versionAsInProject(),
-					systemProperty("javax.xml.bind.JAXBContextFactory").value("com.sun.xml.bind.v2.JAXBContextFactory")
-			);
-		}
+
 		return options;
 	}
 

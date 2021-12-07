@@ -17,17 +17,12 @@ package org.ops4j.pax.web.service.undertow.configuration.model;
 
 import java.util.HashMap;
 import java.util.Map;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.UnmarshallerHandler;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.undertow.internal.configuration.ResolvingContentHandler;
+import org.ops4j.pax.web.service.undertow.internal.configuration.UnmarshallingContentHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
@@ -39,18 +34,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class ConfigurationParserTest {
 
 	public static final Logger LOG = LoggerFactory.getLogger(ConfigurationParserTest.class);
-	private static JAXBContext context;
-
-	@BeforeClass
-	public static void jaxbContext() throws JAXBException {
-		context = JAXBContext.newInstance("org.ops4j.pax.web.service.undertow.configuration.model");
-	}
 
 	@Test
-	public void jaxbModel() throws Exception {
+	public void model() throws Exception {
 		LOG.info("Unmarshall undertow-default-template-1.1.xml");
-//		StreamSource source = new StreamSource(getClass().getResourceAsStream("/templates/undertow-default-template.xml"));
-		Unmarshaller unmarshaller = context.createUnmarshaller();
 
 		Map<String, String> pid = new HashMap<>();
 		pid.put(PaxWebConfig.PID_CFG_HTTP_PORT, "8123");
@@ -63,12 +50,13 @@ public class ConfigurationParserTest {
 		SAXParserFactory spf = SAXParserFactory.newInstance();
 		spf.setNamespaceAware(true);
 		XMLReader xmlReader = spf.newSAXParser().getXMLReader();
-		UnmarshallerHandler unmarshallerHandler = unmarshaller.getUnmarshallerHandler();
+		UnmarshallingContentHandler unmarshallerHandler = new UnmarshallingContentHandler();
 		xmlReader.setContentHandler(new ResolvingContentHandler(pid, unmarshallerHandler));
 		xmlReader.parse(new InputSource(getClass().getResourceAsStream("/templates/undertow-default-template-1.1.xml")));
 
 		//Configuration cfg = (Configuration) unmarshaller.unmarshal(source);
-		UndertowConfiguration cfg = (UndertowConfiguration) unmarshallerHandler.getResult();
+		UndertowConfiguration cfg = unmarshallerHandler.getConfiguration();
+		cfg.init();
 		LOG.info("Configuration: {}", cfg);
 
 		assertThat(cfg.getSocketBindings().get(0).getPort(), equalTo(8123));
@@ -78,11 +66,6 @@ public class ConfigurationParserTest {
 
 		assertThat(cfg.getSecurityRealms().get(1).getIdentities().getSsl().getKeystore().getPath(),
 				equalTo("/data/tmp/certs/server.keystore"));
-
-		LOG.info("Marshall configuration");
-		Marshaller marshaller = context.createMarshaller();
-		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-		marshaller.marshal(cfg, System.out);
 	}
 
 }

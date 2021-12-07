@@ -19,62 +19,33 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
 
-import static org.ops4j.pax.web.service.undertow.configuration.model.ObjectFactory.NS_IO;
-import static org.ops4j.pax.web.service.undertow.configuration.model.ObjectFactory.NS_PAXWEB_UNDERTOW;
-import static org.ops4j.pax.web.service.undertow.configuration.model.ObjectFactory.NS_UNDERTOW;
-
-@XmlRootElement(name = "undertow")
-@XmlType(name = "UndertowType", propOrder = {
-		"ioSubsystem",
-		"subsystem",
-		"securityRealms",
-		"interfaces",
-		"socketBindings"
-})
-@XmlAccessorType(XmlAccessType.FIELD)
 public class UndertowConfiguration {
 
-	@XmlElement(name = "subsystem", namespace = NS_IO)
 	private IoSubsystem ioSubsystem;
 
-	@XmlElement(namespace = NS_UNDERTOW)
 	private UndertowSubsystem subsystem;
 
-	@XmlElement(name = "security-realm", namespace = NS_PAXWEB_UNDERTOW)
 	private final List<SecurityRealm> securityRealms = new ArrayList<>();
 
-	@XmlElement(name = "interface")
 	private final List<Interface> interfaces = new ArrayList<>();
 
-	@XmlElement(name = "socket-binding")
 	private final List<SocketBinding> socketBindings = new ArrayList<>();
 
-	@XmlTransient
+	// transient (not parsed, but calculated) elements
+
 	private final Map<String, SecurityRealm> securityRealmsMap = new HashMap<>();
 
-	@XmlTransient
 	private final Map<String, Interface> interfacesMap = new HashMap<>();
 
-	@XmlTransient
 	private final Map<String, SocketBinding> socketBindingsMap = new HashMap<>();
 
-	@XmlTransient
 	private final Map<String, UndertowSubsystem.FileHandler> handlersMap = new HashMap<>();
 
-	@XmlTransient
 	private final Map<String, UndertowSubsystem.AbstractFilter> filtersMap = new HashMap<>();
 
-	@XmlTransient
 	private final Map<String, IoSubsystem.Worker> workers = new HashMap<>();
 
-	@XmlTransient
 	private final Map<String, IoSubsystem.BufferPool> bufferPools = new HashMap<>();
 
 	/**

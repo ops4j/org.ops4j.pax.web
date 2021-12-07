@@ -50,18 +50,18 @@
 		<buffer-pool name="default" buffer-size="16364" direct-buffers="true" />
 		<buffer-pool name="bp2" buffer-size="16364" direct-buffers="true" />
 		<worker name="default" io-threads="8" task-core-threads="64" task-max-threads="64"
-				stack-size="0"
-				task-keepalive="60000" />
+				stack-size="1"
+				task-keepalive="60001" />
 		<worker name="w2" io-threads="8" task-core-threads="64" task-max-threads="64"
-				stack-size="0"
-				task-keepalive="60000" />
+				stack-size="2"
+				task-keepalive="60002" />
 	</subsystem>
 
 	<!-- https://docs.jboss.org/author/display/WFLY/Undertow+subsystem+configuration -->
 	<subsystem xmlns="urn:jboss:domain:undertow:12.0">
 		<!-- org.wildfly.extension.undertow.ByteBufferPoolDefinition -->
 		<!-- used to construct org.wildfly.extension.undertow.ByteBufferPoolDefinition.ByteBufferPoolService - not needed -->
-		<byte-buffer-pool name="" buffer-size="" direct="" max-pool-size="" />
+		<byte-buffer-pool name="" buffer-size="" direct="false" max-pool-size="" />
 		<!-- org.wildfly.extension.undertow.BufferCacheDefinition -->
 		<buffer-cache name="default" buffer-size="1024" buffers-per-region="1024" max-regions="10" />
 		<!-- org.wildfly.extension.undertow.ServerDefinition -->

@@ -102,17 +102,10 @@
 							javax.security.auth,
 							javax.security.auth.callback,
 							javax.security.auth.login,
-							javax.xml.bind,
-							javax.xml.bind.annotation,
-							com.sun.xml.bind.v2;resolution:=optional,
+							javax.xml.namespace,
 							javax.xml.parsers,
 							org.xml.sax,
 							org.xml.sax.helpers
-
-							<!-- to check -->
-<!--							javax.management.*; resolution:=optional,-->
-<!--							javax.el; version="[2.1.0,4.0.0)";resolution:=optional,-->
-<!--							*-->
 						</Import-Package>
 						<Provide-Capability>
 							osgi.service;effective:=active;objectClass:List&lt;String&gt;="org.ops4j.pax.web.service.spi.ServerControllerFactory"
@@ -260,29 +253,5 @@
 		</dependency>
 
 	</dependencies>
-
-	<profiles>
-		<profile>
-			<id>jdk11</id>
-			<activation>
-				<jdk>[9,)</jdk>
-			</activation>
-			<dependencies>
-
-				<!-- JavaEE / JakartaEE -->
-
-				<dependency>
-					<groupId>jakarta.xml.bind</groupId>
-					<artifactId>jakarta.xml.bind-api</artifactId>
-				</dependency>
-				<dependency>
-					<groupId>com.sun.xml.bind</groupId>
-					<artifactId>jaxb-impl</artifactId>
-					<scope>test</scope>
-				</dependency>
-
-			</dependencies>
-		</profile>
-	</profiles>
 
 </project>

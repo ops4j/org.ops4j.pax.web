@@ -17,35 +17,32 @@ package org.ops4j.pax.web.service.undertow.configuration.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import java.util.Map;
+import javax.xml.namespace.QName;
 
-import static org.ops4j.pax.web.service.undertow.configuration.model.ObjectFactory.NS_PAXWEB_UNDERTOW;
-import static org.ops4j.pax.web.service.undertow.configuration.model.ObjectFactory.NS_WILDFLY;
+import org.ops4j.pax.web.service.undertow.internal.configuration.ParserUtils;
+import org.xml.sax.Locator;
 
-@XmlType(name = "security-realmType", namespace = NS_PAXWEB_UNDERTOW, propOrder = {
-		"identities",
-		"authentication",
-		"userPrincipalClassName",
-		"rolePrincipalClassNames"
-})
 public class SecurityRealm {
 
-	@XmlAttribute
+	private static final QName ATT_NAME = new QName("name");
+
 	private String name;
 
-	@XmlElement(name = "server-identities", namespace = NS_WILDFLY)
 	private ServerIdentities identities;
 
-	@XmlElement(name = "authentication", namespace = NS_WILDFLY)
 	private Authentication authentication;
 
-	@XmlElement(name = "user-principal-class-name")
 	private String userPrincipalClassName;
 
-	@XmlElement(name = "role-principal-class-name")
 	private final List<String> rolePrincipalClassNames = new ArrayList<>();
+
+	public static SecurityRealm create(Map<QName, String> attributes) {
+		SecurityRealm realm = new SecurityRealm();
+		realm.name = attributes.get(ATT_NAME);
+
+		return realm;
+	}
 
 	public ServerIdentities getIdentities() {
 		return identities;
@@ -97,11 +94,7 @@ public class SecurityRealm {
 		return sb.toString();
 	}
 
-	@XmlType(name = "server-identitiesType", namespace = NS_WILDFLY, propOrder = {
-			"ssl"
-	})
 	public static class ServerIdentities {
-		@XmlElement(name = "ssl")
 		private SSLConfig ssl;
 
 		public SSLConfig getSsl() {
@@ -113,15 +106,9 @@ public class SecurityRealm {
 		}
 	}
 
-	@XmlType(name = "sslType", namespace = NS_WILDFLY, propOrder = {
-			"engine",
-			"keystore"
-	})
 	public static class SSLConfig {
-		@XmlElement(name = "engine")
 		private Engine engine;
 
-		@XmlElement(name = "keystore")
 		private Keystore keystore;
 
 		public Engine getEngine() {
@@ -148,20 +135,10 @@ public class SecurityRealm {
 		}
 	}
 
-	@XmlType(name = "authenticationType", namespace = NS_WILDFLY, propOrder = {
-			"truststore",
-			"jaas",
-			"properties",
-			"users"
-	})
 	public static class Authentication {
-		@XmlElement
 		private Truststore truststore;
-		@XmlElement
 		private JaasAuth jaas;
-		@XmlElement
 		private PropertiesAuth properties;
-		@XmlElement
 		private UsersAuth users;
 
 		public Truststore getTruststore() {
@@ -206,12 +183,20 @@ public class SecurityRealm {
 		}
 	}
 
-	@XmlType(name = "engineType", namespace = NS_WILDFLY)
 	public static class Engine {
-		@XmlAttribute(name = "enabled-cipher-suites")
+		private static final QName ATT_ENABLED_CIPHER_SUITES = new QName("enabled-cipher-suites");
+		private static final QName ATT_ENABLED_PROTOCOLS = new QName("enabled-protocols");
+
 		private final List<String> enabledCipherSuites = new ArrayList<>();
-		@XmlAttribute(name = "enabled-protocols")
 		private final List<String> enabledProtocols = new ArrayList<>();
+
+		public static Engine create(Map<QName, String> attributes, Locator locator) {
+			Engine engine = new Engine();
+			engine.getEnabledCipherSuites().addAll(ParserUtils.toStringList(attributes.get(ATT_ENABLED_CIPHER_SUITES), locator));
+			engine.getEnabledProtocols().addAll(ParserUtils.toStringList(attributes.get(ATT_ENABLED_PROTOCOLS), locator));
+
+			return engine;
+		}
 
 		public List<String> getEnabledCipherSuites() {
 			return enabledCipherSuites;
@@ -229,15 +214,24 @@ public class SecurityRealm {
 		}
 	}
 
-	@XmlType(name = "realmKeyStoreType", namespace = NS_WILDFLY)
 	public static class Truststore {
+		protected static final QName ATT_PROVIDER = new QName("provider");
+		protected static final QName ATT_PATH = new QName("path");
+		protected static final QName ATT_KEYSTORE_PASSWORD = new QName("keystore-password");
+
 		// Watch out for provider vs. type confusion
-		@XmlAttribute(name = "provider")
-		private String type;
-		@XmlAttribute
-		private String path;
-		@XmlAttribute(name = "keystore-password")
-		private String password;
+		protected String type;
+		protected String path;
+		protected String password;
+
+		public static Truststore create(Map<QName, String> attributes, Locator locator) {
+			Truststore truststore = new Truststore();
+			truststore.type = attributes.get(ATT_PROVIDER);
+			truststore.path = attributes.get(ATT_PATH);
+			truststore.password = attributes.get(ATT_KEYSTORE_PASSWORD);
+
+			return truststore;
+		}
 
 		public String getType() {
 			return type;
@@ -271,14 +265,26 @@ public class SecurityRealm {
 		}
 	}
 
-	@XmlType(name = "realmExtendedKeyStoreType", namespace = NS_WILDFLY)
 	public static class Keystore extends Truststore {
-		@XmlAttribute
+		protected static final QName ATT_ALIAS = new QName("alias");
+		protected static final QName ATT_KEY_PASSWORD = new QName("key-password");
+		protected static final QName ATT_GENERATE_SELF_SIGNED_CERTIFICATE_HOST = new QName("generate-self-signed-certificate-host");
+
 		private String alias;
-		@XmlAttribute(name = "key-password")
 		private String keyPassword;
-		@XmlAttribute(name = "generate-self-signed-certificate-host")
 		private String generateSelfSignedCertificateHost;
+
+		public static Keystore create(Map<QName, String> attributes, Locator locator) {
+			Keystore keystore = new Keystore();
+			keystore.type = attributes.get(ATT_PROVIDER);
+			keystore.path = attributes.get(ATT_PATH);
+			keystore.password = attributes.get(ATT_KEYSTORE_PASSWORD);
+			keystore.alias = attributes.get(ATT_ALIAS);
+			keystore.keyPassword = attributes.get(ATT_KEY_PASSWORD);
+			keystore.generateSelfSignedCertificateHost = attributes.get(ATT_GENERATE_SELF_SIGNED_CERTIFICATE_HOST);
+
+			return keystore;
+		}
 
 		public String getAlias() {
 			return alias;
@@ -313,10 +319,16 @@ public class SecurityRealm {
 		}
 	}
 
-	@XmlType(name = "jaasAuthenticationType", namespace = NS_WILDFLY)
 	public static class JaasAuth {
-		@XmlAttribute
+		protected static final QName ATT_NAME = new QName("name");
+
 		private String name;
+
+		public static JaasAuth create(Map<QName, String> attributes, Locator locator) {
+			JaasAuth auth = new JaasAuth();
+			auth.name = attributes.get(ATT_NAME);
+			return auth;
+		}
 
 		public String getName() {
 			return name;
@@ -332,10 +344,17 @@ public class SecurityRealm {
 		}
 	}
 
-	@XmlType(name = "propertiesAuthenticationType", namespace = NS_WILDFLY)
 	public static class PropertiesAuth {
-		@XmlAttribute
+		protected static final QName ATT_PATH = new QName("path");
+
 		private String path;
+
+		public static PropertiesAuth create(Map<QName, String> attributes, Locator locator) {
+			PropertiesAuth auth = new PropertiesAuth();
+			auth.path = attributes.get(ATT_PATH);
+
+			return auth;
+		}
 
 		public String getPath() {
 			return path;
@@ -351,9 +370,7 @@ public class SecurityRealm {
 		}
 	}
 
-	@XmlType(name = "usersAuthenticationType", namespace = NS_WILDFLY)
 	public static class UsersAuth {
-		@XmlElement(name = "user")
 		private final List<User> users = new ArrayList<>();
 
 		public List<User> getUsers() {
@@ -366,12 +383,18 @@ public class SecurityRealm {
 		}
 	}
 
-	@XmlType(name = "userType", namespace = NS_WILDFLY)
 	public static class User {
-		@XmlAttribute
+		protected static final QName ATT_USERNAME = new QName("username");
+
 		private String username;
-		@XmlElement
 		private String password;
+
+		public static User create(Map<QName, String> attributes, Locator locator) {
+			User user = new User();
+			user.username = attributes.get(ATT_USERNAME);
+
+			return user;
+		}
 
 		public String getUsername() {
 			return username;

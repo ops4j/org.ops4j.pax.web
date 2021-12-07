@@ -17,10 +17,8 @@ package org.ops4j.pax.web.service.undertow.configuration.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlType;
+import java.util.Map;
+import javax.xml.namespace.QName;
 
 import io.undertow.Handlers;
 import io.undertow.attribute.ExchangeAttributes;
@@ -36,32 +34,20 @@ import io.undertow.server.handlers.builder.PredicatedHandlersParser;
 import io.undertow.server.handlers.encoding.ContentEncodingRepository;
 import io.undertow.server.handlers.encoding.EncodingHandler;
 import io.undertow.server.handlers.encoding.GzipEncodingProvider;
+import org.ops4j.pax.web.service.undertow.internal.configuration.ParserUtils;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXParseException;
 
-import static org.ops4j.pax.web.service.undertow.configuration.model.ObjectFactory.NS_UNDERTOW;
-
-@XmlType(name = "undertow-subsystemType", namespace = NS_UNDERTOW, propOrder = {
-		"bufferCache",
-		"server",
-		"servletContainer",
-		"fileHandlers",
-		"filters"
-})
 public class UndertowSubsystem {
 
-	@XmlElement(name = "buffer-cache")
 	private BufferCache bufferCache;
 
-	@XmlElement
 	private Server server;
 
-	@XmlElement(name = "servlet-container")
 	private ServletContainer servletContainer;
 
-	@XmlElementWrapper(name = "handlers")
-	@XmlElement(name = "file")
 	private final List<FileHandler> fileHandlers = new ArrayList<>();
 
-	@XmlElement
 	private Filters filters;
 
 	public BufferCache getBufferCache() {
@@ -108,16 +94,26 @@ public class UndertowSubsystem {
 				"\n\t}";
 	}
 
-	@XmlType(name = "buffer-cacheType", namespace = NS_UNDERTOW)
 	public static class BufferCache {
-		@XmlAttribute
+		private static final QName ATT_NAME = new QName("name");
+		private static final QName ATT_BUFFER_SIZE = new QName("buffer-size");
+		private static final QName ATT_BUFFERS_PER_REGION = new QName("buffers-per-region");
+		private static final QName ATT_MAX_REGIONS = new QName("max-regions");
+
 		private String name;
-		@XmlAttribute(name = "buffer-size")
 		private int bufferSize = 1024;
-		@XmlAttribute(name = "buffers-per-region")
 		private int buffersPerRegion = 1024;
-		@XmlAttribute(name = "max-regions")
 		private int maxRegions = 10;
+
+		public static BufferCache create(Map<QName, String> attributes, Locator locator) throws SAXParseException {
+			BufferCache cache = new BufferCache();
+			cache.name = attributes.get(ATT_NAME);
+			cache.bufferSize = ParserUtils.toInteger(attributes.get(ATT_BUFFER_SIZE), locator, 1024);
+			cache.buffersPerRegion = ParserUtils.toInteger(attributes.get(ATT_BUFFERS_PER_REGION), locator, 1024);
+			cache.maxRegions = ParserUtils.toInteger(attributes.get(ATT_MAX_REGIONS), locator, 10);
+
+			return cache;
+		}
 
 		public String getName() {
 			return name;
@@ -161,24 +157,38 @@ public class UndertowSubsystem {
 		}
 	}
 
-	@XmlType(name = "file-handlerType", namespace = NS_UNDERTOW)
 	public static class FileHandler {
-		@XmlAttribute
+		private static final QName ATT_NAME = new QName("name");
+		private static final QName ATT_PATH = new QName("path");
+		private static final QName ATT_CACHE_BUFFER_SIZE = new QName("cache-buffer-size");
+		private static final QName ATT_CACHE_BUFFERS = new QName("cache-buffers");
+		private static final QName ATT_DIRECTORY_LISTING = new QName("directory-listing");
+		private static final QName ATT_FOLLOW_SYMLINKS = new QName("follow-symlink");
+		private static final QName ATT_CASE_SENSITIVE = new QName("case-sensitive");
+		private static final QName ATT_SAFE_SYMLINK_PATHS = new QName("safe-symlink-paths");
+
 		private String name;
-		@XmlAttribute
 		private String path;
-		@XmlAttribute(name = "cache-buffer-size")
 		private Integer cacheBufferSize = 1024;
-		@XmlAttribute(name = "cache-buffers")
 		private Integer cacheBuffers = 1024;
-		@XmlAttribute(name = "directory-listing")
 		private Boolean directoryListing = false;
-		@XmlAttribute(name = "follow-symlink")
 		private Boolean followSymlink = false;
-		@XmlAttribute(name = "case-sensitive")
 		private Boolean caseSensitive = true;
-		@XmlAttribute(name = "safe-symlink-paths")
 		private final List<String> safeSymlinkPaths = new ArrayList<>();
+
+		public static FileHandler create(Map<QName, String> attributes, Locator locator) throws SAXParseException {
+			FileHandler handler = new FileHandler();
+			handler.name = attributes.get(ATT_NAME);
+			handler.path = attributes.get(ATT_PATH);
+			handler.cacheBufferSize = ParserUtils.toInteger(attributes.get(ATT_CACHE_BUFFER_SIZE), locator, 1024);
+			handler.cacheBuffers = ParserUtils.toInteger(attributes.get(ATT_CACHE_BUFFERS), locator, 1024);
+			handler.directoryListing = ParserUtils.toBoolean(attributes.get(ATT_DIRECTORY_LISTING), locator, false);
+			handler.followSymlink = ParserUtils.toBoolean(attributes.get(ATT_FOLLOW_SYMLINKS), locator, false);
+			handler.caseSensitive = ParserUtils.toBoolean(attributes.get(ATT_CASE_SENSITIVE), locator, true);
+			handler.safeSymlinkPaths.addAll(ParserUtils.toStringList(attributes.get(ATT_SAFE_SYMLINK_PATHS), locator));
+
+			return handler;
+		}
 
 		public String getName() {
 			return name;
@@ -241,29 +251,13 @@ public class UndertowSubsystem {
 		}
 	}
 
-	@XmlType(name = "filterType", namespace = NS_UNDERTOW, propOrder = {
-			"responseHeaders",
-			"errorPages",
-			"customFilters",
-			"expressionFilters",
-			"gzipFilters",
-			"requestLimitFilters",
-			"rewriteFilters"
-	})
 	public static class Filters {
-		@XmlElement(name = "response-header")
 		private final List<ResponseHeaderFilter> responseHeaders = new ArrayList<>();
-		@XmlElement(name = "error-page")
 		private final List<ErrorPageFilter> errorPages = new ArrayList<>();
-		@XmlElement(name = "filter")
 		private final List<CustomFilter> customFilters = new ArrayList<>();
-		@XmlElement(name = "expression-filter")
 		private final List<ExpressionFilter> expressionFilters = new ArrayList<>();
-		@XmlElement(name = "gzip")
 		private final List<GzipFilter> gzipFilters = new ArrayList<>();
-		@XmlElement(name = "request-limit")
 		private final List<RequestLimitFilter> requestLimitFilters = new ArrayList<>();
-		@XmlElement(name = "rewrite")
 		private final List<RewriteFilter> rewriteFilters = new ArrayList<>();
 
 		public List<ResponseHeaderFilter> getResponseHeaders() {
@@ -295,9 +289,9 @@ public class UndertowSubsystem {
 		}
 	}
 
-	@XmlType(name = "abstractFilterType", namespace = NS_UNDERTOW)
 	public abstract static class AbstractFilter {
-		@XmlAttribute
+		protected static final QName ATT_NAME = new QName("name");
+
 		protected String name;
 
 		public String getName() {
@@ -317,12 +311,21 @@ public class UndertowSubsystem {
 		public abstract HttpHandler configure(HttpHandler handler, Predicate predicate);
 	}
 
-	@XmlType(name = "response-headerType", namespace = NS_UNDERTOW)
 	public static class ResponseHeaderFilter extends AbstractFilter {
-		@XmlAttribute(name = "header-name")
+		private static final QName ATT_HEADER_NAME = new QName("header-name");
+		private static final QName ATT_HEADER_VALUE = new QName("header-value");
+
 		private String header;
-		@XmlAttribute(name = "header-value")
 		private String value;
+
+		public static ResponseHeaderFilter create(Map<QName, String> attributes, Locator locator) {
+			ResponseHeaderFilter filter = new ResponseHeaderFilter();
+			filter.name = attributes.get(ATT_NAME);
+			filter.header = attributes.get(ATT_HEADER_NAME);
+			filter.value = attributes.get(ATT_HEADER_VALUE);
+
+			return filter;
+		}
 
 		@Override
 		public HttpHandler configure(HttpHandler handler, Predicate predicate) {
@@ -350,12 +353,21 @@ public class UndertowSubsystem {
 		}
 	}
 
-	@XmlType(name = "errorPageType", namespace = NS_UNDERTOW)
 	public static class ErrorPageFilter extends AbstractFilter {
-		@XmlAttribute
+		private static final QName ATT_CODE = new QName("code");
+		private static final QName ATT_PATH = new QName("path");
+
 		private String code;
-		@XmlAttribute
 		private String path;
+
+		public static ErrorPageFilter create(Map<QName, String> attributes, Locator locator) {
+			ErrorPageFilter filter = new ErrorPageFilter();
+			filter.name = attributes.get(ATT_NAME);
+			filter.code = attributes.get(ATT_CODE);
+			filter.path = attributes.get(ATT_PATH);
+
+			return filter;
+		}
 
 		@Override
 		public HttpHandler configure(HttpHandler handler, Predicate predicate) {
@@ -380,12 +392,21 @@ public class UndertowSubsystem {
 		}
 	}
 
-	@XmlType(name = "customFilterType", namespace = NS_UNDERTOW)
 	public static class CustomFilter extends AbstractFilter {
-		@XmlAttribute(name = "class-name")
+		private static final QName ATT_CLASS_NAME = new QName("class-name");
+		private static final QName ATT_MODULE = new QName("module");
+
 		private String className;
-		@XmlAttribute
 		private String module;
+
+		public static CustomFilter create(Map<QName, String> attributes, Locator locator) {
+			CustomFilter filter = new CustomFilter();
+			filter.name = attributes.get(ATT_NAME);
+			filter.className = attributes.get(ATT_CLASS_NAME);
+			filter.module = attributes.get(ATT_MODULE);
+
+			return filter;
+		}
 
 		@Override
 		public HttpHandler configure(HttpHandler handler, Predicate predicate) {
@@ -410,12 +431,21 @@ public class UndertowSubsystem {
 		}
 	}
 
-	@XmlType(name = "expressionFilterType", namespace = NS_UNDERTOW)
 	public static class ExpressionFilter extends AbstractFilter {
-		@XmlAttribute(name = "expression")
+		private static final QName ATT_EXPRESSION = new QName("expression");
+		private static final QName ATT_MODULE = new QName("module");
+
 		private String expression;
-		@XmlAttribute
 		private String module;
+
+		public static ExpressionFilter create(Map<QName, String> attributes, Locator locator) {
+			ExpressionFilter filter = new ExpressionFilter();
+			filter.name = attributes.get(ATT_NAME);
+			filter.expression = attributes.get(ATT_EXPRESSION);
+			filter.module = attributes.get(ATT_MODULE);
+
+			return filter;
+		}
 
 		@Override
 		public HttpHandler configure(HttpHandler handler, Predicate predicate) {
@@ -444,8 +474,15 @@ public class UndertowSubsystem {
 		}
 	}
 
-	@XmlType(name = "gzipType", namespace = NS_UNDERTOW)
 	public static class GzipFilter extends AbstractFilter {
+
+		public static GzipFilter create(Map<QName, String> attributes, Locator locator) {
+			GzipFilter filter = new GzipFilter();
+			filter.name = attributes.get(ATT_NAME);
+
+			return filter;
+		}
+
 		@Override
 		public HttpHandler configure(HttpHandler handler, Predicate predicate) {
 			if (predicate == null) {
@@ -456,12 +493,21 @@ public class UndertowSubsystem {
 		}
 	}
 
-	@XmlType(name = "request-limitType", namespace = NS_UNDERTOW)
 	public static class RequestLimitFilter extends AbstractFilter {
-		@XmlAttribute(name = "max-concurrent-requests")
+		private static final QName ATT_MAX_CONCURRENT_REQUESTS = new QName("max-concurrent-requests");
+		private static final QName ATT_QUEUE_SIZE = new QName("queue-size");
+
 		private Integer maxConcurrentRequests = 100;
-		@XmlAttribute(name = "queue-size")
 		private Integer queueSize = 0;
+
+		public static RequestLimitFilter create(Map<QName, String> attributes, Locator locator) throws SAXParseException {
+			RequestLimitFilter filter = new RequestLimitFilter();
+			filter.name = attributes.get(ATT_NAME);
+			filter.maxConcurrentRequests = ParserUtils.toInteger(attributes.get(ATT_MAX_CONCURRENT_REQUESTS), locator, 100);
+			filter.queueSize = ParserUtils.toInteger(attributes.get(ATT_QUEUE_SIZE), locator, 0);
+
+			return filter;
+		}
 
 		public Integer getMaxConcurrentRequests() {
 			return maxConcurrentRequests;
@@ -489,12 +535,21 @@ public class UndertowSubsystem {
 		}
 	}
 
-	@XmlType(name = "rewriteFilterType", namespace = NS_UNDERTOW)
 	public static class RewriteFilter extends AbstractFilter {
-		@XmlAttribute
+		private static final QName ATT_TARGET = new QName("target");
+		private static final QName ATT_REDIRECT = new QName("redirect");
+
 		private String target;
-		@XmlAttribute
 		private String redirect;
+
+		public static RewriteFilter create(Map<QName, String> attributes, Locator locator) {
+			RewriteFilter filter = new RewriteFilter();
+			filter.name = attributes.get(ATT_NAME);
+			filter.target = attributes.get(ATT_TARGET);
+			filter.redirect = attributes.get(ATT_REDIRECT);
+
+			return filter;
+		}
 
 		public String getTarget() {
 			return target;

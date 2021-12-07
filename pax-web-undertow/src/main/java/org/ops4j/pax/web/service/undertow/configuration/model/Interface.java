@@ -17,22 +17,25 @@ package org.ops4j.pax.web.service.undertow.configuration.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import java.util.Map;
+import javax.xml.namespace.QName;
 
-import static org.ops4j.pax.web.service.undertow.configuration.model.ObjectFactory.NS_WILDFLY;
+import org.xml.sax.Locator;
 
-@XmlType(name = "named-interfaceType", namespace = NS_WILDFLY, propOrder = {
-		"addresses"
-})
 public class Interface {
 
-	@XmlAttribute
+	private static final QName ATT_NAME = new QName("name");
+
 	private String name;
 
-	@XmlElement(name = "inet-address")
 	private final List<InetAddress> addresses = new ArrayList<>();
+
+	public static Interface create(Map<QName, String> attributes) {
+		Interface iface = new Interface();
+		iface.name = attributes.get(ATT_NAME);
+
+		return iface;
+	}
 
 	public String getName() {
 		return name;
@@ -53,10 +56,17 @@ public class Interface {
 				" }";
 	}
 
-	@XmlType(name = "inet-addressType", namespace = NS_WILDFLY)
 	public static class InetAddress {
-		@XmlAttribute(name = "value")
+		private static final QName ATT_VALUE = new QName("value");
+
 		private String ip;
+
+		public static InetAddress create(Map<QName, String> attributes, Locator locator) {
+			InetAddress address = new InetAddress();
+			address.ip = attributes.get(ATT_VALUE);
+
+			return address;
+		}
 
 		public String getIp() {
 			return ip;

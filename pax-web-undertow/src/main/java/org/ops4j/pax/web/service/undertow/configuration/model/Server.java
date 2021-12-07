@@ -20,33 +20,33 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import java.util.Map;
+import javax.xml.namespace.QName;
 
 import io.undertow.protocols.http2.Http2Channel;
+import org.ops4j.pax.web.service.undertow.internal.configuration.ParserUtils;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXParseException;
 import org.xnio.SslClientAuthMode;
 
-import static org.ops4j.pax.web.service.undertow.configuration.model.ObjectFactory.NS_UNDERTOW;
-
-@XmlType(name = "serverType", namespace = NS_UNDERTOW, propOrder = {
-		"httpListeners",
-		"httpsListeners",
-		"host"
-})
 public class Server {
 
-	@XmlAttribute
+	protected static final QName ATT_NAME = new QName("name");
+
 	private String name;
 
-	@XmlElement(name = "http-listener")
 	private final List<HttpListener> httpListeners = new LinkedList<>();
 
-	@XmlElement(name = "https-listener")
 	private final List<HttpsListener> httpsListeners = new LinkedList<>();
 
-	@XmlElement
 	private Host host;
+
+	public static Server create(Map<QName, String> attributes, Locator locator) {
+		Server server = new Server();
+		server.name = attributes.get(ATT_NAME);
+
+		return server;
+	}
 
 	public String getName() {
 		return name;
@@ -94,7 +94,6 @@ public class Server {
 	//  - WRITE_TIMEOUT = OptionAttributeDefinition.builder("write-timeout", Options.WRITE_TIMEOUT).setAllowExpression(true).setMeasurementUnit(MeasurementUnit.MILLISECONDS).build();
 	//  - MAX_CONNECTIONS = OptionAttributeDefinition.builder(Constants.MAX_CONNECTIONS, Options.CONNECTION_HIGH_WATER).setValidator(new IntRangeValidator(1)).setAllowExpression(true).build();
 
-	@XmlType(name = "socket-options-type", namespace = NS_UNDERTOW)
 	public abstract static class SocketOptions {
 
 		// org.wildfly.extension.undertow.ListenerResourceDefinition#SOCKET_OPTIONS
@@ -103,46 +102,39 @@ public class Server {
 		 * XNIO: org.xnio.Options#RECEIVE_BUFFER, Java: java.net.ServerSocket#setReceiveBufferSize(int),
 		 * java.net.SocketOptions#SO_RCVBUF, default: 0x10000 (org.xnio.nio.AbstractNioChannel#DEFAULT_BUFFER_SIZE)
 		 */
-		@XmlAttribute(name = "receive-buffer")
 		protected int receiveBuffer = 0x10000;
 
 		/**
 		 * XNIO: org.xnio.Options#SEND_BUFFER, Java: java.net.Socket#setSendBufferSize(int),
 		 * java.net.SocketOptions#SO_SNDBUF, default: 0x10000 (org.xnio.nio.AbstractNioChannel#DEFAULT_BUFFER_SIZE)
 		 */
-		@XmlAttribute(name = "send-buffer")
 		protected int sendBuffer = 0x10000;
 
 		/**
 		 * XNIO: org.xnio.Options#BACKLOG, Java: 2nd parameter of
 		 * java.net.ServerSocket#bind(java.net.SocketAddress, int), default: 128 or 50 when using 1-arg bind().
 		 */
-		@XmlAttribute(name = "tcp-backlog")
 		protected int tcpBacklog = 128;
 
 		/**
 		 * XNIO: org.xnio.Options#KEEP_ALIVE, Java: java.net.Socket#setKeepAlive(boolean),
 		 * java.net.SocketOptions#SO_KEEPALIVE, default: false
 		 */
-		@XmlAttribute(name = "tcp-keep-alive")
 		protected boolean tcpKeepAlive = false;
 
 		/**
 		 * XNIO: org.xnio.Options#READ_TIMEOUT (in ms), default: 0
 		 */
-		@XmlAttribute(name = "read-timeout")
 		protected int readTimeout = 0;
 
 		/**
 		 * XNIO: org.xnio.Options#WRITE_TIMEOUT (in ms), default: 0
 		 */
-		@XmlAttribute(name = "write-timeout")
 		protected int writeTimeout = 0;
 
 		/**
 		 * XNIO: org.xnio.Options#CONNECTION_HIGH_WATER
 		 */
-		@XmlAttribute(name = "max-connections")
 		protected int maxConnections = Integer.MAX_VALUE;
 
 		public int getReceiveBuffer() {
@@ -236,29 +228,54 @@ public class Server {
 	//  - RFC6265_COOKIE_VALIDATION = OptionAttributeDefinition.builder("rfc6265-cookie-validation", UndertowOptions.ENABLE_RFC6265_COOKIE_VALIDATION).setDefaultValue(ModelNode.FALSE).setRequired(false).setAllowExpression(true).build();
 	//  - ALLOW_UNESCAPED_CHARACTERS_IN_URL = OptionAttributeDefinition.builder("allow-unescaped-characters-in-url", UndertowOptions.ALLOW_UNESCAPED_CHARACTERS_IN_URL).setDefaultValue(ModelNode.FALSE).setRequired(false).setAllowExpression(true).build();
 
-	@XmlType(name = "listener-type", namespace = NS_UNDERTOW)
 	public abstract static class Listener extends SocketOptions {
+		// org.ops4j.pax.web.service.undertow.configuration.model.Server.SocketOptions
+		protected static final QName ATT_RECEIVE_BUFFER = new QName("receive-buffer");
+		protected static final QName ATT_SEND_BUFFER = new QName("send-buffer");
+		protected static final QName ATT_TCP_BACKLOG = new QName("tcp-backlog");
+		protected static final QName ATT_TCP_KEEP_ALIVE = new QName("tcp-keep-alive");
+		protected static final QName ATT_READ_TIMEOUT = new QName("read-timeout");
+		protected static final QName ATT_WRITE_TIMEOUT = new QName("write-timeout");
+		protected static final QName ATT_MAX_CONNECTIONS = new QName("max-connections");
+		// org.ops4j.pax.web.service.undertow.configuration.model.Server.Listener
+		protected static final QName ATT_NAME = new QName("name");
+		protected static final QName ATT_SOCKET_BINDING = new QName("socket-binding");
+		protected static final QName ATT_WORKER = new QName("worker");
+		protected static final QName ATT_BUFFER_POOL = new QName("buffer-pool");
+		protected static final QName ATT_ENABLED = new QName("enabled");
+		protected static final QName ATT_RESOLVE_PEER_ADDRESS = new QName("resolve-peer-address");
+		protected static final QName ATT_DISALLOWED_METHODS = new QName("disallowed-methods");
+		protected static final QName ATT_SECURE = new QName("secure");
+		protected static final QName ATT_MAX_POST_SIZE = new QName("max-post-size");
+		protected static final QName ATT_BUFFER_PIPELINED_DATA = new QName("buffer-pipelined-data");
+		protected static final QName ATT_MAX_HEADER_SIZE = new QName("max-header-size");
+		protected static final QName ATT_MAX_PARAMETERS = new QName("max-parameters");
+		protected static final QName ATT_MAX_HEADERS = new QName("max-headers");
+		protected static final QName ATT_MAX_COOKIES = new QName("max-cookies");
+		protected static final QName ATT_ALLOW_ENCODED_SLASH = new QName("allow-encoded-slash");
+		protected static final QName ATT_DECODE_URL = new QName("decode-url");
+		protected static final QName ATT_URL_CHARSET = new QName("url-charset");
+		protected static final QName ATT_ALWAYS_SET_KEEP_ALIVE = new QName("always-set-keep-alive");
+		protected static final QName ATT_MAX_BUFFERED_REQUEST_SIZE = new QName("max-buffered-request-size");
+		protected static final QName ATT_RECORD_REQUEST_START_TIME = new QName("record-request-start-time");
+		protected static final QName ATT_ALLOW_EQUALS_IN_COOKIE_VALUE = new QName("allow-equals-in-cookie-value");
+		protected static final QName ATT_NO_REQUEST_TIMEOUT = new QName("no-request-timeout");
+		protected static final QName ATT_REQUEST_PARSE_TIMEOUT = new QName("request-parse-timeout");
+		protected static final QName ATT_RFC6265_COOKIE_VALIDATION = new QName("rfc6265-cookie-validation");
+		protected static final QName ATT_ALLOW_UNESCAPED_CHARACTERS_IN_URL = new QName("allow-unescaped-characters-in-url");
 
-		@XmlAttribute
 		protected String name;
 
 		// meta information
 		// generic attributes defined in static block of org.wildfly.extension.undertow.ListenerResourceDefinition
 		// ATTRIBUTES = new LinkedHashSet<>(Arrays.asList(SOCKET_BINDING, WORKER, BUFFER_POOL, ENABLED, RESOLVE_PEER_ADDRESS, DISALLOWED_METHODS, SECURE));
 
-		@XmlAttribute(name = "socket-binding")
 		protected String socketBindingName;
-		@XmlAttribute(name = "worker")
 		protected String workerName = "default";
-		@XmlAttribute(name = "buffer-pool")
 		protected String bufferPoolName = "default";
-		@XmlAttribute
 		protected boolean enabled = true;
-		@XmlAttribute(name = "resolve-peer-address")
 		protected boolean resolvePeerAddress = false;
-		@XmlAttribute(name = "disallowed-methods")
 		protected List<String> disallowedMethods = new LinkedList<>(Collections.singletonList("TRACE"));
-		@XmlAttribute
 		protected boolean secure = false;
 
 		// org.wildfly.extension.undertow.ListenerResourceDefinition#LISTENER_OPTIONS
@@ -266,103 +283,86 @@ public class Server {
 		/**
 		 * Undertow: io.undertow.UndertowOptions#MAX_ENTITY_SIZE
 		 */
-		@XmlAttribute(name = "max-post-size")
 		protected long maxPostSize = 10485760L;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#BUFFER_PIPELINED_DATA
 		 */
-		@XmlAttribute(name = "buffer-pipelined-data")
 		protected boolean bufferPipelinedData = false;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#MAX_HEADER_SIZE
 		 */
-		@XmlAttribute(name = "max-header-size")
 		protected int maxHeaderSize = 1048576;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#MAX_PARAMETERS
 		 */
-		@XmlAttribute(name = "max-parameters")
 		protected int maxParameters = 1000;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#MAX_HEADERS
 		 */
-		@XmlAttribute(name = "max-headers")
 		protected int maxHeaders = 200;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#MAX_COOKIES
 		 */
-		@XmlAttribute(name = "max-cookies")
 		protected int maxCookies = 200;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#ALLOW_ENCODED_SLASH
 		 */
-		@XmlAttribute(name = "allow-encoded-slash")
 		protected boolean allowEncodedSlash = false;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#DECODE_URL
 		 */
-		@XmlAttribute(name = "decode-url")
 		protected boolean decodeUrl = true;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#URL_CHARSET
 		 */
-		@XmlAttribute(name = "url-charset")
 		protected String urlCharset = StandardCharsets.UTF_8.name();
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#ALWAYS_SET_KEEP_ALIVE
 		 */
-		@XmlAttribute(name = "always-set-keep-alive")
 		protected boolean alwaysSetKeepAlive = true;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#MAX_BUFFERED_REQUEST_SIZE
 		 */
-		@XmlAttribute(name = "max-buffered-request-size")
 		protected int maxBufferedRequestSize = 16384;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#RECORD_REQUEST_START_TIME
 		 */
-		@XmlAttribute(name = "record-request-start-time")
 		protected boolean recordRequestStartTime = false;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#ALLOW_EQUALS_IN_COOKIE_VALUE
 		 */
-		@XmlAttribute(name = "allow-equals-in-cookie-value")
 		protected boolean allowEqualsInCookieValue = false;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#NO_REQUEST_TIMEOUT
 		 */
-		@XmlAttribute(name = "no-request-timeout")
 		protected int noRequestTimeout = 60000;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#REQUEST_PARSE_TIMEOUT
 		 */
-		@XmlAttribute(name = "request-parse-timeout")
 		protected int requestParseTimeout = 60000;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#ENABLE_RFC6265_COOKIE_VALIDATION
 		 */
-		@XmlAttribute(name = "rfc6265-cookie-validation")
 		protected boolean rfc6265CookieValidation = false;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#ALLOW_UNESCAPED_CHARACTERS_IN_URL
 		 */
-		@XmlAttribute(name = "allow-unescaped-characters-in-url")
 		protected boolean allowUnescapedCharactersInUrl = false;
 
 		public String getName() {
@@ -619,70 +619,122 @@ public class Server {
 
 	// http-listener-type (some atrributes have different type in XSD and different in Wildfly extension model)
 
-	@XmlType(name = "http-listener-type", namespace = NS_UNDERTOW)
 	public static class HttpListener extends Listener {
+		protected static final QName ATT_CERTIFICATE_FORWARDING = new QName("certificate-forwarding");
+		protected static final QName ATT_REDIRECT_SOCKET = new QName("redirect-socket");
+		protected static final QName ATT_PROXY_ADDRESS_FORWARDING = new QName("proxy-address-forwarding");
+		protected static final QName ATT_ENABLE_HTTP2 = new QName("enable-http2");
+		protected static final QName ATT_HTTP2_ENABLE_PUSH = new QName("http2-enable-push");
+		protected static final QName ATT_HTTP2_HEADER_TABLE_SIZE = new QName("http2-header-table-size");
+		protected static final QName ATT_HTTP2_INITIAL_WINDOW_SIZE = new QName("http2-initial-window-size");
+		protected static final QName ATT_HTTP2_MAX_CONCURRENT_STREAMS = new QName("http2-max-concurrent-streams");
+		protected static final QName ATT_HTTP2_MAX_FRAME_SIZE = new QName("http2-max-frame-size");
+		protected static final QName ATT_HTTP2_MAX_HEADER_LIST_SIZE = new QName("http2-max-header-list-size");
+		protected static final QName ATT_REQUIRE_HOST_HTTP11 = new QName("require-host-http11");
+		protected static final QName ATT_PROXY_PROTOCOL = new QName("proxy-protocol");
 
-		@XmlAttribute(name = "certificate-forwarding")
 		private boolean certificateForwarding = false;
 
-		@XmlAttribute(name = "redirect-socket")
 		private String redirectSocket;
 
-		@XmlAttribute(name = "proxy-address-forwarding")
 		private boolean proxyAddressForwarding = false;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#ENABLE_HTTP2
 		 */
-		@XmlAttribute(name = "enable-http2")
 		private boolean enableHttp2 = false;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_ENABLE_PUSH
 		 */
-		@XmlAttribute(name = "http2-enable-push")
 		private boolean http2EnablePush = false;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_HEADER_TABLE_SIZE, defaults to
 		 * io.undertow.UndertowOptions#HTTP2_SETTINGS_HEADER_TABLE_SIZE_DEFAULT
 		 */
-		@XmlAttribute(name = "http2-header-table-size")
 		private int http2HeaderTableSize = io.undertow.UndertowOptions.HTTP2_SETTINGS_HEADER_TABLE_SIZE_DEFAULT;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_INITIAL_WINDOW_SIZE, defaults to
 		 * io.undertow.protocols.http2.Http2Channel#DEFAULT_INITIAL_WINDOW_SIZE
 		 */
-		@XmlAttribute(name = "http2-initial-window-size")
 		private int http2InitialWindowSize = Http2Channel.DEFAULT_INITIAL_WINDOW_SIZE;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_MAX_CONCURRENT_STREAMS
 		 */
-		@XmlAttribute(name = "http2-max-concurrent-streams")
 		private Integer http2MaxConcurrentStreams;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_MAX_FRAME_SIZE
 		 */
-		@XmlAttribute(name = "http2-max-frame-size")
 		private int http2MaxFrameSize = Http2Channel.DEFAULT_MAX_FRAME_SIZE;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_MAX_HEADER_LIST_SIZE
 		 */
-		@XmlAttribute(name = "http2-max-header-list-size")
 		private Integer http2MaxHeaderListSize;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#REQUIRE_HOST_HTTP11
 		 */
-		@XmlAttribute(name = "require-host-http11")
 		private boolean requireHostHttp11 = false;
 
-		@XmlAttribute(name = "proxy-protocol")
 		private boolean proxyProtocol = false;
+
+		public static HttpListener create(Map<QName, String> attributes, Locator locator) throws SAXParseException {
+			HttpListener listener = new HttpListener();
+			// org.ops4j.pax.web.service.undertow.configuration.model.Server.SocketOptions
+			listener.receiveBuffer = ParserUtils.toInteger(attributes.get(ATT_RECEIVE_BUFFER), locator, 0x10000);
+			listener.sendBuffer = ParserUtils.toInteger(attributes.get(ATT_SEND_BUFFER), locator, 0x10000);
+			listener.tcpBacklog = ParserUtils.toInteger(attributes.get(ATT_TCP_BACKLOG), locator, 128);
+			listener.tcpKeepAlive = ParserUtils.toBoolean(attributes.get(ATT_TCP_KEEP_ALIVE), locator, false);
+			listener.readTimeout = ParserUtils.toInteger(attributes.get(ATT_READ_TIMEOUT), locator, 0);
+			listener.writeTimeout = ParserUtils.toInteger(attributes.get(ATT_WRITE_TIMEOUT), locator, 0);
+			listener.maxConnections = ParserUtils.toInteger(attributes.get(ATT_MAX_CONNECTIONS), locator, Integer.MAX_VALUE);
+			// org.ops4j.pax.web.service.undertow.configuration.model.Server.Listener
+			listener.name = attributes.get(ATT_NAME);
+			listener.socketBindingName = attributes.get(ATT_SOCKET_BINDING);
+			listener.workerName = ParserUtils.toStringValue(attributes.get(ATT_WORKER), locator, "default");
+			listener.bufferPoolName = ParserUtils.toStringValue(attributes.get(ATT_BUFFER_POOL), locator, "default");
+			listener.enabled = ParserUtils.toBoolean(attributes.get(ATT_ENABLED), locator, true);
+			listener.resolvePeerAddress = ParserUtils.toBoolean(attributes.get(ATT_RESOLVE_PEER_ADDRESS), locator, false);
+			listener.disallowedMethods.addAll(ParserUtils.toStringList(attributes.get(ATT_DISALLOWED_METHODS), locator));
+			listener.secure = ParserUtils.toBoolean(attributes.get(ATT_SECURE), locator, false);
+			listener.maxPostSize = ParserUtils.toLong(attributes.get(ATT_MAX_POST_SIZE), locator, 10485760L);
+			listener.bufferPipelinedData = ParserUtils.toBoolean(attributes.get(ATT_BUFFER_PIPELINED_DATA), locator, false);
+			listener.maxHeaderSize = ParserUtils.toInteger(attributes.get(ATT_MAX_HEADER_SIZE), locator, 1048576);
+			listener.maxParameters = ParserUtils.toInteger(attributes.get(ATT_MAX_PARAMETERS), locator, 1000);
+			listener.maxHeaders = ParserUtils.toInteger(attributes.get(ATT_MAX_HEADERS), locator, 200);
+			listener.maxCookies = ParserUtils.toInteger(attributes.get(ATT_MAX_COOKIES), locator, 200);
+			listener.allowEncodedSlash = ParserUtils.toBoolean(attributes.get(ATT_ALLOW_ENCODED_SLASH), locator, false);
+			listener.decodeUrl = ParserUtils.toBoolean(attributes.get(ATT_DECODE_URL), locator, true);
+			listener.urlCharset = ParserUtils.toStringValue(attributes.get(ATT_URL_CHARSET), locator, StandardCharsets.UTF_8.name());
+			listener.alwaysSetKeepAlive = ParserUtils.toBoolean(attributes.get(ATT_ALWAYS_SET_KEEP_ALIVE), locator, true);
+			listener.maxBufferedRequestSize = ParserUtils.toInteger(attributes.get(ATT_MAX_BUFFERED_REQUEST_SIZE), locator, 16384);
+			listener.recordRequestStartTime = ParserUtils.toBoolean(attributes.get(ATT_RECORD_REQUEST_START_TIME), locator, false);
+			listener.allowEqualsInCookieValue = ParserUtils.toBoolean(attributes.get(ATT_ALLOW_EQUALS_IN_COOKIE_VALUE), locator, false);
+			listener.noRequestTimeout = ParserUtils.toInteger(attributes.get(ATT_NO_REQUEST_TIMEOUT), locator, 60000);
+			listener.requestParseTimeout = ParserUtils.toInteger(attributes.get(ATT_REQUEST_PARSE_TIMEOUT), locator, 60000);
+			listener.rfc6265CookieValidation = ParserUtils.toBoolean(attributes.get(ATT_RFC6265_COOKIE_VALIDATION), locator, false);
+			listener.allowUnescapedCharactersInUrl = ParserUtils.toBoolean(attributes.get(ATT_ALLOW_UNESCAPED_CHARACTERS_IN_URL), locator, false);
+			// org.ops4j.pax.web.service.undertow.configuration.model.Server.HttpListener
+			listener.certificateForwarding = ParserUtils.toBoolean(attributes.get(ATT_CERTIFICATE_FORWARDING), locator, false);
+			listener.redirectSocket = attributes.get(ATT_REDIRECT_SOCKET);
+			listener.proxyAddressForwarding = ParserUtils.toBoolean(attributes.get(ATT_PROXY_ADDRESS_FORWARDING), locator, false);
+			listener.enableHttp2 = ParserUtils.toBoolean(attributes.get(ATT_ENABLE_HTTP2), locator, false);
+			listener.http2EnablePush = ParserUtils.toBoolean(attributes.get(ATT_HTTP2_ENABLE_PUSH), locator, false);
+			listener.http2HeaderTableSize = ParserUtils.toInteger(attributes.get(ATT_HTTP2_HEADER_TABLE_SIZE), locator, io.undertow.UndertowOptions.HTTP2_SETTINGS_HEADER_TABLE_SIZE_DEFAULT);
+			listener.http2InitialWindowSize = ParserUtils.toInteger(attributes.get(ATT_HTTP2_INITIAL_WINDOW_SIZE), locator, Http2Channel.DEFAULT_INITIAL_WINDOW_SIZE);
+			listener.http2MaxConcurrentStreams = ParserUtils.toInteger(attributes.get(ATT_HTTP2_MAX_CONCURRENT_STREAMS), locator, null);
+			listener.http2MaxFrameSize = ParserUtils.toInteger(attributes.get(ATT_HTTP2_MAX_FRAME_SIZE), locator, Http2Channel.DEFAULT_MAX_FRAME_SIZE);
+			listener.http2MaxHeaderListSize = ParserUtils.toInteger(attributes.get(ATT_HTTP2_MAX_HEADER_LIST_SIZE), locator, null);
+			listener.requireHostHttp11 = ParserUtils.toBoolean(attributes.get(ATT_REQUIRE_HOST_HTTP11), locator, false);
+			listener.proxyProtocol = ParserUtils.toBoolean(attributes.get(ATT_PROXY_PROTOCOL), locator, false);
+
+			return listener;
+		}
 
 		@Override
 		public boolean isCertificateForwarding() {
@@ -811,114 +863,181 @@ public class Server {
 		}
 	}
 
-	@XmlType(name = "https-listener-type", namespace = NS_UNDERTOW)
 	public static class HttpsListener extends Listener {
+		protected static final QName ATT_SSL_CONTEXT = new QName("ssl-context");
+		protected static final QName ATT_CERTIFICATE_FORWARDING = new QName("certificate-forwarding");
+		protected static final QName ATT_PROXY_ADDRESS_FORWARDING = new QName("proxy-address-forwarding");
+		protected static final QName ATT_SECURITY_REALM = new QName("security-realm");
+		protected static final QName ATT_VERIFY_CLIENT = new QName("verify-client");
+		protected static final QName ATT_ENABLED_CIPHER_SUITES = new QName("enabled-cipher-suites");
+		protected static final QName ATT_ENABLED_PROTOCOLS = new QName("enabled-protocols");
+		protected static final QName ATT_ENABLE_HTTP2 = new QName("enable-http2");
+		protected static final QName ATT_ENABLE_SPDY = new QName("enable-spdy");
+		protected static final QName ATT_SSL_SESSION_CACHE_SIZE = new QName("ssl-session-cache-size");
+		protected static final QName ATT_SSL_SESSION_TIMEOUT = new QName("ssl-session-timeout");
+		protected static final QName ATT_HTTP2_ENABLE_PUSH = new QName("http2-enable-push");
+		protected static final QName ATT_HTTP2_HEADER_TABLE_SIZE = new QName("http2-header-table-size");
+		protected static final QName ATT_HTTP2_INITIAL_WINDOW_SIZE = new QName("http2-initial-window-size");
+		protected static final QName ATT_HTTP2_MAX_CONCURRENT_STREAMS = new QName("http2-max-concurrent-streams");
+		protected static final QName ATT_HTTP2_MAX_FRAME_SIZE = new QName("http2-max-frame-size");
+		protected static final QName ATT_HTTP2_MAX_HEADER_LIST_SIZE = new QName("http2-max-header-list-size");
+		protected static final QName ATT_REQUIRE_HOST_HTTP11 = new QName("require-host-http11");
+		protected static final QName ATT_PROXY_PROTOCOL = new QName("proxy-protocol");
 
-		@XmlAttribute(name = "ssl-context")
 		private String sslContext;
 
-		@XmlAttribute(name = "certificate-forwarding")
 		private boolean certificateForwarding = false;
 
-		@XmlAttribute(name = "proxy-address-forwarding")
 		private boolean proxyAddressForwarding = false;
 
 		// legacy in urn:jboss:domain:undertow:4.0 - but still used in pax-web
 		// but "ssl-context" used in Wildfly integrates harder with the Wildfly itself, so "security-realm" is
 		// the mechanism to configure security
-		@XmlAttribute(name = "security-realm")
 		private String securityRealm;
 
 		/**
 		 * XNIO: org.xnio.Options#SSL_CLIENT_AUTH_MODE
 		 */
-		@XmlAttribute(name = "verify-client")
 		private SslClientAuthMode verifyClient = SslClientAuthMode.NOT_REQUESTED;
 
 		/**
 		 * XNIO: org.xnio.Options#SSL_ENABLED_CIPHER_SUITES
 		 */
-		@XmlAttribute(name = "enabled-cipher-suites")
 		private List<String> enabledCipherSuites = new ArrayList<>();
 
 		/**
 		 * XNIO: org.xnio.Options#SSL_ENABLED_PROTOCOLS
 		 */
-		@XmlAttribute(name = "enabled-protocols")
 		private List<String> enabledProtocols = new ArrayList<>();
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#ENABLE_HTTP2
 		 */
-		@XmlAttribute(name = "enable-http2")
 		private boolean enableHttp2 = false;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#ENABLE_SPDY
 		 */
-		@XmlAttribute(name = "enable-spdy")
 		@Deprecated
 		private boolean enableSpdy = false;
 
 		/**
 		 * XNIO: org.xnio.Options#SSL_SERVER_SESSION_CACHE_SIZE
 		 */
-		@XmlAttribute(name = "ssl-session-cache-size")
 		private int sslSessionCacheSize = 0;
 
-		//<xs:attribute name="" use="optional" type="xs:string"/>
 		/**
 		 * XNIO: org.xnio.Options#SSL_SERVER_SESSION_TIMEOUT
 		 */
-		@XmlAttribute(name = "ssl-session-timeout")
 		private int sslSessionTimeout = 0;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_ENABLE_PUSH
 		 */
-		@XmlAttribute(name = "http2-enable-push")
 		private boolean http2EnablePush = false;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_HEADER_TABLE_SIZE, defaults to
 		 * io.undertow.UndertowOptions#HTTP2_SETTINGS_HEADER_TABLE_SIZE_DEFAULT
 		 */
-		@XmlAttribute(name = "http2-header-table-size")
 		private int http2HeaderTableSize = io.undertow.UndertowOptions.HTTP2_SETTINGS_HEADER_TABLE_SIZE_DEFAULT;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_INITIAL_WINDOW_SIZE, defaults to
 		 * io.undertow.protocols.http2.Http2Channel#DEFAULT_INITIAL_WINDOW_SIZE
 		 */
-		@XmlAttribute(name = "http2-initial-window-size")
 		private int http2InitialWindowSize = Http2Channel.DEFAULT_INITIAL_WINDOW_SIZE;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_MAX_CONCURRENT_STREAMS
 		 */
-		@XmlAttribute(name = "http2-max-concurrent-streams")
 		private Integer http2MaxConcurrentStreams;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_MAX_FRAME_SIZE
 		 */
-		@XmlAttribute(name = "http2-max-frame-size")
 		private int http2MaxFrameSize = Http2Channel.DEFAULT_MAX_FRAME_SIZE;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_MAX_HEADER_LIST_SIZE
 		 */
-		@XmlAttribute(name = "http2-max-header-list-size")
 		private Integer http2MaxHeaderListSize;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#REQUIRE_HOST_HTTP11
 		 */
-		@XmlAttribute(name = "require-host-http11")
 		private boolean requireHostHttp11 = false;
 
-		@XmlAttribute(name = "proxy-protocol")
 		private boolean proxyProtocol = false;
+
+		public static HttpsListener create(Map<QName, String> attributes, Locator locator) throws SAXParseException {
+			HttpsListener listener = new HttpsListener();
+			// org.ops4j.pax.web.service.undertow.configuration.model.Server.SocketOptions
+			listener.receiveBuffer = ParserUtils.toInteger(attributes.get(ATT_RECEIVE_BUFFER), locator, 0x10000);
+			listener.sendBuffer = ParserUtils.toInteger(attributes.get(ATT_SEND_BUFFER), locator, 0x10000);
+			listener.tcpBacklog = ParserUtils.toInteger(attributes.get(ATT_TCP_BACKLOG), locator, 128);
+			listener.tcpKeepAlive = ParserUtils.toBoolean(attributes.get(ATT_TCP_KEEP_ALIVE), locator, false);
+			listener.readTimeout = ParserUtils.toInteger(attributes.get(ATT_READ_TIMEOUT), locator, 0);
+			listener.writeTimeout = ParserUtils.toInteger(attributes.get(ATT_WRITE_TIMEOUT), locator, 0);
+			listener.maxConnections = ParserUtils.toInteger(attributes.get(ATT_MAX_CONNECTIONS), locator, Integer.MAX_VALUE);
+			// org.ops4j.pax.web.service.undertow.configuration.model.Server.Listener
+			listener.name = attributes.get(ATT_NAME);
+			listener.socketBindingName = attributes.get(ATT_SOCKET_BINDING);
+			listener.workerName = ParserUtils.toStringValue(attributes.get(ATT_WORKER), locator, "default");
+			listener.bufferPoolName = ParserUtils.toStringValue(attributes.get(ATT_BUFFER_POOL), locator, "default");
+			listener.enabled = ParserUtils.toBoolean(attributes.get(ATT_ENABLED), locator, true);
+			listener.resolvePeerAddress = ParserUtils.toBoolean(attributes.get(ATT_RESOLVE_PEER_ADDRESS), locator, false);
+			listener.disallowedMethods.addAll(ParserUtils.toStringList(attributes.get(ATT_DISALLOWED_METHODS), locator));
+			listener.secure = ParserUtils.toBoolean(attributes.get(ATT_SECURE), locator, false);
+			listener.maxPostSize = ParserUtils.toLong(attributes.get(ATT_MAX_POST_SIZE), locator, 10485760L);
+			listener.bufferPipelinedData = ParserUtils.toBoolean(attributes.get(ATT_BUFFER_PIPELINED_DATA), locator, false);
+			listener.maxHeaderSize = ParserUtils.toInteger(attributes.get(ATT_MAX_HEADER_SIZE), locator, 1048576);
+			listener.maxParameters = ParserUtils.toInteger(attributes.get(ATT_MAX_PARAMETERS), locator, 1000);
+			listener.maxHeaders = ParserUtils.toInteger(attributes.get(ATT_MAX_HEADERS), locator, 200);
+			listener.maxCookies = ParserUtils.toInteger(attributes.get(ATT_MAX_COOKIES), locator, 200);
+			listener.allowEncodedSlash = ParserUtils.toBoolean(attributes.get(ATT_ALLOW_ENCODED_SLASH), locator, false);
+			listener.decodeUrl = ParserUtils.toBoolean(attributes.get(ATT_DECODE_URL), locator, true);
+			listener.urlCharset = ParserUtils.toStringValue(attributes.get(ATT_URL_CHARSET), locator, StandardCharsets.UTF_8.name());
+			listener.alwaysSetKeepAlive = ParserUtils.toBoolean(attributes.get(ATT_ALWAYS_SET_KEEP_ALIVE), locator, true);
+			listener.maxBufferedRequestSize = ParserUtils.toInteger(attributes.get(ATT_MAX_BUFFERED_REQUEST_SIZE), locator, 16384);
+			listener.recordRequestStartTime = ParserUtils.toBoolean(attributes.get(ATT_RECORD_REQUEST_START_TIME), locator, false);
+			listener.allowEqualsInCookieValue = ParserUtils.toBoolean(attributes.get(ATT_ALLOW_EQUALS_IN_COOKIE_VALUE), locator, false);
+			listener.noRequestTimeout = ParserUtils.toInteger(attributes.get(ATT_NO_REQUEST_TIMEOUT), locator, 60000);
+			listener.requestParseTimeout = ParserUtils.toInteger(attributes.get(ATT_REQUEST_PARSE_TIMEOUT), locator, 60000);
+			listener.rfc6265CookieValidation = ParserUtils.toBoolean(attributes.get(ATT_RFC6265_COOKIE_VALIDATION), locator, false);
+			listener.allowUnescapedCharactersInUrl = ParserUtils.toBoolean(attributes.get(ATT_ALLOW_UNESCAPED_CHARACTERS_IN_URL), locator, false);
+			// org.ops4j.pax.web.service.undertow.configuration.model.Server.HttpListener
+			listener.sslContext = attributes.get(ATT_SSL_CONTEXT);
+			listener.certificateForwarding = ParserUtils.toBoolean(attributes.get(ATT_CERTIFICATE_FORWARDING), locator, false);
+			listener.proxyAddressForwarding = ParserUtils.toBoolean(attributes.get(ATT_PROXY_ADDRESS_FORWARDING), locator, false);
+			listener.securityRealm = attributes.get(ATT_SECURITY_REALM);
+			String vc = attributes.get(ATT_VERIFY_CLIENT);
+			if (vc == null) {
+				listener.verifyClient = SslClientAuthMode.NOT_REQUESTED;
+			} else {
+				try {
+					listener.verifyClient = SslClientAuthMode.valueOf(vc);
+				} catch (IllegalArgumentException e) {
+					throw new SAXParseException("Can't parse \"" + vc + "\" as valid value for \"verify-client\" attribute", locator);
+				}
+			}
+			listener.enabledCipherSuites.addAll(ParserUtils.toStringList(attributes.get(ATT_ENABLED_CIPHER_SUITES), locator));
+			listener.enabledProtocols.addAll(ParserUtils.toStringList(attributes.get(ATT_ENABLED_PROTOCOLS), locator));
+			listener.enableHttp2 = ParserUtils.toBoolean(attributes.get(ATT_ENABLE_HTTP2), locator, false);
+			listener.enableSpdy = ParserUtils.toBoolean(attributes.get(ATT_ENABLE_HTTP2), locator, false);
+			listener.sslSessionCacheSize = ParserUtils.toInteger(attributes.get(ATT_SSL_SESSION_CACHE_SIZE), locator, 0);
+			listener.sslSessionTimeout = ParserUtils.toInteger(attributes.get(ATT_SSL_SESSION_TIMEOUT), locator, 0);
+			listener.http2EnablePush = ParserUtils.toBoolean(attributes.get(ATT_HTTP2_ENABLE_PUSH), locator, false);
+			listener.http2HeaderTableSize = ParserUtils.toInteger(attributes.get(ATT_HTTP2_HEADER_TABLE_SIZE), locator, io.undertow.UndertowOptions.HTTP2_SETTINGS_HEADER_TABLE_SIZE_DEFAULT);
+			listener.http2InitialWindowSize = ParserUtils.toInteger(attributes.get(ATT_HTTP2_INITIAL_WINDOW_SIZE), locator, Http2Channel.DEFAULT_INITIAL_WINDOW_SIZE);
+			listener.http2MaxConcurrentStreams = ParserUtils.toInteger(attributes.get(ATT_HTTP2_MAX_CONCURRENT_STREAMS), locator, null);
+			listener.http2MaxFrameSize = ParserUtils.toInteger(attributes.get(ATT_HTTP2_MAX_FRAME_SIZE), locator, Http2Channel.DEFAULT_MAX_FRAME_SIZE);
+			listener.http2MaxHeaderListSize = ParserUtils.toInteger(attributes.get(ATT_HTTP2_MAX_HEADER_LIST_SIZE), locator, null);
+			listener.requireHostHttp11 = ParserUtils.toBoolean(attributes.get(ATT_REQUIRE_HOST_HTTP11), locator, false);
+			listener.proxyProtocol = ParserUtils.toBoolean(attributes.get(ATT_PROXY_PROTOCOL), locator, false);
+
+			return listener;
+		}
 
 		public String getSslContext() {
 			return sslContext;
@@ -1115,24 +1234,25 @@ public class Server {
 		}
 	}
 
-	@XmlType(name = "hostType", namespace = NS_UNDERTOW, propOrder = {
-			"location",
-			"accessLog",
-			"filterRef"
-	})
 	public static class Host {
+		protected static final QName ATT_NAME = new QName("name");
+		protected static final QName ATT_ALIAS = new QName("alias");
 
-		@XmlAttribute
 		private String name;
-		@XmlAttribute
 		private String alias;
-		@XmlElement
 		private final List<Location> location = new ArrayList<>();
-		@XmlElement(name = "access-log")
 		private AccessLog accessLog;
-		@XmlElement(name = "filter-ref")
 		private final List<FilterRef> filterRef = new ArrayList<>();
+
 		// <xs:element name="console-access-log" type="consoleAccessLogType" minOccurs="0"/>
+
+		public static Host create(Map<QName, String> attributes, Locator locator) {
+			Host host = new Host();
+			host.name = attributes.get(ATT_NAME);
+			host.alias = attributes.get(ATT_ALIAS);
+
+			return host;
+		}
 
 		public String getName() {
 			return name;
@@ -1150,7 +1270,7 @@ public class Server {
 			this.alias = alias;
 		}
 
-		public List<Location> getLocation() {
+		public List<Location> getLocations() {
 			return location;
 		}
 
@@ -1162,7 +1282,7 @@ public class Server {
 			this.accessLog = accessLog;
 		}
 
-		public List<FilterRef> getFilterRef() {
+		public List<FilterRef> getFilterRefs() {
 			return filterRef;
 		}
 
@@ -1178,15 +1298,21 @@ public class Server {
 			return sb.toString();
 		}
 
-		@XmlType(name = "locationType", namespace = NS_UNDERTOW)
 		public static class Location {
+			protected static final QName ATT_NAME = new QName("name");
+			protected static final QName ATT_HANDLER = new QName("handler");
 
-			@XmlAttribute
 			private String name;
-			@XmlAttribute
 			private String handler;
-			@XmlElement(name = "filter-ref")
 			private final List<FilterRef> filterRef = new ArrayList<>();
+
+			public static Location create(Map<QName, String> attributes, Locator locator) {
+				Location location = new Location();
+				location.name = attributes.get(ATT_NAME);
+				location.handler = attributes.get(ATT_HANDLER);
+
+				return location;
+			}
 
 			public String getName() {
 				return name;
@@ -1204,7 +1330,7 @@ public class Server {
 				this.handler = handler;
 			}
 
-			public List<FilterRef> getFilterRef() {
+			public List<FilterRef> getFilterRefs() {
 				return filterRef;
 			}
 
@@ -1219,24 +1345,34 @@ public class Server {
 			}
 		}
 
-		@XmlType(name = "accessLogType", namespace = NS_UNDERTOW)
 		public static class AccessLog {
+			protected static final QName ATT_PATTERN = new QName("pattern");
+			protected static final QName ATT_DIRECTORY = new QName("directory");
+			protected static final QName ATT_PREFIX = new QName("prefix");
+			protected static final QName ATT_SUFFIX = new QName("suffix");
+			protected static final QName ATT_ROTATE = new QName("rotate");
 
-			@XmlAttribute
 			private String pattern = "common";
-			@XmlAttribute
 			private String directory;
-			@XmlAttribute
 			private String prefix = "access_log.";
-			@XmlAttribute
 			private String suffix = "log";
-			@XmlAttribute
 			private String rotate = "true";
 			//<xs:attribute name="worker" use="optional" type="xs:string" default="default"/>
 			//<xs:attribute name="relative-to" use="optional" type="xs:string" />
 			//<xs:attribute name="use-server-log" use="optional" type="xs:string" default="false"/>
 			//<xs:attribute name="extended" use="optional" type="xs:string" default="false" />
 			//<xs:attribute name="predicate" use="optional" type="xs:string" />
+
+			public static AccessLog create(Map<QName, String> attributes, Locator locator) {
+				AccessLog al = new AccessLog();
+				al.pattern = ParserUtils.toStringValue(attributes.get(ATT_PATTERN), locator, "common");
+				al.directory = attributes.get(ATT_DIRECTORY);
+				al.prefix = ParserUtils.toStringValue(attributes.get(ATT_PREFIX), locator, "access_log.");
+				al.suffix = ParserUtils.toStringValue(attributes.get(ATT_SUFFIX), locator, "log");
+				al.rotate = ParserUtils.toStringValue(attributes.get(ATT_ROTATE), locator, "true");
+
+				return al;
+			}
 
 			public String getPattern() {
 				return pattern;
@@ -1281,7 +1417,7 @@ public class Server {
 			@Override
 			public String toString() {
 				final StringBuilder sb = new StringBuilder("{ ");
-				sb.append("pattern: ").append(pattern).append('\'');
+				sb.append("pattern: '").append(pattern).append('\'');
 				sb.append(", directory: ").append(directory);
 				sb.append(", prefix: ").append(prefix);
 				sb.append(", suffix: ").append(suffix);
@@ -1291,13 +1427,20 @@ public class Server {
 			}
 		}
 
-		@XmlType(name = "filter-refType", namespace = NS_UNDERTOW)
 		public static class FilterRef {
+			protected static final QName ATT_NAME = new QName("name");
+			protected static final QName ATT_PREDICATE = new QName("predicate");
 
-			@XmlAttribute
 			private String name;
-			@XmlAttribute
 			private String predicate;
+
+			public static FilterRef create(Map<QName, String> attributes, Locator locator) {
+				FilterRef ref = new FilterRef();
+				ref.name = attributes.get(ATT_NAME);
+				ref.predicate = attributes.get(ATT_PREDICATE);
+
+				return ref;
+			}
 
 			public String getName() {
 				return name;
@@ -1319,7 +1462,7 @@ public class Server {
 			public String toString() {
 				final StringBuilder sb = new StringBuilder("{ ");
 				sb.append("name: ").append(name);
-				sb.append("predicate: ").append(predicate);
+				sb.append(", predicate: ").append(predicate);
 				sb.append(" }");
 				return sb.toString();
 			}
