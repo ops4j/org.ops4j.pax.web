@@ -483,7 +483,6 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 			// OsgiContextModel.DEFAULT_CONTEXT_MODEL. We will use OsgiContextModel.DEFAULT_CONTEXT_MODEL to
 			// call the supplier of the context, so we'll get nice delegate for our MultiBundleWebContainerContext
 			Batch batch = new Batch("Initialization of shared HttpContext \"" + contextId + "\"");
-			ServletContextModel scm = getOrCreateServletContextModel(PaxWebConstants.DEFAULT_CONTEXT_PATH, batch);
 
 			// the behavioral aspects from the DEFAULT_CONTEXT_MODEL - wcc will have proper id/name
 			WebContainerContext wcc = OsgiContextModel.DEFAULT_CONTEXT_MODEL.getContextSupplier().apply(null, contextId);
