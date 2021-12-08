@@ -15,12 +15,14 @@
  */
 package org.ops4j.pax.web.itest.karaf;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
 
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
@@ -41,10 +43,16 @@ public abstract class WebConsoleBaseKarafTest extends AbstractKarafTestBase {
 
 	@Before
 	public void setUp() throws Exception {
+		bundle("org.apache.felix.configadmin").stop(Bundle.STOP_TRANSIENT);
 		final Bundle wc = bundle("org.apache.felix.webconsole");
 		if (wc.getState() != Bundle.ACTIVE) {
 			configureAndWaitForServletWithMapping("/system/console/res/*", wc::start);
 		}
+	}
+
+	@After
+	public void cleanUp() throws BundleException {
+		bundle("org.apache.felix.configadmin").start();
 	}
 
 	@Test
