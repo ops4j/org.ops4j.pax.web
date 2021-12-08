@@ -1626,6 +1626,14 @@
 						<groupId>org.apache.felix</groupId>
 						<artifactId>org.apache.felix.framework</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>jakarta.xml.bind</groupId>
+						<artifactId>jakarta.xml.bind-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.glassfish.jaxb</groupId>
+						<artifactId>jaxb-runtime</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>

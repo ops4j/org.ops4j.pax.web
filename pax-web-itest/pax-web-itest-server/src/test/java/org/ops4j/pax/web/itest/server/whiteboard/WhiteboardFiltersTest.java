@@ -91,6 +91,7 @@ public class WhiteboardFiltersTest extends MultiContainerTestSupport {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void oneServletWithTwoContextsAndAPreprocessor() throws Exception {
 		Bundle sample1 = mockBundle("sample1");
 
