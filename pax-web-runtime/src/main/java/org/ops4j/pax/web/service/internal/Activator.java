@@ -158,6 +158,9 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	private ServiceTracker<ServerListener, ServerListener> serverListenerTracker;
 	private final List<ServerListener> serverListeners = new CopyOnWriteArrayList<>();
 
+	private ServiceTracker<?, ?> jasyptTracker;
+	private AtomicBoolean jasyptTracking = new AtomicBoolean(false);
+
 	private final AtomicBoolean initialConfigSet = new AtomicBoolean(false);
 
 	/**
@@ -222,6 +225,20 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			serverControllerFactory.releaseServerController(serverController, serverController.getConfiguration());
 		}
 
+		if (jasyptTracker != null) {
+			jasyptTracker.close();
+			jasyptTracker = null;
+		}
+		if (httpServiceRuntimeReg != null) {
+			LOG.info("Unregistering current HttpServiceRuntime");
+			httpServiceRuntimeReg.unregister();
+			httpServiceRuntimeReg = null;
+		}
+		if (httpServiceFactoryReg != null) {
+			LOG.info("Unregistering current HttpService factory");
+			httpServiceFactoryReg.unregister();
+			httpServiceFactoryReg = null;
+		}
 		if (serverListenerTracker != null) {
 			serverListenerTracker.close();
 			serverListenerTracker = null;
@@ -410,6 +427,13 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			serverModel = null;
 		}
 
+		this.configuration = dictionary;
+		this.serverControllerFactory = controllerFactory;
+
+		if (jasyptTracker != null) {
+			jasyptTracker.close();
+			jasyptTracker = null;
+		}
 		if (httpServiceRuntimeReg != null) {
 			LOG.info("Unregistering current HttpServiceRuntime");
 			httpServiceRuntimeReg.unregister();
@@ -435,9 +459,6 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 		}
 
 		boolean hadSCF = this.serverControllerFactory != null;
-
-		this.configuration = dictionary;
-		this.serverControllerFactory = controllerFactory;
 
 		if (serverControllerFactory == null) {
 			if (hadSCF) {
@@ -485,6 +506,30 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 						// 1. We can obtain an OSGi service of org.jasypt.encryption.StringEncryptor
 						LOG.info("Encryption is enabled and Jasypt encryptor with ID \"{}\" will be looked up in OSGi registry",
 								decryptor);
+						String filter = String.format("(&(%s=%s)(decryptor=%s))",
+								Constants.OBJECTCLASS, "org.jasypt.encryption.StringEncryptor", decryptor);
+
+						synchronized (JasyptCustomizer.class) {
+							if (jasyptTracker != null) {
+								jasyptTracker.close();
+								jasyptTracker = null;
+							}
+							jasyptTracking.set(true);
+							try {
+								jasyptTracker = new ServiceTracker<>(bundleContext, bundleContext.createFilter(filter), new JasyptCustomizer());
+								jasyptTracker.open();
+								Object encryptor = jasyptTracker.getService();
+								if (encryptor != null) {
+									resolver = SecurePropertyResolver.wrap(resolver, encryptor);
+								} else {
+									LOG.info("Jasypt encryptor with ID \"{}\" is not found in OSGi registry." +
+											" Pax Web configuration will be performed after it becomes available.", decryptor);
+									return;
+								}
+							} finally {
+								jasyptTracking.set(false);
+							}
+						}
 					} else {
 						// 2. We can configure our own org.jasypt.encryption.StringEncryptor
 						LOG.info("Encryption is enabled and pax-web-runtime will configure Jasypt encryptor");
@@ -821,6 +866,33 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			if (bundleContext != null) {
 				bundleContext.ungetService(reference);
 			}
+		}
+	}
+
+	/**
+	 * Customizer that simply reconfigures the runtime when Jasypt encryptor becomes available
+	 */
+	private class JasyptCustomizer implements ServiceTrackerCustomizer<Object, Object> {
+		@Override
+		public Object addingService(ServiceReference<Object> reference) {
+			synchronized (JasyptCustomizer.class) {
+				if (!jasyptTracking.get() && serverControllerFactory != null) {
+					performConfiguration();
+				}
+			}
+			return bundleContext.getService(reference);
+		}
+
+		@Override
+		public void modifiedService(ServiceReference<Object> reference, Object service) {
+		}
+
+		@Override
+		public void removedService(ServiceReference<Object> reference, Object service) {
+			if (!jasyptTracking.get() && serverControllerFactory != null) {
+				performConfiguration();
+			}
+			bundleContext.ungetService(reference);
 		}
 	}
 

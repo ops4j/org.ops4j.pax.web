@@ -39,7 +39,7 @@ public abstract class AbstractWebContainerSecuredIntegrationTest extends Abstrac
 
 	public static final Logger LOG = LoggerFactory.getLogger(AbstractWebContainerSecuredIntegrationTest.class);
 
-	private Bundle hsBundle;
+	protected Bundle hsBundle;
 
 	@Inject
 	private ConfigurationAdmin caService;
@@ -86,6 +86,14 @@ public abstract class AbstractWebContainerSecuredIntegrationTest extends Abstrac
 
 		additionalConfiguration(properties);
 
+		configureWebBundle(config, properties);
+	}
+
+	protected void additionalConfiguration(Dictionary<String, Object> properties) {
+	}
+
+	protected void configureWebBundle(org.osgi.service.cm.Configuration config, Dictionary<String, Object> properties)
+			throws Exception {
 		configureAndWaitForServletWithMapping("/helloworld/wc/error/create", () -> {
 			hsBundle = installAndStartBundle(sampleURI("wc-helloworld"));
 			Dictionary<String, Object> current = config.getProperties();
@@ -95,9 +103,6 @@ public abstract class AbstractWebContainerSecuredIntegrationTest extends Abstrac
 				});
 			}
 		});
-	}
-
-	protected void additionalConfiguration(Dictionary<String, Object> properties) {
 	}
 
 	@After

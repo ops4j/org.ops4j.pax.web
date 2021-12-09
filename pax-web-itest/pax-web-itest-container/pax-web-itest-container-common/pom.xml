@@ -101,6 +101,7 @@
 							org.ops4j.pax.exam,
 							org.ops4j.pax.exam.*,
 							org.hamcrest,
+							org.jasypt.*,
 							<!--
 								These are dynamically imported, because we don't want refresh after installation
 								of the bundles that export these packages

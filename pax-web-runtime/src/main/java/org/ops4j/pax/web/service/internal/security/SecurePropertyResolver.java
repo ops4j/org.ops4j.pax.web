@@ -104,8 +104,29 @@ public class SecurePropertyResolver implements PropertyResolver {
 		this.encryptor = encryptor;
 	}
 
+	public SecurePropertyResolver(PropertyResolver resolver, StringEncryptor encryptor) {
+		this.delegate = resolver;
+		this.encryptor = encryptor;
+
+		prefix = delegate.get(PaxWebConfig.PID_CFG_ENC_PREFIX);
+		if (prefix == null || "".equals(prefix)) {
+			prefix = "ENC(";
+		}
+		suffix = delegate.get(PaxWebConfig.PID_CFG_ENC_SUFFIX);
+		if (suffix == null || "".equals(suffix)) {
+			suffix = ")";
+		}
+	}
+
 	public static PropertyResolver wrap(PropertyResolver resolver) {
 		return new SecurePropertyResolver(resolver);
+	}
+
+	public static PropertyResolver wrap(PropertyResolver resolver, Object encryptor) {
+		if (!StringEncryptor.class.isAssignableFrom(encryptor.getClass())) {
+			throw new IllegalArgumentException("Can't use " + encryptor + " - it is not an instance of org.jasypt.encryption.StringEncryptor");
+		}
+		return new SecurePropertyResolver(resolver, (StringEncryptor) encryptor);
 	}
 
 	@Override
