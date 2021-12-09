@@ -90,10 +90,14 @@
 							<!-- other required packages -->
 							javax.xml.parsers,
 							org.w3c.dom,
-							org.xml.sax
+							org.xml.sax,
 
-							<!-- to check after restoring previous functionality (jasypt) -->
-<!--							org.jasypt.encryption.pbe;resolution:=optional,-->
+							org.jasypt.commons;resolution:=optional,
+							org.jasypt.encryption;resolution:=optional,
+							org.jasypt.encryption.pbe;resolution:=optional,
+							org.jasypt.encryption.pbe.config;resolution:=optional
+
+							<!-- to check after restoring previous functionality -->
 <!--							javax.crypto.spec;resolution:=optional,-->
 <!--							javax.crypto;resolution:=optional-->
 						</Import-Package>
@@ -223,10 +227,11 @@
 
 		<!-- Other -->
 
-<!--		<dependency>-->
-<!--			<groupId>org.jasypt</groupId>-->
-<!--			<artifactId>jasypt</artifactId>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>org.jasypt</groupId>
+			<artifactId>jasypt</artifactId>
+			<optional>true</optional>
+		</dependency>
 
 		<!-- Testing -->
 

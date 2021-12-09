@@ -827,6 +827,12 @@
 			<artifactId>asm-analysis</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.jasypt</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
 	</dependencies>
 
 </project>

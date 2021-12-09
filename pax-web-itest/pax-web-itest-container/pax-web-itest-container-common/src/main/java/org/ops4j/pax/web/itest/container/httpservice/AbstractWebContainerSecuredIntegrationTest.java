@@ -84,6 +84,8 @@ public abstract class AbstractWebContainerSecuredIntegrationTest extends Abstrac
 		properties.put(PaxWebConfig.PID_CFG_SSL_RENEGOTIATION_ALLOWED, "true");
 		properties.put(PaxWebConfig.PID_CFG_SSL_SESSION_ENABLED, "true");
 
+		additionalConfiguration(properties);
+
 		configureAndWaitForServletWithMapping("/helloworld/wc/error/create", () -> {
 			hsBundle = installAndStartBundle(sampleURI("wc-helloworld"));
 			Dictionary<String, Object> current = config.getProperties();
@@ -93,6 +95,9 @@ public abstract class AbstractWebContainerSecuredIntegrationTest extends Abstrac
 				});
 			}
 		});
+	}
+
+	protected void additionalConfiguration(Dictionary<String, Object> properties) {
 	}
 
 	@After

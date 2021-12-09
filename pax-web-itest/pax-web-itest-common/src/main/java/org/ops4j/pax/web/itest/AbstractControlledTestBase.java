@@ -634,6 +634,11 @@ public abstract class AbstractControlledTestBase {
 		};
 	}
 
+	protected Option jasypt() {
+		return mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.jasypt")
+				.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2);
+	}
+
 	// --- helper methods to be used in all the tests
 
 	/**

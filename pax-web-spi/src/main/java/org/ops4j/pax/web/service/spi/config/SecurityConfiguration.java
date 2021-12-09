@@ -246,4 +246,68 @@ public interface SecurityConfiguration {
 	 */
 	Boolean getFormAuthRedirect();
 
+	/**
+	 * Checks if configuration values are expected to be encrypted - this triggers a configuration (or tracking)
+	 * of Jasypt StringEncryptor (optional dependency)
+	 * @return
+	 */
+	Boolean isEncEnabled();
+
+	/**
+	 * Returns a prefix for encrypted property values - defaults to {@code ENC(}
+	 * @return
+	 */
+	String getEncPrefix();
+
+	/**
+	 * Returns a prefix for encrypted property values - defaults to {@code )}
+	 * @return
+	 */
+	String getEncSuffix();
+
+	/**
+	 * Returns a provider to use for {@link javax.crypto.SecretKeyFactory}. Defaults (Oracle/OpenJDK) to {@code SunJCE}
+	 * @return
+	 */
+	String getEncProvider();
+
+	/**
+	 * Returns an algorithm ID to use for {@link javax.crypto.SecretKeyFactory#getInstance(String)}. Defaults to
+	 * {@code PBEWithHmacSHA256AndAES_128}
+	 * @return
+	 */
+	String getEncAlgorithm();
+
+	/**
+	 * Returns plain text master password to use.
+	 * @return
+	 */
+	String getEncMasterPassword();
+
+	/**
+	 * Returns an environment variable name that holds plain text master password to use.
+	 * @return
+	 */
+	String getEncMasterPasswordEnvVariable();
+
+	/**
+	 * Returns an system property name that holds plain text master password to use.
+	 * @return
+	 */
+	String getEncMasterPasswordSystemProperty();
+
+	/**
+	 * Returns an iteration count to use for PBE encryption
+	 * @return
+	 */
+	Integer getEncIterationCount();
+
+	/**
+	 * Returns a decryptor ID. This will be used to construct a
+	 * {@code (&(objectClass=org.jasypt.encryption.StringEncryptor)(decryptor=&lt;decryptor ID&gt;))} filter to lookup
+	 * for encryptor/decryptor service.
+	 * @return
+	 */
+	String getEncOSGiDecryptorId();
+
 }

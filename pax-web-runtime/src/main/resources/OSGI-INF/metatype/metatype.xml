@@ -211,11 +211,28 @@
 <!--		<AD name="Default Virtual Hosts" id="org.ops4j.pax.web.default.virtualhosts" required="false" type="String" default="" />-->
 <!--		<AD name="Default Connectors" id="org.ops4j.pax.web.default.connectors" required="false" type="String" default="" />-->
 
-<!--		<AD name="Enable Encrypted password" id="org.ops4j.pax.web.enc.enabled" type="String" default="false" />-->
-<!--		<AD name="Master Password for Encrypted password" id="org.ops4j.pax.web.enc.masterpassword" type="String" default="" />-->
-<!--		<AD name="Algorithm for Encrypted password" id="org.ops4j.pax.web.enc.algorithm" type="String" default="PBEWithMD5AndDES" />-->
-<!--		<AD name="Prefix for Encrypted password" id="org.ops4j.pax.web.enc.prefix" type="String" default="ENC(" />-->
-<!--		<AD name="Suffix for Encrypted password" id="org.ops4j.pax.web.enc.suffix" type="String" default=")" />-->
+		<AD id="org.ops4j.pax.web.enc.enabled" type="String" default="false"
+				name="Enable Encrypted values" />
+		<AD id="org.ops4j.pax.web.enc.prefix" type="String" default="ENC("
+				name="Prefix for Encrypted values" />
+		<AD id="org.ops4j.pax.web.enc.suffix" type="String" default=")"
+				name="Suffix for Encrypted values" />
+		<AD id="org.ops4j.pax.web.enc.masterpassword" type="String"
+				name="Master Password for encrypted values" />
+		<AD id="org.ops4j.pax.web.enc.masterpassword.env.variable" type="String"
+				name="Environment variable to use for master password" />
+		<AD id="org.ops4j.pax.web.enc.masterpassword.sys.property" type="String"
+				name="System property to use for master password" />
+
+		<AD id="org.ops4j.pax.web.enc.provider" type="String"
+				name="Security provider for PBE SecretKeyFactory algorithm" />
+		<AD id="org.ops4j.pax.web.enc.algorithm" type="String" default="PBEWithHmacSHA256AndAES_128"
+				name="SecretKeyFactory algorithm, defaults to PBEWithHmacSHA256AndAES_128" />
+		<AD id="org.ops4j.pax.web.enc.iterationcount" type="Integer" default="1000"
+				name="Iteration count" />
+
+		<AD id="org.ops4j.pax.web.enc.osgi.decryptor" type="String"
+				name="decryptor ID ('decryptor' property of org.jasypt.encryption.StringEncryptor OSGi service)" />
 
 		<!-- Properties related to WAR extender -->
 

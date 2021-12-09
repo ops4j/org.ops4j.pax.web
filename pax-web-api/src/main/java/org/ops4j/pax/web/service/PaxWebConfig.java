@@ -413,4 +413,45 @@ public interface PaxWebConfig {
 	/** Global Scratch directory for JSPs - by default it is relative to global tmp dir and depends on the context */
 	String PID_CFG_JSP_SCRATCH_DIR = "org.ops4j.pax.web.jsp.scratch.dir";
 
+	// Properties related to Jasypt encryption - both direct usage of Jasypt and via OSGi services
+
+	String PID_CFG_ENC_PROPERTY_PREFIX = "org.ops4j.pax.web.enc.";
+
+	/**
+	 * Boolean property that tells pax-web-runtime that the configuration may contain encrypted values.
+	 * Defaults to {@code false}.
+	 */
+	String PID_CFG_ENC_ENABLED = "org.ops4j.pax.web.enc.enabled";
+
+	/** String property for the prefix for encrypted values. Defaults to {@code ENC(} */
+	String PID_CFG_ENC_PREFIX = "org.ops4j.pax.web.enc.prefix";
+	/** String property for the suffix for encrypted values. Defaults to {@code )} */
+	String PID_CFG_ENC_SUFFIX = "org.ops4j.pax.web.enc.suffix";
+
+	// we can either specify everything ourselves ...
+
+	/** Provider name to use for PBE encryption - defaults to {@code SunJCE} on Oracle/OpenJDK */
+	String PID_CFG_ENC_PROVIDER = "org.ops4j.pax.web.enc.provider";
+	/**
+	 * Algorithm name to use for PBE encryption - see {@link javax.crypto.SecretKeyFactory#getInstance(java.lang.String)}
+	 * defaults to {@code PBEWithHmacSHA256AndAES_128}
+	 */
+	String PID_CFG_ENC_ALGORITHM = "org.ops4j.pax.web.enc.algorithm";
+	/** Plain text encryption password */
+	String PID_CFG_ENC_MASTERPASSWORD = "org.ops4j.pax.web.enc.masterpassword";
+	/** Environment variable to use for encryption password */
+	String PID_CFG_ENC_MASTERPASSWORD_ENV = "org.ops4j.pax.web.enc.masterpassword.env.variable";
+	/** System property to use for encryption password */
+	String PID_CFG_ENC_MASTERPASSWORD_SYS = "org.ops4j.pax.web.enc.masterpassword.sys.property";
+	/** IC parameter for PBE encryption - defaults to 1000 */
+	String PID_CFG_ENC_ITERATION_COUNT = "org.ops4j.pax.web.enc.iterationcount";
+
+	// ... or simply reference a StringEncryptor someone else has configured
+
+	/**
+	 * Similarly to Pax JDBC/JMS, we can reference an OSGi service with {@code objectClass=org.jasypt.encryption.StringEncryptor}
+	 * and {@code decryptor} properties. A filter is created to track the OSGi service used to decrypt configuration values.
+	 */
+	String PID_CFG_ENC_OSGI_DECRYPTOR = "org.ops4j.pax.web.enc.osgi.decryptor";
+
 }

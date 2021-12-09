@@ -236,15 +236,14 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 
 	private class ServerConfigurationImpl implements ServerConfiguration {
 
-		private File tmpDir = null;
-		private String[] listeningAddresses = null;
-		private File[] externalConfigurations = null;
+		private final File tmpDir;
+		private final String[] listeningAddresses ;
+		private final File[] externalConfigurations;
 
 		private final int eventDispatcherThreadCount;
 
 		private final boolean showStacks;
 
-		@SuppressWarnings("deprecation")
 		private ServerConfigurationImpl() {
 			// eager resolution of some important properties
 			resolveIntegerProperty(PaxWebConfig.PID_CFG_HTTP_PORT);
@@ -261,7 +260,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 				throw new IllegalStateException("Can't determine java.io.tmpdir property");
 			}
 			tmpDir = Utils.resolve(tmpDir);
-			File possibleTmpDir = null;
+			File possibleTmpDir;
 			if (tmpDir.startsWith("file:")) {
 				possibleTmpDir = new File(URI.create(tmpDir));
 			} else {
@@ -397,31 +396,6 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		@Override
 		public List<String> getVirtualHosts() {
 			return Collections.emptyList();
-		}
-
-		@Override
-		public Boolean isEncEnabled() {
-			return null;
-		}
-
-		@Override
-		public String getEncMasterPassword() {
-			return null;
-		}
-
-		@Override
-		public String getEncAlgorithm() {
-			return null;
-		}
-
-		@Override
-		public String getEncPrefix() {
-			return null;
-		}
-
-		@Override
-		public String getEncSuffix() {
-			return null;
 		}
 	}
 
@@ -630,6 +604,62 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		@Override
 		public Boolean getFormAuthRedirect() {
 			return resolveBooleanProperty(PaxWebConfig.PID_CFG_FORMAUTH_REDIRECT);
+		}
+
+		@Override
+		public Boolean isEncEnabled() {
+			Boolean enabled = resolveBooleanProperty(PaxWebConfig.PID_CFG_ENC_ENABLED);
+			return enabled == null ? Boolean.FALSE : enabled;
+		}
+
+		@Override
+		public String getEncPrefix() {
+			String prefix = resolveStringProperty(PaxWebConfig.PID_CFG_ENC_PREFIX);
+			return prefix == null || "".equals(prefix.trim()) ? "ENC(" : prefix;
+		}
+
+		@Override
+		public String getEncSuffix() {
+			String suffix = resolveStringProperty(PaxWebConfig.PID_CFG_ENC_SUFFIX);
+			return suffix == null || "".equals(suffix.trim()) ? ")" : suffix;
+		}
+
+		@Override
+		public String getEncProvider() {
+			String provider = resolveStringProperty(PaxWebConfig.PID_CFG_ENC_PROVIDER);
+			return provider == null || "SunJCE".equals(provider.trim()) ? null : provider;
+		}
+
+		@Override
+		public String getEncAlgorithm() {
+			String alg = resolveStringProperty(PaxWebConfig.PID_CFG_ENC_PROVIDER);
+			return alg == null || "".equals(alg.trim()) ? "PBEWithHmacSHA256AndAES_128" : alg;
+		}
+
+		@Override
+		public String getEncMasterPassword() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_ENC_MASTERPASSWORD);
+		}
+
+		@Override
+		public String getEncMasterPasswordEnvVariable() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_ENC_MASTERPASSWORD_ENV);
+		}
+
+		@Override
+		public String getEncMasterPasswordSystemProperty() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_ENC_MASTERPASSWORD_SYS);
+		}
+
+		@Override
+		public Integer getEncIterationCount() {
+			Integer ic = resolveIntegerProperty(PaxWebConfig.PID_CFG_ENC_ITERATION_COUNT);
+			return ic == null ? 1000 : ic;
+		}
+
+		@Override
+		public String getEncOSGiDecryptorId() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_ENC_OSGI_DECRYPTOR);
 		}
 	}
 

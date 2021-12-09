@@ -677,4 +677,18 @@ public class Utils {
 		}
 	}
 
+	/**
+	 * Check if Jasypt bundle is available
+	 *
+	 * @return
+	 */
+	public static boolean isJasyptAvailable(Class<?> cls) {
+		try {
+			cls.getClassLoader().loadClass("org.jasypt.encryption.StringEncryptor");
+			return true;
+		} catch (ClassNotFoundException ignore) {
+			return false;
+		}
+	}
+
 }

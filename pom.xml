@@ -226,6 +226,7 @@
 		<dependency.org.apache.myfaces.commons.facelets-examples20>1.0.2.1</dependency.org.apache.myfaces.commons.facelets-examples20>
 		<dependency.org.apache.myfaces.trinidad>2.2.1</dependency.org.apache.myfaces.trinidad>
 		<dependency.org.apache.servicemix.bundles.aopalliance>1.0_6</dependency.org.apache.servicemix.bundles.aopalliance>
+		<dependency.org.apache.servicemix.bundles.jasypt>1.9.3_1</dependency.org.apache.servicemix.bundles.jasypt>
 		<dependency.org.apache.servicemix.bundles.javax-inject>1_3</dependency.org.apache.servicemix.bundles.javax-inject>
 		<dependency.org.apache.taglibs>1.2.5</dependency.org.apache.taglibs>
 		<dependency.org.apache.tomcat>9.0.56</dependency.org.apache.tomcat>
@@ -243,6 +244,7 @@
 		<dependency.org.glassfish.jersey>2.34</dependency.org.glassfish.jersey>
 
 		<dependency.org.javassist>3.28.0-GA</dependency.org.javassist>
+		<dependency.org.jasypt>1.9.3</dependency.org.jasypt>
 		<dependency.org.jboss.classfilewriter>1.2.5.Final</dependency.org.jboss.classfilewriter>
 		<dependency.org.jboss.logging>3.4.2.Final</dependency.org.jboss.logging>
 		<dependency.org.jboss.threads>3.4.0.Final</dependency.org.jboss.threads>
@@ -2648,6 +2650,17 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-compress</artifactId>
 				<version>${dependency.org.apache.commons.compress}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jasypt</groupId>
+				<artifactId>jasypt</artifactId>
+				<version>${dependency.org.jasypt}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.servicemix.bundles</groupId>
+				<artifactId>org.apache.servicemix.bundles.jasypt</artifactId>
+				<version>${dependency.org.apache.servicemix.bundles.jasypt}</version>
 			</dependency>
 
 			<dependency>

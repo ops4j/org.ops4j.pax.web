@@ -37,6 +37,7 @@ import org.ops4j.pax.web.annotations.PaxWebConfiguration;
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.internal.security.SecurePropertyResolver;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.ops4j.pax.web.service.spi.config.Configuration;
@@ -472,6 +473,47 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			PropertyResolver resolver = this.configuration != null ? new DictionaryPropertyResolver(this.configuration, tmpResolver) : tmpResolver;
 			allProperties.putAll(Utils.toMap(this.configuration));
 
+			// before creating a configuration, we have to check if the encryption is enabled - and there are two
+			// ways to implement the decryption
+			String enabled = allProperties.get(PaxWebConfig.PID_CFG_ENC_ENABLED);
+			if ("true".equalsIgnoreCase(enabled)) {
+				if (!Utils.isJasyptAvailable(this.getClass())) {
+					LOG.warn("Encryption is enabled, but Jasypt bundle is not available. Decryption of configuration values won't be performed.");
+				} else {
+					String decryptor = allProperties.get(PaxWebConfig.PID_CFG_ENC_OSGI_DECRYPTOR);
+					if (decryptor != null && !"".equals(decryptor)) {
+						// 1. We can obtain an OSGi service of org.jasypt.encryption.StringEncryptor
+						LOG.info("Encryption is enabled and Jasypt encryptor with ID \"{}\" will be looked up in OSGi registry",
+								decryptor);
+					} else {
+						// 2. We can configure our own org.jasypt.encryption.StringEncryptor
+						LOG.info("Encryption is enabled and pax-web-runtime will configure Jasypt encryptor");
+						boolean foundPassword = false;
+						String env = allProperties.get(PaxWebConfig.PID_CFG_ENC_MASTERPASSWORD_ENV);
+						if (env != null && !"".equals(env)) {
+							LOG.debug("Environment variable \"{}\" will be used to obtain the master password", env);
+							foundPassword = true;
+						}
+						String sys = allProperties.get(PaxWebConfig.PID_CFG_ENC_MASTERPASSWORD_SYS);
+						if (sys != null && !"".equals(sys)) {
+							LOG.debug("System property \"{}\" will be used to obtain the master password", sys);
+							foundPassword = true;
+						}
+						String password = allProperties.get(PaxWebConfig.PID_CFG_ENC_MASTERPASSWORD);
+						if (password != null && !"".equals(password)) {
+//							LOG.debug("Master password was specified in the configuration");
+							foundPassword = true;
+						}
+
+						if (!foundPassword) {
+							LOG.warn("No master password was provided. Decryption of configuration values won't be performed.");
+						} else {
+							resolver = SecurePropertyResolver.wrap(resolver);
+						}
+					}
+				}
+			}
+
 			// full configuration with all required properties. That's all that is needed down the stream
 			final Configuration configuration = ConfigurationBuilder.getConfiguration(resolver, allProperties);
 
@@ -672,14 +714,16 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 		setProperty(properties, PaxWebConfig.PID_CFG_DIGESTAUTH_MAX_NONCE_COUNT, sec.getDigestAuthMaxNonceCount());
 		setProperty(properties, PaxWebConfig.PID_CFG_FORMAUTH_REDIRECT, sec.getFormAuthRedirect());
 
-//		setProperty(toPropagate, PROPERTY_HTTP_USE_NIO, configuration.useNIO());
-//		setProperty(toPropagate, PROPERTY_DEFAULT_AUTHMETHOD, configuration.getDefaultAuthMethod());
-//		setProperty(toPropagate, PROPERTY_DEFAULT_REALMNAME, configuration.getDefaultRealmName());
-//		setProperty(toPropagate, PROPERTY_ENC_ENABLED, configuration.isEncEnabled());
-//		setProperty(toPropagate, PROPERTY_ENC_MASTERPASSWORD, configuration.getEncMasterPassword());
-//		setProperty(toPropagate, PROPERTY_ENC_ALGORITHM, configuration.getEncAlgorithm());
-//		setProperty(toPropagate, PROPERTY_ENC_PREFIX, configuration.getEncPrefix());
-//		setProperty(toPropagate, PROPERTY_ENC_SUFFIX, configuration.getEncSuffix());
+		setProperty(properties, PaxWebConfig.PID_CFG_ENC_ENABLED, sec.isEncEnabled());
+		setProperty(properties, PaxWebConfig.PID_CFG_ENC_MASTERPASSWORD, "********"/*sec.getEncMasterPassword()*/);
+		setProperty(properties, PaxWebConfig.PID_CFG_ENC_MASTERPASSWORD_ENV, sec.getEncMasterPasswordEnvVariable());
+		setProperty(properties, PaxWebConfig.PID_CFG_ENC_MASTERPASSWORD_SYS, sec.getEncMasterPasswordSystemProperty());
+		setProperty(properties, PaxWebConfig.PID_CFG_ENC_PROVIDER, sec.getEncProvider());
+		setProperty(properties, PaxWebConfig.PID_CFG_ENC_ALGORITHM, sec.getEncAlgorithm());
+		setProperty(properties, PaxWebConfig.PID_CFG_ENC_ITERATION_COUNT, sec.getEncIterationCount());
+		setProperty(properties, PaxWebConfig.PID_CFG_ENC_PREFIX, sec.getEncPrefix());
+		setProperty(properties, PaxWebConfig.PID_CFG_ENC_SUFFIX, sec.getEncSuffix());
+		setProperty(properties, PaxWebConfig.PID_CFG_ENC_OSGI_DECRYPTOR, sec.getEncOSGiDecryptorId());
 
 		return properties;
 	}

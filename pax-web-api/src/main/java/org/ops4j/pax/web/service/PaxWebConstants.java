@@ -265,14 +265,7 @@ public interface PaxWebConstants {
 
 
 
-
 	String PROPERTY_VIRTUAL_HOST_LIST = "org.ops4j.pax.web.default.virtualhosts";
 	String PROPERTY_CONNECTOR_LIST = "org.ops4j.pax.web.default.connectors";
-
-	String PROPERTY_ENC_MASTERPASSWORD = PID + ".enc.masterpassword";
-	String PROPERTY_ENC_ALGORITHM = PID + ".enc.algorithm";
-	String PROPERTY_ENC_ENABLED = PID + ".enc.enabled";
-	String PROPERTY_ENC_PREFIX = PID + ".enc.prefix";
-	String PROPERTY_ENC_SUFFIX = PID + ".enc.suffix";
 
 }
