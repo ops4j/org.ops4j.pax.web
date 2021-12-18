@@ -221,7 +221,7 @@
 		<dependency.org.apache.httpcomponents.client5>5.1</dependency.org.apache.httpcomponents.client5>
 		<dependency.org.apache.httpcomponents.core5>5.1.1</dependency.org.apache.httpcomponents.core5>
 		<dependency.org.apache.karaf>4.4.0-SNAPSHOT</dependency.org.apache.karaf>
-		<dependency.org.apache.logging.log4j>2.15.0</dependency.org.apache.logging.log4j>
+		<dependency.org.apache.logging.log4j>2.16.0</dependency.org.apache.logging.log4j>
 		<dependency.org.apache.myfaces>2.3.9</dependency.org.apache.myfaces>
 		<dependency.org.apache.myfaces.commons.facelets-examples20>1.0.2.1</dependency.org.apache.myfaces.commons.facelets-examples20>
 		<dependency.org.apache.myfaces.trinidad>2.2.1</dependency.org.apache.myfaces.trinidad>
