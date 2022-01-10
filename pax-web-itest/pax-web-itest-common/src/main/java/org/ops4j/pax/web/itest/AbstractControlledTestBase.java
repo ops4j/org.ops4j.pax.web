@@ -523,6 +523,10 @@ public abstract class AbstractControlledTestBase {
 
 	protected Option[] primefaces() {
 		return combine(myfaces(),
+				mavenBundle("jakarta.persistence", "jakarta.persistence-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-jpa2")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
 				mavenBundle("jakarta.xml.bind", "jakarta.xml.bind-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("com.sun.activation", "javax.activation")
