@@ -822,6 +822,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-compatibility-jpa2</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-fragment-myfaces-inject</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -1986,6 +1991,12 @@
 				<groupId>jakarta.interceptor</groupId>
 				<artifactId>jakarta.interceptor-api</artifactId>
 				<version>${dependency.jakarta.interceptor-api}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>jakarta.persistence</groupId>
+				<artifactId>jakarta.persistence-api</artifactId>
+				<version>${dependency.jakarta.persistence-api}</version>
 			</dependency>
 
 			<!-- SMX -->
