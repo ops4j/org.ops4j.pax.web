@@ -162,7 +162,7 @@
 
 		<!-- versions of Maven dependencies (sorted and groupped in arbitrary way)  -->
 
-		<dependency.biz.aQute.bnd.bndlib>5.3.0</dependency.biz.aQute.bnd.bndlib>
+		<dependency.biz.aQute.bnd.bndlib>6.1.0</dependency.biz.aQute.bnd.bndlib>
 
 		<dependency.commons-beanutils>1.9.4</dependency.commons-beanutils>
 		<dependency.commons-codec>1.15</dependency.commons-codec>
