@@ -256,7 +256,7 @@
 
 		<dependency.org.jline>3.21.0</dependency.org.jline>
 		<dependency.org.jsoup>1.14.3</dependency.org.jsoup>
-		<dependency.org.mockito>3.11.2</dependency.org.mockito>
+		<dependency.org.mockito>4.2.0</dependency.org.mockito>
 		<dependency.org.mortbay.jetty.alpn>8.1.2.v20141202</dependency.org.mortbay.jetty.alpn>
 
 		<dependency.org.ops4j.base>1.5.1</dependency.org.ops4j.base>
