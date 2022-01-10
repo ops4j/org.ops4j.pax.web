@@ -235,6 +235,7 @@
 
 		<dependency.org.bouncycastle>1.70</dependency.org.bouncycastle>
 
+		<!-- 3.26.0 is the last version supporting JDK 8 -->
 		<dependency.org.eclipse.jdt.ecj>3.26.0</dependency.org.eclipse.jdt.ecj>
 		<dependency.org.eclipse.jetty>9.4.44.v20210927</dependency.org.eclipse.jetty>
 		<dependency.org.eclipse.jetty.osgi>9.4.44</dependency.org.eclipse.jetty.osgi>
