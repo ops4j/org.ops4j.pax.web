@@ -268,8 +268,8 @@
 		<dependency.org.osgi.core>7.0.0</dependency.org.osgi.core>
 		<dependency.org.osgi.core8>8.0.0</dependency.org.osgi.core8>
 		<dependency.org.osgi.cmpn>7.0.0</dependency.org.osgi.cmpn>
-		<dependency.org.osgi.service.cdi>1.0.0</dependency.org.osgi.service.cdi>
-		<dependency.org.osgi.service.jaxrs>1.0.0</dependency.org.osgi.service.jaxrs>
+		<dependency.org.osgi.service.cdi>1.0.1</dependency.org.osgi.service.cdi>
+		<dependency.org.osgi.service.jaxrs>1.0.1</dependency.org.osgi.service.jaxrs>
 		<dependency.org.osgi.util.function>1.1.0</dependency.org.osgi.util.function>
 		<dependency.org.osgi.util.promise>1.1.1</dependency.org.osgi.util.promise>
 
