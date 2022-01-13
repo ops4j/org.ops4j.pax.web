@@ -20,6 +20,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
+import java.security.Security;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.concurrent.CountDownLatch;
@@ -32,6 +33,7 @@ import javax.servlet.ServletContext;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -62,6 +64,11 @@ public class JettyServerWrapperTest {
 	@Mock
 	private BundleContext bundleContextMock;
 	private volatile Exception exceptionInRunnable;
+
+	@BeforeClass
+	public static void init() {
+		Security.setProperty("authconfigprovider.factory", "org.ops4j.pax.web.service.jetty.internal.FakeAuthConfigFactory");
+	}
 
 	@Before
 	public void mockIt() {
