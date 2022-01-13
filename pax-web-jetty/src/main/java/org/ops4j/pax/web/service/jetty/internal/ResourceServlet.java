@@ -134,6 +134,19 @@ class ResourceServlet extends HttpServlet implements ResourceFactory {
 			return;
 		}
 
+		// Pax Web 8 has better customization of Jetty's default org.ops4j.pax.web.service.jetty.internal.web.DefaultServlet
+		// and the resources are served with GET/POST methods, TRACE returns 405 and OPTIONS returns `Allow: GET,HEAD,POST,OPTIONS`
+		boolean getOrPost = "GET".equals(request.getMethod()) || "POST".equals(request.getMethod());
+		if (!getOrPost) {
+			// yes - also HEAD is not supported
+			if ("OPTIONS".equals(request.getMethod())) {
+				response.setHeader("Allow", "GET,HEAD,POST,OPTIONS");
+				return;
+			}
+			response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+			return;
+		}
+
 		String mapping;
 		Boolean included = request
 				.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null;

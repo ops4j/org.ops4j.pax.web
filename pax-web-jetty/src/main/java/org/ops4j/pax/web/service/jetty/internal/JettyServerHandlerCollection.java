@@ -62,6 +62,14 @@ class JettyServerHandlerCollection extends HandlerCollection {
 			return;
 		}
 
+		if ("*".equals(target) && "OPTIONS".equals(request.getMethod())) {
+			// https://github.com/ops4j/org.ops4j.pax.web/issues/1667
+			// see org.apache.catalina.connector.CoyoteAdapter.postParseRequest()
+			response.setHeader("Allow", "GET, HEAD, POST, PUT, DELETE, OPTIONS");
+			baseRequest.setHandled(true);
+			return;
+		}
+
 		final ContextModel matched = serverModel.matchPathToContext(target);
 		if (matched != null) {
 			// check for nulls and start complaining
