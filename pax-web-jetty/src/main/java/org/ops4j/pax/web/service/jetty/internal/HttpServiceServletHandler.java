@@ -48,8 +48,11 @@ class HttpServiceServletHandler extends ServletHandler {
 						 final HttpServletRequest request, final HttpServletResponse response)
 			throws IOException, ServletException {
 		if (request.getMethod().equals(METHOD_TRACE)) {
-			throw new ServletException("HTTP TRACE method is disabled");
+			response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+			baseRequest.setHandled(true);
+			return;
 		}
+
 		// we have to set the jetty request as a request attribute if not
 		// already set in order to be able to handle the
 		// case that the request has been wrapped with a custom wrapper (case of
