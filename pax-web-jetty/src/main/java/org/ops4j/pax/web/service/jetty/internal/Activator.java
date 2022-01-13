@@ -17,11 +17,8 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Hashtable;
 
-import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration.Customizer;
 import org.eclipse.jetty.util.thread.ShutdownThread;
@@ -35,6 +32,8 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Registers the ServletControllerFactory on startup
@@ -44,29 +43,13 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  */
 public class Activator implements BundleActivator {
 
-	private static class PriorityComparator implements Comparator<Object> {
-
-		@Override
-		public int compare(Object element1, Object element2) {
-			Integer comparison = 0;
-			if (element1 != element2) {
-				comparison = null;
-				for (Object element : Arrays.asList(element1, element2)) {
-//					javax.annotation.Priority annotation = element.getClass().getAnnotation(javax.annotation.Priority.class);
-//					int priority = annotation == null ? 0 : annotation.value();
-//					comparison = comparison == null ? priority : comparison - priority;
-				}
-			}
-			return comparison;
-		}
-	}
+	public static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
 	private BundleContext bundleContext;
 
 	private ServiceRegistration<ServerControllerFactory> registration;
 
 	private ServiceTracker<Handler, Handler> handlerTracker;
-	private ServiceTracker<Connector, Connector> connectorTracker;
 	private ServiceTracker<Customizer, Customizer> customizerTracker;
 
 	private JettyServerControllerFactory serverControllerFactory;
@@ -92,9 +75,6 @@ public class Activator implements BundleActivator {
 		handlerTracker = new ServiceTracker<>(bundleContext, Handler.class, new HandlerCustomizer());
 		handlerTracker.open();
 
-		connectorTracker = new ServiceTracker<>(bundleContext, Connector.class, new ConnectorCustomizer());
-		connectorTracker.open();
-		
 		customizerTracker = new ServiceTracker<>(bundleContext, Customizer.class, new CustomizerCustomizer());
 		customizerTracker.open();
 
@@ -113,128 +93,98 @@ public class Activator implements BundleActivator {
 		} catch (IllegalStateException e) {
 			// bundle context has already been invalidated ?
 		}
-		connectorTracker.close();
 		handlerTracker.close();
 		customizerTracker.close();
 	}
 
+	/**
+	 * {@link ServiceTrackerCustomizer} that handles {@link Handler} services.
+	 */
 	private class HandlerCustomizer implements ServiceTrackerCustomizer<Handler, Handler> {
-
 		@Override
 		public Handler addingService(ServiceReference<Handler> reference) {
 			Handler handler = bundleContext.getService(reference);
 			Integer ranking = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
 
-            //add handler to factory and restart. 
-            if (registration != null) {
-                registration.unregister();
-            }
-			
-//			serverControllerFactory.addHandler(handler, ranking == null ? 0 : ranking);
+			LOG.debug("Registered Jetty Handler: {}", handler);
 
-            registration = bundleContext.registerService(
-                    ServerControllerFactory.class,
-                    serverControllerFactory,
-                    new Hashtable<>());
+			// add handler to factory and restart.
+			if (registration != null) {
+				try {
+					registration.unregister();
+				} catch (java.lang.IllegalStateException ignored) {
+				}
+			}
 
-            return handler;
+			LOG.debug("Adding {} Handler to Jetty server", handler);
+			serverControllerFactory.addHandler(handler, ranking == null ? 0 : ranking);
+
+			registration = bundleContext.registerService(ServerControllerFactory.class,
+					serverControllerFactory, new Hashtable<>());
+
+			return handler;
 		}
 
 		@Override
 		public void modifiedService(ServiceReference<Handler> reference, Handler service) {
-			// do nothing
+			// we could handle a change of "service.ranking" property, but we're not doing it
 		}
 
 		@Override
 		public void removedService(ServiceReference<Handler> reference, Handler handler) {
 			bundleContext.ungetService(reference);
-//			try {
-//				serverControllerFactory.removeHandler(handler);
-//			} catch (NoClassDefFoundError e) {
-//				// we should never go here, but if this happens silently ignore it
-//			}
-		}
 
-	}
+			LOG.debug("Unegistered Jetty Handler: {}", handler);
 
-	private class ConnectorCustomizer implements ServiceTrackerCustomizer<Connector, Connector> {
-
-		@Override
-		public Connector addingService(ServiceReference<Connector> reference) {
-			Connector connector = bundleContext.getService(reference);
-
-			//add handler to factory and restart. 
+			// remove handler from factory and restart.
 			if (registration != null) {
-				registration.unregister();
-			}
-			Integer ranking = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
-//			serverControllerFactory.addConnector(connector, ranking == null ? 0 : ranking);
-
-
-			registration = bundleContext.registerService(
-					ServerControllerFactory.class,
-					serverControllerFactory,
-					new Hashtable<>());
-
-			return connector;
-		}
-
-		@Override
-		public void modifiedService(ServiceReference<Connector> reference, Connector service) {
-			// ignore
-		}
-
-		@Override
-		public void removedService(ServiceReference<Connector> reference, Connector connector) {
-			bundleContext.ungetService(reference);
-			try {
-				// remove handler from factory and restart it. 
-				if (registration != null) {
+				try {
 					registration.unregister();
+				} catch (java.lang.IllegalStateException ignored) {
 				}
-
-//				serverControllerFactory.removeConnector(connector);
-
-
-				registration = bundleContext.registerService(
-						ServerControllerFactory.class,
-						serverControllerFactory,
-						new Hashtable<>());
-			} catch (NoClassDefFoundError e) {
-				// we should never go here, but if this happens silently ignore it
 			}
+
+			LOG.debug("Removing {} Handler from Jetty server", handler);
+			serverControllerFactory.removeHandler(handler);
+
+			registration = bundleContext.registerService(ServerControllerFactory.class,
+					serverControllerFactory, new Hashtable<>());
 		}
-
 	}
-	
-	private class CustomizerCustomizer implements ServiceTrackerCustomizer<Customizer, Customizer> {
 
+	/**
+	 * {@link ServiceTrackerCustomizer} that handles {@link Customizer} services. Registration of such
+	 * services doesn't require re-registration of {@link ServerControllerFactory}, because {@link Customizer}
+	 * works for each request individually.
+	 */
+	private class CustomizerCustomizer implements ServiceTrackerCustomizer<Customizer, Customizer> {
 		@Override
 		public Customizer addingService(ServiceReference<Customizer> reference) {
 			Customizer customizer = bundleContext.getService(reference);
 			Integer ranking = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
-//			serverControllerFactory.addCustomizer(customizer, ranking == null ? 0 : ranking);
+
+			LOG.debug("Registered Jetty Customizer: {}", customizer);
+
+			LOG.debug("Adding {} Customizer to Jetty server", customizer);
+			serverControllerFactory.addCustomizer(customizer, ranking == null ? 0 : ranking);
 
 			return customizer;
 		}
 
 		@Override
 		public void modifiedService(ServiceReference<Customizer> reference, Customizer service) {
-			// ignore
+			// we could handle a change of "service.ranking" property, but we're not doing it
 		}
 
 		@Override
 		public void removedService(ServiceReference<Customizer> reference, Customizer customizer) {
 			bundleContext.ungetService(reference);
-//			try {
-//
-//				serverControllerFactory.removeCustomizer(customizer);
-//
-//			} catch (NoClassDefFoundError e) {
-//				// we should never go here, but if this happens silently ignore it
-//			}
-		}
 
+			LOG.debug("Unegistered Jetty Customizer: {}", customizer);
+
+			LOG.debug("Removing {} Customizer from Jetty server", customizer);
+			serverControllerFactory.removeCustomizer(customizer);
+		}
 	}
 
 }

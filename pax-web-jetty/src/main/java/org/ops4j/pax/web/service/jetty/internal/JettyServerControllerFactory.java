@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration.Customizer;
 import org.ops4j.pax.web.service.spi.ServerController;
@@ -30,6 +29,8 @@ import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.osgi.framework.Bundle;
 
 public class JettyServerControllerFactory implements ServerControllerFactory {
+
+	static Comparator<PriorityValue<?>> priorityComparator = Comparator.comparingInt(PriorityValue::getPriority);
 
 	/**
 	 * Bundle to raise environment awareness.
@@ -45,7 +46,7 @@ public class JettyServerControllerFactory implements ServerControllerFactory {
 	private final ClassLoader classLoader;
 
 	/** One {@link org.ops4j.pax.web.service.spi.ServerController} per unique configuration ID. */
-	private final Map<String, ServerController> serverControllers = new HashMap<>();
+	private final Map<String, JettyServerController> serverControllers = new HashMap<>();
 
 	/** Utility class to construct different Jetty supporting objects */
 	private final JettyFactory jettyFactory;
@@ -53,7 +54,6 @@ public class JettyServerControllerFactory implements ServerControllerFactory {
 	// --- low level Jetty components that impact server behavior. All with corresponding priority
 
 	private final Set<PriorityValue<Handler>> handlers;
-	private final Set<PriorityValue<Connector>> connectors;
 	private final Set<PriorityValue<Customizer>> customizers;
 
 	/**
@@ -67,11 +67,8 @@ public class JettyServerControllerFactory implements ServerControllerFactory {
 		this.paxWebJettyBundle = paxWebJettyBundle;
 		this.classLoader = classLoader;
 
-		Comparator<PriorityValue<?>> c = Comparator.comparingInt(o -> o.priority);
-
-		handlers = new TreeSet<>(c);
-		connectors = new TreeSet<>(c);
-		customizers = new TreeSet<>(c);
+		handlers = new TreeSet<>(priorityComparator);
+		customizers = new TreeSet<>(priorityComparator);
 
 		jettyFactory = new JettyFactory(paxWebJettyBundle, classLoader);
 	}
@@ -86,123 +83,50 @@ public class JettyServerControllerFactory implements ServerControllerFactory {
 				jettyFactory, configuration);
 		serverControllers.put(configuration.id(), controller);
 
-		return controller;
+		// this is where registered handlers and connectors are added to a JettyServerController.
+		// customizers are added anytime when needed
+		controller.setHandlers(handlers);
+		controller.setCustomizers(customizers);
 
-//		return new JettyServerController(new JettyFactory(bundle), priorityComparator) {
-//
-//			@Override
-//			public synchronized void start() {
-//				synchronized (serverControllers) {
-//					for (PriorityValue<Connector> pv : connectors) {
-//						jettyServer.addConnector(pv.value);
-//					}
-//					super.start();
-//					if (!customizers.isEmpty()) {
-//						addCustomizers(JettyServerControllerFactory.this.customizers.stream()
-//								.map(pv -> pv.value).collect(Collectors.toList()));
-//					}
-//					for (PriorityValue<Handler> pv : handlers) {
-//						jettyServer.addHandler(pv.value);
-//					}
-//					serverControllers.put(configuration.id(), this);
-//				}
-//			}
-//
-//			@Override
-//			public synchronized void stop() {
-//				synchronized (serverControllers) {
-//					serverControllers.remove(this);
-//					for (Handler handler : JettyServerControllerFactory.this.handlers.keySet()) {
-//						jettyServer.removeHandler(handler);
-//					}
-//					if (!customizers.isEmpty()) {
-//						removeCustomizers(customizers.keySet());
-//					}
-//					super.stop();
-//					for (Connector connector : connectors.keySet()) {
-//						jettyServer.addConnector(connector);
-//					}
-//				}
-//			}
-//		};
+		return controller;
 	}
 
 	@Override
 	public void releaseServerController(ServerController controller, Configuration configuration) {
-		serverControllers.remove(configuration.id(), controller);
+		if (controller instanceof JettyServerController) {
+			serverControllers.remove(configuration.id(), controller);
+		}
 	}
 
-//	public void addHandler(Handler handler, int ranking) {
-//		synchronized (JettyServerControllerFactory.this.serverControllers) {
-//			for (JettyServerController serverController : this.serverControllers.values()) {
-//				serverController.jettyServer.addHandler(handler);
-//			}
-//			this.handlers.add(new PriorityValue<>(handler, ranking));
-//		}
-//	}
-//
-//	public void removeHandler(Handler handler) {
-//		synchronized (JettyServerControllerFactory.this.serverControllers) {
-//			this.handlers.removeIf(pv -> pv.value == handler);
-//			for (JettyServerController serverController : this.serverControllers.values()) {
-//				serverController.jettyServer.removeHandler(handler);
-//			}
-//		}
-//	}
-//
-//	public void addConnector(Connector connector, int ranking) {
-//		synchronized (JettyServerControllerFactory.this.serverControllers) {
-//			for (JettyServerController serverController : this.serverControllers.values()) {
-//				serverController.jettyServer.addConnector(connector);
-//			}
-//			this.connectors.add(new PriorityValue<>(connector, ranking));
-//		}
-//	}
-//
-//	public void removeConnector(Connector connector) {
-//		synchronized (JettyServerControllerFactory.this.serverControllers) {
-//			this.connectors.removeIf(pv -> pv.value == connector);
-//			for (JettyServerController serverController : this.serverControllers.values()) {
-//				serverController.jettyServer.removeConnector(connector);
-//			}
-//		}
-//	}
-//
-//	public void addCustomizer(Customizer customizer, int ranking) {
-//		synchronized (JettyServerControllerFactory.this.serverControllers) {
-//			List<Customizer> customizers = Collections.singletonList(customizer);
-////			for (JettyServerController serverController : this.serverControllers.values()) {
-////				serverController.addCustomizers(customizers);
-////			}
-//			this.customizers.add(new PriorityValue<>(customizer, ranking));
-//		}
-//	}
-//
-//	public void removeCustomizer(Customizer customizer) {
-//		synchronized (JettyServerControllerFactory.this.serverControllers) {
-//			this.customizers.removeIf(pv -> pv.value == customizer);
-//			List<Customizer> customizers = Collections.singletonList(customizer);
-////			for (JettyServerController serverController : this.serverControllers.values()) {
-////				serverController.removeCustomizers(customizers);
-////			}
-//		}
-//	}
+	public void addHandler(Handler handler, int ranking) {
+		// there should be no controllers at all, because when a handler is added, ServerController is unregistered
+		this.handlers.add(new PriorityValue<>(handler, ranking));
+	}
 
-	private static class PriorityValue<T> {
-		private final T value;
-		private final Integer priority;
+	public void removeHandler(Handler handler) {
+		this.handlers.removeIf(pv -> pv.getValue() == handler);
+		// we don't have to remove the handler from controllers, because the controllers will be stopped and
+		// removed anyway
+	}
 
-		PriorityValue(T value, Integer priority) {
-			this.value = value;
-			this.priority = priority;
+	public void addCustomizer(Customizer customizer, int ranking) {
+		synchronized (JettyServerControllerFactory.this.serverControllers) {
+			PriorityValue<Customizer> pv = new PriorityValue<>(customizer, ranking);
+			this.customizers.add(pv);
+			// for customizers there are existing controllers
+			for (JettyServerController serverController : this.serverControllers.values()) {
+				serverController.setCustomizers(customizers);
+			}
 		}
+	}
 
-		public T getValue() {
-			return value;
-		}
-
-		public Integer getPriority() {
-			return priority;
+	public void removeCustomizer(Customizer customizer) {
+		synchronized (JettyServerControllerFactory.this.serverControllers) {
+			this.customizers.removeIf(pv -> pv.getValue() == customizer);
+			// for customizers there are existing controllers
+			for (JettyServerController serverController : this.serverControllers.values()) {
+				serverController.removeCustomizer(customizer);
+			}
 		}
 	}
 

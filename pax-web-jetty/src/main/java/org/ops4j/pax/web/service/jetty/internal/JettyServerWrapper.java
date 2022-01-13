@@ -164,7 +164,7 @@ class JettyServerWrapper implements BatchVisitor {
 	private MBeanContainer mbeanContainer;
 
 	/** Main handler collection for Jetty server */
-	private ContextHandlerCollection mainHandler;
+	private final PrioritizedHandlerCollection mainHandler;
 
 	/** If {@code jetty*.xml} files create instances of {@link HttpConfiguration}, these are collected here. */
 	private final Map<String, HttpConfiguration> httpConfigs = new LinkedHashMap<>();
@@ -232,12 +232,16 @@ class JettyServerWrapper implements BatchVisitor {
 	 */
 	private final List<EventListenerModel> sessionListenerModels = new ArrayList<>();
 
+	private final Set<PriorityValue<HttpConfiguration.Customizer>> registeredCustomizers = new TreeSet<>(JettyServerControllerFactory.priorityComparator);
+
 	JettyServerWrapper(Configuration config, JettyFactory jettyFactory,
 			Bundle paxWebJettyBundle, ClassLoader classLoader) {
 		this.configuration = config;
 		this.jettyFactory = jettyFactory;
 		this.paxWebJettyBundle = paxWebJettyBundle;
 		this.classLoader = classLoader;
+
+		this.mainHandler = new PrioritizedHandlerCollection();
 	}
 
 	// --- lifecycle and configuration methods
@@ -251,16 +255,6 @@ class JettyServerWrapper implements BatchVisitor {
 		LOG.info("Creating Jetty server instance using configuration properties.");
 		createServer();
 
-		// most important part - a handler - even before applying external configuration, as it may contain
-		// <Get name="handler">/<Call name="addHandler">
-		// TODO: my initial idea was to have this hierarchy:
-		//  server:
-		//   - handler collection
-		//      - handler collection to store custom handlers with @Priority > 0
-		//      - context handler collection to store context handlers
-		//      - handler collection to store custom handlers with @Priority < 0
-		//  but for now, let's have it like before Pax Web 8
-		this.mainHandler = new ContextHandlerCollection();
 		server.setHandler(this.mainHandler);
 
 		// No external configuration should replace our "Server" object
@@ -298,6 +292,8 @@ class JettyServerWrapper implements BatchVisitor {
 			dsFactory.setStoreDir(configuration.session().getSessionStoreDirectory());
 			server.addBean(dsFactory);
 		}
+
+		configureServerCustomizers();
 
 		mbeanContainer = jettyFactory.enableJmxIfPossible(server);
 	}
@@ -662,46 +658,6 @@ class JettyServerWrapper implements BatchVisitor {
 
 		return result.toArray(new ServerEvent.Address[0]);
 	}
-
-	// --- connector/handler/customizer methods
-
-//	//	@Override
-//	@Review("Log says about opened port, but the port is not yet opened")
-//	public void addConnector(final Connector connector) {
-//		LOG.info("Pax Web available at [{}]:[{}]",
-//				((ServerConnector) connector).getHost() == null ? "0.0.0.0"
-//						: ((ServerConnector) connector).getHost(),
-//				((ServerConnector) connector).getPort());
-//		server.addConnector(connector);
-//		if (priorityComparator != null) {
-//			Connector[] connectors = server.getConnectors();
-//			@SuppressWarnings("unchecked")
-//			Comparator<Connector> comparator = (Comparator<Connector>) priorityComparator;
-//			Arrays.sort(connectors, comparator);
-//		}
-//	}
-
-//	//	@Override
-//	public void addHandler(Handler handler) {
-//		HandlerCollection handlerCollection = server.getRootHandlerCollection();
-//		handlerCollection.addHandler(handler);
-//		if (priorityComparator != null) {
-//			Handler[] handlers = handlerCollection.getHandlers();
-//			@SuppressWarnings("unchecked")
-//			Comparator<Handler> comparator = (Comparator<Handler>) priorityComparator;
-//			Arrays.sort(handlers, comparator);
-//		}
-//	}
-
-//	//	@Override
-//	public Handler[] getHandlers() {
-//		return server.getRootHandlerCollection().getHandlers();
-//	}
-//
-//	//	@Override
-//	public void removeHandler(Handler handler) {
-//		server.getRootHandlerCollection().removeHandler(handler);
-//	}
 
 	// --- visitor methods for model changes
 
@@ -2380,6 +2336,57 @@ class JettyServerWrapper implements BatchVisitor {
 				httpConfigs.put(id, (HttpConfiguration) v);
 			}
 		});
+	}
+
+	// --- handler/connector/customizer configuration
+	//     only customizers are added/removed to/from "live" server
+
+	public void setHandlers(Set<PriorityValue<Handler>> handlers) {
+		mainHandler.setPriorityHandlers(handlers);
+	}
+
+	public void setCustomizers(Set<PriorityValue<HttpConfiguration.Customizer>> customizers) {
+		registeredCustomizers.clear();
+		registeredCustomizers.addAll(customizers);
+		if (server != null) {
+			configureServerCustomizers();
+		}
+	}
+
+	private void configureServerCustomizers() {
+		Connector[] connectors = server.getConnectors();
+		for (Connector connector : connectors) {
+			Collection<ConnectionFactory> connectionFactories = connector.getConnectionFactories();
+			for (ConnectionFactory connectionFactory : connectionFactories) {
+				if (connectionFactory instanceof HttpConnectionFactory) {
+					// same for secure and non-secure connectors. Secure connectors simply have more
+					// connection factories inside
+					HttpConnectionFactory httpConnectionFactory = (HttpConnectionFactory) connectionFactory;
+					HttpConfiguration httpConfiguration = httpConnectionFactory.getHttpConfiguration();
+					for (PriorityValue<HttpConfiguration.Customizer> customizer : registeredCustomizers) {
+						httpConfiguration.addCustomizer(customizer.getValue());
+					}
+				}
+			}
+		}
+	}
+
+	public void removeCustomizer(HttpConfiguration.Customizer customizer) {
+		if (server != null) {
+			Connector[] connectors = server.getConnectors();
+			for (Connector connector : connectors) {
+				Collection<ConnectionFactory> connectionFactories = connector.getConnectionFactories();
+				for (ConnectionFactory connectionFactory : connectionFactories) {
+					if (connectionFactory instanceof HttpConnectionFactory) {
+						HttpConnectionFactory httpConnectionFactory = (HttpConnectionFactory) connectionFactory;
+						HttpConfiguration httpConfiguration = httpConnectionFactory.getHttpConfiguration();
+						List<HttpConfiguration.Customizer> httpConfigurationCustomizers = httpConfiguration.getCustomizers();
+						httpConfigurationCustomizers.remove(customizer);
+					}
+				}
+			}
+		}
+		registeredCustomizers.removeIf(pv -> pv.getValue() == customizer);
 	}
 
 }

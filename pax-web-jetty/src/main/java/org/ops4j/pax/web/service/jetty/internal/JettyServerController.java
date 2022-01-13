@@ -19,11 +19,12 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.servlet.Servlet;
 
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.util.resource.PathResource;
 import org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet;
 import org.ops4j.pax.web.service.spi.ServerController;
@@ -62,8 +63,6 @@ class JettyServerController implements ServerController {
 	 */
 	private JettyServerWrapper jettyServerWrapper;
 
-						private Comparator<?> priorityComparator;
-
 	JettyServerController(Bundle paxWebJettyBundle, ClassLoader classLoader,
 			JettyFactory jettyFactory, Configuration configuration) {
 		this.paxWebJettyBundle = paxWebJettyBundle;
@@ -73,6 +72,8 @@ class JettyServerController implements ServerController {
 		this.state = ServerState.UNCONFIGURED;
 
 		this.listeners = Collections.synchronizedSet(new LinkedHashSet<>());
+
+		jettyServerWrapper = new JettyServerWrapper(configuration, jettyFactory, paxWebJettyBundle, classLoader);
 	}
 
 	// --- lifecycle methods
@@ -91,7 +92,6 @@ class JettyServerController implements ServerController {
 			throw new IllegalStateException("Can't configure Jetty server controller in state " + state);
 		}
 
-		jettyServerWrapper = new JettyServerWrapper(configuration, jettyFactory, paxWebJettyBundle, classLoader);
 		jettyServerWrapper.configure();
 
 		state = ServerState.STOPPED;
@@ -186,49 +186,16 @@ class JettyServerController implements ServerController {
 		return "JettyServerController{configuration=" + configuration.id() + ",state=" + state + "}";
 	}
 
-	//	private class Started implements State {
-//
-//		@Override
-//		public void addCustomizers(Collection<Customizer> customizers) {
-//			Connector[] connectors = jettyServer.getConnectors();
-//			for (Connector connector : connectors) {
-//				Collection<ConnectionFactory> connectionFactories = connector.getConnectionFactories();
-//				for (ConnectionFactory connectionFactory : connectionFactories) {
-//					if (connectionFactory instanceof HttpConnectionFactory) {
-//						HttpConnectionFactory httpConnectionFactory = (HttpConnectionFactory) connectionFactory;
-//						HttpConfiguration httpConfiguration = httpConnectionFactory.getHttpConfiguration();
-//						if (priorityComparator == null) {
-//							for (Customizer customizer : customizers) {
-//								httpConfiguration.addCustomizer(customizer);
-//							}
-//						} else {
-//    						List<Customizer> httpConfigurationCustomizers = httpConfiguration.getCustomizers();
-//    						httpConfigurationCustomizers.addAll(customizers);
-//    						@SuppressWarnings("unchecked")
-//    						Comparator<Customizer> comparator = (Comparator<Customizer>) priorityComparator;
-//    						Collections.sort(httpConfigurationCustomizers, comparator);
-//						}
-//					}
-//				}
-//			}
-//		}
-//
-//		@Override
-//		public void removeCustomizers(Collection<Customizer> customizers)	{
-//			Connector[] connectors = jettyServer.getConnectors();
-//			for (Connector connector : connectors) {
-//				Collection<ConnectionFactory> connectionFactories = connector.getConnectionFactories();
-//				for (ConnectionFactory connectionFactory : connectionFactories) {
-//					if (connectionFactory instanceof HttpConnectionFactory) {
-//						HttpConnectionFactory httpConnectionFactory = (HttpConnectionFactory) connectionFactory;
-//						HttpConfiguration httpConfiguration = httpConnectionFactory.getHttpConfiguration();
-//						List<Customizer> httpConfigurationCustomizers = httpConfiguration.getCustomizers();
-//						httpConfigurationCustomizers.removeAll(customizers);
-//					}
-//				}
-//			}
-//		}
-//
-//	}
+	public void setHandlers(Set<PriorityValue<Handler>> handlers) {
+		jettyServerWrapper.setHandlers(handlers);
+	}
+
+	public void setCustomizers(Set<PriorityValue<HttpConfiguration.Customizer>> customizers) {
+		jettyServerWrapper.setCustomizers(customizers);
+	}
+
+	public void removeCustomizer(HttpConfiguration.Customizer customizer) {
+		jettyServerWrapper.removeCustomizer(customizer);
+	}
 
 }

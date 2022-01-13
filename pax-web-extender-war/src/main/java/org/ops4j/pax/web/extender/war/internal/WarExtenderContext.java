@@ -143,6 +143,7 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 				"org.ops4j.pax.web.pax-web-karaf",
 				"org.ops4j.pax.web.pax-web-jetty*",
 				"org.ops4j.pax.web.pax-web-tomcat",
+				"org.ops4j.pax.web.pax-web-tomcat-common",
 				"org.ops4j.pax.web.pax-web-undertow",
 				"org.eclipse.jdt.core.compiler.batch",
 				// see Tomcat's tomcat.util.scan.StandardJarScanFilter.jarsToSkip property in

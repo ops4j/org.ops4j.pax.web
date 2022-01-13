@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.jetty.config;
 
 import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.junit.After;
@@ -25,55 +26,43 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.base.VersionUtil;
-import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
+import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
+import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import static org.ops4j.pax.web.itest.common.ITestBase.configureJetty;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
  * @author Achim Nierbeck
  */
 @RunWith(PaxExam.class)
-public class JettyHandlerServiceIntegrationTest extends ITestBase {
+public class JettyHandlerServiceIntegrationTest extends AbstractContainerTestBase {
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(JettyHandlerServiceIntegrationTest.class);
-
-	private Bundle installWarBundle;
+	private Bundle war;
 
 	@Configuration
-	public static Option[] configure() {
-		return configureJetty();
+	public Option[] configure() {
+		Option[] serverOptions = combine(baseConfigure(), paxWebJetty());
+		Option[] jspOptions = combine(serverOptions, paxWebJsp());
+		return combine(jspOptions, paxWebExtenderWar());
 	}
 
 	@Before
-	public void setUp() throws BundleException, InterruptedException {
-		LOG.info("Setting up test");
-
-		initWebListener();
-
-		final String bundlePath = WEB_BUNDLE
-				+ "mvn:org.ops4j.pax.web.samples/war/" + VersionUtil.getProjectVersion()
-				+ "/war?" + WEB_CONTEXT_PATH + "=/test";
-		installWarBundle = bundleContext.installBundle(bundlePath);
-		installWarBundle.start();
-
-		waitForWebListener();
+	public void setUp() throws Exception {
+		war = configureAndWaitForDeploymentUnlessInstalled("war", () -> {
+			installAndStartWebBundle("war", "/test");
+		});
 	}
 
 	@After
 	public void tearDown() throws BundleException {
-		if (installWarBundle != null) {
-			installWarBundle.stop();
-			installWarBundle.uninstall();
+		if (war != null) {
+			war.stop();
+			war.uninstall();
 		}
 	}
-
 
 	@Test
 	public void testWeb() throws Exception {
@@ -85,20 +74,6 @@ public class JettyHandlerServiceIntegrationTest extends ITestBase {
 
 	@Test
 	public void testStaticContent() throws Exception {
-		
-		/*
-		  <New class="org.eclipse.jetty.server.handler.ContextHandler">
-				<Set name="contextPath">/static-content</Set>
-				<Set name="handler">
-					<New class="org.eclipse.jetty.server.handler.ResourceHandler">
-						<Set name="resourceBase">target/logs</Set>
-						<Set name="directoriesListed">true</Set>
-					</New>
-				</Set>
-		  </New>
-		 */
-
-
 		ContextHandler ctxtHandler = new ContextHandler();
 		ctxtHandler.setContextPath("/static-content");
 		ResourceHandler resourceHandler = new ResourceHandler();
@@ -106,15 +81,26 @@ public class JettyHandlerServiceIntegrationTest extends ITestBase {
 		resourceHandler.setDirectoriesListed(true);
 		ctxtHandler.setHandler(resourceHandler);
 
-		ServiceRegistration<Handler> registerService = bundleContext.registerService(Handler.class, ctxtHandler, null);
+		HttpConfiguration.Customizer customizer = (connector1, channelConfig, request)
+				-> request.getResponse().addHeader("X-Y-Z", "x-y-z");
 
-		waitForServer("http://localhost:8181/");
+		@SuppressWarnings("unchecked")
+		final ServiceRegistration<Handler>[] registerHandlerService = new ServiceRegistration[1];
+
+		ServiceRegistration<HttpConfiguration.Customizer> registerCustomizerService  = context.registerService(HttpConfiguration.Customizer.class, customizer, null);
+		configureAndWaitForDeployment(() -> {
+			registerHandlerService[0] = context.registerService(Handler.class, ctxtHandler, null);
+		});
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain '<a href=\"/static-content/'",
 						resp -> resp.contains("<a href=\"/static-content/"))
+				.withResponseHeaderAssertion("Response should contain \"X-Y-Z\" header", headers
+						-> headers.anyMatch(e -> e.getKey().equals("X-Y-Z") && e.getValue().equals("x-y-z")))
 				.doGETandExecuteTest("http://localhost:8181/static-content/");
 
-		registerService.unregister();
+		registerCustomizerService.unregister();
+		registerHandlerService[0].unregister();
 	}
+
 }

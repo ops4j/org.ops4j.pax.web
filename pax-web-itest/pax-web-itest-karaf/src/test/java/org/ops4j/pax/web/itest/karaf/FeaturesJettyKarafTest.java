@@ -39,7 +39,7 @@ public class FeaturesJettyKarafTest extends FeaturesBaseKarafTest {
 	public void testJmx() throws Exception {
 		try (JMXConnector connector = this.getJMXConnector()) {
 			MBeanServerConnection connection = connector.getMBeanServerConnection();
-			ObjectName name = new ObjectName("org.eclipse.jetty.server.handler:type=contexthandlercollection,id=0");
+			ObjectName name = new ObjectName("org.ops4j.pax.web.service.jetty.internal:type=prioritizedhandlercollection,id=0");
 			Object handlers = connection.getAttribute(name, "handlers");
 			assertNotNull(handlers);
 		}
