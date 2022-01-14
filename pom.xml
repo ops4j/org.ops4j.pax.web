@@ -261,7 +261,7 @@
 
 		<dependency.org.ops4j.base>1.5.1</dependency.org.ops4j.base>
 		<dependency.org.ops4j.pax.exam>4.13.4</dependency.org.ops4j.pax.exam>
-		<dependency.org.ops4j.pax.logging>2.0.9</dependency.org.ops4j.pax.logging>
+		<dependency.org.ops4j.pax.logging>2.0.14</dependency.org.ops4j.pax.logging>
 		<dependency.org.ops4j.pax.swissbox>1.8.4</dependency.org.ops4j.pax.swissbox>
 		<dependency.org.ops4j.pax.url>2.6.8</dependency.org.ops4j.pax.url>
 
