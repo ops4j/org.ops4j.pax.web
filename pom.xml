@@ -130,7 +130,7 @@
 		<dependency.org.osgi.util.promise>1.1.1</dependency.org.osgi.util.promise>
 		<dependency.org.osgi.util.function>1.1.0</dependency.org.osgi.util.function>
 		<dependency.paxurl.version>2.6.8</dependency.paxurl.version>
-		<dependency.pax-logging.version>1.11.9</dependency.pax-logging.version>
+		<dependency.pax-logging.version>1.11.13</dependency.pax-logging.version>
 		<!-- github/primefaces/primefaces#4210: Compatibility with Servlet API 4.0" -->
 		<dependency.primefaces.version>6.2</dependency.primefaces.version>
 <!--		<dependency.primefaces.version>6.3-SNAPSHOT</dependency.primefaces.version>-->
