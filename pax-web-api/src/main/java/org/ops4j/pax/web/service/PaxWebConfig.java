@@ -117,6 +117,17 @@ public interface PaxWebConfig {
 	String PID_CFG_HTTP_CHECK_FORWARDED_HEADERS = "org.osgi.service.http.checkForwardedHeaders";
 
 	/**
+	 * Comma-separated list of virtual hosts to set on <em>every deployed context</em> if the context itself
+	 * doesn't specify such configuration. Defaults to empty list.
+	 */
+	String PID_CFG_VIRTUAL_HOST_LIST = "org.ops4j.pax.web.default.virtualhosts";
+	/**
+	 * Comma-separated list of connector names to set on <em>every deployed context</em> if the context itself
+	 * doesn't specify such configuration. Defaults to empty list.
+	 */
+	String PID_CFG_CONNECTOR_LIST = "org.ops4j.pax.web.default.connectors";
+
+	/**
 	 * Option to specify number of threads for internal web element/context (un)registration event dispatching.
 	 * Defaults to {@code 1} ("3" was hardcoded before Pax Web 8).
 	 */

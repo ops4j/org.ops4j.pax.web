@@ -286,9 +286,19 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	 * {@link HttpContext} or {@link org.ops4j.pax.web.service.whiteboard.ContextMapping} was registered.</p>
 	 *
 	 * <p>For each VHost from the list, related {@link ServletContextModel} should be added to given VHost.
-	 * Empty list means the {@link ServletContextModel} is part of all, including default (fallback), VHosts.</p>
+	 * Empty list means the {@link ServletContextModel} is part of all, including the default (fallback), VHosts.</p>
+	 *
+	 * <p>Entire implementation of virtual hosts is based on the most flexible solution from Jetty, where a "host"
+	 * is not a dedicated object being part of the hierarchy (as in Tomcat), but it's rather a label on the context
+	 * (WAR, web application) itself - this allows single web application to be accessed through different
+	 * virtual hosts and connectors.</p>
 	 */
 	private final List<String> virtualHosts = new ArrayList<>();
+
+	/**
+	 * Connector names for given context - always handled together with connectors.
+	 */
+	private final List<String> connectors = new ArrayList<>();
 
 	/**
 	 * <p>This is the <em>owner</em> bundle of this <em>context</em>. For {@link org.osgi.service.http.HttpService}
@@ -539,6 +549,10 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 
 	public List<String> getVirtualHosts() {
 		return virtualHosts;
+	}
+
+	public List<String> getConnectors() {
+		return connectors;
 	}
 
 	public Bundle getOwnerBundle() {

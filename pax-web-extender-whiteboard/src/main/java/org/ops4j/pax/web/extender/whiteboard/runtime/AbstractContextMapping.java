@@ -26,6 +26,7 @@ public abstract class AbstractContextMapping implements ContextMapping {
 	private String contextPath;
 	private Map<String, String> initParameters = new HashMap<>();
 	private String[] virtualHosts = new String[0];
+	private String[] connectors = new String[0];
 
 	@Override
 	public String getContextId() {
@@ -47,6 +48,11 @@ public abstract class AbstractContextMapping implements ContextMapping {
 		return virtualHosts;
 	}
 
+	@Override
+	public String[] getConnectors() {
+		return connectors;
+	}
+
 	public void setContextId(String contextId) {
 		this.contextId = contextId;
 	}
@@ -61,6 +67,10 @@ public abstract class AbstractContextMapping implements ContextMapping {
 
 	public void setVirtualHosts(String[] virtualHosts) {
 		this.virtualHosts = virtualHosts;
+	}
+
+	public void setConnectors(String[] connectors) {
+		this.connectors = connectors;
 	}
 
 }

@@ -380,6 +380,23 @@ public class Utils {
 	}
 
 	/**
+	 * Helper method to convert generic property value into array of Strings. A different variant of
+	 * {@link #asStringArray(String, Object)}, which may be told to treat String values as comma-separated values.
+	 * @param propertyName
+	 * @param value
+	 * @param splitStrings
+	 * @return
+	 */
+	public static String[] asStringArray(String propertyName, Object value, boolean splitStrings) {
+		if (!splitStrings || !(value instanceof String)) {
+			return asStringArray(propertyName, value);
+		}
+
+		// this is a String and it's not null
+		return ((String) value).trim().split("\\s*,\\s*");
+	}
+
+	/**
 	 * Gets a service property by checking legacy and whiteboard property names, printing relevant warnings, if needed.
 	 *
 	 * @param serviceReference
@@ -395,18 +412,20 @@ public class Utils {
 		Object propertyValue;
 		if (legacyName != null) {
 			propertyValue = serviceReference.getProperty(legacyName);
-			if (propertyValue != null) {
+			if (propertyValue != null && whiteboardName != null) {
 				LOG.warn("Legacy {} property specified, R7 {} property should be used instead", legacyName, whiteboardName);
 				value = propertyProvider.apply(legacyName, propertyValue);
 			}
 		}
-		propertyValue = serviceReference.getProperty(whiteboardName);
-		if (propertyValue != null) {
-			if (value != null) {
-				LOG.warn("Both legacy {} and R7 {} properties are specified. Using R7 property: {}.", legacyName,
-						whiteboardName, propertyValue);
+		if (whiteboardName != null) {
+			propertyValue = serviceReference.getProperty(whiteboardName);
+			if (propertyValue != null) {
+				if (value != null) {
+					LOG.warn("Both legacy {} and R7 {} properties are specified. Using R7 property: {}.", legacyName,
+							whiteboardName, propertyValue);
+				}
+				value = propertyProvider.apply(whiteboardName, propertyValue);
 			}
-			value = propertyProvider.apply(whiteboardName, propertyValue);
 		}
 
 		return value;

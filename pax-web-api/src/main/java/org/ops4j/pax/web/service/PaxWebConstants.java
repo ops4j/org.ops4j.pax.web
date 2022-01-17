@@ -98,7 +98,16 @@ public interface PaxWebConstants {
 	String DEFAULT_PAX_WEB_JSP_SYMBOLIC_NAME = "org.ops4j.pax.web.pax-web-jsp";
 
 	/** Manifest header key for web application bundles according to 128.3.1 WAB Definition. */
-	String CONTEXT_PATH_HEADER = "Web-ContextPath";
+	String HEADER_CONTEXT_PATH = "Web-ContextPath";
+
+	/**
+	 * Pax Web specific manifest header of the WAB to specify matching virtual hosts for given context/WAB.
+	 * To handle Jetty-specific {@code hosst@connector} syntax, a slash has to be used instead of at-sign.
+	 */
+	String HEADER_VIRTUAL_HOSTS = "Web-VirtualHosts";
+
+	/** Pax Web specific manifest header of the WAB to specify matching connector names/ids for given context/WAB */
+	String HEADER_CONNECTORS = "Web-Connectors";
 
 	/**
 	 * Service registration property to mark services as <em>internal</em>, so they're not processed by Pax Web
@@ -120,6 +129,7 @@ public interface PaxWebConstants {
 	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping}</li>
 	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.HttpContextMapping}</li>
 	 *     <li>{@link org.osgi.service.http.context.ServletContextHelper}</li>
+	 *     <li>{@link org.osgi.service.http.HttpContext}</li>
 	 * </ul>
 	 * services to indicate <em>virtual hosts</em> with which this context should be associated (though for the two
 	 * Pax Web specific mappings, {@link ContextMapping#getVirtualHosts()} takes precedence).</p>
@@ -128,7 +138,35 @@ public interface PaxWebConstants {
 	 * is assumed to be associated with <strong>all</strong> virtual hosts.</p>
 	 */
 	@Deprecated
-	String SERVICE_PROPERTY_VIRTUAL_HOSTS = "httpContext.virtualhosts";
+	String SERVICE_PROPERTY_VIRTUAL_HOSTS_LEGACY = "httpContext.virtualhosts";
+	/**
+	 * <p>Improved name for the service registration property to configure virtual hosts of the context
+	 * ({@link org.osgi.service.http.context.ServletContextHelper}, {@link org.osgi.service.http.HttpContext}, etc.).</p>
+	 * <p>See http://www.eclipse.org/jetty/documentation/jetty-9/index.html#configuring-virtual-hosts</p>
+	 */
+	String SERVICE_PROPERTY_VIRTUAL_HOSTS = "org.ops4j.pax.web.http.whiteboard.virtualhosts";
+
+	/**
+	 * <p>Pax Web specific service property used when registering:<ul>
+	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping}</li>
+	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.HttpContextMapping}</li>
+	 *     <li>{@link org.osgi.service.http.context.ServletContextHelper}</li>
+	 *     <li>{@link org.osgi.service.http.HttpContext}</li>
+	 * </ul>
+	 * services to indicate <em>connector ids</em> through which this context should be associated (though for the two
+	 * Pax Web specific mappings, {@link ContextMapping#getConnectors()} takes precedence).</p>
+	 *
+	 * <p>The value should be String, array of Strings or Collection of Strings. When missing, <em>context</em>
+	 * is assumed to be accessible through <strong>all</strong> connectors.</p>
+	 */
+	@Deprecated
+	String SERVICE_PROPERTY_CONNECTORS_LEGACY = "httpContext.connectors";
+	/**
+	 * <p>Improved name for the service registration property to configure connectors of the context
+	 * ({@link org.osgi.service.http.context.ServletContextHelper}, {@link org.osgi.service.http.HttpContext}, etc.).</p>
+	 * <p>See http://www.eclipse.org/jetty/documentation/jetty-9/index.html#configuring-virtual-hosts</p>
+	 */
+	String SERVICE_PROPERTY_CONNECTORS = "org.ops4j.pax.web.http.whiteboard.connectors";
 
 	/**
 	 * Legacy service property for context ID.
@@ -257,15 +295,5 @@ public interface PaxWebConstants {
 
 	/** Context name of the WAB bundle or bundle registering OSGi servlet context (Pax Web addition) */
 	String SERVICE_PROPERTY_WEB_SERVLETCONTEXT_NAME = "osgi.web.contextname";
-
-
-
-
-
-
-
-
-	String PROPERTY_VIRTUAL_HOST_LIST = "org.ops4j.pax.web.default.virtualhosts";
-	String PROPERTY_CONNECTOR_LIST = "org.ops4j.pax.web.default.connectors";
 
 }

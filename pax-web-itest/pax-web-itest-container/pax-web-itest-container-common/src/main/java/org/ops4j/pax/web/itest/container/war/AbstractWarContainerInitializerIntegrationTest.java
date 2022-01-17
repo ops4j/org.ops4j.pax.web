@@ -39,7 +39,7 @@ public abstract class AbstractWarContainerInitializerIntegrationTest extends Abs
 				.add(TestServlet.class, InnerClassStrategy.NONE)
 				.add(TestServletContainerInitializer.class, InnerClassStrategy.NONE)
 				.set(Constants.BUNDLE_SYMBOLICNAME, "war-bundle")
-				.set(PaxWebConstants.CONTEXT_PATH_HEADER, "/contextroot")
+				.set(PaxWebConstants.HEADER_CONTEXT_PATH, "/contextroot")
 				.set(Constants.IMPORT_PACKAGE, "javax.servlet, javax.servlet.annotation, javax.servlet.http")
 				.set(Constants.DYNAMICIMPORT_PACKAGE, "*")
 				.add("WEB-INF/web.xml",

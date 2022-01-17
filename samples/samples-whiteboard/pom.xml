@@ -41,6 +41,7 @@
 		<module>whiteboard-ds-dynamic</module>
 		<module>whiteboard-blueprint</module>
 		<module>whiteboard-scopes</module>
+		<module>whiteboard-extended</module>
 	</modules>
 
 </project>

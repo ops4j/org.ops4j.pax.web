@@ -45,7 +45,6 @@ public class TomcatSecureConfigurationIntegrationTest extends AbstractContainerT
 				.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart();
 		return combine(
 				combine(serverOptions, paxWebExtenderWar()), auth,
-				// ports take Server/@portOffset into account
 				frameworkProperty("org.osgi.service.http.secure.enabled").value("true"),
 				frameworkProperty("org.osgi.service.http.port").value("8282"),
 				frameworkProperty("org.osgi.service.http.port.secure").value("8443")

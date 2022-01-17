@@ -250,8 +250,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 
 		// 3. Call the initializers - in startContext()
 
-		// 4. TODO: virtual host handling - at this level (like Pax Web 7)?
-//		this.setVirtualHosts(virtualHosts.toArray(EMPTY_STRING_ARRAY));
+		// 4. Virtual Host/Connector handling - in JettyServerWrapper.ensureServletContextStarted()
 
 		// 5. jetty-web.xml are already handled
 

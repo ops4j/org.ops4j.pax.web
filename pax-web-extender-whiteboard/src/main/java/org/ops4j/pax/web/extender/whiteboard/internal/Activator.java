@@ -147,7 +147,6 @@ public class Activator implements BundleActivator {
 		properties.put(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY, defaultContextModel.getName());
 		properties.put(Constants.SERVICE_RANKING, defaultContextModel.getServiceRank());
 		properties.put(PaxWebConstants.SERVICE_PROPERTY_INTERNAL, true);
-		// TODO: props.put(PaxWebConstants.SERVICE_PROPERTY_VIRTUAL_HOSTS, new String[] { "*" });
 		registration = bundleContext.registerService(ServletContextHelper.class,
 				new DefaultServletContextHelperServiceFactory(), properties);
 

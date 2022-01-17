@@ -22,7 +22,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.servlet.SessionCookieConfig;
@@ -237,12 +236,15 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 	private class ServerConfigurationImpl implements ServerConfiguration {
 
 		private final File tmpDir;
-		private final String[] listeningAddresses ;
+		private final String[] listeningAddresses;
 		private final File[] externalConfigurations;
 
 		private final int eventDispatcherThreadCount;
 
 		private final boolean showStacks;
+
+		private final String[] virtualHosts;
+		private final String[] connectors;
 
 		private ServerConfigurationImpl() {
 			// eager resolution of some important properties
@@ -306,6 +308,18 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 
 			Boolean stacks = resolveBooleanProperty(PaxWebConfig.PID_CFG_SHOW_STACKS);
 			showStacks = stacks != null && stacks;
+
+			// virtual hosts and connector names
+			Object virtualHostNames = resolveStringProperty(PaxWebConfig.PID_CFG_VIRTUAL_HOST_LIST);
+			if (virtualHostNames != null) {
+				virtualHostNames = ((String)virtualHostNames).split("\\s*,\\s*");
+			}
+			Object connectorNames = resolveStringProperty(PaxWebConfig.PID_CFG_CONNECTOR_LIST);
+			if (connectorNames != null) {
+				connectorNames = ((String)connectorNames).split("\\s*,\\s*");
+			}
+			virtualHosts = Utils.asStringArray(PaxWebConfig.PID_CFG_VIRTUAL_HOST_LIST, virtualHostNames);
+			connectors = Utils.asStringArray(PaxWebConfig.PID_CFG_CONNECTOR_LIST, connectorNames);
 		}
 
 		@Override
@@ -394,8 +408,13 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		}
 
 		@Override
-		public List<String> getVirtualHosts() {
-			return Collections.emptyList();
+		public String[] getVirtualHosts() {
+			return virtualHosts;
+		}
+
+		@Override
+		public String[] getConnectors() {
+			return connectors;
 		}
 	}
 

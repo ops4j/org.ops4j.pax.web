@@ -416,7 +416,7 @@ public class MultiContainerTestSupport {
 	/**
 	 * Helper method to create mock {@link Bundle} with associated mock {@link BundleContext}.
 	 * @param symbolicName
-	 * @param contextPath a value for {@link PaxWebConstants#CONTEXT_PATH_HEADER}
+	 * @param contextPath a value for {@link PaxWebConstants#HEADER_CONTEXT_PATH}
 	 * @param obtainWebContainer whether to configure bundle-scoped {@link WebContainer} reference
 	 *                           for this bundle.
 	 * @return
@@ -433,7 +433,7 @@ public class MultiContainerTestSupport {
 
 		if (contextPath != null) {
 			Dictionary<String, String> headers = new Hashtable<>();
-			headers.put(PaxWebConstants.CONTEXT_PATH_HEADER, contextPath);
+			headers.put(PaxWebConstants.HEADER_CONTEXT_PATH, contextPath);
 			when(bundle.getHeaders()).thenReturn(headers);
 		}
 

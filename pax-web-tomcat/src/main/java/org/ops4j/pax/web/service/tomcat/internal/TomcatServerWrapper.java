@@ -805,9 +805,7 @@ class TomcatServerWrapper implements BatchVisitor {
 			}
 
 			//		// TODO: what about the AccessControlContext?
-			//		// TODO: the virtual host section below
-			//		// TODO: what about the VirtualHosts?
-			//		// TODO: connectors are needed for virtual host?
+			//		// TODO_VH: the virtual host/connector section below
 			//
 			//		final Context context = server.addContext(
 			//				contextModel.getAccessControllerContext(),

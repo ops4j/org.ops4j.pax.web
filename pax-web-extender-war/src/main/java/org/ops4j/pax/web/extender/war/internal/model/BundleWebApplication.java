@@ -1295,6 +1295,25 @@ public class BundleWebApplication {
 		// osgi.http.whiteboard.context.select selector
 //		ocm.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, PaxWebConstants.DEFAULT_CONTEXT_NAME);
 
+		String virtualHosts = Utils.getManifestHeader(bundle, PaxWebConstants.HEADER_VIRTUAL_HOSTS);
+		if (virtualHosts != null && !"".equals(virtualHosts.trim())) {
+			String[] virtualHostsArray = Utils.asStringArray(PaxWebConstants.SERVICE_PROPERTY_VIRTUAL_HOSTS, virtualHosts, true);
+			for (int i = 0; i < virtualHostsArray.length; i++) {
+				String s = virtualHostsArray[i];
+				if (s.contains("/")) {
+					virtualHostsArray[i] = s.replace("/", "@");
+				}
+			}
+			ocm.getVirtualHosts().addAll(Arrays.asList(virtualHostsArray));
+			ocm.getContextRegistrationProperties().put(PaxWebConstants.SERVICE_PROPERTY_VIRTUAL_HOSTS, virtualHostsArray);
+		}
+		String connectors = Utils.getManifestHeader(bundle, PaxWebConstants.HEADER_CONNECTORS);
+		if (connectors != null && !"".equals(connectors.trim())) {
+			String[] connectorsArray = Utils.asStringArray(PaxWebConstants.SERVICE_PROPERTY_CONNECTORS, connectors, true);
+			ocm.getConnectors().addAll(Arrays.asList(connectorsArray));
+			ocm.getContextRegistrationProperties().put(PaxWebConstants.SERVICE_PROPERTY_CONNECTORS, connectorsArray);
+		}
+
 		// this is the best place to think about how to reference the underlying "context"
 		// in HttpService and Whiteboard scenarios.
 		//  - For HttpService, the OsgiContextModel needs a direct reference to HttpContext object and

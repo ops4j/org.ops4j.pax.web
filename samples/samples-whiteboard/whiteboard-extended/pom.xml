@@ -21,8 +21,8 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.ops4j.pax.web</groupId>
-		<artifactId>samples</artifactId>
+		<groupId>org.ops4j.pax.web.samples</groupId>
+		<artifactId>samples-whiteboard</artifactId>
 		<version>8.0.1-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
@@ -31,21 +31,38 @@
 	<artifactId>whiteboard-extended</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web - Samples - Whiteboard Extender (Virtual Hosts and Connectors)</name>
+	<name>OPS4J Pax Web Whiteboard Samples - Virtual Hosts</name>
 
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
 				<configuration>
 					<instructions>
 						<Bundle-Activator>org.ops4j.pax.web.extender.samples.whiteboard.internal.Activator</Bundle-Activator>
-						<Export-Package>org.ops4j.pax.web.extender.samples.whiteboard.internal.*</Export-Package>
 						<Import-Package>
-							javax.servlet.*; version="[3.1,5)",
-							*
+							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
+							javax.servlet;version="[3.1,5)",
+							javax.servlet.http;version="[3.1,5)",
+
+							<!-- ranges indicate we can work with OSGi Core R6+ -->
+							org.osgi.framework;version="[1.8,2)",
+							org.osgi.util.tracker;version="[1.5,2)",
+
+							<!-- OSGi cmpn -->
+							org.osgi.service.http;version="[1.2,2)",
+							org.osgi.service.http.context;version="[1.1,2)",
+							org.osgi.service.http.whiteboard;version="[1.1,2)",
+
+							<!-- from pax-logging-api -->
+							org.slf4j;version="[1.7,2)",
+
+							<!-- from pax-web -->
+							org.ops4j.pax.web.service.whiteboard
 						</Import-Package>
+						<Private-Package>org.ops4j.pax.web.extender.samples.whiteboard.internal</Private-Package>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -59,16 +76,6 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-runtime</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-extender-whiteboard</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 		<!-- OSGi -->
@@ -87,8 +94,8 @@
 		<!-- JavaEE -->
 
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -98,11 +105,6 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
-			<scope>test</scope>
 		</dependency>
 
 	</dependencies>

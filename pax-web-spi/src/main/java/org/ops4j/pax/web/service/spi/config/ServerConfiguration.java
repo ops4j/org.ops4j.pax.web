@@ -16,7 +16,6 @@
 package org.ops4j.pax.web.service.spi.config;
 
 import java.io.File;
-import java.util.List;
 
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
@@ -157,16 +156,18 @@ public interface ServerConfiguration {
 	 */
 	Boolean isShowStacks();
 
+	/**
+	 * Returns a list of virtual hosts to be used by default (if a context doesn't specify own configuration).
+	 * Defaults to empty list.
+	 * @return
+	 */
+	String[] getVirtualHosts();
 
-
-
-
-
-
-
-
-
-
-	List<String> getVirtualHosts();
+	/**
+	 * Returns a list of connector names to be used by default (if a context doesn't specify own configuration).
+	 * Defaults to empty list.
+	 * @return
+	 */
+	String[] getConnectors();
 
 }

@@ -97,7 +97,7 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 
 	/**
 	 * ContextPath mapped lists of bundles awaiting allocation of their
-	 * {@link PaxWebConstants#CONTEXT_PATH_HEADER context path}
+	 * {@link PaxWebConstants#HEADER_CONTEXT_PATH context path}
 	 */
 	private final Map<String, List<Bundle>> webApplicationQueue = new HashMap<>();
 
@@ -331,14 +331,14 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 			return null;
 		}
 
-		String context = Utils.getManifestHeader(bundle, PaxWebConstants.CONTEXT_PATH_HEADER);
+		String context = Utils.getManifestHeader(bundle, PaxWebConstants.HEADER_CONTEXT_PATH);
 		if (context == null) {
 			return null;
 		}
 
 		if (!context.startsWith("/") || (!"/".equals(context) && context.endsWith("/"))) {
 			LOG.warn("{} manifest header of {} specifies invalid context path: {}. This bundle will not be processed.",
-					PaxWebConstants.CONTEXT_PATH_HEADER, bundle, context);
+					PaxWebConstants.HEADER_CONTEXT_PATH, bundle, context);
 			return null;
 		}
 

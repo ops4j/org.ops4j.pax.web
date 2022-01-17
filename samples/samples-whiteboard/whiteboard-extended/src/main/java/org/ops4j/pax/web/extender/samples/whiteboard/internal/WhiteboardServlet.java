@@ -16,7 +16,6 @@
 package org.ops4j.pax.web.extender.samples.whiteboard.internal;
 
 import java.io.IOException;
-
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -28,34 +27,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class WhiteboardServlet extends HttpServlet {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(WhiteboardServlet.class);
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 2468029128065282904L;
-	private String servletAlias;
+	private static final Logger LOG = LoggerFactory.getLogger(WhiteboardServlet.class);
+
+	private final String alias;
 
 	public WhiteboardServlet(final String alias) {
-		servletAlias = alias;
+		this.alias = alias;
 	}
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 		ServletContext context = config.getServletContext();
-		LOG.debug(
-				"Servlet Context info - ContextName = [{}], ContextPath = [{}]",
+		LOG.debug("Servlet Context info - ContextName = [{}], ContextPath = [{}]",
 				context.getServletContextName(), context.getContextPath());
 	}
 
-	protected void doGet(HttpServletRequest request,
-						 HttpServletResponse response) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		response.setContentType("text/html");
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.getWriter().println("<h1>Hello Whiteboard Extender</h1>");
-		response.getWriter().println("request alias: " + servletAlias);
+		response.getWriter().println("request alias: " + alias);
 	}
 
 }

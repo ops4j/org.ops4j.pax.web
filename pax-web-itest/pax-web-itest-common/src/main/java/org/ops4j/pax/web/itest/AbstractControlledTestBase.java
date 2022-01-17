@@ -690,7 +690,7 @@ public abstract class AbstractControlledTestBase {
 	protected Bundle installAndStartWebBundle(String artifactId, String contextPath) {
 		String uri = String.format("webbundle:%s?%s=%s&%s=org.ops4j.pax.web.samples.%s",
 				sampleWarURI(artifactId),
-				PaxWebConstants.CONTEXT_PATH_HEADER, contextPath,
+				PaxWebConstants.HEADER_CONTEXT_PATH, contextPath,
 				Constants.BUNDLE_SYMBOLICNAME, artifactId);
 		return installAndStartBundle(uri);
 	}
@@ -708,7 +708,7 @@ public abstract class AbstractControlledTestBase {
 			String symbolicName, String contextPath, Function<String, String> convertURI) {
 		String uri = String.format("webbundle:mvn:%s/%s/%s/war?%s=%s&%s=%s",
 				groupId, artifactId, version,
-				PaxWebConstants.CONTEXT_PATH_HEADER, contextPath,
+				PaxWebConstants.HEADER_CONTEXT_PATH, contextPath,
 				Constants.BUNDLE_SYMBOLICNAME, symbolicName);
 		return installAndStartBundle(convertURI == null ? uri : convertURI.apply(uri));
 	}

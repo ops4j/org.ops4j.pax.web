@@ -15,6 +15,8 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 
+import java.util.Arrays;
+
 import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.AbstractContextTracker;
 import org.ops4j.pax.web.service.WebContainerContext;
@@ -88,8 +90,15 @@ public class HttpContextMappingTracker extends AbstractContextTracker<HttpContex
 			// and additionally a whiteboard context path
 			model.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
 
-			// 5. TODO: virtual hosts
-//			service.getVirtualHosts();
+			// 5. virtual hosts
+			model.getVirtualHosts().clear();
+			model.getConnectors().clear();
+			if (service.getVirtualHosts() != null) {
+				model.getVirtualHosts().addAll(Arrays.asList(service.getVirtualHosts()));
+			}
+			if (service.getConnectors() != null) {
+				model.getConnectors().addAll(Arrays.asList(service.getConnectors()));
+			}
 
 			// 6. source of the context
 			// HttpContextMapping is the legaciest of the Whiteboard methods - it's Pax Web specific

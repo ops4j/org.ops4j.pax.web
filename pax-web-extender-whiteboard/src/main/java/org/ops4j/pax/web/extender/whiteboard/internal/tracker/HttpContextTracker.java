@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -109,8 +110,22 @@ public class HttpContextTracker extends AbstractContextTracker<HttpContext> {
 		// and additionally a whiteboard context path
 		model.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
 
-		// 5. TODO: virtual hosts
-//			service.getVirtualHosts();
+		// 5. virtual hosts - checked using only legacy property name
+		String[] virtualHosts = Utils.getPaxWebProperty(serviceReference,
+				PaxWebConstants.SERVICE_PROPERTY_VIRTUAL_HOSTS_LEGACY, null,
+				(n, v) -> Utils.asStringArray(n, v, true));
+		String[] connectors = Utils.getPaxWebProperty(serviceReference,
+				PaxWebConstants.SERVICE_PROPERTY_CONNECTORS_LEGACY, null,
+				(n, v) -> Utils.asStringArray(n, v, true));
+
+		model.getVirtualHosts().clear();
+		model.getConnectors().clear();
+		if (virtualHosts != null) {
+			model.getVirtualHosts().addAll(Arrays.asList(virtualHosts));
+		}
+		if (connectors != null) {
+			model.getConnectors().addAll(Arrays.asList(connectors));
+		}
 
 		// 6. source of the context
 		// with ServletContextHelper registration (according to Whiteboard Service spec), the service should be

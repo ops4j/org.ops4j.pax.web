@@ -43,7 +43,7 @@ public abstract class AbstractServletAnnotatedIntegrationTest extends AbstractCo
 				.add(AnnotatedTestServlet.class)
 				.add(AnnotatedMultipartTestServlet.class)
 				.set(Constants.BUNDLE_SYMBOLICNAME, "AnnotatedServletTest")
-				.set(PaxWebConstants.CONTEXT_PATH_HEADER, "/annotatedTest")
+				.set(PaxWebConstants.HEADER_CONTEXT_PATH, "/annotatedTest")
 				.set(Constants.IMPORT_PACKAGE, "javax.servlet")
 				.set(Constants.DYNAMICIMPORT_PACKAGE, "*")
 				.build()).noStart();

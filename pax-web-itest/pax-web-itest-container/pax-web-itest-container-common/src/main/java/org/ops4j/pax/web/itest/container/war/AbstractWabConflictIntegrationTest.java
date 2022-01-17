@@ -40,7 +40,7 @@ public abstract class AbstractWabConflictIntegrationTest extends AbstractContain
 		Bundle wab = context.installBundle(wabUri);
 		String warUri = String.format("webbundle:mvn:org.ops4j.pax.web.samples/war-simplest-javaee/%s/war?%s=%s&%s=%s",
 				VersionUtils.getProjectVersion(),
-				PaxWebConstants.CONTEXT_PATH_HEADER, "/war-bundle", // the same as for war-simplest-osgi
+				PaxWebConstants.HEADER_CONTEXT_PATH, "/war-bundle", // the same as for war-simplest-osgi
 				Constants.BUNDLE_SYMBOLICNAME, "org.ops4j.pax.web.samples.war-simplest-javaee");
 		Bundle war = context.installBundle(warUri);
 

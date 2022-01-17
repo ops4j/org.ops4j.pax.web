@@ -55,11 +55,6 @@ public class PaxWebWhiteboardHttpContextMapping implements HttpContextMapping {
 	}
 
 	@Override
-	public String[] getVirtualHosts() {
-		return new String[0];
-	}
-
-	@Override
 	public HttpContext getHttpContext() {
 		return null; //turns into DefaultHttpContext
 	}

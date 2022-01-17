@@ -671,7 +671,7 @@ public class EmbeddedUndertowTest {
 		//        - org.xnio.OptionMap socket options
 		//        - io.undertow.server.OpenListener
 		//        - enabled, started flags
-		//     - Set<org.wildfly.extension.undertow.Host> (virtual hosts?)
+		//     - TODO_VH: Set<org.wildfly.extension.undertow.Host> (virtual hosts?)
 		//        - io.undertow.server.handlers.PathHandler
 		//        - Set<String> allAliases
 		//        - name

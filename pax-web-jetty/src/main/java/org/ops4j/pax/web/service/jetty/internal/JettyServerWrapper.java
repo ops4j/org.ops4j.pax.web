@@ -2078,6 +2078,68 @@ class JettyServerWrapper implements BatchVisitor {
 				ensureSecurityConstraintsConfigured(securityHandler, securityConfig.getSecurityConstraints());
 			}
 
+			// taking virtual host / connector configuration from OsgiContextModel
+			// see http://www.eclipse.org/jetty/documentation/jetty-9/index.html#configuring-virtual-hosts
+			// Jetty supports the following styles of virtual host name:
+			//  - www.hostname.com
+			//  - *.hostname.com (one level wildcarded)
+			//  - 10.20.30.40 (IP address)
+			//  - @ConnectorName - not strictly a virtual host, but handled in the same way as VH, but not by matching
+			//    the "Host" header, but incomming connector's name
+			//  - actually, looks like it can also be "virtualHost@connectorName" format, where both must match
+			List<String> allVirtualHosts = new ArrayList<>();
+			List<String> vhosts = new ArrayList<>(highestRanked.getVirtualHosts());
+			if (vhosts.isEmpty()) {
+				vhosts.addAll(Arrays.asList(configuration.server().getVirtualHosts()));
+			}
+			List<String> connectors = new ArrayList<>(highestRanked.getConnectors());
+			if (connectors.isEmpty()) {
+				connectors.addAll(Arrays.asList(configuration.server().getConnectors()));
+			}
+			for (String vhost : vhosts) {
+				if (vhost == null || "".equals(vhost.trim())) {
+					continue;
+				}
+				if (vhost.startsWith("@")) {
+					// it is a connector
+					allVirtualHosts.add(vhost);
+				} else {
+					// it is a normal virtual host (yes - don't process it anyway)
+					allVirtualHosts.add(vhost);
+				}
+			}
+			for (String c : connectors) {
+				if (c == null || "".equals(c.trim())) {
+					continue;
+				}
+				if (c.startsWith("@")) {
+					// it is a connector, but should be specified as special Jetty's VHost - add without processing
+					allVirtualHosts.add(c);
+				} else {
+					// it is a connector, but should be added as "@" prefixed VHost
+					allVirtualHosts.add("@" + c);
+				}
+			}
+			boolean connectorOnly = false;
+			boolean vhostOnly = false;
+			boolean vhostAndConnector = false;
+			for (String vh : allVirtualHosts) {
+				if (!vh.contains("@")) {
+					vhostOnly = true;
+				} else if (vh.startsWith("@")) {
+					connectorOnly = true;
+				} else {
+					vhostAndConnector = true;
+				}
+			}
+			if (vhostOnly && connectorOnly && !vhostAndConnector) {
+				// add artificial handler@connector to prevent filtering out the host-only VHosts
+				// see https://github.com/eclipse/jetty.project/issues/1785
+				allVirtualHosts.add("_@_");
+			}
+
+			sch.setVirtualHosts(allVirtualHosts.toArray(new String[0]));
+
 			// and finally - XML context configuration which should be treated as highest priority (overriding
 			// the above setup)
 			XmlConfiguration previous = null;

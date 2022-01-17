@@ -28,6 +28,8 @@ import org.osgi.service.http.HttpContext;
  */
 public interface ContextMapping {
 
+	String[] EMPTY_STRING_ARRAY = new String[0];
+
 	/**
 	 * <p>Get an ID of the context that may be referenced later:<ul>
 	 *     <li>Using {@code httpContext.id} service registration property (legacy Pax Web Whiteboard approach)</li>
@@ -84,6 +86,17 @@ public interface ContextMapping {
 	 * @return list of virtual hosts to which this context should be mapped. If {@code null} or 0-sized array is
 	 *         returned, context will be mapped to all virtual hosts.
 	 */
-	String[] getVirtualHosts();
+	default String[] getVirtualHosts() {
+		return EMPTY_STRING_ARRAY;
+	}
+
+	/**
+	 * <p>Get connector names through which this context should be accessible. This is mostly modelled for Jetty,
+	 * but Tomcat and Undertow also have some tricky configuration.</p>
+	 * @return
+	 */
+	default String[] getConnectors() {
+		return EMPTY_STRING_ARRAY;
+	}
 
 }

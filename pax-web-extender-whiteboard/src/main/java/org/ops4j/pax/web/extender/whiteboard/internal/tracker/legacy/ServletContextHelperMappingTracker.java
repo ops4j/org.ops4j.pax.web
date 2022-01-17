@@ -15,6 +15,8 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 
+import java.util.Arrays;
+
 import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.AbstractContextTracker;
 import org.ops4j.pax.web.service.spi.context.DefaultServletContextHelper;
@@ -75,8 +77,15 @@ public class ServletContextHelperMappingTracker extends AbstractContextTracker<S
 			// ... create ones instead (service.id and service.rank are already there)
 			setupArtificialServiceRegistrationProperties(model, service, true);
 
-			// 5. TODO: virtual hosts
-//			service.getVirtualHosts();
+			// 5. virtual hosts
+			model.getVirtualHosts().clear();
+			model.getConnectors().clear();
+			if (service.getVirtualHosts() != null) {
+				model.getVirtualHosts().addAll(Arrays.asList(service.getVirtualHosts()));
+			}
+			if (service.getConnectors() != null) {
+				model.getConnectors().addAll(Arrays.asList(service.getConnectors()));
+			}
 
 			// 6. source of the context
 			// ServletContextHelperMapping is legacy (Pax Web specific) method for registration of

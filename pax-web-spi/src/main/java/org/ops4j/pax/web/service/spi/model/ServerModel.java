@@ -905,6 +905,8 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		osgiContextModel.getContextParams().clear();
 		// explicit proof that no particular VHost is associated, thus context will be available through all VHosts
 		osgiContextModel.getVirtualHosts().clear();
+		// same for connectors (connector names)
+		osgiContextModel.getConnectors().clear();
 
 		// the context still should behave (almost) like it was registered
 		Hashtable<String, Object> registration = osgiContextModel.getContextRegistrationProperties();
