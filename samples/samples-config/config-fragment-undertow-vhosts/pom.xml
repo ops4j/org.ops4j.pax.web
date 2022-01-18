@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright 2021 OPS4J.
+    Copyright 2022 OPS4J.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -21,29 +21,43 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.ops4j.pax.web</groupId>
-		<artifactId>samples</artifactId>
+		<groupId>org.ops4j.pax.web.samples</groupId>
+		<artifactId>samples-config</artifactId>
 		<version>8.0.1-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.ops4j.pax.web.samples</groupId>
-	<artifactId>samples-config</artifactId>
-	<packaging>pom</packaging>
+	<artifactId>config-fragment-undertow-vhosts</artifactId>
+	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web Config Samples/Fragments</name>
+	<name>OPS4J Pax Web Config Samples - Undertow Virtual Hosts</name>
 
-	<modules>
-		<module>auth-config-fragment-jetty</module>
-		<module>auth-config-fragment-tomcat</module>
-		<module>auth-config-fragment-undertow</module>
-		<module>limit-post-config-fragment-tomcat</module>
-		<module>limit-post-config-fragment-undertow</module>
-		<module>config-fragment-tomcat</module>
-		<module>config-fragment-tomcat-vhosts</module>
-		<module>config-fragment-jetty</module>
-		<module>config-fragment-undertow-vhosts</module>
-		<module>showcase</module>
-	</modules>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Fragment-Host>org.ops4j.pax.web.pax-web-undertow</Fragment-Host>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+
+		<!-- pax-web own artifacts -->
+
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-undertow</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+	</dependencies>
 
 </project>

@@ -2576,6 +2576,48 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				deployment.addListener(li);
 			}
 
+
+			// taking virtual host / connector configuration from OsgiContextModel - see
+			// org.eclipse.jetty.server.handler.ContextHandler.checkVirtualHost() and similar pax-web-jetty code
+			List<String> allVirtualHosts = new ArrayList<>();
+			List<String> vhosts = new ArrayList<>(highestRanked.getVirtualHosts());
+			if (vhosts.isEmpty()) {
+				vhosts.addAll(Arrays.asList(configuration.server().getVirtualHosts()));
+			}
+			List<String> connectors = new ArrayList<>(highestRanked.getConnectors());
+			if (connectors.isEmpty()) {
+				connectors.addAll(Arrays.asList(configuration.server().getConnectors()));
+			}
+			for (String vhost : vhosts) {
+				if (vhost == null || "".equals(vhost.trim())) {
+					continue;
+				}
+				if (vhost.startsWith("@")) {
+					// it is a connector
+					allVirtualHosts.add(vhost);
+				} else {
+					// it is a normal virtual host (yes - don't process it anyway)
+					allVirtualHosts.add(vhost);
+				}
+			}
+			for (String c : connectors) {
+				if (c == null || "".equals(c.trim())) {
+					continue;
+				}
+				if (c.startsWith("@")) {
+					// it is a connector, but should be specified as special Jetty's VHost - add without processing
+					allVirtualHosts.add(c);
+				} else {
+					// it is a connector, but should be added as "@" prefixed VHost
+					allVirtualHosts.add("@" + c);
+				}
+			}
+
+			PaxWebOuterHandlerWrapper handlerWrapper = wrappingHandlers.get(contextPath);
+			if (handlerWrapper != null) {
+				handlerWrapper.setVirtualHosts(allVirtualHosts.toArray(new String[0]));
+			}
+
 			manager = servletContainer.addDeployment(deployment);
 
 			// here's where Undertow-specific instance of javax.servlet.ServletContext is created

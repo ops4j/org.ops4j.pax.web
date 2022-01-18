@@ -870,6 +870,11 @@
 				<artifactId>config-fragment-jetty</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>config-fragment-undertow-vhosts</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>

@@ -76,6 +76,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xnio.ChannelListener;
 import org.xnio.ChannelListeners;
+import org.xnio.Option;
 import org.xnio.OptionMap;
 import org.xnio.Options;
 import org.xnio.Sequence;
@@ -87,6 +88,8 @@ import org.xnio.channels.AcceptingChannel;
 import org.xnio.ssl.SslConnection;
 
 public class UndertowFactory {
+
+	public static final Option<String> PAX_WEB_CONNECTOR_NAME = Option.simple(UndertowFactory.class, "PAX_WEB_CONNECTOR_NAME", String.class);
 
 	private static final Logger LOG = LoggerFactory.getLogger(UndertowFactory.class);
 
@@ -493,8 +496,11 @@ public class UndertowFactory {
 
 		undertowOptions.set(Options.SECURE, listener.isSecure());
 
+		String defaultConnectorName = config.server().getHttpConnectorName();
+
 		if (listener.isSecure()) {
 			handler = new MarkSecureHandler(handler);
+			defaultConnectorName = config.server().getHttpSecureConnectorName();
 		}
 		if (listener.isResolvePeerAddress()) {
 			// PAXWEB-1236
@@ -536,6 +542,12 @@ public class UndertowFactory {
 				undertowOptions.set(UndertowOptions.HTTP2_SETTINGS_MAX_HEADER_LIST_SIZE, listener.getHttp2MaxHeaderListSize());
 			}
 		}
+
+		String connectorName = listener.getName();
+		if (connectorName == null || "".equals(connectorName.trim())) {
+			connectorName = defaultConnectorName;
+		}
+		undertowOptions.set(PAX_WEB_CONNECTOR_NAME, connectorName);
 
 		return handler;
 	}
