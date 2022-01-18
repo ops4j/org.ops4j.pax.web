@@ -353,7 +353,7 @@ class TomcatServerWrapper implements BatchVisitor {
 
 		TomcatFactory.ServerHolder holder = new TomcatFactory.ServerHolder();
 		if (config != null) {
-			Digester digester = tomcatFactory.createServerDigester();
+			Digester digester = tomcatFactory.createServerDigester(configuration);
 			digester.push(holder);
 
 			LOG.debug("Parsing {}", config);

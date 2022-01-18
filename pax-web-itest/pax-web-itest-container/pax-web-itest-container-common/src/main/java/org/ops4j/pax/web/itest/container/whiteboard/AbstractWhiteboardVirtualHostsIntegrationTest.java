@@ -63,7 +63,6 @@ public class AbstractWhiteboardVirtualHostsIntegrationTest extends AbstractConta
 	// If Jetty has "localhost" host and "@default" connector configured, connector is checked in two cases:
 	// 1) host@connnector - both must match
 	// 2) @connector - only a connector matching is enough - even if "Host" header doesn't match ANY context's host
-	//
 
 	@Test
 	public void testWhiteBoardContextFound() throws Exception {

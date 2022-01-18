@@ -367,11 +367,14 @@ public class TomcatFactory {
 	/**
 	 * Returns a Tomcat-specific XML processor to parse {@code tomcat-server.xml}.
 	 * @return
+	 * @param configuration
 	 */
-	public Digester createServerDigester() {
+	public Digester createServerDigester(Configuration configuration) {
 		Digester digester = new PaxWebCatalina().createStartDigester();
+
 		// special rule for catalinaHome / catalinaBase attributes
 		digester.getRules().match("", "Server").add(new BaseDirsRule(digester));
+
 		// special rule for Connector/@protocol - ensure that HTTP/1.1 is changed to
 		List<Rule> rules = digester.getRules().match("", "Server/Service/Connector");
 		int idx = 0;
@@ -384,6 +387,7 @@ public class TomcatFactory {
 			idx++;
 		}
 		rules.add(idx, new PaxWebConnectorCreateRule(digester));
+		rules.add(new PaxWebConnectorSetName(digester, configuration.server()));
 
 		return digester;
 	}
@@ -507,6 +511,31 @@ public class TomcatFactory {
 				((AttributesImpl) attributes).setValue(idx, "org.ops4j.pax.web.service.tomcat.internal.PaxWebHttp11Nio2Protocol");
 			}
 			super.begin(namespace, name, attributes);
+		}
+	}
+
+	/**
+	 * Special rule that sets connector's name for the purpose of vhost/connector matching.
+	 */
+	private static class PaxWebConnectorSetName extends Rule {
+		private final ServerConfiguration serverConfiguration;
+
+		PaxWebConnectorSetName(Digester digester, ServerConfiguration server) {
+			this.digester = digester;
+			this.serverConfiguration = server;
+		}
+
+		@Override
+		public void begin(String namespace, String name, Attributes attributes) throws Exception {
+			Object connector = digester.peek();
+			if (connector instanceof Connector) {
+				String connectorName = attributes.getValue("name");
+				if (connectorName == null || "".equals(connectorName.trim())) {
+					connectorName = ((Connector) connector).getSecure() ? serverConfiguration.getHttpSecureConnectorName()
+							: serverConfiguration.getHttpConnectorName();
+				}
+				((PaxWebHttp11Nio2Protocol) ((Connector) connector).getProtocolHandler()).setPaxWebConnectorName(connectorName);
+			}
 		}
 	}
 
