@@ -18,6 +18,9 @@ package org.ops4j.pax.web.service.tomcat.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.catalina.Authenticator;
 import org.apache.catalina.Lifecycle;
@@ -35,6 +38,7 @@ import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.apache.tomcat.util.digester.Digester;
 import org.ops4j.pax.web.service.spi.config.Configuration;
+import org.ops4j.pax.web.service.spi.config.ServerConfiguration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.LoginConfigModel;
 import org.ops4j.pax.web.service.spi.model.elements.SecurityConfigurationModel;
@@ -63,9 +67,12 @@ public class OsgiContextConfiguration implements LifecycleListener {
 	private final LoginConfig loginConfig;
 	private final boolean noAuth;
 
+	private final ServerConfiguration serverConfiguration;
+
 	public OsgiContextConfiguration(OsgiContextModel osgiContextModel, Configuration configuration, TomcatFactory tomcatFactory) {
 		this.osgiContextModel = osgiContextModel;
 		this.tomcatFactory = tomcatFactory;
+		this.serverConfiguration = configuration.server();
 
 		if (osgiContextModel.getSecurityConfiguration().getLoginConfig() == null) {
 			authenticationValve = null;
@@ -225,6 +232,44 @@ public class OsgiContextConfiguration implements LifecycleListener {
 
 				context.getPipeline().addValve(authenticationValve);
 			}
+
+			// taking virtual host / connector configuration from OsgiContextModel - see
+			// org.eclipse.jetty.server.handler.ContextHandler.checkVirtualHost() and similar pax-web-jetty code
+			List<String> allVirtualHosts = new ArrayList<>();
+			List<String> vhosts = new ArrayList<>(osgiContextModel.getVirtualHosts());
+			if (vhosts.isEmpty()) {
+				vhosts.addAll(Arrays.asList(serverConfiguration.getVirtualHosts()));
+			}
+			List<String> connectors = new ArrayList<>(osgiContextModel.getConnectors());
+			if (connectors.isEmpty()) {
+				connectors.addAll(Arrays.asList(serverConfiguration.getConnectors()));
+			}
+			for (String vhost : vhosts) {
+				if (vhost == null || "".equals(vhost.trim())) {
+					continue;
+				}
+				if (vhost.startsWith("@")) {
+					// it is a connector
+					allVirtualHosts.add(vhost);
+				} else {
+					// it is a normal virtual host (yes - don't process it anyway)
+					allVirtualHosts.add(vhost);
+				}
+			}
+			for (String c : connectors) {
+				if (c == null || "".equals(c.trim())) {
+					continue;
+				}
+				if (c.startsWith("@")) {
+					// it is a connector, but should be specified as special Jetty's VHost - add without processing
+					allVirtualHosts.add(c);
+				} else {
+					// it is a connector, but should be added as "@" prefixed VHost
+					allVirtualHosts.add("@" + c);
+				}
+			}
+
+			context.setVirtualHosts(allVirtualHosts.toArray(new String[0]));
 
 			// Tomcat-specific context configuration
 			ClassLoader tccl = Thread.currentThread().getContextClassLoader();

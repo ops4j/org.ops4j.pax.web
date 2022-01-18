@@ -33,6 +33,8 @@ public class PaxWebHttp11Nio2Protocol extends AbstractHttp11JsseProtocol<Nio2Cha
 
 	private static final Log LOG = LogFactory.getLog(PaxWebHttp11Nio2Protocol.class);
 
+	private String name;
+
 	public PaxWebHttp11Nio2Protocol() {
 		super(new Nio2Endpoint() {
 			@Override
@@ -59,6 +61,15 @@ public class PaxWebHttp11Nio2Protocol extends AbstractHttp11JsseProtocol<Nio2Cha
 		} else {
 			return "http-nio2";
 		}
+	}
+
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }

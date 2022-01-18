@@ -17,6 +17,8 @@ package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.File;
 import java.security.NoSuchAlgorithmException;
+import java.util.Iterator;
+import java.util.List;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
 
@@ -26,6 +28,7 @@ import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardServer;
 import org.apache.catalina.core.StandardThreadExecutor;
 import org.apache.catalina.startup.Catalina;
+import org.apache.catalina.startup.ConnectorCreateRule;
 import org.apache.catalina.startup.ContextConfig;
 import org.apache.coyote.http2.Http2Protocol;
 import org.apache.tomcat.util.compat.JreCompat;
@@ -37,6 +40,7 @@ import org.ops4j.pax.web.service.spi.config.ServerConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
+import org.xml.sax.helpers.AttributesImpl;
 
 /**
  * <p>Helper class that's used to create various parts of embedded Tomcat similar to Jetty equivalent.</p>
@@ -147,6 +151,7 @@ public class TomcatFactory {
 
 		Connector defaultConnector = new Connector("org.ops4j.pax.web.service.tomcat.internal.PaxWebHttp11Nio2Protocol");
 
+		defaultConnector.setProperty("name", sc.getHttpConnectorName());
 		defaultConnector.setProperty("address", address);
 		defaultConnector.setPort(sc.getHttpPort());
 		defaultConnector.setScheme("http");
@@ -191,6 +196,7 @@ public class TomcatFactory {
 
 		Connector secureConnector = new Connector("org.ops4j.pax.web.service.tomcat.internal.PaxWebHttp11Nio2Protocol");
 
+		secureConnector.setProperty("name", sc.getHttpSecureConnectorName());
 		secureConnector.setProperty("address", address);
 		secureConnector.setPort(sc.getHttpSecurePort());
 		secureConnector.setScheme("https");
@@ -366,6 +372,19 @@ public class TomcatFactory {
 		Digester digester = new PaxWebCatalina().createStartDigester();
 		// special rule for catalinaHome / catalinaBase attributes
 		digester.getRules().match("", "Server").add(new BaseDirsRule(digester));
+		// special rule for Connector/@protocol - ensure that HTTP/1.1 is changed to
+		List<Rule> rules = digester.getRules().match("", "Server/Service/Connector");
+		int idx = 0;
+		for (Iterator<Rule> iterator = rules.iterator(); iterator.hasNext(); ) {
+			Rule rule = iterator.next();
+			if (rule instanceof ConnectorCreateRule) {
+				iterator.remove();
+				break;
+			}
+			idx++;
+		}
+		rules.add(idx, new PaxWebConnectorCreateRule(digester));
+
 		return digester;
 	}
 
@@ -462,6 +481,30 @@ public class TomcatFactory {
 						((StandardServer) top).setCatalinaBase(new File(base));
 					}
 				}
+			}
+			super.begin(namespace, name, attributes);
+		}
+	}
+
+	/**
+	 * Special rule that always uses Pax Web specific protocol handler class name for any Tomcat configuration
+	 * that <em>should</em> be replaced by Pax Web protocol handler. It's mostly used to be able to set the "name"
+	 * property for a connector.
+	 */
+	private static class PaxWebConnectorCreateRule extends ConnectorCreateRule {
+		PaxWebConnectorCreateRule(Digester digester) {
+			this.digester = digester;
+		}
+
+		@Override
+		public void begin(String namespace, String name, Attributes attributes) throws Exception {
+			String protocolName = attributes.getValue("protocol");
+			if (protocolName == null || "HTTP/1.1".equals(protocolName)
+					|| "org.apache.coyote.http11.Http11NioProtocol".equals(protocolName)
+					|| "org.apache.coyote.http11.Http11Nio2Protocol".equals(protocolName)) {
+				int idx = attributes.getIndex("protocol");
+				attributes = new AttributesImpl(attributes);
+				((AttributesImpl) attributes).setValue(idx, "org.ops4j.pax.web.service.tomcat.internal.PaxWebHttp11Nio2Protocol");
 			}
 			super.begin(namespace, name, attributes);
 		}

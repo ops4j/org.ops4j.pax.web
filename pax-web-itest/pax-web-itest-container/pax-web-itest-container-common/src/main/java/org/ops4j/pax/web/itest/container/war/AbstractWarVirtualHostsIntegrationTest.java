@@ -35,7 +35,7 @@ public class AbstractWarVirtualHostsIntegrationTest extends AbstractContainerTes
 					"org.ops4j.pax.web.samples.war", "/test",
 					// we can't use localhost@default, so Pax Web handles localhost/default (<vhost>/<connector>)
 					uri -> uri + "&" + PaxWebConstants.HEADER_VIRTUAL_HOSTS + "=localhost/default"
-							+ "&" + PaxWebConstants.HEADER_CONNECTORS + "=jettyConn1");
+							+ "&" + PaxWebConstants.HEADER_CONNECTORS + "=custom");
 		});
 	}
 

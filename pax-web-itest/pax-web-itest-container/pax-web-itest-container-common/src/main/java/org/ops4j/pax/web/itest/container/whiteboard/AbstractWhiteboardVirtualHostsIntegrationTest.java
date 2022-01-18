@@ -50,10 +50,10 @@ public class AbstractWhiteboardVirtualHostsIntegrationTest extends AbstractConta
 
 	// contexts  | path | virtual host | connectors
 	// ----------+------+--------------+--------------
-	// extended1 | /foo | localhost    | jettyConn1(*)
+	// extended1 | /foo | localhost    | custom(*)
 	// extended2 | /bar | <all>        | default
-	// extended3 | /    | 127.0.0.1    | jettyConn1(*)
-	// extended4 | /baz | <all>        | jettyConn1(*)
+	// extended3 | /    | 127.0.0.1    | custom(*)
+	// extended4 | /baz | <all>        | custom(*)
 	//
 	// (*) means that this config is externally specified
 

@@ -46,7 +46,7 @@ public class Activator implements BundleActivator {
 		props = new Hashtable<>();
 		HashMap<String, String> contextMappingParams = new HashMap<>();
 		WhiteboardHttpContextMapping extended1 = new WhiteboardHttpContextMapping("extended1", "/foo", contextMappingParams);
-		// set only virtual hosts - "jettyConn1" will be added by default from "org.ops4j.pax.web.default.connectors" config property
+		// set only virtual hosts - "custom" will be added by default from "org.ops4j.pax.web.default.connectors" config property
 		extended1.setVirtualHost("localhost");
 		httpContextMappingReg1 = bundleContext.registerService(HttpContextMapping.class, extended1, props);
 
@@ -57,7 +57,7 @@ public class Activator implements BundleActivator {
 		extended2.setConnector("default");
 		httpContextMappingReg2 = bundleContext.registerService(HttpContextMapping.class, extended2, props);
 
-		// register the third context - only virtual hosts (but different than extended1), so jettyConn1 connector
+		// register the third context - only virtual hosts (but different than extended1), so custom connector
 		props = new Hashtable<>();
 		contextMappingParams = new HashMap<>();
 		props.put(Constants.SERVICE_RANKING, 1);

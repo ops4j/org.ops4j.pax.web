@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+
+    Copyright 2022 OPS4J.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<Server port="8005" shutdown="SHUTDOWN" catalinaBase="target/tomcat">
+	<Service name="Catalina">
+		<!--
+			"name" is set on the underlying org.ops4j.pax.web.service.tomcat.internal.PaxWebHttp11Nio2Protocol
+			via generic org.apache.catalina.connector.Connector.setProperty() call.
+			if "name" is not specified, it is taken from
+			org.osgi.service.http.connector.name/org.osgi.service.http.secure.connector.name PID properties
+		-->
+		<Connector port="8181" protocol="HTTP/1.1" redirectPort="8443" />
+
+		<Connector name="custom" port="8282" protocol="HTTP/1.1" redirectPort="8443" />
+	</Service>
+</Server>

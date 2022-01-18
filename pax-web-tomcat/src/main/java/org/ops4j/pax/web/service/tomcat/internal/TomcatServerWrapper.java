@@ -543,6 +543,13 @@ class TomcatServerWrapper implements BatchVisitor {
 			if (enabled) {
 				LOG.info("Using configured {} as {} connector for address: {}:{}", expectedConnector,
 						(secure ? "secure" : "non secure"), address, port);
+				if (expectedConnector.getProperty("name") == null) {
+					if (secure) {
+						expectedConnector.setProperty("name", configuration.server().getHttpSecureConnectorName());
+					} else {
+						expectedConnector.setProperty("name", configuration.server().getHttpConnectorName());
+					}
+				}
 			} else {
 				for (Connector connector : currentConnectors) {
 					if (connector.getSecure() == secure) {

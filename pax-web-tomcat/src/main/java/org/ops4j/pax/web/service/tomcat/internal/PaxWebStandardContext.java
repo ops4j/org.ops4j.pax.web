@@ -123,6 +123,11 @@ public class PaxWebStandardContext extends StandardContext {
 
 	private final OsgiSessionAttributeListener osgiSessionsBridge;
 
+	// as in org.eclipse.jetty.server.handler.ContextHandler._vhosts, _vhostswildcard and _vconnectors
+	private String[] virtualHosts;
+	private boolean[] virtualHostWildcards;
+	private String[] connectorNames;
+
 	public PaxWebStandardContext(Default404Servlet defaultServlet, OsgiSessionAttributeListener osgiSessionsBridge) {
 		super();
 		getPipeline().addValve(new PaxWebStandardContextValve((ValveBase) getPipeline().getBasic(), defaultServlet));
@@ -506,6 +511,99 @@ public class PaxWebStandardContext extends StandardContext {
 
 	public List<PreprocessorFilterConfig> getPreprocessors() {
 		return preprocessors;
+	}
+
+	public void setVirtualHosts(String[] virtualHosts) {
+		int size = virtualHosts == null ? 0 : virtualHosts.length;
+		if (size == 0) {
+			this.virtualHosts = null;
+			this.virtualHostWildcards = null;
+			this.connectorNames = null;
+		} else {
+			this.virtualHosts = new String[size];
+			this.virtualHostWildcards = new boolean[size];
+			this.connectorNames = new String[size];
+
+			for (int i = 0; i < size; i++) {
+				this.virtualHosts[i] = null;
+				this.virtualHostWildcards[i] = false;
+				this.connectorNames[i] = null;
+
+				String vh = virtualHosts[i];
+				if (vh == null || "".equals(vh.trim())) {
+					continue;
+				}
+				if (vh.startsWith("@")) {
+					// connector only
+					this.connectorNames[i] = vh.substring(1);
+				} else {
+					String host;
+					String connector = null;
+					int atpos = vh.indexOf("@");
+					if (atpos >= 0) {
+						// host@connector
+						host = vh.substring(0, atpos).trim();
+						connector = vh.substring(atpos + 1).trim();
+					} else {
+						// host only
+						host = vh.trim();
+					}
+					if (connector != null && !"".equals(connector)) {
+						this.connectorNames[i] = connector;
+					}
+					if (!"".equals(host)) {
+						this.virtualHosts[i] = host;
+						if (host.startsWith("*.")) {
+							this.virtualHostWildcards[i] = true;
+							// *.example.com -> .example.com
+							this.virtualHosts[i] = host.substring(1);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Method similar to {@code org.eclipse.jetty.server.handler.ContextHandler#checkVirtualHost()} and reimplements
+	 * Tomcat's approach to Virtual Hosts, but at context level.
+	 * @param vhost
+	 * @param connectorName
+	 */
+	public boolean matches(String vhost, String connectorName) {
+		if (this.virtualHosts == null || virtualHosts.length == 0) {
+			return true;
+		}
+
+		for (int i = 0; i < virtualHosts.length; i++) {
+			String vh = virtualHosts[i];
+			String connector = connectorNames[i];
+
+			if (connector != null) {
+				// always chck connector name - if it doesn't match, return false regardless of Host header
+				if (!connector.equalsIgnoreCase(connectorName)) {
+					continue;
+				}
+
+				if (vh == null) {
+					// plain @connectorName rule - Host header doesn't matter
+					return true;
+				}
+			}
+
+			if (vh != null) {
+				if (virtualHostWildcards[i]) {
+					// wildcard only at the beginning, and only for one additional subdomain level
+					int index = vhost.indexOf(".");
+					if (index >= 0 && vhost.substring(index).equalsIgnoreCase(vh)) {
+						return true;
+					}
+				} else if (vhost.equalsIgnoreCase(vh)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private static class SessionFilteringInvocationHandler implements InvocationHandler {

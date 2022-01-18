@@ -63,6 +63,14 @@ public class PaxWebStandardContextValve extends ValveBase {
 			return;
 		}
 
+		// Tomcat does it at mapping level, when <Engine> selects a <Host>
+		// Here we're already at <Engine>/<Host>/<Context> level and do the VHost mapping as in Jetty.
+		PaxWebStandardContext ctx = ((PaxWebStandardContext) getContainer());
+		if (!ctx.matches(request.getServerName(), (String) request.getConnector().getProperty("name"))) {
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+
 		Wrapper wrapper = request.getWrapper();
 		if (wrapper == null) {
 			// we need SOME wrapper, so preprocessors/security/filters are called correctly

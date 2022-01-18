@@ -119,6 +119,7 @@
 							org.w3c.dom.ls,
 							org.xml.sax,
 							org.xml.sax.ext,
+							org.xml.sax.helpers,
 
 							<!-- Optional, but used packages -->
 							com.sun.jndi.ldap;resolution:=optional,

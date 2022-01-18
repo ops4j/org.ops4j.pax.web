@@ -59,7 +59,7 @@
 				<Set name="idleTimeout">
 					<Property name="http.timeout" default="30000" />
 				</Set>
-				<Set name="name">jettyConn1</Set>
+				<Set name="name">custom</Set>
 			</New>
 		</Arg>
 	</Call>

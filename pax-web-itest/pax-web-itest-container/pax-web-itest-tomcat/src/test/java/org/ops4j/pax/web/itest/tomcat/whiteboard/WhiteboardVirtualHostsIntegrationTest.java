@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.jetty.whiteboard;
+package org.ops4j.pax.web.itest.tomcat.whiteboard;
 
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -37,10 +37,10 @@ public class WhiteboardVirtualHostsIntegrationTest extends AbstractWhiteboardVir
 
 	@Configuration
 	public Option[] configure() {
-		Option[] serverOptions = combine(baseConfigure(), paxWebJetty());
-		// this will install a fragment attached to pax-web-jetty bundle, so it can find "jetty.xml" resource
-		// used to alter the Jetty server
-		MavenArtifactProvisionOption config = mavenBundle("org.ops4j.pax.web.samples", "config-fragment-jetty")
+		Option[] serverOptions = combine(baseConfigure(), paxWebTomcat());
+		// this will install a fragment attached to pax-web-tomcat bundle, so it can find "tomcat-server.xml" resource
+		// used to configure the Tomcat server
+		MavenArtifactProvisionOption config = mavenBundle("org.ops4j.pax.web.samples", "config-fragment-tomcat-vhosts")
 				.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart();
 		Option[] otherConfig = combine(serverOptions, config,
 				systemProperty(PaxWebConfig.PID_CFG_CONNECTOR_LIST).value("custom"));
