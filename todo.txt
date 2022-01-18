@@ -22,7 +22,7 @@ Moved to after 8.0.0.GA (8.0.x):
  + [#1654] Switch away from JAXB to SAX/StAX parsing for undertow.xml
  + [#1655] Jasypt encryption in PID
  + [#1666] Jetty org.eclipse.jetty.server.Handler and org.eclipse.jetty.server.HttpConfiguration.Customizer tracking (as in Pax Web 7)
- ~ [#1674] Web-VirtualHosts / Web-Connectors
+ + [#1674] Web-VirtualHosts / Web-Connectors
  - [#1657] Keycloak integration
  - [#1675] pax-web-deployer
  - [#1656] HTTP context processing (potentially with external web-fragment.xml)
