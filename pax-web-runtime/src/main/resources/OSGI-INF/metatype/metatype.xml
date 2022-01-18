@@ -70,6 +70,11 @@
 		<AD id="org.ops4j.pax.web.server.showStacks" required="false" type="Boolean" default="false"
 				name="Display stack trace when error occurs" />
 
+		<AD id="org.ops4j.pax.web.default.virtualhosts" required="false" type="String" default=""
+				name="Default Virtual Hosts for all deployed contexts" />
+		<AD id="org.ops4j.pax.web.default.connectors" required="false" type="String" default=""
+				name="Default Connectors for all deployed contexts" />
+
 		<!-- Properties related to Security/SSL/TLS -->
 
 		<AD id="org.ops4j.pax.web.ssl.keystore" type="String" default=""
@@ -207,9 +212,6 @@
 				name="NCSA Log Extended" />
 		<AD id="org.ops4j.pax.web.log.ncsa.logtimezone" type="String" default="GMT"
 				name="NCSA Log Time Zone" />
-
-<!--		<AD name="Default Virtual Hosts" id="org.ops4j.pax.web.default.virtualhosts" required="false" type="String" default="" />-->
-<!--		<AD name="Default Connectors" id="org.ops4j.pax.web.default.connectors" required="false" type="String" default="" />-->
 
 		<AD id="org.ops4j.pax.web.enc.enabled" type="String" default="false"
 				name="Enable Encrypted values" />
