@@ -151,7 +151,7 @@ public class TomcatFactory {
 
 		Connector defaultConnector = new Connector("org.ops4j.pax.web.service.tomcat.internal.PaxWebHttp11Nio2Protocol");
 
-		defaultConnector.setProperty("name", sc.getHttpConnectorName());
+		defaultConnector.setProperty("PaxWebConnectorName", sc.getHttpConnectorName());
 		defaultConnector.setProperty("address", address);
 		defaultConnector.setPort(sc.getHttpPort());
 		defaultConnector.setScheme("http");
@@ -196,7 +196,7 @@ public class TomcatFactory {
 
 		Connector secureConnector = new Connector("org.ops4j.pax.web.service.tomcat.internal.PaxWebHttp11Nio2Protocol");
 
-		secureConnector.setProperty("name", sc.getHttpSecureConnectorName());
+		secureConnector.setProperty("PaxWebConnectorName", sc.getHttpSecureConnectorName());
 		secureConnector.setProperty("address", address);
 		secureConnector.setPort(sc.getHttpSecurePort());
 		secureConnector.setScheme("https");

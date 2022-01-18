@@ -63,12 +63,11 @@ public class PaxWebHttp11Nio2Protocol extends AbstractHttp11JsseProtocol<Nio2Cha
 		}
 	}
 
-	@Override
-	public String getName() {
+	public String getPaxWebConnectorName() {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setPaxWebConnectorName(String name) {
 		this.name = name;
 	}
 
