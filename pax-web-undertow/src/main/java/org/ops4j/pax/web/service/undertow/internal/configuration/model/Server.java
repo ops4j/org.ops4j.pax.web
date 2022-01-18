@@ -16,6 +16,8 @@
 package org.ops4j.pax.web.service.undertow.internal.configuration.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -189,9 +191,10 @@ public class Server {
 		protected boolean secure = false;
 		@XmlAttribute(name = "record-request-start-time")
 		protected boolean recordRequestStartTime = false;
+		@XmlAttribute(name = "disallowed-methods")
+		protected List<String> disallowedMethods = new ArrayList<>(Collections.singletonList("TRACE"));
 
 		//<xs:attribute name="worker" type="xs:string" default="default"/>
-		//<xs:attribute name="resolve-peer-address" type="xs:boolean" default="false"/>
 		//<xs:attribute name="max-post-size" type="xs:long" default="10485760"/>
 		//<xs:attribute name="buffer-pipelined-data" type="xs:boolean" default="false"/>
 		//<xs:attribute name="max-header-size" type="xs:long" default="1048576"/>
@@ -205,7 +208,6 @@ public class Server {
 		//<xs:attribute name="allow-equals-in-cookie-value" type="xs:boolean" default="false"/>
 		//<xs:attribute name="no-request-timeout" type="xs:int" default="60000"/>
 		//<xs:attribute name="request-parse-timeout" type="xs:int"/>
-		//<xs:attribute name="disallowed-methods" type="stringList" default="TRACE"/>
 		//<xs:attribute name="rfc6265-cookie-validation" type="xs:boolean" default="false"/>
 
 		public String getName() {
@@ -263,6 +265,10 @@ public class Server {
 		public void setRecordRequestStartTime(boolean recordRequestStartTime) {
 			this.recordRequestStartTime = recordRequestStartTime;
 		}
+
+		public List<String> getDisallowedMethods() {
+			return disallowedMethods;
+		}
 	}
 
 	@XmlType(name = "http-listener-type", namespace = NS_UNDERTOW)
@@ -272,9 +278,9 @@ public class Server {
 		//<xs:attribute name="certificate-forwarding" use="optional" type="xs:string" default="false">
 		//<xs:attribute name="redirect-socket" use="optional" type="xs:string">
 		@XmlAttribute(name = "proxy-address-forwarding")
-		private String proxyAddressForwarding;
+		protected String proxyAddressForwarding;
 		@XmlAttribute(name = "resolve-peer-address")
-		private String peerHostLookup;
+		protected String peerHostLookup;
 		//<xs:attribute name="enable-http2" use="optional" type="xs:string">
 		//<xs:attribute name="http2-enable-push" type="xs:boolean" use="optional" />
 		//<xs:attribute name="http2-header-table-size" type="xs:int" use="optional" />
@@ -301,14 +307,13 @@ public class Server {
 		}
 
 		public String getPeerHostLookup() {
-	                return peerHostLookup;
-	        }
+			return peerHostLookup;
+		}
 
-	        public void setPeerHostLookup(String peerHostLookup) {
-	                this.peerHostLookup = peerHostLookup;
-	        }
-	        
-		
+		public void setPeerHostLookup(String peerHostLookup) {
+			this.peerHostLookup = peerHostLookup;
+		}
+
 		@Override
 		public String toString() {
 			final StringBuilder sb = new StringBuilder("{ ");
@@ -328,6 +333,7 @@ public class Server {
 			sb.append(", redirect socket: ").append(redirectSocket);
 			sb.append(", proxy address forwarding: ").append(proxyAddressForwarding);
 			sb.append(", peer host lookup: ").append(peerHostLookup);
+			sb.append(", disallowed methods: ").append(disallowedMethods);
 			sb.append(" }");
 			return sb.toString();
 		}
@@ -349,10 +355,6 @@ public class Server {
 		@XmlAttribute(name="enabled-protocols")
 		private List<String> enabledProtocols = new ArrayList<>();
 		//<xs:attribute name="certificate-forwarding" use="optional" type="xs:string" default="false">
-		@XmlAttribute(name = "proxy-address-forwarding")
-		private String proxyAddressForwarding;
-		@XmlAttribute(name = "resolve-peer-address")
-                private String peerHostLookup;
 		//<xs:attribute name="enable-http2" use="optional" type="xs:string">
 		//<xs:attribute name="enable-spdy" use="optional" type="xs:string">
 		//<xs:attribute name="ssl-session-cache-size" use="optional" type="xs:string"/>
@@ -406,16 +408,6 @@ public class Server {
 		public void setProxyAddressForwarding(String proxyAddressForwarding) {
 			this.proxyAddressForwarding = proxyAddressForwarding;
 		}
-		
-		@Override
-		public String getPeerHostLookup() {
-                    return peerHostLookup;
-                }
-
-		@Override
-                public void setPeerHostLookup(String peerHostLookup) {
-                    this.peerHostLookup = peerHostLookup;
-                }
 
 		@Override
 		public String toString() {
@@ -439,6 +431,7 @@ public class Server {
 			sb.append(", enabled protocols: ").append(enabledProtocols);
 			sb.append(", proxy address forwarding: ").append(proxyAddressForwarding);
 			sb.append(", peer host lookup: ").append(peerHostLookup);
+			sb.append(", disallowed methods: ").append(disallowedMethods);
 			sb.append(" }");
 			return sb.toString();
 		}

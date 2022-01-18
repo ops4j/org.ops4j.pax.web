@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -62,12 +63,14 @@ import javax.xml.parsers.SAXParserFactory;
 import io.undertow.UndertowOptions;
 import io.undertow.security.idm.Account;
 import io.undertow.security.idm.Credential;
+import io.undertow.server.handlers.DisallowedMethodsHandler;
 import io.undertow.server.handlers.ProxyPeerAddressHandler;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.servlet.api.ServletContainer;
 import io.undertow.servlet.api.SessionPersistenceManager;
 import io.undertow.servlet.util.InMemorySessionPersistence;
+import io.undertow.util.HttpString;
 import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
 import org.ops4j.pax.web.service.WebContainerConstants;
@@ -527,6 +530,9 @@ public class ServerControllerImpl implements ServerController, ServerControllerE
             
             // PAXWEB-1236
             boolean peerHostLookup = false;
+
+            // https://github.com/ops4j/org.ops4j.pax.web/issues/1676
+            Set<String> disallowedMethods = new HashSet<>();
  
             // http listener
             if (http != null) {
@@ -553,6 +559,7 @@ public class ServerControllerImpl implements ServerController, ServerControllerE
                         peerHostLookup = true;
                     }
                 }
+                disallowedMethods.addAll(http.getDisallowedMethods());
             }
 
             // https listener
@@ -605,6 +612,7 @@ public class ServerControllerImpl implements ServerController, ServerControllerE
                         }
                     }
                 }
+                disallowedMethods.addAll(https.getDisallowedMethods());
             }
 
             builder.setServerOption(UndertowOptions.RECORD_REQUEST_START_TIME, recordRequestStartTime);
@@ -742,6 +750,13 @@ public class ServerControllerImpl implements ServerController, ServerControllerE
 
             if (peerHostLookup) {
                 rootHandler = new PeerNameResolvingHandler(rootHandler);
+            }
+            if (!disallowedMethods.isEmpty()) {
+                Set<HttpString> disallowedMethodNames = new HashSet<>();
+                for (String m : disallowedMethods) {
+                    disallowedMethodNames.add(HttpString.tryFromString(m));
+                }
+                rootHandler = new DisallowedMethodsHandler(rootHandler, disallowedMethodNames);
             }
         } catch (Exception e) {
             throw new IllegalArgumentException("Problem configuring Undertow server using \"" + undertowResource + "\": " + e.getMessage(), e);

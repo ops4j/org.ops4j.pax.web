@@ -23,7 +23,7 @@
 
     <subsystem xmlns="urn:jboss:domain:undertow:4.0">
         <server name="default-server">
-            <http-listener name="http" socket-binding="http" />
+            <http-listener name="http" socket-binding="http" disallowed-methods="TRACE" />
             <host name="default-host" alias="localhost">
                 <access-log pattern="common" directory="target" prefix="access--log--simple" suffix=".log" />
             </host>
