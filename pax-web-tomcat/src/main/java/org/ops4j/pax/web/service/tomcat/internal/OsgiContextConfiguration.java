@@ -122,7 +122,9 @@ public class OsgiContextConfiguration implements LifecycleListener {
 				authenticator = new NonLoginAuthenticator();
 				break;
 			default:
-				// TODO: discover (OSGi, ServiceLoader) an authenticator, e.g., Keycloak
+				// TODO: discover a Valve for login configuration
+				//       Keycloak has org.apache.catalina.Valve -> org.keycloak.adapters.tomcat.KeycloakAuthenticatorValve
+				//       in org.keycloak/keycloak-pax-web-tomcat8
 		}
 
 		authenticationValve = (Valve) authenticator;

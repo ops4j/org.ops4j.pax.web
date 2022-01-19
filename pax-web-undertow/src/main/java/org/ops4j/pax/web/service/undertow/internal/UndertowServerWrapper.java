@@ -2531,6 +2531,10 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 					}
 				}
 
+				// TODO: discover a ServletExtension for login configuration
+				//       Keycloak has io.undertow.servlet.ServletExtension -> org.keycloak.adapters.undertow.KeycloakServletExtension
+				//       in org.keycloak/keycloak-pax-web-undertow
+
 				deployment.setLoginConfig(new LoginConfig(authMethod, realmName,
 						lc.getFormLoginPage(), lc.getFormErrorPage()));
 
@@ -2575,7 +2579,6 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			for (ListenerInfo li : rankedListeners.get(contextPath).values()) {
 				deployment.addListener(li);
 			}
-
 
 			// taking virtual host / connector configuration from OsgiContextModel - see
 			// org.eclipse.jetty.server.handler.ContextHandler.checkVirtualHost() and similar pax-web-jetty code

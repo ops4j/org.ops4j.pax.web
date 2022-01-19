@@ -2068,7 +2068,9 @@ class JettyServerWrapper implements BatchVisitor {
 						securityHandler.setAuthenticator(new ConfigurableSpnegoAuthenticator());
 						break;
 					default:
-						// TODO: discover (OSGi, ServiceLoader) an authenticator, e.g., Keycloak
+						// TODO: discover an Authenticator for login configuration
+						//       Keycloak has org.eclipse.jetty.security.Authenticator -> org.keycloak.adapters.jetty.KeycloakJettyAuthenticator
+						//       in org.keycloak/keycloak-pax-web-jetty94
 				}
 
 				for (String role : securityConfig.getSecurityRoles()) {
