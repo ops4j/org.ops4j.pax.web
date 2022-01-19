@@ -789,8 +789,6 @@ class TomcatServerWrapper implements BatchVisitor {
 
 			webXml.getMimeMappings().forEach(context::addMimeMapping);
 
-			// TODO: handle virtual hosts here. Context should be added to all declared virtual hosts.
-			//       Remember - it's much harder in Tomcat than in Jetty and Undertow
 			defaultHost.addChild(context);
 
 			// session configuration - based on defaultSessionConfiguration, but may be later overriden in OsgiContext
