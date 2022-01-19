@@ -35,7 +35,6 @@
 package org.ops4j.pax.web.service.jetty.internal.web;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -57,6 +56,7 @@ import org.eclipse.jetty.server.ResourceContentFactory;
 import org.eclipse.jetty.server.ResourceService;
 import org.eclipse.jetty.server.ResourceService.WelcomeFactory;
 import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.URIUtil;
@@ -143,6 +143,8 @@ import org.eclipse.jetty.util.resource.ResourceFactory;
  *  encodingHeaderCacheSize
  *                    Max entries in a cache of ACCEPT-ENCODING headers.
  * </pre>
+ *
+ * <p>Pax Web 8: I had to copy this servlet from Jetty code to change some fields from private to protected.</p>
  */
 public class DefaultServlet extends HttpServlet implements ResourceFactory, WelcomeFactory
 {
@@ -168,7 +170,6 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
     private boolean _useFileMappedBuffer = false;
     private String _relativeResourceBase;
     private ServletHandler _servletHandler;
-    private ServletHolder _defaultHolder;
 
     public DefaultServlet(ResourceService resourceService)
     {
@@ -242,7 +243,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
             }
             if (_stylesheet == null)
             {
-                _stylesheet = Resource.newResource(this.getClass().getResource("/jetty-dir.css"));
+                _stylesheet = ResourceHandler.getDefaultStylesheet();
             }
         }
         catch (Exception e)
@@ -302,7 +303,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
         _resourceService.setContentFactory(contentFactory);
         _resourceService.setWelcomeFactory(this);
 
-        List<String> gzipEquivalentFileExtensions = new ArrayList<String>();
+        List<String> gzipEquivalentFileExtensions = new ArrayList<>();
         String otherGzipExtensions = getInitParameter("otherGzipFileExtensions");
         if (otherGzipExtensions != null)
         {
@@ -322,14 +323,6 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
         _resourceService.setGzipEquivalentFileExtensions(gzipEquivalentFileExtensions);
 
         _servletHandler = _contextHandler.getChildHandlerByClass(ServletHandler.class);
-        if (_servletHandler != null) {
-            // could be null when the WAB ships own jetty-web.xml
-            for (ServletHolder h : _servletHandler.getServlets())
-            {
-                if (h.getServletInstance() == this)
-                    _defaultHolder = h;
-            }
-        }
 
         if (LOG.isDebugEnabled())
             LOG.debug("resource base = " + _resourceBase);
@@ -451,8 +444,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
             }
             else
             {
-                URL u = _servletContext.getResource(pathInContext);
-                r = _contextHandler.newResource(u);
+                return null;
             }
 
             if (LOG.isDebugEnabled())
@@ -484,20 +476,28 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
         doGet(request, response);
     }
 
+    @Override
+    protected void doHead(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException
+    {
+        doGet(request, response);
+    }
+
     /* (non-Javadoc)
      * @see javax.servlet.http.HttpServlet#doTrace(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     @Override
-    protected void doTrace(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+    protected void doTrace(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException
     {
-        resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+        response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     }
 
     @Override
-    protected void doOptions(HttpServletRequest req, HttpServletResponse resp)
+    protected void doOptions(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException
     {
-        resp.setHeader("Allow", "GET,HEAD,POST,OPTIONS");
+        response.setHeader("Allow", "GET,HEAD,POST,OPTIONS");
     }
 
     /*
@@ -518,9 +518,9 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
             return null;
 
         String welcomeServlet = null;
-        for (int i = 0; i < _welcomes.length; i++)
+        for (String s : _welcomes)
         {
-            String welcomeInContext = URIUtil.addPaths(pathInContext, _welcomes[i]);
+            String welcomeInContext = URIUtil.addPaths(pathInContext, s);
             Resource welcome = getResource(welcomeInContext);
             if (welcome != null && welcome.exists())
                 return welcomeInContext;
@@ -528,9 +528,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
             if ((_welcomeServlets || _welcomeExactServlets) && welcomeServlet == null)
             {
                 MappedResource<ServletHolder> entry = _servletHandler.getMappedServlet(welcomeInContext);
-                @SuppressWarnings("ReferenceEquality")
-                boolean isDefaultHolder = (entry.getResource() != _defaultHolder);
-                if (entry != null && isDefaultHolder &&
+                if (entry != null && entry.getResource().getServletInstance() != this &&
                     (_welcomeServlets || (_welcomeExactServlets && entry.getPathSpec().getDeclaration().equals(welcomeInContext))))
                     welcomeServlet = welcomeInContext;
             }

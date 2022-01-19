@@ -167,6 +167,8 @@ public class DefaultServlet extends HttpServlet {
             path = CanonicalPathUtils.canonicalize(path.replace(File.separatorChar, '/'));
         }
 
+        // io.undertow.servlet.handlers.SecurityActions.requireCurrentServletRequestContext() has package access...
+//        HttpServerExchange exchange = SecurityActions.requireCurrentServletRequestContext().getOriginalRequest().getExchange();
         HttpServerExchange exchange = requireCurrentServletRequestContext().getOriginalRequest().getExchange();
         final Resource resource;
         //we want to disallow windows characters in the path
@@ -446,6 +448,8 @@ public class DefaultServlet extends HttpServlet {
         if (!path.isEmpty()) {
             if(dispatcherType == DispatcherType.REQUEST) {
                 //WFLY-3543 allow the dispatcher to access stuff in web-inf and meta inf
+                // io.undertow.servlet.handlers.Paths.isForbidden() has package access...
+//                if (Paths.isForbidden(path)) {
                 if (path.startsWith("/META-INF") ||
                         path.startsWith("META-INF") ||
                         path.startsWith("/WEB-INF") ||
@@ -484,7 +488,12 @@ public class DefaultServlet extends HttpServlet {
         if (System.getSecurityManager() == null) {
             return ServletRequestContext.requireCurrent();
         } else {
-            return AccessController.doPrivileged((PrivilegedAction<ServletRequestContext>) ServletRequestContext::requireCurrent);
+            return AccessController.doPrivileged(new PrivilegedAction<ServletRequestContext>() {
+                @Override
+                public ServletRequestContext run() {
+                    return ServletRequestContext.requireCurrent();
+                }
+            });
         }
     }
 
