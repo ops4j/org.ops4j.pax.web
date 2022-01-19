@@ -31,7 +31,7 @@
 	<artifactId>config-fragment-tomcat-vhosts</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web Config Samples - Tomcat Virtual Hosts</name>
+	<name>OPS4J Pax Web Config Samples - Tomcat VHosts</name>
 
 	<build>
 		<plugins>

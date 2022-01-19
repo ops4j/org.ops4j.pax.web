@@ -31,7 +31,7 @@
 	<artifactId>config-fragment-undertow-vhosts</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web Config Samples - Undertow Virtual Hosts</name>
+	<name>OPS4J Pax Web Config Samples - Undertow VHosts</name>
 
 	<build>
 		<plugins>
