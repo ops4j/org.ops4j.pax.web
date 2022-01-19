@@ -216,6 +216,10 @@ public class TomcatFactory {
 		// "The NIO2 connector requires an exclusive executor to operate properly on shutdown"
 //		protocol.setExecutor(executor);
 
+		if (sc.getConnectorIdleTimeout() != null) {
+			secureConnector.setProperty("connectionTimeout", sc.getConnectorIdleTimeout().toString());
+		}
+
 		// --- server keystore for server's own identity
 
 		String sslKeystore = secc.getSslKeystore();
