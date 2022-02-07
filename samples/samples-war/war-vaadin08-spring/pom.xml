@@ -43,7 +43,7 @@
 
 	<properties>
 		<dependency.com.vaadin>8.13.2</dependency.com.vaadin>
-		<dependency.org.springframework>4.3.25.RELEASE</dependency.org.springframework>
+		<dependency.org.springframework>4.3.29.RELEASE</dependency.org.springframework>
 		<dependency.org.springframework.boot>1.5.22.RELEASE</dependency.org.springframework.boot>
 	</properties>
 
