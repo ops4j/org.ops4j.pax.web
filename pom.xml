@@ -239,6 +239,7 @@
 		<dependency.org.eclipse.jdt.ecj>3.26.0</dependency.org.eclipse.jdt.ecj>
 		<dependency.org.eclipse.jetty>9.4.44.v20210927</dependency.org.eclipse.jetty>
 		<dependency.org.eclipse.jetty.osgi>9.4.44</dependency.org.eclipse.jetty.osgi>
+		<!-- 3.12.100 is the last version exporting org.osgi.framework 1.8 (R6) -->
 		<dependency.org.eclipse.platform.osgi>3.12.100</dependency.org.eclipse.platform.osgi>
 
 		<dependency.org.glassfish.hk2>2.6.1</dependency.org.glassfish.hk2>
@@ -263,7 +264,7 @@
 		<dependency.org.ops4j.pax.exam>4.13.4</dependency.org.ops4j.pax.exam>
 		<dependency.org.ops4j.pax.logging>2.0.14</dependency.org.ops4j.pax.logging>
 		<dependency.org.ops4j.pax.swissbox>1.8.4</dependency.org.ops4j.pax.swissbox>
-		<dependency.org.ops4j.pax.url>2.6.8</dependency.org.ops4j.pax.url>
+		<dependency.org.ops4j.pax.url>2.6.11</dependency.org.ops4j.pax.url>
 
 		<dependency.org.osgi.core>7.0.0</dependency.org.osgi.core>
 		<dependency.org.osgi.core8>8.0.0</dependency.org.osgi.core8>
