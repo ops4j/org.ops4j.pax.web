@@ -539,7 +539,16 @@ public class ServerControllerImpl implements ServerController, ServerControllerE
                 UndertowConfiguration.BindingInfo binding = cfg.bindingInfo(http.getSocketBindingName());
                 for (String address : binding.getAddresses()) {
                     LOG.info("Starting undertow http listener on " + address + ":" + binding.getPort());
-                    builder.addHttpListener(binding.getPort(), address);
+                    Undertow.ListenerBuilder lb = new Undertow.ListenerBuilder();
+                    lb.setHost(address).setPort(binding.getPort());
+                    lb.setType(Undertow.ListenerType.HTTP);
+                    if (http.getMaxConnections() > 0) {
+                        lb.setOverrideSocketOptions(OptionMap.builder()
+                                .set(Options.CONNECTION_HIGH_WATER, http.getMaxConnections())
+                                .set(Options.CONNECTION_LOW_WATER, http.getMaxConnections())
+                                .getMap());
+                    }
+                    builder.addListener(lb);
                     if (http.isRecordRequestStartTime()) {
                         recordRequestStartTime = true;
                     }
@@ -565,7 +574,17 @@ public class ServerControllerImpl implements ServerController, ServerControllerE
                     // TODO: could this be shared across interface:port bindings?
                     SSLContext sslContext = buildSSLContext(realm);
 
-                    builder.addHttpsListener(binding.getPort(), address, sslContext);
+                    Undertow.ListenerBuilder lb = new Undertow.ListenerBuilder();
+                    lb.setHost(address).setPort(binding.getPort());
+                    lb.setType(Undertow.ListenerType.HTTPS);
+                    lb.setSslContext(sslContext);
+                    if (https.getMaxConnections() > 0) {
+                        lb.setOverrideSocketOptions(OptionMap.builder()
+                                .set(Options.CONNECTION_HIGH_WATER, https.getMaxConnections())
+                                .set(Options.CONNECTION_LOW_WATER, https.getMaxConnections())
+                                .getMap());
+                    }
+                    builder.addListener(lb);
                     if (https.isRecordRequestStartTime()) {
                         recordRequestStartTime = true;
                     }
