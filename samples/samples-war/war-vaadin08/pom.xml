@@ -39,7 +39,7 @@
 	</description>
 
 	<properties>
-		<dependency.com.vaadin>8.13.2</dependency.com.vaadin>
+		<dependency.com.vaadin>8.14.1</dependency.com.vaadin>
 	</properties>
 
 	<build>
