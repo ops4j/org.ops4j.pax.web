@@ -76,9 +76,11 @@ class Hc5TestClient implements HttpTestClient {
 	private final Collection<AssertionDefinition<Stream<Map.Entry<String, String>>>> responseHeaderAssertion = new ArrayList<>();
 	private URL keystoreLocationURL;
 	private BaseAuthDefinition authDefinition;
+	private String urlToTest;
 	private String pathToTest;
 	private boolean doGET;
 	private boolean doPOST;
+	private boolean doOPTIONS;
 	private boolean doHEAD;
 	private final Map<String, String> requestParameters = new HashMap<>();
 	private int timeoutInSeconds = 100;
@@ -229,6 +231,14 @@ class Hc5TestClient implements HttpTestClient {
 	}
 
 	@Override
+	public HttpTestClient doOPTIONS(String url, String path) {
+		this.doOPTIONS = true;
+		this.urlToTest = url;
+		this.pathToTest = path;
+		return this;
+	}
+
+	@Override
 	public HttpTestClient doPOST(String url, Map<String, byte[]> attachments) {
 		this.doPOST = true;
 		pathToTest = url;
@@ -299,6 +309,8 @@ class Hc5TestClient implements HttpTestClient {
 				requestBuilder = ClassicRequestBuilder.post(pathToTest);
 			} else if (doHEAD) {
 				requestBuilder = ClassicRequestBuilder.head(pathToTest);
+			} else if (doOPTIONS) {
+				requestBuilder = ClassicRequestBuilder.options(urlToTest);
 			} else {
 				throw new IllegalStateException("Test must be configured either with GET or POST!");
 			}
@@ -310,6 +322,10 @@ class Hc5TestClient implements HttpTestClient {
 				final MultipartEntityBuilder b = MultipartEntityBuilder.create();
 				attachments.forEach(b::addBinaryBody);
 				requestBuilder.setEntity(b.build());
+			}
+
+			if (doOPTIONS) {
+				requestBuilder.setPath(pathToTest);
 			}
 
 			request = requestBuilder.build();

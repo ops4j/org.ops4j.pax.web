@@ -168,6 +168,14 @@ public interface HttpTestClient {
 	HttpTestClient doPOST(String url);
 
 	/**
+	 * Prepares the client to execute a POST-request against the given URL.
+	 *
+	 * @param url Destination-url that should be tested - only protocol, host and port
+	 * @param path the path part of URL to test
+	 */
+	HttpTestClient doOPTIONS(String url, String path);
+
+	/**
 	 * Prepares the client to execute a POST-request against the given URL with attachments.
 	 *
 	 * @param url Destination-url that should be tested

@@ -85,7 +85,13 @@ public class PrioritizedHandlerCollection extends ContextHandlerCollection {
 			try {
 				handlerCollectionBefore.handle(target, baseRequest, request, response);
 				if (!baseRequest.isHandled()) {
-					// User should know what (s)he's doing - if a handler marks the request as handler, there's
+					// https://github.com/ops4j/org.ops4j.pax.web/issues/1664
+					if ("OPTIONS".equals(baseRequest.getMethod()) && "*".equals(target)) {
+						response.setStatus(HttpServletResponse.SC_OK);
+						response.setHeader("Allow", "GET, HEAD, POST, PUT, DELETE, OPTIONS");
+						baseRequest.setHandled(true);
+					}
+					// User should know what (s)he's doing - if a handler marks the request as handled, there's
 					// no need to call real context handlers.
 					super.handle(target, baseRequest, request, response);
 				}

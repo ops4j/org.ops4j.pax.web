@@ -329,6 +329,11 @@
 			<artifactId>war-simplest-javaee</artifactId>
 			<type>war</type>
 		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>war-http-methods</artifactId>
+			<type>war</type>
+		</dependency>
 
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
