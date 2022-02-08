@@ -510,6 +510,8 @@ public class UndertowFactory {
 			// PAXWEB-1233
 			handler = new ProxyPeerAddressHandler(handler);
 		}
+		// https://github.com/ops4j/org.ops4j.pax.web/issues/1664
+		handler = new RootHttpOptionsHandler(handler, listener.getDisallowedMethods());
 		if (listener.getDisallowedMethods().size() > 0) {
 			Set<HttpString> disallowedMethods = new HashSet<>();
 			listener.getDisallowedMethods().stream().map(HttpString::tryFromString).forEach(disallowedMethods::add);

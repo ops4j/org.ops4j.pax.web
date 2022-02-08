@@ -335,6 +335,15 @@ public class UndertowResourceServlet extends DefaultServlet implements ResourceM
 	}
 
 	@Override
+	protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		// https://github.com/ops4j/org.ops4j.pax.web/issues/1664
+		//
+		// instead of relying on reflection used in javax.servlet.http.HttpServlet.doOptions()
+		// we simply return fixed set of methods (to be compatible with Jetty and Tomcat)
+		resp.setHeader("Allow", "OPTIONS, GET, HEAD, POST");
+	}
+
+	@Override
 	public Resource getResource(String path) throws IOException {
 		HttpServletRequestImpl originalRequest = requireCurrentServletRequestContext().getOriginalRequest();
 		String pathInfo = originalRequest.getPathInfo();
