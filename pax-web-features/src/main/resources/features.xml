@@ -313,8 +313,6 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 
 		<bundle start-level="30" dependency="true">mvn:jakarta.annotation/jakarta.annotation-api/${dependency.jakarta.annotation-api}</bundle>
 
-<!--		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-deployer/${project.version}</bundle>-->
-
 		<!-- pax-url-war requires osgi promise+function -->
 		<bundle start-level="30" dependency="true">mvn:org.osgi/org.osgi.util.promise/${dependency.org.osgi.util.promise}</bundle>
 		<bundle start-level="30" dependency="true">mvn:org.osgi/org.osgi.util.function/${dependency.org.osgi.util.function}</bundle>
@@ -330,6 +328,8 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		<!-- We need one bundle from Karaf, not entire "shell" feature - we don't want to accidentally include Karaf's Pax Web features -->
 		<bundle dependency="true">mvn:org.apache.karaf.shell/org.apache.karaf.shell.core/${dependency.org.apache.karaf}</bundle>
 		<bundle dependency="true">mvn:org.jline/jline/${dependency.org.jline}</bundle>
+
+		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-deployer/${project.version}</bundle>
 
 		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-karaf/${project.version}</bundle>
 	</feature>
