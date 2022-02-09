@@ -237,8 +237,8 @@
 
 		<!-- 3.26.0 is the last version supporting JDK 8 -->
 		<dependency.org.eclipse.jdt.ecj>3.26.0</dependency.org.eclipse.jdt.ecj>
-		<dependency.org.eclipse.jetty>9.4.44.v20210927</dependency.org.eclipse.jetty>
-		<dependency.org.eclipse.jetty.osgi>9.4.44</dependency.org.eclipse.jetty.osgi>
+		<dependency.org.eclipse.jetty>9.4.45.v20220203</dependency.org.eclipse.jetty>
+		<dependency.org.eclipse.jetty.osgi>9.4.45</dependency.org.eclipse.jetty.osgi>
 		<!-- 3.12.100 is the last version exporting org.osgi.framework 1.8 (R6) -->
 		<dependency.org.eclipse.platform.osgi>3.12.100</dependency.org.eclipse.platform.osgi>
 
