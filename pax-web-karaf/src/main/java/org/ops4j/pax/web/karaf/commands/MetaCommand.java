@@ -63,8 +63,10 @@ public class MetaCommand implements Action {
 			}
 			Bundle[] bundles = ref.getUsingBundles();
 			Map<Long, Bundle> bundlesMap = new TreeMap<>();
-			for (Bundle b : bundles) {
-				bundlesMap.put(b.getBundleId(), b);
+			if (bundles != null) {
+				for (Bundle b : bundles) {
+					bundlesMap.put(b.getBundleId(), b);
+				}
 			}
 
 			System.out.println("Registering Bundle: " + ref.getBundle());
@@ -123,7 +125,9 @@ public class MetaCommand implements Action {
 			}
 
 			Map<Long, Bundle> bundlesMap = new TreeMap<>();
-			Collections.addAll(bundles, ref.getUsingBundles());
+			if (ref.getUsingBundles() != null) {
+				Collections.addAll(bundles, ref.getUsingBundles());
+			}
 			System.out.println("Registering Bundle: " + ref.getBundle());
 			System.out.println("Service ID: " + ref.getProperty(Constants.SERVICE_ID));
 			System.out.println("Service Scope: " + ref.getProperty(Constants.SERVICE_SCOPE));
