@@ -21,13 +21,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 import org.apache.felix.fileinstall.ArtifactUrlTransformer;
-import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,17 +34,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author Alin Dreghiciu, Achim Nierbeck
  */
-@Component
 public class WarDeployer implements ArtifactUrlTransformer {
 
-	/**
-	 * Logger.
-	 */
 	private static final Logger LOG = LoggerFactory.getLogger(WarDeployer.class);
 
-	/**
-	 * Standard PATH separator
-	 */
+	/** Standard PATH separator */
 	private static final String PATH_SEPERATOR = "/";
 
 	public boolean canHandle(final File artifact) {
@@ -63,25 +55,20 @@ public class WarDeployer implements ArtifactUrlTransformer {
 			// Only handle WAR artifacts
 			if (entry == null) {
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("No war file do not handle artifact:"
-							+ artifact.getName());
+					LOG.debug("No WAR archive, will not handle artifact: " + artifact.getName());
 				}
 				return false;
 			}
 			// Only handle non OSGi bundles
 			Manifest m = jar.getManifest();
 			if (m != null
-					&& m.getMainAttributes().getValue(
-					new Attributes.Name("Bundle-SymbolicName")) != null
-					&& m.getMainAttributes().getValue(
-					new Attributes.Name("Bundle-Version")) != null) {
+					&& m.getMainAttributes().getValue("Bundle-SymbolicName") != null
+					&& m.getMainAttributes().getValue("Bundle-Version") != null) {
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("This artifact has OSGi Manifest Header skipping: "
-							+ artifact.getName());
+					LOG.debug("This artifact has OSGi Manifest Header skipping: " + artifact.getName());
 				}
 				return false;
 			}
-			//CHECKSTYLE:OFF
 		} catch (Exception e) {
 			if (LOG.isTraceEnabled()) {
 				LOG.trace("Can't handle file " + artifact.getName(), e);
@@ -91,21 +78,17 @@ public class WarDeployer implements ArtifactUrlTransformer {
 			if (jar != null) {
 				try {
 					jar.close();
-				} catch (IOException ignore) {
+				} catch (IOException e) {
 					if (LOG.isDebugEnabled()) {
-						LOG.debug("failed to close war file", ignore);
+						LOG.debug("Failed to close WAR file", e);
 					}
 				}
 			}
 		}
-		//CHECKSTYLE:ON
 		try {
-			new URL("webbundle", null, artifact.toURI().toURL()
-					.toExternalForm());
+			new URL("webbundle", null, artifact.toURI().toURL().toExternalForm());
 		} catch (MalformedURLException e) {
-			LOG.warn(String
-					.format("File %s could not be transformed. Most probably that Pax URL WAR handler is not installed",
-							artifact.getAbsolutePath()));
+			LOG.warn("File {} could not be transformed. Most probably that Pax URL WAR handler is not installed", artifact.getAbsolutePath());
 			return false;
 		}
 
@@ -119,14 +102,13 @@ public class WarDeployer implements ArtifactUrlTransformer {
 		final String path = artifact.getPath();
 		final String protocol = artifact.getProtocol();
 		if (path != null) {
-			int idx = -1;
+			int idx;
 			// match the last slash to retrieve the name of the archive
 			if ("jardir".equalsIgnoreCase(protocol)) {
 				// just to make sure this works on all kinds of windows
 				File fileInstance = new File(path);
 				// with a jardir this is system specific
-				idx = fileInstance.getAbsolutePath()
-						.lastIndexOf(File.separator);
+				idx = fileInstance.getAbsolutePath().lastIndexOf(File.separator);
 			} else {
 				// a standard file is not system specific, this is always a
 				// standardized URL path
@@ -134,8 +116,7 @@ public class WarDeployer implements ArtifactUrlTransformer {
 			}
 			// match the suffix so we get rid of it for displaying
 			if (idx > 0) {
-				final String[] name = DeployerUtils.extractNameVersionType(path
-						.substring(idx + 1));
+				final String[] name = DeployerUtils.extractNameVersionType(path.substring(idx + 1));
 				final StringBuilder url = new StringBuilder();
 				url.append(artifact.toExternalForm());
 				if (artifact.toExternalForm().contains("?")) {

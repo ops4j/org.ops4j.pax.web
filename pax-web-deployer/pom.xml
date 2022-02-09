@@ -35,12 +35,7 @@
 
 	<description>
 		A fileInstall deployer that will automatically transform wars into bundles ready to be used by WAR extender.
-		Detailed information to be found at http://wiki.ops4j.org/confluence/x/AYAz.
 	</description>
-
-	<properties>
-		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
-	</properties>
 
 	<build>
 		<plugins>
@@ -50,15 +45,17 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
+						<Bundle-Activator>org.ops4j.pax.web.deployer.internal.Activator</Bundle-Activator>
 						<Import-Package>
-							org.slf4j; version="[1.5,2.0)",
-							org.apache.felix.fileinstall; version="[3,4)",
-							org.osgi.framework; version="[1,2)"
+							<!-- ranges indicate we can work with OSGi Core R6+ -->
+							org.osgi.framework;version="[1.8,2)",
+
+							<!-- from pax-logging-api -->
+							org.slf4j;version="[1.7,2)",
+
+							org.apache.felix.fileinstall;version="[3,4)"
 						</Import-Package>
 						<Private-Package>org.ops4j.pax.web.deployer.internal.*</Private-Package>
-						<Embed-Dependency>*; scope=compile; type=!pom; inline=true</Embed-Dependency>
-						<Embed-Transitive>true</Embed-Transitive>
-						<_dsannotations>*</_dsannotations>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -66,20 +63,6 @@
 	</build>
 
 	<dependencies>
-
-		<!-- OPS4J dependencies -->
-
-		<dependency>
-			<groupId>org.ops4j.base</groupId>
-			<artifactId>ops4j-base-lang</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.swissbox</groupId>
-			<artifactId>pax-swissbox-optional-jcl</artifactId>
-			<scope>compile</scope>
-			<optional>true</optional>
-		</dependency>
 
 		<!-- OSGi -->
 
