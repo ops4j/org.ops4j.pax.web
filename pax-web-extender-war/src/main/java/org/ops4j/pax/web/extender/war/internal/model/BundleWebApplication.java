@@ -1909,10 +1909,13 @@ public class BundleWebApplication {
 		for (URL url : urls) {
 			model.getWabClassPath().add(url);
 		}
-		model.getWabClassPath().addAll(classSpace.getWabClassPath());
-		model.getWabClassPathSkipped().addAll(classSpace.getWabClassPathNotScanned());
-		model.getContainerFragmentBundles().addAll(classSpace.getContainerFragmentBundles());
-		model.getApplicationFragmentBundles().addAll(classSpace.getApplicationFragmentBundles().keySet());
+		BundleWebApplicationClassSpace cs = classSpace;
+		if (cs != null) {
+			model.getWabClassPath().addAll(cs.getWabClassPath());
+			model.getWabClassPathSkipped().addAll(cs.getWabClassPathNotScanned());
+			model.getContainerFragmentBundles().addAll(cs.getContainerFragmentBundles());
+			model.getApplicationFragmentBundles().addAll(cs.getApplicationFragmentBundles().keySet());
+		}
 
 		return model;
 	}
