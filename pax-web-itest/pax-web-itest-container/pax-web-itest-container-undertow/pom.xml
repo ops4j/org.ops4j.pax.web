@@ -636,7 +636,7 @@
 		</dependency>
 	</dependencies>
 	<properties>
-		<alpn-version>8.1.2.v20141202</alpn-version>
+		<alpn-version>8.1.13.v20181017</alpn-version>
 		<sonar.jacoco.itReportPath>${project.basedir}/../../../target/jacoco-it.exec</sonar.jacoco.itReportPath>
 	</properties>
 	<build>
