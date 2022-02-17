@@ -271,10 +271,10 @@ public class TomcatFactory {
 			protocol.setTruststoreAlgorithm(secc.getTrustManagerFactoryAlgorithm());
 		}
 
-		if (secc.isClientAuthWanted() != null) {
+		if (secc.isClientAuthWanted() != null && secc.isClientAuthWanted()) {
 			protocol.setClientAuth("want");
 		}
-		if (secc.isClientAuthNeeded() != null) {
+		if (secc.isClientAuthNeeded() != null && secc.isClientAuthNeeded()) {
 			protocol.setClientAuth("require");
 		}
 
