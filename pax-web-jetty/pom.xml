@@ -69,6 +69,7 @@
 							<!-- from Jetty bundles -->
 							org.eclipse.jetty.*,
 							org.eclipse.jetty.jaas,
+							org.eclipse.jetty.http2.server,
 
 							<!-- other -->
 							javax.annotation;version="[1.2,2)"; resolution:=optional,
@@ -207,8 +208,20 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
+			<groupId>org.eclipse.jetty.http2</groupId>
+			<artifactId>http2-http-client-transport</artifactId>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-alpn-server</artifactId>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-alpn-openjdk8-server</artifactId>
 			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
@@ -264,11 +277,6 @@
 <!--			<artifactId>alpn-boot</artifactId>-->
 <!--			<scope>provided</scope>-->
 <!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.eclipse.jetty.http2</groupId>-->
-<!--			<artifactId>http2-server</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
 
 		<!-- Logging -->
 
@@ -288,6 +296,22 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.httpcomponents.client5</groupId>
+			<artifactId>httpclient5</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents.core5</groupId>
+			<artifactId>httpcore5</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents.core5</groupId>
+			<artifactId>httpcore5-h2</artifactId>
 			<scope>test</scope>
 		</dependency>
 

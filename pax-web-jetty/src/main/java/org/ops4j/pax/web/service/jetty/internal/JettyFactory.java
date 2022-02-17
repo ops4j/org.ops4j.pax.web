@@ -466,7 +466,7 @@ class JettyFactory {
 			// to be sent over SSL and wait for HTTP2CServerConnectionFactory to switch the connection:
 			//  < HTTP/1.1 101 Switching Protocols
 			//
-			// without ALPN, the only factory that can upgrade connections (in Jety - instance of
+			// without ALPN, the only factory that can upgrade connections (in Jetty - instance of
 			// org.eclipse.jetty.server.ConnectionFactory.Upgrading) is
 			// org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory
 			//

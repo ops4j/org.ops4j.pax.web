@@ -91,7 +91,6 @@
 	</feature>
 
 	<feature name="pax-web-jetty-websockets" description="Jetty 9 bundles for Web Sockets support" version="${dependency.org.eclipse.jetty}">
-		<feature>pax-web-websockets</feature>
 		<feature>pax-web-jetty</feature>
 
 		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-client/${dependency.org.eclipse.jetty}</bundle>
@@ -102,6 +101,25 @@
 		<bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-client/${dependency.org.eclipse.jetty}</bundle>
 		<bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-server/${dependency.org.eclipse.jetty}</bundle>
 		<bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-servlet/${dependency.org.eclipse.jetty}</bundle>
+	</feature>
+
+	<feature name="pax-jetty-http2" description="Jetty 9 bundles for HTTP/2 support" version="${dependency.org.eclipse.jetty}" >
+<!--		<details>-->
+<!--			Please beware, for this feature to run properly you'll need to add the alpn-boot.jar to the-->
+<!--			lib/ext folder of Karaf in some cases of your JVM.-->
+<!--			make sure you have the following jar from it's maven coordinate installed:-->
+<!--			mvn:org.mortbay.jetty.alpn/alpn-boot/8.1.4.v20150727 (and yes version 8.x is intentional there is no newer-->
+<!--			version available)-->
+<!--		</details>-->
+<!--		<library type="extension">mvn:org.mortbay.jetty.alpn/alpn-boot/8.1.4.v20150727</library>-->
+		<feature>pax-web-jetty</feature>
+
+<!--		<bundle start-level="1">mvn:org.eclipse.jetty.osgi/jetty-osgi-alpn/${dependency.org.eclipse.jetty}</bundle>-->
+<!--		<bundle start-level="30">mvn:org.eclipse.jetty.alpn/alpn-api/${dependency.alpn.version}</bundle>-->
+<!--		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-server/${dependency.org.eclipse.jetty}</bundle>-->
+		<bundle start-level="30">mvn:org.eclipse.jetty.http2/http2-hpack/${dependency.org.eclipse.jetty}</bundle>
+		<bundle start-level="30">mvn:org.eclipse.jetty.http2/http2-common/${dependency.org.eclipse.jetty}</bundle>
+		<bundle start-level="30">mvn:org.eclipse.jetty.http2/http2-server/${dependency.org.eclipse.jetty}</bundle>
 	</feature>
 
 	<feature name="pax-web-http-jetty" description="Http Service implementation using Jetty 9" version="${project.version}">
@@ -321,7 +339,6 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 
 	<!-- Karaf integration -->
 
-
 	<feature name="pax-web-karaf" description="Pax Web Karaf integration" version="${project.version}">
 		<feature>pax-web-core</feature>
 
@@ -333,24 +350,6 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 
 		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-karaf/${project.version}</bundle>
 	</feature>
-
-	<!--	<feature name="pax-jetty-http2" version="${project.version}" description="Optional additional feature to run Jetty with SPDY">-->
-<!--		<details>-->
-<!--			Please beware, for this feature to run properly you'll need to add the alpn-boot.jar to the-->
-<!--			lib/ext folder of Karaf in some cases of your JVM.-->
-<!--			make sure you have the following jar from it's maven coordinate installed:-->
-<!--			mvn:org.mortbay.jetty.alpn/alpn-boot/8.1.4.v20150727 (and yes version 8.x is intentional there is no newer-->
-<!--			version available)-->
-<!--		</details>-->
-<!--		<library type="extension">mvn:org.mortbay.jetty.alpn/alpn-boot/8.1.4.v20150727</library>-->
-<!--		<feature version="[9.3,10.0)">pax-jetty</feature>-->
-<!--		<bundle start-level="1">mvn:org.eclipse.jetty.osgi/jetty-osgi-alpn/${dependency.org.eclipse.jetty}</bundle>-->
-<!--		<bundle start-level="30">mvn:org.eclipse.jetty.alpn/alpn-api/${dependency.alpn.version}</bundle>-->
-<!--		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-server/${dependency.org.eclipse.jetty}</bundle>-->
-<!--		<bundle start-level="30">mvn:org.eclipse.jetty.http2/http2-server/${dependency.org.eclipse.jetty}</bundle>-->
-<!--		<bundle start-level="30">mvn:org.eclipse.jetty.http2/http2-common/${dependency.org.eclipse.jetty}</bundle>-->
-<!--		<bundle start-level="30">mvn:org.eclipse.jetty.http2/http2-hpack/${dependency.org.eclipse.jetty}</bundle>-->
-<!--	</feature>-->
 
 <!--	<feature name="pax-jsf-support" version="${project.version}">-->
 <!--		<feature version="[8.0,8.1)">pax-war</feature>-->

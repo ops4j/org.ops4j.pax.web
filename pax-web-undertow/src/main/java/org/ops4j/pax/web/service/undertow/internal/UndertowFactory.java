@@ -97,7 +97,6 @@ public class UndertowFactory {
 
 	private final Xnio xnio;
 
-	private boolean alpnAvailable;
 	private boolean http2Available;
 
 	private long maxMemory;
@@ -119,9 +118,6 @@ public class UndertowFactory {
 	 */
 	private void discovery() {
 		maxMemory = Runtime.getRuntime().maxMemory();
-
-		// TODO: check how ALPN is used in Undertow
-		alpnAvailable = false;
 
 		// see org.wildfly.extension.undertow.ListenerService#commonOptions
 		this.commonSocketOptions = OptionMap.builder()
@@ -340,7 +336,7 @@ public class UndertowFactory {
 		openListener = httpListener;
 
 		if (definition instanceof Server.HttpsListener) {
-			if (alpnAvailable && http2Available && definition.isEnableHttp2()) {
+			if (http2Available && definition.isEnableHttp2()) {
 				AlpnOpenListener alpnListener = new AlpnOpenListener(bufferPoolForListener, undertowOptions, httpListener);
 				Http2OpenListener http2Listener = new Http2OpenListener(bufferPoolForListener, undertowOptions);
 				http2Listener.setRootHandler(listenerSpecificHandler);

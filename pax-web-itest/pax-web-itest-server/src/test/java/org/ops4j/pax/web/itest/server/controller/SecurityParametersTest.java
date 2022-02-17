@@ -57,6 +57,17 @@ public class SecurityParametersTest {
 		}
 
 		{
+			LOG.info("TLS 1.2:");
+			tls12.init(new KeyManager[0], new TrustManager[0], SecureRandom.getInstance("SHA1PRNG"));
+			SSLParameters enabled = tls12.getDefaultSSLParameters();
+			SSLParameters supported = tls12.getSupportedSSLParameters();
+			LOG.info("    Enabled/Default protocols: {}", String.join(", ", enabled.getProtocols()));
+			LOG.info("    Supported protocols: {}", String.join(", ", supported.getProtocols()));
+			LOG.info("    Enabled/Default cipher suites: {}", String.join(", ", enabled.getCipherSuites()));
+			LOG.info("    Supported cipher suites: {}", String.join(", ", supported.getCipherSuites()));
+		}
+
+		{
 			LOG.info("TLS 1.3:");
 			tls13.init(new KeyManager[0], new TrustManager[0], SecureRandom.getInstance("SHA1PRNG"));
 			SSLParameters enabled = tls13.getDefaultSSLParameters();

@@ -26,7 +26,7 @@ Moved to after 8.0.0.GA (8.0.x):
  - [#1657] Keycloak integration
  + [#1675] pax-web-deployer
  - [#1656] HTTP context processing (potentially with external web-fragment.xml)
- - [#1420, #1370] HTTP/2 (mostly tests)
+ ~ [#1420, #1370] HTTP/2 (mostly tests)
  - [#1406] JAX-RS example with aries-jaxrs
  - [#1622] CDI example with aries-cdi
 

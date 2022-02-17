@@ -141,7 +141,7 @@
 		<plugin.maven-remote-resources-plugin>1.7.0</plugin.maven-remote-resources-plugin>
 		<plugin.maven-resources-plugin>3.2.0</plugin.maven-resources-plugin>
 		<plugin.dependency.maven-filtering>3.2.0</plugin.dependency.maven-filtering>
-		<plugin.maven-site-plugin>3.10.0</plugin.maven-site-plugin>
+		<plugin.maven-site-plugin>3.11.0</plugin.maven-site-plugin>
 		<plugin.maven-source-plugin>3.2.1</plugin.maven-source-plugin>
 		<plugin.maven-surefire-plugin>2.22.2</plugin.maven-surefire-plugin>
 		<plugin.maven-war-plugin>3.3.2</plugin.maven-war-plugin>
@@ -261,7 +261,7 @@
 		<dependency.org.mortbay.jetty.alpn>8.1.13.v20181017</dependency.org.mortbay.jetty.alpn>
 
 		<dependency.org.ops4j.base>1.5.1</dependency.org.ops4j.base>
-		<dependency.org.ops4j.pax.exam>4.13.4</dependency.org.ops4j.pax.exam>
+		<dependency.org.ops4j.pax.exam>4.13.5</dependency.org.ops4j.pax.exam>
 		<dependency.org.ops4j.pax.logging>2.0.14</dependency.org.ops4j.pax.logging>
 		<dependency.org.ops4j.pax.swissbox>1.8.4</dependency.org.ops4j.pax.swissbox>
 		<dependency.org.ops4j.pax.url>2.6.11</dependency.org.ops4j.pax.url>
@@ -2222,6 +2222,11 @@
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-alpn-server</artifactId>
+				<version>${dependency.org.eclipse.jetty}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-alpn-openjdk8-server</artifactId>
 				<version>${dependency.org.eclipse.jetty}</version>
 			</dependency>
 			<dependency>
