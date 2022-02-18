@@ -91,6 +91,7 @@
 	</feature>
 
 	<feature name="pax-web-jetty-websockets" description="Jetty 9 bundles for Web Sockets support" version="${dependency.org.eclipse.jetty}">
+		<feature>pax-web-websockets</feature>
 		<feature>pax-web-jetty</feature>
 
 		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-client/${dependency.org.eclipse.jetty}</bundle>
@@ -103,23 +104,33 @@
 		<bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-servlet/${dependency.org.eclipse.jetty}</bundle>
 	</feature>
 
-	<feature name="pax-jetty-http2" description="Jetty 9 bundles for HTTP/2 support" version="${dependency.org.eclipse.jetty}" >
-<!--		<details>-->
-<!--			Please beware, for this feature to run properly you'll need to add the alpn-boot.jar to the-->
-<!--			lib/ext folder of Karaf in some cases of your JVM.-->
-<!--			make sure you have the following jar from it's maven coordinate installed:-->
-<!--			mvn:org.mortbay.jetty.alpn/alpn-boot/8.1.4.v20150727 (and yes version 8.x is intentional there is no newer-->
-<!--			version available)-->
-<!--		</details>-->
-<!--		<library type="extension">mvn:org.mortbay.jetty.alpn/alpn-boot/8.1.4.v20150727</library>-->
+	<feature name="pax-web-jetty-http2" description="Jetty 9 bundles for HTTP/2 support" version="${dependency.org.eclipse.jetty}" >
+		<details>
+			Before JDK 8u252 org.eclipse.jetty.alpn.ALPN from org.eclipse.jetty.alpn:alpn-api:1.1.3.v20160715
+			had to be present on boot classpath. It's no longer needed and on newer JDK 8 versions it's enough to
+			have org.eclipse.jetty:jetty-alpn-openjdk8-server bundle installed.
+			On JDK9+, have org.eclipse.jetty:jetty-alpn-java-server bundle has to be installed.
+		</details>
 		<feature>pax-web-jetty</feature>
 
-<!--		<bundle start-level="1">mvn:org.eclipse.jetty.osgi/jetty-osgi-alpn/${dependency.org.eclipse.jetty}</bundle>-->
-<!--		<bundle start-level="30">mvn:org.eclipse.jetty.alpn/alpn-api/${dependency.alpn.version}</bundle>-->
-<!--		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-server/${dependency.org.eclipse.jetty}</bundle>-->
 		<bundle start-level="30">mvn:org.eclipse.jetty.http2/http2-hpack/${dependency.org.eclipse.jetty}</bundle>
 		<bundle start-level="30">mvn:org.eclipse.jetty.http2/http2-common/${dependency.org.eclipse.jetty}</bundle>
 		<bundle start-level="30">mvn:org.eclipse.jetty.http2/http2-server/${dependency.org.eclipse.jetty}</bundle>
+	</feature>
+
+	<feature name="pax-web-jetty-http2-jdk9" description="Jetty 9 bundles for HTTP/2 support (JDK8)" version="${dependency.org.eclipse.jetty}" >
+		<feature>pax-web-jetty</feature>
+
+		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-server/${dependency.org.eclipse.jetty}</bundle>
+		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-java-server/${dependency.org.eclipse.jetty}</bundle>
+	</feature>
+
+	<feature name="pax-web-jetty-http2-jdk8" description="Jetty 9 bundles for HTTP/2 support (JDK8)" version="${dependency.org.eclipse.jetty}" >
+		<feature>pax-web-jetty</feature>
+
+		<bundle start-level="30">mvn:org.eclipse.jetty.alpn/alpn-api/${dependency.org.eclipse.jetty.alpn}</bundle>
+		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-server/${dependency.org.eclipse.jetty}</bundle>
+		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-openjdk8-server/${dependency.org.eclipse.jetty}</bundle>
 	</feature>
 
 	<feature name="pax-web-http-jetty" description="Http Service implementation using Jetty 9" version="${project.version}">

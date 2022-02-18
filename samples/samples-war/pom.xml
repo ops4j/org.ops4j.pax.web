@@ -63,6 +63,7 @@
 		<module>war-websocket-jsr356</module>
 		<module>war-security</module>
 		<module>war-http-methods</module>
+		<module>war-http2</module>
 	</modules>
 
 </project>

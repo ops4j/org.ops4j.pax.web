@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import javax.xml.namespace.QName;
 
+import io.undertow.UndertowOptions;
 import io.undertow.protocols.http2.Http2Channel;
 import org.ops4j.pax.web.service.undertow.internal.configuration.ParserUtils;
 import org.xml.sax.Locator;
@@ -664,7 +665,7 @@ public class Server {
 		/**
 		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_MAX_CONCURRENT_STREAMS
 		 */
-		private Integer http2MaxConcurrentStreams;
+		private Integer http2MaxConcurrentStreams = -1;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_MAX_FRAME_SIZE
@@ -674,7 +675,7 @@ public class Server {
 		/**
 		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_MAX_HEADER_LIST_SIZE
 		 */
-		private Integer http2MaxHeaderListSize;
+		private Integer http2MaxHeaderListSize = UndertowOptions.DEFAULT_MAX_HEADER_SIZE;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#REQUIRE_HOST_HTTP11
@@ -727,9 +728,9 @@ public class Server {
 			listener.http2EnablePush = ParserUtils.toBoolean(attributes.get(ATT_HTTP2_ENABLE_PUSH), locator, false);
 			listener.http2HeaderTableSize = ParserUtils.toInteger(attributes.get(ATT_HTTP2_HEADER_TABLE_SIZE), locator, io.undertow.UndertowOptions.HTTP2_SETTINGS_HEADER_TABLE_SIZE_DEFAULT);
 			listener.http2InitialWindowSize = ParserUtils.toInteger(attributes.get(ATT_HTTP2_INITIAL_WINDOW_SIZE), locator, Http2Channel.DEFAULT_INITIAL_WINDOW_SIZE);
-			listener.http2MaxConcurrentStreams = ParserUtils.toInteger(attributes.get(ATT_HTTP2_MAX_CONCURRENT_STREAMS), locator, null);
+			listener.http2MaxConcurrentStreams = ParserUtils.toInteger(attributes.get(ATT_HTTP2_MAX_CONCURRENT_STREAMS), locator, -1);
 			listener.http2MaxFrameSize = ParserUtils.toInteger(attributes.get(ATT_HTTP2_MAX_FRAME_SIZE), locator, Http2Channel.DEFAULT_MAX_FRAME_SIZE);
-			listener.http2MaxHeaderListSize = ParserUtils.toInteger(attributes.get(ATT_HTTP2_MAX_HEADER_LIST_SIZE), locator, null);
+			listener.http2MaxHeaderListSize = ParserUtils.toInteger(attributes.get(ATT_HTTP2_MAX_HEADER_LIST_SIZE), locator, UndertowOptions.DEFAULT_MAX_HEADER_SIZE);
 			listener.requireHostHttp11 = ParserUtils.toBoolean(attributes.get(ATT_REQUIRE_HOST_HTTP11), locator, false);
 			listener.proxyProtocol = ParserUtils.toBoolean(attributes.get(ATT_PROXY_PROTOCOL), locator, false);
 
@@ -951,7 +952,7 @@ public class Server {
 		/**
 		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_MAX_CONCURRENT_STREAMS
 		 */
-		private Integer http2MaxConcurrentStreams;
+		private Integer http2MaxConcurrentStreams = -1;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_MAX_FRAME_SIZE
@@ -961,7 +962,7 @@ public class Server {
 		/**
 		 * Undertow: io.undertow.UndertowOptions#HTTP2_SETTINGS_MAX_HEADER_LIST_SIZE
 		 */
-		private Integer http2MaxHeaderListSize;
+		private Integer http2MaxHeaderListSize = UndertowOptions.DEFAULT_MAX_HEADER_SIZE;
 
 		/**
 		 * Undertow: io.undertow.UndertowOptions#REQUIRE_HOST_HTTP11
@@ -1030,9 +1031,9 @@ public class Server {
 			listener.http2EnablePush = ParserUtils.toBoolean(attributes.get(ATT_HTTP2_ENABLE_PUSH), locator, false);
 			listener.http2HeaderTableSize = ParserUtils.toInteger(attributes.get(ATT_HTTP2_HEADER_TABLE_SIZE), locator, io.undertow.UndertowOptions.HTTP2_SETTINGS_HEADER_TABLE_SIZE_DEFAULT);
 			listener.http2InitialWindowSize = ParserUtils.toInteger(attributes.get(ATT_HTTP2_INITIAL_WINDOW_SIZE), locator, Http2Channel.DEFAULT_INITIAL_WINDOW_SIZE);
-			listener.http2MaxConcurrentStreams = ParserUtils.toInteger(attributes.get(ATT_HTTP2_MAX_CONCURRENT_STREAMS), locator, null);
+			listener.http2MaxConcurrentStreams = ParserUtils.toInteger(attributes.get(ATT_HTTP2_MAX_CONCURRENT_STREAMS), locator, -1);
 			listener.http2MaxFrameSize = ParserUtils.toInteger(attributes.get(ATT_HTTP2_MAX_FRAME_SIZE), locator, Http2Channel.DEFAULT_MAX_FRAME_SIZE);
-			listener.http2MaxHeaderListSize = ParserUtils.toInteger(attributes.get(ATT_HTTP2_MAX_HEADER_LIST_SIZE), locator, null);
+			listener.http2MaxHeaderListSize = ParserUtils.toInteger(attributes.get(ATT_HTTP2_MAX_HEADER_LIST_SIZE), locator, UndertowOptions.DEFAULT_MAX_HEADER_SIZE);
 			listener.requireHostHttp11 = ParserUtils.toBoolean(attributes.get(ATT_REQUIRE_HOST_HTTP11), locator, false);
 			listener.proxyProtocol = ParserUtils.toBoolean(attributes.get(ATT_PROXY_PROTOCOL), locator, false);
 

@@ -263,7 +263,10 @@ public class UndertowFactory {
 	 */
 	public UndertowFactory.AcceptingChannelWithAddress createDefaultListener(String address, HttpHandler rootHandler,
 			Configuration configuration) {
-		return createListener(address, rootHandler, configuration, new Server.HttpListener(),
+		Server.HttpListener def = new Server.HttpListener();
+		def.setEnableHttp2(true);
+		def.setHttp2EnablePush(true);
+		return createListener(address, rootHandler, configuration, def,
 				new InetSocketAddress(address, configuration.server().getHttpPort()));
 	}
 
@@ -276,7 +279,10 @@ public class UndertowFactory {
 	 */
 	public UndertowFactory.AcceptingChannelWithAddress createSecureListener(String address, HttpHandler rootHandler,
 			Configuration configuration) {
-		AcceptingChannelWithAddress listener = createListener(address, rootHandler, configuration, new Server.HttpsListener(),
+		Server.HttpsListener def = new Server.HttpsListener();
+		def.setEnableHttp2(true);
+		def.setHttp2EnablePush(true);
+		AcceptingChannelWithAddress listener = createListener(address, rootHandler, configuration, def,
 				new InetSocketAddress(address, configuration.server().getHttpSecurePort()));
 		listener.setSecure(true);
 		return listener;

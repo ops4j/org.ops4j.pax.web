@@ -93,7 +93,8 @@
 							org.slf4j;version="[1.7,2)",
 
 							<!-- test dependencies -->
-							javax.inject
+							javax.inject,
+							javax.net.ssl
 						</Import-Package>
 						<DynamicImport-Package>
 							org.junit,
@@ -113,7 +114,8 @@
 
 							org.ops4j.pax.web.resources.api,
 							org.ops4j.pax.web.resources.jsf,
-							javax.faces.application
+							javax.faces.application,
+							org.apache.hc.*
 						</DynamicImport-Package>
 						<Export-Package>
 							org.ops4j.pax.web.itest,
@@ -332,6 +334,11 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>war-http-methods</artifactId>
+			<type>war</type>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>war-http2</artifactId>
 			<type>war</type>
 		</dependency>
 

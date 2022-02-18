@@ -239,6 +239,8 @@
 		<dependency.org.eclipse.jdt.ecj>3.26.0</dependency.org.eclipse.jdt.ecj>
 		<dependency.org.eclipse.jetty>9.4.45.v20220203</dependency.org.eclipse.jetty>
 		<dependency.org.eclipse.jetty.osgi>9.4.45</dependency.org.eclipse.jetty.osgi>
+		<dependency.org.eclipse.jetty.alpn>1.1.3.v20160715</dependency.org.eclipse.jetty.alpn>
+		<dependency.org.eclipse.jetty.alpn.osgi>1.1.3</dependency.org.eclipse.jetty.alpn.osgi>
 		<!-- 3.12.100 is the last version exporting org.osgi.framework 1.8 (R6) -->
 		<dependency.org.eclipse.platform.osgi>3.12.100</dependency.org.eclipse.platform.osgi>
 
@@ -1026,6 +1028,12 @@
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
 				<artifactId>war-http-methods</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>war-http2</artifactId>
 				<version>${project.version}</version>
 				<type>war</type>
 			</dependency>
@@ -2215,6 +2223,12 @@
 			</dependency>
 
 			<dependency>
+				<!-- JDK8 only -->
+				<groupId>org.eclipse.jetty.alpn</groupId>
+				<artifactId>alpn-api</artifactId>
+				<version>${dependency.org.eclipse.jetty.alpn}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-alpn-client</artifactId>
 				<version>${dependency.org.eclipse.jetty}</version>
@@ -2225,24 +2239,15 @@
 				<version>${dependency.org.eclipse.jetty}</version>
 			</dependency>
 			<dependency>
+				<!-- JDK8 only -->
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-alpn-openjdk8-server</artifactId>
 				<version>${dependency.org.eclipse.jetty}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.eclipse.jetty.osgi</groupId>
-				<artifactId>jetty-osgi-alpn</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.mortbay.jetty.alpn</groupId>
-				<artifactId>alpn-boot</artifactId>
-				<version>${dependency.org.mortbay.jetty.alpn}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.eclipse.jetty.osgi</groupId>
-				<artifactId>jetty-osgi-npn</artifactId>
+				<!-- JDK9+ -->
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-alpn-java-server</artifactId>
 				<version>${dependency.org.eclipse.jetty}</version>
 			</dependency>
 
@@ -2269,17 +2274,6 @@
 			<dependency>
 				<groupId>org.eclipse.jetty.http2</groupId>
 				<artifactId>http2-hpack</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.eclipse.jetty.spdy</groupId>
-				<artifactId>spdy-server</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty.spdy</groupId>
-				<artifactId>spdy-http-server</artifactId>
 				<version>${dependency.org.eclipse.jetty}</version>
 			</dependency>
 

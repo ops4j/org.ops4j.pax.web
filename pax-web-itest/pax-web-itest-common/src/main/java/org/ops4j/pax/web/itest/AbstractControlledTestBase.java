@@ -309,6 +309,36 @@ public abstract class AbstractControlledTestBase {
 		};
 	}
 
+	/**
+	 * Installation of all the bundles required by {@code pax-web-jetty} with HTTP2 support
+	 * @return
+	 */
+	protected Option[] paxWebJettyHttp2() {
+		Option[] common = combine(paxWebJetty(),
+				mavenBundle().groupId("org.eclipse.jetty.http2")
+						.artifactId("http2-hpack").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty.http2")
+						.artifactId("http2-common").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty.http2")
+						.artifactId("http2-server").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-alpn-server").versionAsInProject()
+		);
+		if (javaMajorVersion() >= 9) {
+			return combine(common,
+					mavenBundle().groupId("org.eclipse.jetty")
+							.artifactId("jetty-alpn-java-server").versionAsInProject()
+			);
+		} else {
+			return combine(common,
+					mavenBundle().groupId("org.eclipse.jetty.alpn")
+							.artifactId("alpn-api").versionAsInProject(),
+					mavenBundle().groupId("org.eclipse.jetty")
+							.artifactId("jetty-alpn-openjdk8-server").versionAsInProject()
+			);
+		}
+	}
+
 	protected Option[] jettyWebSockets() {
 		return new Option[] {
 				mavenBundle("jakarta.websocket", "jakarta.websocket-api")

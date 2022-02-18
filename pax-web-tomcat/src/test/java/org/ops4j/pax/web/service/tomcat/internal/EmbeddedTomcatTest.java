@@ -879,7 +879,7 @@ public class EmbeddedTomcatTest {
 		// is added in host.addChild(), 3rd one (MapperListener) is added when host fires
 		// org.apache.catalina.Container.ADD_CHILD_EVENT and the host's MapperListener is also added as lifecycle
 		// listener to the context.
-		context.addLifecycleListener(new VersionLoggerListener());
+		server.addLifecycleListener(new VersionLoggerListener());
 		context.addLifecycleListener(new ContextConfig());
 		host.addChild(context);
 

@@ -93,7 +93,25 @@
 								<feature>framework</feature>
 							</framework>
 							<features>
-								<feature>pax-web-*</feature>
+								<feature>pax-web-specs</feature>
+								<feature>pax-web-core</feature>
+								<feature>pax-web-websockets</feature>
+								<feature>pax-web-jetty</feature>
+								<feature>pax-web-jetty-websockets</feature>
+								<feature>pax-web-jetty-http2</feature>
+<!--								<feature>pax-web-jetty-http2-jdk8</feature>-->
+<!--								<feature>pax-web-jetty-http2-jdk9</feature>-->
+								<feature>pax-web-http-jetty</feature>
+								<feature>pax-web-tomcat</feature>
+								<feature>pax-web-tomcat-websockets</feature>
+								<feature>pax-web-http-tomcat</feature>
+								<feature>pax-web-undertow</feature>
+								<feature>pax-web-undertow-websockets</feature>
+								<feature>pax-web-http-undertow</feature>
+								<feature>pax-web-jsp</feature>
+								<feature>pax-web-whiteboard</feature>
+								<feature>pax-web-war</feature>
+								<feature>pax-web-karaf</feature>
 							</features>
 							<verifyTransitive>false</verifyTransitive>
 							<ignoreMissingConditions>true</ignoreMissingConditions>

@@ -37,7 +37,7 @@
 					appBase="." autoDeploy="false" deployOnStartup="false">
 
 				<!-- https://tomcat.apache.org/tomcat-9.0-doc/config/context.html -->
-				<Context className="org.apache.catalina.core.StandardContext" docBase="${docbase}" path="/app1"
+				<Context docBase="${docbase}" path="/app1"
 						workDir="${workdir}" />
 
 			</Host>

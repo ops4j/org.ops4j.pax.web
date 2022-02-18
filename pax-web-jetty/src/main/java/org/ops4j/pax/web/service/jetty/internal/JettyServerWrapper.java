@@ -46,6 +46,7 @@ import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.http.HttpSessionAttributeListener;
 
 import org.eclipse.jetty.http.MimeTypes;
+import org.eclipse.jetty.http.PreEncodedHttpField;
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.security.ConstraintAware;
 import org.eclipse.jetty.security.ConstraintMapping;
@@ -133,6 +134,7 @@ import org.ops4j.pax.web.service.spi.task.WebSocketModelChange;
 import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -358,6 +360,29 @@ class JettyServerWrapper implements BatchVisitor {
 			URL emptyConfig = getClass().getResource("/jetty-empty.xml");
 			if (emptyConfig != null) {
 				new XmlConfiguration(Resource.newResource(emptyConfig));
+			}
+
+			// to load HttpFieldPreEncoder both for HTTP/1.1 and HTTP/2 we need to call static block
+			// of org.eclipse.jetty.http.PreEncodedHttpField class within proper ClassLoader
+			ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+			try {
+				OsgiServletContextClassLoader cl = new OsgiServletContextClassLoader();
+				Bundle bundle = FrameworkUtil.getBundle(this.getClass());
+				if (bundle != null) {
+					// non unit-test
+					cl.addBundle(bundle);
+					for (Bundle b : bundle.getBundleContext().getBundles()) {
+						String sn = b.getSymbolicName();
+						if ("org.eclipse.jetty.http".equals(sn) || "org.eclipse.jetty.http2.hpack".equals(sn)) {
+							cl.addBundles(b);
+						}
+					}
+					Thread.currentThread().setContextClassLoader(cl);
+				}
+				// it's not enough to load a class to get static{} block called
+				new PreEncodedHttpField("empty", "empty");
+			} finally {
+				Thread.currentThread().setContextClassLoader(tccl);
 			}
 
 			// When parsing, TCCL will be set to CL of pax-web-jetty bundle

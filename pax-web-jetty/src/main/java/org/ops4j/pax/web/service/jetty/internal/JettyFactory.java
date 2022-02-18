@@ -43,7 +43,9 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.SecurityConfiguration;
 import org.ops4j.pax.web.service.spi.config.ServerConfiguration;
+import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +80,6 @@ class JettyFactory {
 	 */
 	private void discovery() {
 		try {
-			classLoader.loadClass("org.eclipse.jetty.alpn.ALPN");
 			classLoader.loadClass("org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory");
 			// TODO: check JDK9+ support for ALPN
 			alpnAvailable = true;
@@ -262,9 +263,6 @@ class JettyFactory {
 
 		SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
 		if (secc.getSslProvider() != null) {
-			// TODO: check JDK8/JDK09+ compliance, provider probably SHOULD be "Conscrypt"
-			//       Jetty uses this provider for several things and neither "SUN" nor "SunJSSE" is suitable for all
-			//       of them
 			sslContextFactory.setProvider(secc.getSslProvider());
 		}
 
@@ -447,10 +445,30 @@ class JettyFactory {
 
 			secureConnector.addConnectionFactory(new SslConnectionFactory(sslContextFactory, "ALPN"));
 
-			ALPNServerConnectionFactory alpnConnectionFactory = new ALPNServerConnectionFactory();
-			// if no protocol can be negotiated, we'll force HTTP/1.1
-			alpnConnectionFactory.setDefaultProtocol(HttpVersion.HTTP_1_1.asString());
-			secureConnector.addConnectionFactory(alpnConnectionFactory);
+			ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+			try {
+				OsgiServletContextClassLoader cl = new OsgiServletContextClassLoader();
+				Bundle bundle = FrameworkUtil.getBundle(this.getClass());
+				if (bundle != null) {
+					// non unit-test
+					cl.addBundle(bundle);
+					for (Bundle b : bundle.getBundleContext().getBundles()) {
+						String sn = b.getSymbolicName();
+						if ("org.eclipse.jetty.io".equals(sn)
+								|| "org.eclipse.jetty.alpn.java.server".equals(sn)
+								|| "org.eclipse.jetty.alpn.openjdk8.server".equals(sn)) {
+							cl.addBundles(b);
+						}
+					}
+					Thread.currentThread().setContextClassLoader(cl);
+				}
+				ALPNServerConnectionFactory alpnConnectionFactory = new ALPNServerConnectionFactory();
+				// if no protocol can be negotiated, we'll force HTTP/1.1
+				alpnConnectionFactory.setDefaultProtocol(HttpVersion.HTTP_1_1.asString());
+				secureConnector.addConnectionFactory(alpnConnectionFactory);
+			} finally {
+				Thread.currentThread().setContextClassLoader(tccl);
+			}
 		} else {
 			// no ALPN, so no HTTP/2
 			// if we want to support HTTP/2 over TLS without ALPN, alpn extension

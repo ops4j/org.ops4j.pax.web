@@ -69,7 +69,6 @@
 							<!-- from Jetty bundles -->
 							org.eclipse.jetty.*,
 							org.eclipse.jetty.jaas,
-							org.eclipse.jetty.http2.server,
 
 							<!-- other -->
 							javax.annotation;version="[1.2,2)"; resolution:=optional,
@@ -261,22 +260,6 @@
 			<artifactId>javax-websocket-server-impl</artifactId>
 			<scope>provided</scope>
 		</dependency>
-
-		<!--		<dependency>-->
-<!--			<groupId>org.eclipse.jetty</groupId>-->
-<!--			<artifactId>jetty-jaas</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.eclipse.jetty.osgi</groupId>-->
-<!--			<artifactId>jetty-osgi-alpn</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.mortbay.jetty.alpn</groupId>-->
-<!--			<artifactId>alpn-boot</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
 
 		<!-- Logging -->
 

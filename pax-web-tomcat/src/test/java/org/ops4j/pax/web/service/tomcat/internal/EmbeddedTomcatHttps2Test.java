@@ -50,6 +50,7 @@ import org.apache.catalina.core.StandardServer;
 import org.apache.catalina.core.StandardService;
 import org.apache.catalina.core.StandardThreadExecutor;
 import org.apache.catalina.core.StandardWrapper;
+import org.apache.catalina.startup.CatalinaBaseConfigurationSource;
 import org.apache.coyote.http11.AbstractHttp11JsseProtocol;
 import org.apache.coyote.http2.Http2Protocol;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
@@ -79,6 +80,7 @@ import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.hc.core5.http.ssl.TLS;
 import org.apache.hc.core5.http2.HttpVersionPolicy;
 import org.apache.hc.core5.io.CloseMode;
+import org.apache.tomcat.util.file.ConfigFileLoader;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,7 +96,10 @@ public class EmbeddedTomcatHttps2Test {
 
 	@Test
 	public void https2NioExchange() throws Exception {
-//		System.setProperty("javax.net.debug", "all");
+		// important when running together with EmbeddedTomcatTests (`mvn test`)
+		ConfigFileLoader.setSource(new CatalinaBaseConfigurationSource(new File("target"), null));
+
+		//		System.setProperty("javax.net.debug", "all");
 		Server server = new StandardServer();
 		server.setCatalinaBase(new File("target"));
 
@@ -109,19 +114,19 @@ public class EmbeddedTomcatHttps2Test {
 		connector.setScheme("https");
 		connector.setSecure(true);
 		connector.setProperty("SSLEnabled", "true");
-//		connector.setPort(0);
-		connector.setPort(8123);
+		connector.setPort(0);
+//		connector.setPort(8123);
 		AbstractHttp11JsseProtocol<?> protocol = (AbstractHttp11JsseProtocol<?>) connector.getProtocolHandler();
 		protocol.setSslImplementationName("org.apache.tomcat.util.net.jsse.JSSEImplementation");
 
-		protocol.setKeystoreFile("../pax-web-itest/etc/security/server.jks");
+		protocol.setKeystoreFile("../../pax-web-itest/etc/security/server.jks");
 		protocol.setKeystorePass("passw0rd");
 		protocol.setKeystoreType("JKS");
 		protocol.setKeystoreProvider("SUN");
 		protocol.setKeyPass("passw0rd");
 		protocol.setKeyAlias("server");
 
-		protocol.setTruststoreFile("../pax-web-itest/etc/security/server.jks");
+		protocol.setTruststoreFile("../../pax-web-itest/etc/security/server.jks");
 		protocol.setTruststorePass("passw0rd");
 		protocol.setTruststoreType("JKS");
 		protocol.setTruststoreProvider("SUN");

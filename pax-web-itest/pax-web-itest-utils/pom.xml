@@ -89,7 +89,8 @@
 							javax.websocket.*
 						</Dynamic-ImportPackage>
 						<Export-Package>
-							org.ops4j.pax.web.itest.utils.*
+							org.ops4j.pax.web.itest.utils.*,
+							org.apache.hc.*
 						</Export-Package>
 						<Include-Resource>
 							{maven-resources},
@@ -158,17 +159,14 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents.client5</groupId>
 			<artifactId>httpclient5</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents.core5</groupId>
 			<artifactId>httpcore5</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents.core5</groupId>
 			<artifactId>httpcore5-h2</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 	</dependencies>
