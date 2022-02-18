@@ -227,7 +227,7 @@ public class EmbeddedTomcatHttps2Test {
 		final CountDownLatch latch = new CountDownLatch(3);
 
 		try (CloseableHttpAsyncClient client = HttpAsyncClients.custom()
-				.setVersionPolicy(HttpVersionPolicy.NEGOTIATE).setConnectionManager(cm).build()) {
+				.setVersionPolicy(HttpVersionPolicy.FORCE_HTTP_2).setConnectionManager(cm).build()) {
 
 			client.register("*", () -> new AsyncPushConsumer() {
 				@Override

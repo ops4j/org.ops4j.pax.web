@@ -183,7 +183,7 @@ public class EmbeddedUndertowHttps2Test {
 
 		try (CloseableHttpAsyncClient client = HttpAsyncClients.custom()
 				.setH2Config(H2Config.custom().setPushEnabled(true).build())
-				.setVersionPolicy(HttpVersionPolicy.NEGOTIATE).setConnectionManager(cm).build()) {
+				.setVersionPolicy(HttpVersionPolicy.FORCE_HTTP_2).setConnectionManager(cm).build()) {
 
 			client.register("*", () -> new AsyncPushConsumer() {
 				@Override

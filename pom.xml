@@ -2222,6 +2222,14 @@
 						<groupId>javax.annotation</groupId>
 						<artifactId>javax.annotation-api</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>org.ow2.asm</groupId>
+						<artifactId>asm</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.ow2.asm</groupId>
+						<artifactId>asm-commons</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 
@@ -2334,6 +2342,14 @@
 					<exclusion>
 						<groupId>javax.websocket</groupId>
 						<artifactId>javax.websocket-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.ow2.asm</groupId>
+						<artifactId>asm</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.ow2.asm</groupId>
+						<artifactId>asm-commons</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>

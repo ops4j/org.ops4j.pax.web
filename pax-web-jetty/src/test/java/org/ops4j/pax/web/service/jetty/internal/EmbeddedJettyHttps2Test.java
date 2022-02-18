@@ -176,7 +176,7 @@ public class EmbeddedJettyHttps2Test {
 		final PoolingAsyncClientConnectionManager cm = PoolingAsyncClientConnectionManagerBuilder.create()
 				.setTlsStrategy(tlsStrategy).build();
 		try (CloseableHttpAsyncClient client = HttpAsyncClients.custom()
-				.setVersionPolicy(HttpVersionPolicy.NEGOTIATE).setConnectionManager(cm).build()) {
+				.setVersionPolicy(HttpVersionPolicy.FORCE_HTTP_2).setConnectionManager(cm).build()) {
 
 			client.start();
 
