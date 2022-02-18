@@ -192,6 +192,15 @@ public class AbstractKarafTestBase extends AbstractControlledTestBase {
 				features(paxWebFeatures, "pax-web-http-jetty", "pax-web-war", "pax-web-whiteboard"));
 	}
 
+	public Option[] jettyHttp2Config() {
+		String http2Feature = "pax-web-jetty-http2-jdk8";
+		if (javaMajorVersion() > 8) {
+			http2Feature = "pax-web-jetty-http2-jdk9";
+		}
+		return combine(baseConfigure(),
+				features(paxWebFeatures, "pax-web-http-jetty", "pax-web-jetty-http2", http2Feature, "pax-web-war", "pax-web-whiteboard"));
+	}
+
 	public Option[] tomcatConfig() {
 		return combine(baseConfigure(),
 				features(paxWebFeatures, "pax-web-http-tomcat", "pax-web-war", "pax-web-whiteboard"));

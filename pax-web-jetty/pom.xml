@@ -219,8 +219,23 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
+			<!-- JDK8 only -->
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-alpn-openjdk8-server</artifactId>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<!-- JDK8 only -->
+			<groupId>org.eclipse.jetty.alpn</groupId>
+			<artifactId>alpn-api</artifactId>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<!-- JDK9+ -->
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-alpn-java-server</artifactId>
 			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>

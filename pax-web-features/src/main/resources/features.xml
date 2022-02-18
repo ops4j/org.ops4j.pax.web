@@ -110,6 +110,10 @@
 			had to be present on boot classpath. It's no longer needed and on newer JDK 8 versions it's enough to
 			have org.eclipse.jetty:jetty-alpn-openjdk8-server bundle installed.
 			On JDK9+, have org.eclipse.jetty:jetty-alpn-java-server bundle has to be installed.
+			So without direct dependency, if pax-web-jetty-http2 feature is installed, additional feature has to be
+			installed depending on JDK used:
+			 - JDK8: pax-web-jetty-http2-jdk8
+			 - JDK9 and later: pax-web-jetty-http2-jdk9
 		</details>
 		<feature>pax-web-jetty</feature>
 
@@ -118,19 +122,19 @@
 		<bundle start-level="30">mvn:org.eclipse.jetty.http2/http2-server/${dependency.org.eclipse.jetty}</bundle>
 	</feature>
 
-	<feature name="pax-web-jetty-http2-jdk9" description="Jetty 9 bundles for HTTP/2 support (JDK8)" version="${dependency.org.eclipse.jetty}" >
-		<feature>pax-web-jetty</feature>
-
-		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-server/${dependency.org.eclipse.jetty}</bundle>
-		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-java-server/${dependency.org.eclipse.jetty}</bundle>
-	</feature>
-
 	<feature name="pax-web-jetty-http2-jdk8" description="Jetty 9 bundles for HTTP/2 support (JDK8)" version="${dependency.org.eclipse.jetty}" >
 		<feature>pax-web-jetty</feature>
 
 		<bundle start-level="30">mvn:org.eclipse.jetty.alpn/alpn-api/${dependency.org.eclipse.jetty.alpn}</bundle>
 		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-server/${dependency.org.eclipse.jetty}</bundle>
 		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-openjdk8-server/${dependency.org.eclipse.jetty}</bundle>
+	</feature>
+
+	<feature name="pax-web-jetty-http2-jdk9" description="Jetty 9 bundles for HTTP/2 support (JDK9)" version="${dependency.org.eclipse.jetty}" >
+		<feature>pax-web-jetty</feature>
+
+		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-server/${dependency.org.eclipse.jetty}</bundle>
+		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-java-server/${dependency.org.eclipse.jetty}</bundle>
 	</feature>
 
 	<feature name="pax-web-http-jetty" description="Http Service implementation using Jetty 9" version="${project.version}">
