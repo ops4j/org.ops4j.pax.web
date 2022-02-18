@@ -19,7 +19,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -52,7 +51,6 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -746,19 +744,6 @@ public class EmbeddedJettyHttp2Test {
 		}
 
 		return buffer.hasRemaining();
-	}
-
-	@Test
-	@Ignore("Just local tool")
-	public void decodeHPACK() throws Exception {
-		FileInputStream fis1 = new FileInputStream("/data/tmp/hpack5.dat");
-		byte[] b1 = new byte[48];
-		fis1.read(b1, 0, 26);
-		fis1.close();
-
-		HpackDecoder decoder = new HpackDecoder(4096, 8192);
-		MetaData m1 = decoder.decode(ByteBuffer.wrap(b1, 0, 26));
-		System.out.println();
 	}
 
 }
