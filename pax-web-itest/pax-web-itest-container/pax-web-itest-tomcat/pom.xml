@@ -91,6 +91,22 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- OSGi -->
+
+		<dependency>
+			<!-- Can't be added to maven-failsafe-plugin classpath -->
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.cdi</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<!-- Can't be added to maven-failsafe-plugin classpath -->
+			<groupId>org.apache.aries.cdi</groupId>
+			<artifactId>org.apache.aries.cdi.extender</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
 		<!-- JavaEE -->
 
 		<dependency>
@@ -100,6 +116,19 @@
 			-->
 			<groupId>jakarta.el</groupId>
 			<artifactId>jakarta.el-api</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<!-- Can't be added to maven-failsafe-plugin classpath -->
+			<groupId>jakarta.enterprise</groupId>
+			<artifactId>jakarta.enterprise.cdi-api</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<!-- Can't be added to maven-failsafe-plugin classpath -->
+			<groupId>org.apache.myfaces.core</groupId>
+			<artifactId>myfaces-api</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 

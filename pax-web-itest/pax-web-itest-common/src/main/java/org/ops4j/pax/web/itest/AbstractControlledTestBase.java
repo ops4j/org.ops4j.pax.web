@@ -619,6 +619,9 @@ public abstract class AbstractControlledTestBase {
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-interceptor12")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
+				// Aries CDI extension.servlet.weld and extension.el.jsp require JavaServlet 3.1 capability...
+				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-servlet31")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart(),
 
 				mavenBundle("org.osgi", "org.osgi.service.cdi")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
@@ -662,8 +665,6 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle("jakarta.validation", "jakarta.validation-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.jboss.classfilewriter", "jboss-classfilewriter")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.jboss.weld", "weld-osgi-bundle")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
 		};
 	}

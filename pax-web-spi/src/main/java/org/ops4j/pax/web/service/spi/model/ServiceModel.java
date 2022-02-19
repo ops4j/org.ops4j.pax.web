@@ -156,7 +156,7 @@ public class ServiceModel implements BatchVisitor {
 			// we don't have to "resolve" here, as the OsgiContextModel has direct reference and is already
 			// scoped to proper serviceBundle
 			return ctx.getDirectHttpContextInstance();
-		});
+		}, false);
 	}
 
 	/**
@@ -180,7 +180,7 @@ public class ServiceModel implements BatchVisitor {
 			serverController.sendBatch(batch);
 
 			return model;
-		});
+		}, false);
 	}
 
 	public MultiBundleWebContainerContext getOrCreateDefaultSharedHttpContext(String contextId) {
@@ -192,7 +192,7 @@ public class ServiceModel implements BatchVisitor {
 			}
 			// we don't have to "resolve" here, as the OsgiContextModel has direct reference
 			return (MultiBundleWebContainerContext) ctx.getDirectHttpContextInstance();
-		});
+		}, false);
 	}
 
 	public Map<String, Map<String, ServletModel>> getAliasMapping() {

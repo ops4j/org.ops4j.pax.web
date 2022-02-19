@@ -104,6 +104,7 @@ import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.ClearDynamicRegistrationsChange;
 import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
 import org.ops4j.pax.web.service.spi.task.ContextMetadataModelChange;
+import org.ops4j.pax.web.service.spi.task.ContextStartChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
@@ -1416,7 +1417,10 @@ class TomcatServerWrapper implements BatchVisitor {
 
 				if (stopped) {
 					// we have to start it again
-					ensureServletContextStarted(standardContext);
+					// register a "callback batch operation", which will be submitted withing a new batch
+					// as new task in single paxweb-config thread pool's thread
+					LOG.info("Scheduling start of the {} context after listener registration for already started context", contextPath);
+					change.registerBatchCompletedAction(new ContextStartChange(OpCode.MODIFY, contextPath));
 				}
 			});
 		}
@@ -1833,6 +1837,17 @@ class TomcatServerWrapper implements BatchVisitor {
 		}
 	}
 
+	@Override
+	public void visitContextStartChange(ContextStartChange change) {
+		String contextPath = change.getContextPath();
+		PaxWebStandardContext standardContext = contextHandlers.get(contextPath);
+		if (standardContext != null) {
+			ensureServletContextStarted(standardContext);
+		} else {
+			LOG.debug("Not starting unknown context {}.", contextPath);
+		}
+	}
+
 	/**
 	 * <p>Registration of <em>active web element</em> should always start the context. On the other hand,
 	 * registration of <em>passive web element</em> should <strong>not</strong> start the context.</p>
@@ -1929,7 +1944,13 @@ class TomcatServerWrapper implements BatchVisitor {
 				}
 			});
 
-			context.start();
+			ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+			try {
+				Thread.currentThread().setContextClassLoader(highestRankedContext.getClassLoader());
+				context.start();
+			} finally {
+				Thread.currentThread().setContextClassLoader(tccl);
+			}
 			// swap dynamic to normal context
 			dynamicContext.rememberAttributesFromSCIs();
 			context.setOsgiServletContext(highestRankedContext);

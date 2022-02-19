@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.jetty.war.jsf;
+package org.ops4j.pax.web.itest.tomcat.war.jsf;
 
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -30,7 +30,7 @@ public class WarJSFCdiIntegrationTest extends AbstractWarJSFCdiIntegrationTest {
 
 	@Configuration
 	public Option[] configure() {
-		Option[] serverOptions = combine(baseConfigure(), paxWebJetty());
+		Option[] serverOptions = combine(baseConfigure(), paxWebTomcat());
 		// myfaces-core-api doesn't import javax.inject and I'm getting
 		// WELD-001111: interface javax.faces.annotation.FlowMap defined on org.apache.myfaces.cdi.JsfArtifactFlowMapProducer@2143ca58 is not a qualifier
 		// if javax.inject is available only as bundle (== is excluded from maven-failsafe-plugin test classpath)

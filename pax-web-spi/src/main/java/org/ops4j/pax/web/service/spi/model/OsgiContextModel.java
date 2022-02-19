@@ -348,6 +348,13 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	private final List<Change> unregistrations = new ArrayList<>();
 
 	/**
+	 * When a model is registered from Whiteboard, we usually do NOT want to wait for the registration to finish.
+	 * Internal model manipulation ({@link org.ops4j.pax.web.service.spi.model.ServerModel}) still has to be
+	 * synchronized, but we don't want to wait for the registration to complete (maybe only in unit tests).
+	 */
+	private boolean async = false;
+
+	/**
 	 * {@link ClassLoader} may be configured for given {@link OsgiContextModel} in some cases (WAB), but externally
 	 * configured {@link ClassLoader} may be created in other scenarios (whiteboard, {@link org.osgi.service.http.HttpService}.
 	 */
@@ -748,6 +755,14 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 
 	public void setWab(boolean wab) {
 		this.wab = wab;
+	}
+
+	public void setAsynchronusRegistration(boolean async) {
+		this.async = async;
+	}
+
+	public boolean isAsynchronusRegistration() {
+		return async;
 	}
 
 	@Override

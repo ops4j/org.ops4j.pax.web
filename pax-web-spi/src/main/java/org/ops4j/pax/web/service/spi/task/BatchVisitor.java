@@ -130,4 +130,12 @@ public interface BatchVisitor {
 	 */
 	void visitClearDynamicRegistrationsChange(ClearDynamicRegistrationsChange change);
 
+	/**
+	 * Process a change related to starting a context - action created on the visitor side to schedule start
+	 * of the context in different thread/event tick.
+	 * @param contextStartChange
+	 */
+	default void visitContextStartChange(ContextStartChange contextStartChange) {
+	}
+
 }

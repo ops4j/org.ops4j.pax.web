@@ -126,6 +126,13 @@ public abstract class ElementModel<T, D extends WebElementEventData>
 	private String contextSelector;
 
 	/**
+	 * When a model is registered from Whiteboard, we usually do NOT want to wait for the registration to finish.
+	 * Internal model manipulation ({@link org.ops4j.pax.web.service.spi.model.ServerModel}) still has to be
+	 * synchronized, but we don't want to wait for the registration to complete (maybe only in unit tests).
+	 */
+	private boolean async;
+
+	/**
 	 * <p>This method should be called from Whiteboard infrastructure to really perform the validation and set
 	 * <em>isValid</em> flag, which is then used for "Failure DTO" purposes.</p>
 	 */
@@ -360,6 +367,14 @@ public abstract class ElementModel<T, D extends WebElementEventData>
 
 	public void setDtoFailureCode(int dtoFailureCode) {
 		this.dtoFailureCode = dtoFailureCode;
+	}
+
+	public void setAsynchronusRegistration(boolean async) {
+		this.async = async;
+	}
+
+	public boolean isAsynchronusRegistration() {
+		return async;
 	}
 
 	@Override

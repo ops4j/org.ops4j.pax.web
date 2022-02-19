@@ -119,6 +119,7 @@ import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.ClearDynamicRegistrationsChange;
 import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
 import org.ops4j.pax.web.service.spi.task.ContextMetadataModelChange;
+import org.ops4j.pax.web.service.spi.task.ContextStartChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
@@ -1575,18 +1576,11 @@ class JettyServerWrapper implements BatchVisitor {
 
 				if (stopped) {
 					// we have to start it again
-					ensureServletContextStarted(servletContextHandler);
+					// register a "callback batch operation", which will be submitted withing a new batch
+					// as new task in single paxweb-config thread pool's thread
+					LOG.info("Scheduling start of the {} context after listener registration for already started context", contextPath);
+					change.registerBatchCompletedAction(new ContextStartChange(OpCode.MODIFY, contextPath));
 				}
-
-				// calling javax.servlet.ServletContextListener.contextInitialized() when server (context) is
-				// already started and doing it in separate thread is a tweak to make Aries-CDI + extensions
-				// work with CDI/JSF sample. I definitely have to solve it differently.
-				// The problems are summarized in https://github.com/ops4j/org.ops4j.pax.web/issues/1622
-//				if (servletContextHandler.isStarted() && ServletContextListener.class.isAssignableFrom(eventListener.getClass())) {
-//					new Thread(() -> {
-//						((ServletContextListener) eventListener).contextInitialized(new ServletContextEvent(osgiServletContexts.get(context)));
-//					}).start();
-//				}
 			});
 		}
 
@@ -1967,6 +1961,17 @@ class JettyServerWrapper implements BatchVisitor {
 
 		if (removed[0] > 0) {
 			LOG.debug("Removed {} dynamically registered servlets/filters/listeners from context {}", removed[0], contextPath);
+		}
+	}
+
+	@Override
+	public void visitContextStartChange(ContextStartChange change) {
+		String contextPath = change.getContextPath();
+		PaxWebServletContextHandler servletContextHandler = contextHandlers.get(contextPath);
+		if (servletContextHandler != null) {
+			ensureServletContextStarted(servletContextHandler);
+		} else {
+			LOG.debug("Not starting unknown context {}.", contextPath);
 		}
 	}
 

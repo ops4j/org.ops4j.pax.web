@@ -494,7 +494,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 			controller.sendBatch(batch);
 
 			return model;
-		});
+		}, false);
 	}
 
 	/**
@@ -505,17 +505,18 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 	 * <p>The task is executed by {@link Executor} associated with this {@link ServerModel}.</p>
 	 *
 	 * @param task
+	 * @param asynchronous
 	 * @param <T>
 	 * @return
 	 * @throws ServletException
 	 * @throws NamespaceException
 	 */
-	public <T> T run(ModelRegistrationTask<T> task) throws ServletException, NamespaceException {
+	public <T> T run(ModelRegistrationTask<T> task, boolean asynchronous) throws ServletException, NamespaceException {
 		// in theory, a task doesn't have to change the model, but we accept false positives
 		// that's the only required place to increment the change count thanks to single-threaded config pool ;)
 		incrementChangeCounter();
 
-		if (Thread.currentThread().getId() == registrationThreadId) {
+		if (!asynchronous && Thread.currentThread().getId() == registrationThreadId) {
 			// we can run immediately
 			return task.run();
 		}
@@ -524,7 +525,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 
 		try {
 			try {
-				return CompletableFuture.supplyAsync(() -> {
+				CompletableFuture<T> future = CompletableFuture.supplyAsync(() -> {
 					try {
 						return task.run();
 					} catch (ServletException e) {
@@ -532,7 +533,12 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 					} catch (NamespaceException e) {
 						throw new ModelRegistrationException(e);
 					}
-				}, executor).get();
+				}, executor);
+				if (asynchronous) {
+					return null;
+				} else {
+					return future.get();
+				}
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 				throw new IllegalStateException(e.getMessage(), e);
@@ -553,6 +559,45 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 
 		// ??
 		return null;
+	}
+
+	/**
+	 * <p>Utility method of the global {@link ServerModel} to allow asynchronous configuration/registration
+	 * tasks. Such tasks can still freely manipulate all internal Pax Web Runtime models without a need for
+	 * synchronization. But the invoker doesn't wait for the end of this task</p>
+	 *
+	 * <p>The task is executed by {@link Executor} associated with this {@link ServerModel}.</p>
+	 *
+	 * @param task
+	 * @return
+	 * @throws ServletException
+	 * @throws NamespaceException
+	 */
+	public <T> void runAsync(ModelRegistrationTask<T> task) {
+		incrementChangeCounter();
+
+		if (Thread.currentThread().getId() == registrationThreadId) {
+			// we never try to block the current thread, so we ensure that the task is rescheduled to be invoked
+			// after current task finishes.
+			// what's more, we expect the thread to be the exactly the single thread from paxweb-config pool
+		}
+
+		final Throwable originalTrace = new Throwable();
+
+		try {
+			CompletableFuture.supplyAsync(() -> {
+				try {
+					return task.run();
+				} catch (ServletException e) {
+					throw new ModelRegistrationException(e);
+				} catch (NamespaceException e) {
+					throw new ModelRegistrationException(e);
+				}
+			}, executor);
+		} catch (RuntimeException e) {
+			e.addSuppressed(originalTrace);
+			throw e;
+		}
 	}
 
 	public void setStopping() {
@@ -589,9 +634,9 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		}
 	}
 
-	public <T> T runSilently(ModelRegistrationTask<T> task) {
+	public <T> T runSilently(ModelRegistrationTask<T> task, boolean asynchronous) {
 		try {
-			return run(task);
+			return run(task, asynchronous);
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
@@ -1151,7 +1196,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 				}
 			});
 			return null;
-		});
+		}, false);
 
 		// shared contexts
 		contexts.addAll(sharedContexts.values().stream().map(Utils::getHighestRankedModel).collect(Collectors.toSet()));
@@ -1173,7 +1218,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 				}
 			});
 			return null;
-		});
+		}, false);
 
 		return contexts;
 	}
@@ -1207,7 +1252,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 			}
 
 			return null;
-		});
+		}, false);
 	}
 
 	/**
@@ -3017,58 +3062,6 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		eventListeners.entrySet().removeIf(e -> e.getValue().isDynamic());
 	}
 
-//	private List<String> resolveVirtualHosts(ElementModel elementModel) {
-//		return null;
-//		List<String> virtualHosts = elementModel.getContextModel().getVirtualHosts();
-//		if (virtualHosts == null || virtualHosts.isEmpty()) {
-//			virtualHosts = new ArrayList<>();
-//			virtualHosts.add(DEFAULT_VIRTUAL_HOST);
-//		}
-//		return virtualHosts;
-//	}
-
-	private String resolveVirtualHost(String hostName) {
-//		if (bundlesByVirtualHost.containsKey(hostName)) {
-//			return hostName;
-//		} else {
-			return DEFAULT_VIRTUAL_HOST;
-//		}
-	}
-
-//	private List<String> resolveVirtualHosts(Bundle bundle) {
-//		List<String> virtualHosts = new ArrayList<>();
-////		for (Map.Entry<String, List<Bundle>> entry : bundlesByVirtualHost.entrySet()) {
-////			if (entry.getValue().contains(bundle)) {
-////				virtualHosts.add(entry.getKey());
-////			}
-////		}
-//		if (virtualHosts.isEmpty()) {
-//			virtualHosts.add(DEFAULT_VIRTUAL_HOST);
-//		}
-//		return virtualHosts;
-//	}
-
-//	private void associateBundle(List<String> virtualHosts, Bundle bundle) {
-//		for (String virtualHost : virtualHosts) {
-////			List<Bundle> bundles = bundlesByVirtualHost.get(virtualHost);
-////			if (bundles == null) {
-////				bundles = new ArrayList<>();
-////				bundlesByVirtualHost.put(virtualHost, bundles);
-////			}
-////			bundles.add(bundle);
-//		}
-//	}
-
-//	private void deassociateBundle(List<String> virtualHosts, Bundle bundle) {
-//		for (String virtualHost : virtualHosts) {
-////			List<Bundle> bundles = bundlesByVirtualHost.get(virtualHost);
-////			bundles.remove(bundle);
-////			if (bundles.isEmpty()) {
-////				bundlesByVirtualHost.remove(virtualHost);
-////			}
-//		}
-//	}
-
 	// --- implementation of org.osgi.service.http.runtime.HttpServiceRuntime
 
 	@Override
@@ -3290,7 +3283,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 			dto.failedServletDTOs = failedServletDTOs.toArray(new FailedServletDTO[0]);
 
 			return dto;
-		});
+		}, false);
 	}
 
 	@Override
@@ -3435,7 +3428,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 			}
 
 			return dto;
-		});
+		}, false);
 	}
 
 	@Override

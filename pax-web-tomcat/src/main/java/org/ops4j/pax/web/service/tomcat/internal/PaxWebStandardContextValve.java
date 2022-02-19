@@ -77,7 +77,13 @@ public class PaxWebStandardContextValve extends ValveBase {
 			request.getMappingData().wrapper = wrapperFor404Servlet;
 		}
 
-		getNext().invoke(request, response);
+		ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+		try {
+			Thread.currentThread().setContextClassLoader(ctx.getServletContext() == null ? tccl : ctx.getServletContext().getClassLoader());
+			getNext().invoke(request, response);
+		} finally {
+			Thread.currentThread().setContextClassLoader(tccl);
+		}
 	}
 
 }

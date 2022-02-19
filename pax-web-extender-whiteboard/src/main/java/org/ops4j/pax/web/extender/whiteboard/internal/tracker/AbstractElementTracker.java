@@ -180,6 +180,7 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 		// turn a ServiceReference into ElementModel<R> that can be passed to HttpService/WebContainer
 		// and contains almost _everything_ needed to process it later (for example after WebContainer becomes available)
 		T webElement = createElementModel(serviceReference, rank, serviceId);
+		webElement.setAsynchronusRegistration(true);
 
 		return addingService(serviceReference, webElement);
 	}

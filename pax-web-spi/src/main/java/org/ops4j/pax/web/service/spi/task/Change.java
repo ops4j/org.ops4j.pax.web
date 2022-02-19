@@ -30,6 +30,7 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 public abstract class Change {
 
 	private final OpCode kind;
+	private Change batchCompletedAction;
 
 	public Change(OpCode kind) {
 		this.kind = kind;
@@ -66,6 +67,19 @@ public abstract class Change {
 	 * @return
 	 */
 	public void uninstall(List<Change> operations) {
+	}
+
+	/**
+	 * If during action/change handling, the visitor (action invoker) decides there's another action to perform
+	 * but in separate thread (next "tick" of single event thread), this is the way to register such action.
+	 * @param action
+	 */
+	public void registerBatchCompletedAction(Change action) {
+		this.batchCompletedAction = action;
+	}
+
+	public Change getBatchCompletedAction() {
+		return batchCompletedAction;
 	}
 
 }

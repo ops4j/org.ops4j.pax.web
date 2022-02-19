@@ -493,7 +493,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				newBatch.accept(serviceModel);
 
 				return null;
-			});
+			}, model.isAsynchronusRegistration());
 
 			event(WebElementEvent.State.DEPLOYED, model);
 		} catch (ServletException | NamespaceException | RuntimeException e) {
@@ -664,7 +664,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				batch.accept(serviceModel);
 
 				return null;
-			});
+			}, model.isAsynchronusRegistration());
 
 			event(WebElementEvent.State.UNDEPLOYED, model);
 		} catch (Exception e) {
@@ -845,7 +845,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				batch.accept(serviceModel);
 
 				return null;
-			});
+			}, model.isAsynchronusRegistration());
 
 			event(WebElementEvent.State.DEPLOYED, model);
 		} catch (NamespaceException ignored) {
@@ -974,7 +974,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				batch.accept(serviceModel);
 
 				return null;
-			});
+			}, model.isAsynchronusRegistration());
 
 			event(WebElementEvent.State.UNDEPLOYED, model);
 		} catch (Exception e) {
@@ -1015,8 +1015,25 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 				batch.accept(serviceModel);
 
+				// in this special case (registration of event listener), we expect that the eventListener
+				// registration change may contain a "callback change" that has to be scheduled in another tick
+				// of the event (config) thread
+				Batch toSchedule = new Batch("After registration of " + model);
+				for (Change c : batch.getOperations()) {
+					if (c.getBatchCompletedAction() != null) {
+						toSchedule.getOperations().add(c.getBatchCompletedAction());
+					}
+				}
+				if (!toSchedule.getOperations().isEmpty()) {
+					LOG.info("Scheduling {}", toSchedule);
+					serverModel.runAsync(() -> {
+						serverController.sendBatch(toSchedule);
+						return null;
+					});
+				}
+
 				return null;
-			});
+			}, model.isAsynchronusRegistration());
 
 			event(WebElementEvent.State.DEPLOYED, model);
 		} catch (Exception e) {
@@ -1045,7 +1062,14 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		try {
 			event(WebElementEvent.State.UNDEPLOYING, model);
 
-			serverModel.run(() -> {
+			// in this special case (unregistration of event listener), we've observed deadlocks
+			// when Aries CDI's thread was stopping the CDI container which lead to unregistration of
+			// org.jboss.weld.module.web.servlet.WeldInitialListener, however another thread (paxweb-config)
+			// was starting the WeldInitialListener and was attempting to get a CDI container lock, which
+			// was kept by the unregistration thread.
+			// So in this case we're doing it fully async without waiting for the result
+
+			serverModel.runAsync(() -> {
 				List<EventListenerModel> toUnregister = new LinkedList<>();
 
 				// This loop checks Whiteboard unregistration - reference identity
@@ -1088,7 +1112,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			});
 
 			event(WebElementEvent.State.UNDEPLOYED, model);
-		} catch (ServletException | NamespaceException e) {
+		} catch (Exception e) {
 			// if toUnregister is null, IllegalArgumentException is thrown anyway
 			event(WebElementEvent.State.FAILED, model, e);
 			throw new RuntimeException(e.getMessage(), e);
@@ -1134,7 +1158,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				batch.accept(serviceModel);
 
 				return null;
-			});
+			}, model.isAsynchronusRegistration());
 
 			event(WebElementEvent.State.DEPLOYED, model);
 		} catch (Exception e) {
@@ -1188,7 +1212,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				batch.accept(serviceModel);
 
 				return null;
-			});
+			}, model.isAsynchronusRegistration());
 
 			event(WebElementEvent.State.UNDEPLOYED, model);
 		} catch (Exception e) {
@@ -1238,7 +1262,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				batch.accept(serviceModel);
 
 				return null;
-			});
+			}, model.isAsynchronusRegistration());
 
 			event(WebElementEvent.State.DEPLOYED, model);
 		} catch (Exception e) {
@@ -1319,7 +1343,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				batch.accept(serviceModel);
 
 				return null;
-			});
+			}, model.isAsynchronusRegistration());
 
 			event(WebElementEvent.State.UNDEPLOYED, model);
 		} catch (Exception e) {
@@ -1412,7 +1436,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 			// no need to visit() the batch at service/serverModel level
 			return null;
-		});
+		}, false);
 	}
 
 	@Override
@@ -1448,7 +1472,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 			// no need to visit() the batch at service/serverModel level
 			return null;
-		});
+		}, false);
 	}
 
 	// methods used to unregister JSPs
@@ -1499,7 +1523,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				batch.accept(serviceModel);
 
 				return null;
-			});
+			}, model.isAsynchronusRegistration());
 
 			event(WebElementEvent.State.DEPLOYED, model);
 		} catch (Exception e) {
@@ -1561,7 +1585,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				batch.accept(serviceModel);
 
 				return null;
-			});
+			}, model.isAsynchronusRegistration());
 
 			event(WebElementEvent.State.UNDEPLOYED, model);
 		} catch (ServletException | NamespaceException e) {
@@ -1593,7 +1617,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 			// no need to visit() the batch at service/serverModel level
 			return null;
-		});
+		}, false);
 	}
 
 	@Override
@@ -1629,7 +1653,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 			// no need to visit() the batch at service/serverModel level
 			return null;
-		});
+		}, false);
 	}
 
 	// methods used to alter context init parameters
@@ -1654,7 +1678,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 			// no need to visit() the batch at service/serverModel level
 			return null;
-		});
+		}, false);
 	}
 
 	// methods used to register annotated web socket endpoints
@@ -1821,7 +1845,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				batch.accept(serviceModel);
 
 				return null;
-			});
+			}, model.isAsynchronusRegistration());
 
 			event(WebElementEvent.State.DEPLOYED, model);
 		} catch (Exception e) {
@@ -1966,7 +1990,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				batch.accept(serviceModel);
 
 				return null;
-			});
+			}, model.isAsynchronusRegistration());
 
 			event(WebElementEvent.State.UNDEPLOYED, model);
 		} catch (Exception e) {
@@ -2164,7 +2188,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 					handleReRegistrationEvents(WebElementEvent.State.FAILED, batch, e);
 				}
 				return null;
-			});
+			}, model.isAsynchronusRegistration());
 		}
 
 		@Override
@@ -2182,7 +2206,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				}
 
 				return null;
-			});
+			}, model.isAsynchronusRegistration());
 		}
 
 		@Override
@@ -2230,7 +2254,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			serverModel.runSilently(() -> {
 				serverModel.getFailedWhiteboardElements().add(webElement);
 				return null;
-			});
+			}, webElement.isAsynchronusRegistration());
 		}
 
 		@Override
@@ -2238,7 +2262,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			serverModel.runSilently(() -> {
 				serverModel.getWhiteboardContexts().add(webContext);
 				return null;
-			});
+			}, webContext.isAsynchronusRegistration());
 		}
 
 		@Override
@@ -2246,7 +2270,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			serverModel.runSilently(() -> {
 				serverModel.getFailedWhiteboardElements().remove(webElement);
 				return null;
-			});
+			}, webElement.isAsynchronusRegistration());
 		}
 
 		@Override
@@ -2254,7 +2278,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			serverModel.runSilently(() -> {
 				serverModel.getWhiteboardContexts().remove(webContext);
 				return null;
-			});
+			}, webContext.isAsynchronusRegistration());
 		}
 
 		private void handleReRegistrationEvents(WebElementEvent.State state, Batch batch, Exception e) {
@@ -2376,7 +2400,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				} finally {
 					Thread.currentThread().setName(name);
 				}
-			});
+			}, false);
 		}
 
 		@Override
@@ -2389,7 +2413,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 				OsgiContextModel ocm = serverModel.getWabContext(contextPath, wab, true);
 				return ocm != null;
-			});
+			}, false);
 		}
 
 		@Override
@@ -2413,7 +2437,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 				serverModel.releaseWabContext(contextPath, wab);
 				return null;
-			});
+			}, false);
 		}
 
 		@Override

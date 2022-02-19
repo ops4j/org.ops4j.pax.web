@@ -138,6 +138,7 @@ import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.ClearDynamicRegistrationsChange;
 import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
 import org.ops4j.pax.web.service.spi.task.ContextMetadataModelChange;
+import org.ops4j.pax.web.service.spi.task.ContextStartChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
@@ -1995,7 +1996,10 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 				if (stopped) {
 					// we have to start it again
-					ensureServletContextStarted(contextPath);
+					// register a "callback batch operation", which will be submitted withing a new batch
+					// as new task in single paxweb-config thread pool's thread
+					LOG.info("Scheduling start of the {} context after listener registration for already started context", contextPath);
+					change.registerBatchCompletedAction(new ContextStartChange(OpCode.MODIFY, contextPath));
 				}
 			});
 		}
@@ -2407,6 +2411,12 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 		if (removed[0] > 0) {
 			LOG.debug("Removed {} dynamically registered servlets/filters/listeners from context {}", removed[0], contextPath);
 		}
+	}
+
+	@Override
+	public void visitContextStartChange(ContextStartChange change) {
+		String contextPath = change.getContextPath();
+		ensureServletContextStarted(contextPath);
 	}
 
 	/**

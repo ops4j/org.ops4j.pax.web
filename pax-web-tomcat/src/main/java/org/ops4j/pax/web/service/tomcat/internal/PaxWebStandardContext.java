@@ -294,11 +294,23 @@ public class PaxWebStandardContext extends StandardContext {
 			// only when it sets us the instances of listeners (we override this method) we can start returning
 			// them - that's the only way to prevent Tomcat passing org.apache.catalina.core.StandardContext.NoPluggabilityServletContext
 			// to our listeners
-			super.setApplicationLifecycleListeners(new Object[0]);
-			return super.listenerStart();
+			ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+			try {
+				Thread.currentThread().setContextClassLoader(getParentClassLoader());
+				super.setApplicationLifecycleListeners(new Object[0]);
+				return super.listenerStart();
+			} finally {
+				Thread.currentThread().setContextClassLoader(tccl);
+			}
 		}
 
 		return false;
+	}
+
+	@Override
+	public ClassLoader bind(boolean usePrivilegedAction, ClassLoader originalClassLoader) {
+		// no-op
+		return originalClassLoader;
 	}
 
 	@Override
@@ -307,67 +319,73 @@ public class PaxWebStandardContext extends StandardContext {
 		// items from the context
 		Container[] children = findChildren();
 
-		// this will clear the listeners, but we'll add them again when (re)starting the context
-		super.stopInternal();
+		ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+		try {
+			Thread.currentThread().setContextClassLoader(osgiServletContext.getClassLoader());
+			// this will clear the listeners, but we'll add them again when (re)starting the context
+			super.stopInternal();
 
-		for (Container child : children) {
-			if (child instanceof PaxWebStandardWrapper) {
-				PaxWebStandardWrapper pwsw = ((PaxWebStandardWrapper) child);
-				ServletModel model = pwsw.getServletModel();
-				OsgiScopedServletContext osgiServletContext = (OsgiScopedServletContext) pwsw.getServletContext();
-				PaxWebStandardWrapper wrapper = new PaxWebStandardWrapper(model,
-						pwsw.getOsgiContextModel(), osgiServletContext.getOsgiContext(), this);
+			for (Container child : children) {
+				if (child instanceof PaxWebStandardWrapper) {
+					PaxWebStandardWrapper pwsw = ((PaxWebStandardWrapper) child);
+					ServletModel model = pwsw.getServletModel();
+					OsgiScopedServletContext osgiServletContext = (OsgiScopedServletContext) pwsw.getServletContext();
+					PaxWebStandardWrapper wrapper = new PaxWebStandardWrapper(model,
+							pwsw.getOsgiContextModel(), osgiServletContext.getOsgiContext(), this);
 
-				boolean isDefaultResourceServlet = model.isResourceServlet();
-				for (String pattern : model.getUrlPatterns()) {
-					isDefaultResourceServlet &= "/".equals(pattern);
-				}
-				if (model.isResourceServlet()) {
-					wrapper.addInitParameter("pathInfoOnly", Boolean.toString(!isDefaultResourceServlet));
-				}
-				addChild(wrapper);
-
-				// <servlet-mapping>
-				String name = model.getName();
-				for (String pattern : model.getUrlPatterns()) {
-					removeServletMapping(pattern);
-					addServletMappingDecoded(pattern, name, false);
-				}
-
-				// are there any error page declarations in the model?
-				ErrorPageModel epm = model.getErrorPageModel();
-				if (epm != null && epm.isValid()) {
-					String location = epm.getLocation();
-					for (String ex : epm.getExceptionClassNames()) {
-						ErrorPage errorPage = new ErrorPage();
-						errorPage.setExceptionType(ex);
-						errorPage.setLocation(location);
-						addErrorPage(errorPage);
+					boolean isDefaultResourceServlet = model.isResourceServlet();
+					for (String pattern : model.getUrlPatterns()) {
+						isDefaultResourceServlet &= "/".equals(pattern);
 					}
-					for (int code : epm.getErrorCodes()) {
-						ErrorPage errorPage = new ErrorPage();
-						errorPage.setErrorCode(code);
-						errorPage.setLocation(location);
-						addErrorPage(errorPage);
+					if (model.isResourceServlet()) {
+						wrapper.addInitParameter("pathInfoOnly", Boolean.toString(!isDefaultResourceServlet));
 					}
-					if (epm.isXx4()) {
-						for (int c = 400; c < 500; c++) {
+					addChild(wrapper);
+
+					// <servlet-mapping>
+					String name = model.getName();
+					for (String pattern : model.getUrlPatterns()) {
+						removeServletMapping(pattern);
+						addServletMappingDecoded(pattern, name, false);
+					}
+
+					// are there any error page declarations in the model?
+					ErrorPageModel epm = model.getErrorPageModel();
+					if (epm != null && epm.isValid()) {
+						String location = epm.getLocation();
+						for (String ex : epm.getExceptionClassNames()) {
 							ErrorPage errorPage = new ErrorPage();
-							errorPage.setErrorCode(c);
+							errorPage.setExceptionType(ex);
 							errorPage.setLocation(location);
 							addErrorPage(errorPage);
 						}
-					}
-					if (epm.isXx5()) {
-						for (int c = 500; c < 600; c++) {
+						for (int code : epm.getErrorCodes()) {
 							ErrorPage errorPage = new ErrorPage();
-							errorPage.setErrorCode(c);
+							errorPage.setErrorCode(code);
 							errorPage.setLocation(location);
 							addErrorPage(errorPage);
+						}
+						if (epm.isXx4()) {
+							for (int c = 400; c < 500; c++) {
+								ErrorPage errorPage = new ErrorPage();
+								errorPage.setErrorCode(c);
+								errorPage.setLocation(location);
+								addErrorPage(errorPage);
+							}
+						}
+						if (epm.isXx5()) {
+							for (int c = 500; c < 600; c++) {
+								ErrorPage errorPage = new ErrorPage();
+								errorPage.setErrorCode(c);
+								errorPage.setLocation(location);
+								addErrorPage(errorPage);
+							}
 						}
 					}
 				}
 			}
+		} finally {
+			Thread.currentThread().setContextClassLoader(tccl);
 		}
 
 		// clear the OSGi context - new one will be set when the context is started again
