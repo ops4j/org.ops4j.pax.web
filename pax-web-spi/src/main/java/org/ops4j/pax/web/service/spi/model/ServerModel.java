@@ -2186,10 +2186,10 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 
 			// newlyDisabled are scheduled for disabling (in batch), so let's remove them from the snapshot
 			if (newlyDisabled != null) {
-				newlyDisabled.forEach(fm -> {
-					getServletContextModels(fm).forEach(scm2 -> {
+				newlyDisabled.forEach(epm -> {
+					getServletContextModels(epm).forEach(scm2 -> {
 						if (scm.equals(scm2)) {
-							enabledErrorPages.remove(fm);
+							enabledErrorPages.remove(epm);
 						}
 					});
 				});

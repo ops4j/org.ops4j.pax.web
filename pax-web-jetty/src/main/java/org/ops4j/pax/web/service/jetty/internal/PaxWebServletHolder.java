@@ -208,11 +208,14 @@ public class PaxWebServletHolder extends ServletHolder {
 	protected synchronized Servlet getInstance() {
 		Servlet instance = super.getInstance();
 		if (instance == null && servletReference != null) {
-			if (!servletModel.isPrototype()) {
-				instance = servletModel.getRegisteringBundle().getBundleContext().getService(servletReference);
-			} else {
-				serviceObjects = servletModel.getRegisteringBundle().getBundleContext().getServiceObjects(servletReference);
-				instance = serviceObjects.getService();
+			BundleContext context = servletModel.getRegisteringBundle().getBundleContext();
+			if (context != null) {
+				if (!servletModel.isPrototype()) {
+					instance = context.getService(servletReference);
+				} else {
+					serviceObjects = context.getServiceObjects(servletReference);
+					instance = serviceObjects.getService();
+				}
 			}
 		}
 		if (instance == null && servletModel.getElementSupplier() != null) {

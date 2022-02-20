@@ -28,6 +28,7 @@ import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedFilter;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.runtime.dto.DTOConstants;
@@ -136,11 +137,14 @@ public class PaxWebFilterHolder extends FilterHolder {
 	protected synchronized Filter getInstance() {
 		Filter instance = super.getInstance();
 		if (instance == null && filterReference != null) {
-			if (!filterModel.isPrototype()) {
-				instance = filterModel.getRegisteringBundle().getBundleContext().getService(filterReference);
-			} else {
-				serviceObjects = filterModel.getRegisteringBundle().getBundleContext().getServiceObjects(filterReference);
-				instance = serviceObjects.getService();
+			BundleContext context = filterModel.getRegisteringBundle().getBundleContext();
+			if (context != null) {
+				if (!filterModel.isPrototype()) {
+					instance = context.getService(filterReference);
+				} else {
+					serviceObjects = context.getServiceObjects(filterReference);
+					instance = serviceObjects.getService();
+				}
 			}
 		}
 		if (instance == null && filterModel.getElementSupplier() != null) {
@@ -169,7 +173,10 @@ public class PaxWebFilterHolder extends FilterHolder {
 		super.destroyInstance(o);
 		if (filterModel != null && filterReference != null) {
 			if (!filterModel.isPrototype()) {
-				filterModel.getRegisteringBundle().getBundleContext().ungetService(filterReference);
+				BundleContext context = filterModel.getRegisteringBundle().getBundleContext();
+				if (context != null) {
+					context.ungetService(filterReference);
+				}
 			} else {
 				Filter realFilter = (Filter) o;
 				if (realFilter instanceof FilterHolder.Wrapper) {

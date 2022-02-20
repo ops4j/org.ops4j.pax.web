@@ -31,6 +31,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.undertow.internal.web.UndertowResourceServlet;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceObjects;
 import org.osgi.service.http.runtime.dto.DTOConstants;
 
@@ -220,11 +221,14 @@ public class PaxWebServletInfo extends ServletInfo {
 			if (instance == null) {
 				if (model.getElementReference() != null) {
 					// obtain Servlet using service reference
-					if (!model.isPrototype()) {
-						instance = model.getRegisteringBundle().getBundleContext().getService(model.getElementReference());
-					} else {
-						serviceObjects = model.getRegisteringBundle().getBundleContext().getServiceObjects(model.getElementReference());
-						instance = serviceObjects.getService();
+					BundleContext context = model.getRegisteringBundle().getBundleContext();
+					if (context != null) {
+						if (!model.isPrototype()) {
+							instance = context.getService(model.getElementReference());
+						} else {
+							serviceObjects = context.getServiceObjects(model.getElementReference());
+							instance = serviceObjects.getService();
+						}
 					}
 					if (instance == null) {
 						model.setDtoFailureCode(DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE);
@@ -254,7 +258,10 @@ public class PaxWebServletInfo extends ServletInfo {
 					if (model.getElementReference() != null) {
 						try {
 							if (!model.isPrototype()) {
-								model.getRegisteringBundle().getBundleContext().ungetService(model.getElementReference());
+								BundleContext context = model.getRegisteringBundle().getBundleContext();
+								if (context != null) {
+									context.ungetService(model.getElementReference());
+								}
 							} else if (getInstance() != null) {
 								Servlet realServlet = getInstance();
 								if (realServlet instanceof OsgiInitializedServlet) {

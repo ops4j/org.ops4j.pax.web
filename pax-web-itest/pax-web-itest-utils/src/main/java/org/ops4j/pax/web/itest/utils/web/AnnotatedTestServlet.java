@@ -16,6 +16,8 @@
 package org.ops4j.pax.web.itest.utils.web;
 
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -32,29 +34,29 @@ public class AnnotatedTestServlet extends HttpServlet {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AnnotatedTestServlet.class);
 
-	private boolean initCalled;
-	private boolean destroyCalled;
+	private final CountDownLatch initCalled = new CountDownLatch(1);
+	private final CountDownLatch destroyCalled = new CountDownLatch(1);
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
-		this.initCalled = true;
+		this.initCalled.countDown();
 		LOG.info("init called");
 		super.init(config);
 	}
 
 	@Override
 	public void destroy() {
-		this.destroyCalled = true;
+		this.destroyCalled.countDown();
 		LOG.info("destroy called");
 		super.destroy();
 	}
 
-	public boolean isInitCalled() {
-		return initCalled;
+	public boolean isInitCalled() throws InterruptedException {
+		return initCalled.await(5, TimeUnit.SECONDS);
 	}
 
-	public boolean isDestroyCalled() {
-		return destroyCalled;
+	public boolean isDestroyCalled() throws InterruptedException {
+		return destroyCalled.await(5, TimeUnit.SECONDS);
 	}
 
 	@Override

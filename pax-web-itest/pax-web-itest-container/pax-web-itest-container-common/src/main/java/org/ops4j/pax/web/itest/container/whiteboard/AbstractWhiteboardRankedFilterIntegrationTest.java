@@ -33,6 +33,8 @@ import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.ops4j.pax.web.service.PaxWebConstants;
+import org.ops4j.pax.web.service.spi.model.events.FilterEventData;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
@@ -68,86 +70,119 @@ public abstract class AbstractWhiteboardRankedFilterIntegrationTest extends Abst
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testWhiteBoardFilteredFirst() throws Exception {
-		Dictionary<String, Object> props = new Hashtable<>();
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/ranked/*");
-		props.put(Constants.SERVICE_RANKING, 1);
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX + Constants.SERVICE_RANKING, "1");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "rank_1");
-		ServiceRegistration<Filter> filter1 = context.registerService(Filter.class, new RankFilter(), props);
+		final ServiceRegistration<Filter>[] filter1 = new ServiceRegistration[1];
+		final ServiceRegistration<Filter>[] filter2 = new ServiceRegistration[1];
+		configureAndWait(() -> {
+			Dictionary<String, Object> props = new Hashtable<>();
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/ranked/*");
+			props.put(Constants.SERVICE_RANKING, 1);
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX + Constants.SERVICE_RANKING, "1");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "rank_1");
+			filter1[0] = context.registerService(Filter.class, new RankFilter(), props);
 
-		props = new Hashtable<>();
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/ranked/*");
-		props.put(Constants.SERVICE_RANKING, 2);
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX + Constants.SERVICE_RANKING, "2");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "rank_2");
-		ServiceRegistration<Filter> filter2 = context.registerService(Filter.class, new RankFilter(), props);
+			props = new Hashtable<>();
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/ranked/*");
+			props.put(Constants.SERVICE_RANKING, 2);
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX + Constants.SERVICE_RANKING, "2");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "rank_2");
+			filter2[0] = context.registerService(Filter.class, new RankFilter(), props);
+		}, events -> events.stream()
+				.filter(e -> e.getType() == WebElementEvent.State.DEPLOYED && ((FilterEventData)e.getData()).getFilterName().equals("rank_2")).count() == 1);
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Filter Rank: 2Filter Rank: 1'",
 						resp -> resp.contains("Filter Rank: 2Filter Rank: 1"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/ranked");
 
-		filter1.unregister();
-		filter2.unregister();
+		configureAndWait(() -> {
+			filter1[0].unregister();
+		}, events -> events.stream()
+				.filter(e -> e.getType() == WebElementEvent.State.UNDEPLOYED && ((FilterEventData)e.getData()).getFilterName().equals("rank_1")).count() == 1);
+		configureAndWait(() -> {
+			filter2[0].unregister();
+		}, events -> events.stream()
+				.filter(e -> e.getType() == WebElementEvent.State.UNDEPLOYED && ((FilterEventData)e.getData()).getFilterName().equals("rank_2")).count() == 1);
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testWhiteBoardFilteredLast() throws Exception {
-		Dictionary<String, Object> props = new Hashtable<>();
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/ranked/*");
-		props.put(Constants.SERVICE_RANKING, 2);
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX + Constants.SERVICE_RANKING, "2");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "rank_2");
-		ServiceRegistration<Filter> filter1 = context.registerService(Filter.class, new RankFilter(), props);
+		final ServiceRegistration<Filter>[] filter1 = new ServiceRegistration[1];
+		final ServiceRegistration<Filter>[] filter2 = new ServiceRegistration[1];
+		configureAndWait(() -> {
+			Dictionary<String, Object> props = new Hashtable<>();
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/ranked/*");
+			props.put(Constants.SERVICE_RANKING, 2);
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX + Constants.SERVICE_RANKING, "2");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "rank_2");
+			filter1[0] = context.registerService(Filter.class, new RankFilter(), props);
 
-		props = new Hashtable<>();
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/ranked/*");
-		props.put(Constants.SERVICE_RANKING, 1);
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX + Constants.SERVICE_RANKING, "1");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "rank_1");
-		ServiceRegistration<Filter> filter2 = context.registerService(Filter.class, new RankFilter(), props);
+			props = new Hashtable<>();
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/ranked/*");
+			props.put(Constants.SERVICE_RANKING, 1);
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX + Constants.SERVICE_RANKING, "1");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "rank_1");
+			filter2[0] = context.registerService(Filter.class, new RankFilter(), props);
+		}, events -> events.stream()
+				.filter(e -> e.getType() == WebElementEvent.State.DEPLOYED && ((FilterEventData)e.getData()).getFilterName().equals("rank_1")).count() == 1);
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Filter Rank: 2Filter Rank: 1'",
 						resp -> resp.contains("Filter Rank: 2Filter Rank: 1"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/ranked");
 
-		filter1.unregister();
-		filter2.unregister();
+		configureAndWait(() -> {
+			filter1[0].unregister();
+		}, events -> events.stream()
+				.filter(e -> e.getType() == WebElementEvent.State.UNDEPLOYED && ((FilterEventData)e.getData()).getFilterName().equals("rank_2")).count() == 1);
+		configureAndWait(() -> {
+			filter2[0].unregister();
+		}, events -> events.stream()
+				.filter(e -> e.getType() == WebElementEvent.State.UNDEPLOYED && ((FilterEventData)e.getData()).getFilterName().equals("rank_1")).count() == 1);
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testWhiteBoardFilteredInsertInMiddle() throws Exception {
-		Dictionary<String, Object> props = new Hashtable<>();
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/ranked/*");
-		props.put(Constants.SERVICE_RANKING, 1);
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX + Constants.SERVICE_RANKING, "1");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "rank_1");
-		ServiceRegistration<Filter> filter1 = context.registerService(Filter.class, new RankFilter(), props);
+		final ServiceRegistration<Filter>[] filter1 = new ServiceRegistration[1];
+		final ServiceRegistration<Filter>[] filter2 = new ServiceRegistration[1];
+		final ServiceRegistration<Filter>[] filter3 = new ServiceRegistration[1];
+		configureAndWait(() -> {
+			Dictionary<String, Object> props = new Hashtable<>();
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/ranked/*");
+			props.put(Constants.SERVICE_RANKING, 1);
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX + Constants.SERVICE_RANKING, "1");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "rank_1");
+			filter1[0] = context.registerService(Filter.class, new RankFilter(), props);
 
-		props = new Hashtable<>();
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/ranked/*");
-		props.put(Constants.SERVICE_RANKING, 3);
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX + Constants.SERVICE_RANKING, "3");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "rank_3");
-		ServiceRegistration<Filter> filter3 = context.registerService(Filter.class, new RankFilter(), props);
+			props = new Hashtable<>();
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/ranked/*");
+			props.put(Constants.SERVICE_RANKING, 3);
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX + Constants.SERVICE_RANKING, "3");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "rank_3");
+			filter3[0] = context.registerService(Filter.class, new RankFilter(), props);
 
-		props = new Hashtable<>();
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/ranked/*");
-		props.put(Constants.SERVICE_RANKING, 2);
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX + Constants.SERVICE_RANKING, "2");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "rank_2");
-		ServiceRegistration<Filter> filter2 = context.registerService(Filter.class, new RankFilter(), props);
+			props = new Hashtable<>();
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/ranked/*");
+			props.put(Constants.SERVICE_RANKING, 2);
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX + Constants.SERVICE_RANKING, "2");
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "rank_2");
+			filter2[0] = context.registerService(Filter.class, new RankFilter(), props);
+		}, events -> events.stream()
+				.filter(e -> e.getType() == WebElementEvent.State.DEPLOYED && ((FilterEventData)e.getData()).getFilterName().equals("rank_2")).count() == 1);
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Filter Rank: 3Filter Rank: 2Filter Rank: 1'",
 						resp -> resp.contains("Filter Rank: 3Filter Rank: 2Filter Rank: 1"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/ranked");
 
-		filter1.unregister();
-		filter2.unregister();
-		filter3.unregister();
+		// undergistration is synchronous, because otherwise the context could attempt to start after unregistration
+		// of first filter, while the 2nd one is being unregistered
+		filter1[0].unregister();
+		filter2[0].unregister();
+		filter3[0].unregister();
 	}
 
 	public static class RankFilter implements Filter {

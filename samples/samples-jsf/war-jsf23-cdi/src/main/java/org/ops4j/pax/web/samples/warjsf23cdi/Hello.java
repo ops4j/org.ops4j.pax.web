@@ -46,7 +46,6 @@ public class Hello implements Serializable {
 	private ServerControllerFactory serverControllerFactory;
 
 	public Hello() {
-		System.out.println("<ctor>");
 	}
 
 	public void setWhat(String what) {

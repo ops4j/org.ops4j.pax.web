@@ -22,6 +22,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.runtime.dto.DTOConstants;
@@ -54,12 +55,15 @@ public class PreprocessorFilterConfig implements FilterConfig {
 		// obtain Filter using reference
 		ServiceReference<Filter> ref = model.getElementReference();
 		if (ref != null) {
-			if (!model.isPrototype()) {
-				instance = (Preprocessor) model.getRegisteringBundle().getBundleContext().getService(ref);
-			} else {
-				serviceObjects = model.getRegisteringBundle().getBundleContext().getServiceObjects(ref);
-				if (serviceObjects != null) {
-					instance = (Preprocessor) serviceObjects.getService();
+			BundleContext context = model.getRegisteringBundle().getBundleContext();
+			if (context != null) {
+				if (!model.isPrototype()) {
+					instance = (Preprocessor) context.getService(ref);
+				} else {
+					serviceObjects = context.getServiceObjects(ref);
+					if (serviceObjects != null) {
+						instance = (Preprocessor) serviceObjects.getService();
+					}
 				}
 			}
 		}
@@ -87,7 +91,10 @@ public class PreprocessorFilterConfig implements FilterConfig {
 			instance = null;
 			if (model.getElementReference() != null) {
 				if (!model.isPrototype()) {
-					model.getRegisteringBundle().getBundleContext().ungetService(model.getElementReference());
+					BundleContext context = model.getRegisteringBundle().getBundleContext();
+					if (context != null) {
+						context.ungetService(model.getElementReference());
+					}
 				} else if (serviceObjects != null && getInstance() != null) {
 					serviceObjects.ungetService(getInstance());
 					serviceObjects = null;

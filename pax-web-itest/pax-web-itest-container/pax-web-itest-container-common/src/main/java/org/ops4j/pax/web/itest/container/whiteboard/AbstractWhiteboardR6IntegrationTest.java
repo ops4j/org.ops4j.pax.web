@@ -22,8 +22,10 @@ import java.net.URL;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.servlet.AsyncContext;
 import javax.servlet.FilterChain;
@@ -173,9 +175,11 @@ public abstract class AbstractWhiteboardR6IntegrationTest extends AbstractContai
 
 		Dictionary<String, String> properties = new Hashtable<>();
 		properties.put("osgi.http.whiteboard.filter.pattern", "/*");
+		CountDownLatch latch = new CountDownLatch(1);
 		ServiceRegistration<javax.servlet.Filter> registerFilter = context
-				.registerService(javax.servlet.Filter.class, new MyFilter(), properties);
+				.registerService(javax.servlet.Filter.class, new MyFilter(latch), properties);
 
+		latch.await(5, TimeUnit.SECONDS);
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'before'",
 						resp -> resp.contains("before"))
@@ -291,7 +295,11 @@ public abstract class AbstractWhiteboardR6IntegrationTest extends AbstractContai
 		properties.put("osgi.http.whiteboard.resource.pattern", "/files/*");
 		properties.put("osgi.http.whiteboard.resource.prefix", "/images");
 
-		ServiceRegistration<MyResourceService> registerService = context.registerService(MyResourceService.class, new MyResourceService(), properties);
+		@SuppressWarnings("unchecked")
+		final ServiceRegistration<MyResourceService>[] registerService = new ServiceRegistration[1];
+		configureAndWaitForServletWithMapping("/files/*", () -> {
+			registerService[0] = context.registerService(MyResourceService.class, new MyResourceService(), properties);
+		});
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseHeaderAssertion("Header 'Content-Type' must be 'image/png'",
@@ -299,14 +307,14 @@ public abstract class AbstractWhiteboardR6IntegrationTest extends AbstractContai
 								&& header.getValue().equals("image/png")))
 				.doGETandExecuteTest("http://127.0.0.1:8181/files/ops4j.png");
 
-		registerService.unregister();
+		registerService[0].unregister();
 	}
 
-	private ServiceRegistration<Servlet> registerServlet() {
+	private ServiceRegistration<Servlet> registerServlet() throws Exception {
 		return registerServlet(null);
 	}
 
-	private ServiceRegistration<Servlet> registerServlet(Dictionary<String, String> extendedProps) {
+	private ServiceRegistration<Servlet> registerServlet(Dictionary<String, String> extendedProps) throws Exception {
 		Dictionary<String, String> properties = new Hashtable<>();
 		properties.put("osgi.http.whiteboard.servlet.pattern", "/myservlet");
 		properties.put("servlet.init.myname", "value");
@@ -319,8 +327,12 @@ public abstract class AbstractWhiteboardR6IntegrationTest extends AbstractContai
 			}
 		}
 
-		return context.registerService(Servlet.class, new MyServlet(),
-				properties);
+		@SuppressWarnings("unchecked")
+		final ServiceRegistration<Servlet>[] reg = new ServiceRegistration[1];
+		configureAndWaitForServletWithMapping("/myservlet", () -> {
+			reg[0] = context.registerService(Servlet.class, new MyServlet(), properties);
+		});
+		return reg[0];
 	}
 
 	private static class CDNServletContextHelper extends ServletContextHelper {
@@ -385,7 +397,14 @@ public abstract class AbstractWhiteboardR6IntegrationTest extends AbstractContai
 
 	private static class MyFilter implements javax.servlet.Filter {
 
+		private final CountDownLatch latch;
+
+		private MyFilter(CountDownLatch latch) {
+			this.latch = latch;
+		}
+
 		public void init(FilterConfig filterConfig) throws ServletException {
+			latch.countDown();
 		}
 
 		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

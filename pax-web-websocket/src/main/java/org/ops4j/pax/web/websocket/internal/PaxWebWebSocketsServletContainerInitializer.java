@@ -80,7 +80,7 @@ public class PaxWebWebSocketsServletContainerInitializer implements ServletConta
 				annotatedEndpointInstances.put(wsm, wsm.getWebSocketEndpoint());
 			} else if (wsm.getElementSupplier() != null) {
 				annotatedEndpointInstances.put(wsm, wsm.getElementSupplier().get());
-			} else if (wsm.getElementReference() != null) {
+			} else if (wsm.getElementReference() != null && wsm.getRegisteringBundle().getBundleContext() != null) {
 				// Not using ServiceObjects even if this service may be prototype-scoped. 1) Whiteboard
 				// specification doesn't say anything about WebSockets, 2) WebSockets are managed via SCIs, which
 				// (without special tricks/proxies) have only onStartup() methods.

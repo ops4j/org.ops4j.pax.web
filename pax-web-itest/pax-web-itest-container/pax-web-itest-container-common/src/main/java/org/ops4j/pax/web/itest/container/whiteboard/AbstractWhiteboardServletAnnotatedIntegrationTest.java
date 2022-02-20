@@ -24,6 +24,7 @@ import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.utils.web.AnnotatedTestFilter;
 import org.ops4j.pax.web.itest.utils.web.AnnotatedTestServlet;
+import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
 import org.osgi.framework.ServiceRegistration;
 
 import static org.junit.Assert.assertTrue;
@@ -41,10 +42,11 @@ public abstract class AbstractWhiteboardServletAnnotatedIntegrationTest extends 
 
 	@Test
 	public void testWhiteboardServletRegistration() throws Exception {
+		AnnotatedTestServlet annotatedTestServlet = new AnnotatedTestServlet();
 		@SuppressWarnings("unchecked")
 		final ServiceRegistration<Servlet>[] servletRegistration = new ServiceRegistration[1];
 		configureAndWaitForServletWithMapping("/test", () -> {
-			servletRegistration[0] = context.registerService(Servlet.class, new AnnotatedTestServlet(), null);
+			servletRegistration[0] = context.registerService(Servlet.class, annotatedTestServlet, null);
 		});
 
 		try {
@@ -53,8 +55,13 @@ public abstract class AbstractWhiteboardServletAnnotatedIntegrationTest extends 
 							resp -> resp.contains("TEST OK"))
 					.doGETandExecuteTest("http://127.0.0.1:8181/test");
 		} finally {
-			servletRegistration[0].unregister();
+			configureAndWait(() -> {
+				servletRegistration[0].unregister();
+			}, events -> events.stream().filter(e -> e.getType() == WebElementEvent.State.UNDEPLOYED).count() == 1);
 		}
+
+		assertTrue(annotatedTestServlet.isInitCalled());
+		assertTrue(annotatedTestServlet.isDestroyCalled());
 	}
 
 	@Test
@@ -72,7 +79,9 @@ public abstract class AbstractWhiteboardServletAnnotatedIntegrationTest extends 
 							resp -> resp.contains("TEST OK"))
 					.doGETandExecuteTest("http://127.0.0.1:8181/test");
 		} finally {
-			servletRegistration[0].unregister();
+			configureAndWait(() -> {
+				servletRegistration[0].unregister();
+			}, events -> events.stream().filter(e -> e.getType() == WebElementEvent.State.UNDEPLOYED).count() == 1);
 		}
 
 		assertTrue(annotatedTestServlet.isInitCalled());
@@ -82,11 +91,12 @@ public abstract class AbstractWhiteboardServletAnnotatedIntegrationTest extends 
 	@Test
 	@SuppressWarnings("unchecked")
 	public void testWhiteboardFilterRegistration() throws Exception {
+		AnnotatedTestServlet annotatedTestServlet = new AnnotatedTestServlet();
 		final ServiceRegistration<Servlet>[] servletRegistration = new ServiceRegistration[1];
 		final ServiceRegistration<Filter>[] filterRegistration = new ServiceRegistration[1];
 		configureAndWaitForServletWithMapping("/test", () -> {
 			filterRegistration[0] = context.registerService(Filter.class, new AnnotatedTestFilter(), null);
-			servletRegistration[0] = context.registerService(Servlet.class, new AnnotatedTestServlet(), null);
+			servletRegistration[0] = context.registerService(Servlet.class, annotatedTestServlet, null);
 		});
 
 		try {
@@ -97,9 +107,16 @@ public abstract class AbstractWhiteboardServletAnnotatedIntegrationTest extends 
 							resp -> resp.contains("FILTER-INIT: true"))
 					.doGETandExecuteTest("http://127.0.0.1:8181/test");
 		} finally {
-			servletRegistration[0].unregister();
-			filterRegistration[0].unregister();
+			configureAndWait(() -> {
+				servletRegistration[0].unregister();
+			}, events -> events.stream().filter(e -> e.getType() == WebElementEvent.State.UNDEPLOYED).count() == 1);
+			configureAndWait(() -> {
+				filterRegistration[0].unregister();
+			}, events -> events.stream().filter(e -> e.getType() == WebElementEvent.State.UNDEPLOYED).count() == 1);
 		}
+
+		assertTrue(annotatedTestServlet.isInitCalled());
+		assertTrue(annotatedTestServlet.isDestroyCalled());
 	}
 
 }

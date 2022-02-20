@@ -31,6 +31,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.tomcat.internal.web.TomcatResourceServlet;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.runtime.dto.DTOConstants;
@@ -211,11 +212,14 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 		if (instance == null) {
 			if (serviceReference != null) {
 				// obtain Servlet using reference
-				if (!servletModel.isPrototype()) {
-					instance = servletModel.getRegisteringBundle().getBundleContext().getService(serviceReference);
-				} else {
-					serviceObjects = servletModel.getRegisteringBundle().getBundleContext().getServiceObjects(serviceReference);
-					instance = serviceObjects.getService();
+				BundleContext context = servletModel.getRegisteringBundle().getBundleContext();
+				if (context != null) {
+					if (!servletModel.isPrototype()) {
+						instance = context.getService(serviceReference);
+					} else {
+						serviceObjects = context.getServiceObjects(serviceReference);
+						instance = serviceObjects.getService();
+					}
 				}
 			} else if (servletClass != null) {
 				try {
@@ -248,8 +252,9 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 	public synchronized void unload() throws ServletException {
 		super.unload();
 		if (servletModel != null && servletModel.getElementReference() != null) {
-			if (!servletModel.isPrototype() && servletModel.getRegisteringBundle().getBundleContext() != null) {
-				servletModel.getRegisteringBundle().getBundleContext().ungetService(servletModel.getElementReference());
+			BundleContext context = servletModel.getRegisteringBundle().getBundleContext();
+			if (!servletModel.isPrototype() && context != null) {
+				context.ungetService(servletModel.getElementReference());
 			} else if (serviceObjects != null && getServlet() != null) {
 				serviceObjects.ungetService(getServlet());
 			}

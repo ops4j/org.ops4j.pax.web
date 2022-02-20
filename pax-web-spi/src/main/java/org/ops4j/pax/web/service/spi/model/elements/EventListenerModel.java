@@ -20,6 +20,7 @@ package org.ops4j.pax.web.service.spi.model.elements;
 import org.ops4j.pax.web.service.spi.model.events.EventListenerEventData;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.http.runtime.dto.DTOConstants;
 import org.osgi.service.http.runtime.dto.FailedListenerDTO;
 import org.osgi.service.http.runtime.dto.ListenerDTO;
@@ -112,7 +113,10 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 				resolvedListener = getElementSupplier().get();
 			}
 			if (getElementReference() != null) {
-				resolvedListener = getRegisteringBundle().getBundleContext().getService(getElementReference());
+				BundleContext context = getRegisteringBundle().getBundleContext();
+				if (context != null) {
+					resolvedListener = context.getService(getElementReference());
+				}
 			}
 			if (resolvedListener == null) {
 				dtoFailureCode = DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE;
@@ -125,7 +129,10 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 
 	public void releaseEventListener() {
 		if (getElementReference() != null) {
-			getRegisteringBundle().getBundleContext().ungetService(getElementReference());
+			BundleContext context = getRegisteringBundle().getBundleContext();
+			if (context != null) {
+				context.ungetService(getElementReference());
+			}
 		}
 		resolvedListener = null;
 	}

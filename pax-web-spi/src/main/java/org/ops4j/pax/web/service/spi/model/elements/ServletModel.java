@@ -615,6 +615,9 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		this.errorDeclarations = errorDeclarations;
 		if (errorDeclarations != null && (urlPatterns == null || urlPatterns.length == 0) && alias == null) {
 			urlPatterns = new String[] { generateRandomErrorPage() };
+			if (Servlet.class.getName().equals(name)) {
+				name = urlPatterns[0];
+			}
 		}
 	}
 

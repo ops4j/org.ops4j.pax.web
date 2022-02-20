@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.container.war.jsf;
+package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.ops4j.pax.web.service.spi.model.events.EventListenerEventData;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
 
-public class AbstractWarJSFCdiIntegrationTest extends AbstractContainerTestBase {
+public abstract class CdiJSFBaseKarafTest extends AbstractKarafTestBase {
 
 	@Before
 	public void setUp() {
@@ -61,8 +60,8 @@ public class AbstractWarJSFCdiIntegrationTest extends AbstractContainerTestBase 
 	@Test
 	public void testCdi() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'hello from working JSF 2.3/CDI 2.0 example, org.ops4j.pax.url.commons.handler.HandlerActivator$Handler'",
-						resp -> resp.contains("hello from working JSF 2.3/CDI 2.0 example, org.ops4j.pax.url.commons.handler.HandlerActivator$Handler"))
+				.withResponseAssertion("Response must contain 'hello from working JSF 2.3/CDI 2.0 example'",
+						resp -> resp.contains("hello from working JSF 2.3/CDI 2.0 example"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf23-cdi/");
 	}
 

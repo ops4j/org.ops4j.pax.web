@@ -432,62 +432,70 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 		for (BundleWhiteboardApplication app : apps) {
 			WhiteboardWebContainerView view = app.getWhiteboardContainer();
 			for (ElementModel<?, ?> webElement : app.getWebElements()) {
-				Filter filter = webElement.getContextFilter();
-				List<OsgiContextModel> newMatching = resolveContexts(webElement.getRegisteringBundle(), filter);
-				List<OsgiContextModel> oldMatching = webElement.getContextModels();
+				boolean isAsync = webElement.isAsynchronusRegistration();
+				try {
+					// re-registration has to be synchronous, because otherwise we'd change the osgi context models
+					// of the element when it's being unregistered for example
+					webElement.setAsynchronusRegistration(false);
+					Filter filter = webElement.getContextFilter();
+					List<OsgiContextModel> newMatching = resolveContexts(webElement.getRegisteringBundle(), filter);
+					List<OsgiContextModel> oldMatching = webElement.getContextModels();
 
-				// 0.
-				if (newMatching.size() == oldMatching.size() && newMatching.containsAll(oldMatching)) {
-					continue;
-				}
+					// 0.
+					if (newMatching.size() == oldMatching.size() && newMatching.containsAll(oldMatching)) {
+						continue;
+					}
 
-				// 1. unregistration because of no matching contexts
-				if (newMatching.size() == 0) {
-					LOG.debug("Unregistering {} because its context selection filter doesn't match any context", webElement);
+					// 1. unregistration because of no matching contexts
+					if (newMatching.size() == 0) {
+						LOG.debug("Unregistering {} because its context selection filter doesn't match any context", webElement);
+						if (view != null) {
+							// first unregister
+							webElement.unregister(view);
+						}
+						// then change
+						webElement.changeContextModels(newMatching);
+						webElement.setDtoFailureCode(DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING);
+						continue;
+					}
+
+					// 2. easy registration after some models matched
+					if (oldMatching.size() == 0) {
+						// first change
+						webElement.changeContextModels(newMatching);
+						LOG.debug("Registering {} because its context selection filter started matching existing contexts", webElement);
+						if (view != null) {
+							// then register
+							webElement.setDtoFailureCode(-1);
+							webElement.register(view);
+						}
+						continue;
+					}
+
+					// 3. generic case - unregistration from removed models, registration to new models
+
+					// now the tricky part - initially I wanted to optimize - remove the model only from "removed"
+					// contexts and add it only to "added" ones. First difficulty (actually easy to workaround) occurred
+					// when I saw ServletModel disappearing from the ServerModel, but the more important problem which
+					// turned out to be solution was: when additional context is added that matches a selector of
+					// existing ServletModel, then in simple scenario indeed - existing servlet should be registered
+					// in new context. But if there's different ServletModel, with conflicting name or URL patterns
+					// which is now disabled/waiting because its selector only matches the new context, the first servlet
+					// should eventually be disabled in ALL contexts, because it'll be disabled in the new context!
+					//
+					// so it's really easier - FULLY unregister the element from all current contexts and then
+					// register to all the new contexts
 					if (view != null) {
-						// first unregister
+						LOG.debug("Unregistering {} because its context selection filter matched new set of contexts", webElement);
 						webElement.unregister(view);
 					}
-					// then change
 					webElement.changeContextModels(newMatching);
-					webElement.setDtoFailureCode(DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING);
-					continue;
-				}
-
-				// 2. easy registration after some models matched
-				if (oldMatching.size() == 0) {
-					// first change
-					webElement.changeContextModels(newMatching);
-					LOG.debug("Registering {} because its context selection filter started matching existing contexts", webElement);
 					if (view != null) {
-						// then register
-						webElement.setDtoFailureCode(-1);
+						LOG.debug("Registering {} again after its context selection filter matched new set of contexts", webElement);
 						webElement.register(view);
 					}
-					continue;
-				}
-
-				// 3. generic case - unregistration from removed models, registration to new models
-
-				// now the tricky part - initially I wanted to optimize - remove the model only from "removed"
-				// contexts and add it only to "added" ones. First difficulty (actually easy to workaround) occurred
-				// when I saw ServletModel disappearing from the ServerModel, but the more important problem which
-				// turned out to be solution was: when additional context is added that matches a selector of
-				// existing ServletModel, then in simple scenario indeed - existing servlet should be registered
-				// in new context. But if there's different ServletModel, with conflicting name or URL patterns
-				// which is now disabled/waiting because its selector only matches the new context, the first servlet
-				// should eventually be disabled in ALL contexts, because it'll be disabled in the new context!
-				//
-				// so it's really easier - FULLY unregister the element from all current contexts and then
-				// register to all the new contexts
-				if (view != null) {
-					LOG.debug("Unregistering {} because its context selection filter matched new set of contexts", webElement);
-					webElement.unregister(view);
-				}
-				webElement.changeContextModels(newMatching);
-				if (view != null) {
-					LOG.debug("Registering {} again after its context selection filter matched new set of contexts", webElement);
-					webElement.register(view);
+				} finally {
+					webElement.setAsynchronusRegistration(isAsync);
 				}
 			}
 		}
@@ -505,6 +513,10 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 	public <R, D extends WebElementEventData, T extends ElementModel<R, D>> void removeWebElement(Bundle bundle, T webElement) {
 		lock.lock();
 		try {
+			if (!acceptWabContexts.get() || webElement.getRegisteringBundle().getState() < Bundle.ACTIVE) {
+				// whiteboard context is stopping, mass unregistration - we want it synchronized
+				webElement.setAsynchronusRegistration(false);
+			}
 			getBundleApplication(bundle).removeWebElement(webElement);
 
 			WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle, currentWebContainerReference);

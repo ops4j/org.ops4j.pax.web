@@ -62,13 +62,6 @@
 					<includes>
 						<include>**/*IntegrationTest.java</include>
 					</includes>
-					<excludes>
-						<!--
-							This test isn't working as I want it to work. Also it requires Felix 6, so I'll probably
-							move it to pax-web-itest-karaf (4.3.x based)
-						-->
-						<exclude>**/WarJSFCdiIntegrationTest.java</exclude>
-					</excludes>
 					<systemPropertyVariables>
 						<!--
 							to configure pax-exam with pax.exam.system=default which gives us more control over installed bundles
@@ -146,29 +139,6 @@
 	</build>
 
 	<profiles>
-		<profile>
-			<id>felix6</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-failsafe-plugin</artifactId>
-						<configuration>
-							<excludes>
-								<exclude>**/*</exclude>
-							</excludes>
-							<includes>
-								<include>**/WarJSFCdiIntegrationTest.java</include>
-							</includes>
-							<classpathDependencyExcludes>
-								<!-- This includes osgi.core R6 -->
-								<exclude>biz.aQute.bnd:biz.aQute.bndlib</exclude>
-							</classpathDependencyExcludes>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
 		<profile>
 			<id>jetty</id>
 			<activation>

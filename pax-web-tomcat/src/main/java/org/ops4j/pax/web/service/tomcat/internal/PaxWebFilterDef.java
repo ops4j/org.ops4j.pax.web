@@ -32,6 +32,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedFilter;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.ScopedFilter;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.runtime.dto.DTOConstants;
@@ -136,12 +137,15 @@ public class PaxWebFilterDef extends FilterDef {
 		public void init(FilterConfig filterConfig) throws ServletException {
 			if (filterReference != null) {
 				// it SHOULD be a reference
-				Filter instance;
-				if (!filterModel.isPrototype()) {
-					instance = filterModel.getRegisteringBundle().getBundleContext().getService(filterReference);
-				} else {
-					serviceObjects = filterModel.getRegisteringBundle().getBundleContext().getServiceObjects(filterReference);
-					instance = serviceObjects.getService();
+				Filter instance = null;
+				BundleContext context = filterModel.getRegisteringBundle().getBundleContext();
+				if (context != null) {
+					if (!filterModel.isPrototype()) {
+						instance = context.getService(filterReference);
+					} else {
+						serviceObjects = context.getServiceObjects(filterReference);
+						instance = serviceObjects.getService();
+					}
 				}
 
 				if (instance == null) {
@@ -166,7 +170,10 @@ public class PaxWebFilterDef extends FilterDef {
 			filter.destroy();
 			if (filterReference != null) {
 				if (!filterModel.isPrototype()) {
-					filterModel.getRegisteringBundle().getBundleContext().ungetService(filterReference);
+					BundleContext context = filterModel.getRegisteringBundle().getBundleContext();
+					if (context != null) {
+						context.ungetService(filterReference);
+					}
 				} else {
 					Filter realFilter = filter;
 					if (realFilter instanceof ScopedFilter) {

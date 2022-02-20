@@ -21,6 +21,7 @@ import javax.websocket.server.ServerEndpoint;
 
 import org.ops4j.pax.web.service.spi.model.events.WebSocketEventData;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,8 +132,9 @@ public class WebSocketModel extends ElementModel<Object, WebSocketEventData> {
             }
         } else if (getElementReference() != null) {
             Object ws = null;
+            BundleContext context = getRegisteringBundle().getBundleContext();
             try {
-                ws = getRegisteringBundle().getBundleContext().getService(getElementReference());
+                ws = context == null ? null : context.getService(getElementReference());
                 if (ws != null) {
                     c = ws.getClass();
                 } else {
@@ -140,7 +142,7 @@ public class WebSocketModel extends ElementModel<Object, WebSocketEventData> {
                 }
             } finally {
                 if (ws != null) {
-                    getRegisteringBundle().getBundleContext().ungetService(getElementReference());
+                    context.ungetService(getElementReference());
                 }
             }
         }
