@@ -163,23 +163,26 @@ public abstract class AbstractWhiteboardIntegrationTest extends AbstractContaine
 		DefaultHttpContextMapping httpContextMapping = new DefaultHttpContextMapping();
 		httpContextMapping.setContextId("alternative");
 		httpContextMapping.setContextPath("/alternative");
-		ServiceRegistration<HttpContextMapping> httpContextMappingRegistration
-				= bundleContext.registerService(HttpContextMapping.class, httpContextMapping, null);
+		ServiceRegistration<HttpContextMapping> httpContextMappingRegistration;
+		httpContextMappingRegistration = bundleContext.registerService(HttpContextMapping.class, httpContextMapping, null);
 		try {
 			Servlet servlet = new WhiteboardServlet("/alias");
 			DefaultServletMapping servletMapping = new DefaultServletMapping();
 			servletMapping.setServlet(servlet);
 			servletMapping.setAlias("/alias");
 			servletMapping.setContextId(httpContextMapping.getContextId());
-			ServiceRegistration<ServletMapping> servletRegistration
-					= bundleContext.registerService(ServletMapping.class, servletMapping, null);
+			@SuppressWarnings("unchecked")
+			final ServiceRegistration<ServletMapping>[] servletRegistration = new ServiceRegistration[1];
+			configureAndWaitForServletWithMapping("/alias/*", () -> {
+				servletRegistration[0] = bundleContext.registerService(ServletMapping.class, servletMapping, null);
+			});
 			try {
 				HttpTestClientFactory.createDefaultTestClient()
 						.withResponseAssertion("Response must contain 'Hello Whiteboard Extender'",
 								resp -> resp.contains("Hello Whiteboard Extender"))
 						.doGETandExecuteTest("http://127.0.0.1:8181/alternative/alias");
 			} finally {
-				servletRegistration.unregister();
+				servletRegistration[0].unregister();
 			}
 		} finally {
 			httpContextMappingRegistration.unregister();
@@ -200,8 +203,11 @@ public abstract class AbstractWhiteboardIntegrationTest extends AbstractContaine
 			servletMapping.setServlet(servlet);
 			servletMapping.setAlias("/dtocheck");
 			servletMapping.setContextId(httpContextMapping.getContextId());
-			ServiceRegistration<ServletMapping> servletRegistration
-					= bundleContext.registerService(ServletMapping.class, servletMapping, null);
+			@SuppressWarnings("unchecked")
+			final ServiceRegistration<ServletMapping>[] servletRegistration = new ServiceRegistration[1];
+			configureAndWaitForServletWithMapping("/dtocheck/*", () -> {
+				servletRegistration[0] = bundleContext.registerService(ServletMapping.class, servletMapping, null);
+			});
 
 			ServiceReference<HttpServiceRuntime> serviceReference
 					= bundleContext.getServiceReference(HttpServiceRuntime.class);
@@ -224,7 +230,7 @@ public abstract class AbstractWhiteboardIntegrationTest extends AbstractContaine
 				assertThat(count, equalTo(1L));
 			} finally {
 				bundleContext.ungetService(serviceReference);
-				servletRegistration.unregister();
+				servletRegistration[0].unregister();
 			}
 		} finally {
 			httpContextMappingRegistration.unregister();
