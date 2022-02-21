@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /**
  * The services in this package relate to jaxrs-whiteboard as specified by the OSGi R7 Compendium specification.
  * This sample uses the jaxrs-whiteboard implementation provided by aries
- * 
  */
 package org.ops4j.pax.web.samples.whiteboard.ds.jaxrs;

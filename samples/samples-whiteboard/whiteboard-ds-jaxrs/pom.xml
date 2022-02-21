@@ -21,16 +21,17 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.ops4j.pax.web</groupId>
-		<artifactId>samples</artifactId>
-		<version>8.0.1-SNAPSHOT</version>
+		<groupId>org.ops4j.pax.web.samples</groupId>
+		<artifactId>samples-whiteboard</artifactId>
+		<version>8.0.2-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.ops4j.pax.web.samples</groupId>
 	<artifactId>whiteboard-ds-jaxrs</artifactId>
+	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web - Samples - Whiteboard JAXRS with Declarative-Services</name>
+	<name>OPS4J Pax Web Whiteboard Samples - JAX-RS</name>
 
 	<build>
 		<plugins>
@@ -40,29 +41,22 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Include-Resource>{maven-resources}</Include-Resource>
-						<_dsannotations>*</_dsannotations>
-						<!-- Export only necessary for integration-test in pax-web -->
-						<Export-Package>
-							org.ops4j.pax.web.samples.whiteboard.ds.jaxrs
-						</Export-Package>
 						<Import-Package>
-							javax.servlet.*; version="2.5",
+							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
+							javax.servlet;version="[3.1,5)",
+							javax.servlet.http;version="[3.1,5)",
+
+							<!-- ranges indicate we can work with OSGi Core R6+ -->
+							org.osgi.framework;version="[1.8,2)",
+							org.osgi.util.tracker;version="[1.5,2)",
+
 							*
 						</Import-Package>
+						<Export-Package>org.ops4j.pax.web.samples.whiteboard.ds.jaxrs</Export-Package>
+						<Include-Resource>{maven-resources}</Include-Resource>
+						<_dsannotations>*</_dsannotations>
 					</instructions>
 				</configuration>
-				<executions>
-					<execution>
-						<id>baseline</id>
-						<goals>
-							<goal>baseline</goal>
-						</goals>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -86,19 +80,20 @@
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.service.jaxrs</artifactId>
+			<artifactId>osgi.cmpn</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- JavaEE -->
 
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>javax.ws.rs-api</artifactId>
+			<groupId>jakarta.ws.rs</groupId>
+			<artifactId>jakarta.ws.rs-api</artifactId>
 		</dependency>
 
 		<!-- Logging -->
@@ -106,12 +101,6 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
-			<scope>test</scope>
 		</dependency>
 
 	</dependencies>

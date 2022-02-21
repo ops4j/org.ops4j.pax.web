@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -256,8 +257,10 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 	 *     <li>lower thank {@link Integer#MAX_VALUE} ranking - to allow other registered contexts to <em>take over, or</em></li>
 	 *     <li>changed properties (like context path or init params).</li>
 	 * </ul></p>
+	 *
+	 * <p>This map os concurrent, because we shouldn't block access to it</p>
 	 */
-	private final Map<ContextKey, TreeSet<OsgiContextModel>> bundleContexts = new HashMap<>();
+	private final Map<ContextKey, TreeSet<OsgiContextModel>> bundleContexts = new ConcurrentHashMap<>();
 
 	/**
 	 * When using Whiteboard methods to override bundleContexts, we have to remember the actual defaults, to restore
@@ -1189,14 +1192,11 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		final List<OsgiContextModel> contexts = new LinkedList<>();
 
 		// bundle contexts
-		runSilently(() -> {
-			bundleContexts.forEach((context, set) -> {
-				if (bundle.equals(context.bundle)) {
-					contexts.add(getHighestRankedModel(set));
-				}
-			});
-			return null;
-		}, false);
+		bundleContexts.forEach((context, set) -> {
+			if (bundle.equals(context.bundle)) {
+				contexts.add(getHighestRankedModel(set));
+			}
+		});
 
 		// shared contexts
 		contexts.addAll(sharedContexts.values().stream().map(Utils::getHighestRankedModel).collect(Collectors.toSet()));
@@ -1211,14 +1211,11 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		final List<OsgiContextModel> contexts = new LinkedList<>();
 
 		// bundle contexts
-		runSilently(() -> {
-			bundleContexts.forEach((context, set) -> {
-				if (bundle.equals(context.bundle)) {
-					contexts.addAll(set);
-				}
-			});
-			return null;
-		}, false);
+		bundleContexts.forEach((context, set) -> {
+			if (bundle.equals(context.bundle)) {
+				contexts.addAll(set);
+			}
+		});
 
 		return contexts;
 	}

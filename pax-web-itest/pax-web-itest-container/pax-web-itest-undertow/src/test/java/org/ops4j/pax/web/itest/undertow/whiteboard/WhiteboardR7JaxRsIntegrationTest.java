@@ -13,23 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.undertow;
-
-import static org.ops4j.pax.exam.OptionUtils.combine;
+package org.ops4j.pax.web.itest.undertow.whiteboard;
 
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.common.AbstractWhiteboardR7JaxRsIntegrationTest;
+import org.ops4j.pax.web.itest.container.whiteboard.AbstractWhiteboardR7JaxRsIntegrationTest;
+
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 @RunWith(PaxExam.class)
 public class WhiteboardR7JaxRsIntegrationTest extends AbstractWhiteboardR7JaxRsIntegrationTest {
 
-    @Configuration
-    public static Option[] configure() {
-        return combine(configureUndertow(),
-                configureJaxrs()
-        );
-    }
+	@Configuration
+	public Option[] configure() {
+		Option[] base = combine(baseConfigure(), paxWebUndertow());
+		Option[] base2 = combine(base, combine(scr(), configAdmin()));
+		Option[] baseWhiteboard = combine(base2, paxWebExtenderWhiteboard());
+		return combine(baseWhiteboard, ariesJaxrs());
+	}
+
 }

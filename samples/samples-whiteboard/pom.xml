@@ -42,6 +42,7 @@
 		<module>whiteboard-blueprint</module>
 		<module>whiteboard-scopes</module>
 		<module>whiteboard-extended</module>
+		<module>whiteboard-ds-jaxrs</module>
 	</modules>
 
 </project>

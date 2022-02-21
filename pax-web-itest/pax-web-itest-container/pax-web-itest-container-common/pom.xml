@@ -200,6 +200,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-compatibility-jaxrs2</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-fragment-myfaces-inject</artifactId>
 		</dependency>
 		<dependency>
@@ -573,6 +577,10 @@
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.service.cdi</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.jaxrs</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.apache.felix</groupId>
@@ -604,36 +612,12 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.aries.cdi</groupId>
-			<artifactId>org.apache.aries.cdi.spi</artifactId>
+			<groupId>org.apache.aries.component-dsl</groupId>
+			<artifactId>org.apache.aries.component-dsl.component-dsl</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.aries.cdi</groupId>
-			<artifactId>org.apache.aries.cdi.extension.spi</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.aries.cdi</groupId>
-			<artifactId>org.apache.aries.cdi.extender</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.aries.cdi</groupId>
-			<artifactId>org.apache.aries.cdi.weld</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.aries.cdi</groupId>
-			<artifactId>org.apache.aries.cdi.extension.servlet.common</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.aries.cdi</groupId>
-			<artifactId>org.apache.aries.cdi.extension.servlet.weld</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.aries.cdi</groupId>
-			<artifactId>org.apache.aries.cdi.extra</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.aries.cdi</groupId>
-			<artifactId>org.apache.aries.cdi.extension.el.jsp</artifactId>
+			<groupId>org.apache.aries.jax.rs</groupId>
+			<artifactId>org.apache.aries.jax.rs.whiteboard</artifactId>
 		</dependency>
 
 		<dependency>
@@ -865,6 +849,44 @@
 			<groupId>org.apache.servicemix.bundles</groupId>
 			<artifactId>org.apache.servicemix.bundles.jasypt</artifactId>
 			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-frontend-jaxrs</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-transports-http</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-rs-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.ws.xmlschema</groupId>
+			<artifactId>xmlschema-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-rs-sse</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.woodstox</groupId>
+			<artifactId>stax2-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.woodstox</groupId>
+			<artifactId>woodstox-core</artifactId>
 		</dependency>
 
 	</dependencies>

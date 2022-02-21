@@ -32,7 +32,6 @@ import org.ops4j.pax.web.itest.AbstractControlledTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClient;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 
-import static org.ops4j.pax.exam.Constants.START_LEVEL_TEST_BUNDLE;
 import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
@@ -215,103 +214,6 @@ public class AbstractKarafTestBase extends AbstractControlledTestBase {
 	public Option[] undertowConfig() {
 		return combine(baseConfigure(),
 				features(paxWebFeatures, "pax-web-http-undertow", "pax-web-war", "pax-web-whiteboard"));
-	}
-
-	protected Option[] ariesCdiAndMyfaces() {
-		return new Option[] {
-				mavenBundle("jakarta.el", "jakarta.el-api")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-el2")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
-				mavenBundle("jakarta.websocket", "jakarta.websocket-api")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				// it has to be CDI 1.2 for Myfaces 2.3.x, but can't conflict with CDI 2.0 needed by aries-cdi
-//				mavenBundle("javax.enterprise", "cdi-api")
-//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("commons-collections", "commons-collections")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("commons-beanutils", "commons-beanutils")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("commons-digester", "commons-digester")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.apache.myfaces.core", "myfaces-api")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.apache.myfaces.core", "myfaces-impl")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.javax-inject")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2),
-				mavenBundle("org.ops4j.pax.web", "pax-web-fragment-myfaces-inject")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
-				mavenBundle("org.ops4j.pax.web", "pax-web-fragment-myfaces-spifly")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
-
-				// These 4 would be required because of osgi.contract capabilities. But Pax Web provides proper
-				// compatibility bundles that fix _canonical_ jakarta API bundles
-//				mavenBundle("org.apache.geronimo.specs", "geronimo-el_2.2_spec")
-//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-//				mavenBundle("org.apache.geronimo.specs", "geronimo-interceptor_1.2_spec")
-//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-//				mavenBundle("org.apache.geronimo.specs", "geronimo-jcdi_2.0_spec")
-//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-//				mavenBundle("org.apache.geronimo.specs", "geronimo-annotation_1.3_spec")
-//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-
-				mavenBundle("jakarta.enterprise", "jakarta.enterprise.cdi-api")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart(),
-				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-cdi12")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
-				mavenBundle("jakarta.interceptor", "jakarta.interceptor-api")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-interceptor12")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
-				// Aries CDI extension.servlet.weld and extension.el.jsp require JavaServlet 3.1 capability...
-				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-servlet31")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart(),
-
-				mavenBundle("org.osgi", "org.osgi.service.cdi")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.apache.felix", "org.apache.felix.converter")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-
-				mavenBundle("org.apache.aries.cdi", "org.apache.aries.cdi.spi")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.apache.aries.cdi", "org.apache.aries.cdi.extension.spi")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.apache.aries.cdi", "org.apache.aries.cdi.extender")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.apache.aries.cdi", "org.apache.aries.cdi.weld")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.apache.aries.cdi", "org.apache.aries.cdi.extension.servlet.common")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.apache.aries.cdi", "org.apache.aries.cdi.extension.servlet.weld")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.apache.aries.cdi", "org.apache.aries.cdi.extension.el.jsp")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.apache.aries.cdi", "org.apache.aries.cdi.extra")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.jboss.weld", "weld-osgi-bundle")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.jboss.classfilewriter", "jboss-classfilewriter")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-
-				mavenBundle("org.apache.aries.spifly", "org.apache.aries.spifly.dynamic.bundle")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ow2.asm", "asm")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ow2.asm", "asm-commons")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ow2.asm", "asm-util")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ow2.asm", "asm-tree")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ow2.asm", "asm-analysis")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-
-				mavenBundle("jakarta.validation", "jakarta.validation-api")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.jboss.classfilewriter", "jboss-classfilewriter")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
-		};
 	}
 
 	protected static String getMyFacesVersion() {

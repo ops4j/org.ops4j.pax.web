@@ -25,22 +25,18 @@ import java.util.Set;
 
 import static org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants.JAX_RS_APPLICATION_BASE;
 
-
-@Component(
-        immediate = true,
-        property = JAX_RS_APPLICATION_BASE + "=/jaxrs-application",
-        service = Application.class
-)
+@Component(immediate = true, property = JAX_RS_APPLICATION_BASE + "=/jaxrs-application", service = Application.class)
 public class WhiteboardJaxRsApplication extends Application {
 
-    @Override
-    public Set<Object> getSingletons() {
-        return Collections.singleton(this);
-    }
+	@Override
+	public Set<Object> getSingletons() {
+		return Collections.singleton(this);
+	}
 
-    @GET
-    @Produces("text/plain")
-    public String sayHello() {
-        return "Hello from JAXRS";
-    }
+	@GET
+	@Produces("text/plain")
+	public String sayHello() {
+		return "Hello from JAXRS";
+	}
+
 }
