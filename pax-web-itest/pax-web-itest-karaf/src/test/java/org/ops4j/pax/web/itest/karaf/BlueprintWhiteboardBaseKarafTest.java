@@ -168,15 +168,18 @@ public abstract class BlueprintWhiteboardBaseKarafTest extends AbstractKarafTest
 			servletMapping.setServlet(servlet);
 			servletMapping.setAlias("/alias");
 			servletMapping.setContextId(httpContextMapping.getContextId());
-			ServiceRegistration<ServletMapping> servletRegistration
-					= bundleContext.registerService(ServletMapping.class, servletMapping, null);
+			@SuppressWarnings("unchecked")
+			final ServiceRegistration<ServletMapping>[] servletRegistration = new ServiceRegistration[1];
+			configureAndWaitForServletWithMapping("/alias/*", () -> {
+				servletRegistration[0] = bundleContext.registerService(ServletMapping.class, servletMapping, null);
+			});
 			try {
 				createTestClientForKaraf()
 						.withResponseAssertion("Response must contain text served by Karaf using Whiteboard-Extender Alias!",
 								resp -> resp.contains("Hello Whiteboard Extender"))
 						.doGETandExecuteTest("http://127.0.0.1:8181/alternative/alias");
 			} finally {
-				servletRegistration.unregister();
+				servletRegistration[0].unregister();
 			}
 		} finally {
 			httpContextMappingRegistration.unregister();

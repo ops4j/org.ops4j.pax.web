@@ -44,7 +44,7 @@ public abstract class FeaturesBaseKarafTest extends AbstractKarafTestBase {
 		Hashtable<String, Object> env = new Hashtable<>();
 		String[] credentials = new String[] { "karaf", "karaf" };
 		env.put(JMXConnector.CREDENTIALS, credentials);
-		int count = 5;
+		int count = 15;
 		Exception last = null;
 		while (count > 0) {
 			try {
