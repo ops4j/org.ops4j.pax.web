@@ -584,9 +584,10 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			// this is where org.osgi.service.http.HttpService bundle-scoped service is registered in OSGi
 			// this is the most fundamental operation related to Http Service specification
 			Dictionary<String, Object> props = determineServiceProperties(configuration);
-			ServiceFactory<StoppableHttpService> factory = new StoppableHttpServiceFactory() {
+			ServiceFactory<StoppableHttpService> factory = new StoppableHttpServiceFactory(serverController, serverModel,
+					webElementEventDispatcher) {
 				@Override
-				StoppableHttpService createService(Bundle bundle) {
+				StoppableHttpService createService(Bundle bundle, ServerController serverController, ServerModel serverModel, WebElementEventDispatcher webElementEventDispatcher) {
 					HttpServiceEnabled enabledService =
 							new HttpServiceEnabled(bundle, serverController, serverModel,
 									webElementEventDispatcher, configuration);

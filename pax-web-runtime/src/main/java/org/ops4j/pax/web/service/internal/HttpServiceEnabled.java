@@ -237,8 +237,11 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			b.getOperations().add(new TransactionStateChange(OpCode.DISASSOCIATE, ctx));
 		}
 
-		serverController.sendBatch(b);
-		b.accept(serviceModel);
+		serverModel.runSilently(() -> {
+			serverController.sendBatch(b);
+			b.accept(serviceModel);
+			return null;
+		}, true);
 
 		stopped = true;
 	}

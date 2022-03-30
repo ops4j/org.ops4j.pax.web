@@ -41,6 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
@@ -555,6 +556,8 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 					throw new RuntimeException(e.getCause().getMessage(), e.getCause());
 				}
 			}
+		} catch (RejectedExecutionException e) {
+			return null;
 		} catch (RuntimeException e) {
 			e.addSuppressed(originalTrace);
 			throw e;

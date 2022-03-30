@@ -16,6 +16,8 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import org.ops4j.pax.web.service.spi.ServerController;
+import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
@@ -30,10 +32,20 @@ public abstract class StoppableHttpServiceFactory implements ServiceFactory<Stop
 
 	private static final Logger LOG = LoggerFactory.getLogger(StoppableHttpServiceFactory.class);
 
+	private final ServerController serverController;
+	private final ServerModel serverModel;
+	private final WebElementEventDispatcher webElementEventDispatcher;
+
+	public StoppableHttpServiceFactory(ServerController serverController, ServerModel serverModel, WebElementEventDispatcher webElementEventDispatcher) {
+		this.serverController = serverController;
+		this.serverModel = serverModel;
+		this.webElementEventDispatcher = webElementEventDispatcher;
+	}
+
 	@Override
 	public StoppableHttpService getService(final Bundle bundle, final ServiceRegistration<StoppableHttpService> serviceRegistration) {
 		LOG.info("Binding HTTP Service for bundle: [{}]", bundle);
-		return createService(bundle);
+		return createService(bundle, serverController, serverModel, webElementEventDispatcher);
 	}
 
 	@Override
@@ -42,6 +54,6 @@ public abstract class StoppableHttpServiceFactory implements ServiceFactory<Stop
 		httpService.stop();
 	}
 
-	abstract StoppableHttpService createService(Bundle bundle);
+	abstract StoppableHttpService createService(Bundle bundle, ServerController serverController, ServerModel serverModel, WebElementEventDispatcher webElementEventDispatcher);
 
 }

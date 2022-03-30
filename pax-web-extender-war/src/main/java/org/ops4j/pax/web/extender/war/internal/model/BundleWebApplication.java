@@ -426,8 +426,11 @@ public class BundleWebApplication {
 
 	public void webContainerRemoved(ServiceReference<WebContainer> ref) {
 		if (ref != webContainerServiceRef) {
-			throw new IllegalStateException("Removing unknown WebContainer reference " + ref
-					+ ", expecting " + webContainerServiceRef);
+			if (webContainerServiceRef != null) {
+				throw new IllegalStateException("Removing unknown WebContainer reference " + ref
+						+ ", expecting " + webContainerServiceRef);
+			}
+			return;
 		}
 
 		LOG.info("WebContainer reference is gone. Cleaning up the state of " + this);

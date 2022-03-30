@@ -39,6 +39,7 @@ public class OsgiContextModelChange extends Change {
 	public void uninstall(List<Change> operations) {
 		if (this.getKind() == OpCode.ADD) {
 			operations.addAll(osgiContextModel.getUnregistrations());
+			osgiContextModel.getUnregistrations().clear();
 			operations.add(new OsgiContextModelChange(OpCode.DELETE, null, osgiContextModel, null));
 		} else if (this.getKind() == OpCode.ASSOCIATE) {
 			operations.add(new OsgiContextModelChange(OpCode.DISASSOCIATE, context, osgiContextModel, null));
