@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -35,13 +36,13 @@ import static org.junit.Assert.fail;
 public class ConfigurationImplTest {
     
     @Rule
-    public TemporaryFolder testFolder = new TemporaryFolder();
+    public TemporaryFolder testFolder = new TemporaryFolder(new File("target"));
 
 	@Test
 	public void immediateProperties() throws NoSuchFieldException, IllegalAccessException {
 		Dictionary<String, String> props = new Hashtable<>();
 		props.put(PaxWebConfig.PID_CFG_HTTP_PORT, "1234");
-		props.put(PaxWebConfig.PID_CFG_TEMP_DIR, testFolder.getRoot().getName());
+		props.put(PaxWebConfig.PID_CFG_TEMP_DIR, testFolder.getRoot().getAbsolutePath());
 		PropertyResolver resolver = new DictionaryPropertyResolver(props);
 
 		Configuration config = ConfigurationBuilder.getConfiguration(resolver, new HashMap<>());
