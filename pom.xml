@@ -179,7 +179,7 @@
 
 		<!--		<dependency.io.gatling.highcharts>3.6.1</dependency.io.gatling.highcharts>-->
 
-		<dependency.io.undertow>2.2.15.Final</dependency.io.undertow>
+		<dependency.io.undertow>2.2.17.Final</dependency.io.undertow>
 
 		<dependency.jakarta.annotation-api>1.3.5</dependency.jakarta.annotation-api>
 		<dependency.jakarta.el-api>3.0.3</dependency.jakarta.el-api>
