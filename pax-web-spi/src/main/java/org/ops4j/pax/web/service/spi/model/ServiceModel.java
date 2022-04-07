@@ -148,7 +148,7 @@ public class ServiceModel implements BatchVisitor {
 
 	public WebContainerContext getOrCreateDefaultHttpContext(String contextId) {
 		return serverModel.runSilently(() -> {
-			OsgiContextModel ctx = serverModel.getBundleContextModel(contextId, serviceBundle);
+			OsgiContextModel ctx = serverModel.getContextModel(contextId, serviceBundle);
 			if (ctx == null) {
 				// create one in batch through ServiceModel and ensure its stored at ServerModel as well
 				ctx = createDefaultHttpContext(contextId);

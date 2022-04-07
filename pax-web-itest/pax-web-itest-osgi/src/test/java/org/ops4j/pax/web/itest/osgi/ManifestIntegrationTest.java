@@ -50,7 +50,6 @@ public class ManifestIntegrationTest {
 	}
 
 	@Test
-	@Ignore("Until we build pax-web-jetty-bundle in Pax Web 8")
 	public void testJettyBundleAccess() throws Exception {
 		File repodir = new File(System.getProperty("user.home") + "/.m2/repository");
 		assertTrue("Repository dir exists: " + repodir, repodir.exists());

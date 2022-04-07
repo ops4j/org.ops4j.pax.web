@@ -124,6 +124,21 @@ public class Utils {
 		return converted;
 	}
 
+	public static Hashtable<String, Object> toHashtable(Dictionary<String, ?> dictionary) {
+		Hashtable<String, Object> converted = new Hashtable<>();
+		if (dictionary != null) {
+			Enumeration<String> enumeration = dictionary.keys();
+			while (enumeration.hasMoreElements()) {
+				String k = enumeration.nextElement();
+				Object v = dictionary.get(k);
+
+				converted.put(k, v);
+			}
+		}
+
+		return converted;
+	}
+
 	/**
 	 * Special method to be called from R6 framwork ({@code ServiceReference#getProperties()} was
 	 * added in R7 == org.osgi.framework;version=1.9).

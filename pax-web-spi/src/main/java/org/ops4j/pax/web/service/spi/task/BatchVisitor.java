@@ -138,4 +138,25 @@ public interface BatchVisitor {
 	default void visitContextStartChange(ContextStartChange contextStartChange) {
 	}
 
+	/**
+	 * Process a change related to stopping a context
+	 * @param contextStopChange
+	 */
+	default void visitContextStopChange(ContextStopChange contextStopChange) {
+	}
+
+	/**
+	 * Process a change related to context parameters setup
+	 * @param contextParamsChange
+	 */
+	default void visitContextParamsChange(ContextParamsChange contextParamsChange) {
+	}
+
+	/**
+	 * Process a changed related to security configuration of web context.
+	 * @param securityConfigChange
+	 */
+	default void visitSecurityConfigChange(SecurityConfigChange securityConfigChange) {
+	}
+
 }

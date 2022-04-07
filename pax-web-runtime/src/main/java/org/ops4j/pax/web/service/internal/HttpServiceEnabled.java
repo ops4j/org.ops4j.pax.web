@@ -50,6 +50,7 @@ import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.internal.views.DirectWebContainerView;
+import org.ops4j.pax.web.service.internal.views.ProcessingWebContainerView;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.context.UniqueMultiBundleWebContainerContextWrapper;
@@ -129,8 +130,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 	private final WebElementEventListener eventDispatcher;
 
-	private final WhiteboardWebContainerView whiteboardContainerView = new WhiteboardWebContainer();
-	private final DirectWebContainerView directContainerView = new DirectWebContainer();
+	private final WhiteboardWebContainerView whiteboardWebContainer = new WhiteboardWebContainer();
+	private final DirectWebContainerView directWebContainer = new DirectWebContainer();
+	private final ProcessingWebContainerView processingWebContainer = new ProcessingWebContainer();
 	private final WebAppWebContainerView webAppWebContainer = new WebAppWebContainer();
 	private final ReportWebContainer reportWebContainer = new ReportWebContainer();
 
@@ -252,17 +254,17 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 	public <T extends PaxWebContainerView> T adapt(Class<T> type) {
 		if (type == WhiteboardWebContainerView.class) {
 			// gives access to ServerModel and other bundle-agnostic internals of the runtime
-			return type.cast(whiteboardContainerView);
+			return type.cast(whiteboardWebContainer);
 		}
 		if (type == DirectWebContainerView.class) {
 			// direct HttpService-like registration of models - mostly for test purpose, as DirectWebContainerView
 			// is not available in any of the exported package
-			return type.cast(directContainerView);
+			return type.cast(directWebContainer);
 		}
 		if (type == DynamicJEEWebContainerView.class) {
 			// view used by javax.servlet.ServletContext.addServlet/Filter/Listener dynamic methods
 			// we'll reuse whiteboardContainerView, but cast it to different interface
-			return type.cast(whiteboardContainerView);
+			return type.cast(whiteboardWebContainer);
 		}
 		if (type == WebAppWebContainerView.class) {
 			// view used when registering WARs (WABs). This is kind of transactional view to register everything
@@ -274,6 +276,10 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			// view used to get information about installed "web applications" - whatever is their origin
 			// (WAB, Whiteboard or HttpService/WebContainer)
 			return type.cast(reportWebContainer);
+		}
+		if (type == ProcessingWebContainerView.class) {
+			// view used to alter existing contexts using "HTTP Context Processing"
+			return type.cast(processingWebContainer);
 		}
 		return null;
 	}
@@ -2404,6 +2410,26 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		@Override
 		public void unregisterErrorPages(ErrorPageModel model) {
 			doUnregisterErrorPages(model);
+		}
+	}
+
+	private class ProcessingWebContainer implements ProcessingWebContainerView {
+		@Override
+		public OsgiContextModel getContextModel(Bundle bundle, String contextId) {
+			return serverModel.getContextModel(contextId, bundle);
+		}
+
+		@Override
+		public void sendBatch(final Batch batch) {
+			serverModel.runSilently(() -> {
+				serverController.sendBatch(batch);
+				// no need to pass the batch to the model, as we don't store security information and
+				// context params at Server|ServiceModel level.
+				// When HTTP context processing will be extended for example to allow registration of
+				// additional filters, please uncomment this.
+//				batch.accept(serviceModel);
+				return null;
+			}, true);
 		}
 	}
 

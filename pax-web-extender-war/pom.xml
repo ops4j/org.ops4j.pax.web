@@ -59,21 +59,15 @@
 							org.osgi.util.tracker;version="[1.5,2)",
 
 							<!-- OSGi cmpn -->
-<!--							org.osgi.service.cm;version="[1.0,2.0)";resolution:=optional,-->
-<!--							org.osgi.service.event;resolution:=optional,-->
 							org.osgi.service.http;version="[1.2,2)",
 							org.osgi.service.http.context;version="[1.1,2)",
-<!--							org.osgi.service.http.runtime;version="[1.1,2)",-->
-<!--							org.osgi.service.http.runtime.dto;version="[1.1,2)",-->
 
 							<!-- from pax-web-api -->
 							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
-<!--							org.ops4j.pax.web.service.whiteboard;version="${pax-web.osgi.version}",-->
 							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
 
 							<!-- from pax-web-spi -->
 							org.ops4j.pax.web.service.spi;version="${pax-web.osgi.version}",
-<!--							org.ops4j.pax.web.service.spi.config;version="${pax-web.osgi.version}",-->
 							org.ops4j.pax.web.service.spi.context;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.model;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.model.elements;version="${pax-web.osgi.version}",
@@ -83,7 +77,6 @@
 							org.ops4j.pax.web.service.spi.servlet;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.task;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.util;version="${pax-web.osgi.version}",
-<!--							org.ops4j.pax.web.service.spi.whiteboard;version="${pax-web.osgi.version}",-->
 
 							<!-- from pax-logging-api -->
 							org.slf4j;version="[1.7,2)",
@@ -103,30 +96,7 @@
 							org.apache.tomcat.util.digester;version="${dependency.org.apache.tomcat}"
 							<!-- from pax-web-tomcat-common / tomcat-embed-core -->
 							org.apache.tomcat.util.bcel;version="${dependency.org.apache.tomcat}",
-							org.apache.tomcat.util.bcel.classfile;version="${dependency.org.apache.tomcat}",
-
-							<!-- to check -->
-
-<!--							javax.security.auth,-->
-<!--							javax.security.auth.callback,-->
-<!--							javax.security.auth.login,-->
-<!--							javax.xml.parsers,-->
-<!--							org.ops4j.pax.web.jsp; version="${pax-web.osgi.version}"; resolution:=optional,-->
-<!--							org.ops4j.pax.web.descriptor.gen; version="${pax-web.osgi.version}",-->
-<!--							org.apache.jasper.servlet; resolution:=optional,-->
-<!--							org.osgi.service.event; version="[1.1.0,2.0.0)"; resolution:=optional,-->
-<!--							org.osgi.service.log; version="[1.0.0,2.0.0)"; resolution:=optional,-->
-<!--							org.osgi.service.packageadmin; resolution:=optional,-->
-<!--							org.apache.xbean.finder.*; version="[4.4,5)",-->
-<!--							org.w3c.dom,-->
-<!--							org.xml.sax,-->
-<!--							org.xml.sax.helpers,-->
-<!--							javax.xml.bind,-->
-<!--							javax.xml.bind.annotation,-->
-<!--							javax.xml.bind.annotation.adapters,-->
-<!--							javax.xml.transform,-->
-<!--							javax.xml.transform.sax,-->
-<!--							javax.xml.namespace-->
+							org.apache.tomcat.util.bcel.classfile;version="${dependency.org.apache.tomcat}"
 						</Import-Package>
 						<Private-Package>
 							org.ops4j.pax.web.extender.war.internal.*,
@@ -151,50 +121,6 @@
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-spi</artifactId>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.web</groupId>-->
-<!--			<artifactId>pax-web-jsp</artifactId>-->
-<!--			<optional>true</optional>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.web</groupId>-->
-<!--			<artifactId>pax-web-descriptor</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
-
-		<!-- OPS4J dependencies -->
-
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.base</groupId>-->
-<!--			<artifactId>ops4j-base-lang</artifactId>-->
-<!--			<optional>true</optional>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.base</groupId>-->
-<!--			<artifactId>ops4j-base-util-xml</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.base</groupId>-->
-<!--			<artifactId>ops4j-base-spi</artifactId>-->
-<!--		</dependency>-->
-
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.swissbox</groupId>-->
-<!--			<artifactId>pax-swissbox-core</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.swissbox</groupId>-->
-<!--			<artifactId>pax-swissbox-optional-jcl</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.swissbox</groupId>-->
-<!--			<artifactId>pax-swissbox-extender</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.swissbox</groupId>-->
-<!--			<artifactId>pax-swissbox-tracker</artifactId>-->
-<!--		</dependency>-->
 
 		<!-- OSGi -->
 

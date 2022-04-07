@@ -38,7 +38,6 @@ import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.apache.tomcat.util.digester.Digester;
 import org.ops4j.pax.web.service.spi.config.Configuration;
-import org.ops4j.pax.web.service.spi.config.ServerConfiguration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.LoginConfigModel;
 import org.ops4j.pax.web.service.spi.model.elements.SecurityConfigurationModel;
@@ -62,72 +61,14 @@ public class OsgiContextConfiguration implements LifecycleListener {
 	private final TomcatFactory tomcatFactory;
 
 	/** This is an {@link org.apache.catalina.Authenticator} configured for the context */
-	private final Valve authenticationValve;
+	private Valve authenticationValve;
 
-	private final LoginConfig loginConfig;
-	private final boolean noAuth;
-
-	private final ServerConfiguration serverConfiguration;
+	private final Configuration configuration;
 
 	public OsgiContextConfiguration(OsgiContextModel osgiContextModel, Configuration configuration, TomcatFactory tomcatFactory) {
 		this.osgiContextModel = osgiContextModel;
 		this.tomcatFactory = tomcatFactory;
-		this.serverConfiguration = configuration.server();
-
-		if (osgiContextModel.getSecurityConfiguration().getLoginConfig() == null) {
-			authenticationValve = null;
-			loginConfig = new LoginConfig("NONE", null, null, null);
-			noAuth = true;
-			return;
-		}
-
-		SecurityConfigurationModel securityConfig = osgiContextModel.getSecurityConfiguration();
-		LoginConfigModel loginConfig = securityConfig.getLoginConfig();
-
-		// see org.apache.catalina.startup.ContextConfig.authenticatorConfig()
-
-		this.loginConfig = new LoginConfig(loginConfig.getAuthMethod(), loginConfig.getRealmName(),
-				loginConfig.getFormLoginPage(), loginConfig.getFormErrorPage());
-		noAuth = false;
-
-		// determine the Authenticator valve
-		// Tomcat does it using /org/apache/catalina/startup/Authenticators.properties
-		Authenticator authenticator = null;
-		switch (loginConfig.getAuthMethod().toUpperCase()) {
-			case "BASIC":
-				authenticator = new BasicAuthenticator();
-				if (this.loginConfig.getRealmName() == null) {
-					this.loginConfig.setRealmName("default");
-				}
-				break;
-			case "DIGEST":
-				DigestAuthenticator digestAuthenticator = new DigestAuthenticator();
-				digestAuthenticator.setNonceValidity(configuration.security().getDigestAuthMaxNonceAge());
-				authenticator = digestAuthenticator;
-				if (this.loginConfig.getRealmName() == null) {
-					this.loginConfig.setRealmName("default");
-				}
-				break;
-			case "CLIENT-CERT":
-			case "CLIENT_CERT":
-				authenticator = new SSLAuthenticator();
-				break;
-			case "FORM":
-				authenticator = new FormAuthenticator();
-				break;
-			case "SPNEGO":
-				authenticator = new SpnegoAuthenticator();
-				break;
-			case "NONE":
-				authenticator = new NonLoginAuthenticator();
-				break;
-			default:
-				// TODO: discover a Valve for login configuration
-				//       Keycloak has org.apache.catalina.Valve -> org.keycloak.adapters.tomcat.KeycloakAuthenticatorValve
-				//       in org.keycloak/keycloak-pax-web-tomcat8
-		}
-
-		authenticationValve = (Valve) authenticator;
+		this.configuration = configuration;
 	}
 
 	public Valve getAuthenticationValve() {
@@ -138,6 +79,62 @@ public class OsgiContextConfiguration implements LifecycleListener {
 	public void lifecycleEvent(LifecycleEvent event) {
 		if (event.getType().equals(Lifecycle.CONFIGURE_START_EVENT)) {
 //		if (event.getLifecycle().getState() == LifecycleState.STARTING_PREP) {
+
+			LoginConfig lc;
+			boolean noAuth = false;
+
+			if (osgiContextModel.getSecurityConfiguration().getLoginConfig() == null) {
+				authenticationValve = null;
+				lc = new LoginConfig("NONE", null, null, null);
+				noAuth = true;
+			} else {
+				SecurityConfigurationModel securityConfig = osgiContextModel.getSecurityConfiguration();
+				LoginConfigModel loginConfig = securityConfig.getLoginConfig();
+
+				// see org.apache.catalina.startup.ContextConfig.authenticatorConfig()
+
+				lc = new LoginConfig(loginConfig.getAuthMethod(), loginConfig.getRealmName(),
+						loginConfig.getFormLoginPage(), loginConfig.getFormErrorPage());
+
+				// determine the Authenticator valve
+				// Tomcat does it using /org/apache/catalina/startup/Authenticators.properties
+				Authenticator authenticator = null;
+				switch (loginConfig.getAuthMethod().toUpperCase()) {
+					case "BASIC":
+						authenticator = new BasicAuthenticator();
+						if (lc.getRealmName() == null) {
+							lc.setRealmName("default");
+						}
+						break;
+					case "DIGEST":
+						DigestAuthenticator digestAuthenticator = new DigestAuthenticator();
+						digestAuthenticator.setNonceValidity(configuration.security().getDigestAuthMaxNonceAge());
+						authenticator = digestAuthenticator;
+						if (lc.getRealmName() == null) {
+							lc.setRealmName("default");
+						}
+						break;
+					case "CLIENT-CERT":
+					case "CLIENT_CERT":
+						authenticator = new SSLAuthenticator();
+						break;
+					case "FORM":
+						authenticator = new FormAuthenticator();
+						break;
+					case "SPNEGO":
+						authenticator = new SpnegoAuthenticator();
+						break;
+					case "NONE":
+						authenticator = new NonLoginAuthenticator();
+						break;
+					default:
+						// TODO: discover a Valve for login configuration
+						//       Keycloak has org.apache.catalina.Valve -> org.keycloak.adapters.tomcat.KeycloakAuthenticatorValve
+						//       in org.keycloak/keycloak-pax-web-tomcat8
+				}
+
+				authenticationValve = (Valve) authenticator;
+			}
 
 			PaxWebStandardContext context = (PaxWebStandardContext) event.getSource();
 			// org.apache.catalina.startup.ContextConfig.configureStart() is called during CONFIGURE_START_EVENT
@@ -184,7 +181,7 @@ public class OsgiContextConfiguration implements LifecycleListener {
 			}
 
 			// alter security configuration
-			context.setLoginConfig(this.loginConfig);
+			context.setLoginConfig(lc);
 
 			// security constraints
 			if (!noAuth) {
@@ -240,11 +237,11 @@ public class OsgiContextConfiguration implements LifecycleListener {
 			List<String> allVirtualHosts = new ArrayList<>();
 			List<String> vhosts = new ArrayList<>(osgiContextModel.getVirtualHosts());
 			if (vhosts.isEmpty()) {
-				vhosts.addAll(Arrays.asList(serverConfiguration.getVirtualHosts()));
+				vhosts.addAll(Arrays.asList(configuration.server().getVirtualHosts()));
 			}
 			List<String> connectors = new ArrayList<>(osgiContextModel.getConnectors());
 			if (connectors.isEmpty()) {
-				connectors.addAll(Arrays.asList(serverConfiguration.getConnectors()));
+				connectors.addAll(Arrays.asList(configuration.server().getConnectors()));
 			}
 			for (String vhost : vhosts) {
 				if (vhost == null || "".equals(vhost.trim())) {

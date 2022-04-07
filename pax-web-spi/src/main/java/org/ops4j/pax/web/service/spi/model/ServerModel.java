@@ -1106,8 +1106,12 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 	 * @param ownerBundle
 	 * @return
 	 */
-	public OsgiContextModel getBundleContextModel(String name, Bundle ownerBundle) {
-		return getHighestRankedModel(bundleContexts.get(ContextKey.with(name, ownerBundle)));
+	public OsgiContextModel getContextModel(String name, Bundle ownerBundle) {
+		if (ownerBundle == null) {
+			return getHighestRankedModel(sharedContexts.get(name));
+		} else {
+			return getHighestRankedModel(bundleContexts.get(ContextKey.with(name, ownerBundle)));
+		}
 	}
 
 	/**

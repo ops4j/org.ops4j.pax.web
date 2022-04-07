@@ -142,6 +142,7 @@
 		<feature>pax-web-jetty</feature>
 		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-runtime/${project.version}</bundle>
 		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jetty/${project.version}</bundle>
+		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-tomcat-common/${project.version}</bundle>
 
 		<capability>pax.web.http.provider;provider:=jetty</capability>
 
@@ -276,6 +277,7 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		<feature>pax-web-core</feature>
 		<feature>pax-web-undertow</feature>
 		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-runtime/${project.version}</bundle>
+		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-tomcat-common/${project.version}</bundle>
 
 		<capability>pax.web.http.provider;provider:=undertow</capability>
 

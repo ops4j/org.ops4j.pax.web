@@ -90,7 +90,7 @@ public class Activator implements BundleActivator {
 	/** Whiteboard Extender context - this is where the Whiteboard magic is managed. */
 	private WhiteboardExtenderContext whiteboardExtenderContext;
 
-	/** The default {@link ServletContextHelper} registration as in 140.2 The Servlet Context*/
+	/** The default {@link ServletContextHelper} registration as in 140.2 The Servlet Context */
 	private ServiceRegistration<ServletContextHelper> registration;
 
 	/**

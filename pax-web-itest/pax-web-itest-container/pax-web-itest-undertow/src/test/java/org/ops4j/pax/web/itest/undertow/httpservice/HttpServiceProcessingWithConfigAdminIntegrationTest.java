@@ -13,34 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.jetty;
+package org.ops4j.pax.web.itest.undertow.httpservice;
 
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.base.client.HttpTestClientFactory;
-import org.ops4j.pax.web.itest.common.AbstractHttpServiceProcessingWithConfigAdminIntegrationTest;
+import org.ops4j.pax.exam.options.MavenArtifactProvisionOption;
+import org.ops4j.pax.web.itest.container.httpservice.AbstractHttpServiceProcessingWithConfigAdminIntegrationTest;
+
+import static org.ops4j.pax.exam.Constants.START_LEVEL_TEST_BUNDLE;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 @RunWith(PaxExam.class)
 public class HttpServiceProcessingWithConfigAdminIntegrationTest extends AbstractHttpServiceProcessingWithConfigAdminIntegrationTest {
 
 	@Configuration
-	public static Option[] configure() {
-		return configureJetty();
-	}
-
-	protected void performSecurityAssertion() throws Exception {
-		HttpTestClientFactory.createDefaultTestClient()
-				.withReturnCode(403)
-				.doGETandExecuteTest("http://127.0.0.1:8181/helloworld/hs");
-	}
-
-	@Override
-	protected void waitForReRegistration(Runnable trigger) throws InterruptedException {
-		// Jetty doesn't re-register javax.servlet.ServletContext...
-		trigger.run();
-		Thread.sleep(2000);
+	public Option[] configure() {
+		Option[] serverOptions = combine(baseConfigure(), paxWebUndertow());
+		Option[] configOptions = combine(serverOptions, configAdmin());
+		MavenArtifactProvisionOption auth = mavenBundle("org.ops4j.pax.web.samples", "auth-config-fragment-undertow")
+				.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart();
+		return combine(configOptions, auth);
 	}
 
 }

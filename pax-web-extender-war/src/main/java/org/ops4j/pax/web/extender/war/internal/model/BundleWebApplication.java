@@ -725,12 +725,6 @@ public class BundleWebApplication {
 				}
 			}
 
-			// TODO: special situation for aries-cdi, which is also an extender. its two CDI extensions:
-			//  - org.apache.aries.cdi.extension.servlet.weld.WeldServletExtension
-			//  - org.apache.aries.cdi.extension.el.jsp.ELJSPExtension
-			//  register two servlet context listeners via whiteboard
-			// We have to (somehow) wait for this extender before we actually register the web application...
-
 			state = deploymentState.get();
 			if (state == State.DEPLOYING) {
 				LOG.debug("Registering {} in WebContainer", contextPath);

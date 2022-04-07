@@ -15,43 +15,36 @@
  */
 package org.ops4j.pax.web.service.spi.task;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 
 /**
- * An action that's registered not during web element registration (the registering side), but during action handling
- * (the invoking side). This special action was created to prevent deadlocks described in the Aries-CDI example
- * case at https://github.com/ops4j/org.ops4j.pax.web/issues/1622.
- * For HTTP context processing (to alter security configuration) this action may also be registered when configuration
- * changes.
+ * Change of context params ({@link javax.servlet.ServletContext#getInitParameter(String)}).
  */
-public class ContextStartChange extends Change {
+public class ContextParamsChange extends Change {
 
-	private final String contextPath;
 	private final OsgiContextModel osgiContextModel;
+	private final Map<String, String> params = new LinkedHashMap<>();
 
-	public ContextStartChange(OpCode op, String contextPath) {
+	public ContextParamsChange(OpCode op, OsgiContextModel osgiContextModel, Map<String, String> params) {
 		super(op);
-		this.contextPath = contextPath;
-		this.osgiContextModel = null;
-	}
-
-	public ContextStartChange(OpCode op, OsgiContextModel osgiContextModel) {
-		super(op);
-		this.contextPath = osgiContextModel.getContextPath();
 		this.osgiContextModel = osgiContextModel;
+		this.params.putAll(params);
 	}
 
 	@Override
 	public void accept(BatchVisitor visitor) {
-		visitor.visitContextStartChange(this);
-	}
-
-	public String getContextPath() {
-		return contextPath;
+		visitor.visitContextParamsChange(this);
 	}
 
 	public OsgiContextModel getOsgiContextModel() {
 		return osgiContextModel;
+	}
+
+	public Map<String, String> getParams() {
+		return params;
 	}
 
 }

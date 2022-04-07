@@ -13,20 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.undertow;
+package org.ops4j.pax.web.itest.jetty.httpservice;
 
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.common.AbstractHttpServiceProcessingWithConfigAdminIntegrationTest;
+import org.ops4j.pax.exam.options.MavenArtifactProvisionOption;
+import org.ops4j.pax.web.itest.container.httpservice.AbstractHttpServiceProcessingWithConfigAdminIntegrationTest;
+
+import static org.ops4j.pax.exam.Constants.START_LEVEL_TEST_BUNDLE;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 @RunWith(PaxExam.class)
 public class HttpServiceProcessingWithConfigAdminIntegrationTest extends AbstractHttpServiceProcessingWithConfigAdminIntegrationTest {
 
 	@Configuration
-	public static Option[] configure() {
-		return configureUndertow();
+	public Option[] configure() {
+		Option[] serverOptions = combine(baseConfigure(), paxWebJetty());
+		Option[] configOptions = combine(serverOptions, configAdmin());
+		MavenArtifactProvisionOption auth = mavenBundle("org.ops4j.pax.web.samples", "auth-config-fragment-jetty")
+				.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart();
+		return combine(configOptions, auth);
 	}
 
 }

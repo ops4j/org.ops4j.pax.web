@@ -138,7 +138,9 @@ import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.ClearDynamicRegistrationsChange;
 import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
 import org.ops4j.pax.web.service.spi.task.ContextMetadataModelChange;
+import org.ops4j.pax.web.service.spi.task.ContextParamsChange;
 import org.ops4j.pax.web.service.spi.task.ContextStartChange;
+import org.ops4j.pax.web.service.spi.task.ContextStopChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
@@ -147,6 +149,7 @@ import org.ops4j.pax.web.service.spi.task.FilterStateChange;
 import org.ops4j.pax.web.service.spi.task.MimeAndLocaleMappingChange;
 import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
+import org.ops4j.pax.web.service.spi.task.SecurityConfigChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
 import org.ops4j.pax.web.service.spi.task.TransactionStateChange;
@@ -1996,7 +1999,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 				if (stopped) {
 					// we have to start it again
-					// register a "callback batch operation", which will be submitted withing a new batch
+					// register a "callback batch operation", which will be submitted within a new batch
 					// as new task in single paxweb-config thread pool's thread
 					LOG.info("Scheduling start of the {} context after listener registration for already started context", contextPath);
 					change.registerBatchCompletedAction(new ContextStartChange(OpCode.MODIFY, contextPath));
@@ -2419,6 +2422,52 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 		ensureServletContextStarted(contextPath);
 	}
 
+	@Override
+	public void visitContextStopChange(ContextStopChange change) {
+		String contextPath = change.getContextPath();
+		DeploymentManager manager = getDeploymentManager(contextPath);
+
+		stopUndertowContext(contextPath, manager, null, false);
+	}
+
+	@Override
+	public void visitContextParamsChange(ContextParamsChange change) {
+		// only here we set the parameters
+		if (change.getKind() == OpCode.ADD) {
+			LOG.info("Adding init parameters to {}: {}", change.getOsgiContextModel(), change.getParams());
+			change.getOsgiContextModel().getContextParams().putAll(change.getParams());
+		} else {
+			LOG.info("Removing init parameters from {}: {}", change.getOsgiContextModel(), change.getParams());
+			change.getParams().keySet().forEach(param -> {
+				change.getOsgiContextModel().getContextParams().remove(param);
+			});
+		}
+	}
+
+	@Override
+	public void visitSecurityConfigChange(SecurityConfigChange change) {
+		// we should have the comfort of stopped target context
+		LoginConfigModel loginConfigModel = change.getLoginConfigModel();
+		List<String> securityRoles = change.getSecurityRoles();
+		List<SecurityConstraintModel> securityConstraints = change.getSecurityConstraints();
+		if (change.getKind() == OpCode.ADD) {
+			LOG.info("Adding security configuration to {}", change.getOsgiContextModel());
+			// just operate on the same OsgiContextModel that comes with the change
+			// even if it's not highest ranked
+			change.getOsgiContextModel().getSecurityConfiguration().setLoginConfig(loginConfigModel);
+			change.getOsgiContextModel().getSecurityConfiguration().getSecurityRoles().addAll(securityRoles);
+			change.getOsgiContextModel().getSecurityConfiguration().getSecurityConstraints().addAll(securityConstraints);
+		} else {
+			LOG.info("Removing security configuration from {}", change.getOsgiContextModel());
+			change.getOsgiContextModel().getSecurityConfiguration().setLoginConfig(null);
+			securityRoles.forEach(change.getOsgiContextModel().getSecurityConfiguration().getSecurityRoles()::remove);
+			securityConstraints.forEach(sc -> {
+				change.getOsgiContextModel().getSecurityConfiguration().getSecurityConstraints()
+						.removeIf(scm -> scm.getName().equals(sc.getName()));
+			});
+		}
+	}
+
 	/**
 	 * <p>This method is always (should be) called withing the "configuration thread" of Pax Web Runtime, because
 	 * it's called in visit() methods for servlets (including resources) and filters, so we can safely access
@@ -2532,7 +2581,9 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			// alter security configuration
 			SecurityConfigurationModel security = highestRanked.getSecurityConfiguration();
 			LoginConfigModel lc = security.getLoginConfig();
-			if (lc != null) {
+			if (lc == null) {
+				deployment.setLoginConfig(null);
+			} else {
 				String authMethod = lc.getAuthMethod();
 				String realmName = lc.getRealmName();
 				if ("BASIC".equals(authMethod) || "DIGEST".equals(authMethod)) {
@@ -2547,34 +2598,34 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 				deployment.setLoginConfig(new LoginConfig(authMethod, realmName,
 						lc.getFormLoginPage(), lc.getFormErrorPage()));
+			}
 
-				deployment.getSecurityRoles().clear();
-				deployment.addSecurityRoles(security.getSecurityRoles());
+			deployment.getSecurityRoles().clear();
+			deployment.addSecurityRoles(security.getSecurityRoles());
 
-				deployment.getSecurityConstraints().clear();
-				for (SecurityConstraintModel constraintModel : security.getSecurityConstraints()) {
-					SecurityConstraint constraint = new SecurityConstraint();
-					if (constraintModel.isAuthRolesSet()) {
-						constraint.setEmptyRoleSemantic(SecurityInfo.EmptyRoleSemantic.AUTHENTICATE);
-					}
-					constraint.addRolesAllowed(constraintModel.getAuthRoles());
-					if (constraintModel.getTransportGuarantee() == ServletSecurity.TransportGuarantee.NONE) {
-						constraint.setTransportGuaranteeType(TransportGuaranteeType.NONE);
-					} else if (constraintModel.getTransportGuarantee() == ServletSecurity.TransportGuarantee.CONFIDENTIAL) {
-						constraint.setTransportGuaranteeType(TransportGuaranteeType.CONFIDENTIAL);
-					}
-					for (SecurityConstraintModel.WebResourceCollection col : constraintModel.getWebResourceCollections()) {
-						WebResourceCollection wrc = new WebResourceCollection();
-						boolean methodSet = false;
-						wrc.addHttpMethods(col.getMethods());
-						if (col.getMethods().size() == 0) {
-							wrc.addHttpMethodOmissions(col.getOmittedMethods());
-						}
-						wrc.addUrlPatterns(col.getPatterns());
-						constraint.addWebResourceCollection(wrc);
-					}
-					deployment.addSecurityConstraint(constraint);
+			deployment.getSecurityConstraints().clear();
+			for (SecurityConstraintModel constraintModel : security.getSecurityConstraints()) {
+				SecurityConstraint constraint = new SecurityConstraint();
+				if (constraintModel.isAuthRolesSet()) {
+					constraint.setEmptyRoleSemantic(SecurityInfo.EmptyRoleSemantic.AUTHENTICATE);
 				}
+				constraint.addRolesAllowed(constraintModel.getAuthRoles());
+				if (constraintModel.getTransportGuarantee() == ServletSecurity.TransportGuarantee.NONE) {
+					constraint.setTransportGuaranteeType(TransportGuaranteeType.NONE);
+				} else if (constraintModel.getTransportGuarantee() == ServletSecurity.TransportGuarantee.CONFIDENTIAL) {
+					constraint.setTransportGuaranteeType(TransportGuaranteeType.CONFIDENTIAL);
+				}
+				for (SecurityConstraintModel.WebResourceCollection col : constraintModel.getWebResourceCollections()) {
+					WebResourceCollection wrc = new WebResourceCollection();
+					boolean methodSet = false;
+					wrc.addHttpMethods(col.getMethods());
+					if (col.getMethods().size() == 0) {
+						wrc.addHttpMethodOmissions(col.getOmittedMethods());
+					}
+					wrc.addUrlPatterns(col.getPatterns());
+					constraint.addWebResourceCollection(wrc);
+				}
+				deployment.addSecurityConstraint(constraint);
 			}
 
 			// only now add the listeners in correct order

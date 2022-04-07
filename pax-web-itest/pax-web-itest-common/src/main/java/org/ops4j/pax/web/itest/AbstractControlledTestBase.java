@@ -224,9 +224,13 @@ public abstract class AbstractControlledTestBase {
 	 * {@link org.osgi.service.http.HttpService}.
 	 * @return
 	 */
-	protected Option paxWebRuntime() {
-		return mavenBundle("org.ops4j.pax.web", "pax-web-runtime")
-				.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1);
+	protected Option[] paxWebRuntime() {
+		return new Option[] {
+				mavenBundle("org.ops4j.pax.web", "pax-web-tomcat-common")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ops4j.pax.web", "pax-web-runtime")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
+		};
 	}
 
 	protected Option[] paxWebTestSupport() {

@@ -65,9 +65,7 @@ import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.dto.ServiceReferenceDTO;
-import org.osgi.service.event.EventAdmin;
 import org.osgi.service.http.HttpService;
-import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.HttpServiceRuntime;
 import org.osgi.service.http.runtime.HttpServiceRuntimeConstants;
 import org.osgi.service.log.LogService;
@@ -82,9 +80,9 @@ import static org.ops4j.pax.web.service.PaxWebConstants.HTTPSERVICE_REGISTRATION
  * <p>Main entry point to Pax-Web.</p>
  * <p>This activator performs these actions:<ul>
  *     <li>servlet event dispatcher</li>
- *     <li>registration of {@link WebElementEventListener}-{@link EventAdmin} bridge</li>
+ *     <li>registration of {@link WebElementEventListener}-{@code org.osgi.service.event.EventAdmin} bridge</li>
  *     <li>registration of {@link WebElementEventListener}-{@link LogService} bridge</li>
- *     <li>registration of {@link org.osgi.service.cm.ManagedService} to monitor
+ *     <li>registration of {@code org.osgi.service.cm.ManagedService} to monitor
  *     {@code org.ops4j.pax.web} PID changes</li>
  * </ul></p>
  * <p></p>
@@ -114,8 +112,8 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	 */
 	private WebElementEventDispatcher webElementEventDispatcher;
 
-//	/** Processor for instructions in {@code org.ops4j.pax.web.context} factory PID */
-//	private HttpContextProcessing httpContextProcessing;
+	/** Processor for instructions in {@code org.ops4j.pax.web.context} factory PID */
+	private HttpContextProcessing httpContextProcessing;
 
 	/**
 	 * Registration for current {@link org.osgi.framework.ServiceFactory} for {@link HttpService} and
@@ -134,23 +132,21 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	 */
 	private ServiceRegistration<HttpServiceRuntime> httpServiceRuntimeReg;
 
-	/** Registration of {@link org.osgi.service.cm.ManagedService} for {@code org.ops4j.pax.web} PID. */
+	/** Registration of {@code org.osgi.service.cm.ManagedService} for {@code org.ops4j.pax.web} PID. */
 	private ServiceRegistration<?> managedServiceReg;
 
-	/** Registration of default {@link ServletContextHelper} */
-	private ServiceRegistration<ServletContextHelper> servletContextHelperReg;
-
-//	/**
-//	 * Registration of MSF for {@code org.ops4j.pax.web.context} factory PID for current
-//	 * {@link ServerControllerFactory}. When {@link ServerControllerFactory} changes, this MSF is re-registered.
-//	 */
-//	private ServiceRegistration<ManagedServiceFactory> managedServiceFactoryReg;
+	/**
+	 * Registration of {@code org.osgi.service.cm.ManagedServiceFactory} for {@code org.ops4j.pax.web.context}
+	 * factory PID for current {@link ServerControllerFactory}. When {@link ServerControllerFactory} changes,
+	 * this MSF is re-registered.
+	 */
+	private ServiceRegistration<?> managedServiceFactoryReg;
 
 	/** Tracker for {@link ServerControllerFactory} that may come from one of server bundles (e.g., pax-web-jetty) */
 	private ServiceTracker<ServerControllerFactory, ServerControllerFactory> serverControllerFactoryTracker;
 
 	/** Tracker for optional EventAdmin */
-	private ServiceTracker<EventAdmin, EventAdmin> eventServiceTracker;
+	private ServiceTracker<?, ?> eventServiceTracker;
 
 	/** Tracker for optional LogService, but because Slf4J comes from pax-logging anyway, this service is usually available */
 	private ServiceTracker<LogService, LogService> logServiceTracker;
@@ -159,7 +155,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	private final List<ServerListener> serverListeners = new CopyOnWriteArrayList<>();
 
 	private ServiceTracker<?, ?> jasyptTracker;
-	private AtomicBoolean jasyptTracking = new AtomicBoolean(false);
+	private final AtomicBoolean jasyptTracking = new AtomicBoolean(false);
 
 	private final AtomicBoolean initialConfigSet = new AtomicBoolean(false);
 
@@ -225,19 +221,11 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			serverControllerFactory.releaseServerController(serverController, serverController.getConfiguration());
 		}
 
+		cleanUpHttpServiceRegistrations();
+
 		if (jasyptTracker != null) {
 			jasyptTracker.close();
 			jasyptTracker = null;
-		}
-		if (httpServiceRuntimeReg != null) {
-			LOG.info("Unregistering current HttpServiceRuntime");
-			httpServiceRuntimeReg.unregister();
-			httpServiceRuntimeReg = null;
-		}
-		if (httpServiceFactoryReg != null) {
-			LOG.info("Unregistering current HttpService factory");
-			httpServiceFactoryReg.unregister();
-			httpServiceFactoryReg = null;
 		}
 		if (serverListenerTracker != null) {
 			serverListenerTracker.close();
@@ -246,10 +234,6 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 		if (serverControllerFactoryTracker != null) {
 			serverControllerFactoryTracker.close();
 			serverControllerFactoryTracker = null;
-		}
-		if (servletContextHelperReg != null) {
-			servletContextHelperReg.unregister();
-			servletContextHelperReg = null;
 		}
 		if (managedServiceReg != null) {
 			managedServiceReg.unregister();
@@ -263,11 +247,8 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			webElementEventDispatcher.destroy();
 			webElementEventDispatcher = null;
 		}
-//		if (httpContextProcessing != null) {
-//			httpContextProcessing.destroy();
-//		}
 
-		// Wait up to 20 seconds, otherwhise
+		// Wait up to 20 seconds, otherwise...
 		try {
 			runtimeExecutor.shutdown();
 			LOG.debug("...entering 20 seconds grace period...");
@@ -278,7 +259,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			runtimeExecutor.shutdownNow();
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			// Ignore, we are done anyways...
+			// ...Ignore, we are done anyways.
 		}
 
 		LOG.info("Pax Web Runtime stopped");
@@ -296,24 +277,26 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 				new PaxWebManagedService(this), props);
 	}
 
-//	/**
-//	 * Registers a managed service factory to create {@link org.osgi.service.http.HttpContext} <em>processors</em>
-//	 * - these will possibly register additional web items (like login configurations or filters) for shared or
-//	 * per-bundle http services.
-//	 *
-//	 * @param context
-//	 */
-//	private void createManagedServiceFactory(BundleContext context) {
-//		// sanity check
-//		if (managedServiceFactoryReg != null) {
-//			managedServiceFactoryReg.unregister();
-//			managedServiceFactoryReg = null;
-//		}
-//		final Dictionary<String, String> props = new Hashtable<>();
-//		props.put(Constants.SERVICE_PID, HttpContextProcessing.PID);
-//		httpContextProcessing = new HttpContextProcessing(bundleContext, serverController);
-//		managedServiceFactoryReg = context.registerService(ManagedServiceFactory.class, httpContextProcessing, props);
-//	}
+	/**
+	 * Registers a managed service factory to create {@link org.osgi.service.http.HttpContext} <em>processors</em>
+	 * - these will possibly register additional web items (like login configurations or filters) for shared or
+	 * per-bundle http services.
+	 *
+	 * @param context
+	 * @param serverController
+	 */
+	private void createManagedServiceFactory(BundleContext context, ServerController serverController) {
+		// sanity check
+		if (managedServiceFactoryReg != null) {
+			managedServiceFactoryReg.unregister();
+			managedServiceFactoryReg = null;
+		}
+		final Dictionary<String, String> props = new Hashtable<>();
+		props.put(Constants.SERVICE_PID, HttpContextProcessing.PID);
+		httpContextProcessing = new HttpContextProcessing(context);
+		managedServiceFactoryReg = context.registerService("org.osgi.service.cm.ManagedServiceFactory",
+				httpContextProcessing, props);
+	}
 
 	// two methods update the configuration of entire Pax Web runtime:
 	//  - updateConfiguration(Dictionary) - schedules reconfiguration because configuration properties changed
@@ -428,22 +411,10 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 		}
 
 		this.configuration = dictionary;
+		boolean hadSCF = this.serverControllerFactory != null;
 		this.serverControllerFactory = controllerFactory;
 
-		if (jasyptTracker != null) {
-			jasyptTracker.close();
-			jasyptTracker = null;
-		}
-		if (httpServiceRuntimeReg != null) {
-			LOG.info("Unregistering current HttpServiceRuntime");
-			httpServiceRuntimeReg.unregister();
-			httpServiceRuntimeReg = null;
-		}
-		if (httpServiceFactoryReg != null) {
-			LOG.info("Unregistering current HttpService factory");
-			httpServiceFactoryReg.unregister();
-			httpServiceFactoryReg = null;
-		}
+		cleanUpHttpServiceRegistrations();
 //		if (managedServiceFactoryReg != null) {
 //			managedServiceFactoryReg.unregister();
 //			managedServiceFactoryReg = null;
@@ -457,8 +428,6 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			}
 			serverController = null;
 		}
-
-		boolean hadSCF = this.serverControllerFactory != null;
 
 		if (serverControllerFactory == null) {
 			if (hadSCF) {
@@ -587,7 +556,8 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			ServiceFactory<StoppableHttpService> factory = new StoppableHttpServiceFactory(serverController, serverModel,
 					webElementEventDispatcher) {
 				@Override
-				StoppableHttpService createService(Bundle bundle, ServerController serverController, ServerModel serverModel, WebElementEventDispatcher webElementEventDispatcher) {
+				StoppableHttpService createService(Bundle bundle, ServerController serverController,
+						ServerModel serverModel, WebElementEventDispatcher webElementEventDispatcher) {
 					HttpServiceEnabled enabledService =
 							new HttpServiceEnabled(bundle, serverController, serverModel,
 									webElementEventDispatcher, configuration);
@@ -635,9 +605,11 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			// added listener is immediately called with the current state
 			serverController.addListener(new AddressConfiguration());
 
-			// ManagedServiceFactory for org.ops4j.pax.web.context factory PID
-			// we need registered WebContainer for this MSF to work
-//			createManagedServiceFactory(bundleContext);
+			if (Utils.isConfigurationAdminAvailable(this.getClass())) {
+				// ManagedServiceFactory for org.ops4j.pax.web.context factory PID
+				// we need registered WebContainer for this MSF to work
+				createManagedServiceFactory(bundleContext, serverController);
+			}
 		} catch (Throwable t) {
 			try {
 				Bundle bundle = bundleContext.getBundle();
@@ -647,6 +619,27 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 				LOG.error("Unable to start Pax Web server: {}", t.getMessage(), t);
 			} catch (IllegalStateException ignored) {
 			}
+		}
+	}
+
+	private void cleanUpHttpServiceRegistrations() {
+		if (httpServiceRuntimeReg != null) {
+			LOG.info("Unregistering current HttpServiceRuntime");
+			httpServiceRuntimeReg.unregister();
+			httpServiceRuntimeReg = null;
+		}
+		if (httpServiceFactoryReg != null) {
+			LOG.info("Unregistering current HttpService factory");
+			httpServiceFactoryReg.unregister();
+			httpServiceFactoryReg = null;
+		}
+		if (httpContextProcessing != null) {
+			httpContextProcessing.destroy();
+			httpContextProcessing = null;
+		}
+		if (managedServiceFactoryReg != null) {
+			managedServiceFactoryReg.unregister();
+			managedServiceFactoryReg = null;
 		}
 	}
 

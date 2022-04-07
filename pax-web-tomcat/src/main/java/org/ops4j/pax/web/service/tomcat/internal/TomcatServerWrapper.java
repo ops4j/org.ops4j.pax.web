@@ -85,6 +85,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.model.elements.LoginConfigModel;
 import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
@@ -104,7 +105,9 @@ import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.ClearDynamicRegistrationsChange;
 import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
 import org.ops4j.pax.web.service.spi.task.ContextMetadataModelChange;
+import org.ops4j.pax.web.service.spi.task.ContextParamsChange;
 import org.ops4j.pax.web.service.spi.task.ContextStartChange;
+import org.ops4j.pax.web.service.spi.task.ContextStopChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
@@ -113,6 +116,7 @@ import org.ops4j.pax.web.service.spi.task.FilterStateChange;
 import org.ops4j.pax.web.service.spi.task.MimeAndLocaleMappingChange;
 import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
+import org.ops4j.pax.web.service.spi.task.SecurityConfigChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
 import org.ops4j.pax.web.service.spi.task.TransactionStateChange;
@@ -1417,7 +1421,7 @@ class TomcatServerWrapper implements BatchVisitor {
 
 				if (stopped) {
 					// we have to start it again
-					// register a "callback batch operation", which will be submitted withing a new batch
+					// register a "callback batch operation", which will be submitted within a new batch
 					// as new task in single paxweb-config thread pool's thread
 					LOG.info("Scheduling start of the {} context after listener registration for already started context", contextPath);
 					change.registerBatchCompletedAction(new ContextStartChange(OpCode.MODIFY, contextPath));
@@ -1845,6 +1849,58 @@ class TomcatServerWrapper implements BatchVisitor {
 			ensureServletContextStarted(standardContext);
 		} else {
 			LOG.debug("Not starting unknown context {}.", contextPath);
+		}
+	}
+
+	@Override
+	public void visitContextStopChange(ContextStopChange change) {
+		String contextPath = change.getContextPath();
+		PaxWebStandardContext standardContext = contextHandlers.get(contextPath);
+		if (standardContext != null && standardContext.isStarted()) {
+			LOG.info("Stopping Tomcat context \"{}\"", contextPath);
+			try {
+				standardContext.stop();
+			} catch (Exception e) {
+				LOG.warn("Error stopping Tomcat context \"{}\": {}", contextPath, e.getMessage(), e);
+			}
+		}
+	}
+
+	@Override
+	public void visitContextParamsChange(ContextParamsChange change) {
+		// only here we set the parameters
+		if (change.getKind() == OpCode.ADD) {
+			LOG.info("Adding init parameters to {}: {}", change.getOsgiContextModel(), change.getParams());
+			change.getOsgiContextModel().getContextParams().putAll(change.getParams());
+		} else {
+			LOG.info("Removing init parameters from {}: {}", change.getOsgiContextModel(), change.getParams());
+			change.getParams().keySet().forEach(param -> {
+				change.getOsgiContextModel().getContextParams().remove(param);
+			});
+		}
+	}
+
+	@Override
+	public void visitSecurityConfigChange(SecurityConfigChange change) {
+		// we should have the comfort of stopped target context
+		LoginConfigModel loginConfigModel = change.getLoginConfigModel();
+		List<String> securityRoles = change.getSecurityRoles();
+		List<SecurityConstraintModel> securityConstraints = change.getSecurityConstraints();
+		if (change.getKind() == OpCode.ADD) {
+			LOG.info("Adding security configuration to {}", change.getOsgiContextModel());
+			// just operate on the same OsgiContextModel that comes with the change
+			// even if it's not highest ranked
+			change.getOsgiContextModel().getSecurityConfiguration().setLoginConfig(loginConfigModel);
+			change.getOsgiContextModel().getSecurityConfiguration().getSecurityRoles().addAll(securityRoles);
+			change.getOsgiContextModel().getSecurityConfiguration().getSecurityConstraints().addAll(securityConstraints);
+		} else {
+			LOG.info("Removing security configuration from {}", change.getOsgiContextModel());
+			change.getOsgiContextModel().getSecurityConfiguration().setLoginConfig(null);
+			securityRoles.forEach(change.getOsgiContextModel().getSecurityConfiguration().getSecurityRoles()::remove);
+			securityConstraints.forEach(sc -> {
+				change.getOsgiContextModel().getSecurityConfiguration().getSecurityConstraints()
+						.removeIf(scm -> scm.getName().equals(sc.getName()));
+			});
 		}
 	}
 

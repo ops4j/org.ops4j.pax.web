@@ -18,6 +18,7 @@ package org.ops4j.pax.web.samples.spring.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
@@ -32,6 +33,10 @@ public class HelloWorldController implements Controller {
 		modelAndView.setViewName("helloWorld");
 		String message = "Done! Spring MVC works like a charm! : - ) ";
 		modelAndView.addObject("message", message);
+		HelloWorldController object = new HelloWorldController();
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(object);
+		binder.setAllowedFields();
+		binder.bind(request);
 		return modelAndView;
 	}
 

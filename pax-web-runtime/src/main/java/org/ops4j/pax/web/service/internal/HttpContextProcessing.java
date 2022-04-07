@@ -16,26 +16,42 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import javax.servlet.annotation.ServletSecurity;
 
+import org.apache.tomcat.util.descriptor.web.LoginConfig;
+import org.apache.tomcat.util.descriptor.web.SecurityCollection;
+import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
+import org.apache.tomcat.util.descriptor.web.WebXml;
+import org.apache.tomcat.util.descriptor.web.WebXmlParser;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
-import org.ops4j.pax.web.service.spi.ServerController;
+import org.ops4j.pax.web.service.internal.views.ProcessingWebContainerView;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.LoginConfigModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintModel;
+import org.ops4j.pax.web.service.spi.task.Batch;
+import org.ops4j.pax.web.service.spi.task.ContextParamsChange;
+import org.ops4j.pax.web.service.spi.task.ContextStartChange;
+import org.ops4j.pax.web.service.spi.task.ContextStopChange;
+import org.ops4j.pax.web.service.spi.task.OpCode;
+import org.ops4j.pax.web.service.spi.task.SecurityConfigChange;
 import org.ops4j.pax.web.service.spi.util.NamedThreadFactory;
+import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -43,7 +59,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
-import org.osgi.service.http.HttpContext;
 import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.slf4j.Logger;
@@ -60,21 +75,21 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 
 	private static final String KEY_CONTEXT_ID = "context.id";
 	private static final String KEY_BUNDLE_SN = "bundle.symbolicName";
+	private static final String KEY_WEB_FRAGMENT = "context.webFragment";
 	private static final String PREFIX_CONTEXT_PARAM = "context.param.";
 	private static final String PREFIX_LOGIN_CONFIG = "login.config.";
 	private static final String PREFIX_SECURITY = "security.";
+	private static final String PREFIX_SECURITY_ROLE = "security.roles";
 
 	private final ExecutorService configExecutor = new ThreadPoolExecutor(0, 1,
 			20, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("paxweb-context"));
 
 	private final BundleContext serviceContext;
-	private final ServerController serverController;
 
 	private final ConcurrentMap<String, HttpContextTracker> httpContextTrackers = new ConcurrentHashMap<>();
 
-	public HttpContextProcessing(BundleContext serviceContext, ServerController serverController) {
+	public HttpContextProcessing(BundleContext serviceContext) {
 		this.serviceContext = serviceContext;
-		this.serverController = serverController;
 	}
 
 	@Override
@@ -137,7 +152,7 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 		// real PID from factory PID holding given processor's configuration
 		private final String pid;
 
-		private Dictionary<String, ?> properties;
+		private Map<String, String> properties;
 		// declared symbolic name of bundle to track
 		private String symbolicName;
 		// tracker for given symbolic name
@@ -145,12 +160,16 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 		// tracked bundle + version
 		private Bundle bundle;
 		private Version version;
+		private String contextId;
 
 		// transient values for current configuration
-		private HttpContext httpContext;
-		private Dictionary<String, String> contextParams;
-		private LoginConfiguration loginConfiguration;
-		private List<SecurityConstraintsMapping> securityMappings = new LinkedList<>();
+		private final Map<String, String> contextParams = new LinkedHashMap<>();
+		// <login-config>
+		private LoginConfigModel loginConfiguration;
+		// <security-role>
+		private final List<String> securityRoles = new LinkedList<>();
+		// <security-constraint>
+		private final List<SecurityConstraintModel> securityMappings = new LinkedList<>();
 
 		HttpContextTracker(String pid) {
 			this.pid = pid;
@@ -193,8 +212,12 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 				}
 
 				// non-null symbolicName is kind if indicator that the configuration is correct
-				properties = props;
-				symbolicName = properties.get(KEY_BUNDLE_SN).toString().trim();
+				properties = Utils.toMap(props);
+				symbolicName = properties.get(KEY_BUNDLE_SN).trim();
+				contextId = properties.get(KEY_CONTEXT_ID);
+				if (contextId == null) {
+					contextId = PaxWebConstants.DEFAULT_CONTEXT_NAME;
+				}
 
 				if (bundleTracker == null) {
 					bundleTracker = new BundleTracker<>(serviceContext, Bundle.ACTIVE, this);
@@ -212,48 +235,201 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 		 * configured bundle's {@link WebContainer} to register additional web items
 		 */
 		private void processContext() {
-			LOG.info("Customizing WebContainer for bundle {}/{}", symbolicName, version);
-
-			WebContainer wc = getWebContainer();
-			if (wc == null) {
+			OsgiContextModel osgiContextModel = getProcessedOsgiContextModel();
+			if (osgiContextModel == null) {
+				return;
+			}
+			LOG.info("Customizing {}", osgiContextModel);
+			ProcessingWebContainerView view = getProcessingView();
+			if (view == null) {
 				return;
 			}
 
-			// we have all we need - it's finally the time to apply PID configuration to WebContainer
-			String contextId = (String) properties.get(KEY_CONTEXT_ID);
-			if (contextId == null) {
-				contextId = PaxWebConstants.DEFAULT_CONTEXT_NAME;
+			Batch batch = new Batch("Processing context \"" + contextId + "\" for bundle " + bundle.getSymbolicName());
+			// we always have to restart the context
+			batch.getOperations().add(new ContextStopChange(OpCode.MODIFY, osgiContextModel));
+
+			// we could set the properties directly, but we want to do it in elegant way - using a batch
+			// surrounded by restart of the target context.
+
+			// Properties file (configuration admin config) can encode parts of security-related stuff from web.xml
+			// and also (as a bonus) context parameters.
+			// This "HTTP context processing" was designed as limited subset of the information content from
+			// full web[-fragment].xml
+			//
+			// we handle:
+			// 0) meta information to select the context (no web[-fragment].xml equivalent)
+			//    context.id = <ID of the context or "default" if not present>
+			//    bundle.symbolicName = <symbolic name of the bundle for which to obtain WebContainer instance>
+			//
+			// 1) context parameters
+			//    <context-param>
+			//      <param-name>token</param-name>
+			//      <param-value>string</param-value>
+			//    </context-param>
+			// encoded as:
+			//    context.param.param-name = param-value
+			//
+			// 2) security roles:
+			//    <security-role>
+			//      <role-name>token</role-name>
+			//    </security-role>
+			// encoded as:
+			//    security.roles = role1, role2, ...
+			//
+			// 3) login configuration:
+			//    <login-config>
+			//      <auth-method>token</auth-method>
+			//      <realm-name>token</realm-name>
+			//      <form-login-config>
+			//        <form-login-page>/token</form-login-page>
+			//        <form-error-page>/token</form-error-page>
+			//      </form-login-config>
+			//    </login-config>
+			// encoded as:
+			//    login.config.authMethod = auth-method
+			//    login.config.realmName = realm-name
+			//    login.config.formLoginPage = form-login-page
+			//    login.config.formErrorPage = form-error-page
+			//
+			// 4) security constraints (multiple)
+			//    <security-constraint>
+			//      <display-name>token</display-name>
+			//      <web-resource-collection> <!--1 or more repetitions:-->
+			//        <web-resource-name>token</web-resource-name>
+			//        <url-pattern>string</url-pattern> <!--1 or more repetitions:-->
+			//        <!--You have a CHOICE of the next 2 items at this level-->
+			//        <http-method>token</http-method> <!--1 or more repetitions:-->
+			//        <http-method-omission>token</http-method-omission> <!--1 or more repetitions:-->
+			//      </web-resource-collection>
+			//      <auth-constraint> <!--Optional:-->
+			//        <role-name>token</role-name> <!--Zero or more repetitions:-->
+			//      </auth-constraint>
+			//      <user-data-constraint> <!--Optional:-->
+			//        <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+			//      </user-data-constraint>
+			//    </security-constraint>
+			// encoded as:
+			//    security.[constraint.name].url(s) = url-pattern1, url-pattern2, ...
+			//    security.[constraint.name].methods = GET, POST, ...
+			//    security.[constraint.name].methodOmissions = GET, POST, ...
+			//    security.[constraint.name].roles = role1, role2, ...
+			//    security.[constraint.name].transportGuarantee = CONFIDENTIAL|INTEGRAL|NONE
+			//
+			// however if there's "context.webFragment" property, we assume it's web-fragment.xml location
+			// that we can parse and extract relevant information from it
+
+			String webFragmentLocation = properties.get(KEY_WEB_FRAGMENT);
+			if (webFragmentLocation != null && !"".equals(webFragmentLocation.trim())) {
+				File f = new File(webFragmentLocation);
+				if (!f.isFile()) {
+					LOG.warn("Web Fragment location {} is not accessible. Skipping.", webFragmentLocation);
+				} else {
+					LOG.info("Processing Web Fragment {}", webFragmentLocation);
+					WebXml fragment = new WebXml();
+					fragment.setDistributable(true);
+					fragment.setOverridable(true);
+					fragment.setAlwaysAddWelcomeFiles(false);
+					fragment.setReplaceWelcomeFiles(true);
+					try {
+						fragment.setURL(f.toURI().toURL());
+						WebXmlParser parser = new WebXmlParser(false, false, true);
+						parser.setClassLoader(WebXmlParser.class.getClassLoader());
+						parser.parseWebXml(fragment.getURL(), fragment, true);
+
+						// context params
+						contextParams.putAll(fragment.getContextParams());
+						// security roles
+						securityRoles.addAll(fragment.getSecurityRoles());
+						// login config from web-fragment.xml
+						LoginConfig loginConfig = fragment.getLoginConfig();
+						if (loginConfig != null) {
+							loginConfiguration = new LoginConfigModel();
+							LOG.info("Registering login configuration in WebContainer for bundle \"" + symbolicName + "\": method={}, realm={}",
+									loginConfig.getAuthMethod(), loginConfig.getRealmName());
+							loginConfiguration.setAuthMethod(loginConfig.getAuthMethod());
+							loginConfiguration.setRealmName(loginConfig.getRealmName());
+							loginConfiguration.setFormLoginPage(loginConfig.getLoginPage());
+							loginConfiguration.setFormErrorPage(loginConfig.getErrorPage());
+						}
+						// security constraints
+						for (SecurityConstraint sc : fragment.getSecurityConstraints()) {
+							SecurityConstraintModel constraint = new SecurityConstraintModel();
+							// <display-name> (no <name> at this level)
+							constraint.setName(sc.getDisplayName());
+							// <web-resource-collection> elements
+							for (SecurityCollection wrc : sc.findCollections()) {
+								SecurityConstraintModel.WebResourceCollection collection = new SecurityConstraintModel.WebResourceCollection();
+								collection.setName(wrc.getName());
+								collection.getMethods().addAll(Arrays.asList(wrc.findMethods()));
+								collection.getOmittedMethods().addAll(Arrays.asList(wrc.findOmittedMethods()));
+								collection.getPatterns().addAll(Arrays.asList(wrc.findPatterns()));
+								constraint.getWebResourceCollections().add(collection);
+							}
+							// <auth-constraint> elements
+							constraint.setAuthRolesSet(sc.getAuthConstraint());
+							constraint.getAuthRoles().addAll(Arrays.asList(sc.findAuthRoles()));
+							// in case the roles were missing and used in <auth-constraint>, we have to add them here
+							securityRoles.addAll(constraint.getAuthRoles());
+							// <user-data-constraint>
+							if (sc.getUserConstraint() != null && !"".equals(sc.getUserConstraint().trim())) {
+								if (ServletSecurity.TransportGuarantee.NONE.toString().equals(sc.getUserConstraint())) {
+									constraint.setTransportGuarantee(ServletSecurity.TransportGuarantee.NONE);
+								} else {
+									constraint.setTransportGuarantee(ServletSecurity.TransportGuarantee.CONFIDENTIAL);
+								}
+							}
+
+							securityMappings.add(constraint);
+						}
+					} catch (IOException e) {
+						LOG.warn("Failure parsing default {}: {}", webFragmentLocation, e.getMessage(), e);
+					}
+				}
 			}
-			// shared contexts are not supported for now...
-			httpContext = wc.createDefaultHttpContext(contextId);
 
-			contextParams = collectContextParams(properties);
-//			if (contextParams != null && !contextParams.isEmpty()) {
-//				LOG.info("Setting context parameters in WebContainer for bundle \"" + symbolicName + "\": {}", contextParams);
-//				wc.setContextParam(contextParams, httpContext);
-//			}
+			// context params from Configuration Admin override those from web-fragment.xml
+			contextParams.putAll(collectContextParams(properties));
+			if (!contextParams.isEmpty()) {
+				LOG.info("Setting context parameters in {}", osgiContextModel);
+				batch.getOperations().add(new ContextParamsChange(OpCode.ADD, osgiContextModel, contextParams));
+			}
 
-			loginConfiguration = collectLoginConfiguration(properties);
-//			if (loginConfiguration != null) {
-//				LOG.info("Registering login configuration in WebContainer for bundle \"" + symbolicName + "\": method={}, realm={}",
-//						loginConfiguration.authMethod, loginConfiguration.realmName);
-//				wc.registerLoginConfig(loginConfiguration.authMethod,
-//						loginConfiguration.realmName,
-//						loginConfiguration.formLoginPage,
-//						loginConfiguration.formErrorPage,
-//						httpContext);
-//			}
+			// login config from Configuration Admin - may override the config from web-fragment.xml
+			LoginConfigModel cmLoginConfig = collectLoginConfiguration(properties);
+			if (cmLoginConfig != null) {
+				if (loginConfiguration == null) {
+					loginConfiguration = new LoginConfigModel();
+					LOG.info("Registering login configuration in {}: method={}, realm={}",
+							osgiContextModel, cmLoginConfig.getAuthMethod(), cmLoginConfig.getRealmName());
+				} else {
+					LOG.info("Overriding login configuration in {}: method={}, realm={}",
+							osgiContextModel, cmLoginConfig.getAuthMethod(), cmLoginConfig.getRealmName());
+				}
+				loginConfiguration.setAuthMethod(cmLoginConfig.getAuthMethod());
+				loginConfiguration.setRealmName(cmLoginConfig.getRealmName());
+				loginConfiguration.setFormLoginPage(cmLoginConfig.getFormLoginPage());
+				loginConfiguration.setFormErrorPage(cmLoginConfig.getFormErrorPage());
+			}
 
-			securityMappings = collectSecurityMappings(properties);
-//			if (securityMappings != null && !securityMappings.isEmpty()) {
-//				for (SecurityConstraintsMapping scm: securityMappings) {
-//					LOG.info("Registering security mappings in WebContainer for bundle \"" + symbolicName + "\": " + scm);
-//					wc.registerConstraintMapping(scm.name, scm.method, scm.url, null, true, scm.roles, httpContext);
-//				}
-//			}
+			// finally security mappings from CM have higher priority than the ones from web-fragment.xml
+			List<SecurityConstraintModel> cmSecurityMappings = collectSecurityMappings(properties);
+			cmSecurityMappings.addAll(securityMappings);
+			securityMappings.clear();
+			securityMappings.addAll(cmSecurityMappings);
 
-			// altering the context required stopping it - let's (knowing the details) start it again
-//			wc.end(httpContext);
+			if (!securityMappings.isEmpty()) {
+				LOG.info("Registering security mappings in {}", osgiContextModel);
+			}
+
+			// login config and security constraints
+			batch.getOperations().add(new SecurityConfigChange(OpCode.ADD, osgiContextModel, loginConfiguration, securityMappings, securityRoles));
+
+			// start after reconfiguration
+			batch.getOperations().add(new ContextStartChange(OpCode.MODIFY, osgiContextModel));
+
+			// apply the changes by sending the batch
+			view.sendBatch(batch);
 		}
 
 		/**
@@ -262,58 +438,57 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 		public void cleanupContext() {
 			LOG.info("{}: Restoring WebContainer for bundle {}/{}", this, symbolicName, version);
 
-			WebContainer wc = getWebContainer();
-			if (wc == null || httpContext == null) {
+			OsgiContextModel osgiContextModel = getProcessedOsgiContextModel();
+			if (osgiContextModel == null) {
+				return;
+			}
+			ProcessingWebContainerView view = getProcessingView();
+			if (view == null) {
 				return;
 			}
 
-			// we have to revert previous configuration - but current WebContainer interface doesn't allow
-			// us to clean everything correctly
-//			if (securityMappings.size() > 0) {
-//				wc.unregisterConstraintMapping(httpContext);
-//				securityMappings.clear();
-//			}
-//			if (loginConfiguration != null) {
-//				// even if before processing there could be another login configuration applied...
-//				wc.unregisterLoginConfig(httpContext);
-//				loginConfiguration = null;
-//			}
-//			if (contextParams != null && !contextParams.isEmpty()) {
-//				wc.setContextParam(null, httpContext);
-//				contextParams = null;
-//			}
+			Batch batch = new Batch("Processing context \"" + contextId + "\" for bundle " + bundle.getSymbolicName());
+			// we always have to restart the context
+			batch.getOperations().add(new ContextStopChange(OpCode.MODIFY, osgiContextModel));
 
-			// cleaning the context required stopping it - let's (knowing the details) start it again
-//			wc.end(httpContext);
+			// context params
+			batch.getOperations().add(new ContextParamsChange(OpCode.DELETE, osgiContextModel, contextParams));
 
-			httpContext = null;
+			// login config and security constraints - yes - login config be changed to null (even if there was something
+			// configured before HTTP context processing)
+			batch.getOperations().add(new SecurityConfigChange(OpCode.DELETE, osgiContextModel, loginConfiguration, securityMappings, securityRoles));
+
+			// start after reconfiguration
+			batch.getOperations().add(new ContextStartChange(OpCode.MODIFY, osgiContextModel));
+
+			// apply the changes by sending the batch
+			view.sendBatch(batch);
 		}
 
-		private LoginConfiguration collectLoginConfiguration(Dictionary<String,?> properties) {
+		private LoginConfigModel collectLoginConfiguration(Map<String, String> properties) {
 			if (properties != null) {
 				if (properties.get(PREFIX_LOGIN_CONFIG + "authMethod") != null) {
 					// all other properties are optional
-					LoginConfiguration lc = new LoginConfiguration();
-					lc.authMethod = properties.get(PREFIX_LOGIN_CONFIG + "authMethod").toString();
-					lc.realmName = (String) properties.get(PREFIX_LOGIN_CONFIG + "realmName");
-					if (lc.realmName == null) {
-						lc.realmName = UUID.randomUUID().toString();
+					LoginConfigModel lc = new LoginConfigModel();
+					lc.setAuthMethod(properties.get(PREFIX_LOGIN_CONFIG + "authMethod"));
+					lc.setRealmName(properties.get(PREFIX_LOGIN_CONFIG + "realmName"));
+					if (lc.getRealmName() == null) {
+						lc.setRealmName("default");
 					}
-					lc.formLoginPage = (String) properties.get(PREFIX_LOGIN_CONFIG + "formLoginPage");
-					lc.formErrorPage = (String) properties.get(PREFIX_LOGIN_CONFIG + "formErrorPage");
+					lc.setFormLoginPage(properties.get(PREFIX_LOGIN_CONFIG + "formLoginPage"));
+					lc.setFormErrorPage(properties.get(PREFIX_LOGIN_CONFIG + "formErrorPage"));
 					return lc;
 				}
 			}
 			return null;
 		}
 
-		private Dictionary<String, String> collectContextParams(Dictionary<String,?> properties) {
-			Hashtable<String, String> result = new Hashtable<>();
+		private Map<String, String> collectContextParams(Map<String, String> properties) {
+			Map<String, String> result = new HashMap<>();
 			if (properties != null) {
-				for (Enumeration<String> e = properties.keys(); e.hasMoreElements(); ) {
-					String k = e.nextElement();
+				for (String k : properties.keySet()) {
 					if (k != null && k.startsWith(PREFIX_CONTEXT_PARAM)) {
-						String v = (String) properties.get(k);
+						String v = properties.get(k);
 						String paramName = k.substring(PREFIX_CONTEXT_PARAM.length());
 						result.put(paramName, v);
 					}
@@ -322,38 +497,90 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 			return result;
 		}
 
-		private List<SecurityConstraintsMapping> collectSecurityMappings(Dictionary<String,?> properties) {
-			List<SecurityConstraintsMapping> result = new LinkedList<>();
+		private List<SecurityConstraintModel> collectSecurityMappings(Map<String, String> properties) {
+			List<SecurityConstraintModel> result = new LinkedList<>();
 			if (properties != null) {
-				Map<String, SecurityConstraintsMapping> temp = new HashMap<>();
-				for (Enumeration<String> e = properties.keys(); e.hasMoreElements(); ) {
-					String k = e.nextElement();
+				final Map<String, SecurityConstraintModel> temp = new LinkedHashMap<>();
+				for (String k : properties.keySet()) {
 					if (k != null && k.startsWith(PREFIX_SECURITY)) {
 						String paramName = k.substring(PREFIX_SECURITY.length());
 						if (paramName.contains(".")) {
 							String constraintName = paramName.substring(0, paramName.lastIndexOf('.'));
-							SecurityConstraintsMapping model = temp.computeIfAbsent(constraintName, n -> new SecurityConstraintsMapping());
-							model.name = constraintName;
-							String v = (String) properties.get(k);
+							SecurityConstraintModel model = temp.computeIfAbsent(constraintName, n -> {
+								SecurityConstraintModel scm = new SecurityConstraintModel();
+								scm.setName(constraintName);
+								SecurityConstraintModel.WebResourceCollection collection = new SecurityConstraintModel.WebResourceCollection();
+								collection.setName(constraintName); // same as <security-constraint>/<display-name>
+								// only one <web-resource-collection> element per <security-constraint> in ConfigAdmin
+								scm.getWebResourceCollections().add(collection);
+								// no way to decide between "set no roles" (deny all) and "no roles set" (allow all)
+								// so only "deny all behavior"
+								scm.setAuthRolesSet(true);
+								return scm;
+							});
+
+							SecurityConstraintModel.WebResourceCollection collection = model.getWebResourceCollections().get(0);
+
+							// encoded as:
+							//    security.[constraint.name].url(s) = url-pattern1, url-pattern2, ...
+							//    security.[constraint.name].method(s) = GET, POST, ...
+							//    security.[constraint.name].methodOmissions = GET, POST, ...
+							//    security.[constraint.name].roles = role1, role2, ...
+							//    security.[constraint.name].transportGuarantee = CONFIDENTIAL|INTEGRAL|NONE
+
+							String v = properties.get(k);
 							if (paramName.endsWith(".url")) {
-								model.url = v;
+								collection.getPatterns().add(v.trim());
+							} else if (paramName.endsWith(".urls")) {
+								collection.getPatterns().addAll(Arrays.asList(v.split("\\s*,\\s*")));
 							} else if (paramName.endsWith(".method")) {
-								model.method = v;
+								collection.getMethods().add(v.trim());
+							} else if (paramName.endsWith(".methods")) {
+								collection.getMethods().addAll(Arrays.asList(v.split("\\s*,\\s*")));
+							} else if (paramName.endsWith(".methodOmissions")) {
+								collection.getOmittedMethods().addAll(Arrays.asList(v.split("\\s*,\\s*")));
 							} else if (paramName.endsWith(".roles")) {
-								model.roles.addAll(Arrays.asList(v.split("\\s*,\\s*")));
+								model.getAuthRoles().addAll(Arrays.asList(v.split("\\s*,\\s*")));
+							} else if (paramName.endsWith(".transportGuarantee")) {
+								if (ServletSecurity.TransportGuarantee.CONFIDENTIAL.toString().equalsIgnoreCase(v.trim())
+										|| "INTEGRAL".equalsIgnoreCase(v.trim())) {
+									model.setTransportGuarantee(ServletSecurity.TransportGuarantee.CONFIDENTIAL);
+								} else {
+									model.setTransportGuarantee(ServletSecurity.TransportGuarantee.NONE);
+								}
 							}
 						}
 					}
 				}
 
-				for (SecurityConstraintsMapping scm: temp.values()) {
-					if (scm.url != null) {
-						result.add(scm);
-					}
-				}
+				result.addAll(temp.values());
 
 			}
 			return result;
+		}
+
+		private OsgiContextModel getProcessedOsgiContextModel() {
+			ProcessingWebContainerView view = getProcessingView();
+			if (view == null) {
+				return null;
+			}
+
+			OsgiContextModel osgiContextModel = view.getContextModel(bundle, contextId);
+			if (osgiContextModel == null) {
+				LOG.warn("Can't find OsgiContextModel with name \"{}\" for bundle {}", contextId, bundle);
+				return null;
+			}
+
+			return osgiContextModel;
+		}
+
+		private ProcessingWebContainerView getProcessingView() {
+			WebContainer wc = getWebContainer();
+			if (wc == null) {
+				return null;
+			}
+
+			return wc.adapt(ProcessingWebContainerView.class);
 		}
 
 		@Override
@@ -379,6 +606,8 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 		@Override
 		public void removedBundle(Bundle bundle, BundleEvent event, Object object) {
 			this.bundle = null;
+			this.version = null;
+			// no need to reconfigure the context, because everything will be cleaned up anyway
 		}
 
 		/**
@@ -415,28 +644,6 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 		@Override
 		public String toString() {
 			return "HTTP Context Processor {" + "bundle=" + bundle + '}';
-		}
-
-		private class LoginConfiguration {
-			String authMethod;
-			String realmName;
-			String formLoginPage;
-			String formErrorPage;
-		}
-
-		private class SecurityConstraintsMapping {
-			String name;
-			String url;
-			String method;
-			List<String> roles = new LinkedList<>();
-
-			@Override
-			public String toString() {
-				return "SecurityConstraintsMapping{" + "name='" + name + '\'' +
-						", url='" + url + '\'' +
-						", roles=" + roles +
-						'}';
-			}
 		}
 	}
 
