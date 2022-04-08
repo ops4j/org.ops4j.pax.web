@@ -195,6 +195,8 @@
 		<dependency.jakarta.websocket-api>1.1.2</dependency.jakarta.websocket-api>
 		<dependency.jakarta.ws.rs-api>2.1.6</dependency.jakarta.ws.rs-api>
 		<dependency.jakarta.xml.bind-api>2.3.3</dependency.jakarta.xml.bind-api>
+		<dependency.jakarta.xml.soap-api>1.4.2</dependency.jakarta.xml.soap-api>
+		<dependency.jakarta.xml.ws-api>2.3.3</dependency.jakarta.xml.ws-api>
 
 		<dependency.junit>4.13.2</dependency.junit>
 
@@ -2024,6 +2026,16 @@
 				<groupId>jakarta.ws.rs</groupId>
 				<artifactId>jakarta.ws.rs-api</artifactId>
 				<version>${dependency.jakarta.ws.rs-api}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.xml.soap</groupId>
+				<artifactId>jakarta.xml.soap-api</artifactId>
+				<version>${dependency.jakarta.xml.soap-api}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.xml.ws</groupId>
+				<artifactId>jakarta.xml.ws-api</artifactId>
+				<version>${dependency.jakarta.xml.ws-api}</version>
 			</dependency>
 			<dependency>
 				<groupId>jakarta.xml.bind</groupId>

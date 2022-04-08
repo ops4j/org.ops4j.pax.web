@@ -133,6 +133,7 @@
 	<feature name="pax-web-jetty-http2-jdk9" description="Jetty 9 bundles for HTTP/2 support (JDK9+)" version="${dependency.org.eclipse.jetty}" >
 		<feature>pax-web-jetty</feature>
 
+		<bundle start-level="30">mvn:org.eclipse.jetty.alpn/alpn-api/${dependency.org.eclipse.jetty.alpn}</bundle>
 		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-server/${dependency.org.eclipse.jetty}</bundle>
 		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-java-server/${dependency.org.eclipse.jetty}</bundle>
 	</feature>

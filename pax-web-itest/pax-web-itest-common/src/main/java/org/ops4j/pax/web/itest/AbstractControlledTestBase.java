@@ -63,14 +63,14 @@ import org.slf4j.LoggerFactory;
 
 import static org.ops4j.pax.exam.Constants.START_LEVEL_SYSTEM_BUNDLES;
 import static org.ops4j.pax.exam.Constants.START_LEVEL_TEST_BUNDLE;
-import static org.ops4j.pax.exam.CoreOptions.bootDelegationPackage;
+import static org.ops4j.pax.exam.CoreOptions.bootDelegationPackages;
 import static org.ops4j.pax.exam.CoreOptions.cleanCaches;
 import static org.ops4j.pax.exam.CoreOptions.frameworkProperty;
 import static org.ops4j.pax.exam.CoreOptions.frameworkStartLevel;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.linkBundle;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.systemPackage;
+import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemTimeout;
 import static org.ops4j.pax.exam.CoreOptions.url;
 import static org.ops4j.pax.exam.CoreOptions.workingDirectory;
@@ -125,9 +125,8 @@ public abstract class AbstractControlledTestBase {
 
 		return new Option[] {
 				// basic options
-				bootDelegationPackage("sun.*"),
-				bootDelegationPackage("com.sun.*"),
-				systemPackage("sun.misc"),
+				bootDelegationPackages("sun.*", "com.sun.*"),
+				systemPackages("sun.misc", "com.sun.xml.bind.annotation;version=2.3"),
 
 				frameworkStartLevel(START_LEVEL_TEST_BUNDLE),
 
@@ -330,6 +329,8 @@ public abstract class AbstractControlledTestBase {
 		);
 		if (javaMajorVersion() >= 9) {
 			return combine(common,
+					mavenBundle().groupId("org.eclipse.jetty.alpn")
+							.artifactId("alpn-api").versionAsInProject(),
 					mavenBundle().groupId("org.eclipse.jetty")
 							.artifactId("jetty-alpn-java-server").versionAsInProject()
 			);
@@ -657,6 +658,10 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle("jakarta.ws.rs", "jakarta.ws.rs-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("jakarta.xml.bind", "jakarta.xml.bind-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("jakarta.xml.ws", "jakarta.xml.ws-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("jakarta.xml.soap", "jakarta.xml.soap-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("com.sun.activation", "javax.activation")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),

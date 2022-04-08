@@ -668,6 +668,14 @@
 			<groupId>jakarta.ws.rs</groupId>
 			<artifactId>jakarta.ws.rs-api</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>jakarta.xml.ws</groupId>
+			<artifactId>jakarta.xml.ws-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.xml.soap</groupId>
+			<artifactId>jakarta.xml.soap-api</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>jakarta.el</groupId>
