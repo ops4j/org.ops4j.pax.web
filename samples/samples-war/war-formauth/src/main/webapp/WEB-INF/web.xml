@@ -34,6 +34,15 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>logout.servlet</servlet-name>
+		<servlet-class>org.ops4j.pax.web.extender.samples.war.formauth.LogoutServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>logout.servlet</servlet-name>
+		<url-pattern>/logout</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>helloworld.servlet.wc</servlet-name>
 		<servlet-class>org.ops4j.pax.web.samples.helloworld.wc.internal.HelloWorldServlet</servlet-class>
 		<init-param>

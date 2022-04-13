@@ -811,7 +811,10 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	 * @return
 	 */
 	public String getTemporaryLocation() {
-		return String.format("%s/%s", "/".equals(contextPath) ? "ROOT" : contextPath.substring(1), getName());
+		String name = getName();
+		name = name.replace("/", "_");
+		name = name.replace("\\", "_");
+		return String.format("%s/%s", "/".equals(contextPath) ? "ROOT" : contextPath.substring(1), name);
 	}
 
 	/**

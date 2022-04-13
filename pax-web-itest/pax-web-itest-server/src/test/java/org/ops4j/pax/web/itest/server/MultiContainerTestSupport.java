@@ -621,6 +621,28 @@ public class MultiContainerTestSupport {
 		return ref;
 	}
 
+	protected ServiceReference<EventListener> mockListenerReference(Bundle bundle, Supplier<EventListener> supplier, Long serviceId, Integer rank) {
+		Hashtable<String, Object> props = new Hashtable<>();
+
+		EventListener instance = supplier.get();
+		try {
+			when(bundle.loadClass(instance.getClass().getName()))
+					.thenAnswer((Answer<Class<?>>) invocation -> instance.getClass());
+			when(bundle.loadClass(EventListener.class.getName()))
+					.thenAnswer((Answer<Class<?>>) invocation -> EventListener.class);
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
+
+		ServiceReference<EventListener> ref = mockReference(bundle, EventListener.class, props, null, serviceId, rank);
+		when(bundle.getBundleContext().getService(ref)).thenReturn(instance);
+		if (enableWhiteboardExtender()) {
+			when(whiteboardBundleContext.getService(ref)).thenReturn(instance);
+		}
+
+		return ref;
+	}
+
 	protected <S> ServiceReference<S> mockReference(Bundle bundle, Class<S> clazz, Hashtable<String, Object> props,
 			Supplier<S> supplier) {
 		return mockReference(bundle, clazz, props, supplier, 0L, 0);

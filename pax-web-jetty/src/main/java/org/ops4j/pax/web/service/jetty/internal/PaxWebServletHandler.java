@@ -282,7 +282,7 @@ public class PaxWebServletHandler extends ServletHandler {
 			return;
 		}
 
-		// wheter there are filters or not, we *copy* code from super.doHandle() to ensure that
+		// whether there are filters or not, we *copy* code from super.doHandle() to ensure that
 		// getOsgiFilterChain() is called
 
 		// this should never be null because of ServletHandler.setEnsureDefaultServlet(true)

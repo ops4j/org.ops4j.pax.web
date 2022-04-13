@@ -81,7 +81,6 @@ class JettyFactory {
 	private void discovery() {
 		try {
 			classLoader.loadClass("org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory");
-			// TODO: check JDK9+ support for ALPN
 			alpnAvailable = true;
 		} catch (ClassNotFoundException e) {
 			alpnAvailable = false;

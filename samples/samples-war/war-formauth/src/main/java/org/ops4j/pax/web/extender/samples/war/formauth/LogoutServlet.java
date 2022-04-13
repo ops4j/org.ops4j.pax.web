@@ -16,25 +16,19 @@
 package org.ops4j.pax.web.extender.samples.war.formauth;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class ExampleServlet extends HttpServlet {
+public class LogoutServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -3820576584247236099L;
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		final PrintWriter writer = response.getWriter();
-		writer.println("<body>");
-		writer.println("<h1>Hello World</h1>");
-		writer.println("<img src='" + request.getContextPath() + "/images/logo.png' border='0'/>");
-		writer.println("<h1>from WEB-INF/classes</h1><br />");
-		writer.println("<h2>Welcome " + request.getUserPrincipal().getName() + " ("
-				+ request.getUserPrincipal().getClass().getName() + ")</h2><br />");
-		writer.println("<a href=\"" + request.getContextPath() + "/logout\">logout</a><br />");
-		writer.println("</body>");
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+		request.logout();
+		request.getSession().invalidate();
+		response.sendRedirect("wc/example");
 	}
 
 }

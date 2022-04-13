@@ -23,6 +23,7 @@ import javax.servlet.UnavailableException;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.util.resource.PathResource;
 import org.eclipse.jetty.util.resource.Resource;
+import org.ops4j.pax.web.service.jetty.internal.PaxWebServletContextHandler;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.util.Path;
 import org.slf4j.Logger;
@@ -132,32 +133,7 @@ public class JettyResourceServlet extends DefaultServlet {
 				// under Osgi(Scoped)ServletContext
 				URL url = getServletContext().getResource(chroot + "/" + childPath);
 
-				// we have to check if the URL points to the root of the bundle. Felix throws IOException
-				// when opening connection for URIs like "bundle://22.0:1/"
-				if (url != null) {
-					if ("bundle".equals(url.getProtocol())) {
-						if ("/".equals(url.getPath())) {
-							// Felix, root of the bundle - return a resource which says it's a directory
-							return new RootBundleURLResource(Resource.newResource(url));
-						} else if (!url.getPath().endsWith("/")) {
-							// unfortunately, due to https://issues.apache.org/jira/browse/FELIX-6294
-							// we have to check ourselves if it's a directory and possibly append a slash
-							// just as org.eclipse.osgi.storage.bundlefile.BundleFile#fixTrailingSlash() does it
-							Resource potentialDirectory = Resource.newResource(url);
-							if (potentialDirectory.exists() && potentialDirectory.length() == 0) {
-								URL fixedURL = new URL(url.toExternalForm() + "/");
-								Resource properDirectory = Resource.newResource(fixedURL);
-								if (properDirectory.exists()) {
-									return properDirectory;
-								}
-							}
-						}
-					}
-				}
-
-				// resource can be provided by custom HttpContext/ServletContextHelper, so we can't really
-				// affect lastModified for caching purposes
-				return Resource.newResource(url);
+				return PaxWebServletContextHandler.toJettyResource(url);
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage(), e);

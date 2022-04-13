@@ -315,7 +315,7 @@ class JettyServerWrapper implements BatchVisitor {
 
 		// actual org.eclipse.jetty.server.Server
 		this.server = new Server(qtp);
-		this.server.setSessionIdManager(new DefaultSessionIdManager(this.server));
+		this.server.setSessionIdManager(new PaxWebSessionIdManager(this.server));
 	}
 
 	/**

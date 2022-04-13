@@ -15,6 +15,8 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.AccessControlContext;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,18 +31,24 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.eclipse.jetty.server.HandlerContainer;
-import org.eclipse.jetty.server.session.Session;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.log.Log;
+import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
+import org.ops4j.pax.web.service.jetty.internal.web.RootBundleURLResource;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerKey;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
+import org.ops4j.pax.web.service.spi.util.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,6 +93,43 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 	private final Set<String> attributesToClearBeforeRestart = new HashSet<>();
 
 	/**
+	 * Helper method to be used from {@link org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet}
+	 * and from {@link #getResource(String)}
+	 *
+	 * @param url
+	 * @return
+	 * @throws MalformedURLException
+	 */
+	public static Resource toJettyResource(URL url) throws MalformedURLException {
+		// we have to check if the URL points to the root of the bundle. Felix throws IOException
+		// when opening connection for URIs like "bundle://22.0:1/"
+		if (url != null) {
+			if ("bundle".equals(url.getProtocol())) {
+				if ("/".equals(url.getPath())) {
+					// Felix, root of the bundle - return a resource which says it's a directory
+					return new RootBundleURLResource(Resource.newResource(url));
+				} else if (!url.getPath().endsWith("/")) {
+					// unfortunately, due to https://issues.apache.org/jira/browse/FELIX-6294
+					// we have to check ourselves if it's a directory and possibly append a slash
+					// just as org.eclipse.osgi.storage.bundlefile.BundleFile#fixTrailingSlash() does it
+					Resource potentialDirectory = Resource.newResource(url);
+					if (potentialDirectory.exists() && potentialDirectory.length() == 0) {
+						URL fixedURL = new URL(url.toExternalForm() + "/");
+						Resource properDirectory = Resource.newResource(fixedURL);
+						if (properDirectory.exists()) {
+							return properDirectory;
+						}
+					}
+				}
+			}
+		}
+
+		// resource can be provided by custom HttpContext/ServletContextHelper, so we can't really
+		// affect lastModified for caching purposes
+		return Resource.newResource(url);
+	}
+
+	/**
 	 * Create a slightly extended version of Jetty's {@link ServletContextHandler}. It is still not as complex as
 	 * {@code org.eclipse.jetty.webapp.WebAppContext} which does all the sort of XML/annotation configuration, but
 	 * we take some of the mechanisms from {@code WebAppContext} if they're useful in Pax Web.
@@ -101,7 +146,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 				getClass().getClassLoader());
 		_scontext.setAttribute("org.eclipse.jetty.server.session.timer", executorScheduler);
 
-		// need to initialize the logger as super doStart is to late already
+		// need to initialize the logger as super doStart is too late already
 		setLogger(Log.getLogger(getDisplayName() == null ? getContextPath() : getDisplayName()));
 
 		// "128.3.5 Static Content" is the only place where protected directories are mentioned. We'll handle them
@@ -282,15 +327,61 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 	}
 
 	@Override
-	protected SessionHandler newSessionHandler() {
-		return new SessionHandler() {
-			@Override
-			public void doSessionAttributeListeners(Session session, String name, Object old, Object value) {
-				if (!name.startsWith("__osgi@session@")) {
-					super.doSessionAttributeListeners(session, name, old, value);
+	protected void requestInitialized(Request baseRequest, HttpServletRequest request) {
+		// a little trick, so we can give the client a single JSESSIONID, but internally, we can use it to access
+		// different OsgiContextModel-related session for a context
+		// This method is a good place to do it - ServletHandler is too late and
+		// org.eclipse.jetty.server.Request.getUserIdentityScope() is already available here.
+		// We have to do it in first scoped handler's handle() method, because Keycloak accesses the session
+		// in org.keycloak.adapters.jetty.Jetty94RequestAuthenticator before ServletHandler is called
+
+		if (getSessionHandler() instanceof PaxWebSessionHandler) {
+			PaxWebSessionHandler sessionHandler = (PaxWebSessionHandler) getSessionHandler();
+			String sid = baseRequest.getRequestedSessionId();
+			if (sid != null && baseRequest.getSession(false) == null) {
+				String baseSid = sessionHandler.getSessionIdManager().getId(sid);
+				baseSid += PaxWebSessionIdManager.getSessionIdSuffix(baseRequest);
+				sid = sessionHandler.getSessionIdManager().getExtendedId(baseSid, request);
+				HttpSession session = sessionHandler.getHttpSession(sid);
+
+				if (session != null && sessionHandler.isValid(session)) {
+					baseRequest.enterSession(session);
+					baseRequest.setSession(session);
 				}
 			}
-		};
+		}
+
+		super.requestInitialized(baseRequest, request);
+	}
+
+	/**
+	 * Special override for libraries using {@link ContextHandler#getCurrentContext()} directly. It should eventually
+	 * deletage to {@link org.ops4j.pax.web.service.spi.servlet.OsgiServletContext#getResource(String)}.
+	 * @param path
+	 * @return
+	 * @throws MalformedURLException
+	 */
+	@Override
+	public Resource getResource(String path) throws MalformedURLException {
+		String childPath = Path.securePath(path);
+		if (childPath == null) {
+			return null;
+		}
+		if (childPath.startsWith("/")) {
+			childPath = childPath.substring(1);
+		}
+
+		URL url = osgiServletContext.getResource("/" + childPath);
+		Resource resource = toJettyResource(url);
+		if (resource == null) {
+			return super.getResource(path);
+		}
+		return resource;
+	}
+
+	@Override
+	protected SessionHandler newSessionHandler() {
+		return new PaxWebSessionHandler();
 	}
 
 }

@@ -227,17 +227,6 @@
 			<artifactId>whiteboard-blueprint</artifactId>
 		</dependency>
 
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>-->
-<!--			<artifactId>fragment</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>-->
-<!--			<artifactId>war</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
-
 		<!-- OPS4J dependencies -->
 
 		<dependency>
@@ -421,73 +410,6 @@
 			<artifactId>log4j-slf4j-impl</artifactId>
 		</dependency>
 
-		<!-- Spring -->
-
-<!--		<dependency>-->
-<!--			<groupId>org.springframework</groupId>-->
-<!--			<artifactId>spring-expression</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.apache.servicemix.bundles</groupId>-->
-<!--			<artifactId>org.apache.servicemix.bundles.spring-beans</artifactId>-->
-<!--			<version>${smx.spring.version}</version>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.apache.servicemix.bundles</groupId>-->
-<!--			<artifactId>org.apache.servicemix.bundles.spring-core</artifactId>-->
-<!--			<version>${smx.spring.version}</version>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.apache.servicemix.bundles</groupId>-->
-<!--			<artifactId>org.apache.servicemix.bundles.spring-aop</artifactId>-->
-<!--			<version>${smx.spring.version}</version>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.apache.servicemix.bundles</groupId>-->
-<!--			<artifactId>org.apache.servicemix.bundles.spring-context</artifactId>-->
-<!--			<version>${smx.spring.version}</version>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.apache.servicemix.bundles</groupId>-->
-<!--			<artifactId>org.apache.servicemix.bundles.spring-context-support</artifactId>-->
-<!--			<version>${smx.spring.version}</version>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.apache.servicemix.bundles</groupId>-->
-<!--			<artifactId>org.apache.servicemix.bundles.spring-expression</artifactId>-->
-<!--			<version>${smx.spring.version}</version>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.apache.servicemix.bundles</groupId>-->
-<!--			<artifactId>org.apache.servicemix.bundles.spring-web</artifactId>-->
-<!--			<version>${smx.spring.version}</version>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.apache.servicemix.bundles</groupId>-->
-<!--			<artifactId>org.apache.servicemix.bundles.spring-webmvc</artifactId>-->
-<!--			<version>${smx.spring.version}</version>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.springframework.osgi</groupId>-->
-<!--			<artifactId>spring-osgi-web</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.springframework.osgi</groupId>-->
-<!--			<artifactId>spring-osgi-io</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.springframework.osgi</groupId>-->
-<!--			<artifactId>spring-osgi-core</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.springframework.osgi</groupId>-->
-<!--			<artifactId>spring-osgi-extender</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.springframework.osgi</groupId>-->
-<!--			<artifactId>spring-osgi-annotation</artifactId>-->
-<!--		</dependency>-->
-
 		<!-- Other -->
 
 		<dependency>
@@ -507,23 +429,6 @@
 			<groupId>org.eclipse.jdt</groupId>
 			<artifactId>ecj</artifactId>
 		</dependency>
-
-<!--		<dependency>-->
-<!--			<groupId>org.apache.myfaces.commons</groupId>-->
-<!--			<artifactId>myfaces-commons-facelets-examples20</artifactId>-->
-<!--			<type>war</type>-->
-<!--			<scope>test</scope>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.apache.myfaces.core</groupId>-->
-<!--			<artifactId>myfaces-api</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.apache.myfaces.core</groupId>-->
-<!--			<artifactId>myfaces-impl</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
 
 	</dependencies>
 

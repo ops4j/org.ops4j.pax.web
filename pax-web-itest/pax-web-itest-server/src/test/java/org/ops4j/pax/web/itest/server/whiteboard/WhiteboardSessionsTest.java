@@ -16,22 +16,37 @@
 package org.ops4j.pax.web.itest.server.whiteboard;
 
 import java.io.IOException;
+import java.util.EventListener;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionAttributeListener;
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
 
 import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.ops4j.pax.web.itest.server.MultiContainerTestSupport;
 import org.ops4j.pax.web.itest.server.support.Utils;
+import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -39,6 +54,7 @@ import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 import static org.hamcrest.CoreMatchers.endsWith;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 import static org.ops4j.pax.web.itest.server.support.Utils.httpGET;
@@ -130,8 +146,173 @@ public class WhiteboardSessionsTest extends MultiContainerTestSupport {
 		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/t?op=get"));
 		assertThat(EntityUtils.toString(res.getEntity()), endsWith("v=2"));
 
+		client.close();
+
 		getServletCustomizer().removedService(servlet1Ref, model1);
 		getServletCustomizer().removedService(servlet2Ref, model2);
+	}
+
+	@Test
+	public void sessionListeners() throws Exception {
+		Bundle sample1 = mockBundle("sample1");
+
+		ServletContextHelper helper1 = new ServletContextHelper() { };
+		getServletContextHelperCustomizer().addingService(mockServletContextHelperReference(sample1, "c1",
+				() -> helper1, 0L, 0, "/c"));
+
+		ServletContextHelper helper2 = new ServletContextHelper() { };
+		getServletContextHelperCustomizer().addingService(mockServletContextHelperReference(sample1, "d1",
+				() -> helper2, 0L, 0, "/d"));
+
+		// 2nd /d context with different helper and higher ranking
+		ServletContextHelper helper3 = new ServletContextHelper() { };
+		getServletContextHelperCustomizer().addingService(mockServletContextHelperReference(sample1, "d2",
+				() -> helper3, 0L, 1, "/d"));
+
+		final Map<String, HttpSession> sessions = new ConcurrentHashMap<>();
+
+		ServiceReference<EventListener> sessionListenerRef = mockListenerReference(sample1, () -> new HttpSessionListener() {
+			@Override
+			public void sessionCreated(HttpSessionEvent se) {
+				LOG.info("Session created: {}", se.getSession());
+				sessions.put(se.getSession().getId(), se.getSession());
+			}
+
+			@Override
+			public void sessionDestroyed(HttpSessionEvent se) {
+				LOG.info("Session destroyed: {}", se.getSession());
+				sessions.remove(se.getSession().getId(), se.getSession());
+			}
+		}, 0L, 0);
+		when(sessionListenerRef.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT))
+				.thenReturn("(|(osgi.http.whiteboard.context.name=c1)(osgi.http.whiteboard.context.name=d1)(osgi.http.whiteboard.context.name=d2))");
+		when(sessionListenerRef.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER)).thenReturn("true");
+		EventListenerModel elModel1 = getListenerCustomizer().addingService(sessionListenerRef);
+
+		ServiceReference<EventListener> sessionAttributeListenerRef = mockListenerReference(sample1, () -> new HttpSessionAttributeListener() {
+			@Override
+			public void attributeAdded(HttpSessionBindingEvent event) {
+				LOG.info("Attribute added: {} ({})", event.getName(), event);
+			}
+
+			@Override
+			public void attributeRemoved(HttpSessionBindingEvent event) {
+				LOG.info("Attribute removed: {} ({})", event.getName(), event);
+			}
+
+			@Override
+			public void attributeReplaced(HttpSessionBindingEvent event) {
+				LOG.info("Attribute replaced: {} ({})", event.getName(), event);
+			}
+		}, 0L, 0);
+		when(sessionAttributeListenerRef.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT))
+				.thenReturn("(|(osgi.http.whiteboard.context.name=c1)(osgi.http.whiteboard.context.name=d1)(osgi.http.whiteboard.context.name=d2))");
+		when(sessionAttributeListenerRef.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER)).thenReturn("true");
+		EventListenerModel elModel2 = getListenerCustomizer().addingService(sessionAttributeListenerRef);
+
+		// servlet registered to /c and /d (with helper d1)
+		ServiceReference<Servlet> servlet1Ref = mockServletReference(sample1, "servlet1",
+				() -> new SessionServlet("1"), 0L, 0, "/s");
+		when(servlet1Ref.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT))
+				.thenReturn("(|(osgi.http.whiteboard.context.name=c1)(osgi.http.whiteboard.context.name=d1))");
+		ServletModel model1 = getServletCustomizer().addingService(servlet1Ref);
+
+		// servlet registered to /c and /d (with helper d2)
+		ServiceReference<Servlet> servlet2Ref = mockServletReference(sample1, "servlet2",
+				() -> new SessionServlet("2"), 0L, 0, "/t");
+		when(servlet2Ref.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT))
+				.thenReturn("(|(osgi.http.whiteboard.context.name=c1)(osgi.http.whiteboard.context.name=d2))");
+		ServletModel model2 = getServletCustomizer().addingService(servlet2Ref);
+
+		// sessions managed with httpclient5
+		BasicCookieStore store = new BasicCookieStore();
+
+		CloseableHttpClient client = HttpClients.custom().setDefaultCookieStore(store).build();
+		RequestConfig rc = RequestConfig.custom()
+				.setConnectTimeout(3600, TimeUnit.SECONDS)
+				.setResponseTimeout(3600, TimeUnit.SECONDS)
+				.build();
+		HttpClientContext clientContext = HttpClientContext.create();
+		clientContext.setRequestConfig(rc);
+
+		CloseableHttpResponse res;
+
+		// request to non-existing servlet - 404 and no session should be created
+		client.execute(new HttpGet("http://127.0.0.1:" + port + "/c/x"), clientContext);
+		client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/x"), clientContext);
+		assertThat(sessions.size(), equalTo(0));
+		assertThat(store.getCookies().size(), equalTo(0));
+
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/c/s?op=create"), clientContext);
+		assertThat(EntityUtils.toString(res.getEntity()), endsWith("session=not-null"));
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/c/s?op=dont_create"), clientContext);
+		assertThat(EntityUtils.toString(res.getEntity()), endsWith("session=not-null"));
+
+		// session should be created now:
+		//  - from runtime perspective in context /c
+		//  - from whitebord perspective in helper c1 for /c
+		assertThat(sessions.size(), equalTo(1));
+		assertThat(store.getCookies().size(), equalTo(1));
+
+		// session should be visible through servlet /t in context /c
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/c/t?op=dont_create"), clientContext);
+		assertThat(EntityUtils.toString(res.getEntity()), endsWith("session=not-null"));
+		// but not in /d through any servlet
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/s?op=dont_create"), clientContext);
+		assertThat(EntityUtils.toString(res.getEntity()), endsWith("session=null"));
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/t?op=dont_create"), clientContext);
+		assertThat(EntityUtils.toString(res.getEntity()), endsWith("session=null"));
+		assertThat(sessions.size(), equalTo(1));
+		assertThat(store.getCookies().size(), equalTo(1));
+
+		// we'll create a session in /d through servlet /s (thus using d1)
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/s?op=create"), clientContext);
+		assertThat(EntityUtils.toString(res.getEntity()), endsWith("session=not-null"));
+		assertThat(sessions.size(), equalTo(2));
+		assertThat(store.getCookies().size(), equalTo(2));
+		// which means that /t in /d should NOT see the session, because it's using d2
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/t?op=dont_create"), clientContext);
+		assertThat(EntityUtils.toString(res.getEntity()), endsWith("session=null"));
+		assertThat(sessions.size(), equalTo(2));
+		assertThat(store.getCookies().size(), equalTo(2));
+
+		// now we'll create new /d session through /t (d2)
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/t?op=create"), clientContext);
+		assertThat(EntityUtils.toString(res.getEntity()), endsWith("session=not-null"));
+		assertThat(sessions.size(), equalTo(3));
+		assertThat(store.getCookies().size(), equalTo(2));
+
+		// set the same attribute in two sessions
+		client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/s?op=set1"), clientContext);
+		client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/t?op=set2"), clientContext);
+		// and check the values
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/s?op=get"), clientContext);
+		assertThat(EntityUtils.toString(res.getEntity()), endsWith("v=1"));
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/t?op=get"), clientContext);
+		assertThat(EntityUtils.toString(res.getEntity()), endsWith("v=2"));
+
+		// change the attribute in d2
+		client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/t?op=change3"), clientContext);
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/s?op=get"), clientContext);
+		assertThat(EntityUtils.toString(res.getEntity()), endsWith("v=1"));
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/t?op=get"), clientContext);
+		assertThat(EntityUtils.toString(res.getEntity()), endsWith("v=3"));
+
+		// delete the attribute in d1
+		client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/s?op=delete"), clientContext);
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/s?op=get"), clientContext);
+		assertThat(EntityUtils.toString(res.getEntity()), endsWith("v=null"));
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/t?op=get"), clientContext);
+		assertThat(EntityUtils.toString(res.getEntity()), endsWith("v=3"));
+
+		assertThat(sessions.size(), equalTo(3));
+
+		client.close();
+
+		getServletCustomizer().removedService(servlet1Ref, model1);
+		getServletCustomizer().removedService(servlet2Ref, model2);
+		getListenerCustomizer().removedService(sessionAttributeListenerRef, elModel2);
+		getListenerCustomizer().removedService(sessionListenerRef, elModel1);
 	}
 
 	private static class SessionServlet extends Utils.MyIdServlet {
@@ -167,6 +348,12 @@ public class WhiteboardSessionsTest extends MultiContainerTestSupport {
 					break;
 				case "set2":
 					req.getSession().setAttribute("v", "2");
+					break;
+				case "change3":
+					req.getSession().setAttribute("v", "3");
+					break;
+				case "delete":
+					req.getSession().removeAttribute("v");
 					break;
 				case "get":
 					resp.getWriter().print("v=" + (req.getSession().getAttribute("v")));
