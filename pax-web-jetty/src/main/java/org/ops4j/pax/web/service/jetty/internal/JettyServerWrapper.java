@@ -31,6 +31,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -48,6 +49,7 @@ import javax.servlet.http.HttpSessionAttributeListener;
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.http.PreEncodedHttpField;
 import org.eclipse.jetty.jmx.MBeanContainer;
+import org.eclipse.jetty.security.Authenticator;
 import org.eclipse.jetty.security.ConstraintAware;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
@@ -85,6 +87,7 @@ import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.xml.XmlConfiguration;
+import org.ops4j.pax.web.service.AuthenticatorService;
 import org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
@@ -2155,9 +2158,13 @@ class JettyServerWrapper implements BatchVisitor {
 						securityHandler.setAuthenticator(new ConfigurableSpnegoAuthenticator());
 						break;
 					default:
-						// TODO: discover an Authenticator for login configuration
-						//       Keycloak has org.eclipse.jetty.security.Authenticator -> org.keycloak.adapters.jetty.KeycloakJettyAuthenticator
-						//       in org.keycloak/keycloak-pax-web-jetty94
+						Authenticator authenticator = getAuthenticator(loginConfig.getAuthMethod().toUpperCase());
+						if (authenticator == null) {
+							LOG.warn("Can't find Jetty Authenticator for auth method {}", loginConfig.getAuthMethod().toUpperCase());
+						} else {
+							LOG.debug("Setting custom Jetty authenticator {}", authenticator);
+							securityHandler.setAuthenticator(authenticator);
+						}
 				}
 
 				for (String role : securityConfig.getSecurityRoles()) {
@@ -2258,6 +2265,21 @@ class JettyServerWrapper implements BatchVisitor {
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
+	}
+
+	private Authenticator getAuthenticator(String authMethod) {
+		ServiceLoader<AuthenticatorService> sl = ServiceLoader.load(AuthenticatorService.class, getClass().getClassLoader());
+		for (AuthenticatorService svc : sl) {
+			try {
+				Authenticator auth = svc.getAuthenticatorService(authMethod, Authenticator.class);
+				if (auth != null) {
+					return auth;
+				}
+			} catch (Throwable t) {
+				LOG.debug("Unable to load AuthenticatorService for: " + authMethod, t);
+			}
+		}
+		return null;
 	}
 
 	private void ensureSecurityConstraintsConfigured(ConstraintSecurityHandler securityHandler, List<SecurityConstraintModel> models) {

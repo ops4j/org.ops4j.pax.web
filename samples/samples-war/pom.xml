@@ -64,6 +64,7 @@
 		<module>war-security</module>
 		<module>war-http-methods</module>
 		<module>war-http2</module>
+		<module>war-keycloak</module>
 	</modules>
 
 </project>
