@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>org.ops4j.pax.web</groupId>
 		<artifactId>samples</artifactId>
-		<version>7.3.25</version>
+		<version>7.3.26-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
