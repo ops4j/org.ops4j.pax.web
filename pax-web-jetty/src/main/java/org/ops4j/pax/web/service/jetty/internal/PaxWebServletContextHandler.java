@@ -93,6 +93,31 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 	private final Set<String> attributesToClearBeforeRestart = new HashSet<>();
 
 	/**
+	 * Create a slightly extended version of Jetty's {@link ServletContextHandler}. It is still not as complex as
+	 * {@code org.eclipse.jetty.webapp.WebAppContext} which does all the sort of XML/annotation configuration, but
+	 * we take some of the mechanisms from {@code WebAppContext} if they're useful in Pax Web.
+	 *
+	 * @param parent
+	 * @param contextPath
+	 * @param configuration
+	 */
+	public PaxWebServletContextHandler(HandlerContainer parent, String contextPath, Configuration configuration) {
+		super(parent, contextPath, true, true);
+
+		// TCCL of sessionManager timer threads will be set to thread of pax-web-jetty bundle, not to current TCCL
+		ScheduledExecutorScheduler executorScheduler = new ScheduledExecutorScheduler(getSessionHandler().toString() + "Timer", true,
+				getClass().getClassLoader());
+		_scontext.setAttribute("org.eclipse.jetty.server.session.timer", executorScheduler);
+
+		// need to initialize the logger as super doStart is too late already
+		setLogger(Log.getLogger(getDisplayName() == null ? getContextPath() : getDisplayName()));
+
+		// "128.3.5 Static Content" is the only place where protected directories are mentioned. We'll handle them
+		// at request processing stage and configure here
+		setProtectedTargets(new String[] { "/WEB-INF", "/META-INF", "/OSGI-INF", "/OSGI-OPT" });
+	}
+
+	/**
 	 * Helper method to be used from {@link org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet}
 	 * and from {@link #getResource(String)}
 	 *
@@ -129,30 +154,6 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 		return Resource.newResource(url);
 	}
 
-	/**
-	 * Create a slightly extended version of Jetty's {@link ServletContextHandler}. It is still not as complex as
-	 * {@code org.eclipse.jetty.webapp.WebAppContext} which does all the sort of XML/annotation configuration, but
-	 * we take some of the mechanisms from {@code WebAppContext} if they're useful in Pax Web.
-	 *
-	 * @param parent
-	 * @param contextPath
-	 * @param configuration
-	 */
-	public PaxWebServletContextHandler(HandlerContainer parent, String contextPath, Configuration configuration) {
-		super(parent, contextPath, true, true);
-
-		// TCCL of sessionManager timer threads will be set to thread of pax-web-jetty bundle, not to current TCCL
-		ScheduledExecutorScheduler executorScheduler = new ScheduledExecutorScheduler(getSessionHandler().toString() + "Timer", true,
-				getClass().getClassLoader());
-		_scontext.setAttribute("org.eclipse.jetty.server.session.timer", executorScheduler);
-
-		// need to initialize the logger as super doStart is too late already
-		setLogger(Log.getLogger(getDisplayName() == null ? getContextPath() : getDisplayName()));
-
-		// "128.3.5 Static Content" is the only place where protected directories are mentioned. We'll handle them
-		// at request processing stage and configure here
-		setProtectedTargets(new String[] { "/WEB-INF", "/META-INF", "/OSGI-INF", "/OSGI-OPT" });
-	}
 
 	public void setServletContainerInitializers(Collection<SCIWrapper> wrappers) {
 		this.servletContainerInitializers.clear();
