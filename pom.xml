@@ -121,7 +121,7 @@
 		<!-- versions of Maven plugins -->
 
 		<!-- Maven plugins from org.apache.maven.plugins (and their dependencies) -->
-		<plugin.maven-antrun-plugin>3.0.0</plugin.maven-antrun-plugin>
+		<plugin.maven-antrun-plugin>3.1.0</plugin.maven-antrun-plugin>
 		<plugin.maven-archetype-plugin>3.2.1</plugin.maven-archetype-plugin>
 		<plugin.maven-assembly-plugin>3.3.0</plugin.maven-assembly-plugin>
 		<plugin.maven-checkstyle-plugin>3.1.2</plugin.maven-checkstyle-plugin>
@@ -136,12 +136,12 @@
 		<plugin.maven-gpg-plugin>3.0.1</plugin.maven-gpg-plugin>
 		<plugin.maven-install-plugin>2.5.2</plugin.maven-install-plugin>
 		<plugin.maven-jar-plugin>3.2.2</plugin.maven-jar-plugin>
-		<plugin.maven-javadoc-plugin>3.3.2</plugin.maven-javadoc-plugin>
+		<plugin.maven-javadoc-plugin>3.4.0</plugin.maven-javadoc-plugin>
 		<plugin.maven-release-plugin>2.5.3</plugin.maven-release-plugin>
 		<plugin.maven-remote-resources-plugin>1.7.0</plugin.maven-remote-resources-plugin>
 		<plugin.maven-resources-plugin>3.2.0</plugin.maven-resources-plugin>
 		<plugin.dependency.maven-filtering>3.2.0</plugin.dependency.maven-filtering>
-		<plugin.maven-site-plugin>3.11.0</plugin.maven-site-plugin>
+		<plugin.maven-site-plugin>3.12.0</plugin.maven-site-plugin>
 		<plugin.maven-source-plugin>3.2.1</plugin.maven-source-plugin>
 		<plugin.maven-surefire-plugin>2.22.2</plugin.maven-surefire-plugin>
 		<plugin.maven-war-plugin>3.3.2</plugin.maven-war-plugin>
