@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ServiceLoader;
 
 import org.apache.catalina.Authenticator;
 import org.apache.catalina.Lifecycle;
@@ -37,6 +38,7 @@ import org.apache.tomcat.util.descriptor.web.LoginConfig;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.apache.tomcat.util.digester.Digester;
+import org.ops4j.pax.web.service.AuthenticatorService;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.LoginConfigModel;
@@ -128,12 +130,20 @@ public class OsgiContextConfiguration implements LifecycleListener {
 						authenticator = new NonLoginAuthenticator();
 						break;
 					default:
-						// TODO: discover a Valve for login configuration
-						//       Keycloak has org.apache.catalina.Valve -> org.keycloak.adapters.tomcat.KeycloakAuthenticatorValve
-						//       in org.keycloak/keycloak-pax-web-tomcat8
+						Authenticator customAuthenticator = getAuthenticator(loginConfig.getAuthMethod().toUpperCase());
+						if (customAuthenticator == null) {
+							LOG.warn("Can't find Tomcat Authenticator for auth method {}", loginConfig.getAuthMethod().toUpperCase());
+						} else {
+							LOG.debug("Setting custom Tomcat authenticator {}", customAuthenticator);
+							authenticator = customAuthenticator;
+						}
 				}
 
 				authenticationValve = (Valve) authenticator;
+			}
+
+			if (authenticationValve == null) {
+				noAuth = true;
 			}
 
 			PaxWebStandardContext context = (PaxWebStandardContext) event.getSource();
@@ -299,19 +309,19 @@ public class OsgiContextConfiguration implements LifecycleListener {
 		}
 	}
 
-//	private Valve getAuthenticator(String method) {
-//		ServiceLoader<AuthenticatorService> sl = ServiceLoader.load(AuthenticatorService.class, getClass().getClassLoader());
-//		for (AuthenticatorService svc : sl) {
-//			try {
-//				Valve auth = svc.getAuthenticatorService(method, Valve.class);
-//				if (auth != null) {
-//					return auth;
-//				}
-//			} catch (Throwable t) {
-//				LOG.debug("Unable to load AuthenticatorService for: " + method, t);
-//			}
-//		}
-//		return null;
-//	}
+	private Authenticator getAuthenticator(String method) {
+		ServiceLoader<AuthenticatorService> sl = ServiceLoader.load(AuthenticatorService.class, getClass().getClassLoader());
+		for (AuthenticatorService svc : sl) {
+			try {
+				Valve auth = svc.getAuthenticatorService(method, Valve.class);
+				if (auth != null && Authenticator.class.isAssignableFrom(auth.getClass())) {
+					return (Authenticator) auth;
+				}
+			} catch (Throwable t) {
+				LOG.debug("Unable to load AuthenticatorService for: " + method, t);
+			}
+		}
+		return null;
+	}
 
 }
