@@ -104,62 +104,29 @@ public class OsgiHttpServletRequestWrapper extends HttpServletRequestWrapper {
 	}
 
 	@Override
-//	@SuppressWarnings("unchecked")
 	public HttpSession getSession(boolean create) {
-		return super.getSession(create);
-//		if (session != null && session.isInvalid()) {
-//			session = null;
-//		}
-//		if (session == null) {
-//			synchronized (this) {
-//				if (session == null) {
-//					HttpSession original = super.getSession(create);
-//					if (original == null) {
-//						return null;
-//					}
-//					if (original instanceof OsgiHttpSession) {
-//						session = (OsgiHttpSession) original;
-//						return session;
-//					}
-//					Map<String, Object> localSession = null;
-//					String key;
-//					if (osgiContext != null) {
-//						// there's "global" session for given ServletContext, but we have to manage
-//						// the "local" session for given OsgiServletContext/OsgiContextModel/ServletContextHelper
-//						key = String.format("__osgi@session@%s",
-//								osgiContextModel.isWab() ? osgiContextModel.getContextPath() : osgiContextModel.getId());
-//						Object localSessionObject = original.getAttribute(key);
-//						if (localSessionObject != null) {
-//							if (!(localSessionObject instanceof Map)) {
-//								LOG.warn("Session for {} is not initialized correctly, reinitializing the session", osgiContextModel);
-//								localSession = new HashMap<>();
-//								original.setAttribute(key, localSession);
-//							} else {
-//								localSession = (Map<String, Object>) localSessionObject;
-//							}
-//						} else if (create) {
-//							localSession = new HashMap<>();
-//							original.setAttribute(key, localSession);
-//						}
-//					} else {
-//						// just use global session
-//						return original;
-//					}
-//
-//					if (localSession == null) {
-//						// no session, but weren't asked to create one
-//						return null;
-//					}
-//
-//					// the only place where org.ops4j.pax.web.service.spi.servlet.OsgiHttpSession
-//					// is created - it'll manage the session splitting by OsgiContextModel
-//					this.session = new OsgiHttpSession(original, localSession, key, osgiContextModel,
-//							osgiContext, context, osgiSessionsBridge);
-//				}
-//			}
-//		}
-//
-//		return session;
+		if (session != null) {
+			session = null;
+		}
+		if (session == null) {
+			synchronized (this) {
+				if (session == null) {
+					HttpSession original = super.getSession(create);
+					if (original == null) {
+						return null;
+					}
+					if (original instanceof OsgiHttpSession) {
+						session = (OsgiHttpSession) original;
+						return session;
+					}
+
+					// the only place where org.ops4j.pax.web.service.spi.servlet.OsgiHttpSession is created
+					this.session = new OsgiHttpSession(original, osgiContext, context, osgiSessionsBridge);
+				}
+			}
+		}
+
+		return session;
 	}
 
 	@Override

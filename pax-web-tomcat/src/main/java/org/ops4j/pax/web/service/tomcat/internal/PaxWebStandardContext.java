@@ -15,13 +15,8 @@
  */
 package org.ops4j.pax.web.service.tomcat.internal;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -36,8 +31,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSessionAttributeListener;
-import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionListener;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.LifecycleException;
@@ -413,11 +407,6 @@ public class PaxWebStandardContext extends StandardContext {
 	public void addApplicationEventListener(EventListenerModel model, Object listener) {
 		// we're not adding the listener to StandardContext - we'll add all listeners when the context is started
 
-		if (listener instanceof HttpSessionAttributeListener) {
-			// we should not pass information about meta OSGi-scoped session
-			listener = proxiedHttpSessionAttributeListener(listener);
-		}
-
 		if (model == null || model.isDynamic()) {
 			orderedListeners.add(listener);
 		} else {
@@ -483,7 +472,7 @@ public class PaxWebStandardContext extends StandardContext {
 		List<Object> lifecycleListeners = new ArrayList<>();
 		List<Object> eventListeners = new ArrayList<>();
 		for (Object listener : rankedListeners.values()) {
-			if (listener instanceof ServletContextListener) {
+			if (listener instanceof ServletContextListener || listener instanceof HttpSessionListener) {
 				lifecycleListeners.add(listener);
 			}
 			// because ServletContextListener's implementation may implement other listener interfaces too
@@ -492,22 +481,6 @@ public class PaxWebStandardContext extends StandardContext {
 
 		super.setApplicationLifecycleListeners(lifecycleListeners.toArray());
 		super.setApplicationEventListeners(eventListeners.toArray());
-	}
-
-	public Object proxiedHttpSessionAttributeListener(Object eventListener) {
-		SessionFilteringInvocationHandler handler = new SessionFilteringInvocationHandler(eventListener);
-		ClassLoader cl = getParentClassLoader();
-		if (cl == null) {
-			// for test scenario
-			cl = eventListener.getClass().getClassLoader();
-		}
-		Set<Class<?>> interfaces = new LinkedHashSet<>();
-		Class<?> c = eventListener.getClass();
-		while (c != Object.class) {
-			interfaces.addAll(Arrays.asList(c.getInterfaces()));
-			c = c.getSuperclass();
-		}
-		return Proxy.newProxyInstance(cl, interfaces.toArray(new Class[0]), handler);
 	}
 
 	public void setDefaultOsgiContextModel(OsgiContextModel defaultOsgiContextModel, WebContainerContext resolvedWebContainerContext) {
@@ -622,29 +595,6 @@ public class PaxWebStandardContext extends StandardContext {
 			}
 		}
 		return false;
-	}
-
-	private static class SessionFilteringInvocationHandler implements InvocationHandler {
-		private final Object eventListener;
-
-		SessionFilteringInvocationHandler(Object eventListener) {
-			this.eventListener = eventListener;
-		}
-
-		@Override
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			boolean proceed = method.getName().equals("attributeAdded")
-					|| method.getName().equals("attributeRemoved")
-					|| method.getName().equals("attributeReplaced");
-			if (proceed && method.getDeclaringClass() == HttpSessionAttributeListener.class) {
-				HttpSessionBindingEvent event = (HttpSessionBindingEvent) args[0];
-				if (event.getName().startsWith("__osgi@session@")) {
-					return null;
-				}
-				return method.invoke(eventListener, args);
-			}
-			return method.invoke(eventListener, args);
-		}
 	}
 
 }

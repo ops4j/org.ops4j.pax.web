@@ -23,6 +23,7 @@ import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleState;
 import org.apache.catalina.util.SessionConfig;
 import org.apache.tomcat.util.res.StringManager;
+import org.ops4j.pax.web.service.tomcat.internal.PaxWebSessionIdGenerator;
 
 public class ApplicationSessionCookieConfig implements SessionCookieConfig {
 
@@ -38,7 +39,7 @@ public class ApplicationSessionCookieConfig implements SessionCookieConfig {
     private String domain;
     private String name;
     private String path;
-    private StandardContext context;
+    private final StandardContext context;
 
     public ApplicationSessionCookieConfig(StandardContext context) {
         this.context = context;
@@ -160,6 +161,12 @@ public class ApplicationSessionCookieConfig implements SessionCookieConfig {
      */
     public static Cookie createSessionCookie(Context context,
             String sessionId, boolean secure) {
+
+        // Pax Web / OSGi adjustment
+        String sessionIdPrefix = PaxWebSessionIdGenerator.sessionIdPrefix.get();
+        if (sessionIdPrefix != null && sessionId.startsWith(sessionIdPrefix + "~")) {
+            sessionId = sessionId.substring(sessionIdPrefix.length() + 1);
+        }
 
         SessionCookieConfig scc =
             context.getServletContext().getSessionCookieConfig();

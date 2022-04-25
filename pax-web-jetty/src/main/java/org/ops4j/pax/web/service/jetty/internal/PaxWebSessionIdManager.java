@@ -37,7 +37,7 @@ public class PaxWebSessionIdManager extends DefaultSessionIdManager {
 			if (uis instanceof PaxWebServletHolder) {
 				PaxWebServletHolder holder = (PaxWebServletHolder) uis;
 				OsgiContextModel ocm = holder.getOsgiContextModel();
-				return "~" + ocm.getTemporaryLocation();
+				return "~" + ocm.getTemporaryLocation().replaceAll("/", "_");
 			}
 		}
 		return null;

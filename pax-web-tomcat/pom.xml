@@ -176,7 +176,7 @@
 							org.apache.catalina.authenticator;version="${dependency.org.apache.tomcat}",
 							org.apache.catalina.authenticator.jaspic;version="${dependency.org.apache.tomcat}",
 							org.apache.catalina.connector;version="${dependency.org.apache.tomcat}",
-							org.apache.catalina.core;version="${dependency.org.apache.tomcat}",
+							org.apache.catalina.core;version="${dependency.org.apache.tomcat}";-split-package:=merge-first,
 							org.apache.catalina.deploy;version="${dependency.org.apache.tomcat}",
 							org.apache.catalina.filters;version="${dependency.org.apache.tomcat}",
 							org.apache.catalina.loader;version="${dependency.org.apache.tomcat}",

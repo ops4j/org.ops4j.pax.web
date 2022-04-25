@@ -290,8 +290,7 @@ public class MultiContainerTestSupport {
 					.thenReturn(mock(ServiceRegistration.class));
 
 			// manually create mock for WebContainer service scoped to a pax-web-extender-whiteboard bundle
-			HttpServiceEnabled container = new HttpServiceEnabled(whiteboardBundle, controller, serverModel, null, config);
-			//		containers.put(whiteboardBundle, container);
+			HttpServiceEnabled container = containers.get(whiteboardBundle);
 
 			when(whiteboardBundleContext.getService(containerRef)).thenReturn(container);
 

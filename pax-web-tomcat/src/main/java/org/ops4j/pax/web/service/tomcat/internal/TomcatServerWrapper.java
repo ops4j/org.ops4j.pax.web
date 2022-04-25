@@ -808,11 +808,12 @@ class TomcatServerWrapper implements BatchVisitor {
 			context.setSessionCookiePathUsesTrailingSlash(false);
 			context.setValidateClientProvidedNewSessionId(true);
 
+			StandardManager manager = new PaxWebSessionManager();
+			manager.setSessionIdGenerator(new PaxWebSessionIdGenerator());
 			if (sc.getSessionStoreDirectory() != null) {
-				StandardManager manager = new StandardManager();
 				manager.setPathname(new File(sc.getSessionStoreDirectory(), "SESSIONS.ser").getAbsolutePath());
-				context.setManager(manager);
 			}
+			context.setManager(manager);
 
 			//		// TODO: what about the AccessControlContext?
 			//
