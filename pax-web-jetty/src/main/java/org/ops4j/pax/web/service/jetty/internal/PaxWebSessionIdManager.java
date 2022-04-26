@@ -37,7 +37,10 @@ public class PaxWebSessionIdManager extends DefaultSessionIdManager {
 			if (uis instanceof PaxWebServletHolder) {
 				PaxWebServletHolder holder = (PaxWebServletHolder) uis;
 				OsgiContextModel ocm = holder.getOsgiContextModel();
-				return "~" + ocm.getTemporaryLocation().replaceAll("/", "_");
+				// we can't replace '/' to '_' because of how
+				// org.eclipse.jetty.server.session.FileSessionDataStore.initializeStore() analyzes the
+				// session files.
+				return "~" + ocm.getTemporaryLocation().replaceAll("/", "#").replaceAll("_", "#");
 			}
 		}
 		return null;
@@ -74,7 +77,6 @@ public class PaxWebSessionIdManager extends DefaultSessionIdManager {
 		if (suffix != null) {
 			// it means that we may be accessing existing session for a context, but through a different
 			// OsgiContextModel. This means we have to create another session, but with the same JSESSIONID prefix
-			// TOCHECK: security concerns?
 			String rsid = request.getRequestedSessionId();
 			if (rsid == null) {
 				return super.newSessionId(request, created) + suffix;
