@@ -69,9 +69,11 @@
 							<!-- from Jetty bundles -->
 							org.eclipse.jetty.*,
 							org.eclipse.jetty.jaas,
+							org.eclipse.jetty.rewrite.handler;resolution:=optional,
+							org.eclipse.jetty.servlets;resolution:=optional,
 
 							<!-- other -->
-							javax.annotation;version="[1.2,2)"; resolution:=optional,
+							javax.annotation;version="[1.2,2)";resolution:=optional,
 							javax.management,
 							javax.net.ssl,
 							javax.xml.parsers,

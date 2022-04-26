@@ -80,12 +80,16 @@
 		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-continuation/${dependency.org.eclipse.jetty}</bundle>
 		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-jmx/${dependency.org.eclipse.jetty}</bundle>
 		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-jaas/${dependency.org.eclipse.jetty}</bundle>
+	</feature>
 
+	<feature name="pax-web-jetty-extras" description="Jetty 9 additional bundles" version="${dependency.org.eclipse.jetty}">
+		<feature>pax-web-jetty</feature>
+
+		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-rewrite/${dependency.org.eclipse.jetty}</bundle>
+		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-servlets/${dependency.org.eclipse.jetty}</bundle>
 <!--		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-jaspi/${dependency.org.eclipse.jetty}</bundle>-->
 <!--		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-plus/${dependency.org.eclipse.jetty}</bundle>-->
 <!--		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-jndi/${dependency.org.eclipse.jetty}</bundle>-->
-<!--		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-rewrite/${dependency.org.eclipse.jetty}</bundle>-->
-<!--		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-servlets/${dependency.org.eclipse.jetty}</bundle>-->
 <!--		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-webapp/${dependency.org.eclipse.jetty}</bundle>-->
 <!--		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-deploy/${dependency.org.eclipse.jetty}</bundle>-->
 	</feature>

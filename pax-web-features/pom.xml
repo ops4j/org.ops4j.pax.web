@@ -98,6 +98,7 @@
 								<feature>pax-web-websockets</feature>
 								<feature>pax-web-jetty</feature>
 								<feature>pax-web-jetty-websockets</feature>
+								<feature>pax-web-jetty-extras</feature>
 								<feature>pax-web-jetty-http2</feature>
 <!--								<feature>pax-web-jetty-http2-jdk8</feature>-->
 <!--								<feature>pax-web-jetty-http2-jdk9</feature>-->
