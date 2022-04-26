@@ -119,12 +119,12 @@ public class PaxWebOuterHandlerWrapper implements HandlerWrapper {
 					}
 				}
 
-				// just proceed
 				exchange.addExchangeCompleteListener((exchange1, nextListener) -> {
 					PaxWebSessionIdGenerator.sessionIdPrefix.set(null);
 					PaxWebSessionIdGenerator.cookieSessionId.set(null);
 					nextListener.proceed();
 				});
+				// just proceed
 				handler.handleRequest(exchange);
 			}
 		};

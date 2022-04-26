@@ -249,12 +249,12 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 		);
 
 		// static resources
-		when(wab.findEntries("/", "hello.txt", false)).thenReturn(
+		when(wab.findEntries("/", "hello.txt", false)).thenAnswer((i) ->
 				Collections.enumeration(Collections.singletonList(
 						new File("src/test/resources/bundles/the-wab-itself/hello.txt").toURI().toURL()
 				))
 		);
-		when(wab.findEntries("/", "hello-fragment.txt", false)).thenReturn(
+		when(wab.findEntries("/", "hello-fragment.txt", false)).thenAnswer((i) ->
 				Collections.enumeration(Collections.singletonList(
 						new File("src/test/resources/bundles/the-wab-fragment/hello-fragment.txt").toURI().toURL()
 				))

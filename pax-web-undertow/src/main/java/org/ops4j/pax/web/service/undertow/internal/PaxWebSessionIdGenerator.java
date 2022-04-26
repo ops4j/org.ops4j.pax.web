@@ -31,6 +31,8 @@ public class PaxWebSessionIdGenerator extends SecureRandomSessionIdGenerator {
 			return super.createSessionId();
 		} else {
 			if (cookie != null) {
+				// cookie used already and we're creating new session
+				cookieSessionId.set(null);
 				return prefix + "~" + cookie;
 			}
 			return prefix + "~" + super.createSessionId();

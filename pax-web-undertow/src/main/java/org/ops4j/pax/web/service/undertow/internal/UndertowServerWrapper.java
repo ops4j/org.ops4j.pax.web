@@ -108,6 +108,7 @@ import io.undertow.servlet.handlers.ServletHandler;
 import io.undertow.servlet.handlers.ServletRequestContext;
 import io.undertow.servlet.util.ImmediateInstanceFactory;
 import io.undertow.servlet.util.InMemorySessionPersistence;
+import org.ops4j.pax.web.service.AuthenticatorService;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
 import org.ops4j.pax.web.service.spi.config.SessionConfiguration;
@@ -174,6 +175,7 @@ import org.ops4j.pax.web.service.undertow.internal.configuration.UnmarshallingCo
 import org.ops4j.pax.web.service.undertow.internal.security.JaasIdentityManager;
 import org.ops4j.pax.web.service.undertow.internal.security.PropertiesIdentityManager;
 import org.ops4j.pax.web.service.undertow.internal.web.FlexibleErrorPages;
+import org.ops4j.pax.web.service.undertow.internal.web.OsgiResourceManager;
 import org.ops4j.pax.web.service.undertow.internal.web.OsgiServletContainerInitializerInfo;
 import org.ops4j.pax.web.service.undertow.internal.web.UndertowResourceServlet;
 import org.osgi.framework.Bundle;
@@ -2533,6 +2535,11 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				deployment.setClassLoader(highestRankedContext.getClassLoader());
 			}
 
+			// keycloak accesses resources directly inside
+			// org.keycloak.adapters.undertow.KeycloakServletExtension#handleDeployment where we don't have
+			// access to Osgi contexts
+			deployment.setResourceManager(new OsgiResourceManager("", highestRankedContext));
+
 			// handle Pax Web specific extensions
 			ServiceLoader<PaxWebUndertowExtension> extensions = ServiceLoader.load(PaxWebUndertowExtension.class, highestRankedContext.getClassLoader());
 			for (PaxWebUndertowExtension extension : extensions) {
@@ -2674,9 +2681,13 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 					}
 				}
 
-				// TODO: discover a ServletExtension for login configuration
-				//       Keycloak has io.undertow.servlet.ServletExtension -> org.keycloak.adapters.undertow.KeycloakServletExtension
-				//       in org.keycloak/keycloak-pax-web-undertow
+				ServletExtension customAuthenticator = getAuthenticator(authMethod.toUpperCase());
+				if (customAuthenticator == null) {
+					LOG.warn("Can't find Undertow Authenticator for auth method {}", authMethod.toUpperCase());
+				} else {
+					LOG.debug("Setting custom Undertow authenticator {}", customAuthenticator);
+					deployment.getServletExtensions().add(customAuthenticator);
+				}
 
 				deployment.setLoginConfig(new LoginConfig(authMethod, realmName,
 						lc.getFormLoginPage(), lc.getFormErrorPage()));
@@ -2993,7 +3004,11 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			if (port < 0) {
 				LOG.debug("Confidential port not defined for port {}", port);
 			}
-			return UndertowServerWrapper.this.securePortMapping.get(port);
+			Integer mappedPort = UndertowServerWrapper.this.securePortMapping.get(port);
+			if (mappedPort == null) {
+				return -1;
+			}
+			return mappedPort;
 		}
 	}
 
@@ -3067,19 +3082,19 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 		}
 	}
 
-//	private ServletExtension getAuthenticator(String method) {
-//		ServiceLoader<AuthenticatorService> sl = ServiceLoader.load(AuthenticatorService.class, getClass().getClassLoader());
-//		for (AuthenticatorService svc : sl) {
-//			try {
-//				ServletExtension auth = svc.getAuthenticatorService(method, ServletExtension.class);
-//				if (auth != null) {
-//					return auth;
-//				}
-//			} catch (Throwable t) {
-//				LOG.debug("Unable to load AuthenticatorService for: " + method, t);
-//			}
-//		}
-//		return null;
-//	}
+	private ServletExtension getAuthenticator(String method) {
+		ServiceLoader<AuthenticatorService> sl = ServiceLoader.load(AuthenticatorService.class, getClass().getClassLoader());
+		for (AuthenticatorService svc : sl) {
+			try {
+				ServletExtension auth = svc.getAuthenticatorService(method, ServletExtension.class);
+				if (auth != null) {
+					return auth;
+				}
+			} catch (Throwable t) {
+				LOG.debug("Unable to load AuthenticatorService for: " + method, t);
+			}
+		}
+		return null;
+	}
 
 }
