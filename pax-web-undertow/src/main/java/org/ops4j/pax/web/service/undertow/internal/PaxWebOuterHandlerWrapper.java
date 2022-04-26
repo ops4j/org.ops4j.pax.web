@@ -21,10 +21,12 @@ import javax.servlet.http.HttpServletRequest;
 import io.undertow.server.HandlerWrapper;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.server.handlers.Cookie;
 import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.handlers.ServletRequestContext;
 import io.undertow.util.Headers;
 import io.undertow.util.StatusCodes;
+import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiHttpServletRequestWrapper;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiSessionAttributeListener;
@@ -86,6 +88,7 @@ public class PaxWebOuterHandlerWrapper implements HandlerWrapper {
 
 				ServletInfo servletInfo = context.getCurrentServlet().getManagedServlet().getServletInfo();
 
+				OsgiContextModel osgiContextModel = null;
 				if (servletInfo instanceof PaxWebServletInfo) {
 					PaxWebServletInfo paxWebServletInfo = (PaxWebServletInfo) servletInfo;
 
@@ -94,15 +97,34 @@ public class PaxWebOuterHandlerWrapper implements HandlerWrapper {
 						// wrap request, so it returns servlet's servlet context
 						req = new OsgiHttpServletRequestWrapper(incomingRequest,
 								paxWebServletInfo.getServletContext(), osgiSessionsBridge);
+						osgiContextModel = paxWebServletInfo.getServletContext().getOsgiContextModel();
 					} else {
 						// wrap request, so it returns default context's servlet context
 						req = new OsgiHttpServletRequestWrapper(incomingRequest,
 								defaultServletContext, osgiSessionsBridge);
+						osgiContextModel = defaultServletContext.getOsgiContextModel();
 					}
 					context.setServletRequest(req);
 				}
 
+				// attachment is such a great place to pass information down the request handling thread...
+				// unfortunately session manipulation methods can't access the exchange
+				if (osgiContextModel != null) {
+					String sessionIdPrefix = osgiContextModel.getTemporaryLocation().replaceAll("/", "_");
+					PaxWebSessionIdGenerator.sessionIdPrefix.set(sessionIdPrefix);
+					String sessionCookie = context.getCurrentServletContext().getSessionCookieConfig().getName();
+					Cookie cookie = exchange.getRequestCookie(sessionCookie);
+					if (cookie != null) {
+						PaxWebSessionIdGenerator.cookieSessionId.set(cookie.getValue());
+					}
+				}
+
 				// just proceed
+				exchange.addExchangeCompleteListener((exchange1, nextListener) -> {
+					PaxWebSessionIdGenerator.sessionIdPrefix.set(null);
+					PaxWebSessionIdGenerator.cookieSessionId.set(null);
+					nextListener.proceed();
+				});
 				handler.handleRequest(exchange);
 			}
 		};

@@ -45,7 +45,7 @@ public class PaxWebServletInfo extends ServletInfo {
 
 	private final ServletModel servletModel;
 
-	private final OsgiContextModel osgiContextModel;
+	private OsgiContextModel osgiContextModel;
 
 	/** Used to hold 404 servlet instance for the purpose of cloning */
 	private Servlet servlet;
@@ -137,6 +137,10 @@ public class PaxWebServletInfo extends ServletInfo {
 
 	public OsgiServletContext getOsgiServletContext() {
 		return osgiServletContext;
+	}
+
+	public void setOsgiContextModel(OsgiContextModel osgiContextModel) {
+		this.osgiContextModel = osgiContextModel;
 	}
 
 	public OsgiContextModel getOsgiContextModel() {

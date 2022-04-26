@@ -98,6 +98,7 @@ public class PaxWebStandardContextValve extends ValveBase {
 			getNext().invoke(request, response);
 		} finally {
 			PaxWebSessionIdGenerator.sessionIdPrefix.set(null);
+			PaxWebSessionIdGenerator.cookieSessionId.set(null);
 			Thread.currentThread().setContextClassLoader(tccl);
 		}
 	}

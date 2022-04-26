@@ -30,7 +30,9 @@ public class ApplicationSessionCookieConfig implements SessionCookieConfig {
     /**
      * The string manager for this package.
      */
+    //CHECKSTYLE:OFF
     private static final StringManager sm = StringManager.getManager(ApplicationSessionCookieConfig.class);
+    //CHECKSTYLE:ON
 
     private boolean httpOnly;
     private boolean secure;

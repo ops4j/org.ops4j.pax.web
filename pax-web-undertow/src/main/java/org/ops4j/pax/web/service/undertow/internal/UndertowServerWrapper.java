@@ -73,6 +73,7 @@ import io.undertow.server.handlers.accesslog.AccessLogReceiver;
 import io.undertow.server.handlers.accesslog.DefaultAccessLogReceiver;
 import io.undertow.server.handlers.resource.PathResourceManager;
 import io.undertow.server.handlers.resource.ResourceHandler;
+import io.undertow.server.session.SessionConfig;
 import io.undertow.servlet.ServletExtension;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.ConfidentialPortManager;
@@ -92,16 +93,19 @@ import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.api.ServletSecurityInfo;
 import io.undertow.servlet.api.ServletSessionConfig;
 import io.undertow.servlet.api.ServletStackTraces;
+import io.undertow.servlet.api.SessionConfigWrapper;
 import io.undertow.servlet.api.SessionPersistenceManager;
 import io.undertow.servlet.api.TransportGuaranteeType;
 import io.undertow.servlet.api.WebResourceCollection;
 import io.undertow.servlet.core.ContextClassLoaderSetupAction;
 import io.undertow.servlet.core.DeploymentImpl;
+import io.undertow.servlet.core.InMemorySessionManagerFactory;
 import io.undertow.servlet.core.ManagedFilter;
 import io.undertow.servlet.core.ManagedFilters;
 import io.undertow.servlet.core.ManagedListener;
 import io.undertow.servlet.core.ManagedServlet;
 import io.undertow.servlet.handlers.ServletHandler;
+import io.undertow.servlet.handlers.ServletRequestContext;
 import io.undertow.servlet.util.ImmediateInstanceFactory;
 import io.undertow.servlet.util.InMemorySessionPersistence;
 import org.ops4j.pax.web.service.spi.config.Configuration;
@@ -749,11 +753,11 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			if (persistentSessions.getPath() != null && !"".equals(persistentSessions.getPath().trim())) {
 				// file persistence manager
 				File sessionsDir = new File(persistentSessions.getPath());
-				if (!sessionsDir.isDirectory() || !sessionsDir.mkdirs()) {
-					LOG.warn("Can't access or create {} for file session persistence.", sessionsDir);
-				} else {
+				if (sessionsDir.isDirectory() || sessionsDir.mkdirs()) {
 					LOG.info("Using file session persistence. Location: " + sessionsDir.getCanonicalPath());
 					globalSessionPersistenceManager = new FileSessionPersistence(sessionsDir);
+				} else {
+					LOG.warn("Can't access or create {} for file session persistence.", sessionsDir);
 				}
 			} else {
 				// in memory persistence manager
@@ -1342,12 +1346,30 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				// and the highest ranked context should be registered as OSGi service (if it wasn't registered)
 				highestRankedContext.register();
 			}
+			DeploymentInfo deploymentInfo = deploymentInfos.get(contextPath);
+			if (deploymentInfo != null) {
+				ServletInfo defaultServlet = deploymentInfo.getServlets().get("default");
+				if (defaultServlet instanceof PaxWebServletInfo) {
+					if (((PaxWebServletInfo) defaultServlet).is404()) {
+						((PaxWebServletInfo) defaultServlet).setOsgiContextModel(highestRankedModel);
+					}
+				}
+			}
 		} else {
 			if (wrappingHandlers.containsKey(contextPath)) {
 				wrappingHandlers.get(contextPath).setDefaultServletContext(null);
 			}
 			if (securityHandlers.containsKey(contextPath)) {
 				securityHandlers.get(contextPath).setDefaultOsgiContextModel(null, null);
+			}
+			DeploymentInfo deploymentInfo = deploymentInfos.get(contextPath);
+			if (deploymentInfo != null) {
+				ServletInfo defaultServlet = deploymentInfo.getServlets().get("default");
+				if (defaultServlet instanceof PaxWebServletInfo) {
+					if (((PaxWebServletInfo) defaultServlet).is404()) {
+						((PaxWebServletInfo) defaultServlet).setOsgiContextModel(null);
+					}
+				}
 			}
 
 			// removing LAST OsgiContextModel for given servlet context (by context path) is almost like if the
@@ -2543,7 +2565,67 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			RegisteringContainerInitializer registeringSCI = new RegisteringContainerInitializer(highestRankedContext, registrations);
 			deployment.addServletContainerInitializers(new OsgiServletContainerInitializerInfo(registeringSCI));
 
-			deployment.setSessionManagerFactory(new PaxWebInMemorySessionManagerFactory());
+			deployment.setSessionIdGenerator(new PaxWebSessionIdGenerator());
+			deployment.setSessionConfigWrapper(new SessionConfigWrapper() {
+				@Override
+				public SessionConfig wrap(final SessionConfig sessionConfig, Deployment deployment) {
+					return new SessionConfig() {
+						@Override
+						public void setSessionId(HttpServerExchange exchange, String sessionId) {
+							String prefix = PaxWebSessionIdGenerator.sessionIdPrefix.get();
+							if (prefix != null) {
+								// to trim leading "prefix~" from sessionId
+								sessionId = sessionId.substring(prefix.length() + 1);
+							}
+							sessionConfig.setSessionId(exchange, sessionId);
+						}
+
+						@Override
+						public void clearSession(HttpServerExchange exchange, String sessionId) {
+							sessionConfig.clearSession(exchange, sessionId);
+						}
+
+						@Override
+						public String findSessionId(HttpServerExchange exchange) {
+							String prefix = PaxWebSessionIdGenerator.sessionIdPrefix.get();
+							String id = sessionConfig.findSessionId(exchange);
+							if (id != null && prefix == null) {
+								// we may be restoring sessions in ServletInitialHandler...
+								ServletRequestContext ctx = exchange.getAttachment(ServletRequestContext.ATTACHMENT_KEY);
+								if (ctx != null && ctx.getCurrentServlet() != null) {
+									if (ctx.getCurrentServlet().getManagedServlet() != null && ctx.getCurrentServlet().getManagedServlet().getServletInfo() instanceof PaxWebServletInfo) {
+										OsgiContextModel osgiContextModel;
+										PaxWebServletInfo paxWebServletInfo = (PaxWebServletInfo) ctx.getCurrentServlet().getManagedServlet().getServletInfo();
+
+										if (!paxWebServletInfo.is404()) {
+											osgiContextModel = paxWebServletInfo.getServletContext().getOsgiContextModel();
+										} else {
+											osgiContextModel = paxWebServletInfo.getOsgiContextModel();
+										}
+										prefix = osgiContextModel == null ? null : osgiContextModel.getTemporaryLocation().replaceAll("/", "_");
+									}
+								}
+							}
+							if (prefix != null && id != null) {
+								// to add leading "prefix~" to sessionId
+								return prefix + "~" + id;
+							}
+							return id;
+						}
+
+						@Override
+						public SessionCookieSource sessionCookieSource(HttpServerExchange exchange) {
+							return sessionConfig.sessionCookieSource(exchange);
+						}
+
+						@Override
+						public String rewriteUrl(String originalUrl, String sessionId) {
+							return sessionConfig.rewriteUrl(originalUrl, sessionId);
+						}
+					};
+				}
+			});
+			deployment.setSessionManagerFactory(new InMemorySessionManagerFactory());
 
 			// alter session configuration
 			SessionConfigurationModel session = highestRanked.getSessionConfiguration();
