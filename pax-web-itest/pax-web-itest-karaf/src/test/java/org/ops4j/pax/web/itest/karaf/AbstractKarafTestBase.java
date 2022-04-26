@@ -152,9 +152,9 @@ public class AbstractKarafTestBase extends AbstractControlledTestBase {
 
 				features(karafStandardFeatures, "wrap", "aries-blueprint"),
 
-				editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j2.pattern", "%d{HH:mm:ss.SSS} %-5level {%thread} [%C] (%F:%L) : %msg%n"),
-				editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j2.logger.paxweb.name", "org.ops4j.pax.web"),
-				editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j2.logger.paxweb.level", "trace"),
+//				editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j2.pattern", "%d{HH:mm:ss.SSS} %-5level {%thread} [%C] (%F:%L) : %msg%n"),
+//				editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j2.logger.paxweb.name", "org.ops4j.pax.web"),
+//				editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j2.logger.paxweb.level", "info"),
 
 				editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg", "org.ops4j.pax.url.mvn.useFallbackRepositories", "false"),
 				editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg", "org.ops4j.pax.url.mvn.repositories", "https://repo1.maven.org/maven2@id=central"),
@@ -163,7 +163,6 @@ public class AbstractKarafTestBase extends AbstractControlledTestBase {
 				editConfigurationFilePut("etc/users.properties", "_g_:admingroup", "group,admin,manager,viewer,systembundles,ssh"),
 
 				replaceConfigurationFile("etc/keystore", new File("../etc/security/server.jks")),
-//				replaceConfigurationFile("/etc/jetty.xml", new File(getClass().getClassLoader().getResource("jetty.xml").getFile())),
 
 				systemProperty("karaf.log.console").value("OFF"),
 				systemProperty("pax-web.version").value(System.getProperty("pax-web.version")),
