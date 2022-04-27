@@ -2479,15 +2479,15 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 
 		@Override
-		public boolean allocateContext(Bundle wab, String contextPath) {
+		public AllocationStatus allocateContext(Bundle wab, String contextPath) {
 			return serverModel.runSilently(() -> {
 				if (stopped) {
 					LOG.info("WebContainer is already stopped.");
-					return false;
+					return AllocationStatus.SERVICE_STOPPED;
 				}
 
 				OsgiContextModel ocm = serverModel.getWabContext(contextPath, wab, true);
-				return ocm != null;
+				return ocm != null ? AllocationStatus.ALLOCATED : AllocationStatus.NOT_AVAILABLE;
 			}, false);
 		}
 

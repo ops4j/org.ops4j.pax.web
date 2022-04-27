@@ -681,18 +681,23 @@ public class BundleWebApplication {
 					return;
 				}
 
-				if (!view.allocateContext(bundle, contextPath)) {
-					LOG.debug("Context path {} is already used. {} will wait for this context to be available.",
-							contextPath, this);
-					// 128.3.2 Starting the Web Application Bundle, point 3): If the Context Path value is already in
-					// use by another Web Application, then the Web Application must not be deployed, and the
-					// deployment fails. [...] If the prior Web Application with the same Context Path is undeployed
-					// later, this Web Application should be considered as a candidate.
-					if (deploymentState.compareAndSet(state, State.WAITING_FOR_CONTEXT)) {
-						WebApplicationEvent event = new WebApplicationEvent(WebApplicationEvent.State.FAILED, bundle, contextPath, null);
-						event.setAwaitingAllocation(true);
-						event.setCollisionIds(extenderContext.calculateCollisionIds(contextPath, bundle));
-						extenderContext.sendWebEvent(event);
+				WebAppWebContainerView.AllocationStatus status = view.allocateContext(bundle, contextPath);
+				if (status != WebAppWebContainerView.AllocationStatus.ALLOCATED) {
+					if (status == WebAppWebContainerView.AllocationStatus.NOT_AVAILABLE) {
+						LOG.debug("Context path {} is already used. {} will wait for this context to be available.",
+								contextPath, this);
+						// 128.3.2 Starting the Web Application Bundle, point 3): If the Context Path value is already in
+						// use by another Web Application, then the Web Application must not be deployed, and the
+						// deployment fails. [...] If the prior Web Application with the same Context Path is undeployed
+						// later, this Web Application should be considered as a candidate.
+						if (deploymentState.compareAndSet(state, State.WAITING_FOR_CONTEXT)) {
+							WebApplicationEvent event = new WebApplicationEvent(WebApplicationEvent.State.FAILED, bundle, contextPath, null);
+							event.setAwaitingAllocation(true);
+							event.setCollisionIds(extenderContext.calculateCollisionIds(contextPath, bundle));
+							extenderContext.sendWebEvent(event);
+						}
+					} else if (status == WebAppWebContainerView.AllocationStatus.SERVICE_STOPPED) {
+						deploymentState.compareAndSet(state, State.WAITING_FOR_CONTEXT);
 					}
 					return;
 				}

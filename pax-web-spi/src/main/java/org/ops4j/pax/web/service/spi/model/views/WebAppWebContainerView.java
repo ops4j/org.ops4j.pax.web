@@ -69,7 +69,7 @@ public interface WebAppWebContainerView extends PaxWebContainerView {
 	 * @param contextPath
 	 * @return
 	 */
-	boolean allocateContext(Bundle wab, String contextPath);
+	AllocationStatus allocateContext(Bundle wab, String contextPath);
 
 	/**
 	 * After {@link #allocateContext(Bundle, String)} has returned {@code true}, we can use this method to get
@@ -126,5 +126,9 @@ public interface WebAppWebContainerView extends PaxWebContainerView {
 	 * @return
 	 */
 	Configuration getConfiguration();
+
+	enum AllocationStatus {
+		ALLOCATED, NOT_AVAILABLE, SERVICE_STOPPED
+	}
 
 }
