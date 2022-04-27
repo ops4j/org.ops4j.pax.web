@@ -223,20 +223,15 @@ public class TomcatFactory {
 		// --- server keystore for server's own identity
 
 		String sslKeystore = secc.getSslKeystore();
-		if (sslKeystore == null) {
-			throw new IllegalArgumentException("Location of server keystore is not specified"
-					+ " (org.ops4j.pax.web.ssl.keystore property).");
+		if (sslKeystore != null) {
+			protocol.setKeystoreFile(sslKeystore);
 		}
-		protocol.setKeystoreFile(sslKeystore);
-
-		if (secc.getSslKeystorePassword() == null) {
-			throw new IllegalArgumentException("Missing server keystore password.");
+		if (secc.getSslKeystorePassword() != null) {
+			protocol.setKeystorePass(secc.getSslKeystorePassword());
 		}
-		if (secc.getSslKeyPassword() == null) {
-			throw new IllegalArgumentException("Missing private key password.");
+		if (secc.getSslKeyPassword() != null) {
+			protocol.setKeyPass(secc.getSslKeyPassword());
 		}
-		protocol.setKeystorePass(secc.getSslKeystorePassword());
-		protocol.setKeyPass(secc.getSslKeyPassword());
 
 		if (secc.getSslKeyManagerFactoryAlgorithm() != null) {
 			LOG.debug("Not supported SSL Key Algorithm parameter");

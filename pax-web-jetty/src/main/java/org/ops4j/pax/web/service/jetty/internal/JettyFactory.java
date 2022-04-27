@@ -272,20 +272,15 @@ class JettyFactory {
 		// --- server keystore for server's own identity
 
 		String sslKeystore = secc.getSslKeystore();
-		if (sslKeystore == null) {
-			throw new IllegalArgumentException("Location of server keystore is not specified"
-					+ " (org.ops4j.pax.web.ssl.keystore property).");
+		if (sslKeystore != null) {
+			sslContextFactory.setKeyStorePath(sslKeystore);
 		}
-		sslContextFactory.setKeyStorePath(sslKeystore);
-
-		if (secc.getSslKeystorePassword() == null) {
-			throw new IllegalArgumentException("Missing server keystore password.");
+		if (secc.getSslKeystorePassword() != null) {
+			sslContextFactory.setKeyStorePassword(secc.getSslKeystorePassword());
 		}
-		if (secc.getSslKeyPassword() == null) {
-			throw new IllegalArgumentException("Missing private key password.");
+		if (secc.getSslKeyPassword() != null) {
+			sslContextFactory.setKeyManagerPassword(secc.getSslKeyPassword());
 		}
-		sslContextFactory.setKeyStorePassword(secc.getSslKeystorePassword());
-		sslContextFactory.setKeyManagerPassword(secc.getSslKeyPassword());
 
 		if (secc.getSslKeyManagerFactoryAlgorithm() != null) {
 			sslContextFactory.setKeyManagerFactoryAlgorithm(secc.getSslKeyManagerFactoryAlgorithm());

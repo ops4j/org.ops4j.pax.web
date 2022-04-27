@@ -778,8 +778,11 @@ public class UndertowFactory {
 		Collection<? extends CRL> crlList = null;
 
 		if (crlPath != null) {
-			try (InputStream in = loadResource(crlPath).openStream()) {
-				crlList = CertificateFactory.getInstance("X.509").generateCRLs(in);
+			URL url = loadResource(crlPath);
+			if (url != null) {
+				try (InputStream in = url.openStream()) {
+					crlList = CertificateFactory.getInstance("X.509").generateCRLs(in);
+				}
 			}
 		}
 
