@@ -2325,7 +2325,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			serverModel.runSilently(() -> {
 				serverModel.getFailedWhiteboardElements().remove(webElement);
 				return null;
-			}, webElement.isAsynchronusRegistration());
+			}, true);
 		}
 
 		@Override
@@ -2333,7 +2333,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			serverModel.runSilently(() -> {
 				serverModel.getWhiteboardContexts().remove(webContext);
 				return null;
-			}, webContext.isAsynchronusRegistration());
+			}, true);
 		}
 
 		private void handleReRegistrationEvents(WebElementEvent.State state, Batch batch, Exception e) {
