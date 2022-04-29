@@ -70,6 +70,8 @@
 							org.eclipse.jetty.*,
 							org.eclipse.jetty.jaas,
 							org.eclipse.jetty.rewrite.handler;resolution:=optional,
+							org.eclipse.jetty.server.handler.gzip,
+							org.eclipse.jetty.server.handler.jmx,
 							org.eclipse.jetty.servlets;resolution:=optional,
 
 							<!-- other -->

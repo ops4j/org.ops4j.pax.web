@@ -294,10 +294,13 @@ class Hc5TestClient implements HttpTestClient {
 				httpClientBuilder.disableRedirectHandling();
 			}
 
+			boolean gzip = httpHeaders.containsKey("Accept-Encoding") && "gzip".equals(httpHeaders.get("Accept-Encoding"));
+
 			RequestConfig requestConfig = RequestConfig.custom()
 					.setResponseTimeout(Timeout.ofSeconds(timeoutInSeconds))
 					.setConnectTimeout(Timeout.ofSeconds(timeoutInSeconds))
 					.setConnectionRequestTimeout(Timeout.ofSeconds(timeoutInSeconds))
+					.setContentCompressionEnabled(gzip)
 					.build();
 
 			ClassicHttpRequest request = null;
