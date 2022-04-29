@@ -22,7 +22,8 @@
 -->
 <Server port="8005" shutdown="SHUTDOWN">
 	<Service name="Catalina">
-		<Connector port="8181" protocol="HTTP/1.1" redirectPort="8443" />
+		<!-- See https://tomcat.apache.org/tomcat-9.0-doc/config/http.html#Standard_Implementation for gzip encoding configuration -->
+		<Connector port="8181" protocol="HTTP/1.1" redirectPort="8443" compression="off" />
 
 		<!-- see https://tomcat.apache.org/tomcat-9.0-doc/config/http.html#SSL_Support_-_SSLHostConfig -->
 		<!--

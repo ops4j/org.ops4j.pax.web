@@ -29,18 +29,34 @@
 
 	<!-- Use this connector for many frequently idle connections and for
 		threadless continuations. -->
-	<!--	<New id="httpConfig" class="org.eclipse.jetty.server.HttpConfiguration">-->
-	<!--		<Set name="secureScheme">https</Set>-->
-	<!--		<Set name="securePort">-->
-	<!--			<Property name="jetty.secure.port" default="8443" />-->
-	<!--		</Set>-->
-	<!--		<Set name="outputBufferSize">32768</Set>-->
-	<!--		<Set name="requestHeaderSize">8192</Set>-->
-	<!--		<Set name="responseHeaderSize">8192</Set>-->
-	<!--		<Set name="sendServerVersion">true</Set>-->
-	<!--		<Set name="sendDateHeader">false</Set>-->
-	<!--		<Set name="headerCacheSize">512</Set>-->
-	<!--	</New>-->
+	<!--
+	<New id="httpConfig" class="org.eclipse.jetty.server.HttpConfiguration">
+		<Set name="secureScheme">https</Set>
+		<Set name="securePort">
+			<Property name="jetty.secure.port" default="8443" />
+		</Set>
+		<Set name="outputBufferSize">32768</Set>
+		<Set name="requestHeaderSize">8192</Set>
+		<Set name="responseHeaderSize">8192</Set>
+		<Set name="sendServerVersion">true</Set>
+		<Set name="sendDateHeader">false</Set>
+		<Set name="headerCacheSize">512</Set>
+	</New>
+	-->
+
+	<!-- Uncomment these two elements to enable GZIP compression -->
+	<!-- https://www.eclipse.org/jetty/javadoc/jetty-9/org/eclipse/jetty/server/handler/gzip/GzipHandler.html -->
+	<!--
+	<Get id="OrigHandler" name="handler" />
+
+	<Set name="handler">
+		<New id="GzipHandler" class="org.eclipse.jetty.server.handler.gzip.GzipHandler">
+			<Set name="handler">
+				<Ref refid="OrigHandler" />
+			</Set>
+		</New>
+	</Set>
+	-->
 
 	<!-- =========================================================== -->
 	<!-- Special server connectors -->

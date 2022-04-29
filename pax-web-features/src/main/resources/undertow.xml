@@ -178,6 +178,7 @@
 				<filter-ref name="server-header" />
 				<filter-ref name="x-powered-by-header" />
 <!--				<filter-ref name="expression-filter-1" predicate="method(GET)" />-->
+				<!-- uncomment here and in <gzip name="gzip-filter" /> to enable gzip response encoding -->
 <!--				<filter-ref name="gzip-filter" />-->
 			</host>
 		</server>
@@ -208,6 +209,7 @@
 			<response-header name="server-header" header-name="Server" header-value="pax-undertow" />
 			<response-header name="x-powered-by-header" header-name="X-Powered-By" header-value="Pax-Web-Undertow/${project.version}" />
 <!--			<expression-filter name="expression-filter-1" expression="redirect(http://localhost)" />-->
+			<!-- uncomment here and in <filter-ref name="gzip-filter" /> to enable gzip response encoding -->
 <!--			<gzip name="gzip-filter" />-->
 			<!-- org.wildfly.extension.undertow.filters.RequestLimitHandler -->
 <!--			<request-limit name="rl-1" max-concurrent-requests="100" queue-size="128" />-->
