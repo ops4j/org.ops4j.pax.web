@@ -40,10 +40,13 @@ public class PaxWebSessionIdManager extends DefaultSessionIdManager {
 				// we can't replace '/' to '_' because of how
 				// org.eclipse.jetty.server.session.FileSessionDataStore.initializeStore() analyzes the
 				// session files.
+				if (ocm == null || ocm.getTemporaryLocation() == null) {
+					return "";
+				}
 				return "~" + ocm.getTemporaryLocation().replaceAll("/", "#").replaceAll("_", "#");
 			}
 		}
-		return null;
+		return "";
 	}
 
 	@Override
